@@ -100,7 +100,7 @@ class CansasConstants(object):
                  }
     RUN = {"variable" : "{0}.run.append(\"{1}\")",
            "attributes" : {"name" :
-                           {"variable" : "{0}.run_name[node_value] = \"{1}\""}}
+                           {"variable" : "{0}.run_name[\"{3}\"] = \"{1}\""}}
           }
     SASDATA_IDATA_Q = {"variable" : "{0}.x = numpy.append({0}.x, {1})",
                        "unit" : "x_unit",
@@ -622,7 +622,7 @@ class CansasConstants(object):
                       "storeas" : "content",
                       "attributes" : {"name" :
                                       {"variable" :
-                                       "{0}.run_name[node_value] = \"{1}\""}},
+                                       "{0}.run_name[\"{3}\"] = \"{1}\""}},
                       "children" : {"Title" : TITLE,
                                     "Run" : RUN,
                                     "SASdata" : SASDATA,

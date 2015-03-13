@@ -25,11 +25,13 @@ from sas.dataloader.data_info import TransmissionSpectrum
 from sas.dataloader.data_info import Detector
 from sas.dataloader.data_info import Process
 from sas.dataloader.data_info import Aperture
-# Both imports used. Do not remove either.
-from xml.dom.minidom import parseString
 import sas.dataloader.readers.xml_reader as xml_reader
 from sas.dataloader.readers.xml_reader import XMLreader
 from sas.dataloader.readers.cansas_constants import CansasConstants
+
+# The following 2 imports *ARE* used. Do not remove either.
+import xml.dom.minidom
+from xml.dom.minidom import parseString
 
 _ZERO = 1e-16
 PREPROCESS = "xmlpreprocess"
@@ -46,8 +48,7 @@ CANSAS_FORMAT = CONSTANTS.format
 CANSAS_NS = CONSTANTS.names
 ALLOW_ALL = True
 
-# DO NOT REMOVE
-# Called by outside packages:
+# DO NOT REMOVE Called by outside packages:
 #    sas.perspectives.invariant.invariant_state
 #    sas.perspectives.fitting.pagestate
 def get_content(location, node):
@@ -61,15 +62,12 @@ def get_content(location, node):
     """
     nodes = node.xpath(location,
                        namespaces={'ns': CANSAS_NS.get("1.0").get("ns")})
-
     if len(nodes) > 0:
         return nodes[0]
     else:
         return None
 
-
-# DO NOT REMOVE
-# Called by outside packages:
+# DO NOT REMOVE Called by outside packages:
 #    sas.perspectives.fitting.pagestate
 def write_node(doc, parent, name, value, attr=None):
     """
@@ -92,7 +90,6 @@ def write_node(doc, parent, name, value, attr=None):
         return True
     return False
 
-
 class Reader(XMLreader):
     """
     Class to load cansas 1D XML files
@@ -103,26 +100,21 @@ class Reader(XMLreader):
     ##CanSAS version - defaults to version 1.0
     cansas_version = "1.0"
     base_ns = "{cansas1d/1.0}"
-
     logging = None
     errors = None
-
     type_name = "canSAS"
     ## Wildcards
     type = ["XML files (*.xml)|*.xml", "SasView Save Files (*.svs)|*.svs"]
     ## List of allowed extensions
     ext = ['.xml', '.XML', '.svs', '.SVS']
-
     ## Flag to bypass extension check
     allow_all = True
-
 
     def __init__(self):
         ## List of errors
         self.errors = set()
         self.logging = []
         self.encoding = None
-
 
     def is_cansas(self, ext="xml"):
         """
@@ -139,7 +131,6 @@ class Reader(XMLreader):
         if ext == "svs":
             return True
         return False
-
 
     def load_file_and_schema(self, xml_file):
         """
@@ -164,14 +155,12 @@ class Reader(XMLreader):
         self.set_schema(schema_path)
         return cansas_defaults
 
-
     def read(self, xml_file):
         """
         Validate and read in an xml_file file in the canSAS format.
 
         :param xml_file: A canSAS file path in proper XML format
         """
-
         # output - Final list of Data1D objects
         output = []
         # ns - Namespace hierarchy for current xml_file object
@@ -240,7 +229,6 @@ class Reader(XMLreader):
         # Return a list of parsed entries that dataloader can manage
         return None
 
-
     def _final_cleanup(self, data1d):
         """
         Final cleanup of the Data1D object to be sure it has all the
@@ -259,6 +247,10 @@ class Reader(XMLreader):
         size_dx = data1d.dx.size
         size_dxl = data1d.dxl.size
         size_dxw = data1d.dxw.size
+        if data1d._xunit != data1d.x_unit:
+            data1d.x_unit = data1d._xunit
+        if data1d._yunit != data1d.y_unit:
+            data1d.y_unit = data1d._yunit
         if size_dxl == 0 and size_dxw == 0:
             data1d.dxl = None
             data1d.dxw = None
@@ -286,7 +278,6 @@ class Reader(XMLreader):
             name = self._create_unique_key(dictionary, name, numb)
         return name
 
-
     def _unit_conversion(self, node, new_current_level, data1d, \
                                                 tagname, node_value):
         """
@@ -302,12 +293,12 @@ class Reader(XMLreader):
         attr = node.attrib
         value_unit = ''
         err_msg = None
+        default_unit = None
         if 'unit' in attr and new_current_level.get('unit') is not None:
             try:
                 local_unit = attr['unit']
                 if isinstance(node_value, float) is False:
                     exec("node_value = float({0})".format(node_value))
-                default_unit = None
                 unitname = new_current_level.get("unit")
                 exec "default_unit = data1d.{0}".format(unitname)
                 if local_unit is not None and default_unit is not None and \
@@ -317,9 +308,7 @@ class Reader(XMLreader):
                         ## Check local units - bad units raise KeyError
                         data_conv_q = Converter(local_unit)
                         value_unit = default_unit
-                        i_string = "node_value = data_conv_q"
-                        i_string += "(node_value, units=data1d.{0})"
-                        exec i_string.format(unitname)
+                        node_value = data_conv_q(node_value, units=default_unit)
                     else:
                         value_unit = local_unit
                         err_msg = "Unit converter is not available.\n"
@@ -329,10 +318,7 @@ class Reader(XMLreader):
                 err_msg = "CanSAS reader: unexpected "
                 err_msg += "\"{0}\" unit [{1}]; "
                 err_msg = err_msg.format(tagname, local_unit)
-                intermediate = "err_msg += " + \
-                            "\"expecting [{1}]\"" + \
-                            ".format(data1d.{0})"
-                exec intermediate.format(unitname, "{0}", "{1}")
+                err_msg += "expecting [{0}]".format(default_unit)
                 value_unit = local_unit
             except:
                 print sys.exc_info()
@@ -346,7 +332,6 @@ class Reader(XMLreader):
             self.errors.add(err_msg)
         node_value = "float({0})".format(node_value)
         return node_value, value_unit
-
 
     def _check_for_empty_data(self, data1d):
         """
@@ -474,8 +459,10 @@ class Reader(XMLreader):
                         attrib_value = unit
                     else:
                         attrib_value = node.attrib[key]
-                    store_attr = attrib_variable.format("data1d", \
-                                                    attrib_value, key)
+                    store_attr = attrib_variable.format("data1d",
+                                                        attrib_value,
+                                                        key,
+                                                        node_value)
                     exec store_attr
                 except AttributeError:
                     pass
@@ -697,22 +684,22 @@ class Reader(XMLreader):
             point = self.create_element("Idata")
             node.append(point)
             self.write_node(point, "Q", datainfo.x[i],
-                            {'unit': datainfo._xunit})
+                            {'unit': datainfo.x_unit})
             if len(datainfo.y) >= i:
                 self.write_node(point, "I", datainfo.y[i],
-                                {'unit': datainfo._yunit})
+                                {'unit': datainfo.y_unit})
             if datainfo.dy != None and len(datainfo.dy) > i:
                 self.write_node(point, "Idev", datainfo.dy[i],
-                                {'unit': datainfo._yunit})
+                                {'unit': datainfo.y_unit})
             if datainfo.dx != None and len(datainfo.dx) > i:
                 self.write_node(point, "Qdev", datainfo.dx[i],
-                                {'unit': datainfo._xunit})
+                                {'unit': datainfo.x_unit})
             if datainfo.dxw != None and len(datainfo.dxw) > i:
                 self.write_node(point, "dQw", datainfo.dxw[i],
-                                {'unit': datainfo._xunit})
+                                {'unit': datainfo.x_unit})
             if datainfo.dxl != None and len(datainfo.dxl) > i:
                 self.write_node(point, "dQl", datainfo.dxl[i],
-                                {'unit': datainfo._xunit})
+                                {'unit': datainfo.x_unit})
 
     def _write_trans_spectrum(self, datainfo, entry_node):
         """
@@ -894,7 +881,6 @@ class Reader(XMLreader):
                 self.write_node(apert, "distance", aperture.distance,
                                 {"unit": aperture.distance_unit})
 
-
     def _write_detectors(self, datainfo, instr):
         """
         Writes the detector information to the XML file
@@ -1037,15 +1023,12 @@ class Reader(XMLreader):
 
         # Get PIs and create root element
         pi_string = self._get_pi_string()
-
         # Define namespaces and create SASroot object
         main_node = self._create_main_node()
-
         # Create ElementTree, append SASroot and apply processing instructions
         base_string = pi_string + self.to_string(main_node)
         base_element = self.create_element_from_string(base_string)
         doc = self.create_tree(base_element)
-
         # Create SASentry Element
         entry_node = self.create_element("SASentry")
         root = doc.getroot()
@@ -1053,43 +1036,31 @@ class Reader(XMLreader):
 
         # Add Title to SASentry
         self.write_node(entry_node, "Title", datainfo.title)
-
         # Add Run to SASentry
         self._write_run_names(datainfo, entry_node)
-
         # Add Data info to SASEntry
         self._write_data(datainfo, entry_node)
-
         # Transmission Spectrum Info
         self._write_trans_spectrum(datainfo, entry_node)
-
         # Sample info
         self._write_sample_info(datainfo, entry_node)
-
         # Instrument info
         instr = self._write_instrument(datainfo, entry_node)
-
         #   Source
         self._write_source(datainfo, instr)
-
         #   Collimation
         self._write_collimation(datainfo, instr)
-
         #   Detectors
         self._write_detectors(datainfo, instr)
-
         # Processes info
         self._write_process_notes(datainfo, entry_node)
-
         # Note info
         self._write_notes(datainfo, entry_node)
-
         # Return the document, and the SASentry node associated with
         #      the data we just wrote
         # If the calling function was not the cansas reader, return a minidom
         #      object rather than an lxml object.
         entry_node = self._check_origin(entry_node, doc)
-
         return doc, entry_node
 
     def write_node(self, parent, name, value, attr=None):

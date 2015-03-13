@@ -67,7 +67,7 @@ class FitPage(BasicPage):
         self.fill_data_combobox(data_list=self.data_list)
         #create a default data for an empty panel
         self.create_default_data()
-        #self._manager.frame.Bind(wx.EVT_SET_FOCUS, self.on_set_focus)
+        self._manager.frame.Bind(wx.EVT_SET_FOCUS, self.on_set_focus)
 
     def enable_fit_button(self):
         """
@@ -75,6 +75,15 @@ class FitPage(BasicPage):
         """
         flag = check_data_validity(self.data) & (self.model is not None)
         self.btFit.Enable(flag)
+        
+    def on_set_focus(self, event):
+        """
+        Override the basepage focus method to ensure the save flag is set 
+        properly when focusing on the fit page.
+        """
+        flag = check_data_validity(self.data) & (self.model is not None)
+        self._set_save_flag(flag)
+        self.parent.on_set_focus(event)
 
     def _fill_data_sizer(self):
         """
