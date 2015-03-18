@@ -31,16 +31,17 @@ _do_aboutbox = True
 _do_acknowledge = True
 _do_tutorial = True
 _acknowledgement_preamble =\
-'''If you found this software useful to your work please remember to acknowledge 
-its use in your publications as suggested below and reference the SasView website: 
-http://www.sasview.org/. Please also consider letting us know by sending us the 
-reference to your work. This will help us to ensure the long term support and 
-development of the software.
-'''
+'''To ensure the long term support and development of this software please''' +\
+''' remember to do the following.'''
+_acknowledgement_preamble_bullet1 =\
+'''Acknowledge its use in your publications as suggested below'''
+_acknowledgement_preamble_bullet2 =\
+'''Reference the following website: http://www.sasview.org'''
+_acknowledgement_preamble_bullet3 =\
+'''Send us your reference for our records: sansdanse@gmail.com'''
 _acknowledgement_publications = \
-'''This work benefited from software developed by the DANSE project under NSF 
-award DMR-0520547 and currently maintained by NIST, UMD, ORNL, ISIS, ESS 
-and ILL.
+'''This work benefited from the use of the SasView application, originally 
+developed under NSF award DMR-0520547.
 '''
 _acknowledgement =  \
 '''This work originally developed as part of the DANSE project funded by the NSF
