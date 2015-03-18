@@ -259,7 +259,7 @@ for f in matplotlibdata:
 
 # Copy the settings file for the sas.dataloader file extension associations
 import sas.dataloader.readers
-f = os.path.join(sas.dataloader.readers.get_data_path(),'defaults.xml')
+f = os.path.join(sas.dataloader.readers.get_data_path(),'defaults.json')
 if os.path.isfile(f):
     data_files.append(('.', [f]))
 f = 'custom_config.py'
