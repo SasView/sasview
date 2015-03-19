@@ -179,7 +179,6 @@ class Plugin(PluginBase):
         wx.EVT_MENU(owner, self.id_batchfit, self.on_add_sim_page)
         self.batch_menu = self.menu1.FindItemById(self.id_batchfit)
         self.batch_menu.Enable(False)
-        self.menu1.AppendSeparator()
 
         self.menu1.AppendSeparator()
         self.id_bumps_options = wx.NewId()

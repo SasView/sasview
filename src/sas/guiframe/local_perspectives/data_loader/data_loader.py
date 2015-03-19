@@ -227,7 +227,7 @@ class Plugin(PluginBase):
             message = "Loading Data Complete! "
         message += log_msg
         self.load_complete(output=output, error_message=error_message,
-                           message=message, path=path, info='warning')
+                           message=message, path=path, info='info')
 
     def load_update(self, output=None, message="", info="warning"):
         """
