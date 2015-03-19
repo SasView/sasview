@@ -1,9 +1,9 @@
 __version__ = "3.1.0"
 __build__ = "1"
 try:
-    import pkg_resources
-    d = pkg_resources.get_distribution("sasview")
-    __build__ = str(d.version)
+    import subprocess
+    d = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'])
+    __build__ = str(d).strip()
 except:
     import logging
     import sys
