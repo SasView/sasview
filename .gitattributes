@@ -1,0 +1,3 @@
+*.sld linguist-language=Other
+*.asc linguist-language=Other
+sasview/test/* linguist-language=Other
