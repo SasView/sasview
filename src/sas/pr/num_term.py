@@ -143,7 +143,8 @@ class NTermEstimator(object):
                 nt = nts[int(tem) - 1]
             return nt, self.alpha_list[nt - 10], self.mess_list[nt - 10]
         except:
-            logging.error("NTermEstimator.num_terms: %s" % sys.exc_value)
+            #TODO: check the logic above and make sure it doesn't 
+            # rely on the try-except.
             return self.nterm_min, self.invertor.alpha, ''
 
 
