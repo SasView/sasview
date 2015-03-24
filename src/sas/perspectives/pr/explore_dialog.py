@@ -256,6 +256,7 @@ class ExploreDialog(wx.Dialog):
         Invoked when a new output type is selected for plotting,
         or when a new computation is finished.
         """
+        self.npts_ctl.SetFocus()
         # Get the output type selection
         output_type = self.output_box.GetString(self.output_box.GetSelection())
 
@@ -375,7 +376,6 @@ class ExploreDialog(wx.Dialog):
         Invoked when the user changed a value on the form.
         Process the form and compute the output to be plottted.
         """
-        self.npts_ctl.SetFocus()
         # Get the content of the form
         content = self._get_values()
         # If the content of the form is invalid, return and do nothing
