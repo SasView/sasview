@@ -328,7 +328,7 @@ class ExploreDialog(wx.Dialog):
 
         # Ouput selection box
         selection_msg = wx.StaticText(self, -1, "Select a dependent variable:")
-        self.output_box = wx.ComboBox(self, -1, style=wx.CB_DROPDOWN)
+        self.output_box = wx.ComboBox(self, -1, style=wx.CB_READONLY)
         for item in self.results.outputs.keys():
             self.output_box.Append(item, "")
         self.output_box.SetStringSelection(DEFAULT_OUTPUT)
@@ -340,7 +340,8 @@ class ExploreDialog(wx.Dialog):
         output_sizer.Add(self.output_box, (0, 1), (1, 2),
                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 10)
 
-        wx.EVT_COMBOBOX(self.output_box, -1, self._plot_output)
+        self.Bind(wx.EVT_COMBOBOX, self._plot_output)
+        #wx.EVT_COMBOBOX(self.output_box, -1, self._plot_output)
         sizer_main.Add(output_sizer, 0, wx.EXPAND | wx.ALL, 10)
 
         sizer_main.Add(self.plotpanel, 0, wx.EXPAND | wx.ALL, 10)
