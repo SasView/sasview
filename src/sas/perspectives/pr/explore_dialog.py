@@ -340,8 +340,7 @@ class ExploreDialog(wx.Dialog):
         output_sizer.Add(self.output_box, (0, 1), (1, 2),
                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 10)
 
-        self.Bind(wx.EVT_COMBOBOX, self._plot_output)
-        #wx.EVT_COMBOBOX(self.output_box, -1, self._plot_output)
+        wx.EVT_COMBOBOX(self.output_box, -1, self._plot_output)
         sizer_main.Add(output_sizer, 0, wx.EXPAND | wx.ALL, 10)
 
         sizer_main.Add(self.plotpanel, 0, wx.EXPAND | wx.ALL, 10)
