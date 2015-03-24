@@ -164,7 +164,8 @@ class smear_testdata(unittest.TestCase):
 
     def test_slit(self):
         smear = smear_selection(self.data_slit)
-        self.assertEqual(smear.__class__.__name__, 'SlitSmearer')
+        #self.assertEqual(smear.__class__.__name__, 'SlitSmearer')
+        self.assertEqual(smear.__class__.__name__, 'PySlitSmearer')
 
         fitter = Fit('bumps')
         
@@ -180,13 +181,12 @@ class smear_testdata(unittest.TestCase):
         fitter.select_problem_for_fit(id=1,value=1)
         
         result1, = fitter.fit()
-        
+
         #print "v",result1.pvec
         #print "dv",result1.stderr
         #print "chisq(v)",result1.fitness
-        
-        self.assertTrue( math.fabs(result1.pvec[0]-2340) < 20 )
-        self.assertTrue( math.fabs(result1.pvec[1]-0.010) < 0.002 )
+
+        numpy.testing.assert_allclose(result1.pvec, [2323.466,0.22137], rtol=0.001)
 
 if __name__ == '__main__':
     unittest.main()

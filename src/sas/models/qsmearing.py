@@ -80,7 +80,7 @@ def smear_selection(data1D, model = None):
                 break
     # If we found slit smearing data, return a slit smearer
     if _found_slit == True:
-        return SlitSmearer(data1D, model)
+        return PySlitSmearer(data1D, model)
     return None
             
 
@@ -582,3 +582,41 @@ def get_qextrapolate(width, data_x):
     nbins_low = nbins_low - len(data_x_ext[data_x_ext <= 0])
     return nbins_low, nbins_high, \
              new_width[data_x_ext > 0], data_x_ext[data_x_ext > 0]
+
+
+
+from .resolution import Slit1D
+class PySlitSmearer(object):
+    def __init__(self, data1D, model = None):
+        self.model = model
+
+        q = data1D.x
+        width = data1D.dxw if data1D.dxw is not None else 0
+        height = data1D.dxl if data1D.dxl is not None else 0
+        # TODO: width and height seem to be reversed
+        self.resolution = Slit1D(q, height, width)
+
+    def __call__(self, iq_in, first_bin=0, last_bin=None):
+        if last_bin is None or last_bin >= len(iq_in):
+            last_bin = len(iq_in) - 1
+        q_calc = self.resolution.q_calc
+        iq_calc = numpy.empty_like(q_calc)
+        iq_calc[:first_bin] = 0
+        iq_calc[first_bin:last_bin+1] = iq_in
+        if last_bin < len(q_calc)-1:
+            iq_calc[last_bin:] = self.model.evalDistribution(q_calc[last_bin:])
+        iq_out = self.resolution.apply(iq_calc)
+        return iq_out[first_bin:last_bin+1]
+
+    def get_bin_range(self, q_min=None, q_max=None):
+        """
+
+        :param q_min: minimum q-value to smear
+        :param q_max: maximum q-value to smear
+
+        """
+        # assume the data values are sorted
+        first = numpy.searchsorted(self.resolution.q, q_min)
+        # assume that the resolution is much larger than the q range
+        last = len(self.resolution.q)-1
+        return first, last
