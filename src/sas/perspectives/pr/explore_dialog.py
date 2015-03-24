@@ -328,10 +328,11 @@ class ExploreDialog(wx.Dialog):
 
         # Ouput selection box
         selection_msg = wx.StaticText(self, -1, "Select a dependent variable:")
-        self.output_box = wx.ComboBox(self, -1)
+        self.output_box = wx.ComboBox(self, -1, style=wx.CB_DROPDOWN)
         for item in self.results.outputs.keys():
             self.output_box.Append(item, "")
         self.output_box.SetStringSelection(DEFAULT_OUTPUT)
+        self.output_box.SetEditable(False)
 
         output_sizer = wx.GridBagSizer(5, 5)
         output_sizer.Add(selection_msg, (0, 0), (1, 1),
