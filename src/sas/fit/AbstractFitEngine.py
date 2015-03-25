@@ -160,7 +160,7 @@ class FitData1D(Data1D):
         # Check error bar; if no error bar found, set it constant(=1)
         # TODO: Should provide an option for users to set it like percent,
         # constant, or dy data
-        if dy == None or dy == [] or dy.all() == 0:
+        if dy is None or dy == [] or dy.all() == 0:
             self.dy = numpy.ones(len(y))
         else:
             self.dy = numpy.asarray(dy).copy()
@@ -259,8 +259,8 @@ class FitData1D(Data1D):
             :note: in this case just return empty array 
         """
         return []
-    
-    
+
+
 class FitData2D(Data2D):
     """
         Wrapper class  for SAS data

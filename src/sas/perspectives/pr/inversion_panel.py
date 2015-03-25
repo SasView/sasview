@@ -702,7 +702,11 @@ class InversionControl(ScrolledPanel, PanelBase):
         """
         try:
             alpha = self.alpha_estimate_ctl.GetLabel()
-            self.alpha_ctl.SetValue(float(alpha))
+            # Check that we have a number
+            float(alpha)
+            self.alpha_ctl.SetValue(alpha)
+        except ValueError:
+            logging.error("InversionControl._on_accept_alpha got a value that was not a number: %s" % alpha )
         except:
             # No estimate or bad estimate, either do nothing
             logging.error("InversionControl._on_accept_alpha: %s" % sys.exc_value)
@@ -714,7 +718,11 @@ class InversionControl(ScrolledPanel, PanelBase):
         """
         try:
             nterms = self.nterms_estimate_ctl.GetLabel()
-            self.nfunc_ctl.SetValue(float(nterms))
+            # Check that we have a number
+            float(nterms)
+            self.nfunc_ctl.SetValue(nterms)
+        except ValueError:
+            logging.error("InversionControl._on_accept_nterms got a value that was not a number: %s" % nterms )
         except:
             # No estimate or bad estimate, either do nothing
             logging.error("InversionControl._on_accept_nterms: %s" % sys.exc_value)

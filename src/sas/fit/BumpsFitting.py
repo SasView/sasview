@@ -106,6 +106,8 @@ class SasFitness(object):
         self.name = model.name
         self.model = model.model
         self.data = data
+        if self.data.smearer is not None:
+            self.data.smearer.model = self.model
         self._define_pars()
         self._init_pars(kw)
         if initial_values is not None:
@@ -173,7 +175,8 @@ class SasFitness(object):
 
     def _recalculate(self):
         if self._dirty:
-            self._residuals, self._theory = self.data.residuals(self.model.evalDistribution)
+            self._residuals, self._theory \
+                = self.data.residuals(self.model.evalDistribution)
             self._dirty = False
 
     def numpoints(self):
