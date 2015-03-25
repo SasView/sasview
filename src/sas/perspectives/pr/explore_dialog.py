@@ -333,7 +333,6 @@ class ExploreDialog(wx.Dialog):
         for item in self.results.outputs.keys():
             self.output_box.Append(item, "")
         self.output_box.SetStringSelection(DEFAULT_OUTPUT)
-        self.output_box.SetEditable(False)
 
         output_sizer = wx.GridBagSizer(5, 5)
         output_sizer.Add(selection_msg, (0, 0), (1, 1),
