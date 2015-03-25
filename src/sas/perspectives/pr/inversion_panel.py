@@ -675,17 +675,16 @@ class InversionControl(ScrolledPanel, PanelBase):
         button_ok.SetToolTipString("Perform P(r) inversion.")
         self.Bind(wx.EVT_BUTTON, self._on_invert, id=wx_id)
 
-#        self.button_help = wx.Button(self, -1, "HELP")
-#       app_tip = "Get help on P(r) inversion."
-#        self.button_help.SetToolTipString(app_tip)
-#        self.button_help.Bind(wx.EVT_BUTTON, self.on_help)
+        self.button_help = wx.Button(self, -1, "HELP")
+        self.button_help.SetToolTipString("Get help on P(r) inversion.")
+        self.button_help.Bind(wx.EVT_BUTTON, self.on_help)
 
         self._set_reset_flag(True)
         self._set_save_flag(True)
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
         sizer_button.Add((20, 20), 1, wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         sizer_button.Add(button_ok, 0, wx.LEFT | wx.ADJUST_MINSIZE, 10)
-#        sizer_button.Add(self.button_help, 0, wx.LEFT | wx.ADJUST_MINSIZE, 10)
+        sizer_button.Add(self.button_help, 0, wx.LEFT | wx.ADJUST_MINSIZE, 10)
 
         iy_vb += 1
         vbox.Add(sizer_button, (iy_vb, 0), (1, 1),
@@ -961,44 +960,6 @@ class InversionControl(ScrolledPanel, PanelBase):
         _doc_viewer = DocumentationWindow(self, -1, \
              _TreeLocation, "P(r) Help")
 
-
-
-#class HelpDialog(wx.Dialog):
-#    """
-#    """
-#    def __init__(self, parent, id):
-#        """
-#        """
-#        from sas.pr.invertor import help
-#        wx.Dialog.__init__(self, parent, id, size=(400, 450))
-#        self.SetTitle("P(r) help")
-#        self.SetWindowVariant(variant=FONT_VARIANT)
-#
-#        vbox = wx.BoxSizer(wx.VERTICAL)
-#
-#       explanation = help()
-#
-#        label_explain = wx.StaticText(self, -1, explanation, size=(360, 350))
-#
-#        vbox.Add(label_explain, 0, wx.ALL | wx.EXPAND, 15)
-#
-#
-#        static_line = wx.StaticLine(self, -1)
-#        vbox.Add(static_line, 0, wx.EXPAND, 0)
-#
-#        button_ok = wx.Button(self, wx.ID_OK, "OK")
-#
-#        sizer_button = wx.BoxSizer(wx.HORIZONTAL)
-#        sizer_button.Add((20, 20), 1, wx.EXPAND | wx.ADJUST_MINSIZE, 0)
-#        sizer_button.Add(button_ok, 0, wx.LEFT | wx.RIGHT | wx.ADJUST_MINSIZE, 10)
-#
-#        vbox.Add(sizer_button, 0, wx.EXPAND | wx.BOTTOM | wx.TOP, 10)
-#
-#        self.SetSizer(vbox)
-#        self.SetAutoLayout(True)
-#
-#        self.Layout()
-#        self.Centre()
 
 class PrDistDialog(wx.Dialog):
     """
