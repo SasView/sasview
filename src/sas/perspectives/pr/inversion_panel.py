@@ -15,6 +15,7 @@ from inversion_state import InversionState
 from pr_widgets import PrTextCtrl
 from pr_widgets import DataFileTextCtrl
 from pr_widgets import OutputTextCtrl
+from sas.guiframe.documentation_window import DocumentationWindow
 
 if sys.platform.count("win32") > 0:
     FONT_VARIANT = 0
@@ -674,11 +675,17 @@ class InversionControl(ScrolledPanel, PanelBase):
         button_ok.SetToolTipString("Perform P(r) inversion.")
         self.Bind(wx.EVT_BUTTON, self._on_invert, id=wx_id)
 
+#        self.button_help = wx.Button(self, -1, "HELP")
+#       app_tip = "Get help on P(r) inversion."
+#        self.button_help.SetToolTipString(app_tip)
+#        self.button_help.Bind(wx.EVT_BUTTON, self.on_help)
+
         self._set_reset_flag(True)
         self._set_save_flag(True)
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
         sizer_button.Add((20, 20), 1, wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         sizer_button.Add(button_ok, 0, wx.LEFT | wx.ADJUST_MINSIZE, 10)
+#        sizer_button.Add(self.button_help, 0, wx.LEFT | wx.ADJUST_MINSIZE, 10)
 
         iy_vb += 1
         vbox.Add(sizer_button, (iy_vb, 0), (1, 1),
@@ -927,42 +934,63 @@ class InversionControl(ScrolledPanel, PanelBase):
                 msg = "InversionControl._change_file: %s" % sys.exc_value
                 logging.error(msg)
 
-class HelpDialog(wx.Dialog):
-    """
-    """
-    def __init__(self, parent, id):
+    def on_help(self, event):
         """
-        """
-        from sas.pr.invertor import help
-        wx.Dialog.__init__(self, parent, id, size=(400, 450))
-        self.SetTitle("P(r) help")
-        self.SetWindowVariant(variant=FONT_VARIANT)
+        Bring up the P(r) Documentation whenever
+        the HELP button is clicked.
 
-        vbox = wx.BoxSizer(wx.VERTICAL)
+        Calls DocumentationWindow with the path of the location within the
+        documentation tree (after /doc/ ....".  Note that when using old
+        versions of Wx (before 2.9) and thus not the release version of
+        installers, the help comes up at the top level of the file as
+        webbrowser does not pass anything past the # to the browser when it is
+        running "file:///...."
 
-        explanation = help()
+    :param evt: Triggers on clicking the help button
+    """
 
-        label_explain = wx.StaticText(self, -1, explanation, size=(360, 350))
+        _TreeLocation = "user/perspectives/pr/pr_help.html"
+        _doc_viewer = DocumentationWindow(self, -1, \
+             _TreeLocation, "P(r) Help")
 
-        vbox.Add(label_explain, 0, wx.ALL | wx.EXPAND, 15)
 
 
-        static_line = wx.StaticLine(self, -1)
-        vbox.Add(static_line, 0, wx.EXPAND, 0)
-
-        button_ok = wx.Button(self, wx.ID_OK, "OK")
-
-        sizer_button = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_button.Add((20, 20), 1, wx.EXPAND | wx.ADJUST_MINSIZE, 0)
-        sizer_button.Add(button_ok, 0, wx.LEFT | wx.RIGHT | wx.ADJUST_MINSIZE, 10)
-
-        vbox.Add(sizer_button, 0, wx.EXPAND | wx.BOTTOM | wx.TOP, 10)
-
-        self.SetSizer(vbox)
-        self.SetAutoLayout(True)
-
-        self.Layout()
-        self.Centre()
+#class HelpDialog(wx.Dialog):
+#    """
+#    """
+#    def __init__(self, parent, id):
+#        """
+#        """
+#        from sas.pr.invertor import help
+#        wx.Dialog.__init__(self, parent, id, size=(400, 450))
+#        self.SetTitle("P(r) help")
+#        self.SetWindowVariant(variant=FONT_VARIANT)
+#
+#        vbox = wx.BoxSizer(wx.VERTICAL)
+#
+#       explanation = help()
+#
+#        label_explain = wx.StaticText(self, -1, explanation, size=(360, 350))
+#
+#        vbox.Add(label_explain, 0, wx.ALL | wx.EXPAND, 15)
+#
+#
+#        static_line = wx.StaticLine(self, -1)
+#        vbox.Add(static_line, 0, wx.EXPAND, 0)
+#
+#        button_ok = wx.Button(self, wx.ID_OK, "OK")
+#
+#        sizer_button = wx.BoxSizer(wx.HORIZONTAL)
+#        sizer_button.Add((20, 20), 1, wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+#        sizer_button.Add(button_ok, 0, wx.LEFT | wx.RIGHT | wx.ADJUST_MINSIZE, 10)
+#
+#        vbox.Add(sizer_button, 0, wx.EXPAND | wx.BOTTOM | wx.TOP, 10)
+#
+#        self.SetSizer(vbox)
+#        self.SetAutoLayout(True)
+#
+#        self.Layout()
+#        self.Centre()
 
 class PrDistDialog(wx.Dialog):
     """
