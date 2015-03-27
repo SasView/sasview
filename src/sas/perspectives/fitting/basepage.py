@@ -174,9 +174,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## list of orientation parameters
         self.orientation_params = []
         self.orientation_params_disp = []
-#       Self.model should ALWAYS be None here.  It was set to none above in 
+#       Self.model should ALWAYS be None here.  It was set to none above in
 #       this long init setting.  no obvious function call in between setting
-#       and this - commenting out on 4/8/2014 by PDB.  Remove once clear 
+#       and this - commenting out on 4/8/2014 by PDB.  Remove once clear
 #       it is pointless.
 #        if self.model != None:
 #            self.disp_list = self.model.getDispParamList()
@@ -416,7 +416,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## Call back for EVT_SET_FOCUS events
         _on_set_focus_callback = None
 
-        def __init__(self, parent, id= -1,
+        def __init__(self, parent, id=-1,
                      value=wx.EmptyString,
                      pos=wx.DefaultPosition,
                      size=wx.DefaultSize,
@@ -429,7 +429,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                      text_enter_callback=None):
 
             wx.TextCtrl.__init__(self, parent, id, value, pos,
-                                  size, style, validator, name)
+                                 size, style, validator, name)
 
             # Bind appropriate events
             self._on_set_focus_callback = parent.onSetFocus \
@@ -487,10 +487,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         set some page important information at once
         """
-#       THIS METHOD/FUNCTION NO LONGE APPEARS TO BE CALLED.  Started up program 
+#       THIS METHOD/FUNCTION NO LONGE APPEARS TO BE CALLED.  Started up program
 #       and started new fit window and PR and Invariant and a fit in fitting
 #       but never entered this routine which should be an initialization
-#       routine.  Leave for a while but probably something to clean up at 
+#       routine.  Leave for a while but probably something to clean up at
 #       some point?
 #
 #       PDB April 13 2014
@@ -588,6 +588,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
     def get_state(self):
         """
+        return the current page state
         """
         return self.state
 
@@ -644,10 +645,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## It is now set dynamically through _show_combox and _show_combos_helper
         ## These are called for first time by formfactor_combo_init
         ## itself called from fitpanel only.  If we find that I'm wrong and
-        ## we DO need to initialize somehow here - do it by a call to 
-        ## formfactor_combo_init 
+        ## we DO need to initialize somehow here - do it by a call to
+        ## formfactor_combo_init
         ## self.formfator_combo_init()
-        ## BUT NOT HERE -- make it last line of this 
+        ## BUT NOT HERE -- make it last line of this
         ## method so that structure box is populated before _show_comboox_helper
         ## is called.  Otherwise wx will complain mightily:-)
         ##
@@ -659,7 +660,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 #            self._populate_box(self.formfactorbox,
 #                               self.model_list_box["Shapes"])
             self._populate_box(self.structurebox,
-                                self.model_list_box["Structure Factors"])
+                               self.model_list_box["Structure Factors"])
             self.structurebox.Insert("None", 0, None)
             self.structurebox.SetSelection(0)
             self.structurebox.Hide()
@@ -685,7 +686,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         #----------------------------------------------------
         self.disable_disp = wx.RadioButton(self, -1, 'Off', (10, 10),
-                                            style=wx.RB_GROUP)
+                                           style=wx.RB_GROUP)
         self.enable_disp = wx.RadioButton(self, -1, 'On', (10, 30))
         # best size for MAC and PC
         if ON_MAC:
@@ -695,14 +696,14 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.disp_help_bt = wx.Button(self, wx.NewId(), '?',
                                       style=wx.BU_EXACTFIT,
                                       size=size_q)
-        self.disp_help_bt.Bind(wx.EVT_BUTTON,
-                        self.on_pd_help_clicked, id=self.disp_help_bt.GetId())
+        self.disp_help_bt.Bind(wx.EVT_BUTTON, self.on_pd_help_clicked,
+                               id=self.disp_help_bt.GetId())
         self.disp_help_bt.SetToolTipString("Helps for Polydispersion.")
 
         self.Bind(wx.EVT_RADIOBUTTON, self._set_dipers_Param,
-                     id=self.disable_disp.GetId())
+                  id=self.disable_disp.GetId())
         self.Bind(wx.EVT_RADIOBUTTON, self._set_dipers_Param,
-                   id=self.enable_disp.GetId())
+                  id=self.enable_disp.GetId())
         #MAC needs SetValue
         self.disable_disp.SetValue(True)
         sizer_dispersion = wx.BoxSizer(wx.HORIZONTAL)
@@ -717,8 +718,8 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         ## fill a sizer for dispersion
         boxsizer1.Add(sizer_dispersion, 0,
-                wx.TOP | wx.BOTTOM | wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE,
-                border=5)
+                      wx.TOP|wx.BOTTOM|wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE,
+                      border=5)
         self.sizer4_4 = wx.GridBagSizer(6, 5)
 
         boxsizer1.Add(self.sizer4_4)
@@ -777,13 +778,13 @@ class BasicPage(ScrolledPanel, PanelBase):
             self._default_save_location = \
                         self._manager.parent._default_save_location
         dlg = wx.FileDialog(self, "Choose a file", self._default_save_location,
-                                        self.window_caption, "*.fitv", wx.SAVE)
+                            self.window_caption, "*.fitv", wx.SAVE)
 
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             self._default_save_location = os.path.dirname(path)
             self._manager.parent._default_save_location = \
-                                 self._default_save_location
+                                self._default_save_location
         else:
             return None
         # MAC always needs the extension for saving
@@ -842,7 +843,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             infor = "warning"
         # inform msg to wx
         wx.PostEvent(self._manager.parent,
-                    StatusEvent(status=msg, info=infor))
+                     StatusEvent(status=msg, info=infor))
 
     def _get_time_stamp(self):
         """
@@ -911,9 +912,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         try:
             if path == None:
+                status = " Selected Distribution was not loaded: %s" % path
                 wx.PostEvent(self._manager.parent,
-                            StatusEvent(status=\
-                            " Selected Distribution was not loaded: %s" % path))
+                             StatusEvent(status=status))
                 return None, None
             input_f = open(path, 'r')
             buff = input_f.read()
@@ -930,7 +931,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                     weights.append(weight)
                 except:
                     # Skip non-data lines
-                    logging.error(sys.exc_value)
+                    logging.error(sys.exc_info()[1])
             return numpy.array(angles), numpy.array(weights)
         except:
             raise
@@ -1094,12 +1095,12 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         ## save checkbutton state and txtcrtl values
         self._copy_parameters_state(self.orientation_params,
-                                     self.state.orientation_params)
+                                    self.state.orientation_params)
         self._copy_parameters_state(self.orientation_params_disp,
-                                     self.state.orientation_params_disp)
+                                    self.state.orientation_params_disp)
         self._copy_parameters_state(self.parameters, self.state.parameters)
         self._copy_parameters_state(self.fittable_param,
-                                             self.state.fittable_param)
+                                    self.state.fittable_param)
         self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
 
     def check_invalid_panel(self):
@@ -1135,7 +1136,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         except:
             category_pos = 0
             for ind_cat in range(self.categorybox.GetCount()):
-                if self.categorycombobox.GetString(ind_form) == \
+                if self.categorycombobox.GetString(ind_cat) == \
                                         state.categorycombobox:
                     category_pos = int(ind_cat)
                     break
@@ -1364,10 +1365,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.model_view.SetLabel("2D Mode")
             else:
                 self.model_view.SetLabel("1D Mode")
-        # else:
-
-        if self._manager != None and self.engine_type != None:
-            self._manager._on_change_engine(engine=self.engine_type)
+        
         ## set the select all check box to the a given state
         self.cb1.SetValue(state.cb1)
 
@@ -1479,7 +1477,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.model._persistency_dict[key] = \
                                  [state.values, state.weights]
             except:
-                logging.error(sys.exc_value)
+                logging.error(sys.exc_info()[1])
             selection = self._find_polyfunc_selection(disp_model)
             for list in self.fittable_param:
                 if list[1] == key and list[7] != None:
@@ -1496,7 +1494,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                             list[5].Disable()
                             list[6].Disable()
                         except:
-                            logging.error(sys.exc_value)
+                            logging.error(sys.exc_info()[1])
             # For array, disable all fixed params
             if selection == 1:
                 for item in self.fixed_param:
@@ -1505,7 +1503,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                         try:
                             item[2].Disable()
                         except:
-                            logging.error(sys.exc_value)
+                            logging.error(sys.exc_info()[1])
 
         # Make sure the check box updated when all checked
         if self.cb1.GetValue():
@@ -1519,8 +1517,8 @@ class BasicPage(ScrolledPanel, PanelBase):
             self._default_save_location = \
                         self._manager.parent.get_save_location()
         dlg = wx.FileDialog(self, "Choose a weight file",
-                                self._default_save_location, "",
-                                "*.*", wx.OPEN)
+                            self._default_save_location, "",
+                            "*.*", wx.OPEN)
         path = None
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
@@ -1586,13 +1584,13 @@ class BasicPage(ScrolledPanel, PanelBase):
         if self.model != None:
             try:
                 is_modified = self._check_value_enter(self.fittable_param,
-                                                     is_modified)
+                                                      is_modified)
                 is_modified = self._check_value_enter(self.fixed_param,
                                                       is_modified)
                 is_modified = self._check_value_enter(self.parameters,
                                                       is_modified)
             except:
-                logging.error(sys.exc_value)
+                logging.error(sys.exc_info()[1])
 
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and
@@ -1658,9 +1656,9 @@ class BasicPage(ScrolledPanel, PanelBase):
             self._check_value_enter(self.fixed_param, is_modified)
             self._check_value_enter(self.parameters, is_modified)
 
-            # If qmin and qmax have been modified, update qmin and qmax and 
+            # If qmin and qmax have been modified, update qmin and qmax and
             # Here we should check whether the boundaries have been modified.
-            # If qmin and qmax have been modified, update qmin and qmax and 
+            # If qmin and qmax have been modified, update qmin and qmax and
             # set the is_modified flag to True
             self.fitrange = self._validate_qrange(self.qmin, self.qmax)
             if self.fitrange:
@@ -1680,13 +1678,14 @@ class BasicPage(ScrolledPanel, PanelBase):
                     elif self.pinhole_smearer.GetValue():
                         flag = self.update_pinhole_smear()
                     else:
+                        enable_smearer = not self.disable_smearer.GetValue()
                         self._manager.set_smearer(smearer=temp_smearer,
                                                   uid=self.uid,
                                                   fid=self.data.id,
                                                   qmin=float(self.qmin_x),
                                                   qmax=float(self.qmax_x),
-                            enable_smearer=not self.disable_smearer.GetValue(),
-                                                      draw=False)
+                                                  enable_smearer=enable_smearer,
+                                                  draw=False)
                 elif not self._is_2D():
                     self._manager.set_smearer(smearer=temp_smearer,
                                               qmin=float(self.qmin_x),
@@ -1734,7 +1733,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         try:
             self.save_current_state()
         except:
-            logging.error(sys.exc_value)
+            logging.error(sys.exc_info()[1])
 
         return flag
 
@@ -1989,12 +1988,15 @@ class BasicPage(ScrolledPanel, PanelBase):
                     #    wx.PostEvent(self.parent.parent,
                     #                 StatusEvent(status=msg, info="error"))
         except:
-            msg = "%s\n" % (sys.exc_value)
+            msg = "%s\n" % (sys.exc_info()[1])
             wx.PostEvent(self._manager.parent,
                          StatusEvent(status=msg, info="error"))
         self._populate_box(self.formfactorbox, m_list)
 
     def _on_modify_cat(self, event=None):
+        """
+        Called when category manager is opened
+        """
         self._manager.parent.on_category_panel(event)
 
     def _show_combox(self, event=None):
@@ -2058,12 +2060,13 @@ class BasicPage(ScrolledPanel, PanelBase):
                         self.qmax_x = tempmax
                 else:
                     tcrtl.SetBackgroundColour("pink")
-                    msg = "Model Error: wrong value entered: %s" % sys.exc_value
+                    msg = "Model Error: wrong value entered: %s" % \
+                                    sys.exc_info()[1]
                     wx.PostEvent(self.parent, StatusEvent(status=msg))
                     return
             except:
                 tcrtl.SetBackgroundColour("pink")
-                msg = "Model Error: wrong value entered: %s" % sys.exc_value
+                msg = "Model Error: wrong value entered: %s" % sys.exc_info()[1]
                 wx.PostEvent(self.parent, StatusEvent(status=msg))
                 return
             #Check if # of points for theory model are valid(>0).
@@ -2115,12 +2118,13 @@ class BasicPage(ScrolledPanel, PanelBase):
                         self.theory_qmax_x = tempmax
                 else:
                     tcrtl.SetBackgroundColour("pink")
-                    msg = "Model Error: wrong value entered: %s" % sys.exc_value
+                    msg = "Model Error: wrong value entered: %s" % \
+                                        sys.exc_info()[1]
                     wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                     return
             except:
                 tcrtl.SetBackgroundColour("pink")
-                msg = "Model Error: wrong value entered: %s" % sys.exc_value
+                msg = "Model Error: wrong value entered: %s" % sys.exc_info()[1]
                 wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                 return
             #Check if # of points for theory model are valid(>0).
@@ -2550,7 +2554,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 try:
                     self.model.set_dispersion(p, disp_model)
                 except:
-                    logging.error(sys.exc_value)
+                    logging.error(sys.exc_info()[1])
 
         ## save state into
         self.save_current_state()
@@ -2763,7 +2767,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             del self.model._persistency_dict[name.split('.')[0]]
             del self.state.model._persistency_dict[name.split('.')[0]]
         except:
-            logging.error(sys.exc_value)
+            logging.error(sys.exc_info()[1])
 
     def _lay_out(self):
         """
@@ -2909,7 +2913,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                         canvases.append(item2.canvas)
             except:
                 # Not for control panels
-                logging.error(sys.exc_value)
+                logging.error(sys.exc_info()[1])
         # Make sure the resduals plot goes to the last
         if res_item != None:
             graphs.append(res_item[0])
@@ -3225,7 +3229,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 if item[7].__class__.__name__ == 'ComboBox':
                     disfunc = str(item[7].GetValue())
             except:
-                logging.error(sys.exc_value)
+                logging.error(sys.exc_info()[1])
 
             # 2D
             if self.data.__class__.__name__ == "Data2D":
@@ -3260,7 +3264,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                     for weight in self.weights[name]:
                         disfunc += ' ' + str(weight)
             except:
-                logging.error(sys.exc_value)
+                logging.error(sys.exc_info()[1])
             content += name + ',' + str(check) + ',' + value + disfunc + ':'
 
         return content
@@ -3461,7 +3465,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                                                        weights=pd_weights)
                             is_array = True
                 except:
-                    logging.error(sys.exc_value)
+                    logging.error(sys.exc_info()[1])
                 if not is_array:
                     self._disp_obj_dict[name] = disp_model
                     self.model.set_dispersion(name,
@@ -3476,8 +3480,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                                              self.state.weights]
 
             except:
-                logging.error(sys.exc_value)
-                print "Error in BasePage._paste_poly_help: %s" % sys.exc_value
+                logging.error(sys.exc_info()[1])
+                print "Error in BasePage._paste_poly_help: %s" % \
+                                        sys.exc_info()[1]
 
     def _set_disp_array_cb(self, item):
         """
@@ -3501,14 +3506,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         print "BasicPage.update_pinhole_smear was called: skipping"
         return
 
-
-
-
     def _read_category_info(self):
         """
         Reads the categories in from file
         """
-
         # # ILL mod starts here - July 2012 kieranrcampbell@gmail.com
         self.master_category_dict = defaultdict(list)
         self.by_model_dict = defaultdict(list)
@@ -3522,7 +3523,6 @@ class BasicPage(ScrolledPanel, PanelBase):
             self.master_category_dict = json.load(cat_file)
             self._regenerate_model_dict()
             cat_file.close()
-
         except IOError:
             raise
             print 'Problem reading in category file.'
@@ -3535,7 +3535,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         key and the list of categories belonging to that model
         along with the enabled mapping
         """
-
         self.by_model_dict = defaultdict(list)
         for category in self.master_category_dict:
             for (model, enabled) in self.master_category_dict[category]:
@@ -3563,9 +3562,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         else:
             self.categorybox.SetSelection(\
                 self.categorybox.GetSelection())
-
         #self._on_change_cat(None)
-
 
     def _on_change_cat(self, event):
         """
@@ -3587,9 +3584,6 @@ class BasicPage(ScrolledPanel, PanelBase):
                                       key=lambda name: name[0]):
                 if(enabled):
                     self.model_box.Append(model)
-
-
-
 
     def _fill_model_sizer(self, sizer):
         """
@@ -3653,8 +3647,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         #self.shape_rbutton.SetValue(True)
 
         sizer_radiobutton = wx.GridSizer(2, 2, 5, 5)
-
-
         #sizer_radiobutton.Add(self.shape_rbutton)
         #sizer_radiobutton.Add(self.shape_indep_rbutton)
         sizer_radiobutton.Add((5, 5))

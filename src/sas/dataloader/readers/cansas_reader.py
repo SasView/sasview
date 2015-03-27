@@ -321,7 +321,6 @@ class Reader(XMLreader):
                 err_msg += "expecting [{0}]".format(default_unit)
                 value_unit = local_unit
             except:
-                print sys.exc_info()
                 err_msg = "CanSAS reader: unknown error converting "
                 err_msg += "\"{0}\" unit [{1}]"
                 err_msg = err_msg.format(tagname, local_unit)
@@ -989,7 +988,7 @@ class Reader(XMLreader):
                 self.write_text(node, item)
                 self.append(node, entry_node)
 
-    def _check_origin(self, entry_node, doc):
+    def _check_origin(self, entry_node, doc, frm):
         """
         Return the document, and the SASentry node associated with
         the data we just wrote.
@@ -999,7 +998,8 @@ class Reader(XMLreader):
         :param entry_node: lxml node ElementTree object to be appended to
         :param doc: entire xml tree
         """
-        frm = inspect.stack()[1]
+        if not frm:
+            frm = inspect.stack()[1]
         mod_name = frm[1].replace("\\", "/").replace(".pyc", "")
         mod_name = mod_name.replace(".py", "")
         mod = mod_name.split("sas/")
@@ -1010,7 +1010,7 @@ class Reader(XMLreader):
             node_name = entry_node.tag
             node_list = doc.getElementsByTagName(node_name)
             entry_node = node_list.item(0)
-        return entry_node
+        return doc, entry_node
 
     def _to_xml_doc(self, datainfo):
         """
@@ -1060,7 +1060,8 @@ class Reader(XMLreader):
         #      the data we just wrote
         # If the calling function was not the cansas reader, return a minidom
         #      object rather than an lxml object.
-        entry_node = self._check_origin(entry_node, doc)
+        frm = inspect.stack()[1]
+        doc, entry_node = self._check_origin(entry_node, doc, frm)
         return doc, entry_node
 
     def write_node(self, parent, name, value, attr=None):
