@@ -1,5 +1,5 @@
 """
-This module provide GUI for the neutron scattering length density calculator
+This module provides the GUI for the invariant perspective panel
 
 """
 import copy
@@ -20,6 +20,8 @@ from sas.perspectives.invariant.invariant_widgets import OutputTextCtrl
 from sas.perspectives.invariant.invariant_widgets import InvTextCtrl
 from sas.perspectives.invariant.invariant_state import InvariantState as IState
 from sas.guiframe.panel_base import PanelBase
+from sas.guiframe.documentation_window import DocumentationWindow
+
 # The minimum q-value to be used when extrapolating
 Q_MINIMUM = 1e-5
 # The maximum q-value to be used when extrapolating
@@ -54,7 +56,8 @@ else:
 
 class InvariantPanel(ScrolledPanel, PanelBase):
     """
-    Provides the Invariant GUI.
+    Main class defining the sizers (wx "panels") used to draw the
+    Invariant GUI.
     """
     ## Internal nickname for the window, used by the AUI manager
     window_name = "Invariant"
@@ -1838,16 +1841,20 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         #detail button
         id = wx.NewId()
         self.button_details = wx.Button(self, id, "Details?")
-        hint_msg = "Details about the results of the computation"
+        hint_msg = "Get more details of computation such as fraction from extrapolation"
         self.button_details.SetToolTipString(hint_msg)
         self.Bind(wx.EVT_BUTTON, self.display_details, id=id)
-        details = "Details on Invariant Total Calculations"
-        details_txt = wx.StaticText(self, -1, details)
-        self.button_sizer.AddMany([(details_txt, 0,
-                                    wx.RIGHT | wx.BOTTOM | wx.TOP, 10),
+        #help button
+        id = wx.NewId()
+        self.button_help = wx.Button(self, id, "HELP")
+        self.button_help.SetToolTipString("Invariant Documentation")
+        self.Bind(wx.EVT_BUTTON, self.on_help, id=id)
+        self.button_sizer.AddMany([((20, 20), 1, wx.EXPAND | wx.ADJUST_MINSIZE, 0),
                                    (self.button_details, 0, wx.ALL, 10),
                                    (self.button_calculate, 0,
-                                    wx.RIGHT | wx.TOP | wx.BOTTOM, 10)])
+                                    wx.RIGHT | wx.TOP | wx.BOTTOM, 10),
+                                   (self.button_help, 0, 
+                                    wx.RIGHT | wx.TOP | wx.BOTTOM, 10),])
     def _do_layout(self):
         """
         Draw window content
@@ -1868,6 +1875,25 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                                   wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)])
         self.SetSizer(self.main_sizer)
         self.SetAutoLayout(True)
+        
+    def on_help(self, event):
+        """
+        Bring up the Invariant Documentation whenever the HELP button is 
+        clicked.
+
+        Calls DocumentationWindow with the path of the location within the
+        documentation tree (after /doc/ ....".  Note that when using old
+        versions of Wx (before 2.9) and thus not the release version of
+        installers, the help comes up at the top level of the file as
+        webbrowser does not pass anything past the # to the browser when it is
+        running "file:///...."
+
+    :param evt: Triggers on clicking the help button
+    """
+
+        _TreeLocation = "user/perspectives/invariant/invariant_help.html"
+        _doc_viewer = DocumentationWindow(self, -1, \
+             _TreeLocation, "Invariant Help")
 
 
 class InvariantDialog(wx.Dialog):
