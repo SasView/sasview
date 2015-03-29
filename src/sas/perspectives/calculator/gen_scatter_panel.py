@@ -41,10 +41,12 @@ from sas.guiframe.documentation_window import DocumentationWindow
 _BOX_WIDTH = 76
 #Slit length panel size 
 if sys.platform.count("win32") > 0:
+    PANEL_TOP = 0
     PANEL_WIDTH = 570
     PANEL_HEIGHT = 370
     FONT_VARIANT = 0
 else:
+    PANEL_TOP = 40
     PANEL_WIDTH = 620
     PANEL_HEIGHT = 370
     FONT_VARIANT = 1
@@ -1844,7 +1846,7 @@ class SasGenWindow(widget.CHILD_FRAME):
 
 
         self.build_panels()
-        self.SetPosition((20, 5))
+        self.SetPosition((wx.LEFT, PANEL_TOP))
         self.Show(True)
 
     def build_panels(self):
