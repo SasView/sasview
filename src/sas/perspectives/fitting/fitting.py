@@ -953,6 +953,7 @@ class Plugin(PluginBase):
                                                       type="stop"))
                 return True
             except:
+                raise
                 msg = "Fitting error: %s" % str(sys.exc_value)
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
                                                       type="stop"))

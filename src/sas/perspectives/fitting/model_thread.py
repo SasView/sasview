@@ -168,8 +168,8 @@ class Calc1D(CalcThread):
         if self.smearer is not None:
             first_bin, last_bin = self.smearer.get_bin_range(self.qmin,
                                                              self.qmax)
-            mask = self.data.x[first_bin:last_bin]
-            output[first_bin:last_bin] = self.model.evalDistribution(mask)
+            mask = self.data.x[first_bin:last_bin+1]
+            output[first_bin:last_bin+1] = self.model.evalDistribution(mask)
             output = self.smearer(output, first_bin, last_bin)
         else:
             output[index] = self.model.evalDistribution(self.data.x[index])
