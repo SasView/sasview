@@ -1,5 +1,5 @@
 """
-GUI for the data operation
+GUI for the data operations panel (sum and multiply)
 """
 import wx
 import sys
@@ -16,12 +16,14 @@ from sas.guiframe.documentation_window import DocumentationWindow
 
 #Control panel width 
 if sys.platform.count("win32") > 0:
+    PANEL_TOP = 0
     PANEL_WIDTH = 790
     PANEL_HEIGTH = 370
     FONT_VARIANT = 0
     _BOX_WIDTH = 200
     ON_MAC = False
 else:
+    PANEL_TOP = 60
     _BOX_WIDTH = 230
     PANEL_WIDTH = 900
     PANEL_HEIGTH = 430
@@ -962,7 +964,7 @@ class DataOperatorWindow(widget.CHILD_FRAME):
         self.manager = manager
         self.panel = DataOperPanel(parent=self)
         wx.EVT_CLOSE(self, self.OnClose)
-        self.SetPosition((25, 10))
+        self.SetPosition((wx.LEFT, PANEL_TOP))
         self.Show()
 
     def OnClose(self, event=None):

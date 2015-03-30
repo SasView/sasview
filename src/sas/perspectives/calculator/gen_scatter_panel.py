@@ -46,7 +46,7 @@ if sys.platform.count("win32") > 0:
     PANEL_HEIGHT = 370
     FONT_VARIANT = 0
 else:
-    PANEL_TOP = 40
+    PANEL_TOP = 60
     PANEL_WIDTH = 620
     PANEL_HEIGHT = 370
     FONT_VARIANT = 1
@@ -378,16 +378,24 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         self.time_text = wx.StaticText(self, -1, self.est_time % str('2 sec'))
         self.orient_combo = self._fill_orient_combo()
         self.orient_combo.Show(False)
+
         self.bt_compute = wx.Button(self, wx.NewId(), 'Compute')
         self.bt_compute.Bind(wx.EVT_BUTTON, self.on_compute)
         self.bt_compute.SetToolTipString("Compute 2D Scattering Pattern.")
+
         self.bt_help = wx.Button(self, wx.NewId(), 'HELP')
         self.bt_help.Bind(wx.EVT_BUTTON, self.on_help)
         self.bt_help.SetToolTipString("Help on Scatter Calculator")
+
+        self.bt_close = wx.Button(self, wx.ID_CANCEL, 'Close')
+        self.bt_close.Bind(wx.EVT_BUTTON, self.on_panel_close)
+        self.bt_close.SetToolTipString("Close this window")
+
         self.button_sizer.AddMany([(self.time_text , 0, wx.LEFT, 20),
                                    (self.orient_combo , 0, wx.LEFT, 20),
                                    (self.bt_compute, 0, wx.LEFT, 20),
-                                   (self.bt_help, 0, wx.LEFT, 5)])
+                                   (self.bt_help, 0, wx.LEFT, 20),
+                                   (self.bt_close, 0, wx.LEFT, 5)])
 
     def estimate_ctime(self):
         """
@@ -1211,9 +1219,9 @@ class SasGenPanel(ScrolledPanel, PanelBase):
 
     def on_panel_close(self, event):
         """
-        On Close SLD panel
+        close the window containing this panel
         """
-        #Not implemented   
+        self.parent.Close()
 
 class OmfPanel(ScrolledPanel, PanelBase):
     """

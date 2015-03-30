@@ -24,10 +24,12 @@ from sas.guiframe.documentation_window import DocumentationWindow
 _BOX_WIDTH = 76
 #Slit length panel size 
 if sys.platform.count("win32") > 0:
+    PANEL_TOP = 0
     PANEL_WIDTH = 500
     PANEL_HEIGHT = 210
     FONT_VARIANT = 0
 else:
+    PANEL_TOP = 60
     PANEL_WIDTH = 530
     PANEL_HEIGHT = 210
     FONT_VARIANT = 1
@@ -292,7 +294,7 @@ class SlitLengthCalculatorWindow(widget.CHILD_FRAME):
         self.manager = manager
         self.panel = SlitLengthCalculatorPanel(parent=self)
         self.Bind(wx.EVT_CLOSE, self.on_close)
-        self.SetPosition((25, 10))
+        self.SetPosition((wx.LEFT, PANEL_TOP))
         self.Show(True)
 
     def on_close(self, event):

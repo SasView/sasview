@@ -29,10 +29,12 @@ _SCALE = 1e-6
 
 #SLD panel size 
 if sys.platform.count("win32") > 0:
+    PANEL_TOP = 0
     _STATICBOX_WIDTH = 350
     PANEL_SIZE = 400
     FONT_VARIANT = 0
 else:
+    PANEL_TOP = 60
     _STATICBOX_WIDTH = 380
     PANEL_SIZE = 410
     FONT_VARIANT = 1
@@ -58,6 +60,7 @@ class SldPanel(wx.Panel, PanelBase):
         # Object that receive status event
         self.base = base
         self.wavelength = WAVELENGTH
+        self.parent = parent
         #layout attribute
         self.compound_ctl = None
         self.density_ctl = None
@@ -289,9 +292,14 @@ class SldPanel(wx.Panel, PanelBase):
         self.button_help.SetToolTipString("help on SLD calculator.")
         self.Bind(wx.EVT_BUTTON, self.on_help, id=id)
 
+        self.button_close = wx.Button(self, wx.ID_CANCEL, 'Close')
+        self.button_close.Bind(wx.EVT_BUTTON, self.on_close)
+        self.button_close.SetToolTipString("Close this window.")
+
         sizer_button.Add((150, 20), 1, wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         sizer_button.Add(self.button_calculate, 0, wx.RIGHT | wx.ADJUST_MINSIZE, 20)
         sizer_button.Add(self.button_help, 0, wx.RIGHT | wx.ADJUST_MINSIZE, 20)
+        sizer_button.Add(self.button_close, 0, wx.RIGHT | wx.ADJUST_MINSIZE, 20)
         sizer3.Add(sizer_button)
         #---------layout----------------
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -319,6 +327,12 @@ class SldPanel(wx.Panel, PanelBase):
         _TreeLocation = "user/perspectives/calculator/sld_calculator_help.html"
         _doc_viewer = DocumentationWindow(self, -1, \
              _TreeLocation, "General Scattering Calculator Help")
+
+    def on_close(self, event):
+        """
+        close the window containing this panel
+        """
+        self.parent.Close()
 
     def calculate_xray_sld(self, element):
         """
@@ -481,7 +495,7 @@ class SldWindow(widget.CHILD_FRAME):
         self.manager = manager
         self.panel = SldPanel(self, base=base)
         self.Bind(wx.EVT_CLOSE, self.on_close)
-        self.SetPosition((20, 10))
+        self.SetPosition((wx.LEFT, PANEL_TOP))
         self.Show(True)
 
     def on_close(self, event):

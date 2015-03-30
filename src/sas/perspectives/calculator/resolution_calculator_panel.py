@@ -38,11 +38,13 @@ _BOX_WIDTH = 100
 _Q_DEFAULT = 0.0
 #Slit length panel size
 if sys.platform.count("win32") > 0:
+    PANEL_TOP = 0
     PANEL_WIDTH = 525
     PANEL_HEIGHT = 653
     FONT_VARIANT = 0
     IS_WIN = True
 else:
+    PANEL_TOP = 60
     PANEL_WIDTH = 540
     PANEL_HEIGHT = 662
     FONT_VARIANT = 1
@@ -1334,7 +1336,7 @@ class ResolutionWindow(widget.CHILD_FRAME):
         self.manager = manager
         self.panel = ResolutionCalculatorPanel(parent=self)
         self.Bind(wx.EVT_CLOSE, self.OnClose)
-        self.SetPosition((25, 10))
+        self.SetPosition((wx.LEFT, PANEL_TOP))
         self.Show(True)
 
     def OnClose(self, event):

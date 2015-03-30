@@ -17,11 +17,13 @@ _INPUTS = ['Mass Density', 'Molar Volume']
 _UNITS = ['g/cm^(3)     ', 'cm^(3)/mol ']
 #Density panel size 
 if sys.platform.count("win32") > 0:
+    PANEL_TOP = 0
     _STATICBOX_WIDTH = 410
     _BOX_WIDTH = 200
     PANEL_SIZE = 440
     FONT_VARIANT = 0
 else:
+    PANEL_TOP = 60
     _STATICBOX_WIDTH = 430
     _BOX_WIDTH = 200
     PANEL_SIZE = 460
@@ -48,6 +50,7 @@ class DensityPanel(ScrolledPanel, PanelBase):
         self.SetWindowVariant(variant=FONT_VARIANT)
         # Object that receive status event
         self.base = base
+        self.parent = parent
         # chemeical formula, string
         self.compound = ''
         # value of the density/volume, float
@@ -210,10 +213,16 @@ class DensityPanel(ScrolledPanel, PanelBase):
         self.button_help.SetToolTipString("Help for density calculator.")
         self.Bind(wx.EVT_BUTTON, self.on_help, id=id)
 
-        sizer_button.Add((150, 20), 1, wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+        self.button_close = wx.Button(self, wx.ID_CANCEL, 'Close')
+        self.button_close.Bind(wx.EVT_BUTTON, self.on_close)
+        self.button_close.SetToolTipString("Close this window.")
+
+        sizer_button.Add((100, 20), 1, wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         sizer_button.Add(self.button_calculate, 0,
                                         wx.RIGHT | wx.ADJUST_MINSIZE, 20)
         sizer_button.Add(self.button_help, 0,
+                                        wx.RIGHT | wx.ADJUST_MINSIZE, 20)
+        sizer_button.Add(self.button_close, 0,
                                         wx.RIGHT | wx.ADJUST_MINSIZE, 20)
         sizer3.Add(sizer_button)
 
@@ -378,6 +387,12 @@ class DensityPanel(ScrolledPanel, PanelBase):
         _doc_viewer = DocumentationWindow(self, -1, \
              _TreeLocation, "Density/Volume Calculator Help")
 
+    def on_close(self, event):
+        """
+        close the window containing this panel
+        """
+        self.parent.Close()
+
     def clear_outputs(self):
         """
         Clear the outputs textctrl
@@ -414,7 +429,7 @@ class DensityWindow(widget.CHILD_FRAME):
         self.manager = manager
         self.panel = DensityPanel(self, base=base)
         self.Bind(wx.EVT_CLOSE, self.on_close)
-        self.SetPosition((25, 10))
+        self.SetPosition((wx.LEFT, PANEL_TOP))
         self.Show(True)
 
     def on_close(self, event):
