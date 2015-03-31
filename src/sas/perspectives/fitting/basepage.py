@@ -97,8 +97,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## total number of point: float
         self.npts = None
         self.num_points = None
-        ## default fitengine type
-        self.engine_type = 'bumps'
         ## smear default
         self.current_smearer = None
         ## 2D smear accuracy default
@@ -946,7 +944,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Store current state
         """
-        self.state.engine_type = copy.deepcopy(self.engine_type)
         ## save model option
         if self.model != None:
             self.disp_list = self.model.getDispParamList()
@@ -1044,8 +1041,6 @@ class BasicPage(ScrolledPanel, PanelBase):
             self.disp_list = self.model.getDispParamList()
             self.state.disp_list = copy.deepcopy(self.disp_list)
             self.state.model = self.model.clone()
-        if hasattr(self, "engine_type"):
-            self.state.engine_type = copy.deepcopy(self.engine_type)
 
         self.state.enable2D = copy.deepcopy(self.enable2D)
         self.state.values = copy.deepcopy(self.values)
@@ -1298,7 +1293,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         except:
             # Backward compatibility (for older state files)
             self.magnetic_on = False
-        self.engine_type = state.engine_type
 
         self.disp_cb_dict = state.disp_cb_dict
         self.disp_list = state.disp_list
@@ -1354,9 +1348,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         if state.multi_factor != None:
             self.multifactorbox.SetSelection(state.multi_factor)
 
-        #reset the fitting engine type
-        self.engine_type = state.engine_type
-        #draw the pnael according to the new model parameter
+        #draw the panel according to the new model parameter
         self._on_select_model(event=None)
 
         # take care of 2D button

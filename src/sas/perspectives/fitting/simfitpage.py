@@ -151,7 +151,6 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             flag = (self._manager.sim_page.uid == self.uid)
 
         ## making sure all parameters content a constraint
-        ## validity of the constraint expression is own by fit engine
         if not self.batch_on and self.show_constraint.GetValue():
             if not self._set_constraint():
                 return

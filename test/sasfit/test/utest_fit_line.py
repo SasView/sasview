@@ -7,7 +7,7 @@ import math
 
 from sas.fit.AbstractFitEngine import Model, FitHandler
 from sas.dataloader.loader import Loader
-from sas.fit.Fitting import Fit
+from sas.fit.BumpsFitting import BumpsFit as Fit
 from sas.models.LineModel import LineModel
 from sas.models.Constant import Constant
 
@@ -15,7 +15,7 @@ class testFitModule(unittest.TestCase):
     """ test fitting """
 
     def test_bad_pars(self):
-        fitter = Fit('bumps')
+        fitter = Fit()
 
         data = Loader().load("testdata_line.txt")
         data.name = data.filename
@@ -33,8 +33,8 @@ class testFitModule(unittest.TestCase):
         else:
             raise AssertionError("No error raised for fitting with wrong parameters name to fit")
 
-    def fit_single(self, fitter_name, isdream=False):
-        fitter = Fit(fitter_name)
+    def fit_single(self, isdream=False):
+        fitter = Fit()
 
         data = Loader().load("testdata_line.txt")
         data.name = data.filename
@@ -73,7 +73,7 @@ class testFitModule(unittest.TestCase):
         fitters.FIT_OPTIONS[alg].options.update(monitors=[])
         #print "fitting",alg,opts
         #kprint "options",fitters.FIT_OPTIONS[alg].__dict__
-        self.fit_single('bumps', isdream=(alg=='dream'))
+        self.fit_single(isdream=(alg=='dream'))
 
     def test_bumps_de(self):
         self.fit_bumps('de')
@@ -101,7 +101,7 @@ class testFitModule(unittest.TestCase):
         data2.name = data2.filename
      
         #Importing the Fit module
-        fitter = Fit('bumps')
+        fitter = Fit()
         # Receives the type of model for the fitting
         model11  = LineModel()
         model11.name= "M1"
@@ -160,7 +160,7 @@ class testFitModule(unittest.TestCase):
         pars2= ['value']
         
         #Importing the Fit module
-        fitter = Fit('bumps')
+        fitter = Fit()
         fitter.set_data(data1,1)
         fitter.set_model(model1,1,pars1)
         fitter.set_data(data2,2,smearer=None)
@@ -193,7 +193,7 @@ class testFitModule(unittest.TestCase):
         pars1= ['A','B']
         #Importing the Fit module
 
-        fitter = Fit('bumps')
+        fitter = Fit()
         fitter.set_data(data1,1,qmin=0, qmax=7)
         fitter.set_model(model,1,pars1)
         fitter.set_data(data2,1,qmin=1,qmax=10)

@@ -41,8 +41,7 @@ LIST_OF_DATA_ATTRIBUTES = [["is_data", "is_data", "bool"],
                            ["data_id", "data_id", "string"],
                            ["name", "name", "string"],
                            ["data_name", "data_name", "string"]]
-LIST_OF_STATE_ATTRIBUTES = [["engine_type", "engine_type", "string"],
-                            ["qmin", "qmin", "float"],
+LIST_OF_STATE_ATTRIBUTES = [["qmin", "qmin", "float"],
                             ["qmax", "qmax", "float"],
                             ["npts", "npts", "float"],
                             ["categorycombobox", "categorycombobox", "string"],
@@ -172,8 +171,6 @@ class PageState(object):
         ## reset True change the state of exsiting button
         self.reset = False
 
-        #engine type
-        self.engine_type = None
         # flag to allow data2D plot
         self.enable2D = False
         # model on which the fit would be performed
@@ -287,7 +284,6 @@ class PageState(object):
         obj.data_name = self.data_name
         obj.is_data = self.is_data
         obj.model_list_box = copy.deepcopy(self.model_list_box)
-        obj.engine_type = copy.deepcopy(self.engine_type)
 
         obj.categorycombobox = self.categorycombobox
         obj.formfactorcombobox = self.formfactorcombobox

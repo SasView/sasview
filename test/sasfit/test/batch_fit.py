@@ -2,7 +2,7 @@ import copy
 import time
 import unittest
 from sas.dataloader.loader import Loader
-from sas.fit.Fitting import Fit
+from sas.fit.Fitting import BumpsFit as Fit
 from sas.models.CylinderModel import CylinderModel
 import sas.models.dispersion_models 
 from sas.models.qsmearing import smear_selection
@@ -41,13 +41,13 @@ class BatchFit:
         self.qmin = qmin
         self.qmax = qmax
         
-    def _reset_helper(self, path=None, engine="bumps", npts=NPTS):
+    def _reset_helper(self, path=None, npts=NPTS):
         """
-        Set value to fitter engine and prepare inputs for map function
+        Set value to fitter and prepare inputs for map function
         """
         for i in range(npts):
             data = Loader().load(path)
-            fitter = Fit(engine)
+            fitter = Fit()
             #create model
             model = CylinderModel()
             model.setParam('scale', 1.0)
@@ -76,7 +76,7 @@ class BatchFit:
             self.list_of_function.append('fit')
             self.list_of_mapper.append(classMapper)
                    
-    def reset_value(self, engine='bumps'):
+    def reset_value(self):
         """
         Initialize inputs for the map function
         """
@@ -87,21 +87,21 @@ class BatchFit:
         self.list_of_mapper = []
 
         path = "testdata_line3.txt"
-        self._reset_helper(path=path, engine=engine, npts=NPTS)
+        self._reset_helper(path=path, npts=NPTS)
         path = "testdata_line.txt"
-        self._reset_helper(path=path, engine=engine, npts=NPTS)
+        self._reset_helper(path=path, npts=NPTS)
         path = "SILIC010_noheader.DAT"
-        self._reset_helper(path=path, engine=engine, npts=NPTS)
+        self._reset_helper(path=path, npts=NPTS)
         path = "cyl_400_20.txt"
-        self._reset_helper(path=path, engine=engine, npts=NPTS)
+        self._reset_helper(path=path, npts=NPTS)
         path = "sphere_80.txt"
-        self._reset_helper(path=path, engine=engine, npts=NPTS)
+        self._reset_helper(path=path, npts=NPTS)
         path = "PolySpheres.txt"
-        self._reset_helper(path=path, engine=engine, npts=NPTS)
+        self._reset_helper(path=path, npts=NPTS)
         path = "latex_qdev.txt"
-        self._reset_helper(path=path, engine=engine, npts=NPTS)
+        self._reset_helper(path=path, npts=NPTS)
         path = "latex_qdev2.txt"
-        self._reset_helper(path=path, engine=engine, npts=NPTS)
+        self._reset_helper(path=path, npts=NPTS)
         
       
     def test_map_fit(self, n=0):

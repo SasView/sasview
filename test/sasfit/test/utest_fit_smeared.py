@@ -7,7 +7,7 @@ import math
 
 import numpy
 from sas.fit.AbstractFitEngine import Model
-from sas.fit.Fitting import Fit
+from sas.fit.BumpsFitting import BumpsFit as Fit
 from sas.dataloader.loader import Loader
 from sas.models.qsmearing import smear_selection
 from sas.models.CylinderModel import CylinderModel
@@ -23,7 +23,7 @@ class testFitModule(unittest.TestCase):
         # This data file has not error, add them
         #out.dy = out.y
         
-        fitter = Fit('bumps')
+        fitter = Fit()
         fitter.set_data(out,1)
         
         # Receives the type of model for the fitting
@@ -61,7 +61,7 @@ class testFitModule(unittest.TestCase):
         fitters.FIT_DEFAULT = alg
         #fitters.FIT_OPTIONS[alg].options.update(opts)
         fitters.FIT_OPTIONS[alg].options.update(monitors=[])
-        self._dispersion(fitter = Fit('bumps'))
+        self._dispersion(fitter = Fit())
 
     def _dispersion(self, fitter):
         # Load data
@@ -93,8 +93,7 @@ class testFitModule(unittest.TestCase):
         fitter.select_problem_for_fit(id=1,value=1)
         #import time; T0 = time.time()
         result1, = fitter.fit()
-        #print "time",time.time()-T0,fitter._engine.__class__.__name__
-        
+
         self.assert_(result1)
         self.assertTrue(len(result1.pvec)>0)
         self.assertTrue(len(result1.stderr)>0)
@@ -136,13 +135,13 @@ class smear_testdata(unittest.TestCase):
         #self.assertEqual(smear.__class__.__name__, 'PySmearer')
 
         # Fit
-        fitter = Fit('bumps')
+        fitter = Fit()
         
         # Data: right now this is the only way to set the smearer object
         # We should improve that and have a way to get access to the
         # data for a given fit.
         fitter.set_data(self.data_res,1)
-        fitter._engine.fit_arrange_dict[1].data_list[0].smearer = smear
+        fitter.fit_arrange_dict[1].data_list[0].smearer = smear
 
         # Model: maybe there's a better way to do this.
         # Ideally we should have to create a new model from our sas model.
@@ -168,14 +167,14 @@ class smear_testdata(unittest.TestCase):
         #self.assertEqual(smear.__class__.__name__, 'SlitSmearer')
         #self.assertEqual(smear.__class__.__name__, 'PySmearer')
 
-        fitter = Fit('bumps')
+        fitter = Fit()
         
         # Data: right now this is the only way to set the smearer object
         # We should improve that and have a way to get access to the
         # data for a given fit.
         fitter.set_data(self.data_slit,1)
-        fitter._engine.fit_arrange_dict[1].data_list[0].smearer = smear
-        fitter._engine.fit_arrange_dict[1].data_list[0].qmax = 0.003
+        fitter.fit_arrange_dict[1].data_list[0].smearer = smear
+        fitter.fit_arrange_dict[1].data_list[0].qmax = 0.003
         
         # Model
         fitter.set_model(Model(self.sphere),1, ['radius','scale'])

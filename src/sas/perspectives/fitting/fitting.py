@@ -31,7 +31,7 @@ from sas.guiframe.events import EVT_SLICER_PARS_UPDATE
 from sas.guiframe.gui_style import GUIFRAME_ID
 from sas.guiframe.plugin_base import PluginBase
 from sas.guiframe.data_processor import BatchCell
-from sas.fit.Fitting import Fit
+from sas.fit.BumpsFitting import BumpsFit as Fit
 from sas.perspectives.fitting.console import ConsoleUpdate
 from sas.perspectives.fitting.fitproblem import FitProblemDictionary
 from sas.perspectives.fitting.fitpanel import FitPanel
@@ -83,9 +83,6 @@ class Plugin(PluginBase):
         self.standalone = True
         ## dictionary of page closed and id
         self.closed_page_dict = {}
-        ## Fit engine
-        self._fit_engine = 'bumps'
-        self._gui_engine = None
         ## Relative error desired in the sum of squares (float)
         self.batch_reset_flag = True
         #List of selected data
@@ -750,7 +747,7 @@ class Plugin(PluginBase):
 
     def stop_fit(self, uid):
         """
-        Stop the fit engine
+        Stop the fit
         """
         if uid in self.fit_thread_list.keys():
             calc_fit = self.fit_thread_list[uid]
@@ -876,7 +873,7 @@ class Plugin(PluginBase):
     def onFit(self, uid):
         """
         Get series of data, model, associates parameters and range and send then
-        to  series of fit engines. Fit data and model, display result to
+        to  series of fitters. Fit data and model, display result to
         corresponding panels.
         :param uid: id related to the panel currently calling this fit function.
         """
@@ -895,8 +892,8 @@ class Plugin(PluginBase):
         fitter_list = []
         sim_fitter = None
         if fit_type == 'simultaneous':
-            #simulatanous fit only one engine need to be created
-            sim_fitter = Fit(self._fit_engine)
+            # for simultaneous fitting only one fitter is needed
+            sim_fitter = Fit()
             sim_fitter.fitter_id = self.sim_page.uid
             fitter_list.append(sim_fitter)
 
@@ -935,7 +932,7 @@ class Plugin(PluginBase):
                     fitproblem_list = page_info.values()
                     for fitproblem in  fitproblem_list:
                         if sim_fitter is None:
-                            fitter = Fit(self._fit_engine)
+                            fitter = Fit()
                             fitter.fitter_id = page_id
                             fitter_list.append(fitter)
                         else:
@@ -964,7 +961,7 @@ class Plugin(PluginBase):
         msg = "Fitting is in progress..."
         wx.PostEvent(self.parent, StatusEvent(status=msg, type="progress"))
 
-        #Handler used for fit engine displayed message
+        #Handler used to display fit message
         handler = ConsoleUpdate(parent=self.parent,
                                 manager=self,
                                 improvement_delta=0.1)
@@ -1147,10 +1144,7 @@ class Plugin(PluginBase):
 
     def _add_problem_to_fit(self, fitproblem, pars, fitter, fit_id):
         """
-        Create and set fit engine with series of data and model
-        :param pars: list of fittable parameters
-        :param fitter_list: list of fit engine
-        :param value:  structure storing data mapped to their model, range etc.
+        Create and set fitter with series of data and model
         """
         data = fitproblem.get_fit_data()
         model = fitproblem.get_model()
@@ -1206,7 +1200,7 @@ class Plugin(PluginBase):
                             batch_outputs, batch_inputs, elapsed=None):
         """
         Display fit result in batch
-        :param result: list of objects received fromt fit engines
+        :param result: list of objects received from fitters
         :param pars: list of  fitted parameters names
         :param page_id: list of page ids which called fit function
         :param elapsed: time spent at the fitting level
@@ -1307,8 +1301,8 @@ class Plugin(PluginBase):
                             batch_outputs[param].append(ERROR)
                             batch_inputs["error on %s" % str(param)].append(ERROR)
                 else:
-                    # ToDo: Why sometimes res.pvec comes with numpy.float64?
-                    # Need to fix it within ScipyEngine
+                    # TODO: Why sometimes res.pvec comes with numpy.float64?
+                    # probably from scipy lmfit
                     if res.pvec.__class__ == numpy.float64:
                         res.pvec = [res.pvec]
 
@@ -1920,7 +1914,7 @@ class Plugin(PluginBase):
             if data_copy.dy == None or data_copy.dy == []:
                 dy = numpy.ones(len(data_copy.y))
             else:
-                ## Set consitently w/AbstractFitengine:
+                ## Set consistently w/AbstractFitengine:
                 # But this should be corrected later.
                 dy = deepcopy(data_copy.dy)
                 dy[dy == 0] = 1

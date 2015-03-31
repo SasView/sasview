@@ -7,7 +7,7 @@ import math
 
 from sas.dataloader.data_info import Data1D 
 from sas.fit.AbstractFitEngine import Model,FitData1D
-from sas.fit.Fitting import Fit
+from sas.fit.BumpsFitting import BumpsFit as Fit
 from sas.dataloader.loader import Loader
 from sas.models.MultiplicationModel import MultiplicationModel
 from sas.models.CylinderModel import CylinderModel
@@ -37,7 +37,7 @@ class testFitModule(unittest.TestCase):
         model = Model(model1)
     
         pars1 =['length','radius','scale_factor']
-        fitter = Fit('bumps')
+        fitter = Fit()
         fitter.set_data(data,1)
         fitter.set_model(model,1,pars1)
         fitter.select_problem_for_fit(id=1,value=1)

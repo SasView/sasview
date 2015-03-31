@@ -183,21 +183,6 @@ class FitPage(BasicPage):
             return True
         return False
 
-    def _on_engine_change(self, name):
-        """
-        get the current name of the fit engine type
-         and update the panel accordingly
-        """
-
-        self.engine_type = str(name)
-        self.state.engine_type = self.engine_type
-        if not self.is_mac:
-            if len(self.parameters) == 0:
-                self.Layout()
-                return
-            self.Layout()
-            self.Refresh()
-
     def _fill_range_sizer(self):
         """
         Fill the sizer containing the plotting range
@@ -2833,9 +2818,6 @@ class FitPage(BasicPage):
             self.sizer3.Layout()
             self.SetupScrolling()
             return
-        ## the panel is drawn using the current value of the fit engine
-        if self.engine_type == None and self._manager != None:
-            self.engine_type = self._manager._return_engine_type()
 
         box_description = wx.StaticBox(self, -1, str("Model Parameters"))
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)

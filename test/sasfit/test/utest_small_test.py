@@ -3,7 +3,7 @@
 """
 import unittest
 import math
-from sas.fit.Fitting import Fit
+from sas.fit.BumpsFitting import BumpsFit as Fit
 from sas.dataloader.loader import Loader
 import bumps.fitters
 bumps.fitters.FIT_DEFAULT = 'lm'
@@ -15,7 +15,7 @@ class testFitModule(unittest.TestCase):
         
         out= Loader().load("cyl_400_20.txt")
        
-        fitter = Fit('bumps')
+        fitter = Fit()
         # Receives the type of model for the fitting
         from sas.models.CylinderModel import CylinderModel
         model  = CylinderModel()
