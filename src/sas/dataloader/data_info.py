@@ -727,9 +727,9 @@ class SESANSData1D(plottable_sesans1D, DataInfo):
     SESANS 1D data class
     """
     x_unit = 'nm'
-    y_unit = 'a.u.'
+    y_unit = 'pol'
 
-    def __init__(self, x=None, y=None, lam=None, dy=None, dx=None, dlam=None):
+    def __init__(self, x=None, y=None, lam=None, dx=None, dy=None, dlam=None):
         DataInfo.__init__(self)
         plottable_sesans1D.__init__(self, x, y, lam, dx, dy, dlam)
 
