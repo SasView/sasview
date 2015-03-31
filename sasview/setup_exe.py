@@ -13,16 +13,16 @@
 # be added to the distribution directory for that purpose.
 # See for example the 'images' directory below.
 
-import os, sys
-import platform
+import os
+import sys
 
 # put the build directory at the front of the path
 if os.path.abspath(os.path.dirname(__file__)) != os.path.abspath(os.getcwd()):
     raise RuntimeError("Must run setup_exe from the sasview directory")
 from distutils.util import get_platform
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-platform = '%s-%s'%(get_platform(),sys.version[:3])
-build_path = os.path.join(root, 'build','lib.'+platform)
+platform = '%s-%s'%(get_platform(), sys.version[:3])
+build_path = os.path.join(root, 'build', 'lib.'+platform)
 sys.path.insert(0, build_path)
 
 import local_config
@@ -61,7 +61,7 @@ try:
         import py2exe.mf as modulefinder
     except ImportError:
         import modulefinder
-    import win32com, sys
+    import win32com
     for p in win32com.__path__[1:]:
         modulefinder.AddPackagePath(win32_folder, p)
     for extra in ["win32com.shell", "win32com.adsi", "win32com.axcontrol",
@@ -210,7 +210,8 @@ elif sys.version_info >= (2, 6):
 elif sys.version_info >= (2, 5):
     manifest = manifest_for_python25
     py26MSdll = None
-    
+
+
 class Target:
     def __init__(self, **kw):
         self.__dict__.update(kw)
@@ -259,7 +260,7 @@ for f in matplotlibdata:
 
 # Copy the settings file for the sas.dataloader file extension associations
 import sas.dataloader.readers
-f = os.path.join(sas.dataloader.readers.get_data_path(),'defaults.json')
+f = os.path.join(sas.dataloader.readers.get_data_path(), 'defaults.json')
 if os.path.isfile(f):
     data_files.append(('.', [f]))
 f = 'custom_config.py'
@@ -275,7 +276,7 @@ if os.path.isfile(f):
     data_files.append(('.', [f]))
     
 if os.path.isfile("BUILD_NUMBER"):
-    data_files.append(('.',["BUILD_NUMBER"]))
+    data_files.append(('.', ["BUILD_NUMBER"]))
 
 # Copying the images directory to the distribution directory.
 for f in findall(images_dir):
@@ -302,10 +303,10 @@ if os.path.exists(doc_path):
 else:
     raise Exception("You must first build the documentation before creating an installer.")
 
-if py26MSdll != None:
+if py26MSdll is not None:
     # install the MSVC 9 runtime dll's into the application folder
     data_files.append(("Microsoft.VC90.CRT", py26MSdll))
-if py26MSdll_x86 != None:
+if py26MSdll_x86 is not None:
     # install the MSVC 9 runtime dll's into the application folder
     data_files.append(("Microsoft.VC90.CRT", py26MSdll_x86))
 
@@ -331,8 +332,9 @@ packages.extend([
     'reportlab.pdfgen',
     'reportlab.platypus',
     ])
+packages.append('periodictable.core') # not found automatically
 #packages.append('IPython')
-includes = ['site','lxml._elementpath', 'lxml.etree']
+includes = ['site', 'lxml._elementpath', 'lxml.etree']
 
 # Exclude packages that are not needed but are often found on build systems
 excludes = ['Tkinter', 'PyQt4', '_ssl', '_tkagg', 'sip', 'pytz']
@@ -356,7 +358,7 @@ target_wx_client = Target(
     description = 'SasView',
     script = 'sasview.py',
     icon_resources = [(1, os.path.join(images_dir, "ball.ico"))],
-    other_resources = [(24,1,manifest)],
+    other_resources = [(24, 1, manifest)],
     dest_base = "SasView"
     )
 
@@ -375,16 +377,13 @@ setup(
     options={
         'py2exe': {
             'dll_excludes': dll_excludes,
-            'packages' : packages,
-            'includes':includes,
-            'excludes':excludes,
+            'packages': packages,
+            'includes': includes,
+            'excludes': excludes,
             "compressed": 1,
             "optimize": 0,
-            "bundle_files":bundle_option,
+            "bundle_files": bundle_option,
             },
     },
     data_files=data_files,
-    
 )
-
-
