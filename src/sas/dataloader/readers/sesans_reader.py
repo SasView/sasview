@@ -1,7 +1,10 @@
 """
-    SESANS reader
+    SESANS reader (based on ASCII reader)
+    
+    Reader for .ses or .sesans file format
+    
+    Jurrian Bakker 
 """
-
 import numpy
 import os
 from sas.dataloader.data_info import SESANSData1D
@@ -247,7 +250,7 @@ class Reader:
 #                    output.yaxis("\\rm{P/P0}", output.y_unit)
 #                else:
 #                    output.yaxis("\\rm{P/P0}", "a.u.")
-                output.xaxis("\\rm{z}", 'A')   
+                output.xaxis("\\rm{z}", 'nm')   
                 output.yaxis("\\rm{P/P0}", " ")
                 # Store loading process information
                 output.meta_data['loader'] = self.type_name
@@ -255,14 +258,14 @@ class Reader:
                 output.sample.name = paramvals[1]
                 output.sample.ID = paramvals[0]
                 output.sample.zacceptance=float(paramvals[7])
-#                print output                
+                output.vars=varheader
 
 #                print "sesans_reader end"
                 
                 if len(output.x) < 1:
                     raise RuntimeError, "%s is empty" % path
 #                print output
-                
+#                print output.lam
                 return output
             
         else:
