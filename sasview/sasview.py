@@ -11,7 +11,8 @@
 import os
 import sys
 import logging
-from shutil import copy
+import traceback
+
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s',
                     filename=os.path.join(os.path.expanduser("~"),
@@ -108,9 +109,8 @@ class SasView():
             fitting_plug = module.Plugin()
             self.gui.add_perspective(fitting_plug)
         except Exception as inst:
-            logging.error("Fitting problems: " + str(inst))
-            logging.error("%s: could not find Fitting plug-in module"% APP_NAME) 
-            logging.error(sys.exc_value)
+            logging.error("%s: could not find Fitting plug-in module"% APP_NAME)
+            logging.error(traceback.format_exc())
 
         # P(r) perspective
         try:
@@ -119,8 +119,8 @@ class SasView():
             self.gui.add_perspective(pr_plug)
         except:
             logging.error("%s: could not find P(r) plug-in module"% APP_NAME)
-            logging.error(sys.exc_value)  
-        
+            logging.error(traceback.format_exc())
+
         #Invariant perspective
         try:
             import sas.perspectives.invariant as module    
@@ -130,8 +130,8 @@ class SasView():
             raise
             logging.error("%s: could not find Invariant plug-in module"% \
                           APP_NAME)
-            logging.error(sys.exc_value)  
-        
+            logging.error(traceback.format_exc())
+
         #Calculator perspective   
         try:
             import sas.perspectives.calculator as module    
@@ -140,8 +140,8 @@ class SasView():
         except:
             logging.error("%s: could not find Calculator plug-in module"% \
                                                         APP_NAME)
-            logging.error(sys.exc_value)  
-        
+            logging.error(traceback.format_exc())
+
             
         # Add welcome page
         self.gui.set_welcome_panel(WelcomePanel)
