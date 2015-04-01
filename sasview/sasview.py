@@ -84,9 +84,9 @@ if hasattr(sys, 'frozen'):
     sys.setdefaultencoding("iso-8859-1")
 from sas.guiframe import gui_manager
 from sas.guiframe.gui_style import GUIFRAME
-from sas.sasview.welcome_panel import WelcomePanel
+from welcome_panel import WelcomePanel
 # For py2exe, import config here
-import sas.sasview.local_config
+import local_config
 PLUGIN_MODEL_DIR = 'plugin_models'
 APP_NAME = 'SasView'
 
