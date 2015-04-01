@@ -1,8 +1,10 @@
-
+"""
+Base module for loading and running the main SasView application.
+"""
 ################################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation. 
+#project funded by the US National Science Foundation.
 #
 #See the license text in license.txt
 #
@@ -27,8 +29,11 @@ class StreamToLogger(object):
         self.logger = logger
         self.log_level = log_level
         self.linebuf = ''
- 
+
     def write(self, buf):
+        """
+        Main logging method
+        """
         # Write the message to stdout so we can see it when running interactively
         sys.stdout.write(buf)
         for line in buf.rstrip().splitlines():
@@ -37,6 +42,9 @@ class StreamToLogger(object):
 stderr_logger = logging.getLogger('STDERR')
 sl = StreamToLogger(stderr_logger, logging.ERROR)
 sys.stderr = sl
+
+# Log the start of the session
+logging.info(" --- SasView session started ---")
 
 # Log the python version
 logging.info("Python: %s" % sys.version)
@@ -48,7 +56,8 @@ logging.info("Python: %s" % sys.version)
 # new version of wx.
 WX_ENV_VAR = "SASVIEW_WX_VERSION"
 if WX_ENV_VAR in os.environ:
-    logging.info("You have set the %s environment variable to %s." % (WX_ENV_VAR, os.environ[WX_ENV_VAR]))
+    logging.info("You have set the %s environment variable to %s." % \
+                 (WX_ENV_VAR, os.environ[WX_ENV_VAR]))
     import wxversion
     if wxversion.checkInstalled(os.environ[WX_ENV_VAR]):
         logging.info("Version %s of wxPython is installed, so using that version." % os.environ[WX_ENV_VAR])
@@ -63,9 +72,9 @@ try:
     logging.info("Wx version: %s" % wx.__version__)
 except:
     logging.error("Wx version: error reading version")
-    
-# The below will make sure that sasview application uses the matplotlib font 
-# bundled with sasview. 
+
+# The below will make sure that sasview application uses the matplotlib font
+# bundled with sasview.
 if hasattr(sys, 'frozen'):
     mplconfigdir = os.path.join(os.path.expanduser("~"), '.matplotlib')
     if not os.path.exists(mplconfigdir):
@@ -75,9 +84,9 @@ if hasattr(sys, 'frozen'):
     sys.setdefaultencoding("iso-8859-1")
 from sas.guiframe import gui_manager
 from sas.guiframe.gui_style import GUIFRAME
-from welcome_panel import WelcomePanel
+from sas.sasview.welcome_panel import WelcomePanel
 # For py2exe, import config here
-import local_config
+import sas.sasview.local_config
 PLUGIN_MODEL_DIR = 'plugin_models'
 APP_NAME = 'SasView'
 
@@ -88,12 +97,13 @@ class SasViewApp(gui_manager.ViewApp):
 
 class SasView():
     """
+    Main class for running the SasView application
     """
     def __init__(self):
         """
         """
         #from gui_manager import ViewApp
-        self.gui = SasViewApp(0) 
+        self.gui = SasViewApp(0)
         # Set the application manager for the GUI
         self.gui.set_manager(self)
         # Add perspectives to the basic application
@@ -108,13 +118,13 @@ class SasView():
             import sas.perspectives.fitting as module    
             fitting_plug = module.Plugin()
             self.gui.add_perspective(fitting_plug)
-        except Exception as inst:
+        except Exception:
             logging.error("%s: could not find Fitting plug-in module"% APP_NAME)
             logging.error(traceback.format_exc())
 
         # P(r) perspective
         try:
-            import sas.perspectives.pr as module    
+            import sas.perspectives.pr as module
             pr_plug = module.Plugin(standalone=False)
             self.gui.add_perspective(pr_plug)
         except:
@@ -123,18 +133,17 @@ class SasView():
 
         #Invariant perspective
         try:
-            import sas.perspectives.invariant as module    
+            import sas.perspectives.invariant as module
             invariant_plug = module.Plugin(standalone=False)
             self.gui.add_perspective(invariant_plug)
         except:
-            raise
             logging.error("%s: could not find Invariant plug-in module"% \
                           APP_NAME)
             logging.error(traceback.format_exc())
 
         #Calculator perspective   
         try:
-            import sas.perspectives.calculator as module    
+            import sas.perspectives.calculator as module
             calculator_plug = module.Plugin(standalone=False)
             self.gui.add_perspective(calculator_plug)
         except:
@@ -142,19 +151,22 @@ class SasView():
                                                         APP_NAME)
             logging.error(traceback.format_exc())
 
-            
+
         # Add welcome page
         self.gui.set_welcome_panel(WelcomePanel)
-      
+
         # Build the GUI
         self.gui.build_gui()
-        # delete unused model folder    
+        # delete unused model folder
         self.gui.clean_plugin_models(PLUGIN_MODEL_DIR)
         # Start the main loop
         self.gui.MainLoop()
 
 
 def run():
+    """
+    __main__ method for loading and running SasView
+    """
     from multiprocessing import freeze_support
     freeze_support()
     if len(sys.argv) > 1:

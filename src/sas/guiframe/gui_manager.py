@@ -896,7 +896,10 @@ class ViewerFrame(PARENT_FRAME):
         plugins = []
         # Go through files in panels directory
         try:
-            file_list = os.listdir(dir)
+            if os.path.isdir(dir):
+                file_list = os.listdir(dir)
+            else:
+                file_list = []
             ## the default panel is the panel is the last plugin added
             for item in file_list:
                 toks = os.path.splitext(os.path.basename(item))
@@ -2018,6 +2021,7 @@ class ViewerFrame(PARENT_FRAME):
         """
         Quit the application
         """
+        logging.info(" --- SasView session was closed --- \n")
         wx.Exit()
         sys.exit()
 
