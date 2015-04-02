@@ -44,6 +44,9 @@ class OutputPlot(PlotPanel):
     Plot panel used to show the selected results as a function
     of D_max
     """
+    ## Title for plottools
+    window_caption = "D Explorer"
+
     def __init__(self, d_min, d_max, parent, id= -1, color=None, \
                  dpi=None, style=wx.NO_FULL_REPAINT_ON_RESIZE, **kwargs):
         """
@@ -256,7 +259,6 @@ class ExploreDialog(wx.Dialog):
         Invoked when a new output type is selected for plotting,
         or when a new computation is finished.
         """
-        self.npts_ctl.SetFocus()
         # Get the output type selection
         output_type = self.output_box.GetString(self.output_box.GetSelection())
 
@@ -304,7 +306,6 @@ class ExploreDialog(wx.Dialog):
         sizer_params.Add(self.npts_ctl, (iy, ix), (1, 1),
                          wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         self.npts_ctl.SetValue("%g" % DEFAULT_NPTS)
-        self.npts_ctl.Bind(wx.EVT_KILL_FOCUS, self._recalc)
 
         ix += 1
         label_dmin = wx.StaticText(self, -1, "Min Distance [A]")
@@ -314,7 +315,6 @@ class ExploreDialog(wx.Dialog):
         sizer_params.Add(self.dmin_ctl, (iy, ix), (1, 1),
                          wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         self.dmin_ctl.SetValue(str(self._default_min))
-        self.dmin_ctl.Bind(wx.EVT_KILL_FOCUS, self._recalc)
 
         ix += 1
         label_dmax = wx.StaticText(self, -1, "Max Distance [A]")
@@ -324,8 +324,6 @@ class ExploreDialog(wx.Dialog):
         sizer_params.Add(self.dmax_ctl, (iy, ix), (1, 1),
                          wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         self.dmax_ctl.SetValue(str(self._default_max))
-        self.dmax_ctl.Bind(wx.EVT_KILL_FOCUS, self._recalc)
-
 
         # Ouput selection box
         selection_msg = wx.StaticText(self, -1, "Select a dependent variable:")
@@ -367,6 +365,13 @@ class ExploreDialog(wx.Dialog):
     def set_plot_unfocus(self):
         """
         Not implemented
+        """
+        pass
+
+    def send_focus_to_datapanel(self, name):
+        """
+            The GUI manager sometimes calls this method
+            TODO: refactor this
         """
         pass
 

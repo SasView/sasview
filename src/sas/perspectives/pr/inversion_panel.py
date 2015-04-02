@@ -891,7 +891,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         if self._manager._last_pr is not None:
             pr = self._manager._create_plot_pr()
             dialog = ExploreDialog(pr, 10, None, -1, "")
-            dialog.ShowModal()
+            dialog.Show()
         else:
             message = "No data to analyze. Please load a data set to proceed."
             wx.PostEvent(self._manager.parent, StatusEvent(status=message))

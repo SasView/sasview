@@ -536,6 +536,7 @@ class Invertor(Cinvertor):
             # If we fail, estimate alpha and return the default
             # number of terms
             best_alpha, _, _ = self.estimate_alpha(self.nfunc)
+            logging.warning("Invertor.estimate_numterms: %s" % sys.exc_value)
             return self.nfunc, best_alpha, "Could not estimate number of terms"
 
     def estimate_alpha(self, nfunc):
