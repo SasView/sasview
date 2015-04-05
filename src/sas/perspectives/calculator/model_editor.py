@@ -282,15 +282,22 @@ class TextDialog(wx.Dialog):
 
     def check_name(self, event=None):
         """
-        Check name if exist already
+        Check that proposed new model name is a valid Python module name 
+        and that it does not already exist. If not show error message and
+        pink background in text box else call on_apply
+        
+        :TODO this should be separated out from the GUI code.  For that we
+        need to pass it the name (or if we want to keep the default name 
+        option also need to pass the self._operator attribute) We just need
+        the function to return an error code that the name is good or if 
+        not why (not a valid name, name exists already).  The rest of the 
+        error handling should be done in this module. so on_apply would then
+        start by checking the name and then either raise errors or do the
+        deed.
         """
+        #Get the function/file name
         mname = M_NAME
         self.on_change_name(None)
-        list_fnames = os.listdir(self.plugin_dir)
-        # fake existing regular model name list
-        m_list = [model + ".py" for model in self.model_list]
-        list_fnames.append(m_list)
-        # function/file name
         title = self.name_tcl.GetValue().lstrip().rstrip()
         if title == '':
             text = self._operator
@@ -302,18 +309,35 @@ class TextDialog(wx.Dialog):
             title = mname
         self.name = title
         t_fname = title + '.py'
-        if not self.overwrite_name:
+
+        #First check if the name is a valid Python name
+        if re.match('^[A-Za-z0-9_]*$',title):
+            self.good_name = True
+        else: 
+            self.good_name = False
+            msg = ("%s is not a valid Python name. Only alphanumeric \n" \
+                "and underscore allowed" % self.name)
+ 
+        #Now check if the name already exists
+        if not self.overwrite_name and self.good_name:
+            #Create list of existing model names for comparison
+            list_fnames = os.listdir(self.plugin_dir)
+            # fake existing regular model name list
+            m_list = [model + ".py" for model in self.model_list]
+            list_fnames.append(m_list)
             if t_fname in list_fnames and title != mname:
-                self.name_tcl.SetBackgroundColour('pink')
                 self.good_name = False
-                info = 'Error'
                 msg = "Name exists already."
-                wx.MessageBox(msg, info)
-                self._notes = msg
-                color = 'red'
-                self._msg_box.SetLabel(msg)
-                self._msg_box.SetForegroundColour(color)
-                return self.good_name
+
+        if self.good_name == False:
+            self.name_tcl.SetBackgroundColour('pink')
+            info = 'Error'
+            wx.MessageBox(msg, info)
+            self._notes = msg
+            color = 'red'
+            self._msg_box.SetLabel(msg)
+            self._msg_box.SetForegroundColour(color)
+            return self.good_name
         self.fname = os.path.join(self.plugin_dir, t_fname)
         s_title = title
         if len(title) > 20:
@@ -434,10 +458,9 @@ class TextDialog(wx.Dialog):
         a sum or multiply model then create the appropriate string
         """
 
-        self._type = type
         name = ''
 
-        if self._type == '*':
+        if type == '*':
             name = 'Multi'
             factor = 'BackGround'
             f_oper = '+'
@@ -447,7 +470,7 @@ class TextDialog(wx.Dialog):
             f_oper = '*'
 
         self.factor = factor
-        self._operator = self._type
+        self._operator = type
         self.explanation = "  Custom Model = %s %s (model1 %s model2)\n" % \
                     (self.factor, f_oper, self._operator)
         self.explanationctr.SetLabel(self.explanation)
