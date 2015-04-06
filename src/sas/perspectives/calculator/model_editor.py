@@ -6,7 +6,7 @@ function of y (usually the intensity).  It also provides a drop down of
 standard available math functions.  Finally a full python editor panel for
 complete customizatin is provided.
 
-:TODO the writiong of the file and name checking (and maybe some other
+..TODO:: the writiong of the file and name checking (and maybe some other
 funtions?) should be moved to a computational module which could be called
 fropm a python script.  Basically one just needs to pass the name,
 description text and function text (or in the case of the composite editor 
@@ -16,7 +16,7 @@ the names of the first and second model and the operator to be used).
 ################################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation. 
+#project funded by the US National Science Foundation.
 #
 #See the license text in license.txt
 #
@@ -32,11 +32,11 @@ from wx.py.editwindow import EditWindow
 if sys.platform.count("win32") > 0:
     FONT_VARIANT = 0
     PNL_WIDTH = 450
-    PNL_HITE = 320
+    PNL_HEIGHT = 320
 else:
     FONT_VARIANT = 1
     PNL_WIDTH = 590
-    PNL_HITE = 350
+    PNL_HEIGHT = 350
 M_NAME = 'Model'
 EDITOR_WIDTH = 800
 EDITOR_HEIGTH = 735
@@ -44,7 +44,7 @@ PANEL_WIDTH = 500
 _BOX_WIDTH = 55
 
 
-def _compileFile(path):
+def _compile_file(path):
     """
     Compile the file in the path
     """
@@ -56,7 +56,7 @@ def _compileFile(path):
         _, value, _ = sys.exc_info()
         return value
 
-def _deleteFile(path):
+def _delete_file(path):
     """
     Delete file in the path
     """
@@ -70,8 +70,8 @@ class TextDialog(wx.Dialog):
     """
     Dialog for easy custom composite models.  Provides a wx.Dialog panel
     to choose two existing models (including pre-existing custom models which
-    may themselves be sum models) as well as an operation on those models (add 
-    or multiply) the resulting model will add a scale parameter for summed 
+    may themselves be composite models) as well as an operation on those models
+    (add or multiply) the resulting model will add a scale parameter for summed 
     models and a background parameter for a multiplied model.
     
     The user also gives a brief help for the model in a description box and 
@@ -82,21 +82,23 @@ class TextDialog(wx.Dialog):
     'Edit Custom Model' under 'Fitting' menu.  This is currently called as
     a Modal Dialog.
     
-    :TODO the build in compiler currently balks at when it tries to import
+    ..TODO:: the build in compiler currently balks at when it tries to import
     a model whose name contains spaces or symbols (such as + ... underscore 
-    should be fine) need to either alter how the model file is written on add
-    checking method to look for non-approved characters.  - PDB:April 5, 2015
+    should be fine).  Have fixed so the editor cannot save such a file name
+    but if a file is dropped in the plugin directory from outside this class
+    will create a file that cannot be compiled.  Should add the check to
+    the write method or to the on_modelx method.
+          - PDB:April 5, 2015
     """
     def __init__(self, parent=None, base=None, id=None, title='',
                  model_list=[], plugin_dir=None):
         """
-        This class is run when instatiated.  The __init__ intializes and
+        This class is run when instatiated.  The __init__ initializes and
         calls the internal methods necessary.  On exiting the wx.Dialog
         window should be destroyed.
-
         """
         wx.Dialog.__init__(self, parent=parent, id=id,
-                           title=title, size=(PNL_WIDTH, PNL_HITE))
+                           title=title, size=(PNL_WIDTH, PNL_HEIGHT))
         self.parent = base
         #Font
         self.SetWindowVariant(variant=FONT_VARIANT)
@@ -122,8 +124,8 @@ class TextDialog(wx.Dialog):
         self.model1 = None
         self.model2 = None
         self.static_line_1 = None
-        self.okButton = None
-        self.closeButton = None
+        self.ok_button = None
+        self.close_button = None
         self._msg_box = None
         self.msg_sizer = None
         self.fname = None
@@ -151,8 +153,8 @@ class TextDialog(wx.Dialog):
         self.name_tcl.SetToolTipString(hint_name)
 
         self.name_sizer.AddMany([(self.name_txt, 0, wx.LEFT | wx.TOP, 10),
-                            (self.name_tcl, -1,
-                             wx.EXPAND | wx.RIGHT | wx.TOP | wx.BOTTOM, 10)])
+                                (self.name_tcl, -1,
+                                wx.EXPAND | wx.RIGHT | wx.TOP | wx.BOTTOM, 10)])
 
 
     def _layout_description(self):
@@ -169,8 +171,9 @@ class TextDialog(wx.Dialog):
         self.desc_tcl.SetToolTipString(hint_desc)
 
         self.desc_sizer.AddMany([(desc_txt, 0, wx.LEFT | wx.TOP, 10),
-                                (self.desc_tcl, -1,
-                                wx.EXPAND | wx.RIGHT | wx.TOP | wx.BOTTOM, 10)])
+                                 (self.desc_tcl, -1,
+                                  wx.EXPAND | wx.RIGHT | wx.TOP | wx.BOTTOM,
+                                  10)])
 
 
     def _layout_model_selection(self):
@@ -182,14 +185,17 @@ class TextDialog(wx.Dialog):
         #First set up main sizer for the selection
         selection_box_title = wx.StaticBox(self, -1, 'Select',
                                        size=(PNL_WIDTH - 30, 70))
-        self._selection_box = wx.StaticBoxSizer(selection_box_title, wx.VERTICAL)
+        self._selection_box = wx.StaticBoxSizer(selection_box_title, 
+                                                wx.VERTICAL)
 
         #Next create the help labels for the model selection
         select_help_box = wx.BoxSizer(wx.HORIZONTAL)
         model_string = " Model%s (p%s):"
-        select_help_box.Add(wx.StaticText(self, -1, model_string % (1, 1)), 0, 0)
+        select_help_box.Add(wx.StaticText(self, -1, model_string % (1, 1)),
+                            0, 0)
         select_help_box.Add((box_width - 25, 10),0,0)
-        select_help_box.Add(wx.StaticText(self, -1, model_string % (2, 2)), 0, 0)
+        select_help_box.Add(wx.StaticText(self, -1, model_string % (2, 2)),
+                            0, 0)
         self._selection_box.Add(select_help_box, 0, 0)
 
         #Next create the actual selection box with 3 combo boxes
@@ -200,7 +206,8 @@ class TextDialog(wx.Dialog):
         self.model1.SetMinSize((box_width * 5 / 6, -1))
         self.model1.SetToolTipString("model1")
 
-        self._operator_choice = wx.ComboBox(self, -1, size=(50, -1), style=wx.CB_READONLY)
+        self._operator_choice = wx.ComboBox(self, -1, size=(50, -1),
+                                            style=wx.CB_READONLY)
         wx.EVT_COMBOBOX(self._operator_choice, -1, self.on_select_operator)
         operation_tip = "Add: +, Multiply: * "
         self._operator_choice.SetToolTipString(operation_tip)
@@ -216,7 +223,8 @@ class TextDialog(wx.Dialog):
         selection_box_choose.Add(self._operator_choice, 0, 0)
         selection_box_choose.Add((15, 10))
         selection_box_choose.Add(self.model2, 0, 0)
-        self._selection_box.Add((20,5), 0, 0) # add some space between labels and selection
+        # add some space between labels and selection
+        self._selection_box.Add((20,5), 0, 0)
         self._selection_box.Add(selection_box_choose, 0, 0)
 
     def _build_sizer(self):
@@ -259,13 +267,13 @@ class TextDialog(wx.Dialog):
 
         # Finally add the buttons (apply and close) on the bottom
         # TODO: need help added here
-        self.okButton = wx.Button(self, wx.ID_OK, 'Apply')
-        self.okButton.Bind(wx.EVT_BUTTON, self.check_name)
-        self.closeButton = wx.Button(self, wx.ID_CANCEL, 'Close')
+        self.ok_button = wx.Button(self, wx.ID_OK, 'Apply')
+        self.ok_button.Bind(wx.EVT_BUTTON, self.check_name)
+        self.close_button = wx.Button(self, wx.ID_CANCEL, 'Close')
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
         sizer_button.AddMany([((20, 20), 1, 0),
-                              (self.okButton, 0, 0),
-                              (self.closeButton, 0, wx.LEFT | wx.RIGHT, 10)])        
+                              (self.ok_button, 0, 0),
+                              (self.close_button, 0, wx.LEFT | wx.RIGHT, 10)])        
         mainsizer.Add(sizer_button, 0, wx.EXPAND | wx.BOTTOM | wx.TOP, 10)
 
         self.SetSizer(mainsizer)
@@ -286,7 +294,7 @@ class TextDialog(wx.Dialog):
         and that it does not already exist. If not show error message and
         pink background in text box else call on_apply
         
-        :TODO this should be separated out from the GUI code.  For that we
+        ..TODO:: this should be separated out from the GUI code.  For that we
         need to pass it the name (or if we want to keep the default name 
         option also need to pass the self._operator attribute) We just need
         the function to return an error code that the name is good or if 
@@ -316,7 +324,7 @@ class TextDialog(wx.Dialog):
         else: 
             self.good_name = False
             msg = ("%s is not a valid Python name. Only alphanumeric \n" \
-                "and underscore allowed" % self.name)
+                   "and underscore allowed" % self.name)
  
         #Now check if the name already exists
         if not self.overwrite_name and self.good_name:
@@ -349,11 +357,17 @@ class TextDialog(wx.Dialog):
 
     def on_apply(self, path):
         """
-        On Apply
+        This method is a misnomer - it is not bound to the apply button
+        event.  Instead the apply button event goes to check_name which
+        then calls this method if the name of the new file is acceptable.
+        
+        ..todo:: this should be bound to the apply button.  The first line
+        should call the check_name method which itself should be in another
+        module separated from the the GUI modules. 
         """
         self.name_tcl.SetBackgroundColour('white')
         try:
-            label = self.getText()
+            label = self.get_textnames()
             fname = path
             name1 = label[0]
             name2 = label[1]
@@ -372,7 +386,7 @@ class TextDialog(wx.Dialog):
         if self.parent.parent != None:
             from sas.guiframe.events import StatusEvent
             wx.PostEvent(self.parent.parent, StatusEvent(status=msg,
-                                                      info=info))
+                                                         info=info))
         else:
             raise
 
@@ -381,24 +395,20 @@ class TextDialog(wx.Dialog):
         Set the list of models
         """
         # list of model names
-        cm_list = []
-        # models
-        list = self.model_list
-        # custom models
-        al_list = os.listdir(self.plugin_dir)
-        for c_name in al_list:
-            if c_name.split('.')[-1] == 'py' and \
-                    c_name.split('.')[0] != '__init__':
-                name = str(c_name.split('.')[0])
-                cm_list.append(name)
-                if name not in list:
-                    list.append(name)
-        self.cm_list = cm_list
-        if len(list) > 1:
-            list.sort()
-        for idx in range(len(list)):
-            self.model1.Append(str(list[idx]), idx)
-            self.model2.Append(str(list[idx]), idx)
+        # get regular models
+        main_list = self.model_list
+        # get custom models
+        self.update_cm_list()
+        # add custom models to model list
+        for name in self.cm_list:
+            if name not in main_list:
+                main_list.append(name)
+
+        if len(main_list) > 1:
+            main_list.sort()
+        for idx in range(len(main_list)):
+            self.model1.Append(str(main_list[idx]), idx)
+            self.model2.Append(str(main_list[idx]), idx)
         self.model1.SetStringSelection(self.model1_string)
         self.model2.SetStringSelection(self.model2_string)
 
@@ -472,7 +482,7 @@ class TextDialog(wx.Dialog):
         self.factor = factor
         self._operator = type
         self.explanation = "  Custom Model = %s %s (model1 %s model2)\n" % \
-                    (self.factor, f_oper, self._operator)
+                           (self.factor, f_oper, self._operator)
         self.explanationctr.SetLabel(self.explanation)
         self.name = name + M_NAME
 
@@ -487,7 +497,7 @@ class TextDialog(wx.Dialog):
             self._operator_choice.SetClientData(pos, str(oper.strip()))
         self._operator_choice.SetSelection(0)
 
-    def getText(self):
+    def get_textnames(self):
         """
         Returns model name string as list
         """
@@ -501,7 +511,6 @@ class TextDialog(wx.Dialog):
         description = self.desc_tcl.GetValue().lstrip().rstrip()
         if description == '':
             description = name1 + self._operator + name2
-        name = self.name_tcl.GetValue().lstrip().rstrip()
         text = self._operator_choice.GetValue()
         if text.count('+') > 0:
             factor = 'scale_factor'
@@ -572,13 +581,13 @@ class TextDialog(wx.Dialog):
         Compile the file in the path
         """
         path = self.fname
-        _compileFile(path)
+        _compile_file(path)
 
     def delete_file(self, path):
         """
         Delete file in the path
         """
-        _deleteFile(path)
+        _delete_file(path)
 
 
 class EditorPanel(wx.ScrolledWindow):
@@ -587,10 +596,9 @@ class EditorPanel(wx.ScrolledWindow):
     """
     def __init__(self, parent, base, path, title, *args, **kwds):
         kwds['name'] = title
-        kwds["size"] = (EDITOR_WIDTH, EDITOR_HEIGTH)
+#        kwds["size"] = (EDITOR_WIDTH, EDITOR_HEIGTH)
         kwds["style"] = wx.FULL_REPAINT_ON_RESIZE
         wx.ScrolledWindow.__init__(self, parent, *args, **kwds)
-        #self.SetupScrolling()
         self.parent = parent
         self.base = base
         self.path = path
@@ -604,8 +612,11 @@ class EditorPanel(wx.ScrolledWindow):
         self.main_sizer = None
         self.name_sizer = None
         self.name_hsizer = None
+        self.name_tcl = None
         self.desc_sizer = None
+        self.desc_tcl = None
         self.param_sizer = None
+        self.param_tcl = None
         self.function_sizer = None
         self.func_horizon_sizer = None
         self.button_sizer = None
@@ -617,9 +628,12 @@ class EditorPanel(wx.ScrolledWindow):
         self.warning = ""
         self._description = "New Custom Model"
         self.function_tcl = None
+        self.math_combo = None
+        self.bt_apply = None
+        self.bt_close = None
         #self._default_save_location = os.getcwd()
         self._do_layout()
-        #self.bt_apply.Disable()
+
 
 
     def _define_structure(self):
@@ -655,10 +669,10 @@ class EditorPanel(wx.ScrolledWindow):
         hint_name = "Unique Model Function Name."
         self.name_tcl.SetToolTipString(hint_name)
         self.name_hsizer.AddMany([(self.name_tcl, 0, wx.LEFT | wx.TOP, 0),
-                                       (overwrite_cb, 0, wx.LEFT, 20)])
+                                  (overwrite_cb, 0, wx.LEFT, 20)])
         self.name_sizer.AddMany([(name_txt, 0, wx.LEFT | wx.TOP, 10),
-                                       (self.name_hsizer, 0,
-                                        wx.LEFT | wx.TOP | wx.BOTTOM, 10)])
+                                 (self.name_hsizer, 0,
+                                  wx.LEFT | wx.TOP | wx.BOTTOM, 10)])
 
 
     def _layout_description(self):
@@ -669,12 +683,11 @@ class EditorPanel(wx.ScrolledWindow):
         desc_txt = wx.StaticText(self, -1, 'Description (optional) : ')
         self.desc_tcl = wx.TextCtrl(self, -1, size=(PANEL_WIDTH * 3 / 5, -1))
         self.desc_tcl.SetValue('')
-        #self.name_tcl.SetFont(self.font)
         hint_desc = "Write a short description of the model function."
         self.desc_tcl.SetToolTipString(hint_desc)
         self.desc_sizer.AddMany([(desc_txt, 0, wx.LEFT | wx.TOP, 10),
-                                       (self.desc_tcl, 0,
-                                        wx.LEFT | wx.TOP | wx.BOTTOM, 10)])
+                                 (self.desc_tcl, 0,
+                                  wx.LEFT | wx.TOP | wx.BOTTOM, 10)])
     def _layout_param(self):
         """
         Do the layout for parameter related widgets
@@ -685,14 +698,15 @@ class EditorPanel(wx.ScrolledWindow):
         param_tip += "#Example:\n"
         param_tip += "A = 1\nB = 1"
         #param_txt.SetToolTipString(param_tip)
-        id = wx.NewId()
-        self.param_tcl = EditWindow(self, id, wx.DefaultPosition,
-                            wx.DefaultSize, wx.CLIP_CHILDREN | wx.SUNKEN_BORDER)
+        newid = wx.NewId()
+        self.param_tcl = EditWindow(self, newid, wx.DefaultPosition,
+                                    wx.DefaultSize,
+                                    wx.CLIP_CHILDREN | wx.SUNKEN_BORDER)
         self.param_tcl.setDisplayLineNumbers(True)
         self.param_tcl.SetToolTipString(param_tip)
 
         self.param_sizer.AddMany([(param_txt, 0, wx.LEFT, 10),
-                        (self.param_tcl, 1, wx.EXPAND | wx.ALL, 10)])
+                                  (self.param_tcl, 1, wx.EXPAND | wx.ALL, 10)])
 
     def _layout_function(self):
         """
@@ -708,9 +722,10 @@ class EditorPanel(wx.ScrolledWindow):
         math_txt = wx.StaticText(self, -1, '*Useful math functions: ')
         math_combo = self._fill_math_combo()
 
-        id = wx.NewId()
-        self.function_tcl = EditWindow(self, id, wx.DefaultPosition,
-                            wx.DefaultSize, wx.CLIP_CHILDREN | wx.SUNKEN_BORDER)
+        newid = wx.NewId()
+        self.function_tcl = EditWindow(self, newid, wx.DefaultPosition,
+                                       wx.DefaultSize,
+                                       wx.CLIP_CHILDREN | wx.SUNKEN_BORDER)
         self.function_tcl.setDisplayLineNumbers(True)
         self.function_tcl.SetToolTipString(hint_function)
 
@@ -757,26 +772,21 @@ class EditorPanel(wx.ScrolledWindow):
         self._layout_function()
         self._layout_msg()
         self._layout_button()
-        self.main_sizer.AddMany([(self.name_sizer, 0,
-                                        wx.EXPAND | wx.ALL, 5),
+        self.main_sizer.AddMany([(self.name_sizer, 0, wx.EXPAND | wx.ALL, 5),
                                  (wx.StaticLine(self), 0,
-                                       wx.ALL | wx.EXPAND, 5),
-                                 (self.desc_sizer, 0,
-                                        wx.EXPAND | wx.ALL, 5),
+                                  wx.ALL | wx.EXPAND, 5),
+                                 (self.desc_sizer, 0, wx.EXPAND | wx.ALL, 5),
                                  (wx.StaticLine(self), 0,
-                                       wx.ALL | wx.EXPAND, 5),
-                                (self.param_sizer, 1,
-                                         wx.EXPAND | wx.ALL, 5),
+                                  wx.ALL | wx.EXPAND, 5),
+                                 (self.param_sizer, 1, wx.EXPAND | wx.ALL, 5),
                                  (wx.StaticLine(self), 0,
-                                       wx.ALL | wx.EXPAND, 5),
-                                (self.function_sizer, 2,
-                                         wx.EXPAND | wx.ALL, 5),
+                                  wx.ALL | wx.EXPAND, 5),
+                                 (self.function_sizer, 2,
+                                  wx.EXPAND | wx.ALL, 5),
                                  (wx.StaticLine(self), 0,
-                                       wx.ALL | wx.EXPAND, 5),
-                                 (self.msg_sizer, 0,
-                                        wx.EXPAND | wx.ALL, 5),
-                                (self.button_sizer, 0,
-                                         wx.EXPAND | wx.ALL, 5)])
+                                  wx.ALL | wx.EXPAND, 5),
+                                 (self.msg_sizer, 0, wx.EXPAND | wx.ALL, 5),
+                                 (self.button_sizer, 0, wx.EXPAND | wx.ALL, 5)])
         self.SetSizer(self.main_sizer)
         self.SetAutoLayout(True)
 
@@ -859,20 +869,36 @@ class EditorPanel(wx.ScrolledWindow):
         """
         if event is not None:
             event.Skip()
-        cb = event.GetEventObject()
-        self.overwrite_name = cb.GetValue()
+        cb_value = event.GetEventObject()
+        self.overwrite_name = cb_value.GetValue()
 
     def on_click_apply(self, event):
         """
-        Changes are saved in data object imported to edit
+        Changes are saved in data object imported to edit.
+        
+        checks firs for valid name, then if it already exists then checks
+        that a function was entered and finally that if entered it contains at
+        least a return statement.  If all passes writes file then tries to 
+        compile.  If compile fails or import module fails or run method fails
+        tries to remove any .py and pyc files that may have been created and
+        sets error message.
+        
+        ..todo:: this code still could do with a careful going over to clean
+        up and simplify. the non GUI methods such as this one should be removed
+        to computational code of SasView. Most of those computational methods
+        would be the same for both the simple editors.
         """
         #must post event here
         event.Skip()
+        name = self.name_tcl.GetValue().lstrip().rstrip()
         info = 'Info'
         msg = ''
         # Sort out the errors if occur
-        if self.check_name():
-            name = self.name_tcl.GetValue().lstrip().rstrip()
+        # First check for valid python name then if the name already exists
+        if not re.match('^[A-Za-z0-9_]*$',name):
+            msg = "not a valid python name. Name must include only alpha \n"
+            msg += "numeric or underline characters and no spaces"
+        elif self.check_name():
             description = self.desc_tcl.GetValue()
             param_str = self.param_tcl.GetText()
             func_str = self.function_tcl.GetText()
@@ -880,8 +906,8 @@ class EditorPanel(wx.ScrolledWindow):
             if func_str.lstrip().rstrip():
                 if func_str.count('return') > 0:
                     self.write_file(self.fname, description, param_str,
-                                                                    func_str)
-                    tr_msg = _compileFile(self.fname)
+                                    func_str)
+                    tr_msg = _compile_file(self.fname)
                     msg = str(tr_msg.__str__())
                     # Compile error
                     if msg:
@@ -894,24 +920,29 @@ class EditorPanel(wx.ScrolledWindow):
                 msg = 'Error: Function is not defined.'
         else:
             msg = "Name exists already."
-        # Prepare for the messagebox
+        # Prepare the messagebox
         if self.base != None and not msg:
             self.base.update_custom_combo()
             Model = None
-            exec "from %s import Model" % name
+            try:
+                exec "from %s import Model" % name
+            except:
+                msg = 'new model fails to import in python'
+        if self.base != None and not msg:
             try:
                 Model().run(0.01)
             except:
-                msg = "Error "
+                msg = "new model fails on run method:"
                 _, value, _ = sys.exc_info()
                 msg += "in %s:\n%s\n" % (name, value)
+        # Prepare the messagebox
         if msg:
             info = 'Error'
             color = 'red'
             try:
                 # try to remove pyc file if exists
-                _deleteFile(self.fname)
-                _deleteFile(self.fname + "c")
+                _delete_file(self.fname)
+                _delete_file(self.fname + "c")
             except:
                 pass
         else:
@@ -920,18 +951,12 @@ class EditorPanel(wx.ScrolledWindow):
             msg += " Please look for it in the Customized Models."
             info = 'Info'
             color = 'blue'
-        # Not to display long error msg
-        if info == 'Error':
-            mss = info
-        else:
-            mss = msg
-        self._msg_box.SetLabel(mss)
+        self._msg_box.SetLabel(msg)
         self._msg_box.SetForegroundColour(color)
-        # Send msg to the top window  
+        # Send msg to the top window
         if self.base != None:
-                from sas.guiframe.events import StatusEvent
-                wx.PostEvent(self.base.parent, StatusEvent(status=msg,
-                                                      info=info))
+            from sas.guiframe.events import StatusEvent
+            wx.PostEvent(self.base.parent, StatusEvent(status=msg, info=info))
         self.warning = msg
 
 
@@ -946,7 +971,7 @@ class EditorPanel(wx.ScrolledWindow):
         """
         try:
             out_f = open(fname, 'w')
-        except :
+        except:
             raise
         # Prepare the content of the function
         lines = CUSTOM_TEMPLATE.split('\n')
@@ -961,7 +986,7 @@ class EditorPanel(wx.ScrolledWindow):
         spaces = '        '#8spaces
         # write function here
         for line in lines:
-            # The location where to put the strings is 
+            # The location where to put the strings is
             # hard-coded in the template as shown below.
             if line.count("#self.params here"):
                 for param_line in param_str.split('\n'):
@@ -1016,7 +1041,6 @@ class EditorPanel(wx.ScrolledWindow):
 
         :param line: one line of string got from the param_str
         """
-        flag = True
         params_str = ''
         spaces = '        '#8spaces
         items = line.split(";")
@@ -1037,7 +1061,6 @@ class EditorPanel(wx.ScrolledWindow):
 
         :param line: one line of string got from the param_str
         """
-        flag = True
         params_str = ''
         spaces = '        '#8spaces
         items = line.split(";")
@@ -1084,7 +1107,7 @@ class EditorWindow(wx.Frame):
         self.Show(False)
         #if self.parent != None:
         #    self.parent.new_model_frame = None
-        #self.Destroy()  
+        #self.Destroy()
 
 ## Templates for custom models
 CUSTOM_TEMPLATE = """
@@ -1488,14 +1511,13 @@ if __name__ == "__main__":
         print "===> Simple Test: Failed!"
 """
 
-if __name__ == "__main__": 
+if __name__ == "__main__":
 #    app = wx.PySimpleApp()
     app = wx.App()
-    frame = TextDialog(id=1, model_list=["SphereModel", "CylinderModel"],plugin_dir='../fitting/plugin_models')   
-#    frame = wx.Dialog()
+    frame = TextDialog(id=1, model_list=["SphereModel", "CylinderModel"],
+                       plugin_dir='../fitting/plugin_models')
     frame.ShowModal()
-#    frame.Show(True)
-    app.MainLoop()             
+    app.MainLoop()
 
 #if __name__ == "__main__":
 #    from sas.perspectives.fitting import models
