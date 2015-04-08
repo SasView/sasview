@@ -3577,7 +3577,7 @@ The DAB model is ostensibly a development of the earlier Debye-Bueche model.
 
 *2.2.5.1. Definition*
 
-.. image:: img/image180.PNG
+.. image:: img/image180_corrected.PNG
 
 The parameter *L* is the correlation length.
 
@@ -4093,7 +4093,7 @@ Check out Chapter 4 on Data Treatment, pages 155-156.
 
 This model fits the Porod function
 
-.. image:: img/image197.PNG
+.. image:: img/image197_corrected.PNG
 
 to the data directly without any need for linearisation (*cf*. Log *I(q)* vs Log *q*).
 
