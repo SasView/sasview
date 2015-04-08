@@ -84,6 +84,7 @@ class FitPage(BasicPage):
         flag = check_data_validity(self.data) & (self.model is not None)
         self._set_save_flag(flag)
         self.parent.on_set_focus(event)
+        self.on_tap_focus()
 
     def _fill_data_sizer(self):
         """
