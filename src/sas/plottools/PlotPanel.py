@@ -1225,10 +1225,11 @@ class PlotPanel(wx.Panel):
         # even less clear.
 
         # Properties defined by plot
-        matplotlib.rc('text', usetex=True)
-        self.subplot.set_xlabel(r"$%s$" % prop["xlabel"])
-        self.subplot.set_ylabel(r"$%s$" % prop["ylabel"])
-        matplotlib.rc('text', usetex=False)
+        
+        self.subplot.set_xlabel(prop["xlabel"])
+        self.subplot.set_ylabel(prop["ylabel"])
+        
+        
         self.subplot.set_title(prop["title"])
 
     def clear(self):
