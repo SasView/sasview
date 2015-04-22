@@ -62,7 +62,7 @@ class DataOperPanel(wx.ScrolledWindow):
         self._do_layout()
         self.fill_data_combox()
         self.fill_oprator_combox()
-        self.Bind(wx.EVT_PAINT, self.set_panel_on_focus)
+        self.Bind(wx.EVT_SET_FOCUS, self.set_panel_on_focus)
 
     def _define_structure(self):
         """
