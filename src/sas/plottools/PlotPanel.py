@@ -1225,10 +1225,16 @@ class PlotPanel(wx.Panel):
         # even less clear.
 
         # Properties defined by plot
-        matplotlib.rc('text', usetex=True)
-        self.subplot.set_xlabel(r"$%s$"%prop["xlabel"])
-        self.subplot.set_ylabel(r"$%s$"%prop["ylabel"])
+        
+        # Ricardo:
+        # A empty label "$$" will prevent the panel from displaying! 
+        
+        if prop["xlabel"]:
+            self.subplot.set_xlabel(r"$%s$"%prop["xlabel"])
+        if prop["ylabel"]:
+            self.subplot.set_ylabel(r"$%s$"%prop["ylabel"])
         self.subplot.set_title(prop["title"])
+        
 
     def clear(self):
         """Reset the plot"""
