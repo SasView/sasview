@@ -12,7 +12,7 @@ Defines the interface for a Plugin class that can be used by the gui_manager.
 #copyright 2008, University of Tennessee
 ################################################################################
 
-class PluginBase:
+class PluginBase(object):
     """
     This class defines the interface for a Plugin class
     that can be used by the gui_manager.
@@ -35,7 +35,7 @@ class PluginBase:
 
     def __init__(self, name="Test_plugin", standalone=True):
         """
-            Abstract class for gui_manager Plugins.
+        Abstract class for gui_manager Plugins.
         """
         # Define if the plugin is local to Viewerframe  and always active
         self._always_active = False

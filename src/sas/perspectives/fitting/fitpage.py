@@ -25,6 +25,7 @@ SMEAR_SIZE_H = 0.00
 from sas.perspectives.fitting.basepage import BasicPage as BasicPage
 from sas.perspectives.fitting.basepage import PageInfoEvent as PageInfoEvent
 from sas.models.qsmearing import smear_selection
+from .basepage import ModelTextCtrl
 
 
 class FitPage(BasicPage):
@@ -283,29 +284,29 @@ class FitPage(BasicPage):
         self.btFit.SetToolTipString("Start fitting.")
 
         #textcntrl for custom resolution
-        self.smear_pinhole_max = self.ModelTextCtrl(self, -1,
+        self.smear_pinhole_max = ModelTextCtrl(self, -1,
                             size=(_BOX_WIDTH - 25, 20),
                             style=wx.TE_PROCESS_ENTER,
                             text_enter_callback=self.onPinholeSmear)
-        self.smear_pinhole_min = self.ModelTextCtrl(self, -1,
+        self.smear_pinhole_min = ModelTextCtrl(self, -1,
                             size=(_BOX_WIDTH - 25, 20),
                             style=wx.TE_PROCESS_ENTER,
                             text_enter_callback=self.onPinholeSmear)
-        self.smear_slit_height = self.ModelTextCtrl(self, -1,
+        self.smear_slit_height = ModelTextCtrl(self, -1,
                             size=(_BOX_WIDTH - 25, 20),
                             style=wx.TE_PROCESS_ENTER,
                             text_enter_callback=self.onSlitSmear)
-        self.smear_slit_width = self.ModelTextCtrl(self, -1,
+        self.smear_slit_width = ModelTextCtrl(self, -1,
                             size=(_BOX_WIDTH - 25, 20),
                             style=wx.TE_PROCESS_ENTER,
                             text_enter_callback=self.onSlitSmear)
 
         ## smear
         self.smear_data_left = BGTextCtrl(self, -1,
-                                         size=(_BOX_WIDTH - 25, 20), style=0)
+                                          size=(_BOX_WIDTH - 25, 20), style=0)
         self.smear_data_left.SetValue(str(self.dq_l))
         self.smear_data_right = BGTextCtrl(self, -1,
-                                        size=(_BOX_WIDTH - 25, 20), style=0)
+                                           size=(_BOX_WIDTH - 25, 20), style=0)
         self.smear_data_right.SetValue(str(self.dq_r))
 
         #set default values for smear
@@ -354,10 +355,10 @@ class FitPage(BasicPage):
         self.Npts_fit = BGTextCtrl(self, -1, "-", size=(75, 20), style=0)
         self.Npts_fit.SetToolTipString(\
                             " Npts : number of points selected for fitting")
-        self.Npts_total = self.ModelTextCtrl(self, -1,
-                        size=(_BOX_WIDTH, 20),
-                        style=wx.TE_PROCESS_ENTER,
-                        text_enter_callback=self._onQrangeEnter)
+        self.Npts_total = ModelTextCtrl(self, -1,
+                            size=(_BOX_WIDTH, 20),
+                            style=wx.TE_PROCESS_ENTER,
+                            text_enter_callback=self._onQrangeEnter)
         self.Npts_total.SetValue(format_number(self.npts_x))
         self.Npts_total.SetToolTipString(\
                                 " Total Npts : total number of data points")
@@ -514,22 +515,22 @@ class FitPage(BasicPage):
 
         self.sizer5.Clear(True)
 
-        self.qmin = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
-                                    style=wx.TE_PROCESS_ENTER,
-                                    set_focus_callback=self.qrang_set_focus,
-                                    text_enter_callback=self._onQrangeEnter,
-                                    name='qmin')
+        self.qmin = ModelTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
+                                  style=wx.TE_PROCESS_ENTER,
+                                  set_focus_callback=self.qrang_set_focus,
+                                  text_enter_callback=self._onQrangeEnter,
+                                  name='qmin')
         self.qmin.SetValue(str(self.qmin_x))
         q_tip = "Click outside of the axes\n to remove the lines."
         qmin_tip = "Minimun value of Q.\n"
         qmin_tip += q_tip
         self.qmin.SetToolTipString(qmin_tip)
 
-        self.qmax = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
-                                       style=wx.TE_PROCESS_ENTER,
-                                       set_focus_callback=self.qrang_set_focus,
-                                       text_enter_callback=self._onQrangeEnter,
-                                       name='qmax')
+        self.qmax = ModelTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
+                                  style=wx.TE_PROCESS_ENTER,
+                                  set_focus_callback=self.qrang_set_focus,
+                                  text_enter_callback=self._onQrangeEnter,
+                                  name='qmax')
         self.qmax.SetValue(str(self.qmax_x))
         qmax_tip = "Maximum value of Q.\n"
         qmax_tip += q_tip
@@ -685,9 +686,9 @@ class FitPage(BasicPage):
                                 wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 5)
                         ix = 1
                         value = self.model.getParam(name1)
-                        ctl1 = self.ModelTextCtrl(self, -1,
-                                                  size=(_BOX_WIDTH / 1.3, 20),
-                                                  style=wx.TE_PROCESS_ENTER)
+                        ctl1 = ModelTextCtrl(self, -1,
+                                             size=(_BOX_WIDTH / 1.3, 20),
+                                             style=wx.TE_PROCESS_ENTER)
                         ctl1.SetLabel('PD[ratio]')
                         poly_text = "Polydispersity (STD/mean) of %s\n" % item
                         poly_text += "STD: the standard deviation"
@@ -714,18 +715,18 @@ class FitPage(BasicPage):
                             ctl2.Hide()
 
                         ix = 4
-                        ctl3 = self.ModelTextCtrl(self, -1,
-                                                  size=(_BOX_WIDTH / 2, 20),
-                                                  style=wx.TE_PROCESS_ENTER,
-                                text_enter_callback=self._onparamRangeEnter)
+                        ctl3 = ModelTextCtrl(self, -1,
+                                             size=(_BOX_WIDTH / 2, 20),
+                                             style=wx.TE_PROCESS_ENTER,
+                            text_enter_callback=self._onparamRangeEnter)
 
                         self.sizer4_4.Add(ctl3, (iy, ix), (1, 1),
                                           wx.EXPAND | wx.ADJUST_MINSIZE, 0)
 
                         ix = 5
-                        ctl4 = self.ModelTextCtrl(self, -1,
-                                                  size=(_BOX_WIDTH / 2, 20),
-                                                  style=wx.TE_PROCESS_ENTER,
+                        ctl4 = ModelTextCtrl(self, -1,
+                                             size=(_BOX_WIDTH / 2, 20),
+                                             style=wx.TE_PROCESS_ENTER,
                             text_enter_callback=self._onparamRangeEnter)
 
                         self.sizer4_4.Add(ctl4, (iy, ix), (1, 1),
@@ -737,9 +738,9 @@ class FitPage(BasicPage):
                     elif p == "npts":
                         ix = 6
                         value = self.model.getParam(name2)
-                        Tctl = self.ModelTextCtrl(self, -1,
-                                                  size=(_BOX_WIDTH / 2.2, 20),
-                                                  style=wx.TE_PROCESS_ENTER)
+                        Tctl = ModelTextCtrl(self, -1,
+                                             size=(_BOX_WIDTH / 2.2, 20),
+                                             style=wx.TE_PROCESS_ENTER)
 
                         Tctl.SetValue(str(format_number(value)))
                         self.sizer4_4.Add(Tctl, (iy, ix), (1, 1),
@@ -749,9 +750,9 @@ class FitPage(BasicPage):
                     elif p == "nsigmas":
                         ix = 7
                         value = self.model.getParam(name3)
-                        Tct2 = self.ModelTextCtrl(self, -1,
-                                                  size=(_BOX_WIDTH / 2.2, 20),
-                                                  style=wx.TE_PROCESS_ENTER)
+                        Tct2 = ModelTextCtrl(self, -1,
+                                             size=(_BOX_WIDTH / 2.2, 20),
+                                             style=wx.TE_PROCESS_ENTER)
 
                         Tct2.SetValue(str(format_number(value)))
                         self.sizer4_4.Add(Tct2, (iy, ix), (1, 1),
@@ -810,9 +811,9 @@ class FitPage(BasicPage):
                             cb.Hide()
                         ix = 1
                         value = self.model.getParam(name1)
-                        ctl1 = self.ModelTextCtrl(self, -1,
-                                                  size=(_BOX_WIDTH / 1.3, 20),
-                                                  style=wx.TE_PROCESS_ENTER)
+                        ctl1 = ModelTextCtrl(self, -1,
+                                             size=(_BOX_WIDTH / 1.3, 20),
+                                             style=wx.TE_PROCESS_ENTER)
                         poly_tip = "Absolute Sigma for %s." % item
                         ctl1.SetToolTipString(poly_tip)
                         ctl1.SetValue(str(format_number(value, True)))
@@ -858,9 +859,9 @@ class FitPage(BasicPage):
                                 ctl2.Show(True)
 
                         ix = 4
-                        ctl3 = self.ModelTextCtrl(self, -1,
-                                                  size=(_BOX_WIDTH / 2, 20),
-                                                  style=wx.TE_PROCESS_ENTER,
+                        ctl3 = ModelTextCtrl(self, -1,
+                                             size=(_BOX_WIDTH / 2, 20),
+                                             style=wx.TE_PROCESS_ENTER,
                                 text_enter_callback=self._onparamRangeEnter)
 
                         self.sizer4_4.Add(ctl3, (iy, ix), (1, 1),
@@ -869,9 +870,9 @@ class FitPage(BasicPage):
                         ctl3.Hide()
 
                         ix = 5
-                        ctl4 = self.ModelTextCtrl(self, -1,
-                            size=(_BOX_WIDTH / 2, 20),
-                            style=wx.TE_PROCESS_ENTER,
+                        ctl4 = ModelTextCtrl(self, -1,
+                                             size=(_BOX_WIDTH / 2, 20),
+                                             style=wx.TE_PROCESS_ENTER,
                             text_enter_callback=self._onparamRangeEnter)
                         self.sizer4_4.Add(ctl4, (iy, ix), (1, 1),
                                           wx.EXPAND | wx.ADJUST_MINSIZE, 0)
@@ -885,9 +886,9 @@ class FitPage(BasicPage):
                     elif p == "npts":
                         ix = 6
                         value = self.model.getParam(name2)
-                        Tctl = self.ModelTextCtrl(self, -1,
-                                                 size=(_BOX_WIDTH / 2.2, 20),
-                                                 style=wx.TE_PROCESS_ENTER)
+                        Tctl = ModelTextCtrl(self, -1,
+                                             size=(_BOX_WIDTH / 2.2, 20),
+                                             style=wx.TE_PROCESS_ENTER)
 
                         Tctl.SetValue(str(format_number(value)))
                         if self.data.__class__.__name__ == "Data2D" or \
@@ -905,9 +906,9 @@ class FitPage(BasicPage):
                     elif p == "nsigmas":
                         ix = 7
                         value = self.model.getParam(name3)
-                        Tct2 = self.ModelTextCtrl(self, -1,
-                                                  size=(_BOX_WIDTH / 2.2, 20),
-                                                  style=wx.TE_PROCESS_ENTER)
+                        Tct2 = ModelTextCtrl(self, -1,
+                                             size=(_BOX_WIDTH / 2.2, 20),
+                                             style=wx.TE_PROCESS_ENTER)
 
                         Tct2.SetValue(str(format_number(value)))
                         if self.data.__class__.__name__ == "Data2D" or \
@@ -1139,7 +1140,7 @@ class FitPage(BasicPage):
         self.state.structurecombobox = self.structurebox.GetLabel()
         self.state.formfactorcombobox = self.formfactorbox.GetLabel()
         self.enable_fit_button()
-        if self.model != None:
+        if self.model is not None:
             self.m_name = self.model.name
             self.state.m_name = self.m_name
             self.rename_model()
@@ -1151,18 +1152,12 @@ class FitPage(BasicPage):
                     self._set_bookmark_flag(not self.batch_on)
                     self._keep.Enable(not self.batch_on)
                     self._set_save_flag(True)
-            # Reset smearer, model and data
-            if not copy_flag:
-                self.disable_smearer.SetValue(True)
-                self.enable_smearer.SetValue(False)
 
             # more disables for 2D
             self._set_smear_buttons()
 
             try:
                 # update smearer sizer
-                #if not self.enable_smearer.GetValue():
-                #    self.disable_smearer.SetValue(True)
                 self.onSmear(None)
                 temp_smear = None
                 if not self.disable_smearer.GetValue():
@@ -1267,13 +1262,14 @@ class FitPage(BasicPage):
                         flag = flag or flag1
                 elif self.data.__class__.__name__ != "Data2D" and \
                         not self.enable2D:
+                    enable_smearer = not self.disable_smearer.GetValue()
                     self._manager.set_smearer(smearer=temp_smearer,
                                               fid=self.data.id,
                                               uid=self.uid,
                                               qmin=float(self.qmin_x),
                                               qmax=float(self.qmax_x),
-                            enable_smearer=not self.disable_smearer.GetValue(),
-                                            draw=True)
+                                              enable_smearer=enable_smearer,
+                                              draw=True)
                 if flag:
                     #self.compute_chisqr(smearer= temp_smearer)
 
@@ -1771,8 +1767,7 @@ class FitPage(BasicPage):
             return
         self.current_smearer = smear_selection(data, self.model)
         flag = self.disable_smearer.GetValue()
-        self.disable_smearer.SetValue(flag)
-        if self.current_smearer == None:
+        if self.current_smearer is None:
             self.enable_smearer.Disable()
         else:
             self.enable_smearer.Enable()
@@ -1958,8 +1953,6 @@ class FitPage(BasicPage):
         #update model plot with new data information
         if flag:
             #set model view button
-            if not self.enable_smearer.GetValue():
-                    self.disable_smearer.SetValue(True)
             self.onSmear(None)
 
             if self.data.__class__.__name__ == "Data2D":
@@ -2131,20 +2124,14 @@ class FitPage(BasicPage):
                         if cov[ind] != None:
                             if numpy.isfinite(float(cov[ind])):
                                 val_err = format_number(cov[ind], True)
-                                if not self.is_mac:
-                                    item[3].Show(True)
-                                    item[4].Show(True)
- 				    item[4].SetForegroundColour(wx.BLACK)
-                                item[4].SetValue(val_err)
-                                has_error = True
-			    else:
-			        val_err = 'NaN'
-                                if not self.is_mac:
-                                    item[3].Show(True)
-                                    item[4].Show(True)
-				    item[4].SetForegroundColour(wx.RED)
-                                item[4].SetValue(val_err)
-                                has_error = True
+                            else:
+                                val_err = 'NaN'
+                            if not self.is_mac:
+                                item[3].Show(True)
+                                item[4].Show(True)
+                                item[4].SetForegroundColour(wx.RED)
+                            item[4].SetValue(val_err)
+                            has_error = True
                 i += 1
             else:
                 raise ValueError, "onsetValues: Invalid parameters..."
@@ -2204,7 +2191,6 @@ class FitPage(BasicPage):
             wx.PostEvent(self._manager.parent,
                          StatusEvent(status="Smear: %s" % msg))
             return
-
         # Need update param values
         self._update_paramv_on_fit()
 
@@ -2344,12 +2330,13 @@ class FitPage(BasicPage):
             get_pin_max.SetBackgroundColour("white")
         ## set smearing value whether or not the data contain the smearing info
 
+        enable_smearer = not self.disable_smearer.GetValue()
         self._manager.set_smearer(smearer=self.current_smearer,
-                            fid=self.data.id,
-                            qmin=float(self.qmin_x),
-                            qmax=float(self.qmax_x),
-                            enable_smearer=not self.disable_smearer.GetValue(),
-                            uid=self.uid)
+                                  fid=self.data.id,
+                                  qmin=float(self.qmin_x),
+                                  qmax=float(self.qmax_x),
+                                  enable_smearer=enable_smearer,
+                                  uid=self.uid)
         return msg
 
     def update_pinhole_smear(self):
@@ -2474,8 +2461,7 @@ class FitPage(BasicPage):
         :return: message to inform the user about the validity
             of the values entered for slit smear
         """
-        if self.data.__class__.__name__ == "Data2D" or \
-                        self.enable2D:
+        if self.data.__class__.__name__ == "Data2D" or self.enable2D:
             return
         # make sure once more if it is smearer
         data = copy.deepcopy(self.data)
@@ -2512,12 +2498,13 @@ class FitPage(BasicPage):
 
         self.current_smearer = smear_selection(data, self.model)
         ## set smearing value whether or not the data contain the smearing info
+        enable_smearer = not self.disable_smearer.GetValue()
         self._manager.set_smearer(smearer=self.current_smearer,
-                                 fid=self.data.id,
-                                 qmin=float(self.qmin_x),
-                                 qmax=float(self.qmax_x),
-                        enable_smearer=not self.disable_smearer.GetValue(),
-                                 uid=self.uid)
+                                  fid=self.data.id,
+                                  qmin=float(self.qmin_x),
+                                  qmax=float(self.qmax_x),
+                                  enable_smearer=enable_smearer,
+                                  uid=self.uid)
         return msg
 
     def update_slit_smear(self):
@@ -2562,7 +2549,7 @@ class FitPage(BasicPage):
             return
         # Need update param values
         self._update_paramv_on_fit()
-        if self.model != None:
+        if self.model is not None:
             if self.data.is_data:
                 self._manager.page_finder[self.uid].add_data(data=self.data)
         temp_smearer = self.on_smear_helper()
@@ -2572,12 +2559,13 @@ class FitPage(BasicPage):
         self._set_weight()
 
         ## set smearing value whether or not the data contain the smearing info
+        enable_smearer = not self.disable_smearer.GetValue()
         wx.CallAfter(self._manager.set_smearer, uid=self.uid,
                      smearer=temp_smearer,
                      fid=self.data.id,
                      qmin=float(self.qmin_x),
                      qmax=float(self.qmax_x),
-                     enable_smearer=not self.disable_smearer.GetValue(),
+                     enable_smearer=enable_smearer,
                      draw=True)
 
         self.state.enable_smearer = self.enable_smearer.GetValue()
@@ -2593,7 +2581,7 @@ class FitPage(BasicPage):
         """
         self._get_smear_info()
         #renew smear sizer
-        if self.smear_type != None:
+        if self.smear_type is not None:
             self.smear_description_smear_type.SetValue(str(self.smear_type))
             self.smear_data_left.SetValue(str(self.dq_l))
             self.smear_data_right.SetValue(str(self.dq_r))
@@ -2606,7 +2594,7 @@ class FitPage(BasicPage):
         if self.current_smearer != temp_smearer or update:
             self.current_smearer = temp_smearer
         if self.enable_smearer.GetValue():
-            if self.current_smearer == None:
+            if self.current_smearer is None:
                 wx.PostEvent(self._manager.parent,
                     StatusEvent(status="Data contains no smearing information"))
             else:
@@ -2952,8 +2940,8 @@ class FitPage(BasicPage):
                         #    describing the interface")
                         wx.EVT_COMBOBOX(fun_box, -1, self._on_fun_box)
                     else:
-                        fun_box = self.ModelTextCtrl(self, -1,
-                                                     size=(_BOX_WIDTH, 20),
+                        fun_box = ModelTextCtrl(self, -1,
+                                                size=(_BOX_WIDTH, 20),
                                 style=wx.TE_PROCESS_ENTER, name='%s' % item)
                         fun_box.SetToolTipString(\
                                 "Hit 'Enter' after typing to update the plot.")
@@ -2976,8 +2964,8 @@ class FitPage(BasicPage):
                     ## add parameter value
                     ix += 1
                     value = self.model.getParam(item)
-                    ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
-                                        style=wx.TE_PROCESS_ENTER)
+                    ctl1 = ModelTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
+                                         style=wx.TE_PROCESS_ENTER)
                     ctl1.SetToolTipString(\
                                 "Hit 'Enter' after typing to update the plot.")
                     ctl1.SetValue(format_number(value, True))
@@ -2998,9 +2986,9 @@ class FitPage(BasicPage):
                         ctl2.Hide()
 
                     ix += 1
-                    ctl3 = self.ModelTextCtrl(self, -1,
-                                              size=(_BOX_WIDTH / 1.9, 20),
-                                              style=wx.TE_PROCESS_ENTER,
+                    ctl3 = ModelTextCtrl(self, -1,
+                                         size=(_BOX_WIDTH / 1.9, 20),
+                                         style=wx.TE_PROCESS_ENTER,
                                 text_enter_callback=self._onparamRangeEnter)
                     min_bound = self.model.details[item][1]
                     if min_bound is not None:
@@ -3010,9 +2998,9 @@ class FitPage(BasicPage):
                               wx.EXPAND | wx.ADJUST_MINSIZE, 0)
 
                     ix += 1
-                    ctl4 = self.ModelTextCtrl(self, -1,
-                                              size=(_BOX_WIDTH / 1.9, 20),
-                                              style=wx.TE_PROCESS_ENTER,
+                    ctl4 = ModelTextCtrl(self, -1,
+                                         size=(_BOX_WIDTH / 1.9, 20),
+                                         style=wx.TE_PROCESS_ENTER,
                                 text_enter_callback=self._onparamRangeEnter)
                     max_bound = self.model.details[item][2]
                     if max_bound is not None:
@@ -3114,8 +3102,8 @@ class FitPage(BasicPage):
                     ## add parameter value
                     ix += 1
                     value = self.model.getParam(item)
-                    ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
-                                        style=wx.TE_PROCESS_ENTER)
+                    ctl1 = ModelTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
+                                         style=wx.TE_PROCESS_ENTER)
                     ctl1.SetToolTipString(\
                                 "Hit 'Enter' after typing to update the plot.")
                     ctl1.SetValue(format_number(value, True))
@@ -3141,9 +3129,9 @@ class FitPage(BasicPage):
                     ctl2.Hide()
 
                     ix += 1
-                    ctl3 = self.ModelTextCtrl(self, -1,
-                                              size=(_BOX_WIDTH / 1.8, 20),
-                                              style=wx.TE_PROCESS_ENTER,
+                    ctl3 = ModelTextCtrl(self, -1,
+                                         size=(_BOX_WIDTH / 1.8, 20),
+                                         style=wx.TE_PROCESS_ENTER,
                                 text_enter_callback=self._onparamRangeEnter)
 
                     sizer.Add(ctl3, (iy, ix), (1, 1),
@@ -3151,9 +3139,9 @@ class FitPage(BasicPage):
                     ctl3.Hide()
 
                     ix += 1
-                    ctl4 = self.ModelTextCtrl(self, -1,
-                                              size=(_BOX_WIDTH / 1.8, 20),
-                                              style=wx.TE_PROCESS_ENTER,
+                    ctl4 = ModelTextCtrl(self, -1,
+                                         size=(_BOX_WIDTH / 1.8, 20),
+                                         style=wx.TE_PROCESS_ENTER,
                             text_enter_callback=self._onparamRangeEnter)
                     sizer.Add(ctl4, (iy, ix), (1, 1),
                               wx.EXPAND | wx.ADJUST_MINSIZE, 0)

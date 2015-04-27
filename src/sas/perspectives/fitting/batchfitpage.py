@@ -121,13 +121,13 @@ class BatchFitPage(FitPage):
 #             
 #         self.sizer5.Clear(True)
 #      
-#         self.qmin  = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH, 20), 
+#         self.qmin  = ModelTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
 #                                           style=wx.TE_PROCESS_ENTER, 
 #                                     text_enter_callback = self._onQrangeEnter)
 #         self.qmin.SetValue(str(self.qmin_x))
 #         self.qmin.SetToolTipString("Minimun value of Q in linear scale.")
 #      
-#         self.qmax  = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH, 20), 
+#         self.qmax  = ModelTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
 #                                           style=wx.TE_PROCESS_ENTER, 
 #                                         text_enter_callback=self._onQrangeEnter)
 #         self.qmax.SetValue(str(self.qmax_x))
