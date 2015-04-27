@@ -2182,15 +2182,6 @@ class FitPage(BasicPage):
                      None for 1D
 
         """
-        if self.model == None:
-            self.disable_smearer.SetValue(True)
-            if event == None:
-                return
-            msg = "Please select a Model first..."
-            wx.MessageBox(msg, 'Info')
-            wx.PostEvent(self._manager.parent,
-                         StatusEvent(status="Smear: %s" % msg))
-            return
         # Need update param values
         self._update_paramv_on_fit()
 
@@ -2364,16 +2355,6 @@ class FitPage(BasicPage):
         Create a custom slit smear object that will change the way residuals
         are compute when fitting
         """
-        if self.model == None:
-            self.disable_smearer.SetValue(True)
-            if event == None:
-                return
-            msg = "Please select a Model first..."
-            wx.MessageBox(msg, 'Info')
-            wx.PostEvent(self._manager.parent,
-                         StatusEvent(status="Smear: %s" % msg))
-            return
-
         # Need update param values
         self._update_paramv_on_fit()
 
@@ -2538,15 +2519,6 @@ class FitPage(BasicPage):
         if self.data is None:
             return
 
-        if self.model == None:
-            self.disable_smearer.SetValue(True)
-            if event == None:
-                return
-            msg = "Please select a Model first..."
-            wx.MessageBox(msg, 'Info')
-            wx.PostEvent(self._manager.parent,
-                         StatusEvent(status="Smear: %s" % msg))
-            return
         # Need update param values
         self._update_paramv_on_fit()
         if self.model is not None:
