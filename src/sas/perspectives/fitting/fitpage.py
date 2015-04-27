@@ -1061,7 +1061,7 @@ class FitPage(BasicPage):
         else:
             label = "Fit"
             color = "black"
-        self.btFit.Enable(False)
+        #self.btFit.Enable(False)
         self.btFit.SetLabel(label)
         self.btFit.SetForegroundColour(color)
         self.btFit.Enable(True)
