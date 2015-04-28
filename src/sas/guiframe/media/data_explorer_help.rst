@@ -16,9 +16,9 @@ Activate_Data_
 
 Remove_Data_
 
-Append_Plot_to_Graph_
-
 Create_New_Plot_
+
+Append_Plot_to_Graph_
 
 Freeze_Theory_
 
@@ -39,7 +39,7 @@ Under *View* in the menu bar, *Data Explorer* can be toggled between Show and
 Hide by clicking *Show/Hide Data Explorer*.
 
 *NOTE! When* Data Explorer *is hidden, all data loaded will be sent directly 
-to the current active application, if possible. When* Data Explorer *is 
+to the current active analysis perspective, if possible. When* Data Explorer *is
 shown, data go first to the* Data Explorer.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
@@ -49,11 +49,18 @@ shown, data go first to the* Data Explorer.
 Load Data
 ---------
 
-To load data, click the button *Load Data*, then select one or more (by holding 
-the Ctrl key) files to load into the application. The name of each selected 
-file will be listed.
+To load data, do one of the following:
 
-Clicking the *+*  symbol will display any available metadata.
+Select File -> Load Data File(s), and navigate to your data;
+
+Select File -> Load Data Folder, which will attempt to load all the data in the
+specified folder;
+
+Or, in the *Data Explorer* click the button *Load Data*, then select one or more
+(by holding down the Ctrl key) files to load into SasView.
+
+The name of each loaded file will be listed in the *Data Explorer*. Clicking the
+*+*  symbol alongside will display any available metadata read from the file.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -63,8 +70,8 @@ Handy Menu
 ----------
 
 Right-clicking on a loaded dataset (or model calculation, what SasView calls a 
-theory) brings up a *Handy Menu* from which it is possible to access Datainfo, 
-Save the data/theory, or Plot the data/theory.
+'theory') brings up a *Handy Menu* from which it is possible to access *Data Info*,
+*Save* the data/theory, or *Plot* the data/theory.
 
 .. image:: hand_menu.png
 
@@ -76,12 +83,12 @@ Activate Data
 -------------
 
 To interact with data it must be activated. This is accomplished by checking 
-the box next to the data label. A green tick will appear.
+the box next to the file name in the *Data Explorer*. A green tick will appear.
 
-Unchecking/unticking the box deactivates a data set.
+Unchecking/unticking a box deactivates that data set.
 
 There is also a combo box labeled *Selection Options* from which you can 
-activate or deactivate multiple data sets.
+activate or deactivate multiple data sets in one go.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -93,26 +100,7 @@ Remove Data
 *WARNING!* Remove Data *will stop any data operations currently using the 
 selected data sets.*
 
-*Remove Data* removes all reference to selected data from the application.
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-.. _Append_Plot_to_Graph:
-
-Append Plot to Graph
---------------------
-
-This operation can only be performed on 1D data and plot panels currently 
-containing 1D data.
-
-Click on the button *Append To* to add selected data to a plot panel. Next to 
-the button is a combo box containing the names of available plot panels. 
-Selecting a name from this combo box will move that plot into focus.
- 
-If a plot panel is not available, the combo box and button will be 
-disabled.
-
-2D Data cannot be appended to any plot panels.
+*Remove Data* removes all references to selected data from SasView.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -121,8 +109,27 @@ disabled.
 Create New Plot
 ---------------
 
-Click on the *New Plot* button to create a new plot panel where the currently 
+Click on the *New Plot* button to create a new plot panel where the currently
 selected data will be plotted.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+.. _Append_Plot_to_Graph:
+
+Append Plot to Graph
+--------------------
+
+This operation can currently only be performed on 1D data and plot panels
+containing 1D data.
+
+Click on the button *Append Plot To* to add selected data to a plot panel. Next
+to the button is a combo box containing the names of available plot panels.
+Selecting a name from this combo box will move that plot into focus.
+ 
+If a plot panel is not available, the combo box and button will be 
+disabled.
+
+2D Data cannot be appended to any plot panels.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -133,7 +140,8 @@ Freeze Theory
 
 The *Freeze Theory* button generates data from the selected theory.
 
-*NOTE! This operation can only be performed when theory labels are selected.*
+*NOTE! This operation can only be performed when theory labels are selected in*
+*the Data panel.*
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -142,8 +150,8 @@ The *Freeze Theory* button generates data from the selected theory.
 Send to Application
 -------------------
 
-Click on the button *Send To* button to send the currently selected data to 
-a perspective (for *Fitting*, *P(r) Inversion*, or *Invariant* calculation).
+Click on the *Send To* button to send the currently selected data to one of the
+perspectives (for *Fitting*, *P(r) Inversion*, or *Invariant* calculation).
  
 The *Single*/*Batch* mode radio buttons only apply to the *Fitting* perspective.
 
@@ -154,4 +162,4 @@ option on the menu bar.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 18Feb2015
+.. note::  This help document was last changed by Steve King, 26Apr2015
