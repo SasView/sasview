@@ -24,8 +24,6 @@
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Smearing_Computation:
-
 Smearing Computation
 --------------------
 

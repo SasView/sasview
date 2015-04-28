@@ -24,8 +24,6 @@
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-..  _Polydispersity_Distributions:
-
 Polydispersity Distributions
 ----------------------------
 

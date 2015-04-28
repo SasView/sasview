@@ -41,15 +41,15 @@ Model_Functions_
 
 Custom_Model_Editor_
 
+Key_Combinations_
+
+Status_Bar_Help_
+
 Polydispersity_Distributions_
 
 Smearing_Computation_
 
 Polarisation_Magnetic_Scattering_
-
-Key_Combinations_
-
-Status_Bar_Help_
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -564,3 +564,32 @@ Console
 Select *light bulb/info icon*  button in the status bar at the bottom of the 
 application window to display available history. During a long task, the 
 console can also help users to understand the status in progressing.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+..  _Polydispersity_Distributions:
+
+Polydispersity Distributions
+----------------------------
+
+Polydispersity Distributions <pd_help>
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+..  _Smearing_Computation:
+
+Smearing Computation
+--------------------
+
+Smearing Computation <sm_help>
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+..  _Polarisation_Magnetic_Scattering:
+
+Polarisation/Magnetic Scattering
+--------------------------------
+
+Polarisation/Magnetic Scattering <mag_help>
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ

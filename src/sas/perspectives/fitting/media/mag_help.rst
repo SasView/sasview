@@ -24,8 +24,6 @@
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Polarisation_Magnetic_Scattering:
-
 Polarisation/Magnetic Scattering
 --------------------------------
 
