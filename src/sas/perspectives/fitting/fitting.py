@@ -1210,7 +1210,7 @@ class Plugin(PluginBase):
         if uid in self.fit_thread_list.keys():
             del self.fit_thread_list[uid]
 
-        self._update_fit_button(page_id)
+        wx.CallAfter(self._update_fit_button, page_id)
         t1 = time.time()
         str_time = time.strftime("%a, %d %b %Y %H:%M:%S ", time.localtime(t1))
         msg = "Fit completed on %s \n" % str_time
@@ -1449,7 +1449,7 @@ class Plugin(PluginBase):
         wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
                                                       type="stop"))
         wx.PostEvent(self.result_panel, PlotResultEvent(result=result))
-        self._update_fit_button(page_id)
+        wx.CallAfter(self._update_fit_button, page_id)
         result = result[0]
         self.fit_thread_list = {}
         if page_id is None:
@@ -1469,7 +1469,7 @@ class Plugin(PluginBase):
                              StatusEvent(status=msg,
                                          info="warning",
                                          type="stop"))
-                    self._update_fit_button(page_id)
+                    wx.CallAfter(self._update_fit_button, page_id)
                 else:
                     #set the panel when fit result are float not list
                     if res.pvec.__class__ == numpy.float64:

@@ -397,90 +397,6 @@ class BasicPage(ScrolledPanel, PanelBase):
                     self._manager.menu1.FindItemById(self._manager.id_batchfit)
             batch_menu.Enable(self.batch_on and flag)
 
-    class ModelTextCtrl(wx.TextCtrl):
-        """
-        Text control for model and fit parameters.
-        Binds the appropriate events for user interactions.
-        Default callback methods can be overwritten on initialization
-
-        :param kill_focus_callback: callback method for EVT_KILL_FOCUS event
-        :param set_focus_callback:  callback method for EVT_SET_FOCUS event
-        :param mouse_up_callback:   callback method for EVT_LEFT_UP event
-        :param text_enter_callback: callback method for EVT_TEXT_ENTER event
-
-        """
-        ## Set to True when the mouse is clicked while whole string is selected
-        full_selection = False
-        ## Call back for EVT_SET_FOCUS events
-        _on_set_focus_callback = None
-
-        def __init__(self, parent, id=-1,
-                     value=wx.EmptyString,
-                     pos=wx.DefaultPosition,
-                     size=wx.DefaultSize,
-                     style=0,
-                     validator=wx.DefaultValidator,
-                     name=wx.TextCtrlNameStr,
-                     kill_focus_callback=None,
-                     set_focus_callback=None,
-                     mouse_up_callback=None,
-                     text_enter_callback=None):
-
-            wx.TextCtrl.__init__(self, parent, id, value, pos,
-                                 size, style, validator, name)
-
-            # Bind appropriate events
-            self._on_set_focus_callback = parent.onSetFocus \
-                      if set_focus_callback is None else set_focus_callback
-            self.Bind(wx.EVT_SET_FOCUS, self._on_set_focus)
-            self.Bind(wx.EVT_KILL_FOCUS, self._silent_kill_focus \
-                      if kill_focus_callback is None else kill_focus_callback)
-            self.Bind(wx.EVT_TEXT_ENTER, parent._onparamEnter \
-                      if text_enter_callback is None else text_enter_callback)
-            if not ON_MAC:
-                self.Bind(wx.EVT_LEFT_UP, self._highlight_text \
-                          if mouse_up_callback is None else mouse_up_callback)
-
-        def _on_set_focus(self, event):
-            """
-            Catch when the text control is set in focus to highlight the whole
-            text if necessary
-
-            :param event: mouse event
-
-            """
-            event.Skip()
-            self.full_selection = True
-            return self._on_set_focus_callback(event)
-
-        def _highlight_text(self, event):
-            """
-            Highlight text of a TextCtrl only of no text has be selected
-
-            :param event: mouse event
-
-            """
-            # Make sure the mouse event is available to other listeners
-            event.Skip()
-            control = event.GetEventObject()
-            if self.full_selection:
-                self.full_selection = False
-                # Check that we have a TextCtrl
-                if issubclass(control.__class__, wx.TextCtrl):
-                    # Check whether text has been selected,
-                    # if not, select the whole string
-                    (start, end) = control.GetSelection()
-                    if start == end:
-                        control.SetSelection(-1, -1)
-
-        def _silent_kill_focus(self, event):
-            """
-            Save the state of the page
-            """
-
-            event.Skip()
-            #pass
-
     def set_page_info(self, page_info):
         """
         set some page important information at once
@@ -1679,13 +1595,14 @@ class BasicPage(ScrolledPanel, PanelBase):
                                                   enable_smearer=enable_smearer,
                                                   draw=False)
                 elif not self._is_2D():
+                    enable_smearer = not self.disable_smearer.GetValue()
                     self._manager.set_smearer(smearer=temp_smearer,
                                               qmin=float(self.qmin_x),
                                               uid=self.uid,
                                               fid=self.data.id,
                                               qmax=float(self.qmax_x),
-                            enable_smearer=not self.disable_smearer.GetValue(),
-                                                 draw=False)
+                                              enable_smearer=enable_smearer,
+                                              draw=False)
                     if self.data != None:
                         index_data = ((self.qmin_x <= self.data.x) & \
                                       (self.data.x <= self.qmax_x))
@@ -3773,3 +3690,88 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         toggle view of model from 1D to 2D  or 2D from 1D if implemented
         """
+
+class ModelTextCtrl(wx.TextCtrl):
+    """
+    Text control for model and fit parameters.
+    Binds the appropriate events for user interactions.
+    Default callback methods can be overwritten on initialization
+
+    :param kill_focus_callback: callback method for EVT_KILL_FOCUS event
+    :param set_focus_callback:  callback method for EVT_SET_FOCUS event
+    :param mouse_up_callback:   callback method for EVT_LEFT_UP event
+    :param text_enter_callback: callback method for EVT_TEXT_ENTER event
+
+    """
+    ## Set to True when the mouse is clicked while whole string is selected
+    full_selection = False
+    ## Call back for EVT_SET_FOCUS events
+    _on_set_focus_callback = None
+
+    def __init__(self, parent, id=-1,
+                 value=wx.EmptyString,
+                 pos=wx.DefaultPosition,
+                 size=wx.DefaultSize,
+                 style=0,
+                 validator=wx.DefaultValidator,
+                 name=wx.TextCtrlNameStr,
+                 kill_focus_callback=None,
+                 set_focus_callback=None,
+                 mouse_up_callback=None,
+                 text_enter_callback=None):
+
+        wx.TextCtrl.__init__(self, parent, id, value, pos,
+                             size, style, validator, name)
+
+        # Bind appropriate events
+        self._on_set_focus_callback = parent.onSetFocus \
+            if set_focus_callback is None else set_focus_callback
+        self.Bind(wx.EVT_SET_FOCUS, self._on_set_focus)
+        self.Bind(wx.EVT_KILL_FOCUS, self._silent_kill_focus \
+            if kill_focus_callback is None else kill_focus_callback)
+        self.Bind(wx.EVT_TEXT_ENTER, parent._onparamEnter \
+            if text_enter_callback is None else text_enter_callback)
+        if not ON_MAC:
+            self.Bind(wx.EVT_LEFT_UP, self._highlight_text \
+                if mouse_up_callback is None else mouse_up_callback)
+
+    def _on_set_focus(self, event):
+        """
+        Catch when the text control is set in focus to highlight the whole
+        text if necessary
+
+        :param event: mouse event
+
+        """
+        event.Skip()
+        self.full_selection = True
+        return self._on_set_focus_callback(event)
+
+    def _highlight_text(self, event):
+        """
+        Highlight text of a TextCtrl only of no text has be selected
+
+        :param event: mouse event
+
+        """
+        # Make sure the mouse event is available to other listeners
+        event.Skip()
+        control = event.GetEventObject()
+        if self.full_selection:
+            self.full_selection = False
+            # Check that we have a TextCtrl
+            if issubclass(control.__class__, wx.TextCtrl):
+                # Check whether text has been selected,
+                # if not, select the whole string
+                (start, end) = control.GetSelection()
+                if start == end:
+                    control.SetSelection(-1, -1)
+
+    def _silent_kill_focus(self, event):
+        """
+        Save the state of the page
+        """
+
+        event.Skip()
+        #pass
+

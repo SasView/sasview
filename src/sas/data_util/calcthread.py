@@ -83,7 +83,7 @@ class CalcThread:
     be passed as keyword arguments.  Details of how the functions
     should be implemented vary from framework to framework.
 
-    For wx, something like the following is needed: ::
+    For wx, something like the following is needed::
 
         import wx, wx.lib.newevent
         (CalcCompleteEvent, EVT_CALC_COMPLETE) = wx.lib.newevent.NewEvent()
