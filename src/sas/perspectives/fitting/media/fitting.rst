@@ -12,4 +12,4 @@ Fitting Documentation
 
    Polarisation/Magnetic Scattering <mag_help>
 
-   SasView Optimisers <Bumps/doc/guide/index>
+   SasView Optimisers <https://github.com/bumps/bumps/blob/master/doc/guide/optimizer.rst>
