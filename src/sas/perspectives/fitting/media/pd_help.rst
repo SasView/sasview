@@ -55,7 +55,7 @@ The following five distribution functions are provided
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 Rectangular Distribution
-------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. image:: pd_image001.png
 
@@ -76,7 +76,7 @@ The PD (polydispersity) is
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 Array Distribution
-------------------
+^^^^^^^^^^^^^^^^^^
 
 This distribution is to be given by users as a txt file where the array 
 should be defined by two columns in the order of x and f(x) values. The f(x) 
@@ -98,7 +98,7 @@ given in the control panel, for example â€˜radius = 60â€™, will be igno
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 Gaussian Distribution
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
 .. image:: pd_image005.png
 
@@ -114,7 +114,7 @@ The PD (polydispersity) is
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 Lognormal Distribution
-----------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
 .. image:: pd_image007.png
 
@@ -142,7 +142,7 @@ p increases, requiring higher values of Nsigmas and Npts.
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 Schulz Distribution
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 .. image:: pd_image011.png
 
