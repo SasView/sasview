@@ -12,7 +12,7 @@ User Documentation
    
    Plotting Data/Models <guiframe/graph_help>
    
-   Fitting Perspective <perspectives/fitting/fitting_help>
+   Fitting Perspective <perspectives/fitting/fitting>
    
    P(r) Inversion Perspective <perspectives/pr/pr_help>
    
