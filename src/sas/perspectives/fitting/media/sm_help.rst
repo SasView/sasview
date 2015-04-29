@@ -27,13 +27,13 @@
 Smearing Computation
 --------------------
 
-Slit_Smearing_ 
+The following three smearing algorithms are provided
 
-Pinhole_Smearing_
+*  *Slit Smearing*
+*  *Pinhole Smearing*
+*  *2D Smearing*
 
-2D_Smearing_
-
-.. _Slit_Smearing:
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 Slit Smearing
 -------------
@@ -73,8 +73,8 @@ integral of Equation 1 is simplified to
 
 Equation 4
 
-Numerical Implementation of Equation 4
---------------------------------------
+Numerical Implementation of Equation 4:
+---------------------------------------
 
 Case 1
 ------
@@ -126,7 +126,7 @@ for qp= qi- |inlineimage012| and
 qN= qi+ |inlineimage012|. |inlineimage018| = 0 for
 *Is* in *j* < *p* or *j* > *N-1*.
 
-.. _Pinhole_Smearing:
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 Pinhole Smearing
 ----------------
@@ -146,7 +146,7 @@ to cover all data points of the smearing computation for a given model and
 for a given slit size. The *Norm*  factor is found numerically with the 
 weighting matrix, and considered on *Is* computation.
 
-.. _2D_Smearing:
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 2D Smearing
 ----------- 

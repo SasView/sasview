@@ -4,10 +4,12 @@ Fitting Documentation
 .. toctree::
    :maxdepth: 1
 
-   Fitting Perspective <perspectives/fitting/fitting_help>
+   Fitting Perspective <fitting_help>
 
-   Polydispersity Distributions <perspectives/fitting/pd_help>
+   Polydispersity Distributions <pd_help>
 
-   Smearing Computation <perspectives/fitting/sm_help>
+   Smearing Computation <sm_help>
 
-   Polarisation/Magnetic Scattering <perspectives/fitting/mag_help>
+   Polarisation/Magnetic Scattering <mag_help>
+
+   SasView Optimisers <Bumps/doc/guide/index>

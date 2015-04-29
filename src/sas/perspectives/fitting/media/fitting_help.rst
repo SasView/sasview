@@ -25,7 +25,7 @@
 Fitting Perspective
 ===================
 
-Load_a_File_
+Preparing_to_fit_data_
 
 Single_Fit_
 
@@ -47,15 +47,24 @@ Status_Bar_Help_
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-..  _Load_a_File:
+.. _Preparing_to_fit_data:
 
-Load a File
------------
+Preparing to fit data
+---------------------
 
-From Menu go to *Data* -> *Load Data File(or Folder)* . Select a file/folder 
-from the menu bar and click on Open button. Data contained in the file will be 
-displayed. To cancel the loading click on *cancel* . In case a file can not be 
-loaded, an error message will be displayed on the statusbar.
+To fit some data you must first load some data, activate one or more data sets,
+then send those data sets to the fitting perspective.
+
+Instructions on how to do this are in the User Documentation section *Loading*
+*Data*.
+
+SasView can fit data in one of three ways:
+
+*  in *Single* fit mode
+*  in *Simultaneous* fit mode
+*  in *Batch* fit mode
+
+These modes of operation are described below.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -391,7 +400,7 @@ Fig.3
 Model Functions
 ---------------
 
-Model Documentation <models/model_functions>
+See *Model Documentation*.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 

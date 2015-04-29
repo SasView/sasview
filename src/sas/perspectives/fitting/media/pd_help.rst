@@ -39,20 +39,20 @@ different from the typical definition in polymer science) for a size
 distribution and Sigma for an angular distribution (see below).
 
 Note that this computation is very time intensive thus applying polydispersion/
-angular distrubtion for more than one paramters or increasing Npts values 
+angular distribution for more than one parameters or increasing Npts values
 might need extensive patience to complete the computation. Also note that 
 even though it is time consuming, it is safer to have larger values of Npts 
 and Nsigmas.
 
 The following five distribution functions are provided
 
-*  *Rectangular_Distribution_*
-*  *Array_Distribution_*
-*  *Gaussian_Distribution_*
-*  *Lognormal_Distribution_*
-*  *Schulz_Distribution_*
+*  *Rectangular Distribution*
+*  *Array Distribution*
+*  *Gaussian Distribution*
+*  *Lognormal Distribution*
+*  *Schulz Distribution*
 
-.. _Rectangular_Distribution:
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 Rectangular Distribution
 ------------------------
@@ -73,7 +73,7 @@ The PD (polydispersity) is
 
 .. image:: pd_image004.jpg
 
-.. _Array_Distribution:
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 Array Distribution
 ------------------
@@ -95,7 +95,7 @@ Example of an array in the file
 We use only these array values in the computation, therefore the mean value 
 given in the control panel, for example â€˜radius = 60â€™, will be ignored.
 
-.. _Gaussian_Distribution:
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 Gaussian Distribution
 ---------------------
@@ -111,7 +111,7 @@ The PD (polydispersity) is
 
 .. image:: pd_image006.jpg
 
-.. _Lognormal_Distribution:
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 Lognormal Distribution
 ----------------------
@@ -139,7 +139,7 @@ xpeak=exp(/mu/-p2).
 This distribution function spreads more and the peak shifts to the left as the 
 p increases, requiring higher values of Nsigmas and Npts.
 
-.. _Schulz_Distribution:
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 Schulz Distribution
 -------------------
