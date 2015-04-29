@@ -36,7 +36,7 @@ The following three smearing algorithms are provided
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 Slit Smearing
--------------
+^^^^^^^^^^^^^
 
 The sit smeared scattering intensity for SAS is defined by
 
@@ -73,11 +73,8 @@ integral of Equation 1 is simplified to
 
 Equation 4
 
-Numerical Implementation of Equation 4:
----------------------------------------
-
-Case 1
-------
+Numerical Implementation of Equation 4: Case 1
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For |inlineimage012| = 0 and |inlineimage011| = constant.
 
@@ -93,8 +90,8 @@ Equation 5
 
 |inlineimage018| = 0 for *Is* in *j* < *i* or *j* > N-1*.
 
-Case 2
-------
+Numerical Implementation of Equation 4: Case 2
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For |inlineimage012| = constant and |inlineimage011| = 0.
 
@@ -103,8 +100,8 @@ Similarly to Case 1, we get
 |inlineimage019| for qp= qi- |inlineimage012| and qN= qi+ |inlineimage012|. |inlineimage018| = 0
 for *Is* in *j* < *p* or *j* > *N-1*.
 
-Case 3
-------
+Numerical Implementation of Equation 4: Case 3
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For |inlineimage011| = constant and 
 |inlineimage011| = constant.
@@ -129,7 +126,7 @@ qN= qi+ |inlineimage012|. |inlineimage018| = 0 for
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 Pinhole Smearing
-----------------
+^^^^^^^^^^^^^^^^
 
 The pinhole smearing computation is done similar to the case above except 
 that the weight function used is the Gaussian function, so that the Equation 6 
@@ -149,7 +146,7 @@ weighting matrix, and considered on *Is* computation.
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 2D Smearing
------------ 
+^^^^^^^^^^^
 
 The 2D smearing computation is done similar to the 1D pinhole smearing above 
 except that the weight function used was the 2D elliptical Gaussian function
