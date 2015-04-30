@@ -6,30 +6,32 @@
 Loading Data
 ============
 
-Introduction_
+Help is available on:
 
-Load_Data_
+The_data_explorer_
 
-Handy_Menu_
+Loading_data_
 
-Activate_Data_
+The_handy_menu_
 
-Remove_Data_
+Activating_data_
 
-Create_New_Plot_
+Removing_data_
 
-Append_Plot_to_Graph_
+Creating_a_new_plot_
 
-Freeze_Theory_
+Appending_plots_to_a_graph_
 
-Send_Data_to_Applications_
+Freezing_the_theory_
+
+Sending_data_to_applications_
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Introduction:
+.. _The_data_explorer:
 
-Introduction
-------------
+The data explorer
+-----------------
 
 *Data Explorer* is a panel that allows the user more interactions with data. 
 Some functionalities provided by the *Data Explorer* are also available through 
@@ -44,10 +46,10 @@ shown, data go first to the* Data Explorer.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Load_Data:
+.. _Loading_data:
 
-Load Data
----------
+Loading data
+------------
 
 To load data, do one of the following:
 
@@ -64,10 +66,10 @@ The name of each loaded file will be listed in the *Data Explorer*. Clicking the
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Handy_Menu:
+.. _The_handy_menu:
 
-Handy Menu
-----------
+The handy menu
+--------------
 
 Right-clicking on a loaded dataset (or model calculation, what SasView calls a 
 'theory') brings up a *Handy Menu* from which it is possible to access *Data Info*,
@@ -77,10 +79,10 @@ Right-clicking on a loaded dataset (or model calculation, what SasView calls a
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Activate_Data:
+.. _Activating_data:
 
-Activate Data
--------------
+Activating data
+---------------
 
 To interact with data it must be activated. This is accomplished by checking 
 the box next to the file name in the *Data Explorer*. A green tick will appear.
@@ -92,10 +94,10 @@ activate or deactivate multiple data sets in one go.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Remove_Data:
+.. _Removing_data:
 
-Remove Data
------------
+Removing data
+-------------
 
 *WARNING!* Remove Data *will stop any data operations currently using the 
 selected data sets.*
@@ -104,20 +106,20 @@ selected data sets.*
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Create_New_Plot:
+.. _Creating_a_new_plot:
 
-Create New Plot
----------------
+Creating a new plot
+-------------------
 
 Click on the *New Plot* button to create a new plot panel where the currently
 selected data will be plotted.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Append_Plot_to_Graph:
+.. _Appending_plots_to_a_graph:
 
-Append Plot to Graph
---------------------
+Appending plots to a graph
+--------------------------
 
 This operation can currently only be performed on 1D data and plot panels
 containing 1D data.
@@ -133,10 +135,10 @@ disabled.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Freeze_Theory:
+.. _Freezing_the_theory:
 
-Freeze Theory
--------------
+Freezing the theory
+-------------------
 
 The *Freeze Theory* button generates data from the selected theory.
 
@@ -145,10 +147,10 @@ The *Freeze Theory* button generates data from the selected theory.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Send_Data_to_Applications:
+.. _Sending_data_to_applications:
 
-Send to Application
--------------------
+Sending data to applications
+----------------------------
 
 Click on the *Send To* button to send the currently selected data to one of the
 perspectives (for *Fitting*, *P(r) Inversion*, or *Invariant* calculation).
@@ -162,4 +164,4 @@ option on the menu bar.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 26Apr2015
+.. note::  This help document was last changed by Steve King, 30Apr2015
