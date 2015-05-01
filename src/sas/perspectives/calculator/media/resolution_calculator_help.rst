@@ -7,8 +7,8 @@
 .. |lambda| unicode:: U+03BB
 .. |Ang| unicode:: U+212B
 
-Q Resolution Estimator
-======================
+Q Resolution Estimator Tool
+===========================
 
 Description
 -----------
@@ -19,8 +19,8 @@ incident beam.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-How To
-------
+Using the tool
+--------------
 
 1) Select *SAS Resolution Estimator* from the *Tool* menu on the SasView toolbar.
 
@@ -104,4 +104,4 @@ D.F.R. Mildner, J.M. Carpenter and D.L. Worcester
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 19Feb2015
+.. note::  This help document was last changed by Steve King, 01May2015

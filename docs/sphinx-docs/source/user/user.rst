@@ -22,7 +22,7 @@ User Documentation
       
    Density/Volume Calculator Tool <perspectives/calculator/density_calculator_help>
    
-   Generic Scattering Calculator Tool <perspectives/calculator/sas_calculator_help>
+   Generic SANS Calculator Tool <perspectives/calculator/sas_calculator_help>
    
    Image Viewer Tool <perspectives/calculator/image_viewer_help>
       
@@ -32,6 +32,6 @@ User Documentation
    
    Slit Size Calculator Tool <perspectives/calculator/slit_calculator_help>
    
-   SANS Resolution Estimator Tool <perspectives/calculator/resolution_calculator_help>
+   Q Resolution Estimator Tool <perspectives/calculator/resolution_calculator_help>
    
    Python Shell Tool <perspectives/calculator/python_shell_help>

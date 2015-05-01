@@ -3,16 +3,14 @@
 .. This is a port of the original SasView html help file to ReSTructured text
 .. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
 
+.. _Formats:
+
 Data Formats
 ============
 
-1D_Formats_
-
-2D_Formats_
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-.. _1D_Formats:
+SasView reads several different 1D (I(Q) vs Q) and 2D (I(Qx,Qy) vs (Qx,Qy))
+data files. But please note that SasView does not at present load data where
+the Q and I(Q) data are in separate files.
 
 1D Formats
 ----------
@@ -45,12 +43,7 @@ http://danse.chem.utk.edu/trac/wiki/NCNROutput1D_IQ
 For a description of the ISIS 1D format see:
 http://www.isis.stfc.ac.uk/instruments/loq/software/colette-ascii-file-format-descriptions9808.pdf
 
-*NOTE! SasView does not at present load data where the Q and I(Q) data are in 
-separate files.*
-
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-.. _2D_Formats:
 
 2D Formats
 ----------
@@ -66,4 +59,4 @@ http://danse.chem.utk.edu/trac/wiki/NCNROutput1D_2DQxQy
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 18Feb2015
+.. note::  This help document was last changed by Steve King, 01May2015

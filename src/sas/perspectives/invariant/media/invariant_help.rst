@@ -12,22 +12,8 @@
 Invariant Calculation Perspective
 =================================
 
-Scattering_Invariant_
-
-How_to_Use_
-
-Volume_Fraction_
-
-Specific_Surface_Area_
-
-Reference_
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-.. _Scattering_Invariant:
-
-Scattering (Porod) Invariant
-----------------------------
+Description
+-----------
 
 The scattering, or Porod, invariant (Q*\) is a model-independent quantity that 
 can be easily calculated from scattering data.
@@ -64,10 +50,8 @@ Low-*Q* region (<= *Qmin* in data)
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _How_to_Use:
-
-How to Use
-----------
+Using the perspective
+---------------------
 
 1) Select *Invariant* from the *Analysis* menu on the SasView toolbar.
 
@@ -103,10 +87,11 @@ How to Use
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Volume_Fraction:
+Parameters
+----------
 
 Volume Fraction
----------------
+^^^^^^^^^^^^^^^
 
 The volume fraction |phi| is related to Q*\  by
 
@@ -118,10 +103,8 @@ where |bigdelta|\ |rho| is the SLD contrast.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Specific_Surface_Area:
-
 Specific Surface Area
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
 The specific surface area *Sv* is related to Q*\  by
 
@@ -131,10 +114,8 @@ where *Cp* is the Porod constant.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Reference:
-
-References
-----------
+Reference
+---------
 
 O. Glatter and O. Kratky
 Chapter 2 in *Small Angle X-Ray Scattering*
@@ -144,4 +125,4 @@ http://physchem.kfunigraz.ac.at/sm/
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 19Feb2015
+.. note::  This help document was last changed by Steve King, 01May2015

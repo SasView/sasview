@@ -36,8 +36,8 @@ smooth *P(r)* output.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-How To
-------
+Using the perspective
+---------------------
 
 The user must enter
 
@@ -59,4 +59,4 @@ P.B. Moore
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 19Feb2015
+.. note::  This help document was last changed by Steve King, 01May2015

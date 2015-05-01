@@ -21,8 +21,8 @@ only been tested with beam profile data from Anton-Paar SAXSess*\ |TM|\
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-How To
--------
+Using the tool
+--------------
 
 1) Select *Slit Size Calculator* from the *Tool* menu on the SasView toolbar.
 
@@ -35,9 +35,9 @@ How To
    in the tool window.
 
 *NOTE! The beam profile file does not carry any information about the units of 
-the Q data. This calculator assumes the data has units of 1/\ |Ang| . If the 
+the Q data. This calculator assumes the data has units of 1/\ |Ang|\ . If the
 data is not in these units it must be manually converted beforehand.*
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 19Feb2015
+.. note::  This help document was last changed by Steve King, 01May2015

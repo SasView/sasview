@@ -13,23 +13,18 @@
 .. |equiv| unicode:: U+2261
 .. |noteql| unicode:: U+2260
 
-Generic Scattering Calculator Tool
-==================================
+Generic SANS Calculator Tool
+============================
 
-Nuclear_Scattering_
+Description
+-----------
 
-Magnetic_Scattering_Polarisation_
+This tool attempts to simulate the SANS expected from a specified
+shape/structure or scattering length density profile. The tool can
+handle both nuclear and magnetic contributions to the scattering.
 
-Using_the_SAS_Calculator_GUI_
-
-Using_PDB_Data_
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-.. _Nuclear_Scattering:
-
-Nuclear Scattering
-------------------
+Theory
+------
 
 In general, a particle with a volume *V* can be described by an ensemble 
 containing *N* 3-dimensional rectangular pixels where each pixel is much 
@@ -63,10 +58,8 @@ The scattering length density (SLD) of each pixel, where the SLD is uniform, is
 a combination of the nuclear and magnetic SLDs and depends on the spin states 
 of the neutrons as follows.
 
-.. _Magnetic_Scattering_Polarisation:
-
-Magnetic Scattering & Polarisation
-----------------------------------
+Magnetic Scattering
+^^^^^^^^^^^^^^^^^^^
 
 For magnetic scattering, only the magnetization component, *M*\ :sub:`perp`\ , 
 perpendicular to the scattering vector *Q* contributes to the magnetic 
@@ -124,10 +117,8 @@ components of the magnetisation vector in the laboratory xyz frame.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Using_the_SAS_Calculator_GUI:
-
-Using the SAS Calculator GUI
-----------------------------
+Using the tool
+--------------
 
 .. image:: gen_gui_help.bmp
 
@@ -151,12 +142,10 @@ is taken account.*
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Using_PDB_Data:
+Using PDB/OMF or SLD files
+--------------------------
 
-Using PDB Data
---------------
-
-The SAS Calculator tool can read some PDB, OMF or SLD files but ignores 
+The SANS Calculator tool can read some PDB, OMF or SLD files but ignores
 polarized/magnetic scattering when doing so, thus related parameters such as 
 *Up_frac_in*, etc, will be ignored.
 
@@ -174,4 +163,4 @@ for further use.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 19Feb2015
+.. note::  This help document was last changed by Steve King, 01May2015

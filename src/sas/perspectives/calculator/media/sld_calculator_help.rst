@@ -11,19 +11,17 @@ SLD Calculator Tool
 Description
 -----------
 
-The neutron scattering length density is defined as
+The neutron scattering length density (SLD) is defined as
 
   SLD = (b_c1 + b_c2 + ... + b_cn) / Vm
 
-where 
-
-b_ci is the bound coherent scattering length of ith of n atoms in a molecule 
+where b_ci is the bound coherent scattering length of ith of n atoms in a molecule
 with the molecular volume Vm
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-How to Format the Compound Name
--------------------------------
+Specifying the Compound Name
+----------------------------
 
 To calculate scattering length densities enter the empirical formula of a 
 compound and its mass density and click "Calculate".
@@ -56,5 +54,5 @@ TIPS!
    
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 19Feb2015
+.. note::  This help document was last changed by Steve King, 01May2015
 

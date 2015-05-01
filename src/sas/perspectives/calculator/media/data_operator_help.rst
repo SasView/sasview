@@ -17,8 +17,8 @@ value(s) must match with each other UNLESS using the 'append' operator.*
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-How To
-------
+Using the tool
+--------------
 
 1) Enure you have loaded data into the *Data Explorer* (see :ref:`Loading_data`).
 
@@ -52,4 +52,4 @@ window.*
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 18Feb2015 
+.. note::  This help document was last changed by Steve King, 01May2015

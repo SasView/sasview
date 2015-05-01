@@ -3,32 +3,10 @@
 .. This is a port of the original SasView html help file to ReSTructured text
 .. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
 
+.. _Loading_data:
+
 Loading Data
 ============
-
-Help is available on:
-
-The_data_explorer_
-
-Loading_data_
-
-The_handy_menu_
-
-Activating_data_
-
-Removing_data_
-
-Creating_a_new_plot_
-
-Appending_plots_to_a_graph_
-
-Freezing_the_theory_
-
-Sending_data_to_applications_
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-.. _The_data_explorer:
 
 The data explorer
 -----------------
@@ -45,8 +23,6 @@ to the current active analysis perspective, if possible. When* Data Explorer *is
 shown, data go first to the* Data Explorer.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-.. _Loading_data:
 
 Loading data
 ------------
@@ -66,8 +42,6 @@ The name of each loaded file will be listed in the *Data Explorer*. Clicking the
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _The_handy_menu:
-
 The handy menu
 --------------
 
@@ -78,8 +52,6 @@ Right-clicking on a loaded dataset (or model calculation, what SasView calls a
 .. image:: hand_menu.png
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-.. _Activating_data:
 
 Activating data
 ---------------
@@ -94,8 +66,6 @@ activate or deactivate multiple data sets in one go.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Removing_data:
-
 Removing data
 -------------
 
@@ -106,8 +76,6 @@ selected data sets.*
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Creating_a_new_plot:
-
 Creating a new plot
 -------------------
 
@@ -115,8 +83,6 @@ Click on the *New Plot* button to create a new plot panel where the currently
 selected data will be plotted.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-.. _Appending_plots_to_a_graph:
 
 Appending plots to a graph
 --------------------------
@@ -135,8 +101,6 @@ disabled.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Freezing_the_theory:
-
 Freezing the theory
 -------------------
 
@@ -146,8 +110,6 @@ The *Freeze Theory* button generates data from the selected theory.
 *the Data panel.*
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-.. _Sending_data_to_applications:
 
 Sending data to applications
 ----------------------------
@@ -164,4 +126,4 @@ option on the menu bar.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 30Apr2015
+.. note::  This help document was last changed by Steve King, 01May2015

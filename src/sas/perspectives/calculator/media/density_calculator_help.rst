@@ -15,8 +15,8 @@ should be provided.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-How To
-------
+Using the tool
+--------------
 
 1) Select *Density/Volume Calculator* from the *Tool* menu on the SasView toolbar.
 
@@ -32,4 +32,4 @@ How To
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 18Feb2015
+.. note::  This help document was last changed by Steve King, 01May2015

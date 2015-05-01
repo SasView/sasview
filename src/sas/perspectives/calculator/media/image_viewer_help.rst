@@ -23,8 +23,8 @@ The supported input image formats are:
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-How To
-------
+Using the tool
+--------------
 
 1) Select *Image Viewer* from the *Tool* menu on the SasView toolbar.
 
@@ -52,4 +52,4 @@ How To
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 18Feb2015
+.. note::  This help document was last changed by Steve King, 01May2015

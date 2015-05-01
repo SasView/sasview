@@ -10,46 +10,8 @@
 Plotting Data/Models
 ====================
 
-Help is available on:
-
-Graph_window_options_
-
-Dataset_menu_options_
-
-2D_data_averaging_
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-.. _Graph_window_options:
-
 Graph window options
 --------------------
-
-Invoking_the_graph_menu_
-
-How_to_Hide-Show-Delete_a_graph_
-
-Dragging_a_plot_
-
-Zooming_In-Out_on_a_plot_
-
-Saving_a_plot_image_
-
-Printing_a_plot_
-
-Resetting_the_graph_
-
-Modifying_the_graph_
-
-Changing_scales_
-
-Toggling_scales_
-
-2D_color_maps_
-
-Getting_data_coordinates_
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 .. _Invoking_the_graph_menu:
 
@@ -59,8 +21,6 @@ Invoking the graph menu
 To invoke the *Graph Menu* simply right-click on a data/theory plot, or click 
 the *Graph Menu* (bullet list) icon in the toolbar at the bottom of the plot. 
 Then select a menu item.
-
-.. _How_to_Hide-Show-Delete_a_graph:
 
 How to Hide-Show-Delete a graph
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -83,8 +43,6 @@ plot window.
 *NOTE! If a residuals graph (when fitting data) is hidden, it will not show up 
 after computation.*
 
-.. _Dragging_a_plot:
-
 Dragging a plot
 ^^^^^^^^^^^^^^^
 
@@ -94,8 +52,6 @@ a hand. Then left-click and drag the plot around. The axis values will adjust
 accordingly.
  
 To disable dragging mode, unselect the *crossed arrows* icon on the toolbar.
-
-.. _Zooming_In-Out_on_a_plot:
 
 Zooming In-Out on a plot
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -116,8 +72,6 @@ on one axis and scroll the wheel to zoom in/out on just that axis.*
 
 To return to the original view of the data, click the the *Reset* (home) icon 
 in the toolbar at the bottom of the plot (see Resetting_the_graph_ for further details).
-
-.. _Saving_a_plot_image:
 
 Saving a plot image
 ^^^^^^^^^^^^^^^^^^^
@@ -142,8 +96,6 @@ The currently supported image types are:
 *  SVG/SVGA (scalable vector graphics)
 *  TIF/TIFF (tagged iamge file)
 
-.. _Printing_a_plot:
-
 Printing a plot
 ^^^^^^^^^^^^^^^
 
@@ -159,8 +111,6 @@ To reset the axis range of a graph to its initial values select *Reset Graph
 Range* on the *Graph Menu* (see Invoking_the_graph_menu_). Alternatively, use
 the *Reset* (home) icon in the toolbar at the bottom of the plot.
 
-.. _Modifying_the_graph:
-
 Modifying the graph
 ^^^^^^^^^^^^^^^^^^^
 
@@ -174,8 +124,6 @@ make some custom modifications to plots, including:
 *  changing the axis legend label font & font colour
 *  adding/removing a text string
 *  adding a grid overlay
-
-.. _Changing_scales:
 
 Changing scales
 ^^^^^^^^^^^^^^^
@@ -202,8 +150,6 @@ For properly corrected and scaled data, these SAS transformations can be used
 to estimate, for example, Rg, rod diameter, or SANS incoherent background 
 levels, via a linear fit (see Making_a_linear_fit_).
 
-.. _Toggling_scales:
-
 Toggling scales
 ^^^^^^^^^^^^^^^
 
@@ -213,18 +159,14 @@ From the *Graph Menu* (see Invoking_the_graph_menu_) select *Toggle Linear/Log
 Scale* to switch between a linear to log intensity scale. The type of scale 
 selected is written alongside the colour scale.
 
-.. _2D_color_maps:
-
 2D color maps
 ^^^^^^^^^^^^^
 
 This menu option is only available with 2D data.
 
-From the *Graph Menu* (see Invoking_the_Graph_Menu_) select *2D Color Map* to 
+From the *Graph Menu* (see Invoking_the_graph_menu_) select *2D Color Map* to
 choose a different color scale for the image and/or change the maximum or 
 minimum limits of the scale.
-
-.. _Getting_data_coordinates:
 
 Getting data coordinates
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -234,26 +176,8 @@ displayed in the status bar at the very bottom-left of the SasView window.
  
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Dataset_menu_options:
-
 Dataset menu options
 --------------------
-
-Invoking_the_dataset_menu_
-
-Getting_data_info_
-
-Saving_data_
-
-Making_a_linear_fit_
-
-Removing_data_from_the_plot_
-
-Show-Hide_error_bars_
-
-Modify_plot_properties_
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 .. _Invoking_the_dataset_menu:
 
@@ -263,16 +187,12 @@ Invoking the dataset menu
 From the *Graph Menu* (see Invoking_the_graph_menu_) highlight a plotted
 dataset.
 
-.. _Getting_data_info:
-
 Getting data info
 ^^^^^^^^^^^^^^^^^
 
 In the *Dataset Menu* (see Invoking_the_dataset_menu_), highlight a data set
 and select *DataInfo* to bring up a data information dialog panel for that 
 data set.
-
-.. _Saving_data:
 
 Saving data
 ^^^^^^^^^^^
@@ -282,9 +202,9 @@ a File* (if 1D data) or *Save as a file(DAT)* (if 2D data). A save dialog will
 appear.
 
 1D data can be saved in either ASCII text (.TXT) or CanSAS/SASXML (.XML) 
-formats (see :ref:`1D_Formats`).
+formats (see :ref:`Formats`).
 
-2D data can only be saved in the NIST 2D format (.DAT) (see :ref:`2D_Formats`).
+2D data can only be saved in the NIST 2D format (.DAT) (see :ref:`Formats`).
 
 .. _Making_a_linear_fit:
 
@@ -306,8 +226,6 @@ The following figure shows an example of a Guinier analysis using this option
 
 .. image:: guinier_fit.png
 
-.. _Removing_data_from_the_plot:
-
 Removing data from the plot
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -316,16 +234,12 @@ selected data will be removed from the plot.
 
 *NOTE! This action cannot be undone.*
 
-.. _Show-Hide_error_bars:
-
 Show-Hide error bars
 ^^^^^^^^^^^^^^^^^^^^
 
 In the *Dataset Menu* (see Invoking_the_dataset_menu_), select *Show Error Bar*
 or *Hide Error Bar* to switch between showing/hiding the errors associated 
 with the chosen dataset. 
-
-.. _Modify_plot_properties:
 
 Modify plot properties
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -336,32 +250,8 @@ chosen dataset, or to change the dataset label that appears on the plot.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _2D_data_averaging:
-
 2D data averaging
 -----------------
-
-Purpose_
-
-How_to_average_
-
-Unmasked_circular_average_
-
-Masked_circular_average_
-
-Sector_average_
-
-Annular_average_
-
-Box_sum_
-
-Box_averaging_in_Qx_
-
-Box_averaging_in_Qy_
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-.. _Purpose:
 
 Purpose
 ^^^^^^^
@@ -371,8 +261,6 @@ This feature is only available with 2D data.
 2D data averaging allows you to perform different types of averages on your 
 data. The region to be averaged is displayed in the plot window and its limits 
 can be modified by dragging the boundaries around.
-
-.. _How_to_average:
 
 How to average
 ^^^^^^^^^^^^^^
@@ -410,23 +298,17 @@ order to display the average numerically, rather than graphically.
 
 To remove a 'slicer', bring back the *Dataset menu* and select *Clear Slicer*.
 
-.. _Unmasked_circular_average:
-
 Unmasked circular average
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This operation will perform an average in constant Q-rings around the (x,y) 
 pixel location of the beam center.
 
-.. _Masked_circular_average:
-
 Masked circular average
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 This operation is the same as 'Unmasked Circular Average' except that any 
 masked region is excluded.
-
-.. _Sector_average:
 
 Sector average [Q View]
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -435,8 +317,6 @@ This operation averages in constant Q-arcs.
 
 The width of the sector is specified in degrees (+/- |delta|\|phi|\) each side 
 of the central angle (|phi|\).
-
-.. _Annular_average:
 
 Annular average [|phi| View]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -447,8 +327,6 @@ and averaged over a specified number of pixels.
 The data is returned as a function of angle (|phi|\) in degrees with zero 
 degrees at the 3 O'clock position.
 
-.. _Box_sum:
-
 Box sum
 ^^^^^^^
 
@@ -456,8 +334,6 @@ This operation performs a sum of counts in a 2D region of interest.
 
 When editing the slicer parameters, the user can enter the length and the width 
 the rectangular slicer and the coordinates of the center of the rectangle.
-
-.. _Box_averaging_in_Qx:
 
 Box Averaging in Qx
 ^^^^^^^^^^^^^^^^^^^
@@ -468,8 +344,6 @@ When editing the slicer parameters, the user can control the length and the
 width the rectangular slicer. The averaged output is calculated from constant 
 bins with rectangular shape. The resultant Q values are nominal values, that 
 is, the central value of each bin on the x-axis.
-
-.. _Box_averaging_in_Qy:
 
 Box Averaging in Qy
 ^^^^^^^^^^^^^^^^^^^
@@ -483,4 +357,4 @@ is, the central value of each bin on the x-axis.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 30Apr2015
+.. note::  This help document was last changed by Steve King, 01May2015

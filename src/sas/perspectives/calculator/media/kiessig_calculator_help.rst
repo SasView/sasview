@@ -20,13 +20,13 @@ using the relation
   
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-How To
-------
+Using the tool
+--------------
 
 To get a rough thickness or particle size, simply type the fringe or peak 
 position (in units of 1/|Ang|\) and click on the *Compute* button.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 18Feb2015
+.. note::  This help document was last changed by Steve King, 01May2015
 
