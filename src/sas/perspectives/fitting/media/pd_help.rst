@@ -10,6 +10,7 @@
 .. |phi| unicode:: U+03C6
 .. |theta| unicode:: U+03B8
 .. |chi| unicode:: U+03C7
+.. |Ang| unicode:: U+212B
 
 .. |inlineimage004| image:: sm_image004.gif
 .. |inlineimage005| image:: sm_image005.gif
@@ -27,47 +28,51 @@
 Polydispersity Distributions
 ----------------------------
 
-Calculates the form factor for a polydisperse and/or angular population of 
-particles with uniform scattering length density. The resultant form factor 
-is normalized by the average particle volume such that 
+With some models SasView can calculate the average form factor for a population
+of particles that exhibit size and/or orientational polydispersity. The resultant
+form factor is normalized by the average particle volume such that
 
-P(q) = scale*\<F*F\>/Vol + bkg
+*P(q) = scale* * \ <F*\F> / *V + bkg*
 
-where F is the scattering amplitude and the\<\>denote an average over the size 
-distribution.  Users should use PD (polydispersity: this definition is 
-different from the typical definition in polymer science) for a size 
-distribution and Sigma for an angular distribution (see below).
+where F is the scattering amplitude and the \<\> denote an average over the size
+distribution.
 
-Note that this computation is very time intensive thus applying polydispersion/
-angular distribution for more than one parameters or increasing Npts values
-might need extensive patience to complete the computation. Also note that 
-even though it is time consuming, it is safer to have larger values of Npts 
-and Nsigmas.
+Users should note that this computation is very intensive. Applying polydispersion
+to multiple parameters at the same time, or increasing the number of *Npts* values
+in the fit, will require patience! However, the calculations are generally more
+robust with more data points or more angles.
 
-The following five distribution functions are provided
+SasView uses the term *PD* for a size distribution (and not to be confused with a
+molecular weight distributions in polymer science) and the term *Sigma* for an
+angular distribution.
+
+The following five distribution functions are provided:
 
 *  *Rectangular Distribution*
-*  *Array Distribution*
 *  *Gaussian Distribution*
 *  *Lognormal Distribution*
 *  *Schulz Distribution*
+*  *Array Distribution*
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 Rectangular Distribution
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
+The Rectangular Distribution is defined as
+
 .. image:: pd_image001.png
 
-The xmean is the mean of the distribution, w is the half-width, and Norm is a 
-normalization factor which is determined during the numerical calculation. 
-Note that the Sigma and the half width *w*  are different.
+where *xmean* is the mean of the distribution, *w* is the half-width, and *Norm* is a
+normalization factor which is determined during the numerical calculation.
+
+Note that the standard deviation and the half width *w* are different!
 
 The standard deviation is
 
 .. image:: pd_image002.png
 
-The PD (polydispersity) is
+whilst the polydispersity is
 
 .. image:: pd_image003.png
 
@@ -75,39 +80,20 @@ The PD (polydispersity) is
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-Array Distribution
-^^^^^^^^^^^^^^^^^^
-
-This distribution is to be given by users as a txt file where the array 
-should be defined by two columns in the order of x and f(x) values. The f(x) 
-will be normalized by SasView during the computation.
-
-Example of an array in the file
-
-30        0.1
-32        0.3
-35        0.4
-36        0.5
-37        0.6
-39        0.7
-41        0.9
-
-We use only these array values in the computation, therefore the mean value 
-given in the control panel, for example â€˜radius = 60â€™, will be ignored.
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
 Gaussian Distribution
 ^^^^^^^^^^^^^^^^^^^^^
 
+The Gaussian Distribution is defined as
+
 .. image:: pd_image005.png
 
-The xmean is the mean of the distribution and Norm is a normalization factor 
+where *xmean* is the mean of the distribution and *Norm* is a normalization factor
 which is determined during the numerical calculation.
 
-The PD (polydispersity) is
+The polydispersity is
 
 .. image:: pd_image003.png
+
 
 .. image:: pd_image006.jpg
 
@@ -116,14 +102,18 @@ The PD (polydispersity) is
 Lognormal Distribution
 ^^^^^^^^^^^^^^^^^^^^^^
 
+The Lognormal Distribution is defined as
+
 .. image:: pd_image007.png
 
-The /mu/=ln(xmed), xmed is the median value of the distribution, and Norm is a 
-normalization factor which will be determined during the numerical calculation. 
-The median value is the value given in the size parameter in the control panel, 
-for example, â€œradius = 60â€�.
+where |mu|\ =ln(*xmed*), *xmed* is the median value of the distribution, and
+*Norm* is a normalization factor which will be determined during the numerical
+calculation.
 
-The PD (polydispersity) is given by /sigma/
+The median value for the distribution will be the value given for the respective
+size parameter in the *Fitting Perspective*, for example, radius = 60.
+
+The polydispersity is given by |sigma|
 
 .. image:: pd_image008.png
 
@@ -131,34 +121,81 @@ For the angular distribution
 
 .. image:: pd_image009.png
 
-The mean value is given by xmean=exp(/mu/+p2/2). The peak value is given by 
-xpeak=exp(/mu/-p2).
+The mean value is given by *xmean*\ =exp(|mu|\ +p\ :sup:`2`\ /2). The peak value
+is given by *xpeak*\ =exp(|mu|-p\ :sup:`2`\ ).
 
 .. image:: pd_image010.jpg
 
-This distribution function spreads more and the peak shifts to the left as the 
-p increases, requiring higher values of Nsigmas and Npts.
+This distribution function spreads more, and the peak shifts to the left, as *p*
+increases, requiring higher values of Nsigmas and Npts.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 Schulz Distribution
 ^^^^^^^^^^^^^^^^^^^
 
+The Schulz distribution is defined as
+
 .. image:: pd_image011.png
 
-The xmean is the mean of the distribution and Norm is a normalization factor
-which is determined during the numerical calculation.
+where *xmean* is the mean of the distribution and *Norm* is a normalization factor
+which is determined during the numerical calculation, and *z* is a measure of the
+width of the distribution such that
 
-The z = 1/p2â€“ 1.
+z = (1-p\ :sup:`2`\ ) / p\ :sup:`2`
 
-The PD (polydispersity) is
+The polydispersity is
 
 .. image:: pd_image012.png
 
-Note that the higher PD (polydispersity) might need higher values of Npts and 
-Nsigmas. For example, at PD = 0.7 and radisus = 60 A, Npts >= 160, and 
-Nsigmas >= 15 at least.
+Note that larger values of PD might need larger values of Npts and Nsigmas.
+For example, at PD=0.7 and radius=60 |Ang|, Npts>=160 and Nsigmas>=15 at least.
 
 .. image:: pd_image013.jpg
 
+For further information on the Schulz distribution see:
+M Kotlarchyk & S-H Chen, *J Chem Phys*, (1983), 79, 2461.
+
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+Array Distribution
+^^^^^^^^^^^^^^^^^^
+
+This user-definable distribution should be given as as a simple ASCII text file
+where the array is defined by two columns of numbers: *x* and *f(x)*. The *f(x)*
+will be normalized by SasView during the computation.
+
+Example of what an array distribution file should look like:
+
+====  =====
+ 30    0.1
+ 32    0.3
+ 35    0.4
+ 36    0.5
+ 37    0.6
+ 39    0.7
+ 41    0.9
+====  =====
+
+SasView only uses these array values during the computation, therefore any mean
+value of the parameter represented by *x* present in the *Fitting Perspective*
+will be ignored.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+Note about DLS polydispersity
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Many commercial Dynamic Light Scattering (DLS) instruments produce a size
+polydispersity parameter, sometimes even given the symbol *p*! This parameter is
+defined as the relative standard deviation coefficient of variation of the size
+distribution and is NOT the same as the polydispersity parameters in the Lognormal
+and Schulz distributions above (though they all related) except when the DLS
+polydispersity parameter is <0.13.
+
+For more information see:
+S King, C Washington & R Heenan, *Phys Chem Chem Phys*, (2005), 7, 143
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+.. note::  This help document was last changed by Steve King, 01May2015
