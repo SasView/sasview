@@ -35,11 +35,13 @@ Magnetic scattering is implemented in five (2D) models
 *  *CylinderModel*
 *  *ParallelepipedModel*
 
-In general, the scattering length density (SLD) in each regions where the 
-SLD (=/beta/) is uniform, is a combination of the nuclear and magnetic SLDs and 
-depends on the spin states of the neutrons as follows. For magnetic scattering, 
-only the magnetization component, *M*perp, perpendicular to the scattering 
-vector *Q* contributes to the the magnetic scattering length.
+In general, the scattering length density (SLD, = |beta|) in each region where the
+SLD is uniform, is a combination of the nuclear and magnetic SLDs and, for polarised
+neutrons, also depends on the spin states of the neutrons.
+
+For magnetic scattering, only the magnetization component, *M*\ :sub:`perp`,
+perpendicular to the scattering vector *Q* contributes to the the magnetic
+scattering length.
 
 .. image:: mag_vector.bmp
 
@@ -47,32 +49,31 @@ The magnetic scattering length density is then
 
 .. image:: dm_eq.gif
 
-where /gamma/ = -1.913 the gyromagnetic ratio, /mu/B is the Bohr magneton, r0 
-is the classical radius of electron, and */sigma/* is the Pauli spin. For 
-polarised neutron, the magnetic scattering is depending on the spin states. 
+where |gamma| = -1.913 is the gyromagnetic ratio, |mu|\ :sub:`B` is the
+Bohr magneton, *r*\ :sub:`0` is the classical radius of electron, and |sigma|
+is the Pauli spin.
 
-Let's consider that the incident neutrons are polarized parallel (+)/
-anti-parallel (-) to the x' axis (See both Figures above). The possible 
-out-coming states then are + and - states for both incident states
+Assuming that incident neutrons are polarized parallel (+) and anti-parallel (-)
+to the *x'* axis, the possible spin states after the sample are then
 
-Non-spin flips: (+ +) and (- -)
-Spin flips:     (+ -) and (- +)
+No spin-flips (+ +) and (- -)
+
+Spin-flips    (+ -) and (- +)
 
 .. image:: M_angles_pic.bmp
 
-Now, let's assume that the angles of the *Q*  vector and the spin-axis (x') 
-against x-axis are /phi/ and /theta/up, respectively (See Figure above). Then, 
-depending upon the polarisation (spin) state of neutrons, the scattering length 
-densities, including the nuclear scattering length density (/beta/N) are given 
-as, for non-spin-flips
+If the angles of the *Q* vector and the spin-axis (*x'*) to the *x*-axis are |phi|
+and |theta|\ :sub:`up`, respectively, then, depending on the spin state of the
+neutrons, the scattering length densities, including the nuclear scattering
+length density (|beta|\ :sub:`N`) are
 
 .. image:: sld1.gif
 
-for spin-flips
+when there are no spin-flips, and
 
 .. image:: sld2.gif
 
-where
+when there are, and
 
 .. image:: mxp.gif
 
@@ -84,9 +85,8 @@ where
 
 .. image:: mqy.gif
 
-Here, the M0x, M0y and M0z are the x, y and z components of the magnetization 
-vector given in the xyz lab frame. The angles of the magnetization, /theta/M 
-and /phi/M as defined in the Figure (above)
+Here, *M*\ :sub:`0x`, *M*\ :sub:`0y` and *M*\ :sub:`0z` are the x, y and z components
+of the magnetization vector given in the laboratory xyz frame given by
 
 .. image:: m0x_eq.gif
 
@@ -94,15 +94,22 @@ and /phi/M as defined in the Figure (above)
 
 .. image:: m0z_eq.gif
 
-The user input parameters are M0_sld = DMM0, Up_theta = /theta/up, 
-M_theta = /theta/M, and M_phi = /phi/M. The 'Up_frac_i' and 'Up_frac_f' are 
-the ratio
+and the magnetization angles |theta|\ :sub:`M` and |phi|\ :sub:`M` are defined in
+the figure above.
 
-(spin up)/(spin up + spin down)
+The user input parameters are:
 
-neutrons before the sample and at the analyzer, respectively.
+===========   ================================================================
+ M0_sld        = *D*\ :sub:`M` *M*\ :sub:`0`
+ Up_theta      = |theta|\ :sub:`up`
+ M_theta       = |theta|\ :sub:`M`
+ M_phi         = |phi|\ :sub:`M`
+ Up_frac_i     = (spin up)/(spin up + spin down) neutrons *before* the sample
+ Up_frac_f     = (spin up)/(spin up + spin down) neutrons *after* the sample
+===========   ================================================================
 
-*Note:* The values of the 'Up_frac_i' and 'Up_frac_f' must be in the range
-between 0 and 1.
+*Note:* The values of the 'Up_frac_i' and 'Up_frac_f' must be in the range 0 to 1.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+.. note::  This help document was last changed by Steve King, 02May2015
