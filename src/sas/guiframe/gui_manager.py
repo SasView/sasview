@@ -1294,7 +1294,6 @@ class ViewerFrame(PARENT_FRAME):
             or self._menubar.GetMenuCount() == 0:
             return
         #replace or add a new menu for the current plugin
-
         pos = self._menubar.FindMenu(str(self._applications_menu_name))
         if pos != -1:
             menu_list = self._current_perspective.populate_menu(self)
@@ -1307,16 +1306,19 @@ class ViewerFrame(PARENT_FRAME):
                 self._applications_menu_name = None
             #get the position of the menu when it first added
             self._applications_menu_pos = pos
-
         else:
             menu_list = self._current_perspective.populate_menu(self)
             if menu_list:
                 for (menu, name) in menu_list:
                     if self._applications_menu_pos == -1:
-                        self._menubar.Append(menu, name)
+                        # Find the Help position and insert just before it if possible
+                        help_pos = self._menubar.FindMenu("Help")
+                        if help_pos == -1:
+                            self._menubar.Append(menu, name)
+                        else:
+                            self._menubar.Insert(help_pos-1, menu, name)
                     else:
-                        self._menubar.Insert(self._applications_menu_pos,
-                                             menu, name)
+                        self._menubar.Insert(self._applications_menu_pos, menu, name)
                     self._applications_menu_name = name
 
     def _add_help_menu(self):

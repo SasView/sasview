@@ -79,8 +79,6 @@ class Plugin(PluginBase):
         # Start with a good default
         self.elapsed = 0.022
         self.fit_panel = None
-        #Flag to let the plug-in know that it is running stand alone
-        self.standalone = True
         ## dictionary of page closed and id
         self.closed_page_dict = {}
         ## Relative error desired in the sum of squares (float)
