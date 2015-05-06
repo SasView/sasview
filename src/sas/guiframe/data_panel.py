@@ -1000,6 +1000,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         set the plot panel on focus
         """
+        if self.cb_plotpanel and self.cb_plotpanel.IsBeingDeleted():
+            return
         for _, value in self.parent.plot_panels.iteritems():
             name_plot_panel = str(value.window_caption)
             if name_plot_panel not in self.cb_plotpanel.GetItems():
