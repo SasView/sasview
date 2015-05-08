@@ -50,8 +50,8 @@ clean:
 	rm -rf $(BUILDDIR)/*
 
 stubs:
-	rm -rf source/api
-	sphinx-apidoc -o source/api -d 8 ../../src
+	rm -rf source/dev/api
+	sphinx-apidoc -o source/dev/api -d 8 ../../src
 	
 html: stubs
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
