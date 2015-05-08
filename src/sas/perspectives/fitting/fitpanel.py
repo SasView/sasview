@@ -297,7 +297,7 @@ class FitPanel(nb, PanelBase):
         copy a dictionary of model into its own dictionary
 
         :param m_dict: dictionnary made of model name as key and model class
-        as value
+            as value
         """
         self.model_list_box = dict
 

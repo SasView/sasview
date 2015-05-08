@@ -1,6 +1,4 @@
-"""    
- Provide F(x) = K*1/(4*pi*Lb*(alpha)^(2))*(q^(2)+k2)/(1+(r02)^(2))*(q^(2)+k2)\
-                       *(q^(2)-(12*h*C/b^(2)))
+"""
  BEPolyelectrolyte as a BaseComponent model
 """
 
@@ -11,16 +9,17 @@ class BEPolyelectrolyte(BaseComponent):
     """
         Class that evaluates a BEPolyelectrolyte.
         
-        F(x) = K*1/(4*pi*Lb*(alpha)^(2))*(q^(2)+k2)/(1+(r02)^(2))*(q^(2)+k2)\
-                       *(q^(2)-(12*h*C/b^(2))) 
+        F(x) = K/(4 pi Lb (alpha)^(2)) (q^(2)+k2)/(1+(r02)^(2)) (q^(2)+k2)\
+                        (q^(2)-(12 h C/b^(2)))
         
-        The model has Eight parameters: 
-            K        =  Constrast factor of the polymer
-            Lb       =  Bjerrum length
-            H        =  virial parameter
-            B        =  monomer length
-            Cs       =  Concentration of monovalent salt 
-            alpha    =  ionazation degree 
+        The model has Eight parameters::
+
+            K        = Constrast factor of the polymer
+            Lb       = Bjerrum length
+            H        = virial parameter
+            B        = monomer length
+            Cs       = Concentration of monovalent salt
+            alpha    = ionazation degree
             C        = polymer molar concentration
             bkd      = background
     """
@@ -74,13 +73,13 @@ class BEPolyelectrolyte(BaseComponent):
     def _BEPoly(self, x):
         """
             Evaluate  
-            F(x) = K*1/(4*pi*Lb*(alpha)^(2))*(q^(2)+k2)/(1+(r02)^(2))
-                *(q^(2)+k2)*(q^(2)-(12*h*C/b^(2)))
+            F(x) = K 1/(4 pi Lb (alpha)^(2)) (q^(2)+k2)/(1+(r02)^(2))
+                 (q^(2)+k2) (q^(2)-(12 h C/b^(2)))
         
             has 3 internal parameters :
-                   The inverse Debye Length: K2 = 4*pi*Lb*(2*Cs+alpha*C)
-                   r02 =1/alpha/Ca^(0.5)*(B/(48*pi*Lb)^(0.5))
-                   Ca = C*6.022136e-4
+                   The inverse Debye Length: K2 = 4 pi Lb (2 Cs+alpha C)
+                   r02 =1/alpha/Ca^(0.5) (B/(48 pi Lb)^(0.5))
+                   Ca = 6.022136e-4 C
         """
         Ca = self.params['c'] * 6.022136e-4
         #remove singulars

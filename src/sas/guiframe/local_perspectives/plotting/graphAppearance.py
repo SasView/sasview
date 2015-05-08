@@ -4,16 +4,10 @@
 
 Dialog for general graph appearance
 
+This software was developed by Institut Laue-Langevin as part of
+Distributed Data Analysis of Neutron Scattering Experiments (DANSE).
 
-/**
-    This software was developed by Institut Laue-Langevin as part of
-    Distributed Data Analysis of Neutron Scattering Experiments (DANSE).
-
-    Copyright 2012 Institut Laue-Langevin
-
-**/
-
-
+Copyright 2012 Institut Laue-Langevin
 """
 
 import wx

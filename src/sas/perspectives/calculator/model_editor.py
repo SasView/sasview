@@ -88,7 +88,8 @@ class TextDialog(wx.Dialog):
     but if a file is dropped in the plugin directory from outside this class
     will create a file that cannot be compiled.  Should add the check to
     the write method or to the on_modelx method.
-          - PDB:April 5, 2015
+
+    - PDB:April 5, 2015
     """
     def __init__(self, parent=None, base=None, id=None, title='',
                  model_list=[], plugin_dir=None):

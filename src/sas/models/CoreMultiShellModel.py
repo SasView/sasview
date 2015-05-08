@@ -169,8 +169,8 @@ class CoreMultiShellModel(BaseComponent):
         Get SLD profile 
         
         : return: (r, beta) where r is a list of radius of the transition points
-                beta is a list of the corresponding SLD values 
-        : Note: This works only for func_shell# = 2.
+            beta is a list of the corresponding SLD values
+        : Note: This works only for func_shell num = 2.
         """
         r = []
         beta = []

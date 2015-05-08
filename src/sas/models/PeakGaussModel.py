@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 """ 
-    Model describes a Gaussian shaped peak including a flat background
-    Provide F(q) = scale*exp( -1/2 *[(q-q0)/B]^2 )+ background
-    PeakGaussModel function as a BaseComponent model
+PeakGaussModel function as a BaseComponent model
 """
 
 from sas.models.BaseComponent import BaseComponent
@@ -11,9 +9,9 @@ import math
 class PeakGaussModel(BaseComponent):
    
     """
-        Class that evaluates a gaussian  shaped peak.
+        Class that evaluates a gaussian shaped peak with a flat background.
         
-        F(q) = scale*exp( -1/2 *[(q-qo)/B]^2 )+ background
+        F(q) = scale exp( -1/2 [(q-qo)/B]^2 )+ background
         
         The model has three parameters: 
             scale     =  scale
@@ -55,7 +53,7 @@ class PeakGaussModel(BaseComponent):
             
     def _PeakGauss(self, x):
         """
-            Evaluate  F(x) = scale*exp( -1/2 *[(x-q0)/B]^2 )+ background
+            Evaluate  F(x) = scale exp( -1/2 [(x-q0)/B]^2 )+ background
            
         """
         return self.params['scale']*math.exp(-1/2 *\

@@ -24,7 +24,7 @@ class FitProblemComponent(object):
     def enable_smearing(self, flag=False):
         """
         :param flag: bool.When flag is 1 get the computer smear value. When
-        flag is 0 ingore smear value.
+            flag is 0 ingore smear value.
         """
 
     def get_smearer(self):
@@ -75,9 +75,9 @@ class FitProblemComponent(object):
 
     def set_fit_data(self, data):
         """
-         Store of list of data and create  by create new fitproblem of each data
-         id , if there was existing information about model, this information
-         get copy to the new fitproblem
+        Store of list of data and create  by create new fitproblem of each data
+        id, if there was existing information about model, this information
+        get copy to the new fitproblem
         :param data: list of data selected
         """
 
@@ -201,7 +201,7 @@ class FitProblemDictionary(FitProblemComponent, dict):
     def enable_smearing(self, flag=False, fid=None):
         """
         :param flag: bool.When flag is 1 get the computer smear value. When
-        flag is 0 ingore smear value.
+            flag is 0 ingore smear value.
         """
         self._smear_on = flag
         if fid is None:
@@ -345,8 +345,7 @@ class FitProblemDictionary(FitProblemComponent, dict):
     def get_fit_data(self, fid):
         """
         return data for the given fitproblem id
-        :param fid: is key representing a fitproblem. usually extract from data
-                    id
+        :param fid: key representing a fitproblem, usually extract from data id
         """
         if fid in self.iterkeys():
             return self[fid].get_fit_data()
@@ -530,7 +529,7 @@ class FitProblem(FitProblemComponent):
     def enable_smearing(self, flag=False):
         """
         :param flag: bool.When flag is 1 get the computer smear value. When
-        flag is 0 ingore smear value.
+            flag is 0 ingore smear value.
         """
         self.smearer_enable = flag
 

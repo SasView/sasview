@@ -3,12 +3,12 @@
 """
 Format values and uncertainties nicely for printing.
 
-:func:`format_uncertainty_pm`(v,err) produces the expanded format v +/- err.
+:func:`format_uncertainty_pm` produces the expanded format v +/- err.
 
-:func:`format_uncertainty_compact`(v,err) produces the compact format v(##),
+:func:`format_uncertainty_compact` produces the compact format v(##),
 where the number in parenthesis is the uncertainty in the last two digits of v.
 
-:func:`format_uncertainty`(v,err) uses the compact format by default, but this
+:func:`format_uncertainty` uses the compact format by default, but this
 can be changed to use the expanded +/- format by setting 
 format_uncertainty.compact to False.
     

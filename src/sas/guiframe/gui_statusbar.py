@@ -21,7 +21,6 @@ BUTTON_SIZE = 40
 STATUS_BAR_ICON_SIZE = 12
 CONSOLE_WIDTH = 500
 CONSOLE_HEIGHT = 300
-FRAME_ICON = wx.Icon(GUIFRAME_ICON.FRAME_ICON_PATH, wx.BITMAP_TYPE_ICO)
 
 if sys.platform.count("win32") > 0:
     FONT_VARIANT = 0
@@ -185,6 +184,8 @@ class StatusBar(wxStatusB):
                     self.frame.SetIcon(icon)
                 except:
                     try:
+                        FRAME_ICON = wx.Icon(GUIFRAME_ICON.FRAME_ICON_PATH,
+                                             wx.BITMAP_TYPE_ICO)
                         self.frame.SetIcon(FRAME_ICON)
                     except:
                         pass

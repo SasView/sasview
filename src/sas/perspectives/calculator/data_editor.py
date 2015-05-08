@@ -52,7 +52,7 @@ def load_error(error=None):
 class DataEditorPanel(wx.ScrolledWindow):
     """
     :param data: when not empty the class can
-                same information into a dat object
+        same information into a dat object
         and post event containing the changed data object to some other frame
     """
     def __init__(self, parent, data=[], *args, **kwds):

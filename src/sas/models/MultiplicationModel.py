@@ -4,8 +4,8 @@ from sas.models.BaseComponent import BaseComponent
 import copy
 #from sas.models.pluginmodel import Model1DPlugin
 class MultiplicationModel(BaseComponent):
-    """
-        Use for P(Q)*S(Q); function call must be in the order of P(Q) and then S(Q):
+    r"""
+        Use for P(Q)\*S(Q); function call must be in the order of P(Q) and then S(Q):
         The model parameters are combined from both models, P(Q) and S(Q), except 1) 'effect_radius' of S(Q)
         which will be calculated from P(Q) via calculate_ER(), 
         and 2) 'scale' in P model which is synchronized w/ volfraction in S 
@@ -108,7 +108,7 @@ class MultiplicationModel(BaseComponent):
         
         : return: (r, beta) where r is a list of radius of the transition points
                 beta is a list of the corresponding SLD values 
-        : Note: This works only for func_shell# = 2 (exp function).
+        : Note: This works only for func_shell num = 2 (exp function).
         """
         try:
             x, y = self.p_model.getProfile()

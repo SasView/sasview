@@ -569,9 +569,9 @@ class ViewerFrame(PARENT_FRAME):
 
     def on_batch_selection(self, event=None):
         """
-        :param event: contains parameter enable . when enable is set to True
-        the application is in Batch mode
-        else the application is default mode(single mode)
+        :param event: contains parameter enable. When enable is set to True
+            the application is in Batch mode otherwise the application is
+            in Single mode.
         """
         if event is not None:
             self.batch_on = event.enable
@@ -2897,7 +2897,7 @@ class ViewerFrame(PARENT_FRAME):
         Get pane Caption from window_name
 
         :param name: window_name in AuiPaneInfo
-        : return: AuiPaneInfo of the name
+        :return: AuiPaneInfo of the name
         """
         for panel in self.plot_panels.values():
             if panel.frame.GetTitle() == name:
