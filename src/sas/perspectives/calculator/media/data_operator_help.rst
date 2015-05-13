@@ -20,7 +20,7 @@ value(s) must match with each other UNLESS using the 'append' operator.*
 Using the tool
 --------------
 
-1) Enure you have loaded data into the *Data Explorer* (see :ref:`Loading_data`).
+1) Ensure you have loaded data into the *Data Explorer* (see :ref:`Loading_data`).
 
 2) Select *Data Operation* from the *Tool* menu on the SasView toolbar.
 
