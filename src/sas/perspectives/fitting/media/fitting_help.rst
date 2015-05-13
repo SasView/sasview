@@ -25,53 +25,233 @@
 Fitting Perspective
 ===================
 
-Preparing_to_fit_data_
-
-Single_Fit_
-
-Simultaneous_Fitting_
-
-Batch_Fitting_
-
-Model_Selection_
-
-Model_Category_Manager_
-
-Model_Functions_
-
-Custom_Model_Editor_
-
-Key_Combinations_
-
-Status_Bar_Help_
-
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-.. _Preparing_to_fit_data:
 
 Preparing to fit data
 ---------------------
 
 To fit some data you must first load some data, activate one or more data sets,
-then send those data sets to the fitting perspective.
+send those data sets to the fitting perspective, and select a model to fit to
+each data set.
 
-Instructions on how to do this are in the User Documentation section *Loading*
-*Data*.
+Instructions on how to load and activate data are in the User Documentation
+section :ref:`Loading_data`.
 
 SasView can fit data in one of three ways:
 
-*  in *Single* fit mode
-*  in *Simultaneous* fit mode
-*  in *Batch* fit mode
+*  in *Single* fit mode - individual data sets are fitted independently one-by-one
 
-These modes of operation are described below.
+*  in *Simultaneous* fit mode - multiple data sets are fitted simultaneously to
+the *same* model with/without constrained parameters (this might be useful, for
+example, if you have measured the same sample at different contrasts)
+
+*  in *Batch* fit mode - multiple data sets are fitted sequentially to the
+*same* model (this might be useful, for example, if you have performed a kinetic
+or time-resolved experiment and have *lots* of data sets!)
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Single_Fit:
+Selecting a model
+-----------------
 
-Single Fit
-----------
+By default, the models in SasView are grouped into five categories
+
+*  *Shapes* - models describing 'objects' (spheres, cylinders, etc)
+*  *Shape-Independent* - models describing structure in terms of density
+correlation functions, fractals, peaks, power laws, etc
+*  *Customized Models* - SasView-created (non-library) Python models
+*  *Uncategorised* - other models (for reflectivity, etc)
+*  *Structure Factor* - S(Q) models
+
+Use the *Category* drop-down menu to chose a category of model, then select
+a model from the drop-down menu beneath. You can decide your own model
+categorizations using the :ref:`Category_Manager`.
+
+Once you have selected a model you can read its help documentation by clicking
+on the *Description* button to the right.
+
+Show 1D/2D
+^^^^^^^^^^
+
+Models are normally fitted to 1D (ie, I(Q) vs Q) data sets, but some models in
+SasView can also be fitted to 2D (ie, I(Qx,Qy) vs Qx vs Qy) data sets.
+
+*NB: Magnetic scattering can only be fitted in SasView in 2D.*
+
+To activate 2D fitting mode, click the *Show 2D* button on the *Fit Page*. To
+return to 1D fitting model, click the same button (which will now say *Show 1D*).
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+Model Functions
+---------------
+
+For a complete list of all the models available in SasView, see the section
+:ref:`SasView_model_functions`.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+.. _Category_Manager:
+
+Category Manager
+----------------
+
+To change the model categorizations, click on the *Modify* button on the *Fit Page*.
+
+Our SAS models are, by default, classified into 5 categories; shapes,
+shape-independent, structure factor, and customized models, where these
+categories (except the customized models) can be reassigned, added, and
+removed using 'Category Manager'. Each models can also be enabled(shown)/
+disabled(hidden) from the category that they belong. The Category Manager
+panel is accessible from the model category 'Modify' button in the fitting
+panel or the 'View/Category Manager' menu in the menu bar (Fig. 1).
+
+1) Enable/Disable models: Check/uncheck the check boxes to enable/disable the
+models (Fig. 2).
+
+2) Change category: Highlight a model in the list by left-clicking and click
+the 'Modify' button. In the 'Change Category' panel, one can create/use a
+category for the model, then click the 'Add' button. In order to delete a
+category, select a category name and click the 'Remove Selected' button
+(Fig. 3).
+
+3) To apply the changes made, hit the OK button. Otherwise, click the 'Cancel'
+button (Fig. 2).
+
+.. image:: cat_fig0.bmp
+
+Fig.1
+
+.. image:: cat_fig1.bmp
+
+Fig.2
+
+.. image:: cat_fig2.bmp
+
+Fig.3
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+
+
+Change Model Parameters
+^^^^^^^^^^^^^^^^^^^^^^^
+
+To visualize model in a different window, from menu click on *Model*. Select
+a type of model and then the name of your model.A new window will appear with
+the plot of your model with default values. Change model's parameters on
+*model view*  tab and view the plotted model with its new parameters.
+
+Write your Own Model
+^^^^^^^^^^^^^^^^^^^^
+
+The custom model editors are provided from 'Fitting' menu in the menu bar.
+See 'Custom model editor' in the side menu on left. Advanced users can write
+your own model and save it (in .py format) into *plugin_models*  directory in
+.sasview of your home directory (eg., username\.sasview>\plugin_models). Your
+plugin model will be added into "<>Customized Models" on the next model
+selection.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+Custom Model Editor
+-------------------
+
+Description
+^^^^^^^^^^^
+
+This menu (Fitting/Edit Custom Model in the menu bar) interface is to provide
+you an easy way to write your own custom models. The changes in a model
+function are effective after it is re-selected from the combo-box menu.
+
+.. image:: edit_model_menu.bmp
+
+New
+---
+
+This option is used to make a new model. A model code generated by this option
+can be viewed and further modified by the 'Advanced' option below.
+
+.. image:: new_model.bmp
+
+Sum|Multi(p1,p2)
+^^^^^^^^^^^^^^^^
+
+This option create a new sum (or multiplication) model. Fill up the (sum
+model function) name and the description. The description will show up on
+details button in the application. Then select the p1 or p2 model for the
+sum/multi model, select an operator as necessary and click the Apply button
+for activation. Hit the 'Close' button when it's done.
+
+.. image:: sum_model.bmp
+
+Advanced
+^^^^^^^^
+
+The menu option shows all the files in the plugin_models folder. You can edit,
+modify, and save it. It is recommended to modify only the lines with arrow
+(-------). In the end of edit, 'Compile' and 'Run' from the menu bar to
+activate or to see the model working properly.
+
+Delete
+^^^^^^
+
+The menu option is to delete the custom models. Just select the file name to
+delete.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+Key Combinations
+----------------
+
+Copy & Paste
+^^^^^^^^^^^^
+
+To copy the parameter values in a Fit(Model) panel to the clipboard:
+
+*Ctrl(Cmd on MAC) + Left(Mouse)Click*  on the panel.
+
+To paste the parameter values to a Fit(Model)panel from the clipboard:
+
+*Ctrl(Cmd on MAC) + Shift + Left(Mouse)Click*  on the panel.
+
+If this operation is successful, it will say so in the info line at the
+bottom of the SasView window.
+
+Bookmark
+^^^^^^^^
+
+Bookmark of a fit-panel or model-panel status:
+
+*(Mouse)Right-Click*  and select the bookmark in the popup list.
+
+Graph Context Menu
+^^^^^^^^^^^^^^^^^^
+
+To get the graph context menu to print, copy, save data, (2D)average, etc.:
+
+*Locate the mouse point on the plot to highlight and *(Mouse) Right Click*
+to bring up the full menu.
+
+FTolerance (SciPy)
+^^^^^^^^^^^^^^^^^^
+
+To change the ftol value of the Scipy FitEngine (leastsq):
+
+First, make sure that the Fit panel has data and a model selected.
+
+*Ctrl(Cmd on MAC) + Shift + Alt + Right(Mouse)Click*  on the panel.
+
+Then, set up the value in the dialog panel.
+
+If this operation is successful, the new ftol value will be displayed in the
+info line at the bottom of the SV window.Note that increasing the ftol value
+may cause for the fitting to terminate with higher |chi| sq.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+Single Fit Mode
+---------------
 
 One of two fit-engines can be chosen from the Fitting menu bar. The Simple Fit-
 engine uses Scipy's leasqr and the Complex Fit-Engine is a custom optimizer 
@@ -88,10 +268,8 @@ updated.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-..  _Simultaneous_Fitting:
-
-Simultaneous Fitting
---------------------
+Simultaneous Fit Mode
+---------------------
 
 This fitting option enables to set a number of the constraints between the 
 parameters of fitting(s). It requires one or more FitPages with a data and a 
@@ -123,29 +301,11 @@ the FitPage to recalculate.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-..  _Batch_Fitting:
-
-Batch Fitting
--------------
-
-Batch_Fit_
-
-Batch_Window_
-
-Edit_Grid_
-
-Save_Grid_
-
-Open_Batch_Results_
-
-Plot_
-
-View_Column_Cell_
-
-.. _Batch_Fit:
+Batch Fit Mode
+--------------
 
 Batch Fit
----------
+^^^^^^^^^
 
 Create a *Batch Page* by selecting the *Batch* radio button on the DataExplorer
 (see figure below) and for a new control page select 'New FitPage' in the 
@@ -177,10 +337,8 @@ previous data fitting (if any), choose the 'Chain Fitting' option in the
 Fitting menubar, which will speed up the fitting especially when you have 
 lots of, and similar, data sets.
 
-.. _Batch_Window:
-
 Batch Window
-------------
+^^^^^^^^^^^^
 Batch Window provides an easy way to view the fit results, i.e., plot data, 
 fits, and residuals. Batch window will be automatically shown after a batch 
 fit is finished.
@@ -192,10 +350,8 @@ Figure 2).
 
 Figure 2: Edit Menu: 
 
-.. _Edit_Grid:
-
 Edit Grid
----------
+^^^^^^^^^
 
 Once a batch fit is completed, all fitted and fixed model parameters are 
 displayed to the current sheet of the batch window except the errors of the 
@@ -217,10 +373,8 @@ column in the grid.
 
 Figure 3: Edit Menu:
 
-.. _Save_Grid:
-
 Save Grid
----------
+^^^^^^^^^
 To save the current page on the batch window, select the *'File'*  menubar 
 item(see Figure 4), then choose the *'Save as'*  menu item to save it as a 
 .csv file.
@@ -232,10 +386,8 @@ reloading the saved file.
 Warning! To ensure accuracy of saved fit results, it is recommended to save 
 the current grid before modifying it .
 
-.. _Open_Batch_Results:
-
-Open Batch Results 
-------------------
+Open Batch Results
+^^^^^^^^^^^^^^^^^^
 
 Any *csv*  file can be opened in the grid by selecting the *'Open'*  under 
 the *'File'*  menu in the Grid Window(see Figure 4). All columns in the file 
@@ -246,10 +398,8 @@ available only when at least one column will be removed from the grid.
 
 Figure 4: MenuBar:
 
-.. _Plot:
-
 Plot
-----
+^^^^
 
 To *plot*  a column versus another, select one column at the time, click the 
 *'Add'*  button next to the text control of X/Y -axis *Selection Range*  to 
@@ -287,10 +437,8 @@ with valid entries for plotting to work. The dY-bar is optional (see Figure 5).
 
 Figure 5: Plotting
 
-.. _View_Column_Cell:
-
 View Column/Cell(s)
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 Select 1 or more cells from the same column, click the 'View Fits' button to 
 display available curves. 
@@ -311,258 +459,17 @@ Figure 6: View Fits
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-..  _Model_Selection:
-
-Model_Type_ 
-
-Change_Model_Parameters_
-
-Write_your_Own_Model_
-
-.. _Model_Type:
-
-Model Type
-----------
-
-Models are grouped into three classes
-
-*  *Shapes* 
-*  *Shape-Independent* 
-*  *Uncategorised*
-*  *Customized Models* 
-*  *Structure Factor*
-
-.. _Change_Model_Parameters:
-
-Change Model Parameters
------------------------
-
-To visualize model in a different window, from menu click on *Model*. Select 
-a type of model and then the name of your model.A new window will appear with 
-the plot of your model with default values. Change model's parameters on 
-*model view*  tab and view the plotted model with its new parameters.
-
-.. _Write_your_Own_Model:
-
-Write your Own Model
---------------------
-
-The custom model editors are provided from 'Fitting' menu in the menu bar. 
-See 'Custom model editor' in the side menu on left. Advanced users can write 
-your own model and save it (in .py format) into *plugin_models*  directory in 
-.sasview of your home directory (eg., username\.sasview>\plugin_models). Your 
-plugin model will be added into "<>Customized Models" on the next model 
-selection.
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-..  _Model_Category_Manager:
-
-Model Category Manager
-----------------------
-
-Our SAS models are, by default, classified into 5 categories; shapes, 
-shape-independent, structure factor, and customized models, where these 
-categories (except the customized models) can be reassigned, added, and 
-removed using 'Category Manager'. Each models can also be enabled(shown)/
-disabled(hidden) from the category that they belong. The Category Manager 
-panel is accessible from the model category 'Modify' button in the fitting 
-panel or the 'View/Category Manager' menu in the menu bar (Fig. 1).
-
-1) Enable/Disable models: Check/uncheck the check boxes to enable/disable the 
-models (Fig. 2).
-
-2) Change category: Highlight a model in the list by left-clicking and click 
-the 'Modify' button. In the 'Change Category' panel, one can create/use a 
-category for the model, then click the 'Add' button. In order to delete a 
-category, select a category name and click the 'Remove Selected' button 
-(Fig. 3).
-
-3) To apply the changes made, hit the OK button. Otherwise, click the 'Cancel' 
-button (Fig. 2).
-
-.. image:: cat_fig0.bmp
-
-Fig.1
-
-.. image:: cat_fig1.bmp
-
-Fig.2
-
-.. image:: cat_fig2.bmp
-
-Fig.3
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-..  _Model_Functions:
-
-Model Functions
----------------
-
-See *Model Documentation*.
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-..  _Custom_Model_Editor:
-
-Custom Model Editor
--------------------
-
-Description_ 
-
-New_
-
-Sum_Multi_p1_p2_
-
-Advanced_
-
-Delete_
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-.. _Description:
-
-Description
------------
-
-This menu (Fitting/Edit Custom Model in the menu bar) interface is to provide 
-you an easy way to write your own custom models. The changes in a model 
-function are effective after it is re-selected from the combo-box menu.
-
-.. image:: edit_model_menu.bmp
-
-.. _New:
-
-New
----
-
-This option is used to make a new model. A model code generated by this option 
-can be viewed and further modified by the 'Advanced' option below.
-
-.. image:: new_model.bmp
-
-.. _Sum_Multi_p1_p2:
-
-Sum|Multi(p1,p2)
-----------------
-
-This option create a new sum (or multiplication) model. Fill up the (sum 
-model function) name and the description. The description will show up on 
-details button in the application. Then select the p1 or p2 model for the 
-sum/multi model, select an operator as necessary and click the Apply button 
-for activation. Hit the 'Close' button when it's done.
-
-.. image:: sum_model.bmp
-
-.. _Advanced:
-
-Advanced
---------
-
-The menu option shows all the files in the plugin_models folder. You can edit, 
-modify, and save it. It is recommended to modify only the lines with arrow 
-(-------). In the end of edit, 'Compile' and 'Run' from the menu bar to
-activate or to see the model working properly.
-
-.. _Delete:
-
-Delete
-------
-
-The menu option is to delete the custom models. Just select the file name to 
-delete.
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-.. _Key_Combinations:
-
-Key Combinations
-----------------
-
-Copy_Paste_
-
-Bookmark_
-
-Graph_Context_Menu_
-
-FTolerance_
-
-.. _Copy_Paste:
-
-Copy & Paste
-------------
-
-To copy the parameter values in a Fit(Model) panel to the clipboard:
-
-*Ctrl(Cmd on MAC) + Left(Mouse)Click*  on the panel.
-
-To paste the parameter values to a Fit(Model)panel from the clipboard:
-
-*Ctrl(Cmd on MAC) + Shift + Left(Mouse)Click*  on the panel.
-
-If this operation is successful, it will say so in the info line at the 
-bottom of the SasView window.
-
-.. _Bookmark:
-
-Bookmark
---------
-
-Bookmark of a fit-panel or model-panel status:
-
-*(Mouse)Right-Click*  and select the bookmark in the popup list.
-
-.. _Graph_Context_Menu:
-
-Graph Context Menu
-------------------
-
-To get the graph context menu to print, copy, save data, (2D)average, etc.:
-
-*Locate the mouse point on the plot to highlight and *(Mouse) Right Click* 
-to bring up the full menu.
-
-.. _FTolerance: 
-
-FTolerance (SciPy)
-------------------
-
-To change the ftol value of the Scipy FitEngine (leastsq):
-
-First, make sure that the Fit panel has data and a model selected.
-
-*Ctrl(Cmd on MAC) + Shift + Alt + Right(Mouse)Click*  on the panel.
-
-Then, set up the value in the dialog panel.
-
-If this operation is successful, the new ftol value will be displayed in the 
-info line at the bottom of the SV window.Note that increasing the ftol value 
-may cause for the fitting to terminate with higher |chi| sq.
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-.. _Status_Bar_Help:
-
 Status Bar Help
----------------
-
-Message_Warning_Hint_ 
-
-Console_
-
-.. _Message_Warning_Hint:
+^^^^^^^^^^^^^^^
 
 Message/Warning/Hint
---------------------
+^^^^^^^^^^^^^^^^^^^^
 
 The status bar located at the bottom of the application frame, displays 
 messages, hints, warnings and errors.
 
-.. _Console:
-
 Console
--------
+^^^^^^^
 
 Select *light bulb/info icon*  button in the status bar at the bottom of the 
 application window to display available history. During a long task, the 
