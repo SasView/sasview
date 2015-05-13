@@ -77,6 +77,8 @@
 
 .. Actual document starts here...
 
+.. _SasView_model_functions:
+
 SasView Model Functions
 =======================
 
