@@ -254,8 +254,7 @@ optimisers:
 *  Nelder-Mead Simplex
 
 These optimisers form the *Bumps* package written by P Kienzle. For more information
-on each optimiser, see *Information on the SasView Optimisers* in the documentation
-for the :ref:`Fitting Perspective`.
+on each optimiser, see the :ref:`Fitting Documentation`.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -284,10 +283,23 @@ bottom of the SasView window.
 Bookmark
 ^^^^^^^^
 
-To *Bookmark* a *Fit Page* or model-panel status, either:
+To *Bookmark* a *Fit Page* either:
 
 *  Select a *Fit Page* and then click on *Bookmark* in the tool bar, or
 *  Right-click and select the *Bookmark* in the popup menu.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+Status Bar & Console
+--------------------
+
+The status bar is located at the bottom of the SasView window and displays
+messages, hints, warnings and errors.
+
+At the right-hand side of the status bar is a button marked *Console*. The *Console*
+displays available message history and some run-time traceback information.
+
+During a long task the *Console* can also be used to monitor the progress.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -497,23 +509,5 @@ data and fits.
 .. image:: view_button.bmp
 
 Figure 6: View Fits
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-Status Bar Help
-^^^^^^^^^^^^^^^
-
-Message/Warning/Hint
-^^^^^^^^^^^^^^^^^^^^
-
-The status bar located at the bottom of the application frame, displays 
-messages, hints, warnings and errors.
-
-Console
-^^^^^^^
-
-Select *light bulb/info icon*  button in the status bar at the bottom of the 
-application window to display available history. During a long task, the 
-console can also help users to understand the status in progressing.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
