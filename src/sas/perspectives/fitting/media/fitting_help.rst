@@ -238,6 +238,8 @@ It is recommended that existing plugin models be used as templates.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
+.. _Fitting_Options:
+
 Fitting Options
 ---------------
 
@@ -254,7 +256,7 @@ optimisers:
 *  Nelder-Mead Simplex
 
 These optimisers form the *Bumps* package written by P Kienzle. For more information
-on each optimiser, see the :ref:`Fitting Documentation`.
+on each optimiser, see the :ref:`Fitting_Documentation`.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -290,6 +292,8 @@ To *Bookmark* a *Fit Page* either:
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
+.. _Status_bar:
+
 Status Bar & Console
 --------------------
 
@@ -306,18 +310,48 @@ During a long task the *Console* can also be used to monitor the progress.
 Single Fit Mode
 ---------------
 
-One of two fit-engines can be chosen from the Fitting menu bar. The Simple Fit-
-engine uses Scipy's leasqr and the Complex Fit-Engine is a custom optimizer 
-that provides a better chance to find the global minimum of the |chi| 2 but that
-requires longer computation time. In order to set a data to a control panel 
-(FitPage), see the "DataLoader Help". Once a data set to the FiPage, select a 
-model from the combo box. The default parameters of the model will be display. 
-Set initial parameters if need. Check and uncheck parameters to fit/fix. Click 
-the *'Fit'*  button. When the fitting is finished, the resultant parameter 
-values will be displayed with the errors. If a error is missing, it generally 
-means that the corresponding parameter is not very depending on the model. The 
-chisq/Npt_fit and the plot associated with the fit operation will be also 
-updated.
+*NB: Before proceeding, ensure that the Single Mode radio button at the bottom of*
+*the Data Explorer is checked (see the section* :ref:`Loading_data` *).*
+
+When data is sent to the fitting perspective it is plotted in a graph window as
+markers.
+
+If a graph does not appear, or a graph window appears but is empty, then the data
+has not loaded correctly. Check to see if there is a message in the :ref:`Status_Bar`
+or in the *Console* window.
+
+Assuming the data has loaded correctly, when a model is selected a green model
+calculation (or what SasView calls a 'Theory') line will appear in the earlier graph
+window, and a second graph window will appear displaying the residuals (the
+difference between the experimental data and the theory) at the same X-data values.
+
+The objective of model-fitting is to find a *physically-plausible* model, and set
+of model parameters, that generate a theory that reproduces the experimental data
+and gives residual values as close to zero as possible.
+
+Change the default values of the model parameters by hand until the theory line
+starts to represent the experimental data. Then uncheck the tick boxes alongside
+all parameters *except* the 'background' and the 'scale'. Click the *Fit* button.
+SasView will optimise the values of the 'background' and 'scale' and also display
+the corresponding uncertainties on the optimised values.
+
+*NB: If no uncertainty is shown it generally means that the model is not very*
+*dependent on the corresponding parameter (or that one or more parameters are*
+*'correlated').*
+
+In the bottom left corner of the *Fit Page* is a box displaying the normalised value
+of the statistical |chi|\  :sup:`2` parameter returned by the optimiser.
+
+Now check the box for another model parameter and click *Fit* again. Repeat this
+process until most or all parameters are checked and have been optimised. As the
+fit of the theory to the experimental data improves the value of 'chi2/Npts' will
+decrease. A good model fit should easily produce values of 'chi2/Npts' that are
+close to zero, and certainly <100.
+
+SasView has a number of different optimisers (see the section :ref:`Fitting_Options`).
+The DREAM optimiser is the most sophisticated, but may not necessarily be the best
+option for fitting simple models. If uncertain, try the Levenberg-Marquardt optimiser
+initially.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 

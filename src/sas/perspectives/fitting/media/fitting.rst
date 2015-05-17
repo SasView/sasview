@@ -1,3 +1,5 @@
+.. _Fitting_Documentation:
+
 Fitting Documentation
 =====================
 
