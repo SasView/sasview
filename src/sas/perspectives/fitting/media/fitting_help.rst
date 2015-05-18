@@ -53,7 +53,7 @@ By default, the models in SasView are grouped into five categories
 
 *  *Shapes* - models describing 'objects' (spheres, cylinders, etc)
 *  *Shape-Independent* - models describing structure in terms of density correlation functions, fractals, peaks, power laws, etc
-*  *Customized Models* - SasView-created (non-library) Python models
+*  *Customized Models* - SasView- or User-created (non-library) Python models
 *  *Uncategorised* - other models (for reflectivity, etc)
 *  *Structure Factor* - S(Q) models
 
@@ -112,11 +112,11 @@ button. Then click *Done*.
 Showing/hiding models
 ^^^^^^^^^^^^^^^^^^^^^
 
-Use the *Enable All/Disable All* buttons and the check boxes beside each model to
+Use the *Enable All / Disable All* buttons and the check boxes beside each model to
 select the models to show/hide. To apply the selection, click *Ok*. Otherwise click
 *Cancel*.
 
-*NB: it may be necessary to change to a different category and then back again*
+*NB: It may be necessary to change to a different category and then back again*
 *before any changes take effect.*
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
@@ -136,8 +136,8 @@ Adding your own models
 
 There are currently two ways to add your own models to SasView:
 
-* using the :ref:`Custom_Model_Editor`
-* by :ref:`Writing_a_Plugin`
+* Using the :ref:`Custom_Model_Editor`
+* By :ref:`Writing_a_Plugin`
 
 *NB: Because of the way these options are implemented, it is not possible for them*
 *to use the polydispersity algorithms in SasView. Only models in the model library*
@@ -177,7 +177,7 @@ Sum|Multi(p1,p2)
 
 This option creates a custom model of the form
 
-Custom Model = scale_factor * (model1 +/* model2)
+Custom Model = scale_factor \* (model1 +/\* model2)
 
 In the *Easy Sum/Multi Editor* give the new custom model a function name and brief
 description (to appear under the *Details* button on the *Fit Page*). Then select
@@ -194,7 +194,7 @@ Advanced
 
 Selecting this option shows all the custom models in the plugin model folder
 
-C:\Users\[username]\.sasview\plugin_models - (on Windows)
+  *C:\\Users\\[username]\\.sasview\\plugin_models* - (on Windows)
 
 You can edit, modify, and save the Python code in any of these models using the
 *Advanced Custom Model Editor*.
@@ -229,7 +229,7 @@ Writing a Plugin
 Advanced users can write their own model in Python and save it to the the SasView
 *plugin_models* folder
 
-C:\Users\[username]\.sasview\plugin_models - (on Windows)
+  *C:\\Users\\[username]\\.sasview\\plugin_models* - (on Windows)
 
 in .py format. The next time SasView is started it will compile the plugin and add
 it to the list of *Customized Models*.
