@@ -10,6 +10,10 @@
 Plotting Data/Models
 ====================
 
+SasView generates three different types of graph window: one that displays *1D data*
+(ie, I(Q) vs Q), one that displays *1D residuals* (ie, the difference between the
+experimental data and the theory at the same Q values), and *2D color maps*.
+
 Graph window options
 --------------------
 
