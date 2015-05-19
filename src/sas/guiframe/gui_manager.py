@@ -1959,13 +1959,13 @@ class ViewerFrame(PARENT_FRAME):
                 msg += "should have a data set "
                 msg += "and model selected. "
                 msg += "No project was saved to %s" % (str(path))
-                logging.error(msg)
-                wx.PostEvent(self, StatusEvent(status=msg))
+                logging.warning(msg)
+                wx.PostEvent(self, StatusEvent(status=msg, info="error"))
         except:
             msg = "Error occurred while saving: "
             msg += "To save, at least one application panel "
             msg += "should have a data set.."
-            wx.PostEvent(self, StatusEvent(status=msg))
+            wx.PostEvent(self, StatusEvent(status=msg, info="error"))
 
     def on_save_helper(self, doc, reader, panel, path):
         """
