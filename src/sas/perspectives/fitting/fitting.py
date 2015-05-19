@@ -185,7 +185,7 @@ class Plugin(PluginBase):
 
         self.id_result_panel = wx.NewId()
         self.menu1.Append(self.id_result_panel, "Fit Results", "Show fit results panel")
-        wx.EVT_MENU(owner, self.id_result_panel, lambda ev: self.result_frame.Show())
+        wx.EVT_MENU(owner, self.id_result_panel, self.on_fit_results)
         self.menu1.AppendSeparator()
 
         self.id_reset_flag = wx.NewId()
@@ -740,8 +740,18 @@ class Plugin(PluginBase):
             return model_name, param_name
 
     def on_bumps_options(self, event=None):
+        """
+        Open the bumps options panel.
+        """
         from bumps.gui.fit_dialog import OpenFitOptions
         OpenFitOptions()
+
+    def on_fit_results(self, event=None):
+        """
+        Make the Fit Results panel visible.
+        """
+        self.result_frame.Show()
+        self.result_frame.Raise()
 
     def stop_fit(self, uid):
         """
