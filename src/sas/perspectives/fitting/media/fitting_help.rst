@@ -313,6 +313,8 @@ Single Fit Mode
 *NB: Before proceeding, ensure that the Single Mode radio button at the bottom of*
 *the Data Explorer is checked (see the section* :ref:`Loading_data` *).*
 
+This mode fits one data set.
+
 When data is sent to the fitting perspective it is plotted in a graph window as
 markers.
 
@@ -358,12 +360,98 @@ initially.
 Simultaneous Fit Mode
 ---------------------
 
-This fitting option enables to set a number of the constraints between the 
-parameters of fitting(s). It requires one or more FitPages with a data and a 
-model set for the fitting, and performs multiple fittings given by the 
-FitPage(s). The Complex (ParkMC) FitEngine will be used automatically.
+*NB: Before proceeding, ensure that the Single Mode radio button at the bottom of*
+*the Data Explorer is checked (see the section* :ref:`Loading_data` *).*
 
-Simultaneous Fit without Constraint
+This mode is an extension of the :ref:`Single Fit Mode` that fits two or more data 
+sets *to the same model* simultaneously. If necessary it is possible to constrain 
+fit parameters between data sets (eg, to fix a background level, or radius, etc).
+
+If the data to be fit are in multiple files, load each file, select it in the 
+*Data Explorer*, and *Send To Fitting*.
+
+If multiple data sets are in one file, load that file, *Unselect All Data*, then 
+select each dataset one at a time and Send To Fitting.
+
+The result should be that for 
+n
+datsets you have 2
+n
+graphs (
+n
+of the data & model fit and 
+n
+residuals plots).
+
+IMPORTANT! 
+If you need to create a n
+ew model with the new model wizard, or use a 
+model which is the sum of two existing models, go Fitting 
+
+Edit Custom Model 
+before
+sending the data to the fitting engine.
+The model will be available under 
+‘
+Customised 
+Models
+’
+on 
+the FitPage. NB: the name will likely be abbreviated; eg, 
+‘
+Peak 
+Gauss
+Model + Absolute Power Law Model
+’
+will appear as 
+‘
+PGM + APL
+’
+.
+3.
+Go to each Fit
+Page in turn
+and:
+
+Select the required model.
+
+Unselect all the model par
+ameters.
+
+Enter some starting guesses for the parameters (it may be helpful to remove the 
+residuals plots for clarity; go Graph 
+
+Show and untick graph windows as required).
+
+Enter any parameter limits (recommended).
+
+Select which parameters will refine (sele
+cting all is probably a bad idea...).
+4.
+Select Fitting 
+
+Simultaneous Fit (this also selects the Complex Fit Engine).
+5.
+Go to the Simultaneous Fit page
+and:
+
+Select which datasets are to be fitted (which will probably be all of them or you wouldn’t 
+have 
+loaded them in!).
+
+It is possible to tie parameters between datasets with constraints; eg, make the 
+Background in FitPage1 the same as the Background in FitPage2, and so on. To do this, 
+answer ‘yes’ to Add Constraints in the Fit Constraints box.
+
+But note th
+at SANSView only lets you constrain parameters that are refining.
+6.
+Click Fit
+
+
+
+Simultaneous Fits without Constraints
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Assuming some FitPages are already set up, check the checkboxes of the 
 model_data rows to fit. And click the 'Fit' button. The results will return to 
@@ -373,7 +461,8 @@ Note that the chi2/Npts returned is the sum of the chi2/Npts of each fits. If
 one needs the chi2 value only for a page, click the 'Compute' button in the 
 FitPage to recalculate.
 
-Simultaneous Fit with Constraint
+Simultaneous Fits with Constraints
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Enter constraint in the text control next to *constraint fit*  button. 
 Constraint should be of type model1 parameter name = f(model2 parameter name) 
@@ -390,6 +479,9 @@ the FitPage to recalculate.
 
 Batch Fit Mode
 --------------
+
+*NB: Before proceeding, ensure that the Batch Mode radio button at the bottom of*
+*the Data Explorer is checked (see the section* :ref:`Loading_data` *).*
 
 Batch Fit
 ^^^^^^^^^
