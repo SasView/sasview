@@ -131,6 +131,8 @@ It is also possible to add your own models.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
+.. _Adding_your_own_models:
+
 Adding your own models
 ----------------------
 
@@ -367,113 +369,71 @@ This mode is an extension of the :ref:`Single Fit Mode` that fits two or more da
 sets *to the same model* simultaneously. If necessary it is possible to constrain 
 fit parameters between data sets (eg, to fix a background level, or radius, etc).
 
-If the data to be fit are in multiple files, load each file, select it in the 
-*Data Explorer*, and *Send To Fitting*.
+If the data to be fit are in multiple files, load each file, then select each file
+in the *Data Explorer*, and *Send To Fitting*. If multiple data sets are in one file,
+load that file, *Unselect All Data*, select just those data sets to be fitted, and
+*Send To Fitting*. Either way, the result should be that for *n* data sets you have
+2*n* graphs (*n* of the data and model fit, and *n* of the resulting residuals). But
+it may be helpful to minimise the residuals plots for clarity.
 
-If multiple data sets are in one file, load that file, *Unselect All Data*, then 
-select each dataset one at a time and Send To Fitting.
+*NB: If you need to use a customized model, you must ensure that model is available*
+*first (see* :ref:`Adding_your_own_models` *).*
 
-The result should be that for 
-n
-datsets you have 2
-n
-graphs (
-n
-of the data & model fit and 
-n
-residuals plots).
+Now go to each *FitPage* in turn and:
 
-IMPORTANT! 
-If you need to create a n
-ew model with the new model wizard, or use a 
-model which is the sum of two existing models, go Fitting 
+  Select the required category and model;
 
-Edit Custom Model 
-before
-sending the data to the fitting engine.
-The model will be available under 
-‘
-Customised 
-Models
-’
-on 
-the FitPage. NB: the name will likely be abbreviated; eg, 
-‘
-Peak 
-Gauss
-Model + Absolute Power Law Model
-’
-will appear as 
-‘
-PGM + APL
-’
-.
-3.
-Go to each Fit
-Page in turn
-and:
+  Unselect all the model parameters;
 
-Select the required model.
+  Enter some starting guesses for the parameters;
 
-Unselect all the model par
-ameters.
+  Enter any parameter limits (recommended);
 
-Enter some starting guesses for the parameters (it may be helpful to remove the 
-residuals plots for clarity; go Graph 
+  Select which parameters will refine (selecting all is generally a bad idea...);
 
-Show and untick graph windows as required).
+When done, select *Constrained or Simultaneous Fit* under *Fitting* in the menu bar.
 
-Enter any parameter limits (recommended).
+In the *Const & Simul Fit* page that appears, select which data sets are to be
+simultaneously fitted (this will probably be all of them or you would not have loaded
+them in the first place!).
 
-Select which parameters will refine (sele
-cting all is probably a bad idea...).
-4.
-Select Fitting 
+To tie parameters between the data sets with constraints, check the 'yes' radio button
+next to *Add Constraint?* in the *Fit Constraints* box.
 
-Simultaneous Fit (this also selects the Complex Fit Engine).
-5.
-Go to the Simultaneous Fit page
-and:
+*NB: You can only constrain parameters that are set to refine.*
 
-Select which datasets are to be fitted (which will probably be all of them or you wouldn’t 
-have 
-loaded them in!).
-
-It is possible to tie parameters between datasets with constraints; eg, make the 
-Background in FitPage1 the same as the Background in FitPage2, and so on. To do this, 
-answer ‘yes’ to Add Constraints in the Fit Constraints box.
-
-But note th
-at SANSView only lets you constrain parameters that are refining.
-6.
-Click Fit
-
-
+When ready, click the *Fit* button on the *Const & Simul Fit* page, NOT the *Fit*
+button on the individual *FitPage*'s.
 
 Simultaneous Fits without Constraints
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Assuming some FitPages are already set up, check the checkboxes of the 
-model_data rows to fit. And click the 'Fit' button. The results will return to 
-each FitPages.
+The results of the model-fitting will be returned to each of the individual
+*FitPage*'s.
 
-Note that the chi2/Npts returned is the sum of the chi2/Npts of each fits. If 
-one needs the chi2 value only for a page, click the 'Compute' button in the 
-FitPage to recalculate.
+Note that the chi2/Npts value returned is the SUM of the chi2/Npts of each fit. To
+the chi2/Npts value for a specific *FitPage*, click the *Compute* button at the
+bottom of that *FitPage* to recalculate.
 
 Simultaneous Fits with Constraints
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Enter constraint in the text control next to *constraint fit*  button. 
-Constraint should be of type model1 parameter name = f(model2 parameter name) 
-for example, M0.radius=2*M1.radius. Many constraints can be entered for a 
-single fit. Each of them should be separated by a newline charater or ";" 
-The easy setup can generate many constraint inputs easily when the selected 
-two models are the same type.
+Use the *Easy Setup* drop-down buttons in the *Const & Simul Fit* page to set
+up constraints between *FitPage*'s.
 
-Note that the chi2/Npts returned is the sum of the chi2/Npts of each fits. 
-If one needs the chi2 value only for one fit, click the 'Compute' button in 
-the FitPage to recalculate.
+Constraints will generally be of the form Mi Parameter1 = Mj.Parameter1, however
+the text box after the '=' sign can be used to adjust this relationship; for
+example Mi Parameter1 = scalar*Mj.Parameter1. A 'free-form' constraint box is
+also provided.
+
+Many constraints can be entered for a single fit.
+
+The results of the model-fitting will be returned to each of the individual
+*FitPage*'s.
+
+Note that the chi2/Npts value returned is the SUM of the chi2/Npts of each fit. To
+the chi2/Npts value for a specific *FitPage*, click the *Compute* button at the
+bottom of that *FitPage* to recalculate.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
