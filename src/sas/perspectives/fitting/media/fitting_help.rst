@@ -131,6 +131,8 @@ It is also possible to add your own models.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
+.. _Adding_your_own_models:
+
 Adding your own models
 ----------------------
 
@@ -313,6 +315,8 @@ Single Fit Mode
 *NB: Before proceeding, ensure that the Single Mode radio button at the bottom of*
 *the Data Explorer is checked (see the section* :ref:`Loading_data` *).*
 
+This mode fits one data set.
+
 When data is sent to the fitting perspective it is plotted in a graph window as
 markers.
 
@@ -358,38 +362,86 @@ initially.
 Simultaneous Fit Mode
 ---------------------
 
-This fitting option enables to set a number of the constraints between the 
-parameters of fitting(s). It requires one or more FitPages with a data and a 
-model set for the fitting, and performs multiple fittings given by the 
-FitPage(s). The Complex (ParkMC) FitEngine will be used automatically.
+*NB: Before proceeding, ensure that the Single Mode radio button at the bottom of*
+*the Data Explorer is checked (see the section* :ref:`Loading_data` *).*
 
-Simultaneous Fit without Constraint
+This mode is an extension of the :ref:`Single Fit Mode` that fits two or more data 
+sets *to the same model* simultaneously. If necessary it is possible to constrain 
+fit parameters between data sets (eg, to fix a background level, or radius, etc).
 
-Assuming some FitPages are already set up, check the checkboxes of the 
-model_data rows to fit. And click the 'Fit' button. The results will return to 
-each FitPages.
+If the data to be fit are in multiple files, load each file, then select each file
+in the *Data Explorer*, and *Send To Fitting*. If multiple data sets are in one file,
+load that file, *Unselect All Data*, select just those data sets to be fitted, and
+*Send To Fitting*. Either way, the result should be that for *n* data sets you have
+2*n* graphs (*n* of the data and model fit, and *n* of the resulting residuals). But
+it may be helpful to minimise the residuals plots for clarity.
 
-Note that the chi2/Npts returned is the sum of the chi2/Npts of each fits. If 
-one needs the chi2 value only for a page, click the 'Compute' button in the 
-FitPage to recalculate.
+*NB: If you need to use a customized model, you must ensure that model is available*
+*first (see* :ref:`Adding_your_own_models` *).*
 
-Simultaneous Fit with Constraint
+Now go to each *FitPage* in turn and:
 
-Enter constraint in the text control next to *constraint fit*  button. 
-Constraint should be of type model1 parameter name = f(model2 parameter name) 
-for example, M0.radius=2*M1.radius. Many constraints can be entered for a 
-single fit. Each of them should be separated by a newline charater or ";" 
-The easy setup can generate many constraint inputs easily when the selected 
-two models are the same type.
+  Select the required category and model;
 
-Note that the chi2/Npts returned is the sum of the chi2/Npts of each fits. 
-If one needs the chi2 value only for one fit, click the 'Compute' button in 
-the FitPage to recalculate.
+  Unselect all the model parameters;
+
+  Enter some starting guesses for the parameters;
+
+  Enter any parameter limits (recommended);
+
+  Select which parameters will refine (selecting all is generally a bad idea...);
+
+When done, select *Constrained or Simultaneous Fit* under *Fitting* in the menu bar.
+
+In the *Const & Simul Fit* page that appears, select which data sets are to be
+simultaneously fitted (this will probably be all of them or you would not have loaded
+them in the first place!).
+
+To tie parameters between the data sets with constraints, check the 'yes' radio button
+next to *Add Constraint?* in the *Fit Constraints* box.
+
+*NB: You can only constrain parameters that are set to refine.*
+
+When ready, click the *Fit* button on the *Const & Simul Fit* page, NOT the *Fit*
+button on the individual *FitPage*'s.
+
+Simultaneous Fits without Constraints
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The results of the model-fitting will be returned to each of the individual
+*FitPage*'s.
+
+Note that the chi2/Npts value returned is the SUM of the chi2/Npts of each fit. To
+the chi2/Npts value for a specific *FitPage*, click the *Compute* button at the
+bottom of that *FitPage* to recalculate.
+
+Simultaneous Fits with Constraints
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Use the *Easy Setup* drop-down buttons in the *Const & Simul Fit* page to set
+up constraints between *FitPage*'s.
+
+Constraints will generally be of the form Mi Parameter1 = Mj.Parameter1, however
+the text box after the '=' sign can be used to adjust this relationship; for
+example Mi Parameter1 = scalar*Mj.Parameter1. A 'free-form' constraint box is
+also provided.
+
+Many constraints can be entered for a single fit.
+
+The results of the model-fitting will be returned to each of the individual
+*FitPage*'s.
+
+Note that the chi2/Npts value returned is the SUM of the chi2/Npts of each fit. To
+the chi2/Npts value for a specific *FitPage*, click the *Compute* button at the
+bottom of that *FitPage* to recalculate.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 Batch Fit Mode
 --------------
+
+*NB: Before proceeding, ensure that the Batch Mode radio button at the bottom of*
+*the Data Explorer is checked (see the section* :ref:`Loading_data` *).*
 
 Batch Fit
 ^^^^^^^^^
