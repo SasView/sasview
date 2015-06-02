@@ -1510,8 +1510,9 @@ class Plugin(PluginBase):
                                                               type="stop"))
 
         except:
-            msg = "Fit completed but Following"
-            msg += " warning occurred: %s" % sys.exc_value
+            msg = ("Fit completed but the following error occurred: %s"
+                   % sys.exc_value)
+            #import traceback; msg = "\n".join((traceback.format_exc(), msg))
             wx.PostEvent(self.parent, StatusEvent(status=msg, info="warning",
                                                   type="stop"))
 
