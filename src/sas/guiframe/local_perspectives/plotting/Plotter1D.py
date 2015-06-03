@@ -216,16 +216,19 @@ class ModelPanel1D(PlotPanel, PanelBase):
         if active_ctrl == None:
             return
         if event.id in self.plots.keys():
+            ctrl = event.ctrl
+            self.cursor_id = event.id
             # Set line position and color
             colors = ['red', 'purple']
-            self.cursor_id = event.id
-            ctrl = event.ctrl
+            x_data = self.plots[self.cursor_id].x
+            values = [max(x_data.min(), float(ctrl[0].GetValue())),
+                      min(x_data.max(), float(ctrl[1].GetValue()))]
             if self.ly == None:
                 self.ly = []
-                for ind_ly in range(len(colors)):
-                    self.ly.append(self.subplot.axvline(color=colors[ind_ly],
-                                                        lw=2.5, alpha=0.7))
-                    self.ly[ind_ly].set_rasterized(True)
+                for c, v in zip(colors, values):
+                    h = self.subplot.axvline(x=v, color=c, lw=2.5, alpha=0.7)
+                    h.set_rasterized(True)
+                    self.ly.append(h)
             try:
                 # Display x,y in the status bar if possible
                 xval = float(active_ctrl.GetValue())
@@ -238,11 +241,10 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 # text event
                 try:
                     is_moved = False
-                    for idx in range(len(self.ly)):
-                        val = float(ctrl[idx].GetValue())
+                    for h, v in zip(self.ly, values):
                         # check if vline moved
-                        if self.ly[idx].get_xdata() != val:
-                            self.ly[idx].set_xdata(val)
+                        if h.get_xdata() != v:
+                            h.set_xdata(v)
                             is_moved = True
                     if is_moved:
                         self.canvas.draw()
@@ -251,12 +253,9 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 event.Skip()
                 return
             self.q_ctrl = ctrl
-            pos_x_min = float(self.q_ctrl[0].GetValue())
-            pos_x_max = float(self.q_ctrl[1].GetValue())
-            pos_x = [pos_x_min, pos_x_max]
-            for ind_ly in range(len(colors)):
-                self.ly[ind_ly].set_color(colors[ind_ly])
-                self.ly[ind_ly].set_xdata(pos_x[ind_ly])
+            for h, c, v in zip(self.ly, colors, values):
+                h.set_color(c)
+                h.set_xdata(v)
             self.canvas.draw()
         else:
             self.q_ctrl = None
