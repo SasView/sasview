@@ -351,7 +351,7 @@ package_data['sas.sasview'] = ['images/*', 'media/*', 'test/*',
 packages.append("sas.sasview")
 
 required = [
-    'bumps>=0.7.5.5', 'periodictable>=1.3.1', 'pyparsing<2.0.0',
+    'bumps>=0.7.5.6', 'periodictable>=1.3.1', 'pyparsing<2.0.0',
 
     # 'lxml>=2.2.2',
     'lxml', 
