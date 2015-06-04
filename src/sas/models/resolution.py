@@ -296,7 +296,7 @@ def geometric_extrapolation(q, q_min, q_max, points_per_decade=None):
 
     *points_per_decade* sets the ratio between consecutive steps such
     that there will be $n$ points used for every factor of 10 increase
-    in *q*.
+    in $q$.
 
     If *points_per_decade* is not given, it will be estimated as follows.
     Starting at $q_1$ and stepping geometrically by $\Delta q$ to $q_n$
@@ -315,8 +315,10 @@ def geometric_extrapolation(q, q_min, q_max, points_per_decade=None):
 
     Substituting:
 
+    .. math::
+
         n_\text{extend} = (n-1) (\log q_\text{max} - \log q_n)
-            / (\log q_n - log q_1)
+            / (\log q_n - \log q_1)
     """
     q = np.sort(q)
     if points_per_decade is None:
