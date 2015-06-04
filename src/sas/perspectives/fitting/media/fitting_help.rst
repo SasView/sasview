@@ -257,6 +257,10 @@ optimisers:
 *  Differential Evolution
 *  Nelder-Mead Simplex
 
+The DREAM optimiser is the most sophisticated, but may not necessarily be the best
+option for fitting simple models. If uncertain, try the Levenberg-Marquardt optimiser
+initially.
+
 These optimisers form the *Bumps* package written by P Kienzle. For more information
 on each optimiser, see the :ref:`Fitting_Documentation`.
 
@@ -308,6 +312,8 @@ displays available message history and some run-time traceback information.
 During a long task the *Console* can also be used to monitor the progress.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+.. _Single_Fit_Mode:
 
 Single Fit Mode
 ---------------
@@ -365,7 +371,7 @@ Simultaneous Fit Mode
 *NB: Before proceeding, ensure that the Single Mode radio button at the bottom of*
 *the Data Explorer is checked (see the section* :ref:`Loading_data` *).*
 
-This mode is an extension of the :ref:`Single Fit Mode` that fits two or more data 
+This mode is an extension of the :ref:`Single_Fit_Mode` that fits two or more data
 sets *to the same model* simultaneously. If necessary it is possible to constrain 
 fit parameters between data sets (eg, to fix a background level, or radius, etc).
 
@@ -373,11 +379,14 @@ If the data to be fit are in multiple files, load each file, then select each fi
 in the *Data Explorer*, and *Send To Fitting*. If multiple data sets are in one file,
 load that file, *Unselect All Data*, select just those data sets to be fitted, and
 *Send To Fitting*. Either way, the result should be that for *n* data sets you have
-2*n* graphs (*n* of the data and model fit, and *n* of the resulting residuals). But
+2\ *n* graphs (*n* of the data and model fit, and *n* of the resulting residuals). But
 it may be helpful to minimise the residuals plots for clarity.
 
 *NB: If you need to use a customized model, you must ensure that model is available*
 *first (see* :ref:`Adding_your_own_models` *).*
+
+Method
+^^^^^^
 
 Now go to each *FitPage* in turn and:
 
@@ -412,7 +421,7 @@ The results of the model-fitting will be returned to each of the individual
 *FitPage*'s.
 
 Note that the chi2/Npts value returned is the SUM of the chi2/Npts of each fit. To
-the chi2/Npts value for a specific *FitPage*, click the *Compute* button at the
+see the chi2/Npts value for a specific *FitPage*, click the *Compute* button at the
 bottom of that *FitPage* to recalculate.
 
 Simultaneous Fits with Constraints
@@ -421,10 +430,16 @@ Simultaneous Fits with Constraints
 Use the *Easy Setup* drop-down buttons in the *Const & Simul Fit* page to set
 up constraints between *FitPage*'s.
 
-Constraints will generally be of the form Mi Parameter1 = Mj.Parameter1, however
-the text box after the '=' sign can be used to adjust this relationship; for
-example Mi Parameter1 = scalar*Mj.Parameter1. A 'free-form' constraint box is
-also provided.
+Constraints will generally be of the form
+
+  Mi Parameter1 = Mj.Parameter1
+
+however the text box after the '=' sign can be used to adjust this
+relationship; for example
+
+  Mi Parameter1 = scalar \* Mj.Parameter1
+
+A 'free-form' constraint box is also provided.
 
 Many constraints can be entered for a single fit.
 
@@ -432,7 +447,7 @@ The results of the model-fitting will be returned to each of the individual
 *FitPage*'s.
 
 Note that the chi2/Npts value returned is the SUM of the chi2/Npts of each fit. To
-the chi2/Npts value for a specific *FitPage*, click the *Compute* button at the
+see the chi2/Npts value for a specific *FitPage*, click the *Compute* button at the
 bottom of that *FitPage* to recalculate.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
@@ -440,160 +455,155 @@ bottom of that *FitPage* to recalculate.
 Batch Fit Mode
 --------------
 
-*NB: Before proceeding, ensure that the Batch Mode radio button at the bottom of*
-*the Data Explorer is checked (see the section* :ref:`Loading_data` *).*
+*NB: Before proceeding, ensure that the Single Mode radio button at the bottom of*
+*the Data Explorer is checked (see the section* :ref:`Loading_data` *). The Batch*
+*Mode button will be used later on!*
 
-Batch Fit
-^^^^^^^^^
+This mode *sequentially* fits two or more data sets *to the same model*. Unlike in
+simultaneous fitting, in batch fitting it is not possible to constrain fit parameters
+between data sets.
 
-Create a *Batch Page* by selecting the *Batch* radio button on the DataExplorer
-(see figure below) and for a new control page select 'New FitPage' in the 
-Fitting menubar.
+If the data to be fit are in multiple files, load each file in the *Data Explorer*.
+If multiple data sets are in one file, load just that file. *Unselect All Data*, then
+select a single initial data set to be fitted. Fit that selected data set as described
+above under :ref:`Single_Fit_Mode` .
+
+*NB: If you need to use a customized model, you must ensure that model is available*
+*first (see* :ref:`Adding_your_own_models` *).*
+
+Method
+^^^^^^
+
+Now *Select All Data* in the *Data Explorer*, check the *Batch Mode* radio button
+at the bottom of that panel and *Send To Fitting*. A *BatchPage* will be created.
 
 .. image:: batch_button_area.bmp
 
-Figure 1: MenuBar: 
+*NB: The Batch Page can also be created by checking the Batch Mode radio button*
+*and selecting New Fit Page under Fitting in the menu bar.*
 
-Load Data to the DataExplorer if not already loaded.
+Using the drop-down menus in the *BatchPage*, now set up the *same* data set
+with the *same* model that you just fitted in single fit mode. A quick way to
+set the model parameter values is to just copy them from the earlier Single
+Fit. To do this, go back to the Single Fit *FitPage*, select *Copy Params*
+under *Edit* in the menu bar, then go back to the *BatchPage* and *Paste Params*.
 
-Select one or more data sets by checking the check boxes, and then make sure 
-that "Fitting" is selected in the dropdown menu next to the "Send To" button. 
-Once ready, click the 'Send To' button to set data to a BatchPage. If already 
-an empty batch page exists, it will be set there. Otherwise it will create a 
-new Batch Page. Set up the model and the parameter values as same as a single 
-fitting (see Single Fit help). Then use 'Fit' button to
-perform the fitting.
+When ready, use the *Fit* button on the *BatchPage* to perform the fitting, NOT
+the *Fit* button on the individual *FitPage*'s.
 
-Unlike a single fit, the results of the fittings will not return to the 
-BatchPage'. Instead, a Grid window will be provided once the fitting is 
-completed. The Grid window is also accessible from the 'View' menu 
-(see Figure 2).
+Unlike in single fit mode, the results of batch fits are not returned to
+the *BatchPage*. Instead, a spreadsheet-like :ref:`Grid_Window` will appear.
 
-Note that only one model is used for all the data. The initial parameter 
-values given in the control page will be used all the data fittings. If one 
-wants the FitEngine to use the initial values from the results of the 
-previous data fitting (if any), choose the 'Chain Fitting' option in the 
-Fitting menubar, which will speed up the fitting especially when you have 
-lots of, and similar, data sets.
-
-Batch Window
-^^^^^^^^^^^^
-Batch Window provides an easy way to view the fit results, i.e., plot data, 
-fits, and residuals. Batch window will be automatically shown after a batch 
-fit is finished.
-
-Once closed, it can be opened anytime from the "View" menubar item (see 
-Figure 2).
-
-.. image:: restore_batch_window.bmp
-
-Figure 2: Edit Menu: 
-
-Edit Grid
-^^^^^^^^^
-
-Once a batch fit is completed, all fitted and fixed model parameters are 
-displayed to the current sheet of the batch window except the errors of the 
-parameters. To view the errors, click on a given column then under *Edit*  
-menubar item, and insert the desired parameter by selecting a menu item with 
-the appropriated label. Empty column can be inserted in the same way. A 
-column value can be customized by editing an existing empty column.
-
-To Remove column from the grid, select it, choose edit menu, and click the 
-*'remove'*  menu item. Any removed column should reinserted whenever needed.
-
-All above options are also available when right clicking on a given column 
-label(see Figure 3).
-
-*Note:*  A column always needs to be selected in order to remove or insert a 
-column in the grid.
-
-.. image:: edit_menu.bmp
-
-Figure 3: Edit Menu:
-
-Save Grid
-^^^^^^^^^
-To save the current page on the batch window, select the *'File'*  menubar 
-item(see Figure 4), then choose the *'Save as'*  menu item to save it as a 
-.csv file.
-
-*Note:* The grid doesn't save the data array, fits, and the array residuals.
-As a result, the 'View (fit) Results' functionality will be lost when
-reloading the saved file.
-
-Warning! To ensure accuracy of saved fit results, it is recommended to save 
-the current grid before modifying it .
-
-Open Batch Results
-^^^^^^^^^^^^^^^^^^
-
-Any *csv*  file can be opened in the grid by selecting the *'Open'*  under 
-the *'File'*  menu in the Grid Window(see Figure 4). All columns in the file 
-will be displayed but insertion will not available. Insertion will be 
-available only when at least one column will be removed from the grid.
-
-.. image:: file_menu.bmp
-
-Figure 4: MenuBar:
-
-Plot
-^^^^
-
-To *plot*  a column versus another, select one column at the time, click the 
-*'Add'*  button next to the text control of X/Y -axis *Selection Range*  to 
-plot the value of this column on the X/Y axis. Alternatively, all available 
-range can be selected by clicking the column letter (eg. B). Repeat the same 
-procedure the next axis. Finally, click the *'Plot'*  button. When clicking 
-on *Add*  button, the grid will automatically fill the axis label, but 
-different labels and units can be entered in the correct controls before 
-clicking on the plot button.
-
-*X/Y -Axis Selection Range* can be edited manually. These text controls
-allow the following types of expression (operation can be + - * /, or pow)
- 
-1) if the current axis label range is a function of 1 or more columns, write 
-this type of expression
-
-constant1  * column_name1 [minimum row index :  maximum  row index] operator 
-constant2 * column_name2 [minimum row index :  maximum  row index] 
-
-Example: radius [2 : 5] -3 * scale [2 : 5] 
-
-2) if only some values of a given column are need but the range between the 
-first row and the last row used is not continuous, write the following 
-expression in the text control
-
-column_name1 [minimum row index1 :  maximum  row index1] , column_name1 
-[minimum row index2 :  maximum  row index2] 
-
-Example : radius [2 : 5] , radius [10 : 25] 
-
-Note: Both text controls ( X and Y-axis Selection Ranges) need to be filled 
-with valid entries for plotting to work. The dY-bar is optional (see Figure 5).
-
-.. image:: plot_button.bmp
-
-Figure 5: Plotting
-
-View Column/Cell(s)
-^^^^^^^^^^^^^^^^^^^
-
-Select 1 or more cells from the same column, click the 'View Fits' button to 
-display available curves. 
-
-For example, select the cells of the  'Chi2'  column, then click the  'View Fits'  
-button. The plots generates will represent the residuals  plots. 
- 
-If you select any cells of the 'Data' column and click the 'View Fits' button. 
-It generates both  data and fits in the graph (see Figure 6). 
-
-Alternatively, just click the column letter (eg. B) to choose all the 
-available data sets, then simply click the 'View Fits' button to plot the 
-data and fits. 
+If you want to visually check a graph of a particular fit, click on the name of
+a *Data set* in the *Grid Window* and then click the *View Fits* button. The
+data and the model fit will be displayed. If you select mutliple data sets they
+will all appear on one graph.
 
 .. image:: view_button.bmp
 
-Figure 6: View Fits
+*NB: In theory, returning to the BatchPage and changing the name of the I(Q)*
+*data source should also work, but at the moment whilst this does change the*
+*data set displayed it always superimposes the 'theory' corresponding to the*
+*starting parameters.*
+
+If you select a 'Chi2' value and click the *View Fits* button a graph of the
+residuals for that data set is displayed. Again, if you select multiple 'Chi2'
+values then all the residuals data will appear on one graph.
+
+Chain Fitting
+^^^^^^^^^^^^^
+
+By default, the *same* parameter values copied from the initial single fit into
+the *BatchPage* will be used as the starting parameters for all batch fits. It
+is, however, possible to get *SasView* to use the results of a fit to a preceding
+data set as the starting parameters for the next fit in the sequence. This
+variation of batch fitting is called *Chain Fitting*, and will considerably speed
+up model-fitting if you have lots of very similar data sets where a few parameters
+are gradually changing. Do not use chain fitting on disparate data sets.
+
+To use chain fitting, select *Chain Fitting* under *Fitting* in the menu bar. It
+toggles on/off, so selecting it again will switch back to normal batch fitting.
+
+.. _Grid_Window:
+
+Grid Window
+^^^^^^^^^^^
+
+The *Grid Window* provides an easy way to view the results from batch fitting.
+It will be displayed automatically when a batch fit completes, but may be
+opened at any time by selecting *Show Grid Window* under *View* in the menu
+bar.
+
+.. image:: restore_batch_window.bmp
+
+Once a batch fit is completed, all model parameters are displayed but *not*
+their uncertainties. To view the uncertainties, click on a given column then
+go to *Edit* in the menu bar, select *Insert Column Before* and choose the
+required data from the list. An empty column can be inserted in the same way.
+
+To remove a column from the grid, click on the column header and choose
+*Remove Column* under *Edit* in the menu bar. The same functionality also
+allows you to re-order columns.
+
+*NB: You cannot insert/remove/re-order the rows in the Grid Window.*
+
+All of the above functions are also available by right-clicking on a column
+label.
+
+.. image:: edit_menu.bmp
+
+*NB: If there is an existing Grid Window and another batch fit is performed,*
+*an additional 'Table' tab will be added to the Grid Window.*
+
+The parameter values in the *currently selected* table of the *Grid Window*
+can be output to a CSV file by choosing *Save As* under *File* in the (*Grid*
+*Window*) menu bar. The default filename includes the date and time that the
+batch fit was performed.
+
+Saved CSV files can be reloaded by choosing *Open* under *File* in the *Grid*
+*Window* menu bar. The loaded parameters will appear in a new table tab.
+
+.. image:: file_menu.bmp
+
+*NB: Saving the Grid Window does not save any experimental data, residuals*
+*or actual model fits. Consequently if you reload a saved CSV file the*
+*ability to View Fits will be lost.*
+
+Parameter Plots
+^^^^^^^^^^^^^^^
+
+Any column of *numeric* parameter values can be plotted against another using
+the *Grid Window*. Simply select one column at the time and click the *Add*
+button next to the required *X/Y-axis Selection Range* text box. When both
+the X and Y axis boxes have been completed, click the *Plot* button.
+
+When the *Add* button is clicked, *SasView* also automatically completes the
+*X/Y-axis Label* text box with the heading from Row 1 of the selected table,
+but different labels and units can be entered manually.
+
+.. image:: plot_button.bmp
+
+The *X/Y-axis Selection Range* can be edited manually. The text control box
+recognises the operators +, -, \*, /, or 'pow', and allows the following
+types of expression :
+ 
+  1) if an axis label range is a function of 1 or more *columns*, write
+     this type of expression
+
+     constant1 * column_name1 [minimum row index :  maximum  row index]
+     operator constant2 * column_name2 [minimum row index :  maximum  row index]
+
+     Example: radius [2 : 5] -3 * scale [2 : 5]
+
+  2) if only some *values* of a given column are needed but the range between
+     the first row and the last row used is not continuous, write this type of
+     expression
+
+     column_name1 [minimum row index1 :  maximum  row index1] , column_name1
+     [minimum row index2 :  maximum  row index2]
+
+     Example: radius [2 : 5] , radius [10 : 25]
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+.. note::  This help document was last changed by Steve King, 04Jun2015
