@@ -266,6 +266,22 @@ on each optimiser, see the :ref:`Fitting_Documentation`.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
+Fitting Limits
+--------------
+
+By default, *SasView* will attempt to model fit the full range of the data; ie,
+across all *Q* values. If necessary, however, it is possible to specify only a
+sub-region of the data for fitting.
+
+In a *FitPage* or *BatchPage* change the *Q* values in the *Min* and/or *Max*
+text boxes. Vertical coloured bars will appear on the graph with the data and
+'theory' indicating the current *Q* limits (red = *Qmin*, purple = *Qmax*).
+
+To return to including all data in the fit, click the *Reset* button.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+
 Shortcuts
 ---------
 
