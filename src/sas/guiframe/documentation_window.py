@@ -27,7 +27,7 @@ class DocumentationWindow(wx.Frame):
             docs_path = os.path.join(get_app_dir(), "doc")
 
         file_path = os.path.join(docs_path, path)
-        url = "file://" + urllib.quote(file_path)
+        url = "file:///" + urllib.quote(file_path,'\:')
 
         if not os.path.exists(file_path):
             logging.error("Could not find Sphinx documentation at %s \
