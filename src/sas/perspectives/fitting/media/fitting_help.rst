@@ -350,6 +350,7 @@ Assuming the data has loaded correctly, when a model is selected a green model
 calculation (or what SasView calls a 'Theory') line will appear in the earlier graph
 window, and a second graph window will appear displaying the residuals (the
 difference between the experimental data and the theory) at the same X-data values.
+See :ref:`Assessing_Fit_Quality`.
 
 The objective of model-fitting is to find a *physically-plausible* model, and set
 of model parameters, that generate a theory that reproduces the experimental data
@@ -372,7 +373,7 @@ Now check the box for another model parameter and click *Fit* again. Repeat this
 process until most or all parameters are checked and have been optimised. As the
 fit of the theory to the experimental data improves the value of 'chi2/Npts' will
 decrease. A good model fit should easily produce values of 'chi2/Npts' that are
-close to zero, and certainly <100.
+close to one, and certainly <100. See :ref:`Assessing_Fit_Quality`.
 
 SasView has a number of different optimisers (see the section :ref:`Fitting_Options`).
 The DREAM optimiser is the most sophisticated, but may not necessarily be the best
@@ -396,7 +397,8 @@ in the *Data Explorer*, and *Send To Fitting*. If multiple data sets are in one 
 load that file, *Unselect All Data*, select just those data sets to be fitted, and
 *Send To Fitting*. Either way, the result should be that for *n* data sets you have
 2\ *n* graphs (*n* of the data and model fit, and *n* of the resulting residuals). But
-it may be helpful to minimise the residuals plots for clarity.
+it may be helpful to minimise the residuals plots for clarity. Also see
+:ref:`Assessing_Fit_Quality`.
 
 *NB: If you need to use a customized model, you must ensure that model is available*
 *first (see* :ref:`Adding_your_own_models` *).*
@@ -438,7 +440,7 @@ The results of the model-fitting will be returned to each of the individual
 
 Note that the chi2/Npts value returned is the SUM of the chi2/Npts of each fit. To
 see the chi2/Npts value for a specific *FitPage*, click the *Compute* button at the
-bottom of that *FitPage* to recalculate.
+bottom of that *FitPage* to recalculate. Also see :ref:`Assessing_Fit_Quality`.
 
 Simultaneous Fits with Constraints
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -464,7 +466,7 @@ The results of the model-fitting will be returned to each of the individual
 
 Note that the chi2/Npts value returned is the SUM of the chi2/Npts of each fit. To
 see the chi2/Npts value for a specific *FitPage*, click the *Compute* button at the
-bottom of that *FitPage* to recalculate.
+bottom of that *FitPage* to recalculate. Also see :ref:`Assessing_Fit_Quality`.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -524,7 +526,8 @@ will all appear on one graph.
 
 If you select a 'Chi2' value and click the *View Fits* button a graph of the
 residuals for that data set is displayed. Again, if you select multiple 'Chi2'
-values then all the residuals data will appear on one graph.
+values then all the residuals data will appear on one graph. Also see
+:ref:`Assessing_Fit_Quality`.
 
 Chain Fitting
 ^^^^^^^^^^^^^
