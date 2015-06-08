@@ -28,6 +28,8 @@ import os
 import math
 import re
 from wx.py.editwindow import EditWindow
+from sas.guiframe.documentation_window import DocumentationWindow
+
 
 if sys.platform.count("win32") > 0:
     FONT_VARIANT = 0
@@ -270,11 +272,18 @@ class TextDialog(wx.Dialog):
         # Finally add the buttons (apply and close) on the bottom
         # Eventually need to add help here
         self.ok_button = wx.Button(self, wx.ID_OK, 'Apply')
+        _app_tip = "Save the new Model."
+        self.ok_button.SetToolTipString(_app_tip)
         self.ok_button.Bind(wx.EVT_BUTTON, self.check_name)
+        self.help_button = wx.Button(self, -1, 'HELP')
+        _app_tip = "Help on composite model creation."
+        self.help_butto.SetToolTipString(_app_tip)
+        self.help_button.Bind(wx.EVT_BUTTON, self.on_help)
         self.close_button = wx.Button(self, wx.ID_CANCEL, 'Close')
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
         sizer_button.AddMany([((20, 20), 1, 0),
                               (self.ok_button, 0, 0),
+                              (self.help_button, 0, 0),
                               (self.close_button, 0, wx.LEFT | wx.RIGHT, 10)])
         mainsizer.Add(sizer_button, 0, wx.EXPAND | wx.BOTTOM | wx.TOP, 10)
 
@@ -391,6 +400,26 @@ class TextDialog(wx.Dialog):
                                                          info=info))
         else:
             raise
+
+    def on_help(self, event):
+        """
+        Bring up the Composite Model Editor Documentation whenever
+        the HELP button is clicked.
+
+        Calls DocumentationWindow with the path of the location within the
+        documentation tree (after /doc/ ....".  Note that when using old
+        versions of Wx (before 2.9) and thus not the release version of
+        installers, the help comes up at the top level of the file as
+        webbrowser does not pass anything past the # to the browser when it is
+        running "file:///...."
+
+    :param evt: Triggers on clicking the help button
+    """
+
+        _TreeLocation = "user/perspectives/fitting/fitting_help.html"
+        _PageAnchor = "#sum-multi-p1-p2"
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, _PageAnchor,
+                                          "Composite Model Editor Help")
 
     def _set_model_list(self):
         """
@@ -755,12 +784,18 @@ class EditorPanel(wx.ScrolledWindow):
         self.bt_apply.SetToolTipString("Save changes into the imported data.")
         self.bt_apply.Bind(wx.EVT_BUTTON, self.on_click_apply)
 
+        self.bt_help = wx.Button(self, -1, "HELP", size=(_BOX_WIDTH, -1))
+        self.bt_help.SetToolTipString("Get Help For Model Editor")
+        self.bt_help.Bind(wx.EVT_BUTTON, self.on_help)
+
         self.bt_close = wx.Button(self, -1, 'Close', size=(_BOX_WIDTH, -1))
         self.bt_close.Bind(wx.EVT_BUTTON, self.on_close)
         self.bt_close.SetToolTipString("Close this panel.")
 
         self.button_sizer.AddMany([(self.bt_apply, 0,
                                     wx.LEFT, EDITOR_WIDTH * 0.8),
+                                   (self.bt_help, 0,
+                                    wx.LEFT,15),
                                    (self.bt_close, 0,
                                     wx.LEFT | wx.BOTTOM, 15)])
 
@@ -1088,6 +1123,26 @@ class EditorPanel(wx.ScrolledWindow):
         Get the warning msg
         """
         return self.warning
+
+    def on_help(self, event):
+        """
+        Bring up the Custom Model Editor Documentation whenever
+        the HELP button is clicked.
+
+        Calls DocumentationWindow with the path of the location within the
+        documentation tree (after /doc/ ....".  Note that when using old
+        versions of Wx (before 2.9) and thus not the release version of
+        installers, the help comes up at the top level of the file as
+        webbrowser does not pass anything past the # to the browser when it is
+        running "file:///...."
+
+    :param evt: Triggers on clicking the help button
+    """
+
+        _TreeLocation = "user/perspectives/fitting/fitting_help.html"
+        _PageAnchor = "#custom-model-editor"
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, _PageAnchor,
+                                          "Custom Model Editor Help")
 
     def on_close(self, event):
         """
