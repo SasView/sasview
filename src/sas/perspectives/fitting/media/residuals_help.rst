@@ -41,7 +41,7 @@ calculate the number of 'degrees of freedom'), but the 'normalized chi-squared'
 and the 'reduced chi-squared' are very close to each other when *Npts* >> number of
 parameters.
 
-For a good fit, *Chi2/Npts* -> 0.
+For a good fit, *Chi2/Npts* tends to 0.
 
 Chi^2/Npts is sometimes referred to as the 'goodness-of-fit' parameter.
 
