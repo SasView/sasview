@@ -634,8 +634,8 @@ class DataOperPanel(wx.ScrolledWindow):
     """
 
         _TreeLocation = "user/perspectives/calculator/data_operator_help.html"
-        _doc_viewer = DocumentationWindow(self, -1, \
-             _TreeLocation, "Data Operation Help")
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+                                          "Data Operation Help")
 
     def disconnect_panels(self):
         """

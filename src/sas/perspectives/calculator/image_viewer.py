@@ -149,8 +149,8 @@ class ImageFrame(PlotFrame):
         """
 
         _TreeLocation = "user/perspectives/calculator/image_viewer_help.html"
-        _doc_viewer = DocumentationWindow(self, -1, \
-             _TreeLocation, "Image Viewer Help")
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+                                          "Image Viewer Help")
 
 
 class SetDialog(wx.Dialog):

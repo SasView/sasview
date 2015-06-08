@@ -957,8 +957,8 @@ class InversionControl(ScrolledPanel, PanelBase):
     """
 
         _TreeLocation = "user/perspectives/pr/pr_help.html"
-        _doc_viewer = DocumentationWindow(self, -1, \
-             _TreeLocation, "P(r) Help")
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+                                          "P(r) Help")
 
 
 class PrDistDialog(wx.Dialog):

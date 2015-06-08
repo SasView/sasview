@@ -2846,17 +2846,15 @@ class BasicPage(ScrolledPanel, PanelBase):
         :param evt: on Help Button pressed event
         """
 
-        if self.model == None:
-            name = 'index.html'
-        else:
-            name = self.formfactorbox.GetValue()
-
+        _TreeLocation = 'user/models/model_functions.html'
         if self.model != None:
-            _docspath = 'user/models/model_functions.html#' + name
-            _doc_viewer = DocumentationWindow(self, -1, _docspath, name + "Help")
+            name = self.formfactorbox.GetValue()
+            _PageAnchor = '#' + name
+            _doc_viewer = DocumentationWindow(self, -1, _TreeLocation,
+                                              _PageAnchor, name + "Help")
         else:
-            _doc_viewer = DocumentationWindow(self, -1, "index.html", \
-                                                "General Help")
+            _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+                                                "General Model Help")
 
 
     def on_model_help_clicked(self, event):
@@ -2907,8 +2905,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
 
         _TreeLocation = "_images/M_angles_pic.bmp"
-        _doc_viewer = DocumentationWindow(self, -1, \
-             _TreeLocation, "Magnetic Angle Defintions")
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+                                          "Magnetic Angle Defintions")
 
     def _on_mag_on(self, event):
         """
@@ -2953,9 +2951,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
 
         _TreeLocation = "user/perspectives/fitting/fitting_help.html"
-        _TreeLocation += "#polydispersity-distributions"
-        _doc_viewer = DocumentationWindow(self, -1, \
-             _TreeLocation, "Polydispersity Help")
+        _PageAnchor = "#polydispersity-distributions"
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation,
+                                          _PageAnchor, "Polydispersity Help")
 
     def on_left_down(self, event):
         """

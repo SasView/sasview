@@ -913,8 +913,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
     """
 
         _TreeLocation = "user/perspectives/calculator/sas_calculator_help.html"
-        _doc_viewer = DocumentationWindow(self, -1, \
-             _TreeLocation, "General Scattering Calculator Help")
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+                                          "General Scattering Calculator Help")
 
     def _check_value(self):
         """
