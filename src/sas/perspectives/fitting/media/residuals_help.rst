@@ -43,7 +43,7 @@ parameters.
 
 For a good fit, *Chi2/Npts* tends to 0.
 
-Chi^2/Npts is sometimes referred to as the 'goodness-of-fit' parameter.
+*Chi2/Npts* is sometimes referred to as the 'goodness-of-fit' parameter.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
