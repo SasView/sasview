@@ -8,6 +8,8 @@ Fitting Documentation
 
    Fitting Data <fitting_help>
 
+   Assessing Fit Quality <residuals_help>
+
    Polydispersity Distributions <pd_help>
 
    Smearing Functions <sm_help>
