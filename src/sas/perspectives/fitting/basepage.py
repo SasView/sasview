@@ -2950,8 +2950,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         :param evt: Triggers on clicking ? in polydispersity box
         """
 
-        _TreeLocation = "user/perspectives/fitting/fitting_help.html"
-        _PageAnchor = "#polydispersity-distributions"
+        _TreeLocation = "user/perspectives/fitting/pd_help.html"
+        _PageAnchor = ""
         _doc_viewer = DocumentationWindow(self, -1, _TreeLocation,
                                           _PageAnchor, "Polydispersity Help")
 

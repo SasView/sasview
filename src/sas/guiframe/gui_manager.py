@@ -43,7 +43,6 @@ from sas.guiframe.events import EVT_NEW_BATCH
 from sas.guiframe.CategoryManager import CategoryManager
 from sas.dataloader.loader import Loader
 from matplotlib import _pylab_helpers
-from documentation_window import DocumentationWindow
 
 def get_app_dir():
     """
@@ -2165,6 +2164,7 @@ class ViewerFrame(PARENT_FRAME):
         """
         # Running SasView "in-place" using run.py means the docs will be in a
         # different place than they would otherwise.
+        from documentation_window import DocumentationWindow
         DocumentationWindow(self, -1, "index.html", "", "SasView Documentation")
 
     def set_manager(self, manager):

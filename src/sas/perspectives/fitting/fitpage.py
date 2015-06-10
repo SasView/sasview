@@ -15,6 +15,7 @@ from sas.guiframe.events import PlotQrangeEvent
 from sas.guiframe.dataFitting import check_data_validity
 from sas.guiframe.utils import format_number
 from sas.guiframe.utils import check_float
+from sas.guiframe.documentation_window import DocumentationWindow
 
 (Chi2UpdateEvent, EVT_CHI2_UPDATE) = wx.lib.newevent.NewEvent()
 _BOX_WIDTH = 76
@@ -187,8 +188,10 @@ class FitPage(BasicPage):
 
     def _fill_range_sizer(self):
         """
-        Fill the sizer containing the plotting range
-        add  access to npts
+        Fill the Fitting sizer on the fit panel which contains: the smearing
+        information (dq), the weighting information (dI or other), the plotting
+        range, access to the 2D mask editor, the compute, fit, and help
+        buttons, xi^2, number of points etc.
         """
         is_2Ddata = False
 
@@ -264,7 +267,7 @@ class FitPage(BasicPage):
         self.dI_idata.Enable(False)
         weighting_box.Add(sizer_weighting)
 
-        sizer_fit = wx.GridSizer(2, 4, 2, 6)
+        sizer_fit = wx.GridSizer(2, 5, 2, 6)
 
         # combobox for smear2d accuracy selection
         self.smear_accuracy = wx.ComboBox(self, -1, size=(50, -1),
@@ -283,6 +286,16 @@ class FitPage(BasicPage):
         self.btFit.Bind(wx.EVT_BUTTON, self._onFit, id=self.btFit.GetId())
         self.btFit.SetToolTipString("Start fitting.")
 
+        #General Help button
+        self.btFitHelp = wx.Button(self, -1, 'HELP')
+        self.btFitHelp.SetToolTipString("General Fitting Help.")
+        self.btFitHelp.Bind(wx.EVT_BUTTON, self._onFitHelp)
+        
+        #Resolution Smearing Help button
+        self.btSmearHelp = wx.Button(self, -1, '?')
+        self.btSmearHelp.SetToolTipString("Resolution Smearing Help.")
+        self.btSmearHelp.Bind(wx.EVT_BUTTON, self._onSmearHelp)
+        
         #textcntrl for custom resolution
         self.smear_pinhole_max = ModelTextCtrl(self, -1,
                             size=(_BOX_WIDTH - 25, 20),
@@ -390,10 +403,12 @@ class FitPage(BasicPage):
         sizer_fit.Add(self.points_sizer, 0, 0)
         #sizer_fit.Add(box_description_3, 0, 0)
         sizer_fit.Add(self.draw_button, 0, 0)
+        sizer_fit.Add((-1,5))
         sizer_fit.Add(self.tcChi, 0, 0)
         sizer_fit.Add(self.Npts_fit, 0, 0)
         sizer_fit.Add(self.Npts_total, 0, 0)
         sizer_fit.Add(self.btFit, 0, 0)
+        sizer_fit.Add(self.btFitHelp, 0, 0)
 
         # StaticText for smear
         self.smear_description_none = wx.StaticText(self, -1,
@@ -1045,6 +1060,45 @@ class FitPage(BasicPage):
         #self._manager.onFit(uid=self.uid)
         self.fit_started = self._manager.onFit(uid=self.uid)
         wx.CallAfter(self.set_fitbutton)
+
+    def _onFitHelp(self, event):
+        """
+        Bring up the Full Fitting Documentation whenever the HELP button is
+        clicked.
+
+        Calls DocumentationWindow with the path of the location within the
+        documentation tree (after /doc/ ....".  Note that when using old
+        versions of Wx (before 2.9) and thus not the release version of
+        installers, the help comes up at the top level of the file as
+        webbrowser does not pass anything past the # to the browser when it is
+        running "file:///...."
+
+    :param evt: Triggers on clicking the help button
+    """
+
+        _TreeLocation = "user/perspectives/fitting/fitting_help.html"
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+                                          "General Fitting Help")
+
+    def _onSmearHelp(self, event):
+        """
+        Bring up the instrumental resolution smearing Documentation whenever
+        the ? button in the smearing box is clicked.
+
+        Calls DocumentationWindow with the path of the location within the
+        documentation tree (after /doc/ ....".  Note that when using old
+        versions of Wx (before 2.9) and thus not the release version of
+        installers, the help comes up at the top level of the file as
+        webbrowser does not pass anything past the # to the browser when it is
+        running "file:///...."
+
+    :param evt: Triggers on clicking the help button
+    """
+
+        _TreeLocation = "user/perspectives/fitting/sm_help.html"
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+                                          "Instrumental Resolution Smearing \
+                                          Help")
 
     def set_fitbutton(self):
         """

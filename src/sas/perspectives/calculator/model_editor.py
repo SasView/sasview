@@ -277,7 +277,7 @@ class TextDialog(wx.Dialog):
         self.ok_button.Bind(wx.EVT_BUTTON, self.check_name)
         self.help_button = wx.Button(self, -1, 'HELP')
         _app_tip = "Help on composite model creation."
-        self.help_butto.SetToolTipString(_app_tip)
+        self.help_button.SetToolTipString(_app_tip)
         self.help_button.Bind(wx.EVT_BUTTON, self.on_help)
         self.close_button = wx.Button(self, wx.ID_CANCEL, 'Close')
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
