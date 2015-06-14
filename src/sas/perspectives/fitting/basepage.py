@@ -2888,7 +2888,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             msg += "You must select a model to get information on this"
             wx.MessageBox(msg, info)
 
-    def _on_mag_help(self, event):
+    def _on_mag_angle_help(self, event):
         """
         Bring up Magnetic Angle definition bmp image whenever the ? button
         is clicked. Calls DocumentationWindow with the path of the location
@@ -2907,6 +2907,26 @@ class BasicPage(ScrolledPanel, PanelBase):
         _TreeLocation = "_images/M_angles_pic.bmp"
         _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
                                           "Magnetic Angle Defintions")
+
+    def _on_mag_help(self, event):
+        """
+        Bring up Magnetic Angle definition bmp image whenever the ? button
+        is clicked. Calls DocumentationWindow with the path of the location
+        within the documentation tree (after /doc/ ....". When using old
+        versions of Wx (i.e. before 2.9 and therefore not part of release
+        versions distributed via installer) it brings up an image viewer
+        box which allows the user to click through the rest of the images in
+        the directory.  Not ideal but probably better than alternative which
+        would bring up the entire discussion of how magnetic models work?
+        Specially since it is not likely to be accessed.  The normal release
+        versions bring up the normal image box.
+
+        :param evt: Triggers on clicking ? in Magnetic Angles? box
+        """
+
+        _TreeLocation = "user/perspectives/fitting/mag_help.html"
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+                                          "Polarized Beam/Magnetc Help")
 
     def _on_mag_on(self, event):
         """

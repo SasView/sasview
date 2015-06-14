@@ -292,7 +292,7 @@ class FitPage(BasicPage):
         self.btFitHelp.Bind(wx.EVT_BUTTON, self._onFitHelp)
         
         #Resolution Smearing Help button
-        self.btSmearHelp = wx.Button(self, -1, '?')
+        self.btSmearHelp = wx.Button(self, -1, '?', style=wx.BU_EXACTFIT)
         self.btSmearHelp.SetToolTipString("Resolution Smearing Help.")
         self.btSmearHelp.Bind(wx.EVT_BUTTON, self._onSmearHelp)
         
@@ -3065,18 +3065,29 @@ class FitPage(BasicPage):
             if item in self.model.orientation_params:
                 orient_angle = wx.StaticText(self, -1, '[For 2D only]:')
                 mag_on_button = wx.Button(self, -1, "Magnetic ON")
+                mag_on_button.SetToolTipString("Turn Pol Beam/Mag scatt on/off")
                 mag_on_button.Bind(wx.EVT_BUTTON, self._on_mag_on)
-                mag_help_button = wx.Button(self, -1, "Magnetic angles?")
+                mag_angle_help_button = wx.Button(self, -1, "Magnetic angles?")
+                mag_angle_help_button.SetToolTipString("see angle definitions")
+                mag_help_button = wx.Button(self, -1, "Mag HELP")
+                mag_help_button.SetToolTipString("Help on pol beam/mag fitting")
                 mag_help_button.Bind(wx.EVT_BUTTON, self._on_mag_help)
+                mag_angle_help_button.Bind(wx.EVT_BUTTON, \
+                                            self._on_mag_angle_help)
                 sizer.Add(orient_angle, (iy, ix), (1, 1),
                           wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
                 iy += 1
                 sizer.Add(mag_on_button, (iy, ix), (1, 1),
                           wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+                ix += 1
+                sizer.Add(mag_angle_help_button, (iy, ix), (1, 1),
+                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
                 sizer.Add(mag_help_button, (iy, ix + 1), (1, 1),
                           wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
 
                 #handle the magnetic buttons
+                #clean this up so that assume mag is off then turn 
+                #all buttons on IF mag has mag and has 2D
                 if not self._has_magnetic:
                     mag_on_button.Show(False)
                 elif not self.data.__class__.__name__ == "Data2D":
@@ -3088,9 +3099,11 @@ class FitPage(BasicPage):
                     if self.magnetic_on:
                         mag_on_button.SetLabel("Magnetic OFF")
                         mag_help_button.Show(True)
+                        mag_angle_help_button.Show(True)
                     else:
                         mag_on_button.SetLabel("Magnetic ON")
                         mag_help_button.Show(False)
+                        mag_angle_help_button.Show(False)
 
                 if not self.data.__class__.__name__ == "Data2D" and \
                         not self.enable2D:
