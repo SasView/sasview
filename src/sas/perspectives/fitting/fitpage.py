@@ -291,8 +291,17 @@ class FitPage(BasicPage):
         self.btFitHelp.SetToolTipString("General Fitting Help.")
         self.btFitHelp.Bind(wx.EVT_BUTTON, self._onFitHelp)
         
-        #Resolution Smearing Help button
-        self.btSmearHelp = wx.Button(self, -1, '?', style=wx.BU_EXACTFIT)
+        #Resolution Smearing Help button (for now use same technique as
+        #used for dI help to get tiniest possible button that works
+        #both on MAC and PC.  Should completely rewrite the fitting sizer 
+        #in future.  This is minimum to get out release 3.1
+        #        comment June 14, 2015     --- PDB
+        if sys.platform.count("win32") > 0:
+            size_q = (20, 15)  #on PC
+        else:
+            size_q = (30, 20)  #on MAC
+        self.btSmearHelp = wx.Button(self, -1, '?', style=wx.BU_EXACTFIT,\
+                                     size=size_q)
         self.btSmearHelp.SetToolTipString("Resolution Smearing Help.")
         self.btSmearHelp.Bind(wx.EVT_BUTTON, self._onSmearHelp)
         
@@ -353,13 +362,23 @@ class FitPage(BasicPage):
         self.disable_smearer.SetValue(True)
 
         # add 4 types of smearing to the sizer
+        # Note from June 14, 2015
+        # removed the extra (10,10) spaces to make room for help.  Actually
+        # don't see the need for those anyway as the wx.LEFT, xx should take
+        # care of spacing anyway though it does not seem to work for some
+        # reason.  Currently leaving as we are in "code freeze" only making
+        # minimal changes necessary for release 3.1.  We probably want to clean
+        # up the whole fitpage (and basepage and fitpanel etc) eventually.
+        #                          ---- PDB
         sizer_smearer.Add(self.disable_smearer, 0, wx.LEFT, 10)
-        sizer_smearer.Add((10, 10))
+#        sizer_smearer.Add((10, 10))
         sizer_smearer.Add(self.enable_smearer)
-        sizer_smearer.Add((10, 10))
+#        sizer_smearer.Add((10, 10))
         sizer_smearer.Add(self.pinhole_smearer)
-        sizer_smearer.Add((10, 10))
+#        sizer_smearer.Add((10, 10))
         sizer_smearer.Add(self.slit_smearer)
+#        sizer_smearer.Add((10, 10))
+        sizer_smearer.Add(self.btSmearHelp)
         sizer_smearer.Add((10, 10))
 
         # StaticText for chi2, N(for fitting), Npts + Log/linear spacing
