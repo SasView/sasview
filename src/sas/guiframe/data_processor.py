@@ -18,6 +18,7 @@ from sas.guiframe.events import StatusEvent
 from sas.plottools import plottables
 from sas.guiframe.dataFitting import Data1D
 
+
 FUNC_DICT = {"sqrt": "math.sqrt",
              "pow": "math.sqrt"}
 
@@ -1129,6 +1130,29 @@ class GridPanel(SPanel):
         except:
             wx.PostEvent(self.parent.parent, StatusEvent(status=msg, info="error"))
 
+    def on_help(self, event):
+        """
+        Bring up the Batch Grid Panel Usage Documentation whenever
+        the HELP button is clicked.
+
+        Calls DocumentationWindow with the path of the location within the
+        documentation tree (after /doc/ ....".  Note that when using old
+        versions of Wx (before 2.9) and thus not the release version of
+        installers, the help comes up at the top level of the file as
+        webbrowser does not pass anything past the # to the browser when it is
+        running "file:///...."
+
+    :param evt: Triggers on clicking the help button
+    """
+        #import documentation window here to avoid circular imports
+        #if put at top of file with rest of imports.
+        from documentation_window import DocumentationWindow
+
+        _TreeLocation = "user/perspectives/fitting/fitting_help.html"
+        _PageAnchor = "#batch-fit-mode"
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, _PageAnchor,
+                                          "Batch Mode Help")
+
     def get_sentence(self, dict, sentence, column_names):
         """
         Get sentence from dict
@@ -1185,12 +1209,19 @@ class GridPanel(SPanel):
         plot_tip += "click the Add buttons first."
 
         self.plot_button.SetToolTipString(plot_tip)
+
+        self.help_button = wx.Button(self, -1, "HELP")
+        self.help_button.SetToolTipString("Get Help for Batch Mode")
+        self.help_button.Bind(wx.EVT_BUTTON, self.on_help)
+
         boxsizer1.AddMany([(note_text, 0, wx.LEFT, 10),
                            (self.view_button, 0, wx.LEFT | wx.RIGHT, 10)])
         self.button_sizer.AddMany([(boxsizer1, 0,
                                     wx.LEFT | wx.RIGHT | wx.BOTTOM, 10),
                                    (self.plot_button, 0,
-                                    wx.LEFT | wx.TOP | wx.BOTTOM | wx.EXPAND, 12)])
+                                    wx.LEFT | wx.TOP | wx.BOTTOM, 12),
+                                   (self.help_button,0, 
+                                    wx.LEFT | wx.TOP | wx.BOTTOM, 12)])
 
         wx.EVT_BUTTON(self, self.plot_button.GetId(), self.on_plot)
         self.plotting_sizer.AddMany(\
