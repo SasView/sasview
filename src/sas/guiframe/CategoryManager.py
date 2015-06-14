@@ -79,7 +79,13 @@ class CategoryManager(wx.Frame):
     """
     def __init__(self, parent, win_id, title):
         """
-        Category Manager Dialog class
+        Category Manager Dialog class.  This is the class that is used to
+        bring up a dialog box allowing the user to create new model categories
+        and to add and remove models from a given category allowing complete
+        user customization of categories for models.  This and Category 
+        Installer provide the mecahnisms for creating the category dictionary
+        which is saved as a json file so that categories remain persistent
+        from session to session
         :param win_id: A new wx ID
         :param title: Title for the window
         """
@@ -87,10 +93,17 @@ class CategoryManager(wx.Frame):
         # make sure the category file is where it should be
         self.performance_blocking = False
 
+        # get the current status of model categorization (from the dictionary)
         self.master_category_dict = defaultdict(list)
         self.by_model_dict = defaultdict(list)
         self.model_enabled_dict = defaultdict(bool)
 
+        #----------Initialize panels, frames, and sizers ------------
+        # the whole panel is panel of hbox (a horizontal sizer and contains
+        # the left_pane (vbox2 sizer) which houses all the buttons and
+        # the right_pane (vbox sizer) which houses the current model/category 
+        #list)
+        #     Comments added June 14, 2015 -PDB
         wx.Frame.__init__(self, parent, win_id, title, size=(660, 400))
 
         panel = wx.Panel(self, -1)
@@ -113,18 +126,22 @@ class CategoryManager(wx.Frame):
         self._regenerate_model_dict()
         self._set_enabled()      
 
+        #----------button and button layout -----------------------
         vbox2 = wx.BoxSizer(wx.VERTICAL)
 
+        #Create buttons
         sel = wx.Button(left_panel, -1, 'Enable All', size=(100, -1))
         des = wx.Button(left_panel, -1, 'Disable All', size=(100, -1))
         modify_button = wx.Button(left_panel, -1, 'Modify', 
                                   size=(100, -1))
         ok_button = wx.Button(left_panel, -1, 'OK', size=(100, -1))
+        help_button = wx.Button(left_panel, -1, 'HELP', size=(100, -1))
         cancel_button = wx.Button(left_panel, -1, 'Cancel', 
                                   size=(100, -1))        
 
         
 
+        #bind buttons to action method
         self.Bind(wx.EVT_BUTTON, self._on_selectall, 
                   id=sel.GetId())
         self.Bind(wx.EVT_BUTTON, self._on_deselectall, 
@@ -133,25 +150,32 @@ class CategoryManager(wx.Frame):
                   id = modify_button.GetId())
         self.Bind(wx.EVT_BUTTON, self._on_ok, 
                   id = ok_button.GetId())
+        self.Bind(wx.EVT_BUTTON, self._on_help, 
+                  id = help_button.GetId())
         self.Bind(wx.EVT_BUTTON, self._on_cancel, 
                   id = cancel_button.GetId())
 
+        #add buttons to sizer (vbox2) and convert to panel so displays well
+        #on all platforms
         vbox2.Add(modify_button, 0, wx.TOP, 10)
         vbox2.Add((-1, 20))
         vbox2.Add(sel)
         vbox2.Add(des)
         vbox2.Add((-1, 20))
         vbox2.Add(ok_button)
+        vbox2.Add(help_button)
         vbox2.Add(cancel_button)
 
         left_panel.SetSizer(vbox2)
 
+        #--------------------- layout of current cat/model list --------
         vbox.Add(self.cat_list, 1, wx.EXPAND | wx.TOP, 3)
         vbox.Add((-1, 10))
 
 
         right_panel.SetSizer(vbox)
 
+        #-------------- put it all together -----------------
         hbox.Add(left_panel, 0, wx.EXPAND | wx.RIGHT, 5)
         hbox.Add(right_panel, 1, wx.EXPAND)
         hbox.Add((3, -1))
@@ -292,6 +316,30 @@ class CategoryManager(wx.Frame):
         wx.PostEvent(self.parent, evt)
 
         self.Destroy()
+
+    def _on_help(self, event):
+        """
+        Bring up the Category Manager Panel Documentation whenever
+        the HELP button is clicked.
+
+        Calls DocumentationWindow with the path of the location within the
+        documentation tree (after /doc/ ....".  Note that when using old
+        versions of Wx (before 2.9) and thus not the release version of
+        installers, the help comes up at the top level of the file as
+        webbrowser does not pass anything past the # to the browser when it is
+        running "file:///...."
+
+    :param evt: Triggers on clicking the help button
+    """
+
+        #import documentation window here to avoid circular imports
+        #if put at top of file with rest of imports.
+        from documentation_window import DocumentationWindow
+
+        _TreeLocation = "user/perspectives/fitting/fitting_help.html"
+        _PageAnchor = "#category-manager"
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, _PageAnchor,
+                                          "Category Manager Help")
 
     def _on_cancel(self, event):
         """
