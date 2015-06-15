@@ -348,6 +348,7 @@ ext_modules.extend(c_models)
 package_dir["sas.sasview"] = "sasview"
 package_data['sas.sasview'] = ['images/*', 
                                'media/*',
+                               'test/*.txt',
                                'test/1d_data/*',
                                'test/2d_data/*',
                                'test/save_states/*',
