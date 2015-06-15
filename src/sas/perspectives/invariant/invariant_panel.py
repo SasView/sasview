@@ -1892,8 +1892,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
     """
 
         _TreeLocation = "user/perspectives/invariant/invariant_help.html"
-        _doc_viewer = DocumentationWindow(self, -1, \
-             _TreeLocation, "Invariant Help")
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+                                          "Invariant Help")
 
 
 class InvariantDialog(wx.Dialog):

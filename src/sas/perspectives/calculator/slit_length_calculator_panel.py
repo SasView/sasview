@@ -186,8 +186,8 @@ class SlitLengthCalculatorPanel(wx.Panel, PanelBase):
     """
 
         _TreeLocation = "user/perspectives/calculator/slit_calculator_help.html"
-        _doc_viewer = DocumentationWindow(self, -1, \
-             _TreeLocation, "Slit Length Calculator Help")
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+                                          "Slit Length Calculator Help")
 
     def on_close(self, event):
         """

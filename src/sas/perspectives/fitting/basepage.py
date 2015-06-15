@@ -2846,17 +2846,15 @@ class BasicPage(ScrolledPanel, PanelBase):
         :param evt: on Help Button pressed event
         """
 
-        if self.model == None:
-            name = 'index.html'
-        else:
-            name = self.formfactorbox.GetValue()
-
+        _TreeLocation = 'user/models/model_functions.html'
         if self.model != None:
-            _docspath = 'user/models/model_functions.html#' + name
-            _doc_viewer = DocumentationWindow(self, -1, _docspath, name + "Help")
+            name = self.formfactorbox.GetValue()
+            _PageAnchor = '#' + name
+            _doc_viewer = DocumentationWindow(self, -1, _TreeLocation,
+                                              _PageAnchor, name + "Help")
         else:
-            _doc_viewer = DocumentationWindow(self, -1, "index.html", \
-                                                "General Help")
+            _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+                                                "General Model Help")
 
 
     def on_model_help_clicked(self, event):
@@ -2890,7 +2888,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             msg += "You must select a model to get information on this"
             wx.MessageBox(msg, info)
 
-    def _on_mag_help(self, event):
+    def _on_mag_angle_help(self, event):
         """
         Bring up Magnetic Angle definition bmp image whenever the ? button
         is clicked. Calls DocumentationWindow with the path of the location
@@ -2907,8 +2905,28 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
 
         _TreeLocation = "_images/M_angles_pic.bmp"
-        _doc_viewer = DocumentationWindow(self, -1, \
-             _TreeLocation, "Magnetic Angle Defintions")
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+                                          "Magnetic Angle Defintions")
+
+    def _on_mag_help(self, event):
+        """
+        Bring up Magnetic Angle definition bmp image whenever the ? button
+        is clicked. Calls DocumentationWindow with the path of the location
+        within the documentation tree (after /doc/ ....". When using old
+        versions of Wx (i.e. before 2.9 and therefore not part of release
+        versions distributed via installer) it brings up an image viewer
+        box which allows the user to click through the rest of the images in
+        the directory.  Not ideal but probably better than alternative which
+        would bring up the entire discussion of how magnetic models work?
+        Specially since it is not likely to be accessed.  The normal release
+        versions bring up the normal image box.
+
+        :param evt: Triggers on clicking ? in Magnetic Angles? box
+        """
+
+        _TreeLocation = "user/perspectives/fitting/mag_help.html"
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+                                          "Polarized Beam/Magnetc Help")
 
     def _on_mag_on(self, event):
         """
@@ -2952,10 +2970,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         :param evt: Triggers on clicking ? in polydispersity box
         """
 
-        _TreeLocation = "user/perspectives/fitting/fitting_help.html"
-        _TreeLocation += "#polydispersity-distributions"
-        _doc_viewer = DocumentationWindow(self, -1, \
-             _TreeLocation, "Polydispersity Help")
+        _TreeLocation = "user/perspectives/fitting/pd_help.html"
+        _PageAnchor = ""
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation,
+                                          _PageAnchor, "Polydispersity Help")
 
     def on_left_down(self, event):
         """

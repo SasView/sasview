@@ -14,7 +14,7 @@ from gui_manager import get_app_dir
 
 
 class DocumentationWindow(wx.Frame):
-    def __init__(self, parent, id, path, title, size=(850, 540)):
+    def __init__(self, parent, id, path, url_instruction, title, size=(850, 540)):
         wx.Frame.__init__(self, parent, id, title, size=size)
 
         SPHINX_DOC_ENV = "SASVIEW_DOC_PATH"
@@ -27,7 +27,7 @@ class DocumentationWindow(wx.Frame):
             docs_path = os.path.join(get_app_dir(), "doc")
 
         file_path = os.path.join(docs_path, path)
-        url = "file://" + urllib.quote(file_path)
+        url = "file:///" + urllib.quote(file_path,'\:')+ url_instruction
 
         if not os.path.exists(file_path):
             logging.error("Could not find Sphinx documentation at %s \
@@ -47,7 +47,7 @@ class DocumentationWindow(wx.Frame):
 
 def main():
     app = wx.App()
-    DocumentationWindow(None, -1, "index.html", "Documentation",)
+    DocumentationWindow(None, -1, "index.html", "", "Documentation",)
     app.MainLoop()
 
 if __name__ == '__main__':

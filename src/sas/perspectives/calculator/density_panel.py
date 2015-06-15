@@ -384,8 +384,8 @@ class DensityPanel(ScrolledPanel, PanelBase):
     """
 
         _TreeLocation = "user/perspectives/calculator/density_calculator_help.html"
-        _doc_viewer = DocumentationWindow(self, -1, \
-             _TreeLocation, "Density/Volume Calculator Help")
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+                                          "Density/Volume Calculator Help")
 
     def on_close(self, event):
         """

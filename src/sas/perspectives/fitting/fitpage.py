@@ -15,6 +15,7 @@ from sas.guiframe.events import PlotQrangeEvent
 from sas.guiframe.dataFitting import check_data_validity
 from sas.guiframe.utils import format_number
 from sas.guiframe.utils import check_float
+from sas.guiframe.documentation_window import DocumentationWindow
 
 (Chi2UpdateEvent, EVT_CHI2_UPDATE) = wx.lib.newevent.NewEvent()
 _BOX_WIDTH = 76
@@ -187,8 +188,10 @@ class FitPage(BasicPage):
 
     def _fill_range_sizer(self):
         """
-        Fill the sizer containing the plotting range
-        add  access to npts
+        Fill the Fitting sizer on the fit panel which contains: the smearing
+        information (dq), the weighting information (dI or other), the plotting
+        range, access to the 2D mask editor, the compute, fit, and help
+        buttons, xi^2, number of points etc.
         """
         is_2Ddata = False
 
@@ -264,7 +267,7 @@ class FitPage(BasicPage):
         self.dI_idata.Enable(False)
         weighting_box.Add(sizer_weighting)
 
-        sizer_fit = wx.GridSizer(2, 4, 2, 6)
+        sizer_fit = wx.GridSizer(2, 5, 2, 6)
 
         # combobox for smear2d accuracy selection
         self.smear_accuracy = wx.ComboBox(self, -1, size=(50, -1),
@@ -283,6 +286,25 @@ class FitPage(BasicPage):
         self.btFit.Bind(wx.EVT_BUTTON, self._onFit, id=self.btFit.GetId())
         self.btFit.SetToolTipString("Start fitting.")
 
+        #General Help button
+        self.btFitHelp = wx.Button(self, -1, 'HELP')
+        self.btFitHelp.SetToolTipString("General Fitting Help.")
+        self.btFitHelp.Bind(wx.EVT_BUTTON, self._onFitHelp)
+        
+        #Resolution Smearing Help button (for now use same technique as
+        #used for dI help to get tiniest possible button that works
+        #both on MAC and PC.  Should completely rewrite the fitting sizer 
+        #in future.  This is minimum to get out release 3.1
+        #        comment June 14, 2015     --- PDB
+        if sys.platform.count("win32") > 0:
+            size_q = (20, 15)  #on PC
+        else:
+            size_q = (30, 20)  #on MAC
+        self.btSmearHelp = wx.Button(self, -1, '?', style=wx.BU_EXACTFIT,\
+                                     size=size_q)
+        self.btSmearHelp.SetToolTipString("Resolution Smearing Help.")
+        self.btSmearHelp.Bind(wx.EVT_BUTTON, self._onSmearHelp)
+        
         #textcntrl for custom resolution
         self.smear_pinhole_max = ModelTextCtrl(self, -1,
                             size=(_BOX_WIDTH - 25, 20),
@@ -340,13 +362,23 @@ class FitPage(BasicPage):
         self.disable_smearer.SetValue(True)
 
         # add 4 types of smearing to the sizer
+        # Note from June 14, 2015
+        # removed the extra (10,10) spaces to make room for help.  Actually
+        # don't see the need for those anyway as the wx.LEFT, xx should take
+        # care of spacing anyway though it does not seem to work for some
+        # reason.  Currently leaving as we are in "code freeze" only making
+        # minimal changes necessary for release 3.1.  We probably want to clean
+        # up the whole fitpage (and basepage and fitpanel etc) eventually.
+        #                          ---- PDB
         sizer_smearer.Add(self.disable_smearer, 0, wx.LEFT, 10)
-        sizer_smearer.Add((10, 10))
+#        sizer_smearer.Add((10, 10))
         sizer_smearer.Add(self.enable_smearer)
-        sizer_smearer.Add((10, 10))
+#        sizer_smearer.Add((10, 10))
         sizer_smearer.Add(self.pinhole_smearer)
-        sizer_smearer.Add((10, 10))
+#        sizer_smearer.Add((10, 10))
         sizer_smearer.Add(self.slit_smearer)
+#        sizer_smearer.Add((10, 10))
+        sizer_smearer.Add(self.btSmearHelp)
         sizer_smearer.Add((10, 10))
 
         # StaticText for chi2, N(for fitting), Npts + Log/linear spacing
@@ -390,10 +422,12 @@ class FitPage(BasicPage):
         sizer_fit.Add(self.points_sizer, 0, 0)
         #sizer_fit.Add(box_description_3, 0, 0)
         sizer_fit.Add(self.draw_button, 0, 0)
+        sizer_fit.Add((-1,5))
         sizer_fit.Add(self.tcChi, 0, 0)
         sizer_fit.Add(self.Npts_fit, 0, 0)
         sizer_fit.Add(self.Npts_total, 0, 0)
         sizer_fit.Add(self.btFit, 0, 0)
+        sizer_fit.Add(self.btFitHelp, 0, 0)
 
         # StaticText for smear
         self.smear_description_none = wx.StaticText(self, -1,
@@ -1045,6 +1079,45 @@ class FitPage(BasicPage):
         #self._manager.onFit(uid=self.uid)
         self.fit_started = self._manager.onFit(uid=self.uid)
         wx.CallAfter(self.set_fitbutton)
+
+    def _onFitHelp(self, event):
+        """
+        Bring up the Full Fitting Documentation whenever the HELP button is
+        clicked.
+
+        Calls DocumentationWindow with the path of the location within the
+        documentation tree (after /doc/ ....".  Note that when using old
+        versions of Wx (before 2.9) and thus not the release version of
+        installers, the help comes up at the top level of the file as
+        webbrowser does not pass anything past the # to the browser when it is
+        running "file:///...."
+
+    :param evt: Triggers on clicking the help button
+    """
+
+        _TreeLocation = "user/perspectives/fitting/fitting_help.html"
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+                                          "General Fitting Help")
+
+    def _onSmearHelp(self, event):
+        """
+        Bring up the instrumental resolution smearing Documentation whenever
+        the ? button in the smearing box is clicked.
+
+        Calls DocumentationWindow with the path of the location within the
+        documentation tree (after /doc/ ....".  Note that when using old
+        versions of Wx (before 2.9) and thus not the release version of
+        installers, the help comes up at the top level of the file as
+        webbrowser does not pass anything past the # to the browser when it is
+        running "file:///...."
+
+    :param evt: Triggers on clicking the help button
+    """
+
+        _TreeLocation = "user/perspectives/fitting/sm_help.html"
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+                                          "Instrumental Resolution Smearing \
+                                          Help")
 
     def set_fitbutton(self):
         """
@@ -3011,18 +3084,29 @@ class FitPage(BasicPage):
             if item in self.model.orientation_params:
                 orient_angle = wx.StaticText(self, -1, '[For 2D only]:')
                 mag_on_button = wx.Button(self, -1, "Magnetic ON")
+                mag_on_button.SetToolTipString("Turn Pol Beam/Mag scatt on/off")
                 mag_on_button.Bind(wx.EVT_BUTTON, self._on_mag_on)
-                mag_help_button = wx.Button(self, -1, "Magnetic angles?")
+                mag_angle_help_button = wx.Button(self, -1, "Magnetic angles?")
+                mag_angle_help_button.SetToolTipString("see angle definitions")
+                mag_help_button = wx.Button(self, -1, "Mag HELP")
+                mag_help_button.SetToolTipString("Help on pol beam/mag fitting")
                 mag_help_button.Bind(wx.EVT_BUTTON, self._on_mag_help)
+                mag_angle_help_button.Bind(wx.EVT_BUTTON, \
+                                            self._on_mag_angle_help)
                 sizer.Add(orient_angle, (iy, ix), (1, 1),
                           wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
                 iy += 1
                 sizer.Add(mag_on_button, (iy, ix), (1, 1),
                           wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+                ix += 1
+                sizer.Add(mag_angle_help_button, (iy, ix), (1, 1),
+                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
                 sizer.Add(mag_help_button, (iy, ix + 1), (1, 1),
                           wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
 
                 #handle the magnetic buttons
+                #clean this up so that assume mag is off then turn 
+                #all buttons on IF mag has mag and has 2D
                 if not self._has_magnetic:
                     mag_on_button.Show(False)
                 elif not self.data.__class__.__name__ == "Data2D":
@@ -3034,9 +3118,11 @@ class FitPage(BasicPage):
                     if self.magnetic_on:
                         mag_on_button.SetLabel("Magnetic OFF")
                         mag_help_button.Show(True)
+                        mag_angle_help_button.Show(True)
                     else:
                         mag_on_button.SetLabel("Magnetic ON")
                         mag_help_button.Show(False)
+                        mag_angle_help_button.Show(False)
 
                 if not self.data.__class__.__name__ == "Data2D" and \
                         not self.enable2D:

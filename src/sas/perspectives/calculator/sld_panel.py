@@ -325,8 +325,8 @@ class SldPanel(wx.Panel, PanelBase):
     """
 
         _TreeLocation = "user/perspectives/calculator/sld_calculator_help.html"
-        _doc_viewer = DocumentationWindow(self, -1, \
-             _TreeLocation, "General Scattering Calculator Help")
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+                                          "General Scattering Calculator Help")
 
     def on_close(self, event):
         """

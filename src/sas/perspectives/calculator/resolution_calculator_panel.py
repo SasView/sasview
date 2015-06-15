@@ -641,8 +641,8 @@ class ResolutionCalculatorPanel(ScrolledPanel):
     """
 
         _TreeLocation = "user/perspectives/calculator/resolution_calculator_help.html"
-        _doc_viewer = DocumentationWindow(self, -1,
-                                          _TreeLocation, "Resolution Calculator Help")
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+                                          "Resolution Calculator Help")
 
     def on_close(self, event):
         """

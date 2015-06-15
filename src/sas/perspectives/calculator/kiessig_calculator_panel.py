@@ -172,8 +172,7 @@ class KiessigThicknessCalculatorPanel(wx.Panel, PanelBase):
     :param evt: Triggers on clicking the help button
     """
         _TreeLocation = "user/perspectives/calculator/kiessig_calculator_help.html"
-        _doc_viewer = DocumentationWindow(self, -1,
-                                          _TreeLocation,
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
                                           "Density/Volume Calculator Help")
 
     def on_close(self, event):
