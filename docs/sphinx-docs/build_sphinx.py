@@ -137,11 +137,14 @@ def build():
     html = os.path.join(SPHINX_BUILD, "html")
     copy_tree(html, SASVIEW_DOCS)
 
-if __name__ == "__main__":
+def rebuild():
     clean()
     retrieve_user_docs()
     retrieve_bumps_docs()
     apidoc()
     build()
-	
+
     print "=== Done ==="
+
+if __name__ == "__main__":
+    main()
