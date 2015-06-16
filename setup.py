@@ -346,8 +346,14 @@ ext_modules.extend(c_models)
 # SasView
 
 package_dir["sas.sasview"] = "sasview"
-package_data['sas.sasview'] = ['images/*', 'media/*', 'test/*', 
-                                 'default_categories.json']
+package_data['sas.sasview'] = ['images/*', 
+                               'media/*',
+                               'test/*.txt',
+                               'test/1d_data/*',
+                               'test/2d_data/*',
+                               'test/save_states/*',
+                               'test/upcoming_formats/*', 
+                               'default_categories.json']
 packages.append("sas.sasview")
 
 required = [

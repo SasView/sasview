@@ -1,0 +1,443 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="example.xsl" ?>
+<SASroot version="1.0"
+    xmlns="cansas1d/1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="cansas1d/1.0 http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd"
+    >
+	<SASentry>
+		<Title>latex particles 0.5micron diameter in D2O Qdev</Title>
+		<Run>latex_sans</Run>
+		<SASdata>
+			<Idata><Q unit="1/A">0.003797</Q><I unit="1/cm">4006.05896074137</I><Idev unit="1/cm">160.350516888371</Idev><Qdev unit="1/A">0.00109</Qdev><Qmean unit="1/A">0.003945</Qmean><Shadowfactor>0.9956</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.004197</Q><I unit="1/cm">1594.1292143245</I><Idev unit="1/cm">144.193913580953</Idev><Qdev unit="1/A">0.001093</Qdev><Qmean unit="1/A">0.004328</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.004596</Q><I unit="1/cm">772.577974895497</I><Idev unit="1/cm">47.4452686423936</Idev><Qdev unit="1/A">0.001096</Qdev><Qmean unit="1/A">0.004716</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.004996</Q><I unit="1/cm">491.192789065555</I><Idev unit="1/cm">1.64212795726675</Idev><Qdev unit="1/A">0.0011</Qdev><Qmean unit="1/A">0.005106</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.005396</Q><I unit="1/cm">339.222462507531</I><Idev unit="1/cm">18.6638380002217</Idev><Qdev unit="1/A">0.001105</Qdev><Qmean unit="1/A">0.005498</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.005795</Q><I unit="1/cm">234.025331038665</I><Idev unit="1/cm">10.9659413510261</Idev><Qdev unit="1/A">0.001111</Qdev><Qmean unit="1/A">0.00589</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.006195</Q><I unit="1/cm">167.755826933366</I><Idev unit="1/cm">14.4727399222556</Idev><Qdev unit="1/A">0.001117</Qdev><Qmean unit="1/A">0.006284</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.006595</Q><I unit="1/cm">127.184502137658</I><Idev unit="1/cm">11.3388420587577</Idev><Qdev unit="1/A">0.001124</Qdev><Qmean unit="1/A">0.006678</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.006995</Q><I unit="1/cm">97.8743226629875</I><Idev unit="1/cm">7.72496924983092</Idev><Qdev unit="1/A">0.001131</Qdev><Qmean unit="1/A">0.007073</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.007394</Q><I unit="1/cm">75.7387226323965</I><Idev unit="1/cm">1.28726671212578</Idev><Qdev unit="1/A">0.00114</Qdev><Qmean unit="1/A">0.007468</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.007794</Q><I unit="1/cm">59.9674693155301</I><Idev unit="1/cm">5.66729694206856</Idev><Qdev unit="1/A">0.001148</Qdev><Qmean unit="1/A">0.007864</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.008194</Q><I unit="1/cm">48.5642877717183</I><Idev unit="1/cm">0.775068066134696</Idev><Qdev unit="1/A">0.001157</Qdev><Qmean unit="1/A">0.008261</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.008593</Q><I unit="1/cm">39.562368466145</I><Idev unit="1/cm">2.99469690504217</Idev><Qdev unit="1/A">0.001167</Qdev><Qmean unit="1/A">0.008657</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.008993</Q><I unit="1/cm">32.4131561966359</I><Idev unit="1/cm">0.112809624406009</Idev><Qdev unit="1/A">0.001177</Qdev><Qmean unit="1/A">0.009054</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.009393</Q><I unit="1/cm">26.9845122194651</I><Idev unit="1/cm">1.7559522605892</Idev><Qdev unit="1/A">0.001187</Qdev><Qmean unit="1/A">0.009451</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.009792</Q><I unit="1/cm">22.7193453130392</I><Idev unit="1/cm">1.70872993541491</Idev><Qdev unit="1/A">0.001198</Qdev><Qmean unit="1/A">0.009848</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01019</Q><I unit="1/cm">19.1396044557923</I><Idev unit="1/cm">0.870622123390108</Idev><Qdev unit="1/A">0.001209</Qdev><Qmean unit="1/A">0.01025</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01059</Q><I unit="1/cm">16.3106897029038</I><Idev unit="1/cm">1.2784566380161</Idev><Qdev unit="1/A">0.00122</Qdev><Qmean unit="1/A">0.01064</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01099</Q><I unit="1/cm">13.9942384293878</I><Idev unit="1/cm">1.09311729425028</Idev><Qdev unit="1/A">0.001232</Qdev><Qmean unit="1/A">0.01104</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01139</Q><I unit="1/cm">12.0788620780442</I><Idev unit="1/cm">0.321912704167634</Idev><Qdev unit="1/A">0.001244</Qdev><Qmean unit="1/A">0.01144</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01179</Q><I unit="1/cm">10.4538680640273</I><Idev unit="1/cm">0.826219886472332</Idev><Qdev unit="1/A">0.001257</Qdev><Qmean unit="1/A">0.01184</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01219</Q><I unit="1/cm">9.1009265046415</I><Idev unit="1/cm">0.719848600677436</Idev><Qdev unit="1/A">0.00127</Qdev><Qmean unit="1/A">0.01224</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01259</Q><I unit="1/cm">8.00642412230866</I><Idev unit="1/cm">0.684722867161744</Idev><Qdev unit="1/A">0.001283</Qdev><Qmean unit="1/A">0.01263</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01299</Q><I unit="1/cm">7.0456897705157</I><Idev unit="1/cm">0.166699720295245</Idev><Qdev unit="1/A">0.001296</Qdev><Qmean unit="1/A">0.01303</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01339</Q><I unit="1/cm">6.21724872865112</I><Idev unit="1/cm">0.153868634641546</Idev><Qdev unit="1/A">0.00131</Qdev><Qmean unit="1/A">0.01343</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01374</Q><I unit="1/cm">6.74668413666121</I><Idev unit="1/cm">0.184975656820248</Idev><Qdev unit="1/A">0.002327</Qdev><Qmean unit="1/A">0.01391</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01379</Q><I unit="1/cm">5.51301078640481</I><Idev unit="1/cm">0.118762537848476</Idev><Qdev unit="1/A">0.001324</Qdev><Qmean unit="1/A">0.01383</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01419</Q><I unit="1/cm">4.91258237718056</I><Idev unit="1/cm">0.176969813745123</Idev><Qdev unit="1/A">0.001338</Qdev><Qmean unit="1/A">0.01423</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01459</Q><I unit="1/cm">4.38999875927883</I><Idev unit="1/cm">0.311353476052822</Idev><Qdev unit="1/A">0.001353</Qdev><Qmean unit="1/A">0.01463</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01499</Q><I unit="1/cm">3.94346403459969</I><Idev unit="1/cm">0.387860159730271</Idev><Qdev unit="1/A">0.001367</Qdev><Qmean unit="1/A">0.01502</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01505</Q><I unit="1/cm">4.50082504231816</I><Idev unit="1/cm">0.0139779788973798</Idev><Qdev unit="1/A">0.002353</Qdev><Qmean unit="1/A">0.01521</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01539</Q><I unit="1/cm">3.54650814465845</I><Idev unit="1/cm">0.231354575544875</Idev><Qdev unit="1/A">0.001382</Qdev><Qmean unit="1/A">0.01542</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01579</Q><I unit="1/cm">3.20079465045656</I><Idev unit="1/cm">0.236881998414208</Idev><Qdev unit="1/A">0.001397</Qdev><Qmean unit="1/A">0.01582</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01619</Q><I unit="1/cm">2.89569892696003</I><Idev unit="1/cm">0.0558838715831364</Idev><Qdev unit="1/A">0.001413</Qdev><Qmean unit="1/A">0.01622</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01636</Q><I unit="1/cm">3.14491132919071</I><Idev unit="1/cm">0.286903957843761</Idev><Qdev unit="1/A">0.002381</Qdev><Qmean unit="1/A">0.0165</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01659</Q><I unit="1/cm">2.62598011992341</I><Idev unit="1/cm">0.0778103209577416</Idev><Qdev unit="1/A">0.001429</Qdev><Qmean unit="1/A">0.01662</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01699</Q><I unit="1/cm">2.38848351112502</I><Idev unit="1/cm">0.123003804813548</Idev><Qdev unit="1/A">0.001444</Qdev><Qmean unit="1/A">0.01702</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01738</Q><I unit="1/cm">2.17876187277835</I><Idev unit="1/cm">0.177344328232719</Idev><Qdev unit="1/A">0.001461</Qdev><Qmean unit="1/A">0.01742</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01767</Q><I unit="1/cm">2.26908817318902</I><Idev unit="1/cm">0.171479862774944</Idev><Qdev unit="1/A">0.002411</Qdev><Qmean unit="1/A">0.0178</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01778</Q><I unit="1/cm">1.99127729706612</I><Idev unit="1/cm">0.0776180412490532</Idev><Qdev unit="1/A">0.001477</Qdev><Qmean unit="1/A">0.01782</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01818</Q><I unit="1/cm">1.82791800631361</I><Idev unit="1/cm">0.0244195325473987</Idev><Qdev unit="1/A">0.001493</Qdev><Qmean unit="1/A">0.01821</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01858</Q><I unit="1/cm">1.67848509472461</I><Idev unit="1/cm">0.0887006173311792</Idev><Qdev unit="1/A">0.00151</Qdev><Qmean unit="1/A">0.01861</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01898</Q><I unit="1/cm">1.68661526173643</I><Idev unit="1/cm">0.0465056210763128</Idev><Qdev unit="1/A">0.002444</Qdev><Qmean unit="1/A">0.0191</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01898</Q><I unit="1/cm">1.68661526173643</I><Idev unit="1/cm">0.0287818270155056</Idev><Qdev unit="1/A">0.001527</Qdev><Qmean unit="1/A">0.01901</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01938</Q><I unit="1/cm">1.42409914349359</I><Idev unit="1/cm">0.0407580018820144</Idev><Qdev unit="1/A">0.001544</Qdev><Qmean unit="1/A">0.01941</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.01978</Q><I unit="1/cm">1.31550314607982</I><Idev unit="1/cm">0.0341712929199376</Idev><Qdev unit="1/A">0.001561</Qdev><Qmean unit="1/A">0.01981</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02018</Q><I unit="1/cm">1.21769505061127</I><Idev unit="1/cm">0.0391146947477466</Idev><Qdev unit="1/A">0.001578</Qdev><Qmean unit="1/A">0.02021</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02029</Q><I unit="1/cm">1.28605198884776</I><Idev unit="1/cm">0.117319377167684</Idev><Qdev unit="1/A">0.002479</Qdev><Qmean unit="1/A">0.0204</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02058</Q><I unit="1/cm">1.12934269342291</I><Idev unit="1/cm">0.0695535935594028</Idev><Qdev unit="1/A">0.001596</Qdev><Qmean unit="1/A">0.02061</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02098</Q><I unit="1/cm">1.04908270996237</I><Idev unit="1/cm">0.103945865391001</Idev><Qdev unit="1/A">0.001613</Qdev><Qmean unit="1/A">0.02101</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02138</Q><I unit="1/cm">0.976282250802788</I><Idev unit="1/cm">0.0294678419183636</Idev><Qdev unit="1/A">0.001631</Qdev><Qmean unit="1/A">0.02141</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.0216</Q><I unit="1/cm">1.00272837079373</I><Idev unit="1/cm">0.0124100240987653</Idev><Qdev unit="1/A">0.002515</Qdev><Qmean unit="1/A">0.0217</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02178</Q><I unit="1/cm">0.911737853213214</I><Idev unit="1/cm">0.0287995848932864</Idev><Qdev unit="1/A">0.001649</Qdev><Qmean unit="1/A">0.0218</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02218</Q><I unit="1/cm">0.851315660791169</I><Idev unit="1/cm">0.00949505713408692</Idev><Qdev unit="1/A">0.001667</Qdev><Qmean unit="1/A">0.0222</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02258</Q><I unit="1/cm">0.796120161506339</I><Idev unit="1/cm">0.00735078128024068</Idev><Qdev unit="1/A">0.001685</Qdev><Qmean unit="1/A">0.0226</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.0229</Q><I unit="1/cm">0.796270874403319</I><Idev unit="1/cm">0.0803724084027472</Idev><Qdev unit="1/A">0.002554</Qdev><Qmean unit="1/A">0.02301</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02298</Q><I unit="1/cm">0.745657450200667</I><Idev unit="1/cm">0.059779068825452</Idev><Qdev unit="1/A">0.001703</Qdev><Qmean unit="1/A">0.023</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02338</Q><I unit="1/cm">0.699514756231151</I><Idev unit="1/cm">0.00790528516519376</Idev><Qdev unit="1/A">0.001722</Qdev><Qmean unit="1/A">0.0234</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02378</Q><I unit="1/cm">0.65715264050569</I><Idev unit="1/cm">0.0586251853969212</Idev><Qdev unit="1/A">0.00174</Qdev><Qmean unit="1/A">0.0238</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02418</Q><I unit="1/cm">0.618262281205102</I><Idev unit="1/cm">0.0168711285503726</Idev><Qdev unit="1/A">0.001759</Qdev><Qmean unit="1/A">0.0242</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02421</Q><I unit="1/cm">0.644819133988899</I><Idev unit="1/cm">0.0494125214193752</Idev><Qdev unit="1/A">0.002594</Qdev><Qmean unit="1/A">0.02431</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02458</Q><I unit="1/cm">0.582489093815054</I><Idev unit="1/cm">0.0188057515484036</Idev><Qdev unit="1/A">0.001778</Qdev><Qmean unit="1/A">0.0246</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02498</Q><I unit="1/cm">0.549545690031832</I><Idev unit="1/cm">0.0417923893167032</Idev><Qdev unit="1/A">0.001797</Qdev><Qmean unit="1/A">0.025</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02537</Q><I unit="1/cm">0.519158483003037</I><Idev unit="1/cm">0.00547405917074116</Idev><Qdev unit="1/A">0.001816</Qdev><Qmean unit="1/A">0.0254</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02552</Q><I unit="1/cm">0.530683804646732</I><Idev unit="1/cm">0.0055377606424412</Idev><Qdev unit="1/A">0.002636</Qdev><Qmean unit="1/A">0.02561</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02577</Q><I unit="1/cm">0.491088414959934</I><Idev unit="1/cm">0.0220638376659903</Idev><Qdev unit="1/A">0.001835</Qdev><Qmean unit="1/A">0.0258</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02617</Q><I unit="1/cm">0.465766983148075</I><Idev unit="1/cm">0.00219192354124381</Idev><Qdev unit="1/A">0.001854</Qdev><Qmean unit="1/A">0.02619</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02657</Q><I unit="1/cm">0.441691463896423</I><Idev unit="1/cm">0.00224346396292702</Idev><Qdev unit="1/A">0.001873</Qdev><Qmean unit="1/A">0.02659</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02683</Q><I unit="1/cm">0.442666910956566</I><Idev unit="1/cm">0.0215039698815934</Idev><Qdev unit="1/A">0.00268</Qdev><Qmean unit="1/A">0.02692</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02697</Q><I unit="1/cm">0.419375781086374</I><Idev unit="1/cm">0.0277204867647122</Idev><Qdev unit="1/A">0.001892</Qdev><Qmean unit="1/A">0.02699</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02737</Q><I unit="1/cm">0.398682938030571</I><Idev unit="1/cm">0.00203185153971183</Idev><Qdev unit="1/A">0.001912</Qdev><Qmean unit="1/A">0.02739</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02777</Q><I unit="1/cm">0.379442001854766</I><Idev unit="1/cm">0.0180345924155163</Idev><Qdev unit="1/A">0.001931</Qdev><Qmean unit="1/A">0.02779</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02814</Q><I unit="1/cm">0.374855701327087</I><Idev unit="1/cm">0.000629509477568996</Idev><Qdev unit="1/A">0.002725</Qdev><Qmean unit="1/A">0.02822</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02817</Q><I unit="1/cm">0.361565025292849</I><Idev unit="1/cm">0.00226870013564266</Idev><Qdev unit="1/A">0.001951</Qdev><Qmean unit="1/A">0.02819</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02857</Q><I unit="1/cm">0.344920584388848</I><Idev unit="1/cm">0.0340542095504553</Idev><Qdev unit="1/A">0.001971</Qdev><Qmean unit="1/A">0.02859</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02897</Q><I unit="1/cm">0.329394913469722</I><Idev unit="1/cm">0.00707027436457572</Idev><Qdev unit="1/A">0.00199</Qdev><Qmean unit="1/A">0.02899</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02937</Q><I unit="1/cm">0.314925143385435</I><Idev unit="1/cm">0.024193305471527</Idev><Qdev unit="1/A">0.00201</Qdev><Qmean unit="1/A">0.02939</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02944</Q><I unit="1/cm">0.321479507858024</I><Idev unit="1/cm">0.0292488886883381</Idev><Qdev unit="1/A">0.002771</Qdev><Qmean unit="1/A">0.02952</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.02977</Q><I unit="1/cm">0.301413481064123</I><Idev unit="1/cm">0.0230294151791749</Idev><Qdev unit="1/A">0.00203</Qdev><Qmean unit="1/A">0.02979</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03017</Q><I unit="1/cm">0.288785128600725</I><Idev unit="1/cm">0.0104349423686301</Idev><Qdev unit="1/A">0.00205</Qdev><Qmean unit="1/A">0.03019</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03057</Q><I unit="1/cm">0.277262775698961</I><Idev unit="1/cm">0.0231222680213251</Idev><Qdev unit="1/A">0.00207</Qdev><Qmean unit="1/A">0.03058</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03075</Q><I unit="1/cm">0.278702012332152</I><Idev unit="1/cm">0.0122598703608383</Idev><Qdev unit="1/A">0.002819</Qdev><Qmean unit="1/A">0.03083</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03097</Q><I unit="1/cm">0.266182575065651</I><Idev unit="1/cm">0.0212226662246979</Idev><Qdev unit="1/A">0.00209</Qdev><Qmean unit="1/A">0.03098</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03137</Q><I unit="1/cm">0.255800189819289</I><Idev unit="1/cm">0.00512775943742396</Idev><Qdev unit="1/A">0.00211</Qdev><Qmean unit="1/A">0.03138</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03176</Q><I unit="1/cm">0.246071817168687</I><Idev unit="1/cm">0.00419683570305196</Idev><Qdev unit="1/A">0.002131</Qdev><Qmean unit="1/A">0.03178</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03206</Q><I unit="1/cm">0.244582880638537</I><Idev unit="1/cm">0.0172838158368264</Idev><Qdev unit="1/A">0.002868</Qdev><Qmean unit="1/A">0.03213</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03216</Q><I unit="1/cm">0.23693013236114</I><Idev unit="1/cm">0.021226606765065</Idev><Qdev unit="1/A">0.002151</Qdev><Qmean unit="1/A">0.03218</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03256</Q><I unit="1/cm">0.228343786784347</I><Idev unit="1/cm">0.0200454346432129</Idev><Qdev unit="1/A">0.002171</Qdev><Qmean unit="1/A">0.03258</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03296</Q><I unit="1/cm">0.220280695658962</I><Idev unit="1/cm">0.0220163054025753</Idev><Qdev unit="1/A">0.002192</Qdev><Qmean unit="1/A">0.03298</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03336</Q><I unit="1/cm">0.212683882786184</I><Idev unit="1/cm">0.0205409815887873</Idev><Qdev unit="1/A">0.002212</Qdev><Qmean unit="1/A">0.03338</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03337</Q><I unit="1/cm">0.216673241974744</I><Idev unit="1/cm">0.00536164144687976</Idev><Qdev unit="1/A">0.002918</Qdev><Qmean unit="1/A">0.03344</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03376</Q><I unit="1/cm">0.205537721722577</I><Idev unit="1/cm">0.0141462724715579</Idev><Qdev unit="1/A">0.002233</Qdev><Qmean unit="1/A">0.03378</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03416</Q><I unit="1/cm">0.198805274928019</I><Idev unit="1/cm">0.0141397156607886</Idev><Qdev unit="1/A">0.002253</Qdev><Qmean unit="1/A">0.03418</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03456</Q><I unit="1/cm">0.192456382211136</I><Idev unit="1/cm">0.00119407437504898</Idev><Qdev unit="1/A">0.002274</Qdev><Qmean unit="1/A">0.03458</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03467</Q><I unit="1/cm">0.194003357022187</I><Idev unit="1/cm">0.0119742663316565</Idev><Qdev unit="1/A">0.00297</Qdev><Qmean unit="1/A">0.03474</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03496</Q><I unit="1/cm">0.186609299904401</I><Idev unit="1/cm">0.0135859764092058</Idev><Qdev unit="1/A">0.002295</Qdev><Qmean unit="1/A">0.03497</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03536</Q><I unit="1/cm">0.180954066736571</I><Idev unit="1/cm">0.00501271650380536</Idev><Qdev unit="1/A">0.002316</Qdev><Qmean unit="1/A">0.03537</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03576</Q><I unit="1/cm">0.175604612246579</I><Idev unit="1/cm">0.0158523402641472</Idev><Qdev unit="1/A">0.002336</Qdev><Qmean unit="1/A">0.03577</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03598</Q><I unit="1/cm">0.175128354259244</I><Idev unit="1/cm">0.0164386405549529</Idev><Qdev unit="1/A">0.003022</Qdev><Qmean unit="1/A">0.03605</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03616</Q><I unit="1/cm">0.170531411571126</I><Idev unit="1/cm">0.0141908715583233</Idev><Qdev unit="1/A">0.002357</Qdev><Qmean unit="1/A">0.03617</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03656</Q><I unit="1/cm">0.165750913641999</I><Idev unit="1/cm">0.0154903132852618</Idev><Qdev unit="1/A">0.002378</Qdev><Qmean unit="1/A">0.03657</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03695</Q><I unit="1/cm">0.161245537261007</I><Idev unit="1/cm">0.0134667911841415</Idev><Qdev unit="1/A">0.002399</Qdev><Qmean unit="1/A">0.03697</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03729</Q><I unit="1/cm">0.15954658549394</I><Idev unit="1/cm">0.0016887771808399</Idev><Qdev unit="1/A">0.003075</Qdev><Qmean unit="1/A">0.03735</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03735</Q><I unit="1/cm">0.156932926748078</I><Idev unit="1/cm">0.00687816695343752</Idev><Qdev unit="1/A">0.00242</Qdev><Qmean unit="1/A">0.03737</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03775</Q><I unit="1/cm">0.152847811198684</I><Idev unit="1/cm">0.00991326895358868</Idev><Qdev unit="1/A">0.002441</Qdev><Qmean unit="1/A">0.03777</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03815</Q><I unit="1/cm">0.149048312395448</I><Idev unit="1/cm">0.00286749056752995</Idev><Qdev unit="1/A">0.002462</Qdev><Qmean unit="1/A">0.03817</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03855</Q><I unit="1/cm">0.145383661476316</I><Idev unit="1/cm">0.00387577316858306</Idev><Qdev unit="1/A">0.002483</Qdev><Qmean unit="1/A">0.03857</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.0386</Q><I unit="1/cm">0.146384301191591</I><Idev unit="1/cm">0.0109530741508066</Idev><Qdev unit="1/A">0.00313</Qdev><Qmean unit="1/A">0.03866</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03895</Q><I unit="1/cm">0.141916892298913</I><Idev unit="1/cm">0.00406869243218332</Idev><Qdev unit="1/A">0.002504</Qdev><Qmean unit="1/A">0.03896</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03935</Q><I unit="1/cm">0.138688247413135</I><Idev unit="1/cm">0.00523332925555816</Idev><Qdev unit="1/A">0.002525</Qdev><Qmean unit="1/A">0.03936</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.03975</Q><I unit="1/cm">0.13563194659973</I><Idev unit="1/cm">0.00371784708794055</Idev><Qdev unit="1/A">0.002547</Qdev><Qmean unit="1/A">0.03976</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.0399</Q><I unit="1/cm">0.135378509966486</I><Idev unit="1/cm">0.0110585530877352</Idev><Qdev unit="1/A">0.003185</Qdev><Qmean unit="1/A">0.03996</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.04015</Q><I unit="1/cm">0.132475413045412</I><Idev unit="1/cm">0.0065733869439444</Idev><Qdev unit="1/A">0.002568</Qdev><Qmean unit="1/A">0.04016</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.04055</Q><I unit="1/cm">0.129650853948864</I><Idev unit="1/cm">0.0105796840508662</Idev><Qdev unit="1/A">0.002589</Qdev><Qmean unit="1/A">0.04056</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.0407</Q><I unit="1/cm">0.135015608112949</I><Idev unit="1/cm">0.0101209896421567</Idev><Qdev unit="1/A">0.004896</Qdev><Qmean unit="1/A">0.04092</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.04095</Q><I unit="1/cm">0.127208370753458</I><Idev unit="1/cm">0.0113850725679602</Idev><Qdev unit="1/A">0.00261</Qdev><Qmean unit="1/A">0.04096</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.04121</Q><I unit="1/cm">0.125963773485565</I><Idev unit="1/cm">0.0022988486115027</Idev><Qdev unit="1/A">0.003241</Qdev><Qmean unit="1/A">0.04127</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.04134</Q><I unit="1/cm">0.124425512154284</I><Idev unit="1/cm">0.004704906909565</Idev><Qdev unit="1/A">0.002632</Qdev><Qmean unit="1/A">0.04136</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.04174</Q><I unit="1/cm">0.12175139303484</I><Idev unit="1/cm">0.0104200650724689</Idev><Qdev unit="1/A">0.002653</Qdev><Qmean unit="1/A">0.04176</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.04214</Q><I unit="1/cm">0.119906534488567</I><Idev unit="1/cm">0.00478612408780964</Idev><Qdev unit="1/A">0.002675</Qdev><Qmean unit="1/A">0.04216</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.04252</Q><I unit="1/cm">0.118031718060252</I><Idev unit="1/cm">0.007113888268586</Idev><Qdev unit="1/A">0.003298</Qdev><Qmean unit="1/A">0.04257</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.04254</Q><I unit="1/cm">0.117718795031699</I><Idev unit="1/cm">0.00842474681083352</Idev><Qdev unit="1/A">0.002696</Qdev><Qmean unit="1/A">0.04255</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.04294</Q><I unit="1/cm">0.114902394749353</I><Idev unit="1/cm">0.00187716940571643</Idev><Qdev unit="1/A">0.002717</Qdev><Qmean unit="1/A">0.04295</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.04334</Q><I unit="1/cm">0.11339021216593</I><Idev unit="1/cm">0.007842719046824</Idev><Qdev unit="1/A">0.002739</Qdev><Qmean unit="1/A">0.04335</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.04374</Q><I unit="1/cm">0.11205482700416</I><Idev unit="1/cm">0.0032370815249605</Idev><Qdev unit="1/A">0.00276</Qdev><Qmean unit="1/A">0.04375</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.04382</Q><I unit="1/cm">0.111170374310819</I><Idev unit="1/cm">0.00177198673739075</Idev><Qdev unit="1/A">0.003356</Qdev><Qmean unit="1/A">0.04388</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.04457</Q><I unit="1/cm">0.111162078092115</I><Idev unit="1/cm">0.00477407044828156</Idev><Qdev unit="1/A">0.005008</Qdev><Qmean unit="1/A">0.04478</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.04513</Q><I unit="1/cm">0.105340228684494</I><Idev unit="1/cm">0.0112460015292242</Idev><Qdev unit="1/A">0.003414</Qdev><Qmean unit="1/A">0.04518</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.04644</Q><I unit="1/cm">0.100212831748332</I><Idev unit="1/cm">0.009500313306954</Idev><Qdev unit="1/A">0.003473</Qdev><Qmean unit="1/A">0.04649</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.04774</Q><I unit="1/cm">0.0957800754749087</I><Idev unit="1/cm">0.00552335951593452</Idev><Qdev unit="1/A">0.003533</Qdev><Qmean unit="1/A">0.04779</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.04844</Q><I unit="1/cm">0.0962656487190431</I><Idev unit="1/cm">0.000920808548798656</Idev><Qdev unit="1/A">0.005127</Qdev><Qmean unit="1/A">0.04863</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.04905</Q><I unit="1/cm">0.091870586974471</I><Idev unit="1/cm">0.00349037958642798</Idev><Qdev unit="1/A">0.003593</Qdev><Qmean unit="1/A">0.04909</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.05035</Q><I unit="1/cm">0.0884226099187461</I><Idev unit="1/cm">0.00115124801350639</Idev><Qdev unit="1/A">0.003654</Qdev><Qmean unit="1/A">0.0504</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.05166</Q><I unit="1/cm">0.0855053944052964</I><Idev unit="1/cm">0.00994029203378968</Idev><Qdev unit="1/A">0.003716</Qdev><Qmean unit="1/A">0.0517</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.05231</Q><I unit="1/cm">0.0867503520668501</I><Idev unit="1/cm">0.00566910671351808</Idev><Qdev unit="1/A">0.005254</Qdev><Qmean unit="1/A">0.05248</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.05296</Q><I unit="1/cm">0.0830817706396237</I><Idev unit="1/cm">0.00666712733384452</Idev><Qdev unit="1/A">0.003778</Qdev><Qmean unit="1/A">0.05301</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.05427</Q><I unit="1/cm">0.0811206646116662</I><Idev unit="1/cm">0.0074601970394538</Idev><Qdev unit="1/A">0.00384</Qdev><Qmean unit="1/A">0.05431</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.05557</Q><I unit="1/cm">0.0794870182163403</I><Idev unit="1/cm">0.00353931868669503</Idev><Qdev unit="1/A">0.003903</Qdev><Qmean unit="1/A">0.05562</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.05618</Q><I unit="1/cm">0.0803397058175806</I><Idev unit="1/cm">0.0018815382672622</Idev><Qdev unit="1/A">0.005387</Qdev><Qmean unit="1/A">0.05634</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.05688</Q><I unit="1/cm">0.0779981227075428</I><Idev unit="1/cm">0.00915172656608852</Idev><Qdev unit="1/A">0.003967</Qdev><Qmean unit="1/A">0.05692</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.05818</Q><I unit="1/cm">0.0765054023431254</I><Idev unit="1/cm">0.004220758843912</Idev><Qdev unit="1/A">0.004031</Qdev><Qmean unit="1/A">0.05822</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.05949</Q><I unit="1/cm">0.0750176646191393</I><Idev unit="1/cm">0.00463641959504044</Idev><Qdev unit="1/A">0.004095</Qdev><Qmean unit="1/A">0.05953</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.06004</Q><I unit="1/cm">0.0744534311784568</I><Idev unit="1/cm">0.000653901724200016</Idev><Qdev unit="1/A">0.005526</Qdev><Qmean unit="1/A">0.06019</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.06079</Q><I unit="1/cm">0.0736271429569049</I><Idev unit="1/cm">0.00378670965514223</Idev><Qdev unit="1/A">0.00416</Qdev><Qmean unit="1/A">0.06083</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.0621</Q><I unit="1/cm">0.0724886888785603</I><Idev unit="1/cm">0.000498990519808252</Idev><Qdev unit="1/A">0.004225</Qdev><Qmean unit="1/A">0.06213</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.0634</Q><I unit="1/cm">0.0716004784288293</I><Idev unit="1/cm">0.00354187411323413</Idev><Qdev unit="1/A">0.00429</Qdev><Qmean unit="1/A">0.06344</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.06391</Q><I unit="1/cm">0.0681489290477084</I><Idev unit="1/cm">0.00165854517551403</Idev><Qdev unit="1/A">0.005671</Qdev><Qmean unit="1/A">0.06405</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.0647</Q><I unit="1/cm">0.0708574478356056</I><Idev unit="1/cm">0.00389764739528386</Idev><Qdev unit="1/A">0.004356</Qdev><Qmean unit="1/A">0.06474</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.06601</Q><I unit="1/cm">0.0700571973526123</I><Idev unit="1/cm">0.00248225247806094</Idev><Qdev unit="1/A">0.004422</Qdev><Qmean unit="1/A">0.06604</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.06731</Q><I unit="1/cm">0.0691437165346186</I><Idev unit="1/cm">0.00771720366641172</Idev><Qdev unit="1/A">0.004488</Qdev><Qmean unit="1/A">0.06734</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.06777</Q><I unit="1/cm">0.0647271674077529</I><Idev unit="1/cm">0.00253796913288505</Idev><Qdev unit="1/A">0.005821</Qdev><Qmean unit="1/A">0.0679</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.06861</Q><I unit="1/cm">0.068250551236173</I><Idev unit="1/cm">0.00647180336585684</Idev><Qdev unit="1/A">0.004555</Qdev><Qmean unit="1/A">0.06865</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.06991</Q><I unit="1/cm">0.0675540874401575</I><Idev unit="1/cm">0.00121909335974068</Idev><Qdev unit="1/A">0.004622</Qdev><Qmean unit="1/A">0.06995</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.07122</Q><I unit="1/cm">0.0671144044378858</I><Idev unit="1/cm">0.00342321846479574</Idev><Qdev unit="1/A">0.004689</Qdev><Qmean unit="1/A">0.07125</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.07163</Q><I unit="1/cm">0.0663920545826557</I><Idev unit="1/cm">0.00432162646186284</Idev><Qdev unit="1/A">0.005975</Qdev><Qmean unit="1/A">0.07175</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.07252</Q><I unit="1/cm">0.066791627793156</I><Idev unit="1/cm">0.00166299549113495</Idev><Qdev unit="1/A">0.004756</Qdev><Qmean unit="1/A">0.07255</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.07382</Q><I unit="1/cm">0.0663952482380711</I><Idev unit="1/cm">0.0017735983946147</Idev><Qdev unit="1/A">0.004824</Qdev><Qmean unit="1/A">0.07385</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.07512</Q><I unit="1/cm">0.0658687002489019</I><Idev unit="1/cm">0.00720147617318608</Idev><Qdev unit="1/A">0.004892</Qdev><Qmean unit="1/A">0.07515</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.07548</Q><I unit="1/cm">0.0669862109940541</I><Idev unit="1/cm">0.00178996924663279</Idev><Qdev unit="1/A">0.006134</Qdev><Qmean unit="1/A">0.0756</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.07642</Q><I unit="1/cm">0.0653304935681244</I><Idev unit="1/cm">0.000526445906563532</Idev><Qdev unit="1/A">0.00496</Qdev><Qmean unit="1/A">0.07645</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.07772</Q><I unit="1/cm">0.06492192106116</I><Idev unit="1/cm">0.00682181462494132</Idev><Qdev unit="1/A">0.005029</Qdev><Qmean unit="1/A">0.07775</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.07903</Q><I unit="1/cm">0.0646574610989626</I><Idev unit="1/cm">0.00143881324318404</Idev><Qdev unit="1/A">0.005097</Qdev><Qmean unit="1/A">0.07905</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.07934</Q><I unit="1/cm">0.0647970438430554</I><Idev unit="1/cm">0.00275759995923313</Idev><Qdev unit="1/A">0.006297</Qdev><Qmean unit="1/A">0.07945</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.08033</Q><I unit="1/cm">0.0644342512499126</I><Idev unit="1/cm">0.000428514203161624</Idev><Qdev unit="1/A">0.005166</Qdev><Qmean unit="1/A">0.08035</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.08163</Q><I unit="1/cm">0.0641603759696911</I><Idev unit="1/cm">0.0070178996330858</Idev><Qdev unit="1/A">0.005235</Qdev><Qmean unit="1/A">0.08165</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.08293</Q><I unit="1/cm">0.0638446312840932</I><Idev unit="1/cm">0.00535246895522096</Idev><Qdev unit="1/A">0.005304</Qdev><Qmean unit="1/A">0.08295</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.08319</Q><I unit="1/cm">0.0638273679832481</I><Idev unit="1/cm">0.00261352685599949</Idev><Qdev unit="1/A">0.006463</Qdev><Qmean unit="1/A">0.0833</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.08423</Q><I unit="1/cm">0.0635538060743309</I><Idev unit="1/cm">0.00445288301003852</Idev><Qdev unit="1/A">0.005373</Qdev><Qmean unit="1/A">0.08425</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.08552</Q><I unit="1/cm">0.0633234957637986</I><Idev unit="1/cm">0.00729930751448412</Idev><Qdev unit="1/A">0.005443</Qdev><Qmean unit="1/A">0.08555</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.08682</Q><I unit="1/cm">0.0631333179727378</I><Idev unit="1/cm">0.00299517865806913</Idev><Qdev unit="1/A">0.005512</Qdev><Qmean unit="1/A">0.08685</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.08704</Q><I unit="1/cm">0.0631156097548716</I><Idev unit="1/cm">0.00316067551657405</Idev><Qdev unit="1/A">0.006633</Qdev><Qmean unit="1/A">0.08714</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.08812</Q><I unit="1/cm">0.0629518194569258</I><Idev unit="1/cm">0.00565524653668248</Idev><Qdev unit="1/A">0.005582</Qdev><Qmean unit="1/A">0.08815</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.08942</Q><I unit="1/cm">0.0627730906340203</I><Idev unit="1/cm">0.0052170120621334</Idev><Qdev unit="1/A">0.005652</Qdev><Qmean unit="1/A">0.08945</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.09072</Q><I unit="1/cm">0.0626094704452542</I><Idev unit="1/cm">0.00463161951888352</Idev><Qdev unit="1/A">0.005722</Qdev><Qmean unit="1/A">0.09074</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.09089</Q><I unit="1/cm">0.0626498650385704</I><Idev unit="1/cm">0.000325069344399684</Idev><Qdev unit="1/A">0.006806</Qdev><Qmean unit="1/A">0.09099</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.09202</Q><I unit="1/cm">0.0624599299716043</I><Idev unit="1/cm">0.00130131375763371</Idev><Qdev unit="1/A">0.005792</Qdev><Qmean unit="1/A">0.09204</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.09331</Q><I unit="1/cm">0.0623192870664056</I><Idev unit="1/cm">0.00386789676505963</Idev><Qdev unit="1/A">0.005862</Qdev><Qmean unit="1/A">0.09334</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.09461</Q><I unit="1/cm">0.0621840974328725</I><Idev unit="1/cm">0.0017932030284589</Idev><Qdev unit="1/A">0.005933</Qdev><Qmean unit="1/A">0.09464</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.09473</Q><I unit="1/cm">0.0621986912795015</I><Idev unit="1/cm">0.00159306118149988</Idev><Qdev unit="1/A">0.006981</Qdev><Qmean unit="1/A">0.09483</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.09591</Q><I unit="1/cm">0.0620582556582799</I><Idev unit="1/cm">0.00448676734840604</Idev><Qdev unit="1/A">0.006003</Qdev><Qmean unit="1/A">0.09593</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.0972</Q><I unit="1/cm">0.0619407017005454</I><Idev unit="1/cm">0.00317270247697942</Idev><Qdev unit="1/A">0.006074</Qdev><Qmean unit="1/A">0.09723</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.0985</Q><I unit="1/cm">0.0618316173798011</I><Idev unit="1/cm">0.00644575436672228</Idev><Qdev unit="1/A">0.006144</Qdev><Qmean unit="1/A">0.09852</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.09857</Q><I unit="1/cm">0.0618536820706473</I><Idev unit="1/cm">0.00228425203843518</Idev><Qdev unit="1/A">0.00716</Qdev><Qmean unit="1/A">0.09866</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.0998</Q><I unit="1/cm">0.0617264618148268</I><Idev unit="1/cm">0.0001097496986634</Idev><Qdev unit="1/A">0.006215</Qdev><Qmean unit="1/A">0.09982</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1011</Q><I unit="1/cm">0.0616292316540801</I><Idev unit="1/cm">0.000697860024047632</Idev><Qdev unit="1/A">0.006286</Qdev><Qmean unit="1/A">0.1011</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1024</Q><I unit="1/cm">0.0615505320497014</I><Idev unit="1/cm">5.81125792511864e-05</Idev><Qdev unit="1/A">0.00734</Qdev><Qmean unit="1/A">0.1025</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1024</Q><I unit="1/cm">0.0615505320497014</I><Idev unit="1/cm">0.00220706440250695</Idev><Qdev unit="1/A">0.006357</Qdev><Qmean unit="1/A">0.1024</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1037</Q><I unit="1/cm">0.0614432094813749</I><Idev unit="1/cm">0.0046134447925846</Idev><Qdev unit="1/A">0.006428</Qdev><Qmean unit="1/A">0.1037</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.105</Q><I unit="1/cm">0.0613557474597038</I><Idev unit="1/cm">0.0038845682876357</Idev><Qdev unit="1/A">0.006499</Qdev><Qmean unit="1/A">0.105</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1062</Q><I unit="1/cm">0.0613069509900557</I><Idev unit="1/cm">0.00342625871888222</Idev><Qdev unit="1/A">0.007523</Qdev><Qmean unit="1/A">0.1063</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1063</Q><I unit="1/cm">0.0612716306574794</I><Idev unit="1/cm">0.0049076643688466</Idev><Qdev unit="1/A">0.00657</Qdev><Qmean unit="1/A">0.1063</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1076</Q><I unit="1/cm">0.0611904871080731</I><Idev unit="1/cm">0.00690638629591356</Idev><Qdev unit="1/A">0.006642</Qdev><Qmean unit="1/A">0.1076</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1089</Q><I unit="1/cm">0.0611135673266261</I><Idev unit="1/cm">0.00312107705294076</Idev><Qdev unit="1/A">0.006713</Qdev><Qmean unit="1/A">0.1089</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1101</Q><I unit="1/cm">0.0611148667568423</I><Idev unit="1/cm">0.00631372426906872</Idev><Qdev unit="1/A">0.007708</Qdev><Qmean unit="1/A">0.1102</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1102</Q><I unit="1/cm">0.0610437538846029</I><Idev unit="1/cm">0.00491988314837844</Idev><Qdev unit="1/A">0.006784</Qdev><Qmean unit="1/A">0.1102</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1114</Q><I unit="1/cm">0.0609842808625083</I><Idev unit="1/cm">0.0016279238455129</Idev><Qdev unit="1/A">0.006856</Qdev><Qmean unit="1/A">0.1115</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1127</Q><I unit="1/cm">0.0609358807035418</I><Idev unit="1/cm">0.000522920964234972</Idev><Qdev unit="1/A">0.006928</Qdev><Qmean unit="1/A">0.1128</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1139</Q><I unit="1/cm">0.060964369439983</I><Idev unit="1/cm">0.00185730485700522</Idev><Qdev unit="1/A">0.007894</Qdev><Qmean unit="1/A">0.114</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.114</Q><I unit="1/cm">0.0608900626072025</I><Idev unit="1/cm">0.0024183868308623</Idev><Qdev unit="1/A">0.006999</Qdev><Qmean unit="1/A">0.114</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1153</Q><I unit="1/cm">0.0608508956820064</I><Idev unit="1/cm">0.00584350494000012</Idev><Qdev unit="1/A">0.007071</Qdev><Qmean unit="1/A">0.1153</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1166</Q><I unit="1/cm">0.0608158752982061</I><Idev unit="1/cm">0.0049421083759054</Idev><Qdev unit="1/A">0.007143</Qdev><Qmean unit="1/A">0.1166</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1177</Q><I unit="1/cm">0.0608462805087556</I><Idev unit="1/cm">0.00343799922541136</Idev><Qdev unit="1/A">0.008083</Qdev><Qmean unit="1/A">0.1178</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1179</Q><I unit="1/cm">0.0607826589407479</I><Idev unit="1/cm">0.00103131112545898</Idev><Qdev unit="1/A">0.007214</Qdev><Qmean unit="1/A">0.1179</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1192</Q><I unit="1/cm">0.0607507027685334</I><Idev unit="1/cm">0.00108194265797187</Idev><Qdev unit="1/A">0.007286</Qdev><Qmean unit="1/A">0.1192</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1205</Q><I unit="1/cm">0.060719730830305</I><Idev unit="1/cm">0.00469421713508036</Idev><Qdev unit="1/A">0.007358</Qdev><Qmean unit="1/A">0.1205</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1216</Q><I unit="1/cm">0.0607285245479243</I><Idev unit="1/cm">0.0043627306729732</Idev><Qdev unit="1/A">0.008272</Qdev><Qmean unit="1/A">0.1216</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1218</Q><I unit="1/cm">0.0606901464421876</I><Idev unit="1/cm">0.005686418241669</Idev><Qdev unit="1/A">0.00743</Qdev><Qmean unit="1/A">0.1218</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1231</Q><I unit="1/cm">0.0606614020999667</I><Idev unit="1/cm">0.00493913438232264</Idev><Qdev unit="1/A">0.007502</Qdev><Qmean unit="1/A">0.1231</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1243</Q><I unit="1/cm">0.0606313386557632</I><Idev unit="1/cm">0.00262957905619337</Idev><Qdev unit="1/A">0.007574</Qdev><Qmean unit="1/A">0.1244</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1254</Q><I unit="1/cm">0.0605123867148291</I><Idev unit="1/cm">0.0045827157277498</Idev><Qdev unit="1/A">0.008464</Qdev><Qmean unit="1/A">0.1254</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1256</Q><I unit="1/cm">0.0605977537543078</I><Idev unit="1/cm">0.000380795660094707</Idev><Qdev unit="1/A">0.007646</Qdev><Qmean unit="1/A">0.1257</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1269</Q><I unit="1/cm">0.0605572967948118</I><Idev unit="1/cm">0.00616226532768536</Idev><Qdev unit="1/A">0.007718</Qdev><Qmean unit="1/A">0.1269</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1282</Q><I unit="1/cm">0.0605242010906595</I><Idev unit="1/cm">0.00570396690670424</Idev><Qdev unit="1/A">0.00779</Qdev><Qmean unit="1/A">0.1282</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1292</Q><I unit="1/cm">0.060298115041447</I><Idev unit="1/cm">0.000551109837639756</Idev><Qdev unit="1/A">0.008656</Qdev><Qmean unit="1/A">0.1293</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1295</Q><I unit="1/cm">0.0605001047494084</I><Idev unit="1/cm">0.00478302389749476</Idev><Qdev unit="1/A">0.007862</Qdev><Qmean unit="1/A">0.1295</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1308</Q><I unit="1/cm">0.0604825383613427</I><Idev unit="1/cm">0.000855793307535084</Idev><Qdev unit="1/A">0.007934</Qdev><Qmean unit="1/A">0.1308</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1321</Q><I unit="1/cm">0.0604629047731714</I><Idev unit="1/cm">0.0065739509959126</Idev><Qdev unit="1/A">0.008007</Qdev><Qmean unit="1/A">0.1321</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.133</Q><I unit="1/cm">0.0602504634643954</I><Idev unit="1/cm">0.00414749265501156</Idev><Qdev unit="1/A">0.00885</Qdev><Qmean unit="1/A">0.1331</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1334</Q><I unit="1/cm">0.060433494138156</I><Idev unit="1/cm">0.00304606998489991</Idev><Qdev unit="1/A">0.008079</Qdev><Qmean unit="1/A">0.1334</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1346</Q><I unit="1/cm">0.0603955091485214</I><Idev unit="1/cm">0.00217980851062088</Idev><Qdev unit="1/A">0.008151</Qdev><Qmean unit="1/A">0.1347</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1359</Q><I unit="1/cm">0.060339855669002</I><Idev unit="1/cm">0.00657830852280236</Idev><Qdev unit="1/A">0.008223</Qdev><Qmean unit="1/A">0.1359</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1368</Q><I unit="1/cm">0.0604853369811103</I><Idev unit="1/cm">0.00566643758305936</Idev><Qdev unit="1/A">0.009045</Qdev><Qmean unit="1/A">0.1369</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1372</Q><I unit="1/cm">0.0603196598246341</I><Idev unit="1/cm">0.00534151465141852</Idev><Qdev unit="1/A">0.008296</Qdev><Qmean unit="1/A">0.1372</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1385</Q><I unit="1/cm">0.060309375532759</I><Idev unit="1/cm">0.00284852938606321</Idev><Qdev unit="1/A">0.008368</Qdev><Qmean unit="1/A">0.1385</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1398</Q><I unit="1/cm">0.0602967436271026</I><Idev unit="1/cm">0.00295336795952682</Idev><Qdev unit="1/A">0.00844</Qdev><Qmean unit="1/A">0.1398</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1406</Q><I unit="1/cm">0.0603607137051181</I><Idev unit="1/cm">0.00487404736393792</Idev><Qdev unit="1/A">0.009241</Qdev><Qmean unit="1/A">0.1407</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1411</Q><I unit="1/cm">0.0602742613941729</I><Idev unit="1/cm">0.00349395972226982</Idev><Qdev unit="1/A">0.008513</Qdev><Qmean unit="1/A">0.1411</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1423</Q><I unit="1/cm">0.0602479668885315</I><Idev unit="1/cm">0.005664978076193</Idev><Qdev unit="1/A">0.008585</Qdev><Qmean unit="1/A">0.1424</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1444</Q><I unit="1/cm">0.0602321387683859</I><Idev unit="1/cm">0.00726208362318404</Idev><Qdev unit="1/A">0.009437</Qdev><Qmean unit="1/A">0.1445</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1482</Q><I unit="1/cm">0.0602373449409927</I><Idev unit="1/cm">0.000551871069496724</Idev><Qdev unit="1/A">0.009635</Qdev><Qmean unit="1/A">0.1483</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.152</Q><I unit="1/cm">0.0601917748376853</I><Idev unit="1/cm">0.000174825030187418</Idev><Qdev unit="1/A">0.009833</Qdev><Qmean unit="1/A">0.152</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1558</Q><I unit="1/cm">0.0601626483154205</I><Idev unit="1/cm">0.00506295625874152</Idev><Qdev unit="1/A">0.01003</Qdev><Qmean unit="1/A">0.1558</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1596</Q><I unit="1/cm">0.0601246884885564</I><Idev unit="1/cm">0.00275908041925203</Idev><Qdev unit="1/A">0.01023</Qdev><Qmean unit="1/A">0.1596</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1633</Q><I unit="1/cm">0.0601072198435495</I><Idev unit="1/cm">0.00318664126975139</Idev><Qdev unit="1/A">0.01043</Qdev><Qmean unit="1/A">0.1634</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1671</Q><I unit="1/cm">0.060082660240696</I><Idev unit="1/cm">0.0067972803733086</Idev><Qdev unit="1/A">0.01063</Qdev><Qmean unit="1/A">0.1672</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1709</Q><I unit="1/cm">0.0600620391573538</I><Idev unit="1/cm">0.00510790639516724</Idev><Qdev unit="1/A">0.01083</Qdev><Qmean unit="1/A">0.1709</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1746</Q><I unit="1/cm">0.0600405296819793</I><Idev unit="1/cm">0.00171872687511416</Idev><Qdev unit="1/A">0.01104</Qdev><Qmean unit="1/A">0.1747</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1784</Q><I unit="1/cm">0.0600169671903371</I><Idev unit="1/cm">0.00481893939615856</Idev><Qdev unit="1/A">0.01124</Qdev><Qmean unit="1/A">0.1784</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1821</Q><I unit="1/cm">0.0599997364001797</I><Idev unit="1/cm">0.00523105362212836</Idev><Qdev unit="1/A">0.01144</Qdev><Qmean unit="1/A">0.1822</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1859</Q><I unit="1/cm">0.0600346273600415</I><Idev unit="1/cm">0.00446256490875272</Idev><Qdev unit="1/A">0.01164</Qdev><Qmean unit="1/A">0.1859</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1896</Q><I unit="1/cm">0.0600406310253657</I><Idev unit="1/cm">0.00110037196469935</Idev><Qdev unit="1/A">0.01185</Qdev><Qmean unit="1/A">0.1897</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1934</Q><I unit="1/cm">0.0599391545394123</I><Idev unit="1/cm">0.00479193687348968</Idev><Qdev unit="1/A">0.01205</Qdev><Qmean unit="1/A">0.1934</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.1971</Q><I unit="1/cm">0.0599561819034172</I><Idev unit="1/cm">0.000864313104333068</Idev><Qdev unit="1/A">0.01225</Qdev><Qmean unit="1/A">0.1971</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.2008</Q><I unit="1/cm">0.0599802397897324</I><Idev unit="1/cm">0.0034717120216067</Idev><Qdev unit="1/A">0.01246</Qdev><Qmean unit="1/A">0.2008</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.2045</Q><I unit="1/cm">0.0599178286727727</I><Idev unit="1/cm">0.00037384535848055</Idev><Qdev unit="1/A">0.01266</Qdev><Qmean unit="1/A">0.2046</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.2082</Q><I unit="1/cm">0.0599556160980537</I><Idev unit="1/cm">0.00307239247384116</Idev><Qdev unit="1/A">0.01286</Qdev><Qmean unit="1/A">0.2083</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.2119</Q><I unit="1/cm">0.0599215170670492</I><Idev unit="1/cm">0.00516387789630184</Idev><Qdev unit="1/A">0.01307</Qdev><Qmean unit="1/A">0.212</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.2156</Q><I unit="1/cm">0.0599285612216116</I><Idev unit="1/cm">0.00708695318052664</Idev><Qdev unit="1/A">0.01327</Qdev><Qmean unit="1/A">0.2157</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.2193</Q><I unit="1/cm">0.0599152304890063</I><Idev unit="1/cm">0.00129626063050738</Idev><Qdev unit="1/A">0.01348</Qdev><Qmean unit="1/A">0.2194</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.223</Q><I unit="1/cm">0.0599146575372292</I><Idev unit="1/cm">0.00657812531638604</Idev><Qdev unit="1/A">0.01368</Qdev><Qmean unit="1/A">0.2231</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.2267</Q><I unit="1/cm">0.0599124723616312</I><Idev unit="1/cm">0.0019230796710478</Idev><Qdev unit="1/A">0.01388</Qdev><Qmean unit="1/A">0.2267</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.2304</Q><I unit="1/cm">0.0599061632185743</I><Idev unit="1/cm">0.00528098181232892</Idev><Qdev unit="1/A">0.01409</Qdev><Qmean unit="1/A">0.2304</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.234</Q><I unit="1/cm">0.059903578323727</I><Idev unit="1/cm">0.00450716588007848</Idev><Qdev unit="1/A">0.01429</Qdev><Qmean unit="1/A">0.2341</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.2377</Q><I unit="1/cm">0.0599019693196267</I><Idev unit="1/cm">0.00715205822448168</Idev><Qdev unit="1/A">0.0145</Qdev><Qmean unit="1/A">0.2377</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.2414</Q><I unit="1/cm">0.0598985623373038</I><Idev unit="1/cm">0.000232373714606139</Idev><Qdev unit="1/A">0.0147</Qdev><Qmean unit="1/A">0.2414</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.245</Q><I unit="1/cm">0.0598750516967508</I><Idev unit="1/cm">0.00144320427650416</Idev><Qdev unit="1/A">0.0149</Qdev><Qmean unit="1/A">0.245</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.2486</Q><I unit="1/cm">0.0598815532278908</I><Idev unit="1/cm">0.00708248747291248</Idev><Qdev unit="1/A">0.01511</Qdev><Qmean unit="1/A">0.2487</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.2523</Q><I unit="1/cm">0.0598948998661915</I><Idev unit="1/cm">0.00121759188786928</Idev><Qdev unit="1/A">0.01531</Qdev><Qmean unit="1/A">0.2523</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.2559</Q><I unit="1/cm">0.0598726139874623</I><Idev unit="1/cm">0.00278897820945736</Idev><Qdev unit="1/A">0.01551</Qdev><Qmean unit="1/A">0.2559</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.2595</Q><I unit="1/cm">0.0598865763133905</I><Idev unit="1/cm">0.00590043083256296</Idev><Qdev unit="1/A">0.01571</Qdev><Qmean unit="1/A">0.2596</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.2631</Q><I unit="1/cm">0.0598714989657985</I><Idev unit="1/cm">0.00506789735621128</Idev><Qdev unit="1/A">0.01592</Qdev><Qmean unit="1/A">0.2632</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.2667</Q><I unit="1/cm">0.0598796938486174</I><Idev unit="1/cm">0.00413814983082576</Idev><Qdev unit="1/A">0.01612</Qdev><Qmean unit="1/A">0.2668</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.2703</Q><I unit="1/cm">0.0598695847941254</I><Idev unit="1/cm">0.000570358074717744</Idev><Qdev unit="1/A">0.01632</Qdev><Qmean unit="1/A">0.2704</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.2739</Q><I unit="1/cm">0.0598746609102166</I><Idev unit="1/cm">0.00514749477354896</Idev><Qdev unit="1/A">0.01652</Qdev><Qmean unit="1/A">0.274</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.2775</Q><I unit="1/cm">0.0598710946052492</I><Idev unit="1/cm">0.00233949375949796</Idev><Qdev unit="1/A">0.01673</Qdev><Qmean unit="1/A">0.2775</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.2811</Q><I unit="1/cm">0.0598651661820699</I><Idev unit="1/cm">0.0013068816502873</Idev><Qdev unit="1/A">0.01693</Qdev><Qmean unit="1/A">0.2811</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.2847</Q><I unit="1/cm">0.059869579181067</I><Idev unit="1/cm">0.00145840607426022</Idev><Qdev unit="1/A">0.01713</Qdev><Qmean unit="1/A">0.2847</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.2882</Q><I unit="1/cm">0.0598647053691857</I><Idev unit="1/cm">0.00645270241890912</Idev><Qdev unit="1/A">0.01733</Qdev><Qmean unit="1/A">0.2882</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.2918</Q><I unit="1/cm">0.0598626946445512</I><Idev unit="1/cm">0.00743014395660804</Idev><Qdev unit="1/A">0.01753</Qdev><Qmean unit="1/A">0.2918</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.2953</Q><I unit="1/cm">0.0598615272479092</I><Idev unit="1/cm">0.00159526300663046</Idev><Qdev unit="1/A">0.01773</Qdev><Qmean unit="1/A">0.2953</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.2988</Q><I unit="1/cm">0.0598641396420646</I><Idev unit="1/cm">0.00532105445563836</Idev><Qdev unit="1/A">0.01793</Qdev><Qmean unit="1/A">0.2989</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3024</Q><I unit="1/cm">0.0598612295806549</I><Idev unit="1/cm">0.00362076758305341</Idev><Qdev unit="1/A">0.01813</Qdev><Qmean unit="1/A">0.3024</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3059</Q><I unit="1/cm">0.0598553782115866</I><Idev unit="1/cm">0.000694342700495228</Idev><Qdev unit="1/A">0.01833</Qdev><Qmean unit="1/A">0.3059</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3094</Q><I unit="1/cm">0.0598611284593141</I><Idev unit="1/cm">0.000164906970711582</Idev><Qdev unit="1/A">0.01853</Qdev><Qmean unit="1/A">0.3094</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3129</Q><I unit="1/cm">0.0598564807267493</I><Idev unit="1/cm">0.000292255202139402</Idev><Qdev unit="1/A">0.01873</Qdev><Qmean unit="1/A">0.3129</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3164</Q><I unit="1/cm">0.0598574055729553</I><Idev unit="1/cm">0.00173368799879996</Idev><Qdev unit="1/A">0.01893</Qdev><Qmean unit="1/A">0.3164</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3199</Q><I unit="1/cm">0.0598565118552629</I><Idev unit="1/cm">0.00656001236562596</Idev><Qdev unit="1/A">0.01912</Qdev><Qmean unit="1/A">0.3199</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3234</Q><I unit="1/cm">0.059854469989597</I><Idev unit="1/cm">0.00145280150316772</Idev><Qdev unit="1/A">0.01932</Qdev><Qmean unit="1/A">0.3234</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3268</Q><I unit="1/cm">0.0598540229496195</I><Idev unit="1/cm">0.00037971264686968</Idev><Qdev unit="1/A">0.01952</Qdev><Qmean unit="1/A">0.3269</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3303</Q><I unit="1/cm">0.0598554486681863</I><Idev unit="1/cm">0.000238660576570818</Idev><Qdev unit="1/A">0.01972</Qdev><Qmean unit="1/A">0.3303</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3338</Q><I unit="1/cm">0.0598527397416005</I><Idev unit="1/cm">0.00604866634070472</Idev><Qdev unit="1/A">0.01991</Qdev><Qmean unit="1/A">0.3338</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3372</Q><I unit="1/cm">0.0598517990703868</I><Idev unit="1/cm">0.00241504403863614</Idev><Qdev unit="1/A">0.02011</Qdev><Qmean unit="1/A">0.3372</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3406</Q><I unit="1/cm">0.0598536588848801</I><Idev unit="1/cm">0.00486344183607404</Idev><Qdev unit="1/A">0.0203</Qdev><Qmean unit="1/A">0.3407</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3441</Q><I unit="1/cm">0.0598500192805346</I><Idev unit="1/cm">0.00299483243382103</Idev><Qdev unit="1/A">0.0205</Qdev><Qmean unit="1/A">0.3441</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3475</Q><I unit="1/cm">0.0598510137107766</I><Idev unit="1/cm">0.00582814456851036</Idev><Qdev unit="1/A">0.0207</Qdev><Qmean unit="1/A">0.3475</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3509</Q><I unit="1/cm">0.0598506733448819</I><Idev unit="1/cm">0.0034360032765413</Idev><Qdev unit="1/A">0.02089</Qdev><Qmean unit="1/A">0.3509</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3543</Q><I unit="1/cm">0.0598513080913984</I><Idev unit="1/cm">0.00375553714507095</Idev><Qdev unit="1/A">0.02108</Qdev><Qmean unit="1/A">0.3543</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3577</Q><I unit="1/cm">0.0598469570341251</I><Idev unit="1/cm">0.00145158303366345</Idev><Qdev unit="1/A">0.02128</Qdev><Qmean unit="1/A">0.3577</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3611</Q><I unit="1/cm">0.0598505009672979</I><Idev unit="1/cm">0.00265475137899194</Idev><Qdev unit="1/A">0.02147</Qdev><Qmean unit="1/A">0.3611</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3645</Q><I unit="1/cm">0.0598482977039411</I><Idev unit="1/cm">0.00674573004841572</Idev><Qdev unit="1/A">0.02166</Qdev><Qmean unit="1/A">0.3645</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3678</Q><I unit="1/cm">0.0598486839631768</I><Idev unit="1/cm">0.00111160831046708</Idev><Qdev unit="1/A">0.02186</Qdev><Qmean unit="1/A">0.3678</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3712</Q><I unit="1/cm">0.0598477463604065</I><Idev unit="1/cm">0.00303739914850977</Idev><Qdev unit="1/A">0.02205</Qdev><Qmean unit="1/A">0.3712</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3745</Q><I unit="1/cm">0.059848268321775</I><Idev unit="1/cm">0.00364757844838747</Idev><Qdev unit="1/A">0.02224</Qdev><Qmean unit="1/A">0.3745</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3779</Q><I unit="1/cm">0.0598469126316892</I><Idev unit="1/cm">0.00247959277349808</Idev><Qdev unit="1/A">0.02243</Qdev><Qmean unit="1/A">0.3779</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3812</Q><I unit="1/cm">0.0598471198875677</I><Idev unit="1/cm">0.00371599954529285</Idev><Qdev unit="1/A">0.02262</Qdev><Qmean unit="1/A">0.3812</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3845</Q><I unit="1/cm">0.0598462693918775</I><Idev unit="1/cm">0.00453922346919508</Idev><Qdev unit="1/A">0.02281</Qdev><Qmean unit="1/A">0.3845</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3878</Q><I unit="1/cm">0.0598466342642868</I><Idev unit="1/cm">0.006779525782308</Idev><Qdev unit="1/A">0.023</Qdev><Qmean unit="1/A">0.3878</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3911</Q><I unit="1/cm">0.0598456023046037</I><Idev unit="1/cm">0.0072376973498202</Idev><Qdev unit="1/A">0.02319</Qdev><Qmean unit="1/A">0.3911</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3944</Q><I unit="1/cm">0.0598462561762734</I><Idev unit="1/cm">0.00259365235024266</Idev><Qdev unit="1/A">0.02338</Qdev><Qmean unit="1/A">0.3944</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.3977</Q><I unit="1/cm">0.0598449850147436</I><Idev unit="1/cm">0.00205279235695875</Idev><Qdev unit="1/A">0.02357</Qdev><Qmean unit="1/A">0.3977</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+			<Idata><Q unit="1/A">0.401</Q><I unit="1/cm">0.0598461884817662</I><Idev unit="1/cm">0.00379297785107319</Idev><Qdev unit="1/A">0.02375</Qdev><Qmean unit="1/A">0.401</Qmean><Shadowfactor>1</Shadowfactor></Idata>
+		</SASdata>
+		<SASsample>
+			<ID></ID>
+			<thickness unit="mm">1</thickness>
+			<transmission>0.327</transmission>
+		</SASsample>
+		<SASinstrument>
+			<name></name>
+			<SASsource>
+				<radiation>neutron</radiation>
+				<wavelength unit="A">5</wavelength>
+			</SASsource>
+			<SAScollimation>
+			</SAScollimation>
+			<SASdetector>
+				<name></name>
+			</SASdetector>
+		</SASinstrument>
+		<SASnote>
+			free form description of processing
+		</SASnote>
+	</SASentry>
+	<SASentry>
+		<Title>latex particles 0.5micron diameter in D2O slit</Title>
+		<Run>latex_usans</Run>
+		<SASdata>
+			<Idata><Q unit="1/A">7.7457e-05</Q><I unit="1/cm">8432.04</I><Idev unit="1/cm">153.745</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">8.3007e-05</Q><I unit="1/cm">8298.38</I><Idev unit="1/cm">152.01</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">8.8557e-05</Q><I unit="1/cm">8091.51</I><Idev unit="1/cm">149.908</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">9.4107e-05</Q><I unit="1/cm">7947.7</I><Idev unit="1/cm">148.184</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">9.9657e-05</Q><I unit="1/cm">8174.04</I><Idev unit="1/cm">149.824</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000105207</Q><I unit="1/cm">7890.52</I><Idev unit="1/cm">147.061</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000110757</Q><I unit="1/cm">8067.04</I><Idev unit="1/cm">74.9155</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000121857</Q><I unit="1/cm">7995.24</I><Idev unit="1/cm">74.0244</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000132957</Q><I unit="1/cm">7969.3</I><Idev unit="1/cm">73.7818</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000144057</Q><I unit="1/cm">7953.56</I><Idev unit="1/cm">73.6532</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000155157</Q><I unit="1/cm">7896.35</I><Idev unit="1/cm">73.3392</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000166257</Q><I unit="1/cm">7877.91</I><Idev unit="1/cm">73.1936</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000177357</Q><I unit="1/cm">7769.46</I><Idev unit="1/cm">72.6739</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000188457</Q><I unit="1/cm">7746.93</I><Idev unit="1/cm">72.5899</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000199557</Q><I unit="1/cm">7820.8</I><Idev unit="1/cm">72.9063</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000210657</Q><I unit="1/cm">7656.83</I><Idev unit="1/cm">72.1007</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000221757</Q><I unit="1/cm">7777.33</I><Idev unit="1/cm">72.6551</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000232857</Q><I unit="1/cm">7613.01</I><Idev unit="1/cm">71.8768</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000243957</Q><I unit="1/cm">7498.28</I><Idev unit="1/cm">71.316</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000255057</Q><I unit="1/cm">7494.75</I><Idev unit="1/cm">71.2836</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000266157</Q><I unit="1/cm">7266.92</I><Idev unit="1/cm">70.182</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000277257</Q><I unit="1/cm">7292.37</I><Idev unit="1/cm">57.4236</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000305007</Q><I unit="1/cm">7214.55</I><Idev unit="1/cm">57.0526</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000332757</Q><I unit="1/cm">7103.18</I><Idev unit="1/cm">56.5915</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000360507</Q><I unit="1/cm">6883.81</I><Idev unit="1/cm">55.7205</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000388257</Q><I unit="1/cm">6818.14</I><Idev unit="1/cm">55.4232</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000416007</Q><I unit="1/cm">6591.98</I><Idev unit="1/cm">54.4991</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000443757</Q><I unit="1/cm">6420.5</I><Idev unit="1/cm">53.7756</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000471507</Q><I unit="1/cm">6120.15</I><Idev unit="1/cm">52.5042</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000499257</Q><I unit="1/cm">5950.12</I><Idev unit="1/cm">51.7582</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000527007</Q><I unit="1/cm">5792.76</I><Idev unit="1/cm">51.0591</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000554757</Q><I unit="1/cm">5524.39</I><Idev unit="1/cm">43.2058</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000610257</Q><I unit="1/cm">5127.92</I><Idev unit="1/cm">41.599</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000665757</Q><I unit="1/cm">4753.49</I><Idev unit="1/cm">40.0733</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000721257</Q><I unit="1/cm">4355.25</I><Idev unit="1/cm">38.3487</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000776757</Q><I unit="1/cm">3878.25</I><Idev unit="1/cm">36.2076</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000832257</Q><I unit="1/cm">3471.25</I><Idev unit="1/cm">34.2637</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000887757</Q><I unit="1/cm">3022.77</I><Idev unit="1/cm">31.9597</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000943257</Q><I unit="1/cm">2600.33</I><Idev unit="1/cm">29.6463</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.000998757</Q><I unit="1/cm">2309.11</I><Idev unit="1/cm">27.9459</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00105426</Q><I unit="1/cm">1975.45</I><Idev unit="1/cm">25.8603</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00110976</Q><I unit="1/cm">1701.57</I><Idev unit="1/cm">21.4532</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00122076</Q><I unit="1/cm">1156.72</I><Idev unit="1/cm">17.7038</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00133176</Q><I unit="1/cm">748.659</I><Idev unit="1/cm">14.2685</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00144276</Q><I unit="1/cm">465.515</I><Idev unit="1/cm">11.2799</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00155376</Q><I unit="1/cm">252.307</I><Idev unit="1/cm">8.35705</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00166476</Q><I unit="1/cm">157.822</I><Idev unit="1/cm">6.66382</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00177576</Q><I unit="1/cm">117.146</I><Idev unit="1/cm">5.78352</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00188676</Q><I unit="1/cm">93.1465</I><Idev unit="1/cm">5.19397</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00199776</Q><I unit="1/cm">103.864</I><Idev unit="1/cm">5.46342</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00210876</Q><I unit="1/cm">128.147</I><Idev unit="1/cm">6.0333</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00221976</Q><I unit="1/cm">135.96</I><Idev unit="1/cm">6.20529</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00233076</Q><I unit="1/cm">138.712</I><Idev unit="1/cm">6.26599</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00244176</Q><I unit="1/cm">126.272</I><Idev unit="1/cm">5.99155</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00255276</Q><I unit="1/cm">114.46</I><Idev unit="1/cm">5.72081</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00266376</Q><I unit="1/cm">74.2613</I><Idev unit="1/cm">4.67786</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00277476</Q><I unit="1/cm">72.3794</I><Idev unit="1/cm">4.62347</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00288576</Q><I unit="1/cm">47.3385</I><Idev unit="1/cm">3.82544</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00299676</Q><I unit="1/cm">36.0379</I><Idev unit="1/cm">3.40491</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00310776</Q><I unit="1/cm">30.3854</I><Idev unit="1/cm">3.17364</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00321876</Q><I unit="1/cm">24.7429</I><Idev unit="1/cm">2.92505</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00332976</Q><I unit="1/cm">28.5101</I><Idev unit="1/cm">3.09348</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00344076</Q><I unit="1/cm">27.9635</I><Idev unit="1/cm">3.06924</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00355176</Q><I unit="1/cm">33.3649</I><Idev unit="1/cm">3.29833</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00366276</Q><I unit="1/cm">35.237</I><Idev unit="1/cm">3.37337</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00377376</Q><I unit="1/cm">29.0365</I><Idev unit="1/cm">3.11578</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00388476</Q><I unit="1/cm">32.5455</I><Idev unit="1/cm">3.26424</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00399576</Q><I unit="1/cm">23.1284</I><Idev unit="1/cm">2.84982</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00410676</Q><I unit="1/cm">23.6642</I><Idev unit="1/cm">2.87489</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00421776</Q><I unit="1/cm">19.3575</I><Idev unit="1/cm">2.66567</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00432876</Q><I unit="1/cm">12.8971</I><Idev unit="1/cm">2.31662</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00443976</Q><I unit="1/cm">12.8958</I><Idev unit="1/cm">2.31647</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00455076</Q><I unit="1/cm">9.66256</I><Idev unit="1/cm">2.12012</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00466176</Q><I unit="1/cm">9.66792</I><Idev unit="1/cm">2.1208</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00477276</Q><I unit="1/cm">9.39793</I><Idev unit="1/cm">2.10354</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00488376</Q><I unit="1/cm">13.7138</I><Idev unit="1/cm">2.36412</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00499476</Q><I unit="1/cm">14.2495</I><Idev unit="1/cm">2.39427</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00510576</Q><I unit="1/cm">9.12935</I><Idev unit="1/cm">2.08632</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00521676</Q><I unit="1/cm">11.822</I><Idev unit="1/cm">2.25339</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00532776</Q><I unit="1/cm">10.7551</I><Idev unit="1/cm">2.18935</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00543876</Q><I unit="1/cm">11.8258</I><Idev unit="1/cm">2.25385</Idev><dQl unit="1/A">0.117</dQl></Idata>
+			<Idata><Q unit="1/A">0.00554976</Q><I unit="1/cm">8.04703</I><Idev unit="1/cm">2.01492</Idev><dQl unit="1/A">0.117</dQl></Idata>
+		</SASdata>
+		<SASsample>
+			<ID></ID>
+			<thickness unit="mm">1</thickness>
+			<transmission>0.84031</transmission>
+		</SASsample>
+		<SASinstrument>
+			<name></name>
+			<SASsource>
+				<radiation>neutron</radiation>
+				<wavelength unit="A">2.38</wavelength>
+			</SASsource>
+			<SAScollimation>
+			</SAScollimation>
+			<SASdetector>
+				<name></name>
+			</SASdetector>
+		</SASinstrument>
+		<SASnote>
+			free form description of processing
+		</SASnote>
+	</SASentry>
+</SASroot>
