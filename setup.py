@@ -157,11 +157,7 @@ class BuildSphinxCommand(Command):
     def run(self):
         sys.path.append("docs/sphinx-docs")
         import build_sphinx
-
-        build_sphinx.clean()
-        build_sphinx.retrieve_user_docs()
-        build_sphinx.apidoc()
-        build_sphinx.build()
+        build_sphinx.rebuild()
 
 # sas module
 package_dir["sas"] = os.path.join("src", "sas")
