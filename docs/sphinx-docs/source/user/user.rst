@@ -35,3 +35,5 @@ User Documentation
    Q Resolution Estimator Tool <perspectives/calculator/resolution_calculator_help>
    
    Python Shell Tool <perspectives/calculator/python_shell_help>
+   
+   Test Data <test/testdata.rst>
