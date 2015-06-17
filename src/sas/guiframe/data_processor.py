@@ -84,13 +84,69 @@ class SPanel(ScrolledPanel):
         ScrolledPanel.__init__(self, parent, *args, **kwds)
         self.SetupScrolling()
 
+
+class GridCellEditor(sheet.CCellEditor):
+    """ Custom cell editor """
+    def __init__(self, grid):
+        super(GridCellEditor, self).__init__(grid)
+
+    def EndEdit(self, row, col, grid, previous):
+        """ 
+            Commit editing the current cell. Returns True if the value has changed.
+            @param previous: previous value in the cell
+        """
+        changed = False                             # Assume value not changed
+        val = self._tc.GetValue()                   # Get value in edit control
+        if val != self._startValue:                 # Compare
+            changed = True                          # If different then changed is True
+            grid.GetTable().SetValue(row, col, val) # Update the table
+        self._startValue = ''                       # Clear the class' start value
+        self._tc.SetValue('')                       # Clear contents of the edit control
+        return changed
+
+
 class GridPage(sheet.CSheet):
     """
     """
     def __init__(self, parent, panel=None):
         """
         """
-        sheet.CSheet.__init__(self, parent)
+        #sheet.CSheet.__init__(self, parent)
+        
+        # The following is the __init__ from CSheet. ##########################
+        # We re-write it here because the class is broken in wx 3.0,
+        # such that the cell editor is not able to receive the right
+        # number of parameters when it is called. The only way to
+        # pick a different cell editor is apparently to re-write the __init__.
+        wx.grid.Grid.__init__(self, parent, -1)
+
+        # Init variables
+        self._lastCol = -1              # Init last cell column clicked
+        self._lastRow = -1              # Init last cell row clicked
+        self._selected = None           # Init range currently selected
+                                        # Map string datatype to default renderer/editor
+        self.RegisterDataType(wx.grid.GRID_VALUE_STRING,
+                              wx.grid.GridCellStringRenderer(),
+                              GridCellEditor(self))
+
+        self.CreateGrid(4, 3)           # By default start with a 4 x 3 grid
+        self.SetColLabelSize(18)        # Default sizes and alignment
+        self.SetRowLabelSize(50)
+        self.SetRowLabelAlignment(wx.ALIGN_RIGHT, wx.ALIGN_BOTTOM)
+        self.SetColSize(0, 75)          # Default column sizes
+        self.SetColSize(1, 75)
+        self.SetColSize(2, 75)
+
+        # Sink events
+        self.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.OnLeftClick)
+        self.Bind(wx.grid.EVT_GRID_CELL_RIGHT_CLICK, self.OnRightClick)
+        self.Bind(wx.grid.EVT_GRID_CELL_LEFT_DCLICK, self.OnLeftDoubleClick)
+        self.Bind(wx.grid.EVT_GRID_RANGE_SELECT, self.OnRangeSelect)
+        self.Bind(wx.grid.EVT_GRID_ROW_SIZE, self.OnRowSize)
+        self.Bind(wx.grid.EVT_GRID_COL_SIZE, self.OnColSize)
+        self.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.OnCellChange)
+        self.Bind(wx.grid.EVT_GRID_SELECT_CELL, self.OnGridSelectCell)
+        # This ends the __init__ section for CSheet. ##########################
 
         self.AdjustScrollbars()
         #self.SetLabelBackgroundColour('#DBD4D4')
