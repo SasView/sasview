@@ -1,3 +1,4 @@
+import sys
 import os
 import logging
 import wx
@@ -9,6 +10,14 @@ try:
     import wx.html2 as html
 except:
     wx_supports_html2 = False
+if sys.platform.count("win32") > 0:
+    #this is a PC
+    wx_supports_html2 = True
+else:
+    #this is a MAC
+    wx_supports_html2 = False
+
+
 
 from gui_manager import get_app_dir
 
