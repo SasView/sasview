@@ -11,9 +11,8 @@ import logging
 __appname__ = "SasView"
 __version__ = sas.sasview.__version__
 __build__ = sas.sasview.__build__
-__download_page__ = 'http://sourceforge.net/projects/sasview/files/'
-__update_URL__ = ['svn.code.sf.net', 
-                  '/p/sasview/code/trunk/sasview.latestversion']
+__download_page__ = 'https://github.com/SasView/sasview/releases'
+__update_URL__ = ['https://github.com/SasView/sasview.git']
 
 
 # Debug message flag
@@ -23,7 +22,7 @@ __EVT_DEBUG__ = False
 __TEST__ = False
 
 # Debug message should be written to a file?
-__EVT_DEBUG_2_FILE__   = False
+__EVT_DEBUG_2_FILE__ = False
 __EVT_DEBUG_FILENAME__ = "debug.log"
 
 # About box info
@@ -38,14 +37,16 @@ _acknowledgement_preamble_bullet1 =\
 _acknowledgement_preamble_bullet2 =\
 '''Reference the following website: http://www.sasview.org'''
 _acknowledgement_preamble_bullet3 =\
-'''Send us your reference for our records: sansdanse@gmail.com'''
+'''Reference the model you used if appropriate (see documentation for refs)'''
+_acknowledgement_preamble_bullet4 =\
+'''Send us your reference for our records: developers@sasview.org'''
 _acknowledgement_publications = \
-'''This work benefited from the use of the SasView application, originally 
+'''This work benefited from the use of the SasView application, originally
 developed under NSF award DMR-0520547.
 '''
 _acknowledgement =  \
 '''This work originally developed as part of the DANSE project funded by the NSF
-under grant DMR-0520547, and currently maintained by NIST, UMD, ORNL, ISIS, ESS 
+under grant DMR-0520547, and currently maintained by NIST, UMD, ORNL, ISIS, ESS
 and ILL.
 
 '''
@@ -59,7 +60,7 @@ _license = "mailto:help@sasview.org"
 icon_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "images"))
 logging.info("icon path: %s" % icon_path)
 media_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "media"))
-test_path =  os.path.abspath(os.path.join(os.path.dirname(__file__), "test"))
+test_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "test"))
 
 _nist_logo = os.path.join(icon_path, "nist_logo.png")
 _umd_logo = os.path.join(icon_path, "umd_logo.png")
@@ -91,20 +92,20 @@ GUIFRAME_WIDTH = 1150
 GUIFRAME_HEIGHT = 840
 PLUGIN_STATE_EXTENSIONS = ['.fitv', '.inv', '.prv']
 PLUGINS_WLIST = ['Fitting files (*.fitv)|*.fitv',
-                  'Invariant files (*.inv)|*.inv',
-                  'P(r) files (*.prv)|*.prv']
+                 'Invariant files (*.inv)|*.inv',
+                 'P(r) files (*.prv)|*.prv']
 PLOPANEL_WIDTH = 415
 PLOPANEL_HEIGTH = 370
 DATAPANEL_WIDTH = 235
 DATAPANEL_HEIGHT = 700
-SPLASH_SCREEN_PATH = os.path.join(icon_path,"SVwelcome_mini.png")
-TUTORIAL_PATH = os.path.join(media_path,"Tutorial.pdf")
+SPLASH_SCREEN_PATH = os.path.join(icon_path, "SVwelcome_mini.png")
+TUTORIAL_PATH = os.path.join(media_path, "Tutorial.pdf")
 DEFAULT_STYLE = GUIFRAME.MULTIPLE_APPLICATIONS|GUIFRAME.MANAGER_ON\
                     |GUIFRAME.CALCULATOR_ON|GUIFRAME.TOOLBAR_ON
 SPLASH_SCREEN_WIDTH = 512
 SPLASH_SCREEN_HEIGHT = 366
 SS_MAX_DISPLAY_TIME = 2000
-WELCOME_PANEL_ON  = True
+WELCOME_PANEL_ON = True
 WELCOME_PANEL_SHOW = False
 CLEANUP_PLOT = False
 # OPEN and SAVE project menu
@@ -130,10 +131,12 @@ DEFAULT_PERSPECTIVE = 'None'
 
 def printEVT(message):
     if __EVT_DEBUG__:
+        """
+        :TODO - Need method doc string
+        """
         print "%g:  %s" % (time.clock(), message)
-        
+
         if __EVT_DEBUG_2_FILE__:
             out = open(__EVT_DEBUG_FILENAME__, 'a')
             out.write("%10g:  %s\n" % (time.clock(), message))
             out.close()
-            

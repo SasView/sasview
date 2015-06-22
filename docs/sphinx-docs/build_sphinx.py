@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Functions for building sphinx docs.
 
@@ -147,4 +148,4 @@ def rebuild():
     print "=== Done ==="
 
 if __name__ == "__main__":
-    main()
+    rebuild()
