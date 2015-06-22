@@ -353,10 +353,10 @@ packages.extend([
     ])
 packages.append('periodictable.core') # not found automatically
 #packages.append('IPython')
-includes = ['site', 'lxml._elementpath', 'lxml.etree', 'zmq.backend.cython']
+includes = ['site', 'lxml._elementpath', 'lxml.etree']
 
 # Exclude packages that are not needed but are often found on build systems
-excludes = ['Tkinter', 'PyQt4', '_ssl', '_tkagg', 'sip', 'pytz', 'zmq.libzmq']
+excludes = ['Tkinter', 'PyQt4', '_ssl', '_tkagg', 'sip', 'pytz']
 
 
 dll_excludes = [
@@ -371,7 +371,6 @@ dll_excludes = [
     'w9xpopen.exe',
     # accidental links to msys/cygwin binaries; shouldn't be needed
     'cygwin1.dll',
-    'libzmq.pyd'
     ]
 
 target_wx_client = Target(
@@ -390,8 +389,6 @@ gen.generate_installer()
 #initialize category stuff
 #from sas.guiframe.CategoryInstaller import CategoryInstaller
 #CategoryInstaller.check_install(s)
-
-sys.setrecursionlimit(10000)
 
 setup(
     windows=[target_wx_client],
