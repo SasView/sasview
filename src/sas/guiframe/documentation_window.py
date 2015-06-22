@@ -40,8 +40,8 @@ class DocumentationWindow(wx.Frame):
     help file resides along with the name of the help file.
     called
     (self, parent, dummy_id, path, url_instruction, title, size=(850, 540))
-    
-    :param path: path to html file beginning AFTER /doc/ and ending in the 
+
+    :param path: path to html file beginning AFTER /doc/ and ending in the
     file.html
     :param url_instructions: anchor string or other query e.g. '#MyAnchor
     :param title - text to place in the title bar of the help panel
@@ -64,7 +64,7 @@ class DocumentationWindow(wx.Frame):
         #we use "file:///" +... If the mac behavior changes may need to make the
         #file:/// be another constant at the beginning that yields // for Mac
         #and /// for PC.
-        #Note added June 21, 2015     PDB 
+        #Note added June 21, 2015     PDB
         file_path = os.path.join(docs_path, path)
         url = "file:///" + urllib.quote(file_path, r'/\:')+ url_instruction
 
