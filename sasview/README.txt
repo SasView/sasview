@@ -1,24 +1,73 @@
 Release Notes
 =============
 
-SasView 3.0.0
+SasView 3.1.0
+    -The documentation/help has had a complete overhaul including
+      - A completely new interface.
+      - The text has had a clean-up and been brought up to date with the latest
+        features.
+      - A Help (or sometimes ?) button has been added to every panel, and some
+        sub panels if appropriate, linking to the appropriate section in the
+        documentation.
+      - The model help has been split so that the details button now brings up
+        a very short pop-up giving the equation being used while HELP goes to 
+        the section in the full documentation describing the model.
+      - Extensive help has also been added for the new optimizer engine (see 
+        below) including rules of thumb on how and when to choose a given
+        optimizer and what the parameter do.
+    - The optimizer package has been completely replaced.  The new optimizer
+      still defaults to the standard Levenberg-Marquardt algorithm.  However 4
+      other optimizers are now available. Each starts with a set of default
+      parameters which can be tuned.  The DREAM optimizer takes the longest but
+      is the most powerful and yields rich information including full parameter
+      correlation and uncertainty plots.  A results panel has been added to
+      accommodate this.  The five optimizers are:
+      - A Levenberg-Marquardt optimizer
+      - A Quasi-Newton BFGS optimizer
+      - A Nelder-Mead Simplex optimizer
+      - A Differential Evolution optimizer
+      - A Monte Carlo optimizer DREAM optimizer 
+    - Several new models added (what are they)
+    - Infrastructure to allow SESANS data to bit fit with models in a future
+      release was added and can currently be used from command line with some
+      caveats.
+    - A number of bugs were fixed including a thread crashing issue and a
+      incorrect resolution slit smearing.
+    - Implemented much more robust error logging to better enable much easier
+      debugging in general and particularly debugging an issue reported by
+      SasView user.
+    - A number of infrastructure tasks under the hood to enhance maintainability
+      - Upgrade from Wx 2.9 to 3.0.2 which allows several new features but
+        required significant other rework as well.
+      - Fully implemented Sphinx to the build process to produce both better
+        user documentation and developer documentation.
+      - Restructuring of code base to more unified nomenclature and structure
+        so that source installation tree more closely matches the installer
+        version tree.
+      - Code cleanup (an ongoing task) 
+      - Migration of repository to github simplifying contributions from
+        non-project personnel through pull requests
 
-    - The GUI look and feel has been refactored to be more familiar for Windows
-      users by using MDI frames. Graph windows are also now free-floating
-    - Five new models have been added: PringlesModel, CoreShellEllipsoidXTModel,
-      RectangularPrismModel, RectangularHollowPrismModel and 
-      RectangularHollowPrismInfThinWallsModel
-    - The data loader now supports ILL DAT data files and reads the full meta 
-      information from canSAS file formats
-    - Redefined convention for specifying angular parameters for anisotropic models
-    - A number of minor features have been added such as permitting a log 
-      distribution of points when using a model to simulate data, and the 
-      addition of a Kratky plot option to the linear plots
-    - A number of bugs have also been fixed
-    - Save Project and Save Analysis now work more reliably
-    - BETA: Magnetic contrast supporting full polarization analysis has been 
-            implemented for some spherical and cylindrical models
-    - BETA: Two new tools have been added:
+
+    - New in Version 3.0.0
+      - The GUI look and feel has been refactored to be more familiar for
+        Windows users by using MDI frames. Graph windows are also now free-
+        floating.
+      - Five new models have been added: PringlesModel, CoreShellEllipsoidXTModel,
+        RectangularPrismModel, RectangularHollowPrismModel and 
+        RectangularHollowPrismInfThinWallsModel.
+      - The data loader now supports ILL DAT data files and reads the full meta 
+        information from canSAS file formats.
+      - Redefined convention for specifying angular parameters for anisotropic
+        models.
+      - A number of minor features have been added such as permitting a log 
+        distribution of points when using a model to simulate data, and the 
+        addition of a Kratky plot option to the linear plots.
+      - A number of bugs have also been fixed.
+      - Save Project and Save Analysis now work more reliably.
+      - BETA: Magnetic contrast supporting full polarization analysis has been 
+            implemented for some spherical and cylindrical models.
+      - BETA: Two new tools have been added:
             * A generic scattering calculator which takes an atomic, magnetic or 
               SLD distribution in space and generates the appropriate 2D 
               scattering pattern. In some cases the orientationally averaged 
@@ -27,7 +76,7 @@ SasView 3.0.0
               file.
             * An image viewer/converter for data in image format; this reads in 
               an image file and will attempt to convert the image pixels to 
-              data. Supported formats include: TIFF, TIF, PNG, BMP, JPG
+              data. Supported formats include: TIFF, TIF, PNG, BMP, JPG.
 
     - New in Version 2.2.1
       - Minor patch to support CanSAS XML v1.1 file format
@@ -179,58 +228,66 @@ SasView 3.0.0
 
     2.1- System Requirements:
         - Python version >= 2.5 and < 3.0 should be running on the system
-        - We currently use Python 2.6
+        - We currently use Python 2.7
 
     2.2- Installing from source:
-        - Get the code from sourceforge at https://svn.code.sf.net/p/sasview/code/
-          for trunk end with code/trunk for a this release version end in 
-          code/releases/sasview-3.0.0
+        - Get the code from sourceforge at https://github.com/SasView/sasview.git
+          for this release version use: https://github.com/SasView/sasview/releases
             - run 'python setup.py install' under the 'sasview-x.x.x' folder
             - run 'python sasview.py' under the 'sasview' folder.
-        - The following modules are required (version numbers are what are used in the release build):
-            - wxPython 2.8.12.1 (NOTE: do NOT use version 2.9)
-            - matplotlib 1.1.0
-            - SciPy 0.10.1 (NOTE: Mac build uses 0.10.0)
-            - pisa 3.0.27 (DO NOT USE ver 3.0.33 on windows: it will not work!)
-            - setuptools 0.6c11
+        - The following modules are required (version numbers are what are used
+          in the windows release build):
+        - Common Packages
+          - reportlab 3.1.44
+          - lxml 3.4.4.0 (MAC 3.4.2.0)
+          - PIL 1.1.7
+          - xhtml2pdf 3.0.33 (MAC = not installed on build server)
+          - unittest-xml-reporting 1.12.0 (MAC 1.10.0)
+          - matplotlib Version Installed: 1.4.3 (MAC 1.1.1)
+          - bumps Version Installed: 0.7.5.6
+          - scipy Version Installed: 0.16.0b2 (MAC 0.11.0)
+          - periodictable Version Installed: 1.4.1
+          - setuptools Version Installed: 7.0 (MAC 12.0.5)
+          - sphinx Version Installed: 1.3.1 (MAC 1.3b2)
+          - pyparsing Version Installed: 2.0.3
+          - numpy Version Installed: 1.9.2 (MAC 1.6.2)
+          - html5lib Version Installed: 0.99999
+          - wx Version Installed: 3.0.2.0
+          
 
-            (The following three are easily installed using easy_install)
-            - lxml 2.3.0.0 (NOTE: Mac build uses 3.1.0.0)
-            - numpy 1.6.1 (NOTE: Mac build uses version 1.6.2)
-            - periodictable 1.3.0
-            
-            (The following are additional dependencies for Mac)
-            - py2app 0.7.1
-            
-            (The following are additional dependencies for Windows)
-            - comtypes 0.6.2 (for PDF support on windows systems)
-            - pywin32 build 217 (to read ms office)
-            - html5lib 0.95-dev
-            - reportlab 2.5 (NOTE: Mab build uses 2.6 though should not be needed)
-            - pyparsing 1.5.5 (required for periodictable and bundling
-              NOTE: is ALSO present on Mac Build)
-            - PIL 1.1.7 (Python Image Library - NOTE: is also present on Mac build)
-            - py2exe 0.6.9 (WIN)
-            - vcredist_x86.exe (version 9.0.21022.8  -microsoft visual C 2008 
+        - Windows Specific Packages:
+          - pywin 219
+          - py2exe 0.6.9
+          - comtypes 1.1.1
+          - MinGW w/ gcc version 4.6.1 (WIN)
+          - vcredist_x86.exe (version 9.0.21022.8  -microsoft visual C 2008 
               re-distributable)
-            - subversion -1.6.0 (<1.6.1)
-            - MinGW w/ gcc version 4.6.1 (WIN)
-            - Innosetup (WIN - isetup 5.4.2-unicode).
+          - Innosetup (WIN - isetup 5.4.2-unicode) - used to create distributalbe
             
-            (On Windows, the following site has all the dependencies nicely packaged)
-            http://www.lfd.uci.edu/~gohlke/pythonlibs/
+        - MAC Specifci Packages:
+          - py2app 0.7.1
+        - Windows build dependencies can be set up using anaconda. Instructions
+          can be found at http://trac.sasview.org/wiki/AnacondaSetup
 
 
 3- Known Issues
 
     3.1- All systems:
-        - very old computers may not be able to run
-        - polydispersity on multiple parameters included in a simultaneous/
+        - Tutorial has not yet been updated and is somewhat out of date
+        - Very old computers may not be able to run
+        - Polydispersity on multiple parameters included in a simultaneous/
           constrained fit will likely not be correct
+        - Constrained/simultaneous fit page does not have a stop button
+        - Constrained/simultaneous fit do not accept min/max limits
         - Save project does not store the state of all the windows
         - Loading projects can be very slow
         - Save Project only works once a data set has been associated with
           a model.  Error is reported on status bar.
+        - There is a numerical precision problem with the multishell model when
+          the iner radius gets large enough (ticket #288)
+        - The angular distribution angles are not clearly defined and may in
+          some cases lead to incorrect calculations(ticket #332)
+          
 
     3.2- Windows:
         - If installed to same directory as old version without first removing
@@ -243,7 +300,7 @@ SasView 3.0.0
         - multiprocessing does not currently work on MAC OS
 		
     3.4- Linux:
-        - None
+        - Not well tested
 
 4- SasView website
 
