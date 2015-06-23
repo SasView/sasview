@@ -218,7 +218,7 @@ SasView 3.1.0
 
 2- Downloading and Installing
 	
-	*** Note 1:  Much more information is available at www.sasview.org under links.
+    *** Note 1:  Much more information is available at www.sasview.org under links.
 	             Look in the 'For Developers' section and particularly the wiki at
 	             www.sasview.org/trac/wiki.
     *** Note 2:  If you have EXE or ZIP SasView installer, you won't need any of
@@ -231,7 +231,7 @@ SasView 3.1.0
         - We currently use Python 2.7
 
     2.2- Installing from source:
-        - Get the code from sourceforge at https://github.com/SasView/sasview.git
+        - Get the code from GitHub at https://github.com/SasView/sasview.git
           for this release version use: https://github.com/SasView/sasview/releases
             - run 'python setup.py install' under the 'sasview-x.x.x' folder
             - run 'python sasview.py' under the 'sasview' folder.
@@ -262,7 +262,7 @@ SasView 3.1.0
           - MinGW w/ gcc version 4.6.1 (WIN)
           - vcredist_x86.exe (version 9.0.21022.8  -microsoft visual C 2008 
               re-distributable)
-          - Innosetup (WIN - isetup 5.4.2-unicode) - used to create distributalbe
+          - Innosetup (WIN - isetup 5.4.2-unicode) - used to create distributable
             
         - MAC Specifci Packages:
           - py2app 0.7.1
@@ -273,6 +273,13 @@ SasView 3.1.0
 3- Known Issues
 
     3.1- All systems:
+        - Documentation Window may take a few seconds to load the first time
+          it i called.  Also, an internet connection is required before
+          equations will render properly. Until then they will show in their
+          original TeX format.
+        - The copy and paste functions (^C, ^V) in the batch mode results grid
+          require two clicks: one to select the cell and a second to select the
+          contents of the cell. 
         - Tutorial has not yet been updated and is somewhat out of date
         - Very old computers may not be able to run
         - Polydispersity on multiple parameters included in a simultaneous/
@@ -316,10 +323,8 @@ SasView 3.1.0
 6- Installer download website
 
     - Latest release Version
-        - http://sourceforge.net/projects/sasview/files/
-    - Latest developer Windows or Ubuntu build
-        - http://build.sasview.org/
-    - Latest developer Mac OS build
-        - http://download.mantidproject.org/jenkins/view/All/job/sasview_snowleopard_32bit/
+        - https://github.com/SasView/sasview/releases
+    - Latest developer builds
+        - https://jenkins.esss.dk/sasview/view/Master-Builds/
 
     
