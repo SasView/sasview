@@ -3114,6 +3114,7 @@ class FitPage(BasicPage):
                 else:
                     mag_on_button.Show(True)
                 mag_help_button.Show(False)
+                mag_angle_help_button.Show(False)
                 if mag_on_button.IsShown():
                     if self.magnetic_on:
                         mag_on_button.SetLabel("Magnetic OFF")
