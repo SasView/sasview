@@ -304,6 +304,8 @@ SasView 3.1.0
           safest to uninstall old version prior to installing new version anyway.
 		
     3.3- MAC:
+        - Application normally starts up hidden. Click icon in Dock to view/use
+          application. 
         - multiprocessing does not currently work on MAC OS
 		
     3.4- Linux:
