@@ -18,6 +18,7 @@ import logging
 import wx
 import webbrowser
 import urllib
+import sys
 
 SPHINX_DOC_ENV = "SASVIEW_DOC_PATH"
 WX_SUPPORTS_HTML2 = True
@@ -26,6 +27,9 @@ try:
 except:
     WX_SUPPORTS_HTML2 = False
 
+MAC = True
+if sys.platform.count("win32") > 0:
+    MAC = False
 
 from gui_manager import get_app_dir
 
@@ -72,6 +76,8 @@ class DocumentationWindow(wx.Frame):
             logging.error("Could not find Sphinx documentation at %s \
             -- has it been built?", file_path)
         elif WX_SUPPORTS_HTML2:
+            if MAC:
+                logging.error('url = ' + url)
             # Complete HTML/CSS support!
             self.view = html.WebView.New(self)
             self.view.LoadURL(url)
