@@ -9,7 +9,8 @@ __appname__ = "DummyView"
 __version__ = '0.0.0'
 __build__ = '1'
 __download_page__ = 'https://github.com/SasView/sasview/releases'
-__update_URL__ = ['https://github.com/SasView/sasview.git']
+__update_URL__ = ['raw.githubusercontent.com',
+                  '/SasView/sasview/master/sasview.latestversion']
 
 
 # Debug message flag

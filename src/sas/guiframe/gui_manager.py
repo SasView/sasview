@@ -2040,7 +2040,7 @@ class ViewerFrame(PARENT_FRAME):
         a call-back method when the current version number has been obtained.
         """
         try:
-            conn = httplib.HTTPConnection(config.__update_URL__[0],
+            conn = httplib.HTTPSConnection(config.__update_URL__[0],
                                           timeout=3.0)
             conn.request("GET", config.__update_URL__[1])
             res = conn.getresponse()
