@@ -230,6 +230,10 @@ path = os.getcwd()
 media_dir = os.path.join(path, "media")
 images_dir = os.path.join(path, "images")
 test_dir = os.path.join(path, "test")
+test_1d_dir = os.path.join(path, "test\\1d_data")
+test_2d_dir = os.path.join(path, "test\\2d_data")
+test_save_dir = os.path.join(path, "test\\save_states")
+test_upcoming_dir = os.path.join(path, "test\\upcoming_formats")
 
 matplotlibdatadir = matplotlib.get_data_path()
 matplotlibdata = findall(matplotlibdatadir)
@@ -289,9 +293,25 @@ for f in findall(media_dir):
         data_files.append(("media", [f]))
 
 # Copying the sample data user data
-for f in findall(test_dir):
+for f in findall(test_1d_dir):
     if not ".svn" in f:
-        data_files.append(("test", [f]))
+        data_files.append(("test\\1d_data", [f]))
+
+# Copying the sample data user data
+for f in findall(test_2d_dir):
+    if not ".svn" in f:
+        data_files.append(("test\\2d_data", [f]))
+
+# Copying the sample data user data
+for f in findall(test_save_dir):
+    if not ".svn" in f:
+        data_files.append(("test\\save_states", [f]))
+
+# Copying the sample data user data
+for f in findall(test_upcoming_dir):
+    if not ".svn" in f:
+        data_files.append(("test\\upcoming_formats", [f]))
+
 
 # See if the documentation has been built, and if so include it.
 doc_path = os.path.join(build_path, "doc")
@@ -309,7 +329,6 @@ if py26MSdll is not None:
 if py26MSdll_x86 is not None:
     # install the MSVC 9 runtime dll's into the application folder
     data_files.append(("Microsoft.VC90.CRT", py26MSdll_x86))
-
 
 # NOTE:
 #  need an empty __init__.py in site-packages/numpy/distutils/tests and site-packages/mpl_toolkits
@@ -369,7 +388,7 @@ import installer_generator as gen
 gen.generate_installer()
 #initialize category stuff
 #from sas.guiframe.CategoryInstaller import CategoryInstaller
-#CategoryInstaller.check_install()
+#CategoryInstaller.check_install(s)
 
 setup(
     windows=[target_wx_client],
