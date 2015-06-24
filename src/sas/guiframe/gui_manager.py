@@ -2046,10 +2046,14 @@ class ViewerFrame(PARENT_FRAME):
             res = conn.getresponse()
             content = res.read()
             conn.close()
+            logging.info("connected to GitHub. sasview.latestversion = %s"
+                         % (content))
         except:
+            logging.info("failed to connect to GitHub")
             content = "0.0.0"
 
         version = content.strip()
+        logging.info("Latest SasView version number: %s" % (version))
         if len(re.findall('\d+\.\d+\.\d+$', version)) < 0:
             content = "0.0.0"
         self._process_version(content, standalone=event == None)
