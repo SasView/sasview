@@ -289,14 +289,17 @@ Release Notes
 ===============
 
    3.1- All systems:
-        - Documentation Window may take a few seconds to load the first time
-          it i called.  Also, an internet connection is required before
+        - The documentation window may take a few seconds to load the first time
+          it is called. Also, an internet connection is required before
           equations will render properly. Until then they will show in their
           original TeX format.
+        - If the documentation window remains stubbornly blank, install a 
+          different browser and set that as your default browser. Issues have
+          been noted with Internet Explorer 11.
         - The copy and paste functions (^C, ^V) in the batch mode results grid
           require two clicks: one to select the cell and a second to select the
           contents of the cell. 
-        - Tutorial has not yet been updated and is somewhat out of date
+        - The tutorial has not yet been updated and is somewhat out of date
         - Very old computers may not be able to run
         - Polydispersity on multiple parameters included in a simultaneous/
           constrained fit will likely not be correct
