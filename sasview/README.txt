@@ -233,7 +233,7 @@ Release Notes
 	
    *** Note 1:  Much more information is available at www.sasview.org under links.
 	            Look in the 'For Developers' section and particularly the wiki at
-             www.sasview.org/trac/wiki.
+                www.sasview.org/trac/wiki.
    *** Note 2:  If you have EXE or ZIP SasView installer, you won't need any of
                 the following.  However it is highly recommended that any
                 previous versions be un-installed prior to installing the
@@ -248,39 +248,42 @@ Release Notes
           for this release version use: https://github.com/SasView/sasview/releases
           - run 'python setup.py install' under the 'sasview-x.x.x' folder
           - run 'python sasview.py' under the 'sasview' folder.
+          
         - The following modules are required (version numbers are what are used
           in the windows release build):
-        - Common Packages
-          - reportlab 3.1.44
-          - lxml 3.4.4.0 (MAC 3.4.2.0)
-          - PIL 1.1.7
-          - xhtml2pdf 3.0.33 (MAC = not installed on build server)
-          - unittest-xml-reporting 1.12.0 (MAC 1.10.0)
-          - matplotlib Version Installed: 1.4.3 (MAC 1.1.1)
-          - bumps Version Installed: 0.7.5.6
-          - scipy Version Installed: 0.16.0b2 (MAC 0.11.0)
-          - periodictable Version Installed: 1.4.1
-          - setuptools Version Installed: 7.0 (MAC 12.0.5)
-          - sphinx Version Installed: 1.3.1 (MAC 1.3b2)
-          - pyparsing Version Installed: 2.0.3
-          - numpy Version Installed: 1.9.2 (MAC 1.6.2)
-          - html5lib Version Installed: 0.99999
-          - wx Version Installed: 3.0.2.0
           
-        - Windows Specific Packages:
-          - pywin 219
-          - py2exe 0.6.9
-          - comtypes 1.1.1
-          - MinGW w/ gcc version 4.6.1 (WIN)
-          - vcredist_x86.exe (version 9.0.21022.8  -microsoft visual C 2008 
-            re-distributable)
-          - Innosetup (WIN - isetup 5.4.2-unicode) - used to create distributable
-            
-        - MAC Specifci Packages:
-          - py2app 0.7.1
-        - Windows build dependencies can be set up using anaconda. Instructions
-          can be found at http://trac.sasview.org/wiki/AnacondaSetup
+          - Common Packages
+            - reportlab 3.1.44
+            - lxml 3.4.4.0 (MAC 3.4.2.0)
+            - PIL 1.1.7
+            - xhtml2pdf 3.0.33 (MAC = not installed on build server)
+            - unittest-xml-reporting 1.12.0 (MAC 1.10.0)
+            - matplotlib Version Installed: 1.4.3 (MAC 1.1.1)
+            - bumps Version Installed: 0.7.5.6
+            - scipy Version Installed: 0.16.0b2 (MAC 0.11.0)
+            - periodictable Version Installed: 1.4.1
+            - setuptools Version Installed: 7.0 (MAC 12.0.5)
+            - sphinx Version Installed: 1.3.1 (MAC 1.3b2)
+            - pyparsing Version Installed: 2.0.3
+            - numpy Version Installed: 1.9.2 (MAC 1.6.2)
+            - html5lib Version Installed: 0.99999
+            - wx Version Installed: 3.0.2.0
+          
+          - Windows Specific Packages
+            - pywin 219
+            - py2exe 0.6.9
+            - comtypes 1.1.1
+            - MinGW w/ gcc version 4.6.1 (WIN)
+            - vcredist_x86.exe (version 9.0.21022.8  -microsoft visual C 2008 
+              re-distributable)
+            - Innosetup (WIN - isetup 5.4.2-unicode) - used to create distributable
 
+            *** Note: Windows build dependencies can be set up using anaconda. Instructions
+                can be found at http://trac.sasview.org/wiki/AnacondaSetup
+            
+          - MAC Specifc Packages
+            - py2app 0.7.1
+          
 
 3- Known Issues
 ===============
