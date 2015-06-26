@@ -1302,7 +1302,6 @@ class ViewerFrame(PARENT_FRAME):
             menu_list = self._current_perspective.populate_menu(self)
             if menu_list:
                 for (menu, name) in menu_list:
-                    print "[%s]" % name
                     self._menubar.Replace(pos, menu, name)
                     self._applications_menu_name = name
                 self._applications_menu_pos = pos
