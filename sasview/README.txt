@@ -32,8 +32,12 @@ Release Notes
          - A Nelder-Mead Simplex optimizer
          - A Differential Evolution optimizer
          - A Monte Carlo optimizer (DREAM) 
-     - Several new models added:
-!!!       - (what are they???)
+     - New models were added:
+         - MicelleSphCoreModel (currently residing in the Uncategorized category)
+     - Existing models were updated:
+         - RectangularPrismModel
+         - RectangularHollowPrismModel
+         - RectangularHollowPrismInfThinWallsModel
      - Infrastructure to allow SESANS data to be fit with models was added. This
        will become available in a future release but can currently be used from 
        the command line with some caveats.
@@ -293,14 +297,14 @@ Release Notes
           it is called. Also, an internet connection is required before
           equations will render properly. Until then they will show in their
           original TeX format.
-        - If the documentation window remains stubbornly blank, install a 
+        - If the documentation window remains stubbornly blank, try installing a 
           different browser and set that as your default browser. Issues have
           been noted with Internet Explorer 11.
         - The copy and paste functions (^C, ^V) in the batch mode results grid
           require two clicks: one to select the cell and a second to select the
           contents of the cell. 
         - The tutorial has not yet been updated and is somewhat out of date
-        - Very old computers may not be able to run
+        - Very old computers may struggle to run the 3.x and later releases
         - Polydispersity on multiple parameters included in a simultaneous/
           constrained fit will likely not be correct
         - Constrained/simultaneous fit page does not have a stop button
@@ -324,7 +328,7 @@ Release Notes
    3.3- MAC:
         - Application normally starts up hidden. Click icon in Dock to view/use
           application. 
-        - multiprocessing does not currently work on MAC OS
+        - Multiprocessing does not currently work on MAC OS
 		
    3.4- Linux:
         - Not well tested
