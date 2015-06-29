@@ -2849,9 +2849,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         _TreeLocation = 'user/models/model_functions.html'
         if self.model != None:
             name = self.formfactorbox.GetValue()
-            _PageAnchor = '#' + name
+            _PageAnchor = '#' + name.lower()
             _doc_viewer = DocumentationWindow(self, -1, _TreeLocation,
-                                              _PageAnchor, name + "Help")
+                                              _PageAnchor, name + " Help")
         else:
             _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
                                                 "General Model Help")

@@ -23,6 +23,7 @@ import re
 warnings.simplefilter("ignore")
 import logging
 import httplib
+import traceback
 
 
 from sas.guiframe.events import EVT_CATEGORY
@@ -1295,17 +1296,19 @@ class ViewerFrame(PARENT_FRAME):
             return
         #replace or add a new menu for the current plugin
         pos = self._menubar.FindMenu(str(self._applications_menu_name))
+        if pos == -1 and self._applications_menu_pos > 0:
+            pos = self._applications_menu_pos
         if pos != -1:
             menu_list = self._current_perspective.populate_menu(self)
             if menu_list:
                 for (menu, name) in menu_list:
                     self._menubar.Replace(pos, menu, name)
                     self._applications_menu_name = name
+                self._applications_menu_pos = pos
             else:
                 self._menubar.Remove(pos)
                 self._applications_menu_name = None
-            #get the position of the menu when it first added
-            self._applications_menu_pos = pos
+                self._applications_menu_pos = -1
         else:
             menu_list = self._current_perspective.populate_menu(self)
             if menu_list:
@@ -1315,8 +1318,10 @@ class ViewerFrame(PARENT_FRAME):
                         help_pos = self._menubar.FindMenu("Help")
                         if help_pos == -1:
                             self._menubar.Append(menu, name)
+                            self._applications_menu_pos = -1
                         else:
                             self._menubar.Insert(help_pos-1, menu, name)
+                            self._applications_menu_pos = help_pos - 1
                     else:
                         self._menubar.Insert(self._applications_menu_pos, menu, name)
                     self._applications_menu_name = name
@@ -2035,16 +2040,22 @@ class ViewerFrame(PARENT_FRAME):
         a call-back method when the current version number has been obtained.
         """
         try:
-            conn = httplib.HTTPConnection(config.__update_URL__[0],
+            conn = httplib.HTTPSConnection(config.__update_URL__[0],
                                           timeout=3.0)
             conn.request("GET", config.__update_URL__[1])
             res = conn.getresponse()
             content = res.read()
             conn.close()
+            logging.info("connected to GitHub. sasview.latestversion = %s"
+                         % (content))
         except:
+            msg = traceback.format_exc()
+            logging.info(msg)
+            logging.info("failed to connect to GitHub")
             content = "0.0.0"
 
         version = content.strip()
+        logging.info("Latest SasView version number: %s" % (version))
         if len(re.findall('\d+\.\d+\.\d+$', version)) < 0:
             content = "0.0.0"
         self._process_version(content, standalone=event == None)
@@ -2165,7 +2176,8 @@ class ViewerFrame(PARENT_FRAME):
         # Running SasView "in-place" using run.py means the docs will be in a
         # different place than they would otherwise.
         from documentation_window import DocumentationWindow
-        DocumentationWindow(self, -1, "index.html", "", "SasView Documentation")
+        _TreeLocation = "user/user.html"
+        DocumentationWindow(self, -1, _TreeLocation, "", "SasView Documentation")
 
     def set_manager(self, manager):
         """

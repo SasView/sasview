@@ -1,5 +1,7 @@
-User Documentation
-==================
+SasView User Documentation
+==========================
+
+.. note:: In Windows use [Alt]-[Cursor left] to return to the previous page
 
 .. toctree::
    :maxdepth: 1
@@ -36,4 +38,4 @@ User Documentation
    
    Python Shell Tool <perspectives/calculator/python_shell_help>
    
-   Test Data <test/testdata.rst>
+   Test Data <../test/testdata_help.rst>

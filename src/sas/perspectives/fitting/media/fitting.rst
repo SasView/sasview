@@ -16,7 +16,5 @@ Fitting Documentation
 
    Polarisation/Magnetic Scattering <mag_help>
 
-   Information on the SasView Optimisers - Local <optimizer.rst>
-
-   Information on the SasView Optimisers - Web <https://github.com/bumps/bumps/blob/master/doc/guide/optimizer.rst>
+   Information on the SasView Optimisers <optimizer.rst>
    

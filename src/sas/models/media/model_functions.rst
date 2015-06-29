@@ -19,7 +19,9 @@
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 
-.. note::  The contents of this document are awaiting proof reading. Feb2015
+.. note::  The contents of this document are presented in good faith and are 
+           believed to be mostly correct and accurate, however they have not 
+           yet been rigorously checked for errors. June2015
 
 
 .. Set up some substitutions to make life easier...
@@ -81,28 +83,6 @@
 
 SasView Model Functions
 =======================
-
-Contents
---------
-1. Background_
-
-2. Model_ Functions
-
- 2.1 Shape-based_ Functions
- 
- 2.2 Shape-independent_ Functions
- 
- 2.3 Structure-factor_ Functions
- 
- 2.4 Customised_ Functions
-
-3. References_
-
-
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-
 
 .. _Background:
 
@@ -288,6 +268,8 @@ Parallelpipeds
 - sum_Ap1_1_Ap2_
 - polynomial5_
 - sph_bessel_jn_
+
+Also see the documentation on :ref:`Adding_your_own_models` under Fitting Data. 
 
 
 

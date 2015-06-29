@@ -8,9 +8,9 @@ from sas.guiframe.gui_style import GUIFRAME
 __appname__ = "DummyView"
 __version__ = '0.0.0'
 __build__ = '1'
-__download_page__ = 'http://sourceforge.net/projects/sasview/files/'
-__update_URL__ = ['svn.code.sf.net', 
-                  '/p/sasview/code/trunk/sasview.latestversion']
+__download_page__ = 'https://github.com/SasView/sasview/releases'
+__update_URL__ = ['raw.githubusercontent.com',
+                  '/SasView/sasview/master/sasview.latestversion']
 
 
 # Debug message flag
@@ -20,7 +20,7 @@ __EVT_DEBUG__ = True
 __TEST__ = False
 
 # Debug message should be written to a file?
-__EVT_DEBUG_2_FILE__   = False
+__EVT_DEBUG_2_FILE__ = False
 __EVT_DEBUG_FILENAME__ = "debug.log"
 
 # About box info
@@ -35,14 +35,16 @@ _acknowledgement_preamble_bullet1 =\
 _acknowledgement_preamble_bullet2 =\
 '''Reference the following website: http://www.sasview.org'''
 _acknowledgement_preamble_bullet3 =\
-'''Send us your reference for our records: sansdanse@gmail.com'''
+'''Reference the model you used if appropriate (see documentation for refs)'''
+_acknowledgement_preamble_bullet4 =\
+'''Send us your reference for our records: developers@sasview.org'''
 _acknowledgement_publications = \
-'''This work benefited from the use of the SasView application, originally 
+'''This work benefited from the use of the SasView application, originally
 developed under NSF award DMR-0520547.
 '''
 _acknowledgement =  \
 '''This work originally developed as part of the DANSE project funded by the NSF
-under grant DMR-0520547, and currently maintained by NIST, UMD, ORNL, ISIS, ESS 
+under grant DMR-0520547, and currently maintained by NIST, UMD, ORNL, ISIS, ESS
 and ILL.
 
 '''
@@ -84,11 +86,11 @@ APPLICATION_WLIST = ''
 APPLICATION_STATE_EXTENSION = None
 PLUGINS_WLIST = []
 PLUGIN_STATE_EXTENSIONS = []
-SPLASH_SCREEN_PATH = "images/danse_logo.png"     
+SPLASH_SCREEN_PATH = "images/danse_logo.png"
 DEFAULT_STYLE = GUIFRAME.SINGLE_APPLICATION
 SPLASH_SCREEN_WIDTH = 500
 SPLASH_SCREEN_HEIGHT = 300
-WELCOME_PANEL_ON  = False
+WELCOME_PANEL_ON = False
 TUTORIAL_PATH = None
 SS_MAX_DISPLAY_TIME = 1500
 PLOPANEL_WIDTH = 350
@@ -124,9 +126,12 @@ import wx.lib.newevent
 (StatusBarEvent, EVT_STATUS) = wx.lib.newevent.NewEvent()
 
 def printEVT(message):
+    """
+    :TODO - need method documentation
+    """
     if __EVT_DEBUG__:
         print "%g:  %s" % (time.clock(), message)
-        
+    
         if __EVT_DEBUG_2_FILE__:
             out = open(__EVT_DEBUG_FILENAME__, 'a')
             out.write("%10g:  %s\n" % (time.clock(), message))

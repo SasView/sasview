@@ -140,7 +140,7 @@ class GridPage(sheet.CSheet):
         # Sink events
         self.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.OnLeftClick)
         self.Bind(wx.grid.EVT_GRID_CELL_RIGHT_CLICK, self.OnRightClick)
-        self.Bind(wx.grid.EVT_GRID_CELL_LEFT_DCLICK, self.OnLeftDoubleClick)
+        #self.Bind(wx.grid.EVT_GRID_CELL_LEFT_DCLICK, self.OnLeftDoubleClick)
         self.Bind(wx.grid.EVT_GRID_RANGE_SELECT, self.OnRangeSelect)
         self.Bind(wx.grid.EVT_GRID_ROW_SIZE, self.OnRowSize)
         self.Bind(wx.grid.EVT_GRID_COL_SIZE, self.OnColSize)
@@ -186,12 +186,16 @@ class GridPage(sheet.CSheet):
         self.EnableEditing(True)
         if self.GetNumberCols() > 0:
             self.default_col_width = self.GetColSize(0)
-        self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.on_left_click)
-        self.Bind(wx.grid.EVT_GRID_LABEL_RIGHT_CLICK, self.on_right_click)
-        self.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.on_selected_cell)
-        self.Bind(wx.grid.EVT_GRID_CMD_CELL_CHANGE, self.on_edit_cell)
-        self.Bind(wx.grid.EVT_GRID_CELL_RIGHT_CLICK, self.onContextMenu)
+        #self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.on_left_click)
+        #self.Bind(wx.grid.EVT_GRID_LABEL_RIGHT_CLICK, self.on_right_click)
+        #self.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.on_selected_cell)
+        #self.Bind(wx.grid.EVT_GRID_CMD_CELL_CHANGE, self.on_edit_cell)
+        #self.Bind(wx.grid.EVT_GRID_CELL_RIGHT_CLICK, self.onContextMenu)
 
+    def OnLeftClick(self, event):
+        sheet.CSheet.OnLeftClick(self, event)
+        self.on_selected_cell(event)
+        
     def on_edit_cell(self, event):
         """
         """
@@ -210,7 +214,6 @@ class GridPage(sheet.CSheet):
         flag_shift = event.ShiftDown()
         row, col = event.GetRow(), event.GetCol()
         cell = (row, col)
-        event.Skip()
         if not flag and not flag_shift:
             self.selected_cols = []
             self.selected_rows = []
@@ -272,12 +275,12 @@ class GridPage(sheet.CSheet):
         for cell_row, cell_col in self.selected_cells:
             if cell_row > 0 and cell_row < self.max_row_touse:
                 self.axis_value.append(self.GetCellValue(cell_row, cell_col))
+        event.Skip()
 
     def on_left_click(self, event):
         """
         Catch the left click on label mouse event
         """
-        event.Skip()
         flag = event.CmdDown() or event.ControlDown()
 
         col = event.GetCol()
@@ -316,6 +319,7 @@ class GridPage(sheet.CSheet):
             self.axis_label = self.GetCellValue(0, col)
             if not self.axis_label:
                 self.axis_label = " "
+        event.Skip()
 
     def on_right_click(self, event):
         """
@@ -1384,6 +1388,13 @@ class GridFrame(wx.Frame):
         self.save_menu = self.file.Append(wx.NewId(), 'Save As', 'Save into File')
         wx.EVT_MENU(self, self.save_menu.GetId(), self.on_save_page)
 
+        # To add the edit menu, call add_edit_menu() here.
+        self.edit = None
+        self.Bind(wx.EVT_MENU_OPEN, self.on_menu_open)
+        
+        self.Bind(wx.EVT_CLOSE, self.on_close)
+
+    def add_edit_menu(self, menubar):
         self.edit = wx.Menu()
 
         add_table_menu = self.edit.Append(-1, 'New Table',
@@ -1413,10 +1424,7 @@ class GridFrame(wx.Frame):
         hint = "Remove the selected column"
         self.remove_menu = self.edit.Append(-1, 'Remove Column', hint)
         wx.EVT_MENU(self, self.remove_menu.GetId(), self.on_remove_column)
-
-        self.Bind(wx.EVT_MENU_OPEN, self.on_menu_open)
         menubar.Append(self.edit, "&Edit")
-        self.Bind(wx.EVT_CLOSE, self.on_close)
 
     def on_copy(self, event):
         """
