@@ -544,10 +544,7 @@ class PageState(object):
                     paramval += param + "\n"
                     paramval_string += CENTRE % param + "\n"
 
-        text_string = "\n\n\n" + title + "\n\n" + file + \
-                      "\n" + q_name + \
-                      "\n" + chi2 + \
-                      "\n\n" + paramval
+        text_string = "\n\n\n%s\n\n%s\n%s\n%s\n\n%s" % (title, file, q_name, chi2, paramval)
 
         title_name = self._check_html_format(title_name)
         file_name = self._check_html_format(file_name)

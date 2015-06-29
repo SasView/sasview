@@ -43,7 +43,7 @@ class ReportDialog(BaseReportDialog):
             if len(self.report_list[2]) == 1:
                 self.report_html = self.report_list[0] % \
                                     "memory:img_fit0.png"
-            elif len(self.report_list) == 2:
+            elif len(self.report_list[2]) == 2:
                 self.report_html = self.report_list[0] % \
                                     ("memory:img_fit0.png",
                                      "memory:img_fit1.png")

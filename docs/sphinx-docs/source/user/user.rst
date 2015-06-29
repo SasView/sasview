@@ -36,4 +36,4 @@ User Documentation
    
    Python Shell Tool <perspectives/calculator/python_shell_help>
    
-   Test Data <test/testdata.rst>
+   Test Data <../test/testdata_help.rst>
