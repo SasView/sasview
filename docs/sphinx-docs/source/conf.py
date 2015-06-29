@@ -20,6 +20,7 @@ from distutils.util import get_platform
 platform = '.%s-%s'%(get_platform(),sys.version[:3])
 build_lib = os.path.abspath('../../../build/lib'+platform)
 sys.path.insert(0, build_lib)
+sys.path.insert(0, os.path.abspath('_extensions')) # for sphinx extensions
 print "-- path --"
 print "\n".join(sys.path)
 
@@ -34,6 +35,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.todo',
               'sphinx.ext.coverage',
               'sphinx.ext.mathjax',
+              'dollarmath',
               'sphinx.ext.viewcode']
 
 # Add any paths that contain templates here, relative to this directory.
