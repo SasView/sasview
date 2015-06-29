@@ -22,6 +22,8 @@ analysis file contains the data and parameters for a single fit (.fit), p(r)
 inversion (.pr), or invariant calculation (.inv). A project file (.svs) contains 
 the results for every active analysis.
 
+Some of the available test data is described below.
+
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 1D Test Data
