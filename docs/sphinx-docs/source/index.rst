@@ -6,6 +6,8 @@
 SasView Documentation
 =====================
 
+.. note:: This toc is now deprecated; you should not be viewing it from Help!
+
 .. toctree::
    :maxdepth: 1
 
