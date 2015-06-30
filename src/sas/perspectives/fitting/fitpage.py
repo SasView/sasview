@@ -2197,12 +2197,13 @@ class FitPage(BasicPage):
                         if cov[ind] != None:
                             if numpy.isfinite(float(cov[ind])):
                                 val_err = format_number(cov[ind], True)
+				item[4].SetForegroundColour(wx.BLACK)
                             else:
                                 val_err = 'NaN'
+                                item[4].SetForegroundColour(wx.RED)
                             if not self.is_mac:
                                 item[3].Show(True)
                                 item[4].Show(True)
-                                item[4].SetForegroundColour(wx.RED)
                             item[4].SetValue(val_err)
                             has_error = True
                 i += 1
