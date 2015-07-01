@@ -35,6 +35,7 @@ Release Notes
      - New models were added:
          - MicelleSphCoreModel (currently residing in the Uncategorized category)
      - Existing models were updated:
+         - LamellarPS (bug in polydispersity integration fixed)
          - RectangularPrismModel
          - RectangularHollowPrismModel
          - RectangularHollowPrismInfThinWallsModel
