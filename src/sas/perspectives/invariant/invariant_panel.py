@@ -828,7 +828,11 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         try:
             attr = getattr(self, key)
-            attr.SetValue(str(value))
+            if attr.__class__.__name__ == "StaticText":
+                return
+            if type(value) is not bool:
+                value = str(value)
+            attr.SetValue(value)
         except:
             logging.error("Invariant state: %s", sys.exc_value)
 

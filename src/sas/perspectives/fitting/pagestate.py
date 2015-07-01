@@ -881,7 +881,7 @@ class PageState(object):
                             except:
                                 # pass if line is empty (it happens)
                                 logging.error(sys.exc_value)
-                    dic[name] = numpy.array(value_list)
+                        dic[name] = numpy.array(value_list)
                     setattr(self, item[1], dic)
 
     def set_plot_state(self, figs, canvases):
