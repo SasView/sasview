@@ -24,6 +24,8 @@ warnings.simplefilter("ignore")
 import logging
 import httplib
 import traceback
+import urllib
+import urllib2
 
 
 from sas.guiframe.events import EVT_CATEGORY
@@ -2040,12 +2042,10 @@ class ViewerFrame(PARENT_FRAME):
         a call-back method when the current version number has been obtained.
         """
         try:
-            conn = httplib.HTTPSConnection(config.__update_URL__[0],
-                                          timeout=3.0)
-            conn.request("GET", config.__update_URL__[1])
-            res = conn.getresponse()
-            content = res.read()
-            conn.close()
+            req = urllib2.Request('https://github.com/SasView/sasview/releases/latest')
+            res = urllib2.urlopen(req)
+            get_url= res.geturl()
+            content = get_url.partition('/v')[2]
             logging.info("connected to GitHub. sasview.latestversion = %s"
                          % (content))
         except:
