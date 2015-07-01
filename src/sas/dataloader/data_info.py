@@ -438,6 +438,19 @@ class Process(object):
         self.term = []
         self.notes = []
 
+    def is_empty(self):
+        """
+            Return True if the object is empty
+        """
+        return len(self.name) == 0 and len(self.date) == 0 and len(self.description) == 0 \
+            and len(self.term) == 0 and len(self.notes) == 0
+            
+    def single_line_desc(self):
+        """
+            Return a single line string representing the process
+        """
+        return "%s %s %s" % (self.name, self.date, self.description)
+     
     def __str__(self):
         _str = "Process:\n"
         _str += "   Name:         %s\n" % self.name
