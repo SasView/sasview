@@ -356,7 +356,7 @@ packages.append('periodictable.core') # not found automatically
 includes = ['site', 'lxml._elementpath', 'lxml.etree']
 
 # Exclude packages that are not needed but are often found on build systems
-excludes = ['Tkinter', 'PyQt4', '_ssl', '_tkagg', 'sip', 'pytz']
+excludes = ['Tkinter', 'PyQt4', '_tkagg', 'sip', 'pytz']
 
 
 dll_excludes = [
