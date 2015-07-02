@@ -53,8 +53,8 @@ class Plugin(PluginBase):
     DEFAULT_NFUNC = 10
     DEFAULT_DMAX = 140.0
 
-    def __init__(self, standalone=True):
-        PluginBase.__init__(self, name="Pr Inversion", standalone=standalone)
+    def __init__(self):
+        PluginBase.__init__(self, name="Pr Inversion")
         ## Simulation window manager
         self.simview = None
 
@@ -93,8 +93,6 @@ class Plugin(PluginBase):
         self.current_plottable = None
         ## Number of P(r) points to display on the output plot
         self._pr_npts = 51
-        ## Flag to let the plug-in know that it is running standalone
-        self.standalone = standalone
         self._normalize_output = False
         self._scale_output_unity = False
 
@@ -622,7 +620,7 @@ class Plugin(PluginBase):
         elif item.id in [PR_LOADED_LABEL, IQ_DATA_LABEL, IQ_FIT_LABEL, IQ_SMEARED_LABEL]:
             return []
         elif item.id == graph.selected_plottable:
-            if not self.standalone and issubclass(item.__class__, Data1D):
+            if issubclass(item.__class__, Data1D):
                 return [["Compute P(r)",
                          "Compute P(r) from distribution",
                          self._on_context_inversion]]
@@ -1237,8 +1235,7 @@ class Plugin(PluginBase):
         self.parent = parent
         self.frame = MDIFrame(self.parent, None, 'None', (100, 200))
         self.control_panel = InversionControl(self.frame, -1,
-                                              style=wx.RAISED_BORDER,
-                                              standalone=self.standalone)
+                                              style=wx.RAISED_BORDER)
         self.frame.set_panel(self.control_panel)
         self._frame_set_helper()
         self.control_panel.set_manager(self)
@@ -1316,5 +1313,4 @@ class Plugin(PluginBase):
             Post initialization call back to close the loose ends
             [Somehow openGL needs this call]
         """
-        if self.standalone:
-            self.parent.set_perspective(self.perspective)
+        pass

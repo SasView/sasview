@@ -34,7 +34,7 @@ class InversionControl(ScrolledPanel, PanelBase):
     ## Oscillation parameters (sin function = 1.1)
     oscillation_max = 1.5
 
-    def __init__(self, parent, id=-1, plots=None, standalone=False, **kwargs):
+    def __init__(self, parent, id=-1, plots=None, **kwargs):
         """
         """
         ScrolledPanel.__init__(self, parent, id=id, **kwargs)
@@ -82,8 +82,6 @@ class InversionControl(ScrolledPanel, PanelBase):
         self.distance_explorator_ctl = None
         ## Data manager
         self._manager = None
-        ## Standalone flage
-        self.standalone = standalone
         ## Default file location for save
         self._default_save_location = os.getcwd()
         if self.parent is not None:

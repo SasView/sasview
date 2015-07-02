@@ -33,7 +33,7 @@ class PluginBase(object):
     See dummyapp.py for a plugin example.
     """
 
-    def __init__(self, name="Test_plugin", standalone=True):
+    def __init__(self, name="Test_plugin"):
         """
         Abstract class for gui_manager Plugins.
         """
@@ -41,8 +41,6 @@ class PluginBase(object):
         self._always_active = False
         ## Plug-in name. It will appear on the application menu.
         self.sub_menu = name
-        #standalone flag
-        self.standalone = standalone
         ## Reference to the parent window. Filled by get_panels() below.
         self.parent = None
         self.frame = None
@@ -261,17 +259,6 @@ class PluginBase(object):
         Post initialization call back to close the loose ends
         """
         pass
-
-    def set_default_perspective(self):
-        """
-       Call back method that True to notify the parent that the current plug-in
-       can be set as default  perspective.
-       when returning False, the plug-in is not candidate for an automatic
-       default perspective setting
-        """
-        if self.standalone:
-            return True
-        return False
 
     def set_state(self, state=None, datainfo=None):    
         """

@@ -35,8 +35,8 @@ class Plugin(PluginBase):
     Plug-in class to be instantiated by the GUI manager
     """
 
-    def __init__(self, standalone=False):
-        PluginBase.__init__(self, name="Plotting", standalone=standalone)
+    def __init__(self):
+        PluginBase.__init__(self, name="Plotting")
 
         ## Plot panels
         self.plot_panels = {}

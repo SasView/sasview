@@ -125,7 +125,7 @@ class SasView():
         # P(r) perspective
         try:
             import sas.perspectives.pr as module
-            pr_plug = module.Plugin(standalone=False)
+            pr_plug = module.Plugin()
             self.gui.add_perspective(pr_plug)
         except:
             logging.error("%s: could not find P(r) plug-in module"% APP_NAME)
@@ -134,7 +134,7 @@ class SasView():
         #Invariant perspective
         try:
             import sas.perspectives.invariant as module
-            invariant_plug = module.Plugin(standalone=False)
+            invariant_plug = module.Plugin()
             self.gui.add_perspective(invariant_plug)
         except:
             logging.error("%s: could not find Invariant plug-in module"% \
@@ -144,7 +144,7 @@ class SasView():
         #Calculator perspective   
         try:
             import sas.perspectives.calculator as module
-            calculator_plug = module.Plugin(standalone=False)
+            calculator_plug = module.Plugin()
             self.gui.add_perspective(calculator_plug)
         except:
             logging.error("%s: could not find Calculator plug-in module"% \

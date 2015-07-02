@@ -32,8 +32,8 @@ class Plugin(PluginBase):
     that can be used by the gui_manager.
     """
 
-    def __init__(self, standalone=False):
-        PluginBase.__init__(self, name="Invariant", standalone=standalone)
+    def __init__(self):
+        PluginBase.__init__(self, name="Invariant")
 
         # dictionary containing data name and error on dy of that data
         self.err_dy = {}

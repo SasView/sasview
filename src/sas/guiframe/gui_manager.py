@@ -817,7 +817,6 @@ class ViewerFrame(PARENT_FRAME):
         self.SetStatusBar(self.sb)
         # Load panels
         self._load_panels()
-        self.set_default_perspective()
 
     def SetStatusText(self, *args, **kwds):
         """
@@ -926,11 +925,7 @@ class ViewerFrame(PARENT_FRAME):
                             module = imp.load_module(name, file, item, info)
                         if hasattr(module, "PLUGIN_ID"):
                             try:
-                                plug = module.Plugin()
-                                if plug.set_default_perspective():
-                                    self._current_perspective = plug
-                                plugins.append(plug)
-
+                                plugins.append(module.Plugin())
                                 msg = "Found plug-in: %s" % module.PLUGIN_ID
                                 logging.info(msg)
                             except:
@@ -2197,18 +2192,6 @@ class ViewerFrame(PARENT_FRAME):
         for item in self.plugins:
             if hasattr(item, "post_init"):
                 item.post_init()
-
-    def set_default_perspective(self):
-        """
-        Choose among the plugin the first plug-in that has
-        "set_default_perspective" method and its return value is True will be
-        as a default perspective when the welcome page is closed
-        """
-        for item in self.plugins:
-            if hasattr(item, "set_default_perspective"):
-                if item.set_default_perspective():
-                    item.on_perspective(event=None)
-                    return
 
     def set_perspective(self, panels):
         """

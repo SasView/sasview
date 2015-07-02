@@ -32,8 +32,8 @@ class Plugin(PluginBase):
     This class defines the interface for a Plugin class
     for calculator perspective
     """
-    def __init__(self, standalone=True):
-        PluginBase.__init__(self, name="Calculator", standalone=standalone)
+    def __init__(self):
+        PluginBase.__init__(self, name="Calculator")
         # Log startup
         logging.info("Calculator plug-in started")
         self.sub_menu = "Tool"
