@@ -12,8 +12,7 @@ __appname__ = "SasView"
 __version__ = sas.sasview.__version__
 __build__ = sas.sasview.__build__
 __download_page__ = 'https://github.com/SasView/sasview/releases'
-__update_URL__ = ['raw.githubusercontent.com',
-                  '/SasView/sasview/master/sasview.latestversion']
+__update_URL__ = 'http://www.sasview.org/sasview.latestversion'
 
 
 # Debug message flag

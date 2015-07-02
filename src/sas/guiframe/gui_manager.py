@@ -2042,16 +2042,15 @@ class ViewerFrame(PARENT_FRAME):
         a call-back method when the current version number has been obtained.
         """
         try:
-            req = urllib2.Request('https://github.com/SasView/sasview/releases/latest')
+            req = urllib2.Request(config.__update_URL__)
             res = urllib2.urlopen(req)
-            get_url= res.geturl()
-            content = get_url.partition('/v')[2]
-            logging.info("connected to GitHub. sasview.latestversion = %s"
+            content = res.read().strip()
+            logging.info("Connected to www.sasview.org. Latest version: %s"
                          % (content))
         except:
             msg = traceback.format_exc()
             logging.info(msg)
-            logging.info("failed to connect to GitHub")
+            logging.info("Failed to connect to www.sasview.org")
             content = "0.0.0"
 
         version = content.strip()
