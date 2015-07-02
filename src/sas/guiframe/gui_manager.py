@@ -230,7 +230,6 @@ class ViewerFrame(PARENT_FRAME):
         """
         Initialize the Frame object
         """
-
         PARENT_FRAME.__init__(self, parent=parent, title=title, pos=pos, size=size)
         # title
         self.title = title
@@ -359,7 +358,7 @@ class ViewerFrame(PARENT_FRAME):
                     icon = self.GetIcon()
                     frame.SetIcon(icon)
                 except:
-                    pass
+                    logging.error("ViewerFrame.put_icon: could not set icon")
 
     def get_client_size(self):
         """
@@ -747,7 +746,6 @@ class ViewerFrame(PARENT_FRAME):
                 wx.EVT_MENU(self, id, cpanel._back_to_bookmark)
             self._toolbar.Realize()
 
-
     def build_gui(self):
         """
         Build the GUI by setting up the toolbar, menu and layout.
@@ -773,7 +771,6 @@ class ViewerFrame(PARENT_FRAME):
         self._add_help_menu()
         # Append item from plugin under menu file if necessary
         self._populate_file_menu()
-
 
         if not wx.VERSION_STRING >= '3.0.0.0':
             self.SetMenuBar(self._menubar)
@@ -1493,42 +1490,42 @@ class ViewerFrame(PARENT_FRAME):
             if len(plugin.populate_file_menu()) > 0:
                 for item in plugin.populate_file_menu():
                     m_name, m_hint, m_handler = item
-                    id = wx.NewId()
-                    self._file_menu.Append(id, m_name, m_hint)
-                    wx.EVT_MENU(self, id, m_handler)
+                    wx_id = wx.NewId()
+                    self._file_menu.Append(wx_id, m_name, m_hint)
+                    wx.EVT_MENU(self, wx_id, m_handler)
                 self._file_menu.AppendSeparator()
 
         style1 = self.__gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
         if OPEN_SAVE_MENU:
-            id = wx.NewId()
+            wx_id = wx.NewId()
             hint_load_file = "read all analysis states saved previously"
-            self._save_appl_menu = self._file_menu.Append(id, '&Open Project', hint_load_file)
-            wx.EVT_MENU(self, id, self._on_open_state_project)
+            self._save_appl_menu = self._file_menu.Append(wx_id, '&Open Project', hint_load_file)
+            wx.EVT_MENU(self, wx_id, self._on_open_state_project)
 
         if style1 == GUIFRAME.MULTIPLE_APPLICATIONS:
             # some menu of plugin to be seen under file menu
             hint_load_file = "Read a status files and load"
             hint_load_file += " them into the analysis"
-            id = wx.NewId()
-            self._save_appl_menu = self._file_menu.Append(id,
+            wx_id = wx.NewId()
+            self._save_appl_menu = self._file_menu.Append(wx_id,
                                                           '&Open Analysis', hint_load_file)
-            wx.EVT_MENU(self, id, self._on_open_state_application)
+            wx.EVT_MENU(self, wx_id, self._on_open_state_application)
         if OPEN_SAVE_MENU:
             self._file_menu.AppendSeparator()
-            id = wx.NewId()
-            self._file_menu.Append(id, '&Save Project',
+            wx_id = wx.NewId()
+            self._file_menu.Append(wx_id, '&Save Project',
                                    'Save the state of the whole analysis')
-            wx.EVT_MENU(self, id, self._on_save_project)
+            wx.EVT_MENU(self, wx_id, self._on_save_project)
         if style1 == GUIFRAME.MULTIPLE_APPLICATIONS:
-            id = wx.NewId()
-            self._save_appl_menu = self._file_menu.Append(id, \
+            wx_id = wx.NewId()
+            self._save_appl_menu = self._file_menu.Append(wx_id, \
                 '&Save Analysis', 'Save state of the current active analysis panel')
-            wx.EVT_MENU(self, id, self._on_save_application)
+            wx.EVT_MENU(self, wx_id, self._on_save_application)
         if not sys.platform == 'darwin':
             self._file_menu.AppendSeparator()
-            id = wx.NewId()
-            self._file_menu.Append(id, '&Quit', 'Exit')
-            wx.EVT_MENU(self, id, self.Close)
+            wx_id = wx.NewId()
+            self._file_menu.Append(wx_id, '&Quit', 'Exit')
+            wx.EVT_MENU(self, wx_id, self.Close)
 
     def _add_menu_file(self):
         """
@@ -1699,12 +1696,9 @@ class ViewerFrame(PARENT_FRAME):
     def get_data(self, path):
         """
         """
-        message = ""
         log_msg = ''
-        output = []
-        error_message = ""
         basename = os.path.basename(path)
-        root, extension = os.path.splitext(basename)
+        _, extension = os.path.splitext(basename)
         if extension.lower() not in EXTENSIONS:
             log_msg = "File Loader cannot "
             log_msg += "load: %s\n" % str(basename)
@@ -2370,13 +2364,12 @@ class ViewerFrame(PARENT_FRAME):
             theory_data, theory_state = item
             total_plot_list.append(theory_data)
         for new_plot in total_plot_list:
-            id = new_plot.id
             for group_id in new_plot.list_group_id:
-                wx.PostEvent(self, NewPlotEvent(id=id,
+                wx.PostEvent(self, NewPlotEvent(id=new_plot.id,
                                                 group_id=group_id,
                                                 action='remove'))
                 #remove res plot: Todo: improve
-                wx.CallAfter(self._remove_res_plot, id)
+                wx.CallAfter(self._remove_res_plot, new_plot.id)
         self._data_manager.delete_data(data_id=data_id,
                                        theory_id=theory_id)
 
@@ -2411,26 +2404,26 @@ class ViewerFrame(PARENT_FRAME):
             # This is MAC Fix
             ext_num = dlg.GetFilterIndex()
             if ext_num == 0:
-                format = '.txt'
+                ext_format = '.txt'
             else:
-                format = '.xml'
-            path = os.path.splitext(path)[0] + format
+                ext_format = '.xml'
+            path = os.path.splitext(path)[0] + ext_format
             mypath = os.path.basename(path)
 
             #Instantiate a loader
             loader = Loader()
-            format = ".txt"
-            if os.path.splitext(mypath)[1].lower() == format:
+            ext_format = ".txt"
+            if os.path.splitext(mypath)[1].lower() == ext_format:
                 # Make sure the ext included in the file name
                 # especially on MAC
-                fName = os.path.splitext(path)[0] + format
+                fName = os.path.splitext(path)[0] + ext_format
                 self._onsaveTXT(data, fName)
-            format = ".xml"
-            if os.path.splitext(mypath)[1].lower() == format:
+            ext_format = ".xml"
+            if os.path.splitext(mypath)[1].lower() == ext_format:
                 # Make sure the ext included in the file name
                 # especially on MAC
-                fName = os.path.splitext(path)[0] + format
-                loader.save(fName, data, format)
+                fName = os.path.splitext(path)[0] + ext_format
+                loader.save(fName, data, ext_format)
             try:
                 self._default_save_location = os.path.dirname(path)
             except:
@@ -2553,21 +2546,21 @@ class ViewerFrame(PARENT_FRAME):
             # This is MAC Fix
             ext_num = dlg.GetFilterIndex()
             if ext_num == 0:
-                format = '.dat'
+                ext_format = '.dat'
             else:
-                format = ''
-            path = os.path.splitext(path)[0] + format
+                ext_format = ''
+            path = os.path.splitext(path)[0] + ext_format
             mypath = os.path.basename(path)
 
             #Instantiate a loader
             loader = Loader()
 
-            format = ".dat"
-            if os.path.splitext(mypath)[1].lower() == format:
+            ext_format = ".dat"
+            if os.path.splitext(mypath)[1].lower() == ext_format:
                 # Make sure the ext included in the file name
                 # especially on MAC
-                fileName = os.path.splitext(path)[0] + format
-                loader.save(fileName, data, format)
+                fileName = os.path.splitext(path)[0] + ext_format
+                loader.save(fileName, data, ext_format)
             try:
                 self._default_save_location = os.path.dirname(path)
             except:
@@ -3160,9 +3153,9 @@ class DefaultPanel(wx.Panel, PanelBase):
 
 
 
-class ViewApp(wx.App):
+class SasViewApp(wx.App):
     """
-    Toy application to test this Frame
+    SasView application
     """
     def OnInit(self):
         """
@@ -3248,8 +3241,8 @@ class ViewApp(wx.App):
         if os.path.exists(model_folder) and os.path.isdir(model_folder):
             if len(os.listdir(model_folder)) > 0:
                 try:
-                    for file in os.listdir(model_folder):
-                        file_path = os.path.join(model_folder, file)
+                    for filename in os.listdir(model_folder):
+                        file_path = os.path.join(model_folder, filename)
                         if os.path.isfile(file_path):
                             os.remove(file_path)
                 except:
@@ -3268,10 +3261,7 @@ class ViewApp(wx.App):
         Build the GUI
         """
         #try to load file at the start
-        try:
-            self.open_file()
-        except:
-            raise
+        self.open_file()
         self.frame.build_gui()
 
     def set_welcome_panel(self, panel_class):

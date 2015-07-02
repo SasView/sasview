@@ -90,11 +90,6 @@ import local_config
 PLUGIN_MODEL_DIR = 'plugin_models'
 APP_NAME = 'SasView'
 
-class SasViewApp(gui_manager.ViewApp):
-    """
-    """
-  
-
 class SasView():
     """
     Main class for running the SasView application
@@ -103,7 +98,7 @@ class SasView():
         """
         """
         #from gui_manager import ViewApp
-        self.gui = SasViewApp(0)
+        self.gui = gui_manager.SasViewApp(0)
         # Set the application manager for the GUI
         self.gui.set_manager(self)
         # Add perspectives to the basic application
