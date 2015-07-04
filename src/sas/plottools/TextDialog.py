@@ -7,7 +7,7 @@ if sys.platform.count("win32") > 0:
 else:
     FONT_VARIANT = 1
     PNL_WIDTH = 500
-FAMILY = ['serif', 'sas-serif', 'fantasy', 'monospace']
+FAMILY = ['serif', 'sans-serif', 'fantasy', 'monospace']
 SIZE = [8, 9, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72]
 STYLE = ['normal', 'italic']
 WEIGHT = ['light', 'normal', 'bold']
@@ -19,7 +19,7 @@ class TextDialog(wx.Dialog):
         """
         Dialog window pops- up when selecting 'Add Text' on the toolbar
         """
-        wx.Dialog.__init__(self, parent, id, title, size=(PNL_WIDTH, 280))
+        wx.Dialog.__init__(self, parent, id, title, size=(PNL_WIDTH, 300))
         self.parent = parent
         # Font
         self.SetWindowVariant(variant=FONT_VARIANT)
@@ -34,8 +34,8 @@ class TextDialog(wx.Dialog):
         vbox = wx.BoxSizer(wx.VERTICAL)
         text_box = wx.BoxSizer(wx.HORIZONTAL)
         sizer = wx.GridBagSizer(1, 3)
-        _BOX_WIDTH = 60
-        font_description = wx.StaticBox(self, -1, 'Font', size=(PNL_WIDTH - 20, 70))
+        _BOX_WIDTH = 70
+        font_description = wx.StaticBox(self, -1, 'Font')
         font_box = wx.StaticBoxSizer(font_description, wx.VERTICAL)
         family_box = wx.BoxSizer(wx.HORIZONTAL)
         style_box = wx.BoxSizer(wx.HORIZONTAL)
@@ -102,7 +102,7 @@ class TextDialog(wx.Dialog):
         self.font_style.SetSelection(0)
         self.font_style.SetToolTipString("Font style of the text.")
         # font color
-        self.font_color = wx.ComboBox(self, -1, style=wx.CB_READONLY)
+        self.font_color = wx.ComboBox(self, -1, style = wx.CB_READONLY)
         wx.EVT_COMBOBOX(self.font_color, -1, self.on_color)
         self.font_color.SetMinSize((_BOX_WIDTH, -1))
         self._set_color_list()
@@ -110,8 +110,10 @@ class TextDialog(wx.Dialog):
         self.font_color.SetToolTipString("Font color of the text.")
         # Buttons on the bottom
         self.static_line_1 = wx.StaticLine(self, -1)
-        self.ok_button = wx.Button(self, wx.ID_OK, 'OK', size=(_BOX_WIDTH, 25))
-        self.close_button = wx.Button(self, wx.ID_CANCEL, 'Cancel', size=(_BOX_WIDTH, 25))
+        self.ok_button = wx.Button(self, wx.ID_OK, 'OK',
+                                   size = (_BOX_WIDTH, 25))
+        self.close_button = wx.Button(self, wx.ID_CANCEL, 'Cancel',
+                                      size = (_BOX_WIDTH, 25))
 
         # Intro
         explanation = "Select font properties :"
@@ -120,25 +122,31 @@ class TextDialog(wx.Dialog):
         iy = 1
         sizer.Add(wx.StaticText(self, -1, explanation), (iy, ix),
                   (1, 1), wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
-        family_box.Add(wx.StaticText(self, -1, 'Family :'), -1, 0)
-        family_box.Add(self.font_family, -1, 0)
+        family_box.Add(wx.StaticText(self, -1, 'Family :', size = (50, -1)),
+                       0, wx.TOP, 5)
+        family_box.Add(self.font_family, 0, 0)
         family_box.Add((_BOX_WIDTH / 2, -1))
-        family_box.Add(wx.StaticText(self, -1, 'Size :'), -1, 0)
-        family_box.Add(self.font_size, -1, 0)
+        family_box.Add(wx.StaticText(self, -1, 'Size :', size = (50, -1)),
+                       0, wx.TOP, 5)
+        family_box.Add(self.font_size, 0, 0)
         if unit_box != None:
             family_box.Add((_BOX_WIDTH / 2, -1))
-            family_box.Add(tick_label_text, -1, 0)
-            family_box.Add(self.tick_label_check, -1, 0)
-        style_box.Add(wx.StaticText(self, -1, 'Style :'), -1, 0)
-        style_box.Add(self.font_style, -1, 0)
+            family_box.Add(tick_label_text, 0, 0)
+            family_box.Add(self.tick_label_check, 0, 0)
+        style_box.Add(wx.StaticText(self, -1, 'Style :', size = (50, -1)),
+                      0, wx.TOP, 5)
+        style_box.Add(self.font_style, 0, 0)
         style_box.Add((_BOX_WIDTH / 2, -1))
-        style_box.Add(wx.StaticText(self, -1, 'Weight :'), -1, 0)
-        style_box.Add(self.font_weight, -1, 0)
+        style_box.Add(wx.StaticText(self, -1, 'Weight :', size = (50, -1)),
+                      0, wx.TOP, 5)
+        style_box.Add(self.font_weight, 0, 0)
         style_box.Add((_BOX_WIDTH / 2, -1))
-        style_box.Add(wx.StaticText(self, -1, 'Color :'), -1, 0)
-        style_box.Add(self.font_color, -1, 0)
-        font_box.Add(family_box, -1, 10)
-        font_box.Add(style_box, -1, 10)
+        style_box.Add(wx.StaticText(self, -1, 'Color :', size = (45, -1)),
+                      0, wx.TOP, 5)
+        style_box.Add(self.font_color, 0, 0)
+        font_box.Add(family_box, 0, 10)
+        font_box.Add((0,5))
+        font_box.Add(style_box, 0, 10)
         iy += 1
         ix = 0
         sizer.Add(font_box, (iy, ix),
@@ -151,8 +159,8 @@ class TextDialog(wx.Dialog):
         text_box.Add(self.text_string)
         vbox.Add(text_box, 0, wx.EXPAND, 15)
         if unit_box != None:
-            unit_box.Add(unit_text, -1, 0)
-            unit_box.Add(self.unit_ctrl, -1, 0)
+            unit_box.Add(unit_text, 0, 0)
+            unit_box.Add(self.unit_ctrl, 0, 0)
             vbox.Add((5, 5))
             vbox.Add(unit_box, 0, wx.LEFT, 15)
 
