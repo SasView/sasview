@@ -111,6 +111,6 @@ class NavigationToolBar(NavigationToolbar2WxAgg):
             Print
         """
         try:
-            self.canvas.Printer_Preview(event=event)
+            self._parent.onPrint(event=event)
         except:
             logging.error("Plot toolbar could not print")

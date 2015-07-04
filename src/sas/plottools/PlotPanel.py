@@ -2,6 +2,7 @@
     Plot panel.
 """
 import logging
+import traceback
 import wx
 # Try a normal import first
 # If it fails, try specifying a version
@@ -861,7 +862,7 @@ class PlotPanel(wx.Panel):
         """
         Implement save image
         """
-        self.toolbar.save(evt)
+        self.toolbar.save_figure(evt)
 
     def onContextMenu(self, event):
         """
@@ -1985,20 +1986,41 @@ class PlotPanel(wx.Panel):
 
     def onPrinterPreview(self, event=None):
         """
+        Matplotlib camvas can no longer print itself.  Thus need to do
+        everything ourselves: need to create a printpreview frame to to
+        see the preview but needs a parent frame object.  Also needs a
+        printout object (just as any printing task).
         """
         try:
-            self.canvas.Printer_Preview(event=event)
-            self.Update()
+            #check if parent is a frame.  If not keep getting the higher
+            #parent till we find a frame
+            _plot = self
+            while not isinstance(_plot, wx.Frame):
+                _plot = _plot.GetParent()
+                assert _plot is not None
+
+            #now create the printpeview object
+            _preview = wx.PrintPreview(PlotPrintout(self,'test'),
+                                       PlotPrintout(self,'test'))
+            #and tie it to a printpreview frame then show it
+            _frame = wx.PreviewFrame(_preview, _plot, "Print Preview", wx.Point(100, 100), wx.Size(600, 650))
+            _frame.Centre(wx.BOTH)
+            _frame.Initialize()
+            _frame.Show(True)
         except:
+            traceback.print_exc()
             pass
 
     def onPrint(self, event=None):
         """
+        Matplotlib canvas can no longer print itself so using wx.Printer.  
+        Need therefore to also define a Printout object.
         """
         try:
-            self.canvas.Printer_Print(event=event)
-            self.Update()
+            _printer = wx.Printer()
+            _printer.Print(self.canvas, PlotPrintout(self,'test'), True)
         except:
+            traceback.print_exc()
             pass
 
     def OnCopyFigureMenu(self, evt):
@@ -2036,3 +2058,37 @@ class NoRepaintCanvas(FigureCanvasWxAgg):
             self.draw(repaint=False)
             self._drawn += 1
         self.gui_repaint(drawDC=wx.PaintDC(self))
+
+class PlotPrintout(wx.Printout):
+    """
+    Create the wx.Printout object for matplotlib figure from the PlotPanel.
+    Provides the required OnPrintPage and HasPage overrides.  Other methods
+    may be added/overriden in the future.
+    :TODO: this needs LOTS of TLC .. but fixes immediate problem
+    """
+    def __init__(self, figure, title, size=None, dpi=None, **kwargs):
+        """
+        Initialize wx.Printout and get passed figure object
+        """
+        wx.Printout.__init__(self)
+        self.figure = figure
+
+    def OnPrintPage(self, page):
+        """
+        Most rudimentry OnPrintPage overide.  instatiates a dc object, gets
+        its size, gets the size of the figure object, scales it to the dc
+        canvas size keeping the aspect ratio intact, then prints as bitmap
+        """
+        _dc = self.GetDC()
+        (_dcX, _dcY) = _dc.GetSizeTuple()
+        (_bmpX,_bmpY) = self.figure.canvas.GetSize()
+        _scale = min(_dcX/_bmpX, _dcY/_bmpY)
+        _dc.SetUserScale(_scale, _scale)
+        _dc.DrawBitmap(self.figure.canvas.bitmap, 0, 0, False,)
+        return True
+
+    def GetPageInfo(self):
+        """
+        just sets the page to 1 - no flexibility for now
+        """
+        return (1, 1, 1, 1)
