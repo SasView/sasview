@@ -301,6 +301,10 @@ Release Notes
         - If the documentation window remains stubbornly blank, try installing a 
           different browser and set that as your default browser. Issues have
           been noted with Internet Explorer 11.
+        - Check for Updates may fail (with the status bar message ' Cannot 
+          connect to the application server') if your internet connection uses 
+          a proxy server. Tested resolutions for this are described on the 
+          website FAQ.
         - The copy and paste functions (^C, ^V) in the batch mode results grid
           require two clicks: one to select the cell and a second to select the
           contents of the cell. 
