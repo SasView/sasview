@@ -26,7 +26,7 @@ import httplib
 import traceback
 import urllib
 import urllib2
-
+import json
 
 from sas.guiframe.events import EVT_CATEGORY
 from sas.guiframe.events import EVT_STATUS
@@ -2053,12 +2053,10 @@ class ViewerFrame(PARENT_FRAME):
             logging.info("Failed to connect to www.sasview.org")
             content = "0.0.0"
 
-        version = content.strip()
-        if len(re.findall('\d+\.\d+\.\d+$', version)) < 0:
-            content = "0.0.0"
-        self._process_version(content, standalone=event == None)
+        version_info = json.loads(content)
+        self._process_version(version_info, standalone=event == None)
 
-    def _process_version(self, version, standalone=True):
+    def _process_version(self, version_info, standalone=True):
         """
         Call-back method for the process of checking for updates.
         This methods is called by a VersionThread object once the current
@@ -2070,6 +2068,7 @@ class ViewerFrame(PARENT_FRAME):
            the background, False otherwise.
 
         """
+        version = version_info["version"]
         try:
             if version == "0.0.0":
                 msg = "Could not connect to the application server."
@@ -2079,7 +2078,10 @@ class ViewerFrame(PARENT_FRAME):
                 msg = "Version %s is available! " % str(version)
                 if not standalone:
                     import webbrowser
-                    webbrowser.open(config.__download_page__)
+                    if "download_url" in version_info:
+                        webbrowser.open(version_info["download_url"])
+                    else:
+                        webbrowser.open(config.__download_page__)
                 else:
                     msg += "See the help menu to download it."
                 self.SetStatusText(msg)
