@@ -634,21 +634,21 @@ class PlotPanel(wx.Panel):
         """
         when clicking on linear Fit on context menu , display Fitting Dialog
         """
-        list = {}
+        plot_dict = {}
         menu = event.GetEventObject()
-        id = event.GetId()
-        self.set_selected_from_menu(menu, id)
+        event_id = event.GetId()
+        self.set_selected_from_menu(menu, event_id)
         plotlist = self.graph.returnPlottable()
         if self.graph.selected_plottable is not None:
             for item in plotlist:
                 if item.id == self.graph.selected_plottable:
-                    list[item] = plotlist[item]
+                    plot_dict[item] = plotlist[item]
         else:
-            list = plotlist
+            plot_dict = plotlist
         from fitDialog import LinearFit
 
-        if len(list.keys()) > 0:
-            first_item = list.keys()[0]
+        if len(plot_dict.keys()) > 0:
+            first_item = plot_dict.keys()[0]
             dlg = LinearFit(parent=None, plottable=first_item,
                             push_data=self.onFitDisplay,
                             transform=self.returnTrans,
@@ -870,60 +870,52 @@ class PlotPanel(wx.Panel):
 
         """
         # Slicer plot popup menu
-        id = wx.NewId()
+        wx_id = wx.NewId()
         slicerpop = wx.Menu()
-        slicerpop.Append(id, '&Save image', 'Save image as PNG')
-        wx.EVT_MENU(self, id, self.onSaveImage)
+        slicerpop.Append(wx_id, '&Save image', 'Save image as PNG')
+        wx.EVT_MENU(self, wx_id, self.onSaveImage)
 
-        id = wx.NewId()
-        slicerpop.Append(id, '&Printer setup', 'Set image size')
-        wx.EVT_MENU(self, id, self.onPrinterSetup)
+        wx_id = wx.NewId()
+        slicerpop.Append(wx_id, '&Printer setup', 'Set image size')
+        wx.EVT_MENU(self, wx_id, self.onPrinterSetup)
 
-        id = wx.NewId()
-        slicerpop.Append(id, '&Printer Preview', 'Set image size')
-        wx.EVT_MENU(self, id, self.onPrinterPreview)
+        wx_id = wx.NewId()
+        slicerpop.Append(wx_id, '&Print image', 'Print image ')
+        wx.EVT_MENU(self, wx_id, self.onPrint)
 
-        id = wx.NewId()
-        slicerpop.Append(id, '&Print image', 'Print image ')
-        wx.EVT_MENU(self, id, self.onPrint)
+        wx_id = wx.NewId()
+        slicerpop.Append(wx_id, '&Copy', 'Copy to the clipboard')
+        wx.EVT_MENU(self, wx_id, self.OnCopyFigureMenu)
 
-        id = wx.NewId()
-        slicerpop.Append(id, '&Copy', 'Copy to the clipboard')
-        wx.EVT_MENU(self, id, self.OnCopyFigureMenu)
-
-        #id = wx.NewId()
-        #slicerpop.Append(id, '&Load 1D data file')
-        #wx.EVT_MENU(self, id, self._onLoad1DData)
-
-        id = wx.NewId()
+        wx_id = wx.NewId()
         slicerpop.AppendSeparator()
-        slicerpop.Append(id, '&Properties')
-        wx.EVT_MENU(self, id, self._onProperties)
+        slicerpop.Append(wx_id, '&Properties')
+        wx.EVT_MENU(self, wx_id, self._onProperties)
 
-        id = wx.NewId()
+        wx_id = wx.NewId()
         slicerpop.AppendSeparator()
-        slicerpop.Append(id, '&Linear Fit')
-        wx.EVT_MENU(self, id, self.onFitting)
+        slicerpop.Append(wx_id, '&Linear Fit')
+        wx.EVT_MENU(self, wx_id, self.onFitting)
 
-        id = wx.NewId()
+        wx_id = wx.NewId()
         slicerpop.AppendSeparator()
-        slicerpop.Append(id, '&Toggle Legend On/Off', 'Toggle Legend On/Off')
-        wx.EVT_MENU(self, id, self.onLegend)
+        slicerpop.Append(wx_id, '&Toggle Legend On/Off', 'Toggle Legend On/Off')
+        wx.EVT_MENU(self, wx_id, self.onLegend)
 
         loc_menu = wx.Menu()
         for label in self._loc_labels:
-            id = wx.NewId()
-            loc_menu.Append(id, str(label), str(label))
-            wx.EVT_MENU(self, id, self.onChangeLegendLoc)
-        id = wx.NewId()
-        slicerpop.AppendMenu(id, '&Modify Legend Location', loc_menu)
+            wx_id = wx.NewId()
+            loc_menu.Append(wx_id, str(label), str(label))
+            wx.EVT_MENU(self, wx_id, self.onChangeLegendLoc)
+        wx_id = wx.NewId()
+        slicerpop.AppendMenu(wx_id, '&Modify Legend Location', loc_menu)
 
-        id = wx.NewId()
-        slicerpop.Append(id, '&Modify Y Axis Label')
-        wx.EVT_MENU(self, id, self._on_yaxis_label)
-        id = wx.NewId()
-        slicerpop.Append(id, '&Modify X Axis Label')
-        wx.EVT_MENU(self, id, self._on_xaxis_label)
+        wx_id = wx.NewId()
+        slicerpop.Append(wx_id, '&Modify Y Axis Label')
+        wx.EVT_MENU(self, wx_id, self._on_yaxis_label)
+        wx_id = wx.NewId()
+        slicerpop.Append(wx_id, '&Modify X Axis Label')
+        wx.EVT_MENU(self, wx_id, self._on_xaxis_label)
 
         try:
             # mouse event
@@ -1922,10 +1914,7 @@ class PlotPanel(wx.Panel):
         self.xmin = xmin
         self.xmax = xmax
         #In case need to change the range of data plotted
-        list = []
-        list = self.graph.returnPlottable()
-        for item in list:
-            #item.onFitRange(xminView,xmaxView)
+        for item in self.graph.returnPlottable():
             item.onFitRange(None, None)
         # Create new data plottable with result
         self.fit_result.x = []
@@ -1969,9 +1958,7 @@ class PlotPanel(wx.Panel):
         """
         Reset the graph by plotting the full range of data
         """
-        list = []
-        list = self.graph.returnPlottable()
-        for item in list:
+        for item in self.graph.returnPlottable():
             item.onReset()
         self.graph.render(self)
         self._onEVT_FUNC_PROPERTY(False)

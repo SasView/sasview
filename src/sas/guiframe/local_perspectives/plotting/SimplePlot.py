@@ -59,10 +59,6 @@ class SimplePlotPanel(PlotPanel):
         wx.EVT_MENU(self, wx_id, self.onPrint)
 
         wx_id = wx.NewId()
-        slicerpop.Append(wx_id, '&Print Preview', 'Print preview')
-        wx.EVT_MENU(self, wx_id, self.onPrinterPreview)
-
-        wx_id = wx.NewId()
         slicerpop.Append(wx_id, '&Copy to Clipboard', 'Copy to the clipboard')
         wx.EVT_MENU(self, wx_id, self.OnCopyFigureMenu)
 
@@ -232,12 +228,6 @@ class PlotFrame(wx.Frame):
         item.SetBitmap(print_bmp)
         menu.AppendItem(item)
         wx.EVT_MENU(self, id, self.on_print_image)
-
-        id = wx.NewId()
-        item = wx.MenuItem(menu, id, "&Print Preview")
-        item.SetBitmap(preview_bmp)
-        menu.AppendItem(item)
-        wx.EVT_MENU(self, id, self.on_print_preview)
 
         menu.AppendSeparator()
         id = wx.NewId()

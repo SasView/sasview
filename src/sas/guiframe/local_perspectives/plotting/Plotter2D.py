@@ -299,10 +299,6 @@ class ModelPanel2D(ModelPanel1D):
         wx.EVT_MENU(self, wx_id, self.onPrint)
 
         wx_id = wx.NewId()
-        slicerpop.Append(wx_id, '&Print Preview', 'Print preview')
-        wx.EVT_MENU(self, wx_id, self.onPrinterPreview)
-
-        wx_id = wx.NewId()
         slicerpop.Append(wx_id, '&Copy to Clipboard', 'Copy to the clipboard')
         wx.EVT_MENU(self, wx_id, self.OnCopyFigureMenu)
         slicerpop.AppendSeparator()

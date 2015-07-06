@@ -2235,13 +2235,9 @@ class FitPage(BasicPage):
         Set weight in fit problem
         """
         # compute weight for the current data
-        from sas.perspectives.fitting.utils import get_weight
         flag_weight = self.get_weight_flag()
         if is_2D == None:
             is_2D = self._is_2D()
-        weight = get_weight(data=self.data,
-                            is2d=is_2D,
-                            flag=flag_weight)
         self._manager.set_fit_weight(uid=self.uid,
                                      flag=flag_weight,
                                      is2d=is_2D,
@@ -2259,8 +2255,6 @@ class FitPage(BasicPage):
         # Need update param values
         self._update_paramv_on_fit()
 
-        # msg default
-        msg = None
         if event != None:
             tcrtl = event.GetEventObject()
             # event case of radio button
@@ -2274,7 +2268,7 @@ class FitPage(BasicPage):
             is_new_pinhole = True
         # if any value is changed
         if is_new_pinhole:
-            msg = self._set_pinhole_smear()
+            self._set_pinhole_smear()
         # hide all silt sizer
         self._hide_all_smear_info()
 

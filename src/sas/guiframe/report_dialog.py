@@ -66,12 +66,6 @@ class BaseReportDialog(wx.Dialog):
         hbox.Add(button_close)
         button_close.SetFocus()
 
-        button_preview = wx.Button(self, wx.NewId(), "Preview")
-        button_preview.SetToolTipString("Print preview this report.")
-        button_preview.Bind(wx.EVT_BUTTON, self.onPreview,
-                            id=button_preview.GetId()) 
-        hbox.Add(button_preview)
-
         button_print = wx.Button(self, wx.NewId(), "Print")
         button_print.SetToolTipString("Print this report.")
         button_print.Bind(wx.EVT_BUTTON, self.onPrint,

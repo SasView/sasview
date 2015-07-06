@@ -563,9 +563,6 @@ class ModelPanel1D(PlotPanel, PanelBase):
             wx_id = wx.NewId()
             self._slicerpop.Append(wx_id, '&Print Image', 'Print image ')
             wx.EVT_MENU(self, wx_id, self.onPrint)
-            wx_id = wx.NewId()
-            self._slicerpop.Append(wx_id, '&Print Preview', 'Print preview')
-            wx.EVT_MENU(self, wx_id, self.onPrinterPreview)
 
             wx_id = wx.NewId()
             self._slicerpop.Append(wx_id, '&Copy to Clipboard',

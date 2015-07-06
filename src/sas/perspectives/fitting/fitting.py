@@ -515,7 +515,7 @@ class Plugin(PluginBase):
             data_list = []
         selected_data_list = []
         if self.batch_on:
-            page = self.add_fit_page(data=data_list)
+            self.add_fit_page(data=data_list)
         else:
             if len(data_list) > MAX_NBR_DATA:
                 from fitting_widgets import DataDialog
@@ -536,9 +536,9 @@ class Plugin(PluginBase):
                         data.group_id = group_id
                         if group_id not in data.list_group_id:
                             data.list_group_id.append(group_id)
-                        page = self.add_fit_page(data=[data])
+                        self.add_fit_page(data=[data])
             except:
-                msg = "Fitting Set_data: " + str(sys.exc_value)
+                msg = "Fitting set_data: " + str(sys.exc_value)
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
 
     def set_theory(self, theory_list=None):
@@ -669,6 +669,10 @@ class Plugin(PluginBase):
         :param fid: id corresponding to a fit problem (data, model)
         :param weight: current dy data
         """
+        # If we are not dealing with a specific fit problem, then
+        # there is no point setting the weights.
+        if fid is None:
+            return
         if uid in self.page_finder.keys():
             self.page_finder[uid].set_weight(flag=flag, is2d=is2d)
 
