@@ -21,7 +21,6 @@ from matplotlib.font_manager import FontProperties
 DEBUG = False
 
 from plottables import Graph
-from plottables import Text
 from TextDialog import TextDialog
 from LabelDialog import LabelDialog
 import operator
@@ -32,7 +31,8 @@ DEFAULT_CMAP = pylab.cm.jet
 import copy
 import numpy
 
-from sas.guiframe.events import StatusEvent
+from ..guiframe.events import StatusEvent
+from .toolbar import NavigationToolBar, PlotPrintout, bind
 
 def show_tree(obj, d=0):
     """Handy function for displaying a tree of graph objects"""
@@ -88,20 +88,6 @@ def _rescale(lo, hi, step, pt=None, bal=None, scale='linear'):
         else:
             lo, hi = math.pow(10., lo), math.pow(10., hi)
     return (lo, hi)
-
-
-def CopyImage(canvas):
-    """
-    0: matplotlib plot
-    1: wx.lib.plot
-    2: other
-    """
-    bmp = wx.BitmapDataObject()
-    bmp.SetBitmap(canvas.bitmap)
-
-    wx.TheClipboard.Open()
-    wx.TheClipboard.SetData(bmp)
-    wx.TheClipboard.Close()
 
 
 class PlotPanel(wx.Panel):
@@ -333,8 +319,9 @@ class PlotPanel(wx.Panel):
         add toolbar
         """
         self.enable_toolbar = True
-        from toolbar import NavigationToolBar
         self.toolbar = NavigationToolBar(parent=self, canvas=self.canvas)
+        bind(self.toolbar, wx.EVT_TOOL, self.onResetGraph, id=self.toolbar._NTB2_RESET)
+        bind(self.toolbar, wx.EVT_TOOL, self.onContextMenu, id=self.toolbar._NTB2_HOME)
         self.toolbar.Realize()
         ## The 'SetToolBar()' is not working on MAC: JHC
         #if IS_MAC:
@@ -1965,6 +1952,9 @@ class PlotPanel(wx.Panel):
         self.is_zoomed = False
         self.toolbar.update()
 
+    def onPrint(self, event=None):
+        self.toolbar.print_figure(event)
+
     def onPrinterSetup(self, event=None):
         """
         """
@@ -1987,8 +1977,8 @@ class PlotPanel(wx.Panel):
                 assert _plot is not None
 
             #now create the printpeview object
-            _preview = wx.PrintPreview(PlotPrintout(self,'test'),
-                                       PlotPrintout(self,'test'))
+            _preview = wx.PrintPreview(PlotPrintout(self.canvas),
+                                       PlotPrintout(self.canvas))
             #and tie it to a printpreview frame then show it
             _frame = wx.PreviewFrame(_preview, _plot, "Print Preview", wx.Point(100, 100), wx.Size(600, 650))
             _frame.Centre(wx.BOTH)
@@ -1998,24 +1988,12 @@ class PlotPanel(wx.Panel):
             traceback.print_exc()
             pass
 
-    def onPrint(self, event=None):
-        """
-        Matplotlib canvas can no longer print itself so using wx.Printer.  
-        Need therefore to also define a Printout object.
-        """
-        try:
-            _printer = wx.Printer()
-            _printer.Print(self.canvas, PlotPrintout(self,'test'), True)
-        except:
-            traceback.print_exc()
-            pass
-
     def OnCopyFigureMenu(self, evt):
         """
         Copy the current figure to clipboard
         """
         try:
-            CopyImage(self.canvas)
+            self.toolbar.copy_figure()
         except:
             print "Error in copy Image"
 
@@ -2045,37 +2023,3 @@ class NoRepaintCanvas(FigureCanvasWxAgg):
             self.draw(repaint=False)
             self._drawn += 1
         self.gui_repaint(drawDC=wx.PaintDC(self))
-
-class PlotPrintout(wx.Printout):
-    """
-    Create the wx.Printout object for matplotlib figure from the PlotPanel.
-    Provides the required OnPrintPage and HasPage overrides.  Other methods
-    may be added/overriden in the future.
-    :TODO: this needs LOTS of TLC .. but fixes immediate problem
-    """
-    def __init__(self, figure, title, size=None, dpi=None, **kwargs):
-        """
-        Initialize wx.Printout and get passed figure object
-        """
-        wx.Printout.__init__(self)
-        self.figure = figure
-
-    def OnPrintPage(self, page):
-        """
-        Most rudimentry OnPrintPage overide.  instatiates a dc object, gets
-        its size, gets the size of the figure object, scales it to the dc
-        canvas size keeping the aspect ratio intact, then prints as bitmap
-        """
-        _dc = self.GetDC()
-        (_dcX, _dcY) = _dc.GetSizeTuple()
-        (_bmpX,_bmpY) = self.figure.canvas.GetSize()
-        _scale = min(_dcX/_bmpX, _dcY/_bmpY)
-        _dc.SetUserScale(_scale, _scale)
-        _dc.DrawBitmap(self.figure.canvas.bitmap, 0, 0, False,)
-        return True
-
-    def GetPageInfo(self):
-        """
-        just sets the page to 1 - no flexibility for now
-        """
-        return (1, 1, 1, 1)
