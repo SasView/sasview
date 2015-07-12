@@ -43,9 +43,10 @@ class DocumentationWindow(wx.Frame):
     (self, parent, dummy_id, path, url_instruction, title, size=(850, 540))
 
     :param path: path to html file beginning AFTER /doc/ and ending in the
-    file.html
-    :param url_instructions: anchor string or other query e.g. '#MyAnchor
-    :param title - text to place in the title bar of the help panel
+    file.html.
+    
+    :param url_instructions: anchor string or other query e.g. '#MyAnchor'
+    :param title: text to place in the title bar of the help panel
     """
     def __init__(self, parent, dummy_id, path, url_instruction, title, size=(850, 540)):
         wx.Frame.__init__(self, parent, dummy_id, title, size=size)

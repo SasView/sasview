@@ -8,40 +8,8 @@ only knows about information sent to it but not about the fits or fit panel and
 thus cannot feed back to the fitting panel.  This could change in the future.
 
 The organization of the classes goes as:
-#      ------------------------------------------------------------
-#      | --------------------------------------------------------  |
-#      | | ----------------------------------------------------  | |
-#      | | | ------------------------------------------------  | | |
-#      | | | | --------------------------------------------  | | | |
-#      | | | |                                               | | | |
-#      | | | |                                               | | | |
-#      | | | |     GridPage Class = the actual grid          | | | |
-#      | | | |       GridCellEditor: overides class of same  | | | |
-#      | | | |          name in the wx.CSheet module         | | | |
-#      | | | |       BatchCell:  class defines a cell within | | | |
-#      | | | |          within the grid                      | | | |
-#      | | | |                                               | | | |
-#      | | | |                                               | | | |
-#      | | | ------------------------------------------------- | | |
-#      | | |       Notebook class: contains all the GridPages  | | |
-#      | | -----              ---------------------------------| | |
-#      | |      |  Page 1     |                                  | |
-#      | |      ---------------                                  | |
-#      | |                                                       | |
-#      | |    ----------------------------------------------     | |
-#      | |                                                       | |
-#      | |    Plotting area = a standard gridsizer               | |
-#      | |     layout managed by the GridPanel class directly    | |
-#      | |                                                       | |
-#      | |    ----------------------------------------------     | |
-#      | |                                                       | |
-#      | |      GridPanel Class(SPanel(ScrolledPanel)            | |
-#      | |         contains the GridPage and the 'plotting area' | |
-#      | |         below it                                      | |
-#      | --------------------------------------------------------- |
-#      |                                                           |
-#      |            GridFrame class(wx.Frame)                      |
-#      -------------------------------------------------------------
+.. image::  media/BatchGridClassLayout.png
+   :align:   center
 
 """
 import wx
@@ -86,8 +54,8 @@ def parse_string(sentence, list):
     """
     Return a dictionary of column label and index or row selected
     
-    @param sentence: String to parse
-    @param list: list of columns label
+    :param sentence: String to parse
+    :param list: list of columns label
     
     """
 
@@ -181,7 +149,7 @@ class GridCellEditor(sheet.CCellEditor):
         and in the call to the base class the rest of this method is copied
         as is from sheet.CCellEditor.PaintBackground
         
-        @param dc: the wxDC object for the paint
+        :param dc: the wxDC object for the paint
         -------
         Draws the part of the cell not occupied by the edit control.  The
         base class version just fills it with background colour from the
@@ -199,7 +167,7 @@ class GridCellEditor(sheet.CCellEditor):
         """ 
         Commit editing the current cell. Returns True if the value has changed.
         
-        @param previous: previous value in the cell
+        :param previous: previous value in the cell
         
         """
         changed = False                             # Assume value not changed
@@ -695,8 +663,8 @@ class GridPage(sheet.CSheet):
         """
         Add data to the grid
         
-        @param data_inputs: data to use from the context menu of the grid
-        @param data_ouputs: default columns deplayed
+        :param data_inputs: data to use from the context menu of the grid
+        :param data_ouputs: default columns deplayed
         
         """
         
@@ -1028,7 +996,7 @@ class Notebook(nb, PanelBase):
         Receive a list of cells and  create a string presenting the selected
         cells that can be used as data for one axis of a plot.
         
-        @param cell_list: list of tuple
+        :param cell_list: list of tuple
 
         """
         pos = self.GetSelection()
@@ -1486,7 +1454,7 @@ class GridPanel(SPanel):
         webbrowser does not pass anything past the # to the browser when it is
         running "file:///...."
 
-        @param evt: Triggers on clicking the help button
+        :param evt: Triggers on clicking the help button
 
         """
 
@@ -1631,7 +1599,7 @@ class GridPanel(SPanel):
         Receive a list of cells and  create a string presenting the selected
         cells.
 
-        @param cell_list: list of tuple
+        :param cell_list: list of tuple
 
         """
 
@@ -1982,8 +1950,8 @@ class BatchOutputFrame(wx.Frame):
         """
         Initialize dialog
 
-        @param parent: Window instantiating this dialog
-        @param result: result to display in a grid or export to an external
+        :param parent: Window instantiating this dialog
+        :param result: result to display in a grid or export to an external
                 application.
 
         """
