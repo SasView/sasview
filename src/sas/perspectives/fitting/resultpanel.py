@@ -9,6 +9,10 @@ import wx
 import wx.lib.newevent
 from wx.aui import AuiNotebook as Notebook
 
+from bumps.gui.convergence_view import ConvergenceView
+from bumps.gui.uncertainty_view import UncertaintyView, CorrelationView, TraceView
+from bumps.dream.stats import var_stats, format_vars
+
 from sas.guiframe.panel_base import PanelBase
 from sas.guiframe.events import StatusEvent
 
@@ -54,33 +58,37 @@ class ResultPanel(Notebook, PanelBase):
         self.frame.Show()
         result = event.result[0][0]
         if hasattr(result, 'convergence'):
-            from bumps.gui.convergence_view import ConvergenceView
             best, pop = result.convergence[:, 0], result.convergence[:, 1:]
-            self.get_panel(ConvergenceView).update(best, pop)
+            self._get_view(ConvergenceView).update(best, pop)
+        else:
+            self._del_view(ConvergenceView)
         if hasattr(result, 'uncertainty_state'):
-            from bumps.gui.uncertainty_view import UncertaintyView, CorrelationView, TraceView
-            from bumps.dream.stats import var_stats, format_vars
             stats = var_stats(result.uncertainty_state.draw())
             msg = format_vars(stats)
-            self.get_panel(CorrelationView).update(result.uncertainty_state)
-            self.get_panel(UncertaintyView).update((result.uncertainty_state, stats))
-            self.get_panel(TraceView).update(result.uncertainty_state)
+            self._get_view(CorrelationView).update(result.uncertainty_state)
+            self._get_view(UncertaintyView).update((result.uncertainty_state, stats))
+            self._get_view(TraceView).update(result.uncertainty_state)
             # TODO: stats should be stored in result rather than computed in bumps UncertaintyView
             wx.PostEvent(self.frame.parent,
                          StatusEvent(status=msg, info="info"))
-            print
+        else:
+            for view in (CorrelationView, UncertaintyView, TraceView):
+                self._del_view(view)
 
     def get_frame(self):
         return self.frame
 
-    def add_panel(self, panel):
-        self.AddPage(panel, panel.title)
-
-    def get_panel(self, panel_class):
+    def _get_view(self, view_class):
         for idx in range(self.PageCount):
-            if self.GetPageText(idx) == panel_class.title:
+            if self.GetPageText(idx) == view_class.title:
                 return self.GetPage(idx)
         else:
-            panel = panel_class(self)
-            self.add_panel(panel)
+            panel = view_class(self)
+            self.AddPage(panel, panel.title)
             return panel
+
+    def _del_view(self, view_class):
+        for idx in range(self.PageCount):
+            if self.GetPageText(idx) == view_class.title:
+                self.DeletePage(idx)
+
