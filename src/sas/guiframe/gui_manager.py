@@ -2047,13 +2047,12 @@ class ViewerFrame(PARENT_FRAME):
             content = res.read().strip()
             logging.info("Connected to www.sasview.org. Latest version: %s"
                          % (content))
+            version_info = json.loads(content)
         except:
             msg = traceback.format_exc()
             logging.info(msg)
             logging.info("Failed to connect to www.sasview.org")
-            content = "0.0.0"
-
-        version_info = json.loads(content)
+            version_info = {"version": "0.0.0"}
         self._process_version(version_info, standalone=event == None)
 
     def _process_version(self, version_info, standalone=True):
@@ -2068,8 +2067,8 @@ class ViewerFrame(PARENT_FRAME):
            the background, False otherwise.
 
         """
-        version = version_info["version"]
         try:
+            version = version_info["version"]
             if version == "0.0.0":
                 msg = "Could not connect to the application server."
                 msg += " Please try again later."
