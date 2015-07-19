@@ -51,6 +51,8 @@ def get_app_dir():
     """
         The application directory is the one where the default custom_config.py
         file resides.
+
+        :returns: app_path - the path to the applicatin directory
     """
     # First, try the directory of the executable we are running
     app_path = sys.path[0]
@@ -67,7 +69,7 @@ def get_app_dir():
         return os.path.abspath(os.getcwd())
 
     # Finally, try the directory of the sasview module
-    #TODO: gui_manager will have to know about sasview until we
+    # TODO: gui_manager will have to know about sasview until we
     # clean all these module variables and put them into a config class
     # that can be passed by sasview.py.
     logging.info(sys.executable)
@@ -833,11 +835,11 @@ class ViewerFrame(PARENT_FRAME):
 
     def PushStatusText(self, *args, **kwds):
         """
-            FIXME: No message is passed. What is this supposed to do?
+        .. todo:: No message is passed. What is this supposed to do?
         """
         field = self.sb.get_msg_position()
         wx.Frame.PushStatusText(self, field=field,
-                                string="FIXME: PushStatusText called without text")
+                                string="FIXME - PushStatusText called without text")
 
     def add_perspective(self, plugin):
         """
@@ -893,7 +895,7 @@ class ViewerFrame(PARENT_FRAME):
 
         :param dir: directory in which to look for plug-ins
 
-        :return: list of plug-ins
+        :returns: list of plug-ins
 
         """
         plugins = []
@@ -944,7 +946,7 @@ class ViewerFrame(PARENT_FRAME):
                         if not file == None:
                             file.close()
         except:
-            # Should raise and catch at a higher level and 
+            # Should raise and catch at a higher level and
             # display error on status bar
             logging.error(sys.exc_value)
 
@@ -991,7 +993,7 @@ class ViewerFrame(PARENT_FRAME):
                 panels.extend(ps)
 
         # Set up welcome panel
-        #TODO: this needs serious simplification
+        # TODO: this needs serious simplification
         if self.welcome_panel_class is not None:
             welcome_panel = MDIFrame(self, None, 'None', (100, 200))
             self.defaultPanel = self.welcome_panel_class(welcome_panel, -1, style=wx.RAISED_BORDER)
@@ -1081,6 +1083,10 @@ class ViewerFrame(PARENT_FRAME):
 
     def onfreeze(self, theory_id):
         """
+        Saves theory/model and passes to data loader.
+
+        ..warning:: This seems to be the exact same code as the next
+        function called simply freeze. This probably needs fixing
         """
         data_state_list = self._data_manager.freeze(theory_id)
         self._data_panel.load_data_list(list=data_state_list)
@@ -1092,6 +1098,10 @@ class ViewerFrame(PARENT_FRAME):
 
     def freeze(self, data_id, theory_id):
         """
+        Saves theory/model and passes to data loader.
+
+        ..warning:: This seems to be the exact same code as the next
+        function called simply freeze. This probably needs fixing
         """
         data_state_list = self._data_manager.freeze_theory(data_id=data_id,
                                                            theory_id=theory_id)
@@ -1156,7 +1166,7 @@ class ViewerFrame(PARENT_FRAME):
 
         :param p: panel object to add to the AUI manager
 
-        :return: ID of the event associated with the new panel [int]
+        :returns: ID of the event associated with the new panel [int]
 
         """
         ID = wx.NewId()
@@ -1177,7 +1187,7 @@ class ViewerFrame(PARENT_FRAME):
 
         # Append nummber
         captions = self._get_plotpanel_captions()
-        #FIXME: Fix this aweful loop
+        # FIXME: Fix this awful loop
         while (1):
             caption = windowcaption + '%s' % str(self.graph_num)
             if caption not in captions:
@@ -2049,8 +2059,6 @@ class ViewerFrame(PARENT_FRAME):
                          % (content))
             version_info = json.loads(content)
         except:
-            msg = traceback.format_exc()
-            logging.info(msg)
             logging.info("Failed to connect to www.sasview.org")
             version_info = {"version": "0.0.0"}
         self._process_version(version_info, standalone=event == None)
@@ -2457,7 +2465,8 @@ class ViewerFrame(PARENT_FRAME):
     def _onsaveTXT(self, data, path):
         """
         Save file as txt
-        :TODO: Refactor and remove this method. See TODO in _onSave.
+
+        .. todo:: Refactor and remove this method. See 'TODO' in _onSave.
         """
         if not path == None:
             out = open(path, 'w')
@@ -2885,7 +2894,7 @@ class ViewerFrame(PARENT_FRAME):
                     captions = self._get_plotpanel_captions()
                     # Append nummber
                     inc = 1
-                    #FIXME: fix this terrible loop
+                    # FIXME: fix this terrible loop
                     while (1):
                         caption = new_caption + '_%s' % str(inc)
                         if caption not in captions:
@@ -2908,7 +2917,7 @@ class ViewerFrame(PARENT_FRAME):
         Get pane Caption from window_name
 
         :param name: window_name in AuiPaneInfo
-        :return: AuiPaneInfo of the name
+        :returns: AuiPaneInfo of the name
         """
         for panel in self.plot_panels.values():
             if panel.frame.GetTitle() == name:
@@ -3080,12 +3089,12 @@ class ViewerFrame(PARENT_FRAME):
             except:
                 pass
 
-        # Draw all panels 
+        # Draw all panels
         if count == 1:
             f_draw(self.schedule_full_draw_list[0])
         else:
             map(f_draw, self.schedule_full_draw_list)
-        # Reset the attr  
+        # Reset the attr
         if len(self.schedule_full_draw_list) == 0:
             self.set_schedule(False)
         else:
@@ -3126,7 +3135,8 @@ class ViewerFrame(PARENT_FRAME):
         """
         Get window size
 
-        :return size: tuple
+        :returns: size
+        :rtype: tuple
         """
         width, height = self.GetSizeTuple()
         if not IS_WIN:
@@ -3147,7 +3157,7 @@ class ViewerFrame(PARENT_FRAME):
         except:
             pass
 
-        # restart idle        
+        # restart idle
         self._redraw_idle(*args, **kwargs)
 
 
@@ -3155,7 +3165,7 @@ class ViewerFrame(PARENT_FRAME):
         """
         Restart Idle
         """
-        # restart idle   
+        # restart idle
         self.idletimer.Restart(100 * TIME_FACTOR, *args, **kwargs)
 
 
@@ -3315,7 +3325,7 @@ class ViewApp(wx.App):
         placed on the left side of the screen.
         """
         is_maximized = False
-        # Get size of screen without 
+        # Get size of screen without
         for screenCount in range(wx.Display().GetCount()):
             screen = wx.Display(screenCount)
             if screen.IsPrimary():
@@ -3332,7 +3342,7 @@ class ViewApp(wx.App):
             customWidth = displayWidth * 0.9
             customHeight = displayHeight * 0.9
         else:
-            # If the custom screen is bigger than the 
+            # If the custom screen is bigger than the
             # window screen than make maximum size
             if customWidth > displayWidth:
                 customWidth = displayWidth
@@ -3430,6 +3440,10 @@ class MDIFrame(CHILD_FRAME):
 
     def show_data_panel(self, action):
         """
+        Turns on the data panel
+
+        The the data panel is optional.  Most of its functions can be
+        performed from the menu bar and from the plots.
         """
         self.parent.show_data_panel(action)
 
