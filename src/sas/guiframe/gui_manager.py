@@ -45,7 +45,9 @@ from sas.guiframe.data_processor import GridFrame
 from sas.guiframe.events import EVT_NEW_BATCH
 from sas.guiframe.CategoryManager import CategoryManager
 from sas.dataloader.loader import Loader
+from sas.guiframe.proxy import Connection
 from matplotlib import _pylab_helpers
+
 
 def get_app_dir():
     """
@@ -2051,17 +2053,34 @@ class ViewerFrame(PARENT_FRAME):
         A thread is started for the connecting with the server. The thread calls
         a call-back method when the current version number has been obtained.
         """
-        try:
-            req = urllib2.Request(config.__update_URL__)
-            res = urllib2.urlopen(req)
-            content = res.read().strip()
-            logging.info("Connected to www.sasview.org. Latest version: %s"
-                         % (content))
-            version_info = json.loads(content)
-        except:
-            logging.info("Failed to connect to www.sasview.org")
-            version_info = {"version": "0.0.0"}
-        self._process_version(version_info, standalone=event == None)
+        version_info = {"version": "0.0.0"}
+        c = Connection(config.__update_URL__, config.UPDATE_TIMEOUT)
+        response = c.connect()
+        if response is not None:
+            try:
+                # 
+                content = response.read().strip()
+                logging.info("Connected to www.sasview.org. Latest version: %s"
+                             % (content))
+                version_info = json.loads(content)
+            except:
+                logging.info("Failed to connect to www.sasview.org")
+        self._process_version(version_info, standalone=event == None)    
+
+        
+        
+#         
+#         try:
+#             req = urllib2.Request(config.__update_URL__)
+#             res = urllib2.urlopen(req)
+#             content = res.read().strip()
+#             logging.info("Connected to www.sasview.org. Latest version: %s"
+#                          % (content))
+#             version_info = json.loads(content)
+#         except:
+#             logging.info("Failed to connect to www.sasview.org")
+#             version_info = {"version": "0.0.0"}
+#         self._process_version(version_info, standalone=event == None)
 
     def _process_version(self, version_info, standalone=True):
         """

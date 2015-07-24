@@ -14,7 +14,6 @@ __build__ = sas.sasview.__build__
 __download_page__ = 'https://github.com/SasView/sasview/releases'
 __update_URL__ = 'http://www.sasview.org/latestversion.json'
 
-
 # Debug message flag
 __EVT_DEBUG__ = False
 
@@ -128,6 +127,9 @@ WELCOME_PANEL_SHOW = False
 TOOLBAR_SHOW = True
 # set a default perspective
 DEFAULT_PERSPECTIVE = 'None'
+
+# Time out for updating sasview
+UPDATE_TIMEOUT = 2
 
 def printEVT(message):
     if __EVT_DEBUG__:
