@@ -16,8 +16,9 @@
 
 // [PYTHONCLASS] = DABModel
 // [DISP_PARAMS] = length, scale, background
-// [DESCRIPTION] = <text>Provide F(x) = scale/( 1 + (x*L)^2 )^(2) + background
-//    DAB (Debye Anderson Brumberger) function as a BaseComponent model
+// [DESCRIPTION] = <text>DAB (Debye Anderson Brumberger) Model
+//    F(x) = scale * L^3/( 1 + (q*L)^2 )^2 + background
+//    L: the correlation length
 //     </text>
 // [FIXED] = 
 // [ORIENTATION_PARAMS] =
