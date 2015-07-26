@@ -4,6 +4,11 @@ Release Notes
 1- Features
 ===========
 
+   - New in Version 3.1.1
+     --------------------
+     - Fixes bug #457 that prevented SasView from starting if the user was not
+       connected to the internet, or was behind a proxy server.
+
    - New in Version 3.1.0
      --------------------
      - The documentation/help has had a complete overhaul including:
