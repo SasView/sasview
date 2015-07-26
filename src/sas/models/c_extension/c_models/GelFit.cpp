@@ -33,7 +33,7 @@ GelFitModel::GelFitModel()
     zeta = Parameter(16.0);
     radius = Parameter(104.0,true);
     radius.set_min(2.0);
-    scale = Parameter(2.0,true);
+    FractalExp = Parameter(2.0,true);
     background = Parameter(0.01);
 }
 
@@ -42,7 +42,7 @@ double GelFitModel::operator()(double q)
     double dp[3];
     dp[0] = zeta();
     dp[1] = radius();
-    dp[2] = scale();
+    dp[2] = FractalExp();
     
     if (dp[2] <= 0)
     {
