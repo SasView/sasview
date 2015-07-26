@@ -115,9 +115,10 @@ plist = dict(CFBundleDocumentTypes=[dict(CFBundleTypeExtensions=EXTENSIONS_LIST,
                                    CFBundleTypeName="sasview file",
                                    CFBundleTypeRole="Shell" )],)
 
-#Get version
-import sasview
-VERSION = sasview.__version__
+#Get version - NB nasty hack. Need to find correct way to give path to installed sasview (AJJ)
+import __init__ as sasviewver
+
+VERSION = sasviewver.__version__
 APPNAME = "SasView "+VERSION
 DMGNAME = "SasView-"+VERSION
 
