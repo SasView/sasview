@@ -149,6 +149,6 @@ setup(
 #Build dmg
 DMG="dist/%s.dmg"%DMGNAME
 if os.path.exists(DMG): os.unlink(DMG)
-os.system('cd dist && ../../build_tools/dmgpack.sh "%s" "%s.app"'%(DMGNAME,APPNAME)
+os.system('cd dist && ../../build_tools/dmgpack.sh "%s" "%s.app"'%(DMGNAME,APPNAME))
 os.system('chmod a+r "%s"'%DMG)
 
