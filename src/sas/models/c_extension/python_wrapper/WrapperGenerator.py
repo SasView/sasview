@@ -559,17 +559,19 @@ class WrapperGenerator(object):
 
     def replaceToken(self, line, key, value): #pylint: disable-msg=R0201
         """ Replace a token in the template file 
-            @param line: line of text to inspect
-            @param key: token to look for
-            @param value: string value to replace the token with
-            @return: new string value
+            :param line: line of text to inspect
+            :param key: token to look for
+            :param value: string value to replace the token with
+            :return: new string value
         """
+        _str_value = str(value)
+        _new_value = _str_value.replace('\\','/')
         lenkey = len(key)
         newline = line
 
         while newline.count(key) > 0:
             index = newline.index(key)
-            newline = newline[:index] + value + newline[index + lenkey:]
+            newline = newline[:index] + _new_value + newline[index + lenkey:]
 
         return newline
 
