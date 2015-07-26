@@ -115,6 +115,12 @@ plist = dict(CFBundleDocumentTypes=[dict(CFBundleTypeExtensions=EXTENSIONS_LIST,
                                    CFBundleTypeName="sasview file",
                                    CFBundleTypeRole="Shell" )],)
 
+#Get version
+import sasview
+VERSION = sasview.__version__
+APPNAME = "SasView "+VERSION
+DMGNAME = "SasView-"+VERSION
+
 APP = ['sasview.py']
 DATA_FILES += ['images','test','media']
 
@@ -132,10 +138,17 @@ OPTIONS = {'argv_emulation': True,
            'excludes' : EXCLUDES,
            }
 setup(
-    name="sasview",
+    name=APPNAME,
     app=APP,
     data_files=DATA_FILES,
     include_package_data= True,
     options={'py2app': OPTIONS},
     setup_requires=['py2app'],
 )
+
+#Build dmg
+DMG="dist/%s.dmg"%DMGNAME
+if os.path.exists(DMG): os.unlink(DMG)
+os.system('cd dist && ../../build_tools/dmgpack.sh "%s" "%s.app"'%(DMGNAME,APPNAME)
+os.system('chmod a+r "%s"'%DMG)
+
