@@ -46,4 +46,4 @@ cd $WORKSPACE/sasview
 python setup_mac.py py2app
 
 cd $WORKSPACE/sasview/dist
-tar -czf `python -c "import pkg_resources;print '%s.tar.gz' % pkg_resources.get_distribution('sasview').egg_name()"` sasview.app
+tar -czf `python -c "import pkg_resources;print '%s.tar.gz' % pkg_resources.get_distribution('sasview').egg_name()"` `python -c "import sasview; print 'SasView-%s.app' % sasview.__version__"`
