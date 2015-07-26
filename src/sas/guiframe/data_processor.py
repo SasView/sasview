@@ -8,7 +8,8 @@ only knows about information sent to it but not about the fits or fit panel and
 thus cannot feed back to the fitting panel.  This could change in the future.
 
 The organization of the classes goes as:
-.. image::  media/BatchGridClassLayout.png
+
+.. image::  ../../user/guiframe/BatchGridClassLayout.png
    :align:   center
 
 """
@@ -36,12 +37,10 @@ FUNC_DICT = {"sqrt": "math.sqrt",
 class BatchCell(object):
     """
     Object describing a cell in  the grid.
-
     """
     def __init__(self):
         """
         Initialize attributes of class (label, value, col, row, object)
-        
         """
         self.label = ""
         self.value = None
@@ -53,10 +52,10 @@ class BatchCell(object):
 def parse_string(sentence, list):
     """
     Return a dictionary of column label and index or row selected
-    
+
     :param sentence: String to parse
     :param list: list of columns label
-    
+    :returns: col_dict
     """
 
     p2 = re.compile(r'\d+')
@@ -115,42 +114,40 @@ class SPanel(ScrolledPanel):
 
 
 class GridCellEditor(sheet.CCellEditor):
-    """ 
+    """
     Custom cell editor
-    
+
     This subclasses the sheet.CCellEditor (itself a subclass of
     grid.GridCellEditor) in order to override two of its methods:
     PaintBackrgound and EndEdit.
     
     This is necessary as the sheet module is broken in wx 3.0.2 and
     improperly subclasses grid.GridCellEditor
-    
     """
     def __init__(self, grid):
         """
         Override of CCellEditor init. Runs the grid.GridCellEditor init code
-
         """
         super(GridCellEditor, self).__init__(grid)
 
     def PaintBackground(self, dc, rect, attr):
-        """ 
+        """
         Overrides wx.sheet.CCellEditor.PaintBackground which incorrectly calls
         the base class method.
-        
+
         In wx3.0 all paint objects must explicitly
         have a wxPaintDC (Device Context) object.  Thus the paint event which
         generates a call to this method provides such a DC object and the
         base class in grid expects to receive that object.  sheet was apparently
         not updated to reflect this and hence fails.  This could thus
         become obsolete in a future bug fix of wxPython.
-        
+
         Apart from adding a dc variable in the list of arguments in the def
         and in the call to the base class the rest of this method is copied
         as is from sheet.CCellEditor.PaintBackground
-        
-        :param dc: the wxDC object for the paint
-        -------
+
+        **From original GridCellEditor docs:**
+
         Draws the part of the cell not occupied by the edit control.  The
         base class version just fills it with background colour from the
         attribute.
@@ -158,17 +155,17 @@ class GridCellEditor(sheet.CCellEditor):
         NOTE: There is no need to override this if you don't need
         to do something out of the ordinary.
 
+        :param dc: the wxDC object for the paint
         """
         # Call base class method.
         DC = dc
         super(sheet.CCellEditor,self).PaintBackground(DC, rect, attr)
 
     def EndEdit(self, row, col, grid, previous):
-        """ 
+        """
         Commit editing the current cell. Returns True if the value has changed.
-        
+
         :param previous: previous value in the cell
-        
         """
         changed = False                             # Assume value not changed
         val = self._tc.GetValue()                   # Get value in edit control
@@ -183,21 +180,19 @@ class GridCellEditor(sheet.CCellEditor):
 class GridPage(sheet.CSheet):
     """
     Class that receives the results of a batch fit.
-    
+
     GridPage displays the received results in a wx.grid using sheet.  This is
     then used by GridPanel and GridFrame to present the full GUI.
-    
     """
     def __init__(self, parent, panel=None):
         """
         Initialize
-        
+
         Initialize all the attributes of GridPage, and the events. include
         the init stuff from sheet.CSheet as well.
-        
         """
         #sheet.CSheet.__init__(self, parent)
-        
+
         # The following is the __init__ from CSheet. ##########################
         # We re-write it here because the class is broken in wx 3.0,
         # such that the cell editor is not able to receive the right
@@ -242,7 +237,7 @@ class GridPage(sheet.CSheet):
         # properly and does not need the above re-implementation of the
         # CSheet init method.  Basically these override any intrinsic binding
         self.Bind(wx.grid.EVT_GRID_LABEL_RIGHT_CLICK, self.on_right_click)
-        self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.on_left_click)        
+        self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.on_left_click)
 
         self.AdjustScrollbars()
         #self.SetLabelBackgroundColour('#DBD4D4')
@@ -282,8 +277,8 @@ class GridPage(sheet.CSheet):
         self.EnableEditing(True)
         if self.GetNumberCols() > 0:
             self.default_col_width = self.GetColSize(0)
-        # We have moved these to the top of the init section with the 
-        # rest of the grid event bindings from the sheet init when 
+        # We have moved these to the top of the init section with the
+        # rest of the grid event bindings from the sheet init when
         # appropriate
         #self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.on_left_click)
         #self.Bind(wx.grid.EVT_GRID_LABEL_RIGHT_CLICK, self.on_right_click)
@@ -294,23 +289,21 @@ class GridPage(sheet.CSheet):
     def OnLeftClick(self, event):
         """
         Overrides sheet.CSheet.OnLefClick.
-        
+
         Processes when a cell is selected by left clicking on that cell. First
         process the base Sheet method then the current class specific method
-         
         """
         sheet.CSheet.OnLeftClick(self, event)
         self.on_selected_cell(event)
-        
+
 
     def OnCellChange(self, event):
         """
         Overrides sheet.CSheet.OnCellChange.  
-        
+
         Processes when a cell has been edited by a cell editor. Checks for the
         edited row being outside the max row to use attribute and if so updates
-        the last row.  Then calls the base handler using skip. 
-
+        the last row.  Then calls the base handler using skip.
         """
         row, _ = event.GetRow(), event.GetCol()
         if row > self.max_row_touse:
@@ -322,9 +315,8 @@ class GridPage(sheet.CSheet):
     def on_selected_cell(self, event):
         """
         Handler catching cell selection.
-        
-        Called after calling base 'on left click' method.
 
+        Called after calling base 'on left click' method.
         """
 
         flag = event.CmdDown() or event.ControlDown()
@@ -397,14 +389,13 @@ class GridPage(sheet.CSheet):
     def on_left_click(self, event):
         """
         Is triggered when the left mouse button is clicked while the mouse
-        is hovering over the column 'label.' 
-        
+        is hovering over the column 'label.'
+
         This processes the information on the selected column: the column name
         (in row 0 of column) and the range of cells with a valid value to be
         used by the GridPanel set_axis methods.
-        
         """
-        
+
         flag = event.CmdDown() or event.ControlDown()
 
         col = event.GetCol()
@@ -448,18 +439,17 @@ class GridPage(sheet.CSheet):
     def on_right_click(self, event):
         """
         Is triggered when the right mouse button is clicked while the mouse
-        is hovering over the column 'label.' 
-        
+        is hovering over the column 'label.'
+
         This brings up a context menu that allows the deletion of the column,
-        or the insertion of a new column either to the right or left of the 
+        or the insertion of a new column either to the right or left of the
         current column.  If inserting a new column can insert a blank column or
         choose a number of hidden columns.  By default all the error parameters
         are in hidden columns so as to save space on the grid.  Also any other
         intrinsic variables stored with the data such as Temperature, pressure,
         time etc can be used to populate this menu.
-        
         """
-        
+
         col = event.GetCol()
         row = event.GetRow()
         # Ignore the index column
@@ -496,9 +486,8 @@ class GridPage(sheet.CSheet):
         """
         method called to populate the 'insert column before current column'
         submenu.
-        
         """
-        
+
         if self.data is None:
             return
         id = wx.NewId()
@@ -520,9 +509,8 @@ class GridPage(sheet.CSheet):
         """
         Method called to populate the 'insert column after current column'
         submenu
-        
         """
-        
+
         if self.data is None:
             return
         wx_id = wx.NewId()
@@ -545,9 +533,8 @@ class GridPage(sheet.CSheet):
         """
         Called when user chooses remove from the column right click menu
         Checks the columnn exists then calls the remove_column method
-        
         """
-        
+
         if self.selected_cols is not None or len(self.selected_cols) > 0:
             col = self.selected_cols[0]
             self.remove_column(col=col, numCols=1)
@@ -555,9 +542,8 @@ class GridPage(sheet.CSheet):
     def remove_column(self, col, numCols=1):
         """
         Remove the col column from the current grid
-        
         """
-        
+
         # add data to the grid    
         row = 0
         col_name = self.GetCellValue(row, col)
@@ -580,13 +566,12 @@ class GridPage(sheet.CSheet):
         Called when user chooses insert 'column before' submenu
         of the column context menu obtained when right clicking on a given
         column header.
-        
+
         Sets up to insert column into the current grid before the current
         highlighted column location and sets up what to populate that column
         with.  Then calls insert_column method to actually do the insertion. 
-        
         """
-        
+
         if self.selected_cols is not None or len(self.selected_cols) > 0:
             col = self.selected_cols[0]
             # add data to the grid
@@ -601,14 +586,13 @@ class GridPage(sheet.CSheet):
         """
         Called when user chooses insert 'column after' submenu
         of the column context menu obtained when right clicking on a given
-        column header. 
-        
+        column header.
+
         Sets up to insert column into the current grid after the current
         highlighted column location and sets up what to populate that column
         with.  Then calls insert_column method to actually do the insertion. 
-        
         """
-        
+
         if self.selected_cols is not None or len(self.selected_cols) > 0:
             col = self.selected_cols[0] + 1
             # add data to the grid
@@ -622,9 +606,8 @@ class GridPage(sheet.CSheet):
         """
         Insert column at position col with data[col_name] into the current
         grid.
-        
         """
-        
+
         row = 0
         self.InsertCols(pos=col, numCols=1, updateLabels=True)
         if col_name.strip() != "Empty":
@@ -647,27 +630,25 @@ class GridPage(sheet.CSheet):
     def on_set_x_axis(self, event):
         """
         Just calls the panel version of the method
-        
         """
-        
+
         self.panel.set_xaxis(x=self.axis_value, label=self.axis_label)
 
     def on_set_y_axis(self, event):
         """
         Just calls the panel version of the method
-        
         """
+
         self.panel.set_yaxis(y=self.axis_value, label=self.axis_label)
 
     def set_data(self, data_inputs, data_outputs, details, file_name):
         """
         Add data to the grid
-        
+
         :param data_inputs: data to use from the context menu of the grid
-        :param data_ouputs: default columns deplayed
-        
+        :param data_ouputs: default columns displayed
         """
-        
+
         self.file_name = file_name
         self.details = details
 
@@ -703,9 +684,8 @@ class GridPage(sheet.CSheet):
     def set_grid_values(self):
         """
         Set the values in grids
-        
         """
-        
+
         # add data to the grid
         row = 0
         col = 0
@@ -740,9 +720,8 @@ class GridPage(sheet.CSheet):
     def get_grid_view(self):
         """
         Return value contained in the grid
-        
         """
-        
+
         grid_view = {}
         for col in xrange(self.GetNumberCols()):
             label = self.GetCellValue(row=0, col=col)
@@ -760,22 +739,20 @@ class GridPage(sheet.CSheet):
     def get_nofrows(self):
         """
         Return number of total rows
-        
         """
         return self._rows
 
     def onContextMenu(self, event):
         """
         Method to handle cell right click context menu. 
-        
+
         THIS METHOD IS NOT CURRENTLY USED.  It is designed to provide a
         cell pop up context by right clicking on a cell and gives the
         option to cut, paste, and clear. This will probably be removed in
         future versions and is being superceded by more traditional cut and
         paste options.
-        
         """
-        
+
         wx_id = wx.NewId()
         c_menu = wx.Menu()
         copy_menu = c_menu.Append(wx_id, '&Copy', 'Copy the selected cells')
@@ -816,7 +793,6 @@ class GridPage(sheet.CSheet):
         context menu which is being removed. This will probably be removed in
         future versions and is being superceded by more traditional cut and
         paste options
-
         """
 
         self.Copy()
@@ -824,12 +800,11 @@ class GridPage(sheet.CSheet):
     def on_paste(self, event):
         """
         Called when paste is chosen from cell right click context menu
-        
+
         THIS METHOD IS NOT CURRENTLY USED.  it is part of right click cell
         context menu which is being removed. This will probably be removed in
         future versions and is being superceded by more traditional cut and
         paste options
-
         """
 
         if self.data == None:
@@ -846,7 +821,6 @@ class GridPage(sheet.CSheet):
         context menu which is being removed. This will probably be removed in
         future versions and is being superceded by more traditional cut and
         paste options
-
         """
 
         self.Clear()
@@ -856,9 +830,8 @@ class Notebook(nb, PanelBase):
     ## Internal name for the AUI manager
     window_name = "Fit panel"
     ## Title to appear on top of the window
-    
     """
-    
+
     window_caption = "Notebook "
 
     def __init__(self, parent, manager=None, data=None, *args, **kwargs):
@@ -897,7 +870,6 @@ class Notebook(nb, PanelBase):
         """
         display the close button on the tab if more than 1 tab exits.
         Otherwise remove the close button
-
         """
 
         if self.GetPageCount() <= 1:
@@ -917,7 +889,6 @@ class Notebook(nb, PanelBase):
         """
         Return the select cell range from a given selected column. Checks that
         all cells are from the same column
-
         """
 
         pos = self.GetSelection()
@@ -948,7 +919,6 @@ class Notebook(nb, PanelBase):
     def get_highlighted_row(self, is_number=True):
         """
         Add highlight rows
-
         """
 
         pos = self.GetSelection()
@@ -979,7 +949,6 @@ class Notebook(nb, PanelBase):
     def get_column_labels(self):
         """
         return dictionary of columns labels on the current page
-
         """
 
         pos = self.GetSelection()
@@ -995,9 +964,8 @@ class Notebook(nb, PanelBase):
         """
         Receive a list of cells and  create a string presenting the selected
         cells that can be used as data for one axis of a plot.
-        
-        :param cell_list: list of tuple
 
+        :param cell_list: list of tuple
         """
         pos = self.GetSelection()
         grid = self.GetPage(pos)
@@ -1074,7 +1042,6 @@ class Notebook(nb, PanelBase):
     def on_close_page(self, event):
         """
         close the page
-
         """
 
         if self.GetPageCount() == 1:
@@ -1108,7 +1075,6 @@ class Notebook(nb, PanelBase):
         """
         Order a list of 'inputs.' Used to sort rows and columns to present
         in batch results grid.
-
         """
 
         # Let's re-order the data from the keys in 'Data' name.
@@ -1142,7 +1108,6 @@ class Notebook(nb, PanelBase):
     def add_column(self):
         """
         Append a new column to the grid
-
         """
 
         # I Believe this is no longer used now that we have removed the 
@@ -1154,7 +1119,6 @@ class Notebook(nb, PanelBase):
     def on_remove_column(self):
         """
         Remove the selected column from the grid
-
         """
         # I Believe this is no longer used now that we have removed the 
         # edit menu from the menubar - PDB July 12, 2015
@@ -1165,15 +1129,13 @@ class Notebook(nb, PanelBase):
 class GridPanel(SPanel):
     """
     A ScrolledPanel class that contains the grid sheet as well as a number of
-    widgets to create interesting plots and buttons for help etc. 
-
+    widgets to create interesting plots and buttons for help etc.
     """
 
     def __init__(self, parent, data_inputs=None,
                  data_outputs=None, *args, **kwds):
         """
         Initialize the GridPanel
-
         """
 
         SPanel.__init__(self, parent, *args, **kwds)
@@ -1263,7 +1225,6 @@ class GridPanel(SPanel):
         """
         Get object represented by the given cells and plot them.  Basically
         plot the colum in y vs the column in x.
-
         """
 
         pos = self.notebook.GetSelection()
@@ -1344,7 +1305,6 @@ class GridPanel(SPanel):
     def on_plot(self, event):
         """
         Evaluate the contains of textcrtl and plot result
-
         """
 
         pos = self.notebook.GetSelection()
@@ -1455,7 +1415,6 @@ class GridPanel(SPanel):
         running "file:///...."
 
         :param evt: Triggers on clicking the help button
-
         """
 
         #import documentation window here to avoid circular imports
@@ -1470,7 +1429,6 @@ class GridPanel(SPanel):
     def get_sentence(self, dict, sentence, column_names):
         """
         Get sentence from dict
-
         """
 
         for tok, (col_name, list) in dict.iteritems():
@@ -1487,7 +1445,6 @@ class GridPanel(SPanel):
         """
         Draw the area related to the grid by adding it as the first element
         in the panel's grid_sizer
-
         """
 
         self.notebook = Notebook(parent=self)
@@ -1498,7 +1455,6 @@ class GridPanel(SPanel):
         """
         Add the area containing all the plot options, buttons etc to a plotting
         area sizer to later be added to the top level grid_sizer
-
         """
 
         view_description = wx.StaticBox(self, -1, 'Plot Fits/Residuals')
@@ -1542,7 +1498,7 @@ class GridPanel(SPanel):
                                     wx.LEFT | wx.RIGHT | wx.BOTTOM, 10),
                                    (self.plot_button, 0,
                                     wx.LEFT | wx.TOP | wx.BOTTOM, 12),
-                                   (self.help_button,0, 
+                                   (self.help_button,0,
                                     wx.LEFT | wx.TOP | wx.BOTTOM, 12)])
 
         wx.EVT_BUTTON(self, self.plot_button.GetId(), self.on_plot)
@@ -1576,7 +1532,6 @@ class GridPanel(SPanel):
     def on_edit_axis(self, event):
         """
         Get the selected column on  the visible grid and set values for axis
-
         """
 
         try:
@@ -1600,7 +1555,6 @@ class GridPanel(SPanel):
         cells.
 
         :param cell_list: list of tuple
-
         """
 
         if self.notebook is not None:
@@ -1609,7 +1563,6 @@ class GridPanel(SPanel):
     def edit_axis_helper(self, tcrtl_label, tcrtl_title, label, title):
         """
         get controls to modify
-
         """
 
         if label != None:
@@ -1620,7 +1573,7 @@ class GridPanel(SPanel):
     def add_column(self):
         """
         """
-        # I Believe this is no longer used now that we have removed the 
+        # I Believe this is no longer used now that we have removed the
         # edit menu from the menubar - PDB July 12, 2015
         if self.notebook is not None:
             self.notebook.add_column()
@@ -1628,7 +1581,7 @@ class GridPanel(SPanel):
     def on_remove_column(self):
         """
         """
-        # I Believe this is no longer used now that we have removed the 
+        # I Believe this is no longer used now that we have removed the
         # edit menu from the menubar - PDB July 12, 2015
         if self.notebook is not None:
             self.notebook.on_remove_column()
@@ -1637,14 +1590,12 @@ class GridPanel(SPanel):
 class GridFrame(wx.Frame):
     """
     The main wx.Frame for the batch results grid
-
     """
 
     def __init__(self, parent=None, data_inputs=None, data_outputs=None, id=-1,
                  title="Batch Fitting Results Panel", size=(800, 500)):
         """
         Initialize the Frame
-        
         """
 
         wx.Frame.__init__(self, parent=parent, id=id, title=title, size=size)
@@ -1689,7 +1640,6 @@ class GridFrame(wx.Frame):
         """
         populates the edit menu on the menubar.  Not activated as of SasView
         3.1.0
-
         """
         self.edit = wx.Menu()
 
@@ -1724,8 +1674,7 @@ class GridFrame(wx.Frame):
 
     def on_copy(self, event):
         """
-        On Copy from the Edit menu item on the menubar  
-
+        On Copy from the Edit menu item on the menubar
         """
         # I Believe this is no longer used now that we have removed the 
         # edit menu from the menubar - PDB July 12, 2015
@@ -1738,7 +1687,6 @@ class GridFrame(wx.Frame):
     def on_paste(self, event):
         """
         On Paste from the Edit menu item on the menubar
-
         """
         # I Believe this is no longer used now that we have removed the 
         # edit menu from the menubar - PDB July 12, 2015
@@ -1751,7 +1699,6 @@ class GridFrame(wx.Frame):
     def on_clear(self, event):
         """
         On Clear from the Edit menu item on the menubar
-
         """
         # I Believe this is no longer used now that we have removed the 
         # edit menu from the menubar - PDB July 12, 2015
@@ -1762,7 +1709,6 @@ class GridFrame(wx.Frame):
     def GetLabelText(self, id):
         """
         Get Label Text
-
         """
         for item in self.insert_before_menu.GetMenuItems():
             m_id = item.GetId()
@@ -1772,7 +1718,6 @@ class GridFrame(wx.Frame):
     def on_remove_column(self, event):
         """
         On remove column from the Edit menu Item on the menubar
-
         """
         # I Believe this is no longer used now that we have removed the 
         # edit menu from the menubar - PDB July 12, 2015
@@ -1783,7 +1728,6 @@ class GridFrame(wx.Frame):
     def on_menu_open(self, event):
         """
         On menu open
-
         """
         if self.file == event.GetMenu():
             pos = self.panel.notebook.GetSelection()
@@ -1845,10 +1789,9 @@ class GridFrame(wx.Frame):
     def on_save_page(self, event):
         """
         Saves data in grid to a csv file.
-        
+
         At this time only the columns displayed get saved.  Thus any error
         bars not inserted before saving will not be saved in the file
-
         """
 
         if self.parent is not None:
@@ -1882,7 +1825,6 @@ class GridFrame(wx.Frame):
     def on_open(self, event):
         """
         Open file containing batch result
-
         """
 
         if self.parent is not None:
@@ -1891,7 +1833,6 @@ class GridFrame(wx.Frame):
     def open_with_excel(self, event):
         """
         open excel and display batch result in Excel
-
         """
 
         if self.parent is not None:
@@ -1918,14 +1859,12 @@ class GridFrame(wx.Frame):
     def on_append_column(self, event):
         """
         Append a new column to the grid
-
         """
         self.panel.add_column()
 
     def set_data(self, data_inputs, data_outputs, details="", file_name=None):
         """
         Set data
-
         """
         self.panel.notebook.set_data(data_inputs=data_inputs,
                                      file_name=file_name,
@@ -1935,7 +1874,6 @@ class GridFrame(wx.Frame):
     def add_table(self, event):
         """
         Add a new table
-
         """
         # DO not event.Skip(): it will make 2 pages
         self.panel.notebook.add_empty_page()
@@ -1943,7 +1881,6 @@ class GridFrame(wx.Frame):
 class BatchOutputFrame(wx.Frame):
     """
     Allow to select where the result of batch will be displayed or stored
-
     """
     def __init__(self, parent, data_inputs, data_outputs, file_name="",
                  details="", *args, **kwds):
@@ -1951,9 +1888,8 @@ class BatchOutputFrame(wx.Frame):
         Initialize dialog
 
         :param parent: Window instantiating this dialog
-        :param result: result to display in a grid or export to an external
+        :param result: result to display in a grid or export to an external\
                 application.
-
         """
 
         #kwds['style'] = wx.CAPTION|wx.SYSTEM_MENU
@@ -1977,7 +1913,6 @@ class BatchOutputFrame(wx.Frame):
     def _do_layout(self):
         """
         Draw the content of the current dialog window
-
         """
 
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -2032,7 +1967,6 @@ class BatchOutputFrame(wx.Frame):
     def on_apply(self, event):
         """
         Get the user selection and display output to the selected application
-
         """
 
         if self.flag == 1:
@@ -2045,7 +1979,6 @@ class BatchOutputFrame(wx.Frame):
     def on_close(self, event):
         """
         close the Window
-
         """
 
         self.Close()
@@ -2054,7 +1987,6 @@ class BatchOutputFrame(wx.Frame):
         """
         Receive event and display data into third party application
         or save data to file.
-
         """
         if self.save_to_file.GetValue():
             _, ext = os.path.splitext(self.file_name)
