@@ -9,9 +9,10 @@ class MultiplicationModel(BaseComponent):
         The model parameters are combined from both models, P(Q) and S(Q), except 1) 'effect_radius' of S(Q)
         which will be calculated from P(Q) via calculate_ER(), 
         and 2) 'scale' in P model which is synchronized w/ volfraction in S 
-        then P*S is multiplied by a new param, 'scale_factor'.
+        then P*S is multiplied by a new parameter, 'scale_factor'.
         The polydispersion is applicable only to P(Q), not to S(Q).
-        Note: P(Q) refers to 'form factor' model while S(Q) does to 'structure factor'.
+
+        .. note:: P(Q) refers to 'form factor' model while S(Q) does to 'structure factor'.
     """
     def __init__(self, p_model, s_model ):
         BaseComponent.__init__(self)
@@ -80,8 +81,8 @@ class MultiplicationModel(BaseComponent):
             
     def _clone(self, obj):
         """
-            Internal utility function to copy the internal
-            data members to a fresh copy.
+        Internal utility function to copy the internal data members to a
+        fresh copy.
         """
         obj.params     = copy.deepcopy(self.params)
         obj.description     = copy.deepcopy(self.description)
@@ -95,8 +96,8 @@ class MultiplicationModel(BaseComponent):
     
     def _set_dispersion(self):
         """
-           combined the two models dispersions
-           Polydispersion should not be applied to s_model
+        combine the two models' dispersions. Polydispersity should not be
+        applied to s_model
         """
         ##set dispersion only from p_model 
         for name , value in self.p_model.dispersion.iteritems():
@@ -106,9 +107,10 @@ class MultiplicationModel(BaseComponent):
         """
         Get SLD profile of p_model if exists
         
-        : return: (r, beta) where r is a list of radius of the transition points
-                beta is a list of the corresponding SLD values 
-        : Note: This works only for func_shell num = 2 (exp function).
+        :return: (r, beta) where r is a list of radius of the transition points\
+                beta is a list of the corresponding SLD values
+
+        .. note:: This works only for func_shell num = 2 (exp function).
         """
         try:
             x, y = self.p_model.getProfile()
@@ -120,8 +122,8 @@ class MultiplicationModel(BaseComponent):
     
     def _set_params(self):
         """
-            Concatenate the parameters of the two models to create
-            this model parameters 
+        Concatenate the parameters of the two models to create
+        these model parameters 
         """
 
         for name , value in self.p_model.params.iteritems():
@@ -140,8 +142,8 @@ class MultiplicationModel(BaseComponent):
             
     def _set_details(self):
         """
-            Concatenate details of the two models to create
-            this model details 
+        Concatenate details of the two models to create
+        this model's details 
         """
         for name, detail in self.p_model.details.iteritems():
             if name != 'scale':
@@ -153,7 +155,7 @@ class MultiplicationModel(BaseComponent):
     
     def _set_scale_factor(self):
         """
-            Set scale=volfraction to P model
+        Set scale=volfraction for P model
         """
         value = self.params['volfraction']
         if value != None: 
@@ -167,7 +169,7 @@ class MultiplicationModel(BaseComponent):
             
     def _set_effect_radius(self):
         """
-            Set effective radius to S(Q) model
+        Set effective radius to S(Q) model
         """
         if not 'effect_radius' in self.s_model.params.keys():
             return
@@ -205,7 +207,7 @@ class MultiplicationModel(BaseComponent):
         
     def _setParamHelper(self, name, value):
         """
-            Helper function to setparam
+        Helper function to setparam
         """
         # Look for dispersion parameters
         toks = name.split('.')
@@ -228,7 +230,7 @@ class MultiplicationModel(BaseComponent):
    
     def _set_fixed_params(self):
         """
-             fill the self.fixed list with the p_model fixed list
+        Fill the self.fixed list with the p_model fixed list
         """
         for item in self.p_model.fixed:
             self.fixed.append(item)
@@ -239,6 +241,7 @@ class MultiplicationModel(BaseComponent):
     def run(self, x = 0.0):
         """ 
         Evaluate the model
+        
         :param x: input q-value (float or [float, float] as [r, theta])
         :return: (scattering function value)
         """
@@ -249,9 +252,11 @@ class MultiplicationModel(BaseComponent):
                             self.s_model.run(x)
 
     def runXY(self, x = 0.0):
-        """ Evaluate the model
-            @param x: input q-value (float or [float, float] as [qx, qy])
-            @return: scattering function value
+        """ 
+        Evaluate the model
+        
+        :param x: input q-value (float or [float, float] as [qx, qy])
+        :return: scattering function value
         """  
         # set effective radius and scaling factor before run
         self._set_effect_radius()
@@ -265,6 +270,7 @@ class MultiplicationModel(BaseComponent):
     def evalDistribution(self, x = []):
         """ 
         Evaluate the model in cartesian coordinates
+        
         :param x: input q[], or [qx[], qy[]]
         :return: scattering function P(q[])
         """
@@ -278,6 +284,7 @@ class MultiplicationModel(BaseComponent):
     def set_dispersion(self, parameter, dispersion):
         """
         Set the dispersion object for a model parameter
+        
         :param parameter: name of the parameter [string]
         :dispersion: dispersion object of type DispersionModel
         """
@@ -292,7 +299,7 @@ class MultiplicationModel(BaseComponent):
 
     def fill_description(self, p_model, s_model):
         """
-            Fill the description for P(Q)*S(Q)
+        Fill the description for P(Q)*S(Q)
         """
         description = ""
         description += "Note:1) The effect_radius (effective radius) of %s \n"%\

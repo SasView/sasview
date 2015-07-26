@@ -42,9 +42,8 @@ class DocumentationWindow(wx.Frame):
     called
     (self, parent, dummy_id, path, url_instruction, title, size=(850, 540))
 
-    :param path: path to html file beginning AFTER /doc/ and ending in the
+    :param path: path to html file beginning AFTER /doc/ and ending in the\
     file.html.
-    
     :param url_instructions: anchor string or other query e.g. '#MyAnchor'
     :param title: text to place in the title bar of the help panel
     """
