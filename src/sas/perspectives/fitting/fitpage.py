@@ -267,8 +267,6 @@ class FitPage(BasicPage):
         self.dI_idata.Enable(False)
         weighting_box.Add(sizer_weighting)
 
-        sizer_fit = wx.GridSizer(2, 5, 2, 6)
-
         # combobox for smear2d accuracy selection
         self.smear_accuracy = wx.ComboBox(self, -1, size=(50, -1),
                                           style=wx.CB_READONLY)
@@ -281,14 +279,14 @@ class FitPage(BasicPage):
         wx.EVT_COMBOBOX(self.smear_accuracy, -1, self._on_select_accuracy)
 
         #Fit button
-        self.btFit = wx.Button(self, wx.NewId(), 'Fit', size=(88, 25))
+        self.btFit = wx.Button(self, wx.NewId(), 'Fit')
         self.default_bt_colour = self.btFit.GetDefaultAttributes()
         self.btFit.Bind(wx.EVT_BUTTON, self._onFit, id=self.btFit.GetId())
         self.btFit.SetToolTipString("Start fitting.")
 
         #General Help button
-        self.btFitHelp = wx.Button(self, -1, 'HELP')
-        self.btFitHelp.SetToolTipString("General Fitting Help.")
+        self.btFitHelp = wx.Button(self, -1, 'Help')
+        self.btFitHelp.SetToolTipString("General fitting help.")
         self.btFitHelp.Bind(wx.EVT_BUTTON, self._onFitHelp)
         
         #Resolution Smearing Help button (for now use same technique as
@@ -302,7 +300,7 @@ class FitPage(BasicPage):
             size_q = (30, 20)  #on MAC
         self.btSmearHelp = wx.Button(self, -1, '?', style=wx.BU_EXACTFIT,\
                                      size=size_q)
-        self.btSmearHelp.SetToolTipString("Resolution Smearing Help.")
+        self.btSmearHelp.SetToolTipString("Resolution smearing help.")
         self.btSmearHelp.Bind(wx.EVT_BUTTON, self._onSmearHelp)
         
         #textcntrl for custom resolution
@@ -361,23 +359,10 @@ class FitPage(BasicPage):
                   id=self.slit_smearer.GetId())
         self.disable_smearer.SetValue(True)
 
-        # add 4 types of smearing to the sizer
-        # Note from June 14, 2015
-        # removed the extra (10,10) spaces to make room for help.  Actually
-        # don't see the need for those anyway as the wx.LEFT, xx should take
-        # care of spacing anyway though it does not seem to work for some
-        # reason.  Currently leaving as we are in "code freeze" only making
-        # minimal changes necessary for release 3.1.  We probably want to clean
-        # up the whole fitpage (and basepage and fitpanel etc) eventually.
-        #                          ---- PDB
         sizer_smearer.Add(self.disable_smearer, 0, wx.LEFT, 10)
-#        sizer_smearer.Add((10, 10))
         sizer_smearer.Add(self.enable_smearer)
-#        sizer_smearer.Add((10, 10))
         sizer_smearer.Add(self.pinhole_smearer)
-#        sizer_smearer.Add((10, 10))
         sizer_smearer.Add(self.slit_smearer)
-#        sizer_smearer.Add((10, 10))
         sizer_smearer.Add(self.btSmearHelp)
         sizer_smearer.Add((10, 10))
 
@@ -396,8 +381,7 @@ class FitPage(BasicPage):
                                 " Total Npts : total number of data points")
 
         # Update and Draw button
-        self.draw_button = wx.Button(self, wx.NewId(),
-                                     'Compute', size=(88, 24))
+        self.draw_button = wx.Button(self, wx.NewId(), 'Compute')
         self.draw_button.Bind(wx.EVT_BUTTON, \
                               self._onDraw, id=self.draw_button.GetId())
         self.draw_button.SetToolTipString("Compute and Draw.")
@@ -413,21 +397,6 @@ class FitPage(BasicPage):
 
         box_description_1 = wx.StaticText(self, -1, '   Chi2/Npts')
         box_description_2 = wx.StaticText(self, -1, 'Npts(Fit)')
-        #box_description_3 = wx.StaticText(self, -1, 'Total Npts')
-        #box_description_3.SetToolTipString( \
-        #                        " Total Npts : total number of data points")
-
-        sizer_fit.Add(box_description_1, 0, 0)
-        sizer_fit.Add(box_description_2, 0, 0)
-        sizer_fit.Add(self.points_sizer, 0, 0)
-        #sizer_fit.Add(box_description_3, 0, 0)
-        sizer_fit.Add(self.draw_button, 0, 0)
-        sizer_fit.Add((-1,5))
-        sizer_fit.Add(self.tcChi, 0, 0)
-        sizer_fit.Add(self.Npts_fit, 0, 0)
-        sizer_fit.Add(self.Npts_total, 0, 0)
-        sizer_fit.Add(self.btFit, 0, 0)
-        sizer_fit.Add(self.btFitHelp, 0, 0)
 
         # StaticText for smear
         self.smear_description_none = wx.StaticText(self, -1,
@@ -575,15 +544,15 @@ class FitPage(BasicPage):
         self.qmax.Bind(wx.EVT_KEY_DOWN, self.on_key)
         self.qmin.Bind(wx.EVT_TEXT, self.on_qrange_text)
         self.qmax.Bind(wx.EVT_TEXT, self.on_qrange_text)
-        id = wx.NewId()
-        self.reset_qrange = wx.Button(self, id, 'Reset', size=(77, 20))
+        wx_id = wx.NewId()
+        self.reset_qrange = wx.Button(self, wx_id, 'Reset')
 
-        self.reset_qrange.Bind(wx.EVT_BUTTON, self.on_reset_clicked, id=id)
+        self.reset_qrange.Bind(wx.EVT_BUTTON, self.on_reset_clicked, id=wx_id)
         self.reset_qrange.SetToolTipString("Reset Q range to the default")
 
-        sizer = wx.GridSizer(2, 4, 2, 6)
+        sizer = wx.GridSizer(5, 5, 2, 6)
 
-        self.btEditMask = wx.Button(self, wx.NewId(), 'Editor', size=(88, 23))
+        self.btEditMask = wx.Button(self, wx.NewId(), 'Editor')
         self.btEditMask.Bind(wx.EVT_BUTTON, self._onMask,
                              id=self.btEditMask.GetId())
         self.btEditMask.SetToolTipString("Edit Mask.")
@@ -593,17 +562,30 @@ class FitPage(BasicPage):
         sizer.Add(wx.StaticText(self, -1, ' Min[1/A]'))
         sizer.Add(wx.StaticText(self, -1, ' Max[1/A]'))
         sizer.Add(self.EditMask_title)
+        sizer.Add((-1,5))
+
         sizer.Add(self.reset_qrange)
         sizer.Add(self.qmin)
         sizer.Add(self.qmax)
-        #sizer.Add(self.theory_npts_tcrtl)
         sizer.Add(self.btEditMask)
-        boxsizer_range.Add(sizer_chi2)
-        boxsizer_range.Add((10, 10))
-        boxsizer_range.Add(sizer)
+        sizer.Add((-1,5))
 
-        boxsizer_range.Add((10, 15))
-        boxsizer_range.Add(sizer_fit)
+        sizer.AddMany(5*[(-1,5)])
+
+        sizer.Add(box_description_1, 0, 0)
+        sizer.Add(box_description_2, 0, 0)
+        sizer.Add(self.points_sizer, 0, 0)
+        sizer.Add(self.draw_button, 0, 0)
+        sizer.Add((-1,5))
+        
+        sizer.Add(self.tcChi, 0, 0)
+        sizer.Add(self.Npts_fit, 0, 0)
+        sizer.Add(self.Npts_total, 0, 0)
+        sizer.Add(self.btFit, 0, 0)
+        sizer.Add(self.btFitHelp, 0, 0)
+        
+        boxsizer_range.Add(sizer_chi2)
+        boxsizer_range.Add(sizer)
         if is_2Ddata:
             self.btEditMask.Enable()
             self.EditMask_title.Enable()

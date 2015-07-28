@@ -40,8 +40,8 @@ APPLICATION_WLIST = config.APPLICATION_WLIST
 
 class Plugin(PluginBase):
 
-    def __init__(self, standalone=False):
-        PluginBase.__init__(self, name="DataLoader", standalone=standalone)
+    def __init__(self):
+        PluginBase.__init__(self, name="DataLoader")
         # Default location
         self._default_save_location = DEFAULT_OPEN_FOLDER
         self.loader = Loader()

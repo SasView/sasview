@@ -90,11 +90,6 @@ import local_config
 PLUGIN_MODEL_DIR = 'plugin_models'
 APP_NAME = 'SasView'
 
-class SasViewApp(gui_manager.ViewApp):
-    """
-    """
-  
-
 class SasView():
     """
     Main class for running the SasView application
@@ -103,7 +98,7 @@ class SasView():
         """
         """
         #from gui_manager import ViewApp
-        self.gui = SasViewApp(0)
+        self.gui = gui_manager.SasViewApp(0)
         # Set the application manager for the GUI
         self.gui.set_manager(self)
         # Add perspectives to the basic application
@@ -125,7 +120,7 @@ class SasView():
         # P(r) perspective
         try:
             import sas.perspectives.pr as module
-            pr_plug = module.Plugin(standalone=False)
+            pr_plug = module.Plugin()
             self.gui.add_perspective(pr_plug)
         except:
             logging.error("%s: could not find P(r) plug-in module"% APP_NAME)
@@ -134,7 +129,7 @@ class SasView():
         #Invariant perspective
         try:
             import sas.perspectives.invariant as module
-            invariant_plug = module.Plugin(standalone=False)
+            invariant_plug = module.Plugin()
             self.gui.add_perspective(invariant_plug)
         except:
             logging.error("%s: could not find Invariant plug-in module"% \
@@ -144,7 +139,7 @@ class SasView():
         #Calculator perspective   
         try:
             import sas.perspectives.calculator as module
-            calculator_plug = module.Plugin(standalone=False)
+            calculator_plug = module.Plugin()
             self.gui.add_perspective(calculator_plug)
         except:
             logging.error("%s: could not find Calculator plug-in module"% \

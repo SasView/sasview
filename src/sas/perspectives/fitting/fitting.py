@@ -60,8 +60,8 @@ class Plugin(PluginBase):
     """
     Fitting plugin is used to perform fit
     """
-    def __init__(self, standalone=False):
-        PluginBase.__init__(self, name="Fitting", standalone=standalone)
+    def __init__(self):
+        PluginBase.__init__(self, name="Fitting")
 
         #list of panel to send to guiframe
         self.mypanels = []
@@ -220,8 +220,8 @@ class Plugin(PluginBase):
         """
         Get the python editor panel
         """
-        id = event.GetId()
-        label = self.edit_menu.GetLabel(id)
+        event_id = event.GetId()
+        label = self.edit_menu.GetLabel(event_id)
         from sas.perspectives.calculator.pyconsole import PyConsole
         filename = os.path.join(models.find_plugins_dir(), label)
         frame = PyConsole(parent=self.parent, manager=self,
@@ -235,8 +235,8 @@ class Plugin(PluginBase):
         """
         Delete custom model file
         """
-        id = event.GetId()
-        label = self.delete_menu.GetLabel(id)
+        event_id = event.GetId()
+        label = self.delete_menu.GetLabel(event_id)
         toks = os.path.splitext(label)
         path = os.path.join(models.find_plugins_dir(), toks[0])
         try:
@@ -255,7 +255,7 @@ class Plugin(PluginBase):
                 #wx.PostEvent(self.parent, StatusEvent(status=msg, type='stop',
                 #                                      info='warning'))
             else:
-                self.delete_menu.Delete(id)
+                self.delete_menu.Delete(event_id)
                 for item in self.edit_menu.GetMenuItems():
                     if item.GetLabel() == label:
                         self.edit_menu.DeleteItem(item)
@@ -271,7 +271,7 @@ class Plugin(PluginBase):
         """
         Edit summodel template and make one
         """
-        id = event.GetId()
+        event_id = event.GetId()
         model_manager = models.ModelManager()
         model_list = model_manager.get_model_name_list()
         plug_dir = models.find_plugins_dir()
@@ -289,7 +289,7 @@ class Plugin(PluginBase):
             self.new_model_frame.Show(False)
             self.new_model_frame.Show(True)
         else:
-            id = event.GetId()
+            event_id = event.GetId()
             dir_path = models.find_plugins_dir()
             title = "New Custom Model Function"
             self.new_model_frame = EditorWindow(parent=self, base=self,
@@ -331,15 +331,15 @@ class Plugin(PluginBase):
         """
         Set list of the edit model menu labels
         """
-        id = wx.NewId()
+        wx_id = wx.NewId()
         #new_model_menu = wx.Menu()
-        self.edit_model_menu.Append(id, 'New',
+        self.edit_model_menu.Append(wx_id, 'New',
                                    'Add a new model function')
-        wx.EVT_MENU(owner, id, self.make_new_model)
-        id = wx.NewId()
-        self.edit_model_menu.Append(id, 'Sum|Multi(p1, p2)',
+        wx.EVT_MENU(owner, wx_id, self.make_new_model)
+        wx_id = wx.NewId()
+        self.edit_model_menu.Append(wx_id, 'Sum|Multi(p1, p2)',
                                     'Sum of two model functions')
-        wx.EVT_MENU(owner, id, self.make_sum_model)
+        wx.EVT_MENU(owner, wx_id, self.make_sum_model)
         e_id = wx.NewId()
         self.edit_menu = wx.Menu()
         self.edit_model_menu.AppendMenu(e_id,
@@ -375,9 +375,9 @@ class Plugin(PluginBase):
                     if name == submenu.GetLabel(item.GetId()):
                         has_file = True
                 if not has_file:
-                    id = wx.NewId()
-                    submenu.Append(id, name)
-                    wx.EVT_MENU(owner, id, menu)
+                    wx_id = wx.NewId()
+                    submenu.Append(wx_id, name)
+                    wx.EVT_MENU(owner, wx_id, menu)
                     has_file = False
 
     def put_icon(self, frame):
@@ -396,10 +396,10 @@ class Plugin(PluginBase):
         """
         Create a page to access simultaneous fit option
         """
-        id = event.GetId()
+        event_id = event.GetId()
         caption = "Const & Simul Fit"
         page = self.sim_page
-        if id == self.id_batchfit:
+        if event_id == self.id_batchfit:
             caption = "Combined Batch"
             page = self.batch_page
 
@@ -718,8 +718,8 @@ class Plugin(PluginBase):
         sim_page_id = self.sim_page.uid
         for uid, value in self.page_finder.iteritems():
             if uid != sim_page_id and uid != self.batch_page.uid:
-                list = value.get_model()
-                model = list[0]
+                model_list = value.get_model()
+                model = model_list[0]
                 if model.name == modelname:
                     value.set_model_param(names, values)
                     break
@@ -1567,7 +1567,6 @@ class Plugin(PluginBase):
 
         """
         if event.panel is not None:
-            new_panel = event.panel
             self.slicer_panels.append(event.panel)
             # Set group ID if available
             event_id = self.parent.popup_panel(event.panel)
@@ -1651,7 +1650,7 @@ class Plugin(PluginBase):
             #    new_plot.custom_color = self.color_dict[new_plot.id]
             #find if this theory was already plotted and replace that plot given
             #the same id
-            theory_data = self.page_finder[page_id].get_theory_data(fid=data.id)
+            self.page_finder[page_id].get_theory_data(fid=data.id)
 
             if data.is_data:
                 data_name = str(data.name)
