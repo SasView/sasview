@@ -54,6 +54,8 @@ The following five distribution functions are provided:
 *  *Schulz Distribution*
 *  *Array Distribution*
 
+These are all implemented in SasView as *number-average* distributions.
+
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 Rectangular Distribution
