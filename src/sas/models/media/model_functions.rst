@@ -2238,14 +2238,19 @@ CoreShellEllipsoidModel.
 The geometric parameters of this model are
 
   *equat_core* = equatorial core radius = *Rminor_core*
+  
   *X_core* = *polar_core* / *equat_core* = *Rmajor_core* / *Rminor_core*
+  
   *T_shell* = *equat_outer* - *equat_core* = *Rminor_outer* - *Rminor_core*
+  
   *XpolarShell* = *Tpolar_shell* / *T_shell* = (*Rmajor_outer* - *Rmajor_core*)/(*Rminor_outer* - *Rminor_core*)
 
 In terms of the original radii
 
   *polar_core* = *equat_core* \* *X_core*
+  
   *equat_shell* = *equat_core* + *T_shell*
+  
   *polar_shell* = *equat_core* \* *X_core* + *T_shell* \* *XpolarShell*
 
   (where we note that "shell" perhaps confusingly, relates to the outer radius)
