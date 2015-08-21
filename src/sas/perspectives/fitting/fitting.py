@@ -43,6 +43,7 @@ from sas.perspectives.fitting.fitpage import Chi2UpdateEvent
 from sas.perspectives.calculator.model_editor import TextDialog
 from sas.perspectives.calculator.model_editor import EditorWindow
 from sas.guiframe.gui_manager import MDIFrame
+from sas.guiframe.documentation_window import DocumentationWindow
 
 MAX_NBR_DATA = 4
 
@@ -747,8 +748,19 @@ class Plugin(PluginBase):
         """
         Open the bumps options panel.
         """
-        from bumps.gui.fit_dialog import OpenFitOptions
-        OpenFitOptions()
+        try:
+            from bumps.gui.fit_dialog import show_fit_config
+            show_fit_config(self.parent, help=self.on_help)
+        except ImportError:
+            # CRUFT: Bumps 0.7.5.6 and earlier do not have the help button
+            from bumps.gui.fit_dialog import OpenFitOptions
+            OpenFitOptions()
+
+    def on_help(self, algorithm_id):
+        _TreeLocation = "user/perspectives/fitting/optimizer.html"
+        _anchor = "#fit-"+algorithm_id
+        DocumentationWindow(self.parent, -1, _TreeLocation, _anchor, "Optimizer Help")
+
 
     def on_fit_results(self, event=None):
         """

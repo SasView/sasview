@@ -7,13 +7,25 @@ from datetime import timedelta, datetime
 import numpy
 
 from bumps import fitters
+try:
+    from bumps.options import FIT_CONFIG
+    # Default bumps to use the Levenberg-Marquardt optimizer
+    FIT_CONFIG.selected_id = fitters.LevenbergMarquardtFit.id
+    def get_fitter():
+        return FIT_CONFIG.selected_fitter, FIT_CONFIG.selected_values
+except:
+    # CRUFT: Bumps changed its handling of fit options around 0.7.5.6
+    # Default bumps to use the Levenberg-Marquardt optimizer
+    fitters.FIT_DEFAULT = 'lm'
+    def get_fitter():
+        fitopts = fitters.FIT_OPTIONS[fitters.FIT_DEFAULT]
+        return fitopts.fitclass, fitopts.options.copy()
+
+
 from bumps.mapper import SerialMapper, MPMapper
 from bumps import parameter
-
-# TODO: remove globals from interface to bumps options!
-# Default bumps to use the levenberg-marquardt optimizer
 from bumps.fitproblem import FitProblem
-fitters.FIT_DEFAULT = 'lm'
+
 
 from sas.fit.AbstractFitEngine import FitEngine
 from sas.fit.AbstractFitEngine import FResult
@@ -310,10 +322,13 @@ def run_bumps(problem, handler, curr_thread):
             return True
         return False
 
-    fitopts = fitters.FIT_OPTIONS[fitters.FIT_DEFAULT]
-    fitclass = fitopts.fitclass
-    options = fitopts.options.copy()
-    max_step = fitopts.options.get('steps', 0) + fitopts.options.get('burn', 0)
+    fitclass, options = get_fitter()
+    steps = options.get('steps', 0)
+    if steps == 0:
+        pop = options.get('pop',0)*len(problem._parameters)
+        samples = options.get('samples', 0)
+        steps = (samples+pop-1)/pop if pop != 0 else samples
+    max_step = steps + options.get('burn', 0)
     pars = [p.name for p in problem._parameters]
     #x0 = numpy.asarray([p.value for p in problem._parameters])
     options['monitors'] = [
