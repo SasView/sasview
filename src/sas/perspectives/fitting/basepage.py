@@ -10,6 +10,7 @@ import copy
 import math
 import string
 import json
+import logging
 from collections import defaultdict
 from wx.lib.scrolledpanel import ScrolledPanel
 from sas.guiframe.panel_base import PanelBase
@@ -25,6 +26,8 @@ from sas.dataloader.data_info import Detector
 from sas.dataloader.data_info import Source
 from sas.perspectives.fitting.pagestate import PageState
 from sas.guiframe.CategoryInstaller import CategoryInstaller
+from sas.guiframe.documentation_window import DocumentationWindow
+
 
 (PageInfoEvent, EVT_PAGE_INFO) = wx.lib.newevent.NewEvent()
 (PreviousStateEvent, EVT_PREVIOUS_STATE) = wx.lib.newevent.NewEvent()
@@ -94,8 +97,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## total number of point: float
         self.npts = None
         self.num_points = None
-        ## default fitengine type
-        self.engine_type = 'bumps'
         ## smear default
         self.current_smearer = None
         ## 2D smear accuracy default
@@ -396,90 +397,6 @@ class BasicPage(ScrolledPanel, PanelBase):
                     self._manager.menu1.FindItemById(self._manager.id_batchfit)
             batch_menu.Enable(self.batch_on and flag)
     
-    class ModelTextCtrl(wx.TextCtrl):
-        """
-        Text control for model and fit parameters.
-        Binds the appropriate events for user interactions.
-        Default callback methods can be overwritten on initialization
-        
-        :param kill_focus_callback: callback method for EVT_KILL_FOCUS event
-        :param set_focus_callback:  callback method for EVT_SET_FOCUS event
-        :param mouse_up_callback:   callback method for EVT_LEFT_UP event
-        :param text_enter_callback: callback method for EVT_TEXT_ENTER event
-        
-        """
-        ## Set to True when the mouse is clicked while whole string is selected
-        full_selection = False
-        ## Call back for EVT_SET_FOCUS events
-        _on_set_focus_callback = None
-        
-        def __init__(self, parent, id=-1,
-                     value=wx.EmptyString,
-                     pos=wx.DefaultPosition,
-                     size=wx.DefaultSize,
-                     style=0,
-                     validator=wx.DefaultValidator,
-                     name=wx.TextCtrlNameStr,
-                     kill_focus_callback=None,
-                     set_focus_callback=None,
-                     mouse_up_callback=None,
-                     text_enter_callback=None):
-             
-            wx.TextCtrl.__init__(self, parent, id, value, pos,
-                                  size, style, validator, name)
-            
-            # Bind appropriate events
-            self._on_set_focus_callback = parent.onSetFocus \
-                      if set_focus_callback is None else set_focus_callback
-            self.Bind(wx.EVT_SET_FOCUS, self._on_set_focus)
-            self.Bind(wx.EVT_KILL_FOCUS, self._silent_kill_focus \
-                      if kill_focus_callback is None else kill_focus_callback)
-            self.Bind(wx.EVT_TEXT_ENTER, parent._onparamEnter \
-                      if text_enter_callback is None else text_enter_callback)
-            if not ON_MAC:
-                self.Bind(wx.EVT_LEFT_UP, self._highlight_text \
-                          if mouse_up_callback is None else mouse_up_callback)
-            
-        def _on_set_focus(self, event):
-            """
-            Catch when the text control is set in focus to highlight the whole
-            text if necessary
-            
-            :param event: mouse event
-            
-            """
-            event.Skip()
-            self.full_selection = True
-            return self._on_set_focus_callback(event)
-        
-        def _highlight_text(self, event):
-            """
-            Highlight text of a TextCtrl only of no text has be selected
-            
-            :param event: mouse event
-            
-            """
-            # Make sure the mouse event is available to other listeners
-            event.Skip()
-            control = event.GetEventObject()
-            if self.full_selection:
-                self.full_selection = False
-                # Check that we have a TextCtrl
-                if issubclass(control.__class__, wx.TextCtrl):
-                    # Check whether text has been selected,
-                    # if not, select the whole string
-                    (start, end) = control.GetSelection()
-                    if start == end:
-                        control.SetSelection(-1, -1)
-                        
-        def _silent_kill_focus(self, event):
-            """
-            Save the state of the page
-            """
-            
-            event.Skip()
-            #pass
-    
     def set_page_info(self, page_info):
         """
         set some page important information at once
@@ -585,6 +502,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         
     def get_state(self):
         """
+        return the current page state
         """
         return self.state
     
@@ -692,8 +610,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.disp_help_bt = wx.Button(self, wx.NewId(), '?',
                                       style=wx.BU_EXACTFIT,
                                       size=size_q)
-        self.disp_help_bt.Bind(wx.EVT_BUTTON,
-                        self.on_pd_help_clicked, id=self.disp_help_bt.GetId())
+        self.disp_help_bt.Bind(wx.EVT_BUTTON, self.on_pd_help_clicked,
+                               id=self.disp_help_bt.GetId())
         self.disp_help_bt.SetToolTipString("Helps for Polydispersion.")
         
         self.Bind(wx.EVT_RADIOBUTTON, self._set_dipers_Param,
@@ -908,9 +826,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         try:
             if path == None:
+                status = " Selected Distribution was not loaded: %s" % path
                 wx.PostEvent(self._manager.parent,
-                            StatusEvent(status= \
-                            " Selected Distribution was not loaded: %s" % path))
+                             StatusEvent(status=status))
                 return None, None
             input_f = open(path, 'r')
             buff = input_f.read()
@@ -927,7 +845,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                     weights.append(weight)
                 except:
                     # Skip non-data lines
-                    pass
+                    logging.error(sys.exc_info()[1])
             return numpy.array(angles), numpy.array(weights)
         except:
             raise
@@ -942,7 +860,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Store current state
         """
-        self.state.engine_type = copy.deepcopy(self.engine_type)
         ## save model option
         if self.model != None:
             self.disp_list = self.model.getDispParamList()
@@ -1040,8 +957,6 @@ class BasicPage(ScrolledPanel, PanelBase):
             self.disp_list = self.model.getDispParamList()
             self.state.disp_list = copy.deepcopy(self.disp_list)
             self.state.model = self.model.clone()
-        if hasattr(self, "engine_type"):
-            self.state.engine_type = copy.deepcopy(self.engine_type)
             
         self.state.enable2D = copy.deepcopy(self.enable2D)
         self.state.values = copy.deepcopy(self.values)
@@ -1132,7 +1047,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         except:
             category_pos = 0
             for ind_cat in range(self.categorybox.GetCount()):
-                if self.categorycombobox.GetString(ind_form) == \
+                if self.categorycombobox.GetString(ind_cat) == \
                                         state.categorycombobox:
                     category_pos = int(ind_cat)
                     break
@@ -1295,7 +1210,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         except:
             # Backward compatibility (for older state files)
             self.magnetic_on = False
-        self.engine_type = state.engine_type
 
         self.disp_cb_dict = state.disp_cb_dict
         self.disp_list = state.disp_list
@@ -1351,9 +1265,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         if state.multi_factor != None:
             self.multifactorbox.SetSelection(state.multi_factor)
 
-        #reset the fitting engine type
-        self.engine_type = state.engine_type
-        #draw the pnael according to the new model parameter
+        #draw the panel according to the new model parameter
         self._on_select_model(event=None)
             
         # take care of 2D button
@@ -1362,10 +1274,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.model_view.SetLabel("2D Mode")
             else:
                 self.model_view.SetLabel("1D Mode")
-        # else:
                 
-        if self._manager != None and self.engine_type != None:
-            self._manager._on_change_engine(engine=self.engine_type)
         ## set the select all check box to the a given state
         self.cb1.SetValue(state.cb1)
      
@@ -1478,7 +1387,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.model._persistency_dict[key] = \
                                  [state.values, state.weights]
             except:
-                pass
+                logging.error(sys.exc_info()[1])
             selection = self._find_polyfunc_selection(disp_model)
             for list in self.fittable_param:
                 if list[1] == key and list[7] != None:
@@ -1495,7 +1404,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                             list[5].Disable()
                             list[6].Disable()
                         except:
-                            pass
+                            logging.error(sys.exc_info()[1])
             # For array, disable all fixed params
             if selection == 1:
                 for item in self.fixed_param:
@@ -1504,7 +1413,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                         try:
                             item[2].Disable()
                         except:
-                            pass
+                            logging.error(sys.exc_info()[1])
     
         # Make sure the check box updated when all checked
         if self.cb1.GetValue():
@@ -1591,7 +1500,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 is_modified = self._check_value_enter(self.parameters,
                                                       is_modified)
             except:
-                pass
+                logging.error(sys.exc_info()[1])
 
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and
@@ -1679,20 +1588,22 @@ class BasicPage(ScrolledPanel, PanelBase):
                     elif self.pinhole_smearer.GetValue():
                         flag = self.update_pinhole_smear()
                     else:
+                        enable_smearer = not self.disable_smearer.GetValue()
                         self._manager.set_smearer(smearer=temp_smearer,
                                                   uid=self.uid,
                                                   fid=self.data.id,
                                                   qmin=float(self.qmin_x),
                                                   qmax=float(self.qmax_x),
-                            enable_smearer=not self.disable_smearer.GetValue(),
+                                                  enable_smearer=enable_smearer,
                                                       draw=False)
                 elif not self._is_2D():
+                    enable_smearer = not self.disable_smearer.GetValue()
                     self._manager.set_smearer(smearer=temp_smearer,
                                               qmin=float(self.qmin_x),
                                               uid=self.uid,
                                               fid=self.data.id,
                                               qmax=float(self.qmax_x),
-                            enable_smearer=not self.disable_smearer.GetValue(),
+                                              enable_smearer=enable_smearer,
                                                  draw=False)
                     if self.data != None:
                         index_data = ((self.qmin_x <= self.data.x) & \
@@ -1733,7 +1644,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         try:
             self.save_current_state()
         except:
-            pass
+            logging.error(sys.exc_info()[1])
    
         return flag
                
@@ -1862,131 +1773,6 @@ class BasicPage(ScrolledPanel, PanelBase):
                               [min_state, min_value],
                               [max_state, max_value], unit])
            
-#    The following funcion seems to be superseded with fillsizer and 
-#    init combo box.  certainly it seems not to know about categories and uses 
-#    only shapes and shape independent -- tested after commenting out and does
-#    not seem to cause problem.  Leave commented out for now but delete in
-#    a code cleanup once clear it really is no longer used.
-#    PDB  8 April 2014
-
-#    def _set_model_sizer_selection(self, model):
-#        """
-#        Display the sizer according to the type of the current model
-#        """
-#        if model == None:
-#            return
-#        if hasattr(model, "s_model"):
-#            
-#            class_name = model.s_model.__class__
-#            name = model.s_model.name
-#            flag = (name != "NoStructure")
-#            if flag and \
-#                (class_name in self.model_list_box["Structure Factors"]):
-#                self.structurebox.Show()
-#                self.text2.Show()
-#                self.structurebox.Enable()
-#               self.text2.Enable()
- #               items = self.structurebox.GetItems()
- #               self.sizer1.Layout()
- #               
- #               for i in range(len(items)):
- #                   if items[i] == str(name):
- #                       self.structurebox.SetSelection(i)
- #                       break
- #                   
- #       if hasattr(model, "p_model"):
- #           class_name = model.p_model.__class__
- #           name = model.p_model.name
- #           self.formfactorbox.Clear()
- #           
- #           for k, list in self.model_list_box.iteritems():
- #               if k in["P(Q)*S(Q)", "Shapes"] and \
- #                   class_name in self.model_list_box["Shapes"]:
- #                   self.shape_rbutton.SetValue(True)
- #                   ## fill the form factor list with new model
- #                   self._populate_box(self.formfactorbox,
- #                                      self.model_list_box["Shapes"])
- #                   items = self.formfactorbox.GetItems()
- #                   ## set comboxbox to the selected item
- #                   for i in range(len(items)):
- #                       if items[i] == str(name):
- #                           self.formfactorbox.SetSelection(i)
- #                           break
- #                   return
- #               elif k == "Shape-Independent":
- #                   self.shape_indep_rbutton.SetValue(True)
- #               elif k == "Structure Factors":
- #                   self.struct_rbutton.SetValue(True)
- #               elif k == "Multi-Functions":
- #                   continue
- #               else:
- #                   self.plugin_rbutton.SetValue(True)
- #              
- #               if class_name in list:
- #                   ## fill the form factor list with new model
- #                   self._populate_box(self.formfactorbox, list)
- #                   items = self.formfactorbox.GetItems()
- #                   ## set comboxbox to the selected item
- #                   for i in range(len(items)):
- #                       if items[i] == str(name):
- #                           self.formfactorbox.SetSelection(i)
- #                           break
- #                   break
- #       else:
-            ## Select the model from the menu
-#            class_name = model.__class__
-#            name = model.name
-#            self.formfactorbox.Clear()
-#            items = self.formfactorbox.GetItems()
-#    
-#            for k, list in self.model_list_box.iteritems():
-#                if k in["P(Q)*S(Q)", "Shapes"] and \
-#                    class_name in self.model_list_box["Shapes"]:
-#                    if class_name in self.model_list_box["P(Q)*S(Q)"]:
-#                        self.structurebox.Show()
-#                        self.text2.Show()
-#                       self.structurebox.Enable()
-#                       self.structurebox.SetSelection(0)
-#                       self.text2.Enable()
-#                   else:
-#                        self.structurebox.Hide()
-#                        self.text2.Hide()
-#                        self.structurebox.Disable()
-#                        self.structurebox.SetSelection(0)
-#                        self.text2.Disable()
-#                        
-#                    self.shape_rbutton.SetValue(True)
-                    ## fill the form factor list with new model
-#                    self._populate_box(self.formfactorbox,
-#                                       self.model_list_box["Shapes"])
-#                    items = self.formfactorbox.GetItems()
-#                    ## set comboxbox to the selected item
-#                    for i in range(len(items)):
-#                        if items[i] == str(name):
-#                            self.formfactorbox.SetSelection(i)
-#                            break
-#                    return
-#                elif k == "Shape-Independent":
-#                    self.shape_indep_rbutton.SetValue(True)
-#                elif k == "Structure Factors":
-#                    self.struct_rbutton.SetValue(True)
-#                elif k == "Multi-Functions":
-#                    continue
-#                else:
-#                    self.plugin_rbutton.SetValue(True)
-#                if class_name in list:
-#                    self.structurebox.SetSelection(0)
-#                    self.structurebox.Disable()
-#                    self.text2.Disable()
-                    ## fill the form factor list with new model
-#                    self._populate_box(self.formfactorbox, list)
-#                    items = self.formfactorbox.GetItems()
-                    ## set comboxbox to the selected item
-#                    for i in range(len(items)):
-#                        if items[i] == str(name):
-#                            self.formfactorbox.SetSelection(i)
-#                            break
-#                    break
                 
     def _draw_model(self, update_chisqr=True, source='model'):
         """
@@ -2113,12 +1899,15 @@ class BasicPage(ScrolledPanel, PanelBase):
                     #    wx.PostEvent(self.parent.parent,
                     #                 StatusEvent(status=msg, info="error"))
         except:
-            msg = "%s\n" % (sys.exc_value)
+            msg = "%s\n" % (sys.exc_info()[1])
             wx.PostEvent(self._manager.parent,
                          StatusEvent(status=msg, info="error"))
         self._populate_box(self.formfactorbox, m_list)
     
     def _on_modify_cat(self, event=None):  
+        """
+        Called when category manager is opened
+        """
         self._manager.parent.on_category_panel(event)  
         
     def _show_combox(self, event=None):
@@ -2184,12 +1973,13 @@ class BasicPage(ScrolledPanel, PanelBase):
                         self.qmax_x = tempmax
                 else:
                     tcrtl.SetBackgroundColour("pink")
-                    msg = "Model Error: wrong value entered: %s" % sys.exc_value
+                    msg = "Model Error: wrong value entered: %s" % \
+                                    sys.exc_info()[1]
                     wx.PostEvent(self.parent, StatusEvent(status=msg))
                     return
             except:
                 tcrtl.SetBackgroundColour("pink")
-                msg = "Model Error: wrong value entered: %s" % sys.exc_value
+                msg = "Model Error: wrong value entered: %s" % sys.exc_info()[1]
                 wx.PostEvent(self.parent, StatusEvent(status=msg))
                 return
             #Check if # of points for theory model are valid(>0).
@@ -2241,12 +2031,13 @@ class BasicPage(ScrolledPanel, PanelBase):
                         self.theory_qmax_x = tempmax
                 else:
                     tcrtl.SetBackgroundColour("pink")
-                    msg = "Model Error: wrong value entered: %s" % sys.exc_value
+                    msg = "Model Error: wrong value entered: %s" % \
+                                        sys.exc_info()[1]
                     wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                     return
             except:
                 tcrtl.SetBackgroundColour("pink")
-                msg = "Model Error: wrong value entered: %s" % sys.exc_value
+                msg = "Model Error: wrong value entered: %s" % sys.exc_info()[1]
                 wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                 return
             #Check if # of points for theory model are valid(>0).
@@ -2677,8 +2468,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 try:
                     self.model.set_dispersion(p, disp_model)
                 except:
-
-                    pass
+                    logging.error(sys.exc_info()[1])
 
         ## save state into
         self.save_current_state()
@@ -2891,7 +2681,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             del self.model._persistency_dict[name.split('.')[0]]
             del self.state.model._persistency_dict[name.split('.')[0]]
         except:
-            pass
+            logging.error(sys.exc_info()[1])
                                             
     def _lay_out(self):
         """
@@ -3037,7 +2827,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                         canvases.append(item2.canvas)  
             except:
                 # Not for control panels
-                pass
+                logging.error(sys.exc_info()[1])
         # Make sure the resduals plot goes to the last
         if res_item != None:
             graphs.append(res_item[0])
@@ -3045,64 +2835,103 @@ class BasicPage(ScrolledPanel, PanelBase):
         # return the list of graphs
         return graphs, canvases
 
+    def on_function_help_clicked(self, event):
+        """
+        Function called when 'Help' button is pressed next to model
+        of interest.  This calls DocumentationWindow from
+        documentation_window.py. It will load the top level of the model
+        help documenation sphinx generated html if no model is presented.
+        If a model IS present then if documention for that model exists
+        it will load to that  point otherwise again it will go to the top.
+        For Wx2.8 and below is used (i.e. non-released through installer)
+        a browser is loaded and the top of the model documentation only is
+        accessible because webbrowser module does not pass anything after
+        the # to the browser.
+
+        :param evt: on Help Button pressed event
+        """
+
+        _TreeLocation = 'user/models/model_functions.html'
+        if self.model != None:
+            name = self.formfactorbox.GetValue()
+            _PageAnchor = '#' + name.lower()
+            _doc_viewer = DocumentationWindow(self, -1, _TreeLocation,
+                                              _PageAnchor, name + " Help")
+        else:
+            _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+                                                "General Model Help")
+
+
     def on_model_help_clicked(self, event):
         """
-        on 'More details' button
+        Function called when 'Description' button is pressed next to model
+        of interest.  This calls the Description embedded in the model. This
+        should work with either Wx2.8 and lower or higher. If no model is
+        selected it will give the message that a model must be chosen first
+        in the box that would normally contain the description.  If a badly
+        behaved model is encountered which has no description then it will
+        give the message that none is available.
+
+        :param evt: on Description Button pressed event
         """
-        from sas.perspectives.fitting.help_panel import  HelpWindow
-        from sas.models import get_data_path
         
-        # Get models help model_function path
-        path = get_data_path(media='media')
-        model_path = os.path.join(path, "model_functions.html")
         if self.model == None:
-            name = 'FuncHelp'
+            name = 'index.html'
         else:
             name = self.formfactorbox.GetValue()
-        frame = HelpWindow(None, -1, pageToOpen=model_path)
-        # If model name exists and model is not a custom model
-        #mod_cat = self.categorybox.GetStringSelection()
-        if frame.rhelp.HasAnchor(name):
-            frame.Show(True)
-            frame.rhelp.ScrollToAnchor(name)
-        else:
-            if self.model != None:
-                frame.Destroy()
+
                 msg = 'Model description:\n'
+        info = "Info"
+        if self.model != None:
+#                frame.Destroy()
                 if str(self.model.description).rstrip().lstrip() == '':
                     msg += "Sorry, no information is available for this model."
                 else:
                     msg += self.model.description + '\n'
-                info = "Info"
                 wx.MessageBox(msg, info)
             else:
-                frame.Show(True)
+            msg += "You must select a model to get information on this"
+            wx.MessageBox(msg, info)
+
+    def _on_mag_angle_help(self, event):
+        """
+        Bring up Magnetic Angle definition bmp image whenever the ? button
+        is clicked. Calls DocumentationWindow with the path of the location
+        within the documentation tree (after /doc/ ....". When using old
+        versions of Wx (i.e. before 2.9 and therefore not part of release
+        versions distributed via installer) it brings up an image viewer
+        box which allows the user to click through the rest of the images in
+        the directory.  Not ideal but probably better than alternative which
+        would bring up the entire discussion of how magnetic models work?
+        Specially since it is not likely to be accessed.  The normal release
+        versions bring up the normal image box.
+
+        :param evt: Triggers on clicking ? in Magnetic Angles? box
+        """
+
+        _TreeLocation = "_images/M_angles_pic.bmp"
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+                                          "Magnetic Angle Defintions")
 
     def _on_mag_help(self, event):    
         """
-        Magnetic angles help panel
-        """
-        from sas.perspectives.fitting.help_panel import  HelpWindow
-        # Get models help model_function path
-        #import sas.perspectives.fitting as fitmedia
-        from sas.models import get_data_path
+        Bring up Magnetic Angle definition bmp image whenever the ? button
+        is clicked. Calls DocumentationWindow with the path of the location
+        within the documentation tree (after /doc/ ....". When using old
+        versions of Wx (i.e. before 2.9 and therefore not part of release
+        versions distributed via installer) it brings up an image viewer
+        box which allows the user to click through the rest of the images in
+        the directory.  Not ideal but probably better than alternative which
+        would bring up the entire discussion of how magnetic models work?
+        Specially since it is not likely to be accessed.  The normal release
+        versions bring up the normal image box.
 
-        media = get_data_path(media='media')
-        path = os.path.join(media, "mag_pic.html") 
-        name = "Polar/Magnetic Angles"
-        frame = HelpWindow(None, -1,  
-                           title=' Help: Polarization/Magnetization Angles',  
-                           pageToOpen=path, size=(865, 450))   
-        try: 
-            frame.splitter.DetachWindow(frame.lpanel)
-            # Display only the right side one
-            frame.lpanel.Hide() 
-            frame.Show(True)
-        except:
-            frame.Destroy() 
-            msg = 'Display Error\n'
-            info = "Info"
-            wx.MessageBox(msg, info)
+        :param evt: Triggers on clicking ? in Magnetic Angles? box
+        """
+
+        _TreeLocation = "user/perspectives/fitting/mag_help.html"
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+                                          "Polarized Beam/Magnetc Help")
 
     def _on_mag_on(self, event):    
         """
@@ -3135,17 +2964,21 @@ class BasicPage(ScrolledPanel, PanelBase):
             
     def on_pd_help_clicked(self, event):
         """
-        Button event for PD help
-        """
-        from help_panel import  HelpWindow
-        import sas.models as models
+        Bring up Polydispersity Documentation whenever the ? button is clicked.
+        Calls DocumentationWindow with the path of the location within the
+        documentation tree (after /doc/ ....".  Note that when using old
+        versions of Wx (before 2.9) and thus not the release version of
+        istallers, the help comes up at the top level of the file as
+        webbrowser does not pass anything past the # to the browser when it is
+        running "file:///...."
         
-        # Get models help model_function path
-        path = models.get_data_path(media='media')
-        pd_path = os.path.join(path, "pd_help.html")
+        :param evt: Triggers on clicking ? in polydispersity box
+        """
 
-        frame = HelpWindow(None, -1, pageToOpen=pd_path)
-        frame.Show(True)
+        _TreeLocation = "user/perspectives/fitting/pd_help.html"
+        _PageAnchor = ""
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation,
+                                          _PageAnchor, "Polydispersity Help")
         
     def on_left_down(self, event):
         """
@@ -3328,7 +3161,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 if item[7].__class__.__name__ == 'ComboBox':
                     disfunc = str(item[7].GetValue())
             except:
-                pass
+                logging.error(sys.exc_info()[1])
             
             # 2D
             if self.data.__class__.__name__ == "Data2D":
@@ -3363,7 +3196,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                     for weight in self.weights[name]:
                         disfunc += ' ' + str(weight)
             except:
-                pass
+                logging.error(sys.exc_info()[1])
             content += name + ',' + str(check) + ',' + value + disfunc + ':'
 
         return content
@@ -3564,7 +3397,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                                                        weights=pd_weights)
                             is_array = True
                 except:
-                    pass
+                    logging.error(sys.exc_info()[1])
                 if not is_array:
                     self._disp_obj_dict[name] = disp_model
                     self.model.set_dispersion(name,
@@ -3579,7 +3412,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                                              self.state.weights]
                          
             except:
-                print "Error in BasePage._paste_poly_help: %s" % sys.exc_value
+                logging.error(sys.exc_info()[1])
+                print "Error in BasePage._paste_poly_help: %s" % \
+                                        sys.exc_info()[1]
     
     def _set_disp_array_cb(self, item):
         """
@@ -3603,14 +3438,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         print "BasicPage.update_pinhole_smear was called: skipping"
         return
 
-
-
-
     def _read_category_info(self):
         """
         Reads the categories in from file
         """
-
         # # ILL mod starts here - July 2012 kieranrcampbell@gmail.com
         self.master_category_dict = defaultdict(list)
         self.by_model_dict = defaultdict(list)
@@ -3624,7 +3455,6 @@ class BasicPage(ScrolledPanel, PanelBase):
             self.master_category_dict = json.load(cat_file)
             self._regenerate_model_dict()
             cat_file.close()
-
         except IOError:
             raise
             print 'Problem reading in category file.'
@@ -3637,7 +3467,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         key and the list of categories belonging to that model
         along with the enabled mapping
         """
-
         self.by_model_dict = defaultdict(list)
         for category in self.master_category_dict:
             for (model, enabled) in self.master_category_dict[category]:
@@ -3665,9 +3494,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         else:
             self.categorybox.SetSelection( \
                 self.categorybox.GetSelection())
-
         #self._on_change_cat(None)
-
 
     def _on_change_cat(self, event):
         """
@@ -3690,9 +3517,6 @@ class BasicPage(ScrolledPanel, PanelBase):
                 if(enabled):
                     self.model_box.Append(model)
 
-
-
-
     def _fill_model_sizer(self, sizer):
         """
         fill sizer containing model info
@@ -3707,9 +3531,13 @@ class BasicPage(ScrolledPanel, PanelBase):
         sizer_cat = wx.BoxSizer(wx.HORIZONTAL)
         self.mbox_description.SetForegroundColour(wx.RED)
         id = wx.NewId()
-        self.model_help = wx.Button(self, id, 'Details', size=(80, 23))
+        self.model_func = wx.Button(self, id, 'Help', size=(80, 23))
+        self.model_func.Bind(wx.EVT_BUTTON, self.on_function_help_clicked, id=id)
+        self.model_func.SetToolTipString("Full Model Function Help")
+        id = wx.NewId()
+        self.model_help = wx.Button(self, id, 'Description', size=(80, 23))
         self.model_help.Bind(wx.EVT_BUTTON, self.on_model_help_clicked, id=id)
-        self.model_help.SetToolTipString("Model Function Help")
+        self.model_help.SetToolTipString("Short Model Function Description")
         id = wx.NewId()
         self.model_view = wx.Button(self, id, "Show 2D", size=(80, 23))
         self.model_view.Bind(wx.EVT_BUTTON, self._onModel2D, id=id)
@@ -3751,15 +3579,16 @@ class BasicPage(ScrolledPanel, PanelBase):
         #self.shape_rbutton.SetValue(True)
       
         sizer_radiobutton = wx.GridSizer(2, 2, 5, 5)
-
         #sizer_radiobutton.Add(self.shape_rbutton)
         #sizer_radiobutton.Add(self.shape_indep_rbutton)
         sizer_radiobutton.Add((5,5))
-        sizer_radiobutton.Add(self.model_view, 1, wx.RIGHT, 15)
+        sizer_radiobutton.Add(self.model_view, 1, wx.RIGHT, 5)
         #sizer_radiobutton.Add(self.plugin_rbutton)
         #sizer_radiobutton.Add(self.struct_rbutton)
-        sizer_radiobutton.Add((5,5))
-        sizer_radiobutton.Add(self.model_help, 1, wx.RIGHT, 15)
+#        sizer_radiobutton.Add((5,5))
+        sizer_radiobutton.Add(self.model_help, 1, wx.RIGHT | wx.LEFT, 5)
+#        sizer_radiobutton.Add((5,5))
+        sizer_radiobutton.Add(self.model_func, 1, wx.RIGHT, 5)
         sizer_cat.Add(sizer_cat_box, 1, wx.LEFT, 2.5)
         sizer_cat.Add(sizer_radiobutton)
         sizer_selection = wx.BoxSizer(wx.HORIZONTAL)
@@ -3884,3 +3713,88 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         toggle view of model from 1D to 2D  or 2D from 1D if implemented
         """
+
+class ModelTextCtrl(wx.TextCtrl):
+    """
+    Text control for model and fit parameters.
+    Binds the appropriate events for user interactions.
+    Default callback methods can be overwritten on initialization
+
+    :param kill_focus_callback: callback method for EVT_KILL_FOCUS event
+    :param set_focus_callback:  callback method for EVT_SET_FOCUS event
+    :param mouse_up_callback:   callback method for EVT_LEFT_UP event
+    :param text_enter_callback: callback method for EVT_TEXT_ENTER event
+
+    """
+    ## Set to True when the mouse is clicked while whole string is selected
+    full_selection = False
+    ## Call back for EVT_SET_FOCUS events
+    _on_set_focus_callback = None
+
+    def __init__(self, parent, id=-1,
+                 value=wx.EmptyString,
+                 pos=wx.DefaultPosition,
+                 size=wx.DefaultSize,
+                 style=0,
+                 validator=wx.DefaultValidator,
+                 name=wx.TextCtrlNameStr,
+                 kill_focus_callback=None,
+                 set_focus_callback=None,
+                 mouse_up_callback=None,
+                 text_enter_callback=None):
+
+        wx.TextCtrl.__init__(self, parent, id, value, pos,
+                             size, style, validator, name)
+
+        # Bind appropriate events
+        self._on_set_focus_callback = parent.onSetFocus \
+            if set_focus_callback is None else set_focus_callback
+        self.Bind(wx.EVT_SET_FOCUS, self._on_set_focus)
+        self.Bind(wx.EVT_KILL_FOCUS, self._silent_kill_focus \
+            if kill_focus_callback is None else kill_focus_callback)
+        self.Bind(wx.EVT_TEXT_ENTER, parent._onparamEnter \
+            if text_enter_callback is None else text_enter_callback)
+        if not ON_MAC:
+            self.Bind(wx.EVT_LEFT_UP, self._highlight_text \
+                if mouse_up_callback is None else mouse_up_callback)
+
+    def _on_set_focus(self, event):
+        """
+        Catch when the text control is set in focus to highlight the whole
+        text if necessary
+
+        :param event: mouse event
+
+        """
+        event.Skip()
+        self.full_selection = True
+        return self._on_set_focus_callback(event)
+
+    def _highlight_text(self, event):
+        """
+        Highlight text of a TextCtrl only of no text has be selected
+
+        :param event: mouse event
+
+        """
+        # Make sure the mouse event is available to other listeners
+        event.Skip()
+        control = event.GetEventObject()
+        if self.full_selection:
+            self.full_selection = False
+            # Check that we have a TextCtrl
+            if issubclass(control.__class__, wx.TextCtrl):
+                # Check whether text has been selected,
+                # if not, select the whole string
+                (start, end) = control.GetSelection()
+                if start == end:
+                    control.SetSelection(-1, -1)
+
+    def _silent_kill_focus(self, event):
+        """
+        Save the state of the page
+        """
+
+        event.Skip()
+        #pass
+

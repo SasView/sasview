@@ -15,7 +15,7 @@ static double pearl_necklace_kernel(double dp[], double q) {
   double radius = dp[1];
   double edge_separation = dp[2];
   double thick_string = dp[3];
-  double num_pearls = dp[4];
+  double num_pearls = floor(dp[4]+0.5);  // Force integer number of pearls
   double sld_pearl = dp[5];
   double sld_string = dp[6];
   double sld_solv = dp[7];

@@ -1,0 +1,5 @@
+*.sld linguist-language=Other
+*.asc linguist-language=Other
+Make.mm linguist-language=Makefile
+sasview/test/* linguist-language=Other
+* test=auto

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Functions for building sphinx docs.
 
@@ -10,6 +11,7 @@ import sys
 import fnmatch
 import shutil
 import imp
+from glob import glob
 
 from distutils.dir_util import copy_tree
 from distutils.util import get_platform
@@ -24,6 +26,7 @@ run.prepare()
 SASVIEW_SRC = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "src")
 SASVIEW_BUILD = os.path.abspath(os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "build", "lib"+platform))
 SASVIEW_DOCS = os.path.join(SASVIEW_BUILD, "doc")
+SASVIEW_TEST = os.path.join(SASVIEW_SRC, "..", "sasview", "test", "media")
 
 SPHINX_BUILD = os.path.join(CURRENT_SCRIPT_DIR, "build")
 SPHINX_SOURCE = os.path.join(CURRENT_SCRIPT_DIR, "source")
@@ -31,6 +34,11 @@ SPHINX_SOURCE_API = os.path.join(SPHINX_SOURCE, "dev", "api")
 SPHINX_SOURCE_GUIFRAME = os.path.join(SPHINX_SOURCE, "user", "guiframe")
 SPHINX_SOURCE_MODELS = os.path.join(SPHINX_SOURCE, "user", "models")
 SPHINX_SOURCE_PERSPECTIVES = os.path.join(SPHINX_SOURCE, "user", "perspectives")
+SPHINX_SOURCE_TEST = os.path.join(SPHINX_SOURCE, "test")
+
+BUMPS_DOCS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..",
+                          "bumps", "doc", "guide")
+BUMPS_TARGET = os.path.join(SPHINX_SOURCE_PERSPECTIVES, "fitting")
 
 def _remove_dir(dir_path):
     """Removes the given directory."""
@@ -48,6 +56,7 @@ def clean():
     _remove_dir(SPHINX_SOURCE_GUIFRAME)
     _remove_dir(SPHINX_SOURCE_MODELS)
     _remove_dir(SPHINX_SOURCE_PERSPECTIVES)
+    _remove_dir(SPHINX_SOURCE_TEST)
 
 def retrieve_user_docs():
     """
@@ -80,6 +89,34 @@ def retrieve_user_docs():
             dest_dir = os.path.join(SPHINX_SOURCE, "user", dest_dir_part)
 
             copy_tree(docs, dest_dir)
+            
+    # Now pickup testdata_help.rst
+#    print os.path.abspath(SASVIEW_TEST)
+#    print os.path.abspath(SPHINX_SOURCE_TEST)
+    if os.path.exists(SASVIEW_TEST):
+       print "Found docs folder at ", SASVIEW_TEST
+       shutil.copytree(SASVIEW_TEST, SPHINX_SOURCE_TEST)       
+
+def retrieve_bumps_docs():
+    """
+    Copies select files from the bumps documentation into fitting perspective
+    """
+    if os.path.exists(BUMPS_DOCS):
+        print "=== Retrieve BUMPS Docs ==="
+        filenames = [os.path.join(BUMPS_DOCS, "optimizer.rst")]
+        filenames += glob(os.path.join(BUMPS_DOCS, "dream-*.png"))
+        filenames += glob(os.path.join(BUMPS_DOCS, "fit-*.png"))
+        for f in filenames:
+            print "Copying file", f
+            shutil.copy(f, BUMPS_TARGET)
+    else:
+        print """
+*** Error *** missing directory %s
+The documentation will not include the optimizer selection section.
+Checkout the bumps source tree and rebuild the docs.
+
+
+""" % BUMPS_DOCS
 
 def apidoc():
     """
@@ -111,10 +148,14 @@ def build():
     html = os.path.join(SPHINX_BUILD, "html")
     copy_tree(html, SASVIEW_DOCS)
 
-if __name__ == "__main__":
+def rebuild():
     clean()
     retrieve_user_docs()
+    retrieve_bumps_docs()
     apidoc()
     build()
-	
+
     print "=== Done ==="
+
+if __name__ == "__main__":
+    rebuild()

@@ -7,9 +7,25 @@ from datetime import timedelta, datetime
 import numpy
 
 from bumps import fitters
+try:
+    from bumps.options import FIT_CONFIG
+    # Default bumps to use the Levenberg-Marquardt optimizer
+    FIT_CONFIG.selected_id = fitters.LevenbergMarquardtFit.id
+    def get_fitter():
+        return FIT_CONFIG.selected_fitter, FIT_CONFIG.selected_values
+except:
+    # CRUFT: Bumps changed its handling of fit options around 0.7.5.6
+    # Default bumps to use the Levenberg-Marquardt optimizer
+    fitters.FIT_DEFAULT = 'lm'
+    def get_fitter():
+        fitopts = fitters.FIT_OPTIONS[fitters.FIT_DEFAULT]
+        return fitopts.fitclass, fitopts.options.copy()
+
+
 from bumps.mapper import SerialMapper, MPMapper
 from bumps import parameter
 from bumps.fitproblem import FitProblem
+
 
 from sas.fit.AbstractFitEngine import FitEngine
 from sas.fit.AbstractFitEngine import FResult
@@ -102,6 +118,8 @@ class SasFitness(object):
         self.name = model.name
         self.model = model.model
         self.data = data
+        if self.data.smearer is not None:
+            self.data.smearer.model = self.model
         self._define_pars()
         self._init_pars(kw)
         if initial_values is not None:
@@ -169,7 +187,8 @@ class SasFitness(object):
 
     def _recalculate(self):
         if self._dirty:
-            self._residuals, self._theory = self.data.residuals(self.model.evalDistribution)
+            self._residuals, self._theory \
+                = self.data.residuals(self.model.evalDistribution)
             self._dirty = False
 
     def numpoints(self):
@@ -263,19 +282,25 @@ class BumpsFit(FitEngine):
         for M in problem.models:
             fitness = M.fitness
             fitted_index = [varying.index(p) for p in fitness.fitted_pars]
+            param_list = fitness.fitted_par_names + fitness.computed_par_names
             R = FResult(model=fitness.model, data=fitness.data,
-                        param_list=fitness.fitted_par_names+fitness.computed_par_names)
+                        param_list=param_list)
             R.theory = fitness.theory()
             R.residuals = fitness.residuals()
             R.index = fitness.data.idx
             R.fitter_id = self.fitter_id
             # TODO: should scale stderr by sqrt(chisq/DOF) if dy is unknown
-            R.stderr = numpy.hstack((result['stderr'][fitted_index],
-                                     numpy.NaN*numpy.ones(len(fitness.computed_pars))))
-            R.pvec = numpy.hstack((result['value'][fitted_index],
-                                  [p.value for p in fitness.computed_pars]))
             R.success = result['success']
-            R.fitness = numpy.sum(R.residuals**2)/(fitness.numpoints() - len(fitted_index))
+            if R.success:
+                R.stderr = numpy.hstack((result['stderr'][fitted_index],
+                                         numpy.NaN*numpy.ones(len(fitness.computed_pars))))
+                R.pvec = numpy.hstack((result['value'][fitted_index],
+                                      [p.value for p in fitness.computed_pars]))
+                R.fitness = numpy.sum(R.residuals**2)/(fitness.numpoints() - len(fitted_index))
+            else:
+                R.stderr = numpy.NaN*numpy.ones(len(param_list))
+                R.pvec = numpy.asarray( [p.value for p in fitness.fitted_pars+fitness.computed_pars])
+                R.fitness = numpy.NaN
             R.convergence = result['convergence']
             if result['uncertainty'] is not None:
                 R.uncertainty_state = result['uncertainty']
@@ -297,11 +322,15 @@ def run_bumps(problem, handler, curr_thread):
             return True
         return False
 
-    fitopts = fitters.FIT_OPTIONS[fitters.FIT_DEFAULT]
-    fitclass = fitopts.fitclass
-    options = fitopts.options.copy()
-    max_step = fitopts.options.get('steps', 0) + fitopts.options.get('burn', 0)
+    fitclass, options = get_fitter()
+    steps = options.get('steps', 0)
+    if steps == 0:
+        pop = options.get('pop',0)*len(problem._parameters)
+        samples = options.get('samples', 0)
+        steps = (samples+pop-1)/pop if pop != 0 else samples
+    max_step = steps + options.get('burn', 0)
     pars = [p.name for p in problem._parameters]
+    #x0 = numpy.asarray([p.value for p in problem._parameters])
     options['monitors'] = [
         BumpsMonitor(handler, max_step, pars, problem.dof),
         ConvergenceMonitor(),
@@ -309,7 +338,7 @@ def run_bumps(problem, handler, curr_thread):
     fitdriver = fitters.FitDriver(fitclass, problem=problem,
                                   abort_test=abort_test, **options)
     omp_threads = int(os.environ.get('OMP_NUM_THREADS','0'))
-    mapper = MPMapper if omp_threads == 1 else SerialMapper       
+    mapper = MPMapper if omp_threads == 1 else SerialMapper
     fitdriver.mapper = mapper.start_mapper(problem, None)
     #import time; T0 = time.time()
     try:
@@ -324,10 +353,12 @@ def run_bumps(problem, handler, curr_thread):
     convergence_list = options['monitors'][-1].convergence
     convergence = (2*numpy.asarray(convergence_list)/problem.dof
                    if convergence_list else numpy.empty((0,1),'d'))
+
+    success = best is not None
     return {
-        'value': best,
-        'stderr': fitdriver.stderr(),
-        'success': True, # better success reporting in bumps
+        'value': best if success else None,
+        'stderr': fitdriver.stderr() if success else None,
+        'success': success,
         'convergence': convergence,
         'uncertainty': getattr(fitdriver.fitter, 'state', None),
         }

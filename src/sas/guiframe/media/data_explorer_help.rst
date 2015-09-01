@@ -3,33 +3,13 @@
 .. This is a port of the original SasView html help file to ReSTructured text
 .. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
 
+.. _Loading_data:
+
 Loading Data
 ============
 
-Introduction_
-
-Load_Data_
-
-Handy_Menu_
-
-Activate_Data_
-
-Remove_Data_
-
-Append_Plot_to_Graph_
-
-Create_New_Plot_
-
-Freeze_Theory_
-
-Send_Data_to_Applications_
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-.. _Introduction:
-
-Introduction
-------------
+The data explorer
+-----------------
 
 *Data Explorer* is a panel that allows the user more interactions with data. 
 Some functionalities provided by the *Data Explorer* are also available through 
@@ -38,110 +18,104 @@ the context menu of plot panels or other menus within the application.
 Under *View* in the menu bar, *Data Explorer* can be toggled between Show and 
 Hide by clicking *Show/Hide Data Explorer*.
 
-NOTE! When *Data Explorer* is hidden, all data loaded will be sent directly 
-to the current active application, if possible. When *Data Explorer* is 
-shown, data go first to the *Data Explorer*.
+*NOTE! When* Data Explorer *is hidden, all data loaded will be sent directly 
+to the current active analysis perspective, if possible. When* Data Explorer *is
+shown, data go first to the* Data Explorer.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Load_Data:
+Loading data
+------------
 
-Load Data
----------
+To load data, do one of the following:
 
-To load data, click the button *Load Data*, then select one or more (by holding 
-the Ctrl key) files to load into the application. The name of each selected 
-file will be listed. Clicking the *+*  symbol will display any available 
-metadata.
+Select File -> Load Data File(s), and navigate to your data;
+
+Select File -> Load Data Folder, which will attempt to load all the data in the
+specified folder;
+
+Or, in the *Data Explorer* click the button *Load Data*, then select one or more
+(by holding down the Ctrl key) files to load into SasView.
+
+The name of each loaded file will be listed in the *Data Explorer*. Clicking the
+*+*  symbol alongside will display any available metadata read from the file.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Handy_Menu:
-
-Handy Menu
-----------
+The handy menu
+--------------
 
 Right-clicking on a loaded dataset (or model calculation, what SasView calls a 
-theory) brings up a *Handy Menu* from which it is possible to access Data Info, 
-Save the data/theory, or Plot the data/theory.
+'theory') brings up a *Handy Menu* from which it is possible to access *Data Info*,
+*Save* the data/theory, or *Plot* the data/theory.
 
 .. image:: hand_menu.png
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Activate_Data:
-
-Activate Data
--------------
+Activating data
+---------------
 
 To interact with data it must be activated. This is accomplished by checking 
-the box next to the data label. A green tick will appear.
+the box next to the file name in the *Data Explorer*. A green tick will appear.
 
-Unchecking/unticking the box deactivates a data set.
+Unchecking/unticking a box deactivates that data set.
 
 There is also a combo box labeled *Selection Options* from which you can 
-activate or deactivate multiple data sets.
+activate or deactivate multiple data sets in one go.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Remove_Data:
+Removing data
+-------------
 
-Remove Data
------------
+*WARNING!* Remove Data *will stop any data operations currently using the 
+selected data sets.*
 
-WARNING! *Remove Data* will stop any data operations currently using the 
-selected data sets.
-
-
-*Remove Data* removes all reference to selected data from the application.
+*Remove Data* removes all references to selected data from SasView.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Append_Plot_to_Graph:
+Creating a new plot
+-------------------
 
-Append Plot to Graph
---------------------
+Click on the *New Plot* button to create a new plot panel where the currently
+selected data will be plotted.
 
-Click on the button *Append To* to add selected data to a plot panel. Next to 
-the button is a combo box containing the names of available plot panels. 
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+Appending plots to a graph
+--------------------------
+
+This operation can currently only be performed on 1D data and plot panels
+containing 1D data.
+
+Click on the button *Append Plot To* to add selected data to a plot panel. Next
+to the button is a combo box containing the names of available plot panels.
 Selecting a name from this combo box will move that plot into focus.
  
 If a plot panel is not available, the combo box and button will be 
 disabled.
 
-2D Data cannot be appended to any plot panels. This operation can 
-only be performed on 1D data and plot panels currently containing 1D data.
+2D Data cannot be appended to any plot panels.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Create_New_Plot:
-
-Create New Plot
----------------
-
-Click on the *New Plot* button to create a new plot panel where the currently 
-selected data will be plotted.
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-.. _Freeze_Theory:
-
-Freeze Theory
--------------
+Freezing the theory
+-------------------
 
 The *Freeze Theory* button generates data from the selected theory.
 
-NOTE! This operation can only be performed when theory labels are selected.
+*NOTE! This operation can only be performed when theory labels are selected in*
+*the Data panel.*
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Send_Data_to_Applications:
+Sending data to applications
+----------------------------
 
-Send to Application
--------------------
-
-Click on the button *Send To* button to send the currently selected data to 
-a perspective (for *Fitting*, *P(r) Inversion*, or *Invariant* calculation).
+Click on the *Send To* button to send the currently selected data to one of the
+perspectives (for *Fitting*, *P(r) Inversion*, or *Invariant* calculation).
  
 The *Single*/*Batch* mode radio buttons only apply to the *Fitting* perspective.
 
@@ -149,3 +123,7 @@ The *Single*/*Batch* mode radio buttons only apply to the *Fitting* perspective.
 fitting one data set followed by another. If several data sets need to be 
 fitted at the same time, use *Simultaneous* fitting under the *Fitting* 
 option on the menu bar.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+.. note::  This help document was last changed by Steve King, 01May2015

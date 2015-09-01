@@ -11,27 +11,35 @@
 
 .project
 .pydevproject
+.vagrant
 .idea
 build
 dist
 sasview.egg-info
 sasview.egg-info
+
 .mplconfig
 doctrees
 html
 build
 
-docs/sphinx-docs
-
-**/test/logs
+/dist
 **/build
-
+sasview.egg-info
+sasview-install
+**/test/logs
 *.pyc
+default_categories.json
 
-src/sas/models/*.py
+/src/sas/models/*.py
+/src/sas/models/c_extension/c_models/c_models.cpp
+/src/sas/models/c_extension/python_wrapper/generated/
+/src/sas/models/media/.idea/
 
-src/sas/models/c_extension/c_models/c_models.cpp
-src/sas/models/c_extension/python_wrapper/generated/
-src/sas/models/media/.idea/
+/docs/sphinx-docs/build
+/docs/sphinx-docs/source/dev/api
+/docs/sphinx-docs/source/user/guiframe
+/docs/sphinx-docs/source/user/models
+/docs/sphinx-docs/source/user/perspectives
 
 default_categories.json

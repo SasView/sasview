@@ -25,953 +25,604 @@
 Fitting Perspective
 ===================
 
-Load_a_File_
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-Single_Fit_
+Preparing to fit data
+---------------------
 
-Simultaneous_Fitting_
+To fit some data you must first load some data, activate one or more data sets,
+send those data sets to the fitting perspective, and select a model to fit to
+each data set.
 
-Batch_Fitting_
+Instructions on how to load and activate data are in the section :ref:`Loading_data`.
 
-Model_Selection_
+SasView can fit data in one of three ways:
 
-Model_Category_Manager_
+*  in *Single* fit mode - individual data sets are fitted independently one-by-one
 
-Model_Functions_
+*  in *Simultaneous* fit mode - multiple data sets are fitted simultaneously to the *same* model with/without constrained parameters (this might be useful, for example, if you have measured the same sample at different contrasts)
 
-Custom_Model_Editor_
-
-Polydispersity_Distributions_
-
-Smearing_Computation_
-
-Polarisation_Magnetic_Scattering_
-
-Key_Combinations_
-
-Status_Bar_Help_
+*  in *Batch* fit mode - multiple data sets are fitted sequentially to the *same* model (this might be useful, for example, if you have performed a kinetic or time-resolved experiment and have *lots* of data sets!)
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-..  _Load_a_File:
+Selecting a model
+-----------------
 
-Load a File
------------
+By default, the models in SasView are grouped into five categories
 
-From Menu go to *Data* -> *Load Data File(or Folder)* . Select a file/folder 
-from the menu bar and click on Open button. Data contained in the file will be 
-displayed. To cancel the loading click on *cancel* . In case a file can not be 
-loaded, an error message will be displayed on the statusbar.
+*  *Shapes* - models describing 'objects' (spheres, cylinders, etc)
+*  *Shape-Independent* - models describing structure in terms of density correlation functions, fractals, peaks, power laws, etc
+*  *Customized Models* - SasView- or User-created (non-library) Python models
+*  *Uncategorised* - other models (for reflectivity, etc)
+*  *Structure Factor* - S(Q) models
 
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+Use the *Category* drop-down menu to chose a category of model, then select
+a model from the drop-down menu beneath. A graph of the chosen model, calculated
+using default parameter values, will appear. The graph will update dynamically
+as the parameter values are changed.
 
-.. _Single_Fit:
+You can decide your own model categorizations using the :ref:`Category_Manager`.
 
-Single Fit
-----------
+Once you have selected a model you can read its help documentation by clicking
+on the *Description* button to the right.
 
-One of two fit-engines can be chosen from the Fitting menu bar. The Simple Fit-
-engine uses Scipy's leasqr and the Complex Fit-Engine is a custom optimizer 
-that provides a better chance to find the global minimum of the |chi| 2 but that
-requires longer computation time. In order to set a data to a control panel 
-(FitPage), see the "DataLoader Help". Once a data set to the FiPage, select a 
-model from the combo box. The default parameters of the model will be display. 
-Set initial parameters if need. Check and uncheck parameters to fit/fix. Click 
-the *'Fit'*  button. When the fitting is finished, the resultant parameter 
-values will be displayed with the errors. If a error is missing, it generally 
-means that the corresponding parameter is not very depending on the model. The 
-chisq/Npt_fit and the plot associated with the fit operation will be also 
-updated.
+Show 1D/2D
+^^^^^^^^^^
 
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+Models are normally fitted to 1D (ie, I(Q) vs Q) data sets, but some models in
+SasView can also be fitted to 2D (ie, I(Qx,Qy) vs Qx vs Qy) data sets.
 
-..  _Simultaneous_Fitting:
+*NB: Magnetic scattering can only be fitted in SasView in 2D.*
 
-Simultaneous Fitting
---------------------
-
-This fitting option enables to set a number of the constraints between the 
-parameters of fitting(s). It requires one or more FitPages with a data and a 
-model set for the fitting, and performs multiple fittings given by the 
-FitPage(s). The Complex (ParkMC) FitEngine will be used automatically.
-
-Simultaneous Fit without Constraint
-
-Assuming some FitPages are already set up, check the checkboxes of the 
-model_data rows to fit. And click the 'Fit' button. The results will return to 
-each FitPages.
-
-Note that the chi2/Npts returned is the sum of the chi2/Npts of each fits. If 
-one needs the chi2 value only for a page, click the 'Compute' button in the 
-FitPage to recalculate.
-
-Simultaneous Fit with Constraint
-
-Enter constraint in the text control next to *constraint fit*  button. 
-Constraint should be of type model1 parameter name = f(model2 parameter name) 
-for example, M0.radius=2*M1.radius. Many constraints can be entered for a 
-single fit. Each of them should be separated by a newline charater or ";" 
-The easy setup can generate many constraint inputs easily when the selected 
-two models are the same type.
-
-Note that the chi2/Npts returned is the sum of the chi2/Npts of each fits. 
-If one needs the chi2 value only for one fit, click the 'Compute' button in 
-the FitPage to recalculate.
+To activate 2D fitting mode, click the *Show 2D* button on the *Fit Page*. To
+return to 1D fitting model, click the same button (which will now say *Show 1D*).
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-..  _Batch_Fitting:
+.. _Category_Manager:
 
-Batch Fitting
--------------
+Category Manager
+----------------
 
-Batch_Fit_
-
-Batch_Window_
-
-Edit_Grid_
-
-Save_Grid_
-
-Open_Batch_Results_
-
-Plot_
-
-View_Column_Cell_
-
-.. _Batch_Fit:
-
-Batch Fit
----------
-
-Create a *Batch Page* by selecting the *Batch* radio button on the DataExplorer
-(see figure below) and for a new control page select 'New FitPage' in the 
-Fitting menubar.
-
-.. image:: batch_button_area.bmp
-
-Figure 1: MenuBar: 
-
-Load Data to the DataExplorer if not already loaded.
-
-Select one or more data sets by checking the check boxes, and then make sure 
-that "Fitting" is selected in the dropdown menu next to the "Send To" button. 
-Once ready, click the 'Send To' button to set data to a BatchPage. If already 
-an empty batch page exists, it will be set there. Otherwise it will create a 
-new Batch Page. Set up the model and the parameter values as same as a single 
-fitting (see Single Fit help) <Single_Fit_>. Then use 'Fit' button to 
-perform the fitting.
-
-Unlike a single fit, the results of the fittings will not return to the 
-BatchPage'. Instead, a Grid window will be provided once the fitting is 
-completed. The Grid window is also accessible from the 'View' menu 
-(see Figure 2).
-
-Note that only one model is used for all the data. The initial parameter 
-values given in the control page will be used all the data fittings. If one 
-wants the FitEngine to use the initial values from the results of the 
-previous data fitting (if any), choose the 'Chain Fitting' option in the 
-Fitting menubar, which will speed up the fitting especially when you have 
-lots of, and similar, data sets.
-
-.. _Batch_Window:
-
-Batch Window
-------------
-Batch Window provides an easy way to view the fit results, i.e., plot data, 
-fits, and residuals. Batch window will be automatically shown after a batch 
-fit is finished.
-
-Once closed, it can be opened anytime from the "View" menubar item (see 
-Figure 2).
-
-.. image:: restore_batch_window.bmp
-
-Figure 2: Edit Menu: 
-
-.. _Edit_Grid:
-
-Edit Grid
----------
-
-Once a batch fit is completed, all fitted and fixed model parameters are 
-displayed to the current sheet of the batch window except the errors of the 
-parameters. To view the errors, click on a given column then under *Edit*  
-menubar item, and insert the desired parameter by selecting a menu item with 
-the appropriated label. Empty column can be inserted in the same way. A 
-column value can be customized by editing an existing empty column.
-
-To Remove column from the grid, select it, choose edit menu, and click the 
-*'remove'*  menu item. Any removed column should reinserted whenever needed.
-
-All above options are also available when right clicking on a given column 
-label(see Figure 3).
-
-*Note:*  A column always needs to be selected in order to remove or insert a 
-column in the grid.
-
-.. image:: edit_menu.bmp
-
-Figure 3: Edit Menu:
-
-.. _Save_Grid:
-
-Save Grid
----------
-To save the current page on the batch window, select the *'File'*  menubar 
-item(see Figure 4), then choose the *'Save as'*  menu item to save it as a 
-.csv file.
-
-*Note:* The grid doesn't save the data array, fits, and the array residuals.
-As a result, the 'View (fit) Results' functionality will be lost when
-reloading the saved file.
-
-Warning! To ensure accuracy of saved fit results, it is recommended to save 
-the current grid before modifying it .
-
-.. _Open_Batch_Results:
-
-Open Batch Results 
-------------------
-
-Any *csv*  file can be opened in the grid by selecting the *'Open'*  under 
-the *'File'*  menu in the Grid Window(see Figure 4). All columns in the file 
-will be displayed but insertion will not available. Insertion will be 
-available only when at least one column will be removed from the grid.
-
-.. image:: file_menu.bmp
-
-Figure 4: MenuBar:
-
-.. _Plot:
-
-Plot
-----
-
-To *plot*  a column versus another, select one column at the time, click the 
-*'Add'*  button next to the text control of X/Y -axis *Selection Range*  to 
-plot the value of this column on the X/Y axis. Alternatively, all available 
-range can be selected by clicking the column letter (eg. B). Repeat the same 
-procedure the next axis. Finally, click the *'Plot'*  button. When clicking 
-on *Add*  button, the grid will automatically fill the axis label, but 
-different labels and units can be entered in the correct controls before 
-clicking on the plot button.
-
-*X/Y -Axis Selection Range* can be edited manually. These text controls
-allow the following types of expression (operation can be + - * /, or pow)
- 
-1) if the current axis label range is a function of 1 or more columns, write 
-this type of expression
-
-constant1  * column_name1 [minimum row index :  maximum  row index] operator 
-constant2 * column_name2 [minimum row index :  maximum  row index] 
-
-Example: radius [2 : 5] -3 * scale [2 : 5] 
-
-2) if only some values of a given column are need but the range between the 
-first row and the last row used is not continuous, write the following 
-expression in the text control
-
-column_name1 [minimum row index1 :  maximum  row index1] , column_name1 
-[minimum row index2 :  maximum  row index2] 
-
-Example : radius [2 : 5] , radius [10 : 25] 
-
-Note: Both text controls ( X and Y-axis Selection Ranges) need to be filled 
-with valid entries for plotting to work. The dY-bar is optional (see Figure 5).
-
-.. image:: plot_button.bmp
-
-Figure 5: Plotting
-
-.. _View_Column_Cell:
-
-View Column/Cell(s)
--------------------
-
-Select 1 or more cells from the same column, click the 'View Fits' button to 
-display available curves. 
-
-For example, select the cells of the  'Chi2'  column, then click the  'View Fits'  
-button. The plots generates will represent the residuals  plots. 
- 
-If you select any cells of the 'Data' column and click the 'View Fits' button. 
-It generates both  data and fits in the graph (see Figure 6). 
-
-Alternatively, just click the column letter (eg. B) to choose all the 
-available data sets, then simply click the 'View Fits' button to plot the 
-data and fits. 
-
-.. image:: view_button.bmp
-
-Figure 6: View Fits
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-..  _Model_Selection:
-
-Model_Type_ 
-
-Change_Model_Parameters_
-
-Write_your_Own_Model_
-
-.. _Model_Type:
-
-Model Type
-----------
-
-Models are grouped into three classes
-
-*  *Shapes* 
-*  *Shape-Independent* 
-*  *Uncategorised*
-*  *Customized Models* 
-*  *Structure Factor*
-
-.. _Change_Model_Parameters:
-
-Change Model Parameters
------------------------
-
-To visualize model in a different window, from menu click on *Model*. Select 
-a type of model and then the name of your model.A new window will appear with 
-the plot of your model with default values. Change model's parameters on 
-*model view*  tab and view the plotted model with its new parameters.
-
-.. _Write_your_Own_Model:
-
-Write your Own Model
---------------------
-
-The custom model editors are provided from 'Fitting' menu in the menu bar. 
-See 'Custom model editor' in the side menu on left. Advanced users can write 
-your own model and save it (in .py format) into *plugin_models*  directory in 
-.sasview of your home directory (eg., username\.sasview>\plugin_models). Your 
-plugin model will be added into "<>Customized Models" on the next model 
-selection.
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-..  _Model_Category_Manager:
-
-Model Category Manager
-----------------------
-
-Our SAS models are, by default, classified into 5 categories; shapes, 
-shape-independent, structure factor, and customized models, where these 
-categories (except the customized models) can be reassigned, added, and 
-removed using 'Category Manager'. Each models can also be enabled(shown)/
-disabled(hidden) from the category that they belong. The Category Manager 
-panel is accessible from the model category 'Modify' button in the fitting 
-panel or the 'View/Category Manager' menu in the menu bar (Fig. 1).
-
-1) Enable/Disable models: Check/uncheck the check boxes to enable/disable the 
-models (Fig. 2).
-
-2) Change category: Highlight a model in the list by left-clicking and click 
-the 'Modify' button. In the 'Change Category' panel, one can create/use a 
-category for the model, then click the 'Add' button. In order to delete a 
-category, select a category name and click the 'Remove Selected' button 
-(Fig. 3).
-
-3) To apply the changes made, hit the OK button. Otherwise, click the 'Cancel' 
-button (Fig. 2).
+To change the model categorizations, either choose *Category Manager* from the
+*View* option on the menubar, or click on the *Modify* button on the *Fit Page*.
 
 .. image:: cat_fig0.bmp
 
-Fig.1
+The categorization of all models except the customized models can be reassigned,
+added to, and removed using *Category Manager*. Models can also be hidden from view
+in the drop-down menus.
 
 .. image:: cat_fig1.bmp
 
-Fig.2
+Changing category
+^^^^^^^^^^^^^^^^^
+
+To change category, highlight a model in the list by left-clicking on its entry and
+then click the *Modify* button. Use the *Change Category* panel that appears to make
+the required changes.
 
 .. image:: cat_fig2.bmp
 
-Fig.3
+To create a category for the selected model, click the *Add* button. In order
+to delete a category, select the category name and click the *Remove Selected*
+button. Then click *Done*.
+
+Showing/hiding models
+^^^^^^^^^^^^^^^^^^^^^
+
+Use the *Enable All / Disable All* buttons and the check boxes beside each model to
+select the models to show/hide. To apply the selection, click *Ok*. Otherwise click
+*Cancel*.
+
+*NB: It may be necessary to change to a different category and then back again*
+*before any changes take effect.*
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-..  _Model_Functions:
 
 Model Functions
 ---------------
 
-Model Documentation <models/model_functions>
+For a complete list of all the library models available in SasView, see the section
+:ref:`SasView_model_functions`.
+
+It is also possible to add your own models.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-..  _Custom_Model_Editor:
+.. _Adding_your_own_models:
+
+Adding your own models
+----------------------
+
+There are currently two ways to add your own models to SasView:
+
+* Using the :ref:`Custom_Model_Editor`
+* By :ref:`Writing_a_Plugin`
+
+*NB: Because of the way these options are implemented, it is not possible for them*
+*to use the polydispersity algorithms in SasView. Only models in the model library*
+*can do this. At the time of writing (Release 3.1.0) work is in hand to make it*
+*easier to add new models to the model library.*
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+.. _Custom_Model_Editor:
 
 Custom Model Editor
 -------------------
 
-Description_ 
-
-New_
-
-Sum_Multi_p1_p2_
-
-Advanced_
-
-Delete_
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-.. _Description:
-
-Description
------------
-
-This menu (Fitting/Edit Custom Model in the menu bar) interface is to provide 
-you an easy way to write your own custom models. The changes in a model 
-function are effective after it is re-selected from the combo-box menu.
+From the *Fitting* option in the menu bar, select *Edit Custom Model*.
 
 .. image:: edit_model_menu.bmp
 
-.. _New:
+and then one of the options
+
+*  *New* - to create a new custom model template
+*  *Sum|Multi(p1,p2)* - to create a new model by summing/multiplying existing models in the model library
+*  *Advanced* - to edit a new custom model
+*  *Delete* - to delete a custom model
 
 New
----
-
-This option is used to make a new model. A model code generated by this option 
-can be viewed and further modified by the 'Advanced' option below.
+^^^^
 
 .. image:: new_model.bmp
 
-.. _Sum_Multi_p1_p2:
+A model template generated by this option can be viewed and further modified using
+the :ref:`Advanced` option.
 
 Sum|Multi(p1,p2)
-----------------
-
-This option create a new sum (or multiplication) model. Fill up the (sum 
-model function) name and the description. The description will show up on 
-details button in the application. Then select the p1 or p2 model for the 
-sum/multi model, select an operator as necessary and click the Apply button 
-for activation. Hit the 'Close' button when it's done.
+^^^^^^^^^^^^^^^^
 
 .. image:: sum_model.bmp
+
+This option creates a custom model of the form
+
+Custom Model = scale_factor \* (model1 +/\* model2)
+
+In the *Easy Sum/Multi Editor* give the new custom model a function name and brief
+description (to appear under the *Details* button on the *Fit Page*). Then select
+two existing models, as p1 and p2, and the required operator, '+' or '*' between
+them. Finally, click the *Apply* button to generate the model and then click *Close*.
+
+*NB: Any changes to a custom model generated in this way only become effective after*
+*it is re-selected from the model drop-down menu on the Fit Page.*
 
 .. _Advanced:
 
 Advanced
---------
+^^^^^^^^
 
-The menu option shows all the files in the plugin_models folder. You can edit, 
-modify, and save it. It is recommended to modify only the lines with arrow 
-(-------). In the end of edit, 'Compile' and 'Run' from the menu bar to
-activate or to see the model working properly.
+Selecting this option shows all the custom models in the plugin model folder
 
-.. _Delete:
+  *C:\\Users\\[username]\\.sasview\\plugin_models* - (on Windows)
+
+You can edit, modify, and save the Python code in any of these models using the
+*Advanced Custom Model Editor*.
+
+*NB: Unless you are confident about what you are doing, it is recommended that you*
+*only modify lines denoted with the ## <----- comments!*
+
+When editing is complete, select *Run -> Compile* from the *Model Editor* menu bar. An
+*Info* box will appear with the results of the compilation and model unit tests. The
+model will only be usable if the tests 'pass'.
+
+To use the model, go to the relevant *Fit Page*, select the *Customized Models*
+category and then select the model from the drop-down menu.
+
+*NB: Any changes to a custom model generated in this way only become effective after*
+*it is re-selected from the model drop-down menu on the Fit Page.*
 
 Delete
-------
+^^^^^^
 
-The menu option is to delete the custom models. Just select the file name to 
-delete.
+Simply highlight the custom model to be removed. This operation is final!
 
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-..  _Polydispersity_Distributions:
-
-Polydispersity Distributions
-----------------------------
-
-Calculates the form factor for a polydisperse and/or angular population of 
-particles with uniform scattering length density. The resultant form factor 
-is normalized by the average particle volume such that 
-
-P(q) = scale*\<F*F\>/Vol + bkg
-
-where F is the scattering amplitude and the\<\>denote an average over the size 
-distribution.  Users should use PD (polydispersity: this definition is 
-different from the typical definition in polymer science) for a size 
-distribution and Sigma for an angular distribution (see below).
-
-Note that this computation is very time intensive thus applying polydispersion/
-angular distrubtion for more than one paramters or increasing Npts values 
-might need extensive patience to complete the computation. Also note that 
-even though it is time consuming, it is safer to have larger values of Npts 
-and Nsigmas.
-
-The following five distribution functions are provided
-
-*  *Rectangular_Distribution_*
-*  *Array_Distribution_*
-*  *Gaussian_Distribution_*
-*  *Lognormal_Distribution_*
-*  *Schulz_Distribution_*
-
-.. _Rectangular_Distribution:
-
-Rectangular Distribution
-------------------------
-
-.. image:: pd_image001.png
-
-The xmean is the mean of the distribution, w is the half-width, and Norm is a 
-normalization factor which is determined during the numerical calculation. 
-Note that the Sigma and the half width *w*  are different.
-
-The standard deviation is
-
-.. image:: pd_image002.png
-
-The PD (polydispersity) is
-
-.. image:: pd_image003.png
-
-.. image:: pd_image004.jpg
-
-.. _Array_Distribution:
-
-Array Distribution
-------------------
-
-This distribution is to be given by users as a txt file where the array 
-should be defined by two columns in the order of x and f(x) values. The f(x) 
-will be normalized by SasView during the computation.
-
-Example of an array in the file
-
-30        0.1
-32        0.3
-35        0.4
-36        0.5
-37        0.6
-39        0.7
-41        0.9
-
-We use only these array values in the computation, therefore the mean value 
-given in the control panel, for example â€˜radius = 60â€™, will be ignored.
-
-.. _Gaussian_Distribution:
-
-Gaussian Distribution
----------------------
-
-.. image:: pd_image005.png
-
-The xmean is the mean of the distribution and Norm is a normalization factor 
-which is determined during the numerical calculation.
-
-The PD (polydispersity) is
-
-.. image:: pd_image003.png
-
-.. image:: pd_image006.jpg
-
-.. _Lognormal_Distribution:
-
-Lognormal Distribution
-----------------------
-
-.. image:: pd_image007.png
-
-The /mu/=ln(xmed), xmed is the median value of the distribution, and Norm is a 
-normalization factor which will be determined during the numerical calculation. 
-The median value is the value given in the size parameter in the control panel, 
-for example, â€œradius = 60â€�.
-
-The PD (polydispersity) is given by /sigma/
-
-.. image:: pd_image008.png
-
-For the angular distribution
-
-.. image:: pd_image009.png
-
-The mean value is given by xmean=exp(/mu/+p2/2). The peak value is given by 
-xpeak=exp(/mu/-p2).
-
-.. image:: pd_image010.jpg
-
-This distribution function spreads more and the peak shifts to the left as the 
-p increases, requiring higher values of Nsigmas and Npts.
-
-.. _Schulz_Distribution:
-
-Schulz Distribution
--------------------
-
-.. image:: pd_image011.png
-
-The xmean is the mean of the distribution and Norm is a normalization factor
-which is determined during the numerical calculation.
-
-The z = 1/p2â€“ 1.
-
-The PD (polydispersity) is
-
-.. image:: pd_image012.png
-
-Note that the higher PD (polydispersity) might need higher values of Npts and 
-Nsigmas. For example, at PD = 0.7 and radisus = 60 A, Npts >= 160, and 
-Nsigmas >= 15 at least.
-
-.. image:: pd_image013.jpg
+*NB: Custom models shipped with SasView cannot be removed in this way.*
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Smearing_Computation:
+.. _Writing_a_Plugin:
 
-Smearing Computation
---------------------
-
-Slit_Smearing_ 
-
-Pinhole_Smearing_
-
-2D_Smearing_
-
-.. _Slit_Smearing:
-
-Slit Smearing
--------------
-
-The sit smeared scattering intensity for SAS is defined by
-
-.. image:: sm_image002.gif
-
-where Norm =
-
-.. image:: sm_image003.gif
-
-Equation 1
-
-The functions |inlineimage004| and |inlineimage005|
-refer to the slit width weighting function and the slit height weighting 
-determined at the q point, respectively. Here, we assumes that the weighting 
-function is described by a rectangular function, i.e.,
-
-.. image:: sm_image006.gif
-
-Equation 2
-
-and
-
-.. image:: sm_image007.gif
-
-Equation 3
-
-so that |inlineimage008| |inlineimage009| for |inlineimage010| and u.
-
-The |inlineimage011| and |inlineimage012| stand for
-the slit height (FWHM/2) and the slit width (FWHM/2) in the q space. Now the 
-integral of Equation 1 is simplified to
-
-.. image:: sm_image013.gif
-
-Equation 4
-
-Numerical Implementation of Equation 4
---------------------------------------
-
-Case 1
-------
-
-For |inlineimage012| = 0 and |inlineimage011| = constant.
-
-.. image:: sm_image016.gif
-
-For discrete q values, at the q values from the data points and at the q 
-values extended up to qN= qi + |inlineimage011| the smeared 
-intensity can be calculated approximately
-
-.. image:: sm_image017.gif
-
-Equation 5
-
-|inlineimage018| = 0 for *Is* in *j* < *i* or *j* > N-1*.
-
-Case 2
-------
-
-For |inlineimage012| = constant and |inlineimage011| = 0.
-
-Similarly to Case 1, we get
-
-|inlineimage019| for qp= qi- |inlineimage012| and qN= qi+ |inlineimage012|. |inlineimage018| = 0
-for *Is* in *j* < *p* or *j* > *N-1*.
-
-Case 3
-------
-
-For |inlineimage011| = constant and 
-|inlineimage011| = constant.
-
-In this case, the best way is to perform the integration, Equation 1, 
-numerically for both slit height and width. However, the numerical integration 
-is not correct enough unless given a large number of iteration, say at least 
-10000 by 10000 for each element of the matrix, W, which will take minutes and 
-minutes to finish the calculation for a set of typical SAS data. An 
-alternative way which is correct for slit width << slit hight, is used in 
-SasView. This method is a mixed method that combines method 1 with the 
-numerical integration for the slit width.
-
-.. image:: sm_image020.gif
-
-Equation 7
-
-for qp= qi- |inlineimage012| and
-qN= qi+ |inlineimage012|. |inlineimage018| = 0 for
-*Is* in *j* < *p* or *j* > *N-1*.
-
-.. _Pinhole_Smearing:
-
-Pinhole Smearing
+Writing a Plugin
 ----------------
 
-The pinhole smearing computation is done similar to the case above except 
-that the weight function used is the Gaussian function, so that the Equation 6 
-for this case becomes
+Advanced users can write their own model in Python and save it to the the SasView
+*plugin_models* folder
 
-.. image:: sm_image021.gif
+  *C:\\Users\\[username]\\.sasview\\plugin_models* - (on Windows)
 
-Equation 8
+in .py format. The next time SasView is started it will compile the plugin and add
+it to the list of *Customized Models*.
 
-For all the cases above, the weighting matrix *W* is calculated when the 
-smearing is called at the first time, and it includes the ~ 60 q values 
-(finely binned evenly) below (\>0) and above the q range of data in order 
-to cover all data points of the smearing computation for a given model and 
-for a given slit size. The *Norm*  factor is found numerically with the 
-weighting matrix, and considered on *Is* computation.
-
-.. _2D_Smearing:
-
-2D Smearing
------------ 
-
-The 2D smearing computation is done similar to the 1D pinhole smearing above 
-except that the weight function used was the 2D elliptical Gaussian function
-
-.. image:: sm_image022.gif
-
-Equation 9
-
-In Equation 9, x0 = qcos/theta/ and y0 = qsin/theta/, and the primed axes 
-are in the coordinate rotated by an angle /theta/ around the z-axis (below) 
-so that xâ€™0= x0cos/theta/+y0sin/theta/ and yâ€™0= -x0sin/theta/+y0cos/theta/.
-
-Note that the rotation angle is zero for x-y symmetric elliptical Gaussian 
-distribution. The A is a normalization factor.
-
-.. image:: sm_image023.gif
-
-Now we consider a numerical integration where each bins in /theta/ and R are 
-*evenly* (this is to simplify the equation below) distributed by /delta//theta/ 
-and /delta/R, respectively, and it is assumed that I(xâ€™, yâ€™) is constant 
-within the bins which in turn becomes
-
-.. image:: sm_image024.gif
-
-Equation 10
-
-Since we have found the weighting factor on each bin points, it is convenient 
-to transform xâ€™-yâ€™ back to x-y coordinate (rotating it by -/theta/ around z 
-axis). Then, for the polar symmetric smear
-
-.. image:: sm_image025.gif
-
-Equation 11
-
-where
-
-.. image:: sm_image026.gif
-
-while for the x-y symmetric smear
-
-.. image:: sm_image027.gif
-
-Equation 12
-
-where
-
-.. image:: sm_image028.gif
-
-Here, the current version of the SasView uses Equation 11 for 2D smearing 
-assuming that all the Gaussian weighting functions are aligned in the polar 
-coordinate.
-
-In the control panel, the higher accuracy indicates more and finer binnng 
-points so that it costs more in time.
+It is recommended that existing plugin models be used as templates.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Polarisation_Magnetic_Scattering:
+.. _Fitting_Options:
 
-Polarisation/Magnetic Scattering
---------------------------------
-
-Magnetic scattering is implemented in five (2D) models 
-
-*  *SphereModel*
-*  *CoreShellModel*
-*  *CoreMultiShellModel*
-*  *CylinderModel*
-*  *ParallelepipedModel*
-
-In general, the scattering length density (SLD) in each regions where the 
-SLD (=/beta/) is uniform, is a combination of the nuclear and magnetic SLDs and 
-depends on the spin states of the neutrons as follows. For magnetic scattering, 
-only the magnetization component, *M*perp, perpendicular to the scattering 
-vector *Q* contributes to the the magnetic scattering length.
-
-.. image:: mag_vector.bmp
-
-The magnetic scattering length density is then
-
-.. image:: dm_eq.gif
-
-where /gamma/ = -1.913 the gyromagnetic ratio, /mu/B is the Bohr magneton, r0 
-is the classical radius of electron, and */sigma/* is the Pauli spin. For 
-polarised neutron, the magnetic scattering is depending on the spin states. 
-
-Let's consider that the incident neutrons are polarized parallel (+)/
-anti-parallel (-) to the x' axis (See both Figures above). The possible 
-out-coming states then are + and - states for both incident states
-
-Non-spin flips: (+ +) and (- -)
-Spin flips:     (+ -) and (- +)
-
-.. image:: M_angles_pic.bmp
-
-Now, let's assume that the angles of the *Q*  vector and the spin-axis (x') 
-against x-axis are /phi/ and /theta/up, respectively (See Figure above). Then, 
-depending upon the polarisation (spin) state of neutrons, the scattering length 
-densities, including the nuclear scattering length density (/beta/N) are given 
-as, for non-spin-flips
-
-.. image:: sld1.gif
-
-for spin-flips
-
-.. image:: sld2.gif
-
-where
-
-.. image:: mxp.gif
-
-.. image:: myp.gif
-
-.. image:: mzp.gif
-
-.. image:: mqx.gif
-
-.. image:: mqy.gif
-
-Here, the M0x, M0y and M0z are the x, y and z components of the magnetization 
-vector given in the xyz lab frame. The angles of the magnetization, /theta/M 
-and /phi/M as defined in the Figure (above)
-
-.. image:: m0x_eq.gif
-
-.. image:: m0y_eq.gif
-
-.. image:: m0z_eq.gif
-
-The user input parameters are M0_sld = DMM0, Up_theta = /theta/up, 
-M_theta = /theta/M, and M_phi = /phi/M. The 'Up_frac_i' and 'Up_frac_f' are 
-the ratio
-
-(spin up)/(spin up + spin down)
-
-neutrons before the sample and at the analyzer, respectively.
-
-*Note:* The values of the 'Up_frac_i' and 'Up_frac_f' must be in the range
-between 0 and 1.
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-.. _Key_Combinations:
-
-Key Combinations
-----------------
-
-Copy_Paste_
-
-Bookmark_
-
-Graph_Context_Menu_
-
-FTolerance_
-
-.. _Copy_Paste:
-
-Copy & Paste
-------------
-
-To copy the parameter values in a Fit(Model) panel to the clipboard:
-
-*Ctrl(Cmd on MAC) + Left(Mouse)Click*  on the panel.
-
-To paste the parameter values to a Fit(Model)panel from the clipboard:
-
-*Ctrl(Cmd on MAC) + Shift + Left(Mouse)Click*  on the panel.
-
-If this operation is successful, it will say so in the info line at the 
-bottom of the SasView window.
-
-.. _Bookmark:
-
-Bookmark
---------
-
-Bookmark of a fit-panel or model-panel status:
-
-*(Mouse)Right-Click*  and select the bookmark in the popup list.
-
-.. _Graph_Context_Menu:
-
-Graph Context Menu
-------------------
-
-To get the graph context menu to print, copy, save data, (2D)average, etc.:
-
-*Locate the mouse point on the plot to highlight and *(Mouse) Right Click* 
-to bring up the full menu.
-
-.. _FTolerance: 
-
-FTolerance (SciPy)
-------------------
-
-To change the ftol value of the Scipy FitEngine (leastsq):
-
-First, make sure that the Fit panel has data and a model selected.
-
-*Ctrl(Cmd on MAC) + Shift + Alt + Right(Mouse)Click*  on the panel.
-
-Then, set up the value in the dialog panel.
-
-If this operation is successful, the new ftol value will be displayed in the 
-info line at the bottom of the SV window.Note that increasing the ftol value 
-may cause for the fitting to terminate with higher |chi| sq.
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-.. _Status_Bar_Help:
-
-Status Bar Help
+Fitting Options
 ---------------
 
-Message_Warning_Hint_ 
+It is possible to specify which optimiser SasView should use to fit the data, and
+to modify some of the configurational parameters for each optimiser.
 
-Console_
+From *Fitting* in the menu bar select *Fit Options*, then select one of the following
+optimisers:
 
-.. _Message_Warning_Hint:
+*  DREAM
+*  Levenberg-Marquardt
+*  Quasi-Newton BFGS
+*  Differential Evolution
+*  Nelder-Mead Simplex
 
-Message/Warning/Hint
+The DREAM optimiser is the most sophisticated, but may not necessarily be the best
+option for fitting simple models. If uncertain, try the Levenberg-Marquardt optimiser
+initially.
+
+These optimisers form the *Bumps* package written by P Kienzle. For more information
+on each optimiser, see the :ref:`Fitting_Documentation`.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+Fitting Limits
+--------------
+
+By default, *SasView* will attempt to model fit the full range of the data; ie,
+across all *Q* values. If necessary, however, it is possible to specify only a
+sub-region of the data for fitting.
+
+In a *FitPage* or *BatchPage* change the *Q* values in the *Min* and/or *Max*
+text boxes. Vertical coloured bars will appear on the graph with the data and
+'theory' indicating the current *Q* limits (red = *Qmin*, purple = *Qmax*).
+
+To return to including all data in the fit, click the *Reset* button.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+
+Shortcuts
+---------
+
+Copy/Paste Parameters
+^^^^^^^^^^^^^^^^^^^^^
+
+It is possible to copy the parameters from one *Fit Page* and to paste them into
+another *Fit Page* using the same model.
+
+To *copy* parameters, either:
+
+*  Select *Edit -> Copy Params* from the menu bar, or
+*  Use Ctrl(Cmd on Mac) + Left Mouse Click on the *Fit Page*.
+
+To *paste* parameters, either:
+
+*  Select *Edit -> Paste Params* from the menu bar, or
+*  Use Ctrl(Cmd on Mac) + Shift + Left-click on the *Fit Page*.
+
+If either operation is successful a message will appear in the info line at the
+bottom of the SasView window.
+
+Bookmark
+^^^^^^^^
+
+To *Bookmark* a *Fit Page* either:
+
+*  Select a *Fit Page* and then click on *Bookmark* in the tool bar, or
+*  Right-click and select the *Bookmark* in the popup menu.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+.. _Status_bar:
+
+Status Bar & Console
 --------------------
 
-The status bar located at the bottom of the application frame, displays 
+The status bar is located at the bottom of the SasView window and displays
 messages, hints, warnings and errors.
 
-.. _Console:
+At the right-hand side of the status bar is a button marked *Console*. The *Console*
+displays available message history and some run-time traceback information.
 
-Console
--------
+During a long task the *Console* can also be used to monitor the progress.
 
-Select *light bulb/info icon*  button in the status bar at the bottom of the 
-application window to display available history. During a long task, the 
-console can also help users to understand the status in progressing.
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+.. _Single_Fit_Mode:
+
+Single Fit Mode
+---------------
+
+*NB: Before proceeding, ensure that the Single Mode radio button at the bottom of*
+*the Data Explorer is checked (see the section* :ref:`Loading_data` *).*
+
+This mode fits one data set.
+
+When data is sent to the fitting perspective it is plotted in a graph window as
+markers.
+
+If a graph does not appear, or a graph window appears but is empty, then the data
+has not loaded correctly. Check to see if there is a message in the :ref:`Status_Bar`
+or in the *Console* window.
+
+Assuming the data has loaded correctly, when a model is selected a green model
+calculation (or what SasView calls a 'Theory') line will appear in the earlier graph
+window, and a second graph window will appear displaying the residuals (the
+difference between the experimental data and the theory) at the same X-data values.
+See :ref:`Assessing_Fit_Quality`.
+
+The objective of model-fitting is to find a *physically-plausible* model, and set
+of model parameters, that generate a theory that reproduces the experimental data
+and gives residual values as close to zero as possible.
+
+Change the default values of the model parameters by hand until the theory line
+starts to represent the experimental data. Then uncheck the tick boxes alongside
+all parameters *except* the 'background' and the 'scale'. Click the *Fit* button.
+SasView will optimise the values of the 'background' and 'scale' and also display
+the corresponding uncertainties on the optimised values.
+
+*NB: If no uncertainty is shown it generally means that the model is not very*
+*dependent on the corresponding parameter (or that one or more parameters are*
+*'correlated').*
+
+In the bottom left corner of the *Fit Page* is a box displaying the normalised value
+of the statistical |chi|\  :sup:`2` parameter returned by the optimiser.
+
+Now check the box for another model parameter and click *Fit* again. Repeat this
+process until most or all parameters are checked and have been optimised. As the
+fit of the theory to the experimental data improves the value of 'chi2/Npts' will
+decrease. A good model fit should easily produce values of 'chi2/Npts' that are
+close to zero, and certainly <100. See :ref:`Assessing_Fit_Quality`.
+
+SasView has a number of different optimisers (see the section :ref:`Fitting_Options`).
+The DREAM optimiser is the most sophisticated, but may not necessarily be the best
+option for fitting simple models. If uncertain, try the Levenberg-Marquardt optimiser
+initially.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+Simultaneous Fit Mode
+---------------------
+
+*NB: Before proceeding, ensure that the Single Mode radio button at the bottom of*
+*the Data Explorer is checked (see the section* :ref:`Loading_data` *).*
+
+This mode is an extension of the :ref:`Single_Fit_Mode` that fits two or more data
+sets *to the same model* simultaneously. If necessary it is possible to constrain 
+fit parameters between data sets (eg, to fix a background level, or radius, etc).
+
+If the data to be fit are in multiple files, load each file, then select each file
+in the *Data Explorer*, and *Send To Fitting*. If multiple data sets are in one file,
+load that file, *Unselect All Data*, select just those data sets to be fitted, and
+*Send To Fitting*. Either way, the result should be that for *n* data sets you have
+2\ *n* graphs (*n* of the data and model fit, and *n* of the resulting residuals). But
+it may be helpful to minimise the residuals plots for clarity. Also see
+:ref:`Assessing_Fit_Quality`.
+
+*NB: If you need to use a customized model, you must ensure that model is available*
+*first (see* :ref:`Adding_your_own_models` *).*
+
+Method
+^^^^^^
+
+Now go to each *FitPage* in turn and:
+
+  Select the required category and model;
+
+  Unselect all the model parameters;
+
+  Enter some starting guesses for the parameters;
+
+  Enter any parameter limits (recommended);
+
+  Select which parameters will refine (selecting all is generally a bad idea...);
+
+When done, select *Constrained or Simultaneous Fit* under *Fitting* in the menu bar.
+
+In the *Const & Simul Fit* page that appears, select which data sets are to be
+simultaneously fitted (this will probably be all of them or you would not have loaded
+them in the first place!).
+
+To tie parameters between the data sets with constraints, check the 'yes' radio button
+next to *Add Constraint?* in the *Fit Constraints* box.
+
+*NB: You can only constrain parameters that are set to refine.*
+
+When ready, click the *Fit* button on the *Const & Simul Fit* page, NOT the *Fit*
+button on the individual *FitPage*'s.
+
+Simultaneous Fits without Constraints
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The results of the model-fitting will be returned to each of the individual
+*FitPage*'s.
+
+Note that the chi2/Npts value returned is the SUM of the chi2/Npts of each fit. To
+see the chi2/Npts value for a specific *FitPage*, click the *Compute* button at the
+bottom of that *FitPage* to recalculate. Also see :ref:`Assessing_Fit_Quality`.
+
+Simultaneous Fits with Constraints
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Use the *Easy Setup* drop-down buttons in the *Const & Simul Fit* page to set
+up constraints between *FitPage*'s.
+
+Constraints will generally be of the form
+
+  Mi Parameter1 = Mj.Parameter1
+
+however the text box after the '=' sign can be used to adjust this
+relationship; for example
+
+  Mi Parameter1 = scalar \* Mj.Parameter1
+
+A 'free-form' constraint box is also provided.
+
+Many constraints can be entered for a single fit.
+
+The results of the model-fitting will be returned to each of the individual
+*FitPage*'s.
+
+Note that the chi2/Npts value returned is the SUM of the chi2/Npts of each fit. To
+see the chi2/Npts value for a specific *FitPage*, click the *Compute* button at the
+bottom of that *FitPage* to recalculate. Also see :ref:`Assessing_Fit_Quality`.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+Batch Fit Mode
+--------------
+
+*NB: Before proceeding, ensure that the Single Mode radio button at the bottom of*
+*the Data Explorer is checked (see the section* :ref:`Loading_data` *). The Batch*
+*Mode button will be used later on!*
+
+This mode *sequentially* fits two or more data sets *to the same model*. Unlike in
+simultaneous fitting, in batch fitting it is not possible to constrain fit parameters
+between data sets.
+
+If the data to be fit are in multiple files, load each file in the *Data Explorer*.
+If multiple data sets are in one file, load just that file. *Unselect All Data*, then
+select a single initial data set to be fitted. Fit that selected data set as described
+above under :ref:`Single_Fit_Mode` .
+
+*NB: If you need to use a customized model, you must ensure that model is available*
+*first (see* :ref:`Adding_your_own_models` *).*
+
+Method
+^^^^^^
+
+Now *Select All Data* in the *Data Explorer*, check the *Batch Mode* radio button
+at the bottom of that panel and *Send To Fitting*. A *BatchPage* will be created.
+
+.. image:: batch_button_area.bmp
+
+*NB: The Batch Page can also be created by checking the Batch Mode radio button*
+*and selecting New Fit Page under Fitting in the menu bar.*
+
+Using the drop-down menus in the *BatchPage*, now set up the *same* data set
+with the *same* model that you just fitted in single fit mode. A quick way to
+set the model parameter values is to just copy them from the earlier Single
+Fit. To do this, go back to the Single Fit *FitPage*, select *Copy Params*
+under *Edit* in the menu bar, then go back to the *BatchPage* and *Paste Params*.
+
+When ready, use the *Fit* button on the *BatchPage* to perform the fitting, NOT
+the *Fit* button on the individual *FitPage*'s.
+
+Unlike in single fit mode, the results of batch fits are not returned to
+the *BatchPage*. Instead, a spreadsheet-like :ref:`Grid_Window` will appear.
+
+If you want to visually check a graph of a particular fit, click on the name of
+a *Data set* in the *Grid Window* and then click the *View Fits* button. The
+data and the model fit will be displayed. If you select mutliple data sets they
+will all appear on one graph.
+
+.. image:: view_button.bmp
+
+*NB: In theory, returning to the BatchPage and changing the name of the I(Q)*
+*data source should also work, but at the moment whilst this does change the*
+*data set displayed it always superimposes the 'theory' corresponding to the*
+*starting parameters.*
+
+If you select a 'Chi2' value and click the *View Fits* button a graph of the
+residuals for that data set is displayed. Again, if you select multiple 'Chi2'
+values then all the residuals data will appear on one graph. Also see
+:ref:`Assessing_Fit_Quality`.
+
+Chain Fitting
+^^^^^^^^^^^^^
+
+By default, the *same* parameter values copied from the initial single fit into
+the *BatchPage* will be used as the starting parameters for all batch fits. It
+is, however, possible to get *SasView* to use the results of a fit to a preceding
+data set as the starting parameters for the next fit in the sequence. This
+variation of batch fitting is called *Chain Fitting*, and will considerably speed
+up model-fitting if you have lots of very similar data sets where a few parameters
+are gradually changing. Do not use chain fitting on disparate data sets.
+
+To use chain fitting, select *Chain Fitting* under *Fitting* in the menu bar. It
+toggles on/off, so selecting it again will switch back to normal batch fitting.
+
+.. _Grid_Window:
+
+Grid Window
+^^^^^^^^^^^
+
+The *Grid Window* provides an easy way to view the results from batch fitting.
+It will be displayed automatically when a batch fit completes, but may be
+opened at any time by selecting *Show Grid Window* under *View* in the menu
+bar.
+
+.. image:: restore_batch_window.bmp
+
+Once a batch fit is completed, all model parameters are displayed but *not*
+their uncertainties. To view the uncertainties, click on a given column then
+go to *Edit* in the menu bar, select *Insert Column Before* and choose the
+required data from the list. An empty column can be inserted in the same way.
+
+To remove a column from the grid, click on the column header and choose
+*Remove Column* under *Edit* in the menu bar. The same functionality also
+allows you to re-order columns.
+
+*NB: You cannot insert/remove/re-order the rows in the Grid Window.*
+
+All of the above functions are also available by right-clicking on a column
+label.
+
+.. image:: edit_menu.bmp
+
+*NB: If there is an existing Grid Window and another batch fit is performed,*
+*an additional 'Table' tab will be added to the Grid Window.*
+
+The parameter values in the *currently selected* table of the *Grid Window*
+can be output to a CSV file by choosing *Save As* under *File* in the (*Grid*
+*Window*) menu bar. The default filename includes the date and time that the
+batch fit was performed.
+
+Saved CSV files can be reloaded by choosing *Open* under *File* in the *Grid*
+*Window* menu bar. The loaded parameters will appear in a new table tab.
+
+.. image:: file_menu.bmp
+
+*NB: Saving the Grid Window does not save any experimental data, residuals*
+*or actual model fits. Consequently if you reload a saved CSV file the*
+*ability to View Fits will be lost.*
+
+Parameter Plots
+^^^^^^^^^^^^^^^
+
+Any column of *numeric* parameter values can be plotted against another using
+the *Grid Window*. Simply select one column at the time and click the *Add*
+button next to the required *X/Y-axis Selection Range* text box. When both
+the X and Y axis boxes have been completed, click the *Plot* button.
+
+When the *Add* button is clicked, *SasView* also automatically completes the
+*X/Y-axis Label* text box with the heading from Row 1 of the selected table,
+but different labels and units can be entered manually.
+
+.. image:: plot_button.bmp
+
+The *X/Y-axis Selection Range* can be edited manually. The text control box
+recognises the operators +, -, \*, /, or 'pow', and allows the following
+types of expression :
+ 
+  1) if an axis label range is a function of 1 or more *columns*, write
+     this type of expression
+
+     constant1 * column_name1 [minimum row index :  maximum  row index]
+     operator constant2 * column_name2 [minimum row index :  maximum  row index]
+
+     Example: radius [2 : 5] -3 * scale [2 : 5]
+
+  2) if only some *values* of a given column are needed but the range between
+     the first row and the last row used is not continuous, write this type of
+     expression
+
+     column_name1 [minimum row index1 :  maximum  row index1] , column_name1
+     [minimum row index2 :  maximum  row index2]
+
+     Example: radius [2 : 5] , radius [10 : 25]
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+.. note::  This help document was last changed by Steve King, 04Jun2015

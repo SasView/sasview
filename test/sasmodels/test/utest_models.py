@@ -58,11 +58,11 @@ class TestCyl(unittest.TestCase):
         self.assertTrue(time.clock()-t0<1e-4)
      
     def test2D(self):
-        """ Test 2D model of a cylinder """ 
+        """ Test 2D model of a cylinder """
         self.comp.setParam('cyl_theta', 10.0)
         self.comp.setParam('cyl_phi', 10.0)
-        self.assertAlmostEqual(self.comp.run([0.2, 2.5]), 
-                               0.038176446608393366, 2) 
+        self.assertAlmostEqual(self.comp.run([0.2, 2.5]),
+                               0.038176446608393366, 2)
  
 class TestGaussian(unittest.TestCase):
     """Unit tests for Gaussian function"""

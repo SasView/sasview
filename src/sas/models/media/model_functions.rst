@@ -9,7 +9,6 @@
 .. The RectangularPrism models were coded and documented by M A Gonzalez, ILL, Apr 2014
 
 .. To do:
-.. Remove the 'This is xi' & 'This is zeta' lines before release!
 .. Add example parameters/plots for the CoreShellEllipsoidXTModel
 .. Add example parameters/plots for the RectangularPrism models
 .. Check the content against the NIST Igor Help File
@@ -19,6 +18,10 @@
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
+
+.. note::  The contents of this document are presented in good faith and are 
+           believed to be mostly correct and accurate, however they have not 
+           yet been rigorously checked for errors. June2015
 
 
 .. Set up some substitutions to make life easier...
@@ -76,30 +79,10 @@
 
 .. Actual document starts here...
 
+.. _SasView_model_functions:
+
 SasView Model Functions
 =======================
-
-Contents
---------
-1. Background_
-
-2. Model_ Functions
-
- 2.1 Shape-based_ Functions
- 
- 2.2 Shape-independent_ Functions
- 
- 2.3 Structure-factor_ Functions
- 
- 2.4 Customised_ Functions
-
-3. References_
-
-
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-
 
 .. _Background:
 
@@ -168,6 +151,7 @@ Sphere-based
 - FuzzySphereModel_
 - RaspBerryModel_
 - CoreShellModel_ (including magnetic 2D version)
+- MicelleSphCoreModel_
 - CoreMultiShellModel_ (including magnetic 2D version)
 - Core2ndMomentModel_
 - MultiShellModel_
@@ -284,6 +268,8 @@ Parallelpipeds
 - sum_Ap1_1_Ap2_
 - polynomial5_
 - sph_bessel_jn_
+
+Also see the documentation on :ref:`Adding_your_own_models` under Fitting Data. 
 
 
 
@@ -2252,14 +2238,19 @@ CoreShellEllipsoidModel.
 The geometric parameters of this model are
 
   *equat_core* = equatorial core radius = *Rminor_core*
+  
   *X_core* = *polar_core* / *equat_core* = *Rmajor_core* / *Rminor_core*
+  
   *T_shell* = *equat_outer* - *equat_core* = *Rminor_outer* - *Rminor_core*
+  
   *XpolarShell* = *Tpolar_shell* / *T_shell* = (*Rmajor_outer* - *Rmajor_core*)/(*Rminor_outer* - *Rminor_core*)
 
 In terms of the original radii
 
   *polar_core* = *equat_core* \* *X_core*
+  
   *equat_shell* = *equat_core* + *T_shell*
+  
   *polar_shell* = *equat_core* \* *X_core* + *T_shell* \* *XpolarShell*
 
   (where we note that "shell" perhaps confusingly, relates to the outer radius)
@@ -2443,7 +2434,7 @@ The form factor is
 .. image:: img/image137.jpg
 
 where |delta|\ T = tail length (or *t_length*), |delta|\ H = head thickness (or *h_thickness*),
-|drho|\ H = SLD(headgroup) - SLD(solvent), and |drho|\ T = SLD(tail) - SLD(solvent).
+|drho|\ H = SLD(headgroup) - SLD(solvent), and |drho|\ T = SLD(tail) - SLD(solvent). The total thickness is 2(H+T).
 
 The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
@@ -3371,6 +3362,28 @@ R Nayuk and K Huber, *Z. Phys. Chem.*, 226 (2012) 837-854
 
 
 
+.. _MicelleSphCoreModel:
+
+**2.1.42. MicelleSphCoreModel**
+
+This model provides the form factor, *P(q)*, for a micelle with a spherical core 
+and Gaussian polymer chains attached to the surface.
+
+*2.1.42.1. Definition*
+
+The 1D scattering intensity for this model is calculated according to the equations given by Pedersen
+(Pedersen, 2000).
+
+*2.1.42.2. Validation of the MicelleSphCoreModel*
+
+This model has not yet been validated. Feb2015
+
+REFERENCES
+
+J Pedersen, *J. Appl. Cryst.*, 33 (2000) 637-640
+
+
+
 2.2 Shape-independent Functions
 -------------------------------
 
@@ -3553,7 +3566,7 @@ The DAB model is ostensibly a development of the earlier Debye-Bueche model.
 
 *2.2.5.1. Definition*
 
-.. image:: img/image180.PNG
+.. image:: img/image180_corrected.PNG
 
 The parameter *L* is the correlation length.
 
@@ -4069,7 +4082,7 @@ Check out Chapter 4 on Data Treatment, pages 155-156.
 
 This model fits the Porod function
 
-.. image:: img/image197.PNG
+.. image:: img/image197_corrected.PNG
 
 to the data directly without any need for linearisation (*cf*. Log *I(q)* vs Log *q*).
 
@@ -4775,10 +4788,10 @@ R V Sharma, K C Sharma, *Physica*, 89A (1977) 213
 
 **2.3.3. HayterMSAStructure Factor**
 
-This calculates the structure factor (the Fourier transform of the pair correlation function *g(r)*) for a system of
-charged, spheroidal objects in a dielectric medium. When combined with an appropriate form factor (such as sphere,
-core+shell, ellipsoid, etc), this allows for inclusion of the interparticle interference effects due to screened coulomb
-repulsion between charged particles.
+This is an implementation of the Rescaled Mean Spherical Approximation which calculates the structure factor (the 
+Fourier transform of the pair correlation function *g(r)*) for a system of charged, spheroidal objects in a
+dielectric medium. When combined with an appropriate form factor (such as sphere,core+shell, ellipsoid, etc), this
+allows for inclusion of the interparticle interference effects due to screened coulomb repulsion between charged particles.
 
 **This routine only works for charged particles**. If the charge is set to zero the routine will self-destruct!
 For non-charged particles use a hard sphere potential.

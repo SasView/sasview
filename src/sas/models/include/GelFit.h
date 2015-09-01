@@ -32,8 +32,8 @@ public:
   //  [DEFAULT]=radius= 104
   Parameter radius;
 
-  //  [DEFAULT]=scale= 2
-  Parameter scale;
+  //  [DEFAULT]=FractalExp= 2
+  Parameter FractalExp;
 
   //  [DEFAULT]=background= 0.01
   Parameter background;

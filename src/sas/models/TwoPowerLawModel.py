@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 """ 
-Provide I(q) = A*pow(qval,-1.0*m1) for q<=qc
-    =scale*pow(qval,-1.0*m2) for q>qc
 TwoPowerLaw function as a BaseComponent model
+
+Calculate::
+
+    I(q) = A pow(qval,-m1) for q<=qc
+    I(q) = scale pow(qval,-m2) for q>qc
 """
 
 from sas.models.BaseComponent import BaseComponent
@@ -13,9 +16,12 @@ class TwoPowerLawModel(BaseComponent):
     """ 
     Class that evaluates a TwoPowerLawModel.
 
-    I(q) = coef_A*pow(qval,-1.0*power1) for q<=qc
-        =C*pow(qval,-1.0*power2) for q>qc
-    where C=coef_A*pow(qc,-1.0*power1)/pow(qc,-1.0*power2).
+    Calculate::
+
+       I(q) = coef_A pow(qval,-power1) for q<=qc
+       I(q) = C pow(qval,-power2) for q>qc
+
+    where C=coef_A pow(qc,-power1)/pow(qc,-power2).
     
     List of default parameters:
     

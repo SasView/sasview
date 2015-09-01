@@ -1,10 +1,10 @@
 """
     Module that contains classes to hold information read from
     reduced data files.
-    
+
     A good description of the data members can be found in
     the CanSAS 1D XML data format:
-    
+
     http://www.smallangles.net/wgwiki/index.php/cansas1d_documentation
 """
 #####################################################################
@@ -25,42 +25,43 @@ from sas.data_util.uncertainty import Uncertainty
 import numpy
 import math
 
-
-class plottable_sesans1D:
+class plottable_sesans1D(object):
     """
     SESANS is a place holder for 1D SESANS plottables.
-    
-    #TODO: This was directly copied from the plottables_1D.
-    #TODO: The class has not been updated from there.
+
+    #TODO: This was directly copied from the plottables_1D. Modified Somewhat.
+    #Class has been updated.
     """
     # The presence of these should be mutually
     # exclusive with the presence of Qdev (dx)
     x = None
     y = None
+    lam = None
     dx = None
     dy = None
+    dlam = None
     ## Slit smearing length
     dxl = None
     ## Slit smearing width
     dxw = None
-    
+
     # Units
     _xaxis = ''
     _xunit = ''
     _yaxis = ''
     _yunit = ''
-    
-    def __init__(self, x, y, dx=None, dy=None, dxl=None, dxw=None):
+
+    def __init__(self, x, y, lam, dx=None, dy=None, dlam=None):
+#        print "SESANS plottable working"
         self.x = numpy.asarray(x)
         self.y = numpy.asarray(y)
+        self.lam = numpy.asarray(lam)
         if dx is not None:
             self.dx = numpy.asarray(dx)
         if dy is not None:
             self.dy = numpy.asarray(dy)
-        if dxl is not None:
-            self.dxl = numpy.asarray(dxl)
-        if dxw is not None: 
-            self.dxw = numpy.asarray(dxw)
+        if dlam is not None:
+            self.dlam = numpy.asarray(dlam)
 
     def xaxis(self, label, unit):
         """
@@ -68,7 +69,7 @@ class plottable_sesans1D:
         """
         self._xaxis = label
         self._xunit = unit
-        
+
     def yaxis(self, label, unit):
         """
         set the y axis label and unit
@@ -77,7 +78,7 @@ class plottable_sesans1D:
         self._yunit = unit
 
 
-class plottable_1D:
+class plottable_1D(object):
     """
     Data1D is a place holder for 1D plottables.
     """
@@ -91,13 +92,13 @@ class plottable_1D:
     dxl = None
     ## Slit smearing width
     dxw = None
-    
+
     # Units
     _xaxis = ''
     _xunit = ''
     _yaxis = ''
     _yunit = ''
-    
+
     def __init__(self, x, y, dx=None, dy=None, dxl=None, dxw=None):
         self.x = numpy.asarray(x)
         self.y = numpy.asarray(y)
@@ -107,7 +108,7 @@ class plottable_1D:
             self.dy = numpy.asarray(dy)
         if dxl is not None:
             self.dxl = numpy.asarray(dxl)
-        if dxw is not None: 
+        if dxw is not None:
             self.dxw = numpy.asarray(dxw)
 
     def xaxis(self, label, unit):
@@ -116,7 +117,7 @@ class plottable_1D:
         """
         self._xaxis = label
         self._xunit = unit
-        
+
     def yaxis(self, label, unit):
         """
         set the y axis label and unit
@@ -125,7 +126,7 @@ class plottable_1D:
         self._yunit = unit
 
 
-class plottable_2D:
+class plottable_2D(object):
     """
     Data2D is a place holder for 2D plottables.
     """
@@ -141,7 +142,7 @@ class plottable_2D:
     dqx_data = None
     dqy_data = None
     mask = None
-    
+
     # Units
     _xaxis = ''
     _xunit = ''
@@ -149,7 +150,7 @@ class plottable_2D:
     _yunit = ''
     _zaxis = ''
     _zunit = ''
-    
+
     def __init__(self, data=None, err_data=None, qx_data=None,
                  qy_data=None, q_data=None, mask=None,
                  dqx_data=None, dqy_data=None):
@@ -160,24 +161,24 @@ class plottable_2D:
         self.mask = numpy.asarray(mask)
         self.err_data = numpy.asarray(err_data)
         if dqx_data is not None:
-            self.dqx_data = numpy.asarray(dqx_data) 
+            self.dqx_data = numpy.asarray(dqx_data)
         if dqy_data is not None:
-            self.dqy_data = numpy.asarray(dqy_data) 
-               
+            self.dqy_data = numpy.asarray(dqy_data)
+
     def xaxis(self, label, unit):
         """
         set the x axis label and unit
         """
         self._xaxis = label
         self._xunit = unit
-        
+
     def yaxis(self, label, unit):
         """
         set the y axis label and unit
         """
         self._yaxis = label
         self._yunit = unit
-            
+
     def zaxis(self, label, unit):
         """
         set the z axis label and unit
@@ -185,8 +186,8 @@ class plottable_2D:
         self._zaxis = label
         self._zunit = unit
 
-            
-class Vector:
+
+class Vector(object):
     """
     Vector class to hold multi-dimensional objects
     """
@@ -196,27 +197,26 @@ class Vector:
     y = None
     ## z component
     z = None
-    
+
     def __init__(self, x=None, y=None, z=None):
         """
         Initialization. Components that are not
         set a set to None by default.
-        
+
         :param x: x component
         :param y: y component
         :param z: z component
-        
         """
         self.x = x
         self.y = y
         self.z = z
-        
+
     def __str__(self):
         msg = "x = %s\ty = %s\tz = %s" % (str(self.x), str(self.y), str(self.z))
         return msg
-        
 
-class Detector:
+
+class Detector(object):
     """
     Class to hold detector information
     """
@@ -243,20 +243,18 @@ class Detector:
     ## Slit length of the instrument for this detector.[float] [mm]
     slit_length = None
     slit_length_unit = 'mm'
-    
+
     def __init__(self):
         """
-        
         Initialize class attribute that are objects...
-        
         """
-        self.offset      = Vector()
+        self.offset = Vector()
         self.orientation = Vector()
         self.beam_center = Vector()
-        self.pixel_size  = Vector()
-        
+        self.pixel_size = Vector()
+
     def __str__(self):
-        _str  = "Detector:\n"
+        _str = "Detector:\n"
         _str += "   Name:         %s\n" % self.name
         _str += "   Distance:     %s [%s]\n" % \
             (str(self.distance), str(self.distance_unit))
@@ -273,7 +271,7 @@ class Detector:
         return _str
 
 
-class Aperture:
+class Aperture(object):
     ## Name
     name = None
     ## Type
@@ -286,12 +284,12 @@ class Aperture:
     ## Aperture distance [float]
     distance = None
     distance_unit = 'mm'
-    
+
     def __init__(self):
         self.size = Vector()
-    
-    
-class Collimation:
+
+
+class Collimation(object):
     """
     Class to hold collimation information
     """
@@ -302,10 +300,10 @@ class Collimation:
     length_unit = 'mm'
     ## Aperture
     aperture = None
-    
+
     def __init__(self):
         self.aperture = []
-    
+
     def __str__(self):
         _str = "Collimation:\n"
         _str += "   Length:       %s [%s]\n" % \
@@ -318,7 +316,7 @@ class Collimation:
         return _str
 
 
-class Source:
+class Source(object):
     """
     Class to hold source information
     """
@@ -345,12 +343,12 @@ class Source:
     ## Wavelength spread [float] [Angstrom]
     wavelength_spread = None
     wavelength_spread_unit = 'percent'
-    
+
     def __init__(self):
         self.beam_size = Vector()
-        
+
     def __str__(self):
-        _str  = "Source:\n"
+        _str = "Source:\n"
         _str += "   Radiation:    %s\n" % str(self.radiation)
         _str += "   Shape:        %s\n" % str(self.beam_shape)
         _str += "   Wavelength:   %s [%s]\n" % \
@@ -364,18 +362,18 @@ class Source:
         _str += "   Beam_size:    %s [%s]\n" % \
             (str(self.beam_size), str(self.beam_size_unit))
         return _str
-    
-    
+
+
 """
 Definitions of radiation types
 """
-NEUTRON  = 'neutron'
-XRAY     = 'x-ray'
-MUON     = 'muon'
+NEUTRON = 'neutron'
+XRAY = 'x-ray'
+MUON = 'muon'
 ELECTRON = 'electron'
-    
-    
-class Sample:
+
+
+class Sample(object):
     """
     Class to hold the sample description
     """
@@ -399,14 +397,14 @@ class Sample:
     orientation_unit = 'degree'
     ## Details
     details = None
-    
+
     def __init__(self):
-        self.position    = Vector()
+        self.position = Vector()
         self.orientation = Vector()
-        self.details     = []
-    
+        self.details = []
+
     def __str__(self):
-        _str  = "Sample:\n"
+        _str = "Sample:\n"
         _str += "   ID:           %s\n" % str(self.ID)
         _str += "   Transmission: %s\n" % str(self.transmission)
         _str += "   Thickness:    %s [%s]\n" % \
@@ -417,15 +415,15 @@ class Sample:
             (str(self.position), str(self.position_unit))
         _str += "   Orientation:  %s [%s]\n" % \
             (str(self.orientation), str(self.orientation_unit))
-        
+
         _str += "   Details:\n"
         for item in self.details:
             _str += "      %s\n" % item
-            
+
         return _str
-  
-  
-class Process:
+
+
+class Process(object):
     """
     Class that holds information about the processes
     performed on the data.
@@ -435,13 +433,26 @@ class Process:
     description = ''
     term = None
     notes = None
-    
+
     def __init__(self):
         self.term = []
         self.notes = []
-    
+
+    def is_empty(self):
+        """
+            Return True if the object is empty
+        """
+        return len(self.name) == 0 and len(self.date) == 0 and len(self.description) == 0 \
+            and len(self.term) == 0 and len(self.notes) == 0
+            
+    def single_line_desc(self):
+        """
+            Return a single line string representing the process
+        """
+        return "%s %s %s" % (self.name, self.date, self.description)
+     
     def __str__(self):
-        _str  = "Process:\n"
+        _str = "Process:\n"
         _str += "   Name:         %s\n" % self.name
         _str += "   Date:         %s\n" % self.date
         _str += "   Description:  %s\n" % self.description
@@ -450,8 +461,9 @@ class Process:
         for item in self.notes:
             _str += "   Note:         %s\n" % item
         return _str
-    
-class TransmissionSpectrum:
+
+
+class TransmissionSpectrum(object):
     """
     Class that holds information about transmission spectrum
     for white beams and spallation sources.
@@ -467,14 +479,14 @@ class TransmissionSpectrum:
     ## Transmission Deviation (float) [unit less]
     transmission_deviation = None
     transmission_deviation_unit = ''
-    
+
     def __init__(self):
         self.wavelength = []
         self.transmission = []
         self.transmission_deviation = []
-    
+
     def __str__(self):
-        _str  = "Transmission Spectrum:\n"
+        _str = "Transmission Spectrum:\n"
         _str += "   Name:             \t{0}\n".format(self.name)
         _str += "   Timestamp:        \t{0}\n".format(self.timestamp)
         _str += "   Wavelength unit:  \t{0}\n".format(self.wavelength_unit)
@@ -485,9 +497,9 @@ class TransmissionSpectrum:
                 len(self.transmission_deviation)]
         _str += "   Number of Pts:    \t{0}\n".format(max(length_list))
         return _str
-    
-  
-class DataInfo:
+
+
+class DataInfo(object):
     """
     Class to hold the data read from a file.
     It includes four blocks of data for the
@@ -495,82 +507,82 @@ class DataInfo:
     the data itself and any other meta data.
     """
     ## Title
-    title      = ''
+    title = ''
     ## Run number
-    run        = None
+    run = None
     ## Run name
-    run_name   = None
+    run_name = None
     ## File name
-    filename   = ''
+    filename = ''
     ## Notes
-    notes      = None
+    notes = None
     ## Processes (Action on the data)
-    process    = None
+    process = None
     ## Instrument name
     instrument = ''
     ## Detector information
-    detector   = None
+    detector = None
     ## Sample information
-    sample     = None
+    sample = None
     ## Source information
-    source     = None
+    source = None
     ## Collimation information
     collimation = None
     ## Transmission Spectrum INfo
     trans_spectrum = None
     ## Additional meta-data
-    meta_data  = None
+    meta_data = None
     ## Loading errors
     errors = None
-            
+
     def __init__(self):
         """
         Initialization
         """
-        ## Title 
-        self.title      = ''
+        ## Title
+        self.title = ''
         ## Run number
-        self.run        = []
-        self.run_name   = {}
+        self.run = []
+        self.run_name = {}
         ## File name
-        self.filename   = ''
+        self.filename = ''
         ## Notes
-        self.notes      = []
+        self.notes = []
         ## Processes (Action on the data)
-        self.process    = []
+        self.process = []
         ## Instrument name
         self.instrument = ''
         ## Detector information
-        self.detector   = []
+        self.detector = []
         ## Sample information
-        self.sample     = Sample()
+        self.sample = Sample()
         ## Source information
-        self.source     = Source()
+        self.source = Source()
         ## Collimation information
         self.collimation = []
         ## Transmission Spectrum
         self.trans_spectrum = []
         ## Additional meta-data
-        self.meta_data  = {}
+        self.meta_data = {}
         ## Loading errors
         self.errors = []
-        
+
     def append_empty_process(self):
         """
         """
         self.process.append(Process())
-        
+
     def add_notes(self, message=""):
         """
         Add notes to datainfo
         """
         self.notes.append(message)
-        
+
     def __str__(self):
         """
         Nice printout
         """
-        _str =  "File:            %s\n" % self.filename
+        _str = "File:            %s\n" % self.filename
         _str += "Title:           %s\n" % self.title
         _str += "Run:             %s\n" % str(self.run)
         _str += "Instrument:      %s\n" % str(self.instrument)
@@ -587,7 +599,7 @@ class DataInfo:
         for item in self.trans_spectrum:
             _str += "%s\n" % str(item)
         return _str
-            
+
     # Private method to perform operation. Not implemented for DataInfo,
     # but should be implemented for each data class inherited from DataInfo
     # that holds actual data (ex.: Data1D)
@@ -598,7 +610,7 @@ class DataInfo:
         that holds actual data (ex.: Data1D)
         """
         return NotImplemented
-    
+
     def _perform_union(self, other):
         """
         Private method to perform union operation. Not implemented for DataInfo,
@@ -610,7 +622,7 @@ class DataInfo:
     def __add__(self, other):
         """
         Add two data sets
-        
+
         :param other: data set to add to the current one
         :return: new data set
         :raise ValueError: raised when two data sets are incompatible
@@ -618,211 +630,234 @@ class DataInfo:
         def operation(a, b):
             return a + b
         return self._perform_operation(other, operation)
-        
+
     def __radd__(self, other):
         """
         Add two data sets
-        
+
         :param other: data set to add to the current one
-        
         :return: new data set
-        
         :raise ValueError: raised when two data sets are incompatible
-        
         """
         def operation(a, b):
             return b + a
         return self._perform_operation(other, operation)
-        
+
     def __sub__(self, other):
         """
         Subtract two data sets
-        
+
         :param other: data set to subtract from the current one
-        
         :return: new data set
-        
         :raise ValueError: raised when two data sets are incompatible
-        
         """
         def operation(a, b):
             return a - b
         return self._perform_operation(other, operation)
-        
+
     def __rsub__(self, other):
         """
         Subtract two data sets
-        
+
         :param other: data set to subtract from the current one
-        
         :return: new data set
-        
         :raise ValueError: raised when two data sets are incompatible
-        
         """
         def operation(a, b):
             return b - a
         return self._perform_operation(other, operation)
-        
+
     def __mul__(self, other):
         """
         Multiply two data sets
-        
+
         :param other: data set to subtract from the current one
-        
         :return: new data set
-        
         :raise ValueError: raised when two data sets are incompatible
-        
         """
         def operation(a, b):
             return a * b
         return self._perform_operation(other, operation)
-        
+
     def __rmul__(self, other):
         """
         Multiply two data sets
-        
+
         :param other: data set to subtract from the current one
-        
         :return: new data set
-        
         :raise ValueError: raised when two data sets are incompatible
         """
         def operation(a, b):
             return b * a
         return self._perform_operation(other, operation)
-        
+
     def __div__(self, other):
         """
         Divided a data set by another
-        
+
         :param other: data set that the current one is divided by
-        
         :return: new data set
-        
         :raise ValueError: raised when two data sets are incompatible
-        
         """
         def operation(a, b):
             return a/b
         return self._perform_operation(other, operation)
-        
+
     def __rdiv__(self, other):
         """
         Divided a data set by another
-        
+
         :param other: data set that the current one is divided by
-        
         :return: new data set
-        
         :raise ValueError: raised when two data sets are incompatible
-        
         """
         def operation(a, b):
             return b/a
         return self._perform_operation(other, operation)
-            
-        
+
     def __or__(self, other):
         """
         Union a data set with another
-        
+
         :param other: data set to be unified
-        
         :return: new data set
-        
         :raise ValueError: raised when two data sets are incompatible
-        
         """
         return self._perform_union(other)
-        
+
     def __ror__(self, other):
         """
         Union a data set with another
-        
+
         :param other: data set to be unified
-        
         :return: new data set
-        
         :raise ValueError: raised when two data sets are incompatible
-        
         """
         return self._perform_union(other)
-                
+
+class SESANSData1D(plottable_sesans1D, DataInfo):
+    """
+    SESANS 1D data class
+    """
+    x_unit = 'nm'
+    y_unit = 'pol'
+
+    def __init__(self, x=None, y=None, lam=None, dx=None, dy=None, dlam=None):
+        DataInfo.__init__(self)
+        plottable_sesans1D.__init__(self, x, y, lam, dx, dy, dlam)
+
+    def __str__(self):
+        """
+        Nice printout
+        """
+        _str = "%s\n" % DataInfo.__str__(self)
+        _str += "Data:\n"
+        _str += "   Type:         %s\n" % self.__class__.__name__
+        _str += "   X-axis:       %s\t[%s]\n" % (self._xaxis, self._xunit)
+        _str += "   Y-axis:       %s\t[%s]\n" % (self._yaxis, self._yunit)
+        _str += "   Length:       %g\n" % len(self.x)
+        return _str
+
+    def clone_without_data(self, length=0, clone=None):
+        """
+        Clone the current object, without copying the data (which
+        will be filled out by a subsequent operation).
+        The data arrays will be initialized to zero.
+
+        :param length: length of the data array to be initialized
+        :param clone: if provided, the data will be copied to clone
+        """
+        from copy import deepcopy
+        if clone is None or not issubclass(clone.__class__, Data1D):
+            x = numpy.zeros(length)
+            dx = numpy.zeros(length)
+            y = numpy.zeros(length)
+            dy = numpy.zeros(length)
+            clone = Data1D(x, y, dx=dx, dy=dy)
+
+        clone.title = self.title
+        clone.run = self.run
+        clone.filename = self.filename
+        clone.instrument = self.instrument
+        clone.notes = deepcopy(self.notes)
+        clone.process = deepcopy(self.process)
+        clone.detector = deepcopy(self.detector)
+        clone.sample = deepcopy(self.sample)
+        clone.source = deepcopy(self.source)
+        clone.collimation = deepcopy(self.collimation)
+        clone.trans_spectrum = deepcopy(self.trans_spectrum)
+        clone.meta_data = deepcopy(self.meta_data)
+        clone.errors = deepcopy(self.errors)
+
+        return clone
+
 class Data1D(plottable_1D, DataInfo):
     """
     1D data class
     """
     x_unit = '1/A'
     y_unit = '1/cm'
-    
+
     def __init__(self, x, y, dx=None, dy=None):
         DataInfo.__init__(self)
         plottable_1D.__init__(self, x, y, dx, dy)
-        
+
     def __str__(self):
         """
         Nice printout
         """
-        _str =  "%s\n" % DataInfo.__str__(self)
-    
+        _str = "%s\n" % DataInfo.__str__(self)
         _str += "Data:\n"
         _str += "   Type:         %s\n" % self.__class__.__name__
         _str += "   X-axis:       %s\t[%s]\n" % (self._xaxis, self._xunit)
         _str += "   Y-axis:       %s\t[%s]\n" % (self._yaxis, self._yunit)
         _str += "   Length:       %g\n" % len(self.x)
-
         return _str
 
     def is_slit_smeared(self):
         """
         Check whether the data has slit smearing information
-        
         :return: True is slit smearing info is present, False otherwise
-        
         """
         def _check(v):
             if (v.__class__ == list or v.__class__ == numpy.ndarray) \
                 and len(v) > 0 and min(v) > 0:
                 return True
-            
             return False
-        
         return _check(self.dxl) or _check(self.dxw)
-        
+
     def clone_without_data(self, length=0, clone=None):
         """
         Clone the current object, without copying the data (which
         will be filled out by a subsequent operation).
         The data arrays will be initialized to zero.
-        
+
         :param length: length of the data array to be initialized
         :param clone: if provided, the data will be copied to clone
         """
         from copy import deepcopy
-        
+
         if clone is None or not issubclass(clone.__class__, Data1D):
-            x  = numpy.zeros(length)
+            x = numpy.zeros(length)
             dx = numpy.zeros(length)
-            y  = numpy.zeros(length)
+            y = numpy.zeros(length)
             dy = numpy.zeros(length)
             clone = Data1D(x, y, dx=dx, dy=dy)
-        
-        clone.title          = self.title
-        clone.run            = self.run
-        clone.filename       = self.filename
-        clone.instrument     = self.instrument
-        clone.notes          = deepcopy(self.notes)
-        clone.process        = deepcopy(self.process)
-        clone.detector       = deepcopy(self.detector)
-        clone.sample         = deepcopy(self.sample)
-        clone.source         = deepcopy(self.source)
-        clone.collimation    = deepcopy(self.collimation)
+
+        clone.title = self.title
+        clone.run = self.run
+        clone.filename = self.filename
+        clone.instrument = self.instrument
+        clone.notes = deepcopy(self.notes)
+        clone.process = deepcopy(self.process)
+        clone.detector = deepcopy(self.detector)
+        clone.sample = deepcopy(self.sample)
+        clone.source = deepcopy(self.source)
+        clone.collimation = deepcopy(self.collimation)
         clone.trans_spectrum = deepcopy(self.trans_spectrum)
-        clone.meta_data      = deepcopy(self.meta_data)
-        clone.errors         = deepcopy(self.errors)
-        
+        clone.meta_data = deepcopy(self.meta_data)
+        clone.errors = deepcopy(self.errors)
+
         return clone
 
     def _validity_check(self, other):
@@ -832,13 +867,10 @@ class Data1D(plottable_1D, DataInfo):
         Returns errors vectors equal to original
         errors vectors if they were present or vectors
         of zeros when none was found.
-        
+
         :param other: other data set for operation
-        
         :return: dy for self, dy for other [numpy arrays]
-        
         :raise ValueError: when lengths are not compatible
-        
         """
         dy_other = None
         if isinstance(other, Data1D):
@@ -847,38 +879,24 @@ class Data1D(plottable_1D, DataInfo):
                 len(self.y) != len(other.y):
                 msg = "Unable to perform operation: data length are not equal"
                 raise ValueError, msg
-            
             # Here we could also extrapolate between data points
             ZERO = 1.0e-12
             for i in range(len(self.x)):
                 if math.fabs(self.x[i] - other.x[i]) > ZERO:
                     msg = "Incompatible data sets: x-values do not match"
                     raise ValueError, msg
-                """
-                if self.dxl != None and other.dxl == None:
-                    msg = "Incompatible data sets: dxl-values do not match"
-                    raise ValueError, msg
-                if self.dxl == None and other.dxl != None:
-                    msg = "Incompatible data sets: dxl-values do not match"
-                    raise ValueError, msg
-                if self.dxw != None and other.dxw == None:
-                    msg = "Incompatible data sets: dxw-values do not match"
-                    raise ValueError, msg
-                if self.dxw == None and other.dxw != None:
-                    msg = "Incompatible data sets: dxw-values do not match"
-                    raise ValueError, msg
-                """
+
             # Check that the other data set has errors, otherwise
             # create zero vector
             dy_other = other.dy
             if other.dy == None or (len(other.dy) != len(other.y)):
                 dy_other = numpy.zeros(len(other.y))
-            
+
         # Check that we have errors, otherwise create zero vector
         dy = self.dy
         if self.dy == None or (len(self.dy) != len(self.y)):
             dy = numpy.zeros(len(self.y))
-            
+
         return dy, dy_other
 
     def _perform_operation(self, other, operation):
@@ -904,7 +922,7 @@ class Data1D(plottable_1D, DataInfo):
                 result.dxw[i] = self.dxw[i]
             if self.dxl is not None and len(self.x) == len(self.dxl):
                 result.dxl[i] = self.dxl[i]
-            
+
             a = Uncertainty(self.y[i], dy[i]**2)
             if isinstance(other, Data1D):
                 b = Uncertainty(other.y[i], dy_other[i]**2)
@@ -920,12 +938,12 @@ class Data1D(plottable_1D, DataInfo):
                     result.dxl[i] = math.sqrt(result.dxl[i])
             else:
                 b = other
-            
+
             output = operation(a, b)
             result.y[i] = output.x
             result.dy[i] = math.sqrt(math.fabs(output.variance))
         return result
-    
+
     def _validity_check_union(self, other):
         """
         Checks that the data lengths are compatible.
@@ -933,17 +951,14 @@ class Data1D(plottable_1D, DataInfo):
         Returns errors vectors equal to original
         errors vectors if they were present or vectors
         of zeros when none was found.
-        
+
         :param other: other data set for operation
-        
         :return: bool
-        
         :raise ValueError: when data types are not compatible
-        
         """
         if not isinstance(other, Data1D):
             msg = "Unable to perform operation: different types of data set"
-            raise ValueError, msg   
+            raise ValueError, msg
         return True
 
     def _perform_union(self, other):
@@ -988,100 +1003,21 @@ class Data1D(plottable_1D, DataInfo):
             result.dxl = numpy.append(self.dxl, other.dxl)
             result.dxl = result.dxl[ind]
         return result
-        
-        
-class SESANSData1D(plottable_sesans1D, DataInfo):
-    """
-    SESANS 1D data class
-    """
-    x_unit = '1/A'
-    y_unit = '1/cm'
-    
-    def __init__(self, x, y, dx=None, dy=None):
-        DataInfo.__init__(self)
-        plottable_sesans1D.__init__(self, x, y, dx, dy)
-        
-    def __str__(self):
-        """
-        Nice printout
-        """
-        _str =  "%s\n" % DataInfo.__str__(self)
-    
-        _str += "Data:\n"
-        _str += "   Type:         %s\n" % self.__class__.__name__
-        _str += "   X-axis:       %s\t[%s]\n" % (self._xaxis, self._xunit)
-        _str += "   Y-axis:       %s\t[%s]\n" % (self._yaxis, self._yunit)
-        _str += "   Length:       %g\n" % len(self.x)
 
-        return _str
 
-    def is_slit_smeared(self):
-        """
-        Check whether the data has slit smearing information
-        
-        :return: True is slit smearing info is present, False otherwise
-        
-        """
-        def _check(v):
-            if (v.__class__ == list or v.__class__ == numpy.ndarray) \
-                and len(v) > 0 and min(v) > 0:
-                return True
-            
-            return False
-        
-        return _check(self.dxl) or _check(self.dxw)
-        
-    def clone_without_data(self, length=0, clone=None):
-        """
-        Clone the current object, without copying the data (which
-        will be filled out by a subsequent operation).
-        The data arrays will be initialized to zero.
-        
-        :param length: length of the data array to be initialized
-        :param clone: if provided, the data will be copied to clone
-        """
-        from copy import deepcopy
-        
-        if clone is None or not issubclass(clone.__class__, Data1D):
-            x  = numpy.zeros(length)
-            dx = numpy.zeros(length)
-            y  = numpy.zeros(length)
-            dy = numpy.zeros(length)
-            clone = Data1D(x, y, dx=dx, dy=dy)
-        
-        clone.title          = self.title
-        clone.run            = self.run
-        clone.filename       = self.filename
-        clone.instrument     = self.instrument
-        clone.notes          = deepcopy(self.notes)
-        clone.process        = deepcopy(self.process)
-        clone.detector       = deepcopy(self.detector)
-        clone.sample         = deepcopy(self.sample)
-        clone.source         = deepcopy(self.source)
-        clone.collimation    = deepcopy(self.collimation)
-        clone.trans_spectrum = deepcopy(self.trans_spectrum)
-        clone.meta_data      = deepcopy(self.meta_data)
-        clone.errors         = deepcopy(self.errors)
-        
-        return clone
-    
-    
 class Data2D(plottable_2D, DataInfo):
     """
     2D data class
     """
     ## Units for Q-values
     Q_unit = '1/A'
-    
     ## Units for I(Q) values
     I_unit = '1/cm'
-    
     ## Vector of Q-values at the center of each bin in x
     x_bins = None
-    
     ## Vector of Q-values at the center of each bin in y
     y_bins = None
-    
+
     def __init__(self, data=None, err_data=None, qx_data=None,
                  qy_data=None, q_data=None, mask=None,
                  dqx_data=None, dqy_data=None):
@@ -1095,29 +1031,24 @@ class Data2D(plottable_2D, DataInfo):
 
     def __str__(self):
         _str = "%s\n" % DataInfo.__str__(self)
-        
         _str += "Data:\n"
         _str += "   Type:         %s\n" % self.__class__.__name__
         _str += "   X- & Y-axis:  %s\t[%s]\n" % (self._yaxis, self._yunit)
         _str += "   Z-axis:       %s\t[%s]\n" % (self._zaxis, self._zunit)
-        #leny = 0
-        #if len(self.data) > 0:
-        #    leny = len(self.data)
         _str += "   Length:       %g \n" % (len(self.data))
-        
         return _str
-  
+
     def clone_without_data(self, length=0, clone=None):
         """
         Clone the current object, without copying the data (which
         will be filled out by a subsequent operation).
         The data arrays will be initialized to zero.
-        
+
         :param length: length of the data array to be initialized
         :param clone: if provided, the data will be copied to clone
         """
         from copy import deepcopy
-        
+
         if clone is None or not issubclass(clone.__class__, Data2D):
             data = numpy.zeros(length)
             err_data = numpy.zeros(length)
@@ -1127,25 +1058,25 @@ class Data2D(plottable_2D, DataInfo):
             mask = numpy.zeros(length)
             dqx_data = None
             dqy_data = None
-            clone = Data2D(data=data, err_data=err_data, 
-                           qx_data=qx_data, qy_data=qy_data, 
+            clone = Data2D(data=data, err_data=err_data,
+                           qx_data=qx_data, qy_data=qy_data,
                            q_data=q_data, mask=mask)
 
-        clone.title       = self.title
-        clone.run         = self.run
-        clone.filename    = self.filename
-        clone.instrument  = self.instrument
-        clone.notes       = deepcopy(self.notes)
-        clone.process     = deepcopy(self.process)
-        clone.detector    = deepcopy(self.detector)
-        clone.sample      = deepcopy(self.sample)
-        clone.source      = deepcopy(self.source)
+        clone.title = self.title
+        clone.run = self.run
+        clone.filename = self.filename
+        clone.instrument = self.instrument
+        clone.notes = deepcopy(self.notes)
+        clone.process = deepcopy(self.process)
+        clone.detector = deepcopy(self.detector)
+        clone.sample = deepcopy(self.sample)
+        clone.source = deepcopy(self.source)
         clone.collimation = deepcopy(self.collimation)
-        clone.meta_data   = deepcopy(self.meta_data)
-        clone.errors      = deepcopy(self.errors)
-        
+        clone.meta_data = deepcopy(self.meta_data)
+        clone.errors = deepcopy(self.errors)
+
         return clone
-  
+
     def _validity_check(self, other):
         """
         Checks that the data lengths are compatible.
@@ -1153,13 +1084,10 @@ class Data2D(plottable_2D, DataInfo):
         Returns errors vectors equal to original
         errors vectors if they were present or vectors
         of zeros when none was found.
-        
+
         :param other: other data set for operation
-        
         :return: dy for self, dy for other [numpy arrays]
-        
         :raise ValueError: when lengths are not compatible
-        
         """
         err_other = None
         if isinstance(other, Data2D):
@@ -1169,9 +1097,6 @@ class Data2D(plottable_2D, DataInfo):
                 len(self.qy_data) != len(other.qy_data):
                 msg = "Unable to perform operation: data length are not equal"
                 raise ValueError, msg
-            #if len(self.data) < 1:
-            #    msg = "Incompatible data sets: I-values do not match"
-            #    raise ValueError, msg 
             for ind in range(len(self.data)):
                 if self.qx_data[ind] != other.qx_data[ind]:
                     msg = "Incompatible data sets: qx-values do not match"
@@ -1179,28 +1104,26 @@ class Data2D(plottable_2D, DataInfo):
                 if self.qy_data[ind] != other.qy_data[ind]:
                     msg = "Incompatible data sets: qy-values do not match"
                     raise ValueError, msg
-                   
+
             # Check that the scales match
             err_other = other.err_data
             if other.err_data == None or \
                 (len(other.err_data) != len(other.data)):
                 err_other = numpy.zeros(len(other.data))
-            
+
         # Check that we have errors, otherwise create zero vector
         err = self.err_data
         if self.err_data == None or \
             (len(self.err_data) != len(self.data)):
             err = numpy.zeros(len(other.data))
-            
         return err, err_other
-  
+
     def _perform_operation(self, other, operation):
         """
         Perform 2D operations between data sets
-        
+
         :param other: other data set
         :param operation: function defining the operation
-        
         """
         # First, check the data compatibility
         dy, dy_other = self._validity_check(other)
@@ -1215,7 +1138,7 @@ class Data2D(plottable_2D, DataInfo):
             result.data[i] = self.data[i]
             if self.err_data is not None and \
                 numpy.size(self.data) == numpy.size(self.err_data):
-                result.err_data[i] = self.err_data[i]    
+                result.err_data[i] = self.err_data[i]
             if self.dqx_data is not None:
                 result.dqx_data[i] = self.dqx_data[i]
             if self.dqy_data is not None:
@@ -1224,7 +1147,7 @@ class Data2D(plottable_2D, DataInfo):
             result.qy_data[i] = self.qy_data[i]
             result.q_data[i] = self.q_data[i]
             result.mask[i] = self.mask[i]
-            
+
             a = Uncertainty(self.data[i], dy[i]**2)
             if isinstance(other, Data2D):
                 b = Uncertainty(other.data[i], dy_other[i]**2)
@@ -1233,7 +1156,7 @@ class Data2D(plottable_2D, DataInfo):
                     result.dqx_data[i] *= self.dqx_data[i]
                     result.dqx_data[i] += (other.dqx_data[i]**2)
                     result.dqx_data[i] /= 2
-                    result.dqx_data[i] = math.sqrt(result.dqx_data[i])     
+                    result.dqx_data[i] = math.sqrt(result.dqx_data[i])
                 if other.dqy_data is not None and \
                         result.dqy_data is not None:
                     result.dqy_data[i] *= self.dqy_data[i]
@@ -1242,12 +1165,11 @@ class Data2D(plottable_2D, DataInfo):
                     result.dqy_data[i] = math.sqrt(result.dqy_data[i])
             else:
                 b = other
-            
             output = operation(a, b)
             result.data[i] = output.x
             result.err_data[i] = math.sqrt(math.fabs(output.variance))
         return result
-    
+
     def _validity_check_union(self, other):
         """
         Checks that the data lengths are compatible.
@@ -1255,26 +1177,22 @@ class Data2D(plottable_2D, DataInfo):
         Returns errors vectors equal to original
         errors vectors if they were present or vectors
         of zeros when none was found.
-        
+
         :param other: other data set for operation
-        
         :return: bool
-        
         :raise ValueError: when data types are not compatible
-        
         """
         if not isinstance(other, Data2D):
             msg = "Unable to perform operation: different types of data set"
-            raise ValueError, msg   
+            raise ValueError, msg
         return True
-    
+
     def _perform_union(self, other):
         """
         Perform 2D operations between data sets
-        
+
         :param other: other data set
         :param operation: function defining the operation
-        
         """
         # First, check the data compatibility
         self._validity_check_union(other)
@@ -1285,7 +1203,7 @@ class Data2D(plottable_2D, DataInfo):
         result.ymin = self.ymin
         result.ymax = self.ymax
         if self.dqx_data == None or self.dqy_data == None or \
-                other.dqx_data == None or other.dqy_data == None :
+                other.dqx_data == None or other.dqy_data == None:
             result.dqx_data = None
             result.dqy_data = None
         else:
@@ -1293,7 +1211,7 @@ class Data2D(plottable_2D, DataInfo):
                                          numpy.size(other.data))
             result.dqy_data = numpy.zeros(len(self.data) + \
                                          numpy.size(other.data))
-        
+
         result.data = numpy.append(self.data, other.data)
         result.qx_data = numpy.append(self.qx_data, other.qx_data)
         result.qy_data = numpy.append(self.qy_data, other.qy_data)

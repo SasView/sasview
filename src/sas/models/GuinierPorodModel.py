@@ -1,7 +1,5 @@
 """ 
-    I(q) = scale/q^s* exp ( - R_g^2 q^2 / (3-s) ) for q<= ql
-        = scale/q^m*exp((-ql^2*Rg^2)/(3-s))*ql^(m-s) for q>=ql
-    Guinier function as a BaseComponent model
+Guinier function as a BaseComponent model
 """
 from sas.models.BaseComponent import BaseComponent
 from math import sqrt,exp
@@ -10,8 +8,10 @@ class GuinierPorodModel(BaseComponent):
     """ 
     Class that evaluates a GuinierPorod model.
 
-    I(q) = scale/q^s* exp ( - R_g^2 q^2 / (3-s) ) for q<= ql
-        = scale/q^m*exp((-ql^2*Rg^2)/(3-s))*ql^(m-s) for q>=ql
+    Calculate::
+
+        I(q) = scale/q^s exp(-q^2 Rg^2 / (3-s) ) for q<= ql
+        I(q) = scale/q^m exp(-ql^2 Rg^2 / (3-s)) ql^(m-s) for q>=ql
     """
     def __init__(self):
         """ Initialization """

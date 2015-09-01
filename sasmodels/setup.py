@@ -110,9 +110,9 @@ dist = setup(
     name="sasmodels",
     version = VERSION,
     description = "Python module for SAS scattering models",
-    author = "SAS/DANSE",
-    author_email = "sansdanse@gmail.gov",
-    url = "http://sansviewproject.svn.sourceforge.net",
+    author = "SasView Team",
+    author_email = "developers@sasview.org",
+    url = "https://github.com/SasView/sasview.git",
     
     # Place this module under the sas package
     #ext_package = "sas",

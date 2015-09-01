@@ -58,6 +58,7 @@ def smear_selection(data1D, model = None):
     # If we found resolution smearing data, return a QSmearer
     if _found_resolution == True:
         return QSmearer(data1D, model)
+        #return pinhole_smear(data1D, model)
 
     # Look for slit smearing data
     _found_slit = False
@@ -80,7 +81,8 @@ def smear_selection(data1D, model = None):
                 break
     # If we found slit smearing data, return a slit smearer
     if _found_slit == True:
-        return SlitSmearer(data1D, model)
+        #return SlitSmearer(data1D, model)
+        return slit_smear(data1D, model)
     return None
             
 
@@ -197,7 +199,7 @@ class _BaseSmearer(object):
             if iq_in[len(iq_in) - 1] == 0:
                 iq_in[len(iq_in) - 1] = iq_in_high[0]
             # Append the extrapolated points to the data points
-            if self.nbins_low > 0:                             
+            if self.nbins_low > 0:
                 iq_in_temp = numpy.append(iq_in_low, iq_in)
             if self.nbins_high > 0:
                 iq_in_temp = numpy.append(iq_in_temp, iq_in_high[1:])
@@ -582,3 +584,68 @@ def get_qextrapolate(width, data_x):
     nbins_low = nbins_low - len(data_x_ext[data_x_ext <= 0])
     return nbins_low, nbins_high, \
              new_width[data_x_ext > 0], data_x_ext[data_x_ext > 0]
+
+
+
+from .resolution import Slit1D, Pinhole1D
+class PySmear(object):
+    """
+    Wrapper for pure python sasmodels resolution functions.
+    """
+    def __init__(self, resolution, model):
+        self.model = model
+        self.resolution = resolution
+        self.offset = numpy.searchsorted(self.resolution.q_calc, self.resolution.q[0])
+
+    def apply(self, iq_in, first_bin=0, last_bin=None):
+        """
+        Apply the resolution function to the data.
+
+        Note that this is called with iq_in matching data.x, but with
+        iq_in[first_bin:last_bin] set to theory values for these bins,
+        and the remainder left undefined.  The first_bin, last_bin values
+        should be those returned from get_bin_range.
+
+        The returned value is of the same length as iq_in, with the range
+        first_bin:last_bin set to the resolution smeared values.
+        """
+        if last_bin is None: last_bin = len(iq_in)
+        start, end = first_bin + self.offset, last_bin + self.offset
+        q_calc = self.resolution.q_calc
+        iq_calc = numpy.empty_like(q_calc)
+        if start > 0:
+            iq_calc[:start] = self.model.evalDistribution(q_calc[:start])
+        if end+1 < len(q_calc):
+            iq_calc[end+1:] = self.model.evalDistribution(q_calc[end+1:])
+        iq_calc[start:end+1] = iq_in[first_bin:last_bin+1]
+        smeared = self.resolution.apply(iq_calc)
+        return smeared
+    __call__ = apply
+
+    def get_bin_range(self, q_min=None, q_max=None):
+        """
+        For a given q_min, q_max, find the corresponding indices in the data.
+
+        Returns first, last.
+
+        Note that these are indexes into q from the data, not the q_calc
+        needed by the resolution function.  Note also that these are the
+        indices, not the range limits.  That is, the complete range will be
+        q[first:last+1].
+        """
+        q = self.resolution.q
+        first = numpy.searchsorted(q, q_min)
+        last = numpy.searchsorted(q, q_max)
+        return first, min(last,len(q)-1)
+
+def slit_smear(data, model=None):
+    q = data.x
+    width = data.dxw if data.dxw is not None else 0
+    height = data.dxl if data.dxl is not None else 0
+    # TODO: width and height seem to be reversed
+    return PySmear(Slit1D(q, height, width), model)
+
+def pinhole_smear(data, model=None):
+    q = data.x
+    width = data.dx if data.dx is not None else 0
+    return PySmear(Pinhole1D(q, width), model)

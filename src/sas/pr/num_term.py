@@ -1,10 +1,11 @@
 import math
 import numpy
 import copy
+import sys
+import logging
 from sas.pr.invertor import Invertor
 
-
-class Num_terms():
+class NTermEstimator(object):
     """
     """
     def __init__(self, invertor):
@@ -16,14 +17,13 @@ class Num_terms():
         if self.nterm_max > 50:
             self.nterm_max = 50
         self.isquit_func = None
-         
+
         self.osc_list = []
         self.err_list = []
         self.alpha_list = []
         self.mess_list = []
-         
         self.dataset = []
-     
+
     def is_odd(self, n):
         """
         """
@@ -40,7 +40,7 @@ class Num_terms():
             re = osc.pop(0)
             lis.append(re)
         return lis
-           
+
     def median_osc(self):
         """
         """
@@ -77,13 +77,12 @@ class Num_terms():
             self.err_list.append(err)
             self.alpha_list.append(inver.alpha)
             self.mess_list.append(message)
-         
+
         new_osc1 = []
         new_osc2 = []
         new_osc3 = []
         flag9 = False
         flag8 = False
-        flag7 = False
         for i in range(len(self.err_list)):
             if self.err_list[i] <= 1.0 and self.err_list[i] >= 0.9:
                 new_osc1.append(self.osc_list[i])
@@ -93,24 +92,23 @@ class Num_terms():
                 flag8 = True
             if self.err_list[i] < 0.8 and self.err_list[i] >= 0.7:
                 new_osc3.append(self.osc_list[i])
-                flag7 = True
-                 
+
         if flag9 == True:
             self.dataset = new_osc1
         elif flag8 == True:
             self.dataset = new_osc2
         else:
             self.dataset = new_osc3
-         
+
         return self.dataset
-        
+
     def ls_osc(self):
         """
         """
         # Generate data
-        ls_osc = self.get0_out()
+        self.get0_out()
         med = self.median_osc()
-        
+
         #TODO: check 1
         ls_osc = self.dataset
         ls = []
@@ -123,15 +121,11 @@ class Num_terms():
         """
         """
         ls = self.ls_osc()
-        #print "ls", ls
         nt_ls = []
         for i in range(len(ls)):
             r = ls[i]
             n = self.osc_list.index(r) + 10
-            #er = self.err_list[n]
-            #nt = self.osc_list.index(r) + 10
             nt_ls.append(n)
-        #print "nt list", nt_ls
         return nt_ls
 
     def num_terms(self, isquit_func=None):
@@ -141,29 +135,31 @@ class Num_terms():
             self.isquit_func = isquit_func
             nts = self.compare_err()
             div = len(nts)
-            tem = float(div)/2.0
+            tem = float(div) / 2.0
             odd = self.is_odd(div)
             if odd == True:
                 nt = nts[int(tem)]
             else:
                 nt = nts[int(tem) - 1]
-            return nt, self.alpha_list[nt - 10], self.mess_list[nt-10]
+            return nt, self.alpha_list[nt - 10], self.mess_list[nt - 10]
         except:
-            return self.nterm_min, self.alpha_list[10], self.mess_list[10]
+            #TODO: check the logic above and make sure it doesn't 
+            # rely on the try-except.
+            return self.nterm_min, self.invertor.alpha, ''
 
 
 #For testing
 def load(path):
     # Read the data from the data file
-    data_x   = numpy.zeros(0)
-    data_y   = numpy.zeros(0)
+    data_x = numpy.zeros(0)
+    data_y = numpy.zeros(0)
     data_err = numpy.zeros(0)
-    scale    = None
-    min_err  = 0.0
+    scale = None
+    min_err = 0.0
     if not path == None:
-        input_f = open(path,'r')
-        buff    = input_f.read()
-        lines   = buff.split('\n')
+        input_f = open(path, 'r')
+        buff = input_f.read()
+        lines = buff.split('\n')
         for line in lines:
             try:
                 toks = line.split()
@@ -178,27 +174,24 @@ def load(path):
                         min_err = 0.01 * y
                     err = scale * math.sqrt(test_y) + min_err
                     #err = 0
-                    
+
                 data_x = numpy.append(data_x, test_x)
                 data_y = numpy.append(data_y, test_y)
                 data_err = numpy.append(data_err, err)
             except:
-                pass
-               
+                logging.error(sys.exc_value)
+
     return data_x, data_y, data_err
 
 
 if __name__ == "__main__":
-    i = Invertor()
+    invert = Invertor()
     x, y, erro = load("test/Cyl_A_D102.txt")
-    i.d_max = 102.0
-    i.nfunc = 10
-    #i.q_max = 0.4
-    #i.q_min = 0.07
-    i.x = x
-    i.y = y
-    i.err = erro
-    #i.out, i.cov = i.lstsq(10)
+    invert.d_max = 102.0
+    invert.nfunc = 10
+    invert.x = x
+    invert.y = y
+    invert.err = erro
     # Testing estimator
-    est = Num_terms(i)
+    est = NTermEstimator(invert)
     print est.num_terms()

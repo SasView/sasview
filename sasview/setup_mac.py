@@ -20,6 +20,12 @@ import pytz
 import sys
 import platform
 
+from distutils.util import get_platform
+root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+platform = '%s-%s'%(get_platform(),sys.version[:3])
+build_path = os.path.join(root, 'build','lib.'+platform)
+sys.path.insert(0, build_path)
+
 ICON = local_config.SetupIconFile_mac
 EXTENSIONS_LIST = []
 DATA_FILES = []
@@ -40,7 +46,7 @@ import sas.guiframe as guiframe
 DATA_FILES += guiframe.data_files()
 
 #CANSAxml reader data files
-RESOURCES_FILES.append(os.path.join(sas.dataloader.readers.get_data_path(),'defaults.xml'))
+RESOURCES_FILES.append(os.path.join(sas.dataloader.readers.get_data_path(),'defaults.json'))
 
 # Locate libxml2 library
 lib_locs = ['/usr/local/lib', '/usr/lib']
@@ -57,6 +63,16 @@ DATA_FILES += ['images','test','media', 'custom_config.py', 'local_config.py',
                'default_categories.json']
 if os.path.isfile("BUILD_NUMBER"):
     DATA_FILES.append("BUILD_NUMBER")
+
+# See if the documentation has been built, and if so include it.
+doc_path = os.path.join(build_path, "doc")
+if os.path.exists(doc_path):
+    for dirpath, dirnames, filenames in os.walk(doc_path):
+        for filename in filenames:
+            sub_dir = os.path.join("doc", os.path.relpath(dirpath, doc_path))
+            DATA_FILES.append((sub_dir, [os.path.join(dirpath, filename)]))
+else:
+    raise Exception("You must first build the documentation before creating an installer.")
     
 # locate file extensions
 def find_extension():
@@ -99,6 +115,13 @@ plist = dict(CFBundleDocumentTypes=[dict(CFBundleTypeExtensions=EXTENSIONS_LIST,
                                    CFBundleTypeName="sasview file",
                                    CFBundleTypeRole="Shell" )],)
 
+#Get version - NB nasty hack. Need to find correct way to give path to installed sasview (AJJ)
+import __init__ as sasviewver
+
+VERSION = sasviewver.__version__
+APPNAME = "SasView "+VERSION
+DMGNAME = "SasView-"+VERSION
+
 APP = ['sasview.py']
 DATA_FILES += ['images','test','media']
 
@@ -116,10 +139,17 @@ OPTIONS = {'argv_emulation': True,
            'excludes' : EXCLUDES,
            }
 setup(
-    name="sasview",
+    name=APPNAME,
     app=APP,
     data_files=DATA_FILES,
     include_package_data= True,
     options={'py2app': OPTIONS},
     setup_requires=['py2app'],
 )
+
+#Build dmg
+DMG="dist/%s.dmg"%DMGNAME
+if os.path.exists(DMG): os.unlink(DMG)
+os.system('cd dist && ../../build_tools/dmgpack.sh "%s" "%s.app"'%(DMGNAME,APPNAME))
+os.system('chmod a+r "%s"'%DMG)
+

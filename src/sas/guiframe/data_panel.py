@@ -685,8 +685,9 @@ class DataPanel(ScrolledPanel, PanelBase):
                                                    'Path: %s' % s_path) 
                         self.tree_ctrl.DeleteChildren(d_p_c) 
                         for process in process_list:
-                            _ = self.tree_ctrl.AppendItem(d_p_c,
-                                                              process.__str__())
+                            if not process.is_empty():
+                                _ = self.tree_ctrl.AppendItem(d_p_c,
+                                                              process.single_line_desc())
                 wx.CallAfter(self.append_theory, state_id, theory_list)
             # Sort by data name
             if self.tree_ctrl.root:
@@ -1000,6 +1001,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         set the plot panel on focus
         """
+        if self.cb_plotpanel and self.cb_plotpanel.IsBeingDeleted():
+            return
         for _, value in self.parent.plot_panels.iteritems():
             name_plot_panel = str(value.window_caption)
             if name_plot_panel not in self.cb_plotpanel.GetItems():

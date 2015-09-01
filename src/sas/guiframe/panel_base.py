@@ -60,15 +60,15 @@ class PanelBase:
 
     def on_batch_selection(self, event):
         """
-        :param event: contains parameter enable . when enable is set to True
-        the application is in Batch mode
-        else the application is default mode(single mode)
+        :param event: contains parameter enable. When enable is set to True
+            the application is in Batch mode otherwise the application is
+            in Single mode.
         """
         self.batch_on = event.enable
     def save_project(self, doc=None):
         """
         return an xml node containing state of the panel
-         that guiframe can write to file
+        that guiframe can write to file
         """
         return None
     

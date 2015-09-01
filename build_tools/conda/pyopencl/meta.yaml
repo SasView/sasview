@@ -37,6 +37,7 @@ requirements:
 
   run:
     - python
+    - setuptools
     - numpy
     - pytools >=2014.2
     - pytest >=2

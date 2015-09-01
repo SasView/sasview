@@ -3,24 +3,30 @@
 .. This is a port of the original SasView html help file to ReSTructured text
 .. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
 
+.. |pi| unicode:: U+03C0
+.. |Ang| unicode:: U+212B
+
 Kiessig Thickness Calculator Tool
 =================================
 
 Description
 -----------
 
-This tool is to approximately estimate the thickness of a layer or the 
-diameter of particles from the Kiessig fringe in SAS/NR data, and using the 
-Kiessig relation
+This tool is approximately estimates the thickness of a layer or the diameter 
+of particles from the position of the Kiessig fringe/Bragg peak in NR/SAS data 
+using the relation
 
-thickness = 2*Pi/fringe_width.
+(thickness *or* size) = 2 * |pi| / (fringe_width *or* peak position)
   
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
+Using the tool
+--------------
 
-How To
-------
+To get a rough thickness or particle size, simply type the fringe or peak 
+position (in units of 1/|Ang|\) and click on the *Compute* button.
 
-To get a rough thickness or particle size, just type the Kiessig fringe width 
-(in units of 1/Angstrom) and click on the 'Compute' button. Then the output 
-value will be show up in the 'Thickness' text box.
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+.. note::  This help document was last changed by Steve King, 01May2015
+

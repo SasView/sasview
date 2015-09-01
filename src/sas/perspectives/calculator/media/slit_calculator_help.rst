@@ -3,29 +3,41 @@
 .. This is a port of the original SasView html help file to ReSTructured text
 .. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
 
+.. |Ang| unicode:: U+212B
+.. |TM| unicode:: U+2122
+
 Slit Size Calculator Tool
 =========================
 
 Description
 -----------
-This tool is for X-ray users to calculate the slit size (FWHM/2) for smearing 
-based on their half beam profile data (SAXSess).
+
+This tool enables X-ray users to calculate the slit size (FWHM/2) for smearing 
+based on their half beam profile data.
+
+*NOTE! Whilst it may have some more generic applicability, the calculator has
+only been tested with beam profile data from Anton-Paar SAXSess*\ |TM|\  
+*software.*
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-How To
--------
-To calculate the slit size (FWHM/2), just load the beam profile data using the 
-browse button.
+Using the tool
+--------------
 
-Once a data is loaded, the slit size will be computed and show up in the text 
-box.
+1) Select *Slit Size Calculator* from the *Tool* menu on the SasView toolbar.
 
-Because the unit is not specified in the data file, we do not convert it into 
-1/Angstrom so  users are responsible for converting the units of their data.
+2) Load a beam profile file in the *Data* field using the *Browse* button.
 
-Note: This slit size calculator only works for beam profile data produced by 
-'SAXSess'.
+   *NOTE! To see an example of the beam profile file format, visit the file 
+   beam profile.DAT in your {installation_directory}/SasView/test folder.*
 
-To see the file format, check the file, 'beam profile.DAT', in the 'test' 
-folder of SasView.
+3) Once a data is loaded, the slit size is automatically computed and displayed 
+   in the tool window.
+
+*NOTE! The beam profile file does not carry any information about the units of 
+the Q data. This calculator assumes the data has units of 1/\ |Ang|\ . If the
+data is not in these units it must be manually converted beforehand.*
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+.. note::  This help document was last changed by Steve King, 01May2015

@@ -14,7 +14,7 @@ mkdir sasview-install
 rm -rf dist
 rm -rf build
 
-"$EASY_INSTALL" -d "$WORKSPACE/utils" bumps==0.7.5.4
+"$EASY_INSTALL" -d "$WORKSPACE/utils" bumps==0.7.5.6
 "$EASY_INSTALL" -d "$WORKSPACE/utils" periodictable==1.3.0
 
 export PYTHONPATH=$WORKSPACE/sasview-install:$WORKSPACE/utils:$PYTHONPATH
@@ -23,6 +23,6 @@ $PYTHON check_packages.py
 $PYTHON setup.py bdist_egg
 
 cd $WORKSPACE/dist
-ln -s sasview*.egg sasview.egg || true
-$EASY_INSTALL -N -d ../sasview-install sasview.egg
+# ln -s sasview*.egg sasview.egg || true
+$EASY_INSTALL -N -d ../sasview-install sasview*.egg
 

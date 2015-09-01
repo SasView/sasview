@@ -1,11 +1,13 @@
-
+"""
+    Loading thread
+"""
 import time
 import sys
 import os
 
 from sas.data_util.calcthread import CalcThread
 
-        
+
 EXTENSIONS = ['.svs', '.prv', '.inv', '.fitv']
 
 class DataReader(CalcThread):
@@ -16,23 +18,22 @@ class DataReader(CalcThread):
                  flag=True,
                  transform_data=None,
                  completefn=None,
-                 updatefn   = None,
-                 yieldtime  = 0.01,
-                 worktime   = 0.01
-                 ):
+                 updatefn=None,
+                 yieldtime=0.01,
+                 worktime=0.01):
         CalcThread.__init__(self, completefn,
-                 updatefn,
-                 yieldtime,
-                 worktime)
+                            updatefn,
+                            yieldtime,
+                            worktime)
         self.load_state_flag = flag
         self.transform_data = transform_data
         self.list_path = path
-        #Instantiate a loader 
+        # Instantiate a loader
         self.loader = loader
         self.message = ""
-        self.starttime = 0  
+        self.starttime = 0
         self.updatefn = updatefn
-        
+
     def isquit(self):
         """
         :raise KeyboardInterrupt: when the thread is interrupted
@@ -40,9 +41,8 @@ class DataReader(CalcThread):
         try:
             CalcThread.isquit(self)
         except KeyboardInterrupt:
-            raise KeyboardInterrupt   
-        
-        
+            raise KeyboardInterrupt
+
     def compute(self):
         """
         read some data
@@ -51,8 +51,8 @@ class DataReader(CalcThread):
         output = []
         error_message = ""
         for path in self.list_path:
-            basename  = os.path.basename(path)
-            root, extension = os.path.splitext(basename)
+            basename = os.path.basename(path)
+            _, extension = os.path.splitext(basename)
             if self.load_state_flag:
                 if extension.lower() in EXTENSIONS:
                     pass
@@ -60,8 +60,7 @@ class DataReader(CalcThread):
                 if extension.lower() not in EXTENSIONS:
                     pass
             try:
-                temp =  self.loader.load(path)
-                elapsed = time.time() - self.starttime
+                temp = self.loader.load(path)
                 if temp.__class__.__name__ == "list":
                     for item in temp:
                         data = self.transform_data(item, path)
@@ -76,10 +75,7 @@ class DataReader(CalcThread):
                 error_message = "Error while loading: %s\n" % str(path)
                 error_message += str(sys.exc_value) + "\n"
                 self.updatefn(output=output, message=error_message)
-                
+
         message = "Loading Complete!"
         self.complete(output=output, error_message=error_message,
-                       message=message, path=self.list_path)
-            
-   
-      
+                      message=message, path=self.list_path)

@@ -25,6 +25,9 @@ from sasmodels.sasview_model import make_class
 PLUGIN_DIR = 'plugin_models'
 
 def get_model_python_path():
+    """
+        Returns the python path for a model
+    """
     return os.path.dirname(__file__)
 
 
@@ -41,12 +44,12 @@ def log(message):
 def _check_plugin(model, name):
     """
     Do some checking before model adding plugins in the list
-    
+
     :param model: class model to add into the plugin list
     :param name:name of the module plugin
-    
+
     :return model: model if valid model or None if not valid
-    
+
     """
     #Check if the plugin is of type Model1DPlugin
     if not issubclass(model, Model1DPlugin):
@@ -61,16 +64,17 @@ def _check_plugin(model, name):
         new_instance = model()
     except:
         msg = "Plugin %s error in __init__ \n\t: %s %s\n" % (str(name),
-                                    str(sys.exc_type), sys.exc_value)
+                                                             str(sys.exc_type),
+                                                             sys.exc_info()[1])
         log(msg)
         return None
-   
+
     if hasattr(new_instance, "function"):
         try:
             value = new_instance.function()
         except:
-            msg = "Plugin %s: error writing function \n\t :%s %s\n " % (str(name),
-                                    str(sys.exc_type), sys.exc_value)
+            msg = "Plugin %s: error writing function \n\t :%s %s\n " % \
+                    (str(name), str(sys.exc_type), sys.exc_info()[1])
             log(msg)
             return None
     else:
@@ -78,19 +82,19 @@ def _check_plugin(model, name):
         log(msg)
         return None
     return model
-  
-  
+
+
 def find_plugins_dir():
     """
         Find path of the plugins directory.
         The plugin directory is located in the user's home directory.
     """
     dir = os.path.join(os.path.expanduser("~"), '.sasview', PLUGIN_DIR)
-    
+
     # If the plugin directory doesn't exist, create it
     if not os.path.isdir(dir):
         os.makedirs(dir)
-        
+
     # Find paths needed
     try:
         # For source
@@ -127,13 +131,16 @@ def find_plugins_dir():
 
 
 class ReportProblem:
+    """
+        Class to check for problems with specific values
+    """
     def __nonzero__(self):
         type, value, traceback = sys.exc_info()
         if type is not None and issubclass(type, py_compile.PyCompileError):
             print "Problem with", repr(value)
             raise type, value, traceback
         return 1
-    
+
 report_problem = ReportProblem()
 
 
@@ -146,8 +153,7 @@ def compile_file(dir):
         compileall.compile_dir(dir=dir, ddir=dir, force=1,
                                quiet=report_problem)
     except:
-        type, value, traceback = sys.exc_info()
-        return value
+        return sys.exc_info()[1]
     return None
 
 
@@ -156,9 +162,9 @@ def _findModels(dir):
     """
     # List of plugin objects
     plugins = {}
+    dir = find_plugins_dir()
     # Go through files in plug-in directory
     #always recompile the folder plugin
-    dir = find_plugins_dir()
     if not os.path.isdir(dir):
         msg = "SasView couldn't locate Model plugin folder."
         msg += """ "%s" does not exist""" % dir
@@ -167,14 +173,14 @@ def _findModels(dir):
     else:
         log("looking for models in: %s" % str(dir))
         compile_file(dir)
-        logging.info("pluging model dir: %s\n" % str(dir))
+        logging.info("plugin model dir: %s" % str(dir))
     try:
         list = os.listdir(dir)
         for item in list:
             toks = os.path.splitext(os.path.basename(item))
             if toks[1] == '.py' and not toks[0] == '__init__':
                 name = toks[0]
-            
+
                 path = [os.path.abspath(dir)]
                 file = None
                 try:
@@ -187,22 +193,23 @@ def _findModels(dir):
                         except:
                             msg = "Error accessing Model"
                             msg += "in %s\n  %s %s\n" % (name,
-                                    str(sys.exc_type), sys.exc_value)
+                                                         str(sys.exc_type),
+                                                         sys.exc_info()[1])
                             log(msg)
                 except:
                     msg = "Error accessing Model"
                     msg += " in %s\n  %s %s \n" % (name,
-                                    str(sys.exc_type), sys.exc_value)
+                                                   str(sys.exc_type),
+                                                   sys.exc_info()[1])
                     log(msg)
                 finally:
-              
+
                     if not file == None:
                         file.close()
     except:
         # Don't deal with bad plug-in imports. Just skip.
-        msg = "Could not import model plugin: %s\n" % sys.exc_value
+        msg = "Could not import model plugin: %s" % sys.exc_info()[1]
         log(msg)
-        pass
     return plugins
 
 
@@ -214,30 +221,30 @@ class ModelList(object):
         """
         """
         self.mydict = {}
-        
+
     def set_list(self, name, mylist):
         """
         :param name: the type of the list
         :param mylist: the list to add
-        
+
         """
         if name not in self.mydict.keys():
             self.reset_list(name, mylist)
-            
+
     def reset_list(self, name, mylist):
         """
         :param name: the type of the list
         :param mylist: the list to add
         """
         self.mydict[name] = mylist
-            
+
     def get_list(self):
         """
         return all the list stored in a dictionary object
         """
         return self.mydict
-        
-        
+
+
 class ModelManagerBase:
     """
         Base class for the model manager
@@ -248,7 +255,7 @@ class ModelManagerBase:
     form_factor_dict = {}
     ## dictionary of structure factor models
     struct_factor_dict = {}
-    ##list of shape models -- this is superseded by categories 
+    ##list of shape models -- this is superseded by categories
 #    shape_list = []
     ## shape independent model list-- this is superseded by categories
 #    shape_indep_list = []
@@ -263,14 +270,14 @@ class ModelManagerBase:
     ## Event owner (guiframe)
     event_owner = None
     last_time_dir_modified = 0
-    
+
     def __init__(self):
         """
         """
         self.model_dictionary = {}
         self.stored_plugins = {}
         self._getModelList()
-        
+
     def findModels(self):
         """
         find  plugin model in directory of plugin .recompile all file
@@ -279,22 +286,22 @@ class ModelManagerBase:
         temp = {}
         if self.is_changed():
             return  _findModels(dir)
-        logging.info("pluging model : %s\n" % str(temp))
+        logging.info("plugin model : %s" % str(temp))
         return temp
-        
+
     def _getModelList(self):
         """
         List of models we want to make available by default
         for this application
-    
+
         :return: the next free event ID following the new menu events
-        
+
         """
 
         ## NOTE: as of April 26, 2014, as part of first pass on fixing categories,
-        ## all the appends to shape_list or shape_independent_list are 
-        ## commented out.  They should be possible to remove.  They are in 
-        ## fact a "category" of model whereas the other list are actually 
+        ## all the appends to shape_list or shape_independent_list are
+        ## commented out.  They should be possible to remove.  They are in
+        ## fact a "category" of model whereas the other list are actually
         ## "attributes" of a model.  In other words is it a structure factor
         ## that can be used against a form factor, is it a form factor that is
         ## knows how to be multiplied by a structure factor, does it have user
@@ -303,8 +310,8 @@ class ModelManagerBase:
         ## We hope this whole list will be superseded by the new C models
         ## structure where each model will provide a method to interrogate it
         ## about its "attributes" -- then this long list becomes a loop reading
-        ## each model in the category list to populate the "attribute"lists.  
-        ## We should also refactor the whole category vs attribute list 
+        ## each model in the category list to populate the "attribute"lists.
+        ## We should also refactor the whole category vs attribute list
         ## structure when doing this as now the attribute lists think they are
         ## also category lists.
         ##
@@ -336,7 +343,7 @@ class ModelManagerBase:
              self.multiplication_factor.append(SphereModel)
         #     self.model_name_list.append(SphereModel.__name__)
         except:
-             pass
+            pass
 
         try:
             from sas.models.BinaryHSModel import BinaryHSModel
@@ -344,7 +351,7 @@ class ModelManagerBase:
             #        self.shape_list.append(BinaryHSModel)
             self.model_name_list.append(BinaryHSModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(BinaryHSModel.__name__))
 
         try:
             from sas.models.FuzzySphereModel import FuzzySphereModel
@@ -353,7 +360,7 @@ class ModelManagerBase:
             self.multiplication_factor.append(FuzzySphereModel)
             self.model_name_list.append(FuzzySphereModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(FuzzySphereModel.__name__))
 
         try:
             from sas.models.RaspBerryModel import RaspBerryModel
@@ -361,7 +368,7 @@ class ModelManagerBase:
             #        self.shape_list.append(RaspBerryModel)
             self.model_name_list.append(RaspBerryModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(RaspBerryModel.__name__))
 
         try:
             from sas.models.CoreShellModel import CoreShellModel
@@ -371,7 +378,7 @@ class ModelManagerBase:
             self.multiplication_factor.append(CoreShellModel)
             self.model_name_list.append(CoreShellModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(CoreShellModel.__name__))
 
         try:
             from sas.models.Core2ndMomentModel import Core2ndMomentModel
@@ -379,8 +386,8 @@ class ModelManagerBase:
             #        self.shape_list.append(Core2ndMomentModel)
             self.model_name_list.append(Core2ndMomentModel.__name__)
         except:
-            pass
-
+            logging.error(base_message.format(Core2ndMomentModel.__name__))
+            
         try:
             from sas.models.CoreMultiShellModel import CoreMultiShellModel
             self.model_dictionary[CoreMultiShellModel.__name__] = CoreMultiShellModel
@@ -388,7 +395,7 @@ class ModelManagerBase:
             self.multiplication_factor.append(CoreMultiShellModel)
             self.multi_func_list.append(CoreMultiShellModel)
         except:
-            pass
+            logging.error(base_message.format(CoreMultiShellModel.__name__))
 
         try:
             from sas.models.VesicleModel import VesicleModel
@@ -397,7 +404,7 @@ class ModelManagerBase:
             self.multiplication_factor.append(VesicleModel)
             self.model_name_list.append(VesicleModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(VesicleModel.__name__))
 
         try:
             from sas.models.MultiShellModel import MultiShellModel
@@ -406,7 +413,7 @@ class ModelManagerBase:
             self.multiplication_factor.append(MultiShellModel)
             self.model_name_list.append(MultiShellModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(MultiShellModel.__name__))
 
         try:
             from sas.models.OnionExpShellModel import OnionExpShellModel
@@ -415,7 +422,7 @@ class ModelManagerBase:
             self.multiplication_factor.append(OnionExpShellModel)
             self.multi_func_list.append(OnionExpShellModel)
         except:
-            pass
+            logging.error(base_message.format(OnionExpShellModel.__name__))
 
         try:
             from sas.models.SphericalSLDModel import SphericalSLDModel
@@ -425,7 +432,7 @@ class ModelManagerBase:
             self.multiplication_factor.append(SphericalSLDModel)
             self.multi_func_list.append(SphericalSLDModel)
         except:
-            pass
+            logging.error(base_message.format(SphericalSLDModel.__name__))
 
         try:
             from sas.models.LinearPearlsModel import LinearPearlsModel
@@ -434,7 +441,7 @@ class ModelManagerBase:
             #        self.shape_list.append(LinearPearlsModel)
             self.model_name_list.append(LinearPearlsModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(LinearPearlsModel.__name__))
 
         try:
             from sas.models.PearlNecklaceModel import PearlNecklaceModel
@@ -443,7 +450,7 @@ class ModelManagerBase:
             #        self.shape_list.append(PearlNecklaceModel)
             self.model_name_list.append(PearlNecklaceModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(PearlNecklaceModel.__name__))
 
         try:
             from sas.models.CylinderModel import CylinderModel
@@ -453,7 +460,7 @@ class ModelManagerBase:
             self.multiplication_factor.append(CylinderModel)
             self.model_name_list.append(CylinderModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(CylinderModel.__name__))
 
         try:
             from sas.models.CoreShellCylinderModel import CoreShellCylinderModel
@@ -463,7 +470,7 @@ class ModelManagerBase:
             self.multiplication_factor.append(CoreShellCylinderModel)
             self.model_name_list.append(CoreShellCylinderModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(CoreShellCylinderModel.__name__))
 
         try:
             from sas.models.CoreShellBicelleModel import CoreShellBicelleModel
@@ -473,7 +480,7 @@ class ModelManagerBase:
             self.multiplication_factor.append(CoreShellBicelleModel)
             self.model_name_list.append(CoreShellBicelleModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(CoreShellBicelleModel.__name__))
 
         try:
             from sas.models.HollowCylinderModel import HollowCylinderModel
@@ -483,7 +490,7 @@ class ModelManagerBase:
             self.multiplication_factor.append(HollowCylinderModel)
             self.model_name_list.append(HollowCylinderModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(HollowCylinderModel.__name__))
 
         try:
             from sas.models.FlexibleCylinderModel import FlexibleCylinderModel
@@ -492,7 +499,7 @@ class ModelManagerBase:
             #        self.shape_list.append(FlexibleCylinderModel)
             self.model_name_list.append(FlexibleCylinderModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(FlexibleCylinderModel.__name__))
 
         try:
             from sas.models.FlexCylEllipXModel import FlexCylEllipXModel
@@ -501,7 +508,7 @@ class ModelManagerBase:
             #        self.shape_list.append(FlexCylEllipXModel)
             self.model_name_list.append(FlexCylEllipXModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(FlexCylEllipXModel.__name__))
 
         try:
             from sas.models.StackedDisksModel import StackedDisksModel
@@ -511,7 +518,7 @@ class ModelManagerBase:
             self.multiplication_factor.append(StackedDisksModel)
             self.model_name_list.append(StackedDisksModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(StackedDisksModel.__name__))
 
         try:
             from sas.models.ParallelepipedModel import ParallelepipedModel
@@ -521,7 +528,7 @@ class ModelManagerBase:
             self.multiplication_factor.append(ParallelepipedModel)
             self.model_name_list.append(ParallelepipedModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(ParallelepipedModel.__name__))
 
         try:
             from sas.models.CSParallelepipedModel import CSParallelepipedModel
@@ -531,7 +538,7 @@ class ModelManagerBase:
             self.multiplication_factor.append(CSParallelepipedModel)
             self.model_name_list.append(CSParallelepipedModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(CSParallelepipedModel.__name__))
 
         try:
             from sas.models.EllipticalCylinderModel import EllipticalCylinderModel
@@ -541,7 +548,7 @@ class ModelManagerBase:
             self.multiplication_factor.append(EllipticalCylinderModel)
             self.model_name_list.append(EllipticalCylinderModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(EllipticalCylinderModel.__name__))
 
         try:
             from sas.models.CappedCylinderModel import CappedCylinderModel
@@ -550,7 +557,7 @@ class ModelManagerBase:
             #       self.shape_list.append(CappedCylinderModel)
             self.model_name_list.append(CappedCylinderModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(CappedCylinderModel.__name__))
 
         try:
             from sas.models.EllipsoidModel import EllipsoidModel
@@ -560,7 +567,7 @@ class ModelManagerBase:
             self.multiplication_factor.append(EllipsoidModel)
             self.model_name_list.append(EllipsoidModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(EllipsoidModel.__name__))
 
         try:
             from sas.models.CoreShellEllipsoidModel import CoreShellEllipsoidModel
@@ -570,7 +577,7 @@ class ModelManagerBase:
             self.multiplication_factor.append(CoreShellEllipsoidModel)
             self.model_name_list.append(CoreShellEllipsoidModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(CoreShellEllipsoidModel.__name__))
 
         try:
             from sas.models.CoreShellEllipsoidXTModel import CoreShellEllipsoidXTModel
@@ -580,7 +587,7 @@ class ModelManagerBase:
             self.multiplication_factor.append(CoreShellEllipsoidXTModel)
             self.model_name_list.append(CoreShellEllipsoidXTModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(CoreShellEllipsoidXTModel.__name__))
 
         try:
             from sas.models.TriaxialEllipsoidModel import TriaxialEllipsoidModel
@@ -590,7 +597,7 @@ class ModelManagerBase:
             self.multiplication_factor.append(TriaxialEllipsoidModel)
             self.model_name_list.append(TriaxialEllipsoidModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(TriaxialEllipsoidModel.__name__))
 
         try:
             from sas.models.LamellarModel import LamellarModel
@@ -599,7 +606,7 @@ class ModelManagerBase:
             #        self.shape_list.append(LamellarModel)
             self.model_name_list.append(LamellarModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(LamellarModel.__name__))
 
         try:
             from sas.models.LamellarFFHGModel import LamellarFFHGModel
@@ -608,7 +615,7 @@ class ModelManagerBase:
             #        self.shape_list.append(LamellarFFHGModel)
             self.model_name_list.append(LamellarFFHGModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(LamellarFFHGModel.__name__))
 
         try:
             from sas.models.LamellarPSModel import LamellarPSModel
@@ -617,7 +624,7 @@ class ModelManagerBase:
             #        self.shape_list.append(LamellarPSModel)
             self.model_name_list.append(LamellarPSModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(LamellarPSModel.__name__))
 
         try:
             from sas.models.LamellarPSHGModel import LamellarPSHGModel
@@ -626,7 +633,7 @@ class ModelManagerBase:
             #        self.shape_list.append(LamellarPSHGModel)
             self.model_name_list.append(LamellarPSHGModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(LamellarPSHGModel.__name__))
 
         try:
             from sas.models.LamellarPCrystalModel import LamellarPCrystalModel
@@ -635,7 +642,7 @@ class ModelManagerBase:
             #        self.shape_list.append(LamellarPCrystalModel)
             self.model_name_list.append(LamellarPCrystalModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(LamellarPCrystalModel.__name__))
 
         try:
             from sas.models.SCCrystalModel import SCCrystalModel
@@ -644,8 +651,8 @@ class ModelManagerBase:
             #        self.shape_list.append(SCCrystalModel)
             self.model_name_list.append(SCCrystalModel.__name__)
         except:
-            pass
-
+            logging.error(base_message.format(SCCrystalModel.__name__))
+            
         try:
             from sas.models.FCCrystalModel import FCCrystalModel
 
@@ -653,7 +660,7 @@ class ModelManagerBase:
             #        self.shape_list.append(FCCrystalModel)
             self.model_name_list.append(FCCrystalModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(FCCrystalModel.__name__))
 
         try:
             from sas.models.BCCrystalModel import BCCrystalModel
@@ -662,7 +669,7 @@ class ModelManagerBase:
             #        self.shape_list.append(BCCrystalModel)
             self.model_name_list.append(BCCrystalModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(BCCrystalModel.__name__))
 
 
         ## Structure factor
@@ -673,7 +680,7 @@ class ModelManagerBase:
             self.struct_list.append(SquareWellStructure)
             self.model_name_list.append(SquareWellStructure.__name__)
         except:
-            pass
+            logging.error(base_message.format(SquareWellStructure.__name__))
 
         try:
             from sas.models.HardsphereStructure import HardsphereStructure
@@ -682,7 +689,7 @@ class ModelManagerBase:
             self.struct_list.append(HardsphereStructure)
             self.model_name_list.append(HardsphereStructure.__name__)
         except:
-            pass
+            logging.error(base_message.format(HardsphereStructure.__name__))
 
         try:
             from sas.models.StickyHSStructure import StickyHSStructure
@@ -691,7 +698,7 @@ class ModelManagerBase:
             self.struct_list.append(StickyHSStructure)
             self.model_name_list.append(StickyHSStructure.__name__)
         except:
-            pass
+            logging.error(base_message.format(StickyHSStructure.__name__))
 
         try:
             from sas.models.HayterMSAStructure import HayterMSAStructure
@@ -700,7 +707,7 @@ class ModelManagerBase:
             self.struct_list.append(HayterMSAStructure)
             self.model_name_list.append(HayterMSAStructure.__name__)
         except:
-            pass
+            logging.error(base_message.format(HayterMSAStructure.__name__))
 
 
 
@@ -712,7 +719,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(PowerLawAbsModel)
             self.model_name_list.append(PowerLawAbsModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(PowerLawAbsModel.__name__))
 
         try:
             from sas.models.BEPolyelectrolyte import BEPolyelectrolyte
@@ -720,9 +727,9 @@ class ModelManagerBase:
             self.model_dictionary[BEPolyelectrolyte.__name__] = BEPolyelectrolyte
             #        self.shape_indep_list.append(BEPolyelectrolyte)
             self.model_name_list.append(BEPolyelectrolyte.__name__)
-            self.form_factor_dict[str(wx.NewId())] =  [SphereModel]
+            self.form_factor_dict[str(wx.NewId())] = [SphereModel]
         except:
-            pass
+            logging.error(base_message.format(BEPolyelectrolyte.__name__))
 
         try:
             from sas.models.BroadPeakModel import BroadPeakModel
@@ -731,7 +738,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(BroadPeakModel)
             self.model_name_list.append(BroadPeakModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(BroadPeakModel.__name__))
 
         try:
             from sas.models.CorrLengthModel import CorrLengthModel
@@ -740,7 +747,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(CorrLengthModel)
             self.model_name_list.append(CorrLengthModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(CorrLengthModel.__name__))
 
         try:
             from sas.models.DABModel import DABModel
@@ -749,7 +756,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(DABModel)
             self.model_name_list.append(DABModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(DABModel.__name__))
 
         try:
             from sas.models.DebyeModel import DebyeModel
@@ -758,7 +765,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(DebyeModel)
             self.model_name_list.append(DebyeModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(DebyeModel.__name__))
 
         try:
             from sas.models.FractalModel import FractalModel
@@ -767,7 +774,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(FractalModel)
             self.model_name_list.append(FractalModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(FractalModel.__name__))
 
         try:
             from sas.models.FractalCoreShellModel import FractalCoreShellModel
@@ -776,7 +783,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(FractalCoreShellModel)
             self.model_name_list.append(FractalCoreShellModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(FractalCoreShellModel.__name__))
 
         try:
             from sas.models.GaussLorentzGelModel import GaussLorentzGelModel
@@ -785,7 +792,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(GaussLorentzGelModel)
             self.model_name_list.append(GaussLorentzGelModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(GaussLorentzGelModel.__name__))
 
         try:
             from sas.models.GuinierModel import GuinierModel
@@ -794,7 +801,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(GuinierModel)
             self.model_name_list.append(GuinierModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(GuinierModel.__name__))
 
         try:
             from sas.models.GuinierPorodModel import GuinierPorodModel
@@ -803,7 +810,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(GuinierPorodModel)
             self.model_name_list.append(GuinierPorodModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(GuinierPorodModel.__name__))
 
         try:
             from sas.models.LorentzModel import LorentzModel
@@ -812,7 +819,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(LorentzModel)
             self.model_name_list.append(LorentzModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(LorentzModel.__name__))
 
         try:
             from sas.models.MassFractalModel import MassFractalModel
@@ -821,7 +828,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(MassFractalModel)
             self.model_name_list.append(MassFractalModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(MassFractalModel.__name__))
 
         try:
             from sas.models.MassSurfaceFractal import MassSurfaceFractal
@@ -830,7 +837,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(MassSurfaceFractal)
             self.model_name_list.append(MassSurfaceFractal.__name__)
         except:
-            pass
+            logging.error(base_message.format(MassSurfaceFractal.__name__))
 
         try:
             from sas.models.PeakGaussModel import PeakGaussModel
@@ -839,7 +846,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(PeakGaussModel)
             self.model_name_list.append(PeakGaussModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(PeakGaussModel.__name__))
 
         try:
             from sas.models.PeakLorentzModel import PeakLorentzModel
@@ -848,7 +855,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(PeakLorentzModel)
             self.model_name_list.append(PeakLorentzModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(PeakLorentzModel.__name__))
 
         try:
             from sas.models.Poly_GaussCoil import Poly_GaussCoil
@@ -857,7 +864,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(Poly_GaussCoil)
             self.model_name_list.append(Poly_GaussCoil.__name__)
         except:
-            pass
+            logging.error(base_message.format(Poly_GaussCoil.__name__))
 
         try:
             from sas.models.PolymerExclVolume import PolymerExclVolume
@@ -866,7 +873,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(PolymerExclVolume)
             self.model_name_list.append(PolymerExclVolume.__name__)
         except:
-            pass
+            logging.error(base_message.format(PolymerExclVolume.__name__))
 
         try:
             from sas.models.PorodModel import PorodModel
@@ -875,7 +882,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(PorodModel)
             self.model_name_list.append(PorodModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(PorodModel.__name__))
 
         try:
             from sas.models.RPA10Model import RPA10Model
@@ -884,7 +891,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(RPA10Model)
             self.multi_func_list.append(RPA10Model)
         except:
-            pass
+            logging.error(base_message.format(RPA10Model.__name__))
 
         try:
             from sas.models.StarPolymer import StarPolymer
@@ -893,7 +900,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(StarPolymer)
             self.model_name_list.append(StarPolymer.__name__)
         except:
-            pass
+            logging.error(base_message.format(StarPolymer.__name__))
 
         try:
             from sas.models.SurfaceFractalModel import SurfaceFractalModel
@@ -902,7 +909,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(SurfaceFractalModel)
             self.model_name_list.append(SurfaceFractalModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(SurfaceFractalModel.__name__))
 
         try:
             from sas.models.TeubnerStreyModel import TeubnerStreyModel
@@ -911,7 +918,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(TeubnerStreyModel)
             self.model_name_list.append(TeubnerStreyModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(TeubnerStreyModel.__name__))
 
         try:
             from sas.models.TwoLorentzianModel import TwoLorentzianModel
@@ -920,7 +927,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(TwoLorentzianModel)
             self.model_name_list.append(TwoLorentzianModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(TwoLorentzianModel.__name__))
 
         try:
             from sas.models.TwoPowerLawModel import TwoPowerLawModel
@@ -929,7 +936,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(TwoPowerLawModel)
             self.model_name_list.append(TwoPowerLawModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(TwoPowerLawModel.__name__))
 
         try:
             from sas.models.UnifiedPowerRgModel import UnifiedPowerRgModel
@@ -938,7 +945,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(UnifiedPowerRgModel)
             self.multi_func_list.append(UnifiedPowerRgModel)
         except:
-            pass
+            logging.error(base_message.format(UnifiedPowerRgModel.__name__))
 
         try:
             from sas.models.LineModel import LineModel
@@ -947,7 +954,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(LineModel)
             self.model_name_list.append(LineModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(LineModel.__name__))
 
         try:
             from sas.models.ReflectivityModel import ReflectivityModel
@@ -956,7 +963,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(ReflectivityModel)
             self.multi_func_list.append(ReflectivityModel)
         except:
-            pass
+            logging.error(base_message.format(ReflectivityModel.__name__))
 
         try:
             from sas.models.ReflectivityIIModel import ReflectivityIIModel
@@ -965,7 +972,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(ReflectivityIIModel)
             self.multi_func_list.append(ReflectivityIIModel)
         except:
-            pass
+            logging.error(base_message.format(ReflectivityIIModel.__name__))
 
         try:
             from sas.models.GelFitModel import GelFitModel
@@ -974,7 +981,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(GelFitModel)
             self.model_name_list.append(GelFitModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(GelFitModel.__name__))
 
         try:
             from sas.models.PringlesModel import PringlesModel
@@ -983,7 +990,7 @@ class ModelManagerBase:
             #        self.shape_indep_list.append(PringlesModel)
             self.model_name_list.append(PringlesModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(PringlesModel.__name__))
 
         try:
             from sas.models.RectangularPrismModel import RectangularPrismModel
@@ -993,7 +1000,7 @@ class ModelManagerBase:
             self.multiplication_factor.append(RectangularPrismModel)
             self.model_name_list.append(RectangularPrismModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(RectangularPrismModel.__name__))
 
         try:
             from sas.models.RectangularHollowPrismInfThinWallsModel import RectangularHollowPrismInfThinWallsModel
@@ -1003,7 +1010,7 @@ class ModelManagerBase:
             self.multiplication_factor.append(RectangularHollowPrismInfThinWallsModel)
             self.model_name_list.append(RectangularHollowPrismInfThinWallsModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(RectangularHollowPrismInfThinWallsModel.__name__))
 
         try:
             from sas.models.RectangularHollowPrismModel import RectangularHollowPrismModel
@@ -1013,7 +1020,7 @@ class ModelManagerBase:
             self.multiplication_factor.append(RectangularHollowPrismModel)
             self.model_name_list.append(RectangularHollowPrismModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(RectangularHollowPrismModel.__name__))
 
         try:
             from sas.models.MicelleSphCoreModel import MicelleSphCoreModel
@@ -1023,7 +1030,7 @@ class ModelManagerBase:
             self.multiplication_factor.append(MicelleSphCoreModel)
             self.model_name_list.append(MicelleSphCoreModel.__name__)
         except:
-            pass
+            logging.error(base_message.format(MicelleSphCoreModel.__name__))
 
 
 
@@ -1031,15 +1038,15 @@ class ModelManagerBase:
         #self.model_dictionary[FractalO_Z.__name__] = FractalO_Z
         #self.shape_indep_list.append(FractalO_Z)
         #self.model_name_list.append(FractalO_Z.__name__)
-    
+
         #Looking for plugins
         self.stored_plugins = self.findModels()
         self.plugins = self.stored_plugins.values()
         for name, plug in self.stored_plugins.iteritems():
             self.model_dictionary[name] = plug
-            
+
         self._get_multifunc_models()
-       
+
         return 0
 
     def is_changed(self):
@@ -1054,9 +1061,9 @@ class ModelManagerBase:
             if  self.last_time_dir_modified != temp:
                 is_modified = True
                 self.last_time_dir_modified = temp
-        
+
         return is_modified
-    
+
     def update(self):
         """
         return a dictionary of model if
@@ -1073,7 +1080,7 @@ class ModelManagerBase:
             return self.model_combobox.get_list()
         else:
             return {}
-    
+
     def pulgins_reset(self):
         """
         return a dictionary of model
@@ -1092,7 +1099,7 @@ class ModelManagerBase:
 
         self.model_combobox.reset_list("Customized Models", self.plugins)
         return self.model_combobox.get_list()
-       
+
 ##   I believe the next four methods are for the old form factor GUI
 ##   where the dropdown showed a list of categories which then rolled out
 ##   in a second dropdown to the side. Some testing shows they indeed no longer
@@ -1119,7 +1126,7 @@ class ModelManagerBase:
 #        self.modelmenu = modelmenu
         ## guiframe reference
 #        self.event_owner = event_owner
-        
+
 #        shape_submenu = wx.Menu()
 #        shape_indep_submenu = wx.Menu()
 #        structure_factor = wx.Menu()
@@ -1130,27 +1137,27 @@ class ModelManagerBase:
 #                                         shape_submenu,
 #                                         " simple shape"],
 #                         list1=self.shape_list)
-        
+
 #        self._fill_simple_menu(menuinfo=["Shape-Independent",
 #                                         shape_indep_submenu,
 #                                         "List of shape-independent models"],
 #                         list1=self.shape_indep_list)
-        
+
 #        self._fill_simple_menu(menuinfo=["Structure Factors",
 #                                         structure_factor,
 #                                         "List of Structure factors models"],
 #                                list1=self.struct_list)
-        
+
 #        self._fill_plugin_menu(menuinfo=["Customized Models", added_models,
 #                                            "List of additional models"],
 #                                 list1=self.plugins)
-        
+
 #        self._fill_menu(menuinfo=["P(Q)*S(Q)", multip_models,
 #                                  "mulplication of 2 models"],
 #                                   list1=self.multiplication_factor,
 #                                   list2=self.struct_list)
 #        return 0
-    
+
 #    def _fill_plugin_menu(self, menuinfo, list1):
 #        """
 #        fill the plugin menu with costumized models
@@ -1161,7 +1168,7 @@ class ModelManagerBase:
 #            msg = "No model available check plugins.log for errors to fix problem"
 #            menuinfo[1].Append(int(id), "Empty", msg)
 #        self._fill_simple_menu(menuinfo, list1)
-        
+
 #   def _fill_simple_menu(self, menuinfo, list1):
 #       """
 #       Fill the menu with list item
@@ -1175,7 +1182,7 @@ class ModelManagerBase:
 #       """
 #       if len(list1) > 0:
 #           self.model_combobox.set_list(menuinfo[0], list1)
-            
+
 #            for item in list1:
 #                try:
 #                    id = wx.NewId()
@@ -1235,13 +1242,13 @@ class ModelManagerBase:
 #                                       newmenu, menuinfo[2])
 #        id = wx.NewId()
 #        self.modelmenu.AppendMenu(id, menuinfo[0], menuinfo[1], menuinfo[2])
-        
+
     def _on_model(self, evt):
         """
         React to a model menu event
-        
+
         :param event: wx menu event
-        
+
         """
         if int(evt.GetId()) in self.form_factor_dict.keys():
             from sas.models.MultiplicationModel import MultiplicationModel
@@ -1250,12 +1257,12 @@ class ModelManagerBase:
             model = MultiplicationModel(model1, model2)
         else:
             model = self.struct_factor_dict[str(evt.GetId())]()
-        
+
         #TODO: investigate why the following two lines were left in the code
         #      even though the ModelEvent class doesn't exist
         #evt = ModelEvent(model=model)
         #wx.PostEvent(self.event_owner, evt)
-        
+
     def _get_multifunc_models(self):
         """
         Get the multifunctional models
@@ -1268,11 +1275,11 @@ class ModelManagerBase:
             except:
                 # pass to other items
                 pass
-                    
+
     def get_model_list(self):
         """
         return dictionary of models for fitpanel use
-        
+
         """
         ## Model_list now only contains attribute lists not category list.
         ## Eventually this should be in one master list -- read in category
@@ -1281,7 +1288,7 @@ class ModelManagerBase:
         ## and update json file.
         ##
         ## -PDB   April 26, 2014
-        
+
 #        self.model_combobox.set_list("Shapes", self.shape_list)
 #        self.model_combobox.set_list("Shape-Independent",
 #                                     self.shape_indep_list)
@@ -1292,7 +1299,7 @@ class ModelManagerBase:
                                      self.multiplication_factor)
         self.model_combobox.set_list("Multi-Functions", self.multi_func_list)
         return self.model_combobox.get_list()
-    
+
     def get_model_name_list(self):
         """
         return regular model name list
@@ -1304,8 +1311,8 @@ class ModelManagerBase:
         return dictionary linking model names to objects
         """
         return self.model_dictionary
-  
-        
+
+
 class ModelManager(object):
     """
     implement model
@@ -1318,31 +1325,31 @@ class ModelManager(object):
     CategoryInstaller.check_install(model_list=cat_model_list)
     def findModels(self):
         return self.__modelmanager.findModels()
-    
+
     def _getModelList(self):
         return self.__modelmanager._getModelList()
-    
+
     def is_changed(self):
         return self.__modelmanager.is_changed()
-    
+
     def update(self):
         return self.__modelmanager.update()
-    
+
     def pulgins_reset(self):
         return self.__modelmanager.pulgins_reset()
-    
+
     def populate_menu(self, modelmenu, event_owner):
         return self.__modelmanager.populate_menu(modelmenu, event_owner)
-    
+
     def _on_model(self, evt):
         return self.__modelmanager._on_model(evt)
-    
+
     def _get_multifunc_models(self):
         return self.__modelmanager._get_multifunc_models()
-    
+
     def get_model_list(self):
         return self.__modelmanager.get_model_list()
-    
+
     def get_model_name_list(self):
         return self.__modelmanager.get_model_name_list()
 

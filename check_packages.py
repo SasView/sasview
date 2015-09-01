@@ -18,7 +18,7 @@ common_required_package_list = {
     'PIL':{'version':'1.1.7','import_name':'Image','test':'VERSION'},
     'pylint':{'version':None,'import_name':'pylint','test':None},
     'periodictable':{'version':'1.3.0','import_name':'periodictable','test':'__version__'},
-    'bumps':{'version':'0.7.5.4','import_name':'bumps','test':'__version__'},
+    'bumps':{'version':'0.7.5.6','import_name':'bumps','test':'__version__'},
     'numpy':{'version':'1.6.1','import_name':'numpy','test':'__version__'},
     'scipy':{'version':'0.10.1','import_name':'scipy','test':'__version__'},
     'wx':{'version':'2.8.12.1','import_name':'wx','test':'__version__'},

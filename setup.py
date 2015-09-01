@@ -157,11 +157,7 @@ class BuildSphinxCommand(Command):
     def run(self):
         sys.path.append("docs/sphinx-docs")
         import build_sphinx
-
-        build_sphinx.clean()
-        build_sphinx.retrieve_user_docs()
-        build_sphinx.apidoc()
-        build_sphinx.build()
+        build_sphinx.rebuild()
 
 # sas module
 package_dir["sas"] = os.path.join("src", "sas")
@@ -206,7 +202,7 @@ ext_modules.append( Extension("sas.pr.core.pr_inversion",
                               include_dirs=[numpy_incl_path],
                               ) )
         
-# sas.fit (park integration)
+# sas.fit
 package_dir["sas.fit"] = os.path.join("src", "sas", "fit")
 packages.append("sas.fit")
 
@@ -236,18 +232,6 @@ packages.append("sas.data_util")
 # Plottools
 package_dir["sas.plottools"] = os.path.join("src", "sas", "plottools")
 packages.append("sas.plottools")
-
-# Park 1.2.1
-package_dir["park"]="park-1.2.1/park"
-packages.extend(["park"])
-package_data["park"] = ['park-1.2.1/*.txt', 'park-1.2.1/park.epydoc']
-ext_modules.append( Extension("park._modeling",
-                              sources = [ os.path.join("park-1.2.1", 
-                                                "park", "lib", "modeling.cc"),
-                                         os.path.join("park-1.2.1", 
-                                                "park", "lib", "resolution.c"),
-                                         ],
-                              ) )
 
 # sas models
 includedir  = os.path.join("src", "sas", "models", "include")
@@ -359,12 +343,18 @@ packages.append("sas.models")
 # SasView
 
 package_dir["sas.sasview"] = "sasview"
-package_data['sas.sasview'] = ['images/*', 'media/*', 'test/*', 
+package_data['sas.sasview'] = ['images/*', 
+                               'media/*',
+                               'test/*.txt',
+                               'test/1d_data/*',
+                               'test/2d_data/*',
+                               'test/save_states/*',
+                               'test/upcoming_formats/*', 
                                  'default_categories.json']
 packages.append("sas.sasview")
 
 required = [
-    'bumps>=0.7.5.4', 'periodictable>=1.3.1', 'pyparsing<2.0.0',
+    'bumps>=0.7.5.6', 'periodictable>=1.3.1', 'pyparsing<2.0.0',
 
     # 'lxml>=2.2.2',
     'lxml', 
@@ -385,12 +375,12 @@ setup(
     name="sasview",
     version = VERSION,
     description = "SasView application",
-    author = "University of Tennessee",
-    author_email = "sansdanse@gmail.com",
+    author = "SasView Team",
+    author_email = "developers@sasview.org",
     url = "http://sasview.org",
     license = "PSF",
     keywords = "small-angle x-ray and neutron scattering analysis",
-    download_url = "https://sourceforge.net/projects/sansviewproject/files/",
+    download_url = "https://github.com/SasView/sasview.git",
     package_dir = package_dir,
     packages = packages,
     package_data = package_data,

@@ -15,6 +15,8 @@ from sas.perspectives.calculator.calculator_widgets import InputTextCtrl
 from sas.dataloader.data_info import Data2D
 from sas.dataloader.data_info import Detector
 from sas.dataloader.manipulations import reader2D_converter
+from sas.guiframe.documentation_window import DocumentationWindow
+
 _BOX_WIDTH = 60
 IS_WIN = True
 if sys.platform.count("win32") > 0:
@@ -33,7 +35,7 @@ class ImageView:
         Init
         """
         self.parent = parent
-        
+
     def load(self):
         """
         load image files
@@ -58,53 +60,35 @@ class ImageView:
                 is_png = extension.lower() == '.png'
                 plot_frame = ImageFrame(parent, -1, basename, img)
                 plot_frame.Show(False)
-                #plot_frame.im_show(img)
                 ax = plot_frame.plotpanel
                 if not is_png:
                     ax.subplot.set_ylim(ax.subplot.get_ylim()[::-1])
                 ax.subplot.set_xlabel('x [pixel]')
                 ax.subplot.set_ylabel('y [pixel]')
-                ax.figure.subplots_adjust(left=0.15, bottom=0.1, 
+                ax.figure.subplots_adjust(left=0.15, bottom=0.1,
                                           right=0.95, top=0.95)
-                plot_frame.SetTitle('Picture -- %s --'% basename)
+                plot_frame.SetTitle('Picture -- %s --' % basename)
                 plot_frame.Show(True)
                 if parent != None:
                     parent.put_icon(plot_frame)
             except:
                 print "parent", parent
-                raise
-                err_msg += "Failed to load '%s'.\n"% basename
+                err_msg += "Failed to load '%s'.\n" % basename
         if err_msg:
             if parent is not None:
                 wx.PostEvent(parent, StatusEvent(status=err_msg, info="error"))
             else:
                 print err_msg
 
-        
     def choose_data_file(self, location=None):
         """
         Open a file dialog to allow loading a file
         """
-        parent = self.parent
         path = None
         if location == None:
             location = os.getcwd()
-        wlist = ''
-        elist = ["All images (*.png, *.bmp, *.gif, *.jpg, *.tif, *.tiff) | \
-                *.png; *.bmp; *.gif; *.jpg; *.tif; *.tiff", 
-                "PNG files (*.PNG, *.png) | *.png", 
-                "BMP files (*.BMP, *.bmp) | *.bmp", 
-                "GIF files (*.GIF, *.gif) | *.gif",
-                "JPG files (*.JPG, *.jpg) | *.jpg",
-                "TIF files (*.TIF, *.tif) | *.tif",
-                "TIFF files (*.TIFF, *.tiff) | *.tiff"]
-        if not IS_WIN:
-            del elist[0]
-        elist.append("All files (*.*) | *.*")
-        wlist = '|'.join(elist)        
-        style = wx.OPEN|wx.FD_MULTIPLE
-        dlg = wx.FileDialog(parent, "Image Viewer: Choose a image file", 
-                            location, "", wlist, style=style)
+        dlg = wx.FileDialog(self.parent, "Image Viewer: Choose a image file",
+                            location, "", "", style=wx.FD_OPEN | wx.FD_MULTIPLE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPaths()
         else:
@@ -116,8 +100,8 @@ class ImageFrame(PlotFrame):
     """
     Frame for simple plot
     """
-    def __init__(self, parent, id, title, image=None, scale='log_{10}', 
-                 size=wx.Size(550, 470)): 
+    def __init__(self, parent, id, title, image=None, scale='log_{10}',
+                 size=wx.Size(550, 470)):
         """
         comment
         :Param data: image array got from imread() of matplotlib [narray]
@@ -126,9 +110,9 @@ class ImageFrame(PlotFrame):
         # Initialize the Frame object
         PlotFrame.__init__(self, parent, id, title, scale, size)
         self.parent = parent
-        self.data = image 
+        self.data = image
         self.file_name = title
-                   
+
         menu = wx.Menu()
         id = wx.NewId()
         item = wx.MenuItem(menu, id, "&Convert to Data")
@@ -142,10 +126,10 @@ class ImageFrame(PlotFrame):
         menu_help.AppendItem(item)
         wx.EVT_MENU(self, id, self.on_help)
         self.menu_bar.Append(menu_help, "&Help")
-        
+
         self.SetMenuBar(self.menu_bar)
         self.im_show(image)
-    
+
     def on_set_data(self, event):
         """
         Rescale the x y range, make 2D data and send it to data explore
@@ -154,35 +138,26 @@ class ImageFrame(PlotFrame):
         self.panel = SetDialog(parent=self, title=title, image=self.data)
         self.panel.ShowModal()
 
-    def on_help(self, event):    
+    def on_help(self, event):
         """
-        Image Viewer help panel
-        """
-        from sas.perspectives.calculator.help_panel import  HelpWindow
-        # Get models help model_function path
-        import sas.perspectives.calculator as calmedia
+        Bring up Image Viewer Documentation from the image viewer window
+        whenever the help menu item "how to" is clicked. Calls
+        DocumentationWindow with the path of the location within the
+        documentation tree (after /doc/ ....".
 
-        media = calmedia.get_data_path(media='media')
-        path = os.path.join(media,"load_image_help.html") 
-        name = "Image Viewer"
-        frame = HelpWindow(self, -1, title=' Help: Image Viewer',  
-                           pageToOpen=path, size=(640, 450))   
-        try: 
-            frame.splitter.DetachWindow(frame.lpanel)
-            # Display only the right side one
-            frame.lpanel.Hide() 
-            frame.Show(True)
-        except:
-            frame.Destroy() 
-            msg = 'Display Error\n'
-            info = "Info"
-            wx.MessageBox(msg, info)
-            
+        :param evt: Triggers on clicking "how to" in help menu
+        """
+
+        _TreeLocation = "user/perspectives/calculator/image_viewer_help.html"
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+                                          "Image Viewer Help")
+
+
 class SetDialog(wx.Dialog):
     """
     Dialog for Data Set
     """
-    def __init__(self, parent, id=-1, title="Convert to Data", image=None, 
+    def __init__(self, parent, id= -1, title="Convert to Data", image=None,
                  size=(_DIALOG_WIDTH, 270)):
         wx.Dialog.__init__(self, parent, id, title, size)
         # parent
@@ -194,17 +169,17 @@ class SetDialog(wx.Dialog):
         self.xy_ctrls = []
         self.is_png = self._get_is_png()
         self._build_layout()
-        my_title = "Convert Image to Data - %s -"% self.title
+        my_title = "Convert Image to Data - %s -" % self.title
         self.SetTitle(my_title)
         self.SetSize(size)
-    
+
     def _get_is_png(self):
         """
         Get if the image file is png
         """
         _, extension = os.path.splitext(self.title)
         return extension.lower() == '.png'
-            
+
     def _build_layout(self):
         """
         Layout
@@ -214,7 +189,7 @@ class SetDialog(wx.Dialog):
         xbox = wx.BoxSizer(wx.HORIZONTAL)
         ybox = wx.BoxSizer(wx.HORIZONTAL)
         btnbox = wx.BoxSizer(wx.VERTICAL)
-        
+
         sb_title = wx.StaticBox(self, -1, 'Transform Axes')
         boxsizer = wx.StaticBoxSizer(sb_title, wx.VERTICAL)
         z_title = wx.StaticText(self, -1, 'z values (range: 0 - 255) to:')
@@ -227,7 +202,7 @@ class SetDialog(wx.Dialog):
         ymax_title = wx.StaticText(self, -1, 'ymax:')
         z_ctl = InputTextCtrl(self, -1, size=(_BOX_WIDTH , 20),
                                 style=wx.TE_PROCESS_ENTER)
-        
+
         xmin_ctl = InputTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
                                 style=wx.TE_PROCESS_ENTER)
         xmax_ctl = InputTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
@@ -246,20 +221,20 @@ class SetDialog(wx.Dialog):
         xmax_ctl.Bind(wx.EVT_TEXT, self._onparam)
         ymin_ctl.Bind(wx.EVT_TEXT, self._onparam)
         ymax_ctl.Bind(wx.EVT_TEXT, self._onparam)
-        xbox.AddMany([(x_title , 0, wx.LEFT, 0), 
-                      (xmin_title , 0, wx.LEFT, 10), 
-                      (xmin_ctl , 0, wx.LEFT, 10), 
-                      (xmax_title , 0, wx.LEFT, 10), 
+        xbox.AddMany([(x_title , 0, wx.LEFT, 0),
+                      (xmin_title , 0, wx.LEFT, 10),
+                      (xmin_ctl , 0, wx.LEFT, 10),
+                      (xmax_title , 0, wx.LEFT, 10),
                       (xmax_ctl , 0, wx.LEFT, 10)])
-        ybox.AddMany([(y_title , 0, wx.LEFT, 0), 
-                      (ymin_title , 0, wx.LEFT, 10), 
-                      (ymin_ctl , 0, wx.LEFT, 10), 
-                      (ymax_title , 0, wx.LEFT, 10), 
-                      (ymax_ctl , 0, wx.LEFT, 10)])     
-        zbox.AddMany([(z_title , 0, wx.LEFT, 0), 
+        ybox.AddMany([(y_title , 0, wx.LEFT, 0),
+                      (ymin_title , 0, wx.LEFT, 10),
+                      (ymin_ctl , 0, wx.LEFT, 10),
+                      (ymax_title , 0, wx.LEFT, 10),
+                      (ymax_ctl , 0, wx.LEFT, 10)])
+        zbox.AddMany([(z_title , 0, wx.LEFT, 0),
                       (ztime_title, 0, wx.LEFT, 10),
-                      (z_ctl , 0, wx.LEFT, 7), 
-                      ])   
+                      (z_ctl , 0, wx.LEFT, 7),
+                      ])
         msg = "The data rescaled will show up in the Data Explorer. \n"
         msg += "*Note: Recommend to use an image with 8 bit Grey \n"
         msg += "  scale (and with No. of pixels < 300 x 300).\n"
@@ -293,8 +268,8 @@ class SetDialog(wx.Dialog):
         """
         By pass original txtcrl binding
         """
-        pass    
-        
+        pass
+
     def _onparam(self, event=None):
         """
         Set to default
@@ -308,7 +283,7 @@ class SetDialog(wx.Dialog):
         flag = True
         item.SetBackgroundColour("white")
         try:
-            val = float(item.GetValue())  
+            val = float(item.GetValue())
             if val < -10.0 or val > 10.0:
                 item.SetBackgroundColour("pink")
                 item.Refresh()
@@ -321,46 +296,46 @@ class SetDialog(wx.Dialog):
             err_msg = "The allowed range of the min and max values are \n"
             err_msg += "between -10 and 10."
             if self.base is not None:
-                wx.PostEvent(self.base, StatusEvent(status=err_msg, 
+                wx.PostEvent(self.base, StatusEvent(status=err_msg,
                                                     info="error"))
             else:
                 print err_msg
         return flag
 
-    def _on_z_enter(self, event= None): 
+    def _on_z_enter(self, event=None):
         """
         On z factor enter
         """
         item = event.GetEventObject()
         self._check_z_ctrl(item)
-        
+
     def _check_z_ctrl(self, item, is_button=False):
         """
         """
         flag = True
         item.SetBackgroundColour("white")
         try:
-            val = float(item.GetValue())  
+            val = float(item.GetValue())
             if val <= 0:
                 item.SetBackgroundColour("pink")
                 item.Refresh()
                 flag = False
         except:
             item.SetBackgroundColour("pink")
-            item.Refresh() 
+            item.Refresh()
             flag = False
         if not flag and is_button:
             err_msg = "The z scale value should be larger than 0."
             if self.base is not None:
-                wx.PostEvent(self.base, StatusEvent(status=err_msg, 
+                wx.PostEvent(self.base, StatusEvent(status=err_msg,
                                                     info="error"))
             else:
                 print err_msg
-        return flag 
-    
+        return flag
+
     def on_set(self, event):
         """
-        Set image as data   
+        Set image as data
         """
         event.Skip()
         # Check the textctrl values
@@ -381,13 +356,13 @@ class SetDialog(wx.Dialog):
         except:
             err_msg = "Error occurred while converting Image to Data."
             if self.base is not None:
-                wx.PostEvent(self.base, StatusEvent(status=err_msg, 
+                wx.PostEvent(self.base, StatusEvent(status=err_msg,
                                                     info="error"))
             else:
                 print err_msg
-            
+
         self.OnClose(event)
-    
+
     def convert_image(self, rgb, xmin, xmax, ymin, ymax, zscale):
         """
         Convert image to data2D
@@ -429,7 +404,7 @@ class SetDialog(wx.Dialog):
         if self.base != None:
             data = self.base.create_gui_data(output, self.title)
             self.base.add_data({data.id:data})
-            
+
     def rgb2gray(self, rgb):
         """
         RGB to Grey
@@ -439,15 +414,15 @@ class SetDialog(wx.Dialog):
             #factor = 255.0
             rgb = rgb[::-1]
         if rgb.ndim == 2:
-            grey = np.rollaxis(rgb, axis = 0)
+            grey = np.rollaxis(rgb, axis=0)
         else:
-            red, green, blue = np.rollaxis(rgb[...,:3], axis = -1)
+            red, green, blue = np.rollaxis(rgb[..., :3], axis= -1)
             grey = 0.299 * red + 0.587 * green + 0.114 * blue
         max_i = rgb.max()
         factor = 255.0 / max_i
-        grey *= factor 
+        grey *= factor
         return np.array(grey)
-                      
+
     def OnClose(self, event):
         """
         Close event
@@ -455,10 +430,9 @@ class SetDialog(wx.Dialog):
         # clear event
         event.Skip()
         self.Destroy()
-                       
+
 if __name__ == "__main__":
-    app  = wx.App()
+    app = wx.App()
     ImageView(None).load()
-    app.MainLoop()   
-    
- 
+    app.MainLoop()
+

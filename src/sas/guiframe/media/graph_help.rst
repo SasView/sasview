@@ -3,357 +3,362 @@
 .. This is a port of the original SasView html help file to ReSTructured text
 .. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
 
+.. |delta| unicode:: U+03B4
+.. |phi| unicode:: U+03C6
+
+
 Plotting Data/Models
 ====================
 
-Graph_Menu_
+SasView generates three different types of graph window: one that displays *1D data*
+(ie, I(Q) vs Q), one that displays *1D residuals* (ie, the difference between the
+experimental data and the theory at the same Q values), and *2D color maps*.
 
-2D_Data_Averaging_
+Graph window options
+--------------------
 
-Key_Sequences_
+.. _Invoking_the_graph_menu:
 
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+Invoking the graph menu
+^^^^^^^^^^^^^^^^^^^^^^^
 
-.. _Graph_Menu:
+To invoke the *Graph Menu* simply right-click on a data/theory plot, or click 
+the *Graph Menu* (bullet list) icon in the toolbar at the bottom of the plot. 
+Then select a menu item.
 
-Graph Menu
-----------
+How to Hide-Show-Delete a graph
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Invoking_the_Graph_Menu_
+To expand a plot window, click the *Maximise* (square) icon in the top-right 
+corner.
 
-Reset_Graph_
+To shrink a plot window, click the *Restore down* (square-on-square) icon in 
+the top-right corner.
 
-Hide_Show_Delete_Graph_
+To hide a plot, click the *Minimise* (-) icon in the top-right corner of the 
+plot window.
 
-Data_Info_
+To show a hidden plot, select the *Restore up* (square-on-square) icon on the 
+minimised window.
 
-Save_Plot_Image_
+To delete a plot, click the *Close* (x) icon in the top-right corner of the 
+plot window.
 
-Save_Data_
+*NOTE! If a residuals graph (when fitting data) is hidden, it will not show up 
+after computation.*
 
-Drag_Plot_
+Dragging a plot
+^^^^^^^^^^^^^^^
 
-Zoom_In_Out_
+Select the *Pan* (crossed arrows) icon in the toolbar at the bottom of the plot 
+to activate this option. Move the mouse pointer to the plot. It will change to 
+a hand. Then left-click and drag the plot around. The axis values will adjust 
+accordingly.
+ 
+To disable dragging mode, unselect the *crossed arrows* icon on the toolbar.
 
-Remove_Data_from_Plot_
+Zooming In-Out on a plot
+^^^^^^^^^^^^^^^^^^^^^^^^
 
-Change_Scale_
+Select the *Zoom* (magnifying glass) button in the toolbar at the bottom of 
+the plot to activate this option. Move the mouse pointer to the plot. It will 
+change to a cross-hair. Then left-click and drag the pointer around to generate 
+a region of interest. Release the mouse button to generate the new view.
 
-Linear_Fit_
+To disable zoom mode, unselect the *Zoom* button on the toolbar.
 
-Other_Graph_Modifications_
+After zooming in on a a region, the *left arrow* or *right arrow* buttons on 
+the toolbar will switch between recent views.
 
-.. _Invoking_the_Graph_Menu:
+*NOTE! If a wheel mouse is available scrolling the wheel will zoom in/out 
+on the current plot (changing both axes). Alternatively, point at the numbers 
+on one axis and scroll the wheel to zoom in/out on just that axis.*
 
-Introduction
-------------
+To return to the original view of the data, click the the *Reset* (home) icon 
+in the toolbar at the bottom of the plot (see Resetting_the_graph_ for further details).
 
-Locating the pointer and right-clicking on a data/theory plot will bring a 
-context menu. On the menu, select a menu item.
+Saving a plot image
+^^^^^^^^^^^^^^^^^^^
 
-.. _Reset_Graph:
+To save the current plot as an image file, right click on the plot to bring up 
+the *Graph Menu* (see Invoking_the_graph_menu_) and select *Save Image*.
+Alternatively, click on the *Save* (floppy disk) icon in the toolbar at the 
+bottom of the plot.
+ 
+A dialog window will open. Select a folder, enter a filename, choose an output 
+image type, and click *Save*.
 
-Reset Graph
------------
+The currently supported image types are:
 
-To reset the graph's axis range, right click on the plot and the context menu 
-pops-up. Select *Reset Graph*  and the plot will take its initial range. Also 
-the 'home' icon in tool bar will do the same.
+*  EPS (encapsulated postscript)
+*  EMF (enhanced metafile)
+*  JPG/JPEG (joint photographics experts group)
+*  PDF (portable documant format)
+*  PNG (portable network graphics)
+*  PS (postscript)
+*  RAW/RGBA (bitmap)
+*  SVG/SVGA (scalable vector graphics)
+*  TIF/TIFF (tagged iamge file)
 
-.. _Hide_Show_Delete_Graph:
+Printing a plot
+^^^^^^^^^^^^^^^
 
-Hide/Show/Delete Graph
-----------------------
+To send the current plot to a printer, click on the *Print* (printer) icon in 
+the toolbar at the bottom of the plot.
 
-To Hide, click the Hide (bar) button in the tool bar.To Show, select the the 
-'Show' menu item in the 'Graph' menu in the menu bar.To Delete, click the 'x' 
-button in the title bar.
+.. _Resetting_the_graph:
 
-Note: If a residuals graph (in Fitting) is hidden, it will not show up after 
-computation.
+Resetting the graph
+^^^^^^^^^^^^^^^^^^^
 
-.. _Data_Info:
+To reset the axis range of a graph to its initial values select *Reset Graph 
+Range* on the *Graph Menu* (see Invoking_the_graph_menu_). Alternatively, use
+the *Reset* (home) icon in the toolbar at the bottom of the plot.
 
-Data Info
----------
+Modifying the graph
+^^^^^^^^^^^^^^^^^^^
 
-From the context menu, select 'Data Info' to see the data information dialog
-panel.
+From the *Graph Menu* (see Invoking_the_graph_menu_) it is also possible to
+make some custom modifications to plots, including:
 
-.. _Save_Plot_Image:
+*  changing the plot window title
+*  changing the axis legend locations
+*  changing the axis legend label text
+*  changing the axis legend label units
+*  changing the axis legend label font & font colour
+*  adding/removing a text string
+*  adding a grid overlay
 
-Save Plot Image
----------------
+Changing scales
+^^^^^^^^^^^^^^^
 
-Right click on plot. Context menu will pop-up select save image [file name].
-A dialog window opens and write a the name of the file to save and click on 
-*Save Image.*
+This menu option is only available with 1D data.
 
-.. _Save_Data:
+From the *Graph Menu* (see Invoking_the_graph_menu_) select *Change Scale*. A
+dialog window will appear in which it is possible to choose different 
+transformations of the x (usually Q) or y (usually I(Q)) axes, including:
 
-Save Data
----------
+*  x, x^2, x^4, ln(x), log10(x), log10(x^4)
+*  y, 1/y, ln(y), y^2, y.(x^4), 1/sqrt(y),
+*  log10(y), ln(y.x), ln(y.x^2), ln(y.x^4), log10(y.x^4)
+ 
+A *View* option includes short-cuts to common SAS transformations, such as:
 
-From the context menu, select 'Save points as a file' for 1D, or 'Save as a 
-file(DAT)' for 2D. Note that two formats, txt and xml, are available in 1D 
-saving.
+*  linear
+*  Guinier
+*  X-sectional Guinier
+*  Porod
+*  Kratky
 
-.. _Drag_Plot:
+For properly corrected and scaled data, these SAS transformations can be used 
+to estimate, for example, Rg, rod diameter, or SANS incoherent background 
+levels, via a linear fit (see Making_a_linear_fit_).
 
-Drag Plot
----------
+Toggling scales
+^^^^^^^^^^^^^^^
 
-Select the *crossed arrows*  button on the plot panel *toolbar*  to drag the 
-plot. To disable dragging mode, unselect the same button on the toolbar.
+This menu option is only available with 2D data.
 
-.. _Zoom_In_Out:
+From the *Graph Menu* (see Invoking_the_graph_menu_) select *Toggle Linear/Log
+Scale* to switch between a linear to log intensity scale. The type of scale 
+selected is written alongside the colour scale.
 
-Zoom In/Out
------------
+2D color maps
+^^^^^^^^^^^^^
 
-Select the *rectangle*  button on the plot panel *toolbar*  to zoom in a
-region of the plot.
+This menu option is only available with 2D data.
 
-To disable zoom mode, unselect the same button on the toolbar. After zoom in
-a region, select *left arrow*  or *right arrow*  button on the toolbar to set
-the graph the the previous size. If a mouse wheel button is available,
-*zoom in/out*  by scrolling the mouse wheel (see Key_Sequences_ help for
-details).
+From the *Graph Menu* (see Invoking_the_graph_menu_) select *2D Color Map* to
+choose a different color scale for the image and/or change the maximum or 
+minimum limits of the scale.
 
-.. _Remove_Data_from_Plot:
+Getting data coordinates
+^^^^^^^^^^^^^^^^^^^^^^^^
 
-Remove Data from Plot
----------------------
+Clicking anywhere in the plot window will cause the current coordinates to be 
+displayed in the status bar at the very bottom-left of the SasView window.
+ 
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-Highlight the plot and the context menu appears.Select *remove [file name]*.
-The plot selected will disappear.
+Dataset menu options
+--------------------
 
-.. _Change_Scale:
+.. _Invoking_the_dataset_menu:
 
-Change Scale
-------------
+Invoking the dataset menu
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If the loaded data is a 1-D data changing scale or data representation will 
-work as follows. *Right click* on the plot window. A context menu pops-up and 
-select *Change Scale* . A dialog window titled *select the scale of the graph* 
-will pop-up then change the *x* , the *y*  and the *view*  values as wish.
+From the *Graph Menu* (see Invoking_the_graph_menu_) highlight a plotted
+dataset.
 
-The 'view' option includes the axis scale short-cuts such as Linear, Guinier, 
-Cross-sectional (XC) Guinier, and Porod plot scale. For a proper data set, 
-these axis scales can be used to estimate Rg, Rod diameter, or Background of 
-neutron scattering data respectively (via 'Linear Fit'; see below). For a 2D 
-image, *Right click*  on the image to pop-up the context menu. Select to 
-switch from linear to log scale. The scale selected is printed on the status 
-bar.
+Getting data info
+^^^^^^^^^^^^^^^^^
 
-If the loaded data is an image. *Right click*  on the image to pop-up the
-context menu. Select to switch from linear to log scale. The scale selected is
-printed on the status bar.
+In the *Dataset Menu* (see Invoking_the_dataset_menu_), highlight a data set
+and select *DataInfo* to bring up a data information dialog panel for that 
+data set.
 
-.. _Linear_Fit:
+Saving data
+^^^^^^^^^^^
 
-Linear Fit
-----------
+In the *Dataset Menu* (see Invoking_the_dataset_menu_), select *Save Points as
+a File* (if 1D data) or *Save as a file(DAT)* (if 2D data). A save dialog will 
+appear.
 
-Linear fit is to perform a line model fitting keeping the scale of the plot.
-Highlight data to fit. From the context menu select *Linear Fit* . A dialog
-window appears. Change model initial parameters, data limits and hit *fit*
-button. New parameters values are displayed and the line with the new
-parameters is added to the plot. Especially for Guinier, XC Guinier, and
-Porod plot scale, this 'Linear Fit' will provides Rg, Rod diameter, and
-background, respectively. The following figure shows an example for the
-Guinier scale.
+1D data can be saved in either ASCII text (.TXT) or CanSAS/SASXML (.XML) 
+formats (see :ref:`Formats`).
+
+2D data can only be saved in the NIST 2D format (.DAT) (see :ref:`Formats`).
+
+.. _Making_a_linear_fit:
+
+Making a linear fit
+^^^^^^^^^^^^^^^^^^^
+
+Linear fit performs a simple ( y(x)=ax+b ) linear fit within the plot window.
+
+In the *Dataset Menu* (see Invoking_the_dataset_menu_), select *Linear Fit*. A
+fitting dialog will appear. Set some initial parameters and data limits and 
+click *Fit*. The fitted parameter values are displayed and the resulting line 
+calculated from them is added to the plot. 
+
+This option is most useful for performing simple Guinier, XS Guinier, and
+Porod type analyses, for example, to estimate Rg, a rod diameter, or incoherent 
+background level, respectively.
+
+The following figure shows an example of a Guinier analysis using this option
 
 .. image:: guinier_fit.png
 
-.. _Other_Graph_Modifications:
+Removing data from the plot
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Other Graph Modifications
--------------------------
+In the *Dataset Menu* (see Invoking_the_dataset_menu_), select *Remove*. The
+selected data will be removed from the plot.
 
-Some custom modifications of the symbols, text, axis, etc of the graph are 
-provided.
+*NOTE! This action cannot be undone.*
+
+Show-Hide error bars
+^^^^^^^^^^^^^^^^^^^^
+
+In the *Dataset Menu* (see Invoking_the_dataset_menu_), select *Show Error Bar*
+or *Hide Error Bar* to switch between showing/hiding the errors associated 
+with the chosen dataset. 
+
+Modify plot properties
+^^^^^^^^^^^^^^^^^^^^^^
+
+In the *Dataset Menu* (see Invoking_the_dataset_menu_), select *Modify Plot
+Property* to change the size, color, or shape of the displayed marker for the 
+chosen dataset, or to change the dataset label that appears on the plot.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _2D_Data_Averaging:
-
-2D Data Averaging
+2D data averaging
 -----------------
 
-Principle_
+Purpose
+^^^^^^^
 
-How_to_Average_
+This feature is only available with 2D data.
 
-Available_Averagings_
+2D data averaging allows you to perform different types of averages on your 
+data. The region to be averaged is displayed in the plot window and its limits 
+can be modified by dragging the boundaries around.
 
-Unmasked_Circular_Average_
+How to average
+^^^^^^^^^^^^^^
 
-Masked_Circular_Average_
+In the *Dataset Menu* (see Invoking_the_dataset_menu_), select one of the
+following averages
 
-Sector_Average_
+*  Perform Circular Average
+*  Sector [Q view]
+*  Annulus [Phi view]
+*  Box sum
+*  Box averaging in Qx
+*  Box averaging on Qy
 
-Annular_Average_
+A 'slicer' will appear (except for *Perform Circular Average*) in the plot that 
+you can drag by clicking on a slicer's handle. When the handle is highlighted 
+in red, it means that the slicer can move/change size.
 
-Box_Sum_
+*NOTE! The slicer size will reset if you try to select a region greater than 
+the size of the data.*
 
-Box_Averaging_in_Qx_
+Alternatively, once a 'slicer' is active you can also select the region to 
+average by bringing back the *Dataset Menu* and selecting *Edit Slicer 
+Parameters*. A dialog window will appear in which you can enter values to 
+define a region or select the number of points to plot (*nbins*).
 
-Box_Averaging_in_Qy_
+A separate plot window will also have appeared, displaying the requested 
+average.
 
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+*NOTE! The displayed average only updates when input focus is moved back to 
+that window; ie, when the mouse pointer is moved onto that plot.*
 
-.. Principle: 
+Selecting *Box Sum* automatically brings up the 'Slicer Parameters' dialog in 
+order to display the average numerically, rather than graphically.
 
-Principle
----------
+To remove a 'slicer', bring back the *Dataset menu* and select *Clear Slicer*.
 
-This feature allows you to perform different types of averages on your data, 
-and allows you to see what regions of the detector will contribute to the 
-average. The region to be averaged will be drown and can be modified by 
-dragging the lines around.
+Unmasked circular average
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. _How_to_Average:
+This operation will perform an average in constant Q-rings around the (x,y) 
+pixel location of the beam center.
 
-How to Average
---------------
+Masked circular average
+^^^^^^^^^^^^^^^^^^^^^^^
 
-Right click on 2D data for the context menu to appear. Select one type of 
-averages among *"sector [Q view]", "Annulus [Phi view]", "Box sum", "Box 
-averaging in Qx ", "box averaging on Qy","Perform circular Average".*
+This operation is the same as 'Unmasked Circular Average' except that any 
+masked region is excluded.
 
-A slicer will appear except for *"Perform circular Average"*  that you can 
-drag by clicking on a slicer 's marker. When the marker is highlighted in red, 
-it means that the slicer can change size.You can also move some of the slicer 
-by simply drag its side when highlighted in red. the slicer size will be reset 
-to its previous size if the user try to select a region greater than the size 
-of the data.
+Sector average [Q View]
+^^^^^^^^^^^^^^^^^^^^^^^
 
-The user can also select a region to average when a slicer has been selected 
-already by *right clicking*  on the context menu and selecting *Edit Slicer 
-Parameters* . The dialog window will appears and the user can enter values to 
-selected a region or selected numbers of points to plot *nbins* .
+This operation averages in constant Q-arcs.
 
-For *Box sum* , when the user selects this option, a new panel is created 
-containing the result of average of the sum of every pixels contains on that 
-data.The user can also enter values to select a region.
+The width of the sector is specified in degrees (+/- |delta|\|phi|\) each side 
+of the central angle (|phi|\).
 
-.. _Available_Averagings:
+Annular average [|phi| View]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Available Averagings
---------------------
+This operation performs an average between two Q-values centered on (0,0), 
+and averaged over a specified number of pixels.
 
-Some different types of averaging are provided for.
+The data is returned as a function of angle (|phi|\) in degrees with zero 
+degrees at the 3 O'clock position.
 
-.. _Unmasked_Circular_Average:
+Box sum
+^^^^^^^
 
-Unmasked Circular Average
--------------------------
+This operation performs a sum of counts in a 2D region of interest.
 
-This operation will perform and average in constant q-rings around the (x,y) pixel
-location of the beam center.
-
-.. _Masked_Circular_Average:
-
-Masked Circular Average
------------------------
-
-This operation is same as 'Masked Circular Average' except that the masked
-region is excluded if masked.
-
-.. _Sector_Average:
-
-Sector Average [Q View]
------------------------
-
-This operation averages in constant q-arcs. The width of the sector is specified in
-degrees (+/- delta phi) each side of the central angle (phi).
-
-.. _Annular_Average:
-
-Annular Average [Phi View]
---------------------------
-
-It performs an average between two q-values centered in (0,0), and averaged 
-over a width of a specified number of pixels. The data is returned as a 
-function of angle (phi) in degrees. Moving one circle of this slicer to 
-radius of zero corresponding to a circular averaging on radius qmax , the 
-outer circle. The angle zero starts from the positive x-axis direction.
-
-.. _Box_Sum:
-
-Box Sum
--------
-
-Perform the sum of counts in a 2D region of interest.When editing the slicer, 
-the user can enter the length and the width the rectangle slicer and the 
-coordinates of the center of this rectangle.
-
-.. _Box_Averaging_in_Qx:
+When editing the slicer parameters, the user can enter the length and the width 
+the rectangular slicer and the coordinates of the center of the rectangle.
 
 Box Averaging in Qx
--------------------
+^^^^^^^^^^^^^^^^^^^
 
-Computes average I(Qx) for a region of interest. When editing the slicer, the 
-user can control the length and the width the rectangle slicer. The averaged 
-output is calculated from the constant bins with rectangular shape. The 
-resultant q values are nominal values, i.e., the central values of each bins 
-on the x-axis.
+This operation computes an average I(Qx) for the region of interest.
 
-.. _Box_Averaging_in_Qy:
+When editing the slicer parameters, the user can control the length and the 
+width the rectangular slicer. The averaged output is calculated from constant 
+bins with rectangular shape. The resultant Q values are nominal values, that 
+is, the central value of each bin on the x-axis.
 
 Box Averaging in Qy
--------------------
+^^^^^^^^^^^^^^^^^^^
 
-Computes average I(Qy) for a region of interest.When editing the slicer, the 
-user can control the length and the width the rectangle slicer. The averaged 
-output is calculated from the constant bins with rectangular shape. The 
-resultant q values are nominal values, i.e., the central values of each bins 
-on the y-axis.
+This operation computes an average I(Qy) for the region of interest.
 
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+When editing the slicer parameters, the user can control the length and the 
+width the rectangular slicer. The averaged output is calculated from constant 
+bins with rectangular shape. The resultant Q values are nominal values, that 
+is, the central value of each bin on the x-axis.
 
-.. _Key_Sequences:
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-Key Sequences
--------------
-
-Floating_Panel_
-
-Context_Menu_
-
-Zoom_
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
-.. _Floating_Panel:
-
-Floating Panel
---------------
-
-For a graph panel to float on the top of the SV window:
-
-Press the *Ctrl(Cmd on MAC) key*  on dragging and placing a panel. Or if you 
-want to make all plot panels float, select 'Float' from Graph/Preperences in 
-the menu bar. Otherwise choose 'Dock'.
-
-.. _Context_Menu:
-
-Graph Context Menu
-------------------
-
-To get the graph context menu to print, copy, save data, (2D)average, etc, 
-*locate the mouse point on the plot to highlight and *(Mouse) Right Click* 
-to bring up the full menu.
-
-.. _Zoom:
-
-Zoom In/Out
------------
-
-To Zoom in or out the full plot, *locate the mouse point inside the graph 
-which will be the center of the zooming, then *rotate MouseWheel*.
-
-*To Zoom in or out the plot in x or y direction, *locate (and click) the 
-mouse point near x (or y) axis just outside of the graph and then *rotate 
-MouseWheel* .* Note that this works only on the 1D plots.
+.. note::  This help document was last changed by Steve King, 01May2015
