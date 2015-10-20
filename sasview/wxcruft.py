@@ -56,7 +56,7 @@ class CallLater:
     __RUNNING = set()
 
     def __init__(self, millis, callableObj, *args, **kwargs):
-        print "=================== entering CallLater constructor"
+        # print "=================== entering CallLater constructor"
         assert callable(callableObj), "callableObj is not callable"
         self.millis = millis
         self.callable = callableObj
@@ -80,7 +80,7 @@ class CallLater:
         if args or kwargs:
             self.SetArgs(*args, **kwargs)
         self.Stop()
-        self.timer = wx.PyTimer(self.Notify, id=self.id)
+        self.timer = PyTimer(self.Notify, id=self.id)  # PAK
         self.timer.Start(self.millis, wx.TIMER_ONE_SHOT)
         self.running = True
         self.__RUNNING.add(self)

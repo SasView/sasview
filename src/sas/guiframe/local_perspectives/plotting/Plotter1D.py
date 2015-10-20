@@ -35,6 +35,17 @@ def find_key(dic, val):
     """return the key of dictionary dic given the value"""
     return [k for k, v in dic.iteritems() if v == val][0]
 
+class IdCollection:
+    def __init__(self):
+        self._ids = []
+        self._index = 0
+    def next(self):
+        if len(self._ids) == self._index:
+           self._ids.append(wx.NewId())
+        self._index += 1
+        return self._ids[self._index-1]
+    def reset(self):
+        self._index = 0
 
 
 class ModelPanel1D(PlotPanel, PanelBase):
@@ -51,6 +62,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
     ALWAYS_ON = True
     ## Group ID
     group_id = None
+    _menu_ids = IdCollection()
 
     def __init__(self, parent, id=-1, color=None,
                  dpi=None, style=wx.NO_FULL_REPAINT_ON_RESIZE, **kwargs):
@@ -555,16 +567,17 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self._slicerpop = PanelMenu()
         self._slicerpop.set_plots(self.plots)
         self._slicerpop.set_graph(self.graph)
+        self._menu_ids.reset()
         if not self.graph.selected_plottable in self.plots:
             # Various plot options
-            wx_id = wx.NewId()
+            wx_id = self._menu_ids.next()
             self._slicerpop.Append(wx_id, '&Save Image', 'Save image as PNG')
             wx.EVT_MENU(self, wx_id, self.onSaveImage)
-            wx_id = wx.NewId()
+            wx_id = self._menu_ids.next()
             self._slicerpop.Append(wx_id, '&Print Image', 'Print image ')
             wx.EVT_MENU(self, wx_id, self.onPrint)
 
-            wx_id = wx.NewId()
+            wx_id = self._menu_ids.next()
             self._slicerpop.Append(wx_id, '&Copy to Clipboard',
                                    'Copy to the clipboard')
             wx.EVT_MENU(self, wx_id, self.OnCopyFigureMenu)
@@ -581,10 +594,10 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 if plot != self.plots[self.graph.selected_plottable]:
                     continue
 
-            wx_id = wx.NewId()
+            wx_id = self._menu_ids.next()
             plot_menu.Append(wx_id, "&DataInfo", name)
             wx.EVT_MENU(self, wx_id, self. _onDataShow)
-            wx_id = wx.NewId()
+            wx_id = self._menu_ids.next()
             plot_menu.Append(wx_id, "&Save Points as a File", name)
             wx.EVT_MENU(self, wx_id, self._onSave)
             plot_menu.AppendSeparator()
@@ -596,7 +609,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 for item in item_list:
 
                     try:
-                        wx_id = wx.NewId()
+                        wx_id = self._menu_ids.next()
                         plot_menu.Append(wx_id, item[0], name)
                         wx.EVT_MENU(self, wx_id, item[2])
                     except:
@@ -606,22 +619,22 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 plot_menu.AppendSeparator()
 
             if self.parent.ClassName.count('wxDialog') == 0:
-                wx_id = wx.NewId()
+                wx_id = self._menu_ids.next()
                 plot_menu.Append(wx_id, '&Linear Fit', name)
                 wx.EVT_MENU(self, wx_id, self.onFitting)
                 plot_menu.AppendSeparator()
 
-                wx_id = wx.NewId()
+                wx_id = self._menu_ids.next()
                 plot_menu.Append(wx_id, "Remove", name)
                 wx.EVT_MENU(self, wx_id, self._onRemove)
                 if not plot.is_data:
-                    wx_id = wx.NewId()
+                    wx_id = self._menu_ids.next()
                     plot_menu.Append(wx_id, '&Freeze', name)
                     wx.EVT_MENU(self, wx_id, self.onFreeze)
                 plot_menu.AppendSeparator()
 
                 if plot.is_data:
-                    wx_id = wx.NewId()
+                    wx_id = self._menu_ids.next()
                     self.hide_menu = plot_menu.Append(wx_id, "Hide Error Bar", name)
 
                     if plot.dy is not None and plot.dy != []:
@@ -635,10 +648,10 @@ class ModelPanel1D(PlotPanel, PanelBase):
 
                     plot_menu.AppendSeparator()
 
-                wx_id = wx.NewId()
+                wx_id = self._menu_ids.next()
                 plot_menu.Append(wx_id, '&Modify Plot Property', name)
                 wx.EVT_MENU(self, wx_id, self.createAppDialog)
-            wx_id = wx.NewId()
+            wx_id = self._menu_ids.next()
             # plot_menu.SetTitle(name)
             self._slicerpop.AppendMenu(wx_id, '&%s' % name, plot_menu)
             # Option to hide
@@ -647,11 +660,11 @@ class ModelPanel1D(PlotPanel, PanelBase):
             self._slicerpop.AppendSeparator()
             loc_menu = wx.Menu()
             for label in self._loc_labels:
-                wx_id = wx.NewId()
+                wx_id = self._menu_ids.next()
                 loc_menu.Append(wx_id, str(label), str(label))
                 wx.EVT_MENU(self, wx_id, self.onChangeLegendLoc)
 
-            wx_id = wx.NewId()
+            wx_id = self._menu_ids.next()
             self._slicerpop.Append(wx_id, '&Modify Graph Appearance',
                                    'Modify graph appearance')
             wx.EVT_MENU(self, wx_id, self.modifyGraphAppearance)
@@ -659,24 +672,24 @@ class ModelPanel1D(PlotPanel, PanelBase):
 
 
             if self.position != None:
-                wx_id = wx.NewId()
+                wx_id = self._menu_ids.next()
                 self._slicerpop.Append(wx_id, '&Add Text')
                 wx.EVT_MENU(self, wx_id, self._on_addtext)
-                wx_id = wx.NewId()
+                wx_id = self._menu_ids.next()
                 self._slicerpop.Append(wx_id, '&Remove Text')
                 wx.EVT_MENU(self, wx_id, self._on_removetext)
                 self._slicerpop.AppendSeparator()
-            wx_id = wx.NewId()
+            wx_id = self._menu_ids.next()
             self._slicerpop.Append(wx_id, '&Change Scale')
             wx.EVT_MENU(self, wx_id, self._onProperties)
             self._slicerpop.AppendSeparator()
-            wx_id = wx.NewId()
+            wx_id = self._menu_ids.next()
             self._slicerpop.Append(wx_id, '&Reset Graph Range')
             wx.EVT_MENU(self, wx_id, self.onResetGraph)
 
             if self.parent.ClassName.count('wxDialog') == 0:
                 self._slicerpop.AppendSeparator()
-                wx_id = wx.NewId()
+                wx_id = self._menu_ids.next()
                 self._slicerpop.Append(wx_id, '&Window Title')
                 wx.EVT_MENU(self, wx_id, self.onChangeCaption)
         try:
