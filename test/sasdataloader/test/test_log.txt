@@ -1,5 +1,0 @@
-2013-12-20 15:51:09,931 DEBUG Inside testLoad module
-2013-12-20 15:51:10,296 INFO Danse_reader Reading MP_New.sans 
-
-2013-12-20 15:51:10,348 INFO Danse_reader Reading P_New.sans 
-
