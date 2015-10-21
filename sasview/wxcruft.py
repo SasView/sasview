@@ -14,13 +14,30 @@ def trace_new_id():
 
 def NewId():
     id = wx._misc.NewId()
-    frame = inspect.stack()[1]
+    path, line, function = _get_caller()
+    if path == "sas/guiframe/utils.py":
+        # Special case: NewId is being called via an IdList request; we
+        # want to which widget triggered the request, not that it was
+        # triggered via IdList.
+        path, line, function = _get_caller(2)
+        tag = " via IdList"
+    elif path.endswith("/wxcruft.py"):
+        # Special case: NewId is being called via CallLater; we want to
+        # know where the CallLater was invoked.
+        path, line, function = _get_caller(1)
+        tag = " via CallLater"
+    else:
+        tag = ""
+    print "NewId %d from %s(%d):%s%s"%(id, path, line, function, tag)
+    return id
+
+def _get_caller(distance=0):
+    frame = inspect.stack()[distance+2]
     path = frame[1]
     index = path.find('/sas/')
     if index == -1: index = path.find('\\sas\\')
-    path = path[index+1:]
-    print "NewId %d from %s(%d):%s"%(id, path, frame[2], frame[3])
-    return id
+    return path[index+1:], frame[2], frame[3]
+
 
 
 # ==========================================================================

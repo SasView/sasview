@@ -40,13 +40,13 @@ class BatchDataDialog(wx.Dialog):
         Draw the content of the current dialog window
         """
         vbox = wx.BoxSizer(wx.VERTICAL)
-        box_description = wx.StaticBox(self, -1, str("Hint"))
+        box_description = wx.StaticBox(self, wx.ID_ANY, str("Hint"))
         hint_sizer = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         selection_sizer = wx.GridBagSizer(5, 5)
         button_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.data_1d_selected = wx.RadioButton(self, -1, 'Data1D',
+        self.data_1d_selected = wx.RadioButton(self, wx.ID_ANY, 'Data1D',
                                                 style=wx.RB_GROUP)
-        self.data_2d_selected = wx.RadioButton(self, -1, 'Data2D')
+        self.data_2d_selected = wx.RadioButton(self, wx.ID_ANY, 'Data2D')
         self.data_1d_selected.SetValue(True)
         self.data_2d_selected.SetValue(False)
         button_cancel = wx.Button(self, wx.ID_CANCEL, "Cancel")
@@ -54,7 +54,7 @@ class BatchDataDialog(wx.Dialog):
         button_OK.SetFocus()
         hint = "Selected Data set contains both 1D and 2D Data.\n"
         hint += "Please select on type of analysis before proceeding.\n"
-        hint_sizer.Add(wx.StaticText(self, -1, hint))
+        hint_sizer.Add(wx.StaticText(self, wx.ID_ANY, hint))
         #draw area containing radio buttons
         ix = 0
         iy = 0
@@ -71,7 +71,7 @@ class BatchDataDialog(wx.Dialog):
                                 wx.LEFT | wx.RIGHT | wx.ADJUST_MINSIZE, 10)
         vbox.Add(hint_sizer, 0, wx.EXPAND | wx.ALL, 10)
         vbox.Add(selection_sizer, 0, wx.TOP | wx.BOTTOM, 10)
-        vbox.Add(wx.StaticLine(self, -1), 0, wx.EXPAND, 0)
+        vbox.Add(wx.StaticLine(self, wx.ID_ANY), 0, wx.EXPAND, 0)
         vbox.Add(button_sizer, 0, wx.TOP | wx.BOTTOM, 10)
         self.SetSizer(vbox)
         self.Layout()
@@ -102,7 +102,7 @@ class DataDialog(wx.Dialog):
         if not data_list:
             return
         select_data_text = " %s Data selected.\n" % str(self._nb_selected_data)
-        self._data_text_ctrl = wx.StaticText(self, -1, str(select_data_text))
+        self._data_text_ctrl = wx.StaticText(self, wx.ID_ANY, str(select_data_text))
 
         self._data_text_ctrl.SetForegroundColour('blue')
         self._sizer_main = wx.BoxSizer(wx.VERTICAL)
@@ -125,14 +125,14 @@ class DataDialog(wx.Dialog):
             text += " no more than '%s' data\n" % str(self._max_data)
             text += "for adequate plot display size. \n"
             text += "unchecked data won't be send to fitting . \n"
-        text_ctrl = wx.StaticText(self, -1, str(text))
+        text_ctrl = wx.StaticText(self, wx.ID_ANY, str(text))
         self._sizer_txt.Add(text_ctrl)
         iy = 0
         ix = 0
         data_count = 0
         for i in range(len(data_list)):
             data_count += 1
-            cb = wx.CheckBox(self._panel, -1, str(data_list[i].name), (10, 10))
+            cb = wx.CheckBox(self._panel, wx.ID_ANY, str(data_list[i].name), (10, 10))
             wx.EVT_CHECKBOX(self, cb.GetId(), self._count_selected_data)
             if data_count <= MAX_NBR_DATA:
                 cb.SetValue(True)
@@ -152,7 +152,7 @@ class DataDialog(wx.Dialog):
         button_OK.SetFocus()
         self._sizer_button.Add(button_OK, 0,
                                 wx.LEFT | wx.RIGHT | wx.ADJUST_MINSIZE, 10)
-        static_line = wx.StaticLine(self, -1)
+        static_line = wx.StaticLine(self, wx.ID_ANY)
         self._sizer_txt.Add(self._panel, 0, wx.EXPAND | wx.ALL, 10)
         self._sizer_main.Add(self._sizer_txt, 0, wx.EXPAND | wx.ALL, 10)
         self._sizer_main.Add(self._data_text_ctrl, 0, wx.EXPAND | wx.ALL, 10)

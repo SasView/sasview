@@ -122,3 +122,76 @@ def look_for_tag(string1, begin, end=None):
             end_flag = True
     return begin_flag, end_flag
 
+class IdList:
+    """
+    Create a list of wx ids that can be reused.
+
+    Ids for items need to be unique within their context.  In a dynamic
+    application where the number of ids needed different each time the
+    form is created, depending for example, on the number of items that
+    need to be shown in the context menu, you cannot preallocate the
+    ids that you are going to use for the form.  Instead, you can use
+    an IdList, which will reuse ids from context to context, adding new
+    ones if the new context requires more than a previous context.
+
+    IdList is set up as an iterator, which returns new ids forever
+    or until it runs out.  This makes it pretty useful for defining
+    menus::
+
+        class Form(wx.Dialog):
+            _form_id_pool = IdList()
+            def __init__(self):
+                ...
+                menu = wx.Menu()
+                for item, wx_id in zip(menu_items, self._form_id_pool):
+                    name, description, callback = item
+                    menu.Append(wx_id, name, description)
+                    wx.EVT_MENU(self, wx_id, callback)
+                ...
+
+    It is a little unusual to use an iterator outside of a loop, but it is
+    supported. For example, when defining a form, your class definition
+    might look something like::
+
+        class Form(wx.Dialog):
+            _form_id_pool = IdList()
+            def __init__(self, pairs, ...):
+                ids = iter(_form_id_pool)
+                ...
+                wx.StaticText(self, ids.next(), "Some key-value pairs")
+                for name, value in pairs:
+                    label = wx.StaticText(self, ids.next(), name)
+                    input = wx.TextCtrl(self, ids.next(), value=str(value))
+                    ...
+                ...
+
+    If the dialog is really dynamic, and not defined all in one place, then
+    save the id list iterator as *self._ids = iter(_form_id_pool)* in the
+    constructor.
+
+    The wx documentation is not clear on whether ids need to be unique.
+    Clearly different dialogs can use the same ids, as this is done for the
+    standard button ids such as wx.ID_HELP.  Presumably each widget on the
+    form needs its own id, but whether these ids can match the ids of menu
+    items is not indicated, or whether different submenus need their own
+    ids.  Using different id lists for menu items and widgets is safest,
+    but probably not necessary.  And what about notebook tabs.  Do the
+    ids need to be unique across all tabs?
+    """
+    def __init__(self):
+        self._ids = []
+    def __iter__(self):
+        return _IdListIterator(self)
+    def __getitem__(self, index):
+        while index >= len(self._ids):
+            self._ids.append(wx.NewId())
+        return self._ids[index]
+
+class _IdListIterator:
+    def __init__(self, id_list):
+        self.id_list = id_list
+        self.index = -1
+    def next(self):
+        self.index += 1
+        return self.id_list[self.index]
+

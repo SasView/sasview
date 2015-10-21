@@ -45,8 +45,12 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
     window_name = "simultaneous Fit page"
     ## Title to appear on top of the window
     window_caption = "Simultaneous Fit Page"
+    ID_SET_ALL = wx.NewId()
+    ID_REMOVE = wx.NewId()
+    ID_FIT = wx.NewId()
+    ID_ADD = wx.NewId()
 
-    def __init__(self, parent, page_finder={}, id= -1, batch_on=False,
+    def __init__(self, parent, page_finder={}, id= wx.ID_ANY, batch_on=False,
                      *args, **kwargs):
         ScrolledPanel.__init__(self, parent, id=id,
                                style=wx.FULL_REPAINT_ON_RESIZE,
@@ -77,7 +81,6 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         self.nb_constraint = 0
         self.model_cbox_left = None
         self.model_cbox_right = None
-        self.uid = wx.NewId()
         ## draw page
         self.define_page_structure()
         self.draw_page()
@@ -293,7 +296,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                 self.manager.schedule_for_fit(value=0, uid=item[2])
 
         self.sizer1.Clear(True)
-        box_description = wx.StaticBox(self, -1, "Fit Combinations")
+        box_description = wx.StaticBox(self, wx.ID_ANY, "Fit Combinations")
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         sizer_title = wx.BoxSizer(wx.HORIZONTAL)
         sizer_couples = wx.GridBagSizer(5, 5)
@@ -302,12 +305,12 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             msg = " No fit combinations are found! \n\n"
             msg += " Please load data and set up "
             msg += "at least two fit panels first..."
-            sizer_title.Add(wx.StaticText(self, -1, msg))
+            sizer_title.Add(wx.StaticText(self, wx.ID_ANY, msg))
         else:
             ## store model
             self._store_model()
 
-            self.cb1 = wx.CheckBox(self, -1, 'Select all')
+            self.cb1 = wx.CheckBox(self, wx.ID_ANY, 'Select all')
             self.cb1.SetValue(False)
 
             wx.EVT_CHECKBOX(self, self.cb1.GetId(), self.check_all_model_name)
@@ -369,17 +372,17 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         """
         Show constraint fields
         """
-        box_description = wx.StaticBox(self, -1, "Easy Setup ")
+        box_description = wx.StaticBox(self, wx.ID_ANY, "Easy Setup ")
         boxsizer = wx.StaticBoxSizer(box_description, wx.HORIZONTAL)
         sizer_constraint = wx.BoxSizer(wx.HORIZONTAL)
-        self.model_cbox_left = wx.ComboBox(self, -1, style=wx.CB_READONLY)
+        self.model_cbox_left = wx.ComboBox(self, wx.ID_ANY, style=wx.CB_READONLY)
         self.model_cbox_left.Clear()
-        self.model_cbox_right = wx.ComboBox(self, -1, style=wx.CB_READONLY)
+        self.model_cbox_right = wx.ComboBox(self, wx.ID_ANY, style=wx.CB_READONLY)
         self.model_cbox_right.Clear()
-        wx.EVT_COMBOBOX(self.model_cbox_left, -1, self._on_select_modelcb)
-        wx.EVT_COMBOBOX(self.model_cbox_right, -1, self._on_select_modelcb)
-        egal_txt = wx.StaticText(self, -1, " = ")
-        self.set_button = wx.Button(self, wx.NewId(), 'Set All')
+        wx.EVT_COMBOBOX(self.model_cbox_left, wx.ID_ANY, self._on_select_modelcb)
+        wx.EVT_COMBOBOX(self.model_cbox_right, wx.ID_ANY, self._on_select_modelcb)
+        egal_txt = wx.StaticText(self, wx.ID_ANY, " = ")
+        self.set_button = wx.Button(self, self.ID_SET_ALL, 'Set All')
         self.set_button.Bind(wx.EVT_BUTTON, self._on_set_all_equal,
                              id=self.set_button.GetId())
         set_tip = "Add constraints for all the adjustable parameters "
@@ -398,12 +401,12 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             self.model_cbox_right.Append(str(model.name), model)
         boxsizer.Add(self.model_cbox_left,
                              flag=wx.RIGHT | wx.EXPAND, border=10)
-        boxsizer.Add(wx.StaticText(self, -1, ".parameters"),
+        boxsizer.Add(wx.StaticText(self, wx.ID_ANY, ".parameters"),
                              flag=wx.RIGHT | wx.EXPAND, border=5)
         boxsizer.Add(egal_txt, flag=wx.RIGHT | wx.EXPAND, border=5)
         boxsizer.Add(self.model_cbox_right,
                              flag=wx.RIGHT | wx.EXPAND, border=10)
-        boxsizer.Add(wx.StaticText(self, -1, ".parameters"),
+        boxsizer.Add(wx.StaticText(self, wx.ID_ANY, ".parameters"),
                              flag=wx.RIGHT | wx.EXPAND, border=5)
         boxsizer.Add((20, -1))
         boxsizer.Add(self.set_button, flag=wx.RIGHT | wx.EXPAND, border=5)
@@ -509,18 +512,18 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             return
 
         sizer_constraint = wx.BoxSizer(wx.HORIZONTAL)
-        model_cbox = wx.ComboBox(self, -1, style=wx.CB_READONLY)
+        model_cbox = wx.ComboBox(self, wx.ID_ANY, style=wx.CB_READONLY)
         model_cbox.Clear()
-        param_cbox = wx.ComboBox(self, -1, style=wx.CB_READONLY, size=(100, -1),)
+        param_cbox = wx.ComboBox(self, wx.ID_ANY, style=wx.CB_READONLY, size=(100, -1),)
         param_cbox.Hide()
 
         #This is for GetCLientData() _on_select_param: Was None return on MAC.
         self.param_cbox = param_cbox
 
-        wx.EVT_COMBOBOX(param_cbox, -1, self._on_select_param)
-        self.ctl2 = wx.TextCtrl(self, -1)
-        egal_txt = wx.StaticText(self, -1, " = ")
-        self.btRemove = wx.Button(self, wx.NewId(), 'Remove')
+        wx.EVT_COMBOBOX(param_cbox, wx.ID_ANY, self._on_select_param)
+        self.ctl2 = wx.TextCtrl(self, wx.ID_ANY)
+        egal_txt = wx.StaticText(self, wx.ID_ANY, " = ")
+        self.btRemove = wx.Button(self, self.ID_REMOVE, 'Remove')
         self.btRemove.Bind(wx.EVT_BUTTON, self.onRemove,
                            id=self.btRemove.GetId())
         self.btRemove.SetToolTipString("Remove constraint.")
@@ -535,8 +538,8 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         #This is for GetCLientData() passing to self._on_select_param: Was None return on MAC.
         self.model_cbox = model_cbox
 
-        wx.EVT_COMBOBOX(model_cbox, -1, self._on_select_model)
-        sizer_constraint.Add((5, -1))
+        wx.EVT_COMBOBOX(model_cbox, wx.ID_ANY, self._on_select_model)
+        sizer_constraint.Add((5, wx.ID_ANY))
         sizer_constraint.Add(model_cbox, flag=wx.RIGHT | wx.EXPAND, border=10)
         sizer_constraint.Add(param_cbox, flag=wx.RIGHT | wx.EXPAND, border=5)
         sizer_constraint.Add(egal_txt, flag=wx.RIGHT | wx.EXPAND, border=5)
@@ -671,11 +674,11 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         Draw fit button
         """
         self.sizer3.Clear(True)
-        box_description = wx.StaticBox(self, -1, "Fit ")
+        box_description = wx.StaticBox(self, wx.ID_ANY, "Fit ")
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.btFit = wx.Button(self, wx.NewId(), 'Fit', size=wx.DefaultSize)
+        self.btFit = wx.Button(self, self.ID_FIT, 'Fit', size=wx.DefaultSize)
         self.btFit.Bind(wx.EVT_BUTTON, self.onFit, id=self.btFit.GetId())
         self.btFit.SetToolTipString("Perform fit.")
         if self.batch_on:
@@ -683,7 +686,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         else:
             text = " This page requires at least one FitPage with a data\n"
             text = " and a model for fitting."
-        text_hint = wx.StaticText(self, -1, text)
+        text_hint = wx.StaticText(self, wx.ID_ANY, text)
 
         sizer_button.Add(text_hint, wx.RIGHT | wx.EXPAND, 10)
         sizer_button.Add(self.btFit, 0, wx.LEFT | wx.ADJUST_MINSIZE, 10)
@@ -704,16 +707,16 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             if self.sizer2.IsShown():
                 self.sizer2.Show(False)
             return
-        box_description = wx.StaticBox(self, -1, "Fit Constraints")
+        box_description = wx.StaticBox(self, wx.ID_ANY, "Fit Constraints")
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         sizer_title = wx.BoxSizer(wx.HORIZONTAL)
         self.sizer_all_constraints = wx.BoxSizer(wx.HORIZONTAL)
         self.sizer_constraints = wx.BoxSizer(wx.VERTICAL)
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.hide_constraint = wx.RadioButton(self, -1, 'No', (10, 10),
+        self.hide_constraint = wx.RadioButton(self, wx.ID_ANY, 'No', (10, 10),
                                               style=wx.RB_GROUP)
-        self.show_constraint = wx.RadioButton(self, -1, 'Yes', (10, 30))
+        self.show_constraint = wx.RadioButton(self, wx.ID_ANY, 'Yes', (10, 30))
         self.Bind(wx.EVT_RADIOBUTTON, self._display_constraint,
                   id=self.hide_constraint.GetId())
         self.Bind(wx.EVT_RADIOBUTTON, self._display_constraint,
@@ -724,23 +727,23 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         self.hide_constraint.SetValue(True)
         self.show_constraint.SetValue(False)
 
-        sizer_title.Add(wx.StaticText(self, -1, " Model"))
+        sizer_title.Add(wx.StaticText(self, wx.ID_ANY, " Model"))
         sizer_title.Add((10, 10))
-        sizer_title.Add(wx.StaticText(self, -1, " Parameter"))
+        sizer_title.Add(wx.StaticText(self, wx.ID_ANY, " Parameter"))
         sizer_title.Add((10, 10))
-        sizer_title.Add(wx.StaticText(self, -1, " Add Constraint?"))
+        sizer_title.Add(wx.StaticText(self, wx.ID_ANY, " Add Constraint?"))
         sizer_title.Add((10, 10))
         sizer_title.Add(self.show_constraint)
         sizer_title.Add(self.hide_constraint)
         sizer_title.Add((10, 10))
 
-        self.btAdd = wx.Button(self, wx.NewId(), 'Add')
+        self.btAdd = wx.Button(self, self.ID_ADD, 'Add')
         self.btAdd.Bind(wx.EVT_BUTTON, self._onAdd_constraint,
                         id=self.btAdd.GetId())
         self.btAdd.SetToolTipString("Add another constraint?")
         self.btAdd.Hide()
 
-        text_hint = wx.StaticText(self, -1,
+        text_hint = wx.StaticText(self, wx.ID_ANY,
                                   "Example: [M0][paramter] = M1.parameter")
         sizer_button.Add(text_hint, 0 , wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 10)
         sizer_button.Add(self.btAdd, 0, wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 10)
@@ -820,26 +823,26 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         list = []
         sizer.Clear(True)
 
-        new_name = wx.StaticText(self, -1, '  Model Title ',
+        new_name = wx.StaticText(self, wx.ID_ANY, '  Model Title ',
                                  style=wx.ALIGN_CENTER)
         new_name.SetBackgroundColour('orange')
         new_name.SetForegroundColour(wx.WHITE)
         sizer.Add(new_name, (iy, ix), (1, 1),
                             wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
         ix += 2
-        model_type = wx.StaticText(self, -1, '  Model ')
+        model_type = wx.StaticText(self, wx.ID_ANY, '  Model ')
         model_type.SetBackgroundColour('grey')
         model_type.SetForegroundColour(wx.WHITE)
         sizer.Add(model_type, (iy, ix), (1, 1),
                             wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         ix += 1
-        data_used = wx.StaticText(self, -1, '  Data ')
+        data_used = wx.StaticText(self, wx.ID_ANY, '  Data ')
         data_used.SetBackgroundColour('grey')
         data_used.SetForegroundColour(wx.WHITE)
         sizer.Add(data_used, (iy, ix), (1, 1),
                             wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         ix += 1
-        tab_used = wx.StaticText(self, -1, '  FitPage ')
+        tab_used = wx.StaticText(self, wx.ID_ANY, '  FitPage ')
         tab_used.SetBackgroundColour('grey')
         tab_used.SetForegroundColour(wx.WHITE)
         sizer.Add(tab_used, (iy, ix), (1, 1),
@@ -878,7 +881,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             name = '_'
             if model is not None:
                 name = str(model.name)
-            cb = wx.CheckBox(self, -1, name)
+            cb = wx.CheckBox(self, wx.ID_ANY, name)
             cb.SetValue(False)
             cb.Enable(model is not None and data.is_data)
             sizer.Add(cb, (iy, ix), (1, 1),
@@ -886,22 +889,22 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             wx.EVT_CHECKBOX(self, cb.GetId(), self.check_model_name)
             ix += 2
             type = model.__class__.__name__
-            model_type = wx.StaticText(self, -1, str(type))
+            model_type = wx.StaticText(self, wx.ID_ANY, str(type))
             sizer.Add(model_type, (iy, ix), (1, 1),
                       wx.EXPAND | wx.ADJUST_MINSIZE, 0)
             if self.batch_on:
-                data_used = wx.ComboBox(self, -1, style=wx.CB_READONLY)
+                data_used = wx.ComboBox(self, wx.ID_ANY, style=wx.CB_READONLY)
                 data_used.AppendItems(data_list)
                 data_used.SetSelection(0)
             else:
-                data_used = wx.StaticText(self, -1, data_list[0])
+                data_used = wx.StaticText(self, wx.ID_ANY, data_list[0])
 
             ix += 1
             sizer.Add(data_used, (iy, ix), (1, 1),
                       wx.EXPAND | wx.ADJUST_MINSIZE, 0)
             ix += 1
             caption = value.get_fit_tab_caption()
-            tab_caption_used = wx.StaticText(self, -1, str(caption))
+            tab_caption_used = wx.StaticText(self, wx.ID_ANY, str(caption))
             sizer.Add(tab_caption_used, (iy, ix), (1, 1),
                       wx.EXPAND | wx.ADJUST_MINSIZE, 0)
 

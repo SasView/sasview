@@ -92,7 +92,8 @@ class FitPage(BasicPage):
         """
         fill sizer 0 with data info
         """
-        self.data_box_description = wx.StaticBox(self, -1, 'I(q) Data Source')
+        self.data_box_description = wx.StaticBox(self, wx.ID_ANY,
+                                                 'I(q) Data Source')
         if check_data_validity(self.data):
             dname_color = wx.BLUE
         else:
@@ -101,10 +102,10 @@ class FitPage(BasicPage):
         boxsizer1 = wx.StaticBoxSizer(self.data_box_description, wx.VERTICAL)
         #----------------------------------------------------------
         sizer_data = wx.BoxSizer(wx.HORIZONTAL)
-        self.dataSource = wx.ComboBox(self, -1, style=wx.CB_READONLY)
-        wx.EVT_COMBOBOX(self.dataSource, -1, self.on_select_data)
+        self.dataSource = wx.ComboBox(self, wx.ID_ANY, style=wx.CB_READONLY)
+        wx.EVT_COMBOBOX(self.dataSource, wx.ID_ANY, self.on_select_data)
         self.dataSource.SetMinSize((_DATA_BOX_WIDTH, -1))
-        sizer_data.Add(wx.StaticText(self, -1, 'Name : '))
+        sizer_data.Add(wx.StaticText(self, wx.ID_ANY, 'Name : '))
         sizer_data.Add(self.dataSource)
         sizer_data.Add((0, 5))
         boxsizer1.Add(sizer_data, 0, wx.ALL, 10)
@@ -220,7 +221,7 @@ class FitPage(BasicPage):
         self._get_smear_info()
 
         #Sizers
-        box_description_range = wx.StaticBox(self, -1, str(title))
+        box_description_range = wx.StaticBox(self, wx.ID_ANY, str(title))
         box_description_range.SetForegroundColour(wx.BLUE)
         boxsizer_range = wx.StaticBoxSizer(box_description_range, wx.VERTICAL)
         self.sizer_set_smearer = wx.BoxSizer(wx.VERTICAL)
@@ -228,21 +229,22 @@ class FitPage(BasicPage):
         self.sizer_new_smear = wx.BoxSizer(wx.HORIZONTAL)
         self.sizer_set_masking = wx.BoxSizer(wx.HORIZONTAL)
         sizer_chi2 = wx.BoxSizer(wx.VERTICAL)
-        smear_set_box = wx.StaticBox(self, -1, 'Set Instrumental Smearing')
+        smear_set_box = wx.StaticBox(self, wx.ID_ANY,
+                                     'Set Instrumental Smearing')
         sizer_smearer_box = wx.StaticBoxSizer(smear_set_box, wx.HORIZONTAL)
         sizer_smearer_box.SetMinSize((_DATA_BOX_WIDTH, 60))
 
-        weighting_set_box = wx.StaticBox(self, -1, \
+        weighting_set_box = wx.StaticBox(self, wx.ID_ANY,
                                 'Set Weighting by Selecting dI Source')
         weighting_box = wx.StaticBoxSizer(weighting_set_box, wx.HORIZONTAL)
         sizer_weighting = wx.BoxSizer(wx.HORIZONTAL)
         weighting_box.SetMinSize((_DATA_BOX_WIDTH, 40))
         #Filling the sizer containing weighting info.
-        self.dI_noweight = wx.RadioButton(self, -1, 'No Weighting',
-                                          style=wx.RB_GROUP)
-        self.dI_didata = wx.RadioButton(self, -1, 'Use dI Data')
-        self.dI_sqrdata = wx.RadioButton(self, -1, 'Use |sqrt(I Data)|')
-        self.dI_idata = wx.RadioButton(self, -1, 'Use |I Data|')
+        self.dI_noweight = wx.RadioButton(self, wx.ID_ANY,
+                                          'No Weighting', style=wx.RB_GROUP)
+        self.dI_didata = wx.RadioButton(self, wx.ID_ANY, 'Use dI Data')
+        self.dI_sqrdata = wx.RadioButton(self, wx.ID_ANY, 'Use |sqrt(I Data)|')
+        self.dI_idata = wx.RadioButton(self, wx.ID_ANY, 'Use |I Data|')
         self.Bind(wx.EVT_RADIOBUTTON, self.onWeighting,
                   id=self.dI_noweight.GetId())
         self.Bind(wx.EVT_RADIOBUTTON, self.onWeighting,
@@ -268,24 +270,25 @@ class FitPage(BasicPage):
         weighting_box.Add(sizer_weighting)
 
         # combobox for smear2d accuracy selection
-        self.smear_accuracy = wx.ComboBox(self, -1, size=(50, -1),
-                                          style=wx.CB_READONLY)
+        self.smear_accuracy = wx.ComboBox(self, wx.ID_ANY,
+                                          size=(50, -1), style=wx.CB_READONLY)
         self._set_accuracy_list()
         self.smear_accuracy.SetValue(self.smear2d_accuracy)
         self.smear_accuracy.SetSelection(0)
-        self.smear_accuracy.SetToolTipString(\
+        self.smear_accuracy.SetToolTipString(
             "'Higher' uses more Gaussian points for smearing computation.")
 
-        wx.EVT_COMBOBOX(self.smear_accuracy, -1, self._on_select_accuracy)
+        wx.EVT_COMBOBOX(self.smear_accuracy, wx.ID_ANY,
+                        self._on_select_accuracy)
 
         #Fit button
-        self.btFit = wx.Button(self, wx.NewId(), 'Fit')
+        self.btFit = wx.Button(self, self._ids.next(), 'Fit')
         self.default_bt_colour = self.btFit.GetDefaultAttributes()
         self.btFit.Bind(wx.EVT_BUTTON, self._onFit, id=self.btFit.GetId())
         self.btFit.SetToolTipString("Start fitting.")
 
         #General Help button
-        self.btFitHelp = wx.Button(self, -1, 'Help')
+        self.btFitHelp = wx.Button(self, wx.ID_ANY, 'Help')
         self.btFitHelp.SetToolTipString("General fitting help.")
         self.btFitHelp.Bind(wx.EVT_BUTTON, self._onFitHelp)
         
@@ -298,34 +301,34 @@ class FitPage(BasicPage):
             size_q = (20, 15)  #on PC
         else:
             size_q = (30, 20)  #on MAC
-        self.btSmearHelp = wx.Button(self, -1, '?', style=wx.BU_EXACTFIT,\
-                                     size=size_q)
+        self.btSmearHelp = wx.Button(self, wx.ID_ANY, '?',
+                                     style=wx.BU_EXACTFIT, size=size_q)
         self.btSmearHelp.SetToolTipString("Resolution smearing help.")
         self.btSmearHelp.Bind(wx.EVT_BUTTON, self._onSmearHelp)
         
         #textcntrl for custom resolution
-        self.smear_pinhole_max = ModelTextCtrl(self, -1,
+        self.smear_pinhole_max = ModelTextCtrl(self, wx.ID_ANY,
                             size=(_BOX_WIDTH - 25, 20),
                             style=wx.TE_PROCESS_ENTER,
                             text_enter_callback=self.onPinholeSmear)
-        self.smear_pinhole_min = ModelTextCtrl(self, -1,
+        self.smear_pinhole_min = ModelTextCtrl(self, wx.ID_ANY,
                             size=(_BOX_WIDTH - 25, 20),
                             style=wx.TE_PROCESS_ENTER,
                             text_enter_callback=self.onPinholeSmear)
-        self.smear_slit_height = ModelTextCtrl(self, -1,
+        self.smear_slit_height = ModelTextCtrl(self, wx.ID_ANY,
                             size=(_BOX_WIDTH - 25, 20),
                             style=wx.TE_PROCESS_ENTER,
                             text_enter_callback=self.onSlitSmear)
-        self.smear_slit_width = ModelTextCtrl(self, -1,
+        self.smear_slit_width = ModelTextCtrl(self, wx.ID_ANY,
                             size=(_BOX_WIDTH - 25, 20),
                             style=wx.TE_PROCESS_ENTER,
                             text_enter_callback=self.onSlitSmear)
 
         ## smear
-        self.smear_data_left = BGTextCtrl(self, -1,
+        self.smear_data_left = BGTextCtrl(self, wx.ID_ANY,
                                           size=(_BOX_WIDTH - 25, 20), style=0)
         self.smear_data_left.SetValue(str(self.dq_l))
-        self.smear_data_right = BGTextCtrl(self, -1,
+        self.smear_data_right = BGTextCtrl(self, wx.ID_ANY,
                                            size=(_BOX_WIDTH - 25, 20), style=0)
         self.smear_data_right.SetValue(str(self.dq_r))
 
@@ -336,17 +339,16 @@ class FitPage(BasicPage):
         self.smear_slit_width.SetValue(str(self.dxw))
 
         #Filling the sizer containing instruments smearing info.
-        self.disable_smearer = wx.RadioButton(self, -1,
+        self.disable_smearer = wx.RadioButton(self, wx.ID_ANY,
                                               'None', style=wx.RB_GROUP)
-        self.enable_smearer = wx.RadioButton(self, -1,
-                                             'Use dQ Data')
+        self.enable_smearer = wx.RadioButton(self, wx.ID_ANY, 'Use dQ Data')
         #self.enable_smearer.SetToolTipString(
         #"Click to use the loaded dQ data for smearing.")
-        self.pinhole_smearer = wx.RadioButton(self, -1,
+        self.pinhole_smearer = wx.RadioButton(self, wx.ID_ANY,
                                               'Custom Pinhole Smear')
         #self.pinhole_smearer.SetToolTipString
         #("Click to input custom resolution for pinhole smearing.")
-        self.slit_smearer = wx.RadioButton(self, -1, 'Custom Slit Smear')
+        self.slit_smearer = wx.RadioButton(self, wx.ID_ANY, 'Custom Slit Smear')
         #self.slit_smearer.SetToolTipString
         #("Click to input custom resolution for slit smearing.")
         self.Bind(wx.EVT_RADIOBUTTON, self.onSmear,
@@ -367,13 +369,12 @@ class FitPage(BasicPage):
         sizer_smearer.Add((10, 10))
 
         # StaticText for chi2, N(for fitting), Npts + Log/linear spacing
-        self.tcChi = BGTextCtrl(self, -1, "-", size=(75, 20), style=0)
+        self.tcChi = BGTextCtrl(self, wx.ID_ANY, "-", size=(75, 20), style=0)
         self.tcChi.SetToolTipString("Chi2/Npts(Fit)")
-        self.Npts_fit = BGTextCtrl(self, -1, "-", size=(75, 20), style=0)
-        self.Npts_fit.SetToolTipString(\
+        self.Npts_fit = BGTextCtrl(self, wx.ID_ANY, "-", size=(75, 20), style=0)
+        self.Npts_fit.SetToolTipString(
                             " Npts : number of points selected for fitting")
-        self.Npts_total = ModelTextCtrl(self, -1,
-                            size=(_BOX_WIDTH, 20),
+        self.Npts_total = ModelTextCtrl(self, wx.ID_ANY, size=(_BOX_WIDTH, 20),
                             style=wx.TE_PROCESS_ENTER,
                             text_enter_callback=self._onQrangeEnter)
         self.Npts_total.SetValue(format_number(self.npts_x))
@@ -381,57 +382,57 @@ class FitPage(BasicPage):
                                 " Total Npts : total number of data points")
 
         # Update and Draw button
-        self.draw_button = wx.Button(self, wx.NewId(), 'Compute')
-        self.draw_button.Bind(wx.EVT_BUTTON, \
+        self.draw_button = wx.Button(self, self._ids.next(), 'Compute')
+        self.draw_button.Bind(wx.EVT_BUTTON,
                               self._onDraw, id=self.draw_button.GetId())
         self.draw_button.SetToolTipString("Compute and Draw.")
 
         self.points_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.pointsbox = wx.CheckBox(self, -1, 'Log?', (10, 10))
+        self.pointsbox = wx.CheckBox(self, wx.ID_ANY, 'Log?', (10, 10))
         self.pointsbox.SetValue(False)
         self.pointsbox.SetToolTipString("Check mark to use log spaced points")
         wx.EVT_CHECKBOX(self, self.pointsbox.GetId(), self.select_log)
 
-        self.points_sizer.Add(wx.StaticText(self, -1, 'Npts    '))
+        self.points_sizer.Add(wx.StaticText(self, wx.ID_ANY, 'Npts    '))
         self.points_sizer.Add(self.pointsbox)
 
-        box_description_1 = wx.StaticText(self, -1, '   Chi2/Npts')
-        box_description_2 = wx.StaticText(self, -1, 'Npts(Fit)')
+        box_description_1 = wx.StaticText(self, wx.ID_ANY, '   Chi2/Npts')
+        box_description_2 = wx.StaticText(self, wx.ID_ANY, 'Npts(Fit)')
 
         # StaticText for smear
-        self.smear_description_none = wx.StaticText(self, -1,
+        self.smear_description_none = wx.StaticText(self, wx.ID_ANY,
                                     smear_message_none, style=wx.ALIGN_LEFT)
-        self.smear_description_dqdata = wx.StaticText(self,
-                                - 1, smear_message_dqdata, style=wx.ALIGN_LEFT)
-        self.smear_description_type = wx.StaticText(self,
-                                     - 1, "Type:", style=wx.ALIGN_LEFT)
-        self.smear_description_accuracy_type = wx.StaticText(self, -1,
-                                        "Accuracy:", style=wx.ALIGN_LEFT)
-        self.smear_description_smear_type = BGTextCtrl(self, -1,
+        self.smear_description_dqdata = wx.StaticText(self, wx.ID_ANY,
+                                 smear_message_dqdata, style=wx.ALIGN_LEFT)
+        self.smear_description_type = wx.StaticText(self, wx.ID_ANY,
+                                    "Type:", style=wx.ALIGN_LEFT)
+        self.smear_description_accuracy_type = wx.StaticText(self, wx.ID_ANY,
+                                    "Accuracy:", style=wx.ALIGN_LEFT)
+        self.smear_description_smear_type = BGTextCtrl(self, wx.ID_ANY,
                                                        size=(57, 20), style=0)
         self.smear_description_smear_type.SetValue(str(self.dq_l))
         self.SetBackgroundColour(self.GetParent().GetBackgroundColour())
-        self.smear_description_2d = wx.StaticText(self, -1,
+        self.smear_description_2d = wx.StaticText(self, wx.ID_ANY,
                                     smear_message_2d, style=wx.ALIGN_LEFT)
-        self.smear_message_new_s = wx.StaticText(self, -1,
+        self.smear_message_new_s = wx.StaticText(self, wx.ID_ANY,
                          smear_message_new_ssmear, style=wx.ALIGN_LEFT)
-        self.smear_message_new_p = wx.StaticText(self, -1,
+        self.smear_message_new_p = wx.StaticText(self, wx.ID_ANY,
                             smear_message_new_psmear, style=wx.ALIGN_LEFT)
-        self.smear_description_2d_x = wx.StaticText(self, -1,
+        self.smear_description_2d_x = wx.StaticText(self, wx.ID_ANY,
                             smear_message_2d_x_title, style=wx.ALIGN_LEFT)
-        self.smear_description_2d_x.SetToolTipString(\
+        self.smear_description_2d_x.SetToolTipString(
                                         "  dQp(parallel) in q_r direction.")
-        self.smear_description_2d_y = wx.StaticText(self, -1,
+        self.smear_description_2d_y = wx.StaticText(self, wx.ID_ANY,
                             smear_message_2d_y_title, style=wx.ALIGN_LEFT)
         self.smear_description_2d_y.SetToolTipString(\
                                     " dQs(perpendicular) in q_phi direction.")
-        self.smear_description_pin_min = wx.StaticText(self, -1,
+        self.smear_description_pin_min = wx.StaticText(self, wx.ID_ANY,
                         smear_message_pinhole_min_title, style=wx.ALIGN_LEFT)
-        self.smear_description_pin_max = wx.StaticText(self, -1,
+        self.smear_description_pin_max = wx.StaticText(self, wx.ID_ANY,
                         smear_message_pinhole_max_title, style=wx.ALIGN_LEFT)
-        self.smear_description_slit_height = wx.StaticText(self, -1,
+        self.smear_description_slit_height = wx.StaticText(self, wx.ID_ANY,
                         smear_message_slit_height_title, style=wx.ALIGN_LEFT)
-        self.smear_description_slit_width = wx.StaticText(self, -1,
+        self.smear_description_slit_width = wx.StaticText(self, wx.ID_ANY,
                         smear_message_slit_width_title, style=wx.ALIGN_LEFT)
 
         #arrange sizers
@@ -518,7 +519,7 @@ class FitPage(BasicPage):
 
         self.sizer5.Clear(True)
 
-        self.qmin = ModelTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
+        self.qmin = ModelTextCtrl(self, wx.ID_ANY, size=(_BOX_WIDTH, 20),
                                   style=wx.TE_PROCESS_ENTER,
                                   set_focus_callback=self.qrang_set_focus,
                                   text_enter_callback=self._onQrangeEnter,
@@ -529,7 +530,7 @@ class FitPage(BasicPage):
         qmin_tip += q_tip
         self.qmin.SetToolTipString(qmin_tip)
 
-        self.qmax = ModelTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
+        self.qmax = ModelTextCtrl(self, wx.ID_ANY, size=(_BOX_WIDTH, 20),
                                   style=wx.TE_PROCESS_ENTER,
                                   set_focus_callback=self.qrang_set_focus,
                                   text_enter_callback=self._onQrangeEnter,
@@ -544,7 +545,7 @@ class FitPage(BasicPage):
         self.qmax.Bind(wx.EVT_KEY_DOWN, self.on_key)
         self.qmin.Bind(wx.EVT_TEXT, self.on_qrange_text)
         self.qmax.Bind(wx.EVT_TEXT, self.on_qrange_text)
-        wx_id = wx.NewId()
+        wx_id = self._ids.next()
         self.reset_qrange = wx.Button(self, wx_id, 'Reset')
 
         self.reset_qrange.Bind(wx.EVT_BUTTON, self.on_reset_clicked, id=wx_id)
@@ -552,15 +553,15 @@ class FitPage(BasicPage):
 
         sizer = wx.GridSizer(5, 5, 2, 6)
 
-        self.btEditMask = wx.Button(self, wx.NewId(), 'Editor')
+        self.btEditMask = wx.Button(self, self._ids.next(), 'Editor')
         self.btEditMask.Bind(wx.EVT_BUTTON, self._onMask,
                              id=self.btEditMask.GetId())
         self.btEditMask.SetToolTipString("Edit Mask.")
-        self.EditMask_title = wx.StaticText(self, -1, ' Masking(2D)')
+        self.EditMask_title = wx.StaticText(self, wx.ID_ANY, ' Masking(2D)')
 
-        sizer.Add(wx.StaticText(self, -1, '   Q range'))
-        sizer.Add(wx.StaticText(self, -1, ' Min[1/A]'))
-        sizer.Add(wx.StaticText(self, -1, ' Max[1/A]'))
+        sizer.Add(wx.StaticText(self, wx.ID_ANY, '   Q range'))
+        sizer.Add(wx.StaticText(self, wx.ID_ANY, ' Min[1/A]'))
+        sizer.Add(wx.StaticText(self, wx.ID_ANY, ' Max[1/A]'))
         sizer.Add(self.EditMask_title)
         sizer.Add((-1,5))
 
@@ -617,18 +618,18 @@ class FitPage(BasicPage):
         self._reset_dispersity()
 
         ## fill a sizer with the combobox to select dispersion type
-        model_disp = wx.StaticText(self, -1, 'Function')
+        model_disp = wx.StaticText(self, wx.ID_ANY, 'Function')
         CHECK_STATE = self.cb1.GetValue()
         import sas.models.dispersion_models
         self.polydisp = sas.models.dispersion_models.models
 
         ix = 0
         iy = 0
-        disp = wx.StaticText(self, -1, ' ')
+        disp = wx.StaticText(self, wx.ID_ANY, ' ')
         self.sizer4_4.Add(disp, (iy, ix), (1, 1),
                           wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
         ix += 1
-        values = wx.StaticText(self, -1, 'PD[ratio]')
+        values = wx.StaticText(self, wx.ID_ANY, 'PD[ratio]')
         polytext = "Polydispersity (= STD/mean); "
         polytext += "the standard deviation over the mean value."
         values.SetToolTipString(polytext)
@@ -640,28 +641,28 @@ class FitPage(BasicPage):
             err_text = 'Error'
         else:
             err_text = ''
-        self.text_disp_1 = wx.StaticText(self, -1, err_text)
+        self.text_disp_1 = wx.StaticText(self, wx.ID_ANY, err_text)
         self.sizer4_4.Add(self.text_disp_1, (iy, ix), (1, 1), \
                           wx.EXPAND | wx.ADJUST_MINSIZE, 0)
 
         ix += 1
-        self.text_disp_min = wx.StaticText(self, -1, 'Min')
+        self.text_disp_min = wx.StaticText(self, wx.ID_ANY, 'Min')
         self.sizer4_4.Add(self.text_disp_min, (iy, ix), (1, 1), \
                             wx.EXPAND | wx.ADJUST_MINSIZE, 0)
 
         ix += 1
-        self.text_disp_max = wx.StaticText(self, -1, 'Max')
+        self.text_disp_max = wx.StaticText(self, wx.ID_ANY, 'Max')
         self.sizer4_4.Add(self.text_disp_max, (iy, ix), (1, 1),
                           wx.EXPAND | wx.ADJUST_MINSIZE, 0)
 
         ix += 1
-        npts = wx.StaticText(self, -1, 'Npts')
+        npts = wx.StaticText(self, wx.ID_ANY, 'Npts')
         npts.SetToolTipString("Number of sampling points for the numerical\n\
         integration over the distribution function.")
         self.sizer4_4.Add(npts, (iy, ix), (1, 1),
                           wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         ix += 1
-        nsigmas = wx.StaticText(self, -1, 'Nsigs')
+        nsigmas = wx.StaticText(self, wx.ID_ANY, 'Nsigs')
         nsigmas.SetToolTipString("Number of sigmas between which the range\n\
          of the distribution function will be used for weighting. \n\
         The value '3' covers 99.5% for Gaussian distribution \n\
@@ -694,7 +695,7 @@ class FitPage(BasicPage):
 
                     if p == "width":
                         ix = 0
-                        cb = wx.CheckBox(self, -1, name0, (10, 10))
+                        cb = wx.CheckBox(self, wx.ID_ANY, name0, (10, 10))
                         cb.SetValue(CHECK_STATE)
                         cb.SetToolTipString("Check mark to fit")
                         wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
@@ -702,7 +703,7 @@ class FitPage(BasicPage):
                                 wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 5)
                         ix = 1
                         value = self.model.getParam(name1)
-                        ctl1 = ModelTextCtrl(self, -1,
+                        ctl1 = ModelTextCtrl(self, wx.ID_ANY,
                                              size=(_BOX_WIDTH / 1.3, 20),
                                              style=wx.TE_PROCESS_ENTER)
                         ctl1.SetLabel('PD[ratio]')
@@ -714,14 +715,14 @@ class FitPage(BasicPage):
                         self.sizer4_4.Add(ctl1, (iy, ix), (1, 1), wx.EXPAND)
                         ## text to show error sign
                         ix = 2
-                        text2 = wx.StaticText(self, -1, '+/-')
+                        text2 = wx.StaticText(self, wx.ID_ANY, '+/-')
                         self.sizer4_4.Add(text2, (iy, ix), (1, 1),
                                           wx.EXPAND | wx.ADJUST_MINSIZE, 0)
                         if not self.is_mac:
                             text2.Hide()
 
                         ix = 3
-                        ctl2 = wx.TextCtrl(self, -1,
+                        ctl2 = wx.TextCtrl(self, wx.ID_ANY,
                                            size=(_BOX_WIDTH / 1.3, 20),
                                            style=0)
 
@@ -731,7 +732,7 @@ class FitPage(BasicPage):
                             ctl2.Hide()
 
                         ix = 4
-                        ctl3 = ModelTextCtrl(self, -1,
+                        ctl3 = ModelTextCtrl(self, wx.ID_ANY,
                                              size=(_BOX_WIDTH / 2, 20),
                                              style=wx.TE_PROCESS_ENTER,
                             text_enter_callback=self._onparamRangeEnter)
@@ -740,7 +741,7 @@ class FitPage(BasicPage):
                                           wx.EXPAND | wx.ADJUST_MINSIZE, 0)
 
                         ix = 5
-                        ctl4 = ModelTextCtrl(self, -1,
+                        ctl4 = ModelTextCtrl(self, wx.ID_ANY,
                                              size=(_BOX_WIDTH / 2, 20),
                                              style=wx.TE_PROCESS_ENTER,
                             text_enter_callback=self._onparamRangeEnter)
@@ -754,7 +755,7 @@ class FitPage(BasicPage):
                     elif p == "npts":
                         ix = 6
                         value = self.model.getParam(name2)
-                        Tctl = ModelTextCtrl(self, -1,
+                        Tctl = ModelTextCtrl(self, wx.ID_ANY,
                                              size=(_BOX_WIDTH / 2.2, 20),
                                              style=wx.TE_PROCESS_ENTER)
 
@@ -766,7 +767,7 @@ class FitPage(BasicPage):
                     elif p == "nsigmas":
                         ix = 7
                         value = self.model.getParam(name3)
-                        Tct2 = ModelTextCtrl(self, -1,
+                        Tct2 = ModelTextCtrl(self, wx.ID_ANY,
                                              size=(_BOX_WIDTH / 2.2, 20),
                                              style=wx.TE_PROCESS_ENTER)
 
@@ -778,13 +779,13 @@ class FitPage(BasicPage):
                                                  None, None])
 
                 ix = 8
-                disp_box = wx.ComboBox(self, -1, size=(65, -1),
+                disp_box = wx.ComboBox(self, wx.ID_ANY, size=(65, -1),
                                        style=wx.CB_READONLY, name='%s' % name1)
                 for key, value in self.polydisp.iteritems():
                     name_disp = str(key)
                     disp_box.Append(name_disp, value)
                     disp_box.SetStringSelection("gaussian")
-                wx.EVT_COMBOBOX(disp_box, -1, self._on_disp_func)
+                wx.EVT_COMBOBOX(disp_box, wx.ID_ANY, self._on_disp_func)
                 self.sizer4_4.Add(disp_box, (iy, ix), (1, 1), wx.EXPAND)
                 self.fittable_param.append([cb, name1, ctl1, text2,
                                             ctl2, ctl3, ctl4, disp_box])
@@ -814,7 +815,7 @@ class FitPage(BasicPage):
 
                     if p == "width":
                         ix = 0
-                        cb = wx.CheckBox(self, -1, name0, (10, 10))
+                        cb = wx.CheckBox(self, wx.ID_ANY, name0, (10, 10))
                         cb.SetValue(CHECK_STATE)
                         cb.SetToolTipString("Check mark to fit")
                         wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
@@ -827,7 +828,7 @@ class FitPage(BasicPage):
                             cb.Hide()
                         ix = 1
                         value = self.model.getParam(name1)
-                        ctl1 = ModelTextCtrl(self, -1,
+                        ctl1 = ModelTextCtrl(self, wx.ID_ANY,
                                              size=(_BOX_WIDTH / 1.3, 20),
                                              style=wx.TE_PROCESS_ENTER)
                         poly_tip = "Absolute Sigma for %s." % item
@@ -853,14 +854,14 @@ class FitPage(BasicPage):
                         self.sizer4_4.Add(ctl1, (iy, ix), (1, 1), wx.EXPAND)
                         ## text to show error sign
                         ix = 2
-                        text2 = wx.StaticText(self, -1, '+/-')
+                        text2 = wx.StaticText(self, wx.ID_ANY, '+/-')
                         self.sizer4_4.Add(text2, (iy, ix), (1, 1),
                                           wx.EXPAND | wx.ADJUST_MINSIZE, 0)
 
                         text2.Hide()
 
                         ix = 3
-                        ctl2 = wx.TextCtrl(self, -1,
+                        ctl2 = wx.TextCtrl(self, wx.ID_ANY,
                                            size=(_BOX_WIDTH / 1.3, 20),
                                            style=0)
 
@@ -875,7 +876,7 @@ class FitPage(BasicPage):
                                 ctl2.Show(True)
 
                         ix = 4
-                        ctl3 = ModelTextCtrl(self, -1,
+                        ctl3 = ModelTextCtrl(self, wx.ID_ANY,
                                              size=(_BOX_WIDTH / 2, 20),
                                              style=wx.TE_PROCESS_ENTER,
                                 text_enter_callback=self._onparamRangeEnter)
@@ -886,7 +887,7 @@ class FitPage(BasicPage):
                         ctl3.Hide()
 
                         ix = 5
-                        ctl4 = ModelTextCtrl(self, -1,
+                        ctl4 = ModelTextCtrl(self, wx.ID_ANY,
                                              size=(_BOX_WIDTH / 2, 20),
                                              style=wx.TE_PROCESS_ENTER,
                             text_enter_callback=self._onparamRangeEnter)
@@ -902,7 +903,7 @@ class FitPage(BasicPage):
                     elif p == "npts":
                         ix = 6
                         value = self.model.getParam(name2)
-                        Tctl = ModelTextCtrl(self, -1,
+                        Tctl = ModelTextCtrl(self, wx.ID_ANY,
                                              size=(_BOX_WIDTH / 2.2, 20),
                                              style=wx.TE_PROCESS_ENTER)
 
@@ -922,7 +923,7 @@ class FitPage(BasicPage):
                     elif p == "nsigmas":
                         ix = 7
                         value = self.model.getParam(name3)
-                        Tct2 = ModelTextCtrl(self, -1,
+                        Tct2 = ModelTextCtrl(self, wx.ID_ANY,
                                              size=(_BOX_WIDTH / 2.2, 20),
                                              style=wx.TE_PROCESS_ENTER)
 
@@ -942,13 +943,13 @@ class FitPage(BasicPage):
                                         Tct2, None, None, None, None, None])
 
                 ix = 8
-                disp_box = wx.ComboBox(self, -1, size=(65, -1),
+                disp_box = wx.ComboBox(self, wx.ID_ANY, size=(65, -1),
                                 style=wx.CB_READONLY, name='%s' % name1)
                 for key, value in self.polydisp.iteritems():
                     name_disp = str(key)
                     disp_box.Append(name_disp, value)
                     disp_box.SetStringSelection("gaussian")
-                wx.EVT_COMBOBOX(disp_box, -1, self._on_disp_func)
+                wx.EVT_COMBOBOX(disp_box, wx.ID_ANY, self._on_disp_func)
                 self.sizer4_4.Add(disp_box, (iy, ix), (1, 1), wx.EXPAND)
                 self.fittable_param.append([cb, name1, ctl1, text2,
                                             ctl2, ctl3, ctl4, disp_box])
@@ -1078,7 +1079,7 @@ class FitPage(BasicPage):
     """
 
         _TreeLocation = "user/perspectives/fitting/fitting_help.html"
-        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+        _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation, "",
                                           "General Fitting Help")
 
     def _onSmearHelp(self, event):
@@ -1097,7 +1098,7 @@ class FitPage(BasicPage):
     """
 
         _TreeLocation = "user/perspectives/fitting/sm_help.html"
-        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+        _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation, "",
                                           "Instrumental Resolution Smearing \
                                           Help")
 
@@ -1181,8 +1182,12 @@ class FitPage(BasicPage):
             self._set_bookmark_flag(False)
             self._keep.Enable(False)
             self._set_save_flag(False)
+        # TODO: why do we have to variables for one flag??
         self.enable_disp.SetValue(False)
         self.disable_disp.SetValue(True)
+        # TODO: should not have an untrapped exception when displaying disperser
+        # TODO: do we need to create the disperser panel on every model change?
+        # Note: if we fix this, then remove ID_DISPERSER_HELP from basepage
         try:
             self.set_dispers_sizer()
         except:
@@ -2830,7 +2835,7 @@ class FitPage(BasicPage):
             self.SetupScrolling()
             return
 
-        box_description = wx.StaticBox(self, -1, str("Model Parameters"))
+        box_description = wx.StaticBox(self, wx.ID_ANY, str("Model Parameters"))
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         sizer = wx.GridBagSizer(5, 5)
         ## save the current model
@@ -2897,7 +2902,7 @@ class FitPage(BasicPage):
         iy = 0
         ix = 0
         select_text = "Select All"
-        self.cb1 = wx.CheckBox(self, -1, str(select_text), (10, 10))
+        self.cb1 = wx.CheckBox(self, wx.ID_ANY, str(select_text), (10, 10))
         wx.EVT_CHECKBOX(self, self.cb1.GetId(), self.select_all_param)
         self.cb1.SetToolTipString("To check/uncheck all the boxes below.")
         self.cb1.SetValue(True)
@@ -2905,27 +2910,27 @@ class FitPage(BasicPage):
         sizer.Add(self.cb1, (iy, ix), (1, 1), \
                              wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 5)
         ix += 1
-        self.text2_2 = wx.StaticText(self, -1, 'Value')
+        self.text2_2 = wx.StaticText(self, wx.ID_ANY, 'Value')
         sizer.Add(self.text2_2, (iy, ix), (1, 1), \
                             wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         ix += 2
-        self.text2_3 = wx.StaticText(self, -1, 'Error')
+        self.text2_3 = wx.StaticText(self, wx.ID_ANY, 'Error')
         sizer.Add(self.text2_3, (iy, ix), (1, 1), \
                             wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         if not self.is_mac:
             self.text2_3.Hide()
         ix += 1
-        self.text2_min = wx.StaticText(self, -1, 'Min')
+        self.text2_min = wx.StaticText(self, wx.ID_ANY, 'Min')
         sizer.Add(self.text2_min, (iy, ix), (1, 1), \
                             wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         #self.text2_min.Hide()
         ix += 1
-        self.text2_max = wx.StaticText(self, -1, 'Max')
+        self.text2_max = wx.StaticText(self, wx.ID_ANY, 'Max')
         sizer.Add(self.text2_max, (iy, ix), (1, 1), \
                             wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         #self.text2_max.Hide()
         ix += 1
-        self.text2_4 = wx.StaticText(self, -1, '[Units]')
+        self.text2_4 = wx.StaticText(self, wx.ID_ANY, '[Units]')
         sizer.Add(self.text2_4, (iy, ix), (1, 1), \
                             wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         self.text2_4.Hide()
@@ -2946,7 +2951,7 @@ class FitPage(BasicPage):
                     self.model_list_box["Multi-Functions"] or \
                     self.temp_multi_functional)\
                     and (item in self.model.non_fittable):
-                    non_fittable_name = wx.StaticText(self, -1, item)
+                    non_fittable_name = wx.StaticText(self, wx.ID_ANY, item)
                     sizer.Add(non_fittable_name, (iy, ix), (1, 1), \
                             wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 21)
                     ## add parameter value
@@ -2954,15 +2959,15 @@ class FitPage(BasicPage):
                     value = self.model.getParam(item)
                     if len(self.model.fun_list) > 0:
                         #num = item.split('_')[1][5:7]
-                        fun_box = wx.ComboBox(self, -1, size=(100, -1),
+                        fun_box = wx.ComboBox(self, wx.ID_ANY, size=(100, -1),
                                     style=wx.CB_READONLY, name='%s' % item)
                         self._set_fun_box_list(fun_box)
                         fun_box.SetSelection(0)
                         #self.fun_box.SetToolTipString("A function
                         #    describing the interface")
-                        wx.EVT_COMBOBOX(fun_box, -1, self._on_fun_box)
+                        wx.EVT_COMBOBOX(fun_box, wx.ID_ANY, self._on_fun_box)
                     else:
-                        fun_box = ModelTextCtrl(self, -1,
+                        fun_box = ModelTextCtrl(self, wx.ID_ANY,
                                                 size=(_BOX_WIDTH, 20),
                                 style=wx.TE_PROCESS_ENTER, name='%s' % item)
                         fun_box.SetToolTipString(\
@@ -2974,7 +2979,7 @@ class FitPage(BasicPage):
                                                 None, None])
                 else:
                     ## add parameters name with checkbox for selecting to fit
-                    cb = wx.CheckBox(self, -1, item)
+                    cb = wx.CheckBox(self, wx.ID_ANY, item)
                     cb.SetValue(CHECK_STATE)
                     cb.SetToolTipString(" Check mark to fit.")
                     #cb.SetValue(True)
@@ -2986,7 +2991,7 @@ class FitPage(BasicPage):
                     ## add parameter value
                     ix += 1
                     value = self.model.getParam(item)
-                    ctl1 = ModelTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
+                    ctl1 = ModelTextCtrl(self, wx.ID_ANY, size=(_BOX_WIDTH, 20),
                                          style=wx.TE_PROCESS_ENTER)
                     ctl1.SetToolTipString(\
                                 "Hit 'Enter' after typing to update the plot.")
@@ -2994,13 +2999,13 @@ class FitPage(BasicPage):
                     sizer.Add(ctl1, (iy, ix), (1, 1), wx.EXPAND)
                     ## text to show error sign
                     ix += 1
-                    text2 = wx.StaticText(self, -1, '+/-')
+                    text2 = wx.StaticText(self, wx.ID_ANY, '+/-')
                     sizer.Add(text2, (iy, ix), (1, 1), \
                               wx.EXPAND | wx.ADJUST_MINSIZE, 0)
                     if not self.is_mac:
                         text2.Hide()
                     ix += 1
-                    ctl2 = wx.TextCtrl(self, -1,
+                    ctl2 = wx.TextCtrl(self, wx.ID_ANY,
                                        size=(_BOX_WIDTH / 1.2, 20), style=0)
                     sizer.Add(ctl2, (iy, ix), (1, 1),
                               wx.EXPAND | wx.ADJUST_MINSIZE, 0)
@@ -3008,7 +3013,7 @@ class FitPage(BasicPage):
                         ctl2.Hide()
 
                     ix += 1
-                    ctl3 = ModelTextCtrl(self, -1,
+                    ctl3 = ModelTextCtrl(self, wx.ID_ANY,
                                          size=(_BOX_WIDTH / 1.9, 20),
                                          style=wx.TE_PROCESS_ENTER,
                                 text_enter_callback=self._onparamRangeEnter)
@@ -3020,7 +3025,7 @@ class FitPage(BasicPage):
                               wx.EXPAND | wx.ADJUST_MINSIZE, 0)
 
                     ix += 1
-                    ctl4 = ModelTextCtrl(self, -1,
+                    ctl4 = ModelTextCtrl(self, wx.ID_ANY,
                                          size=(_BOX_WIDTH / 1.9, 20),
                                          style=wx.TE_PROCESS_ENTER,
                                 text_enter_callback=self._onparamRangeEnter)
@@ -3033,10 +3038,10 @@ class FitPage(BasicPage):
                     ix += 1
                     # Units
                     if item in self.model.details:
-                        units = wx.StaticText(self, -1,
+                        units = wx.StaticText(self, wx.ID_ANY,
                             self.model.details[item][0], style=wx.ALIGN_LEFT)
                     else:
-                        units = wx.StaticText(self, -1, "",
+                        units = wx.StaticText(self, wx.ID_ANY, "",
                                               style=wx.ALIGN_LEFT)
                     sizer.Add(units, (iy, ix), (1, 1),
                               wx.EXPAND | wx.ADJUST_MINSIZE, 0)
@@ -3059,13 +3064,13 @@ class FitPage(BasicPage):
         #Add tile for orientational angle
         for item in keys:
             if item in self.model.orientation_params:
-                orient_angle = wx.StaticText(self, -1, '[For 2D only]:')
-                mag_on_button = wx.Button(self, -1, "Magnetic ON")
+                orient_angle = wx.StaticText(self, wx.ID_ANY, '[For 2D only]:')
+                mag_on_button = wx.Button(self, wx.ID_ANY, "Magnetic ON")
                 mag_on_button.SetToolTipString("Turn Pol Beam/Mag scatt on/off")
                 mag_on_button.Bind(wx.EVT_BUTTON, self._on_mag_on)
-                mag_angle_help_button = wx.Button(self, -1, "Magnetic angles?")
+                mag_angle_help_button = wx.Button(self, wx.ID_ANY, "Magnetic angles?")
                 mag_angle_help_button.SetToolTipString("see angle definitions")
-                mag_help_button = wx.Button(self, -1, "Mag HELP")
+                mag_help_button = wx.Button(self, wx.ID_ANY, "Mag HELP")
                 mag_help_button.SetToolTipString("Help on pol beam/mag fitting")
                 mag_help_button.Bind(wx.EVT_BUTTON, self._on_mag_help)
                 mag_angle_help_button.Bind(wx.EVT_BUTTON, \
@@ -3123,7 +3128,7 @@ class FitPage(BasicPage):
                     iy += 1
                     ix = 0
                     ## add parameters name with checkbox for selecting to fit
-                    cb = wx.CheckBox(self, -1, item)
+                    cb = wx.CheckBox(self, wx.ID_ANY, item)
                     cb.SetValue(CHECK_STATE)
                     cb.SetToolTipString("Check mark to fit")
                     wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)

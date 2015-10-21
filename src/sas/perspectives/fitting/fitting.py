@@ -276,7 +276,7 @@ class Plugin(PluginBase):
         model_manager = models.ModelManager()
         model_list = model_manager.get_model_name_list()
         plug_dir = models.find_plugins_dir()
-        textdial = TextDialog(None, self, -1, 'Easy Sum/Multi(p1, p2) Editor',
+        textdial = TextDialog(None, self, wx.ID_ANY, 'Easy Sum/Multi(p1, p2) Editor',
                               model_list, plug_dir)
         self.put_icon(textdial)
         textdial.ShowModal()
@@ -759,7 +759,7 @@ class Plugin(PluginBase):
     def on_help(self, algorithm_id):
         _TreeLocation = "user/perspectives/fitting/optimizer.html"
         _anchor = "#fit-"+algorithm_id
-        DocumentationWindow(self.parent, -1, _TreeLocation, _anchor, "Optimizer Help")
+        DocumentationWindow(self.parent, wx.ID_ANY, _TreeLocation, _anchor, "Optimizer Help")
 
 
     def on_fit_results(self, event=None):

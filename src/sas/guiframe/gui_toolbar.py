@@ -35,6 +35,7 @@ class GUIToolBar(Tbar):
     """
     Implement toolbar for guiframe
     """
+    ID_BOOKMARK = wx.NewId()
     def __init__(self, parent,  *args, **kwds):
         Tbar.__init__(self, parent,  *args, **kwds)
         #Set window's font size 
@@ -132,10 +133,9 @@ class GUIToolBar(Tbar):
         """
         Add default items in bookmark menu
         """
-        id = wx.NewId()
-        self._bookmark_menu.Append(id, 'Bookmark This Page State')
+        self._bookmark_menu.Append(self.ID_BOOKMARK, 'Bookmark This Page State')
         self._bookmark_menu.AppendSeparator()
-        wx.EVT_MENU(self, id, self.on_bookmark)
+        wx.EVT_MENU(self, self.ID_BOOKMARK, self.on_bookmark)
    
     def on_bind_button(self):
         """

@@ -74,8 +74,8 @@ try:
 except:
     logging.error("Wx version: error reading version")
 
-#from . import wxcruft
-#wxcruft.call_later_fix()
+from . import wxcruft
+wxcruft.call_later_fix()
 #wxcruft.trace_new_id()
 
 # The below will make sure that sasview application uses the matplotlib font
