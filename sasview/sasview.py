@@ -74,7 +74,7 @@ try:
 except:
     logging.error("Wx version: error reading version")
 
-from . import wxcruft
+import wxcruft
 wxcruft.call_later_fix()
 #wxcruft.trace_new_id()
 
