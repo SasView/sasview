@@ -14,6 +14,8 @@
 .vagrant
 .mplconfig
 
+/setup.cfg
+
 /dist
 /build
 sasview.egg-info
@@ -33,3 +35,7 @@ default_categories.json
 /docs/sphinx-docs/source/user/models
 /docs/sphinx-docs/source/user/perspectives
 
+# test outputs
+/test/pr_inversion/test/test_output.txt
+/test/sasdataloader/test/plugins.zip
+/test/sasdataloader/test/test_log.txt
