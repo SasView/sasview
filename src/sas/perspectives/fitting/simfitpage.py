@@ -1,12 +1,18 @@
 """
     Simultaneous fit page
 """
-import sys, re, string, wx
+import sys
+from collections import namedtuple
+
+import wx
 import wx.lib.newevent
+from wx.lib.scrolledpanel import ScrolledPanel
+
 from sas.guiframe.events import StatusEvent
 from sas.guiframe.panel_base import PanelBase
-from wx.lib.scrolledpanel import ScrolledPanel
 from sas.guiframe.events import PanelOnFocusEvent
+from sas.guiframe.utils import IdList
+
 #Control panel width 
 if sys.platform.count("darwin") == 0:
     PANEL_WID = 420
@@ -15,6 +21,11 @@ else:
     PANEL_WID = 490
     FONT_VARIANT = 1
 
+
+# Each constraint requires five widgets and sizer.  Package them in
+# a named tuple for easy access.
+ConstraintLine = namedtuple('ConstraintLine',
+        'model_cbox param_cbox egal_txt constraint btRemove sizer')
 
 def get_fittableParam(model):
     """
@@ -34,7 +45,6 @@ def get_fittableParam(model):
 
     return fittable_param
 
-
 class SimultaneousFitPage(ScrolledPanel, PanelBase):
     """
     Simultaneous fitting panel
@@ -46,12 +56,12 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
     ## Title to appear on top of the window
     window_caption = "Simultaneous Fit Page"
     ID_SET_ALL = wx.NewId()
-    ID_REMOVE = wx.NewId()
     ID_FIT = wx.NewId()
     ID_ADD = wx.NewId()
+    _id_pool = IdList()
 
-    def __init__(self, parent, page_finder={}, id= wx.ID_ANY, batch_on=False,
-                     *args, **kwargs):
+    def __init__(self, parent, page_finder={}, id=wx.ID_ANY, batch_on=False,
+                 *args, **kwargs):
         ScrolledPanel.__init__(self, parent, id=id,
                                style=wx.FULL_REPAINT_ON_RESIZE,
                                *args, **kwargs)
@@ -59,6 +69,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         """
         Simultaneous page display
         """
+        self._ids = iter(self._id_pool)
         self.SetupScrolling()
         ##Font size
         self.SetWindowVariant(variant=FONT_VARIANT)
@@ -128,20 +139,21 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             return
         if len(self.constraints_list) == 0:
             return
+        wx.CallAfter(self._remove_after, event.GetId())
+        #self._onAdd_constraint(None)
+
+    def _remove_after(self, id):
         for item in self.constraints_list:
-            length = len(item)
-            if event.GetId() == item[length - 2].GetId():
-                sizer = item[length - 1]
-                sizer.Clear(True)
-                self.sizer_constraints.Remove(sizer)
-                #self.SetScrollbars(20,20,25,65)
+            if id == item.btRemove.GetId():
+                self.sizer_constraints.Hide(item.sizer)
+                item.sizer.Clear(True)
+                self.sizer_constraints.Remove(item.sizer)
+                ##self.SetScrollbars(20,20,25,65)
                 self.constraints_list.remove(item)
                 self.nb_constraint -= 1
                 self.sizer2.Layout()
                 self.Layout()
                 break
-
-        #self._onAdd_constraint(None)
 
     def onFit(self, event):
         """
@@ -197,15 +209,14 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             self._store_model()
             if not self.batch_on:
                 ## display constraint fields
-                if self.show_constraint.GetValue() and\
-                                 len(self.constraints_list) == 0:
+                if (self.show_constraint.GetValue() and
+                                 len(self.constraints_list) == 0):
                     self._show_all_constraint()
                     self._show_constraint()
         else:
             for item in self.model_list:
                 item[0].SetValue(False)
 
-            self.model_toFit = []
             if not self.batch_on:
                 ##constraint info
                 self._hide_constraint()
@@ -254,29 +265,18 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         """
         Update easy setup combobox on selecting a model
         """
-        if self.model_cbox_left != None and self.model_cbox_right != None:
-            try:
-                # when there is something
-                self.model_cbox_left.Clear()
-                self.model_cbox_right.Clear()
-                self.model_cbox.Clear()
-            except:
-                # when there is nothing
-                pass
-            #for id, model in self.constraint_dict.iteritems():
-            for item in self.model_toFit:
-                model = item[3]
-                ## check if all parameters have been selected for constraint
-                ## then do not allow add constraint on parameters
-                if str(model.name) not in self.model_cbox_left.GetItems():
-                    self.model_cbox_left.Append(str(model.name), model)
-                if str(model.name) not in self.model_cbox_right.GetItems():
-                    self.model_cbox_right.Append(str(model.name), model)
-                if str(model.name) not in self.model_cbox.GetItems():
-                    self.model_cbox.Append(str(model.name), model)
+        if self.model_cbox_left == None or self.model_cbox_right == None:
+            return
+
+        models = [(item[3].name, item[3]) for item in self.model_toFit]
+        setComboBoxItems(self.model_cbox_left, models)
+        setComboBoxItems(self.model_cbox_right, models)
+        for item in self.constraints_list:
+            setComboBoxItems(item[0], models)
+        if self.model_cbox_left.GetSelection() == wx.NOT_FOUND:
             self.model_cbox_left.SetSelection(0)
-            self.sizer2.Layout()
-            self.sizer3.Layout()
+        self.sizer2.Layout()
+        self.sizer3.Layout()
 
     def draw_page(self):
         """
@@ -401,13 +401,13 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             self.model_cbox_right.Append(str(model.name), model)
         boxsizer.Add(self.model_cbox_left,
                              flag=wx.RIGHT | wx.EXPAND, border=10)
-        boxsizer.Add(wx.StaticText(self, wx.ID_ANY, ".parameters"),
-                             flag=wx.RIGHT | wx.EXPAND, border=5)
+        #boxsizer.Add(wx.StaticText(self, wx.ID_ANY, ".parameters"),
+        #                     flag=wx.RIGHT | wx.EXPAND, border=5)
         boxsizer.Add(egal_txt, flag=wx.RIGHT | wx.EXPAND, border=5)
         boxsizer.Add(self.model_cbox_right,
                              flag=wx.RIGHT | wx.EXPAND, border=10)
-        boxsizer.Add(wx.StaticText(self, wx.ID_ANY, ".parameters"),
-                             flag=wx.RIGHT | wx.EXPAND, border=5)
+        #boxsizer.Add(wx.StaticText(self, wx.ID_ANY, ".parameters"),
+        #                     flag=wx.RIGHT | wx.EXPAND, border=5)
         boxsizer.Add((20, -1))
         boxsizer.Add(self.set_button, flag=wx.RIGHT | wx.EXPAND, border=5)
         sizer_constraint.Add(boxsizer, flag=wx.RIGHT | wx.EXPAND, border=5)
@@ -429,8 +429,8 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             flag = False
         if self.model_cbox_right.GetValue().strip() == '':
             flag = False
-        if self.model_cbox_left.GetValue() == \
-                self.model_cbox_right.GetValue():
+        if (self.model_cbox_left.GetValue() ==
+                self.model_cbox_right.GetValue()):
             flag = False
         self.set_button.Enable(flag)
 
@@ -462,12 +462,13 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         for param in param_list:
             num_cbox += 1
             if param in param_listB:
-                self.model_cbox.SetStringSelection(model_left)
+                item = self.constraints_list[-1]
+                item.model_cbox.SetStringSelection(model_left)
                 self._on_select_model(None)
-                self.param_cbox.Clear()
-                self.param_cbox.Append(str(param), model)
-                self.param_cbox.SetStringSelection(str(param))
-                self.ctl2.SetValue(str(model_right + "." + str(param)))
+                item.param_cbox.Clear()
+                item.param_cbox.Append(str(param), model)
+                item.param_cbox.SetStringSelection(str(param))
+                item.constraint.SetValue(str(model_right + "." + str(param)))
                 has_param = True
                 if num_cbox == (len(param_list) + 1):
                     break
@@ -498,7 +499,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                 nb_fit_param += len(self.page_finder[id].get_param2fit())
             ##Don't add anymore
             if len(self.constraints_list) == nb_fit_param:
-                msg = "Cannot add another constraint .Maximum of number "
+                msg = "Cannot add another constraint. Maximum of number "
                 msg += "Parameters name reached %s" % str(nb_fit_param)
                 wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
                 self.sizer_constraints.Layout()
@@ -512,45 +513,52 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             return
 
         sizer_constraint = wx.BoxSizer(wx.HORIZONTAL)
+
+        # Model list
         model_cbox = wx.ComboBox(self, wx.ID_ANY, style=wx.CB_READONLY)
         model_cbox.Clear()
-        param_cbox = wx.ComboBox(self, wx.ID_ANY, style=wx.CB_READONLY, size=(100, -1),)
-        param_cbox.Hide()
-
-        #This is for GetCLientData() _on_select_param: Was None return on MAC.
-        self.param_cbox = param_cbox
-
-        wx.EVT_COMBOBOX(param_cbox, wx.ID_ANY, self._on_select_param)
-        self.ctl2 = wx.TextCtrl(self, wx.ID_ANY)
-        egal_txt = wx.StaticText(self, wx.ID_ANY, " = ")
-        self.btRemove = wx.Button(self, self.ID_REMOVE, 'Remove')
-        self.btRemove.Bind(wx.EVT_BUTTON, self.onRemove,
-                           id=self.btRemove.GetId())
-        self.btRemove.SetToolTipString("Remove constraint.")
-        self.btRemove.Hide()
-        if hasattr(self, "btAdd"):
-            self.btAdd.Hide()
         for id, model in self.constraint_dict.iteritems():
             ## check if all parameters have been selected for constraint
             ## then do not allow add constraint on parameters
             model_cbox.Append(str(model.name), model)
-
-        #This is for GetCLientData() passing to self._on_select_param: Was None return on MAC.
-        self.model_cbox = model_cbox
-
         wx.EVT_COMBOBOX(model_cbox, wx.ID_ANY, self._on_select_model)
-        sizer_constraint.Add((5, wx.ID_ANY))
+
+        # Parameters in model
+        param_cbox = wx.ComboBox(self, wx.ID_ANY, style=wx.CB_READONLY,
+                                 size=(100, -1))
+        param_cbox.Hide()
+        wx.EVT_COMBOBOX(param_cbox, wx.ID_ANY, self._on_select_param)
+
+        egal_txt = wx.StaticText(self, wx.ID_ANY, " = ")
+
+        # Parameter constraint
+        constraint = wx.TextCtrl(self, wx.ID_ANY)
+
+        # Remove button
+        #btRemove = wx.Button(self, self.ID_REMOVE, 'Remove')
+        btRemove = wx.Button(self, self._ids.next(), 'Remove')
+        btRemove.Bind(wx.EVT_BUTTON, self.onRemove,
+                      id=btRemove.GetId())
+        btRemove.SetToolTipString("Remove constraint.")
+        btRemove.Hide()
+
+        # Hid the add button, if it exists
+        if hasattr(self, "btAdd"):
+            self.btAdd.Hide()
+
+        sizer_constraint.Add((5, -1))
         sizer_constraint.Add(model_cbox, flag=wx.RIGHT | wx.EXPAND, border=10)
         sizer_constraint.Add(param_cbox, flag=wx.RIGHT | wx.EXPAND, border=5)
         sizer_constraint.Add(egal_txt, flag=wx.RIGHT | wx.EXPAND, border=5)
-        sizer_constraint.Add(self.ctl2, flag=wx.RIGHT | wx.EXPAND, border=10)
-        sizer_constraint.Add(self.btRemove, flag=wx.RIGHT | wx.EXPAND, border=10)
+        sizer_constraint.Add(constraint, flag=wx.RIGHT | wx.EXPAND, border=10)
+        sizer_constraint.Add(btRemove, flag=wx.RIGHT | wx.EXPAND, border=10)
 
         self.sizer_constraints.Insert(before=self.nb_constraint,
-                        item=sizer_constraint, flag=wx.TOP | wx.BOTTOM | wx.EXPAND,
-                        border=5)
-        self.constraints_list.append([model_cbox, param_cbox, egal_txt,
-                                    self.ctl2, self.btRemove, sizer_constraint])
+                item=sizer_constraint, flag=wx.TOP | wx.BOTTOM | wx.EXPAND,
+                border=5)
+        c = ConstraintLine(model_cbox, param_cbox, egal_txt,
+                           constraint, btRemove, sizer_constraint)
+        self.constraints_list.append(c)
 
         self.nb_constraint += 1
         self.sizer_constraints.Layout()
@@ -560,7 +568,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         """
         hide buttons related constraint
         """
-        for id in  self.page_finder.iterkeys():
+        for id in self.page_finder.iterkeys():
             self.page_finder[id].clear_model_param()
 
         self.nb_constraint = 0
@@ -568,17 +576,11 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         if hasattr(self, "btAdd"):
             self.btAdd.Hide()
         self._store_model()
-        if self.model_cbox_left != None:
-            try:
-                self.model_cbox_left.Clear()
-            except:
-                pass
+        if self.model_cbox_left is not None:
+            self.model_cbox_left.Clear()
             self.model_cbox_left = None
-        if self.model_cbox_right != None:
-            try:
-                self.model_cbox_right.Clear()
-            except:
-                pass
+        if self.model_cbox_right is not None:
+            self.model_cbox_right.Clear()
             self.model_cbox_right = None
         self.constraints_list = []
         self.sizer_all_constraints.Clear(True)
@@ -591,25 +593,31 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         """
         fill combox box with list of parameters
         """
-        param_list = []
+        if not self.constraints_list:
+            return
+
         ##This way PC/MAC both work, instead of using event.GetClientData().
-        n = self.model_cbox.GetCurrentSelection()
-        model = self.model_cbox.GetClientData(n)
+        model_cbox = self.constraints_list[-1].model_cbox
+        n = model_cbox.GetCurrentSelection()
+        if n == wx.NOT_FOUND:
+            return
+
+        model = model_cbox.GetClientData(n)
+        param_list = []
         for id, dic_model in self.constraint_dict.iteritems():
             if model == dic_model:
                 param_list = self.page_finder[id].get_param2fit()
-                #break
-        length = len(self.constraints_list)
-        if length < 1:
-            return
-        param_cbox = self.constraints_list[length - 1][1]
+                break
+
+        param_cbox = self.constraints_list[-1].param_cbox
         param_cbox.Clear()
         ## insert only fittable paramaters
         for param in param_list:
             param_cbox.Append(str(param), model)
-
         param_cbox.Show(True)
-        self.btRemove.Show(True)
+
+        btRemove = self.constraints_list[-1].btRemove
+        btRemove.Show(True)
         self.btAdd.Show(True)
         self.sizer2.Layout()
 
@@ -622,14 +630,9 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         #model = self.param_cbox.GetClientData(n)
         #param = event.GetString()
 
-        length = len(self.constraints_list)
-        if length < 1:
-            return
-        egal_txt = self.constraints_list[length - 1][2]
-        egal_txt.Show(True)
-
-        ctl2 = self.constraints_list[length - 1][3]
-        ctl2.Show(True)
+        if self.constraints_list:
+            self.constraints_list[-1].egal_txt.Show(True)
+            self.constraints_list[-1].constraint.Show(True)
 
     def _onAdd_constraint(self, event):
         """
@@ -642,25 +645,22 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         ## check that a constraint is added
         # before allow to add another constraint
         for item in self.constraints_list:
-            model_cbox = item[0]
-            if model_cbox.GetString(0) == "":
+            if item.model_cbox.GetString(0) == "":
                 msg = " Select a model Name! "
                 wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
                 return
-            param_cbox = item[1]
-            if param_cbox.GetString(0) == "":
+            if item.param_cbox.GetString(0) == "":
                 msg = " Select a parameter Name! "
                 wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
                 return
-            ctl2 = item[3]
-            if ctl2.GetValue().lstrip().rstrip() == "":
-                model = param_cbox.GetClientData(\
-                                            param_cbox.GetCurrentSelection())
+            if item.constraint.GetValue().lstrip().rstrip() == "":
+                model = item.param_cbox.GetClientData(
+                                        item.param_cbox.GetCurrentSelection())
                 if model != None:
                     msg = " Enter a constraint for %s.%s! " % (model.name,
-                                                        param_cbox.GetString(0))
+                                        item.param_cbox.GetString(0))
                 else:
-                     msg = " Enter a constraint"
+                    msg = " Enter a constraint"
                 wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
                 return
         ## some model or parameters can be constrained
@@ -745,8 +745,10 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
 
         text_hint = wx.StaticText(self, wx.ID_ANY,
                                   "Example: [M0][paramter] = M1.parameter")
-        sizer_button.Add(text_hint, 0 , wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 10)
-        sizer_button.Add(self.btAdd, 0, wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 10)
+        sizer_button.Add(text_hint, 0,
+                         wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 10)
+        sizer_button.Add(self.btAdd, 0,
+                         wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 10)
 
         boxsizer1.Add(sizer_title, flag=wx.TOP | wx.BOTTOM, border=10)
         boxsizer1.Add(self.sizer_all_constraints, flag=wx.TOP | wx.BOTTOM,
@@ -769,15 +771,15 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         and its appropriates parameters
         """
         for item in self.constraints_list:
-            select0 = item[0].GetSelection()
+            select0 = item.model_cbox.GetSelection()
             if select0 == wx.NOT_FOUND:
                 continue
-            model = item[0].GetClientData(select0)
-            select1 = item[1].GetSelection()
+            model = item.model_cbox.GetClientData(select0)
+            select1 = item.param_cbox.GetSelection()
             if select1 == wx.NOT_FOUND:
                 continue
-            param = item[1].GetString(select1)
-            constraint = item[3].GetValue().lstrip().rstrip()
+            param = item.param_cbox.GetString(select1)
+            constraint = item.constraint.GetValue().lstrip().rstrip()
             if param.lstrip().rstrip() == "":
                 param = None
                 msg = " Constraint will be ignored!. missing parameters"
@@ -810,7 +812,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                     for fid in self.page_finder[id].iterkeys():
                         # wrap in param/constraint in str() to remove unicode
                         self.page_finder[id].set_model_param(str(param),
-                                                        str(constraint), fid=fid)
+                                str(constraint), fid=fid)
                     break
         return True
 
@@ -846,7 +848,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         tab_used.SetBackgroundColour('grey')
         tab_used.SetForegroundColour(wx.WHITE)
         sizer.Add(tab_used, (iy, ix), (1, 1),
-                            wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+                  wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         for id, value in self.page_finder.iteritems():
             if id not in self.parent.opened_pages:
                 continue
@@ -885,11 +887,11 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             cb.SetValue(False)
             cb.Enable(model is not None and data.is_data)
             sizer.Add(cb, (iy, ix), (1, 1),
-                       wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+                      wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
             wx.EVT_CHECKBOX(self, cb.GetId(), self.check_model_name)
             ix += 2
-            type = model.__class__.__name__
-            model_type = wx.StaticText(self, wx.ID_ANY, str(type))
+            model_type = wx.StaticText(self, wx.ID_ANY,
+                                       model.__class__.__name__)
             sizer.Add(model_type, (iy, ix), (1, 1),
                       wx.EXPAND | wx.ADJUST_MINSIZE, 0)
             if self.batch_on:
@@ -923,3 +925,12 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             if self.parent.parent is not None:
                 wx.PostEvent(self.parent.parent, PanelOnFocusEvent(panel=self))
             self.page_finder = self.parent._manager.get_page_finder()
+
+
+def setComboBoxItems(cbox, items):
+    assert isinstance(cbox, wx.ComboBox)
+    selected = cbox.GetStringSelection()
+    cbox.Clear()
+    for k, (name, value) in enumerate(items):
+        cbox.Append(name, value)
+    cbox.SetStringSelection(selected)
