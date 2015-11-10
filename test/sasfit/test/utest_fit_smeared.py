@@ -13,6 +13,22 @@ from sas.models.qsmearing import smear_selection
 from sas.models.CylinderModel import CylinderModel
 from sas.models.SphereModel import SphereModel
 
+
+from bumps import fitters
+try:
+    from bumps.options import FIT_CONFIG
+    def set_fitter(alg, opts):
+        FIT_CONFIG.selected_id= alg
+        FIT_CONFIG.values[alg].update(opts, monitors=[])
+except:
+    # CRUFT: Bumps changed its handling of fit options around 0.7.5.6
+    def set_fitter(alg, opts):
+        #print "fitting",alg,opts
+        #print "options",fitters.FIT_OPTIONS[alg].__dict__
+        fitters.FIT_DEFAULT = alg
+        fitters.FIT_OPTIONS[alg].options.update(opts, monitors=[])
+
+
 class testFitModule(unittest.TestCase):
     """ test fitting """
     
@@ -56,11 +72,7 @@ class testFitModule(unittest.TestCase):
         """
             Cylinder fit with dispersion
         """
-        alg = 'lm'
-        from bumps import fitters
-        fitters.FIT_DEFAULT = alg
-        #fitters.FIT_OPTIONS[alg].options.update(opts)
-        fitters.FIT_OPTIONS[alg].options.update(monitors=[])
+        set_fitter('lm', {})
         self._dispersion(fitter = Fit())
 
     def _dispersion(self, fitter):

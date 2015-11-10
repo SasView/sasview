@@ -22,6 +22,7 @@ sasview.egg-info
 sasview-install
 **/test/logs
 *.pyc
+*.so
 default_categories.json
 
 /src/sas/models/*.py
