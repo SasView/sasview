@@ -2,6 +2,7 @@
 """ 
 PeakGaussModel function as a BaseComponent model
 """
+from __future__ import division
 
 from sas.models.BaseComponent import BaseComponent
 import math
