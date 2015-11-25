@@ -68,10 +68,15 @@ else:
     logging.info("You have not set the %s environment variable, so using default version of wxPython." % WX_ENV_VAR)
 
 import wx
+
 try:
     logging.info("Wx version: %s" % wx.__version__)
 except:
     logging.error("Wx version: error reading version")
+
+import wxcruft
+wxcruft.call_later_fix()
+#wxcruft.trace_new_id()
 
 # The below will make sure that sasview application uses the matplotlib font
 # bundled with sasview.

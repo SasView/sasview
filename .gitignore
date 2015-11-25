@@ -14,12 +14,15 @@
 .vagrant
 .mplconfig
 
+/setup.cfg
+
 /dist
 /build
 sasview.egg-info
 sasview-install
 **/test/logs
 *.pyc
+*.so
 default_categories.json
 
 /src/sas/models/*.py
@@ -33,3 +36,7 @@ default_categories.json
 /docs/sphinx-docs/source/user/models
 /docs/sphinx-docs/source/user/perspectives
 
+# test outputs
+/test/pr_inversion/test/test_output.txt
+/test/sasdataloader/test/plugins.zip
+/test/sasdataloader/test/test_log.txt

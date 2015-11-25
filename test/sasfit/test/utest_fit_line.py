@@ -11,6 +11,21 @@ from sas.fit.BumpsFitting import BumpsFit as Fit
 from sas.models.LineModel import LineModel
 from sas.models.Constant import Constant
 
+from bumps import fitters
+try:
+    from bumps.options import FIT_CONFIG
+    def set_fitter(alg, opts):
+        FIT_CONFIG.selected_id = alg
+        FIT_CONFIG.values[alg].update(opts, monitors=[])
+except:
+    # CRUFT: Bumps changed its handling of fit options around 0.7.5.6
+    def set_fitter(alg, opts):
+        #print "fitting",alg,opts
+        #print "options",fitters.FIT_OPTIONS[alg].__dict__
+        fitters.FIT_DEFAULT = alg
+        fitters.FIT_OPTIONS[alg].options.update(opts, monitors=[])
+
+
 class testFitModule(unittest.TestCase):
     """ test fitting """
 
@@ -66,13 +81,7 @@ class testFitModule(unittest.TestCase):
             self.assertTrue( abs(fx-fx_) <= 1e-5 )
 
     def fit_bumps(self, alg, **opts):
-        #Importing the Fit module
-        from bumps import fitters
-        fitters.FIT_DEFAULT = alg
-        fitters.FIT_OPTIONS[alg].options.update(opts)
-        fitters.FIT_OPTIONS[alg].options.update(monitors=[])
-        #print "fitting",alg,opts
-        #kprint "options",fitters.FIT_OPTIONS[alg].__dict__
+        set_fitter(alg, opts)
         self.fit_single(isdream=(alg=='dream'))
 
     def test_bumps_de(self):

@@ -286,29 +286,30 @@ class ModelPanel2D(ModelPanel1D):
         :param event: wx context event
 
         """
+        ids = iter(self._menu_ids)
         slicerpop = PanelMenu()
         slicerpop.set_plots(self.plots)
         slicerpop.set_graph(self.graph)
 
-        wx_id = wx.NewId()
+        wx_id = ids.next()
         slicerpop.Append(wx_id, '&Save Image')
         wx.EVT_MENU(self, wx_id, self.onSaveImage)
 
-        wx_id = wx.NewId()
+        wx_id = ids.next()
         slicerpop.Append(wx_id, '&Print Image', 'Print image')
         wx.EVT_MENU(self, wx_id, self.onPrint)
 
-        wx_id = wx.NewId()
+        wx_id = ids.next()
         slicerpop.Append(wx_id, '&Copy to Clipboard', 'Copy to the clipboard')
         wx.EVT_MENU(self, wx_id, self.OnCopyFigureMenu)
         slicerpop.AppendSeparator()
         # saving data
         plot = self.data2D
-        wx_id = wx.NewId()
+        wx_id = ids.next()
         slicerpop.Append(wx_id, "&Data Info")
         wx.EVT_MENU(self, wx_id, self._onDataShow)
 
-        wx_id = wx.NewId()
+        wx_id = ids.next()
         slicerpop.Append(wx_id, "&Save as a File (DAT)")
         self.action_ids[str(wx_id)] = plot
         wx.EVT_MENU(self, wx_id, self._onSave)
@@ -319,9 +320,9 @@ class ModelPanel2D(ModelPanel1D):
             if (not item_list == None) and (not len(item_list) == 0) and\
                 self.data2D.name.split(" ")[0] != 'Residuals':
                 # The line above; Not for trunk
-                for item in item_list:
+                # Note: reusing menu ids for the sub-menus.  See Plotter1D.
+                for item, wx_id in zip(item_list, self._menu_ids):
                     try:
-                        wx_id = wx.NewId()
                         slicerpop.Append(wx_id, item[0], item[1])
                         wx.EVT_MENU(self, wx_id, item[2])
                     except:
@@ -330,62 +331,62 @@ class ModelPanel2D(ModelPanel1D):
                         wx.PostEvent(self.parent, StatusEvent(status=msg))
                 slicerpop.AppendSeparator()
 
-            wx_id = wx.NewId()
+            wx_id = ids.next()
             slicerpop.Append(wx_id, '&Perform Circular Average')
             wx.EVT_MENU(self, wx_id, self.onCircular) \
             # For Masked Data
             if not plot.mask.all():
-                wx_id = wx.NewId()
+                wx_id = ids.next()
                 slicerpop.Append(wx_id, '&Masked Circular Average')
                 wx.EVT_MENU(self, wx_id, self.onMaskedCircular)
-            wx_id = wx.NewId()
+            wx_id = ids.next()
             slicerpop.Append(wx_id, '&Sector [Q View]')
             wx.EVT_MENU(self, wx_id, self.onSectorQ)
-            wx_id = wx.NewId()
+            wx_id = ids.next()
             slicerpop.Append(wx_id, '&Annulus [Phi View ]')
             wx.EVT_MENU(self, wx_id, self.onSectorPhi)
-            wx_id = wx.NewId()
+            wx_id = ids.next()
             slicerpop.Append(wx_id, '&Box Sum')
             wx.EVT_MENU(self, wx_id, self.onBoxSum)
-            wx_id = wx.NewId()
+            wx_id = ids.next()
             slicerpop.Append(wx_id, '&Box Averaging in Qx')
             wx.EVT_MENU(self, wx_id, self.onBoxavgX)
-            wx_id = wx.NewId()
+            wx_id = ids.next()
             slicerpop.Append(wx_id, '&Box Averaging in Qy')
             wx.EVT_MENU(self, wx_id, self.onBoxavgY)
             if self.slicer != None:
-                wx_id = wx.NewId()
+                wx_id = ids.next()
                 slicerpop.Append(wx_id, '&Clear Slicer')
                 wx.EVT_MENU(self, wx_id, self.onClearSlicer)
                 if self.slicer.__class__.__name__ != "BoxSum":
-                    wx_id = wx.NewId()
+                    wx_id = ids.next()
                     slicerpop.Append(wx_id, '&Edit Slicer Parameters')
                     wx.EVT_MENU(self, wx_id, self._onEditSlicer)
             slicerpop.AppendSeparator()
 
-        wx_id = wx.NewId()
+        wx_id = ids.next()
         slicerpop.Append(wx_id, '&Edit Graph Label', 'Edit Graph Label')
         wx.EVT_MENU(self, wx_id, self.onEditLabels)
         slicerpop.AppendSeparator()
 
         # ILL mod here
 
-        wx_id = wx.NewId()
+        wx_id = ids.next()
         slicerpop.Append(wx_id, '&Modify graph appearance', 'Modify graph appearance')
         wx.EVT_MENU(self, wx_id, self.modifyGraphAppearance)
         slicerpop.AppendSeparator()
 
-        wx_id = wx.NewId()
+        wx_id = ids.next()
         slicerpop.Append(wx_id, '&2D Color Map')
         wx.EVT_MENU(self, wx_id, self._onEditDetector)
         slicerpop.AppendSeparator()
 
-        wx_id = wx.NewId()
+        wx_id = ids.next()
         slicerpop.Append(wx_id, '&Toggle Linear/Log Scale')
         wx.EVT_MENU(self, wx_id, self._onToggleScale)
 
         slicerpop.AppendSeparator()
-        wx_id = wx.NewId()
+        wx_id = ids.next()
         slicerpop.Append(wx_id, '&Window Title')
         wx.EVT_MENU(self, wx_id, self.onChangeCaption)
 

@@ -35,7 +35,7 @@ class FitPanel(nb, PanelBase):
     def __init__(self, parent, manager=None, *args, **kwargs):
         """
         """
-        nb.__init__(self, parent, -1,
+        nb.__init__(self, parent, wx.ID_ANY,
                     style=wx.aui.AUI_NB_WINDOWLIST_BUTTON |
                     wx.aui.AUI_NB_DEFAULT_STYLE |
                     wx.CLIP_CHILDREN)
@@ -323,7 +323,7 @@ class FitPanel(nb, PanelBase):
         page_finder = self._manager.get_page_finder()
         if caption == "Const & Simul Fit":
             self.sim_page = SimultaneousFitPage(self, page_finder=page_finder,
-                                                 id= -1, batch_on=False)
+                                                 id= wx.ID_ANY, batch_on=False)
             self.sim_page.window_caption = caption
             self.sim_page.window_name = caption
             self.sim_page.uid = wx.NewId()

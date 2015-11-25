@@ -14,7 +14,7 @@ import logging
 from collections import defaultdict
 from wx.lib.scrolledpanel import ScrolledPanel
 from sas.guiframe.panel_base import PanelBase
-from sas.guiframe.utils import format_number, check_float
+from sas.guiframe.utils import format_number, check_float, IdList
 from sas.guiframe.events import PanelOnFocusEvent
 from sas.guiframe.events import StatusEvent
 from sas.guiframe.events import AppendBookmarkEvent
@@ -56,6 +56,12 @@ class BasicPage(ScrolledPanel, PanelBase):
     window_name = "Fit Page"
     ## Title to appear on top of the window
     window_caption = "Fit Page "
+    # These two buttons have specific IDs since they seem to be created more
+    # frequently than they need to.  In particular, set_dispers_sizer() is
+    # called by _on_select_model
+    ID_BOOKMARK = wx.NewId()
+    ID_DISPERSER_HELP = wx.NewId()
+    _id_pool = IdList()
 
     def __init__(self, parent, color='blue', **kwargs):
         """
@@ -65,8 +71,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.SetupScrolling()
         #Set window's font size
         self.SetWindowVariant(variant=FONT_VARIANT)
-
         self.SetBackgroundColour(color)
+
+        self._ids = iter(self._id_pool)
         ## parent of the page
         self.parent = parent
         ## manager is the fitting plugin
@@ -198,14 +205,14 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## Create context menu for page
         self.popUpMenu = wx.Menu()
 
-        id = wx.NewId()
-        self._keep = wx.MenuItem(self.popUpMenu, id, "Add bookmark",
+        wx_id = self._ids.next()
+        self._keep = wx.MenuItem(self.popUpMenu, wx_id, "Add bookmark",
                                  " Keep the panel status to recall it later")
         self.popUpMenu.AppendItem(self._keep)
         self._keep.Enable(False)
         self._set_bookmark_flag(False)
         self._set_save_flag(False)
-        wx.EVT_MENU(self, id, self.on_bookmark)
+        wx.EVT_MENU(self, wx_id, self.on_bookmark)
         self.popUpMenu.AppendSeparator()
 
         ## Default locations
@@ -593,21 +600,22 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         fill sizer containing dispersity info
         """
+        #print "==== entering set_dispers_sizer ==="
         self.sizer4.Clear(True)
         name = "Polydispersity and Orientational Distribution"
-        box_description = wx.StaticBox(self, -1, name)
+        box_description = wx.StaticBox(self, wx.ID_ANY, name)
         box_description.SetForegroundColour(wx.BLUE)
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         #----------------------------------------------------
-        self.disable_disp = wx.RadioButton(self, -1, 'Off', (10, 10),
+        self.disable_disp = wx.RadioButton(self, wx.ID_ANY, 'Off', (10, 10),
                                            style=wx.RB_GROUP)
-        self.enable_disp = wx.RadioButton(self, -1, 'On', (10, 30))
+        self.enable_disp = wx.RadioButton(self, wx.ID_ANY, 'On', (10, 30))
         # best size for MAC and PC
         if ON_MAC:
             size_q = (30, 20)
         else:
             size_q = (20, 15)
-        self.disp_help_bt = wx.Button(self, wx.NewId(), '?',
+        self.disp_help_bt = wx.Button(self, self.ID_DISPERSER_HELP, '?',
                                       style=wx.BU_EXACTFIT,
                                       size=size_q)
         self.disp_help_bt.Bind(wx.EVT_BUTTON, self.on_pd_help_clicked,
@@ -623,7 +631,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         sizer_dispersion = wx.BoxSizer(wx.HORIZONTAL)
         sizer_dispersion.Add((20, 20))
         name = ""  # Polydispersity and \nOrientational Distribution "
-        sizer_dispersion.Add(wx.StaticText(self, -1, name))
+        sizer_dispersion.Add(wx.StaticText(self, wx.ID_ANY, name))
         sizer_dispersion.Add(self.enable_disp)
         sizer_dispersion.Add((20, 20))
         sizer_dispersion.Add(self.disable_disp)
@@ -794,9 +802,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         msg += " Saved! right click on this page to retrieve this model"
         wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
 
-        id = wx.NewId()
-        self.popUpMenu.Append(id, name, str(msg))
-        wx.EVT_MENU(self, id, self.onResetModel)
+        self.popUpMenu.Append(self.ID_BOOKMARK, name, str(msg))
+        wx.EVT_MENU(self, self.ID_BOOKMARK, self.onResetModel)
         wx.PostEvent(self._manager.parent,
                      AppendBookmarkEvent(title=name,
                                          hint=str(msg),
@@ -1437,13 +1444,14 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         reset the context menu
         """
+        ids = iter(self._id_pool)  # Reusing ids for context menu
         for name, _ in self.state.saved_states.iteritems():
             self.number_saved_state += 1
             ## Add item in the context menu
-            id = wx.NewId()
+            wx_id = ids.next()
             msg = 'Save model and state %g' % self.number_saved_state
-            self.popUpMenu.Append(id, name, msg)
-            wx.EVT_MENU(self, id, self.onResetModel)
+            self.popUpMenu.Append(wx_id, name, msg)
+            wx.EVT_MENU(self, wx_id, self.onResetModel)
 
     def _reset_plotting_range(self, state):
         """
@@ -1830,7 +1838,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         sld_data = pf_data1d(x, y)
         sld_data.name = 'SLD'
         sld_data.axes = self.sld_axes
-        self.panel = SLDPanel(self, data=sld_data, axes=self.sld_axes, id= -1)
+        self.panel = SLDPanel(self, data=sld_data, axes=self.sld_axes,
+                              id=wx.ID_ANY)
         self.panel.ShowModal()
 
     def _set_multfactor_combobox(self, multiplicity=10):
@@ -2420,7 +2429,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         self.sizer4_4.Clear(True)
         text = "No polydispersity available for this model"
-        model_disp = wx.StaticText(self, -1, text)
+        model_disp = wx.StaticText(self, wx.ID_ANY, text)
         self.sizer4_4.Add(model_disp, (iy, ix), (1, 1),
                           wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 10)
         self.sizer4_4.Layout()
@@ -2850,11 +2859,11 @@ class BasicPage(ScrolledPanel, PanelBase):
         if self.model != None:
             name = self.formfactorbox.GetValue()
             _PageAnchor = '#' + name.lower()
-            _doc_viewer = DocumentationWindow(self, -1, _TreeLocation,
+            _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation,
                                               _PageAnchor, name + " Help")
         else:
-            _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
-                                                "General Model Help")
+            _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation,
+                                              "", "General Model Help")
 
 
     def on_model_help_clicked(self, event):
@@ -2905,7 +2914,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
 
         _TreeLocation = "_images/M_angles_pic.bmp"
-        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+        _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation, "",
                                           "Magnetic Angle Defintions")
 
     def _on_mag_help(self, event):
@@ -2925,7 +2934,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
 
         _TreeLocation = "user/perspectives/fitting/mag_help.html"
-        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+        _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation, "",
                                           "Polarized Beam/Magnetc Help")
 
     def _on_mag_on(self, event):
@@ -2972,7 +2981,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         _TreeLocation = "user/perspectives/fitting/pd_help.html"
         _PageAnchor = ""
-        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation,
+        _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation,
                                           _PageAnchor, "Polydispersity Help")
 
     def on_left_down(self, event):
@@ -3516,42 +3525,49 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         fill sizer containing model info
         """
+        # This should only be called once per fit tab
+        #print "==== Entering _fill_model_sizer"
         ##Add model function Details button in fitpanel.
         ##The following 3 lines are for Mac. Let JHC know before modifying...
         title = "Model"
         self.formfactorbox = None
         self.multifactorbox = None
-        self.mbox_description = wx.StaticBox(self, -1, str(title))
+        self.mbox_description = wx.StaticBox(self, wx.ID_ANY, str(title))
         boxsizer1 = wx.StaticBoxSizer(self.mbox_description, wx.VERTICAL)
         sizer_cat = wx.BoxSizer(wx.HORIZONTAL)
         self.mbox_description.SetForegroundColour(wx.RED)
-        id = wx.NewId()
-        self.model_func = wx.Button(self, id, 'Help', size=(80, 23))
-        self.model_func.Bind(wx.EVT_BUTTON, self.on_function_help_clicked, id=id)
+        wx_id = self._ids.next()
+        self.model_func = wx.Button(self, wx_id, 'Help', size=(80, 23))
+        self.model_func.Bind(wx.EVT_BUTTON, self.on_function_help_clicked,
+                             id=wx_id)
         self.model_func.SetToolTipString("Full Model Function Help")
-        id = wx.NewId()
-        self.model_help = wx.Button(self, id, 'Description', size=(80, 23))
-        self.model_help.Bind(wx.EVT_BUTTON, self.on_model_help_clicked, id=id)
+        wx_id = self._ids.next()
+        self.model_help = wx.Button(self, wx_id, 'Description', size=(80, 23))
+        self.model_help.Bind(wx.EVT_BUTTON, self.on_model_help_clicked,
+                             id=wx_id)
         self.model_help.SetToolTipString("Short Model Function Description")
-        id = wx.NewId()
-        self.model_view = wx.Button(self, id, "Show 2D", size=(80, 23))
-        self.model_view.Bind(wx.EVT_BUTTON, self._onModel2D, id=id)
+        wx_id = self._ids.next()
+        self.model_view = wx.Button(self, wx_id, "Show 2D", size=(80, 23))
+        self.model_view.Bind(wx.EVT_BUTTON, self._onModel2D, id=wx_id)
         hint = "toggle view of model from 1D to 2D  or 2D to 1D"
         self.model_view.SetToolTipString(hint)
 
-        cat_set_box = wx.StaticBox(self, -1, 'Category')
+        cat_set_box = wx.StaticBox(self, wx.ID_ANY, 'Category')
         sizer_cat_box = wx.StaticBoxSizer(cat_set_box, wx.HORIZONTAL)
         sizer_cat_box.SetMinSize((200, 50))
-        self.categorybox = wx.ComboBox(self, -1, style=wx.CB_READONLY)
+        self.categorybox = wx.ComboBox(self, wx.ID_ANY,
+                                       style=wx.CB_READONLY)
         self.categorybox.SetToolTip(wx.ToolTip("Select a Category/Type"))
         self._populate_listbox()
-        wx.EVT_COMBOBOX(self.categorybox, -1, self._show_combox)
-        #self.shape_rbutton = wx.RadioButton(self, -1, 'Shapes',
+        wx.EVT_COMBOBOX(self.categorybox, wx.ID_ANY, self._show_combox)
+        #self.shape_rbutton = wx.RadioButton(self, wx.ID_ANY, 'Shapes',
         #                                     style=wx.RB_GROUP)
-        #self.shape_indep_rbutton = wx.RadioButton(self, -1,
+        #self.shape_indep_rbutton = wx.RadioButton(self, wx.ID_ANY,
         #                                          "Shape-Independent")
-        #self.struct_rbutton = wx.RadioButton(self, -1, "Structure Factor ")
-        #self.plugin_rbutton = wx.RadioButton(self, -1, "Uncategorized")
+        #self.struct_rbutton = wx.RadioButton(self, wx.ID_ANY,
+        #                                     "Structure Factor ")
+        #self.plugin_rbutton = wx.RadioButton(self, wx.ID_ANY,
+        #                                     "Uncategorized")
 
         #self.Bind(wx.EVT_RADIOBUTTON, self._show_combox,
         #                   id=self.shape_rbutton.GetId())
@@ -3563,7 +3579,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         #                    id=self.plugin_rbutton.GetId())
         #MAC needs SetValue
 
-        show_cat_button = wx.Button(self, -1, "Modify")
+        show_cat_button = wx.Button(self, wx.ID_ANY, "Modify")
         cat_tip = "Modify model categories \n"
         cat_tip += "(also accessible from the menu bar)."
         show_cat_button.SetToolTip(wx.ToolTip(cat_tip))
@@ -3589,24 +3605,24 @@ class BasicPage(ScrolledPanel, PanelBase):
         sizer_selection = wx.BoxSizer(wx.HORIZONTAL)
         mutifactor_selection = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.text1 = wx.StaticText(self, -1, "")
-        self.text2 = wx.StaticText(self, -1, "P(Q)*S(Q)")
-        self.mutifactor_text = wx.StaticText(self, -1, "No. of Shells: ")
-        self.mutifactor_text1 = wx.StaticText(self, -1, "")
-        self.show_sld_button = wx.Button(self, -1, "Show SLD Profile")
+        self.text1 = wx.StaticText(self, wx.ID_ANY, "")
+        self.text2 = wx.StaticText(self, wx.ID_ANY, "P(Q)*S(Q)")
+        self.mutifactor_text = wx.StaticText(self, wx.ID_ANY, "No. of Shells: ")
+        self.mutifactor_text1 = wx.StaticText(self, wx.ID_ANY, "")
+        self.show_sld_button = wx.Button(self, wx.ID_ANY, "Show SLD Profile")
         self.show_sld_button.Bind(wx.EVT_BUTTON, self._on_show_sld)
 
-        self.formfactorbox = wx.ComboBox(self, -1, style=wx.CB_READONLY)
+        self.formfactorbox = wx.ComboBox(self, wx.ID_ANY, style=wx.CB_READONLY)
         self.formfactorbox.SetToolTip(wx.ToolTip("Select a Model"))
         if self.model != None:
             self.formfactorbox.SetValue(self.model.name)
-        self.structurebox = wx.ComboBox(self, -1, style=wx.CB_READONLY)
-        self.multifactorbox = wx.ComboBox(self, -1, style=wx.CB_READONLY)
+        self.structurebox = wx.ComboBox(self, wx.ID_ANY, style=wx.CB_READONLY)
+        self.multifactorbox = wx.ComboBox(self, wx.ID_ANY, style=wx.CB_READONLY)
         self.initialize_combox()
-        wx.EVT_COMBOBOX(self.formfactorbox, -1, self._on_select_model)
+        wx.EVT_COMBOBOX(self.formfactorbox, wx.ID_ANY, self._on_select_model)
 
-        wx.EVT_COMBOBOX(self.structurebox, -1, self._on_select_model)
-        wx.EVT_COMBOBOX(self.multifactorbox, -1, self._on_select_model)
+        wx.EVT_COMBOBOX(self.structurebox, wx.ID_ANY, self._on_select_model)
+        wx.EVT_COMBOBOX(self.multifactorbox, wx.ID_ANY, self._on_select_model)
         ## check model type to show sizer
         if self.model != None:
             print "_set_model_sizer_selection: disabled."

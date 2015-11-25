@@ -254,11 +254,29 @@ Release Notes
         - We currently use Python 2.7
 
    2.2- Installing from source
-        - Get the code from GitHub at https://github.com/SasView/sasview.git
-          for this release version use: https://github.com/SasView/sasview/releases
-          - run 'python setup.py install' under the 'sasview-x.x.x' folder
+        - Get the source code
+          - to follow the current development version from source control use
+              git clone https://github.com/SasView/sasview.git
+              git clone https://github.com/bumps/bumps.git
+	  - to install a specific version
+
+        - Build, install and run a specific release
+          - make sure the requirements below are already installed
+          - retrieve the source from https://github.com/SasView/sasview/releases
+          - open a command line window in the 'sasview-x.x.x' directory
+          - run 'python setup.py install'
           - run 'python sasview.py' under the 'sasview' folder.
-          
+
+        - Build, install and run the current development version
+          - clone the source from git; also clone bumps, which is developed in parallel
+              git clone https://github.com/SasView/sasview.git
+              git clone https://github.com/bumps/bumps.git
+          - open a command line window in the 'sasview' directory
+          - run 'python setup.py build'
+          - run 'python run.py'; this runs from the source directories, so you
+            don't have to rebuild every time you make a change, unless you are
+            changing the C++ model files
+
         - The following modules are required (version numbers are what are used
           in the windows release build):
           
