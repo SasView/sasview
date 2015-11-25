@@ -120,7 +120,7 @@ import __init__ as sasviewver
 
 VERSION = sasviewver.__version__
 APPNAME = "SasView "+VERSION
-DMGNAME = "SasView-"+VERSION
+DMGNAME = "SasView-"+VERSION+"-MacOSX"
 
 APP = ['sasview.py']
 DATA_FILES += ['images','test','media']
