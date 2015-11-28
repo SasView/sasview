@@ -2412,10 +2412,14 @@ class BasicPage(ScrolledPanel, PanelBase):
             wx.PostEvent(self.parent, event)
         #draw the model with the current dispersity
         self._draw_model()
-        self.sizer4_4.Layout()
-        self.sizer5.Layout()
-        self.Layout()
-        self.Refresh()
+        ## Need to use FitInside again here to replace the next four lines.
+        ## Otherwised polydispersity off does not resize the scrollwindow. 
+        ## PDB Nov 28, 2015
+        self.FitInside()
+#        self.sizer4_4.Layout()
+#        self.sizer5.Layout()
+#        self.Layout()
+#        self.Refresh()
 
     def _layout_sizer_noDipers(self):
         """

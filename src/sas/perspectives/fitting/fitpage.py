@@ -2263,7 +2263,11 @@ class FitPage(BasicPage):
         self._show_smear_sizer()
 
         self.sizer_set_smearer.Layout()
-        self.Layout()
+        ## we need FitInside here not just self.Layout to ensure all the sizers
+        ## end up with the necessasary space to in the scroll panel. In
+        ## particular the compute and fit buttons end up on top of each other
+        ## PDB Nov 28 2015. 
+        self.FitInside()
 
         if event != None:
             event.Skip()
@@ -2437,7 +2441,11 @@ class FitPage(BasicPage):
         # show relevant slit sizers
         self._show_smear_sizer()
         self.sizer_set_smearer.Layout()
-        self.Layout()
+        ## we need FitInside here not just self.Layout to ensure all the sizers
+        ## end up with the necessasary space to in the scroll panel. In
+        ## particular the compute and fit buttons end up on top of each other
+        ## PDB Nov 28 2015. 
+        self.FitInside()
 
         if event != None:
             event.Skip()
@@ -2567,7 +2575,7 @@ class FitPage(BasicPage):
     def onSmear(self, event):
         """
         Create a smear object that will change the way residuals
-        are compute when fitting
+        are computed when fitting
         """
         if event != None:
             event.Skip()
@@ -2582,7 +2590,11 @@ class FitPage(BasicPage):
         temp_smearer = self.on_smear_helper()
 
         self.sizer_set_smearer.Layout()
-        self.Layout()
+        ## we need FitInside here not just self.Layout to ensure all the sizers
+        ## end up with the necessasary space to in the scroll panel. In
+        ## particular the compute and fit buttons end up on top of each other
+        ## PDB Nov 28 2015. 
+        self.FitInside()
         self._set_weight()
 
         ## set smearing value whether or not the data contain the smearing info
