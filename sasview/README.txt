@@ -4,6 +4,24 @@ Release Notes
 1- Features
 ===========
 
+   - New in Version 3.1.2
+     --------------------
+     This release is a major stability improvement, having fixed a serious bug 
+     that came to light since release 3.1.1. All users should upgrade.
+
+     - Fixes bug #468 broken remove constraint buttons in 
+       simultaneous/constrained fitting panel
+     - Fixes bug #474 resulting from changes in 3.1.1 that had 
+       introduced an error in the high-Q of slit-smeared models.
+     - Fixes bug #478 which would cause wx to run out of IDs and result 
+       in SasView crashing even if left alone.
+     - Fixes bug #479 missing help button on simultaneous/constrained fit page
+     - Fixes bug #480 GUI resizing issues on simultaneous fit page
+     - Fixes bug #486 broken Report Results
+     - Fixes bug #488 redraw issues in fit page
+
+
+
    - New in Version 3.1.1
      --------------------
      - Fixes bug #457 that prevented SasView from starting if the user was not
