@@ -18,6 +18,15 @@ else:
             event(actor, action)
 
 class NavigationToolBar(NavigationToolbar2WxAgg):
+    _NTB2_HOME = wx.NewId()
+    _NTB2_BACK = wx.NewId()
+    _NTB2_FORWARD = wx.NewId()
+    _NTB2_PAN = wx.NewId()
+    _NTB2_ZOOM = wx.NewId()
+    _NTB2_SAVE = wx.NewId()
+    _NTB2_PRINT = wx.NewId()
+    _NTB2_RESET = wx.NewId()
+    _NTB2_COPY = wx.NewId()
     """
     Overwrite matplotlib toolbar
     """
@@ -30,14 +39,6 @@ class NavigationToolBar(NavigationToolbar2WxAgg):
     
     def _init_toolbar(self):
         self._parent = self.canvas.GetParent()
-        self._NTB2_HOME = wx.NewId()
-        self._NTB2_BACK = wx.NewId()
-        self._NTB2_FORWARD = wx.NewId()
-        self._NTB2_PAN = wx.NewId()
-        self._NTB2_ZOOM = wx.NewId()
-        self._NTB2_SAVE = wx.NewId()
-        self._NTB2_PRINT = wx.NewId()
-        self._NTB2_RESET = wx.NewId()
 
         # for mpl 1.2+ compatibility
         self.wx_ids = {}
@@ -100,18 +101,15 @@ class NavigationToolBar(NavigationToolbar2WxAgg):
 
         """
         # Slicer plot popup menu
-        wx_id = wx.NewId()
         popup = wx.Menu()
-        popup.Append(wx_id, '&Save image', 'Save image as PNG')
-        wx.EVT_MENU(self, wx_id, self.save_figure)
+        popup.Append(self._NTB2_SAVE, '&Save image', 'Save image as PNG')
+        wx.EVT_MENU(self, self._NTB2_SAVE, self.save_figure)
 
-        wx_id = wx.NewId()
-        popup.Append(wx_id, '&Print image', 'Print image ')
-        wx.EVT_MENU(self, wx_id, self.print_figure)
+        popup.Append(self._NTB2_PRINT, '&Print image', 'Print image ')
+        wx.EVT_MENU(self, self._NTB2_PRINT, self.print_figure)
 
-        wx_id = wx.NewId()
-        popup.Append(wx_id, '&Copy to Clipboard', 'Copy image to the clipboard')
-        wx.EVT_MENU(self, wx_id, self.copy_figure)
+        popup.Append(self._NTB2_COPY, '&Copy to Clipboard', 'Copy image to the clipboard')
+        wx.EVT_MENU(self, self._NTB2_COPY, self.copy_figure)
 
         # Show the popup menu relative to the location of the toolbar
         self.PopupMenu(popup, (0,0))

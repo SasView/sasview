@@ -40,7 +40,7 @@ class ResultPanel(Notebook, PanelBase):
                  | wx.aui.AUI_NB_DEFAULT_STYLE
                  | wx.CLIP_CHILDREN)
                  & ~wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB)
-        Notebook.__init__(self, parent, -1, style=style)
+        Notebook.__init__(self, parent, wx.ID_ANY, style=style)
         PanelBase.__init__(self, parent)
         self.frame = parent
         self.Bind(EVT_PLOT_RESULT, self.on_plot_results)

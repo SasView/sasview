@@ -14,6 +14,7 @@
 import time
 import os
 import sys
+import wx
 import copy
 import logging
 import numpy
@@ -604,7 +605,7 @@ class PageState(object):
         # make plot image
         images = self.set_plot_state(figs, canvases)
         report_list = [report_str, text_str, images]
-        dialog = ReportDialog(report_list, None, -1, "")
+        dialog = ReportDialog(report_list, None, wx.ID_ANY, "")
         dialog.Show()
 
     def _toXML_helper(self, thelist, element, newdoc):

@@ -37,7 +37,7 @@ class BatchFitPage(FitPage):
         """
         fill sizer 0 with data info
         """
-        self.data_box_description = wx.StaticBox(self, -1, 'I(q) Data Source')
+        self.data_box_description = wx.StaticBox(self, wx.ID_ANY, 'I(q) Data Source')
         if check_data_validity(self.data):
             dname_color = wx.BLUE
         else:
@@ -46,19 +46,19 @@ class BatchFitPage(FitPage):
         boxsizer1 = wx.StaticBoxSizer(self.data_box_description, wx.VERTICAL)
         #----------------------------------------------------------
         sizer_data = wx.BoxSizer(wx.VERTICAL)
-        text1 = wx.StaticText(self, -1, ' - Choose a file to set initial fit parameters -')
+        text1 = wx.StaticText(self, wx.ID_ANY, ' - Choose a file to set initial fit parameters -')
         text1.SetForegroundColour(wx.RED)
         sizer_data.Add(text1)
-        text2 = wx.StaticText(self, -1, ' - This panel is not designed to view individual fits. - ')
+        text2 = wx.StaticText(self, wx.ID_ANY, ' - This panel is not designed to view individual fits. - ')
         text2.SetForegroundColour(wx.RED)
         sizer_data.Add(text2)
 
         combo = wx.BoxSizer(wx.HORIZONTAL)
-        self.dataSource = wx.ComboBox(self, -1, style=wx.CB_READONLY)
-        wx.EVT_COMBOBOX(self.dataSource, -1, self.on_select_data)
+        self.dataSource = wx.ComboBox(self, wx.ID_ANY, style=wx.CB_READONLY)
+        wx.EVT_COMBOBOX(self.dataSource, wx.ID_ANY, self.on_select_data)
         self.dataSource.SetMinSize((_DATA_BOX_WIDTH, -1))
 
-        combo.Add(wx.StaticText(self, -1, 'Name : '))
+        combo.Add(wx.StaticText(self, wx.ID_ANY, 'Name : '))
         combo.Add((0, 5))
         combo.Add(self.dataSource)
 
@@ -85,7 +85,7 @@ class BatchFitPage(FitPage):
 #         self._get_smear_info()
 #         
 #         #Sizers
-#         box_description_range = wx.StaticBox(self, -1, str(title))
+#         box_description_range = wx.StaticBox(self, wx.ID_ANY, str(title))
 #         boxsizer_range = wx.StaticBoxSizer(box_description_range, wx.VERTICAL)      
 #         self.sizer_set_smearer = wx.BoxSizer(wx.VERTICAL)
 #         #sizer_smearer = wx.BoxSizer(wx.HORIZONTAL)
@@ -95,13 +95,13 @@ class BatchFitPage(FitPage):
 # 
 #         sizer_fit = wx.GridSizer(2, 4, 2, 6)
 #         #Fit button
-#         self.btFit = wx.Button(self, wx.NewId(), 'Fit', size=(88, 25))
+#         self.btFit = wx.Button(self, self._ids.next(), 'Fit', size=(88, 25))
 #         self.default_bt_colour =  self.btFit.GetDefaultAttributes()
 #         self.btFit.Bind(wx.EVT_BUTTON, self._onFit, id= self.btFit.GetId())
 #         self.btFit.SetToolTipString("Start fitting.")
 # 
 #         # Update and Draw button
-#         self.draw_button = wx.Button(self, wx.NewId(), 'Compute', size=(88, 24))
+#         self.draw_button = wx.Button(self, self._ids.next(), 'Compute', size=(88, 24))
 #         self.draw_button.Bind(wx.EVT_BUTTON, \
 #                               self._onDraw,id=self.draw_button.GetId())
 #         self.draw_button.SetToolTipString("Compute and Draw.")  
@@ -121,19 +121,19 @@ class BatchFitPage(FitPage):
 #             
 #         self.sizer5.Clear(True)
 #      
-#         self.qmin  = ModelTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
+#         self.qmin  = ModelTextCtrl(self, wx.ID_ANY, size=(_BOX_WIDTH, 20),
 #                                           style=wx.TE_PROCESS_ENTER, 
 #                                     text_enter_callback = self._onQrangeEnter)
 #         self.qmin.SetValue(str(self.qmin_x))
 #         self.qmin.SetToolTipString("Minimun value of Q in linear scale.")
 #      
-#         self.qmax  = ModelTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
+#         self.qmax  = ModelTextCtrl(self, wx.ID_ANY, size=(_BOX_WIDTH, 20),
 #                                           style=wx.TE_PROCESS_ENTER, 
 #                                         text_enter_callback=self._onQrangeEnter)
 #         self.qmax.SetValue(str(self.qmax_x))
 #         self.qmax.SetToolTipString("Maximum value of Q in linear scale.")
 #         
-#         id = wx.NewId()
+#         id = self._ids.next()
 #         self.reset_qrange =wx.Button(self, id, 'Reset', size=(77, 20))
 #       
 #         self.reset_qrange.Bind(wx.EVT_BUTTON, self.on_reset_clicked, id=id)
@@ -143,15 +143,15 @@ class BatchFitPage(FitPage):
 #         sizer_horizontal = wx.BoxSizer(wx.HORIZONTAL)
 #         sizer = wx.GridSizer(2, 4, 2, 6)
 # 
-#         self.btEditMask = wx.Button(self, wx.NewId(),'Editor', size=(88, 23))
+#         self.btEditMask = wx.Button(self, self._ids.next(),'Editor', size=(88, 23))
 #         self.btEditMask.Bind(wx.EVT_BUTTON, 
 #                              self._onMask,id=self.btEditMask.GetId())
 #         self.btEditMask.SetToolTipString("Edit Mask.")
-#         self.EditMask_title = wx.StaticText(self, -1, ' Masking(2D)')
+#         self.EditMask_title = wx.StaticText(self, wx.ID_ANY, ' Masking(2D)')
 # 
-#         sizer.Add(wx.StaticText(self, -1, 'Q range'))     
-#         sizer.Add(wx.StaticText(self, -1, ' Min[1/A]'))
-#         sizer.Add(wx.StaticText(self, -1, ' Max[1/A]'))
+#         sizer.Add(wx.StaticText(self, wx.ID_ANY, 'Q range'))
+#         sizer.Add(wx.StaticText(self, wx.ID_ANY, ' Min[1/A]'))
+#         sizer.Add(wx.StaticText(self, wx.ID_ANY, ' Max[1/A]'))
 #         sizer.Add(self.EditMask_title)
 #  
 #         sizer.Add(self.reset_qrange)   
