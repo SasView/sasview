@@ -3,8 +3,8 @@
 import wx
 import sys
 from copy import deepcopy
-from sas.dataloader.loader import Loader
-from sas.dataloader.data_info import Aperture, Collimation
+from sas.sascalc.dataloader.loader import Loader
+from sas.sascalc.dataloader.data_info import Aperture, Collimation
 from aperture_editor import ApertureDialog
 
 from sas.guiframe.utils import check_float

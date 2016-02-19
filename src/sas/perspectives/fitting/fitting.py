@@ -20,7 +20,7 @@ import time
 from copy import deepcopy
 import models
 
-from sas.dataloader.loader import Loader
+from sas.sascalc.dataloader.loader import Loader
 from sas.guiframe.dataFitting import Data2D
 from sas.guiframe.dataFitting import Data1D
 from sas.guiframe.dataFitting import check_data_validity
@@ -31,7 +31,7 @@ from sas.guiframe.events import EVT_SLICER_PARS_UPDATE
 from sas.guiframe.gui_style import GUIFRAME_ID
 from sas.guiframe.plugin_base import PluginBase
 from sas.guiframe.data_processor import BatchCell
-from sas.fit.BumpsFitting import BumpsFit as Fit
+from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 from sas.perspectives.fitting.console import ConsoleUpdate
 from sas.perspectives.fitting.fitproblem import FitProblemDictionary
 from sas.perspectives.fitting.fitpanel import FitPanel

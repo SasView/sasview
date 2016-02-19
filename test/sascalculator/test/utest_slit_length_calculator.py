@@ -3,8 +3,8 @@
 """
 
 import unittest
-from sas.dataloader.readers.ascii_reader import Reader
-from  sas.calculator.slit_length_calculator import SlitlengthCalculator as calculator
+from sas.sascalc.dataloader.readers.ascii_reader import Reader
+from  sas.sascalc.calculator.slit_length_calculator import SlitlengthCalculator as calculator
 
 import os.path
 

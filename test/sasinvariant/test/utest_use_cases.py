@@ -5,8 +5,9 @@
 #TODO: there's no test for smeared extrapolation
 import unittest
 import numpy
-from sas.dataloader.loader import  Loader
-from sas.invariant import invariant
+from sas.sascalc.dataloader.loader import  Loader
+
+from sas.sascalc.invariant import invariant
 
 class Data1D:
     pass

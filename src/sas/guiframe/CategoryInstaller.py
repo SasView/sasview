@@ -32,8 +32,8 @@ class CategoryInstaller:
         """
         returns the dir where installed_models.txt should be
         """
-        import sas.dataloader.readers
-        return sas.dataloader.readers.get_data_path()
+        import sas.sascalc.dataloader.readers
+        return sas.sascalc.dataloader.readers.get_data_path()
 
     @staticmethod
     def _get_models_py_dir():

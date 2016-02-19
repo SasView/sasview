@@ -124,7 +124,7 @@ class AnnulusInteractor(_BaseInteractor):
         if data == None:
             return
 
-        from sas.dataloader.manipulations import Ring
+        from sas.sascalc.dataloader.manipulations import Ring
         rmin = min(math.fabs(self.inner_circle.get_radius()),
                    math.fabs(self.outer_circle.get_radius()))
         rmax = max(math.fabs(self.inner_circle.get_radius()),
@@ -523,7 +523,7 @@ class CircularMask(_BaseInteractor):
         if data == None:
             return
         mask = data.mask
-        from sas.dataloader.manipulations import Ringcut
+        from sas.sascalc.dataloader.manipulations import Ringcut
 
         rmin = 0
         rmax = math.fabs(self.outer_circle.get_radius())

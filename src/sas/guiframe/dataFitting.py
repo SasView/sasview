@@ -4,13 +4,13 @@ Adapters for fitting module
 import copy
 import numpy
 import math
-from sas.data_util.uncertainty import Uncertainty
+from sas.sascalc.data_util.uncertainty import Uncertainty
 from sas.plottools.plottables import Data1D as PlotData1D
 from sas.plottools.plottables import Data2D as PlotData2D
 from sas.plottools.plottables import Theory1D as PlotTheory1D
 
-from sas.dataloader.data_info import Data1D as LoadData1D
-from sas.dataloader.data_info import Data2D as LoadData2D
+from sas.sascalc.dataloader.data_info import Data1D as LoadData1D
+from sas.sascalc.dataloader.data_info import Data2D as LoadData2D
 
 
 class Data1D(PlotData1D, LoadData1D):

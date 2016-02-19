@@ -3,8 +3,8 @@
 """
 import unittest
 import math
-from sas.fit.BumpsFitting import BumpsFit as Fit
-from sas.dataloader.loader import Loader
+from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
+from sas.sascalc.dataloader.loader import Loader
 import bumps.fitters
 bumps.fitters.FIT_DEFAULT = 'lm'
 

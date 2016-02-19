@@ -149,7 +149,7 @@ class SectorInteractor(_BaseInteractor):
             phimax = self.right_edge.get_angle()
         # print "phimin, phimax, rmin ,rmax",math.degrees(phimin),
         # math.degrees(phimax), rmin ,rmax
-        # from sas.dataloader.manipulations import SectorQ
+        # from sas.sascalc.dataloader.manipulations import SectorQ
 
         sect = new_sector(r_min=rmin, r_max=rmax,
                           phi_min=phimin, phi_max=phimax)
@@ -260,7 +260,7 @@ class SectorInteractorQ(SectorInteractor):
     def _post_data(self):
         """
         """
-        from sas.dataloader.manipulations import SectorQ
+        from sas.sascalc.dataloader.manipulations import SectorQ
         self.post_data(SectorQ)
 
 
@@ -277,6 +277,6 @@ class SectorInteractorPhi(SectorInteractor):
     def _post_data(self):
         """
         """
-        from sas.dataloader.manipulations import SectorPhi
+        from sas.sascalc.dataloader.manipulations import SectorPhi
         self.post_data(SectorPhi)
 

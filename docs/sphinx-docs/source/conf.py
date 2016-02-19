@@ -81,7 +81,7 @@ release = '3.1.2'
 # that we don't get various "ImportError: No module named ___" when
 # running Sphinx.
 exclude_patterns = ["*sas.perspectives.simulation.rst",
-                    "*sas.pr.c_extensions.rst",
+                    "*sas.sascalc.pr.c_extensions.rst",
                     "*sas.realspace.rst",
                     "*sas.simulation.rst",
                     "*sas.sasview.setup_exe.rst",

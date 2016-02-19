@@ -179,11 +179,11 @@ class BoxSum(_BaseInteractor):
         y_min = self.vertical_lines.y2
         y_max = self.vertical_lines.y1
         # #computation of the sum and its error
-        from sas.dataloader.manipulations import Boxavg
+        from sas.sascalc.dataloader.manipulations import Boxavg
         box = Boxavg(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
         self.count, self.error = box(self.base.data2D)
         # Dig out number of points summed, SMK & PDB, 04/03/2013
-        from sas.dataloader.manipulations import Boxsum
+        from sas.sascalc.dataloader.manipulations import Boxsum
         boxtotal = Boxsum(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
         self.total, self.totalerror, self.points = boxtotal(self.base.data2D)
 

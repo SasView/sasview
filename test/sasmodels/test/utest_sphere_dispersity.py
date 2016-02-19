@@ -4,7 +4,7 @@
 """
 
 import unittest, math, numpy
-from sas.dataloader.loader import  Loader
+from sas.sascalc.dataloader.loader import  Loader
 
         
 class TestSphereGauss(unittest.TestCase):

@@ -570,7 +570,7 @@ class ModelPanel2D(ModelPanel1D):
         # Find the best number of bins
         npt = math.sqrt(len(self.data2D.data[numpy.isfinite(self.data2D.data)]))
         npt = math.floor(npt)
-        from sas.dataloader.manipulations import CircularAverage
+        from sas.sascalc.dataloader.manipulations import CircularAverage
         ## compute the maximum radius of data2D
         self.qmax = max(math.fabs(self.data2D.xmax),
                         math.fabs(self.data2D.xmin))

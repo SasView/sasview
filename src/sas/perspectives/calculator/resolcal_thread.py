@@ -2,7 +2,7 @@
 Thread for Resolution computation
 """
 import time
-from sas.data_util.calcthread import CalcThread
+from sas.sascalc.data_util.calcthread import CalcThread
 
 class CalcRes(CalcThread):
     """

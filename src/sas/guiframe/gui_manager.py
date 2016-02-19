@@ -44,7 +44,7 @@ from sas.guiframe.gui_toolbar import GUIToolBar
 from sas.guiframe.data_processor import GridFrame
 from sas.guiframe.events import EVT_NEW_BATCH
 from sas.guiframe.CategoryManager import CategoryManager
-from sas.dataloader.loader import Loader
+from sas.sascalc.dataloader.loader import Loader
 from sas.guiframe.proxy import Connection
 from matplotlib import _pylab_helpers
 

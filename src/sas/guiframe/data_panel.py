@@ -33,7 +33,7 @@ from sas.guiframe.events import NewLoadDataEvent
 from sas.guiframe.events import NewPlotEvent
 from sas.guiframe.gui_style import GUIFRAME
 from sas.guiframe.events import NewBatchEvent
-from sas.dataloader.loader import Loader
+from sas.sascalc.dataloader.loader import Loader
 #from sas.guiframe.local_perspectives.plotting.masking \
 #    import FloatPanel as QucikPlotDialog
 from sas.guiframe.local_perspectives.plotting.SimplePlot import PlotFrame \

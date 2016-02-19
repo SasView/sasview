@@ -1,4 +1,4 @@
-from sas.dataloader.loader import Loader
+from sas.sascalc.dataloader.loader import Loader
 import unittest
 
 class testLoader(unittest.TestCase):

@@ -12,7 +12,7 @@ import wx
 import sys
 
 from sas.guiframe.panel_base import PanelBase
-from sas.calculator.kiessig_calculator import KiessigThicknessCalculator
+from sas.sascalc.calculator.kiessig_calculator import KiessigThicknessCalculator
 from calculator_widgets import OutputTextCtrl
 from calculator_widgets import InputTextCtrl
 from sas.perspectives.calculator import calculator_widgets as widget

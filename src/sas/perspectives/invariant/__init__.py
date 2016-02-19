@@ -1,7 +1,9 @@
 PLUGIN_ID = "Invariant plug-in 1.0"
 import os
-from invariant import *
+
 from distutils.filelist import findall
+from invariant import *
+
 def get_data_path(media):
     """
     """

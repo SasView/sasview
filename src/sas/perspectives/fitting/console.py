@@ -4,7 +4,7 @@
 from sas.guiframe.events import StatusEvent
 import time
 import wx
-from sas.fit import FitHandler
+from sas.sascalc.fit import FitHandler
 
 class ConsoleUpdate(FitHandler):
     """

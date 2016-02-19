@@ -518,7 +518,7 @@ class BoxInteractorX(BoxInteractor):
         """
         Post data creating by averaging in Qx direction
         """
-        from sas.dataloader.manipulations import SlabX
+        from sas.sascalc.dataloader.manipulations import SlabX
         self.post_data(SlabX, direction="X")
 
 
@@ -535,6 +535,6 @@ class BoxInteractorY(BoxInteractor):
         """
         Post data creating by averaging in Qy direction
         """
-        from sas.dataloader.manipulations import SlabY
+        from sas.sascalc.dataloader.manipulations import SlabY
         self.post_data(SlabY, direction="Y")
 

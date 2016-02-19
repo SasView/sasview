@@ -4,8 +4,8 @@ import sys
 import os
 from copy import deepcopy
 
-from sas.dataloader.loader import Loader
-from sas.dataloader.data_info import Data2D
+from sas.sascalc.dataloader.loader import Loader
+from sas.sascalc.dataloader.data_info import Data2D
 from detector_editor import DetectorDialog
 from collimation_editor import CollimationDialog
 from console import ConsoleDialog

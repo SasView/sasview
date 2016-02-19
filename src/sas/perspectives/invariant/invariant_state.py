@@ -7,11 +7,11 @@ import os
 import sys
 import logging
 import copy
-import sas.dataloader
+import sas.sascalc.dataloader
 # from xml.dom.minidom import parse
 from lxml import etree
-from sas.dataloader.readers.cansas_reader import Reader as CansasReader
-from sas.dataloader.readers.cansas_reader import get_content
+from sas.sascalc.dataloader.readers.cansas_reader import Reader as CansasReader
+from sas.sascalc.dataloader.readers.cansas_reader import get_content
 from sas.guiframe.utils import format_number
 from sas.guiframe.gui_style import GUIFRAME_ID
 from sas.guiframe.dataFitting import Data1D

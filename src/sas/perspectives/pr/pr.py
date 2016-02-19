@@ -27,9 +27,9 @@ from sas.guiframe.dataFitting import Data1D
 from sas.guiframe.events import NewPlotEvent
 from sas.guiframe.events import StatusEvent
 from sas.guiframe.gui_style import GUIFRAME_ID
-from sas.pr.invertor import Invertor
-from sas.dataloader.loader import Loader
-import sas.dataloader
+from sas.sascalc.pr.invertor import Invertor
+from sas.sascalc.dataloader.loader import Loader
+import sas.sascalc.dataloader
 
 from pr_widgets import load_error
 from sas.guiframe.plugin_base import PluginBase

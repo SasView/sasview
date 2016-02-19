@@ -533,7 +533,7 @@ class SourceDialog(wx.Dialog):
 
 if __name__ == "__main__":
     app = wx.App()
-    from sas.dataloader.data_info import Source
+    from sas.sascalc.dataloader.data_info import Source
     source = Source()
     dlg = SourceDialog(source=source)
     dlg.ShowModal()

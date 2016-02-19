@@ -18,8 +18,8 @@ import sys
 import logging
 from lxml import etree
 from sas.guiframe.dataFitting import Data1D
-from sas.dataloader.readers.cansas_reader import Reader as CansasReader
-from sas.dataloader.readers.cansas_reader import get_content
+from sas.sascalc.dataloader.readers.cansas_reader import Reader as CansasReader
+from sas.sascalc.dataloader.readers.cansas_reader import get_content
 
 PRNODE_NAME = 'pr_inversion'
 CANSAS_NS = "cansas1d/1.0"

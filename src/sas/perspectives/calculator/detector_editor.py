@@ -2,7 +2,7 @@
 import wx
 import sys
 from copy import deepcopy
-from sas.dataloader.data_info import Detector
+from sas.sascalc.dataloader.data_info import Detector
 from sas.guiframe.utils import check_float
 
 _BOX_WIDTH = 60

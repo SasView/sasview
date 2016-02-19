@@ -51,7 +51,7 @@ else:
     PANEL_SIZE = 300
     FONT_VARIANT = 1
 
-from sas.data_util.calcthread import CalcThread
+from sas.sascalc.data_util.calcthread import CalcThread
 
 class CalcPlot(CalcThread):
     """

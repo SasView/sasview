@@ -5,7 +5,7 @@ import wx
 import sys
 import time
 import numpy
-from sas.dataloader.data_info import Data1D
+from sas.sascalc.dataloader.data_info import Data1D
 from sas.plottools.PlotPanel import PlotPanel
 from sas.plottools.plottables import Graph
 from sas.plottools import transform

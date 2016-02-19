@@ -199,7 +199,7 @@ class ViewerFrame(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             mypath = os.path.basename(path)
-            from sas.dataloader.loader import  Loader
+            from sas.sascalc.dataloader.loader import  Loader
            
             #Instantiate a loader 
             L=Loader()

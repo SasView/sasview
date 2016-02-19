@@ -5,7 +5,7 @@ import time
 import sys
 import os
 
-from sas.data_util.calcthread import CalcThread
+from sas.sascalc.data_util.calcthread import CalcThread
 
 
 EXTENSIONS = ['.svs', '.prv', '.inv', '.fitv']

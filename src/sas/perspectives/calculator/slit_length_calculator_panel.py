@@ -15,7 +15,7 @@ import os
 from sas.guiframe.panel_base import PanelBase
 
 from sas.guiframe.events import StatusEvent
-from sas.calculator.slit_length_calculator import SlitlengthCalculator
+from sas.sascalc.calculator.slit_length_calculator import SlitlengthCalculator
 from calculator_widgets import OutputTextCtrl
 from calculator_widgets import InterActiveOutputTextCtrl
 from sas.perspectives.calculator import calculator_widgets as widget

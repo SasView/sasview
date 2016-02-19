@@ -20,7 +20,7 @@ import copy
 
 from sas.guiframe.data_state import DataState
 from sas.guiframe.utils import parse_name
-import sas.dataloader.data_info as DataInfo
+import sas.sascalc.dataloader.data_info as DataInfo
 from sas.guiframe.dataFitting import Data1D
 from sas.guiframe.dataFitting import Data2D
 import time

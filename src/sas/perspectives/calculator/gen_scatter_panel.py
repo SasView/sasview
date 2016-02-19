@@ -19,16 +19,16 @@ matplotlib.interactive(False)
 matplotlib.use('WXAgg')
 
 #from sas.guiframe.gui_manager import MDIFrame
-from sas.data_util.calcthread import CalcThread
+from sas.sascalc.data_util.calcthread import CalcThread
 from sas.guiframe.local_perspectives.plotting.SimplePlot import PlotFrame
 from sas.guiframe.dataFitting import Data2D
 from sas.guiframe.dataFitting import Data1D
-from sas.dataloader.data_info import Detector
-from sas.dataloader.data_info import Source
+from sas.sascalc.dataloader.data_info import Detector
+from sas.sascalc.dataloader.data_info import Source
 from sas.guiframe.panel_base import PanelBase
 from sas.guiframe.utils import format_number
 from sas.guiframe.events import StatusEvent
-from sas.calculator import sas_gen
+from sas.sascalc.calculator import sas_gen
 from sas.perspectives.calculator.calculator_widgets import OutputTextCtrl
 from sas.perspectives.calculator.calculator_widgets import InputTextCtrl
 from wx.lib.scrolledpanel import ScrolledPanel

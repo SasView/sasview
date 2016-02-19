@@ -11,7 +11,7 @@
 
 import sys
 import time
-from sas.data_util.calcthread import CalcThread
+from sas.sascalc.data_util.calcthread import CalcThread
 
 class CalcPr(CalcThread):
     """

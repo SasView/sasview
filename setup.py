@@ -164,7 +164,7 @@ package_dir["sas"] = os.path.join("src", "sas")
 packages.append("sas")
 
 # sas.invariant
-package_dir["sas.invariant"] = os.path.join("src", "sas", "invariant")
+package_dir["sas.invariant"] = os.path.join("src", "sas", "sascalc", "invariant")
 packages.extend(["sas.invariant"])
 
 # sas.guiframe
@@ -181,30 +181,30 @@ for d in os.listdir(os.path.join(guiframe_path, "local_perspectives")):
         package_dir[package_name] = os.path.join(guiframe_path, "local_perspectives", d)
 
 # sas.dataloader
-package_dir["sas.dataloader"] = os.path.join("src", "sas", "dataloader")
+package_dir["sas.dataloader"] = os.path.join("src", "sas", "sascalc", "dataloader")
 package_data["sas.dataloader.readers"] = ['defaults.json','schema/*.xsd']
 packages.extend(["sas.dataloader","sas.dataloader.readers","sas.dataloader.readers.schema"])
 
 # sas.calculator
-package_dir["sas.calculator"] =os.path.join("src", "sas", "calculator")
-packages.extend(["sas.calculator"])
+package_dir["sas.calculator"] =os.path.join("src", "sas", "sascalc", "calculator")
+packages.extend(["sas.sascalc.calculator"])
     
-# sas.pr
+# sas.sascalc.pr
 numpy_incl_path = os.path.join(NUMPY_INC, "numpy")
-srcdir  = os.path.join("src", "sas", "pr", "c_extensions")
-package_dir["sas.pr.core"] = srcdir
-package_dir["sas.pr"] = os.path.join("src","sas", "pr")
-packages.extend(["sas.pr","sas.pr.core"])
-ext_modules.append( Extension("sas.pr.core.pr_inversion",
+srcdir  = os.path.join("src", "sas", "sascalc", "pr", "c_extensions")
+package_dir["sas.sascalc.pr.core"] = srcdir
+package_dir["sas.sascalc.pr"] = os.path.join("src","sas", "sascalc", "pr")
+packages.extend(["sas.sascalc.pr","sas.sascalc.pr.core"])
+ext_modules.append( Extension("sas.sascalc.pr.core.pr_inversion",
                               sources = [os.path.join(srcdir, "Cinvertor.c"),
                                          os.path.join(srcdir, "invertor.c"),
                                          ],
                               include_dirs=[numpy_incl_path],
                               ) )
         
-# sas.fit
-package_dir["sas.fit"] = os.path.join("src", "sas", "fit")
-packages.append("sas.fit")
+# sas.sascalc.fit
+package_dir["sas.sascalc.fit"] = os.path.join("src", "sas", "sascalc", "fit")
+packages.append("sas.sascalc.fit")
 
 # Perspectives
 package_dir["sas.perspectives"] = os.path.join("src", "sas", "perspectives")
@@ -226,8 +226,8 @@ packages.extend(["sas.perspectives", "sas.perspectives.calculator"])
 package_data['sas.perspectives.calculator'] = ['images/*', 'media/*']
     
 # Data util
-package_dir["data_util"] = os.path.join("src", "sas", "data_util")
-packages.append("sas.data_util")
+package_dir["data_util"] = os.path.join("src", "sas", "sascalc", "data_util")
+packages.append("sas.sascalc.data_util")
 
 # Plottools
 package_dir["sas.plottools"] = os.path.join("src", "sas", "plottools")

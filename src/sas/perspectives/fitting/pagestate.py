@@ -24,14 +24,14 @@ import xml.dom.minidom
 from xml.dom.minidom import parseString
 from lxml import etree
 
-import sas.dataloader
-from sas.dataloader.readers.cansas_reader import Reader as CansasReader
-from sas.dataloader.readers.cansas_reader import get_content, write_node
-from sas.dataloader.data_info import Data2D
-from sas.dataloader.data_info import Collimation
-from sas.dataloader.data_info import Detector
-from sas.dataloader.data_info import Process
-from sas.dataloader.data_info import Aperture
+import sas.sascalc.dataloader
+from sas.sascalc.dataloader.readers.cansas_reader import Reader as CansasReader
+from sas.sascalc.dataloader.readers.cansas_reader import get_content, write_node
+from sas.sascalc.dataloader.data_info import Data2D
+from sas.sascalc.dataloader.data_info import Collimation
+from sas.sascalc.dataloader.data_info import Detector
+from sas.sascalc.dataloader.data_info import Process
+from sas.sascalc.dataloader.data_info import Aperture
 #Information to read/write state as xml
 FITTING_NODE_NAME = 'fitting_plug_in'
 CANSAS_NS = "cansas1d/1.0"

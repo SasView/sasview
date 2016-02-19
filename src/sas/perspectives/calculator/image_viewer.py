@@ -12,9 +12,9 @@ import matplotlib.image as mpimg
 import matplotlib.colors as colors
 from sas.guiframe.events import StatusEvent
 from sas.perspectives.calculator.calculator_widgets import InputTextCtrl
-from sas.dataloader.data_info import Data2D
-from sas.dataloader.data_info import Detector
-from sas.dataloader.manipulations import reader2D_converter
+from sas.sascalc.dataloader.data_info import Data2D
+from sas.sascalc.dataloader.data_info import Detector
+from sas.sascalc.dataloader.manipulations import reader2D_converter
 from sas.guiframe.documentation_window import DocumentationWindow
 
 _BOX_WIDTH = 60

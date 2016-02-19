@@ -7,7 +7,7 @@ import sys
 import wx
 import logging
 
-from sas.dataloader.loader import Loader
+from sas.sascalc.dataloader.loader import Loader
 from sas.guiframe.plugin_base import PluginBase
 from sas.guiframe.events import StatusEvent
 from sas.guiframe.gui_style import GUIFRAME

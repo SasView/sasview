@@ -965,7 +965,7 @@ class PrDistDialog(wx.Dialog):
     of points on the P(r) plot.
     """
     def __init__(self, parent, id):
-        from sas.pr.invertor import help
+        from sas.sascalc.pr.invertor import help
         wx.Dialog.__init__(self, parent, id, size=(250, 120))
         self.SetTitle("P(r) distribution")
 

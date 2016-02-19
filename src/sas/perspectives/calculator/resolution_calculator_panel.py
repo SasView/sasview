@@ -25,7 +25,7 @@ from matplotlib import _pylab_helpers
 from matplotlib.figure import Figure
 
 #from sas.guicomm.events import StatusEvent
-from sas.calculator.resolution_calculator import ResolutionCalculator
+from sas.sascalc.calculator.resolution_calculator import ResolutionCalculator
 from sas.guiframe.events import StatusEvent
 from sas.perspectives.calculator.calculator_widgets import OutputTextCtrl
 from sas.perspectives.calculator.calculator_widgets import InputTextCtrl

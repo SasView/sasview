@@ -12,7 +12,7 @@ NOTES:
 """
 from setuptools import setup
 import periodictable.xsf
-import sas.dataloader.readers 
+import sas.sascalc.dataloader.readers 
 import os
 import string
 import local_config
@@ -82,7 +82,7 @@ def find_extension():
     try:
         list = []
         EXCEPTION_LIST = ['*', '.', '']
-        from sas.dataloader.loader import Loader
+        from sas.sascalc.dataloader.loader import Loader
         wild_cards = Loader().get_wildcards()
         for item in wild_cards:
             #['All (*.*)|*.*']

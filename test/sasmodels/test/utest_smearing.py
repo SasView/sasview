@@ -5,8 +5,8 @@
 
 import unittest
 import numpy, math
-from sas.dataloader.loader import  Loader
-from sas.dataloader.data_info import Data1D, Data2D
+from sas.sascalc.dataloader.loader import  Loader
+from sas.sascalc.dataloader.data_info import Data1D, Data2D
 #from DataLoader.qsmearing import SlitSmearer, QSmearer, smear_selection
 from sas.models.qsmearing import SlitSmearer, QSmearer, smear_selection
 from sas.models.SphereModel import SphereModel

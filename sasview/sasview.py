@@ -136,7 +136,7 @@ class SasView():
             import sas.perspectives.invariant as module
             invariant_plug = module.Plugin()
             self.gui.add_perspective(invariant_plug)
-        except:
+        except Exception as e :
             logging.error("%s: could not find Invariant plug-in module"% \
                           APP_NAME)
             logging.error(traceback.format_exc())

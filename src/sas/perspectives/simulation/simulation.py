@@ -21,7 +21,7 @@ from sas.guiframe.dataFitting import Data1D
 # Real-space simulation import
 import sas.realspace.VolumeCanvas as VolumeCanvas
 
-from sas.data_util.calcthread import CalcThread
+from sas.sascalc.data_util.calcthread import CalcThread
 from sas.guicomm.events import NewPlotEvent, StatusEvent    
 
 class Calc1D(CalcThread):

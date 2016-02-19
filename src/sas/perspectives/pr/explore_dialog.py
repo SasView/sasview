@@ -149,7 +149,7 @@ class ExploreDialog(wx.Dialog):
         """
         Initialization. The parameters added to Dialog are:
 
-        :param pr_state: sas.pr.invertor.Invertor object
+        :param pr_state: sas.sascalc.pr.invertor.Invertor object
         :param nfunc: Number of terms in the expansion
 
         """

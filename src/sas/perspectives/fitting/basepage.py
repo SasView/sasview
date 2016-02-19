@@ -22,8 +22,8 @@ from sas.guiframe.dataFitting import Data2D
 from sas.guiframe.dataFitting import Data1D
 from sas.guiframe.dataFitting import check_data_validity
 from sas.guiframe.gui_style import GUIFRAME_ID
-from sas.dataloader.data_info import Detector
-from sas.dataloader.data_info import Source
+from sas.sascalc.dataloader.data_info import Detector
+from sas.sascalc.dataloader.data_info import Source
 from sas.perspectives.fitting.pagestate import PageState
 from sas.guiframe.CategoryInstaller import CategoryInstaller
 from sas.guiframe.documentation_window import DocumentationWindow

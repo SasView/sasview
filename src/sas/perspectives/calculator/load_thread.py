@@ -2,8 +2,8 @@
     Thread handler used to load data
 """
 import time
-from sas.data_util.calcthread import CalcThread
-from sas.dataloader.loader import Loader
+from sas.sascalc.data_util.calcthread import CalcThread
+from sas.sascalc.dataloader.loader import Loader
 
 class DataReader(CalcThread):
     """

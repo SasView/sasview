@@ -263,7 +263,7 @@ for f in matplotlibdata:
     data_files.append((os.path.split(dirname)[0], [f]))
 
 # Copy the settings file for the sas.dataloader file extension associations
-import sas.dataloader.readers
+import sas.sascalc.dataloader.readers
 f = os.path.join(sas.dataloader.readers.get_data_path(), 'defaults.json')
 if os.path.isfile(f):
     data_files.append(('.', [f]))

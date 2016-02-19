@@ -8,8 +8,10 @@ import sys
 import os
 import wx
 import logging
+
 from wx.lib.scrolledpanel import ScrolledPanel
-from sas.invariant import invariant
+from sas.sascalc.invariant import invariant
+
 from sas.guiframe.utils import format_number
 from sas.guiframe.utils import check_float
 from sas.guiframe.events import StatusEvent
@@ -1921,7 +1923,7 @@ class InvariantWindow(wx.Frame):
 
         wx.Frame.__init__(self, parent, id, title, size=(PANEL_WIDTH + 100,
                                                          PANEL_HEIGHT + 100))
-        from sas.dataloader.loader import  Loader
+        from sas.sascalc.dataloader.loader import  Loader
         self.loader = Loader()
         path = "C:/ECLPS/workspace/trunk/sasdataloader/test/ascii_test_3.txt"
         data = self.loader.load(path)

@@ -5,7 +5,7 @@
 
 import unittest
 import numpy, math
-from sas.dataloader.loader import  Loader
+from sas.sascalc.dataloader.loader import  Loader
 from sas.guiframe.dataFitting import Data1D, Data2D
 from sas.guiframe.dataFitting import Data1D as Theory1D
  
