@@ -49,8 +49,8 @@ CANSAS_NS = CONSTANTS.names
 ALLOW_ALL = True
 
 # DO NOT REMOVE Called by outside packages:
-#    sas.perspectives.invariant.invariant_state
-#    sas.perspectives.fitting.pagestate
+#    sas.sasgui.perspectives.invariant.invariant_state
+#    sas.sasgui.perspectives.fitting.pagestate
 def get_content(location, node):
     """
     Get the first instance of the content of a xpath location.
@@ -68,7 +68,7 @@ def get_content(location, node):
         return None
 
 # DO NOT REMOVE Called by outside packages:
-#    sas.perspectives.fitting.pagestate
+#    sas.sasgui.perspectives.fitting.pagestate
 def write_node(doc, parent, name, value, attr=None):
     """
     :param doc: document DOM

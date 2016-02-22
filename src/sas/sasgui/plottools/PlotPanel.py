@@ -31,7 +31,7 @@ DEFAULT_CMAP = pylab.cm.jet
 import copy
 import numpy
 
-from sas.guiframe.events import StatusEvent
+from sas.sasgui.guiframe.events import StatusEvent
 from .toolbar import NavigationToolBar, PlotPrintout, bind
 
 def show_tree(obj, d=0):

@@ -243,16 +243,16 @@ import periodictable
 import logging
 data_files += periodictable.data_files()
 
-import sas.perspectives.fitting as fitting
+import sas.sasgui.perspectives.fitting as fitting
 data_files += fitting.data_files()
 
-import sas.perspectives.calculator as calculator
+import sas.sasgui.perspectives.calculator as calculator
 data_files += calculator.data_files()
 
-import sas.perspectives.invariant as invariant
+import sas.sasgui.perspectives.invariant as invariant
 data_files += invariant.data_files()
 
-import sas.guiframe as guiframe
+import sas.sasgui.guiframe as guiframe
 data_files += guiframe.data_files()
 
 import sas.models as models
@@ -387,7 +387,7 @@ if is_64bits:
 import installer_generator as gen
 gen.generate_installer()
 #initialize category stuff
-#from sas.guiframe.CategoryInstaller import CategoryInstaller
+#from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 #CategoryInstaller.check_install(s)
 
 setup(

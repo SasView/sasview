@@ -34,15 +34,15 @@ RESOURCES_FILES = []
 #Periodictable data file
 DATA_FILES = periodictable.data_files()
 #invariant and calculator help doc
-import sas.perspectives.fitting as fitting
+import sas.sasgui.perspectives.fitting as fitting
 DATA_FILES += fitting.data_files()
-import sas.perspectives.calculator as calculator
+import sas.sasgui.perspectives.calculator as calculator
 DATA_FILES += calculator.data_files()
-import sas.perspectives.invariant as invariant
+import sas.sasgui.perspectives.invariant as invariant
 DATA_FILES += invariant.data_files()
 import sas.models as models
 DATA_FILES += models.data_files()
-import sas.guiframe as guiframe
+import sas.sasgui.guiframe as guiframe
 DATA_FILES += guiframe.data_files()
 
 #CANSAxml reader data files
