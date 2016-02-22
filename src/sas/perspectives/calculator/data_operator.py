@@ -6,9 +6,9 @@ import sys
 import time
 import numpy
 from sas.sascalc.dataloader.data_info import Data1D
-from sas.plottools.PlotPanel import PlotPanel
-from sas.plottools.plottables import Graph
-from sas.plottools import transform
+from sas.sasgui.plottools.PlotPanel import PlotPanel
+from sas.sasgui.plottools.plottables import Graph
+from sas.sasgui.plottools import transform
 from matplotlib.font_manager import FontProperties
 from sas.guiframe.events import StatusEvent
 from sas.perspectives.calculator import calculator_widgets as widget
@@ -887,7 +887,7 @@ class SmallPanel(PlotPanel):
         if len(list.keys()) > 0:
             first_item = list.keys()[0]
             if first_item.x != []:
-                from sas.plottools.PropertyDialog import Properties
+                from sas.sasgui.plottools.PropertyDialog import Properties
                 dial = Properties(self, -1, 'Change Scale')
                 # type of view or model used
                 dial.xvalue.Clear()

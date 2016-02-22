@@ -8,7 +8,7 @@ If your application uses matplotlib outside plottools, then
 please do the following at the start of your application:
 
     # Select matplotlib version and backend
-    import sas.plottools.config
+    import sas.sasgui.plottools.config
 
 Note that plottools requires particular versions of matplotlib
 and a particular backend.  As of this writing it is the WXAgg

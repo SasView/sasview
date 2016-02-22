@@ -3,8 +3,8 @@ Simple Plot Frame : supporting only copy, print, scale
 """
 import wx
 from sas.guiframe.local_perspectives.plotting.Plotter2D import ModelPanel2D as PlotPanel
-from sas.plottools.toolbar import NavigationToolBar
-from sas.plottools.plottables import Graph
+from sas.sasgui.plottools.toolbar import NavigationToolBar
+from sas.sasgui.plottools.plottables import Graph
 from sas.guiframe.utils import PanelMenu
 from sas.guiframe.events import StatusEvent
 

@@ -15,9 +15,9 @@ import sys
 import math
 import numpy
 import logging
-from sas.plottools.PlotPanel import PlotPanel
-from sas.plottools.plottables import Graph
-from sas.plottools.TextDialog import TextDialog
+from sas.sasgui.plottools.PlotPanel import PlotPanel
+from sas.sasgui.plottools.plottables import Graph
+from sas.sasgui.plottools.TextDialog import TextDialog
 from sas.guiframe.events import StatusEvent
 from sas.guiframe.events import NewPlotEvent
 from sas.guiframe.events import PanelOnFocusEvent
@@ -25,7 +25,7 @@ from sas.guiframe.events import SlicerEvent
 from sas.guiframe.utils import PanelMenu
 from  sas.guiframe.local_perspectives.plotting.binder import BindArtist
 from Plotter1D import ModelPanel1D
-from sas.plottools.toolbar import NavigationToolBar
+from sas.sasgui.plottools.toolbar import NavigationToolBar
 from matplotlib.font_manager import FontProperties
 from graphAppearance import graphAppearance
 (InternalEvent, EVT_INTERNAL) = wx.lib.newevent.NewEvent()

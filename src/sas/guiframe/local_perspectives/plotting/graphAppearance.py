@@ -11,7 +11,7 @@ Copyright 2012 Institut Laue-Langevin
 """
 
 import wx
-from sas.plottools.SimpleFont import SimpleFont
+from sas.sasgui.plottools.SimpleFont import SimpleFont
 
 COLOR = ['black', 'blue', 'green', 'red', 'cyan', 'magenta', 'yellow']
 

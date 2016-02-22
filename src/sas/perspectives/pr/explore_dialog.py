@@ -27,10 +27,10 @@ import warnings
 warnings.simplefilter("ignore")
 
 # Import plotting classes
-from sas.plottools.PlotPanel import PlotPanel
-from sas.plottools import Data1D as Model1D
+from sas.sasgui.plottools.PlotPanel import PlotPanel
+from sas.sasgui.plottools import Data1D as Model1D
 from sas.guiframe.gui_style import GUIFRAME_ID
-from sas.plottools.plottables import Graph
+from sas.sasgui.plottools.plottables import Graph
 
 from pr_widgets import PrTextCtrl
 

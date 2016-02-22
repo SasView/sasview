@@ -1039,7 +1039,7 @@ def test_load():
     """
         Test code
     """
-    from sas.plottools.arrow3d import Arrow3D
+    from sas.sasgui.plottools.arrow3d import Arrow3D
     current_dir = os.path.abspath(os.path.curdir)
     print current_dir
     for i in range(6):

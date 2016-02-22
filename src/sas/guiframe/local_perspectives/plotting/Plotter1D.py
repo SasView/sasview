@@ -15,7 +15,7 @@ import sys
 import math
 import numpy
 import logging
-from sas.plottools.PlotPanel import PlotPanel
+from sas.sasgui.plottools.PlotPanel import PlotPanel
 from sas.guiframe.events import StatusEvent
 from sas.guiframe.events import PanelOnFocusEvent
 from sas.guiframe.utils import PanelMenu, IdList

@@ -5,9 +5,9 @@ import copy
 import numpy
 import math
 from sas.sascalc.data_util.uncertainty import Uncertainty
-from sas.plottools.plottables import Data1D as PlotData1D
-from sas.plottools.plottables import Data2D as PlotData2D
-from sas.plottools.plottables import Theory1D as PlotTheory1D
+from sas.sasgui.plottools.plottables import Data1D as PlotData1D
+from sas.sasgui.plottools.plottables import Data2D as PlotData2D
+from sas.sasgui.plottools.plottables import Theory1D as PlotTheory1D
 
 from sas.sascalc.dataloader.data_info import Data1D as LoadData1D
 from sas.sascalc.dataloader.data_info import Data2D as LoadData2D

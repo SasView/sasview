@@ -230,8 +230,8 @@ package_dir["data_util"] = os.path.join("src", "sas", "sascalc", "data_util")
 packages.append("sas.sascalc.data_util")
 
 # Plottools
-package_dir["sas.plottools"] = os.path.join("src", "sas", "plottools")
-packages.append("sas.plottools")
+package_dir["sas.sasgui.plottools"] = os.path.join("src", "sas", "sasgui", "plottools")
+packages.append("sas.sasgui.plottools")
 
 # sas models
 includedir  = os.path.join("src", "sas", "models", "include")

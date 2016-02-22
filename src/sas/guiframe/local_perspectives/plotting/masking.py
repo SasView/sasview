@@ -24,8 +24,8 @@ import matplotlib.cm as cm
 import math
 import copy
 import numpy
-from sas.plottools.PlotPanel import PlotPanel
-from sas.plottools.plottables import Graph
+from sas.sasgui.plottools.PlotPanel import PlotPanel
+from sas.sasgui.plottools.plottables import Graph
 from binder import BindArtist
 from sas.guiframe.dataFitting import Data1D, Data2D
 from boxMask import BoxMask

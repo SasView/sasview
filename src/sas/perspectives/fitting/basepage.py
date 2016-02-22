@@ -1831,7 +1831,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         # get profile data
         x, y = self.model.getProfile()
 
-        from sas.plottools import Data1D as pf_data1d
+        from sas.sasgui.plottools import Data1D as pf_data1d
         #from sas.perspectives.theory.profile_dialog import SLDPanel
         from sas.guiframe.local_perspectives.plotting.profile_dialog \
         import SLDPanel

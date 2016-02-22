@@ -33,7 +33,7 @@ from sas.perspectives.calculator.calculator_widgets import OutputTextCtrl
 from sas.perspectives.calculator.calculator_widgets import InputTextCtrl
 from wx.lib.scrolledpanel import ScrolledPanel
 from sas.perspectives.calculator.load_thread import GenReader
-from sas.plottools.arrow3d import Arrow3D
+from sas.sasgui.plottools.arrow3d import Arrow3D
 from sas.perspectives.calculator import calculator_widgets as widget
 from sas.guiframe.events import NewPlotEvent
 from sas.guiframe.documentation_window import DocumentationWindow

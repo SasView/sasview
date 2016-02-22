@@ -27,7 +27,7 @@ import wx.lib.sheet as sheet
 from sas.guiframe.panel_base import PanelBase
 from sas.guiframe.events import NewPlotEvent
 from sas.guiframe.events import StatusEvent
-from sas.plottools import plottables
+from sas.sasgui.plottools import plottables
 from sas.guiframe.dataFitting import Data1D
 
 

@@ -4,7 +4,7 @@ SLD Profile Dialog for multifunctional models
 import wx
 import sys
 from copy import deepcopy
-from sas.plottools.plottables import Graph
+from sas.sasgui.plottools.plottables import Graph
 from Plotter1D import ModelPanel1D as PlotPanel
 from sas.guiframe.dataFitting import Data1D
 from sas.guiframe.gui_style import GUIFRAME_ID
