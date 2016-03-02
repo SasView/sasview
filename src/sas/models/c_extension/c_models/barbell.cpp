@@ -30,6 +30,19 @@ extern "C" {
 	#include "barbell.h"
 }
 
+// Convenience parameter structure
+typedef struct {
+    double scale;
+    double rad_bar;
+    double len_bar;
+    double rad_bell;
+    double sld_barbell;
+    double sld_solv;
+    double background;
+    double theta;
+    double phi;
+} BarBellParameters;
+
 BarBellModel :: BarBellModel() {
 	scale      = Parameter(1.0);
 	rad_bar		= Parameter(20.0);
@@ -45,7 +58,7 @@ BarBellModel :: BarBellModel() {
 	phi    = Parameter(0.0, true);
 }
 
-double bar2d_kernel(double dp[], double q, double alpha) {
+double barbell2d_kernel(double dp[], double q, double alpha) {
   int j;
   double Pi;
   double scale,contr,bkg,sldc,slds;
@@ -112,6 +125,77 @@ double bar2d_kernel(double dp[], double q, double alpha) {
 
   return answer;
 }
+
+/**
+ * Function to evaluate 2D scattering function
+ * @param pars: parameters of the BarBell
+ * @param q: q-value
+ * @param q_x: q_x / q
+ * @param q_y: q_y / q
+ * @return: function value
+ */
+static double barbell_analytical_2D_scaled(BarBellParameters *pars, double q, double q_x, double q_y) {
+  double cyl_x, cyl_y;//, cyl_z;
+  //double q_z;
+  double alpha, cos_val;
+  double answer;
+  double dp[7];
+  //convert angle degree to radian
+  double pi = 4.0*atan(1.0);
+  double theta = pars->theta * pi/180.0;
+  double phi = pars->phi * pi/180.0;
+
+  dp[0] = pars->scale;
+  dp[1] = pars->rad_bar;
+  dp[2] = pars->len_bar;
+  dp[3] = pars->rad_bell;
+  dp[4] = pars->sld_barbell;
+  dp[5] = pars->sld_solv;
+  dp[6] = pars->background;
+
+
+  //double Pi = 4.0*atan(1.0);
+    // Cylinder orientation
+    cyl_x = cos(theta) * cos(phi);
+    cyl_y = sin(theta);
+    //cyl_z = -cos(theta) * sin(phi);
+
+    // q vector
+    //q_z = 0;
+
+    // Compute the angle btw vector q and the
+    // axis of the cylinder
+    cos_val = cyl_x*q_x + cyl_y*q_y;// + cyl_z*q_z;
+
+    // The following test should always pass
+    if (fabs(cos_val)>1.0) {
+      printf("cyl_ana_2D: Unexpected error: cos(alpha)>1\n");
+      return 0;
+    }
+
+    // Note: cos(alpha) = 0 and 1 will get an
+    // undefined value from CylKernel
+  alpha = acos( cos_val );
+
+  answer = barbell2d_kernel(dp, q, alpha);
+
+
+  return answer;
+
+}
+
+/**
+ * Function to evaluate 2D scattering function
+ * @param pars: parameters of the BarBell
+ * @param q: q-value
+ * @return: function value
+ */
+static double barbell_analytical_2DXY(BarBellParameters *pars, double qx, double qy){
+  double q;
+  q = sqrt(qx*qx+qy*qy);
+  return barbell_analytical_2D_scaled(pars, q, qx/q, qy/q);
+}
+
 /**
  * Function to evaluate 1D scattering function
  * The NIST IGOR library is used for the actual calculation.
@@ -189,20 +273,19 @@ double BarBellModel :: operator()(double q) {
  * @return: function value
  */
 double BarBellModel :: operator()(double qx, double qy) {
-  double dp[7];
+  BarBellParameters dp;
 
-  // Fill parameter array for IGOR library
-  // Add the background after averaging
-  dp[0] = scale();
-  dp[1] = rad_bar();
-  dp[2] = len_bar();
-  dp[3] = rad_bell();
-  dp[4] = sld_barbell();
-  dp[5] = sld_solv();
-  dp[6] = 0.0;
-
-  double _theta = theta();
-  double _phi = phi();
+	// Fill parameter array for IGOR library
+	// Add the background after averaging
+	dp.scale = scale();
+	dp.rad_bar = rad_bar();
+	dp.len_bar = len_bar();
+	dp.rad_bell = rad_bell();
+	dp.sld_barbell = sld_barbell();
+	dp.sld_solv = sld_solv();
+	dp.background = 0.0;
+	dp.theta = theta();
+	dp.phi = phi();
 
 	// Get the dispersion points for the rad_bar
 	vector<WeightPoint> weights_rad_bar;
@@ -236,53 +319,29 @@ double BarBellModel :: operator()(double qx, double qy) {
 
 	// Loop over radius weight points
 	for(size_t i=0; i<weights_rad_bar.size(); i++) {
-		dp[1] = weights_rad_bar[i].value;
+		dp.rad_bar = weights_rad_bar[i].value;
 		for(size_t j=0; j<weights_len_bar.size(); j++) {
-			dp[2] = weights_len_bar[j].value;
+			dp.len_bar = weights_len_bar[j].value;
 			for(size_t k=0; k<weights_rad_bell.size(); k++) {
-				dp[3] = weights_rad_bell[k].value;
+				dp.rad_bell = weights_rad_bell[k].value;
 				// Average over theta distribution
 				for(size_t l=0; l< weights_theta.size(); l++) {
-					_theta = weights_theta[l].value;
+					dp.theta = weights_theta[l].value;
 					// Average over phi distribution
 					for(size_t m=0; m< weights_phi.size(); m++) {
-						_phi = weights_phi[m].value;
+						dp.phi = weights_phi[m].value;
 						//Un-normalize Form by volume
-						hDist = sqrt(fabs(dp[3]*dp[3]-dp[1]*dp[1]));
-						vol_i = pi*dp[1]*dp[1]*dp[2]+2.0*pi*(2.0*dp[3]*dp[3]*dp[3]/3.0
-										+dp[3]*dp[3]*hDist-hDist*hDist*hDist/3.0);
-
-					  const double q = sqrt(qx*qx+qy*qy);
-					  //convert angle degree to radian
-					  const double pi = 4.0*atan(1.0);
-
-					  // Cylinder orientation
-				    const double cyl_x = cos(_theta * pi/180.0) * cos(_phi * pi/180.0);
-				    const double cyl_y = sin(_theta * pi/180.0);
-
-				    // Compute the angle btw vector q and the
-				    // axis of the cylinder (assume qz = 0)
-				    const double cos_val = cyl_x*qx + cyl_y*qy;
-
-				    // The following test should always pass
-				    if (fabs(cos_val)>1.0) {
-				      return 0;
-				    }
-
-				    // Note: cos(alpha) = 0 and 1 will get an
-				    // undefined value from CylKernel
-				    const double alpha = acos( cos_val );
-
-            // Call the IGOR library function to get the kernel
-            const double output = bar2d_kernel(dp, q, alpha)/sin(alpha);
-
+						hDist = -sqrt(fabs(dp.rad_bell*dp.rad_bell-dp.rad_bar*dp.rad_bar));
+						vol_i = pi*dp.rad_bar*dp.rad_bar*dp.len_bar+2.0*pi/3.0*((dp.rad_bell-hDist)*(dp.rad_bell-hDist)*
+										(2*dp.rad_bell+hDist));
 						double _ptvalue = weights_rad_bar[i].weight
 											* weights_len_bar[j].weight
 											* weights_rad_bell[k].weight
 											* weights_theta[l].weight
 											* weights_phi[m].weight
 											* vol_i
-											* output;
+											* barbell_analytical_2DXY(&dp, qx, qy);
+											//* output;
 											//* pow(weights_rad[i].value,3.0);
 
 						// Consider when there is infinte or nan.

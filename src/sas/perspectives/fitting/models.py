@@ -314,8 +314,8 @@ class ModelManagerBase:
 
         # regular model names only
         base_message = "Unable to load model {0}"
+        self.model_name_list = []
         try:
-            self.model_name_list = []
             from sas.models.SphereModel import SphereModel
             self.model_dictionary[SphereModel.__name__] = SphereModel
             #        self.shape_list.append(SphereModel)
@@ -528,6 +528,15 @@ class ModelManagerBase:
             self.model_name_list.append(EllipticalCylinderModel.__name__)
         except:
             logging.error(base_message.format(EllipticalCylinderModel.__name__))
+
+        try:
+            from sas.models.BarBellModel import BarBellModel
+
+            self.model_dictionary[BarBellModel.__name__] = BarBellModel
+            #       self.shape_list.append(BarBellModel)
+            self.model_name_list.append(BarBellModel.__name__)
+        except:
+            logging.error(base_message.format(BarBellModel.__name__))
 
         try:
             from sas.models.CappedCylinderModel import CappedCylinderModel
