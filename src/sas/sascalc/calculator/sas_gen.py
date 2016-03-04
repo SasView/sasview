@@ -1039,7 +1039,7 @@ def test_load():
     """
         Test code
     """
-    from sas.sasgui.plottools.arrow3d import Arrow3D
+    from mpl_toolkits.mplot3d import Axes3D
     current_dir = os.path.abspath(os.path.curdir)
     print current_dir
     for i in range(6):
@@ -1059,7 +1059,7 @@ def test_load():
 
     import matplotlib.pyplot as plt
     fig = plt.figure()
-    ax = fig.gca(projection='3d')
+    ax = Axes3D(fig)
     ax.plot(output.pos_x, output.pos_y, output.pos_z, '.', c="g",
             alpha=0.7, markeredgecolor='gray', rasterized=True)
     gap = 7
@@ -1080,10 +1080,6 @@ def test_load():
     color_y = numpy.fabs(unit_y2 * 0.8)
     color_z = numpy.fabs(unit_z2 * 0.8)
     colors = numpy.column_stack((color_x, color_y, color_z))
-    a = Arrow3D(None, x_arrow, y_arrow, z_arrow, colors,
-                mutation_scale=10, lw=1, arrowstyle="->",
-                color="y", alpha=0.5)
-    ax.add_artist(a)
     plt.show()
 
 def test():
