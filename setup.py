@@ -95,7 +95,7 @@ platform_copt = {}
 if sys.platform =='darwin':
     try:
         darwin_ver = int(os.uname()[2].split('.')[0])
-        if darwin_ver >= 13:
+        if darwin_ver >= 13 and darwin_ver < 14:
             platform_copt = {'unix' : ['-Wno-error=unused-command-line-argument-hard-error-in-future']}
     except:
         print "PROBLEM determining Darwin version"
