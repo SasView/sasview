@@ -5,10 +5,10 @@
 import unittest
 import math
 
-from sas.dataloader.data_info import Data1D 
-from sas.fit.AbstractFitEngine import Model,FitData1D
-from sas.fit.BumpsFitting import BumpsFit as Fit
-from sas.dataloader.loader import Loader
+from sas.sascalc.dataloader.data_info import Data1D 
+from sas.sascalc.fit.AbstractFitEngine import Model,FitData1D
+from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
+from sas.sascalc.dataloader.loader import Loader
 from sas.models.MultiplicationModel import MultiplicationModel
 from sas.models.CylinderModel import CylinderModel
 from sas.models.SquareWellStructure import SquareWellStructure

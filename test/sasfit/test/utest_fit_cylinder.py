@@ -5,9 +5,9 @@
 import unittest
 import math
 
-from sas.fit.AbstractFitEngine import Model
-from sas.fit.BumpsFitting import BumpsFit as Fit
-from sas.dataloader.loader import Loader
+from sas.sascalc.fit.AbstractFitEngine import Model
+from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
+from sas.sascalc.dataloader.loader import Loader
 
 class TestSingleFit(unittest.TestCase):
     """ test single fitting """

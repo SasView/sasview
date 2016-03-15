@@ -113,9 +113,9 @@ def prepare():
 
     # Compiled modules need to be pulled from the build directory.
     # Some packages are not where they are needed, so load them explicitly.
-    import sas.pr
-    sas.pr.core = import_package('sas.pr.core',
-                                  joinpath(build_path, 'sas', 'pr', 'core'))
+    import sas.sascalc.pr
+    sas.sascalc.pr.core = import_package('sas.sascalc.pr.core',
+                                  joinpath(build_path, 'sas', 'sascalc', 'pr', 'core'))
 
 
     # Pull the entire sas.models package from the build directory since it contains

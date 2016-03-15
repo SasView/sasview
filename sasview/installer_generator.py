@@ -44,7 +44,7 @@ def find_extension():
     try:
         
         #(ext, type, name, flags)
-        from sas.dataloader.loader import Loader
+        from sas.sascalc.dataloader.loader import Loader
         wild_cards = Loader().get_wildcards()
         for item in wild_cards:
             #['All (*.*)|*.*']

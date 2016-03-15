@@ -87,8 +87,8 @@ if hasattr(sys, 'frozen'):
     os.environ['MPLCONFIGDIR'] = mplconfigdir
     reload(sys)
     sys.setdefaultencoding("iso-8859-1")
-from sas.guiframe import gui_manager
-from sas.guiframe.gui_style import GUIFRAME
+from sas.sasgui.guiframe import gui_manager
+from sas.sasgui.guiframe.gui_style import GUIFRAME
 from welcome_panel import WelcomePanel
 # For py2exe, import config here
 import local_config
@@ -115,7 +115,7 @@ class SasView():
 
         # Fitting perspective
         try:
-            import sas.perspectives.fitting as module    
+            import sas.sasgui.perspectives.fitting as module    
             fitting_plug = module.Plugin()
             self.gui.add_perspective(fitting_plug)
         except Exception:
@@ -124,7 +124,7 @@ class SasView():
 
         # P(r) perspective
         try:
-            import sas.perspectives.pr as module
+            import sas.sasgui.perspectives.pr as module
             pr_plug = module.Plugin()
             self.gui.add_perspective(pr_plug)
         except:
@@ -133,17 +133,17 @@ class SasView():
 
         #Invariant perspective
         try:
-            import sas.perspectives.invariant as module
+            import sas.sasgui.perspectives.invariant as module
             invariant_plug = module.Plugin()
             self.gui.add_perspective(invariant_plug)
-        except:
+        except Exception as e :
             logging.error("%s: could not find Invariant plug-in module"% \
                           APP_NAME)
             logging.error(traceback.format_exc())
 
         #Calculator perspective   
         try:
-            import sas.perspectives.calculator as module
+            import sas.sasgui.perspectives.calculator as module
             calculator_plug = module.Plugin()
             self.gui.add_perspective(calculator_plug)
         except:

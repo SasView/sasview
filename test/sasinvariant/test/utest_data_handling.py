@@ -9,9 +9,10 @@ copyright 2010, University of Tennessee
 """
 import unittest
 import numpy, math
-from sas.dataloader.loader import  Loader
-from sas.dataloader.data_info import Data1D
-from sas.invariant import invariant
+from sas.sascalc.dataloader.loader import  Loader
+from sas.sascalc.dataloader.data_info import Data1D
+
+from sas.sascalc.invariant import invariant
     
 class TestLinearFit(unittest.TestCase):
     """

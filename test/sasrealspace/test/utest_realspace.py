@@ -20,7 +20,7 @@ except:
     print sys.exc_value
     #testing the version that is working on
     print "Testing installed version"
-    import sas.realspace.VolumeCanvas as VolumeCanvas
+    import sas.sascalc.realspace.VolumeCanvas as VolumeCanvas
      
 class TestRealSpaceModel(unittest.TestCase):
     """ Unit tests for sphere model """

@@ -80,13 +80,13 @@ release = '3.1.2'
 # the build directory.  Exclude the appropriate *.rst files here so
 # that we don't get various "ImportError: No module named ___" when
 # running Sphinx.
-exclude_patterns = ["*sas.perspectives.simulation.rst",
-                    "*sas.pr.c_extensions.rst",
-                    "*sas.realspace.rst",
-                    "*sas.simulation.rst",
+exclude_patterns = ["*sas.sasgui.perspectives.simulation.rst",
+                    "*sas.sascalc.pr.c_extensions.rst",
+                    "*sas.sascalc.realspace.rst",
+                    "*sas.sascalc.simulation.rst",
                     "*sas.sasview.setup_exe.rst",
                     "*sas.sasview.setup_mac.rst",
-                    "*sas.guiframe.custom_pstats.rst", # pstats not in standard library on Ubuntu out of the box
+                    "*sas.sasgui.guiframe.custom_pstats.rst", # pstats not in standard library on Ubuntu out of the box
                     ]
 
 # The reST default role (used for this markup: `text`) to use for all documents.

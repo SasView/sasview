@@ -36,8 +36,8 @@
      
 """
 import wx
-from sas.plottools.PlotPanel import PlotPanel
-from sas.plottools.plottables import Data1D, Theory1D, Data2D
+from sas.sasgui.plottools.PlotPanel import PlotPanel
+from sas.sasgui.plottools.plottables import Data1D, Theory1D, Data2D
 import  sys,os
 import numpy
 import random, math
@@ -199,7 +199,7 @@ class ViewerFrame(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             mypath = os.path.basename(path)
-            from sas.dataloader.loader import  Loader
+            from sas.sascalc.dataloader.loader import  Loader
            
             #Instantiate a loader 
             L=Loader()

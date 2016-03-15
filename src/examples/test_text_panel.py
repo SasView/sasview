@@ -26,8 +26,8 @@ The following is a checklist of functionality to look for while testing:
 """
 
 import wx
-from sas.plottools.PlotPanel import PlotPanel
-from sas.plottools.plottables import Text, Graph
+from sas.sasgui.plottools.PlotPanel import PlotPanel
+from sas.sasgui.plottools.plottables import Text, Graph
 
 class TestPlotPanel(PlotPanel):
     
