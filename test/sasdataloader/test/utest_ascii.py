@@ -5,7 +5,7 @@ import warnings
 warnings.simplefilter("ignore")
 
 import unittest
-from sas.dataloader.loader import  Loader
+from sas.sascalc.dataloader.loader import  Loader
  
 import os.path
 

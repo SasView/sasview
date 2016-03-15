@@ -3,7 +3,7 @@
 """
 
 import unittest
-from  sas.calculator.resolution_calculator import ResolutionCalculator \
+from  sas.sascalc.calculator.resolution_calculator import ResolutionCalculator \
                                             as calculator
 
 class resolution_calculator(unittest.TestCase):

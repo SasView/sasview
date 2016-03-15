@@ -5,7 +5,7 @@ import warnings
 warnings.simplefilter("ignore")
 
 import unittest
-from sas.calculator import sas_gen
+from sas.sascalc.calculator import sas_gen
 from sas.models.SphereModel import SphereModel
 
 import numpy

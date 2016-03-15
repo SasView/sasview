@@ -13,8 +13,8 @@ logging.basicConfig(level=logging.DEBUG,
 
 import unittest
 import math
-import sas.dataloader
-from sas.dataloader.loader import  Loader
+import sas.sascalc.dataloader
+from sas.sascalc.dataloader.loader import  Loader
 
 # Check whether we should test image loading on this system 
 HAS_IMAGE = False

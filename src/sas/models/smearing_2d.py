@@ -239,7 +239,7 @@ if __name__ == '__main__':
     z = numpy.ones(10)
     dz = numpy.sqrt(z)
     
-    from sas.dataloader import Data2D
+    from sas.sascalc.dataloader import Data2D
     #for i in range(10): print i, 0.001 + i*0.008/9.0 
     #for i in range(100): print i, int(math.floor( (i/ (100/9.0)) )) 
     out = Data2D()

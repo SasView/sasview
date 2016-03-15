@@ -1,8 +1,8 @@
 import copy
 import time
 import unittest
-from sas.dataloader.loader import Loader
-from sas.fit.Fitting import BumpsFit as Fit
+from sas.sascalc.dataloader.loader import Loader
+from sas.sascalc.fit.Fitting import BumpsFit as Fit
 from sas.models.CylinderModel import CylinderModel
 import sas.models.dispersion_models 
 from sas.models.qsmearing import smear_selection

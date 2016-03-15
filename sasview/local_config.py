@@ -3,7 +3,7 @@
 """
 import time
 import os
-from sas.guiframe.gui_style import GUIFRAME
+from sas.sasgui.guiframe.gui_style import GUIFRAME
 import sas.sasview
 import logging
 

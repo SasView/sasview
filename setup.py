@@ -95,7 +95,7 @@ platform_copt = {}
 if sys.platform =='darwin':
     try:
         darwin_ver = int(os.uname()[2].split('.')[0])
-        if darwin_ver >= 13:
+        if darwin_ver >= 13 and darwin_ver < 14:
             platform_copt = {'unix' : ['-Wno-error=unused-command-line-argument-hard-error-in-future']}
     except:
         print "PROBLEM determining Darwin version"
@@ -164,74 +164,74 @@ package_dir["sas"] = os.path.join("src", "sas")
 packages.append("sas")
 
 # sas.invariant
-package_dir["sas.invariant"] = os.path.join("src", "sas", "invariant")
+package_dir["sas.invariant"] = os.path.join("src", "sas", "sascalc", "invariant")
 packages.extend(["sas.invariant"])
 
-# sas.guiframe
-guiframe_path = os.path.join("src", "sas", "guiframe")
-package_dir["sas.guiframe"] = guiframe_path
-package_dir["sas.guiframe.local_perspectives"] = os.path.join(os.path.join(guiframe_path, "local_perspectives"))
-package_data["sas.guiframe"] = ['images/*', 'media/*']
-packages.extend(["sas.guiframe", "sas.guiframe.local_perspectives"])
+# sas.sasgui.guiframe
+guiframe_path = os.path.join("src", "sas", "sasgui", "guiframe")
+package_dir["sas.sasgui.guiframe"] = guiframe_path
+package_dir["sas.sasgui.guiframe.local_perspectives"] = os.path.join(os.path.join(guiframe_path, "local_perspectives"))
+package_data["sas.sasgui.guiframe"] = ['images/*', 'media/*']
+packages.extend(["sas.sasgui.guiframe", "sas.sasgui.guiframe.local_perspectives"])
 # build local plugin
 for d in os.listdir(os.path.join(guiframe_path, "local_perspectives")):
     if d not in ['.svn','__init__.py', '__init__.pyc']:
-        package_name = "sas.guiframe.local_perspectives." + d
+        package_name = "sas.sasgui.guiframe.local_perspectives." + d
         packages.append(package_name)
         package_dir[package_name] = os.path.join(guiframe_path, "local_perspectives", d)
 
 # sas.dataloader
-package_dir["sas.dataloader"] = os.path.join("src", "sas", "dataloader")
+package_dir["sas.dataloader"] = os.path.join("src", "sas", "sascalc", "dataloader")
 package_data["sas.dataloader.readers"] = ['defaults.json','schema/*.xsd']
 packages.extend(["sas.dataloader","sas.dataloader.readers","sas.dataloader.readers.schema"])
 
 # sas.calculator
-package_dir["sas.calculator"] =os.path.join("src", "sas", "calculator")
-packages.extend(["sas.calculator"])
+package_dir["sas.calculator"] =os.path.join("src", "sas", "sascalc", "calculator")
+packages.extend(["sas.sascalc.calculator"])
     
-# sas.pr
+# sas.sascalc.pr
 numpy_incl_path = os.path.join(NUMPY_INC, "numpy")
-srcdir  = os.path.join("src", "sas", "pr", "c_extensions")
-package_dir["sas.pr.core"] = srcdir
-package_dir["sas.pr"] = os.path.join("src","sas", "pr")
-packages.extend(["sas.pr","sas.pr.core"])
-ext_modules.append( Extension("sas.pr.core.pr_inversion",
+srcdir  = os.path.join("src", "sas", "sascalc", "pr", "c_extensions")
+package_dir["sas.sascalc.pr.core"] = srcdir
+package_dir["sas.sascalc.pr"] = os.path.join("src","sas", "sascalc", "pr")
+packages.extend(["sas.sascalc.pr","sas.sascalc.pr.core"])
+ext_modules.append( Extension("sas.sascalc.pr.core.pr_inversion",
                               sources = [os.path.join(srcdir, "Cinvertor.c"),
                                          os.path.join(srcdir, "invertor.c"),
                                          ],
                               include_dirs=[numpy_incl_path],
                               ) )
         
-# sas.fit
-package_dir["sas.fit"] = os.path.join("src", "sas", "fit")
-packages.append("sas.fit")
+# sas.sascalc.fit
+package_dir["sas.sascalc.fit"] = os.path.join("src", "sas", "sascalc", "fit")
+packages.append("sas.sascalc.fit")
 
 # Perspectives
-package_dir["sas.perspectives"] = os.path.join("src", "sas", "perspectives")
-package_dir["sas.perspectives.pr"] = os.path.join("src", "sas", "perspectives", "pr")
-packages.extend(["sas.perspectives","sas.perspectives.pr"])
-package_data["sas.perspectives.pr"] = ['images/*']
+package_dir["sas.sasgui.perspectives"] = os.path.join("src", "sas", "sasgui", "perspectives")
+package_dir["sas.sasgui.perspectives.pr"] = os.path.join("src", "sas", "sasgui", "perspectives", "pr")
+packages.extend(["sas.sasgui.perspectives","sas.sasgui.perspectives.pr"])
+package_data["sas.sasgui.perspectives.pr"] = ['images/*']
 
-package_dir["sas.perspectives.invariant"] = os.path.join("src", "sas", "perspectives", "invariant")
-packages.extend(["sas.perspectives.invariant"])
-package_data['sas.perspectives.invariant'] = [os.path.join("media",'*')]
+package_dir["sas.sasgui.perspectives.invariant"] = os.path.join("src", "sas", "sasgui", "perspectives", "invariant")
+packages.extend(["sas.sasgui.perspectives.invariant"])
+package_data['sas.sasgui.perspectives.invariant'] = [os.path.join("media",'*')]
 
-package_dir["sas.perspectives.fitting"] = os.path.join("src", "sas", "perspectives", "fitting")
-package_dir["sas.perspectives.fitting.plugin_models"] = os.path.join("src", "sas", "perspectives", "fitting", "plugin_models")
-packages.extend(["sas.perspectives.fitting", 
-                 "sas.perspectives.fitting.plugin_models"])
-package_data['sas.perspectives.fitting'] = ['media/*','plugin_models/*']
+package_dir["sas.sasgui.perspectives.fitting"] = os.path.join("src", "sas", "sasgui", "perspectives", "fitting")
+package_dir["sas.sasgui.perspectives.fitting.plugin_models"] = os.path.join("src", "sas", "sasgui", "perspectives", "fitting", "plugin_models")
+packages.extend(["sas.sasgui.perspectives.fitting", 
+                 "sas.sasgui.perspectives.fitting.plugin_models"])
+package_data['sas.sasgui.perspectives.fitting'] = ['media/*','plugin_models/*']
 
-packages.extend(["sas.perspectives", "sas.perspectives.calculator"])    
-package_data['sas.perspectives.calculator'] = ['images/*', 'media/*']
+packages.extend(["sas.sasgui.perspectives", "sas.sasgui.perspectives.calculator"])    
+package_data['sas.sasgui.perspectives.calculator'] = ['images/*', 'media/*']
     
 # Data util
-package_dir["data_util"] = os.path.join("src", "sas", "data_util")
-packages.append("sas.data_util")
+package_dir["data_util"] = os.path.join("src", "sas", "sascalc", "data_util")
+packages.append("sas.sascalc.data_util")
 
 # Plottools
-package_dir["sas.plottools"] = os.path.join("src", "sas", "plottools")
-packages.append("sas.plottools")
+package_dir["sas.sasgui.plottools"] = os.path.join("src", "sas", "sasgui", "plottools")
+packages.append("sas.sasgui.plottools")
 
 # sas models
 includedir  = os.path.join("src", "sas", "models", "include")

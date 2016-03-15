@@ -11,7 +11,7 @@ try:
     print "Testing local version"
 except:
     print "Testing installed version"
-    import sas.realspace.VolumeCanvas as VolumeCanvas
+    import sas.sascalc.realspace.VolumeCanvas as VolumeCanvas
      
 class Validator:
  

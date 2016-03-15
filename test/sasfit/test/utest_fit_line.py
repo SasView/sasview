@@ -5,9 +5,9 @@
 import unittest
 import math
 
-from sas.fit.AbstractFitEngine import Model, FitHandler
-from sas.dataloader.loader import Loader
-from sas.fit.BumpsFitting import BumpsFit as Fit
+from sas.sascalc.fit.AbstractFitEngine import Model, FitHandler
+from sas.sascalc.dataloader.loader import Loader
+from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 from sas.models.LineModel import LineModel
 from sas.models.Constant import Constant
 
