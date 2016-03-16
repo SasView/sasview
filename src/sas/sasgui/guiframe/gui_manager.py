@@ -1289,7 +1289,7 @@ class ViewerFrame(PARENT_FRAME):
                         self._tool_menu.Append(id, tool[0], tool[1])
                         wx.EVT_MENU(self, id, tool[2])
             if self._tool_menu is not None:
-                self._menubar.Append(self._tool_menu, '&Tool')
+                self._menubar.Append(self._tool_menu, '&Tools')
 
     def _add_current_plugin_menu(self):
         """
