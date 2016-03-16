@@ -1499,7 +1499,7 @@ class ViewerFrame(PARENT_FRAME):
             #want Analysis.  This is NOT an issue on the Mac which does not
             #have the extra Window menu item.
             #      March 2016 Code Camp  -- PDB 
-            Tools_pos = self._menubar.FindMenu("Tool")
+            Tools_pos = self._menubar.FindMenu("Tools")
             self._menubar.Insert(Tools_pos+1,self._applications_menu,
                                  '&Analysis')
             self._check_applications_menu()
