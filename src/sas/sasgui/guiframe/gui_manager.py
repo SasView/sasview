@@ -1289,7 +1289,7 @@ class ViewerFrame(PARENT_FRAME):
                         self._tool_menu.Append(id, tool[0], tool[1])
                         wx.EVT_MENU(self, id, tool[2])
             if self._tool_menu is not None:
-                self._menubar.Append(self._tool_menu, '&Tool')
+                self._menubar.Append(self._tool_menu, '&Tools')
 
     def _add_current_plugin_menu(self):
         """
@@ -1320,14 +1320,14 @@ class ViewerFrame(PARENT_FRAME):
             if menu_list:
                 for (menu, name) in menu_list:
                     if self._applications_menu_pos == -1:
-                        # Find the Help position and insert just before it if possible
-                        help_pos = self._menubar.FindMenu("Help")
-                        if help_pos == -1:
+                        # Find the Analysis position and insert just after it if possible
+                        analysis_pos = self._menubar.FindMenu("Analysis")
+                        if analysis_pos == -1:
                             self._menubar.Append(menu, name)
                             self._applications_menu_pos = -1
                         else:
-                            self._menubar.Insert(help_pos-1, menu, name)
-                            self._applications_menu_pos = help_pos - 1
+                            self._menubar.Insert(analysis_pos+1, menu, name)
+                            self._applications_menu_pos = analysis_pos + 1
                     else:
                         self._menubar.Insert(self._applications_menu_pos, menu, name)
                     self._applications_menu_name = name
@@ -1491,7 +1491,17 @@ class ViewerFrame(PARENT_FRAME):
 
             if not plug_data_count or not plug_no_data_count:
                 self._applications_menu.RemoveItem(separator)
-            self._menubar.Append(self._applications_menu, '&Analysis')
+            #Windows introduces a "Window" menu item during the layout process
+            #somehow.  We want it to be next to the last item with Help as
+            #last. However Analysis gets stuck after Window in normal ordering
+            #so force it to be next after the Tools menu item.  Should we add
+            #another menu item will need to check if this is still where we 
+            #want Analysis.  This is NOT an issue on the Mac which does not
+            #have the extra Window menu item.
+            #      March 2016 Code Camp  -- PDB 
+            Tools_pos = self._menubar.FindMenu("Tools")
+            self._menubar.Insert(Tools_pos+1,self._applications_menu,
+                                 '&Analysis')
             self._check_applications_menu()
 
     def _populate_file_menu(self):
