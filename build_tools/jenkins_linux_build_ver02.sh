@@ -46,9 +46,9 @@ $PYTHON setup.py docs
 # BUILD_EGG 
 $PYTHON setup.py bdist_egg --skip-build
 
-#cd $WORKSPACE/sasview/dist
-##ln -s sasview*.egg sasview.egg || true
-#$EASY_INSTALL -N -d ../sasview-install sasview*.egg
+cd $WORKSPACE/sasview/dist
+#ln -s sasview*.egg sasview.egg || true
+$EASY_INSTALL -N -d ../sasview-install sasview*.egg
 
 cd $WORKSPACE
 
