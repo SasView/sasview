@@ -31,9 +31,9 @@ SASVIEW_TEST = os.path.join(SASVIEW_SRC, "..", "sasview", "test", "media")
 SPHINX_BUILD = os.path.join(CURRENT_SCRIPT_DIR, "build")
 SPHINX_SOURCE = os.path.join(CURRENT_SCRIPT_DIR, "source")
 SPHINX_SOURCE_API = os.path.join(SPHINX_SOURCE, "dev", "api")
-SPHINX_SOURCE_GUIFRAME = os.path.join(SPHINX_SOURCE, "user", "guiframe")
+SPHINX_SOURCE_GUIFRAME = os.path.join(SPHINX_SOURCE, "user", "sasgui", "guiframe")
 SPHINX_SOURCE_MODELS = os.path.join(SPHINX_SOURCE, "user", "models")
-SPHINX_SOURCE_PERSPECTIVES = os.path.join(SPHINX_SOURCE, "user", "perspectives")
+SPHINX_SOURCE_PERSPECTIVES = os.path.join(SPHINX_SOURCE, "user", "sasgui", "perspectives")
 SPHINX_SOURCE_TEST = os.path.join(SPHINX_SOURCE, "test")
 
 BUMPS_DOCS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..",

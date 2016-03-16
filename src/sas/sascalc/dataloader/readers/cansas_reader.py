@@ -148,7 +148,7 @@ class Reader(XMLreader):
 
         # Generic values for the cansas file based on the version
         cansas_defaults = CANSAS_NS.get(self.cansas_version, "1.0")
-        schema_path = "{0}/sas/dataloader/readers/schema/{1}".format\
+        schema_path = "{0}/sas/sascalc/dataloader/readers/schema/{1}".format\
                 (base, cansas_defaults.get("schema")).replace("\\", "/")
 
         # Link a schema to the XML file.
@@ -1004,7 +1004,7 @@ class Reader(XMLreader):
         mod_name = mod_name.replace(".py", "")
         mod = mod_name.split("sas/")
         mod_name = mod[1]
-        if mod_name != "dataloader/readers/cansas_reader":
+        if mod_name != "sascalc/dataloader/readers/cansas_reader":
             string = self.to_string(doc, pretty_print=False)
             doc = parseString(string)
             node_name = entry_node.tag

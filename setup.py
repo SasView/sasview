@@ -163,9 +163,17 @@ class BuildSphinxCommand(Command):
 package_dir["sas"] = os.path.join("src", "sas")
 packages.append("sas")
 
-# sas.invariant
-package_dir["sas.invariant"] = os.path.join("src", "sas", "sascalc", "invariant")
-packages.extend(["sas.invariant"])
+# sas module
+package_dir["sas.sasgui"] = os.path.join("src", "sas", "sasgui")
+packages.append("sas.sasgui")
+
+# sas module
+package_dir["sas.sascalc"] = os.path.join("src", "sas", "sascalc")
+packages.append("sas.sascalc")
+
+# sas.sascalc.invariant
+package_dir["sas.sascalc.invariant"] = os.path.join("src", "sas", "sascalc", "invariant")
+packages.extend(["sas.sascalc.invariant"])
 
 # sas.sasgui.guiframe
 guiframe_path = os.path.join("src", "sas", "sasgui", "guiframe")
@@ -180,13 +188,13 @@ for d in os.listdir(os.path.join(guiframe_path, "local_perspectives")):
         packages.append(package_name)
         package_dir[package_name] = os.path.join(guiframe_path, "local_perspectives", d)
 
-# sas.dataloader
-package_dir["sas.dataloader"] = os.path.join("src", "sas", "sascalc", "dataloader")
-package_data["sas.dataloader.readers"] = ['defaults.json','schema/*.xsd']
-packages.extend(["sas.dataloader","sas.dataloader.readers","sas.dataloader.readers.schema"])
+# sas.sascalc.dataloader
+package_dir["sas.sascalc.dataloader"] = os.path.join("src", "sas", "sascalc", "dataloader")
+package_data["sas.sascalc.dataloader.readers"] = ['defaults.json','schema/*.xsd']
+packages.extend(["sas.sascalc.dataloader","sas.sascalc.dataloader.readers","sas.sascalc.dataloader.readers.schema"])
 
-# sas.calculator
-package_dir["sas.calculator"] =os.path.join("src", "sas", "sascalc", "calculator")
+# sas.sascalc.calculator
+package_dir["sas.sascalc.calculator"] =os.path.join("src", "sas", "sascalc", "calculator")
 packages.extend(["sas.sascalc.calculator"])
     
 # sas.sascalc.pr
@@ -226,7 +234,7 @@ packages.extend(["sas.sasgui.perspectives", "sas.sasgui.perspectives.calculator"
 package_data['sas.sasgui.perspectives.calculator'] = ['images/*', 'media/*']
     
 # Data util
-package_dir["data_util"] = os.path.join("src", "sas", "sascalc", "data_util")
+package_dir["sas.sascalc.data_util"] = os.path.join("src", "sas", "sascalc", "data_util")
 packages.append("sas.sascalc.data_util")
 
 # Plottools
