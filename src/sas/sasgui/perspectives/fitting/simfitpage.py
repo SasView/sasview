@@ -90,6 +90,8 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         self.model_list = []
         ## selected mdoel to fit
         self.model_toFit = []
+        ## Control the fit state
+        self.fit_started = False
         ## number of constraint
         self.nb_constraint = 0
         self.model_cbox_left = None
@@ -422,6 +424,11 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         signal for fitting
 
         """
+        if self.fit_started:
+            self._stop_fit()
+            self.fit_started = False
+            return
+
         flag = False
         # check if the current page a simultaneous fit page or a batch page
         if self == self._manager.sim_page:
@@ -438,6 +445,8 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                 if item[0].GetValue():
                     self.manager.schedule_for_fit(value=1, uid=item[2])
             try:
+                self.fit_started = True
+                wx.CallAfter(self.set_fitbutton)
                 if not self.manager.onFit(uid=self.uid):
                     return
             except:
@@ -446,6 +455,34 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         else:
             msg = "Select at least one model check box to fit "
             wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+
+    def _on_fit_complete(self):
+        """
+        Set the completion flag and display the updated fit button label.
+        """
+        self.fit_started = False
+        self.set_fitbutton()
+
+    def _stop_fit(self, event=None):
+        """
+        Attempt to stop the fitting thread
+        """
+        if event != None:
+            event.Skip()
+        self.manager.stop_fit(self.uid)
+        self.manager._reset_schedule_problem(value=0)
+        self._on_fit_complete()
+
+    def set_fitbutton(self):
+        """
+        Set fit button label depending on the fit_started
+        """
+        label = "Stop" if self.fit_started else "Fit"
+        color = "red" if self.fit_started else "black"
+
+        self.btFit.SetLabel(label)
+        self.btFit.SetForegroundColour(color)
+        self.btFit.Enable(True)
 
     def _onHelp(self, event):
         """

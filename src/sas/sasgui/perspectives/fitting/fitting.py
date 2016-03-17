@@ -1482,6 +1482,12 @@ class Plugin(PluginBase):
         self._mac_sleep(0.2)
         try:
             index = 0
+            # Update potential simfit page(s)
+            if self.sim_page is not None:
+                self.sim_page._on_fit_complete()
+            if self.batch_page:
+                self.batch_page._on_fit_complete()
+            # Update all fit pages
             for uid in page_id:
                 res = result[index]
                 if res.fitness is None or \

@@ -95,6 +95,8 @@ class FitThread(CalcThread):
             #Stop on exception during fitting. Todo: need to put 
             #some mssg and reset progress bar.
 
+            # Shouldn't this be re-raising? ConsoleUpdate doesn't act on it.
+            # raise KeyboardInterrupt
             if self.handler is not None:
                 self.handler.stop(msg=msg)
         except:
