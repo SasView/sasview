@@ -7,11 +7,7 @@ set PYLINT=c:\python27\scripts\pylint
 set PYTHONPATH=%WORKSPACE%\sasview-install;%PYTHONPATH%
 
 
-
 cd %WORKSPACE%
-
-del /F test\sasview.txt
-
-%PYLINT% --rcfile "%WORKSPACE%/build_tools/pylint.rc" -f parseable sasview-install/sasview*.egg/sas sasview > test/sasview.txt
+%PYLINT% --rcfile "%WORKSPACE%cd /build_tools/pylint.rc" -f parseable sasview-install/sasview*.egg/sas sasview > test/sasview.txt
 
 cd %WORKSPACE%
