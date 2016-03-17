@@ -3,7 +3,7 @@ set PYTHON=C:\Python27\python
 set EASY_INSTALL=c:\python27\scripts\easy_install.exe
 set NEXUSDIR="C:\Program Files (x86)\NeXus Data Format\"
 set PATH=C:\Python27;C:\Python27\Scripts;C:\mingw\bin;%PATH%
-
+set PYLINT=c:\python27\scripts\pylint
 
 
 cd %WORKSPACE%
@@ -44,6 +44,9 @@ python installer_generator.py
 
 cd Output
 xcopy setupSasView.exe %WORKSPACE%\dist
+
+cd %WORKSPACE%
+%PYLINT% --rcfile "%WORKSPACE%cd /build_tools/pylint.rc" -f parseable sasview-install/sasview*.egg/sas sasview > test/sasview.txt
 
 
 cd  %WORKSPACE%
