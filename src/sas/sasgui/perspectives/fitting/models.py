@@ -302,14 +302,15 @@ class ModelManagerBase:
         #Build list automagically from sasmodels package
         for mod_name in sasmodels.core.list_models():
             mod_def = sasmodels.core.load_model_info(mod_name)
-            self.model_dictionary[mod_def['oldname']] = make_class(mod_def,dtype=None,namestyle='oldname')
-            self.model_name_list.append(mod_def['oldname'])
+            self.model_dictionary[mod_def['name']] = make_class(mod_def,dtype=None,namestyle='name')
             if mod_def['structure_factor'] == True:
-                self.struct_list.append(self.model_dictionary[mod_def['oldname']])
+                self.struct_list.append(self.model_dictionary[mod_def['name']])
             if mod_def['variant_info'] is not None:
-                self.multi_func_list.append(self.model_dictionary[mod_def['oldname']])
+                self.multi_func_list.append(self.model_dictionary[mod_def['name']])
+            else:
+                self.model_name_list.append(mod_def['name'])
             if mod_def['ER'] is not None:
-                self.multiplication_factor.append(self.model_dictionary[mod_def['oldname']])
+                self.multiplication_factor.append(self.model_dictionary[mod_def['name']])
 
         #Looking for plugins
         self.stored_plugins = self.findModels()

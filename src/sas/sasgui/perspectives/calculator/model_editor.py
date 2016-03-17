@@ -573,7 +573,7 @@ class TextDialog(wx.Dialog):
                 elif line.count("import %s as P1"):
                     if not self.is_p1_custom:
                         line = line.replace('#', '')
-                        out_f.write(line % (name1, name1) + "\n")
+                        out_f.write(line % (name1) + "\n")
                     else:
                         out_f.write(line + "\n")
                 elif line.count("import Model as P2"):
@@ -585,7 +585,7 @@ class TextDialog(wx.Dialog):
                 elif line.count("import %s as P2"):
                     if not self.is_p2_custom:
                         line = line.replace('#', '')
-                        out_f.write(line % (name2, name2) + "\n")
+                        out_f.write(line % (name2) + "\n")
                     else:
                         out_f.write(line + "\n")
                 elif line.count("self.description = '%s'"):
@@ -1264,11 +1264,11 @@ import copy
 from sas.models.pluginmodel import Model1DPlugin
 # User can change the name of the model (only with single functional model)
 #P1_model:
-#from sas.models.%s import %s as P1
+#from sasmodels.models import %s as P1
 #from %s import Model as P1
 
 #P2_model:
-#from sas.models.%s import %s as P2
+#from sasmodels.models import %s as P2
 #from %s import Model as P2
 import os
 import sys

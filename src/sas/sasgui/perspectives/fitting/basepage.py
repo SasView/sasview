@@ -1281,7 +1281,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.model_view.SetLabel("2D Mode")
             else:
                 self.model_view.SetLabel("1D Mode")
-        
+
         ## set the select all check box to the a given state
         self.cb1.SetValue(state.cb1)
 
@@ -1903,7 +1903,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                     if enabled:
                         m_list.append(self.model_dict[model])
                     #else:
-                    #    msg = "This model is disabled by Category Manager." 
+                    #    msg = "This model is disabled by Category Manager."
                     #    wx.PostEvent(self.parent.parent,
                     #                 StatusEvent(status=msg, info="error"))
         except:
@@ -1944,10 +1944,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             model = models()
             name = model.__class__.__name__
             if models.__name__ != "NoStructure":
-                if hasattr(model, "oldname"):
-                    name = model.oldname
-                elif hasattr(model, "name"):
-                    name = model.name
+                name = model.name
                 mlist.append((name, models))
 
         # Sort the models
@@ -2416,7 +2413,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         #draw the model with the current dispersity
         self._draw_model()
         ## Need to use FitInside again here to replace the next four lines.
-        ## Otherwised polydispersity off does not resize the scrollwindow. 
+        ## Otherwised polydispersity off does not resize the scrollwindow.
         ## PDB Nov 28, 2015
         self.FitInside()
 #        self.sizer4_4.Layout()
@@ -2460,7 +2457,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.orientation_params_disp = []
         self.values = {}
         self.weights = {}
-      
+
         #from sas.models.dispersion_models import GaussianDispersion
         from sasmodels.weights import GaussianDispersion
         if len(self.disp_cb_dict) == 0:
@@ -2969,7 +2966,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         self.Show(False)
         self.set_model_param_sizer(self.model)
-        #self._set_sizer_dispersion() 
+        #self._set_sizer_dispersion()
         self.state.magnetic_on = self.magnetic_on
         self.SetupScrolling()
         self.Show(True)
@@ -3596,7 +3593,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         sizer_cat_box.Add((10,10))
         sizer_cat_box.Add(show_cat_button)
         #self.shape_rbutton.SetValue(True)
-      
+
         sizer_radiobutton = wx.GridSizer(2, 2, 5, 5)
         #sizer_radiobutton.Add(self.shape_rbutton)
         #sizer_radiobutton.Add(self.shape_indep_rbutton)
@@ -3816,4 +3813,3 @@ class ModelTextCtrl(wx.TextCtrl):
 
         event.Skip()
         #pass
-
