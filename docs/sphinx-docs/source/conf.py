@@ -200,15 +200,23 @@ html_add_permalinks = ""
 
 # -- Options for LaTeX output --------------------------------------------------
 
+LATEX_PREAMBLE=r"""
+\renewcommand{\AA}{\text{\r{A}}} % Allow \AA in math mode
+\usepackage[utf8]{inputenc}      % Allow unicode symbols in text
+\DeclareUnicodeCharacter {00B7} {\ensuremath{\cdot}}   % cdot
+\DeclareUnicodeCharacter {00B0} {\ensuremath{^\circ}}  % degrees
+\DeclareUnicodeCharacter {212B} {\AA}                  % Angstrom
+"""
 latex_elements = {
 # The paper size ('letterpaper' or 'a4paper').
-#'papersize': 'letterpaper',
+'papersize': 'a4paper',
 
 # The font size ('10pt', '11pt' or '12pt').
 #'pointsize': '10pt',
 
 # Additional stuff for the LaTeX preamble.
-#'preamble': '',
+'preamble': LATEX_PREAMBLE
+
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
