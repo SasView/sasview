@@ -85,7 +85,7 @@ def sample_graph():
         y = numpy.sin(2*numpy.pi*x*2.8)
         dy = numpy.sqrt(100*numpy.abs(y))/100
 
-    from sas.plottools.plottables import Data1D, Theory1D, Chisq , Graph
+    from sas.sasgui.plottools.plottables import Data1D, Theory1D, Chisq , Graph
     data = Data1D(x,y,dy=dy)
     data.xaxis('distance', 'm')
     data.yaxis('time', 's')
