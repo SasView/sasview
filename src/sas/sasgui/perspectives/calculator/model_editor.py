@@ -588,6 +588,11 @@ class TextDialog(wx.Dialog):
                         out_f.write(line % (name2) + "\n")
                     else:
                         out_f.write(line + "\n")
+                elif line.count("P1 = make_class"):
+                    out_f.write(line % (name1) + "\n")
+                elif line.count("P2 = make_class"):
+                    out_f.write(line % (name2) + "\n")
+
                 elif line.count("self.description = '%s'"):
                     out_f.write(line % description + "\n")
                 #elif line.count("run") and line.count("%s"):
@@ -1262,13 +1267,13 @@ SUM_TEMPLATE = """
 # A sample of an experimental model function for Sum/Multiply(Pmodel1,Pmodel2)
 import copy
 from sas.models.pluginmodel import Model1DPlugin
+from sasmodels.sasview_model import make_class
+from sasmodels.core import load_model_info
 # User can change the name of the model (only with single functional model)
 #P1_model:
-#from sasmodels.models import %s as P1
 #from %s import Model as P1
 
 #P2_model:
-#from sasmodels.models import %s as P2
 #from %s import Model as P2
 import os
 import sys
@@ -1277,6 +1282,8 @@ class Model(Model1DPlugin):
     name = ""
     def __init__(self):
         Model1DPlugin.__init__(self, name='')
+        P1 = make_class(load_model_info('%s'))
+        P2 = make_class(load_model_info('%s'))
         p_model1 = P1()
         p_model2 = P2()
         ## Setting  model name model description
