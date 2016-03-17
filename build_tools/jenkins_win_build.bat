@@ -3,7 +3,7 @@ set PYTHON=C:\Python27\python
 set EASY_INSTALL=c:\python27\scripts\easy_install.exe
 set NEXUSDIR="C:\Program Files (x86)\NeXus Data Format\"
 set PATH=C:\Python27;C:\Python27\Scripts;C:\mingw\bin;%PATH%
-set PYLINT=c:\python27cscripts\pylint
+set PYLINT=c:\python27\scripts\pylint
 
 
 cd %WORKSPACE%\sasview
