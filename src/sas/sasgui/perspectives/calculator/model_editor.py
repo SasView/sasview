@@ -109,8 +109,8 @@ class TextDialog(wx.Dialog):
         self.overwrite_name = False
         self.plugin_dir = plugin_dir
         self.model_list = model_list
-        self.model1_string = "SphereModel"
-        self.model2_string = "CylinderModel"
+        self.model1_string = "sphere"
+        self.model2_string = "cylinder"
         self.name = 'Sum' + M_NAME
         self.factor = 'scale_factor'
         self._notes = ''
