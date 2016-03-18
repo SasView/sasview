@@ -9,7 +9,7 @@ import numpy
 from sas.sascalc.fit.AbstractFitEngine import Model
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 from sas.sascalc.dataloader.loader import Loader
-from sas.models.qsmearing import smear_selection
+from sas.sascalc.data_util.qsmearing import smear_selection
 from sas.models.CylinderModel import CylinderModel
 from sas.models.SphereModel import SphereModel
 

@@ -13,7 +13,7 @@ for a fitProblem i.e relationship between data and model.
 #copyright 2009, University of Tennessee
 ################################################################################
 import copy
-from sas.models.qsmearing import smear_selection
+from sas.sascalc.data_util.qsmearing import smear_selection
 
 class FitProblemComponent(object):
     """
