@@ -28,6 +28,21 @@ SASVIEW_BUILD = os.path.abspath(os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "bu
 SASVIEW_DOCS = os.path.join(SASVIEW_BUILD, "doc")
 SASVIEW_TEST = os.path.join(SASVIEW_SRC, "..", "sasview", "test", "media")
 
+# Need to slurp in the new sasmodels model definitions to replace the old model_functions.rst
+# We are currently here:
+#/sasview-local-trunk/docs/sphinx-docs/build_sphinx.py
+SASMODELS_SOURCE_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "sasmodels", "models")
+SASMODELS_SOURCE_IMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "sasmodels", "models", "img")
+
+#/sasview-local-trunk/docs/sphinx-docs/source/user/models
+SASMODELS_DEST_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "source", "user", "models")
+SASMODELS_DEST_IMG = os.path.join(CURRENT_SCRIPT_DIR, "source", "user", "models", "img")
+
+#print SASMODELS_SOURCE_MODELS
+#print SASMODELS_SOURCE_IMG
+#print SASMODELS_DEST_MODELS
+#print SASMODELS_DEST_IMG
+
 SPHINX_BUILD = os.path.join(CURRENT_SCRIPT_DIR, "build")
 SPHINX_SOURCE = os.path.join(CURRENT_SCRIPT_DIR, "source")
 SPHINX_SOURCE_API = os.path.join(SPHINX_SOURCE, "dev", "api")
