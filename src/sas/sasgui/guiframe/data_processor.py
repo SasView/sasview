@@ -9,7 +9,9 @@ thus cannot feed back to the fitting panel.  This could change in the future.
 
 The organization of the classes goes as:
 
-.. image::  ../../user/guiframe/BatchGridClassLayout.png
+#Path to this is:           /sasview/src/sas/sasgui/guiframe/data_processor.py
+#Path to image is:          /sasview/src/sas/sasgui/guiframe/media/BatchGridClassLayout.png
+.. image::  ./guiframe/media/BatchGridClassLayout.png
    :align:   center
 
 """
