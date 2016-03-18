@@ -12,12 +12,21 @@
 .project
 .pydevproject
 .vagrant
+.idea
+build
+dist
+sasview.egg-info
+sasview.egg-info
+
 .mplconfig
+doctrees
+html
+build
 
 /setup.cfg
 
 /dist
-/build
+**/build
 sasview.egg-info
 sasview-install
 **/test/logs
@@ -40,3 +49,4 @@ default_categories.json
 /test/pr_inversion/test/test_output.txt
 /test/sasdataloader/test/plugins.zip
 /test/sasdataloader/test/test_log.txt
+

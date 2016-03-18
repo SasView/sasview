@@ -103,6 +103,9 @@ def prepare():
     # Put the source trees on the path
     addpath(joinpath(root, 'src'))
 
+    # sasmodels on the path
+    addpath(joinpath(root, '../sasmodels/'))
+
     # Import the sasview package from root/sasview as sas.sasview.  It would
     # be better to just store the package in src/sas/sasview.
     import sas

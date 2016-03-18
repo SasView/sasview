@@ -251,17 +251,17 @@ gen_dir  = os.path.join("src", "sas", "models", "c_extension", "c_gen")
 wrapper_dir  = os.path.join("src", "sas", "models", "c_extension", "python_wrapper", "generated")
 model_dir = os.path.join("src", "sas","models")
 
-if os.path.isdir(wrapper_dir):
-    for file in os.listdir(wrapper_dir): 
-        file_path =  os.path.join(wrapper_dir, file)
-        os.remove(file_path)
-else:
-    os.makedirs(wrapper_dir)
-sys.path.append(os.path.join("src", "sas", "models", "c_extension", "python_wrapper"))
-from wrapping import generate_wrappers
-generate_wrappers(header_dir = includedir, 
-                  output_dir = model_dir,
-                  c_wrapper_dir = wrapper_dir)
+#if os.path.isdir(wrapper_dir):
+#    for file in os.listdir(wrapper_dir):
+#        file_path =  os.path.join(wrapper_dir, file)
+#        os.remove(file_path)
+#else:
+#    os.makedirs(wrapper_dir)
+#sys.path.append(os.path.join("src", "sas", "models", "c_extension", "python_wrapper"))
+#from wrapping import generate_wrappers
+#generate_wrappers(header_dir = includedir,
+#                  output_dir = model_dir,
+#                  c_wrapper_dir = wrapper_dir)
 
 IGNORED_FILES = [".svn"]
 if not os.name=='nt':
@@ -290,8 +290,8 @@ def append_file(file_list, dir_path):
         
 model_sources = []
 append_file(file_list=model_sources, dir_path=igordir)
-append_file(file_list=model_sources, dir_path=c_model_dir)
-append_file(file_list=model_sources, dir_path=wrapper_dir)
+#append_file(file_list=model_sources, dir_path=c_model_dir)
+#append_file(file_list=model_sources, dir_path=wrapper_dir)
 
 smear_sources = []
 append_file(file_list=smear_sources, dir_path=smear_dir)
@@ -310,12 +310,12 @@ if os.name=='nt':
     geni_sources.append(os.path.join(igordir, "winFuncs.c"))
 
 c_models = [ 
-    Extension("sas.models.sas_extension.c_models",
-        sources=model_sources,                 
-        include_dirs=[
-            igordir, includedir, c_model_dir, numpy_incl_path, cephes_dir
-        ],
-    ),
+    #Extension("sas.models.sas_extension.c_models",
+    #    sources=model_sources,
+    #    include_dirs=[
+    #        igordir, includedir, c_model_dir, numpy_incl_path, cephes_dir
+    #    ],
+    #),
 
     # Smearer extension
     Extension("sas.models.sas_extension.smearer",
@@ -347,6 +347,7 @@ c_models = [
 # Comment out the following to avoid rebuilding all the models
 ext_modules.extend(c_models)
 
+packages.append("sas.models")
 # SasView
 
 package_dir["sas.sasview"] = "sasview"
@@ -357,7 +358,7 @@ package_data['sas.sasview'] = ['images/*',
                                'test/2d_data/*',
                                'test/save_states/*',
                                'test/upcoming_formats/*', 
-                               'default_categories.json']
+                                 'default_categories.json']
 packages.append("sas.sasview")
 
 required = [

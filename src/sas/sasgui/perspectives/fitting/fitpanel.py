@@ -119,7 +119,7 @@ class FitPanel(nb, PanelBase):
     def reset_pmodel_list(self):
         """
         """
-        temp = self.menu_mng.pulgins_reset()
+        temp = self.menu_mng.plugins_reset()
         if len(temp):
             self.model_list_box = temp
         return temp

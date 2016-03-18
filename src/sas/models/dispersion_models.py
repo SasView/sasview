@@ -153,7 +153,7 @@ class ArrayDispersion(DispersionModel):
         
         c_models.set_dispersion_weights(self.cdisp, values, weights)
         
-models = {"gaussian":GaussianDispersion,  "rectangula":RectangleDispersion,
+models = {"gaussian":GaussianDispersion,  "rectangular":RectangleDispersion,
           "array":ArrayDispersion, "schulz":SchulzDispersion, 
           "lognormal":LogNormalDispersion}       
         
