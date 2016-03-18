@@ -101,11 +101,11 @@ Instructions on how to use SasView itself are available separately.
 To easily compare to the scattering intensity measured in experiments, we normalize the form factors by the volume of
 the particle
 
-.. image:: img/image001.PNG
+.. image:: img/olddocs/image001.PNG
 
 with
 
-.. image:: img/image002.PNG
+.. image:: img/olddocs/image002.PNG
 
 where |P0|\ *(q)* is the un-normalized form factor, |rho|\ *(r)* is the scattering length density at a given
 point in space and the integration is done over the volume *V* of the scatterer.
@@ -113,7 +113,7 @@ point in space and the integration is done over the volume *V* of the scatterer.
 For systems without inter-particle interference, the form factors we provide can be related to the scattering intensity
 by the particle volume fraction
 
-.. image:: img/image003.PNG
+.. image:: img/olddocs/image003.PNG
 
 Our so-called 1D scattering intensity functions provide *P(q)* for the case where the scatterer is randomly oriented. In
 that case, the scattering intensity only depends on the length of *q* . The intensity measured on the plane of the SAS
@@ -336,7 +336,7 @@ For information about polarised and magnetic scattering, click here_.
 
 The 1D scattering intensity is calculated in the following way (Guinier, 1955)
 
-.. image:: img/image004.PNG
+.. image:: img/olddocs/image004.PNG
 
 where *scale* is a volume fraction, *V* is the volume of the scatterer, *r* is the radius of the sphere, *bkg* is
 the background level and *sldXXX* is the scattering length density (SLD) of the scatterer or the solvent.
@@ -371,7 +371,7 @@ A Guinier and G. Fournet, *Small-Angle Scattering of X-Rays*, John Wiley and Son
 Validation of our code was done by comparing the output of the 1D model to the output of the software provided by the
 NIST (Kline, 2006). Figure 1 shows a comparison of the output of our model and the output of the NIST software.
 
-.. image:: img/image005.jpg
+.. image:: img/olddocs/image005.jpg
 
 Figure 1: Comparison of the DANSE scattering intensity for a sphere with the output of the NIST SANS analysis software.
 The parameters were set to: Scale=1.0, Radius=60 |Ang|, Contrast=1e-6 |Ang^-2|, and Background=0.01 |cm^-1|.
@@ -390,17 +390,17 @@ This model (binary hard sphere model) provides the scattering intensity, for bin
 sphere interaction between those particles. Using Percus-Yevick closure, the calculation is an exact multi-component
 solution
 
-.. image:: img/image006.PNG
+.. image:: img/olddocs/image006.PNG
 
 where *Sij* are the partial structure factors and *fi* are the scattering amplitudes of the particles. The subscript 1
 is for the smaller particle and 2 is for the larger. The number fraction of the larger particle, (*x* = n2/(n1+n2),
 where *n* = the number density) is internally calculated based on
 
-.. image:: img/image007.PNG
+.. image:: img/olddocs/image007.PNG
 
 The 2D scattering intensity is the same as 1D, regardless of the orientation of the *q* vector which is defined as
 
-.. image:: img/image008.PNG
+.. image:: img/olddocs/image008.PNG
 
 The parameters of the BinaryHSModel are the following (in the names, *l* (or *ls*\ ) stands for larger spheres
 while *s* (or *ss*\ ) for the smaller spheres).
@@ -418,7 +418,7 @@ vol_frac_ls     None      0.1
 vol_frac_ss     None      0.2
 ==============  ========  =============
 
-.. image:: img/image009.jpg
+.. image:: img/olddocs/image009.jpg
 
 *Figure. 1D plot using the default values above (w/200 data point).*
 
@@ -444,12 +444,12 @@ This model is to calculate the scattering from spherical particles with a "fuzzy
 
 The scattering intensity *I(q)* is calculated as:
 
-.. image:: img/image010.PNG
+.. image:: img/olddocs/image010.PNG
 
 where the amplitude *A(q)* is given as the typical sphere scattering convoluted with a Gaussian to get a gradual
 drop-off in the scattering length density
 
-.. image:: img/image011.PNG
+.. image:: img/olddocs/image011.PNG
 
 Here |A2|\ *(q)* is the form factor, *P(q)*. The scale is equivalent to the volume fraction of spheres, each of
 volume, *V*\. Contrast (|drho|) is the difference of scattering length densities of the sphere and the surrounding
@@ -470,7 +470,7 @@ From the reference
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image008.PNG
+.. image:: img/olddocs/image008.PNG
 
 This example dataset is produced by running the FuzzySphereModel, using 200 data points, *qmin* = 0.001 -1,
 *qmax* = 0.7 |Ang^-1| and the default values
@@ -486,7 +486,7 @@ sldSph          |Ang^-2|  1e-6
 background      |cm^-1|   0.001
 ==============  ========  =============
 
-.. image:: img/image012.jpg
+.. image:: img/olddocs/image012.jpg
 
 *Figure. 1D plot using the default values (w/200 data point).*
 
@@ -507,7 +507,7 @@ of a larger sphere, such as the structure of a Pickering emulsion.
 
 The structure is:
 
-.. image:: img/raspberry_pic.jpg
+.. image:: img/olddocs/raspberry_pic.jpg
 
 where *Ro* = the radius of the large sphere, *Rp* = the radius of the smaller sphere on the surface, |delta| = the
 fractional penetration depth, and surface coverage = fractional coverage of the large sphere surface (0.9 max).
@@ -522,7 +522,7 @@ The returned value is scaled to units of |cm^-1|. No inter-particle scattering i
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image008.PNG
+.. image:: img/olddocs/image008.PNG
 
 This example dataset is produced by running the RaspBerryModel, using 2000 data points, *qmin* = 0.0001 |Ang^-1|,
 *qmax* = 0.2 |Ang^-1| and the default values below, where *Ssph/Lsph* stands for smaller or larger sphere, respectively,
@@ -543,7 +543,7 @@ volf_Lsph       None      0.005
 background      |cm^-1|   0
 ==============  ========  =============
 
-.. image:: img/raspberry_plot.jpg
+.. image:: img/olddocs/raspberry_plot.jpg
 
 *Figure. 1D plot using the values of /2000 data points.*
 
@@ -567,7 +567,7 @@ For information about polarised and magnetic scattering, click here_.
 
 The 1D scattering intensity is calculated in the following way (Guinier, 1955)
 
-.. image:: img/image013.PNG
+.. image:: img/olddocs/image013.PNG
 
 where *scale* is a scale factor, *Vs* is the volume of the outer shell, *Vc* is the volume of the core, *rs* is the
 radius of the shell, *rc* is the radius of the core, *c* is the scattering length density of the core, *s* is the
@@ -607,7 +607,7 @@ A Guinier and G Fournet, *Small-Angle Scattering of X-Rays*, John Wiley and Sons
 Validation of our code was done by comparing the output of the 1D model to the output of the software provided by
 NIST (Kline, 2006). Figure 1 shows a comparison of the output of our model and the output of the NIST software.
 
-.. image:: img/image014.jpg
+.. image:: img/olddocs/image014.jpg
 
 Figure 1: Comparison of the SasView scattering intensity for a core-shell sphere with the output of the NIST SANS
 analysis software. The parameters were set to: *Scale* = 1.0, *Radius* = 60 , *Contrast* = 1e-6 |Ang^-2|, and
@@ -668,13 +668,13 @@ Research (Kline, 2006).
 This example dataset is produced by running the CoreMultiShellModel using 200 data points, *qmin* = 0.001 -1,
 *qmax* = 0.7 -1 and the above default values.
 
-.. image:: img/image015.jpg
+.. image:: img/olddocs/image015.jpg
 
 *Figure: 1D plot using the default values (w/200 data point).*
 
 The scattering length density profile for the default sld values (w/ 4 shells).
 
-.. image:: img/image016.jpg
+.. image:: img/olddocs/image016.jpg
 
 *Figure: SLD profile against the radius of the sphere for default SLDs.*
 
@@ -703,7 +703,7 @@ moment, |sigma| = sqrt((*t* :sup:`2` )/12). The |sigma| is the second moment abo
 
 The *I* :sub:`0` is calculated in the following way (King, 2002)
 
-.. image:: img/secondmeq1.jpg
+.. image:: img/olddocs/secondmeq1.jpg
 
 where *scale* is a scale factor, *poly* is the sld of the polymer (or surfactant) layer, *solv* is the sld of the
 solvent/medium and cores, |phi|\ :sub:`cores` is the volume fraction of the core paraticles, and |biggamma| and
@@ -730,7 +730,7 @@ sld_solv        |Ang^-2|  6.3e-6
 background      |cm^-1|   0.0
 ==============  ========  =============
 
-.. image:: img/secongm_fig1.jpg
+.. image:: img/olddocs/secongm_fig1.jpg
 
 REFERENCE
 
@@ -746,11 +746,11 @@ S King, P Griffiths, J. Hone, and T Cosgrove, *SANS from Adsorbed Polymer Layers
 This model provides the form factor, *P(q)*, for a multi-lamellar vesicle with *N* shells where the core is filled with
 solvent and the shells are interleaved with layers of solvent. For *N* = 1, this returns the VesicleModel (above).
 
-.. image:: img/image020.jpg
+.. image:: img/olddocs/image020.jpg
 
 The 2D scattering intensity is the same as 1D, regardless of the orientation of the *q* vector which is defined as
 
-.. image:: img/image008.PNG
+.. image:: img/olddocs/image008.PNG
 
 NB: The outer most radius (= *core_radius* + *n_pairs* \* *s_thickness* + (*n_pairs* - 1) \* *w_thickness*) is used
 as the effective radius for *S(Q)* when *P(Q)* \* *S(Q)* is applied.
@@ -773,7 +773,7 @@ w_thickness     |Ang|     10
 NB: *s_thickness* is the shell thickness while the *w_thickness* is the solvent thickness, and *n_pair*
 is the number of shells.
 
-.. image:: img/image021.jpg
+.. image:: img/olddocs/image021.jpg
 
 *Figure. 1D plot using the default values (w/200 data point).*
 
@@ -800,27 +800,27 @@ model.
 
 The 1D scattering intensity is calculated in the following way
 
-.. image:: img/image022.gif
+.. image:: img/olddocs/image022.gif
 
-.. image:: img/image023.gif
+.. image:: img/olddocs/image023.gif
 
 where, for a spherically symmetric particle with a particle density |rho|\ *(r)*
 
-.. image:: img/image024.gif
+.. image:: img/olddocs/image024.gif
 
 so that
 
-.. image:: img/image025.gif
+.. image:: img/olddocs/image025.gif
 
-.. image:: img/image026.gif
+.. image:: img/olddocs/image026.gif
 
-.. image:: img/image027.gif
+.. image:: img/olddocs/image027.gif
 
 Here we assumed that the SLDs of the core and solvent are constant against *r*.
 
 Now lets consider the SLD of a shell, *r*\ :sub:`shelli`, defined by
 
-.. image:: img/image028.gif
+.. image:: img/olddocs/image028.gif
 
 An example of a possible SLD profile is shown below where *sld_in_shelli* (|rho|\ :sub:`in`\ ) and
 *thick_shelli* (|bigdelta|\ *t* :sub:`shelli`\ ) stand for the SLD of the inner side of the *i*\ th shell and the
@@ -828,48 +828,48 @@ thickness of the *i*\ th shell in the equation above, respectively.
 
 For \| *A* \| > 0,
 
-.. image:: img/image029.gif
+.. image:: img/olddocs/image029.gif
 
 For *A* ~ 0 (eg., *A* = -0.0001), this function converges to that of the linear SLD profile (ie,
 |rho|\ :sub:`shelli`\ *(r)* = *A*\ :sup:`'` ( *r* - *r*\ :sub:`shelli` - 1) / |bigdelta|\ *t* :sub:`shelli`) + *B*\ :sup:`'`),
 so this case is equivalent to
 
-.. image:: img/image030.gif
+.. image:: img/olddocs/image030.gif
 
-.. image:: img/image031.gif
+.. image:: img/olddocs/image031.gif
 
-.. image:: img/image032.gif
+.. image:: img/olddocs/image032.gif
 
-.. image:: img/image033.gif
+.. image:: img/olddocs/image033.gif
 
 For *A* = 0, the exponential function has no dependence on the radius (so that *sld_out_shell* (|rho|\ :sub:`out`) is
 ignored this case) and becomes flat. We set the constant to |rho|\ :sub:`in` for convenience, and thus the form
 factor contributed by the shells is
 
-.. image:: img/image034.gif
+.. image:: img/olddocs/image034.gif
 
-.. image:: img/image035.gif
+.. image:: img/olddocs/image035.gif
 
 In the equation
 
-.. image:: img/image036.gif
+.. image:: img/olddocs/image036.gif
 
 Finally, the form factor can be calculated by
 
-.. image:: img/image037.gif
+.. image:: img/olddocs/image037.gif
 
 where
 
-.. image:: img/image038.gif
+.. image:: img/olddocs/image038.gif
 
 and
 
-.. image:: img/image039.gif
+.. image:: img/olddocs/image039.gif
 
 The 2D scattering intensity is the same as *P(q)* above, regardless of the orientation of the *q* vector which is
 defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 NB: The outer most radius is used as the effective radius for *S(Q)* when *P(Q)* \* *S(Q)* is applied.
 
@@ -891,11 +891,11 @@ background      |cm^-1|   0.0
 
 NB: *rad_core* represents the core radius (*R1*) and *thick_shell1* (*R2* - *R1*) is the thickness of the shell1, etc.
 
-.. image:: img/image041.jpg
+.. image:: img/olddocs/image041.jpg
 
 *Figure. 1D plot using the default values (w/400 point).*
 
-.. image:: img/image042.jpg
+.. image:: img/olddocs/image042.jpg
 
 *Figure. SLD profile from the default values.*
 
@@ -917,7 +917,7 @@ of the shell.
 
 The 1D scattering intensity is calculated in the following way (Guinier, 1955)
 
-.. image:: img/image017.PNG
+.. image:: img/olddocs/image017.PNG
 
 where *scale* is a scale factor, *Vshell* is the volume of the shell, *V1* is the volume of the core, *V2* is the total
 volume, *R1* is the radius of the core, *R2* is the outer radius of the shell, |rho|\ :sub:`1` is the scattering
@@ -927,12 +927,12 @@ the background level, and *J1* = (sin\ *x*- *x* cos\ *x*)/ *x* :sup:`2`\ . The f
 scattering, namely the volume of the shell alone. Also, the vesicle is best defined in terms of a core radius (= *R1*)
 and a shell thickness, *t*.
 
-.. image:: img/image018.jpg
+.. image:: img/olddocs/image018.jpg
 
 The 2D scattering intensity is the same as *P(q)* above, regardless of the orientation of the *q* vector which is
 defined as
 
-.. image:: img/image008.PNG
+.. image:: img/olddocs/image008.PNG
 
 NB: The outer most radius (= *radius* + *thickness*) is used as the effective radius for *S(Q)* when *P(Q)* \* *S(Q)*
 is applied.
@@ -952,7 +952,7 @@ background      |cm^-1|   0.0
 
 NB: *radius* represents the core radius (*R1*) and the *thickness* (*R2* - *R1*) is the shell thickness.
 
-.. image:: img/image019.jpg
+.. image:: img/olddocs/image019.jpg
 
 *Figure. 1D plot using the default values (w/200 data point).*
 
@@ -983,42 +983,42 @@ normalized by the total volume of the sphere.
 
 The 1D scattering intensity is calculated in the following way:
 
-.. image:: img/image022.gif
+.. image:: img/olddocs/image022.gif
 
-.. image:: img/image043.gif
+.. image:: img/olddocs/image043.gif
 
 where, for a spherically symmetric particle with a particle density |rho|\ *(r)*
 
-.. image:: img/image024.gif
+.. image:: img/olddocs/image024.gif
 
 so that
 
-.. image:: img/image044.gif
+.. image:: img/olddocs/image044.gif
 
-.. image:: img/image045.gif
+.. image:: img/olddocs/image045.gif
 
-.. image:: img/image046.gif
+.. image:: img/olddocs/image046.gif
 
-.. image:: img/image047.gif
+.. image:: img/olddocs/image047.gif
 
-.. image:: img/image048.gif
+.. image:: img/olddocs/image048.gif
 
-.. image:: img/image027.gif
+.. image:: img/olddocs/image027.gif
 
 Here we assumed that the SLDs of the core and solvent are constant against *r*. The SLD at the interface between
 shells, |rho|\ :sub:`inter_i`, is calculated with a function chosen by an user, where the functions are
 
 1) Exp
 
-.. image:: img/image049.gif
+.. image:: img/olddocs/image049.gif
 
 2) Power-Law
 
-.. image:: img/image050.gif
+.. image:: img/olddocs/image050.gif
 
 3) Erf
 
-.. image:: img/image051.gif
+.. image:: img/olddocs/image051.gif
 
 The functions are normalized so that they vary between 0 and 1, and they are constrained such that the SLD is
 continuous at the boundaries of the interface as well as each sub-layers. Thus *B* and *C* are determined.
@@ -1026,34 +1026,34 @@ continuous at the boundaries of the interface as well as each sub-layers. Thus *
 Once |rho|\ :sub:`rinter_i` is found at the boundary of the sub-layer of the interface, we can find its contribution
 to the form factor *P(q)*
 
-.. image:: img/image052.gif
+.. image:: img/olddocs/image052.gif
 
-.. image:: img/image053.gif
+.. image:: img/olddocs/image053.gif
 
-.. image:: img/image054.gif
+.. image:: img/olddocs/image054.gif
 
 where we assume that |rho|\ :sub:`inter_i`\ *(r)* can be approximately linear within a sub-layer *j*.
 
 In the equation
 
-.. image:: img/image055.gif
+.. image:: img/olddocs/image055.gif
 
 Finally, the form factor can be calculated by
 
-.. image:: img/image037.gif
+.. image:: img/olddocs/image037.gif
 
 where
 
-.. image:: img/image038.gif
+.. image:: img/olddocs/image038.gif
 
 and
 
-.. image:: img/image056.gif
+.. image:: img/olddocs/image056.gif
 
 The 2D scattering intensity is the same as *P(q)* above, regardless of the orientation of the *q* vector which is
 defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 NB: The outer most radius is used as the effective radius for *S(Q)* when *P(Q)* \* *S(Q)* is applied.
 
@@ -1080,11 +1080,11 @@ thick_core0     |Ang|     50
 
 NB: *rad_core0* represents the core radius (*R1*).
 
-.. image:: img/image057.jpg
+.. image:: img/olddocs/image057.jpg
 
 *Figure. 1D plot using the default values (w/400 point).*
 
-.. image:: img/image058.jpg
+.. image:: img/olddocs/image058.jpg
 
 *Figure. SLD profile from the default values.*
 
@@ -1103,13 +1103,13 @@ This model provides the form factor for *N* spherical pearls of radius *R* linea
 length or edge separation) *l* (= *A* - 2\ *R*)). *A* is the center-to-center pearl separation distance. The thickness
 of each string is assumed to be negligible.
 
-.. image:: img/linearpearls.jpg
+.. image:: img/olddocs/linearpearls.jpg
 
 *2.1.12.1. Definition*
 
 The output of the scattering intensity function for the LinearPearlsModel is given by (Dobrynin, 1996)
 
-.. image:: img/linearpearl_eq1.gif
+.. image:: img/olddocs/linearpearl_eq1.gif
 
 where the mass *m*\ :sub:`p` is (SLD\ :sub:`pearl` - SLD\ :sub:`solvent`) \* (volume of *N* pearls). V is the total
 volume.
@@ -1132,7 +1132,7 @@ background       |cm^-1|   0.0
 
 NB: *num_pearls* must be an integer.
 
-.. image:: img/linearpearl_plot.jpg
+.. image:: img/olddocs/linearpearl_plot.jpg
 
 REFERENCE
 
@@ -1149,29 +1149,29 @@ of radius *R*) freely jointed by *M* rods (like strings - with a total mass *Mw*
 and the string segment length (or edge separation) *l* (= *A* - 2\ *R*)). *A* is the center-to-center pearl separation
 distance.
 
-.. image:: img/pearl_fig.jpg
+.. image:: img/olddocs/pearl_fig.jpg
 
 *2.1.13.1. Definition*
 
 The output of the scattering intensity function for the PearlNecklaceModel is given by (Schweins, 2004)
 
-.. image:: img/pearl_eq1.gif
+.. image:: img/olddocs/pearl_eq1.gif
 
 where
 
-.. image:: img/pearl_eq2.gif
+.. image:: img/olddocs/pearl_eq2.gif
 
-.. image:: img/pearl_eq3.gif
+.. image:: img/olddocs/pearl_eq3.gif
 
-.. image:: img/pearl_eq4.gif
+.. image:: img/olddocs/pearl_eq4.gif
 
-.. image:: img/pearl_eq5.gif
+.. image:: img/olddocs/pearl_eq5.gif
 
-.. image:: img/pearl_eq6.gif
+.. image:: img/olddocs/pearl_eq6.gif
 
 and
 
-.. image:: img/pearl_eq7.gif
+.. image:: img/olddocs/pearl_eq7.gif
 
 where the mass *m*\ :sub:`i` is (SLD\ :sub:`i` - SLD\ :sub:`solvent`) \* (volume of the *N* pearls/rods). *V* is the
 total volume of the necklace.
@@ -1197,7 +1197,7 @@ background       |cm^-1|   0.0
 
 NB: *num_pearls* must be an integer.
 
-.. image:: img/pearl_plot.jpg
+.. image:: img/olddocs/pearl_plot.jpg
 
 REFERENCE
 
@@ -1218,11 +1218,11 @@ For information about polarised and magnetic scattering, click here_.
 
 The output of the 2D scattering intensity function for oriented cylinders is given by (Guinier, 1955)
 
-.. image:: img/image059.PNG
+.. image:: img/olddocs/image059.PNG
 
 where
 
-.. image:: img/image060.PNG
+.. image:: img/olddocs/image060.PNG
 
 and |alpha| is the angle between the axis of the cylinder and the *q*-vector, *V* is the volume of the cylinder,
 *L* is the length of the cylinder, *r* is the radius of the cylinder, and |drho| (contrast) is the
@@ -1231,11 +1231,11 @@ scattering length density difference between the scatterer and the solvent. *J1*
 To provide easy access to the orientation of the cylinder, we define the axis of the cylinder using two angles |theta|
 and |phi|. Those angles are defined in Figure 1.
 
-.. image:: img/image061.jpg
+.. image:: img/olddocs/image061.jpg
 
 *Figure 1. Definition of the angles for oriented cylinders.*
 
-.. image:: img/image062.jpg
+.. image:: img/olddocs/image062.jpg
 
 *Figure 2. Examples of the angles for oriented pp against the detector plane.*
 
@@ -1258,7 +1258,7 @@ cyl_phi         degree    60
 
 The output of the 1D scattering intensity function for randomly oriented cylinders is then given by
 
-.. image:: img/image063.PNG
+.. image:: img/olddocs/image063.PNG
 
 The *cyl_theta* and *cyl_phi* parameter are not used for the 1D output. Our implementation of the scattering kernel
 and the 1D scattering intensity use the c-library from NIST.
@@ -1268,7 +1268,7 @@ and the 1D scattering intensity use the c-library from NIST.
 Validation of our code was done by comparing the output of the 1D model to the output of the software provided by the
 NIST (Kline, 2006). Figure 3 shows a comparison of the 1D output of our model and the output of the NIST software.
 
-.. image:: img/image065.jpg
+.. image:: img/olddocs/image065.jpg
 
 *Figure 3: Comparison of the SasView scattering intensity for a cylinder with the output of the NIST SANS analysis*
 *software.* The parameters were set to: *Scale* = 1.0, *Radius* = 20 |Ang|, *Length* = 400 |Ang|,
@@ -1276,14 +1276,14 @@ NIST (Kline, 2006). Figure 3 shows a comparison of the 1D output of our model an
 
 In general, averaging over a distribution of orientations is done by evaluating the following
 
-.. image:: img/image064.PNG
+.. image:: img/olddocs/image064.PNG
 
 where *p(*\ |theta|,\ |phi|\ *)* is the probability distribution for the orientation and |P0|\ *(q,*\ |alpha|\ *)* is
 the scattering intensity for the fully oriented system. Since we have no other software to compare the implementation
 of the intensity for fully oriented cylinders, we can compare the result of averaging our 2D output using a uniform
 distribution *p(*\ |theta|,\ |phi|\ *)* = 1.0. Figure 4 shows the result of such a cross-check.
 
-.. image:: img/image066.jpg
+.. image:: img/olddocs/image066.jpg
 
 *Figure 4: Comparison of the intensity for uniformly distributed cylinders calculated from our 2D model and the*
 *intensity from the NIST SANS analysis software.* The parameters used were: *Scale* = 1.0, *Radius* = 20 |Ang|,
@@ -1308,7 +1308,7 @@ The inside and outside of the hollow cylinder are assumed have the same SLD.
 
 The 1D scattering intensity is calculated in the following way (Guinier, 1955)
 
-.. image:: img/image072.PNG
+.. image:: img/olddocs/image072.PNG
 
 where *scale* is a scale factor, *J1* is the 1st order Bessel function, *J1(x)* = (sin *x* - *x* cos *x*)/ *x*\ :sup:`2`.
 
@@ -1333,18 +1333,18 @@ sldSolv         |Ang^-2|  5e-06
 background      |cm^-1|   0.01
 ==============  ========  =============
 
-.. image:: img/image074.jpg
+.. image:: img/olddocs/image074.jpg
 
 *Figure. 1D plot using the default values (w/1000 data point).*
 
 Our model uses the form factor calculations implemented in a c-library provided by the NIST Center for Neutron Research
 (Kline, 2006).
 
-.. image:: img/image061.jpg
+.. image:: img/olddocs/image061.jpg
 
 *Figure. Definition of the angles for the oriented HollowCylinderModel.*
 
-.. image:: img/image062.jpg
+.. image:: img/olddocs/image062.jpg
 
 *Figure. Examples of the angles for oriented pp against the detector plane.*
 
@@ -1370,7 +1370,7 @@ The returned value is scaled to units of |cm^-1|\ |sr^-1|, absolute scale.
 
 The Capped Cylinder geometry is defined as
 
-.. image:: img/image112.jpg
+.. image:: img/olddocs/image112.jpg
 
 where *r* is the radius of the cylinder. All other parameters are as defined in the diagram. Since the end cap radius
 *R* >= *r* and by definition for this geometry *h* < 0, *h* is then defined by *r* and *R* as
@@ -1379,11 +1379,11 @@ where *r* is the radius of the cylinder. All other parameters are as defined in 
 
 The scattered intensity *I(q)* is calculated as
 
-.. image:: img/image113.jpg
+.. image:: img/olddocs/image113.jpg
 
 where the amplitude *A(q)* is given as
 
-.. image:: img/image114.jpg
+.. image:: img/olddocs/image114.jpg
 
 The < > brackets denote an average of the structure over all orientations. <\ *A*\ :sup:`2`\ *(q)*> is then the form
 factor, *P(q)*. The scale factor is equivalent to the volume fraction of cylinders, each of volume, *V*. Contrast is the
@@ -1391,11 +1391,11 @@ difference of scattering length densities of the cylinder and the surrounding so
 
 The volume of the Capped Cylinder is (with *h* as a positive value here)
 
-.. image:: img/image115.jpg
+.. image:: img/olddocs/image115.jpg
 
 and its radius-of-gyration
 
-.. image:: img/image116.jpg
+.. image:: img/olddocs/image116.jpg
 
 **The requirement that** *R* >= *r* **is not enforced in the model! It is up to you to restrict this during analysis.**
 
@@ -1414,22 +1414,22 @@ sld_solv        |Ang^-2|  6.3e-006
 background      |cm^-1|   0
 ==============  ========  =============
 
-.. image:: img/image117.jpg
+.. image:: img/olddocs/image117.jpg
 
 *Figure. 1D plot using the default values (w/256 data point).*
 
 For 2D data: The 2D scattering intensity is calculated similar to the 2D cylinder model. For example, for
 |theta| = 45 deg and |phi| =0 deg with default values for other parameters
 
-.. image:: img/image118.jpg
+.. image:: img/olddocs/image118.jpg
 
 *Figure. 2D plot (w/(256X265) data points).*
 
-.. image:: img/image061.jpg
+.. image:: img/olddocs/image061.jpg
 
 *Figure. Definition of the angles for oriented 2D cylinders.*
 
-.. image:: img/image062.jpg
+.. image:: img/olddocs/image062.jpg
 
 *Figure. Examples of the angles for oriented pp against the detector plane.*
 
@@ -1452,13 +1452,13 @@ form factor is normalized by the particle volume.
 
 The output of the 2D scattering intensity function for oriented core-shell cylinders is given by (Kline, 2006)
 
-.. image:: img/image067.PNG
+.. image:: img/olddocs/image067.PNG
 
 where
 
-.. image:: img/image068.PNG
+.. image:: img/olddocs/image068.PNG
 
-.. image:: img/image239.PNG
+.. image:: img/olddocs/image239.PNG
 
 and |alpha| is the angle between the axis of the cylinder and the *q*\ -vector, *Vs* is the volume of the outer shell
 (i.e. the total volume, including the shell), *Vc* is the volume of the core, *L* is the length of the core, *r* is the
@@ -1467,7 +1467,7 @@ radius of the core, *t* is the thickness of the shell, |rho|\ :sub:`c` is the sc
 the solvent, and *bkg* is the background level. The outer radius of the shell is given by *r+t* and the total length of
 the outer shell is given by *L+2t*. *J1* is the first order Bessel function.
 
-.. image:: img/image069.jpg
+.. image:: img/olddocs/image069.jpg
 
 To provide easy access to the orientation of the core-shell cylinder, we define the axis of the cylinder using two
 angles |theta| and |phi|\ . As for the case of the cylinder, those angles are defined in Figure 2 of the CylinderModel.
@@ -1502,7 +1502,7 @@ and the 1D scattering intensity use the c-library from NIST.
 Validation of our code was done by comparing the output of the 1D model to the output of the software provided by the
 NIST (Kline, 2006). Figure 1 shows a comparison of the 1D output of our model and the output of the NIST software.
 
-.. image:: img/image070.jpg
+.. image:: img/olddocs/image070.jpg
 
 *Figure 1: Comparison of the SasView scattering intensity for a core-shell cylinder with the output of the NIST SANS*
 *analysis software.* The parameters were set to: *Scale* = 1.0, *Radius* = 20 |Ang|, *Thickness* = 10 |Ang|,
@@ -1513,18 +1513,18 @@ Averaging over a distribution of orientation is done by evaluating the equation 
 to compare the implementation of the intensity for fully oriented cylinders, we can compare the result of averaging our
 2D output using a uniform distribution *p(*\ |theta|,\ |phi|\ *)* = 1.0. Figure 2 shows the result of such a cross-check.
 
-.. image:: img/image071.jpg
+.. image:: img/olddocs/image071.jpg
 
 *Figure 2: Comparison of the intensity for uniformly distributed core-shell cylinders calculated from our 2D model and*
 *the intensity from the NIST SANS analysis software.* The parameters used were: *Scale* = 1.0, *Radius* = 20 |Ang|,
 *Thickness* = 10 |Ang|, *Length* =400 |Ang|, *Core_sld* = 1e-6 |Ang^-2|, *Shell_sld* = 4e-6 |Ang^-2|,
 *Solvent_sld* = 1e-6 |Ang^-2|, and *Background* = 0.0 |cm^-1|.
 
-.. image:: img/image061.jpg
+.. image:: img/olddocs/image061.jpg
 
 *Figure. Definition of the angles for oriented core-shell cylinders.*
 
-.. image:: img/image062.jpg
+.. image:: img/olddocs/image062.jpg
 
 *Figure. Examples of the angles for oriented pp against the detector plane.*
 
@@ -1544,17 +1544,17 @@ The angles |theta| and |phi| define the orientation of the axis of the cylinder.
 orientation of the major axis of the ellipse with respect to the vector *Q*\ . A gaussian polydispersity can be added
 to any of the orientation angles, and also for the minor radius and the ratio of the ellipse radii.
 
-.. image:: img/image098.gif
+.. image:: img/olddocs/image098.gif
 
 *Figure.* *a* = *r_minor* and |nu|\ :sub:`n` = *r_ratio* (i.e., *r_major* / *r_minor*).
 
 The function calculated is
 
-.. image:: img/image099.PNG
+.. image:: img/olddocs/image099.PNG
 
 with the functions
 
-.. image:: img/image100.PNG
+.. image:: img/olddocs/image100.PNG
 
 and the angle |bigpsi| is defined as the orientation of the major axis of the ellipse with respect to the vector *q*\ .
 
@@ -1573,11 +1573,11 @@ For example, |bigpsi| = 0 when the *r_minor* axis is parallel to the *x*\ -axis 
 
 All angle parameters are valid and given only for 2D calculation; ie, an oriented system.
 
-.. image:: img/image101.jpg
+.. image:: img/olddocs/image101.jpg
 
 *Figure. Definition of angles for 2D*
 
-.. image:: img/image062.jpg
+.. image:: img/olddocs/image062.jpg
 
 *Figure. Examples of the angles for oriented elliptical cylinders against the detector plane.*
 
@@ -1596,7 +1596,7 @@ sldSolv         |Ang^-2|  1e-06
 background      |cm^-1|   0
 ==============  ========  =============
 
-.. image:: img/image102.jpg
+.. image:: img/olddocs/image102.jpg
 
 *Figure. 1D plot using the default values (w/1000 data point).*
 
@@ -1607,14 +1607,14 @@ the 2D calculation over all possible angles. The figure below shows the comparis
 averaged 2D values while the line represents the result of the 1D calculation (for the 2D averaging, values of 76, 180,
 and 76 degrees are taken for the angles of |theta|, |phi|, and |bigpsi| respectively).
 
-.. image:: img/image103.gif
+.. image:: img/olddocs/image103.gif
 
 *Figure. Comparison between 1D and averaged 2D.*
 
 In the 2D average, more binning in the angle |phi| is necessary to get the proper result. The following figure shows
 the results of the averaging by varying the number of angular bins.
 
-.. image:: img/image104.gif
+.. image:: img/olddocs/image104.gif
 
 *Figure. The intensities averaged from 2D over different numbers of bins and angles.*
 
@@ -1638,11 +1638,11 @@ where the averaging < > is applied over all orientations for 1D.
 
 The 2D scattering intensity is the same as 1D, regardless of the orientation of the *q* vector which is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 *2.1.19.1. Definition*
 
-.. image:: img/image075.jpg
+.. image:: img/olddocs/image075.jpg
 
 The chain of contour length, *L*, (the total length) can be described as a chain of some number of locally stiff
 segments of length *l*\ :sub:`p`\ , the persistence length (the length along the cylinder over which the flexible
@@ -1665,7 +1665,7 @@ background      |cm^-1|   0.01
 kuhn_length     |Ang|     100
 ==============  ========  =============
 
-.. image:: img/image076.jpg
+.. image:: img/olddocs/image076.jpg
 
 *Figure. 1D plot using the default values (w/1000 data point).*
 
@@ -1720,7 +1720,7 @@ in the reference below. Most notably
 
 - The scattering function is negative for a range of parameter values and q-values that are experimentally accessible. A correction function has been added to give the proper behavior.
 
-.. image:: img/image077.jpg
+.. image:: img/olddocs/image077.jpg
 
 The chain of contour length, *L*, (the total length) can be described as a chain of some number of locally stiff
 segments of length *l*\ :sub:`p`\ , the persistence length (the length along the cylinder over which the flexible
@@ -1744,7 +1744,7 @@ unit volume, *I(q)* = |phi| \* *P(q)*.
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image008.PNG
+.. image:: img/olddocs/image008.PNG
 
 This example dataset is produced by running the Macro FlexCylEllipXModel, using 200 data points, *qmin* = 0.001 |Ang^-1|,
 *qmax* = 0.7 |Ang^-1| and the default values below
@@ -1762,7 +1762,7 @@ sldCyl          |Ang^-2|  1e-6
 sldSolv         |Ang^-2|  6.3e-6
 ==============  ========  =============
 
-.. image:: img/image078.jpg
+.. image:: img/olddocs/image078.jpg
 
 *Figure. 1D plot using the default values (w/200 data points).*
 
@@ -1789,7 +1789,7 @@ This model is a more general case of core-shell cylinder model (see above and re
 of the shell are separated into a face-shell and a rim-shell so that users can set different values of the thicknesses
 and SLDs.
 
-.. image:: img/image240.png
+.. image:: img/olddocs/image240.png
 
 *(Graphic from DOI: 10.1039/C0NP00002G)*
 
@@ -1817,15 +1817,15 @@ The output of the 1D scattering intensity function for randomly oriented cylinde
 The *axis_theta* and *axis_phi* parameters are not used for the 1D output. Our implementation of the scattering kernel
 and the 1D scattering intensity use the c-library from NIST.
 
-.. image:: img/cscylbicelle_pic.jpg
+.. image:: img/olddocs/cscylbicelle_pic.jpg
 
 *Figure. 1D plot using the default values (w/200 data point).*
 
-.. image:: img/image061.jpg
+.. image:: img/olddocs/image061.jpg
 
 *Figure. Definition of the angles for the oriented CoreShellBicelleModel.*
 
-.. image:: img/image062.jpg
+.. image:: img/olddocs/image062.jpg
 
 *Figure. Examples of the angles for oriented pp against the detector plane.*
 
@@ -1851,7 +1851,7 @@ The returned value is scaled to units of |cm^-1|\ |sr^-1|, absolute scale.
 
 The barbell geometry is defined as
 
-.. image:: img/image105.jpg
+.. image:: img/olddocs/image105.jpg
 
 where *r* is the radius of the cylinder. All other parameters are as defined in the diagram.
 
@@ -1862,11 +1862,11 @@ Since the end cap radius
 
 The scattered intensity *I(q)* is calculated as
 
-.. image:: img/image106.PNG
+.. image:: img/olddocs/image106.PNG
 
 where the amplitude *A(q)* is given as
 
-.. image:: img/image107.PNG
+.. image:: img/olddocs/image107.PNG
 
 The < > brackets denote an average of the structure over all orientations. <*A* :sup:`2`\ *(q)*> is then the form
 factor, *P(q)*. The scale factor is equivalent to the volume fraction of cylinders, each of volume, *V*. Contrast is
@@ -1874,12 +1874,12 @@ the difference of scattering length densities of the cylinder and the surroundin
 
 The volume of the barbell is
 
-.. image:: img/image108.jpg
+.. image:: img/olddocs/image108.jpg
 
 
 and its radius-of-gyration is
 
-.. image:: img/image109.jpg
+.. image:: img/olddocs/image109.jpg
 
 **The requirement that** *R* >= *r* **is not enforced in the model!** It is up to you to restrict this during analysis.
 
@@ -1898,22 +1898,22 @@ sld_solv        |Ang^-2|  6.3e-006
 background      |cm^-1|   0
 ==============  ========  =============
 
-.. image:: img/image110.jpg
+.. image:: img/olddocs/image110.jpg
 
 *Figure. 1D plot using the default values (w/256 data point).*
 
 For 2D data: The 2D scattering intensity is calculated similar to the 2D cylinder model. For example, for
 |theta| = 45 deg and |phi| = 0 deg with default values for other parameters
 
-.. image:: img/image111.jpg
+.. image:: img/olddocs/image111.jpg
 
 *Figure. 2D plot (w/(256X265) data points).*
 
-.. image:: img/image061.jpg
+.. image:: img/olddocs/image061.jpg
 
 *Figure. Examples of the angles for oriented pp against the detector plane.*
 
-.. image:: img/image062.jpg
+.. image:: img/olddocs/image062.jpg
 
 Figure. Definition of the angles for oriented 2D barbells.
 
@@ -1939,31 +1939,31 @@ function is HIGHLY oscillatory, especially around the *q*-values that correspond
 
 The 2D scattering intensity is the same as 1D, regardless of the orientation of the *q* vector which is defined as
 
-.. image:: img/image008.PNG
+.. image:: img/olddocs/image008.PNG
 
 The returned value is in units of |cm^-1| |sr^-1|, on absolute scale.
 
 *2.1.23.1 Definition*
 
-.. image:: img/image079.gif
+.. image:: img/olddocs/image079.gif
 
 The scattering intensity *I(q)* is
 
-.. image:: img/image081.PNG
+.. image:: img/olddocs/image081.PNG
 
 where the contrast
 
-.. image:: img/image082.PNG
+.. image:: img/olddocs/image082.PNG
 
 and *N* is the number of discs per unit volume, |alpha| is the angle between the axis of the disc and *q*, and *Vt*
 and *Vc* are the total volume and the core volume of a single disc, respectively.
 
-.. image:: img/image083.PNG
+.. image:: img/olddocs/image083.PNG
 
 where *d* = thickness of the layer (*layer_thick*), 2\ *h* = core thickness (*core_thick*), and *R* = radius of the
 disc (*radius*).
 
-.. image:: img/image084.PNG
+.. image:: img/olddocs/image084.PNG
 
 where *n* = the total number of the disc stacked (*n_stacking*), *D* = the next neighbor center-to-center distance
 (*d-spacing*), and |sigma|\ D= the Gaussian standard deviation of the d-spacing (*sigma_d*).
@@ -1989,15 +1989,15 @@ sigma_d         |Ang|     0
 solvent_sld     |Ang^-2|  5e-06
 ==============  ========  =============
 
-.. image:: img/image085.jpg
+.. image:: img/olddocs/image085.jpg
 
 *Figure. 1D plot using the default values (w/1000 data point).*
 
-.. image:: img/image086.jpg
+.. image:: img/olddocs/image086.jpg
 
 *Figure. Examples of the angles for oriented stackeddisks against the detector plane.*
 
-.. image:: img/image062.jpg
+.. image:: img/olddocs/image062.jpg
 
 *Figure. Examples of the angles for oriented pp against the detector plane.*
 
@@ -2020,7 +2020,7 @@ J S Higgins and H C Benoit, *Polymers and Neutron Scattering*, Clarendon, Oxford
 
 This model provides the form factor, *P(q)*, for a 'pringle' or 'saddle-shaped' object (a hyperbolic paraboloid).
 
-.. image:: img/image241.png
+.. image:: img/olddocs/image241.png
 
 *(Graphic from Matt Henderson, matt@matthen.com)*
 
@@ -2028,11 +2028,11 @@ The returned value is in units of |cm^-1|, on absolute scale.
 
 The form factor calculated is
 
-.. image:: img/pringle_eqn_1.jpg
+.. image:: img/olddocs/pringle_eqn_1.jpg
 
 where
 
-.. image:: img/pringle_eqn_2.jpg
+.. image:: img/olddocs/pringle_eqn_2.jpg
 
 The parameters of the model and a plot comparing the pringle model with the equivalent cylinder are shown below.
 
@@ -2049,7 +2049,7 @@ sld_solvent     |Ang^-2|  6.3e-06
 thickness       |Ang|     10
 ==============  ========  =============
 
-.. image:: img/pringle-vs-cylinder.png
+.. image:: img/olddocs/pringle-vs-cylinder.png
 
 *Figure. 1D plot using the default values (w/150 data point).*
 
@@ -2070,15 +2070,15 @@ The form factor is normalized by the particle volume.
 
 The output of the 2D scattering intensity function for oriented ellipsoids is given by (Feigin, 1987)
 
-.. image:: img/image059.PNG
+.. image:: img/olddocs/image059.PNG
 
 where
 
-.. image:: img/image119.PNG
+.. image:: img/olddocs/image119.PNG
 
 and
 
-.. image:: img/image120.PNG
+.. image:: img/olddocs/image120.PNG
 
 |alpha| is the angle between the axis of the ellipsoid and the *q*\ -vector, *V* is the volume of the ellipsoid, *Ra*
 is the radius along the rotational axis of the ellipsoid, *Rb* is the radius perpendicular to the rotational axis of
@@ -2110,12 +2110,12 @@ axis_phi          degree    0.0
 The output of the 1D scattering intensity function for randomly oriented ellipsoids is then given by the equation
 above.
 
-.. image:: img/image121.jpg
+.. image:: img/olddocs/image121.jpg
 
 The *axis_theta* and *axis_phi* parameters are not used for the 1D output. Our implementation of the scattering
 kernel and the 1D scattering intensity use the c-library from NIST.
 
-.. image:: img/image122.jpg
+.. image:: img/olddocs/image122.jpg
 
 *Figure. The angles for oriented ellipsoid.*
 
@@ -2125,7 +2125,7 @@ Validation of our code was done by comparing the output of the 1D model to the o
 NIST (Kline, 2006). Figure 1 below shows a comparison of the 1D output of our model and the output of the NIST
 software.
 
-.. image:: img/image123.jpg
+.. image:: img/olddocs/image123.jpg
 
 *Figure 1: Comparison of the SasView scattering intensity for an ellipsoid with the output of the NIST SANS analysis*
 *software.* The parameters were set to: *Scale* = 1.0, *Radius_a* = 20, *Radius_b* = 400, *Contrast* = 3e-6 |Ang^-2|,
@@ -2136,7 +2136,7 @@ to compare the implementation of the intensity for fully oriented ellipsoids, we
 our 2D output using a uniform distribution *p(*\ |theta|,\ |phi|\ *)* = 1.0. Figure 2 shows the result of such a
 cross-check.
 
-.. image:: img/image124.jpg
+.. image:: img/olddocs/image124.jpg
 
 *Figure 2: Comparison of the intensity for uniformly distributed ellipsoids calculated from our 2D model and the*
 *intensity from the NIST SANS analysis software.* The parameters used were: *Scale* = 1.0, *Radius_a* = 20,
@@ -2168,7 +2168,7 @@ the volume of the cylinder.
 where the volume *V* = (4/3)\ |pi| (*r*\ :sub:`maj` *r*\ :sub:`min`\ :sup:`2`) and the averaging < > is applied over
 all orientations for 1D.
 
-.. image:: img/image125.gif
+.. image:: img/olddocs/image125.gif
 
 The returned value is in units of |cm^-1|, on absolute scale.
 
@@ -2176,7 +2176,7 @@ The returned value is in units of |cm^-1|, on absolute scale.
 
 The form factor calculated is
 
-.. image:: img/image126.PNG
+.. image:: img/olddocs/image126.PNG
 
 To provide easy access to the orientation of the core-shell ellipsoid, we define the axis of the solid ellipsoid using
 two angles |theta| and |phi|\ . These angles are defined on Figure 2 of the CylinderModel_. The contrast is defined as
@@ -2202,11 +2202,11 @@ sld_core        |Ang^-2|  2e-06
 sld_shell       |Ang^-2|  1e-06
 ==============  ========  =============
 
-.. image:: img/image127.jpg
+.. image:: img/olddocs/image127.jpg
 
 *Figure. 1D plot using the default values (w/1000 data point).*
 
-.. image:: img/image122.jpg
+.. image:: img/olddocs/image122.jpg
 
 *Figure. The angles for oriented CoreShellEllipsoid.*
 
@@ -2233,7 +2233,7 @@ CoreShellEllipsoidModel.
 
 *2.1.27.1. Definition*
 
-.. image:: img/image125.gif
+.. image:: img/olddocs/image125.gif
 
 The geometric parameters of this model are
 
@@ -2300,7 +2300,7 @@ i.e., *Ra* =< *Rb* =< *Rc*\ . **Users should maintain this inequality for all ca
 
 where the volume *V* = (4/3)\ |pi| (*Ra* *Rb* *Rc*), and the averaging < > is applied over all orientations for 1D.
 
-.. image:: img/image128.jpg
+.. image:: img/olddocs/image128.jpg
 
 The returned value is in units of |cm^-1|, on absolute scale.
 
@@ -2308,7 +2308,7 @@ The returned value is in units of |cm^-1|, on absolute scale.
 
 The form factor calculated is
 
-.. image:: img/image129.PNG
+.. image:: img/olddocs/image129.PNG
 
 To provide easy access to the orientation of the triaxial ellipsoid, we define the axis of the cylinder using the
 angles |theta|, |phi| and |bigpsi|. These angles are defined on Figure 2 of the CylinderModel_. The angle |bigpsi| is
@@ -2336,7 +2336,7 @@ sldEll          |Ang^-2|  1.0e-06
 sldSolv         |Ang^-2|  6.3e-06
 ==============  ========  =============
 
-.. image:: img/image130.jpg
+.. image:: img/olddocs/image130.jpg
 
 *Figure. 1D plot using the default values (w/1000 data point).*
 
@@ -2347,11 +2347,11 @@ Validation of our code was done by comparing the output of the 1D calculation to
 2D while the line represents the result of 1D calculation (for 2D averaging, 76, 180, and 76 points are taken for the
 angles of |theta|, |phi|, and |psi| respectively).
 
-.. image:: img/image131.gif
+.. image:: img/olddocs/image131.gif
 
 *Figure. Comparison between 1D and averaged 2D.*
 
-.. image:: img/image132.jpg
+.. image:: img/olddocs/image132.jpg
 
 *Figure. The angles for oriented ellipsoid.*
 
@@ -2376,17 +2376,17 @@ distribution in solution are assumed. Polydispersity in the bilayer thickness ca
 
 The scattering intensity *I(q)* is
 
-.. image:: img/image133.PNG
+.. image:: img/olddocs/image133.PNG
 
 The form factor is
 
-.. image:: img/image134.PNG
+.. image:: img/olddocs/image134.PNG
 
 where |delta| = bilayer thickness.
 
 The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 The returned value is in units of |cm^-1|, on absolute scale. In the parameters, *sld_bi* = SLD of the bilayer,
 *sld_sol* = SLD of the solvent, and *bi_thick* = thickness of the bilayer.
@@ -2401,7 +2401,7 @@ sld_sol         |Ang^-2|  6e-06
 scale           None      1
 ==============  ========  =============
 
-.. image:: img/image135.jpg
+.. image:: img/olddocs/image135.jpg
 
 *Figure. 1D plot using the default values (w/1000 data point).*
 
@@ -2427,18 +2427,18 @@ solution are assumed. The SLD of the head region is taken to be different from t
 
 The scattering intensity *I(q)* is
 
-.. image:: img/image136.PNG
+.. image:: img/olddocs/image136.PNG
 
 The form factor is
 
-.. image:: img/image137.jpg
+.. image:: img/olddocs/image137.jpg
 
 where |delta|\ T = tail length (or *t_length*), |delta|\ H = head thickness (or *h_thickness*),
 |drho|\ H = SLD(headgroup) - SLD(solvent), and |drho|\ T = SLD(tail) - SLD(solvent). The total thickness is 2(H+T).
 
 The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 The returned value is in units of |cm^-1|, on absolute scale. In the parameters, *sld_tail* = SLD of the tail group,
 and *sld_head* = SLD of the head group.
@@ -2455,7 +2455,7 @@ t_length        |Ang|     15
 sld_tail        |Ang^-2|  0
 ==============  ========  =============
 
-.. image:: img/image138.jpg
+.. image:: img/olddocs/image138.jpg
 
 *Figure. 1D plot using the default values (w/1000 data point).*
 
@@ -2483,19 +2483,19 @@ distribution in solution are assumed.
 
 The scattering intensity *I(q)* is
 
-.. image:: img/image139.PNG
+.. image:: img/olddocs/image139.PNG
 
 The form factor is
 
-.. image:: img/image134.PNG
+.. image:: img/olddocs/image134.PNG
 
 and the structure factor is
 
-.. image:: img/image140.PNG
+.. image:: img/olddocs/image140.PNG
 
 where
 
-.. image:: img/image141.PNG
+.. image:: img/olddocs/image141.PNG
 
 Here *d* = (repeat) spacing, |delta| = bilayer thickness, the contrast |drho| = SLD(headgroup) - SLD(solvent),
 K = smectic bending elasticity, B = compression modulus, and N = number of lamellar plates (*n_plates*).
@@ -2506,7 +2506,7 @@ handled accurately (see the original reference below for more details).
 
 The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 The returned value is in units of |cm^-1|, on absolute scale.
 
@@ -2522,7 +2522,7 @@ spacing         |Ang|     400
 caille          |Ang^-2|  0.1
 ==============  ========  =============
 
-.. image:: img/image142.jpg
+.. image:: img/olddocs/image142.jpg
 
 *Figure. 1D plot using the default values (w/6000 data point).*
 
@@ -2549,19 +2549,19 @@ region.
 
 The scattering intensity *I(q)* is
 
-.. image:: img/image139.PNG
+.. image:: img/olddocs/image139.PNG
 
 The form factor is
 
-.. image:: img/image143.PNG
+.. image:: img/olddocs/image143.PNG
 
 The structure factor is
 
-.. image:: img/image140.PNG
+.. image:: img/olddocs/image140.PNG
 
 where
 
-.. image:: img/image141.PNG
+.. image:: img/olddocs/image141.PNG
 
 where |delta|\ T = tail length (or *t_length*), |delta|\ H = head thickness (or *h_thickness*),
 |drho|\ H = SLD(headgroup) - SLD(solvent), and |drho|\ T = SLD(tail) - SLD(headgroup).
@@ -2574,7 +2574,7 @@ handled accurately (see the original reference below for more details).
 
 The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 The returned value is in units of |cm^-1|, on absolute scale. In the parameters, *sld_tail* = SLD of the tail group,
 *sld_head* = SLD of the head group, and *sld_solvent* = SLD of the solvent.
@@ -2594,7 +2594,7 @@ spacing         |Ang|     40
 caille          |Ang^-2|  0.001
 ==============  ========  =============
 
-.. image:: img/image144.jpg
+.. image:: img/olddocs/image144.jpg
 
 *Figure. 1D plot using the default values (w/6000 data point).*
 
@@ -2621,11 +2621,11 @@ characterized by a Gaussian polydispersity. **This model can be used for large m
 
 The scattering intensity *I(q)* is calculated as
 
-.. image:: img/image145.jpg
+.. image:: img/olddocs/image145.jpg
 
 The form factor of the bilayer is approximated as the cross section of an infinite, planar bilayer of thickness *t*
 
-.. image:: img/image146.jpg
+.. image:: img/olddocs/image146.jpg
 
 Here, the scale factor is used instead of the mass per area of the bilayer (*G*). The scale factor is the volume
 fraction of the material in the bilayer, *not* the total excluded volume of the paracrystal. *Z*\ :sub:`N`\ *(q)*
@@ -2634,11 +2634,11 @@ from the Bergstrom reference below.
 
 Non-integer numbers of stacks are calculated as a linear combination of the lower and higher values
 
-.. image:: img/image147.jpg
+.. image:: img/olddocs/image147.jpg
 
 The 2D scattering intensity is the same as 1D, regardless of the orientation of the *q* vector which is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 The parameters of the model are *Nlayers* = no. of layers, and *pd_spacing* = polydispersity of spacing.
 
@@ -2655,7 +2655,7 @@ spacing         |Ang|     250
 thickness       |Ang|     33
 ==============  ========  =============
 
-.. image:: img/image148.jpg
+.. image:: img/olddocs/image148.jpg
 
 *Figure. 1D plot using the default values above (w/20000 data point).*
 
@@ -2682,7 +2682,7 @@ The returned value is scaled to units of |cm^-1|\ |sr^-1|, absolute scale.
 
 The scattering intensity *I(q)* is calculated as
 
-.. image:: img/image149.jpg
+.. image:: img/olddocs/image149.jpg
 
 where *scale* is the volume fraction of spheres, *Vp* is the volume of the primary particle, *V(lattice)* is a volume
 correction for the crystal structure, *P(q)* is the form factor of the sphere (normalized), and *Z(q)* is the
@@ -2694,26 +2694,26 @@ Equation (16) of the 1987 reference is used to calculate *Z(q)*, using equations
 The lattice correction (the occupied volume of the lattice) for a simple cubic structure of particles of radius *R*
 and nearest neighbor separation *D* is
 
-.. image:: img/image150.jpg
+.. image:: img/olddocs/image150.jpg
 
 The distortion factor (one standard deviation) of the paracrystal is included in the calculation of *Z(q)*
 
-.. image:: img/image151.jpg
+.. image:: img/olddocs/image151.jpg
 
 where *g* is a fractional distortion based on the nearest neighbor distance.
 
 The simple cubic lattice is
 
-.. image:: img/image152.jpg
+.. image:: img/olddocs/image152.jpg
 
 For a crystal, diffraction peaks appear at reduced *q*\ -values given by
 
-.. image:: img/image153.jpg
+.. image:: img/olddocs/image153.jpg
 
 where for a simple cubic lattice any *h*\ , *k*\ , *l* are allowed and none are forbidden. Thus the peak positions
 correspond to (just the first 5)
 
-.. image:: img/image154.jpg
+.. image:: img/olddocs/image154.jpg
 
 **NB: The calculation of** *Z(q)* **is a double numerical integral that must be carried out with a high density of**
 **points to properly capture the sharp peaks of the paracrystalline scattering.** So be warned that the calculation is
@@ -2735,7 +2735,7 @@ d_factor        None      0.06
 This example dataset is produced using 200 data points, *qmin* = 0.01 |Ang^-1|, *qmax* = 0.1 |Ang^-1| and the above
 default values.
 
-.. image:: img/image155.jpg
+.. image:: img/olddocs/image155.jpg
 
 *Figure. 1D plot in the linear scale using the default values (w/200 data point).*
 
@@ -2743,9 +2743,9 @@ The 2D (Anisotropic model) is based on the reference below where *I(q)* is appro
 scattering pattern for 2D may not be accurate. Note that we are not responsible for any incorrectness of the 2D model
 computation.
 
-.. image:: img/image156.jpg
+.. image:: img/olddocs/image156.jpg
 
-.. image:: img/image157.jpg
+.. image:: img/olddocs/image157.jpg
 
 *Figure. 2D plot using the default values (w/200X200 pixels).*
 
@@ -2773,7 +2773,7 @@ The returned value is scaled to units of |cm^-1|\ |sr^-1|, absolute scale.
 
 The scattering intensity *I(q)* is calculated as
 
-.. image:: img/image158.jpg
+.. image:: img/olddocs/image158.jpg
 
 where *scale* is the volume fraction of spheres, *Vp* is the volume of the primary particle, *V(lattice)* is a volume
 correction for the crystal structure, *P(q)* is the form factor of the sphere (normalized), and *Z(q)* is the
@@ -2785,26 +2785,26 @@ Equation (1) of the 1990 reference is used to calculate *Z(q)*, using equations 
 The lattice correction (the occupied volume of the lattice) for a face-centered cubic structure of particles of radius
 *R* and nearest neighbor separation *D* is
 
-.. image:: img/image159.jpg
+.. image:: img/olddocs/image159.jpg
 
 The distortion factor (one standard deviation) of the paracrystal is included in the calculation of *Z(q)*
 
-.. image:: img/image160.jpg
+.. image:: img/olddocs/image160.jpg
 
 where *g* is a fractional distortion based on the nearest neighbor distance.
 
 The face-centered cubic lattice is
 
-.. image:: img/image161.jpg
+.. image:: img/olddocs/image161.jpg
 
 For a crystal, diffraction peaks appear at reduced q-values given by
 
-.. image:: img/image162.jpg
+.. image:: img/olddocs/image162.jpg
 
 where for a face-centered cubic lattice *h*\ , *k*\ , *l* all odd or all even are allowed and reflections where
 *h*\ , *k*\ , *l* are mixed odd/even are forbidden. Thus the peak positions correspond to (just the first 5)
 
-.. image:: img/image163.jpg
+.. image:: img/olddocs/image163.jpg
 
 **NB: The calculation of** *Z(q)* **is a double numerical integral that must be carried out with a high density of**
 **points to properly capture the sharp peaks of the paracrystalline scattering.** So be warned that the calculation is
@@ -2826,7 +2826,7 @@ d_factor        None      0.06
 This example dataset is produced using 200 data points, *qmin* = 0.01 |Ang^-1|, *qmax* = 0.1 |Ang^-1| and the above
 default values.
 
-.. image:: img/image164.jpg
+.. image:: img/olddocs/image164.jpg
 
 *Figure. 1D plot in the linear scale using the default values (w/200 data point).*
 
@@ -2834,9 +2834,9 @@ The 2D (Anisotropic model) is based on the reference below where *I(q)* is appro
 scattering pattern for 2D may not be accurate. Note that we are not responsible for any incorrectness of the 2D model
 computation.
 
-.. image:: img/image165.gif
+.. image:: img/olddocs/image165.gif
 
-.. image:: img/image166.jpg
+.. image:: img/olddocs/image166.jpg
 
 *Figure. 2D plot using the default values (w/200X200 pixels).*
 
@@ -2864,7 +2864,7 @@ The returned value is scaled to units of |cm^-1|\ |sr^-1|, absolute scale.
 
 The scattering intensity *I(q)* is calculated as
 
-.. image:: img/image167.jpg
+.. image:: img/olddocs/image167.jpg
 
 where *scale* is the volume fraction of spheres, *Vp* is the volume of the primary particle, *V(lattice)* is a volume
 correction for the crystal structure, *P(q)* is the form factor of the sphere (normalized), and *Z(q)* is the
@@ -2876,26 +2876,26 @@ Equation (1) of the 1990 reference is used to calculate *Z(q)*, using equations 
 The lattice correction (the occupied volume of the lattice) for a body-centered cubic structure of particles of radius
 *R* and nearest neighbor separation *D* is
 
-.. image:: img/image159.jpg
+.. image:: img/olddocs/image159.jpg
 
 The distortion factor (one standard deviation) of the paracrystal is included in the calculation of *Z(q)*
 
-.. image:: img/image160.jpg
+.. image:: img/olddocs/image160.jpg
 
 where *g* is a fractional distortion based on the nearest neighbor distance.
 
 The body-centered cubic lattice is
 
-.. image:: img/image168.jpg
+.. image:: img/olddocs/image168.jpg
 
 For a crystal, diffraction peaks appear at reduced q-values given by
 
-.. image:: img/image162.jpg
+.. image:: img/olddocs/image162.jpg
 
 where for a body-centered cubic lattice, only reflections where (\ *h* + *k* + *l*\ ) = even are allowed and
 reflections where (\ *h* + *k* + *l*\ ) = odd are forbidden. Thus the peak positions correspond to (just the first 5)
 
-.. image:: img/image169.jpg
+.. image:: img/olddocs/image169.jpg
 
 **NB: The calculation of** *Z(q)* **is a double numerical integral that must be carried out with a high density of**
 **points to properly capture the sharp peaks of the paracrystalline scattering.** So be warned that the calculation is
@@ -2917,7 +2917,7 @@ d_factor        None      0.06
 This example dataset is produced using 200 data points, *qmin* = 0.001 |Ang^-1|, *qmax* = 0.1 |Ang^-1| and the above
 default values.
 
-.. image:: img/image170.jpg
+.. image:: img/olddocs/image170.jpg
 
 *Figure. 1D plot in the linear scale using the default values (w/200 data point).*
 
@@ -2925,9 +2925,9 @@ The 2D (Anisotropic model) is based on the reference below where *I(q)* is appro
 scattering pattern for 2D may not be accurate. Note that we are not responsible for any incorrectness of the 2D model
 computation.
 
-.. image:: img/image165.gif
+.. image:: img/olddocs/image165.gif
 
-.. image:: img/image171.jpg
+.. image:: img/olddocs/image171.jpg
 
 *Figure. 2D plot using the default values (w/200X200 pixels).*
 
@@ -2954,18 +2954,18 @@ where the volume *V* = *A B C* and the averaging < > is applied over all orienta
 
 For information about polarised and magnetic scattering, click here_.
 
-.. image:: img/image087.jpg
+.. image:: img/olddocs/image087.jpg
 
 *2.1.37.1. Definition*
 
 **The edge of the solid must satisfy the condition that** *A* < *B*. Then, assuming *a* = *A* / *B* < 1,
 *b* = *B* / *B* = 1, and *c* = *C* / *B* > 1, the form factor is
 
-.. image:: img/image088.PNG
+.. image:: img/olddocs/image088.PNG
 
 and the contrast is defined as
 
-.. image:: img/image089.PNG
+.. image:: img/olddocs/image089.PNG
 
 The scattering intensity per unit volume is returned in units of |cm^-1|; ie, *I(q)* = |phi| *P(q)*\ .
 
@@ -2978,11 +2978,11 @@ To provide easy access to the orientation of the parallelepiped, we define the a
 rotational angle around the *long_c* axis against the *q* plane. For example, |bigpsi| = 0 when the *short_b* axis is
 parallel to the *x*-axis of the detector.
 
-.. image:: img/image090.jpg
+.. image:: img/olddocs/image090.jpg
 
 *Figure. Definition of angles for 2D*.
 
-.. image:: img/image091.jpg
+.. image:: img/olddocs/image091.jpg
 
 *Figure. Examples of the angles for oriented pp against the detector plane.*
 
@@ -2997,7 +2997,7 @@ short_b         |Ang|     75
 scale           None      1
 ==============  ========  =============
 
-.. image:: img/image092.jpg
+.. image:: img/olddocs/image092.jpg
 
 *Figure. 1D plot using the default values (w/1000 data point).*
 
@@ -3008,7 +3008,7 @@ a 2D calculation over all possible angles. The Figure below shows the comparison
 2D while the line represents the result of the 1D calculation (for the averaging, 76, 180, 76 points are taken for the
 angles of |theta|, |phi|, and |psi| respectively).
 
-.. image:: img/image093.gif
+.. image:: img/olddocs/image093.gif
 
 *Figure. Comparison between 1D and averaged 2D.*
 
@@ -3042,16 +3042,16 @@ An instrument resolution smeared version of the model is also provided.
 The function calculated is the form factor of the rectangular solid below. The core of the solid is defined by the
 dimensions *A*, *B*, *C* such that *A* < *B* < *C*.
 
-.. image:: img/image087.jpg
+.. image:: img/olddocs/image087.jpg
 
 There are rectangular "slabs" of thickness *tA* that add to the *A* dimension (on the *BC* faces). There are similar
 slabs on the *AC* (= *tB*) and *AB* (= *tC*) faces. The projection in the *AB* plane is then
 
-.. image:: img/image094.jpg
+.. image:: img/olddocs/image094.jpg
 
 The volume of the solid is
 
-.. image:: img/image095.PNG
+.. image:: img/olddocs/image095.PNG
 
 **meaning that there are "gaps" at the corners of the solid.**
 
@@ -3083,11 +3083,11 @@ To provide easy access to the orientation of the parallelepiped, we define the a
 rotational angle around the *long_c* axis against the *q* plane. For example, |bigpsi| = 0 when the *short_b* axis is
 parallel to the *x*-axis of the detector.
 
-.. image:: img/image090.jpg
+.. image:: img/olddocs/image090.jpg
 
 *Figure. Definition of angles for 2D*.
 
-.. image:: img/image091.jpg
+.. image:: img/olddocs/image091.jpg
 
 *Figure. Examples of the angles for oriented cspp against the detector plane.*
 
@@ -3112,11 +3112,11 @@ midB            |Ang|     75
 scale           None      1
 ==============  ========  =============
 
-.. image:: img/image096.jpg
+.. image:: img/olddocs/image096.jpg
 
 *Figure. 1D plot using the default values (w/256 data points).*
 
-.. image:: img/image097.jpg
+.. image:: img/olddocs/image097.jpg
 
 *Figure. 2D plot using the default values (w/(256X265) data points).*
 
@@ -3397,11 +3397,11 @@ The Debye model is a form factor for a linear polymer chain obeying Gaussian sta
 In addition to the radius-of-gyration, *Rg*, a scale factor *scale*, and a constant background term are included in the
 calculation. **NB: No size polydispersity is included in this model, use the** Poly_GaussCoil_ **Model instead**
 
-.. image:: img/image172.PNG
+.. image:: img/olddocs/image172.PNG
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -3411,7 +3411,7 @@ rg              |Ang|     50.0
 background      |cm^-1|   0.0
 ==============  ========  =============
 
-.. image:: img/image173.jpg
+.. image:: img/olddocs/image173.jpg
 
 *Figure. 1D plot using the default values (w/200 data point).*
 
@@ -3438,13 +3438,13 @@ The returned value is scaled to units of |cm^-1|, absolute scale.
 
 The scattering intensity *I(q)* is calculated as
 
-.. image:: img/image174.jpg
+.. image:: img/olddocs/image174.jpg
 
 Here the peak position is related to the d-spacing as *Q0* = 2|pi| / *d0*.
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 ==================  ========  =============
 Parameter name      Units     Default value
@@ -3458,7 +3458,7 @@ exponent_l (=m)     None      3
 Background (=B)     |cm^-1|   0.1
 ==================  ========  =============
 
-.. image:: img/image175.jpg
+.. image:: img/olddocs/image175.jpg
 
 *Figure. 1D plot using the default values (w/200 data point).*
 
@@ -3482,7 +3482,7 @@ The returned value is scaled to units of |cm^-1|, absolute scale.
 
 The scattering intensity *I(q)* is calculated as
 
-.. image:: img/image176.jpg
+.. image:: img/olddocs/image176.jpg
 
 The first term describes Porod scattering from clusters (exponent = n) and the second term is a Lorentzian function
 describing scattering from polymer chains (exponent = *m*). This second term characterizes the polymer/solvent
@@ -3493,7 +3493,7 @@ function. 
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 ====================  ========  =============
 Parameter name        Units     Default value
@@ -3506,7 +3506,7 @@ exponent_l (=m)       None      3
 Background (=B)       |cm^-1|   0.1
 ====================  ========  =============
 
-.. image:: img/image177.jpg
+.. image:: img/olddocs/image177.jpg
 
 *Figure. 1D plot using the default values (w/500 data points).*
 
@@ -3527,13 +3527,13 @@ B Hammouda, D L Ho and S R Kline, *Insight into Clustering in Poly(ethylene oxid
 
 The Ornstein-Zernicke model is defined by
 
-.. image:: img/image178.PNG
+.. image:: img/olddocs/image178.PNG
 
 The parameter *L* is the screening length.
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -3543,7 +3543,7 @@ length          |Ang|     50.0
 background      |cm^-1|   0.0
 ==============  ========  =============
 
-.. image:: img/image179.jpg
+.. image:: img/olddocs/image179.jpg
 
 * Figure. 1D plot using the default values (w/200 data point).*
 
@@ -3566,13 +3566,13 @@ The DAB model is ostensibly a development of the earlier Debye-Bueche model.
 
 *2.2.5.1. Definition*
 
-.. image:: img/image180_corrected.PNG
+.. image:: img/olddocs/image180_corrected.PNG
 
 The parameter *L* is the correlation length.
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -3582,7 +3582,7 @@ length          |Ang|     50.0
 background      |cm^-1|   0.0
 ==============  ========  =============
 
-.. image:: img/image181.jpg
+.. image:: img/olddocs/image181.jpg
 
 * Figure. 1D plot using the default values (w/200 data point).*
 
@@ -3603,7 +3603,7 @@ P Debye, A M Bueche, *Scattering by an Inhomogeneous Solid*, *J. Appl. Phys.*, 2
 
 This model describes a simple power law with background.
 
-.. image:: img/image182.PNG
+.. image:: img/olddocs/image182.PNG
 
 Note the minus sign in front of the exponent. The parameter *m* should therefore be entered as a **positive** number.
 
@@ -3615,7 +3615,7 @@ m               None      4
 Background      |cm^-1|   0.0
 ==============  ========  =============
 
-.. image:: img/image183.jpg
+.. image:: img/olddocs/image183.jpg
 
 *Figure. 1D plot using the default values (w/200 data point).*
 
@@ -3634,11 +3634,11 @@ DABModel_ this function generates a peak.
 
 *2.2.7.1. Definition*
 
-.. image:: img/image184.PNG
+.. image:: img/olddocs/image184.PNG
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -3649,7 +3649,7 @@ c2              None      5000.0
 background      |cm^-1|   0.0
 ==============  ========  =============
 
-.. image:: img/image185.jpg
+.. image:: img/olddocs/image185.jpg
 
 *Figure. 1D plot using the default values (w/200 data point).*
 
@@ -3672,7 +3672,7 @@ The value returned is in |cm^-1|\ .
 
 *2.2.8.1. Definition*
 
-.. image:: img/image186.PNG
+.. image:: img/olddocs/image186.PNG
 
 The *scale* parameter is the volume fraction of the building blocks, *R0* is the radius of the building block, *Df* is
 the fractal dimension, |xi| is the correlation length, |rho|\ *solvent* is the scattering length density of the
@@ -3682,7 +3682,7 @@ solvent, and |rho|\ *block* is the scattering length density of the building blo
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -3696,7 +3696,7 @@ solvent_sld     |Ang^-2|  6e-6
 background      |cm^-1|   0.0
 ==============  ========  =============
 
-.. image:: img/image187.jpg
+.. image:: img/olddocs/image187.jpg
 
 *Figure. 1D plot using the default values (w/200 data point).*
 
@@ -3714,7 +3714,7 @@ Calculates the scattering from fractal-like aggregates based on the Mildner refe
 
 *2.2.9.1. Definition*
 
-.. image:: img/mass_fractal_eq1.jpg
+.. image:: img/olddocs/mass_fractal_eq1.jpg
 
 where *R* is the radius of the building block, *Dm* is the **mass** fractal dimension, |zeta| is the cut-off length,
 |rho|\ *solvent* is the scattering length density of the solvent, and |rho|\ *particle* is the scattering length
@@ -3733,7 +3733,7 @@ co_length       |Ang|     100.0
 background      |cm^-1|   0.0
 ==============  ========  =============
 
-.. image:: img/mass_fractal_fig1.jpg
+.. image:: img/olddocs/mass_fractal_fig1.jpg
 
 *Figure. 1D plot using default values.*
 
@@ -3754,7 +3754,7 @@ Calculates the scattering from fractal-like aggregates based on the Mildner refe
 
 *2.2.10.1. Definition*
 
-.. image:: img/surface_fractal_eq1.gif
+.. image:: img/olddocs/surface_fractal_eq1.gif
 
 where *R* is the radius of the building block, *Ds* is the **surface** fractal dimension, |zeta| is the cut-off length,
 |rho|\ *solvent* is the scattering length density of the solvent, and |rho|\ *particle* is the scattering length
@@ -3773,7 +3773,7 @@ co_length       |Ang|     500.0
 background      |cm^-1|   0.0
 ==============  ========  =============
 
-.. image:: img/surface_fractal_fig1.jpg
+.. image:: img/olddocs/surface_fractal_fig1.jpg
 
 *Figure. 1D plot using default values.*
 
@@ -3801,7 +3801,7 @@ fractal dimension of the primary particles, *Ds*.
 
 The scattered intensity *I(q)* is  calculated using a modified Ornstein-Zernicke equation
 
-.. image:: img/masssurface_fractal_eq1.jpg
+.. image:: img/olddocs/masssurface_fractal_eq1.jpg
 
 where *Rg* is the size of the cluster, *rg* is the size of the primary particle, *Ds* is the surface fractal dimension,
 *Dm* is the mass fractal dimension, |rho|\ *solvent* is the scattering length density of the solvent, and |rho|\ *p* is
@@ -3821,7 +3821,7 @@ mass_dim        None      1.8
 background      |cm^-1|   0.0
 ==============  ========  =============
 
-.. image:: img/masssurface_fractal_fig1.jpg
+.. image:: img/olddocs/masssurface_fractal_fig1.jpg
 
 *Figure. 1D plot using default values.*
 
@@ -3847,15 +3847,15 @@ The returned value is scaled to units of |cm^-1|, absolute scale.
 
 *2.2.12.1. Definition*
 
-.. image:: img/fractcore_eq1.gif
+.. image:: img/olddocs/fractcore_eq1.gif
 
 The form factor *P(q)* is that from CoreShellModel_ with *bkg* = 0
 
-.. image:: img/image013.PNG
+.. image:: img/olddocs/image013.PNG
 
 while the fractal structure factor S(q) is
 
-.. image:: img/fractcore_eq3.gif
+.. image:: img/olddocs/fractcore_eq3.gif
 
 where *Df* = frac_dim, |xi| = cor_length, *rc* = (core) radius, and *scale* = volume fraction.
 
@@ -3863,7 +3863,7 @@ The fractal structure is as documented in the FractalModel_. Polydispersity of r
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -3879,7 +3879,7 @@ solvent_sld     |Ang^-2|  6.35e-6
 background      |cm^-1|   0.0
 ==============  ========  =============
 
-.. image:: img/image188.jpg
+.. image:: img/olddocs/image188.jpg
 
 *Figure. 1D plot using the default values (w/500 data points).*
 
@@ -3904,7 +3904,7 @@ The returned value is scaled to units of |cm^-1|, absolute scale.
 
 The scattering intensity *I(q)* is calculated as (eqn 5 from the reference)
 
-.. image:: img/image189.jpg
+.. image:: img/olddocs/image189.jpg
 
 |bigzeta| is the length scale of the static correlations in the gel, which can be attributed to the "frozen-in"
 crosslinks. |xi| is the dynamic correlation length, which can be attributed to the fluctuating polymer chains between
@@ -3916,7 +3916,7 @@ be introduced into the model by summing this model with the PeakGaussModel_ func
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 ===================================  ========  =============
 Parameter name                       Units     Default value
@@ -3928,7 +3928,7 @@ stat_colength (=static corr length)  |Ang|     100.0
 background                           |cm^-1|   0.0
 ===================================  ========  =============
 
-.. image:: img/image190.jpg
+.. image:: img/olddocs/image190.jpg
 
 *Figure. 1D plot using the default values (w/500 data points).*
 
@@ -3948,7 +3948,7 @@ The value returned is in |cm^-1|.
 
 *2.2.14.1. Definition*
 
-.. image:: img/image191.PNG
+.. image:: img/olddocs/image191.PNG
 
 where *K* is the contrast factor for the polymer, *Lb* is the Bjerrum length, *h* is the virial parameter, *b* is the
 monomer length, *Cs* is the concentration of monovalent salt, |alpha| is the ionization degree, *Ca* is the polymer
@@ -3956,7 +3956,7 @@ molar concentration, and *background* is the incoherent background.
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -3991,13 +3991,13 @@ E Raphael, J F Joanny, *Europhysics Letters*, 11 (1990) 179
 
 This model fits the Guinier function
 
-.. image:: img/image192.PNG
+.. image:: img/olddocs/image192.PNG
 
 to the data directly without any need for linearisation (*cf*. Ln *I(q)* vs *q*\ :sup:`2`).
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -4026,7 +4026,7 @@ The result is in the units of |cm^-1|, absolute scale.
 
 The following functional form is used
 
-.. image:: img/image193.jpg
+.. image:: img/olddocs/image193.jpg
 
 This is based on the generalized Guinier law for such elongated objects (see the Glatter reference below). For 3D
 globular objects (such as spheres), *s* = 0 and one recovers the standard Guinier_ formula. For 2D symmetry (such as
@@ -4035,11 +4035,11 @@ is thus defined, and is 3 for spherical objects, 2 for rods, and 1 for plates.
 
 Enforcing the continuity of the Guinier and Porod functions and their derivatives yields
 
-.. image:: img/image194.jpg
+.. image:: img/olddocs/image194.jpg
 
 and
 
-.. image:: img/image195.jpg
+.. image:: img/olddocs/image195.jpg
 
 Note that
 
@@ -4051,7 +4051,7 @@ Note that
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image008.PNG
+.. image:: img/olddocs/image008.PNG
 
 ==============================  ========  =============
 Parameter name                  Units     Default value
@@ -4063,7 +4063,7 @@ m            (=Porod exponent)  None      3
 background                      |cm^-1|   0.1
 ==============================  ========  =============
 
-.. image:: img/image196.jpg
+.. image:: img/olddocs/image196.jpg
 
 *Figure. 1D plot using the default values (w/500 data points).*
 
@@ -4082,7 +4082,7 @@ Check out Chapter 4 on Data Treatment, pages 155-156.
 
 This model fits the Porod function
 
-.. image:: img/image197_corrected.PNG
+.. image:: img/olddocs/image197_corrected.PNG
 
 to the data directly without any need for linearisation (*cf*. Log *I(q)* vs Log *q*).
 
@@ -4091,7 +4091,7 @@ Here *C* is the scale factor and *Sv* is the specific surface area (ie, surface 
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -4112,14 +4112,14 @@ None.
 
 This model describes a Gaussian shaped peak on a flat background
 
-.. image:: img/image198.PNG
+.. image:: img/olddocs/image198.PNG
 
 with the peak having height of *I0* centered at *q0* and having a standard deviation of *B*.  The FWHM (full-width
 half-maximum) is 2.354 B.  
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -4130,7 +4130,7 @@ B               |Ang^-1|  0.005
 background      |cm^-1|   1
 ==============  ========  =============
 
-.. image:: img/image199.jpg
+.. image:: img/olddocs/image199.jpg
 
 *Figure. 1D plot using the default values (w/500 data points).*
 
@@ -4146,13 +4146,13 @@ None.
 
 This model describes a Lorentzian shaped peak on a flat background
 
-.. image:: img/image200.PNG
+.. image:: img/olddocs/image200.PNG
 
 with the peak having height of *I0* centered at *q0* and having a HWHM (half-width half-maximum) of B. 
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -4163,7 +4163,7 @@ B               |Ang^-1|  0.005
 background      |cm^-1|     1
 ==============  ========  =============
 
-.. image:: img/image201.jpg
+.. image:: img/olddocs/image201.jpg
 
 *Figure. 1D plot using the default values (w/500 data points).*
 
@@ -4187,19 +4187,19 @@ The returned value is scaled to units of |cm^-1|, absolute scale.
 
 The scattering intensity *I(q)* is calculated as
 
-.. image:: img/image202.PNG
+.. image:: img/olddocs/image202.PNG
 
 where the dimensionless chain dimension is
 
-.. image:: img/image203.PNG
+.. image:: img/olddocs/image203.PNG
 
 and the polydispersity is
 
-.. image:: img/image204.PNG
+.. image:: img/olddocs/image204.PNG
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 This example dataset is produced using 200 data points, using 200 data points,
 *qmin* = 0.001 |Ang^-1|, *qmax* = 0.7 |Ang^-1| and the default values
@@ -4213,7 +4213,7 @@ poly_m (Mw/Mn)  None      2
 background      |cm^-1|   0.001
 ==============  ========  =============
 
-.. image:: img/image205.jpg
+.. image:: img/olddocs/image205.jpg
 
 *Figure. 1D plot using the default values (w/200 data point).*
 
@@ -4239,25 +4239,25 @@ The returned value is scaled to units of |cm^-1|, absolute scale.
 
 The form factor  was originally presented in the following integral form (Benoit, 1957)
 
-.. image:: img/image206.jpg
+.. image:: img/olddocs/image206.jpg
 
 where |nu| is the excluded volume parameter (which is related to the Porod exponent *m* as |nu| = 1 / *m*), *a* is the
 statistical segment length of the polymer chain, and *n* is the degree of polymerization. This integral was later put
 into an almost analytical form as follows (Hammouda, 1993)
 
-.. image:: img/image207.jpg
+.. image:: img/olddocs/image207.jpg
 
 where |gamma|\ *(x,U)* is the incomplete gamma function
 
-.. image:: img/image208.jpg
+.. image:: img/olddocs/image208.jpg
 
 and the variable *U* is given in terms of the scattering vector *Q* as
 
-.. image:: img/image209.jpg
+.. image:: img/olddocs/image209.jpg
 
 The square of the radius-of-gyration is defined as
 
-.. image:: img/image210.jpg
+.. image:: img/olddocs/image210.jpg
 
 Note that this model applies only in the mass fractal range (ie, 5/3 <= *m* <= 3) and **does not** apply to surface
 fractals (3 < *m* <= 4). It also does not reproduce the rigid rod limit (*m* = 1) because it assumes chain flexibility
@@ -4265,22 +4265,22 @@ from the outset. It may cover a portion of the semi-flexible chain range (1 < *
 
 A low-*Q* expansion yields the Guinier form and a high-*Q* expansion yields the Porod form which is given by
 
-.. image:: img/image211.jpg
+.. image:: img/olddocs/image211.jpg
 
 Here |biggamma|\ *(x)* = |gamma|\ *(x,inf)* is the gamma function.
 
 The asymptotic limit is dominated by the first term
 
-.. image:: img/image212.jpg
+.. image:: img/olddocs/image212.jpg
 
 The special case when |nu| = 0.5 (or *m* = 1/|nu| = 2) corresponds to Gaussian chains for which the form factor is given
 by the familiar Debye_ function.
 
-.. image:: img/image213.jpg
+.. image:: img/olddocs/image213.jpg
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 This example dataset is produced using 200 data points, *qmin* = 0.001 |Ang^-1|, *qmax* = 0.2 |Ang^-1| and the default
 values
@@ -4294,7 +4294,7 @@ m (=Porod exponent)  None      3
 background           |cm^-1|   0.0
 ===================  ========  =============
 
-.. image:: img/image214.jpg
+.. image:: img/olddocs/image214.jpg
 
 *Figure. 1D plot using the default values (w/500 data points).*
 
@@ -4378,7 +4378,7 @@ vc (=specific volume_c)  **unit**  100
 vd (=specific volume_d)  **unit**  100
 =======================  ========  =============
 
-.. image:: img/image215.jpg
+.. image:: img/olddocs/image215.jpg
 
 *Figure. 1D plot using the default values (w/500 data points).*
 
@@ -4400,7 +4400,7 @@ The returned value is scaled to units of |cm^-1|, absolute scale.
 
 The scattering intensity *I(q)* is calculated as
 
-.. image:: img/image216.jpg 
+.. image:: img/olddocs/image216.jpg 
 
 where *A* = Lorentzian scale factor #1, *C* = Lorentzian scale #2, |xi|\ :sub:`1` and |xi|\ :sub:`2` are the
 corresponding correlation lengths, and *n* and *m* are the respective power law exponents (set *n* = *m* = 2 for
@@ -4408,7 +4408,7 @@ Ornstein-Zernicke behaviour).
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 ===============================  ========  =============
 Parameter name                   Units     Default value
@@ -4422,7 +4422,7 @@ exponent_2 (=m)                  None      2
 background (=B)                  |cm^-1|   0.1
 ===============================  ========  =============
 
-.. image:: img/image217.jpg
+.. image:: img/olddocs/image217.jpg
 
 *Figure. 1D plot using the default values (w/500 data points).*
 
@@ -4444,7 +4444,7 @@ The returned value is scaled to units of |cm^-1|, absolute scale.
 
 The scattering intensity *I(q)* is calculated as
 
-.. image:: img/image218.jpg
+.. image:: img/olddocs/image218.jpg
 
 where *qc* is the location of the crossover from one slope to the other. The scaling *coef_A* sets the overall
 intensity of the lower *q* power law region. The scaling of the second power law region is then automatically scaled to
@@ -4454,7 +4454,7 @@ match the first.
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -4466,7 +4466,7 @@ power_2 (=m2)   None      4
 background      |cm^-1|   0.0
 ==============  ========  =============
 
-.. image:: img/image219.jpg
+.. image:: img/olddocs/image219.jpg
 
 *Figure. 1D plot using the default values (w/500 data points).*
 
@@ -4495,7 +4495,7 @@ fractal clusters, random coils (Debye equation), ellipsoidal particles, etc. 
 
 The empirical fit function is 
 
-.. image:: img/image220.jpg
+.. image:: img/olddocs/image220.jpg
 
 For each level, the four parameters *Gi*, *Rg,i*, *Bi* and *Pi* must be chosen. 
 
@@ -4506,7 +4506,7 @@ See the references for further information on choosing the parameters.
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -4523,7 +4523,7 @@ B1              |cm^-1|   4.5e-6                |
 background      |cm^-1|   0.0
 ==============  ========  =============
 
-.. image:: img/image221.jpg
+.. image:: img/olddocs/image221.jpg
 
 *Figure. 1D plot using the default values (w/500 data points).*
 
@@ -4541,7 +4541,7 @@ G Beaucage, *J. Appl. Cryst.*, 29 (1996) 134-146
 
 This calculates the simple linear function
 
-.. image:: img/image222.PNG
+.. image:: img/olddocs/image222.PNG
 
 **NB: For 2D plots,** *I(q)* = *I(qx)*\ *\ *I(qy)*, **which is a different definition to other shape independent models.**
 
@@ -4576,11 +4576,11 @@ Also see the GaussLorentzGel_ Model.
 
 The scattered intensity *I(q)* is calculated as
 
-.. image:: img/image233.gif
+.. image:: img/olddocs/image233.gif
 
 where
 
-.. image:: img/image234.gif
+.. image:: img/olddocs/image234.gif
 
 Note that the first term reduces to the Ornstein-Zernicke equation when *D* = 2; ie, when the Flory exponent is 0.5
 (theta conditions). In gels with significant hydrogen bonding *D* has been reported to be ~2.6 to 2.8.
@@ -4596,7 +4596,7 @@ Fractal exponent     (= *D*)  None      2
 Correlation length  (= *a1*)  |Ang|     16
 ============================  ========  =============
 
-.. image:: img/image235.gif
+.. image:: img/olddocs/image235.gif
 
 *Figure. 1D plot using the default values (w/300 data points).*
 
@@ -4618,15 +4618,15 @@ This model is also known as the Benoit Star model.
 
 For a star with *f* arms:
 
-.. image:: img/star1.png
+.. image:: img/olddocs/star1.png
 
 where
 
-.. image:: img/star2.png
+.. image:: img/olddocs/star2.png
 
 and
 
-.. image:: img/star3.png
+.. image:: img/olddocs/star3.png
 
 is the square of the ensemble average radius-of-gyration of an arm.
 
@@ -4655,12 +4655,12 @@ function. The interfacial thickness is equivalent to (-2.5 |sigma| to +2.5 |sigm
 
 Also see ReflectivityIIModel_.
 
-.. image:: img/image231.bmp
+.. image:: img/olddocs/image231.bmp
 
 *Figure. Comparison (using the SLD profile below) with the NIST web calculation (circles)*
 http://www.ncnr.nist.gov/resources/reflcalc.html
 
-.. image:: img/image232.gif
+.. image:: img/olddocs/image232.gif
 
 *Figure. SLD profile used for the calculation (above).*
 
@@ -4684,15 +4684,15 @@ available functions are
 
 1) Erf
 
-.. image:: img/image051.gif
+.. image:: img/olddocs/image051.gif
 
 2) Power-Law
 
-.. image:: img/image050.gif
+.. image:: img/olddocs/image050.gif
 
 3) Exp
 
-.. image:: img/image049.gif
+.. image:: img/olddocs/image049.gif
 
 The constant *A* in the expressions above (but the parameter *nu* in the model!) is an input.
 
@@ -4716,13 +4716,13 @@ sphere (excluded volume) interactions.
 
 The calculation uses the Percus-Yevick closure where the interparticle potential is
 
-.. image:: img/image223.PNG
+.. image:: img/olddocs/image223.PNG
 
 where *r* is the distance from the center of the sphere of a radius *R*.
 
 For a 2D plot, the wave transfer is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -4731,7 +4731,7 @@ effect_radius   |Ang|     50.0
 volfraction     None      0.2
 ==============  ========  =============
 
-.. image:: img/image224.jpg
+.. image:: img/olddocs/image224.jpg
 
 *Figure. 1D plot using the default values (in linear scale).*
 
@@ -4757,13 +4757,13 @@ The well width (*l*\ ) is defined as multiples of the particle diameter (2\*\ *R
 
 The interaction potential is:
 
-.. image:: img/image225.PNG
+.. image:: img/olddocs/image225.PNG
 
 where *r* is the distance from the center of the sphere of a radius *R*.
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 ==============  =========  =============
 Parameter name  Units      Default value
@@ -4774,7 +4774,7 @@ welldepth       kT         1.5
 wellwidth       diameters  1.2
 ==============  =========  =============
 
-.. image:: img/image226.jpg
+.. image:: img/olddocs/image226.jpg
 
 *Figure. 1D plot using the default values (in linear scale).*
 
@@ -4802,7 +4802,7 @@ multivalent salts. The counterions are also assumed to be monovalent.
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -4815,7 +4815,7 @@ salt conc       M         0
 dielectconst    None      71.1
 ==============  ========  =============
 
-.. image:: img/image227.jpg
+.. image:: img/olddocs/image227.jpg
 
 *Figure. 1D plot using the default values (in linear scale).*
 
@@ -4841,11 +4841,11 @@ is defined in the equation below and is a function of both the perturbation para
 well, |bigdelta| (same units as *R*), and the depth of the well, *Uo*, in units of kT. From the definition, it is clear
 that smaller |tau| means stronger attraction.
 
-.. image:: img/image228.PNG
+.. image:: img/olddocs/image228.PNG
 
 where the interaction potential is
 
-.. image:: img/image229.PNG
+.. image:: img/olddocs/image229.PNG
 
 The Percus-Yevick (PY) closure was used for this calculation, and is an adequate closure for an attractive interparticle
 potential. This solution has been compared to Monte Carlo simulations for a square well fluid, with good agreement.
@@ -4861,7 +4861,7 @@ until the optimization does not hit the constraints.
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-.. image:: img/image040.gif
+.. image:: img/olddocs/image040.gif
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -4872,7 +4872,7 @@ volfraction     None      0.1
 stickiness      K         0.2
 ==============  ========  =============
 
-.. image:: img/image230.jpg
+.. image:: img/olddocs/image230.jpg
 
 *Figure. 1D plot using the default values (in linear scale).*
 
