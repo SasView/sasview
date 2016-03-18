@@ -15,7 +15,7 @@ from glob import glob
 
 from distutils.dir_util import copy_tree
 from distutils.util import get_platform
-from shutil import copyfile
+from shutil import copy
 
 platform = '.%s-%s'%(get_platform(),sys.version[:3])
 
@@ -32,10 +32,11 @@ SASVIEW_TEST = os.path.join(SASVIEW_SRC, "..", "sasview", "test", "media")
 # Need to slurp in the new sasmodels model definitions to replace the old model_functions.rst
 # We are currently here:
 #/sasview-local-trunk/docs/sphinx-docs/build_sphinx.py
+
 SASMODELS_SOURCE_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "sasmodels", "models")
 SASMODELS_SOURCE_IMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "sasmodels", "models", "img")
-SASMODELS_DEST_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "source", "user", "models")
-SASMODELS_DEST_IMG = os.path.join(CURRENT_SCRIPT_DIR, "source", "user", "models", "img")
+SASMODELS_DEST_MODELS = os.path.join(SASVIEW_SRC, "sas", "models", "media")
+SASMODELS_DEST_IMG = os.path.join(SASVIEW_SRC, "sas", "models", "media", "img")
 
 #print SASMODELS_SOURCE_MODELS
 #print SASMODELS_SOURCE_IMG
@@ -112,9 +113,10 @@ def retrieve_user_docs():
        shutil.copytree(SASVIEW_TEST, SPHINX_SOURCE_TEST)       
        
     # Make sure we have the relevant images for the new sasmodels documentation
-    copyfile(SASMODELS_SOURCE_IMG, SASMODELS_DEST_IMG)
+#    for filename in glob.glob(os.path.join('C:\Code\sasmodels\sasmodels\models\img', '*.*')):
+#        shutil.copy(filename, 'c:/code/sasview-local-trunk/src/sas/models/media')
 
-    sys.exit()
+#    sys.exit()
 
 
 def retrieve_bumps_docs():
