@@ -15,6 +15,7 @@ from glob import glob
 
 from distutils.dir_util import copy_tree
 from distutils.util import get_platform
+from shutil import copyfile
 
 platform = '.%s-%s'%(get_platform(),sys.version[:3])
 
@@ -109,6 +110,12 @@ def retrieve_user_docs():
     if os.path.exists(SASVIEW_TEST):
        print "Found docs folder at ", SASVIEW_TEST
        shutil.copytree(SASVIEW_TEST, SPHINX_SOURCE_TEST)       
+       
+    # Make sure we have the relevant images for the new sasmodels documentation
+    copyfile(SASMODELS_SOURCE_IMG, SASMODELS_DEST_IMG)
+
+    sys.exit()
+
 
 def retrieve_bumps_docs():
     """
