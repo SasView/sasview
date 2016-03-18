@@ -236,7 +236,7 @@ class Plugin(PluginBase):
             self.state_reader.write(filepath, current_plottable, state)
         else:
             msg = "invariant.save_file: the data being saved is"
-            msg += " not a sas.dataloader.data_info.Data1D object"
+            msg += " not a sas.sascalc.dataloader.data_info.Data1D object"
             raise RuntimeError, msg
 
     def set_state(self, state=None, datainfo=None):

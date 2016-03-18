@@ -6,7 +6,7 @@ import sas.sasgui.guiframe.gui_manager as gui_manager
 
 from sas.sasgui.guiframe.plugin_base import PluginBase
 
-class DummyView(gui_manager.ViewApp):
+class DummyView(gui_manager.SasViewApp):
     """
     """
     

@@ -895,7 +895,7 @@ class Plugin(PluginBase):
         # Write the output to file
         # First, check that the data is of the right type
         if issubclass(self.current_plottable.__class__,
-                      sas.dataloader.data_info.Data1D):
+                      sas.sascalc.dataloader.data_info.Data1D):
             self.state_reader.write(filepath, self.current_plottable, prstate)
         else:
             msg = "pr.save_data: the data being saved is not a"

@@ -139,7 +139,7 @@ class FitData1D(Data1D):
             The proper way to set the smearing object would be to
             do the following: ::
             
-                from sas.models.qsmearing import smear_selection
+                from sas.sascalc.data_util.qsmearing import smear_selection
                 smearer = smear_selection(some_data)
                 fitdata1d = FitData1D( x= [1,3,..,],
                                         y= [3,4,..,8],

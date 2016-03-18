@@ -772,8 +772,8 @@ class Reader(CansasReader):
         : return: xml doc
         """
         if datainfo is None:
-            datainfo = sas.dataloader.data_info.Data1D(x=[], y=[])
-        elif not issubclass(datainfo.__class__, sas.dataloader.data_info.Data1D):
+            datainfo = sas.sascalc.dataloader.data_info.Data1D(x=[], y=[])
+        elif not issubclass(datainfo.__class__, sas.sascalc.dataloader.data_info.Data1D):
             msg = "The cansas writer expects a Data1D"
             msg += " instance: %s" % str(datainfo.__class__.__name__)
             raise RuntimeError, msg

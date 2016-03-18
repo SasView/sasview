@@ -1612,7 +1612,7 @@ class Reader(CansasReader):
         """
 
         if state.data is None:
-            data = sas.dataloader.data_info.Data1D(x=[], y=[])
+            data = sas.sascalc.dataloader.data_info.Data1D(x=[], y=[])
             return None
         elif not state.data.is_data:
             return None
@@ -1625,7 +1625,7 @@ class Reader(CansasReader):
                 state.data.run_name[0] = state.data.name
 
             if issubclass(state.data.__class__,
-                          sas.dataloader.data_info.Data1D):
+                          sas.sascalc.dataloader.data_info.Data1D):
                 data = state.data
                 doc, sasentry = self._to_xml_doc(data)
             else:
