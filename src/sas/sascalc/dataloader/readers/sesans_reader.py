@@ -86,33 +86,7 @@ class Reader:
                 output = SESANSData1D(x=x, y=y, lam=lam, dy=dy, dx=dx, dlam=dlam)
 #                print output                
                 self.filename = output.filename = basename
-                
-                
-                data_conv_z = None
-                data_conv_P = None
-#                print "passing"
-                if has_converter == True and output.x_unit != 'A':
-                    data_conv_z = Converter('nm')
-                    # Test it
-                    data_conv_z(1.0, output.x_unit)
-#                    print data_conv_z
-#                    print data_conv_z(1.0, output.x_unit)
-                if has_converter == True and output.y_unit != ' ':
-                    data_conv_P = Converter('a.u.')
-                    # Test it
-                    data_conv_P(1.0, output.y_unit)
-#                    print data_conv_P
-#                    print data_conv_P(1.0, output.y_unit)
-                # The first good line of data will define whether
-                # we have 2-column or 3-column ascii
-#                print output.x_unit
-#                print output.y_unit
-                
-#                print "past output"
-                
-#                has_error_dx = None
-#                has_error_dy = None
-                
+
 #                #Initialize counters for data lines and header lines.
 #                is_data = False  # Has more than 5 lines
 #                # More than "5" lines of data is considered as actual
@@ -140,16 +114,11 @@ class Reader:
 #                print zvals
                 for line in lines:
                     # Initial try for CSV (split on ,)
-#                    print line
                     line=line.strip()
-#                    print line
                     toks = line.split('\t')
-#                    print toks
                     if len(toks)==2:
                         paramnames.append(toks[0])
-#                        print paramnames
                         paramvals.append(toks[1])
-#                        print paramvals
                     if len(toks)>5:
                         zvals.append(toks[0])
                         dzvals.append(toks[1])
@@ -159,99 +128,50 @@ class Reader:
                         dPvals.append(toks[5])
                     else:
                         continue
-#                print varheaders
-#                print paramnames
-#                print paramvals
-#                print zvals  
-#                print len(zvals)
-                
+
                 x=[]
                 y=[]
                 lam=[]
                 dx=[]
                 dy=[]
                 dlam=[]
+                lam_header = lamvals[0].split()
+                data_conv_z = None
+                default_z_unit = "A"
+                data_conv_P = None
+                default_p_unit = " "
+                lam_unit = lam_header[1].replace("[","").replace("]","")
+                for i,x_val in output.x:
+                    output.x[i], output.x_unit = self._unit_conversion(x_val, lam_unit, default_z_unit)
+                for i,y_val in output.y:
+                    output.y[i], output.y_unit = self._unit_conversion(y_val, " ", default_p_unit)
                 varheader=[zvals[0],dzvals[0],lamvals[0],dlamvals[0],Pvals[0],dPvals[0]]
-#                print varheader
-                valrange=range(len(zvals)-1)
-#                print valrange
+                valrange=range(1, len(zvals))
                 for i in valrange:
-                    x.append(float(zvals[i+1]))
-                    y.append(float(Pvals[i+1]))
-                    lam.append(float(lamvals[i+1]))
-                    dy.append(float(dPvals[i+1]))
-                    dx.append(float(dzvals[i+1]))
-                    dlam.append(float(dlamvals[i+1]))
-                    
+                    x.append(float(zvals[i]))
+                    y.append(float(Pvals[i]))
+                    lam.append(float(lamvals[i]))
+                    dy.append(float(dPvals[i]))
+                    dx.append(float(dzvals[i]))
+                    dlam.append(float(dlamvals[i]))
+
                 x,y,lam,dy,dx,dlam = [
                    numpy.asarray(v, 'double')
                    for v in (x,y,lam,dy,dx,dlam)
                 ]
 
-#                print x
-#                print y
-#                print dx
-#                print dy
-#                print len(x)
-#                print len(y)
-#                print len(dx)
-#                print len(dy)
-                
-                
                 input_f.close()
-                # Sanity check
-#                if has_error_dy == True and not len(y) == len(dy):
-#                    msg = "sesans_reader: y and dy have different length"
-#                    raise RuntimeError, msg
-#                if has_error_dx == True and not len(x) == len(dx):
-#                    msg = "sesans_reader: y and dy have different length"
-#                    raise RuntimeError, msg
-#                # If the data length is zero, consider this as
-#                # though we were not able to read the file.
-#                if len(x) == 0:
-#                    raise RuntimeError, "sesans_reader: could not load file"
-#                print "alive"
-                #Let's re-order the data to make cal.
-                # curve look better some cases
-#                ind = numpy.lexsort((ty, tx))
-#                for i in ind:
-#                    x[i] = tx[ind[i]]
-#                    y[i] = ty[ind[i]]
-#                    if has_error_dy == True:
-#                        dy[i] = tdy[ind[i]]
-#                    if has_error_dx == True:
-#                        dx[i] = tdx[ind[i]]
-                # Zeros in dx, dy
-#                if has_error_dx:
-#                    dx[dx == 0] = _ZERO
-#                if has_error_dy:
-#                    dy[dy == 0] = _ZERO
+
                 #Data
                 output.x = x #[x != 0]
-#                print output.x
                 output.y = y #[x != 0]
-#                print output.y
-#                output.dy = dy[x != 0] if has_error_dy == True\
-#                    else numpy.zeros(len(output.y))
-#                output.dx = dx[x != 0] if has_error_dx == True\
-#                    else numpy.zeros(len(output.x))
                 output.dy = dy
                 output.dx = dx
                 output.lam = lam
                 output.dlam = dlam
 
-
-#                print "still alive"                
-#                if data_conv_z is not None:
-#                    output.xaxis("\\rm{z}", output.x_unit)
-#                else:
-#                    output.xaxis("\\rm{z}", 'nm')
-#                if data_conv_P is not None:
-#                    output.yaxis("\\rm{P/P0}", output.y_unit)
-#                else:
-#                    output.yaxis("\\rm{P/P0}", "a.u.")
-                output.xaxis("\\rm{z}", 'nm')   
-                output.yaxis("\\rm{P/P0}", " ")
+                output.xaxis("\rm{z}", output.x_unit)
+                output.yaxis("\\rm{P/P0}", output.y_unit)
                 # Store loading process information
                 output.meta_data['loader'] = self.type_name
                 output.sample.thickness = float(paramvals[6])
@@ -260,14 +180,19 @@ class Reader:
                 output.sample.zacceptance=float(paramvals[7])
                 output.vars=varheader
 
-#                print "sesans_reader end"
-                
                 if len(output.x) < 1:
                     raise RuntimeError, "%s is empty" % path
-#                print output
-#                print output.lam
                 return output
-            
+
         else:
             raise RuntimeError, "%s is not a file" % path
         return None
+
+    def _unit_conversion(self, value, value_unit, default_unit):
+        if has_converter == True and value_unit != default_unit:
+            data_conv_q = Converter(value_unit)
+            value = data_conv_q(value, units=default_unit)
+            new_unit = default_unit
+        else:
+            new_unit = value_unit
+        return value, new_unit
