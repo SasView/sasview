@@ -2908,8 +2908,9 @@ class FitPage(BasicPage):
             # no numbers
             else:
                 return cmp(a.lower(), b.lower())
-
-        keys.sort(custom_compare)
+        
+        # keys obtained now from ordered dict, so commenting alphabetical ordering
+        #keys.sort(custom_compare)
 
         iy = 0
         ix = 0
