@@ -33,8 +33,6 @@ SASVIEW_TEST = os.path.join(SASVIEW_SRC, "..", "sasview", "test", "media")
 #/sasview-local-trunk/docs/sphinx-docs/build_sphinx.py
 SASMODELS_SOURCE_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "sasmodels", "models")
 SASMODELS_SOURCE_IMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "sasmodels", "models", "img")
-
-#/sasview-local-trunk/docs/sphinx-docs/source/user/models
 SASMODELS_DEST_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "source", "user", "models")
 SASMODELS_DEST_IMG = os.path.join(CURRENT_SCRIPT_DIR, "source", "user", "models", "img")
 
