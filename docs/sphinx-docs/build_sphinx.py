@@ -16,6 +16,7 @@ from glob import glob
 from distutils.dir_util import copy_tree
 from distutils.util import get_platform
 from shutil import copy
+from os import listdir
 
 platform = '.%s-%s'%(get_platform(),sys.version[:3])
 
@@ -36,12 +37,16 @@ SASVIEW_TEST = os.path.join(SASVIEW_SRC, "..", "sasview", "test", "media")
 SASMODELS_SOURCE_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "sasmodels", "models")
 SASMODELS_SOURCE_IMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "sasmodels", "models", "img")
 SASMODELS_DEST_MODELS = os.path.join(SASVIEW_SRC, "sas", "models", "media")
-SASMODELS_DEST_IMG = os.path.join(SASVIEW_SRC, "sas", "models", "media", "img")
+SASMODELS_DEST_IMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "src", "sas", "models", "media", "img")
 
-#print SASMODELS_SOURCE_MODELS
-#print SASMODELS_SOURCE_IMG
-#print SASMODELS_DEST_MODELS
-#print SASMODELS_DEST_IMG
+#if os.path.exists(SASMODELS_SOURCE_MODELS):
+#    print "Found models folder at ", SASMODELS_SOURCE_MODELS
+#if os.path.exists(SASMODELS_SOURCE_IMG):
+#    print "Found img folder at ", SASMODELS_SOURCE_IMG
+#if os.path.exists(SASMODELS_DEST_MODELS):
+#    print "Found models folder at ", SASMODELS_DEST_MODELS
+#if os.path.exists(SASMODELS_DEST_IMG):
+#    print "Found img folder at ", SASMODELS_DEST_IMG
 
 SPHINX_BUILD = os.path.join(CURRENT_SCRIPT_DIR, "build")
 SPHINX_SOURCE = os.path.join(CURRENT_SCRIPT_DIR, "source")
@@ -113,10 +118,25 @@ def retrieve_user_docs():
        shutil.copytree(SASVIEW_TEST, SPHINX_SOURCE_TEST)       
        
     # Make sure we have the relevant images for the new sasmodels documentation
-#    for filename in glob.glob(os.path.join('C:\Code\sasmodels\sasmodels\models\img', '*.*')):
-#        shutil.copy(filename, 'c:/code/sasview-local-trunk/src/sas/models/media')
+    if os.path.exists(SASMODELS_SOURCE_IMG):
+        print "Found img  folder SASMODELS_SOURCE_IMG    at ", SASMODELS_SOURCE_IMG
+        if os.path.exists(SASMODELS_DEST_IMG):
+            print "Found img  folder SASMODELS_DEST_IMG      at ", SASMODELS_DEST_IMG
+            for files in os.listdir(SASMODELS_SOURCE_IMG):
+                fromhere=os.path.join(SASMODELS_SOURCE_IMG,files)
+                tohere=os.path.join(SASMODELS_DEST_IMG,files)
+                shutil.copy(fromhere,tohere)
 
-#    sys.exit()
+    # And the relevant .py files with the rst descriptions for the new sasmodels documentation
+    if os.path.exists(SASMODELS_SOURCE_MODELS):
+        print "Found docs folder SASMODELS_SOURCE_MODELS at ", SASMODELS_SOURCE_MODELS
+        if os.path.exists(SASMODELS_DEST_MODELS):
+            print "Found docs folder SASMODELS_DEST_MODELS   at ", SASMODELS_DEST_MODELS
+            for files in os.listdir(SASMODELS_SOURCE_MODELS):
+                if files.endswith(".py"):
+                    fromhere=os.path.join(SASMODELS_SOURCE_MODELS,files)
+                    tohere=os.path.join(SASMODELS_DEST_MODELS,files)
+                    shutil.copy(fromhere,tohere)
 
 
 def retrieve_bumps_docs():
