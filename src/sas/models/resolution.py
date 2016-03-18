@@ -188,8 +188,8 @@ def slit_resolution(q_calc, q, width, height, n_height=30):
                 dq_\perp dq_\parallel
 
 
-    Definition
-    ----------
+    Algorithm
+    ---------
 
     We are using the mid-point integration rule to assign weights to each
     element of a weight matrix $W$ so that
@@ -429,7 +429,7 @@ def geometric_extrapolation(q, q_min, q_max, points_per_decade=None):
 
     Substituting:
 
-         n_\text{extend} = (n-1) (\log q_\text{max} - \log q_n)
+        n_\text{extend} = (n-1) (\log q_\text{max} - \log q_n)
             / (\log q_n - log q_1)
     """
     q = np.sort(q)
