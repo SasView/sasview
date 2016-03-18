@@ -14,7 +14,7 @@ SMEAR_SIZE_L = 0.00
 SMEAR_SIZE_H = 0.00
 
 from sas.sasgui.perspectives.fitting.basepage import PageInfoEvent
-from sas.models.qsmearing import smear_selection
+from sas.sascalc.data_util.qsmearing import smear_selection
 from sas.sasgui.perspectives.fitting.fitpage import FitPage
 from sas.sasgui.perspectives.fitting.fitpage import check_data_validity
 

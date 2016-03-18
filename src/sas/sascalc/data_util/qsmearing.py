@@ -13,7 +13,7 @@ import math
 import logging
 import sys
 import sas.models.sas_extension.smearer as smearer
-from sas.models.smearing_2d import Smearer2D
+from sas.sascalc.data_util.smearing_2d import Smearer2D
 
 def smear_selection(data1D, model = None):
     """

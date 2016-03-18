@@ -25,7 +25,7 @@ SMEAR_SIZE_H = 0.00
 
 from sas.sasgui.perspectives.fitting.basepage import BasicPage as BasicPage
 from sas.sasgui.perspectives.fitting.basepage import PageInfoEvent as PageInfoEvent
-from sas.models.qsmearing import smear_selection
+from sas.sascalc.data_util.qsmearing import smear_selection
 from .basepage import ModelTextCtrl
 
 
