@@ -19,8 +19,7 @@ from sas.sasgui.guiframe.events import StatusEvent
 from sas.models.pluginmodel import Model1DPlugin
 from sas.models.BaseComponent import BaseComponent
 from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
-from sasmodels.sasview_model import make_class
-import sasmodels.core
+from sasmodels import sasview_model,core
 
 
 PLUGIN_DIR = 'plugin_models'
@@ -300,20 +299,17 @@ class ModelManagerBase:
         self.model_name_list = []
 
         #Build list automagically from sasmodels package
-        for mod_name in sasmodels.core.list_models():
-            try:
-                mod_def = sasmodels.core.load_model_info(mod_name)
-                self.model_dictionary[mod_def['name']] = make_class(mod_def,dtype=None,namestyle='name')
-                if mod_def['structure_factor'] == True:
-                    self.struct_list.append(self.model_dictionary[mod_def['name']])
-                if mod_def['variant_info'] is not None:
-                    self.multi_func_list.append(self.model_dictionary[mod_def['name']])
-                else:
-                    self.model_name_list.append(mod_def['name'])
-                if mod_def['ER'] is not None:
-                    self.multiplication_factor.append(self.model_dictionary[mod_def['name']])
-            except:
-                logging.info("Problem loading %s model" % mod_name)
+        for model in sasview_model.standard_models():
+            self.model_dictionary[model._model_info['name']] = model
+            if model._model_info['structure_factor'] == True:
+                self.struct_list.append(model)
+            if model._model_info['variant_info'] is not None:
+                self.multi_func_list.append(model)
+            else:
+                self.model_name_list.append(model._model_info['name'])
+            if model._model_info['ER'] is not None:
+                self.multiplication_factor.append(model)
+
 
         #Looking for plugins
         self.stored_plugins = self.findModels()
