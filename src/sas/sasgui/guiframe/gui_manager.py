@@ -3479,5 +3479,5 @@ class MDIFrame(CHILD_FRAME):
         self.panel.on_close(event)
 
 if __name__ == "__main__":
-    app = ViewApp(0)
+    app = SasViewApp(0)
     app.MainLoop()
