@@ -34,9 +34,9 @@ SASVIEW_TEST = os.path.join(SASVIEW_SRC, "..", "sasview", "test", "media")
 # We are currently here:
 #/sasview-local-trunk/docs/sphinx-docs/build_sphinx.py
 
-SASMODELS_SOURCE_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "sasmodels", "models")
-SASMODELS_SOURCE_IMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "sasmodels", "models", "img")
-SASMODELS_DEST_MODELS = os.path.join(SASVIEW_SRC, "sas", "models", "media")
+SASMODELS_SOURCE_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "model")
+SASMODELS_SOURCE_IMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "model", "img")
+SASMODELS_DEST_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "src", "sas", "models", "media")
 SASMODELS_DEST_IMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "src", "sas", "models", "media", "img")
 
 #if os.path.exists(SASMODELS_SOURCE_MODELS):
@@ -78,6 +78,7 @@ def clean():
     _remove_dir(SPHINX_SOURCE_PERSPECTIVES)
     _remove_dir(SPHINX_SOURCE_TEST)
 
+
 def retrieve_user_docs():
     """
     Copies across the contents of any media/ directories in src/, and puts them
@@ -113,10 +114,12 @@ def retrieve_user_docs():
     # Now pickup testdata_help.rst
 #    print os.path.abspath(SASVIEW_TEST)
 #    print os.path.abspath(SPHINX_SOURCE_TEST)
+    print "=== Including Test Data Docs ==="
     if os.path.exists(SASVIEW_TEST):
        print "Found docs folder at ", SASVIEW_TEST
        shutil.copytree(SASVIEW_TEST, SPHINX_SOURCE_TEST)       
-       
+
+    print "=== And the Sasmodels Docs ===" 
     # Make sure we have the relevant images for the new sasmodels documentation
     if os.path.exists(SASMODELS_SOURCE_IMG):
         print "Found img  folder SASMODELS_SOURCE_IMG    at ", SASMODELS_SOURCE_IMG
@@ -127,13 +130,13 @@ def retrieve_user_docs():
                 tohere=os.path.join(SASMODELS_DEST_IMG,files)
                 shutil.copy(fromhere,tohere)
 
-    # And the relevant .py files with the rst descriptions for the new sasmodels documentation
+    # And the relevant rst descriptions for the new sasmodels documentation
     if os.path.exists(SASMODELS_SOURCE_MODELS):
         print "Found docs folder SASMODELS_SOURCE_MODELS at ", SASMODELS_SOURCE_MODELS
         if os.path.exists(SASMODELS_DEST_MODELS):
             print "Found docs folder SASMODELS_DEST_MODELS   at ", SASMODELS_DEST_MODELS
             for files in os.listdir(SASMODELS_SOURCE_MODELS):
-                if files.endswith(".py"):
+                if files.endswith(".rst"):
                     fromhere=os.path.join(SASMODELS_SOURCE_MODELS,files)
                     tohere=os.path.join(SASMODELS_DEST_MODELS,files)
                     shutil.copy(fromhere,tohere)
