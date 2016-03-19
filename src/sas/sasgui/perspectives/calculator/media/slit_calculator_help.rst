@@ -3,8 +3,6 @@
 .. This is a port of the original SasView html help file to ReSTructured text
 .. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
 
-.. |Ang| unicode:: U+212B
-.. |TM| unicode:: U+2122
 
 Slit Size Calculator Tool
 =========================

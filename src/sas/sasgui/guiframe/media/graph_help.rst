@@ -3,9 +3,6 @@
 .. This is a port of the original SasView html help file to ReSTructured text
 .. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
 
-.. |delta| unicode:: U+03B4
-.. |phi| unicode:: U+03C6
-
 
 Plotting Data/Models
 ====================
