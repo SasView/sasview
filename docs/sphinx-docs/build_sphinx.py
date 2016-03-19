@@ -33,20 +33,30 @@ SASVIEW_TEST = os.path.join(SASVIEW_SRC, "..", "sasview", "test", "media")
 # Need to slurp in the new sasmodels model definitions to replace the old model_functions.rst
 # We are currently here:
 #/sasview-local-trunk/docs/sphinx-docs/build_sphinx.py
-
+SASMODELS_SOURCE_PROLOG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc")
+#SASMODELS_SOURCE_REF_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "ref", "models")
 SASMODELS_SOURCE_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "model")
 SASMODELS_SOURCE_IMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "model", "img")
+SASMODELS_DEST_PROLOG = os.path.join(CURRENT_SCRIPT_DIR, "source")
+SASMODELS_DEST_REF_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "source", "user")
 SASMODELS_DEST_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "src", "sas", "models", "media")
 SASMODELS_DEST_IMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "src", "sas", "models", "media", "img")
 
+#if os.path.exists(SASMODELS_SOURCE_PROLOG):
+#    print "Found models prolog folder at ", SASMODELS_SOURCE_PROLOG
+#if os.path.exists(SASMODELS_SOURCE_REF_MODELS):
+#    print "Found models ref folder at ", SASMODELS_SOURCE_REF_MODELS
 #if os.path.exists(SASMODELS_SOURCE_MODELS):
 #    print "Found models folder at ", SASMODELS_SOURCE_MODELS
 #if os.path.exists(SASMODELS_SOURCE_IMG):
 #    print "Found img folder at ", SASMODELS_SOURCE_IMG
+#if os.path.exists(SASMODELS_DEST_REF_MODELS):
+#    print "Found models ref folder at ", SASMODELS_DEST_REF_MODELS
 #if os.path.exists(SASMODELS_DEST_MODELS):
 #    print "Found models folder at ", SASMODELS_DEST_MODELS
 #if os.path.exists(SASMODELS_DEST_IMG):
 #    print "Found img folder at ", SASMODELS_DEST_IMG
+#sys.exit()
 
 SPHINX_BUILD = os.path.join(CURRENT_SCRIPT_DIR, "build")
 SPHINX_SOURCE = os.path.join(CURRENT_SCRIPT_DIR, "source")
@@ -125,16 +135,42 @@ def retrieve_user_docs():
         print "Found img  folder SASMODELS_SOURCE_IMG    at ", SASMODELS_SOURCE_IMG
         if os.path.exists(SASMODELS_DEST_IMG):
             print "Found img  folder SASMODELS_DEST_IMG      at ", SASMODELS_DEST_IMG
+            print "Copying sasmodels model image files..."
             for files in os.listdir(SASMODELS_SOURCE_IMG):
                 fromhere=os.path.join(SASMODELS_SOURCE_IMG,files)
                 tohere=os.path.join(SASMODELS_DEST_IMG,files)
                 shutil.copy(fromhere,tohere)
 
+    # And the rst prolog with the unit substitutions
+    if os.path.exists(SASMODELS_SOURCE_PROLOG):
+        print "Found prolog folder SASMODELS_SOURCE_PROLOG at ", SASMODELS_SOURCE_PROLOG
+        if os.path.exists(SASMODELS_DEST_PROLOG):
+            print "Found docs folder SASMODELS_DEST_PROLOG   at ", SASMODELS_DEST_PROLOG
+            print "Copying sasmodels rst_prolog file..."
+            for files in os.listdir(SASMODELS_SOURCE_PROLOG):
+                if files.startswith("rst"):
+                    fromhere=os.path.join(SASMODELS_SOURCE_PROLOG,files)
+                    tohere=os.path.join(SASMODELS_DEST_PROLOG,files)
+                    shutil.copy(fromhere,tohere)
+
+    # ACTUALLY IT TURNED OUT WE NEED TO EDIT THE TOCTREES SO THIS COPY WASN'T USEFUL IN THE END!
     # And the relevant rst descriptions for the new sasmodels documentation
+#    if os.path.exists(SASMODELS_SOURCE_REF_MODELS):
+#        print "Found docs folder SASMODELS_SOURCE_REF_MODELS at ", SASMODELS_SOURCE_REF_MODELS
+#        if os.path.exists(SASMODELS_DEST_REF_MODELS):
+#            print "Found docs folder SASMODELS_DEST_REF_MODELS   at ", SASMODELS_DEST_REF_MODELS
+#            print "Copying sasmodels model toctree files..."
+#            for files in os.listdir(SASMODELS_SOURCE_REF_MODELS):
+#                if files.endswith(".rst"):
+#                    fromhere=os.path.join(SASMODELS_SOURCE_REF_MODELS,files)
+#                    tohere=os.path.join(SASMODELS_DEST_REF_MODELS,files)
+#                    shutil.copy(fromhere,tohere)
+
     if os.path.exists(SASMODELS_SOURCE_MODELS):
         print "Found docs folder SASMODELS_SOURCE_MODELS at ", SASMODELS_SOURCE_MODELS
         if os.path.exists(SASMODELS_DEST_MODELS):
             print "Found docs folder SASMODELS_DEST_MODELS   at ", SASMODELS_DEST_MODELS
+            print "Copying sasmodels model files..."
             for files in os.listdir(SASMODELS_SOURCE_MODELS):
                 if files.endswith(".rst"):
                     fromhere=os.path.join(SASMODELS_SOURCE_MODELS,files)
