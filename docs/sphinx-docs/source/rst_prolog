@@ -1,6 +1,7 @@
 .. Set up some substitutions to make life easier...
 .. Remove |biggamma|, etc. when they are no longer needed.
 
+
 .. |alpha| unicode:: U+03B1
 .. |beta| unicode:: U+03B2
 .. |gamma| unicode:: U+03B3
@@ -31,10 +32,13 @@
 .. |bigdelta| unicode:: U+0394
 .. |bigzeta| unicode:: U+039E
 .. |bigpsi| unicode:: U+03A8
+.. |bigphi| unicode:: U+03A6
+.. |bigsigma| unicode:: U+03A3
 .. |Gamma| unicode:: U+0393
 .. |Delta| unicode:: U+0394
 .. |Zeta| unicode:: U+039E
 .. |Psi| unicode:: U+03A8
+
 
 .. |drho| replace:: |Delta|\ |rho|
 .. |Ang| unicode:: U+212B
@@ -54,6 +58,10 @@
 .. |sr^-1| replace:: sr\ :sup:`-1`
 .. |P0| replace:: P\ :sub:`0`\
 .. |A2| replace:: A\ :sub:`2`\
+
+
+.. |equiv| unicode:: U+2261
+.. |noteql| unicode:: U+2260
 
 
 .. |cdot| unicode:: U+00B7
