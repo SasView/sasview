@@ -177,7 +177,13 @@ class Reader:
                 output.sample.thickness = float(paramvals[6])
                 output.sample.name = paramvals[1]
                 output.sample.ID = paramvals[0]
+                zaccept_unit_split = paramnames[7].split("[")
+                zaccept_unit = zaccept_unit_split[1].replace("]","")
+                if zaccept_unit.strip() == '\AA^-1':
+                    zaccept_unit = "1/A"
                 output.sample.zacceptance=float(paramvals[7])
+                output.sample.zacceptance=self._unit_conversion(output.sample.zacceptance,
+                                                                zaccept_unit, "1/" + default_z_unit)
                 output.vars=varheader
 
                 if len(output.x) < 1:
