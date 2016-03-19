@@ -6,7 +6,6 @@ warnings.simplefilter("ignore")
 
 import unittest
 from sas.sascalc.calculator import sas_gen
-from sas.models.SphereModel import SphereModel
 
 import numpy
  
@@ -17,8 +16,7 @@ class sas_gen_test(unittest.TestCase):
     def setUp(self):
         self.sldloader = sas_gen.SLDReader()
         self.pdbloader = sas_gen.PDBReader()
-        self.omfloader = sas_gen.OMFReader() 
-        self.comp = SphereModel()
+        self.omfloader = sas_gen.OMFReader()
         
     def test_sldreader(self):
         """
@@ -52,31 +50,6 @@ class sas_gen_test(unittest.TestCase):
         self.assertEqual(output.pos_y[0], 0.0)
         self.assertEqual(output.pos_z[0], 0.0)
 
-"""      
-    def test_slda_and_run(self): # Works when sld reader uses loadtxt
-        sld_data = self.sldloader.read("sphere697_r30.sld")
-        # Generic computation  
-        model = sas_gen.GenSAS()
-        model.setParam('background', 0.0)
-        model.setParam('scale', 1.0)
-        model.setParam('Up_frac_in', 0.5)
-        model.setParam('Up_frac_out', 0.5)
-        model.setParam('Up_theta', 0.0)
-        x = numpy.array([0.01])
-        y = numpy.array([0.01])
-        model.set_sld_data(sld_data)
-        out_gen = model.runXY([x, y])
-        # Analytic computation
-        analy_model = self.comp
-        analy_model.setParam('background', 0.0)
-        analy_model.setParam('scale', 1.0)
-        analy_model.setParam('radius', 30.0)
-        analy_model.setParam('sldSolv', 0.0)
-        analy_model.setParam('sldSph', 6.97e-06) 
-        out_analy = analy_model.runXY([0.01, 0.01])
-        # Comparison
-        self.assertAlmostEqual(out_gen[0], out_analy, 1)
-"""   
 if __name__ == '__main__':
     unittest.main()
    
