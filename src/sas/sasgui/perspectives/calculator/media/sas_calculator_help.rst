@@ -3,16 +3,6 @@
 .. This is a port of the original SasView html help file to ReSTructured text
 .. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
 
-.. |beta| unicode:: U+03B2
-.. |gamma| unicode:: U+03B3
-.. |theta| unicode:: U+03B8
-.. |mu| unicode:: U+03BC
-.. |sigma| unicode:: U+03C3
-.. |phi| unicode:: U+03C6
-
-.. |equiv| unicode:: U+2261
-.. |noteql| unicode:: U+2260
-
 Generic SANS Calculator Tool
 ============================
 

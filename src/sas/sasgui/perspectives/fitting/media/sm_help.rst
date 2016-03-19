@@ -3,15 +3,6 @@
 .. This is a port of the original SasView html help file to ReSTructured text
 .. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
 
-.. |beta| unicode:: U+03B2
-.. |gamma| unicode:: U+03B3
-.. |mu| unicode:: U+03BC
-.. |sigma| unicode:: U+03C3
-.. |phi| unicode:: U+03C6
-.. |theta| unicode:: U+03B8
-.. |chi| unicode:: U+03C7
-.. |bigdelta| unicode:: U+0394
-
 .. |inlineimage004| image:: sm_image004.gif
 .. |inlineimage005| image:: sm_image005.gif
 .. |inlineimage008| image:: sm_image008.gif

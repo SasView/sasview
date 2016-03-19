@@ -3,10 +3,6 @@
 .. This is a port of the original SasView html help file to ReSTructured text
 .. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
 
-.. |pi| unicode:: U+03C0
-.. |lambda| unicode:: U+03BB
-.. |Ang| unicode:: U+212B
-
 Q Resolution Estimator Tool
 ===========================
 

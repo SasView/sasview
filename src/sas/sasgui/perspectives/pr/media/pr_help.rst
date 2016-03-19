@@ -3,11 +3,6 @@
 .. This is a port of the original SasView html help file to ReSTructured text
 .. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
 
-.. |pi| unicode:: U+03C0
-.. |bigphi| unicode:: U+03A6
-.. |bigsigma| unicode:: U+03A3
-.. |chi| unicode:: U+03C7
-
 P(r) Inversion Perspective
 ==========================
 
