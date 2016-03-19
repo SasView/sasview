@@ -6,7 +6,9 @@ SasView User Documentation
 .. toctree::
    :maxdepth: 1
 
-   Model Documentation <models/olddocs/model_functions>
+   Old SasView Model Documentation <models/olddocs/model_functions>
+   
+   New SasModels Model Documentation <index>
    
    Tools <tools>
    
