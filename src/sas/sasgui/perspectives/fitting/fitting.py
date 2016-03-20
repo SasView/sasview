@@ -298,6 +298,13 @@ class Plugin(PluginBase):
             self.put_icon(self.new_model_frame)
         self.new_model_frame.Show(True)
 
+    def load_plugin_models(self, event):
+        """
+        Update of models in plugin_models folder
+        """
+        event_id = event.GetId()
+        self.update_custom_combo()        
+
     def update_custom_combo(self):
         """
         Update custom model list in the fitpage combo box
@@ -337,10 +344,12 @@ class Plugin(PluginBase):
         self.edit_model_menu.Append(wx_id, 'New',
                                    'Add a new model function')
         wx.EVT_MENU(owner, wx_id, self.make_new_model)
+        
         wx_id = wx.NewId()
         self.edit_model_menu.Append(wx_id, 'Sum|Multi(p1, p2)',
                                     'Sum of two model functions')
         wx.EVT_MENU(owner, wx_id, self.make_sum_model)
+
         e_id = wx.NewId()
         self.edit_menu = wx.Menu()
         self.edit_model_menu.AppendMenu(e_id,
@@ -352,6 +361,11 @@ class Plugin(PluginBase):
         self.edit_model_menu.AppendMenu(d_id,
                                         'Delete', self.delete_menu)
         self.set_edit_menu_helper(owner, self.delete_custom_model)
+
+        wx_id = wx.NewId()
+        self.edit_model_menu.Append(wx_id, 'Load Models',
+          '(Re)Load all models present in user plugin_models folder')
+        wx.EVT_MENU(owner, wx_id, self.load_plugin_models)
 
     def set_edit_menu_helper(self, owner=None, menu=None):
         """
