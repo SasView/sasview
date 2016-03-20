@@ -14,7 +14,7 @@ import shutil
 import json
 from collections import defaultdict
 
-USER_FILE = 'serialized_cat.json'
+USER_FILE = 'categories.json'
 
 class CategoryInstaller:
     """
@@ -110,7 +110,7 @@ class CategoryInstaller:
     @staticmethod
     def get_user_file():
         """
-        returns the user data file, eg .sasview/serialized_cat.json
+        returns the user data file, eg .sasview/categories.json.json
         """
         return os.path.join(CategoryInstaller._get_home_dir(),
                             USER_FILE)
@@ -128,7 +128,7 @@ class CategoryInstaller:
     def check_install(homedir = None, model_list=None):
         """
         the main method of this class
-        makes sure serialized_cat.json exists and if not
+        makes sure categories.json exists and if not
         compile it and install
         :param homefile: Override the default home directory
         :param model_list: List of model names except customized models

@@ -12,6 +12,7 @@ Sphere Functions
     models/fuzzy_sphere.rst
     models/linear_pearls.rst
     models/multi_shell.rst
+    models/onion.rst
     models/raspberry.rst
     models/sphere.rst
     models/spherepy.rst
