@@ -6,8 +6,9 @@ Lamellae Functions
 
 .. toctree::
 
-    models/lamellar.rst
-    models/lamellarCaille.rst
-    models/lamellarCailleHG.rst
-    models/lamellarFFHG.rst
-    models/lamellarPC.rst
+    models//lamellar.rst
+    models//lamellar_hg.rst
+    models//lamellar_hg_stack_caille.rst
+    models//lamellar_stack_caille.rst
+    models//lamellar_stack_paracrystal.rst
+    
