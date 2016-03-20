@@ -1894,7 +1894,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         try:
             if mod_cat == custom_model:
                 for model in self.model_list_box[mod_cat]:
-                    str_m = str(model).split(".")[0]
+                    if 'sasmodels.sasview_model.' in str(model):
+                        str_m = model._model_info['id']
+                    else:
+                        str_m = str(model).split(".")[0]
                     #self.model_box.Append(str_m)
                     m_list.append(self.model_dict[str_m])
             else:
