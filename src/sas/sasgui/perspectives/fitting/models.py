@@ -16,8 +16,8 @@ from sas.sasgui.guiframe.events import StatusEvent
 # Explicitly import from the pluginmodel module so that py2exe
 # places it in the distribution. The Model1DPlugin class is used
 # as the base class of plug-in models.
-from sas.models.pluginmodel import Model1DPlugin
-from sas.models.BaseComponent import BaseComponent
+from sas.sascalc.fit.pluginmodel import Model1DPlugin
+from sas.sascalc.calculator.BaseComponent import BaseComponent
 from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 from sasmodels import sasview_model,core
 

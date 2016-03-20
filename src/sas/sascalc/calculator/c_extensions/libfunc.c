@@ -2,7 +2,7 @@
 
 #include <math.h>
 
-#include "libmultifunc/libfunc.h"
+#include "libfunc.h"
 
 #include <stdio.h>
 
