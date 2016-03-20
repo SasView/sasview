@@ -286,3 +286,5 @@ texinfo_documents = [
 if os.path.exists('rst_prolog'):
     with open('rst_prolog') as fid:
         rst_prolog = fid.read()
+
+numfig = True
