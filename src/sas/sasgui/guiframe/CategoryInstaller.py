@@ -175,10 +175,3 @@ class CategoryInstaller:
             
             json.dump( master_category_dict,
                          open(serialized_file, 'wb') )
-            
-            try:
-                #It happens only in source environment
-                shutil.copyfile(serialized_file, default_file)
-            except:
-                pass
-        
