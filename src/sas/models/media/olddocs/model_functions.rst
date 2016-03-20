@@ -3980,7 +3980,7 @@ The following functional form is used
 .. image:: ..\img\olddocs\image193.jpg
 
 This is based on the generalized Guinier law for such elongated objects (see the Glatter reference below). For 3D
-globular objects (such as spheres), *s* = 0 and one recovers the standard Guinier_ formula. For 2D symmetry (such as
+globular objects (such as spheres), *s* = 0 and one recovers the standard GuinierLaw_ formula. For 2D symmetry (such as
 for rods) *s* = 1, and for 1D symmetry (such as for lamellae or platelets) *s* = 2. A dimensionality parameter (3-*s*)
 is thus defined, and is 3 for spherical objects, 2 for rods, and 1 for plates.
 
