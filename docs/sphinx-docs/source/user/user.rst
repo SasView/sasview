@@ -6,18 +6,12 @@ SasView User Documentation
 .. toctree::
    :maxdepth: 1
 
-   Old SasView Model Documentation <models/olddocs/model_functions>
+   SasView (4.x.x) Model Documentation <index>
+
+   SasView (3.x.x) Model Documentation <models/olddocs/model_functions>
    
-   New SasModels Model Documentation <index>
+   Analysis <analysis>
    
    Tools <tools>
-   
-   Types of Analysis <analysis>
-
-   Data Formats <sasgui/guiframe/data_formats_help>
-   
-   Loading Data <sasgui/guiframe/data_explorer_help>
-   
-   Plotting Data/Models <sasgui/guiframe/graph_help>
-      
-   Test Data <../test/testdata_help.rst>
+         
+   Working with SasView <working>
