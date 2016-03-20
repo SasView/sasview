@@ -46,7 +46,7 @@ if os.path.isdir(sas_dir):
     f_path = os.path.join(sas_dir, "sasview.log")
     if os.path.isfile(f_path):
         os.remove(f_path)
-    f_path = os.path.join(sas_dir, "serialized_cat.json")
+    f_path = os.path.join(sas_dir, "categories.json")
     if os.path.isfile(f_path):
         os.remove(f_path)
     f_path = os.path.join(sas_dir, 'config', "custom_config.py")
