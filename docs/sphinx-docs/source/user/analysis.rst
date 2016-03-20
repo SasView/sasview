@@ -1,5 +1,5 @@
-SasView Documentation: Types of Analysis
-========================================
+Types of Analysis
+=================
 
 .. note:: In Windows use [Alt]-[Cursor left] to return to the previous page
 

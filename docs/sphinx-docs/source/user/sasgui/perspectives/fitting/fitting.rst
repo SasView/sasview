@@ -1,7 +1,7 @@
 .. _Fitting_Documentation:
 
-Fitting Documentation
-=====================
+Model Fitting
+=============
 
 .. toctree::
    :maxdepth: 1
