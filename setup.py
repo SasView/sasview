@@ -35,12 +35,12 @@ ext_modules = []
 # We do this here because application updates these files from .sasview
 # except when there is no such file
 # Todo : make this list generic
-plugin_model_list = ['polynominal5.py', 'sph_bessel_jn.py', 
-                     'sum_Ap1_1_Ap2.py', 'sum_p1_p2.py', 
-                     'testmodel_2.py', 'testmodel.py',
-                     'polynominal5.pyc', 'sph_bessel_jn.pyc', 
-                     'sum_Ap1_1_Ap2.pyc', 'sum_p1_p2.pyc', 
-                     'testmodel_2.pyc', 'testmodel.pyc', 'plugins.log']
+# plugin_model_list = ['polynominal5.py', 'sph_bessel_jn.py',
+#                      'sum_Ap1_1_Ap2.py', 'sum_p1_p2.py',
+#                      'testmodel_2.py', 'testmodel.py',
+#                      'polynominal5.pyc', 'sph_bessel_jn.pyc',
+#                      'sum_Ap1_1_Ap2.pyc', 'sum_p1_p2.pyc',
+#                      'testmodel_2.pyc', 'testmodel.pyc', 'plugins.log']
 sas_dir = os.path.join(os.path.expanduser("~"),'.sasview')
 if os.path.isdir(sas_dir):
     f_path = os.path.join(sas_dir, "sasview.log")
@@ -52,12 +52,12 @@ if os.path.isdir(sas_dir):
     f_path = os.path.join(sas_dir, 'config', "custom_config.py")
     if os.path.isfile(f_path):
         os.remove(f_path)
-    f_path = os.path.join(sas_dir, 'plugin_models')
-    if os.path.isdir(f_path):
-        for f in os.listdir(f_path): 
-            if f in plugin_model_list:
-                file_path =  os.path.join(f_path, f)
-                os.remove(file_path)
+    # f_path = os.path.join(sas_dir, 'plugin_models')
+    # if os.path.isdir(f_path):
+    #     for f in os.listdir(f_path):
+    #         if f in plugin_model_list:
+    #             file_path =  os.path.join(f_path, f)
+    #             os.remove(file_path)
                     
 # 'sys.maxsize' and 64bit: Not supported for python2.5
 is_64bits = False
@@ -225,10 +225,10 @@ packages.extend(["sas.sasgui.perspectives.invariant"])
 package_data['sas.sasgui.perspectives.invariant'] = [os.path.join("media",'*')]
 
 package_dir["sas.sasgui.perspectives.fitting"] = os.path.join("src", "sas", "sasgui", "perspectives", "fitting")
-package_dir["sas.sasgui.perspectives.fitting.plugin_models"] = os.path.join("src", "sas", "sasgui", "perspectives", "fitting", "plugin_models")
-packages.extend(["sas.sasgui.perspectives.fitting", 
-                 "sas.sasgui.perspectives.fitting.plugin_models"])
-package_data['sas.sasgui.perspectives.fitting'] = ['media/*','plugin_models/*']
+# package_dir["sas.sasgui.perspectives.fitting.plugin_models"] = os.path.join("src", "sas", "sasgui", "perspectives", "fitting", "plugin_models")
+packages.extend(["sas.sasgui.perspectives.fitting",#"sas.sasgui.perspectives.fitting.plugin_models"
+                 ])
+package_data['sas.sasgui.perspectives.fitting'] = ['media/*']
 
 packages.extend(["sas.sasgui.perspectives", "sas.sasgui.perspectives.calculator"])    
 package_data['sas.sasgui.perspectives.calculator'] = ['images/*', 'media/*']
@@ -248,7 +248,7 @@ cephes_dir = os.path.join("src", "sas", "models", "c_extension", "cephes")
 c_model_dir = os.path.join("src", "sas", "models", "c_extension", "c_models")
 smear_dir  = os.path.join("src", "sas", "models", "c_extension", "c_smearer")
 gen_dir  = os.path.join("src", "sas", "models", "c_extension", "c_gen")
-wrapper_dir  = os.path.join("src", "sas", "models", "c_extension", "python_wrapper", "generated")
+# wrapper_dir  = os.path.join("src", "sas", "models", "c_extension", "python_wrapper", "generated")
 model_dir = os.path.join("src", "sas","models")
 
 #if os.path.isdir(wrapper_dir):
@@ -290,11 +290,11 @@ def append_file(file_list, dir_path):
         
 model_sources = []
 append_file(file_list=model_sources, dir_path=igordir)
-#append_file(file_list=model_sources, dir_path=c_model_dir)
-#append_file(file_list=model_sources, dir_path=wrapper_dir)
+append_file(file_list=model_sources, dir_path=c_model_dir)
+# append_file(file_list=model_sources, dir_path=wrapper_dir)
 
-smear_sources = []
-append_file(file_list=smear_sources, dir_path=smear_dir)
+# smear_sources = []
+# append_file(file_list=smear_sources, dir_path=smear_dir)
         
 package_dir["sas.models"] = model_dir
 package_dir["sas.models.sas_extension"] = os.path.join("src", "sas", "models", "sas_extension")
@@ -302,36 +302,36 @@ package_data['sas.models'] = [os.path.join('media', "*.*")]
 package_data['sas.models'] += [os.path.join('media','img', "*.*")]
 packages.extend(["sas.models","sas.models.sas_extension"])
     
-smearer_sources = [os.path.join(smear_dir, "smearer.cpp"),
-                  os.path.join(smear_dir, "smearer_module.cpp")]
+# smearer_sources = [os.path.join(smear_dir, "smearer.cpp"),
+#                   os.path.join(smear_dir, "smearer_module.cpp")]
 geni_sources = [os.path.join(gen_dir, "sld2i_module.cpp")]
 if os.name=='nt':
-    smearer_sources.append(os.path.join(igordir, "winFuncs.c"))
+#     smearer_sources.append(os.path.join(igordir, "winFuncs.c"))
     geni_sources.append(os.path.join(igordir, "winFuncs.c"))
 
 c_models = [ 
-    #Extension("sas.models.sas_extension.c_models",
+    # Extension("sas.models.sas_extension.c_models",
     #    sources=model_sources,
     #    include_dirs=[
     #        igordir, includedir, c_model_dir, numpy_incl_path, cephes_dir
     #    ],
-    #),
+    # ),
 
     # Smearer extension
-    Extension("sas.models.sas_extension.smearer",
-        sources = smearer_sources,
-        include_dirs=[igordir,  smear_dir, numpy_incl_path],
-    ),
-                    
-    Extension("sas.models.sas_extension.smearer2d_helper",
-        sources = [
-            os.path.join(smear_dir, "smearer2d_helper_module.cpp"),
-            os.path.join(smear_dir, "smearer2d_helper.cpp"),
-            os.path.join(igordir, "winFuncs.c"),
-        ],
-        include_dirs=[smear_dir, numpy_incl_path],
-    ),
-                    
+    # Extension("sas.models.sas_extension.smearer",
+    #     sources = smearer_sources,
+    #     include_dirs=[igordir,  smear_dir, numpy_incl_path],
+    # ),
+    #
+    # Extension("sas.models.sas_extension.smearer2d_helper",
+    #     sources = [
+    #         os.path.join(smear_dir, "smearer2d_helper_module.cpp"),
+    #         os.path.join(smear_dir, "smearer2d_helper.cpp"),
+    #         os.path.join(igordir, "winFuncs.c"),
+    #     ],
+    #     include_dirs=[smear_dir, numpy_incl_path],
+    # ),
+    #
     Extension("sas.models.sas_extension.sld2i",
         sources = [
             os.path.join(gen_dir, "sld2i_module.cpp"),
