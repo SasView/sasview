@@ -177,10 +177,10 @@ Parallelpipeds
 - FractalCoreShell_
 - GaussLorentzGel_
 - GelFitModel_
-- Guinier_
+- GuinierLaw_
 - GuinierPorod_
 - LineModel_
-- Lorentz_
+- LorentzOZ_
 - MassFractalModel_
 - MassSurfaceFractal_
 - PeakGaussModel_
@@ -3470,7 +3470,7 @@ B Hammouda, D L Ho and S R Kline, *Insight into Clustering in Poly(ethylene oxid
 
 
 
-.. _Lorentz:
+.. _LorentzOZ:
 
 **2.2.4. Lorentz (Ornstein-Zernicke Model)**
 
@@ -3936,7 +3936,7 @@ E Raphael, J F Joanny, *Europhysics Letters*, 11 (1990) 179
 
 
 
-.. _Guinier:
+.. _GuinierLaw:
 
 **2.2.15. Guinier (Model)**
 
