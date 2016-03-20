@@ -10,6 +10,7 @@ Shape-Independent Functions
     models/broad_peak.rst
     models/correlation_length.rst
     models/dab.rst
+    models/fractal.rst
     models/fractal_core_shell.rst
     models/gauss_lorentz_gel.rst
     models/gaussian_peak.rst
