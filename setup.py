@@ -253,9 +253,9 @@ packages.append("sas.sascalc.data_util")
 package_dir["sas.sasgui.plottools"] = os.path.join("src", "sas", "sasgui", "plottools")
 packages.append("sas.sasgui.plottools")
 
-# Last of the sas.models
-package_dir["sas.models"] = os.path.join("src", "sas", "models")
-packages.append("sas.models")
+# # Last of the sas.models
+# package_dir["sas.models"] = os.path.join("src", "sas", "models")
+# packages.append("sas.models")
 
 IGNORED_FILES = [".svn"]
 if not os.name=='nt':
