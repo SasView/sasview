@@ -2941,7 +2941,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         :param evt: Triggers on clicking ? in Magnetic Angles? box
         """
 
-        _TreeLocation = "user/perspectives/fitting/mag_help.html"
+        _TreeLocation = "user/sasgui/perspectives/fitting/mag_help.html"
         _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation, "",
                                           "Polarized Beam/Magnetc Help")
 
@@ -2987,7 +2987,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         :param evt: Triggers on clicking ? in polydispersity box
         """
 
-        _TreeLocation = "user/perspectives/fitting/pd_help.html"
+        _TreeLocation = "user/sasgui/perspectives/fitting/pd_help.html"
         _PageAnchor = ""
         _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation,
                                           _PageAnchor, "Polydispersity Help")
