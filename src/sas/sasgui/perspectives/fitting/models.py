@@ -150,7 +150,7 @@ def compile_file(dir):
     """
     try:
         import compileall
-        compileall.compile_dir(dir=dir, ddir=dir, force=1,
+        compileall.compile_dir(dir=dir, ddir=dir, force=0,
                                quiet=report_problem)
     except:
         return sys.exc_info()[1]
