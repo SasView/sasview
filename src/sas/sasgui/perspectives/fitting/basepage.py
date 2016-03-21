@@ -2145,7 +2145,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         struct_factor = self.structurebox.GetClientData(s_id)
 
         if  struct_factor != None:
-            from sas.models.MultiplicationModel import MultiplicationModel
+            from sas.sascalc.fit.MultiplicationModel import MultiplicationModel
             self.model = MultiplicationModel(form_factor, struct_factor())
             # multifunctional form factor
             if len(form_factor.non_fittable) > 0:

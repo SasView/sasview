@@ -383,7 +383,7 @@ class ModelManagerBase:
 
         """
         if int(evt.GetId()) in self.form_factor_dict.keys():
-            from sas.models.MultiplicationModel import MultiplicationModel
+            from sas.sascalc.fit.MultiplicationModel import MultiplicationModel
             self.model_dictionary[MultiplicationModel.__name__] = MultiplicationModel
             model1, model2 = self.form_factor_dict[int(evt.GetId())]
             model = MultiplicationModel(model1, model2)
