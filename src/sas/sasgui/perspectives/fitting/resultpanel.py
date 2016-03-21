@@ -9,6 +9,8 @@ import wx
 import wx.lib.newevent
 from wx.aui import AuiNotebook as Notebook
 
+import datetime
+
 from bumps.gui.convergence_view import ConvergenceView
 from bumps.gui.uncertainty_view import UncertaintyView, CorrelationView, TraceView
 from bumps.dream.stats import var_stats, format_vars
@@ -55,8 +57,11 @@ class ResultPanel(Notebook, PanelBase):
             event.Skip()
 
     def on_plot_results(self, event):
-        self.frame.Show()
+        self.frame.Show(True)
         result = event.result[0][0]
+        filename = result.data.sas_data.filename
+        current_time = datetime.datetime.now().strftime("%I:%M%p, %B %d, %Y")
+        self.parent.SetTitle(self.window_name + " - " + filename + " - " + current_time)
         if hasattr(result, 'convergence'):
             best, pop = result.convergence[:, 0], result.convergence[:, 1:]
             self._get_view(ConvergenceView).update(best, pop)
