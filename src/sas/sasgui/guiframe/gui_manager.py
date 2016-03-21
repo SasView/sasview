@@ -1341,14 +1341,6 @@ class ViewerFrame(PARENT_FRAME):
         self._help_menu = wx.Menu()
         style = self.__gui_style & GUIFRAME.WELCOME_PANEL_ON
 
-        if style == GUIFRAME.WELCOME_PANEL_ON or custom_config != None:
-            # add the welcome panel menu item
-            if config.WELCOME_PANEL_ON and self.defaultPanel is not None:
-                wx_id = wx.NewId()
-                self._help_menu.Append(wx_id, '&Welcome', '')
-                wx.EVT_MENU(self, wx_id, self.show_welcome_panel)
-
-        self._help_menu.AppendSeparator()
         wx_id = wx.NewId()
         self._help_menu.Append(wx_id, '&Documentation', '')
         wx.EVT_MENU(self, wx_id, self._onSphinxDocs)
