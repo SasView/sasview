@@ -6,7 +6,7 @@ SasView User Documentation
 .. toctree::
    :maxdepth: 1
 
-   SasView (4.x.x) Model Documentation <index>
+   SasView Model Documentation <index>
 
    Analysis <analysis>
    

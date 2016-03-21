@@ -14,7 +14,7 @@ Sphere Functions
     models/core_shell_sphere.rst
     models/fuzzy_sphere.rst
     models/linear_pearls.rst
-    models/multi_shell.rst
+    models/multilayer_vesicle.rst
     models/onion.rst
     models/polymer_micelle.rst
     models/raspberry.rst
