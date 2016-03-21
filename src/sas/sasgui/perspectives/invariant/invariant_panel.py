@@ -1897,7 +1897,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
     :param evt: Triggers on clicking the help button
     """
 
-        _TreeLocation = "user/perspectives/invariant/invariant_help.html"
+        _TreeLocation = "user/sasgui/perspectives/invariant/invariant_help.html"
         _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
                                           "Invariant Help")
 
