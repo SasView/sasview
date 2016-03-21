@@ -37,10 +37,12 @@ SASMODELS_SOURCE_PROLOG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sa
 SASMODELS_SOURCE_REF_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "ref", "models")
 SASMODELS_SOURCE_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "model")
 SASMODELS_SOURCE_IMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "model", "img")
+SASMODELS_SOURCE_AUTOIMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "_build", "html","_images")
 SASMODELS_DEST_PROLOG = os.path.join(CURRENT_SCRIPT_DIR, "source")
 SASMODELS_DEST_REF_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "source", "user")
 SASMODELS_DEST_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "source", "user", "models")
 SASMODELS_DEST_IMG = os.path.join(CURRENT_SCRIPT_DIR,  "source", "user", "model-imgs", "new-models")
+SASMODELS_DEST_BUILDIMG = os.path.join(CURRENT_SCRIPT_DIR,  "source", "user", "models", "img")
 
 #if os.path.exists(SASMODELS_SOURCE_PROLOG):
 #    print "Found models prolog folder at ", SASMODELS_SOURCE_PROLOG
@@ -144,6 +146,7 @@ def retrieve_user_docs():
 
     print "=== And the Sasmodels Docs ===" 
     # Make sure we have the relevant images for the new sasmodels documentation
+    # First(!) we'll make a local reference copy for SasView (/new-models will be cleaned each build)
     if os.path.exists(SASMODELS_SOURCE_IMG):
         print "Found img  folder SASMODELS_SOURCE_IMG    at ", SASMODELS_SOURCE_IMG
         if os.path.exists(SASMODELS_DEST_IMG):
@@ -154,6 +157,15 @@ def retrieve_user_docs():
                 tohere=os.path.join(SASMODELS_DEST_IMG,files)
                 shutil.copy(fromhere,tohere)
 
+    if os.path.exists(SASMODELS_SOURCE_AUTOIMG):
+        print "Found img  folder SASMODELS_SOURCE_AUTOIMG    at ", SASMODELS_SOURCE_AUTOIMG
+        if os.path.exists(SASMODELS_DEST_IMG):
+            print "Copying sasmodels model auto-generated image files..."
+            for files in os.listdir(SASMODELS_SOURCE_AUTOIMG):
+                fromhere=os.path.join(SASMODELS_SOURCE_AUTOIMG,files)
+                tohere=os.path.join(SASMODELS_DEST_IMG,files)
+                shutil.copy(fromhere,tohere)
+    
     # And the rst prolog with the unit substitutions
     if os.path.exists(SASMODELS_SOURCE_PROLOG):
         print "Found prolog folder SASMODELS_SOURCE_PROLOG at ", SASMODELS_SOURCE_PROLOG
@@ -202,6 +214,24 @@ def retrieve_user_docs():
                     fromhere=os.path.join(SASMODELS_SOURCE_MODELS,files)
                     tohere=os.path.join(SASMODELS_DEST_MODELS,files)
                     shutil.copy(fromhere,tohere)
+        else:
+            print "Missing docs folder SASMODELS_DEST_MODELS at ", SASMODELS_DEST_MODELS
+            os.makedirs(SASMODELS_DEST_MODELS)
+            if not os.path.exists(SASMODELS_DEST_BUILDIMG):
+                os.makedirs(SASMODELS_DEST_BUILDIMG)
+            print "Created docs folder SASMODELS_DEST_MODELS at ", SASMODELS_DEST_MODELS
+            print "Copying model files for build..."
+            for files in os.listdir(SASMODELS_SOURCE_MODELS):
+                if files.endswith(".rst"):
+                    fromhere=os.path.join(SASMODELS_SOURCE_MODELS,files)
+                    tohere=os.path.join(SASMODELS_DEST_MODELS,files)
+                    shutil.copy(fromhere,tohere)
+            # No choice but to do this because model files are all coded for images in /models/img
+            print "Copying image files for build..."
+            for files in os.listdir(SASMODELS_DEST_IMG):
+                fromhere=os.path.join(SASMODELS_DEST_IMG,files)
+                tohere=os.path.join(SASMODELS_DEST_BUILDIMG,files)
+                shutil.copy(fromhere,tohere)
 
 
 def retrieve_bumps_docs():
