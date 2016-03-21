@@ -383,7 +383,8 @@ class DensityPanel(ScrolledPanel, PanelBase):
     :param evt: Triggers on clicking the help button
     """
 
-        _TreeLocation = "user/perspectives/calculator/density_calculator_help.html"
+        _TreeLocation = "user/sasgui/perspectives/calculator/"
+        _TreeLocation += "density_calculator_help.html"
         _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
                                           "Density/Volume Calculator Help")
 

@@ -1080,7 +1080,7 @@ class FitPage(BasicPage):
     :param evt: Triggers on clicking the help button
     """
 
-        _TreeLocation = "user/perspectives/fitting/fitting_help.html"
+        _TreeLocation = "user/sasgui/perspectives/fitting/fitting_help.html"
         _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation, "",
                                           "General Fitting Help")
 
@@ -1099,7 +1099,7 @@ class FitPage(BasicPage):
     :param evt: Triggers on clicking the help button
     """
 
-        _TreeLocation = "user/perspectives/fitting/sm_help.html"
+        _TreeLocation = "user/sasgui/perspectives/fitting/sm_help.html"
         _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation, "",
                                           "Instrumental Resolution Smearing \
                                           Help")

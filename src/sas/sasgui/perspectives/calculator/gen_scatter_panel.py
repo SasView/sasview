@@ -912,7 +912,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
     :param evt: Triggers on clicking the help button
     """
 
-        _TreeLocation = "user/perspectives/calculator/sas_calculator_help.html"
+        _TreeLocation = "user/sasgui/perspectives/calculator/"
+        _TreeLocation += "sas_calculator_help.html"
         _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
                                           "General Scattering Calculator Help")
 

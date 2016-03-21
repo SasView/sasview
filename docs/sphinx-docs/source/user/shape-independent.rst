@@ -1,3 +1,6 @@
+..
+    Generated from doc/gentoc.py -- DO NOT EDIT --
+
 .. Shape-independent:
 
 ***************************
@@ -10,6 +13,7 @@ Shape-Independent Functions
     models/broad_peak.rst
     models/correlation_length.rst
     models/dab.rst
+    models/fractal.rst
     models/fractal_core_shell.rst
     models/gauss_lorentz_gel.rst
     models/gaussian_peak.rst
@@ -20,7 +24,6 @@ Shape-Independent Functions
     models/lorentz.rst
     models/mass_fractal.rst
     models/mass_surface_fractal.rst
-    models/micelle_spherical_core.rst
     models/mono_gauss_coil.rst
     models/peak_lorentz.rst
     models/poly_gauss_coil.rst

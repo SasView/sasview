@@ -954,7 +954,7 @@ class InversionControl(ScrolledPanel, PanelBase):
     :param evt: Triggers on clicking the help button
     """
 
-        _TreeLocation = "user/perspectives/pr/pr_help.html"
+        _TreeLocation = "user/sasgui/perspectives/pr/pr_help.html"
         _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
                                           "P(r) Help")
 

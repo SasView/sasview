@@ -34,7 +34,7 @@ SASVIEW_TEST = os.path.join(SASVIEW_SRC, "..", "sasview", "test", "media")
 # We are currently here:
 #/sasview-local-trunk/docs/sphinx-docs/build_sphinx.py
 SASMODELS_SOURCE_PROLOG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc")
-#SASMODELS_SOURCE_REF_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "ref", "models")
+SASMODELS_SOURCE_REF_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "ref", "models")
 SASMODELS_SOURCE_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "model")
 SASMODELS_SOURCE_IMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "model", "img")
 SASMODELS_DEST_PROLOG = os.path.join(CURRENT_SCRIPT_DIR, "source")
@@ -69,6 +69,19 @@ SPHINX_SOURCE_TEST = os.path.join(SPHINX_SOURCE, "test")
 BUMPS_DOCS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..",
                           "bumps", "doc", "guide")
 BUMPS_TARGET = os.path.join(SPHINX_SOURCE_PERSPECTIVES, "fitting")
+
+def inplace_change(filename, old_string, new_string):
+# Thanks to http://stackoverflow.com/questions/4128144/replace-string-within-file-contents
+        s=open(filename).read()
+        if old_string in s:
+                print 'Changing "{old_string}" to "{new_string}"'.format(**locals())
+                s=s.replace(old_string, new_string)
+                f=open(filename, 'w')
+                f.write(s)
+                f.flush()
+                f.close()
+        else:
+                print 'No occurences of "{old_string}" found.'.format(**locals())
 
 def _remove_dir(dir_path):
     """Removes the given directory."""
@@ -153,18 +166,31 @@ def retrieve_user_docs():
                     tohere=os.path.join(SASMODELS_DEST_PROLOG,files)
                     shutil.copy(fromhere,tohere)
 
-    # ACTUALLY IT TURNED OUT WE NEED TO EDIT THE TOCTREES SO THIS COPY WASN'T USEFUL IN THE END!
-    # And the relevant rst descriptions for the new sasmodels documentation
-#    if os.path.exists(SASMODELS_SOURCE_REF_MODELS):
-#        print "Found docs folder SASMODELS_SOURCE_REF_MODELS at ", SASMODELS_SOURCE_REF_MODELS
-#        if os.path.exists(SASMODELS_DEST_REF_MODELS):
-#            print "Found docs folder SASMODELS_DEST_REF_MODELS   at ", SASMODELS_DEST_REF_MODELS
-#            print "Copying sasmodels model toctree files..."
-#            for files in os.listdir(SASMODELS_SOURCE_REF_MODELS):
-#                if files.endswith(".rst"):
-#                    fromhere=os.path.join(SASMODELS_SOURCE_REF_MODELS,files)
-#                    tohere=os.path.join(SASMODELS_DEST_REF_MODELS,files)
-#                    shutil.copy(fromhere,tohere)
+    if os.path.exists(SASMODELS_SOURCE_REF_MODELS):
+        print "Found docs folder SASMODELS_SOURCE_REF_MODELS at ", SASMODELS_SOURCE_REF_MODELS
+        if os.path.exists(SASMODELS_DEST_REF_MODELS):
+            print "Found docs folder SASMODELS_DEST_REF_MODELS   at ", SASMODELS_DEST_REF_MODELS
+            print "Copying sasmodels model toctree files..."
+            for files in os.listdir(SASMODELS_SOURCE_REF_MODELS):
+                if files.endswith(".rst"):
+                    fromhere=os.path.join(SASMODELS_SOURCE_REF_MODELS,files)
+                    tohere=os.path.join(SASMODELS_DEST_REF_MODELS,files)
+                    shutil.copy(fromhere,tohere)
+    # But need to change the path to the model docs in the tocs
+    for files in os.listdir(SASMODELS_DEST_REF_MODELS):
+#        print files
+        if files.startswith("shape"):
+            print "Changing toc paths in", files
+            inplace_change(os.path.join(SASMODELS_DEST_REF_MODELS,files), "../../model/", "models/")
+        if files.startswith("sphere"):
+            print "Changing toc paths in", files
+            inplace_change(os.path.join(SASMODELS_DEST_REF_MODELS,files), "../../model/", "models/")
+        if files.startswith("custom"):
+            print "Changing toc paths in", files
+            inplace_change(os.path.join(SASMODELS_DEST_REF_MODELS,files), "../../model/", "models/")
+        if files.startswith("structure"):
+            print "Changing toc paths in", files
+            inplace_change(os.path.join(SASMODELS_DEST_REF_MODELS,files), "../../model/", "models/")
 
     if os.path.exists(SASMODELS_SOURCE_MODELS):
         print "Found docs folder SASMODELS_SOURCE_MODELS at ", SASMODELS_SOURCE_MODELS

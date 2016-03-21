@@ -16,8 +16,8 @@ from sas.sasgui.guiframe.events import StatusEvent
 # Explicitly import from the pluginmodel module so that py2exe
 # places it in the distribution. The Model1DPlugin class is used
 # as the base class of plug-in models.
-from sas.models.pluginmodel import Model1DPlugin
-from sas.models.BaseComponent import BaseComponent
+from sas.sascalc.fit.pluginmodel import Model1DPlugin
+from sas.sascalc.calculator.BaseComponent import BaseComponent
 from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 from sasmodels import sasview_model,core
 
@@ -180,7 +180,6 @@ def _findModels(dir):
             toks = os.path.splitext(os.path.basename(item))
             if toks[1] == '.py' and not toks[0] == '__init__':
                 name = toks[0]
-
                 path = [os.path.abspath(dir)]
                 file = None
                 try:
@@ -196,6 +195,10 @@ def _findModels(dir):
                                                          str(sys.exc_type),
                                                          sys.exc_info()[1])
                             log(msg)
+                    else:
+                        filename = os.path.join(dir, item)
+                        plugins[name] = sasview_model.make_class_from_file(filename) 
+
                 except:
                     msg = "Error accessing Model"
                     msg += " in %s\n  %s %s \n" % (name,
@@ -210,6 +213,7 @@ def _findModels(dir):
         # Don't deal with bad plug-in imports. Just skip.
         msg = "Could not import model plugin: %s" % sys.exc_info()[1]
         log(msg)
+
     return plugins
 
 
@@ -310,13 +314,12 @@ class ModelManagerBase:
             if model._model_info['ER'] is not None:
                 self.multiplication_factor.append(model)
 
-
         #Looking for plugins
         self.stored_plugins = self.findModels()
         self.plugins = self.stored_plugins.values()
         for name, plug in self.stored_plugins.iteritems():
             self.model_dictionary[name] = plug
-
+        
         self._get_multifunc_models()
 
         return 0

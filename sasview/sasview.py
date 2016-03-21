@@ -78,15 +78,14 @@ import wxcruft
 wxcruft.call_later_fix()
 #wxcruft.trace_new_id()
 
-# The below will make sure that sasview application uses the matplotlib font
-# bundled with sasview.
-if hasattr(sys, 'frozen'):
-    mplconfigdir = os.path.join(os.path.expanduser("~"), '.matplotlib')
-    if not os.path.exists(mplconfigdir):
-        os.mkdir(mplconfigdir)
-    os.environ['MPLCONFIGDIR'] = mplconfigdir
-    reload(sys)
-    sys.setdefaultencoding("iso-8859-1")
+#Always use private .matplotlib setup to avoid conflicts with other
+#uses of matplotlib
+mplconfigdir = os.path.join(os.path.expanduser("~"),'.sasview','.matplotlib')
+if not os.path.exists(mplconfigdir):
+    os.mkdir(mplconfigdir)
+os.environ['MPLCONFIGDIR'] = mplconfigdir
+reload(sys)
+sys.setdefaultencoding("iso-8859-1")
 from sas.sasgui.guiframe import gui_manager
 from sas.sasgui.guiframe.gui_style import GUIFRAME
 from welcome_panel import WelcomePanel

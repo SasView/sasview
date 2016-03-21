@@ -148,7 +148,8 @@ class ImageFrame(PlotFrame):
         :param evt: Triggers on clicking "how to" in help menu
         """
 
-        _TreeLocation = "user/perspectives/calculator/image_viewer_help.html"
+        _TreeLocation = "user/sasgui/perspectives/calculator/"
+        _TreeLocation += "image_viewer_help.html"
         _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
                                           "Image Viewer Help")
 

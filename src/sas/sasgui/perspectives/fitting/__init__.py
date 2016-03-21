@@ -38,10 +38,10 @@ def data_files():
     """
     data_files = []
     path = os.path.dirname(__file__)
-    p_path = os.path.join(path, 'plugin_models')
-    for f in findall(p_path):
-        data_files.append(('plugin_models', [f]))
-    path = get_data_path(media="media")
+    # p_path = os.path.join(path, 'plugin_models')
+    # for f in findall(p_path):
+    #     data_files.append(('plugin_models', [f]))
+    # path = get_data_path(media="media")
     for f in findall(path):
         data_files.append(('media/fitting_media', [f]))
     

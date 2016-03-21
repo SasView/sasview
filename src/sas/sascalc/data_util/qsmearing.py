@@ -18,19 +18,18 @@ from sasmodels.resolution2d import Pinhole2D
 
 def smear_selection(data, model = None):
     """
-    Creates the right type of smearer according 
+    Creates the right type of smearer according
     to the data.
-
     The canSAS format has a rule that either
     slit smearing data OR resolution smearing data
-    is available. 
-    
+    is available.
+
     For the present purpose, we choose the one that
     has none-zero data. If both slit and resolution
-    smearing arrays are filled with good data 
+    smearing arrays are filled with good data
     (which should not happen), then we choose the
-    resolution smearing data. 
-    
+    resolution smearing data.
+
     :param data: Data1D object
     :param model: sas.model instance
     """
@@ -42,15 +41,15 @@ def smear_selection(data, model = None):
         elif data.dqx_data == None or data.dqy_data == None:
             return None
         return Pinhole2D(data)
-    
+
     if  not hasattr(data, "dx") and not hasattr(data, "dxl")\
          and not hasattr(data, "dxw"):
         return None
-    
+
     # Look for resolution smearing data
     _found_resolution = False
     if data.dx is not None and len(data.dx) == len(data.x):
-        
+
         # Check that we have non-zero data
         if data.dx[0] > 0.0:
             _found_resolution = True
@@ -64,17 +63,17 @@ def smear_selection(data, model = None):
     _found_slit = False
     if data.dxl is not None and len(data.dxl) == len(data.x) \
         and data.dxw is not None and len(data.dxw) == len(data.x):
-        
+
         # Check that we have non-zero data
         if data.dxl[0] > 0.0 or data.dxw[0] > 0.0:
             _found_slit = True
-        
+
         # Sanity check: all data should be the same as a function of Q
         for item in data.dxl:
             if data.dxl[0] != item:
                 _found_resolution = False
                 break
-            
+
         for item in data.dxw:
             if data.dxw[0] != item:
                 _found_resolution = False
@@ -97,12 +96,10 @@ class PySmear(object):
     def apply(self, iq_in, first_bin=0, last_bin=None):
         """
         Apply the resolution function to the data.
-
         Note that this is called with iq_in matching data.x, but with
         iq_in[first_bin:last_bin] set to theory values for these bins,
         and the remainder left undefined.  The first_bin, last_bin values
         should be those returned from get_bin_range.
-
         The returned value is of the same length as iq_in, with the range
         first_bin:last_bin set to the resolution smeared values.
         """
@@ -122,9 +119,7 @@ class PySmear(object):
     def get_bin_range(self, q_min=None, q_max=None):
         """
         For a given q_min, q_max, find the corresponding indices in the data.
-
         Returns first, last.
-
         Note that these are indexes into q from the data, not the q_calc
         needed by the resolution function.  Note also that these are the
         indices, not the range limits.  That is, the complete range will be

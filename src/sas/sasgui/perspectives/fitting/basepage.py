@@ -1894,7 +1894,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         try:
             if mod_cat == custom_model:
                 for model in self.model_list_box[mod_cat]:
-                    str_m = str(model).split(".")[0]
+                    if 'sasmodels.sasview_model.' in str(model):
+                        str_m = model._model_info['id']
+                    else:
+                        str_m = str(model).split(".")[0]
                     #self.model_box.Append(str_m)
                     m_list.append(self.model_dict[str_m])
             else:
@@ -2860,13 +2863,13 @@ class BasicPage(ScrolledPanel, PanelBase):
         :param evt: on Help Button pressed event
         """
 
-        _TreeLocation = 'user/models/model_functions.html'
         if self.model != None:
             name = self.formfactorbox.GetValue()
-            _PageAnchor = '#' + name.lower()
+            _TreeLocation = 'user/models/'+ name.lower()+'.html'
             _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation,
-                                              _PageAnchor, name + " Help")
+                                              "", name + " Help")
         else:
+            _TreeLocation = 'user/index.html'
             _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation,
                                               "", "General Model Help")
 
@@ -2938,7 +2941,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         :param evt: Triggers on clicking ? in Magnetic Angles? box
         """
 
-        _TreeLocation = "user/perspectives/fitting/mag_help.html"
+        _TreeLocation = "user/sasgui/perspectives/fitting/mag_help.html"
         _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation, "",
                                           "Polarized Beam/Magnetc Help")
 
@@ -2984,7 +2987,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         :param evt: Triggers on clicking ? in polydispersity box
         """
 
-        _TreeLocation = "user/perspectives/fitting/pd_help.html"
+        _TreeLocation = "user/sasgui/perspectives/fitting/pd_help.html"
         _PageAnchor = ""
         _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation,
                                           _PageAnchor, "Polydispersity Help")
