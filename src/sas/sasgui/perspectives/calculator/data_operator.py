@@ -633,7 +633,8 @@ class DataOperPanel(wx.ScrolledWindow):
     :param evt: Triggers on clicking the help button
     """
 
-        _TreeLocation = "user/perspectives/calculator/data_operator_help.html"
+        _TreeLocation = "user/sasgui/perspectives/calculator/"
+        _TreeLocation += "data_operator_help.html"
         _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
                                           "Data Operation Help")
 
