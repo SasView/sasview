@@ -8,8 +8,6 @@ SasView User Documentation
 
    SasView (4.x.x) Model Documentation <index>
 
-   SasView (3.x.x) Model Documentation <models/olddocs/model_functions>
-   
    Analysis <analysis>
    
    Tools <tools>
