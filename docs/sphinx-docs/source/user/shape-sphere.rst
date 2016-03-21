@@ -1,3 +1,6 @@
+..
+    Generated from doc/gentoc.py -- DO NOT EDIT --
+
 .. shape-sphere:
 
 ****************
@@ -13,6 +16,7 @@ Sphere Functions
     models/linear_pearls.rst
     models/multi_shell.rst
     models/onion.rst
+    models/polymer_micelle.rst
     models/raspberry.rst
     models/sphere.rst
     models/spherepy.rst

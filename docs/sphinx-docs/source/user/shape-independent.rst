@@ -1,3 +1,6 @@
+..
+    Generated from doc/gentoc.py -- DO NOT EDIT --
+
 .. Shape-independent:
 
 ***************************
@@ -21,7 +24,6 @@ Shape-Independent Functions
     models/lorentz.rst
     models/mass_fractal.rst
     models/mass_surface_fractal.rst
-    models/micelle_spherical_core.rst
     models/mono_gauss_coil.rst
     models/peak_lorentz.rst
     models/poly_gauss_coil.rst

@@ -1,3 +1,6 @@
+..
+    Generated from doc/gentoc.py -- DO NOT EDIT --
+
 .. Models:
 
 ***************
@@ -12,6 +15,7 @@ Model Functions
     shape-paracrystal.rst
     shape-parallelepiped.rst
     shape-sphere.rst
+    sphere-based.rst
     shape-independent.rst
     structure-factor.rst
     custom-models.rst

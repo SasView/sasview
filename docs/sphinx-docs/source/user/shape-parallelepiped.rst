@@ -1,3 +1,6 @@
+..
+    Generated from doc/gentoc.py -- DO NOT EDIT --
+
 .. shape-parallelepiped:
 
 ************************
