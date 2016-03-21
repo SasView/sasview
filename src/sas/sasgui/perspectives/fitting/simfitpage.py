@@ -498,7 +498,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
 
     :param evt: Triggers on clicking the help button
     """
-        _TreeLocation = "user/perspectives/fitting/fitting_help.html"
+        _TreeLocation = "user/sasgui/perspectives/fitting/fitting_help.html"
         _PageAnchor = "#simultaneous-fit-mode"
         _doc_viewer = DocumentationWindow(self, self.ID_DOC, _TreeLocation,
                                           _PageAnchor,
