@@ -141,10 +141,6 @@ class Reader:
                 data_conv_P = None
                 default_p_unit = " "
                 lam_unit = lam_header[1].replace("[","").replace("]","")
-                for i,x_val in output.x:
-                    output.x[i], output.x_unit = self._unit_conversion(x_val, lam_unit, default_z_unit)
-                for i,y_val in output.y:
-                    output.y[i], output.y_unit = self._unit_conversion(y_val, " ", default_p_unit)
                 varheader=[zvals[0],dzvals[0],lamvals[0],dlamvals[0],Pvals[0],dPvals[0]]
                 valrange=range(1, len(zvals))
                 for i in valrange:
@@ -162,13 +158,12 @@ class Reader:
 
                 input_f.close()
 
-                #Data
-                output.x = x #[x != 0]
-                output.y = y #[x != 0]
+                output.x, output.x_unit = self._unit_conversion(x, lam_unit, default_z_unit)
+                output.y = y
+                output.dx, output.dx_unit = self._unit_conversion(dx, lam_unit, default_z_unit)
                 output.dy = dy
-                output.dx = dx
-                output.lam = lam
-                output.dlam = dlam
+                output.lam, output.lam_unit = self._unit_conversion(lam, lam_unit, default_z_unit)
+                output.dlam, output.dlam_unit = self._unit_conversion(dlam, lam_unit, default_z_unit)
 
                 output.xaxis("\rm{z}", output.x_unit)
                 output.yaxis("\\rm{P/P0}", output.y_unit)
@@ -181,9 +176,7 @@ class Reader:
                 zaccept_unit = zaccept_unit_split[1].replace("]","")
                 if zaccept_unit.strip() == '\AA^-1':
                     zaccept_unit = "1/A"
-                output.sample.zacceptance=float(paramvals[7])
-                output.sample.zacceptance=self._unit_conversion(output.sample.zacceptance,
-                                                                zaccept_unit, "1/" + default_z_unit)
+                output.sample.zacceptance=(float(paramvals[7]),zaccept_unit)
                 output.vars=varheader
 
                 if len(output.x) < 1:
