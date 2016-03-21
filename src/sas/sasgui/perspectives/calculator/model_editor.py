@@ -1345,8 +1345,8 @@ class Model(Model1DPlugin):
     name = ""
     def __init__(self):
         Model1DPlugin.__init__(self, name='')
-        P1 = make_class(load_model_info('%s'))
-        P2 = make_class(load_model_info('%s'))
+        P1 = make_class('%s')
+        P2 = make_class('%s')
         p_model1 = P1()
         p_model2 = P2()
         ## Setting  model name model description
