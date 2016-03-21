@@ -116,8 +116,7 @@ select the models to show/hide. To apply the selection, click *Ok*. Otherwise cl
 Model Functions
 ---------------
 
-For a complete list of all the library models available in SasView, see the section
-:ref:`Models`.
+For a complete list of all the library models available in SasView, see the Model Documentation.
 
 It is also possible to add your own models.
 
