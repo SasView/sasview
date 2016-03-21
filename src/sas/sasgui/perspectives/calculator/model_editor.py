@@ -1329,7 +1329,7 @@ if __name__ == "__main__":
 SUM_TEMPLATE = """
 # A sample of an experimental model function for Sum/Multiply(Pmodel1,Pmodel2)
 import copy
-from sas.models.pluginmodel import Model1DPlugin
+from sas.sascalc.fit.pluginmodel import Model1DPlugin
 from sasmodels.sasview_model import make_class
 from sasmodels.core import load_model_info
 # User can change the name of the model (only with single functional model)
