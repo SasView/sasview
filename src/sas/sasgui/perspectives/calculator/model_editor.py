@@ -416,7 +416,7 @@ class TextDialog(wx.Dialog):
     :param evt: Triggers on clicking the help button
     """
 
-        _TreeLocation = "user/perspectives/fitting/fitting_help.html"
+        _TreeLocation = "user/sasgui/perspectives/fitting/fitting_help.html"
         _PageAnchor = "#sum-multi-p1-p2"
         _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, _PageAnchor,
                                           "Composite Model Editor Help")
@@ -1144,7 +1144,7 @@ class EditorPanel(wx.ScrolledWindow):
     :param evt: Triggers on clicking the help button
     """
 
-        _TreeLocation = "user/perspectives/fitting/fitting_help.html"
+        _TreeLocation = "user/sasgui/perspectives/fitting/fitting_help.html"
         _PageAnchor = "#custom-model-editor"
         _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, _PageAnchor,
                                           "Custom Model Editor Help")
