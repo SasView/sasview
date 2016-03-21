@@ -2863,13 +2863,13 @@ class BasicPage(ScrolledPanel, PanelBase):
         :param evt: on Help Button pressed event
         """
 
-        _TreeLocation = 'user/models/model_functions.html'
         if self.model != None:
             name = self.formfactorbox.GetValue()
-            _PageAnchor = '#' + name.lower()
+            _TreeLocation = 'user/models/'+ name.lower()+'.html'
             _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation,
-                                              _PageAnchor, name + " Help")
+                                              "", name + " Help")
         else:
+            _TreeLocation = 'user/index.html'
             _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation,
                                               "", "General Model Help")
 
