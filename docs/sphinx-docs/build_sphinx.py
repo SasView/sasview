@@ -40,7 +40,7 @@ SASMODELS_SOURCE_IMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmo
 SASMODELS_DEST_PROLOG = os.path.join(CURRENT_SCRIPT_DIR, "source")
 SASMODELS_DEST_REF_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "source", "user")
 SASMODELS_DEST_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "source", "user", "models")
-SASMODELS_DEST_IMG = os.path.join(CURRENT_SCRIPT_DIR,  "source", "user", "models", "img")
+SASMODELS_DEST_IMG = os.path.join(CURRENT_SCRIPT_DIR,  "source", "user", "model-imgs", "new-models")
 
 #if os.path.exists(SASMODELS_SOURCE_PROLOG):
 #    print "Found models prolog folder at ", SASMODELS_SOURCE_PROLOG
