@@ -640,7 +640,8 @@ class ResolutionCalculatorPanel(ScrolledPanel):
     :param evt: Triggers on clicking the help button
     """
 
-        _TreeLocation = "user/perspectives/calculator/resolution_calculator_help.html"
+        _TreeLocation = "user/sasgui/perspectives/calculator/"
+        _TreeLocation += "resolution_calculator_help.html"
         _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
                                           "Resolution Calculator Help")
 

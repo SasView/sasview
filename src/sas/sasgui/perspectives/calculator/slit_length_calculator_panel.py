@@ -185,7 +185,8 @@ class SlitLengthCalculatorPanel(wx.Panel, PanelBase):
     :param evt: Triggers on clicking the help button
     """
 
-        _TreeLocation = "user/perspectives/calculator/slit_calculator_help.html"
+        _TreeLocation = "user/sasgui/perspectives/calculator/"
+        _TreeLocation += "slit_calculator_help.html"
         _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
                                           "Slit Length Calculator Help")
 
