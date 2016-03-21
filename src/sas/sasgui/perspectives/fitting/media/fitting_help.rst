@@ -117,7 +117,7 @@ Model Functions
 ---------------
 
 For a complete list of all the library models available in SasView, see the section
-:ref:`SasView_model_functions`.
+:ref:`Models`.
 
 It is also possible to add your own models.
 
