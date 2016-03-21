@@ -9,6 +9,6 @@ Paracrystal Functions
 
 .. toctree::
 
-    models/bcc.rst
-    models/fcc.rst
-    models/sc_crystal.rst
+    models/bcc_paracrystal.rst
+    models/fcc_paracrystal.rst
+    models/sc_paracrystal.rst
