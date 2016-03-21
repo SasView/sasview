@@ -105,13 +105,17 @@ class BaseComponent:
           where 1D arrays, ::
 
               qx_prime = [ qx[0], qx[1], qx[2], ....]
+
           and ::
+
               qy_prime = [ qy[0], qy[1], qy[2], ....]
 
         Then get ::
+
             q = numpy.sqrt(qx_prime^2+qy_prime^2)
 
         that is a qr in 1D array; ::
+
             q = [q[0], q[1], q[2], ....]
 
         ..note::
@@ -122,6 +126,7 @@ class BaseComponent:
         The method is then called the following way: ::
 
             evalDistribution(q)
+
         where q is a numpy array.
 
         :param qdist: ndarray of scalar q-values or list [qx,qy] where qx,qy are 1D ndarrays

@@ -11,8 +11,9 @@ The organization of the classes goes as:
 
 #Path to this is:           /sasview/src/sas/sasgui/guiframe/data_processor.py
 #Path to image is:          /sasview/src/sas/sasgui/guiframe/media/BatchGridClassLayout.png
-.. image::  ./guiframe/media/BatchGridClassLayout.png
-   :align:   center
+
+.. image:: ./guiframe/media/BatchGridClassLayout.png
+   :align: center
 
 """
 import wx
