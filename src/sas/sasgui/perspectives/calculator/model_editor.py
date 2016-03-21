@@ -744,6 +744,22 @@ class EditorPanel(wx.ScrolledWindow):
 
         self.param_sizer.AddMany([(param_txt, 0, wx.LEFT, 10),
                                   (self.param_tcl, 1, wx.EXPAND | wx.ALL, 10)])
+        
+        # Parameters with polydispersity
+        pd_param_txt = wx.StaticText(self, -1, 'Fit Parameters requiring polydispersity (if any): ')
+
+        pd_param_tip = "#Set the parameters and initial values.\n"
+        pd_param_tip += "#Example:\n"
+        pd_param_tip += "C = 2\nD = 2"
+        newid = wx.NewId()
+        self.pd_param_tcl = EditWindow(self, newid, wx.DefaultPosition,
+                                    wx.DefaultSize,
+                                    wx.CLIP_CHILDREN | wx.SUNKEN_BORDER)
+        self.pd_param_tcl.setDisplayLineNumbers(True)
+        self.pd_param_tcl.SetToolTipString(pd_param_tip)
+        
+        self.param_sizer.AddMany([(pd_param_txt, 0, wx.LEFT, 10),
+                                  (self.pd_param_tcl, 1, wx.EXPAND | wx.ALL, 10)])
 
     def _layout_function(self):
         """
@@ -945,24 +961,31 @@ class EditorPanel(wx.ScrolledWindow):
         elif self.check_name():
             description = self.desc_tcl.GetValue()
             param_str = self.param_tcl.GetText()
+            pd_param_str = self.pd_param_tcl.GetText()
             func_str = self.function_tcl.GetText()
             # No input for the model function
             if func_str.lstrip().rstrip():
                 if func_str.count('return') > 0:
-                    self.write_file(self.fname, description, param_str,
-                                    func_str)
-                    tr_msg = _compile_file(self.fname)
-                    msg = str(tr_msg.__str__())
-                    # Compile error
-                    if msg:
-                        msg.replace("  ", "\n")
-                        msg += "\nCompiling Failed"
-                        try:
-                            # try to remove pyc file if exists
-                            _delete_file(self.fname)
-                            _delete_file(self.fname + "c")
-                        except:
-                            pass
+                    self.write_file(self.fname, name, description, param_str,
+                                    pd_param_str, func_str)
+                    # Modified compiling test, as it will fail for sasmodels.sasview_model class
+                    # Should add a test to check that the class is correctly built 
+                    # by sasview_model.make_class_from_file?
+#                    try: 
+#                        tr_msg = _compile_file(self.fname)
+#                        msg = str(tr_msg.__str__())
+#                        # Compile error
+#                        if msg:
+#                            msg.replace("  ", "\n")
+#                            msg += "\nCompiling Failed"
+#                            try:
+#                                # try to remove pyc file if exists
+#                                _delete_file(self.fname)
+#                                _delete_file(self.fname + "c")
+#                            except:
+#                                pass
+#                    except:
+#                        pass
                 else:
                     msg = "Error: The func(x) must 'return' a value at least.\n"
                     msg += "For example: \n\nreturn 2*x"
@@ -970,31 +993,38 @@ class EditorPanel(wx.ScrolledWindow):
                 msg = 'Error: Function is not defined.'
         else:
             msg = "Name exists already."
+
         # Prepare the messagebox
         if self.base != None and not msg:
             self.base.update_custom_combo()
+            # Passed exception in import test as it will fail for sasmodels.sasview_model class
+            # Should add similar test for new style?
             Model = None
             try:
                 exec "from %s import Model" % name
             except:
-                msg = 'new model fails to import in python'
-                try:
-                    # try to remove pyc file if exists
-                    _delete_file(self.fname + "c")
-                except:
-                    pass
-        if self.base != None and not msg:
-            try:
-                Model().run(0.01)
-            except:
-                msg = "new model fails on run method:"
-                _, value, _ = sys.exc_info()
-                msg += "in %s:\n%s\n" % (name, value)
-                try:
-                    # try to remove pyc file if exists
-                    _delete_file(self.fname + "c")
-                except:
-                    pass
+                pass
+#            except:
+#                msg = 'new model fails to import in python'
+#                try:
+#                    # try to remove pyc file if exists
+#                    _delete_file(self.fname + "c")
+#                except:
+#                    pass
+#
+# And also need to test if model runs            
+#        if self.base != None and not msg:
+#            try:
+#                Model().run(0.01)
+#            except:
+#                msg = "new model fails on run method:"
+#                _, value, _ = sys.exc_info()
+#                msg += "in %s:\n%s\n" % (name, value)
+#                try:
+#                    # try to remove pyc file if exists
+#                    _delete_file(self.fname + "c")
+#                except:
+#                    pass
         # Prepare the messagebox
         if msg:
             info = 'Error'
@@ -1013,14 +1043,14 @@ class EditorPanel(wx.ScrolledWindow):
             wx.PostEvent(self.base.parent, StatusEvent(status=msg, info=info))
         self.warning = msg
 
-
-    def write_file(self, fname, desc_str, param_str, func_str):
+    def write_file(self, fname, name, desc_str, param_str, pd_param_str, func_str):
         """
         Write content in file
 
         :param fname: full file path
         :param desc_str: content of the description strings
         :param param_str: content of params; Strings
+        :param pd_param_str: content of params requiring polydispersity; Strings
         :param func_str: content of func; Strings
         """
         try:
@@ -1031,72 +1061,89 @@ class EditorPanel(wx.ScrolledWindow):
         lines = CUSTOM_TEMPLATE.split('\n')
 
         has_scipy = func_str.count("scipy.")
-        self.is_2d = func_str.count("#self.ndim = 2")
-        line_2d = ''
-        if self.is_2d:
-            line_2d = CUSTOM_2D_TEMP.split('\n')
-        line_test = TEST_TEMPLATE.split('\n')
-        local_params = ''
-        spaces = '        '#8spaces
+        if has_scipy:
+            lines.insert(0, 'import scipy')
+        
+        # Think about 2D later        
+        #self.is_2d = func_str.count("#self.ndim = 2")
+        #line_2d = ''
+        #if self.is_2d:
+        #    line_2d = CUSTOM_2D_TEMP.split('\n')
+        
+        # Also think about test later        
+        #line_test = TEST_TEMPLATE.split('\n')
+        #local_params = ''
+        #spaces = '        '#8spaces
+        spaces4  = ' '*4
+        spaces13 = ' '*13
+        spaces16 = ' '*16     
+        param_names = []    # to store parameter names
+        has_scipy = func_str.count("scipy.")
+        if has_scipy:
+            lines.insert(0, 'import scipy')
+
         # write function here
         for line in lines:
             # The location where to put the strings is
             # hard-coded in the template as shown below.
-            if line.count("#self.params here"):
+            out_f.write(line + '\n')
+            if line.count('#name'):
+                out_f.write('name = "%s" \n' % name)               
+            elif line.count('#title'):
+                out_f.write('title = "User model for %s"\n' % name)               
+            elif line.count('#description'):
+                out_f.write('description = "%s"\n' % desc_str)               
+            elif line.count('#parameters'):
+                out_f.write('parameters = [ \n')
                 for param_line in param_str.split('\n'):
                     p_line = param_line.lstrip().rstrip()
                     if p_line:
-                        p0_line = self.set_param_helper(p_line)
-                        local_params += self.set_function_helper(p_line)
-                        out_f.write(p0_line)
-            elif line.count("#local params here"):
-                if local_params:
-                    out_f.write(local_params)
-            elif line.count("self.description = "):
-                des0 = self.name + "\\n"
-                desc = str(desc_str.lstrip().rstrip().replace('\"', ''))
-                out_f.write(line % (des0 + desc) + "\n")
-            elif line.count("def function(self, x=0.0%s):"):
-                if self.is_2d:
-                    y_str = ', y=0.0'
-                    out_f.write(line % y_str + "\n")
-                else:
-                    out_f.write(line % '' + "\n")
-            elif line.count("#function here"):
-                for func_line in func_str.split('\n'):
-                    f_line = func_line.rstrip()
-                    if f_line:
-                        out_f.write(spaces + f_line + "\n")
-                if not func_str:
-                    dep_var = 'y'
-                    if self.is_2d:
-                        dep_var = 'z'
-                    out_f.write(spaces + 'return %s' % dep_var + "\n")
-            elif line.count("#import scipy?"):
-                if has_scipy:
-                    out_f.write("import scipy" + "\n")
-            #elif line.count("name = "):
-            #    out_f.write(line % self.name + "\n")
-            elif line:
-                out_f.write(line + "\n")
-        # run string for 2d
-        if line_2d:
-            for line in line_2d:
-                out_f.write(line + "\n")
-        # Test strins
-        for line in line_test:
-            out_f.write(line + "\n")
+                        pname, pvalue = self.get_param_helper(p_line)
+                        param_names.append(pname)
+                        out_f.write("%s['%s', '', %s, [-numpy.inf, numpy.inf], '', ''],\n" % (spaces16, pname, pvalue))
+                for param_line in pd_param_str.split('\n'):
+                    p_line = param_line.lstrip().rstrip()
+                    if p_line:
+                        pname, pvalue = self.get_param_helper(p_line)
+                        param_names.append(pname)
+                        out_f.write("%s['%s', '', %s, [-numpy.inf, numpy.inf], 'volume', ''],\n" % (spaces16, pname, pvalue))
+                out_f.write('%s]\n' % spaces13)
+            
+        # No form_volume or ER available in simple model editor
+        out_f.write('def form_volume(*arg): \n')
+        out_f.write('    return 1.0 \n')
+        out_f.write('\n')
+        out_f.write('def ER(*arg): \n')
+        out_f.write('    return 1.0 \n')
+        
+        # function to compute
+        out_f.write('\n')
+        out_f.write('def Iq(x ')
+        for name in param_names:
+            out_f.write(', %s' % name)
+        out_f.write('):\n')
+        for func_line in func_str.split('\n'):
+            out_f.write('%s%s\n' % (spaces4, func_line))
+        
+        Iqxy_string = 'return Iq(numpy.sqrt(x**2+y**2) '
+            
+        out_f.write('\n')
+        out_f.write('def Iqxy(x, y ')
+        for name in param_names:
+            out_f.write(', %s' % name)
+            Iqxy_string += ', ' + name
+        out_f.write('):\n')
+        Iqxy_string += ')'
+        out_f.write('%s%s\n' % (spaces4, Iqxy_string))
 
         out_f.close()
 
-    def set_param_helper(self, line):
+    def get_param_helper(self, line):
         """
         Get string in line to define the params dictionary
 
         :param line: one line of string got from the param_str
         """
-        params_str = ''
-        spaces = '        '#8spaces
         items = line.split(";")
         for item in items:
             name = item.split("=")[0].lstrip().rstrip()
@@ -1105,9 +1152,8 @@ class EditorPanel(wx.ScrolledWindow):
                 float(value)
             except:
                 value = 1.0 # default
-            params_str += spaces + "self.params['%s'] = %s\n" % (name, value)
 
-        return params_str
+        return name, value
 
     def set_function_helper(self, line):
         """
@@ -1184,26 +1230,43 @@ class EditorWindow(wx.Frame):
         #self.Destroy()
 
 ## Templates for custom models
+#CUSTOM_TEMPLATE = """
+#from sas.models.pluginmodel import Model1DPlugin
+#from math import *
+#import os
+#import sys
+#import numpy
+##import scipy?
+#class Model(Model1DPlugin):
+#    name = ""
+#    def __init__(self):
+#        Model1DPlugin.__init__(self, name=self.name)
+#        #set name same as file name
+#        self.name = self.get_fname()
+#        #self.params here
+#        self.description = "%s"
+#        self.set_details()
+#    def function(self, x=0.0%s):
+#        #local params here
+#        #function here
+#"""
+
 CUSTOM_TEMPLATE = """
-from sas.models.pluginmodel import Model1DPlugin
 from math import *
 import os
 import sys
 import numpy
-#import scipy?
-class Model(Model1DPlugin):
-    name = ""
-    def __init__(self):
-        Model1DPlugin.__init__(self, name=self.name)
-        #set name same as file name
-        self.name = self.get_fname()
-        #self.params here
-        self.description = "%s"
-        self.set_details()
-    def function(self, x=0.0%s):
-        #local params here
-        #function here
+
+#name 
+
+#title
+
+#description
+
+#parameters 
+
 """
+
 CUSTOM_2D_TEMP = """
     def run(self, x=0.0, y=0.0):
         if x.__class__.__name__ == 'list':
