@@ -19,5 +19,4 @@ Sphere Functions
     models/polymer_micelle.rst
     models/raspberry.rst
     models/sphere.rst
-    models/spherepy.rst
     models/vesicle.rst
