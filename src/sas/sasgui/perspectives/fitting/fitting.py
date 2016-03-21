@@ -771,7 +771,7 @@ class Plugin(PluginBase):
             OpenFitOptions()
 
     def on_help(self, algorithm_id):
-        _TreeLocation = "user/perspectives/fitting/optimizer.html"
+        _TreeLocation = "user/sasgui/perspectives/fitting/optimizer.html"
         _anchor = "#fit-"+algorithm_id
         DocumentationWindow(self.parent, wx.ID_ANY, _TreeLocation, _anchor, "Optimizer Help")
 
