@@ -118,10 +118,9 @@ class BaseComponent:
 
             q = [q[0], q[1], q[2], ....]
 
-        ..note::
-          Due to 2D speed issue, no anisotropic scattering
-          is supported for python models, thus C-models should have
-          their own evalDistribution methods.
+        .. note:: Due to 2D speed issue, no anisotropic scattering
+                  is supported for python models, thus C-models should have
+                  their own evalDistribution methods.
 
         The method is then called the following way: ::
 
