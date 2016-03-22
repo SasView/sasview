@@ -9,10 +9,11 @@ thus cannot feed back to the fitting panel.  This could change in the future.
 
 The organization of the classes goes as:
 
-#Path to this is:           /sasview/src/sas/sasgui/guiframe/data_processor.py
-#Path to image is:          /sasview/src/sas/sasgui/guiframe/media/BatchGridClassLayout.png
+.. note:: Path to this is: /sasview/src/sas/sasgui/guiframe/data_processor.py
 
-.. image:: ./guiframe/media/BatchGridClassLayout.png
+.. note:: Path to image is: /sasview/src/sas/sasgui/guiframe/media/BatchGridClassLayout.png
+
+.. image:: media/BatchGridClassLayout.png
    :align: center
 
 """
@@ -155,8 +156,8 @@ class GridCellEditor(sheet.CCellEditor):
         base class version just fills it with background colour from the
         attribute.
 
-        NOTE: There is no need to override this if you don't need
-        to do something out of the ordinary.
+        .. note:: There is no need to override this if you don't need
+                  to do something out of the ordinary.
 
         :param dc: the wxDC object for the paint
         """
