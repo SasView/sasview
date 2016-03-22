@@ -86,7 +86,7 @@ double sinc(double x)
   return sin(x)/x;
 }
 
-
+/*
 double gamln(double xx) {
 
     double x,y,tmp,ser;
@@ -102,7 +102,7 @@ double gamln(double xx) {
     for (j=0;j<=5;j++) ser += cof[j]/++y;
     return -tmp+log(2.5066282746310005*ser/x);
 }
-
+*/
 // calculate magnetic sld and return total sld
 // bn : contrast (not just sld of the layer)
 // m0: max mag of M; mtheta: angle from x-z plane;
@@ -240,7 +240,7 @@ polar_sld cal_msld(int isangle, double qx, double qy, double bn,
    Required for implementation of fast error function (erf)
 **/
 
-
+/*
 #define ITMAX 100
 #define EPS 3.0e-7
 #define FPMIN 1.0e-30
@@ -274,12 +274,13 @@ void gser(float *gamser, float a, float x, float *gln) {
 
 
 }
+*/
 
 /**
    Implements the incomplete gamma function Q(a,x) evaluated by its continued fraction
    representation
 **/
-
+/*
 void gcf(float *gammcf, float a, float x, float *gln) {
   int i;
   float an,b,c,d,del,h;
@@ -305,11 +306,12 @@ void gcf(float *gammcf, float a, float x, float *gln) {
   *gammcf = exp(-x+a*log(x)-(*gln))*h;
   return;
 }
-
+*/
 
 /**
    Represents incomplete error function, P(a,x)
 **/
+/*
 float gammp(float a, float x) {
   float gamser,gammcf,gln;
   if(x < 0.0 || a <= 0.0) printf("Invalid arguments in routine gammp");
@@ -321,12 +323,12 @@ float gammp(float a, float x) {
     return 1.0 - gammcf;
   }
 }
-
+*/
 /**
     Implementation of the error function, erf(x)
 **/
-
+/*
 float erff(float x) {
   return x < 0.0 ? -gammp(0.5,x*x) : gammp(0.5,x*x);
 }
-
+*/
