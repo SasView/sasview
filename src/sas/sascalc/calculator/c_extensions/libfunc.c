@@ -235,12 +235,11 @@ polar_sld cal_msld(int isangle, double qx, double qy, double bn,
 **/
 
 /**
-   Implements eq 6.2.5 (small gamma) of Numerical Recipes in C, essentially
-   the incomplete gamma function multiplied by the gamma function.
-   Required for implementation of fast error function (erf)
+Wojtek's comment Mar 22 2016: The remaing code can mostly likely be deleated
+Keeping it in order to check if it is not breaking anything
 **/
 
-/*
+
 #define ITMAX 100
 #define EPS 3.0e-7
 #define FPMIN 1.0e-30
@@ -249,7 +248,7 @@ void gser(float *gamser, float a, float x, float *gln) {
   int n;
   float sum,del,ap;
 
-  *gln = gamln(a);
+  *gln = lgamma(a);
   if(x <= 0.0) {
     if (x < 0.0) printf("Error: x less than 0 in routine gser");
     *gamser = 0.0;
@@ -274,18 +273,16 @@ void gser(float *gamser, float a, float x, float *gln) {
 
 
 }
-*/
 
 /**
    Implements the incomplete gamma function Q(a,x) evaluated by its continued fraction
    representation
 **/
-/*
 void gcf(float *gammcf, float a, float x, float *gln) {
   int i;
   float an,b,c,d,del,h;
 
-  *gln = gamln(a);
+  *gln = lgamma(a);
   b = x+1.0-a;
   c = 1.0/FPMIN;
   d = 1.0/b;
@@ -306,12 +303,10 @@ void gcf(float *gammcf, float a, float x, float *gln) {
   *gammcf = exp(-x+a*log(x)-(*gln))*h;
   return;
 }
-*/
 
 /**
    Represents incomplete error function, P(a,x)
 **/
-/*
 float gammp(float a, float x) {
   float gamser,gammcf,gln;
   if(x < 0.0 || a <= 0.0) printf("Invalid arguments in routine gammp");
@@ -323,12 +318,9 @@ float gammp(float a, float x) {
     return 1.0 - gammcf;
   }
 }
-*/
 /**
     Implementation of the error function, erf(x)
 **/
-/*
 float erff(float x) {
   return x < 0.0 ? -gammp(0.5,x*x) : gammp(0.5,x*x);
 }
-*/
