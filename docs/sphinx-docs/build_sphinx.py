@@ -149,22 +149,30 @@ def retrieve_user_docs():
     # First(!) we'll make a local reference copy for SasView (/new-models will be cleaned each build)
     if os.path.exists(SASMODELS_SOURCE_IMG):
         print "Found img  folder SASMODELS_SOURCE_IMG    at ", SASMODELS_SOURCE_IMG
-        if os.path.exists(SASMODELS_DEST_IMG):
-            print "Found img  folder SASMODELS_DEST_IMG      at ", SASMODELS_DEST_IMG
-            print "Copying sasmodels model image files..."
-            for files in os.listdir(SASMODELS_SOURCE_IMG):
-                fromhere=os.path.join(SASMODELS_SOURCE_IMG,files)
-                tohere=os.path.join(SASMODELS_DEST_IMG,files)
-                shutil.copy(fromhere,tohere)
+        if not os.path.exists(SASMODELS_DEST_IMG):
+            print "Missing docs folder SASMODELS_DEST_IMG at ", SASMODELS_DEST_IMG
+            os.makedirs(SASMODELS_DEST_IMG)
+            print "created SASMODELS_DEST_BUILDIMG at ", SASMODELS_DEST_BUILDIMG
+        else: print "Found img  folder SASMODELS_DEST_IMG      at ", SASMODELS_DEST_IMG
+        print "Copying sasmodels model image files..."
+        for files in os.listdir(SASMODELS_SOURCE_IMG):
+            fromhere=os.path.join(SASMODELS_SOURCE_IMG,files)
+            tohere=os.path.join(SASMODELS_DEST_IMG,files)
+            shutil.copy(fromhere,tohere)
+    else: print "cannot find SASMODELS_SOURCE_IMG", SASMODELS_SOURCE_IMG
 
     if os.path.exists(SASMODELS_SOURCE_AUTOIMG):
         print "Found img  folder SASMODELS_SOURCE_AUTOIMG    at ", SASMODELS_SOURCE_AUTOIMG
-        if os.path.exists(SASMODELS_DEST_IMG):
-            print "Copying sasmodels model auto-generated image files..."
-            for files in os.listdir(SASMODELS_SOURCE_AUTOIMG):
-                fromhere=os.path.join(SASMODELS_SOURCE_AUTOIMG,files)
-                tohere=os.path.join(SASMODELS_DEST_IMG,files)
-                shutil.copy(fromhere,tohere)
+        if not os.path.exists(SASMODELS_DEST_IMG):
+            print "Missing docs folder SASMODELS_DEST_IMG at ", ASMODELS_DEST_IMG
+            os.makedirs(SASMODELS_DEST_BUILDIMG)
+            print "created SASMODELS_DEST_BUILDIMG at ", SASMODELS_DEST_BUILDIMG
+        print "Copying sasmodels model auto-generated image files..."
+        for files in os.listdir(SASMODELS_SOURCE_AUTOIMG):
+            fromhere=os.path.join(SASMODELS_SOURCE_AUTOIMG,files)
+            tohere=os.path.join(SASMODELS_DEST_IMG,files)
+            shutil.copy(fromhere,tohere)
+        else: print "no source directorty",SASMODELS_SOURCE_AUTOIMG ,"was found"
     
     # And the rst prolog with the unit substitutions
     if os.path.exists(SASMODELS_SOURCE_PROLOG):

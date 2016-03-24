@@ -404,6 +404,8 @@ Use DREAM when you want a detailed analysis of the parameter uncertainty.
 Like differential evolution, DREAM will evaluate $k$ points in parallel,
 where $k$ is the size of the population.
 
+.. _option-burn:
+
 Options
 -------
 
