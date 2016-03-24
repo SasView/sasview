@@ -4,9 +4,11 @@
 """
 import sys
 import os
+import shutil
 from setuptools import setup, Extension
 from distutils.command.build_ext import build_ext
 from distutils.core import Command
+from shutil import rmtree
 
 try:
     from numpy.distutils.misc_util import get_numpy_include_dirs
@@ -41,6 +43,10 @@ ext_modules = []
 #                      'polynominal5.pyc', 'sph_bessel_jn.pyc',
 #                      'sum_Ap1_1_Ap2.pyc', 'sum_p1_p2.pyc',
 #                      'testmodel_2.pyc', 'testmodel.pyc', 'plugins.log']
+
+CURRENT_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+SASVIEW_BUILD = os.path.join(CURRENT_SCRIPT_DIR, "build")
+
 sas_dir = os.path.join(os.path.expanduser("~"),'.sasview')
 if os.path.isdir(sas_dir):
     f_path = os.path.join(sas_dir, "sasview.log")
@@ -58,6 +64,9 @@ if os.path.isdir(sas_dir):
     #         if f in plugin_model_list:
     #             file_path =  os.path.join(f_path, f)
     #             os.remove(file_path)
+    if os.path.exists(SASVIEW_BUILD):
+        print "Removing existing build directory", SASVIEW_BUILD, "for a clean build"
+        shutil.rmtree(SASVIEW_BUILD)
                     
 # 'sys.maxsize' and 64bit: Not supported for python2.5
 is_64bits = False
