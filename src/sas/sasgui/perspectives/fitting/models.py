@@ -1,39 +1,35 @@
 """
     Utilities to manage models
 """
-import wx
 import imp
 import os
 import sys
-import math
 import os.path
 # Time is needed by the log method
 import time
 import logging
 import py_compile
 import shutil
-from sas.sasgui.guiframe.events import StatusEvent
 # Explicitly import from the pluginmodel module so that py2exe
 # places it in the distribution. The Model1DPlugin class is used
 # as the base class of plug-in models.
 from sas.sascalc.fit.pluginmodel import Model1DPlugin
-from sas.sascalc.calculator.BaseComponent import BaseComponent
 from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
-from sasmodels import sasview_model,core
+from sasmodels.sasview_model import load_custom_model, load_standard_models
 
 
 PLUGIN_DIR = 'plugin_models'
 
 def get_model_python_path():
     """
-        Returns the python path for a model
+    Returns the python path for a model
     """
     return os.path.dirname(__file__)
 
 
 def log(message):
     """
-        Log a message in a file located in the user's home directory
+    Log a message in a file located in the user's home directory
     """
     dir = os.path.join(os.path.expanduser("~"), '.sasview', PLUGIN_DIR)
     out = open(os.path.join(dir, "plugins.log"), 'a')
@@ -86,8 +82,8 @@ def _check_plugin(model, name):
 
 def find_plugins_dir():
     """
-        Find path of the plugins directory.
-        The plugin directory is located in the user's home directory.
+    Find path of the plugins directory.
+    The plugin directory is located in the user's home directory.
     """
     dir = os.path.join(os.path.expanduser("~"), '.sasview', PLUGIN_DIR)
 
@@ -132,7 +128,7 @@ def find_plugins_dir():
 
 class ReportProblem:
     """
-        Class to check for problems with specific values
+    Class to check for problems with specific values
     """
     def __nonzero__(self):
         type, value, traceback = sys.exc_info()
@@ -158,8 +154,6 @@ def compile_file(dir):
 
 
 def _findModels(dir):
-    """
-    """
     # List of plugin objects
     plugins = {}
     dir = find_plugins_dir()
@@ -197,7 +191,7 @@ def _findModels(dir):
                             log(msg)
                     else:
                         filename = os.path.join(dir, item)
-                        plugins[name] = sasview_model.make_class_from_file(filename) 
+                        plugins[name] = load_custom_model(filename)
 
                 except:
                     msg = "Error accessing Model"
@@ -251,7 +245,7 @@ class ModelList(object):
 
 class ModelManagerBase:
     """
-        Base class for the model manager
+    Base class for the model manager
     """
     ## external dict for models
     model_combobox = ModelList()
@@ -272,8 +266,6 @@ class ModelManagerBase:
     last_time_dir_modified = 0
 
     def __init__(self):
-        """
-        """
         self.model_dictionary = {}
         self.stored_plugins = {}
         self._getModelList()
@@ -299,11 +291,10 @@ class ModelManagerBase:
         """
 
         # regular model names only
-        base_message = "Unable to load model {0}"
         self.model_name_list = []
 
         #Build list automagically from sasmodels package
-        for model in sasview_model.standard_models():
+        for model in load_standard_models():
             self.model_dictionary[model._model_info['name']] = model
             if model._model_info['structure_factor'] == True:
                 self.struct_list.append(model)
@@ -327,7 +318,7 @@ class ModelManagerBase:
     def is_changed(self):
         """
         check the last time the plugin dir has changed and return true
-         is the directory was modified else return false
+        is the directory was modified else return false
         """
         is_modified = False
         plugin_dir = find_plugins_dir()
