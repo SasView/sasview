@@ -1,49 +1,85 @@
 export PATH=$PATH:/usr/local/bin/
 
-cd $WORKSPACE
 
-export PYTHONPATH=$WORKSPACE/sasview-install:$WORKSPACE/utils:$PYTHONPATH
+PYTHON=${PYTHON:-`which python`}
+EASY_INSTALL=${EASY_INSTALL:-`which easy_install`}
+PYLINT=${PYLINT:-`which pylint`}
 
-##########################################################################
-# Use git/svn scripts
-
-#  Check dependencies
-cd $WORKSPACE
-if [ ! -d "utils" ]; then
-    mkdir utils
-fi
-
-
-# BUILD_CODE
-cd $WORKSPACE
-/bin/sh -xe build_tools/jenkins_linux_build.sh
-
-
-# TEST_CODE
-cd $WORKSPACE
-/bin/sh -xe build_tools/jenkins_linux_test.sh
-
-
-# BUILD DOCS
+export PYTHONPATH=$PYTHONPATH:$WORKSPACE/sasview/utils
+export PYTHONPATH=$PYTHONPATH:$WORKSPACE/sasview/sasview-install
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
+
+
 cd $WORKSPACE
-python setup.py docs
 
-
-# BUILD_egg with new docs
+# SASMODLES
 cd $WORKSPACE
-python setup.py bdist_egg --skip-build
+cd sasmodels
+
+rm -rf build
+rm -rf dist
+
+$PYTHON setup.py clean
+$PYTHON setup.py build
 
 
-# PYLINT_CODE
-#cd $WORKSPACE
-#/bin/sh -xe build_tools/jenkins_linux_pylint.sh
+# SASMODLES - BUILD DOCS
+cd  doc
+make html
+
+cd $WORKSPACE
+cd sasmodels
+$PYTHON setup.py bdist_egg
+
+
+# SASVIEW
+cd $WORKSPACE
+cd sasview
+rm -rf sasview-install
+mkdir  sasview-install
+rm -rf utils
+mkdir  utils
+rm -rf dist
+rm -rf build
+
+
+# INSTALL SASMODELS
+cd $WORKSPACE
+cd sasmodels
+cd dist
+$EASY_INSTALL -d $WORKSPACE/sasview/utils sasmodels*.egg
+
+
+# BUILD SASVIEW
+cd $WORKSPACE
+cd sasview
+$PYTHON setup.py clean
+$PYTHON setup.py build
+$PYTHON setup.py docs
+
+
+# SASVIEW BUILD_egg with new docs
+cd $WORKSPACE
+cd sasview
+python setup.py bdist_egg
+cd dist
+$EASY_INSTALL -d $WORKSPACE/sasview/sasview-install sasview*.egg
+
+# TEST
+cd $WORKSPACE
+cd sasview
+cd test
+$PYTHON utest_sasview.py
+
+# PYLINT
+cd $WORKSPACE
+cd sasview
+$PYLINT --rcfile "build_tools/pylint.rc" -f parseable sasview-install/sasview*.egg/sas sasview | tee  test/sasview.txt
 
 
 # BUILD APP
-cd $WORKSPACE/sasview
+cd $WORKSPACE
+cd sasview/sasview
 python setup_mac.py py2app
 
-#cd $WORKSPACE/sasview/dist
-#tar -czf `python -c "import pkg_resources;print '%s.tar.gz SasView-%s.app' % (pkg_resources.get_distribution('sasview').egg_name(),pkg_resources.get_distribution('sasview').version)"`
