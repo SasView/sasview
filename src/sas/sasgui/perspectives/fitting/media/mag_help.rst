@@ -21,11 +21,11 @@ Polarisation/Magnetic Scattering
 
 Magnetic scattering is implemented in five (2D) models 
 
-*  *SphereModel*
-*  *CoreShellModel*
-*  *CoreMultiShellModel*
-*  *CylinderModel*
-*  *ParallelepipedModel*
+*  *sphere*
+*  *core_shell_sphere*
+*  *core_multi_shell*
+*  *cylinder*
+*  *parallelepiped*
 
 In general, the scattering length density (SLD, = |beta|) in each region where the
 SLD is uniform, is a combination of the nuclear and magnetic SLDs and, for polarised

@@ -11,6 +11,7 @@ Sphere Functions
 
     models/adsorbed_layer.rst
     models/binary_hard_sphere.rst
+    models/core_multi_shell.rst
     models/core_shell_sphere.rst
     models/fuzzy_sphere.rst
     models/linear_pearls.rst
