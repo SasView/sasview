@@ -19,11 +19,14 @@ import local_config
 import pytz
 import sys
 import platform
+#Extending recursion limit
+sys.setrecursionlimit(10000)
 
 from distutils.util import get_platform
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 platform = '%s-%s'%(get_platform(),sys.version[:3])
-build_path = os.path.join(root, 'build','lib.'+platform)
+#build_path = os.path.join(root, 'build','lib.'+platform)
+build_path = os.path.join(root)
 sys.path.insert(0, build_path)
 
 ICON = local_config.SetupIconFile_mac
@@ -40,7 +43,8 @@ import sas.sasgui.perspectives.calculator as calculator
 DATA_FILES += calculator.data_files()
 import sas.sasgui.perspectives.invariant as invariant
 DATA_FILES += invariant.data_files()
-import sas.models as models
+#import sas.models as models
+import sasmodels.models as models
 DATA_FILES += models.data_files()
 import sas.sasgui.guiframe as guiframe
 DATA_FILES += guiframe.data_files()
@@ -65,11 +69,12 @@ if os.path.isfile("BUILD_NUMBER"):
     DATA_FILES.append("BUILD_NUMBER")
 
 # See if the documentation has been built, and if so include it.
-doc_path = os.path.join(build_path, "doc")
+doc_path = os.path.join(build_path, "docs")
+print doc_path
 if os.path.exists(doc_path):
     for dirpath, dirnames, filenames in os.walk(doc_path):
         for filename in filenames:
-            sub_dir = os.path.join("doc", os.path.relpath(dirpath, doc_path))
+            sub_dir = os.path.join("docs", os.path.relpath(dirpath, doc_path))
             DATA_FILES.append((sub_dir, [os.path.join(dirpath, filename)]))
 else:
     raise Exception("You must first build the documentation before creating an installer.")

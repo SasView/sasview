@@ -72,7 +72,7 @@ cd sasview
 cd test
 $PYTHON utest_sasview.py
 
-# PYLINT
+## PYLINT
 cd $WORKSPACE
 cd sasview
 $PYLINT --rcfile "build_tools/pylint.rc" -f parseable sasview-install/sasview*.egg/sas sasview | tee  test/sasview.txt
