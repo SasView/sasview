@@ -295,15 +295,15 @@ class ModelManagerBase:
 
         #Build list automagically from sasmodels package
         for model in load_standard_models():
-            self.model_dictionary[model._model_info['name']] = model
-            if model._model_info['structure_factor'] == True:
+            self.model_dictionary[model.name] = model
+            if model.is_structure_factor:
                 self.struct_list.append(model)
-            if model._model_info['variant_info'] is not None:
+            if model.is_form_factor:
+                self.multiplication_factor.append(model)
+            if model.is_multiplicity_model:
                 self.multi_func_list.append(model)
             else:
-                self.model_name_list.append(model._model_info['name'])
-            if model._model_info['ER'] is not None:
-                self.multiplication_factor.append(model)
+                self.model_name_list.append(model.name)
 
         #Looking for plugins
         self.stored_plugins = self.findModels()
@@ -386,14 +386,8 @@ class ModelManagerBase:
         """
         Get the multifunctional models
         """
-        for item in self.plugins:
-            try:
-                # check the multiplicity if any
-                if item.multiplicity_info[0] > 1:
-                    self.multi_func_list.append(item)
-            except:
-                # pass to other items
-                pass
+        items = [item for item in self.plugins if item.is_multiplicity_model]
+        self.multi_func_list = items
 
     def get_model_list(self):
         """
