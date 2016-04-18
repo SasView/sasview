@@ -9,6 +9,9 @@ import numpy
 import copy
 import math
 import time
+
+from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
+
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.events import NewPlotEvent
 from sas.sasgui.guiframe.events import PlotQrangeEvent
@@ -620,10 +623,6 @@ class FitPage(BasicPage):
         ## fill a sizer with the combobox to select dispersion type
         model_disp = wx.StaticText(self, wx.ID_ANY, 'Function')
         CHECK_STATE = self.cb1.GetValue()
-        #import sas.models.dispersion_models
-        #self.polydisp = sas.models.dispersion_models.models
-        import sasmodels.weights
-        self.polydisp =  sasmodels.weights.models
 
         ix = 0
         iy = 0
@@ -783,7 +782,7 @@ class FitPage(BasicPage):
                 ix = 8
                 disp_box = wx.ComboBox(self, wx.ID_ANY, size=(65, -1),
                                        style=wx.CB_READONLY, name='%s' % name1)
-                for key, value in self.polydisp.iteritems():
+                for key, value in POLYDISPERSITY_MODELS.iteritems():
                     name_disp = str(key)
                     disp_box.Append(name_disp, value)
                     disp_box.SetStringSelection("gaussian")
@@ -947,7 +946,7 @@ class FitPage(BasicPage):
                 ix = 8
                 disp_box = wx.ComboBox(self, wx.ID_ANY, size=(65, -1),
                                 style=wx.CB_READONLY, name='%s' % name1)
-                for key, value in self.polydisp.iteritems():
+                for key, value in POLYDISPERSITY_MODELS.iteritems():
                     name_disp = str(key)
                     disp_box.Append(name_disp, value)
                     disp_box.SetStringSelection("gaussian")

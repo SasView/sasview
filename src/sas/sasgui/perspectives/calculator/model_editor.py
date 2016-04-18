@@ -1328,7 +1328,12 @@ if __name__ == "__main__":
 """
 SUM_TEMPLATE = """
 # A sample of an experimental model function for Sum/Multiply(Pmodel1,Pmodel2)
+import os
+import sys
 import copy
+
+import nuympy
+
 from sas.sascalc.fit.pluginmodel import Model1DPlugin
 from sasmodels.sasview_model import make_class
 from sasmodels.core import load_model_info
@@ -1338,8 +1343,6 @@ from sasmodels.core import load_model_info
 
 #P2_model:
 #from %s import Model as P2
-import os
-import sys
 
 class Model(Model1DPlugin):
     name = ""
@@ -1384,7 +1387,7 @@ class Model(Model1DPlugin):
 
         ## Parameter details [units, min, max]
         self._set_details()
-        self.details['scale_factor'] = ['', None, None]
+        self.details['scale_factor'] = ['', 0.0, numpy.inf]
 
 
         #list of parameter that can be fitted

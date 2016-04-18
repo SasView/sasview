@@ -79,13 +79,13 @@ class GenSAS(BaseComponent):
         self.description = 'GenSAS'
         ## Parameter details [units, min, max]
         self.details = {}
-        self.details['scale'] = ['', None, None]
-        self.details['background'] = ['[1/cm]', None, None]
-        self.details['solvent_SLD'] = ['1/A^(2)', None, None]
-        self.details['total_volume'] = ['A^(3)', None, None]
-        self.details['Up_frac_in'] = ['[u/(u+d)]', None, None]
-        self.details['Up_frac_out'] = ['[u/(u+d)]', None, None]
-        self.details['Up_theta'] = ['[deg]', None, None]
+        self.details['scale'] = ['', 0.0, numpy.inf]
+        self.details['background'] = ['[1/cm]', 0.0, numpy.inf]
+        self.details['solvent_SLD'] = ['1/A^(2)', -numpy.inf, numpy.inf]
+        self.details['total_volume'] = ['A^(3)', 0.0, numpy.inf]
+        self.details['Up_frac_in'] = ['[u/(u+d)]', 0.0, 1.0]
+        self.details['Up_frac_out'] = ['[u/(u+d)]', 0.0, 1.0]
+        self.details['Up_theta'] = ['[deg]', -numpy.inf, numpy.inf]
         # fixed parameters
         self.fixed = []
 

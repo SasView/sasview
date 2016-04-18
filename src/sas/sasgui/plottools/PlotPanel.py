@@ -1993,7 +1993,7 @@ class PlotPanel(wx.Panel):
         Copy the current figure to clipboard
         """
         try:
-            self.toolbar.copy_figure()
+            self.toolbar.copy_figure(self.canvas)
         except:
             print "Error in copy Image"
 
