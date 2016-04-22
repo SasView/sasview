@@ -17,7 +17,6 @@ import basepage
 import models
 _BOX_WIDTH = 80
 
-
 class FitPanel(nb, PanelBase):
     """
     FitPanel class contains fields allowing to fit  models and  data
@@ -153,9 +152,6 @@ class FitPanel(nb, PanelBase):
     def on_set_focus(self, event):
         """
         """
-        from bumps.options import FIT_CONFIG
-        current = FIT_CONFIG.selected_name
-        self.parent.SetTitle(self.window_name + " - Active Fitting Optimizer: " + current)
         pos = self.GetSelection()
         if pos != -1:
             selected_page = self.GetPage(pos)
