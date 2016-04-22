@@ -26,7 +26,7 @@ rm -rf build
 export PYTHONPATH=$WORKSPACE/sasview/sasview-install:$WORKSPACE/sasview/utils:$PYTHONPATH
 
 
-"$EASY_INSTALL" -d "$WORKSPACE/sasview/utils" bumps==0.7.5.6
+"$EASY_INSTALL" -d "$WORKSPACE/sasview/utils" bumps==0.7.5.9
 "$EASY_INSTALL" -d "$WORKSPACE/sasview/utils" periodictable==1.3.0
 
 # CHECK_PACKAGES

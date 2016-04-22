@@ -60,6 +60,7 @@ from bumps.gui.fit_dialog import show_fit_config
 try:
     from bumps.gui.fit_dialog import EVT_FITTER_CHANGED
 except ImportError:
+    # CRUFT: bumps 0.7.5.8 and below
     EVT_FITTER_CHANGED = None  # type: wx.PyCommandEvent
 
 class Plugin(PluginBase):
@@ -506,6 +507,7 @@ class Plugin(PluginBase):
         self.parent.Bind(EVT_SLICER_PANEL, self._on_slicer_event)
         self.parent.Bind(EVT_SLICER_PARS_UPDATE, self._onEVT_SLICER_PANEL)
 
+        # CRUFT: EVT_FITTER_CHANGED is not None for bumps 0.7.5.9 and above
         if EVT_FITTER_CHANGED is not None:
             self.parent.Bind(EVT_FITTER_CHANGED, self.on_fitter_changed)
         self._set_fitter_label(bumps.options.FIT_CONFIG)

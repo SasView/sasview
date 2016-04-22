@@ -15,7 +15,7 @@ MD sasview-install
 RD /S /Q dist
 RD /S /Q build
 
-rem %PYTHON% -m pip install -t ../sasview-install --no-deps bumps=0.7.5.6
+rem %PYTHON% -m pip install -t ../sasview-install --no-deps bumps=0.7.5.9
 rem PYTHON% -m pip install -t ../sasview-install --no-deps periodictable=1.3.0
 rem %PYTHON% -m pip install -t ../sasview-install --no-deps pyparsing=1.5.5
 

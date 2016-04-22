@@ -342,7 +342,7 @@ Release Notes
             - xhtml2pdf 3.0.33 (MAC = not installed on build server)
             - unittest-xml-reporting 1.12.0 (MAC 1.10.0)
             - matplotlib Version Installed: 1.4.3 (MAC 1.1.1)
-            - bumps Version Installed: 0.7.5.6
+            - bumps Version Installed: 0.7.5.9
             - scipy Version Installed: 0.16.0b2 (MAC 0.11.0)
             - periodictable Version Installed: 1.4.1
             - setuptools Version Installed: 7.0 (MAC 12.0.5)

@@ -1,10 +1,10 @@
 package:
   name: bumps
-  version: !!str 0.7.5.4
+  version: !!str 0.7.5.9
 
 source:
-  fn: bumps-0.7.5.4.tar.gz
-  url: https://pypi.python.org/packages/source/b/bumps/bumps-0.7.5.4.tar.gz
+  fn: bumps-0.7.5.9.tar.gz
+  url: https://pypi.python.org/packages/source/b/bumps/bumps-0.7.5.9.tar.gz
   md5: a47c035fbb18afa5ca53067506a5ff1c
 #  patches:
    # List any patch files here
