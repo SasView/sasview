@@ -55,14 +55,14 @@ $EASY_INSTALL -d $WORKSPACE/sasview/utils sasmodels*.egg
 cd $WORKSPACE
 cd sasview
 $PYTHON setup.py clean
-$PYTHON setup.py build
-$PYTHON setup.py docs
+$PYTHON setup.py build docs bdist_egg
+#$PYTHON setup.py docs
 
 
 # SASVIEW BUILD_egg with new docs
 cd $WORKSPACE
 cd sasview
-python setup.py bdist_egg
+#python setup.py bdist_egg
 cd dist
 $EASY_INSTALL -d $WORKSPACE/sasview/sasview-install sasview*.egg
 
