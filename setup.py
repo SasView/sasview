@@ -248,8 +248,9 @@ packages.extend(["sas.sasgui.perspectives.invariant"])
 package_data['sas.sasgui.perspectives.invariant'] = [os.path.join("media",'*')]
 
 package_dir["sas.sasgui.perspectives.fitting"] = os.path.join("src", "sas", "sasgui", "perspectives", "fitting")
-packages.extend(["sas.sasgui.perspectives.fitting"])
-package_data['sas.sasgui.perspectives.fitting'] = ['media/*']
+package_dir["sas.sasgui.perspectives.fitting.plugin_models"] = os.path.join("src", "sas", "sasgui", "perspectives", "fitting", "plugin_models")
+packages.extend(["sas.sasgui.perspectives.fitting", "sas.sasgui.perspectives.fitting.plugin_models"])
+package_data['sas.sasgui.perspectives.fitting'] = ['media/*', 'plugin_models/*']
 
 packages.extend(["sas.sasgui.perspectives", "sas.sasgui.perspectives.calculator"])
 package_data['sas.sasgui.perspectives.calculator'] = ['images/*', 'media/*']
