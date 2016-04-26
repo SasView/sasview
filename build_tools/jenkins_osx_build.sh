@@ -56,21 +56,21 @@ cd $WORKSPACE
 cd sasview
 $PYTHON setup.py clean
 $PYTHON setup.py build docs bdist_egg
-#$PYTHON setup.py docs
 
 
-# SASVIEW BUILD_egg with new docs
+# INSTALL SASVIEW
 cd $WORKSPACE
 cd sasview
-#python setup.py bdist_egg
 cd dist
 $EASY_INSTALL -d $WORKSPACE/sasview/sasview-install sasview*.egg
+
 
 # TEST
 cd $WORKSPACE
 cd sasview
 cd test
 $PYTHON utest_sasview.py
+
 
 # PYLINT
 cd $WORKSPACE
