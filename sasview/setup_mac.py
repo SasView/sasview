@@ -40,7 +40,7 @@ import sas.sasgui.perspectives.calculator as calculator
 DATA_FILES += calculator.data_files()
 import sas.sasgui.perspectives.invariant as invariant
 DATA_FILES += invariant.data_files()
-import sas.models as models
+import sasmodels.models as models
 DATA_FILES += models.data_files()
 import sas.sasgui.guiframe as guiframe
 DATA_FILES += guiframe.data_files()
