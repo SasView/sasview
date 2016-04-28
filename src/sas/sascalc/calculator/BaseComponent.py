@@ -49,6 +49,10 @@ class BaseComponent:
         self.output_name = "Intensity"
         self.output_unit = "cm^{-1}"
 
+        self.is_multiplicity_model = False
+        self.is_structure_factor = False
+        self.is_form_factor = False
+
     def __str__(self):
         """
         :return: string representatio

@@ -54,16 +54,15 @@ $EASY_INSTALL -d $WORKSPACE/sasview/utils sasmodels*.egg
 cd $WORKSPACE
 cd sasview
 $PYTHON setup.py clean
-$PYTHON setup.py build
-#$PYTHON setup.py docs
+$PYTHON setup.py build docs bdist_egg
 
 
-# SASVIEW BUILD_egg with new docs
+# INSTALL SASVIEW
 cd $WORKSPACE
 cd sasview
-$PYTHON setup.py docs bdist_egg
 cd dist
 $EASY_INSTALL -d $WORKSPACE/sasview/sasview-install sasview*.egg
+
 
 # TEST
 #cd $WORKSPACE
@@ -71,14 +70,13 @@ $EASY_INSTALL -d $WORKSPACE/sasview/sasview-install sasview*.egg
 #cd test
 #$PYTHON utest_sasview.py
 
-## PYLINT
-#cd $WORKSPACE
-#cd sasview
-#$PYLINT --rcfile "build_tools/pylint.rc" -f parseable sasview-install/sasview*.egg/sas sasview | tee  test/sasview.txt
-
+# PYLINT
+cd $WORKSPACE
+cd sasview
+$PYLINT --rcfile "build_tools/pylint.rc" -f parseable sasview-install/sasview*.egg/sas sasview | tee  test/sasview.txt
 
 # BUILD APP
-#cd $WORKSPACE
-#cd sasview/sasview
-#$PYTHON setup_mac.py py2app
+cd $WORKSPACE
+cd sasview/sasview
+$PYTHON setup_mac.py py2app
 

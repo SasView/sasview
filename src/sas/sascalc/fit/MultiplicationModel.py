@@ -1,8 +1,9 @@
+import copy
+
+import numpy
 
 from sas.sascalc.calculator.BaseComponent import BaseComponent
-#import numpy, math
-import copy
-from sas.sascalc.fit.pluginmodel import Model1DPlugin
+
 class MultiplicationModel(BaseComponent):
     r"""
         Use for P(Q)\*S(Q); function call must be in the order of P(Q) and then S(Q):
@@ -46,7 +47,7 @@ class MultiplicationModel(BaseComponent):
         
         ## Parameter details [units, min, max]
         self._set_details()
-        self.details['scale_factor'] = ['',     None, None]
+        self.details['scale_factor'] = ['', 0.0, numpy.inf]
         
         #list of parameter that can be fitted
         self._set_fixed_params()  
@@ -74,10 +75,12 @@ class MultiplicationModel(BaseComponent):
             try:
                 self.multiplicity_info = p_model.multiplicity_info 
                 self.fun_list = p_model.fun_list
+                self.is_multiplicity_model = True
             except:
                 pass
         else:
-            self.multiplicity_info = []
+            self.is_multiplicity_model = False
+            self.multiplicity_info = [0]
             
     def _clone(self, obj):
         """

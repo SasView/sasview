@@ -255,7 +255,8 @@ data_files += invariant.data_files()
 import sas.sasgui.guiframe as guiframe
 data_files += guiframe.data_files()
 
-import sas.models as models
+#import sas.models as models
+import sasmodels.models as models
 data_files += models.data_files()
 
 for f in matplotlibdata:
@@ -337,7 +338,7 @@ if py26MSdll_x86 is not None:
 #
 packages = [
     'matplotlib', 'scipy', 'encodings', 'comtypes',
-    'win32com', 'xhtml2pdf', 'bumps',
+    'win32com', 'xhtml2pdf', 'bumps','sasmodels', 'sas',
     ]
 packages.extend([
     'reportlab',

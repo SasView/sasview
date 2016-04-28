@@ -4,6 +4,43 @@ Release Notes
 1- Features
 ===========
 
+    - New in Version 4.0.0-alpha
+      --------------------
+      This alpha release brings a major overhaul of the model system. The new model
+      package allows rapid integration of custom models and access to polydispersity
+      without requiring a compiler.
+
+      - Model package changes and improvements
+         - Model interface moved to independent sasmodels package.
+         - Most models converted to new interface.
+         - Allows rapid integration of user-written models.
+         - OpenCL GPU utilization for faster fitting.
+         - Improved numerical integration of Bessel functions.
+      - SESANS integration and implementation
+         - Scripting interface added for analysis of SESANS data.
+         - Hankel transformation now accepts finite acceptance angles.
+         - 2D cosine transformation added for TOF SESANS analysis.
+      - Documentation improvements
+         - The documentation tree was restructured for a better end user experience.
+         - The documentation for each model was revamped and verified by at least
+           two people following the conversion of the model.
+         - Theoretical 1D (and 2D if applicable) scattering curves are auto-generated
+           and added to the model documentation for each model.
+      - Separation of GUI and calculations for future GUI enhancements
+      - Bug fixes
+         - Fixes bug #411 No stop button on simultaneous fit page
+         - Fixes bug #410 Error with raspberry model
+         - Fixes bug #364 Possible inconsistency in Poly_GausCoil model
+         - Fixes bug #439 Hayter Penfold MSA code needs checking
+         - Fixes bug #484 lammellerPC is precision limited
+         - Fixes bug #498 $HOME/.matplotlib conflicts
+         - Fixes bug #348 Control order in which fit parameters appear in the gui
+         - Fixes bug #456 Provide DREAM Results Panel with something to identify
+           data and age of results
+         - Fixes bug #556 Build script improvements for developers
+
+
+
    - New in Version 3.1.2
      --------------------
      This release is a major stability improvement, having fixed a serious bug 
@@ -305,7 +342,7 @@ Release Notes
             - xhtml2pdf 3.0.33 (MAC = not installed on build server)
             - unittest-xml-reporting 1.12.0 (MAC 1.10.0)
             - matplotlib Version Installed: 1.4.3 (MAC 1.1.1)
-            - bumps Version Installed: 0.7.5.6
+            - bumps Version Installed: 0.7.5.9
             - scipy Version Installed: 0.16.0b2 (MAC 0.11.0)
             - periodictable Version Installed: 1.4.1
             - setuptools Version Installed: 7.0 (MAC 12.0.5)

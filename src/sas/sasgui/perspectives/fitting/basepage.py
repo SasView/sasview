@@ -1895,7 +1895,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             if mod_cat == custom_model:
                 for model in self.model_list_box[mod_cat]:
                     if 'sasmodels.sasview_model.' in str(model):
-                        str_m = model._model_info['id']
+                        str_m = model.id
                     else:
                         str_m = str(model).split(".")[0]
                     #self.model_box.Append(str_m)
@@ -1944,11 +1944,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         mlist = []
         for models in list:
-            model = models()
-            name = model.__class__.__name__
-            if models.__name__ != "NoStructure":
-                name = model.name
-                mlist.append((name, models))
+            if models.name != "NoStructure":
+                mlist.append((models.name, models))
 
         # Sort the models
         mlist_sorted = sorted(mlist)
@@ -2098,15 +2095,14 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         if form_factor != None:
             # set multifactor for Mutifunctional models
-            if form_factor().__class__ in \
-                                        self.model_list_box["Multi-Functions"]:
+            if form_factor.is_multiplicity_model:
                 m_id = self.multifactorbox.GetCurrentSelection()
-                multiplicity = form_factor().multiplicity_info[0]
+                multiplicity = form_factor.multiplicity_info[0]
                 self.multifactorbox.Clear()
                 self._set_multfactor_combobox(multiplicity)
                 self._show_multfactor_combobox()
                 #ToDo:  this info should be called directly from the model
-                text = form_factor().multiplicity_info[1]  # 'No. of Shells: '
+                text = form_factor.multiplicity_info[1]  # 'No. of Shells: '
 
                 self.mutifactor_text.SetLabel(text)
                 if m_id > multiplicity - 1:
@@ -2116,7 +2112,6 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.multi_factor = self.multifactorbox.GetClientData(m_id)
                 if self.multi_factor == None:
                     self.multi_factor = 0
-                form_factor = form_factor(int(self.multi_factor))
                 self.multifactorbox.SetSelection(m_id)
                 # Check len of the text1 and max_multiplicity
                 text = ''
@@ -2130,11 +2125,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                     self.show_sld_button.Show(True)
                 else:
                     self.sld_axes = ""
-
             else:
                 self._hide_multfactor_combobox()
                 self.show_sld_button.Hide()
-                form_factor = form_factor()
                 self.multi_factor = None
         else:
             self._hide_multfactor_combobox()
@@ -2146,16 +2139,17 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         if  struct_factor != None:
             from sas.sascalc.fit.MultiplicationModel import MultiplicationModel
-            self.model = MultiplicationModel(form_factor, struct_factor())
+            self.model = MultiplicationModel(form_factor(self.multi_factor),
+                                             struct_factor())
             # multifunctional form factor
             if len(form_factor.non_fittable) > 0:
                 self.temp_multi_functional = True
+        elif form_factor != None:
+            self.model = form_factor(self.multi_factor)
         else:
-            if form_factor != None:
-                self.model = form_factor
-            else:
-                self.model = None
-                return self.model
+            self.model = None
+            return
+
         # check if model has magnetic parameters
         if len(self.model.magnetic_params) > 0:
             self._has_magnetic = True
@@ -2285,7 +2279,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 paramater's value, string="+/-",
                 parameter's error of fit,
                 parameter's minimum value,
-                parrameter's maximum value ,
+                parameter's maximum value ,
                 parameter's units]
         """
         is_modified = modified

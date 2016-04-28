@@ -55,7 +55,13 @@ if sys.platform == "win32":
 else:
     ON_MAC = True
 
-
+import bumps.options
+from bumps.gui.fit_dialog import show_fit_config
+try:
+    from bumps.gui.fit_dialog import EVT_FITTER_CHANGED
+except ImportError:
+    # CRUFT: bumps 0.7.5.8 and below
+    EVT_FITTER_CHANGED = None  # type: wx.PyCommandEvent
 
 class Plugin(PluginBase):
     """
@@ -500,6 +506,12 @@ class Plugin(PluginBase):
         self.index_theory = 0
         self.parent.Bind(EVT_SLICER_PANEL, self._on_slicer_event)
         self.parent.Bind(EVT_SLICER_PARS_UPDATE, self._onEVT_SLICER_PANEL)
+
+        # CRUFT: EVT_FITTER_CHANGED is not None for bumps 0.7.5.9 and above
+        if EVT_FITTER_CHANGED is not None:
+            self.parent.Bind(EVT_FITTER_CHANGED, self.on_fitter_changed)
+        self._set_fitter_label(bumps.options.FIT_CONFIG)
+
         #self.parent._mgr.Bind(wx.aui.EVT_AUI_PANE_CLOSE,self._onclearslicer)
         #Create reader when fitting panel are created
         self.state_reader = Reader(self.set_state)
@@ -762,13 +774,15 @@ class Plugin(PluginBase):
         """
         Open the bumps options panel.
         """
-        try:
-            from bumps.gui.fit_dialog import show_fit_config
-            show_fit_config(self.parent, help=self.on_help)
-        except ImportError:
-            # CRUFT: Bumps 0.7.5.6 and earlier do not have the help button
-            from bumps.gui.fit_dialog import OpenFitOptions
-            OpenFitOptions()
+        show_fit_config(self.parent, help=self.on_help)
+
+    def on_fitter_changed(self, event):
+        self._set_fitter_label(event.config)
+
+    def _set_fitter_label(self, config):
+        self.fit_panel.parent.SetTitle(self.fit_panel.window_name
+                                       + " - Active Fitting Optimizer: "
+                                       + config.selected_name)
 
     def on_help(self, algorithm_id):
         _TreeLocation = "user/sasgui/perspectives/fitting/optimizer.html"
