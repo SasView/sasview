@@ -37,7 +37,7 @@ ext_modules = []
 # We do this here because application updates these files from .sasview
 # except when there is no such file
 # Todo : make this list generic
-# plugin_model_list = ['polynominal5.py', 'sph_bessel_jn.py',
+#plugin_model_list = ['polynominal5.py', 'sph_bessel_jn.py',
 #                      'sum_Ap1_1_Ap2.py', 'sum_p1_p2.py',
 #                      'testmodel_2.py', 'testmodel.py',
 #                      'polynominal5.pyc', 'sph_bessel_jn.pyc',
@@ -58,8 +58,8 @@ if os.path.isdir(sas_dir):
     f_path = os.path.join(sas_dir, 'config', "custom_config.py")
     if os.path.isfile(f_path):
         os.remove(f_path)
-    # f_path = os.path.join(sas_dir, 'plugin_models')
-    # if os.path.isdir(f_path):
+    #f_path = os.path.join(sas_dir, 'plugin_models')
+    #if os.path.isdir(f_path):
     #     for f in os.listdir(f_path):
     #         if f in plugin_model_list:
     #             file_path =  os.path.join(f_path, f)
@@ -295,9 +295,19 @@ def append_file(file_list, dir_path):
 file_sources = []
 append_file(file_sources, gen_dir)
 
+#Wojtek's hacky way to add doc files while bundling egg
+#def add_doc_files(directory):
+#    paths = []
+#    for (path, directories, filenames) in os.walk(directory):
+#        for filename in filenames:
+#            paths.append(os.path.join(path, filename))
+#    return paths
+
+#doc_files = add_doc_files('doc')
+
 # SasView
 package_dir["sas.sasview"] = "sasview"
-package_data['sas.sasview'] = ['images/*', 
+package_data['sas.sasview'] = ['images/*',
                                'media/*',
                                'test/*.txt',
                                'test/1d_data/*',
@@ -323,7 +333,7 @@ if os.name=='nt':
     required.extend(['html5lib', 'reportlab'])
 else:
     required.extend(['pil'])
-   
+
 # Set up SasView    
 setup(
     name="sasview",
