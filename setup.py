@@ -324,7 +324,7 @@ if os.name=='nt':
     required.extend(['html5lib', 'reportlab'])
 else:
     # 'pil' is now called 'pillow'
-    required.extend(['pil'])
+    required.extend(['pillow'])
 
 # Set up SasView    
 setup(
