@@ -6,8 +6,13 @@ import sys
 
 # Fix for error: hash-collision-3-both-1-and-1/
 # See http://jaredforsyth.com/blog/2010/apr/28/accessinit-hash-collision-3-both-1-and-1/
-import PIL.Image
-sys.modules['Image'] = PIL.Image
+try:
+    import PIL.Image
+except ImportError:
+    pass
+else:
+    sys.modules['Image'] = PIL.Image
+
 
 common_required_package_list = {
     'setuptools':{'version':'0.6c11','import_name':'setuptools','test':'__version__'},
