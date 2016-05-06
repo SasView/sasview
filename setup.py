@@ -8,20 +8,11 @@ import shutil
 from setuptools import setup, Extension
 from distutils.command.build_ext import build_ext
 from distutils.core import Command
-from shutil import rmtree
 
 try:
     from numpy.distutils.misc_util import get_numpy_include_dirs
-    NUMPY_INC = get_numpy_include_dirs()[0]
-except:
-    try:
-        import numpy
-        NUMPY_INC = os.path.join(os.path.split(numpy.__file__)[0], 
-                                 "core","include")
-    except:
-        msg = "\nNumpy is needed to build SasView. "
-        print msg, "Try easy_install numpy.\n  %s" % str(sys.exc_value)
-        sys.exit(0)
+except ImportError:
+    pass
 
 # Manage version number ######################################
 import sasview
@@ -203,7 +194,6 @@ package_data["sas.sascalc.dataloader.readers"] = ['defaults.json','schema/*.xsd'
 packages.extend(["sas.sascalc.dataloader","sas.sascalc.dataloader.readers","sas.sascalc.dataloader.readers.schema"])
 
 # sas.sascalc.calculator
-numpy_incl_path = os.path.join(NUMPY_INC, "numpy")
 gen_dir = os.path.join("src", "sas", "sascalc", "calculator", "c_extensions")
 package_dir["sas.sascalc.calculator.core"] = gen_dir
 package_dir["sas.sascalc.calculator"] = os.path.join("src", "sas", "sascalc", "calculator")
@@ -215,7 +205,7 @@ ext_modules.append( Extension("sas.sascalc.calculator.core.sld2i",
             os.path.join(gen_dir, "libfunc.c"),
             os.path.join(gen_dir, "librefl.c"),
         ],
-        include_dirs=[numpy_incl_path, gen_dir],
+        include_dirs=[gen_dir],
     )
 )
 
@@ -229,7 +219,7 @@ ext_modules.append( Extension("sas.sascalc.pr.core.pr_inversion",
                               sources = [os.path.join(srcdir, "Cinvertor.c"),
                                          os.path.join(srcdir, "invertor.c"),
                                          ],
-                              include_dirs=[numpy_incl_path],
+                              include_dirs=[],
                               ) )
         
 # sas.sascalc.fit
