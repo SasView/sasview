@@ -9,11 +9,6 @@ from setuptools import setup, Extension
 from distutils.command.build_ext import build_ext
 from distutils.core import Command
 
-try:
-    from numpy.distutils.misc_util import get_numpy_include_dirs
-except ImportError:
-    pass
-
 # Manage version number ######################################
 import sasview
 VERSION = sasview.__version__
