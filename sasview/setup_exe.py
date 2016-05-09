@@ -196,8 +196,8 @@ else:
 
 # Select the appropriate manifest to use.
 py26MSdll_x86 = None
-if sys.version_info >= (3, 0) or sys.version_info < (2, 5):
-    print "*** This script only works with Python 2.5, 2.6, or 2.7."
+if sys.version_info >= (3, 0) or sys.version_info < (2, 6):
+    print "*** This script only works with Python 2.6 or 2.7."
     sys.exit()
 elif sys.version_info >= (2, 6):
     manifest = manifest_for_python26
@@ -207,9 +207,6 @@ elif sys.version_info >= (2, 6):
         py26MSdll_x86 = glob(r"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*.*")
     except:
         pass
-elif sys.version_info >= (2, 5):
-    manifest = manifest_for_python25
-    py26MSdll = None
 
 
 class Target:
@@ -255,9 +252,18 @@ data_files += invariant.data_files()
 import sas.sasgui.guiframe as guiframe
 data_files += guiframe.data_files()
 
-#import sas.models as models
-import sasmodels.models as models
-data_files += models.data_files()
+# precompile sas models into the sasview build path; doesn't matter too much
+# where it is so long as it is a place that will get cleaned up afterwards.
+import sasmodels.core
+dll_path = os.path.join(build_path, 'compiled_models')
+compiled_dlls += sasmodels.core.precompile_dlls(dll_path, dtype='double')
+
+# include the compiled models as data; coordinate the target path for the
+# data with installer_generator.py
+datafiles.append('compiled_models', compiled_dlls)
+
+import sasmodels
+data_files += sasmodels.data_files()
 
 for f in matplotlibdata:
     dirname = os.path.join('mpl-data', f[len(matplotlibdatadir)+1:])

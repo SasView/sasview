@@ -152,8 +152,5 @@ static PyMethodDef module_methods[] = {
 PyMODINIT_FUNC
 initsld2i(void)
 {
-    PyObject* m;
-
-    m = Py_InitModule3("sld2i", module_methods,
-                       "Sld2i module");
+    Py_InitModule3("sld2i", module_methods, "Sld2i module");
 }
