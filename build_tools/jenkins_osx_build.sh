@@ -65,10 +65,10 @@ $EASY_INSTALL -d $WORKSPACE/sasview/sasview-install sasview*.egg
 
 
 # TEST
-#cd $WORKSPACE
-#cd sasview
-#cd test
-#$PYTHON utest_sasview.py
+cd $WORKSPACE
+cd sasview
+cd test
+$PYTHON utest_sasview.py
 
 # PYLINT
 cd $WORKSPACE
