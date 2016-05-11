@@ -703,8 +703,6 @@ class View(object):
                 self.dy = []
             else:
                 self.dy = None
-            tempx = []
-            tempy = []
             if not has_err_x:
                 dx = numpy.zeros(len(x))
             if not has_err_y:
@@ -723,20 +721,18 @@ class View(object):
                         self.dx.append(tempdx)
                     if has_err_y:
                         self.dy.append(tempdy)
-                except:
-                    tempx = x[i]
-                    tempy = y[i]
-                    tempdy = dy[i]
+                except Exception:
+                    pass
             # Sanity check
             if not len(self.x) == len(self.y):
                 msg = "Plottable.View: transformed x "
                 msg += "and y are not of the same length"
                 raise ValueError, msg
-            if has_err_x and not (len(self.x) and len(self.dx)):
+            if has_err_x and not (len(self.x) == len(self.dx)):
                 msg = "Plottable.View: transformed x and dx"
                 msg += " are not of the same length"
                 raise ValueError, msg
-            if has_err_y and not (len(self.y) and len(self.dy)):
+            if has_err_y and not (len(self.y) == len(self.dy)):
                 msg = "Plottable.View: transformed y"
                 msg += " and dy are not of the same length"
                 raise ValueError, msg
