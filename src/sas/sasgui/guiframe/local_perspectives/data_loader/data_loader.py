@@ -154,9 +154,14 @@ class Plugin(PluginBase):
             error message to be sure user knows the issue.
         """
         data_error = False
-        for error_data in item.errors:
+        if hasattr(item, 'errors'):
+            for error_data in item.errors:
+                data_error = True
+                message += "\tError: {0}\n".format(error_data)
+        else:
+            logging.error("Loader returned an invalid object:\n %s" % str(item))
             data_error = True
-            message += "\tError: {0}\n".format(error_data)
+        
         data = self.parent.create_gui_data(item, p_file)
         output[data.id] = data
         return output, message, data_error
@@ -202,6 +207,7 @@ class Plugin(PluginBase):
                                                           output,
                                                           error_message)
             except:
+                logging.error(sys.exc_value)
                 any_error = True
             if any_error or error_message != "":
                 if error_message == "":
