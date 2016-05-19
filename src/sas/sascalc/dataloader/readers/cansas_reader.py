@@ -220,8 +220,8 @@ class Reader(XMLreader):
                             return_value = self._final_cleanup(return_value)
                             output.append(return_value)
                     else:
-                        output.append("Invalid XML at: {0}".format(\
-                                                    self.find_invalid_xml()))
+                        raise RuntimeError, "Invalid XML at: {0}".format(\
+                                                    self.find_invalid_xml())
                 except:
                     # If the file does not match the schema, raise this error
                     raise RuntimeError, "%s cannot be read" % xml_file
