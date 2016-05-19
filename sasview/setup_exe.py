@@ -378,6 +378,8 @@ dll_excludes = [
     'w9xpopen.exe',
     # accidental links to msys/cygwin binaries; shouldn't be needed
     'cygwin1.dll',
+    # no need to distribute OpenCL.dll - users should have their own copy
+    'OpenCL.dll'
     ]
 
 target_wx_client = Target(
