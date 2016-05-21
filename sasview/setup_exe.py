@@ -234,6 +234,11 @@ test_upcoming_dir = os.path.join(path, "test\\upcoming_formats")
 
 matplotlibdatadir = matplotlib.get_data_path()
 matplotlibdata = findall(matplotlibdatadir)
+
+from distutils.sysconfig import get_python_lib
+site_loc = get_python_lib()
+opencl_include_dir = os.path.join(site_loc, "pyopencl", "cl")
+
 data_files = []
 # Copying SLD data
 import periodictable
@@ -319,6 +324,9 @@ for f in findall(test_upcoming_dir):
     if not ".svn" in f:
         data_files.append(("test\\upcoming_formats", [f]))
 
+# Copying opencl include files
+for f in findall(opencl_include_dir):
+    data_files.append(("includes\\pyopencl",[f]))
 
 # See if the documentation has been built, and if so include it.
 doc_path = os.path.join(build_path, "doc")
@@ -378,6 +386,8 @@ dll_excludes = [
     'w9xpopen.exe',
     # accidental links to msys/cygwin binaries; shouldn't be needed
     'cygwin1.dll',
+    # no need to distribute OpenCL.dll - users should have their own copy
+    'OpenCL.dll'
     ]
 
 target_wx_client = Target(
