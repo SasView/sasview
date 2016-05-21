@@ -29,6 +29,7 @@ import math
 import re
 from wx.py.editwindow import EditWindow
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
+from .pyconsole import show_model_output, check_model
 
 
 if sys.platform.count("win32") > 0:
@@ -44,19 +45,6 @@ EDITOR_WIDTH = 800
 EDITOR_HEIGTH = 735
 PANEL_WIDTH = 500
 _BOX_WIDTH = 55
-
-
-def _compile_file(path):
-    """
-    Compile the file in the path
-    """
-    try:
-        import py_compile
-        py_compile.compile(file=path, doraise=True)
-        return ''
-    except:
-        _, value, _ = sys.exc_info()
-        return value
 
 def _delete_file(path):
     """
@@ -383,8 +371,9 @@ class TextDialog(wx.Dialog):
             name1 = label[0]
             name2 = label[1]
             self.write_string(fname, name1, name2)
-            self.compile_file(fname)
-            self.parent.update_custom_combo()
+            success = show_model_output(self, fname)
+            if success:
+                self.parent.update_custom_combo()
             msg = self._notes
             info = 'Info'
             color = 'blue'
@@ -617,7 +606,7 @@ class TextDialog(wx.Dialog):
         Compile the file in the path
         """
         path = self.fname
-        _compile_file(path)
+        show_model_output(self, path)
 
     def delete_file(self, path):
         """
@@ -953,6 +942,7 @@ class EditorPanel(wx.ScrolledWindow):
         name = self.name_tcl.GetValue().lstrip().rstrip()
         info = 'Info'
         msg = ''
+        result, check_err = '', ''
         # Sort out the errors if occur
         # First check for valid python name then if the name already exists
         if not re.match('^[A-Za-z0-9_]*$', name):
@@ -968,6 +958,13 @@ class EditorPanel(wx.ScrolledWindow):
                 if func_str.count('return') > 0:
                     self.write_file(self.fname, name, description, param_str,
                                     pd_param_str, func_str)
+                    try:
+                        result, msg = check_model(self.fname), None
+                    except Exception:
+                        import traceback
+                        result, msg = None, "error building model"
+                        check_err = "\n"+traceback.format_exc(limit=2)
+
                     # Modified compiling test, as it will fail for sasmodels.sasview_model class
                     # Should add a test to check that the class is correctly built 
                     # by sasview_model.make_class_from_file?
@@ -1030,9 +1027,9 @@ class EditorPanel(wx.ScrolledWindow):
             info = 'Error'
             color = 'red'
         else:
-            msg = "Successful! "
+            self._notes = result
+            msg = "Successful! Please look for %s in Customized Models."%name
             msg += "  " + self._notes
-            msg += " Please look for it in the Customized Models."
             info = 'Info'
             color = 'blue'
         self._msg_box.SetLabel(msg)
@@ -1040,7 +1037,8 @@ class EditorPanel(wx.ScrolledWindow):
         # Send msg to the top window
         if self.base != None:
             from sas.sasgui.guiframe.events import StatusEvent
-            wx.PostEvent(self.base.parent, StatusEvent(status=msg, info=info))
+            wx.PostEvent(self.base.parent,
+                         StatusEvent(status=msg+check_err, info=info))
         self.warning = msg
 
     def write_file(self, fname, name, desc_str, param_str, pd_param_str, func_str):
