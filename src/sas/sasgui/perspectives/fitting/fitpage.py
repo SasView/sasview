@@ -1329,8 +1329,7 @@ class FitPage(BasicPage):
                                               uid=self.uid,
                                               qmin=float(self.qmin_x),
                                               qmax=float(self.qmax_x),
-                                              enable_smearer=enable_smearer,
-                                              draw=True)
+                                              enable_smearer=enable_smearer)
                 if flag:
                     #self.compute_chisqr(smearer= temp_smearer)
 
@@ -2605,8 +2604,7 @@ class FitPage(BasicPage):
                      fid=self.data.id,
                      qmin=float(self.qmin_x),
                      qmax=float(self.qmax_x),
-                     enable_smearer=enable_smearer,
-                     draw=True)
+                     enable_smearer=enable_smearer)
 
         self.state.enable_smearer = self.enable_smearer.GetValue()
         self.state.disable_smearer = self.disable_smearer.GetValue()

@@ -118,12 +118,14 @@ class CalcThread:
     """
 
     def __init__(self, completefn=None, updatefn=None,
-                 yieldtime=0.01, worktime=0.01):
+                 yieldtime=0.01, worktime=0.01,
+                 exception_handler=None):
         """Prepare the calculator"""
         self.yieldtime     = yieldtime
         self.worktime      = worktime
         self.completefn    = completefn
         self.updatefn      = updatefn
+        self.exception_handler = exception_handler
         self._interrupting = False
         self._running      = False
         self._queue        = []
@@ -198,7 +200,6 @@ class CalcThread:
             raise KeyboardInterrupt
 
     def update(self, **kwargs):
-
         """Update GUI with the lastest results from the current work unit."""
         if self.updatefn != None and clock() > self._time_for_update:
             self._lock.acquire()
@@ -224,7 +225,26 @@ class CalcThread:
     def compute(self, *args, **kwargs):
         """Perform a work unit.  The subclass will provide details of
         the arguments."""
-        raise NotImplemented, "Calculation thread needs compute method"
+        raise NotImplemented("Calculation thread needs compute method")
+
+    def exception(self):
+        """
+        An exception occurred during computation, so call the exception handler
+        if there is one.  If not, then log the exception and continue.
+        """
+        # If we have an exception handler, let it try to handle the exception.
+        # If it fails fall through to log the failure to handle the exception
+        # (the original exception will be lost).  If there is no exception
+        # handler, just log the exception in compute that we are responding to.
+        if self.exception_handler:
+            try:
+                self.exception_handler(*sys.exc_info())
+                return
+            except Exception:
+                pass
+        import logging
+        logging.error(traceback.format_exc())
+        #print 'CalcThread exception',
 
     def _run(self):
         """Internal function to manage the thread."""
@@ -249,8 +269,7 @@ class CalcThread:
             except KeyboardInterrupt:
                 pass
             except:
-                traceback.print_exc()
-                #print 'CalcThread exception',
+                self.exception()
         self._running = False
 
 
