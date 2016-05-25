@@ -80,6 +80,10 @@ wxcruft.call_later_fix()
 
 #Always use private .matplotlib setup to avoid conflicts with other
 #uses of matplotlib
+#Have to check if .sasview exists first 
+sasdir = os.path.join(os.path.expanduser("~"),'.sasview')
+if not os.path.exists(sasdir):
+    os.mkdir(sasdir)
 mplconfigdir = os.path.join(os.path.expanduser("~"),'.sasview','.matplotlib')
 if not os.path.exists(mplconfigdir):
     os.mkdir(mplconfigdir)
