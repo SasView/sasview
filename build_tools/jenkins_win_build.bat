@@ -4,7 +4,6 @@ set PATH=c:\python27;c:\mingw\bin;%PATH%
 set PYLINT= C:\Python27\Scripts\pylint
 set INNO="C:\Program Files (x86)\Inno Setup 5\ISCC.exe"
 
-
 set PYTHONPATH=%PYTHONPATH%;%WORKSPACE%\sasview\utils
 set PYTHONPATH=%PYTHONPATH%;%WORKSPACE%\sasview\sasview-install
 
@@ -67,6 +66,12 @@ echo F | xcopy sasview-*.egg sasview.egg /Y
 %EASY_INSTALL% -d %WORKSPACE%\sasview\sasview-install sasview.egg
 
 
+:: TINYCC build ####################################################
+cd %WORKSPACE%
+cd tinycc
+%PYTHON% setup.py build
+xcopy /S build\lib\* %WORKSPACE%\sasview\utils\
+
 :: SASVIEW INSTALLER ##################################################
 cd %WORKSPACE%
 cd sasview
@@ -76,7 +81,6 @@ cd sasview
 %INNO% installer.iss
 cd Output
 xcopy setupSasView.exe %WORKSPACE%\sasview\dist
-
 
 :: SASVIEW PYLINT #####################################################
 cd %WORKSPACE%\sasview
