@@ -1330,7 +1330,7 @@ import os
 import sys
 import copy
 
-import nuympy
+import numpy
 
 from sas.sascalc.fit.pluginmodel import Model1DPlugin
 from sasmodels.sasview_model import make_class
