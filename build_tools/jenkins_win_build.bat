@@ -1,52 +1,91 @@
-
-set PYTHON=C:\Python27\python
+set PYTHON=c:\python27\python
 set EASY_INSTALL=c:\python27\scripts\easy_install.exe
-set NEXUSDIR="C:\Program Files (x86)\NeXus Data Format\"
-set PATH=C:\Python27;C:\Python27\Scripts;C:\mingw\bin;%PATH%
-set PYLINT=c:\python27\scripts\pylint
+set PATH=c:\python27;c:\mingw\bin;%PATH%
+set PYLINT= C:\Python27\Scripts\pylint
+set INNO="C:\Program Files (x86)\Inno Setup 5\ISCC.exe"
+
+set PYTHONPATH=%PYTHONPATH%;%WORKSPACE%\sasview\utils
+set PYTHONPATH=%PYTHONPATH%;%WORKSPACE%\sasview\sasview-install
+
+echo %PYTHONPATH%
+echo %WORKSPACE%
 
 
-cd %WORKSPACE%\sasview
-%PYTHON% check_packages.py
+:: MAKE DIR FOR EGGS ##################################################
+cd %WORKSPACE%
+cd sasview
+MD sasview-install
+MD utils
 
 
-cd %WORKSPACE%\sasview
-python setup.py build -cmingw32
+:: SASMODELS build ####################################################
+cd %WORKSPACE%
+cd sasmodels
+%PYTHON% setup.py build
 
 
-cd %WORKSPACE%\sasview
-python setup.py docs
+
+:: SASMODELS doc ######################################################
+cd doc
+make html
 
 
-cd %WORKSPACE%\sasview
-python setup.py bdist_egg --skip-build
+:: SASMODELS build egg ################################################
+cd %WORKSPACE%
+cd sasmodels
+%PYTHON% setup.py bdist_egg
 
 
+:: SASMODELS install egg ##############################################
+cd %WORKSPACE%
+cd sasmodels
+cd dist
+echo F | xcopy sasmodels-*.egg sasmodels.egg /Y
+%EASY_INSTALL% -d %WORKSPACE%\sasview\utils sasmodels.egg
+
+
+:: NOW BUILD SASVIEW
+
+:: SASVIEW build egg ################################################
+:: Remember to modify C:\Python27\Lib\distutils\distutils.cfg to you compiler
+cd %WORKSPACE%
+cd sasview
+%PYTHON% setup.py build docs bdist_egg
+
+
+:: SASVIEW utest ######################################################
 cd %WORKSPACE%\sasview\test
 %PYTHON% utest_sasview.py
 
 
-cd %WORKSPACE%\sasview
-mkdir sasview-install
-set PYTHONPATH=%WORKSPACE%\sasview\sasview-install;%PYTHONPATH%
-
-
-cd %WORKSPACE%\sasview
+:: SASVIEW INSTALL EGG ################################################
+cd %WORKSPACE%
+cd sasview
 cd dist
-%EASY_INSTALL% -d ..\sasview-install sasview-3.1.2-py2.7-win32.egg
+echo F | xcopy sasview-*.egg sasview.egg /Y
+%EASY_INSTALL% -d %WORKSPACE%\sasview\sasview-install sasview.egg
 
 
-cd %WORKSPACE%\sasview\sasview
-python setup_exe.py py2exe
-python installer_generator.py
-"C:\Program Files (x86)\Inno Setup 5\ISCC.exe" installer.iss 
+:: TINYCC build ####################################################
+cd %WORKSPACE%
+cd tinycc
+%PYTHON% setup.py build
+xcopy /S build\lib\* %WORKSPACE%\sasview\utils\
 
-
+:: SASVIEW INSTALLER ##################################################
+cd %WORKSPACE%
+cd sasview
+cd sasview
+%PYTHON% setup_exe.py py2exe
+%PYTHON% installer_generator.py
+%INNO% installer.iss
 cd Output
 xcopy setupSasView.exe %WORKSPACE%\sasview\dist
 
+:: SASVIEW PYLINT #####################################################
 cd %WORKSPACE%\sasview
-%PYLINT% --rcfile "build_tools/pylint.rc" -f parseable sasview-install/sasview*.egg/sas sasview > test/sasview.txt
+%PYLINT% --rcfile "build_tools/pylint.rc" -f parseable sasview-install/sasview.egg/sas sasview > test/sasview.txt
 
 
-cd  %WORKSPACE%
+:: GO BACK ############################################################
+cd %WORKSPACE%

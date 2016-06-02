@@ -1,12 +1,13 @@
 export PATH=$PATH:/usr/local/bin/
 
-
 PYTHON=${PYTHON:-`which python`}
 EASY_INSTALL=${EASY_INSTALL:-`which easy_install`}
 PYLINT=${PYLINT:-`which pylint`}
 
 export PYTHONPATH=$PYTHONPATH:$WORKSPACE/sasview/utils
 export PYTHONPATH=$PYTHONPATH:$WORKSPACE/sasview/sasview-install
+export PYTHONPATH=$PYTHONPATH:/Library/Python/2.7/site-packages
+
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 
@@ -55,16 +56,15 @@ $EASY_INSTALL -d $WORKSPACE/sasview/utils sasmodels*.egg
 cd $WORKSPACE
 cd sasview
 $PYTHON setup.py clean
-$PYTHON setup.py build
-$PYTHON setup.py docs
+$PYTHON setup.py build docs bdist_egg
 
 
-# SASVIEW BUILD_egg with new docs
+# INSTALL SASVIEW
 cd $WORKSPACE
 cd sasview
-python setup.py bdist_egg
 cd dist
 $EASY_INSTALL -d $WORKSPACE/sasview/sasview-install sasview*.egg
+
 
 # TEST
 cd $WORKSPACE
@@ -77,9 +77,8 @@ cd $WORKSPACE
 cd sasview
 $PYLINT --rcfile "build_tools/pylint.rc" -f parseable sasview-install/sasview*.egg/sas sasview | tee  test/sasview.txt
 
-
 # BUILD APP
 cd $WORKSPACE
 cd sasview/sasview
-python setup_mac.py py2app
+$PYTHON setup_mac.py py2app
 

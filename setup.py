@@ -8,20 +8,6 @@ import shutil
 from setuptools import setup, Extension
 from distutils.command.build_ext import build_ext
 from distutils.core import Command
-from shutil import rmtree
-
-try:
-    from numpy.distutils.misc_util import get_numpy_include_dirs
-    NUMPY_INC = get_numpy_include_dirs()[0]
-except:
-    try:
-        import numpy
-        NUMPY_INC = os.path.join(os.path.split(numpy.__file__)[0], 
-                                 "core","include")
-    except:
-        msg = "\nNumpy is needed to build SasView. "
-        print msg, "Try easy_install numpy.\n  %s" % str(sys.exc_value)
-        sys.exit(0)
 
 # Manage version number ######################################
 import sasview
@@ -37,7 +23,7 @@ ext_modules = []
 # We do this here because application updates these files from .sasview
 # except when there is no such file
 # Todo : make this list generic
-# plugin_model_list = ['polynominal5.py', 'sph_bessel_jn.py',
+#plugin_model_list = ['polynominal5.py', 'sph_bessel_jn.py',
 #                      'sum_Ap1_1_Ap2.py', 'sum_p1_p2.py',
 #                      'testmodel_2.py', 'testmodel.py',
 #                      'polynominal5.pyc', 'sph_bessel_jn.pyc',
@@ -58,8 +44,8 @@ if os.path.isdir(sas_dir):
     f_path = os.path.join(sas_dir, 'config', "custom_config.py")
     if os.path.isfile(f_path):
         os.remove(f_path)
-    # f_path = os.path.join(sas_dir, 'plugin_models')
-    # if os.path.isdir(f_path):
+    #f_path = os.path.join(sas_dir, 'plugin_models')
+    #if os.path.isdir(f_path):
     #     for f in os.listdir(f_path):
     #         if f in plugin_model_list:
     #             file_path =  os.path.join(f_path, f)
@@ -203,7 +189,6 @@ package_data["sas.sascalc.dataloader.readers"] = ['defaults.json','schema/*.xsd'
 packages.extend(["sas.sascalc.dataloader","sas.sascalc.dataloader.readers","sas.sascalc.dataloader.readers.schema"])
 
 # sas.sascalc.calculator
-numpy_incl_path = os.path.join(NUMPY_INC, "numpy")
 gen_dir = os.path.join("src", "sas", "sascalc", "calculator", "c_extensions")
 package_dir["sas.sascalc.calculator.core"] = gen_dir
 package_dir["sas.sascalc.calculator"] = os.path.join("src", "sas", "sascalc", "calculator")
@@ -214,9 +199,8 @@ ext_modules.append( Extension("sas.sascalc.calculator.core.sld2i",
             os.path.join(gen_dir, "sld2i.cpp"),
             os.path.join(gen_dir, "libfunc.c"),
             os.path.join(gen_dir, "librefl.c"),
-            os.path.join(gen_dir, "winFuncs.c"),
         ],
-        include_dirs=[numpy_incl_path, gen_dir],
+        include_dirs=[gen_dir],
     )
 )
 
@@ -230,7 +214,7 @@ ext_modules.append( Extension("sas.sascalc.pr.core.pr_inversion",
                               sources = [os.path.join(srcdir, "Cinvertor.c"),
                                          os.path.join(srcdir, "invertor.c"),
                                          ],
-                              include_dirs=[numpy_incl_path],
+                              include_dirs=[],
                               ) )
         
 # sas.sascalc.fit
@@ -248,8 +232,9 @@ packages.extend(["sas.sasgui.perspectives.invariant"])
 package_data['sas.sasgui.perspectives.invariant'] = [os.path.join("media",'*')]
 
 package_dir["sas.sasgui.perspectives.fitting"] = os.path.join("src", "sas", "sasgui", "perspectives", "fitting")
-packages.extend(["sas.sasgui.perspectives.fitting"])
-package_data['sas.sasgui.perspectives.fitting'] = ['media/*']
+package_dir["sas.sasgui.perspectives.fitting.plugin_models"] = os.path.join("src", "sas", "sasgui", "perspectives", "fitting", "plugin_models")
+packages.extend(["sas.sasgui.perspectives.fitting", "sas.sasgui.perspectives.fitting.plugin_models"])
+package_data['sas.sasgui.perspectives.fitting'] = ['media/*', 'plugin_models/*']
 
 packages.extend(["sas.sasgui.perspectives", "sas.sasgui.perspectives.calculator"])
 package_data['sas.sasgui.perspectives.calculator'] = ['images/*', 'media/*']
@@ -266,10 +251,6 @@ packages.append("sas.sasgui.plottools")
 # package_dir["sas.models"] = os.path.join("src", "sas", "models")
 # packages.append("sas.models")
 
-IGNORED_FILES = [".svn"]
-if not os.name=='nt':
-    IGNORED_FILES.extend(["gamma_win.c","winFuncs.c"])
-
 EXTENSIONS = [".c", ".cpp"]
 
 def append_file(file_list, dir_path):
@@ -279,7 +260,7 @@ def append_file(file_list, dir_path):
     for f in os.listdir(dir_path):
         if os.path.isfile(os.path.join(dir_path, f)):
             _, ext = os.path.splitext(f)
-            if ext.lower() in EXTENSIONS and f not in IGNORED_FILES:
+            if ext.lower() in EXTENSIONS:
                 file_list.append(os.path.join(dir_path, f))
         elif os.path.isdir(os.path.join(dir_path, f)) and \
                 not f.startswith("."):
@@ -287,17 +268,26 @@ def append_file(file_list, dir_path):
             for new_f in os.listdir(sub_dir):
                 if os.path.isfile(os.path.join(sub_dir, new_f)):
                     _, ext = os.path.splitext(new_f)
-                    if ext.lower() in EXTENSIONS and\
-                         new_f not in IGNORED_FILES:
+                    if ext.lower() in EXTENSIONS:
                         file_list.append(os.path.join(sub_dir, new_f))
 
 # Comment out the following to avoid rebuilding all the models
 file_sources = []
 append_file(file_sources, gen_dir)
 
+#Wojtek's hacky way to add doc files while bundling egg
+#def add_doc_files(directory):
+#    paths = []
+#    for (path, directories, filenames) in os.walk(directory):
+#        for filename in filenames:
+#            paths.append(os.path.join(path, filename))
+#    return paths
+
+#doc_files = add_doc_files('doc')
+
 # SasView
 package_dir["sas.sasview"] = "sasview"
-package_data['sas.sasview'] = ['images/*', 
+package_data['sas.sasview'] = ['images/*',
                                'media/*',
                                'test/*.txt',
                                'test/1d_data/*',
@@ -308,7 +298,7 @@ package_data['sas.sasview'] = ['images/*',
 packages.append("sas.sasview")
 
 required = [
-    'bumps>=0.7.5.6', 'periodictable>=1.3.1', 'pyparsing<2.0.0',
+    'bumps>=0.7.5.9', 'periodictable>=1.3.1', 'pyparsing<2.0.0',
 
     # 'lxml>=2.2.2',
     'lxml', 
@@ -322,8 +312,9 @@ required = [
 if os.name=='nt':
     required.extend(['html5lib', 'reportlab'])
 else:
-    required.extend(['pil'])
-   
+    # 'pil' is now called 'pillow'
+    required.extend(['pillow'])
+
 # Set up SasView    
 setup(
     name="sasview",

@@ -114,7 +114,7 @@ static PyObject * set_x(Cinvertor *self, PyObject *args) {
 	}
 
 	//self->params.x = data;
-	self->params.npoints = ndata;
+	self->params.npoints = (int)ndata;
 	return Py_BuildValue("i", self->params.npoints);
 }
 
@@ -179,7 +179,7 @@ static PyObject * set_y(Cinvertor *self, PyObject *args) {
 	}
 
 	//self->params.y = data;
-	self->params.ny = ndata;
+	self->params.ny = (int)ndata;
 	return Py_BuildValue("i", self->params.ny);
 }
 
@@ -244,7 +244,7 @@ static PyObject * set_err(Cinvertor *self, PyObject *args) {
 	}
 
 	//self->params.err = data;
-	self->params.nerr = ndata;
+	self->params.nerr = (int)ndata;
 	return Py_BuildValue("i", self->params.nerr);
 }
 
@@ -522,10 +522,10 @@ static PyObject * residuals(Cinvertor *self, PyObject *args) {
 	// Should create this list only once and refill it
     residuals = PyList_New(self->params.npoints);
 
-    regterm = reg_term(pars, self->params.d_max, npars, nslice);
+    regterm = reg_term(pars, self->params.d_max, (int)npars, nslice);
 
     for(i=0; i<self->params.npoints; i++) {
-    	diff = self->params.y[i] - iq(pars, self->params.d_max, npars, self->params.x[i]);
+    	diff = self->params.y[i] - iq(pars, self->params.d_max, (int)npars, self->params.x[i]);
     	residual = diff*diff / (self->params.err[i]*self->params.err[i]);
 
     	// regularization term
@@ -572,11 +572,11 @@ static PyObject * pr_residuals(Cinvertor *self, PyObject *args) {
 	// Should create this list only once and refill it
     residuals = PyList_New(self->params.npoints);
 
-    regterm = reg_term(pars, self->params.d_max, npars, nslice);
+    regterm = reg_term(pars, self->params.d_max, (int)npars, nslice);
 
 
     for(i=0; i<self->params.npoints; i++) {
-    	diff = self->params.y[i] - pr(pars, self->params.d_max, npars, self->params.x[i]);
+    	diff = self->params.y[i] - pr(pars, self->params.d_max, (int)npars, self->params.x[i]);
     	residual = diff*diff / (self->params.err[i]*self->params.err[i]);
 
     	// regularization term
@@ -610,7 +610,7 @@ static PyObject * get_iq(Cinvertor *self, PyObject *args) {
 	if (!PyArg_ParseTuple(args, "Od", &data_obj, &q)) return NULL;
 	OUTVECTOR(data_obj,pars,npars);
 
-	iq_value = iq(pars, self->params.d_max, npars, q);
+	iq_value = iq(pars, self->params.d_max, (int)npars, q);
 	return Py_BuildValue("f", iq_value);
 }
 
@@ -635,7 +635,7 @@ static PyObject * get_iq_smeared(Cinvertor *self, PyObject *args) {
 	if (!PyArg_ParseTuple(args, "Od", &data_obj, &q)) return NULL;
 	OUTVECTOR(data_obj,pars,npars);
 
-	iq_value = iq_smeared(pars, self->params.d_max, npars,
+	iq_value = iq_smeared(pars, self->params.d_max, (int)npars,
 							self->params.slit_height, self->params.slit_width,
 							q, 21);
 	return Py_BuildValue("f", iq_value);
@@ -660,7 +660,7 @@ static PyObject * get_pr(Cinvertor *self, PyObject *args) {
 	if (!PyArg_ParseTuple(args, "Od", &data_obj, &r)) return NULL;
 	OUTVECTOR(data_obj,pars,npars);
 
-	pr_value = pr(pars, self->params.d_max, npars, r);
+	pr_value = pr(pars, self->params.d_max, (int)npars, r);
 	return Py_BuildValue("f", pr_value);
 }
 
@@ -688,11 +688,11 @@ static PyObject * get_pr_err(Cinvertor *self, PyObject *args) {
 	OUTVECTOR(data_obj,pars,npars);
 
 	if (err_obj == Py_None) {
-		pr_value = pr(pars, self->params.d_max, npars, r);
+		pr_value = pr(pars, self->params.d_max, (int)npars, r);
 		pr_err_value = 0.0;
 	} else {
 		OUTVECTOR(err_obj,pars_err,npars2);
-		pr_err(pars, pars_err, self->params.d_max, npars, r, &pr_value, &pr_err_value);
+		pr_err(pars, pars_err, self->params.d_max, (int)npars, r, &pr_value, &pr_err_value);
 	}
 	return Py_BuildValue("ff", pr_value, pr_err_value);
 }
@@ -727,8 +727,8 @@ static PyObject * oscillations(Cinvertor *self, PyObject *args) {
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
 	OUTVECTOR(data_obj,pars,npars);
 
-	oscill = reg_term(pars, self->params.d_max, npars, 100);
-	norm   = int_p2(pars, self->params.d_max, npars, 100);
+	oscill = reg_term(pars, self->params.d_max, (int)npars, 100);
+	norm   = int_p2(pars, self->params.d_max, (int)npars, 100);
 	return Py_BuildValue("f", sqrt(oscill/norm)/acos(-1.0)*self->params.d_max );
 
 }
@@ -748,7 +748,7 @@ static PyObject * get_peaks(Cinvertor *self, PyObject *args) {
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
 	OUTVECTOR(data_obj,pars,npars);
 
-	count = npeaks(pars, self->params.d_max, npars, 100);
+	count = npeaks(pars, self->params.d_max, (int)npars, 100);
 
 	return Py_BuildValue("i", count );
 
@@ -769,7 +769,7 @@ static PyObject * get_positive(Cinvertor *self, PyObject *args) {
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
 	OUTVECTOR(data_obj,pars,npars);
 
-	fraction = positive_integral(pars, self->params.d_max, npars, 100);
+	fraction = positive_integral(pars, self->params.d_max, (int)npars, 100);
 
 	return Py_BuildValue("f", fraction );
 
@@ -794,7 +794,7 @@ static PyObject * get_pos_err(Cinvertor *self, PyObject *args) {
 	OUTVECTOR(data_obj,pars,npars);
 	OUTVECTOR(err_obj,pars_err,npars2);
 
-	fraction = positive_errors(pars, pars_err, self->params.d_max, npars, 51);
+	fraction = positive_errors(pars, pars_err, self->params.d_max, (int)npars, 51);
 
 	return Py_BuildValue("f", fraction );
 
@@ -814,7 +814,7 @@ static PyObject * get_rg(Cinvertor *self, PyObject *args) {
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
 	OUTVECTOR(data_obj,pars,npars);
 
-	value = rg(pars, self->params.d_max, npars, 101);
+	value = rg(pars, self->params.d_max, (int)npars, 101);
 
 	return Py_BuildValue("f", value );
 
@@ -834,7 +834,7 @@ static PyObject * get_iq0(Cinvertor *self, PyObject *args) {
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
 	OUTVECTOR(data_obj,pars,npars);
 
-	value = 4.0*acos(-1.0)*int_pr(pars, self->params.d_max, npars, 101);
+	value = 4.0*acos(-1.0)*int_pr(pars, self->params.d_max, (int)npars, 101);
 
 	return Py_BuildValue("f", value );
 

@@ -3,11 +3,12 @@ Console Module display Python console
 """
 import sys
 import os
+
+import numpy as np
+
 import wx
-import wx.lib.dialogs
+from wx.lib.dialogs import ScrolledMessageDialog
 import wx.py.editor as editor
-import wx.py.frame as frame
-import py_compile
 
 if sys.platform.count("win32") > 0:
     PANEL_WIDTH = 800
@@ -17,20 +18,60 @@ else:
     PANEL_WIDTH = 830
     PANEL_HEIGHT = 730
     FONT_VARIANT = 1
-ID_COMPILE = wx.NewId()
+ID_CHECK_MODEL = wx.NewId()
 ID_RUN = wx.NewId()
 
-def compile_file(path):
+def check_model(path):
     """
-    Compile a python file
+    Check that the model on the path can run.
     """
+    # try running the model
+    from sasmodels.core import load_model, call_kernel
+    model = load_model(path)
+
+    q =  np.array([0.01, 0.1])
+    kernel = model.make_kernel([q])
+    Iq = call_kernel(kernel, {})
+
+    qx, qy =  np.array([0.01, 0.01]), np.array([0.1, 0.1])
+    kernel = model.make_kernel([qx, qy])
+    Iqxy = call_kernel(kernel, {})
+
+    result = """
+    Iq(%s) = %s
+    Iqxy(%s, %s) = %s
+    """%(q, Iq, qx, qy, Iqxy)
+
+    return result
+
+def show_model_output(parent, fname):
+    # Make sure we have a python file; not sure why we care though...
+    if not (fname and os.path.exists(fname) and fname.endswith('.py')):
+        mssg = "\n This is not a python file."
+        wx.MessageBox(str(mssg), 'Error', style=wx.ICON_ERROR)
+        return False
+
     try:
-        import py_compile
-        py_compile.compile(file=path, doraise=True)
-    except:
-        type, value, traceback = sys.exc_info()
-        return value
-    return None
+        result, errmsg = check_model(fname), None
+    except Exception:
+        import traceback
+        result, errmsg = None, traceback.format_exc(limit=2)
+
+    parts = ["Running model '%s'..." % os.path.basename(fname)]
+    if errmsg is not None:
+        parts.extend(["", "Error occurred:", errmsg, ""])
+        title, icon = "Error", wx.ICON_ERROR
+    else:
+        parts.extend(["", "Success:", result, ""])
+        title, icon = "Info", wx.ICON_INFORMATION
+    text = "\n".join(parts)
+    dlg = ScrolledMessageDialog(parent, text, title, size=((550, 250)))
+    fnt = wx.Font(10, wx.TELETYPE, wx.NORMAL, wx.NORMAL)
+    dlg.GetChildren()[0].SetFont(fnt)
+    dlg.GetChildren()[0].SetInsertionPoint(0)
+    dlg.ShowModal()
+    dlg.Destroy()
+    return errmsg is None
 
 class PyConsole(editor.EditorNotebookFrame):
     ## Internal nickname for the window, used by the AUI manager
@@ -64,9 +105,9 @@ class PyConsole(editor.EditorNotebookFrame):
         self.Bind(wx.EVT_MENU, self.OnOpenFile, id=wx.ID_OPEN)
         self.Bind(wx.EVT_MENU, self.OnSaveFile, id=wx.ID_SAVE)
         self.Bind(wx.EVT_MENU, self.OnSaveAsFile, id=wx.ID_SAVEAS)
-        self.Bind(wx.EVT_MENU, self.OnCompile, id=ID_COMPILE)
+        self.Bind(wx.EVT_MENU, self.OnCheckModel, id=ID_CHECK_MODEL)
         self.Bind(wx.EVT_MENU, self.OnRun, id=ID_RUN)
-        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateCompileMenu, id=ID_COMPILE)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateCompileMenu, id=ID_CHECK_MODEL)
         self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateCompileMenu, id=ID_RUN)
         self.Bind(wx.EVT_CLOSE, self.on_close)
         if not title.count('Python Shell'):
@@ -80,8 +121,8 @@ class PyConsole(editor.EditorNotebookFrame):
         Add menu
         """
         self.compileMenu = wx.Menu()
-        self.compileMenu.Append(ID_COMPILE, 'Compile',
-                 'Compile the file')
+        self.compileMenu.Append(ID_CHECK_MODEL, 'Check model',
+                 'Loading and run the model')
         self.compileMenu.AppendSeparator()
         self.compileMenu.Append(ID_RUN, 'Run in Shell',
                  'Run the file in the Python Shell')
@@ -191,7 +232,7 @@ class PyConsole(editor.EditorNotebookFrame):
         """
         Run
         """
-        if self._check_changed():
+        if not self._check_saved():
             return True
         if self.buffer and self.buffer.doc.filepath:
             self.editor.setFocus()
@@ -206,75 +247,29 @@ class PyConsole(editor.EditorNotebookFrame):
             title = 'Error'
             icon = wx.ICON_ERROR
             wx.MessageBox(str(mssg), title, style=icon)
-            return 0
+            return False
 
-    def OnCompile(self, event):
+    def OnCheckModel(self, event):
         """
         Compile
         """
-        if self._check_changed():
+        if not self._check_saved():
             return True
-        run_out = self.OnRun(None)
-        if self._get_err_msg(run_out):
-            if self._manager != None and self.panel != None:
-                self._manager.set_edit_menu_helper(self.parent)
-                # Update custom model list in fitpage combobox
-                wx.CallAfter(self._manager.update_custom_combo)
+        fname = self.editor.getStatus()[0]
+        success = show_model_output(self, fname)
 
-    def _check_changed(self):
+        # Update custom model list in fitpage combobox
+        if success and self._manager != None and self.panel != None:
+            self._manager.set_edit_menu_helper(self.parent)
+            wx.CallAfter(self._manager.update_custom_combo)
+
+    def _check_saved(self):
         """
         If content was changed, suggest to save it first
         """
         if self.bufferHasChanged() and self.buffer.doc.filepath:
             cancel = self.bufferSuggestSave()
-            if cancel:
-                return cancel
-
-    def _get_err_msg(self, text=''):
-        """
-        Get err_msg
-        """
-        name = None
-        mssg = "\n This is not a python file."
-        title = 'Error'
-        icon = wx.ICON_ERROR
-        try:
-            fname = self.editor.getStatus()[0]
-            name = os.path.basename(fname)
-            if name.split('.')[-1] != 'py':
-                wx.MessageBox(str(mssg), title, style=icon)
-                return False
-            msg = compile_file(fname)
-        except:
-            msg = None
-        if name == None:
-            wx.MessageBox(str(mssg), title, style=icon)
-            return False
-        mssg = "Compiling '%s'...\n" % name
-        if msg != None:
-            mssg += "Error occurred:\n"
-            mssg += str(msg) + "\n\n"
-            if text:
-                mssg += "Run-Test results:\n"
-                mssg += str(text)
-                title = 'Warning'
-                icon = wx.ICON_WARNING
-        else:
-            mssg += "Successful.\n\n"
-            if text:
-                if text.count('Failed') or text.count('Error:') > 0:
-                    mssg += "But Simple Test FAILED: Please check your code.\n"
-                mssg += "Run-Test results:\n"
-                mssg += str(text)
-            title = 'Info'
-            icon = wx.ICON_INFORMATION
-        dlg = wx.lib.dialogs.ScrolledMessageDialog(self, mssg, title,
-                                                   size=((550, 250)))
-        fnt = wx.Font(10, wx.TELETYPE, wx.NORMAL, wx.NORMAL)
-        dlg.GetChildren()[0].SetFont(fnt)
-        dlg.GetChildren()[0].SetInsertionPoint(0)
-        dlg.ShowModal()
-        dlg.Destroy()
+            return not cancel
         return True
 
     def OnUpdateCompileMenu(self, event):
@@ -285,7 +280,7 @@ class PyConsole(editor.EditorNotebookFrame):
         id = event.GetId()
         event.Enable(True)
         try:
-            if id == ID_COMPILE or id == ID_RUN:
+            if id == ID_CHECK_MODEL or id == ID_RUN:
                 menu_on = False
                 if self.buffer and self.buffer.doc.filepath:
                     menu_on = True

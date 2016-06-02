@@ -15,20 +15,40 @@
 
 import os
 import sys
+import warnings
+from glob import glob
+import shutil
+
+from distutils.util import get_platform
+from distutils.core import setup
+from distutils.filelist import findall
+from distutils.sysconfig import get_python_lib
+import py2exe
+
+#from idlelib.PyShell import warning_stream
 
 # put the build directory at the front of the path
 if os.path.abspath(os.path.dirname(__file__)) != os.path.abspath(os.getcwd()):
     raise RuntimeError("Must run setup_exe from the sasview directory")
-from distutils.util import get_platform
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 platform = '%s-%s'%(get_platform(), sys.version[:3])
 build_path = os.path.join(root, 'build', 'lib.'+platform)
+#build_path = os.path.join(root, 'sasview-install', 'Lib', 'site-packages')
 sys.path.insert(0, build_path)
 
 import local_config
+from installer_generator import generate_installer
+
+import matplotlib
+try:
+    import tinycc
+except ImportError:
+    warnings.warn("TinyCC package is not available and will not be included")
+    tinycc = None
 
 if len(sys.argv) == 1:
     sys.argv.append('py2exe')
+
 # When using the SasView build script, we need to be able to pass
 # an extra path to be added to the python path. The extra arguments
 # should be removed from the list so that the setup processing doesn't
@@ -44,9 +64,6 @@ except:
     print "Error processing extra python path needed to build SasView\n  %s" % \
                 sys.exc_value
 
-from distutils.core import setup
-from distutils.filelist import findall
-import matplotlib
 
 # Solution taken from here: http://www.py2exe.org/index.cgi/win32com.shell
 # ModuleFinder can't handle runtime changes to __path__, but win32com uses them
@@ -78,138 +95,67 @@ except ImportError:
     # no build path setup, no worries.
     pass
 
-import py2exe
-import shutil
 # Remove the build folder
 shutil.rmtree("build", ignore_errors=True)
 # do the same for dist folder
 shutil.rmtree("dist", ignore_errors=True)
 
-if sys.version_info < (2, 6):
-    is_64bits = False 
-    origIsSystemDLL = py2exe.build_exe.isSystemDLL
-    def isSystemDLL(pathname):
-            if os.path.basename(pathname).lower() in ("msvcp71.dll", "comctl32.dll"):
-                    return 0
-            return origIsSystemDLL(pathname)
-    py2exe.build_exe.isSystemDLL = isSystemDLL
-else:
-    is_64bits = sys.maxsize > 2**32
-
-if is_64bits and sys.version_info >= (2, 6):
-    manifest = """
-       <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-       <assembly xmlns="urn:schemas-microsoft-com:asm.v1"
-       manifestVersion="1.0">
-       <assemblyIdentity
-           version="0.64.1.0"
-           processorArchitecture="amd64"
-           name="Controls"
-           type="win32"
-       />
-       <description>SasView</description>
-       <dependency>
-           <dependentAssembly>
-               <assemblyIdentity
-                   type="win32"
-                   name="Microsoft.Windows.Common-Controls"
-                   version="6.0.0.0"
-                   processorArchitecture="amd64"
-                   publicKeyToken="6595b64144ccf1df"
-                   language="*"
-               />
-           </dependentAssembly>
-       </dependency>
-       </assembly>
-      """
-else:
-    manifest_for_python26 = """
-        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-        <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+is_64bits = sys.maxsize > 2**32
+arch = "amd64" if is_64bits else "x86"
+manifest = """
+    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+      <assemblyIdentity
+        version="5.0.0.0"
+        processorArchitecture="%(arch)s"
+        name="SasView"
+        type="win32">
+      </assemblyIdentity>
+      <description>SasView</description>
+      <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
+        <security>
+          <requestedPrivileges>
+            <requestedExecutionLevel
+              level="asInvoker"
+              uiAccess="false">
+            </requestedExecutionLevel>
+          </requestedPrivileges>
+        </security>
+      </trustInfo>
+      <dependency>
+        <dependentAssembly>
           <assemblyIdentity
-            version="5.0.0.0"
-            processorArchitecture="x86"
-            name="SasView"
-            type="win32">
+            type="win32"
+            name="Microsoft.VC90.CRT"
+            version="9.0.21022.8"
+            processorArchitecture="%(arch)s"
+            publicKeyToken="1fc8b3b9a1e18e3b">
           </assemblyIdentity>
-          <description>SasView</description>
-          <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
-            <security>
-              <requestedPrivileges>
-                <requestedExecutionLevel
-                  level="asInvoker"
-                  uiAccess="false">
-                </requestedExecutionLevel>
-              </requestedPrivileges>
-            </security>
-          </trustInfo>
-          <dependency>
-            <dependentAssembly>
-              <assemblyIdentity
-                type="win32"
-                name="Microsoft.VC90.CRT"
-                version="9.0.21022.8"
-                processorArchitecture="x86"
-                publicKeyToken="1fc8b3b9a1e18e3b">
-              </assemblyIdentity>
-            </dependentAssembly>
-          </dependency>
-          <dependency>
-            <dependentAssembly>
-              <assemblyIdentity
-                type="win32"
-                name="Microsoft.Windows.Common-Controls"
-                version="6.0.0.0"
-                processorArchitecture="x86"
-                publicKeyToken="6595b64144ccf1df"
-                language="*">
-              </assemblyIdentity>
-            </dependentAssembly>
-          </dependency>
-        </assembly>
-        """
-    manifest_for_python25 = """
-       <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-       <assembly xmlns="urn:schemas-microsoft-com:asm.v1"
-       manifestVersion="1.0">
-       <assemblyIdentity
-           version="0.64.1.0"
-           processorArchitecture="x86"
-           name="Controls"
-           type="win32"
-       />
-       <description>SasView</description>
-       <dependency>
-           <dependentAssembly>
-               <assemblyIdentity
-                   type="win32"
-                   name="Microsoft.Windows.Common-Controls"
-                   version="6.0.0.0"
-                   processorArchitecture="X86"
-                   publicKeyToken="6595b64144ccf1df"
-                   language="*"
-               />
-           </dependentAssembly>
-       </dependency>
-       </assembly>
-      """
+        </dependentAssembly>
+      </dependency>
+      <dependency>
+        <dependentAssembly>
+          <assemblyIdentity
+            type="win32"
+            name="Microsoft.Windows.Common-Controls"
+            version="6.0.0.0"
+            processorArchitecture="%(arch)s"
+            publicKeyToken="6595b64144ccf1df"
+            language="*">
+          </assemblyIdentity>
+        </dependentAssembly>
+      </dependency>
+    </assembly>
+    """%{'arch': arch}
 
-# Select the appropriate manifest to use.
-py26MSdll_x86 = None
-if sys.version_info >= (3, 0) or sys.version_info < (2, 5):
-    print "*** This script only works with Python 2.5, 2.6, or 2.7."
-    sys.exit()
-elif sys.version_info >= (2, 6):
-    manifest = manifest_for_python26
-    from glob import glob
-    py26MSdll = glob(r"C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*.*")
-    try:
-        py26MSdll_x86 = glob(r"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*.*")
-    except:
-        pass
-elif sys.version_info >= (2, 5):
-    manifest = manifest_for_python25
-    py26MSdll = None
+if is_64bits:
+    msvcrtdll = glob(r"C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*.*")
+else:
+    msvcrtdll = glob(r"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*.*")
+if msvcrtdll:
+    msvcrtdll_data_files = ("Microsoft.VC90.CRT", msvcrtdll)
+else:
+    msvcrtdll_data_files = None
 
 
 class Target:
@@ -237,10 +183,17 @@ test_upcoming_dir = os.path.join(path, "test\\upcoming_formats")
 
 matplotlibdatadir = matplotlib.get_data_path()
 matplotlibdata = findall(matplotlibdatadir)
+
+site_loc = get_python_lib()
+opencl_include_dir = os.path.join(site_loc, "pyopencl", "cl")
+
 data_files = []
+
+if tinycc:
+    data_files += tinycc.data_files()
+
 # Copying SLD data
 import periodictable
-import logging
 data_files += periodictable.data_files()
 
 import sas.sasgui.perspectives.fitting as fitting
@@ -255,8 +208,18 @@ data_files += invariant.data_files()
 import sas.sasgui.guiframe as guiframe
 data_files += guiframe.data_files()
 
-import sas.models as models
-data_files += models.data_files()
+# precompile sas models into the sasview build path; doesn't matter too much
+# where it is so long as it is a place that will get cleaned up afterwards.
+import sasmodels.core
+dll_path = os.path.join(build_path, 'compiled_models')
+compiled_dlls = sasmodels.core.precompile_dlls(dll_path, dtype='double')
+
+# include the compiled models as data; coordinate the target path for the
+# data with installer_generator.py
+data_files.append(('compiled_models', compiled_dlls))
+
+import sasmodels
+data_files += sasmodels.data_files()
 
 for f in matplotlibdata:
     dirname = os.path.join('mpl-data', f[len(matplotlibdatadir)+1:])
@@ -312,6 +275,9 @@ for f in findall(test_upcoming_dir):
     if not ".svn" in f:
         data_files.append(("test\\upcoming_formats", [f]))
 
+# Copying opencl include files
+for f in findall(opencl_include_dir):
+    data_files.append(("includes\\pyopencl",[f]))
 
 # See if the documentation has been built, and if so include it.
 doc_path = os.path.join(build_path, "doc")
@@ -323,12 +289,9 @@ if os.path.exists(doc_path):
 else:
     raise Exception("You must first build the documentation before creating an installer.")
 
-if py26MSdll is not None:
+if msvcrtdll_data_files is not None:
     # install the MSVC 9 runtime dll's into the application folder
-    data_files.append(("Microsoft.VC90.CRT", py26MSdll))
-if py26MSdll_x86 is not None:
-    # install the MSVC 9 runtime dll's into the application folder
-    data_files.append(("Microsoft.VC90.CRT", py26MSdll_x86))
+    data_files.append(msvcrtdll_data_files)
 
 # NOTE:
 #  need an empty __init__.py in site-packages/numpy/distutils/tests and site-packages/mpl_toolkits
@@ -337,7 +300,7 @@ if py26MSdll_x86 is not None:
 #
 packages = [
     'matplotlib', 'scipy', 'encodings', 'comtypes',
-    'win32com', 'xhtml2pdf', 'bumps',
+    'win32com', 'xhtml2pdf', 'bumps','sasmodels', 'sas',
     ]
 packages.extend([
     'reportlab',
@@ -355,8 +318,11 @@ packages.append('periodictable.core') # not found automatically
 #packages.append('IPython')
 includes = ['site', 'lxml._elementpath', 'lxml.etree']
 
+if tinycc:
+    packages.append('tinycc')
+
 # Exclude packages that are not needed but are often found on build systems
-excludes = ['Tkinter', 'PyQt4', '_tkagg', 'sip', 'pytz']
+excludes = ['Tkinter', 'PyQt4', '_tkagg', 'sip', 'pytz', 'sympy']
 
 
 dll_excludes = [
@@ -371,6 +337,8 @@ dll_excludes = [
     'w9xpopen.exe',
     # accidental links to msys/cygwin binaries; shouldn't be needed
     'cygwin1.dll',
+    # no need to distribute OpenCL.dll - users should have their own copy
+    'OpenCL.dll'
     ]
 
 target_wx_client = Target(
@@ -384,8 +352,7 @@ target_wx_client = Target(
 bundle_option = 2
 if is_64bits:
     bundle_option = 3
-import installer_generator as gen
-gen.generate_installer()
+generate_installer()
 #initialize category stuff
 #from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 #CategoryInstaller.check_install(s)

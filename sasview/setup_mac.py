@@ -19,13 +19,15 @@ import local_config
 import pytz
 import sys
 import platform
+#Extending recursion limit
+sys.setrecursionlimit(10000)
 
 from distutils.util import get_platform
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 platform = '%s-%s'%(get_platform(),sys.version[:3])
 build_path = os.path.join(root, 'build','lib.'+platform)
 sys.path.insert(0, build_path)
-
+print "BUILDING PATH INSIDE", build_path
 ICON = local_config.SetupIconFile_mac
 EXTENSIONS_LIST = []
 DATA_FILES = []
@@ -40,7 +42,7 @@ import sas.sasgui.perspectives.calculator as calculator
 DATA_FILES += calculator.data_files()
 import sas.sasgui.perspectives.invariant as invariant
 DATA_FILES += invariant.data_files()
-import sas.models as models
+import sasmodels as models
 DATA_FILES += models.data_files()
 import sas.sasgui.guiframe as guiframe
 DATA_FILES += guiframe.data_files()
@@ -66,6 +68,7 @@ if os.path.isfile("BUILD_NUMBER"):
 
 # See if the documentation has been built, and if so include it.
 doc_path = os.path.join(build_path, "doc")
+print doc_path
 if os.path.exists(doc_path):
     for dirpath, dirnames, filenames in os.walk(doc_path):
         for filename in filenames:
@@ -130,7 +133,7 @@ EXCLUDES = ['PyQt4', 'sip', 'QtGui']
 OPTIONS = {'argv_emulation': True,
            'packages': ['lxml','numpy', 'scipy', 'pytz', 'encodings',
                         'encodings','matplotlib', 'periodictable',
-                        'reportlab','sasmodels'
+                        'reportlab','sasmodels',"pyopencl"
                         ],
            'iconfile': ICON,
            'frameworks':[libxml_path],

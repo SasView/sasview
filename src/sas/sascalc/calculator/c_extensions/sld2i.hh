@@ -38,8 +38,8 @@ public:
 			double in_spin, double out_spin,
 			double s_theta);
 	// compute function
-	virtual void genicomXY(int npoints, double* qx, double* qy, double *I_out);
-	virtual void genicom(int npoints, double* q, double *I_out);
+	void genicomXY(int npoints, double* qx, double* qy, double *I_out);
+	void genicom(int npoints, double* q, double *I_out);
 };
 
 #endif

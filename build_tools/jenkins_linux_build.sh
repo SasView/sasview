@@ -1,28 +1,76 @@
-#! /bin/sh
+export PATH=$PATH:/usr/local/bin/
 
-# try to find reasonable settings, if not provided in the environment
 PYTHON=${PYTHON:-`which python`}
 EASY_INSTALL=${EASY_INSTALL:-`which easy_install`}
 PYLINT=${PYLINT:-`which pylint`}
-BUILD_TOOLS_DIR=`dirname $0`
-WORKSPACE=${WORKSPACE:-`readlink -f $BUILD_TOOLS_DIR/..`}
-# WORKSPACE top level of source
+
+export PYTHONPATH=$PYTHONPATH:$WORKSPACE/sasview/utils
+export PYTHONPATH=$PYTHONPATH:$WORKSPACE/sasview/sasview-install
+
 
 cd $WORKSPACE
+
+# SASMODLES
+cd $WORKSPACE
+cd sasmodels
+
+rm -rf build
+rm -rf dist
+
+$PYTHON setup.py clean
+$PYTHON setup.py build
+
+
+# SASMODLES - BUILD DOCS
+cd  doc
+make html
+
+cd $WORKSPACE
+cd sasmodels
+$PYTHON setup.py bdist_egg
+
+
+# SASVIEW
+cd $WORKSPACE
+cd sasview
 rm -rf sasview-install
-mkdir sasview-install
+mkdir  sasview-install
+rm -rf utils
+mkdir  utils
 rm -rf dist
 rm -rf build
 
-"$EASY_INSTALL" -d "$WORKSPACE/utils" bumps==0.7.5.6
-"$EASY_INSTALL" -d "$WORKSPACE/utils" periodictable==1.3.0
 
-export PYTHONPATH=$WORKSPACE/sasview-install:$WORKSPACE/utils:$PYTHONPATH
+# INSTALL SASMODELS
+cd $WORKSPACE
+cd sasmodels
+cd dist
+$EASY_INSTALL -d $WORKSPACE/sasview/utils sasmodels*.egg
 
-$PYTHON check_packages.py
-$PYTHON setup.py bdist_egg
 
-cd $WORKSPACE/dist
-# ln -s sasview*.egg sasview.egg || true
-$EASY_INSTALL -N -d ../sasview-install sasview*.egg
+# BUILD SASVIEW
+cd $WORKSPACE
+cd sasview
+$PYTHON setup.py clean
+$PYTHON setup.py build docs bdist_egg
+
+
+# INSTALL SASVIEW
+cd $WORKSPACE
+cd sasview
+cd dist
+$EASY_INSTALL -d $WORKSPACE/sasview/sasview-install sasview*.egg
+
+
+# TEST
+cd $WORKSPACE
+cd sasview
+cd test
+$PYTHON utest_sasview.py
+
+## PYLINT
+#cd $WORKSPACE
+#cd sasview
+#$PYLINT --rcfile "build_tools/pylint.rc" -f parseable sasview-install/sasview*.egg/sas sasview | tee  test/sasview.txt
+
 

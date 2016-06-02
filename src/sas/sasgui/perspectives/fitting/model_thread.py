@@ -24,9 +24,11 @@ class Calc2D(CalcThread):
                  update_chisqr=True,
                  source='model',
                  yieldtime=0.04,
-                 worktime=0.04
+                 worktime=0.04,
+                 exception_handler=None,
                  ):
-        CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime)
+        CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime,
+                            exception_handler=exception_handler)
         self.qmin = qmin
         self.qmax = qmax
         self.weight = weight
@@ -132,14 +134,13 @@ class Calc1D(CalcThread):
                  source='model',
                  updatefn=None,
                  yieldtime=0.01,
-                 worktime=0.01
+                 worktime=0.01,
+                 exception_handler=None,
                  ):
         """
         """
-        CalcThread.__init__(self, completefn,
-                 updatefn,
-                 yieldtime,
-                 worktime)
+        CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime,
+                            exception_handler=exception_handler)
         self.fid = fid
         self.data = data
         self.qmin = qmin

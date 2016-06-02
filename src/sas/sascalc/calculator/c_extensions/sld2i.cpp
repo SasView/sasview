@@ -163,9 +163,9 @@ void GenI :: genicom(int npoints, double *q, double *I_out){
 	}
 	//Assume that pixel volumes are given in vol_pix in A^3 unit
 	// Loop over q-values and multiply apply matrix
-	for(size_t i=0; i<npoints; i++){
+	for(int i=0; i<npoints; i++){
 		sumj =0.0;		
-		for(size_t j=0; j<n_pix; j++){
+		for(int j=0; j<n_pix; j++){
 			//Isotropic: Assumes all slds are real (no magnetic)
 			//Also assumes there is no polarization: No dependency on spin
 			if (is_sym == 1){
@@ -182,7 +182,7 @@ void GenI :: genicom(int npoints, double *q, double *I_out){
 			else{
 				//full calculation
 				//pragma omp parallel for
-				for(size_t k=0; k<n_pix; k++){
+				for(int k=0; k<n_pix; k++){
 					sld_j =  sldn_val[j] * sldn_val[k] * vol_pix[j] * vol_pix[k];
 					qr = (x_val[j]-x_val[k])*(x_val[j]-x_val[k])+
 						      (y_val[j]-y_val[k])*(y_val[j]-y_val[k])+ 

@@ -18,7 +18,7 @@ over the full range of Q from zero to infinity, that is
 
 .. image:: image001.gif
 
-where *g = Q* for pinhole geometry (SAS) and *g = Qv* (the slit height) for  
+where *g = q* for pinhole geometry (SAS) and *g = q*\ :sub:`v` (the slit height) for  
 slit geometry (USAS).
 
 The worth of Q*\  is that it can be used to determine the volume fraction and 

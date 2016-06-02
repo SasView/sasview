@@ -18,7 +18,7 @@ import logging
 import numpy
 import time
 from copy import deepcopy
-import models
+import traceback
 
 from sas.sascalc.dataloader.loader import Loader
 from sas.sasgui.guiframe.dataFitting import Data2D
@@ -45,6 +45,8 @@ from sas.sasgui.perspectives.calculator.model_editor import EditorWindow
 from sas.sasgui.guiframe.gui_manager import MDIFrame
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
+from . import models
+
 MAX_NBR_DATA = 4
 
 (PageInfoEvent, EVT_PAGE_INFO) = wx.lib.newevent.NewEvent()
@@ -55,7 +57,13 @@ if sys.platform == "win32":
 else:
     ON_MAC = True
 
-
+import bumps.options
+from bumps.gui.fit_dialog import show_fit_config
+try:
+    from bumps.gui.fit_dialog import EVT_FITTER_CHANGED
+except ImportError:
+    # CRUFT: bumps 0.7.5.8 and below
+    EVT_FITTER_CHANGED = None  # type: wx.PyCommandEvent
 
 class Plugin(PluginBase):
     """
@@ -253,16 +261,16 @@ class Plugin(PluginBase):
                 msg += "inside of the SasView application, "
                 msg += "and try it again."
                 wx.MessageBox(msg, 'Info')
-                #wx.PostEvent(self.parent, StatusEvent(status=msg, type='stop',
-                #                                      info='warning'))
+                #evt = StatusEvent(status=msg, type='stop', info='warning')
+                #wx.PostEvent(self.parent, evt)
             else:
                 self.delete_menu.Delete(event_id)
                 for item in self.edit_menu.GetMenuItems():
                     if item.GetLabel() == label:
                         self.edit_menu.DeleteItem(item)
                         msg = "The custom model, %s, has been deleted." % label
-                        wx.PostEvent(self.parent, StatusEvent(status=msg,
-                                                type='stop', info='info'))
+                        evt = StatusEvent(status=msg, type='stop', info='info')
+                        wx.PostEvent(self.parent, evt)
                         break
         except:
             msg = 'Delete Error: \nCould not delete the file; Check if in use.'
@@ -500,6 +508,12 @@ class Plugin(PluginBase):
         self.index_theory = 0
         self.parent.Bind(EVT_SLICER_PANEL, self._on_slicer_event)
         self.parent.Bind(EVT_SLICER_PARS_UPDATE, self._onEVT_SLICER_PANEL)
+
+        # CRUFT: EVT_FITTER_CHANGED is not None for bumps 0.7.5.9 and above
+        if EVT_FITTER_CHANGED is not None:
+            self.parent.Bind(EVT_FITTER_CHANGED, self.on_fitter_changed)
+        self._set_fitter_label(bumps.options.FIT_CONFIG)
+
         #self.parent._mgr.Bind(wx.aui.EVT_AUI_PANE_CLOSE,self._onclearslicer)
         #Create reader when fitting panel are created
         self.state_reader = Reader(self.set_state)
@@ -566,9 +580,9 @@ class Plugin(PluginBase):
                 self.fit_panel.set_model_state(theory_state)
             except:
                 msg = "Fitting: cannot deal with the theory received"
+                evt = StatusEvent(status=msg, info="error")
                 logging.error("set_theory " + msg + "\n" + str(sys.exc_value))
-                wx.PostEvent(self.parent,
-                             StatusEvent(status=msg, info="error"))
+                wx.PostEvent(self.parent, evt)
 
     def set_state(self, state=None, datainfo=None, format=None):
         """
@@ -762,13 +776,15 @@ class Plugin(PluginBase):
         """
         Open the bumps options panel.
         """
-        try:
-            from bumps.gui.fit_dialog import show_fit_config
-            show_fit_config(self.parent, help=self.on_help)
-        except ImportError:
-            # CRUFT: Bumps 0.7.5.6 and earlier do not have the help button
-            from bumps.gui.fit_dialog import OpenFitOptions
-            OpenFitOptions()
+        show_fit_config(self.parent, help=self.on_help)
+
+    def on_fitter_changed(self, event):
+        self._set_fitter_label(event.config)
+
+    def _set_fitter_label(self, config):
+        self.fit_panel.parent.SetTitle(self.fit_panel.window_name
+                                       + " - Active Fitting Optimizer: "
+                                       + config.selected_name)
 
     def on_help(self, algorithm_id):
         _TreeLocation = "user/sasgui/perspectives/fitting/optimizer.html"
@@ -953,17 +969,15 @@ class Plugin(PluginBase):
                                      is2d=page._is_2D())
                     if not page.param_toFit:
                         msg = "No fitting parameters for %s" % page.window_caption
-                        wx.PostEvent(page.parent.parent,
-                                     StatusEvent(status=msg, info="error",
-                                                 type="stop"))
+                        evt = StatusEvent(status=msg, info="error", type="stop")
+                        wx.PostEvent(page.parent.parent, evt)
                         return False
                     if not page._update_paramv_on_fit():
                         msg = "Fitting range or parameter values are"
                         msg += " invalid in %s" % \
                                     page.window_caption
-                        wx.PostEvent(page.parent.parent,
-                                     StatusEvent(status=msg, info="error",
-                                     type="stop"))
+                        evt = StatusEvent(status=msg, info="error", type="stop")
+                        wx.PostEvent(page.parent.parent, evt)
                         return False
 
                     pars = [str(element[1]) for element in page.param_toFit]
@@ -984,14 +998,14 @@ class Plugin(PluginBase):
                     page_info.clear_model_param()
             except KeyboardInterrupt:
                 msg = "Fitting terminated"
-                wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
-                                                      type="stop"))
+                evt = StatusEvent(status=msg, info="info", type="stop")
+                wx.PostEvent(self.parent, evt)
                 return True
             except:
                 raise
                 msg = "Fitting error: %s" % str(sys.exc_value)
-                wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
-                                                      type="stop"))
+                evt = StatusEvent(status=msg, info="error", type="stop")
+                wx.PostEvent(self.parent, evt)
                 return False
         ## If a thread is already started, stop it
         #if self.calc_fit!= None and self.calc_fit.isrunning():
@@ -1086,12 +1100,12 @@ class Plugin(PluginBase):
             page = self.fit_panel.add_empty_page()
             # add data associated to the page created
             if page != None:
-                wx.PostEvent(self.parent, StatusEvent(status="Page Created",
-                                               info="info"))
+                evt = StatusEvent(status="Page Created", info="info")
+                wx.PostEvent(self.parent, evt)
             else:
                 msg = "Page was already Created"
-                wx.PostEvent(self.parent, StatusEvent(status=msg,
-                                                       info="warning"))
+                evt = StatusEvent(status=msg, info="warning")
+                wx.PostEvent(self.parent, evt)
         except:
             msg = "Creating Fit page: %s" % sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
@@ -1253,8 +1267,8 @@ class Plugin(PluginBase):
         str_time = time.strftime("%a, %d %b %Y %H:%M:%S ", time.localtime(t1))
         msg = "Fit completed on %s \n" % str_time
         msg += "Duration time: %s s.\n" % str(elapsed)
-        wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
-                                              type="stop"))
+        evt = StatusEvent(status=msg, info="info", type="stop")
+        wx.PostEvent(self.parent, evt)
 
         if batch_outputs is None:
             batch_outputs = {}
@@ -1404,8 +1418,8 @@ class Plugin(PluginBase):
                                          batch_outputs=batch_outputs,
                                          batch_inputs=batch_inputs)
 
-        wx.PostEvent(self.parent, StatusEvent(status=msg, error="info",
-                                              type="stop"))
+        evt = StatusEvent(status=msg, error="info", type="stop")
+        wx.PostEvent(self.parent, evt)
         # Remove parameters that are not shown
         cpage = self.fit_panel.get_page_by_id(uid)
         tbatch_outputs = {}
@@ -1484,8 +1498,8 @@ class Plugin(PluginBase):
         str_time = time.strftime("%a, %d %b %Y %H:%M:%S ", time.localtime(t1))
         msg = "Fit completed on %s \n" % str_time
         msg += "Duration time: %s s.\n" % str(elapsed)
-        wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
-                                                      type="stop"))
+        evt = StatusEvent(status=msg, info="info", type="stop")
+        wx.PostEvent(self.parent, evt)
         wx.PostEvent(self.result_panel, PlotResultEvent(result=result))
         wx.CallAfter(self._update_fit_button, page_id)
         result = result[0]
@@ -1509,10 +1523,8 @@ class Plugin(PluginBase):
                     numpy.any(res.pvec == None) or \
                     not numpy.all(numpy.isfinite(res.pvec)):
                     msg = "Fitting did not converge!!!"
-                    wx.PostEvent(self.parent,
-                             StatusEvent(status=msg,
-                                         info="warning",
-                                         type="stop"))
+                    evt = StatusEvent(status=msg, info="warning", type="stop")
+                    wx.PostEvent(self.parent, evt)
                     wx.CallAfter(self._update_fit_button, page_id)
                 else:
                     #set the panel when fit result are float not list
@@ -1536,21 +1548,19 @@ class Plugin(PluginBase):
                         wx.CallAfter(cpage._on_fit_complete)
                     except KeyboardInterrupt:
                         msg = "Singular point: Fitting Stoped."
-                        wx.PostEvent(self.parent, StatusEvent(status=msg,
-                                                              info="info",
-                                                              type="stop"))
+                        evt = StatusEvent(status=msg, info="info", type="stop")
+                        wx.PostEvent(self.parent, evt)
                     except:
                         msg = "Singular point: Fitting Error occurred."
-                        wx.PostEvent(self.parent, StatusEvent(status=msg,
-                                                              info="error",
-                                                              type="stop"))
+                        evt = StatusEvent(status=msg, info="error", type="stop")
+                        wx.PostEvent(self.parent, evt)
 
         except:
             msg = ("Fit completed but the following error occurred: %s"
                    % sys.exc_value)
             #import traceback; msg = "\n".join((traceback.format_exc(), msg))
-            wx.PostEvent(self.parent, StatusEvent(status=msg, info="warning",
-                                                  type="stop"))
+            evt = StatusEvent(status=msg, info="warning", type="stop")
+            wx.PostEvent(self.parent, evt)
 
     def _update_fit_button(self, page_id):
         """
@@ -1587,8 +1597,7 @@ class Plugin(PluginBase):
 
         ## post a message to status bar
         msg = "Set Chain Fitting: %s" % str(not self.batch_reset_flag)
-        wx.PostEvent(self.parent,
-                     StatusEvent(status=msg))
+        wx.PostEvent(self.parent, StatusEvent(status=msg))
 
 
     def _on_slicer_event(self, event):
@@ -1734,13 +1743,21 @@ class Plugin(PluginBase):
         except:
             raise
 
+    def _calc_exception(self, etype, value, tb):
+        """
+        Handle exception from calculator by posting it as an error.
+        """
+        logging.error("".join(traceback.format_exception(etype, value, tb)))
+        msg = traceback.format_exception(etype, value, tb, limit=1)
+        evt = StatusEvent(status="".join(msg), type="stop", info="error")
+        wx.PostEvent(self.parent, evt)
+
     def _update2D(self, output, time=None):
         """
         Update the output of plotting model
         """
-        wx.PostEvent(self.parent, StatusEvent(status="Plot \
-        #updating ... ", type="update"))
-        #self.ready_fit()
+        msg = "Plot updating ... "
+        wx.PostEvent(self.parent, StatusEvent(msg, type="update"))
 
     def _complete2D(self, image, data, model, page_id, elapsed, index, qmin,
                 qmax, fid=None, weight=None, toggle_mode_on=False, state=None,
@@ -1846,17 +1863,19 @@ class Plugin(PluginBase):
                 while self.calc_2D.isrunning():
                     time.sleep(0.1)
             self.calc_2D = Calc2D(model=model,
-                                    data=data,
-                                    page_id=page_id,
-                                    smearer=smearer,
-                                    qmin=qmin,
-                                    qmax=qmax,
-                                    weight=weight,
-                                    fid=fid,
-                                    toggle_mode_on=toggle_mode_on,
-                                    state=state,
-                                    completefn=self._complete2D,
-                                    update_chisqr=update_chisqr, source=source)
+                                  data=data,
+                                  page_id=page_id,
+                                  smearer=smearer,
+                                  qmin=qmin,
+                                  qmax=qmax,
+                                  weight=weight,
+                                  fid=fid,
+                                  toggle_mode_on=toggle_mode_on,
+                                  state=state,
+                                  completefn=self._complete2D,
+                                  update_chisqr=update_chisqr,
+                                  exception_handler=self._calc_exception,
+                                  source=source)
             self.calc_2D.queue()
         except:
             raise
@@ -1911,6 +1930,7 @@ class Plugin(PluginBase):
                                   completefn=self._complete1D,
                                   #updatefn = self._update1D,
                                   update_chisqr=update_chisqr,
+                                  exception_handler=self._calc_exception,
                                   source=source)
             self.calc_1D.queue()
         except:
