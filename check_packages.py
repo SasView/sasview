@@ -19,6 +19,7 @@ common_required_package_list = {
     'pyparsing':{'version':'1.5.5','import_name':'pyparsing','test':'__version__'},
     'html5lib':{'version':'0.95','import_name':'html5lib','test':'__version__'},
     'reportlab':{'version':'2.5','import_name':'reportlab','test':'Version'},
+    'h5py':{'version':'2.5','import_name':'h5py','test':'__version__'},
     'lxml':{'version':'2.3','import_name':'lxml.etree','test':'LXML_VERSION'},
     'PIL':{'version':'1.1.7','import_name':'Image','test':'VERSION'},
     'pylint':{'version':None,'import_name':'pylint','test':None},
