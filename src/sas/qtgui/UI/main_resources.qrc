@@ -1,0 +1,15 @@
+<RCC>
+  <qresource>
+    <file>res/ball.ico</file>
+    <file>res/SVwelcome.png</file>
+    <file>res/bookmark.png</file>
+    <file>res/copy.png</file>
+    <file>res/house_2.png</file>
+    <file>res/paste.png</file>
+    <file>res/redo.png</file>
+    <file>res/report.png</file>
+    <file>res/reset.png</file>
+    <file>res/save.png</file>
+    <file>res/undo.png</file>
+  </qresource>
+</RCC>
