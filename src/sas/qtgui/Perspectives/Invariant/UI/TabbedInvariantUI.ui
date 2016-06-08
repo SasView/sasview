@@ -13,10 +13,6 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <property name="windowIcon">
-   <iconset resource="main_resources.qrc">
-    <normaloff>:/res/ball.ico</normaloff>:/res/ball.ico</iconset>
-  </property>
   <layout class="QGridLayout" name="gridLayout_11">
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
@@ -575,8 +571,5 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="main_resources.qrc"/>
- </resources>
  <connections/>
 </ui>

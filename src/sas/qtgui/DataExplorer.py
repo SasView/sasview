@@ -14,7 +14,6 @@ from sas.sascalc.dataloader.loader import Loader
 from sas.sasgui.guiframe.data_manager import DataManager
 
 # UI
-#from UI.DataExplorerUI import DataExplorerUI
 from UI.TabbedFileLoadUI import DataLoadWidget
 
 class DataExplorerWindow(DataLoadWidget):
@@ -38,6 +37,9 @@ class DataExplorerWindow(DataLoadWidget):
         self.cmdLoad.clicked.connect(self.loadFile)
         self.cmdDelete.clicked.connect(self.deleteFile)
         self.cmdSendTo.clicked.connect(self.sendData)
+
+        # Connect the comboboxes
+        self.cbSelect.currentIndexChanged.connect(self.selectData)
 
         # Communicator for signal definitions
         self.communicate = self.parent.communicator()
@@ -221,7 +223,91 @@ class DataExplorerWindow(DataLoadWidget):
         wlist = ';;'.join(new_cards)
 
         return wlist
-           
+
+    def selectData(self, index):
+        """
+        Callback method for modifying the TreeView on Selection Options change
+        """
+        if not isinstance(index, int):
+            msg = "Incorrect type passed to DataExplorer.selectData()"
+            raise AttributeError, msg
+
+        # Respond appropriately
+        if index == 0:
+            # Select All
+            for index in range(self.model.rowCount()):
+                item = self.model.item(index)
+                if item.isCheckable() and item.checkState() == QtCore.Qt.Unchecked:
+                    item.setCheckState(QtCore.Qt.Checked)
+        elif index == 1:
+            # De-select All
+            for index in range(self.model.rowCount()):
+                item = self.model.item(index)
+                if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
+                    item.setCheckState(QtCore.Qt.Unchecked)
+
+        elif index == 2:
+            # Select All 1-D
+            for index in range(self.model.rowCount()):
+                item = self.model.item(index)
+                item.setCheckState(QtCore.Qt.Unchecked)
+
+                try:
+                    is1D = item.child(0).data().toPyObject().__class__.__name__ == 'Data1D'
+                except AttributeError:
+                    msg = "Bad structure of the data model."
+                    raise RuntimeError, msg
+
+                if is1D:
+                    item.setCheckState(QtCore.Qt.Checked)
+
+        elif index == 3:
+            # Unselect All 1-D
+            for index in range(self.model.rowCount()):
+                item = self.model.item(index)
+
+                try:
+                    is1D = item.child(0).data().toPyObject().__class__.__name__ == 'Data1D'
+                except AttributeError:
+                    msg = "Bad structure of the data model."
+                    raise RuntimeError, msg
+
+                if item.isCheckable() and item.checkState() == QtCore.Qt.Checked and is1D:
+                    item.setCheckState(QtCore.Qt.Unchecked)
+
+        elif index == 4:
+            # Select All 2-D
+            for index in range(self.model.rowCount()):
+                item = self.model.item(index)
+                item.setCheckState(QtCore.Qt.Unchecked)
+                try:
+                    is2D = item.child(0).data().toPyObject().__class__.__name__ == 'Data2D'
+                except AttributeError:
+                    msg = "Bad structure of the data model."
+                    raise RuntimeError, msg
+
+                if is2D:
+                    item.setCheckState(QtCore.Qt.Checked)
+
+        elif index == 5:
+            # Unselect All 2-D
+            for index in range(self.model.rowCount()):
+                item = self.model.item(index)
+
+                try:
+                    is2D = item.child(0).data().toPyObject().__class__.__name__ == 'Data2D'
+                except AttributeError:
+                    msg = "Bad structure of the data model."
+                    raise RuntimeError, msg
+
+                if item.isCheckable() and item.checkState() == QtCore.Qt.Checked and is2D:
+                    item.setCheckState(QtCore.Qt.Unchecked)
+
+        else:
+            msg = "Incorrect value in the Selection Option"
+            # Change this to a proper logging action
+            raise Exception, msg
+
 
     def loadComplete(self, output, message=""):
         """
@@ -261,11 +347,13 @@ class DataExplorerWindow(DataLoadWidget):
         object_item = QtGui.QStandardItem()
         object_item.setData(QtCore.QVariant(data))
 
+        checkbox_item.setChild(0, object_item)
+
         # Add rows for display in the view
         self.addExtraRows(info_item, data)
 
         # Set info_item as the only child
-        checkbox_item.setChild(0, info_item)
+        checkbox_item.setChild(1, info_item)
 
         # New row in the model
         self.model.appendRow(checkbox_item)

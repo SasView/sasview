@@ -44,6 +44,7 @@ class DataExplorerTest(unittest.TestCase):
         self.assertFalse(self.form.chkBatch.isChecked())
 
         self.assertEqual(self.form.cbSelect.count(), 6)
+        self.assertEqual(self.form.cbSelect.currentIndex(), 0)
 
         # Class is in the default state even without pressing OK
         self.assertEqual(self.form.treeView.model().rowCount(), 0)
@@ -98,6 +99,62 @@ class DataExplorerTest(unittest.TestCase):
         # self.assertTrue(QtGui.QFileDialog.getOpenFileName.called)
 
         # Assure the model contains no items
+
+    def testDataSelection(self):
+        """
+        Tests the functionality of the Selection Option combobox
+        """
+        # Populate the model with 1d and 2d data
+        filename = ["cyl_400_20.txt", "Dec07031.ASC"]
+        self.form.readData(filename)
+
+        # Unselect all data
+        self.form.cbSelect.setCurrentIndex(1)
+
+        # Test the current selection
+        item1D = self.form.model.item(0)
+        item2D = self.form.model.item(1)
+        self.assertTrue(item1D.checkState() == QtCore.Qt.Unchecked)
+        self.assertTrue(item2D.checkState() == QtCore.Qt.Unchecked)        
+
+        # Select all data
+        self.form.cbSelect.setCurrentIndex(0)
+
+        # Test the current selection
+        self.assertTrue(item1D.checkState() == QtCore.Qt.Checked)
+        self.assertTrue(item2D.checkState() == QtCore.Qt.Checked)        
+
+        # select 1d data
+        self.form.cbSelect.setCurrentIndex(2)
+
+        # Test the current selection
+        self.assertTrue(item1D.checkState() == QtCore.Qt.Checked)
+        self.assertTrue(item2D.checkState() == QtCore.Qt.Unchecked)        
+
+        # unselect 1d data
+        self.form.cbSelect.setCurrentIndex(3)
+
+        # Test the current selection
+        self.assertTrue(item1D.checkState() == QtCore.Qt.Unchecked)
+        self.assertTrue(item2D.checkState() == QtCore.Qt.Unchecked)        
+
+        # select 2d data
+        self.form.cbSelect.setCurrentIndex(4)
+
+        # Test the current selection
+        self.assertTrue(item1D.checkState() == QtCore.Qt.Unchecked)
+        self.assertTrue(item2D.checkState() == QtCore.Qt.Checked)        
+
+        # unselect 2d data
+        self.form.cbSelect.setCurrentIndex(5)
+
+        # Test the current selection
+        self.assertTrue(item1D.checkState() == QtCore.Qt.Unchecked)
+        self.assertTrue(item2D.checkState() == QtCore.Qt.Unchecked)        
+
+        # choose impossible index and assure the code raises
+        #with self.assertRaises(Exception):
+        #    self.form.cbSelect.setCurrentIndex(6)
 
     def testReadData(self):
         """

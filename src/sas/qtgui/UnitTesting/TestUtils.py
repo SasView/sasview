@@ -11,23 +11,27 @@ class QtSignalSpy(QObject):
         """
         super(QtSignalSpy, self).__init__(parent)
 
-        self._connector = {}
+        self._recorder = {}
         self._count = 0
-        self._signal = [None, None]
+        self._signal = []
 
         # Assign our own slot to the emitted signal
-        if isinstance(signal, pyqtBoundSignal):
-            signal.connect(self.slot)
-        elif hasattr(widget, signal):
-            getattr(widget, signal).connect(self.slot)
-        else:
-            widget.signal.connect(slot)
+        try:
+            if isinstance(signal, pyqtBoundSignal):
+                signal.connect(self.slot)
+            elif hasattr(widget, signal):
+                getattr(widget, signal).connect(self.slot)
+            else:
+                widget.signal.connect(slot)
+        except AttributeError:
+            msg = "Wrong construction of QtSignalSpy instance"
+            raise RuntimeError, msg
 
     def slot(self, *args, **kwargs):
         """
         Record emitted signal.
         """
-        self._connector[self._count] = {
+        self._recorder[self._count] = {
             'args'   : args,
             'kwargs' : kwargs,
             }
@@ -36,19 +40,13 @@ class QtSignalSpy(QObject):
         self._signal = [args, kwargs]
 
     def signal(self, index=None):
-        """
-        """
         if index == None:
             return self._signal
         else:
             return self._signal[index]
 
     def count(self):
-        """
-        """
         return self._count
 
     def called(self):
-        """
-        """
-        return self._connector
+        return self._recorder

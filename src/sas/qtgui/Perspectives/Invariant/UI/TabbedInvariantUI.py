@@ -26,9 +26,6 @@ class Ui_tabbedInvariantUI(object):
     def setupUi(self, tabbedInvariantUI):
         tabbedInvariantUI.setObjectName(_fromUtf8("tabbedInvariantUI"))
         tabbedInvariantUI.resize(465, 408)
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/res/ball.ico")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        tabbedInvariantUI.setWindowIcon(icon)
         self.gridLayout_11 = QtGui.QGridLayout(tabbedInvariantUI)
         self.gridLayout_11.setObjectName(_fromUtf8("gridLayout_11"))
         self.tabWidget = QtGui.QTabWidget(tabbedInvariantUI)
@@ -314,7 +311,7 @@ class Ui_tabbedInvariantUI(object):
         self.gridLayout_11.addLayout(self.horizontalLayout_8, 2, 0, 1, 1)
 
         self.retranslateUi(tabbedInvariantUI)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(tabbedInvariantUI)
 
     def retranslateUi(self, tabbedInvariantUI):
@@ -367,7 +364,6 @@ class Ui_tabbedInvariantUI(object):
         self.pushButton_2.setText(_translate("tabbedInvariantUI", "Status", None))
         self.pushButton_3.setText(_translate("tabbedInvariantUI", "Help", None))
 
-import main_resources_rc
 
 class tabbedInvariantUI(QtGui.QDialog, Ui_tabbedInvariantUI):
     def __init__(self, parent=None, f=QtCore.Qt.WindowFlags()):
