@@ -1,0 +1,45 @@
+# For the docs to build and go in the right place, docs/sphinx-docs/build_sphinx.py
+# has to be modified with
+#    SASVIEW_DOCS = os.path.join(SASVIEW_BUILD, "sas/sasview/doc")
+
+site_packages := `python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"`
+
+prefix := '../../'
+	
+check:
+	# Check dependencies
+	@cd ..; python check_packages.py
+	
+sasmodels/core:
+	cd ${prefix}sasmodels; rm -rf build
+	cd ${prefix}sasmodels; rm -rf dist
+	cd ${prefix}sasmodels; python setup.py clean
+	cd ${prefix}sasmodels; python setup.py build
+
+sasmodels/docs:
+	cd ${prefix}sasmodels/doc; make html
+	
+sasmodels: sasmodels/core sasmodels/docs
+	@rm -rf ${prefix}sasmodels/build
+	@rm -rf ${prefix}sasmodels/dist
+	cd ${prefix}sasmodels; python setup.py bdist_egg
+
+sasview:
+	@rm -rf ../build
+	@rm -rf ../dist
+	@cd ..; python setup.py build docs bdist_egg
+
+rpm:
+	@echo "Creating RPMs"
+	rm -rf ../build/sasview
+	mkdir ../build/sasview
+	cp -pr ../dist/sasview*.egg ../build/sasview
+	cp -pr ${prefix}sasmodels/dist/sasmodels*.egg ../build/sasview
+
+	cd ../build;tar -czf ~/rpmbuild/SOURCES/sasview.tgz sasview
+	rpmbuild -ba sasview.spec
+	
+.PHONY: check
+.PHONY: sasview
+.PHONY: rpm
+.PHONY: sasmodels
