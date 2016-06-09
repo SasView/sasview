@@ -299,7 +299,7 @@ if msvcrtdll_data_files is not None:
 # packages
 #
 packages = [
-    'matplotlib', 'scipy', 'encodings', 'comtypes',
+    'matplotlib', 'scipy', 'encodings', 'comtypes', 'h5py',
     'win32com', 'xhtml2pdf', 'bumps','sasmodels', 'sas',
     ]
 packages.extend([
