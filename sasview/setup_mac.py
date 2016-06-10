@@ -119,7 +119,8 @@ plist = dict(CFBundleDocumentTypes=[dict(CFBundleTypeExtensions=EXTENSIONS_LIST,
                                    CFBundleTypeRole="Shell" )],)
 
 #Get version - NB nasty hack. Need to find correct way to give path to installed sasview (AJJ)
-#Pyopencl and h5py have been added to packages
+#h5py has been added to packages. It requires hdf5 to be installed separetly
+#
 import __init__ as sasviewver
 
 VERSION = sasviewver.__version__
