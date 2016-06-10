@@ -1,4 +1,6 @@
 export PATH=$PATH:/usr/local/bin/
+export PATH=$PATH:/usr/local/hdf5/include
+
 
 PYTHON=${PYTHON:-`which python`}
 EASY_INSTALL=${EASY_INSTALL:-`which easy_install`}
