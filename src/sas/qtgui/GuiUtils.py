@@ -24,6 +24,7 @@ from PyQt4 import QtGui
 #from sas.sasgui.guiframe.events import EVT_NEW_COLOR
 #from sas.sasgui.guiframe.events import StatusEvent
 #from sas.sasgui.guiframe.events import NewPlotEvent
+from sas.sasgui.guiframe.dataFitting import Data1D
 
 
 def get_app_dir():
@@ -201,3 +202,6 @@ class Communicate(QtCore.QObject):
 
     # Send data to the current perspective
     updatePerspectiveWithDataSignal = QtCore.pyqtSignal(list)
+
+    # New data in current perspective
+    updateModelFromPerspectiveSignal = QtCore.pyqtSignal(Data1D)

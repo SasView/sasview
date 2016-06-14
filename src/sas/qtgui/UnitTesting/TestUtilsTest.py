@@ -17,15 +17,24 @@ class TestUtilsTest(unittest.TestCase):
 
     def testQtSignalSpy(self):
         '''Create the Spy the correct way'''
+        test_string = 'my precious'
 
+        def signalReceived(signal):
+            # Test the signal callback
+            self.assertEqual(signal, test_string)
+
+        communicator = Communicate()
+        communicator.statusBarUpdateSignal.connect(signalReceived)
+
+        # Define the signal spy for testing
         widget = QWidget()
-        signal = Communicate.statusBarUpdateSignal
-        self.spy = QtSignalSpy(widget, signal)
+        spy = QtSignalSpy(widget, communicator.statusBarUpdateSignal)
 
         # Emit a signal
-        signal.emit('aa')
+        communicator.statusBarUpdateSignal.emit(test_string)
 
-        # Test the spy object
+        # Was the signal caught by the signal spy?
+        self.assertEqual(spy.count(), 1)
 
 if __name__ == "__main__":
     unittest.main()

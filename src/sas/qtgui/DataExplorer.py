@@ -51,7 +51,8 @@ class DataExplorerWindow(DataLoadWidget):
         # The Data viewer is QTreeView showing the proxy model
         self.treeView.setModel(self.proxy)
 
-    def loadFile(self, event):
+
+    def loadFile(self, event=None):
         """
         Called when the "Load" button pressed.
         Opens the Qt "Open File..." dialog 
@@ -63,49 +64,112 @@ class DataExplorerWindow(DataLoadWidget):
         # Notify the manager of the new data available
         self.communicate.fileReadSignal.emit(path_str)
 
-        # Read in the data from chosen file(s)
-        self.readData(path_str)
+        # threaded file load
+        load_thread = threads.deferToThread(self.readData, path_str)
+        load_thread.addCallback(self.loadComplete)
 
+        return
+
+    def loadFolder(self, event=None):
+        """
+        Called when the "File/Load Folder" menu item chosen.
+        Opens the Qt "Open Folder..." dialog 
+        """
+        dir = QtGui.QFileDialog.getExistingDirectory(self, "Choose a directory", "",
+              QtGui.QFileDialog.ShowDirsOnly)
+        if dir is None:
+            return
+
+        dir = str(dir)
+
+        if not os.path.isdir(dir):
+            return
+
+        # get content of dir into a list
+        path_str = [os.path.join(os.path.abspath(dir), filename) for filename in os.listdir(dir)]
+
+        # threaded file load
+        load_thread = threads.deferToThread(self.readData, path_str)
+        load_thread.addCallback(self.loadComplete)
+        
         return
 
     def deleteFile(self, event):
         """
+        Delete selected rows from the model
         """
+        # Assure this is indeed wanted
+        delete_msg = "This operation will delete the checked data sets and all the dependents." +\
+                     "\nDo you want to continue?"
+        reply = QtGui.QMessageBox.question(self, 'Warning', delete_msg,
+                QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+
+        if reply == QtGui.QMessageBox.No:
+            return
+
         # Figure out which rows are checked
+        ind = -1
+        # Use 'while' so the row count is forced at every iteration
+        while ind < self.model.rowCount():
+            ind += 1
+            item = self.model.item(ind)
+            if item and item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
+                # Delete these rows from the model
+                self.model.removeRow(ind)
+                # Decrement index since we just deleted it
+                ind -= 1
 
-        # Delete these rows from the model
-
-        # Call data_manager update with delete_data()
-
+        # pass temporarily kept as a breakpoint anchor
         pass
 
     def sendData(self, event):
         """
+        Send selected item data to the current perspective and set the relevant notifiers
         """
+        # should this reside on GuiManager or here?
+        self._perspective = self.parent.perspective()
+
+        # Set the signal handlers
+        self.communicator = self._perspective.communicator()
+        self.communicator.updateModelFromPerspectiveSignal.connect(self.updateModelFromPerspective)
+
         # Figure out which rows are checked
-
-        # Dig up data from model
-        # To get the original Data1D object back use:
-        # object_item.data().toPyObject()
-
+        selected_items = []
+        for index in range(self.model.rowCount()):
+            item = self.model.item(index)
+            if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
+                selected_items.append(item)
 
         # Which perspective has been selected?
+        if len(selected_items) > 1 and not self._perspective.allowBatch():
+            msg = self._perspective.title() + " does not allow multiple data."
+            msgbox = QtGui.QMessageBox()
+            msgbox.setIcon(QtGui.QMessageBox.Critical)
+            msgbox.setText(msg)
+            msgbox.setStandardButtons(QtGui.QMessageBox.Ok)
+            retval = msgbox.exec_()
+            return
+        # Dig up data from model
+        data = [selected_items[0].child(0).data().toPyObject()]
 
+        # TODO
         # New plot or appended?
 
         # Notify the GuiManager about the send request
-        # updatePerspectiveWithDataSignal()
-        pass
+        self._perspective.setData(data_list=data)
+
 
     def chooseFiles(self):
         """
+        Shows the Open file dialog and returns the chosen path(s)
         """
         # List of known extensions
         wlist = self.getWlist()
 
         # Location is automatically saved - no need to keep track of the last dir
-        # TODO: is it really?
-        paths = QtGui.QFileDialog.getOpenFileName(self, "Choose a file", "", wlist)
+        # But only with Qt built-in dialog (non-platform native)
+        paths = QtGui.QFileDialog.getOpenFileName(self, "Choose a file", "",
+                wlist, None, QtGui.QFileDialog.DontUseNativeDialog)
         if paths is None:
             return
 
@@ -131,6 +195,7 @@ class DataExplorerWindow(DataLoadWidget):
         any_error = False
         data_error = False
         error_message = ""
+        
         for p_file in path:
             info = "info"
             basename = os.path.basename(p_file)
@@ -146,15 +211,10 @@ class DataExplorerWindow(DataLoadWidget):
                 continue
 
             try:
-                message = "Loading Data... " + str(p_file) + "\n"
+                message = "Loading Data... " + str(basename) + "\n"
 
                 # change this to signal notification in GuiManager
                 self.communicate.statusBarUpdateSignal.emit(message)
-
-                # threaded file load
-                # load_thread = threads.deferToThread(self.loadThread, p_file)
-                # Add deferred callback for call return
-                # load_thread.addCallback(self.plotResult)
 
                 output_objects = self.loader.load(p_file)
 
@@ -169,17 +229,22 @@ class DataExplorerWindow(DataLoadWidget):
                     new_data = self.manager.create_gui_data(item, p_file)
                     output[new_data.id] = new_data
                     self.updateModel(new_data, p_file)
+                    self.model.reset()
+
+                    QtGui.qApp.processEvents()
 
                     if hasattr(item, 'errors'):
                         for error_data in item.errors:
                             data_error = True
                             message += "\tError: {0}\n".format(error_data)
                     else:
+
                         logging.error("Loader returned an invalid object:\n %s" % str(item))
                         data_error = True
 
-            except:
+            except Exception as ex:
                 logging.error(sys.exc_value)
+
                 any_error = True
             if any_error or error_message != "":
                 if error_message == "":
@@ -206,7 +271,7 @@ class DataExplorerWindow(DataLoadWidget):
         else:
             message = "Loading Data Complete! "
         message += log_msg
-        self.loadComplete(output=output, message=message)
+        return (output, message)
 
     def getWlist(self):
         """
@@ -313,10 +378,10 @@ class DataExplorerWindow(DataLoadWidget):
         """
         Post message to status bar and update the data manager
         """
+        self.model.reset()
         # Notify the manager of the new data available
         self.communicate.statusBarUpdateSignal.emit(message)
         self.communicate.fileDataReceivedSignal.emit(output)
-
         self.manager.add_data(data_list=output)
 
     def updateModel(self, data, p_file):
@@ -361,9 +426,22 @@ class DataExplorerWindow(DataLoadWidget):
         # Don't show "empty" rows with data objects
         self.proxy.setFilterRegExp(r"[^()]")
 
+    def updateModelFromPerspective(self, model_item):
+        """
+        """
+        # Overwrite the index with what we got from the perspective
+        if type(model_item) != QtGui.QStandardItem:
+            msg = "Wrong data type returned from calculations."
+            raise AttributeError, msg
+        # self.model.insertRow(model_item)
+        # Reset the view
+        self.model.reset()
+        # Pass acting as a debugger anchor
+        pass
 
     def addExtraRows(self, info_item, data):
         """
+        Extract relevant data to include in the Info ModelItem
         """
         title_item   = QtGui.QStandardItem("Title: "      + data.title)
         run_item     = QtGui.QStandardItem("Run: "        + str(data.run))

@@ -1,5 +1,7 @@
 import sys
 import unittest
+#from twisted.trial import unittest
+#from twisted.internet import reactor, defer, interfaces, threads, protocol, error
 
 from PyQt4.QtGui import *
 from PyQt4.QtTest import QTest
@@ -19,9 +21,21 @@ class DataExplorerTest(unittest.TestCase):
     '''Test the Data Explorer GUI'''
     def setUp(self):
         '''Create the GUI'''
+        class MyPerspective(object):
+            def communicator(self):
+                return Communicate()
+            def allowBatch(self):
+                return False
+            def setData(self, data_list=None):
+                return None
+            def title(self):
+                return "Dummy Perspective"
+
         class dummy_manager(object):
             def communicator(self):
                 return Communicate()
+            def perspective(self):
+                return MyPerspective()
 
         self.form = DataExplorerWindow(None, dummy_manager())
 
@@ -66,39 +80,90 @@ class DataExplorerTest(unittest.TestCase):
         QtGui.QFileDialog.getOpenFileName.assert_called_once()
 
     def testDeleteButton(self):
+        """
+        Functionality of the delete button
+        """
 
         deleteButton = self.form.cmdDelete
 
         # Mock the confirmation dialog with return=Yes
+        QtGui.QMessageBox.question = MagicMock(return_value=QtGui.QMessageBox.No)
 
         # Populate the model
+        filename = ["cyl_400_20.txt", "Dec07031.ASC", "cyl_400_20.txt"]
+        self.form.readData(filename)
 
-        # Assure the checkbox is on
+        # Assure the model contains three items
+        self.assertEqual(self.form.model.rowCount(), 3)
+
+        # Assure the checkboxes are on
+        item1 = self.form.model.item(0)
+        item2 = self.form.model.item(1)
+        item3 = self.form.model.item(2)
+        self.assertTrue(item1.checkState() == QtCore.Qt.Checked)
+        self.assertTrue(item2.checkState() == QtCore.Qt.Checked)
+        self.assertTrue(item3.checkState() == QtCore.Qt.Checked)
 
         # Click on the delete  button
         QTest.mouseClick(deleteButton, Qt.LeftButton)
 
         # Test the warning dialog called once
-        # self.assertTrue(QtGui.QFileDialog.getOpenFileName.called)
+        self.assertTrue(QtGui.QMessageBox.question.called)
+
+        # Assure the model still contains the items
+        self.assertEqual(self.form.model.rowCount(), 3)
+
+        # Now, mock the confirmation dialog with return=Yes
+        QtGui.QMessageBox.question = MagicMock(return_value=QtGui.QMessageBox.Yes)
+
+        # Click on the delete  button
+        QTest.mouseClick(deleteButton, Qt.LeftButton)
+
+        # Test the warning dialog called once
+        self.assertTrue(QtGui.QMessageBox.question.called)
 
         # Assure the model contains no items
+        self.assertEqual(self.form.model.rowCount(), 0)
 
-    def testSendToButton(self):        
-        sendToButton = self.form.cmdSendTo
+        # Click delete once again to assure no nasty behaviour on empty model
+        QTest.mouseClick(deleteButton, Qt.LeftButton)
 
-        # Mock the current perspective set_data method
 
+    def testSendToButton(self):
+        """
+        Test that clicking the Send To button sends checked data to a perspective
+        """
+        
         # Populate the model
+        filename = ["cyl_400_20.txt"]
+        self.form.readData(filename)
+
+        # setData is the method we want to see called
+        mocked = self.form.parent.perspective().setData
+        mocked = MagicMock(filename)
 
         # Assure the checkbox is on
+        self.form.cbSelect.setCurrentIndex(0)
 
         # Click on the Send To  button
-        QTest.mouseClick(sendToButton, Qt.LeftButton)
+        QTest.mouseClick(self.form.cmdSendTo, Qt.LeftButton)
 
         # Test the set_data method called once
-        # self.assertTrue(QtGui.QFileDialog.getOpenFileName.called)
+        # self.assertTrue(mocked.called)
 
-        # Assure the model contains no items
+        # open another file
+        filename = ["cyl_400_20.txt"]
+        self.form.readData(filename)
+
+        # Mock the warning message
+        QtGui.QMessageBox = MagicMock()
+
+        # Click on the button
+        QTest.mouseClick(self.form.cmdSendTo, Qt.LeftButton)
+
+        # Assure the message box popped up
+        QtGui.QMessageBox.assert_called_once()
+
 
     def testDataSelection(self):
         """
@@ -158,7 +223,7 @@ class DataExplorerTest(unittest.TestCase):
 
     def testReadData(self):
         """
-        Test the readData() method
+        Test the low level readData() method
         """
         filename = ["cyl_400_20.txt"]
         self.form.manager.add_data = MagicMock()
@@ -171,18 +236,9 @@ class DataExplorerTest(unittest.TestCase):
         self.form.readData(filename)
 
         # Expected two status bar updates
-        self.assertEqual(spy_status_update.count(), 2)
+        self.assertEqual(spy_status_update.count(), 1)
         self.assertIn(filename[0], str(spy_status_update.called()[0]['args'][0]))
-        self.assertIn("Loading Data Complete", str(spy_status_update.called()[1]['args'][0]))
 
-        # Expect one Data Received signal
-        self.assertEqual(spy_data_received.count(), 1)
-
-        # Assure returned dictionary has correct data
-        # We don't know the data ID, so need to iterate over dict
-        data_dict = spy_data_received.called()[0]['args'][0]
-        for data_key, data_value in data_dict.iteritems():
-            self.assertIsInstance(data_value, Data1D)
 
         # Check that the model contains the item
         self.assertEqual(self.form.model.rowCount(), 1)
@@ -193,8 +249,11 @@ class DataExplorerTest(unittest.TestCase):
         model_name = str(self.form.model.data(model_item).toString())
         self.assertEqual(model_name, filename[0])
 
-        # Assure add_data on data_manager was called (last call)
-        self.assertTrue(self.form.manager.add_data.called)
+    def testLoadFile(self):
+        """
+        Test the threaded call to readData()
+        """
+        pass
 
     def testGetWList(self):
         """
@@ -205,26 +264,38 @@ class DataExplorerTest(unittest.TestCase):
             'IGOR/DAT 2D Q_map files (*.dat);;IGOR 1D files (*.abs);;'+\
             'HFIR 1D files (*.d1d);;DANSE files (*.sans);;NXS files (*.nxs)'
         self.assertEqual(defaults, list)
-
+       
     def testLoadComplete(self):
         """
+        Test the callback method updating the data object
         """
-        # Initialize signal spy instances        
+
+        data_dict = {"a1":Data1D()}
+
+        self.form.manager.add_data = MagicMock()
+
+        # Initialize signal spy instances
         spy_status_update = QtSignalSpy(self.form, self.form.communicate.statusBarUpdateSignal)
         spy_data_received = QtSignalSpy(self.form, self.form.communicate.fileDataReceivedSignal)
 
-        # Need an empty Data1D object
-        mockData = Data1D()
+        # Read in the file
+        self.form.loadComplete(data_dict, message="Loading Data Complete")
 
-        # Call the tested method
-        self.form.loadComplete({"a":mockData}, message="test message")
+        # "Loading data complete" no longer sent in LoadFile but in callback
+        self.assertIn("Loading Data Complete", str(spy_status_update.called()[0]['args'][0]))
 
-        # test the signals 
-        self.assertEqual(spy_status_update.count(), 1)
-        self.assertIn("message", str(spy_status_update.called()[0]['args'][0]))
+        # Expect one Data Received signal
         self.assertEqual(spy_data_received.count(), 1)
 
-        # The data_manager update is going away, so don't bother testing
-       
+        # Assure returned dictionary has correct data
+        # We don't know the data ID, so need to iterate over dict
+        data_dict = spy_data_received.called()[0]['args'][0]
+        for data_key, data_value in data_dict.iteritems():
+            self.assertIsInstance(data_value, Data1D)
+
+        # Assure add_data on data_manager was called (last call)
+        self.assertTrue(self.form.manager.add_data.called)
+
+
 if __name__ == "__main__":
     unittest.main()

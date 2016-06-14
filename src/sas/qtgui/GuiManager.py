@@ -64,11 +64,10 @@ class GuiManager(object):
         # Default perspective
         self._current_perspective = self.invariantWidget
      
-
     def fileRead(self, data):
         """
         """
-        #print("FILE %s "%data)
+        print("FILE %s "%data)
         pass
     
     def updatePerspective(self, data):
@@ -224,15 +223,14 @@ class GuiManager(object):
     #============ FILE =================
     def actionLoadData(self):
         """
+        Load file from Data Explorer
         """
-        print("actionLoadData TRIGGERED")
-        pass
+        self.filesWidget.loadFile()
 
     def actionLoad_Data_Folder(self):
         """
         """
-        print("actionLoad_Data_Folder TRIGGERED")
-        pass
+        self.filesWidget.loadFolder()
 
     def actionOpen_Project(self):
         """

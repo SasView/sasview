@@ -8,15 +8,24 @@ from mock import MagicMock
 
 # Local
 from GuiManager import GuiManager
+from UI.MainWindowUI import MainWindow
 
-#app = QApplication(sys.argv)
+app = QApplication(sys.argv)
 
 class GuiManagerTest(unittest.TestCase):
-    '''Test the WelcomePanel'''
+    '''Test the Main Window functionality'''
     def setUp(self):
         '''Create the tested object'''
+        class MainSasViewWindow(MainWindow):
+            # Main window of the application
+            def __init__(self, reactor, parent=None):
+                super(MainSasViewWindow, self).__init__(parent)
+        
+                # define workspace for dialogs.
+                self.workspace = QWorkspace(self)
+                self.setCentralWidget(self.workspace)
 
-        self.manager = GuiManager(None)
+        self.manager = GuiManager(MainSasViewWindow(None), None)
 
     def tearDown(self):
         '''Destroy the GUI'''
@@ -50,6 +59,20 @@ class GuiManagerTest(unittest.TestCase):
         """
         """
         pass
+
+    def testActionLoadData(self):
+        """
+        Menu File/Load Data File(s)
+        """
+        # Mock the system file open method
+        QFileDialog.getOpenFileName = MagicMock(return_value=None)
+
+        # invoke the action
+
+        # Test the getOpenFileName() dialog called once
+        #self.assertTrue(QtGui.QFileDialog.getOpenFileName.called)
+        #QtGui.QFileDialog.getOpenFileName.assert_called_once()
+        
 
     # test each action separately
        

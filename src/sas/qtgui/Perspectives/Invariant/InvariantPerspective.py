@@ -10,6 +10,7 @@ from twisted.internet import threads
 # sas-global
 from sas.sascalc.invariant import invariant
 from sas.sasgui.guiframe.dataFitting import Data1D
+from sas.qtgui.GuiUtils import Communicate
 
 # local
 from UI.TabbedInvariantUI import tabbedInvariantUI
@@ -39,8 +40,6 @@ class InvariantWindow(tabbedInvariantUI):
     # for the gui and providing an interface to the data model.
     def __init__(self, manager=None, parent=None):
         super(InvariantWindow, self).__init__(parent)
-        # This controller contains the ui and doesn't inherit it directly!
-        # self.form = InvariantUI()
         self.setWindowTitle("Invariant Perspective")
         # initial input params
         self._background = 0.0
@@ -64,6 +63,7 @@ class InvariantWindow(tabbedInvariantUI):
         self._high_extrapolate = False
         self._high_power_value  = False
 
+        self.communicate = Communicate()
 
         # Mask file selector
         ###################################################
@@ -91,6 +91,11 @@ class InvariantWindow(tabbedInvariantUI):
 
         # Set up the mapper
         self.setupMapper()
+
+    def communicator(self):
+        """
+        """
+        return self.communicate
 
     def updateFromModel(self):
         """
@@ -141,6 +146,7 @@ class InvariantWindow(tabbedInvariantUI):
             self.pushButton.setText("Calculate")
             self.pushButton.setStyleSheet(self.style)
 
+
     def plotResult(self, model):
         """
         """
@@ -153,9 +159,15 @@ class InvariantWindow(tabbedInvariantUI):
         self.pushButton.setText("Calculate")
         self.pushButton.setStyleSheet(self.style)
 
+        # Send the new data to DE for keeping in the model
+        self.communicate.updateModelFromPerspectiveSignal.emit(self._data)
+
 
     def calculateThread(self, extrapolation):
         """
+        Perform Invariant calculations.
+
+        TODO: Create a dictionary of results to be sent to DE on completion.
         """
         self.updateFromModel()
 
@@ -293,6 +305,11 @@ class InvariantWindow(tabbedInvariantUI):
 
         return self.model
                 
+    def title(self):
+        """
+        Perspective name
+        """
+        return "Invariant panel"
 
     def status(self):
         """
@@ -536,7 +553,11 @@ class InvariantWindow(tabbedInvariantUI):
             msg += "type %s" % (data.__class__.__name__)
             #wx.PostEvent(self.parent, StatusEvent(status=msg, info='error'))
 
-
+    def allowBatch(self):
+        """
+        Tell the caller that we don't accept multiple data instances
+        """
+        return False
 
 if __name__ == "__main__":
     app = QtGui.QApplication([])
