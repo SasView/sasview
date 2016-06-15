@@ -10,6 +10,10 @@
             "-reader":"sesans_reader"
          },
          {
+            "-extension":".h5",
+            "-reader":"cansas_reader_HDF5"
+         },
+         {
             "-extension":".txt",
             "-reader":"ascii_reader"
          },

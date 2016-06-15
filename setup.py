@@ -301,7 +301,7 @@ required = [
     'bumps>=0.7.5.9', 'periodictable>=1.3.1', 'pyparsing<2.0.0',
 
     # 'lxml>=2.2.2',
-    'lxml', 
+    'lxml', 'h5py==2.5',
 
     ## The following dependecies won't install automatically, so assume them
     ## The numbers should be bumped up for matplotlib and wxPython as well.
