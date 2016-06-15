@@ -11,6 +11,7 @@ from twisted.internet import threads
 from sas.sascalc.invariant import invariant
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.qtgui.GuiUtils import Communicate
+from sas.qtgui.GuiUtils import updateModelItem
 
 # local
 from UI.TabbedInvariantUI import tabbedInvariantUI
@@ -34,7 +35,6 @@ class MyModel(object):
         item = QtGui.QStandardItem(str(item))
         self._model.appendRow(item)
 
-# class InvariantWindow(InvariantUI):
 class InvariantWindow(tabbedInvariantUI):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
@@ -52,6 +52,7 @@ class InvariantWindow(tabbedInvariantUI):
 
         self._manager = manager
         self._reactor = self._manager.reactor()
+        self._model_item = QtGui.QStandardItem()
 
         self._helpView = QtWebKit.QWebView()
         self.detailsDialog = DetailsDialog(self)
@@ -118,7 +119,7 @@ class InvariantWindow(tabbedInvariantUI):
         self._high_fit  = ( str(self.model.item(WIDGETS.W_HIGHQ_FIT).text()) == 'true')
         self._high_power_value  = float(self.model.item(WIDGETS.W_HIGHQ_POWER_VALUE).text())
 
-    def calculate(self):
+    def calculateInvariant(self):
         """
         Use twisted to thread the calculations away.
         """
@@ -150,7 +151,8 @@ class InvariantWindow(tabbedInvariantUI):
     def plotResult(self, model):
         """
         """
-        self._plotter.show()
+        if self._low_extrapolate or self._high_extrapolate:
+            self._plotter.show()
         self.model = model
         self.mapper.toFirst()
 
@@ -159,8 +161,8 @@ class InvariantWindow(tabbedInvariantUI):
         self.pushButton.setText("Calculate")
         self.pushButton.setStyleSheet(self.style)
 
-        # Send the new data to DE for keeping in the model
-        self.communicate.updateModelFromPerspectiveSignal.emit(self._data)
+        # Send the modified model item to DE for keeping in the model
+        self.communicate.updateModelFromPerspectiveSignal.emit(self._model_item)
 
 
     def calculateThread(self, extrapolation):
@@ -254,10 +256,14 @@ class InvariantWindow(tabbedInvariantUI):
             #qstar_total, qstar_total_error = inv.get_qstar_with_error()
 
             # Plot the chart
+            title = "Low-Q extrapolation"
             self._plotter.data(extrapolated_data)
-            self._plotter.title("Low-Q extrapolation")
+            self._plotter.title(title)
             self._plotter.plot()
 
+            # Add the plot to the model item
+            variant_item = QtCore.QVariant(self._plotter)
+            updateModelItem(self._model_item, variant_item, title)
 
         if self._high_extrapolate:
             # for presentation in InvariantDetails
@@ -270,9 +276,14 @@ class InvariantWindow(tabbedInvariantUI):
 
             # find how to add this plot to the existing plot for low_extrapolate
             # Plot the chart
+            title = "High-Q extrapolation"
             self._plotter.data(high_out_data)
-            self._plotter.title("High-Q extrapolation")
+            self._plotter.title(title)
             self._plotter.plot()
+
+            # Add the plot to the model item
+            variant_item = QtCore.QVariant(self._plotter)
+            updateModelItem(self._model_item, variant_item, title)
 
 
         item = QtGui.QStandardItem(str(float('%.5g'% volume_fraction)))
@@ -325,7 +336,7 @@ class InvariantWindow(tabbedInvariantUI):
         self._helpView.show()
 
     def setupSlots(self):
-        self.pushButton.clicked.connect(self.calculate)
+        self.pushButton.clicked.connect(self.calculateInvariant)
         self.pushButton_2.clicked.connect(self.status)
         self.pushButton_3.clicked.connect(self.help)
 
@@ -488,9 +499,31 @@ class InvariantWindow(tabbedInvariantUI):
 
         self.mapper.toFirst()
 
-    def setData(self, data_list=None):
+    def setData(self, data_item):
+        """
+        Obtain a QStandardItem object and dissect it to get Data1D/2D
+        Pass it over to the calculator
+        """
+        if not isinstance(data_item, list):
+            msg = "Incorrect type passed to the Invariant Perspective"
+            raise AttributeError, msg
+
+        if not isinstance(data_item[0], QtGui.QStandardItem):
+            msg = "Incorrect type passed to the Invariant Perspective"
+            raise AttributeError, msg
+
+        self._model_item = data_item[0]
+
+        # Extract data on 1st child - this is the Data1D/2D component
+        data = self._model_item.child(0).data().toPyObject()
+
+        self.calculate(data_list=[data])
+        
+    def calculate(self, data_list=None):
         """
         receive a list of data and compute invariant
+
+        TODO: pass warnings/messages to log
         """
         msg = ""
         data = None
@@ -519,8 +552,10 @@ class InvariantWindow(tabbedInvariantUI):
                     # remake this as a qt event
                     #wx.PostEvent(self.parent, StatusEvent(status=msg, info='error'))
                     return
-                msg += "Invariant panel does not allow multiple data!\n"
-                msg += "Please select one.\n"
+
+                # TODO: add msgbox for data choice
+                #msg += "Invariant panel does not allow multiple data!\n"
+                #msg += "Please select one.\n"
                 #if len(data_list) > 1:
                     #from invariant_widgets import DataDialog
                     #dlg = DataDialog(data_list=data_1d_list, text=msg)
@@ -544,7 +579,7 @@ class InvariantWindow(tabbedInvariantUI):
                 try:
                     self._data = data
                     self._path = "unique path"
-                    self.calculate()
+                    self.calculateInvariant()
                 except:
                     msg = "Invariant Set_data: " + str(sys.exc_value)
                     #wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))

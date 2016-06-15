@@ -204,4 +204,32 @@ class Communicate(QtCore.QObject):
     updatePerspectiveWithDataSignal = QtCore.pyqtSignal(list)
 
     # New data in current perspective
-    updateModelFromPerspectiveSignal = QtCore.pyqtSignal(Data1D)
+    updateModelFromPerspectiveSignal = QtCore.pyqtSignal(QtGui.QStandardItem)
+
+def updateModelItem(item, update_data, name=""):
+    """
+    Updates QStandardItem with a checkboxed row named 'name'
+    and containing QVariant 'update_data'
+    """
+    assert type(item) == QtGui.QStandardItem
+    assert type(update_data) == QtCore.QVariant
+
+    checkbox_item = QtGui.QStandardItem(True)
+    checkbox_item.setCheckable(True)
+    checkbox_item.setCheckState(QtCore.Qt.Checked)
+    checkbox_item.setText(name)
+
+    # Add "Info" item
+    info_item = QtGui.QStandardItem("Info")
+
+    # Add the actual Data1D/Data2D object
+    object_item = QtGui.QStandardItem()
+    object_item.setData(update_data)
+
+    checkbox_item.setChild(0, object_item)
+
+    # Set info_item as the only child
+    checkbox_item.setChild(1, info_item)
+
+    # Append the new row to the main item
+    item.appendRow(checkbox_item)

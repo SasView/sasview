@@ -16,6 +16,9 @@ from sas.sasgui.guiframe.data_manager import DataManager
 # UI
 from UI.TabbedFileLoadUI import DataLoadWidget
 
+# This is how to get data1/2D from the model item
+# data = [selected_items[0].child(0).data().toPyObject()]
+
 class DataExplorerWindow(DataLoadWidget):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
@@ -149,14 +152,15 @@ class DataExplorerWindow(DataLoadWidget):
             msgbox.setStandardButtons(QtGui.QMessageBox.Ok)
             retval = msgbox.exec_()
             return
-        # Dig up data from model
-        data = [selected_items[0].child(0).data().toPyObject()]
+
+        # Dig up the item
+        data = selected_items
 
         # TODO
         # New plot or appended?
 
         # Notify the GuiManager about the send request
-        self._perspective.setData(data_list=data)
+        self._perspective.setData(data_item=data)
 
 
     def chooseFiles(self):
@@ -271,7 +275,7 @@ class DataExplorerWindow(DataLoadWidget):
         else:
             message = "Loading Data Complete! "
         message += log_msg
-        return (output, message)
+        return output, message
 
     def getWlist(self):
         """
@@ -374,15 +378,19 @@ class DataExplorerWindow(DataLoadWidget):
             raise Exception, msg
 
 
-    def loadComplete(self, output, message=""):
+    def loadComplete(self, output):
         """
         Post message to status bar and update the data manager
         """
         self.model.reset()
+        assert(type(output), tuple)
+
+        output_data = output[0]
+        message = output[1]
         # Notify the manager of the new data available
         self.communicate.statusBarUpdateSignal.emit(message)
-        self.communicate.fileDataReceivedSignal.emit(output)
-        self.manager.add_data(data_list=output)
+        self.communicate.fileDataReceivedSignal.emit(output_data)
+        self.manager.add_data(data_list=output_data)
 
     def updateModel(self, data, p_file):
         """
@@ -428,12 +436,20 @@ class DataExplorerWindow(DataLoadWidget):
 
     def updateModelFromPerspective(self, model_item):
         """
+        Receive an update model item from a perspective
+        Make sure it is valid and if so, replace it in the model
         """
-        # Overwrite the index with what we got from the perspective
+        # Assert the correct type
         if type(model_item) != QtGui.QStandardItem:
             msg = "Wrong data type returned from calculations."
             raise AttributeError, msg
+        # Assert other properties
+
+        # Remove the original item        
+
+        # Add the current item
         # self.model.insertRow(model_item)
+
         # Reset the view
         self.model.reset()
         # Pass acting as a debugger anchor

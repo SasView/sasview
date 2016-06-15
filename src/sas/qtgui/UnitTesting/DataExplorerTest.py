@@ -1,7 +1,5 @@
 import sys
 import unittest
-#from twisted.trial import unittest
-#from twisted.internet import reactor, defer, interfaces, threads, protocol, error
 
 from PyQt4.QtGui import *
 from PyQt4.QtTest import QTest
@@ -26,7 +24,7 @@ class DataExplorerTest(unittest.TestCase):
                 return Communicate()
             def allowBatch(self):
                 return False
-            def setData(self, data_list=None):
+            def setData(self, data_item=None):
                 return None
             def title(self):
                 return "Dummy Perspective"
@@ -270,7 +268,9 @@ class DataExplorerTest(unittest.TestCase):
         Test the callback method updating the data object
         """
 
+        message="Loading Data Complete"
         data_dict = {"a1":Data1D()}
+        output_data = (data_dict, message)
 
         self.form.manager.add_data = MagicMock()
 
@@ -279,7 +279,7 @@ class DataExplorerTest(unittest.TestCase):
         spy_data_received = QtSignalSpy(self.form, self.form.communicate.fileDataReceivedSignal)
 
         # Read in the file
-        self.form.loadComplete(data_dict, message="Loading Data Complete")
+        self.form.loadComplete(output_data)
 
         # "Loading data complete" no longer sent in LoadFile but in callback
         self.assertIn("Loading Data Complete", str(spy_status_update.called()[0]['args'][0]))
