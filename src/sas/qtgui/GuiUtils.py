@@ -25,6 +25,7 @@ from PyQt4 import QtGui
 #from sas.sasgui.guiframe.events import StatusEvent
 #from sas.sasgui.guiframe.events import NewPlotEvent
 from sas.sasgui.guiframe.dataFitting import Data1D
+from sas.sasgui.guiframe.dataFitting import Data2D
 
 
 def get_app_dir():
@@ -208,8 +209,8 @@ class Communicate(QtCore.QObject):
 
 def updateModelItem(item, update_data, name=""):
     """
-    Updates QStandardItem with a checkboxed row named 'name'
-    and containing QVariant 'update_data'
+    Adds a checkboxed row named "name" to QStandardItem
+    Adds QVariant 'update_data' to that row.
     """
     assert type(item) == QtGui.QStandardItem
     assert type(update_data) == QtCore.QVariant
@@ -220,16 +221,91 @@ def updateModelItem(item, update_data, name=""):
     checkbox_item.setText(name)
 
     # Add "Info" item
-    info_item = QtGui.QStandardItem("Info")
+    py_update_data = update_data.toPyObject()
+    if type(py_update_data) == (Data1D or Data2D):
+        # If Data1/2D added - extract Info from it
+        info_item = infoFromData(py_update_data)
+    else:
+        # otherwise just add a naked item
+        info_item = QtGui.QStandardItem("Info")        
 
     # Add the actual Data1D/Data2D object
     object_item = QtGui.QStandardItem()
     object_item.setData(update_data)
 
+    # Set the data object as the first child
     checkbox_item.setChild(0, object_item)
 
-    # Set info_item as the only child
+    # Set info_item as the second child
     checkbox_item.setChild(1, info_item)
 
     # Append the new row to the main item
     item.appendRow(checkbox_item)
+
+def plotsFromCheckedItems(model_item):
+    """
+    Returns the list of plots for items in the model which are checked
+    """
+    assert type(model_item) == QtGui.QStandardItemModel
+
+    checkbox_item = QtGui.QStandardItem(True)
+    plot_data = []
+
+    # Iterate over model looking for items with checkboxes
+    for index in range(model_item.rowCount()):
+        item = model_item.item(index)
+        if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
+            # TODO: assure item type is correct (either data1/2D or Plotter)
+            plot_data.append(item.child(0).data().toPyObject())
+        # Going 1 level deeper only
+        for index_2 in range(item.rowCount()):
+            item_2 = item.child(index_2)
+            if item_2 and item_2.isCheckable() and item_2.checkState() == QtCore.Qt.Checked:
+                # TODO: assure item type is correct (either data1/2D or Plotter)
+                plot_data.append(item_2.child(0).data().toPyObject())
+  
+    return plot_data
+
+def infoFromData(data):
+    """
+    Given Data1D/Data2D object, extract relevant Info elements
+    and add them to a model item
+    """
+    assert type(data) in [Data1D, Data2D]
+
+    info_item = QtGui.QStandardItem("Info")
+
+    title_item   = QtGui.QStandardItem("Title: "      + data.title)
+    info_item.appendRow(title_item)
+    run_item     = QtGui.QStandardItem("Run: "        + str(data.run))
+    info_item.appendRow(run_item)
+    type_item    = QtGui.QStandardItem("Type: "       + str(data.__class__.__name__))
+    info_item.appendRow(type_item)
+
+    if data.path:
+        path_item    = QtGui.QStandardItem("Path: "       + data.path)
+        info_item.appendRow(path_item)
+
+    if data.instrument:
+        instr_item   = QtGui.QStandardItem("Instrument: " + data.instrument)
+        info_item.appendRow(instr_item)
+
+    process_item = QtGui.QStandardItem("Process")
+    if isinstance(data.process, list) and data.process:
+        for process in data.process:
+            process_date = process.date
+            process_date_item = QtGui.QStandardItem("Date: " + process_date)
+            process_item.appendRow(process_date_item)
+
+            process_descr = process.description
+            process_descr_item = QtGui.QStandardItem("Description: " + process_descr)
+            process_item.appendRow(process_descr_item)
+
+            process_name = process.name
+            process_name_item = QtGui.QStandardItem("Name: " + process_name)
+            process_item.appendRow(process_name_item)
+
+    info_item.appendRow(process_item)
+
+    return info_item
+

@@ -78,11 +78,7 @@ class Plotter(QtGui.QDialog):
         plot self._data
         """
         # create an axis
-        #ax = self.figure.add_subplot(self._current_plot)
         ax = self._ax
-
-        # discards the old graph
-        # ax.hold(False)
 
         # plot data with legend
         ax.plot(self._data.x, self._data.y, '*-', label=self._title)

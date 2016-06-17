@@ -6,12 +6,13 @@ from PyQt4 import QtGui
 from PyQt4 import QtWebKit
 
 from twisted.internet import threads
+from twisted.internet import reactor
 
 # sas-global
 from sas.sascalc.invariant import invariant
 from sas.sasgui.guiframe.dataFitting import Data1D
-from sas.qtgui.GuiUtils import Communicate
-from sas.qtgui.GuiUtils import updateModelItem
+# from sas.qtgui.GuiUtils import *
+from GuiUtils import *
 
 # local
 from UI.TabbedInvariantUI import tabbedInvariantUI
@@ -261,9 +262,15 @@ class InvariantWindow(tabbedInvariantUI):
             self._plotter.title(title)
             self._plotter.plot()
 
+            # Convert the data into plottable
+            extrapolated_data = self._manager.createGuiData(extrapolated_data)
+
             # Add the plot to the model item
-            variant_item = QtCore.QVariant(self._plotter)
-            updateModelItem(self._model_item, variant_item, title)
+            # variant_item = QtCore.QVariant(self._plotter)
+            variant_item = QtCore.QVariant(extrapolated_data)
+
+            # This needs to run in the main thread
+            reactor.callFromThread(updateModelItem, self._model_item, variant_item, title)
 
         if self._high_extrapolate:
             # for presentation in InvariantDetails
@@ -274,6 +281,9 @@ class InvariantWindow(tabbedInvariantUI):
             power_high = inv.get_extrapolation_power(range='high')
             high_out_data = inv.get_extra_data_high(q_end=qmax_plot, npts=500)
 
+            # Convert the data into plottable
+            high_out_data = self._manager.createGuiData(high_out_data)
+
             # find how to add this plot to the existing plot for low_extrapolate
             # Plot the chart
             title = "High-Q extrapolation"
@@ -282,9 +292,10 @@ class InvariantWindow(tabbedInvariantUI):
             self._plotter.plot()
 
             # Add the plot to the model item
-            variant_item = QtCore.QVariant(self._plotter)
-            updateModelItem(self._model_item, variant_item, title)
-
+            # variant_item = QtCore.QVariant(self._plotter)
+            variant_item = QtCore.QVariant(high_out_data)
+            # This needs to run in the main thread
+            reactor.callFromThread(updateModelItem, self._model_item, variant_item, title)
 
         item = QtGui.QStandardItem(str(float('%.5g'% volume_fraction)))
         self.model.setItem(WIDGETS.W_VOLUME_FRACTION, item)

@@ -8,10 +8,14 @@ from mock import MagicMock
 
 # Local
 from sas.sasgui.guiframe.dataFitting import Data1D
+from sas.sascalc.dataloader.loader import Loader
+from sas.sasgui.guiframe.data_manager import DataManager
+
 from DataExplorer import DataExplorerWindow
 from GuiManager import GuiManager
 from GuiUtils import *
 from UnitTesting.TestUtils import QtSignalSpy
+from Plotter import Plotter
 
 app = QApplication(sys.argv)
 
@@ -295,6 +299,30 @@ class DataExplorerTest(unittest.TestCase):
 
         # Assure add_data on data_manager was called (last call)
         self.assertTrue(self.form.manager.add_data.called)
+
+    def testNewPlot(self):
+        """
+        Creating new plots from Data1D/2D
+        """
+        loader = Loader()
+        manager = DataManager()
+
+        # get Data1D
+        p_file="cyl_400_20.txt"
+        output_object = loader.load(p_file)
+        new_data = [manager.create_gui_data(output_object, p_file)]
+
+        # Mask the plot show call
+        Plotter.show = MagicMock()
+
+        # Mask retrieval of the data
+        self.form.plotsFromCheckedItems = MagicMock(return_value=new_data)
+
+        # Call the plotting method
+        self.form.newPlot()
+
+        # The plot was displayed
+        self.assertTrue(Plotter.show.called)
 
 
 if __name__ == "__main__":

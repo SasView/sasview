@@ -10,6 +10,7 @@ from twisted.internet import threads
 
 # SAS
 from GuiUtils import *
+from Plotter import Plotter
 from sas.sascalc.dataloader.loader import Loader
 from sas.sasgui.guiframe.data_manager import DataManager
 
@@ -40,6 +41,7 @@ class DataExplorerWindow(DataLoadWidget):
         self.cmdLoad.clicked.connect(self.loadFile)
         self.cmdDelete.clicked.connect(self.deleteFile)
         self.cmdSendTo.clicked.connect(self.sendData)
+        self.cmdNew.clicked.connect(self.newPlot)
 
         # Connect the comboboxes
         self.cbSelect.currentIndexChanged.connect(self.selectData)
@@ -53,6 +55,9 @@ class DataExplorerWindow(DataLoadWidget):
 
         # The Data viewer is QTreeView showing the proxy model
         self.treeView.setModel(self.proxy)
+
+        # Debug view on the model
+        self.listView.setModel(self.model)
 
 
     def loadFile(self, event=None):
@@ -162,6 +167,20 @@ class DataExplorerWindow(DataLoadWidget):
         # Notify the GuiManager about the send request
         self._perspective.setData(data_item=data)
 
+    def newPlot(self):
+        """
+        Create a new matplotlib chart from selected data
+        """
+
+        plots = plotsFromCheckedItems(self.model)
+
+        # Call show on requested plots
+        new_plot = Plotter()
+        for plot_set in plots:
+            new_plot.data(plot_set)
+            new_plot.plot()
+
+        new_plot.show()
 
     def chooseFiles(self):
         """
@@ -414,7 +433,7 @@ class DataExplorerWindow(DataLoadWidget):
         checkbox_item.setText(os.path.basename(p_file))
 
         # Add "Info" item
-        info_item = QtGui.QStandardItem("Info")
+        # info_item = QtGui.QStandardItem("Info")
 
         # Add the actual Data1D/Data2D object
         object_item = QtGui.QStandardItem()
@@ -423,7 +442,8 @@ class DataExplorerWindow(DataLoadWidget):
         checkbox_item.setChild(0, object_item)
 
         # Add rows for display in the view
-        self.addExtraRows(info_item, data)
+        # self.addExtraRows(info_item, data)
+        info_item = infoFromData(data)
 
         # Set info_item as the only child
         checkbox_item.setChild(1, info_item)
@@ -443,48 +463,14 @@ class DataExplorerWindow(DataLoadWidget):
         if type(model_item) != QtGui.QStandardItem:
             msg = "Wrong data type returned from calculations."
             raise AttributeError, msg
-        # Assert other properties
 
-        # Remove the original item        
-
-        # Add the current item
-        # self.model.insertRow(model_item)
+        # TODO: Assert other properties
 
         # Reset the view
         self.model.reset()
+
         # Pass acting as a debugger anchor
         pass
-
-    def addExtraRows(self, info_item, data):
-        """
-        Extract relevant data to include in the Info ModelItem
-        """
-        title_item   = QtGui.QStandardItem("Title: "      + data.title)
-        run_item     = QtGui.QStandardItem("Run: "        + str(data.run))
-        type_item    = QtGui.QStandardItem("Type: "       + str(data.__class__.__name__))
-        path_item    = QtGui.QStandardItem("Path: "       + data.path)
-        instr_item   = QtGui.QStandardItem("Instrument: " + data.instrument)
-        process_item = QtGui.QStandardItem("Process")
-        if isinstance(data.process, list) and data.process:
-            for process in data.process:
-                process_date = process.date
-                process_date_item = QtGui.QStandardItem("Date: " + process_date)
-                process_item.appendRow(process_date_item)
-
-                process_descr = process.description
-                process_descr_item = QtGui.QStandardItem("Description: " + process_descr)
-                process_item.appendRow(process_descr_item)
-
-                process_name = process.name
-                process_name_item = QtGui.QStandardItem("Name: " + process_name)
-                process_item.appendRow(process_name_item)
-
-        info_item.appendRow(title_item)
-        info_item.appendRow(run_item)
-        info_item.appendRow(type_item)
-        info_item.appendRow(path_item)
-        info_item.appendRow(instr_item)
-        info_item.appendRow(process_item)
        
 
 if __name__ == "__main__":

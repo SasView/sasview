@@ -2,8 +2,12 @@ import sys
 
 from PyQt4 import QtCore
 from PyQt4 import QtGui
+from PyQt4 import QtWebKit
+
+from twisted.internet import reactor
 
 # General SAS imports
+from sas.sasgui.guiframe.data_manager import DataManager
 import LocalConfig
 from GuiUtils import *
 
@@ -30,7 +34,8 @@ class GuiManager(object):
         self.addCallbacks()
 
         # Create the data manager
-        #self._data_manager = DataManager()
+        # TODO: pull out all required methods from DataManager and reimplement
+        self._data_manager = DataManager()
 
         # Create action triggers
         self.addTriggers()
@@ -54,6 +59,10 @@ class GuiManager(object):
         # Show the Welcome panel
         self.welcomePanel = WelcomePanel()
         self._workspace.workspace.addWindow(self.welcomePanel)
+
+        # Current help file
+        self._helpView = QtWebKit.QWebView()
+        self._helpLocation = "html/index.html"
 
         #==========================================================
         # TEMP PROTOTYPE
@@ -106,10 +115,11 @@ class GuiManager(object):
         """
         self._workspace.statusbar.showMessage(text)
 
-    #def createGuiData(self, item, p_file):
-    #    """
-    #    """
-    #    return self._data_manager.create_gui_data(item, p_file)
+    def createGuiData(self, item, p_file=None):
+        """
+        Access the Data1D -> plottable Data1D conversion
+        """
+        return self._data_manager.create_gui_data(item, p_file)
 
     def addData(self, data_list):
         """
@@ -254,13 +264,24 @@ class GuiManager(object):
         """
         """
         print("actionSave_Analysis TRIGGERED")
+       
         pass
 
     def actionQuit(self):
         """
+        Close the reactor, exit the application.
         """
-        print("actionQuit TRIGGERED")
-        pass
+        # display messagebox
+        quit_msg = "Are you sure you want to exit the application?"
+        reply = QtGui.QMessageBox.question(self._parent, 'Warning', quit_msg,
+                QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+
+        if reply == QtGui.QMessageBox.No:
+            return
+
+        # exit if yes
+        reactor.callFromThread(reactor.stop)
+        sys.exit()
 
     #============ EDIT =================
     def actionUndo(self):
@@ -488,8 +509,8 @@ class GuiManager(object):
     def actionDocumentation(self):
         """
         """
-        print("actionDocumentation TRIGGERED")
-        pass
+        self._helpView.load(QtCore.QUrl(self._helpLocation))
+        self._helpView.show()
 
     def actionTutorial(self):
         """
