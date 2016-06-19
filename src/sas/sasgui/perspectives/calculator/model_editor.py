@@ -718,9 +718,11 @@ class EditorPanel(wx.ScrolledWindow):
         """
         Do the layout for parameter related widgets
         """
-        param_txt = wx.StaticText(self, -1, 'Fit Parameters (if any): ')
+        param_txt = wx.StaticText(self, -1, 'Fit Parameters NOT requiring' + \
+                                  ' polydispersity (if any): ')
 
-        param_tip = "#Set the parameters and initial values.\n"
+        param_tip = "#Set the parameters NOT requiring polydispersity " + \
+        "and their initial values.\n"
         param_tip += "#Example:\n"
         param_tip += "A = 1\nB = 1"
         #param_txt.SetToolTipString(param_tip)
@@ -735,9 +737,11 @@ class EditorPanel(wx.ScrolledWindow):
                                   (self.param_tcl, 1, wx.EXPAND | wx.ALL, 10)])
         
         # Parameters with polydispersity
-        pd_param_txt = wx.StaticText(self, -1, 'Fit Parameters requiring polydispersity (if any): ')
+        pd_param_txt = wx.StaticText(self, -1, 'Fit Parameters requiring ' + \
+                                     'polydispersity (if any): ')
 
-        pd_param_tip = "#Set the parameters and initial values.\n"
+        pd_param_tip = "#Set the parameters requiring polydispersity and " + \
+        "their initial values.\n"
         pd_param_tip += "#Example:\n"
         pd_param_tip += "C = 2\nD = 2"
         newid = wx.NewId()
@@ -802,12 +806,9 @@ class EditorPanel(wx.ScrolledWindow):
         self.bt_close.Bind(wx.EVT_BUTTON, self.on_close)
         self.bt_close.SetToolTipString("Close this panel.")
 
-        self.button_sizer.AddMany([(self.bt_apply, 0,
-                                    wx.LEFT, EDITOR_WIDTH * 0.8),
-                                   (self.bt_help, 0,
-                                    wx.LEFT,15),
-                                   (self.bt_close, 0,
-                                    wx.LEFT | wx.BOTTOM, 15)])
+        self.button_sizer.AddMany([(self.bt_apply, 0,0),
+                                   (self.bt_help, 0, wx.LEFT | wx.BOTTOM,15),
+                                   (self.bt_close, 0, wx.LEFT | wx.RIGHT, 15)])
 
     def _do_layout(self):
         """
@@ -834,7 +835,7 @@ class EditorPanel(wx.ScrolledWindow):
                                  (wx.StaticLine(self), 0,
                                   wx.ALL | wx.EXPAND, 5),
                                  (self.msg_sizer, 0, wx.EXPAND | wx.ALL, 5),
-                                 (self.button_sizer, 0, wx.EXPAND | wx.ALL, 5)])
+                                 (self.button_sizer, 0, wx.ALIGN_RIGHT)])
         self.SetSizer(self.main_sizer)
         self.SetAutoLayout(True)
 
