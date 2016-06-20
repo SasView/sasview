@@ -8,13 +8,16 @@ import re
 import os
 import sys
 
-from sas.sascalc.dataloader.data_info import Data1D, Data2D, Sample, Source
+from sas.sascalc.dataloader.data_info import plottable_1D, plottable_2D, Data1D, Data2D, Sample, Source
 from sas.sascalc.dataloader.data_info import Process, Aperture, Collimation, TransmissionSpectrum, Detector
 
 
 class Reader():
     """
-    This is a placeholder for the epic class description I plan on writing in the future. But not today.
+    A class for reading in CanSAS v2.0 data files. The existing iteration opens Mantid generated HDF5 formatted files
+    with file extension .h5/.H5. Any number of data sets may be present within the file and any dimensionality of data
+    may be used. Currently 1D and 2D SAS data sets are supported, but future implementations will include 1D and 2D
+    SESANS data. This class assumes a single data set for each sasentry.
 
     :Dependencies:
         The CanSAS HDF5 reader requires h5py v2.5.0 or later.
@@ -33,9 +36,9 @@ class Reader():
     ## For recursion and saving purposes, remember parent objects
     parent_list = None
     ## Data type name
-    type_name = "CanSAS 2D"
+    type_name = "CanSAS 2.0"
     ## Wildcards
-    type = ["CanSAS 2D HDF5 Files (*.h5)|*.h5"]
+    type = ["CanSAS 2.0 HDF5 Files (*.h5)|*.h5"]
     ## List of allowed extensions
     ext = ['.h5', '.H5']
     ## Flag to bypass extension check
@@ -45,9 +48,10 @@ class Reader():
 
     def __init__(self):
         """
-        Create the reader object and define initial states for certain class variables
+        Create the reader object and define initial states for class variables
         """
         self.current_dataset = None
+        self.datasets = []
         self.raw_data = None
         self.errors = set()
         self.logging = []
@@ -63,13 +67,13 @@ class Reader():
 
     def read(self, filename):
         """
-        General read method called by the top-level SasView data_loader.
+        This is the general read method that all SasView data_loaders must have.
 
         :param filename: A path for an HDF5 formatted CanSAS 2D data file.
         :return: List of Data1D/2D objects or a list of errors.
         """
 
-        ## Reinitialize the class when loading new data file to reset all class variables
+        ## Reinitialize the class when loading a new data file to reset all class variables
         self.__init__()
         ## Check that the file exists
         if os.path.isfile(filename):
@@ -81,13 +85,14 @@ class Reader():
                 self.raw_data = h5py.File(filename, 'r')
                 ## Read in all child elements of top level SASroot
                 self.read_children(self.raw_data)
+                ## Add the last data set to the list of outputs
                 self.add_data_set()
         ## Return data set(s)
         return self.output
 
     def read_children(self, data, parent=u'SASroot'):
         """
-        Recursive method for stepping through the hierarchy. Stores the data
+        A recursive method for stepping through the hierarchical data file.
 
         :param data: h5py Group object of any kind
         :param parent: h5py Group parent name
@@ -110,17 +115,17 @@ class Reader():
                 class_prog = re.compile(value.name)
 
             if isinstance(value, h5py.Group):
+                ##TODO: Rework this for multiple SASdata objects within a single SASentry to allow for both 1D and 2D
+                ##TODO:     data within the same SASentry - One 1D and one 2D data object for all SASdata sets?
                 ## If this is a new sasentry, store the current data set and create a fresh Data1D/2D object
                 if class_prog.match(u'SASentry'):
                     self.add_data_set(key)
-                ## If the value is a group of data, iterate
-                ## TODO: If Process, Aperture, etc, store and renew
-                ##Recursion step to access data within the
-                self.read_children(data.get(key), class_name)
+                ## Recursion step to access data within the group
+                self.read_children(value, class_name)
+                self.add_intermediate(class_name)
 
             elif isinstance(value, h5py.Dataset):
                 ## If this is a dataset, store the data appropriately
-                ## TODO: Add instrumental information
                 data_set = data[key][:]
 
                 for data_point in data_set:
@@ -170,24 +175,6 @@ class Reader():
                     elif key == u'Mask':
                         self.current_dataset.mask = np.append(self.current_dataset.mask, data_point)
 
-                    ## Other Information
-                    elif key == u'wavelength':
-                        if data_set.size > 1:
-                            self.trans_spectrum.wavelength.append(data_point)
-                            self.source.wavelength = sum(self.trans_spectrum.wavelength)\
-                                                     / len(self.trans_spectrum.wavelength)
-                        else:
-                            self.source.wavelength = data_point
-                    elif key == u'probe_type':
-                        self.source.radiation = data_point
-                    elif key == u'transmission':
-                        if data_set.size > 1:
-                            self.trans_spectrum.transmission.append(data_point)
-                            self.sample.transmission = sum(self.trans_spectrum.transmission) \
-                                                     / len(self.trans_spectrum.transmission)
-                        else:
-                            self.sample.transmission = data_point
-
                     ## Sample Information
                     elif key == u'Title' and parent == u'SASsample':
                         self.sample.name = data_point
@@ -195,6 +182,20 @@ class Reader():
                         self.sample.thickness = data_point
                     elif key == u'temperature' and parent == u'SASsample':
                         self.sample.temperature = data_point
+
+                    ## Instrumental Information
+                    elif key == u'name' and parent == u'SASinstrument':
+                        self.current_dataset.instrument = data_point
+                    elif key == u'name' and parent == u'SASdetector':
+                        self.detector.name = data_point
+                    elif key == u'SDD' and parent == u'SASdetector':
+                        self.detector.distance = data_point
+                        self.detector.distance_unit = value.attrs.get(u'unit')
+                    elif key == u'SSD' and parent == u'SAScollimation':
+                        self.collimation.length = data_point
+                        self.collimation.length_unit = value.attrs.get(u'unit')
+                    elif key == u'name' and parent == u'SAScollimation':
+                        self.collimation.name = data_point
 
                     ## Process Information
                     elif key == u'name' and parent == u'SASprocess':
@@ -205,6 +206,25 @@ class Reader():
                         self.process.description = data_point
                     elif key == u'date' and parent == u'SASprocess':
                         self.process.date = data_point
+                    elif parent == u'SASprocess':
+                        self.process.notes.append(data_point)
+
+                    ## Transmission Spectrum
+                    elif key == u'T' and parent == u'SAStransmission_spectrum':
+                        self.trans_spectrum.transmission.append(data_point)
+                    elif key == u'Tdev' and parent == u'SAStransmission_spectrum':
+                        self.trans_spectrum.transmission_deviation.append(data_point)
+                    elif key == u'lambda' and parent == u'SAStransmission_spectrum':
+                        self.trans_spectrum.wavelength.append(data_point)
+
+                    ## Other Information
+                    elif key == u'wavelength' and parent == u'SASdata':
+                        self.source.wavelength = data_point
+                        self.source.wavelength.unit = value.attrs.get(u'unit')
+                    elif key == u'radiation' and parent == u'SASsource':
+                        self.source.radiation = data_point
+                    elif key == u'transmission' and parent == u'SASdata':
+                        self.sample.transmission = data_point
 
                     ## Everything else goes in meta_data
                     else:
@@ -215,15 +235,40 @@ class Reader():
                 ## I don't know if this reachable code
                 self.errors.add("ShouldNeverHappenException")
 
-        return
+    def add_intermediate(self, parent):
+        """
+        This method stores any intermediate objects within the final data set after fully reading the set.
+
+        :param parent: The NXclass name for the h5py Group object that just finished being processed
+        :return:
+        """
+
+        if parent == u'SASprocess':
+            self.current_dataset.process.append(self.process)
+            self.process = Process()
+        elif parent == u'SASdetector':
+            self.current_dataset.detector.append(self.detector)
+            self.detector = Detector()
+        elif parent == u'SAStransmission_spectrum':
+            self.current_dataset.trans_spectrum.append(self.trans_spectrum)
+            self.trans_spectrum = TransmissionSpectrum()
+        elif parent == u'SASsource':
+            self.current_dataset.source = self.source
+            self.source = Source()
+        elif parent == u'SASsample':
+            self.current_dataset.sample = self.sample
+            self.sample = Sample()
+        elif parent == u'SAScollimation':
+            self.current_dataset.collimation.append(self.collimation)
+            self.collimation = Collimation()
+        elif parent == u'SASaperture':
+            self.collimation.aperture.append(self.aperture)
+            self.aperture = Aperture()
 
     def final_data_cleanup(self):
         """
         Does some final cleanup and formatting on self.current_dataset
         """
-        ## TODO: Add all cleanup items - NOT FINISHED
-        ## TODO: All strings to float64
-        ## TODO: All intermediates (self.sample, etc.) put in self.current_dataset
 
         ## Type cast data arrays to float64 and find min/max as appropriate
         if type(self.current_dataset) is Data2D:
@@ -291,6 +336,18 @@ class Reader():
                 self.current_dataset.dy = np.delete(self.current_dataset.dy, [0])
                 self.current_dataset.dy =self.current_dataset.dy.astype(np.float64)
 
+        if len(self.current_dataset.trans_spectrum) is not 0:
+            spectrum_list = []
+            for spectrum in self.current_dataset.trans_spectrum:
+                spectrum.transmission = np.delete(spectrum.transmission, [0])
+                spectrum.transmission = spectrum.transmission.astype(np.float64)
+                spectrum.transmission_deviation = np.delete(spectrum.transmission_deviation, [0])
+                spectrum.transmission_deviation = spectrum.transmission_deviation.astype(np.float64)
+                spectrum.wavelength = np.delete(spectrum.wavelength, [0])
+                spectrum.wavelength = spectrum.wavelength.astype(np.float64)
+                spectrum_list.append(spectrum)
+            self.current_dataset.trans_spectrum = spectrum_list
+
         else:
             self.errors.add("ShouldNeverHappenException")
 
@@ -324,15 +381,7 @@ class Reader():
         :param key: NeXus group name for current tree level
         :return: None
         """
-        entry = []
-        if key is not "":
-            entry = self.raw_data.get(key)
-        else:
-            key_prog = re.compile("sasentry*")
-            for key in self.raw_data.keys():
-                if (key_prog.match(key)):
-                    entry = self.raw_data.get(key)
-                    break
+        entry = self._find_intermediate(key, "sasentry*")
         data = entry.get("sasdata")
         if data.get("Qx") is not None:
             self.current_dataset = Data2D()
@@ -341,6 +390,25 @@ class Reader():
             y = np.array(0)
             self.current_dataset = Data1D(x, y)
         self.current_dataset.filename = self.raw_data.filename
+
+    def _find_intermediate(self, key="", basename=""):
+        """
+        A private class used to find an entry by either using a direct key or knowing the approximate basename.
+
+        :param key: Exact keyname of an entry
+        :param basename: Approximate name of an entry
+        :return:
+        """
+        entry = []
+        if key is not "":
+            entry = self.raw_data.get(key)
+        else:
+            key_prog = re.compile(basename)
+            for key in self.raw_data.keys():
+                if (key_prog.match(key)):
+                    entry = self.raw_data.get(key)
+                    break
+        return entry
 
     def _create_unique_key(self, dictionary, name, numb=0):
         """
