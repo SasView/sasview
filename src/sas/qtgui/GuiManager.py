@@ -1,4 +1,8 @@
 import sys
+import subprocess
+import logging
+import json
+import webbrowser
 
 from PyQt4 import QtCore
 from PyQt4 import QtGui
@@ -8,8 +12,11 @@ from twisted.internet import reactor
 
 # General SAS imports
 from sas.sasgui.guiframe.data_manager import DataManager
+from sas.sasgui.guiframe.proxy import Connection
+
 import LocalConfig
 from GuiUtils import *
+from UI.AcknowledgementsUI import Acknowledgements
 
 # Perspectives
 from Perspectives.Invariant.InvariantPerspective import InvariantWindow
@@ -20,6 +27,8 @@ class GuiManager(object):
     """
     Main SasView window functionality
     """
+    HELP_DIRECTORY_LOCATION="html"
+
     def __init__(self, mainWindow=None, reactor=None, parent=None):
         """
         
@@ -55,14 +64,24 @@ class GuiManager(object):
         self.dockedFilesWidget = QtGui.QDockWidget("File explorer", self._workspace)
         self.dockedFilesWidget.setWidget(self.filesWidget)
         self._workspace.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.dockedFilesWidget)
+
+        self.ackWidget = Acknowledgements()
+
         # Disable the close button (?)
+
         # Show the Welcome panel
         self.welcomePanel = WelcomePanel()
         self._workspace.workspace.addWindow(self.welcomePanel)
 
         # Current help file
         self._helpView = QtWebKit.QWebView()
-        self._helpLocation = "html/index.html"
+        # Needs URL like path, so no path.join() here
+        self._helpLocation = self.HELP_DIRECTORY_LOCATION + "/index.html"
+
+        # Current tutorial location
+        self._tutorialLocation = os.path.join(self.HELP_DIRECTORY_LOCATION,
+                                              "_downloads",
+                                              "Tutorial.pdf")
 
         #==========================================================
         # TEMP PROTOTYPE
@@ -76,7 +95,6 @@ class GuiManager(object):
     def fileRead(self, data):
         """
         """
-        print("FILE %s "%data)
         pass
     
     def updatePerspective(self, data):
@@ -160,8 +178,93 @@ class GuiManager(object):
             msg = "Guiframe does not have a current perspective"
             logging.info(msg)
 
+    def quitApplication(self):
+        """
+        Close the reactor and exit nicely.
+        """
+        # Display confirmation messagebox
+        quit_msg = "Are you sure you want to exit the application?"
+        reply = QtGui.QMessageBox.question(
+                        self._parent,
+                        'Warning',
+                        quit_msg,
+                        QtGui.QMessageBox.Yes,
+                        QtGui.QMessageBox.No)
+
+        if reply == QtGui.QMessageBox.No:
+            return
+
+        # Exit if yes
+        reactor.callFromThread(reactor.stop)
+        reactor.stop
+        sys.exit()
+
+    def checkUpdate(self):
+        """
+        Check with the deployment server whether a new version
+        of the application is available.
+        A thread is started for the connecting with the server. The thread calls
+        a call-back method when the current version number has been obtained.
+        """
+        version_info = {"version": "0.0.0"}
+        c = Connection(LocalConfig.__update_URL__, LocalConfig.UPDATE_TIMEOUT)
+        response = c.connect()
+        if response is not None:
+            try:
+                content = response.read().strip()
+                logging.info("Connected to www.sasview.org. Latest version: %s"
+                             % (content))
+                version_info = json.loads(content)
+            except:
+                logging.info("Failed to connect to www.sasview.org")
+        self.processVersion(version_info)  
+  
+    def processVersion(self, version_info, standalone=False):
+        """
+        Call-back method for the process of checking for updates.
+        This methods is called by a VersionThread object once the current
+        version number has been obtained. If the check is being done in the
+        background, the user will not be notified unless there's an update.
+
+        :param version: version string
+        :param standalone: True of the update is being checked in
+           the background, False otherwise.
+
+        """
+        try:
+            version = version_info["version"]
+            if version == "0.0.0":
+                msg = "Could not connect to the application server."
+                msg += " Please try again later."
+                #self.SetStatusText(msg)
+                self.communicate.statusBarUpdateSignal.emit(msg)
+
+            elif cmp(version, LocalConfig.__version__) > 0:
+                msg = "Version %s is available! " % str(version)
+                if not standalone:
+                    if "download_url" in version_info:
+                        webbrowser.open(version_info["download_url"])
+                    else:
+                        webbrowser.open(LocalConfig.__download_page__)
+                else:
+                    msg += "See the help menu to download it."
+                self.communicate.statusBarUpdateSignal.emit(msg)
+            else:
+                msg = "You have the latest version"
+                msg += " of %s" % str(LocalConfig.__appname__)
+                self.communicate.statusBarUpdateSignal.emit(msg)
+        except:
+            msg = "guiframe: could not get latest application"
+            msg += " version number\n  %s" % sys.exc_value
+            logging.error(msg)
+            if not standalone:
+                msg = "Could not connect to the application server."
+                msg += " Please try again later."
+                self.communicate.statusBarUpdateSignal.emit(msg)
+
     def addCallbacks(self):
         """
+        Method defining all signal connections for the gui manager
         """
         self.communicate = Communicate()
         self.communicate.fileDataReceivedSignal.connect(self.fileRead)
@@ -233,12 +336,13 @@ class GuiManager(object):
     #============ FILE =================
     def actionLoadData(self):
         """
-        Load file from Data Explorer
+        Menu File/Load Data File(s)
         """
         self.filesWidget.loadFile()
 
     def actionLoad_Data_Folder(self):
         """
+        Menu File/Load Data Folder
         """
         self.filesWidget.loadFolder()
 
@@ -271,17 +375,7 @@ class GuiManager(object):
         """
         Close the reactor, exit the application.
         """
-        # display messagebox
-        quit_msg = "Are you sure you want to exit the application?"
-        reply = QtGui.QMessageBox.question(self._parent, 'Warning', quit_msg,
-                QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
-
-        if reply == QtGui.QMessageBox.No:
-            return
-
-        # exit if yes
-        reactor.callFromThread(reactor.stop)
-        sys.exit()
+        self.quitApplication()
 
     #============ EDIT =================
     def actionUndo(self):
@@ -508,31 +602,41 @@ class GuiManager(object):
     #============ HELP =================
     def actionDocumentation(self):
         """
+        Display the documentation
+
+        TODO: use QNetworkAccessManager to assure _helpLocation is valid
         """
         self._helpView.load(QtCore.QUrl(self._helpLocation))
         self._helpView.show()
 
     def actionTutorial(self):
         """
+        Open the tutorial PDF file with default PDF renderer
         """
-        print("actionTutorial TRIGGERED")
-        pass
+        # Not terribly safe here. Shell injection warning.
+        # isfile() helps but this probably needs a better solution.
+        if os.path.isfile(self._tutorialLocation):
+            result = subprocess.Popen([self._tutorialLocation], shell=True)
 
     def actionAcknowledge(self):
         """
+        Open the Acknowledgements widget
         """
-        print("actionAcknowledge TRIGGERED")
-        pass
+        self.ackWidget.show()
 
     def actionAbout(self):
         """
+        Open the About box
         """
+        
         print("actionAbout TRIGGERED")
         pass
 
     def actionCheck_for_update(self):
         """
+        Menu Help/Check for Update
         """
-        print("actionCheck_for_update TRIGGERED")
+        self.checkUpdate()
+
         pass
 

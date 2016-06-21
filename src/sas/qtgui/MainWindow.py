@@ -20,8 +20,13 @@ class MainSasViewWindow(MainWindow):
 
         # Create the gui manager
         from GuiManager import GuiManager
-        guiManager = GuiManager(self, reactor, self)
+        self.guiManager = GuiManager(self, reactor, self)
 
+    def closeEvent(self, event):
+        from twisted.internet import reactor
+        reactor.stop
+        event.accept()
+        sys.exit()
         
 def SplashScreen():
     """
@@ -59,4 +64,3 @@ if __name__ == "__main__":
     # No need to .exec_ - the reactor takes care of it.
     reactor.run()
 
-    # TODO : in the VS debugger, the Qt loop doesn't seem to end - investigate

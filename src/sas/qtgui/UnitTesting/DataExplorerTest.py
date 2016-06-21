@@ -71,15 +71,36 @@ class DataExplorerTest(unittest.TestCase):
     def testLoadButton(self):
         loadButton = self.form.cmdLoad
 
-        # Mock the system file open method
-        QtGui.QFileDialog.getOpenFileName = MagicMock(return_value=None)
+        filename = "cyl_400_20.txt"
+        # Initialize signal spy instances
+        spy_file_read = QtSignalSpy(self.form, self.form.communicate.fileReadSignal)
+
+        # Return no files.
+        QtGui.QFileDialog.getOpenFileNames = MagicMock(return_value=None)
 
         # Click on the Load button
         QTest.mouseClick(loadButton, Qt.LeftButton)
 
         # Test the getOpenFileName() dialog called once
-        self.assertTrue(QtGui.QFileDialog.getOpenFileName.called)
-        QtGui.QFileDialog.getOpenFileName.assert_called_once()
+        self.assertTrue(QtGui.QFileDialog.getOpenFileNames.called)
+        QtGui.QFileDialog.getOpenFileNames.assert_called_once()
+
+        # Make sure the signal has not been emitted
+        self.assertEqual(spy_file_read.count(), 0)
+
+        # Now, return a single file
+        QtGui.QFileDialog.getOpenFileNames = MagicMock(return_value=filename)
+        
+        # Click on the Load button
+        QTest.mouseClick(loadButton, Qt.LeftButton)
+
+        # Test the getOpenFileName() dialog called once
+        self.assertTrue(QtGui.QFileDialog.getOpenFileNames.called)
+        QtGui.QFileDialog.getOpenFileNames.assert_called_once()
+
+        # Expected one spy instance
+        self.assertEqual(spy_file_read.count(), 1)
+        self.assertIn(filename, str(spy_file_read.called()[0]['args'][0]))
 
     def testDeleteButton(self):
         """
@@ -130,7 +151,6 @@ class DataExplorerTest(unittest.TestCase):
         # Click delete once again to assure no nasty behaviour on empty model
         QTest.mouseClick(deleteButton, Qt.LeftButton)
 
-
     def testSendToButton(self):
         """
         Test that clicking the Send To button sends checked data to a perspective
@@ -165,7 +185,6 @@ class DataExplorerTest(unittest.TestCase):
 
         # Assure the message box popped up
         QtGui.QMessageBox.assert_called_once()
-
 
     def testDataSelection(self):
         """
@@ -271,7 +290,6 @@ class DataExplorerTest(unittest.TestCase):
         """
         Test the callback method updating the data object
         """
-
         message="Loading Data Complete"
         data_dict = {"a1":Data1D()}
         output_data = (data_dict, message)

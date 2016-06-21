@@ -84,7 +84,7 @@ class DataExplorerWindow(DataLoadWidget):
         Opens the Qt "Open Folder..." dialog 
         """
         dir = QtGui.QFileDialog.getExistingDirectory(self, "Choose a directory", "",
-              QtGui.QFileDialog.ShowDirsOnly)
+              QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontUseNativeDialog)
         if dir is None:
             return
 
@@ -170,6 +170,8 @@ class DataExplorerWindow(DataLoadWidget):
     def newPlot(self):
         """
         Create a new matplotlib chart from selected data
+
+        TODO: Add 2D-functionality
         """
 
         plots = plotsFromCheckedItems(self.model)
@@ -191,20 +193,18 @@ class DataExplorerWindow(DataLoadWidget):
 
         # Location is automatically saved - no need to keep track of the last dir
         # But only with Qt built-in dialog (non-platform native)
-        paths = QtGui.QFileDialog.getOpenFileName(self, "Choose a file", "",
+        paths = QtGui.QFileDialog.getOpenFileNames(self, "Choose a file", "",
                 wlist, None, QtGui.QFileDialog.DontUseNativeDialog)
         if paths is None:
             return
 
+        if type(paths) == QtCore.QStringList:
+            paths = [str(f) for f in paths]
+
         if paths.__class__.__name__ != "list":
             paths = [paths]
 
-        path_str=[]
-        for path in paths:
-            if str(path):
-                path_str.append(str(path))
-
-        return path_str
+        return paths
 
     def readData(self, path):
         """
@@ -401,8 +401,12 @@ class DataExplorerWindow(DataLoadWidget):
         """
         Post message to status bar and update the data manager
         """
+        # Don't show "empty" rows with data objects
+        self.proxy.setFilterRegExp(r"[^()]")
+
+        # Reset the model so the view gets updated.
         self.model.reset()
-        assert(type(output), tuple)
+        assert type(output)== tuple
 
         output_data = output[0]
         message = output[1]
@@ -432,9 +436,6 @@ class DataExplorerWindow(DataLoadWidget):
         checkbox_item.setCheckState(QtCore.Qt.Checked)
         checkbox_item.setText(os.path.basename(p_file))
 
-        # Add "Info" item
-        # info_item = QtGui.QStandardItem("Info")
-
         # Add the actual Data1D/Data2D object
         object_item = QtGui.QStandardItem()
         object_item.setData(QtCore.QVariant(data))
@@ -442,7 +443,6 @@ class DataExplorerWindow(DataLoadWidget):
         checkbox_item.setChild(0, object_item)
 
         # Add rows for display in the view
-        # self.addExtraRows(info_item, data)
         info_item = infoFromData(data)
 
         # Set info_item as the only child
@@ -451,9 +451,6 @@ class DataExplorerWindow(DataLoadWidget):
         # New row in the model
         self.model.appendRow(checkbox_item)
         
-        # Don't show "empty" rows with data objects
-        self.proxy.setFilterRegExp(r"[^()]")
-
     def updateModelFromPerspective(self, model_item):
         """
         Receive an update model item from a perspective
