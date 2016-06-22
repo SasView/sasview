@@ -1324,6 +1324,7 @@ SUM_TEMPLATE = """
 import os
 import sys
 import copy
+import collections
 
 import numpy
 
@@ -1349,7 +1350,7 @@ class Model(Model1DPlugin):
             self.fill_description(p_model1, p_model2)
 
         ## Define parameters
-        self.params = {}
+        self.params = collections.OrderedDict()
 
         ## Parameter details [units, min, max]
         self.details = {}
