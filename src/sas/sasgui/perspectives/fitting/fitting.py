@@ -272,7 +272,8 @@ class Plugin(PluginBase):
                         evt = StatusEvent(status=msg, type='stop', info='info')
                         wx.PostEvent(self.parent, evt)
                         break
-        except:
+        except Exception:
+            import traceback; traceback.print_exc()
             msg = 'Delete Error: \nCould not delete the file; Check if in use.'
             wx.MessageBox(msg, 'Error')
 
@@ -578,7 +579,7 @@ class Plugin(PluginBase):
             try:
                 _, theory_state = item
                 self.fit_panel.set_model_state(theory_state)
-            except:
+            except Exception:
                 msg = "Fitting: cannot deal with the theory received"
                 evt = StatusEvent(status=msg, info="error")
                 logging.error("set_theory " + msg + "\n" + str(sys.exc_value))

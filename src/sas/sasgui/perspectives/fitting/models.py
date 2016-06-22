@@ -1,12 +1,13 @@
 """
     Utilities to manage models
 """
-import imp
+import traceback
 import os
 import sys
 import os.path
 # Time is needed by the log method
 import time
+import datetime
 import logging
 import py_compile
 import shutil
@@ -19,6 +20,8 @@ from sasmodels.sasview_model import load_custom_model, load_standard_models
 
 
 PLUGIN_DIR = 'plugin_models'
+PLUGIN_LOG = os.path.join(os.path.expanduser("~"), '.sasview', PLUGIN_DIR,
+                          "plugins.log")
 
 def get_model_python_path():
     """
@@ -27,13 +30,14 @@ def get_model_python_path():
     return os.path.dirname(__file__)
 
 
-def log(message):
+def plugin_log(message):
     """
     Log a message in a file located in the user's home directory
     """
-    dir = os.path.join(os.path.expanduser("~"), '.sasview', PLUGIN_DIR)
-    out = open(os.path.join(dir, "plugins.log"), 'a')
-    out.write("%10g:  %s\n" % (time.clock(), message))
+    out = open(PLUGIN_LOG, 'a')
+    now = time.time()
+    stamp = datetime.datetime.fromtimestamp(now).strftime('%Y-%m-%d %H:%M:%S')
+    out.write("%s: %s\n" % (stamp, message))
     out.close()
 
 
@@ -50,11 +54,11 @@ def _check_plugin(model, name):
     #Check if the plugin is of type Model1DPlugin
     if not issubclass(model, Model1DPlugin):
         msg = "Plugin %s must be of type Model1DPlugin \n" % str(name)
-        log(msg)
+        plugin_log(msg)
         return None
     if model.__name__ != "Model":
         msg = "Plugin %s class name must be Model \n" % str(name)
-        log(msg)
+        plugin_log(msg)
         return None
     try:
         new_instance = model()
@@ -62,7 +66,7 @@ def _check_plugin(model, name):
         msg = "Plugin %s error in __init__ \n\t: %s %s\n" % (str(name),
                                                              str(sys.exc_type),
                                                              sys.exc_info()[1])
-        log(msg)
+        plugin_log(msg)
         return None
 
     if hasattr(new_instance, "function"):
@@ -71,11 +75,11 @@ def _check_plugin(model, name):
         except:
             msg = "Plugin %s: error writing function \n\t :%s %s\n " % \
                     (str(name), str(sys.exc_type), sys.exc_info()[1])
-            log(msg)
+            plugin_log(msg)
             return None
     else:
         msg = "Plugin  %s needs a method called function \n" % str(name)
-        log(msg)
+        plugin_log(msg)
         return None
     return model
 
@@ -131,10 +135,10 @@ class ReportProblem:
     Class to check for problems with specific values
     """
     def __nonzero__(self):
-        type, value, traceback = sys.exc_info()
+        type, value, tb = sys.exc_info()
         if type is not None and issubclass(type, py_compile.PyCompileError):
             print "Problem with", repr(value)
-            raise type, value, traceback
+            raise type, value, tb
         return 1
 
 report_problem = ReportProblem()
@@ -154,59 +158,35 @@ def compile_file(dir):
 
 
 def _findModels(dir):
+    """
+    Find custom models
+    """
     # List of plugin objects
-    plugins = {}
     dir = find_plugins_dir()
     # Go through files in plug-in directory
-    #always recompile the folder plugin
     if not os.path.isdir(dir):
-        msg = "SasView couldn't locate Model plugin folder."
-        msg += """ "%s" does not exist""" % dir
+        msg = "SasView couldn't locate Model plugin folder %r." % dir
         logging.warning(msg)
-        return plugins
-    else:
-        log("looking for models in: %s" % str(dir))
-        compile_file(dir)
-        logging.info("plugin model dir: %s" % str(dir))
-    try:
-        list = os.listdir(dir)
-        for item in list:
-            toks = os.path.splitext(os.path.basename(item))
-            if toks[1] == '.py' and not toks[0] == '__init__':
-                name = toks[0]
-                path = [os.path.abspath(dir)]
-                file = None
-                try:
-                    (file, path, info) = imp.find_module(name, path)
-                    module = imp.load_module(name, file, item, info)
-                    if hasattr(module, "Model"):
-                        try:
-                            if _check_plugin(module.Model, name) != None:
-                                plugins[name] = module.Model
-                        except:
-                            msg = "Error accessing Model"
-                            msg += "in %s\n  %s %s\n" % (name,
-                                                         str(sys.exc_type),
-                                                         sys.exc_info()[1])
-                            log(msg)
-                    else:
-                        filename = os.path.join(dir, item)
-                        plugins[name] = load_custom_model(filename)
+        return {}
 
-                except:
-                    msg = "Error accessing Model"
-                    msg += " in %s\n  %s %s \n" % (name,
-                                                   str(sys.exc_type),
-                                                   sys.exc_info()[1])
-                    log(msg)
-                finally:
+    plugin_log("looking for models in: %s" % str(dir))
+    #compile_file(dir)  #always recompile the folder plugin
+    logging.info("plugin model dir: %s" % str(dir))
 
-                    if not file == None:
-                        file.close()
-    except:
-        # Don't deal with bad plug-in imports. Just skip.
-        msg = "Could not import model plugin: %s" % sys.exc_info()[1]
-        log(msg)
+    plugins = {}
+    for filename in os.listdir(dir):
+        name, ext = os.path.splitext(filename)
+        if ext == '.py' and not name == '__init__':
+            path = os.path.abspath(os.path.join(dir, filename))
+            try:
+                model = load_custom_model(path)
+            except Exception:
+                msg = traceback.format_exc()
+                msg += "\nwhile accessing model in %r" % path
+                plugin_log(msg)
+                logging.warning("Failed to load plugin %r. See %s for details"
+                                % (path, PLUGIN_LOG))
+            plugins[model.name] = model
 
     return plugins
 
