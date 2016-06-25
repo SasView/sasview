@@ -10,8 +10,13 @@ from distutils.command.build_ext import build_ext
 from distutils.core import Command
 
 # Manage version number ######################################
-import sasview
-VERSION = sasview.__version__
+with open(os.path.join("src", "sas", "sasview", "__init__.py")) as fid:
+    for line in fid:
+        if line.startswith('__version__'):
+            VERSION = line.split('"')[1]
+            break
+    else:
+        raise ValueError("Could not find version in src/sas/sasview/__init__.py")
 ##############################################################
 
 package_dir = {}
@@ -286,7 +291,6 @@ append_file(file_sources, gen_dir)
 #doc_files = add_doc_files('doc')
 
 # SasView
-package_dir["sas.sasview"] = "sasview"
 package_data['sas.sasview'] = ['images/*',
                                'media/*',
                                'test/*.txt',

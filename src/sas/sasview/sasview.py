@@ -15,10 +15,11 @@ import sys
 import logging
 import traceback
 
+log_file = os.path.join(os.path.expanduser("~"), 'sasview.log')
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s',
-                    filename=os.path.join(os.path.expanduser("~"),
-                                          'sasview.log'))
+                    filename=log_file,
+)
 logging.captureWarnings(True)
 
 class StreamToLogger(object):
@@ -74,27 +75,23 @@ try:
 except:
     logging.error("Wx version: error reading version")
 
-import wxcruft
+from . import wxcruft
 wxcruft.call_later_fix()
 #wxcruft.trace_new_id()
-
 #Always use private .matplotlib setup to avoid conflicts with other
 #uses of matplotlib
-#Have to check if .sasview exists first 
-sasdir = os.path.join(os.path.expanduser("~"),'.sasview')
-if not os.path.exists(sasdir):
-    os.mkdir(sasdir)
-mplconfigdir = os.path.join(os.path.expanduser("~"),'.sasview','.matplotlib')
+
+import sas.sasgui
+mplconfigdir = os.path.join(sas.sasgui.get_user_dir(), '.matplotlib')
 if not os.path.exists(mplconfigdir):
     os.mkdir(mplconfigdir)
 os.environ['MPLCONFIGDIR'] = mplconfigdir
 reload(sys)
 sys.setdefaultencoding("iso-8859-1")
+
+
 from sas.sasgui.guiframe import gui_manager
-from sas.sasgui.guiframe.gui_style import GUIFRAME
-from welcome_panel import WelcomePanel
-# For py2exe, import config here
-import local_config
+from .welcome_panel import WelcomePanel
 PLUGIN_MODEL_DIR = 'plugin_models'
 APP_NAME = 'SasView'
 
@@ -174,10 +171,10 @@ def run():
     freeze_support()
     if len(sys.argv) > 1:
         ## Run sasview as an interactive python interpreter
-        #if sys.argv[1] == "-i":
-        #    sys.argv = ["ipython", "--pylab"]
-        #    from IPython import start_ipython
-        #    sys.exit(start_ipython())
+        if sys.argv[1] == "-i":
+            sys.argv = ["ipython", "--pylab"]
+            from IPython import start_ipython
+            sys.exit(start_ipython())
         thing_to_run = sys.argv[1]
         sys.argv = sys.argv[1:]
         import runpy

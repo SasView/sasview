@@ -11,11 +11,8 @@ NOTES:
    12/05/2011: Needs macholib >= 1.4.3 and py2app >= 0.6.4 to create a 64-bit app
 """
 from setuptools import setup
-import periodictable.xsf
-import sas.sascalc.dataloader.readers
 import os
 import string
-import local_config
 import pytz
 import sys
 import platform
@@ -28,43 +25,85 @@ platform = '%s-%s'%(get_platform(),sys.version[:3])
 build_path = os.path.join(root, 'build','lib.'+platform)
 sys.path.insert(0, build_path)
 print "BUILDING PATH INSIDE", build_path
+
+from sas.sasview import local_config
+
 ICON = local_config.SetupIconFile_mac
 EXTENSIONS_LIST = []
-DATA_FILES = []
 RESOURCES_FILES = []
+DATA_FILES = []
 
 #Periodictable data file
-DATA_FILES = periodictable.data_files()
+import periodictable
+DATA_FILES += periodictable.data_files()
 #invariant and calculator help doc
-import sas.sasgui.perspectives.fitting as fitting
+from sas.sasgui.perspectives import fitting
 DATA_FILES += fitting.data_files()
-import sas.sasgui.perspectives.calculator as calculator
+from sas.sasgui.perspectives import calculator
 DATA_FILES += calculator.data_files()
-import sas.sasgui.perspectives.invariant as invariant
+from sas.sasgui.perspectives import invariant
 DATA_FILES += invariant.data_files()
-import sasmodels as models
-DATA_FILES += models.data_files()
-import sas.sasgui.guiframe as guiframe
+import sasmodels
+DATA_FILES += sasmodels.data_files()
+from sas.sasgui import guiframe
 DATA_FILES += guiframe.data_files()
 
 #CANSAxml reader data files
-RESOURCES_FILES.append(os.path.join(sas.sascalc.dataloader.readers.get_data_path(),'defaults.json'))
+from sas.sascalc.dataloader import readers
+RESOURCES_FILES.append(os.path.join(readers.get_data_path(),'defaults.json'))
 
-# Locate libxml2 library
-lib_locs = ['/usr/local/lib', '/usr/lib']
-libxml_path = None
-for item in lib_locs:
-    libxml_path_test = '%s/libxml2.2.dylib' % item
-    if os.path.isfile(libxml_path_test):
-        libxml_path = libxml_path_test
-if libxml_path == None:
-    raise RuntimeError, "Could not find libxml2 on the system"
+# Copy the config files
+sasview_path = os.path.join('..','src','sas','sasview')
+custom_config_file = os.path.join(sasview_path, 'custom_config.py')
+local_config_file = os.path.join(sasview_path, 'local_config.py')
+DATA_FILES.append(('.', [custom_config_file]))
+DATA_FILES.append(('config', [custom_config_file]))
+DATA_FILES.append(('.', [local_config_file]))
 
-APP = ['sasview.py']
-DATA_FILES += ['images','test','media', 'custom_config.py', 'local_config.py',
-               'default_categories.json']
+# default_categories.json is beside the config files
+category_config = os.path.join(sasview_path, 'default_categories.json')
+if os.path.isfile(category_config):
+    DATA_FILES.append(('.', [category_config]))
+
 if os.path.isfile("BUILD_NUMBER"):
-    DATA_FILES.append("BUILD_NUMBER")
+    DATA_FILES.append(('.', ["BUILD_NUMBER"]))
+
+images_dir = local_config.icon_path
+media_dir = local_config.media_path
+images_dir = local_config.icon_path
+test_dir = local_config.test_path
+test_1d_dir = os.path.join(test_dir, "1d_data")
+test_2d_dir = os.path.join(test_dir, "2d_data")
+test_save_dir = os.path.join(test_dir, "save_states")
+test_upcoming_dir = os.path.join(test_dir, "upcoming_formats")
+
+# Copying the images directory to the distribution directory.
+for f in findall(images_dir):
+    DATA_FILES.append(("images", [f]))
+
+# Copying the HTML help docs
+for f in findall(media_dir):
+    DATA_FILES.append(("media", [f]))
+
+# Copying the sample data user data
+for f in findall(test_1d_dir):
+    DATA_FILES.append(("test\\1d_data", [f]))
+
+# Copying the sample data user data
+for f in findall(test_2d_dir):
+    DATA_FILES.append(("test\\2d_data", [f]))
+
+# Copying the sample data user data
+for f in findall(test_save_dir):
+    DATA_FILES.append(("test\\save_states", [f]))
+
+# Copying the sample data user data
+for f in findall(test_upcoming_dir):
+    DATA_FILES.append(("test\\upcoming_formats", [f]))
+
+# Copying opencl include files
+for f in findall(opencl_include_dir):
+    DATA_FILES.append(("includes\\pyopencl", [f]))
 
 # See if the documentation has been built, and if so include it.
 doc_path = os.path.join(build_path, "doc")
@@ -118,17 +157,24 @@ plist = dict(CFBundleDocumentTypes=[dict(CFBundleTypeExtensions=EXTENSIONS_LIST,
                                    CFBundleTypeName="sasview file",
                                    CFBundleTypeRole="Shell" )],)
 
+# Locate libxml2 library
+lib_locs = ['/usr/local/lib', '/usr/lib']
+libxml_path = None
+for item in lib_locs:
+    libxml_path_test = '%s/libxml2.2.dylib' % item
+    if os.path.isfile(libxml_path_test):
+        libxml_path = libxml_path_test
+if libxml_path == None:
+    raise RuntimeError, "Could not find libxml2 on the system"
+
 #Get version - NB nasty hack. Need to find correct way to give path to installed sasview (AJJ)
 #h5py has been added to packages. It requires hdf5 to be installed separetly
 #
-import __init__ as sasviewver
 
-VERSION = sasviewver.__version__
+from sas.sasview import __version__ as VERSION
 APPNAME = "SasView "+VERSION
 DMGNAME = "SasView-"+VERSION+"-MacOSX"
-
 APP = ['sasview.py']
-DATA_FILES += ['images','test','media']
 
 EXCLUDES = ['PyQt4', 'sip', 'QtGui']
 

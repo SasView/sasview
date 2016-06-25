@@ -15,10 +15,12 @@ reasons.
 """
 import os
 import logging
-import wx
-import webbrowser
 import urllib
-import sys
+
+import webbrowser
+import wx
+
+from sas.sasgui import get_app_dir
 
 SPHINX_DOC_ENV = "SASVIEW_DOC_PATH"
 WX_SUPPORTS_HTML2 = True
@@ -26,9 +28,6 @@ try:
     import wx.html2 as html
 except:
     WX_SUPPORTS_HTML2 = False
-
-
-from gui_manager import get_app_dir
 
 
 class DocumentationWindow(wx.Frame):

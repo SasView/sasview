@@ -3,7 +3,7 @@ This module generates .iss file according to the local config of
 the current application. Please make sure a file named "local_config.py"
 exists in the current directory. Edit local_config.py according to your needs.
 """
-import local_config
+from sas.sasview import local_config
 import os 
 import string
 
@@ -23,7 +23,7 @@ DefaultDirName = os.path.join("{pf}" , AppName+Dev)
 DefaultGroupName = os.path.join(local_config.DefaultGroupName, AppVerName)
                                 
 OutputBaseFilename = local_config.OutputBaseFilename
-SetupIconFile = "images\\ball.ico"
+SetupIconFile = local_config.SetupIconFile_win
 LicenseFile = 'license.txt'
 DisableProgramGroupPage = 'yes'
 Compression = 'lzma'

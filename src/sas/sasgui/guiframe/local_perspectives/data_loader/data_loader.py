@@ -8,29 +8,14 @@ import wx
 import logging
 
 from sas.sascalc.dataloader.loader import Loader
+
+from sas.sasgui import get_local_config
 from sas.sasgui.guiframe.plugin_base import PluginBase
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.gui_style import GUIFRAME
 from sas.sasgui.guiframe.gui_manager import DEFAULT_OPEN_FOLDER
-try:
-    # Try to find a local config
-    import imp
-    path = os.getcwd()
-    if(os.path.isfile("%s/%s.py" % (path, 'local_config'))) or \
-        (os.path.isfile("%s/%s.pyc" % (path, 'local_config'))):
-        fObj, path, descr = imp.find_module('local_config', [path])
-        config = imp.load_module('local_config', fObj, path, descr)
-    else:
-        # Try simply importing local_config
-        import local_config as config
-except:
-    # Didn't find local config, load the default
-    import sas.sasgui.guiframe.config as config
 
-if config is None:
-    import sas.sasgui.guiframe.config as config
-
-
+config = get_local_config()
 extension_list = []
 if config.APPLICATION_STATE_EXTENSION is not None:
     extension_list.append(config.APPLICATION_STATE_EXTENSION)

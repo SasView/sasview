@@ -1,11 +1,12 @@
 """
-    Application settings
+Application settings
 """
 import time
 import os
+import logging
+
 from sas.sasgui.guiframe.gui_style import GUIFRAME
 import sas.sasview
-import logging
 
 # Version of the application
 __appname__ = "SasView"

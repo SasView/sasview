@@ -124,6 +124,9 @@ EDIT_MENU = False
 import wx.lib.newevent
 (StatusBarEvent, EVT_STATUS) = wx.lib.newevent.NewEvent()
 
+# Time out for updating sasview
+UPDATE_TIMEOUT = 2
+
 def printEVT(message):
     """
     :TODO - need method documentation

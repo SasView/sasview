@@ -10,9 +10,10 @@ Copyright (c) Institut Laue-Langevin 2012
 
 import os
 import sys
-import shutil
 import json
 from collections import defaultdict
+
+from sas.sasgui import get_user_dir
 
 USER_FILE = 'categories.json'
 
@@ -67,13 +68,6 @@ class CategoryInstaller:
         raise RuntimeError('CategoryInstaller: Could not find folder containing default categories')
 
     @staticmethod
-    def _get_home_dir():
-        """
-        returns the users sasview config dir
-        """
-        return os.path.join(os.path.expanduser("~"), ".sasview")
-
-    @staticmethod
     def _regenerate_model_dict(master_category_dict):
         """
         regenerates self.by_model_dict which has each model name as the key
@@ -112,8 +106,7 @@ class CategoryInstaller:
         """
         returns the user data file, eg .sasview/categories.json.json
         """
-        return os.path.join(CategoryInstaller._get_home_dir(),
-                            USER_FILE)
+        return os.path.join(get_user_dir(), USER_FILE)
 
     @staticmethod
     def get_default_file():

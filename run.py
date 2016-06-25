@@ -106,11 +106,6 @@ def prepare():
     # sasmodels on the path
     addpath(joinpath(root, '../sasmodels/'))
 
-    # Import the sasview package from root/sasview as sas.sasview.  It would
-    # be better to just store the package in src/sas/sasview.
-    import sas
-    sas.sasview = import_package('sas.sasview', joinpath(root,'sasview'))
-
     # The sas.models package Compiled Model files should be pulled in from the build directory even though
     # the source is stored in src/sas/models.
 
@@ -120,8 +115,6 @@ def prepare():
     sas.sascalc.pr.core = import_package('sas.sascalc.pr.core',
                                   joinpath(build_path, 'sas', 'sascalc', 'pr', 'core'))
 
-    # Compiled modules need to be pulled from the build directory.
-    # Some packages are not where they are needed, so load them explicitly.
     import sas.sascalc.calculator
     sas.sascalc.calculator.core = import_package('sas.sascalc.calculator.core',
                                   joinpath(build_path, 'sas', 'sascalc', 'calculator', 'core'))

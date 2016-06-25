@@ -22,12 +22,13 @@ import warnings
 import re
 warnings.simplefilter("ignore")
 import logging
-import httplib
 import traceback
 import urllib
-import urllib2
 import json
 
+from matplotlib import _pylab_helpers
+
+from sas.sasgui import get_local_config, get_app_dir, get_user_dir
 from sas.sasgui.guiframe.events import EVT_CATEGORY
 from sas.sasgui.guiframe.events import EVT_STATUS
 from sas.sasgui.guiframe.events import EVT_APPEND_BOOKMARK
@@ -46,99 +47,10 @@ from sas.sasgui.guiframe.events import EVT_NEW_BATCH
 from sas.sasgui.guiframe.CategoryManager import CategoryManager
 from sas.sascalc.dataloader.loader import Loader
 from sas.sasgui.guiframe.proxy import Connection
-from matplotlib import _pylab_helpers
+from sas.sasgui.guiframe.customdir import setup_custom_config
 
-
-def get_app_dir():
-    """
-        The application directory is the one where the default custom_config.py
-        file resides.
-
-        :returns: app_path - the path to the applicatin directory
-    """
-    # First, try the directory of the executable we are running
-    app_path = sys.path[0]
-    if os.path.isfile(app_path):
-        app_path = os.path.dirname(app_path)
-    if os.path.isfile(os.path.join(app_path, "custom_config.py")):
-        app_path = os.path.abspath(app_path)
-        logging.info("Using application path: %s", app_path)
-        return app_path
-
-    # Next, try the current working directory
-    if os.path.isfile(os.path.join(os.getcwd(), "custom_config.py")):
-        logging.info("Using application path: %s", os.getcwd())
-        return os.path.abspath(os.getcwd())
-
-    # Finally, try the directory of the sasview module
-    # TODO: gui_manager will have to know about sasview until we
-    # clean all these module variables and put them into a config class
-    # that can be passed by sasview.py.
-    logging.info(sys.executable)
-    logging.info(str(sys.argv))
-    from sas import sasview as sasview
-    app_path = os.path.dirname(sasview.__file__)
-    logging.info("Using application path: %s", app_path)
-    return app_path
-
-def get_user_directory():
-    """
-        Returns the user's home directory
-    """
-    userdir = os.path.join(os.path.expanduser("~"), ".sasview")
-    if not os.path.isdir(userdir):
-        os.makedirs(userdir)
-    return userdir
-
-def _find_local_config(file, path):
-    """
-        Find configuration file for the current application
-    """
-    config_module = None
-    fObj = None
-    try:
-        fObj, path_config, descr = imp.find_module(file, [path])
-        config_module = imp.load_module(file, fObj, path_config, descr)
-    except:
-        logging.error("Error loading %s/%s: %s" % (path, file, sys.exc_value))
-    finally:
-        if fObj is not None:
-            fObj.close()
-    logging.info("GuiManager loaded %s/%s" % (path, file))
-    return config_module
-
-# Get APP folder
-PATH_APP = get_app_dir()
-DATAPATH = PATH_APP
-
-# GUI always starts from the App folder
-#os.chdir(PATH_APP)
-# Read in the local config, which can either be with the main
-# application or in the installation directory
-config = _find_local_config('local_config', PATH_APP)
-if config is None:
-    config = _find_local_config('local_config', os.getcwd())
-    if config is None:
-        # Didn't find local config, load the default
-        import sas.sasgui.guiframe.config as config
-        logging.info("using default local_config")
-    else:
-        logging.info("found local_config in %s" % os.getcwd())
-else:
-    logging.info("found local_config in %s" % PATH_APP)
-
-from sas.sasgui.guiframe.customdir  import SetupCustom
-c_conf_dir = SetupCustom().setup_dir(PATH_APP)
-custom_config = _find_local_config('custom_config', c_conf_dir)
-if custom_config is None:
-    custom_config = _find_local_config('custom_config', os.getcwd())
-    if custom_config is None:
-        msgConfig = "Custom_config file was not imported"
-        logging.info(msgConfig)
-    else:
-        logging.info("using custom_config in %s" % os.getcwd())
-else:
-    logging.info("using custom_config from %s" % c_conf_dir)
+config = get_local_config()
+custom_config = setup_custom_config()
 
 #read some constants from config
 APPLICATION_STATE_EXTENSION = config.APPLICATION_STATE_EXTENSION
@@ -171,7 +83,7 @@ try:
     if open_folder != None and os.path.isdir(open_folder):
         DEFAULT_OPEN_FOLDER = os.path.abspath(open_folder)
     else:
-        DEFAULT_OPEN_FOLDER = PATH_APP
+        DEFAULT_OPEN_FOLDER = get_app_dir()
 except:
     DATALOADER_SHOW = True
     TOOLBAR_SHOW = True
@@ -185,7 +97,7 @@ except:
     CONTROL_HEIGHT = -1
     DEFAULT_PERSPECTIVE = None
     CLEANUP_PLOT = False
-    DEFAULT_OPEN_FOLDER = PATH_APP
+    DEFAULT_OPEN_FOLDER = get_app_dir()
 
 DEFAULT_STYLE = config.DEFAULT_STYLE
 
@@ -253,7 +165,7 @@ class ViewerFrame(PARENT_FRAME):
                                         'images', 'ball.ico')
                 if os.path.isfile(ico_file):
                     self.SetIcon(wx.Icon(ico_file, wx.BITMAP_TYPE_ICO))
-        self.path = PATH_APP
+        self.path = get_app_dir()
         self.application_name = APPLICATION_NAME
         ## Application manager
         self._input_file = None
@@ -524,9 +436,9 @@ class ViewerFrame(PARENT_FRAME):
         _, ext = os.path.splitext(name)
         try:
             fd = open(file_name, 'w')
-        except:
+        except Exception:
             # On Permission denied: IOError
-            temp_dir = get_user_directory()
+            temp_dir = get_user_dir()
             temp_file_name = os.path.join(temp_dir, name)
             fd = open(temp_file_name, 'w')
         separator = "\t"
@@ -2060,7 +1972,7 @@ class ViewerFrame(PARENT_FRAME):
 
         
         
-#         
+#         import urllib2
 #         try:
 #             req = urllib2.Request(config.__update_URL__)
 #             res = urllib2.urlopen(req)
@@ -3252,7 +3164,7 @@ class SasViewApp(wx.App):
                 app_app = app_base + '.app'
                 if basename.lower() in [app_py, app_exe, app_app, app_base]:
                     data_base = sys.argv[1]
-                    input_file = os.path.normpath(os.path.join(DATAPATH,
+                    input_file = os.path.normpath(os.path.join(get_app_dir(),
                                                                data_base))
         if input_file is None:
             return
@@ -3267,7 +3179,7 @@ class SasViewApp(wx.App):
         """
         # do it only the first time app loaded
         # delete unused model folder
-        model_folder = os.path.join(PATH_APP, path)
+        model_folder = os.path.join(get_app_dir(), path)
         if os.path.exists(model_folder) and os.path.isdir(model_folder):
             if len(os.listdir(model_folder)) > 0:
                 try:

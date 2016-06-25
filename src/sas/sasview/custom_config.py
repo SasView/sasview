@@ -1,5 +1,5 @@
 """
-    Application appearance custom configuration
+Application appearance custom configuration
 """
 DATAPANEL_WIDTH = -1
 CLEANUP_PLOT = False

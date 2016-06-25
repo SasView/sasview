@@ -36,7 +36,7 @@ build_path = os.path.join(root, 'build', 'lib.'+platform)
 #build_path = os.path.join(root, 'sasview-install', 'Lib', 'site-packages')
 sys.path.insert(0, build_path)
 
-import local_config
+from sas.sasview import local_config
 from installer_generator import generate_installer
 
 import matplotlib
@@ -173,40 +173,32 @@ class Target:
 #
 path = os.getcwd()
 
-media_dir = os.path.join(path, "media")
-images_dir = os.path.join(path, "images")
-test_dir = os.path.join(path, "test")
-test_1d_dir = os.path.join(path, "test\\1d_data")
-test_2d_dir = os.path.join(path, "test\\2d_data")
-test_save_dir = os.path.join(path, "test\\save_states")
-test_upcoming_dir = os.path.join(path, "test\\upcoming_formats")
-
 matplotlibdatadir = matplotlib.get_data_path()
 matplotlibdata = findall(matplotlibdatadir)
 
 site_loc = get_python_lib()
 opencl_include_dir = os.path.join(site_loc, "pyopencl", "cl")
 
-data_files = []
+DATA_FILES = []
 
 if tinycc:
-    data_files += tinycc.data_files()
+    DATA_FILES += tinycc.data_files()
 
 # Copying SLD data
 import periodictable
-data_files += periodictable.data_files()
+DATA_FILES += periodictable.data_files()
 
-import sas.sasgui.perspectives.fitting as fitting
-data_files += fitting.data_files()
+from sas.sasgui.perspectives import fitting
+DATA_FILES += fitting.data_files()
 
-import sas.sasgui.perspectives.calculator as calculator
-data_files += calculator.data_files()
+from sas.sasgui.perspectives import calculator
+DATA_FILES += calculator.data_files()
 
-import sas.sasgui.perspectives.invariant as invariant
-data_files += invariant.data_files()
+from sas.sasgui.perspectives import invariant
+DATA_FILES += invariant.data_files()
 
-import sas.sasgui.guiframe as guiframe
-data_files += guiframe.data_files()
+from sas.sasgui import guiframe
+DATA_FILES += guiframe.data_files()
 
 # precompile sas models into the sasview build path; doesn't matter too much
 # where it is so long as it is a place that will get cleaned up afterwards.
@@ -216,68 +208,74 @@ compiled_dlls = sasmodels.core.precompile_dlls(dll_path, dtype='double')
 
 # include the compiled models as data; coordinate the target path for the
 # data with installer_generator.py
-data_files.append(('compiled_models', compiled_dlls))
+DATA_FILES.append(('compiled_models', compiled_dlls))
 
 import sasmodels
-data_files += sasmodels.data_files()
+DATA_FILES += sasmodels.data_files()
 
 for f in matplotlibdata:
     dirname = os.path.join('mpl-data', f[len(matplotlibdatadir)+1:])
-    data_files.append((os.path.split(dirname)[0], [f]))
+    DATA_FILES.append((os.path.split(dirname)[0], [f]))
 
 # Copy the settings file for the sas.dataloader file extension associations
-import sas.sascalc.dataloader.readers
-f = os.path.join(sas.sascalc.dataloader.readers.get_data_path(), 'defaults.json')
-if os.path.isfile(f):
-    data_files.append(('.', [f]))
-f = 'custom_config.py'
-if os.path.isfile(f):
-    data_files.append(('.', [f]))
-    data_files.append(('config', [f]))
-f = 'local_config.py'
-if os.path.isfile(f):
-    data_files.append(('.', [f]))
+from sas.sascalc.dataloader import readers
+reader_config = os.path.join(readers.get_data_path(), 'defaults.json')
+if os.path.isfile(reader_config):
+    DATA_FILES.append(('.', [reader_config]))
 
-f = 'default_categories.json'
-if os.path.isfile(f):
-    data_files.append(('.', [f]))
+# Copy the config files
+sasview_path = os.path.join('..','src','sas','sasview')
+custom_config_file = os.path.join(sasview_path, 'custom_config.py')
+local_config_file = os.path.join(sasview_path, 'local_config.py')
+DATA_FILES.append(('.', [custom_config_file]))
+DATA_FILES.append(('config', [custom_config_file]))
+DATA_FILES.append(('.', [local_config_file]))
+
+# default_categories.json is beside the config files
+category_config = os.path.join(os.path.dirname(local_config_file),
+                               'default_categories.json')
+if os.path.isfile(category_config):
+    DATA_FILES.append(('.', [category_config]))
     
 if os.path.isfile("BUILD_NUMBER"):
-    data_files.append(('.', ["BUILD_NUMBER"]))
+    DATA_FILES.append(('.', ["BUILD_NUMBER"]))
+
+images_dir = local_config.icon_path
+media_dir = local_config.media_path
+images_dir = local_config.icon_path
+test_dir = local_config.test_path
+test_1d_dir = os.path.join(test_dir, "1d_data")
+test_2d_dir = os.path.join(test_dir, "2d_data")
+test_save_dir = os.path.join(test_dir, "save_states")
+test_upcoming_dir = os.path.join(test_dir, "upcoming_formats")
 
 # Copying the images directory to the distribution directory.
 for f in findall(images_dir):
-    if not ".svn" in f:
-        data_files.append(("images", [f]))
+    DATA_FILES.append(("images", [f]))
 
 # Copying the HTML help docs
 for f in findall(media_dir):
-    if not ".svn" in f:
-        data_files.append(("media", [f]))
+    DATA_FILES.append(("media", [f]))
 
 # Copying the sample data user data
 for f in findall(test_1d_dir):
-    if not ".svn" in f:
-        data_files.append(("test\\1d_data", [f]))
+    DATA_FILES.append(("test\\1d_data", [f]))
 
 # Copying the sample data user data
 for f in findall(test_2d_dir):
-    if not ".svn" in f:
-        data_files.append(("test\\2d_data", [f]))
+    DATA_FILES.append(("test\\2d_data", [f]))
 
 # Copying the sample data user data
 for f in findall(test_save_dir):
-    if not ".svn" in f:
-        data_files.append(("test\\save_states", [f]))
+    DATA_FILES.append(("test\\save_states", [f]))
 
 # Copying the sample data user data
 for f in findall(test_upcoming_dir):
-    if not ".svn" in f:
-        data_files.append(("test\\upcoming_formats", [f]))
+    DATA_FILES.append(("test\\upcoming_formats", [f]))
 
 # Copying opencl include files
 for f in findall(opencl_include_dir):
-    data_files.append(("includes\\pyopencl",[f]))
+    DATA_FILES.append(("includes\\pyopencl", [f]))
 
 # See if the documentation has been built, and if so include it.
 doc_path = os.path.join(build_path, "doc")
@@ -285,13 +283,13 @@ if os.path.exists(doc_path):
     for dirpath, dirnames, filenames in os.walk(doc_path):
         for filename in filenames:
             sub_dir = os.path.join("doc", os.path.relpath(dirpath, doc_path))
-            data_files.append((sub_dir, [os.path.join(dirpath, filename)]))
+            DATA_FILES.append((sub_dir, [os.path.join(dirpath, filename)]))
 else:
     raise Exception("You must first build the documentation before creating an installer.")
 
 if msvcrtdll_data_files is not None:
     # install the MSVC 9 runtime dll's into the application folder
-    data_files.append(msvcrtdll_data_files)
+    DATA_FILES.append(msvcrtdll_data_files)
 
 # NOTE:
 #  need an empty __init__.py in site-packages/numpy/distutils/tests and site-packages/mpl_toolkits
@@ -343,8 +341,8 @@ dll_excludes = [
 
 target_wx_client = Target(
     description = 'SasView',
-    script = 'sasview.py',
-    icon_resources = [(1, os.path.join(images_dir, "ball.ico"))],
+    script = 'startup.py',
+    icon_resources = [(1, local_config.SetupIconFile_win)],
     other_resources = [(24, 1, manifest)],
     dest_base = "SasView"
     )
@@ -371,5 +369,5 @@ setup(
             "bundle_files": bundle_option,
             },
     },
-    data_files=data_files,
+    data_files=DATA_FILES,
 )

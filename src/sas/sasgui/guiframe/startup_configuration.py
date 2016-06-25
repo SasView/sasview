@@ -8,15 +8,16 @@
 #
 #copyright 2009, University of Tennessee
 ################################################################################
-import wx
 import os
-import sys
 import copy
-#import sas.sasgui.guiframe.gui_manager as gui
-from sas.sasgui.guiframe.events import StatusEvent  
+
+import wx
+
+from sas.sasgui.customdir import get_custom_config_path
 from sas.sasgui.guiframe.gui_style import GUIFRAME
 from sas.sasgui.guiframe import gui_manager as CURRENT
-from sas.sasgui.guiframe.customdir  import SetupCustom
+
+
 # default configuration
 DEFAULT_STRINGS = {'GUIFRAME_WIDTH':-1,
                    'GUIFRAME_HEIGHT':-1,
@@ -63,7 +64,6 @@ class StartupConfiguration(wx.Dialog):
                            size=(PANEL_WIDTH, PANEL_HEIGHT))
         # parent
         self.parent = parent
-        self.path = SetupCustom().find_dir()
         self._gui = gui
         # font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
@@ -188,27 +188,14 @@ class StartupConfiguration(wx.Dialog):
     
     def write_custom_config(self):
         """
-            Write custom configuration
+        Write custom configuration
         """
-        fname = os.path.join(self.path, 'custom_config.py')
-        self.write_string(fname, self.return_string)
-
-    def write_string(self, fname, strings):
-        """
-        Write and Save file
-        """
-        
-        try:
-            out_f =  open(fname,'w')
-        except :
-            raise  #RuntimeError, "Error: Can not change the configuration..."
-        out_f.write("#Application appearance custom configuration\n" )
-        for key, item in strings.iteritems():
-            if (key == 'DEFAULT_PERSPECTIVE') or \
-                (key == 'DEFAULT_OPEN_FOLDER' and item != None):
-                out_f.write("%s = \"%s\"\n" % (key,str(item)))
-            else:
-                out_f.write("%s = %s\n" % (key,str(item)))
-    
-        out_f.close() 
-        
+        path = get_custom_config_path()
+        with open(path, 'w') as out_f:
+            out_f.write("#Application appearance custom configuration\n" )
+            for key, item in self.return_string.iteritems():
+                if (key == 'DEFAULT_PERSPECTIVE') or \
+                    (key == 'DEFAULT_OPEN_FOLDER' and item != None):
+                    out_f.write("%s = \"%s\"\n" % (key,str(item)))
+                else:
+                    out_f.write("%s = %s\n" % (key,str(item)))
