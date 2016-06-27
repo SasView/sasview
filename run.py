@@ -125,5 +125,5 @@ def prepare():
 
 if __name__ == "__main__":
     prepare()
-    from sas.sasview.sasview import run
-    run()
+    from sas.sasview.sasview import run_gui
+    run_gui()

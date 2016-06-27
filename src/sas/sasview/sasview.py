@@ -15,12 +15,10 @@ import sys
 import logging
 import traceback
 
-log_file = os.path.join(os.path.expanduser("~"), 'sasview.log')
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s %(levelname)s %(message)s',
-                    filename=log_file,
-)
-logging.captureWarnings(True)
+
+reload(sys)
+sys.setdefaultencoding("iso-8859-1")
+
 
 class StreamToLogger(object):
     """
@@ -40,58 +38,6 @@ class StreamToLogger(object):
         for line in buf.rstrip().splitlines():
             self.logger.log(self.log_level, line.rstrip())
 
-stderr_logger = logging.getLogger('STDERR')
-sl = StreamToLogger(stderr_logger, logging.ERROR)
-sys.stderr = sl
-
-# Log the start of the session
-logging.info(" --- SasView session started ---")
-
-# Log the python version
-logging.info("Python: %s" % sys.version)
-
-# Allow the dynamic selection of wxPython via an environment variable, when devs
-# who have multiple versions of the module installed want to pick between them.
-# This variable does not have to be set of course, and through normal usage will
-# probably not be, but this can make things a little easier when upgrading to a
-# new version of wx.
-WX_ENV_VAR = "SASVIEW_WX_VERSION"
-if WX_ENV_VAR in os.environ:
-    logging.info("You have set the %s environment variable to %s." % \
-                 (WX_ENV_VAR, os.environ[WX_ENV_VAR]))
-    import wxversion
-    if wxversion.checkInstalled(os.environ[WX_ENV_VAR]):
-        logging.info("Version %s of wxPython is installed, so using that version." % os.environ[WX_ENV_VAR])
-        wxversion.select(os.environ[WX_ENV_VAR])
-    else:
-        logging.error("Version %s of wxPython is not installed, so using default version." % os.environ[WX_ENV_VAR])
-else:
-    logging.info("You have not set the %s environment variable, so using default version of wxPython." % WX_ENV_VAR)
-
-import wx
-
-try:
-    logging.info("Wx version: %s" % wx.__version__)
-except:
-    logging.error("Wx version: error reading version")
-
-from . import wxcruft
-wxcruft.call_later_fix()
-#wxcruft.trace_new_id()
-#Always use private .matplotlib setup to avoid conflicts with other
-#uses of matplotlib
-
-import sas.sasgui
-mplconfigdir = os.path.join(sas.sasgui.get_user_dir(), '.matplotlib')
-if not os.path.exists(mplconfigdir):
-    os.mkdir(mplconfigdir)
-os.environ['MPLCONFIGDIR'] = mplconfigdir
-reload(sys)
-sys.setdefaultencoding("iso-8859-1")
-
-
-from sas.sasgui.guiframe import gui_manager
-from .welcome_panel import WelcomePanel
 PLUGIN_MODEL_DIR = 'plugin_models'
 APP_NAME = 'SasView'
 
@@ -102,8 +48,8 @@ class SasView():
     def __init__(self):
         """
         """
-        #from gui_manager import ViewApp
-        self.gui = gui_manager.SasViewApp(0)
+        from sas.sasgui.guiframe.gui_manager import SasViewApp
+        self.gui = SasViewApp(0)
         # Set the application manager for the GUI
         self.gui.set_manager(self)
         # Add perspectives to the basic application
@@ -115,7 +61,7 @@ class SasView():
 
         # Fitting perspective
         try:
-            import sas.sasgui.perspectives.fitting as module    
+            import sas.sasgui.perspectives.fitting as module
             fitting_plug = module.Plugin()
             self.gui.add_perspective(fitting_plug)
         except Exception:
@@ -141,7 +87,7 @@ class SasView():
                           APP_NAME)
             logging.error(traceback.format_exc())
 
-        #Calculator perspective   
+        #Calculator perspective
         try:
             import sas.sasgui.perspectives.calculator as module
             calculator_plug = module.Plugin()
@@ -153,6 +99,7 @@ class SasView():
 
 
         # Add welcome page
+        from .welcome_panel import WelcomePanel
         self.gui.set_welcome_panel(WelcomePanel)
 
         # Build the GUI
@@ -163,18 +110,92 @@ class SasView():
         self.gui.MainLoop()
 
 
-def run():
+def setup_logging():
+    log_file = os.path.join(os.path.expanduser("~"), 'sasview.log')
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s %(levelname)s %(message)s',
+                        filename=log_file,
+                        )
+    logging.captureWarnings(True)
+
+    stderr_logger = logging.getLogger('STDERR')
+    sl = StreamToLogger(stderr_logger, logging.ERROR)
+    sys.stderr = sl
+
+    # Log the start of the session
+    logging.info(" --- SasView session started ---")
+
+    # Log the python version
+    logging.info("Python: %s" % sys.version)
+
+
+def setup_wx():
+    # Allow the dynamic selection of wxPython via an environment variable, when devs
+    # who have multiple versions of the module installed want to pick between them.
+    # This variable does not have to be set of course, and through normal usage will
+    # probably not be, but this can make things a little easier when upgrading to a
+    # new version of wx.
+    WX_ENV_VAR = "SASVIEW_WX_VERSION"
+    if WX_ENV_VAR in os.environ:
+        logging.info("You have set the %s environment variable to %s." % \
+                     (WX_ENV_VAR, os.environ[WX_ENV_VAR]))
+        import wxversion
+        if wxversion.checkInstalled(os.environ[WX_ENV_VAR]):
+            logging.info("Version %s of wxPython is installed, so using that version." % os.environ[WX_ENV_VAR])
+            wxversion.select(os.environ[WX_ENV_VAR])
+        else:
+            logging.error("Version %s of wxPython is not installed, so using default version." % os.environ[WX_ENV_VAR])
+    else:
+        logging.info("You have not set the %s environment variable, so using default version of wxPython." % WX_ENV_VAR)
+
+    import wx
+
+    try:
+        logging.info("Wx version: %s" % wx.__version__)
+    except:
+        logging.error("Wx version: error reading version")
+
+    from . import wxcruft
+    wxcruft.call_later_fix()
+    #wxcruft.trace_new_id()
+    #Always use private .matplotlib setup to avoid conflicts with other
+    #uses of matplotlib
+
+
+def setup_mpl():
+    import sas.sasgui
+    mplconfigdir = os.path.join(sas.sasgui.get_user_dir(), '.matplotlib')
+    if not os.path.exists(mplconfigdir):
+        os.mkdir(mplconfigdir)
+    os.environ['MPLCONFIGDIR'] = mplconfigdir
+    # Set backend to WXAgg; this overrides matplotlibrc, but shouldn't override
+    # mpl.use().  Note: Don't import matplotlib here since the script that
+    # we are running may not actually need it; also, putting as little on the
+    # path as we can
+    os.environ['MPLBACKEND'] = 'WXAgg'
+
+
+def run_gui():
     """
     __main__ method for loading and running SasView
     """
     from multiprocessing import freeze_support
     freeze_support()
-    if len(sys.argv) > 1:
-        ## Run sasview as an interactive python interpreter
-        if sys.argv[1] == "-i":
-            sys.argv = ["ipython", "--pylab"]
-            from IPython import start_ipython
-            sys.exit(start_ipython())
+    setup_logging()
+    setup_wx()
+    setup_mpl()
+    SasView()
+
+
+def run_cli():
+    setup_mpl()
+    if len(sys.argv) == 1:
+        # Run sasview as an interactive python interpreter
+        sys.argv = ["ipython", "--pylab"]
+        from IPython import start_ipython
+        sys.exit(start_ipython())
+    else:
+        # Run sasview as a python script interpreter
         thing_to_run = sys.argv[1]
         sys.argv = sys.argv[1:]
         import runpy
@@ -182,9 +203,7 @@ def run():
             runpy.run_path(thing_to_run, run_name="__main__")
         else:
             runpy.run_module(thing_to_run, run_name="__main__")
-    else:
-        SasView()
 
 if __name__ == "__main__":
-    run()
+    run_gui()
 

@@ -32,9 +32,9 @@ if os.path.abspath(os.path.dirname(__file__)) != os.path.abspath(os.getcwd()):
     raise RuntimeError("Must run setup_exe from the sasview directory")
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 platform = '%s-%s'%(get_platform(), sys.version[:3])
-build_path = os.path.join(root, 'build', 'lib.'+platform)
-#build_path = os.path.join(root, 'sasview-install', 'Lib', 'site-packages')
+build_path = os.path.join(root, 'sasview-install', 'Lib', 'site-packages')
 sys.path.insert(0, build_path)
+doc_path = os.path.join(root, 'build', 'lib.'+platform, 'doc')
 
 from sas.sasview import local_config
 from installer_generator import generate_installer
@@ -278,7 +278,6 @@ for f in findall(opencl_include_dir):
     DATA_FILES.append(("includes\\pyopencl", [f]))
 
 # See if the documentation has been built, and if so include it.
-doc_path = os.path.join(build_path, "doc")
 if os.path.exists(doc_path):
     for dirpath, dirnames, filenames in os.walk(doc_path):
         for filename in filenames:
@@ -313,7 +312,10 @@ packages.extend([
     'reportlab.platypus',
     ])
 packages.append('periodictable.core') # not found automatically
-#packages.append('IPython')
+# For an interactive interpreter, SasViewCom
+packages.extend(['IPython','pyreadline','pyreadline.unicode_helper'])
+
+# individual models
 includes = ['site', 'lxml._elementpath', 'lxml.etree']
 
 if tinycc:
@@ -328,7 +330,8 @@ dll_excludes = [
     'libgdk_pixbuf-2.0-0.dll', 'libgobject-2.0-0.dll', 'libgdk-win32-2.0-0.dll',
     'tcl84.dll', 'tk84.dll', 'QtGui4.dll', 'QtCore4.dll',
     # numpy 1.8 openmp bindings (still seems to use all the cores without them)
-    'libiomp5md.dll', 'libifcoremd.dll', 'libmmd.dll', 'svml_dispmd.dll','libifportMD.dll',
+    # ... but we seem to need them when building from anaconda, so don't exclude ...
+    #'libiomp5md.dll', 'libifcoremd.dll', 'libmmd.dll', 'svml_dispmd.dll','libifportMD.dll',
     # microsoft C runtime (not allowed to ship with the app; need to ship vcredist
     'msvcp90.dll',
     # 32-bit windows console piping
@@ -339,13 +342,31 @@ dll_excludes = [
     'OpenCL.dll'
     ]
 
+# extra dlls not found automatically
+python_root = os.path.dirname(os.path.abspath(sys.executable))
+dll_path = os.path.join(python_root, 'Library', 'bin')
+# the following are found already: 'mkl_intel_thread', 'libmmd', 'libifcoremd'
+dll_includes = ['mkl_core', 'mkl_def', 'libiomp5md']
+dll_includes = [os.path.join(dll_path, dll+'.dll') for dll in dll_includes]
+dll_includes = [dll for dll in dll_includes if os.path.exists(dll)]
+if dll_includes:
+   DATA_FILES.append(('.', dll_includes))
+
 target_wx_client = Target(
     description = 'SasView',
-    script = 'startup.py',
+    script = 'sasview_gui.py',
     icon_resources = [(1, local_config.SetupIconFile_win)],
     other_resources = [(24, 1, manifest)],
     dest_base = "SasView"
     )
+
+target_console_client = Target(
+    description = 'SasView console',
+    script = 'sasview_console.py',
+    icon_resources = [(1, local_config.SetupIconFile_win)],
+    other_resources = [(24, 1, manifest)],
+    dest_base = "SasViewCom"
+)
 
 bundle_option = 2
 if is_64bits:
@@ -357,7 +378,7 @@ generate_installer()
 
 setup(
     windows=[target_wx_client],
-    console=[],
+    console=[target_console_client],
     options={
         'py2exe': {
             'dll_excludes': dll_excludes,

@@ -174,7 +174,7 @@ if libxml_path == None:
 from sas.sasview import __version__ as VERSION
 APPNAME = "SasView "+VERSION
 DMGNAME = "SasView-"+VERSION+"-MacOSX"
-APP = ['sasview.py']
+APP = ['sasview_gui.py']
 
 EXCLUDES = ['PyQt4', 'sip', 'QtGui']
 

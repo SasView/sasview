@@ -55,15 +55,13 @@ if os.path.isdir(sas_dir):
     #         if f in plugin_model_list:
     #             file_path =  os.path.join(f_path, f)
     #             os.remove(file_path)
-    if os.path.exists(SASVIEW_BUILD):
-        print "Removing existing build directory", SASVIEW_BUILD, "for a clean build"
-        shutil.rmtree(SASVIEW_BUILD)
+
+if os.path.exists(SASVIEW_BUILD):
+    print "Removing existing build directory", SASVIEW_BUILD, "for a clean build"
+    shutil.rmtree(SASVIEW_BUILD)
                     
 # 'sys.maxsize' and 64bit: Not supported for python2.5
-is_64bits = False
-if sys.version_info >= (2, 6):
-    is_64bits = sys.maxsize > 2**32
-    
+is_64bits = sys.maxsize > 2**32
 enable_openmp = False
 
 if sys.platform =='darwin':
@@ -337,11 +335,11 @@ setup(
     install_requires = required,
     zip_safe = False,
     entry_points = {
-                    'console_scripts':[
-                                       "sasview = sas.sasview.sasview:run",
-                                       ]
-                    },
-    cmdclass = {'build_ext': build_ext_subclass,
-                'docs': BuildSphinxCommand,
-                'disable_openmp': DisableOpenMPCommand}
+        'console_scripts': ["sasview = sas.sasview.sasview:run_cli"]
+        },
+    cmdclass = {
+        'build_ext': build_ext_subclass,
+        'docs': BuildSphinxCommand,
+        'disable_openmp': DisableOpenMPCommand,
+        }
     )   
