@@ -1450,7 +1450,7 @@ class Model(Model1DPlugin):
         return upper_name
 
     def _set_dispersion(self):
-        self.dispersion = {}
+        self.dispersion = collections.OrderedDict()
         ##set dispersion only from p_model
         for name , value in self.p_model1.dispersion.iteritems():
             #if name.lower() not in self.p_model1.orientation_params:
