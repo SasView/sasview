@@ -201,8 +201,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## flag to determine if state has change
         self.state_change = False
         ## save customized array
-        self.values = []
-        self.weights = []
+        self.values = {}   # type: Dict[str, List[float, ...]]
+        self.weights = {}   # type: Dict[str, List[float, ...]]
         ## retrieve saved state
         self.number_saved_state = 0
         ## dictionary of saved state
@@ -2587,7 +2587,8 @@ class BasicPage(ScrolledPanel, PanelBase):
             # draw
             self._draw_model()
             self.Refresh()
-        except:
+        except Exception:
+            logging.error(traceback.format_exc())
             # Error msg
             msg = "Error occurred:"
             msg += " Could not select the distribution function..."
@@ -2679,13 +2680,14 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         # Try to delete values and weight of the names array dic if exists
         try:
-            del self.values[name]
-            del self.weights[name]
-            # delete all other dic
-            del self.state.values[name]
-            del self.state.weights[name]
-            del self.model._persistency_dict[name.split('.')[0]]
-            del self.state.model._persistency_dict[name.split('.')[0]]
+            if name in self.values:
+                del self.values[name]
+                del self.weights[name]
+                # delete all other dic
+                del self.state.values[name]
+                del self.state.weights[name]
+                del self.model._persistency_dict[name.split('.')[0]]
+                del self.state.model._persistency_dict[name.split('.')[0]]
         except Exception:
             logging.error(traceback.format_exc())
 
