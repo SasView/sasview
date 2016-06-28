@@ -1,23 +1,43 @@
+import sys
 import os
+from os.path import exists, expanduser, dirname, realpath, join as joinpath
+
+def dirn(path, n):
+    path = realpath(path)
+    for _ in range(n):
+        path = dirname(path)
+    return path
 
 # Set up config directories
 def make_user_folder():
-    path = os.path.join(os.path.expanduser("~"),'.sasview')
-    if not os.path.exists(path):
+    path = joinpath(expanduser("~"),'.sasview')
+    if not exists(path):
         os.mkdir(path)
     return path
 
+
 def find_app_folder():
-    # If the directory containing sasview.py exists, then we are not running
-    # frozen and the current path is the app path.
-    root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-    path = os.path.join(root, 'sasview')
-    if os.path.exists(path):
+    # We are starting out with the following info:
+    #     __file__ = .../sas/sasgui/__init__.pyc
+    # Check if the sister path .../sas/sasview exists, and use it as the
+    # app directory.  This will only be the case if the app is not frozen.
+    path = joinpath(dirn(__file__, 2), 'sasview')
+    if exists(path):
         return path
 
-    # If we are running frozen, then skip from:
-    #    library.zip/sas/sasview
-    path = os.path.dirname(os.path.dirname(root))
+    # If we are running frozen, then root is a parent directory
+    if sys.platform == 'darwin':
+        # Here is the path to the file on the mac:
+        #     .../Sasview.app/Contents/Resources/lib/python2.7/site-packages.zip/sas/sasgui/__init__.pyc
+        # We want the path to the Resources directory.
+        path = dirn(__file__, 6)
+    elif os.name == 'nt':
+        # Here is the path to the file on windows:
+        #     ../Sasview/library.zip/sas/sasgui/__init__.pyc
+        # We want the path to the Sasview directory.
+        path = dirn(__file__, 4)
+    else:
+        raise RuntimeError("Couldn't find the app directory")
     return path
 
 USER_FOLDER = make_user_folder()

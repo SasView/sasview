@@ -13,23 +13,26 @@ NOTES:
 from setuptools import setup
 import os
 import string
-import pytz
 import sys
-import platform
 #Extending recursion limit
 sys.setrecursionlimit(10000)
 
+import macholib_patch
+
 from distutils.util import get_platform
+from distutils.filelist import findall
+from distutils.sysconfig import get_python_lib
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 platform = '%s-%s'%(get_platform(),sys.version[:3])
-build_path = os.path.join(root, 'build','lib.'+platform)
-sys.path.insert(0, build_path)
-print "BUILDING PATH INSIDE", build_path
+doc_path = os.path.join(root, 'build', 'lib.'+platform, 'doc')
+env = os.path.join(root, 'sasview-install', 'lib', 'python2.7', 'site-packages')
+#sys.path.insert(0, env)
+
+print "BUILDING PATH INSIDE", env
 
 from sas.sasview import local_config
 
 ICON = local_config.SetupIconFile_mac
-EXTENSIONS_LIST = []
 RESOURCES_FILES = []
 DATA_FILES = []
 
@@ -70,7 +73,6 @@ if os.path.isfile("BUILD_NUMBER"):
 
 images_dir = local_config.icon_path
 media_dir = local_config.media_path
-images_dir = local_config.icon_path
 test_dir = local_config.test_path
 test_1d_dir = os.path.join(test_dir, "1d_data")
 test_2d_dir = os.path.join(test_dir, "2d_data")
@@ -87,26 +89,27 @@ for f in findall(media_dir):
 
 # Copying the sample data user data
 for f in findall(test_1d_dir):
-    DATA_FILES.append(("test\\1d_data", [f]))
+    DATA_FILES.append((os.path.join("test","1d_data"), [f]))
 
 # Copying the sample data user data
 for f in findall(test_2d_dir):
-    DATA_FILES.append(("test\\2d_data", [f]))
+    DATA_FILES.append((os.path.join("test","2d_data"), [f]))
 
 # Copying the sample data user data
 for f in findall(test_save_dir):
-    DATA_FILES.append(("test\\save_states", [f]))
+    DATA_FILES.append((os.path.join("test","save_states"), [f]))
 
 # Copying the sample data user data
 for f in findall(test_upcoming_dir):
-    DATA_FILES.append(("test\\upcoming_formats", [f]))
+    DATA_FILES.append((os.path.join("test","upcoming_formats"), [f]))
 
 # Copying opencl include files
+site_loc = get_python_lib()
+opencl_include_dir = os.path.join(site_loc, "pyopencl", "cl")
 for f in findall(opencl_include_dir):
-    DATA_FILES.append(("includes\\pyopencl", [f]))
+    DATA_FILES.append((os.path.join("includes","pyopencl"), [f]))
 
 # See if the documentation has been built, and if so include it.
-doc_path = os.path.join(build_path, "doc")
 print doc_path
 if os.path.exists(doc_path):
     for dirpath, dirnames, filenames in os.walk(doc_path):

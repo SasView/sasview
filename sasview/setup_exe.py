@@ -32,9 +32,9 @@ if os.path.abspath(os.path.dirname(__file__)) != os.path.abspath(os.getcwd()):
     raise RuntimeError("Must run setup_exe from the sasview directory")
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 platform = '%s-%s'%(get_platform(), sys.version[:3])
+doc_path = os.path.join(root, 'build', 'lib.'+platform, 'doc')
 build_path = os.path.join(root, 'sasview-install', 'Lib', 'site-packages')
 sys.path.insert(0, build_path)
-doc_path = os.path.join(root, 'build', 'lib.'+platform, 'doc')
 
 from sas.sasview import local_config
 from installer_generator import generate_installer
@@ -176,9 +176,6 @@ path = os.getcwd()
 matplotlibdatadir = matplotlib.get_data_path()
 matplotlibdata = findall(matplotlibdatadir)
 
-site_loc = get_python_lib()
-opencl_include_dir = os.path.join(site_loc, "pyopencl", "cl")
-
 DATA_FILES = []
 
 if tinycc:
@@ -242,7 +239,6 @@ if os.path.isfile("BUILD_NUMBER"):
 
 images_dir = local_config.icon_path
 media_dir = local_config.media_path
-images_dir = local_config.icon_path
 test_dir = local_config.test_path
 test_1d_dir = os.path.join(test_dir, "1d_data")
 test_2d_dir = os.path.join(test_dir, "2d_data")
@@ -259,23 +255,25 @@ for f in findall(media_dir):
 
 # Copying the sample data user data
 for f in findall(test_1d_dir):
-    DATA_FILES.append(("test\\1d_data", [f]))
+    DATA_FILES.append((os.path.join("test","1d_data"), [f]))
 
 # Copying the sample data user data
 for f in findall(test_2d_dir):
-    DATA_FILES.append(("test\\2d_data", [f]))
+    DATA_FILES.append((os.path.join("test","2d_data"), [f]))
 
 # Copying the sample data user data
 for f in findall(test_save_dir):
-    DATA_FILES.append(("test\\save_states", [f]))
+    DATA_FILES.append((os.path.join("test","save_states"), [f]))
 
 # Copying the sample data user data
 for f in findall(test_upcoming_dir):
-    DATA_FILES.append(("test\\upcoming_formats", [f]))
+    DATA_FILES.append((os.path.join("test","upcoming_formats"), [f]))
 
 # Copying opencl include files
+site_loc = get_python_lib()
+opencl_include_dir = os.path.join(site_loc, "pyopencl", "cl")
 for f in findall(opencl_include_dir):
-    DATA_FILES.append(("includes\\pyopencl", [f]))
+    DATA_FILES.append((os.path.join("includes","pyopencl"), [f]))
 
 # See if the documentation has been built, and if so include it.
 if os.path.exists(doc_path):
