@@ -140,18 +140,18 @@ class GuiManagerTest(unittest.TestCase):
 
         webbrowser.open.assert_called_with("https://github.com/SasView/sasview/releases")
 
-        # 4. version > LocalConfig.__version__ and standalone
-        version_info = {u'version' : u'999.0.0'}
-        spy_status_update = QtSignalSpy(self.manager, self.manager.communicate.statusBarUpdateSignal)
-        webbrowser.open = MagicMock()
+        ## 4. version > LocalConfig.__version__ and standalone
+        #version_info = {u'version' : u'999.0.0'}
+        #spy_status_update = QtSignalSpy(self.manager, self.manager.communicate.statusBarUpdateSignal)
+        #webbrowser.open = MagicMock()
 
-        self.manager.processVersion(version_info, standalone=True)
+        #self.manager.processVersion(version_info, standalone=True)
 
-        self.assertEqual(spy_status_update.count(), 1)
-        message = 'See the help menu to download it'
-        self.assertIn(message, str(spy_status_update.signal(index=0)))
+        #self.assertEqual(spy_status_update.count(), 1)
+        #message = 'See the help menu to download it'
+        #self.assertIn(message, str(spy_status_update.signal(index=0)))
 
-        self.assertFalse(webbrowser.open.called)
+        #self.assertFalse(webbrowser.open.called)
 
         # 5. couldn't load version
         version_info = {}
@@ -228,7 +228,11 @@ class GuiManagerTest(unittest.TestCase):
         """
         Menu Help/Acknowledge
         """
-        pass
+        self.manager.actionAcknowledge()
+
+        # Check if the window is actually opened.
+        self.assertTrue(self.manager.ackWidget.isVisible())
+        self.assertIn("developers@sasview.org", self.manager.ackWidget.label.text())
 
     def testActionCheck_for_update(self):
         """

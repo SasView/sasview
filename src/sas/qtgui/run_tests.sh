@@ -4,4 +4,5 @@ python -m UnitTesting.DataExplorerTest
 python -m UnitTesting.GuiManagerTest
 python -m UnitTesting.MainWindowTest
 python -m UnitTesting.GuiUtilsTest
-
+python -m UnitTesting.AboutBoxTest
+python -m UnitTesting.DroppableDataLoadWidgetTest

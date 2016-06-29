@@ -1,8 +1,11 @@
 import sys
 import unittest
+import webbrowser
+import urlparse
 
 from PyQt4 import QtCore
 from PyQt4 import QtGui
+from mock import MagicMock
 
 # SV imports
 from sas.sascalc.dataloader.loader import Loader
@@ -54,7 +57,8 @@ class GuiUtilsTest(unittest.TestCase):
             'fileDataReceivedSignal',
             'statusBarUpdateSignal',
             'updatePerspectiveWithDataSignal',
-            'updateModelFromPerspectiveSignal'
+            'updateModelFromPerspectiveSignal',
+            'plotRequestedSignal'
         ]
 
         # Assure all signals are defined.
@@ -159,6 +163,31 @@ class GuiUtilsTest(unittest.TestCase):
         self.assertIn(p_file,   item.child(3).text())
         self.assertIn("Process",item.child(4).text())
 
+    def testOpenLink(self):
+        """
+        Opening a link in the external browser
+        """
+        good_url1 = r"http://test.test.com"
+        good_url2 = r"mailto:test@mail.com"
+        good_url3 = r"https://127.0.0.1"
+
+        bad_url1 = ""
+        bad_url2 = QtGui.QStandardItem()
+        bad_url3 = r"poop;//**I.am.a.!bad@url"
+
+        webbrowser.open = MagicMock()
+        openLink(good_url1)
+        openLink(good_url2)
+        openLink(good_url3)
+        self.assertEqual(webbrowser.open.call_count, 3)
+
+        with self.assertRaises(AttributeError):
+            openLink(bad_url1)
+        with self.assertRaises(AttributeError):
+            openLink(bad_url2)
+        with self.assertRaises(AttributeError):
+            openLink(bad_url3)
+        pass
 
 if __name__ == "__main__":
     unittest.main()

@@ -14,22 +14,23 @@ from Plotter import Plotter
 from sas.sascalc.dataloader.loader import Loader
 from sas.sasgui.guiframe.data_manager import DataManager
 
-# UI
-from UI.TabbedFileLoadUI import DataLoadWidget
+from DroppableDataLoadWidget import DroppableDataLoadWidget
 
 # This is how to get data1/2D from the model item
 # data = [selected_items[0].child(0).data().toPyObject()]
 
-class DataExplorerWindow(DataLoadWidget):
+class DataExplorerWindow(DroppableDataLoadWidget):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
 
     def __init__(self, parent=None, guimanager=None):
-        super(DataExplorerWindow, self).__init__(parent)
+        super(DataExplorerWindow, self).__init__(parent, guimanager)
 
         # Main model for keeping loaded data
         self.model = QtGui.QStandardItemModel(self)
-        self._default_save_location = None
+
+        # Secondary model for keeping frozen data sets
+        self.theory_model = QtGui.QStandardItemModel(self)
 
         # GuiManager is the actual parent, but we needed to also pass the QMainWindow
         # in order to set the widget parentage properly.
@@ -39,15 +40,19 @@ class DataExplorerWindow(DataLoadWidget):
 
         # Connect the buttons
         self.cmdLoad.clicked.connect(self.loadFile)
-        self.cmdDelete.clicked.connect(self.deleteFile)
+        self.cmdDeleteData.clicked.connect(self.deleteFile)
+        self.cmdDeleteTheory.clicked.connect(self.deleteTheory)
+        self.cmdFreeze.clicked.connect(self.freezeTheory)
         self.cmdSendTo.clicked.connect(self.sendData)
         self.cmdNew.clicked.connect(self.newPlot)
 
         # Connect the comboboxes
         self.cbSelect.currentIndexChanged.connect(self.selectData)
 
-        # Communicator for signal definitions
-        self.communicate = self.parent.communicator()
+        #self.closeEvent.connect(self.closeEvent)
+        # self.aboutToQuit.connect(self.closeEvent)
+
+        self.communicator.fileReadSignal.connect(self.loadFromURL)
 
         # Proxy model for showing a subset of Data1D/Data2D content
         self.proxy = QtGui.QSortFilterProxyModel(self)
@@ -56,9 +61,21 @@ class DataExplorerWindow(DataLoadWidget):
         # The Data viewer is QTreeView showing the proxy model
         self.treeView.setModel(self.proxy)
 
-        # Debug view on the model
-        self.listView.setModel(self.model)
+        # Theory model view
+        #self.freezeView.setModel(self.theory_model)
 
+    def closeEvent(self, event):
+        """
+        Overwrite the close event - no close!
+        """
+        event.ignore()
+
+    def loadFromURL(self, url):
+        """
+        Threaded file load
+        """
+        load_thread = threads.deferToThread(self.readData, url)
+        load_thread.addCallback(self.loadComplete)
 
     def loadFile(self, event=None):
         """
@@ -68,15 +85,7 @@ class DataExplorerWindow(DataLoadWidget):
         path_str = self.chooseFiles()
         if not path_str:
             return
-
-        # Notify the manager of the new data available
-        self.communicate.fileReadSignal.emit(path_str)
-
-        # threaded file load
-        load_thread = threads.deferToThread(self.readData, path_str)
-        load_thread.addCallback(self.loadComplete)
-
-        return
+        self.loadFromURL(path_str)
 
     def loadFolder(self, event=None):
         """
@@ -96,11 +105,7 @@ class DataExplorerWindow(DataLoadWidget):
         # get content of dir into a list
         path_str = [os.path.join(os.path.abspath(dir), filename) for filename in os.listdir(dir)]
 
-        # threaded file load
-        load_thread = threads.deferToThread(self.readData, path_str)
-        load_thread.addCallback(self.loadComplete)
-        
-        return
+        self.loadFromURL(path_str)
 
     def deleteFile(self, event):
         """
@@ -130,6 +135,34 @@ class DataExplorerWindow(DataLoadWidget):
         # pass temporarily kept as a breakpoint anchor
         pass
 
+    def deleteTheory(self, event):
+        """
+        Delete selected rows from the theory model
+        """
+        # Assure this is indeed wanted
+        delete_msg = "This operation will delete the checked data sets and all the dependents." +\
+                     "\nDo you want to continue?"
+        reply = QtGui.QMessageBox.question(self, 'Warning', delete_msg,
+                QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+
+        if reply == QtGui.QMessageBox.No:
+            return
+
+        # Figure out which rows are checked
+        ind = -1
+        # Use 'while' so the row count is forced at every iteration
+        while ind < self.theory_model.rowCount():
+            ind += 1
+            item = self.theory_model.item(ind)
+            if item and item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
+                # Delete these rows from the model
+                self.theory_model.removeRow(ind)
+                # Decrement index since we just deleted it
+                ind -= 1
+
+        # pass temporarily kept as a breakpoint anchor
+        pass
+
     def sendData(self, event):
         """
         Send selected item data to the current perspective and set the relevant notifiers
@@ -147,6 +180,9 @@ class DataExplorerWindow(DataLoadWidget):
             item = self.model.item(index)
             if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
                 selected_items.append(item)
+
+        if len(selected_items) < 1:
+            return
 
         # Which perspective has been selected?
         if len(selected_items) > 1 and not self._perspective.allowBatch():
@@ -166,6 +202,37 @@ class DataExplorerWindow(DataLoadWidget):
 
         # Notify the GuiManager about the send request
         self._perspective.setData(data_item=data)
+
+    def freezeTheory(self, event):
+        """
+        Freeze selected theory rows.
+
+        "Freezing" means taking the plottable data from the filename item
+        and copying it to a separate top-level item.
+        """
+        import copy
+        # Figure out which _inner_ rows are checked
+        # Use 'while' so the row count is forced at every iteration
+        outer_index = -1
+        while outer_index < self.model.rowCount():
+            outer_index += 1
+            outer_item = self.model.item(outer_index)
+            if not outer_item:
+                continue
+            for inner_index in xrange(outer_item.rowCount()):
+                subitem = outer_item.child(inner_index)
+                if subitem and subitem.isCheckable() and subitem.checkState() == QtCore.Qt.Checked:
+                    # Update the main model
+                    new_item = subitem.takeRow(inner_index)
+                    #new_item = QtGui.QStandardItem(subitem)
+                    #new_item = subitem.clone()
+                    #new_item = QtGui.QStandardItem()
+                    #new_item = copy.deepcopy(subitem)
+                    #super(new_item, self).__init__()   
+                    self.model.insertRow(0, new_item)
+                    outer_index += 1
+
+        self.model.reset()
 
     def newPlot(self):
         """
@@ -237,7 +304,7 @@ class DataExplorerWindow(DataLoadWidget):
                 message = "Loading Data... " + str(basename) + "\n"
 
                 # change this to signal notification in GuiManager
-                self.communicate.statusBarUpdateSignal.emit(message)
+                self.communicator.statusBarUpdateSignal.emit(message)
 
                 output_objects = self.loader.load(p_file)
 
@@ -289,7 +356,7 @@ class DataExplorerWindow(DataLoadWidget):
         
         if any_error or error_message:
             # self.loadUpdate(output=output, message=error_message, info=info)
-            self.communicate.statusBarUpdateSignal.emit(error_message)
+            self.communicator.statusBarUpdateSignal.emit(error_message)
 
         else:
             message = "Loading Data Complete! "
@@ -298,6 +365,7 @@ class DataExplorerWindow(DataLoadWidget):
 
     def getWlist(self):
         """
+        Wildcards of files we know the format of.
         """
         # Display the Qt Load File module
         cards = self.loader.get_wildcards()
@@ -411,8 +479,8 @@ class DataExplorerWindow(DataLoadWidget):
         output_data = output[0]
         message = output[1]
         # Notify the manager of the new data available
-        self.communicate.statusBarUpdateSignal.emit(message)
-        self.communicate.fileDataReceivedSignal.emit(output_data)
+        self.communicator.statusBarUpdateSignal.emit(message)
+        self.communicator.fileDataReceivedSignal.emit(output_data)
         self.manager.add_data(data_list=output_data)
 
     def updateModel(self, data, p_file):

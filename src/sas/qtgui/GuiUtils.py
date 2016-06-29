@@ -8,6 +8,9 @@ import time
 import imp
 import warnings
 import re
+import webbrowser
+import urlparse
+
 warnings.simplefilter("ignore")
 import logging
 import traceback
@@ -24,6 +27,7 @@ from PyQt4 import QtGui
 #from sas.sasgui.guiframe.events import EVT_NEW_COLOR
 #from sas.sasgui.guiframe.events import StatusEvent
 #from sas.sasgui.guiframe.events import NewPlotEvent
+
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import Data2D
 
@@ -199,6 +203,7 @@ class Communicate(QtCore.QObject):
     fileDataReceivedSignal = QtCore.pyqtSignal(dict)
 
     # Update Main window status bar with "str"
+    # Old "StatusEvent"
     statusBarUpdateSignal = QtCore.pyqtSignal(str)
 
     # Send data to the current perspective
@@ -206,6 +211,11 @@ class Communicate(QtCore.QObject):
 
     # New data in current perspective
     updateModelFromPerspectiveSignal = QtCore.pyqtSignal(QtGui.QStandardItem)
+
+    # New plot requested from the GUI manager
+    # Old "NewPlotEvent"
+    plotRequestedSignal = QtCore.pyqtSignal(str)
+
 
 def updateModelItem(item, update_data, name=""):
     """
@@ -309,3 +319,14 @@ def infoFromData(data):
 
     return info_item
 
+def openLink(url):
+    """
+    Open a URL in an external browser.
+    Check the URL first, though.
+    """
+    parsed_url = urlparse.urlparse(url)
+    if parsed_url.scheme:
+        webbrowser.open(url)
+    else:
+        msg = "Attempt at opening an invalid URL"
+        raise AttributeError, msg

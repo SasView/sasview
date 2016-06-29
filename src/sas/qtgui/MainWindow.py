@@ -23,10 +23,7 @@ class MainSasViewWindow(MainWindow):
         self.guiManager = GuiManager(self, reactor, self)
 
     def closeEvent(self, event):
-        from twisted.internet import reactor
-        reactor.stop
-        event.accept()
-        sys.exit()
+        self.guiManager.quitApplication()
         
 def SplashScreen():
     """

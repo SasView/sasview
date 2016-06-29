@@ -6,6 +6,7 @@ from PyQt4 import QtGui
 from PyQt4 import QtWebKit
 
 import sas.sasview
+import LocalConfig
 
 from UI.WelcomePanelUI import WelcomePanelUI
 
@@ -18,6 +19,7 @@ class WelcomePanel(WelcomePanelUI):
         build = sas.sasview.__build__
 
         ver = "\nSasView %s\nBuild: %s" % (version, build)
-        ver += "\n(c) 2009 - 2013, UTK, UMD, NIST, ORNL, ISIS, ESS and IL"
+        #ver += "\n(c) 2009 - 2013, UTK, UMD, NIST, ORNL, ISIS, ESS and IL"
+        ver += LocalConfig._copyright
 
         self.lblVersion.setText(ver)

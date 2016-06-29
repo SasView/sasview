@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>481</width>
-    <height>612</height>
+    <height>620</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -87,7 +87,7 @@
       <layout class="QGridLayout" name="gridLayout_2">
        <item row="0" column="0">
         <layout class="QGridLayout" name="gridLayout">
-         <item row="0" column="0" colspan="3">
+         <item row="0" column="0" colspan="4">
           <widget class="QTreeView" name="treeView">
            <attribute name="headerVisible">
             <bool>false</bool>
@@ -102,9 +102,9 @@
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QPushButton" name="cmdDelete">
+          <widget class="QPushButton" name="cmdFreeze">
            <property name="text">
-            <string>Delete</string>
+            <string>Freeze</string>
            </property>
           </widget>
          </item>
@@ -120,6 +120,13 @@
             </size>
            </property>
           </spacer>
+         </item>
+         <item row="1" column="3">
+          <widget class="QPushButton" name="cmdDeleteData">
+           <property name="text">
+            <string>Delete</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
@@ -245,30 +252,17 @@
    <attribute name="title">
     <string>Theory</string>
    </attribute>
-   <layout class="QGridLayout" name="gridLayout_5">
-    <item row="0" column="0">
+   <layout class="QGridLayout" name="gridLayout_7">
+    <item row="0" column="0" colspan="2">
      <widget class="QGroupBox" name="groupBox_2">
       <property name="title">
        <string>Theory</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_4">
-       <item row="0" column="0" colspan="2">
-        <widget class="QListView" name="listView">
-         <property name="dragEnabled">
-          <bool>true</bool>
-         </property>
-         <property name="dragDropMode">
-          <enum>QAbstractItemView::DragDrop</enum>
-         </property>
-         <property name="defaultDropAction">
-          <enum>Qt::LinkAction</enum>
-         </property>
-        </widget>
-       </item>
        <item row="1" column="0">
-        <widget class="QPushButton" name="cmdFreeze">
+        <widget class="QPushButton" name="cmdDeleteTheory">
          <property name="text">
-          <string>Freeze</string>
+          <string>Delete</string>
          </property>
         </widget>
        </item>
@@ -285,8 +279,65 @@
          </property>
         </spacer>
        </item>
+       <item row="0" column="0" colspan="2">
+        <widget class="QTreeView" name="freezeView"/>
+       </item>
       </layout>
      </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QGroupBox" name="groupBox_4">
+      <property name="title">
+       <string>Plot</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_5">
+       <item row="0" column="0">
+        <widget class="QPushButton" name="cmdNew_2">
+         <property name="text">
+          <string>New</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QPushButton" name="cmdAppend_2">
+         <property name="text">
+          <string>Append to</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QComboBox" name="cbgraph_2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="sizeAdjustPolicy">
+          <enum>QComboBox::AdjustToContents</enum>
+         </property>
+         <item>
+          <property name="text">
+           <string>Graph1</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <spacer name="horizontalSpacer_6">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>287</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
     </item>
    </layout>
   </widget>

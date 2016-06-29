@@ -17,6 +17,7 @@ from sas.sasgui.guiframe.proxy import Connection
 import LocalConfig
 from GuiUtils import *
 from UI.AcknowledgementsUI import Acknowledgements
+from AboutBox import AboutBox
 
 # Perspectives
 from Perspectives.Invariant.InvariantPerspective import InvariantWindow
@@ -59,13 +60,15 @@ class GuiManager(object):
         #
         # Add FileDialog widget as docked
         self.filesWidget = DataExplorerWindow(parent, self)
-        #flags = (QtCore.Qt.Window | QtCore.Qt.WindowTitleHint | QtCore.Qt.CustomizeWindowHint)
+        #flags = (QtCore.Qt.Window | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint)
+        flags = (QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinMaxButtonsHint )
 
-        self.dockedFilesWidget = QtGui.QDockWidget("File explorer", self._workspace)
+        self.dockedFilesWidget = QtGui.QDockWidget("Data explorer", self._workspace, flags=flags)
         self.dockedFilesWidget.setWidget(self.filesWidget)
         self._workspace.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.dockedFilesWidget)
 
         self.ackWidget = Acknowledgements()
+        self.aboutWidget = AboutBox()
 
         # Disable the close button (?)
 
@@ -94,6 +97,7 @@ class GuiManager(object):
      
     def fileRead(self, data):
         """
+        Callback for fileDataReceivedSignal
         """
         pass
     
@@ -196,7 +200,6 @@ class GuiManager(object):
 
         # Exit if yes
         reactor.callFromThread(reactor.stop)
-        reactor.stop
         sys.exit()
 
     def checkUpdate(self):
@@ -219,7 +222,7 @@ class GuiManager(object):
                 logging.info("Failed to connect to www.sasview.org")
         self.processVersion(version_info)  
   
-    def processVersion(self, version_info, standalone=False):
+    def processVersion(self, version_info):
         """
         Call-back method for the process of checking for updates.
         This methods is called by a VersionThread object once the current
@@ -227,9 +230,6 @@ class GuiManager(object):
         background, the user will not be notified unless there's an update.
 
         :param version: version string
-        :param standalone: True of the update is being checked in
-           the background, False otherwise.
-
         """
         try:
             version = version_info["version"]
@@ -241,13 +241,10 @@ class GuiManager(object):
 
             elif cmp(version, LocalConfig.__version__) > 0:
                 msg = "Version %s is available! " % str(version)
-                if not standalone:
-                    if "download_url" in version_info:
-                        webbrowser.open(version_info["download_url"])
-                    else:
-                        webbrowser.open(LocalConfig.__download_page__)
+                if "download_url" in version_info:
+                    webbrowser.open(version_info["download_url"])
                 else:
-                    msg += "See the help menu to download it."
+                    webbrowser.open(LocalConfig.__download_page__)
                 self.communicate.statusBarUpdateSignal.emit(msg)
             else:
                 msg = "You have the latest version"
@@ -257,10 +254,9 @@ class GuiManager(object):
             msg = "guiframe: could not get latest application"
             msg += " version number\n  %s" % sys.exc_value
             logging.error(msg)
-            if not standalone:
-                msg = "Could not connect to the application server."
-                msg += " Please try again later."
-                self.communicate.statusBarUpdateSignal.emit(msg)
+            msg = "Could not connect to the application server."
+            msg += " Please try again later."
+            self.communicate.statusBarUpdateSignal.emit(msg)
 
     def addCallbacks(self):
         """
@@ -628,9 +624,10 @@ class GuiManager(object):
         """
         Open the About box
         """
-        
-        print("actionAbout TRIGGERED")
-        pass
+        # Update the about box with current version and stuff
+
+        # TODO: proper sizing
+        self.aboutWidget.show()
 
     def actionCheck_for_update(self):
         """
