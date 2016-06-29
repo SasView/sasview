@@ -164,7 +164,7 @@ def retrieve_user_docs():
     if os.path.exists(SASMODELS_SOURCE_AUTOIMG):
         print "Found img  folder SASMODELS_SOURCE_AUTOIMG    at ", SASMODELS_SOURCE_AUTOIMG
         if not os.path.exists(SASMODELS_DEST_IMG):
-            print "Missing docs folder SASMODELS_DEST_IMG at ", ASMODELS_DEST_IMG
+            print "Missing docs folder SASMODELS_DEST_IMG at ", SASMODELS_DEST_IMG
             os.makedirs(SASMODELS_DEST_BUILDIMG)
             print "created SASMODELS_DEST_BUILDIMG at ", SASMODELS_DEST_BUILDIMG
         print "Copying sasmodels model auto-generated image files..."
