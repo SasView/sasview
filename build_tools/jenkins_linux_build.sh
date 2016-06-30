@@ -10,6 +10,14 @@ export PYTHONPATH=$PYTHONPATH:$WORKSPACE/sasview/sasview-install
 
 cd $WORKSPACE
 
+
+# SET SASVIEW GITHASH
+cd $WORKSPACE
+cd sasview/sasview
+githash=$( git rev-parse HEAD )
+sed -i.bak s/GIT_COMMIT/$githash/g __init__.py
+
+
 # SASMODLES
 cd $WORKSPACE
 cd sasmodels
