@@ -29,8 +29,9 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self.SetupScrolling()
         self.SetWindowVariant(variant=FONT_VARIANT)
         self._manager = manager
-        self._data = data
-        self._data_name_box = None
+        self._data = data # The data to be analysed
+        self._data_name_box = None # Text box to show name of file
+        # Dictionary for saving IDs of text boxes used to display output data
         self._output_ids = None
         self.state = None
         self.set_state()
@@ -49,6 +50,8 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._data_name_box.SetValue(str(data.name))
         if self._manager is not None:
             self._manager.show_data(data=data, reset=True)
+        # TODO: Set values of lower and upper q appropriately when data is
+        # loaded in
 
 
     def _do_layout(self):
@@ -155,9 +158,12 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         ]
         self._output_ids = dict()
         for i in range(len(label_strings)):
+            # Create a label and a text box for each poperty
             label = wx.StaticText(self, -1, label_strings[i])
             output_box = OutputTextCtrl(self, wx.NewId(), size=(50, 20),
                 value="-", style=wx.ALIGN_CENTER_HORIZONTAL)
+            # Save the ID of each of the text boxes for accessing after the
+            # output data has been calculated
             self._output_ids[label_strings[i]] = output_box.GetId()
             output_sizer.Add(label, (i, 0), (1, 1), wx.LEFT | wx.EXPAND, 15)
             output_sizer.Add(output_box, (i, 2), (1, 1),
@@ -168,7 +174,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         vbox.Add(outputbox_sizer, (2, 0), (1, 1),
             wx.LEFT | wx.RIGHT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
 
-
+        # Controls
         controlbox = wx.StaticBox(self, -1, "Controls")
         controlbox_sizer = wx.StaticBoxSizer(controlbox, wx.VERTICAL)
 
