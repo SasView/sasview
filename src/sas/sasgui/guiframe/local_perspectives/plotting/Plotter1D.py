@@ -221,6 +221,9 @@ class ModelPanel1D(PlotPanel, PanelBase):
             x_data = self.plots[self.cursor_id].x
             values = [max(x_data.min(), float(ctrl[0].GetValue())),
                       min(x_data.max(), float(ctrl[1].GetValue()))]
+            if len(ctrl) == 3:
+                colors.append('purple')
+                values.append(min(x_data.max(), float(ctrl[2].GetValue())))
             if self.ly == None:
                 self.ly = []
                 for c, v in zip(colors, values):

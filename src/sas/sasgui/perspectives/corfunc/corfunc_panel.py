@@ -1,9 +1,13 @@
 import wx
 import sys
 from wx.lib.scrolledpanel import ScrolledPanel
+from sas.sasgui.guiframe.events import PlotQrangeEvent
+from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.panel_base import PanelBase
+from sas.sasgui.guiframe.utils import check_float
 from sas.sasgui.perspectives.invariant.invariant_widgets import OutputTextCtrl
 from sas.sasgui.perspectives.invariant.invariant_widgets import InvTextCtrl
+from sas.sasgui.perspectives.fitting.basepage import ModelTextCtrl
 
 if sys.platform.count("win32") > 0:
     _STATICBOX_WIDTH = 350
@@ -31,15 +35,28 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._manager = manager
         self._data = data # The data to be analysed
         self._data_name_box = None # Text box to show name of file
+        self._qmin_input = None
+        self._qmax1_input = None
+        self._qmax2_input = None
+        self._qmin = 0
+        self._qmax = (0, 0)
         # Dictionary for saving IDs of text boxes used to display output data
         self._output_ids = None
         self.state = None
         self.set_state()
         self._do_layout()
+        self._qmin_input.Bind(wx.EVT_TEXT, self._on_enter_qrange)
+        self._qmax1_input.Bind(wx.EVT_TEXT, self._on_enter_qrange)
+        self._qmax2_input.Bind(wx.EVT_TEXT, self._on_enter_qrange)
 
     def set_state(self, state=None, data=None):
         # TODO: Implement state restoration
         return False
+
+    def onSetFocus(self, evt):
+        if evt is not None:
+            evt.Skip()
+        self._validate_qrange()
 
     def _set_data(self, data=None):
         """
@@ -48,11 +65,95 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         :param data: The data that has been loaded
         """
         self._data_name_box.SetValue(str(data.name))
+        self._data = data
         if self._manager is not None:
             self._manager.show_data(data=data, reset=True)
-        # TODO: Set values of lower and upper q appropriately when data is
-        # loaded in
+        lower = data.x[-1]*0.05
+        upper1 = data.x[-1] - lower*5
+        upper2 = data.x[-1]
+        self.set_qmin(lower)
+        self.set_qmax((upper1, upper2))
 
+
+    def _on_enter_qrange(self, event):
+        """
+        Read values from input boxes and save to memory.
+        """
+        event.Skip()
+        if not self._validate_qrange():
+            return
+        new_qmin = float(self._qmin_input.GetValue())
+        new_qmax1 = float(self._qmax1_input.GetValue())
+        new_qmax2 = float(self._qmax2_input.GetValue())
+        self.qmin = new_qmin
+        self.qmax = (new_qmax1, new_qmax2)
+        data_id = self._manager.data_id
+        from sas.sasgui.perspectives.corfunc.corfunc import GROUP_ID_IQ_DATA
+        group_id = GROUP_ID_IQ_DATA
+        wx.PostEvent(self._manager.parent, PlotQrangeEvent(
+            ctrl=[self._qmin_input, self._qmax1_input, self._qmax2_input],
+            active=event.GetEventObject(), id=data_id, group_id=group_id,
+            leftdown=False))
+
+    def set_qmin(self, qmin):
+        self.qmin = qmin
+        self._qmin_input.SetValue(str(qmin))
+
+    def set_qmax(self, qmax):
+        self.qmax = qmax
+        self._qmax1_input.SetValue(str(qmax[0]))
+        self._qmax2_input.SetValue(str(qmax[1]))
+
+    def _validate_qrange(self):
+        """
+        Check that the values for qmin and qmax in the input boxes are valid
+        """
+        if self._data is None:
+            return False
+        qmin_valid = check_float(self._qmin_input)
+        qmax1_valid = check_float(self._qmax1_input)
+        qmax2_valid = check_float(self._qmax2_input)
+        qmax_valid = qmax1_valid and qmax2_valid
+        if not (qmin_valid and qmax_valid):
+            if not qmin_valid:
+                self._qmin_input.SetBackgroundColour('pink')
+                self._qmin_input.Refresh()
+            if not qmax1_valid:
+                self._qmax1_input.SetBackgroundColour('pink')
+                self._qmax1_input.Refresh()
+            if not qmax2_valid:
+                self._qmax2_input.SetBackgroundColour('pink')
+                self._qmax2_input.Refresh()
+            return False
+        qmin = float(self._qmin_input.GetValue())
+        qmax1 = float(self._qmax1_input.GetValue())
+        qmax2 = float(self._qmax2_input.GetValue())
+        msg = ""
+        if not qmin > self._data.x.min():
+            msg = "qmin must be greater than the lowest q value"
+            qmin_valid = False
+        elif qmax2 < qmax1:
+            "qmax1 must be less than qmax2"
+            qmax_valid = False
+        elif qmin > qmax1:
+            "qmin must be less than qmax"
+            qmin_valid = False
+        # import pdb; pdb.set_trace()
+        if not (qmin_valid and qmax_valid):
+            if not qmin_valid:
+                self._qmin_input.SetBackgroundColour('pink')
+            if not qmax_valid:
+                self._qmax1_input.SetBackgroundColour('pink')
+                self._qmax2_input.SetBackgroundColour('pink')
+            wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
+        else:
+            self._qmin_input.SetBackgroundColour(wx.WHITE)
+            self._qmax1_input.SetBackgroundColour(wx.WHITE)
+            self._qmax2_input.SetBackgroundColour(wx.WHITE)
+        self._qmin_input.Refresh()
+        self._qmax1_input.Refresh()
+        self._qmax2_input.Refresh()
+        return (qmin_valid and qmax_valid)
 
     def _do_layout(self):
         """
@@ -107,15 +208,16 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
             style=wx.ALIGN_CENTER_HORIZONTAL)
 
         qmin_lower = OutputTextCtrl(self, -1, size=(50, 20), value="0.0")
-        qmin_input = InvTextCtrl(self, -1, size=(50, 20),
-                        style=wx.TE_PROCESS_ENTER, name='qmin_input')
-        qmin_input.SetToolTipString(("Values with q < qmin will be used for "
-            "Guinier back extrapolation"))
+        self._qmin_input = ModelTextCtrl(self, -1, size=(50, 20),
+                        style=wx.TE_PROCESS_ENTER, name='qmin_input',
+                        text_enter_callback=self._on_enter_qrange)
+        self._qmin_input.SetToolTipString(("Values with q < qmin will be used "
+            "for Guinier back extrapolation"))
 
         q_sizer.Add(qmin_label, (2, 0), (1, 1), wx.LEFT | wx.EXPAND, 5)
         q_sizer.Add(qmin_lower, (2, 1), (1, 1), wx.LEFT, 5)
         q_sizer.Add(qmin_dash_label, (2, 2), (1, 1), wx.CENTER | wx.EXPAND, 5)
-        q_sizer.Add(qmin_input, (2, 3), (1, 1), wx.LEFT, 5)
+        q_sizer.Add(self._qmin_input, (2, 3), (1, 1), wx.LEFT, 5)
 
         # Upper Q range
         qmax_tooltip = ("Values with qmax1 < q < qmax2 will be used for Porod"
@@ -125,17 +227,19 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         qmax_dash_label = wx.StaticText(self, -1, "-", size=(10,20),
             style=wx.ALIGN_CENTER_HORIZONTAL)
 
-        qmax1_input = InvTextCtrl(self, -1, size=(50, 20),
-            style=wx.TE_PROCESS_ENTER, name="qmax1_input")
-        qmax1_input.SetToolTipString(qmax_tooltip)
-        qmax2_input = InvTextCtrl(self, -1, size=(50, 20),
-            style=wx.TE_PROCESS_ENTER, name="qmax2_input")
-        qmax2_input.SetToolTipString(qmax_tooltip)
+        self._qmax1_input = ModelTextCtrl(self, -1, size=(50, 20),
+            style=wx.TE_PROCESS_ENTER, name="qmax1_input",
+            text_enter_callback=self._on_enter_qrange)
+        self._qmax1_input.SetToolTipString(qmax_tooltip)
+        self._qmax2_input = ModelTextCtrl(self, -1, size=(50, 20),
+            style=wx.TE_PROCESS_ENTER, name="qmax2_input",
+            text_enter_callback=self._on_enter_qrange)
+        self._qmax2_input.SetToolTipString(qmax_tooltip)
 
         q_sizer.Add(qmax_label, (3, 0), (1, 1), wx.LEFT | wx.EXPAND, 5)
-        q_sizer.Add(qmax1_input, (3, 1), (1, 1), wx.LEFT, 5)
+        q_sizer.Add(self._qmax1_input, (3, 1), (1, 1), wx.LEFT, 5)
         q_sizer.Add(qmax_dash_label, (3, 2), (1, 1), wx.CENTER | wx.EXPAND, 5)
-        q_sizer.Add(qmax2_input, (3,3), (1, 1), wx.LEFT, 5)
+        q_sizer.Add(self._qmax2_input, (3,3), (1, 1), wx.LEFT, 5)
 
         qbox_sizer.Add(q_sizer, wx.TOP, 0)
 
