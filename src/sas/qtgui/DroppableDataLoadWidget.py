@@ -2,8 +2,7 @@
 from PyQt4 import QtCore
 
 # UI
-from UI.TabbedFileLoadUI import DataLoadWidget
-# from UI.Test2DataExplorerUI import DataLoadWidget
+from UI.DataExplorerUI import DataLoadWidget
 
 class DroppableDataLoadWidget(DataLoadWidget):
     """
@@ -22,7 +21,7 @@ class DroppableDataLoadWidget(DataLoadWidget):
         Return True if the event contain URLs
         """
         # Analyze mime data
-        if event.mimeData().hasUrls():
+        if event.mimeData().hasUrls() and self.currentIndex() == 0:
             return True
         else:
             return False

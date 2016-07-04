@@ -1,263 +1,402 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DataExplorerUI</class>
- <widget class="QDialog" name="DataExplorerUI">
+ <class>DataLoadWidget</class>
+ <widget class="QTabWidget" name="DataLoadWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>454</width>
-    <height>577</height>
+    <width>517</width>
+    <height>693</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Dialog</string>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
-  <layout class="QGridLayout" name="gridLayout_4">
-   <item row="0" column="0">
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>Selection Options</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QComboBox" name="comboBox">
-     <item>
-      <property name="text">
-       <string>Select all</string>
+  <property name="windowTitle">
+   <string>TabWidget</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="main_resources.qrc">
+    <normaloff>:/res/ball.ico</normaloff>:/res/ball.ico</iconset>
+  </property>
+  <property name="currentIndex">
+   <number>0</number>
+  </property>
+  <widget class="QWidget" name="dataTab">
+   <attribute name="title">
+    <string>Data</string>
+   </attribute>
+   <layout class="QGridLayout" name="gridLayout_6">
+    <item row="0" column="0">
+     <widget class="QGroupBox" name="groupBox">
+      <property name="title">
+       <string>Data</string>
       </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Unselect all</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Select all 1D</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Unselect all 1D</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Select all 2D</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Unselect all 2D</string>
-      </property>
-     </item>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <spacer name="horizontalSpacer_2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>278</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="2" column="0" colspan="2">
-    <widget class="QGroupBox" name="groupBox">
-     <property name="title">
-      <string>Data</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
-       <widget class="QTreeView" name="treeView">
-        <property name="dragEnabled">
-         <bool>true</bool>
-        </property>
-        <property name="dragDropMode">
-         <enum>QAbstractItemView::DragDrop</enum>
-        </property>
-        <property name="defaultDropAction">
-         <enum>Qt::CopyAction</enum>
-        </property>
-        <property name="selectionMode">
-         <enum>QAbstractItemView::ExtendedSelection</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="QPushButton" name="pushButton">
-          <property name="text">
-           <string>Load</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_2">
-          <property name="text">
-           <string>Delete</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="verticalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>141</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </item>
-      <item row="1" column="0" colspan="2">
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <widget class="QPushButton" name="pushButton_6">
-          <property name="text">
-           <string>Send to</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="comboBox_3">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <item>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="0" column="0">
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QPushButton" name="cmdLoad">
            <property name="text">
-            <string>Fitting</string>
+            <string>Load</string>
            </property>
-          </item>
-          <item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="cbSelect">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <item>
+            <property name="text">
+             <string>Select all</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Unselect all</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Select all 1D</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Unselect all 1D</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Select all 2D</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Unselect all 2D</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_7">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>128</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="cmdDeleteData">
            <property name="text">
-            <string>Pr inversion</string>
+            <string>Delete</string>
            </property>
-          </item>
-          <item>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="1" column="0">
+        <widget class="QTreeView" name="treeView">
+         <property name="acceptDrops">
+          <bool>true</bool>
+         </property>
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
+         <property name="dragEnabled">
+          <bool>true</bool>
+         </property>
+         <property name="dragDropOverwriteMode">
+          <bool>true</bool>
+         </property>
+         <property name="dragDropMode">
+          <enum>QAbstractItemView::DropOnly</enum>
+         </property>
+         <property name="defaultDropAction">
+          <enum>Qt::CopyAction</enum>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
+         <attribute name="headerVisible">
+          <bool>false</bool>
+         </attribute>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QPushButton" name="cmdFreeze">
            <property name="text">
-            <string>Invariant</string>
+            <string>Freeze Theory</string>
            </property>
-          </item>
-         </widget>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="checkBox">
-          <property name="text">
-           <string>Batch mode</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>197</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="3" column="0" colspan="2">
-    <widget class="QGroupBox" name="groupBox_2">
-     <property name="title">
-      <string>Theory</string>
-     </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>58</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QToolButton" name="cmdSendTo">
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="main_resources.qrc">
+             <normaloff>:/res/file_send-128.png</normaloff>:/res/file_send-128.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="cbFitting">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="sizeAdjustPolicy">
+            <enum>QComboBox::AdjustToContents</enum>
+           </property>
+           <item>
+            <property name="text">
+             <string>Fitting</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Pr inversion</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Invariant</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="chkBatch">
+           <property name="text">
+            <string>Batch mode</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="1" column="0">
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0" rowspan="2">
-       <widget class="QListView" name="listView"/>
-      </item>
-      <item row="0" column="1">
-       <widget class="QPushButton" name="pushButton_3">
-        <property name="text">
-         <string>Freeze</string>
+      <item row="0" column="0">
+       <widget class="QGroupBox" name="groupBox_3">
+        <property name="title">
+         <string>Plot</string>
         </property>
+        <layout class="QGridLayout" name="gridLayout_3">
+         <item row="0" column="0">
+          <widget class="QPushButton" name="cmdNew">
+           <property name="text">
+            <string>Create New</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QPushButton" name="cmdAppend">
+           <property name="text">
+            <string>Append to</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QComboBox" name="cbgraph">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="sizeAdjustPolicy">
+            <enum>QComboBox::AdjustToContents</enum>
+           </property>
+           <item>
+            <property name="text">
+             <string>Graph1</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
-      <item row="1" column="1">
-       <spacer name="verticalSpacer">
+      <item row="0" column="1">
+       <spacer name="horizontalSpacer_3">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>20</width>
-          <height>198</height>
+          <width>108</width>
+          <height>111</height>
          </size>
         </property>
        </spacer>
       </item>
+      <item row="0" column="2" alignment="Qt::AlignBottom">
+       <widget class="QPushButton" name="cmdHelp">
+        <property name="text">
+         <string>Help</string>
+        </property>
+       </widget>
+      </item>
      </layout>
-    </widget>
-   </item>
-   <item row="4" column="0">
-    <widget class="QGroupBox" name="groupBox_3">
-     <property name="title">
-      <string>Plot</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_3">
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="theoryTab">
+   <attribute name="title">
+    <string>Theory</string>
+   </attribute>
+   <layout class="QGridLayout" name="gridLayout_8">
+    <item row="0" column="0">
+     <widget class="QGroupBox" name="groupBox_2">
+      <property name="title">
+       <string>Theory</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="0" column="0">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <spacer name="horizontalSpacer_5">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>353</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="cmdDeleteTheory">
+           <property name="text">
+            <string>Delete</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="1" column="0">
+        <widget class="QTreeView" name="freezeView">
+         <attribute name="headerVisible">
+          <bool>false</bool>
+         </attribute>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <layout class="QGridLayout" name="gridLayout_5">
       <item row="0" column="0">
-       <widget class="QPushButton" name="pushButton_4">
-        <property name="text">
-         <string>New</string>
+       <widget class="QGroupBox" name="groupBox_4">
+        <property name="title">
+         <string>Plot</string>
         </property>
+        <layout class="QGridLayout" name="gridLayout_7">
+         <item row="0" column="0">
+          <widget class="QPushButton" name="cmdNew_2">
+           <property name="text">
+            <string>Create New</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QPushButton" name="cmdAppend_2">
+           <property name="text">
+            <string>Append to</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QComboBox" name="cbgraph_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="sizeAdjustPolicy">
+            <enum>QComboBox::AdjustToContents</enum>
+           </property>
+           <item>
+            <property name="text">
+             <string>Graph1</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QPushButton" name="pushButton_5">
-        <property name="text">
-         <string>Append to</string>
+      <item row="0" column="1">
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-       </widget>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>108</width>
+          <height>111</height>
+         </size>
+        </property>
+       </spacer>
       </item>
-      <item row="1" column="1">
-       <widget class="QComboBox" name="comboBox_2">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+      <item row="0" column="2" alignment="Qt::AlignBottom">
+       <widget class="QPushButton" name="cmdHelp_2">
+        <property name="text">
+         <string>Help</string>
         </property>
-        <item>
-         <property name="text">
-          <string>Graph1</string>
-         </property>
-        </item>
        </widget>
       </item>
      </layout>
-    </widget>
-   </item>
-  </layout>
-  <zorder>groupBox_3</zorder>
-  <zorder>groupBox_2</zorder>
-  <zorder>groupBox</zorder>
-  <zorder>comboBox</zorder>
-  <zorder>label</zorder>
-  <zorder>horizontalSpacer_2</zorder>
+    </item>
+   </layout>
+  </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="main_resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

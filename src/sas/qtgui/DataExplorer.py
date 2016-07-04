@@ -6,6 +6,8 @@ import logging
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 from PyQt4 import QtWebKit
+from PyQt4.Qt import QMutex
+
 from twisted.internet import threads
 
 # SAS
@@ -38,6 +40,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.loader = Loader()
         self.manager = DataManager()
 
+        # Be careful with twisted threads.
+        self.mutex = QMutex()
+
         # Connect the buttons
         self.cmdLoad.clicked.connect(self.loadFile)
         self.cmdDeleteData.clicked.connect(self.deleteFile)
@@ -45,6 +50,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cmdFreeze.clicked.connect(self.freezeTheory)
         self.cmdSendTo.clicked.connect(self.sendData)
         self.cmdNew.clicked.connect(self.newPlot)
+        self.cmdHelp.clicked.connect(self.displayHelp)
+        self.cmdHelp_2.clicked.connect(self.displayHelp)
+
+        # Display HTML content
+        self._helpView = QtWebKit.QWebView()
 
         # Connect the comboboxes
         self.cbSelect.currentIndexChanged.connect(self.selectData)
@@ -55,20 +65,38 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.fileReadSignal.connect(self.loadFromURL)
 
         # Proxy model for showing a subset of Data1D/Data2D content
-        self.proxy = QtGui.QSortFilterProxyModel(self)
-        self.proxy.setSourceModel(self.model)
+        self.data_proxy = QtGui.QSortFilterProxyModel(self)
+        self.data_proxy.setSourceModel(self.model)
+
+        # Don't show "empty" rows with data objects
+        self.data_proxy.setFilterRegExp(r"[^()]")
 
         # The Data viewer is QTreeView showing the proxy model
-        self.treeView.setModel(self.proxy)
+        self.treeView.setModel(self.data_proxy)
+
+        # Proxy model for showing a subset of Theory content
+        self.theory_proxy = QtGui.QSortFilterProxyModel(self)
+        self.theory_proxy.setSourceModel(self.theory_model)
+
+        # Don't show "empty" rows with data objects
+        self.theory_proxy.setFilterRegExp(r"[^()]")
 
         # Theory model view
-        #self.freezeView.setModel(self.theory_model)
+        self.freezeView.setModel(self.theory_proxy)
 
     def closeEvent(self, event):
         """
         Overwrite the close event - no close!
         """
         event.ignore()
+
+    def displayHelp(self):
+        """
+        Show the "Loading data" section of help
+        """
+        _TreeLocation = "html/user/sasgui/guiframe/data_explorer_help.html"
+        self._helpView.load(QtCore.QUrl(_TreeLocation))
+        self._helpView.show()
 
     def loadFromURL(self, url):
         """
@@ -80,7 +108,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
     def loadFile(self, event=None):
         """
         Called when the "Load" button pressed.
-        Opens the Qt "Open File..." dialog 
+        Opens the Qt "Open File..." dialog
         """
         path_str = self.chooseFiles()
         if not path_str:
@@ -90,20 +118,21 @@ class DataExplorerWindow(DroppableDataLoadWidget):
     def loadFolder(self, event=None):
         """
         Called when the "File/Load Folder" menu item chosen.
-        Opens the Qt "Open Folder..." dialog 
+        Opens the Qt "Open Folder..." dialog
         """
-        dir = QtGui.QFileDialog.getExistingDirectory(self, "Choose a directory", "",
+        folder = QtGui.QFileDialog.getExistingDirectory(self, "Choose a directory", "",
               QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontUseNativeDialog)
-        if dir is None:
+        if folder is None:
             return
 
-        dir = str(dir)
+        folder = str(folder)
 
-        if not os.path.isdir(dir):
+        if not os.path.isdir(folder):
             return
 
         # get content of dir into a list
-        path_str = [os.path.join(os.path.abspath(dir), filename) for filename in os.listdir(dir)]
+        path_str = [os.path.join(os.path.abspath(folder), filename)
+                        for filename in os.listdir(folder)]
 
         self.loadFromURL(path_str)
 
@@ -210,29 +239,47 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         "Freezing" means taking the plottable data from the filename item
         and copying it to a separate top-level item.
         """
-        import copy
         # Figure out which _inner_ rows are checked
         # Use 'while' so the row count is forced at every iteration
         outer_index = -1
+        theories_copied = 0
         while outer_index < self.model.rowCount():
             outer_index += 1
             outer_item = self.model.item(outer_index)
             if not outer_item:
                 continue
-            for inner_index in xrange(outer_item.rowCount()):
+            for inner_index in xrange(outer_item.rowCount()): # Should be just two rows: data and Info
                 subitem = outer_item.child(inner_index)
                 if subitem and subitem.isCheckable() and subitem.checkState() == QtCore.Qt.Checked:
-                    # Update the main model
-                    new_item = subitem.takeRow(inner_index)
-                    #new_item = QtGui.QStandardItem(subitem)
-                    #new_item = subitem.clone()
-                    #new_item = QtGui.QStandardItem()
-                    #new_item = copy.deepcopy(subitem)
-                    #super(new_item, self).__init__()   
-                    self.model.insertRow(0, new_item)
-                    outer_index += 1
+                    theories_copied += 1
+                    new_item = self.recursivelyCloneItem(subitem)
+                    self.theory_model.appendRow(new_item)
+            self.theory_model.reset()
 
-        self.model.reset()
+        freeze_msg = ""
+        if theories_copied == 0:
+            return
+        elif theories_copied == 1:
+            freeze_msg = "1 theory sent to Theory tab"
+        elif theories_copied > 1:
+            freeze_msg = "%i theories sent to Theory tab" % theories_copied
+        else:
+            freeze_msg = "Unexpected number of theories copied: %i" % theories_copied
+            raise AttributeError, freeze_msg
+        self.communicator.statusBarUpdateSignal.emit(freeze_msg)
+        # Actively switch tabs
+        self.setCurrentIndex(1)
+
+    def recursivelyCloneItem(self, item):
+        """
+        Clone QStandardItem() object
+        """
+        new_item = item.clone()
+        # clone doesn't do deepcopy :(
+        for child_index in xrange(item.rowCount()):
+            child_item = self.recursivelyCloneItem(item.child(child_index))
+            new_item.setChild(child_index, child_item)
+        return new_item
 
     def newPlot(self):
         """
@@ -265,7 +312,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if paths is None:
             return
 
-        if type(paths) == QtCore.QStringList:
+        #if type(paths) == QtCore.QStringList:
+        if isinstance(paths, QtCore.QStringList):
             paths = [str(f) for f in paths]
 
         if paths.__class__.__name__ != "list":
@@ -275,8 +323,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
     def readData(self, path):
         """
-        verbatim copy/paste from
-            sasgui\guiframe\local_perspectives\data_loader\data_loader.py
+        verbatim copy-paste from
+           sasgui.guiframe.local_perspectives.data_loader.data_loader.py
         slightly modified for clarity
         """
         message = ""
@@ -285,9 +333,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         any_error = False
         data_error = False
         error_message = ""
-        
+
         for p_file in path:
-            info = "info"
             basename = os.path.basename(p_file)
             _, extension = os.path.splitext(basename)
             if extension.lower() in EXTENSIONS:
@@ -314,14 +361,18 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     output_objects = [output_objects]
 
                 for item in output_objects:
-                    # cast sascalc.dataloader.data_info.Data1D into sasgui.guiframe.dataFitting.Data1D
+                    # cast sascalc.dataloader.data_info.Data1D into
+                    # sasgui.guiframe.dataFitting.Data1D
                     # TODO : Fix it
                     new_data = self.manager.create_gui_data(item, p_file)
                     output[new_data.id] = new_data
+
+                    # Model update should be protected
+                    self.mutex.lock()
                     self.updateModel(new_data, p_file)
                     self.model.reset()
-
                     QtGui.qApp.processEvents()
+                    self.mutex.unlock()
 
                     if hasattr(item, 'errors'):
                         for error_data in item.errors:
@@ -353,14 +404,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 else:
                     error_message += "%s\n" % str(p_file)
                 info = "error"
-        
+
         if any_error or error_message:
-            # self.loadUpdate(output=output, message=error_message, info=info)
             self.communicator.statusBarUpdateSignal.emit(error_message)
 
         else:
             message = "Loading Data Complete! "
         message += log_msg
+
         return output, message
 
     def getWlist(self):
@@ -469,12 +520,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Post message to status bar and update the data manager
         """
-        # Don't show "empty" rows with data objects
-        self.proxy.setFilterRegExp(r"[^()]")
-
         # Reset the model so the view gets updated.
         self.model.reset()
-        assert type(output)== tuple
+        assert type(output) == tuple
 
         output_data = output[0]
         message = output[1]
@@ -485,11 +533,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
     def updateModel(self, data, p_file):
         """
+        Add data and Info fields to the model item
         """
         # Structure of the model
         # checkbox + basename
+        #     |-------> Data.D object
         #     |-------> Info
-        #                 |----> Data.D object
         #                 |----> Title:
         #                 |----> Run:
         #                 |----> Type:
@@ -518,7 +567,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # New row in the model
         self.model.appendRow(checkbox_item)
-        
+
     def updateModelFromPerspective(self, model_item):
         """
         Receive an update model item from a perspective
@@ -536,7 +585,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Pass acting as a debugger anchor
         pass
-       
+
 
 if __name__ == "__main__":
     app = QtGui.QApplication([])

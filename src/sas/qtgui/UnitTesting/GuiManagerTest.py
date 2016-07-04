@@ -86,8 +86,6 @@ class GuiManagerTest(unittest.TestCase):
 
         # See that the MessageBox method got called
         self.assertTrue(QMessageBox.question.called)
-        # Also, sys.exit() called
-        self.assertTrue(sys.exit.called)
 
     def testCheckUpdate(self):
         """

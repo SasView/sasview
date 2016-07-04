@@ -28,12 +28,12 @@ class GuiManager(object):
     """
     Main SasView window functionality
     """
-    HELP_DIRECTORY_LOCATION="html"
+    HELP_DIRECTORY_LOCATION = "html"
 
     def __init__(self, mainWindow=None, reactor=None, parent=None):
         """
-        
         """
+
         self._workspace = mainWindow
         self._parent = parent
 
@@ -51,17 +51,17 @@ class GuiManager(object):
         self.addTriggers()
 
         # Populate menus with dynamic data
-        # 
+        #
         # Analysis/Perspectives - potentially
         # Window/current windows
         #
-
         # Widgets
         #
         # Add FileDialog widget as docked
         self.filesWidget = DataExplorerWindow(parent, self)
         #flags = (QtCore.Qt.Window | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint)
-        flags = (QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinMaxButtonsHint )
+        flags = (QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint |
+                 QtCore.Qt.WindowMinMaxButtonsHint)
 
         self.dockedFilesWidget = QtGui.QDockWidget("Data explorer", self._workspace, flags=flags)
         self.dockedFilesWidget.setWidget(self.filesWidget)
@@ -94,13 +94,13 @@ class GuiManager(object):
 
         # Default perspective
         self._current_perspective = self.invariantWidget
-     
+
     def fileRead(self, data):
         """
         Callback for fileDataReceivedSignal
         """
         pass
-    
+
     def updatePerspective(self, data):
         """
         """
@@ -110,8 +110,8 @@ class GuiManager(object):
         else:
             msg = "No perspective is currently active."
             logging.info(msg)
-        
-            
+
+
     def communicator(self):
         """
         """
@@ -143,35 +143,6 @@ class GuiManager(object):
         """
         return self._data_manager.create_gui_data(item, p_file)
 
-    def addData(self, data_list):
-        """
-        receive a dictionary of data from loader
-        store them its data manager if possible
-        send to data the current active perspective if the data panel
-        is not active.
-        :param data_list: dictionary of data's ID and value Data
-        """
-        #Store data into manager
-        #self._data_manager.add_data(data_list)
-
-        # set data in the data panel
-        #if self._data_panel is not None:
-        #    data_state = self._data_manager.get_data_state(data_list.keys())
-        #    self._data_panel.load_data_list(data_state)
-
-        #if the data panel is shown wait for the user to press a button
-        #to send data to the current perspective. if the panel is not
-        #show  automatically send the data to the current perspective
-        #style = self.__gui_style & GUIFRAME.MANAGER_ON
-        #if style == GUIFRAME.MANAGER_ON:
-        #    #wait for button press from the data panel to set_data
-        #    if self._data_panel is not None:
-        #        self._data_panel.frame.Show(True)
-        #else:
-            #automatically send that to the current perspective
-        #self.setData(data_id=data_list.keys())
-        pass
-
     def setData(self, data):
         """
         Sends data to current perspective
@@ -189,18 +160,17 @@ class GuiManager(object):
         # Display confirmation messagebox
         quit_msg = "Are you sure you want to exit the application?"
         reply = QtGui.QMessageBox.question(
-                        self._parent,
-                        'Warning',
-                        quit_msg,
-                        QtGui.QMessageBox.Yes,
-                        QtGui.QMessageBox.No)
+            self._parent,
+            'Warning',
+            quit_msg,
+            QtGui.QMessageBox.Yes,
+            QtGui.QMessageBox.No)
 
         if reply == QtGui.QMessageBox.No:
             return
 
         # Exit if yes
         reactor.callFromThread(reactor.stop)
-        sys.exit()
 
     def checkUpdate(self):
         """
@@ -220,8 +190,8 @@ class GuiManager(object):
                 version_info = json.loads(content)
             except:
                 logging.info("Failed to connect to www.sasview.org")
-        self.processVersion(version_info)  
-  
+        self.processVersion(version_info)
+
     def processVersion(self, version_info):
         """
         Call-back method for the process of checking for updates.
@@ -364,7 +334,7 @@ class GuiManager(object):
         """
         """
         print("actionSave_Analysis TRIGGERED")
-       
+
         pass
 
     def actionQuit(self):

@@ -280,7 +280,11 @@
         </spacer>
        </item>
        <item row="0" column="0" colspan="2">
-        <widget class="QTreeView" name="freezeView"/>
+        <widget class="QTreeView" name="freezeView">
+         <attribute name="headerVisible">
+          <bool>false</bool>
+         </attribute>
+        </widget>
        </item>
       </layout>
      </widget>

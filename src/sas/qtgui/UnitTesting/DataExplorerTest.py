@@ -48,27 +48,49 @@ class DataExplorerTest(unittest.TestCase):
 
     def testDefaults(self):
         '''Test the GUI in its default state'''
+        # Tab widget
         self.assertIsInstance(self.form, QTabWidget)
-        self.assertIsInstance(self.form.treeView, QTreeView)
-        self.assertIsInstance(self.form.freezeView, QTreeView)
         self.assertEqual(self.form.count(), 2)
 
+        # Buttons - data tab
         self.assertEqual(self.form.cmdLoad.text(), "Load")
         self.assertEqual(self.form.cmdDeleteData.text(), "Delete")
         self.assertEqual(self.form.cmdDeleteTheory.text(), "Delete")
-        self.assertEqual(self.form.cmdFreeze.text(), "Freeze")
-        self.assertEqual(self.form.cmdSendTo.text(), "Send to")
+        self.assertEqual(self.form.cmdFreeze.text(), "Freeze Theory")
+        self.assertEqual(self.form.cmdSendTo.text(), "...")
+        self.assertEqual(self.form.cmdSendTo.iconSize(), QSize(32, 32))
+        self.assertIsInstance(self.form.cmdSendTo.icon(), QIcon)
         self.assertEqual(self.form.chkBatch.text(), "Batch mode")
         self.assertFalse(self.form.chkBatch.isChecked())
 
+        # Buttons - theory tab
+
+        # Combo boxes
         self.assertEqual(self.form.cbSelect.count(), 6)
         self.assertEqual(self.form.cbSelect.currentIndex(), 0)
 
-        # Class is in the default state even without pressing OK
+        # Models - data
+        self.assertIsInstance(self.form.model, QStandardItemModel)
         self.assertEqual(self.form.treeView.model().rowCount(), 0)
         self.assertEqual(self.form.treeView.model().columnCount(), 0)
         self.assertEqual(self.form.model.rowCount(), 0)
         self.assertEqual(self.form.model.columnCount(), 0)
+        self.assertIsInstance(self.form.data_proxy, QSortFilterProxyModel)
+        self.assertEqual(self.form.data_proxy.sourceModel(), self.form.model)
+        self.assertEqual("[^()]", str(self.form.data_proxy.filterRegExp().pattern()))
+        self.assertIsInstance(self.form.treeView, QTreeView)
+
+        # Models - theory
+        self.assertIsInstance(self.form.theory_model, QStandardItemModel)
+        self.assertEqual(self.form.freezeView.model().rowCount(), 0)
+        self.assertEqual(self.form.freezeView.model().columnCount(), 0)
+        self.assertEqual(self.form.theory_model.rowCount(), 0)
+        self.assertEqual(self.form.theory_model.columnCount(), 0)
+        self.assertIsInstance(self.form.theory_proxy, QSortFilterProxyModel)
+        self.assertEqual(self.form.theory_proxy.sourceModel(), self.form.theory_model)
+        self.assertEqual("[^()]", str(self.form.theory_proxy.filterRegExp().pattern()))
+        self.assertIsInstance(self.form.freezeView, QTreeView)
+
         
     def testLoadButton(self):
         loadButton = self.form.cmdLoad
@@ -151,6 +173,68 @@ class DataExplorerTest(unittest.TestCase):
 
         # Click delete once again to assure no nasty behaviour on empty model
         QTest.mouseClick(deleteButton, Qt.LeftButton)
+
+    def testDeleteTheory(self):
+        """
+        Test that clicking "Delete" in theories tab removes selected indices
+        """
+        deleteButton = self.form.cmdDeleteTheory
+
+        # Mock the confirmation dialog with return=No
+        QtGui.QMessageBox.question = MagicMock(return_value=QtGui.QMessageBox.No)
+
+        # Populate the model
+        item1 = QtGui.QStandardItem(True)
+        item1.setCheckable(True)
+        item1.setCheckState(QtCore.Qt.Checked)
+        item1.setText("item 1")
+        self.form.theory_model.appendRow(item1)
+        item2 = QtGui.QStandardItem(True)
+        item2.setCheckable(True)
+        item2.setCheckState(QtCore.Qt.Unchecked)
+        item2.setText("item 2")
+        self.form.theory_model.appendRow(item2)
+
+        # Assure the model contains two items
+        self.assertEqual(self.form.theory_model.rowCount(), 2)
+
+        # Assure the checkboxes are on
+        self.assertTrue(item1.checkState() == QtCore.Qt.Checked)
+        self.assertTrue(item2.checkState() == QtCore.Qt.Unchecked)
+
+        # Click on the delete  button
+        QTest.mouseClick(deleteButton, Qt.LeftButton)
+
+        # Test the warning dialog called once
+        self.assertTrue(QtGui.QMessageBox.question.called)
+
+        # Assure the model still contains the items
+        self.assertEqual(self.form.theory_model.rowCount(), 2)
+
+        # Now, mock the confirmation dialog with return=Yes
+        QtGui.QMessageBox.question = MagicMock(return_value=QtGui.QMessageBox.Yes)
+
+        # Click on the delete  button
+        QTest.mouseClick(deleteButton, Qt.LeftButton)
+
+        # Test the warning dialog called once
+        self.assertTrue(QtGui.QMessageBox.question.called)
+
+        # Assure the model contains 1 item
+        self.assertEqual(self.form.theory_model.rowCount(), 1)
+
+        # Set the remaining item to checked
+        self.form.theory_model.item(0).setCheckState(QtCore.Qt.Checked)
+
+        # Click on the delete button again
+        QTest.mouseClick(deleteButton, Qt.LeftButton)
+
+        # Assure the model contains no items
+        self.assertEqual(self.form.theory_model.rowCount(), 0)
+
+        # Click delete once again to assure no nasty behaviour on empty model
+        QTest.mouseClick(deleteButton, Qt.LeftButton)
+
 
     def testSendToButton(self):
         """
@@ -252,6 +336,40 @@ class DataExplorerTest(unittest.TestCase):
         #with self.assertRaises(Exception):
         #    self.form.cbSelect.setCurrentIndex(6)
 
+    def testFreezeTheory(self):
+        """
+        Assure theory freeze functionality works
+        """
+        # Not yet tested - agree on design first.
+        pass
+
+    def testRecursivelyCloneItem(self):
+        """
+        Test the rescursive QAbstractItem/QStandardItem clone
+        """
+        # Create an item with several branches
+        item1 = QtGui.QStandardItem()
+        item2 = QtGui.QStandardItem()
+        item3 = QtGui.QStandardItem()
+        item4 = QtGui.QStandardItem()
+        item5 = QtGui.QStandardItem()
+        item6 = QtGui.QStandardItem()
+
+        item4.appendRow(item5)
+        item2.appendRow(item4)
+        item2.appendRow(item6)
+        item1.appendRow(item2)
+        item1.appendRow(item3)
+
+        # Clone
+        new_item = self.form.recursivelyCloneItem(item1)
+
+        # assure the trees look identical
+        self.assertEqual(item1.rowCount(), new_item.rowCount())
+        self.assertEqual(item1.child(0).rowCount(), new_item.child(0).rowCount())
+        self.assertEqual(item1.child(1).rowCount(), new_item.child(1).rowCount())
+        self.assertEqual(item1.child(0).child(0).rowCount(), new_item.child(0).child(0).rowCount())
+
     def testReadData(self):
         """
         Test the low level readData() method
@@ -280,6 +398,29 @@ class DataExplorerTest(unittest.TestCase):
         model_name = str(self.form.model.data(model_item).toString())
         self.assertEqual(model_name, filename[0])
 
+    def testDisplayHelp(self):
+        """
+        Test that the Help window gets shown correctly
+        """
+        partial_url = "sasgui/guiframe/data_explorer_help.html"
+        button1 = self.form.cmdHelp
+        button2 = self.form.cmdHelp_2
+
+        # Click on the Help button
+        QTest.mouseClick(button1, Qt.LeftButton)
+        qApp.processEvents()
+
+        # Check the browser
+        self.assertIn(partial_url, str(self.form._helpView.url()))
+        # Close the browser
+        self.form._helpView.close()
+
+        # Click on the Help_2 button
+        QTest.mouseClick(button2, Qt.LeftButton)
+        qApp.processEvents()
+        # Check the browser
+        self.assertIn(partial_url, str(self.form._helpView.url()))
+
     def testLoadFile(self):
         """
         Test the threaded call to readData()
@@ -291,12 +432,16 @@ class DataExplorerTest(unittest.TestCase):
         """
         Test the list of known extensions
         """
-        list = self.form.getWlist()
+        w_list = self.form.getWlist()
+
         defaults = 'All (*.*);;canSAS files (*.xml);;SESANS files' +\
             ' (*.ses);;ASCII files (*.txt);;IGOR 2D files (*.asc);;' +\
             'IGOR/DAT 2D Q_map files (*.dat);;IGOR 1D files (*.abs);;'+\
             'HFIR 1D files (*.d1d);;DANSE files (*.sans);;NXS files (*.nxs)'
-        self.assertEqual(defaults, list)
+        default_list = defaults.split(';;')
+
+        for format in default_list:
+            self.assertIn(format, w_list)
        
     def testLoadComplete(self):
         """

@@ -4,16 +4,13 @@
 
 import os
 import sys
-import time
 import imp
 import warnings
-import re
 import webbrowser
 import urlparse
 
 warnings.simplefilter("ignore")
 import logging
-import traceback
 
 from PyQt4 import QtCore
 from PyQt4 import QtGui
@@ -73,21 +70,21 @@ def get_user_directory():
         os.makedirs(userdir)
     return userdir
 
-def _find_local_config(file, path):
+def _find_local_config(confg_file, path):
     """
         Find configuration file for the current application
     """
     config_module = None
     fObj = None
     try:
-        fObj, path_config, descr = imp.find_module(file, [path])
-        config_module = imp.load_module(file, fObj, path_config, descr)
+        fObj, path_config, descr = imp.find_module(confg_file, [path])
+        config_module = imp.load_module(confg_file, fObj, path_config, descr)
     except:
-        logging.error("Error loading %s/%s: %s" % (path, file, sys.exc_value))
+        logging.error("Error loading %s/%s: %s" % (path, confg_file, sys.exc_value))
     finally:
         if fObj is not None:
             fObj.close()
-    logging.info("GuiManager loaded %s/%s" % (path, file))
+    logging.info("GuiManager loaded %s/%s" % (path, confg_file))
     return config_module
 
 # Get APP folder
@@ -237,7 +234,7 @@ def updateModelItem(item, update_data, name=""):
         info_item = infoFromData(py_update_data)
     else:
         # otherwise just add a naked item
-        info_item = QtGui.QStandardItem("Info")        
+        info_item = QtGui.QStandardItem("Info")
 
     # Add the actual Data1D/Data2D object
     object_item = QtGui.QStandardItem()
@@ -273,7 +270,7 @@ def plotsFromCheckedItems(model_item):
             if item_2 and item_2.isCheckable() and item_2.checkState() == QtCore.Qt.Checked:
                 # TODO: assure item type is correct (either data1/2D or Plotter)
                 plot_data.append(item_2.child(0).data().toPyObject())
-  
+
     return plot_data
 
 def infoFromData(data):
@@ -285,19 +282,19 @@ def infoFromData(data):
 
     info_item = QtGui.QStandardItem("Info")
 
-    title_item   = QtGui.QStandardItem("Title: "      + data.title)
+    title_item = QtGui.QStandardItem("Title: " + data.title)
     info_item.appendRow(title_item)
-    run_item     = QtGui.QStandardItem("Run: "        + str(data.run))
+    run_item = QtGui.QStandardItem("Run: " + str(data.run))
     info_item.appendRow(run_item)
-    type_item    = QtGui.QStandardItem("Type: "       + str(data.__class__.__name__))
+    type_item = QtGui.QStandardItem("Type: " + str(data.__class__.__name__))
     info_item.appendRow(type_item)
 
     if data.path:
-        path_item    = QtGui.QStandardItem("Path: "       + data.path)
+        path_item = QtGui.QStandardItem("Path: " + data.path)
         info_item.appendRow(path_item)
 
     if data.instrument:
-        instr_item   = QtGui.QStandardItem("Instrument: " + data.instrument)
+        instr_item = QtGui.QStandardItem("Instrument: " + data.instrument)
         info_item.appendRow(instr_item)
 
     process_item = QtGui.QStandardItem("Process")

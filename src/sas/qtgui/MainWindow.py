@@ -24,6 +24,7 @@ class MainSasViewWindow(MainWindow):
 
     def closeEvent(self, event):
         self.guiManager.quitApplication()
+
         
 def SplashScreen():
     """
