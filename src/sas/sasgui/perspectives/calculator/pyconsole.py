@@ -26,16 +26,13 @@ def check_model(path):
     Check that the model on the path can run.
     """
     # try running the model
-    from sasmodels.core import load_model, call_kernel
-    model = load_model(path)
-
+    from sasmodels.sasview_model import load_custom_model
+    Model = load_custom_model(path)
+    model = Model()
     q =  np.array([0.01, 0.1])
-    kernel = model.make_kernel([q])
-    Iq = call_kernel(kernel, {})
-
+    Iq = model.evalDistribution(q)
     qx, qy =  np.array([0.01, 0.01]), np.array([0.1, 0.1])
-    kernel = model.make_kernel([qx, qy])
-    Iqxy = call_kernel(kernel, {})
+    Iqxy = model.evalDistribution([qx, qy])
 
     result = """
     Iq(%s) = %s
@@ -55,7 +52,7 @@ def show_model_output(parent, fname):
         result, errmsg = check_model(fname), None
     except Exception:
         import traceback
-        result, errmsg = None, traceback.format_exc(limit=2)
+        result, errmsg = None, traceback.format_exc()
 
     parts = ["Running model '%s'..." % os.path.basename(fname)]
     if errmsg is not None:

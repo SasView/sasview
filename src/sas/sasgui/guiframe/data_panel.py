@@ -12,6 +12,7 @@ This module provides Graphic interface for the data_manager module.
 """
 import wx
 from wx.build import build_options
+
 # Check version
 toks = str(wx.__version__).split('.')
 if int(toks[1]) < 9:
@@ -290,18 +291,25 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         Layout widgets related to buttons
         """
+        #Load Data Button
         self.bt_add = wx.Button(self, wx.NewId(), "Load Data", 
                                 size=(BUTTON_WIDTH, -1))
         self.bt_add.SetToolTipString("Load data files")
         wx.EVT_BUTTON(self, self.bt_add.GetId(), self._load_data)
+        
+        #Delete Data Button
         self.bt_remove = wx.Button(self, wx.NewId(), "Delete Data",
          size=(BUTTON_WIDTH, -1))
         self.bt_remove.SetToolTipString("Delete data from the application")
         wx.EVT_BUTTON(self, self.bt_remove.GetId(), self.on_remove)
+        
+        #Send data to perspective button
         self.bt_import = wx.Button(self, wx.NewId(), "Send To",
                                     size=(BUTTON_WIDTH, -1))
         self.bt_import.SetToolTipString("Send Data set to active perspective")
         wx.EVT_BUTTON(self, self.bt_import.GetId(), self.on_import)
+        
+        #Choose perspective to be send data to combo box
         self.perspective_cbox = wx.ComboBox(self, -1,
                                 style=wx.CB_READONLY)
         if not IS_MAC:
@@ -309,17 +317,20 @@ class DataPanel(ScrolledPanel, PanelBase):
         wx.EVT_COMBOBOX(self.perspective_cbox, -1, 
                         self._on_perspective_selection)
     
+        #Append data to current Graph Button
         self.bt_append_plot = wx.Button(self, wx.NewId(), "Append Plot To",
                                         size=(BUTTON_WIDTH, -1))
         self.bt_append_plot.SetToolTipString( \
                                 "Plot the selected data in the active panel")
         wx.EVT_BUTTON(self, self.bt_append_plot.GetId(), self.on_append_plot)
         
+        #Create a new graph and send data to that new graph button
         self.bt_plot = wx.Button(self, wx.NewId(), "New Plot", 
                                  size=(BUTTON_WIDTH, -1))
         self.bt_plot.SetToolTipString("To trigger plotting")
         wx.EVT_BUTTON(self, self.bt_plot.GetId(), self.on_plot)
         
+        #Freeze current theory button - becomes a data set and stays on graph
         self.bt_freeze = wx.Button(self, wx.NewId(), "Freeze Theory", 
                                    size=(BUTTON_WIDTH, -1))
         freeze_tip = "To trigger freeze a theory: making a copy\n"
@@ -328,6 +339,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.bt_freeze.SetToolTipString(freeze_tip)
         wx.EVT_BUTTON(self, self.bt_freeze.GetId(), self.on_freeze)
        
+        #select plot to send to combo box (blank if no data)
         if sys.platform == 'darwin':
             self.cb_plotpanel = wx.ComboBox(self, -1, 
                                             style=wx.CB_READONLY)
@@ -336,6 +348,12 @@ class DataPanel(ScrolledPanel, PanelBase):
                                             style=wx.CB_READONLY|wx.CB_SORT)
         wx.EVT_COMBOBOX(self.cb_plotpanel, -1, self._on_plot_selection)
         self.cb_plotpanel.Disable()
+        
+        #Help button
+        self.bt_help = wx.Button(self, wx.NewId(), "HELP",
+                                 size=(BUTTON_WIDTH, -1))
+        self.bt_help.SetToolTipString("Help for the Data Explorer.")
+        wx.EVT_BUTTON(self,self.bt_help.GetId(), self.on_help)
 
         self.sizer3.AddMany([(self.bt_add),
                              ((10, 10)),
@@ -355,8 +373,8 @@ class DataPanel(ScrolledPanel, PanelBase):
                               wx.EXPAND|wx.ADJUST_MINSIZE, 5),
                              ((10, 10)),
                              (self.sizer4),
-                             ((10, 40)),
-                             ((10, 40))])
+                             ((10, 10)),
+                             (self.bt_help, 0, wx.EXPAND|wx.RIGHT, 5)])
 
         self.sizer3.AddGrowableCol(1, 1)
         self.show_data_button()
@@ -1068,6 +1086,29 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         return self.frame 
     
+    def on_help(self, event):
+        """
+        Bring up the data manager Documentation whenever
+        the HELP button is clicked.
+
+        Calls DocumentationWindow with the path of the location within the
+        documentation tree (after /doc/ ....".  Note that when using old
+        versions of Wx (before 2.9) and thus not the release version of
+        installers, the help comes up at the top level of the file as
+        webbrowser does not pass anything past the # to the browser when it is
+        running "file:///...."
+
+    :param evt: Triggers on clicking the help button
+    """
+
+        #import documentation window here to avoid circular imports
+        #if put at top of file with rest of imports.
+        from documentation_window import DocumentationWindow
+
+        _TreeLocation = "user/sasgui/guiframe/data_explorer_help.html"
+        _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, "",
+                                          "Data Explorer Help")
+
     def on_close(self, event):
         """
         On close event

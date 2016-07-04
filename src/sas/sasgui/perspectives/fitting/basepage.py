@@ -11,8 +11,12 @@ import math
 import string
 import json
 import logging
+import traceback
+
 from collections import defaultdict
 from wx.lib.scrolledpanel import ScrolledPanel
+
+import sasmodels.sasview_model
 from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.guiframe.utils import format_number, check_float, IdList
 from sas.sasgui.guiframe.events import PanelOnFocusEvent
@@ -197,8 +201,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## flag to determine if state has change
         self.state_change = False
         ## save customized array
-        self.values = []
-        self.weights = []
+        self.values = {}   # type: Dict[str, List[float, ...]]
+        self.weights = {}   # type: Dict[str, List[float, ...]]
         ## retrieve saved state
         self.number_saved_state = 0
         ## dictionary of saved state
@@ -851,9 +855,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                     weight = float(toks[1])
                     angles.append(angle)
                     weights.append(weight)
-                except:
+                except Exception:
                     # Skip non-data lines
-                    logging.error(sys.exc_info()[1])
+                    logging.error(traceback.format_exc())
             return numpy.array(angles), numpy.array(weights)
         except:
             raise
@@ -1392,8 +1396,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.model.set_dispersion(param_name, disp_model)
                 self.model._persistency_dict[key] = \
                                  [state.values, state.weights]
-            except:
-                logging.error(sys.exc_info()[1])
+            except Exception:
+                logging.error(traceback.format_exc())
             selection = self._find_polyfunc_selection(disp_model)
             for list in self.fittable_param:
                 if list[1] == key and list[7] != None:
@@ -1409,8 +1413,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                             list[2].Disable()
                             list[5].Disable()
                             list[6].Disable()
-                        except:
-                            logging.error(sys.exc_info()[1])
+                        except Exception:
+                            logging.error(traceback.format_exc())
             # For array, disable all fixed params
             if selection == 1:
                 for item in self.fixed_param:
@@ -1418,8 +1422,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                         # try it and pass it for the orientation for 1D
                         try:
                             item[2].Disable()
-                        except:
-                            logging.error(sys.exc_info()[1])
+                        except Exception:
+                            logging.error(traceback.format_exc())
 
         # Make sure the check box updated when all checked
         if self.cb1.GetValue():
@@ -1506,8 +1510,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                                                       is_modified)
                 is_modified = self._check_value_enter(self.parameters,
                                                       is_modified)
-            except:
-                logging.error(sys.exc_info()[1])
+            except Exception:
+                logging.error(traceback.format_exc())
 
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and
@@ -1650,8 +1654,8 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         try:
             self.save_current_state()
-        except:
-            logging.error(sys.exc_info()[1])
+        except Exception:
+            logging.error(traceback.format_exc())
 
         return flag
 
@@ -1894,11 +1898,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         try:
             if mod_cat == custom_model:
                 for model in self.model_list_box[mod_cat]:
-                    if 'sasmodels.sasview_model.' in str(model):
-                        str_m = model.id
-                    else:
-                        str_m = str(model).split(".")[0]
-                    #self.model_box.Append(str_m)
+                    str_m = model.id if hasattr(model, 'id') else model.name
                     m_list.append(self.model_dict[str_m])
             else:
                 cat_dic = self.master_category_dict[mod_cat]
@@ -1909,8 +1909,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                     #    msg = "This model is disabled by Category Manager."
                     #    wx.PostEvent(self.parent.parent,
                     #                 StatusEvent(status=msg, info="error"))
-        except:
-            msg = "%s\n" % (sys.exc_info()[1])
+        except Exception:
+            msg = traceback.format_exc()
             wx.PostEvent(self._manager.parent,
                          StatusEvent(status=msg, info="error"))
         self._populate_box(self.formfactorbox, m_list)
@@ -2473,8 +2473,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                 # for the selected parameter
                 try:
                     self.model.set_dispersion(p, disp_model)
-                except:
-                    logging.error(sys.exc_info()[1])
+                except Exception:
+                    logging.error(traceback.format_exc())
 
         ## save state into
         self.save_current_state()
@@ -2587,7 +2587,8 @@ class BasicPage(ScrolledPanel, PanelBase):
             # draw
             self._draw_model()
             self.Refresh()
-        except:
+        except Exception:
+            logging.error(traceback.format_exc())
             # Error msg
             msg = "Error occurred:"
             msg += " Could not select the distribution function..."
@@ -2679,15 +2680,16 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         # Try to delete values and weight of the names array dic if exists
         try:
-            del self.values[name]
-            del self.weights[name]
-            # delete all other dic
-            del self.state.values[name]
-            del self.state.weights[name]
-            del self.model._persistency_dict[name.split('.')[0]]
-            del self.state.model._persistency_dict[name.split('.')[0]]
-        except:
-            logging.error(sys.exc_info()[1])
+            if name in self.values:
+                del self.values[name]
+                del self.weights[name]
+                # delete all other dic
+                del self.state.values[name]
+                del self.state.weights[name]
+                del self.model._persistency_dict[name.split('.')[0]]
+                del self.state.model._persistency_dict[name.split('.')[0]]
+        except Exception:
+            logging.error(traceback.format_exc())
 
     def _lay_out(self):
         """
@@ -2831,9 +2833,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                         # append to the list
                         graphs.append(item2.figure)
                         canvases.append(item2.canvas)
-            except:
+            except Exception:
                 # Not for control panels
-                logging.error(sys.exc_info()[1])
+                logging.error(traceback.format_exc())
         # Make sure the resduals plot goes to the last
         if res_item != None:
             graphs.append(res_item[0])
@@ -3166,14 +3168,14 @@ class BasicPage(ScrolledPanel, PanelBase):
             try:
                 if item[7].__class__.__name__ == 'ComboBox':
                     disfunc = str(item[7].GetValue())
-            except:
-                logging.error(sys.exc_info()[1])
+            except Exception:
+                logging.error(traceback.format_exc())
 
             # 2D
             if self.data.__class__.__name__ == "Data2D":
                 try:
                     check = item[0].GetValue()
-                except:
+                except Exception:
                     check = None
                 name = item[1]
                 value = item[2].GetValue()
@@ -3201,8 +3203,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                     disfunc += ','
                     for weight in self.weights[name]:
                         disfunc += ' ' + str(weight)
-            except:
-                logging.error(sys.exc_info()[1])
+            except Exception:
+                logging.error(traceback.format_exc())
             content += name + ',' + str(check) + ',' + value + disfunc + ':'
 
         return content
@@ -3402,8 +3404,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                                                        values=pd_vals,
                                                        weights=pd_weights)
                             is_array = True
-                except:
-                    logging.error(sys.exc_info()[1])
+                except Exception:
+                    logging.error(traceback.format_exc())
                 if not is_array:
                     self._disp_obj_dict[name] = disp_model
                     self.model.set_dispersion(name,
@@ -3417,8 +3419,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                                             [self.state.values,
                                              self.state.weights]
 
-            except:
-                logging.error(sys.exc_info()[1])
+            except Exception:
+                logging.error(traceback.format_exc())
                 print "Error in BasePage._paste_poly_help: %s" % \
                                         sys.exc_info()[1]
 

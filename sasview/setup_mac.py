@@ -119,6 +119,8 @@ plist = dict(CFBundleDocumentTypes=[dict(CFBundleTypeExtensions=EXTENSIONS_LIST,
                                    CFBundleTypeRole="Shell" )],)
 
 #Get version - NB nasty hack. Need to find correct way to give path to installed sasview (AJJ)
+#h5py has been added to packages. It requires hdf5 to be installed separetly
+#
 import __init__ as sasviewver
 
 VERSION = sasviewver.__version__
@@ -133,7 +135,7 @@ EXCLUDES = ['PyQt4', 'sip', 'QtGui']
 OPTIONS = {'argv_emulation': True,
            'packages': ['lxml','numpy', 'scipy', 'pytz', 'encodings',
                         'encodings','matplotlib', 'periodictable',
-                        'reportlab','sasmodels',"pyopencl"
+                        'reportlab','sasmodels',"pyopencl", "h5py"
                         ],
            'iconfile': ICON,
            'frameworks':[libxml_path],

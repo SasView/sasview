@@ -577,9 +577,9 @@ class TextDialog(wx.Dialog):
                         out_f.write(line % (name2) + "\n")
                     else:
                         out_f.write(line + "\n")
-                elif line.count("P1 = make_class"):
+                elif line.count("P1 = find_model"):
                     out_f.write(line % (name1) + "\n")
-                elif line.count("P2 = make_class"):
+                elif line.count("P2 = find_model"):
                     out_f.write(line % (name2) + "\n")
 
                 elif line.count("self.description = '%s'"):
@@ -718,9 +718,11 @@ class EditorPanel(wx.ScrolledWindow):
         """
         Do the layout for parameter related widgets
         """
-        param_txt = wx.StaticText(self, -1, 'Fit Parameters (if any): ')
+        param_txt = wx.StaticText(self, -1, 'Fit Parameters NOT requiring' + \
+                                  ' polydispersity (if any): ')
 
-        param_tip = "#Set the parameters and initial values.\n"
+        param_tip = "#Set the parameters NOT requiring polydispersity " + \
+        "and their initial values.\n"
         param_tip += "#Example:\n"
         param_tip += "A = 1\nB = 1"
         #param_txt.SetToolTipString(param_tip)
@@ -735,9 +737,11 @@ class EditorPanel(wx.ScrolledWindow):
                                   (self.param_tcl, 1, wx.EXPAND | wx.ALL, 10)])
         
         # Parameters with polydispersity
-        pd_param_txt = wx.StaticText(self, -1, 'Fit Parameters requiring polydispersity (if any): ')
+        pd_param_txt = wx.StaticText(self, -1, 'Fit Parameters requiring ' + \
+                                     'polydispersity (if any): ')
 
-        pd_param_tip = "#Set the parameters and initial values.\n"
+        pd_param_tip = "#Set the parameters requiring polydispersity and " + \
+        "their initial values.\n"
         pd_param_tip += "#Example:\n"
         pd_param_tip += "C = 2\nD = 2"
         newid = wx.NewId()
@@ -802,12 +806,9 @@ class EditorPanel(wx.ScrolledWindow):
         self.bt_close.Bind(wx.EVT_BUTTON, self.on_close)
         self.bt_close.SetToolTipString("Close this panel.")
 
-        self.button_sizer.AddMany([(self.bt_apply, 0,
-                                    wx.LEFT, EDITOR_WIDTH * 0.8),
-                                   (self.bt_help, 0,
-                                    wx.LEFT,15),
-                                   (self.bt_close, 0,
-                                    wx.LEFT | wx.BOTTOM, 15)])
+        self.button_sizer.AddMany([(self.bt_apply, 0,0),
+                                   (self.bt_help, 0, wx.LEFT | wx.BOTTOM,15),
+                                   (self.bt_close, 0, wx.LEFT | wx.RIGHT, 15)])
 
     def _do_layout(self):
         """
@@ -834,7 +835,7 @@ class EditorPanel(wx.ScrolledWindow):
                                  (wx.StaticLine(self), 0,
                                   wx.ALL | wx.EXPAND, 5),
                                  (self.msg_sizer, 0, wx.EXPAND | wx.ALL, 5),
-                                 (self.button_sizer, 0, wx.EXPAND | wx.ALL, 5)])
+                                 (self.button_sizer, 0, wx.ALIGN_RIGHT)])
         self.SetSizer(self.main_sizer)
         self.SetAutoLayout(True)
 
@@ -1236,11 +1237,10 @@ class EditorWindow(wx.Frame):
 #import numpy
 ##import scipy?
 #class Model(Model1DPlugin):
-#    name = ""
+#    name = basename without extension of __file__
 #    def __init__(self):
 #        Model1DPlugin.__init__(self, name=self.name)
 #        #set name same as file name
-#        self.name = self.get_fname()
 #        #self.params here
 #        self.description = "%s"
 #        self.set_details()
@@ -1302,11 +1302,6 @@ CUSTOM_2D_TEMP = """
             return iq_array
 """
 TEST_TEMPLATE = """
-    def get_fname(self):
-        path = sys._getframe().f_code.co_filename
-        basename  = os.path.basename(path)
-        name, _ = os.path.splitext(basename)
-        return name
 ######################################################################
 ## THIS IS FOR TEST. DO NOT MODIFY THE FOLLOWING LINES!!!!!!!!!!!!!!!!
 if __name__ == "__main__":
@@ -1329,30 +1324,24 @@ SUM_TEMPLATE = """
 import os
 import sys
 import copy
+import collections
 
 import numpy
 
 from sas.sascalc.fit.pluginmodel import Model1DPlugin
-from sasmodels.sasview_model import make_class
-from sasmodels.core import load_model_info
-# User can change the name of the model (only with single functional model)
-#P1_model:
-#from %s import Model as P1
-
-#P2_model:
-#from %s import Model as P2
+from sasmodels.sasview_model import find_model
 
 class Model(Model1DPlugin):
-    name = ""
-    def __init__(self):
+    name = os.path.splitext(os.path.basename(__file__))[0]
+    is_multiplicity_model = False
+    def __init__(self, multiplicity=1):
         Model1DPlugin.__init__(self, name='')
-        P1 = make_class('%s')
-        P2 = make_class('%s')
+        P1 = find_model('%s')
+        P2 = find_model('%s')
         p_model1 = P1()
         p_model2 = P2()
         ## Setting  model name model description
         self.description = '%s'
-        self.name = self.get_fname()
         if self.name.rstrip().lstrip() == '':
             self.name = self._get_name(p_model1.name, p_model2.name)
         if self.description.rstrip().lstrip() == '':
@@ -1361,7 +1350,7 @@ class Model(Model1DPlugin):
             self.fill_description(p_model1, p_model2)
 
         ## Define parameters
-        self.params = {}
+        self.params = collections.OrderedDict()
 
         ## Parameter details [units, min, max]
         self.details = {}
@@ -1390,7 +1379,9 @@ class Model(Model1DPlugin):
 
         #list of parameter that can be fitted
         self._set_fixed_params()
+
         ## parameters with orientation
+        self.orientation_params = []
         for item in self.p_model1.orientation_params:
             new_item = "p1_" + item
             if not new_item in self.orientation_params:
@@ -1401,6 +1392,7 @@ class Model(Model1DPlugin):
             if not new_item in self.orientation_params:
                 self.orientation_params.append(new_item)
         ## magnetic params
+        self.magnetic_params = []
         for item in self.p_model1.magnetic_params:
             new_item = "p1_" + item
             if not new_item in self.magnetic_params:
@@ -1458,6 +1450,7 @@ class Model(Model1DPlugin):
         return upper_name
 
     def _set_dispersion(self):
+        self.dispersion = collections.OrderedDict()
         ##set dispersion only from p_model
         for name , value in self.p_model1.dispersion.iteritems():
             #if name.lower() not in self.p_model1.orientation_params:
@@ -1573,6 +1566,7 @@ class Model(Model1DPlugin):
 
 
     def _set_fixed_params(self):
+        self.fixed = []
         for item in self.p_model1.fixed:
             new_item = "p1" + item
             self.fixed.append(new_item)
@@ -1622,12 +1616,6 @@ new_parameter in self.p_model2.dispersion.keys():
         description += "This model gives the summation or multiplication of"
         description += "%s and %s. "% ( p_model1.name, p_model2.name )
         self.description += description
-
-    def get_fname(self):
-        path = sys._getframe().f_code.co_filename
-        basename  = os.path.basename(path)
-        name, _ = os.path.splitext(basename)
-        return name
 
 if __name__ == "__main__":
     m1= Model()

@@ -18,7 +18,7 @@ import wx
 import copy
 import logging
 import numpy
-import string
+import traceback
 
 import xml.dom.minidom
 from xml.dom.minidom import parseString
@@ -472,8 +472,8 @@ class PageState(object):
             name = content[0]
             try:
                 value = content[1]
-            except:
-                logging.error(sys.exc_value)
+            except Exception:
+                logging.error(traceback.format_exc())
             if name.count("State created"):
                 repo_time = "" + value
             if name.count("parameter name"):
@@ -514,8 +514,8 @@ class PageState(object):
                     if len(title) == 0:
                         title = content[2] + " [" + repo_time + "]"
                         title_name = HEADER % title
-                except:
-                    logging.error(sys.exc_value)
+                except Exception:
+                    logging.error(traceback.format_exc())
             if name == "model name ":
                 try:
                     modelname = "Model name:" + content[1]
@@ -529,8 +529,8 @@ class PageState(object):
                             + " = " + content[3].split(",")[0]
                     q_name = ("Q Range:    " + q_range)
                     q_range = CENTRE % q_name
-                except:
-                    logging.error(sys.exc_value)
+                except Exception:
+                    logging.error(traceback.format_exc())
         paramval = ""
         for lines in param_string.split(":"):
             line = lines.split(",")
@@ -863,8 +863,8 @@ class PageState(object):
                             disp_model = disp()
                             attribute = getattr(self, item[1])
                             attribute[name] = com_name
-                        except:
-                            logging.error(sys.exc_value)
+                        except Exception:
+                            logging.error(traceback.format_exc())
 
                 # get self.values and self.weights dic. if exists
                 for item in LIST_OF_MODEL_ATTRIBUTES:
@@ -879,9 +879,9 @@ class PageState(object):
                             try:
                                 val = float(line)
                                 value_list.append(val)
-                            except:
+                            except Exception:
                                 # pass if line is empty (it happens)
-                                logging.error(sys.exc_value)
+                                logging.error(traceback.format_exc())
                         dic[name] = numpy.array(value_list)
                     setattr(self, item[1], dic)
 
@@ -1292,7 +1292,7 @@ class Reader(CansasReader):
                     note_value = note.text.strip()
                     if len(note_value) > 0:
                         data_info.notes.append(note_value)
-            except:
+            except Exception:
                 err_mess = "cansas_reader.read: error processing entry notes\n  %s" % sys.exc_value
                 self.errors.append(err_mess)
                 logging.error(err_mess)
@@ -1314,7 +1314,7 @@ class Reader(CansasReader):
                     detail_value = item.text.strip()
                     if len(detail_value) > 0:
                         data_info.sample.details.append(detail_value)
-            except:
+            except Exception:
                 err_mess = "cansas_reader.read: error processing sample details\n  %s" % sys.exc_value
                 self.errors.append(err_mess)
                 logging.error(err_mess)
