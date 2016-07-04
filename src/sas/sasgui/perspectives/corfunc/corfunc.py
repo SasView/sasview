@@ -52,6 +52,7 @@ class Plugin(PluginBase):
         if data_list is None:
             data_list = []
         if len(data_list) >= 1:
+            msg = ""
             if len(data_list) == 1:
                 data = data_list[0]
             else:
