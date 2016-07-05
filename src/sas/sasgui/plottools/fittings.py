@@ -1,11 +1,25 @@
 """
+This module is used to fit a set of x,y data to a model passed to it. It is
+used to calculate the slope and intercepts for the linearized fits.  Two things
+should be noted:
+
+First, this fitting module uses the NLLSQ module of SciPy rather than a linear
+fit.  This along with a few other modules could probably be removed if we
+move to a linear regression approach.
+
+Second, this infrastructure does not allow for resolution smearing of the 
+the models.  Hence the results are not that accurate even for pinhole
+collimation of SANS but may be good for SAXS.  It is completely wrong for 
+slit smeared data. 
+
 """
 from scipy import optimize
 
 
 class Parameter(object):
     """
-    Class to handle model parameters
+    Class to handle model parameters - sets the parameters and their
+    initial value from the model based to it.
     """
     def __init__(self, model, name, value=None):
         self.model = model

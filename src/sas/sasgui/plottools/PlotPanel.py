@@ -645,6 +645,11 @@ class PlotPanel(wx.Panel):
                 and(self.xminView != 0.0)and (self.xmaxView != 0.0):
                 dlg.setFitRange(self.xminView, self.xmaxView,
                                 self.xmin, self.xmax)
+            # It would be nice for this to NOT be modal (i.e. Show).
+            # Not sure about other ramifications - for example
+            # if a second linear fit is started before the first is closed.
+            # consider for future - being able to work on the plot while
+            # seing the fit values would be very nice  -- PDB 7/10/16
             dlg.ShowModal()
 
     def set_selected_from_menu(self, menu, id):
