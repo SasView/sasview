@@ -3,12 +3,24 @@ set EASY_INSTALL=c:\python27\scripts\easy_install.exe
 set PATH=c:\python27;c:\mingw\bin;%PATH%
 set PYLINT= C:\Python27\Scripts\pylint
 set INNO="C:\Program Files (x86)\Inno Setup 5\ISCC.exe"
+set GIT_SED=C:\"Program Files (x86)"\Git\bin\sed.exe
+
 
 set PYTHONPATH=%PYTHONPATH%;%WORKSPACE%\sasview\utils
 set PYTHONPATH=%PYTHONPATH%;%WORKSPACE%\sasview\sasview-install
 
 echo %PYTHONPATH%
 echo %WORKSPACE%
+
+
+:: SET SASVIEW GITHASH ################################################
+cd %WORKSPACE%
+cd sasview\sasview
+git rev-parse HEAD > tmpFile_githash
+SET /p githash= < tmpFile_githash
+DEL tmpFile_githash
+%GIT_SED% -i.bak "s/GIT_COMMIT/%githash%/g" __init__.py
+
 
 
 :: MAKE DIR FOR EGGS ##################################################

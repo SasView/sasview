@@ -330,7 +330,7 @@ dll_excludes = [
     'libgdk_pixbuf-2.0-0.dll', 'libgobject-2.0-0.dll', 'libgdk-win32-2.0-0.dll',
     'tcl84.dll', 'tk84.dll', 'QtGui4.dll', 'QtCore4.dll',
     # numpy 1.8 openmp bindings (still seems to use all the cores without them)
-    'libiomp5md.dll', 'libifcoremd.dll', 'libmmd.dll', 'svml_dispmd.dll','libifportMD.dll',
+    #'libiomp5md.dll', 'libifcoremd.dll', 'libmmd.dll', 'svml_dispmd.dll','libifportMD.dll',
     # microsoft C runtime (not allowed to ship with the app; need to ship vcredist
     'msvcp90.dll',
     # 32-bit windows console piping

@@ -515,12 +515,12 @@ class LinearFit(wx.Dialog):
                     self.I0_tctr.SetValue(format_number(val))
             if self.Rgerr_tctr.IsShown():
                 if rg != None and rg != 0:
-                    value = format_number(3 * float(cstA) / (2 * rg))
+                    value = format_number(3 * float(errA) / (2 * rg))
                 else:
                     value = ''
                 self.Rgerr_tctr.SetValue(value)
                 if self.I0err_tctr.IsShown():
-                    val = numpy.abs(numpy.exp(cstB) - numpy.exp(cstB + errB))
+                    val = numpy.abs(numpy.exp(cstB) * errB)
                     self.I0err_tctr.SetValue(format_number(val))
             if self.Diameter_tctr.IsShown():
                 rg = 4 * numpy.sqrt(-float(cstA))
@@ -533,10 +533,10 @@ class LinearFit(wx.Dialog):
                     value = ''
                 self.Diametererr_tctr.SetValue(value)
             if self.RgQmin_tctr.IsShown():
-                value = format_number(rg * self.mini)
+                value = format_number(rg * self.floatInvTransform(self.mini))
                 self.RgQmin_tctr.SetValue(value)
             if self.RgQmax_tctr.IsShown():
-                value = format_number(rg * self.maxi)
+                value = format_number(rg * self.floatInvTransform(self.maxi))
                 self.RgQmax_tctr.SetValue(value)
 
     def _ongetValues(self):
