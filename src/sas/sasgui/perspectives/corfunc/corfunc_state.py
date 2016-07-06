@@ -18,6 +18,7 @@ DEFAULT_STATE = {
     'qmin_tcl': None,
     'qmax1_tcl': None,
     'qmax2_tcl': None,
+    'background_tcl': None
 }
 
 # List of output parameters, used by __str__
@@ -41,6 +42,7 @@ class CorfuncState(object):
         self.data = None
         self.qmin = None
         self.qmax = [0, 0]
+        self.background = None
         self.outputs = None
 
         self.saved_state = DEFAULT_STATE
@@ -64,6 +66,7 @@ class CorfuncState(object):
         state += "Timestamp:    {}\n".format(self.timestamp)
         state += "Qmin:         {}\n".format(str(self.qmin))
         state += "Qmax:         {}\n".format(str(self.qmax))
+        state += "Background:   {}\n".format(str(self.background))
         if self.outputs is None:
             return state
         state += "\nOutputs:\n"
@@ -88,6 +91,8 @@ class CorfuncState(object):
             self.qmax[0] = value
         elif name == 'qmax2_tcl':
             self.qmax[1] = value
+        elif name == 'background_tcl':
+            self.background = value
 
     def toXML(self, filename='corfunc_state.cor', doc=None, entry_node=None):
         """
