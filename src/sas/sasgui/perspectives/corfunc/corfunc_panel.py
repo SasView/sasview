@@ -51,6 +51,13 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._qmax2_input.Bind(wx.EVT_TEXT, self._on_enter_qrange)
 
     def set_state(self, state=None, data=None):
+        """
+        Set the state of the panel. If no state is provided, the panel will
+        be set to the default state.
+
+        :param state: A CorfuncState object
+        :param data: A Data1D object
+        """
         if state is None:
             self.state = CorfuncState()
         else:
@@ -108,6 +115,8 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
     def save_project(self, doc=None):
         """
         Return an XML node containing the state of the panel
+
+        :param doc: Am xml node to attach the project state to (optional)
         """
         data = self._data
         state = self.get_state()
@@ -122,6 +131,15 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
                 else:
                     doc = new_doc
         return doc
+
+    def set_qmin(self, qmin):
+        self.qmin = qmin
+        self._qmin_input.SetValue(str(qmin))
+
+    def set_qmax(self, qmax):
+        self.qmax = qmax
+        self._qmax1_input.SetValue(str(qmax[0]))
+        self._qmax2_input.SetValue(str(qmax[1]))
 
 
     def _on_enter_qrange(self, event=None):
@@ -144,15 +162,6 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
                 ctrl=[self._qmin_input, self._qmax1_input, self._qmax2_input],
                 active=event.GetEventObject(), id=data_id, group_id=group_id,
                 leftdown=False))
-
-    def set_qmin(self, qmin):
-        self.qmin = qmin
-        self._qmin_input.SetValue(str(qmin))
-
-    def set_qmax(self, qmax):
-        self.qmax = qmax
-        self._qmax1_input.SetValue(str(qmax[0]))
-        self._qmax2_input.SetValue(str(qmax[1]))
 
     def _validate_qrange(self):
         """

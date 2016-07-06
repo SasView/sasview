@@ -31,7 +31,6 @@ class Plugin(PluginBase):
         PluginBase.__init__(self, name="Correlation Function")
         logging.info("Correlation function plug-in started")
         self._always_active = True
-
         self.state_reader = Reader(self.set_state)
         self._extensions = '.cor'
         l = Loader()
@@ -137,6 +136,7 @@ class Plugin(PluginBase):
         new_plot.group_id = GROUP_ID_IQ_DATA
         new_plot.id = self.data_id
         new_plot.title = "I(q)"
+        # Show data on a linear scale
         new_plot.xtransform = 'x'
         new_plot.ytransform = 'y'
         wx.PostEvent(self.parent,
