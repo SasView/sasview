@@ -12,6 +12,9 @@ from sas.sasgui.guiframe.gui_style import GUIFRAME_ID
 from sas.sasgui.perspectives.corfunc.corfunc_panel import CorfuncPanel
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.perspectives.pr.pr_widgets import DataDialog
+from sas.sasgui.perspectives.corfunc.corfunc_state import Reader
+from sas.sascalc.dataloader.loader import Loader
+import sas.sascalc.dataloader
 
 
 GROUP_ID_IQ_DATA = r"$I_{obs}(q)$"
@@ -29,6 +32,11 @@ class Plugin(PluginBase):
         logging.info("Correlation function plug-in started")
         self._always_active = True
 
+        self.state_reader = Reader(self.set_state)
+        self._extensions = '.cor'
+        l = Loader()
+        l.associate_file_reader('.cor', self.state_reader)
+
     def get_panels(self, parent):
         """
         Define the GUI panels
@@ -42,6 +50,12 @@ class Plugin(PluginBase):
         self.perspective.append(self.corfunc_panel.window_name)
 
         return [self.corfunc_panel]
+
+    def set_state(self, state=None, datainfo=None):
+        """
+        Callback for CorfuncState reader. Called when a .cor file is loaded
+        """
+        self.corfunc_panel.set_state(state=state, data=datainfo)
 
     def set_data(self, data_list=None):
         """
@@ -97,7 +111,7 @@ class Plugin(PluginBase):
                                                 group_id=GROUP_ID_IQ_DATA,
                                                 id=self.data_id))
                     self.data_id = data.id
-                    self.corfunc_panel._set_data(data)
+                    self.corfunc_panel.set_data(data)
                 except:
                     msg = "Corfunc set_data: " + str(sys.exc_value)
                     wx.PostEvent(self.parent, StatusEvent(status=msg,

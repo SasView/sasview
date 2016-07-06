@@ -8,6 +8,7 @@ from sas.sasgui.guiframe.utils import check_float
 from sas.sasgui.perspectives.invariant.invariant_widgets import OutputTextCtrl
 from sas.sasgui.perspectives.invariant.invariant_widgets import InvTextCtrl
 from sas.sasgui.perspectives.fitting.basepage import ModelTextCtrl
+from sas.sasgui.perspectives.corfunc.corfunc_state import CorfuncState
 
 if sys.platform.count("win32") > 0:
     _STATICBOX_WIDTH = 350
@@ -38,48 +39,96 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._qmin_input = None
         self._qmax1_input = None
         self._qmax2_input = None
-        self._qmin = 0
-        self._qmax = (0, 0)
+        self.qmin = 0
+        self.qmax = (0, 0)
         # Dictionary for saving IDs of text boxes used to display output data
         self._output_ids = None
         self.state = None
-        self.set_state()
         self._do_layout()
+        self.set_state()
         self._qmin_input.Bind(wx.EVT_TEXT, self._on_enter_qrange)
         self._qmax1_input.Bind(wx.EVT_TEXT, self._on_enter_qrange)
         self._qmax2_input.Bind(wx.EVT_TEXT, self._on_enter_qrange)
 
     def set_state(self, state=None, data=None):
-        # TODO: Implement state restoration
-        return False
+        if state is None:
+            self.state = CorfuncState()
+        else:
+            self.state = state
+        if data is not None:
+            self.state.data = data
+        self.set_data(self.state.data, set_qrange=False)
+        if self.state.qmin is not None:
+            self.set_qmin(self.state.qmin)
+        if self.state.qmax is not None and self.state.qmax != (None, None):
+            self.set_qmax(tuple(self.state.qmax))
+
+    def get_state(self):
+        """
+        Return the state of the panel
+        """
+        state = CorfuncState()
+        state.set_saved_state('qmin_tcl', self.qmin)
+        state.set_saved_state('qmax1_tcl', self.qmax[0])
+        state.set_saved_state('qmax2_tcl', self.qmax[1])
+        if self._data is not None:
+            state.file = self._data.title
+            state.data = self._data
+        self.state = state
+
+        return self.state
 
     def onSetFocus(self, evt):
         if evt is not None:
             evt.Skip()
         self._validate_qrange()
 
-    def _set_data(self, data=None):
+    def set_data(self, data=None, set_qrange=True):
         """
         Update the GUI to reflect new data that has been loaded in
 
         :param data: The data that has been loaded
         """
-        self._data_name_box.SetValue(str(data.name))
+        if data is None:
+            return
+        self._data_name_box.SetValue(str(data.title))
         self._data = data
         if self._manager is not None:
             self._manager.show_data(data=data, reset=True)
-        lower = data.x[-1]*0.05
-        upper1 = data.x[-1] - lower*5
-        upper2 = data.x[-1]
-        self.set_qmin(lower)
-        self.set_qmax((upper1, upper2))
+        if set_qrange:
+            lower = data.x[-1]*0.05
+            upper1 = data.x[-1] - lower*5
+            upper2 = data.x[-1]
+            self.set_qmin(lower)
+            self.set_qmax((upper1, upper2))
+
+    def get_data(self):
+        return self._data
+
+    def save_project(self, doc=None):
+        """
+        Return an XML node containing the state of the panel
+        """
+        data = self._data
+        state = self.get_state()
+        if data is not None:
+            new_doc, sasentry = self._manager.state_reader._to_xml_doc(data)
+            new_doc = state.toXML(doc=new_doc, entry_node=sasentry)
+            if new_doc is not None:
+                if doc is not None and hasattr(doc, "firstChild"):
+                    child = new_doc.getElementsByTagName("SASentry")
+                    for item in child:
+                        doc.firstChild.appendChild(item)
+                else:
+                    doc = new_doc
+        return doc
 
 
-    def _on_enter_qrange(self, event):
+    def _on_enter_qrange(self, event=None):
         """
         Read values from input boxes and save to memory.
         """
-        event.Skip()
+        if event is not None: event.Skip()
         if not self._validate_qrange():
             return
         new_qmin = float(self._qmin_input.GetValue())
@@ -90,10 +139,11 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         data_id = self._manager.data_id
         from sas.sasgui.perspectives.corfunc.corfunc import GROUP_ID_IQ_DATA
         group_id = GROUP_ID_IQ_DATA
-        wx.PostEvent(self._manager.parent, PlotQrangeEvent(
-            ctrl=[self._qmin_input, self._qmax1_input, self._qmax2_input],
-            active=event.GetEventObject(), id=data_id, group_id=group_id,
-            leftdown=False))
+        if event is not None:
+            wx.PostEvent(self._manager.parent, PlotQrangeEvent(
+                ctrl=[self._qmin_input, self._qmax1_input, self._qmax2_input],
+                active=event.GetEventObject(), id=data_id, group_id=group_id,
+                leftdown=False))
 
     def set_qmin(self, qmin):
         self.qmin = qmin
@@ -138,7 +188,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         elif qmin > qmax1:
             "qmin must be less than qmax"
             qmin_valid = False
-        # import pdb; pdb.set_trace()
+
         if not (qmin_valid and qmax_valid):
             if not qmin_valid:
                 self._qmin_input.SetBackgroundColour('pink')
