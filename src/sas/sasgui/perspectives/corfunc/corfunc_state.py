@@ -1,6 +1,3 @@
-"""
-State class for the corfunc UI
-"""
 import time
 import sys
 import os
@@ -34,6 +31,9 @@ output_list = [
 ]
 
 class CorfuncState(object):
+    """
+    Stores information about the state of CorfuncPanel
+    """
 
     def __init__(self):
         # Inputs
@@ -205,7 +205,7 @@ class CorfuncState(object):
 
 class Reader(CansasReader):
     """
-    Class to read a CanSAS file containing the state of the CorfuncPanel
+    Reads a CanSAS file containing the state of a CorfuncPanel
     """
 
     type_name = "Corfunc"
