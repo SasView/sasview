@@ -201,8 +201,8 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         if event is not None:
             wx.PostEvent(self._manager.parent, PlotQrangeEvent(
                 ctrl=[self._qmin_input, self._qmax1_input, self._qmax2_input],
-                active=event.GetEventObject(), id=IQ_DATA_LABEL, group_id=group_id,
-                leftdown=False))
+                active=event.GetEventObject(), id=IQ_DATA_LABEL,
+                group_id=group_id, leftdown=False))
 
     def _validate_inputs(self):
         """
@@ -304,7 +304,8 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
             text_enter_callback=self._on_enter_input)
         self._background_input.SetToolTipString(("A background value to "
             "subtract from all intensity values"))
-        q_sizer.Add(self._background_input, (1,1), (1,1), wx.RIGHT | wx.EXPAND, 5)
+        q_sizer.Add(self._background_input, (1,1), (1,1),
+            wx.RIGHT | wx.EXPAND, 5)
 
         qrange_label = wx.StaticText(self, -1, "Q Range:", size=(50,20))
         q_sizer.Add(qrange_label, (2,0), (1,1), wx.LEFT | wx.EXPAND, 5)

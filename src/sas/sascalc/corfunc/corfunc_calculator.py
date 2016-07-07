@@ -142,8 +142,8 @@ class CorfuncCalculator(object):
         # Smooths between the best-fit porod function and the data to produce a
         # better fitting curve
         data = interp1d(q, iq)
-        s1 = self._Interpolator(data, lambda x: self._porod(x, fitp[0], fitp[1]),
-            self.upperq[0], q[-1])
+        s1 = self._Interpolator(data,
+            lambda x: self._porod(x, fitp[0], fitp[1]), self.upperq[0], q[-1])
 
         mask = np.logical_and(q < self.lowerq, 0 < q)
 

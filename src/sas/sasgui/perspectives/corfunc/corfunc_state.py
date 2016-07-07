@@ -108,7 +108,7 @@ class CorfuncState(object):
         :param entry_node: XML node within the XML document at which
             we will append the data [optional]
 
-        :return: None if no doc is provided, modified XML document if doc != None
+        :return: None if no doc is provided, modified XML document if doc!=None
         """
         from xml.dom.minidom import getDOMImplementation
 
