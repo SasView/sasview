@@ -321,24 +321,8 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
 
         q_sizer.Add(explanation_label, (0,0), (1,4), wx.LEFT | wx.EXPAND, 5)
 
-        background_label = wx.StaticText(self, -1, "Background:", size=(80,20))
-        q_sizer.Add(background_label, (1,0), (1,1), wx.LEFT | wx.EXPAND, 5)
-
-        self._background_input = ModelTextCtrl(self, -1, size=(50,20),
-            style=wx.TE_PROCESS_ENTER, name='background_input',
-            text_enter_callback=self._on_enter_input)
-        self._background_input.SetToolTipString(("A background value to "
-            "subtract from all intensity values"))
-        q_sizer.Add(self._background_input, (1,1), (1,1),
-            wx.RIGHT | wx.EXPAND, 5)
-
-        background_button = wx.Button(self, wx.NewId(), "Calculate",
-            size=(75, 25))
-        background_button.Bind(wx.EVT_BUTTON, self._compute_background)
-        q_sizer.Add(background_button, (1, 2), (1, 1), wx.RIGHT | wx.EXPAND, 5)
-
         qrange_label = wx.StaticText(self, -1, "Q Range:", size=(50,20))
-        q_sizer.Add(qrange_label, (2,0), (1,1), wx.LEFT | wx.EXPAND, 5)
+        q_sizer.Add(qrange_label, (1,0), (1,1), wx.LEFT | wx.EXPAND, 5)
 
         # Lower Q Range
         qmin_label = wx.StaticText(self, -1, "Lower:", size=(50,20))
@@ -352,10 +336,10 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._qmin_input.SetToolTipString(("Values with q < qmin will be used "
             "for Guinier back extrapolation"))
 
-        q_sizer.Add(qmin_label, (3, 0), (1, 1), wx.LEFT | wx.EXPAND, 5)
-        q_sizer.Add(qmin_lower, (3, 1), (1, 1), wx.LEFT, 5)
-        q_sizer.Add(qmin_dash_label, (3, 2), (1, 1), wx.CENTER | wx.EXPAND, 5)
-        q_sizer.Add(self._qmin_input, (3, 3), (1, 1), wx.LEFT, 5)
+        q_sizer.Add(qmin_label, (2, 0), (1, 1), wx.LEFT | wx.EXPAND, 5)
+        q_sizer.Add(qmin_lower, (2, 1), (1, 1), wx.LEFT, 5)
+        q_sizer.Add(qmin_dash_label, (2, 2), (1, 1), wx.CENTER | wx.EXPAND, 5)
+        q_sizer.Add(self._qmin_input, (2, 3), (1, 1), wx.LEFT, 5)
 
         # Upper Q range
         qmax_tooltip = ("Values with qmax1 < q < qmax2 will be used for Porod"
@@ -374,10 +358,26 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
             text_enter_callback=self._on_enter_input)
         self._qmax2_input.SetToolTipString(qmax_tooltip)
 
-        q_sizer.Add(qmax_label, (4, 0), (1, 1), wx.LEFT | wx.EXPAND, 5)
-        q_sizer.Add(self._qmax1_input, (4, 1), (1, 1), wx.LEFT, 5)
-        q_sizer.Add(qmax_dash_label, (4, 2), (1, 1), wx.CENTER | wx.EXPAND, 5)
-        q_sizer.Add(self._qmax2_input, (4,3), (1, 1), wx.LEFT, 5)
+        q_sizer.Add(qmax_label, (3, 0), (1, 1), wx.LEFT | wx.EXPAND, 5)
+        q_sizer.Add(self._qmax1_input, (3, 1), (1, 1), wx.LEFT, 5)
+        q_sizer.Add(qmax_dash_label, (3, 2), (1, 1), wx.CENTER | wx.EXPAND, 5)
+        q_sizer.Add(self._qmax2_input, (3,3), (1, 1), wx.LEFT, 5)
+
+        background_label = wx.StaticText(self, -1, "Background:", size=(80,20))
+        q_sizer.Add(background_label, (4,0), (1,1), wx.LEFT | wx.EXPAND, 5)
+
+        self._background_input = ModelTextCtrl(self, -1, size=(50,20),
+            style=wx.TE_PROCESS_ENTER, name='background_input',
+            text_enter_callback=self._on_enter_input)
+        self._background_input.SetToolTipString(("A background value to "
+            "subtract from all intensity values"))
+        q_sizer.Add(self._background_input, (4,1), (1,1),
+            wx.RIGHT, 5)
+
+        background_button = wx.Button(self, wx.NewId(), "Calculate",
+            size=(75, 20))
+        background_button.Bind(wx.EVT_BUTTON, self._compute_background)
+        q_sizer.Add(background_button, (4, 2), (1, 1), wx.RIGHT, 5)
 
         qbox_sizer.Add(q_sizer, wx.TOP, 0)
 
