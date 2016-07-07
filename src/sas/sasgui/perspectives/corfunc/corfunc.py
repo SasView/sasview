@@ -127,6 +127,7 @@ class Plugin(PluginBase):
 
         :param path: The path to the file
         :param data: The data to plot (Data1D)
+        :param label: What to label the plot. Also used as the plot ID
         :param reset: If True, all other plottables will be cleared
         """
         new_plot = Data1D(data.x, data.y, dy=data.dy)

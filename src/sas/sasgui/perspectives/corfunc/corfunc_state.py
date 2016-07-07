@@ -60,7 +60,6 @@ class CorfuncState(object):
         Pretty print the state
 
         :return: A string representing the state
-
         """
         state = "File:         {}\n".format(self.file)
         state += "Timestamp:    {}\n".format(self.timestamp)
