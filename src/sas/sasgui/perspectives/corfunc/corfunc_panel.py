@@ -250,6 +250,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._qmin_input.Refresh()
         self._qmax1_input.Refresh()
         self._qmax2_input.Refresh()
+        self._background_input.Refresh()
         return (qmin_valid and qmax_valid and background_valid)
 
     def _do_layout(self):
