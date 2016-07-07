@@ -22,6 +22,9 @@ GROUP_ID_IQ_DATA = r"$I(q)$"
 IQ_DATA_LABEL = r"$I_{obs}(q)$"
 IQ_EXTRAPOLATED_DATA_LABEL = r"$I_{extrap}(q)$"
 
+GROUP_ID_TRANSFORM = r"$\Gamma(x)$"
+TRANSFORM_LABEL = r"$\Gamma(x)$"
+
 
 class Plugin(PluginBase):
     """
@@ -128,18 +131,24 @@ class Plugin(PluginBase):
         """
         new_plot = Data1D(data.x, data.y, dy=data.dy)
 
+        group_id = ""
         if label == IQ_DATA_LABEL or label == IQ_EXTRAPOLATED_DATA_LABEL:
             new_plot.xaxis("\\rm{Q}", 'A^{-1}')
             new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
-
+            group_id = GROUP_ID_IQ_DATA
+        elif label == TRANSFORM_LABEL:
+            new_plot.xaxis("{x}", 'A')
+            new_plot.yaxis("{\\Gamma}", '')
+            group_id = GROUP_ID_TRANSFORM
         new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
         new_plot.id = label
         new_plot.name = label
+        new_plot.group_id = group_id
         new_plot.interactive = True
-        new_plot.group_id = GROUP_ID_IQ_DATA
-        new_plot.title = "I(q)"
+        new_plot.title = group_id.replace('$', '').replace('\\', '')
         # Show data on a linear scale
         new_plot.xtransform = 'x'
         new_plot.ytransform = 'y'
         wx.PostEvent(self.parent,
-                     NewPlotEvent(plot=new_plot, title="I(q)", reset=reset))
+                     NewPlotEvent(plot=new_plot, title=new_plot.title,
+                        reset=reset))
