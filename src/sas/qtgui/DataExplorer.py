@@ -1,6 +1,7 @@
 # global
 import sys
 import os
+import time
 import logging
 
 from PyQt4 import QtCore
@@ -15,6 +16,8 @@ from GuiUtils import *
 from Plotter import Plotter
 from sas.sascalc.dataloader.loader import Loader
 from sas.sasgui.guiframe.data_manager import DataManager
+from sas.sasgui.guiframe.dataFitting import Data1D
+from sas.sasgui.guiframe.dataFitting import Data2D
 
 from DroppableDataLoadWidget import DroppableDataLoadWidget
 
@@ -56,12 +59,21 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Display HTML content
         self._helpView = QtWebKit.QWebView()
 
+        # Context menu in the treeview
+        #self.treeView.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
+        #self.actionDataInfo.triggered.connect(self.contextDataInfo)
+        #self.treeView.addAction(self.actionDataInfo)
+
+        # Custom context menu
+        self.treeView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.treeView.customContextMenuRequested.connect(self.onCustomContextMenu)
+
         # Connect the comboboxes
         self.cbSelect.currentIndexChanged.connect(self.selectData)
 
         #self.closeEvent.connect(self.closeEvent)
         # self.aboutToQuit.connect(self.closeEvent)
-
+        self.communicator = self.parent.communicator()
         self.communicator.fileReadSignal.connect(self.loadFromURL)
 
         # Proxy model for showing a subset of Data1D/Data2D content
@@ -132,7 +144,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # get content of dir into a list
         path_str = [os.path.join(os.path.abspath(folder), filename)
-                        for filename in os.listdir(folder)]
+                    for filename in os.listdir(folder)]
 
         self.loadFromURL(path_str)
 
@@ -143,8 +155,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Assure this is indeed wanted
         delete_msg = "This operation will delete the checked data sets and all the dependents." +\
                      "\nDo you want to continue?"
-        reply = QtGui.QMessageBox.question(self, 'Warning', delete_msg,
-                QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+        reply = QtGui.QMessageBox.question(self,
+                                           'Warning',
+                                           delete_msg,
+                                           QtGui.QMessageBox.Yes,
+                                           QtGui.QMessageBox.No)
 
         if reply == QtGui.QMessageBox.No:
             return
@@ -200,7 +215,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self._perspective = self.parent.perspective()
 
         # Set the signal handlers
-        self.communicator = self._perspective.communicator()
         self.communicator.updateModelFromPerspectiveSignal.connect(self.updateModelFromPerspective)
 
         # Figure out which rows are checked
@@ -253,6 +267,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 if subitem and subitem.isCheckable() and subitem.checkState() == QtCore.Qt.Checked:
                     theories_copied += 1
                     new_item = self.recursivelyCloneItem(subitem)
+                    # Append a "unique" descriptor to the name
+                    time_bit = str(time.time())[7:-1].replace('.','')
+                    new_name = new_item.text() + '_@' + time_bit
+                    new_item.setText(new_name)
                     self.theory_model.appendRow(new_item)
             self.theory_model.reset()
 
@@ -260,9 +278,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if theories_copied == 0:
             return
         elif theories_copied == 1:
-            freeze_msg = "1 theory sent to Theory tab"
+            freeze_msg = "1 theory copied to the Theory tab as a data set"
         elif theories_copied > 1:
-            freeze_msg = "%i theories sent to Theory tab" % theories_copied
+            freeze_msg = "%i theories copied to the Theory tab as data sets" % theories_copied
         else:
             freeze_msg = "Unexpected number of theories copied: %i" % theories_copied
             raise AttributeError, freeze_msg
@@ -312,11 +330,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if paths is None:
             return
 
-        #if type(paths) == QtCore.QStringList:
         if isinstance(paths, QtCore.QStringList):
             paths = [str(f) for f in paths]
 
-        if paths.__class__.__name__ != "list":
+        if type(paths) is not list:
             paths = [paths]
 
         return paths
@@ -334,7 +351,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         data_error = False
         error_message = ""
 
-        for p_file in path:
+        number_of_files = len(path)
+        self.communicator.progressBarUpdateSignal.emit(0.0)
+
+        for index, p_file in enumerate(path):
             basename = os.path.basename(p_file)
             _, extension = os.path.splitext(basename)
             if extension.lower() in EXTENSIONS:
@@ -405,12 +425,16 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     error_message += "%s\n" % str(p_file)
                 info = "error"
 
+            current_percentage = int(100.0* index/number_of_files)
+            self.communicator.progressBarUpdateSignal.emit(current_percentage)
+
         if any_error or error_message:
             self.communicator.statusBarUpdateSignal.emit(error_message)
 
         else:
             message = "Loading Data Complete! "
         message += log_msg
+        self.communicator.progressBarUpdateSignal.emit(-1)
 
         return output, message
 
@@ -460,7 +484,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 item.setCheckState(QtCore.Qt.Unchecked)
 
                 try:
-                    is1D = item.child(0).data().toPyObject().__class__.__name__ == 'Data1D'
+                    is1D = type(item.child(0).data().toPyObject()) is Data1D
                 except AttributeError:
                     msg = "Bad structure of the data model."
                     raise RuntimeError, msg
@@ -474,7 +498,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 item = self.model.item(index)
 
                 try:
-                    is1D = item.child(0).data().toPyObject().__class__.__name__ == 'Data1D'
+                    is1D = type(item.child(0).data().toPyObject()) is Data1D
                 except AttributeError:
                     msg = "Bad structure of the data model."
                     raise RuntimeError, msg
@@ -488,7 +512,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 item = self.model.item(index)
                 item.setCheckState(QtCore.Qt.Unchecked)
                 try:
-                    is2D = item.child(0).data().toPyObject().__class__.__name__ == 'Data2D'
+                    is2D = type(item.child(0).data().toPyObject()) is Data2D
                 except AttributeError:
                     msg = "Bad structure of the data model."
                     raise RuntimeError, msg
@@ -502,7 +526,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 item = self.model.item(index)
 
                 try:
-                    is2D = item.child(0).data().toPyObject().__class__.__name__ == 'Data2D'
+                    is2D = type(item.child(0).data().toPyObject()) is Data2D
                 except AttributeError:
                     msg = "Bad structure of the data model."
                     raise RuntimeError, msg
@@ -515,14 +539,31 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             # Change this to a proper logging action
             raise Exception, msg
 
+    def contextDataInfo(self):
+        """
+        """
+        print("contextDataInfo TRIGGERED")
+        pass
+
+    def onCustomContextMenu(self, position):
+        """
+        """
+        print "onCustomContextMenu triggered at point ", position.x(), position.y()
+        index = self.treeView.indexAt(position)
+        if index.isValid():
+            print "VALID CONTEXT MENU"
+    #    self.context_menu.exec(self.treeView.mapToGlobal(position))
+        pass
 
     def loadComplete(self, output):
         """
         Post message to status bar and update the data manager
         """
+        assert type(output) == tuple
+
         # Reset the model so the view gets updated.
         self.model.reset()
-        assert type(output) == tuple
+        self.communicator.progressBarUpdateSignal.emit(-1)
 
         output_data = output[0]
         message = output[1]

@@ -110,6 +110,9 @@
        </item>
        <item row="1" column="0">
         <widget class="QTreeView" name="treeView">
+         <property name="contextMenuPolicy">
+          <enum>Qt::NoContextMenu</enum>
+         </property>
          <property name="acceptDrops">
           <bool>true</bool>
          </property>
@@ -394,6 +397,31 @@
     </item>
    </layout>
   </widget>
+  <action name="actionDataInfo">
+   <property name="text">
+    <string>Data Info</string>
+   </property>
+  </action>
+  <action name="actionSaveAs">
+   <property name="text">
+    <string>Save As</string>
+   </property>
+  </action>
+  <action name="actionQuickPlot">
+   <property name="text">
+    <string>Quick Plot</string>
+   </property>
+  </action>
+  <action name="actionQuick3DPlot">
+   <property name="text">
+    <string>Quick 3DPlot (slow)</string>
+   </property>
+  </action>
+  <action name="actionEditMask">
+   <property name="text">
+    <string>Edit Mask</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="main_resources.qrc"/>

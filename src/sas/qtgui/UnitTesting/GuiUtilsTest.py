@@ -1,7 +1,6 @@
 import sys
 import unittest
 import webbrowser
-import urlparse
 
 from PyQt4 import QtCore
 from PyQt4 import QtGui
@@ -58,7 +57,8 @@ class GuiUtilsTest(unittest.TestCase):
             'statusBarUpdateSignal',
             'updatePerspectiveWithDataSignal',
             'updateModelFromPerspectiveSignal',
-            'plotRequestedSignal'
+            'plotRequestedSignal',
+            'progressBarUpdateSignal',
         ]
 
         # Assure all signals are defined.
@@ -187,7 +187,6 @@ class GuiUtilsTest(unittest.TestCase):
             openLink(bad_url2)
         with self.assertRaises(AttributeError):
             openLink(bad_url3)
-        pass
 
 if __name__ == "__main__":
     unittest.main()

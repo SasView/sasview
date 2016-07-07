@@ -59,18 +59,17 @@ class GuiManager(object):
         #
         # Add FileDialog widget as docked
         self.filesWidget = DataExplorerWindow(parent, self)
-        #flags = (QtCore.Qt.Window | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinimizeButtonHint)
-        flags = (QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint |
-                 QtCore.Qt.WindowMinMaxButtonsHint)
 
-        self.dockedFilesWidget = QtGui.QDockWidget("Data explorer", self._workspace, flags=flags)
+        self.dockedFilesWidget = QtGui.QDockWidget("Data explorer", self._workspace)
         self.dockedFilesWidget.setWidget(self.filesWidget)
+        self.dockedFilesWidget.setFeatures(QtGui.QDockWidget.NoDockWidgetFeatures)
         self._workspace.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.dockedFilesWidget)
 
         self.ackWidget = Acknowledgements()
         self.aboutWidget = AboutBox()
 
-        # Disable the close button (?)
+        # Set up the status bar
+        self.statusBarSetup()
 
         # Show the Welcome panel
         self.welcomePanel = WelcomePanel()
@@ -94,6 +93,25 @@ class GuiManager(object):
 
         # Default perspective
         self._current_perspective = self.invariantWidget
+
+    def statusBarSetup(self):
+        """
+        Define the status bar.
+        | <message label> .... | Progress Bar |
+
+        Progress bar invisible until explicitly shown
+        """
+        self.progress = QtGui.QProgressBar()
+        self._workspace.statusbar.setSizeGripEnabled(False)
+
+        self.statusLabel = QtGui.QLabel()
+        self.statusLabel.setText("Welcome to SasView")
+        self._workspace.statusbar.addPermanentWidget(self.statusLabel,1)
+        self._workspace.statusbar.addPermanentWidget(self.progress, stretch=0)
+        self.progress.setRange(0,100)
+        self.progress.setValue(0)
+        self.progress.setTextVisible(True)
+        self.progress.setVisible(False)
 
     def fileRead(self, data):
         """
@@ -132,10 +150,25 @@ class GuiManager(object):
         """
         return self._current_perspective
 
+    def updateProgressBar(self, value):
+        """
+        Update progress bar with the required value (0-100)
+        """
+        assert(-1 <= value <= 100)
+        if value == -1:
+            self.progress.setVisible(False)
+            return
+        if not self.progress.isVisible():
+            self.progress.setTextVisible(True)
+            self.progress.setVisible(True)
+
+        self.progress.setValue(value)
+
     def updateStatusBar(self, text):
         """
         """
-        self._workspace.statusbar.showMessage(text)
+        #self._workspace.statusbar.showMessage(text)
+        self.statusLabel.setText(text)
 
     def createGuiData(self, item, p_file=None):
         """
@@ -236,6 +269,7 @@ class GuiManager(object):
         self.communicate.fileDataReceivedSignal.connect(self.fileRead)
         self.communicate.statusBarUpdateSignal.connect(self.updateStatusBar)
         self.communicate.updatePerspectiveWithDataSignal.connect(self.updatePerspective)
+        self.communicate.progressBarUpdateSignal.connect(self.updateProgressBar)
 
     def addTriggers(self):
         """
@@ -283,8 +317,7 @@ class GuiManager(object):
         self._workspace.actionEdit_Custom_Model.triggered.connect(self.actionEdit_Custom_Model)
         # Window
         self._workspace.actionCascade.triggered.connect(self.actionCascade)
-        self._workspace.actionTile_Horizontally.triggered.connect(self.actionTile_Horizontally)
-        self._workspace.actionTile_Vertically.triggered.connect(self.actionTile_Vertically)
+        self._workspace.actionTile.triggered.connect(self.actionTile)
         self._workspace.actionArrange_Icons.triggered.connect(self.actionArrange_Icons)
         self._workspace.actionNext.triggered.connect(self.actionNext)
         self._workspace.actionPrevious.triggered.connect(self.actionPrevious)
@@ -401,8 +434,14 @@ class GuiManager(object):
 
     def actionHide_Toolbar(self):
         """
+        Toggle toolbar vsibility
         """
-        print("actionHide_Toolbar TRIGGERED")
+        if self._workspace.toolBar.isVisible():
+            self._workspace.actionHide_Toolbar.setText("Show Toolbar")
+            self._workspace.toolBar.setVisible(False)
+        else:
+            self._workspace.actionHide_Toolbar.setText("Hide Toolbar")
+            self._workspace.toolBar.setVisible(True)
         pass
 
     def actionStartup_Settings(self):
@@ -531,39 +570,33 @@ class GuiManager(object):
     #============ WINDOW =================
     def actionCascade(self):
         """
+        Arranges all the child windows in a cascade pattern.
         """
-        print("actionCascade TRIGGERED")
-        pass
+        self._workspace.workspace.cascade()
 
-    def actionTile_Horizontally(self):
+    def actionTile(self):
         """
+        Tile workspace windows
         """
-        print("actionTile_Horizontally TRIGGERED")
-        pass
-
-    def actionTile_Vertically(self):
-        """
-        """
-        print("actionTile_Vertically TRIGGERED")
-        pass
+        self._workspace.workspace.tile()
 
     def actionArrange_Icons(self):
         """
+        Arranges all iconified windows at the bottom of the workspace
         """
-        print("actionArrange_Icons TRIGGERED")
-        pass
+        self._workspace.workspace.arrangeIcons()
 
     def actionNext(self):
         """
+        Gives the input focus to the next window in the list of child windows.
         """
-        print("actionNext TRIGGERED")
-        pass
+        self._workspace.workspace.activateNextWindow()
 
     def actionPrevious(self):
         """
+        Gives the input focus to the previous window in the list of child windows.
         """
-        print("actionPrevious TRIGGERED")
-        pass
+        self._workspace.workspace.activatePreviousWindow()
 
     #============ HELP =================
     def actionDocumentation(self):

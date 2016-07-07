@@ -15,16 +15,15 @@ class DroppableDataLoadWidget(DataLoadWidget):
         # Enable file drag-drop on treeView
         self.setAcceptDrops(True)
         self.communicator = guimanager.communicator()
+        flags = QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowSystemMenuHint
+        self.setWindowFlags(flags)
 
     def dragIsOK(self, event):
         """
         Return True if the event contain URLs
         """
         # Analyze mime data
-        if event.mimeData().hasUrls() and self.currentIndex() == 0:
-            return True
-        else:
-            return False
+        return bool(event.mimeData().hasUrls() and self.currentIndex() == 0)
 
     def dragEnterEvent(self, event):
         """
@@ -60,3 +59,8 @@ class DroppableDataLoadWidget(DataLoadWidget):
         else:
             event.ignore()
 
+    def closeEvent(self, event):
+        """
+        Overwrite the close event - no close!
+        """
+        event.ignore()

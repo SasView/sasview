@@ -3,9 +3,10 @@
 """
 import time
 import os
+import logging
+
 from sas.sasgui.guiframe.gui_style import GUIFRAME
 import sas.sasview
-import logging
 
 # Version of the application
 __appname__ = "SasView"
@@ -57,7 +58,7 @@ _license = "mailto:help@sasview.org"
 
 
 icon_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "images"))
-logging.info("icon path: %s" % icon_path)
+logging.info("icon path: %s", icon_path)
 media_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "media"))
 test_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "test"))
 
@@ -132,10 +133,10 @@ DEFAULT_PERSPECTIVE = 'None'
 UPDATE_TIMEOUT = 2
 
 def printEVT(message):
+    """
+    Post a debug message to console/file
+    """
     if __EVT_DEBUG__:
-        """
-        :TODO - Need method doc string
-        """
         print "%g:  %s" % (time.clock(), message)
 
         if __EVT_DEBUG_2_FILE__:

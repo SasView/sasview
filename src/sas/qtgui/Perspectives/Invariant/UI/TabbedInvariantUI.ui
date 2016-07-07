@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>465</width>
+    <width>466</width>
     <height>408</height>
    </rect>
   </property>
@@ -42,6 +42,9 @@
             <item>
              <widget class="QLineEdit" name="lineEdit">
               <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="frame">
                <bool>false</bool>
               </property>
               <property name="readOnly">
@@ -120,6 +123,18 @@
             <property name="enabled">
              <bool>true</bool>
             </property>
+            <property name="autoFillBackground">
+             <bool>true</bool>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="frame">
+             <bool>true</bool>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
             <property name="readOnly">
              <bool>true</bool>
             </property>
@@ -136,6 +151,12 @@
            <widget class="QLineEdit" name="lineEdit_15">
             <property name="enabled">
              <bool>true</bool>
+            </property>
+            <property name="frame">
+             <bool>true</bool>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
             <property name="readOnly">
              <bool>true</bool>
@@ -154,6 +175,12 @@
             <property name="enabled">
              <bool>true</bool>
             </property>
+            <property name="frame">
+             <bool>true</bool>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
             <property name="readOnly">
              <bool>true</bool>
             </property>
@@ -170,6 +197,12 @@
            <widget class="QLineEdit" name="lineEdit_16">
             <property name="enabled">
              <bool>true</bool>
+            </property>
+            <property name="frame">
+             <bool>true</bool>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
             <property name="readOnly">
              <bool>true</bool>
@@ -203,7 +236,14 @@
              <bool>true</bool>
             </property>
             <property name="styleSheet">
-             <string notr="true">background-color: rgb(253, 253, 126);</string>
+             <string notr="true">background-color: rgb(253, 253, 126);
+font: bold 8pt &quot;MS Shell Dlg 2&quot;;</string>
+            </property>
+            <property name="frame">
+             <bool>true</bool>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
             <property name="readOnly">
              <bool>true</bool>
@@ -223,7 +263,14 @@
              <bool>true</bool>
             </property>
             <property name="styleSheet">
-             <string notr="true">background-color: rgb(253, 253, 126);</string>
+             <string notr="true">background-color: rgb(253, 253, 126);
+font: bold 8pt &quot;MS Shell Dlg 2&quot;;</string>
+            </property>
+            <property name="frame">
+             <bool>true</bool>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
             <property name="readOnly">
              <bool>true</bool>
@@ -571,5 +618,6 @@
    </item>
   </layout>
  </widget>
+ <resources/>
  <connections/>
 </ui>

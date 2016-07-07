@@ -68,6 +68,7 @@ class Ui_DataLoadWidget(object):
         self.horizontalLayout_2.addWidget(self.cmdDeleteData)
         self.gridLayout.addLayout(self.horizontalLayout_2, 0, 0, 1, 1)
         self.treeView = QtGui.QTreeView(self.groupBox)
+        self.treeView.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
         self.treeView.setAcceptDrops(True)
         self.treeView.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         self.treeView.setDragEnabled(True)
@@ -190,6 +191,16 @@ class Ui_DataLoadWidget(object):
         self.gridLayout_5.addWidget(self.cmdHelp_2, 0, 2, 1, 1, QtCore.Qt.AlignBottom)
         self.gridLayout_8.addLayout(self.gridLayout_5, 1, 0, 1, 1)
         DataLoadWidget.addTab(self.theoryTab, _fromUtf8(""))
+        self.actionDataInfo = QtGui.QAction(DataLoadWidget)
+        self.actionDataInfo.setObjectName(_fromUtf8("actionDataInfo"))
+        self.actionSaveAs = QtGui.QAction(DataLoadWidget)
+        self.actionSaveAs.setObjectName(_fromUtf8("actionSaveAs"))
+        self.actionQuickPlot = QtGui.QAction(DataLoadWidget)
+        self.actionQuickPlot.setObjectName(_fromUtf8("actionQuickPlot"))
+        self.actionQuick3DPlot = QtGui.QAction(DataLoadWidget)
+        self.actionQuick3DPlot.setObjectName(_fromUtf8("actionQuick3DPlot"))
+        self.actionEditMask = QtGui.QAction(DataLoadWidget)
+        self.actionEditMask.setObjectName(_fromUtf8("actionEditMask"))
 
         self.retranslateUi(DataLoadWidget)
         DataLoadWidget.setCurrentIndex(0)
@@ -226,6 +237,11 @@ class Ui_DataLoadWidget(object):
         self.cbgraph_2.setItemText(0, _translate("DataLoadWidget", "Graph1", None))
         self.cmdHelp_2.setText(_translate("DataLoadWidget", "Help", None))
         DataLoadWidget.setTabText(DataLoadWidget.indexOf(self.theoryTab), _translate("DataLoadWidget", "Theory", None))
+        self.actionDataInfo.setText(_translate("DataLoadWidget", "Data Info", None))
+        self.actionSaveAs.setText(_translate("DataLoadWidget", "Save As", None))
+        self.actionQuickPlot.setText(_translate("DataLoadWidget", "Quick Plot", None))
+        self.actionQuick3DPlot.setText(_translate("DataLoadWidget", "Quick 3DPlot (slow)", None))
+        self.actionEditMask.setText(_translate("DataLoadWidget", "Edit Mask", None))
 
 import main_resources_rc
 

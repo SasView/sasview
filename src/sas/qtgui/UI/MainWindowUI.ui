@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>915</width>
-    <height>555</height>
+    <height>527</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -111,8 +111,7 @@
      <string>Window</string>
     </property>
     <addaction name="actionCascade"/>
-    <addaction name="actionTile_Horizontally"/>
-    <addaction name="actionTile_Vertically"/>
+    <addaction name="actionTile"/>
     <addaction name="separator"/>
     <addaction name="actionArrange_Icons"/>
     <addaction name="actionNext"/>
@@ -398,9 +397,9 @@
     <string>Cascade</string>
    </property>
   </action>
-  <action name="actionTile_Horizontally">
+  <action name="actionTile">
    <property name="text">
-    <string>Tile Horizontally</string>
+    <string>Tile</string>
    </property>
   </action>
   <action name="actionTile_Vertically">

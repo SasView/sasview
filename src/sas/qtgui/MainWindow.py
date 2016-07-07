@@ -1,6 +1,5 @@
 import sys
 
-from PyQt4 import QtCore
 from PyQt4 import QtGui
 
 # UNLESS EXEPTIONALLY REQUIRED TRY TO AVOID IMPORTING ANY MODULES HERE

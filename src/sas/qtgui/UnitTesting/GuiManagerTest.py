@@ -11,6 +11,11 @@ from PyQt4.QtWebKit import *
 from mock import MagicMock
 
 # Local
+from DataExplorer import DataExplorerWindow
+from UI.AcknowledgementsUI import Acknowledgements
+from AboutBox import AboutBox
+from WelcomePanel import WelcomePanel
+
 from GuiManager import GuiManager
 from UI.MainWindowUI import MainWindow
 from UnitTesting.TestUtils import QtSignalSpy
@@ -37,9 +42,17 @@ class GuiManagerTest(unittest.TestCase):
         self.manager = None
 
     def testDefaults(self):
-        '''Test the object in its default state'''
-        pass
-        
+        """
+        Test the object in its default state
+        """
+        self.assertIsInstance(self.manager.filesWidget, DataExplorerWindow)
+        self.assertIsInstance(self.manager.dockedFilesWidget, QDockWidget)
+        self.assertEqual(self.manager.dockedFilesWidget.features(), QDockWidget.NoDockWidgetFeatures)
+        self.assertEqual(self.manager._workspace.dockWidgetArea(self.manager.dockedFilesWidget), Qt.LeftDockWidgetArea)
+        self.assertIsInstance(self.manager.ackWidget, Acknowledgements)
+        self.assertIsInstance(self.manager.aboutWidget, AboutBox)
+        self.assertIsInstance(self.manager.welcomePanel, WelcomePanel)
+
     def testUpdatePerspective(self):
         """
         """
@@ -75,8 +88,6 @@ class GuiManagerTest(unittest.TestCase):
 
         # See that the MessageBox method got called
         self.assertTrue(QMessageBox.question.called)
-        # sys.exit() not called this time
-        self.assertFalse(sys.exit.called)
 
         # Say Yes to the close dialog
         QMessageBox.question = MagicMock(return_value=QMessageBox.Yes)
@@ -138,20 +149,7 @@ class GuiManagerTest(unittest.TestCase):
 
         webbrowser.open.assert_called_with("https://github.com/SasView/sasview/releases")
 
-        ## 4. version > LocalConfig.__version__ and standalone
-        #version_info = {u'version' : u'999.0.0'}
-        #spy_status_update = QtSignalSpy(self.manager, self.manager.communicate.statusBarUpdateSignal)
-        #webbrowser.open = MagicMock()
-
-        #self.manager.processVersion(version_info, standalone=True)
-
-        #self.assertEqual(spy_status_update.count(), 1)
-        #message = 'See the help menu to download it'
-        #self.assertIn(message, str(spy_status_update.signal(index=0)))
-
-        #self.assertFalse(webbrowser.open.called)
-
-        # 5. couldn't load version
+        # 4. couldn't load version
         version_info = {}
         logging.error = MagicMock()
         spy_status_update = QtSignalSpy(self.manager, self.manager.communicate.statusBarUpdateSignal)
@@ -172,6 +170,7 @@ class GuiManagerTest(unittest.TestCase):
         """
         pass
 
+    #### FILE ####
     def testActionLoadData(self):
         """
         Menu File/Load Data File(s)
@@ -184,7 +183,48 @@ class GuiManagerTest(unittest.TestCase):
 
         # Test the getOpenFileName() dialog called once
         self.assertTrue(QFileDialog.getOpenFileNames.called)
-        
+
+    def testActionLoadDataFolder(self):
+        """
+        Menu File/Load Data Folder
+        """
+        # Mock the system file open method
+        QFileDialog.getExistingDirectory = MagicMock(return_value=None)
+
+        # invoke the action
+        self.manager.actionLoad_Data_Folder()
+
+        # Test the getOpenFileName() dialog called once
+        self.assertTrue(QFileDialog.getExistingDirectory.called)
+
+    #### VIEW ####
+    def testActionHideToolbar(self):
+        """
+        Menu View/Hide Toolbar
+        """
+        # Need to display the main window to initialize the toolbar.
+        self.manager._workspace.show()
+
+        # Check the initial state
+        self.assertTrue(self.manager._workspace.toolBar.isVisible())
+        self.assertEqual('Hide Toolbar', self.manager._workspace.actionHide_Toolbar.text())
+
+        # Invoke action
+        self.manager.actionHide_Toolbar()
+
+        # Assure changes propagated correctly
+        self.assertFalse(self.manager._workspace.toolBar.isVisible())
+        self.assertEqual('Show Toolbar', self.manager._workspace.actionHide_Toolbar.text())
+
+        # Revert
+        self.manager.actionHide_Toolbar()
+
+        # Assure the original values are back
+        self.assertTrue(self.manager._workspace.toolBar.isVisible())
+        self.assertEqual('Hide Toolbar', self.manager._workspace.actionHide_Toolbar.text())
+
+
+    #### HELP ####
     def testActionDocumentation(self):
         """
         Menu Help/Documentation

@@ -91,7 +91,10 @@ class DataExplorerTest(unittest.TestCase):
         self.assertEqual("[^()]", str(self.form.theory_proxy.filterRegExp().pattern()))
         self.assertIsInstance(self.form.freezeView, QTreeView)
 
-        
+    def testWidgets(self):
+        """
+        Test if all required widgets got added
+        """        
     def testLoadButton(self):
         loadButton = self.form.cmdLoad
 
@@ -110,13 +113,14 @@ class DataExplorerTest(unittest.TestCase):
         QtGui.QFileDialog.getOpenFileNames.assert_called_once()
 
         # Make sure the signal has not been emitted
-        #self.assertEqual(spy_file_read.count(), 0)
+        self.assertEqual(spy_file_read.count(), 0)
 
         # Now, return a single file
         QtGui.QFileDialog.getOpenFileNames = MagicMock(return_value=filename)
-        
+
         # Click on the Load button
         QTest.mouseClick(loadButton, Qt.LeftButton)
+        QtGui.qApp.processEvents()
 
         # Test the getOpenFileName() dialog called once
         self.assertTrue(QtGui.QFileDialog.getOpenFileNames.called)
@@ -126,6 +130,25 @@ class DataExplorerTest(unittest.TestCase):
         #self.assertEqual(spy_file_read.count(), 1)
         #self.assertIn(filename, str(spy_file_read.called()[0]['args'][0]))
 
+    def testLoadFiles(self):
+        """
+        Test progress bar update while loading of multiple files
+        """
+        # Set up the spy on progress bar update signal
+        spy_progress_bar_update = QtSignalSpy(self.form,
+            self.form.communicator.progressBarUpdateSignal)
+
+        # Populate the model
+        filename = ["cyl_400_20.txt", "Dec07031.ASC", "cyl_400_20.txt"]
+        self.form.readData(filename)
+
+        # 0, 0, 33, 66, -1 -> 5 signals reaching progressBar
+        self.assertEqual(spy_progress_bar_update.count(), 5)
+
+        expected_list = [0, 0, 33, 66, -1]
+        spied_list = [spy_progress_bar_update.called()[i]['args'][0] for i in xrange(5)]
+        self.assertEqual(expected_list, spied_list)
+        
     def testDeleteButton(self):
         """
         Functionality of the delete button
@@ -440,8 +463,8 @@ class DataExplorerTest(unittest.TestCase):
             'HFIR 1D files (*.d1d);;DANSE files (*.sans);;NXS files (*.nxs)'
         default_list = defaults.split(';;')
 
-        for format in default_list:
-            self.assertIn(format, w_list)
+        for def_format in default_list:
+            self.assertIn(def_format, w_list)
        
     def testLoadComplete(self):
         """

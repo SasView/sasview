@@ -75,7 +75,7 @@ class AboutBoxTest(unittest.TestCase):
                 LocalConfig._ess_url,
                 LocalConfig._ill_url,
                 LocalConfig._inst_url]
-        
+
         # Press the buttons
         buttonList = self.widget.findChildren(QPushButton)
         for button in buttonList:

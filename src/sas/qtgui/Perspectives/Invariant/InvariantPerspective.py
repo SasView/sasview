@@ -42,6 +42,7 @@ class InvariantWindow(tabbedInvariantUI):
     def __init__(self, manager=None, parent=None):
         super(InvariantWindow, self).__init__(parent)
         self.setWindowTitle("Invariant Perspective")
+
         # initial input params
         self._background = 0.0
         self._scale = 1.0
@@ -94,9 +95,15 @@ class InvariantWindow(tabbedInvariantUI):
         # Set up the mapper
         self.setupMapper()
 
+    def closeEvent(self, event):
+        """
+        Overwrite the default close method of QWidget
+        """
+        # No close on perspectives - one must always be active.
+        event.ignore()
+
     def communicator(self):
-        """
-        """
+        """ Getter for the communicator """
         return self.communicate
 
     def updateFromModel(self):

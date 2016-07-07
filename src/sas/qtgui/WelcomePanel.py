@@ -19,7 +19,6 @@ class WelcomePanel(WelcomePanelUI):
         build = sas.sasview.__build__
 
         ver = "\nSasView %s\nBuild: %s" % (version, build)
-        #ver += "\n(c) 2009 - 2013, UTK, UMD, NIST, ORNL, ISIS, ESS and IL"
         ver += LocalConfig._copyright
 
         self.lblVersion.setText(ver)

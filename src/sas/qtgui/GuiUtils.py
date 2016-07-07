@@ -79,7 +79,7 @@ def _find_local_config(confg_file, path):
     try:
         fObj, path_config, descr = imp.find_module(confg_file, [path])
         config_module = imp.load_module(confg_file, fObj, path_config, descr)
-    except:
+    except ImportError:
         logging.error("Error loading %s/%s: %s" % (path, confg_file, sys.exc_value))
     finally:
         if fObj is not None:
@@ -103,9 +103,9 @@ if config is None:
         import sas.sasgui.guiframe.config as config
         logging.info("using default local_config")
     else:
-        logging.info("found local_config in %s" % os.getcwd())
+        logging.info("found local_config in %s", os.getcwd())
 else:
-    logging.info("found local_config in %s" % PATH_APP)
+    logging.info("found local_config in %s", PATH_APP)
 
 
 from sas.sasgui.guiframe.customdir  import SetupCustom
@@ -117,9 +117,9 @@ if custom_config is None:
         msgConfig = "Custom_config file was not imported"
         logging.info(msgConfig)
     else:
-        logging.info("using custom_config in %s" % os.getcwd())
+        logging.info("using custom_config in %s", os.getcwd())
 else:
-    logging.info("using custom_config from %s" % c_conf_dir)
+    logging.info("using custom_config from %s", c_conf_dir)
 
 #read some constants from config
 APPLICATION_STATE_EXTENSION = config.APPLICATION_STATE_EXTENSION
@@ -153,7 +153,7 @@ try:
         DEFAULT_OPEN_FOLDER = os.path.abspath(open_folder)
     else:
         DEFAULT_OPEN_FOLDER = PATH_APP
-except:
+except AttributeError:
     DATALOADER_SHOW = True
     TOOLBAR_SHOW = True
     FIXED_PANEL = True
@@ -180,7 +180,7 @@ if APPLICATION_STATE_EXTENSION is not None:
 EXTENSIONS = PLUGIN_STATE_EXTENSIONS + extension_list
 try:
     PLUGINS_WLIST = '|'.join(config.PLUGINS_WLIST)
-except:
+except AttributeError:
     PLUGINS_WLIST = ''
 APPLICATION_WLIST = config.APPLICATION_WLIST
 IS_WIN = True
@@ -213,14 +213,17 @@ class Communicate(QtCore.QObject):
     # Old "NewPlotEvent"
     plotRequestedSignal = QtCore.pyqtSignal(str)
 
+    # Progress bar update value
+    progressBarUpdateSignal = QtCore.pyqtSignal(int)
+
 
 def updateModelItem(item, update_data, name=""):
     """
     Adds a checkboxed row named "name" to QStandardItem
     Adds QVariant 'update_data' to that row.
     """
-    assert type(item) == QtGui.QStandardItem
-    assert type(update_data) == QtCore.QVariant
+    assert isinstance(item, QtGui.QStandardItem)
+    assert isinstance(update_data, QtCore.QVariant)
 
     checkbox_item = QtGui.QStandardItem(True)
     checkbox_item.setCheckable(True)
@@ -229,7 +232,7 @@ def updateModelItem(item, update_data, name=""):
 
     # Add "Info" item
     py_update_data = update_data.toPyObject()
-    if type(py_update_data) == (Data1D or Data2D):
+    if isinstance(py_update_data, (Data1D or Data2D)):
         # If Data1/2D added - extract Info from it
         info_item = infoFromData(py_update_data)
     else:
@@ -253,11 +256,9 @@ def plotsFromCheckedItems(model_item):
     """
     Returns the list of plots for items in the model which are checked
     """
-    assert type(model_item) == QtGui.QStandardItemModel
+    assert isinstance(model_item, QtGui.QStandardItemModel)
 
-    checkbox_item = QtGui.QStandardItem(True)
     plot_data = []
-
     # Iterate over model looking for items with checkboxes
     for index in range(model_item.rowCount()):
         item = model_item.item(index)
@@ -278,7 +279,7 @@ def infoFromData(data):
     Given Data1D/Data2D object, extract relevant Info elements
     and add them to a model item
     """
-    assert type(data) in [Data1D, Data2D]
+    assert isinstance(data, (Data1D, Data2D))
 
     info_item = QtGui.QStandardItem("Info")
 
