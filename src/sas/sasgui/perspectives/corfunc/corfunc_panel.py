@@ -55,6 +55,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._output_ids = None
         self.state = None
         self._do_layout()
+        self._disable_inputs()
         self.set_state()
         self._qmin_input.Bind(wx.EVT_TEXT, self._on_enter_input)
         self._qmax1_input.Bind(wx.EVT_TEXT, self._on_enter_input)
@@ -110,9 +111,10 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
 
         :param data: The data that has been loaded
         """
-        self._transform_btn.Disable()
         if data is None:
             return
+        self._enable_inputs()
+        self._transform_btn.Disable()
         self._data_name_box.SetValue(str(data.title))
         self._data = data
         self._calculator.set_data(data)
@@ -441,3 +443,15 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
             wx.LEFT | wx.RIGHT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
 
         self.SetSizer(vbox)
+
+    def _disable_inputs(self):
+        self._qmin_input.Disable()
+        self._qmax1_input.Disable()
+        self._qmax2_input.Disable()
+        self._background_input.Disable()
+
+    def _enable_inputs(self):
+        self._qmin_input.Enable()
+        self._qmax1_input.Enable()
+        self._qmax2_input.Enable()
+        self._background_input.Enable()
