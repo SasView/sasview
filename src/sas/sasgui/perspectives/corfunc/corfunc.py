@@ -4,6 +4,7 @@
 import wx
 import sys
 import logging
+import copy
 from sas.sasgui.guiframe.plugin_base import PluginBase
 from sas.sasgui.guiframe.gui_manager import MDIFrame
 from sas.sasgui.guiframe.events import StatusEvent
@@ -17,8 +18,9 @@ from sas.sascalc.dataloader.loader import Loader
 import sas.sascalc.dataloader
 
 
-GROUP_ID_IQ_DATA = r"$I_{obs}(q)$"
+GROUP_ID_IQ_DATA = r"$I(q)$"
 IQ_DATA_LABEL = r"$I_{obs}(q)$"
+IQ_EXTRAPOLATED_DATA_LABEL = r"$I_{extrap}(q)$"
 
 
 class Plugin(PluginBase):
@@ -116,7 +118,7 @@ class Plugin(PluginBase):
                     wx.PostEvent(self.parent, StatusEvent(status=msg,
                         info='error'))
 
-    def show_data(self, path=None, data=None, reset=False):
+    def show_data(self, data, label, path=None, reset=False):
         """
         Show data read from a file
 
@@ -124,17 +126,17 @@ class Plugin(PluginBase):
         :param data: The data to plot (Data1D)
         :param reset: If True, all other plottables will be cleared
         """
-        if data.dy is not None:
-            new_plot = Data1D(data.x, data.y, dy=data.dy)
-        else:
-            new_plot = Data1D(data.x, data.y)
+        new_plot = Data1D(data.x, data.y, dy=data.dy)
+
+        if label == IQ_DATA_LABEL or label == IQ_EXTRAPOLATED_DATA_LABEL:
+            new_plot.xaxis("\\rm{Q}", 'A^{-1}')
+            new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
+
         new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
-        new_plot.name = IQ_DATA_LABEL
-        new_plot.xaxis("\\rm{Q}", 'A^{-1}')
-        new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
+        new_plot.id = label
+        new_plot.name = label
         new_plot.interactive = True
         new_plot.group_id = GROUP_ID_IQ_DATA
-        new_plot.id = self.data_id
         new_plot.title = "I(q)"
         # Show data on a linear scale
         new_plot.xtransform = 'x'
