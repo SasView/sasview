@@ -5,10 +5,13 @@ from sas.sasgui.guiframe.events import PlotQrangeEvent
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.guiframe.utils import check_float
+from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.perspectives.invariant.invariant_widgets import OutputTextCtrl
 from sas.sasgui.perspectives.invariant.invariant_widgets import InvTextCtrl
 from sas.sasgui.perspectives.fitting.basepage import ModelTextCtrl
 from sas.sasgui.perspectives.corfunc.corfunc_state import CorfuncState
+import sas.sasgui.perspectives.corfunc.corfunc
+from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 
 if sys.platform.count("win32") > 0:
     _STATICBOX_WIDTH = 350
@@ -35,6 +38,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self.SetWindowVariant(variant=FONT_VARIANT)
         self._manager = manager
         self._data = data # The data to be analysed
+        self._extrapolated_data = None # The extrapolated data set
         self._data_name_box = None # Text box to show name of file
         self._background_input = None
         self._qmin_input = None
@@ -51,6 +55,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._qmin_input.Bind(wx.EVT_TEXT, self._on_enter_input)
         self._qmax1_input.Bind(wx.EVT_TEXT, self._on_enter_input)
         self._qmax2_input.Bind(wx.EVT_TEXT, self._on_enter_input)
+        self._background_input.Bind(wx.EVT_TEXT, self._on_enter_input)
 
     def set_state(self, state=None, data=None):
         """
@@ -66,7 +71,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
             self.state = state
         if data is not None:
             self.state.data = data
-        self.set_data(self.state.data, set_qrange=False)
+        self.set_data(data, set_qrange=False)
         if self.state.qmin is not None:
             self.set_qmin(self.state.qmin)
         if self.state.qmax is not None and self.state.qmax != (None, None):
@@ -106,7 +111,8 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._data_name_box.SetValue(str(data.title))
         self._data = data
         if self._manager is not None:
-            self._manager.show_data(data=data, reset=True)
+            from sas.sasgui.perspectives.corfunc.corfunc import IQ_DATA_LABEL
+            self._manager.show_data(data, IQ_DATA_LABEL, reset=True)
         if set_qrange:
             lower = data.x[-1]*0.05
             upper1 = data.x[-1] - lower*5
@@ -117,6 +123,31 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
 
     def get_data(self):
         return self._data
+
+    def compute_extrapolation(self, event=None):
+        if self._data is None:
+            msg = "Data must be loaded in order to perform an extrapolation."
+            wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+            return
+        if not self._validate_inputs:
+            msg = "Invalid Q range entered."
+            wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+            return
+        calculator = CorfuncCalculator(self._data, self.qmin, self.qmax,
+            background=self.background)
+        self._extrapolated_data = calculator.compute_extrapolation()
+        # TODO: Find way to set xlim and ylim so full range of data can be
+        # plotted
+        maxq = self._data.x.max()
+        mask = self._extrapolated_data.x <= maxq
+        numpts = len(self._extrapolated_data.x[mask]) + 250
+        plot_x = self._extrapolated_data.x[0:numpts]
+        plot_y = self._extrapolated_data.y[0:numpts]
+        to_plot = Data1D(plot_x, plot_y)
+        from sas.sasgui.perspectives.corfunc.corfunc import\
+            IQ_EXTRAPOLATED_DATA_LABEL
+        self._manager.show_data(to_plot, IQ_EXTRAPOLATED_DATA_LABEL)
+
 
     def save_project(self, doc=None):
         """
@@ -164,13 +195,13 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         new_qmax2 = float(self._qmax2_input.GetValue())
         self.qmax = (new_qmax1, new_qmax2)
         self.background = float(self._background_input.GetValue())
-        data_id = self._manager.data_id
-        from sas.sasgui.perspectives.corfunc.corfunc import GROUP_ID_IQ_DATA
+        from sas.sasgui.perspectives.corfunc.corfunc import GROUP_ID_IQ_DATA,\
+            IQ_DATA_LABEL
         group_id = GROUP_ID_IQ_DATA
         if event is not None:
             wx.PostEvent(self._manager.parent, PlotQrangeEvent(
                 ctrl=[self._qmin_input, self._qmax1_input, self._qmax2_input],
-                active=event.GetEventObject(), id=data_id, group_id=group_id,
+                active=event.GetEventObject(), id=IQ_DATA_LABEL, group_id=group_id,
                 leftdown=False))
 
     def _validate_inputs(self):
@@ -200,7 +231,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
                 msg = "qmin must be less than qmax"
                 qmin_valid = False
             elif background < 0 or background > self._data.y.max():
-                msg = "background must be positive and less than highest I value"
+                msg = "background must be positive and less than highest I"
                 background_valid = False
         if not qmin_valid:
             self._qmin_input.SetBackgroundColour('pink')
@@ -363,6 +394,8 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         extrapolate_btn = wx.Button(self, wx.NewId(), "Extrapolate")
         transform_btn = wx.Button(self, wx.NewId(), "Transform")
         compute_btn = wx.Button(self, wx.NewId(), "Compute Measuments")
+
+        extrapolate_btn.Bind(wx.EVT_BUTTON, self.compute_extrapolation)
 
         controls_sizer.Add(extrapolate_btn, wx.CENTER | wx.EXPAND)
         controls_sizer.Add(transform_btn, wx.CENTER | wx.EXPAND)
