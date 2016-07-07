@@ -133,6 +133,10 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         return self._data
 
     def compute_extrapolation(self, event=None):
+        """
+        Compute and plot the extrapolated data.
+        Called when Extrapolate button is pressed.
+        """
         if self._data is None:
             msg = "Data must be loaded in order to perform an extrapolation."
             wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
@@ -159,6 +163,10 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._transform_btn.Enable()
 
     def compute_transform(self, event=None):
+        """
+        Compute and plot the transformed data.
+        Called when Transform button is pressed.
+        """
         transformed_data = self._calculator.compute_transform(
             self._extrapolated_data, self.background)
         from sas.sasgui.perspectives.corfunc.corfunc import TRANSFORM_LABEL
@@ -445,12 +453,18 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self.SetSizer(vbox)
 
     def _disable_inputs(self):
+        """
+        Disable all input fields
+        """
         self._qmin_input.Disable()
         self._qmax1_input.Disable()
         self._qmax2_input.Disable()
         self._background_input.Disable()
 
     def _enable_inputs(self):
+        """
+        Enable all input fields
+        """
         self._qmin_input.Enable()
         self._qmax1_input.Enable()
         self._qmax2_input.Enable()

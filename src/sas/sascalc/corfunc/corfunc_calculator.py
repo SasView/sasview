@@ -108,6 +108,11 @@ class CorfuncCalculator(object):
         return bg
 
     def compute_extrapolation(self):
+        """
+        Extrapolate and interpolate scattering data
+
+        :return: The extrapolated data
+        """
         q = self._data.x
         iq = self._data.y
 
@@ -122,6 +127,11 @@ class CorfuncCalculator(object):
     def compute_transform(self, extrapolation, background=None):
         """
         Transform an extrapolated scattering curve into a correlation function.
+
+        :param extrapolation: The extrapolated data
+        :param background: The background value (if not provided, previously
+            calculated value will be used)
+        :return: The transformed data
         """
         qs = extrapolation.x
         iqs = extrapolation.y
@@ -153,8 +163,10 @@ class CorfuncCalculator(object):
         return k, sigma, bg
 
     def _fit_data(self, q, iq):
-        """Given a data set, extrapolate out to large q with Porod
-        and to q=0 with Guinier"""
+        """
+        Given a data set, extrapolate out to large q with Porod and
+        to q=0 with Guinier
+        """
         mask = np.logical_and(q > self.upperq[0], q < self.upperq[1])
 
         # Returns an array where the 1st and 2nd elements are the values of k
