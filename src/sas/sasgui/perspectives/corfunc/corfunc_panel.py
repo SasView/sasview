@@ -151,10 +151,6 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         Compute and plot the extrapolated data.
         Called when Extrapolate button is pressed.
         """
-        if self._data is None:
-            msg = "Data must be loaded in order to perform an extrapolation."
-            wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
-            return
         if not self._validate_inputs:
             msg = "Invalid Q range entered."
             wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
@@ -163,7 +159,15 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._calculator.lowerq = self.qmin
         self._calculator.upperq = self.qmax
         self._calculator.background = self.background
-        self._extrapolated_data = self._calculator.compute_extrapolation()
+        try:
+            self._extrapolated_data = self._calculator.compute_extrapolation()
+        except:
+            msg = "Error extrapolating data."
+            wx.MessageBox(msg, 'error')
+            wx.PostEvent(self._manager.parent,
+                StatusEvent(status=msg, info="Error"))
+            self._transform_btn.Disable()
+            return
         # TODO: Find way to set xlim and ylim so full range of data can be
         # plotted
         maxq = self._data.x.max()
@@ -182,8 +186,18 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         Compute and plot the transformed data.
         Called when Transform button is pressed.
         """
-        transformed_data = self._calculator.compute_transform(
-            self._extrapolated_data, self.background)
+        try:
+            transformed_data = self._calculator.compute_transform(
+                self._extrapolated_data, self.background)
+        except:
+            transformed_data = None
+        if transformed_data is None:
+            msg = "Error calculating Transform."
+            wx.MessageBox(msg, 'error')
+            wx.PostEvent(self._manager.parent,
+                StatusEvent(status=msg, info="Error"))
+            self._extract_btn.Disable()
+            return
         self._transformed_data = transformed_data
         from sas.sasgui.perspectives.corfunc.corfunc import TRANSFORM_LABEL
         import numpy as np
@@ -193,15 +207,15 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._extract_btn.Enable()
 
     def extract_parameters(self, event=None):
-        params = None
         try:
             params = self._calculator.extract_parameters(self._transformed_data)
         except:
             params = None
         if params is None:
             msg = "Error extracting parameters."
+            wx.MessageBox(msg, 'error')
             wx.PostEvent(self._manager.parent,
-                StatusEvent(status=msg, info="error"))
+                StatusEvent(status=msg, info="Error"))
             return
         for key in OUTPUT_STRINGS.keys():
             value = params[key]
