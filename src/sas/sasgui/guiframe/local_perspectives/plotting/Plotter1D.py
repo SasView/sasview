@@ -94,6 +94,9 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.Bind(wx.EVT_SIZE, self._OnReSize)
         self.parent.SetFocus()
 
+        # If true, there are 3 qrange bars
+        self.is_corfunc = False
+
 
     def get_symbol_label(self):
         """
@@ -213,6 +216,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
         active_ctrl = event.active
         if active_ctrl == None:
             return
+        if hasattr(event, 'is_corfunc'):
+            self.is_corfunc = event.is_corfunc
         if event.id in self.plots.keys():
             ctrl = event.ctrl
             self.cursor_id = event.id
@@ -295,6 +300,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
         ly = self.ly
         ly0x = ly[0].get_xdata()
         ly1x = ly[1].get_xdata()
+        ly2x = None
+        if self.is_corfunc: ly2x = ly[2].get_xdata()
         self.q_ctrl[0].SetBackgroundColour('white')
         self.q_ctrl[1].SetBackgroundColour('white')
         if ly0x >= ly1x:
@@ -308,6 +315,16 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 ly[0].set_zorder(nop)
                 self.q_ctrl[0].SetValue(str(pos_x))
                 self.q_ctrl[1].SetBackgroundColour('pink')
+        elif ly2x is not None and ly1x >= ly2x:
+            if self.vl_ind == 1:
+                ly[2].set_xdata(posx)
+                ly[2].set_zorder(nop)
+                self.q_ctrl[2].SetValue(str(pos_x))
+            elif self.vl_ind == 2:
+                ly[1].set_xdata(posx)
+                ly[1].set_zorder(nop)
+                self.q_ctrl[1].SetValue(str(pos_x))
+
 
     def _get_cusor_lines(self, event):
         """
@@ -327,11 +344,16 @@ class ModelPanel1D(PlotPanel, PanelBase):
             # Selecting a new line if cursor lines are displayed already
             dqmin = math.fabs(event.xdata - self.ly[0].get_xdata())
             dqmax = math.fabs(event.xdata - self.ly[1].get_xdata())
-            is_qmax = dqmin > dqmax
-            if is_qmax:
-                self.vl_ind = 1
+            if not self.is_corfunc:
+                is_qmax = dqmin > dqmax
+                if is_qmax:
+                    self.vl_ind = 1
+                else:
+                    self.vl_ind = 0
             else:
-                self.vl_ind = 0
+                dqmax2 = math.fabs(event.xdata - self.ly[2].get_xdata())
+                closest = min(dqmin, dqmax, dqmax2)
+                self.vl_ind = { dqmin: 0, dqmax: 1, dqmax2: 2 }.get(closest)
 
     def cusor_line(self, event):
         """

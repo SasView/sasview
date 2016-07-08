@@ -240,7 +240,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
                 self._manager.show_data(self._data, IQ_DATA_LABEL, reset=False)
             wx.PostEvent(self._manager.parent, PlotQrangeEvent(
                 ctrl=[self._qmin_input, self._qmax1_input, self._qmax2_input],
-                active=active_ctrl, id=IQ_DATA_LABEL,
+                active=active_ctrl, id=IQ_DATA_LABEL, is_corfunc=True,
                 group_id=GROUP_ID_IQ_DATA, leftdown=False))
 
     def _on_click_qrange(self, event=None):
