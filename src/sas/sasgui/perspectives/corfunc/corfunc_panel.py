@@ -60,6 +60,9 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._qmin_input.Bind(wx.EVT_TEXT, self._on_enter_input)
         self._qmax1_input.Bind(wx.EVT_TEXT, self._on_enter_input)
         self._qmax2_input.Bind(wx.EVT_TEXT, self._on_enter_input)
+        self._qmin_input.Bind(wx.EVT_MOUSE_EVENTS, self._on_click_qrange)
+        self._qmax1_input.Bind(wx.EVT_MOUSE_EVENTS, self._on_click_qrange)
+        self._qmax2_input.Bind(wx.EVT_MOUSE_EVENTS, self._on_click_qrange)
         self._background_input.Bind(wx.EVT_TEXT, self._on_enter_input)
 
     def set_state(self, state=None, data=None):
@@ -225,19 +228,33 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         new_qmax2 = float(self._qmax2_input.GetValue())
         self.qmax = (new_qmax1, new_qmax2)
         self.background = float(self._background_input.GetValue())
+        self._calculator.background = self.background
         from sas.sasgui.perspectives.corfunc.corfunc import GROUP_ID_IQ_DATA,\
             IQ_DATA_LABEL
-        group_id = GROUP_ID_IQ_DATA
         if event is not None:
-            if self._manager is not None and\
-                event.GetEventObject() == self._background_input:
+            active_ctrl = event.GetEventObject()
+            if active_ctrl == self._background_input:
                 from sas.sasgui.perspectives.corfunc.corfunc\
                     import IQ_DATA_LABEL
-                self._manager.show_data(self._data, IQ_DATA_LABEL, reset=True)
+                self._manager.show_data(self._data, IQ_DATA_LABEL, reset=False)
+            wx.PostEvent(self._manager.parent, PlotQrangeEvent(
+                ctrl=[self._qmin_input, self._qmax1_input, self._qmax2_input],
+                active=active_ctrl, id=IQ_DATA_LABEL,
+                group_id=GROUP_ID_IQ_DATA, leftdown=False))
+
+    def _on_click_qrange(self, event=None):
+        if event is None:
+            return
+        event.Skip()
+        if not self._validate_inputs(): return
+        is_click = event.LeftDown()
+        if is_click:
+            from sas.sasgui.perspectives.corfunc.corfunc import GROUP_ID_IQ_DATA,\
+                IQ_DATA_LABEL
             wx.PostEvent(self._manager.parent, PlotQrangeEvent(
                 ctrl=[self._qmin_input, self._qmax1_input, self._qmax2_input],
                 active=event.GetEventObject(), id=IQ_DATA_LABEL,
-                group_id=group_id, leftdown=False))
+                group_id=GROUP_ID_IQ_DATA, leftdown=is_click))
 
     def _validate_inputs(self):
         """
