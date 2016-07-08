@@ -152,6 +152,8 @@ class Plugin(PluginBase):
         wx.PostEvent(self.parent,
                      NewPlotEvent(plot=new_plot, title=new_plot.title,
                         reset=reset))
+        if label == IQ_EXTRAPOLATED_DATA_LABEL or label == TRANSFORM_LABEL:
+            self.parent.update_theory(data_id=label, theory=new_plot)
 
     def clear_data(self):
         wx.PostEvent(self.parent,
