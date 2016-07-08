@@ -163,7 +163,6 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
             self._extrapolated_data = self._calculator.compute_extrapolation()
         except:
             msg = "Error extrapolating data."
-            wx.MessageBox(msg, 'error')
             wx.PostEvent(self._manager.parent,
                 StatusEvent(status=msg, info="Error"))
             self._transform_btn.Disable()
@@ -193,7 +192,6 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
             transformed_data = None
         if transformed_data is None:
             msg = "Error calculating Transform."
-            wx.MessageBox(msg, 'error')
             wx.PostEvent(self._manager.parent,
                 StatusEvent(status=msg, info="Error"))
             self._extract_btn.Disable()
@@ -213,7 +211,6 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
             params = None
         if params is None:
             msg = "Error extracting parameters."
-            wx.MessageBox(msg, 'error')
             wx.PostEvent(self._manager.parent,
                 StatusEvent(status=msg, info="Error"))
             return
