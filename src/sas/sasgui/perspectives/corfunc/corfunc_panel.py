@@ -19,7 +19,7 @@ OUTPUT_STRINGS = {
     'dtr': "Average Interface Thickness (A): ",
     'd0': "Average Core Thickness: ",
     'A': "PolyDispersity: ",
-    'Lc/max': "Filling Fraction: "
+    'fill': "Filling Fraction: "
 }
 
 if sys.platform.count("win32") > 0:
@@ -61,6 +61,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self.qmin = 0
         self.qmax = (0, 0)
         self.background = 0
+        self.extracted_params = None
         # Dictionary for saving refs to text boxes used to display output data
         self._output_boxes = None
         self.state = None
@@ -96,6 +97,8 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
             self.set_qmax(tuple(self.state.qmax))
         if self.state.background is not None:
             self.set_background(self.state.background)
+        if self.state.outputs is not None and self.state.outputs != {}:
+            self.set_extracted_params(self.state.outputs)
 
     def get_state(self):
         """
@@ -106,6 +109,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         state.set_saved_state('qmax1_tcl', self.qmax[0])
         state.set_saved_state('qmax2_tcl', self.qmax[1])
         state.set_saved_state('background_tcl', self.background)
+        state.outputs = self.extracted_params
         if self._data is not None:
             state.file = self._data.title
             state.data = self._data
@@ -133,8 +137,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._data = data
         self._calculator.set_data(data)
         # Reset the outputs
-        for key in OUTPUT_STRINGS.keys():
-            self._output_boxes[key].SetValue("-")
+        self.set_extracted_params(None)
         if self._manager is not None:
             from sas.sasgui.perspectives.corfunc.corfunc import IQ_DATA_LABEL
             self._manager.clear_data()
@@ -219,9 +222,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
             wx.PostEvent(self._manager.parent,
                 StatusEvent(status=msg, info="Error"))
             return
-        for key in OUTPUT_STRINGS.keys():
-            value = params[key]
-            self._output_boxes[key].SetValue(value)
+        self.set_extracted_params(params)
 
     def save_project(self, doc=None):
         """
@@ -256,6 +257,16 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self.background = bg
         self._background_input.SetValue(str(bg))
         self._calculator.background = bg
+
+    def set_extracted_params(self, params):
+        self.extracted_params = params
+        if params is None:
+            for key in OUTPUT_STRINGS.keys():
+                self._output_boxes[key].SetValue('-')
+        else:
+            for key in OUTPUT_STRINGS.keys():
+                value = params[key]
+                self._output_boxes[key].SetValue(value)
 
 
     def _compute_background(self, event=None):

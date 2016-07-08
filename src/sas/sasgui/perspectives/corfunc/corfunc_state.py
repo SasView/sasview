@@ -23,12 +23,12 @@ DEFAULT_STATE = {
 
 # List of output parameters, used by __str__
 output_list = [
-    ["long_period", "Long Period"],
-    ["hard_block_thickness", "Average Hard Block Thickness"],
-    ["interface_thickness", "Average Interface Thickness"],
-    ["core_thickness", "Average Core Thickness"],
-    ["polydispersity", "PolyDispersity"],
-    ["filling", "Filling Fraction"]
+    ['max', "Long Period (A): "],
+    ['Lc', "Average Hard Block Thickness (A): "],
+    ['dtr', "Average Interface Thickness (A): "],
+    ['d0', "Average Core Thickness: "],
+    ['A', "PolyDispersity: "],
+    ['fill', "Filling Fraction: "]
 ]
 
 class CorfuncState(object):
@@ -43,7 +43,7 @@ class CorfuncState(object):
         self.qmin = None
         self.qmax = [0, 0]
         self.background = None
-        self.outputs = None
+        self.outputs = {}
 
         self.saved_state = DEFAULT_STATE
         # Will be filled on panel init as number of states increases
@@ -159,6 +159,13 @@ class CorfuncState(object):
             element.appendChild(new_doc.createTextNode(str(value)))
             state.appendChild(element)
 
+        # Output parameters
+        output = new_doc.createElement("output")
+        top_element.appendChild(output)
+        for item in output_list:
+            element = new_doc.createElement(item[0])
+            element.appendChild(new_doc.createTextNode(self.outputs[item[0]]))
+            output.appendChild(element)
 
         # Save the file or return the original document with the state
         # data appended
@@ -205,6 +212,14 @@ class CorfuncState(object):
                             value = None
                         self.set_saved_state(name=item, value=value)
 
+            # Parse outputs
+            entry = get_content('ns:output', node)
+            if entry is not None:
+                for item in output_list:
+                    parameter = get_content("ns:{}".format(item[0]), entry)
+                    if parameter is not None:
+                        self.outputs[item[0]] = parameter.text.strip()
+
 
 
 class Reader(CansasReader):
@@ -213,6 +228,11 @@ class Reader(CansasReader):
     """
 
     type_name = "Corfunc"
+
+    type = ["Invariant file (*.inv)|*.inv",
+            "SASView file (*.svs)|*.svs"]
+
+    ext = ['.cor', '.COR', '.svs', '.SVS']
 
     def __init__(self, callback):
         self.callback = callback
@@ -233,7 +253,7 @@ class Reader(CansasReader):
             # Load file
             basename = os.path.basename(path)
             root, ext = os.path.splitext(basename)
-            if ext.lower() != '.xml' and ext.lower() != '.svs':
+            if not ext.lower() in self.ext:
                 raise IOError, "{} is not a supported file type".format(ext)
             tree = etree.parse(path, parser=etree.ETCompatXMLParser())
             root = tree.getroot()
