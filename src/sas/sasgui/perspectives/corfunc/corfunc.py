@@ -51,6 +51,7 @@ class Plugin(PluginBase):
         self.corfunc_panel = CorfuncPanel(parent=self.frame)
         self.frame.set_panel(self.corfunc_panel)
         self.corfunc_panel.set_manager(self)
+        self._frame_set_helper()
         self.perspective.append(self.corfunc_panel.window_name)
 
         return [self.corfunc_panel]
