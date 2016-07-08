@@ -171,8 +171,8 @@ class CorfuncCalculator(object):
 
         # Returns an array where the 1st and 2nd elements are the values of k
         # and sigma for the best-fit Porod function
-        k, sigma, bg = self._fit_porod(q[mask], iq[mask])
-        self.background = bg
+        k, sigma, _ = self._fit_porod(q[mask], iq[mask])
+        bg = self.background
 
         # Smooths between the best-fit porod function and the data to produce a
         # better fitting curve
