@@ -151,6 +151,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._calculator.set_data(self._data)
         self._calculator.lowerq = self.qmin
         self._calculator.upperq = self.qmax
+        self._calculator.background = self.background
         self._extrapolated_data = self._calculator.compute_extrapolation()
         # TODO: Find way to set xlim and ylim so full range of data can be
         # plotted
