@@ -201,7 +201,7 @@ class CorfuncCalculator(object):
             'Lc': Lc,
             'd0': d0,
             'A': A,
-            'Lc/max': Lc/x[maxs[0]]
+            'fill': Lc/x[maxs[0]]
         }
 
         for key, val in params.iteritems():
