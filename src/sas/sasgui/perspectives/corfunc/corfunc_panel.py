@@ -132,9 +132,14 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._data_name_box.SetValue(str(data.title))
         self._data = data
         self._calculator.set_data(data)
+        # Reset the outputs
+        for key in OUTPUT_STRINGS.keys():
+            self._output_boxes[key].SetValue("-")
         if self._manager is not None:
             from sas.sasgui.perspectives.corfunc.corfunc import IQ_DATA_LABEL
+            self._manager.clear_data()
             self._manager.show_data(self._data, IQ_DATA_LABEL, reset=True)
+
         if set_qrange:
             lower = data.x[-1]*0.05
             upper1 = data.x[-1] - lower*5
@@ -218,8 +223,6 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
             value = params[key]
             self._output_boxes[key].SetValue(value)
 
-
-
     def save_project(self, doc=None):
         """
         Return an XML node containing the state of the panel
@@ -253,6 +256,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self.background = bg
         self._background_input.SetValue(str(bg))
         self._calculator.background = bg
+
 
     def _compute_background(self, event=None):
         self.set_background(self._calculator.compute_background(self.qmax))
