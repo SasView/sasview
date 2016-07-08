@@ -413,8 +413,8 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         qmin_dash_label = wx.StaticText(self, -1, "-", size=(10,20),
             style=wx.ALIGN_CENTER_HORIZONTAL)
 
-        qmin_lower = OutputTextCtrl(self, -1, size=(50, 20), value="0.0")
-        self._qmin_input = ModelTextCtrl(self, -1, size=(50, 20),
+        qmin_lower = OutputTextCtrl(self, -1, size=(75, 20), value="0.0")
+        self._qmin_input = ModelTextCtrl(self, -1, size=(75, 20),
                         style=wx.TE_PROCESS_ENTER, name='qmin_input',
                         text_enter_callback=self._on_enter_input)
         self._qmin_input.SetToolTipString(("Values with q < qmin will be used "
@@ -433,11 +433,11 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         qmax_dash_label = wx.StaticText(self, -1, "-", size=(10,20),
             style=wx.ALIGN_CENTER_HORIZONTAL)
 
-        self._qmax1_input = ModelTextCtrl(self, -1, size=(50, 20),
+        self._qmax1_input = ModelTextCtrl(self, -1, size=(75, 20),
             style=wx.TE_PROCESS_ENTER, name="qmax1_input",
             text_enter_callback=self._on_enter_input)
         self._qmax1_input.SetToolTipString(qmax_tooltip)
-        self._qmax2_input = ModelTextCtrl(self, -1, size=(50, 20),
+        self._qmax2_input = ModelTextCtrl(self, -1, size=(75, 20),
             style=wx.TE_PROCESS_ENTER, name="qmax2_input",
             text_enter_callback=self._on_enter_input)
         self._qmax2_input.SetToolTipString(qmax_tooltip)
@@ -450,7 +450,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         background_label = wx.StaticText(self, -1, "Background:", size=(80,20))
         q_sizer.Add(background_label, (4,0), (1,1), wx.LEFT | wx.EXPAND, 5)
 
-        self._background_input = ModelTextCtrl(self, -1, size=(50,20),
+        self._background_input = ModelTextCtrl(self, -1, size=(75,20),
             style=wx.TE_PROCESS_ENTER, name='background_input',
             text_enter_callback=self._on_enter_input)
         self._background_input.SetToolTipString(("A background value to "
