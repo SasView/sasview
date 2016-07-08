@@ -152,3 +152,9 @@ class Plugin(PluginBase):
         wx.PostEvent(self.parent,
                      NewPlotEvent(plot=new_plot, title=new_plot.title,
                         reset=reset))
+
+    def clear_data(self):
+        wx.PostEvent(self.parent,
+            NewPlotEvent(action='delete', group_id=GROUP_ID_TRANSFORM))
+        wx.PostEvent(self.parent,
+            NewPlotEvent(action='clear', group_id=GROUP_ID_IQ_DATA))
