@@ -1,4 +1,5 @@
 import sys
+import os
 import subprocess
 import logging
 import json
@@ -14,8 +15,10 @@ from twisted.internet import reactor
 from sas.sasgui.guiframe.data_manager import DataManager
 from sas.sasgui.guiframe.proxy import Connection
 
+from SasviewLogger import XStream
+
 import LocalConfig
-from GuiUtils import *
+import GuiUtils
 from UI.AcknowledgementsUI import Acknowledgements
 from AboutBox import AboutBox
 
@@ -33,7 +36,6 @@ class GuiManager(object):
     def __init__(self, mainWindow=None, reactor=None, parent=None):
         """
         """
-
         self._workspace = mainWindow
         self._parent = parent
 
@@ -57,16 +59,16 @@ class GuiManager(object):
         #
         # Widgets
         #
-        # Add FileDialog widget as docked
-        self.filesWidget = DataExplorerWindow(parent, self)
+        self.addWidgets()
 
-        self.dockedFilesWidget = QtGui.QDockWidget("Data explorer", self._workspace)
-        self.dockedFilesWidget.setWidget(self.filesWidget)
-        self.dockedFilesWidget.setFeatures(QtGui.QDockWidget.NoDockWidgetFeatures)
-        self._workspace.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.dockedFilesWidget)
+        # Fork off logging messages to the Log Window
+        XStream.stdout().messageWritten.connect( self.listWidget.insertPlainText  )
+        XStream.stderr().messageWritten.connect( self.listWidget.insertPlainText  )
 
-        self.ackWidget = Acknowledgements()
-        self.aboutWidget = AboutBox()
+        # Log the start of the session
+        logging.info(" --- SasView session started ---")
+        # Log the python version
+        logging.info("Python: %s" % sys.version)
 
         # Set up the status bar
         self.statusBarSetup()
@@ -93,6 +95,35 @@ class GuiManager(object):
 
         # Default perspective
         self._current_perspective = self.invariantWidget
+
+    def addWidgets(self):
+        """
+        Populate the main window with widgets
+
+        TODO: overwrite close() on Log and DR widgets so they can be hidden/shown
+        on request
+        """
+        # Add FileDialog widget as docked
+        self.filesWidget = DataExplorerWindow(self._parent, self)
+
+        self.dockedFilesWidget = QtGui.QDockWidget("Data Explorer", self._workspace)
+        self.dockedFilesWidget.setWidget(self.filesWidget)
+        # Disable maximize/minimize and close buttons
+        self.dockedFilesWidget.setFeatures(QtGui.QDockWidget.NoDockWidgetFeatures)
+        self._workspace.addDockWidget(QtCore.Qt.LeftDockWidgetArea,
+                                      self.dockedFilesWidget)
+
+        # Add the console window as another docked widget
+        self.logDockWidget = QtGui.QDockWidget("Log Explorer", self._workspace)
+        self.logDockWidget.setObjectName("LogDockWidget")
+        self.listWidget = QtGui.QTextBrowser()
+        self.logDockWidget.setWidget(self.listWidget)
+        self._workspace.addDockWidget(QtCore.Qt.BottomDockWidgetArea,
+                                      self.logDockWidget)
+
+        # Add other, minor widgets
+        self.ackWidget = Acknowledgements()
+        self.aboutWidget = AboutBox()
 
     def statusBarSetup(self):
         """
@@ -265,7 +296,7 @@ class GuiManager(object):
         """
         Method defining all signal connections for the gui manager
         """
-        self.communicate = Communicate()
+        self.communicate = GuiUtils.Communicate()
         self.communicate.fileDataReceivedSignal.connect(self.fileRead)
         self.communicate.statusBarUpdateSignal.connect(self.updateStatusBar)
         self.communicate.updatePerspectiveWithDataSignal.connect(self.updatePerspective)
@@ -410,7 +441,9 @@ class GuiManager(object):
     def actionReset(self):
         """
         """
-        print("actionReset TRIGGERED")
+        logging.warning(" *** actionOpen_Analysis logging *******")
+        print("actionReset print TRIGGERED")
+        sys.stderr.write("STDERR - TRIGGERED")
         pass
 
     def actionExcel(self):

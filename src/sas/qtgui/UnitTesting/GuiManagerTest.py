@@ -47,11 +47,42 @@ class GuiManagerTest(unittest.TestCase):
         """
         self.assertIsInstance(self.manager.filesWidget, DataExplorerWindow)
         self.assertIsInstance(self.manager.dockedFilesWidget, QDockWidget)
+        self.assertIsInstance(self.manager.dockedFilesWidget.widget(), DataExplorerWindow)
         self.assertEqual(self.manager.dockedFilesWidget.features(), QDockWidget.NoDockWidgetFeatures)
         self.assertEqual(self.manager._workspace.dockWidgetArea(self.manager.dockedFilesWidget), Qt.LeftDockWidgetArea)
+
+        self.assertIsInstance(self.manager.logDockWidget, QDockWidget)
+        self.assertIsInstance(self.manager.logDockWidget.widget(), QTextBrowser)
+        self.assertEqual(self.manager._workspace.dockWidgetArea(self.manager.logDockWidget), Qt.BottomDockWidgetArea)
+
         self.assertIsInstance(self.manager.ackWidget, Acknowledgements)
         self.assertIsInstance(self.manager.aboutWidget, AboutBox)
         self.assertIsInstance(self.manager.welcomePanel, WelcomePanel)
+
+    def testLogging(self):
+        """
+        Test logging of stdout, stderr and log messages
+        """
+        # See if the log window is empty
+        self.assertEqual(self.manager.logDockWidget.widget().toPlainText(), "")
+
+        # Now, send some message to stdout.
+        # We are in the MainWindow scope, so simple 'print' will work
+        message = "from stdout"
+        print message
+        self.assertIn(message, self.manager.logDockWidget.widget().toPlainText())
+
+        # Send some message to stderr
+        message = "from stderr"
+        sys.stderr.write(message)
+        self.assertIn(message, self.manager.logDockWidget.widget().toPlainText())
+
+        # And finally, send a log message
+        import logging
+        message = "from logging"
+        message_logged = "ERROR: " + message
+        logging.error(message)
+        self.assertIn(message_logged, self.manager.logDockWidget.widget().toPlainText())
 
     def testUpdatePerspective(self):
         """

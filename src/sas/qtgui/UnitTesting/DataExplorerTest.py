@@ -94,7 +94,7 @@ class DataExplorerTest(unittest.TestCase):
     def testWidgets(self):
         """
         Test if all required widgets got added
-        """        
+        """
     def testLoadButton(self):
         loadButton = self.form.cmdLoad
 

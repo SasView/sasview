@@ -11,8 +11,7 @@ from twisted.internet import reactor
 # sas-global
 from sas.sascalc.invariant import invariant
 from sas.sasgui.guiframe.dataFitting import Data1D
-# from sas.qtgui.GuiUtils import *
-from GuiUtils import *
+import GuiUtils
 
 # local
 from UI.TabbedInvariantUI import tabbedInvariantUI
@@ -66,7 +65,7 @@ class InvariantWindow(tabbedInvariantUI):
         self._high_extrapolate = False
         self._high_power_value  = False
 
-        self.communicate = Communicate()
+        self.communicate = GuiUtils.Communicate()
 
         # Mask file selector
         ###################################################
@@ -277,7 +276,7 @@ class InvariantWindow(tabbedInvariantUI):
             variant_item = QtCore.QVariant(extrapolated_data)
 
             # This needs to run in the main thread
-            reactor.callFromThread(updateModelItem, self._model_item, variant_item, title)
+            reactor.callFromThread(GuiUtils.updateModelItem, self._model_item, variant_item, title)
 
         if self._high_extrapolate:
             # for presentation in InvariantDetails

@@ -8,6 +8,9 @@ from PyQt4 import QtGui
 # Local UI
 from UI.MainWindowUI import MainWindow
 
+# Initialize logging
+import SasviewLogger
+
 class MainSasViewWindow(MainWindow):
     # Main window of the application
     def __init__(self, reactor, parent=None):
@@ -53,7 +56,8 @@ if __name__ == "__main__":
 
     # Show the main SV window
     mainwindow = MainSasViewWindow(reactor)
-    mainwindow.show()
+    #mainwindow.show()
+    mainwindow.showMaximized()
 
     # no more splash screen
     splash.finish(mainwindow)

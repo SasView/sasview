@@ -12,7 +12,7 @@ from PyQt4.Qt import QMutex
 from twisted.internet import threads
 
 # SAS
-from GuiUtils import *
+import GuiUtils
 from Plotter import Plotter
 from sas.sascalc.dataloader.loader import Loader
 from sas.sasgui.guiframe.data_manager import DataManager
@@ -306,7 +306,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         TODO: Add 2D-functionality
         """
 
-        plots = plotsFromCheckedItems(self.model)
+        plots = GuiUtils.plotsFromCheckedItems(self.model)
 
         # Call show on requested plots
         new_plot = Plotter()
@@ -333,7 +333,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if isinstance(paths, QtCore.QStringList):
             paths = [str(f) for f in paths]
 
-        if type(paths) is not list:
+        if not isinstance(paths, list):
             paths = [paths]
 
         return paths
@@ -357,7 +357,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         for index, p_file in enumerate(path):
             basename = os.path.basename(p_file)
             _, extension = os.path.splitext(basename)
-            if extension.lower() in EXTENSIONS:
+            if extension.lower() in GuiUtils.EXTENSIONS:
                 any_error = True
                 log_msg = "Data Loader cannot "
                 log_msg += "load: %s\n" % str(p_file)
@@ -429,11 +429,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             self.communicator.progressBarUpdateSignal.emit(current_percentage)
 
         if any_error or error_message:
-            self.communicator.statusBarUpdateSignal.emit(error_message)
+            logging.error(error_message)
+            status_bar_message = "Errors occurred while loading %s" % format(basename)
+            self.communicator.statusBarUpdateSignal.emit(status_bar_message)
 
         else:
             message = "Loading Data Complete! "
         message += log_msg
+        # Notify the progress bar that the updates are over.
         self.communicator.progressBarUpdateSignal.emit(-1)
 
         return output, message
@@ -484,7 +487,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 item.setCheckState(QtCore.Qt.Unchecked)
 
                 try:
-                    is1D = type(item.child(0).data().toPyObject()) is Data1D
+                    is1D = isinstance(item.child(0).data().toPyObject(), Data1D)
                 except AttributeError:
                     msg = "Bad structure of the data model."
                     raise RuntimeError, msg
@@ -498,7 +501,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 item = self.model.item(index)
 
                 try:
-                    is1D = type(item.child(0).data().toPyObject()) is Data1D
+                    is1D = isinstance(item.child(0).data().toPyObject(), Data1D)
                 except AttributeError:
                     msg = "Bad structure of the data model."
                     raise RuntimeError, msg
@@ -512,7 +515,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 item = self.model.item(index)
                 item.setCheckState(QtCore.Qt.Unchecked)
                 try:
-                    is2D = type(item.child(0).data().toPyObject()) is Data2D
+                    is2D = isinstance(item.child(0).data().toPyObject(), Data2D)
                 except AttributeError:
                     msg = "Bad structure of the data model."
                     raise RuntimeError, msg
@@ -526,7 +529,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 item = self.model.item(index)
 
                 try:
-                    is2D = type(item.child(0).data().toPyObject()) is Data2D
+                    is2D = isinstance(item.child(0).data().toPyObject(), Data2D)
                 except AttributeError:
                     msg = "Bad structure of the data model."
                     raise RuntimeError, msg
@@ -601,7 +604,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         checkbox_item.setChild(0, object_item)
 
         # Add rows for display in the view
-        info_item = infoFromData(data)
+        info_item = GuiUtils.infoFromData(data)
 
         # Set info_item as the only child
         checkbox_item.setChild(1, info_item)
@@ -615,7 +618,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Make sure it is valid and if so, replace it in the model
         """
         # Assert the correct type
-        if type(model_item) != QtGui.QStandardItem:
+        if not isinstance(model_item, QtGui.QStandardItem):
             msg = "Wrong data type returned from calculations."
             raise AttributeError, msg
 
