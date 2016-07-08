@@ -13,6 +13,15 @@ from sas.sasgui.perspectives.corfunc.corfunc_state import CorfuncState
 import sas.sasgui.perspectives.corfunc.corfunc
 from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 
+OUTPUT_STRINGS = {
+    'max': "Long Period (A): ",
+    'Lc': "Average Hard Block Thickness (A): ",
+    'dtr': "Average Interface Thickness (A): ",
+    'd0': "Average Core Thickness: ",
+    'A': "PolyDispersity: ",
+    'Lc/max': "Filling Fraction: "
+}
+
 if sys.platform.count("win32") > 0:
     _STATICBOX_WIDTH = 350
     PANEL_WIDTH = 400
@@ -40,6 +49,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         # The data with no correction for background values
         self._data = data # The data to be analysed (corrected fr background)
         self._extrapolated_data = None # The extrapolated data set
+        self._transformed_data = None # Fourier trans. of the extrapolated data
         self._calculator = CorfuncCalculator()
         self._data_name_box = None # Text box to show name of file
         self._background_input = None
@@ -47,12 +57,12 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._qmax1_input = None
         self._qmax2_input = None
         self._transform_btn = None
-        self._compute_btn = None
+        self._extract_btn = None
         self.qmin = 0
         self.qmax = (0, 0)
         self.background = 0
-        # Dictionary for saving IDs of text boxes used to display output data
-        self._output_ids = None
+        # Dictionary for saving refs to text boxes used to display output data
+        self._output_boxes = None
         self.state = None
         self._do_layout()
         self._disable_inputs()
@@ -118,6 +128,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
             return
         self._enable_inputs()
         self._transform_btn.Disable()
+        self._extract_btn.Disable()
         self._data_name_box.SetValue(str(data.title))
         self._data = data
         self._calculator.set_data(data)
@@ -173,11 +184,29 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         """
         transformed_data = self._calculator.compute_transform(
             self._extrapolated_data, self.background)
+        self._transformed_data = transformed_data
         from sas.sasgui.perspectives.corfunc.corfunc import TRANSFORM_LABEL
         import numpy as np
         plot_x = transformed_data.x[np.where(transformed_data.x <= 200)]
         plot_y = transformed_data.y[np.where(transformed_data.x <= 200)]
         self._manager.show_data(Data1D(plot_x, plot_y), TRANSFORM_LABEL)
+        self._extract_btn.Enable()
+
+    def extract_parameters(self, event=None):
+        params = None
+        try:
+            params = self._calculator.extract_parameters(self._transformed_data)
+        except:
+            params = None
+        if params is None:
+            msg = "Error extracting parameters."
+            wx.PostEvent(self._manager.parent,
+                StatusEvent(status=msg, info="error"))
+            return
+        for key in OUTPUT_STRINGS.keys():
+            value = params[key]
+            self._output_boxes[key].SetValue(value)
+
 
 
     def save_project(self, doc=None):
@@ -283,8 +312,8 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
             elif qmin > qmax1:
                 msg = "qmin must be less than qmax"
                 qmin_valid = False
-            elif background < 0 or background > self._data.y.max():
-                msg = "background must be positive and less than highest I"
+            elif background > self._data.y.max():
+                msg = "background must be less than highest I"
                 background_valid = False
         if not qmin_valid:
             self._qmin_input.SetBackgroundColour('pink')
@@ -419,26 +448,20 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
 
         output_sizer = wx.GridBagSizer(5, 5)
 
-        label_strings = [
-            "Long Period (A): ",
-            "Average Hard Block Thickness (A): ",
-            "Average Interface Thickness (A): ",
-            "Average Core Thickness: ",
-            "PolyDispersity: ",
-            "Filling Fraction: "
-        ]
-        self._output_ids = dict()
-        for i in range(len(label_strings)):
+        self._output_boxes = dict()
+        i = 0
+        for key, value in OUTPUT_STRINGS.iteritems():
             # Create a label and a text box for each poperty
-            label = wx.StaticText(self, -1, label_strings[i])
-            output_box = OutputTextCtrl(self, wx.NewId(), size=(50, 20),
+            label = wx.StaticText(self, -1, value)
+            output_box = OutputTextCtrl(self, wx.NewId(),
                 value="-", style=wx.ALIGN_CENTER_HORIZONTAL)
             # Save the ID of each of the text boxes for accessing after the
             # output data has been calculated
-            self._output_ids[label_strings[i]] = output_box.GetId()
+            self._output_boxes[key] = output_box
             output_sizer.Add(label, (i, 0), (1, 1), wx.LEFT | wx.EXPAND, 15)
             output_sizer.Add(output_box, (i, 2), (1, 1),
                 wx.RIGHT | wx.EXPAND, 15)
+            i += 1
 
         outputbox_sizer.Add(output_sizer, wx.TOP, 0)
 
@@ -453,17 +476,18 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
 
         extrapolate_btn = wx.Button(self, wx.NewId(), "Extrapolate")
         self._transform_btn = wx.Button(self, wx.NewId(), "Transform")
-        self._compute_btn = wx.Button(self, wx.NewId(), "Compute Measuments")
+        self._extract_btn = wx.Button(self, wx.NewId(), "Compute Measuments")
 
         self._transform_btn.Disable()
-        self._compute_btn.Disable()
+        self._extract_btn.Disable()
 
         extrapolate_btn.Bind(wx.EVT_BUTTON, self.compute_extrapolation)
         self._transform_btn.Bind(wx.EVT_BUTTON, self.compute_transform)
+        self._extract_btn.Bind(wx.EVT_BUTTON, self.extract_parameters)
 
         controls_sizer.Add(extrapolate_btn, wx.CENTER | wx.EXPAND)
         controls_sizer.Add(self._transform_btn, wx.CENTER | wx.EXPAND)
-        controls_sizer.Add(self._compute_btn, wx.CENTER | wx.EXPAND)
+        controls_sizer.Add(self._extract_btn, wx.CENTER | wx.EXPAND)
 
         controlbox_sizer.Add(controls_sizer, wx.TOP | wx.EXPAND, 0)
         vbox.Add(controlbox_sizer, (3, 0), (1, 1),

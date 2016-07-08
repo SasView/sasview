@@ -12,11 +12,6 @@ from sas.sascalc.dataloader.data_info import Data1D
 
 class CorfuncCalculator(object):
 
-    # Helper class
-    class _Struct:
-        def __init__(self, **entries):
-            self.__dict__.update(entries)
-
     class _Interpolator(object):
         """
         Interpolates between curve f and curve g over the range start:stop and
@@ -146,6 +141,75 @@ class CorfuncCalculator(object):
 
         return transform
 
+    def extract_parameters(self, transformed_data):
+        """
+        Extract the interesting measurements from a correlation function
+        :param transformed_data: Fourier transformation of the
+            extrapolated data
+        """
+        # Calculate indexes of maxima and minima
+        x = transformed_data.x
+        y = transformed_data.y
+        maxs = argrelextrema(y, np.greater)[0]
+        mins = argrelextrema(y, np.less)[0]
+
+        # If there are no maxima, return None
+        if len(maxs) == 0:
+            return None
+
+        GammaMin = y[mins[0]]  # The value at the first minimum
+
+        ddy = (y[:-2]+y[2:]-2*y[1:-1])/(x[2:]-x[:-2])**2  # 2nd derivative of y
+        dy = (y[2:]-y[:-2])/(x[2:]-x[:-2])  # 1st derivative of y
+        # Find where the second derivative goes to zero
+        zeros = argrelextrema(np.abs(ddy), np.less)[0]
+        # locate the first inflection point
+        linear_point = zeros[0]
+        linear_point = int(mins[0]/10)
+
+        # Try to calculate slope around linear_point using 80 data points
+        lower = linear_point - 40
+        upper = linear_point + 40
+
+        # If too few data points to the left, use linear_point*2 data points
+        if lower < 0:
+            lower = 0
+            upper = linear_point * 2
+        # If too few to right, use 2*(dy.size - linear_point) data points
+        elif upper > len(dy):
+            upper = len(dy)
+            width = len(dy) - linear_point
+            lower = 2*linear_point - dy.size
+
+        m = np.mean(dy[lower:upper])  # Linear slope
+        b = y[1:-1][linear_point]-m*x[1:-1][linear_point]  # Linear intercept
+
+        Lc = (GammaMin-b)/m  # Hard block thickness
+
+        # Find the data points where the graph is linear to within 1%
+        mask = np.where(np.abs((y-(m*x+b))/y) < 0.01)[0]
+        if len(mask) == 0:  # Return garbage for bad fits
+            return garbage
+        dtr = x[mask[0]]  # Beginning of Linear Section
+        d0 = x[mask[-1]]  # End of Linear Section
+        GammaMax = y[mask[-1]]
+        A = -GammaMin/GammaMax  # Normalized depth of minimum
+
+        params = {
+            'max': x[maxs[0]],
+            'dtr': dtr,
+            'Lc': Lc,
+            'd0': d0,
+            'A': A,
+            'Lc/max': Lc/x[maxs[0]]
+        }
+
+        for key, val in params.iteritems():
+            params[key] = self._round_sig_figs(val, 6)
+
+        return params
+
+
     def _porod(self, q, K, sigma, bg):
         """Equation for the Porod region of the data"""
         return bg + (K*q**(-4))*np.exp(-q**2*sigma**2)
@@ -190,3 +254,21 @@ class CorfuncCalculator(object):
             self.lowerq)
 
         return s2
+
+    def _round_sig_figs(self, x, sigfigs):
+        """
+        Round a number to a given number of significant figures.
+
+        :param x: The value to round
+        :param sigfigs: How many significant figures to round to
+        :return rounded_str: x rounded to the given number of significant
+            figures, as a string
+        """
+        # Index of first significant digit
+        significant_digit = -int(np.floor(np.log10(np.abs(x))))
+        # Number of digits required for correct number of sig figs
+        digits = significant_digit + (sigfigs - 1)
+        rounded = np.round(x, decimals=digits)
+        rounded_str = "{1:.{0}f}".format(sigfigs -1  + significant_digit,
+            rounded)
+        return rounded_str
