@@ -208,6 +208,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
     def set_background(self, bg):
         self.background = bg
         self._background_input.SetValue(str(bg))
+        self._calculator.background = bg
 
     def _compute_background(self, event=None):
         self.set_background(self._calculator.compute_background(self.qmax))

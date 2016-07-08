@@ -121,21 +121,20 @@ class Plugin(PluginBase):
                     wx.PostEvent(self.parent, StatusEvent(status=msg,
                         info='error'))
 
-    def show_data(self, data, label, path=None, reset=False):
+    def show_data(self, data, label, reset=False):
         """
         Show data read from a file
 
-        :param path: The path to the file
         :param data: The data to plot (Data1D)
         :param label: What to label the plot. Also used as the plot ID
         :param reset: If True, all other plottables will be cleared
         """
-        new_plot = Data1D(data.x, data.y, dy=data.dy)
-
+        new_plot = Data1D(data.x, copy.deepcopy(data.y), dy=data.dy)
         group_id = ""
         if label == IQ_DATA_LABEL or label == IQ_EXTRAPOLATED_DATA_LABEL:
             new_plot.xaxis("\\rm{Q}", 'A^{-1}')
             new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
+            new_plot.y -= self.corfunc_panel.background
             group_id = GROUP_ID_IQ_DATA
         elif label == TRANSFORM_LABEL:
             new_plot.xaxis("{x}", 'A')
