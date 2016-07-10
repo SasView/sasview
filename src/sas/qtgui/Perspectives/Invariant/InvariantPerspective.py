@@ -301,7 +301,7 @@ class InvariantWindow(tabbedInvariantUI):
             # variant_item = QtCore.QVariant(self._plotter)
             variant_item = QtCore.QVariant(high_out_data)
             # This needs to run in the main thread
-            reactor.callFromThread(updateModelItem, self._model_item, variant_item, title)
+            reactor.callFromThread(GuiUtils.updateModelItem, self._model_item, variant_item, title)
 
         item = QtGui.QStandardItem(str(float('%.5g'% volume_fraction)))
         self.model.setItem(WIDGETS.W_VOLUME_FRACTION, item)

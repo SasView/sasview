@@ -3,7 +3,6 @@ import unittest
 import logging
 
 from PyQt4.QtGui import *
-from PyQt4.QtTest import QTest
 from PyQt4.QtCore import *
 
 # Local
@@ -26,7 +25,7 @@ class SasviewLoggerTest(unittest.TestCase):
         self.outHandlerGui=QTextBrowser()
 
 
-    def test_stdout(self):
+    def testQtHandler(self):
         """
         Test redirection of all levels of logging
         """

@@ -1,15 +1,12 @@
-import sys
 from PyQt4 import QtGui
 
-# Replace the qt4agg calls below with qt5 equivalent.
+# TODO: Replace the qt4agg calls below with qt5 equivalent.
 # Requires some code modifications.
 # https://www.boxcontrol.net/embedding-matplotlib-plot-on-pyqt5-gui.html
 #
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
-
-import random
 
 class Plotter(QtGui.QDialog):
     def __init__(self, parent=None):

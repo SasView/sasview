@@ -1,9 +1,6 @@
-import sys
-
-from PyQt4 import QtGui
-
 # UNLESS EXEPTIONALLY REQUIRED TRY TO AVOID IMPORTING ANY MODULES HERE
 # ESPECIALLY ANYTHING IN SAS, SASMODELS NAMESPACE
+from PyQt4 import QtGui
 
 # Local UI
 from UI.MainWindowUI import MainWindow
@@ -15,7 +12,7 @@ class MainSasViewWindow(MainWindow):
     # Main window of the application
     def __init__(self, reactor, parent=None):
         super(MainSasViewWindow, self).__init__(parent)
-        
+
         # define workspace for dialogs.
         self.workspace = QtGui.QWorkspace(self)
         self.setCentralWidget(self.workspace)
@@ -27,7 +24,7 @@ class MainSasViewWindow(MainWindow):
     def closeEvent(self, event):
         self.guiManager.quitApplication()
 
-        
+
 def SplashScreen():
     """
     Displays splash screen as soon as humanely possible.
