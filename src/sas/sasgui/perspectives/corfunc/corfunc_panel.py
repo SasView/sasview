@@ -244,7 +244,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         """
         data = self._data
         state = self.get_state()
-        if data is not None
+        if data is not None:
             new_doc, sasentry = self._manager.state_reader._to_xml_doc(data)
             new_doc = state.toXML(doc=new_doc, entry_node=sasentry)
             if new_doc is not None:
