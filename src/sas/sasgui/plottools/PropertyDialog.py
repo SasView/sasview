@@ -77,7 +77,11 @@ class Properties(wx.Dialog):
         self.view.Insert("Guinier lny vs x^(2)", 2)
         self.view.Insert("XS Guinier ln(y*x) vs x^(2)", 3)
         self.view.Insert("Porod y*x^(4) vs x^(4)", 4)
-        self.view.Insert("Kratky y*x^(2) vs x", 5)
+        # This did not work in 3.1.2 and does not work now.
+        # prefer to fix (should not be too hard) but for the moment
+        # am removing as an option the user sees so they don't get
+        # disappointed.    PDB 7/10/2016 
+        # self.view.Insert("Kratky y*x^(2) vs x", 5)
         self.SetSizer(vbox)
         self.Fit()
         self.Centre()
