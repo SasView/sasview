@@ -9,6 +9,7 @@ from scipy.fftpack import dct
 from scipy.signal import argrelextrema
 from numpy.linalg import lstsq
 from sas.sascalc.dataloader.data_info import Data1D
+from sas.sascalc.corfunc.transform_thread import TransformThread
 
 class CorfuncCalculator(object):
 
@@ -65,6 +66,7 @@ class CorfuncCalculator(object):
         self.lowerq = lowerq
         self.upperq = upperq
         self.background = 0
+        self._transform_thread = None
 
     def set_data(self, data, scale=1):
         """
@@ -119,27 +121,36 @@ class CorfuncCalculator(object):
 
         return extrapolation
 
-    def compute_transform(self, extrapolation, background=None):
+    def compute_transform(self, extrapolation, background=None,
+        completefn=None, updatefn=None):
         """
         Transform an extrapolated scattering curve into a correlation function.
 
         :param extrapolation: The extrapolated data
         :param background: The background value (if not provided, previously
             calculated value will be used)
+        :param completefn: The function to call when the transform calculation
+            is complete`
+        :param updatefn: The function to call to update the GUI with the status
+            of the transform calculation
         :return: The transformed data
         """
-        qs = extrapolation.x
-        iqs = extrapolation.y
-        q = self._data.x
+        if self._transform_thread is not None:
+            if self._transform_thread.isrunning(): return
+
         if background is None: background = self.background
 
-        gamma = dct((iqs-background)*qs**2)
-        gamma = gamma / gamma.max()
-        xs = np.pi*np.arange(len(qs),dtype=np.float32)/(q[1]-q[0])/len(qs)
+        self._transform_thread = TransformThread(self._data, extrapolation,
+        background, completefn=completefn, updatefn=updatefn)
+        self._transform_thread.queue()
 
-        transform = Data1D(xs, gamma)
+    def transform_isrunning(self):
+        if self._transform_thread is None: return False
+        return self._transform_thread.isrunning()
 
-        return transform
+    def stop_transform(self):
+        if self._transform_thread.isrunning():
+            self._transform_thread.stop()
 
     def extract_parameters(self, transformed_data):
         """

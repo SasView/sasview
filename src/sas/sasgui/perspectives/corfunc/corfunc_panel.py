@@ -203,22 +203,39 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         Compute and plot the transformed data.
         Called when Transform button is pressed.
         """
-        try:
-            transformed_data = self._calculator.compute_transform(
-                self._extrapolated_data, self.background)
-        except:
-            transformed_data = None
-        if transformed_data is None:
+        if not self._calculator.transform_isrunning():
+            self._calculator.compute_transform(self._extrapolated_data,
+                self.background, completefn=self.transform_complete,
+                updatefn=self.transform_update)
+            self._transform_btn.SetLabel("Stop Tansform")
+        else:
+            self._calculator.stop_transform()
+            self.transform_update("Fourier transform cancelled.")
+            self._transform_btn.SetLabel("Tansform")
+
+    def transform_update(self, msg=""):
+        """
+        Called from TransformThread to update on status of calculation
+        """
+        wx.PostEvent(self._manager.parent,
+            StatusEvent(status=msg))
+
+    def transform_complete(self, transform=None):
+        """
+        Called from TransformThread when calculation has completed
+        """
+        if transform is None:
             msg = "Error calculating Transform."
             wx.PostEvent(self._manager.parent,
                 StatusEvent(status=msg, info="Error"))
             self._extract_btn.Disable()
             return
-        self._transformed_data = transformed_data
+        self._transformed_data = transform
         import numpy as np
-        plot_x = transformed_data.x[np.where(transformed_data.x <= 200)]
-        plot_y = transformed_data.y[np.where(transformed_data.x <= 200)]
+        plot_x = transform.x[np.where(transform.x <= 200)]
+        plot_y = transform.y[np.where(transform.x <= 200)]
         self._manager.show_data(Data1D(plot_x, plot_y), TRANSFORM_LABEL)
+        self._transform_btn.SetLabel("Tansform")
         self._extract_btn.Enable()
 
     def extract_parameters(self, event=None):
