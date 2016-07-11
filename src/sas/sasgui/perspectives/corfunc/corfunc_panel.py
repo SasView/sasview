@@ -97,10 +97,16 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
             self.set_qmax(tuple(self.state.qmax))
         if self.state.background is not None:
             self.set_background(self.state.background)
+        if self.state.is_extrapolated:
+            self.compute_extrapolation()
+        else:
+            return
+        if self.state.is_transformed:
+            self.compute_transform()
+        else:
+            return
         if self.state.outputs is not None and self.state.outputs != {}:
             self.set_extracted_params(self.state.outputs)
-            self.compute_extrapolation()
-            self.compute_transform()
 
     def get_state(self):
         """
@@ -115,6 +121,10 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         if self._data is not None:
             state.file = self._data.title
             state.data = self._data
+        if self._extrapolated_data is not None:
+            state.is_extrapolated = True
+        if self._transformed_data is not None:
+            state.is_transformed = True
         self.state = state
 
         return self.state
@@ -235,6 +245,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         data = self._data
         state = self.get_state()
         if data is not None:
+            import pdb; pdb.set_trace()
             new_doc, sasentry = self._manager.state_reader._to_xml_doc(data)
             new_doc = state.toXML(doc=new_doc, entry_node=sasentry)
             if new_doc is not None:
