@@ -197,7 +197,6 @@ class CorfuncState(object):
 
         :param node: node of an XML document to read from (optional)
         """
-        import pdb; pdb.set_trace()
         if node.get('version') and node.get('version') == '1.0':
             # Parse filename
             entry = get_content('ns:filename', node)
