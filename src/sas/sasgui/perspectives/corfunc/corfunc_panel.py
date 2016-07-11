@@ -277,6 +277,14 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
                 value = params[key]
                 self._output_boxes[key].SetValue(value)
 
+    def plot_qrange(self, active=None, leftdown=False):
+        if active is None:
+            active = self._qmin_input
+        wx.PostEvent(self._manager.parent, PlotQrangeEvent(
+            ctrl=[self._qmin_input, self._qmax1_input, self._qmax2_input],
+            active=active, id=IQ_DATA_LABEL, is_corfunc=True,
+            group_id=GROUP_ID_IQ_DATA, leftdown=leftdown))
+
 
     def _compute_background(self, event=None):
         self.set_background(self._calculator.compute_background(self.qmax))
@@ -297,25 +305,16 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         if event is not None:
             active_ctrl = event.GetEventObject()
             if active_ctrl == self._background_input:
-                from sas.sasgui.perspectives.corfunc.corfunc\
-                    import IQ_DATA_LABEL
-                self._manager.show_data(self._data, IQ_DATA_LABEL, reset=False)
-            wx.PostEvent(self._manager.parent, PlotQrangeEvent(
-                ctrl=[self._qmin_input, self._qmax1_input, self._qmax2_input],
-                active=active_ctrl, id=IQ_DATA_LABEL, is_corfunc=True,
-                group_id=GROUP_ID_IQ_DATA, leftdown=False))
+                self._manager.show_data(self._data, IQ_DATA_LABEL,
+                    reset=False, active_ctrl=active_ctrl)
 
     def _on_click_qrange(self, event=None):
         if event is None:
             return
         event.Skip()
         if not self._validate_inputs(): return
-        is_click = event.LeftDown()
-        if is_click:
-            wx.PostEvent(self._manager.parent, PlotQrangeEvent(
-                ctrl=[self._qmin_input, self._qmax1_input, self._qmax2_input],
-                active=event.GetEventObject(), id=IQ_DATA_LABEL,
-                group_id=GROUP_ID_IQ_DATA, leftdown=is_click))
+        self.plot_qrange(active=event.GetEventObject(),
+            leftdown=event.LeftDown())
 
     def _validate_inputs(self):
         """
