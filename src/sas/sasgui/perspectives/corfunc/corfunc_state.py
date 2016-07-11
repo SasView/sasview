@@ -45,6 +45,8 @@ class CorfuncState(object):
         self.qmax = [0, 0]
         self.background = None
         self.outputs = {}
+        self.is_extrapolated = False
+        self.is_transformed = False
 
         self.saved_state = DEFAULT_STATE
         # Will be filled on panel init as number of states increases
@@ -160,6 +162,15 @@ class CorfuncState(object):
             element.appendChild(new_doc.createTextNode(str(value)))
             state.appendChild(element)
 
+        # Whether or not the extrapolate & transform buttons have been clicked
+        element = new_doc.createElement("is_extrapolated")
+        top_element.appendChild(element)
+        element.appendChild(new_doc.createTextNode(str(int(self.is_extrapolated))))
+
+        element = new_doc.createElement("is_transformed")
+        top_element.appendChild(element)
+        element.appendChild(new_doc.createTextNode(str(int(self.is_transformed))))
+
         # Output parameters
         if self.outputs != {} and self.outputs is not None:
             output = new_doc.createElement("output")
@@ -186,6 +197,7 @@ class CorfuncState(object):
 
         :param node: node of an XML document to read from (optional)
         """
+        import pdb; pdb.set_trace()
         if node.get('version') and node.get('version') == '1.0':
             # Parse filename
             entry = get_content('ns:filename', node)
@@ -213,6 +225,14 @@ class CorfuncState(object):
                         except:
                             value = None
                         self.set_saved_state(name=item, value=value)
+
+            # Parse is_extrapolated and is_transformed
+            entry = get_content('ns:is_extrapolated', node)
+            if entry is not None:
+                self.is_extrapolated = bool(int(entry.text.strip()))
+            entry = get_content('ns:is_transformed', node)
+            if entry is not None:
+                self.is_transformed = bool(int(entry.text.strip()))
 
             # Parse outputs
             entry = get_content('ns:output', node)
