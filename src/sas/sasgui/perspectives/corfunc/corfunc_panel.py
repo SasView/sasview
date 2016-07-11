@@ -12,6 +12,7 @@ from sas.sasgui.perspectives.fitting.basepage import ModelTextCtrl
 from sas.sasgui.perspectives.corfunc.corfunc_state import CorfuncState
 import sas.sasgui.perspectives.corfunc.corfunc
 from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
+from plot_labels import *
 
 OUTPUT_STRINGS = {
     'max': "Long Period (A): ",
@@ -151,7 +152,6 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         # Reset the outputs
         self.set_extracted_params(None)
         if self._manager is not None:
-            from sas.sasgui.perspectives.corfunc.corfunc import IQ_DATA_LABEL
             self._manager.clear_data()
             self._manager.show_data(self._data, IQ_DATA_LABEL, reset=True)
 
@@ -195,8 +195,6 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         plot_x = self._extrapolated_data.x[0:numpts]
         plot_y = self._extrapolated_data.y[0:numpts]
         to_plot = Data1D(plot_x, plot_y)
-        from sas.sasgui.perspectives.corfunc.corfunc import\
-            IQ_EXTRAPOLATED_DATA_LABEL
         self._manager.show_data(to_plot, IQ_EXTRAPOLATED_DATA_LABEL)
         self._transform_btn.Enable()
 
@@ -217,7 +215,6 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
             self._extract_btn.Disable()
             return
         self._transformed_data = transformed_data
-        from sas.sasgui.perspectives.corfunc.corfunc import TRANSFORM_LABEL
         import numpy as np
         plot_x = transformed_data.x[np.where(transformed_data.x <= 200)]
         plot_y = transformed_data.y[np.where(transformed_data.x <= 200)]
@@ -297,8 +294,6 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self.qmax = (new_qmax1, new_qmax2)
         self.background = float(self._background_input.GetValue())
         self._calculator.background = self.background
-        from sas.sasgui.perspectives.corfunc.corfunc import GROUP_ID_IQ_DATA,\
-            IQ_DATA_LABEL
         if event is not None:
             active_ctrl = event.GetEventObject()
             if active_ctrl == self._background_input:
@@ -317,8 +312,6 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         if not self._validate_inputs(): return
         is_click = event.LeftDown()
         if is_click:
-            from sas.sasgui.perspectives.corfunc.corfunc import GROUP_ID_IQ_DATA,\
-                IQ_DATA_LABEL
             wx.PostEvent(self._manager.parent, PlotQrangeEvent(
                 ctrl=[self._qmin_input, self._qmax1_input, self._qmax2_input],
                 active=event.GetEventObject(), id=IQ_DATA_LABEL,
