@@ -1,6 +1,7 @@
 import time
 import sys
 import os
+import logging
 import sas.sascalc.dataloader
 from lxml import etree
 from sas.sascalc.dataloader.readers.cansas_reader import Reader as CansasReader
@@ -160,12 +161,13 @@ class CorfuncState(object):
             state.appendChild(element)
 
         # Output parameters
-        output = new_doc.createElement("output")
-        top_element.appendChild(output)
-        for item in output_list:
-            element = new_doc.createElement(item[0])
-            element.appendChild(new_doc.createTextNode(self.outputs[item[0]]))
-            output.appendChild(element)
+        if self.outputs != {} and self.outputs is not None:
+            output = new_doc.createElement("output")
+            top_element.appendChild(output)
+            for item in output_list:
+                element = new_doc.createElement(item[0])
+                element.appendChild(new_doc.createTextNode(self.outputs[item[0]]))
+                output.appendChild(element)
 
         # Save the file or return the original document with the state
         # data appended
