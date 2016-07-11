@@ -99,6 +99,8 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
             self.set_background(self.state.background)
         if self.state.outputs is not None and self.state.outputs != {}:
             self.set_extracted_params(self.state.outputs)
+            self.compute_extrapolation()
+            self.compute_transform()
 
     def get_state(self):
         """
