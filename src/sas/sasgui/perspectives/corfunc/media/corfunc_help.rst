@@ -91,7 +91,7 @@ Fourier
 ^^^^^^^
 
 If Fourier is selected for the transform type, the perspective will perform a
-discrete cosine transform to the extrapolated data in order to calculate the
+discrete cosine transform on the extrapolated data in order to calculate the
 correlation function. The following algoritm is applied:
 
 .. math::
@@ -102,7 +102,7 @@ correlation function. The following algoritm is applied:
 Hilbert
 ^^^^^^^
 If Hilbert is selected for the transform type, the perspective will perform a
-Hilbert transform to the extraplated data in order to calculate the Volume
+Hilbert transform on the extraplated data in order to calculate the Volume
 Fraction Profile.
 
 Interpretation
@@ -127,3 +127,48 @@ The structural parameters obtained are:
 *   Average Interface Thickness :math:`\text{} = D_{tr}`
 *   Polydispersity :math:`= \Gamma_{\text{min}}/\Gamma_{\text{max}}`
 *   Local Crystallinity :math:`= L_c/L_p`
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+Usage
+-----
+Upon sending data to the correlation function perspective, it will plot the data
+, as well as a red bar indicating the lower Q range (used for
+back-extrapolation), and 2 purple bars indicating the upper qrange (used for
+forwards-extraplation) [figure 3]. These bars may be moved my clicking and
+dragging, or by entering the appropriate value in the Q range input boxes.
+
+.. figure:: tutorial1.png
+   :align: center
+
+   **Figure 3** A plot of some data showing the Q range bars
+
+Once the Q ranges have been set, click the "Calculate" button next to the
+background input field to calculate the Bonart thermal background level.
+Alternatively, enter your own value into the field. Click the "Extrapolate"
+button to extrapolate the data and plot the extrapolation in the same figure
+as the original data. [figure 4]
+
+.. figure:: tutorial2.png
+   :align: center
+
+   **Figure 4** A plot showing the extrapolated data and the original data
+
+Then, select which type of transform you would like to perform, using the radio
+buttons:
+
+*   **Fourier** Perform a Fourier Transform to calculate the correlation
+    function of the extrapolated data
+*   **Hilbert** Perform a Hilbert Transform to calculate the volume fraction
+    profile of the extrapolated data
+
+Clicking the transform button will then perform the selected transform and plot
+it in a new figure. If a Fourier Transform was performed, the "Compute
+Parameters" button can also be clicked to calculate values for the output
+parameters [figure 5]
+
+ .. figure:: tutorial3.png
+    :align: center
+
+    **Figure 5** The Fourier Transform (correlation function) of the
+    extrapolated data, and the parameters extracted from it.
