@@ -19,7 +19,7 @@ OUTPUT_STRINGS = {
     'Lc': "Average Hard Block Thickness (A): ",
     'dtr': "Average Interface Thickness (A): ",
     'd0': "Average Core Thickness: ",
-    'A': "PolyDispersity: ",
+    'A': "Polydispersity: ",
     'fill': "Local Crystallinity: "
 }
 

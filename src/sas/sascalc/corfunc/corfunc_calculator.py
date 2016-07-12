@@ -214,7 +214,7 @@ class CorfuncCalculator(object):
         dtr = x[mask[0]]  # Beginning of Linear Section
         d0 = x[mask[-1]]  # End of Linear Section
         GammaMax = y[mask[-1]]
-        A = -GammaMin/GammaMax  # Normalized depth of minimum
+        A = np.abs(GammaMin/GammaMax)  # Normalized depth of minimum
 
         params = {
             'max': x[maxs[0]],
