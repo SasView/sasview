@@ -59,6 +59,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._qmin_input = None
         self._qmax1_input = None
         self._qmax2_input = None
+        self._extrapolate_btn = None
         self._transform_btn = None
         self._extract_btn = None
         self.qmin = 0
@@ -577,7 +578,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
 
         controls_sizer = wx.BoxSizer(wx.VERTICAL)
 
-        extrapolate_btn = wx.Button(self, wx.NewId(), "Extrapolate")
+        self._extrapolate_btn = wx.Button(self, wx.NewId(), "Extrapolate")
         self._transform_btn = wx.Button(self, wx.NewId(), "Transform")
         self._extract_btn = wx.Button(self, wx.NewId(), "Compute Parameters")
         help_btn = wx.Button(self, -1, "HELP")
@@ -585,12 +586,12 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._transform_btn.Disable()
         self._extract_btn.Disable()
 
-        extrapolate_btn.Bind(wx.EVT_BUTTON, self.compute_extrapolation)
+        self._extrapolate_btn.Bind(wx.EVT_BUTTON, self.compute_extrapolation)
         self._transform_btn.Bind(wx.EVT_BUTTON, self.compute_transform)
         self._extract_btn.Bind(wx.EVT_BUTTON, self.extract_parameters)
         help_btn.Bind(wx.EVT_BUTTON, self.on_help)
 
-        controls_sizer.Add(extrapolate_btn, wx.CENTER | wx.EXPAND)
+        controls_sizer.Add(self._extrapolate_btn, wx.CENTER | wx.EXPAND)
         controls_sizer.Add(self._transform_btn, wx.CENTER | wx.EXPAND)
         controls_sizer.Add(self._extract_btn, wx.CENTER | wx.EXPAND)
         controls_sizer.Add(help_btn, wx.CENTER | wx.EXPAND)
@@ -610,6 +611,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._qmax1_input.Disable()
         self._qmax2_input.Disable()
         self._background_input.Disable()
+        self._extrapolate_btn.Disable()
 
     def _enable_inputs(self):
         """
@@ -619,6 +621,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._qmax1_input.Enable()
         self._qmax2_input.Enable()
         self._background_input.Enable()
+        self._extrapolate_btn.Enable()
 
     def _round_sig_figs(self, x, sigfigs):
         """
