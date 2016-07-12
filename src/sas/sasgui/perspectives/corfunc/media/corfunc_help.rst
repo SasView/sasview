@@ -70,11 +70,11 @@ The extrapolated data set consists of the Guinier back-extrapolation up to the
 highest Q value of the lower Q range, the original scattering data up to the
 highest value in the upper Q range, and the Porod tail-fit beyond this. The
 joins between the original data and the Guinier/Porod fits are smoothed using
-the algorithm below, to avoid the formation of ripples in the transformd data.
+the algorithm below, to avoid the formation of ripples in the transformed data.
 
-Functions :math:`f(x_i)` and :math:`g(x_i)` where :math:`x_i \in \left\{  {x_1, x_2, ..., x_n} \right\}`
-, are smoothed over the range :math:`[a, b]` to produce :math:`y(x_i)`, by the
-following equations:
+Functions :math:`f(x_i)` and :math:`g(x_i)` where :math:`x_i \in \left\{
+{x_1, x_2, ..., x_n} \right\}`, are smoothed over the range :math:`[a, b]`
+to produce :math:`y(x_i)`, by the following equations:
 
 .. math::
     y(x_i) = h_ig(x_i) + (1-h_i)f(x_i)
@@ -92,7 +92,7 @@ Fourier
 
 If Fourier is selected for the transform type, the perspective will perform a
 discrete cosine transform on the extrapolated data in order to calculate the
-correlation function. The following algoritm is applied:
+correlation function. The following algorithm is applied:
 
 .. math::
     \Gamma(x_k) = 2 \sum_{n=0}^{N-1} x_n \cos{\left[ \frac{\pi}{N}
@@ -102,7 +102,7 @@ correlation function. The following algoritm is applied:
 Hilbert
 ^^^^^^^
 If Hilbert is selected for the transform type, the perspective will perform a
-Hilbert transform on the extraplated data in order to calculate the Volume
+Hilbert transform on the extrapolated data in order to calculate the Volume
 Fraction Profile.
 
 Interpretation
@@ -135,7 +135,7 @@ Usage
 Upon sending data to the correlation function perspective, it will plot the data
 , as well as a red bar indicating the lower Q range (used for
 back-extrapolation), and 2 purple bars indicating the upper qrange (used for
-forwards-extraplation) [figure 3]. These bars may be moved my clicking and
+forwards-extrapolation) [figure 3]. These bars may be moved my clicking and
 dragging, or by entering the appropriate value in the Q range input boxes.
 
 .. figure:: tutorial1.png
