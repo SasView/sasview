@@ -1,5 +1,6 @@
 import wx
 import sys
+import numpy as np
 from wx.lib.scrolledpanel import ScrolledPanel
 from sas.sasgui.guiframe.events import PlotQrangeEvent
 from sas.sasgui.guiframe.events import StatusEvent
@@ -312,7 +313,8 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
                 # Not all parameters were calculated
                 error = True
             for key, value in params.iteritems():
-                self._output_boxes[key].SetValue(value)
+                rounded = self._round_sig_figs(value, 6)
+                self._output_boxes[key].SetValue(rounded)
         if error:
             msg = 'Not all parameters were able to be calculated'
             wx.PostEvent(self._manager.parent, StatusEvent(
@@ -604,3 +606,21 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._qmax1_input.Enable()
         self._qmax2_input.Enable()
         self._background_input.Enable()
+
+    def _round_sig_figs(self, x, sigfigs):
+        """
+        Round a number to a given number of significant figures.
+
+        :param x: The value to round
+        :param sigfigs: How many significant figures to round to
+        :return rounded_str: x rounded to the given number of significant
+            figures, as a string
+        """
+        # Index of first significant digit
+        significant_digit = -int(np.floor(np.log10(np.abs(x))))
+        # Number of digits required for correct number of sig figs
+        digits = significant_digit + (sigfigs - 1)
+        rounded = np.round(x, decimals=digits)
+        rounded_str = "{1:.{0}f}".format(sigfigs -1  + significant_digit,
+            rounded)
+        return rounded_str

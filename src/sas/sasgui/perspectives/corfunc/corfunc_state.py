@@ -177,7 +177,8 @@ class CorfuncState(object):
             top_element.appendChild(output)
             for item in output_list:
                 element = new_doc.createElement(item[0])
-                element.appendChild(new_doc.createTextNode(self.outputs[item[0]]))
+                value = self.outputs[item[0]]
+                element.appendChild(new_doc.createTextNode(str(value)))
                 output.appendChild(element)
 
         # Save the file or return the original document with the state
@@ -239,7 +240,7 @@ class CorfuncState(object):
                 for item in output_list:
                     parameter = get_content("ns:{}".format(item[0]), entry)
                     if parameter is not None:
-                        self.outputs[item[0]] = parameter.text.strip()
+                        self.outputs[item[0]] = float(parameter.text.strip())
 
 
 

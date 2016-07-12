@@ -225,9 +225,6 @@ class CorfuncCalculator(object):
             'fill': Lc/x[maxs[0]]
         }
 
-        for key, val in params.iteritems():
-            params[key] = self._round_sig_figs(val, 6)
-
         return params
 
 
@@ -275,21 +272,3 @@ class CorfuncCalculator(object):
             self.lowerq)
 
         return s2
-
-    def _round_sig_figs(self, x, sigfigs):
-        """
-        Round a number to a given number of significant figures.
-
-        :param x: The value to round
-        :param sigfigs: How many significant figures to round to
-        :return rounded_str: x rounded to the given number of significant
-            figures, as a string
-        """
-        # Index of first significant digit
-        significant_digit = -int(np.floor(np.log10(np.abs(x))))
-        # Number of digits required for correct number of sig figs
-        digits = significant_digit + (sigfigs - 1)
-        rounded = np.round(x, decimals=digits)
-        rounded_str = "{1:.{0}f}".format(sigfigs -1  + significant_digit,
-            rounded)
-        return rounded_str
