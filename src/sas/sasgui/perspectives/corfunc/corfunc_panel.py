@@ -13,6 +13,7 @@ from sas.sasgui.perspectives.fitting.basepage import ModelTextCtrl
 from sas.sasgui.perspectives.corfunc.corfunc_state import CorfuncState
 import sas.sasgui.perspectives.corfunc.corfunc
 from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
+from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 from plot_labels import *
 
 OUTPUT_STRINGS = {
@@ -266,6 +267,14 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
                 StatusEvent(status=msg, info="Error"))
             return
         self.set_extracted_params(params)
+
+    def on_help(self, event=None):
+        """
+        Show the corfunc documentation
+        """
+        tree_location = "user/sasgui/perspectives/corfunc/corfunc_help.html"
+        doc_viewer = DocumentationWindow(self, -1, tree_location, "",
+                                          "Correlation Function Help")
 
     def save_project(self, doc=None):
         """
@@ -571,6 +580,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         extrapolate_btn = wx.Button(self, wx.NewId(), "Extrapolate")
         self._transform_btn = wx.Button(self, wx.NewId(), "Transform")
         self._extract_btn = wx.Button(self, wx.NewId(), "Compute Parameters")
+        help_btn = wx.Button(self, -1, "HELP")
 
         self._transform_btn.Disable()
         self._extract_btn.Disable()
@@ -578,14 +588,17 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         extrapolate_btn.Bind(wx.EVT_BUTTON, self.compute_extrapolation)
         self._transform_btn.Bind(wx.EVT_BUTTON, self.compute_transform)
         self._extract_btn.Bind(wx.EVT_BUTTON, self.extract_parameters)
+        help_btn.Bind(wx.EVT_BUTTON, self.on_help)
 
         controls_sizer.Add(extrapolate_btn, wx.CENTER | wx.EXPAND)
         controls_sizer.Add(self._transform_btn, wx.CENTER | wx.EXPAND)
         controls_sizer.Add(self._extract_btn, wx.CENTER | wx.EXPAND)
+        controls_sizer.Add(help_btn, wx.CENTER | wx.EXPAND)
 
         controlbox_sizer.Add(controls_sizer, wx.TOP | wx.EXPAND, 0)
         vbox.Add(controlbox_sizer, (4, 0), (1, 1),
             wx.LEFT | wx.RIGHT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+
 
         self.SetSizer(vbox)
 
