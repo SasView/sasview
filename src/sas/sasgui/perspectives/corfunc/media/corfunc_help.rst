@@ -14,7 +14,8 @@ The correlation function analysis is performed in 3 stages:
 
 *  Extrapolation of the scattering curve to :math:`Q = 0` and
    :math:`Q = \infty`
-*  Fourier Transform of the extrapolated data to give the correlation function
+*  Fourier/Hilbert Transform of the extrapolated data to give the correlation
+   function/volume fraction profile
 *  Interpretation of the 1D correlation function based on an ideal lamellar
    morphology
 
@@ -59,7 +60,7 @@ regions (see figure 1).
 .. figure:: fig1.gif
    :align: center
 
-   ``Figure 1`` The value of :math:`\sigma` is a measure of the electron
+   **Figure 1** The value of :math:`\sigma` is a measure of the electron
    density profile at the interface between crystalline and amorphous regions.
 
 Smoothing
@@ -82,3 +83,47 @@ where:
 
 .. math::
     h_i = \frac{1}{1 + \frac{(x_i-b)^2}{(x_i-a)^2}}
+
+Transform
+---------
+
+Fourier
+^^^^^^^
+
+If Fourier is selected for the transform type, the perspective will perform a
+discrete cosine transform to the extrapolated data in order to calculate the
+correlation function. The following algoritm is applied:
+
+.. math::
+    \Gamma(x_k) = 2 \sum_{n=0}^{N-1} x_n \cos{\left[ \frac{\pi}{N}
+    \left(n + \frac{1}{2} \right) k \right] } \text{ for } k = 0, 1, \ldots,
+    N-1, N
+
+Hilbert
+^^^^^^^
+If Hilbert is selected for the transform type, the perspective will perform a
+Hilbert transform to the extraplated data in order to calculate the Volume
+Fraction Profile.
+
+Interpretation
+--------------
+Once the correlation function has been calculated by transforming the
+extrapolated data, it may be interpreted by clicking the "Compute Parameters"
+button. The correlation function is interpreted in terms of an ideal lamellar
+morphology, and structural parameters are obtained as shown in Figure 2 below.
+It should be noted that a small beam size is assumed; no de-smearing is
+performed.
+
+.. figure:: fig2.gif
+   :align: center
+
+   **Figure 2** Interpretation of the correlation function.
+
+The structural parameters obtained are:
+
+*   Long Period :math:`= L_p`
+*   Average Hard Block Thickness :math:`= L_c`
+*   Average Core Thickness :math:`= D_0`
+*   Average Interface Thickness :math:`\text{} = D_{tr}`
+*   Polydispersity :math:`= \Gamma_{\text{min}}/\Gamma_{\text{max}}`
+*   Local Crystallinity :math:`= L_c/L_p`
