@@ -107,7 +107,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         else:
             return
         if self.state.outputs is not None and self.state.outputs != {}:
-            self.set_extracted_params(self.state.outputs)
+            self.set_extracted_params(self.state.outputs, reset=True)
 
     def get_state(self):
         """
@@ -150,7 +150,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._data = data
         self._calculator.set_data(data)
         # Reset the outputs
-        self.set_extracted_params(None)
+        self.set_extracted_params(None, reset=True)
         if self._manager is not None:
             self._manager.clear_data()
             self._manager.show_data(self._data, IQ_DATA_LABEL, reset=True)
@@ -284,15 +284,24 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._background_input.SetValue(str(bg))
         self._calculator.background = bg
 
-    def set_extracted_params(self, params):
+    def set_extracted_params(self, params=None, reset=False):
         self.extracted_params = params
+        error = False
         if params is None:
+            if not reset: error = True
             for key in OUTPUT_STRINGS.keys():
                 self._output_boxes[key].SetValue('-')
         else:
-            for key in OUTPUT_STRINGS.keys():
-                value = params[key]
+            if len(params) < len(OUTPUT_STRINGS):
+                # Not all parameters were calculated
+                error = True
+            for key, value in params.iteritems():
                 self._output_boxes[key].SetValue(value)
+        if error:
+            msg = 'Not all parameters were able to be calculated'
+            wx.PostEvent(self._manager.parent, StatusEvent(
+                status=msg, info='error'))
+
 
     def plot_qrange(self, active=None, leftdown=False):
         if active is None:

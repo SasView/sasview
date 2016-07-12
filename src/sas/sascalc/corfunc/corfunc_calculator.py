@@ -200,7 +200,7 @@ class CorfuncCalculator(object):
         # Find the data points where the graph is linear to within 1%
         mask = np.where(np.abs((y-(m*x+b))/y) < 0.01)[0]
         if len(mask) == 0:  # Return garbage for bad fits
-            return garbage
+            return { 'max': self._round_sig_figs(x[maxs[0]], 6) }
         dtr = x[mask[0]]  # Beginning of Linear Section
         d0 = x[mask[-1]]  # End of Linear Section
         GammaMax = y[mask[-1]]
