@@ -63,6 +63,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self.qmax = (0, 0)
         self.background = 0
         self.extracted_params = None
+        self.transform_type = 'fourier'
         # Dictionary for saving refs to text boxes used to display output data
         self._output_boxes = None
         self.state = None
@@ -166,6 +167,10 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
     def get_data(self):
         return self._data
 
+    def radio_changed(self, event=None):
+        if event is not None:
+            self.transform_type = event.GetEventObject().GetName()
+
     def compute_extrapolation(self, event=None):
         """
         Compute and plot the extrapolated data.
@@ -205,27 +210,32 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         """
         if not self._calculator.transform_isrunning():
             self._calculator.compute_transform(self._extrapolated_data,
-                self.background, completefn=self.transform_complete,
+                self.transform_type, background=self.background,
+                completefn=self.transform_complete,
                 updatefn=self.transform_update)
+
             self._transform_btn.SetLabel("Stop Tansform")
         else:
             self._calculator.stop_transform()
-            self.transform_update("Fourier transform cancelled.")
+            self.transform_update("Transform cancelled.")
             self._transform_btn.SetLabel("Tansform")
 
     def transform_update(self, msg=""):
         """
-        Called from TransformThread to update on status of calculation
+        Called from FourierThread to update on status of calculation
         """
         wx.PostEvent(self._manager.parent,
             StatusEvent(status=msg))
 
     def transform_complete(self, transform=None):
         """
-        Called from TransformThread when calculation has completed
+        Called from FourierThread when calculation has completed
         """
+        self._transform_btn.SetLabel("Tansform")
         if transform is None:
             msg = "Error calculating Transform."
+            if self.transform_type == 'hilbert':
+                msg = "Not yet implemented"
             wx.PostEvent(self._manager.parent,
                 StatusEvent(status=msg, info="Error"))
             self._extract_btn.Disable()
@@ -235,8 +245,11 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         plot_x = transform.x[np.where(transform.x <= 200)]
         plot_y = transform.y[np.where(transform.x <= 200)]
         self._manager.show_data(Data1D(plot_x, plot_y), TRANSFORM_LABEL)
-        self._transform_btn.SetLabel("Tansform")
-        self._extract_btn.Enable()
+        # Only enable extract params button if a fourier trans. has been done
+        if self.transform_type == 'fourier':
+            self._extract_btn.Enable()
+        else:
+            self._extract_btn.Disable()
 
     def extract_parameters(self, event=None):
         try:
@@ -420,7 +433,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
 
 
         # Parameters
-        qbox = wx.StaticBox(self, -1, "Parameters")
+        qbox = wx.StaticBox(self, -1, "Input Parameters")
         qbox_sizer = wx.StaticBoxSizer(qbox, wx.VERTICAL)
         qbox_sizer.SetMinSize((_STATICBOX_WIDTH, 75))
 
@@ -498,6 +511,26 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         vbox.Add(qbox_sizer, (1, 0), (1, 1),
             wx.LEFT | wx.RIGHT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
 
+        # Transform type
+        transform_box = wx.StaticBox(self, -1, "Transform Type")
+        transform_sizer = wx.StaticBoxSizer(transform_box, wx.VERTICAL)
+
+        radio_sizer = wx.GridBagSizer(5,5)
+
+        fourier_btn = wx.RadioButton(self, -1, "Fourier", name='fourier',
+            style=wx.RB_GROUP)
+        hilbert_btn = wx.RadioButton(self, -1, "Hilbert", name='hilbert')
+
+        fourier_btn.Bind(wx.EVT_RADIOBUTTON, self.radio_changed)
+        hilbert_btn.Bind(wx.EVT_RADIOBUTTON, self.radio_changed)
+
+        radio_sizer.Add(fourier_btn, (0,0), (1,1), wx.LEFT | wx.EXPAND)
+        radio_sizer.Add(hilbert_btn, (0,1), (1,1), wx.RIGHT | wx.EXPAND)
+
+        transform_sizer.Add(radio_sizer, wx.TOP, 0)
+        vbox.Add(transform_sizer, (2, 0), (1, 1),
+            wx.LEFT | wx.RIGHT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+
         # Output data
         outputbox = wx.StaticBox(self, -1, "Output Parameters")
         outputbox_sizer = wx.StaticBoxSizer(outputbox, wx.VERTICAL)
@@ -521,7 +554,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
 
         outputbox_sizer.Add(output_sizer, wx.TOP, 0)
 
-        vbox.Add(outputbox_sizer, (2, 0), (1, 1),
+        vbox.Add(outputbox_sizer, (3, 0), (1, 1),
             wx.LEFT | wx.RIGHT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
 
         # Controls
@@ -546,7 +579,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         controls_sizer.Add(self._extract_btn, wx.CENTER | wx.EXPAND)
 
         controlbox_sizer.Add(controls_sizer, wx.TOP | wx.EXPAND, 0)
-        vbox.Add(controlbox_sizer, (3, 0), (1, 1),
+        vbox.Add(controlbox_sizer, (4, 0), (1, 1),
             wx.LEFT | wx.RIGHT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
 
         self.SetSizer(vbox)

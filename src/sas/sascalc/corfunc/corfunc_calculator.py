@@ -9,7 +9,8 @@ from scipy.fftpack import dct
 from scipy.signal import argrelextrema
 from numpy.linalg import lstsq
 from sas.sascalc.dataloader.data_info import Data1D
-from sas.sascalc.corfunc.transform_thread import TransformThread
+from sas.sascalc.corfunc.transform_thread import FourierThread
+from sas.sascalc.corfunc.transform_thread import HilbertThread
 
 class CorfuncCalculator(object):
 
@@ -121,7 +122,7 @@ class CorfuncCalculator(object):
 
         return extrapolation
 
-    def compute_transform(self, extrapolation, background=None,
+    def compute_transform(self, extrapolation, trans_type, background=None,
         completefn=None, updatefn=None):
         """
         Transform an extrapolated scattering curve into a correlation function.
@@ -140,8 +141,17 @@ class CorfuncCalculator(object):
 
         if background is None: background = self.background
 
-        self._transform_thread = TransformThread(self._data, extrapolation,
-        background, completefn=completefn, updatefn=updatefn)
+        if trans_type == 'fourier':
+            self._transform_thread = FourierThread(self._data, extrapolation,
+            background, completefn=completefn, updatefn=updatefn)
+        elif trans_type == 'hilbert':
+            self._transform_thread = HilbertThread(self._data, extrapolation,
+            background, completefn=completefn, updatefn=updatefn)
+        else:
+            err = ("Incorrect transform type supplied, must be 'fourier'",
+                " or 'hilbert'")
+            raise ValueError, err
+
         self._transform_thread.queue()
 
     def transform_isrunning(self):

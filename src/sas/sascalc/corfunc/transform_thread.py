@@ -4,7 +4,7 @@ from scipy.fftpack import dct
 import numpy as np
 from time import sleep
 
-class TransformThread(CalcThread):
+class FourierThread(CalcThread):
     def __init__(self, raw_data, extrapolated_data, bg, updatefn=None,
         completefn=None):
         CalcThread.__init__(self, updatefn=updatefn, completefn=completefn)
@@ -38,3 +38,29 @@ class TransformThread(CalcThread):
         transform = Data1D(xs, gamma)
 
         self.complete(transform=transform)
+
+class HilbertThread(CalcThread):
+    def __init__(self, raw_data, extrapolated_data, bg, updatefn=None,
+        completefn=None):
+        CalcThread.__init__(self, updatefn=updatefn, completefn=completefn)
+        self.data = raw_data
+        self.background = bg
+        self.extrapolation = extrapolated_data
+
+    def compute(self):
+        qs = self.extrapolation.x
+        iqs = self.extrapolation.y
+        q = self.data.x
+        background = self.background
+
+        self.ready(delay=0.0)
+        self.update(msg="Starting Hilbert transform.")
+        self.ready(delay=0.0)
+        if self.isquit():
+            return
+
+        # TODO: Implement hilbert transform
+
+        self.update(msg="Hilbert transform completed.")
+
+        self.complete(transform=None)
