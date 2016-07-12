@@ -20,7 +20,7 @@ OUTPUT_STRINGS = {
     'dtr': "Average Interface Thickness (A): ",
     'd0': "Average Core Thickness: ",
     'A': "PolyDispersity: ",
-    'fill': "Filling Fraction: "
+    'fill': "Local Crystallinity: "
 }
 
 if sys.platform.count("win32") > 0:
@@ -490,7 +490,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
             wx.LEFT | wx.RIGHT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
 
         # Output data
-        outputbox = wx.StaticBox(self, -1, "Output Measuments")
+        outputbox = wx.StaticBox(self, -1, "Output Parameters")
         outputbox_sizer = wx.StaticBoxSizer(outputbox, wx.VERTICAL)
 
         output_sizer = wx.GridBagSizer(5, 5)
@@ -523,7 +523,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
 
         extrapolate_btn = wx.Button(self, wx.NewId(), "Extrapolate")
         self._transform_btn = wx.Button(self, wx.NewId(), "Transform")
-        self._extract_btn = wx.Button(self, wx.NewId(), "Compute Measuments")
+        self._extract_btn = wx.Button(self, wx.NewId(), "Compute Parameters")
 
         self._transform_btn.Disable()
         self._extract_btn.Disable()
