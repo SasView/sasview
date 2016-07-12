@@ -80,7 +80,7 @@ wxcruft.call_later_fix()
 
 #Always use private .matplotlib setup to avoid conflicts with other
 #uses of matplotlib
-#Have to check if .sasview exists first 
+#Have to check if .sasview exists first
 sasdir = os.path.join(os.path.expanduser("~"),'.sasview')
 if not os.path.exists(sasdir):
     os.mkdir(sasdir)
@@ -118,7 +118,7 @@ class SasView():
 
         # Fitting perspective
         try:
-            import sas.sasgui.perspectives.fitting as module    
+            import sas.sasgui.perspectives.fitting as module
             fitting_plug = module.Plugin()
             self.gui.add_perspective(fitting_plug)
         except Exception:
@@ -144,13 +144,23 @@ class SasView():
                           APP_NAME)
             logging.error(traceback.format_exc())
 
-        #Calculator perspective   
+        #Calculator perspective
         try:
             import sas.sasgui.perspectives.calculator as module
             calculator_plug = module.Plugin()
             self.gui.add_perspective(calculator_plug)
         except:
             logging.error("%s: could not find Calculator plug-in module"% \
+                                                        APP_NAME)
+            logging.error(traceback.format_exc())
+
+        # File converter tool
+        try:
+            import sas.sasgui.perspectives.file_converter as module
+            converter_plug = module.Plugin()
+            self.gui.add_perspective(converter_plug)
+        except:
+            logging.error("%s: could not find File Converter plug-in module"% \
                                                         APP_NAME)
             logging.error(traceback.format_exc())
 
@@ -190,4 +200,3 @@ def run():
 
 if __name__ == "__main__":
     run()
-
