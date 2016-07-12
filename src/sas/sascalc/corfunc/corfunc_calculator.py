@@ -186,7 +186,6 @@ class CorfuncCalculator(object):
         zeros = argrelextrema(np.abs(ddy), np.less)[0]
         # locate the first inflection point
         linear_point = zeros[0]
-        linear_point = int(mins[0]/10)
 
         # Try to calculate slope around linear_point using 80 data points
         lower = linear_point - 40
