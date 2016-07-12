@@ -66,7 +66,7 @@ class CorfuncCalculator(object):
         self.set_data(data, scale)
         self.lowerq = lowerq
         self.upperq = upperq
-        self.background = 0
+        self.background = self.compute_background()
         self._transform_thread = None
 
     def set_data(self, data, scale=1):
@@ -98,7 +98,7 @@ class CorfuncCalculator(object):
         """
         if self._data is None: return 0
         elif upperq is None and self.upperq is not None: upperq = self.upperq
-        elif upperq == 0: return 0
+        elif upperq is None and self.upperq is None: return 0
         q = self._data.x
         mask = np.logical_and(q > upperq[0], q < upperq[1])
         _, _, bg = self._fit_porod(q[mask], self._data.y[mask])
