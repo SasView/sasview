@@ -1,3 +1,5 @@
+import logging
+
 from PyQt4 import QtGui
 
 # TODO: Replace the qt4agg calls below with qt5 equivalent.
@@ -8,9 +10,14 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
 
+import PlotHelper
+
 class Plotter(QtGui.QDialog):
     def __init__(self, parent=None):
         super(Plotter, self).__init__(parent)
+
+        # Required for the communicator
+        self.parent = parent
 
         # a figure instance to plot on
         self.figure = plt.figure()
@@ -38,41 +45,41 @@ class Plotter(QtGui.QDialog):
         self._ylabel = "Y"
         self._ax = self.figure.add_subplot(self._current_plot)
 
+        # Notify the helper
+        PlotHelper.addPlot(self)
+        # Notify the listeners
+        self.parent.communicator.activeGraphsSignal.emit(PlotHelper.currentPlots())
 
     def data(self, data=None):
-        """
-        """
+        """ data setter """
         self._data = data
 
     def title(self, title=""):
-        """
-        """
+        """ title setter """
         self._title = title
 
     def id(self, id=""):
-        """
-        """
+        """ id setter """
         self._id = id
 
     def x_label(self, xlabel=""):
-        """
-        """
+        """ x-label setter """
         self._xlabel = xlabel
 
     def y_label(self, ylabel=""):
-        """
-        """
+        """ y-label setter """
         self._ylabel = ylabel
 
     def clean(self):
         """
+        Redraw the graph
         """
         self.figure.delaxes(self._ax)
         self._ax = self.figure.add_subplot(self._current_plot)
 
     def plot(self):
         """
-        plot self._data
+        Plot self._data
         """
         # create an axis
         ax = self._ax
@@ -91,3 +98,14 @@ class Plotter(QtGui.QDialog):
 
         # refresh canvas
         self.canvas.draw()
+
+    def closeEvent(self, event):
+        """
+        Overwrite the close event adding helper notification
+        """
+        # Please remove me from your database.
+        PlotHelper.deletePlot(PlotHelper.idOfPlot(self))
+        # Notify the listeners
+        self.parent.communicator.activeGraphsSignal.emit(PlotHelper.currentPlots())
+        event.accept()
+

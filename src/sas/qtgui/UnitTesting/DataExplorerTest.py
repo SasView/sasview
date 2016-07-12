@@ -16,6 +16,7 @@ from GuiManager import GuiManager
 from GuiUtils import *
 from UnitTesting.TestUtils import QtSignalSpy
 from Plotter import Plotter
+import PlotHelper
 
 app = QApplication(sys.argv)
 
@@ -38,6 +39,8 @@ class DataExplorerTest(unittest.TestCase):
                 return Communicate()
             def perspective(self):
                 return MyPerspective()
+            def workspace(self):
+                return None
 
         self.form = DataExplorerWindow(None, dummy_manager())
 
@@ -504,6 +507,12 @@ class DataExplorerTest(unittest.TestCase):
         """
         loader = Loader()
         manager = DataManager()
+        PlotHelper.clear()
+        self.form.enableGraphCombo(None)
+
+        # Make sure the controls are disabled
+        self.assertFalse(self.form.cbgraph.isEnabled())
+        self.assertFalse(self.form.cmdAppend.isEnabled())
 
         # get Data1D
         p_file="cyl_400_20.txt"
@@ -516,11 +525,80 @@ class DataExplorerTest(unittest.TestCase):
         # Mask retrieval of the data
         self.form.plotsFromCheckedItems = MagicMock(return_value=new_data)
 
+        # Mask plotting
+        self.form.parent.workspace = MagicMock()
+
         # Call the plotting method
         self.form.newPlot()
 
         # The plot was displayed
         self.assertTrue(Plotter.show.called)
+
+        # The plot was registered
+        self.assertEqual(len(PlotHelper.currentPlots()), 1)
+
+        self.assertTrue(self.form.cbgraph.isEnabled())
+        self.assertTrue(self.form.cmdAppend.isEnabled())
+
+    def testAppendPlot(self):
+        """
+        Creating new plots from Data1D/2D
+        """
+        loader = Loader()
+        manager = DataManager()
+
+        PlotHelper.clear()
+        self.form.enableGraphCombo(None)
+
+        # Make sure the controls are disabled
+        self.assertFalse(self.form.cbgraph.isEnabled())
+        self.assertFalse(self.form.cmdAppend.isEnabled())
+
+        # get Data1D
+        p_file="cyl_400_20.txt"
+        output_object = loader.load(p_file)
+        new_data = [manager.create_gui_data(output_object, p_file)]
+
+        # Mask plotting
+        self.form.parent.workspace = MagicMock()
+
+        # Mask the plot show call
+        Plotter.show = MagicMock()
+
+        # Mask retrieval of the data
+        self.form.plotsFromCheckedItems = MagicMock(return_value=new_data)
+
+        # Call the plotting method
+        self.form.newPlot()
+
+        # Call the plotting method again, so we have 2 graphs
+        self.form.newPlot()
+
+        # See that we have two plots
+        self.assertEqual(len(PlotHelper.currentPlots()), 2)
+
+        # Add data to plot #1
+        self.form.cbgraph.setCurrentIndex(1)
+        self.form.appendPlot()
+
+        # See that we still have two plots
+        self.assertEqual(len(PlotHelper.currentPlots()), 2)
+
+    def testUpdateGraphCombo(self):
+        """
+        Test the combo box update
+        """
+        PlotHelper.clear()
+
+        graph_list=[1,2,3]
+        self.form.updateGraphCombo(graph_list)
+
+        self.assertEqual(self.form.cbgraph.count(), 3)
+        self.assertEqual(self.form.cbgraph.currentText(), 'Graph1')
+
+        graph_list=[]
+        self.form.updateGraphCombo(graph_list)
+        self.assertEqual(self.form.cbgraph.count(), 0)
 
     def testUpdateModelFromPerspective(self):
         """

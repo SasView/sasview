@@ -216,6 +216,9 @@ class Communicate(QtCore.QObject):
     # Progress bar update value
     progressBarUpdateSignal = QtCore.pyqtSignal(int)
 
+    # Workspace charts added/removed
+    activeGraphsSignal = QtCore.pyqtSignal(list)
+
 
 def updateModelItem(item, update_data, name=""):
     """

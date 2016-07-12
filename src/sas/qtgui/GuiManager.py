@@ -62,8 +62,8 @@ class GuiManager(object):
         self.addWidgets()
 
         # Fork off logging messages to the Log Window
-        XStream.stdout().messageWritten.connect( self.listWidget.insertPlainText  )
-        XStream.stderr().messageWritten.connect( self.listWidget.insertPlainText  )
+        XStream.stdout().messageWritten.connect(self.listWidget.insertPlainText)
+        XStream.stderr().messageWritten.connect(self.listWidget.insertPlainText)
 
         # Log the start of the session
         logging.info(" --- SasView session started ---")
@@ -137,9 +137,9 @@ class GuiManager(object):
 
         self.statusLabel = QtGui.QLabel()
         self.statusLabel.setText("Welcome to SasView")
-        self._workspace.statusbar.addPermanentWidget(self.statusLabel,1)
+        self._workspace.statusbar.addPermanentWidget(self.statusLabel, 1)
         self._workspace.statusbar.addPermanentWidget(self.progress, stretch=0)
-        self.progress.setRange(0,100)
+        self.progress.setRange(0, 100)
         self.progress.setValue(0)
         self.progress.setTextVisible(True)
         self.progress.setVisible(False)
@@ -149,6 +149,12 @@ class GuiManager(object):
         Callback for fileDataReceivedSignal
         """
         pass
+
+    def workspace(self):
+        """
+        Accessor for the main window workspace
+        """
+        return self._workspace.workspace
 
     def updatePerspective(self, data):
         """
@@ -185,7 +191,7 @@ class GuiManager(object):
         """
         Update progress bar with the required value (0-100)
         """
-        assert(-1 <= value <= 100)
+        assert -1 <= value <= 100
         if value == -1:
             self.progress.setVisible(False)
             return
@@ -252,8 +258,8 @@ class GuiManager(object):
                 logging.info("Connected to www.sasview.org. Latest version: %s"
                              % (content))
                 version_info = json.loads(content)
-            except:
-                logging.info("Failed to connect to www.sasview.org")
+            except ValueError, ex:
+                logging.info("Failed to connect to www.sasview.org:", ex)
         self.processVersion(version_info)
 
     def processVersion(self, version_info):

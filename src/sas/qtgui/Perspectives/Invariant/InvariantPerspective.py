@@ -57,7 +57,7 @@ class InvariantWindow(tabbedInvariantUI):
 
         self._helpView = QtWebKit.QWebView()
         self.detailsDialog = DetailsDialog(self)
-        self._plotter = Plotter(self)
+        # self._plotter = Plotter(self)
 
         self._low_extrapolate = False
         self._low_guinier  = True
@@ -158,6 +158,7 @@ class InvariantWindow(tabbedInvariantUI):
     def plotResult(self, model):
         """
         """
+        self._plotter = Plotter(self)
         if self._low_extrapolate or self._high_extrapolate:
             self._plotter.show()
         self.model = model

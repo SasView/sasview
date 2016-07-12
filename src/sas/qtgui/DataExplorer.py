@@ -12,13 +12,14 @@ from PyQt4.Qt import QMutex
 from twisted.internet import threads
 
 # SAS
-import GuiUtils
-from Plotter import Plotter
 from sas.sascalc.dataloader.loader import Loader
 from sas.sasgui.guiframe.data_manager import DataManager
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import Data2D
 
+import GuiUtils
+import PlotHelper
+from Plotter import Plotter
 from DroppableDataLoadWidget import DroppableDataLoadWidget
 
 # This is how to get data1/2D from the model item
@@ -46,6 +47,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Be careful with twisted threads.
         self.mutex = QMutex()
 
+        # Active plots
+        self.active_plots = []
+
         # Connect the buttons
         self.cmdLoad.clicked.connect(self.loadFile)
         self.cmdDeleteData.clicked.connect(self.deleteFile)
@@ -53,6 +57,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cmdFreeze.clicked.connect(self.freezeTheory)
         self.cmdSendTo.clicked.connect(self.sendData)
         self.cmdNew.clicked.connect(self.newPlot)
+        self.cmdAppend.clicked.connect(self.appendPlot)
         self.cmdHelp.clicked.connect(self.displayHelp)
         self.cmdHelp_2.clicked.connect(self.displayHelp)
 
@@ -75,6 +80,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # self.aboutToQuit.connect(self.closeEvent)
         self.communicator = self.parent.communicator()
         self.communicator.fileReadSignal.connect(self.loadFromURL)
+        self.communicator.activeGraphsSignal.connect(self.updateGraphCombo)
+        self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
+        self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
 
         # Proxy model for showing a subset of Data1D/Data2D content
         self.data_proxy = QtGui.QSortFilterProxyModel(self)
@@ -96,6 +104,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Theory model view
         self.freezeView.setModel(self.theory_proxy)
 
+        self.enableGraphCombo(None)
+
     def closeEvent(self, event):
         """
         Overwrite the close event - no close!
@@ -109,6 +119,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         _TreeLocation = "html/user/sasgui/guiframe/data_explorer_help.html"
         self._helpView.load(QtCore.QUrl(_TreeLocation))
         self._helpView.show()
+
+    def enableGraphCombo(self, combo_text):
+        """
+        Enables/disables "Assign Plot" elements
+        """
+        self.cbgraph.setEnabled(len(PlotHelper.currentPlots()) > 0)
+        self.cmdAppend.setEnabled(len(PlotHelper.currentPlots()) > 0)
 
     def loadFromURL(self, url):
         """
@@ -186,8 +203,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Assure this is indeed wanted
         delete_msg = "This operation will delete the checked data sets and all the dependents." +\
                      "\nDo you want to continue?"
-        reply = QtGui.QMessageBox.question(self, 'Warning', delete_msg,
-                QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+        reply = QtGui.QMessageBox.question(self,
+                                           'Warning',
+                                           delete_msg,
+                                           QtGui.QMessageBox.Yes,
+                                           QtGui.QMessageBox.No)
 
         if reply == QtGui.QMessageBox.No:
             return
@@ -262,13 +282,16 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             outer_item = self.model.item(outer_index)
             if not outer_item:
                 continue
-            for inner_index in xrange(outer_item.rowCount()): # Should be just two rows: data and Info
+            # Should be just two rows: data and Info
+            for inner_index in xrange(outer_item.rowCount()):
                 subitem = outer_item.child(inner_index)
-                if subitem and subitem.isCheckable() and subitem.checkState() == QtCore.Qt.Checked:
+                if subitem and \
+                   subitem.isCheckable() and \
+                   subitem.checkState() == QtCore.Qt.Checked:
                     theories_copied += 1
                     new_item = self.recursivelyCloneItem(subitem)
                     # Append a "unique" descriptor to the name
-                    time_bit = str(time.time())[7:-1].replace('.','')
+                    time_bit = str(time.time())[7:-1].replace('.', '')
                     new_name = new_item.text() + '_@' + time_bit
                     new_item.setText(new_name)
                     self.theory_model.appendRow(new_item)
@@ -299,22 +322,69 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             new_item.setChild(child_index, child_item)
         return new_item
 
+    def updateGraphCombo(self, graph_list):
+        """
+        Modify Graph combo box on graph add/delete
+        """
+        orig_text = self.cbgraph.currentText()
+        self.cbgraph.clear()
+        graph_titles = []
+        for graph in graph_list:
+            graph_titles.append("Graph"+str(graph))
+        self.cbgraph.insertItems(0, graph_titles)
+        ind = self.cbgraph.findText(orig_text)
+        if ind > 0:
+            self.cbgraph.setCurrentIndex(ind)
+        pass
+
     def newPlot(self):
         """
         Create a new matplotlib chart from selected data
 
         TODO: Add 2D-functionality
         """
-
         plots = GuiUtils.plotsFromCheckedItems(self.model)
 
         # Call show on requested plots
-        new_plot = Plotter()
+        new_plot = Plotter(self)
         for plot_set in plots:
             new_plot.data(plot_set)
             new_plot.plot()
 
+        # Update the global plot counter
+        title = "Graph"+str(PlotHelper.idOfPlot(new_plot))
+        new_plot.setWindowTitle(title)
+
+        # Add the plot to the workspace
+        self.parent.workspace().addWindow(new_plot)
+
+        # Show the plot
         new_plot.show()
+
+        # Update the active chart list
+        self.active_plots.append(title)
+
+    def appendPlot(self):
+        """
+        Add data set(s) to the existing matplotlib chart
+
+        TODO: Add 2D-functionality
+        """
+        # new plot data
+        new_plots = GuiUtils.plotsFromCheckedItems(self.model)
+
+        # old plot data
+        plot_id = self.cbgraph.currentText()
+        plot_id = int(plot_id[5:])
+
+        assert plot_id in PlotHelper.currentPlots(), "No such plot: Graph%s"%str(plot_id)
+
+        old_plot = PlotHelper.plotById(plot_id)
+
+        # Add new data to the old plot
+        for plot_set in new_plots:
+            old_plot.data(plot_set)
+            old_plot.plot()
 
     def chooseFiles(self):
         """
@@ -423,7 +493,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     error_message = base_message + error_message
                 else:
                     error_message += "%s\n" % str(p_file)
-                info = "error"
 
             current_percentage = int(100.0* index/number_of_files)
             self.communicator.progressBarUpdateSignal.emit(current_percentage)
@@ -562,7 +631,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Post message to status bar and update the data manager
         """
-        assert type(output) == tuple
+        assert isinstance(output, tuple)
 
         # Reset the model so the view gets updated.
         self.model.reset()

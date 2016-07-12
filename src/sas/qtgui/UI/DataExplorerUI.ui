@@ -251,11 +251,6 @@
            <property name="sizeAdjustPolicy">
             <enum>QComboBox::AdjustToContents</enum>
            </property>
-           <item>
-            <property name="text">
-             <string>Graph1</string>
-            </property>
-           </item>
           </widget>
          </item>
         </layout>
