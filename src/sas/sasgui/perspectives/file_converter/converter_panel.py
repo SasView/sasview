@@ -91,10 +91,10 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         instructions = ("Select the 1 column ASCII files containing the Q Axis"
             "and Intensity data, chose where to save the converted file, then "
             "click Convert to convert them to CanSAS XML format")
-        instruction_label = wx.StaticText(self, -1, "",
-            size=(_STATICBOX_WIDTH+40, 28))
-        instruction_label.SetLabel(instructions)
-        vbox.Add(instruction_label, (0,0), (1,1), wx.ALL, 5)
+        instruction_label = wx.StaticText(self, -1, instructions,
+            size=(_STATICBOX_WIDTH+40, -1))
+        instruction_label.Wrap(_STATICBOX_WIDTH+40)
+        vbox.Add(instruction_label, (0,0), (1,1), wx.TOP | wx.LEFT | wx.RIGHT, 5)
 
         section = wx.StaticBox(self, -1)
         section_sizer = wx.StaticBoxSizer(section, wx.VERTICAL)
