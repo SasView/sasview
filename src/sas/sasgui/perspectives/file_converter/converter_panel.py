@@ -18,13 +18,13 @@ if sys.platform.count("win32") > 0:
     PANEL_TOP = 0
     _STATICBOX_WIDTH = 410
     _BOX_WIDTH = 200
-    PANEL_SIZE = 460
+    PANEL_SIZE = 480
     FONT_VARIANT = 0
 else:
     PANEL_TOP = 60
     _STATICBOX_WIDTH = 430
     _BOX_WIDTH = 200
-    PANEL_SIZE = 480
+    PANEL_SIZE = 500
     FONT_VARIANT = 1
 
 class ConverterPanel(ScrolledPanel, PanelBase):
@@ -185,7 +185,8 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
         y = 0
         for item in self.metadata.keys():
-            label = wx.StaticText(metadata_section.GetPane(), -1, item,
+            label_txt = item.replace('_', ' ').capitalize()
+            label = wx.StaticText(metadata_section.GetPane(), -1, label_txt,
                 style=wx.ALIGN_CENTER_VERTICAL)
             input_box = wx.TextCtrl(metadata_section.GetPane(), name=item,
                 size=(_STATICBOX_WIDTH-80, -1))
