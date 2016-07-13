@@ -331,3 +331,94 @@ def openLink(url):
     else:
         msg = "Attempt at opening an invalid URL"
         raise AttributeError, msg
+
+def retrieveData1d(data):
+    """
+    Retrieve 1D data from file and construct its text
+    representation
+    """
+    try:
+        xmin = min(data.x)
+        ymin = min(data.y)
+    except:
+        msg = "Unable to find min/max of \n data named %s" % \
+                    data.filename
+        logging.error(msg)
+        raise ValueError, msg
+
+    text = data.__str__()
+    text += 'Data Min Max:\n'
+    text += 'X_min = %s:  X_max = %s\n' % (xmin, max(data.x))
+    text += 'Y_min = %s:  Y_max = %s\n' % (ymin, max(data.y))
+    if data.dy != None:
+        text += 'dY_min = %s:  dY_max = %s\n' % (min(data.dy), max(data.dy))
+    text += '\nData Points:\n'
+    x_st = "X"
+    for index in range(len(data.x)):
+        if data.dy != None and len(data.dy) > index:
+            dy_val = data.dy[index]
+        else:
+            dy_val = 0.0
+        if data.dx != None and len(data.dx) > index:
+            dx_val = data.dx[index]
+        else:
+            dx_val = 0.0
+        if data.dxl != None and len(data.dxl) > index:
+            if index == 0:
+                x_st = "Xl"
+            dx_val = data.dxl[index]
+        elif data.dxw != None and len(data.dxw) > index:
+            if index == 0:
+                x_st = "Xw"
+            dx_val = data.dxw[index]
+
+        if index == 0:
+            text += "<index> \t<X> \t<Y> \t<dY> \t<d%s>\n" % x_st
+        text += "%s \t%s \t%s \t%s \t%s\n" % (index,
+                                                data.x[index],
+                                                data.y[index],
+                                                dy_val,
+                                                dx_val)
+    return text
+
+def retrieveData2d(data):
+    """
+    Retrieve 1D data from file and construct its text
+    representation
+    """
+    text = data.__str__()
+    text += 'Data Min Max:\n'
+    text += 'I_min = %s\n' % min(data.data)
+    text += 'I_max = %s\n\n' % max(data.data)
+    text += 'Data (First 2501) Points:\n'
+    text += 'Data columns include err(I).\n'
+    text += 'ASCII data starts here.\n'
+    text += "<index> \t<Qx> \t<Qy> \t<I> \t<dI> \t<dQparal> \t<dQperp>\n"
+    di_val = 0.0
+    dx_val = 0.0
+    dy_val = 0.0
+    len_data = len(data.qx_data)
+    for index in xrange(0, len_data):
+        x_val = data.qx_data[index]
+        y_val = data.qy_data[index]
+        i_val = data.data[index]
+        if data.err_data != None:
+            di_val = data.err_data[index]
+        if data.dqx_data != None:
+            dx_val = data.dqx_data[index]
+        if data.dqy_data != None:
+            dy_val = data.dqy_data[index]
+
+        text += "%s \t%s \t%s \t%s \t%s \t%s \t%s\n" % (index,
+                                                        x_val,
+                                                        y_val,
+                                                        i_val,
+                                                        di_val,
+                                                        dx_val,
+                                                        dy_val)
+        # Takes too long time for typical data2d: Break here
+        if index >= 2500:
+            text += ".............\n"
+            break
+
+    return text

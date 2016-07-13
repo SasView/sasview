@@ -43,6 +43,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.parent = guimanager
         self.loader = Loader()
         self.manager = DataManager()
+        self.txt_widget = QtGui.QTextEdit(None)
+        # self.txt_widget = GuiUtils.DisplayWindow()
+
 
         # Be careful with twisted threads.
         self.mutex = QMutex()
@@ -64,14 +67,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Display HTML content
         self._helpView = QtWebKit.QWebView()
 
-        # Context menu in the treeview
-        #self.treeView.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
-        #self.actionDataInfo.triggered.connect(self.contextDataInfo)
-        #self.treeView.addAction(self.actionDataInfo)
-
         # Custom context menu
         self.treeView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.treeView.customContextMenuRequested.connect(self.onCustomContextMenu)
+        self.contextMenu()
 
         # Connect the comboboxes
         self.cbSelect.currentIndexChanged.connect(self.selectData)
@@ -611,20 +610,89 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             # Change this to a proper logging action
             raise Exception, msg
 
-    def contextDataInfo(self):
+    def contextMenu(self):
         """
+        Define actions and layout of the right click context menu
         """
-        print("contextDataInfo TRIGGERED")
-        pass
+        # Create a custom menu based on actions defined in the UI file
+        self.context_menu = QtGui.QMenu(self)
+        self.context_menu.addAction(self.actionDataInfo)
+        self.context_menu.addAction(self.actionSaveAs)
+        self.context_menu.addAction(self.actionQuickPlot)
+        self.context_menu.addSeparator()
+        self.context_menu.addAction(self.actionQuick3DPlot)
+        self.context_menu.addAction(self.actionEditMask)
+
+        # Define the callbacks
+        self.actionDataInfo.triggered.connect(self.showDataInfo)
+        self.actionSaveAs.triggered.connect(self.saveDataAs)
+        self.actionQuickPlot.triggered.connect(self.quickDataPlot)
+        self.actionQuick3DPlot.triggered.connect(self.quickData3DPlot)
+        self.actionEditMask.triggered.connect(self.showEditDataMask)
 
     def onCustomContextMenu(self, position):
         """
+        Show the right-click context menu in the data treeview
         """
-        print "onCustomContextMenu triggered at point ", position.x(), position.y()
         index = self.treeView.indexAt(position)
         if index.isValid():
-            print "VALID CONTEXT MENU"
-    #    self.context_menu.exec(self.treeView.mapToGlobal(position))
+            model_item = self.model.itemFromIndex(self.data_proxy.mapToSource(index))
+            # Find the mapped index
+            orig_index = model_item.isCheckable()
+            if orig_index:
+                # Check the data to enable/disable actions
+                is_2D = isinstance(model_item.child(0).data().toPyObject(), Data2D)
+                self.actionQuick3DPlot.setEnabled(is_2D)
+                self.actionEditMask.setEnabled(is_2D)
+                # Fire up the menu
+                self.context_menu.exec_(self.treeView.mapToGlobal(position))
+
+    def showDataInfo(self):
+        """
+        Show a simple read-only text edit with data information.
+        """
+        index = self.treeView.selectedIndexes()[0]
+        model_item = self.model.itemFromIndex(self.data_proxy.mapToSource(index))
+        data = model_item.child(0).data().toPyObject()
+        if data.__class__.__name__ == "Data1D":
+            text_to_show = GuiUtils.retrieveData1d(data)
+            self.txt_widget.resize(420,600)
+        else:
+            text_to_show = GuiUtils.retrieveData2d(data)
+            self.txt_widget.resize(700,600)
+
+        self.txt_widget.setReadOnly(True)
+        self.txt_widget.setWindowFlags(QtCore.Qt.Window)
+        self.txt_widget.setWindowIcon(QtGui.QIcon(":/res/ball.ico"))
+        self.txt_widget.setWindowTitle("Data Info: %s" % data.filename)
+        self.txt_widget.insertPlainText(text_to_show)
+
+        self.txt_widget.show()
+        vertical_scroll_bar = self.txt_widget.verticalScrollBar()
+        vertical_scroll_bar.triggerAction(QtGui.QScrollBar.SliderToMinimum)
+
+    def saveDataAs(self):
+        """
+        """
+        print "saveDataAs"
+        pass
+
+    def quickDataPlot(self):
+        """
+        """
+        print "quickDataPlot"
+        pass
+
+    def quickData3DPlot(self):
+        """
+        """
+        print "quickData3DPlot"
+        pass
+
+    def showEditDataMask(self):
+        """
+        """
+        print "showEditDataMask"
         pass
 
     def loadComplete(self, output):
