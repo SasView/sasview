@@ -11,7 +11,8 @@
 #This work benefited from DANSE software developed under NSF award DMR-0520547.
 #copyright 2008,2009 University of Tennessee
 #############################################################################
-
+##TODO: Replace 1/A with 1/\AA for Angstorm
+##TODO: Put in x-axis and y-axis information
 import logging
 import numpy
 import os
@@ -455,6 +456,10 @@ class Reader(XMLreader):
                         cs_values.current_level.get("attributes").get(key)
                     attrib_variable = cansas_attrib.get("variable")
                     if key == 'unit' and unit != '':
+                        if unit == "1/A":
+                            unit = "A^{-1}"
+                        elif unit == "1/cm":
+                            unit = "cm^{-1}"
                         attrib_value = unit
                     else:
                         attrib_value = node.attrib[key]

@@ -105,7 +105,7 @@ class CansasConstants(object):
     SASDATA_IDATA_Q = {"variable" : "{0}.x = numpy.append({0}.x, {1})",
                        "unit" : "x_unit",
                        "attributes" : {"unit" :
-                                       {"variable" : "{0}._xunit = \"{1}\"",
+                                       {"variable" : "{0}.xaxis(\"Q\", \'{1}\')",
                                         "storeas" : "content"
                                        }
                                       },
@@ -113,7 +113,7 @@ class CansasConstants(object):
     SASDATA_IDATA_I = {"variable" : "{0}.y = numpy.append({0}.y, {1})",
                        "unit" : "y_unit",
                        "attributes" : {"unit" :
-                                       {"variable" : "{0}._yunit = \"{1}\"",
+                                       {"variable" : "{0}.yaxis(\"Intensity\", \'{1}\')",
                                         "storeas" : "content"
                                        }
                                       },
