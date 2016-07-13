@@ -165,7 +165,7 @@ class Reader(XMLreader):
         output = []
         # ns - Namespace hierarchy for current xml_file object
         ns_list = []
-
+        
         # Check that the file exists
         if os.path.isfile(xml_file):
             basename = os.path.basename(xml_file)
