@@ -52,6 +52,10 @@ class ConverterPanel(ScrolledPanel, PanelBase):
     def extract_data(self, filename):
         data = np.loadtxt(filename, dtype=str)
 
+        if len(data.shape) != 1:
+            msg = "Error reading {}: Only one column of data is allowed"
+            raise Exception(msg.format(filename.split('\\')[-1]))
+
         is_float = True
         try:
             float(data[0])
