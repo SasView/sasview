@@ -11,6 +11,7 @@ from sas.sasgui.perspectives.calculator import calculator_widgets as widget
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sascalc.dataloader.readers.cansas_reader import Reader as CansasReader
+from sas.sascalc.dataloader.data_info import Detector
 
 # Panel size
 if sys.platform.count("win32") > 0:
@@ -40,6 +41,14 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         self.q_input = None
         self.iq_input = None
         self.output = None
+
+        self.metadata = {
+            'title': None,
+            'run': None,
+            'run_name': None,
+            'instrument': None,
+            'detector': None,
+        }
 
         self._do_layout()
         self.SetAutoLayout(True)
@@ -84,13 +93,42 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                 StatusEvent(status=msg, info='error'))
             return
 
+        output_path = self.output.GetPath()
         data = Data1D(x=qdata, y=iqdata)
-        self.convert_to_cansas(data, self.output.GetPath())
+        data.filename = output_path.split('\\')[-1]
+
+        if self.metadata['run'] is not None:
+            run = self.metadata['run']
+            run_name = self.metadata['run_name']
+            self.metadata['run'] = [run]
+            if run_name is not None:
+                self.metadata['run_name'] = { run: run_name }
+        if self.metadata['detector'] is not None:
+            name = self.metadata['detector']
+            detector = Detector()
+            detector.name = name
+            self.metadata['detector'] = [detector]
+
+        for attr, value in self.metadata.iteritems():
+            setattr(data, attr, value)
+
+        self.convert_to_cansas(data, output_path)
         wx.PostEvent(self.parent.manager.parent,
             StatusEvent(status="Conversion completed."))
 
+    def metadata_changed(self, event):
+        event.Skip()
+        textbox = event.GetEventObject()
+        attr = textbox.GetName()
+        value = textbox.GetValue().strip()
+        if value == '':
+            self.metadata[attr] = None
+        else:
+            self.metadata[attr] = value
+
+
     def _do_layout(self):
-        vbox = wx.GridBagSizer(wx.VERTICAL)
+        vbox = wx.BoxSizer(wx.VERTICAL)
 
         instructions = ("Select the 1 column ASCII files containing the Q Axis"
             "and Intensity data, chose where to save the converted file, then "
@@ -98,7 +136,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         instruction_label = wx.StaticText(self, -1, instructions,
             size=(_STATICBOX_WIDTH+40, -1))
         instruction_label.Wrap(_STATICBOX_WIDTH+40)
-        vbox.Add(instruction_label, (0,0), (1,1), wx.TOP | wx.LEFT | wx.RIGHT, 5)
+        vbox.Add(instruction_label, flag=wx.TOP | wx.LEFT | wx.RIGHT, border=5)
 
         section = wx.StaticBox(self, -1)
         section_sizer = wx.StaticBoxSizer(section, wx.VERTICAL)
@@ -138,7 +176,28 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
         section_sizer.Add(input_grid)
 
-        vbox.Add(section_sizer, (1,0), (1,1), wx.ALL, 5)
+        vbox.Add(section_sizer, flag=wx.ALL, border=5)
+
+        metadata_section = wx.CollapsiblePane(self, -1, "Metadata",
+            size=(_STATICBOX_WIDTH+40, -1))
+
+        metadata_grid = wx.GridBagSizer(5, 5)
+
+        y = 0
+        for item in self.metadata.keys():
+            label = wx.StaticText(metadata_section.GetPane(), -1, item,
+                style=wx.ALIGN_CENTER_VERTICAL)
+            input_box = wx.TextCtrl(metadata_section.GetPane(), name=item,
+                size=(_STATICBOX_WIDTH-80, -1))
+            input_box.Bind(wx.EVT_TEXT, self.metadata_changed)
+            metadata_grid.Add(label, (y,0), (1,1),
+                wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+            metadata_grid.Add(input_box, (y,1), (1,1), wx.EXPAND)
+            y += 1
+
+        metadata_section.GetPane().SetSizer(metadata_grid)
+
+        vbox.Add(metadata_section, proportion=0, flag=wx.ALL, border=5)
 
         vbox.Fit(self)
         self.SetSizer(vbox)
