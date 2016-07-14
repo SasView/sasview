@@ -53,7 +53,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             'instrument': None,
             'detector': [Detector()]
         }
-        self.vectors = ['offset', 'orientation', 'pixel_size']
+        self.vectors = ['offset', 'orientation', 'pixel_size', 'beam_center']
         for vector_name in self.vectors:
             setattr(self.metadata['detector'][0], vector_name, Vector())
 
@@ -286,7 +286,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         y += 1
 
         distance_label = wx.StaticText(metadata_pane, -1,
-            "Distance (mm):")
+            "Distance (mm): ")
         metadata_grid.Add(distance_label, (y, 1), (1,1))
 
         distance_input = wx.TextCtrl(metadata_pane, -1,
@@ -318,13 +318,30 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             (y,2), (1,1), wx.BOTTOM, 5)
         y += 1
 
-        pixel_label = wx.StaticText(metadata_pane, -1, "Pixel Size (mm):")
+        pixel_label = wx.StaticText(metadata_pane, -1, "Pixel Size (mm): ")
         metadata_grid.Add(pixel_label, (y,1), (1,1))
 
         pixel_input = VectorInput(metadata_pane, "detector_pixel_size",
              callback=self.metadata_changed)
         self.to_validate.append(pixel_input)
         metadata_grid.Add(pixel_input.GetSizer(), (y,2), (1,1), wx.BOTTOM, 5)
+        y += 1
+
+        beam_label = wx.StaticText(metadata_pane, -1, "Beam Center (mm): ")
+        metadata_grid.Add(beam_label, (y,1), (1,1))
+        beam_input = VectorInput(metadata_pane, "detector_beam_center",
+            callback=self.metadata_changed)
+        self.to_validate.append(beam_input)
+        metadata_grid.Add(beam_input.GetSizer(), (y,2), (1,1), wx.BOTTOM, 5)
+        y += 1
+
+        slit_label = wx.StaticText(metadata_pane, -1, "Slit Length (mm): ")
+        metadata_grid.Add(slit_label, (y,1), (1,1))
+        slit_input = wx.TextCtrl(metadata_pane, -1, size=(50,-1),
+            name="detector_slit_length")
+        self.to_validate.append(slit_input)
+        slit_input.Bind(wx.EVT_TEXT, self.metadata_changed)
+        metadata_grid.Add(slit_input, (y,2), (1,1), wx.BOTTOM, 5)
 
         metadata_pane.SetSizer(metadata_grid)
 
