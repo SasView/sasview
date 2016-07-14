@@ -108,7 +108,10 @@ class Reader():
             value = data.get(key)
             attr_keys = value.attrs.keys()
             attr_values = value.attrs.values()
-            class_name = value.attrs.get(u'NX_class')
+            if value.attrs.get(u'canSAS_class') is not None:
+                class_name = value.attrs.get(u'canSAS_class')
+            else:
+                class_name = value.attrs.get(u'NX_class')
             if class_name is not None:
                 class_prog = re.compile(class_name)
             else:
@@ -130,6 +133,7 @@ class Reader():
 
                 for data_point in data_set:
                     ## Top Level Meta Data
+                    unit = self._get_unit(value)
                     if key == u'definition':
                         self.current_dataset.meta_data['reader'] = data_point
                     elif key == u'run':
@@ -141,34 +145,30 @@ class Reader():
 
                     ## I and Q Data
                     elif key == u'I':
-                        i_unit = value.attrs.get(u'unit')
                         if type(self.current_dataset) is Data2D:
                             self.current_dataset.data = np.append(self.current_dataset.data, data_point)
-                            self.current_dataset.zaxis("Intensity (%s)" % (i_unit), i_unit)
+                            self.current_dataset.zaxis("Intensity", unit)
                         else:
                             self.current_dataset.y = np.append(self.current_dataset.y, data_point)
-                            self.current_dataset.yaxis("Intensity (%s)" % (i_unit), i_unit)
+                            self.current_dataset.yaxis("Intensity", unit)
                     elif key == u'Idev':
                         if type(self.current_dataset) is Data2D:
                             self.current_dataset.err_data = np.append(self.current_dataset.err_data, data_point)
                         else:
                             self.current_dataset.dy = np.append(self.current_dataset.dy, data_point)
                     elif key == u'Q':
-                        q_unit = value.attrs.get(u'unit')
-                        self.current_dataset.xaxis("Q (%s)" % (q_unit), q_unit)
+                        self.current_dataset.xaxis("Q", unit)
                         if type(self.current_dataset) is Data2D:
                             self.current_dataset.q = np.append(self.current_dataset.q, data_point)
                         else:
                             self.current_dataset.x = np.append(self.current_dataset.x, data_point)
                     elif key == u'Qy':
-                        q_unit = value.attrs.get(u'unit')
-                        self.current_dataset.yaxis("Q (%s)" % (q_unit), q_unit)
+                        self.current_dataset.yaxis("Q_y", unit)
                         self.current_dataset.qy_data = np.append(self.current_dataset.qy_data, data_point)
                     elif key == u'Qydev':
                         self.current_dataset.dqy_data = np.append(self.current_dataset.dqy_data, data_point)
                     elif key == u'Qx':
-                        q_unit = value.attrs.get(u'unit')
-                        self.current_dataset.xaxis("Q (%s)" % (q_unit), q_unit)
+                        self.current_dataset.xaxis("Q_x", unit)
                         self.current_dataset.qx_data = np.append(self.current_dataset.qx_data, data_point)
                     elif key == u'Qxdev':
                         self.current_dataset.dqx_data = np.append(self.current_dataset.dqx_data, data_point)
@@ -190,10 +190,10 @@ class Reader():
                         self.detector.name = data_point
                     elif key == u'SDD' and parent == u'SASdetector':
                         self.detector.distance = data_point
-                        self.detector.distance_unit = value.attrs.get(u'unit')
+                        self.detector.distance_unit = unit
                     elif key == u'SSD' and parent == u'SAScollimation':
                         self.collimation.length = data_point
-                        self.collimation.length_unit = value.attrs.get(u'unit')
+                        self.collimation.length_unit = unit
                     elif key == u'name' and parent == u'SAScollimation':
                         self.collimation.name = data_point
 
@@ -220,7 +220,7 @@ class Reader():
                     ## Other Information
                     elif key == u'wavelength' and parent == u'SASdata':
                         self.source.wavelength = data_point
-                        self.source.wavelength.unit = value.attrs.get(u'unit')
+                        self.source.wavelength.unit = unit
                     elif key == u'radiation' and parent == u'SASsource':
                         self.source.radiation = data_point
                     elif key == u'transmission' and parent == u'SASdata':
@@ -425,3 +425,22 @@ class Reader():
             name += "_{0}".format(numb)
             name = self._create_unique_key(dictionary, name, numb)
         return name
+
+    def _get_unit(self, value):
+        """
+        Find the unit for a particular value within the h5py dictionary
+
+        :param value: attribute dictionary for a particular value set
+        :return:
+        """
+        unit = value.attrs.get(u'units')
+        if unit == None:
+            unit = value.attrs.get(u'unit')
+
+        ## Convert the unit formats
+        if unit == "1/A":
+            unit = "A^{-1}"
+        elif unit == "1/cm":
+            unit = "cm^{-1}"
+
+        return unit
