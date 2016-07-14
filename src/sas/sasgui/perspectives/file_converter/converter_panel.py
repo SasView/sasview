@@ -110,16 +110,23 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         if self.metadata['run'] is not None:
             run = self.metadata['run']
             run_name = self.metadata['run_name']
-            self.metadata['run'] = [run]
-            if run_name is not None:
-                self.metadata['run_name'] = { run: run_name }
+
+            if not isinstance(run, list) and run is not None:
+                self.metadata['run'] = [run]
             else:
-                self.metadata['run_name'] = {}
+                run = run[0]
+
+            if not isinstance(run_name, dict):
+                if run_name is not None:
+                    self.metadata['run_name'] = { run: run_name }
+                else:
+                    self.metadata['run_name'] = {}
+            else:
+                self.metadata['run_name'][run] = run_name.values()[0]
         else:
             self.metadata['run'] = []
             self.metadata['run_name'] = {}
-        detector = self.metadata['detector'][0]
-        if detector.name is None:
+        if self.metadata['detector'][0].name is None:
             self.metadata['detector'][0].name = ''
 
         # Convert vectors from strings to float
