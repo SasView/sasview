@@ -62,10 +62,10 @@ class MetadataPanel(ScrolledPanel, PanelBase):
 class DetectorPanel(MetadataPanel):
 
     def __init__(self, parent, detector, base=None, *args, **kwargs):
-        MetadataPanel.__init__(self, parent, detector, base, *args, **kwargs)
-
         if detector.name is None:
             detector.name = ''
+
+        MetadataPanel.__init__(self, parent, detector, base, *args, **kwargs)
 
         self._do_layout()
         self.SetAutoLayout(True)
@@ -161,6 +161,70 @@ class DetectorPanel(MetadataPanel):
         if slit_len is None: slit_len = ''
         elif '.' not in slit_len: slit_len += '.0'
         slit_input.SetValue(slit_len)
+
+        vbox.Fit(self)
+        self.SetSizer(vbox)
+
+class SamplePanel(MetadataPanel):
+
+    def __init__(self, parent, sample, base=None, *args, **kwargs):
+        MetadataPanel.__init__(self, parent, sample, base, *args, **kwargs)
+
+        self._do_layout()
+        self.SetAutoLayout(True)
+        self.Layout()
+
+    def on_close(self, event=None):
+        MetadataPanel.on_close(self, event)
+
+        self.parent.manager.metadata['sample'] = self.metadata
+        self.parent.on_close(event)
+
+    def _do_layout(self):
+        vbox = wx.BoxSizer(wx.VERTICAL)
+
+        section = wx.StaticBox(self, -1, "Sample")
+        section_sizer = wx.StaticBoxSizer(section, wx.VERTICAL)
+        section_sizer.SetMinSize((_STATICBOX_WIDTH, -1))
+
+        input_grid = wx.GridBagSizer(5, 5)
+
+        y = 0
+        name_label = wx.StaticText(self, -1, "Name: ")
+        input_grid.Add(name_label, (y,0), (1,1), wx.ALL, 5)
+        name_input = wx.TextCtrl(self, -1, name="name")
+        input_grid.Add(name_input, (y,1), (1,1))
+        name_input.Bind(wx.EVT_TEXT, self.on_change)
+        y += 1
+
+        id_label = wx.StaticText(self, -1, "ID: ")
+        input_grid.Add(id_label, (y,0), (1,1), wx.ALL, 5)
+        id_input = wx.TextCtrl(self, -1, name="ID")
+        input_grid.Add(id_input, (y,1), (1,1))
+        id_input.Bind(wx.EVT_TEXT, self.on_change)
+        y += 1
+
+        thickness_label = wx.StaticText(self, -1, "Thickness (mm): ")
+        input_grid.Add(thickness_label, (y,0), (1,1), wx.ALL, 5)
+        thickness_input = wx.TextCtrl(self, -1, name="thickness")
+        input_grid.Add(thickness_input, (y,1), (1,1))
+        thickness_input.Bind(wx.EVT_TEXT, self.on_change)
+        self._to_validate.append(thickness_input)
+        y += 1
+
+        name_input.SetValue(self.metadata.name)
+        id_input.SetValue(self.metadata.ID)
+        thickness = self.metadata.thickness
+        if thickness is None:
+            thickness = ''
+        thickness_input.SetValue(str(thickness))
+
+        done_btn = wx.Button(self, -1, "Done")
+        input_grid.Add(done_btn, (y,0), (1,1), wx.ALL, 5)
+        done_btn.Bind(wx.EVT_BUTTON, self.on_close)
+
+        section_sizer.Add(input_grid)
+        vbox.Add(section_sizer, flag=wx.ALL, border=10)
 
         vbox.Fit(self)
         self.SetSizer(vbox)

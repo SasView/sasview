@@ -11,11 +11,13 @@ from sas.sasgui.perspectives.calculator import calculator_widgets as widget
 from sas.sasgui.perspectives.file_converter.converter_widgets import VectorInput
 from sas.sasgui.perspectives.file_converter.meta_panels import MetadataWindow
 from sas.sasgui.perspectives.file_converter.meta_panels import DetectorPanel
+from sas.sasgui.perspectives.file_converter.meta_panels import SamplePanel
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.utils import check_float
 from sas.sascalc.dataloader.readers.cansas_reader import Reader as CansasReader
 from sas.sascalc.dataloader.data_info import Detector
+from sas.sascalc.dataloader.data_info import Sample
 from sas.sascalc.dataloader.data_info import Vector
 
 # Panel size
@@ -54,7 +56,8 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             'run': None,
             'run_name': None,
             'instrument': None,
-            'detector': [Detector()]
+            'detector': [Detector()],
+            'sample': Sample()
         }
         self.vectors = ['offset', 'orientation', 'pixel_size', 'beam_center']
         for vector_name in self.vectors:
@@ -193,6 +196,17 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         self.parent.manager.put_icon(detector_frame)
         detector_frame.Show(True)
 
+    def show_sample_window(self, event):
+        if self.meta_frames != []:
+            for frame in self.meta_frames:
+                frame.panel.on_close()
+        sample_frame = MetadataWindow(SamplePanel,
+            parent=self.parent.manager.parent, manager=self,
+            metadata=self.metadata['sample'], title='Sample Metadata')
+        self.meta_frames.append(sample_frame)
+        self.parent.manager.put_icon(sample_frame)
+        sample_frame.Show(True)
+
     def metadata_changed(self, event):
         event.Skip()
         textbox = event.GetEventObject()
@@ -297,6 +311,13 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         detector_btn = wx.Button(metadata_pane, -1, "Enter Detector Metadata")
         metadata_grid.Add(detector_btn, (y, 1), (1,1), wx.ALL | wx.EXPAND, 5)
         detector_btn.Bind(wx.EVT_BUTTON, self.show_detector_window)
+        y += 1
+
+        sample_label = wx.StaticText(metadata_pane, -1, "Sample: ")
+        metadata_grid.Add(sample_label, (y,0), (1,1), wx.ALL | wx.EXPAND, 5)
+        sample_btn = wx.Button(metadata_pane, -1, "Enter Sample Metadata")
+        metadata_grid.Add(sample_btn, (y,1), (1,1), wx.ALL | wx.EXPAND, 5)
+        sample_btn.Bind(wx.EVT_BUTTON, self.show_sample_window)
         y += 1
 
         metadata_pane.SetSizer(metadata_grid)
