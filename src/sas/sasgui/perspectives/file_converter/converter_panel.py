@@ -9,7 +9,8 @@ from wx.lib.scrolledpanel import ScrolledPanel
 from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.perspectives.calculator import calculator_widgets as widget
 from sas.sasgui.perspectives.file_converter.converter_widgets import VectorInput
-from sas.sasgui.perspectives.file_converter.detector_panel import DetectorWindow
+from sas.sasgui.perspectives.file_converter.meta_panels import MetadataWindow
+from sas.sasgui.perspectives.file_converter.meta_panels import DetectorPanel
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.utils import check_float
@@ -41,7 +42,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
         self.base = base
         self.parent = parent
-        self.detector_frame = None
+        self.meta_frames = []
 
         self.q_input = None
         self.iq_input = None
@@ -182,13 +183,15 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         return True
 
     def show_detector_window(self, event):
-        if self.detector_frame is not None:
-            self.detector_frame.panel.on_close()
-            return
-        self.detector_frame = DetectorWindow(self.parent.manager.parent,
-            manager=self, detector=self.metadata['detector'][0])
-        self.parent.manager.put_icon(self.detector_frame)
-        self.detector_frame.Show(True)
+        if self.meta_frames != []:
+            for frame in self.meta_frames:
+                frame.panel.on_close()
+        detector_frame = MetadataWindow(DetectorPanel,
+            parent=self.parent.manager.parent, manager=self,
+            metadata=self.metadata['detector'][0], title='Detector Metadata')
+        self.meta_frames.append(detector_frame)
+        self.parent.manager.put_icon(detector_frame)
+        detector_frame.Show(True)
 
     def metadata_changed(self, event):
         event.Skip()

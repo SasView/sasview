@@ -19,32 +19,25 @@ else:
     PANEL_SIZE = 470
     FONT_VARIANT = 1
 
-class DetectorPanel(ScrolledPanel, PanelBase):
+class MetadataPanel(ScrolledPanel, PanelBase):
 
-    def __init__(self, parent, detector, base=None, *args, **kwargs):
+    def __init__(self, parent, metadata, base=None, *args, **kwargs):
         ScrolledPanel.__init__(self, parent, *args, **kwargs)
         PanelBase.__init__(self)
         self.SetupScrolling()
         self.SetWindowVariant(variant=FONT_VARIANT)
 
-        if detector.name is None:
-            detector.name = ''
-
         self.base = base
         self.parent = parent
-        self.detector = detector
         self._to_validate = []
         self._vectors = []
-
-        self._do_layout()
-        self.SetAutoLayout(True)
-        self.Layout()
+        self.metadata = metadata
 
     def on_change(self, event):
         ctrl = event.GetEventObject()
         value = ctrl.GetValue()
         if value == '': value = None
-        setattr(self.detector, ctrl.GetName(), value)
+        setattr(self.metadata, ctrl.GetName(), value)
 
     def on_close(self, event=None):
         for ctrl in self._to_validate:
@@ -64,8 +57,24 @@ class DetectorPanel(ScrolledPanel, PanelBase):
                 wx.PostEvent(self.parent.manager.parent.manager.parent,
                     StatusEvent(status=msg, info='error'))
                 return
-            setattr(self.detector, vector_in.GetName(), vector_in.GetValue())
+            setattr(self.metadata, vector_in.GetName(), vector_in.GetValue())
 
+class DetectorPanel(MetadataPanel):
+
+    def __init__(self, parent, detector, base=None, *args, **kwargs):
+        MetadataPanel.__init__(self, parent, detector, base, *args, **kwargs)
+
+        if detector.name is None:
+            detector.name = ''
+
+        self._do_layout()
+        self.SetAutoLayout(True)
+        self.Layout()
+
+    def on_close(self, event=None):
+        MetadataPanel.on_close(self, event)
+
+        self.parent.manager.metadata['detector'] = [self.metadata]
         self.parent.on_close(event)
 
     def _do_layout(self):
@@ -139,16 +148,16 @@ class DetectorPanel(ScrolledPanel, PanelBase):
         section_sizer.Add(input_grid)
         vbox.Add(section_sizer, flag=wx.ALL, border=10)
 
-        name_input.SetValue(self.detector.name)
-        distance = self.detector.distance
+        name_input.SetValue(self.metadata.name)
+        distance = self.metadata.distance
         if distance is None: distance = ''
         elif '.' not in distance: distance += '.0'
         distance_input.SetValue(str(distance))
-        offset_input.SetValue(self.detector.offset)
-        orientation_input.SetValue(self.detector.orientation)
-        pixel_input.SetValue(self.detector.pixel_size)
-        beam_input.SetValue(self.detector.beam_center)
-        slit_len = self.detector.slit_length
+        offset_input.SetValue(self.metadata.offset)
+        orientation_input.SetValue(self.metadata.orientation)
+        pixel_input.SetValue(self.metadata.pixel_size)
+        beam_input.SetValue(self.metadata.beam_center)
+        slit_len = self.metadata.slit_length
         if slit_len is None: slit_len = ''
         elif '.' not in slit_len: slit_len += '.0'
         slit_input.SetValue(slit_len)
@@ -156,21 +165,20 @@ class DetectorPanel(ScrolledPanel, PanelBase):
         vbox.Fit(self)
         self.SetSizer(vbox)
 
-class DetectorWindow(widget.CHILD_FRAME):
+class MetadataWindow(widget.CHILD_FRAME):
 
-    def __init__(self, parent=None, title='Detector Metadata', base=None,
-        manager=None, size=(PANEL_SIZE, PANEL_SIZE*0.8), detector=None,
+    def __init__(self, PanelClass, parent=None, title='', base=None,
+        manager=None, size=(PANEL_SIZE, PANEL_SIZE*0.8), metadata=None,
          *args, **kwargs):
         kwargs['title'] = title
         kwargs['size'] = size
         widget.CHILD_FRAME.__init__(self, parent, *args, **kwargs)
 
         self.manager = manager
-        self.panel = DetectorPanel(self, detector, base=None)
+        self.panel = PanelClass(self, metadata, base=None)
         self.Bind(wx.EVT_CLOSE, self.on_close)
 
     def on_close(self, event):
         if self.manager is not None:
-            self.manager.detector_frame = None
-            self.manager.metadata['detector'] = [self.panel.detector]
+            self.manager.meta_frames.remove(self)
         self.Destroy()
