@@ -8,6 +8,7 @@ import numpy as np
 from wx.lib.scrolledpanel import ScrolledPanel
 from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.perspectives.calculator import calculator_widgets as widget
+from sas.sasgui.perspectives.file_converter.converter_widgets import VectorInput
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.utils import check_float
@@ -154,14 +155,21 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             return
 
         for ctrl in self.to_validate:
-            if ctrl.GetValue() == '': continue
-            ctrl_valid = check_float(ctrl)
+            ctrl_valid = True
+            invalid_control = None
+            if isinstance(ctrl, VectorInput):
+                ctrl_valid, invalid_control = ctrl.Validate()
+            else:
+                if ctrl.GetValue() == '': continue
+                ctrl_valid = check_float(ctrl)
+                invalid_control = ctrl
             if not ctrl_valid:
                 msg = "{} must be a valid float".format(
-                    ctrl.GetName().replace('_', ' '))
+                    invalid_control.GetName().replace('_', ' '))
                 wx.PostEvent(self.parent.manager.parent,
                     StatusEvent(status=msg, info='error'))
                 return False
+
         return True
 
 
@@ -292,80 +300,31 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             "Offset (m): ")
         metadata_grid.Add(offset_label, (y,1), (1,1))
 
-        offset_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        x_label = wx.StaticText(metadata_pane, -1, "x: ",
-            style=wx.ALIGN_CENTER_VERTICAL)
-        offset_sizer.Add(x_label, wx.ALIGN_CENTER_VERTICAL)
-        offset_x_input = wx.TextCtrl(metadata_pane, -1,
-            name="detector_offset_x", size=(50, -1))
-        offset_sizer.Add(offset_x_input)
-        self.to_validate.append(offset_x_input)
-        offset_x_input.Bind(wx.EVT_TEXT, self.metadata_changed)
-        offset_sizer.AddSpacer((15, -1))
-        y_label = wx.StaticText(metadata_pane, -1, "y: ",
-            style=wx.ALIGN_CENTER_VERTICAL)
-        offset_sizer.Add(y_label, wx.ALIGN_CENTER_VERTICAL)
-        offset_y_input = wx.TextCtrl(metadata_pane, -1,
-            name="detector_offset_y", size=(50, -1))
-        offset_sizer.Add(offset_y_input)
-        self.to_validate.append(offset_y_input)
-        offset_y_input.Bind(wx.EVT_TEXT, self.metadata_changed)
-        metadata_grid.Add(offset_sizer, (y,2), (1,1), wx.BOTTOM, 5)
+        offset_input = VectorInput(metadata_pane, "detector_offset",
+            callback=self.metadata_changed)
+        self.to_validate.append(offset_input)
+        metadata_grid.Add(offset_input.GetSizer(), (y,2), (1,1), wx.BOTTOM, 5)
         y += 1
 
         orientation_label = wx.StaticText(metadata_pane, -1,
             u"Orientation (\xb0): ")
         metadata_grid.Add(orientation_label, (y, 1), (1, 1))
 
-        orientation_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        roll_label = wx.StaticText(metadata_pane, -1, "Roll: ")
-        orientation_sizer.Add(roll_label)
-        roll_input = wx.TextCtrl(metadata_pane, -1,
-            name="detector_orientation_x", size=(50, -1))
-        self.to_validate.append(roll_input)
-        roll_input.Bind(wx.EVT_TEXT, self.metadata_changed)
-        orientation_sizer.Add(roll_input)
-        orientation_sizer.AddSpacer((15, -1))
-        pitch_label = wx.StaticText(metadata_pane, -1, "Pitch: ")
-        orientation_sizer.Add(pitch_label)
-        pitch_input = wx.TextCtrl(metadata_pane, 1,
-            name="detector_orientation_y", size=(50,-1))
-        self.to_validate.append(pitch_input)
-        pitch_input.Bind(wx.EVT_TEXT, self.metadata_changed)
-        orientation_sizer.Add(pitch_input)
-        orientation_sizer.AddSpacer((15, -1))
-        yaw_label = wx.StaticText(metadata_pane, -1, "Yaw: ")
-        orientation_sizer.Add(yaw_label)
-        yaw_input = wx.TextCtrl(metadata_pane, 1,
-            name="detector_orientation_z", size=(50,-1))
-        yaw_input.Bind(wx.EVT_TEXT, self.metadata_changed)
-        self.to_validate.append(yaw_input)
-        orientation_sizer.Add(yaw_input)
-
-        metadata_grid.Add(orientation_sizer, (y,2), (1,1), wx.BOTTOM, 5)
+        orientation_input = VectorInput(metadata_pane, "detector_orientation",
+            callback=self.metadata_changed, z_enabled=True,
+            labels=["Roll: ", "Pitch: ", "Yaw: "])
+        self.to_validate.append(orientation_input)
+        metadata_grid.Add(orientation_input.GetSizer(),
+            (y,2), (1,1), wx.BOTTOM, 5)
         y += 1
 
         pixel_label = wx.StaticText(metadata_pane, -1, "Pixel Size (mm):")
         metadata_grid.Add(pixel_label, (y,1), (1,1))
 
-        pixel_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        pixel_x_label = wx.StaticText(metadata_pane, -1, "x: ")
-        pixel_sizer.Add(pixel_x_label)
-        pixel_x_input = wx.TextCtrl(metadata_pane, -1,
-            name="detector_pixel_size_x", size=(50, -1))
-        self.to_validate.append(pixel_x_input)
-        pixel_x_input.Bind(wx.EVT_TEXT, self.metadata_changed)
-        pixel_sizer.Add(pixel_x_input)
-        pixel_sizer.AddSpacer((15, -1))
-        pixel_y_label = wx.StaticText(metadata_pane, -1, "y: ")
-        pixel_sizer.Add(pixel_y_label)
-        pixel_y_input = wx.TextCtrl(metadata_pane, 1,
-            name="detector_pixel_size_y", size=(50,-1))
-        self.to_validate.append(pixel_y_input)
-        pixel_y_input.Bind(wx.EVT_TEXT, self.metadata_changed)
-        pixel_sizer.Add(pixel_y_input)
-
-        metadata_grid.Add(pixel_sizer, (y,2), (1,1), wx.BOTTOM, 5)
+        pixel_input = VectorInput(metadata_pane, "detector_pixel_size",
+             callback=self.metadata_changed)
+        self.to_validate.append(pixel_input)
+        metadata_grid.Add(pixel_input.GetSizer(), (y,2), (1,1), wx.BOTTOM, 5)
 
         metadata_pane.SetSizer(metadata_grid)
 
