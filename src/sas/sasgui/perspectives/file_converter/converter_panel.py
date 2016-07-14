@@ -9,6 +9,7 @@ from wx.lib.scrolledpanel import ScrolledPanel
 from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.perspectives.calculator import calculator_widgets as widget
 from sas.sasgui.perspectives.file_converter.converter_widgets import VectorInput
+from sas.sasgui.perspectives.file_converter.detector_panel import DetectorWindow
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.utils import check_float
@@ -40,6 +41,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
         self.base = base
         self.parent = parent
+        self.detector_frame = None
 
         self.q_input = None
         self.iq_input = None
@@ -179,6 +181,14 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
         return True
 
+    def show_detector_window(self, event):
+        if self.detector_frame is not None:
+            self.detector_frame.panel.on_close()
+            return
+        self.detector_frame = DetectorWindow(self.parent.manager.parent,
+            manager=self, detector=self.metadata['detector'][0])
+        self.parent.manager.put_icon(self.detector_frame)
+        self.detector_frame.Show(True)
 
     def metadata_changed(self, event):
         event.Skip()
@@ -281,74 +291,10 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         detector_label = wx.StaticText(metadata_pane, -1,
             "Detector:")
         metadata_grid.Add(detector_label, (y, 0), (1,1), wx.ALL | wx.EXPAND, 5)
+        detector_btn = wx.Button(metadata_pane, -1, "Enter Detector Metadata")
+        metadata_grid.Add(detector_btn, (y, 1), (1,1), wx.ALL | wx.EXPAND, 5)
+        detector_btn.Bind(wx.EVT_BUTTON, self.show_detector_window)
         y += 1
-
-        name_label = wx.StaticText(metadata_pane, -1, "Name: ")
-        metadata_grid.Add(name_label, (y, 1), (1,1))
-
-        name_input = wx.TextCtrl(metadata_pane,
-            name="detector_name", size=(_STATICBOX_WIDTH-80-55, -1))
-        metadata_grid.Add(name_input, (y, 2), (1,1))
-        name_input.Bind(wx.EVT_TEXT, self.metadata_changed)
-        y += 1
-
-        distance_label = wx.StaticText(metadata_pane, -1,
-            "Distance (mm): ")
-        metadata_grid.Add(distance_label, (y, 1), (1,1))
-
-        distance_input = wx.TextCtrl(metadata_pane, -1,
-            name="detector_distance", size=(50,-1))
-        metadata_grid.Add(distance_input, (y,2), (1,1))
-        self.to_validate.append(distance_input)
-        distance_input.Bind(wx.EVT_TEXT, self.metadata_changed)
-        y += 1
-
-        offset_label = wx.StaticText(metadata_pane, -1,
-            "Offset (m): ")
-        metadata_grid.Add(offset_label, (y,1), (1,1))
-
-        offset_input = VectorInput(metadata_pane, "detector_offset",
-            callback=self.metadata_changed)
-        self.to_validate.append(offset_input)
-        metadata_grid.Add(offset_input.GetSizer(), (y,2), (1,1), wx.BOTTOM, 5)
-        y += 1
-
-        orientation_label = wx.StaticText(metadata_pane, -1,
-            u"Orientation (\xb0): ")
-        metadata_grid.Add(orientation_label, (y, 1), (1, 1))
-
-        orientation_input = VectorInput(metadata_pane, "detector_orientation",
-            callback=self.metadata_changed, z_enabled=True,
-            labels=["Roll: ", "Pitch: ", "Yaw: "])
-        self.to_validate.append(orientation_input)
-        metadata_grid.Add(orientation_input.GetSizer(),
-            (y,2), (1,1), wx.BOTTOM, 5)
-        y += 1
-
-        pixel_label = wx.StaticText(metadata_pane, -1, "Pixel Size (mm): ")
-        metadata_grid.Add(pixel_label, (y,1), (1,1))
-
-        pixel_input = VectorInput(metadata_pane, "detector_pixel_size",
-             callback=self.metadata_changed)
-        self.to_validate.append(pixel_input)
-        metadata_grid.Add(pixel_input.GetSizer(), (y,2), (1,1), wx.BOTTOM, 5)
-        y += 1
-
-        beam_label = wx.StaticText(metadata_pane, -1, "Beam Center (mm): ")
-        metadata_grid.Add(beam_label, (y,1), (1,1))
-        beam_input = VectorInput(metadata_pane, "detector_beam_center",
-            callback=self.metadata_changed)
-        self.to_validate.append(beam_input)
-        metadata_grid.Add(beam_input.GetSizer(), (y,2), (1,1), wx.BOTTOM, 5)
-        y += 1
-
-        slit_label = wx.StaticText(metadata_pane, -1, "Slit Length (mm): ")
-        metadata_grid.Add(slit_label, (y,1), (1,1))
-        slit_input = wx.TextCtrl(metadata_pane, -1, size=(50,-1),
-            name="detector_slit_length")
-        self.to_validate.append(slit_input)
-        slit_input.Bind(wx.EVT_TEXT, self.metadata_changed)
-        metadata_grid.Add(slit_input, (y,2), (1,1), wx.BOTTOM, 5)
 
         metadata_pane.SetSizer(metadata_grid)
 

@@ -24,6 +24,8 @@ class VectorInput(object):
         self.parent = parent
         self.control_name = control_name
         self._callback = callback
+        self._name = control_name
+
         self.labels = labels
         self.z_enabled = z_enabled
         self._sizer = None
@@ -39,6 +41,9 @@ class VectorInput(object):
         """
         return self._sizer
 
+    def GetName(self):
+        return self._name
+
     def GetValue(self):
         """
         Get the value of the vector input
@@ -47,7 +52,7 @@ class VectorInput(object):
         """
         v = Vector()
         if not self.Validate(): return v
-        for direction, control in self._inputs:
+        for direction, control in self._inputs.iteritems():
             try:
                 value = float(control.GetValue())
                 setattr(v, direction, value)
@@ -56,21 +61,32 @@ class VectorInput(object):
 
         return v
 
+    def SetValue(self, vector):
+        directions = ['x', 'y']
+        if self.z_enabled: directions.append('z')
+        for direction in directions:
+            value = getattr(vector, direction)
+            if value is None: value = ''
+            self._inputs[direction].SetValue(str(value))
+
     def Validate(self):
         """
         Validate the contents of the inputs
 
-        :return control_valid: Whether or not the inputs are valid
-        :return invalid_control: The control that is not valid
+        :return all_valid: Whether or not the inputs are valid
+        :return invalid_ctrl: A control that is not valid
             (or None if all are valid)
         """
+        all_valid = True
+        invalid_ctrl = None
         for control in self._inputs.values():
             if control.GetValue() == '': continue
             control.SetBackgroundColour(wx.WHITE)
             control_valid = check_float(control)
             if not control_valid:
-                return False, control
-        return True, None
+                all_valid = False
+                invalid_ctrl = control
+        return all_valid, invalid_ctrl
 
 
     def _do_layout(self):
@@ -84,7 +100,7 @@ class VectorInput(object):
         self._inputs['x'] = x_input
         x_input.Bind(wx.EVT_TEXT, self._callback)
 
-        self._sizer.AddSpacer((15, -1))
+        self._sizer.AddSpacer((10, -1))
 
         y_label = wx.StaticText(self.parent, -1, self.labels[1],
             style=wx.ALIGN_CENTER_VERTICAL)
@@ -96,7 +112,7 @@ class VectorInput(object):
         y_input.Bind(wx.EVT_TEXT, self._callback)
 
         if self.z_enabled:
-            self._sizer.AddSpacer((15, -1))
+            self._sizer.AddSpacer((10, -1))
 
             z_label = wx.StaticText(self.parent, -1, self.labels[2],
                 style=wx.ALIGN_CENTER_VERTICAL)
