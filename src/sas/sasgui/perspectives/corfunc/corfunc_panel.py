@@ -146,6 +146,9 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         :param data: The data that has been loaded
         """
         if data is None:
+            self._disable_inputs()
+            self.set_extracted_params(reset=True)
+            self._data = None
             return
         self._enable_inputs()
         self._transform_btn.Disable()

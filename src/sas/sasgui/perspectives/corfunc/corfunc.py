@@ -115,6 +115,13 @@ class Plugin(PluginBase):
                     wx.PostEvent(self.parent, StatusEvent(status=msg,
                         info='error'))
 
+    def delete_data(self, data):
+        """
+        Delete the data from the perspective
+        """
+        self.clear_data()
+        self.corfunc_panel.set_data(None)
+
     def show_data(self, data, label, reset=False, active_ctrl=None):
         """
         Show data read from a file
@@ -146,8 +153,6 @@ class Plugin(PluginBase):
         wx.PostEvent(self.parent,
                      NewPlotEvent(plot=new_plot, title=new_plot.title,
                         reset=reset))
-        if label == IQ_EXTRAPOLATED_DATA_LABEL or label == TRANSFORM_LABEL:
-            self.parent.update_theory(data_id=label, theory=new_plot)
         if label == IQ_DATA_LABEL or label == IQ_EXTRAPOLATED_DATA_LABEL:
             wx.CallAfter(self.corfunc_panel.plot_qrange, active=active_ctrl,
                 leftdown=True)
