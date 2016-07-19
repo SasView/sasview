@@ -165,7 +165,7 @@ class Reader(XMLreader):
         output = []
         # ns - Namespace hierarchy for current xml_file object
         ns_list = []
-        
+
         # Check that the file exists
         if os.path.isfile(xml_file):
             basename = os.path.basename(xml_file)
@@ -941,11 +941,11 @@ class Reader(XMLreader):
                                                 {"unit": item.pixel_size_unit})
             written = written | self.write_node(pix, "z", item.pixel_size.z,
                                                 {"unit": item.pixel_size_unit})
-            written = written | self.write_node(det, "slit_length",
-                                                item.slit_length,
-                                                {"unit": item.slit_length_unit})
             if written == True:
                 self.append(pix, det)
+            self.write_node(det, "slit_length", item.slit_length,
+                {"unit": item.slit_length_unit})
+
 
     def _write_process_notes(self, datainfo, entry_node):
         """
