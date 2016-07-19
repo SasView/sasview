@@ -33,11 +33,24 @@ class MetadataPanel(ScrolledPanel, PanelBase):
         self._vectors = []
         self.metadata = metadata
 
+    def get_property_string(self, name, is_float=False):
+        value = getattr(self.metadata, name)
+        if value is None or value == []:
+            value = ''
+            is_float = False
+        value = str(value)
+        if is_float and not '.' in value: value += '.0'
+        return value
+
     def on_change(self, event):
         ctrl = event.GetEventObject()
         value = ctrl.GetValue()
+        name = ctrl.GetName()
+        old_value = getattr(self.metadata, name)
         if value == '': value = None
-        setattr(self.metadata, ctrl.GetName(), value)
+        if isinstance(old_value, list): value = [value]
+
+        setattr(self.metadata, name, value)
 
     def on_close(self, event=None):
         for ctrl in self._to_validate:
@@ -48,7 +61,7 @@ class MetadataPanel(ScrolledPanel, PanelBase):
                     ctrl.GetName().replace("_", " "))
                 wx.PostEvent(self.parent.manager.parent.manager.parent,
                     StatusEvent(status=msg, info='error'))
-                return
+                return False
         for vector_in in self._vectors:
             is_valid, invalid_ctrl = vector_in.Validate()
             if not is_valid:
@@ -56,8 +69,9 @@ class MetadataPanel(ScrolledPanel, PanelBase):
                     invalid_ctrl.GetName().replace("_", " "))
                 wx.PostEvent(self.parent.manager.parent.manager.parent,
                     StatusEvent(status=msg, info='error'))
-                return
+                return False
             setattr(self.metadata, vector_in.GetName(), vector_in.GetValue())
+        return True
 
 class DetectorPanel(MetadataPanel):
 
@@ -72,7 +86,8 @@ class DetectorPanel(MetadataPanel):
         self.Layout()
 
     def on_close(self, event=None):
-        MetadataPanel.on_close(self, event)
+        if not MetadataPanel.on_close(self, event):
+            return
 
         self.parent.manager.metadata['detector'] = [self.metadata]
         self.parent.on_close(event)
@@ -149,17 +164,13 @@ class DetectorPanel(MetadataPanel):
         vbox.Add(section_sizer, flag=wx.ALL, border=10)
 
         name_input.SetValue(self.metadata.name)
-        distance = self.metadata.distance
-        if distance is None: distance = ''
-        elif '.' not in distance: distance += '.0'
-        distance_input.SetValue(str(distance))
+        distance = self.get_property_string("distance", is_float=True)
+        distance_input.SetValue(distance)
         offset_input.SetValue(self.metadata.offset)
         orientation_input.SetValue(self.metadata.orientation)
         pixel_input.SetValue(self.metadata.pixel_size)
         beam_input.SetValue(self.metadata.beam_center)
-        slit_len = self.metadata.slit_length
-        if slit_len is None: slit_len = ''
-        elif '.' not in slit_len: slit_len += '.0'
+        slit_len = self.get_property_string("slit_length", is_float=True)
         slit_input.SetValue(slit_len)
 
         vbox.Fit(self)
@@ -169,13 +180,16 @@ class SamplePanel(MetadataPanel):
 
     def __init__(self, parent, sample, base=None, *args, **kwargs):
         MetadataPanel.__init__(self, parent, sample, base, *args, **kwargs)
+        if sample.name is None:
+            sample.name = ''
 
         self._do_layout()
         self.SetAutoLayout(True)
         self.Layout()
 
     def on_close(self, event=None):
-        MetadataPanel.on_close(self, event)
+        if not MetadataPanel.on_close(self, event):
+            return
 
         self.parent.manager.metadata['sample'] = self.metadata
         self.parent.on_close(event)
@@ -212,12 +226,63 @@ class SamplePanel(MetadataPanel):
         self._to_validate.append(thickness_input)
         y += 1
 
+        transmission_label = wx.StaticText(self, -1, "Transmission: ")
+        input_grid.Add(transmission_label, (y,0), (1,1), wx.ALL, 5)
+        transmission_input = wx.TextCtrl(self, -1, name="transmission")
+        input_grid.Add(transmission_input, (y,1), (1,1))
+        transmission_input.Bind(wx.EVT_TEXT, self.on_change)
+        self._to_validate.append(transmission_input)
+        y += 1
+
+        temperature_label = wx.StaticText(self, -1, "Temperature: ")
+        input_grid.Add(temperature_label, (y,0), (1,1), wx.ALL, 5)
+        temperature_input = wx.TextCtrl(self, -1, name="temperature")
+        temperature_input.Bind(wx.EVT_TEXT, self.on_change)
+        self._to_validate.append(temperature_input)
+        input_grid.Add(temperature_input, (y,1), (1,1))
+        temp_unit_label = wx.StaticText(self, -1, "Unit: ")
+        input_grid.Add(temp_unit_label, (y,2), (1,1))
+        temp_unit_input = wx.TextCtrl(self, -1, name="temperature_unit",
+            size=(50,-1))
+        temp_unit_input.Bind(wx.EVT_TEXT, self.on_change)
+        input_grid.Add(temp_unit_input, (y,3), (1,1))
+        y += 1
+
+        position_label = wx.StaticText(self, -1, "Position (mm): ")
+        input_grid.Add(position_label, (y,0), (1,1), wx.ALL, 5)
+        position_input = VectorInput(self, "position")
+        self._vectors.append(position_input)
+        input_grid.Add(position_input.GetSizer(), (y,1), (1,2))
+        y += 1
+
+        orientation_label = wx.StaticText(self, -1, "Orientation (\xb0): ")
+        input_grid.Add(orientation_label, (y,0), (1,1), wx.ALL, 5)
+        orientation_input = VectorInput(self, "orientation",
+            labels=["Roll: ", "Pitch: ", "Yaw: "], z_enabled=True)
+        self._vectors.append(orientation_input)
+        input_grid.Add(orientation_input.GetSizer(), (y,1), (1,3))
+        y += 1
+
+        details_label = wx.StaticText(self, -1, "Details: ")
+        input_grid.Add(details_label, (y,0), (1,1), wx.ALL, 5)
+        details_input = wx.TextCtrl(self, -1, name="details",
+            style=wx.TE_MULTILINE)
+        input_grid.Add(details_input, (y,1), (3,3), wx.EXPAND)
+        y += 3
+
         name_input.SetValue(self.metadata.name)
-        id_input.SetValue(self.metadata.ID)
-        thickness = self.metadata.thickness
-        if thickness is None:
-            thickness = ''
-        thickness_input.SetValue(str(thickness))
+        id_input.SetValue(self.get_property_string("ID"))
+        thickness_input.SetValue(
+            self.get_property_string("thickness", is_float=True))
+        transmission_input.SetValue(
+            self.get_property_string("transmission", is_float=True))
+        temperature_input.SetValue(
+            self.get_property_string("temperature", is_float=True))
+        temp_unit_input.SetValue(self.get_property_string("temperature_unit"))
+        position_input.SetValue(self.metadata.position)
+        orientation_input.SetValue(self.metadata.orientation)
+        details_input.SetValue(self.get_property_string("details"))
+        details_input.Bind(wx.EVT_TEXT, self.on_change)
 
         done_btn = wx.Button(self, -1, "Done")
         input_grid.Add(done_btn, (y,0), (1,1), wx.ALL, 5)
