@@ -185,6 +185,12 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         self.parent.manager.put_icon(sample_frame)
         sample_frame.Show(True)
 
+    def on_collapsible_pane(self, event):
+        self.Freeze()
+        self.SetupScrolling()
+        self.parent.Layout()
+        self.Thaw()
+
     def datatype_changed(self, event):
         event.Skip()
         dtype = event.GetEventObject().GetName()
@@ -278,6 +284,9 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         metadata_pane = metadata_section.GetPane()
         metadata_grid = wx.GridBagSizer(5, 5)
 
+        metadata_section.Bind(wx.EVT_COLLAPSIBLEPANE_CHANGED,
+            self.on_collapsible_pane)
+
         y = 0
         for item in self.metadata.keys():
             if item == 'detector' or item == 'sample': continue
@@ -317,7 +326,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 class ConverterWindow(widget.CHILD_FRAME):
 
     def __init__(self, parent=None, title='File Converter', base=None,
-        manager=None, size=(PANEL_SIZE * 1.05, PANEL_SIZE / 1.55),
+        manager=None, size=(PANEL_SIZE * 1.05, PANEL_SIZE / 1.25),
         *args, **kwargs):
         kwargs['title'] = title
         kwargs['size'] = size
