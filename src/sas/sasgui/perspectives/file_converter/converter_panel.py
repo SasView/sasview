@@ -16,6 +16,7 @@ from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.utils import check_float
 from sas.sascalc.dataloader.readers.cansas_reader import Reader as CansasReader
+from sas.sasgui.perspectives.file_converter.bsl_loader import BSLLoader
 from sas.sascalc.dataloader.data_info import Detector
 from sas.sascalc.dataloader.data_info import Sample
 from sas.sascalc.dataloader.data_info import Vector
@@ -49,6 +50,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         self.q_input = None
         self.iq_input = None
         self.output = None
+        self.data_type = "ascii"
 
         self.metadata = {
             'title': None,
@@ -58,6 +60,8 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             'detector': [Detector()],
             'sample': Sample()
         }
+
+        self.metadata['detector'][0].name = ''
 
         self._do_layout()
         self.SetAutoLayout(True)
@@ -97,8 +101,15 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             return
 
         try:
-            qdata = self.extract_data(self.q_input.GetPath())
-            iqdata = self.extract_data(self.iq_input.GetPath())
+            if self.data_type == 'ascii':
+                qdata = self.extract_data(self.q_input.GetPath())
+                iqdata = self.extract_data(self.iq_input.GetPath())
+            else: # self.data_type == 'bsl'
+                loader = BSLLoader(self.q_input.GetPath(),
+                    self.iq_input.GetPath())
+                bsl_data = loader.load_bsl_data()
+                qdata = bsl_data.q_axis.data[0]
+                iqdata = bsl_data.data_axis.data[0]
         except Exception as ex:
             msg = str(ex)
             wx.PostEvent(self.parent.manager.parent,
@@ -174,6 +185,11 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         self.parent.manager.put_icon(sample_frame)
         sample_frame.Show(True)
 
+    def datatype_changed(self, event):
+        event.Skip()
+        dtype = event.GetEventObject().GetName()
+        self.data_type = dtype
+
     def metadata_changed(self, event):
         event.Skip()
         textbox = event.GetEventObject()
@@ -189,10 +205,10 @@ class ConverterPanel(ScrolledPanel, PanelBase):
     def _do_layout(self):
         vbox = wx.BoxSizer(wx.VERTICAL)
 
-        instructions = ("Select the 1 column ASCII files containing the Q Axis"
-            " and Intensity data, chose where to save the converted file, then"
-            " click Convert to convert them to CanSAS XML format. If required,"
-            " metadata can also be input below.")
+        instructions = ("Select either 1 column ASCII files or BSL files "
+            "containing the Q Axis and Intensity data, chose where to save "
+            "the converted file, then click Convert to convert them to CanSAS "
+            "XML format. If required, metadata can also be input below.")
         instruction_label = wx.StaticText(self, -1, instructions,
             size=(_STATICBOX_WIDTH+40, -1))
         instruction_label.Wrap(_STATICBOX_WIDTH+40)
@@ -204,34 +220,53 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
         input_grid = wx.GridBagSizer(5, 5)
 
+        y = 0
+
         q_label = wx.StaticText(self, -1, "Q Axis: ")
-        input_grid.Add(q_label, (0,0), (1,1), wx.ALIGN_CENTER_VERTICAL, 5)
+        input_grid.Add(q_label, (y,0), (1,1), wx.ALIGN_CENTER_VERTICAL, 5)
 
         self.q_input = wx.FilePickerCtrl(self, -1,
             size=(_STATICBOX_WIDTH-80, -1),
             message="Chose the Q Axis data file.")
-        input_grid.Add(self.q_input, (0,1), (1,1), wx.ALL, 5)
+        input_grid.Add(self.q_input, (y,1), (1,1), wx.ALL, 5)
+        y += 1
 
         iq_label = wx.StaticText(self, -1, "Intensity Data: ")
-        input_grid.Add(iq_label, (1,0), (1,1), wx.ALIGN_CENTER_VERTICAL, 5)
+        input_grid.Add(iq_label, (y,0), (1,1), wx.ALIGN_CENTER_VERTICAL, 5)
 
         self.iq_input = wx.FilePickerCtrl(self, -1,
             size=(_STATICBOX_WIDTH-80, -1),
             message="Chose the Intensity data file.")
-        input_grid.Add(self.iq_input, (1,1), (1,1), wx.ALL, 5)
+        input_grid.Add(self.iq_input, (y,1), (1,1), wx.ALL, 5)
+        y += 1
+
+        data_type_label = wx.StaticText(self, -1, "Input Format: ")
+        input_grid.Add(data_type_label, (y,0), (1,1),
+            wx.ALIGN_CENTER_VERTICAL, 5)
+        radio_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        ascii_btn = wx.RadioButton(self, -1, "ASCII", name="ascii",
+            style=wx.RB_GROUP)
+        ascii_btn.Bind(wx.EVT_RADIOBUTTON, self.datatype_changed)
+        radio_sizer.Add(ascii_btn)
+        bsl_btn = wx.RadioButton(self, -1, "BSL", name="bsl")
+        bsl_btn.Bind(wx.EVT_RADIOBUTTON, self.datatype_changed)
+        radio_sizer.Add(bsl_btn)
+        input_grid.Add(radio_sizer, (y,1), (1,1), wx.ALL, 5)
+        y += 1
 
         output_label = wx.StaticText(self, -1, "Output File: ")
-        input_grid.Add(output_label, (2,0), (1,1), wx.ALIGN_CENTER_VERTICAL, 5)
+        input_grid.Add(output_label, (y,0), (1,1), wx.ALIGN_CENTER_VERTICAL, 5)
 
         self.output = wx.FilePickerCtrl(self, -1,
             size=(_STATICBOX_WIDTH-80, -1),
             message="Chose the Intensity data file.",
             style=wx.FLP_SAVE | wx.FLP_OVERWRITE_PROMPT | wx.FLP_USE_TEXTCTRL,
             wildcard="*.xml")
-        input_grid.Add(self.output, (2,1), (1,1), wx.ALL, 5)
+        input_grid.Add(self.output, (y,1), (1,1), wx.ALL, 5)
+        y += 1
 
         convert_btn = wx.Button(self, wx.ID_OK, "Convert")
-        input_grid.Add(convert_btn, (3,0), (1,1), wx.ALL, 5)
+        input_grid.Add(convert_btn, (y,0), (1,1), wx.ALL, 5)
         convert_btn.Bind(wx.EVT_BUTTON, self.on_convert)
 
         section_sizer.Add(input_grid)
