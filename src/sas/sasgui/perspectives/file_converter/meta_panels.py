@@ -296,6 +296,125 @@ class SamplePanel(MetadataPanel):
         vbox.Fit(self)
         self.SetSizer(vbox)
 
+class SourcePanel(MetadataPanel):
+
+    def __init__(self, parent, source, base=None, *args, **kwargs):
+        MetadataPanel.__init__(self, parent, source, base, *args, **kwargs)
+        if source.name is None:
+            source.name = ''
+        source.wavelength_unit = 'nm'
+
+        self._do_layout()
+        self.SetAutoLayout(True)
+        self.Layout()
+
+    def on_close(self, event=None):
+        if not MetadataPanel.on_close(self, event):
+            return
+
+        self.parent.manager.metadata['source'] = self.metadata
+        self.parent.on_close(event)
+
+    def _do_layout(self):
+        vbox = wx.BoxSizer(wx.VERTICAL)
+
+        section = wx.StaticBox(self, -1, "Source")
+        section_sizer = wx.StaticBoxSizer(section, wx.VERTICAL)
+        section_sizer.SetMinSize((_STATICBOX_WIDTH, -1))
+
+        input_grid = wx.GridBagSizer(5, 5)
+
+        y = 0
+        name_label = wx.StaticText(self, -1, "Name: ")
+        input_grid.Add(name_label, (y,0), (1,1), wx.ALL, 5)
+        name_input = wx.TextCtrl(self, -1, name="name")
+        input_grid.Add(name_input, (y,1), (1,1))
+        name_input.Bind(wx.EVT_TEXT, self.on_change)
+        y += 1
+
+        radiation_label = wx.StaticText(self, -1, "Radiation: ")
+        input_grid.Add(radiation_label, (y,0), (1,1), wx.ALL, 5)
+        radiation_input = wx.ComboBox(self, -1,
+            choices=["neutron", "x-ray", "muon", "electron"],
+            name="radiation", style=wx.CB_READONLY)
+        radiation_input.Bind(wx.EVT_COMBOBOX, self.on_change)
+        input_grid.Add(radiation_input, (y,1), (1,1))
+        y += 1
+
+        size_label = wx.StaticText(self, -1, "Beam Size (mm): ")
+        input_grid.Add(size_label, (y,0), (1,1), wx.ALL, 5)
+        size_input = VectorInput(self, "beam_size")
+        self._vectors.append(size_input)
+        input_grid.Add(size_input.GetSizer(), (y,1), (1,1))
+        y += 1
+
+        shape_label = wx.StaticText(self, -1, "Beam Shape: ")
+        input_grid.Add(shape_label, (y,0), (1,1), wx.ALL, 5)
+        shape_input = wx.TextCtrl(self, -1, name="beam_shape")
+        shape_input.Bind(wx.EVT_TEXT, self.on_change)
+        input_grid.Add(shape_input, (y,1), (1,1))
+        y += 1
+
+        wavelength_label = wx.StaticText(self, -1, "Wavelength (nm): ")
+        input_grid.Add(wavelength_label, (y,0), (1,1), wx.ALL, 5)
+        wavelength_input = wx.TextCtrl(self, -1, name="wavelength",
+            size=(50,-1))
+        wavelength_input.Bind(wx.EVT_TEXT, self.on_change)
+        self._to_validate.append(wavelength_input)
+        input_grid.Add(wavelength_input, (y,1), (1,1))
+        y += 1
+
+        min_wavelength_label = wx.StaticText(self, -1, "Min. Wavelength (nm): ")
+        input_grid.Add(min_wavelength_label, (y,0), (1,1), wx.ALL, 5)
+        min_wavelength_input = wx.TextCtrl(self, -1, name="wavelength_min",
+            size=(50,-1))
+        min_wavelength_input.Bind(wx.EVT_TEXT, self.on_change)
+        self._to_validate.append(min_wavelength_input)
+        input_grid.Add(min_wavelength_input, (y,1), (1,1))
+        y += 1
+
+        max_wavelength_label = wx.StaticText(self, -1, "Max. Wavelength (nm): ")
+        input_grid.Add(max_wavelength_label, (y,0), (1,1), wx.ALL, 5)
+        max_wavelength_input = wx.TextCtrl(self, -1, name="wavelength_max",
+            size=(50,-1))
+        max_wavelength_input.Bind(wx.EVT_TEXT, self.on_change)
+        self._to_validate.append(max_wavelength_input)
+        input_grid.Add(max_wavelength_input, (y,1), (1,1))
+        y += 1
+
+        wavelength_spread_label = wx.StaticText(self, -1,
+            "Wavelength Spread (%): ")
+        input_grid.Add(wavelength_spread_label, (y,0), (1,1), wx.ALL, 5)
+        wavelength_spread_input = wx.TextCtrl(self, -1,
+            name="wavelength_spread", size=(50,-1))
+        wavelength_spread_input.Bind(wx.EVT_TEXT, self.on_change)
+        self._to_validate.append(wavelength_spread_input)
+        input_grid.Add(wavelength_spread_input, (y,1), (1,1))
+        y += 1
+
+
+        name_input.SetValue(self.get_property_string("name"))
+        radiation_input.SetValue(self.get_property_string("radiation"))
+        size_input.SetValue(self.metadata.beam_size)
+        shape_input.SetValue(self.get_property_string("beam_shape"))
+        wavelength_input.SetValue(
+            self.get_property_string("wavelength", is_float=True))
+        min_wavelength_input.SetValue(
+            self.get_property_string("wavelength_min", is_float=True))
+        max_wavelength_input.SetValue(
+            self.get_property_string("wavelength_max", is_float=True))
+
+        done_btn = wx.Button(self, -1, "Done")
+        input_grid.Add(done_btn, (y,0), (1,1), wx.ALL, 5)
+        done_btn.Bind(wx.EVT_BUTTON, self.on_close)
+
+        section_sizer.Add(input_grid)
+        vbox.Add(section_sizer, flag=wx.ALL, border=10)
+
+        vbox.Fit(self)
+        self.SetSizer(vbox)
+
+
 class MetadataWindow(widget.CHILD_FRAME):
 
     def __init__(self, PanelClass, parent=None, title='', base=None,

@@ -12,6 +12,7 @@ from sas.sasgui.perspectives.file_converter.converter_widgets import VectorInput
 from sas.sasgui.perspectives.file_converter.meta_panels import MetadataWindow
 from sas.sasgui.perspectives.file_converter.meta_panels import DetectorPanel
 from sas.sasgui.perspectives.file_converter.meta_panels import SamplePanel
+from sas.sasgui.perspectives.file_converter.meta_panels import SourcePanel
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.utils import check_float
@@ -19,6 +20,7 @@ from sas.sascalc.dataloader.readers.cansas_reader import Reader as CansasReader
 from sas.sasgui.perspectives.file_converter.bsl_loader import BSLLoader
 from sas.sascalc.dataloader.data_info import Detector
 from sas.sascalc.dataloader.data_info import Sample
+from sas.sascalc.dataloader.data_info import Source
 from sas.sascalc.dataloader.data_info import Vector
 
 # Panel size
@@ -58,7 +60,8 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             'run_name': None,
             'instrument': None,
             'detector': [Detector()],
-            'sample': Sample()
+            'sample': Sample(),
+            'source': Source()
         }
 
         self.metadata['detector'][0].name = ''
@@ -185,6 +188,17 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         self.parent.manager.put_icon(sample_frame)
         sample_frame.Show(True)
 
+    def show_source_window(self, event):
+        if self.meta_frames != []:
+            for frame in self.meta_frames:
+                frame.panel.on_close()
+        source_frame = MetadataWindow(SourcePanel,
+            parent=self.parent.manager.parent, manager=self,
+            metadata=self.metadata['source'], title="Source Metadata")
+        self.meta_frames.append(source_frame)
+        self.parent.manager.put_icon(source_frame)
+        source_frame.Show(True)
+
     def on_collapsible_pane(self, event):
         self.Freeze()
         self.SetupScrolling()
@@ -288,8 +302,9 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             self.on_collapsible_pane)
 
         y = 0
+        windows = ['detector', 'sample', 'source']
         for item in self.metadata.keys():
-            if item == 'detector' or item == 'sample': continue
+            if item in windows: continue
             label_txt = item.replace('_', ' ').capitalize()
             label = wx.StaticText(metadata_pane, -1, label_txt,
                 style=wx.ALIGN_CENTER_VERTICAL)
@@ -314,6 +329,13 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         sample_btn = wx.Button(metadata_pane, -1, "Enter Sample Metadata")
         metadata_grid.Add(sample_btn, (y,1), (1,1), wx.ALL | wx.EXPAND, 5)
         sample_btn.Bind(wx.EVT_BUTTON, self.show_sample_window)
+        y += 1
+
+        source_label = wx.StaticText(metadata_pane, -1, "Source: ")
+        metadata_grid.Add(source_label, (y,0), (1,1), wx.ALL | wx.EXPAND, 5)
+        source_btn = wx.Button(metadata_pane, -1, "Enter Source Metadata")
+        source_btn.Bind(wx.EVT_BUTTON, self.show_source_window)
+        metadata_grid.Add(source_btn, (y,1), (1,1), wx.ALL | wx.EXPAND, 5)
         y += 1
 
         metadata_pane.SetSizer(metadata_grid)
