@@ -223,11 +223,11 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
                 completefn=self.transform_complete,
                 updatefn=self.transform_update)
 
-            self._transform_btn.SetLabel("Stop Tansform")
+            self._transform_btn.SetLabel("Stop Transform")
         else:
             self._calculator.stop_transform()
             self.transform_update("Transform cancelled.")
-            self._transform_btn.SetLabel("Tansform")
+            self._transform_btn.SetLabel("Transform")
 
     def transform_update(self, msg=""):
         """
