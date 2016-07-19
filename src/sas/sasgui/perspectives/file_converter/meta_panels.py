@@ -38,6 +38,8 @@ class MetadataPanel(ScrolledPanel, PanelBase):
         if value is None or value == []:
             value = ''
             is_float = False
+        if isinstance(value, list):
+            value = value[0]
         value = str(value)
         if is_float and not '.' in value: value += '.0'
         return value

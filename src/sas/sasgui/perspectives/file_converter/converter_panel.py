@@ -49,7 +49,6 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         self.q_input = None
         self.iq_input = None
         self.output = None
-        self.to_validate = []
 
         self.metadata = {
             'title': None,
@@ -59,9 +58,6 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             'detector': [Detector()],
             'sample': Sample()
         }
-        self.vectors = ['offset', 'orientation', 'pixel_size', 'beam_center']
-        for vector_name in self.vectors:
-            setattr(self.metadata['detector'][0], vector_name, Vector())
 
         self._do_layout()
         self.SetAutoLayout(True)
@@ -127,24 +123,11 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                     self.metadata['run_name'] = { run: run_name }
                 else:
                     self.metadata['run_name'] = {}
-            else:
+            elif run_name != {}:
                 self.metadata['run_name'][run] = run_name.values()[0]
         else:
             self.metadata['run'] = []
             self.metadata['run_name'] = {}
-        if self.metadata['detector'][0].name is None:
-            self.metadata['detector'][0].name = ''
-
-        # Convert vectors from strings to float
-        for vector_name in self.vectors:
-            # Vector of strings or Nones
-            vector = getattr(self.metadata['detector'][0], vector_name)
-            for direction in ['x', 'y', 'z']:
-                value = getattr(vector, direction)
-                if value is not None:
-                    value = float(value)
-                    setattr(vector, direction, value)
-            setattr(self.metadata['detector'][0], vector_name, vector)
 
         for attr, value in self.metadata.iteritems():
             if value is not None:
@@ -166,22 +149,6 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             wx.PostEvent(self.parent.manager.parent,
                 StatusEvent(status=msg, info='error'))
             return
-
-        for ctrl in self.to_validate:
-            ctrl_valid = True
-            invalid_control = None
-            if isinstance(ctrl, VectorInput):
-                ctrl_valid, invalid_control = ctrl.Validate()
-            else:
-                if ctrl.GetValue() == '': continue
-                ctrl_valid = check_float(ctrl)
-                invalid_control = ctrl
-            if not ctrl_valid:
-                msg = "{} must be a valid float".format(
-                    invalid_control.GetName().replace('_', ' '))
-                wx.PostEvent(self.parent.manager.parent,
-                    StatusEvent(status=msg, info='error'))
-                return False
 
         return True
 
@@ -212,21 +179,6 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         textbox = event.GetEventObject()
         attr = textbox.GetName()
         value = textbox.GetValue().strip()
-
-        if attr.startswith('detector_'):
-            attr = attr[9:] # Strip detector_
-            is_vector = False
-            for vector_name in self.vectors:
-                if attr.startswith(vector_name): is_vector = True
-            if is_vector:
-                if value == '': value = None
-                direction = attr[-1]
-                attr = attr[:-2]
-                vector = getattr(self.metadata['detector'][0], attr)
-                setattr(vector, direction, value)
-                value = vector
-            setattr(self.metadata['detector'][0], attr, value)
-            return
 
         if value == '':
             self.metadata[attr] = None
@@ -293,7 +245,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
         y = 0
         for item in self.metadata.keys():
-            if item == 'detector': continue
+            if item == 'detector' or item == 'sample': continue
             label_txt = item.replace('_', ' ').capitalize()
             label = wx.StaticText(metadata_pane, -1, label_txt,
                 style=wx.ALIGN_CENTER_VERTICAL)
