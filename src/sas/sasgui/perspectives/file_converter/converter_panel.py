@@ -66,6 +66,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         }
 
         self.metadata['detector'][0].name = ''
+        self.metadata['source'].radiation = 'neutron'
 
         self._do_layout()
         self.SetAutoLayout(True)
@@ -217,6 +218,11 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         dtype = event.GetEventObject().GetName()
         self.data_type = dtype
 
+    def radiationtype_changed(self, event):
+        event.Skip()
+        rtype = event.GetEventObject().GetValue().lower()
+        self.metadata['source'].radiation = rtype
+
     def metadata_changed(self, event):
         event.Skip()
         textbox = event.GetEventObject()
@@ -282,12 +288,21 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         input_grid.Add(radio_sizer, (y,1), (1,1), wx.ALL, 5)
         y += 1
 
+        radiation_label = wx.StaticText(self, -1, "Radiation Type: ")
+        input_grid.Add(radiation_label, (y,0), (1,1), wx.ALL, 5)
+        radiation_input = wx.ComboBox(self, -1,
+            choices=["Neutron", "X-Ray", "Muon", "Electron"],
+            name="radiation", style=wx.CB_READONLY, value="Neutron")
+        radiation_input.Bind(wx.EVT_COMBOBOX, self.radiationtype_changed)
+        input_grid.Add(radiation_input, (y,1), (1,1))
+        y += 1
+
         output_label = wx.StaticText(self, -1, "Output File: ")
         input_grid.Add(output_label, (y,0), (1,1), wx.ALIGN_CENTER_VERTICAL, 5)
 
         self.output = wx.FilePickerCtrl(self, -1,
             size=(_STATICBOX_WIDTH-80, -1),
-            message="Chose the Intensity data file.",
+            message="Chose where to save the output file.",
             style=wx.FLP_SAVE | wx.FLP_OVERWRITE_PROMPT | wx.FLP_USE_TEXTCTRL,
             wildcard="*.xml")
         input_grid.Add(self.output, (y,1), (1,1), wx.ALL, 5)
@@ -316,6 +331,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         y = 0
         windows = ['detector', 'sample', 'source']
         for item in self.metadata.keys():
+            # Don't make fields for properties that have their own windows
             if item in windows: continue
             label_txt = item.replace('_', ' ').capitalize()
             label = wx.StaticText(metadata_pane, -1, label_txt,

@@ -332,15 +332,6 @@ class SourcePanel(MetadataPanel):
         name_input.Bind(wx.EVT_TEXT, self.on_change)
         y += 1
 
-        radiation_label = wx.StaticText(self, -1, "Radiation: ")
-        input_grid.Add(radiation_label, (y,0), (1,1), wx.ALL, 5)
-        radiation_input = wx.ComboBox(self, -1,
-            choices=["neutron", "x-ray", "muon", "electron"],
-            name="radiation", style=wx.CB_READONLY)
-        radiation_input.Bind(wx.EVT_COMBOBOX, self.on_change)
-        input_grid.Add(radiation_input, (y,1), (1,1))
-        y += 1
-
         size_label = wx.StaticText(self, -1, "Beam Size (mm): ")
         input_grid.Add(size_label, (y,0), (1,1), wx.ALL, 5)
         size_input = VectorInput(self, "beam_size")
@@ -392,9 +383,7 @@ class SourcePanel(MetadataPanel):
         input_grid.Add(wavelength_spread_input, (y,1), (1,1))
         y += 1
 
-
         name_input.SetValue(self.get_property_string("name"))
-        radiation_input.SetValue(self.get_property_string("radiation"))
         size_input.SetValue(self.metadata.beam_size)
         shape_input.SetValue(self.get_property_string("beam_shape"))
         wavelength_input.SetValue(
