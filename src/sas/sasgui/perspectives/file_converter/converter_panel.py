@@ -232,10 +232,11 @@ class ConverterPanel(ScrolledPanel, PanelBase):
     def _do_layout(self):
         vbox = wx.BoxSizer(wx.VERTICAL)
 
-        instructions = ("Select either 1 column ASCII files or BSL files "
-            "containing the Q Axis and Intensity data, chose where to save "
-            "the converted file, then click Convert to convert them to CanSAS "
-            "XML format. If required, metadata can also be input below.")
+        instructions = ("Select either single column ASCII files or BSL/OTOKO"
+            " files containing the Q-Axis and Intensity-axis data, chose where"
+            " to save the converted file, then click Convert to convert them "
+            "to CanSAS XML format. If required, metadata can also be input "
+            "below.")
         instruction_label = wx.StaticText(self, -1, instructions,
             size=(_STATICBOX_WIDTH+40, -1))
         instruction_label.Wrap(_STATICBOX_WIDTH+40)
@@ -249,21 +250,21 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
         y = 0
 
-        q_label = wx.StaticText(self, -1, "Q Axis: ")
+        q_label = wx.StaticText(self, -1, "Q-Axis Data: ")
         input_grid.Add(q_label, (y,0), (1,1), wx.ALIGN_CENTER_VERTICAL, 5)
 
         self.q_input = wx.FilePickerCtrl(self, -1,
             size=(_STATICBOX_WIDTH-80, -1),
-            message="Chose the Q Axis data file.")
+            message="Chose the Q-Axis data file.")
         input_grid.Add(self.q_input, (y,1), (1,1), wx.ALL, 5)
         y += 1
 
-        iq_label = wx.StaticText(self, -1, "Intensity Data: ")
+        iq_label = wx.StaticText(self, -1, "Intensity-Axis Data: ")
         input_grid.Add(iq_label, (y,0), (1,1), wx.ALIGN_CENTER_VERTICAL, 5)
 
         self.iq_input = wx.FilePickerCtrl(self, -1,
             size=(_STATICBOX_WIDTH-80, -1),
-            message="Chose the Intensity data file.")
+            message="Chose the Intensity-Axis data file.")
         input_grid.Add(self.iq_input, (y,1), (1,1), wx.ALL, 5)
         y += 1
 
@@ -275,7 +276,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             style=wx.RB_GROUP)
         ascii_btn.Bind(wx.EVT_RADIOBUTTON, self.datatype_changed)
         radio_sizer.Add(ascii_btn)
-        bsl_btn = wx.RadioButton(self, -1, "BSL", name="bsl")
+        bsl_btn = wx.RadioButton(self, -1, "BSL/OTOKO", name="bsl")
         bsl_btn.Bind(wx.EVT_RADIOBUTTON, self.datatype_changed)
         radio_sizer.Add(bsl_btn)
         input_grid.Add(radio_sizer, (y,1), (1,1), wx.ALL, 5)

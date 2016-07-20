@@ -13,9 +13,9 @@ The input files can be:
 
 *   Single column ASCII data, with lines that end with a digit, comma or
     semi-colon.
-*   `BSL format
+*   `BSL formatted
     <http://www.diamond.ac.uk/Beamlines/Soft-Condensed-Matter/small-angle/
-    SAXS-Software/CCP13/BSL.html>`_ data and .QAX files
+    SAXS-Software/CCP13/BSL.html>`_ data files
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
