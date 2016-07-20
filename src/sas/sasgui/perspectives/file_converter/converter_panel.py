@@ -14,6 +14,7 @@ from sas.sasgui.perspectives.file_converter.meta_panels import DetectorPanel
 from sas.sasgui.perspectives.file_converter.meta_panels import SamplePanel
 from sas.sasgui.perspectives.file_converter.meta_panels import SourcePanel
 from sas.sasgui.guiframe.events import StatusEvent
+from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.utils import check_float
 from sas.sascalc.dataloader.readers.cansas_reader import Reader as CansasReader
@@ -150,6 +151,12 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         self.convert_to_cansas(data, output_path)
         wx.PostEvent(self.parent.manager.parent,
             StatusEvent(status="Conversion completed."))
+
+    def on_help(self, event):
+        tree_location = ("user/sasgui/perspectives/file_converter/"
+            "file_converter_help.html")
+        doc_viewer = DocumentationWindow(self, -1, tree_location,
+            "", "File Converter Help")
 
     def validate_inputs(self):
         msg = "You must select a"
@@ -288,6 +295,10 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         convert_btn = wx.Button(self, wx.ID_OK, "Convert")
         input_grid.Add(convert_btn, (y,0), (1,1), wx.ALL, 5)
         convert_btn.Bind(wx.EVT_BUTTON, self.on_convert)
+
+        help_btn = wx.Button(self, -1, "HELP")
+        input_grid.Add(help_btn, (y,1), (1,1), wx.ALL, 5)
+        help_btn.Bind(wx.EVT_BUTTON, self.on_help)
 
         section_sizer.Add(input_grid)
 
