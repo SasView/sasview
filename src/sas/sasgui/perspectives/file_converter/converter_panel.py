@@ -339,7 +339,11 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
         y = 0
         for item in self.properties:
-            label_txt = item.replace('_', ' ').capitalize()
+            # Capitalise each word
+            label_txt = " ".join(
+                [s.capitalize() for s in item.replace('_', ' ').split(' ')])
+            if item == 'run':
+                label_txt = "Run Number"
             label = wx.StaticText(metadata_pane, -1, label_txt,
                 style=wx.ALIGN_CENTER_VERTICAL)
             input_box = wx.TextCtrl(metadata_pane, name=item,
