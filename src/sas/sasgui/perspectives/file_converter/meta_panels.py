@@ -213,13 +213,6 @@ class SamplePanel(MetadataPanel):
         name_input.Bind(wx.EVT_TEXT, self.on_change)
         y += 1
 
-        id_label = wx.StaticText(self, -1, "ID: ")
-        input_grid.Add(id_label, (y,0), (1,1), wx.ALL, 5)
-        id_input = wx.TextCtrl(self, -1, name="ID")
-        input_grid.Add(id_input, (y,1), (1,1))
-        id_input.Bind(wx.EVT_TEXT, self.on_change)
-        y += 1
-
         thickness_label = wx.StaticText(self, -1, "Thickness (mm): ")
         input_grid.Add(thickness_label, (y,0), (1,1), wx.ALL, 5)
         thickness_input = wx.TextCtrl(self, -1, name="thickness")
@@ -273,7 +266,6 @@ class SamplePanel(MetadataPanel):
         y += 3
 
         name_input.SetValue(self.metadata.name)
-        id_input.SetValue(self.get_property_string("ID"))
         thickness_input.SetValue(
             self.get_property_string("thickness", is_float=True))
         transmission_input.SetValue(
