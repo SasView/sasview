@@ -105,6 +105,8 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         if not self.validate_inputs():
             return
 
+        self.metadata['sample'].ID = self.metadata['title']
+
         try:
             if self.data_type == 'ascii':
                 qdata = self.extract_data(self.q_input.GetPath())
