@@ -91,7 +91,7 @@ class DetectorPanel(MetadataPanel):
         if not MetadataPanel.on_close(self, event):
             return
 
-        self.parent.manager.metadata['detector'] = [self.metadata]
+        self.parent.manager.detector = self.metadata
         self.parent.on_close(event)
 
     def _do_layout(self):
@@ -193,7 +193,7 @@ class SamplePanel(MetadataPanel):
         if not MetadataPanel.on_close(self, event):
             return
 
-        self.parent.manager.metadata['sample'] = self.metadata
+        self.parent.manager.sample = self.metadata
         self.parent.on_close(event)
 
     def _do_layout(self):
@@ -304,7 +304,7 @@ class SourcePanel(MetadataPanel):
         if not MetadataPanel.on_close(self, event):
             return
 
-        self.parent.manager.metadata['source'] = self.metadata
+        self.parent.manager.source = self.metadata
         self.parent.on_close(event)
 
     def _do_layout(self):

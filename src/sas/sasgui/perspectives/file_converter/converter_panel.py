@@ -55,18 +55,17 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         self.output = None
         self.data_type = "ascii"
 
-        self.metadata = {
-            'title': None,
-            'run': None,
-            'run_name': None,
-            'instrument': None,
-            'detector': [Detector()],
-            'sample': Sample(),
-            'source': Source()
-        }
+        self.title = None
+        self.run = None
+        self.run_name = None
+        self.instrument = None
+        self.detector = Detector()
+        self.sample = Sample()
+        self.source = Source()
+        self.properties = ['title', 'run', 'run_name', 'instrument']
 
-        self.metadata['detector'][0].name = ''
-        self.metadata['source'].radiation = 'neutron'
+        self.detector.name = ''
+        self.source.radiation = 'neutron'
 
         self._do_layout()
         self.SetAutoLayout(True)
@@ -105,7 +104,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         if not self.validate_inputs():
             return
 
-        self.metadata['sample'].ID = self.metadata['title']
+        self.sample.ID = self.title
 
         try:
             if self.data_type == 'ascii':
@@ -127,29 +126,38 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         data = Data1D(x=qdata, y=iqdata)
         data.filename = output_path.split('\\')[-1]
 
-        if self.metadata['run'] is not None:
-            run = self.metadata['run']
-            run_name = self.metadata['run_name']
+        if self.run is not None:
+            run = self.run
+            run_name = self.run_name
 
             if not isinstance(run, list) and run is not None:
-                self.metadata['run'] = [run]
+                self.run = [run]
             else:
                 run = run[0]
 
             if not isinstance(run_name, dict):
                 if run_name is not None:
-                    self.metadata['run_name'] = { run: run_name }
+                    self.run_name = { run: run_name }
                 else:
-                    self.metadata['run_name'] = {}
+                    self.run_name = {}
             elif run_name != {}:
-                self.metadata['run_name'][run] = run_name.values()[0]
+                self.run_name[run] = run_name.values()[0]
         else:
-            self.metadata['run'] = []
-            self.metadata['run_name'] = {}
+            self.run = []
+            self.run_name = {}
 
-        for attr, value in self.metadata.iteritems():
-            if value is not None:
-                setattr(data, attr, value)
+        metadata = {
+            'title': self.title,
+            'run': self.run,
+            'run_name': self.run_name,
+            'intrument': self.instrument,
+            'detector': [self.detector],
+            'sample': self.sample,
+            'source': self.source
+        }
+
+        for key, value in metadata.iteritems():
+            setattr(data, key, value)
 
         self.convert_to_cansas(data, output_path)
         wx.PostEvent(self.parent.manager.parent,
@@ -182,7 +190,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                 frame.panel.on_close()
         detector_frame = MetadataWindow(DetectorPanel,
             parent=self.parent.manager.parent, manager=self,
-            metadata=self.metadata['detector'][0], title='Detector Metadata')
+            metadata=self.detector, title='Detector Metadata')
         self.meta_frames.append(detector_frame)
         self.parent.manager.put_icon(detector_frame)
         detector_frame.Show(True)
@@ -193,7 +201,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                 frame.panel.on_close()
         sample_frame = MetadataWindow(SamplePanel,
             parent=self.parent.manager.parent, manager=self,
-            metadata=self.metadata['sample'], title='Sample Metadata')
+            metadata=self.sample, title='Sample Metadata')
         self.meta_frames.append(sample_frame)
         self.parent.manager.put_icon(sample_frame)
         sample_frame.Show(True)
@@ -204,7 +212,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                 frame.panel.on_close()
         source_frame = MetadataWindow(SourcePanel,
             parent=self.parent.manager.parent, manager=self,
-            metadata=self.metadata['source'], title="Source Metadata")
+            metadata=self.source, title="Source Metadata")
         self.meta_frames.append(source_frame)
         self.parent.manager.put_icon(source_frame)
         source_frame.Show(True)
@@ -223,7 +231,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
     def radiationtype_changed(self, event):
         event.Skip()
         rtype = event.GetEventObject().GetValue().lower()
-        self.metadata['source'].radiation = rtype
+        self.source.radiation = rtype
 
     def metadata_changed(self, event):
         event.Skip()
@@ -231,10 +239,9 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         attr = textbox.GetName()
         value = textbox.GetValue().strip()
 
-        if value == '':
-            self.metadata[attr] = None
-        else:
-            self.metadata[attr] = value
+        if value == '': value = None
+
+        setattr(self, attr, value)
 
 
     def _do_layout(self):
@@ -331,10 +338,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             self.on_collapsible_pane)
 
         y = 0
-        windows = ['detector', 'sample', 'source']
-        for item in self.metadata.keys():
-            # Don't make fields for properties that have their own windows
-            if item in windows: continue
+        for item in self.properties:
             label_txt = item.replace('_', ' ').capitalize()
             label = wx.StaticText(metadata_pane, -1, label_txt,
                 style=wx.ALIGN_CENTER_VERTICAL)
