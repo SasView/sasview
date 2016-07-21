@@ -73,7 +73,8 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
     def convert_to_cansas(self, data, filename):
         reader = CansasReader()
-        reader.write(filename, data)
+        reader.write(filename, data,
+            sasentry_attrs={ 'name': self.run_name })
 
     def extract_data(self, filename):
         data = np.loadtxt(filename, dtype=str)
@@ -126,30 +127,14 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         data = Data1D(x=qdata, y=iqdata)
         data.filename = output_path.split('\\')[-1]
 
-        if self.run is not None:
-            run = self.run
-            run_name = self.run_name
-
-            if not isinstance(run, list) and run is not None:
-                self.run = [run]
-            else:
-                run = run[0]
-
-            if not isinstance(run_name, dict):
-                if run_name is not None:
-                    self.run_name = { run: run_name }
-                else:
-                    self.run_name = {}
-            elif run_name != {}:
-                self.run_name[run] = run_name.values()[0]
-        else:
+        if self.run is None:
             self.run = []
-            self.run_name = {}
+        elif not isinstance(self.run, list):
+            self.run = [self.run]
 
         metadata = {
             'title': self.title,
             'run': self.run,
-            'run_name': self.run_name,
             'intrument': self.instrument,
             'detector': [self.detector],
             'sample': self.sample,
