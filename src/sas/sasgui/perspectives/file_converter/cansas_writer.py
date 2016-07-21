@@ -54,7 +54,8 @@ class CansasWriter(CansasReader):
         # Add Run to SASentry
         self._write_run_names(datainfo, entry_node)
         # Add Data info to SASEntry
-        self._write_data(frame_data, entry_node)
+        for data_info in frame_data:
+            self._write_data(data_info, entry_node)
         # Transmission Spectrum Info
         self._write_trans_spectrum(datainfo, entry_node)
         # Sample info
@@ -76,34 +77,33 @@ class CansasWriter(CansasReader):
 
         return doc, entry_node
 
-    def _write_data(self, frame_data, entry_node):
+    def _write_data(self, datainfo, entry_node):
         """
         Writes the I and Q data to the XML file
 
         :param datainfo: The Data1D object the information is coming from
         :param entry_node: lxml node ElementTree object to be appended to
         """
-        for datainfo in frame_data:
-            node = self.create_element("SASdata")
-            self.append(node, entry_node)
+        node = self.create_element("SASdata")
+        self.append(node, entry_node)
 
-            for i in range(len(datainfo.x)):
-                point = self.create_element("Idata")
-                node.append(point)
-                self.write_node(point, "Q", datainfo.x[i],
+        for i in range(len(datainfo.x)):
+            point = self.create_element("Idata")
+            node.append(point)
+            self.write_node(point, "Q", datainfo.x[i],
+                            {'unit': datainfo.x_unit})
+            if len(datainfo.y) >= i:
+                self.write_node(point, "I", datainfo.y[i],
+                                {'unit': datainfo.y_unit})
+            if datainfo.dy != None and len(datainfo.dy) > i:
+                self.write_node(point, "Idev", datainfo.dy[i],
+                                {'unit': datainfo.y_unit})
+            if datainfo.dx != None and len(datainfo.dx) > i:
+                self.write_node(point, "Qdev", datainfo.dx[i],
                                 {'unit': datainfo.x_unit})
-                if len(datainfo.y) >= i:
-                    self.write_node(point, "I", datainfo.y[i],
-                                    {'unit': datainfo.y_unit})
-                if datainfo.dy != None and len(datainfo.dy) > i:
-                    self.write_node(point, "Idev", datainfo.dy[i],
-                                    {'unit': datainfo.y_unit})
-                if datainfo.dx != None and len(datainfo.dx) > i:
-                    self.write_node(point, "Qdev", datainfo.dx[i],
-                                    {'unit': datainfo.x_unit})
-                if datainfo.dxw != None and len(datainfo.dxw) > i:
-                    self.write_node(point, "dQw", datainfo.dxw[i],
-                                    {'unit': datainfo.x_unit})
-                if datainfo.dxl != None and len(datainfo.dxl) > i:
-                    self.write_node(point, "dQl", datainfo.dxl[i],
-                                    {'unit': datainfo.x_unit})
+            if datainfo.dxw != None and len(datainfo.dxw) > i:
+                self.write_node(point, "dQw", datainfo.dxw[i],
+                                {'unit': datainfo.x_unit})
+            if datainfo.dxl != None and len(datainfo.dxl) > i:
+                self.write_node(point, "dQl", datainfo.dxl[i],
+                                {'unit': datainfo.x_unit})

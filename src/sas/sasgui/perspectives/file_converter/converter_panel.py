@@ -72,13 +72,22 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         self.SetAutoLayout(True)
         self.Layout()
 
-    def convert_to_cansas(self, frame_data, filename):
+    def convert_to_cansas(self, frame_data, filename, single_file):
         reader = CansasWriter()
         entry_attrs = None
         if self.run_name is not None:
             entry_attrs = { 'name': self.run_name }
-        reader.write(filename, frame_data,
-            sasentry_attrs=entry_attrs)
+        if single_file:
+            reader.write(filename, frame_data,
+                sasentry_attrs=entry_attrs)
+        else:
+            # strip extension from filename
+            ext = "." + filename.split('.')[-1]
+            name = filename.replace(ext, '')
+            for i in range(len(frame_data)):
+                f_name = "{}{}{}".format(name, i+1, ext)
+                reader.write(f_name, [frame_data[i]],
+                    sasentry_attrs=entry_attrs)
 
     def extract_data(self, filename):
         data = np.loadtxt(filename, dtype=str)
@@ -110,6 +119,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         dlg = FrameSelectDialog(n_frames)
         frames = None
         increment = None
+        single_file = True
         while not valid_input:
             if dlg.ShowModal() == wx.ID_OK:
                 msg = ""
@@ -117,6 +127,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                     first_frame = int(dlg.first_input.GetValue())
                     last_frame = int(dlg.last_input.GetValue())
                     increment = int(dlg.increment_input.GetValue())
+                    single_file = dlg.single_btn.GetValue()
                     if last_frame < 0 or first_frame < 0:
                         msg = "Frame values must be positive"
                     elif increment < 1:
@@ -135,10 +146,10 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                     wx.PostEvent(self.parent.manager.parent,
                         StatusEvent(status=msg))
             else:
-                return [], 0
+                return { 'frames': [], 'inc': None, 'file': single_file }
         frames = range(first_frame, last_frame + increment,
             increment)
-        return frames, increment
+        return { 'frames': frames, 'inc': increment, 'file': single_file }
 
     def on_convert(self, event):
         if not self.validate_inputs():
@@ -158,8 +169,12 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                 iqdata = bsl_data.data_axis.data
                 frames = [iqdata.shape[0]]
                 increment = 1
+                single_file = True
                 if frames[0] > 3:
-                    frames, increment = self.ask_frame_range(frames[0])
+                    params = self.ask_frame_range(frames[0])
+                    frames = params['frames']
+                    increment = params['inc']
+                    single_file = params['file']
                     if frames == []: return
         except Exception as ex:
             msg = str(ex)
@@ -190,12 +205,20 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         for i in frames:
             data = Data1D(x=qdata, y=iqdata[i])
             frame_data.append(data)
-        # Only need to set metadata on first Data1D object
-        frame_data[0].filename = output_path.split('\\')[-1]
-        for key, value in metadata.iteritems():
-            setattr(frame_data[0], key, value)
+        if single_file:
+            # Only need to set metadata on first Data1D object
+            frame_data[0].filename = output_path.split('\\')[-1]
+            for key, value in metadata.iteritems():
+                setattr(frame_data[0], key, value)
+        else:
+            # Need to set metadata for all Data1D objects
+            for datainfo in frame_data:
+                datainfo.filename = output_path.split('\\')[-1]
+                for key, value in metadata.iteritems():
+                    setattr(datainfo, key, value)
 
-        self.convert_to_cansas(frame_data, output_path)
+
+        self.convert_to_cansas(frame_data, output_path, single_file)
         wx.PostEvent(self.parent.manager.parent,
             StatusEvent(status="Conversion completed."))
 
