@@ -5,7 +5,7 @@ import inspect
 
 class CansasWriter(CansasReader):
 
-    def write(self, filename, datainfo, sasentry_attrs=None):
+    def write(self, filename, frame_data, sasentry_attrs=None):
         """
         Write the content of a Data1D as a CanSAS XML file
 
@@ -13,7 +13,7 @@ class CansasWriter(CansasReader):
         :param datainfo: Data1D object
         """
         # Create XML document
-        doc, _ = self._to_xml_doc(datainfo, sasentry_attrs)
+        doc, _ = self._to_xml_doc(frame_data, sasentry_attrs)
         # Write the file
         file_ref = open(filename, 'w')
         if self.encoding == None:
@@ -23,14 +23,16 @@ class CansasWriter(CansasReader):
         file_ref.close()
 
 
-    def _to_xml_doc(self, datainfo, sasentry_attrs=None):
+    def _to_xml_doc(self, frame_data, sasentry_attrs=None):
         """
-        Create an XML document to contain the content of a Data1D
+        Create an XML document to contain the content of an array of Data1Ds
 
-        :param datainfo: Data1D object
+        :param frame_data: An array of Data1D objects
         """
-        if not issubclass(datainfo.__class__, Data1D):
-            raise RuntimeError, "The cansas writer expects a Data1D instance"
+        valid_class = all([issubclass(data.__class__, Data1D) for data in frame_data])
+        if not valid_class:
+            raise RuntimeError, ("The cansas writer expects an array of "
+                "Data1D instances")
 
         # Get PIs and create root element
         pi_string = self._get_pi_string()
@@ -45,12 +47,14 @@ class CansasWriter(CansasReader):
         root = doc.getroot()
         root.append(entry_node)
 
+        # Use the first element in the array for writing metadata
+        datainfo = frame_data[0]
         # Add Title to SASentry
         self.write_node(entry_node, "Title", datainfo.title)
         # Add Run to SASentry
         self._write_run_names(datainfo, entry_node)
         # Add Data info to SASEntry
-        self._write_data(datainfo, entry_node)
+        self._write_data(frame_data, entry_node)
         # Transmission Spectrum Info
         self._write_trans_spectrum(datainfo, entry_node)
         # Sample info
@@ -69,5 +73,37 @@ class CansasWriter(CansasReader):
         self._write_notes(datainfo, entry_node)
         # Return the document, and the SASentry node associated with
         #      the data we just wrote
-        
+
         return doc, entry_node
+
+    def _write_data(self, frame_data, entry_node):
+        """
+        Writes the I and Q data to the XML file
+
+        :param datainfo: The Data1D object the information is coming from
+        :param entry_node: lxml node ElementTree object to be appended to
+        """
+        for datainfo in frame_data:
+            node = self.create_element("SASdata")
+            self.append(node, entry_node)
+
+            for i in range(len(datainfo.x)):
+                point = self.create_element("Idata")
+                node.append(point)
+                self.write_node(point, "Q", datainfo.x[i],
+                                {'unit': datainfo.x_unit})
+                if len(datainfo.y) >= i:
+                    self.write_node(point, "I", datainfo.y[i],
+                                    {'unit': datainfo.y_unit})
+                if datainfo.dy != None and len(datainfo.dy) > i:
+                    self.write_node(point, "Idev", datainfo.dy[i],
+                                    {'unit': datainfo.y_unit})
+                if datainfo.dx != None and len(datainfo.dx) > i:
+                    self.write_node(point, "Qdev", datainfo.dx[i],
+                                    {'unit': datainfo.x_unit})
+                if datainfo.dxw != None and len(datainfo.dxw) > i:
+                    self.write_node(point, "dQw", datainfo.dxw[i],
+                                    {'unit': datainfo.x_unit})
+                if datainfo.dxl != None and len(datainfo.dxl) > i:
+                    self.write_node(point, "dQl", datainfo.dxl[i],
+                                    {'unit': datainfo.x_unit})

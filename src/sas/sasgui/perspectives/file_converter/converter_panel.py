@@ -13,6 +13,7 @@ from sas.sasgui.perspectives.file_converter.meta_panels import MetadataWindow
 from sas.sasgui.perspectives.file_converter.meta_panels import DetectorPanel
 from sas.sasgui.perspectives.file_converter.meta_panels import SamplePanel
 from sas.sasgui.perspectives.file_converter.meta_panels import SourcePanel
+from sas.sasgui.perspectives.file_converter.frame_select_dialog import FrameSelectDialog
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 from sas.sasgui.guiframe.dataFitting import Data1D
@@ -104,6 +105,41 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
         return np.array(data, dtype=np.float32)
 
+    def ask_frame_range(self, n_frames):
+        valid_input = False
+        dlg = FrameSelectDialog(n_frames)
+        frames = None
+        increment = None
+        while not valid_input:
+            if dlg.ShowModal() == wx.ID_OK:
+                msg = ""
+                try:
+                    first_frame = int(dlg.first_input.GetValue())
+                    last_frame = int(dlg.last_input.GetValue())
+                    increment = int(dlg.increment_input.GetValue())
+                    if last_frame < 0 or first_frame < 0:
+                        msg = "Frame values must be positive"
+                    elif increment < 1:
+                        msg = "Increment must be greater than or equal to 1"
+                    elif first_frame > last_frame:
+                        msg = "First frame must be less than last frame"
+                    elif last_frame > n_frames:
+                        msg = "Last frame must be less than {}".format(n_frames)
+                    else:
+                        valid_input = True
+                except:
+                    valid_input = False
+                    msg = "Please enter valid integer values"
+
+                if not valid_input:
+                    wx.PostEvent(self.parent.manager.parent,
+                        StatusEvent(status=msg))
+            else:
+                return [], 0
+        frames = range(first_frame, last_frame + increment,
+            increment)
+        return frames, increment
+
     def on_convert(self, event):
         if not self.validate_inputs():
             return
@@ -119,7 +155,12 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                     self.iq_input.GetPath())
                 bsl_data = loader.load_bsl_data()
                 qdata = bsl_data.q_axis.data[0]
-                iqdata = bsl_data.data_axis.data[0]
+                iqdata = bsl_data.data_axis.data
+                frames = [iqdata.shape[0]]
+                increment = 1
+                if frames[0] > 3:
+                    frames, increment = self.ask_frame_range(frames[0])
+                    if frames == []: return
         except Exception as ex:
             msg = str(ex)
             wx.PostEvent(self.parent.manager.parent,
@@ -127,8 +168,6 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             return
 
         output_path = self.output.GetPath()
-        data = Data1D(x=qdata, y=iqdata)
-        data.filename = output_path.split('\\')[-1]
 
         if self.run is None:
             self.run = []
@@ -147,10 +186,16 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             'source': self.source
         }
 
+        frame_data = []
+        for i in frames:
+            data = Data1D(x=qdata, y=iqdata[i])
+            frame_data.append(data)
+        # Only need to set metadata on first Data1D object
+        frame_data[0].filename = output_path.split('\\')[-1]
         for key, value in metadata.iteritems():
-            setattr(data, key, value)
+            setattr(frame_data[0], key, value)
 
-        self.convert_to_cansas(data, output_path)
+        self.convert_to_cansas(frame_data, output_path)
         wx.PostEvent(self.parent.manager.parent,
             StatusEvent(status="Conversion completed."))
 
