@@ -73,8 +73,11 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
     def convert_to_cansas(self, data, filename):
         reader = CansasReader()
+        entry_attrs = None
+        if self.run_name is not None:
+            entry_attrs = { 'name': self.run_name }
         reader.write(filename, data,
-            sasentry_attrs={ 'name': self.run_name })
+            sasentry_attrs=entry_attrs)
 
     def extract_data(self, filename):
         data = np.loadtxt(filename, dtype=str)
@@ -131,6 +134,9 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             self.run = []
         elif not isinstance(self.run, list):
             self.run = [self.run]
+
+        if self.title is None:
+            self.title = ''
 
         metadata = {
             'title': self.title,
