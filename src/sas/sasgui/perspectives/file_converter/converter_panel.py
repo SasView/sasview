@@ -17,7 +17,7 @@ from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.utils import check_float
-from sas.sascalc.dataloader.readers.cansas_reader import Reader as CansasReader
+from sas.sasgui.perspectives.file_converter.cansas_writer import CansasWriter
 from sas.sasgui.perspectives.file_converter.bsl_loader import BSLLoader
 from sas.sascalc.dataloader.data_info import Detector
 from sas.sascalc.dataloader.data_info import Sample
@@ -71,12 +71,12 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         self.SetAutoLayout(True)
         self.Layout()
 
-    def convert_to_cansas(self, data, filename):
-        reader = CansasReader()
+    def convert_to_cansas(self, frame_data, filename):
+        reader = CansasWriter()
         entry_attrs = None
         if self.run_name is not None:
             entry_attrs = { 'name': self.run_name }
-        reader.write(filename, data,
+        reader.write(filename, frame_data,
             sasentry_attrs=entry_attrs)
 
     def extract_data(self, filename):

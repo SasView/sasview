@@ -1012,7 +1012,7 @@ class Reader(XMLreader):
             entry_node = node_list.item(0)
         return doc, entry_node
 
-    def _to_xml_doc(self, datainfo, sasentry_attrs=None):
+    def _to_xml_doc(self, datainfo):
         """
         Create an XML document to contain the content of a Data1D
 
@@ -1030,7 +1030,7 @@ class Reader(XMLreader):
         base_element = self.create_element_from_string(base_string)
         doc = self.create_tree(base_element)
         # Create SASentry Element
-        entry_node = self.create_element("SASentry", sasentry_attrs)
+        entry_node = self.create_element("SASentry")
         root = doc.getroot()
         root.append(entry_node)
 
@@ -1079,7 +1079,7 @@ class Reader(XMLreader):
             return True
         return False
 
-    def write(self, filename, datainfo, sasentry_attrs=None):
+    def write(self, filename, datainfo):
         """
         Write the content of a Data1D as a CanSAS XML file
 
@@ -1087,7 +1087,7 @@ class Reader(XMLreader):
         :param datainfo: Data1D object
         """
         # Create XML document
-        doc, _ = self._to_xml_doc(datainfo, sasentry_attrs)
+        doc, _ = self._to_xml_doc(datainfo)
         # Write the file
         file_ref = open(filename, 'w')
         if self.encoding == None:
