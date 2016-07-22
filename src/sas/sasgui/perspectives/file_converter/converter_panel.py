@@ -165,17 +165,29 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                 loader = BSLLoader(self.q_input.GetPath(),
                     self.iq_input.GetPath())
                 bsl_data = loader.load_bsl_data()
-                qdata = bsl_data.q_axis.data[0]
+                qdata = bsl_data.q_axis.data
                 iqdata = bsl_data.data_axis.data
+                if len(qdata) > 1:
+                    msg = ("Q-Axis file has multiple frames. Only 1 frame is "
+                        "allowed for the Q-Axis")
+                    wx.PostEvent(self.parent.manager.parent,
+                        StatusEvent(status=msg, info="error"))
+                    return
+                else:
+                    qdata = qdata[0]
                 frames = [iqdata.shape[0]]
                 increment = 1
                 single_file = True
+                # Standard file has 3 frames: SAS, calibration and WAS
                 if frames[0] > 3:
+                    # File has multiple frames
                     params = self.ask_frame_range(frames[0])
                     frames = params['frames']
                     increment = params['inc']
                     single_file = params['file']
                     if frames == []: return
+                else: # Only interested in SAS data
+                    frames = [0]
         except Exception as ex:
             msg = str(ex)
             wx.PostEvent(self.parent.manager.parent,
