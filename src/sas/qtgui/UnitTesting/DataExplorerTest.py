@@ -618,5 +618,110 @@ class DataExplorerTest(unittest.TestCase):
         with self.assertRaises(Exception):
             self.form.updateModelFromPerspective(bad_item)
 
+    def testContextMenu(self):
+        """
+        See if the context menu is present
+        """
+        # get Data1D
+        p_file=["cyl_400_20.txt"]
+        # Read in the file
+        output, message = self.form.readData(p_file)
+        self.form.loadComplete((output, message))
+
+        # Pick up the treeview index corresponding to that file
+        index = self.form.treeView.indexAt(QtCore.QPoint(5,5))
+        self.form.show()
+
+        # Find out the center pointof the treeView row
+        rect = self.form.treeView.visualRect(index).center()
+
+        self.form.context_menu.exec_ = MagicMock()
+
+        # Move the mouse pointer to the first row
+        QTest.mouseMove(self.form.treeView.viewport(), pos=rect)
+
+        # This doesn't invoke the action/signal. Investigate why?
+        # QTest.mouseClick(self.form.treeView.viewport(), Qt.RightButton, pos=rect)
+
+        # Instead, send the signal directly
+        self.form.treeView.customContextMenuRequested.emit(rect)
+
+        # app.exec_() # debug
+
+        # See that the menu has been shown
+        self.form.context_menu.exec_.assert_called_once()
+
+    def testShowDataInfo(self):
+        """
+        Test of the showDataInfo method
+        """
+        # get Data1D
+        p_file=["cyl_400_20.txt"]
+        # Read in the file
+        output, message = self.form.readData(p_file)
+        self.form.loadComplete((output, message))
+
+        # select the data
+        self.form.treeView.selectAll()
+
+        # Call the tested method
+        self.form.showDataInfo()
+
+        # Test the properties
+        self.assertTrue(self.form.txt_widget.isReadOnly())
+        self.assertEqual(self.form.txt_widget.windowTitle(), "Data Info: cyl_400_20.txt")
+        self.assertIn("Waveln_max", self.form.txt_widget.toPlainText())
+
+        # Slider moved all the way up
+        self.assertEqual(self.form.txt_widget.verticalScrollBar().sliderPosition(), 0)
+
+    def testSaveDataAs(self):
+        """
+        Test the Save As context menu action
+        """
+        # get Data1D
+        p_file=["cyl_400_20.txt"]
+        # Read in the file
+        output, message = self.form.readData(p_file)
+        self.form.loadComplete((output, message))
+
+        # select the data
+        self.form.treeView.selectAll()
+
+        QFileDialog.getSaveFileName = MagicMock()
+
+        # Call the tested method
+        self.form.saveDataAs()
+        QFileDialog.getSaveFileName.assert_called_with(
+                                caption="Save As",
+                                directory='cyl_400_20_out.txt',
+                                filter='Text files (*.txt);;CanSAS 1D files(*.xml)',
+                                parent=None)
+        QFileDialog.getSaveFileName.assert_called_once()
+
+        # get Data2D
+        p_file=["Dec07031.ASC"]
+        # Read in the file
+        output, message = self.form.readData(p_file)
+        self.form.loadComplete((output, message))
+
+        # select the data
+        index = self.form.model.index(1, 0)
+        selmodel = self.form.treeView.selectionModel()
+        selmodel.setCurrentIndex(index, QItemSelectionModel.NoUpdate)
+        selmodel.select(index, QItemSelectionModel.Select|QItemSelectionModel.Rows)
+
+        QFileDialog.getSaveFileName = MagicMock()
+
+        # Call the tested method
+        self.form.saveDataAs()
+        QFileDialog.getSaveFileName.assert_called_with(
+                                caption="Save As",
+                                directory='Dec07031_out.dat',
+                                filter='IGOR/DAT 2D file in Q_map (*.dat)',
+                                parent=None)
+        QFileDialog.getSaveFileName.assert_called_once()
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -13,6 +13,12 @@ from sas.sasgui.guiframe.data_manager import DataManager
 # Tested module
 from GuiUtils import *
 
+class FakeData(object):
+    '''Data1D/2D object for testing'''
+    def __init__(self):
+        self.x = []
+        self.y = []
+
 class GuiUtilsTest(unittest.TestCase):
     '''Test the GUI Utilities methods'''
     def setUp(self):
@@ -187,6 +193,34 @@ class GuiUtilsTest(unittest.TestCase):
             openLink(bad_url2)
         with self.assertRaises(AttributeError):
             openLink(bad_url3)
+
+    def testRetrieveData1d(self):
+        """
+        """
+        self.assertRaises(retrieveData1d("BOOP"))
+
+        # data = FakeData()        
+        pass
+
+    def testRetrieveData2d(self):
+        """
+        """
+        pass
+
+    def testOnTXTSave(self):
+        """
+        """
+        pass
+
+    def testSaveData1D(self):
+        """
+        """
+        pass
+
+    def testSaveData2D(self):
+        """
+        """
+        pass
 
 if __name__ == "__main__":
     unittest.main()

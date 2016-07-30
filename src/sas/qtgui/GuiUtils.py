@@ -1,5 +1,5 @@
 """
-    Global defaults and various utility functions usable by the general GUI
+Global defaults and various utility functions usable by the general GUI
 """
 
 import os
@@ -27,6 +27,7 @@ from PyQt4 import QtGui
 
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import Data2D
+from sas.sascalc.dataloader.loader import Loader
 
 
 def get_app_dir():
@@ -337,6 +338,9 @@ def retrieveData1d(data):
     Retrieve 1D data from file and construct its text
     representation
     """
+    if not isinstance(data, Data1D):
+        msg = "Incorrect type passed to retrieveData1d"
+        raise AttributeError, msg
     try:
         xmin = min(data.x)
         ymin = min(data.y)
@@ -422,3 +426,107 @@ def retrieveData2d(data):
             break
 
     return text
+
+def _onTXTSave(data, path):
+    """
+    Save file as formatted txt
+    """
+    with open(path,'w') as out:
+        has_errors = True
+        if data.dy == None or data.dy == []:
+            has_errors = False
+        # Sanity check
+        if has_errors:
+            try:
+                if len(data.y) != len(data.dy):
+                    has_errors = False
+            except:
+                has_errors = False
+        if has_errors:
+            if data.dx != None and data.dx != []:
+                out.write("<X>   <Y>   <dY>   <dX>\n")
+            else:
+                out.write("<X>   <Y>   <dY>\n")
+        else:
+            out.write("<X>   <Y>\n")
+
+        for i in range(len(data.x)):
+            if has_errors:
+                if data.dx != None and data.dx != []:
+                    if  data.dx[i] != None:
+                        out.write("%g  %g  %g  %g\n" % (data.x[i],
+                                                        data.y[i],
+                                                        data.dy[i],
+                                                        data.dx[i]))
+                    else:
+                        out.write("%g  %g  %g\n" % (data.x[i],
+                                                    data.y[i],
+                                                    data.dy[i]))
+                else:
+                    out.write("%g  %g  %g\n" % (data.x[i],
+                                                data.y[i],
+                                                data.dy[i]))
+            else:
+                out.write("%g  %g\n" % (data.x[i],
+                                        data.y[i]))
+
+def saveData1D(data):
+    """
+    Save 1D data points
+    """
+    default_name = os.path.basename(data.filename)
+    default_name, extension = os.path.splitext(default_name)
+    default_name += "_out" + extension
+
+    wildcard = "Text files (*.txt);;"\
+                "CanSAS 1D files(*.xml)"
+    kwargs = {
+        'caption'   : 'Save As',
+        'directory' : default_name,
+        'filter'    : wildcard,
+        'parent'    : None,
+    }
+    # Query user for filename.
+    filename = QtGui.QFileDialog.getSaveFileName(**kwargs)
+
+    # User cancelled.
+    if not filename:
+        return
+
+    filename = str(filename)
+
+    #Instantiate a loader
+    loader = Loader()
+    if os.path.splitext(filename)[1].lower() == ".txt":
+        _onTXTSave(data, filename)
+    if os.path.splitext(filename)[1].lower() == ".xml":
+        loader.save(filename, data, ".xml")
+
+def saveData2D(data):
+    """
+    Save data2d dialog
+    """
+    default_name = os.path.basename(data.filename)
+    default_name, _ = os.path.splitext(default_name)
+    ext_format = ".dat"
+    default_name += "_out" + ext_format
+
+    wildcard = "IGOR/DAT 2D file in Q_map (*.dat)"
+    kwargs = {
+        'caption'   : 'Save As',
+        'directory' : default_name,
+        'filter'    : wildcard,
+        'parent'    : None,
+    }
+    # Query user for filename.
+    filename = QtGui.QFileDialog.getSaveFileName(**kwargs)
+
+    # User cancelled.
+    if not filename:
+        return
+    filename = str(filename)
+    #Instantiate a loader
+    loader = Loader()
+
+    if os.path.splitext(filename)[1].lower() == ext_format:
+        loader.save(filename, data, ext_format)

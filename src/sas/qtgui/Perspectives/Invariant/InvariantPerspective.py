@@ -16,7 +16,6 @@ import GuiUtils
 # local
 from UI.TabbedInvariantUI import tabbedInvariantUI
 from InvariantDetails import DetailsDialog
-from Plotter import Plotter
 from InvariantUtils import WIDGETS
 
 # The minimum q-value to be used when extrapolating
@@ -57,13 +56,15 @@ class InvariantWindow(tabbedInvariantUI):
 
         self._helpView = QtWebKit.QWebView()
         self.detailsDialog = DetailsDialog(self)
-        # self._plotter = Plotter(self)
 
         self._low_extrapolate = False
         self._low_guinier  = True
         self._low_fit  = True
         self._high_extrapolate = False
         self._high_power_value  = False
+
+        # No reason to have this widget resizable
+        self.setFixedSize(422, 400)
 
         self.communicate = GuiUtils.Communicate()
 
@@ -158,9 +159,6 @@ class InvariantWindow(tabbedInvariantUI):
     def plotResult(self, model):
         """
         """
-        self._plotter = Plotter(self)
-        if self._low_extrapolate or self._high_extrapolate:
-            self._plotter.show()
         self.model = model
         self.mapper.toFirst()
 
@@ -235,7 +233,7 @@ class InvariantWindow(tabbedInvariantUI):
             item = QtGui.QStandardItem("ERROR")
             self.model.setItem(WIDGETS.W_VOLUME_FRACTION_ERR, item)
         try:
-            surface, surface_error                 = \
+            surface, surface_error = \
                 inv.get_surface_with_error(self._contrast, self._porod)
         except Exception as ex:
             calculation_failed = True
@@ -250,10 +248,6 @@ class InvariantWindow(tabbedInvariantUI):
             self.mapper.toFirst()
             return self.model
 
-        self._plotter.clean()
-        self._plotter.x_label("Q(A$^{-1}$)")
-        self._plotter.y_label("Intensity(cm$^{-1}$)")
-
         if self._low_extrapolate:
             # for presentation in InvariantDetails
             qstar_low, qstar_low_err = inv.get_qstar_low()
@@ -265,9 +259,6 @@ class InvariantWindow(tabbedInvariantUI):
 
             # Plot the chart
             title = "Low-Q extrapolation"
-            self._plotter.data(extrapolated_data)
-            self._plotter.title(title)
-            self._plotter.plot()
 
             # Convert the data into plottable
             extrapolated_data = self._manager.createGuiData(extrapolated_data)
@@ -294,9 +285,6 @@ class InvariantWindow(tabbedInvariantUI):
             # find how to add this plot to the existing plot for low_extrapolate
             # Plot the chart
             title = "High-Q extrapolation"
-            self._plotter.data(high_out_data)
-            self._plotter.title(title)
-            self._plotter.plot()
 
             # Add the plot to the model item
             # variant_item = QtCore.QVariant(self._plotter)

@@ -654,11 +654,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         index = self.treeView.selectedIndexes()[0]
         model_item = self.model.itemFromIndex(self.data_proxy.mapToSource(index))
         data = model_item.child(0).data().toPyObject()
-        if data.__class__.__name__ == "Data1D":
+        if isinstance(data, Data1D):
             text_to_show = GuiUtils.retrieveData1d(data)
+            # Hardcoded sizes to enable full width rendering with default font
             self.txt_widget.resize(420,600)
         else:
             text_to_show = GuiUtils.retrieveData2d(data)
+            # Hardcoded sizes to enable full width rendering with default font
             self.txt_widget.resize(700,600)
 
         self.txt_widget.setReadOnly(True)
@@ -668,14 +670,21 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.txt_widget.insertPlainText(text_to_show)
 
         self.txt_widget.show()
+        # Move the slider all the way up, if present
         vertical_scroll_bar = self.txt_widget.verticalScrollBar()
         vertical_scroll_bar.triggerAction(QtGui.QScrollBar.SliderToMinimum)
 
     def saveDataAs(self):
         """
+        Save the data points as either txt or xml
         """
-        print "saveDataAs"
-        pass
+        index = self.treeView.selectedIndexes()[0]
+        model_item = self.model.itemFromIndex(self.data_proxy.mapToSource(index))
+        data = model_item.child(0).data().toPyObject()
+        if isinstance(data, Data1D):
+            GuiUtils.saveData1D(data)
+        else:
+            GuiUtils.saveData2D(data)
 
     def quickDataPlot(self):
         """
@@ -726,7 +735,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         #                 |----> Path:
         #                 |----> Process
         #                          |-----> process[0].name
-        #
+        #     |-------> THEORIES
 
         # Top-level item: checkbox with label
         checkbox_item = QtGui.QStandardItem(True)
@@ -743,11 +752,15 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Add rows for display in the view
         info_item = GuiUtils.infoFromData(data)
 
-        # Set info_item as the only child
+        # Set info_item as the first child
         checkbox_item.setChild(1, info_item)
+
+        # Caption for the theories
+        checkbox_item.setChild(2, QtGui.QStandardItem("THEORIES"))
 
         # New row in the model
         self.model.appendRow(checkbox_item)
+
 
     def updateModelFromPerspective(self, model_item):
         """
