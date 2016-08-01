@@ -688,9 +688,25 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
     def quickDataPlot(self):
         """
+        Frozen plot - display an image of the plot
         """
-        print "quickDataPlot"
-        pass
+        index = self.treeView.selectedIndexes()[0]
+        model_item = self.model.itemFromIndex(self.data_proxy.mapToSource(index))
+        data = model_item.child(0).data().toPyObject()
+
+        dimension = 1 if isinstance(data, Data1D) else 2
+
+        # TODO: Replace this with the proper MaskPlotPanel from plottools
+        new_plot = Plotter(self)
+        new_plot.data(data)
+        new_plot.plot(marker='o', linestyle='')
+
+        # Update the global plot counter
+        title = "Plot " + data.name
+        new_plot.setWindowTitle(title)
+
+        # Show the plot
+        new_plot.show()
 
     def quickData3DPlot(self):
         """

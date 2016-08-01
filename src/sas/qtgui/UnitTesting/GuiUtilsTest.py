@@ -9,15 +9,13 @@ from mock import MagicMock
 # SV imports
 from sas.sascalc.dataloader.loader import Loader
 from sas.sasgui.guiframe.data_manager import DataManager
+from sas.sasgui.guiframe.dataFitting import Data1D
+from sas.sasgui.guiframe.dataFitting import Data2D
 
 # Tested module
 from GuiUtils import *
 
-class FakeData(object):
-    '''Data1D/2D object for testing'''
-    def __init__(self):
-        self.x = []
-        self.y = []
+app = QtGui.QApplication(sys.argv)
 
 class GuiUtilsTest(unittest.TestCase):
     '''Test the GUI Utilities methods'''
@@ -197,30 +195,134 @@ class GuiUtilsTest(unittest.TestCase):
     def testRetrieveData1d(self):
         """
         """
-        self.assertRaises(retrieveData1d("BOOP"))
+        with self.assertRaises(AttributeError):
+            retrieveData1d("BOOP")
 
-        # data = FakeData()        
-        pass
+        data = Data1D()
+        with self.assertRaises(ValueError):
+            retrieveData1d(data)
+
+        data = Data1D(x=[1.0, 2.0, 3.0], y=[10.0, 11.0, 12.0])
+
+        text = retrieveData1d(data)
+
+        self.assertIn("Temperature:", text)
+        self.assertIn("Beam_size:", text)
+        self.assertIn("X_min = 1.0:  X_max = 3.0", text)
+        self.assertIn("3.0 \t12.0 \t0.0 \t0.0", text)
 
     def testRetrieveData2d(self):
         """
         """
-        pass
+        with self.assertRaises(AttributeError):
+            retrieveData2d("BOOP")
+        data = Data2D(image=[1.0, 2.0, 3.0],
+                      err_image=[0.01, 0.02, 0.03],
+                      qx_data=[0.1, 0.2, 0.3],
+                      qy_data=[0.1, 0.2, 0.3])
+
+        text = retrieveData2d(data)
+
+        self.assertIn("Type:         Data2D", text)
+        self.assertIn("I_min = 1.0", text)
+        self.assertIn("I_max = 3.0", text)
+        self.assertIn("2 \t0.3 \t0.3 \t3.0 \t0.03 \t0.0 \t0.0", text)
 
     def testOnTXTSave(self):
         """
+        Test the file writer for saving 1d/2d data
         """
-        pass
+        path = "test123"
+        if os.path.isfile(path):
+            os.remove(path)
+
+        # Broken data
+        data = Data1D(x=[1.0, 2.0, 3.0], y=[])
+        # Expect a raise
+        with self.assertRaises(IndexError):
+            onTXTSave(data, path)
+
+        # Good data - no dX/dY
+        data = Data1D(x=[1.0, 2.0, 3.0], y=[10.0, 11.0, 12.0])
+        onTXTSave(data, path)
+
+        self.assertTrue(os.path.isfile(path))
+        with open(path,'r') as out:
+            data_read = out.read()
+            self.assertEqual("<X>   <Y>\n1  10\n2  11\n3  12\n", data_read)
+
+        if os.path.isfile(path):
+            os.remove(path)
+
+        # Good data - with dX/dY
+        data = Data1D(x=[1.0, 2.0, 3.0], y=[10.0, 11.0, 12.0],
+                      dx=[0.1, 0.2, 0.3], dy=[0.1, 0.2, 0.3])
+
+        onTXTSave(data, path)
+        with open(path,'r') as out:
+            data_read = out.read()
+            self.assertIn("<X>   <Y>   <dY>   <dX>\n", data_read)
+            self.assertIn("1  10  0.1  0.1\n", data_read)
+            self.assertIn("2  11  0.2  0.2\n", data_read)
+            self.assertIn("3  12  0.3  0.3\n", data_read)
+
+        if os.path.isfile(path):
+            os.remove(path)
 
     def testSaveData1D(self):
         """
+        Test the 1D file save method
         """
-        pass
+        data = Data1D(x=[1.0, 2.0, 3.0], y=[10.0, 11.0, 12.0],
+                      dx=[0.1, 0.2, 0.3], dy=[0.1, 0.2, 0.3])
+
+        # Test the .txt format
+        file_name = "test123_out.txt"
+        QtGui.QFileDialog.getSaveFileName = MagicMock(return_value=file_name)
+        data.filename = "test123.txt"
+        saveData1D(data)
+        self.assertTrue(os.path.isfile(file_name))
+        os.remove(file_name)
+
+        # Test the .xml format
+        file_name = "test123_out.xml"
+        QtGui.QFileDialog.getSaveFileName = MagicMock(return_value=file_name)
+        data.filename = "test123.xml"
+        saveData1D(data)
+        self.assertTrue(os.path.isfile(file_name))
+        os.remove(file_name)
+
+        # Test the wrong format
+        file_name = "test123_out.mp3"
+        QtGui.QFileDialog.getSaveFileName = MagicMock(return_value=file_name)
+        data.filename = "test123.mp3"
+        saveData1D(data)
+        self.assertFalse(os.path.isfile(file_name))
 
     def testSaveData2D(self):
         """
+        Test the 1D file save method
         """
-        pass
+        data = Data2D(image=[1.0, 2.0, 3.0],
+                      err_image=[0.01, 0.02, 0.03],
+                      qx_data=[0.1, 0.2, 0.3],
+                      qy_data=[0.1, 0.2, 0.3])
+
+        # Test the .txt format
+        file_name = "test123_out.dat"
+        QtGui.QFileDialog.getSaveFileName = MagicMock(return_value=file_name)
+        data.filename = "test123.dat"
+        saveData2D(data)
+        self.assertTrue(os.path.isfile(file_name))
+        os.remove(file_name)
+
+        # Test the wrong format
+        file_name = "test123_out.mp3"
+        QtGui.QFileDialog.getSaveFileName = MagicMock(return_value=file_name)
+        data.filename = "test123.mp3"
+        saveData2D(data)
+        self.assertFalse(os.path.isfile(file_name))
+
 
 if __name__ == "__main__":
     unittest.main()

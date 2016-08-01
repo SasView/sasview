@@ -722,6 +722,13 @@ class DataExplorerTest(unittest.TestCase):
                                 parent=None)
         QFileDialog.getSaveFileName.assert_called_once()
 
+    def testQuickDataPlot(self):
+        """
+        Quick data plot generation.
+
+        TODO: add content once plotting finalized
+        """
+        pass
 
 if __name__ == "__main__":
     unittest.main()

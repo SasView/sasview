@@ -387,9 +387,13 @@ def retrieveData1d(data):
 
 def retrieveData2d(data):
     """
-    Retrieve 1D data from file and construct its text
+    Retrieve 2D data from file and construct its text
     representation
     """
+    if not isinstance(data, Data2D):
+        msg = "Incorrect type passed to retrieveData2d"
+        raise AttributeError, msg
+
     text = data.__str__()
     text += 'Data Min Max:\n'
     text += 'I_min = %s\n' % min(data.data)
@@ -427,7 +431,7 @@ def retrieveData2d(data):
 
     return text
 
-def _onTXTSave(data, path):
+def onTXTSave(data, path):
     """
     Save file as formatted txt
     """
@@ -498,7 +502,7 @@ def saveData1D(data):
     #Instantiate a loader
     loader = Loader()
     if os.path.splitext(filename)[1].lower() == ".txt":
-        _onTXTSave(data, filename)
+        onTXTSave(data, filename)
     if os.path.splitext(filename)[1].lower() == ".xml":
         loader.save(filename, data, ".xml")
 

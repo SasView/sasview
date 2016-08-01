@@ -77,15 +77,21 @@ class Plotter(QtGui.QDialog):
         self.figure.delaxes(self._ax)
         self._ax = self.figure.add_subplot(self._current_plot)
 
-    def plot(self):
+    def plot(self, marker=None, linestyle=None):
         """
         Plot self._data
         """
         # create an axis
         ax = self._ax
 
+        if marker == None:
+            marker = '*'
+
+        if linestyle == None:
+            linestyle = '-'
+
         # plot data with legend
-        ax.plot(self._data.x, self._data.y, '*-', label=self._title)
+        ax.plot(self._data.x, self._data.y, marker=marker, linestyle=linestyle, label=self._title)
 
         # Now add the legend with some customizations.
         legend = ax.legend(loc='lower left', shadow=True)
