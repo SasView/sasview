@@ -4,6 +4,7 @@ set PATH=c:\python27;c:\mingw\bin;%PATH%
 set PYLINT= C:\Python27\Scripts\pylint
 set INNO="C:\Program Files (x86)\Inno Setup 5\ISCC.exe"
 set GIT_SED=C:\"Program Files (x86)"\Git\bin\sed.exe
+set SAS_COMPILER=mingw
 
 
 set PYTHONPATH=%PYTHONPATH%;%WORKSPACE%\sasview\utils

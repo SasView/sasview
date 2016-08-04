@@ -374,7 +374,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                              ((10, 10)),
                              (self.sizer4),
                              ((10, 10)),
-                             (self.bt_help, 0, wx.EXPAND|wx.RIGHT, 5)])
+                             (self.bt_help, 0, wx.RIGHT, 5)])
 
         self.sizer3.AddGrowableCol(1, 1)
         self.show_data_button()
