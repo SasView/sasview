@@ -1,13 +1,9 @@
 """
     Unit tests for the new recursive cansas reader
 """
-import logging
-import warnings
-warnings.simplefilter("ignore")
-
 import sas.sascalc.dataloader.readers.cansas_reader as cansas
 from sas.sascalc.dataloader.loader import Loader
-from sas.sascalc.dataloader.data_info import Data1D
+from sas.sascalc.dataloader.data_info import Data1D, Data2D
 from sas.sascalc.dataloader.readers.xml_reader import XMLreader
 from sas.sascalc.dataloader.readers.cansas_reader import Reader
 from sas.sascalc.dataloader.readers.cansas_constants import CansasConstants
@@ -19,15 +15,19 @@ import StringIO
 import pylint as pylint
 import unittest
 import numpy
+import logging
+import warnings
 
 from lxml import etree
 from xml.dom import minidom
- 
+
+warnings.simplefilter("ignore")
+
 CANSAS_FORMAT = CansasConstants.CANSAS_FORMAT
 CANSAS_NS = CansasConstants.CANSAS_NS
-    
-class cansas_reader(unittest.TestCase):
-    
+
+class cansas_reader_xml(unittest.TestCase):
+
     def setUp(self):
         self.loader = Loader()
         self.xml_valid = "cansas_test_modified.xml"
@@ -42,8 +42,8 @@ class cansas_reader(unittest.TestCase):
         self.isis_1_1_doubletrans = "ISIS_1_1_doubletrans.xml"
         self.schema_1_0 = "cansas1d_v1_0.xsd"
         self.schema_1_1 = "cansas1d_v1_1.xsd"
-        
-    
+
+
     def get_number_of_entries(self, dictionary, name, i):
         if dictionary.get(name) is not None:
             i += 1
@@ -51,15 +51,15 @@ class cansas_reader(unittest.TestCase):
             name += "_{0}".format(i)
             name = self.get_number_of_entries(dictionary, name, i)
         return name
-    
-    
+
+
     def test_invalid_xml(self):
         """
         Should fail gracefully and send a message to logging.info()
         """
         invalid = StringIO.StringIO('<a><c></b></a>')
         reader = XMLreader(invalid)
-       
+
 
     def test_xml_validate(self):
         string = "<xsd:schema xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\n"
@@ -77,8 +77,8 @@ class cansas_reader(unittest.TestCase):
         invalid = etree.parse(StringIO.StringIO('<a><c></c></a>'))
         self.assertTrue(xmlschema.validate(valid))
         self.assertFalse(xmlschema.validate(invalid))
-        
-        
+
+
     def test_real_xml(self):
         reader = XMLreader(self.xml_valid, self.schema_1_0)
         valid = reader.validate_xml()
@@ -86,8 +86,8 @@ class cansas_reader(unittest.TestCase):
             self.assertTrue(valid)
         else:
             self.assertFalse(valid)
-            
-            
+
+
     def _check_data(self, data):
         self.assertTrue(data.title == "TK49 c10_SANS")
         self.assertTrue(data.x.size == 138)
@@ -100,13 +100,13 @@ class cansas_reader(unittest.TestCase):
         self.assertTrue(data.detector[1].distance == 4145.02)
         self.assertTrue(data.process[0].name == "Mantid generated CanSAS1D XML")
         self.assertTrue(data.meta_data["xmlpreprocess"] != None)
-        
-    
+
+
     def _check_data_1_1(self, data):
         spectrum = data.trans_spectrum[0]
         self.assertTrue(len(spectrum.wavelength) == 138)
-        
-    
+
+
     def test_cansas_xml(self):
         filename = "isis_1_1_write_test.xml"
         xmlreader = XMLreader(self.isis_1_1, self.schema_1_1)
@@ -131,8 +131,8 @@ class cansas_reader(unittest.TestCase):
             return_data = reader2.load(filename)
             written_data = return_data[0]
             self._check_data(written_data)
-    
-    
+
+
     def test_double_trans_spectra(self):
         xmlreader = XMLreader(self.isis_1_1_doubletrans, self.schema_1_1)
         self.assertTrue(xmlreader.validate_xml())
@@ -140,8 +140,8 @@ class cansas_reader(unittest.TestCase):
         data = reader.load(self.isis_1_1_doubletrans)
         for item in data:
             self._check_data(item)
-    
-                    
+
+
     def test_entry_name_recurse(self):
         test_values = [1,2,3,4,5,6]
         base_key = "key"
@@ -150,8 +150,8 @@ class cansas_reader(unittest.TestCase):
             new_key = self.get_number_of_entries(d, base_key, i = 0)
             d[new_key] = value
         self.assertTrue(len(d) == 6)
-        
-    
+
+
     def test_load_cansas_file(self):
         valid = []
         reader1 = XMLreader(self.xml_valid, self.schema_1_0)
@@ -168,8 +168,8 @@ class cansas_reader(unittest.TestCase):
         self.assertTrue(reader6.validate_xml())
         reader7 = XMLreader(self.isis_1_1, self.schema_1_0)
         self.assertFalse(reader7.validate_xml())
-        
-       
+
+
     def test_old_cansas_files(self):
         reader1 = XMLreader(self.cansas1d, self.schema_1_0)
         self.assertTrue(reader1.validate_xml())
@@ -181,8 +181,8 @@ class cansas_reader(unittest.TestCase):
         self.assertTrue(reader3.validate_xml())
         reader4 = XMLreader(self.cansas1d_slit, self.schema_1_0)
         self.assertTrue(reader4.validate_xml())
-        
-    
+
+
     def test_save_cansas_v1_0(self):
         filename = "isis_1_0_write_test.xml"
         xmlreader = XMLreader(self.isis_1_0, self.schema_1_0)
@@ -203,8 +203,8 @@ class cansas_reader(unittest.TestCase):
             valid = xmlreader.validate_xml()
             self.assertTrue(valid)
             self._check_data(written_data)
-        
-        
+
+
     def test_processing_instructions(self):
         reader = XMLreader(self.isis_1_1, self.schema_1_1)
         valid = reader.validate_xml()
@@ -213,23 +213,23 @@ class cansas_reader(unittest.TestCase):
             dic = self.get_processing_instructions(reader)
             self.assertTrue(dic == {'xml-stylesheet': \
                                     'type="text/xsl" href="cansas1d.xsl" '})
-            
+
             xml = "<test><a><b><c></c></b></a></test>"
             xmldoc = minidom.parseString(xml)
-            
+
             ## take the processing instructions and put them back in
             xmldoc = self.set_processing_instructions(xmldoc, dic)
             xml_output = xmldoc.toprettyxml()
-            
-    
+
+
     def set_processing_instructions(self, minidom_object, dic):
         xmlroot = minidom_object.firstChild
         for item in dic:
             pi = minidom_object.createProcessingInstruction(item, dic[item])
             minidom_object.insertBefore(pi, xmlroot)
         return minidom_object
-    
-    
+
+
     def get_processing_instructions(self, xml_reader_object):
         dict = {}
         pi = xml_reader_object.xmlroot.getprevious()
@@ -246,7 +246,66 @@ class cansas_reader(unittest.TestCase):
             dict[pi_name] = attr
             pi = pi.getprevious()
         return dict
-        
+
+
+class cansas_reader_hdf5(unittest.TestCase):
+
+    def setUp(self):
+        self.loader = Loader()
+        self.datafile_basic = "simpleexamplefile.h5"
+        self.datafile_multiplesasentry = "cansas_1Dand2D_samedatafile.h5"
+        self.datafile_multiplesasdata = "cansas_1Dand2D_samesasentry.h5"
+        self.datafile_multiplesasdata_multiplesasentry = "cansas_1Dand2D_multiplesasentry_multiplesasdata.h5"
+
+    def test_real_data(self):
+        self.data = self.loader.load(self.datafile_basic)
+        self._check_example_data(self.data[0])
+
+    def test_multiple_sasentries(self):
+        self.data = self.loader.load(self.datafile_multiplesasentry)
+        self.assertTrue(len(self.data) == 2)
+        self._check_multiple_data(self.data[0])
+        self._check_multiple_data(self.data[1])
+        self._check_1d_data(self.data[0])
+
+    def _check_multiple_data(self, data):
+        self.assertTrue(data.title == "MH4_5deg_16T_SLOW")
+        self.assertTrue(data.run[0] == '33837')
+        self.assertTrue(len(data.run) == 1)
+        self.assertTrue(data.instrument == "SANS2D")
+        self.assertTrue(data.source.radiation == "Spallation Neutron Source")
+        self.assertTrue(len(data.detector) == 1)
+        self.assertTrue(data.detector[0].name == "rear-detector")
+        self.assertTrue(data.detector[0].distance == 4.385281)
+        self.assertTrue(data.detector[0].distance_unit == 'm')
+        self.assertTrue(len(data.trans_spectrum) == 1)
+
+    def _check_1d_data(self, data):
+        self.assertTrue(isinstance(data, Data1D))
+        self.assertTrue(len(data.x) == 66)
+        self.assertTrue(len(data.x) == len(data.y))
+        self.assertTrue(data.dy[10] == 0.20721350111248701)
+        self.assertTrue(data.y[10] == 24.193889608153476)
+        self.assertTrue(data.x[10] == 0.008981127988654792)
+
+    def _check_2d_data(self, data):
+        self.assertTrue(isinstance(data, Data2D))
+        self.assertTrue(len(data.x) == 66)
+        self.assertTrue(len(data.x) == len(data.y))
+        self.assertTrue(data.dy[10] == 0.20721350111248701)
+        self.assertTrue(data.y[10] == 24.193889608153476)
+        self.assertTrue(data.x[10] == 0.008981127988654792)
+
+    def _check_example_data(self, data):
+        self.assertTrue(data.title == "")
+        self.assertTrue(data.x.size == 100)
+        self.assertTrue(data._xunit == "A^{-1}")
+        self.assertTrue(data._yunit == "cm^{-1}")
+        self.assertTrue(data.y.size == 100)
+        self.assertAlmostEqual(data.y[9], 0.952749011516985)
+        self.assertAlmostEqual(data.x[9], 0.3834415188257777)
+        self.assertAlmostEqual(len(data.meta_data), 0)
+
 
 if __name__ == '__main__':
     unittest.main()    
