@@ -534,9 +534,17 @@ class GuiManager(object):
 
     def actionPython_Shell_Editor(self):
         """
+        Display the Jupyter console as a docked widget.
         """
-        print("actionPython_Shell_Editor TRIGGERED")
-        pass
+        from IPythonWidget import IPythonWidget
+        terminal = IPythonWidget()
+
+        # Add the console window as another docked widget
+        self.ipDockWidget = QtGui.QDockWidget("IPython", self._workspace)
+        self.ipDockWidget.setObjectName("IPythonDockWidget")
+        self.ipDockWidget.setWidget(terminal)
+        self._workspace.addDockWidget(QtCore.Qt.RightDockWidgetArea,
+                                      self.ipDockWidget)
 
     def actionImage_Viewer(self):
         """
