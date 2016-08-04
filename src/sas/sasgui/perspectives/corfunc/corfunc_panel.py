@@ -635,11 +635,20 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         :return rounded_str: x rounded to the given number of significant
             figures, as a string
         """
-        # Index of first significant digit
-        significant_digit = -int(np.floor(np.log10(np.abs(x))))
-        # Number of digits required for correct number of sig figs
-        digits = significant_digit + (sigfigs - 1)
-        rounded = np.round(x, decimals=digits)
-        rounded_str = "{1:.{0}f}".format(sigfigs -1  + significant_digit,
-            rounded)
+        rounded_str = ""
+        try:
+            # Index of first significant digit
+            significant_digit = -int(np.floor(np.log10(np.abs(x))))
+            # Number of digits required for correct number of sig figs
+            digits = significant_digit + (sigfigs - 1)
+            rounded = np.round(x, decimals=digits)
+            rounded_str = "{1:.{0}f}".format(sigfigs -1  + significant_digit,
+                rounded)
+        except:
+            # Method for finding significant_digit fails if x is 0 (since log10(0)=inf)
+            if x == 0.0:
+                rounded_str = "0.0"
+            else:
+                rounded_str = "-"
+
         return rounded_str
