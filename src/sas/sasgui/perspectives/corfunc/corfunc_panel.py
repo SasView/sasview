@@ -240,7 +240,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         """
         Called from FourierThread when calculation has completed
         """
-        self._transform_btn.SetLabel("Tansform")
+        self._transform_btn.SetLabel("Transform")
         if transform is None:
             msg = "Error calculating Transform."
             if self.transform_type == 'hilbert':
