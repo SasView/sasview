@@ -52,6 +52,22 @@ static PyObject *to_string(CLoader *self, PyObject *params) {
     return Py_BuildValue("s", str);
 }
 
+static PyObject *get_filename(CLoader *self, PyObject *args) {
+    return Py_BuildValue("s", self->params.filename);
+}
+
+static PyObject *get_frame(CLoader *self, PyObject *args) {
+    return Py_BuildValue("i", self->params.frame);
+}
+
+static PyObject *get_n_pixels(CLoader *self, PyObject *args) {
+    return Py_BuildValue("i", self->params.n_pixels);
+}
+
+static PyObject *get_n_rasters(CLoader *self, PyObject *args) {
+    return Py_BuildValue("i", self->params.n_rasters);
+}
+
 static PyObject *load_data(CLoader *self, PyObject *args) {
     int raster;
     int pixel;
@@ -99,7 +115,11 @@ static PyObject *load_data(CLoader *self, PyObject *args) {
 
 static PyMethodDef CLoader_methods[] = {
     { "to_string", (PyCFunction)to_string, METH_VARARGS, "Print the objects params" },
-    {"load_data", (PyCFunction)load_data, METH_VARARGS, "Load the data into a numpy array"},
+    { "get_filename", (PyCFunction)get_filename, METH_VARARGS, "Get the filename" },
+    { "get_frame", (PyCFunction)get_frame, METH_VARARGS, "Get the frame that will be loaded" },
+    { "get_n_pixels", (PyCFunction)get_n_pixels, METH_VARARGS, "Get n_pixels" },
+    { "get_n_rasters", (PyCFunction)get_n_rasters, METH_VARARGS, "Get n_rasters" },
+    { "load_data", (PyCFunction)load_data, METH_VARARGS, "Load the data into a numpy array" },
     {NULL}
 };
 
