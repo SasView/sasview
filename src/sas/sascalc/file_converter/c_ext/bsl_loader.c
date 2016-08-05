@@ -29,6 +29,7 @@ static PyObject *CLoader_init(CLoader *self, PyObject *args, PyObject *kwds) {
         if (!(self->params.filename = malloc(strlen(filename) + 1)))
             Py_RETURN_NONE;
         strcpy(self->params.filename, filename);
+        self->params.frame = frame;
         self->params.n_pixels = n_pixels;
         self->params.n_rasters = n_rasters;
     }
