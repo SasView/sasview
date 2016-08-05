@@ -15,6 +15,7 @@ from DataExplorer import DataExplorerWindow
 from UI.AcknowledgementsUI import Acknowledgements
 from AboutBox import AboutBox
 from WelcomePanel import WelcomePanel
+from IPythonWidget import IPythonWidget
 
 from GuiManager import GuiManager
 from UI.MainWindowUI import MainWindow
@@ -83,6 +84,18 @@ class GuiManagerTest(unittest.TestCase):
         message_logged = "ERROR: " + message
         logging.error(message)
         self.assertIn(message_logged, self.manager.logDockWidget.widget().toPlainText())
+
+    def testConsole(self):
+        """
+        Test the docked QtConsole
+        """
+        # Invoke the console action
+        self.manager.actionPython_Shell_Editor()
+
+        # Test the widegt properties
+        self.assertIsInstance(self.manager.ipDockWidget, QDockWidget)
+        self.assertIsInstance(self.manager.ipDockWidget.widget(), IPythonWidget)
+        self.assertEqual(self.manager._workspace.dockWidgetArea(self.manager.ipDockWidget), Qt.RightDockWidgetArea)
 
     def testUpdatePerspective(self):
         """

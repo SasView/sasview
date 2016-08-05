@@ -21,6 +21,7 @@ import LocalConfig
 import GuiUtils
 from UI.AcknowledgementsUI import Acknowledgements
 from AboutBox import AboutBox
+from IPythonWidget import IPythonWidget
 
 # Perspectives
 from Perspectives.Invariant.InvariantPerspective import InvariantWindow
@@ -536,7 +537,6 @@ class GuiManager(object):
         """
         Display the Jupyter console as a docked widget.
         """
-        from IPythonWidget import IPythonWidget
         terminal = IPythonWidget()
 
         # Add the console window as another docked widget

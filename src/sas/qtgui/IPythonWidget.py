@@ -26,5 +26,3 @@ class IPythonWidget(RichJupyterWidget):
 
         self.kernel_manager.kernel.shell.run_code(
             '\n'.join('import %s as %s' % t for t in MODULES_TO_IMPORT))
-
-        guisupport.start_event_loop_qt4(app)
