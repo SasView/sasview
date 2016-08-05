@@ -36,6 +36,7 @@ class cansas_reader_xml(unittest.TestCase):
         self.cansas1d = "cansas1d.xml"
         self.cansas1d_slit = "cansas1d_slit.xml"
         self.cansas1d_units = "cansas1d_units.xml"
+        self.cansas1d_notitle = "cansas1d_notitle.xml"
         self.isis_1_0 = "ISIS_1_0.xml"
         self.isis_1_1 = "ISIS_1_1.xml"
         self.isis_1_1_notrans = "ISIS_1_1_notrans.xml"
@@ -168,6 +169,17 @@ class cansas_reader_xml(unittest.TestCase):
         self.assertTrue(reader6.validate_xml())
         reader7 = XMLreader(self.isis_1_1, self.schema_1_0)
         self.assertFalse(reader7.validate_xml())
+
+
+    def test_invalid_cansas(self):
+        list = self.loader.load(self.cansas1d_notitle)
+        data = list[0]
+        self.assertTrue(data.x.size == 2)
+        self.assertTrue(len(data.meta_data) == 3)
+        self.assertTrue(len(data.errors) == 1)
+        self.assertTrue(data.detector[0].distance_unit == "mm")
+        self.assertTrue(data.detector[0].name == "fictional hybrid")
+        self.assertTrue(data.detector[0].distance == 4150)
 
 
     def test_old_cansas_files(self):
