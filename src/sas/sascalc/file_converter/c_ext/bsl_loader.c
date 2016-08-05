@@ -24,6 +24,7 @@ static PyObject *CLoader_init(CLoader *self, PyObject *args, PyObject *kwds) {
     const int n_pixels;
     const int n_rasters;
     const int swap_bytes;
+
     if (self != NULL) {
         if (!PyArg_ParseTuple(args, "siiii", &filename, &frame, &n_pixels, &n_rasters, &swap_bytes))
             Py_RETURN_NONE;
@@ -55,6 +56,8 @@ static PyObject *to_string(CLoader *self, PyObject *params) {
         self->params.swap_bytes);
     return Py_BuildValue("s", str);
 }
+
+/*                    ----- Setters and Getters -----                        */
 
 static PyObject *get_filename(CLoader *self, PyObject *args) {
     return Py_BuildValue("s", self->params.filename);
@@ -121,6 +124,8 @@ static PyObject *set_swap_bytes(CLoader *self, PyObject *args) {
     return Py_BuildValue("i", self->params.swap_bytes);
 }
 
+/*                        ----- Instance Methods -----                       */
+
 float reverse_float(const float in_float){
     float retval;
     char *to_convert = (char *)&in_float;
@@ -140,28 +145,20 @@ static PyObject *load_data(CLoader *self, PyObject *args) {
     int frame_pos;
     int size[2] = {self->params.n_rasters, self->params.n_pixels};
     float cur_val;
-    PyObject *read_val;
     FILE *input_file;
     PyArrayObject *data;
 
-    printf("load_data called\n");
-
     if (!PyArg_ParseTuple(args, "O!", &PyArray_Type, &data)) {
-        printf("Failed parsing PyArray object");
         return NULL;
     }
 
     input_file = fopen(self->params.filename, "rb");
     if (!input_file) {
-        printf("Failed opening file\n");
         return NULL;
     }
 
-    printf("Calculating frame_pos\n");
     frame_pos = self->params.n_pixels * self->params.n_rasters * self->params.frame;
-    printf("frame_pos: %d\n", frame_pos);
     fseek(input_file, frame_pos*sizeof(float), SEEK_SET);
-    printf("fseek completed\n");
 
     for (raster = 0; raster < self->params.n_rasters; raster++) {
         for (pixel = 0; pixel < self->params.n_pixels; pixel++) {
@@ -169,17 +166,16 @@ static PyObject *load_data(CLoader *self, PyObject *args) {
             if (self->params.swap_bytes == 0)
                 cur_val = reverse_float(cur_val);
             PyArray_SETITEM(data, PyArray_GETPTR2(data, raster, pixel), PyFloat_FromDouble(cur_val));
-            read_val = PyArray_GETITEM(data, PyArray_GETPTR2(data, raster, pixel));
         }
     }
-    printf("Data read.\n");
 
     fclose(input_file);
-    printf("File closed\n");
     Py_DECREF(data);
-    printf("Function completed\n");
+
     return Py_BuildValue("O", data);
 }
+
+/*                           ----- Class Registration -----                  */
 
 static PyMethodDef CLoader_methods[] = {
     { "to_string", (PyCFunction)to_string, METH_VARARGS, "Print the objects params" },

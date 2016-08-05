@@ -20,7 +20,6 @@ class BSLLoader(CLoader):
         header_file.readline()
 
         while True:
-            import pdb; pdb.set_trace()
             metadata = header_file.readline().strip()
             metadata = metadata.split()
             data_filename = header_file.readline().strip()
@@ -42,7 +41,8 @@ class BSLLoader(CLoader):
                 }
             except:
                 is_valid = False
-                err_msg = "Invalid metadata in header file for {}".format(filename.replace('0.', '1.'))
+                err_msg = "Invalid metadata in header file for {}"
+                err_msg = err_msg.format(filename.replace('0.', '1.'))
             break
 
         if not is_valid:
