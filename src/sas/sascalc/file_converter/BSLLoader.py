@@ -10,10 +10,16 @@ class BSLLoader(CLoader):
 
     # See invertor.py for implementation of pickling and setters/getters
 
-    # def __setattr__(self, name, value):
-    #     # if name == 'param':
-    #     #     return self.set_param(value)
-    #     return CBSLLoader.__set_attr__(self, name, value)
+    def __setattr__(self, name, value):
+        if name == 'filename':
+            return self.set_filename(value)
+        elif name == 'frame':
+            return self.set_frame(value)
+        elif name == 'n_pixels':
+            return self.set_n_pixels(value)
+        elif name == 'n_rasters':
+            return self.set_n_rasters(value)
+        return CBSLLoader.__set_attr__(self, name, value)
 
     def __getattr__(self, name):
         if name == 'filename':

@@ -56,7 +56,25 @@ static PyObject *get_filename(CLoader *self, PyObject *args) {
     return Py_BuildValue("s", self->params.filename);
 }
 
+static PyObject *set_filename(CLoader *self, PyObject *args) {
+    const char *new_filename;
+    if (!PyArg_ParseTuple(args, "s", &new_filename))
+        return NULL;
+    strcpy(self->params.filename, new_filename);
+
+    return Py_BuildValue("s", self->params.filename);
+}
+
 static PyObject *get_frame(CLoader *self, PyObject *args) {
+    return Py_BuildValue("i", self->params.frame);
+}
+
+static PyObject *set_frame(CLoader *self, PyObject *args) {
+    int new_frame;
+    if (!PyArg_ParseTuple(args, "i", &new_frame))
+        return NULL;
+    self->params.frame = new_frame;
+
     return Py_BuildValue("i", self->params.frame);
 }
 
@@ -64,7 +82,25 @@ static PyObject *get_n_pixels(CLoader *self, PyObject *args) {
     return Py_BuildValue("i", self->params.n_pixels);
 }
 
+static PyObject *set_n_pixels(CLoader *self, PyObject *args) {
+    int new_pixels;
+    if (!PyArg_ParseTuple(args, "i", &new_pixels))
+        return NULL;
+    self->params.n_pixels = new_pixels;
+
+    return Py_BuildValue("i", self->params.n_pixels);
+}
+
 static PyObject *get_n_rasters(CLoader *self, PyObject *args) {
+    return Py_BuildValue("i", self->params.n_rasters);
+}
+
+static PyObject *set_n_rasters(CLoader *self, PyObject *args) {
+    int new_rasters;
+    if (!PyArg_ParseTuple(args, "i", &new_rasters))
+        return NULL;
+    self->params.n_rasters = new_rasters;
+
     return Py_BuildValue("i", self->params.n_rasters);
 }
 
@@ -116,9 +152,13 @@ static PyObject *load_data(CLoader *self, PyObject *args) {
 static PyMethodDef CLoader_methods[] = {
     { "to_string", (PyCFunction)to_string, METH_VARARGS, "Print the objects params" },
     { "get_filename", (PyCFunction)get_filename, METH_VARARGS, "Get the filename" },
+    { "set_filename", (PyCFunction)set_filename, METH_VARARGS, "Set the filename" },
     { "get_frame", (PyCFunction)get_frame, METH_VARARGS, "Get the frame that will be loaded" },
+    { "set_frame", (PyCFunction)set_frame, METH_VARARGS, "Set the frame that will be loaded" },
     { "get_n_pixels", (PyCFunction)get_n_pixels, METH_VARARGS, "Get n_pixels" },
+    { "set_n_pixels", (PyCFunction)set_n_pixels, METH_VARARGS, "Set n_pixels" },
     { "get_n_rasters", (PyCFunction)get_n_rasters, METH_VARARGS, "Get n_rasters" },
+    { "set_n_rasters", (PyCFunction)set_n_rasters, METH_VARARGS, "Set n_rasters" },
     { "load_data", (PyCFunction)load_data, METH_VARARGS, "Load the data into a numpy array" },
     {NULL}
 };
