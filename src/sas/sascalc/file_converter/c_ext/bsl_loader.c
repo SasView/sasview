@@ -23,8 +23,9 @@ static PyObject *CLoader_init(CLoader *self, PyObject *args, PyObject *kwds) {
     const int frame;
     const int n_pixels;
     const int n_rasters;
+    const int swap_bytes;
     if (self != NULL) {
-        if (!PyArg_ParseTuple(args, "siii", &filename, &frame, &n_pixels, &n_rasters))
+        if (!PyArg_ParseTuple(args, "siiii", &filename, &frame, &n_pixels, &n_rasters, &swap_bytes))
             Py_RETURN_NONE;
         if (!(self->params.filename = malloc(strlen(filename) + 1)))
             Py_RETURN_NONE;
@@ -32,6 +33,7 @@ static PyObject *CLoader_init(CLoader *self, PyObject *args, PyObject *kwds) {
         self->params.frame = frame;
         self->params.n_pixels = n_pixels;
         self->params.n_rasters = n_rasters;
+        self->params.swap_bytes = swap_bytes;
     }
 
     return 0;
@@ -45,11 +47,12 @@ static void CLoader_dealloc(CLoader *self) {
 static PyObject *to_string(CLoader *self, PyObject *params) {
     char str[100];
     sprintf(str,
-        "Filename: %s\nframe: %d\nn_pixels: %d\nn_rasters: %d\n",
+        "Filename: %s\nframe: %d\nn_pixels: %d\nn_rasters: %d\nswap_bytes: %d",
         self->params.filename,
         self->params.frame,
         self->params.n_pixels,
-        self->params.n_rasters);
+        self->params.n_rasters,
+        self->params.swap_bytes);
     return Py_BuildValue("s", str);
 }
 
@@ -105,6 +108,32 @@ static PyObject *set_n_rasters(CLoader *self, PyObject *args) {
     return Py_BuildValue("i", self->params.n_rasters);
 }
 
+static PyObject *get_swap_bytes(CLoader *self, PyObject *args) {
+    return Py_BuildValue("i", self->params.swap_bytes);
+}
+
+static PyObject *set_swap_bytes(CLoader *self, PyObject *args) {
+    int new_swap;
+    if (!PyArg_ParseTuple(args, "i", &new_swap))
+        return NULL;
+    self->params.swap_bytes = new_swap;
+
+    return Py_BuildValue("i", self->params.swap_bytes);
+}
+
+float reverse_float(const float in_float){
+    float retval;
+    char *to_convert = (char *)&in_float;
+    char *return_float = (char *)&retval;
+
+    return_float[0] = to_convert[3];
+    return_float[1] = to_convert[2];
+    return_float[2] = to_convert[1];
+    return_float[3] = to_convert[0];
+
+    return retval;
+}
+
 static PyObject *load_data(CLoader *self, PyObject *args) {
     int raster;
     int pixel;
@@ -137,6 +166,8 @@ static PyObject *load_data(CLoader *self, PyObject *args) {
     for (raster = 0; raster < self->params.n_rasters; raster++) {
         for (pixel = 0; pixel < self->params.n_pixels; pixel++) {
             fread(&cur_val, sizeof(float), 1, input_file);
+            if (self->params.swap_bytes == 0)
+                cur_val = reverse_float(cur_val);
             PyArray_SETITEM(data, PyArray_GETPTR2(data, raster, pixel), PyFloat_FromDouble(cur_val));
             read_val = PyArray_GETITEM(data, PyArray_GETPTR2(data, raster, pixel));
         }
@@ -160,6 +191,8 @@ static PyMethodDef CLoader_methods[] = {
     { "set_n_pixels", (PyCFunction)set_n_pixels, METH_VARARGS, "Set n_pixels" },
     { "get_n_rasters", (PyCFunction)get_n_rasters, METH_VARARGS, "Get n_rasters" },
     { "set_n_rasters", (PyCFunction)set_n_rasters, METH_VARARGS, "Set n_rasters" },
+    { "get_swap_bytes", (PyCFunction)get_swap_bytes, METH_VARARGS, "Get swap_bytes" },
+    { "set_swap_bytes", (PyCFunction)set_swap_bytes, METH_VARARGS, "Set swap_bytes" },
     { "load_data", (PyCFunction)load_data, METH_VARARGS, "Load the data into a numpy array" },
     {NULL}
 };
