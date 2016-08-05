@@ -17,9 +17,11 @@ from sas.sasgui.perspectives.file_converter.frame_select_dialog import FrameSele
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 from sas.sasgui.guiframe.dataFitting import Data1D
+from sas.sascalc.dataloader.data_info import Data2D
 from sas.sasgui.guiframe.utils import check_float
 from sas.sasgui.perspectives.file_converter.cansas_writer import CansasWriter
-from sas.sasgui.perspectives.file_converter.bsl_loader import BSLLoader
+from sas.sasgui.perspectives.file_converter.bsl_loader import BSLLoader as OTOKOLoader
+from sas.sascalc.file_converter.bsl_loader import BSLLoader
 from sas.sascalc.dataloader.data_info import Detector
 from sas.sascalc.dataloader.data_info import Sample
 from sas.sascalc.dataloader.data_info import Source
@@ -89,7 +91,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                 reader.write(f_name, [frame_data[i]],
                     sasentry_attrs=entry_attrs)
 
-    def extract_data(self, filename):
+    def extract_ascii_data(self, filename):
         data = np.loadtxt(filename, dtype=str)
 
         if len(data.shape) != 1:
@@ -113,6 +115,23 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                 raise Exception(msg)
 
         return np.array(data, dtype=np.float32)
+
+    def extract_otoko_data(self, filename):
+        loader = OTOKOLoader(self.q_input.GetPath(),
+            self.iq_input.GetPath())
+        bsl_data = loader.load_bsl_data()
+        qdata = bsl_data.q_axis.data
+        iqdata = bsl_data.data_axis.data
+        if len(qdata) > 1:
+            msg = ("Q-Axis file has multiple frames. Only 1 frame is "
+                "allowed for the Q-Axis")
+            wx.PostEvent(self.parent.manager.parent,
+                StatusEvent(status=msg, info="error"))
+            return
+        else:
+            qdata = qdata[0]
+
+        return qdata, iqdata
 
     def ask_frame_range(self, n_frames):
         valid_input = False
@@ -159,40 +178,54 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
         try:
             if self.data_type == 'ascii':
-                qdata = self.extract_data(self.q_input.GetPath())
-                iqdata = self.extract_data(self.iq_input.GetPath())
+                qdata = self.extract_ascii_data(self.q_input.GetPath())
+                iqdata = np.array([self.extract_ascii_data(self.iq_input.GetPath())])
+            elif self.data_type == 'otoko':
+                qdata, iqdata = self.extract_otoko_data(self.q_input.GetPath())
             else: # self.data_type == 'bsl'
-                loader = BSLLoader(self.q_input.GetPath(),
-                    self.iq_input.GetPath())
-                bsl_data = loader.load_bsl_data()
-                qdata = bsl_data.q_axis.data
-                iqdata = bsl_data.data_axis.data
-                if len(qdata) > 1:
-                    msg = ("Q-Axis file has multiple frames. Only 1 frame is "
-                        "allowed for the Q-Axis")
-                    wx.PostEvent(self.parent.manager.parent,
-                        StatusEvent(status=msg, info="error"))
-                    return
-                else:
-                    qdata = qdata[0]
-                frames = [iqdata.shape[0]]
-                increment = 1
-                single_file = True
-                # Standard file has 3 frames: SAS, calibration and WAS
-                if frames[0] > 3:
-                    # File has multiple frames
-                    params = self.ask_frame_range(frames[0])
+                loader = BSLLoader(self.iq_input.GetPath())
+                frames = [0]
+                if loader.n_frames > 1:
+                    params = self.ask_frame_range(loader.n_frames)
                     frames = params['frames']
-                    increment = params['inc']
-                    single_file = params['file']
-                    if frames == []: return
-                else: # Only interested in SAS data
-                    frames = [0]
+                data = []
+                for frame in frames:
+                    loader.frame = frame
+                    data.append(loader.load_data())
+                data = data[0]
+                data_x = []
+                data_y = range(loader.n_pixels) * loader.n_rasters
+                data_i = data.reshape((loader.n_pixels*loader.n_rasters,1))
+                for i in range(loader.n_rasters):
+                    data_x += [i] * loader.n_pixels
+                import pdb; pdb.set_trace()
+                data_info = Data2D(data=data_i, qx_data=data_x, qy_data=data_y)
+                from sas.sascalc.dataloader.readers.red2d_reader import Reader as Writer2D
+                writer = Writer2D()
+                writer.write(self.output.GetPath(), data_info)
+                wx.PostEvent(self.parent.manager.parent,
+                    StatusEvent(status="Conversion completed."))
+                return
+
         except Exception as ex:
             msg = str(ex)
             wx.PostEvent(self.parent.manager.parent,
                 StatusEvent(status=msg, info='error'))
             return
+
+        frames = []
+        increment = 1
+        single_file = True
+        # Standard file has 3 frames: SAS, calibration and WAS
+        if iqdata.shape[0] > 3:
+            # File has multiple frames
+            params = self.ask_frame_range(frames[0])
+            frames = params['frames']
+            increment = params['inc']
+            single_file = params['file']
+            if frames == []: return
+        else: # Only interested in SAS data
+            frames = [0]
 
         output_path = self.output.GetPath()
 
@@ -242,7 +275,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
     def validate_inputs(self):
         msg = "You must select a"
-        if self.q_input.GetPath() == '':
+        if self.q_input.GetPath() == '' and self.data_type != 'bsl':
             msg += " Q Axis input file."
         elif self.iq_input.GetPath() == '':
             msg += "n Intensity input file."
@@ -298,6 +331,10 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         event.Skip()
         dtype = event.GetEventObject().GetName()
         self.data_type = dtype
+        if dtype == 'bsl':
+            self.q_input.Disable()
+        else:
+            self.q_input.Enable()
 
     def radiationtype_changed(self, event):
         event.Skip()
@@ -362,10 +399,13 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             style=wx.RB_GROUP)
         ascii_btn.Bind(wx.EVT_RADIOBUTTON, self.datatype_changed)
         radio_sizer.Add(ascii_btn)
-        bsl_btn = wx.RadioButton(self, -1, "BSL/OTOKO", name="bsl")
+        otoko_btn = wx.RadioButton(self, -1, "OTOKO 1D", name="otoko")
+        otoko_btn.Bind(wx.EVT_RADIOBUTTON, self.datatype_changed)
+        radio_sizer.Add(otoko_btn)
+        input_grid.Add(radio_sizer, (y,1), (1,1), wx.ALL, 5)
+        bsl_btn = wx.RadioButton(self, -1, "BSL 2D", name="bsl")
         bsl_btn.Bind(wx.EVT_RADIOBUTTON, self.datatype_changed)
         radio_sizer.Add(bsl_btn)
-        input_grid.Add(radio_sizer, (y,1), (1,1), wx.ALL, 5)
         y += 1
 
         radiation_label = wx.StaticText(self, -1, "Radiation Type: ")

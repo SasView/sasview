@@ -4,6 +4,8 @@
 typedef struct {
     // File to load
     char *filename;
+    // Number of frames in the file
+    int n_frames;
     // Frame to load
     int frame;
     // Number of pixels in the file

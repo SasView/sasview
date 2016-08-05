@@ -7,7 +7,7 @@ class BSLLoader(CLoader):
 
     # TODO: Change to __init__(self, filename, frame)
     # and parse n_(pixels/rasters) from header file
-    def __init__(self, filename, frame):
+    def __init__(self, filename):
         header_file = open(filename, 'r')
         data_info = {}
         is_valid = True
@@ -55,12 +55,14 @@ class BSLLoader(CLoader):
             data_info['rasters'] = data_info['pixels']
             data_info['pixels'] = 1
 
-        CLoader.__init__(self, data_info['filename'], frame,
+        CLoader.__init__(self, data_info['filename'], data_info['frames'],
             data_info['pixels'], data_info['rasters'], data_info['swap_bytes'])
 
     def __setattr__(self, name, value):
         if name == 'filename':
             return self.set_filename(value)
+        elif name == 'n_frames':
+            return self.set_n_frames(value)
         elif name == 'frame':
             return self.set_frame(value)
         elif name == 'n_pixels':
@@ -74,6 +76,8 @@ class BSLLoader(CLoader):
     def __getattr__(self, name):
         if name == 'filename':
             return self.get_filename()
+        elif name == 'n_frames':
+            return self.get_n_frames()
         elif name == 'frame':
             return self.get_frame()
         elif name == 'n_pixels':
@@ -83,6 +87,3 @@ class BSLLoader(CLoader):
         elif name == 'swap_bytes':
             return self.get_swap_bytes()
         return CLoader.__getattr__(self, name)
-
-    def create_arr(self):
-        return np.zeros((self.n_rasters, self.n_pixels))

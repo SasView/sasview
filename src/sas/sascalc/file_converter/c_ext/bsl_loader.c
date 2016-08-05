@@ -20,18 +20,18 @@ static PyObject *CLoader_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 
 static PyObject *CLoader_init(CLoader *self, PyObject *args, PyObject *kwds) {
     const char *filename;
-    const int frame;
+    const int n_frames;
     const int n_pixels;
     const int n_rasters;
     const int swap_bytes;
 
     if (self != NULL) {
-        if (!PyArg_ParseTuple(args, "siiii", &filename, &frame, &n_pixels, &n_rasters, &swap_bytes))
+        if (!PyArg_ParseTuple(args, "siiii", &filename, &n_frames, &n_pixels, &n_rasters, &swap_bytes))
             Py_RETURN_NONE;
         if (!(self->params.filename = malloc(strlen(filename) + 1)))
             Py_RETURN_NONE;
         strcpy(self->params.filename, filename);
-        self->params.frame = frame;
+        self->params.n_frames = n_frames;
         self->params.n_pixels = n_pixels;
         self->params.n_rasters = n_rasters;
         self->params.swap_bytes = swap_bytes;
@@ -48,8 +48,9 @@ static void CLoader_dealloc(CLoader *self) {
 static PyObject *to_string(CLoader *self, PyObject *params) {
     char str[100];
     sprintf(str,
-        "Filename: %s\nframe: %d\nn_pixels: %d\nn_rasters: %d\nswap_bytes: %d",
+        "Filename: %s\nn_frames: %d\nframe: %d\nn_pixels: %d\nn_rasters: %d\nswap_bytes: %d",
         self->params.filename,
+        self->params.n_frames,
         self->params.frame,
         self->params.n_pixels,
         self->params.n_rasters,
@@ -70,6 +71,19 @@ static PyObject *set_filename(CLoader *self, PyObject *args) {
     strcpy(self->params.filename, new_filename);
 
     return Py_BuildValue("s", self->params.filename);
+}
+
+static PyObject *get_n_frames(CLoader *self, PyObject *args) {
+    return Py_BuildValue("i", self->params.n_frames);
+}
+
+static PyObject *set_n_frames(CLoader *self, PyObject *args) {
+    int new_frames;
+    if (!PyArg_ParseTuple(args, "i", &new_frames))
+        return NULL;
+    self->params.n_frames = new_frames;
+
+    return Py_BuildValue("i", self->params.n_frames);
 }
 
 static PyObject *get_frame(CLoader *self, PyObject *args) {
@@ -143,14 +157,12 @@ static PyObject *load_data(CLoader *self, PyObject *args) {
     int raster;
     int pixel;
     int frame_pos;
-    int size[2] = {self->params.n_rasters, self->params.n_pixels};
+    npy_intp size[2] = {self->params.n_rasters, self->params.n_pixels};
     float cur_val;
     FILE *input_file;
     PyArrayObject *data;
 
-    if (!PyArg_ParseTuple(args, "O!", &PyArray_Type, &data)) {
-        return NULL;
-    }
+    data = (PyArrayObject *)PyArray_SimpleNew(2, size, NPY_FLOAT);
 
     input_file = fopen(self->params.filename, "rb");
     if (!input_file) {
@@ -170,9 +182,8 @@ static PyObject *load_data(CLoader *self, PyObject *args) {
     }
 
     fclose(input_file);
-    Py_DECREF(data);
 
-    return Py_BuildValue("O", data);
+    return Py_BuildValue("N", data);
 }
 
 /*                           ----- Class Registration -----                  */
@@ -181,6 +192,8 @@ static PyMethodDef CLoader_methods[] = {
     { "to_string", (PyCFunction)to_string, METH_VARARGS, "Print the objects params" },
     { "get_filename", (PyCFunction)get_filename, METH_VARARGS, "Get the filename" },
     { "set_filename", (PyCFunction)set_filename, METH_VARARGS, "Set the filename" },
+    { "get_n_frames", (PyCFunction)get_n_frames, METH_VARARGS, "Get n_frames" },
+    { "set_n_frames", (PyCFunction)set_n_frames, METH_VARARGS, "Set n_frames" },
     { "get_frame", (PyCFunction)get_frame, METH_VARARGS, "Get the frame that will be loaded" },
     { "set_frame", (PyCFunction)set_frame, METH_VARARGS, "Set the frame that will be loaded" },
     { "get_n_pixels", (PyCFunction)get_n_pixels, METH_VARARGS, "Get n_pixels" },
