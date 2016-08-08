@@ -71,8 +71,8 @@ def prepare():
     root = abspath(dirname(__file__))
     platform = '%s-%s'%(get_platform(),sys.version[:3])
     build_path = joinpath(root, 'build','lib.'+platform)
-    
-    # Notify the help menu that the Sphinx documentation is in a different 
+
+    # Notify the help menu that the Sphinx documentation is in a different
     # place than it otherwise would be.
     os.environ['SASVIEW_DOC_PATH'] = joinpath(build_path, "doc")
 
@@ -119,6 +119,12 @@ def prepare():
     import sas.sascalc.pr
     sas.sascalc.pr.core = import_package('sas.sascalc.pr.core',
                                   joinpath(build_path, 'sas', 'sascalc', 'pr', 'core'))
+
+    # Compiled modules need to be pulled from the build directory.
+    # Some packages are not where they are needed, so load them explicitly.
+    import sas.sascalc.file_converter
+    sas.sascalc.file_converter.core = import_package('sas.sascalc.file_converter.core',
+                                  joinpath(build_path, 'sas', 'sascalc', 'file_converter', 'core'))                    
 
     # Compiled modules need to be pulled from the build directory.
     # Some packages are not where they are needed, so load them explicitly.
