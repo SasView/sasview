@@ -33,6 +33,9 @@ from sas.sascalc.dataloader.readers.cansas_constants import CansasConstants
 import xml.dom.minidom
 from xml.dom.minidom import parseString
 
+## TODO: Refactor to load multiple <SASData> as separate Data1D objects
+## TODO: Refactor to allow invalid XML, but give a useful warning when loaded
+
 _ZERO = 1e-16
 PREPROCESS = "xmlpreprocess"
 ENCODING = "encoding"
@@ -132,7 +135,7 @@ class Reader(XMLreader):
             return True
         return False
 
-    def load_file_and_schema(self, xml_file):
+    def load_file_and_schema(self, xml_file, schema_path=""):
         """
         Loads the file and associates a schema, if a known schema exists
 
@@ -148,14 +151,17 @@ class Reader(XMLreader):
 
         # Generic values for the cansas file based on the version
         cansas_defaults = CANSAS_NS.get(self.cansas_version, "1.0")
-        schema_path = "{0}/sas/sascalc/dataloader/readers/schema/{1}".format\
+        if schema_path == "":
+            schema_path = "{0}/sas/sascalc/dataloader/readers/schema/{1}".format\
                 (base, cansas_defaults.get("schema")).replace("\\", "/")
 
         # Link a schema to the XML file.
         self.set_schema(schema_path)
         return cansas_defaults
 
-    def read(self, xml_file):
+    ## TODO: Test loading invalid CanSAS XML files and see if this works
+    ## TODO: Once works, try adding a warning that the data is invalid
+    def read(self, xml_file, schema_path=""):
         """
         Validate and read in an xml_file file in the canSAS format.
 
@@ -173,7 +179,7 @@ class Reader(XMLreader):
             # If the file type is not allowed, return nothing
             if extension in self.ext or self.allow_all:
                 # Get the file location of
-                cansas_defaults = self.load_file_and_schema(xml_file)
+                cansas_defaults = self.load_file_and_schema(xml_file, schema_path)
 
                 # Try to load the file, but raise an error if unable to.
                 # Check the file matches the XML schema
@@ -224,7 +230,16 @@ class Reader(XMLreader):
                                                     self.find_invalid_xml())
                 except:
                     # If the file does not match the schema, raise this error
-                    raise RuntimeError, "%s cannot be read" % xml_file
+                    schema_path = "{0}/sas/sascalc/dataloader/readers/schema/cansas1d_invalid.xsd"
+                    invalid_xml = self.find_invalid_xml()
+                    invalid_xml = "\n\nThe loaded xml file does not fully meet the CanSAS v1.x specification. SasView " + \
+                                  "loaded as much of the data as possible.\n\n" + invalid_xml
+                    self.errors.add(invalid_xml)
+                    self.set_schema(schema_path)
+                    if self.is_cansas():
+                        output = self.read(xml_file, schema_path)
+                    else:
+                        raise RuntimeError, "%s cannot be read" % xml_file
                 return output
         # Return a list of parsed entries that dataloader can manage
         return None
