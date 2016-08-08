@@ -58,6 +58,8 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         self.q_input = None
         self.iq_input = None
         self.output = None
+        self.radiation_input = None
+        self.metadata_section = None
         self.data_type = "ascii"
 
         self.title = None
@@ -356,8 +358,14 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         if dtype == 'bsl':
             self.q_input.SetPath("")
             self.q_input.Disable()
+            self.radiation_input.Disable()
+            self.metadata_section.Collapse()
+            self.on_collapsible_pane(None)
+            self.metadata_section.Disable()
         else:
             self.q_input.Enable()
+            self.radiation_input.Enable()
+            self.metadata_section.Enable()
 
     def radiationtype_changed(self, event):
         event.Skip()
@@ -433,11 +441,11 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
         radiation_label = wx.StaticText(self, -1, "Radiation Type: ")
         input_grid.Add(radiation_label, (y,0), (1,1), wx.ALIGN_CENTER_VERTICAL, 5)
-        radiation_input = wx.ComboBox(self, -1,
+        self.radiation_input = wx.ComboBox(self, -1,
             choices=["Neutron", "X-Ray", "Muon", "Electron"],
             name="radiation", style=wx.CB_READONLY, value="Neutron")
-        radiation_input.Bind(wx.EVT_COMBOBOX, self.radiationtype_changed)
-        input_grid.Add(radiation_input, (y,1), (1,1), wx.ALL, 5)
+        self.radiation_input.Bind(wx.EVT_COMBOBOX, self.radiationtype_changed)
+        input_grid.Add(self.radiation_input, (y,1), (1,1), wx.ALL, 5)
         y += 1
 
         output_label = wx.StaticText(self, -1, "Output File: ")
@@ -463,12 +471,12 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
         vbox.Add(section_sizer, flag=wx.ALL, border=5)
 
-        metadata_section = wx.CollapsiblePane(self, -1, "Metadata",
+        self.metadata_section = wx.CollapsiblePane(self, -1, "Metadata",
             size=(_STATICBOX_WIDTH+40, -1), style=wx.WS_EX_VALIDATE_RECURSIVELY)
-        metadata_pane = metadata_section.GetPane()
+        metadata_pane = self.metadata_section.GetPane()
         metadata_grid = wx.GridBagSizer(5, 5)
 
-        metadata_section.Bind(wx.EVT_COLLAPSIBLEPANE_CHANGED,
+        self.metadata_section.Bind(wx.EVT_COLLAPSIBLEPANE_CHANGED,
             self.on_collapsible_pane)
 
         y = 0
@@ -512,7 +520,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
         metadata_pane.SetSizer(metadata_grid)
 
-        vbox.Add(metadata_section, proportion=0, flag=wx.ALL, border=5)
+        vbox.Add(self.metadata_section, proportion=0, flag=wx.ALL, border=5)
 
         vbox.Fit(self)
         self.SetSizer(vbox)
