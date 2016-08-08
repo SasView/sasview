@@ -1072,6 +1072,7 @@ class Data2D(plottable_2D, DataInfo):
         clone.sample = deepcopy(self.sample)
         clone.source = deepcopy(self.source)
         clone.collimation = deepcopy(self.collimation)
+        clone.trans_spectrum = deepcopy(self.trans_spectrum)
         clone.meta_data = deepcopy(self.meta_data)
         clone.errors = deepcopy(self.errors)
 
@@ -1225,3 +1226,52 @@ class Data2D(plottable_2D, DataInfo):
             result.dqy_data = numpy.append(self.dqy_data, other.dqy_data)
 
         return result
+
+
+def combine_data_info_with_plottable(data, datainfo):
+    """
+    A function that combines the DataInfo data in self.current_datainto with a plottable_1D or 2D data object.
+
+    :param data: A plottable_1D or plottable_2D data object
+    :return: A fully specified Data1D or Data2D object
+    """
+
+    final_dataset = None
+    if isinstance(data, plottable_1D):
+        final_dataset = Data1D(data.x, data.y)
+        final_dataset.dx = data.dx
+        final_dataset.dy = data.dy
+        final_dataset.dxl = data.dxl
+        final_dataset.dxw = data.dxw
+        final_dataset.xaxis(data._xaxis, data._xunit)
+        final_dataset.yaxis(data._yaxis, data._yunit)
+    elif isinstance(data, plottable_2D):
+        final_dataset = Data2D(data.data, data.err_data, data.qx_data, data.qy_data, data.q_data,
+                               data.mask, data.dqx_data, data.dqy_data)
+        final_dataset.xaxis(data._xaxis, data._xunit)
+        final_dataset.yaxis(data._yaxis, data._yunit)
+        final_dataset.zaxis(data._zaxis, data._zunit)
+    else:
+        return_string = "Should Never Happen: _combine_data_info_with_plottable input is not a plottable1d or " + \
+                        "plottable2d data object"
+        return return_string
+
+    final_dataset.xmax = data.xmax
+    final_dataset.ymax = data.ymax
+    final_dataset.xmin = data.xmin
+    final_dataset.ymin = data.ymin
+    final_dataset.title = datainfo.title
+    final_dataset.run = datainfo.run
+    final_dataset.run_name = datainfo.run_name
+    final_dataset.filename = datainfo.filename
+    final_dataset.notes = datainfo.notes
+    final_dataset.process = datainfo.process
+    final_dataset.instrument = datainfo.instrument
+    final_dataset.detector = datainfo.detector
+    final_dataset.sample = datainfo.sample
+    final_dataset.source = datainfo.source
+    final_dataset.collimation = datainfo.collimation
+    final_dataset.trans_spectrum = datainfo.trans_spectrum
+    final_dataset.meta_data = datainfo.meta_data
+    final_dataset.errors = datainfo.errors
+    return final_dataset
