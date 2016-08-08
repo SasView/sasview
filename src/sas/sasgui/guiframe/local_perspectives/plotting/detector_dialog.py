@@ -6,7 +6,7 @@ import sys
 from sas.sasgui.guiframe.utils import format_number
 from sas.sasgui.guiframe.events import StatusEvent
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as Canvas
-from matplotlib import mpl
+import matplotlib as mpl
 from matplotlib import pylab
 # FONT size
 if sys.platform.count("win32") > 0:
