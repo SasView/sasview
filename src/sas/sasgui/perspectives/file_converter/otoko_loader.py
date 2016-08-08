@@ -14,15 +14,15 @@ class CStyleStruct:
     def __init__(self, **kwds):
         self.__dict__.update(kwds)
 
-class BSLParsingError(Exception):
+class OTOKOParsingError(Exception):
     pass
 
-class BSLData:
+class OTOKOData:
     def __init__(self, q_axis, data_axis):
         self.q_axis = q_axis
         self.data_axis = data_axis
 
-class BSLLoader(object):
+class OTOKOLoader(object):
 
     def __init__(self, qaxis_path, data_path):
         self.qaxis_path = qaxis_path
@@ -35,7 +35,7 @@ class BSLLoader(object):
         of one or more binary files where the actual data is stored.
 
         Given the paths of two header files, this function will load each axis in
-        turn.  If loading is successfull then an instance of the BSLData class
+        turn.  If loading is successfull then an instance of the OTOKOData class
         will be returned, else an exception will be raised.
 
         For more information on the OTOKO file format, please see:
@@ -49,7 +49,7 @@ class BSLLoader(object):
         q_axis    = self._load_bsl_axis(self.qaxis_path)
         data_axis = self._load_bsl_axis(self.data_path)
 
-        return BSLData(q_axis, data_axis)
+        return OTOKOData(q_axis, data_axis)
 
     def _load_bsl_axis(self, header_path):
         """
@@ -59,7 +59,7 @@ class BSLLoader(object):
         assumed to be in the same directory as the header.
         """
         if not os.path.exists(header_path):
-            raise BSLParsingError("The header file %s does not exist." % header_path)
+            raise OTOKOParsingError("The header file %s does not exist." % header_path)
 
         binary_file_info_list = []
         total_frames = 0
@@ -68,7 +68,7 @@ class BSLLoader(object):
         with open(header_path, "r") as header_file:
             lines = header_file.readlines()
             if len(lines) < 4:
-                raise BSLParsingError("Expected more lines in %s." % header_path)
+                raise OTOKOParsingError("Expected more lines in %s." % header_path)
 
             info = lines[0] + lines[1]
 
@@ -84,11 +84,11 @@ class BSLLoader(object):
                 indicators = indicators.split()
 
                 if len(indicators) != 10:
-                    raise BSLParsingError(
+                    raise OTOKOParsingError(
                         "Expected 10 integer indicators on line 3 of %s." \
                         % header_path)
                 if not all([i.isdigit() for i in indicators]):
-                    raise BSLParsingError(
+                    raise OTOKOParsingError(
                         "Expected all indicators on line 3 of %s to be integers." \
                         % header_path)
 
@@ -114,7 +114,7 @@ class BSLLoader(object):
         # number of channels, since I don't think CorFunc can handle ragged data.
         all_n_channels = [info.n_channels for info in binary_file_info_list]
         if not all(all_n_channels[0] == c for c in all_n_channels):
-            raise BSLParsingError(
+            raise OTOKOParsingError(
                 "Expected all binary files listed in %s to have the same number of channels." % header_path)
 
         data = np.zeros(shape=(total_frames, all_n_channels[0]))
@@ -122,7 +122,7 @@ class BSLLoader(object):
 
         for info in binary_file_info_list:
             if not os.path.exists(info.file_path):
-                raise BSLParsingError(
+                raise OTOKOParsingError(
                     "The data file %s does not exist." % info.file_path)
 
             with open(info.file_path, "rb") as binary_file:

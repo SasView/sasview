@@ -62,6 +62,11 @@ class VectorInput(object):
         return v
 
     def SetValue(self, vector):
+        """
+        Set the value of the vector input
+
+        :param vector: A Vector object
+        """
         directions = ['x', 'y']
         if self.z_enabled: directions.append('z')
         for direction in directions:

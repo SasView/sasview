@@ -1,6 +1,10 @@
 import wx
 
 class FrameSelectDialog(wx.Dialog):
+    """
+    This class provides a wx.Dialog subclass for selecting which frames of a
+    multi-frame file to export
+    """
 
     def __init__(self, n_frames, is_bsl=False):
         wx.Dialog.__init__(self, None, title="Select Frames")

@@ -22,7 +22,7 @@ from sas.sascalc.dataloader.data_info import Data2D
 from sas.sasgui.guiframe.utils import check_float
 from sas.sasgui.perspectives.file_converter.cansas_writer import CansasWriter
 from sas.sascalc.dataloader.readers.red2d_reader import Reader as Red2DWriter
-from sas.sasgui.perspectives.file_converter.bsl_loader import BSLLoader as OTOKOLoader
+from sas.sasgui.perspectives.file_converter.otoko_loader import OTOKOLoader
 from sas.sascalc.file_converter.bsl_loader import BSLLoader
 from sas.sascalc.dataloader.data_info import Detector
 from sas.sascalc.dataloader.data_info import Sample
@@ -44,6 +44,9 @@ else:
     FONT_VARIANT = 1
 
 class ConverterPanel(ScrolledPanel, PanelBase):
+    """
+    This class provides the File Converter GUI
+    """
 
     def __init__(self, parent, base=None, *args, **kwargs):
         ScrolledPanel.__init__(self, parent, *args, **kwargs)
@@ -55,13 +58,16 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         self.parent = parent
         self.meta_frames = []
 
+        # GUI inputs
         self.q_input = None
         self.iq_input = None
         self.output = None
         self.radiation_input = None
         self.metadata_section = None
+
         self.data_type = "ascii"
 
+        # Metadata values
         self.title = None
         self.run = None
         self.run_name = None
@@ -79,23 +85,44 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         self.Layout()
 
     def convert_to_cansas(self, frame_data, filename, single_file):
-        reader = CansasWriter()
+        """
+        Saves an array of Data1D objects to a single CanSAS file with multiple
+        <SasData> elements, or to multiple CanSAS files, each with one
+        <SasData> element.
+
+        :param frame_data: The Data1D object to save
+        :param filename: Where to save the CanSAS file
+        :param single_file: If true, array is saved as a single file, if false,
+        each item in the array is saved to it's own file
+        """
+        writer = CansasWriter()
         entry_attrs = None
         if self.run_name is not None:
             entry_attrs = { 'name': self.run_name }
         if single_file:
-            reader.write(filename, frame_data,
+            writer.write(filename, frame_data,
                 sasentry_attrs=entry_attrs)
         else:
             # strip extension from filename
             ext = "." + filename.split('.')[-1]
             name = filename.replace(ext, '')
             for i in range(len(frame_data)):
-                f_name = "{}{}{}".format(name, i+1, ext)
-                reader.write(f_name, [frame_data[i]],
+                # TODO: Change i to actual frame number, not consecutive numbers
+                # (maybe use info in params from frame select dialog, ie
+                # increment. Alternatively, change frame_data to a dictionary
+                # with the frame number as key and use frame_data.iteritems()
+                # (would need to update CansasWriter to deal with this)
+                f_name = name + str(i) + ext
+                writer.write(f_name, [frame_data[i]],
                     sasentry_attrs=entry_attrs)
 
     def extract_ascii_data(self, filename):
+        """
+        Extracts data from a single-column ASCII file
+
+        :param filename: The file to load data from
+        :return: A numpy array containing the extracted data
+        """
         data = np.loadtxt(filename, dtype=str)
 
         if len(data.shape) != 1:
@@ -121,6 +148,12 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         return np.array(data, dtype=np.float32)
 
     def extract_otoko_data(self, filename):
+        """
+        Extracts data from a 1D OTOKO file
+
+        :param filename: The OTOKO file to load the data from
+        :return: A numpy array containing the extracted data
+        """
         loader = OTOKOLoader(self.q_input.GetPath(),
             self.iq_input.GetPath())
         bsl_data = loader.load_bsl_data()
@@ -138,6 +171,13 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         return qdata, iqdata
 
     def ask_frame_range(self, n_frames):
+        """
+        Display a dialog asking the user to input the range of frames they
+        would like to export
+
+        :param n_frames: How many frames the loaded data file has
+        :return: A dictionary containing the parameters input by the user
+        """
         valid_input = False
         is_bsl = (self.data_type == 'bsl')
         dlg = FrameSelectDialog(n_frames, is_bsl)
@@ -178,6 +218,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         return { 'frames': frames, 'inc': increment, 'file': single_file }
 
     def on_convert(self, event):
+        """Called when the Convert button is clicked"""
         if not self.validate_inputs():
             return
 
@@ -190,6 +231,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             elif self.data_type == 'otoko':
                 qdata, iqdata = self.extract_otoko_data(self.q_input.GetPath())
             else: # self.data_type == 'bsl'
+                # TODO: Refactor this into an extract_bsl_data method
                 loader = BSLLoader(self.iq_input.GetPath())
                 frames = [0]
                 if loader.n_frames > 1:
@@ -242,7 +284,8 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         n_frames = iqdata.shape[0]
         # Standard file has 3 frames: SAS, calibration and WAS
         if n_frames > 3:
-            # File has multiple frames
+            # File has multiple frames - ask the user which ones they want to
+            # export
             params = self.ask_frame_range(n_frames)
             frames = params['frames']
             increment = params['inc']
@@ -253,6 +296,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
         output_path = self.output.GetPath()
 
+        # Prepare the metadata for writing to a file
         if self.run is None:
             self.run = []
         elif not isinstance(self.run, list):
@@ -292,6 +336,9 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             StatusEvent(status="Conversion completed."))
 
     def on_help(self, event):
+        """
+        Show the File Converter documentation
+        """
         tree_location = ("user/sasgui/perspectives/file_converter/"
             "file_converter_help.html")
         doc_viewer = DocumentationWindow(self, -1, tree_location,
@@ -313,6 +360,9 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         return True
 
     def show_detector_window(self, event):
+        """
+        Show the window for inputting :class:`~sas.sascalc.dataloader.data_info.Detector~` metadata
+        """
         if self.meta_frames != []:
             for frame in self.meta_frames:
                 frame.panel.on_close()
@@ -324,6 +374,9 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         detector_frame.Show(True)
 
     def show_sample_window(self, event):
+        """
+        Show the window for inputting :class:`~sas.sascalc.dataloader.data_info.Sample~` metadata
+        """
         if self.meta_frames != []:
             for frame in self.meta_frames:
                 frame.panel.on_close()
@@ -335,6 +388,9 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         sample_frame.Show(True)
 
     def show_source_window(self, event):
+        """
+        Show the window for inputting :class:`~sas.sascalc.dataloader.data_info.Source~` metadata
+        """
         if self.meta_frames != []:
             for frame in self.meta_frames:
                 frame.panel.on_close()
@@ -346,12 +402,20 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         source_frame.Show(True)
 
     def on_collapsible_pane(self, event):
+        """
+        Resize the scrollable area to fit the metadata pane when it's
+        collapsed or expanded
+        """
         self.Freeze()
         self.SetupScrolling()
         self.parent.Layout()
         self.Thaw()
 
     def datatype_changed(self, event):
+        """
+        Update the UI and self.data_type when a data type radio button is
+        pressed
+        """
         event.Skip()
         dtype = event.GetEventObject().GetName()
         self.data_type = dtype
@@ -526,6 +590,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         self.SetSizer(vbox)
 
 class ConverterWindow(widget.CHILD_FRAME):
+    """Displays ConverterPanel"""
 
     def __init__(self, parent=None, title='File Converter', base=None,
         manager=None, size=(PANEL_SIZE * 1.05, PANEL_SIZE / 1.25),

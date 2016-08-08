@@ -7,6 +7,10 @@ from sas.sasgui.guiframe.plugin_base import PluginBase
 from sas.sasgui.perspectives.file_converter.converter_panel import ConverterWindow
 
 class Plugin(PluginBase):
+    """
+    This class defines the interface for a Plugin class
+    for File Converter perspective
+    """
 
     def __init__(self):
         PluginBase.__init__(self, name="File Converter")

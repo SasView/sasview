@@ -20,6 +20,10 @@ else:
     FONT_VARIANT = 1
 
 class MetadataPanel(ScrolledPanel, PanelBase):
+    """
+    A common base class to be extended by panels that deal with metadata input.
+    Handles input validation and passing inputted data back to ConverterPanel.
+    """
 
     def __init__(self, parent, metadata, base=None, *args, **kwargs):
         ScrolledPanel.__init__(self, parent, *args, **kwargs)
@@ -29,8 +33,8 @@ class MetadataPanel(ScrolledPanel, PanelBase):
 
         self.base = base
         self.parent = parent
-        self._to_validate = []
-        self._vectors = []
+        self._to_validate = [] # An list of inputs that should contain floats
+        self._vectors = [] # A list of VectorInputs to be validated
         self.metadata = metadata
 
     def get_property_string(self, name, is_float=False):
