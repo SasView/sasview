@@ -2,7 +2,7 @@ import wx
 
 class FrameSelectDialog(wx.Dialog):
 
-    def __init__(self, n_frames):
+    def __init__(self, n_frames, is_bsl=False):
         wx.Dialog.__init__(self, None, title="Select Frames")
 
         sizer = wx.GridBagSizer(10, 10)
@@ -39,19 +39,20 @@ class FrameSelectDialog(wx.Dialog):
         sizer.Add(self.increment_input, (y,1), (1,1))
         y += 1
 
-        export_label = wx.StaticText(self, -1, "Export each frame to:")
-        sizer.Add(export_label, (y,0), (1,1), wx.LEFT | wx.RIGHT | wx.TOP, 5)
-        y += 1
+        if not is_bsl:
+            export_label = wx.StaticText(self, -1, "Export each frame to:")
+            sizer.Add(export_label, (y,0), (1,1), wx.LEFT | wx.RIGHT | wx.TOP, 5)
+            y += 1
 
-        self.single_btn = wx.RadioButton(self, -1, label="The same file",
-            style=wx.RB_GROUP)
-        sizer.Add(self.single_btn, (y,0), (1,1),
-            wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
+            self.single_btn = wx.RadioButton(self, -1, label="The same file",
+                style=wx.RB_GROUP)
+            sizer.Add(self.single_btn, (y,0), (1,1),
+                wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
 
-        multiple_btn = wx.RadioButton(self, -1, label="Multiple files")
-        sizer.Add(multiple_btn, (y,1), (1,1),
-            wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
-        y += 1
+            multiple_btn = wx.RadioButton(self, -1, label="Multiple files")
+            sizer.Add(multiple_btn, (y,1), (1,1),
+                wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
+            y += 1
 
         done_btn = wx.Button(self, wx.ID_OK)
         sizer.Add(done_btn, (y,0), (1,1), wx.LEFT | wx.BOTTOM, 15)
@@ -62,5 +63,6 @@ class FrameSelectDialog(wx.Dialog):
         self.SetSizer(sizer)
 
         size = self.GetSize()
-        size.height += 35
+        if not is_bsl:
+            size.height += 35
         self.SetSize(size)

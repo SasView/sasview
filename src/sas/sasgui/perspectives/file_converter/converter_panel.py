@@ -4,6 +4,7 @@ This module provides a GUI for the file converter
 
 import wx
 import sys
+import os
 import numpy as np
 from wx.lib.scrolledpanel import ScrolledPanel
 from sas.sasgui.guiframe.panel_base import PanelBase
@@ -20,6 +21,7 @@ from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sascalc.dataloader.data_info import Data2D
 from sas.sasgui.guiframe.utils import check_float
 from sas.sasgui.perspectives.file_converter.cansas_writer import CansasWriter
+from sas.sascalc.dataloader.readers.red2d_reader import Reader as Red2DWriter
 from sas.sasgui.perspectives.file_converter.bsl_loader import BSLLoader as OTOKOLoader
 from sas.sascalc.file_converter.bsl_loader import BSLLoader
 from sas.sascalc.dataloader.data_info import Detector
@@ -135,7 +137,8 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
     def ask_frame_range(self, n_frames):
         valid_input = False
-        dlg = FrameSelectDialog(n_frames)
+        is_bsl = (self.data_type == 'bsl')
+        dlg = FrameSelectDialog(n_frames, is_bsl)
         frames = None
         increment = None
         single_file = True
@@ -146,14 +149,16 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                     first_frame = int(dlg.first_input.GetValue())
                     last_frame = int(dlg.last_input.GetValue())
                     increment = int(dlg.increment_input.GetValue())
-                    single_file = dlg.single_btn.GetValue()
+                    if not is_bsl:
+                        single_file = dlg.single_btn.GetValue()
+
                     if last_frame < 0 or first_frame < 0:
                         msg = "Frame values must be positive"
                     elif increment < 1:
                         msg = "Increment must be greater than or equal to 1"
                     elif first_frame > last_frame:
                         msg = "First frame must be less than last frame"
-                    elif last_frame > n_frames:
+                    elif last_frame >= n_frames:
                         msg = "Last frame must be less than {}".format(n_frames)
                     else:
                         valid_input = True
@@ -188,21 +193,37 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                 if loader.n_frames > 1:
                     params = self.ask_frame_range(loader.n_frames)
                     frames = params['frames']
-                data = []
+                data = {}
+
                 for frame in frames:
                     loader.frame = frame
-                    data.append(loader.load_data())
-                data = data[0]
+                    data[frame] = loader.load_data()
+
+                # TODO: Tidy this up
+                # Prepare axes values (arbitrary scale)
                 data_x = []
                 data_y = range(loader.n_pixels) * loader.n_rasters
-                data_i = data.reshape((loader.n_pixels*loader.n_rasters,1))
                 for i in range(loader.n_rasters):
                     data_x += [i] * loader.n_pixels
-                import pdb; pdb.set_trace()
-                data_info = Data2D(data=data_i, qx_data=data_x, qy_data=data_y)
-                from sas.sascalc.dataloader.readers.red2d_reader import Reader as Writer2D
-                writer = Writer2D()
-                writer.write(self.output.GetPath(), data_info)
+
+                file_path = self.output.GetPath()
+                filename = os.path.split(file_path)[-1]
+                file_path = os.path.split(file_path)[0]
+                for i, frame in data.iteritems():
+                    # If more than 1 frame is being exported, append the frame
+                    # number to the filename
+                    if len(data) > 1:
+                        frame_filename = filename.split('.')
+                        frame_filename[0] += str(i+1)
+                        frame_filename = '.'.join(frame_filename)
+                    else:
+                        frame_filename = filename
+
+                    data_i = frame.reshape((loader.n_pixels*loader.n_rasters,1))
+                    data_info = Data2D(data=data_i, qx_data=data_x, qy_data=data_y)
+                    writer = Red2DWriter()
+                    writer.write(os.path.join(file_path, frame_filename), data_info)
+
                 wx.PostEvent(self.parent.manager.parent,
                     StatusEvent(status="Conversion completed."))
                 return
@@ -216,10 +237,11 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         frames = []
         increment = 1
         single_file = True
+        n_frames = iqdata.shape[0]
         # Standard file has 3 frames: SAS, calibration and WAS
-        if iqdata.shape[0] > 3:
+        if n_frames > 3:
             # File has multiple frames
-            params = self.ask_frame_range(frames[0])
+            params = self.ask_frame_range(n_frames)
             frames = params['frames']
             increment = params['inc']
             single_file = params['file']
@@ -332,6 +354,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         dtype = event.GetEventObject().GetName()
         self.data_type = dtype
         if dtype == 'bsl':
+            self.q_input.SetPath("")
             self.q_input.Disable()
         else:
             self.q_input.Enable()
@@ -424,7 +447,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             size=(_STATICBOX_WIDTH-80, -1),
             message="Chose where to save the output file.",
             style=wx.FLP_SAVE | wx.FLP_OVERWRITE_PROMPT | wx.FLP_USE_TEXTCTRL,
-            wildcard="*.xml")
+            wildcard="CanSAS 1D (*.xml)|*.xml|Red2D (*.dat)|*.dat")
         input_grid.Add(self.output, (y,1), (1,1), wx.ALL, 5)
         y += 1
 
