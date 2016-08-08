@@ -396,6 +396,23 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
         y = 0
 
+        data_type_label = wx.StaticText(self, -1, "Input Format: ")
+        input_grid.Add(data_type_label, (y,0), (1,1),
+            wx.ALIGN_CENTER_VERTICAL, 5)
+        radio_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        ascii_btn = wx.RadioButton(self, -1, "ASCII", name="ascii",
+            style=wx.RB_GROUP)
+        ascii_btn.Bind(wx.EVT_RADIOBUTTON, self.datatype_changed)
+        radio_sizer.Add(ascii_btn)
+        otoko_btn = wx.RadioButton(self, -1, "OTOKO 1D", name="otoko")
+        otoko_btn.Bind(wx.EVT_RADIOBUTTON, self.datatype_changed)
+        radio_sizer.Add(otoko_btn)
+        input_grid.Add(radio_sizer, (y,1), (1,1), wx.ALL, 5)
+        bsl_btn = wx.RadioButton(self, -1, "BSL 2D", name="bsl")
+        bsl_btn.Bind(wx.EVT_RADIOBUTTON, self.datatype_changed)
+        radio_sizer.Add(bsl_btn)
+        y += 1
+
         q_label = wx.StaticText(self, -1, "Q-Axis Data: ")
         input_grid.Add(q_label, (y,0), (1,1), wx.ALIGN_CENTER_VERTICAL, 5)
 
@@ -414,30 +431,13 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         input_grid.Add(self.iq_input, (y,1), (1,1), wx.ALL, 5)
         y += 1
 
-        data_type_label = wx.StaticText(self, -1, "Input Format: ")
-        input_grid.Add(data_type_label, (y,0), (1,1),
-            wx.ALIGN_CENTER_VERTICAL, 5)
-        radio_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        ascii_btn = wx.RadioButton(self, -1, "ASCII", name="ascii",
-            style=wx.RB_GROUP)
-        ascii_btn.Bind(wx.EVT_RADIOBUTTON, self.datatype_changed)
-        radio_sizer.Add(ascii_btn)
-        otoko_btn = wx.RadioButton(self, -1, "OTOKO 1D", name="otoko")
-        otoko_btn.Bind(wx.EVT_RADIOBUTTON, self.datatype_changed)
-        radio_sizer.Add(otoko_btn)
-        input_grid.Add(radio_sizer, (y,1), (1,1), wx.ALL, 5)
-        bsl_btn = wx.RadioButton(self, -1, "BSL 2D", name="bsl")
-        bsl_btn.Bind(wx.EVT_RADIOBUTTON, self.datatype_changed)
-        radio_sizer.Add(bsl_btn)
-        y += 1
-
         radiation_label = wx.StaticText(self, -1, "Radiation Type: ")
-        input_grid.Add(radiation_label, (y,0), (1,1), wx.ALL, 5)
+        input_grid.Add(radiation_label, (y,0), (1,1), wx.ALIGN_CENTER_VERTICAL, 5)
         radiation_input = wx.ComboBox(self, -1,
             choices=["Neutron", "X-Ray", "Muon", "Electron"],
             name="radiation", style=wx.CB_READONLY, value="Neutron")
         radiation_input.Bind(wx.EVT_COMBOBOX, self.radiationtype_changed)
-        input_grid.Add(radiation_input, (y,1), (1,1))
+        input_grid.Add(radiation_input, (y,1), (1,1), wx.ALL, 5)
         y += 1
 
         output_label = wx.StaticText(self, -1, "Output File: ")
