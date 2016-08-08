@@ -140,7 +140,8 @@ static PyObject *set_swap_bytes(CLoader *self, PyObject *args) {
 
 /*                        ----- Instance Methods -----                       */
 
-float reverse_float(const float in_float){
+float reverse_float(const float in_float) {
+    // Reverse the order of the bytes of a float
     float retval;
     char *to_convert = (char *)&in_float;
     char *return_float = (char *)&retval;
@@ -162,21 +163,34 @@ static PyObject *load_data(CLoader *self, PyObject *args) {
     FILE *input_file;
     PyArrayObject *data;
 
+    // Create a new numpy array to store the data in
     data = (PyArrayObject *)PyArray_SimpleNew(2, size, NPY_FLOAT);
 
+    // Attempt to open the file specified
     input_file = fopen(self->params.filename, "rb");
     if (!input_file) {
         return NULL;
     }
 
+    // Move the file cursor the the position where the data we're interested
+    // in begins
     frame_pos = self->params.n_pixels * self->params.n_rasters * self->params.frame;
     fseek(input_file, frame_pos*sizeof(float), SEEK_SET);
 
     for (raster = 0; raster < self->params.n_rasters; raster++) {
         for (pixel = 0; pixel < self->params.n_pixels; pixel++) {
-            fread(&cur_val, sizeof(float), 1, input_file);
+            // Try reading the file
+            if (fread(&cur_val, sizeof(float), 1, input_file) == 0) {
+                PyErr_SetString(PyExc_RuntimeError, "Error reading file or EOF reached.");
+                return NULL;
+            }
+
+            // Swap the order of the bytes read, if specified that we should do
+            // so in the header file
             if (self->params.swap_bytes == 0)
                 cur_val = reverse_float(cur_val);
+
+            // Add the read value to the numpy array
             PyArray_SETITEM(data, PyArray_GETPTR2(data, raster, pixel), PyFloat_FromDouble(cur_val));
         }
     }
