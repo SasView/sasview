@@ -68,10 +68,10 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         self.data_type = "ascii"
 
         # Metadata values
-        self.title = None
-        self.run = None
-        self.run_name = None
-        self.instrument = None
+        self.title = ''
+        self.run = ''
+        self.run_name = ''
+        self.instrument = ''
         self.detector = Detector()
         self.sample = Sample()
         self.source = Source()
@@ -98,7 +98,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         """
         writer = CansasWriter()
         entry_attrs = None
-        if self.run_name is not None:
+        if self.run_name != '':
             entry_attrs = { 'name': self.run_name }
 
         if single_file:
@@ -502,8 +502,6 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         textbox = event.GetEventObject()
         attr = textbox.GetName()
         value = textbox.GetValue().strip()
-
-        if value == '': value = None
 
         setattr(self, attr, value)
 
