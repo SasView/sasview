@@ -115,6 +115,36 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                 writer.write(destination, [frame_data],
                     sasentry_attrs=entry_attrs)
 
+    def convert_to_red2d(self, filepath, x, y, frame_data):
+        """
+        Writes Data2D objects to Red2D .dat files. If more than one frame is
+        provided, the frame number will be appended to the filename of each
+        file written.
+
+        :param filepath: The filepath to write to
+        :param x: The x column of the data
+        :param y: The y column of the data
+        :param frame_data: A dictionary of the form frame_number: data, where
+        data is a 2D numpy array containing the intensity data
+        """
+        filename = os.path.split(filepath)[-1]
+        filepath = os.path.split(filepath)[0]
+        writer = Red2DWriter()
+
+        for i, frame in frame_data.iteritems():
+            # If more than 1 frame is being exported, append the frame
+            # number to the filename
+            if len(frame_data) > 1:
+                frame_filename = filename.split('.')
+                frame_filename[0] += str(i+1)
+                frame_filename = '.'.join(frame_filename)
+            else:
+                frame_filename = filename
+
+            data_i = frame.reshape((len(x),1))
+            data_info = Data2D(data=data_i, qx_data=x, qy_data=y)
+            writer.write(os.path.join(filepath, frame_filename), data_info)
+
     def extract_ascii_data(self, filename):
         """
         Extracts data from a single-column ASCII file
@@ -168,6 +198,36 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             qdata = qdata[0]
 
         return qdata, iqdata
+
+    def extract_bsl_data(self, filename):
+        """
+        Extracts data from a 2D BSL file
+
+        :param filename: The header file to extract the data from
+        :return x_data: A 1D array containing all the x coordinates of the data
+        :return y_data: A 1D array containing all the y coordinates of the data
+        :return frame_data: A dictionary of the form frame_number: data, where
+        data is a 2D numpy array containing the intensity data
+        """
+        loader = BSLLoader(filename)
+        frames = [0]
+        if loader.n_frames > 1:
+            params = self.ask_frame_range(loader.n_frames)
+            frames = params['frames']
+        frame_data = {}
+
+        for frame in frames:
+            loader.frame = frame
+            frame_data[frame] = loader.load_data()
+
+        # TODO: Tidy this up
+        # Prepare axes values (arbitrary scale)
+        x_data = []
+        y_data = range(loader.n_pixels) * loader.n_rasters
+        for i in range(loader.n_rasters):
+            x_data += [i] * loader.n_pixels
+
+        return x_data, y_data, frame_data
 
     def ask_frame_range(self, n_frames):
         """
@@ -230,42 +290,11 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             elif self.data_type == 'otoko':
                 qdata, iqdata = self.extract_otoko_data(self.q_input.GetPath())
             else: # self.data_type == 'bsl'
-                # TODO: Refactor this into an extract_bsl_data method
-                loader = BSLLoader(self.iq_input.GetPath())
-                frames = [0]
-                if loader.n_frames > 1:
-                    params = self.ask_frame_range(loader.n_frames)
-                    frames = params['frames']
-                data = {}
-
-                for frame in frames:
-                    loader.frame = frame
-                    data[frame] = loader.load_data()
-
-                # TODO: Tidy this up
-                # Prepare axes values (arbitrary scale)
-                data_x = []
-                data_y = range(loader.n_pixels) * loader.n_rasters
-                for i in range(loader.n_rasters):
-                    data_x += [i] * loader.n_pixels
+                x_data, y_data, frame_data = self.extract_bsl_data(
+                    self.iq_input.GetPath())
 
                 file_path = self.output.GetPath()
-                filename = os.path.split(file_path)[-1]
-                file_path = os.path.split(file_path)[0]
-                for i, frame in data.iteritems():
-                    # If more than 1 frame is being exported, append the frame
-                    # number to the filename
-                    if len(data) > 1:
-                        frame_filename = filename.split('.')
-                        frame_filename[0] += str(i+1)
-                        frame_filename = '.'.join(frame_filename)
-                    else:
-                        frame_filename = filename
-
-                    data_i = frame.reshape((loader.n_pixels*loader.n_rasters,1))
-                    data_info = Data2D(data=data_i, qx_data=data_x, qy_data=data_y)
-                    writer = Red2DWriter()
-                    writer.write(os.path.join(file_path, frame_filename), data_info)
+                self.convert_to_red2d(file_path, x_data, y_data, frame_data)
 
                 wx.PostEvent(self.parent.manager.parent,
                     StatusEvent(status="Conversion completed."))
@@ -362,7 +391,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
     def show_detector_window(self, event):
         """
-        Show the window for inputting :class:`~sas.sascalc.dataloader.data_info.Detector~` metadata
+        Show the window for inputting Detector metadata
         """
         if self.meta_frames != []:
             for frame in self.meta_frames:
@@ -376,7 +405,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
     def show_sample_window(self, event):
         """
-        Show the window for inputting :class:`~sas.sascalc.dataloader.data_info.Sample~` metadata
+        Show the window for inputting Sample metadata
         """
         if self.meta_frames != []:
             for frame in self.meta_frames:
@@ -390,7 +419,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
     def show_source_window(self, event):
         """
-        Show the window for inputting :class:`~sas.sascalc.dataloader.data_info.Source~` metadata
+        Show the window for inputting Source metadata
         """
         if self.meta_frames != []:
             for frame in self.meta_frames:
