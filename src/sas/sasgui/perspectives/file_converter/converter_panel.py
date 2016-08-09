@@ -84,14 +84,15 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         self.SetAutoLayout(True)
         self.Layout()
 
-    def convert_to_cansas(self, frame_data, filename, single_file):
+    def convert_to_cansas(self, frame_data, filepath, single_file):
         """
         Saves an array of Data1D objects to a single CanSAS file with multiple
         <SasData> elements, or to multiple CanSAS files, each with one
         <SasData> element.
 
-        :param frame_data: The Data1D object to save
-        :param filename: Where to save the CanSAS file
+        :param frame_data: If single_file is true, an array of Data1D objects.
+        If single_file is false, a dictionary of the form frame_number: Data1D.
+        :param filepath: Where to save the CanSAS file
         :param single_file: If true, array is saved as a single file, if false,
         each item in the array is saved to it's own file
         """
@@ -99,21 +100,19 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         entry_attrs = None
         if self.run_name is not None:
             entry_attrs = { 'name': self.run_name }
+        
         if single_file:
-            writer.write(filename, frame_data,
+            writer.write(filepath, frame_data,
                 sasentry_attrs=entry_attrs)
         else:
-            # strip extension from filename
-            ext = "." + filename.split('.')[-1]
-            name = filename.replace(ext, '')
-            for i in range(len(frame_data)):
-                # TODO: Change i to actual frame number, not consecutive numbers
-                # (maybe use info in params from frame select dialog, ie
-                # increment. Alternatively, change frame_data to a dictionary
-                # with the frame number as key and use frame_data.iteritems()
-                # (would need to update CansasWriter to deal with this)
-                f_name = name + str(i) + ext
-                writer.write(f_name, [frame_data[i]],
+            # Folder and base filename
+            [group_path, group_name] = os.path.split(filepath)
+            ext = "." + group_name.split('.')[-1] # File extension
+            for frame_number, frame_data in frame_data.iteritems():
+                # Append frame number to base filename
+                filename = group_name.replace(ext, str(frame_number)+ext)
+                destination = os.path.join(group_path, filename)
+                writer.write(destination, [frame_data],
                     sasentry_attrs=entry_attrs)
 
     def extract_ascii_data(self, filename):
@@ -314,18 +313,19 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             'source': self.source
         }
 
-        frame_data = []
+        frame_data = {}
         for i in frames:
             data = Data1D(x=qdata, y=iqdata[i])
-            frame_data.append(data)
+            frame_data[i] = data
         if single_file:
             # Only need to set metadata on first Data1D object
+            frame_data = frame_data.values() # Don't need to know frame numbers
             frame_data[0].filename = output_path.split('\\')[-1]
             for key, value in metadata.iteritems():
                 setattr(frame_data[0], key, value)
         else:
             # Need to set metadata for all Data1D objects
-            for datainfo in frame_data:
+            for datainfo in frame_data.values():
                 datainfo.filename = output_path.split('\\')[-1]
                 for key, value in metadata.iteritems():
                     setattr(datainfo, key, value)
