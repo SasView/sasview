@@ -30,7 +30,7 @@ class BSLLoader(CLoader):
         # SAS data will be in file Xnn001.mdd
         sasdata_filename = filename.replace('000.', '001.')
         if sasdata_filename == filename:
-            err_msg = ("Invalid header filename {}.\n Should be of the format "
+            err_msg = ("Invalid header filename {}.\nShould be of the format "
                 "Xnn000.XXX where X is any alphanumeric character and n is any"
                 " digit.").format(filename)
             raise BSLParsingError(err_msg)

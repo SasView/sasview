@@ -169,6 +169,16 @@ static PyObject *load_data(CLoader *self, PyObject *args) {
     // Attempt to open the file specified
     input_file = fopen(self->params.filename, "rb");
     if (!input_file) {
+        // BSL filenames are 10 characters long
+        // Filename validity checked in bsl_loader.py
+        size_t filename_start = strlen(self->params.filename) - 10;
+        char *filename = self->params.filename + filename_start;
+        char *err_msg = (char *)malloc(sizeof(char) * 32);
+
+        sprintf(err_msg, "Unable to open file: %s", filename);
+
+        PyErr_SetString(PyExc_RuntimeError, err_msg);
+        free(err_msg);
         return NULL;
     }
 
