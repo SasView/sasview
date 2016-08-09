@@ -1,6 +1,6 @@
 """
 Here we handle loading of "OTOKO" data (for more info about this format see
-the comment in load_bsl_data).  Given the paths of header and data files, we
+the comment in load_otoko_data).  Given the paths of header and data files, we
 aim to load the data into numpy arrays for use later.
 """
 
@@ -28,7 +28,7 @@ class OTOKOLoader(object):
         self.qaxis_path = qaxis_path
         self.data_path = data_path
 
-    def load_bsl_data(self):
+    def load_otoko_data(self):
         """
         Loads "OTOKO" data, which is a format that stores each axis separately.
         An axis is represented by a "header" file, which in turn will give details
@@ -41,17 +41,13 @@ class OTOKOLoader(object):
         For more information on the OTOKO file format, please see:
         http://www.diamond.ac.uk/Home/Beamlines/small-angle/SAXS-Software/CCP13/
         XOTOKO.html
-
-        The BSL format, which is based on OTOKO, is also supported.  Find out more
-        about the BSL format at http://www.diamond.ac.uk/Home/Beamlines/small-angle
-        /SAXS-Software/CCP13/BSL.html.
         """
-        q_axis    = self._load_bsl_axis(self.qaxis_path)
-        data_axis = self._load_bsl_axis(self.data_path)
+        q_axis    = self._load_otoko_axis(self.qaxis_path)
+        data_axis = self._load_otoko_axis(self.data_path)
 
         return OTOKOData(q_axis, data_axis)
 
-    def _load_bsl_axis(self, header_path):
+    def _load_otoko_axis(self, header_path):
         """
         Loads an "OTOKO" axis, given the header file path.  Essentially, the
         header file contains information about the data in the form of integer
@@ -106,6 +102,11 @@ class OTOKOLoader(object):
                     swap_bytes = int(indicators[3]) == 0,
                     last_file  = int(indicators[9]) == 0 # We don't use this.
                 )
+                if binary_file_info.dimensions != 1:
+                    msg = "File {} has {} dimensions, expected 1. Is it a BSL file?"
+                    raise OTOKOParsingError(msg.format(filename.strip(),
+                        binary_file_info.dimensions))
+
                 binary_file_info_list.append(binary_file_info)
 
                 total_frames += binary_file_info.n_frames

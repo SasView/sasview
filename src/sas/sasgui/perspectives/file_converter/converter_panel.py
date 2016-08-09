@@ -185,9 +185,9 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         """
         loader = OTOKOLoader(self.q_input.GetPath(),
             self.iq_input.GetPath())
-        bsl_data = loader.load_bsl_data()
-        qdata = bsl_data.q_axis.data
-        iqdata = bsl_data.data_axis.data
+        otoko_data = loader.load_otoko_data()
+        qdata = otoko_data.q_axis.data
+        iqdata = otoko_data.data_axis.data
         if len(qdata) > 1:
             msg = ("Q-Axis file has multiple frames. Only 1 frame is "
                 "allowed for the Q-Axis")
@@ -211,9 +211,34 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         """
         loader = BSLLoader(filename)
         frames = [0]
+        should_continue = True
+
         if loader.n_frames > 1:
             params = self.ask_frame_range(loader.n_frames)
             frames = params['frames']
+        elif loader.n_rasters == 1 and loader.n_frames == 1:
+            message = ("The selected file is an OTOKO file. Please select the "
+            "'OTOKO 1D' option if you wish to convert it.")
+            dlg = wx.MessageDialog(self,
+            message,
+            'Error!',
+            wx.OK | wx.ICON_WARNING)
+            dlg.ShowModal()
+            should_continue = False
+            dlg.Destroy()
+        else:
+            message = ("The selected data file only has 1 frame, it might be"
+                " a multi-frame OTOKO file.\nContinue conversion?")
+            dlg = wx.MessageDialog(self,
+            message,
+            'Warning!',
+            wx.YES_NO | wx.ICON_WARNING)
+            should_continue = (dlg.ShowModal() == wx.ID_YES)
+            dlg.Destroy()
+
+        if not should_continue:
+            return None, None, None
+
         frame_data = {}
 
         for frame in frames:
@@ -293,6 +318,11 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                 x_data, y_data, frame_data = self.extract_bsl_data(
                     self.iq_input.GetPath())
 
+                if x_data == None and y_data == None and frame_data == None:
+                    wx.PostEvent(self.parent.manager.parent,
+                        StatusEvent(status="Conversion cancelled."))
+                    return
+
                 file_path = self.output.GetPath()
                 self.convert_to_red2d(file_path, x_data, y_data, frame_data)
 
@@ -341,7 +371,6 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             'sample': self.sample,
             'source': self.source
         }
-        import pdb; pdb.set_trace()
 
         frame_data = {}
         for i in frames:

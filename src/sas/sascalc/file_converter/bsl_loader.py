@@ -3,17 +3,37 @@ from copy import deepcopy
 import os
 import numpy as np
 
-class BSLLoader(CLoader):
+class BSLParsingError(Exception):
+    pass
 
-    # TODO: Change to __init__(self, filename, frame)
-    # and parse n_(pixels/rasters) from header file
+class BSLLoader(CLoader):
+    """
+    Loads 2D SAS data from a BSL file.
+    CLoader is a C extension (found in c_ext/bsl_loader.c)
+
+    See http://www.diamond.ac.uk/Beamlines/Soft-Condensed-Matter/small-angle/SAXS-Software/CCP13/BSL.html
+    for more info on the BSL file format.
+    """
+
     def __init__(self, filename):
+        """
+        Parses the BSL header file and sets instance variables apropriately
+
+        :param filename: Path to the BSL header file
+        """
         header_file = open(filename, 'r')
         data_info = {}
         is_valid = True
         err_msg = ""
 
         [folder, filename] = os.path.split(filename)
+        # SAS data will be in file Xnn001.mdd
+        sasdata_filename = filename.replace('000.', '001.')
+        if sasdata_filename == filename:
+            err_msg = ("Invalid header filename {}.\n Should be of the format "
+                "Xnn000.XXX where X is any alphanumeric character and n is any"
+                " digit.").format(filename)
+            raise BSLParsingError(err_msg)
 
         # First 2 lines are headers
         header_file.readline()
@@ -28,8 +48,14 @@ class BSLLoader(CLoader):
                 is_valid = False
                 err_msg = "Invalid header file: {}".format(filename)
                 break
-            # SAS data will be in file Xnn001.mdd
-            if data_filename != filename.replace('0.', '1.'):
+
+            if data_filename != sasdata_filename:
+                last_file = (metadata[9] == '0')
+                if last_file: # Reached last file we have metadata for
+                    is_valid = False
+                    err_msg = "No metadata for {} found in header file: {}"
+                    err_msg = err_msg.format(sasdata_filename, filename)
+                    break
                 continue
             try:
                 data_info = {
@@ -42,18 +68,11 @@ class BSLLoader(CLoader):
             except:
                 is_valid = False
                 err_msg = "Invalid metadata in header file for {}"
-                err_msg = err_msg.format(filename.replace('0.', '1.'))
+                err_msg = err_msg.format(sasdata_filename)
             break
 
         if not is_valid:
-            raise Exception(err_msg)
-
-        if data_info['frames'] == 1:
-            # File is actually in OTOKO (1D) format
-            # Number of frames is 2nd indicator,
-            data_info['frames'] = data_info['rasters']
-            data_info['rasters'] = data_info['pixels']
-            data_info['pixels'] = 1
+            raise BSLParsingError(err_msg)
 
         CLoader.__init__(self, data_info['filename'], data_info['frames'],
             data_info['pixels'], data_info['rasters'], data_info['swap_bytes'])
