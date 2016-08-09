@@ -152,7 +152,20 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         :param filename: The file to load data from
         :return: A numpy array containing the extracted data
         """
-        data = np.loadtxt(filename, dtype=str)
+        try:
+            data = np.loadtxt(filename, dtype=str)
+        except:
+            is_bsl = False
+            # Check if file is a BSL or OTOKO header file
+            f = open(filename, 'r')
+            f.readline()
+            f.readline()
+            bsl_metadata = f.readline().strip().split()
+            f.close()
+            if len(bsl_metadata) == 10:
+                msg = ("Error parsing ASII data. {} looks like a BSL or OTOKO "
+                    "header file.")
+                raise Exception(msg.format(os.path.split(filename)[-1]))
 
         if len(data.shape) != 1:
             msg = "Error reading {}: Only one column of data is allowed"
