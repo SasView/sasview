@@ -485,7 +485,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             self.metadata_section.Collapse()
             self.on_collapsible_pane(None)
             self.metadata_section.Disable()
-            self.output.SetWildcard("Red2D (*.dat)|*.dat")
+            self.output.SetWildcard("IGOR/DAT 2D file in Q_map (*.dat)|*.DAT")
         else:
             self.q_input.Enable()
             self.radiation_input.Enable()
@@ -509,11 +509,13 @@ class ConverterPanel(ScrolledPanel, PanelBase):
     def _do_layout(self):
         vbox = wx.BoxSizer(wx.VERTICAL)
 
-        instructions = ("Select either single column ASCII files or BSL/OTOKO"
-            " files containing the Q-Axis and Intensity-axis data, chose where"
-            " to save the converted file, then click Convert to convert them "
-            "to CanSAS XML format. If required, metadata can also be input "
-            "below.")
+        instructions = ("Select either single column ASCII files or 1D OTOKO "
+        "files containing the Q-Axis and Intensity-Axis data, or a 2D BSL file"
+        ", then chose where to save the converted file, and click Convert.\n"
+        "ASCII and OTOKO files will be converted to CanSAS XML, and OTKO files"
+        " to IGOR/DAT 2D Q_map files.\nCanSAS metadata can also be optionally "
+        "input below.")
+
         instruction_label = wx.StaticText(self, -1, instructions,
             size=(_STATICBOX_WIDTH+40, -1))
         instruction_label.Wrap(_STATICBOX_WIDTH+40)
@@ -651,7 +653,7 @@ class ConverterWindow(widget.CHILD_FRAME):
     """Displays ConverterPanel"""
 
     def __init__(self, parent=None, title='File Converter', base=None,
-        manager=None, size=(PANEL_SIZE * 1.05, PANEL_SIZE / 1.25),
+        manager=None, size=(PANEL_SIZE * 1.05, PANEL_SIZE / 1.1),
         *args, **kwargs):
         kwargs['title'] = title
         kwargs['size'] = size
