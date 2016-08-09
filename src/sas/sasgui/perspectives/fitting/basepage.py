@@ -2145,7 +2145,11 @@ class BasicPage(ScrolledPanel, PanelBase):
             if len(form_factor.non_fittable) > 0:
                 self.temp_multi_functional = True
         elif form_factor != None:
-            self.model = form_factor(self.multi_factor)
+            if self.multi_factor is not None:
+                self.model = form_factor(self.multi_factor)
+            else:
+                # old style plugin models do not accept a multiplicity argument
+                self.model = form_factor()
         else:
             self.model = None
             return
