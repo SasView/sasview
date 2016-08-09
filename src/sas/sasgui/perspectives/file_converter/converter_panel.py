@@ -18,12 +18,10 @@ from sas.sasgui.perspectives.file_converter.frame_select_dialog import FrameSele
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 from sas.sasgui.guiframe.dataFitting import Data1D
-from sas.sascalc.dataloader.data_info import Data2D
 from sas.sasgui.guiframe.utils import check_float
 from sas.sasgui.perspectives.file_converter.cansas_writer import CansasWriter
-from sas.sascalc.dataloader.readers.red2d_reader import Reader as Red2DWriter
+from sas.sascalc.file_converter.convert_bsl_thread import ConvertBSLThread
 from sas.sasgui.perspectives.file_converter.otoko_loader import OTOKOLoader
-from sas.sascalc.file_converter.bsl_loader import BSLLoader
 from sas.sascalc.dataloader.data_info import Detector
 from sas.sascalc.dataloader.data_info import Sample
 from sas.sascalc.dataloader.data_info import Source
@@ -57,12 +55,14 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         self.base = base
         self.parent = parent
         self.meta_frames = []
+        self.bsl_thread = None
 
         # GUI inputs
         self.q_input = None
         self.iq_input = None
         self.output = None
         self.radiation_input = None
+        self.convert_btn = None
         self.metadata_section = None
 
         self.data_type = "ascii"
@@ -114,36 +114,6 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                 destination = os.path.join(group_path, filename)
                 writer.write(destination, [frame_data],
                     sasentry_attrs=entry_attrs)
-
-    def convert_to_red2d(self, filepath, x, y, frame_data):
-        """
-        Writes Data2D objects to Red2D .dat files. If more than one frame is
-        provided, the frame number will be appended to the filename of each
-        file written.
-
-        :param filepath: The filepath to write to
-        :param x: The x column of the data
-        :param y: The y column of the data
-        :param frame_data: A dictionary of the form frame_number: data, where
-        data is a 2D numpy array containing the intensity data
-        """
-        filename = os.path.split(filepath)[-1]
-        filepath = os.path.split(filepath)[0]
-        writer = Red2DWriter()
-
-        for i, frame in frame_data.iteritems():
-            # If more than 1 frame is being exported, append the frame
-            # number to the filename
-            if len(frame_data) > 1:
-                frame_filename = filename.split('.')
-                frame_filename[0] += str(i+1)
-                frame_filename = '.'.join(frame_filename)
-            else:
-                frame_filename = filename
-
-            data_i = frame.reshape((len(x),1))
-            data_info = Data2D(data=data_i, qx_data=x, qy_data=y)
-            writer.write(os.path.join(filepath, frame_filename), data_info)
 
     def extract_ascii_data(self, filename):
         """
@@ -212,61 +182,6 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
         return qdata, iqdata
 
-    def extract_bsl_data(self, filename):
-        """
-        Extracts data from a 2D BSL file
-
-        :param filename: The header file to extract the data from
-        :return x_data: A 1D array containing all the x coordinates of the data
-        :return y_data: A 1D array containing all the y coordinates of the data
-        :return frame_data: A dictionary of the form frame_number: data, where
-        data is a 2D numpy array containing the intensity data
-        """
-        loader = BSLLoader(filename)
-        frames = [0]
-        should_continue = True
-
-        if loader.n_frames > 1:
-            params = self.ask_frame_range(loader.n_frames)
-            frames = params['frames']
-        elif loader.n_rasters == 1 and loader.n_frames == 1:
-            message = ("The selected file is an OTOKO file. Please select the "
-            "'OTOKO 1D' option if you wish to convert it.")
-            dlg = wx.MessageDialog(self,
-            message,
-            'Error!',
-            wx.OK | wx.ICON_WARNING)
-            dlg.ShowModal()
-            should_continue = False
-            dlg.Destroy()
-        else:
-            message = ("The selected data file only has 1 frame, it might be"
-                " a multi-frame OTOKO file.\nContinue conversion?")
-            dlg = wx.MessageDialog(self,
-            message,
-            'Warning!',
-            wx.YES_NO | wx.ICON_WARNING)
-            should_continue = (dlg.ShowModal() == wx.ID_YES)
-            dlg.Destroy()
-
-        if not should_continue:
-            return None, None, None
-
-        frame_data = {}
-
-        for frame in frames:
-            loader.frame = frame
-            frame_data[frame] = loader.load_data()
-
-        # TODO: Tidy this up
-        # Prepare axes values (arbitrary scale)
-        x_data = []
-        y_data = range(loader.n_pixels) * loader.n_rasters
-        for i in range(loader.n_rasters):
-            x_data += [i] * loader.n_pixels
-
-        return x_data, y_data, frame_data
-
     def ask_frame_range(self, n_frames):
         """
         Display a dialog asking the user to input the range of frames they
@@ -319,6 +234,11 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         if not self.validate_inputs():
             return
 
+        if self.bsl_thread is not None and self.bsl_thread.isrunning():
+            self.bsl_thread.stop()
+            self.conversion_complete(success=False)
+            return
+
         self.sample.ID = self.title
 
         try:
@@ -328,19 +248,11 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             elif self.data_type == 'otoko':
                 qdata, iqdata = self.extract_otoko_data(self.q_input.GetPath())
             else: # self.data_type == 'bsl'
-                x_data, y_data, frame_data = self.extract_bsl_data(
-                    self.iq_input.GetPath())
-
-                if x_data == None and y_data == None and frame_data == None:
-                    wx.PostEvent(self.parent.manager.parent,
-                        StatusEvent(status="Conversion cancelled."))
-                    return
-
-                file_path = self.output.GetPath()
-                self.convert_to_red2d(file_path, x_data, y_data, frame_data)
-
-                wx.PostEvent(self.parent.manager.parent,
-                    StatusEvent(status="Conversion completed."))
+                self.bsl_thread = ConvertBSLThread(self, self.iq_input.GetPath(),
+                    self.output.GetPath(), updatefn=self.conversion_update,
+                    completefn=self.conversion_complete)
+                self.bsl_thread.queue()
+                self.convert_btn.SetLabel("Stop Conversion")
                 return
 
         except Exception as ex:
@@ -407,6 +319,26 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         wx.PostEvent(self.parent.manager.parent,
             StatusEvent(status="Conversion completed."))
 
+    def conversion_update(self, msg="", exception=None):
+        if exception is not None:
+            msg = str(exception)
+            wx.PostEvent(self.parent.manager.parent,
+                StatusEvent(status=msg, info='error'))
+        else:
+            wx.PostEvent(self.parent.manager.parent,
+                StatusEvent(status=msg))
+
+    def conversion_complete(self, success=True):
+        self.convert_btn.SetLabel("Convert")
+        msg = "Conversion "
+        if success:
+            msg += "completed"
+        else:
+            msg += "failed"
+        wx.PostEvent(self.parent.manager.parent,
+            StatusEvent(status=msg))
+
+
     def on_help(self, event):
         """
         Show the File Converter documentation
@@ -423,7 +355,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         elif self.iq_input.GetPath() == '':
             msg += "n Intensity input file."
         elif self.output.GetPath() == '':
-            msg += "destination for the converted file."
+            msg += " destination for the converted file."
         if msg != "You must select a":
             wx.PostEvent(self.parent.manager.parent,
                 StatusEvent(status=msg, info='error'))
@@ -596,9 +528,10 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         input_grid.Add(self.output.GetCtrl(), (y,1), (1,1), wx.EXPAND | wx.ALL, 5)
         y += 1
 
-        convert_btn = wx.Button(self, wx.ID_OK, "Convert")
-        input_grid.Add(convert_btn, (y,0), (1,1), wx.ALL, 5)
-        convert_btn.Bind(wx.EVT_BUTTON, self.on_convert)
+        self.convert_btn = wx.Button(self, wx.ID_OK, "Stop Converstion")
+        self.convert_btn.SetLabel("Convert")
+        input_grid.Add(self.convert_btn, (y,0), (1,1), wx.ALL, 5)
+        self.convert_btn.Bind(wx.EVT_BUTTON, self.on_convert)
 
         help_btn = wx.Button(self, -1, "HELP")
         input_grid.Add(help_btn, (y,1), (1,1), wx.ALL, 5)
