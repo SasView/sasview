@@ -549,7 +549,8 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
         self.q_input = wx.FilePickerCtrl(self, -1,
             size=(_STATICBOX_WIDTH-80, -1),
-            message="Chose the Q-Axis data file.")
+            message="Chose the Q-Axis data file.",
+            style=wx.FLP_USE_TEXTCTRL | wx.FLP_CHANGE_DIR)
         input_grid.Add(self.q_input, (y,1), (1,1), wx.ALL, 5)
         y += 1
 
@@ -558,7 +559,8 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
         self.iq_input = wx.FilePickerCtrl(self, -1,
             size=(_STATICBOX_WIDTH-80, -1),
-            message="Chose the Intensity-Axis data file.")
+            message="Chose the Intensity-Axis data file.",
+            style=wx.FLP_USE_TEXTCTRL | wx.FLP_CHANGE_DIR)
         input_grid.Add(self.iq_input, (y,1), (1,1), wx.ALL, 5)
         y += 1
 
