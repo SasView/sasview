@@ -71,6 +71,7 @@ class BSLLoader(CLoader):
                 err_msg = err_msg.format(sasdata_filename)
             break
 
+        header_file.close()
         if not is_valid:
             raise BSLParsingError(err_msg)
 
