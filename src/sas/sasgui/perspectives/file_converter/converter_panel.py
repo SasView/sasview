@@ -100,7 +100,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         entry_attrs = None
         if self.run_name is not None:
             entry_attrs = { 'name': self.run_name }
-        
+
         if single_file:
             writer.write(filepath, frame_data,
                 sasentry_attrs=entry_attrs)
@@ -307,11 +307,12 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         metadata = {
             'title': self.title,
             'run': self.run,
-            'intrument': self.instrument,
+            'instrument': self.instrument,
             'detector': [self.detector],
             'sample': self.sample,
             'source': self.source
         }
+        import pdb; pdb.set_trace()
 
         frame_data = {}
         for i in frames:
