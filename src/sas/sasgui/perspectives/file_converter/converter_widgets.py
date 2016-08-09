@@ -2,6 +2,7 @@
 This module provides some custom wx widgets for the file converter perspective
 """
 import wx
+import os
 from sas.sascalc.dataloader.data_info import Vector
 from sas.sasgui.guiframe.utils import check_float
 
@@ -127,3 +128,61 @@ class VectorInput(object):
             self._sizer.Add(z_input)
             self._inputs['z'] = z_input
             z_input.Bind(wx.EVT_TEXT, self._callback)
+
+class FileInput(object):
+
+    def __init__(self, parent, wildcard=''):
+        self.parent = parent
+        self._sizer = None
+        self._text_ctrl = None
+        self._button_ctrl = None
+        self._filepath = ''
+        self._wildcard = wildcard
+
+        self._do_layout()
+
+    def GetCtrl(self):
+        return self._sizer
+
+    def GetPath(self):
+        return self._filepath
+
+    def SetWildcard(self, wildcard):
+        self._wildcard = wildcard
+
+
+    def _on_text_change(self, event):
+        event.Skip()
+        self._filepath = self._text_ctrl.GetValue()
+
+    def _on_browse(self, event):
+        event.Skip()
+        initial_path = self._filepath
+        initial_dir = os.getcwd()
+        if not os.path.isfile(initial_path):
+            initial_path = ''
+        else:
+            initial_dir = os.path.split(initial_path)[0]
+
+        file_dlg = wx.FileDialog(self.parent, defaultDir=initial_dir,
+            defaultFile=initial_path, wildcard=self._wildcard,
+            style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
+        if file_dlg.ShowModal() == wx.ID_CANCEL:
+            file_dlg.Destroy()
+            return
+        self._filepath = file_dlg.GetPath()
+        file_dlg.Destroy()
+        self._text_ctrl.SetValue(self._filepath)
+
+    def _do_layout(self):
+        self._sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        self._text_ctrl = wx.TextCtrl(self.parent, -1)
+        self._sizer.Add(self._text_ctrl, wx.EXPAND)
+        self._text_ctrl.Bind(wx.EVT_TEXT, self._on_text_change)
+
+        self._sizer.AddSpacer(5)
+
+        self._button_ctrl = wx.Button(self.parent, -1, "Browse")
+        self._sizer.Add(self._button_ctrl)
+        self._button_ctrl.Bind(wx.EVT_BUTTON, self._on_browse)

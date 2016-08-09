@@ -9,7 +9,7 @@ import numpy as np
 from wx.lib.scrolledpanel import ScrolledPanel
 from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.perspectives.calculator import calculator_widgets as widget
-from sas.sasgui.perspectives.file_converter.converter_widgets import VectorInput
+from sas.sasgui.perspectives.file_converter.converter_widgets import FileInput
 from sas.sasgui.perspectives.file_converter.meta_panels import MetadataWindow
 from sas.sasgui.perspectives.file_converter.meta_panels import DetectorPanel
 from sas.sasgui.perspectives.file_converter.meta_panels import SamplePanel
@@ -485,10 +485,12 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             self.metadata_section.Collapse()
             self.on_collapsible_pane(None)
             self.metadata_section.Disable()
+            self.output.SetWildcard("Red2D (*.dat)|*.dat")
         else:
             self.q_input.Enable()
             self.radiation_input.Enable()
             self.metadata_section.Enable()
+            self.output.SetWildcard("CanSAS 1D (*.xml)|*.xml")
 
     def radiationtype_changed(self, event):
         event.Skip()
@@ -574,12 +576,9 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         output_label = wx.StaticText(self, -1, "Output File: ")
         input_grid.Add(output_label, (y,0), (1,1), wx.ALIGN_CENTER_VERTICAL, 5)
 
-        self.output = wx.FilePickerCtrl(self, -1,
-            size=(_STATICBOX_WIDTH-80, -1),
-            message="Chose where to save the output file.",
-            style=wx.FLP_SAVE | wx.FLP_OVERWRITE_PROMPT | wx.FLP_USE_TEXTCTRL,
-            wildcard="CanSAS 1D (*.xml)|*.xml|Red2D (*.dat)|*.dat")
-        input_grid.Add(self.output, (y,1), (1,1), wx.ALL, 5)
+        self.output = FileInput(self,
+            wildcard="CanSAS 1D (*.xml)|*.xml")
+        input_grid.Add(self.output.GetCtrl(), (y,1), (1,1), wx.EXPAND | wx.ALL, 5)
         y += 1
 
         convert_btn = wx.Button(self, wx.ID_OK, "Convert")
