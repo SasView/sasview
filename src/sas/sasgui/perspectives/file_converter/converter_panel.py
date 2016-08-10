@@ -19,9 +19,10 @@ from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.utils import check_float
-from sas.sasgui.perspectives.file_converter.cansas_writer import CansasWriter
+from sas.sascalc.file_converter.cansas_writer import CansasWriter
+from sas.sascalc.file_converter.otoko_loader import OTOKOLoader
+from sas.sascalc.file_converter.bsl_loader import BSLLoader
 from sas.sascalc.file_converter.convert_bsl_thread import ConvertBSLThread
-from sas.sasgui.perspectives.file_converter.otoko_loader import OTOKOLoader
 from sas.sascalc.dataloader.data_info import Detector
 from sas.sascalc.dataloader.data_info import Sample
 from sas.sascalc.dataloader.data_info import Source
@@ -55,6 +56,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         self.base = base
         self.parent = parent
         self.meta_frames = []
+        self.to_convert = {}
         self.bsl_thread = None
 
         # GUI inputs
@@ -182,6 +184,63 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
         return qdata, iqdata
 
+    def extract_bsl_data(self, filename):
+        """
+        Extracts data from a 2D BSL file
+
+        :param filename: The header file to extract the data from
+        :return x_data: A 1D array containing all the x coordinates of the data
+        :return y_data: A 1D array containing all the y coordinates of the data
+        :return frame_data: A dictionary of the form frame_number: data, where
+        data is a 2D numpy array containing the intensity data
+        """
+        loader = BSLLoader(filename)
+        frames = [0]
+        should_continue = True
+
+        if loader.n_frames > 1:
+            params = self.ask_frame_range(loader.n_frames)
+            frames = params['frames']
+            if len(frames) == 0:
+                should_continue = False
+        elif loader.n_rasters == 1 and loader.n_frames == 1:
+            message = ("The selected file is an OTOKO file. Please select the "
+            "'OTOKO 1D' option if you wish to convert it.")
+            dlg = wx.MessageDialog(self,
+            message,
+            'Error!',
+            wx.OK | wx.ICON_WARNING)
+            dlg.ShowModal()
+            should_continue = False
+            dlg.Destroy()
+        else:
+            message = ("The selected data file only has 1 frame, it might be"
+                " a multi-frame OTOKO file.\nContinue conversion?")
+            dlg = wx.MessageDialog(self,
+            message,
+            'Warning!',
+            wx.YES_NO | wx.ICON_WARNING)
+            should_continue = (dlg.ShowModal() == wx.ID_YES)
+            dlg.Destroy()
+
+        if not should_continue:
+            return None, None, None
+
+        frame_data = {}
+
+        for frame in frames:
+            loader.frame = frame
+            frame_data[frame] = loader.load_data()
+
+        # TODO: Tidy this up
+        # Prepare axes values (arbitrary scale)
+        x_data = []
+        y_data = range(loader.n_pixels) * loader.n_rasters
+        for i in range(loader.n_rasters):
+            x_data += [i] * loader.n_pixels
+
+        return x_data, y_data, frame_data
+
     def ask_frame_range(self, n_frames):
         """
         Display a dialog asking the user to input the range of frames they
@@ -235,8 +294,8 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             return
 
         if self.bsl_thread is not None and self.bsl_thread.isrunning():
+            self.to_convert = {}
             self.bsl_thread.stop()
-            self.conversion_complete(success=False)
             return
 
         self.sample.ID = self.title
@@ -248,10 +307,21 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             elif self.data_type == 'otoko':
                 qdata, iqdata = self.extract_otoko_data(self.q_input.GetPath())
             else: # self.data_type == 'bsl'
-                self.bsl_thread = ConvertBSLThread(self, self.iq_input.GetPath(),
-                    self.output.GetPath(), updatefn=self.conversion_update,
+
+                x, y, frame_data = self.extract_bsl_data(self.iq_input.GetPath())
+                if x == None and y == None and frame_data == None:
+                    # Cancelled by user
+                    return
+
+                self.to_convert = frame_data
+
+                frame_number, data = self.to_convert.popitem()
+                self.bsl_thread = ConvertBSLThread((x, y), data,
+                    self.output.GetPath(), frame_number=frame_number,
+                    updatefn=self.conversion_update,
                     completefn=self.conversion_complete)
                 self.bsl_thread.queue()
+
                 self.convert_btn.SetLabel("Stop Conversion")
                 return
 
@@ -329,14 +399,25 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                 StatusEvent(status=msg))
 
     def conversion_complete(self, success=True):
-        self.convert_btn.SetLabel("Convert")
-        msg = "Conversion "
+        msg = "Conversion of {} ".format(self.bsl_thread.frame_filename)
+
         if success:
             msg += "completed"
         else:
             msg += "failed"
         wx.PostEvent(self.parent.manager.parent,
             StatusEvent(status=msg))
+
+        if len(self.to_convert) == 0:
+            self.convert_btn.SetLabel("Convert")
+            self.bsl_thread = None
+            wx.PostEvent(self.parent.manager.parent,
+                StatusEvent(status="Conversion finished"))
+        else:
+            n, data = self.to_convert.popitem()
+            self.bsl_thread.frame_data = data
+            self.bsl_thread.frame_number = n
+            self.bsl_thread.queue()
 
 
     def on_help(self, event):
@@ -612,6 +693,8 @@ class ConverterWindow(widget.CHILD_FRAME):
         self.Show(True)
 
     def on_close(self, event):
+        if self.panel.bsl_thread.isrunning():
+            self.panel.bsl_thread.stop()
         if self.manager is not None:
             self.manager.converter_frame = None
         self.Destroy()
