@@ -284,8 +284,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                         StatusEvent(status=msg))
             else:
                 return { 'frames': [], 'inc': None, 'file': single_file }
-        frames = range(first_frame, last_frame + increment,
-            increment)
+        frames = range(first_frame, last_frame + 1, increment)
         return { 'frames': frames, 'inc': increment, 'file': single_file }
 
     def on_convert(self, event):
