@@ -732,6 +732,11 @@ class PlotPanel(wx.Panel):
                         self.yLabel = "y*x^(4)"
                         self.viewModel = "--"
                         dial.setValues(self.xLabel, self.yLabel, self.viewModel)
+                    if self.viewModel == "Kratky y*x^(2) vs x":
+                        self.xLabel = "x"
+                        self.yLabel = "y*x^(2)"
+                        self.viewModel = "--"
+                        dial.setValues(self.xLabel, self.yLabel, self.viewModel)
                     self._onEVT_FUNC_PROPERTY()
                 dial.Destroy()
 
@@ -1820,6 +1825,12 @@ class PlotPanel(wx.Panel):
                 item.transformY(transform.toOneOverX, transform.errOneOverX)
                 yunits = convert_unit(-1, yunits)
                 self.graph._yaxis_transformed("1/%s" % yname, "%s" % yunits)
+            if self.yLabel == "y*x^(2)":
+                set_ylim = True
+                item.transformY(transform.toYX2, transform.errToYX2)
+                xunits = convert_unit(4, self.xaxis_unit)
+                self.graph._yaxis_transformed("%s \ \ %s^{2}" % (yname, xname),
+                                              "%s%s" % (yunits, xunits))
             if self.yLabel == "y*x^(4)":
                 set_ylim = True
                 item.transformY(transform.toYX4, transform.errToYX4)

@@ -63,13 +63,14 @@ class Properties(wx.Dialog):
         self.yvalue.Insert("1/y", 1)
         self.yvalue.Insert("ln(y)", 2)
         self.yvalue.Insert("y^(2)", 3)
-        self.yvalue.Insert("y*x^(4)", 4)
-        self.yvalue.Insert("1/sqrt(y)", 5)
-        self.yvalue.Insert("log10(y)", 6)
-        self.yvalue.Insert("ln(y*x)", 7)
-        self.yvalue.Insert("ln(y*x^(2))", 8)
-        self.yvalue.Insert("ln(y*x^(4))", 9)
-        self.yvalue.Insert("log10(y*x^(4))", 10)
+        self.yvalue.Insert("y*x^(2)", 4)
+        self.yvalue.Insert("y*x^(4)", 5)
+        self.yvalue.Insert("1/sqrt(y)", 6)
+        self.yvalue.Insert("log10(y)", 7)
+        self.yvalue.Insert("ln(y*x)", 8)
+        self.yvalue.Insert("ln(y*x^(2))", 9)
+        self.yvalue.Insert("ln(y*x^(4))", 10)
+        self.yvalue.Insert("log10(y*x^(4))", 11)
         # type of view or model used
         self.view.SetValue("--")
         self.view.Insert("--", 0)
@@ -77,11 +78,7 @@ class Properties(wx.Dialog):
         self.view.Insert("Guinier lny vs x^(2)", 2)
         self.view.Insert("XS Guinier ln(y*x) vs x^(2)", 3)
         self.view.Insert("Porod y*x^(4) vs x^(4)", 4)
-        # This did not work in 3.1.2 and does not work now.
-        # prefer to fix (should not be too hard) but for the moment
-        # am removing as an option the user sees so they don't get
-        # disappointed.    PDB 7/10/2016 
-        # self.view.Insert("Kratky y*x^(2) vs x", 5)
+        self.view.Insert("Kratky y*x^(2) vs x", 5)
         self.SetSizer(vbox)
         self.Fit()
         self.Centre()
