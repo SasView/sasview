@@ -156,6 +156,12 @@ class Graph(object):
         self.prop["xlabel_base"] = name
         self.prop["xunit_base"] = units
 
+    def xlim(self, xlim):
+        """
+        Set the limits of the x axis to (min, max).
+        """
+        self.prop["xlim"] = xlim
+
     def yaxis(self, name, units):
         """
         Properties of the y axis.
@@ -166,6 +172,12 @@ class Graph(object):
         self.prop["yunit"] = units
         self.prop["ylabel_base"] = name
         self.prop["yunit_base"] = units
+
+    def ylim(self, ylim):
+        """
+        Set the limits of the y axis to (min, max).
+        """
+        self.prop["ylim"] = ylim
 
     def title(self, name):
         """
@@ -265,6 +277,7 @@ class Graph(object):
         self.symbol = 0
         self.prop = {"xlabel": "", "xunit": None,
                      "ylabel": "", "yunit": None,
+                     "xlim": None, "ylim": None,
                      "title": ""}
         self.plottables = {}
 
