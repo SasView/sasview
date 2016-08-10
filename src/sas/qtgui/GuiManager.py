@@ -19,14 +19,19 @@ from SasviewLogger import XStream
 
 import LocalConfig
 import GuiUtils
-from UI.AcknowledgementsUI import Acknowledgements
+from UI.AcknowledgementsUI import Ui_Acknowledgements
 from AboutBox import AboutBox
 from IPythonWidget import IPythonWidget
+from WelcomePanel import WelcomePanel
 
 # Perspectives
 from Perspectives.Invariant.InvariantPerspective import InvariantWindow
 from DataExplorer import DataExplorerWindow
-from WelcomePanel import WelcomePanel
+
+class Acknowledgements(QtGui.QDialog, Ui_Acknowledgements):
+    def __init__(self, parent=None):
+        QtGui.QDialog.__init__(self, parent)
+        self.setupUi(self)
 
 class GuiManager(object):
     """

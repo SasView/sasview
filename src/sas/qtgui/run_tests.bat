@@ -1,0 +1,12 @@
+@echo off
+
+python -m UnitTesting.TestUtilsTest
+python -m UnitTesting.WelcomePanelTest
+python -m UnitTesting.DataExplorerTest
+python -m UnitTesting.GuiManagerTest
+python -m UnitTesting.MainWindowTest
+python -m UnitTesting.GuiUtilsTest
+python -m UnitTesting.AboutBoxTest
+python -m UnitTesting.DroppableDataLoadWidgetTest
+python -m UnitTesting.SasviewLoggerTest
+python -m UnitTesting.PlotHelperTest

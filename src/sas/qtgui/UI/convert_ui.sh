@@ -1,1 +1,1 @@
-pyuic.bat -w $1.ui > $1.py
+pyuic.bat $1.ui > $1.py

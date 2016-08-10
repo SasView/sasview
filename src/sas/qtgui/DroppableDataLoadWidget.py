@@ -1,16 +1,17 @@
 # global
-from PyQt4 import QtCore
+from PyQt4 import QtGui, QtCore
 
 # UI
-from UI.DataExplorerUI import DataLoadWidget
+from UI.DataExplorerUI import Ui_DataLoadWidget
 
-class DroppableDataLoadWidget(DataLoadWidget):
+class DroppableDataLoadWidget(QtGui.QTabWidget, Ui_DataLoadWidget):
     """
     Overwrite drag and drop methods in the base class
     so users can drop files directly onto the Data Explorer
     """
     def __init__(self, parent=None, guimanager=None):
         super(DroppableDataLoadWidget, self).__init__(parent)
+        self.setupUi(self)
 
         # Enable file drag-drop on treeView
         self.setAcceptDrops(True)

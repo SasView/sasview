@@ -3,15 +3,16 @@
 from PyQt4 import QtGui
 
 # Local UI
-from UI.MainWindowUI import MainWindow
+from UI.MainWindowUI import Ui_MainWindow
 
 # Initialize logging
 import SasviewLogger
 
-class MainSasViewWindow(MainWindow):
+class MainSasViewWindow(QtGui.QMainWindow, Ui_MainWindow):
     # Main window of the application
     def __init__(self, reactor, parent=None):
         super(MainSasViewWindow, self).__init__(parent)
+        self.setupUi(self)
 
         # define workspace for dialogs.
         self.workspace = QtGui.QWorkspace(self)

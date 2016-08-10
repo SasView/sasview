@@ -8,11 +8,13 @@ from PyQt4 import QtWebKit
 import sas.sasview
 import LocalConfig
 
-from UI.WelcomePanelUI import WelcomePanelUI
+from UI.WelcomePanelUI import Ui_WelcomePanelUI
 
-class WelcomePanel(WelcomePanelUI):
+class WelcomePanel(QtGui.QDialog, Ui_WelcomePanelUI):
     def __init__(self, parent=None):
         super(WelcomePanel, self).__init__(parent)
+        self.setupUi(self)
+
         self.setWindowTitle("Welcome")
 
         version = sas.sasview.__version__

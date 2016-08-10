@@ -1,14 +1,17 @@
 import functools
+from PyQt4 import QtGui
 
 import sas.sasview
 import LocalConfig
 import GuiUtils
 
-from UI.AboutUI import AboutUI
+from UI.AboutUI import Ui_AboutUI
 
-class AboutBox(AboutUI):
+class AboutBox(QtGui.QDialog, Ui_AboutUI):
     def __init__(self, parent=None):
         super(AboutBox, self).__init__(parent)
+        self.setupUi(self)
+
         self.setWindowTitle("About")
 
         self.addText()
