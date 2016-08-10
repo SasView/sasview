@@ -15,12 +15,12 @@ echo %WORKSPACE%
 
 
 :: SET SASVIEW GITHASH ################################################
-cd %WORKSPACE%
-cd sasview\sasview
-git rev-parse HEAD > tmpFile_githash
-SET /p githash= < tmpFile_githash
-DEL tmpFile_githash
-%GIT_SED% -i.bak "s/GIT_COMMIT/%githash%/g" __init__.py
+:: cd %WORKSPACE%
+:: cd sasview\sasview
+:: git rev-parse HEAD > tmpFile_githash
+:: SET /p githash= < tmpFile_githash
+:: DEL tmpFile_githash
+:: %GIT_SED% -i.bak "s/GIT_COMMIT/%githash%/g" __init__.py
 
 
 
