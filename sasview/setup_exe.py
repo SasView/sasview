@@ -241,6 +241,12 @@ if os.path.isfile(f):
 f = 'default_categories.json'
 if os.path.isfile(f):
     data_files.append(('.', [f]))
+
+# atlas DLL required by matplotlib 11.1
+# ** REVISIT WHEN MOVING TO ANACONDA **
+f = "c:\\python27\\lib\\site-packages\\numpy\\core\\numpy-atlas.dll"
+if os.path.isfile(f):
+    data_files.append(('.', [f]))
     
 if os.path.isfile("BUILD_NUMBER"):
     data_files.append(('.', ["BUILD_NUMBER"]))
@@ -331,6 +337,7 @@ dll_excludes = [
     'tcl84.dll', 'tk84.dll', 'QtGui4.dll', 'QtCore4.dll',
     # numpy 1.8 openmp bindings (still seems to use all the cores without them)
     #'libiomp5md.dll', 'libifcoremd.dll', 'libmmd.dll', 'svml_dispmd.dll','libifportMD.dll',
+    'numpy-atlas.dll',
     # microsoft C runtime (not allowed to ship with the app; need to ship vcredist
     'msvcp90.dll',
     # 32-bit windows console piping
