@@ -6,6 +6,8 @@ Provide base functionality for all model components
 
 # imports
 import copy
+from collections import OrderedDict
+
 import numpy
 #TO DO: that about a way to make the parameter
 #is self return if it is fittable or not
@@ -253,7 +255,7 @@ class BaseComponent:
         """
         Return a list of all available parameters for the model
         """
-        list = self.params.keys()
+        list = _ordered_keys(self.params)
         # WARNING: Extending the list with the dispersion parameters
         list.extend(self.getDispParamList())
         return list
@@ -263,9 +265,8 @@ class BaseComponent:
         Return a list of all available parameters for the model
         """
         list = []
-
-        for item in self.dispersion.keys():
-            for p in self.dispersion[item].keys():
+        for item in _ordered_keys(self.dispersion):
+            for p in _ordered_keys(self.dispersion[item]):
                 if p not in ['type']:
                     list.append('%s.%s' % (item.lower(), p.lower()))
 
@@ -308,3 +309,10 @@ class BaseComponent:
         div
         """
         raise ValueError, "Model operation are no longer supported"
+
+
+def _ordered_keys(d):
+    keys = list(d.keys())
+    if not isinstance(d, OrderedDict):
+        keys.sort()
+    return keys
