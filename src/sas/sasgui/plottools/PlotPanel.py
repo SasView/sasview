@@ -1222,10 +1222,6 @@ class PlotPanel(wx.Panel):
             self.subplot.set_xlabel(r"$%s$"%prop["xlabel"])
         if prop["ylabel"]:
             self.subplot.set_ylabel(r"$%s$"%prop["ylabel"])
-        if prop["xlim"] is not None:
-            self.subplot.set_xlim(prop["xlim"])
-        if prop["ylim"] is not None:
-            self.subplot.set_ylim(prop["ylim"])
         self.subplot.set_title(prop["title"])
 
 
@@ -1766,7 +1762,6 @@ class PlotPanel(wx.Panel):
         _xscale = 'linear'
         _yscale = 'linear'
         for item in list:
-            set_ylim = False # Whether to set ylim based on data points or error bars
             item.setLabel(self.xLabel, self.yLabel)
             # control axis labels from the panel itself
             yname, yunits = item.get_yaxis()
@@ -1826,13 +1821,11 @@ class PlotPanel(wx.Panel):
                 yunits = convert_unit(-1, yunits)
                 self.graph._yaxis_transformed("1/%s" % yname, "%s" % yunits)
             if self.yLabel == "y*x^(2)":
-                set_ylim = True
                 item.transformY(transform.toYX2, transform.errToYX2)
                 xunits = convert_unit(4, self.xaxis_unit)
                 self.graph._yaxis_transformed("%s \ \ %s^{2}" % (yname, xname),
                                               "%s%s" % (yunits, xunits))
             if self.yLabel == "y*x^(4)":
-                set_ylim = True
                 item.transformY(transform.toYX4, transform.errToYX4)
                 xunits = convert_unit(4, self.xaxis_unit)
                 self.graph._yaxis_transformed("%s \ \ %s^{4}" % (yname, xname),
@@ -1863,24 +1856,7 @@ class PlotPanel(wx.Panel):
                 _yscale = 'log'
                 self.graph._yaxis_transformed("%s \ \ %s^{4}" % (yname, xname),
                                               "%s%s" % (yunits, xunits))
-            if self.viewModel == "Guinier lny vs x^(2)":
-                item.transformX(transform.toX2, transform.errToX2)
-                xunits = convert_unit(2, xunits)
-                self.graph._xaxis_transformed("%s^{2}" % xname, "%s" % xunits)
-                item.transformY(transform.toLogX, transform.errToLogX)
-                self.graph._yaxis_transformed("\ln\ \ %s" % yname, "%s" % yunits)
-            if self.viewModel == "Porod y*x^(4) vs x^(4)":
-                item.transformX(transform.toX4, transform.errToX4)
-                xunits = convert_unit(4, self.xaxis_unit)
-                self.graph._xaxis_transformed("%s^{4}" % xname, "%s" % xunits)
-                item.transformY(transform.toYX4, transform.errToYX4)
-                self.graph._yaxis_transformed("%s \ \ %s^{4}" % (yname, xname),
-                                              "%s%s" % (yunits, xunits))
             item.transformView()
-            if set_ylim:
-                self.graph.ylim((min(item.view.y), max(item.view.y)))
-            else:
-                self.graph.ylim(None)
 
         # set new label and units
         yname = self.graph.prop["ylabel"]
