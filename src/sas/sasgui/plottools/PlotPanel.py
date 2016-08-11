@@ -1797,7 +1797,7 @@ class PlotPanel(wx.Panel):
                 self.graph._yaxis_transformed("1/%s" % yname, "%s" % yunits)
             if self.yLabel == "y*x^(2)":
                 item.transformY(transform.toYX2, transform.errToYX2)
-                xunits = convert_unit(4, self.xaxis_unit)
+                xunits = convert_unit(2, self.xaxis_unit)
                 self.graph._yaxis_transformed("%s \ \ %s^{2}" % (yname, xname),
                                               "%s%s" % (yunits, xunits))
             if self.yLabel == "y*x^(4)":
