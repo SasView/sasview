@@ -14,7 +14,7 @@ from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.perspectives.calculator import calculator_widgets as widget
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
-#Control panel width 
+#Control panel width
 if sys.platform.count("win32") > 0:
     PANEL_TOP = 0
     PANEL_WIDTH = 790
@@ -155,7 +155,7 @@ class DataOperPanel(wx.ScrolledWindow):
         self._show_numctrl(self.numberctr, False)
 
         wx.EVT_TEXT_ENTER(self.data_namectr, -1, self.on_name)
-        wx.EVT_TEXT_ENTER(self.numberctr, -1, self.on_number)
+        wx.EVT_TEXT(self.numberctr, -1, self.on_number)
         wx.EVT_COMBOBOX(self.data1_cbox, -1, self.on_select_data1)
         wx.EVT_COMBOBOX(self.operator_cbox, -1, self.on_select_operator)
         wx.EVT_COMBOBOX(self.data2_cbox, -1, self.on_select_data2)
@@ -234,12 +234,16 @@ class DataOperPanel(wx.ScrolledWindow):
             ctrl.SetBackgroundColour(color)
         self.name_sizer.Layout()
 
-    def on_number(self, event=None):
+    def on_number(self, event=None, control=None):
         """
         On selecting Number for Data2
         """
         self.send_warnings('')
-        item = event.GetEventObject()
+        item = control
+        if item is None and event is not None:
+            item = event.GetEventObject()
+        elif item is None:
+            raise ValueError("Event or control must be supplied")
         text = item.GetValue().strip()
         if self.numberctr.IsShown():
             if self.numberctr.IsEnabled():
@@ -250,9 +254,10 @@ class DataOperPanel(wx.ScrolledWindow):
                     self.data2_cbox.SetClientData(pos, val)
                 except:
                     self._set_textctrl_color(self.numberctr, 'pink')
-                    msg = "DataOperation: Number requires a float number."
-                    self.send_warnings(msg, 'error')
-                    return
+                    if event is None:
+                        msg = "DataOperation: Number requires a float number."
+                        self.send_warnings(msg, 'error')
+                    return False
             else:
                 self._set_textctrl_color(self.numberctr, self.color)
 
@@ -262,6 +267,7 @@ class DataOperPanel(wx.ScrolledWindow):
             self.output.name = str(self.data_namectr.GetValue())
         self.draw_output(self.output)
         self.Refresh()
+        return True
 
     def on_select_data1(self, event=None):
         """
@@ -606,6 +612,10 @@ class DataOperPanel(wx.ScrolledWindow):
             msg = "No Output Data has been generated...   "
             wx.MessageBox(msg, 'Error')
             return
+        if self.numberctr.IsEnabled() and self.numberctr.IsShown():
+            valid_num = self.on_number(control=self.numberctr)
+            if not valid_num:
+                return
         # send data to data manager
         self.output.name = name
         self.output.run = "Data Operation"
@@ -730,7 +740,7 @@ class SmallPanel(PlotPanel):
 
         #add plot
         self.graph.add(plot)
-        #draw        
+        #draw
         self.graph.render(self)
 
         try:
@@ -984,4 +994,3 @@ if __name__ == "__main__":
     widget.CHILD_FRAME = wx.Frame
     window = DataOperatorWindow(parent=None, data=[], title="Data Editor")
     app.MainLoop()
-
