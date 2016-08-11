@@ -12,13 +12,12 @@ from mock import MagicMock
 
 # Local
 from DataExplorer import DataExplorerWindow
-from UI.AcknowledgementsUI import Acknowledgements
 from AboutBox import AboutBox
 from WelcomePanel import WelcomePanel
 from IPythonWidget import IPythonWidget
 
-from GuiManager import GuiManager
-from UI.MainWindowUI import MainWindow
+from GuiManager import Acknowledgements, GuiManager
+from MainWindow import MainSasViewWindow
 from UnitTesting.TestUtils import QtSignalSpy
 
 app = QApplication(sys.argv)
@@ -27,16 +26,16 @@ class GuiManagerTest(unittest.TestCase):
     '''Test the Main Window functionality'''
     def setUp(self):
         '''Create the tested object'''
-        class MainSasViewWindow(MainWindow):
+        class MainWindow(MainSasViewWindow):
             # Main window of the application
             def __init__(self, reactor, parent=None):
-                super(MainSasViewWindow, self).__init__(parent)
+                super(MainWindow, self).__init__(parent)
         
                 # define workspace for dialogs.
                 self.workspace = QWorkspace(self)
                 self.setCentralWidget(self.workspace)
 
-        self.manager = GuiManager(MainSasViewWindow(None), None)
+        self.manager = GuiManager(MainWindow(None), None)
 
     def tearDown(self):
         '''Destroy the GUI'''
