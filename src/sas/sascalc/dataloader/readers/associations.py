@@ -91,6 +91,8 @@ def register_readers(registry_function):
     #import tiff_reader
     import nexus_reader
     import sesans_reader
+    import cansas_reader_HDF5
+    import anton_paar_saxs_reader
     registry_function(sesans_reader)
     registry_function(abs_reader)
     registry_function(ascii_reader)
@@ -101,5 +103,6 @@ def register_readers(registry_function):
     registry_function(red2d_reader)
     #registry_function(tiff_reader)
     registry_function(nexus_reader)
-    
+    registry_function(cansas_reader_HDF5)
+    registry_function(anton_paar_saxs_reader)
     return True
