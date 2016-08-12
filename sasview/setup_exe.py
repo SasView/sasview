@@ -242,12 +242,27 @@ f = 'default_categories.json'
 if os.path.isfile(f):
     data_files.append(('.', [f]))
 
-# atlas DLL required by matplotlib 11.1
-# ** REVISIT WHEN MOVING TO ANACONDA **
-f = "c:\\python27\\lib\\site-packages\\numpy\\core\\numpy-atlas.dll"
-if os.path.isfile(f):
-    data_files.append(('.', [f]))
-    
+# numerical libraries
+def dll_check(dll_path, dlls):
+    dll_includes = [os.path.join(dll_path, dll+'.dll') for dll in dlls]
+    return [dll for dll in dll_includes if os.path.exists(dll)]
+
+python_root = os.path.dirname(os.path.abspath(sys.executable))
+# Check for ATLAS
+dll_path = os.path.join(python_root, 'lib', 'site-packages', 'numpy', 'core')
+dlls = ['numpy-atlas']
+atlas_dlls = dll_check(dll_path, dlls)
+
+# Check for MKL
+dll_path = os.path.join(python_root, 'Library', 'bin')
+dlls = ['mkl_core', 'mkl_def', 'libiomp5md']
+mkl_dlls = dll_check(dll_path, dlls)
+
+if atlas_dlls:
+    data_files.append(('.', atlas_dlls))
+elif mkl_dlls:
+    data_files.append(('.', mkl_dlls))
+
 if os.path.isfile("BUILD_NUMBER"):
     data_files.append(('.', ["BUILD_NUMBER"]))
 
