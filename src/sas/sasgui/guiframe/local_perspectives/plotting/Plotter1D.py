@@ -591,11 +591,6 @@ class ModelPanel1D(PlotPanel, PanelBase):
             # add menu of other plugins
             item_list = self.parent.get_current_context_menu(self)
             if (not item_list == None) and (not len(item_list) == 0):
-                # Note: reusing menu ids in submenu.  This code works because
-                # IdItems is set up as a lazy iterator returning each id in
-                # sequence, creating new ids as needed so it never runs out.
-                # zip() is set up to stop when any iterator is empty, so it
-                # only asks for the number of ids in item_list.
                 for item, wx_id in zip(item_list, [ids.next() for i in range(len(item_list))]):
 
                     try:
