@@ -596,7 +596,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 # sequence, creating new ids as needed so it never runs out.
                 # zip() is set up to stop when any iterator is empty, so it
                 # only asks for the number of ids in item_list.
-                for item, wx_id in zip(item_list, self._menu_ids):
+                for item, wx_id in zip(item_list, [ids.next() for i in range(len(item_list))]):
 
                     try:
                         plot_menu.Append(wx_id, item[0], name)
