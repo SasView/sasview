@@ -49,6 +49,33 @@ class Plugin(PluginBase):
 
         return [self.corfunc_panel]
 
+    def get_context_menu(self, plotpanel=None):
+        """
+        Get the context menu items available for Corfunc.
+
+        :param plotpanel: A Plotter1D panel
+
+        :return: a list of menu items with call-back function
+
+        :note: if Data1D was generated from Theory1D
+                the fitting option is not allowed
+        """
+        graph = plotpanel.graph
+        if graph.selected_plottable not in plotpanel.plots:
+            return []
+        data = plotpanel.plots[graph.selected_plottable]
+        if data.id == IQ_DATA_LABEL or data.id == IQ_EXTRAPOLATED_DATA_LABEL or data.id == TRANSFORM_LABEL:
+            return []
+        item = plotpanel.plots[graph.selected_plottable]
+        if item.__class__.__name__ is "Data2D":
+            return []
+        elif item.__class__.__name__ is "Data1D":
+            return [["Select data in corfunc",
+                "Send this data to the correlation function perspective",
+                self._on_select_data]]
+
+
+
     def set_state(self, state=None, datainfo=None):
         """
         Callback for CorfuncState reader. Called when a .cor file is loaded
@@ -162,3 +189,11 @@ class Plugin(PluginBase):
             NewPlotEvent(action='delete', group_id=GROUP_ID_TRANSFORM))
         wx.PostEvent(self.parent,
             NewPlotEvent(action='clear', group_id=GROUP_ID_IQ_DATA))
+
+    def _on_select_data(self, event):
+        panel = event.GetEventObject()
+        if not panel.graph.selected_plottable in panel.plots:
+            return
+        data = panel.plots[panel.graph.selected_plottable]
+        print "Data id is: {}".format(data.id)
+        self.set_data([data])
