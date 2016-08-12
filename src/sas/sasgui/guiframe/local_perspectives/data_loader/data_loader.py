@@ -161,7 +161,7 @@ class Plugin(PluginBase):
         else:
             logging.error("Loader returned an invalid object:\n %s" % str(item))
             data_error = True
-        
+
         data = self.parent.create_gui_data(item, p_file)
         output[data.id] = data
         return output, message, data_error
@@ -175,17 +175,19 @@ class Plugin(PluginBase):
         any_error = False
         data_error = False
         error_message = ""
+
         for p_file in path:
             info = "info"
             basename = os.path.basename(p_file)
             _, extension = os.path.splitext(basename)
             if extension.lower() in EXTENSIONS:
                 any_error = True
+                info = "error"
                 log_msg = "Data Loader cannot "
                 log_msg += "load: %s\n" % str(p_file)
                 log_msg += """Please try to open that file from "open project" """
-                log_msg += """or "open analysis" menu\n"""
-                error_message = log_msg + "\n"
+                log_msg += """or "open analysis" menu\n\n"""
+                error_message += log_msg
                 logging.info(log_msg)
                 continue
 
@@ -209,24 +211,22 @@ class Plugin(PluginBase):
             except:
                 logging.error(sys.exc_value)
                 any_error = True
-            if any_error or error_message != "":
-                if error_message == "":
-                    error = "Error: " + str(sys.exc_info()[1]) + "\n"
-                    error += "while loading Data: \n%s\n" % str(basename)
-                    error_message += "The data file you selected could not be loaded.\n"
-                    error_message += "Make sure the content of your file"
-                    error_message += " is properly formatted.\n\n"
-                    error_message += "When contacting the SasView team, mention the"
-                    error_message += " following:\n%s" % str(error)
-                elif data_error:
-                    base_message = "Errors occurred while loading "
-                    base_message += "{0}\n".format(basename)
-                    base_message += "The data file loaded but with errors.\n"
-                    error_message = base_message + error_message
-                else:
-                    error_message += "%s\n" % str(p_file)
+            if any_error:
+                error = "Error: " + str(sys.exc_info()[1])
+                error += " while loading file: %s" % str(basename)
+                error_message += "The data file you selected could not be loaded.\n"
+                error_message += "Make sure the content of your file"
+                error_message += " is properly formatted.\n"
+                error_message += "When contacting the SasView team, mention the"
+                error_message += " following:\n%s\n\n" % str(error)
                 info = "error"
-        
+            elif data_error:
+                base_message = "Errors occurred while loading "
+                base_message += "{0}\n".format(basename)
+                base_message += "The data file loaded but with errors.\n"
+                error_message = base_message + error_message
+                info = "error"
+
         if any_error or error_message:
             self.load_update(output=output, message=error_message, info=info)
         else:
@@ -253,6 +253,3 @@ class Plugin(PluginBase):
         # if error_message != "":
         #    self.load_error(error_message)
         self.parent.add_data(data_list=output)
-
-
-
