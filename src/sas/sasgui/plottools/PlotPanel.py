@@ -712,26 +712,6 @@ class PlotPanel(wx.Panel):
                 dial.setValues(self.prevXtrans, self.prevYtrans, self.viewModel)
                 if dial.ShowModal() == wx.ID_OK:
                     self.xLabel, self.yLabel, self.viewModel = dial.getValues()
-                    if self.viewModel == "Linear y vs x":
-                        self.xLabel = "x"
-                        self.yLabel = "y"
-                        self.viewModel = "--"
-                        dial.setValues(self.xLabel, self.yLabel, self.viewModel)
-                    if self.viewModel == "Guinier lny vs x^(2)":
-                        self.xLabel = "x^(2)"
-                        self.yLabel = "ln(y)"
-                        self.viewModel = "--"
-                        dial.setValues(self.xLabel, self.yLabel, self.viewModel)
-                    if self.viewModel == "XS Guinier ln(y*x) vs x^(2)":
-                        self.xLabel = "x^(2)"
-                        self.yLabel = "ln(y*x)"
-                        self.viewModel = "--"
-                        dial.setValues(self.xLabel, self.yLabel, self.viewModel)
-                    if self.viewModel == "Porod y*x^(4) vs x^(4)":
-                        self.xLabel = "x^(4)"
-                        self.yLabel = "y*x^(4)"
-                        self.viewModel = "--"
-                        dial.setValues(self.xLabel, self.yLabel, self.viewModel)
                     self._onEVT_FUNC_PROPERTY()
                 dial.Destroy()
 
@@ -1210,16 +1190,15 @@ class PlotPanel(wx.Panel):
         # even less clear.
 
         # Properties defined by plot
-        
+
         # Ricardo:
-        # A empty label "$$" will prevent the panel from displaying! 
-        
+        # A empty label "$$" will prevent the panel from displaying!
         if prop["xlabel"]:
             self.subplot.set_xlabel(r"$%s$"%prop["xlabel"])
         if prop["ylabel"]:
             self.subplot.set_ylabel(r"$%s$"%prop["ylabel"])
         self.subplot.set_title(prop["title"])
-        
+
 
     def clear(self):
         """Reset the plot"""
@@ -1563,7 +1542,7 @@ class PlotPanel(wx.Panel):
                                                   y=self.qx_data,
                                                   bins=[self.y_bins, self.x_bins],
                                                   weights=self.data)
-        # Now, normalize the image by weights only for weights>1: 
+        # Now, normalize the image by weights only for weights>1:
         # If weight == 1, there is only one data point in the bin so
         # that no normalization is required.
         image[weights > 1] = image[weights > 1] / weights[weights > 1]
@@ -1759,7 +1738,6 @@ class PlotPanel(wx.Panel):
         _yscale = 'linear'
         for item in list:
             item.setLabel(self.xLabel, self.yLabel)
-
             # control axis labels from the panel itself
             yname, yunits = item.get_yaxis()
             if self.yaxis_label != None:
@@ -1789,7 +1767,7 @@ class PlotPanel(wx.Panel):
                 self.graph._xaxis_transformed("%s^{4}" % xname, "%s" % xunits)
             if self.xLabel == "ln(x)":
                 item.transformX(transform.toLogX, transform.errToLogX)
-                self.graph._xaxis_transformed("\ln\\ %s" % xname, "%s" % xunits)
+                self.graph._xaxis_transformed("\ln{(%s)}" % xname, "%s" % xunits)
             if self.xLabel == "log10(x)":
                 item.transformX(transform.toX_pos, transform.errToX_pos)
                 _xscale = 'log'
@@ -1801,7 +1779,7 @@ class PlotPanel(wx.Panel):
                 _xscale = 'log'
             if self.yLabel == "ln(y)":
                 item.transformY(transform.toLogX, transform.errToLogX)
-                self.graph._yaxis_transformed("\ln\\ %s" % yname, "%s" % yunits)
+                self.graph._yaxis_transformed("\ln{(%s)}" % yname, "%s" % yunits)
             if self.yLabel == "y":
                 item.transformY(transform.toX, transform.errToX)
                 self.graph._yaxis_transformed("%s" % yname, "%s" % yunits)
@@ -1817,6 +1795,11 @@ class PlotPanel(wx.Panel):
                 item.transformY(transform.toOneOverX, transform.errOneOverX)
                 yunits = convert_unit(-1, yunits)
                 self.graph._yaxis_transformed("1/%s" % yname, "%s" % yunits)
+            if self.yLabel == "y*x^(2)":
+                item.transformY(transform.toYX2, transform.errToYX2)
+                xunits = convert_unit(2, self.xaxis_unit)
+                self.graph._yaxis_transformed("%s \ \ %s^{2}" % (yname, xname),
+                                              "%s%s" % (yunits, xunits))
             if self.yLabel == "y*x^(4)":
                 item.transformY(transform.toYX4, transform.errToYX4)
                 xunits = convert_unit(4, self.xaxis_unit)
@@ -1830,7 +1813,7 @@ class PlotPanel(wx.Panel):
                                               "%s" % yunits)
             if self.yLabel == "ln(y*x)":
                 item.transformY(transform.toLogXY, transform.errToLogXY)
-                self.graph._yaxis_transformed("\ln (%s \ \ %s)" % (yname, xname),
+                self.graph._yaxis_transformed("\ln{(%s \ \ %s)}" % (yname, xname),
                                               "%s%s" % (yunits, self.xaxis_unit))
             if self.yLabel == "ln(y*x^(2))":
                 item.transformY(transform.toLogYX2, transform.errToLogYX2)
@@ -1846,19 +1829,6 @@ class PlotPanel(wx.Panel):
                 item.transformY(transform.toYX4, transform.errToYX4)
                 xunits = convert_unit(4, self.xaxis_unit)
                 _yscale = 'log'
-                self.graph._yaxis_transformed("%s \ \ %s^{4}" % (yname, xname),
-                                              "%s%s" % (yunits, xunits))
-            if self.viewModel == "Guinier lny vs x^(2)":
-                item.transformX(transform.toX2, transform.errToX2)
-                xunits = convert_unit(2, xunits)
-                self.graph._xaxis_transformed("%s^{2}" % xname, "%s" % xunits)
-                item.transformY(transform.toLogX, transform.errToLogX)
-                self.graph._yaxis_transformed("\ln\ \ %s" % yname, "%s" % yunits)
-            if self.viewModel == "Porod y*x^(4) vs x^(4)":
-                item.transformX(transform.toX4, transform.errToX4)
-                xunits = convert_unit(4, self.xaxis_unit)
-                self.graph._xaxis_transformed("%s^{4}" % xname, "%s" % xunits)
-                item.transformY(transform.toYX4, transform.errToYX4)
                 self.graph._yaxis_transformed("%s \ \ %s^{4}" % (yname, xname),
                                               "%s%s" % (yunits, xunits))
             item.transformView()
