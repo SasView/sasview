@@ -526,6 +526,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             # Recover the x,y limits
             self.subplot.set_xlim((xlo, xhi))
             self.subplot.set_ylim((ylo, yhi))
+        self.graph.selected_plottable = None
 
 
     def _onRemove(self, event):
