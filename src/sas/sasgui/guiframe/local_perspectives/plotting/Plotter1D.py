@@ -603,10 +603,11 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 plot_menu.AppendSeparator()
 
             if self.parent.ClassName.count('wxDialog') == 0:
-                wx_id = ids.next()
-                plot_menu.Append(wx_id, '&Linear Fit', name)
-                wx.EVT_MENU(self, wx_id, self.onFitting)
-                plot_menu.AppendSeparator()
+                if plot.id != 'fit':
+                    wx_id = ids.next()
+                    plot_menu.Append(wx_id, '&Linear Fit', name)
+                    wx.EVT_MENU(self, wx_id, self.onFitting)
+                    plot_menu.AppendSeparator()
 
                 wx_id = ids.next()
                 plot_menu.Append(wx_id, "Remove", name)
