@@ -14,7 +14,6 @@ from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
 from matplotlib.figure import Figure
 import os
 import transform
-from plottables import Data1D
 #TODO: make the plottables interactive
 from binder import BindArtist
 from matplotlib.font_manager import FontProperties
@@ -189,6 +188,7 @@ class PlotPanel(wx.Panel):
         #self.selected_plottable = None
 
         # new data for the fit
+        from sas.sasgui.guiframe.dataFitting import Data1D
         self.fit_result = Data1D(x=[], y=[], dy=None)
         self.fit_result.symbol = 13
         #self.fit_result = Data1D(x=[], y=[],dx=None, dy=None)
@@ -1724,6 +1724,9 @@ class PlotPanel(wx.Panel):
         # Delete first, and then get the whole list...
         if remove_fit:
             self.graph.delete(self.fit_result)
+            if hasattr(self, 'plots'):
+                if 'fit' in self.plots.keys():
+                    del self.plots['fit']
         self.ly = None
         self.q_ctrl = None
         list = self.graph.returnPlottable()
@@ -1737,6 +1740,8 @@ class PlotPanel(wx.Panel):
         _xscale = 'linear'
         _yscale = 'linear'
         for item in list:
+            if item.id == 'fit':
+                continue
             item.setLabel(self.xLabel, self.yLabel)
             # control axis labels from the panel itself
             yname, yunits = item.get_yaxis()
@@ -1891,6 +1896,13 @@ class PlotPanel(wx.Panel):
         self.graph.add(self.fit_result)
         self.graph.render(self)
         self._offset_graph()
+        if hasattr(self, 'plots'):
+            # Used by Plotter1D
+            fit_id = 'fit'
+            self.fit_result.id = fit_id
+            self.fit_result.title = 'Fit'
+            self.fit_result.name = 'Fit'
+            self.plots[fit_id] = self.fit_result
         self.subplot.figure.canvas.draw_idle()
 
     def onChangeCaption(self, event):
