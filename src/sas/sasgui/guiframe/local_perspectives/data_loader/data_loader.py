@@ -172,16 +172,15 @@ class Plugin(PluginBase):
         message = ""
         log_msg = ''
         output = {}
-        any_error = False
         data_error = False
         error_message = ""
 
         for p_file in path:
+            file_error = False
             info = "info"
             basename = os.path.basename(p_file)
             _, extension = os.path.splitext(basename)
             if extension.lower() in EXTENSIONS:
-                any_error = True
                 info = "error"
                 log_msg = "Data Loader cannot "
                 log_msg += "load: %s\n" % str(p_file)
@@ -210,8 +209,8 @@ class Plugin(PluginBase):
                                                           error_message)
             except:
                 logging.error(sys.exc_value)
-                any_error = True
-            if any_error:
+                file_error = True
+            if file_error:
                 error = "Error: " + str(sys.exc_info()[1])
                 error += " while loading file: %s" % str(basename)
                 error_message += "The data file you selected could not be loaded.\n"
@@ -227,7 +226,7 @@ class Plugin(PluginBase):
                 error_message = base_message + error_message
                 info = "error"
 
-        if any_error or error_message:
+        if error_message != "":
             self.load_update(output=output, message=error_message, info=info)
         else:
             message = "Loading Data Complete! "
