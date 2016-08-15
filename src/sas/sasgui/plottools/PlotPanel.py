@@ -149,6 +149,7 @@ class PlotPanel(wx.Panel):
 
         #List of texts currently on the plot
         self.textList = []
+        self.selectedText = None
         #User scale
         if xtransform != None:
             self.xLabel = xtransform
@@ -351,6 +352,11 @@ class PlotPanel(wx.Panel):
         if event.button == 1:
             self.leftdown = True
             ax = event.inaxes
+            for text in self.textList:
+                if text.contains(event)[0]: # If user has clicked on text
+                    self.selectedText = text
+                    return
+
             if ax != None:
                 self.xInit, self.yInit = event.xdata, event.ydata
                 try:
@@ -372,6 +378,7 @@ class PlotPanel(wx.Panel):
             self.leftdown = False
             self.mousemotion = False
             self.leftup = True
+            self.selectedText = None
 
         #release the legend
         if self.gotLegend == 1:
@@ -447,6 +454,19 @@ class PlotPanel(wx.Panel):
         if self.gotLegend == 1:
             self._on_legend_motion(event)
             return
+
+        if self.leftdown and self.selectedText is not None:
+            # User has clicked on text and is dragging
+            ax = event.inaxes
+            if ax != None:
+                # Only move text if mouse is within axes
+                self.selectedText.set_position((event.xdata, event.ydata))
+                self._dragHelper(0, 0)
+            else:
+                # User has dragged outside of axes
+                self.selectedText = None
+            return
+
         if self.enable_toolbar:
             #Disable dragging without the toolbar to allow zooming with toolbar
             return
