@@ -34,6 +34,7 @@ SASVIEW_TEST = os.path.join(SASVIEW_SRC, "..", "sasview", "test", "media")
 # We are currently here:
 #/sasview-local-trunk/docs/sphinx-docs/build_sphinx.py
 SASMODELS_SOURCE_PROLOG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc")
+SASMODELS_SOURCE_MAGNETISM = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "ref", "magnetism")
 SASMODELS_SOURCE_REF_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "ref", "models")
 SASMODELS_SOURCE_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "model")
 SASMODELS_SOURCE_IMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "model", "img")
@@ -184,6 +185,17 @@ def retrieve_user_docs():
                 if files.startswith("rst"):
                     fromhere=os.path.join(SASMODELS_SOURCE_PROLOG,files)
                     tohere=os.path.join(SASMODELS_DEST_PROLOG,files)
+                    shutil.copy(fromhere,tohere)
+
+    if os.path.exists(SASMODELS_SOURCE_MAGNETISM):
+        print "Found docs folder SASMODELS_SOURCE_MAGNETISM at ", SASMODELS_SOURCE_MAGNETISM
+        if os.path.exists(SASMODELS_DEST_REF_MODELS):
+            print "Found docs folder SASMODELS_DEST_REF_MODELS   at ", SASMODELS_DEST_REF_MODELS
+            print "Copying sasmodels model toctree files..."
+            for files in os.listdir(SASMODELS_SOURCE_MAGNETISM):
+                if files.endswith(".rst"):
+                    fromhere=os.path.join(SASMODELS_SOURCE_MAGNETISM,files)
+                    tohere=os.path.join(SASMODELS_DEST_REF_MODELS,files)
                     shutil.copy(fromhere,tohere)
 
     if os.path.exists(SASMODELS_SOURCE_REF_MODELS):
