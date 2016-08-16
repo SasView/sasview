@@ -14,8 +14,8 @@
 .. |inlineimage019| image:: sm_image019.gif
 
 
-Fitting Perspective
-===================
+Fitting
+=======
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -23,8 +23,7 @@ Preparing to fit data
 ---------------------
 
 To fit some data you must first load some data, activate one or more data sets,
-send those data sets to the fitting perspective, and select a model to fit to
-each data set.
+send those data sets to fitting, and select a model to fit to each data set.
 
 Instructions on how to load and activate data are in the section :ref:`Loading_data`.
 
@@ -330,8 +329,7 @@ Single Fit Mode
 
 This mode fits one data set.
 
-When data is sent to the fitting perspective it is plotted in a graph window as
-markers.
+When data is sent to the fitting it is plotted in a graph window as markers.
 
 If a graph does not appear, or a graph window appears but is empty, then the data
 has not loaded correctly. Check to see if there is a message in the :ref:`Status_Bar`
