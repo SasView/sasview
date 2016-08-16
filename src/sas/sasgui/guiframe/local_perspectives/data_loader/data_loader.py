@@ -169,70 +169,71 @@ class Plugin(PluginBase):
     def get_data(self, path, format=None):
         """
         """
-        message = ""
-        log_msg = ''
+        file_errors = {}
         output = {}
-        data_error = False
-        error_message = ""
+        exception_occurred = False
 
         for p_file in path:
-            file_error = False
-            info = "info"
             basename = os.path.basename(p_file)
             _, extension = os.path.splitext(basename)
             if extension.lower() in EXTENSIONS:
-                info = "error"
                 log_msg = "Data Loader cannot "
-                log_msg += "load: %s\n" % str(p_file)
-                log_msg += """Please try to open that file from "open project" """
-                log_msg += """or "open analysis" menu\n\n"""
-                error_message += log_msg
+                log_msg += "load: {}\n".format(str(p_file))
+                log_msg += "Please try to open that file from \"open project\""
+                log_msg += "or \"open analysis\" menu."
                 logging.info(log_msg)
+                file_errors[basename] = [log_msg]
                 continue
 
             try:
-                message = "Loading Data... " + str(p_file) + "\n"
-                self.load_update(output=output, message=message, info=info)
+                message = "Loading {}...\n".format(p_file)
+                self.load_update(output=output, message=message, info="info")
                 temp = self.loader.load(p_file, format)
-                if temp.__class__.__name__ == "list":
-                    for item in temp:
-                        output, error_message, data_error = \
-                            self._process_data_and_errors(item,
-                                                          p_file,
-                                                          output,
-                                                          error_message)
-                else:
+                if not isinstance(temp, list):
+                    temp = [temp]
+                for item in temp:
+                    error_message = ""
                     output, error_message, data_error = \
-                            self._process_data_and_errors(temp,
-                                                          p_file,
-                                                          output,
-                                                          error_message)
+                        self._process_data_and_errors(item,
+                                                      p_file,
+                                                      output,
+                                                      error_message)
+                    if data_error:
+                        if basename in file_errors.keys():
+                            file_errors[basename] += [error_message]
+                        else:
+                            file_errors[basename] = [error_message]
+                        self.load_update(output=output,
+                            message=error_message, info="warning")
+
+                self.load_update(output=output,
+                message="Loaded {}\n".format(p_file),
+                info="info")
+
             except:
                 logging.error(sys.exc_value)
-                file_error = True
-            if file_error:
-                error = "Error: " + str(sys.exc_info()[1])
-                error += " while loading file: %s" % str(basename)
-                error_message += "The data file you selected could not be loaded.\n"
+
+                error_message = "The Data file you selected could not be loaded.\n"
                 error_message += "Make sure the content of your file"
                 error_message += " is properly formatted.\n"
                 error_message += "When contacting the SasView team, mention the"
-                error_message += " following:\n%s\n\n" % str(error)
-                info = "error"
-            elif data_error:
-                base_message = "Errors occurred while loading "
-                base_message += "{0}\n".format(basename)
-                base_message += "The data file loaded but with errors.\n"
-                error_message = base_message + error_message
-                info = "error"
+                error_message += " following:\n"
+                error_message += "Error: " + str(sys.exc_info()[1])
+                file_errors[basename] = [error_message]
+                self.load_update(output=output, message=error_message, info="warning")
 
-        if error_message != "":
-            self.load_update(output=output, message=error_message, info=info)
-        else:
-            message = "Loading Data Complete! "
-        message += log_msg
-        self.load_complete(output=output, error_message=error_message,
-                           message=message, path=path, info='info')
+        if len(file_errors) > 0:
+            error_message = ""
+            for filename, error_array in file_errors.iteritems():
+                error_message += "The following errors occured whilst "
+                error_message += "loading {}:\n".format(filename)
+                for message in error_array:
+                    error_message += message + "\n"
+                error_message += "\n"
+            self.load_update(output=output, message=error_message, info="error")
+
+        self.load_complete(output=output, message="Loading data complete!",
+            info="info")
 
     def load_update(self, output=None, message="", info="warning"):
         """
