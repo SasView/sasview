@@ -670,6 +670,9 @@ class ModelPanel1D(PlotPanel, PanelBase):
         wx.EVT_MENU(self, wx_id, self._onProperties)
         self._slicerpop.AppendSeparator()
         wx_id = ids.next()
+        self._slicerpop.Append(wx_id, '&Set Graph Range')
+        wx.EVT_MENU(self, wx_id, self.onSetRange)
+        wx_id = ids.next()
         self._slicerpop.Append(wx_id, '&Reset Graph Range')
         wx.EVT_MENU(self, wx_id, self.onResetGraph)
 
@@ -685,6 +688,25 @@ class ModelPanel1D(PlotPanel, PanelBase):
             pos_x, pos_y = self.toolbar.GetPositionTuple()
             pos = (pos_x, pos_y + 5)
         self.PopupMenu(self._slicerpop, pos)
+
+    def onSetRange(self, event):
+        # Display dialog
+        # self.subplot.set_xlim((low, high))
+        # self.subplot.set_ylim((low, high))
+        from sas.sasgui.plottools.RangeDialog import RangeDialog
+        d = RangeDialog(self, -1)
+        xlim = self.subplot.get_xlim()
+        ylim = self.subplot.get_ylim()
+        d.SetXRange(xlim)
+        d.SetYRange(ylim)
+        if d.ShowModal() == wx.ID_OK:
+            x_range = d.GetXRange()
+            y_range = d.GetYRange()
+            if x_range is not None and y_range is not None:
+                self.subplot.set_xlim(x_range)
+                self.subplot.set_ylim(y_range)
+                self.subplot.figure.canvas.draw_idle()
+        d.Destroy()
 
     def onFreeze(self, event):
         """
