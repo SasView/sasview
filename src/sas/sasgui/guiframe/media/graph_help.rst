@@ -93,9 +93,12 @@ The currently supported image types are:
 *  PDF (portable documant format)
 *  PNG (portable network graphics)
 *  PS (postscript)
-*  RAW/RGBA (bitmap)
+*  RAW/RGBA (bitmap, stored as 935x635 pixels of depth 8)
 *  SVG/SVGA (scalable vector graphics)
 *  TIF/TIFF (tagged iamge file)
+
+The PGF image type option requires a LaTeX compiler: xelatex (default), 
+lualatex, or pdflatex. These are not shipped with SasView.
 
 Printing a plot
 ^^^^^^^^^^^^^^^
