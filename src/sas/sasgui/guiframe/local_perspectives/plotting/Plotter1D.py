@@ -772,6 +772,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                                str(appearanceDialog.find_key(self.get_symbol_label(),
                                                              int(curr_symbol))), curr_label)
         self.appD.Bind(wx.EVT_CLOSE, self.on_AppDialog_close)
+        self.graph.selected_plottable = None
 
     def on_AppDialog_close(self, event):
         """
