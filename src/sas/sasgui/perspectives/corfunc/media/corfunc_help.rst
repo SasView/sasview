@@ -1,12 +1,12 @@
 .. corfunc_help.rst
 
-Correlation Function Perspective
-================================
+Correlation Function Analysis
+=============================
 
 Description
 -----------
 
-This perspective performs a correlation function analysis of one-dimensional
+This performs a correlation function analysis of one-dimensional
 SANS data, or generates a model-independent volume fraction profile from a
 one-dimensional SANS pattern of an adsorbed layer.
 
@@ -90,7 +90,7 @@ Transform
 Fourier
 ^^^^^^^
 
-If Fourier is selected for the transform type, the perspective will perform a
+If Fourier is selected for the transform type, the analysis will perform a
 discrete cosine transform on the extrapolated data in order to calculate the
 correlation function. The following algorithm is applied:
 
@@ -101,7 +101,7 @@ correlation function. The following algorithm is applied:
 
 Hilbert
 ^^^^^^^
-If Hilbert is selected for the transform type, the perspective will perform a
+If Hilbert is selected for the transform type, the analysis will perform a
 Hilbert transform on the extrapolated data in order to calculate the Volume
 Fraction Profile.
 
@@ -132,11 +132,11 @@ The structural parameters obtained are:
 
 Usage
 -----
-Upon sending data to the correlation function perspective, it will plot the data
-, as well as a red bar indicating the lower Q range (used for
-back-extrapolation), and 2 purple bars indicating the upper qrange (used for
-forwards-extrapolation) [figure 3]. These bars may be moved my clicking and
-dragging, or by entering the appropriate value in the Q range input boxes.
+Upon sending data for correlation function analysis, it will be plotted,  
+along with a red bar indicating the lower Q range (used for back-extrapolation), 
+and 2 purple bars indicating the upper qrange (used for forward-extrapolation) 
+[figure 3]. These bars may be moved my clicking and dragging, or by entering 
+the appropriate value in the Q range input boxes.
 
 .. figure:: tutorial1.png
    :align: center
