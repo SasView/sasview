@@ -2941,7 +2941,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         :param evt: Triggers on clicking ? in Magnetic Angles? box
         """
 
-        _TreeLocation = "user/sasgui/perspectives/fitting/mag_help.html"
+        _TreeLocation = "user/magnetism.html"
         _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation, "",
                                           "Polarized Beam/Magnetc Help")
 
