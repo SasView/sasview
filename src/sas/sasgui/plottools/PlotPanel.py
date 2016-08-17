@@ -665,6 +665,10 @@ class PlotPanel(wx.Panel):
                 and(self.xminView != 0.0)and (self.xmaxView != 0.0):
                 dlg.setFitRange(self.xminView, self.xmaxView,
                                 self.xmin, self.xmax)
+            else:
+                xlim = self.subplot.get_xlim()
+                ylim = self.subplot.get_ylim()
+                dlg.setFitRange(xlim[0], xlim[1], ylim[0], ylim[1])
             # It would be nice for this to NOT be modal (i.e. Show).
             # Not sure about other ramifications - for example
             # if a second linear fit is started before the first is closed.
@@ -1893,6 +1897,9 @@ class PlotPanel(wx.Panel):
         :param xmax: the highest value of data to fit to the line
 
         """
+        xlim = self.subplot.get_xlim()
+        ylim = self.subplot.get_ylim()
+
         # Saving value to redisplay in Fit Dialog when it is opened again
         self.Avalue, self.Bvalue, self.ErrAvalue, \
                       self.ErrBvalue, self.Chivalue = func
@@ -1923,6 +1930,8 @@ class PlotPanel(wx.Panel):
             self.fit_result.title = 'Fit'
             self.fit_result.name = 'Fit'
             self.plots[fit_id] = self.fit_result
+        self.subplot.set_xlim(xlim)
+        self.subplot.set_ylim(ylim)
         self.subplot.figure.canvas.draw_idle()
 
     def onChangeCaption(self, event):
