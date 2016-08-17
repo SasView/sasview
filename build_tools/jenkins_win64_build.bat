@@ -3,9 +3,7 @@ set EASY_INSTALL=easy_install.exe
 set PYLINT= pylint.exe
 set INNO="C:\util\inno\ISCC.exe"
 set GIT_SED=C:\"Program Files"\Git\bin\sed.exe
-
 set SAS_COMPILER=tinycc
-set WORKSPACE=C:\build
 
 set PYTHONPATH=%WORKSPACE%\sasview\utils
 set PYTHONPATH=%PYTHONPATH%;%WORKSPACE%\sasview\sasview-install
@@ -22,13 +20,17 @@ SET /p githash= < tmpFile_githash
 DEL tmpFile_githash
 %GIT_SED% -i.bak "s/GIT_COMMIT/%githash%/g" __init__.py
 
-
-
 :: MAKE DIR FOR EGGS ##################################################
 cd %WORKSPACE%
 cd sasview
 MD sasview-install
 MD utils
+
+:: TINYCC build ####################################################
+cd %WORKSPACE%
+cd tinycc
+%PYTHON% setup.py build
+xcopy /S build\lib\* %WORKSPACE%\sasview\utils\
 
 
 :: SASMODELS build ####################################################
@@ -36,18 +38,14 @@ cd %WORKSPACE%
 cd sasmodels
 %PYTHON% setup.py build
 
-
-
 :: SASMODELS doc ######################################################
 cd doc
 make html
-
 
 :: SASMODELS build egg ################################################
 cd %WORKSPACE%
 cd sasmodels
 %PYTHON% setup.py bdist_egg
-
 
 :: SASMODELS install egg ##############################################
 cd %WORKSPACE%
@@ -77,12 +75,6 @@ cd dist
 echo F | xcopy sasview-*.egg sasview.egg /Y
 %EASY_INSTALL% -d %WORKSPACE%\sasview\sasview-install sasview.egg
 
-
-:: TINYCC build ####################################################
-cd %WORKSPACE%
-cd tinycc
-%PYTHON% setup.py build
-xcopy /S build\lib\* %WORKSPACE%\sasview\utils\
 
 :: SASVIEW INSTALLER ##################################################
 cd %WORKSPACE%

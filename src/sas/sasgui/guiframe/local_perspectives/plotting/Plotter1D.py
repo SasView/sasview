@@ -526,6 +526,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             # Recover the x,y limits
             self.subplot.set_xlim((xlo, xhi))
             self.subplot.set_ylim((ylo, yhi))
+        self.graph.selected_plottable = None
 
 
     def _onRemove(self, event):
@@ -554,21 +555,21 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self._slicerpop.set_plots(self.plots)
         self._slicerpop.set_graph(self.graph)
         ids = iter(self._menu_ids)
-        if not self.graph.selected_plottable in self.plots:
-            # Various plot options
-            wx_id = ids.next()
-            self._slicerpop.Append(wx_id, '&Save Image', 'Save image as PNG')
-            wx.EVT_MENU(self, wx_id, self.onSaveImage)
-            wx_id = ids.next()
-            self._slicerpop.Append(wx_id, '&Print Image', 'Print image ')
-            wx.EVT_MENU(self, wx_id, self.onPrint)
 
-            wx_id = ids.next()
-            self._slicerpop.Append(wx_id, '&Copy to Clipboard',
-                                   'Copy to the clipboard')
-            wx.EVT_MENU(self, wx_id, self.OnCopyFigureMenu)
+        # Various plot options
+        wx_id = ids.next()
+        self._slicerpop.Append(wx_id, '&Save Image', 'Save image as PNG')
+        wx.EVT_MENU(self, wx_id, self.onSaveImage)
+        wx_id = ids.next()
+        self._slicerpop.Append(wx_id, '&Print Image', 'Print image ')
+        wx.EVT_MENU(self, wx_id, self.onPrint)
 
-            self._slicerpop.AppendSeparator()
+        wx_id = ids.next()
+        self._slicerpop.Append(wx_id, '&Copy to Clipboard',
+                               'Copy to the clipboard')
+        wx.EVT_MENU(self, wx_id, self.OnCopyFigureMenu)
+
+        self._slicerpop.AppendSeparator()
 
         for plot in self.plots.values():
             # title = plot.title
@@ -591,12 +592,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             # add menu of other plugins
             item_list = self.parent.get_current_context_menu(self)
             if (not item_list == None) and (not len(item_list) == 0):
-                # Note: reusing menu ids in submenu.  This code works because
-                # IdItems is set up as a lazy iterator returning each id in
-                # sequence, creating new ids as needed so it never runs out.
-                # zip() is set up to stop when any iterator is empty, so it
-                # only asks for the number of ids in item_list.
-                for item, wx_id in zip(item_list, self._menu_ids):
+                for item, wx_id in zip(item_list, [ids.next() for i in range(len(item_list))]):
 
                     try:
                         plot_menu.Append(wx_id, item[0], name)
@@ -608,10 +604,11 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 plot_menu.AppendSeparator()
 
             if self.parent.ClassName.count('wxDialog') == 0:
-                wx_id = ids.next()
-                plot_menu.Append(wx_id, '&Linear Fit', name)
-                wx.EVT_MENU(self, wx_id, self.onFitting)
-                plot_menu.AppendSeparator()
+                if plot.id != 'fit':
+                    wx_id = ids.next()
+                    plot_menu.Append(wx_id, '&Linear Fit', name)
+                    wx.EVT_MENU(self, wx_id, self.onFitting)
+                    plot_menu.AppendSeparator()
 
                 wx_id = ids.next()
                 plot_menu.Append(wx_id, "Remove", name)
@@ -645,42 +642,45 @@ class ModelPanel1D(PlotPanel, PanelBase):
             self._slicerpop.AppendMenu(wx_id, '&%s' % name, plot_menu)
             # Option to hide
             # TODO: implement functionality to hide a plottable (legend click)
-        if not self.graph.selected_plottable in self.plots:
-            self._slicerpop.AppendSeparator()
-            loc_menu = wx.Menu()
-            for label in self._loc_labels:
-                wx_id = ids.next()
-                loc_menu.Append(wx_id, str(label), str(label))
-                wx.EVT_MENU(self, wx_id, self.onChangeLegendLoc)
 
+        self._slicerpop.AppendSeparator()
+        loc_menu = wx.Menu()
+        for label in self._loc_labels:
             wx_id = ids.next()
-            self._slicerpop.Append(wx_id, '&Modify Graph Appearance',
-                                   'Modify graph appearance')
-            wx.EVT_MENU(self, wx_id, self.modifyGraphAppearance)
-            self._slicerpop.AppendSeparator()
+            loc_menu.Append(wx_id, str(label), str(label))
+            wx.EVT_MENU(self, wx_id, self.onChangeLegendLoc)
+
+        wx_id = ids.next()
+        self._slicerpop.Append(wx_id, '&Modify Graph Appearance',
+                               'Modify graph appearance')
+        wx.EVT_MENU(self, wx_id, self.modifyGraphAppearance)
+        self._slicerpop.AppendSeparator()
 
 
-            if self.position != None:
-                wx_id = ids.next()
-                self._slicerpop.Append(wx_id, '&Add Text')
-                wx.EVT_MENU(self, wx_id, self._on_addtext)
-                wx_id = ids.next()
-                self._slicerpop.Append(wx_id, '&Remove Text')
-                wx.EVT_MENU(self, wx_id, self._on_removetext)
-                self._slicerpop.AppendSeparator()
+        if self.position != None:
             wx_id = ids.next()
-            self._slicerpop.Append(wx_id, '&Change Scale')
-            wx.EVT_MENU(self, wx_id, self._onProperties)
+            self._slicerpop.Append(wx_id, '&Add Text')
+            wx.EVT_MENU(self, wx_id, self._on_addtext)
+            wx_id = ids.next()
+            self._slicerpop.Append(wx_id, '&Remove Text')
+            wx.EVT_MENU(self, wx_id, self._on_removetext)
+            self._slicerpop.AppendSeparator()
+        wx_id = ids.next()
+        self._slicerpop.Append(wx_id, '&Change Scale')
+        wx.EVT_MENU(self, wx_id, self._onProperties)
+        self._slicerpop.AppendSeparator()
+        wx_id = ids.next()
+        self._slicerpop.Append(wx_id, '&Set Graph Range')
+        wx.EVT_MENU(self, wx_id, self.onSetRange)
+        wx_id = ids.next()
+        self._slicerpop.Append(wx_id, '&Reset Graph Range')
+        wx.EVT_MENU(self, wx_id, self.onResetGraph)
+
+        if self.parent.ClassName.count('wxDialog') == 0:
             self._slicerpop.AppendSeparator()
             wx_id = ids.next()
-            self._slicerpop.Append(wx_id, '&Reset Graph Range')
-            wx.EVT_MENU(self, wx_id, self.onResetGraph)
-
-            if self.parent.ClassName.count('wxDialog') == 0:
-                self._slicerpop.AppendSeparator()
-                wx_id = ids.next()
-                self._slicerpop.Append(wx_id, '&Window Title')
-                wx.EVT_MENU(self, wx_id, self.onChangeCaption)
+            self._slicerpop.Append(wx_id, '&Window Title')
+            wx.EVT_MENU(self, wx_id, self.onChangeCaption)
         try:
             pos_evt = event.GetPosition()
             pos = self.ScreenToClient(pos_evt)
@@ -688,6 +688,25 @@ class ModelPanel1D(PlotPanel, PanelBase):
             pos_x, pos_y = self.toolbar.GetPositionTuple()
             pos = (pos_x, pos_y + 5)
         self.PopupMenu(self._slicerpop, pos)
+
+    def onSetRange(self, event):
+        # Display dialog
+        # self.subplot.set_xlim((low, high))
+        # self.subplot.set_ylim((low, high))
+        from sas.sasgui.plottools.RangeDialog import RangeDialog
+        d = RangeDialog(self, -1)
+        xlim = self.subplot.get_xlim()
+        ylim = self.subplot.get_ylim()
+        d.SetXRange(xlim)
+        d.SetYRange(ylim)
+        if d.ShowModal() == wx.ID_OK:
+            x_range = d.GetXRange()
+            y_range = d.GetYRange()
+            if x_range is not None and y_range is not None:
+                self.subplot.set_xlim(x_range)
+                self.subplot.set_ylim(y_range)
+                self.subplot.figure.canvas.draw_idle()
+        d.Destroy()
 
     def onFreeze(self, event):
         """
@@ -775,6 +794,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                                str(appearanceDialog.find_key(self.get_symbol_label(),
                                                              int(curr_symbol))), curr_label)
         self.appD.Bind(wx.EVT_CLOSE, self.on_AppDialog_close)
+        self.graph.selected_plottable = None
 
     def on_AppDialog_close(self, event):
         """

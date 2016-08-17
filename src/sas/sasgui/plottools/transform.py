@@ -290,7 +290,7 @@ def errToLogX(x, y=None, dx=None, dy=None):
     return dx
 
 
-def errToYX2(x, y, dx=None, dy=None):
+def errToYX2(y, x, dy=None, dx=None):
     """
     """
     if dx == None:
@@ -324,7 +324,7 @@ def errToLogXY(x, y, dx=None, dy=None):
     return math.sqrt(math.fabs(err))
 
 
-def errToLogYX2(x, y, dx=None, dy=None):
+def errToLogYX2(y, x, dy=None, dx=None):
     """
     calculate error of Log(yx**2)
 
@@ -374,7 +374,7 @@ def errOneOverSqrtX(x, y=None, dx=None, dy=None):
     return math.fabs(err)
 
 
-def errToLogYX4(x, y=None, dx=None, dy=None):
+def errToLogYX4(y, x, dy=None, dx=None):
     """
     error for ln(y*x^(4))
 
@@ -395,7 +395,7 @@ def errToLogYX4(x, y=None, dx=None, dy=None):
     return err
 
 
-def errToYX4(x, y=None, dx=None, dy=None):
+def errToYX4(y, x, dy=None, dx=None):
     """
     error for (y*x^(4))
 

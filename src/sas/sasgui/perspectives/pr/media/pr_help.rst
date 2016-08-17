@@ -3,8 +3,8 @@
 .. This is a port of the original SasView html help file to ReSTructured text
 .. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
 
-P(r) Inversion Perspective
-==========================
+P(r) Calculation
+================
 
 Description
 -----------
@@ -31,8 +31,8 @@ smooth *P(r)* output.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-Using the perspective
----------------------
+Using P(r) inversion
+--------------------
 
 The user must enter
 

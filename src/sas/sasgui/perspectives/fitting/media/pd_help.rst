@@ -104,7 +104,7 @@ where |mu|\ =ln(*xmed*), *xmed* is the median value of the distribution, and
 calculation.
 
 The median value for the distribution will be the value given for the respective
-size parameter in the *Fitting Perspective*, for example, radius = 60.
+size parameter in the *FitPage*, for example, radius = 60.
 
 The polydispersity is given by |sigma|
 
@@ -171,7 +171,7 @@ Example of what an array distribution file should look like:
 ====  =====
 
 SasView only uses these array values during the computation, therefore any mean
-value of the parameter represented by *x* present in the *Fitting Perspective*
+value of the parameter represented by *x* present in the *FitPage*
 will be ignored.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
