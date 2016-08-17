@@ -183,6 +183,8 @@ class Reader():
                     ## Sample Information
                     elif key == u'Title' and self.parent_class == u'SASsample':
                         self.current_datainfo.sample.name = data_point
+                    elif key == u'name' and self.parent_class == u'SASsample':
+                        self.current_datainfo.sample.name = data_point
                     elif key == u'thickness' and self.parent_class == u'SASsample':
                         self.current_datainfo.sample.thickness = data_point
                     elif key == u'temperature' and self.parent_class == u'SASsample':
@@ -206,6 +208,8 @@ class Reader():
                     elif key == u'name' and self.parent_class == u'SASprocess':
                         self.process.name = data_point
                     elif key == u'Title' and self.parent_class == u'SASprocess':
+                        self.process.name = data_point
+                    elif key == u'name' and self.parent_class == u'SASprocess':
                         self.process.name = data_point
                     elif key == u'description' and self.parent_class == u'SASprocess':
                         self.process.description = data_point
@@ -432,14 +436,11 @@ class Reader():
             data_info = dataset[0]
             sample_entry = sasentry.create_group('sassample')
             sample_entry.attrs['canSAS_class'] = 'SASsample'
-            sample_entry.attrs['name'] = data_info.sample.name
-            sample_entry['ID'] = _h5_string(data_info.sample.name)
+            sample_entry['name'] = _h5_string(data_info.sample.name)
             sample_attrs = ['thickness', 'temperature']
             for key in sample_attrs:
                 if getattr(data_info.sample, key) is not None:
                     sample_entry.create_dataset(key, data=np.array([getattr(data_info.sample, key)]))
-                    # sample_entry[key] = np.array(getattr(data_info.sample, key),
-                    #     dtype=np.float32)
 
             instrument_entry = sasentry.create_group('sasinstrument')
             instrument_entry.attrs['canSAS_class'] = 'SASinstrument'
@@ -471,7 +472,7 @@ class Reader():
                 for det_info in data_info.detector:
                     detector_entry = instrument_entry.create_group(
                         'sasdetector{0:0=2d}'.format(i))
-                    detector_entry.attrs['casnSAS_class'] = 'SASdetector'
+                    detector_entry.attrs['canSAS_class'] = 'SASdetector'
                     if det_info.distance is not None:
                         detector_entry['SDD'] = det_info.distance
                         detector_entry['SDD'].attrs['units'] = det_info.distance_unit
@@ -481,7 +482,7 @@ class Reader():
                         detector_entry['name'] = _h5_string('')
             else:
                 detector_entry = instrument_entry.create_group('sasdetector01')
-                detector_entry.attrs['casnSAS_class'] = 'SASdetector'
+                detector_entry.attrs['canSAS_class'] = 'SASdetector'
                 detector_entry.attrs['name'] = ''
 
             # TODO: implement writing SASnote
