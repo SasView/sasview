@@ -375,6 +375,126 @@ class Reader():
         self.data2d = []
         self.current_datainfo = DataInfo()
 
+    def write(self, dataset, filename, entry_attrs={ 'title':'', 'run_number':'', 'run_name':'' }):
+        """
+        Write an array of Data1d or Data2D objects to a CanSAS 2.0 file, as
+        one SASEntry with multiple SASData elements. The metadata of the first
+        elememt in the array will be written as the SASentry metadata
+        (detector, instrument, sample, etc)
+
+        :param dataset: A list of Data1D or Data2D objects to write
+        :param filename: Where to write the CanSAS 2.0 file
+        :entry_attrs: A dictionary containing the attributes of the SASEntry
+        """
+        is_1d = all([isinstance(d, Data1D) for d in dataset])
+        is_2d = all([isinstance(d, Data2D) for d in dataset])
+
+        if not (is_1d or is_2d):
+            msg = ("All elements of dataset must be of the same class "
+                "(Data1D or Data2D)")
+            raise ValueError(msg)
+
+        def _h5_string(string):
+            """
+            Convert a string to a numpy string in a numpy array. This way it is
+            written to the HDF5 file as a fixed length ASCII string and is
+            compatible with the Reader read() method.
+            """
+            if not isinstance(string, str):
+                raise ValueError("String should be of type str")
+
+            return np.array([np.string_(string)])
+
+        f = h5py.File(filename, 'w')
+        sasentry = f.create_group('sasentry01')
+        sasentry['definition'] = _h5_string('NXcanSAS')
+        sasentry['run'] = _h5_string(entry_attrs['run_number'])
+        sasentry['run'].attrs['name'] = entry_attrs['run_name']
+        sasentry['title'] = _h5_string(entry_attrs['title'])
+        sasentry.attrs['canSAS_class'] = 'SASentry'
+        sasentry.attrs['version'] = '1.0'
+
+        i = 1
+
+        if is_1d:
+            for data_obj in dataset:
+                data_entry = sasentry.create_group("sasdata{0:0=2d}".format(i))
+                data_entry.attrs['canSAS_class'] = 'SASdata'
+                data_entry.attrs['signal'] = 'I'
+                data_entry.attrs['I_axes'] = 'Q'
+                data_entry.attrs['I_uncertainties'] = 'Idev'
+                data_entry.attrs['Q_indicies'] = 0
+                Q_data = data_entry.create_dataset('Q', data=data_obj.x)
+                I_data = data_entry.create_dataset('I', data=data_obj.y)
+                dI_data = data_entry.create_dataset('Idev', data=data_obj.dy)
+                i += 1
+
+            data_info = dataset[0]
+            sample_entry = sasentry.create_group('sassample')
+            sample_entry.attrs['canSAS_class'] = 'SASsample'
+            sample_entry.attrs['name'] = data_info.sample.name
+            sample_entry['ID'] = _h5_string(data_info.sample.name)
+            sample_attrs = ['thickness', 'temperature']
+            for key in sample_attrs:
+                if getattr(data_info.sample, key) is not None:
+                    sample_entry.create_dataset(key, data=np.array([getattr(data_info.sample, key)]))
+                    # sample_entry[key] = np.array(getattr(data_info.sample, key),
+                    #     dtype=np.float32)
+
+            instrument_entry = sasentry.create_group('sasinstrument')
+            instrument_entry.attrs['canSAS_class'] = 'SASinstrument'
+            instrument_entry['name'] = _h5_string(data_info.instrument)
+
+            source_entry = instrument_entry.create_group('sassource')
+            source_entry.attrs['canSAS_class'] = 'SASsource'
+            if data_info.source.radiation is None:
+                source_entry['radiation'] = _h5_string('neutron')
+            else:
+                source_entry['radiation'] = _h5_string(data_info.source.radiation)
+
+            if len(data_info.collimation) > 0:
+                i = 1
+                for coll_info in data_info.collimation:
+                    collimation_entry = instrument_entry.create_group(
+                        'sascollimation{0:0=2d}'.format(i))
+                    collimation_entry.attrs['canSAS_class'] = 'SAScollimation'
+                    if coll_info.length is not None:
+                        collimation_entry['SDD'] = coll_info.length
+                        collimation_entry['SDD'].attrs['units'] = coll_info.length_unit
+                    if coll_info.name is not None:
+                        collimation_entry['name'] = _h5_string(coll_info.name)
+            else:
+                collimation_entry = instrument_entry.create_group('sascollimation01')
+
+            if len(data_info.detector) > 0:
+                i = 1
+                for det_info in data_info.detector:
+                    detector_entry = instrument_entry.create_group(
+                        'sasdetector{0:0=2d}'.format(i))
+                    detector_entry.attrs['casnSAS_class'] = 'SASdetector'
+                    if det_info.distance is not None:
+                        detector_entry['SDD'] = det_info.distance
+                        detector_entry['SDD'].attrs['units'] = det_info.distance_unit
+                    if det_info.name is not None:
+                        detector_entry['name'] = _h5_string(det_info.name)
+                    else:
+                        detector_entry['name'] = _h5_string('')
+            else:
+                detector_entry = instrument_entry.create_group('sasdetector01')
+                detector_entry.attrs['casnSAS_class'] = 'SASdetector'
+                detector_entry.attrs['name'] = ''
+
+            # TODO: implement writing SASnote
+            note_entry = sasentry.create_group('sasnote{0:0=2d}'.format(i))
+            note_entry.attrs['canSAS_class'] = 'SASnote'
+
+        elif is_2d:
+            f.close()
+            raise NotImplementedError("Saving 2D data as CanSAS 2.0 is not yet implemented")
+
+        f.close()
+
+
     def _initialize_new_data_set(self, parent_list = None):
         """
         A private class method to generate a new 1D or 2D data object based on the type of data within the set.
