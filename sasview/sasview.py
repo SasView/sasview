@@ -80,7 +80,7 @@ wxcruft.call_later_fix()
 
 #Always use private .matplotlib setup to avoid conflicts with other
 #uses of matplotlib
-#Have to check if .sasview exists first 
+#Have to check if .sasview exists first
 sasdir = os.path.join(os.path.expanduser("~"),'.sasview')
 if not os.path.exists(sasdir):
     os.mkdir(sasdir)
@@ -97,6 +97,9 @@ from welcome_panel import WelcomePanel
 import local_config
 PLUGIN_MODEL_DIR = 'plugin_models'
 APP_NAME = 'SasView'
+
+from matplotlib import backend_bases
+backend_bases._default_filetypes.pop('pgf', None)
 
 class SasView():
     """
@@ -118,7 +121,7 @@ class SasView():
 
         # Fitting perspective
         try:
-            import sas.sasgui.perspectives.fitting as module    
+            import sas.sasgui.perspectives.fitting as module
             fitting_plug = module.Plugin()
             self.gui.add_perspective(fitting_plug)
         except Exception:
@@ -144,7 +147,7 @@ class SasView():
                           APP_NAME)
             logging.error(traceback.format_exc())
 
-        #Calculator perspective   
+        #Calculator perspective
         try:
             import sas.sasgui.perspectives.calculator as module
             calculator_plug = module.Plugin()
@@ -190,4 +193,3 @@ def run():
 
 if __name__ == "__main__":
     run()
-
