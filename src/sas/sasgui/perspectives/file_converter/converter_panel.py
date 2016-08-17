@@ -692,7 +692,8 @@ class ConverterWindow(widget.CHILD_FRAME):
         self.Show(True)
 
     def on_close(self, event):
-        if self.panel.bsl_thread.isrunning():
+        if self.panel.bsl_thread is not None \
+            and self.panel.bsl_thread.isrunning():
             self.panel.bsl_thread.stop()
         if self.manager is not None:
             self.manager.converter_frame = None
