@@ -379,7 +379,7 @@ class Reader():
         self.data2d = []
         self.current_datainfo = DataInfo()
 
-    def write(self, dataset, filename, entry_attrs={ 'title':'', 'run_number':'', 'run_name':'' }):
+    def write(self, dataset, filename):
         """
         Write an array of Data1d or Data2D objects to a CanSAS 2.0 file, as
         one SASEntry with multiple SASData elements. The metadata of the first
@@ -388,7 +388,6 @@ class Reader():
 
         :param dataset: A list of Data1D or Data2D objects to write
         :param filename: Where to write the CanSAS 2.0 file
-        :entry_attrs: A dictionary containing the attributes of the SASEntry
         """
         is_1d = all([isinstance(d, Data1D) for d in dataset])
         is_2d = all([isinstance(d, Data2D) for d in dataset])
@@ -409,12 +408,21 @@ class Reader():
 
             return np.array([np.string_(string)])
 
+        # Get run name and number from first Data object
+        data_info = dataset[0]
+        run_number = ''
+        run_name = ''
+        if len(data_info.run) > 0:
+            run_number = data_info.run[0]
+            if len(data_info.run_name) > 0:
+                run_name = data_info.run_name[run_number]
+
         f = h5py.File(filename, 'w')
         sasentry = f.create_group('sasentry01')
         sasentry['definition'] = _h5_string('NXcanSAS')
-        sasentry['run'] = _h5_string(entry_attrs['run_number'])
-        sasentry['run'].attrs['name'] = entry_attrs['run_name']
-        sasentry['title'] = _h5_string(entry_attrs['title'])
+        sasentry['run'] = _h5_string(run_number)
+        sasentry['run'].attrs['name'] = run_name
+        sasentry['title'] = _h5_string(data_info.title)
         sasentry.attrs['canSAS_class'] = 'SASentry'
         sasentry.attrs['version'] = '1.0'
 
