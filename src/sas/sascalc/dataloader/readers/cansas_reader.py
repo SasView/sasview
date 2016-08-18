@@ -191,6 +191,12 @@ class Reader(XMLreader):
         :param dom: dom object with a namespace base of names
         """
 
+        frm = inspect.stack()[1]
+        if not self._is_call_local(frm):
+            self.reset_state()
+            self.add_data_set()
+            self.names.append("SASentry")
+            self.parent_class = "SASentry"
         self._check_for_empty_data()
         self.base_ns = "{0}{1}{2}".format("{", \
                             CANSAS_NS.get(self.cansas_version).get("ns"), "}")
@@ -243,6 +249,10 @@ class Reader(XMLreader):
                     self.current_dataset.dxw = np.append(self.current_dataset.dxw, data_point)
                 elif tagname == 'dQl':
                     self.current_dataset.dxl = np.append(self.current_dataset.dxl, data_point)
+                elif tagname == 'Qmean':
+                    pass
+                elif tagname == 'Shadowfactor':
+                    pass
 
                 ## Sample Information
                 elif tagname == 'ID' and self.parent_class == 'SASsample':
@@ -408,7 +418,31 @@ class Reader(XMLreader):
             if len(self.names) > 1:
                 length = len(self.names) - 1
             self.parent_class = self.names[length]
+        if not self._is_call_local(frm):
+            self.add_data_set()
+            empty = None
+            if self.output[0].dx is not None:
+                self.output[0].dxl = np.empty(0)
+                self.output[0].dxw = np.empty(0)
+            else:
+                self.output[0].dx = np.empty(0)
+            return self.output[0], empty
 
+
+    def _is_call_local(self, frm=""):
+        """
+
+        :return:
+        """
+        if frm == "":
+            frm = inspect.stack()[1]
+        mod_name = frm[1].replace("\\", "/").replace(".pyc", "")
+        mod_name = mod_name.replace(".py", "")
+        mod = mod_name.split("sas/")
+        mod_name = mod[1]
+        if mod_name != "sascalc/dataloader/readers/cansas_reader":
+            return False
+        return True
 
     def is_cansas(self, ext="xml"):
         """
@@ -1147,8 +1181,11 @@ class Reader(XMLreader):
             self.write_node(node, "date", item.date)
             self.write_node(node, "description", item.description)
             for term in item.term:
-                value = term['value']
-                del term['value']
+                if isinstance(term, list):
+                    value = term['value']
+                    del term['value']
+                else:
+                    value = term
                 self.write_node(node, "term", value, term)
             for note in item.notes:
                 self.write_node(node, "SASprocessnote", note)
