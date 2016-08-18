@@ -408,6 +408,11 @@ class Reader():
 
             return np.array([np.string_(string)])
 
+        def _h5_float(x):
+            if not (isinstance(x, list)):
+                x = [x]
+            return np.array(x, dtype=np.float32)
+
         # Get run name and number from first Data object
         data_info = dataset[0]
         run_number = ''
@@ -468,7 +473,7 @@ class Reader():
                         'sascollimation{0:0=2d}'.format(i))
                     collimation_entry.attrs['canSAS_class'] = 'SAScollimation'
                     if coll_info.length is not None:
-                        collimation_entry['SDD'] = coll_info.length
+                        collimation_entry['SDD'] = _h5_float(coll_info.length)
                         collimation_entry['SDD'].attrs['units'] = coll_info.length_unit
                     if coll_info.name is not None:
                         collimation_entry['name'] = _h5_string(coll_info.name)
@@ -482,12 +487,13 @@ class Reader():
                         'sasdetector{0:0=2d}'.format(i))
                     detector_entry.attrs['canSAS_class'] = 'SASdetector'
                     if det_info.distance is not None:
-                        detector_entry['SDD'] = det_info.distance
+                        detector_entry['SDD'] = _h5_float(det_info.distance)
                         detector_entry['SDD'].attrs['units'] = det_info.distance_unit
                     if det_info.name is not None:
                         detector_entry['name'] = _h5_string(det_info.name)
                     else:
                         detector_entry['name'] = _h5_string('')
+                    i += 1
             else:
                 detector_entry = instrument_entry.create_group('sasdetector01')
                 detector_entry.attrs['canSAS_class'] = 'SASdetector'
