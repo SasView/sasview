@@ -98,7 +98,7 @@ class cansas_reader_xml(unittest.TestCase):
         self.assertTrue(data.detector[0].name == "HAB")
         self.assertTrue(data.detector[1].name == "main-detector-bank")
         self.assertTrue(data.detector[0].distance == 575.0)
-        self.assertTrue(data.detector[1].distance == 4145.02)
+        self.assertAlmostEqual(data.detector[1].distance, 4145.02)
         self.assertTrue(data.process[0].name == "Mantid generated CanSAS1D XML")
         self.assertTrue(data.meta_data["xmlpreprocess"] != None)
 
