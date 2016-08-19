@@ -340,7 +340,7 @@ class Reader():
 
             if dataset.data.ndim == 2:
                 (n_rows, n_cols) = dataset.data.shape
-                dataset.y_bins = dataset.qy_data[0::n_rows]
+                dataset.y_bins = dataset.qy_data[0::n_cols]
                 dataset.x_bins = dataset.qx_data[:n_cols]
                 dataset.data = dataset.data.flatten()
 
