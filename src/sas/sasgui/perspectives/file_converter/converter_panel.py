@@ -238,8 +238,9 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         :return: A dictionary containing the parameters input by the user
         """
         valid_input = False
-        is_bsl = (self.data_type == 'bsl')
-        dlg = FrameSelectDialog(n_frames, is_bsl)
+        _, ext = os.path.splitext(self.output.GetPath())
+        show_single_btn = (ext == '.h5')
+        dlg = FrameSelectDialog(n_frames, show_single_btn)
         frames = None
         increment = None
         single_file = True
@@ -250,7 +251,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                     first_frame = int(dlg.first_input.GetValue())
                     last_frame = int(dlg.last_input.GetValue())
                     increment = int(dlg.increment_input.GetValue())
-                    if not is_bsl:
+                    if not show_single_btn:
                         single_file = dlg.single_btn.GetValue()
 
                     if last_frame < 0 or first_frame < 0:
@@ -337,7 +338,12 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                 for key, value in metadata.iteritems():
                     setattr(datainfo, key, value)
 
-        self.convert_to_cansas(frame_data, output_path, single_file)
+        _, ext = os.path.splitext(output_path)
+        if ext == '.xml':
+            self.convert_to_cansas(frame_data, output_path, single_file)
+        else: # ext == '.h5'
+            w = NXcanSASWriter()
+            w.write(frame_data, output_path)
 
     def on_convert(self, event):
         """Called when the Convert button is clicked"""
@@ -470,7 +476,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             self.q_input.Enable()
             self.radiation_input.Enable()
             self.metadata_section.Enable()
-            self.output.SetWildcard("CanSAS 1D (*.xml)|*.xml")
+            self.output.SetWildcard("CanSAS 1D (*.xml)|*.xml|NXcanSAS HDF5 File (*.h5)|*.h5")
 
     def radiationtype_changed(self, event):
         event.Skip()
@@ -559,7 +565,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         input_grid.Add(output_label, (y,0), (1,1), wx.ALIGN_CENTER_VERTICAL, 5)
 
         self.output = FileInput(self,
-            wildcard="CanSAS 1D (*.xml)|*.xml")
+            wildcard="CanSAS 1D (*.xml)|*.xml|NXcanSAS HDF5 File (*.h5)|*.h5")
         input_grid.Add(self.output.GetCtrl(), (y,1), (1,1), wx.EXPAND | wx.ALL, 5)
         y += 1
 
