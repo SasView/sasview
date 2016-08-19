@@ -444,13 +444,13 @@ class Process(object):
         """
         return len(self.name) == 0 and len(self.date) == 0 and len(self.description) == 0 \
             and len(self.term) == 0 and len(self.notes) == 0
-            
+
     def single_line_desc(self):
         """
             Return a single line string representing the process
         """
         return "%s %s %s" % (self.name, self.date, self.description)
-     
+
     def __str__(self):
         _str = "Process:\n"
         _str += "   Name:         %s\n" % self.name
@@ -1219,7 +1219,7 @@ class Data2D(plottable_2D, DataInfo):
         result.q_data = numpy.append(self.q_data, other.q_data)
         result.mask = numpy.append(self.mask, other.mask)
         if result.err_data is not None:
-            result.err_data = numpy.append(self.err_data, other.err_data) 
+            result.err_data = numpy.append(self.err_data, other.err_data)
         if self.dqx_data is not None:
             result.dqx_data = numpy.append(self.dqx_data, other.dqx_data)
         if self.dqy_data is not None:
@@ -1251,6 +1251,8 @@ def combine_data_info_with_plottable(data, datainfo):
         final_dataset.xaxis(data._xaxis, data._xunit)
         final_dataset.yaxis(data._yaxis, data._yunit)
         final_dataset.zaxis(data._zaxis, data._zunit)
+        final_dataset.x_bins = data.x_bins
+        final_dataset.y_bins = data.y_bins
     else:
         return_string = "Should Never Happen: _combine_data_info_with_plottable input is not a plottable1d or " + \
                         "plottable2d data object"

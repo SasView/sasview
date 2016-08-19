@@ -61,7 +61,6 @@ class Reader():
         :param filename: A path for an HDF5 formatted CanSAS 2D data file.
         :return: List of Data1D/2D objects and/or a list of errors.
         """
-
         ## Reinitialize the class when loading a new data file to reset all class variables
         self.reset_class_variables()
         ## Check that the file exists
@@ -135,10 +134,50 @@ class Reader():
             elif isinstance(value, h5py.Dataset):
                 ## If this is a dataset, store the data appropriately
                 data_set = data[key][:]
+                unit = self._get_unit(value)
+
+                ## I and Q Data
+                if key == u'I':
+                    if type(self.current_dataset) is plottable_2D:
+                        self.current_dataset.data = data_set
+                        self.current_dataset.zaxis("Intensity", unit)
+                    else:
+                        self.current_dataset.y = data_set.flatten()
+                        self.current_dataset.yaxis("Intensity", unit)
+                    continue
+                elif key == u'Idev':
+                    if type(self.current_dataset) is plottable_2D:
+                        self.current_dataset.err_data = data_set.flatten()
+                    else:
+                        self.current_dataset.dy = data_set.flatten()
+                    continue
+                elif key == u'Q':
+                    self.current_dataset.xaxis("Q", unit)
+                    if type(self.current_dataset) is plottable_2D:
+                        self.current_dataset.q = data_set.flatten()
+                    else:
+                        self.current_dataset.x = data_set.flatten()
+                    continue
+                elif key == u'Qy':
+                    self.current_dataset.yaxis("Q_y", unit)
+                    self.current_dataset.qy_data = data_set.flatten()
+                    continue
+                elif key == u'Qydev':
+                    self.current_dataset.dqy_data = data_set.flatten()
+                    continue
+                elif key == u'Qx':
+                    self.current_dataset.xaxis("Q_x", unit)
+                    self.current_dataset.qx_data = data_set.flatten()
+                    continue
+                elif key == u'Qxdev':
+                    self.current_dataset.dqx_data = data_set.flatten()
+                    continue
+                elif key == u'Mask':
+                    self.current_dataset.mask = data_set.flatten()
+                    continue
 
                 for data_point in data_set:
                     ## Top Level Meta Data
-                    unit = self._get_unit(value)
                     if key == u'definition':
                         self.current_datainfo.meta_data['reader'] = data_point
                     elif key == u'run':
@@ -147,38 +186,6 @@ class Reader():
                         self.current_datainfo.title = data_point
                     elif key == u'SASnote':
                         self.current_datainfo.notes.append(data_point)
-
-                    ## I and Q Data
-                    elif key == u'I':
-                        if type(self.current_dataset) is plottable_2D:
-                            self.current_dataset.data = np.append(self.current_dataset.data, data_point)
-                            self.current_dataset.zaxis("Intensity", unit)
-                        else:
-                            self.current_dataset.y = np.append(self.current_dataset.y, data_point)
-                            self.current_dataset.yaxis("Intensity", unit)
-                    elif key == u'Idev':
-                        if type(self.current_dataset) is plottable_2D:
-                            self.current_dataset.err_data = np.append(self.current_dataset.err_data, data_point)
-                        else:
-                            self.current_dataset.dy = np.append(self.current_dataset.dy, data_point)
-                    elif key == u'Q':
-                        self.current_dataset.xaxis("Q", unit)
-                        if type(self.current_dataset) is plottable_2D:
-                            self.current_dataset.q = np.append(self.current_dataset.q, data_point)
-                        else:
-                            self.current_dataset.x = np.append(self.current_dataset.x, data_point)
-                    elif key == u'Qy':
-                        self.current_dataset.yaxis("Q_y", unit)
-                        self.current_dataset.qy_data = np.append(self.current_dataset.qy_data, data_point)
-                    elif key == u'Qydev':
-                        self.current_dataset.dqy_data = np.append(self.current_dataset.dqy_data, data_point)
-                    elif key == u'Qx':
-                        self.current_dataset.xaxis("Q_x", unit)
-                        self.current_dataset.qx_data = np.append(self.current_dataset.qx_data, data_point)
-                    elif key == u'Qxdev':
-                        self.current_dataset.dqx_data = np.append(self.current_dataset.dqx_data, data_point)
-                    elif key == u'Mask':
-                        self.current_dataset.mask = np.append(self.current_dataset.mask, data_point)
 
                     ## Sample Information
                     elif key == u'Title' and self.parent_class == u'SASsample':
@@ -295,29 +302,21 @@ class Reader():
         ## Combine all plottables with datainfo and append each to output
         ## Type cast data arrays to float64 and find min/max as appropriate
         for dataset in self.data2d:
-            dataset.data = np.delete(dataset.data, [0])
             dataset.data = dataset.data.astype(np.float64)
-            dataset.err_data = np.delete(dataset.err_data, [0])
             dataset.err_data = dataset.err_data.astype(np.float64)
-            dataset.mask = np.delete(dataset.mask, [0])
             if dataset.qx_data is not None:
-                dataset.qx_data = np.delete(dataset.qx_data, [0])
                 dataset.xmin = np.min(dataset.qx_data)
                 dataset.xmax = np.max(dataset.qx_data)
                 dataset.qx_data = dataset.qx_data.astype(np.float64)
             if dataset.dqx_data is not None:
-                dataset.dqx_data = np.delete(dataset.dqx_data, [0])
                 dataset.dqx_data = dataset.dqx_data.astype(np.float64)
             if dataset.qy_data is not None:
-                dataset.qy_data = np.delete(dataset.qy_data, [0])
                 dataset.ymin = np.min(dataset.qy_data)
                 dataset.ymax = np.max(dataset.qy_data)
                 dataset.qy_data = dataset.qy_data.astype(np.float64)
             if dataset.dqy_data is not None:
-                dataset.dqy_data = np.delete(dataset.dqy_data, [0])
                 dataset.dqy_data = dataset.dqy_data.astype(np.float64)
             if dataset.q_data is not None:
-                dataset.q_data = np.delete(dataset.q_data, [0])
                 dataset.q_data = dataset.q_data.astype(np.float64)
             zeros = np.ones(dataset.data.size, dtype=bool)
             try:
@@ -332,31 +331,32 @@ class Reader():
                     dataset.q_data = np.sqrt(dataset.qx_data * dataset.qx_data + dataset.qy_data * dataset.qy_data)
             except:
                 dataset.q_data = None
+
+            if dataset.data.ndim == 2:
+                (n_rows, n_cols) = dataset.data.shape
+                dataset.y_bins = dataset.qy_data[0::n_rows]
+                dataset.x_bins = dataset.qx_data[:n_cols]
+                dataset.data = dataset.data.flatten()
+
             final_dataset = combine_data_info_with_plottable(dataset, self.current_datainfo)
             self.output.append(final_dataset)
 
         for dataset in self.data1d:
             if dataset.x is not None:
-                dataset.x = np.delete(dataset.x, [0])
                 dataset.x = dataset.x.astype(np.float64)
                 dataset.xmin = np.min(dataset.x)
                 dataset.xmax = np.max(dataset.x)
             if dataset.y is not None:
-                dataset.y = np.delete(dataset.y, [0])
                 dataset.y = dataset.y.astype(np.float64)
                 dataset.ymin = np.min(dataset.y)
                 dataset.ymax = np.max(dataset.y)
             if dataset.dx is not None:
-                dataset.dx = np.delete(dataset.dx, [0])
                 dataset.dx = dataset.dx.astype(np.float64)
             if dataset.dxl is not None:
-                dataset.dxl = np.delete(dataset.dxl, [0])
                 dataset.dxl = dataset.dxl.astype(np.float64)
             if dataset.dxw is not None:
-                dataset.dxw = np.delete(dataset.dxw, [0])
                 dataset.dxw = dataset.dxw.astype(np.float64)
             if dataset.dy is not None:
-                dataset.dy = np.delete(dataset.dy, [0])
                 dataset.dy = dataset.dy.astype(np.float64)
             final_dataset = combine_data_info_with_plottable(dataset, self.current_datainfo)
             self.output.append(final_dataset)
