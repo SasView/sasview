@@ -182,6 +182,7 @@ class NXcanSASWriter(Cansas2Reader):
 
         I = np.reshape(data.data, (n_rows, n_cols))
         dI = np.zeros((n_rows, n_cols))
+        # import pdb; pdb.set_trace()
         if not all(data.err_data == [None]):
             dI = np.reshape(data.err_data, (n_rows, n_cols))
         qx =  np.reshape(data.qx_data, (n_rows, n_cols))
@@ -192,3 +193,5 @@ class NXcanSASWriter(Cansas2Reader):
         Qx_entry.attrs['units'] = data.Q_unit
         Qy_entry = data_entry.create_dataset('Qy', data=qy)
         Qy_entry.attrs['units'] = data.Q_unit
+        Idev_entry = data_entry.create_dataset('Idev', data=dI)
+        Idev_entry.attrs['units'] = data.I_unit
