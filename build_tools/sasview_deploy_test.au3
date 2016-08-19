@@ -5,30 +5,22 @@
 ; points at failure location:
 ;
 ; 0 - OK
-; 1 - Download failure
-; 2 - Installer failure
-; 3 - Problems running SasView (simple fitting)
-; 4 - Uninstaller failure
+; 1 - Installer failure
+; 2 - Problems running SasView (simple fitting)
+; 3 - Uninstaller failure
 
 #include <Constants.au3>
 #include <FileConstants.au3>
 #include <MsgBoxConstants.au3>
-#include <InetConstants.au3>
 #include <WinAPIFiles.au3>
 
-; Custom error handler
-;Global $oMyError = ObjEvent("AutoIt.Error","MyErrFunc")
-
 ; Modifiable globals
-if $CmdLine[0] == 0 Then
-   ; Expected command line with the build number as argument
-   Exit (-1)
+Global $fInstallerLocation = @TempDir & "\setupSasView.exe"
+if $CmdLine[0] > 0 Then
+   ; If argument present - use it as local download path
+   $fInstallerLocation = $CmdLine[1]
 EndIf
 
-Local $lBuildNumber = $CmdLine[1]
-;Global $fInstallerLocation = "C:\util\setupSasView.exe" ; debug and testing location
-Global $fInstallerLocation = @TempDir & "\setupSasView.exe"
-Global $fRemoteInstallerLocation = "https://jenkins.esss.dk/sasview/job/SasView_Win7_Test/" & $lBuildNumber & "/artifact/sasview/dist/setupSasView.exe"
 Global $fUninstallerLocation = "C:\Program Files (x86)\SasView\unins000.exe"
 Global $lTimeout = 10          ; 10 sec timeout for waiting on windows
 Global $lInstallTimeout = 120  ; 2 min timeout for the installation process
@@ -36,33 +28,18 @@ Global $lInstallTimeout = 120  ; 2 min timeout for the installation process
 ; General globals
 Global $installerPID = 0
 
-
 ;; MAIN SCRIPT
-Download()
 Install()
 RunSasView()
 Uninstall()
-
 Exit(0)
 
 ;==============================================================
-Func Download()
-   ; Download the file in the background with the selected option of 'force a reload from the remote site.'
-   ConsoleWrite("Downloading...." & @CRLF)
-   Local $iFailFlag = 1
-   Local $hDownload = InetGet($fRemoteInstallerLocation, $fInstallerLocation, $INET_FORCERELOAD)
-
-    ; Close the handle returned by InetGet.
-    InetClose($hDownload)
-	Assert($hDownload, $iFailFlag)
-	ConsoleWrite("Installer downloaded successfully to " & $fInstallerLocation & @CRLF)
-
-EndFunc
 
 Func Install()
    ;;;;; APPLICATION INSTALLED ;;;;;;;
    Local $sSetupWindow = "Setup - SasView"
-   Local $iFailFlag = 2
+   Local $iFailFlag = 1
    ; Run setup
    if FileExists($fInstallerLocation) Then
 	  $installerPID = Run($fInstallerLocation)
@@ -74,7 +51,7 @@ Func Install()
    EndIf
 
    ; License click through
-   WinActivate($sSetupWindow) ; <-- REQUIRED when connecting from another host
+   WinActivate($sSetupWindow)
    Local $test = WinWaitActive($sSetupWindow, "License Agreement", $lTimeout)
    ;ConsoleWrite("license agreement: " & $test)
    Assert($test, $iFailFlag)
