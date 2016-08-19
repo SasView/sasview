@@ -498,9 +498,9 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         instructions = ("Select either single column ASCII files or 1D OTOKO "
         "files containing the Q-Axis and Intensity-Axis data, or a 2D BSL file"
         ", then chose where to save the converted file, and click Convert.\n"
-        "ASCII and OTOKO files will be converted to CanSAS XML, and OTKO files"
-        " to IGOR/DAT 2D Q_map files.\nCanSAS metadata can also be optionally "
-        "input below.")
+        "ASCII and OTOKO files can be converted to CanSAS XML, or NXcanSAS "
+        "HDF5 format. OTOKO files can only be converted to NXcanSAS.\nCanSAS "
+        "metadata can also be optionally input below.")
 
         instruction_label = wx.StaticText(self, -1, instructions,
             size=(_STATICBOX_WIDTH+40, -1))

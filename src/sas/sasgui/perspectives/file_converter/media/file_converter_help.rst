@@ -7,10 +7,9 @@ Description
 -----------
 
 This tool converts file formats with the Q data and intensity data in separate
-files, into a single CanSAS XML file.
+files, into a single CanSAS XML or NXcanSAS HDF5 file.
 
-It can also convert 2D BSL files into IGOR/DAT 2D files, which are 3 column
-ASCII files of the format :code:`Qx - Qy - I(Qx,Qy)`.
+It can also convert 2D BSL files into NXcanSAS HDF5 files.
 
 The input files can be:
 
@@ -45,10 +44,13 @@ frame, and increment respectively will convert frames 0, 10, 20, 30, 40 & 50.
 To convert a single frame, enter the same value for first frame & last frame,
 and 1 as the increment.
 
-For OTOKO files, there is also the option to output the data as multiple frames
-in a single CanSAS file, or multiple files with one frame each. The single file
-option will produce one file with multiple `<SASdata>` elements. The multiple
-file option will output a file for each frame; each file will have one
-`<SASdata>` element, and the frame number will appended to the file name.
+CanSAS XML files can become quite large when exporting multiple frames to a
+single file, so there is an option in the *Select Frame* dialog to output each
+frame to it's own file. The single file option will produce one file with
+multiple `<SASdata>` elements. The multiple file option will output a file for
+each frame; each file will have one `<SASdata>` element, and the frame number
+will appended to the file name.
 
-All converted BSL frames will have the frame number appended to the file name.
+The multiple file option is not available when exporting to NXcanSAS. All
+frames will be written to the same file, since the HDF5 format is designed for
+handling large amounts of data.
