@@ -205,6 +205,9 @@ class Reader(XMLreader):
 
         # Go through each child in the parent element
         for node in dom:
+            attr = node.attrib
+            name = attr.get("name", "")
+            type = attr.get("type", "")
             # Get the element name and set the current names level
             tagname = node.tag.replace(self.base_ns, "")
             tagname_original = tagname
@@ -222,12 +225,22 @@ class Reader(XMLreader):
                     self._initialize_new_data_set()
                 ## Recursion step to access data within the group
                 self._parse_entry(node)
+                if tagname == "SASsample":
+                    self.current_datainfo.sample.name = name
+                elif tagname == "beam_size":
+                    self.current_datainfo.source.beam_size_name = name
+                elif tagname == "SAScollimation":
+                    self.collimation.name = name
+                elif tagname == "aperture":
+                    self.aperture.name = name
+                    self.aperture.type = type
                 self.add_intermediate()
             else:
                 data_point, unit = self._get_node_value(node, tagname)
 
                 ## If this is a dataset, store the data appropriately
                 if tagname == 'Run':
+                    self.current_datainfo.run_name[data_point] = name
                     self.current_datainfo.run.append(data_point)
                 elif tagname == 'Title':
                     self.current_datainfo.title = data_point
@@ -368,7 +381,12 @@ class Reader(XMLreader):
                 elif tagname == 'SASprocessnote':
                     self.process.notes.append(data_point)
                 elif tagname == 'term' and self.parent_class == 'SASprocess':
-                    self.process.term.append(data_point)
+                    unit = attr.get("unit", "")
+                    dic = {}
+                    dic["name"] = name
+                    dic["value"] = data_point
+                    dic["unit"] = unit
+                    self.process.term.append(dic)
 
                 ## Transmission Spectrum
                 elif tagname == 'T' and self.parent_class == 'Tdata':
@@ -530,7 +548,7 @@ class Reader(XMLreader):
         elif self.parent_class == 'SAScollimation':
             self.current_datainfo.collimation.append(self.collimation)
             self.collimation = Collimation()
-        elif self.parent_class == 'SASaperture':
+        elif self.parent_class == 'aperture':
             self.collimation.aperture.append(self.aperture)
             self.aperture = Aperture()
         elif self.parent_class == 'SASdata':
@@ -645,11 +663,11 @@ class Reader(XMLreader):
         value_unit = ''
         err_msg = None
         default_unit = None
-        if 'unit' in attr and attr.get('unit') is not None and not self.ns_list.ns_optional:
+        if not isinstance(node_value, float):
+            node_value = float(node_value)
+        if 'unit' in attr and attr.get('unit') is not None:
             try:
                 local_unit = attr['unit']
-                if not isinstance(node_value, float):
-                    node_value = float(node_value)
                 unitname = self.ns_list.current_level.get("unit", "")
                 if "SASdetector" in self.names:
                     save_in = "detector"
@@ -906,16 +924,16 @@ class Reader(XMLreader):
             if len(datainfo.y) >= i:
                 self.write_node(point, "I", datainfo.y[i],
                                 {'unit': datainfo.y_unit})
-            if datainfo.dy != None and len(datainfo.dy) > i:
+            if datainfo.dy is not None and len(datainfo.dy) > i:
                 self.write_node(point, "Idev", datainfo.dy[i],
                                 {'unit': datainfo.y_unit})
-            if datainfo.dx != None and len(datainfo.dx) > i:
+            if datainfo.dx is not None and len(datainfo.dx) > i:
                 self.write_node(point, "Qdev", datainfo.dx[i],
                                 {'unit': datainfo.x_unit})
-            if datainfo.dxw != None and len(datainfo.dxw) > i:
+            if datainfo.dxw is not None and len(datainfo.dxw) > i:
                 self.write_node(point, "dQw", datainfo.dxw[i],
                                 {'unit': datainfo.x_unit})
-            if datainfo.dxl != None and len(datainfo.dxl) > i:
+            if datainfo.dxl is not None and len(datainfo.dxl) > i:
                 self.write_node(point, "dQl", datainfo.dxl[i],
                                 {'unit': datainfo.x_unit})
 
@@ -1183,6 +1201,9 @@ class Reader(XMLreader):
             for term in item.term:
                 if isinstance(term, list):
                     value = term['value']
+                    del term['value']
+                elif isinstance(term, dict):
+                    value = term.get("value")
                     del term['value']
                 else:
                     value = term

@@ -198,8 +198,6 @@ def write_file():
     msg += """Flags: ignoreversion recursesubdirs createallsubdirs\n"""
     msg += """Source: "dist\plugin_models\*";\tDestDir: "{userdesktop}\..\.sasview\plugin_models";\t"""
     msg += """Flags: recursesubdirs createallsubdirs\n""" 
-    msg += """Source: "dist\compiled_models\*";\tDestDir: "{userdesktop}\..\.sasmodels\compiled_models";\t"""
-    msg += """Flags: recursesubdirs createallsubdirs\n"""
     msg += """Source: "dist\config\custom_config.py";\tDestDir: "{userdesktop}\..\.sasview\config";\t""" 
     msg += """Flags: recursesubdirs createallsubdirs\n"""
     msg += """Source: "dist\default_categories.json";    DestDir: "{userdesktop}\..\.sasview";\t""" 

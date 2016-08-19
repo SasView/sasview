@@ -175,8 +175,7 @@ class cansas_reader(unittest.TestCase):
         """
         
         self.assertEqual(self.data.run[0], "1234")
-        self.assertEqual(self.data.meta_data['loader'], "CanSAS 1D")
-        self.assertEqual(len(self.data.errors), 0)
+        self.assertEqual(self.data.meta_data['loader'], "CanSAS XML 1D")
         
         # Data
         self.assertEqual(len(self.data.x), 2)
@@ -197,9 +196,9 @@ class cansas_reader(unittest.TestCase):
         self.assertEqual(self.data.sample.ID, "SI600-new-long")
         self.assertEqual(self.data.sample.name, "my sample")
         self.assertEqual(self.data.sample.thickness_unit, 'mm')
-        self.assertEqual(self.data.sample.thickness, 1.03)
+        self.assertAlmostEqual(self.data.sample.thickness, 1.03)
         
-        self.assertEqual(self.data.sample.transmission, 0.327)
+        self.assertAlmostEqual(self.data.sample.transmission, 0.327)
         
         self.assertEqual(self.data.sample.temperature_unit, 'C')
         self.assertEqual(self.data.sample.temperature, 0)
@@ -232,9 +231,9 @@ class cansas_reader(unittest.TestCase):
         self.assertEqual(self.data.source.wavelength, 6)
         
         self.assertEqual(self.data.source.wavelength_max_unit, "nm")
-        self.assertEqual(self.data.source.wavelength_max, 1.0)
+        self.assertAlmostEqual(self.data.source.wavelength_max, 1.0)
         self.assertEqual(self.data.source.wavelength_min_unit, "nm")
-        self.assertEqual(self.data.source.wavelength_min, 0.22)
+        self.assertAlmostEqual(self.data.source.wavelength_min, 0.22)
         self.assertEqual(self.data.source.wavelength_spread_unit, "percent")
         self.assertEqual(self.data.source.wavelength_spread, 14.3)
         
@@ -247,7 +246,7 @@ class cansas_reader(unittest.TestCase):
         for item in self.data.collimation[0].aperture:
             self.assertEqual(item.size_unit,'mm')
             self.assertEqual(item.distance_unit,'mm')
-            
+
             if item.size.x==50 \
                 and item.distance==11000.0 \
                 and item.name=='source' \
@@ -293,6 +292,7 @@ class cansas_reader(unittest.TestCase):
             self.assertTrue(item.name in ['NCNR-IGOR', 'spol'])
             self.assertTrue(item.date in ['04-Sep-2007 18:35:02',
                                           '03-SEP-2006 11:42:47'])
+            print item.term
             for t in item.term:
                 if t['name']=="ABS:DSTAND" \
                     and t['unit']=='mm' \
@@ -344,11 +344,11 @@ class cansas_reader(unittest.TestCase):
         self.data = data[0]
         self.assertEqual(self.data.filename, filename)
         # The followed should not have been loaded
-        self.assertEqual(self.data.sample.thickness, 0.00103)
+        self.assertAlmostEqual(self.data.sample.thickness, 0.00103)
         # This one should
-        self.assertEqual(self.data.sample.transmission, 0.327)
+        self.assertAlmostEqual(self.data.sample.transmission, 0.327)
         
-        self.assertEqual(self.data.meta_data['loader'], "CanSAS 1D")
+        self.assertEqual(self.data.meta_data['loader'], "CanSAS XML 1D")
         print self.data.errors
         self.assertEqual(len(self.data.errors), 1)
         
@@ -384,4 +384,4 @@ class cansas_reader(unittest.TestCase):
             
 
 if __name__ == '__main__':
-    unittest.main(testRunner=unittest.TextTestRunner(verbosity=2))
+    unittest.main()
