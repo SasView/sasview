@@ -98,7 +98,7 @@ class cansas_reader_xml(unittest.TestCase):
         self.assertTrue(data.detector[0].name == "HAB")
         self.assertTrue(data.detector[1].name == "main-detector-bank")
         self.assertTrue(data.detector[0].distance == 575.0)
-        self.assertTrue(data.detector[1].distance == 4145.02)
+        self.assertAlmostEqual(data.detector[1].distance, 4145.02)
         self.assertTrue(data.process[0].name == "Mantid generated CanSAS1D XML")
         self.assertTrue(data.meta_data["xmlpreprocess"] != None)
 
@@ -175,7 +175,7 @@ class cansas_reader_xml(unittest.TestCase):
         list = self.loader.load(self.cansas1d_notitle)
         data = list[0]
         self.assertTrue(data.x.size == 2)
-        self.assertTrue(len(data.meta_data) == 3)
+        self.assertTrue(len(data.meta_data) == 2)
         self.assertTrue(len(data.errors) == 1)
         self.assertTrue(data.detector[0].distance_unit == "mm")
         self.assertTrue(data.detector[0].name == "fictional hybrid")

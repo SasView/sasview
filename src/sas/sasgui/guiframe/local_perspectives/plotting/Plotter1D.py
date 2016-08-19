@@ -551,6 +551,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             # Recover the x,y limits
             self.subplot.set_xlim((xlo, xhi))
             self.subplot.set_ylim((ylo, yhi))
+        self.graph.selected_plottable = None
 
 
     def _onRemove(self, event):
@@ -628,10 +629,11 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 plot_menu.AppendSeparator()
 
             if self.parent.ClassName.count('wxDialog') == 0:
-                wx_id = ids.next()
-                plot_menu.Append(wx_id, '&Linear Fit', name)
-                wx.EVT_MENU(self, wx_id, self.onFitting)
-                plot_menu.AppendSeparator()
+                if plot.id != 'fit':
+                    wx_id = ids.next()
+                    plot_menu.Append(wx_id, '&Linear Fit', name)
+                    wx.EVT_MENU(self, wx_id, self.onFitting)
+                    plot_menu.AppendSeparator()
 
                 wx_id = ids.next()
                 plot_menu.Append(wx_id, "Remove", name)
@@ -693,6 +695,9 @@ class ModelPanel1D(PlotPanel, PanelBase):
         wx.EVT_MENU(self, wx_id, self._onProperties)
         self._slicerpop.AppendSeparator()
         wx_id = ids.next()
+        self._slicerpop.Append(wx_id, '&Set Graph Range')
+        wx.EVT_MENU(self, wx_id, self.onSetRange)
+        wx_id = ids.next()
         self._slicerpop.Append(wx_id, '&Reset Graph Range')
         wx.EVT_MENU(self, wx_id, self.onResetGraph)
 
@@ -708,6 +713,25 @@ class ModelPanel1D(PlotPanel, PanelBase):
             pos_x, pos_y = self.toolbar.GetPositionTuple()
             pos = (pos_x, pos_y + 5)
         self.PopupMenu(self._slicerpop, pos)
+
+    def onSetRange(self, event):
+        # Display dialog
+        # self.subplot.set_xlim((low, high))
+        # self.subplot.set_ylim((low, high))
+        from sas.sasgui.plottools.RangeDialog import RangeDialog
+        d = RangeDialog(self, -1)
+        xlim = self.subplot.get_xlim()
+        ylim = self.subplot.get_ylim()
+        d.SetXRange(xlim)
+        d.SetYRange(ylim)
+        if d.ShowModal() == wx.ID_OK:
+            x_range = d.GetXRange()
+            y_range = d.GetYRange()
+            if x_range is not None and y_range is not None:
+                self.subplot.set_xlim(x_range)
+                self.subplot.set_ylim(y_range)
+                self.subplot.figure.canvas.draw_idle()
+        d.Destroy()
 
     def onFreeze(self, event):
         """
@@ -795,6 +819,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                                str(appearanceDialog.find_key(self.get_symbol_label(),
                                                              int(curr_symbol))), curr_label)
         self.appD.Bind(wx.EVT_CLOSE, self.on_AppDialog_close)
+        self.graph.selected_plottable = None
 
     def on_AppDialog_close(self, event):
         """

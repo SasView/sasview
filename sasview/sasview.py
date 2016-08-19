@@ -98,6 +98,9 @@ import local_config
 PLUGIN_MODEL_DIR = 'plugin_models'
 APP_NAME = 'SasView'
 
+from matplotlib import backend_bases
+backend_bases.FigureCanvasBase.filetypes.pop('pgf', None)
+
 class SasView():
     """
     Main class for running the SasView application

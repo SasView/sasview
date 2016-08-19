@@ -14,7 +14,6 @@ from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
 from matplotlib.figure import Figure
 import os
 import transform
-from plottables import Data1D
 #TODO: make the plottables interactive
 from binder import BindArtist
 from matplotlib.font_manager import FontProperties
@@ -150,6 +149,7 @@ class PlotPanel(wx.Panel):
 
         #List of texts currently on the plot
         self.textList = []
+        self.selectedText = None
         #User scale
         if xtransform != None:
             self.xLabel = xtransform
@@ -189,6 +189,7 @@ class PlotPanel(wx.Panel):
         #self.selected_plottable = None
 
         # new data for the fit
+        from sas.sasgui.guiframe.dataFitting import Data1D
         self.fit_result = Data1D(x=[], y=[], dy=None)
         self.fit_result.symbol = 13
         #self.fit_result = Data1D(x=[], y=[],dx=None, dy=None)
@@ -351,6 +352,11 @@ class PlotPanel(wx.Panel):
         if event.button == 1:
             self.leftdown = True
             ax = event.inaxes
+            for text in self.textList:
+                if text.contains(event)[0]: # If user has clicked on text
+                    self.selectedText = text
+                    return
+
             if ax != None:
                 self.xInit, self.yInit = event.xdata, event.ydata
                 try:
@@ -372,6 +378,7 @@ class PlotPanel(wx.Panel):
             self.leftdown = False
             self.mousemotion = False
             self.leftup = True
+            self.selectedText = None
 
         #release the legend
         if self.gotLegend == 1:
@@ -447,6 +454,19 @@ class PlotPanel(wx.Panel):
         if self.gotLegend == 1:
             self._on_legend_motion(event)
             return
+
+        if self.leftdown and self.selectedText is not None:
+            # User has clicked on text and is dragging
+            ax = event.inaxes
+            if ax != None:
+                # Only move text if mouse is within axes
+                self.selectedText.set_position((event.xdata, event.ydata))
+                self._dragHelper(0, 0)
+            else:
+                # User has dragged outside of axes
+                self.selectedText = None
+            return
+
         if self.enable_toolbar:
             #Disable dragging without the toolbar to allow zooming with toolbar
             return
@@ -645,6 +665,10 @@ class PlotPanel(wx.Panel):
                 and(self.xminView != 0.0)and (self.xmaxView != 0.0):
                 dlg.setFitRange(self.xminView, self.xmaxView,
                                 self.xmin, self.xmax)
+            else:
+                xlim = self.subplot.get_xlim()
+                ylim = self.subplot.get_ylim()
+                dlg.setFitRange(xlim[0], xlim[1], ylim[0], ylim[1])
             # It would be nice for this to NOT be modal (i.e. Show).
             # Not sure about other ramifications - for example
             # if a second linear fit is started before the first is closed.
@@ -1724,6 +1748,9 @@ class PlotPanel(wx.Panel):
         # Delete first, and then get the whole list...
         if remove_fit:
             self.graph.delete(self.fit_result)
+            if hasattr(self, 'plots'):
+                if 'fit' in self.plots.keys():
+                    del self.plots['fit']
         self.ly = None
         self.q_ctrl = None
         list = self.graph.returnPlottable()
@@ -1737,6 +1764,8 @@ class PlotPanel(wx.Panel):
         _xscale = 'linear'
         _yscale = 'linear'
         for item in list:
+            if item.id == 'fit':
+                continue
             item.setLabel(self.xLabel, self.yLabel)
             # control axis labels from the panel itself
             yname, yunits = item.get_yaxis()
@@ -1868,6 +1897,9 @@ class PlotPanel(wx.Panel):
         :param xmax: the highest value of data to fit to the line
 
         """
+        xlim = self.subplot.get_xlim()
+        ylim = self.subplot.get_ylim()
+
         # Saving value to redisplay in Fit Dialog when it is opened again
         self.Avalue, self.Bvalue, self.ErrAvalue, \
                       self.ErrBvalue, self.Chivalue = func
@@ -1891,6 +1923,15 @@ class PlotPanel(wx.Panel):
         self.graph.add(self.fit_result)
         self.graph.render(self)
         self._offset_graph()
+        if hasattr(self, 'plots'):
+            # Used by Plotter1D
+            fit_id = 'fit'
+            self.fit_result.id = fit_id
+            self.fit_result.title = 'Fit'
+            self.fit_result.name = 'Fit'
+            self.plots[fit_id] = self.fit_result
+        self.subplot.set_xlim(xlim)
+        self.subplot.set_ylim(ylim)
         self.subplot.figure.canvas.draw_idle()
 
     def onChangeCaption(self, event):
