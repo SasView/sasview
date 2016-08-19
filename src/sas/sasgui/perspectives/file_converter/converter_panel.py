@@ -275,57 +275,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         frames = range(first_frame, last_frame + 1, increment)
         return { 'frames': frames, 'inc': increment, 'file': single_file }
 
-    def on_convert(self, event):
-        """Called when the Convert button is clicked"""
-        if not self.validate_inputs():
-            return
-
-        self.sample.ID = self.title
-
-        try:
-            if self.data_type == 'ascii':
-                qdata = self.extract_ascii_data(self.q_input.GetPath())
-                iqdata = np.array([self.extract_ascii_data(self.iq_input.GetPath())])
-            elif self.data_type == 'otoko':
-                qdata, iqdata = self.extract_otoko_data(self.q_input.GetPath())
-            else: # self.data_type == 'bsl'
-
-                dataset = self.extract_bsl_data(self.iq_input.GetPath())
-                if dataset is None:
-                    # Cancelled by user
-                    return
-
-                w = NXcanSASWriter()
-                w.write(dataset, self.output.GetPath())
-
-                wx.PostEvent(self.parent.manager.parent,
-                    StatusEvent(status="Conversion completed."))
-                return
-
-        except Exception as ex:
-            msg = str(ex)
-            wx.PostEvent(self.parent.manager.parent,
-                StatusEvent(status=msg, info='error'))
-            return
-
-        frames = []
-        increment = 1
-        single_file = True
-        n_frames = iqdata.shape[0]
-        # Standard file has 3 frames: SAS, calibration and WAS
-        if n_frames > 3:
-            # File has multiple frames - ask the user which ones they want to
-            # export
-            params = self.ask_frame_range(n_frames)
-            frames = params['frames']
-            increment = params['inc']
-            single_file = params['file']
-            if frames == []: return
-        else: # Only interested in SAS data
-            frames = [0]
-
-        output_path = self.output.GetPath()
-
+    def get_metadata(self):
         # Prepare the metadata for writing to a file
         if self.run is None:
             self.run = []
@@ -344,6 +294,32 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             'source': self.source
         }
 
+        return metadata
+
+    def convert_1d_data(self, qdata, iqdata):
+        """
+        Formats a 1D array of q_axis data and a 2D array of I axis data (where
+        each row of iqdata is a separate row), into an array of Data1D objects
+        """
+        frames = []
+        increment = 1
+        single_file = True
+        n_frames = iqdata.shape[0]
+        # Standard file has 3 frames: SAS, calibration and WAS
+        if n_frames > 3:
+            # File has multiple frames - ask the user which ones they want to
+            # export
+            params = self.ask_frame_range(n_frames)
+            frames = params['frames']
+            increment = params['inc']
+            single_file = params['file']
+            if frames == []: return
+        else: # Only interested in SAS data
+            frames = [0]
+
+        output_path = self.output.GetPath()
+        metadata = self.get_metadata()
+
         frame_data = {}
         for i in frames:
             data = Data1D(x=qdata, y=iqdata[i])
@@ -361,8 +337,41 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                 for key, value in metadata.iteritems():
                     setattr(datainfo, key, value)
 
-
         self.convert_to_cansas(frame_data, output_path, single_file)
+
+    def on_convert(self, event):
+        """Called when the Convert button is clicked"""
+        if not self.validate_inputs():
+            return
+
+        self.sample.ID = self.title
+
+        try:
+            if self.data_type == 'ascii':
+                qdata = self.extract_ascii_data(self.q_input.GetPath())
+                iqdata = np.array([self.extract_ascii_data(self.iq_input.GetPath())])
+                self.convert_1d_data(qdata, iqdata)
+            elif self.data_type == 'otoko':
+                qdata, iqdata = self.extract_otoko_data(self.q_input.GetPath())
+                self.convert_1d_data(qdata, iqdata)
+            else: # self.data_type == 'bsl'
+                dataset = self.extract_bsl_data(self.iq_input.GetPath())
+                if dataset is None:
+                    # Cancelled by user
+                    return
+
+                metadata = self.get_metadata()
+                for key, value in metadata.iteritems():
+                    setattr(dataset[0], key, value)
+
+                w = NXcanSASWriter()
+                w.write(dataset, self.output.GetPath())
+        except Exception as ex:
+            msg = str(ex)
+            wx.PostEvent(self.parent.manager.parent,
+                StatusEvent(status=msg, info='error'))
+            return
+
         wx.PostEvent(self.parent.manager.parent,
             StatusEvent(status="Conversion completed."))
 
@@ -453,10 +462,10 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         if dtype == 'bsl':
             self.q_input.SetPath("")
             self.q_input.Disable()
-            self.radiation_input.Disable()
-            self.metadata_section.Collapse()
-            self.on_collapsible_pane(None)
-            self.metadata_section.Disable()
+            # self.radiation_input.Disable()
+            # self.metadata_section.Collapse()
+            # self.on_collapsible_pane(None)
+            # self.metadata_section.Disable()
             self.output.SetWildcard("NXcanSAS HDF5 File (*.h5)|*.h5")
         else:
             self.q_input.Enable()
