@@ -75,6 +75,8 @@ class Reader():
                 self.read_children(self.raw_data, [])
                 ## Add the last data set to the list of outputs
                 self.add_data_set()
+                ## Close the data file
+                self.raw_data.close()
         ## Return data set(s)
         return self.output
 
