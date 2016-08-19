@@ -61,8 +61,6 @@ class NXcanSASWriter(Cansas2Reader):
             if len(data_info.run_name) > 0:
                 run_name = data_info.run_name[run_number]
 
-        import pdb; pdb.set_trace()
-
         f = h5py.File(filename, 'w')
         sasentry = f.create_group('sasentry01')
         sasentry['definition'] = _h5_string('NXcanSAS')
@@ -155,9 +153,14 @@ class NXcanSASWriter(Cansas2Reader):
         data_entry.attrs['I_axes'] = 'Q'
         data_entry.attrs['I_uncertainties'] = 'Idev'
         data_entry.attrs['Q_indicies'] = 0
+
+        dI = data_obj.dy
+        if dI is None:
+            dI = np.zeros((data_obj.y.shape))
+
         data_entry.create_dataset('Q', data=data_obj.x)
         data_entry.create_dataset('I', data=data_obj.y)
-        data_entry.create_dataset('Idev', data=data_obj.dy)
+        data_entry.create_dataset('Idev', data=dI)
 
     def _write_2d_data(self, data, data_entry):
         """
