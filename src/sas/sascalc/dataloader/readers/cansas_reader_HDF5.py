@@ -135,11 +135,11 @@ class Reader():
                 ## If this is a dataset, store the data appropriately
                 data_set = data[key][:]
                 unit = self._get_unit(value)
-                
+
                 ## I and Q Data
                 if key == u'I':
                     if type(self.current_dataset) is plottable_2D:
-                        self.current_dataset.data = data_set.flatten()
+                        self.current_dataset.data = data_set
                         self.current_dataset.zaxis("Intensity", unit)
                     else:
                         self.current_dataset.y = data_set.flatten()
@@ -331,6 +331,13 @@ class Reader():
                     dataset.q_data = np.sqrt(dataset.qx_data * dataset.qx_data + dataset.qy_data * dataset.qy_data)
             except:
                 dataset.q_data = None
+
+            if dataset.data.ndim == 2:
+                (n_rows, n_cols) = dataset.data.shape
+                dataset.y_bins = dataset.qy_data[0::n_rows]
+                dataset.x_bins = dataset.qx_data[:n_cols]
+                dataset.data = dataset.data.flatten()
+
             final_dataset = combine_data_info_with_plottable(dataset, self.current_datainfo)
             self.output.append(final_dataset)
 
