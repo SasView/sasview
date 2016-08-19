@@ -164,11 +164,13 @@ class Plugin(PluginBase):
             new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
             new_plot.y -= self.corfunc_panel.background
             group_id = GROUP_ID_IQ_DATA
+            if label == IQ_EXTRAPOLATED_DATA_LABEL:
+                new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
         elif label == TRANSFORM_LABEL:
             new_plot.xaxis("{x}", 'A')
             new_plot.yaxis("{\\Gamma}", '')
             group_id = GROUP_ID_TRANSFORM
-        new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
+            new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
         new_plot.id = label
         new_plot.name = label
         new_plot.group_id = group_id
