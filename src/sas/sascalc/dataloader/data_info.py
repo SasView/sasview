@@ -1036,6 +1036,7 @@ class Data2D(plottable_2D, DataInfo):
         _str += "   X- & Y-axis:  %s\t[%s]\n" % (self._yaxis, self._yunit)
         _str += "   Z-axis:       %s\t[%s]\n" % (self._zaxis, self._zunit)
         _str += "   Length:       %g \n" % (len(self.data))
+        _str += "   Shape:        (%d, %d)\n" % (len(self.y_bins), len(self.x_bins))
         return _str
 
     def clone_without_data(self, length=0, clone=None):
