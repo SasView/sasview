@@ -363,6 +363,9 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                 metadata = self.get_metadata()
                 for key, value in metadata.iteritems():
                     setattr(dataset[0], key, value)
+                if self.run != []:
+                    run_number = self.run[0]
+                    dataset[0].run_name[run_number] = self.run_name
 
                 w = NXcanSASWriter()
                 w.write(dataset, self.output.GetPath())
@@ -462,10 +465,6 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         if dtype == 'bsl':
             self.q_input.SetPath("")
             self.q_input.Disable()
-            # self.radiation_input.Disable()
-            # self.metadata_section.Collapse()
-            # self.on_collapsible_pane(None)
-            # self.metadata_section.Disable()
             self.output.SetWildcard("NXcanSAS HDF5 File (*.h5)|*.h5")
         else:
             self.q_input.Enable()

@@ -61,6 +61,8 @@ class NXcanSASWriter(Cansas2Reader):
             if len(data_info.run_name) > 0:
                 run_name = data_info.run_name[run_number]
 
+        import pdb; pdb.set_trace()
+
         f = h5py.File(filename, 'w')
         sasentry = f.create_group('sasentry01')
         sasentry['definition'] = _h5_string('NXcanSAS')
@@ -89,7 +91,7 @@ class NXcanSASWriter(Cansas2Reader):
         for key in sample_attrs:
             if getattr(data_info.sample, key) is not None:
                 sample_entry.create_dataset(key,
-                    data=np.array([getattr(data_info.sample, key)]))
+                    data=_h5_float(getattr(data_info.sample, key)))
 
         instrument_entry = sasentry.create_group('sasinstrument')
         instrument_entry.attrs['canSAS_class'] = 'SASinstrument'
@@ -182,11 +184,11 @@ class NXcanSASWriter(Cansas2Reader):
 
         I = np.reshape(data.data, (n_rows, n_cols))
         dI = np.zeros((n_rows, n_cols))
-        # import pdb; pdb.set_trace()
         if not all(data.err_data == [None]):
             dI = np.reshape(data.err_data, (n_rows, n_cols))
         qx =  np.reshape(data.qx_data, (n_rows, n_cols))
         qy = np.reshape(data.qy_data, (n_rows, n_cols))
+
         I_entry = data_entry.create_dataset('I', data=I)
         I_entry.attrs['units'] = data.I_unit
         Qx_entry = data_entry.create_dataset('Qx', data=qx)
