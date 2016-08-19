@@ -1,4 +1,5 @@
 from sas.sascalc.file_converter.core.bsl_loader import CLoader
+from sas.sascalc.dataloader.data_info import Data2D
 from copy import deepcopy
 import os
 import numpy as np
@@ -77,6 +78,26 @@ class BSLLoader(CLoader):
 
         CLoader.__init__(self, data_info['filename'], data_info['frames'],
             data_info['pixels'], data_info['rasters'], data_info['swap_bytes'])
+
+    def load_frames(self, frames):
+        frame_data = []
+        # Prepare axis values (arbitrary scale)
+        x = self.n_rasters * range(1, self.n_pixels+1)
+        y = [self.n_pixels * [i] for i in range(1, self.n_rasters+1)]
+        y = np.reshape(y, (1, self.n_pixels*self.n_rasters))[0]
+        x_bins = x[:self.n_pixels]
+        y_bins = y[0::self.n_pixels]
+
+        for frame in frames:
+            self.frame = frame
+            raw_frame_data = self.load_data()
+            data2d = Data2D(data=raw_frame_data, qx_data=x, qy_data=y)
+            data2d.x_bins = x_bins
+            data2d.y_bins = y_bins
+            frame_data.append(data2d)
+
+        return frame_data
+
 
     def __setattr__(self, name, value):
         if name == 'filename':

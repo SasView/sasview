@@ -223,20 +223,11 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             dlg.Destroy()
 
         if not should_continue:
-            return None, None, None
+            return None
 
-        frame_data = {}
+        frame_data = loader.load_frames(frames)
 
-        for frame in frames:
-            loader.frame = frame
-            frame_data[frame] = loader.load_data()
-
-        # Prepare axes values (arbitrary scale)
-        x_data = loader.n_rasters * range(1,loader.n_pixels+1)
-        y_data = [loader.n_pixels * [i] for i in range(1, loader.n_rasters+1)]
-        y_data = np.reshape(y_data, (1, loader.n_pixels*loader.n_rasters))[0]
-
-        return (x_data, y_data), (loader.n_rasters, loader.n_pixels), frame_data
+        return frame_data
 
     def ask_frame_range(self, n_frames):
         """
@@ -299,20 +290,13 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                 qdata, iqdata = self.extract_otoko_data(self.q_input.GetPath())
             else: # self.data_type == 'bsl'
 
-                (x, y), dimensions, frame_data = \
-                    self.extract_bsl_data(self.iq_input.GetPath())
-                if x == None and y == None and frame_data == None:
+                dataset = self.extract_bsl_data(self.iq_input.GetPath())
+                if dataset is None:
                     # Cancelled by user
                     return
 
-                dataset = []
-                for i_data in frame_data.values():
-                    i_data = np.reshape(i_data, (1, i_data.size))[0]
-                    data2d = Data2D(data=i_data, qx_data=x, qy_data=y)
-                    dataset.append(data2d)
                 w = NXcanSASWriter()
-                dimensions = [dimensions] * len(dataset)
-                w.write(dataset, self.output.GetPath(), dimensions=dimensions)
+                w.write(dataset, self.output.GetPath())
 
                 wx.PostEvent(self.parent.manager.parent,
                     StatusEvent(status="Conversion completed."))

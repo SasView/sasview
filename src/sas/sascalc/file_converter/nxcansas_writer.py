@@ -21,7 +21,7 @@ class NXcanSASWriter(Cansas2Reader):
         The NXcanSAS writer requires h5py => v2.5.0 or later.
     """
 
-    def write(self, dataset, filename, dimensions=[]):
+    def write(self, dataset, filename):
         """
         Write an array of Data1d or Data2D objects to an NXcanSAS file, as
         one SASEntry with multiple SASData elements. The metadata of the first
@@ -78,7 +78,7 @@ class NXcanSASWriter(Cansas2Reader):
             if isinstance(data_obj, Data1D):
                 self._write_1d_data(data_obj, data_entry)
             elif isinstance(data_obj, Data2D):
-                self._write_2d_data(data_obj, data_entry, dimensions)
+                self._write_2d_data(data_obj, data_entry)
             i += 1
 
         data_info = dataset[0]
@@ -157,7 +157,7 @@ class NXcanSASWriter(Cansas2Reader):
         data_entry.create_dataset('I', data=data_obj.y)
         data_entry.create_dataset('Idev', data=data_obj.dy)
 
-    def _write_2d_data(self, data, data_entry, dimensions):
+    def _write_2d_data(self, data, data_entry):
         """
         Writes the contents of a Data2D object to a SASdata h5py Group
 
@@ -169,13 +169,9 @@ class NXcanSASWriter(Cansas2Reader):
         data_entry.attrs['I_uncertainties'] = 'Idev'
         data_entry.attrs['Q_indicies'] = [0,1]
 
-        (n_rows, n_cols) = (None, None)
-        try:
-            (n_rows, n_cols) = dimensions.pop(0)
-        except:
-            pass
+        (n_rows, n_cols) = (len(data.y_bins), len(data.x_bins))
 
-        if n_rows == None and n_cols == None:
+        if n_rows == 0 and n_cols == 0:
             # Calculate rows and columns, assuming detector is square
             # Same logic as used in PlotPanel.py _get_bins
             n_cols = int(np.floor(np.sqrt(len(data.qy_data))))
