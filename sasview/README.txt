@@ -4,6 +4,41 @@ Release Notes
 1- Features
 ===========
 
+    - New in Version 4.0.0-beta
+      --------------------
+      This beta adds support for the magnetic and multilevel models of 3.1.2
+      and along with a host of bug fixes found in the alpha.
+
+      - Model package changes and improvements
+         - All 3.1.2 models now available in new interface
+         - Old custom models should now still work
+            - '''NOTE:''' These will be deprecated in a future version. Old
+            custom models should be converted to the new model format which 
+            is now the same as the built in models and offers much better
+            support.
+         - Custom model editor now creates new style models
+         - Custom model editor supports better error checking
+      - Documentation improvements
+        - Continued general cleanup
+      - Other improvements/additions
+         - Support for new canSAS 2D data files added
+         - Plot axes range can now be set manually as well as by zooming
+         - Plot annotations can now be moved around after being placed on plot.
+         - The active optimizer is now listed on the top of the fit panel.
+         - Linear fits now update qmin and max when the x scale limits are
+         changed.  Also the plot range no longer resets after a fit.
+      - Bug fixes
+         - Fixes bug #511 Errors in linearized fits and clean up of interface
+         including Kratky representation
+         - Fixes bug #186 Data operation Tool now executes when something is
+         entered in the text box and does not wait for the user to hit enter
+         - Fixes bug #459 plot context menu bug
+         - Fixes bug #559 copy to clipboard in graph menu broken
+         - Fixes bug #466 cannot remove a linear fit from graph
+         - Numerous bugs introduced in the alpha
+
+
+
     - New in Version 4.0.0-alpha
       --------------------
       This alpha release brings a major overhaul of the model system. The new model
