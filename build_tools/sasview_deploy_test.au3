@@ -91,10 +91,12 @@ Func RunSasView()
    ;;;;; APPLICATION STARTED ;;;;;;;
    ; Start app - DEBUG ONLY
    ;;Run("C:\Program Files (x86)\SasView\SasView.exe")
+   Run("C:\util\SasView\SasView.exe")
+   local $sActiveWindow = "SasView  - Fitting -"
    Local $iFailFlag = 2
    ; Wait for the window
    Sleep(1000)
-   Local $hWnd = WinWaitActive("SasView  - Fitting -", "", $lTimeout)
+   Local $hWnd = WinWaitActive($sActiveWindow, "", $lTimeout)
    Assert($hWnd, $iFailFlag)
 
    ;;;;; Load a File
@@ -112,11 +114,29 @@ Func RunSasView()
    ;; Send file to fitting
    ControlClick($hWnd, "Send To", 231)
 
-   ;; Choose a model
+   ;; Choose a python model
    ControlCommand($hWnd, "", "ComboBox3", "SetCurrentSelection", 1)
-
    ;; Calculate the model
    ControlClick($hWnd, "Compute", 211)
+   ;; Assure we got the charts
+   Local $hPlot = WinWait($sActiveWindow, "Graph2", $lTimeout)
+   Assert($hPlot, $iFailFlag)
+   $hPlot = WinWait($sActiveWindow, "Graph3", $lTimeout)
+   Assert($hPlot, $iFailFlag)
+
+   sleep(1000)
+   ;; Calculate a compiled model
+   ControlClick($hWnd, "Send To", 231)
+
+   ;; Choose Shapes/Cylinder
+   ControlCommand($hWnd, "", "ComboBox2", "SetCurrentSelection", 1)
+   ControlCommand($hWnd, "", "ComboBox3", "SetCurrentSelection", 11)
+   ;; Calculate the model
+   ControlClick($hWnd, "Compute", 211)
+
+   ;; Assure we got another chart
+   $hPlot = WinWait($sActiveWindow, "Graph4", $lTimeout)
+   Assert($hPlot, $iFailFlag)
 
    ;; Close SasView
    WinClose($hWnd)
