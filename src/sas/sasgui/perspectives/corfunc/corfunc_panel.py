@@ -592,7 +592,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         bg_label = wx.StaticText(self, -1, "Bg: ")
         params_sizer.Add(bg_label, (3, 2), (1, 1), wx.LEFT | wx.EXPAND, 15)
 
-        self._background_input = ModelTextCtrl(self, -1, value="-",
+        self._background_input = ModelTextCtrl(self, -1, value="0.0",
             style=wx.TE_PROCESS_ENTER | wx.TE_CENTRE, name='background_input',
             text_enter_callback=self._on_enter_input)
         self._background_input.SetToolTipString(("A background value to "
