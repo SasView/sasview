@@ -208,6 +208,16 @@ data_files += invariant.data_files()
 import sas.sasgui.guiframe as guiframe
 data_files += guiframe.data_files()
 
+# precompile sas models into the sasview build path; doesn't matter too much
+# where it is so long as it is a place that will get cleaned up afterwards.
+import sasmodels.core
+dll_path = os.path.join(build_path, 'compiled_models')
+compiled_dlls = sasmodels.core.precompile_dlls(dll_path, dtype='double')
+
+# include the compiled models as data; coordinate the target path for the
+# data with installer_generator.py
+data_files.append(('compiled_models', compiled_dlls))
+
 import sasmodels
 data_files += sasmodels.data_files()
 
