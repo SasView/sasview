@@ -147,7 +147,9 @@ Once the Q ranges have been set, click the "Calculate" button next to the
 background input field to calculate the Bonart thermal background level.
 Alternatively, enter your own value into the field. Click the "Extrapolate"
 button to extrapolate the data and plot the extrapolation in the same figure
-as the original data. [figure 4]
+as the original data. The values of the parameters used for the Guinier and
+Porod models will also be shown in the "Extrapolation Parameters" section
+[figure 4]
 
 .. figure:: tutorial2.png
    :align: center
