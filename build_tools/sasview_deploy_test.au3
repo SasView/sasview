@@ -91,7 +91,6 @@ Func RunSasView()
    ;;;;; APPLICATION STARTED ;;;;;;;
    ; Start app - DEBUG ONLY
    ;;Run("C:\Program Files (x86)\SasView\SasView.exe")
-   Run("C:\util\SasView\SasView.exe")
    local $sActiveWindow = "SasView  - Fitting -"
    Local $iFailFlag = 2
    ; Wait for the window
