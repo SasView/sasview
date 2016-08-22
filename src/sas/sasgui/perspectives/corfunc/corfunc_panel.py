@@ -186,10 +186,24 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
             msg = "Invalid Q range entered."
             wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
             return
+
+        warning_msg = ""
+        if self.background < 0:
+            warning_msg += "Negative background value entered."
+        if any((self._data.y - self.background) < 0):
+            if warning_msg != "":
+                warning_msg += "\n"
+            warning_msg += "Background value entered results in negative Intensity values."
+        if warning_msg != "":
+            dlg = wx.MessageDialog(self.parent.parent, warning_msg, caption="Warning", style=wx.ICON_EXCLAMATION)
+            dlg.ShowModal()
+            dlg.Destroy()
+
         self._calculator.set_data(self._data)
         self._calculator.lowerq = self.qmin
         self._calculator.upperq = self.qmax
         self._calculator.background = self.background
+
         try:
             self._extrapolated_data = self._calculator.compute_extrapolation()
         except:
