@@ -239,7 +239,7 @@ class CorfuncCalculator(object):
     def _fit_porod(self, q, iq):
         """Fit the Porod region of the curve"""
         fitp = curve_fit(lambda q, k, sig, bg: self._porod(q, k, sig, bg)*q**2,
-                         q, iq*q**2)[0]
+                         q, iq*q**2, bounds=([-np.inf, 0, -np.inf], [np.inf, np.inf, np.inf]))[0]
         k, sigma, bg = fitp
         return k, sigma, bg
 

@@ -50,10 +50,10 @@ the data points in the upper Q range.
 The equation used is:
 
 .. math::
-    I(Q) = B + KQ^{-4}e^{-Q^2\sigma^2}
+    I(Q) = Bg + KQ^{-4}e^{-Q^2\sigma^2}
 
-Where :math:`B` is the Bonart thermal background, :math:`K` is the Porod
-constant, and :math:`\sigma` describes the electron (or neutron scattering
+Where :math:`Bg` is the Bonart thermal background, :math:`K` is the Porod
+constant, and :math:`\sigma > 0` describes the electron (or neutron scattering
 length) density profile at the interface between crystalline and amorphous
 regions (see figure 1).
 
@@ -132,10 +132,10 @@ The structural parameters obtained are:
 
 Usage
 -----
-Upon sending data for correlation function analysis, it will be plotted,  
-along with a red bar indicating the lower Q range (used for back-extrapolation), 
-and 2 purple bars indicating the upper qrange (used for forward-extrapolation) 
-[figure 3]. These bars may be moved my clicking and dragging, or by entering 
+Upon sending data for correlation function analysis, it will be plotted,
+along with a red bar indicating the lower Q range (used for back-extrapolation),
+and 2 purple bars indicating the upper qrange (used for forward-extrapolation)
+[figure 3]. These bars may be moved my clicking and dragging, or by entering
 the appropriate value in the Q range input boxes.
 
 .. figure:: tutorial1.png
