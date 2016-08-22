@@ -239,7 +239,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 # Display x,y in the status bar if possible
                 xval = float(active_ctrl.GetValue())
                 position = self.get_data_xy_vals(xval)
-                if position != None:
+                if position != None and not self.is_corfunc:
                     wx.PostEvent(self.parent, StatusEvent(status=position))
             except:
                 logging.error(sys.exc_value)
