@@ -196,11 +196,13 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         if any((self._data.y - self.background) < 0):
             if warning_msg != "":
                 warning_msg += "\n"
-            warning_msg += "Background value entered results in negative Intensity values."
+            warning_msg += "Background value results in negative Intensity values."
         if warning_msg != "":
-            dlg = wx.MessageDialog(self.parent.parent, warning_msg, caption="Warning", style=wx.ICON_EXCLAMATION)
-            dlg.ShowModal()
-            dlg.Destroy()
+            self._background_input.SetBackgroundColour('yellow')
+            wx.PostEvent(self._manager.parent, StatusEvent(status=warning_msg, info='warning'))
+        else:
+            self._background_input.SetBackgroundColour(wx.WHITE)
+        self._background_input.Refresh()
 
         self._calculator.set_data(self._data)
         self._calculator.lowerq = self.qmin
