@@ -69,13 +69,12 @@ class CorfuncState(object):
         state += "Qmin:         {}\n".format(str(self.qmin))
         state += "Qmax:         {}\n".format(str(self.qmax))
         state += "Background:   {}\n".format(str(self.background))
-        if self.outputs is None:
-            return state
-        state += "\nOutputs:\n"
-        for output in output_list:
-            key = output[0]
-            name = output[1]
-            state += "{}: {}\n".format(name, str(self.outputs[key]))
+
+        if self.outputs != {} and self.outputs is not None:
+            state += "\nOutputs:\n"
+            for key, value in self.outputs.iteritems():
+                name = output_list[key][1]
+                state += "{}: {}\n".format(name, str(value))
 
         return state
 
@@ -175,9 +174,8 @@ class CorfuncState(object):
         if self.outputs != {} and self.outputs is not None:
             output = new_doc.createElement("output")
             top_element.appendChild(output)
-            for item in output_list:
-                element = new_doc.createElement(item[0])
-                value = self.outputs[item[0]]
+            for key, value in self.outputs.iteritems():
+                element = new_doc.createElement(key)
                 element.appendChild(new_doc.createTextNode(str(value)))
                 output.appendChild(element)
 
