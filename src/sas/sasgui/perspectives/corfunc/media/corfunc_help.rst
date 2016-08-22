@@ -132,11 +132,11 @@ The structural parameters obtained are:
 
 Usage
 -----
-Upon sending data for correlation function analysis, it will be plotted,
-along with a red bar indicating the lower Q range (used for back-extrapolation),
-and 2 purple bars indicating the upper qrange (used for forward-extrapolation)
-[figure 3]. These bars may be moved my clicking and dragging, or by entering
-the appropriate value in the Q range input boxes.
+Upon sending data for correlation function analysis, it will be plotted (minus
+the background value), along with a red bar indicating the lower Q range (used
+for back-extrapolation), and 2 purple bars indicating the upper Q range (used
+for forward-extrapolation) [figure 3]. These bars may be moved my clicking and
+dragging, or by entering the appropriate values in the Q range input boxes.
 
 .. figure:: tutorial1.png
    :align: center
@@ -146,10 +146,9 @@ the appropriate value in the Q range input boxes.
 Once the Q ranges have been set, click the "Calculate" button next to the
 background input field to calculate the Bonart thermal background level.
 Alternatively, enter your own value into the field. Click the "Extrapolate"
-button to extrapolate the data and plot the extrapolation in the same figure
-as the original data. The values of the parameters used for the Guinier and
-Porod models will also be shown in the "Extrapolation Parameters" section
-[figure 4]
+button to extrapolate the data and plot the extrapolation in the same figure.
+The values of the parameters used for the Guinier and Porod models will also be
+shown in the "Extrapolation Parameters" section [figure 4]
 
 .. figure:: tutorial2.png
    :align: center
