@@ -171,7 +171,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
             upper2 = data.x[-1]
             self.set_qmin(lower)
             self.set_qmax((upper1, upper2))
-            self.set_background(self._calculator.compute_background(self.qmax))
+            self._compute_background()
 
     def get_data(self):
         return self._data
@@ -209,10 +209,11 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
 
         try:
             params, self._extrapolated_data = self._calculator.compute_extrapolation()
-        except:
-            msg = "Error extrapolating data."
+        except Exception as e:
+            msg = "Error extrapolating data:\n"
+            msg += str(e)
             wx.PostEvent(self._manager.parent,
-                StatusEvent(status=msg, info="Error"))
+                StatusEvent(status=msg, info="error"))
             self._transform_btn.Disable()
             return
         # TODO: Find way to set xlim and ylim so full range of data can be
@@ -373,7 +374,17 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
 
 
     def _compute_background(self, event=None):
-        self.set_background(self._calculator.compute_background(self.qmax))
+        if event is not None:
+            event.Skip()
+        self._on_enter_input()
+        try:
+            bg = self._calculator.compute_background(self.qmax)
+            self.set_background(bg)
+        except Exception as e:
+            msg = "Error computing background level:\n"
+            msg += str(e)
+            wx.PostEvent(self._manager.parent,
+                StatusEvent(status=msg, info="error"))
 
     def _on_enter_input(self, event=None):
         """
