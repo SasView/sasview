@@ -67,6 +67,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self.background = 0
         self.extracted_params = None
         self.transform_type = 'fourier'
+        self._extrapolation_outputs = {}
         # Dictionary for saving refs to text boxes used to display output data
         self._output_boxes = None
         self.state = None
@@ -147,7 +148,9 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         """
         if data is None:
             self._disable_inputs()
+            # Reset outputs
             self.set_extracted_params(reset=True)
+            self.set_extrapolation_params()
             self._data = None
             return
         self._enable_inputs()
@@ -205,7 +208,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._calculator.background = self.background
 
         try:
-            self._extrapolated_data = self._calculator.compute_extrapolation()
+            params, self._extrapolated_data = self._calculator.compute_extrapolation()
         except:
             msg = "Error extrapolating data."
             wx.PostEvent(self._manager.parent,
@@ -225,6 +228,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._transform_btn.Enable()
         self._extract_btn.Disable()
         self.set_extracted_params(reset=True)
+        self.set_extrapolation_params(params)
 
     def compute_transform(self, event=None):
         """
@@ -328,13 +332,25 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._background_input.SetValue(str(bg))
         self._calculator.background = bg
 
+    def set_extrapolation_params(self, params=None):
+        if params is None:
+            # Reset outputs
+            for output in self._extrapolation_outputs.values():
+                output.SetValue('-')
+            return
+        for key, value in params.iteritems():
+            output = self._extrapolation_outputs[key]
+            rounded = self._round_sig_figs(value, 6)
+            output.SetValue(rounded)
+
+
     def set_extracted_params(self, params=None, reset=False):
         self.extracted_params = params
         error = False
         if params is None:
             if not reset: error = True
-            for key in OUTPUT_STRINGS.keys():
-                self._output_boxes[key].SetValue('-')
+            for output in self._output_boxes.values():
+                output.SetValue('-')
         else:
             if len(params) < len(OUTPUT_STRINGS):
                 # Not all parameters were calculated
@@ -346,7 +362,6 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
             msg = 'Not all parameters were able to be calculated'
             wx.PostEvent(self._manager.parent, StatusEvent(
                 status=msg, info='error'))
-
 
     def plot_qrange(self, active=None, leftdown=False):
         if active is None:
@@ -448,6 +463,8 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
 
         file_sizer = wx.GridBagSizer(5, 5)
 
+        y = 0
+
         file_name_label = wx.StaticText(self, -1, "Name:")
         file_sizer.Add(file_name_label, (0, 0), (1, 1),
             wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
@@ -460,9 +477,9 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         file_sizer.AddSpacer((1, 25), pos=(0,2))
         databox_sizer.Add(file_sizer, wx.TOP, 15)
 
-        vbox.Add(databox_sizer, (0, 0), (1, 1),
+        vbox.Add(databox_sizer, (y, 0), (1, 1),
             wx.LEFT | wx.RIGHT | wx.EXPAND | wx.ADJUST_MINSIZE | wx.TOP, 15)
-
+        y += 1
 
         # Parameters
         qbox = wx.StaticBox(self, -1, "Input Parameters")
@@ -522,26 +539,75 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         q_sizer.Add(qmax_dash_label, (3, 2), (1, 1), wx.CENTER | wx.EXPAND, 5)
         q_sizer.Add(self._qmax2_input, (3,3), (1, 1), wx.LEFT, 5)
 
-        background_label = wx.StaticText(self, -1, "Background:", size=(80,20))
-        q_sizer.Add(background_label, (4,0), (1,1), wx.LEFT | wx.EXPAND, 5)
+        qbox_sizer.Add(q_sizer, wx.TOP, 0)
 
-        self._background_input = ModelTextCtrl(self, -1, size=(75,20),
-            style=wx.TE_PROCESS_ENTER, name='background_input',
+        vbox.Add(qbox_sizer, (y, 0), (1, 1),
+            wx.LEFT | wx.RIGHT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+        y += 1
+
+        extrapolation_box = wx.StaticBox(self, -1, "Extrapolation Parameters")
+        extrapolation_sizer = wx.StaticBoxSizer(extrapolation_box, wx.VERTICAL)
+        params_sizer = wx.GridBagSizer(5, 5)
+
+        guinier_label = wx.StaticText(self, -1, "Guinier:")
+        params_sizer.Add(guinier_label, (0, 0), (1,1),
+            wx.ALL | wx.EXPAND | wx.ADJUST_MINSIZE, 5)
+
+        a_label = wx.StaticText(self, -1, "A: ")
+        params_sizer.Add(a_label, (1, 0), (1, 1), wx.LEFT | wx.EXPAND, 15)
+
+        a_output = OutputTextCtrl(self, wx.NewId(),
+            value="-", style=wx.ALIGN_CENTER_HORIZONTAL)
+        params_sizer.Add(a_output, (1, 1), (1, 1), wx.RIGHT | wx.EXPAND, 15)
+        self._extrapolation_outputs['A'] = a_output
+
+        b_label = wx.StaticText(self, -1, "B: ")
+        params_sizer.Add(b_label, (2, 0), (1, 1), wx.LEFT | wx.EXPAND, 15)
+
+        b_output = OutputTextCtrl(self, wx.NewId(),
+            value="-", style=wx.ALIGN_CENTER_HORIZONTAL)
+        params_sizer.Add(b_output, (2, 1), (1, 1), wx.RIGHT | wx.EXPAND, 15)
+        self._extrapolation_outputs['B'] = b_output
+
+        porod_label = wx.StaticText(self, -1, "Porod: ")
+        params_sizer.Add(porod_label, (0, 2), (1, 1),
+            wx.ALL | wx.EXPAND | wx.ADJUST_MINSIZE, 5)
+
+        k_label = wx.StaticText(self, -1, "K: ")
+        params_sizer.Add(k_label, (1, 2), (1, 1), wx.LEFT | wx.EXPAND, 15)
+
+        k_output = OutputTextCtrl(self, wx.NewId(),
+            value="-", style=wx.ALIGN_CENTER_HORIZONTAL)
+        params_sizer.Add(k_output, (1, 3), (1, 1), wx.RIGHT | wx.EXPAND, 15)
+        self._extrapolation_outputs['K'] = k_output
+
+        sigma_label = wx.StaticText(self, -1, u'\u03C3: ')
+        params_sizer.Add(sigma_label, (2, 2), (1, 1), wx.LEFT | wx.EXPAND, 15)
+
+        sigma_output = OutputTextCtrl(self, wx.NewId(),
+            value="-", style=wx.ALIGN_CENTER_HORIZONTAL)
+        params_sizer.Add(sigma_output, (2, 3), (1, 1), wx.RIGHT | wx.EXPAND, 15)
+        self._extrapolation_outputs['sigma'] = sigma_output
+
+        bg_label = wx.StaticText(self, -1, "Bg: ")
+        params_sizer.Add(bg_label, (3, 2), (1, 1), wx.LEFT | wx.EXPAND, 15)
+
+        self._background_input = ModelTextCtrl(self, -1, value="-",
+            style=wx.TE_PROCESS_ENTER | wx.TE_CENTRE, name='background_input',
             text_enter_callback=self._on_enter_input)
         self._background_input.SetToolTipString(("A background value to "
             "subtract from all intensity values"))
-        q_sizer.Add(self._background_input, (4,1), (1,1),
-            wx.RIGHT, 5)
+        params_sizer.Add(self._background_input, (3, 3), (1, 1), wx.RIGHT | wx.EXPAND, 15)
 
-        background_button = wx.Button(self, wx.NewId(), "Calculate",
-            size=(75, 20))
+        background_button = wx.Button(self, wx.NewId(), "Calculate Bg",
+            size=(75, -1))
         background_button.Bind(wx.EVT_BUTTON, self._compute_background)
-        q_sizer.Add(background_button, (4, 2), (1, 1), wx.RIGHT, 5)
+        params_sizer.Add(background_button, (4,3), (1, 1), wx.EXPAND | wx.RIGHT, 15)
 
-        qbox_sizer.Add(q_sizer, wx.TOP, 0)
-
-        vbox.Add(qbox_sizer, (1, 0), (1, 1),
+        extrapolation_sizer.Add(params_sizer)
+        vbox.Add(extrapolation_sizer, (y, 0), (1, 1),
             wx.LEFT | wx.RIGHT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+        y += 1
 
         # Transform type
         transform_box = wx.StaticBox(self, -1, "Transform Type")
@@ -560,8 +626,9 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         radio_sizer.Add(hilbert_btn, (0,1), (1,1), wx.RIGHT | wx.EXPAND)
 
         transform_sizer.Add(radio_sizer, wx.TOP, 0)
-        vbox.Add(transform_sizer, (2, 0), (1, 1),
+        vbox.Add(transform_sizer, (y, 0), (1, 1),
             wx.LEFT | wx.RIGHT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+        y += 1
 
         # Output data
         outputbox = wx.StaticBox(self, -1, "Output Parameters")
@@ -586,8 +653,9 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
 
         outputbox_sizer.Add(output_sizer, wx.TOP, 0)
 
-        vbox.Add(outputbox_sizer, (3, 0), (1, 1),
+        vbox.Add(outputbox_sizer, (y, 0), (1, 1),
             wx.LEFT | wx.RIGHT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+        y += 1
 
         # Controls
         controlbox = wx.StaticBox(self, -1, "Controls")
@@ -614,7 +682,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         controls_sizer.Add(help_btn, wx.CENTER | wx.EXPAND)
 
         controlbox_sizer.Add(controls_sizer, wx.TOP | wx.EXPAND, 0)
-        vbox.Add(controlbox_sizer, (4, 0), (1, 1),
+        vbox.Add(controlbox_sizer, (y, 0), (1, 1),
             wx.LEFT | wx.RIGHT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
 
 
@@ -653,11 +721,17 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         try:
             # Index of first significant digit
             significant_digit = -int(np.floor(np.log10(np.abs(x))))
-            # Number of digits required for correct number of sig figs
-            digits = significant_digit + (sigfigs - 1)
-            rounded = np.round(x, decimals=digits)
-            rounded_str = "{1:.{0}f}".format(sigfigs -1  + significant_digit,
-                rounded)
+
+            if np.abs(significant_digit > 4):
+                # Use scientific notation if x > 1e5 or x < 1e4
+                rounded_str = "{1:.{0}E}".format(sigfigs-1, x)
+            else:
+                # Format as a standard decimal
+                # Number of digits required for correct number of sig figs
+                digits = significant_digit + (sigfigs - 1)
+                rounded = np.round(x, decimals=digits)
+                rounded_str = "{1:.{0}f}".format(sigfigs -1  + significant_digit,
+                    rounded)
         except:
             # Method for finding significant_digit fails if x is 0 (since log10(0)=inf)
             if x == 0.0:

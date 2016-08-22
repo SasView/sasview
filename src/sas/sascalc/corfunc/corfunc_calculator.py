@@ -114,13 +114,13 @@ class CorfuncCalculator(object):
         q = self._data.x
         iq = self._data.y
 
-        s2 = self._fit_data(q, iq)
+        params, s2 = self._fit_data(q, iq)
         qs = np.arange(0, q[-1]*100, (q[1]-q[0]))
         iqs = s2(qs)
 
         extrapolation = Data1D(qs, iqs)
 
-        return extrapolation
+        return params, extrapolation
 
     def compute_transform(self, extrapolation, trans_type, background=None,
         completefn=None, updatefn=None):
@@ -270,4 +270,6 @@ class CorfuncCalculator(object):
         s2 = self._Interpolator((lambda x: (np.exp(g[1]+g[0]*x**2))), s1, q[0],
             self.lowerq)
 
-        return s2
+        params = {'A': g[1], 'B': g[0], 'K': k, 'sigma': sigma}
+
+        return params, s2

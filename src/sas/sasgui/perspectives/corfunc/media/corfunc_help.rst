@@ -32,7 +32,7 @@ points in the lower Q range.
 The equation used is:
 
 .. math::
-    I(Q) = Ae^{Bq^2}
+    I(Q) = e^{A+Bq^2}
 
 The Guinier model assumes that the small angle scattering arises from particles
 and that parameter :math:`B` is related to the radius of gyration of those
