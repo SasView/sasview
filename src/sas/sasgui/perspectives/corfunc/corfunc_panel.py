@@ -216,15 +216,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
                 StatusEvent(status=msg, info="error"))
             self._transform_btn.Disable()
             return
-        # TODO: Find way to set xlim and ylim so full range of data can be
-        # plotted but zoomed in
-        maxq = self._data.x.max()
-        mask = self._extrapolated_data.x <= maxq
-        numpts = len(self._extrapolated_data.x[mask]) + 250
-        plot_x = self._extrapolated_data.x[0:numpts]
-        plot_y = self._extrapolated_data.y[0:numpts]
-        to_plot = Data1D(plot_x, plot_y)
-        self._manager.show_data(to_plot, IQ_EXTRAPOLATED_DATA_LABEL)
+        self._manager.show_data(self._extrapolated_data, IQ_EXTRAPOLATED_DATA_LABEL)
         # Update state of the GUI
         self._transform_btn.Enable()
         self._extract_btn.Disable()

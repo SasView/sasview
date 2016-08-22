@@ -9,6 +9,7 @@ from sas.sasgui.guiframe.plugin_base import PluginBase
 from sas.sasgui.guiframe.gui_manager import MDIFrame
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.events import NewPlotEvent
+from sas.sasgui.guiframe.events import PlotLimitEvent
 from sas.sasgui.guiframe.gui_style import GUIFRAME_ID
 from sas.sasgui.perspectives.corfunc.corfunc_panel import CorfuncPanel
 from sas.sasgui.guiframe.dataFitting import Data1D
@@ -185,6 +186,9 @@ class Plugin(PluginBase):
         if label == IQ_DATA_LABEL or label == IQ_EXTRAPOLATED_DATA_LABEL:
             wx.CallAfter(self.corfunc_panel.plot_qrange, active=active_ctrl,
                 leftdown=True)
+        if label == IQ_EXTRAPOLATED_DATA_LABEL:
+            xlim = (min(self.corfunc_panel._extrapolated_data.x), self.corfunc_panel.qmax[1]*1.2)
+            wx.CallAfter(wx.PostEvent, self.parent, PlotLimitEvent(id=IQ_DATA_LABEL, group_id=GROUP_ID_IQ_DATA, xlim=xlim))
 
     def clear_data(self):
         wx.PostEvent(self.parent,
