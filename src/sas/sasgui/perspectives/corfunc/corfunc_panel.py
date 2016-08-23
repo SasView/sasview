@@ -177,6 +177,9 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         return self._data
 
     def radio_changed(self, event=None):
+        """
+        Called when the "Transform type" radio button are changed
+        """
         if event is not None:
             self.transform_type = event.GetEventObject().GetName()
 
@@ -274,6 +277,9 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
             self._extract_btn.Disable()
 
     def extract_parameters(self, event=None):
+        """
+        Called when "Extract Parameters" is clicked
+        """
         try:
             params = self._calculator.extract_parameters(self._transformed_data)
         except:
@@ -328,6 +334,9 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._calculator.background = bg
 
     def set_extrapolation_params(self, params=None):
+        """
+        Displays the value of the parameters calculated in the extrapolation
+        """
         if params is None:
             # Reset outputs
             for output in self._extrapolation_outputs.values():
@@ -340,6 +349,10 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
 
 
     def set_extracted_params(self, params=None, reset=False):
+        """
+        Displays the values of the parameters extracted from the Fourier
+        transform
+        """
         self.extracted_params = params
         error = False
         if params is None:
@@ -368,6 +381,9 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
 
 
     def _compute_background(self, event=None):
+        """
+        Compute the background level based on the position of the upper q bars
+        """
         if event is not None:
             event.Skip()
         self._on_enter_input()

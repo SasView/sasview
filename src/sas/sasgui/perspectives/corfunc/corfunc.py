@@ -166,11 +166,13 @@ class Plugin(PluginBase):
             new_plot.y -= self.corfunc_panel.background
             group_id = GROUP_ID_IQ_DATA
             if label == IQ_EXTRAPOLATED_DATA_LABEL:
+                # Show the extrapolation as a curve instead of points
                 new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
         elif label == TRANSFORM_LABEL:
             new_plot.xaxis("{x}", 'A')
             new_plot.yaxis("{\\Gamma}", '')
             group_id = GROUP_ID_TRANSFORM
+            # Show the transformation as a curve instead of points
             new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
         new_plot.id = label
         new_plot.name = label
@@ -187,6 +189,7 @@ class Plugin(PluginBase):
             wx.CallAfter(self.corfunc_panel.plot_qrange, active=active_ctrl,
                 leftdown=True)
         if label == IQ_EXTRAPOLATED_DATA_LABEL:
+            # Zoom in to the region we're interested in
             xlim = (min(self.corfunc_panel._extrapolated_data.x), self.corfunc_panel.qmax[1]*1.2)
             wx.CallAfter(wx.PostEvent, self.parent, PlotLimitEvent(id=IQ_DATA_LABEL, group_id=GROUP_ID_IQ_DATA, xlim=xlim))
 
@@ -201,5 +204,4 @@ class Plugin(PluginBase):
         if not panel.graph.selected_plottable in panel.plots:
             return
         data = panel.plots[panel.graph.selected_plottable]
-        print "Data id is: {}".format(data.id)
         self.set_data([data])
