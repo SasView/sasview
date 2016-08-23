@@ -18,7 +18,13 @@ class TestCalculator(unittest.TestCase):
         self.extrapolation = None
 
     def extrapolate(self):
-        _, extrapolation = self.calculator.compute_extrapolation()
+        params, extrapolation = self.calculator.compute_extrapolation()
+
+        # Check the extrapolation parameters
+        self.assertAlmostEqual(params['A'], 4.19, places=2)
+        self.assertAlmostEqual(params['B'], -25470, places=0)
+        self.assertAlmostEqual(params['K'], 4.5e-5, places=2)
+        self.assertAlmostEqual(params['sigma'], 2.2e-10, places=2)
 
         # Ensure the extraplation tends to the background value
         self.assertAlmostEqual(extrapolation.y[-1], self.calculator.background)
