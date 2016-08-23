@@ -38,7 +38,9 @@ class NXcanSASWriter(Cansas2Reader):
             written to the HDF5 file as a fixed length ASCII string and is
             compatible with the Reader read() method.
             """
-            if not isinstance(string, str):
+            if isinstance(string, np.ndarray):
+                return string
+            elif not isinstance(string, str):
                 string = str(string)
 
             return np.array([np.string_(string)])
@@ -223,10 +225,16 @@ class NXcanSASWriter(Cansas2Reader):
             detector_entry.attrs['canSAS_class'] = 'SASdetector'
             detector_entry.attrs['name'] = ''
 
-        # TODO: implement writing SASnote
-        i = 1
-        note_entry = sasentry.create_group('sasnote{0:0=2d}'.format(i))
+        note_entry = sasentry.create_group('sasnote'.format(i))
         note_entry.attrs['canSAS_class'] = 'SASnote'
+        notes = None
+        if len(data_info.notes) > 1:
+            notes = [np.string_(n) for n in data_info.notes]
+            notes = np.array(notes)
+        elif data_info.notes != []:
+            notes = _h5_string(data_info.notes[0])
+        if notes is not None:
+            note_entry.create_dataset('SASnote', data=notes)
 
         f.close()
 
