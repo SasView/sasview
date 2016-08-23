@@ -138,8 +138,14 @@ class NXcanSASWriter(Cansas2Reader):
             names=['polar_angle', 'azimuthal_angle'])
         if data_info.sample.details is not None\
             and data_info.sample.details != []:
-            details = reduce(lambda x,y: x + "\n" + y, data_info.sample.details)
-            sample_entry['details'] = _h5_string(details)
+            details = None
+            if len(data_info.sample.details) > 1:
+                details = [np.string_(d) for d in data_info.sample.details]
+                details = np.array(details)
+            elif data_info.sample.details != []:
+                details = _h5_string(data_info.sample.details[0])
+            if details is not None:
+                sample_entry.create_dataset('details', data=details)
 
         # Instrumment metadata
         instrument_entry = sasentry.create_group('sasinstrument')
