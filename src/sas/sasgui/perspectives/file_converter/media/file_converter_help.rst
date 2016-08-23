@@ -11,16 +11,21 @@ files, into a single CanSAS XML or NXcanSAS HDF5 file.
 
 It can also convert 2D BSL files into NXcanSAS HDF5 files.
 
-The input files can be:
+Supported input file formats:
 
 *   Single column ASCII data, with lines that end with a digit (no delimiter),
     comma or semi-colon.
 *   `One-Dimensional OTOKO formatted
     <http://www.diamond.ac.uk/Beamlines/Soft-Condensed-Matter/small-angle/
-    SAXS-Software/CCP13/XOTOKO.html>`_ data files.
+    SAXS-Software/CCP13/XOTOKO.html>`_ data.
 *   `Two-Dimensional BSL formatted
     <http://www.diamond.ac.uk/Beamlines/Soft-Condensed-Matter/small-angle/
-    SAXS-Software/CCP13/BSL.html>`_ data files.
+    SAXS-Software/CCP13/BSL.html>`_ data.
+
+Supported output file formats@
+
+*   `CanSAS XML <http://www.cansas.org/formats/canSAS1d/1.1/doc/>`_
+*   `NXcanSAS HDF5 <http://download.nexusformat.org/sphinx/classes/contributed_definitions/NXcanSAS.html>`_
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
