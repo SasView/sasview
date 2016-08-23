@@ -94,6 +94,7 @@ class BSLLoader(CLoader):
             data2d = Data2D(data=raw_frame_data, qx_data=x, qy_data=y)
             data2d.x_bins = x_bins
             data2d.y_bins = y_bins
+            data2d.Q_unit = '' # Using arbitrary units
             frame_data.append(data2d)
 
         return frame_data
