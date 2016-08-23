@@ -164,6 +164,8 @@ class Plugin(PluginBase):
             new_plot.xaxis("\\rm{Q}", 'A^{-1}')
             new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
             new_plot.y -= self.corfunc_panel.background
+            # Show data on a log(Q)/I scale
+            new_plot.ytransform = 'y'
             group_id = GROUP_ID_IQ_DATA
             if label == IQ_EXTRAPOLATED_DATA_LABEL:
                 # Show the extrapolation as a curve instead of points
@@ -171,6 +173,9 @@ class Plugin(PluginBase):
         elif label == TRANSFORM_LABEL:
             new_plot.xaxis("{x}", 'A')
             new_plot.yaxis("{\\Gamma}", '')
+            # Show transform on a linear scale
+            new_plot.xtransform = 'x'
+            new_plot.ytransform = 'y'
             group_id = GROUP_ID_TRANSFORM
             # Show the transformation as a curve instead of points
             new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
@@ -179,9 +184,6 @@ class Plugin(PluginBase):
         new_plot.group_id = group_id
         new_plot.interactive = True
         new_plot.title = group_id.replace('$', '').replace('\\', '')
-        # Show data on a linear scale
-        new_plot.xtransform = 'x'
-        new_plot.ytransform = 'y'
         wx.PostEvent(self.parent,
                      NewPlotEvent(plot=new_plot, title=new_plot.title,
                         reset=reset))
