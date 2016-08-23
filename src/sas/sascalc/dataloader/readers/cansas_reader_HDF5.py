@@ -184,6 +184,12 @@ class Reader():
                         self.current_datainfo.meta_data['reader'] = data_point
                     elif key == u'run':
                         self.current_datainfo.run.append(data_point)
+                        try:
+                            run_name = value.attrs['name']
+                            run_dict = {data_point: run_name}
+                            self.current_datainfo.run_name = run_dict
+                        except:
+                            pass
                     elif key == u'title':
                         self.current_datainfo.title = data_point
                     elif key == u'SASnote':

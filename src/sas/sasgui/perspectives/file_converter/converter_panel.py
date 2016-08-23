@@ -283,12 +283,18 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         elif not isinstance(self.run, list):
             self.run = [self.run]
 
+        run_name = None
+        if len(self.run) > 0:
+            run_number = self.run[0]
+            run_name = { run_number: self.run_name }
+
         if self.title is None:
             self.title = ''
 
         metadata = {
             'title': self.title,
             'run': self.run,
+            'run_name': run_name,
             'instrument': self.instrument,
             'detector': [self.detector],
             'sample': self.sample,
@@ -369,9 +375,6 @@ class ConverterPanel(ScrolledPanel, PanelBase):
                 metadata = self.get_metadata()
                 for key, value in metadata.iteritems():
                     setattr(dataset[0], key, value)
-                if self.run != []:
-                    run_number = self.run[0]
-                    dataset[0].run_name[run_number] = self.run_name
 
                 w = NXcanSASWriter()
                 w.write(dataset, self.output.GetPath())
