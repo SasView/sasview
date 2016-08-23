@@ -117,6 +117,10 @@ class NXcanSASWriter(Cansas2Reader):
                 sample_entry.create_dataset(key,
                     data=_h5_float(getattr(data_info.sample, key)))
         _write_h5_vector(sample_entry, data_info.sample.position)
+        # NXcanSAS doesn't save information about pitch, only roll
+        # and yaw. The _write_h5_vector method writes vector.y, but we
+        # need to write vector.z for yaw
+        data_info.sample.orientation.y = data_info.orientation.z
         _write_h5_vector(sample_entry, data_info.sample.orientation,
             names=['polar_angle', 'azimuthal_angle'])
 
@@ -168,6 +172,10 @@ class NXcanSASWriter(Cansas2Reader):
                     _write_h5_float(detector_entry, det_info.slit_length, 'slit_length')
                     detector_entry['slit_length'].attrs['units'] = det_info.slit_length_unit
                 _write_h5_vector(detector_entry, det_info.offset)
+                # NXcanSAS doesn't save information about pitch, only roll
+                # and yaw. The _write_h5_vector method writes vector.y, but we
+                # need to write vector.z for yaw
+                det_info.orientation.y = det_info.orientation.z
                 _write_h5_vector(detector_entry, det_info.orientation,
                     names=['polar_angle', 'azimuthal_angle'])
                 _write_h5_vector(detector_entry, det_info.beam_center,
