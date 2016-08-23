@@ -43,10 +43,35 @@ class NXcanSASWriter(Cansas2Reader):
 
             return np.array([np.string_(string)])
 
+        def _write_h5_string(entry, value, key):
+            entry[key] = _h5_string(value)
+
+
         def _h5_float(x):
             if not (isinstance(x, list)):
                 x = [x]
             return np.array(x, dtype=np.float32)
+
+        def _write_h5_float(entry, value, key):
+            entry.create_dataset(key, data=_h5_float(value))
+
+        def _write_h5_vector(entry, vector, names=['x_position', 'y_position'],
+            units=None, write_fn=_write_h5_string):
+            if len(names) < 2:
+                raise ValueError("Length of names must be >= 2.")
+
+            if vector.x is not None:
+                write_fn(entry, vector.x, names[0])
+                if units is not None:
+                    entry[names[0]].attrs['units'] = units
+            if vector.y is not None:
+                write_fn(entry, vector.y, names[1])
+                if units is not None:
+                    entry[names[1]].attrs['units'] = units
+            if len(names) == 3 and vector.z is not None:
+                write_fn(entry, vector.z, names[2])
+                if units is not None:
+                    entry[names[2]].attrs['units'] = units
 
         valid_data = all([issubclass(d.__class__, (Data1D, Data2D)) for d in dataset])
         if not valid_data:
@@ -82,19 +107,25 @@ class NXcanSASWriter(Cansas2Reader):
             i += 1
 
         data_info = dataset[0]
+        # Sample metadata
         sample_entry = sasentry.create_group('sassample')
         sample_entry.attrs['canSAS_class'] = 'SASsample'
-        sample_entry['name'] = _h5_string(data_info.sample.name)
-        sample_attrs = ['thickness', 'temperature']
+        sample_entry['ID'] = _h5_string(data_info.sample.name)
+        sample_attrs = ['thickness', 'temperature', 'transmission']
         for key in sample_attrs:
             if getattr(data_info.sample, key) is not None:
                 sample_entry.create_dataset(key,
                     data=_h5_float(getattr(data_info.sample, key)))
+        _write_h5_vector(sample_entry, data_info.sample.position)
+        _write_h5_vector(sample_entry, data_info.sample.orientation,
+            names=['polar_angle', 'azimuthal_angle'])
 
+        # Instrumment metadata
         instrument_entry = sasentry.create_group('sasinstrument')
         instrument_entry.attrs['canSAS_class'] = 'SASinstrument'
         instrument_entry['name'] = _h5_string(data_info.instrument)
 
+        # Source metadata
         source_entry = instrument_entry.create_group('sassource')
         source_entry.attrs['canSAS_class'] = 'SASsource'
         if data_info.source.radiation is None:
@@ -102,6 +133,7 @@ class NXcanSASWriter(Cansas2Reader):
         else:
             source_entry['radiation'] = _h5_string(data_info.source.radiation)
 
+        # Collimation metadata
         if len(data_info.collimation) > 0:
             i = 1
             for coll_info in data_info.collimation:
@@ -109,13 +141,16 @@ class NXcanSASWriter(Cansas2Reader):
                     'sascollimation{0:0=2d}'.format(i))
                 collimation_entry.attrs['canSAS_class'] = 'SAScollimation'
                 if coll_info.length is not None:
-                    collimation_entry['SDD'] = _h5_float(coll_info.length)
+                    _write_h5_float(collimation_entry, coll_info.length, 'SDD')
                     collimation_entry['SDD'].attrs['units'] = coll_info.length_unit
                 if coll_info.name is not None:
                     collimation_entry['name'] = _h5_string(coll_info.name)
         else:
+            # Create a blank one - at least 1 set of collimation metadata
+            # required by format
             collimation_entry = instrument_entry.create_group('sascollimation01')
 
+        # Detector metadata
         if len(data_info.detector) > 0:
             i = 1
             for det_info in data_info.detector:
@@ -123,14 +158,28 @@ class NXcanSASWriter(Cansas2Reader):
                     'sasdetector{0:0=2d}'.format(i))
                 detector_entry.attrs['canSAS_class'] = 'SASdetector'
                 if det_info.distance is not None:
-                    detector_entry['SDD'] = _h5_float(det_info.distance)
+                    _write_h5_float(detector_entry, det_info.distance, 'SDD')
                     detector_entry['SDD'].attrs['units'] = det_info.distance_unit
                 if det_info.name is not None:
                     detector_entry['name'] = _h5_string(det_info.name)
                 else:
                     detector_entry['name'] = _h5_string('')
+                if det_info.slit_length is not None:
+                    _write_h5_float(detector_entry, det_info.slit_length, 'slit_length')
+                    detector_entry['slit_length'].attrs['units'] = det_info.slit_length_unit
+                _write_h5_vector(detector_entry, det_info.offset)
+                _write_h5_vector(detector_entry, det_info.orientation,
+                    names=['polar_angle', 'azimuthal_angle'])
+                _write_h5_vector(detector_entry, det_info.beam_center,
+                    names=['beam_center_x', 'beam_center_y'],
+                    write_fn=_write_h5_float, units=det_info.beam_center_unit)
+                _write_h5_vector(detector_entry, det_info.pixel_size,
+                    names=['x_pixel_size', 'y_pixel_size'],
+                    write_fn=_write_h5_float, units=det_info.pixel_size_unit)
+
                 i += 1
         else:
+            # Create a blank one - at least 1 detector required by format
             detector_entry = instrument_entry.create_group('sasdetector01')
             detector_entry.attrs['canSAS_class'] = 'SASdetector'
             detector_entry.attrs['name'] = ''

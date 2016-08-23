@@ -192,7 +192,7 @@ class Reader():
                     ## Sample Information
                     elif key == u'Title' and self.parent_class == u'SASsample': # CanSAS 2.0 format
                         self.current_datainfo.sample.name = data_point
-                    elif key == u'name' and self.parent_class == u'SASsample': # NXcanSAS format
+                    elif key == u'ID' and self.parent_class == u'SASsample': # NXcanSAS format
                         self.current_datainfo.sample.name = data_point
                     elif key == u'thickness' and self.parent_class == u'SASsample':
                         self.current_datainfo.sample.thickness = data_point
