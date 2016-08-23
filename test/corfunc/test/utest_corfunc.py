@@ -18,7 +18,7 @@ class TestCalculator(unittest.TestCase):
         self.extrapolation = None
 
     def extrapolate(self):
-        extrapolation = self.calculator.compute_extrapolation()
+        _, extrapolation = self.calculator.compute_extrapolation()
 
         # Ensure the extraplation tends to the background value
         self.assertAlmostEqual(extrapolation.y[-1], self.calculator.background)
@@ -61,7 +61,6 @@ class TestCalculator(unittest.TestCase):
         self.assertIsNotNone(params)
         self.assertEqual(len(params), 6)
         self.assertLess(abs(params['max']-75), 2.5) # L_p ~= 75
-        self.assertLess(abs(params['dtr']-6), 2.5) # D_tr ~= 6
 
 
     # Ensure tests are ran in correct order;
