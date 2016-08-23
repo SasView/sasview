@@ -46,7 +46,6 @@ class NXcanSASWriter(Cansas2Reader):
         def _write_h5_string(entry, value, key):
             entry[key] = _h5_string(value)
 
-
         def _h5_float(x):
             if not (isinstance(x, list)):
                 x = [x]
@@ -57,6 +56,18 @@ class NXcanSASWriter(Cansas2Reader):
 
         def _write_h5_vector(entry, vector, names=['x_position', 'y_position'],
             units=None, write_fn=_write_h5_string):
+            """
+            Write a vector to an h5 entry
+
+            :param entry: The H5Py entry to write to
+            :param vector: The Vector to write
+            :param names: What to call the x,y and z components of the vector
+                when writing to the H5Py entry
+            :param units: The units of the vector (optional)
+            :param write_fn: A function to convert the value to the required
+                format and write it to the H5Py entry, of the form
+                f(entry, value, name) (optional)
+            """
             if len(names) < 2:
                 raise ValueError("Length of names must be >= 2.")
 
@@ -120,9 +131,13 @@ class NXcanSASWriter(Cansas2Reader):
         # NXcanSAS doesn't save information about pitch, only roll
         # and yaw. The _write_h5_vector method writes vector.y, but we
         # need to write vector.z for yaw
-        data_info.sample.orientation.y = data_info.orientation.z
+        data_info.sample.orientation.y = data_info.sample.orientation.z
         _write_h5_vector(sample_entry, data_info.sample.orientation,
             names=['polar_angle', 'azimuthal_angle'])
+        if data_info.sample.details is not None\
+            and data_info.sample.details != []:
+            details = reduce(lambda x,y: x + "\n" + y, data_info.sample.details)
+            sample_entry['details'] = _h5_string(details)
 
         # Instrumment metadata
         instrument_entry = sasentry.create_group('sasinstrument')
@@ -136,6 +151,22 @@ class NXcanSASWriter(Cansas2Reader):
             source_entry['radiation'] = _h5_string('neutron')
         else:
             source_entry['radiation'] = _h5_string(data_info.source.radiation)
+        if data_info.source.beam_shape is not None:
+            source_entry['beam_shape'] = _h5_string(data_info.source.beam_shape)
+        wavelength_keys = { 'wavelength': 'incident_wavelength',
+            'wavelength_min':'wavelength_min',
+            'wavelength_max': 'wavelength_max',
+            'wavelength_spread': 'incident_wavelength_spread' }
+        for sasname, nxname in wavelength_keys.iteritems():
+            value = getattr(data_info.source, sasname)
+            units = getattr(data_info.source, sasname + '_unit')
+            if value is not None:
+                source_entry[nxname] = _h5_float(value)
+                source_entry[nxname].attrs['units'] = units
+        _write_h5_vector(source_entry, data_info.source.beam_size,
+            names=['beam_size_x', 'beam_size_y'],
+            units=data_info.source.beam_size_unit, write_fn=_write_h5_float)
+
 
         # Collimation metadata
         if len(data_info.collimation) > 0:
