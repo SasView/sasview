@@ -32,8 +32,6 @@ class Plugin(PluginBase):
         self._always_active = True
         self.state_reader = Reader(self.set_state)
         self._extensions = '.cor'
-        l = Loader()
-        l.associate_file_reader('.cor', self.state_reader)
 
     def get_panels(self, parent):
         """
@@ -47,6 +45,9 @@ class Plugin(PluginBase):
         self.corfunc_panel.set_manager(self)
         self._frame_set_helper()
         self.perspective.append(self.corfunc_panel.window_name)
+
+        l = Loader()
+        l.associate_file_reader('.cor', self.state_reader)
 
         return [self.corfunc_panel]
 
@@ -81,7 +82,14 @@ class Plugin(PluginBase):
         """
         Callback for CorfuncState reader. Called when a .cor file is loaded
         """
-        self.corfunc_panel.set_state(state=state, data=datainfo)
+        if isinstance(datainfo, list):
+            data = datainfo[0]
+        else:
+            data = datainfo
+        self.corfunc_panel.set_state(state=state, data=data)
+        self.on_perspective(event=None)
+        data = self.parent.create_gui_data(data, None)
+        self.parent.add_data({ data.id: data })
 
     def set_data(self, data_list=None):
         """

@@ -9,6 +9,7 @@ from sas.sascalc.dataloader.readers.cansas_reader import get_content
 from sas.sasgui.guiframe.utils import format_number
 from sas.sasgui.guiframe.gui_style import GUIFRAME_ID
 from sas.sasgui.guiframe.dataFitting import Data1D
+from sas.sascalc.dataloader.data_info import Data1D as LoaderData1D
 from sas.sascalc.dataloader.loader import Loader
 
 CORNODE_NAME = 'corfunc'
@@ -249,7 +250,7 @@ class Reader(CansasReader):
 
     type_name = "Corfunc"
 
-    type = ["Invariant file (*.inv)|*.inv",
+    type = ["Corfunc file (*.cor)|*.cor",
             "SASView file (*.svs)|*.svs"]
 
     ext = ['.cor', '.COR', '.svs', '.SVS']
@@ -311,8 +312,8 @@ class Reader(CansasReader):
         # Prepare datainfo
         if datainfo is None:
             datainfo = Data1D(x=[], y=[])
-        elif not issubclass(datainfo.__class__, Data1D):
-            msg = ("The CanSAS writer expects a Data1D instance. {} was ",
+        elif not (isinstance(datainfo, Data1D) or isinstance(datainfo, LoaderData1D)):
+            msg = ("The CanSAS writer expects a Data1D instance. {} was "
                 "provided").format(datainfo.__class__.__name__)
             raise RuntimeError, msg
         if datainfo.title is None or datainfo.title == '':

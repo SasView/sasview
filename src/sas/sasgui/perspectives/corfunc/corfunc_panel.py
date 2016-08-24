@@ -1,9 +1,11 @@
 import wx
 import sys
+import os
 import numpy as np
 from wx.lib.scrolledpanel import ScrolledPanel
 from sas.sasgui.guiframe.events import PlotQrangeEvent
 from sas.sasgui.guiframe.events import StatusEvent
+from sas.sasgui.guiframe.events import PanelOnFocusEvent
 from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.guiframe.utils import check_float
 from sas.sasgui.guiframe.dataFitting import Data1D
@@ -298,6 +300,43 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         tree_location = "user/sasgui/perspectives/corfunc/corfunc_help.html"
         doc_viewer = DocumentationWindow(self, -1, tree_location, "",
                                           "Correlation Function Help")
+
+    def get_save_flag(self):
+        if self._data is not None:
+            return True
+        return False
+
+    def on_set_focus(self, event=None):
+        if self._manager.parent is not None:
+            wx.PostEvent(self._manager.parent, PanelOnFocusEvent(panel=self))
+
+    def on_save(self, event=None):
+        """
+        Save corfunc state into a file
+        """
+        # Ask the user the location of the file to write to.
+        path = None
+        default_save_location = os.getcwd()
+        if self._manager.parent != None:
+            default_save_location = self._manager.parent.get_save_location()
+
+        dlg = wx.FileDialog(self, "Choose a file",
+                            default_save_location, \
+                            self.window_caption, "*.cor", wx.SAVE)
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+            default_save_location = os.path.dirname(path)
+            if self._manager.parent != None:
+                self._manager.parent._default_save_location = default_save_location
+        else:
+            return None
+
+        dlg.Destroy()
+        # MAC always needs the extension for saving
+        extens = ".cor"
+        # Make sure the ext included in the file name
+        f_name = os.path.splitext(path)[0] + extens
+        self._manager.state_reader.write(f_name, self._data, self.get_state())
 
     def save_project(self, doc=None):
         """
