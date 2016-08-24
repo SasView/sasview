@@ -249,9 +249,9 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             self.state.file = data.name
 
             num = self.state.saved_state['state_num']
-            if num > 0:
+            if int(num) > 0:
                 self._set_undo_flag(True)
-            if num < len(state.state_list) - 1:
+            if int(num) < len(state.state_list) - 1:
                 self._set_redo_flag(True)
 
             # get bookmarks
@@ -1859,7 +1859,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                                    (self.button_details, 0, wx.ALL, 10),
                                    (self.button_calculate, 0,
                                     wx.RIGHT | wx.TOP | wx.BOTTOM, 10),
-                                   (self.button_help, 0, 
+                                   (self.button_help, 0,
                                     wx.RIGHT | wx.TOP | wx.BOTTOM, 10),])
     def _do_layout(self):
         """
@@ -1881,10 +1881,10 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                                   wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)])
         self.SetSizer(self.main_sizer)
         self.SetAutoLayout(True)
-        
+
     def on_help(self, event):
         """
-        Bring up the Invariant Documentation whenever the HELP button is 
+        Bring up the Invariant Documentation whenever the HELP button is
         clicked.
 
         Calls DocumentationWindow with the path of the location within the
