@@ -110,6 +110,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         else:
             return
         if self.state.is_transformed:
+            self.transform_type = self.state.transform_type
             self.compute_transform()
         else:
             return
@@ -133,6 +134,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
             state.is_extrapolated = True
         if self._transformed_data is not None:
             state.is_transformed = True
+            state.transform_type = self.transform_type
         self.state = state
 
         return self.state

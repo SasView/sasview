@@ -47,11 +47,10 @@ class CorfuncState(object):
         self.background = None
         self.outputs = {}
         self.is_extrapolated = False
+        self.transform_type = 'fourier'
         self.is_transformed = False
 
         self.saved_state = DEFAULT_STATE
-        # Will be filled on panel init as number of states increases
-        self.state_list = {}
         self.timestamp = time.time()
 
         # Raw Data
@@ -171,6 +170,11 @@ class CorfuncState(object):
         top_element.appendChild(element)
         element.appendChild(new_doc.createTextNode(str(int(self.is_transformed))))
 
+        if self.is_transformed:
+            element = new_doc.createElement("transform_type")
+            top_element.appendChild(element)
+            element.appendChild(new_doc.createTextNode(self.transform_type))
+
         # Output parameters
         if self.outputs != {} and self.outputs is not None:
             output = new_doc.createElement("output")
@@ -232,6 +236,8 @@ class CorfuncState(object):
             entry = get_content('ns:is_transformed', node)
             if entry is not None:
                 self.is_transformed = bool(int(entry.text.strip()))
+                entry = get_content('ns:transform_type', node)
+                self.transform_type = entry.text.strip()
 
             # Parse outputs
             entry = get_content('ns:output', node)
