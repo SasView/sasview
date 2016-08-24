@@ -425,7 +425,7 @@ class InvariantState(object):
                         val = str(input_field.text.strip())
                         if input_field is not None:
                             temp_state[item] = val
-                            self.state_list[ind] = temp_state
+                            self.state_list[str(ind)] = temp_state
 
             # Parse current state (ie, saved_state)
             entry = get_content('ns:state', node)
@@ -789,4 +789,3 @@ class Reader(CansasReader):
         if state is not None:
             doc = state.toXML(datainfo.name, doc=doc, entry_node=sasentry)
         return doc
-
