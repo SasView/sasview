@@ -185,6 +185,10 @@
     ],
     "Shape-Independent": [
         [
+            "unified_power_Rg",
+            true
+        ],
+        [
             "guinier_porod",
             true
         ],
