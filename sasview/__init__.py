@@ -1,4 +1,4 @@
-__version__ = "4.0.0-beta"
+__version__ = "4.0b1"
 __build__ = "GIT_COMMIT"
 try:
     import subprocess
