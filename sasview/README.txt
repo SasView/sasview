@@ -4,7 +4,7 @@ Release Notes
 1- Features
 ===========
 
-    - New in Version 4.0.0-beta
+    - New in Version 4.0 beta 1
       --------------------
       This beta adds support for the magnetic and multilevel models of 3.1.2
       and along with a host of bug fixes found in the alpha.
