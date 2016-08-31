@@ -1503,15 +1503,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         if self.data.__class__.__name__ == "Data2D":
             is_2Ddata = True
         if self.model != None:
-            try:
-                is_modified = self._check_value_enter(self.fittable_param,
-                                                      is_modified)
-                is_modified = self._check_value_enter(self.fixed_param,
-                                                      is_modified)
-                is_modified = self._check_value_enter(self.parameters,
-                                                      is_modified)
-            except Exception:
-                logging.error(traceback.format_exc())
+            is_modified = (self._check_value_enter(self.fittable_param)
+                           or self._check_value_enter(self.fixed_param)
+                           or self._check_value_enter(self.parameters))
 
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and
@@ -1560,7 +1554,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         #flag for qmin qmax check values
         flag = True
         self.fitrange = True
-        is_modified = False
 
         #wx.PostEvent(self._manager.parent, StatusEvent(status=" \
         #updating ... ",type="update"))
@@ -1573,9 +1566,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                     self._manager.page_finder[self.uid].set_fit_data(data=\
                                                                 [self.data])
             ##Check the values
-            self._check_value_enter(self.fittable_param, is_modified)
-            self._check_value_enter(self.fixed_param, is_modified)
-            self._check_value_enter(self.parameters, is_modified)
+            self._check_value_enter(self.fittable_param)
+            self._check_value_enter(self.fixed_param)
+            self._check_value_enter(self.parameters)
 
             # If qmin and qmax have been modified, update qmin and qmax and
             # Here we should check whether the boundaries have been modified.
@@ -1658,12 +1651,6 @@ class BasicPage(ScrolledPanel, PanelBase):
             logging.error(traceback.format_exc())
 
         return flag
-
-    def _is_modified(self, is_modified):
-        """
-        return to self._is_modified
-        """
-        return is_modified
 
     def _reset_parameters_state(self, listtorestore, statelist):
         """
@@ -1963,7 +1950,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         msg = ""
         wx.PostEvent(self.parent, StatusEvent(status=msg))
         # Flag to register when a parameter has changed.
-        #is_modified = False
         if tcrtl.GetValue().lstrip().rstrip() != "":
             try:
                 float(tcrtl.GetValue())
@@ -1993,7 +1979,6 @@ class BasicPage(ScrolledPanel, PanelBase):
                     temp_npts = float(self.npts.GetValue())
                     if temp_npts != self.num_points:
                         self.num_points = temp_npts
-                        #is_modified = True
                 else:
                     msg = "Cannot plot: No points in Q range!!!  "
                     wx.PostEvent(self.parent, StatusEvent(status=msg))
@@ -2169,6 +2154,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.on_set_focus(None)
         self.Layout()
 
+
     def _validate_qrange(self, qmin_ctrl, qmax_ctrl):
         """
         Verify that the Q range controls have valid values
@@ -2275,7 +2261,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         return flag
 
-    def _check_value_enter(self, list, modified):
+    def _check_value_enter(self, list):
         """
         :param list: model parameter and panel info
         :Note: each item of the list should be as follow:
@@ -2285,87 +2271,66 @@ class BasicPage(ScrolledPanel, PanelBase):
                 parameter's minimum value,
                 parameter's maximum value ,
                 parameter's units]
+
+        Returns True if the model parameters have changed.
         """
-        is_modified = modified
-        if len(list) == 0:
-            return is_modified
+        is_modified = False
         for item in list:
             #skip angle parameters for 1D
-            if not self.enable2D:
-                if item in self.orientation_params:
-                    continue
-            #try:
+            if not self.enable2D and item in self.orientation_params:
+                continue
+
             name = str(item[1])
+            if name.endswith(".npts") or name.endswith(".nsigmas"):
+                continue
 
-            if string.find(name, ".npts") == -1 and \
-                                        string.find(name, ".nsigmas") == -1:
-                ## check model parameters range
-                param_min = None
-                param_max = None
+            # Check that min, max and value are floats
+            value_ctrl, min_ctrl, max_ctrl = item[2], item[5], item[6]
+            min_str = min_ctrl.GetValue().strip()
+            max_str = max_ctrl.GetValue().strip()
+            value_str = value_ctrl.GetValue().strip()
+            validity = check_float(value_ctrl)
+            if min_str != "":
+                validity = validity and check_float(min_ctrl)
+            if max_str != "":
+                validity = validity and check_float(max_ctrl)
+            if not validity:
+                continue
 
-                ## check minimun value
-                if item[5] != None and item[5] != "":
-                    if item[5].GetValue().lstrip().rstrip() != "":
-                        try:
-                            param_min = float(item[5].GetValue())
-                            if not self._validate_qrange(item[5], item[2]):
-                                if numpy.isfinite(param_min):
-                                    item[2].SetValue(format_number(param_min))
+            # Check that min is less than max
+            low = -numpy.inf if min_str == "" else float(min_str)
+            high = numpy.inf if max_str == "" else float(max_str)
+            if high < low:
+                min_ctrl.SetBackgroundColour("pink")
+                min_ctrl.Refresh()
+                max_ctrl.SetBackgroundColour("pink")
+                max_ctrl.Refresh()
+                #msg = "Invalid fit range for %s: min must be smaller than max"%name
+                #wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
+                continue
 
-                            item[5].SetBackgroundColour(wx.WHITE)
-                            item[2].SetBackgroundColour(wx.WHITE)
+            # Force value between min and max
+            value = float(value_str)
+            if value < low:
+                value = low
+                value_ctrl.SetValue(format_number(value))
+            elif value > high:
+                value = high
+                value_ctrl.SetValue(format_number(value))
 
-                        except:
-                            msg = "Wrong fit parameter range entered"
-                            wx.PostEvent(self._manager.parent,
-                                         StatusEvent(status=msg))
-                            raise ValueError, msg
-                        is_modified = True
-                ## check maximum value
-                if item[6] != None and item[6] != "":
-                    if item[6].GetValue().lstrip().rstrip() != "":
-                        try:
-                            param_max = float(item[6].GetValue())
-                            if not self._validate_qrange(item[2], item[6]):
-                                if numpy.isfinite(param_max):
-                                    item[2].SetValue(format_number(param_max))
+            # Update value in model if it has changed
+            if value != self.model.getParam(name):
+                self.model.setParam(name, value)
+                is_modified = True
 
-                            item[6].SetBackgroundColour(wx.WHITE)
-                            item[2].SetBackgroundColour(wx.WHITE)
-                        except:
-                            msg = "Wrong Fit parameter range entered "
-                            wx.PostEvent(self._manager.parent,
-                                         StatusEvent(status=msg))
-                            raise ValueError, msg
-                        is_modified = True
-
-                if param_min != None and param_max != None:
-                    if not self._validate_qrange(item[5], item[6]):
-                        msg = "Wrong Fit range entered for parameter "
-                        msg += "name %s of model %s " % (name, self.model.name)
-                        wx.PostEvent(self._manager.parent,
-                                     StatusEvent(status=msg))
-
-                if name in self.model.details.keys():
-                    self.model.details[name][1:3] = param_min, param_max
-                    is_modified = True
-                else:
-                    self.model.details[name] = ["", param_min, param_max]
-                    is_modified = True
-            try:
-                # Check if the textctr is enabled
-                if item[2].IsEnabled():
-                    value = float(item[2].GetValue())
-                    item[2].SetBackgroundColour("white")
-                    # If the value of the parameter has changed,
-                    # +update the model and set the is_modified flag
-                    if value != self.model.getParam(name) and \
-                                                numpy.isfinite(value):
-                        self.model.setParam(name, value)
-            except:
-                item[2].SetBackgroundColour("pink")
-                msg = "Wrong Fit parameter value entered "
-                wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
+            if name not in self.model.details.keys():
+                self.model.details[name] = ["", None, None]
+            old_low, old_high = self.model.details[name][1:3]
+            if old_low != low or old_high != high:
+                # The configuration has changed but it won't change the
+                # computed curve so no need to set is_modified to True
+                #is_modified = True
+                self.model.details[name][1:3] = low, high
 
         return is_modified
 

@@ -1364,8 +1364,8 @@ class FitPage(BasicPage):
         if tcrtl.GetValue().lstrip().rstrip() != "":
             try:
                 tcrtl.SetBackgroundColour(wx.WHITE)
-                self._check_value_enter(self.fittable_param, is_modified)
-                self._check_value_enter(self.parameters, is_modified)
+                self._check_value_enter(self.fittable_param)
+                self._check_value_enter(self.parameters)
             except:
                 tcrtl.SetBackgroundColour("pink")
                 msg = "Model Error:wrong value entered : %s" % sys.exc_value
