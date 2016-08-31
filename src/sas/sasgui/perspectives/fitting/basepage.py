@@ -11,8 +11,12 @@ import math
 import string
 import json
 import logging
+import traceback
+
 from collections import defaultdict
 from wx.lib.scrolledpanel import ScrolledPanel
+
+import sasmodels.sasview_model
 from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.guiframe.utils import format_number, check_float, IdList
 from sas.sasgui.guiframe.events import PanelOnFocusEvent
@@ -197,8 +201,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## flag to determine if state has change
         self.state_change = False
         ## save customized array
-        self.values = []
-        self.weights = []
+        self.values = {}   # type: Dict[str, List[float, ...]]
+        self.weights = {}   # type: Dict[str, List[float, ...]]
         ## retrieve saved state
         self.number_saved_state = 0
         ## dictionary of saved state
@@ -851,9 +855,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                     weight = float(toks[1])
                     angles.append(angle)
                     weights.append(weight)
-                except:
+                except Exception:
                     # Skip non-data lines
-                    logging.error(sys.exc_info()[1])
+                    logging.error(traceback.format_exc())
             return numpy.array(angles), numpy.array(weights)
         except:
             raise
@@ -1392,8 +1396,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.model.set_dispersion(param_name, disp_model)
                 self.model._persistency_dict[key] = \
                                  [state.values, state.weights]
-            except:
-                logging.error(sys.exc_info()[1])
+            except Exception:
+                logging.error(traceback.format_exc())
             selection = self._find_polyfunc_selection(disp_model)
             for list in self.fittable_param:
                 if list[1] == key and list[7] != None:
@@ -1409,8 +1413,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                             list[2].Disable()
                             list[5].Disable()
                             list[6].Disable()
-                        except:
-                            logging.error(sys.exc_info()[1])
+                        except Exception:
+                            logging.error(traceback.format_exc())
             # For array, disable all fixed params
             if selection == 1:
                 for item in self.fixed_param:
@@ -1418,8 +1422,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                         # try it and pass it for the orientation for 1D
                         try:
                             item[2].Disable()
-                        except:
-                            logging.error(sys.exc_info()[1])
+                        except Exception:
+                            logging.error(traceback.format_exc())
 
         # Make sure the check box updated when all checked
         if self.cb1.GetValue():
@@ -1499,15 +1503,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         if self.data.__class__.__name__ == "Data2D":
             is_2Ddata = True
         if self.model != None:
-            try:
-                is_modified = self._check_value_enter(self.fittable_param,
-                                                      is_modified)
-                is_modified = self._check_value_enter(self.fixed_param,
-                                                      is_modified)
-                is_modified = self._check_value_enter(self.parameters,
-                                                      is_modified)
-            except:
-                logging.error(sys.exc_info()[1])
+            is_modified = (self._check_value_enter(self.fittable_param)
+                           or self._check_value_enter(self.fixed_param)
+                           or self._check_value_enter(self.parameters))
 
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and
@@ -1556,7 +1554,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         #flag for qmin qmax check values
         flag = True
         self.fitrange = True
-        is_modified = False
 
         #wx.PostEvent(self._manager.parent, StatusEvent(status=" \
         #updating ... ",type="update"))
@@ -1569,9 +1566,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                     self._manager.page_finder[self.uid].set_fit_data(data=\
                                                                 [self.data])
             ##Check the values
-            self._check_value_enter(self.fittable_param, is_modified)
-            self._check_value_enter(self.fixed_param, is_modified)
-            self._check_value_enter(self.parameters, is_modified)
+            self._check_value_enter(self.fittable_param)
+            self._check_value_enter(self.fixed_param)
+            self._check_value_enter(self.parameters)
 
             # If qmin and qmax have been modified, update qmin and qmax and
             # Here we should check whether the boundaries have been modified.
@@ -1650,16 +1647,10 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         try:
             self.save_current_state()
-        except:
-            logging.error(sys.exc_info()[1])
+        except Exception:
+            logging.error(traceback.format_exc())
 
         return flag
-
-    def _is_modified(self, is_modified):
-        """
-        return to self._is_modified
-        """
-        return is_modified
 
     def _reset_parameters_state(self, listtorestore, statelist):
         """
@@ -1894,11 +1885,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         try:
             if mod_cat == custom_model:
                 for model in self.model_list_box[mod_cat]:
-                    if 'sasmodels.sasview_model.' in str(model):
-                        str_m = model.id
-                    else:
-                        str_m = str(model).split(".")[0]
-                    #self.model_box.Append(str_m)
+                    str_m = model.id if hasattr(model, 'id') else model.name
                     m_list.append(self.model_dict[str_m])
             else:
                 cat_dic = self.master_category_dict[mod_cat]
@@ -1909,8 +1896,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                     #    msg = "This model is disabled by Category Manager."
                     #    wx.PostEvent(self.parent.parent,
                     #                 StatusEvent(status=msg, info="error"))
-        except:
-            msg = "%s\n" % (sys.exc_info()[1])
+        except Exception:
+            msg = traceback.format_exc()
             wx.PostEvent(self._manager.parent,
                          StatusEvent(status=msg, info="error"))
         self._populate_box(self.formfactorbox, m_list)
@@ -1963,7 +1950,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         msg = ""
         wx.PostEvent(self.parent, StatusEvent(status=msg))
         # Flag to register when a parameter has changed.
-        #is_modified = False
         if tcrtl.GetValue().lstrip().rstrip() != "":
             try:
                 float(tcrtl.GetValue())
@@ -1993,7 +1979,6 @@ class BasicPage(ScrolledPanel, PanelBase):
                     temp_npts = float(self.npts.GetValue())
                     if temp_npts != self.num_points:
                         self.num_points = temp_npts
-                        #is_modified = True
                 else:
                     msg = "Cannot plot: No points in Q range!!!  "
                     wx.PostEvent(self.parent, StatusEvent(status=msg))
@@ -2145,7 +2130,11 @@ class BasicPage(ScrolledPanel, PanelBase):
             if len(form_factor.non_fittable) > 0:
                 self.temp_multi_functional = True
         elif form_factor != None:
-            self.model = form_factor(self.multi_factor)
+            if self.multi_factor is not None:
+                self.model = form_factor(self.multi_factor)
+            else:
+                # old style plugin models do not accept a multiplicity argument
+                self.model = form_factor()
         else:
             self.model = None
             return
@@ -2164,6 +2153,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.state.disp_list = self.disp_list
         self.on_set_focus(None)
         self.Layout()
+
 
     def _validate_qrange(self, qmin_ctrl, qmax_ctrl):
         """
@@ -2271,7 +2261,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         return flag
 
-    def _check_value_enter(self, list, modified):
+    def _check_value_enter(self, list):
         """
         :param list: model parameter and panel info
         :Note: each item of the list should be as follow:
@@ -2281,87 +2271,66 @@ class BasicPage(ScrolledPanel, PanelBase):
                 parameter's minimum value,
                 parameter's maximum value ,
                 parameter's units]
+
+        Returns True if the model parameters have changed.
         """
-        is_modified = modified
-        if len(list) == 0:
-            return is_modified
+        is_modified = False
         for item in list:
             #skip angle parameters for 1D
-            if not self.enable2D:
-                if item in self.orientation_params:
-                    continue
-            #try:
+            if not self.enable2D and item in self.orientation_params:
+                continue
+
             name = str(item[1])
+            if name.endswith(".npts") or name.endswith(".nsigmas"):
+                continue
 
-            if string.find(name, ".npts") == -1 and \
-                                        string.find(name, ".nsigmas") == -1:
-                ## check model parameters range
-                param_min = None
-                param_max = None
+            # Check that min, max and value are floats
+            value_ctrl, min_ctrl, max_ctrl = item[2], item[5], item[6]
+            min_str = min_ctrl.GetValue().strip()
+            max_str = max_ctrl.GetValue().strip()
+            value_str = value_ctrl.GetValue().strip()
+            validity = check_float(value_ctrl)
+            if min_str != "":
+                validity = validity and check_float(min_ctrl)
+            if max_str != "":
+                validity = validity and check_float(max_ctrl)
+            if not validity:
+                continue
 
-                ## check minimun value
-                if item[5] != None and item[5] != "":
-                    if item[5].GetValue().lstrip().rstrip() != "":
-                        try:
-                            param_min = float(item[5].GetValue())
-                            if not self._validate_qrange(item[5], item[2]):
-                                if numpy.isfinite(param_min):
-                                    item[2].SetValue(format_number(param_min))
+            # Check that min is less than max
+            low = -numpy.inf if min_str == "" else float(min_str)
+            high = numpy.inf if max_str == "" else float(max_str)
+            if high < low:
+                min_ctrl.SetBackgroundColour("pink")
+                min_ctrl.Refresh()
+                max_ctrl.SetBackgroundColour("pink")
+                max_ctrl.Refresh()
+                #msg = "Invalid fit range for %s: min must be smaller than max"%name
+                #wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
+                continue
 
-                            item[5].SetBackgroundColour(wx.WHITE)
-                            item[2].SetBackgroundColour(wx.WHITE)
+            # Force value between min and max
+            value = float(value_str)
+            if value < low:
+                value = low
+                value_ctrl.SetValue(format_number(value))
+            elif value > high:
+                value = high
+                value_ctrl.SetValue(format_number(value))
 
-                        except:
-                            msg = "Wrong fit parameter range entered"
-                            wx.PostEvent(self._manager.parent,
-                                         StatusEvent(status=msg))
-                            raise ValueError, msg
-                        is_modified = True
-                ## check maximum value
-                if item[6] != None and item[6] != "":
-                    if item[6].GetValue().lstrip().rstrip() != "":
-                        try:
-                            param_max = float(item[6].GetValue())
-                            if not self._validate_qrange(item[2], item[6]):
-                                if numpy.isfinite(param_max):
-                                    item[2].SetValue(format_number(param_max))
+            # Update value in model if it has changed
+            if value != self.model.getParam(name):
+                self.model.setParam(name, value)
+                is_modified = True
 
-                            item[6].SetBackgroundColour(wx.WHITE)
-                            item[2].SetBackgroundColour(wx.WHITE)
-                        except:
-                            msg = "Wrong Fit parameter range entered "
-                            wx.PostEvent(self._manager.parent,
-                                         StatusEvent(status=msg))
-                            raise ValueError, msg
-                        is_modified = True
-
-                if param_min != None and param_max != None:
-                    if not self._validate_qrange(item[5], item[6]):
-                        msg = "Wrong Fit range entered for parameter "
-                        msg += "name %s of model %s " % (name, self.model.name)
-                        wx.PostEvent(self._manager.parent,
-                                     StatusEvent(status=msg))
-
-                if name in self.model.details.keys():
-                    self.model.details[name][1:3] = param_min, param_max
-                    is_modified = True
-                else:
-                    self.model.details[name] = ["", param_min, param_max]
-                    is_modified = True
-            try:
-                # Check if the textctr is enabled
-                if item[2].IsEnabled():
-                    value = float(item[2].GetValue())
-                    item[2].SetBackgroundColour("white")
-                    # If the value of the parameter has changed,
-                    # +update the model and set the is_modified flag
-                    if value != self.model.getParam(name) and \
-                                                numpy.isfinite(value):
-                        self.model.setParam(name, value)
-            except:
-                item[2].SetBackgroundColour("pink")
-                msg = "Wrong Fit parameter value entered "
-                wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
+            if name not in self.model.details.keys():
+                self.model.details[name] = ["", None, None]
+            old_low, old_high = self.model.details[name][1:3]
+            if old_low != low or old_high != high:
+                # The configuration has changed but it won't change the
+                # computed curve so no need to set is_modified to True
+                #is_modified = True
+                self.model.details[name][1:3] = low, high
 
         return is_modified
 
@@ -2473,8 +2442,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                 # for the selected parameter
                 try:
                     self.model.set_dispersion(p, disp_model)
-                except:
-                    logging.error(sys.exc_info()[1])
+                except Exception:
+                    logging.error(traceback.format_exc())
 
         ## save state into
         self.save_current_state()
@@ -2587,7 +2556,8 @@ class BasicPage(ScrolledPanel, PanelBase):
             # draw
             self._draw_model()
             self.Refresh()
-        except:
+        except Exception:
+            logging.error(traceback.format_exc())
             # Error msg
             msg = "Error occurred:"
             msg += " Could not select the distribution function..."
@@ -2679,15 +2649,16 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         # Try to delete values and weight of the names array dic if exists
         try:
-            del self.values[name]
-            del self.weights[name]
-            # delete all other dic
-            del self.state.values[name]
-            del self.state.weights[name]
-            del self.model._persistency_dict[name.split('.')[0]]
-            del self.state.model._persistency_dict[name.split('.')[0]]
-        except:
-            logging.error(sys.exc_info()[1])
+            if name in self.values:
+                del self.values[name]
+                del self.weights[name]
+                # delete all other dic
+                del self.state.values[name]
+                del self.state.weights[name]
+                del self.model._persistency_dict[name.split('.')[0]]
+                del self.state.model._persistency_dict[name.split('.')[0]]
+        except Exception:
+            logging.error(traceback.format_exc())
 
     def _lay_out(self):
         """
@@ -2831,9 +2802,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                         # append to the list
                         graphs.append(item2.figure)
                         canvases.append(item2.canvas)
-            except:
+            except Exception:
                 # Not for control panels
-                logging.error(sys.exc_info()[1])
+                logging.error(traceback.format_exc())
         # Make sure the resduals plot goes to the last
         if res_item != None:
             graphs.append(res_item[0])
@@ -2935,7 +2906,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         :param evt: Triggers on clicking ? in Magnetic Angles? box
         """
 
-        _TreeLocation = "user/sasgui/perspectives/fitting/mag_help.html"
+        _TreeLocation = "user/magnetism.html"
         _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation, "",
                                           "Polarized Beam/Magnetc Help")
 
@@ -3166,14 +3137,14 @@ class BasicPage(ScrolledPanel, PanelBase):
             try:
                 if item[7].__class__.__name__ == 'ComboBox':
                     disfunc = str(item[7].GetValue())
-            except:
-                logging.error(sys.exc_info()[1])
+            except Exception:
+                logging.error(traceback.format_exc())
 
             # 2D
             if self.data.__class__.__name__ == "Data2D":
                 try:
                     check = item[0].GetValue()
-                except:
+                except Exception:
                     check = None
                 name = item[1]
                 value = item[2].GetValue()
@@ -3201,8 +3172,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                     disfunc += ','
                     for weight in self.weights[name]:
                         disfunc += ' ' + str(weight)
-            except:
-                logging.error(sys.exc_info()[1])
+            except Exception:
+                logging.error(traceback.format_exc())
             content += name + ',' + str(check) + ',' + value + disfunc + ':'
 
         return content
@@ -3402,8 +3373,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                                                        values=pd_vals,
                                                        weights=pd_weights)
                             is_array = True
-                except:
-                    logging.error(sys.exc_info()[1])
+                except Exception:
+                    logging.error(traceback.format_exc())
                 if not is_array:
                     self._disp_obj_dict[name] = disp_model
                     self.model.set_dispersion(name,
@@ -3417,8 +3388,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                                             [self.state.values,
                                              self.state.weights]
 
-            except:
-                logging.error(sys.exc_info()[1])
+            except Exception:
+                logging.error(traceback.format_exc())
                 print "Error in BasePage._paste_poly_help: %s" % \
                                         sys.exc_info()[1]
 

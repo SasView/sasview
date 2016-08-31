@@ -444,13 +444,13 @@ class Process(object):
         """
         return len(self.name) == 0 and len(self.date) == 0 and len(self.description) == 0 \
             and len(self.term) == 0 and len(self.notes) == 0
-            
+
     def single_line_desc(self):
         """
             Return a single line string representing the process
         """
         return "%s %s %s" % (self.name, self.date, self.description)
-     
+
     def __str__(self):
         _str = "Process:\n"
         _str += "   Name:         %s\n" % self.name
@@ -1036,6 +1036,7 @@ class Data2D(plottable_2D, DataInfo):
         _str += "   X- & Y-axis:  %s\t[%s]\n" % (self._yaxis, self._yunit)
         _str += "   Z-axis:       %s\t[%s]\n" % (self._zaxis, self._zunit)
         _str += "   Length:       %g \n" % (len(self.data))
+        _str += "   Shape:        (%d, %d)\n" % (len(self.y_bins), len(self.x_bins))
         return _str
 
     def clone_without_data(self, length=0, clone=None):
@@ -1072,6 +1073,7 @@ class Data2D(plottable_2D, DataInfo):
         clone.sample = deepcopy(self.sample)
         clone.source = deepcopy(self.source)
         clone.collimation = deepcopy(self.collimation)
+        clone.trans_spectrum = deepcopy(self.trans_spectrum)
         clone.meta_data = deepcopy(self.meta_data)
         clone.errors = deepcopy(self.errors)
 
@@ -1218,10 +1220,61 @@ class Data2D(plottable_2D, DataInfo):
         result.q_data = numpy.append(self.q_data, other.q_data)
         result.mask = numpy.append(self.mask, other.mask)
         if result.err_data is not None:
-            result.err_data = numpy.append(self.err_data, other.err_data) 
+            result.err_data = numpy.append(self.err_data, other.err_data)
         if self.dqx_data is not None:
             result.dqx_data = numpy.append(self.dqx_data, other.dqx_data)
         if self.dqy_data is not None:
             result.dqy_data = numpy.append(self.dqy_data, other.dqy_data)
 
         return result
+
+
+def combine_data_info_with_plottable(data, datainfo):
+    """
+    A function that combines the DataInfo data in self.current_datainto with a plottable_1D or 2D data object.
+
+    :param data: A plottable_1D or plottable_2D data object
+    :return: A fully specified Data1D or Data2D object
+    """
+
+    final_dataset = None
+    if isinstance(data, plottable_1D):
+        final_dataset = Data1D(data.x, data.y)
+        final_dataset.dx = data.dx
+        final_dataset.dy = data.dy
+        final_dataset.dxl = data.dxl
+        final_dataset.dxw = data.dxw
+        final_dataset.xaxis(data._xaxis, data._xunit)
+        final_dataset.yaxis(data._yaxis, data._yunit)
+    elif isinstance(data, plottable_2D):
+        final_dataset = Data2D(data.data, data.err_data, data.qx_data, data.qy_data, data.q_data,
+                               data.mask, data.dqx_data, data.dqy_data)
+        final_dataset.xaxis(data._xaxis, data._xunit)
+        final_dataset.yaxis(data._yaxis, data._yunit)
+        final_dataset.zaxis(data._zaxis, data._zunit)
+        final_dataset.x_bins = data.x_bins
+        final_dataset.y_bins = data.y_bins
+    else:
+        return_string = "Should Never Happen: _combine_data_info_with_plottable input is not a plottable1d or " + \
+                        "plottable2d data object"
+        return return_string
+
+    final_dataset.xmax = data.xmax
+    final_dataset.ymax = data.ymax
+    final_dataset.xmin = data.xmin
+    final_dataset.ymin = data.ymin
+    final_dataset.title = datainfo.title
+    final_dataset.run = datainfo.run
+    final_dataset.run_name = datainfo.run_name
+    final_dataset.filename = datainfo.filename
+    final_dataset.notes = datainfo.notes
+    final_dataset.process = datainfo.process
+    final_dataset.instrument = datainfo.instrument
+    final_dataset.detector = datainfo.detector
+    final_dataset.sample = datainfo.sample
+    final_dataset.source = datainfo.source
+    final_dataset.collimation = datainfo.collimation
+    final_dataset.trans_spectrum = datainfo.trans_spectrum
+    final_dataset.meta_data = datainfo.meta_data
+    final_dataset.errors = datainfo.errors
+    return final_dataset

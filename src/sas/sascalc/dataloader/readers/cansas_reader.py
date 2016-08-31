@@ -13,30 +13,30 @@
 #############################################################################
 
 import logging
-import numpy
+import numpy as np
 import os
 import sys
 import datetime
 import inspect
 # For saving individual sections of data
-from sas.sascalc.dataloader.data_info import Data1D
-from sas.sascalc.dataloader.data_info import Collimation
-from sas.sascalc.dataloader.data_info import TransmissionSpectrum
-from sas.sascalc.dataloader.data_info import Detector
-from sas.sascalc.dataloader.data_info import Process
-from sas.sascalc.dataloader.data_info import Aperture
+from sas.sascalc.dataloader.data_info import Data1D, DataInfo, plottable_1D
+from sas.sascalc.dataloader.data_info import Collimation, TransmissionSpectrum, Detector, Process, Aperture
+from sas.sascalc.dataloader.data_info import combine_data_info_with_plottable as combine_data
 import sas.sascalc.dataloader.readers.xml_reader as xml_reader
 from sas.sascalc.dataloader.readers.xml_reader import XMLreader
-from sas.sascalc.dataloader.readers.cansas_constants import CansasConstants
+from sas.sascalc.dataloader.readers.cansas_constants import CansasConstants, CurrentLevel
 
 # The following 2 imports *ARE* used. Do not remove either.
 import xml.dom.minidom
 from xml.dom.minidom import parseString
 
-_ZERO = 1e-16
 PREPROCESS = "xmlpreprocess"
 ENCODING = "encoding"
 RUN_NAME_DEFAULT = "None"
+INVALID_SCHEMA_PATH_1_1 = "{0}/sas/sascalc/dataloader/readers/schema/cansas1d_invalid_v1_1.xsd"
+INVALID_SCHEMA_PATH_1_0 = "{0}/sas/sascalc/dataloader/readers/schema/cansas1d_invalid_v1_0.xsd"
+INVALID_XML = "\n\nThe loaded xml file, {0} does not fully meet the CanSAS v1.x specification. SasView loaded " + \
+              "as much of the data as possible.\n\n"
 HAS_CONVERTER = True
 try:
     from sas.sascalc.data_util.nxsunit import Converter
@@ -48,48 +48,6 @@ CANSAS_FORMAT = CONSTANTS.format
 CANSAS_NS = CONSTANTS.names
 ALLOW_ALL = True
 
-# DO NOT REMOVE Called by outside packages:
-#    sas.sasgui.perspectives.invariant.invariant_state
-#    sas.sasgui.perspectives.fitting.pagestate
-def get_content(location, node):
-    """
-    Get the first instance of the content of a xpath location.
-
-    :param location: xpath location
-    :param node: node to start at
-
-    :return: Element, or None
-    """
-    nodes = node.xpath(location,
-                       namespaces={'ns': CANSAS_NS.get("1.0").get("ns")})
-    if len(nodes) > 0:
-        return nodes[0]
-    else:
-        return None
-
-# DO NOT REMOVE Called by outside packages:
-#    sas.sasgui.perspectives.fitting.pagestate
-def write_node(doc, parent, name, value, attr=None):
-    """
-    :param doc: document DOM
-    :param parent: parent node
-    :param name: tag of the element
-    :param value: value of the child text node
-    :param attr: attribute dictionary
-
-    :return: True if something was appended, otherwise False
-    """
-    if attr is None:
-        attr = {}
-    if value is not None:
-        node = doc.createElement(name)
-        node.appendChild(doc.createTextNode(str(value)))
-        for item in attr:
-            node.setAttribute(item, attr[item])
-        parent.appendChild(node)
-        return True
-    return False
-
 class Reader(XMLreader):
     """
     Class to load cansas 1D XML files
@@ -97,12 +55,25 @@ class Reader(XMLreader):
     :Dependencies:
         The CanSAS reader requires PyXML 0.8.4 or later.
     """
-    ##CanSAS version - defaults to version 1.0
+    ## CanSAS version - defaults to version 1.0
     cansas_version = "1.0"
     base_ns = "{cansas1d/1.0}"
-    logging = None
-    errors = None
+    cansas_defaults = None
     type_name = "canSAS"
+    invalid = True
+    ## Log messages and errors
+    logging = None
+    errors = set()
+    ## Namespace hierarchy for current xml_file object
+    names = None
+    ns_list = None
+    ## Temporary storage location for loading multiple data sets in a single file
+    current_datainfo = None
+    current_dataset = None
+    current_data1d = None
+    data = None
+    ## List of data1D objects to be sent back to SasView
+    output = None
     ## Wildcards
     type = ["XML files (*.xml)|*.xml", "SasView Save Files (*.svs)|*.svs"]
     ## List of allowed extensions
@@ -110,11 +81,386 @@ class Reader(XMLreader):
     ## Flag to bypass extension check
     allow_all = True
 
-    def __init__(self):
-        ## List of errors
-        self.errors = set()
+    def reset_state(self):
+        """
+        Resets the class state to a base case when loading a new data file so previous
+        data files do not appear a second time
+        """
+        self.current_datainfo = None
+        self.current_dataset = None
+        self.current_data1d = None
+        self.data = []
+        self.process = Process()
+        self.transspectrum = TransmissionSpectrum()
+        self.aperture = Aperture()
+        self.collimation = Collimation()
+        self.detector = Detector()
+        self.names = []
+        self.cansas_defaults = {}
+        self.output = []
+        self.ns_list = None
         self.logging = []
         self.encoding = None
+
+    def read(self, xml_file, schema_path="", invalid=True):
+        """
+        Validate and read in an xml_file file in the canSAS format.
+
+        :param xml_file: A canSAS file path in proper XML format
+        :param schema_path: A file path to an XML schema to validate the xml_file against
+        """
+        # For every file loaded, reset everything to a base state
+        self.reset_state()
+        self.invalid = invalid
+        # Check that the file exists
+        if os.path.isfile(xml_file):
+            basename, extension = os.path.splitext(os.path.basename(xml_file))
+            # If the file type is not allowed, return nothing
+            if extension in self.ext or self.allow_all:
+                # Get the file location of
+                self.load_file_and_schema(xml_file, schema_path)
+                self.add_data_set()
+                # Try to load the file, but raise an error if unable to.
+                # Check the file matches the XML schema
+                try:
+                    self.is_cansas(extension)
+                    self.invalid = False
+                    # Get each SASentry from XML file and add it to a list.
+                    entry_list = self.xmlroot.xpath(
+                            '/ns:SASroot/ns:SASentry',
+                            namespaces={'ns': self.cansas_defaults.get("ns")})
+                    self.names.append("SASentry")
+
+                    # Get all preprocessing events and encoding
+                    self.set_processing_instructions()
+
+                    # Parse each <SASentry> item
+                    for entry in entry_list:
+                        # Create a new DataInfo object for every <SASentry>
+
+
+                        # Set the file name and then parse the entry.
+                        self.current_datainfo.filename = basename + extension
+                        self.current_datainfo.meta_data["loader"] = "CanSAS XML 1D"
+                        self.current_datainfo.meta_data[PREPROCESS] = \
+                            self.processing_instructions
+
+                        # Parse the XML SASentry
+                        self._parse_entry(entry)
+                        # Combine datasets with datainfo
+                        self.add_data_set()
+                except RuntimeError:
+                    # If the file does not match the schema, raise this error
+                    invalid_xml = self.find_invalid_xml()
+                    invalid_xml = INVALID_XML.format(basename + extension) + invalid_xml
+                    self.errors.add(invalid_xml)
+                    # Try again with an invalid CanSAS schema, that requires only a data set in each
+                    base_name = xml_reader.__file__
+                    base_name = base_name.replace("\\", "/")
+                    base = base_name.split("/sas/")[0]
+                    if self.cansas_version == "1.1":
+                        invalid_schema = INVALID_SCHEMA_PATH_1_1.format(base, self.cansas_defaults.get("schema"))
+                    else:
+                        invalid_schema = INVALID_SCHEMA_PATH_1_0.format(base, self.cansas_defaults.get("schema"))
+                    self.set_schema(invalid_schema)
+                    try:
+                        if self.invalid:
+                            if self.is_cansas():
+                                self.output = self.read(xml_file, invalid_schema, False)
+                            else:
+                                raise RuntimeError
+                        else:
+                            raise RuntimeError
+                    except RuntimeError:
+                        x = np.zeros(1)
+                        y = np.zeros(1)
+                        self.current_data1d = Data1D(x,y)
+                        self.current_data1d.errors = self.errors
+                        return [self.current_data1d]
+        else:
+            self.output.append("Not a valid file path.")
+        # Return a list of parsed entries that dataloader can manage
+        return self.output
+
+    def _parse_entry(self, dom):
+        """
+        Parse a SASEntry - new recursive method for parsing the dom of
+            the CanSAS data format. This will allow multiple data files
+            and extra nodes to be read in simultaneously.
+
+        :param dom: dom object with a namespace base of names
+        """
+
+        frm = inspect.stack()[1]
+        if not self._is_call_local(frm):
+            self.reset_state()
+            self.add_data_set()
+            self.names.append("SASentry")
+            self.parent_class = "SASentry"
+        self._check_for_empty_data()
+        self.base_ns = "{0}{1}{2}".format("{", \
+                            CANSAS_NS.get(self.cansas_version).get("ns"), "}")
+        tagname = ''
+        tagname_original = ''
+
+        # Go through each child in the parent element
+        for node in dom:
+            attr = node.attrib
+            name = attr.get("name", "")
+            type = attr.get("type", "")
+            # Get the element name and set the current names level
+            tagname = node.tag.replace(self.base_ns, "")
+            tagname_original = tagname
+            # Skip this iteration when loading in save state information
+            if tagname == "fitting_plug_in" or tagname == "pr_inversion" or tagname == "invariant":
+                continue
+
+            # Get where to store content
+            self.names.append(tagname_original)
+            self.ns_list = CONSTANTS.iterate_namespace(self.names)
+            # If the element is a child element, recurse
+            if len(node.getchildren()) > 0:
+                self.parent_class = tagname_original
+                if tagname == 'SASdata':
+                    self._initialize_new_data_set()
+                ## Recursion step to access data within the group
+                self._parse_entry(node)
+                if tagname == "SASsample":
+                    self.current_datainfo.sample.name = name
+                elif tagname == "beam_size":
+                    self.current_datainfo.source.beam_size_name = name
+                elif tagname == "SAScollimation":
+                    self.collimation.name = name
+                elif tagname == "aperture":
+                    self.aperture.name = name
+                    self.aperture.type = type
+                self.add_intermediate()
+            else:
+                data_point, unit = self._get_node_value(node, tagname)
+
+                ## If this is a dataset, store the data appropriately
+                if tagname == 'Run':
+                    self.current_datainfo.run_name[data_point] = name
+                    self.current_datainfo.run.append(data_point)
+                elif tagname == 'Title':
+                    self.current_datainfo.title = data_point
+                elif tagname == 'SASnote':
+                    self.current_datainfo.notes.append(data_point)
+
+                ## I and Q Data
+                elif tagname == 'I':
+                    self.current_dataset.yaxis("Intensity", unit)
+                    self.current_dataset.y = np.append(self.current_dataset.y, data_point)
+                elif tagname == 'Idev':
+                    self.current_dataset.dy = np.append(self.current_dataset.dy, data_point)
+                elif tagname == 'Q':
+                    self.current_dataset.xaxis("Q", unit)
+                    self.current_dataset.x = np.append(self.current_dataset.x, data_point)
+                elif tagname == 'Qdev':
+                    self.current_dataset.dx = np.append(self.current_dataset.dx, data_point)
+                elif tagname == 'dQw':
+                    self.current_dataset.dxw = np.append(self.current_dataset.dxw, data_point)
+                elif tagname == 'dQl':
+                    self.current_dataset.dxl = np.append(self.current_dataset.dxl, data_point)
+                elif tagname == 'Qmean':
+                    pass
+                elif tagname == 'Shadowfactor':
+                    pass
+
+                ## Sample Information
+                elif tagname == 'ID' and self.parent_class == 'SASsample':
+                    self.current_datainfo.sample.ID = data_point
+                elif tagname == 'Title' and self.parent_class == 'SASsample':
+                    self.current_datainfo.sample.name = data_point
+                elif tagname == 'thickness' and self.parent_class == 'SASsample':
+                    self.current_datainfo.sample.thickness = data_point
+                    self.current_datainfo.sample.thickness_unit = unit
+                elif tagname == 'transmission' and self.parent_class == 'SASsample':
+                    self.current_datainfo.sample.transmission = data_point
+                elif tagname == 'temperature' and self.parent_class == 'SASsample':
+                    self.current_datainfo.sample.temperature = data_point
+                    self.current_datainfo.sample.temperature_unit = unit
+                elif tagname == 'details' and self.parent_class == 'SASsample':
+                    self.current_datainfo.sample.details.append(data_point)
+                elif tagname == 'x' and self.parent_class == 'position':
+                    self.current_datainfo.sample.position.x = data_point
+                    self.current_datainfo.sample.position_unit = unit
+                elif tagname == 'y' and self.parent_class == 'position':
+                    self.current_datainfo.sample.position.y = data_point
+                    self.current_datainfo.sample.position_unit = unit
+                elif tagname == 'z' and self.parent_class == 'position':
+                    self.current_datainfo.sample.position.z = data_point
+                    self.current_datainfo.sample.position_unit = unit
+                elif tagname == 'roll' and self.parent_class == 'orientation' and 'SASsample' in self.names:
+                    self.current_datainfo.sample.orientation.x = data_point
+                    self.current_datainfo.sample.orientation_unit = unit
+                elif tagname == 'pitch' and self.parent_class == 'orientation' and 'SASsample' in self.names:
+                    self.current_datainfo.sample.orientation.y = data_point
+                    self.current_datainfo.sample.orientation_unit = unit
+                elif tagname == 'yaw' and self.parent_class == 'orientation' and 'SASsample' in self.names:
+                    self.current_datainfo.sample.orientation.z = data_point
+                    self.current_datainfo.sample.orientation_unit = unit
+
+                ## Instrumental Information
+                elif tagname == 'name' and self.parent_class == 'SASinstrument':
+                    self.current_datainfo.instrument = data_point
+                ## Detector Information
+                elif tagname == 'name' and self.parent_class == 'SASdetector':
+                    self.detector.name = data_point
+                elif tagname == 'SDD' and self.parent_class == 'SASdetector':
+                    self.detector.distance = data_point
+                    self.detector.distance_unit = unit
+                elif tagname == 'slit_length' and self.parent_class == 'SASdetector':
+                    self.detector.slit_length = data_point
+                    self.detector.slit_length_unit = unit
+                elif tagname == 'x' and self.parent_class == 'offset':
+                    self.detector.offset.x = data_point
+                    self.detector.offset_unit = unit
+                elif tagname == 'y' and self.parent_class == 'offset':
+                    self.detector.offset.y = data_point
+                    self.detector.offset_unit = unit
+                elif tagname == 'z' and self.parent_class == 'offset':
+                    self.detector.offset.z = data_point
+                    self.detector.offset_unit = unit
+                elif tagname == 'x' and self.parent_class == 'beam_center':
+                    self.detector.beam_center.x = data_point
+                    self.detector.beam_center_unit = unit
+                elif tagname == 'y' and self.parent_class == 'beam_center':
+                    self.detector.beam_center.y = data_point
+                    self.detector.beam_center_unit = unit
+                elif tagname == 'z' and self.parent_class == 'beam_center':
+                    self.detector.beam_center.z = data_point
+                    self.detector.beam_center_unit = unit
+                elif tagname == 'x' and self.parent_class == 'pixel_size':
+                    self.detector.pixel_size.x = data_point
+                    self.detector.pixel_size_unit = unit
+                elif tagname == 'y' and self.parent_class == 'pixel_size':
+                    self.detector.pixel_size.y = data_point
+                    self.detector.pixel_size_unit = unit
+                elif tagname == 'z' and self.parent_class == 'pixel_size':
+                    self.detector.pixel_size.z = data_point
+                    self.detector.pixel_size_unit = unit
+                elif tagname == 'roll' and self.parent_class == 'orientation' and 'SASdetector' in self.names:
+                    self.detector.orientation.x = data_point
+                    self.detector.orientation_unit = unit
+                elif tagname == 'pitch' and self.parent_class == 'orientation' and 'SASdetector' in self.names:
+                    self.detector.orientation.y = data_point
+                    self.detector.orientation_unit = unit
+                elif tagname == 'yaw' and self.parent_class == 'orientation' and 'SASdetector' in self.names:
+                    self.detector.orientation.z = data_point
+                    self.detector.orientation_unit = unit
+                ## Collimation and Aperture
+                elif tagname == 'length' and self.parent_class == 'SAScollimation':
+                    self.collimation.length = data_point
+                    self.collimation.length_unit = unit
+                elif tagname == 'name' and self.parent_class == 'SAScollimation':
+                    self.collimation.name = data_point
+                elif tagname == 'distance' and self.parent_class == 'aperture':
+                    self.aperture.distance = data_point
+                    self.aperture.distance_unit = unit
+                elif tagname == 'x' and self.parent_class == 'size':
+                    self.aperture.size.x = data_point
+                    self.collimation.size_unit = unit
+                elif tagname == 'y' and self.parent_class == 'size':
+                    self.aperture.size.y = data_point
+                    self.collimation.size_unit = unit
+                elif tagname == 'z' and self.parent_class == 'size':
+                    self.aperture.size.z = data_point
+                    self.collimation.size_unit = unit
+
+                ## Process Information
+                elif tagname == 'name' and self.parent_class == 'SASprocess':
+                    self.process.name = data_point
+                elif tagname == 'description' and self.parent_class == 'SASprocess':
+                    self.process.description = data_point
+                elif tagname == 'date' and self.parent_class == 'SASprocess':
+                    try:
+                        self.process.date = datetime.datetime.fromtimestamp(data_point)
+                    except:
+                        self.process.date = data_point
+                elif tagname == 'SASprocessnote':
+                    self.process.notes.append(data_point)
+                elif tagname == 'term' and self.parent_class == 'SASprocess':
+                    unit = attr.get("unit", "")
+                    dic = {}
+                    dic["name"] = name
+                    dic["value"] = data_point
+                    dic["unit"] = unit
+                    self.process.term.append(dic)
+
+                ## Transmission Spectrum
+                elif tagname == 'T' and self.parent_class == 'Tdata':
+                    self.transspectrum.transmission = np.append(self.transspectrum.transmission, data_point)
+                    self.transspectrum.transmission_unit = unit
+                elif tagname == 'Tdev' and self.parent_class == 'Tdata':
+                    self.transspectrum.transmission_deviation = np.append(self.transspectrum.transmission_deviation, data_point)
+                    self.transspectrum.transmission_deviation_unit = unit
+                elif tagname == 'Lambda' and self.parent_class == 'Tdata':
+                    self.transspectrum.wavelength = np.append(self.transspectrum.wavelength, data_point)
+                    self.transspectrum.wavelength_unit = unit
+
+                ## Source Information
+                elif tagname == 'wavelength' and (self.parent_class == 'SASsource' or self.parent_class == 'SASData'):
+                    self.current_datainfo.source.wavelength = data_point
+                    self.current_datainfo.source.wavelength_unit = unit
+                elif tagname == 'wavelength_min' and self.parent_class == 'SASsource':
+                    self.current_datainfo.source.wavelength_min = data_point
+                    self.current_datainfo.source.wavelength_min_unit = unit
+                elif tagname == 'wavelength_max' and self.parent_class == 'SASsource':
+                    self.current_datainfo.source.wavelength_max = data_point
+                    self.current_datainfo.source.wavelength_max_unit = unit
+                elif tagname == 'wavelength_spread' and self.parent_class == 'SASsource':
+                    self.current_datainfo.source.wavelength_spread = data_point
+                    self.current_datainfo.source.wavelength_spread_unit = unit
+                elif tagname == 'x' and self.parent_class == 'beam_size':
+                    self.current_datainfo.source.beam_size.x = data_point
+                    self.current_datainfo.source.beam_size_unit = unit
+                elif tagname == 'y' and self.parent_class == 'beam_size':
+                    self.current_datainfo.source.beam_size.y = data_point
+                    self.current_datainfo.source.beam_size_unit = unit
+                elif tagname == 'z' and self.parent_class == 'pixel_size':
+                    self.current_datainfo.source.data_point.z = data_point
+                    self.current_datainfo.source.beam_size_unit = unit
+                elif tagname == 'radiation' and self.parent_class == 'SASsource':
+                    self.current_datainfo.source.radiation = data_point
+                elif tagname == 'beam_shape' and self.parent_class == 'SASsource':
+                    self.current_datainfo.source.beam_shape = data_point
+
+                ## Everything else goes in meta_data
+                else:
+                    new_key = self._create_unique_key(self.current_datainfo.meta_data, tagname)
+                    self.current_datainfo.meta_data[new_key] = data_point
+
+            self.names.remove(tagname_original)
+            length = 0
+            if len(self.names) > 1:
+                length = len(self.names) - 1
+            self.parent_class = self.names[length]
+        if not self._is_call_local(frm):
+            self.add_data_set()
+            empty = None
+            if self.output[0].dx is not None:
+                self.output[0].dxl = np.empty(0)
+                self.output[0].dxw = np.empty(0)
+            else:
+                self.output[0].dx = np.empty(0)
+            return self.output[0], empty
+
+
+    def _is_call_local(self, frm=""):
+        """
+
+        :return:
+        """
+        if frm == "":
+            frm = inspect.stack()[1]
+        mod_name = frm[1].replace("\\", "/").replace(".pyc", "")
+        mod_name = mod_name.replace(".py", "")
+        mod = mod_name.split("sas/")
+        mod_name = mod[1]
+        if mod_name != "sascalc/dataloader/readers/cansas_reader":
+            return False
+        return True
 
     def is_cansas(self, ext="xml"):
         """
@@ -130,13 +476,14 @@ class Reader(XMLreader):
                 return True
         if ext == "svs":
             return True
-        return False
+        raise RuntimeError
 
-    def load_file_and_schema(self, xml_file):
+    def load_file_and_schema(self, xml_file, schema_path=""):
         """
-        Loads the file and associates a schema, if a known schema exists
+        Loads the file and associates a schema, if a schema is passed in or if one already exists
 
         :param xml_file: The xml file path sent to Reader.read
+        :param schema_path: The path to a schema associated with the xml_file, or find one based on the file
         """
         base_name = xml_reader.__file__
         base_name = base_name.replace("\\", "/")
@@ -147,125 +494,114 @@ class Reader(XMLreader):
         self.cansas_version = self.xmlroot.get("version", "1.0")
 
         # Generic values for the cansas file based on the version
-        cansas_defaults = CANSAS_NS.get(self.cansas_version, "1.0")
-        schema_path = "{0}/sas/sascalc/dataloader/readers/schema/{1}".format\
-                (base, cansas_defaults.get("schema")).replace("\\", "/")
+        self.cansas_defaults = CANSAS_NS.get(self.cansas_version, "1.0")
+        if schema_path == "":
+            schema_path = "{0}/sas/sascalc/dataloader/readers/schema/{1}".format \
+                (base, self.cansas_defaults.get("schema")).replace("\\", "/")
 
         # Link a schema to the XML file.
         self.set_schema(schema_path)
-        return cansas_defaults
 
-    def read(self, xml_file):
+    def add_data_set(self):
         """
-        Validate and read in an xml_file file in the canSAS format.
+        Adds the current_dataset to the list of outputs after preforming final processing on the data and then calls a
+        private method to generate a new data set.
 
-        :param xml_file: A canSAS file path in proper XML format
+        :param key: NeXus group name for current tree level
         """
-        # output - Final list of Data1D objects
-        output = []
-        # ns - Namespace hierarchy for current xml_file object
-        ns_list = []
 
-        # Check that the file exists
-        if os.path.isfile(xml_file):
-            basename = os.path.basename(xml_file)
-            _, extension = os.path.splitext(basename)
-            # If the file type is not allowed, return nothing
-            if extension in self.ext or self.allow_all:
-                # Get the file location of
-                cansas_defaults = self.load_file_and_schema(xml_file)
+        if self.current_datainfo and self.current_dataset:
+            self._final_cleanup()
+        self.data = []
+        self.current_datainfo = DataInfo()
 
-                # Try to load the file, but raise an error if unable to.
-                # Check the file matches the XML schema
-                try:
-                    if self.is_cansas(extension):
-                        # Get each SASentry from XML file and add it to a list.
-                        entry_list = self.xmlroot.xpath(
-                                '/ns:SASroot/ns:SASentry',
-                                namespaces={'ns': cansas_defaults.get("ns")})
-                        ns_list.append("SASentry")
+    def _initialize_new_data_set(self, parent_list=None):
+        """
+        A private class method to generate a new 1D data object.
+        Outside methods should call add_data_set() to be sure any existing data is stored properly.
 
-                        # If multiple files, modify the name for each is unique
-                        increment = 0
-                        # Parse each SASentry item
-                        for entry in entry_list:
-                            # Define a new Data1D object with zeroes for
-                            # x_vals and y_vals
-                            data1d = Data1D(numpy.empty(0), numpy.empty(0),
-                                            numpy.empty(0), numpy.empty(0))
-                            data1d.dxl = numpy.empty(0)
-                            data1d.dxw = numpy.empty(0)
+        :param parent_list: List of names of parent elements
+        """
 
-                            # If more than one SASentry, increment each in order
-                            name = basename
-                            if len(entry_list) - 1 > 0:
-                                name += "_{0}".format(increment)
-                                increment += 1
+        if parent_list is None:
+            parent_list = []
+        x = np.array(0)
+        y = np.array(0)
+        self.current_dataset = plottable_1D(x, y)
 
-                            # Set the Data1D name and then parse the entry.
-                            # The entry is appended to a list of entry values
-                            data1d.filename = name
-                            data1d.meta_data["loader"] = "CanSAS 1D"
+    def add_intermediate(self):
+        """
+        This method stores any intermediate objects within the final data set after fully reading the set.
 
-                            # Get all preprocessing events and encoding
-                            self.set_processing_instructions()
-                            data1d.meta_data[PREPROCESS] = \
-                                    self.processing_instructions
+        :param parent: The NXclass name for the h5py Group object that just finished being processed
+        """
 
-                            # Parse the XML file
-                            return_value, extras = \
-                                self._parse_entry(entry, ns_list, data1d)
-                            del extras[:]
+        if self.parent_class == 'SASprocess':
+            self.current_datainfo.process.append(self.process)
+            self.process = Process()
+        elif self.parent_class == 'SASdetector':
+            self.current_datainfo.detector.append(self.detector)
+            self.detector = Detector()
+        elif self.parent_class == 'SAStransmission_spectrum':
+            self.current_datainfo.trans_spectrum.append(self.transspectrum)
+            self.transspectrum = TransmissionSpectrum()
+        elif self.parent_class == 'SAScollimation':
+            self.current_datainfo.collimation.append(self.collimation)
+            self.collimation = Collimation()
+        elif self.parent_class == 'aperture':
+            self.collimation.aperture.append(self.aperture)
+            self.aperture = Aperture()
+        elif self.parent_class == 'SASdata':
+            self._check_for_empty_resolution()
+            self.data.append(self.current_dataset)
 
-                            return_value = self._final_cleanup(return_value)
-                            output.append(return_value)
-                    else:
-                        raise RuntimeError, "Invalid XML at: {0}".format(\
-                                                    self.find_invalid_xml())
-                except:
-                    # If the file does not match the schema, raise this error
-                    raise RuntimeError, "%s cannot be read" % xml_file
-                return output
-        # Return a list of parsed entries that dataloader can manage
-        return None
-
-    def _final_cleanup(self, data1d):
+    def _final_cleanup(self):
         """
         Final cleanup of the Data1D object to be sure it has all the
         appropriate information needed for perspectives
-
-        :param data1d: Data1D object that has been populated
         """
-        # Final cleanup
-        # Remove empty nodes, verify array sizes are correct
+
+        ## Append errors to dataset and reset class errors
+        self.current_datainfo.errors = set()
         for error in self.errors:
-            data1d.errors.append(error)
+            self.current_datainfo.errors.add(error)
         self.errors.clear()
-        numpy.trim_zeros(data1d.x)
-        numpy.trim_zeros(data1d.y)
-        numpy.trim_zeros(data1d.dy)
-        size_dx = data1d.dx.size
-        size_dxl = data1d.dxl.size
-        size_dxw = data1d.dxw.size
-        if data1d._xunit != data1d.x_unit:
-            data1d.x_unit = data1d._xunit
-        if data1d._yunit != data1d.y_unit:
-            data1d.y_unit = data1d._yunit
-        if size_dxl == 0 and size_dxw == 0:
-            data1d.dxl = None
-            data1d.dxw = None
-            numpy.trim_zeros(data1d.dx)
-        elif size_dx == 0:
-            data1d.dx = None
-            size_dx = size_dxl
-            numpy.trim_zeros(data1d.dxl)
-            numpy.trim_zeros(data1d.dxw)
-        return data1d
+
+        ## Combine all plottables with datainfo and append each to output
+        ## Type cast data arrays to float64 and find min/max as appropriate
+        for dataset in self.data:
+            if dataset.x is not None:
+                dataset.x = np.delete(dataset.x, [0])
+                dataset.x = dataset.x.astype(np.float64)
+                dataset.xmin = np.min(dataset.x)
+                dataset.xmax = np.max(dataset.x)
+            if dataset.y is not None:
+                dataset.y = np.delete(dataset.y, [0])
+                dataset.y = dataset.y.astype(np.float64)
+                dataset.ymin = np.min(dataset.y)
+                dataset.ymax = np.max(dataset.y)
+            if dataset.dx is not None:
+                dataset.dx = np.delete(dataset.dx, [0])
+                dataset.dx = dataset.dx.astype(np.float64)
+            if dataset.dxl is not None:
+                dataset.dxl = np.delete(dataset.dxl, [0])
+                dataset.dxl = dataset.dxl.astype(np.float64)
+            if dataset.dxw is not None:
+                dataset.dxw = np.delete(dataset.dxw, [0])
+                dataset.dxw = dataset.dxw.astype(np.float64)
+            if dataset.dy is not None:
+                dataset.dy = np.delete(dataset.dy, [0])
+                dataset.dy = dataset.dy.astype(np.float64)
+            np.trim_zeros(dataset.x)
+            np.trim_zeros(dataset.y)
+            np.trim_zeros(dataset.dy)
+            final_dataset = combine_data(dataset, self.current_datainfo)
+            self.output.append(final_dataset)
 
     def _create_unique_key(self, dictionary, name, numb=0):
         """
         Create a unique key value for any dictionary to prevent overwriting
-        Recurses until a unique key value is found.
+        Recurse until a unique key value is found.
 
         :param dictionary: A dictionary with any number of entries
         :param name: The index of the item to be added to dictionary
@@ -278,31 +614,84 @@ class Reader(XMLreader):
             name = self._create_unique_key(dictionary, name, numb)
         return name
 
-    def _unit_conversion(self, node, new_current_level, data1d, \
-                                                tagname, node_value):
+    def _get_node_value(self, node, tagname):
+        """
+        Get the value of a node and any applicable units
+
+        :param node: The XML node to get the value of
+        :param tagname: The tagname of the node
+        """
+        #Get the text from the node and convert all whitespace to spaces
+        units = ''
+        node_value = node.text
+        if node_value is not None:
+            node_value = ' '.join(node_value.split())
+        else:
+            node_value = ""
+
+        # If the value is a float, compile with units.
+        if self.ns_list.ns_datatype == "float":
+            # If an empty value is given, set as zero.
+            if node_value is None or node_value.isspace() \
+                                    or node_value.lower() == "nan":
+                node_value = "0.0"
+            #Convert the value to the base units
+            node_value, units = self._unit_conversion(node, tagname, node_value)
+
+        # If the value is a timestamp, convert to a datetime object
+        elif self.ns_list.ns_datatype == "timestamp":
+            if node_value is None or node_value.isspace():
+                pass
+            else:
+                try:
+                    node_value = \
+                        datetime.datetime.fromtimestamp(node_value)
+                except ValueError:
+                    node_value = None
+        return node_value, units
+
+    def _unit_conversion(self, node, tagname, node_value):
         """
         A unit converter method used to convert the data included in the file
         to the default units listed in data_info
 
-        :param new_current_level: cansas_constants level as returned by
-            iterate_namespace
-        :param attr: The attributes of the node
-        :param data1d: Where the values will be saved
+        :param node: XML node
+        :param tagname: name of the node
         :param node_value: The value of the current dom node
         """
         attr = node.attrib
         value_unit = ''
         err_msg = None
         default_unit = None
-        if 'unit' in attr and new_current_level.get('unit') is not None:
+        if not isinstance(node_value, float):
+            node_value = float(node_value)
+        if 'unit' in attr and attr.get('unit') is not None:
             try:
                 local_unit = attr['unit']
-                if isinstance(node_value, float) is False:
-                    exec("node_value = float({0})".format(node_value))
-                unitname = new_current_level.get("unit")
-                exec "default_unit = data1d.{0}".format(unitname)
-                if local_unit is not None and default_unit is not None and \
-                        local_unit.lower() != default_unit.lower() \
+                unitname = self.ns_list.current_level.get("unit", "")
+                if "SASdetector" in self.names:
+                    save_in = "detector"
+                elif "aperture" in self.names:
+                    save_in = "aperture"
+                elif "SAScollimation" in self.names:
+                    save_in = "collimation"
+                elif "SAStransmission_spectrum" in self.names:
+                    save_in = "transspectrum"
+                elif "SASdata" in self.names:
+                    x = np.zeros(1)
+                    y = np.zeros(1)
+                    self.current_data1d = Data1D(x, y)
+                    save_in = "current_data1d"
+                elif "SASsource" in self.names:
+                    save_in = "current_datainfo.source"
+                elif "SASsample" in self.names:
+                    save_in = "current_datainfo.sample"
+                elif "SASprocess" in self.names:
+                    save_in = "process"
+                else:
+                    save_in = "current_datainfo"
+                exec "default_unit = self.{0}.{1}".format(save_in, unitname)
+                if local_unit and default_unit and local_unit.lower() != default_unit.lower() \
                         and local_unit.lower() != "none":
                     if HAS_CONVERTER == True:
                         ## Check local units - bad units raise KeyError
@@ -329,62 +718,26 @@ class Reader(XMLreader):
             value_unit = attr['unit']
         if err_msg:
             self.errors.add(err_msg)
-        node_value = "float({0})".format(node_value)
         return node_value, value_unit
 
-    def _check_for_empty_data(self, data1d):
+    def _check_for_empty_data(self):
         """
         Creates an empty data set if no data is passed to the reader
 
         :param data1d: presumably a Data1D object
         """
-        if data1d == None:
-            self.errors = set()
-            x_vals = numpy.empty(0)
-            y_vals = numpy.empty(0)
-            dx_vals = numpy.empty(0)
-            dy_vals = numpy.empty(0)
-            dxl = numpy.empty(0)
-            dxw = numpy.empty(0)
-            data1d = Data1D(x_vals, y_vals, dx_vals, dy_vals)
-            data1d.dxl = dxl
-            data1d.dxw = dxw
-        return data1d
+        if self.current_dataset == None:
+            x_vals = np.empty(0)
+            y_vals = np.empty(0)
+            dx_vals = np.empty(0)
+            dy_vals = np.empty(0)
+            dxl = np.empty(0)
+            dxw = np.empty(0)
+            self.current_dataset = plottable_1D(x_vals, y_vals, dx_vals, dy_vals)
+            self.current_dataset.dxl = dxl
+            self.current_dataset.dxw = dxw
 
-    def _handle_special_cases(self, tagname, data1d, children):
-        """
-        Handle cases where the data type in Data1D is a dictionary or list
-
-        :param tagname: XML tagname in use
-        :param data1d: The original Data1D object
-        :param children: Child nodes of node
-        :param node: existing node with tag name 'tagname'
-        """
-        if tagname == "SASdetector":
-            data1d = Detector()
-        elif tagname == "SAScollimation":
-            data1d = Collimation()
-        elif tagname == "SAStransmission_spectrum":
-            data1d = TransmissionSpectrum()
-        elif tagname == "SASprocess":
-            data1d = Process()
-            for child in children:
-                if child.tag.replace(self.base_ns, "") == "term":
-                    term_attr = {}
-                    for attr in child.keys():
-                        term_attr[attr] = \
-                            ' '.join(child.get(attr).split())
-                    if child.text is not None:
-                        term_attr['value'] = \
-                            ' '.join(child.text.split())
-                    data1d.term.append(term_attr)
-        elif tagname == "aperture":
-            data1d = Aperture()
-        if tagname == "Idata" and children is not None:
-            data1d = self._check_for_empty_resolution(data1d, children)
-        return data1d
-
-    def _check_for_empty_resolution(self, data1d, children):
+    def _check_for_empty_resolution(self):
         """
         A method to check all resolution data sets are the same size as I and Q
         """
@@ -392,230 +745,114 @@ class Reader(XMLreader):
         dqw_exists = False
         dq_exists = False
         di_exists = False
-        for child in children:
-            tag = child.tag.replace(self.base_ns, "")
-            if tag == "dQl":
-                dql_exists = True
-            if tag == "dQw":
-                dqw_exists = True
-            if tag == "Qdev":
-                dq_exists = True
-            if tag == "Idev":
-                di_exists = True
-        if dqw_exists and dql_exists == False:
-            data1d.dxl = numpy.append(data1d.dxl, 0.0)
-        elif dql_exists and dqw_exists == False:
-            data1d.dxw = numpy.append(data1d.dxw, 0.0)
-        elif dql_exists == False and dqw_exists == False \
-                                            and dq_exists == False:
-            data1d.dx = numpy.append(data1d.dx, 0.0)
-        if di_exists == False:
-            data1d.dy = numpy.append(data1d.dy, 0.0)
-        return data1d
+        if self.current_dataset.dxl is not None:
+            dql_exists = True
+        if self.current_dataset.dxw is not None:
+            dqw_exists = True
+        if self.current_dataset.dx is not None:
+            dq_exists = True
+        if self.current_dataset.dy is not None:
+            di_exists = True
+        if dqw_exists and not dql_exists:
+            array_size = self.current_dataset.dxw.size - 1
+            self.current_dataset.dxl = np.append(self.current_dataset.dxl, np.zeros([array_size]))
+        elif dql_exists and not dqw_exists:
+            array_size = self.current_dataset.dxl.size - 1
+            self.current_dataset.dxw = np.append(self.current_dataset.dxw, np.zeros([array_size]))
+        elif not dql_exists and not dqw_exists and not dq_exists:
+            array_size = self.current_dataset.x.size - 1
+            self.current_dataset.dx = np.append(self.current_dataset.dx, np.zeros([array_size]))
+        if not di_exists:
+            array_size = self.current_dataset.y.size - 1
+            self.current_dataset.dy = np.append(self.current_dataset.dy, np.zeros([array_size]))
 
-    def _restore_original_case(self,
-                               tagname_original,
-                               tagname,
-                               save_data1d,
-                               data1d):
+
+    ####### All methods below are for writing CanSAS XML files #######
+
+
+    def write(self, filename, datainfo):
         """
-        Save the special case data to the appropriate location and restore
-        the original Data1D object
+        Write the content of a Data1D as a CanSAS XML file
 
-        :param tagname_original: Unmodified tagname for the node
-        :param tagname: modified tagname for the node
-        :param save_data1d: The original Data1D object
-        :param data1d: If a special case was handled, an object of that type
+        :param filename: name of the file to write
+        :param datainfo: Data1D object
         """
-        if tagname_original == "SASdetector":
-            save_data1d.detector.append(data1d)
-        elif tagname_original == "SAScollimation":
-            save_data1d.collimation.append(data1d)
-        elif tagname == "SAStransmission_spectrum":
-            save_data1d.trans_spectrum.append(data1d)
-        elif tagname_original == "SASprocess":
-            save_data1d.process.append(data1d)
-        elif tagname_original == "aperture":
-            save_data1d.aperture.append(data1d)
-        else:
-            save_data1d = data1d
-        return save_data1d
+        # Create XML document
+        doc, _ = self._to_xml_doc(datainfo)
+        # Write the file
+        file_ref = open(filename, 'w')
+        if self.encoding == None:
+            self.encoding = "UTF-8"
+        doc.write(file_ref, encoding=self.encoding,
+                  pretty_print=True, xml_declaration=True)
+        file_ref.close()
 
-    def _handle_attributes(self, node, data1d, cs_values, tagname):
+    def _to_xml_doc(self, datainfo):
         """
-        Process all of the attributes for a node
+        Create an XML document to contain the content of a Data1D
+
+        :param datainfo: Data1D object
         """
-        attr = node.attrib
-        if attr is not None:
-            for key in node.keys():
-                try:
-                    node_value, unit = self._get_node_value(node, cs_values, \
-                                                   data1d, tagname)
-                    cansas_attrib = \
-                        cs_values.current_level.get("attributes").get(key)
-                    attrib_variable = cansas_attrib.get("variable")
-                    if key == 'unit' and unit != '':
-                        attrib_value = unit
-                    else:
-                        attrib_value = node.attrib[key]
-                    store_attr = attrib_variable.format("data1d",
-                                                        attrib_value,
-                                                        key,
-                                                        node_value)
-                    exec store_attr
-                except AttributeError:
-                    pass
-        return data1d
+        if not issubclass(datainfo.__class__, Data1D):
+            raise RuntimeError, "The cansas writer expects a Data1D instance"
 
-    def _get_node_value(self, node, cs_values, data1d, tagname):
+        # Get PIs and create root element
+        pi_string = self._get_pi_string()
+        # Define namespaces and create SASroot object
+        main_node = self._create_main_node()
+        # Create ElementTree, append SASroot and apply processing instructions
+        base_string = pi_string + self.to_string(main_node)
+        base_element = self.create_element_from_string(base_string)
+        doc = self.create_tree(base_element)
+        # Create SASentry Element
+        entry_node = self.create_element("SASentry")
+        root = doc.getroot()
+        root.append(entry_node)
+
+        # Add Title to SASentry
+        self.write_node(entry_node, "Title", datainfo.title)
+        # Add Run to SASentry
+        self._write_run_names(datainfo, entry_node)
+        # Add Data info to SASEntry
+        self._write_data(datainfo, entry_node)
+        # Transmission Spectrum Info
+        self._write_trans_spectrum(datainfo, entry_node)
+        # Sample info
+        self._write_sample_info(datainfo, entry_node)
+        # Instrument info
+        instr = self._write_instrument(datainfo, entry_node)
+        #   Source
+        self._write_source(datainfo, instr)
+        #   Collimation
+        self._write_collimation(datainfo, instr)
+        #   Detectors
+        self._write_detectors(datainfo, instr)
+        # Processes info
+        self._write_process_notes(datainfo, entry_node)
+        # Note info
+        self._write_notes(datainfo, entry_node)
+        # Return the document, and the SASentry node associated with
+        #      the data we just wrote
+        # If the calling function was not the cansas reader, return a minidom
+        #      object rather than an lxml object.
+        frm = inspect.stack()[1]
+        doc, entry_node = self._check_origin(entry_node, doc, frm)
+        return doc, entry_node
+
+    def write_node(self, parent, name, value, attr=None):
         """
-        Get the value of a node and any applicable units
+        :param doc: document DOM
+        :param parent: parent node
+        :param name: tag of the element
+        :param value: value of the child text node
+        :param attr: attribute dictionary
 
-        :param node: The XML node to get the value of
-        :param cs_values: A CansasConstants.CurrentLevel object
-        :param attr: The node attributes
-        :param dataid: The working object to be modified
-        :param tagname: The tagname of the node
+        :return: True if something was appended, otherwise False
         """
-        #Get the text from the node and convert all whitespace to spaces
-        units = ''
-        node_value = node.text
-        if node_value == "":
-            node_value = None
-        if node_value is not None:
-            node_value = ' '.join(node_value.split())
-
-        # If the value is a float, compile with units.
-        if cs_values.ns_datatype == "float":
-            # If an empty value is given, set as zero.
-            if node_value is None or node_value.isspace() \
-                                    or node_value.lower() == "nan":
-                node_value = "0.0"
-            #Convert the value to the base units
-            node_value, units = self._unit_conversion(node, \
-                        cs_values.current_level, data1d, tagname, node_value)
-
-        # If the value is a timestamp, convert to a datetime object
-        elif cs_values.ns_datatype == "timestamp":
-            if node_value is None or node_value.isspace():
-                pass
-            else:
-                try:
-                    node_value = \
-                        datetime.datetime.fromtimestamp(node_value)
-                except ValueError:
-                    node_value = None
-        return node_value, units
-
-    def _parse_entry(self, dom, names=None, data1d=None, extras=None):
-        """
-        Parse a SASEntry - new recursive method for parsing the dom of
-            the CanSAS data format. This will allow multiple data files
-            and extra nodes to be read in simultaneously.
-
-        :param dom: dom object with a namespace base of names
-        :param names: A list of element names that lead up to the dom object
-        :param data1d: The data1d object that will be modified
-        :param extras: Any values that should go into meta_data when data1d
-            is not a Data1D object
-        """
-
-        if extras is None:
-            extras = []
-        if names is None or names == []:
-            names = ["SASentry"]
-
-        data1d = self._check_for_empty_data(data1d)
-
-        self.base_ns = "{0}{1}{2}".format("{", \
-                            CANSAS_NS.get(self.cansas_version).get("ns"), "}")
-        tagname = ''
-        tagname_original = ''
-
-        # Go through each child in the parent element
-        for node in dom:
-            try:
-                # Get the element name and set the current names level
-                tagname = node.tag.replace(self.base_ns, "")
-                tagname_original = tagname
-                if tagname == "fitting_plug_in" or tagname == "pr_inversion" or\
-                    tagname == "invariant":
-                    continue
-                names.append(tagname)
-                children = node.getchildren()
-                if len(children) == 0:
-                    children = None
-                save_data1d = data1d
-
-                # Look for special cases
-                data1d = self._handle_special_cases(tagname, data1d, children)
-
-                # Get where to store content
-                cs_values = CONSTANTS.iterate_namespace(names)
-                # If the element is a child element, recurse
-                if children is not None:
-                    # Returned value is new Data1D object with all previous and
-                    # new values in it.
-                    data1d, extras = self._parse_entry(node,
-                                                       names, data1d, extras)
-
-                #Get the information from the node
-                node_value, _ = self._get_node_value(node, cs_values, \
-                                                            data1d, tagname)
-
-                # If appending to a dictionary (meta_data | run_name)
-                # make sure the key is unique
-                if cs_values.ns_variable == "{0}.meta_data[\"{2}\"] = \"{1}\"":
-                    # If we are within a Process, Detector, Collimation or
-                    # Aperture instance, pull out old data1d
-                    tagname = self._create_unique_key(data1d.meta_data, \
-                                                      tagname, 0)
-                    if isinstance(data1d, Data1D) == False:
-                        store_me = cs_values.ns_variable.format("data1d", \
-                                                            node_value, tagname)
-                        extras.append(store_me)
-                        cs_values.ns_variable = None
-                if cs_values.ns_variable == "{0}.run_name[\"{2}\"] = \"{1}\"":
-                    tagname = self._create_unique_key(data1d.run_name, \
-                                                      tagname, 0)
-
-                # Check for Data1D object and any extra commands to save
-                if isinstance(data1d, Data1D):
-                    for item in extras:
-                        exec item
-                # Don't bother saving empty information unless it is a float
-                if cs_values.ns_variable is not None and \
-                            node_value is not None and \
-                            node_value.isspace() == False:
-                    # Format a string and then execute it.
-                    store_me = cs_values.ns_variable.format("data1d", \
-                                                            node_value, tagname)
-                    exec store_me
-                # Get attributes and process them
-                data1d = self._handle_attributes(node, data1d, cs_values, \
-                                                 tagname)
-
-            except TypeError:
-                pass
-            except Exception as excep:
-                exc_type, exc_obj, exc_tb = sys.exc_info()
-                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-                print(excep, exc_type, fname, exc_tb.tb_lineno, \
-                      tagname, exc_obj)
-            finally:
-                # Save special cases in original data1d object
-                # then restore the data1d
-                save_data1d = self._restore_original_case(tagname_original, \
-                                                tagname, save_data1d, data1d)
-                if tagname_original == "fitting_plug_in" or \
-                    tagname_original == "invariant" or \
-                    tagname_original == "pr_inversion":
-                    pass
-                else:
-                    data1d = save_data1d
-                    # Remove tagname from names to restore original base
-                    names.remove(tagname_original)
-        return data1d, extras
+        if value is not None:
+            parent = self.ebuilder(parent, name, value, attr)
+            return True
+        return False
 
     def _get_pi_string(self):
         """
@@ -687,16 +924,16 @@ class Reader(XMLreader):
             if len(datainfo.y) >= i:
                 self.write_node(point, "I", datainfo.y[i],
                                 {'unit': datainfo.y_unit})
-            if datainfo.dy != None and len(datainfo.dy) > i:
+            if datainfo.dy is not None and len(datainfo.dy) > i:
                 self.write_node(point, "Idev", datainfo.dy[i],
                                 {'unit': datainfo.y_unit})
-            if datainfo.dx != None and len(datainfo.dx) > i:
+            if datainfo.dx is not None and len(datainfo.dx) > i:
                 self.write_node(point, "Qdev", datainfo.dx[i],
                                 {'unit': datainfo.x_unit})
-            if datainfo.dxw != None and len(datainfo.dxw) > i:
+            if datainfo.dxw is not None and len(datainfo.dxw) > i:
                 self.write_node(point, "dQw", datainfo.dxw[i],
                                 {'unit': datainfo.x_unit})
-            if datainfo.dxl != None and len(datainfo.dxl) > i:
+            if datainfo.dxl is not None and len(datainfo.dxl) > i:
                 self.write_node(point, "dQl", datainfo.dxl[i],
                                 {'unit': datainfo.x_unit})
 
@@ -962,8 +1199,14 @@ class Reader(XMLreader):
             self.write_node(node, "date", item.date)
             self.write_node(node, "description", item.description)
             for term in item.term:
-                value = term['value']
-                del term['value']
+                if isinstance(term, list):
+                    value = term['value']
+                    del term['value']
+                elif isinstance(term, dict):
+                    value = term.get("value")
+                    del term['value']
+                else:
+                    value = term
                 self.write_node(node, "term", value, term)
             for note in item.notes:
                 self.write_node(node, "SASprocessnote", note)
@@ -1011,90 +1254,6 @@ class Reader(XMLreader):
             node_list = doc.getElementsByTagName(node_name)
             entry_node = node_list.item(0)
         return doc, entry_node
-
-    def _to_xml_doc(self, datainfo):
-        """
-        Create an XML document to contain the content of a Data1D
-
-        :param datainfo: Data1D object
-        """
-        if not issubclass(datainfo.__class__, Data1D):
-            raise RuntimeError, "The cansas writer expects a Data1D instance"
-
-        # Get PIs and create root element
-        pi_string = self._get_pi_string()
-        # Define namespaces and create SASroot object
-        main_node = self._create_main_node()
-        # Create ElementTree, append SASroot and apply processing instructions
-        base_string = pi_string + self.to_string(main_node)
-        base_element = self.create_element_from_string(base_string)
-        doc = self.create_tree(base_element)
-        # Create SASentry Element
-        entry_node = self.create_element("SASentry")
-        root = doc.getroot()
-        root.append(entry_node)
-
-        # Add Title to SASentry
-        self.write_node(entry_node, "Title", datainfo.title)
-        # Add Run to SASentry
-        self._write_run_names(datainfo, entry_node)
-        # Add Data info to SASEntry
-        self._write_data(datainfo, entry_node)
-        # Transmission Spectrum Info
-        self._write_trans_spectrum(datainfo, entry_node)
-        # Sample info
-        self._write_sample_info(datainfo, entry_node)
-        # Instrument info
-        instr = self._write_instrument(datainfo, entry_node)
-        #   Source
-        self._write_source(datainfo, instr)
-        #   Collimation
-        self._write_collimation(datainfo, instr)
-        #   Detectors
-        self._write_detectors(datainfo, instr)
-        # Processes info
-        self._write_process_notes(datainfo, entry_node)
-        # Note info
-        self._write_notes(datainfo, entry_node)
-        # Return the document, and the SASentry node associated with
-        #      the data we just wrote
-        # If the calling function was not the cansas reader, return a minidom
-        #      object rather than an lxml object.
-        frm = inspect.stack()[1]
-        doc, entry_node = self._check_origin(entry_node, doc, frm)
-        return doc, entry_node
-
-    def write_node(self, parent, name, value, attr=None):
-        """
-        :param doc: document DOM
-        :param parent: parent node
-        :param name: tag of the element
-        :param value: value of the child text node
-        :param attr: attribute dictionary
-
-        :return: True if something was appended, otherwise False
-        """
-        if value is not None:
-            parent = self.ebuilder(parent, name, value, attr)
-            return True
-        return False
-
-    def write(self, filename, datainfo):
-        """
-        Write the content of a Data1D as a CanSAS XML file
-
-        :param filename: name of the file to write
-        :param datainfo: Data1D object
-        """
-        # Create XML document
-        doc, _ = self._to_xml_doc(datainfo)
-        # Write the file
-        file_ref = open(filename, 'w')
-        if self.encoding == None:
-            self.encoding = "UTF-8"
-        doc.write(file_ref, encoding=self.encoding,
-                  pretty_print=True, xml_declaration=True)
-        file_ref.close()
 
     # DO NOT REMOVE - used in saving and loading panel states.
     def _store_float(self, location, node, variable, storage, optional=True):
@@ -1179,3 +1338,46 @@ class Reader(XMLreader):
         entry = get_content(location, node)
         if entry is not None and entry.text is not None:
             exec "storage.%s = entry.text.strip()" % variable
+
+
+# DO NOT REMOVE Called by outside packages:
+#    sas.sasgui.perspectives.invariant.invariant_state
+#    sas.sasgui.perspectives.fitting.pagestate
+def get_content(location, node):
+    """
+    Get the first instance of the content of a xpath location.
+
+    :param location: xpath location
+    :param node: node to start at
+
+    :return: Element, or None
+    """
+    nodes = node.xpath(location,
+                       namespaces={'ns': CANSAS_NS.get("1.0").get("ns")})
+    if len(nodes) > 0:
+        return nodes[0]
+    else:
+        return None
+
+# DO NOT REMOVE Called by outside packages:
+#    sas.sasgui.perspectives.fitting.pagestate
+def write_node(doc, parent, name, value, attr=None):
+    """
+    :param doc: document DOM
+    :param parent: parent node
+    :param name: tag of the element
+    :param value: value of the child text node
+    :param attr: attribute dictionary
+
+    :return: True if something was appended, otherwise False
+    """
+    if attr is None:
+        attr = {}
+    if value is not None:
+        node = doc.createElement(name)
+        node.appendChild(doc.createTextNode(str(value)))
+        for item in attr:
+            node.setAttribute(item, attr[item])
+        parent.appendChild(node)
+        return True
+    return False

@@ -72,7 +72,6 @@ class ImageView:
                 if parent != None:
                     parent.put_icon(plot_frame)
             except:
-                print "parent", parent
                 err_msg += "Failed to load '%s'.\n" % basename
         if err_msg:
             if parent is not None:
@@ -108,7 +107,8 @@ class ImageFrame(PlotFrame):
         :param parent: parent panel/container
         """
         # Initialize the Frame object
-        PlotFrame.__init__(self, parent, id, title, scale, size)
+        PlotFrame.__init__(self, parent, id, title, scale, size,
+            show_menu_icons=False)
         self.parent = parent
         self.data = image
         self.file_name = title
@@ -436,4 +436,3 @@ if __name__ == "__main__":
     app = wx.App()
     ImageView(None).load()
     app.MainLoop()
-

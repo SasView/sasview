@@ -14,7 +14,6 @@ from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
 from matplotlib.figure import Figure
 import os
 import transform
-from plottables import Data1D
 #TODO: make the plottables interactive
 from binder import BindArtist
 from matplotlib.font_manager import FontProperties
@@ -150,6 +149,7 @@ class PlotPanel(wx.Panel):
 
         #List of texts currently on the plot
         self.textList = []
+        self.selectedText = None
         #User scale
         if xtransform != None:
             self.xLabel = xtransform
@@ -189,6 +189,7 @@ class PlotPanel(wx.Panel):
         #self.selected_plottable = None
 
         # new data for the fit
+        from sas.sasgui.guiframe.dataFitting import Data1D
         self.fit_result = Data1D(x=[], y=[], dy=None)
         self.fit_result.symbol = 13
         #self.fit_result = Data1D(x=[], y=[],dx=None, dy=None)
@@ -351,6 +352,11 @@ class PlotPanel(wx.Panel):
         if event.button == 1:
             self.leftdown = True
             ax = event.inaxes
+            for text in self.textList:
+                if text.contains(event)[0]: # If user has clicked on text
+                    self.selectedText = text
+                    return
+
             if ax != None:
                 self.xInit, self.yInit = event.xdata, event.ydata
                 try:
@@ -372,6 +378,7 @@ class PlotPanel(wx.Panel):
             self.leftdown = False
             self.mousemotion = False
             self.leftup = True
+            self.selectedText = None
 
         #release the legend
         if self.gotLegend == 1:
@@ -447,6 +454,19 @@ class PlotPanel(wx.Panel):
         if self.gotLegend == 1:
             self._on_legend_motion(event)
             return
+
+        if self.leftdown and self.selectedText is not None:
+            # User has clicked on text and is dragging
+            ax = event.inaxes
+            if ax != None:
+                # Only move text if mouse is within axes
+                self.selectedText.set_position((event.xdata, event.ydata))
+                self._dragHelper(0, 0)
+            else:
+                # User has dragged outside of axes
+                self.selectedText = None
+            return
+
         if self.enable_toolbar:
             #Disable dragging without the toolbar to allow zooming with toolbar
             return
@@ -645,6 +665,15 @@ class PlotPanel(wx.Panel):
                 and(self.xminView != 0.0)and (self.xmaxView != 0.0):
                 dlg.setFitRange(self.xminView, self.xmaxView,
                                 self.xmin, self.xmax)
+            else:
+                xlim = self.subplot.get_xlim()
+                ylim = self.subplot.get_ylim()
+                dlg.setFitRange(xlim[0], xlim[1], ylim[0], ylim[1])
+            # It would be nice for this to NOT be modal (i.e. Show).
+            # Not sure about other ramifications - for example
+            # if a second linear fit is started before the first is closed.
+            # consider for future - being able to work on the plot while
+            # seing the fit values would be very nice  -- PDB 7/10/16
             dlg.ShowModal()
 
     def set_selected_from_menu(self, menu, id):
@@ -707,26 +736,6 @@ class PlotPanel(wx.Panel):
                 dial.setValues(self.prevXtrans, self.prevYtrans, self.viewModel)
                 if dial.ShowModal() == wx.ID_OK:
                     self.xLabel, self.yLabel, self.viewModel = dial.getValues()
-                    if self.viewModel == "Linear y vs x":
-                        self.xLabel = "x"
-                        self.yLabel = "y"
-                        self.viewModel = "--"
-                        dial.setValues(self.xLabel, self.yLabel, self.viewModel)
-                    if self.viewModel == "Guinier lny vs x^(2)":
-                        self.xLabel = "x^(2)"
-                        self.yLabel = "ln(y)"
-                        self.viewModel = "--"
-                        dial.setValues(self.xLabel, self.yLabel, self.viewModel)
-                    if self.viewModel == "XS Guinier ln(y*x) vs x^(2)":
-                        self.xLabel = "x^(2)"
-                        self.yLabel = "ln(y*x)"
-                        self.viewModel = "--"
-                        dial.setValues(self.xLabel, self.yLabel, self.viewModel)
-                    if self.viewModel == "Porod y*x^(4) vs x^(4)":
-                        self.xLabel = "x^(4)"
-                        self.yLabel = "y*x^(4)"
-                        self.viewModel = "--"
-                        dial.setValues(self.xLabel, self.yLabel, self.viewModel)
                     self._onEVT_FUNC_PROPERTY()
                 dial.Destroy()
 
@@ -1205,16 +1214,15 @@ class PlotPanel(wx.Panel):
         # even less clear.
 
         # Properties defined by plot
-        
+
         # Ricardo:
-        # A empty label "$$" will prevent the panel from displaying! 
-        
+        # A empty label "$$" will prevent the panel from displaying!
         if prop["xlabel"]:
             self.subplot.set_xlabel(r"$%s$"%prop["xlabel"])
         if prop["ylabel"]:
             self.subplot.set_ylabel(r"$%s$"%prop["ylabel"])
         self.subplot.set_title(prop["title"])
-        
+
 
     def clear(self):
         """Reset the plot"""
@@ -1558,7 +1566,7 @@ class PlotPanel(wx.Panel):
                                                   y=self.qx_data,
                                                   bins=[self.y_bins, self.x_bins],
                                                   weights=self.data)
-        # Now, normalize the image by weights only for weights>1: 
+        # Now, normalize the image by weights only for weights>1:
         # If weight == 1, there is only one data point in the bin so
         # that no normalization is required.
         image[weights > 1] = image[weights > 1] / weights[weights > 1]
@@ -1740,6 +1748,9 @@ class PlotPanel(wx.Panel):
         # Delete first, and then get the whole list...
         if remove_fit:
             self.graph.delete(self.fit_result)
+            if hasattr(self, 'plots'):
+                if 'fit' in self.plots.keys():
+                    del self.plots['fit']
         self.ly = None
         self.q_ctrl = None
         list = self.graph.returnPlottable()
@@ -1753,8 +1764,9 @@ class PlotPanel(wx.Panel):
         _xscale = 'linear'
         _yscale = 'linear'
         for item in list:
+            if item.id == 'fit':
+                continue
             item.setLabel(self.xLabel, self.yLabel)
-
             # control axis labels from the panel itself
             yname, yunits = item.get_yaxis()
             if self.yaxis_label != None:
@@ -1784,7 +1796,7 @@ class PlotPanel(wx.Panel):
                 self.graph._xaxis_transformed("%s^{4}" % xname, "%s" % xunits)
             if self.xLabel == "ln(x)":
                 item.transformX(transform.toLogX, transform.errToLogX)
-                self.graph._xaxis_transformed("\ln\\ %s" % xname, "%s" % xunits)
+                self.graph._xaxis_transformed("\ln{(%s)}" % xname, "%s" % xunits)
             if self.xLabel == "log10(x)":
                 item.transformX(transform.toX_pos, transform.errToX_pos)
                 _xscale = 'log'
@@ -1796,7 +1808,7 @@ class PlotPanel(wx.Panel):
                 _xscale = 'log'
             if self.yLabel == "ln(y)":
                 item.transformY(transform.toLogX, transform.errToLogX)
-                self.graph._yaxis_transformed("\ln\\ %s" % yname, "%s" % yunits)
+                self.graph._yaxis_transformed("\ln{(%s)}" % yname, "%s" % yunits)
             if self.yLabel == "y":
                 item.transformY(transform.toX, transform.errToX)
                 self.graph._yaxis_transformed("%s" % yname, "%s" % yunits)
@@ -1812,6 +1824,11 @@ class PlotPanel(wx.Panel):
                 item.transformY(transform.toOneOverX, transform.errOneOverX)
                 yunits = convert_unit(-1, yunits)
                 self.graph._yaxis_transformed("1/%s" % yname, "%s" % yunits)
+            if self.yLabel == "y*x^(2)":
+                item.transformY(transform.toYX2, transform.errToYX2)
+                xunits = convert_unit(2, self.xaxis_unit)
+                self.graph._yaxis_transformed("%s \ \ %s^{2}" % (yname, xname),
+                                              "%s%s" % (yunits, xunits))
             if self.yLabel == "y*x^(4)":
                 item.transformY(transform.toYX4, transform.errToYX4)
                 xunits = convert_unit(4, self.xaxis_unit)
@@ -1825,7 +1842,7 @@ class PlotPanel(wx.Panel):
                                               "%s" % yunits)
             if self.yLabel == "ln(y*x)":
                 item.transformY(transform.toLogXY, transform.errToLogXY)
-                self.graph._yaxis_transformed("\ln (%s \ \ %s)" % (yname, xname),
+                self.graph._yaxis_transformed("\ln{(%s \ \ %s)}" % (yname, xname),
                                               "%s%s" % (yunits, self.xaxis_unit))
             if self.yLabel == "ln(y*x^(2))":
                 item.transformY(transform.toLogYX2, transform.errToLogYX2)
@@ -1841,19 +1858,6 @@ class PlotPanel(wx.Panel):
                 item.transformY(transform.toYX4, transform.errToYX4)
                 xunits = convert_unit(4, self.xaxis_unit)
                 _yscale = 'log'
-                self.graph._yaxis_transformed("%s \ \ %s^{4}" % (yname, xname),
-                                              "%s%s" % (yunits, xunits))
-            if self.viewModel == "Guinier lny vs x^(2)":
-                item.transformX(transform.toX2, transform.errToX2)
-                xunits = convert_unit(2, xunits)
-                self.graph._xaxis_transformed("%s^{2}" % xname, "%s" % xunits)
-                item.transformY(transform.toLogX, transform.errToLogX)
-                self.graph._yaxis_transformed("\ln\ \ %s" % yname, "%s" % yunits)
-            if self.viewModel == "Porod y*x^(4) vs x^(4)":
-                item.transformX(transform.toX4, transform.errToX4)
-                xunits = convert_unit(4, self.xaxis_unit)
-                self.graph._xaxis_transformed("%s^{4}" % xname, "%s" % xunits)
-                item.transformY(transform.toYX4, transform.errToYX4)
                 self.graph._yaxis_transformed("%s \ \ %s^{4}" % (yname, xname),
                                               "%s%s" % (yunits, xunits))
             item.transformView()
@@ -1893,6 +1897,9 @@ class PlotPanel(wx.Panel):
         :param xmax: the highest value of data to fit to the line
 
         """
+        xlim = self.subplot.get_xlim()
+        ylim = self.subplot.get_ylim()
+
         # Saving value to redisplay in Fit Dialog when it is opened again
         self.Avalue, self.Bvalue, self.ErrAvalue, \
                       self.ErrBvalue, self.Chivalue = func
@@ -1916,6 +1923,15 @@ class PlotPanel(wx.Panel):
         self.graph.add(self.fit_result)
         self.graph.render(self)
         self._offset_graph()
+        if hasattr(self, 'plots'):
+            # Used by Plotter1D
+            fit_id = 'fit'
+            self.fit_result.id = fit_id
+            self.fit_result.title = 'Fit'
+            self.fit_result.name = 'Fit'
+            self.plots[fit_id] = self.fit_result
+        self.subplot.set_xlim(xlim)
+        self.subplot.set_ylim(ylim)
         self.subplot.figure.canvas.draw_idle()
 
     def onChangeCaption(self, event):

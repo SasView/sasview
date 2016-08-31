@@ -2,6 +2,8 @@ from sas.sascalc.calculator.BaseComponent import BaseComponent
 import math
 
 class Model1DPlugin(BaseComponent):
+    is_multiplicity_model = False
+
     ## Name of the model
 
     def __init__(self , name="Plugin Model" ):

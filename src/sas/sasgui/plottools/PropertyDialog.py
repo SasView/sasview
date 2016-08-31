@@ -22,17 +22,18 @@ class Properties(wx.Dialog):
         sizer.Add(wx.StaticText(self, -1, 'View'), (iy, ix))
         iy += 1
         ix = 1
-        self.xvalue = wx.ComboBox(self, -1)
+        self.xvalue = wx.ComboBox(self, -1, style=wx.CB_READONLY)
         x_size += self.xvalue.GetSize()[0]
-        sizer.Add(self.xvalue, (iy, ix), (1, 1), wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+        sizer.Add(self.xvalue, (iy, ix), (1, 1), wx.ADJUST_MINSIZE, 0)
 
         ix += 2
-        self.yvalue = wx.ComboBox(self, -1)
+        self.yvalue = wx.ComboBox(self, -1, style=wx.CB_READONLY)
         x_size += self.yvalue.GetSize()[0]
-        sizer.Add(self.yvalue, (iy, ix), (1, 1), wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+        sizer.Add(self.yvalue, (iy, ix), (1, 1), wx.ADJUST_MINSIZE, 0)
 
         ix += 2
-        self.view = wx.ComboBox(self, -1)
+        self.view = wx.ComboBox(self, -1, style=wx.CB_READONLY)
+        self.view.Bind(wx.EVT_COMBOBOX, self.viewChanged)
         x_size += self.view.GetSize()[0]
         self.view.SetMinSize((160, 30))
         sizer.Add(self.view, (iy, ix), (1, 1),
@@ -63,13 +64,14 @@ class Properties(wx.Dialog):
         self.yvalue.Insert("1/y", 1)
         self.yvalue.Insert("ln(y)", 2)
         self.yvalue.Insert("y^(2)", 3)
-        self.yvalue.Insert("y*x^(4)", 4)
-        self.yvalue.Insert("1/sqrt(y)", 5)
-        self.yvalue.Insert("log10(y)", 6)
-        self.yvalue.Insert("ln(y*x)", 7)
-        self.yvalue.Insert("ln(y*x^(2))", 8)
-        self.yvalue.Insert("ln(y*x^(4))", 9)
-        self.yvalue.Insert("log10(y*x^(4))", 10)
+        self.yvalue.Insert("y*x^(2)", 4)
+        self.yvalue.Insert("y*x^(4)", 5)
+        self.yvalue.Insert("1/sqrt(y)", 6)
+        self.yvalue.Insert("log10(y)", 7)
+        self.yvalue.Insert("ln(y*x)", 8)
+        self.yvalue.Insert("ln(y*x^(2))", 9)
+        self.yvalue.Insert("ln(y*x^(4))", 10)
+        self.yvalue.Insert("log10(y*x^(4))", 11)
         # type of view or model used
         self.view.SetValue("--")
         self.view.Insert("--", 0)
@@ -81,6 +83,25 @@ class Properties(wx.Dialog):
         self.SetSizer(vbox)
         self.Fit()
         self.Centre()
+
+    def viewChanged(self, event):
+        event.Skip()
+        view = self.view.GetValue()
+        if view == "Linear y vs x":
+            self.xvalue.SetValue("x")
+            self.yvalue.SetValue("y")
+        elif view == "Guinier lny vs x^(2)":
+            self.xvalue.SetValue("x^(2)")
+            self.yvalue.SetValue("ln(y)")
+        elif view == "XS Guinier ln(y*x) vs x^(2)":
+            self.xvalue.SetValue("x^(2)")
+            self.yvalue.SetValue("ln(y*x)")
+        elif view == "Porod y*x^(4) vs x^(4)":
+            self.xvalue.SetValue("x^(4)")
+            self.yvalue.SetValue("y*x^(4)")
+        elif view == "Kratky y*x^(2) vs x":
+            self.xvalue.SetValue("x")
+            self.yvalue.SetValue("y*x^(2)")
 
     def setValues(self, x, y, view):
         """

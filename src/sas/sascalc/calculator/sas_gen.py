@@ -2,8 +2,8 @@
 """
 SAS generic computation and sld file readers
 """
-from sas.sascalc.calculator.BaseComponent import BaseComponent
 import sas.sascalc.calculator.core.sld2i as mod
+from sas.sascalc.calculator.BaseComponent import BaseComponent
 from periodictable import formula
 from periodictable import nsf
 import numpy

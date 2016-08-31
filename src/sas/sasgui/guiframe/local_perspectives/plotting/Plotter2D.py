@@ -292,7 +292,7 @@ class ModelPanel2D(ModelPanel1D):
         slicerpop.set_graph(self.graph)
 
         wx_id = ids.next()
-        slicerpop.Append(wx_id, '&Save Image')
+        slicerpop.Append(wx_id, '&Save Image', 'Save image as png')
         wx.EVT_MENU(self, wx_id, self.onSaveImage)
 
         wx_id = ids.next()
@@ -319,9 +319,7 @@ class ModelPanel2D(ModelPanel1D):
             item_list = self.parent.get_current_context_menu(self)
             if (not item_list == None) and (not len(item_list) == 0) and\
                 self.data2D.name.split(" ")[0] != 'Residuals':
-                # The line above; Not for trunk
-                # Note: reusing menu ids for the sub-menus.  See Plotter1D.
-                for item, wx_id in zip(item_list, self._menu_ids):
+                for item, wx_id in zip(item_list, [ids.next() for i in range(len(item_list))]):
                     try:
                         slicerpop.Append(wx_id, item[0], item[1])
                         wx.EVT_MENU(self, wx_id, item[2])

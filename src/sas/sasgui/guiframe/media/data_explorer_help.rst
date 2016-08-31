@@ -19,7 +19,7 @@ Under *View* in the menu bar, *Data Explorer* can be toggled between Show and
 Hide by clicking *Show/Hide Data Explorer*.
 
 *NOTE! When* Data Explorer *is hidden, all data loaded will be sent directly 
-to the current active analysis perspective, if possible. When* Data Explorer *is
+to the current active analysis, if possible. When* Data Explorer *is
 shown, data go first to the* Data Explorer.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
@@ -115,9 +115,9 @@ Sending data to applications
 ----------------------------
 
 Click on the *Send To* button to send the currently selected data to one of the
-perspectives (for *Fitting*, *P(r) Inversion*, or *Invariant* calculation).
+available types of analysis (*Fitting*, *P(r) Inversion*, or *Invariant* calculation).
  
-The *Single*/*Batch* mode radio buttons only apply to the *Fitting* perspective.
+The *Single*/*Batch* mode radio buttons only apply to *Fitting*.
 
 *Batch mode* provides serial (batch) fitting with one model function, that is, 
 fitting one data set followed by another. If several data sets need to be 

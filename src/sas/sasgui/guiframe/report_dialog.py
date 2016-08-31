@@ -14,7 +14,8 @@ if sys.platform == "win32":
     PANEL_HEIGHT = 700
     FONT_VARIANT = 0
     ISPDF = True
-elif sys.platform == "darwin":
+# For OSX and everything else
+else:
     _STATICBOX_WIDTH = 480
     PANEL_WIDTH = 530
     PANEL_HEIGHT = 700
