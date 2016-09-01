@@ -61,6 +61,7 @@ class Reader(XMLreader):
     cansas_defaults = None
     type_name = "canSAS"
     invalid = True
+    frm = ""
     ## Log messages and errors
     logging = None
     errors = set()
@@ -138,7 +139,6 @@ class Reader(XMLreader):
                     for entry in entry_list:
                         # Create a new DataInfo object for every <SASentry>
 
-
                         # Set the file name and then parse the entry.
                         self.current_datainfo.filename = basename + extension
                         self.current_datainfo.meta_data["loader"] = "CanSAS XML 1D"
@@ -182,7 +182,7 @@ class Reader(XMLreader):
         # Return a list of parsed entries that dataloader can manage
         return self.output
 
-    def _parse_entry(self, dom):
+    def _parse_entry(self, dom, recurse=False):
         """
         Parse a SASEntry - new recursive method for parsing the dom of
             the CanSAS data format. This will allow multiple data files
@@ -191,8 +191,7 @@ class Reader(XMLreader):
         :param dom: dom object with a namespace base of names
         """
 
-        frm = inspect.stack()[1]
-        if not self._is_call_local(frm):
+        if not self._is_call_local() and not recurse:
             self.reset_state()
             self.add_data_set()
             self.names.append("SASentry")
@@ -200,8 +199,6 @@ class Reader(XMLreader):
         self._check_for_empty_data()
         self.base_ns = "{0}{1}{2}".format("{", \
                             CANSAS_NS.get(self.cansas_version).get("ns"), "}")
-        tagname = ''
-        tagname_original = ''
 
         # Go through each child in the parent element
         for node in dom:
@@ -224,7 +221,7 @@ class Reader(XMLreader):
                 if tagname == 'SASdata':
                     self._initialize_new_data_set()
                 ## Recursion step to access data within the group
-                self._parse_entry(node)
+                self._parse_entry(node, True)
                 if tagname == "SASsample":
                     self.current_datainfo.sample.name = name
                 elif tagname == "beam_size":
@@ -436,7 +433,8 @@ class Reader(XMLreader):
             if len(self.names) > 1:
                 length = len(self.names) - 1
             self.parent_class = self.names[length]
-        if not self._is_call_local(frm):
+        if not self._is_call_local() and not recurse:
+            self.frm = ""
             self.add_data_set()
             empty = None
             if self.output[0].dx is not None:
@@ -447,14 +445,14 @@ class Reader(XMLreader):
             return self.output[0], empty
 
 
-    def _is_call_local(self, frm=""):
+    def _is_call_local(self):
         """
 
-        :return:
         """
-        if frm == "":
-            frm = inspect.stack()[1]
-        mod_name = frm[1].replace("\\", "/").replace(".pyc", "")
+        if self.frm == "":
+            inter = inspect.stack()
+            self.frm = inter[2]
+        mod_name = self.frm[1].replace("\\", "/").replace(".pyc", "")
         mod_name = mod_name.replace(".py", "")
         mod = mod_name.split("sas/")
         mod_name = mod[1]
@@ -835,8 +833,8 @@ class Reader(XMLreader):
         #      the data we just wrote
         # If the calling function was not the cansas reader, return a minidom
         #      object rather than an lxml object.
-        frm = inspect.stack()[1]
-        doc, entry_node = self._check_origin(entry_node, doc, frm)
+        self.frm = inspect.stack()[1]
+        doc, entry_node = self._check_origin(entry_node, doc)
         return doc, entry_node
 
     def write_node(self, parent, name, value, attr=None):
@@ -1231,7 +1229,7 @@ class Reader(XMLreader):
                 self.write_text(node, item)
                 self.append(node, entry_node)
 
-    def _check_origin(self, entry_node, doc, frm):
+    def _check_origin(self, entry_node, doc):
         """
         Return the document, and the SASentry node associated with
         the data we just wrote.
@@ -1241,9 +1239,9 @@ class Reader(XMLreader):
         :param entry_node: lxml node ElementTree object to be appended to
         :param doc: entire xml tree
         """
-        if not frm:
-            frm = inspect.stack()[1]
-        mod_name = frm[1].replace("\\", "/").replace(".pyc", "")
+        if not self.frm:
+            self.frm = inspect.stack()[1]
+        mod_name = self.frm[1].replace("\\", "/").replace(".pyc", "")
         mod_name = mod_name.replace(".py", "")
         mod = mod_name.split("sas/")
         mod_name = mod[1]

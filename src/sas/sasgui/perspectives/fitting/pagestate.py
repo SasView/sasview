@@ -1568,7 +1568,10 @@ class Reader(CansasReader):
                         state.data.is_data = state.is_data
                     if output[ind].run_name is not None\
                         and len(output[ind].run_name) != 0:
-                        name = output[ind].run_name
+                        if isinstance(output[ind].run_name, dict):
+                            name = output[ind].run_name.keys()[0]
+                        else:
+                            name = output[ind].run_name
                     else:
                         name = original_fname
                     state.data.group_id = name
