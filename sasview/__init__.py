@@ -5,7 +5,7 @@ try:
     import subprocess
     import os
     FNULL = open(os.devnull, 'w')
-    git_revision = subprocess.check_output(['git describe --tags'],
+    git_revision = subprocess.check_output(['git describe', '--tags'],
     #git_revision = subprocess.check_output(['pwd'],
                     stderr=FNULL,
                     shell=True)
