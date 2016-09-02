@@ -4,8 +4,13 @@ try:
     import logging
     import subprocess
     import os
+    import platform
     FNULL = open(os.devnull, 'w')
-    git_revision = subprocess.check_output(['git describe', '--tags'],
+    if platform.system() == "Windows":
+        args = ['git', 'describe', '--tags']
+    else:
+        args = ['git describe --tags']
+    git_revision = subprocess.check_output(args,
     #git_revision = subprocess.check_output(['pwd'],
                     stderr=FNULL,
                     shell=True)
