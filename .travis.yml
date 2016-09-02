@@ -23,7 +23,8 @@ script:
   - cd $WORKSPACE
   - ls -ltr
   - if [ ! -d "utils" ]; then mkdir utils; fi
-  - /bin/sh -xe sasview/build_tools/jenkins_linux_build.sh
+  - make -f sasview/build_tools/Makefile_RHEL7 sasmodels/core
+#  - /bin/sh -xe sasview/build_tools/jenkins_linux_build.sh
 #  - /bin/sh -xe sasview/build_tools/jenkins_linux_test.sh
   - export LC_ALL=en_US.UTF-8
   - export LANG=en_US.UTF-8
