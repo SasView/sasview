@@ -18,9 +18,10 @@ install:
 script:
   - export WORKSPACE=/home/travis/build/SasView/
   - cd $WORKSPACE
-  - git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git SasView/sasmodels
+  - git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git sasmodels
   - export PYTHONPATH=$WORKSPACE/sasview-install:$WORKSPACE/utils:$PYTHONPATH
   - cd $WORKSPACE
+  - ls -ltr
   - if [ ! -d "utils" ]; then mkdir utils; fi
   - /bin/sh -xe sasview/build_tools/jenkins_linux_build.sh
 #  - /bin/sh -xe sasview/build_tools/jenkins_linux_test.sh
