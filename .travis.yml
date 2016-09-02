@@ -25,6 +25,6 @@ script:
 #  - /bin/sh -xe sasview/build_tools/jenkins_linux_test.sh
   - export LC_ALL=en_US.UTF-8
   - export LANG=en_US.UTF-8
-  - python setup.py docs; echo 0
-  - python setup.py bdist_egg --skip-build
+#  - python setup.py docs; echo 0
+#  - python setup.py bdist_egg --skip-build
 
