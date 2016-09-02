@@ -11,7 +11,6 @@ try:
     else:
         args = ['git describe --tags']
     git_revision = subprocess.check_output(args,
-    #git_revision = subprocess.check_output(['pwd'],
                     stderr=FNULL,
                     shell=True)
     __build__ = str(git_revision).strip()
