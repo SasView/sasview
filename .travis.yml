@@ -11,18 +11,28 @@ branches:
 virtualenv:
   system_site_packages: true
 before_install:
-  - 'if [ $TRAVIS_PYTHON_VERSION == "2.7" ]; then sudo apt-get update;sudo apt-get install python-numpy python-scipy python-matplotlib; fi'
+  - 'if [ $TRAVIS_PYTHON_VERSION == "2.7" ]; then sudo apt-get update;sudo apt-get install python-numpy python-scipy python-matplotlib libhdf5-serial-dev python-h5py fglrx opencl-headers python-pyopencl; fi'
 
 install:
   - pip install -r build_tools/requirements.txt
+
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3 # give xvfb some time to start
+  
 script:
-  - export WORKSPACE=/home/travis/build/SasView/sasview/
+  - export WORKSPACE=/home/travis/build/SasView/
+  - cd $WORKSPACE
+  - git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git sasmodels
   - export PYTHONPATH=$WORKSPACE/sasview-install:$WORKSPACE/utils:$PYTHONPATH
+  - cd $WORKSPACE
+  - ls -ltr
   - if [ ! -d "utils" ]; then mkdir utils; fi
-  - /bin/sh -xe build_tools/jenkins_linux_build.sh
-  - /bin/sh -xe build_tools/jenkins_linux_test.sh
+  - /bin/sh -xe sasview/build_tools/travis_build.sh
+#  - /bin/sh -xe sasview/build_tools/jenkins_linux_test.sh
   - export LC_ALL=en_US.UTF-8
   - export LANG=en_US.UTF-8
-  - python setup.py docs; echo 0
-  - python setup.py bdist_egg --skip-build
+#  - python setup.py docs; echo 0
+#  - python setup.py bdist_egg --skip-build
 

@@ -829,10 +829,15 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             :param value: value of the property
         """
         try:
-            attr = getattr(self, key)
+            if key in ['compute_num', 'file', 'is_time_machine', 'state_num']:
+                return
+            else:
+                attr = getattr(self, key)
             if attr.__class__.__name__ == "StaticText":
                 return
-            if type(value) is not bool:
+            if value in ["True", "False", True, False]:
+                value = bool(value)
+            else:
                 value = str(value)
             attr.SetValue(value)
         except:

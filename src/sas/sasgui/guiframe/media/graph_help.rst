@@ -41,8 +41,9 @@ minimised window.
 To delete a plot, click the *Close* (x) icon in the top-right corner of the
 plot window.
 
-*NOTE! If a residuals graph (when fitting data) is hidden, it will not show up
-after computation.*
+.. note:: 
+    *If a residuals graph (when fitting data) is hidden, it will not show up
+    after computation.*
 
 Dragging a plot
 ^^^^^^^^^^^^^^^
@@ -66,6 +67,10 @@ To disable zoom mode, unselect the *Zoom* button on the toolbar.
 
 After zooming in on a a region, the *left arrow* or *right arrow* buttons on
 the toolbar will switch between recent views.
+
+The axis range can also be specified manually.  To do so go to the *Graph Menu*
+(see Invoking_the_graph_menu_ for further details), choose the *Set Graph Range*
+option and enter the limits in the pop box.
 
 *NOTE! If a wheel mouse is available scrolling the wheel will zoom in/out
 on the current plot (changing both axes). Alternatively, point at the numbers
@@ -115,16 +120,24 @@ the *Reset* (home) icon in the toolbar at the bottom of the plot.
 Modifying the graph
 ^^^^^^^^^^^^^^^^^^^
 
-From the *Graph Menu* (see Invoking_the_graph_menu_) it is also possible to
-make some custom modifications to plots, including:
+It is possible to make custom modifications to plots including:
 
 *  changing the plot window title
-*  changing the axis legend locations
-*  changing the axis legend label text
-*  changing the axis legend label units
-*  changing the axis legend label font & font colour
+*  changing the default legend location and toggling it on/off
+*  changing the axis label text
+*  changing the axis label units
+*  changing the axis label font & font colour
 *  adding/removing a text string
 *  adding a grid overlay
+
+The legend and text strings can be drag and dropped around the plot
+
+These options are accessed through the *Graph Menu* (see Invoking_the_graph_menu_)
+and selecting *Modify Graph Appearance* (for axis labels, grid overlay and
+legend position) or *Add Text* to add textual annotations, selecting font, color,
+style and size. *Remove Text* will remove the last annotation added. To change
+the legend. *Window Title* allows a custom title to be entered instead of Graph
+x. 
 
 Changing scales
 ^^^^^^^^^^^^^^^
@@ -233,7 +246,8 @@ Removing data from the plot
 In the *Dataset Menu* (see Invoking_the_dataset_menu_), select *Remove*. The
 selected data will be removed from the plot.
 
-*NOTE! This action cannot be undone.*
+.. note::
+    The Remove data set action cannot be undone.
 
 Show-Hide error bars
 ^^^^^^^^^^^^^^^^^^^^
@@ -247,7 +261,8 @@ Modify plot properties
 
 In the *Dataset Menu* (see Invoking_the_dataset_menu_), select *Modify Plot
 Property* to change the size, color, or shape of the displayed marker for the
-chosen dataset, or to change the dataset label that appears on the plot.
+chosen dataset, or to change the dataset label that appears in the plot legend
+box.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -291,8 +306,9 @@ define a region or select the number of points to plot (*nbins*).
 A separate plot window will also have appeared, displaying the requested
 average.
 
-*NOTE! The displayed average only updates when input focus is moved back to
-that window; ie, when the mouse pointer is moved onto that plot.*
+.. note::
+    The displayed average only updates when input focus is moved back to
+    that window; ie, when the mouse pointer is moved onto that plot.
 
 Selecting *Box Sum* automatically brings up the 'Slicer Parameters' dialog in
 order to display the average numerically, rather than graphically.
@@ -358,4 +374,4 @@ is, the central value of each bin on the x-axis.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 01May2015
+.. note::  This help document was last modified by Paul Butler, 05 September, 2016
