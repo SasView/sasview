@@ -17,4 +17,5 @@ Fitting Documentation
    Polarisation/Magnetic Scattering <mag_help>
 
    Information on the SasView Optimisers <optimizer.rst>
-   
+
+   Writing a Plugin <plugin.rst>
