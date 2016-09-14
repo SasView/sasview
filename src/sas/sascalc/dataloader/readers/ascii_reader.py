@@ -170,6 +170,8 @@ class Reader:
                         pass
 
                 input_f.close()
+                if not is_data:
+                    return None
                 # Sanity check
                 if has_error_dy == True and not len(ty) == len(tdy):
                     msg = "ascii_reader: y and dy have different length"
