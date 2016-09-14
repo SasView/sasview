@@ -76,6 +76,23 @@ class XMLreader():
             self.xmldoc = None
             self.xmlroot = None
 
+    def set_xml_string(self, tag_soup):
+        """
+        Set an XML string as the working XML.
+
+        :param tag_soup: XML formatted string
+        """
+        try:
+            self.xml = tag_soup
+            self.xmldoc = tag_soup
+            self.xmlroot = etree.fromstring(tag_soup)
+        except etree.XMLSyntaxError as xml_error:
+            logging.info(xml_error)
+        except Exception:
+            self.xml = None
+            self.xmldoc = None
+            self.xmlroot = None
+
     def set_schema(self, schema):
         """
         Set the schema file and parse

@@ -44,7 +44,7 @@ class Reader(XMLreader):
     ## List of files to return
     output = None
 
-    def __init__(self):
+    def reset_state(self):
         self.current_dataset = Data1D(np.empty(0), np.empty(0),
                                             np.empty(0), np.empty(0))
         self.datasets = []
@@ -71,7 +71,7 @@ class Reader(XMLreader):
             """
 
         ## Reinitialize the class when loading a new data file to reset all class variables
-        self.__init__()
+        self.reset_state()
         ## Check that the file exists
         if os.path.isfile(filename):
             basename = os.path.basename(filename)
@@ -83,9 +83,6 @@ class Reader(XMLreader):
                 buff = input_f.read()
                 self.raw_data = buff.splitlines()
                 self.read_data()
-                xml_intermediate = self.raw_data[self.upper:]
-                xml = ''.join(xml_intermediate)
-                self.set_xml_file(xml)
         return self.output
 
     def read_data(self):
@@ -99,20 +96,83 @@ class Reader(XMLreader):
         self.data_points = int(line3[0])
         self.lower = 5
         self.upper = self.lower + self.data_points
-        self.detector.distance = float(line4[1])
+        self.source.radiation = 'x-ray'
+        normal = float(line4[3])
         self.current_dataset.source.radiation = "x-ray"
         self.current_dataset.source.name = "Anton Paar SAXSess Instrument"
         self.current_dataset.source.wavelength = float(line4[4])
-        normal = line4[3]
+        xvals = []
+        yvals = []
+        dyvals = []
         for i in range(self.lower, self.upper):
+            index = i - self.lower
             data = self.raw_data[i].split()
-            x_val = [float(data[0])]
-            y_val = [float(data[1])]
-            dy_val = [float(data[2])]
-            self.current_dataset.x = np.append(self.current_dataset.x, x_val)
-            self.current_dataset.y = np.append(self.current_dataset.y, y_val)
-            self.current_dataset.dy = np.append(self.current_dataset.dy, dy_val)
-        self.current_dataset.xaxis("Q (%s)" % (q_unit), q_unit)
-        self.current_dataset.yaxis("Intensity (%s)" % (i_unit), i_unit)
-        self.current_dataset.detector.append(self.detector)
+            xvals.insert(index, normal * float(data[0]))
+            yvals.insert(index, normal * float(data[1]))
+            dyvals.insert(index, normal * float(data[2]))
+        self.current_dataset.x = np.append(self.current_dataset.x, xvals)
+        self.current_dataset.y = np.append(self.current_dataset.y, yvals)
+        self.current_dataset.dy = np.append(self.current_dataset.dy, dyvals)
+        if self.data_points != self.current_dataset.x.size:
+            self.errors.add("Not all data was loaded properly.")
+        if self.current_dataset.dx.size != self.current_dataset.x.size:
+            dxvals = np.zeros(self.current_dataset.x.size)
+            self.current_dataset.dx = dxvals
+        if self.current_dataset.x.size != self.current_dataset.y.size:
+            self.errors.add("The x and y data sets are not the same size.")
+        if self.current_dataset.y.size != self.current_dataset.dy.size:
+            self.errors.add("The y and dy datasets are not the same size.")
+        self.current_dataset.errors = self.errors
+        self.current_dataset.xaxis("Q", q_unit)
+        self.current_dataset.yaxis("Intensity", i_unit)
+        xml_intermediate = self.raw_data[self.upper:]
+        xml = ''.join(xml_intermediate)
+        self.set_xml_string(xml)
+        dom = self.xmlroot.xpath('/fileinfo')
+        self._parse_child(dom)
         self.output.append(self.current_dataset)
+
+    def _parse_child(self, dom, parent=''):
+        """
+        Recursive method for stepping through the embedded XML
+        :param dom: XML node with or without children
+        """
+        for node in dom:
+            tagname = node.tag
+            value = node.text
+            attr = node.attrib
+            key = attr.get("key", '')
+            if len(node.getchildren()) > 1:
+                self._parse_child(node, key)
+                if key == "SampleDetector":
+                    self.current_dataset.detector.append(self.detector)
+                    self.detector = Detector()
+            else:
+                if key == "value":
+                    if parent == "Wavelength":
+                        self.current_dataset.source.wavelength = value
+                    elif parent == "SampleDetector":
+                        self.detector.distance = value
+                    elif parent == "Temperature":
+                        self.current_dataset.sample.temperature = value
+                    elif parent == "CounterSlitLength":
+                        self.detector.slit_length = value
+                elif key == "unit":
+                    value = value.replace("_", "")
+                    if parent == "Wavelength":
+                        self.current_dataset.source.wavelength_unit = value
+                    elif parent == "SampleDetector":
+                        self.detector.distance_unit = value
+                    elif parent == "X":
+                        self.current_dataset.xaxis(self.current_dataset._xaxis, value)
+                    elif parent == "Y":
+                        self.current_dataset.yaxis(self.current_dataset._yaxis, value)
+                    elif parent == "Temperature":
+                        self.current_dataset.sample.temperature_unit = value
+                    elif parent == "CounterSlitLength":
+                        self.detector.slit_length_unit = value
+                elif key == "quantity":
+                    if parent == "X":
+                        self.current_dataset.xaxis(value, self.current_dataset._xunit)
+                    elif parent == "Y":
+                        self.current_dataset.yaxis(value, self.current_dataset._yunit)
