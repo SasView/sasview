@@ -31,25 +31,25 @@ SasView has three ways of writing models:
 Many models are available for download from the
 `model marketplace <http://marketplace.sasview.org/>`_.
 
-The builtin modules are available in the *sasmodels-data/models* subdirectory
-of the sasview distribution.  On Windows, this will be something like
-*C:\Program Files (x86)\SasView\models*.  On MacOSX, these will be within
+The built-in modules are available in the *sasmodels-data\\models* subdirectory
+of the sasview installation folder.  On Windows, this will be something like
+*C:\\Program Files (x86)\\SasView\\sasmodels-data.  On MacOSX, these will be within
 the application bundle as
 */Applications/SasView 4.0.app/Contents/Resources/sasmodels-data/models*.
 
 Create New Model Files
 ^^^^^^^^^^^^^^^^^^^^^^
 
-In the *~/.sasview/plugin_models* directory, copy the appropriate files
+In the *~\\.sasview\\plugin_models* directory, copy the appropriate files
 (using the examples above as templates) to mymodel.py (and mymodel.c, etc)
 as required, where "mymodel" is the name for the model you are creating.
 
 *Please follow these naming rules:*
 
 - No capitalization and thus no CamelCase.
-- If necessary use underscore to separate (i.e. barbell not BarBell or
+- If necessary use underscore to separate words (i.e. barbell not BarBell or
   broad_peak not BroadPeak)
-- Don't include “model” in the name (i.e. barbell not BarBellModel)
+- Do not include “model” in the name (i.e. barbell not BarBellModel)
 
 
 Edit New Model Files
@@ -84,6 +84,7 @@ The model interface definition is in the .py file.  This file contains:
 - a **long description**:
    - this is ReStructuredText enclosed between the r""" and """ delimiters
      at the top of the *.py* file
+   - what you write here is abstracted into the help documentation
 
 - a **definition** of the model:
    - as part of the **long description**
@@ -106,6 +107,9 @@ The model interface definition is in the .py file.  This file contains:
    - as part of the **long description**
    - the *.py* file should also contain a comment identifying *who*
      converted/created the model file
+
+Models that do not conform to these requirements will *never* be incorporated 
+into the built-in library.
 
 More complete documentation for the sasmodels package can be found at
 `<http://www.sasview.org/sasmodels>`_. In particular,
