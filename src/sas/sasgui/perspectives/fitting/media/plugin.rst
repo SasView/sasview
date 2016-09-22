@@ -1,22 +1,19 @@
 .. _Writing_a_Plugin:
 
-Writing a Plugin
-================
+Writing a Plugin Model
+======================
 
-Users can write their own models and save it to the the SasView
+Overview
+^^^^^^^^
+
+You can write your own model and save it to the the SasView
 *plugin_models* folder
 
-  *C:\\Users\\[username]\\.sasview\\plugin_models* - (on Windows)
+  *C:\\Users\\[username]\\.sasview\\plugin_models* (on Windows)
 
 The next time SasView is started it will compile the plugin and add
-it to the list of *Customized Models*.  It is recommended that an
+it to the list of *Customized Models* in a FitPage.  It is recommended that an
 existing model be used as a template.
-
-This page was originally written by our MOST experienced developers,
-but has subsequently been edited by our LEAST experienced developer who felt
-some instructions could have been clearer, and learnt one or two things that
-were missing altogether! But they succeeded in converting a model that passed
-testing, so there is no reason why you should not be able to do the same.
 
 SasView has three ways of writing models:
 
@@ -28,14 +25,15 @@ SasView has three ways of writing models:
   `cylinder.py <https://github.com/SasView/sasmodels/blob/master/sasmodels/models/cylinder.py>`_,
   `cylinder.c <https://github.com/SasView/sasmodels/blob/master/sasmodels/models/cylinder.c>`_
 
-Many models are available for download from the
-`model marketplace <http://marketplace.sasview.org/>`_.
-
 The built-in modules are available in the *sasmodels-data\\models* subdirectory
-of the sasview installation folder.  On Windows, this will be something like
-*C:\\Program Files (x86)\\SasView\\sasmodels-data.  On MacOSX, these will be within
+of your SasView installation folder.  On Windows, this will be something like
+*C:\\Program Files (x86)\\SasView\\sasmodels-data\\models*.  On Mac OSX, these will be within
 the application bundle as
 */Applications/SasView 4.0.app/Contents/Resources/sasmodels-data/models*.
+
+Other models are available for download from our
+`Model Marketplace <http://marketplace.sasview.org/>`_. You can contribute your own models to the 
+Marketplace aswell.
 
 Create New Model Files
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -46,7 +44,7 @@ as required, where "mymodel" is the name for the model you are creating.
 
 *Please follow these naming rules:*
 
-- No capitalization and thus no CamelCase.
+- No capitalization and thus no CamelCase
 - If necessary use underscore to separate words (i.e. barbell not BarBell or
   broad_peak not BroadPeak)
 - Do not include “model” in the name (i.e. barbell not BarBellModel)
@@ -54,6 +52,9 @@ as required, where "mymodel" is the name for the model you are creating.
 
 Edit New Model Files
 ^^^^^^^^^^^^^^^^^^^^
+
+Model Contents
+..............
 
 The model interface definition is in the .py file.  This file contains:
 
@@ -64,19 +65,19 @@ The model interface definition is in the .py file.  This file contains:
     - all in *lower* case
     - without spaces (use underscores to separate words instead)
     - without any capitalization or CamelCase
-    - without incorporating the word 'model'
+    - without incorporating the word "model"
     - examples: *barbell* **not** *BarBell*; *broad_peak* **not** *BroadPeak*; 
       *barbell* **not** *BarBellModel*
 
 - a **model title**:
    - this is the **title** string in the *.py* file
    - this is a one or two line description of the model, which will appear
-     at the start of the model documentation and as a tooltip in the GUI
+     at the start of the model documentation and as a tooltip in the SasView GUI
 
 - a **short discription**:
    - this is the **description** string in the *.py* file
    - this is a medium length description which appears when you click
-     *Description* on the model fit page
+     *Description* on the model FitPage
 
 - a **parameter table**:
    - this will be auto-generated from the *parameters* in the *.py* file
@@ -84,7 +85,9 @@ The model interface definition is in the .py file.  This file contains:
 - a **long description**:
    - this is ReStructuredText enclosed between the r""" and """ delimiters
      at the top of the *.py* file
-   - what you write here is abstracted into the help documentation
+   - what you write here is abstracted into the SasView help documentation
+   - this is what other users will refer to when they want to know what your model does; 
+     so please be helpful!
 
 - a **definition** of the model:
    - as part of the **long description**
@@ -97,7 +100,7 @@ The model interface definition is in the .py file.  This file contains:
    - explaining how the symbols in the formula map to the model parameters
 
 - a **plot** of the function, with a **figure caption**:
-   - this is automatically generated from the default parameters
+   - this is automatically generated from your default parameters
 
 - at least one **reference**:
    - as part of the **long description**
@@ -173,12 +176,12 @@ for a quick guide to the documentation layout commands, or the
 complete details.
 
 The model should include a **formula** written using LaTeX markup.
-The above example uses the *math* command to make a displayed equation.  You
+The example above uses the *math* command to make a displayed equation.  You
 can also use *\$formula\$* for an inline formula. This is handy for defining
 the relationship between the model parameters and formula variables, such
 as the phrase "\$r\$ is the radius" used above.  The live demo MathJax
 page `<http://www.mathjax.org/>`_ is handy for checking that the equations
-will look like you expect.
+will look like you intend.
 
 Math layout uses the `amsmath <http://www.ams.org/publications/authors/tex/amslatex>`_
 package for aligning equations (see amsldoc.pdf on that page for complete documentation).
@@ -210,7 +213,9 @@ Model Definition
 Following the documentation string, there are a series of definitions::
 
     name = "sphere"  # optional: defaults to the filename without .py
+
     title = "Spheres with uniform scattering length density"
+
     description = """\
     P(q)=(scale/V)*[3V(sld-sld_solvent)*(sin(qr)-qr cos(qr))
                     /(qr)^3]^2 + background
@@ -219,9 +224,13 @@ Following the documentation string, there are a series of definitions::
         sld: the SLD of the sphere
         sld_solvent: the SLD of the solvent
     """
+
     category = "shape:sphere"
+
     single = True   # optional: defaults to True
+
     opencl = False  # optional: defaults to False
+
     structure_factor = False  # optional: defaults to False
 
 **name = "mymodel"** defines the name of the model that is shown to the user.
@@ -232,19 +241,19 @@ model file as the name of the model, so the default may be changed.
 
 **title = "short description"** is short description of the model which
 is included after the model name in the automatically generated documentation.
-The title can also be used for a tooltip, for example.
+The title can also be used for a tooltip.
 
 **description = """doc string"""** is a longer description of the model. It
-shows up when you press the "Description" button of the SasView fit page.
+shows up when you press the "Description" button of the SasView FitPage.
 It should give a brief description of the equation and the parameters
 without the need to read the entire model documentation. The triple quotes
 allow you to write the description over multiple lines. Keep the lines
 short since the GUI will wrap each one separately if they are too long.
-**Make sure the parameter names in the description match the model definition.**
+**Make sure the parameter names in the description match the model definition!**
 
 **category = "shape:sphere"** defines where the model will appear in the
 model documentation.  In this example, the model will appear alphabetically
-in the list of spheroid models.
+in the list of spheroid models in the *Shape* category.
 
 **single = True** indicates that the model can be run using single
 precision floating point values.  Set it to False if the numerical
@@ -278,25 +287,24 @@ Next comes the parameter table.  For example::
         ["sld_solvent", "1e-6/Ang^2",  6, [-inf, inf], "sld",    "Solvent scattering length density"],
         ["radius",      "Ang",        50, [0, inf],    "volume", "Sphere radius"],
     ]
-    # pylint: disable=bad-whitespace, line-too-long
 
 **parameters = [["name", "units", default, [min,max], "type", "tooltip"],...]**
-defines the parameters form the model.
+defines the parameters that form the model.
 
-- **the order of the parameters in the definition will be the order of
-  the parameters in the user interface and the order of the parameters
-  in Iq(), Iqxy() and form_volume().**
+**Note: The order of the parameters in the definition will be the order of the 
+parameters in the user interface and the order of the parameters in Iq(), 
+Iqxy() and form_volume(). And** *scale* **and** *background* **parameters are 
+implicit to all models, so they do not need to be included in the parameter table.**
 
-- **scale and background parameters are implicit to all models, so
-  they do not need to be included in the parameter table**
-
-- **"name"** is the name of the parameter shown on the fit screen
+- **"name"** is the name of the parameter shown on the FitPage.
 
   - parameter names should follow the mathematical convention; e.g.,
-    *radius_core* not *core_radius*, or *sld_solvent* not *solvent_sld*
+    *radius_core* not *core_radius*, or *sld_solvent* not *solvent_sld*.
+
   - model parameter names should be consistent between different models,
     so *sld_solvent*, for example, should have exactly the same name
-    in every model
+    in every model.
+
   - to see all the parameter names currently in use, type the following in the
     python shell/editor under the Tools menu::
 
@@ -304,15 +312,18 @@ defines the parameters form the model.
        sasmodels.list_pars.list_pars()
 
     *re-use* as many as possible!!!
+
   - use "name[n]" for multiplicity parameters, where *n* is the name of
     the parameter defining the number of shells/layers/segments, etc.
 
 - **"units"** are displayed along with the parameter name
 
-  - every parameter should have units; use "None" if there are no units
+  - every parameter should have units; use "None" if there are no units.
+
   - **sld's should be given in units of 1e-6/Ang^2, and not simply
     1/Ang^2 to be consistent with the builtin models.  Adjust your formulas
     appropriately.**
+
   - fancy units markup is available for some units, including::
 
         Ang, 1/Ang, 1/Ang^2, 1e-6/Ang^2, degrees, 1/cm, Ang/cm, g/cm^3, mg/m^2
@@ -325,27 +336,30 @@ defines the parameters form the model.
     - units should be properly formatted using sub-/super-scripts
       and using negative exponents instead of the / operator, though
       the unit name should use the / operator for consistency.
-    - post a message to the sasview developers list with the changes
+    - please post a message to the SasView developers mailing list with your changes.
 
-- **default** is the initial value for the parameter
+- **default** is the initial value for the parameter.
 
   - **the parameter default values are used to auto-generate a plot of
     the model function in the documentation.**
 
-- **[min, max]** are the lower and upper limits on the parameter
+- **[min, max]** are the lower and upper limits on the parameter.
 
-  - lower and upper limits can be any number, or -inf or inf.
+  - lower and upper limits can be any number, or *-inf* or *inf*.
+
   - the limits will show up as the default limits for the fit making it easy,
     for example, to force the radius to always be greater than zero.
 
-- **"type"** can be one of: "", "sld", "volume", or "orientation"
+- **"type"** can be one of: "", "sld", "volume", or "orientation".
 
   - "sld" parameters can have magnetic moments when fitting magnetic models;
     depending on the spin polarization of the beam and the $q$ value being
     examined, the effective sld for that material will be used to compute the
-    scattered intensity
+    scattered intensity.
+
   - "volume" parameters are passed to Iq(), Iqxy(), and form_volume(), and
     have polydispersity loops generated automatically.
+
   - "orientation" parameters are only passed to Iqxy(), and have angular
     dispersion.
 
@@ -383,7 +397,7 @@ arc length for the equatorial angle $\phi$ with increasing latitude.
 Python Models
 .............
 
-For pure python models, define the Iq funtion::
+For pure python models, define the *Iq* function::
 
       import numpy as np
       from numpy import cos, sin, ...
@@ -394,10 +408,10 @@ For pure python models, define the Iq funtion::
 
 The parameters *par1, par2, ...* are the list of non-orientation parameters
 to the model in the order that they appear in the parameter table.
-**Note that the autogenerated model file uses *x* rather than *q*.**
+**Note that the autogenerated model file uses** *x* **rather than** *q*.
 
 The *.py* file should import trigonometric and exponential functions from
-numpy rather that from math.  This lets us evaluate the model for the whole
+numpy rather than from math.  This lets us evaluate the model for the whole
 range of $q$ values at once rather than looping over each $q$ separately in
 python.  With $q$ as a vector, you cannot use if statements, but must instead
 do tricks like
@@ -433,13 +447,13 @@ then it will default to *Iqxy = Iq(sqrt(qx**2+qy**2), par1, par2, ...)*.
 Models should define *form_volume(par1, par2, ...)* where the parameter
 list includes the *volume* parameters in order.  This is used for a weighted
 volume normalization so that scattering is on an absolute scale.  If
-*form_volume* is not definded, then the default *form_volume = 1.0* will be
+*form_volume* is not defined, then the default *form_volume = 1.0* will be
 used.
 
 Embedded C Models
 .................
 
-Like pure python models, inline C models need define an *Iq* function::
+Like pure python models, inline C models need to define an *Iq* function::
 
     Iq = """
         return I(q, par1, par2, ...);
@@ -519,11 +533,12 @@ including::
 
 These functions have been tuned to be fast and numerically stable down
 to $q=0$ even in single precision.  In some cases they work around bugs
-which appear on some platforms but not others.
+which appear on some platforms but not others. So use them where needed!!!
 
 Models are defined using double precision declarations for the
 parameters and return values.  Declarations and constants will be converted
 to float or long double depending on the precision requested.
+
 **Floating point constants must include the decimal point.**  This allows us
 to convert values such as 1.0 (double precision) to 1.0f (single precision)
 so that expressions that use these values are not promoted to double precision
@@ -543,7 +558,7 @@ algorithms), use the following::
     #endif
 
 A value defined as SAS_DOUBLE will stay double precision; this should
-not be used since some graphics card don't support double precision.
+not be used since some graphics cards do not support double precision.
 
 
 External C Models
@@ -765,4 +780,3 @@ Finally
 Once compare and the unit test(s) pass properly and everything is done,
 consider adding your model to the
 `model marketplace <http://marketplace.sasview.org/>`_.
-
