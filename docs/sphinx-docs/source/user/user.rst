@@ -13,3 +13,5 @@ SasView User Documentation
    Tools <tools>
          
    Working with SasView <working>
+
+   Computations with GPU <gpu_computations>
