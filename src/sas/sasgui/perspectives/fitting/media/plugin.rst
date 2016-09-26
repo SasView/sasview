@@ -287,6 +287,7 @@ Next comes the parameter table.  For example::
         ["sld_solvent", "1e-6/Ang^2",  6, [-inf, inf], "sld",    "Solvent scattering length density"],
         ["radius",      "Ang",        50, [0, inf],    "volume", "Sphere radius"],
     ]
+    # pylint: enable=bad-whitespace, line-too-long
 
 **parameters = [["name", "units", default, [min,max], "type", "tooltip"],...]**
 defines the parameters that form the model.
@@ -576,12 +577,6 @@ automatically from the parameter table.
 Form Factors
 ............
 
-::
-
-    def ER(radius, thickness):
-        """Effective radius of a core-shell sphere."""
-        return radius + thickness
-
 Away from the dilute limit you can estimate scattering including
 particle-particle interactions using $I(q) = P(q)*S(q)$ where $P(q)$
 is the form factor and $S(q)$ is the structure factor.  The simplest
@@ -590,7 +585,13 @@ uses the effective radius of the form factor as an input to the structure
 factor model.  The effective radius is the average radius of the
 form averaged over all the polydispersity values.
 
-Consider the *core_shell_sphere*, which has a simple effective radius
+::
+
+    def ER(radius, thickness):
+        """Effective radius of a core-shell sphere."""
+        return radius + thickness
+
+Now consider the *core_shell_sphere*, which has a simple effective radius
 equal to the radius of the core plus the thickness of the shell, as
 shown above. Given polydispersity over *(r1, r2, ..., rm)* in radius and
 *(t1, t2, ..., tn)* in thickness, *ER* is called with a mesh
@@ -615,9 +616,9 @@ the structure factor.  The *VR* function returns the volume of
 the whole sphere and the volume of the shell. Like *ER*, there is
 one return value for each point in the mesh grid.
 
-*NOTE: we may be removing or modifying this feature soon.*  As of this
-writing, core-shell sphere returns (1., 1.) for *VR*, giving a volume
-ratio of 1.0.
+*NOTE: we may be removing or modifying this feature soon. As of the 
+time of writing, core-shell sphere returns (1., 1.) for VR, giving a volume
+ratio of 1.0.*
 
 Unit Tests
 ..........
@@ -659,12 +660,12 @@ Test Your New Model
 ^^^^^^^^^^^^^^^^^^^
 
 If you are editing your model from the SasView GUI, you can test it
-by selecting *Run -> Compile* from the *Model Editor* menu bar. An
+by selecting *Run > Compile* from the *Model Editor* menu bar. An
 *Info* box will appear with the results of the compilation and a
 check that the model runs.
 
 If the model compiles and runs, you can next run the unit tests that
-you have added using the **test=** values. Switch to the *Shell* tab
+you have added using the **test =** values. Switch to the *Shell* tab
 and type the following::
 
     from sasmodels.model_test import run_one
@@ -704,13 +705,13 @@ For example to run your model with a random set of parameters::
 
 For the random models,
 
-- sld will be in(-0.5,10.5),
-- angles (theta, phi, psi) will be in (-180,180),
-- angular dispersion will be in (0,45),
-- polydispersity will be in (0,1)
-- other values will be in (0, 2*v) where v is the value of the parameter in demo.
+- *sld* will be in the range (-0.5,10.5),
+- angles (*theta, phi, psi*) will be in the range (-180,180),
+- angular dispersion will be in the range (0,45),
+- polydispersity will be in the range (0,1)
+- other values will be in the range (0, 2\ *v*), where *v* is the value of the parameter in demo.
 
-Dispersion parameters n, sigma and type will be unchanged from demo so that
+Dispersion parameters *n*\, *sigma* and *type* will be unchanged from demo so that
 run times are predictable.
 
 If your model has 2D orientational calculation, then you should also
@@ -722,8 +723,8 @@ test with::
 Clean Lint
 ^^^^^^^^^^
 
-**NB: For now we are not providing pylint with SasView; unless you have a
-SasView development environment available, you can ignore this section.**
+**NB: For now we are not providing pylint with SasView; so unless you have a
+SasView development environment available, you can ignore this section!**
 
 Run the lint check with::
 
@@ -735,10 +736,10 @@ variable name *Rg* for example because $R_g$ is the right name for the model
 parameter then ignore the lint errors.  Also, ignore *missing-docstring*
 for standard model functions *Iq*, *Iqxy*, etc.
 
-We will have delinting sessions at the SasView code camps, where we can
+We will have delinting sessions at the SasView Code Camps, where we can
 decide on standards for model files, parameter names, etc.
 
-For now, you can tell pylint to ignore things.  For example, to align you
+For now, you can tell pylint to ignore things.  For example, to align your
 parameters in blocks::
 
     # pylint: disable=bad-whitespace,line-too-long
@@ -774,9 +775,11 @@ some tools to help with the inevitable syntax errors:
 - `MathJax <http://www.mathjax.org/>`_
 - `amsmath <http://www.ams.org/publications/authors/tex/amslatex>`_
 
+There is also a neat online WYSIWYG ReStructuredText editor at http://rst.ninjs.org\ .
+
 Finally
 ^^^^^^^
 
 Once compare and the unit test(s) pass properly and everything is done,
 consider adding your model to the
-`model marketplace <http://marketplace.sasview.org/>`_.
+`Model Marketplace <http://marketplace.sasview.org/>`_.
