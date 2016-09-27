@@ -16,9 +16,10 @@ import traceback
 from collections import defaultdict
 from wx.lib.scrolledpanel import ScrolledPanel
 
-import sasmodels.sasview_model
+from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
+
 from sas.sasgui.guiframe.panel_base import PanelBase
-from sas.sasgui.guiframe.utils import format_number, check_float, IdList
+from sas.sasgui.guiframe.utils import format_number, check_float, IdList, check_int
 from sas.sasgui.guiframe.events import PanelOnFocusEvent
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.events import AppendBookmarkEvent
@@ -625,7 +626,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                                       size=size_q)
         self.disp_help_bt.Bind(wx.EVT_BUTTON, self.on_pd_help_clicked,
                                id=self.disp_help_bt.GetId())
-        self.disp_help_bt.SetToolTipString("Helps for Polydispersion.")
+        self.disp_help_bt.SetToolTipString("Help for polydispersion.")
 
         self.Bind(wx.EVT_RADIOBUTTON, self._set_dipers_Param,
                   id=self.disable_disp.GetId())
@@ -1122,8 +1123,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                         self.disp_cb_dict[item].SetValue(\
                                                     state.disp_cb_dict[item])
                         # Create the dispersion objects
-                        from sas.models.dispersion_models import ArrayDispersion
-                        disp_model = ArrayDispersion()
+                        disp_model = POLYDISPERSITY_MODELS['array']()
                         if hasattr(state, "values") and \
                                  self.disp_cb_dict[item].GetValue() == True:
                             if len(state.values) > 0:
@@ -2280,57 +2280,73 @@ class BasicPage(ScrolledPanel, PanelBase):
             if not self.enable2D and item in self.orientation_params:
                 continue
 
-            name = str(item[1])
-            if name.endswith(".npts") or name.endswith(".nsigmas"):
+            value_ctrl = item[2]
+            if not value_ctrl.IsEnabled():
+                # ArrayDispersion disables PD, Min, Max, Npts, Nsigs
                 continue
 
-            # Check that min, max and value are floats
-            value_ctrl, min_ctrl, max_ctrl = item[2], item[5], item[6]
-            min_str = min_ctrl.GetValue().strip()
-            max_str = max_ctrl.GetValue().strip()
+            name = item[1]
             value_str = value_ctrl.GetValue().strip()
-            validity = check_float(value_ctrl)
-            if min_str != "":
-                validity = validity and check_float(min_ctrl)
-            if max_str != "":
-                validity = validity and check_float(max_ctrl)
-            if not validity:
-                continue
+            if name.endswith(".npts"):
+                validity = check_int(value_ctrl)
+                if not validity:
+                    continue
+                value = int(value_str)
 
-            # Check that min is less than max
-            low = -numpy.inf if min_str == "" else float(min_str)
-            high = numpy.inf if max_str == "" else float(max_str)
-            if high < low:
-                min_ctrl.SetBackgroundColour("pink")
-                min_ctrl.Refresh()
-                max_ctrl.SetBackgroundColour("pink")
-                max_ctrl.Refresh()
-                #msg = "Invalid fit range for %s: min must be smaller than max"%name
-                #wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
-                continue
+            elif name.endswith(".nsigmas"):
+                validity = check_float(value_ctrl)
+                if not validity:
+                    continue
+                value = float(value_str)
 
-            # Force value between min and max
-            value = float(value_str)
-            if value < low:
-                value = low
-                value_ctrl.SetValue(format_number(value))
-            elif value > high:
-                value = high
-                value_ctrl.SetValue(format_number(value))
+            else:  # value or polydispersity
+
+                # Check that min, max and value are floats
+                min_ctrl, max_ctrl = item[5], item[6]
+                min_str = min_ctrl.GetValue().strip()
+                max_str = max_ctrl.GetValue().strip()
+                validity = check_float(value_ctrl)
+                if min_str != "":
+                    validity = validity and check_float(min_ctrl)
+                if max_str != "":
+                    validity = validity and check_float(max_ctrl)
+                if not validity:
+                    continue
+
+                # Check that min is less than max
+                low = -numpy.inf if min_str == "" else float(min_str)
+                high = numpy.inf if max_str == "" else float(max_str)
+                if high < low:
+                    min_ctrl.SetBackgroundColour("pink")
+                    min_ctrl.Refresh()
+                    max_ctrl.SetBackgroundColour("pink")
+                    max_ctrl.Refresh()
+                    #msg = "Invalid fit range for %s: min must be smaller than max"%name
+                    #wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
+                    continue
+
+                # Force value between min and max
+                value = float(value_str)
+                if value < low:
+                    value = low
+                    value_ctrl.SetValue(format_number(value))
+                elif value > high:
+                    value = high
+                    value_ctrl.SetValue(format_number(value))
+
+                if name not in self.model.details.keys():
+                    self.model.details[name] = ["", None, None]
+                old_low, old_high = self.model.details[name][1:3]
+                if old_low != low or old_high != high:
+                    # The configuration has changed but it won't change the
+                    # computed curve so no need to set is_modified to True
+                    #is_modified = True
+                    self.model.details[name][1:3] = low, high
 
             # Update value in model if it has changed
             if value != self.model.getParam(name):
                 self.model.setParam(name, value)
                 is_modified = True
-
-            if name not in self.model.details.keys():
-                self.model.details[name] = ["", None, None]
-            old_low, old_high = self.model.details[name][1:3]
-            if old_low != low or old_high != high:
-                # The configuration has changed but it won't change the
-                # computed curve so no need to set is_modified to True
-                #is_modified = True
-                self.model.details[name][1:3] = low, high
 
         return is_modified
 
@@ -2686,17 +2702,13 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         :param disp_function: dispersion distr. function
         """
-        # List of the poly_model name in the combobox
-        list = ["RectangleDispersion", "ArrayDispersion",
-                "LogNormalDispersion", "GaussianDispersion",
-                "SchulzDispersion"]
-
         # Find the selection
-        try:
-            selection = list.index(disp_func.__class__.__name__)
-            return selection
-        except:
-            return 3
+        if disp_func is not None:
+            try:
+                return POLYDISPERSITY_MODELS.values().index(disp_func.__class__)
+            except ValueError:
+                pass  # Fall through to default class
+        return POLYDISPERSITY_MODELS.keys().index('gaussian')
 
     def on_reset_clicked(self, event):
         """
