@@ -45,7 +45,23 @@ def check_float(item):
         item.Refresh()
     return flag
 
-    
+
+def check_int(item):
+    """
+    :param item: txtcrtl containing a value
+    """
+    flag = True
+    try:
+        mini = int(item.GetValue())
+        item.SetBackgroundColour(wx.WHITE)
+        item.Refresh()
+    except:
+        flag = False
+        item.SetBackgroundColour("pink")
+        item.Refresh()
+    return flag
+
+
 class PanelMenu(wx.Menu):
     """
     """
