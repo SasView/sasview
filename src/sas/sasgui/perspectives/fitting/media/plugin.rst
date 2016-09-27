@@ -659,10 +659,17 @@ Each list is one test and contains, in order:
 Test Your New Model
 ^^^^^^^^^^^^^^^^^^^
 
+Installed SasView
+.................
+
 If you are editing your model from the SasView GUI, you can test it
 by selecting *Run > Compile* from the *Model Editor* menu bar. An
 *Info* box will appear with the results of the compilation and a
 check that the model runs.
+
+
+Built SasView
+.............
 
 If the model compiles and runs, you can next run the unit tests that
 you have added using the **test =** values. Switch to the *Shell* tab
@@ -720,11 +727,11 @@ test with::
     main("-2d", "~/.sasview/plugin_models/model.py")
 
 
-Clean Lint
-^^^^^^^^^^
+Clean Lint - (Developer Version Only)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**NB: For now we are not providing pylint with SasView; so unless you have a
-SasView development environment available, you can ignore this section!**
+**NB: For now we are not providing pylint with the installer version of SasView; 
+so unless you have a SasView build environment available, you can ignore this section!**
 
 Run the lint check with::
 
@@ -757,8 +764,8 @@ parameters in blocks::
 
 Don't put in too many pylint statements, though, since they make the code ugly.
 
-Check The Docs
-^^^^^^^^^^^^^^
+Check The Docs - (Developer Version Only)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 You can get a rough idea of how the documentation will look using the
 following::
@@ -777,9 +784,9 @@ some tools to help with the inevitable syntax errors:
 
 There is also a neat online WYSIWYG ReStructuredText editor at http://rst.ninjs.org\ .
 
-Finally
-^^^^^^^
+Share Your Model!
+^^^^^^^^^^^^^^^^^
 
 Once compare and the unit test(s) pass properly and everything is done,
 consider adding your model to the
-`Model Marketplace <http://marketplace.sasview.org/>`_.
+`Model Marketplace <http://marketplace.sasview.org/>`_ so that others may use it!
