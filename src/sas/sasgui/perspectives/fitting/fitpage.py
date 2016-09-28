@@ -9,6 +9,7 @@ import numpy
 import copy
 import math
 import time
+import traceback
 
 from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
 
@@ -2057,7 +2058,7 @@ class FitPage(BasicPage):
             self._show_combox_helper()
             msg = "Error: This model state has missing or outdated "
             msg += "information.\n"
-            msg += "%s" % (sys.exc_value)
+            msg += traceback.format_exc()
             wx.PostEvent(self._manager.parent,
                          StatusEvent(status=msg, info="error"))
         self._lay_out()
