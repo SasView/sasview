@@ -164,7 +164,7 @@ class Target:
         # for the versioninfo resources
         self.version = local_config.__version__
         self.company_name = "SasView.org"
-        self.copyright = "copyright 2009 - 2013"
+        self.copyright = "copyright 2009 - 2016"
         self.name = "SasView"
         
 #
