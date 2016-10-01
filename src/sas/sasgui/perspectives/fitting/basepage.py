@@ -16,9 +16,10 @@ import traceback
 from collections import defaultdict
 from wx.lib.scrolledpanel import ScrolledPanel
 
-import sasmodels.sasview_model
+from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
+
 from sas.sasgui.guiframe.panel_base import PanelBase
-from sas.sasgui.guiframe.utils import format_number, check_float, IdList
+from sas.sasgui.guiframe.utils import format_number, check_float, IdList, check_int
 from sas.sasgui.guiframe.events import PanelOnFocusEvent
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.events import AppendBookmarkEvent
@@ -625,7 +626,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                                       size=size_q)
         self.disp_help_bt.Bind(wx.EVT_BUTTON, self.on_pd_help_clicked,
                                id=self.disp_help_bt.GetId())
-        self.disp_help_bt.SetToolTipString("Helps for Polydispersion.")
+        self.disp_help_bt.SetToolTipString("Help for polydispersion.")
 
         self.Bind(wx.EVT_RADIOBUTTON, self._set_dipers_Param,
                   id=self.disable_disp.GetId())
@@ -931,7 +932,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         if len(self._disp_obj_dict) > 0:
             for k, v in self._disp_obj_dict.iteritems():
-                self.state._disp_obj_dict[k] = v
+                self.state._disp_obj_dict[k] = v.type
 
             self.state.values = copy.deepcopy(self.values)
             self.state.weights = copy.deepcopy(self.weights)
@@ -1008,7 +1009,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                             self.state.disp_cb_dict[k] = None
             if len(self._disp_obj_dict) > 0:
                 for k, v in self._disp_obj_dict.iteritems():
-                    self.state._disp_obj_dict[k] = v
+                    self.state._disp_obj_dict[k] = v.type
 
             self.state.values = copy.deepcopy(self.values)
             self.state.weights = copy.deepcopy(self.weights)
@@ -1122,8 +1123,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                         self.disp_cb_dict[item].SetValue(\
                                                     state.disp_cb_dict[item])
                         # Create the dispersion objects
-                        from sas.models.dispersion_models import ArrayDispersion
-                        disp_model = ArrayDispersion()
+                        disp_model = POLYDISPERSITY_MODELS['array']()
                         if hasattr(state, "values") and \
                                  self.disp_cb_dict[item].GetValue() == True:
                             if len(state.values) > 0:
@@ -1378,16 +1378,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.values = copy.deepcopy(state.values)
         self.weights = copy.deepcopy(state.weights)
 
-        for key, disp in state._disp_obj_dict.iteritems():
-            # From saved file, disp_model can not be sent in model obj.
-            # it will be sent as a string here, then converted to model object.
-            if disp.__class__.__name__ == 'str':
-                disp_model = None
-                com_str = "from sasmodels.weights "
-                com_str += "import %s as disp_func \ndisp_model = disp_func()"
-                exec com_str % disp
-            else:
-                disp_model = disp
+        for key, disp_type in state._disp_obj_dict.iteritems():
+            #disp_model = disp
+            disp_model = POLYDISPERSITY_MODELS[disp_type]()
             self._disp_obj_dict[key] = disp_model
             param_name = key.split('.')[0]
             # Try to set dispersion only when available
@@ -2280,57 +2273,73 @@ class BasicPage(ScrolledPanel, PanelBase):
             if not self.enable2D and item in self.orientation_params:
                 continue
 
-            name = str(item[1])
-            if name.endswith(".npts") or name.endswith(".nsigmas"):
+            value_ctrl = item[2]
+            if not value_ctrl.IsEnabled():
+                # ArrayDispersion disables PD, Min, Max, Npts, Nsigs
                 continue
 
-            # Check that min, max and value are floats
-            value_ctrl, min_ctrl, max_ctrl = item[2], item[5], item[6]
-            min_str = min_ctrl.GetValue().strip()
-            max_str = max_ctrl.GetValue().strip()
+            name = item[1]
             value_str = value_ctrl.GetValue().strip()
-            validity = check_float(value_ctrl)
-            if min_str != "":
-                validity = validity and check_float(min_ctrl)
-            if max_str != "":
-                validity = validity and check_float(max_ctrl)
-            if not validity:
-                continue
+            if name.endswith(".npts"):
+                validity = check_int(value_ctrl)
+                if not validity:
+                    continue
+                value = int(value_str)
 
-            # Check that min is less than max
-            low = -numpy.inf if min_str == "" else float(min_str)
-            high = numpy.inf if max_str == "" else float(max_str)
-            if high < low:
-                min_ctrl.SetBackgroundColour("pink")
-                min_ctrl.Refresh()
-                max_ctrl.SetBackgroundColour("pink")
-                max_ctrl.Refresh()
-                #msg = "Invalid fit range for %s: min must be smaller than max"%name
-                #wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
-                continue
+            elif name.endswith(".nsigmas"):
+                validity = check_float(value_ctrl)
+                if not validity:
+                    continue
+                value = float(value_str)
 
-            # Force value between min and max
-            value = float(value_str)
-            if value < low:
-                value = low
-                value_ctrl.SetValue(format_number(value))
-            elif value > high:
-                value = high
-                value_ctrl.SetValue(format_number(value))
+            else:  # value or polydispersity
+
+                # Check that min, max and value are floats
+                min_ctrl, max_ctrl = item[5], item[6]
+                min_str = min_ctrl.GetValue().strip()
+                max_str = max_ctrl.GetValue().strip()
+                validity = check_float(value_ctrl)
+                if min_str != "":
+                    validity = validity and check_float(min_ctrl)
+                if max_str != "":
+                    validity = validity and check_float(max_ctrl)
+                if not validity:
+                    continue
+
+                # Check that min is less than max
+                low = -numpy.inf if min_str == "" else float(min_str)
+                high = numpy.inf if max_str == "" else float(max_str)
+                if high < low:
+                    min_ctrl.SetBackgroundColour("pink")
+                    min_ctrl.Refresh()
+                    max_ctrl.SetBackgroundColour("pink")
+                    max_ctrl.Refresh()
+                    #msg = "Invalid fit range for %s: min must be smaller than max"%name
+                    #wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
+                    continue
+
+                # Force value between min and max
+                value = float(value_str)
+                if value < low:
+                    value = low
+                    value_ctrl.SetValue(format_number(value))
+                elif value > high:
+                    value = high
+                    value_ctrl.SetValue(format_number(value))
+
+                if name not in self.model.details.keys():
+                    self.model.details[name] = ["", None, None]
+                old_low, old_high = self.model.details[name][1:3]
+                if old_low != low or old_high != high:
+                    # The configuration has changed but it won't change the
+                    # computed curve so no need to set is_modified to True
+                    #is_modified = True
+                    self.model.details[name][1:3] = low, high
 
             # Update value in model if it has changed
             if value != self.model.getParam(name):
                 self.model.setParam(name, value)
                 is_modified = True
-
-            if name not in self.model.details.keys():
-                self.model.details[name] = ["", None, None]
-            old_low, old_high = self.model.details[name][1:3]
-            if old_low != low or old_high != high:
-                # The configuration has changed but it won't change the
-                # computed curve so no need to set is_modified to True
-                #is_modified = True
-                self.model.details[name][1:3] = low, high
 
         return is_modified
 
@@ -2503,7 +2512,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 #self._reset_array_disp(param_name)
                 self._disp_obj_dict[name1] = disp_model
                 self.model.set_dispersion(param_name, disp_model)
-                self.state._disp_obj_dict[name1] = disp_model
+                self.state._disp_obj_dict[name1] = disp_model.type
 
                 value1 = str(format_number(self.model.getParam(name1), True))
                 value2 = str(format_number(self.model.getParam(name2)))
@@ -2526,6 +2535,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                     else:
                         item[0].Enable()
                         item[2].Enable()
+                        item[3].Show(True)
+                        item[4].Show(True)
                         item[5].Enable()
                         item[6].Enable()
                     break
@@ -2618,7 +2629,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         disp.set_weights(values, weights)
         self._disp_obj_dict[name] = disp
         self.model.set_dispersion(name.split('.')[0], disp)
-        self.state._disp_obj_dict[name] = disp
+        self.state._disp_obj_dict[name] = disp.type
         self.values[name] = values
         self.weights[name] = weights
         # Store the object to make it persist outside the
@@ -2686,17 +2697,13 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         :param disp_function: dispersion distr. function
         """
-        # List of the poly_model name in the combobox
-        list = ["RectangleDispersion", "ArrayDispersion",
-                "LogNormalDispersion", "GaussianDispersion",
-                "SchulzDispersion"]
-
         # Find the selection
-        try:
-            selection = list.index(disp_func.__class__.__name__)
-            return selection
-        except:
-            return 3
+        if disp_func is not None:
+            try:
+                return POLYDISPERSITY_MODELS.values().index(disp_func.__class__)
+            except ValueError:
+                pass  # Fall through to default class
+        return POLYDISPERSITY_MODELS.keys().index('gaussian')
 
     def on_reset_clicked(self, event):
         """
@@ -3283,9 +3290,14 @@ class BasicPage(ScrolledPanel, PanelBase):
                     check = content[name][0]
                     pd = content[name][1]
                     if name.count('.') > 0:
+                        # If this is parameter.width, then pd may be a floating
+                        # point value or it may be an array distribution.
+                        # Nothing to do for parameter.npts or parameter.nsigmas.
                         try:
                             float(pd)
-                        except:
+                            if name.endswith('.npts'):
+                                pd = int(pd)
+                        except Exception:
                             #continue
                             if not pd and pd != '':
                                 continue
@@ -3293,6 +3305,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                     if item in self.fixed_param and pd == '':
                         # Only array func has pd == '' case.
                         item[2].Enable(False)
+                    else:
+                        item[2].Enable(True)
                     if item[2].__class__.__name__ == "ComboBox":
                         if content[name][1] in self.model.fun_list:
                             fun_val = self.model.fun_list[content[name][1]]
@@ -3319,8 +3333,13 @@ class BasicPage(ScrolledPanel, PanelBase):
                         value = content[name][1:]
                         pd = value[0]
                         if name.count('.') > 0:
+                            # If this is parameter.width, then pd may be a floating
+                            # point value or it may be an array distribution.
+                            # Nothing to do for parameter.npts or parameter.nsigmas.
                             try:
                                 pd = float(pd)
+                                if name.endswith('.npts'):
+                                    pd = int(pd)
                             except:
                                 #continue
                                 if not pd and pd != '':
@@ -3329,6 +3348,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                         if item in self.fixed_param and pd == '':
                             # Only array func has pd == '' case.
                             item[2].Enable(False)
+                        else:
+                            item[2].Enable(True)
                         if item[2].__class__.__name__ == "ComboBox":
                             if value[0] in self.model.fun_list:
                                 fun_val = self.model.fun_list[value[0]]
@@ -3348,64 +3369,86 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Helps get paste for poly function
 
-        :param item: Gui param items
-        :param value: the values for parameter ctrols
+        *item* is the parameter name
+
+        *value* depends on which parameter is being processed, and whether it
+        has array polydispersity.
+
+        For parameters without array polydispersity:
+
+            parameter => ['FLOAT', '']
+            parameter.width => ['FLOAT', 'DISTRIBUTION', '']
+            parameter.npts => ['FLOAT', '']
+            parameter.nsigmas => ['FLOAT', '']
+
+        For parameters with array polydispersity:
+
+            parameter => ['FLOAT', '']
+            parameter.width => ['FILENAME', 'array', [x1, ...], [w1, ...]]
+            parameter.npts => ['FLOAT', '']
+            parameter.nsigmas => ['FLOAT', '']
         """
-        is_array = False
-        if len(value[1]) > 0:
-            # Only for dispersion func.s
-            try:
-                item[7].SetValue(value[1])
-                selection = item[7].GetCurrentSelection()
-                name = item[7].Name
-                param_name = name.split('.')[0]
-                dispersity = item[7].GetClientData(selection)
-                disp_model = dispersity()
-                # Only for array disp
-                try:
-                    pd_vals = numpy.array(value[2])
-                    pd_weights = numpy.array(value[3])
-                    if len(pd_vals) > 0 and len(pd_vals) > 0:
-                        if len(pd_vals) == len(pd_weights):
-                            self._set_disp_array_cb(item=item)
-                            self._set_array_disp_model(name=name,
-                                                       disp=disp_model,
-                                                       values=pd_vals,
-                                                       weights=pd_weights)
-                            is_array = True
-                except Exception:
-                    logging.error(traceback.format_exc())
-                if not is_array:
-                    self._disp_obj_dict[name] = disp_model
-                    self.model.set_dispersion(name,
-                                              disp_model)
-                    self.state._disp_obj_dict[name] = \
-                                              disp_model
-                    self.model.set_dispersion(param_name, disp_model)
-                    self.state.values = self.values
-                    self.state.weights = self.weights
-                    self.model._persistency_dict[param_name] = \
-                                            [self.state.values,
-                                             self.state.weights]
+        # Do nothing if not setting polydispersity
+        if len(value[1]) == 0:
+            return
 
-            except Exception:
-                logging.error(traceback.format_exc())
-                print "Error in BasePage._paste_poly_help: %s" % \
-                                        sys.exc_info()[1]
+        try:
+            name = item[7].Name
+            param_name = name.split('.')[0]
+            item[7].SetValue(value[1])
+            selection = item[7].GetCurrentSelection()
+            dispersity = item[7].GetClientData(selection)
+            disp_model = dispersity()
 
-    def _set_disp_array_cb(self, item):
+            if value[1] == 'array':
+                pd_vals = numpy.array(value[2])
+                pd_weights = numpy.array(value[3])
+                if len(pd_vals) == 0 or len(pd_vals) != len(pd_weights):
+                    msg = ("bad array distribution parameters for %s"
+                           % param_name)
+                    raise ValueError(msg)
+                self._set_disp_cb(True, item=item)
+                self._set_array_disp_model(name=name,
+                                           disp=disp_model,
+                                           values=pd_vals,
+                                           weights=pd_weights)
+            else:
+                self._set_disp_cb(False, item=item)
+                self._disp_obj_dict[name] = disp_model
+                self.model.set_dispersion(param_name, disp_model)
+                self.state._disp_obj_dict[name] = disp_model.type
+                # TODO: It's not an array, why update values and weights?
+                self.model._persistency_dict[param_name] = \
+                    [self.values, self.weights]
+                self.state.values = self.values
+                self.state.weights = self.weights
+
+        except Exception:
+            logging.error(traceback.format_exc())
+            print "Error in BasePage._paste_poly_help: %s" % \
+                                    sys.exc_info()[1]
+
+    def _set_disp_cb(self, isarray, item):
         """
         Set cb for array disp
         """
-        item[0].SetValue(False)
-        item[0].Enable(False)
-        item[2].Enable(False)
-        item[3].Show(False)
-        item[4].Show(False)
-        item[5].SetValue('')
-        item[5].Enable(False)
-        item[6].SetValue('')
-        item[6].Enable(False)
+        if isarray:
+            item[0].SetValue(False)
+            item[0].Enable(False)
+            item[2].Enable(False)
+            item[3].Show(False)
+            item[4].Show(False)
+            item[5].SetValue('')
+            item[5].Enable(False)
+            item[6].SetValue('')
+            item[6].Enable(False)
+        else:
+            item[0].Enable()
+            item[2].Enable()
+            item[3].Show(True)
+            item[4].Show(True)
+            item[5].Enable()
+            item[6].Enable()
 
     def update_pinhole_smear(self):
         """

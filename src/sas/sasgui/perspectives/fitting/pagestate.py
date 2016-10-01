@@ -24,6 +24,8 @@ import xml.dom.minidom
 from xml.dom.minidom import parseString
 from lxml import etree
 
+import sasmodels.weights
+
 import sas.sascalc.dataloader
 from sas.sascalc.dataloader.readers.cansas_reader import Reader as CansasReader
 from sas.sascalc.dataloader.readers.cansas_reader import get_content, write_node
@@ -473,7 +475,8 @@ class PageState(object):
             try:
                 value = content[1]
             except Exception:
-                logging.error(traceback.format_exc())
+                msg = "Report string expected 'name: value' but got %r"%line
+                logging.error(msg)
             if name.count("State created"):
                 repo_time = "" + value
             if name.count("parameter name"):
@@ -515,7 +518,8 @@ class PageState(object):
                         title = content[2] + " [" + repo_time + "]"
                         title_name = HEADER % title
                 except Exception:
-                    logging.error(traceback.format_exc())
+                    msg = "While parsing 'data: ...'\n"
+                    logging.error(msg + traceback.format_exc())
             if name == "model name ":
                 try:
                     modelname = "Model name:" + content[1]
@@ -530,7 +534,8 @@ class PageState(object):
                     q_name = ("Q Range:    " + q_range)
                     q_range = CENTRE % q_name
                 except Exception:
-                    logging.error(traceback.format_exc())
+                    msg = "While parsing 'Plotting Range: ...'\n"
+                    logging.error(msg + traceback.format_exc())
         paramval = ""
         for lines in param_string.split(":"):
             line = lines.split(",")
@@ -710,7 +715,6 @@ class PageState(object):
 
         # For self.values ={ disp_param_name: [vals,...],...}
         # and for self.weights ={ disp_param_name: [weights,...],...}
-        value_list = {}
         for item in LIST_OF_MODEL_ATTRIBUTES:
             element = newdoc.createElement(item[0])
             value_list = getattr(self, item[1])
@@ -724,11 +728,10 @@ class PageState(object):
             inputs.appendChild(element)
 
         # Create doc for the dictionary of self._disp_obj_dic
-        for item in DISPERSION_LIST:
-            element = newdoc.createElement(item[0])
-            value_list = getattr(self, item[1])
-            for key, val in value_list.iteritems():
-                value = repr(val)
+        for tagname, varname, tagtype in DISPERSION_LIST:
+            element = newdoc.createElement(tagname)
+            value_list = getattr(self, varname)
+            for key, value in value_list.iteritems():
                 sub_element = newdoc.createElement(key)
                 sub_element.setAttribute('name', str(key))
                 sub_element.setAttribute('value', str(value))
@@ -846,34 +849,32 @@ class PageState(object):
 
                 # Recover _disp_obj_dict from xml file
                 self._disp_obj_dict = {}
-                for item in DISPERSION_LIST:
-                    # Get node
-                    node = get_content("ns:%s" % item[0], entry)
+                for tagname, varname, tagtype in DISPERSION_LIST:
+                    node = get_content("ns:%s" % tagname, entry)
                     for attr in node:
-                        name = str(attr.get('name'))
-                        val = attr.get('value')
-                        value = val.split(" instance")[0]
-                        disp_name = value.split("<")[1]
-                        try:
-                            # Try to recover disp_model object from strings
-                            com = "from sas.models.dispersion_models "
-                            com += "import %s as disp"
-                            com_name = disp_name.split(".")[3]
-                            exec com % com_name
-                            disp_model = disp()
-                            attribute = getattr(self, item[1])
-                            attribute[name] = com_name
-                        except Exception:
-                            logging.error(traceback.format_exc())
+                        parameter = str(attr.get('name'))
+                        value = attr.get('value')
+                        if value.startswith("<"):
+                            try:
+                                # <path.to.NamedDistribution object/instance...>
+                                cls_name = value[1:].split()[0].split('.')[-1]
+                                cls = getattr(sasmodels.weights, cls_name)
+                                value = cls.type
+                            except Exception:
+                                logging.error("unable to load distribution %r for %s"
+                                              % (value, parameter))
+                                continue
+                        _disp_obj_dict = getattr(self, varname)
+                        _disp_obj_dict[parameter] = value
 
                 # get self.values and self.weights dic. if exists
-                for item in LIST_OF_MODEL_ATTRIBUTES:
-                    node = get_content("ns:%s" % item[0], entry)
+                for tagname, varname in LIST_OF_MODEL_ATTRIBUTES:
+                    node = get_content("ns:%s" % tagname, entry)
                     dic = {}
                     value_list = []
                     for par in node:
                         name = par.get('name')
-                        values = par.text.split('\n')
+                        values = par.text.split()
                         # Get lines only with numbers
                         for line in values:
                             try:
@@ -881,9 +882,11 @@ class PageState(object):
                                 value_list.append(val)
                             except Exception:
                                 # pass if line is empty (it happens)
-                                logging.error(traceback.format_exc())
+                                msg = ("Error reading %r from %s %s\n"
+                                       % (line, tagname, name))
+                                logging.error(msg + traceback.format_exc())
                         dic[name] = numpy.array(value_list)
-                    setattr(self, item[1], dic)
+                    setattr(self, varname, dic)
 
     def set_plot_state(self, figs, canvases):
         """
@@ -1230,7 +1233,8 @@ class Reader(CansasReader):
                 state.fromXML(node=nodes[0])
 
         except:
-            logging.info("XML document does not contain fitting information.\n %s" % sys.exc_value)
+            logging.info("XML document does not contain fitting information.\n"
+                         + traceback.format_exc())
 
         return state
 
