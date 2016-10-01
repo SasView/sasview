@@ -34,19 +34,24 @@ _acknowledgement_preamble =\
 _acknowledgement_preamble_bullet1 =\
 '''Acknowledge its use in your publications as suggested below'''
 _acknowledgement_preamble_bullet2 =\
-'''Reference the following website: http://www.sasview.org'''
+'''Reference SasView as : Doucet M, et. al. SasView version 4.0, Zenodo''' +\
+''', http://doi.org/10.5281/zenodo.159083'''
 _acknowledgement_preamble_bullet3 =\
 '''Reference the model you used if appropriate (see documentation for refs)'''
 _acknowledgement_preamble_bullet4 =\
 '''Send us your reference for our records: developers@sasview.org'''
 _acknowledgement_publications = \
 '''This work benefited from the use of the SasView application, originally
-developed under NSF award DMR-0520547.
+developed under NSF award DMR-0520547. SasView contains code developed with
+funding from the European Union’s Horizon 2020 research and innovation programme
+under the SINE2020 project, grant agreement No 654000.
 '''
 _acknowledgement =  \
 '''This work originally developed as part of the DANSE project funded by the NSF
 under grant DMR-0520547, and currently maintained by NIST, UMD, ORNL, ISIS, ESS
-and ILL.
+and ILL. SasView contains code developed with funding from the European Union’s
+Horizon 2020 research and innovation programme under the SINE2020 project, grant
+agreement No 654000.
 
 '''
 _homepage = "http://www.sasview.org"
