@@ -34,7 +34,7 @@ _acknowledgement_preamble =\
 _acknowledgement_preamble_bullet1 =\
 '''Acknowledge its use in your publications as suggested below'''
 _acknowledgement_preamble_bullet2 =\
-'''Reference SasView as : Doucet M, et. al. SasView version 4.0, Zenodo''' +\
+'''Reference SasView as : M. Doucet, et al. SasView Version 4.0, Zenodo''' +\
 ''', http://doi.org/10.5281/zenodo.159083'''
 _acknowledgement_preamble_bullet3 =\
 '''Reference the model you used if appropriate (see documentation for refs)'''
@@ -42,18 +42,15 @@ _acknowledgement_preamble_bullet4 =\
 '''Send us your reference for our records: developers@sasview.org'''
 _acknowledgement_publications = \
 '''This work benefited from the use of the SasView application, originally
-developed under NSF award DMR-0520547. SasView contains code developed with
-funding from the European Union's Horizon 2020 research and innovation programme
-under the SINE2020 project, grant agreement No 654000.
-'''
-_acknowledgement =  \
-'''This work originally developed as part of the DANSE project funded by the NSF
-under grant DMR-0520547, and currently maintained by NIST, UMD, ORNL, ISIS, ESS
-and ILL. SasView contains code developed with funding from the European Union's
-Horizon 2020 research and innovation programme under the SINE2020 project, grant
-agreement No 654000.
+developed under NSF Award DMR-0520547. SasView also contains code developed 
+with funding from the EU Horizon 2020 research and innovation programme under 
+the SINE2020 project Grant No 654000.'''
 
-'''
+_acknowledgement =  \
+'''This work was originally developed as part of the DANSE project funded by the US NSF under Award DMR-0520547, but is currently maintained by a 
+collaboration between UTK, UMD, NIST, ORNL, ISIS, ESS, ILL and ANSTO. SasView also contains code developed with funding from the EU Horizon 2020 
+research and innovation programme under the SINE2020 project (Grant No 654000).'''
+
 _homepage = "http://www.sasview.org"
 _download = __download_page__
 _authors = []
@@ -69,24 +66,28 @@ test_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "test"))
 _nist_logo = os.path.join(icon_path, "nist_logo.png")
 _umd_logo = os.path.join(icon_path, "umd_logo.png")
 _sns_logo = os.path.join(icon_path, "sns_logo.png")
+_ornl_logo = os.path.join(icon_path, "ornl_logo.png")
 _isis_logo = os.path.join(icon_path, "isis_logo.png")
 _ess_logo = os.path.join(icon_path, "ess_logo.png")
 _ill_logo = os.path.join(icon_path, "ill_logo.png")
+_ansto_logo = os.path.join(icon_path, "ansto_logo.png")
 _nsf_logo = os.path.join(icon_path, "nsf_logo.png")
 _danse_logo = os.path.join(icon_path, "danse_logo.png")
 _inst_logo = os.path.join(icon_path, "utlogo.gif")
 _nist_url = "http://www.nist.gov/"
 _umd_url = "http://www.umd.edu/"
 _sns_url = "http://neutrons.ornl.gov/"
+_ornl_url = "http://neutrons.ornl.gov/"
 _nsf_url = "http://www.nsf.gov"
 _isis_url = "http://www.isis.stfc.ac.uk/"
 _ess_url = "http://ess-scandinavia.eu/"
 _ill_url = "http://www.ill.eu/"
+_ansto_url = "http://www.ansto.gov.au/"
 _danse_url = "http://www.cacr.caltech.edu/projects/danse/release/index.html"
 _inst_url = "http://www.utk.edu"
 _corner_image = os.path.join(icon_path, "angles_flat.png")
 _welcome_image = os.path.join(icon_path, "SVwelcome.png")
-_copyright = "(c) 2009 - 2016, UTK, UMD, NIST, ORNL, ISIS, ESS and ILL"
+_copyright = "(c) 2009 - 2016, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL and ANSTO"
 
 
 #edit the list of file state your plugin can read
