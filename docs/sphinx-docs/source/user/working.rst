@@ -15,3 +15,6 @@ Working with SasView
    Test Data <../test/testdata_help.rst>
       
    Tutorial <tutorial.rst>
+   
+   Computations with a GPU <gpu_computations>
+   

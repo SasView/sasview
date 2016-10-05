@@ -47,7 +47,7 @@ as required, where "mymodel" is the name for the model you are creating.
 - No capitalization and thus no CamelCase
 - If necessary use underscore to separate words (i.e. barbell not BarBell or
   broad_peak not BroadPeak)
-- Do not include “model” in the name (i.e. barbell not BarBellModel)
+- Do not include â€œmodelâ€� in the name (i.e. barbell not BarBellModel)
 
 
 Edit New Model Files
@@ -643,7 +643,7 @@ Each list is one test and contains, in order:
 
 - a dictionary of parameter values. This can be {} using the default
   parameters, or filled with some parameters that will be different
-  from the default, such as {‘radius’:10.0, ‘sld’:4}. Unlisted parameters
+  from the default, such as {â€˜radiusâ€™:10.0, â€˜sldâ€™:4}. Unlisted parameters
   will be given the default values.
 - the input $q$ value or tuple of $(q_x, q_y)$ values.
 - the output $I(q)$ or $I(q_x,q_y)$ expected of the model for the parameters
@@ -663,7 +663,7 @@ Installed SasView
 .................
 
 If you are editing your model from the SasView GUI, you can test it
-by selecting *Run > Compile* from the *Model Editor* menu bar. An
+by selecting *Run > Check Model* from the *Model Editor* menu bar. An
 *Info* box will appear with the results of the compilation and a
 check that the model runs.
 

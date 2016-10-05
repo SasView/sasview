@@ -6,12 +6,12 @@ SasView User Documentation
 .. toctree::
    :maxdepth: 1
 
-   SasView Model Documentation <index>
+   Model Documentation <index>
+   
+   Menu Bar <menu_bar>
 
    Analysis <analysis>
    
    Tools <tools>
          
    Working with SasView <working>
-
-   Computations with GPU <gpu_computations>
