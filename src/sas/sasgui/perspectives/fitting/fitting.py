@@ -1722,7 +1722,7 @@ class Plugin(PluginBase):
                     data=None, update_chisqr=True,
                     source='model', plot_result=True,
                     unsmeared_model=None, unsmeared_data=None,
-                    unsmeared_error=None):
+                    unsmeared_error=None, sq_model=None, pq_model=None):
         """
             Complete plotting 1D data
             @param unsmeared_model: fit model, without smearing
@@ -1743,6 +1743,15 @@ class Plugin(PluginBase):
                                       data_description="Data unsmeared",
                                       data_id="Data  " + data.name + " unsmeared",
                                       dy=unsmeared_error)
+                
+            if sq_model is not None and pq_model is not None:
+                self.create_theory_1D(x, sq_model, page_id, model, data, state,
+                                      data_description=model.name + " S(q)",
+                                      data_id=str(page_id) + " " + data.name + " S(q)")
+                self.create_theory_1D(x, pq_model, page_id, model, data, state,
+                                      data_description=model.name + " P(q)",
+                                      data_id=str(page_id) + " " + data.name + " P(q)")
+
 
             current_pg = self.fit_panel.get_page_by_id(page_id)
             title = new_plot.title

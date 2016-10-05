@@ -6,6 +6,7 @@ import time
 import numpy
 import math
 from sas.sascalc.data_util.calcthread import CalcThread
+from sas.sascalc.fit.MultiplicationModel import MultiplicationModel
 
 class Calc2D(CalcThread):
     """
@@ -193,6 +194,14 @@ class Calc1D(CalcThread):
         else:
             output[index] = self.model.evalDistribution(self.data.x[index])
 
+        sq_model = None
+        pq_model = None
+        if isinstance(self.model, MultiplicationModel):
+            sq_model = numpy.zeros((len(self.data.x)))
+            pq_model = numpy.zeros((len(self.data.x)))
+            sq_model[index] = self.model.s_model.evalDistribution(self.data.x[index])
+            pq_model[index] = self.model.p_model.evalDistribution(self.data.x[index])
+
         elapsed = time.time() - self.starttime
 
         self.complete(x=self.data.x[index], y=output[index],
@@ -207,7 +216,9 @@ class Calc1D(CalcThread):
                       source=self.source,
                       unsmeared_model=unsmeared_output,
                       unsmeared_data=unsmeared_data,
-                      unsmeared_error=unsmeared_error)
+                      unsmeared_error=unsmeared_error,
+                      pq_model=pq_model,
+                      sq_model=sq_model)
 
     def results(self):
         """
