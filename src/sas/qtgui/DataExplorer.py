@@ -29,7 +29,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
 
-    def __init__(self, parent=None, guimanager=None):
+    def __init__(self, parent=None, guimanager=None, manager=None):
         super(DataExplorerWindow, self).__init__(parent, guimanager)
 
         # Main model for keeping loaded data
@@ -42,7 +42,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # in order to set the widget parentage properly.
         self.parent = guimanager
         self.loader = Loader()
-        self.manager = DataManager()
+        self.manager = manager if manager is not None else DataManager()
         self.txt_widget = QtGui.QTextEdit(None)
         # self.txt_widget = GuiUtils.DisplayWindow()
 
@@ -163,6 +163,60 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     for filename in os.listdir(folder)]
 
         self.loadFromURL(path_str)
+
+    def loadProject(self):
+        """
+        Called when the "Open Project" menu item chosen.
+        """
+        kwargs = {
+            'parent'    : self,
+            'caption'   : 'Open Project',
+            'filter'    : 'Project (*.json);;All files (*.*)',
+            'options'   : QtGui.QFileDialog.DontUseNativeDialog
+        }
+        filename = str(QtGui.QFileDialog.getOpenFileName(**kwargs))
+        if filename:
+            load_thread = threads.deferToThread(self.readProject, filename)
+            load_thread.addCallback(self.readProjectComplete)
+
+    def readProject(self, filename):
+        self.communicator.statusBarUpdateSignal.emit("Loading Project... %s" % os.path.basename(filename))
+        try:
+            manager = DataManager()
+            with open(filename, 'r') as infile:
+                manager.load_from_readable(infile)
+
+            self.communicator.statusBarUpdateSignal.emit("Loaded Project: %s" % os.path.basename(filename))
+            return manager
+
+        except:
+            self.communicator.statusBarUpdateSignal.emit("Failed: %s" % os.path.basename(filename))
+            raise
+
+    def readProjectComplete(self, manager):
+        self.model.clear()
+
+        self.manager.assign(manager)
+        for id, item in self.manager.get_all_data().iteritems():
+            self.updateModel(item.data, item.path)
+
+        self.model.reset()
+
+    def saveProject(self):
+        """
+        Called when the "Save Project" menu item chosen.
+        """
+        kwargs = {
+            'parent'    : self,
+            'caption'   : 'Save Project',
+            'filter'    : 'Project (*.json)',
+            'options'   : QtGui.QFileDialog.DontUseNativeDialog
+        }
+        filename = str(QtGui.QFileDialog.getSaveFileName(**kwargs))
+        if filename:
+            self.communicator.statusBarUpdateSignal.emit("Saving Project... %s\n" % os.path.basename(filename))
+            with open(filename, 'w') as outfile:
+                self.manager.save_to_writable(outfile)
 
     def deleteFile(self, event):
         """

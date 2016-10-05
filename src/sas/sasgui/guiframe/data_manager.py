@@ -1,22 +1,24 @@
 ################################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation. 
+#project funded by the US National Science Foundation.
 #
 #See the license text in license.txt
 #
 #copyright 2010, University of Tennessee
 ################################################################################
 """
-This module manages all data loaded into the application. Data_manager makes 
-available all data loaded  for the current perspective. 
+This module manages all data loaded into the application. Data_manager makes
+available all data loaded  for the current perspective.
 
-All modules "creating Data" posts their data to data_manager . 
+All modules "creating Data" posts their data to data_manager .
 Data_manager  make these new data available for all other perspectives.
 """
-import logging
 import os
-import copy 
+import copy
+import logging
+import json
+from StringIO import StringIO
 
 from sas.sasgui.guiframe.data_state import DataState
 from sas.sasgui.guiframe.utils import parse_name
@@ -25,6 +27,11 @@ from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import Data2D
 import time
 
+# used for import/export
+import numpy as np
+from sas.sascalc.dataloader.data_info import Sample, Source, Vector
+from sas.sasgui.plottools.plottables import Plottable, Theory1D, Fit1D, Text, Chisq, View
+
 class DataManager(object):
     """
     Manage a list of data
@@ -32,8 +39,8 @@ class DataManager(object):
     def __init__(self):
         """
         Store opened path and data object created at the loading time
-        :param auto_plot: if True the datamanager sends data to plotting 
-                            plugin. 
+        :param auto_plot: if True the datamanager sends data to plotting
+                            plugin.
         :param auto_set_data: if True the datamanager sends to the current
         perspective
         """
@@ -43,27 +50,27 @@ class DataManager(object):
         self.count = 0
         self.list_of_id = []
         self.time_stamp = time.time()
-      
+
     def __str__(self):
         _str  = ""
         _str += "No of states  is %s \n" % str(len(self.stored_data))
         n_count = 0
         for  value in self.stored_data.values():
-            n_count += 1 
+            n_count += 1
             _str += "State No %s \n"  % str(n_count)
             _str += str(value) + "\n"
         return _str
-        
+
     def create_gui_data(self, data, path=None):
         """
         Receive data from loader and create a data to use for guiframe
         """
-        
+
         if issubclass(Data2D, data.__class__):
-            new_plot = Data2D(image=None, err_image=None) 
-        else: 
+            new_plot = Data2D(image=None, err_image=None)
+        else:
             new_plot = Data1D(x=[], y=[], dx=None, dy=None)
-           
+
         new_plot.copy_from_datainfo(data)
         data.clone_without_data(clone=new_plot)
         #creating a name for data
@@ -81,10 +88,10 @@ class DataManager(object):
             title = data.title
         if title.strip() == "":
             title = file_name
-        
+
         if new_plot.filename.strip() == "":
             new_plot.filename = file_name
-        
+
         new_plot.name = name
         new_plot.title = title
         ## allow to highlight data when plotted
@@ -100,30 +107,30 @@ class DataManager(object):
         ##post data to plot
         # plot data
         return new_plot
- 
+
     def rename(self, name):
         """
         rename data
         """
         ## name of the data allow to differentiate data when plotted
         name = parse_name(name=name, expression="_")
-        
+
         max_char = name.find("[")
         if max_char < 0:
             max_char = len(name)
         name = name[0:max_char]
-        
+
         if name not in self.data_name_dict:
             self.data_name_dict[name] = 0
         else:
             self.data_name_dict[name] += 1
             name = name + " [" + str(self.data_name_dict[name]) + "]"
         return name
-    
-  
+
+
     def add_data(self, data_list):
         """
-        receive a list of 
+        receive a list of
         """
         for id, data in data_list.iteritems():
             if id  in self.stored_data:
@@ -137,19 +144,19 @@ class DataManager(object):
                 data_state.id = id
                 data_state.path = data.path
                 self.stored_data[id] = data_state
-    
+
     def update_data(self, prev_data, new_data):
         """
         """
         if prev_data.id not in self.stored_data.keys():
             return None, {}
-        data_state = self.stored_data[prev_data.id] 
+        data_state = self.stored_data[prev_data.id]
         self.stored_data[new_data.id]  = data_state.clone()
         self.stored_data[new_data.id].data = new_data
         if prev_data.id in self.stored_data.keys():
-            del self.stored_data[prev_data.id] 
+            del self.stored_data[prev_data.id]
         return prev_data.id, {new_data.id: self.stored_data[new_data.id]}
-    
+
     def update_theory(self, theory, data_id=None, state=None):
         """
         """
@@ -157,21 +164,21 @@ class DataManager(object):
         if data_id is None and theory is not None:
             uid = theory.id
         if uid in self.stored_data.keys():
-             data_state = self.stored_data[uid] 
+             data_state = self.stored_data[uid]
         else:
             data_state = DataState()
         data_state.uid = uid
         data_state.set_theory(theory_data=theory, theory_state=state)
         self.stored_data[uid] = data_state
         return {uid: self.stored_data[uid]}
-       
-    
+
+
     def get_message(self):
         """
         return message
         """
         return self.message
-    
+
     def get_by_id(self, id_list=None):
         """
         """
@@ -188,15 +195,15 @@ class DataManager(object):
                     _selected_data[search_id] = data
                 if search_id in theory_list.keys():
                      _selected_theory_list[search_id] = theory_list[search_id]
-                   
+
         return _selected_data, _selected_theory_list
-   
-           
+
+
     def freeze(self, theory_id):
         """
         """
         return self.freeze_theory(self.stored_data.keys(), theory_id)
-        
+
     def freeze_theory(self, data_id, theory_id):
         """
         """
@@ -220,8 +227,8 @@ class DataManager(object):
                                     selected_theory[new_theory.id]
 
         return selected_theory
-                    
-            
+
+
     def delete_data(self, data_id, theory_id=None, delete_all=False):
         """
         """
@@ -231,12 +238,12 @@ class DataManager(object):
                 if data_state.data.name in self.data_name_dict:
                     del self.data_name_dict[data_state.data.name]
                 del self.stored_data[d_id]
-        
+
         self.delete_theory(data_id, theory_id)
         if delete_all:
             self.stored_data = {}
             self.data_name_dict = {}
-            
+
     def delete_theory(self, data_id, theory_id):
         """
         """
@@ -248,7 +255,7 @@ class DataManager(object):
                     del theory_list[theory_id]
         #del pure theory
         self.delete_by_id(theory_id)
-            
+
     def delete_by_id(self, id_list=None):
         """
         save data and path
@@ -256,8 +263,8 @@ class DataManager(object):
         for id in id_list:
             if id in self.stored_data:
                 del self.stored_data[id]
-         
-    
+
+
     def get_by_name(self, name_list=None):
         """
         return a list of data given a list of data names
@@ -268,7 +275,7 @@ class DataManager(object):
                 if data_state.data.name == selected_name:
                     _selected_data[id] = data_state.data
         return _selected_data
-    
+
     def delete_by_name(self, name_list=None):
         """
         save data and path
@@ -287,12 +294,157 @@ class DataManager(object):
             if id in self.stored_data.keys():
                 _selected_data_state[id] = self.stored_data[id]
         return _selected_data_state
-    
+
     def get_all_data(self):
         """
         return list of all available data
         """
         return self.stored_data
-    
 
-        
+    def assign(self, other):
+        self.stored_data = other.stored_data
+        self.message = other.message
+        self.data_name_dict = other.data_name_dict
+        self.count = other.count
+        self.list_of_id = other.list_of_id
+        self.time_stamp = other.time_stamp
+
+    def save_to_writable(self, fp):
+        """
+        save content of stored_data to fp (a .write()-supporting file-like object)
+        """
+
+        def add_type(dict, type):
+            dict['__type__'] = type.__name__
+            return dict
+
+        def jdefault(o):
+            """
+            objects that can't otherwise be serialized need to be converted
+            """
+            # tuples and sets (TODO: default JSONEncoder converts tuples to lists, create custom Encoder that preserves tuples)
+            if isinstance(o, (tuple, set)):
+                content = { 'data': list(o) }
+                return add_type(content, type(o))
+
+            # "simple" types
+            if isinstance(o, (Sample, Source, Vector)):
+                return add_type(o.__dict__, type(o))
+            if isinstance(o, (Plottable, View)):
+                return add_type(o.__dict__, type(o))
+
+            # DataState
+            if isinstance(o, DataState):
+                # don't store parent
+                content = o.__dict__.copy()
+                content.pop('parent')
+                return add_type(content, type(o))
+
+            # ndarray
+            if isinstance(o, np.ndarray):
+                buffer = StringIO()
+                np.save(buffer, o)
+                buffer.seek(0)
+                content = { 'data': buffer.read().decode('latin-1') }
+                return add_type(content, type(o))
+
+            # not supported
+            logging.info("data cannot be serialized to json: %s" % type(o))
+            return None
+
+        json.dump(self.stored_data, fp, indent=2, sort_keys=True, default=jdefault)
+
+
+    def load_from_readable(self, fp):
+        """
+        load content from tp to stored_data (a .read()-supporting file-like object)
+        """
+
+        supported = [
+            tuple, set,
+            Sample, Source, Vector,
+            Plottable, Data1D, Data2D, Theory1D, Fit1D, Text, Chisq, View,
+            DataState, np.ndarray]
+
+        lookup = dict((cls.__name__, cls) for cls in supported)
+
+        class TooComplexException(Exception):
+            pass
+
+        def simple_type(cls, data, level):
+            class Empty(object):
+                def __init__(self):
+                    for key, value in data.iteritems():
+                        setattr(self, key, generate(value, level))
+
+            # create target object
+            o = Empty()
+            o.__class__ = cls
+
+            return o
+
+        def construct(type, data, level):
+            try:
+                cls = lookup[type]
+            except KeyError:
+                logging.info('unknown type: %s' % type)
+                return None
+
+            # tuples and sets
+            if cls in (tuple, set):
+                # convert list to tuple/set
+                return cls(generate(data['data'], level))
+
+            # "simple" types
+            if cls in (Sample, Source, Vector):
+                return simple_type(cls, data, level)
+            if issubclass(cls, Plottable) or (cls == View):
+                return simple_type(cls, data, level)
+
+            # DataState
+            if cls == DataState:
+                o = simple_type(cls, data, level)
+                o.parent = None # TODO: set to ???
+                return o
+
+            # ndarray
+            if cls == np.ndarray:
+                buffer = StringIO()
+                buffer.write(data['data'].encode('latin-1'))
+                buffer.seek(0)
+                return np.load(buffer)
+
+            logging.info('not implemented: %s, %s' % (type, cls))
+            return None
+
+        def generate(data, level):
+            if level > 16: # recursion limit (arbitrary number)
+                raise TooComplexException()
+            else:
+                level += 1
+
+            if isinstance(data, dict):
+                try:
+                    type = data['__type__']
+                except KeyError:
+                    # if dictionary doesn't have __type__ then it is assumed to be just an ordinary dictionary
+                    o = {}
+                    for key, value in data.iteritems():
+                        o[key] = generate(value, level)
+                    return o
+
+                return construct(type, data, level)
+
+            if isinstance(data, list):
+                return [generate(item, level) for item in data]
+
+            return data
+
+        new_stored_data = {}
+        for id, data in json.load(fp).iteritems():
+            try:
+                new_stored_data[id] = generate(data, 0)
+            except TooComplexException:
+                logging.info('unable to load %s' % id)
+
+        self.stored_data = new_stored_data

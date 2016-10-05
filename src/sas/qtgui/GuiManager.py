@@ -110,7 +110,7 @@ class GuiManager(object):
         on request
         """
         # Add FileDialog widget as docked
-        self.filesWidget = DataExplorerWindow(self._parent, self)
+        self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
 
         self.dockedFilesWidget = QtGui.QDockWidget("Data Explorer", self._workspace)
         self.dockedFilesWidget.setWidget(self.filesWidget)
@@ -390,9 +390,9 @@ class GuiManager(object):
 
     def actionOpen_Project(self):
         """
+        Menu Open Project
         """
-        print("actionOpen_Project TRIGGERED")
-        pass
+        self.filesWidget.loadProject()
 
     def actionOpen_Analysis(self):
         """
@@ -402,9 +402,9 @@ class GuiManager(object):
 
     def actionSave(self):
         """
+        Menu Save Project
         """
-        print("actionSave TRIGGERED")
-        pass
+        self.filesWidget.saveProject()
 
     def actionSave_Analysis(self):
         """
