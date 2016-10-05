@@ -13,7 +13,7 @@ Windows
     http://web.engr.oregonstate.edu/~mjb/cs475/DoIHaveOpenCL.pdf
 
     * Go to: Start -> Control Panel -> Administrative Tools
-    * Double Click on Computer Managment
+    * Double Click on Computer Management
     * Click on Device Manager
     * Click open Display Adapters
     * Right-click on available adapter and select Properties
@@ -31,7 +31,7 @@ Mac OSX
 
 Windows
 =========
-    Depeneding on the graphic card on your system, drivers
+    Depending on the graphic card on your system, drivers
     can be obtained from different sources:
 
     * Nvidia: https://developer.nvidia.com/opencl

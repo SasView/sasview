@@ -1520,9 +1520,6 @@ class BasicPage(ScrolledPanel, PanelBase):
             else:
                 self.fitrange = False
 
-            if not self.data.is_data:
-                is_modified = True
-
             ## if any value is modify draw model with new value
             if not self.fitrange:
                 #self.btFit.Disable()
@@ -1538,6 +1535,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.state_change = True
                 self._draw_model()
                 self.Refresh()
+
+        logging.info("is_modified flag set to %g",is_modified)
         return is_modified
 
     def _update_paramv_on_fit(self):

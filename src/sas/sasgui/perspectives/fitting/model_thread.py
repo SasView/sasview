@@ -6,6 +6,7 @@ import time
 import numpy
 import math
 from sas.sascalc.data_util.calcthread import CalcThread
+from sas.sascalc.fit.MultiplicationModel import MultiplicationModel
 
 class Calc2D(CalcThread):
     """
@@ -165,15 +166,41 @@ class Calc1D(CalcThread):
         output = numpy.zeros((len(self.data.x)))
         index = (self.qmin <= self.data.x) & (self.data.x <= self.qmax)
 
+        # If we use a smearer, also return the unsmeared model
+        unsmeared_output = None
+        unsmeared_data = None
+        unsmeared_error = None
         ##smearer the ouput of the plot
         if self.smearer is not None:
             first_bin, last_bin = self.smearer.get_bin_range(self.qmin,
                                                              self.qmax)
             mask = self.data.x[first_bin:last_bin+1]
-            output[first_bin:last_bin+1] = self.model.evalDistribution(mask)
-            output = self.smearer(output, first_bin, last_bin)
+            unsmeared_output = numpy.zeros((len(self.data.x)))
+            unsmeared_output[first_bin:last_bin+1] = self.model.evalDistribution(mask)
+            output = self.smearer(unsmeared_output, first_bin, last_bin)
+            
+            # Rescale data to unsmeared model
+            unsmeared_data = numpy.zeros((len(self.data.x)))
+            unsmeared_error = numpy.zeros((len(self.data.x)))
+            unsmeared_data[first_bin:last_bin+1] = self.data.y[first_bin:last_bin+1]\
+                                                    * unsmeared_output[first_bin:last_bin+1]\
+                                                    / output[first_bin:last_bin+1]
+            unsmeared_error[first_bin:last_bin+1] = self.data.dy[first_bin:last_bin+1]\
+                                                    * unsmeared_output[first_bin:last_bin+1]\
+                                                    / output[first_bin:last_bin+1]
+            unsmeared_output=unsmeared_output[index]
+            unsmeared_data=unsmeared_data[index]
+            unsmeared_error=unsmeared_error
         else:
             output[index] = self.model.evalDistribution(self.data.x[index])
+
+        sq_model = None
+        pq_model = None
+        if isinstance(self.model, MultiplicationModel):
+            sq_model = numpy.zeros((len(self.data.x)))
+            pq_model = numpy.zeros((len(self.data.x)))
+            sq_model[index] = self.model.s_model.evalDistribution(self.data.x[index])
+            pq_model[index] = self.model.p_model.evalDistribution(self.data.x[index])
 
         elapsed = time.time() - self.starttime
 
@@ -186,7 +213,12 @@ class Calc1D(CalcThread):
                       elapsed=elapsed, index=index, model=self.model,
                       data=self.data,
                       update_chisqr=self.update_chisqr,
-                      source=self.source)
+                      source=self.source,
+                      unsmeared_model=unsmeared_output,
+                      unsmeared_data=unsmeared_data,
+                      unsmeared_error=unsmeared_error,
+                      pq_model=pq_model,
+                      sq_model=sq_model)
 
     def results(self):
         """

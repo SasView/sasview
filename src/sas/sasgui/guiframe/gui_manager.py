@@ -1344,23 +1344,29 @@ class ViewerFrame(PARENT_FRAME):
         wx_id = wx.NewId()
         self._help_menu.Append(wx_id, '&Documentation', '')
         wx.EVT_MENU(self, wx_id, self._onSphinxDocs)
+        self._help_menu.AppendSeparator()
 
         if config._do_tutorial and (IS_WIN or sys.platform == 'darwin'):
-            self._help_menu.AppendSeparator()
             wx_id = wx.NewId()
             self._help_menu.Append(wx_id, '&Tutorial', 'Software tutorial')
             wx.EVT_MENU(self, wx_id, self._onTutorial)
+            self._help_menu.AppendSeparator()
+
 
         if config._do_acknowledge:
-            self._help_menu.AppendSeparator()
             wx_id = wx.NewId()
             self._help_menu.Append(wx_id, '&Acknowledge', 'Acknowledging SasView')
             wx.EVT_MENU(self, wx_id, self._onAcknowledge)
+            self._help_menu.AppendSeparator()
+
 
         if config._do_aboutbox:
+            logging.info("Doing help menu")
+            wx_id = wx.NewId()
+            self._help_menu.Append(wx_id, '&About', 'Software information')
+            wx.EVT_MENU(self, wx_id, self._onAbout)
             self._help_menu.AppendSeparator()
-            self._help_menu.Append(wx.ID_ABOUT, '&About', 'Software information')
-            wx.EVT_MENU(self, wx.ID_ABOUT, self._onAbout)
+
 
         # Checking for updates
         wx_id = wx.NewId()

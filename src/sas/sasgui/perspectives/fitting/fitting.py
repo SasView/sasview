@@ -312,7 +312,7 @@ class Plugin(PluginBase):
         Update of models in plugin_models folder
         """
         event_id = event.GetId()
-        self.update_custom_combo()        
+        self.update_custom_combo()
 
     def update_custom_combo(self):
         """
@@ -341,8 +341,7 @@ class Plugin(PluginBase):
                             else:
                                 page.formfactorbox.SetLabel(current_val)
         except:
-            pass
-
+            logging.error("update_custom_combo: %s", sys.exc_value)
 
     def set_edit_menu(self, owner):
         """
@@ -1665,47 +1664,95 @@ class Plugin(PluginBase):
         msg = "Plot updating ... "
         wx.PostEvent(self.parent, StatusEvent(status=msg, type="update"))
 
+    def create_theory_1D(self, x, y, page_id, model, data, state,
+                         data_description, data_id, dy=None):
+        """
+            Create a theory object associate with an existing Data1D
+            and add it to the data manager.
+            @param x: x-values of the data
+            @param y: y_values of the data
+            @param page_id: fit page ID
+            @param model: model used for fitting
+            @param data: Data1D object to create the theory for
+            @param state: model state
+            @param data_description: title to use in the data manager
+            @param data_id: unique data ID
+        """
+        new_plot = Data1D(x=x, y=y)
+        if dy is None:
+            new_plot.is_data = False
+            new_plot.dy = numpy.zeros(len(y))
+            # If this is a theory curve, pick the proper symbol to make it a curve
+            new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
+        else:
+            new_plot.is_data = True
+            new_plot.dy = dy
+        new_plot.interactive = True
+        new_plot.dx = None
+        new_plot.dxl = None
+        new_plot.dxw = None
+        _yaxis, _yunit = data.get_yaxis()
+        _xaxis, _xunit = data.get_xaxis()
+        new_plot.title = data.name
+        new_plot.group_id = data.group_id
+        if new_plot.group_id == None:
+            new_plot.group_id = data.group_id
+        new_plot.id = data_id
+        # Find if this theory was already plotted and replace that plot given
+        # the same id
+        self.page_finder[page_id].get_theory_data(fid=data.id)
+
+        if data.is_data:
+            data_name = str(data.name)
+        else:
+            data_name = str(model.__class__.__name__)
+
+        new_plot.name = data_description + " [" + data_name + "]"
+        new_plot.xaxis(_xaxis, _xunit)
+        new_plot.yaxis(_yaxis, _yunit)
+        self.page_finder[page_id].set_theory_data(data=new_plot,
+                                                  fid=data.id)
+        self.parent.update_theory(data_id=data.id, theory=new_plot,
+                                   state=state)
+        return new_plot
+
     def _complete1D(self, x, y, page_id, elapsed, index, model,
                     weight=None, fid=None,
                     toggle_mode_on=False, state=None,
                     data=None, update_chisqr=True,
-                    source='model', plot_result=True):
+                    source='model', plot_result=True,
+                    unsmeared_model=None, unsmeared_data=None,
+                    unsmeared_error=None, sq_model=None, pq_model=None):
         """
-        Complete plotting 1D data
+            Complete plotting 1D data
+            @param unsmeared_model: fit model, without smearing
+            @param unsmeared_data: data, rescaled to unsmeared model
+            @param unsmeared_error: data error, rescaled to unsmeared model
         """
         try:
             numpy.nan_to_num(y)
+            new_plot = self.create_theory_1D(x, y, page_id, model, data, state,
+                                             data_description=model.name,
+                                             data_id=str(page_id) + " " + data.name)
+            if unsmeared_model is not None:
+                self.create_theory_1D(x, unsmeared_model, page_id, model, data, state,
+                                      data_description=model.name + " unsmeared",
+                                      data_id=str(page_id) + " " + data.name + " unsmeared")
 
-            new_plot = Data1D(x=x, y=y)
-            new_plot.is_data = False
-            new_plot.dy = numpy.zeros(len(y))
-            new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
-            _yaxis, _yunit = data.get_yaxis()
-            _xaxis, _xunit = data.get_xaxis()
-            new_plot.title = data.name
+                self.create_theory_1D(x, unsmeared_data, page_id, model, data, state,
+                                      data_description="Data unsmeared",
+                                      data_id="Data  " + data.name + " unsmeared",
+                                      dy=unsmeared_error)
+                
+            if sq_model is not None and pq_model is not None:
+                self.create_theory_1D(x, sq_model, page_id, model, data, state,
+                                      data_description=model.name + " S(q)",
+                                      data_id=str(page_id) + " " + data.name + " S(q)")
+                self.create_theory_1D(x, pq_model, page_id, model, data, state,
+                                      data_description=model.name + " P(q)",
+                                      data_id=str(page_id) + " " + data.name + " P(q)")
 
-            new_plot.group_id = data.group_id
-            if new_plot.group_id == None:
-                new_plot.group_id = data.group_id
-            new_plot.id = str(page_id) + " " + data.name
-            #if new_plot.id in self.color_dict:
-            #    new_plot.custom_color = self.color_dict[new_plot.id]
-            #find if this theory was already plotted and replace that plot given
-            #the same id
-            self.page_finder[page_id].get_theory_data(fid=data.id)
 
-            if data.is_data:
-                data_name = str(data.name)
-            else:
-                data_name = str(model.__class__.__name__)
-
-            new_plot.name = model.name + " [" + data_name + "]"
-            new_plot.xaxis(_xaxis, _xunit)
-            new_plot.yaxis(_yaxis, _yunit)
-            self.page_finder[page_id].set_theory_data(data=new_plot,
-                                                      fid=data.id)
-            self.parent.update_theory(data_id=data.id, theory=new_plot,
-                                       state=state)
             current_pg = self.fit_panel.get_page_by_id(page_id)
             title = new_plot.title
             batch_on = self.fit_panel.get_page_by_id(page_id).batch_on
