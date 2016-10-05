@@ -12,10 +12,12 @@ from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.guiframe.events import PanelOnFocusEvent
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.dataFitting import check_data_validity
+from sas.sasgui.perspectives.fitting.simfitpage import SimultaneousFitPage
 
 import basepage
 import models
 _BOX_WIDTH = 80
+
 
 class FitPanel(nb, PanelBase):
     """
@@ -25,9 +27,9 @@ class FitPanel(nb, PanelBase):
         on fit Panel window.
 
     """
-    ## Internal name for the AUI manager
+    # Internal name for the AUI manager
     window_name = "Fit panel"
-    ## Title to appear on top of the window
+    # Title to appear on top of the window
     window_caption = "Fit Panel "
     CENTER_PANE = True
 
@@ -39,30 +41,30 @@ class FitPanel(nb, PanelBase):
                     wx.aui.AUI_NB_DEFAULT_STYLE |
                     wx.CLIP_CHILDREN)
         PanelBase.__init__(self, parent)
-        #self.SetWindowStyleFlag(style=nb.FNB_FANCY_TABS)
+        # self.SetWindowStyleFlag(style=nb.FNB_FANCY_TABS)
         self._manager = manager
         self.parent = parent
         self.event_owner = None
-        #dictionary of miodel {model class name, model class}
+        # dictionary of miodel {model class name, model class}
         self.menu_mng = models.ModelManager()
         self.model_list_box = self.menu_mng.get_model_list()
-        #pageClosedEvent = nb.EVT_FLATNOTEBOOK_PAGE_CLOSING
+        # pageClosedEvent = nb.EVT_FLATNOTEBOOK_PAGE_CLOSING
         self.model_dictionary = self.menu_mng.get_model_dictionary()
         self.pageClosedEvent = wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE
 
         self.Bind(self.pageClosedEvent, self.on_close_page)
-        ## save the title of the last page tab added
+        # save the title of the last page tab added
         self.fit_page_name = {}
-        ## list of existing fit page
+        # list of existing fit page
         self.opened_pages = {}
-        #index of fit page
+        # index of fit page
         self.fit_page_index = 0
-        #index of batch page
+        # index of batch page
         self.batch_page_index = 0
-        #page of simultaneous fit
+        # page of simultaneous fit
         self.sim_page = None
         self.batch_page = None
-        ## get the state of a page
+        # get the state of a page
         self.Bind(basepage.EVT_PAGE_INFO, self._onGetstate)
         self.Bind(basepage.EVT_PREVIOUS_STATE, self._onUndo)
         self.Bind(basepage.EVT_NEXT_STATE, self._onRedo)
@@ -79,32 +81,27 @@ class FitPanel(nb, PanelBase):
     def save_project(self, doc=None):
         """
         return an xml node containing state of the panel
-         that guiframe can write to file
+        that guiframe can write to file
         """
-        msg = ""
+        # Iterate through all pages and check for batch fitting
+        batch_state = None
+        if self.sim_page is not None:
+            batch_state = self.sim_page.set_state()
+
         for uid, page in self.opened_pages.iteritems():
-            if page.batch_on:
-                pos = self.GetPageIndex(page)
-                if pos != -1 and page not in [self.sim_page, self.batch_page]:
-                    msg += "%s .\n" % str(self.GetPageText(pos))
-            else:
-                data = page.get_data()
-                # state must be cloned
-                state = page.get_state().clone()
-                if data is not None and page.model is not None:
-                    new_doc = self._manager.state_reader.write_toXML(data,
-                                                                     state)
-                    if doc != None and hasattr(doc, "firstChild"):
-                        child = new_doc.firstChild.firstChild
-                        doc.firstChild.appendChild(child)
-                    else:
-                        doc = new_doc
-        if msg.strip() != "":
-            temp = "Save Project is not supported for Batch page.\n"
-            temp += "The following pages will not be save:\n"
-            message = temp + msg
-            wx.PostEvent(self._manager.parent, StatusEvent(status=message,
-                                                            info="warning"))
+            data = page.get_data()
+            # state must be cloned
+            state = page.get_state().clone()
+            if data is not None or page.model is not None:
+                new_doc = self._manager.state_reader.write_toXML(data,
+                                                                 state,
+                                                                 batch_state)
+                if doc is not None and hasattr(doc, "firstChild"):
+                    child = new_doc.firstChild.firstChild
+                    doc.firstChild.appendChild(child)
+                else:
+                    doc = new_doc
+
         return doc
 
     def update_model_list(self):
@@ -362,7 +359,7 @@ class FitPanel(nb, PanelBase):
             caption = "BatchPage" + str(self.batch_page_index)
             panel.set_index_model(self.batch_page_index)
         else:
-            #Increment index of fit page
+            # Increment index of fit page
             panel = FitPage(parent=self)
             self.fit_page_index += 1
             caption = "FitPage" + str(self.fit_page_index)
@@ -525,7 +522,7 @@ class FitPanel(nb, PanelBase):
                     self.SetPageText(pos, page.window_caption)
                     self.SetSelection(pos)
                     return page
-        #create new page and add data
+        # create new page and add data
         page = self.add_empty_page()
         pos = self.GetPageIndex(page)
         page.fill_data_combobox(data_list)
