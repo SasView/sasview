@@ -4,7 +4,7 @@
 #####################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation. 
+#project funded by the US National Science Foundation.
 #See the license text in license.txt
 #copyright 2008, University of Tennessee
 ######################################################################
@@ -15,6 +15,7 @@ import sys
 
 from sasmodels.resolution import Slit1D, Pinhole1D
 from sasmodels.resolution2d import Pinhole2D
+from sasmodels import sesans
 
 def smear_selection(data, model = None):
     """
@@ -81,7 +82,33 @@ def smear_selection(data, model = None):
     # If we found slit smearing data, return a slit smearer
     if _found_slit == True:
         return slit_smear(data, model)
+
+    # Look for sesans
+    _found_sesans = False
+    if data.hasattr(lam):
+        _found_sesans = True
+        logging.info("Found SESANS data!!")
+
+    # If we found sesans data, do the necessary jiggery pokery
+    if _found_sesans == True:
+        return sesans_smear(data, model)
+
     return None
+
+def sesans_smear(data, model=None):
+    q = sesans.make_q(data.sample.zacceptance, data.Rmax)
+    index = slice(None, None)
+    res = None
+    if data.y is not None:
+        Iq, dIq = data.y, data.dy
+    else:
+        Iq, dIq = None, None
+    #self._theory = np.zeros_like(q)
+    q_vectors = [q]
+    q_mono = sesans.make_all_q(data)
+    Iq = model.evalDistribution(q_mono)
+
+    return sesans.transform(data, q, Iq, 0, 0)
 
 
 class PySmear(object):
