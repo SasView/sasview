@@ -165,13 +165,17 @@ class Calc1D(CalcThread):
         output = numpy.zeros((len(self.data.x)))
         index = (self.qmin <= self.data.x) & (self.data.x <= self.qmax)
 
+        # If we use a smearer, also return the unsmeared model
+        output_unsmeared = None
         ##smearer the ouput of the plot
         if self.smearer is not None:
             first_bin, last_bin = self.smearer.get_bin_range(self.qmin,
                                                              self.qmax)
             mask = self.data.x[first_bin:last_bin+1]
-            output[first_bin:last_bin+1] = self.model.evalDistribution(mask)
-            output = self.smearer(output, first_bin, last_bin)
+            output_unsmeared = numpy.zeros((len(self.data.x)))
+            output_unsmeared[first_bin:last_bin+1] = self.model.evalDistribution(mask)
+            output = self.smearer(output_unsmeared, first_bin, last_bin)
+            output_unsmeared = output_unsmeared[index]
         else:
             output[index] = self.model.evalDistribution(self.data.x[index])
 
@@ -186,7 +190,8 @@ class Calc1D(CalcThread):
                       elapsed=elapsed, index=index, model=self.model,
                       data=self.data,
                       update_chisqr=self.update_chisqr,
-                      source=self.source)
+                      source=self.source,
+                      unsmeared_model=output_unsmeared)
 
     def results(self):
         """
