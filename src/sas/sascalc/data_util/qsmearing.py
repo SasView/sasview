@@ -47,6 +47,16 @@ def smear_selection(data, model = None):
          and not hasattr(data, "dxw"):
         return None
 
+    # Look for sesans
+    _found_sesans = False
+    if hasattr(data,'lam') :
+        _found_sesans = True
+        logging.info("Found SESANS data!!")
+
+    # If we found sesans data, do the necessary jiggery pokery
+    if _found_sesans == True:
+        return sesans_smear(data, model)
+
     # Look for resolution smearing data
     _found_resolution = False
     if data.dx is not None and len(data.dx) == len(data.x):
@@ -82,16 +92,6 @@ def smear_selection(data, model = None):
     # If we found slit smearing data, return a slit smearer
     if _found_slit == True:
         return slit_smear(data, model)
-
-    # Look for sesans
-    _found_sesans = False
-    if data.hasattr(lam):
-        _found_sesans = True
-        logging.info("Found SESANS data!!")
-
-    # If we found sesans data, do the necessary jiggery pokery
-    if _found_sesans == True:
-        return sesans_smear(data, model)
 
     return None
 
