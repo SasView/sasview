@@ -166,16 +166,30 @@ class Calc1D(CalcThread):
         index = (self.qmin <= self.data.x) & (self.data.x <= self.qmax)
 
         # If we use a smearer, also return the unsmeared model
-        output_unsmeared = None
+        unsmeared_output = None
+        unsmeared_data = None
+        unsmeared_error = None
         ##smearer the ouput of the plot
         if self.smearer is not None:
             first_bin, last_bin = self.smearer.get_bin_range(self.qmin,
                                                              self.qmax)
             mask = self.data.x[first_bin:last_bin+1]
-            output_unsmeared = numpy.zeros((len(self.data.x)))
-            output_unsmeared[first_bin:last_bin+1] = self.model.evalDistribution(mask)
-            output = self.smearer(output_unsmeared, first_bin, last_bin)
-            output_unsmeared = output_unsmeared[index]
+            unsmeared_output = numpy.zeros((len(self.data.x)))
+            unsmeared_output[first_bin:last_bin+1] = self.model.evalDistribution(mask)
+            output = self.smearer(unsmeared_output, first_bin, last_bin)
+            
+            # Rescale data to unsmeared model
+            unsmeared_data = numpy.zeros((len(self.data.x)))
+            unsmeared_error = numpy.zeros((len(self.data.x)))
+            unsmeared_data[first_bin:last_bin+1] = self.data.y[first_bin:last_bin+1]\
+                                                    * unsmeared_output[first_bin:last_bin+1]\
+                                                    / output[first_bin:last_bin+1]
+            unsmeared_error[first_bin:last_bin+1] = self.data.dy[first_bin:last_bin+1]\
+                                                    * unsmeared_output[first_bin:last_bin+1]\
+                                                    / output[first_bin:last_bin+1]
+            unsmeared_output=unsmeared_output[index]
+            unsmeared_data=unsmeared_data[index]
+            unsmeared_error=unsmeared_error
         else:
             output[index] = self.model.evalDistribution(self.data.x[index])
 
@@ -191,7 +205,9 @@ class Calc1D(CalcThread):
                       data=self.data,
                       update_chisqr=self.update_chisqr,
                       source=self.source,
-                      unsmeared_model=output_unsmeared)
+                      unsmeared_model=unsmeared_output,
+                      unsmeared_data=unsmeared_data,
+                      unsmeared_error=unsmeared_error)
 
     def results(self):
         """

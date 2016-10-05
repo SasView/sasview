@@ -1665,7 +1665,7 @@ class Plugin(PluginBase):
         wx.PostEvent(self.parent, StatusEvent(status=msg, type="update"))
 
     def create_theory_1D(self, x, y, page_id, model, data, state,
-                         data_description, data_id):
+                         data_description, data_id, dy=None):
         """
             Create a theory object associate with an existing Data1D
             and add it to the data manager.
@@ -1679,13 +1679,18 @@ class Plugin(PluginBase):
             @param data_id: unique data ID
         """
         new_plot = Data1D(x=x, y=y)
-        new_plot.is_data = False
-        new_plot.dy = numpy.zeros(len(y))
-        new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
+        new_plot.is_data = dy is not None
+        new_plot.interactive = True
+        new_plot.dy = dy
+        new_plot.dx = None
+        new_plot.dxl = None
+        new_plot.dxw = None
+        # If this is a theory curve, pick the proper symbol to make it a curve
+        if not new_plot.is_data:
+            new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
         _yaxis, _yunit = data.get_yaxis()
         _xaxis, _xunit = data.get_xaxis()
         new_plot.title = data.name
-
         new_plot.group_id = data.group_id
         if new_plot.group_id == None:
             new_plot.group_id = data.group_id
@@ -1712,10 +1717,13 @@ class Plugin(PluginBase):
                     weight=None, fid=None,
                     toggle_mode_on=False, state=None,
                     data=None, update_chisqr=True,
-                    source='model', plot_result=True, unsmeared_model=None):
+                    source='model', plot_result=True,
+                    unsmeared_model=None, unsmeared_data=None,
+                    unsmeared_error=None):
         """
             Complete plotting 1D data
             @param unsmeared_model: fit model, without smearing
+            @param unsmeared_data: data, rescaled to unsmeared model
         """
         try:
             numpy.nan_to_num(y)
@@ -1723,9 +1731,15 @@ class Plugin(PluginBase):
                                              data_description=model.name,
                                              data_id=str(page_id) + " " + data.name)
             if unsmeared_model is not None:
+                logging.error(str(unsmeared_error))
                 self.create_theory_1D(x, unsmeared_model, page_id, model, data, state,
                                       data_description=model.name + " unsmeared",
                                       data_id=str(page_id) + " " + data.name + " unsmeared")
+
+                self.create_theory_1D(x, unsmeared_data, page_id, model, data, state,
+                                      data_description="Data unsmeared",
+                                      data_id="Data  " + data.name + " unsmeared",
+                                      dy=unsmeared_error)
 
             current_pg = self.fit_panel.get_page_by_id(page_id)
             title = new_plot.title
