@@ -1679,15 +1679,18 @@ class Plugin(PluginBase):
             @param data_id: unique data ID
         """
         new_plot = Data1D(x=x, y=y)
-        new_plot.is_data = dy is not None
+        if dy is None:
+            new_plot.is_data = False
+            new_plot.dy = numpy.zeros(len(y))
+            # If this is a theory curve, pick the proper symbol to make it a curve
+            new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
+        else:
+            new_plot.is_data = True
+            new_plot.dy = dy
         new_plot.interactive = True
-        new_plot.dy = dy
         new_plot.dx = None
         new_plot.dxl = None
         new_plot.dxw = None
-        # If this is a theory curve, pick the proper symbol to make it a curve
-        if not new_plot.is_data:
-            new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
         _yaxis, _yunit = data.get_yaxis()
         _xaxis, _xunit = data.get_xaxis()
         new_plot.title = data.name
