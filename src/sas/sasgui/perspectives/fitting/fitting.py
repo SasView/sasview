@@ -1727,6 +1727,7 @@ class Plugin(PluginBase):
             Complete plotting 1D data
             @param unsmeared_model: fit model, without smearing
             @param unsmeared_data: data, rescaled to unsmeared model
+            @param unsmeared_error: data error, rescaled to unsmeared model
         """
         try:
             numpy.nan_to_num(y)
@@ -1734,7 +1735,6 @@ class Plugin(PluginBase):
                                              data_description=model.name,
                                              data_id=str(page_id) + " " + data.name)
             if unsmeared_model is not None:
-                logging.error(str(unsmeared_error))
                 self.create_theory_1D(x, unsmeared_model, page_id, model, data, state,
                                       data_description=model.name + " unsmeared",
                                       data_id=str(page_id) + " " + data.name + " unsmeared")
