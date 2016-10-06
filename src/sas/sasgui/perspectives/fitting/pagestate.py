@@ -859,14 +859,13 @@ class PageState(object):
 
         :param file: .fitv file
         :param node: node of a XML document to read from
-
         """
         if file is not None:
             msg = "PageState no longer supports non-CanSAS"
             msg += " format for fitting files"
             raise RuntimeError, msg
 
-        if node.get('version')and node.get('version') == '1.0':
+        if node.get('version') and node.get('version') == '1.0':
 
             # Get file name
             entry = get_content('ns:filename', node)
@@ -1271,7 +1270,6 @@ class Reader(CansasReader):
         Read a fit result from an XML node
 
         :param entry: XML node to read from
-
         :return: PageState object
         """
         # Create an empty state
@@ -1280,7 +1278,7 @@ class Reader(CansasReader):
         try:
             nodes = entry.xpath('ns:%s' % FITTING_NODE_NAME,
                                 namespaces={'ns': CANSAS_NS})
-            if nodes != []:
+            if nodes:
                 # Create an empty state
                 state = PageState()
                 state.fromXML(node=nodes[0])
@@ -1290,6 +1288,45 @@ class Reader(CansasReader):
                          + traceback.format_exc())
 
         return state
+
+    def _parse_simfit_state(self, entry):
+        """
+        Parses the saved data for a simultaneous fit
+        :param entry: XML object to read from
+        :return: XML object for a simultaneous fit or None
+        """
+        nodes = entry.xpath('ns:%s' % FITTING_NODE_NAME,
+                            namespaces={'ns': CANSAS_NS})
+        if nodes:
+            simfitstate = nodes[0].xpath('ns:simultaneous_fit',
+                                         namespaces={'ns': CANSAS_NS})
+            if simfitstate:
+                from simfitpage import SimFitPageState
+                sim_fit_state = SimFitPageState()
+                simfitstate_0 = simfitstate[0]
+                all = simfitstate_0.xpath('ns:select_all',
+                                        namespaces={'ns': CANSAS_NS})
+                atts = all[0].attrib
+                checked = atts.get('checked')
+                sim_fit_state.select_all = bool(checked)
+                model_list = simfitstate_0.xpath('ns:model_list',
+                                               namespaces={'ns': CANSAS_NS})
+                model_list_items = model_list[0].xpath('ns:model_list_item',
+                                                       namespaces={'ns': CANSAS_NS})
+                for model in model_list_items:
+                    attrs = model.attrib
+                    sim_fit_state.model_list.append(attrs)
+                constraints = simfitstate_0.xpath('ns:constraints',
+                                                namespaces={'ns': CANSAS_NS})
+                constraint_list = constraints[0].xpath('ns:constraint',
+                                                       namespaces={'ns': CANSAS_NS})
+                for constraint in constraint_list:
+                    attrs = constraint.attrib
+                    sim_fit_state.constraints_list.append(attrs)
+
+                return sim_fit_state
+            else:
+                return None
 
     def _parse_save_state_entry(self, dom):
         """
@@ -1551,19 +1588,17 @@ class Reader(CansasReader):
 
     def _read_cansas(self, path):
         """
-        Load data and P(r) information from a CanSAS XML file.
+        Load data and fitting information from a CanSAS XML file.
 
         :param path: file path
-
         :return: Data1D object if a single SASentry was found,
                     or a list of Data1D objects if multiple entries were found,
                     or None of nothing was found
-
         :raise RuntimeError: when the file can't be opened
         :raise ValueError: when the length of the data vectors are inconsistent
-
         """
         output = []
+        simfitstate = None
         basename = os.path.basename(path)
         root, extension = os.path.splitext(basename)
         ext = extension.lower()
@@ -1583,6 +1618,7 @@ class Reader(CansasReader):
                         except:
                             raise
                         fitstate = self._parse_state(entry)
+                        simfitstate = self._parse_simfit_state(entry)
 
                         # state could be None when .svs file is loaded
                         # in this case, skip appending to output
@@ -1590,6 +1626,7 @@ class Reader(CansasReader):
                             sas_entry.meta_data['fitstate'] = fitstate
                             sas_entry.filename = fitstate.file
                             output.append(sas_entry)
+
             else:
                 self.call_back(format=ext)
                 raise RuntimeError, "%s is not a file" % path
@@ -1633,6 +1670,9 @@ class Reader(CansasReader):
                     self.call_back(state=state,
                                    datainfo=output[ind], format=ext)
                     self.state = state
+                if simfitstate is not None:
+                    self.call_back(state=simfitstate)
+
                 return output
         except:
             self.call_back(format=ext)
