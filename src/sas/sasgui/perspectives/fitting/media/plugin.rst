@@ -3,6 +3,8 @@
 Writing a Plugin Model
 ======================
 
+.. note:: If some code blocks are not readable, expand the documentation window
+
 Overview
 ^^^^^^^^
 

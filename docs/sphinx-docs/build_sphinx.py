@@ -34,6 +34,7 @@ SASVIEW_TEST = os.path.join(SASVIEW_SRC, "..", "sasview", "test", "media")
 # We are currently here:
 #/sasview-local-trunk/docs/sphinx-docs/build_sphinx.py
 SASMODELS_SOURCE_PROLOG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc")
+SASMODELS_SOURCE_SESANS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "ref", "sesans")
 SASMODELS_SOURCE_MAGNETISM = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "ref", "magnetism")
 SASMODELS_SOURCE_MAGIMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "ref", "magnetism", "mag_img")
 SASMODELS_SOURCE_REF_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "ref", "models")
@@ -70,6 +71,7 @@ SPHINX_SOURCE_GUIFRAME = os.path.join(SPHINX_SOURCE, "user", "sasgui", "guiframe
 SPHINX_SOURCE_MODELS = os.path.join(SPHINX_SOURCE, "user", "models")
 SPHINX_SOURCE_PERSPECTIVES = os.path.join(SPHINX_SOURCE, "user", "sasgui", "perspectives")
 SPHINX_SOURCE_TEST = os.path.join(SPHINX_SOURCE, "test")
+SPHINX_SOURCE_USER = os.path.join(SPHINX_SOURCE, "user")
 
 BUMPS_DOCS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..",
                           "bumps", "doc", "guide")
@@ -187,6 +189,17 @@ def retrieve_user_docs():
                 if files.startswith("rst"):
                     fromhere=os.path.join(SASMODELS_SOURCE_PROLOG,files)
                     tohere=os.path.join(SASMODELS_DEST_PROLOG,files)
+                    shutil.copy(fromhere,tohere)
+
+    if os.path.exists(SASMODELS_SOURCE_SESANS):
+        print "Found docs folder SASMODELS_SOURCE_SESANS at ", SASMODELS_SOURCE_SESANS
+        if os.path.exists(SPHINX_SOURCE_USER):
+            print "Found docs folder SPHINX_SOURCE_USER      at ", SPHINX_SOURCE_USER
+            print "Copying sasmodels sesans files..."
+            for files in os.listdir(SASMODELS_SOURCE_SESANS):
+                if files.endswith(".rst"):
+                    fromhere=os.path.join(SASMODELS_SOURCE_SESANS,files)
+                    tohere=os.path.join(SPHINX_SOURCE_USER,files)
                     shutil.copy(fromhere,tohere)
 
     if os.path.exists(SASMODELS_SOURCE_MAGNETISM):

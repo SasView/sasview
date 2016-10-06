@@ -1,3 +1,5 @@
+.. _analysis:
+
 Types of Analysis
 =================
 
@@ -5,9 +7,11 @@ Types of Analysis
 
 .. toctree::
    :maxdepth: 1
-   
+
    Model Fitting <sasgui/perspectives/fitting/fitting>
-   
+
    P(r) Inversion <sasgui/perspectives/pr/pr_help>
-   
+
    Invariant Calculation <sasgui/perspectives/invariant/invariant_help>
+
+   Correlation Function <sasgui/perspectives/corfunc/corfunc_help>
