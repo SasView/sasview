@@ -147,6 +147,14 @@ class SasView():
                           APP_NAME)
             logging.error(traceback.format_exc())
 
+        # Corfunc perspective
+        try:
+            import sas.sasgui.perspectives.corfunc as module
+            corfunc_plug = module.Plugin()
+            self.gui.add_perspective(corfunc_plug)
+        except:
+            logging.error("Unable to load corfunc module")
+
         #Calculator perspective
         try:
             import sas.sasgui.perspectives.calculator as module
