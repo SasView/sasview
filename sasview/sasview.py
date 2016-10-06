@@ -157,6 +157,16 @@ class SasView():
                                                         APP_NAME)
             logging.error(traceback.format_exc())
 
+        # File converter tool
+        try:
+            import sas.sasgui.perspectives.file_converter as module
+            converter_plug = module.Plugin()
+            self.gui.add_perspective(converter_plug)
+        except:
+            logging.error("%s: could not find File Converter plug-in module"% \
+                                                        APP_NAME)
+            logging.error(traceback.format_exc())
+
 
         # Add welcome page
         self.gui.set_welcome_panel(WelcomePanel)
