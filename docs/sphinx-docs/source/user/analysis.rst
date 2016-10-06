@@ -1,3 +1,5 @@
+.. _analysis:
+
 Types of Analysis
 =================
 
