@@ -11,7 +11,7 @@ branches:
 virtualenv:
   system_site_packages: true
 before_install:
-  - 'if [ $TRAVIS_PYTHON_VERSION == "2.7" ]; then sudo apt-get update;sudo apt-get install python-matplotlib libhdf5-serial-dev python-h5py fglrx opencl-headers python-pyopencl; fi'
+  - 'if [ $TRAVIS_PYTHON_VERSION == "2.7" ]; then sudo apt-get update;sudo apt-get install python-matplotlib libhdf5-serial-dev python-h5py fglrx opencl-headers python-pyopencl gfortran libblas-dev liblapack-dev libatlas-dev; fi'
 
 install:
   - pip install -r build_tools/requirements.txt
