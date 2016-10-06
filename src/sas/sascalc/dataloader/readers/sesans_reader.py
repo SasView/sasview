@@ -7,7 +7,7 @@
 """
 import numpy
 import os
-from sas.sascalc.dataloader.data_info import SESANSData1D
+from sas.sascalc.dataloader.data_info import Data1D
 
 # Check whether we have a converter available
 has_converter = True
@@ -83,7 +83,7 @@ class Reader:
                 tdlam = numpy.zeros(0)
                 tdx = numpy.zeros(0)
 #                print "all good"
-                output = SESANSData1D(x=x, y=y, lam=lam, dy=dy, dx=dx, dlam=dlam)
+                output = Data1D(x=x, y=y, lam=lam, dy=dy, dx=dx, dlam=dlam)
 #                print output                
                 self.filename = output.filename = basename
 
