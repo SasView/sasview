@@ -43,12 +43,12 @@ _acknowledgement_preamble_bullet4 =\
 _acknowledgement_publications = \
 '''This work benefited from the use of the SasView application, originally developed under NSF Award 
 DMR-0520547. SasView also contains code developed with funding from the EU Horizon 2020 research 
-and innovation programme under the SINE2020 project Grant No 654000.'''
+and innovation programme under the SINE2020 project Grant No 654000 and by Adam Washington.'''
 
 _acknowledgement =  \
 '''This work was originally developed as part of the DANSE project funded by the US NSF under Award DMR-0520547, but is currently maintained by a 
 collaboration between UTK, UMD, NIST, ORNL, ISIS, ESS, ILL and ANSTO. SasView also contains code developed with funding from the EU Horizon 2020 
-research and innovation programme under the SINE2020 project (Grant No 654000).'''
+research and innovation programme under the SINE2020 project (Grant No 654000) and by Adam Washington (corfunc-py).'''
 
 _homepage = "http://www.sasview.org"
 _download = __download_page__
