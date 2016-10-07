@@ -142,6 +142,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.theory_qmax = None
         self.theory_qmin_x = None
         self.theory_qmax_x = None
+        self.cb1 = None
         self.btEditMask = None
         self.btFit = None
         self.sld_axes = None
@@ -473,6 +474,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.sizer1 = wx.BoxSizer(wx.VERTICAL)
         self.sizer2 = wx.BoxSizer(wx.VERTICAL)
         self.sizer3 = wx.BoxSizer(wx.VERTICAL)
+        self.sizerTrafo = wx.BoxSizer(wx.VERTICAL)
         self.sizer4 = wx.BoxSizer(wx.VERTICAL)
         self.sizer5 = wx.BoxSizer(wx.VERTICAL)
         self.sizer6 = wx.BoxSizer(wx.VERTICAL)
@@ -481,6 +483,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.sizer1.SetMinSize((PANEL_WIDTH, -1))
         self.sizer2.SetMinSize((PANEL_WIDTH, -1))
         self.sizer3.SetMinSize((PANEL_WIDTH, -1))
+        self.sizerTrafo.SetMinSize((PANEL_WIDTH, -1))
         self.sizer4.SetMinSize((PANEL_WIDTH, -1))
         self.sizer5.SetMinSize((PANEL_WIDTH, -1))
         self.sizer6.SetMinSize((PANEL_WIDTH, -1))
@@ -489,6 +492,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.vbox.Add(self.sizer1)
         self.vbox.Add(self.sizer2)
         self.vbox.Add(self.sizer3)
+        self.vbox.Add(self.sizerTrafo)
         self.vbox.Add(self.sizer4)
         self.vbox.Add(self.sizer5)
         self.vbox.Add(self.sizer6)
@@ -1195,6 +1199,9 @@ class BasicPage(ScrolledPanel, PanelBase):
             return
         # set data, etc. from the state
         # reset page between theory and fitting from bookmarking
+        #if state.data == None:
+        #    data = None
+        #else:
         data = state.data
 
         if data == None:
@@ -1220,6 +1227,12 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         self.disp_cb_dict = state.disp_cb_dict
         self.disp_list = state.disp_list
+
+        ## set the state of the radio box
+        #self.shape_rbutton.SetValue(state.shape_rbutton)
+        #self.shape_indep_rbutton.SetValue(state.shape_indep_rbutton)
+        #self.struct_rbutton.SetValue(state.struct_rbutton)
+        #self.plugin_rbutton.SetValue(state.plugin_rbutton)
 
         ## fill model combobox
         self._show_combox_helper()
@@ -1275,6 +1288,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.model_view.SetLabel("2D Mode")
             else:
                 self.model_view.SetLabel("1D Mode")
+
+        ## set the select all check box to the a given state
+        self.cb1.SetValue(state.cb1)
 
         ## reset state of checkbox,textcrtl  and  regular parameters value
         self._reset_parameters_state(self.orientation_params_disp,
@@ -1405,6 +1421,10 @@ class BasicPage(ScrolledPanel, PanelBase):
                         except Exception:
                             logging.error(traceback.format_exc())
 
+        # Make sure the check box updated when all checked
+        if self.cb1.GetValue():
+            self.select_all_param(None)
+
     def _selectDlg(self):
         """
         open a dialog file to selected the customized dispersity
@@ -1503,6 +1523,9 @@ class BasicPage(ScrolledPanel, PanelBase):
             else:
                 self.fitrange = False
 
+            if not self.data.is_data:
+                is_modified = True
+
             ## if any value is modify draw model with new value
             if not self.fitrange:
                 #self.btFit.Disable()
@@ -1518,8 +1541,6 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.state_change = True
                 self._draw_model()
                 self.Refresh()
-
-        logging.info("is_modified flag set to %g",is_modified)
         return is_modified
 
     def _update_paramv_on_fit(self):
@@ -2539,8 +2560,10 @@ class BasicPage(ScrolledPanel, PanelBase):
                     else:
                         item[2].Enable()
 
-            # Make sure the check box updated
-            self.get_all_checked_params()
+            # Make sure the check box updated when all checked
+            if self.cb1.GetValue():
+                #self.select_all_param(None)
+                self.get_all_checked_params()
 
             # update params
             self._update_paramv_on_fit()
@@ -3694,6 +3717,10 @@ class BasicPage(ScrolledPanel, PanelBase):
     def _on_select_model(self, event=None):
         """
         call back for model selection if implemented
+        """
+    def select_all_param(self, event):
+        """
+        set to true or false all checkBox if implemented
         """
     def get_weight_flag(self):
         """
