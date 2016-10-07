@@ -238,9 +238,9 @@ f = 'local_config.py'
 if os.path.isfile(f):
     data_files.append(('.', [f]))
 
-f = 'default_categories.json'
-if os.path.isfile(f):
-    data_files.append(('.', [f]))
+#f = 'default_categories.json'
+#if os.path.isfile(f):
+#    data_files.append(('.', [f]))
 
 # numerical libraries
 def dll_check(dll_path, dlls):
