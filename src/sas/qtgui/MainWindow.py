@@ -64,7 +64,10 @@ class MainSasViewWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.guiManager = GuiManager(self, reactor, self)
 
     def closeEvent(self, event):
-        self.guiManager.quitApplication()
+        if self.guiManager.quitApplication():
+            event.accept()
+        else:
+            event.ignore()
 
 
 def SplashScreen():

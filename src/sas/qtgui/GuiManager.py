@@ -237,16 +237,17 @@ class GuiManager(object):
         quit_msg = "Are you sure you want to exit the application?"
         reply = QtGui.QMessageBox.question(
             self._parent,
-            'Warning',
+            'Information',
             quit_msg,
             QtGui.QMessageBox.Yes,
             QtGui.QMessageBox.No)
 
-        if reply == QtGui.QMessageBox.No:
-            return
-
         # Exit if yes
-        reactor.callFromThread(reactor.stop)
+        if reply == QtGui.QMessageBox.Yes:
+            reactor.callFromThread(reactor.stop)
+            return True
+
+        return False
 
     def checkUpdate(self):
         """
