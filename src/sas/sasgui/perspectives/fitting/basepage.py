@@ -3446,20 +3446,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.master_category_dict = defaultdict(list)
         self.by_model_dict = defaultdict(list)
         self.model_enabled_dict = defaultdict(bool)
-
-        try:
-            categorization_file = CategoryInstaller.get_user_file()
-            if not os.path.isfile(categorization_file):
-                categorization_file = CategoryInstaller.get_default_file()
-            cat_file = open(categorization_file, 'rb')
-            self.master_category_dict = json.load(cat_file)
-            self._regenerate_model_dict()
-            cat_file.close()
-        except IOError:
-            raise
-            print 'Problem reading in category file.'
-            print 'We even looked for it, made sure it was there.'
-            print 'An existential crisis if there ever was one.'
+        categorization_file = CategoryInstaller.get_user_file()
+        with open(categorization_file, 'rb') as f:
+            self.master_category_dict = json.load(f)
+        self._regenerate_model_dict()
 
     def _regenerate_model_dict(self):
         """
