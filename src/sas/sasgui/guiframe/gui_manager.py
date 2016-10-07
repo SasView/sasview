@@ -1332,41 +1332,44 @@ class ViewerFrame(PARENT_FRAME):
                         self._menubar.Insert(self._applications_menu_pos, menu, name)
                     self._applications_menu_name = name
 
+    def _on_marketplace_click(self, event):
+        """
+            Click event for the help menu item linking to the Marketplace.
+        """
+        import webbrowser
+        webbrowser.open_new(config.marketplace_url)
+
     def _add_help_menu(self):
         """
         add help menu to menu bar.  Includes welcome page, about page,
         tutorial PDF and documentation pages.
         """
-        # Help menu
         self._help_menu = wx.Menu()
-        style = self.__gui_style & GUIFRAME.WELCOME_PANEL_ON
 
         wx_id = wx.NewId()
         self._help_menu.Append(wx_id, '&Documentation', '')
         wx.EVT_MENU(self, wx_id, self._onSphinxDocs)
-        self._help_menu.AppendSeparator()
 
         if config._do_tutorial and (IS_WIN or sys.platform == 'darwin'):
             wx_id = wx.NewId()
             self._help_menu.Append(wx_id, '&Tutorial', 'Software tutorial')
             wx.EVT_MENU(self, wx_id, self._onTutorial)
-            self._help_menu.AppendSeparator()
-
 
         if config._do_acknowledge:
             wx_id = wx.NewId()
             self._help_menu.Append(wx_id, '&Acknowledge', 'Acknowledging SasView')
             wx.EVT_MENU(self, wx_id, self._onAcknowledge)
-            self._help_menu.AppendSeparator()
-
 
         if config._do_aboutbox:
             logging.info("Doing help menu")
             wx_id = wx.NewId()
             self._help_menu.Append(wx_id, '&About', 'Software information')
             wx.EVT_MENU(self, wx_id, self._onAbout)
-            self._help_menu.AppendSeparator()
 
+        if config.marketplace_url:
+            wx_id = wx.NewId()
+            self._help_menu.Append(wx_id, '&Model marketplace', '')
+            wx.EVT_MENU(self, wx_id, self._on_marketplace_click)
 
         # Checking for updates
         wx_id = wx.NewId()

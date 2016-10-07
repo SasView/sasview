@@ -87,7 +87,7 @@ _inst_url = "http://www.utk.edu"
 _corner_image = os.path.join(icon_path, "angles_flat.png")
 _welcome_image = os.path.join(icon_path, "SVwelcome.png")
 _copyright = "(c) 2009 - 2016, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL and ANSTO"
-
+marketplace_url = "http://marketplace.sasview.org/"
 
 #edit the list of file state your plugin can read
 APPLICATION_WLIST = 'SasView files (*.svs)|*.svs'
