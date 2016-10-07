@@ -20,8 +20,7 @@ class WelcomePanel(QtGui.QDialog, Ui_WelcomePanelUI):
         version = sas.sasview.__version__
         build = sas.sasview.__build__
 
-        ver = "\nSasView %s\nBuild: %s" % (version, build)
-        ver += LocalConfig._copyright
+        ver = "\nSasView %s\nBuild: %s\n%s" % (version, build, LocalConfig._copyright)
 
         self.lblVersion.setText(ver)
 

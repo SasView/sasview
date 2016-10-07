@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>658</width>
-    <height>711</height>
+    <width>746</width>
+    <height>947</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,6 +21,9 @@
      </property>
      <property name="pixmap">
       <pixmap resource="main_resources.qrc">:/res/SVwelcome.png</pixmap>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
     </widget>
    </item>
@@ -40,9 +43,10 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>This work originally developed as part of the DANSE project funded by the NSF
-under grant DMR-0520547, and currently maintained by NIST, UMD, ORNL, ISIS, ESS
-and ILL.</string>
+      <string>This work originally developed as part of the DANSE project funded by the NSF under grant DMR-0520547, and currently maintained by NIST, UMD, ORNL, ISIS, ESS, ILL and ANSTO.</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
@@ -55,7 +59,7 @@ and ILL.</string>
       </sizepolicy>
      </property>
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;SasView 4.0.0-Alpha&lt;br/&gt;Build: 1&lt;br/&gt;(c) 2009 - 2013, UTK, UMD, NIST, ORNL, ISIS, ESS and ILL&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;SasView 4.0.0-Alpha&lt;br/&gt;Build: 1&lt;br/&gt;(c) 2009 - 2017, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL and ANSTO&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
    </item>
