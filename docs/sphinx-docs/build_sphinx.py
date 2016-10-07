@@ -217,7 +217,6 @@ def retrieve_user_docs():
                     tohere=os.path.join(SPHINX_SOURCE_USER,files)
                     shutil.copy(fromhere,tohere)
 
-
     if os.path.exists(SASMODELS_SOURCE_SESANS):
         print "Found docs folder SASMODELS_SOURCE_SESANS at ", SASMODELS_SOURCE_SESANS
         if os.path.exists(SPHINX_SOURCE_USER):
@@ -243,10 +242,10 @@ def retrieve_user_docs():
     if os.path.exists(SASMODELS_SOURCE_MAGIMG):
         print "Found img folder SASMODELS_SOURCE_MAGIMG   at ", SASMODELS_SOURCE_MAGIMG
         if not os.path.exists(SASMODELS_DEST_MAGIMG):
-            print "Missing docs folder SASMODELS_DEST_MAGIMG at ", SASMODELS_DEST_MAGIMG
+            print "Missing img folder SASMODELS_DEST_MAGIMG at ", SASMODELS_DEST_MAGIMG
             os.makedirs(SASMODELS_DEST_MAGIMG)
             print "created SASMODELS_DEST_MAGIMG at ", SASMODELS_DEST_MAGIMG
-        print "Copying sasmodels model auto-generated image files..."
+        print "Copying sasmodels mag image files..."
         for files in os.listdir(SASMODELS_SOURCE_MAGIMG):
             fromhere=os.path.join(SASMODELS_SOURCE_MAGIMG,files)
             tohere=os.path.join(SASMODELS_DEST_MAGIMG,files)
@@ -254,12 +253,12 @@ def retrieve_user_docs():
     else: print "no source directory",SASMODELS_SOURCE_MAGIMG ,"was found"
 
     if os.path.exists(SASMODELS_SOURCE_SESANSIMG):
-        print "Found img folder SASMODELS_SOURCE_MAGIMG   at ", SASMODELS_SOURCE_SESANSIMG
-        if not os.path.exists(SASMODELS_DEST_MAGIMG):
-            print "Missing docs folder SASMODELS_DEST_MAGIMG at ", SASMODELS_DEST_SESANSIMG
+        print "Found img folder SASMODELS_SOURCE_SESANSIMG   at ", SASMODELS_SOURCE_SESANSIMG
+        if not os.path.exists(SASMODELS_DEST_SESANSIMG):
+            print "Missing img folder SASMODELS_DEST_SESANSIMG at ", SASMODELS_DEST_SESANSIMG
             os.makedirs(SASMODELS_DEST_SESANSIMG)
             print "created SASMODELS_DEST_SESANSIMG at ", SASMODELS_DEST_SESANSIMG
-        print "Copying sasmodels model auto-generated image files..."
+        print "Copying sasmodels sesans image files..."
         for files in os.listdir(SASMODELS_SOURCE_SESANSIMG):
             fromhere=os.path.join(SASMODELS_SOURCE_SESANSIMG,files)
             tohere=os.path.join(SASMODELS_DEST_SESANSIMG,files)
