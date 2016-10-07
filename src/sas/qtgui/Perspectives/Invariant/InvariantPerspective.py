@@ -63,8 +63,8 @@ class InvariantWindow(tabbedInvariantUI):
         self._high_extrapolate = False
         self._high_power_value  = False
 
-        # No reason to have this widget resizable
-        self.setFixedSize(422, 400)
+        # no reason to have this widget resizable
+        self.setFixedSize(self.minimumSizeHint())
 
         self.communicate = GuiUtils.Communicate()
 

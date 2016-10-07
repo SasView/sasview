@@ -24,3 +24,6 @@ class WelcomePanel(QtGui.QDialog, Ui_WelcomePanelUI):
         ver += LocalConfig._copyright
 
         self.lblVersion.setText(ver)
+
+        # no reason to have this widget resizable
+        self.setFixedSize(self.minimumSizeHint())
