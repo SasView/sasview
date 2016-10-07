@@ -592,11 +592,13 @@ class Plugin(PluginBase):
         : param state: PageState object
         : param datainfo: data
         """
-        #state = self.state_reader.get_state()
-        if state != None:
+        from pagestate import PageState
+        from simfitpage import SimFitPageState
+        if isinstance(state, PageState):
             state = state.clone()
-            # store fitting state in temp_state
             self.temp_state.append(state)
+        elif isinstance(state, SimFitPageState):
+            state.load_from_save_state(self)
         else:
             self.temp_state = []
         # index to start with for a new set_state

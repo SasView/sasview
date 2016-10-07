@@ -498,12 +498,15 @@ class ConverterPanel(ScrolledPanel, PanelBase):
     def _do_layout(self):
         vbox = wx.BoxSizer(wx.VERTICAL)
 
-        instructions = ("Select either single column ASCII files or 1D OTOKO "
-        "files containing the Q-Axis and Intensity-Axis data, or a 2D BSL file"
-        ", then chose where to save the converted file, and click Convert.\n"
-        "ASCII and OTOKO files can be converted to CanSAS XML, or NXcanSAS "
-        "HDF5 format. OTOKO files can only be converted to NXcanSAS.\nCanSAS "
-        "metadata can also be optionally input below.")
+        instructions = (
+        "Select linked single column 1D ASCII files containing the Q-axis and "
+        "Intensity-axis data, or 1D BSL/OTOKO files, or a 2D BSL/OTOKO file, "
+        "then choose where to save the converted file, and click Convert.\n"
+        "1D ASCII and BSL/OTOKO files can be converted to CanSAS (XML) or "
+        "NXcanSAS (HDF5) formats. 2D BSL/OTOKO files can only be converted to "
+        "the NXcanSAS format.\n"
+        "Metadata can be optionally added for the CanSAS XML format."
+        )
 
         instruction_label = wx.StaticText(self, -1, instructions,
             size=(_STATICBOX_WIDTH+40, -1))
@@ -526,7 +529,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             style=wx.RB_GROUP)
         ascii_btn.Bind(wx.EVT_RADIOBUTTON, self.datatype_changed)
         radio_sizer.Add(ascii_btn)
-        otoko_btn = wx.RadioButton(self, -1, "OTOKO 1D", name="otoko")
+        otoko_btn = wx.RadioButton(self, -1, "BSL 1D", name="otoko")
         otoko_btn.Bind(wx.EVT_RADIOBUTTON, self.datatype_changed)
         radio_sizer.Add(otoko_btn)
         input_grid.Add(radio_sizer, (y,1), (1,1), wx.ALL, 5)

@@ -411,7 +411,7 @@ class ModelManager(object):
     implement model
     """
     __modelmanager = ModelManagerBase()
-    cat_model_list = [model_name for model_name \
+    cat_model_list = [__modelmanager.model_dictionary[model_name] for model_name \
                       in __modelmanager.model_dictionary.keys() \
                       if model_name not in __modelmanager.stored_plugins.keys()]
 
