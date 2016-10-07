@@ -1049,12 +1049,15 @@ class SimFitPageState:
         :return: None
         """
 
+        # FIXME: Not tracking data set name on loading ==> NECESSARY!
         model_map = {}
-        fit.fit_panel.add_sim_page()
+        if fit.fit_panel.sim_page is None:
+            fit.fit_panel.add_sim_page()
+        sim_page = fit.fit_panel.sim_page
 
         # Process each model and associate old M# with new M#
         i = 0
-        for model in fit.fit_panel.sim_page.model_list:
+        for model in sim_page.model_list:
             model_id = self._format_id(model[1].keys()[0])
             for saved_model in self.model_list:
                 save_id = saved_model.pop('name')
@@ -1064,63 +1067,31 @@ class SimFitPageState:
                     model_map[saved_model.pop('fit_page_source')] = \
                         model[3].name
                     check = bool(saved_model.pop('checked'))
-                    fit.fit_panel.sim_page.model_list[i][0].SetValue(check)
+                    sim_page.model_list[i][0].SetValue(check)
                     continue
             i += 1
-        fit.fit_panel.sim_page.check_model_name(None)
+        sim_page.check_model_name(None)
 
         if len(self.constraints_list) > 0:
-            fit.fit_panel.sim_page.hide_constraint.SetValue(False)
-            fit.fit_panel.sim_page.show_constraint.SetValue(True)
-            fit.fit_panel.sim_page._display_constraint(None)
+            sim_page.hide_constraint.SetValue(False)
+            sim_page.show_constraint.SetValue(True)
+            sim_page._display_constraint(None)
 
-        for constraint in self.constraints_list:
-            model_cbox = constraint.pop('model_cbox')
-            constraint_value = constraint.pop('constraint')
+        for index, item in enumerate(self.constraints_list):
+            model_cbox = item.pop('model_cbox')
+            constraint_value = item.pop('constraint')
+            param = item.pop('param_cbox')
+            equality = item.pop('egal_txt')
             for key, value in model_map.iteritems():
                 model_cbox.replace(key, value)
                 constraint_value.replace(key, value)
 
-            bt_remove = wx.Button(fit.fit_panel.sim_page,
-                                  fit.fit_panel.sim_page._ids.next(), 'Remove')
-            bt_remove.Bind(wx.EVT_BUTTON, fit.fit_panel.sim_page.on_remove,
-                           id=bt_remove.GetId())
-            bt_remove.SetToolTipString("Remove constraint.")
-            param_cbox = wx.ComboBox(fit.fit_panel.sim_page, wx.ID_ANY,
-                                     style=wx.CB_READONLY, size=(100, -1))
-            egal_txt = wx.StaticText(fit.fit_panel.sim_page, wx.ID_ANY, " = ")
-            # Model list
-            model_cbox_sizer = wx.ComboBox(fit.fit_panel.sim_page,
-                                           wx.ID_ANY, style=wx.CB_READONLY)
-            model_cbox_sizer.Clear()
-            wx.EVT_COMBOBOX(model_cbox_sizer, wx.ID_ANY,
-                            fit.fit_panel.sim_page._on_select_model)
-            constraint_sizer = wx.TextCtrl(fit.fit_panel.sim_page, wx.ID_ANY)
-            sizer_constraint = wx.BoxSizer(wx.HORIZONTAL)
-            sizer_constraint.Add((5, -1))
-            sizer_constraint.Add(model_cbox_sizer, flag=wx.RIGHT | wx.EXPAND,
-                                 border=10)
-            sizer_constraint.Add(param_cbox, flag=wx.RIGHT | wx.EXPAND,
-                                 border=5)
-            sizer_constraint.Add(egal_txt, flag=wx.RIGHT | wx.EXPAND, border=5)
-            sizer_constraint.Add(constraint_sizer, flag=wx.RIGHT | wx.EXPAND,
-                                 border=10)
-            sizer_constraint.Add(bt_remove, flag=wx.RIGHT | wx.EXPAND,
-                                 border=10)
-            new_const = ConstraintLine(model_cbox=model_cbox_sizer,
-                                       param_cbox=constraint.pop('param_cbox'),
-                                       egal_txt=constraint.pop('egal_txt'),
-                                       constraint=constraint_value,
-                                       btRemove=bt_remove,
-                                       sizer=sizer_constraint
-                                       )
-            # ConstraintLine = namedtuple('ConstraintLine',
-            #      'model_cbox param_cbox egal_txt constraint btRemove sizer')
-            fit.fit_panel.sim_page.sizer_constraints.Insert(
-                before=fit.fit_panel.sim_page.nb_constraint,
-                item=sizer_constraint, flag=wx.TOP | wx.BOTTOM | wx.EXPAND,
-                border=5)
-            fit.fit_panel.sim_page.constraints_list.append(new_const)
+            sim_page.constraints_list[index][0].SetValue(model_cbox)
+            sim_page._on_select_model(None)
+            sim_page.constraints_list[index][1].SetValue(param)
+            sim_page.constraints_list[index][2].SetLabel(equality)
+            sim_page.constraints_list[index][3].SetValue(constraint_value)
+            sim_page._on_add_constraint(None)
 
     def _format_id(self, original_id):
         original_id = original_id.rstrip('1234567890.')
