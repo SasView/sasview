@@ -1741,10 +1741,11 @@ class Plugin(PluginBase):
                                       data_description=model.name + " unsmeared",
                                       data_id=str(page_id) + " " + data.name + " unsmeared")
 
-                self.create_theory_1D(x, unsmeared_data, page_id, model, data, state,
-                                      data_description="Data unsmeared",
-                                      data_id="Data  " + data.name + " unsmeared",
-                                      dy=unsmeared_error)
+                if unsmeared_data is not None and unsmeared_error is not None:
+                    self.create_theory_1D(x, unsmeared_data, page_id, model, data, state,
+                                          data_description="Data unsmeared",
+                                          data_id="Data  " + data.name + " unsmeared",
+                                          dy=unsmeared_error)
                 
             if sq_model is not None and pq_model is not None:
                 self.create_theory_1D(x, sq_model, page_id, model, data, state,

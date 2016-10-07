@@ -35,7 +35,9 @@ SASVIEW_TOC_SOURCE = os.path.join(CURRENT_SCRIPT_DIR, "source")
 # We are currently here:
 #/sasview-local-trunk/docs/sphinx-docs/build_sphinx.py
 SASMODELS_SOURCE_PROLOG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc")
+SASMODELS_SOURCE_GPU = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "ref", "gpu")
 SASMODELS_SOURCE_SESANS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "ref", "sesans")
+SASMODELS_SOURCE_SESANSIMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "ref", "sesans", "sesans_img")
 SASMODELS_SOURCE_MAGNETISM = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "ref", "magnetism")
 SASMODELS_SOURCE_MAGIMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "ref", "magnetism", "mag_img")
 SASMODELS_SOURCE_REF_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "ref", "models")
@@ -49,6 +51,7 @@ SASMODELS_DEST_REF_MODELS = os.path.join(SASMODELS_DEST_PROLOG, "user")
 SASMODELS_DEST_MODELS = os.path.join(SASMODELS_DEST_PROLOG, "user", "models")
 SASMODELS_DEST_IMG = os.path.join(SASMODELS_DEST_PROLOG, "user", "model-imgs", "new-models")
 SASMODELS_DEST_MAGIMG = os.path.join(SASMODELS_DEST_PROLOG, "user", "mag_img")
+SASMODELS_DEST_SESANSIMG = os.path.join(SASMODELS_DEST_PROLOG, "user", "sesans_img")
 SASMODELS_DEST_BUILDIMG = os.path.join(SASMODELS_DEST_PROLOG, "user", "models", "img")
 
 #if os.path.exists(SASMODELS_SOURCE_PROLOG):
@@ -189,7 +192,7 @@ def retrieve_user_docs():
             fromhere=os.path.join(SASMODELS_SOURCE_AUTOIMG,files)
             tohere=os.path.join(SASMODELS_DEST_IMG,files)
             shutil.copy(fromhere,tohere)
-        else: print "no source directorty",SASMODELS_SOURCE_AUTOIMG ,"was found"
+    else: print "no source directory",SASMODELS_SOURCE_AUTOIMG ,"was found"
 
     # And the rst prolog with the unit substitutions
     if os.path.exists(SASMODELS_SOURCE_PROLOG):
@@ -202,6 +205,18 @@ def retrieve_user_docs():
                     fromhere=os.path.join(SASMODELS_SOURCE_PROLOG,files)
                     tohere=os.path.join(SASMODELS_DEST_PROLOG,files)
                     shutil.copy(fromhere,tohere)
+
+    if os.path.exists(SASMODELS_SOURCE_GPU):
+        print "Found docs folder SASMODELS_SOURCE_GPU at ", SASMODELS_SOURCE_GPU
+        if os.path.exists(SPHINX_SOURCE_USER):
+            print "Found docs folder SPHINX_SOURCE_USER      at ", SPHINX_SOURCE_USER
+            print "Copying sasmodels gpu files..."
+            for files in os.listdir(SASMODELS_SOURCE_GPU):
+                if files.endswith(".rst"):
+                    fromhere=os.path.join(SASMODELS_SOURCE_GPU,files)
+                    tohere=os.path.join(SPHINX_SOURCE_USER,files)
+                    shutil.copy(fromhere,tohere)
+
 
     if os.path.exists(SASMODELS_SOURCE_SESANS):
         print "Found docs folder SASMODELS_SOURCE_SESANS at ", SASMODELS_SOURCE_SESANS
@@ -226,7 +241,7 @@ def retrieve_user_docs():
                     shutil.copy(fromhere,tohere)
 
     if os.path.exists(SASMODELS_SOURCE_MAGIMG):
-        print "Found img  folder SASMODELS_SOURCE_MAGIMG    at ", SASMODELS_SOURCE_MAGIMG
+        print "Found img folder SASMODELS_SOURCE_MAGIMG   at ", SASMODELS_SOURCE_MAGIMG
         if not os.path.exists(SASMODELS_DEST_MAGIMG):
             print "Missing docs folder SASMODELS_DEST_MAGIMG at ", SASMODELS_DEST_MAGIMG
             os.makedirs(SASMODELS_DEST_MAGIMG)
@@ -236,7 +251,20 @@ def retrieve_user_docs():
             fromhere=os.path.join(SASMODELS_SOURCE_MAGIMG,files)
             tohere=os.path.join(SASMODELS_DEST_MAGIMG,files)
             shutil.copy(fromhere,tohere)
-        else: print "no source directorty",SASMODELS_SOURCE_MAGIMG ,"was found"
+    else: print "no source directory",SASMODELS_SOURCE_MAGIMG ,"was found"
+
+    if os.path.exists(SASMODELS_SOURCE_SESANSIMG):
+        print "Found img folder SASMODELS_SOURCE_MAGIMG   at ", SASMODELS_SOURCE_SESANSIMG
+        if not os.path.exists(SASMODELS_DEST_MAGIMG):
+            print "Missing docs folder SASMODELS_DEST_MAGIMG at ", SASMODELS_DEST_SESANSIMG
+            os.makedirs(SASMODELS_DEST_SESANSIMG)
+            print "created SASMODELS_DEST_SESANSIMG at ", SASMODELS_DEST_SESANSIMG
+        print "Copying sasmodels model auto-generated image files..."
+        for files in os.listdir(SASMODELS_SOURCE_SESANSIMG):
+            fromhere=os.path.join(SASMODELS_SOURCE_SESANSIMG,files)
+            tohere=os.path.join(SASMODELS_DEST_SESANSIMG,files)
+            shutil.copy(fromhere,tohere)
+    else: print "no source directory",SASMODELS_SOURCE_SESANSIMG ,"was found"
 
     if os.path.exists(SASMODELS_SOURCE_REF_MODELS):
         print "Found docs folder SASMODELS_SOURCE_REF_MODELS at ", SASMODELS_SOURCE_REF_MODELS
