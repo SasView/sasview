@@ -1151,7 +1151,8 @@ class ViewerFrame(PARENT_FRAME):
                 self.disable_app_menu(self.plot_panels[ID])
                 self.delete_panel(ID)
                 break
-        self.cpanel_on_focus.SetFocus()
+        if self.cpanel_on_focus is not None:
+            self.cpanel_on_focus.SetFocus()
 
 
     def popup_panel(self, p):
@@ -1916,12 +1917,10 @@ class ViewerFrame(PARENT_FRAME):
             if path is not None:
                 self._default_save_location = os.path.dirname(path)
                 dlg.Destroy()
-
-            # Reset to a base state
-            self._on_reset_state()
-
-            # Load the project file
-            self.load_state(path=path, is_project=True)
+                # Reset to a base state
+                self._on_reset_state()
+                # Load the project file
+                self.load_state(path=path, is_project=True)
 
     def _on_reset_state(self):
         """
@@ -1929,13 +1928,14 @@ class ViewerFrame(PARENT_FRAME):
         :return: None
         """
         # Reset all plugins to their base state
+        self._data_panel.set_panel_on_focus()
+        # Remove all loaded data
+        self._data_panel.selection_cbox.SetValue('Select all Data')
+        self._data_panel._on_selection_type(None)
         for plugin in self.plugins:
             plugin.clear_panel()
         # Reset plot number to 0
         self.graph_num = 0
-        # Remove all loaded data
-        self._data_panel.selection_cbox.SetValue('Select all Data')
-        self._data_panel._on_selection_type(None)
 
     def _on_save_application(self, event):
         """

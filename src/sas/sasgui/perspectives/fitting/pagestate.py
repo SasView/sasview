@@ -1639,7 +1639,6 @@ class Reader(CansasReader):
                         except:
                             raise
                         fitstate = self._parse_state(entry)
-                        simfitstate = self._parse_simfit_state(entry)
 
                         # state could be None when .svs file is loaded
                         # in this case, skip appending to output
@@ -1691,6 +1690,7 @@ class Reader(CansasReader):
                     self.call_back(state=state,
                                    datainfo=output[ind], format=ext)
                     self.state = state
+                simfitstate = self._parse_simfit_state(entry)
                 if simfitstate is not None:
                     self.call_back(state=simfitstate)
 
