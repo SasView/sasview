@@ -1,5 +1,7 @@
 .. file_converter_help.rst
 
+.. _File_Converter_Tool:
+
 File Converter Tool
 ===================
 

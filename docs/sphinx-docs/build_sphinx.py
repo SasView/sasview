@@ -29,6 +29,7 @@ SASVIEW_SRC = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "src")
 SASVIEW_BUILD = os.path.abspath(os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "build", "lib"+platform))
 SASVIEW_DOCS = os.path.join(SASVIEW_BUILD, "doc")
 SASVIEW_TEST = os.path.join(SASVIEW_SRC, "..", "sasview", "test", "media")
+SASVIEW_TOC_SOURCE = os.path.join(CURRENT_SCRIPT_DIR, "source")
 
 # Need to slurp in the new sasmodels model definitions to replace the old model_functions.rst
 # We are currently here:
@@ -41,12 +42,14 @@ SASMODELS_SOURCE_REF_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..",
 SASMODELS_SOURCE_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "model")
 SASMODELS_SOURCE_IMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "model", "img")
 SASMODELS_SOURCE_AUTOIMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "_build", "html","_images")
-SASMODELS_DEST_PROLOG = os.path.join(CURRENT_SCRIPT_DIR, "source")
-SASMODELS_DEST_REF_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "source", "user")
-SASMODELS_DEST_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "source", "user", "models")
-SASMODELS_DEST_IMG = os.path.join(CURRENT_SCRIPT_DIR,  "source", "user", "model-imgs", "new-models")
-SASMODELS_DEST_MAGIMG = os.path.join(CURRENT_SCRIPT_DIR,  "source", "user", "mag_img")
-SASMODELS_DEST_BUILDIMG = os.path.join(CURRENT_SCRIPT_DIR,  "source", "user", "models", "img")
+## Don't do assemble-in-place
+## Assemble the docs in a temporary folder
+SASMODELS_DEST_PROLOG = os.path.join(CURRENT_SCRIPT_DIR, "source-temp")
+SASMODELS_DEST_REF_MODELS = os.path.join(SASMODELS_DEST_PROLOG, "user")
+SASMODELS_DEST_MODELS = os.path.join(SASMODELS_DEST_PROLOG, "user", "models")
+SASMODELS_DEST_IMG = os.path.join(SASMODELS_DEST_PROLOG, "user", "model-imgs", "new-models")
+SASMODELS_DEST_MAGIMG = os.path.join(SASMODELS_DEST_PROLOG, "user", "mag_img")
+SASMODELS_DEST_BUILDIMG = os.path.join(SASMODELS_DEST_PROLOG, "user", "models", "img")
 
 #if os.path.exists(SASMODELS_SOURCE_PROLOG):
 #    print "Found models prolog folder at ", SASMODELS_SOURCE_PROLOG
@@ -65,7 +68,7 @@ SASMODELS_DEST_BUILDIMG = os.path.join(CURRENT_SCRIPT_DIR,  "source", "user", "m
 #sys.exit()
 
 SPHINX_BUILD = os.path.join(CURRENT_SCRIPT_DIR, "build")
-SPHINX_SOURCE = os.path.join(CURRENT_SCRIPT_DIR, "source")
+SPHINX_SOURCE = os.path.join(CURRENT_SCRIPT_DIR, "source-temp")
 SPHINX_SOURCE_API = os.path.join(SPHINX_SOURCE, "dev", "api")
 SPHINX_SOURCE_GUIFRAME = os.path.join(SPHINX_SOURCE, "user", "sasgui", "guiframe")
 SPHINX_SOURCE_MODELS = os.path.join(SPHINX_SOURCE, "user", "models")
@@ -103,11 +106,20 @@ def clean():
     print "=== Cleaning Sphinx Build ==="
     _remove_dir(SASVIEW_DOCS)
     _remove_dir(SPHINX_BUILD)
-    _remove_dir(SPHINX_SOURCE_GUIFRAME)
-    _remove_dir(SPHINX_SOURCE_MODELS)
-    _remove_dir(SPHINX_SOURCE_PERSPECTIVES)
-    _remove_dir(SPHINX_SOURCE_TEST)
+    _remove_dir(SPHINX_SOURCE)
+    #_remove_dir(SPHINX_SOURCE_GUIFRAME)
+    #_remove_dir(SPHINX_SOURCE_MODELS)
+    #_remove_dir(SPHINX_SOURCE_PERSPECTIVES)
+    #_remove_dir(SPHINX_SOURCE_TEST)
 
+def setup_source_temp():
+    """
+    Copy the source toctrees to new folder for assembling the sphinx-docs
+    """
+    print "=== Copying Source toctrees ==="
+    if os.path.exists(SASVIEW_TOC_SOURCE):
+       print "Found docs folder at ", SASVIEW_TOC_SOURCE
+       shutil.copytree(SASVIEW_TOC_SOURCE, SPHINX_SOURCE)
 
 def retrieve_user_docs():
     """
@@ -335,6 +347,7 @@ def build():
 
 def rebuild():
     clean()
+    setup_source_temp()
     retrieve_user_docs()
     retrieve_bumps_docs()
     apidoc()
