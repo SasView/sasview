@@ -20,3 +20,5 @@ Working with SasView
    
    Converting SANS to SESANS <sans_to_sesans>
    
+   Fitting SESANS Data <sesans_fitting.rst>
+   
