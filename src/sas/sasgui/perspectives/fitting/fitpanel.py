@@ -199,10 +199,12 @@ class FitPanel(nb, PanelBase):
             self.DeletePage(0)
             nop = nop - 1
 
-        ## save the title of the last page tab added
+        # save the title of the last page tab added
         self.fit_page_name = {}
-        ## list of existing fit page
+        # list of existing fit page
         self.opened_pages = {}
+        self.fit_page_index = 0
+        self.batch_page_index = 0
 
     def set_state(self, state):
         """
@@ -241,6 +243,8 @@ class FitPanel(nb, PanelBase):
         #close all panels only when svs file opened
         self.close_all()
         self._manager.mypanels = []
+        self.sim_page = None
+        self.batch_page = None
 
     def on_close_page(self, event=None):
         """

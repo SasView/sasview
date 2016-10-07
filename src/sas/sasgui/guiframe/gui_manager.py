@@ -1903,18 +1903,39 @@ class ViewerFrame(PARENT_FRAME):
         path = None
         if self._default_save_location == None:
             self._default_save_location = os.getcwd()
-        wx.PostEvent(self, StatusEvent(status="Loading Project file..."))
-        dlg = wx.FileDialog(self,
+        msg = "This operation will set SasView to its freshly opened state "
+        msg += "before loading the project. Do you wish to continue?"
+        if not self._data_panel.on_remove(None, msg):
+            wx.PostEvent(self, StatusEvent(status="Loading Project file..."))
+            dlg = wx.FileDialog(self,
                             "Choose a file",
                             self._default_save_location, "",
                             APPLICATION_WLIST)
-        if dlg.ShowModal() == wx.ID_OK:
-            path = dlg.GetPath()
+            if dlg.ShowModal() == wx.ID_OK:
+                path = dlg.GetPath()
             if path is not None:
                 self._default_save_location = os.path.dirname(path)
-        dlg.Destroy()
+                dlg.Destroy()
 
-        self.load_state(path=path, is_project=True)
+            # Reset to a base state
+            self._on_reset_state()
+
+            # Load the project file
+            self.load_state(path=path, is_project=True)
+
+    def _on_reset_state(self):
+        """
+        Resets SasView to its freshly opened state.
+        :return: None
+        """
+        # Reset all plugins to their base state
+        for plugin in self.plugins:
+            plugin.clear_panel()
+        # Reset plot number to 0
+        self.graph_num = 0
+        # Remove all loaded data
+        self._data_panel.selection_cbox.SetValue('Select all Data')
+        self._data_panel._on_selection_type(None)
 
     def _on_save_application(self, event):
         """
@@ -2062,22 +2083,7 @@ class ViewerFrame(PARENT_FRAME):
                 version_info = json.loads(content)
             except:
                 logging.info("Failed to connect to www.sasview.org")
-        self._process_version(version_info, standalone=event == None)    
-
-        
-        
-#         
-#         try:
-#             req = urllib2.Request(config.__update_URL__)
-#             res = urllib2.urlopen(req)
-#             content = res.read().strip()
-#             logging.info("Connected to www.sasview.org. Latest version: %s"
-#                          % (content))
-#             version_info = json.loads(content)
-#         except:
-#             logging.info("Failed to connect to www.sasview.org")
-#             version_info = {"version": "0.0.0"}
-#         self._process_version(version_info, standalone=event == None)
+        self._process_version(version_info, standalone=event == None)
 
     def _process_version(self, version_info, standalone=True):
         """

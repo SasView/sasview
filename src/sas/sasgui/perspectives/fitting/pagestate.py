@@ -377,8 +377,10 @@ class PageState(object):
         time_str = time.strftime("%b %d %Y %H;%M;%S ", t)
 
         rep += "State created: %s\n" % time_str
-        rep += "State form factor combobox selection: %s\n" % self.formfactorcombobox
-        rep += "State structure factor combobox selection: %s\n" % self.structurecombobox
+        rep += "State form factor combobox selection: %s\n" % \
+               self.formfactorcombobox
+        rep += "State structure factor combobox selection: %s\n" % \
+               self.structurecombobox
         rep += "is data : %s\n" % self.is_data
         rep += "data's name : %s\n" % self.data_name
         rep += "data's id : %s\n" % self.data_id
@@ -638,13 +640,13 @@ class PageState(object):
         Writes the state of the fit panel to file, as XML.
 
         Compatible with standalone writing, or appending to an
-        already existing XML document. In that case, the XML document
-        is required. An optional entry node in the XML document may also be given.
+        already existing XML document. In that case, the XML document is
+        required. An optional entry node in the XML document may also be given.
 
         :param file: file to write to
         :param doc: XML document object [optional]
-        :param entry_node: XML node within the XML document at which we will append the data [optional]
-
+        :param entry_node: XML node within the XML document at which we
+                           will append the data [optional]
         """
         from xml.dom.minidom import getDOMImplementation
 
@@ -743,7 +745,8 @@ class PageState(object):
 
         for item in LIST_OF_STATE_PARAMETERS:
             element = newdoc.createElement(item[0])
-            self._toXML_helper(thelist=getattr(self, item[1]), element=element, newdoc=newdoc)
+            self._toXML_helper(thelist=getattr(self, item[1]),
+                               element=element, newdoc=newdoc)
             inputs.appendChild(element)
 
         # Combined and Simultaneous Fit Parameters
@@ -760,17 +763,18 @@ class PageState(object):
             constraints = newdoc.createElement('constraints')
             batch_combo.appendChild(constraints)
             for constraint in batch_fit_state.constraints_list:
-                # model_cbox, param_cbox, egal_txt, constraint, btRemove, sizer
-                doc_cons = newdoc.createElement('constraint')
-                doc_cons.setAttribute('model_cbox',
-                                      str(constraint.model_cbox.GetValue()))
-                doc_cons.setAttribute('param_cbox',
-                                      str(constraint.param_cbox.GetValue()))
-                doc_cons.setAttribute('egal_txt',
-                                      str(constraint.egal_txt.GetLabel()))
-                doc_cons.setAttribute('constraint',
-                                      str(constraint.constraint.GetValue()))
-                constraints.appendChild(doc_cons)
+                if constraint.model_cbox.GetValue() != "":
+                    # model_cbox, param_cbox, egal_txt, constraint, btRemove, sizer
+                    doc_cons = newdoc.createElement('constraint')
+                    doc_cons.setAttribute('model_cbox',
+                                          str(constraint.model_cbox.GetValue()))
+                    doc_cons.setAttribute('param_cbox',
+                                          str(constraint.param_cbox.GetValue()))
+                    doc_cons.setAttribute('egal_txt',
+                                          str(constraint.egal_txt.GetLabel()))
+                    doc_cons.setAttribute('constraint',
+                                          str(constraint.constraint.GetValue()))
+                    constraints.appendChild(doc_cons)
 
             # Save all models
             models = newdoc.createElement('model_list')
@@ -911,8 +915,8 @@ class PageState(object):
                                 cls = getattr(sasmodels.weights, cls_name)
                                 value = cls.type
                             except Exception:
-                                logging.error("unable to load distribution %r for %s"
-                                              % (value, parameter))
+                                base = "unable to load distribution %r for %s"
+                                logging.error(base % (value, parameter))
                                 continue
                         _disp_obj_dict = getattr(self, varname)
                         _disp_obj_dict[parameter] = value
@@ -1035,13 +1039,15 @@ class Reader(CansasReader):
         if not issubclass(datainfo.__class__, Data2D):
             raise RuntimeError, "The cansas writer expects a Data2D instance"
 
+        title = "cansas1d/%s" % self.version
+        title += "http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd"
         doc = xml.dom.minidom.Document()
         main_node = doc.createElement("SASroot")
         main_node.setAttribute("version", self.version)
         main_node.setAttribute("xmlns", "cansas1d/%s" % self.version)
-        main_node.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
-        main_node.setAttribute("xsi:schemaLocation",
-                               "cansas1d/%s http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd" % self.version)
+        main_node.setAttribute("xmlns:xsi",
+                               "http://www.w3.org/2001/XMLSchema-instance")
+        main_node.setAttribute("xsi:schemaLocation", title)
 
         doc.appendChild(main_node)
 
@@ -1050,10 +1056,12 @@ class Reader(CansasReader):
 
         write_node(doc, entry_node, "Title", datainfo.title)
         if datainfo is not None:
-            write_node(doc, entry_node, "data_class", datainfo.__class__.__name__)
+            write_node(doc, entry_node, "data_class",
+                       datainfo.__class__.__name__)
         for item in datainfo.run:
             runname = {}
-            if datainfo.run_name.has_key(item) and len(str(datainfo.run_name[item])) > 1:
+            if datainfo.run_name.has_key(item) and \
+                            len(str(datainfo.run_name[item])) > 1:
                 runname = {'name': datainfo.run_name[item]}
             write_node(doc, entry_node, "Run", item, runname)
         # Data info
@@ -1312,14 +1320,15 @@ class Reader(CansasReader):
                 model_list = simfitstate_0.xpath('ns:model_list',
                                                namespaces={'ns': CANSAS_NS})
                 model_list_items = model_list[0].xpath('ns:model_list_item',
-                                                       namespaces={'ns': CANSAS_NS})
+                                                   namespaces={'ns': CANSAS_NS})
                 for model in model_list_items:
                     attrs = model.attrib
                     sim_fit_state.model_list.append(attrs)
+
                 constraints = simfitstate_0.xpath('ns:constraints',
                                                 namespaces={'ns': CANSAS_NS})
                 constraint_list = constraints[0].xpath('ns:constraint',
-                                                       namespaces={'ns': CANSAS_NS})
+                                               namespaces={'ns': CANSAS_NS})
                 for constraint in constraint_list:
                     attrs = constraint.attrib
                     sim_fit_state.constraints_list.append(attrs)
@@ -1387,7 +1396,8 @@ class Reader(CansasReader):
                     if len(note_value) > 0:
                         data_info.notes.append(note_value)
             except Exception:
-                err_mess = "cansas_reader.read: error processing entry notes\n  %s" % sys.exc_value
+                err_mess = "cansas_reader.read: error processing entry notes\n"
+                err_mess += "  %s" % sys.exc_value
                 self.errors.append(err_mess)
                 logging.error(err_mess)
 
@@ -1397,11 +1407,15 @@ class Reader(CansasReader):
             data_info.sample.name = entry.get('name')
 
         self._store_content('ns:SASsample/ns:ID', dom, 'ID', data_info.sample)
-        self._store_float('ns:SASsample/ns:thickness', dom, 'thickness', data_info.sample)
-        self._store_float('ns:SASsample/ns:transmission', dom, 'transmission', data_info.sample)
-        self._store_float('ns:SASsample/ns:temperature', dom, 'temperature', data_info.sample)
+        self._store_float('ns:SASsample/ns:thickness', dom, 'thickness',
+                          data_info.sample)
+        self._store_float('ns:SASsample/ns:transmission', dom, 'transmission',
+                          data_info.sample)
+        self._store_float('ns:SASsample/ns:temperature', dom, 'temperature',
+                          data_info.sample)
 
-        nodes = dom.xpath('ns:SASsample/ns:details', namespaces={'ns': CANSAS_NS})
+        nodes = dom.xpath('ns:SASsample/ns:details',
+                          namespaces={'ns': CANSAS_NS})
         for item in nodes:
             try:
                 if item.text is not None:
@@ -1409,14 +1423,18 @@ class Reader(CansasReader):
                     if len(detail_value) > 0:
                         data_info.sample.details.append(detail_value)
             except Exception:
-                err_mess = "cansas_reader.read: error processing sample details\n  %s" % sys.exc_value
+                err_mess = "cansas_reader.read: error processing entry notes\n"
+                err_mess += "  %s" % sys.exc_value
                 self.errors.append(err_mess)
                 logging.error(err_mess)
 
         # Position (as a vector)
-        self._store_float('ns:SASsample/ns:position/ns:x', dom, 'position.x', data_info.sample)
-        self._store_float('ns:SASsample/ns:position/ns:y', dom, 'position.y', data_info.sample)
-        self._store_float('ns:SASsample/ns:position/ns:z', dom, 'position.z', data_info.sample)
+        self._store_float('ns:SASsample/ns:position/ns:x', dom, 'position.x',
+                          data_info.sample)
+        self._store_float('ns:SASsample/ns:position/ns:y', dom, 'position.y',
+                          data_info.sample)
+        self._store_float('ns:SASsample/ns:position/ns:z', dom, 'position.z',
+                          data_info.sample)
 
         # Orientation (as a vector)
         self._store_float('ns:SASsample/ns:orientation/ns:roll',
@@ -1550,7 +1568,8 @@ class Reader(CansasReader):
                         term_attr['value'] = term.text.strip()
                         process.term.append(term_attr)
                 except:
-                    err_mess = "cansas_reader.read: error processing process term\n  %s" % sys.exc_value
+                    err_mess = "cansas_reader.read: error processing "
+                    err_mess += "entry notes\n  %s" % sys.exc_value
                     self.errors.append(err_mess)
                     logging.error(err_mess)
 
@@ -1578,7 +1597,8 @@ class Reader(CansasReader):
                 field = get_content('ns:%s' % item[0], entry)
                 value_list = []
                 if field is not None:
-                    value_list = [parse_entry_helper(node, item) for node in field]
+                    value_list = \
+                        [parse_entry_helper(node, item) for node in field]
                 if len(value_list) < 2:
                     setattr(data_info, item[0], None)
                 else:
@@ -1612,6 +1632,7 @@ class Reader(CansasReader):
                     root = tree.getroot()
                     entry_list = root.xpath('ns:SASentry',
                                             namespaces={'ns': CANSAS_NS})
+                    name_map = {}
                     for entry in entry_list:
                         try:
                             sas_entry, _ = self._parse_save_state_entry(entry)

@@ -1049,7 +1049,6 @@ class SimFitPageState:
         :return: None
         """
 
-        # FIXME: Not tracking data set name on loading ==> NECESSARY!
         model_map = {}
         if fit.fit_panel.sim_page is None:
             fit.fit_panel.add_sim_page()
@@ -1068,7 +1067,7 @@ class SimFitPageState:
                         model[3].name
                     check = bool(saved_model.pop('checked'))
                     sim_page.model_list[i][0].SetValue(check)
-                    continue
+                    break
             i += 1
         sim_page.check_model_name(None)
 
@@ -1079,19 +1078,20 @@ class SimFitPageState:
 
         for index, item in enumerate(self.constraints_list):
             model_cbox = item.pop('model_cbox')
-            constraint_value = item.pop('constraint')
-            param = item.pop('param_cbox')
-            equality = item.pop('egal_txt')
-            for key, value in model_map.iteritems():
-                model_cbox.replace(key, value)
-                constraint_value.replace(key, value)
+            if model_cbox != "":
+                constraint_value = item.pop('constraint')
+                param = item.pop('param_cbox')
+                equality = item.pop('egal_txt')
+                for key, value in model_map.iteritems():
+                    model_cbox.replace(key, value)
+                    constraint_value.replace(key, value)
 
-            sim_page.constraints_list[index][0].SetValue(model_cbox)
-            sim_page._on_select_model(None)
-            sim_page.constraints_list[index][1].SetValue(param)
-            sim_page.constraints_list[index][2].SetLabel(equality)
-            sim_page.constraints_list[index][3].SetValue(constraint_value)
-            sim_page._on_add_constraint(None)
+                sim_page.constraints_list[index][0].SetValue(model_cbox)
+                sim_page._on_select_model(None)
+                sim_page.constraints_list[index][1].SetValue(param)
+                sim_page.constraints_list[index][2].SetLabel(equality)
+                sim_page.constraints_list[index][3].SetValue(constraint_value)
+                sim_page._on_add_constraint(None)
 
     def _format_id(self, original_id):
         original_id = original_id.rstrip('1234567890.')
