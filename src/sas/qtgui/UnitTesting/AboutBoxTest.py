@@ -74,6 +74,7 @@ class AboutBoxTest(unittest.TestCase):
                 LocalConfig._isis_url,
                 LocalConfig._ess_url,
                 LocalConfig._ill_url,
+                LocalConfig._ansto_url,
                 LocalConfig._inst_url]
 
         # Press the buttons

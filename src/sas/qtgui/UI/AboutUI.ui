@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>695</width>
+    <width>1107</width>
     <height>449</height>
    </rect>
   </property>
@@ -159,6 +159,23 @@
        </property>
       </widget>
      </item>
+     <item row="0" column="7">
+      <widget class="QPushButton" name="cmdLinkANSTO">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../images/images.qrc">
+         <normaloff>:/about/ansto_logo.png</normaloff>:/about/ansto_logo.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>175</width>
+         <height>48</height>
+        </size>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item row="5" column="0" colspan="3">
@@ -216,7 +233,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This work originally developed as part of the DANSE project funded by the NSF under grant DMR-0520547, and currently maintained by NIST, UMD, ORNL, ISIS, ESS and ILL.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This work originally developed as part of the DANSE project funded by the NSF under grant DMR-0520547, and currently maintained by NIST, UMD, ORNL, ISIS, ESS, ILL and last but not least ANSTO.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>

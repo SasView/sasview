@@ -59,5 +59,7 @@ class AboutBox(QtGui.QDialog, Ui_AboutUI):
             GuiUtils.openLink, LocalConfig._ess_url))
         self.cmdLinkILL.clicked.connect(functools.partial(
             GuiUtils.openLink, LocalConfig._ill_url))
+        self.cmdLinkANSTO.clicked.connect(functools.partial(
+            GuiUtils.openLink, LocalConfig._ansto_url))
 
         self.cmdOK.clicked.connect(self.close)

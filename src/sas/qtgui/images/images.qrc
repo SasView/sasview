@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="about">
+    <file>ansto_logo.png</file>
     <file>danse_logo.png</file>
     <file>ess_logo.png</file>
     <file>ill_logo.png</file>
