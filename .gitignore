@@ -40,10 +40,13 @@ default_categories.json
 /src/sas/models/media/.idea/
 
 /docs/sphinx-docs/build
+/docs/sphinx-docs/source-temp
 /docs/sphinx-docs/source/dev/api
 /docs/sphinx-docs/source/user/guiframe
 /docs/sphinx-docs/source/user/models
 /docs/sphinx-docs/source/user/perspectives
+/docs/sphinx-docs/source/user/sasgui
+
 
 # test outputs
 /test/pr_inversion/test/test_output.txt

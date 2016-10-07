@@ -8,6 +8,8 @@ import numpy as np
 
 import wx
 from wx.lib.dialogs import ScrolledMessageDialog
+from wx.lib import layoutf
+
 import wx.py.editor as editor
 
 if sys.platform.count("win32") > 0:
@@ -62,13 +64,39 @@ def show_model_output(parent, fname):
         parts.extend(["", "Success:", result, ""])
         title, icon = "Info", wx.ICON_INFORMATION
     text = "\n".join(parts)
-    dlg = ScrolledMessageDialog(parent, text, title, size=((550, 250)))
+    dlg = ResizableScrolledMessageDialog(parent, text, title, size=((550, 250)))
     fnt = wx.Font(10, wx.TELETYPE, wx.NORMAL, wx.NORMAL)
     dlg.GetChildren()[0].SetFont(fnt)
     dlg.GetChildren()[0].SetInsertionPoint(0)
     dlg.ShowModal()
     dlg.Destroy()
     return errmsg is None
+
+class ResizableScrolledMessageDialog(wx.Dialog):
+    """
+    Custom version of wx ScrolledMessageDialog, allowing border resize
+    """
+    def __init__(self, parent, msg, caption,
+        pos=wx.DefaultPosition, size=(500,300),
+        style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER ):
+        # Notice, that style can be overrriden in the caller.
+        wx.Dialog.__init__(self, parent, -1, caption, pos, size, style)
+        x, y = pos
+        if x == -1 and y == -1:
+            self.CenterOnScreen(wx.BOTH)
+
+        text = wx.TextCtrl(self, -1, msg, style=wx.TE_MULTILINE | wx.TE_READONLY)
+        ok = wx.Button(self, wx.ID_OK, "OK")
+
+        # Mysterious constraint layouts from 
+        # https://www.wxpython.org/docs/api/wx.lib.layoutf.Layoutf-class.html
+        lc = layoutf.Layoutf('t=t5#1;b=t5#2;l=l5#1;r=r5#1', (self,ok))
+        text.SetConstraints(lc)
+        lc = layoutf.Layoutf('b=b5#1;x%w50#1;w!80;h!25', (self,))
+        ok.SetConstraints(lc)
+
+        self.SetAutoLayout(1)
+        self.Layout()
 
 class PyConsole(editor.EditorNotebookFrame):
     ## Internal nickname for the window, used by the AUI manager
