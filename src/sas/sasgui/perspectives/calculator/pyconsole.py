@@ -230,6 +230,13 @@ class PyConsole(editor.EditorNotebookFrame):
                             wildcard='Python Files (*.py)|*.py')
         if result.path:
             self.bufferCreate(result.path)
+
+        # See if there is a corresponding C file
+        if result.path != None:
+            c_filename = os.path.splitext(result.path)[0] + ".c"
+            if os.path.isfile(c_filename):
+                self.bufferCreate(c_filename)
+
         cancel = False
         return cancel
 
