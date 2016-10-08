@@ -513,12 +513,9 @@ class BasicPage(ScrolledPanel, PanelBase):
 
     def initialize_combox(self):
         """
-        put default value in the combobox
+        put default value in the combo box
         """
-        ## fill combox box
-        if self.model_list_box is None:
-            return
-        if len(self.model_list_box) > 0:
+        if self.model_list_box is not None and len(self.model_list_box) > 0:
             self._populate_box(self.structurebox,
                                self.model_list_box["Structure Factors"])
             self.structurebox.Insert("None", 0, None)
@@ -527,12 +524,6 @@ class BasicPage(ScrolledPanel, PanelBase):
             self.text2.Hide()
             self.structurebox.Disable()
             self.text2.Disable()
-
-            if self.model.__class__ in self.model_list_box["P(Q)*S(Q)"]:
-                self.structurebox.Show()
-                self.text2.Show()
-                self.structurebox.Enable()
-                self.text2.Enable()
 
     def set_dispers_sizer(self):
         """
@@ -1961,7 +1952,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         if f_id >= 0:
             form_factor = self.formfactorbox.GetClientData(f_id)
 
-        if not form_factor in  self.model_list_box["multiplication"]:
+        if form_factor is None or not form_factor.is_form_factor:
             self.structurebox.Hide()
             self.text2.Hide()
             self.structurebox.Disable()

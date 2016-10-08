@@ -9,6 +9,7 @@ sub-folder in your SasView installation folder.
 The test data sets are organized based on their data structure:
 
 - *1D data*
+- *convertible 1D data files*
 - *2D data*
 - *coordinate data*
 - *image data*
@@ -28,14 +29,14 @@ OR:
 
 - the I(Q) and Q data in separate files *with no other information*.
 
-Data in the latter format need to be converted to a single file format with the :ref:`File_Converter_Tool` before they can be analysed in SasView.
+Data in the latter format need to be converted to a single file format with the :ref:`File_Converter_Tool` before they can be analysed in SasView. Test files are located in the /convertible_files folder.
 
 1D Test Data
 ............
 33837rear_1D_1.75_16.5
   - Data from a magnetically-oriented surfactant liquid crystal output by the Mantid framework. The data was collected on the SANS2D instrument at ISIS.
 
-10wtAOT_Reline_120_reduced / Anton-Paar_PDH / saxsess_example
+10wtAOT_Reline_120_reduced / Anton-Paar / saxsess_example
   - Data from Anton-Paar SAXSess instruments saved in Otto Glatter's PDH format.
   
 AOT_Microemulsion
@@ -47,14 +48,6 @@ AOT_Microemulsion
 APS_DND-CAT
   - ASCII data from the DND-CAT beamline at the APS.
 
-APS_X / APS_Y
-  - ASCII data output by a reduction software package at the APS.
-  - Suitable for testing the :ref:`File_Converter_Tool` .
-
-FIT2D_I / FIT2D_Q
-  - ASCII data output by the FIT2D software package at the ESRF.
-  - Suitable for testing the :ref:`File_Converter_Tool` .
-
 hSDS_D2O
   - h25-sodium dodecyl sulphate solutions at two concentrations: 0.5wt% (just 
     above the cmc), 2wt% (well above the cmc), and 2wt% but with 0.2mM NaCl 
@@ -63,7 +56,7 @@ hSDS_D2O
 
 ISIS_83404 / ISIS_98929
   - Polyamide-6 fibres hydrated in D2O exhibiting a broad lamellar peak from the semi-crystalline nanostructure.
-  - This is the *same data* as that in Z8300* / Z9800* but in an amalgamated ASCII format!
+  - This is the *same data* as that in the BSL/OTOKO Z8300* / Z9800* files but in an amalgamated ASCII format!
   - Suitable for testing :ref:`Correlation_Function_Analysis` .
 
 ISIS_Polymer_Blend_TK49
@@ -75,6 +68,19 @@ P123_D2O
   - Lyotropic liquid crystalline solutions of non-ionic ABA block copolymer 
     Pluronic P123 in water at three concentrations: 10wt%, 30wt%, and 40wt%.
   - Suitable for testing paracrystal models.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+Convertible 1D Data
+^^^^^^^^^^^^^^^^^^^
+
+APS_X / APS_Y
+  - ASCII data output by a reduction software package at the APS.
+  - Suitable for testing the :ref:`File_Converter_Tool` .
+
+FIT2D_I / FIT2D_Q
+  - ASCII data output by the FIT2D software package at the ESRF.
+  - Suitable for testing the :ref:`File_Converter_Tool` .
 
 Z8300*.I1D / Z8300*.QAX / Z9800*.I1D / Z9800*.QAX
   - BSL/OTOKO data from polyamide-6 fibres hydrated in D2O exhibiting a broad lamellar peak from the semi-crystalline nanostructure.

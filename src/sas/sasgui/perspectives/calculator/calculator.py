@@ -79,7 +79,7 @@ class Plugin(PluginBase):
                         self.on_calculate_slit_size),
                 ("Kiessig Thickness Calculator",
                         kiessig_help, self.on_calculate_kiessig),
-                          ("SAS Resolution Estimator",
+                          ("Q Resolution Estimator",
                         resolution_help, self.on_calculate_resoltuion),
                 ("Generic Scattering Calculator",
                         gensas_help, self.on_gen_model),

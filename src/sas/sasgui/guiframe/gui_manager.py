@@ -676,26 +676,29 @@ class ViewerFrame(PARENT_FRAME):
         update the toolbar if available
         update edit menu if available
         """
-        if event != None:
+        if event is not None:
             self.panel_on_focus = event.panel
         if self.panel_on_focus is not None:
-            #Disable save application if the current panel is in batch mode
-            flag = self.panel_on_focus.get_save_flag()
-            if self._save_appl_menu != None:
-                self._save_appl_menu.Enable(flag)
+            # Disable save application if the current panel is in batch mode
+            try:
+                flag = self.panel_on_focus.get_save_flag()
+                if self._save_appl_menu != None:
+                    self._save_appl_menu.Enable(flag)
 
-            if self.panel_on_focus not in self.plot_panels.values():
-                for ID in self.panels.keys():
-                    if self.panel_on_focus != self.panels[ID]:
-                        self.panels[ID].on_kill_focus(None)
+                if self.panel_on_focus not in self.plot_panels.values():
+                    for ID in self.panels.keys():
+                        if self.panel_on_focus != self.panels[ID]:
+                            self.panels[ID].on_kill_focus(None)
 
-            if self._data_panel is not None and \
-                            self.panel_on_focus is not None:
-                self.set_panel_on_focus_helper()
-                #update toolbar
-                self._update_toolbar_helper()
-                #update edit menu
-                self.enable_edit_menu()
+                if self._data_panel is not None and \
+                                self.panel_on_focus is not None:
+                    self.set_panel_on_focus_helper()
+                    #update toolbar
+                    self._update_toolbar_helper()
+                    #update edit menu
+                    self.enable_edit_menu()
+            except wx._core.PyDeadObjectError:
+                pass
 
     def disable_app_menu(self, p_panel=None):
         """
@@ -1903,12 +1906,19 @@ class ViewerFrame(PARENT_FRAME):
 
     def _on_open_state_project(self, event):
         """
+        Load in a .svs project file after removing all data from SasView
         """
         path = None
         if self._default_save_location == None:
             self._default_save_location = os.getcwd()
-        msg = "This operation will set SasView to its freshly opened state "
-        msg += "before loading the project. Do you wish to continue?"
+        msg = "This operation will set remove all data, plots and analyses from"
+        msg += " SasView before loading the project. Do you wish to continue?"
+        self._data_panel.selection_cbox.SetValue('Select all Data')
+        self._data_panel._on_selection_type(None)
+        for _, theory_dict in self._data_panel.list_cb_theory.iteritems():
+            for  key, value in theory_dict.iteritems():
+                item, _, _ = value
+                item.Check(True)
         if not self._data_panel.on_remove(None, msg):
             wx.PostEvent(self, StatusEvent(status="Loading Project file..."))
             dlg = wx.FileDialog(self,
@@ -1933,8 +1943,6 @@ class ViewerFrame(PARENT_FRAME):
         # Reset all plugins to their base state
         self._data_panel.set_panel_on_focus()
         # Remove all loaded data
-        self._data_panel.selection_cbox.SetValue('Select all Data')
-        self._data_panel._on_selection_type(None)
         for plugin in self.plugins:
             plugin.clear_panel()
         # Reset plot number to 0
