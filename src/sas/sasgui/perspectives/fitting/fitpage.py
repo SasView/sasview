@@ -363,7 +363,7 @@ class FitPage(BasicPage):
                   id=self.pinhole_smearer.GetId())
         self.Bind(wx.EVT_RADIOBUTTON, self.onSlitSmear,
                   id=self.slit_smearer.GetId())
-        self.disable_smearer.SetValue(True)
+        self.enable_smearer.SetValue(True)
 
         sizer_smearer.Add(self.disable_smearer, 0, wx.LEFT, 10)
         sizer_smearer.Add(self.enable_smearer)
