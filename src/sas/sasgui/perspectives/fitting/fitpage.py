@@ -97,7 +97,7 @@ class FitPage(BasicPage):
 
     def onTrafo(self, event):
         """
-        On Weighting radio button event, sets the weightbt_string
+        On Trafo radio button event, sets the Trafobt_string
         """
         self.Trafobt_string = event.GetEventObject().GetLabelText()
         self._set_Trafo()
@@ -119,16 +119,17 @@ class FitPage(BasicPage):
         #For every radio button (each statement x3):
         self.no_transform = wx.RadioButton(self, wx.ID_ANY,
                                                   'None', style=wx.RB_GROUP)
-        self.Bind(wx.EVT_RADIOBUTTON, self.onTrafo,
-                          id=self.no_transform.GetId())
+
+        #self.Bind(wx.EVT_RADIOBUTTON, self.onTrafo,
+         #                 id=self.no_transform.GetId())
         self.hankel = wx.RadioButton(self, wx.ID_ANY,
                                                   'Hankel')
-        self.Bind(wx.EVT_RADIOBUTTON, self.onTrafo,
-                          id=self.hankel.GetId())
+        #self.Bind(wx.EVT_RADIOBUTTON, self.onTrafo,
+        #                  id=self.hankel.GetId())
         self.cosine = wx.RadioButton(self, wx.ID_ANY,
                                                   'Cosine')
-        self.Bind(wx.EVT_RADIOBUTTON, self.onTrafo,
-                          id=self.cosine.GetId())
+        #self.Bind(wx.EVT_RADIOBUTTON, self.onTrafo,
+         #                 id=self.cosine.GetId())
 
         #Not sure about this (only once though)
         self.no_transform.SetValue(True)

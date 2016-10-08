@@ -281,8 +281,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         x = numpy.linspace(start=self.qmin_x, stop=self.qmax_x,
                            num=self.npts_x, endpoint=True)
         self.data = Data1D(x=x)
-        self.data.xaxis('\\rm{Q}', "A^{-1}")
-        self.data.yaxis('\\rm{Intensity}', "cm^{-1}")
+        #self.data.xaxis('\\rm{Q}', "A^{-1}")
+        self.data.xaxis('\\rm{X}', "")
+        #self.data.yaxis('\\rm{Intensity}', "cm^{-1}")
+        self.data.yaxis('\\rm{Y}', "")
         self.data.is_data = False
         self.data.id = str(self.uid) + " data"
         self.data.group_id = str(self.uid) + " Model1D"
@@ -307,8 +309,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         x = numpy.logspace(start=qmin, stop=qmax,
                            num=self.npts_x, endpoint=True, base=10.0)
         self.data = Data1D(x=x)
-        self.data.xaxis('\\rm{Q}', "A^{-1}")
-        self.data.yaxis('\\rm{Intensity}', "cm^{-1}")
+        #self.data.xaxis('\\rm{Q}', "A^{-1}")
+        #self.data.yaxis('\\rm{Intensity}', "cm^{-1}")
+        self.data.xaxis('\\rm{X}', "")
+        self.data.yaxis('\\rm{Y}', "")
         self.data.is_data = False
         self.data.id = str(self.uid) + " data"
         self.data.group_id = str(self.uid) + " Model1D"

@@ -26,7 +26,6 @@ from bumps.mapper import SerialMapper, MPMapper
 from bumps import parameter
 from bumps.fitproblem import FitProblem
 
-
 from sas.sascalc.fit.AbstractFitEngine import FitEngine
 from sas.sascalc.fit.AbstractFitEngine import FResult
 from sas.sascalc.fit.expression import compile_constraints

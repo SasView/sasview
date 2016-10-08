@@ -704,9 +704,17 @@ class Data1D(plottable_1D, DataInfo):
     else: # and if it's neither, you get punished!
         raise(TypeError,'This is neither SANS nor SESANS data, what the hell are you doing??')
 
-    def __init__(self, x=None, y=None, lam=None, dx=None, dy=None, dlam=None):
+    def __init__(self, x=None, y=None, dx=None, dy=None, lam=None, dlam=None):
         DataInfo.__init__(self)
-        plottable_1D.__init__(self, x, y, lam, dx, dy, dlam)
+        plottable_1D.__init__(self, x, y, dx, dy,None, None, lam, dlam)
+        if self.lam is None: # This means the lam param was not detected in the data: it's SANS data!
+            x_unit = '1/A'
+            y_unit = '1/cm'
+        elif self.lam is not None: # This means lam was detected (should be an empty ndarray): it's SESANS data!
+            x_unit = 'A'
+            y_unit = 'pol'
+        else: # and if it's neither, you get punished!
+            raise(TypeError,'This is neither SANS nor SESANS data, what the hell are you doing??')
 
     def __str__(self):
         """
