@@ -1037,7 +1037,6 @@ class BasicPage(ScrolledPanel, PanelBase):
             n = self.disp_box.GetCurrentSelection()
             dispersity = self.disp_box.GetClientData(n)
             name = dispersity.__name__
-
             self._set_dipers_Param(event=None)
 
             if name == "ArrayDispersion":
@@ -2289,7 +2288,11 @@ class BasicPage(ScrolledPanel, PanelBase):
             event = PageInfoEvent(page=self)
             wx.PostEvent(self.parent, event)
         #draw the model with the current dispersity
-        self._draw_model()
+
+        #Wojtek P, Oct 8, 2016: Calling draw_model seems to be unessecary.
+        #By comenting it we save an extra Iq calculation
+        #self._draw_model()
+
         ## Need to use FitInside again here to replace the next four lines.
         ## Otherwised polydispersity off does not resize the scrollwindow.
         ## PDB Nov 28, 2015
