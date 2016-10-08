@@ -178,19 +178,22 @@ class Calc1D(CalcThread):
             unsmeared_output = numpy.zeros((len(self.data.x)))
             unsmeared_output[first_bin:last_bin+1] = self.model.evalDistribution(mask)
             output = self.smearer(unsmeared_output, first_bin, last_bin)
-            
+
             # Rescale data to unsmeared model
-            unsmeared_data = numpy.zeros((len(self.data.x)))
-            unsmeared_error = numpy.zeros((len(self.data.x)))
-            unsmeared_data[first_bin:last_bin+1] = self.data.y[first_bin:last_bin+1]\
-                                                    * unsmeared_output[first_bin:last_bin+1]\
-                                                    / output[first_bin:last_bin+1]
-            unsmeared_error[first_bin:last_bin+1] = self.data.dy[first_bin:last_bin+1]\
-                                                    * unsmeared_output[first_bin:last_bin+1]\
-                                                    / output[first_bin:last_bin+1]
-            unsmeared_output=unsmeared_output[index]
-            unsmeared_data=unsmeared_data[index]
-            unsmeared_error=unsmeared_error
+            # Check that the arrays are compatible. If we only have a model but no data,
+            # the length of data.y will be zero.
+            if isinstance(self.data.y, numpy.ndarray) and output.shape == self.data.y.shape:
+                unsmeared_data = numpy.zeros((len(self.data.x)))
+                unsmeared_error = numpy.zeros((len(self.data.x)))
+                unsmeared_data[first_bin:last_bin+1] = self.data.y[first_bin:last_bin+1]\
+                                                        * unsmeared_output[first_bin:last_bin+1]\
+                                                        / output[first_bin:last_bin+1]
+                unsmeared_error[first_bin:last_bin+1] = self.data.dy[first_bin:last_bin+1]\
+                                                        * unsmeared_output[first_bin:last_bin+1]\
+                                                        / output[first_bin:last_bin+1]
+                unsmeared_output=unsmeared_output[index]
+                unsmeared_data=unsmeared_data[index]
+                unsmeared_error=unsmeared_error
         else:
             output[index] = self.model.evalDistribution(self.data.x[index])
 

@@ -1,5 +1,7 @@
 .. corfunc_help.rst
 
+.. _Correlation_Function_Analysis:
+
 Correlation Function Analysis
 =============================
 

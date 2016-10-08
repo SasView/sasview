@@ -4,7 +4,7 @@
 #####################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation. 
+#project funded by the US National Science Foundation.
 #See the license text in license.txt
 #copyright 2008, University of Tennessee
 ######################################################################
@@ -12,8 +12,9 @@ import numpy
 import math
 import logging
 import sys
+import sasmodels.sesans
 
-from sasmodels.resolution import Slit1D, Pinhole1D
+from sasmodels.resolution import Slit1D, Pinhole1D, SESANS1D
 from sasmodels.resolution2d import Pinhole2D
 
 def smear_selection(data, model = None):
@@ -47,6 +48,14 @@ def smear_selection(data, model = None):
         return None
 
     # Look for resolution smearing data
+    _found_sesans = False
+    if data.dx is not None and data.lam is not None:
+        if data.dx[0] > 0.0:
+            _found_sesans = True
+
+    if _found_sesans == True:
+        return sesans_smear(data, model)
+
     _found_resolution = False
     if data.dx is not None and len(data.dx) == len(data.x):
 
@@ -141,3 +150,12 @@ def pinhole_smear(data, model=None):
     q = data.x
     width = data.dx if data.dx is not None else 0
     return PySmear(Pinhole1D(q, width), model)
+
+def sesans_smear(data, model=None):
+    #This should be calculated characteristic length scale
+    #Probably not a data prameter either
+    #Need function to calculate this based on model
+    #Here assume a number
+    Rmax = 50000
+    q_calc = sesans.make_q(data.sample.z, Rmax)
+    return PySmear(SESANS1D(data,q_calc),model)

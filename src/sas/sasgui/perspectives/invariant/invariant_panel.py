@@ -94,6 +94,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self.new_state = False
         self.is_state_data = False
         self.is_power_out = False
+        self._set_analysis(False)
 
         #container of invariant value
         self.inv_container = None
@@ -169,6 +170,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             self._set_preview_flag(False)
             self._reset_state_list()
             self._set_bookmark_flag(True)
+            self._set_analysis(True)
         return True
 
     def _delete_bookmark_items(self):
@@ -280,6 +282,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             self._set_preview_flag(False)
             self.new_state = False
             self.is_state_data = False
+            self._set_analysis(True)
 
     def clear_panel(self):
         """
@@ -910,6 +913,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self._set_save_flag(False)
         self.button_calculate.SetFocus()
         #self.SetupScrolling()
+        self._set_analysis(False)
 
     def _set_state(self, event):
         """

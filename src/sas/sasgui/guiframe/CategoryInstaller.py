@@ -10,9 +10,9 @@ Copyright (c) Institut Laue-Langevin 2012
 
 import os
 import sys
-import shutil
 import json
-from collections import defaultdict
+import logging
+from collections import defaultdict, OrderedDict
 
 USER_FILE = 'categories.json'
 
@@ -22,7 +22,6 @@ class CategoryInstaller:
 
     Note - class is entirely static!
     """
-
 
     def __init__(self):
         """ initialization """
@@ -42,7 +41,7 @@ class CategoryInstaller:
         """
         import sas.sasgui.perspectives.fitting.models
         return sas.sasgui.perspectives.fitting.models.get_model_python_path()
-    
+
     @staticmethod
     def _get_default_cat_file_dir():
         """
@@ -53,7 +52,7 @@ class CategoryInstaller:
         # py2exe (it will be in the exec dir).
         import sas.sasview
         cat_file = "default_categories.json"
-        
+
         possible_cat_file_paths = [
             os.path.join(os.path.split(sas.sasview.__file__)[0], cat_file),           # Source
             os.path.join(os.path.dirname(sys.executable), '..', 'Resources', cat_file), # Mac
@@ -63,7 +62,7 @@ class CategoryInstaller:
         for path in possible_cat_file_paths:
             if os.path.isfile(path):
                 return os.path.dirname(path)
-            
+
         raise RuntimeError('CategoryInstaller: Could not find folder containing default categories')
 
     @staticmethod
@@ -88,9 +87,8 @@ class CategoryInstaller:
             for (model, enabled) in master_category_dict[category]:
                 by_model_dict[model].append(category)
                 model_enabled_dict[model] = enabled
-    
-        return (by_model_dict, model_enabled_dict)
 
+        return (by_model_dict, model_enabled_dict)
 
     @staticmethod
     def _regenerate_master_dict(by_model_dict, model_enabled_dict):
@@ -104,26 +102,19 @@ class CategoryInstaller:
             for category in by_model_dict[model]:
                 master_category_dict[category].append(\
                     (model, model_enabled_dict[model]))
-        
-        return master_category_dict
+        return OrderedDict(sorted(master_category_dict.items(), key=lambda t: t[0]))
 
     @staticmethod
     def get_user_file():
         """
         returns the user data file, eg .sasview/categories.json.json
         """
-        return os.path.join(CategoryInstaller._get_home_dir(),
-                            USER_FILE)
+        return os.path.join(CategoryInstaller._get_home_dir(), USER_FILE)
 
     @staticmethod
     def get_default_file():
-        """
-        returns the path of the default file
-        e.g. blahblah/default_categories.json
-        """
-        return os.path.join(\
-            CategoryInstaller._get_default_cat_file_dir(), "default_categories.json")
-        
+        logging.warning("CategoryInstaller.get_default_file is deprecated.")
+
     @staticmethod
     def check_install(homedir = None, model_list=None):
         """
@@ -133,45 +124,53 @@ class CategoryInstaller:
         :param homefile: Override the default home directory
         :param model_list: List of model names except customized models
         """
-        #model_list = []
-        default_file = CategoryInstaller.get_default_file()
+        _model_dict = { model.name: model for model in model_list}
+        _model_list = _model_dict.keys()
+
         serialized_file = None
-        master_category_dict = defaultdict(list)
         if homedir == None:
             serialized_file = CategoryInstaller.get_user_file()
         else:
             serialized_file = os.path.join(homedir, USER_FILE)
         if os.path.isfile(serialized_file):
-            cat_file = open(serialized_file, 'rb')
+            with open(serialized_file, 'rb') as f:
+                master_category_dict = json.load(f)
         else:
-            cat_file = open(default_file, 'rb')
-        master_category_dict = json.load(cat_file)
-#        master_category_dict = pickle.Unpickler(cat_file).load()
+            master_category_dict = defaultdict(list)
+
         (by_model_dict, model_enabled_dict) = \
                 CategoryInstaller._regenerate_model_dict(master_category_dict)
-        cat_file.close()
-        add_list = model_list
+        add_list = _model_list
         del_name = False
         for cat in master_category_dict.keys():
             for ind in range(len(master_category_dict[cat])):
                 model_name, enabled = master_category_dict[cat][ind]
-                if model_name not in model_list:
+                if model_name not in _model_list:
                     del_name = True 
                     try:
                         by_model_dict.pop(model_name)
                         model_enabled_dict.pop(model_name)
                     except:
-                        pass
+                        logging.error("CategoryInstaller: %s", sys.exc_value)
                 else:
                     add_list.remove(model_name)
         if del_name or (len(add_list) > 0):
             for model in add_list:
                 model_enabled_dict[model]= True
-                by_model_dict[model].append('Uncategorized')
-    
+                if _model_dict[model].category is None or len(str(_model_dict[model].category.capitalize())) == 0:
+                    by_model_dict[model].append('Uncategorized')
+                else:
+                    category = _model_dict[model].category
+                    toks = category.split(':')
+                    category = toks[-1]
+                    toks = category.split('-')
+                    capitalized_words = [t.capitalize() for t in toks]
+                    category = ' '.join(capitalized_words)
+
+                    by_model_dict[model].append(category)
+
             master_category_dict = \
                 CategoryInstaller._regenerate_master_dict(by_model_dict,
                                                           model_enabled_dict)
-            
-            json.dump( master_category_dict,
-                         open(serialized_file, 'wb') )
+
+            json.dump(master_category_dict, open(serialized_file, 'wb'))
