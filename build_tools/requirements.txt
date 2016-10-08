@@ -6,11 +6,11 @@ pyparsing==1.5.5
 html5lib==0.95
 reportlab==2.5
 lxml==2.3
-PIL==1.1.7
+#PIL==1.1.7
 periodictable==1.3.0
 bumps==0.7.5.9
-# numpy==1.6.1
-# scipy==0.10.1
+numpy>=1.7.1
+scipy>=0.18.0
 # wx==2.8.12.1
 # matplotlib==1.1.0
 xhtml2pdf==0.0.6

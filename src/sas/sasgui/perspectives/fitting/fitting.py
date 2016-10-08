@@ -592,11 +592,13 @@ class Plugin(PluginBase):
         : param state: PageState object
         : param datainfo: data
         """
-        #state = self.state_reader.get_state()
-        if state != None:
+        from pagestate import PageState
+        from simfitpage import SimFitPageState
+        if isinstance(state, PageState):
             state = state.clone()
-            # store fitting state in temp_state
             self.temp_state.append(state)
+        elif isinstance(state, SimFitPageState):
+            state.load_from_save_state(self)
         else:
             self.temp_state = []
         # index to start with for a new set_state
@@ -1739,10 +1741,11 @@ class Plugin(PluginBase):
                                       data_description=model.name + " unsmeared",
                                       data_id=str(page_id) + " " + data.name + " unsmeared")
 
-                self.create_theory_1D(x, unsmeared_data, page_id, model, data, state,
-                                      data_description="Data unsmeared",
-                                      data_id="Data  " + data.name + " unsmeared",
-                                      dy=unsmeared_error)
+                if unsmeared_data is not None and unsmeared_error is not None:
+                    self.create_theory_1D(x, unsmeared_data, page_id, model, data, state,
+                                          data_description="Data unsmeared",
+                                          data_id="Data  " + data.name + " unsmeared",
+                                          dy=unsmeared_error)
                 
             if sq_model is not None and pq_model is not None:
                 self.create_theory_1D(x, sq_model, page_id, model, data, state,

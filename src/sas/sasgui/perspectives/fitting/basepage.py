@@ -8,7 +8,6 @@ import numpy
 import time
 import copy
 import math
-import string
 import json
 import logging
 import traceback
@@ -142,7 +141,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.theory_qmax = None
         self.theory_qmin_x = None
         self.theory_qmax_x = None
-        self.cb1 = None
         self.btEditMask = None
         self.btFit = None
         self.sld_axes = None
@@ -335,13 +333,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.data.detector[index].pixel_size.y = 5  # mm
         self.data.detector[index].beam_center.x = qmax
         self.data.detector[index].beam_center.y = qmax
-        ## create x_bins and y_bins of the model 2D
-        #pixel_width_x = self.data.detector[index].pixel_size.x
-        #pixel_width_y = self.data.detector[index].pixel_size.y
-        #center_x = self.data.detector[index].beam_center.x/pixel_width_x
-        #center_y = self.data.detector[index].beam_center.y/pixel_width_y
-        # theory default: assume the beam
-        #center is located at the center of sqr detector
         xmax = qmax
         xmin = -qmax
         ymax = qmax
@@ -360,16 +351,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         q_data = numpy.sqrt(qx_data * qx_data + qy_data * qy_data)
         # set all True (standing for unmasked) as default
         mask = numpy.ones(len(qx_data), dtype=bool)
-        # calculate the range of qx and qy: this way,
-        # it is a little more independent
-        #x_size = xmax - xmin
-        #y_size = ymax - ymin
         # store x and y bin centers in q space
         x_bins = x
         y_bins = y
-        # bin size: x- & y-directions
-        #xstep = x_size / len(x_bins - 1)
-        #ystep = y_size / len(y_bins - 1)
 
         self.data.source = Source()
         self.data.data = numpy.ones(len(mask))
@@ -410,45 +394,12 @@ class BasicPage(ScrolledPanel, PanelBase):
                     self._manager.menu1.FindItemById(self._manager.id_batchfit)
             batch_menu.Enable(self.batch_on and flag)
 
-    def set_page_info(self, page_info):
-        """
-        set some page important information at once
-        """
-#       THIS METHOD/FUNCTION NO LONGE APPEARS TO BE CALLED.  Started up program
-#       and started new fit window and PR and Invariant and a fit in fitting
-#       but never entered this routine which should be an initialization
-#       routine.  Leave for a while but probably something to clean up at
-#       some point?
-#
-#       PDB April 13 2014
-#
-        ##window_name
-        self.window_name = page_info.window_name
-        ##window_caption
-        self.window_caption = page_info.window_caption
-        ## manager is the fitting plugin
-        self._manager = page_info.manager
-        ## owner of the page (fitting plugin)
-        self.event_owner = page_info.event_owner
-        ## current model
-        self.model = page_info.model
-        ## data
-        self.data = page_info.data
-        ## dictionary containing list of models
-        self.model_list_box = page_info.model_list_box
-        ## Data member to store the dispersion object created
-        self.populate_box(model_dict=self.model_list_box)
-
     def onContextMenu(self, event):
         """
         Retrieve the state selected state
         """
-        # Skipping the save state functionality for release 0.9.0
-        #return
-
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
-
         self.PopupMenu(self.popUpMenu, pos)
 
     def onUndo(self, event):
@@ -562,30 +513,9 @@ class BasicPage(ScrolledPanel, PanelBase):
 
     def initialize_combox(self):
         """
-        put default value in the combobox
+        put default value in the combo box
         """
-        ## fill combox box
-        if self.model_list_box is None:
-            return
-        if len(self.model_list_box) > 0:
-        ## This is obsolete code since form factor box is no longer static.
-        ## It is now set dynamically through _show_combox and _show_combos_helper
-        ## These are called for first time by formfactor_combo_init
-        ## itself called from fitpanel only.  If we find that I'm wrong and
-        ## we DO need to initialize somehow here - do it by a call to
-        ## formfactor_combo_init
-        ## self.formfator_combo_init()
-        ## BUT NOT HERE -- make it last line of this
-        ## method so that structure box is populated before _show_comboox_helper
-        ## is called.  Otherwise wx will complain mightily:-)
-        ##
-        ## Also change the name to initiatlize_structurebox along with changes
-        ## to other combobox methods (_populate_listbox --> _populate_categorybox
-        ## etc )
-        ##
-        ##     PDB 4/26/2014
-#            self._populate_box(self.formfactorbox,
-#                               self.model_list_box["Shapes"])
+        if self.model_list_box is not None and len(self.model_list_box) > 0:
             self._populate_box(self.structurebox,
                                self.model_list_box["Structure Factors"])
             self.structurebox.Insert("None", 0, None)
@@ -594,13 +524,6 @@ class BasicPage(ScrolledPanel, PanelBase):
             self.text2.Hide()
             self.structurebox.Disable()
             self.text2.Disable()
-
-            if self.model.__class__ in self.model_list_box["P(Q)*S(Q)"]:
-                self.structurebox.Show()
-                self.text2.Show()
-                self.structurebox.Enable()
-                self.text2.Enable()
-
 
     def set_dispers_sizer(self):
         """
@@ -738,7 +661,6 @@ class BasicPage(ScrolledPanel, PanelBase):
             wx.CallAfter(self.get_copy_latex)
         else:
             wx.CallAfter(self.get_copy)
-
 
     def on_paste(self, event):
         """
@@ -952,11 +874,11 @@ class BasicPage(ScrolledPanel, PanelBase):
         self._copy_parameters_state(self.orientation_params,
                                      self.state.orientation_params)
         self._copy_parameters_state(self.orientation_params_disp,
-                                     self.state.orientation_params_disp)
+                                    self.state.orientation_params_disp)
 
         self._copy_parameters_state(self.parameters, self.state.parameters)
         self._copy_parameters_state(self.fittable_param,
-                                     self.state.fittable_param)
+                                    self.state.fittable_param)
         self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
         #save chisqr
         self.state.tcChi = self.tcChi.GetValue()
@@ -1044,12 +966,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         self.disp_cb_dict = state.disp_cb_dict
         self.disp_list = state.disp_list
-
-        ## set the state of the radio box
-        #self.shape_rbutton.SetValue(state.shape_rbutton)
-        #self.shape_indep_rbutton.SetValue(state.shape_indep_rbutton)
-        #self.struct_rbutton.SetValue(state.struct_rbutton)
-        #self.plugin_rbutton.SetValue(state.plugin_rbutton)
 
         ## fill model combobox
         self._show_combox_helper()
@@ -1196,9 +1112,6 @@ class BasicPage(ScrolledPanel, PanelBase):
             return
         # set data, etc. from the state
         # reset page between theory and fitting from bookmarking
-        #if state.data == None:
-        #    data = None
-        #else:
         data = state.data
 
         if data == None:
@@ -1224,12 +1137,6 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         self.disp_cb_dict = state.disp_cb_dict
         self.disp_list = state.disp_list
-
-        ## set the state of the radio box
-        #self.shape_rbutton.SetValue(state.shape_rbutton)
-        #self.shape_indep_rbutton.SetValue(state.shape_indep_rbutton)
-        #self.struct_rbutton.SetValue(state.struct_rbutton)
-        #self.plugin_rbutton.SetValue(state.plugin_rbutton)
 
         ## fill model combobox
         self._show_combox_helper()
@@ -1285,9 +1192,6 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.model_view.SetLabel("2D Mode")
             else:
                 self.model_view.SetLabel("1D Mode")
-
-        ## set the select all check box to the a given state
-        self.cb1.SetValue(state.cb1)
 
         ## reset state of checkbox,textcrtl  and  regular parameters value
         self._reset_parameters_state(self.orientation_params_disp,
@@ -1417,10 +1321,6 @@ class BasicPage(ScrolledPanel, PanelBase):
                             item[2].Disable()
                         except Exception:
                             logging.error(traceback.format_exc())
-
-        # Make sure the check box updated when all checked
-        if self.cb1.GetValue():
-            self.select_all_param(None)
 
     def _selectDlg(self):
         """
@@ -1877,17 +1777,12 @@ class BasicPage(ScrolledPanel, PanelBase):
         try:
             if mod_cat == custom_model:
                 for model in self.model_list_box[mod_cat]:
-                    str_m = model.id if hasattr(model, 'id') else model.name
-                    m_list.append(self.model_dict[str_m])
+                    m_list.append(self.model_dict[model.name])
             else:
                 cat_dic = self.master_category_dict[mod_cat]
                 for (model, enabled) in cat_dic:
                     if enabled:
                         m_list.append(self.model_dict[model])
-                    #else:
-                    #    msg = "This model is disabled by Category Manager."
-                    #    wx.PostEvent(self.parent.parent,
-                    #                 StatusEvent(status=msg, info="error"))
         except Exception:
             msg = traceback.format_exc()
             wx.PostEvent(self._manager.parent,
@@ -2058,7 +1953,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         if f_id >= 0:
             form_factor = self.formfactorbox.GetClientData(f_id)
 
-        if not form_factor in  self.model_list_box["multiplication"]:
+        if form_factor is None or not form_factor.is_form_factor:
             self.structurebox.Hide()
             self.text2.Hide()
             self.structurebox.Disable()
@@ -2556,10 +2451,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                     else:
                         item[2].Enable()
 
-            # Make sure the check box updated when all checked
-            if self.cb1.GetValue():
-                #self.select_all_param(None)
-                self.get_all_checked_params()
+            # Make sure the check box updated
+            self.get_all_checked_params()
 
             # update params
             self._update_paramv_on_fit()
@@ -3465,20 +3358,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.master_category_dict = defaultdict(list)
         self.by_model_dict = defaultdict(list)
         self.model_enabled_dict = defaultdict(bool)
-
-        try:
-            categorization_file = CategoryInstaller.get_user_file()
-            if not os.path.isfile(categorization_file):
-                categorization_file = CategoryInstaller.get_default_file()
-            cat_file = open(categorization_file, 'rb')
-            self.master_category_dict = json.load(cat_file)
-            self._regenerate_model_dict()
-            cat_file.close()
-        except IOError:
-            raise
-            print 'Problem reading in category file.'
-            print 'We even looked for it, made sure it was there.'
-            print 'An existential crisis if there ever was one.'
+        categorization_file = CategoryInstaller.get_user_file()
+        with open(categorization_file, 'rb') as f:
+            self.master_category_dict = json.load(f)
+        self._regenerate_model_dict()
 
     def _regenerate_model_dict(self):
         """
@@ -3713,10 +3596,6 @@ class BasicPage(ScrolledPanel, PanelBase):
     def _on_select_model(self, event=None):
         """
         call back for model selection if implemented
-        """
-    def select_all_param(self, event):
-        """
-        set to true or false all checkBox if implemented
         """
     def get_weight_flag(self):
         """

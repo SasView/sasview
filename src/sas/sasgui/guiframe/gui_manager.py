@@ -676,26 +676,29 @@ class ViewerFrame(PARENT_FRAME):
         update the toolbar if available
         update edit menu if available
         """
-        if event != None:
+        if event is not None:
             self.panel_on_focus = event.panel
         if self.panel_on_focus is not None:
-            #Disable save application if the current panel is in batch mode
-            flag = self.panel_on_focus.get_save_flag()
-            if self._save_appl_menu != None:
-                self._save_appl_menu.Enable(flag)
+            # Disable save application if the current panel is in batch mode
+            try:
+                flag = self.panel_on_focus.get_save_flag()
+                if self._save_appl_menu != None:
+                    self._save_appl_menu.Enable(flag)
 
-            if self.panel_on_focus not in self.plot_panels.values():
-                for ID in self.panels.keys():
-                    if self.panel_on_focus != self.panels[ID]:
-                        self.panels[ID].on_kill_focus(None)
+                if self.panel_on_focus not in self.plot_panels.values():
+                    for ID in self.panels.keys():
+                        if self.panel_on_focus != self.panels[ID]:
+                            self.panels[ID].on_kill_focus(None)
 
-            if self._data_panel is not None and \
-                            self.panel_on_focus is not None:
-                self.set_panel_on_focus_helper()
-                #update toolbar
-                self._update_toolbar_helper()
-                #update edit menu
-                self.enable_edit_menu()
+                if self._data_panel is not None and \
+                                self.panel_on_focus is not None:
+                    self.set_panel_on_focus_helper()
+                    #update toolbar
+                    self._update_toolbar_helper()
+                    #update edit menu
+                    self.enable_edit_menu()
+            except wx._core.PyDeadObjectError:
+                pass
 
     def disable_app_menu(self, p_panel=None):
         """
@@ -1151,7 +1154,8 @@ class ViewerFrame(PARENT_FRAME):
                 self.disable_app_menu(self.plot_panels[ID])
                 self.delete_panel(ID)
                 break
-        self.cpanel_on_focus.SetFocus()
+        if self.cpanel_on_focus is not None:
+            self.cpanel_on_focus.SetFocus()
 
 
     def popup_panel(self, p):
@@ -1332,41 +1336,44 @@ class ViewerFrame(PARENT_FRAME):
                         self._menubar.Insert(self._applications_menu_pos, menu, name)
                     self._applications_menu_name = name
 
+    def _on_marketplace_click(self, event):
+        """
+            Click event for the help menu item linking to the Marketplace.
+        """
+        import webbrowser
+        webbrowser.open_new(config.marketplace_url)
+
     def _add_help_menu(self):
         """
         add help menu to menu bar.  Includes welcome page, about page,
         tutorial PDF and documentation pages.
         """
-        # Help menu
         self._help_menu = wx.Menu()
-        style = self.__gui_style & GUIFRAME.WELCOME_PANEL_ON
 
         wx_id = wx.NewId()
         self._help_menu.Append(wx_id, '&Documentation', '')
         wx.EVT_MENU(self, wx_id, self._onSphinxDocs)
-        self._help_menu.AppendSeparator()
 
         if config._do_tutorial and (IS_WIN or sys.platform == 'darwin'):
             wx_id = wx.NewId()
             self._help_menu.Append(wx_id, '&Tutorial', 'Software tutorial')
             wx.EVT_MENU(self, wx_id, self._onTutorial)
-            self._help_menu.AppendSeparator()
-
 
         if config._do_acknowledge:
             wx_id = wx.NewId()
             self._help_menu.Append(wx_id, '&Acknowledge', 'Acknowledging SasView')
             wx.EVT_MENU(self, wx_id, self._onAcknowledge)
-            self._help_menu.AppendSeparator()
-
 
         if config._do_aboutbox:
             logging.info("Doing help menu")
             wx_id = wx.NewId()
             self._help_menu.Append(wx_id, '&About', 'Software information')
             wx.EVT_MENU(self, wx_id, self._onAbout)
-            self._help_menu.AppendSeparator()
 
+        if config.marketplace_url:
+            wx_id = wx.NewId()
+            self._help_menu.Append(wx_id, '&Model marketplace', '')
+            wx.EVT_MENU(self, wx_id, self._on_marketplace_click)
 
         # Checking for updates
         wx_id = wx.NewId()
@@ -1899,22 +1906,47 @@ class ViewerFrame(PARENT_FRAME):
 
     def _on_open_state_project(self, event):
         """
+        Load in a .svs project file after removing all data from SasView
         """
         path = None
         if self._default_save_location == None:
             self._default_save_location = os.getcwd()
-        wx.PostEvent(self, StatusEvent(status="Loading Project file..."))
-        dlg = wx.FileDialog(self,
+        msg = "This operation will set remove all data, plots and analyses from"
+        msg += " SasView before loading the project. Do you wish to continue?"
+        self._data_panel.selection_cbox.SetValue('Select all Data')
+        self._data_panel._on_selection_type(None)
+        for _, theory_dict in self._data_panel.list_cb_theory.iteritems():
+            for  key, value in theory_dict.iteritems():
+                item, _, _ = value
+                item.Check(True)
+        if not self._data_panel.on_remove(None, msg):
+            wx.PostEvent(self, StatusEvent(status="Loading Project file..."))
+            dlg = wx.FileDialog(self,
                             "Choose a file",
                             self._default_save_location, "",
                             APPLICATION_WLIST)
-        if dlg.ShowModal() == wx.ID_OK:
-            path = dlg.GetPath()
+            if dlg.ShowModal() == wx.ID_OK:
+                path = dlg.GetPath()
             if path is not None:
                 self._default_save_location = os.path.dirname(path)
-        dlg.Destroy()
+                dlg.Destroy()
+                # Reset to a base state
+                self._on_reset_state()
+                # Load the project file
+                self.load_state(path=path, is_project=True)
 
-        self.load_state(path=path, is_project=True)
+    def _on_reset_state(self):
+        """
+        Resets SasView to its freshly opened state.
+        :return: None
+        """
+        # Reset all plugins to their base state
+        self._data_panel.set_panel_on_focus()
+        # Remove all loaded data
+        for plugin in self.plugins:
+            plugin.clear_panel()
+        # Reset plot number to 0
+        self.graph_num = 0
 
     def _on_save_application(self, event):
         """
@@ -2062,22 +2094,7 @@ class ViewerFrame(PARENT_FRAME):
                 version_info = json.loads(content)
             except:
                 logging.info("Failed to connect to www.sasview.org")
-        self._process_version(version_info, standalone=event == None)    
-
-        
-        
-#         
-#         try:
-#             req = urllib2.Request(config.__update_URL__)
-#             res = urllib2.urlopen(req)
-#             content = res.read().strip()
-#             logging.info("Connected to www.sasview.org. Latest version: %s"
-#                          % (content))
-#             version_info = json.loads(content)
-#         except:
-#             logging.info("Failed to connect to www.sasview.org")
-#             version_info = {"version": "0.0.0"}
-#         self._process_version(version_info, standalone=event == None)
+        self._process_version(version_info, standalone=event == None)
 
     def _process_version(self, version_info, standalone=True):
         """

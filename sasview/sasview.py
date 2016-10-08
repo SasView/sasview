@@ -147,6 +147,14 @@ class SasView():
                           APP_NAME)
             logging.error(traceback.format_exc())
 
+        # Corfunc perspective
+        try:
+            import sas.sasgui.perspectives.corfunc as module
+            corfunc_plug = module.Plugin()
+            self.gui.add_perspective(corfunc_plug)
+        except:
+            logging.error("Unable to load corfunc module")
+
         #Calculator perspective
         try:
             import sas.sasgui.perspectives.calculator as module
@@ -154,6 +162,16 @@ class SasView():
             self.gui.add_perspective(calculator_plug)
         except:
             logging.error("%s: could not find Calculator plug-in module"% \
+                                                        APP_NAME)
+            logging.error(traceback.format_exc())
+
+        # File converter tool
+        try:
+            import sas.sasgui.perspectives.file_converter as module
+            converter_plug = module.Plugin()
+            self.gui.add_perspective(converter_plug)
+        except:
+            logging.error("%s: could not find File Converter plug-in module"% \
                                                         APP_NAME)
             logging.error(traceback.format_exc())
 

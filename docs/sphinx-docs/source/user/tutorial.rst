@@ -1,5 +1,7 @@
 .. tutorial.rst
 
+.. _tutorial:
+
 Tutorial
 ========
 

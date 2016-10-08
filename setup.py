@@ -8,6 +8,7 @@ import shutil
 from setuptools import setup, Extension
 from distutils.command.build_ext import build_ext
 from distutils.core import Command
+import numpy
 
 # Manage version number ######################################
 import sasview
@@ -53,12 +54,12 @@ if os.path.isdir(sas_dir):
     if os.path.exists(SASVIEW_BUILD):
         print "Removing existing build directory", SASVIEW_BUILD, "for a clean build"
         shutil.rmtree(SASVIEW_BUILD)
-                    
+
 # 'sys.maxsize' and 64bit: Not supported for python2.5
 is_64bits = False
 if sys.version_info >= (2, 6):
     is_64bits = sys.maxsize > 2**32
-    
+
 enable_openmp = False
 
 if sys.platform =='darwin':
@@ -117,7 +118,7 @@ class build_ext_subclass( build_ext ):
         # Get 64-bitness
         c = self.compiler.compiler_type
         print "Compiling with %s (64bit=%s)" % (c, str(is_64bits))
-        
+
         # OpenMP build options
         if enable_openmp:
             if copt.has_key(c):
@@ -126,7 +127,7 @@ class build_ext_subclass( build_ext ):
             if lopt.has_key(c):
                 for e in self.extensions:
                     e.extra_link_args = lopt[ c ]
-                    
+
         # Platform-specific build options
         if platform_lopt.has_key(c):
             for e in self.extensions:
@@ -204,7 +205,7 @@ ext_modules.append( Extension("sas.sascalc.calculator.core.sld2i",
     )
 )
 
-    
+
 # sas.sascalc.pr
 srcdir  = os.path.join("src", "sas", "sascalc", "pr", "c_extensions")
 package_dir["sas.sascalc.pr.core"] = srcdir
@@ -216,7 +217,17 @@ ext_modules.append( Extension("sas.sascalc.pr.core.pr_inversion",
                                          ],
                               include_dirs=[],
                               ) )
-        
+
+# sas.sascalc.file_converter
+mydir = os.path.join("src", "sas", "sascalc", "file_converter", "c_ext")
+package_dir["sas.sascalc.file_converter.core"] = mydir
+package_dir["sas.sascalc.file_converter"] = os.path.join("src","sas", "sascalc", "file_converter")
+packages.extend(["sas.sascalc.file_converter","sas.sascalc.file_converter.core"])
+ext_modules.append( Extension("sas.sascalc.file_converter.core.bsl_loader",
+                              sources = [os.path.join(mydir, "bsl_loader.c")],
+                              include_dirs=[numpy.get_include()],
+                              ) )
+
 # sas.sascalc.fit
 package_dir["sas.sascalc.fit"] = os.path.join("src", "sas", "sascalc", "fit")
 packages.append("sas.sascalc.fit")
@@ -238,7 +249,7 @@ package_data['sas.sasgui.perspectives.fitting'] = ['media/*', 'plugin_models/*']
 
 packages.extend(["sas.sasgui.perspectives", "sas.sasgui.perspectives.calculator"])
 package_data['sas.sasgui.perspectives.calculator'] = ['images/*', 'media/*']
-    
+
 # Data util
 package_dir["sas.sascalc.data_util"] = os.path.join("src", "sas", "sascalc", "data_util")
 packages.append("sas.sascalc.data_util")
@@ -293,7 +304,7 @@ package_data['sas.sasview'] = ['images/*',
                                'test/1d_data/*',
                                'test/2d_data/*',
                                'test/save_states/*',
-                               'test/upcoming_formats/*', 
+                               'test/upcoming_formats/*',
                                  'default_categories.json']
 packages.append("sas.sasview")
 
@@ -315,7 +326,7 @@ else:
     # 'pil' is now called 'pillow'
     required.extend(['pillow'])
 
-# Set up SasView    
+# Set up SasView
 setup(
     name="sasview",
     version = VERSION,
@@ -340,4 +351,4 @@ setup(
     cmdclass = {'build_ext': build_ext_subclass,
                 'docs': BuildSphinxCommand,
                 'disable_openmp': DisableOpenMPCommand}
-    )   
+    )

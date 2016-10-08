@@ -396,7 +396,7 @@ class DataOperPanel(wx.ScrolledWindow):
             self._check_newname()
             self._set_textctrl_color(self.data1_cbox, 'pink')
             self._set_textctrl_color(self.data2_cbox, 'pink')
-            msg = "DataOperation: Data types must be same."
+            msg = "DataOperation: %s" % sys.exc_value
             self.send_warnings(msg, 'error')
             self.output = None
             return flag
