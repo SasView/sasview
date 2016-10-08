@@ -12,10 +12,10 @@ import numpy
 import math
 import logging
 import sys
+import sasmodels.sesans
 
-from sasmodels.resolution import Slit1D, Pinhole1D
+from sasmodels.resolution import Slit1D, Pinhole1D, SESANS1D
 from sasmodels.resolution2d import Pinhole2D
-from sasmodels import sesans
 
 def smear_selection(data, model = None):
     """
@@ -47,17 +47,15 @@ def smear_selection(data, model = None):
          and not hasattr(data, "dxw"):
         return None
 
-    # Look for sesans
+    # Look for resolution smearing data
     _found_sesans = False
-    if hasattr(data,'lam') :
-        _found_sesans = True
-        logging.info("Found SESANS data!!")
+    if data.dx is not None and data.lam is not None:
+        if data.dx[0] > 0.0:
+            _found_sesans = True
 
-    # If we found sesans data, do the necessary jiggery pokery
     if _found_sesans == True:
         return sesans_smear(data, model)
 
-    # Look for resolution smearing data
     _found_resolution = False
     if data.dx is not None and len(data.dx) == len(data.x):
 
@@ -92,23 +90,7 @@ def smear_selection(data, model = None):
     # If we found slit smearing data, return a slit smearer
     if _found_slit == True:
         return slit_smear(data, model)
-
     return None
-
-def sesans_smear(data, model=None):
-    q = sesans.make_q(data.sample.zacceptance, data.Rmax)
-    index = slice(None, None)
-    res = None
-    if data.y is not None:
-        Iq, dIq = data.y, data.dy
-    else:
-        Iq, dIq = None, None
-    #self._theory = np.zeros_like(q)
-    q_vectors = [q]
-    q_mono = sesans.make_all_q(data)
-    Iq = model.evalDistribution(q_mono)
-
-    return sesans.transform(data, q, Iq, 0, 0)
 
 
 class PySmear(object):
@@ -168,3 +150,12 @@ def pinhole_smear(data, model=None):
     q = data.x
     width = data.dx if data.dx is not None else 0
     return PySmear(Pinhole1D(q, width), model)
+
+def sesans_smear(data, model=None):
+    #This should be calculated characteristic length scale
+    #Probably not a data prameter either
+    #Need function to calculate this based on model
+    #Here assume a number
+    Rmax = 50000
+    q_calc = sesans.make_q(data.sample.z, Rmax)
+    return PySmear(SESANS1D(data,q_calc),model)
