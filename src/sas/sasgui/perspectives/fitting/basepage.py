@@ -1952,7 +1952,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         if f_id >= 0:
             form_factor = self.formfactorbox.GetClientData(f_id)
 
-        if form_factor is None or not form_factor.is_form_factor:
+        if form_factor is None or \
+            not hasattr(form_factor, 'is_form_factor') or \
+            not form_factor.is_form_factor:
             self.structurebox.Hide()
             self.text2.Hide()
             self.structurebox.Disable()
