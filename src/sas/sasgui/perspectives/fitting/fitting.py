@@ -378,7 +378,8 @@ class Plugin(PluginBase):
         wx_id = wx.NewId()
         self.edit_model_menu.Append(wx_id, 'Python Shell/Editor',
                                     'Python Console')
-        #wx.EVT_MENU(owner, wx_id, self.get_python_panel(filename=None))
+        #SMK: Adding this next line in breaks the build - why?
+        #wx.EVT_MENU(owner, wx_id, self.get_python_panel)
         
     def set_edit_menu_helper(self, owner=None, menu=None):
         """
