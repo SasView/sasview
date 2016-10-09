@@ -5,17 +5,26 @@ Writing a Plugin Model
 
 .. note:: If some code blocks are not readable, expand the documentation window
 
+Introduction
+^^^^^^^^^^^^
+
+There are currently two ways to add your own models to SasView:
+
+* Using the :ref:`Custom_Model_Editor`
+* By Writing a Plugin Model
+
+The Custom Model Editor lets you combine *existing* SasView library models. For anything more 
+complex, or if you want to apply polydispersity to parameters, you will need to write a Plugin Model.  
+
 Overview
 ^^^^^^^^
 
-You can write your own model and save it to the the SasView
-*plugin_models* folder
+If you write your own model and save it to the the SasView *plugin_models* folder
 
   *C:\\Users\\[username]\\.sasview\\plugin_models* (on Windows)
 
-The next time SasView is started it will compile the plugin and add
-it to the list of *Customized Models* in a FitPage.  It is recommended that an
-existing model be used as a template.
+the next time SasView is started it will compile the plugin and add
+it to the list of *Customized Models* in a FitPage.
 
 SasView has three ways of writing models:
 
@@ -41,7 +50,7 @@ Create New Model Files
 ^^^^^^^^^^^^^^^^^^^^^^
 
 In the *~\\.sasview\\plugin_models* directory, copy the appropriate files
-(using the examples above as templates) to mymodel.py (and mymodel.c, etc)
+(we recommend using the examples above as templates) to mymodel.py (and mymodel.c, etc)
 as required, where "mymodel" is the name for the model you are creating.
 
 *Please follow these naming rules:*
