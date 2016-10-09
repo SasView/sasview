@@ -18,4 +18,4 @@ Fitting Documentation
 
    Information on the SasView Optimisers <optimizer.rst>
 
-   Writing a Plugin <plugin.rst>
+   Writing a Plugin Model <plugin.rst>
