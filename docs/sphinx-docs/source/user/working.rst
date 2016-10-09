@@ -16,6 +16,8 @@ Working with SasView
       
    Tutorial <tutorial.rst>
    
+   Writing a Plugin Model <sasgui/perspectives/fitting/plugin.rst>
+   
    Computations with a GPU <gpu_computations>
    
    Converting SANS to SESANS <sans_to_sesans>
