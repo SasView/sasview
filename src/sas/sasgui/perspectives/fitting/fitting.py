@@ -374,7 +374,12 @@ class Plugin(PluginBase):
         self.edit_model_menu.Append(wx_id, 'Load Models',
           '(Re)Load all models present in user plugin_models folder')
         wx.EVT_MENU(owner, wx_id, self.load_plugin_models)
-
+        
+        wx_id = wx.NewId()
+        self.edit_model_menu.Append(wx_id, 'Python Shell/Editor',
+                                    'Python Console')
+        #wx.EVT_MENU(owner, wx_id, self.get_python_panel(filename=None))
+        
     def set_edit_menu_helper(self, owner=None, menu=None):
         """
         help for setting list of the edit model menu labels
