@@ -77,4 +77,5 @@ The Help option provides access to:
 - a :ref:`tutorial` on using *SasView* (in pdf format);
 - information on how to acknowledge *SasView* in publications;
 - information about the version of *SasView* you are using;
+- the :ref:`marketplace`\ ;
 - a check to see if there is a more recent version of *SasView*.
