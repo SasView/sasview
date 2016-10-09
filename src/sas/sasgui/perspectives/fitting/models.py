@@ -180,6 +180,7 @@ def _findModels(dir):
             path = os.path.abspath(os.path.join(dir, filename))
             try:
                 model = load_custom_model(path)
+                model.name = "[plug-in] "+model.name
                 plugins[model.name] = model
             except Exception:
                 msg = traceback.format_exc()
