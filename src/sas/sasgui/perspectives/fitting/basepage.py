@@ -1381,13 +1381,13 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.state.qmax = self.qmax_x
         self.state.npts = self.npts_x
 
-    def _onparamEnter_helper(self):
+    def _onparamEnter_helper(self, is_modified=False):
         """
         check if values entered by the user are changed and valid to replot
         model
         """
         # Flag to register when a parameter has changed.
-        is_modified = False
+        #is_modified = False
         self.fitrange = True
         is_2Ddata = False
         #self._undo.Enable(True)
@@ -1395,9 +1395,13 @@ class BasicPage(ScrolledPanel, PanelBase):
         if self.data.__class__.__name__ == "Data2D":
             is_2Ddata = True
         if self.model != None:
-            is_modified = (self._check_value_enter(self.fittable_param)
-                           or self._check_value_enter(self.fixed_param)
-                           or self._check_value_enter(self.parameters))
+            #Either we get a is_modified = True passed in because
+            #_update_paramv_on_fit() has been called already or
+            # we need to check here ourselves.
+            if not is_modified:
+                is_modified = (self._check_value_enter(self.fittable_param)
+                               or self._check_value_enter(self.fixed_param)
+                               or self._check_value_enter(self.parameters))
 
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and
@@ -1435,7 +1439,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self._draw_model()
                 self.Refresh()
 
-        logging.info("is_modified flag set to %g",is_modified)
+        #logging.info("is_modified flag set to %g",is_modified)
         return is_modified
 
     def _update_paramv_on_fit(self):
@@ -1445,6 +1449,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         #flag for qmin qmax check values
         flag = True
         self.fitrange = True
+        is_modified = False
 
         #wx.PostEvent(self._manager.parent, StatusEvent(status=" \
         #updating ... ",type="update"))
@@ -1457,9 +1462,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                     self._manager.page_finder[self.uid].set_fit_data(data=\
                                                                 [self.data])
             ##Check the values
-            self._check_value_enter(self.fittable_param)
-            self._check_value_enter(self.fixed_param)
-            self._check_value_enter(self.parameters)
+            is_modified = (self._check_value_enter(self.fittable_param)
+                            or self._check_value_enter(self.fixed_param)
+                            or self._check_value_enter(self.parameters))
 
             # If qmin and qmax have been modified, update qmin and qmax and
             # Here we should check whether the boundaries have been modified.
@@ -1541,7 +1546,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         except Exception:
             logging.error(traceback.format_exc())
 
-        return flag
+        return flag,is_modified
 
     def _reset_parameters_state(self, listtorestore, statelist):
         """
