@@ -166,8 +166,10 @@ class MultiplicationModel(BaseComponent):
         """
         Set component backgrounds to zero
         """
-        self.p_model.setParam('background',0)
-        self.s_model.setParam('background',0)
+        if 'background' in self.p_model.params:
+            self.p_model.setParam('background',0)
+        if 'background' in self.s_model.params:
+            self.s_model.setParam('background',0)
 
 
     def _set_scale_factor(self):
