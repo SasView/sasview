@@ -69,7 +69,7 @@ class TextDialog(wx.Dialog):
     model is saved.
 
     This Dialog pops up for the user when they press 'Sum|Multi(p1,p2)' under
-    'Edit Custom Model' under 'Fitting' menu.  This is currently called as
+    'Plugin Model Operations' under 'Fitting' menu.  This is currently called as
     a Modal Dialog.
 
     :TODO the build in compiler currently balks at when it tries to import

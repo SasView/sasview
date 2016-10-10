@@ -220,7 +220,7 @@ class Plugin(PluginBase):
 
         self.id_edit = wx.NewId()
         editmodel_help = "Edit customized model sample file"
-        self.menu1.AppendMenu(self.id_edit, "Edit Custom Model",
+        self.menu1.AppendMenu(self.id_edit, "Plugin Model Operations",
                               self.edit_model_menu, editmodel_help)
         #create  menubar items
         return [(self.menu1, self.sub_menu)]
@@ -235,7 +235,7 @@ class Plugin(PluginBase):
         filename = os.path.join(models.find_plugins_dir(), label)
         frame = PyConsole(parent=self.parent, manager=self,
                           panel=self.fit_panel,
-                          title='Advanced Custom Model Editor',
+                          title='Advanced Plugin Model Editor',
                           filename=filename)
         self.put_icon(frame)
         frame.Show(True)
@@ -301,7 +301,7 @@ class Plugin(PluginBase):
         else:
             event_id = event.GetId()
             dir_path = models.find_plugins_dir()
-            title = "New Custom Model Function"
+            title = "New Plugin Model Function"
             self.new_model_frame = EditorWindow(parent=self, base=self,
                                                 path=dir_path, title=title)
             self.put_icon(self.new_model_frame)
@@ -318,7 +318,7 @@ class Plugin(PluginBase):
         """
         Update custom model list in the fitpage combo box
         """
-        custom_model = 'Customized Models'
+        custom_model = 'Plugin Models'
         try:
             # Update edit menus
             self.set_edit_menu_helper(self.parent, self.edit_custom_model)
@@ -349,7 +349,7 @@ class Plugin(PluginBase):
         """
         wx_id = wx.NewId()
         #new_model_menu = wx.Menu()
-        self.edit_model_menu.Append(wx_id, 'New',
+        self.edit_model_menu.Append(wx_id, 'New Plugin Model',
                                    'Add a new model function')
         wx.EVT_MENU(owner, wx_id, self.make_new_model)
         
@@ -361,17 +361,17 @@ class Plugin(PluginBase):
         e_id = wx.NewId()
         self.edit_menu = wx.Menu()
         self.edit_model_menu.AppendMenu(e_id,
-                                    'Advanced', self.edit_menu)
+                                    'Advanced Plugin Editor', self.edit_menu)
         self.set_edit_menu_helper(owner, self.edit_custom_model)
 
         d_id = wx.NewId()
         self.delete_menu = wx.Menu()
         self.edit_model_menu.AppendMenu(d_id,
-                                        'Delete', self.delete_menu)
+                                        'Delete Plugin Models', self.delete_menu)
         self.set_edit_menu_helper(owner, self.delete_custom_model)
 
         wx_id = wx.NewId()
-        self.edit_model_menu.Append(wx_id, 'Load Models',
+        self.edit_model_menu.Append(wx_id, 'Load Plugin Models',
           '(Re)Load all models present in user plugin_models folder')
         wx.EVT_MENU(owner, wx_id, self.load_plugin_models)
                 

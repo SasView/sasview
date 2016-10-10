@@ -102,7 +102,7 @@ class PyConsole(editor.EditorNotebookFrame):
     ## Internal nickname for the window, used by the AUI manager
     window_name = "Custom Model Editor"
     ## Name to appear on the window title bar
-    window_caption = "Custom Model Editor"
+    window_caption = "Plugin Model Editor"
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = False
     def __init__(self, parent=None, base=None, manager=None, panel=None,
