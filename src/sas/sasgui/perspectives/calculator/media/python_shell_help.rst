@@ -4,8 +4,10 @@
 .. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
 .. Text revised during Code Camp V in Oct 2016.
 
-Python ShellEditor Tool
-=======================
+.. _Python_shell:
+
+Python Shell-Editor Tool
+========================
 
 Description 
 -----------

@@ -144,10 +144,11 @@ From the *Fitting* option in the menu bar, select *Edit Custom Model*.
 
 and then one of the options
 
-*  *New* - to create a new custom model template
-*  *Sum|Multi(p1,p2)* - to create a new model by summing/multiplying existing models in the model library
-*  *Advanced* - to edit a new custom model
+*  *New* - to create a custom model template with a help dialog
+*  *Sum|Multi(p1,p2)* - to create a custom model by summing/multiplying *existing models* in the model library
+*  *Advanced* - to create/edit a custom model in a Python shell
 *  *Delete* - to delete a custom model
+*  *Load* - to (re-)load custom models
 
 New
 ^^^^
@@ -183,28 +184,23 @@ them. Finally, click the *Apply* button to generate the model and then click *Cl
 Advanced
 ^^^^^^^^
 
-Selecting this option shows all the custom models in the plugin model folder
+Selecting this option shows all the custom models in the plugin model folder, on Windows this is
 
-  *C:\\Users\\[username]\\.sasview\\plugin_models* - (on Windows)
+  *C:\\Users\\{username}\\.sasview\\plugin_models*
 
 You can edit, modify, and save the Python code in any of these models using the
-*Advanced Custom Model Editor*.
+*Advanced Custom Model Editor*. Note that this is actually the same tool as the :ref:`Python_shell` .
 
-See :ref:`Writing_a_Plugin` for details on the plugin format.
+For details of the SasView plugin model format see :ref:`Writing_a_Plugin` .
 
-*NB: Sum/Product models are still using the SasView 3.x model format.  Unless
-you are confident about what you are doing, it is recommended that you
-only modify lines denoted with the ## <----- comments!*
+.. note:: Model files generated with the Sum/Multi option are still using the SasView 3.x model format. Unless you are confident about what you are doing, it is recommended that you only modify lines denoted with the ## <----- comments!
 
-When editing is complete, select *Run -> Compile* from the *Model Editor* menu bar. An
-*Info* box will appear with the results of the compilation and model unit tests. The
-model will only be usable if the tests 'pass'.
+When editing is complete, select *Run* > *Check Model* from the *Advanced Custom Model Editor* menu bar. An *Info* box will appear with the results of the compilation and model unit tests. The model will only be usable if the tests 'pass'.
 
 To use the model, go to the relevant *Fit Page*, select the *Customized Models*
 category and then select the model from the drop-down menu.
 
-*NB: Any changes to a custom model generated in this way only become effective after*
-*it is re-selected from the model drop-down menu on the Fit Page.*
+Any changes to a custom model generated in this way only become effective *after* it is re-selected from the model drop-down menu on the FitPage.
 
 Delete
 ^^^^^^
@@ -212,6 +208,11 @@ Delete
 Simply highlight the custom model to be removed. This operation is final!
 
 *NB: Custom models shipped with SasView cannot be removed in this way.*
+
+Load
+^^^^
+
+This option loads (or re-loads) all models present in the plugin model folder.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
