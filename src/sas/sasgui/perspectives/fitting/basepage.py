@@ -1396,7 +1396,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.state.qmax = self.qmax_x
         self.state.npts = self.npts_x
 
-    def _onparamEnter_helper(self, is_modified=False):
+    def _onparamEnter_helper(self,is_modified = False):
         """
         check if values entered by the user are changed and valid to replot
         model
@@ -3052,6 +3052,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         : return content: strings [list] [name,value:....]
         """
         content = ''
+        bound_hi = ''
+        bound_lo = ''
         # go through the str params
         for item in param:
             # copy only the params shown
@@ -3083,6 +3085,14 @@ class BasicPage(ScrolledPanel, PanelBase):
                     name = item[1]
                     value = item[2].GetValue()
 
+            # Bounds
+            try:
+                bound_lo = item[5].GetValue()
+                bound_hi = item[6].GetValue()
+            except Exception:
+                # harmless - need to just pass
+                pass
+
             # add to the content
             if disfunc != '':
 
@@ -3098,7 +3108,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                         disfunc += ' ' + str(weight)
             except Exception:
                 logging.error(traceback.format_exc())
-            content += name + ',' + str(check) + ',' + value + disfunc + ':'
+            content += name + ',' + str(check) + ',' +\
+                    value + disfunc + ',' + bound_lo + ',' +\
+                    bound_hi + ':'
 
         return content
 
@@ -3149,14 +3161,21 @@ class BasicPage(ScrolledPanel, PanelBase):
                 value = item[2]
                 # Transfer the text to content[dictionary]
                 context[name] = [check, value]
+
+                # limits
+                limit_lo = item[3]
+                context[name].append(limit_lo)
+                limit_hi = item[4]
+                context[name].append(limit_hi)
+
             # ToDo: PlugIn this poly disp function for pasting
             try:
-                poly_func = item[3]
+                poly_func = item[5]
                 context[name].append(poly_func)
                 try:
                     # take the vals and weights for  array
-                    array_values = item[4].split(' ')
-                    array_weights = item[5].split(' ')
+                    array_values = item[6].split(' ')
+                    array_weights = item[7].split(' ')
                     val = [float(a_val) for a_val in array_values[1:]]
                     weit = [float(a_weit) for a_weit in array_weights[1:]]
 
@@ -3204,8 +3223,10 @@ class BasicPage(ScrolledPanel, PanelBase):
             if self.data.__class__.__name__ == "Data2D":
                 name = item[1]
                 if name in content.keys():
-                    check = content[name][0]
-                    pd = content[name][1]
+                    values = content[name]
+                    check = values[0]
+                    pd = values[1]
+
                     if name.count('.') > 0:
                         # If this is parameter.width, then pd may be a floating
                         # point value or it may be an array distribution.
@@ -3228,6 +3249,12 @@ class BasicPage(ScrolledPanel, PanelBase):
                         if content[name][1] in self.model.fun_list:
                             fun_val = self.model.fun_list[content[name][1]]
                             self.model.setParam(name, fun_val)
+                    try:
+                        item[5].SetValue(str(values[-3]))
+                        item[6].SetValue(str(values[-2]))
+                    except Exception:
+                        # passing as harmless non-update
+                        pass
 
                     value = content[name][1:]
                     self._paste_poly_help(item, value)
@@ -3272,6 +3299,13 @@ class BasicPage(ScrolledPanel, PanelBase):
                                 fun_val = self.model.fun_list[value[0]]
                                 self.model.setParam(name, fun_val)
                                 # save state
+                        try:
+                            item[5].SetValue(str(value[-3]))
+                            item[6].SetValue(str(value[-2]))
+                        except Exception:
+                            # passing as harmless non-update
+                            pass
+
                         self._paste_poly_help(item, value)
                         if check == 'True':
                             is_true = True
@@ -3306,7 +3340,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             parameter.nsigmas => ['FLOAT', '']
         """
         # Do nothing if not setting polydispersity
-        if len(value[1]) == 0:
+        if len(value[3]) == 0:
             return
 
         try:
