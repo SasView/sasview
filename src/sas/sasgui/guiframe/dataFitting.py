@@ -16,15 +16,16 @@ from sas.sascalc.dataloader.data_info import Data2D as LoadData2D
 class Data1D(PlotData1D, LoadData1D):
     """
     """
-    def __init__(self, x=None, y=None, dx=None, dy=None, lam=None, dlam=None):
+    def __init__(self, x=None, y=None, dx=None, dy=None, lam=None, dlam=None, isSesans=False):
         """
         """
         if x is None:
             x = []
         if y is None:
             y = []
-        PlotData1D.__init__(self, x, y, lam, dx, dy, dlam)
-        LoadData1D.__init__(self, x, y, lam, dx, dy, dlam)
+        self.isSesans = isSesans
+        PlotData1D.__init__(self, x, y, dx, dy, lam, dlam)
+        LoadData1D.__init__(self, x, y, dx, dy, lam, dlam, isSesans)
         self.id = None
         self.list_group_id = []
         self.group_id = None

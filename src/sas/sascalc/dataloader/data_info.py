@@ -24,7 +24,6 @@
 from sas.sascalc.data_util.uncertainty import Uncertainty
 import numpy
 import math
-
 class plottable_1D(object):
     """
     Data1D is a place holder for 1D plottables.
@@ -695,24 +694,25 @@ class Data1D(plottable_1D, DataInfo):
     """
     1D data class
     """
-    if plottable_1D.lam is None: # This means it's SANS data!
-        x_unit = '1/A'
-        y_unit = '1/cm'
-    elif plottable_1D.lam is not None: # This means it's SESANS data!
-        x_unit = 'A'
-        y_unit = 'pol'
-    else: # and if it's neither, you get punished!
-        raise(TypeError,'This is neither SANS nor SESANS data, what the hell are you doing??')
+    #if plottable_1D.lam is None: # This means it's SANS data!
+     #   x_unit = '1/A'
+      #  y_unit = '1/cm'
+    #elif plottable_1D.lam is not None: # This means it's SESANS data!
+     #   x_unit = 'A'
+      #  y_unit = 'pol'
+    #else: # and if it's neither, you get punished!
+     #   raise(TypeError,'This is neither SANS nor SESANS data, what the hell are you doing??')
 
-    def __init__(self, x=None, y=None, dx=None, dy=None, lam=None, dlam=None):
+    def __init__(self, x=None, y=None, dx=None, dy=None, lam=None, dlam=None, isSesans=False):
+        self.isSesans = isSesans
         DataInfo.__init__(self)
         plottable_1D.__init__(self, x, y, dx, dy,None, None, lam, dlam)
-        if self.lam is None: # This means the lam param was not detected in the data: it's SANS data!
-            x_unit = '1/A'
-            y_unit = '1/cm'
-        elif self.lam is not None: # This means lam was detected (should be an empty ndarray): it's SESANS data!
+        if self.isSesans:
             x_unit = 'A'
             y_unit = 'pol'
+        elif not self.isSesans: # it's SANS data! (Could also be simple else statement, but i prefer exhaustive conditionals...-JHB)
+            x_unit = '1/A'
+            y_unit = '1/cm'
         else: # and if it's neither, you get punished!
             raise(TypeError,'This is neither SANS nor SESANS data, what the hell are you doing??')
 

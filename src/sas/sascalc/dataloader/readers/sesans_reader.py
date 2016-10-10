@@ -83,7 +83,7 @@ class Reader:
                 tdlam = numpy.zeros(0)
                 tdx = numpy.zeros(0)
 #                print "all good"
-                output = Data1D(x=x, y=y, lam=lam, dy=dy, dx=dx, dlam=dlam)
+                output = Data1D(x=x, y=y, lam=lam, dy=dy, dx=dx, dlam=dlam, isSesans=True )
 #                print output                
                 self.filename = output.filename = basename
 
@@ -120,12 +120,19 @@ class Reader:
                         paramnames.append(toks[0])
                         paramvals.append(toks[1])
                     if len(toks)>5:
+                       #zvals.append(toks[0])
+                        #dzvals.append(toks[1])
+                        #lamvals.append(toks[2])
+                        #dlamvals.append(toks[3])
+                        #Pvals.append(toks[4])
+                        #dPvals.append(toks[5])
+
                         zvals.append(toks[0])
-                        dzvals.append(toks[1])
-                        lamvals.append(toks[2])
-                        dlamvals.append(toks[3])
-                        Pvals.append(toks[4])
-                        dPvals.append(toks[5])
+                        dzvals.append(toks[3])
+                        lamvals.append(toks[4])
+                        dlamvals.append(toks[5])
+                        Pvals.append(toks[1])
+                        dPvals.append(toks[2])
                     else:
                         continue
 
@@ -139,8 +146,10 @@ class Reader:
                 data_conv_z = None
                 default_z_unit = "A"
                 data_conv_P = None
-                default_p_unit = " "
+                default_p_unit = " " # Adjust unit for axis (L^-3)
                 lam_unit = lam_header[1].replace("[","").replace("]","")
+                if lam_unit == 'AA':
+                    lam_unit = 'A'
                 varheader=[zvals[0],dzvals[0],lamvals[0],dlamvals[0],Pvals[0],dPvals[0]]
                 valrange=range(1, len(zvals))
                 for i in valrange:
@@ -160,21 +169,22 @@ class Reader:
 
                 output.x, output.x_unit = self._unit_conversion(x, lam_unit, default_z_unit)
                 output.y = y
+                output.y_unit = 'pol' # output y_unit erbij
                 output.dx, output.dx_unit = self._unit_conversion(dx, lam_unit, default_z_unit)
                 output.dy = dy
                 output.lam, output.lam_unit = self._unit_conversion(lam, lam_unit, default_z_unit)
                 output.dlam, output.dlam_unit = self._unit_conversion(dlam, lam_unit, default_z_unit)
 
-                output.xaxis("\rm{z}", output.x_unit)
-                output.yaxis("\\rm{P/P0}", output.y_unit)
+                output.xaxis("\\rm{z}", output.x_unit)
+                output.yaxis("\\rm{P/P0}", output.y_unit) # Adjust label to ln P/(lam^2 t), remove lam column refs
                 # Store loading process information
                 output.meta_data['loader'] = self.type_name
-                output.sample.thickness = float(paramvals[6])
+                #output.sample.thickness = float(paramvals[6])
                 output.sample.name = paramvals[1]
                 output.sample.ID = paramvals[0]
                 zaccept_unit_split = paramnames[7].split("[")
                 zaccept_unit = zaccept_unit_split[1].replace("]","")
-                if zaccept_unit.strip() == '\AA^-1':
+                if zaccept_unit.strip() == '\AA^-1' or zaccept_unit.strip() == '\A^-1':
                     zaccept_unit = "1/A"
                 output.sample.zacceptance=(float(paramvals[7]),zaccept_unit)
                 output.vars=varheader

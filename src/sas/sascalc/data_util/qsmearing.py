@@ -12,7 +12,7 @@ import numpy
 import math
 import logging
 import sys
-import sasmodels.sesans
+from sasmodels import sesans
 
 from sasmodels.resolution import Slit1D, Pinhole1D, SESANS1D
 from sasmodels.resolution2d import Pinhole2D
@@ -49,7 +49,7 @@ def smear_selection(data, model = None):
 
     # Look for resolution smearing data
     _found_sesans = False
-    if data.dx is not None and data.lam is not None:
+    if data.dx is not None and data.meta_data['loader']=='SESANS':
         if data.dx[0] > 0.0:
             _found_sesans = True
 
@@ -100,7 +100,16 @@ class PySmear(object):
     def __init__(self, resolution, model):
         self.model = model
         self.resolution = resolution
-        self.offset = numpy.searchsorted(self.resolution.q_calc, self.resolution.q[0])
+        if hasattr(self.resolution, 'data'):
+            if self.resolution.data.meta_data['loader'] == 'SESANS':
+                self.offset = 0
+            # This is default behaviour, for future resolution/transform functions this needs to be revisited.
+            else:
+                self.offset = numpy.searchsorted(self.resolution.q_calc, self.resolution.q[0])
+        else:
+            self.offset = numpy.searchsorted(self.resolution.q_calc, self.resolution.q[0])
+
+        #self.offset = numpy.searchsorted(self.resolution.q_calc, self.resolution.q[0])
 
     def apply(self, iq_in, first_bin=0, last_bin=None):
         """
@@ -134,6 +143,7 @@ class PySmear(object):
         indices, not the range limits.  That is, the complete range will be
         q[first:last+1].
         """
+
         q = self.resolution.q
         first = numpy.searchsorted(q, q_min)
         last = numpy.searchsorted(q, q_max)
@@ -157,5 +167,5 @@ def sesans_smear(data, model=None):
     #Need function to calculate this based on model
     #Here assume a number
     Rmax = 50000
-    q_calc = sesans.make_q(data.sample.z, Rmax)
+    q_calc = sesans.make_q(data.sample.zacceptance, Rmax)
     return PySmear(SESANS1D(data,q_calc),model)

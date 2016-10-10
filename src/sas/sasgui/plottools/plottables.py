@@ -1021,7 +1021,7 @@ class Data1D(Plottable):
     Data plottable: scatter plot of x,y with errors in x and y.
     """
 
-    def __init__(self, x, y, lam=None, dx=None, dy=None, dlam=None):
+    def __init__(self, x, y, dx=None, dy=None, lam=None, dlam=None):
         """
         Draw points specified by x[i],y[i] in the current color/symbol.
         Uncertainty in x is given by dx[i], or by (xlo[i],xhi[i]) if the
