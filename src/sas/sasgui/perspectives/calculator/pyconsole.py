@@ -109,9 +109,9 @@ class PyConsole(editor.EditorNotebookFrame):
                     title='Python Shell/Editor', filename=None,
                     size=(PANEL_WIDTH, PANEL_HEIGHT)):
         self.config = None
+
         editor.EditorNotebookFrame.__init__(self, parent=parent,
-                                        title=title, size=size,
-                                        filename=filename)
+                                        title=title, size=size)
         self.parent = parent
         self._manager = manager
         self.base = base
@@ -125,6 +125,17 @@ class PyConsole(editor.EditorNotebookFrame):
              dataDir = None
         self.dataDir = dataDir
         self.Centre()
+
+        # See if there is a corresponding C file
+        if filename != None:
+            c_filename = os.path.splitext(filename)[0] + ".c"
+            if os.path.isfile(c_filename):
+                self.bufferCreate(c_filename)
+
+            # If not, just open the requested .py, if any.
+            # Needs to be after the C file so the tab focus is correct.
+            if os.path.isfile(filename):
+                    self.bufferCreate(filename)
 
         self.Bind(wx.EVT_MENU, self.OnNewFile, id=wx.ID_NEW)
         self.Bind(wx.EVT_MENU, self.OnOpenFile, id=wx.ID_OPEN)
