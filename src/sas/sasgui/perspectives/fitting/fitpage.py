@@ -995,9 +995,9 @@ class FitPage(BasicPage):
             self.Npts_fit.SetValue(self.npts_x)
             self.create_default_data()
         """
-        flag = self._update_paramv_on_fit()
+        flag,is_modified = self._update_paramv_on_fit()
 
-        wx.CallAfter(self._onparamEnter_helper)
+        wx.CallAfter(self._onparamEnter_helper(is_modified))
         if not flag:
             msg = "The parameters are invalid"
             wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
