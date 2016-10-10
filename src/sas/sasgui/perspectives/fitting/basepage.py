@@ -1098,6 +1098,16 @@ class BasicPage(ScrolledPanel, PanelBase):
         self._lay_out()
         self.Refresh()
 
+    def get_cat_combo_box_pos(self, state):
+        """
+        Iterate through the categories to find the structurefactor
+        :return: combo_box_position
+        """
+        for key, value in self.master_category_dict.iteritems():
+            for list_item in value:
+                if state.formfactorcombobox in list_item:
+                    return self.categorybox.Items.index(key)
+
     def reset_page_helper(self, state):
         """
         Use page_state and change the state of existing page
@@ -1144,12 +1154,15 @@ class BasicPage(ScrolledPanel, PanelBase):
             # to support older version
             category_pos = int(state.categorycombobox)
         except:
+            state.formfactorcombobox = unicode(state.formfactorcombobox.lower())
+            state.categorycombobox = unicode(state.categorycombobox)
             category_pos = 0
-            for ind_cat in range(self.categorybox.GetCount()):
-                if self.categorybox.GetString(ind_cat) == \
-                                        state.categorycombobox:
-                    category_pos = int(ind_cat)
-                    break
+            if state.categorycombobox in self.categorybox.Items:
+                category_pos = self.categorybox.Items.index(
+                    state.categorycombobox)
+            else:
+                # Look in master list for model name (model.lower)
+                category_pos = self.get_cat_combo_box_pos(state)
 
         self.categorybox.Select(category_pos)
         self._show_combox(None)
@@ -1170,12 +1183,14 @@ class BasicPage(ScrolledPanel, PanelBase):
             # to support older version
             structfactor_pos = int(state.structurecombobox)
         except:
-            structfactor_pos = 0
-            for ind_struct in range(self.structurebox.GetCount()):
-                if self.structurebox.GetString(ind_struct) == \
-                                                    (state.structurecombobox):
-                    structfactor_pos = int(ind_struct)
-                    break
+            if state.structurecombobox is not None:
+                structfactor_pos = 0
+                state.structurecombobox = unicode(state.structurecombobox)
+                for ind_struct in range(self.structurebox.GetCount()):
+                    if self.structurebox.GetString(ind_struct) == \
+                                                        (state.structurecombobox):
+                        structfactor_pos = int(ind_struct)
+                        break
 
         self.structurebox.SetSelection(structfactor_pos)
 
