@@ -1381,7 +1381,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.state.qmax = self.qmax_x
         self.state.npts = self.npts_x
 
-    def _onparamEnter_helper(self, is_modified=False):
+    def _onparamEnter_helper(self,is_modified = False):
         """
         check if values entered by the user are changed and valid to replot
         model
