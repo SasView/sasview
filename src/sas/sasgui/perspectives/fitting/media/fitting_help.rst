@@ -140,7 +140,7 @@ Custom Model Editor
 
 From the *Fitting* option in the menu bar, select *Edit Custom Model*.
 
-.. image:: edit_model_menu.bmp
+.. image:: edit_model_menu.png
 
 and then one of the options
 
