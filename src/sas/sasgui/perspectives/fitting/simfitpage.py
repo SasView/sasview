@@ -1092,6 +1092,7 @@ class SimFitPageState:
                 sim_page.constraints_list[index][2].SetLabel(equality)
                 sim_page.constraints_list[index][3].SetValue(constraint_value)
                 sim_page._on_add_constraint(None)
+                sim_page._manager.sim_page = sim_page
 
     def _format_id(self, original_id):
         original_id = original_id.rstrip('1234567890.')
