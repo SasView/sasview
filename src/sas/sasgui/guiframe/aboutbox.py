@@ -116,6 +116,7 @@ class DialogAbout(wx.Dialog):
         self.bitmap_button_ess = wx.BitmapButton(self, -1, wx.NullBitmap)
         self.bitmap_button_ill = wx.BitmapButton(self, -1, wx.NullBitmap)
         self.bitmap_button_ansto = wx.BitmapButton(self, -1, wx.NullBitmap)
+        self.bitmap_button_tudelft = wx.BitmapButton(self, -1, wx.NullBitmap)
         
         self.static_line_3 = wx.StaticLine(self, -1)
         self.button_OK = wx.Button(self, wx.ID_OK, "OK")
@@ -134,6 +135,7 @@ class DialogAbout(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self.onEssLogo, self.bitmap_button_ess)
         self.Bind(wx.EVT_BUTTON, self.onIllLogo, self.bitmap_button_ill)
         self.Bind(wx.EVT_BUTTON, self.onAnstoLogo, self.bitmap_button_ansto)
+        self.Bind(wx.EVT_BUTTON, self.onTudelftLogo, self.bitmap_button_tudelft)
         # end wxGlade
         # fill in acknowledgements
         #self.text_ctrl_acknowledgement.SetValue(__acknowledgement__)
@@ -220,6 +222,12 @@ class DialogAbout(wx.Dialog):
             image = config._ansto_logo
         logo = wx.Bitmap(image)
         self.bitmap_button_ansto.SetBitmapLabel(logo)
+        
+        image = file_dir + "/images/tudelft_logo.png"
+        if os.path.isfile(config._tudelft_logo):
+            image = config._tudelft_logo
+        logo = wx.Bitmap(image)
+        self.bitmap_button_tudelft.SetBitmapLabel(logo)
                 
         # resize dialog window to fit version number nicely
         if wx.VERSION >= (2, 7, 2, 0):
@@ -250,6 +258,7 @@ class DialogAbout(wx.Dialog):
         self.bitmap_button_ess.SetSize(self.bitmap_button_ess.GetBestSize())
         self.bitmap_button_ill.SetSize(self.bitmap_button_ill.GetBestSize())
         self.bitmap_button_ansto.SetSize(self.bitmap_button_ansto.GetBestSize())
+        self.bitmap_button_tudelft.SetSize(self.bitmap_button_tudelft.GetBestSize())
         # end wxGlade
 
     def __do_layout(self):
@@ -312,6 +321,8 @@ class DialogAbout(wx.Dialog):
         sizer_logos.Add(self.bitmap_button_ill, 0, 
                         wx.LEFT|wx.ADJUST_MINSIZE, 2)
         sizer_logos.Add(self.bitmap_button_ansto, 0, 
+                        wx.LEFT|wx.ADJUST_MINSIZE, 2)
+        sizer_logos.Add(self.bitmap_button_tudelft, 0, 
                         wx.LEFT|wx.ADJUST_MINSIZE, 2)
                 
         sizer_logos.Add((10, 50), 0, wx.ADJUST_MINSIZE, 0)
@@ -402,6 +413,13 @@ class DialogAbout(wx.Dialog):
         """ 
         # wxGlade: DialogAbout.<event_handler>
         launchBrowser(config._ansto_url)
+        event.Skip()
+
+    def onTudelftLogo(self, event):
+        """
+        """ 
+        # wxGlade: DialogAbout.<event_handler>
+        launchBrowser(config._tudelft_url)
         event.Skip()
 
 # end of class DialogAbout
