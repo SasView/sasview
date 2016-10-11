@@ -166,6 +166,6 @@ def sesans_smear(data, model=None):
     #Probably not a data prameter either
     #Need function to calculate this based on model
     #Here assume a number
-    Rmax = 50000
+    Rmax = 1000000
     q_calc = sesans.make_q(data.sample.zacceptance, Rmax)
     return PySmear(SESANS1D(data,q_calc),model)

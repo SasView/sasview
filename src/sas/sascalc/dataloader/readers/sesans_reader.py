@@ -169,14 +169,14 @@ class Reader:
 
                 output.x, output.x_unit = self._unit_conversion(x, lam_unit, default_z_unit)
                 output.y = y
-                output.y_unit = 'pol' # output y_unit erbij
+                output.y_unit = '\AA^{-2} cm^{-1}' # output y_unit erbij
                 output.dx, output.dx_unit = self._unit_conversion(dx, lam_unit, default_z_unit)
                 output.dy = dy
                 output.lam, output.lam_unit = self._unit_conversion(lam, lam_unit, default_z_unit)
                 output.dlam, output.dlam_unit = self._unit_conversion(dlam, lam_unit, default_z_unit)
 
                 output.xaxis("\\rm{z}", output.x_unit)
-                output.yaxis("\\rm{P/P0}", output.y_unit) # Adjust label to ln P/(lam^2 t), remove lam column refs
+                output.yaxis("\\rm{ln(P)/(t \lambda^2)}", output.y_unit) # Adjust label to ln P/(lam^2 t), remove lam column refs
                 # Store loading process information
                 output.meta_data['loader'] = self.type_name
                 #output.sample.thickness = float(paramvals[6])
