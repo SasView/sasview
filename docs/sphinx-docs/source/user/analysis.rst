@@ -1,7 +1,7 @@
 .. _analysis:
 
-Types of Analysis
-=================
+Fitting & Other Analyses
+========================
 
 .. note:: In Windows use [Alt]-[Cursor left] to return to the previous page
 

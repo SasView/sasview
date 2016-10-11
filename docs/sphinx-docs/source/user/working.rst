@@ -20,7 +20,3 @@ Working with SasView
    
    Computations with a GPU <gpu_computations>
    
-   Converting SANS to SESANS <sans_to_sesans>
-   
-   Fitting SESANS Data <sesans_fitting.rst>
-   
