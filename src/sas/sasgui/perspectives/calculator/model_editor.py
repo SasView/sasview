@@ -631,7 +631,7 @@ class EditorPanel(wx.ScrolledWindow):
         self.font.SetPointSize(10)
         self.reader = None
         self.name = 'untitled'
-        self.overwrite_name = False
+        self.overwrite_name = True
         self.is_2d = False
         self.fname = None
         self.main_sizer = None
@@ -682,8 +682,8 @@ class EditorPanel(wx.ScrolledWindow):
         """
         #title name [string]
         name_txt = wx.StaticText(self, -1, 'Function Name : ')
-        overwrite_cb = wx.CheckBox(self, -1, "Overwrite?", (10, 10))
-        overwrite_cb.SetValue(False)
+        overwrite_cb = wx.CheckBox(self, -1, "Overwrite existing plugin model of this name?", (10, 10))
+        overwrite_cb.SetValue(True)
         overwrite_cb.SetToolTipString("Overwrite it if already exists?")
         wx.EVT_CHECKBOX(self, overwrite_cb.GetId(), self.on_over_cb)
         #overwrite_cb.Show(False)
@@ -1150,9 +1150,9 @@ class EditorPanel(wx.ScrolledWindow):
     """
 
         _TreeLocation = "user/sasgui/perspectives/fitting/fitting_help.html"
-        _PageAnchor = "#custom-model-editor"
+        _PageAnchor = "#New_Plugin_Model"
         _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, _PageAnchor,
-                                          "Custom Model Editor Help")
+                                          "Plugin Model Editor Help")
 
     def on_close(self, event):
         """
