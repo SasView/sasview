@@ -10,8 +10,8 @@ SasView User Documentation
    
    Menu Bar <menu_bar>
 
-   Analysis <analysis>
+   Fitting & Other Analyses <analysis>
    
-   Tools <tools>
+   Tools & Utilities <tools>
          
    Working with SasView <working>

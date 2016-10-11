@@ -1036,7 +1036,6 @@ class BasicPage(ScrolledPanel, PanelBase):
             n = self.disp_box.GetCurrentSelection()
             dispersity = self.disp_box.GetClientData(n)
             name = dispersity.__name__
-
             self._set_dipers_Param(event=None)
 
             if name == "ArrayDispersion":
@@ -1107,6 +1106,16 @@ class BasicPage(ScrolledPanel, PanelBase):
         self._lay_out()
         self.Refresh()
 
+    def get_cat_combo_box_pos(self, state):
+        """
+        Iterate through the categories to find the structurefactor
+        :return: combo_box_position
+        """
+        for key, value in self.master_category_dict.iteritems():
+            for list_item in value:
+                if state.formfactorcombobox in list_item:
+                    return self.categorybox.Items.index(key)
+
     def reset_page_helper(self, state):
         """
         Use page_state and change the state of existing page
@@ -1162,12 +1171,15 @@ class BasicPage(ScrolledPanel, PanelBase):
             # to support older version
             category_pos = int(state.categorycombobox)
         except:
+            state.formfactorcombobox = unicode(state.formfactorcombobox.lower())
+            state.categorycombobox = unicode(state.categorycombobox)
             category_pos = 0
-            for ind_cat in range(self.categorybox.GetCount()):
-                if self.categorybox.GetString(ind_cat) == \
-                                        state.categorycombobox:
-                    category_pos = int(ind_cat)
-                    break
+            if state.categorycombobox in self.categorybox.Items:
+                category_pos = self.categorybox.Items.index(
+                    state.categorycombobox)
+            else:
+                # Look in master list for model name (model.lower)
+                category_pos = self.get_cat_combo_box_pos(state)
 
         self.categorybox.Select(category_pos)
         self._show_combox(None)
@@ -1188,12 +1200,14 @@ class BasicPage(ScrolledPanel, PanelBase):
             # to support older version
             structfactor_pos = int(state.structurecombobox)
         except:
-            structfactor_pos = 0
-            for ind_struct in range(self.structurebox.GetCount()):
-                if self.structurebox.GetString(ind_struct) == \
-                                                    (state.structurecombobox):
-                    structfactor_pos = int(ind_struct)
-                    break
+            if state.structurecombobox is not None:
+                structfactor_pos = 0
+                state.structurecombobox = unicode(state.structurecombobox)
+                for ind_struct in range(self.structurebox.GetCount()):
+                    if self.structurebox.GetString(ind_struct) == \
+                                                        (state.structurecombobox):
+                        structfactor_pos = int(ind_struct)
+                        break
 
         self.structurebox.SetSelection(structfactor_pos)
 
@@ -1406,13 +1420,13 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.state.qmax = self.qmax_x
         self.state.npts = self.npts_x
 
-    def _onparamEnter_helper(self):
+    def _onparamEnter_helper(self,is_modified = False):
         """
         check if values entered by the user are changed and valid to replot
         model
         """
         # Flag to register when a parameter has changed.
-        is_modified = False
+        #is_modified = False
         self.fitrange = True
         is_2Ddata = False
         #self._undo.Enable(True)
@@ -1420,9 +1434,13 @@ class BasicPage(ScrolledPanel, PanelBase):
         if self.data.__class__.__name__ == "Data2D":
             is_2Ddata = True
         if self.model != None:
-            is_modified = (self._check_value_enter(self.fittable_param)
-                           or self._check_value_enter(self.fixed_param)
-                           or self._check_value_enter(self.parameters))
+            #Either we get a is_modified = True passed in because
+            #_update_paramv_on_fit() has been called already or
+            # we need to check here ourselves.
+            if not is_modified:
+                is_modified = (self._check_value_enter(self.fittable_param)
+                               or self._check_value_enter(self.fixed_param)
+                               or self._check_value_enter(self.parameters))
 
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and
@@ -1471,6 +1489,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         #flag for qmin qmax check values
         flag = True
         self.fitrange = True
+        is_modified = False
 
         #wx.PostEvent(self._manager.parent, StatusEvent(status=" \
         #updating ... ",type="update"))
@@ -1483,9 +1502,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                     self._manager.page_finder[self.uid].set_fit_data(data=\
                                                                 [self.data])
             ##Check the values
-            self._check_value_enter(self.fittable_param)
-            self._check_value_enter(self.fixed_param)
-            self._check_value_enter(self.parameters)
+            is_modified = (self._check_value_enter(self.fittable_param)
+                            or self._check_value_enter(self.fixed_param)
+                            or self._check_value_enter(self.parameters))
 
             # If qmin and qmax have been modified, update qmin and qmax and
             # Here we should check whether the boundaries have been modified.
@@ -1567,7 +1586,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         except Exception:
             logging.error(traceback.format_exc())
 
-        return flag
+        return flag,is_modified
 
     def _reset_parameters_state(self, listtorestore, statelist):
         """
@@ -1978,7 +1997,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         if f_id >= 0:
             form_factor = self.formfactorbox.GetClientData(f_id)
 
-        if form_factor is None or not form_factor.is_form_factor:
+        if form_factor is None or \
+            not hasattr(form_factor, 'is_form_factor') or \
+            not form_factor.is_form_factor:
             self.structurebox.Hide()
             self.text2.Hide()
             self.structurebox.Disable()
@@ -2305,7 +2326,11 @@ class BasicPage(ScrolledPanel, PanelBase):
             event = PageInfoEvent(page=self)
             wx.PostEvent(self.parent, event)
         #draw the model with the current dispersity
-        self._draw_model()
+
+        #Wojtek P, Oct 8, 2016: Calling draw_model seems to be unessecary.
+        #By comenting it we save an extra Iq calculation
+        #self._draw_model()
+
         ## Need to use FitInside again here to replace the next four lines.
         ## Otherwised polydispersity off does not resize the scrollwindow.
         ## PDB Nov 28, 2015
@@ -3054,6 +3079,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         : return content: strings [list] [name,value:....]
         """
         content = ''
+        bound_hi = ''
+        bound_lo = ''
         # go through the str params
         for item in param:
             # copy only the params shown
@@ -3085,6 +3112,14 @@ class BasicPage(ScrolledPanel, PanelBase):
                     name = item[1]
                     value = item[2].GetValue()
 
+            # Bounds
+            try:
+                bound_lo = item[5].GetValue()
+                bound_hi = item[6].GetValue()
+            except Exception:
+                # harmless - need to just pass
+                pass
+
             # add to the content
             if disfunc != '':
 
@@ -3100,7 +3135,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                         disfunc += ' ' + str(weight)
             except Exception:
                 logging.error(traceback.format_exc())
-            content += name + ',' + str(check) + ',' + value + disfunc + ':'
+            content += name + ',' + str(check) + ',' +\
+                    value + disfunc + ',' + bound_lo + ',' +\
+                    bound_hi + ':'
 
         return content
 
@@ -3151,14 +3188,21 @@ class BasicPage(ScrolledPanel, PanelBase):
                 value = item[2]
                 # Transfer the text to content[dictionary]
                 context[name] = [check, value]
+
+                # limits
+                limit_lo = item[3]
+                context[name].append(limit_lo)
+                limit_hi = item[4]
+                context[name].append(limit_hi)
+
             # ToDo: PlugIn this poly disp function for pasting
             try:
-                poly_func = item[3]
+                poly_func = item[5]
                 context[name].append(poly_func)
                 try:
                     # take the vals and weights for  array
-                    array_values = item[4].split(' ')
-                    array_weights = item[5].split(' ')
+                    array_values = item[6].split(' ')
+                    array_weights = item[7].split(' ')
                     val = [float(a_val) for a_val in array_values[1:]]
                     weit = [float(a_weit) for a_weit in array_weights[1:]]
 
@@ -3206,8 +3250,10 @@ class BasicPage(ScrolledPanel, PanelBase):
             if self.data.__class__.__name__ == "Data2D":
                 name = item[1]
                 if name in content.keys():
-                    check = content[name][0]
-                    pd = content[name][1]
+                    values = content[name]
+                    check = values[0]
+                    pd = values[1]
+
                     if name.count('.') > 0:
                         # If this is parameter.width, then pd may be a floating
                         # point value or it may be an array distribution.
@@ -3230,6 +3276,12 @@ class BasicPage(ScrolledPanel, PanelBase):
                         if content[name][1] in self.model.fun_list:
                             fun_val = self.model.fun_list[content[name][1]]
                             self.model.setParam(name, fun_val)
+                    try:
+                        item[5].SetValue(str(values[-3]))
+                        item[6].SetValue(str(values[-2]))
+                    except Exception:
+                        # passing as harmless non-update
+                        pass
 
                     value = content[name][1:]
                     self._paste_poly_help(item, value)
@@ -3274,6 +3326,13 @@ class BasicPage(ScrolledPanel, PanelBase):
                                 fun_val = self.model.fun_list[value[0]]
                                 self.model.setParam(name, fun_val)
                                 # save state
+                        try:
+                            item[5].SetValue(str(value[-3]))
+                            item[6].SetValue(str(value[-2]))
+                        except Exception:
+                            # passing as harmless non-update
+                            pass
+
                         self._paste_poly_help(item, value)
                         if check == 'True':
                             is_true = True
@@ -3308,7 +3367,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             parameter.nsigmas => ['FLOAT', '']
         """
         # Do nothing if not setting polydispersity
-        if len(value[1]) == 0:
+        if len(value[3]) == 0:
             return
 
         try:

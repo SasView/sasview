@@ -47,7 +47,7 @@ Analysis
 --------
 The Analysis option provides access to the key functionality of *SasView*:
 
-- Fitting;
+- Model Fitting;
 - P(r) Inversion;
 - Invariant Analysis;
 - Correlation Function Analysis (*SasView* 4.1 and later)
@@ -61,7 +61,7 @@ The Fitting option allows you to:
 - create a new FitPage;
 - change optimiser (under Fit Options);
 - view fit parameter correlations, distributions, and convergence traces (under Fit Results);
-- create/edit a Custom Model.
+- create/edit a Plugin Model.
 
 Additional functionality is available under this menu option during particular types of model fitting, including:
 
@@ -77,4 +77,9 @@ The Help option provides access to:
 - a :ref:`tutorial` on using *SasView* (in pdf format);
 - information on how to acknowledge *SasView* in publications;
 - information about the version of *SasView* you are using;
+- the :ref:`marketplace`\ ;
 - a check to see if there is a more recent version of *SasView*.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+.. note::  This help document was last changed by Steve King, 10Oct2016

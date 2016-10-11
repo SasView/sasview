@@ -1752,3 +1752,44 @@ class Reader(CansasReader):
                               batch_fit_state=self.batchfit_params)
 
         return doc
+
+# Simple html report templet
+HEADER = "<html>\n"
+HEADER += "<head>\n"
+HEADER += "<meta http-equiv=Content-Type content='text/html; "
+HEADER += "charset=windows-1252'> \n"
+HEADER += "<meta name=Generator >\n"
+HEADER += "</head>\n"
+HEADER += "<body lang=EN-US>\n"
+HEADER += "<div class=WordSection1>\n"
+HEADER += "<p class=MsoNormal><b><span ><center><font size='4' >"
+HEADER += "%s</font></center></span></center></b></p>"
+HEADER += "<p class=MsoNormal>&nbsp;</p>"
+PARA = "<p class=MsoNormal><font size='4' > %s \n"
+PARA += "</font></p>"
+CENTRE = "<p class=MsoNormal><center><font size='4' > %s \n"
+CENTRE += "</font></center></p>"
+FEET_1 = \
+"""
+<p class=MsoNormal>&nbsp;</p>
+<br>
+<p class=MsoNormal><b><span ><center> <font size='4' > Graph
+</font></span></center></b></p>
+<p class=MsoNormal>&nbsp;</p>
+<center>
+<br><font size='4' >Model Computation</font>
+<br><font size='4' >Data: "%s"</font><br>
+"""
+FEET_2 = \
+"""
+<img src="%s" >
+</img>
+"""
+FEET_3 = \
+"""
+</center>
+</div>
+</body>
+</html>
+"""
+ELINE = "<p class=MsoNormal>&nbsp;</p>"

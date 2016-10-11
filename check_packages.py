@@ -25,13 +25,14 @@ common_required_package_list = {
     'pylint':{'version':None,'import_name':'pylint','test':None},
     'periodictable':{'version':'1.3.0','import_name':'periodictable','test':'__version__'},
     'bumps':{'version':'0.7.5.9','import_name':'bumps','test':'__version__'},
-    'numpy':{'version':'1.6.1','import_name':'numpy','test':'__version__'},
-    'scipy':{'version':'0.10.1','import_name':'scipy','test':'__version__'},
+    'numpy':{'version':'1.7.1','import_name':'numpy','test':'__version__'},
+    'scipy':{'version':'0.18.0','import_name':'scipy','test':'__version__'},
     'wx':{'version':'2.8.12.1','import_name':'wx','test':'__version__'},
     'matplotlib':{'version':'1.1.0','import_name':'matplotlib','test':'__version__'},
     'xhtml2pdf':{'version':'3.0.33','import_name':'xhtml2pdf','test':'__version__'},
     'sphinx':{'version':'1.2.1','import_name':'sphinx','test':'__version__'},
     'unittest-xml-reporting':{'version':'1.10.0','import_name':'xmlrunner','test':'__version__'},
+    'pyopencl':{'version':'2015.1','import_name':'pyopencl','test':'VERSION_TEXT'},
 }
 win_required_package_list = {
     'comtypes':{'version':'0.6.2','import_name':'comtypes','test':'__version__'},
