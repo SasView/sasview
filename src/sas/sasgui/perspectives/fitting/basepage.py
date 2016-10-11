@@ -3316,6 +3316,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                         if is_true != None:
                             item[0].SetValue(is_true)
 
+        self.select_param(event=None)
+        self.Refresh()
+
     def _paste_poly_help(self, item, value):
         """
         Helps get paste for poly function
