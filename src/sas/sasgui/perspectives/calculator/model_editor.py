@@ -945,9 +945,10 @@ class EditorPanel(wx.ScrolledWindow):
         result, check_err = '', ''
         # Sort out the errors if occur
         # First check for valid python name then if the name already exists
-        if not re.match('^[A-Za-z0-9_]*$', name):
-            msg = "not a valid python name. Name must include only alpha \n"
-            msg += "numeric or underline characters and no spaces"
+        if not name or not bool(re.match('^[A-Za-z0-9_]*$', name)):
+            msg = "is not a valid python name. Name must not be empty and \n"
+            msg += "may include only alpha numeric or underline characters \n"
+            msg += "and no spaces"
         elif self.check_name():
             description = self.desc_tcl.GetValue()
             param_str = self.param_tcl.GetText()
