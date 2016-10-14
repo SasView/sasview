@@ -2056,7 +2056,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         struct_factor = self.structurebox.GetClientData(s_id)
 
         if  struct_factor != None:
-            from sas.sascalc.fit.MultiplicationModel import MultiplicationModel
+            from sasmodels.sasview_model import MultiplicationModel
             self.model = MultiplicationModel(form_factor(self.multi_factor),
                                              struct_factor())
             # multifunctional form factor
@@ -3342,6 +3342,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                             is_true = None
                         if is_true != None:
                             item[0].SetValue(is_true)
+
+        self.select_param(event=None)
+        self.Refresh()
 
     def _paste_poly_help(self, item, value):
         """
