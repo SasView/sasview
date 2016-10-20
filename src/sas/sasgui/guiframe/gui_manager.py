@@ -2,13 +2,13 @@
     Gui manager: manages the widgets making up an application
 """
 ################################################################################
-#This software was developed by the University of Tennessee as part of the
-#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation.
+# This software was developed by the University of Tennessee as part of the
+# Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+# project funded by the US National Science Foundation.
 #
-#See the license text in license.txtz
+# See the license text in license.txtz
 #
-#copyright 2008, University of Tennessee
+# copyright 2008, University of Tennessee
 ################################################################################
 
 
@@ -20,7 +20,6 @@ import time
 import imp
 import warnings
 import re
-warnings.simplefilter("ignore")
 import logging
 import httplib
 import traceback
@@ -47,6 +46,8 @@ from sas.sasgui.guiframe.CategoryManager import CategoryManager
 from sas.sascalc.dataloader.loader import Loader
 from sas.sasgui.guiframe.proxy import Connection
 from matplotlib import _pylab_helpers
+
+warnings.simplefilter("ignore")
 
 
 def get_app_dir():
@@ -81,6 +82,7 @@ def get_app_dir():
     logging.info("Using application path: %s", app_path)
     return app_path
 
+
 def get_user_directory():
     """
         Returns the user's home directory
@@ -89,6 +91,7 @@ def get_user_directory():
     if not os.path.isdir(userdir):
         os.makedirs(userdir)
     return userdir
+
 
 def _find_local_config(file, path):
     """
@@ -112,7 +115,7 @@ PATH_APP = get_app_dir()
 DATAPATH = PATH_APP
 
 # GUI always starts from the App folder
-#os.chdir(PATH_APP)
+# os.chdir(PATH_APP)
 # Read in the local config, which can either be with the main
 # application or in the installation directory
 config = _find_local_config('local_config', PATH_APP)
@@ -127,7 +130,7 @@ if config is None:
 else:
     logging.info("found local_config in %s" % PATH_APP)
 
-from sas.sasgui.guiframe.customdir  import SetupCustom
+from sas.sasgui.guiframe.customdir import SetupCustom
 c_conf_dir = SetupCustom().setup_dir(PATH_APP)
 custom_config = _find_local_config('custom_config', c_conf_dir)
 if custom_config is None:
@@ -140,7 +143,7 @@ if custom_config is None:
 else:
     logging.info("using custom_config from %s" % c_conf_dir)
 
-#read some constants from config
+# read some constants from config
 APPLICATION_STATE_EXTENSION = config.APPLICATION_STATE_EXTENSION
 APPLICATION_NAME = config.__appname__
 SPLASH_SCREEN_PATH = config.SPLASH_SCREEN_PATH
@@ -168,7 +171,7 @@ try:
     CLEANUP_PLOT = custom_config.CLEANUP_PLOT
     # custom open_path
     open_folder = custom_config.DEFAULT_OPEN_FOLDER
-    if open_folder != None and os.path.isdir(open_folder):
+    if open_folder is not None and os.path.isdir(open_folder):
         DEFAULT_OPEN_FOLDER = os.path.abspath(open_folder)
     else:
         DEFAULT_OPEN_FOLDER = PATH_APP
@@ -221,6 +224,7 @@ if sys.platform.count("win32") < 1:
         PARENT_FRAME = wx.Frame
         CHILD_FRAME = wx.Frame
 
+
 class ViewerFrame(PARENT_FRAME):
     """
     Main application frame
@@ -234,7 +238,8 @@ class ViewerFrame(PARENT_FRAME):
         """
         Initialize the Frame object
         """
-        PARENT_FRAME.__init__(self, parent=parent, title=title, pos=pos, size=size)
+        PARENT_FRAME.__init__(self, parent=parent, title=title,
+                              pos=pos, size=size)
         # title
         self.title = title
         self.__gui_style = gui_style
@@ -255,15 +260,15 @@ class ViewerFrame(PARENT_FRAME):
                     self.SetIcon(wx.Icon(ico_file, wx.BITMAP_TYPE_ICO))
         self.path = PATH_APP
         self.application_name = APPLICATION_NAME
-        ## Application manager
+        # Application manager
         self._input_file = None
         self.app_manager = None
         self._mgr = None
-        #add current perpsective
+        # add current perpsective
         self._current_perspective = None
         self._plotting_plugin = None
         self._data_plugin = None
-        #Menu bar and item
+        # Menu bar and item
         self._menubar = None
         self._file_menu = None
         self._data_menu = None
@@ -277,7 +282,7 @@ class ViewerFrame(PARENT_FRAME):
         self._edit_menu = None
         self._toolbar_menu = None
         self._save_appl_menu = None
-        #tool bar
+        # tool bar
         self._toolbar = None
         # Status bar
         self.sb = None
@@ -285,13 +290,13 @@ class ViewerFrame(PARENT_FRAME):
         self._num_perspectives = 0
         # plot duck cleanup option
         self.cleanup_plots = CLEANUP_PLOT
-        ## Find plug-ins
+        # Find plug-ins
         # Modify this so that we can specify the directory to look into
         self.plugins = []
-        #add local plugin
+        # add local plugin
         self.plugins += self._get_local_plugins()
         self.plugins += self._find_plugins()
-        ## List of panels
+        # List of panels
         self.panels = {}
         # List of plot panels
         self.plot_panels = {}
@@ -303,22 +308,23 @@ class ViewerFrame(PARENT_FRAME):
         # Welcome panel
         self.defaultPanel = None
         self.welcome_panel_class = None
-        #panel on focus
+        # panel on focus
         self.panel_on_focus = None
-        #control_panel on focus
+        # control_panel on focus
         self.cpanel_on_focus = None
 
         self.loader = Loader()
-        #data manager
+        # data manager
         self.batch_on = False
         from sas.sasgui.guiframe.data_manager import DataManager
         self._data_manager = DataManager()
-        self._data_panel = None#DataPanel(parent=self)
+        self._data_panel = None  # DataPanel(parent=self)
         if self.panel_on_focus is not None:
-            self._data_panel.set_panel_on_focus(self.panel_on_focus.window_caption)
+            self._data_panel.set_panel_on_focus(
+                self.panel_on_focus.window_caption)
         # list of plot panels in schedule to full redraw
         self.schedule = False
-        #self.callback = True
+        # self.callback = True
         self._idle_count = 0
         self.schedule_full_draw_list = []
         self.idletimer = wx.CallLater(TIME_FACTOR, self._onDrawIdle)
@@ -332,7 +338,7 @@ class ViewerFrame(PARENT_FRAME):
         wx.EVT_CLOSE(self, self.WindowClose)
         # Register to status events
         self.Bind(EVT_STATUS, self._on_status_event)
-        #Register add extra data on the same panel event on load
+        # Register add extra data on the same panel event on load
         self.Bind(EVT_PANEL_ON_FOCUS, self.set_panel_on_focus)
         self.Bind(EVT_APPEND_BOOKMARK, self.append_bookmark)
         self.Bind(EVT_NEW_LOAD_DATA, self.on_load_data)
@@ -372,7 +378,7 @@ class ViewerFrame(PARENT_FRAME):
         height -= 45
         # Adjust toolbar height
         toolbar = self.GetToolBar()
-        if toolbar != None:
+        if toolbar is not None:
             _, tb_h = toolbar.GetSizeTuple()
             height -= tb_h
         return width, height
@@ -385,7 +391,7 @@ class ViewerFrame(PARENT_FRAME):
                 if hasattr(item, "fit_panel"):
                     fitpanel = item.fit_panel
 
-        if fitpanel != None:
+        if fitpanel is not None:
             for i in range(0, fitpanel.GetPageCount()):
                 fitpanel.GetPage(i)._populate_listbox()
 
@@ -412,7 +418,10 @@ class ViewerFrame(PARENT_FRAME):
                            data_outputs=None):
         """
         Display value of data into the application grid
-        :param data: dictionary of string and list of items
+        :param data_inputs: dictionary of string and list of items
+        :param details: descriptive string
+        :param file_name: file name
+        :param data_outputs: Data outputs
         """
         self.batch_frame.set_data(data_inputs=data_inputs,
                                   data_outputs=data_outputs,
@@ -426,7 +435,7 @@ class ViewerFrame(PARENT_FRAME):
         into a grid
         """
         path = None
-        if self._default_save_location == None:
+        if self._default_save_location is None:
             self._default_save_location = os.getcwd()
         wildcard = "(*.csv; *.txt)|*.csv; *.txt"
         dlg = wx.FileDialog(base,
@@ -468,9 +477,9 @@ class ViewerFrame(PARENT_FRAME):
             line = lines[index]
             line.strip()
             count = 0
-            if separator == None:
+            if separator is None:
                 line.replace('\t', ' ')
-                #found the first line containing the label
+                # found the first line containing the label
                 col_name_toks = line.split()
                 for item in col_name_toks:
                     if item.strip() != "":
@@ -479,7 +488,7 @@ class ViewerFrame(PARENT_FRAME):
                         line = " "
             elif line.find(separator) != -1:
                 if line.count(separator) >= 2:
-                    #found the first line containing the label
+                    # found the first line containing the label
                     col_name_toks = line.split(separator)
                     for item in col_name_toks:
                         if item.strip() != "":
@@ -533,7 +542,7 @@ class ViewerFrame(PARENT_FRAME):
         if ext.lower() == ".csv":
             separator = ","
         fd.write(str(details))
-        for col_name  in data.keys():
+        for col_name in data.keys():
             fd.write(str(col_name))
             fd.write(separator)
         fd.write('\n')
@@ -596,7 +605,7 @@ class ViewerFrame(PARENT_FRAME):
         """
         Set up custom configuration if exists
         """
-        if custom_config == None:
+        if custom_config is None:
             return
 
         if not FIXED_PANEL:
@@ -616,7 +625,7 @@ class ViewerFrame(PARENT_FRAME):
         """
         Set default starting perspective
         """
-        if custom_config == None:
+        if custom_config is None:
             return
         for plugin in self.plugins:
             try:
@@ -625,7 +634,7 @@ class ViewerFrame(PARENT_FRAME):
                     plugin.on_perspective(event=None)
                     frame = plugin.get_frame()
                     frame.Show(True)
-                    #break
+                    # break
                 else:
                     frame = plugin.get_frame()
                     frame.Show(False)
@@ -682,7 +691,7 @@ class ViewerFrame(PARENT_FRAME):
             # Disable save application if the current panel is in batch mode
             try:
                 flag = self.panel_on_focus.get_save_flag()
-                if self._save_appl_menu != None:
+                if self._save_appl_menu is not None:
                     self._save_appl_menu.Enable(flag)
 
                 if self.panel_on_focus not in self.plot_panels.values():
@@ -693,9 +702,9 @@ class ViewerFrame(PARENT_FRAME):
                 if self._data_panel is not None and \
                                 self.panel_on_focus is not None:
                     self.set_panel_on_focus_helper()
-                    #update toolbar
+                    # update toolbar
                     self._update_toolbar_helper()
-                    #update edit menu
+                    # update edit menu
                     self.enable_edit_menu()
             except wx._core.PyDeadObjectError:
                 pass
@@ -710,7 +719,7 @@ class ViewerFrame(PARENT_FRAME):
         """
         Send focusing on ID to data explorer
         """
-        if self._data_panel != None:
+        if self._data_panel is not None:
             self._data_panel.set_panel_on_focus(name)
 
     def set_panel_on_focus_helper(self):
@@ -719,7 +728,7 @@ class ViewerFrame(PARENT_FRAME):
         """
         caption = self.panel_on_focus.window_caption
         self.send_focus_to_datapanel(caption)
-        #update combo
+        # update combo
         if self.panel_on_focus in self.plot_panels.values():
             combo = self._data_panel.cb_plotpanel
             combo_title = str(self.panel_on_focus.window_caption)
@@ -738,8 +747,8 @@ class ViewerFrame(PARENT_FRAME):
         : param panel: a control panel or tap where the bookmark is
         """
         cpanel = panel
-        if self._toolbar != None and cpanel._bookmark_flag:
-            for item in  self._toolbar.get_bookmark_items():
+        if self._toolbar is not None and cpanel._bookmark_flag:
+            for item in self._toolbar.get_bookmark_items():
                 self._toolbar.remove_bookmark_item(item)
             self._toolbar.add_bookmark_default()
             pos = 0
@@ -840,7 +849,8 @@ class ViewerFrame(PARENT_FRAME):
         """
         field = self.sb.get_msg_position()
         wx.Frame.PushStatusText(self, field=field,
-                                string="FIXME - PushStatusText called without text")
+                                string=
+                                "FIXME - PushStatusText called without text")
 
     def add_perspective(self, plugin):
         """
@@ -865,13 +875,14 @@ class ViewerFrame(PARENT_FRAME):
         get plugins local to guiframe and others
         """
         plugins = []
-        #import guiframe local plugins
-        #check if the style contain guiframe.dataloader
+        # import guiframe local plugins
+        # check if the style contain guiframe.dataloader
         style1 = self.__gui_style & GUIFRAME.DATALOADER_ON
         style2 = self.__gui_style & GUIFRAME.PLOTTING_ON
         if style1 == GUIFRAME.DATALOADER_ON:
             try:
-                from sas.sasgui.guiframe.local_perspectives.data_loader import data_loader
+                from sas.sasgui.guiframe.local_perspectives.data_loader \
+                    import data_loader
                 self._data_plugin = data_loader.Plugin()
                 plugins.append(self._data_plugin)
             except:
@@ -880,7 +891,8 @@ class ViewerFrame(PARENT_FRAME):
                 logging.error(msg)
         if style2 == GUIFRAME.PLOTTING_ON:
             try:
-                from sas.sasgui.guiframe.local_perspectives.plotting import plotting
+                from sas.sasgui.guiframe.local_perspectives.plotting \
+                    import plotting
                 self._plotting_plugin = plotting.Plugin()
                 plugins.append(self._plotting_plugin)
             except:
@@ -906,15 +918,15 @@ class ViewerFrame(PARENT_FRAME):
                 file_list = os.listdir(dir)
             else:
                 file_list = []
-            ## the default panel is the panel is the last plugin added
+            # the default panel is the panel is the last plugin added
             for item in file_list:
                 toks = os.path.splitext(os.path.basename(item))
                 name = ''
                 if not toks[0] == '__init__':
                     if toks[1] == '.py' or toks[1] == '':
                         name = toks[0]
-                    #check the validity of the module name parsed
-                    #before trying to import it
+                    # check the validity of the module name parsed
+                    # before trying to import it
                     if name is None or name.strip() == '':
                         continue
                     path = [os.path.abspath(dir)]
@@ -940,7 +952,7 @@ class ViewerFrame(PARENT_FRAME):
                         msg = "ViewerFrame._find_plugins: %s" % sys.exc_value
                         logging.error(msg)
                     finally:
-                        if not file == None:
+                        if file is not None:
                             file.close()
         except:
             # Should raise and catch at a higher level and
@@ -955,13 +967,13 @@ class ViewerFrame(PARENT_FRAME):
         get the proper panel width and height
         """
         self._window_width, self._window_height = self.get_client_size()
-        ## Default size
+        # Default size
         if DATAPANEL_WIDTH < 0:
             panel_width = int(self._window_width * 0.25)
         else:
             panel_width = DATAPANEL_WIDTH
         panel_height = int(self._window_height)
-        if self._data_panel is not None  and (p == self._data_panel):
+        if self._data_panel is not None and (p == self._data_panel):
             return panel_width, panel_height
         if hasattr(p, "CENTER_PANE") and p.CENTER_PANE:
             panel_width = self._window_width * 0.45
@@ -993,7 +1005,8 @@ class ViewerFrame(PARENT_FRAME):
         # TODO: this needs serious simplification
         if self.welcome_panel_class is not None:
             welcome_panel = MDIFrame(self, None, 'None', (100, 200))
-            self.defaultPanel = self.welcome_panel_class(welcome_panel, -1, style=wx.RAISED_BORDER)
+            self.defaultPanel = self.welcome_panel_class(welcome_panel, -1,
+                                                         style=wx.RAISED_BORDER)
             welcome_panel.set_panel(self.defaultPanel)
             self.defaultPanel.set_frame(welcome_panel)
             welcome_panel.Show(False)
@@ -1009,7 +1022,7 @@ class ViewerFrame(PARENT_FRAME):
             if not IS_WIN:
                 frame.SetPosition((0, mac_pos_y + size_t_bar))
             frame.Show(True)
-        #add data panel
+        # add data panel
         win = MDIFrame(self, None, 'None', (100, 200))
         data_panel = DataPanel(parent=win, id=-1)
         win.set_panel(data_panel)
@@ -1017,7 +1030,8 @@ class ViewerFrame(PARENT_FRAME):
         self._data_panel = data_panel
         d_panel_width, h = self._get_panels_size(self._data_panel)
         win.SetSize((d_panel_width, h))
-        is_visible = self.__gui_style & GUIFRAME.MANAGER_ON == GUIFRAME.MANAGER_ON
+        is_visible = self.__gui_style & \
+                     GUIFRAME.MANAGER_ON == GUIFRAME.MANAGER_ON
         if IS_WIN:
             win.SetPosition((0, 0))
         else:
@@ -1063,7 +1077,7 @@ class ViewerFrame(PARENT_FRAME):
         """
         Update the data.
         """
-        prev_id, data_state = self._data_manager.update_data( \
+        prev_id, data_state = self._data_manager.update_data(
                               prev_data=prev_data, new_data=new_data)
 
         self._data_panel.remove_by_id(prev_id)
@@ -1114,7 +1128,6 @@ class ViewerFrame(PARENT_FRAME):
         """
         self._current_perspective.delete_data(data)
 
-
     def get_context_menu(self, plotpanel=None):
         """
         Get the context menu items made available
@@ -1138,7 +1151,7 @@ class ViewerFrame(PARENT_FRAME):
             return
         menu_list = []
         item = self._current_perspective
-        if item != None:
+        if item is not None:
             menu_list.extend(item.get_context_menu(plotpanel=plotpanel))
         return menu_list
 
@@ -1157,7 +1170,6 @@ class ViewerFrame(PARENT_FRAME):
         if self.cpanel_on_focus is not None:
             self.cpanel_on_focus.SetFocus()
 
-
     def popup_panel(self, p):
         """
         Add a panel object to the AUI manager
@@ -1169,7 +1181,7 @@ class ViewerFrame(PARENT_FRAME):
         """
         ID = wx.NewId()
         self.panels[str(ID)] = p
-        ## Check and set the size
+        # Check and set the size
         if PLOPANEL_WIDTH < 0:
             p_panel_width = int(self._window_width * 0.45)
         else:
@@ -1208,13 +1220,13 @@ class ViewerFrame(PARENT_FRAME):
 
         # Register for showing/hiding the panel
         wx.EVT_MENU(self, ID, self.on_view)
-        if p not in self.plot_panels.values() and p.group_id != None:
+        if p not in self.plot_panels.values() and p.group_id is not None:
             self.plot_panels[ID] = p
             if len(self.plot_panels) == 1:
                 self.panel_on_focus = p
                 self.set_panel_on_focus(None)
             if self._data_panel is not None and \
-                self._plotting_plugin is not None:
+                            self._plotting_plugin is not None:
                 ind = self._data_panel.cb_plotpanel.FindString('None')
                 if ind != wx.NOT_FOUND:
                     self._data_panel.cb_plotpanel.Delete(ind)
@@ -1257,7 +1269,7 @@ class ViewerFrame(PARENT_FRAME):
         application_name = 'No Selected Analysis'
         panel_name = 'No Panel on Focus'
         c_panel = self.cpanel_on_focus
-        if self._toolbar is  None:
+        if self._toolbar is None:
             return
         if c_panel is not None:
             self.reset_bookmark_menu(self.cpanel_on_focus)
@@ -1302,9 +1314,9 @@ class ViewerFrame(PARENT_FRAME):
         Add available plug-in sub-menus.
         """
         if self._menubar is None or self._current_perspective is None \
-            or self._menubar.GetMenuCount() == 0:
+                or self._menubar.GetMenuCount() == 0:
             return
-        #replace or add a new menu for the current plugin
+        # replace or add a new menu for the current plugin
         pos = self._menubar.FindMenu(str(self._applications_menu_name))
         if pos == -1 and self._applications_menu_pos > 0:
             pos = self._applications_menu_pos
@@ -1324,7 +1336,7 @@ class ViewerFrame(PARENT_FRAME):
             if menu_list:
                 for (menu, name) in menu_list:
                     if self._applications_menu_pos == -1:
-                        # Find the Analysis position and insert just after it if possible
+                        # Find the Analysis position and insert just after it
                         analysis_pos = self._menubar.FindMenu("Analysis")
                         if analysis_pos == -1:
                             self._menubar.Append(menu, name)
@@ -1333,7 +1345,8 @@ class ViewerFrame(PARENT_FRAME):
                             self._menubar.Insert(analysis_pos+1, menu, name)
                             self._applications_menu_pos = analysis_pos + 1
                     else:
-                        self._menubar.Insert(self._applications_menu_pos, menu, name)
+                        self._menubar.Insert(self._applications_menu_pos,
+                                             menu, name)
                     self._applications_menu_name = name
 
     def _on_marketplace_click(self, event):
@@ -1361,7 +1374,8 @@ class ViewerFrame(PARENT_FRAME):
 
         if config._do_acknowledge:
             wx_id = wx.NewId()
-            self._help_menu.Append(wx_id, '&Acknowledge', 'Acknowledging SasView')
+            self._help_menu.Append(wx_id, '&Acknowledge',
+                                   'Acknowledging SasView')
             wx.EVT_MENU(self, wx_id, self._onAcknowledge)
 
         if config._do_aboutbox:
@@ -1378,7 +1392,8 @@ class ViewerFrame(PARENT_FRAME):
         # Checking for updates
         wx_id = wx.NewId()
         self._help_menu.Append(wx_id, '&Check for update',
-                               'Check for the latest version of %s' % config.__appname__)
+                               'Check for the latest version of %s' %
+                               config.__appname__)
         wx.EVT_MENU(self, wx_id, self._check_update)
         self._menubar.Append(self._help_menu, '&Help')
 
@@ -1399,7 +1414,8 @@ class ViewerFrame(PARENT_FRAME):
         style = self.__gui_style & GUIFRAME.MANAGER_ON
         wx_id = wx.NewId()
         self._data_panel_menu = self._view_menu.Append(wx_id,
-                                                       '&Show Data Explorer', '')
+                                                       '&Show Data Explorer',
+                                                       '')
         wx.EVT_MENU(self, wx_id, self.show_data_panel)
         if style == GUIFRAME.MANAGER_ON:
             self._data_panel_menu.SetText('Hide Data Explorer')
@@ -1410,12 +1426,14 @@ class ViewerFrame(PARENT_FRAME):
         wx_id = wx.NewId()
         style1 = self.__gui_style & GUIFRAME.TOOLBAR_ON
         if style1 == GUIFRAME.TOOLBAR_ON:
-            self._toolbar_menu = self._view_menu.Append(wx_id, '&Hide Toolbar', '')
+            self._toolbar_menu = self._view_menu.Append(wx_id, '&Hide Toolbar',
+                                                        '')
         else:
-            self._toolbar_menu = self._view_menu.Append(wx_id, '&Show Toolbar', '')
+            self._toolbar_menu = self._view_menu.Append(wx_id, '&Show Toolbar',
+                                                        '')
         wx.EVT_MENU(self, wx_id, self._on_toggle_toolbar)
 
-        if custom_config != None:
+        if custom_config is not None:
             self._view_menu.AppendSeparator()
             wx_id = wx.NewId()
             hint_ss = "Select the current/default configuration "
@@ -1426,7 +1444,8 @@ class ViewerFrame(PARENT_FRAME):
 
         wx_id = wx.NewId()
         self._view_menu.AppendSeparator()
-        self._view_menu.Append(wx_id, 'Category Manager', 'Edit model categories')
+        self._view_menu.Append(wx_id, 'Category Manager',
+                               'Edit model categories')
         wx.EVT_MENU(self, wx_id, self._on_category_manager)
 
         self._menubar.Append(self._view_menu, '&View')
@@ -1439,7 +1458,7 @@ class ViewerFrame(PARENT_FRAME):
         self.batch_frame.Show(False)
         self.batch_frame.Show(True)
 
-    def  on_category_panel(self, event):
+    def on_category_panel(self, event):
         """
         On cat panel
         """
@@ -1458,14 +1477,15 @@ class ViewerFrame(PARENT_FRAME):
         Build a panel to allow to edit Mask
         """
         from sas.sasgui.guiframe.startup_configuration \
-        import StartupConfiguration as ConfDialog
+            import StartupConfiguration as ConfDialog
 
         dialog = ConfDialog(parent=self, gui=self.__gui_style)
         result = dialog.ShowModal()
         if result == wx.ID_OK:
             dialog.write_custom_config()
             # post event for info
-            wx.PostEvent(self, StatusEvent(status="Wrote custom configuration", info='info'))
+            wx.PostEvent(self, StatusEvent(status="Wrote custom configuration",
+                                           info='info'))
         dialog.Destroy()
 
     def _add_menu_application(self):
@@ -1484,28 +1504,30 @@ class ViewerFrame(PARENT_FRAME):
                 if len(plug.get_perspective()) > 0:
                     id = wx.NewId()
                     if plug.use_data():
-                        self._applications_menu.InsertCheckItem(pos, id, plug.sub_menu, \
-                            "Switch to analysis: %s" % plug.sub_menu)
+                        self._applications_menu.InsertCheckItem(pos, id,
+                                                                plug.sub_menu,
+                                    "Switch to analysis: %s" % plug.sub_menu)
                         plug_data_count = True
                         pos += 1
                     else:
                         plug_no_data_count = True
-                        self._applications_menu.AppendCheckItem(id, plug.sub_menu, \
+                        self._applications_menu.AppendCheckItem(id,
+                                                                plug.sub_menu,
                             "Switch to analysis: %s" % plug.sub_menu)
                     wx.EVT_MENU(self, id, plug.on_perspective)
 
             if not plug_data_count or not plug_no_data_count:
                 self._applications_menu.RemoveItem(separator)
-            #Windows introduces a "Window" menu item during the layout process
-            #somehow.  We want it to be next to the last item with Help as
-            #last. However Analysis gets stuck after Window in normal ordering
-            #so force it to be next after the Tools menu item.  Should we add
-            #another menu item will need to check if this is still where we 
-            #want Analysis.  This is NOT an issue on the Mac which does not
-            #have the extra Window menu item.
+            # Windows introduces a "Window" menu item during the layout process
+            # somehow.  We want it to be next to the last item with Help as
+            # last. However Analysis gets stuck after Window in normal ordering
+            # so force it to be next after the Tools menu item.  Should we add
+            # another menu item will need to check if this is still where we
+            # want Analysis.  This is NOT an issue on the Mac which does not
+            # have the extra Window menu item.
             #      March 2016 Code Camp  -- PDB 
             Tools_pos = self._menubar.FindMenu("Tools")
-            self._menubar.Insert(Tools_pos+1,self._applications_menu,
+            self._menubar.Insert(Tools_pos+1, self._applications_menu,
                                  '&Analysis')
             self._check_applications_menu()
 
@@ -1526,7 +1548,9 @@ class ViewerFrame(PARENT_FRAME):
         if OPEN_SAVE_MENU:
             wx_id = wx.NewId()
             hint_load_file = "read all analysis states saved previously"
-            self._save_appl_menu = self._file_menu.Append(wx_id, '&Open Project', hint_load_file)
+            self._save_appl_menu = self._file_menu.Append(wx_id,
+                                                          '&Open Project',
+                                                          hint_load_file)
             wx.EVT_MENU(self, wx_id, self._on_open_state_project)
 
         if style1 == GUIFRAME.MULTIPLE_APPLICATIONS:
@@ -1535,7 +1559,8 @@ class ViewerFrame(PARENT_FRAME):
             hint_load_file += " them into the analysis"
             wx_id = wx.NewId()
             self._save_appl_menu = self._file_menu.Append(wx_id,
-                                                          '&Open Analysis', hint_load_file)
+                                                          '&Open Analysis',
+                                                          hint_load_file)
             wx.EVT_MENU(self, wx_id, self._on_open_state_application)
         if OPEN_SAVE_MENU:
             self._file_menu.AppendSeparator()
@@ -1545,8 +1570,9 @@ class ViewerFrame(PARENT_FRAME):
             wx.EVT_MENU(self, wx_id, self._on_save_project)
         if style1 == GUIFRAME.MULTIPLE_APPLICATIONS:
             wx_id = wx.NewId()
-            self._save_appl_menu = self._file_menu.Append(wx_id, \
-                '&Save Analysis', 'Save state of the current active analysis panel')
+            txt = '&Save Analysis'
+            txt2 = 'Save state of the current active analysis panel'
+            self._save_appl_menu = self._file_menu.Append(wx_id, txt, txt2)
             wx.EVT_MENU(self, wx_id, self._on_save_application)
         if not sys.platform == 'darwin':
             self._file_menu.AppendSeparator()
@@ -1588,15 +1614,16 @@ class ViewerFrame(PARENT_FRAME):
         self._edit_menu.AppendSeparator()
 
         self._edit_menu_copyas = wx.Menu()
-        #Sub menu for Copy As...
-        self._edit_menu_copyas.Append(GUIFRAME_ID.COPYEX_ID, 'Copy current tab to Excel',
+        # Sub menu for Copy As...
+        self._edit_menu_copyas.Append(GUIFRAME_ID.COPYEX_ID,
+                                      'Copy current tab to Excel',
                                       'Copy parameter values in tabular format')
         wx.EVT_MENU(self, GUIFRAME_ID.COPYEX_ID, self.on_copy_panel)
 
-        self._edit_menu_copyas.Append(GUIFRAME_ID.COPYLAT_ID, 'Copy current tab to LaTeX',
+        self._edit_menu_copyas.Append(GUIFRAME_ID.COPYLAT_ID,
+                                      'Copy current tab to LaTeX',
                                       'Copy parameter values in tabular format')
         wx.EVT_MENU(self, GUIFRAME_ID.COPYLAT_ID, self.on_copy_panel)
-
 
         self._edit_menu.AppendMenu(GUIFRAME_ID.COPYAS_ID, 'Copy Params as...',
                                    self._edit_menu_copyas,
@@ -1619,7 +1646,7 @@ class ViewerFrame(PARENT_FRAME):
         """
         Return the gui style
         """
-        return  self.__gui_style
+        return self.__gui_style
 
     def _add_menu_data(self):
         """
@@ -1674,7 +1701,7 @@ class ViewerFrame(PARENT_FRAME):
         if self.defaultPanel is None:
             return
         frame = self.panels['default'].get_frame()
-        if frame == None:
+        if frame is None:
             return
         # Show default panel
         if not frame.IsShown():
@@ -1707,7 +1734,7 @@ class ViewerFrame(PARENT_FRAME):
             if panel in self.schedule_full_draw_list:
                 self.schedule_full_draw_list.remove(panel)
 
-            #delete uid number not str(uid)
+            # delete uid number not str(uid)
             if ID in self.plot_panels.keys():
                 del self.plot_panels[ID]
             if ID in self.panels.keys():
@@ -1733,11 +1760,11 @@ class ViewerFrame(PARENT_FRAME):
             logging.error(log_msg)
             return
 
-        #reading a state file
+        # reading a state file
         for plug in self.plugins:
             reader, ext = plug.get_extensions()
             if reader is not None:
-                #read the state of the single plugin
+                # read the state of the single plugin
                 if extension == ext:
                     reader.read(path)
                     return
@@ -1748,7 +1775,8 @@ class ViewerFrame(PARENT_FRAME):
                         msg = "DataLoader Error: Encounted Non-ASCII character"
                         msg += "\n(%s)" % sys.exc_value
                         wx.PostEvent(self, StatusEvent(status=msg,
-                                                       info="error", type="stop"))
+                                                       info="error",
+                                                       type="stop"))
                         return
 
         style = self.__gui_style & GUIFRAME.MANAGER_ON
@@ -1787,7 +1815,7 @@ class ViewerFrame(PARENT_FRAME):
         if path and (path is not None) and os.path.isfile(path):
             basename = os.path.basename(path)
             if APPLICATION_STATE_EXTENSION is not None \
-                and basename.endswith(APPLICATION_STATE_EXTENSION):
+                    and basename.endswith(APPLICATION_STATE_EXTENSION):
                 if is_project:
                     for ID in self.plot_panels.keys():
                         panel = self.plot_panels[ID]
@@ -1857,7 +1885,7 @@ class ViewerFrame(PARENT_FRAME):
         """
         """
         path = None
-        if self._default_save_location == None:
+        if self._default_save_location is None:
             self._default_save_location = os.getcwd()
         wx.PostEvent(self, StatusEvent(status="Loading Analysis file..."))
         plug_wlist = self._on_open_state_app_helper()
@@ -1891,7 +1919,7 @@ class ViewerFrame(PARENT_FRAME):
                     ind = ext
                     break
             # Found the extension
-            if ind != None:
+            if ind is not None:
                 plug_wlist.remove(ind)
                 plug_wlist.insert(0, ind)
                 try:
@@ -1909,22 +1937,24 @@ class ViewerFrame(PARENT_FRAME):
         Load in a .svs project file after removing all data from SasView
         """
         path = None
-        if self._default_save_location == None:
+        if self._default_save_location is None:
             self._default_save_location = os.getcwd()
         msg = "This operation will set remove all data, plots and analyses from"
         msg += " SasView before loading the project. Do you wish to continue?"
-        self._data_panel.selection_cbox.SetValue('Select all Data')
-        self._data_panel._on_selection_type(None)
-        for _, theory_dict in self._data_panel.list_cb_theory.iteritems():
-            for  key, value in theory_dict.iteritems():
-                item, _, _ = value
-                item.Check(True)
-        if not self._data_panel.on_remove(None, msg):
+        msg_box = wx.MessageDialog(None, msg, 'Warning', wx.OK | wx.CANCEL)
+        if msg_box.ShowModal() == wx.ID_OK:
+            self._data_panel.selection_cbox.SetValue('Select all Data')
+            self._data_panel._on_selection_type(None)
+            for _, theory_dict in self._data_panel.list_cb_theory.iteritems():
+                for key, value in theory_dict.iteritems():
+                    item, _, _ = value
+                    item.Check(True)
+            self._data_panel.on_remove(None, False)
+
             wx.PostEvent(self, StatusEvent(status="Loading Project file..."))
-            dlg = wx.FileDialog(self,
-                            "Choose a file",
-                            self._default_save_location, "",
-                            APPLICATION_WLIST)
+            dlg = wx.FileDialog(self, "Choose a file",
+                                self._default_save_location, "",
+                                APPLICATION_WLIST)
             if dlg.ShowModal() == wx.ID_OK:
                 path = dlg.GetPath()
             if path is not None:
@@ -1968,7 +1998,7 @@ class ViewerFrame(PARENT_FRAME):
         """
         save the state of the SasView as *.svs
         """
-        if self._current_perspective is  None:
+        if self._current_perspective is None:
             return
         wx.PostEvent(self, StatusEvent(status="Saving Project file..."))
         path = None
@@ -1996,7 +2026,7 @@ class ViewerFrame(PARENT_FRAME):
             # Write the XML document
             extens = APPLICATION_STATE_EXTENSION
             fName = os.path.splitext(path)[0] + extens
-            if doc != None:
+            if doc is not None:
                 fd = open(fName, 'w')
                 fd.write(doc.toprettyxml())
                 fd.close()
@@ -2028,7 +2058,7 @@ class ViewerFrame(PARENT_FRAME):
                     state = page.get_state().clone()
                     if data is not None:
                         new_doc = reader.write_toXML(data, state)
-                        if doc != None and hasattr(doc, "firstChild"):
+                        if doc is not None and hasattr(doc, "firstChild"):
                             child = new_doc.firstChild.firstChild
                             doc.firstChild.appendChild(child)
                         else:
@@ -2039,7 +2069,7 @@ class ViewerFrame(PARENT_FRAME):
                 state = panel.get_state()
                 if data is not None:
                     new_doc = reader.write_toXML(data, state)
-                    if doc != None and hasattr(doc, "firstChild"):
+                    if doc is not None and hasattr(doc, "firstChild"):
                         child = new_doc.firstChild.firstChild
                         doc.firstChild.appendChild(child)
                     else:
@@ -2094,7 +2124,7 @@ class ViewerFrame(PARENT_FRAME):
                 version_info = json.loads(content)
             except:
                 logging.info("Failed to connect to www.sasview.org")
-        self._process_version(version_info, standalone=event == None)
+        self._process_version(version_info, standalone=event is None)
 
     def _process_version(self, version_info, standalone=True):
         """
@@ -2183,11 +2213,13 @@ class ViewerFrame(PARENT_FRAME):
                     logging.error("Error in _onTutorial: %s" % sys.exc_value)
                     try:
                         # Try an alternate method
-                        logging.error("Could not open the tutorial pdf, trying xhtml2pdf")
+                        logging.error(
+                            "Could not open the tutorial pdf, trying xhtml2pdf")
                         from xhtml2pdf import pisa
                         pisa.startViewer(path)
                     except:
-                        logging.error("Could not open the tutorial pdf with xhtml2pdf")
+                        logging.error(
+                            "Could not open the tutorial pdf with xhtml2pdf")
                         msg = "This feature requires 'PDF Viewer'\n"
                         wx.MessageBox(msg, 'Error')
             else:
@@ -2197,12 +2229,14 @@ class ViewerFrame(PARENT_FRAME):
                 except:
                     try:
                         # Try an alternate method
-                        logging.error("Could not open the tutorial pdf, trying xhtml2pdf")
+                        logging.error(
+                            "Could not open the tutorial pdf, trying xhtml2pdf")
                         from xhtml2pdf import pisa
                         pisa.startViewer(path)
                     except:
-                        logging.error("Could not open the tutorial pdf with xhtml2pdf")
-                        msg = "This feature requires the 'Preview' application\n"
+                        logging.error(
+                            "Could not open the tutorial pdf with xhtml2pdf")
+                        msg = "This feature requires the Preview application\n"
                         wx.MessageBox(msg, 'Error')
 
     def _onSphinxDocs(self, evt):
@@ -2217,7 +2251,8 @@ class ViewerFrame(PARENT_FRAME):
         # different place than they would otherwise.
         from documentation_window import DocumentationWindow
         _TreeLocation = "user/user.html"
-        DocumentationWindow(self, -1, _TreeLocation, "", "SasView Documentation")
+        DocumentationWindow(self, -1, _TreeLocation, "",
+                            "SasView Documentation")
 
     def set_manager(self, manager):
         """
@@ -2251,7 +2286,7 @@ class ViewerFrame(PARENT_FRAME):
             if hasattr(self.panels[item], "ALWAYS_ON"):
                 if self.panels[item].ALWAYS_ON:
                     continue
-            if self.panels[item] == None:
+            if self.panels[item] is None:
                 continue
             if self.panels[item].window_name in panels:
                 frame = self.panels[item].get_frame()
@@ -2260,16 +2295,17 @@ class ViewerFrame(PARENT_FRAME):
             else:
                 # always show the data panel if enable
                 style = self.__gui_style & GUIFRAME.MANAGER_ON
-                if (style == GUIFRAME.MANAGER_ON) and self.panels[item] == self._data_panel:
+                if (style == GUIFRAME.MANAGER_ON) \
+                        and self.panels[item] == self._data_panel:
                     if 'data_panel' in self.panels.keys():
                         frame = self.panels['data_panel'].get_frame()
-                        if frame == None:
+                        if frame is None:
                             continue
                         flag = frame.IsShown()
                         frame.Show(flag)
                 else:
                     frame = self.panels[item].get_frame()
-                    if frame == None:
+                    if frame is None:
                         continue
 
                     if frame.IsShown():
@@ -2279,7 +2315,7 @@ class ViewerFrame(PARENT_FRAME):
         """
         show the data panel
         """
-        if self._data_panel_menu == None:
+        if self._data_panel_menu is None:
             return
         label = self._data_panel_menu.GetText()
         pane = self.panels["data_panel"]
@@ -2309,22 +2345,22 @@ class ViewerFrame(PARENT_FRAME):
         is not active.
         :param data_list: dictionary of data's ID and value Data
         """
-        #Store data into manager
+        # Store data into manager
         self.add_data_helper(data_list)
         # set data in the data panel
         if self._data_panel is not None:
             data_state = self._data_manager.get_data_state(data_list.keys())
             self._data_panel.load_data_list(data_state)
-        #if the data panel is shown wait for the user to press a button
-        #to send data to the current perspective. if the panel is not
-        #show  automatically send the data to the current perspective
+        # if the data panel is shown wait for the user to press a button
+        # to send data to the current perspective. if the panel is not
+        # show  automatically send the data to the current perspective
         style = self.__gui_style & GUIFRAME.MANAGER_ON
         if style == GUIFRAME.MANAGER_ON:
-            #wait for button press from the data panel to set_data
+            # wait for button press from the data panel to set_data
             if self._data_panel is not None:
                 self._data_panel.frame.Show(True)
         else:
-            #automatically send that to the current perspective
+            # automatically send that to the current perspective
             self.set_data(data_id=data_list.keys())
 
     def set_data(self, data_id, theory_id=None):
@@ -2385,10 +2421,10 @@ class ViewerFrame(PARENT_FRAME):
                         wx.PostEvent(self, StatusEvent(status=message,
                                                        info='warning'))
             else:
-                #if not append then new plot
+                # if not append then new plot
                 from sas.sasgui.guiframe.dataFitting import Data2D
                 if issubclass(Data2D, new_plot.__class__):
-                    #for 2 D always plot in a separated new plot
+                    # for 2 D always plot in a separated new plot
                     new_plot.group_id = wx.NewId()
                 else:
                     # plot all 1D in a new plot
@@ -2419,7 +2455,7 @@ class ViewerFrame(PARENT_FRAME):
                 wx.PostEvent(self, NewPlotEvent(id=new_plot.id,
                                                 group_id=group_id,
                                                 action='remove'))
-                #remove res plot: Todo: improve
+                # remove res plot: Todo: improve
                 wx.CallAfter(self._remove_res_plot, new_plot.id)
         self._data_manager.delete_data(data_id=data_id,
                                        theory_id=theory_id)
@@ -2461,7 +2497,7 @@ class ViewerFrame(PARENT_FRAME):
             path = os.path.splitext(path)[0] + ext_format
             mypath = os.path.basename(path)
 
-            #Instantiate a loader
+            # Instantiate a loader
             loader = Loader()
             ext_format = ".txt"
             if os.path.splitext(mypath)[1].lower() == ext_format:
@@ -2481,17 +2517,16 @@ class ViewerFrame(PARENT_FRAME):
                 pass
         dlg.Destroy()
 
-
     def _onsaveTXT(self, data, path):
         """
         Save file as txt
 
         .. todo:: Refactor and remove this method. See 'TODO' in _onSave.
         """
-        if not path == None:
+        if path is not None:
             out = open(path, 'w')
             has_errors = True
-            if data.dy == None or data.dy == []:
+            if data.dy is None or data.dy == []:
                 has_errors = False
             # Sanity check
             if has_errors:
@@ -2501,7 +2536,7 @@ class ViewerFrame(PARENT_FRAME):
                 except:
                     has_errors = False
             if has_errors:
-                if data.dx != None and data.dx != []:
+                if data.dx is not None and data.dx != []:
                     out.write("<X>   <Y>   <dY>   <dX>\n")
                 else:
                     out.write("<X>   <Y>   <dY>\n")
@@ -2510,8 +2545,8 @@ class ViewerFrame(PARENT_FRAME):
 
             for i in range(len(data.x)):
                 if has_errors:
-                    if data.dx != None and data.dx != []:
-                        if  data.dx[i] != None:
+                    if data.dx is not None and data.dx != []:
+                        if data.dx[i] is not None:
                             out.write("%g  %g  %g  %g\n" % (data.x[i],
                                                             data.y[i],
                                                             data.dy[i],
@@ -2542,29 +2577,29 @@ class ViewerFrame(PARENT_FRAME):
             wx.PostEvent(self, StatusEvent(status=msg,
                                            info="error"))
             raise ValueError, msg
-        ## text = str(data)
+        # text = str(data)
         text = data.__str__()
         text += 'Data Min Max:\n'
         text += 'X_min = %s:  X_max = %s\n' % (xmin, max(data.x))
         text += 'Y_min = %s:  Y_max = %s\n' % (ymin, max(data.y))
-        if data.dy != None:
+        if data.dy is not None:
             text += 'dY_min = %s:  dY_max = %s\n' % (min(data.dy), max(data.dy))
         text += '\nData Points:\n'
         x_st = "X"
         for index in range(len(data.x)):
-            if data.dy != None and len(data.dy) > index:
+            if data.dy is not None and len(data.dy) > index:
                 dy_val = data.dy[index]
             else:
                 dy_val = 0.0
-            if data.dx != None and len(data.dx) > index:
+            if data.dx is not None and len(data.dx) > index:
                 dx_val = data.dx[index]
             else:
                 dx_val = 0.0
-            if data.dxl != None and len(data.dxl) > index:
+            if data.dxl is not None and len(data.dxl) > index:
                 if index == 0:
                     x_st = "Xl"
                 dx_val = data.dxl[index]
-            elif data.dxw != None and len(data.dxw) > index:
+            elif data.dxw is not None and len(data.dxw) > index:
                 if index == 0:
                     x_st = "Xw"
                 dx_val = data.dxw[index]
@@ -2604,7 +2639,7 @@ class ViewerFrame(PARENT_FRAME):
             path = os.path.splitext(path)[0] + ext_format
             mypath = os.path.basename(path)
 
-            #Instantiate a loader
+            # Instantiate a loader
             loader = Loader()
 
             ext_format = ".dat"
@@ -2641,11 +2676,11 @@ class ViewerFrame(PARENT_FRAME):
             x_val = data.qx_data[index]
             y_val = data.qy_data[index]
             i_val = data.data[index]
-            if data.err_data != None:
+            if data.err_data is not None:
                 di_val = data.err_data[index]
-            if data.dqx_data != None:
+            if data.dqx_data is not None:
                 dx_val = data.dqx_data[index]
-            if data.dqy_data != None:
+            if data.dqy_data is not None:
                 dy_val = data.dqy_data[index]
 
             text += "%s \t%s \t%s \t%s \t%s \t%s \t%s\n" % (index,
@@ -2680,7 +2715,7 @@ class ViewerFrame(PARENT_FRAME):
                 if hasattr(panel, 'CENTER_PANE') and panel.CENTER_PANE:
                     for name in self._current_perspective.get_perspective():
                         frame = panel.get_frame()
-                        if frame != None:
+                        if frame is not None:
                             if name == panel.window_name:
                                 panel.on_set_focus(event=None)
                                 frame.Show(True)
@@ -2690,7 +2725,7 @@ class ViewerFrame(PARENT_FRAME):
             if self._data_panel is not None:
                 self._data_panel.set_active_perspective(name)
                 self._check_applications_menu()
-            #Set the SasView title
+            # Set the SasView title
             self._set_title_name(name)
 
     def _set_title_name(self, name):
@@ -2722,10 +2757,12 @@ class ViewerFrame(PARENT_FRAME):
         Enable append data on a plot panel
         """
 
-        if self.panel_on_focus not in self._plotting_plugin.plot_panels.values():
+        if self.panel_on_focus \
+                not in self._plotting_plugin.plot_panels.values():
             return
+        check = "Theory1D"
         is_theory = len(self.panel_on_focus.plots) <= 1 and \
-            self.panel_on_focus.plots.values()[0].__class__.__name__ == "Theory1D"
+            self.panel_on_focus.plots.values()[0].__class__.__name__ == check
 
         is_data2d = hasattr(new_plot, 'data')
 
@@ -2733,23 +2770,24 @@ class ViewerFrame(PARENT_FRAME):
             and self.panel_on_focus.group_id is not None
         has_meta_data = hasattr(new_plot, 'meta_data')
 
-        #disable_add_data if the data is being recovered from  a saved state file.
+        # disable_add_data if the data is being recovered from  a saved state
         is_state_data = False
         if has_meta_data:
             if 'invstate' in new_plot.meta_data:
                 is_state_data = True
-            if  'prstate' in new_plot.meta_data:
+            if 'prstate' in new_plot.meta_data:
                 is_state_data = True
-            if  'fitstate' in new_plot.meta_data:
+            if 'fitstate' in new_plot.meta_data:
                 is_state_data = True
 
-        return is_data1d and not is_data2d and not is_theory and not is_state_data
+        return is_data1d and not is_data2d and not is_theory \
+               and not is_state_data
 
     def check_multimode(self, perspective=None):
         """
         Check the perspective have batch mode capablitity
         """
-        if perspective == None or self._data_panel == None:
+        if perspective is None or self._data_panel is None:
             return
         flag = perspective.get_batch_capable()
         flag_on = perspective.batch_on
@@ -2776,7 +2814,7 @@ class ViewerFrame(PARENT_FRAME):
             flag = self.cpanel_on_focus.get_paste_flag()
             self._edit_menu.Enable(GUIFRAME_ID.PASTE_ID, flag)
 
-            #Copy menu
+            # Copy menu
             flag = self.cpanel_on_focus.get_copy_flag()
             self._edit_menu_copyas.Enable(GUIFRAME_ID.COPYEX_ID, flag)
             self._edit_menu_copyas.Enable(GUIFRAME_ID.COPYLAT_ID, flag)
@@ -2907,8 +2945,8 @@ class ViewerFrame(PARENT_FRAME):
             data_panel = self.panels["data_panel"]
             if data_panel.cb_plotpanel is not None:
                 # Check if any panel has the same caption
-                has_newstring = data_panel.cb_plotpanel.FindString\
-                                                            (str(new_caption))
+                has_newstring = data_panel.cb_plotpanel.FindString(
+                    str(new_caption))
                 caption = new_caption
                 if has_newstring != wx.NOT_FOUND:
                     captions = self._get_plotpanel_captions()
@@ -3025,7 +3063,7 @@ class ViewerFrame(PARENT_FRAME):
         """
         drag
         """
-        #Not implemeted
+        # Not implemeted
 
     def enable_reset(self):
         """
@@ -3038,7 +3076,7 @@ class ViewerFrame(PARENT_FRAME):
         """
         """
         size_y = 0
-        if self.GetToolBar() != None and self.GetToolBar().IsShown():
+        if self.GetToolBar() is not None and self.GetToolBar().IsShown():
             if not IS_LINUX:
                 _, size_y = self.GetToolBar().GetSizeTuple()
         return size_y
@@ -3053,7 +3091,7 @@ class ViewerFrame(PARENT_FRAME):
 
         # append this panel in the schedule list if not in yet
         if func == 'append':
-            if not panel in self.schedule_full_draw_list:
+            if panel not in self.schedule_full_draw_list:
                 self.schedule_full_draw_list.append(panel)
         # remove this panel from schedule list
         elif func == 'del':
@@ -3073,7 +3111,7 @@ class ViewerFrame(PARENT_FRAME):
         """
 
         count = len(self.schedule_full_draw_list)
-        #if not self.schedule:
+        # if not self.schedule:
         if count < 1:
             self.set_schedule(False)
             return
@@ -3088,7 +3126,8 @@ class ViewerFrame(PARENT_FRAME):
                 # otherwise, return
                 if ind == count:
                     return
-        #Simple redraw only for a panel shown
+        # Simple redraw only for a panel shown
+
         def f_draw(panel):
             """
             Draw A panel in the full draw list
@@ -3101,7 +3140,7 @@ class ViewerFrame(PARENT_FRAME):
                 if not frame.GetCapture():
                     # draw if possible
                     panel.set_resizing(False)
-                    #panel.Show(True)
+                    # panel.Show(True)
                     panel.draw_plot()
                 # Check if the panel is not shown
                 flag = frame.IsShown()
@@ -3136,9 +3175,9 @@ class ViewerFrame(PARENT_FRAME):
         """
         Set focus on a plot panel
         """
-        if panel == None:
+        if panel is None:
             return
-        #self.set_plot_unfocus()
+        # self.set_plot_unfocus()
         panel.on_set_focus(None)
         # set focusing panel
         self.panel_on_focus = panel
@@ -3171,7 +3210,7 @@ class ViewerFrame(PARENT_FRAME):
         """
         try:
             # check if it is time to redraw
-            if self.GetCapture() == None:
+            if self.GetCapture() is None:
                 # Draw plot, changes resizing too
                 self.full_draw()
         except:
@@ -3179,7 +3218,6 @@ class ViewerFrame(PARENT_FRAME):
 
         # restart idle
         self._redraw_idle(*args, **kwargs)
-
 
     def _redraw_idle(self, *args, **kwargs):
         """
@@ -3194,16 +3232,16 @@ class DefaultPanel(wx.Panel, PanelBase):
     Defines the API for a panels to work with
     the GUI manager
     """
-    ## Internal nickname for the window, used by the AUI manager
+    # Internal nickname for the window, used by the AUI manager
     window_name = "default"
-    ## Name to appear on the window title bar
+    # Name to appear on the window title bar
     window_caption = "Welcome panel"
-    ## Flag to tell the AUI manager to put this panel in the center pane
+    # Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = True
+
     def __init__(self, parent, *args, **kwds):
         wx.Panel.__init__(self, parent, *args, **kwds)
         PanelBase.__init__(self, parent)
-
 
 
 class SasViewApp(wx.App):
@@ -3235,8 +3273,9 @@ class SasViewApp(wx.App):
         # Display a splash screen on top of the frame.
         try:
             if os.path.isfile(SPLASH_SCREEN_PATH):
-                self.s_screen = self.display_splash_screen(parent=self.frame,
-                                                           path=SPLASH_SCREEN_PATH)
+                self.s_screen = \
+                    self.display_splash_screen(parent=self.frame,
+                                               path=SPLASH_SCREEN_PATH)
             else:
                 self.frame.Show()
         except:
@@ -3299,7 +3338,7 @@ class SasViewApp(wx.App):
                         if os.path.isfile(file_path):
                             os.remove(file_path)
                 except:
-                    logging.error("gui_manager.clean_plugin_models:\n  %s" \
+                    logging.error("gui_manager.clean_plugin_models:\n  %s"
                                   % sys.exc_value)
 
     def set_manager(self, manager):
@@ -3313,7 +3352,7 @@ class SasViewApp(wx.App):
         """
         Build the GUI
         """
-        #try to load file at the start
+        # try to load file at the start
         self.open_file()
         self.frame.build_gui()
 
@@ -3390,7 +3429,6 @@ class SasViewApp(wx.App):
         # Return the suggested position and size for the application frame.
         return (posX, posY), (customWidth, customHeight), is_maximized
 
-
     def display_splash_screen(self, parent,
                               path=SPLASH_SCREEN_PATH):
         """Displays the splash screen.  It will exactly cover the main frame."""
@@ -3426,7 +3464,6 @@ class SasViewApp(wx.App):
         s_screen.Show()
         return s_screen
 
-
     def on_close_splash_screen(self, event):
         """
         When the splash screen is closed.
@@ -3446,12 +3483,13 @@ class MDIFrame(CHILD_FRAME):
         :param parent: parent panel/container
         """
         # Initialize the Frame object
-        CHILD_FRAME.__init__(self, parent=parent, id=wx.ID_ANY, title=title, size=size)
+        CHILD_FRAME.__init__(self, parent=parent, id=wx.ID_ANY,
+                             title=title, size=size)
         self.parent = parent
         self.name = "Untitled"
         self.batch_on = self.parent.batch_on
         self.panel = panel
-        if panel != None:
+        if panel is not None:
             self.set_panel(panel)
         self.Show(False)
 

@@ -186,17 +186,14 @@ class FitPanel(nb, PanelBase):
         remove all pages, used when a svs file is opened
         """
 
-        # get number of pages
-        nop = self.GetPageCount()
         # use while-loop, for-loop will not do the job well.
-        while (nop > 0):
+        while (self.GetPageCount() > 0):
             # delete the first page until no page exists
             page = self.GetPage(0)
             if self._manager.parent.panel_on_focus == page:
                 self._manager.parent.panel_on_focus = None
             self._close_helper(selected_page=page)
             self.DeletePage(0)
-            nop = self.GetPageCount()
         # Clear list of names
         self.fit_page_name = {}
         # Clear list of opened pages
@@ -239,7 +236,6 @@ class FitPanel(nb, PanelBase):
         """
         # close all panels only when svs file opened
         self.close_all()
-        self._manager.mypanels = []
         self.sim_page = None
         self.batch_page = None
 
@@ -247,9 +243,8 @@ class FitPanel(nb, PanelBase):
         """
         close page and remove all references to the closed page
         """
-        nbr_page = self.GetPageCount()
         selected_page = self.GetPage(self.GetSelection())
-        if nbr_page == 1:
+        if self.GetPageCount() == 1:
             if selected_page.get_data() is not None:
                 if event is not None:
                     event.Veto()
@@ -292,7 +287,7 @@ class FitPanel(nb, PanelBase):
         """
         copy a dictionary of model into its own dictionary
 
-        :param m_dict: dictionnary made of model name as key and model class
+        :param dict: dictionnary made of model name as key and model class
             as value
         """
         self.model_list_box = dict
@@ -319,7 +314,7 @@ class FitPanel(nb, PanelBase):
         page_finder = self._manager.get_page_finder()
         if caption == "Const & Simul Fit":
             self.sim_page = SimultaneousFitPage(self, page_finder=page_finder,
-                                                 id= wx.ID_ANY, batch_on=False)
+                                                 id=wx.ID_ANY, batch_on=False)
             self.sim_page.window_caption = caption
             self.sim_page.window_name = caption
             self.sim_page.uid = wx.NewId()
@@ -396,7 +391,6 @@ class FitPanel(nb, PanelBase):
         if data.__class__.__name__ != "list":
             raise ValueError, "Fitpanel delete_data expect list of id"
         else:
-            n = self.GetPageCount()
             for page in self.opened_pages.values():
                 pos = self.GetPageIndex(page)
                 temp_data = page.get_data()
@@ -440,7 +434,8 @@ class FitPanel(nb, PanelBase):
                     break
         if data_1d_list and data_2d_list:
             # need to warning the user that this batch is a special case
-            from sas.sasgui.perspectives.fitting.fitting_widgets import BatchDataDialog
+            from sas.sasgui.perspectives.fitting.fitting_widgets import \
+                BatchDataDialog
             dlg = BatchDataDialog(self)
             if dlg.ShowModal() == wx.ID_OK:
                 data_type = dlg.get_data()
@@ -460,7 +455,7 @@ class FitPanel(nb, PanelBase):
             if page is None:
                 page = self.add_empty_page()
             if data_1d_list and not data_2d_list:
-                #only on type of data
+                # only on type of data
                 page.fill_data_combobox(data_1d_list)
             elif not data_1d_list and data_2d_list:
                 page.fill_data_combobox(data_2d_list)
@@ -476,7 +471,7 @@ class FitPanel(nb, PanelBase):
         """
         Add a fitting page on the notebook contained by fitpanel
 
-        :param data: data to fit
+        :param data_list: data to fit
 
         :return panel : page just added for further used.
         is used by fitting module

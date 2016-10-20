@@ -1,11 +1,11 @@
 ################################################################################
-#This software was developed by the University of Tennessee as part of the
-#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation.
+# This software was developed by the University of Tennessee as part of the
+# Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+# project funded by the US National Science Foundation.
 #
-#See the license text in license.txt
+# See the license text in license.txt
 #
-#copyright 2010, University of Tennessee
+# copyright 2010, University of Tennessee
 ################################################################################
 """
 This module provides Graphic interface for the data_manager module.
@@ -13,18 +13,9 @@ This module provides Graphic interface for the data_manager module.
 import wx
 from wx.build import build_options
 
-# Check version
-toks = str(wx.__version__).split('.')
-if int(toks[1]) < 9:
-    if int(toks[2]) < 12:
-        wx_version = 811
-    else:
-        wx_version = 812
-else:
-    wx_version = 900
 import sys
 from wx.lib.scrolledpanel import ScrolledPanel
-import  wx.lib.agw.customtreectrl as CT
+import wx.lib.agw.customtreectrl as CT
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import Data2D
 from sas.sasgui.guiframe.panel_base import PanelBase
@@ -35,11 +26,21 @@ from sas.sasgui.guiframe.events import NewPlotEvent
 from sas.sasgui.guiframe.gui_style import GUIFRAME
 from sas.sasgui.guiframe.events import NewBatchEvent
 from sas.sascalc.dataloader.loader import Loader
-#from sas.sasgui.guiframe.local_perspectives.plotting.masking \
+# from sas.sasgui.guiframe.local_perspectives.plotting.masking \
 #    import FloatPanel as QucikPlotDialog
-from sas.sasgui.guiframe.local_perspectives.plotting.SimplePlot import PlotFrame \
-        as QucikPlotDialog
+from sas.sasgui.guiframe.local_perspectives.plotting.SimplePlot \
+    import PlotFrame as QucikPlotDialog
 import sas.sasgui.guiframe.config as config
+
+# Check version
+toks = str(wx.__version__).split('.')
+if int(toks[1]) < 9:
+    if int(toks[2]) < 12:
+        wx_version = 811
+    else:
+        wx_version = 812
+else:
+    wx_version = 900
 
 extension_list = []
 if config.APPLICATION_STATE_EXTENSION is not None:
@@ -48,7 +49,7 @@ EXTENSIONS = config.PLUGIN_STATE_EXTENSIONS + extension_list
 PLUGINS_WLIST = config.PLUGINS_WLIST
 APPLICATION_WLIST = config.APPLICATION_WLIST
 
-#Control panel width
+# Control panel width
 if sys.platform.count("win32") > 0:
     PANEL_WIDTH = 235
     PANEL_HEIGHT = 700
@@ -64,8 +65,8 @@ else:
     FONT_VARIANT = 1
     IS_MAC = True
 
-STYLE_FLAG = wx.RAISED_BORDER|CT.TR_HAS_BUTTONS| CT.TR_HIDE_ROOT|\
-                    wx.WANTS_CHARS|CT.TR_HAS_VARIABLE_ROW_HEIGHT
+STYLE_FLAG = wx.RAISED_BORDER | CT.TR_HAS_BUTTONS | CT.TR_HIDE_ROOT |\
+                    wx.WANTS_CHARS | CT.TR_HAS_VARIABLE_ROW_HEIGHT
 
 
 class DataTreeCtrl(CT.CustomTreeCtrl):
@@ -73,7 +74,7 @@ class DataTreeCtrl(CT.CustomTreeCtrl):
     Check list control to be used for Data Panel
     """
     def __init__(self, parent, *args, **kwds):
-        #agwstyle is introduced in wx.2.8.11 but is not working for mac
+        # agwstyle is introduced in wx.2.8.11 but is not working for mac
         if IS_MAC and wx_version < 812:
             try:
                 kwds['style'] = STYLE_FLAG
@@ -113,34 +114,36 @@ class DataTreeCtrl(CT.CustomTreeCtrl):
         else:
             return 0
 
+
 class DataPanel(ScrolledPanel, PanelBase):
     """
     This panel displays data available in the application and widgets to
     interact with data.
     """
-    ## Internal name for the AUI manager
+    # Internal name for the AUI manager
     window_name = "Data Panel"
-    ## Title to appear on top of the window
+    # Title to appear on top of the window
     window_caption = "Data Explorer"
-    #type of window
+    # type of window
     window_type = "Data Panel"
-    ## Flag to tell the GUI manager that this panel is not
+    # Flag to tell the GUI manager that this panel is not
     #  tied to any perspective
-    #ALWAYS_ON = True
+    # ALWAYS_ON = True
+
     def __init__(self, parent,
                  list=None,
                  size=(PANEL_WIDTH, PANEL_HEIGHT),
                  id=-1,
                  list_of_perspective=None, manager=None, *args, **kwds):
-        #kwds['size'] = size
-        #kwds['style'] = STYLE_FLAG
+        # kwds['size'] = size
+        # kwds['style'] = STYLE_FLAG
         ScrolledPanel.__init__(self, parent=parent, id=id, *args, **kwds)
         PanelBase.__init__(self, parent)
         self.SetupScrolling()
-        #Set window's font size
+        # Set window's font size
         self.SetWindowVariant(variant=FONT_VARIANT)
         self.loader = Loader()
-        #Default location
+        # Default location
         self._default_save_location = None
         self.all_data1d = True
         self.parent = parent.parent
@@ -158,13 +161,13 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.tree_ctrl = None
         self.tree_ctrl_theory = None
         self.perspective_cbox = None
-        ## Create context menu for page
+        # Create context menu for page
         self.data_menu = None
         self.popUpMenu = None
         self.plot3d_id = None
         self.editmask_id = None
         # Default attr
-        self.vbox  = None
+        self.vbox = None
         self.sizer1 = None
         self.sizer2 = None
         self.sizer3 = None
@@ -209,7 +212,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         Define the skeleton of the panel
         """
         w, h = self.parent.GetSize()
-        self.vbox  = wx.BoxSizer(wx.VERTICAL)
+        self.vbox = wx.BoxSizer(wx.VERTICAL)
         self.sizer1 = wx.BoxSizer(wx.VERTICAL)
         self.sizer1.SetMinSize(wx.Size(w/13, h*2/5))
 
@@ -218,11 +221,11 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.sizer4 = wx.BoxSizer(wx.VERTICAL)
         self.sizer5 = wx.BoxSizer(wx.VERTICAL)
 
-        self.vbox.Add(self.sizer5, 0, wx.EXPAND|wx.ALL, 1)
-        self.vbox.Add(self.sizer1, 1, wx.EXPAND|wx.ALL, 0)
-        self.vbox.Add(self.sizer2, 0, wx.EXPAND|wx.ALL, 1)
-        self.vbox.Add(self.sizer3, 0, wx.EXPAND|wx.ALL, 10)
-        #self.vbox.Add(self.sizer4, 0, wx.EXPAND|wx.ALL,5)
+        self.vbox.Add(self.sizer5, 0, wx.EXPAND | wx.ALL, 1)
+        self.vbox.Add(self.sizer1, 1, wx.EXPAND | wx.ALL, 0)
+        self.vbox.Add(self.sizer2, 0, wx.EXPAND | wx.ALL, 1)
+        self.vbox.Add(self.sizer3, 0, wx.EXPAND | wx.ALL, 10)
+        # self.vbox.Add(self.sizer4, 0, wx.EXPAND|wx.ALL,5)
 
         self.SetSizer(self.vbox)
 
@@ -234,19 +237,18 @@ class DataPanel(ScrolledPanel, PanelBase):
         select_txt.SetForegroundColour('blue')
         self.selection_cbox = wx.ComboBox(self, -1, style=wx.CB_READONLY)
         list_of_options = ['Select all Data',
-                            'Unselect all Data',
+                           'Unselect all Data',
                            'Select all Data 1D',
                            'Unselect all Data 1D',
                            'Select all Data 2D',
-                           'Unselect all Data 2D' ]
+                           'Unselect all Data 2D']
         for option in list_of_options:
             self.selection_cbox.Append(str(option))
         self.selection_cbox.SetValue('Select all Data')
         wx.EVT_COMBOBOX(self.selection_cbox, -1, self._on_selection_type)
         self.sizer5.AddMany([(select_txt, 0, wx.ALL, 5),
-                            (self.selection_cbox, 0, wx.ALL,5)])
+                            (self.selection_cbox, 0, wx.ALL, 5)])
         self.enable_selection()
-
 
     def _on_selection_type(self, event):
         """
@@ -256,7 +258,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         def check_item_and_children(control, check_value=True):
             self.tree_ctrl.CheckItem(data_ctrl, check_value)
             if data_ctrl.HasChildren():
-                if check_value == True and not control.IsExpanded():
+                if check_value and not control.IsExpanded():
                     # Only select children if control is expanded
                     # Always deselect children, regardless (see ticket #259)
                     return
@@ -298,46 +300,46 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         Layout widgets related to buttons
         """
-        #Load Data Button
+        # Load Data Button
         self.bt_add = wx.Button(self, wx.NewId(), "Load Data",
                                 size=(BUTTON_WIDTH, -1))
         self.bt_add.SetToolTipString("Load data files")
         wx.EVT_BUTTON(self, self.bt_add.GetId(), self._load_data)
 
-        #Delete Data Button
+        # Delete Data Button
         self.bt_remove = wx.Button(self, wx.NewId(), "Delete Data",
-         size=(BUTTON_WIDTH, -1))
+                                   size=(BUTTON_WIDTH, -1))
         self.bt_remove.SetToolTipString("Delete data from the application")
         wx.EVT_BUTTON(self, self.bt_remove.GetId(), self.on_remove)
 
-        #Send data to perspective button
+        # Send data to perspective button
         self.bt_import = wx.Button(self, wx.NewId(), "Send To",
-                                    size=(BUTTON_WIDTH, -1))
+                                   size=(BUTTON_WIDTH, -1))
         self.bt_import.SetToolTipString("Send Data set to active perspective")
         wx.EVT_BUTTON(self, self.bt_import.GetId(), self.on_import)
 
-        #Choose perspective to be send data to combo box
+        # Choose perspective to be send data to combo box
         self.perspective_cbox = wx.ComboBox(self, -1,
-                                style=wx.CB_READONLY)
+                                            style=wx.CB_READONLY)
         if not IS_MAC:
             self.perspective_cbox.SetMinSize((BUTTON_WIDTH*1.6, -1))
         wx.EVT_COMBOBOX(self.perspective_cbox, -1,
                         self._on_perspective_selection)
 
-        #Append data to current Graph Button
+        # Append data to current Graph Button
         self.bt_append_plot = wx.Button(self, wx.NewId(), "Append Plot To",
                                         size=(BUTTON_WIDTH, -1))
-        self.bt_append_plot.SetToolTipString( \
-                                "Plot the selected data in the active panel")
+        self.bt_append_plot.SetToolTipString(
+            "Plot the selected data in the active panel")
         wx.EVT_BUTTON(self, self.bt_append_plot.GetId(), self.on_append_plot)
 
-        #Create a new graph and send data to that new graph button
+        # Create a new graph and send data to that new graph button
         self.bt_plot = wx.Button(self, wx.NewId(), "New Plot",
                                  size=(BUTTON_WIDTH, -1))
         self.bt_plot.SetToolTipString("To trigger plotting")
         wx.EVT_BUTTON(self, self.bt_plot.GetId(), self.on_plot)
 
-        #Freeze current theory button - becomes a data set and stays on graph
+        # Freeze current theory button - becomes a data set and stays on graph
         self.bt_freeze = wx.Button(self, wx.NewId(), "Freeze Theory",
                                    size=(BUTTON_WIDTH, -1))
         freeze_tip = "To trigger freeze a theory: making a copy\n"
@@ -346,21 +348,21 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.bt_freeze.SetToolTipString(freeze_tip)
         wx.EVT_BUTTON(self, self.bt_freeze.GetId(), self.on_freeze)
 
-        #select plot to send to combo box (blank if no data)
+        # select plot to send to combo box (blank if no data)
         if sys.platform == 'darwin':
             self.cb_plotpanel = wx.ComboBox(self, -1,
                                             style=wx.CB_READONLY)
         else:
             self.cb_plotpanel = wx.ComboBox(self, -1,
-                                            style=wx.CB_READONLY|wx.CB_SORT)
+                                            style=wx.CB_READONLY | wx.CB_SORT)
         wx.EVT_COMBOBOX(self.cb_plotpanel, -1, self._on_plot_selection)
         self.cb_plotpanel.Disable()
 
-        #Help button
+        # Help button
         self.bt_help = wx.Button(self, wx.NewId(), "HELP",
                                  size=(BUTTON_WIDTH, -1))
         self.bt_help.SetToolTipString("Help for the Data Explorer.")
-        wx.EVT_BUTTON(self,self.bt_help.GetId(), self.on_help)
+        wx.EVT_BUTTON(self, self.bt_help.GetId(), self.on_help)
 
         self.sizer3.AddMany([(self.bt_add),
                              ((10, 10)),
@@ -372,12 +374,12 @@ class DataPanel(ScrolledPanel, PanelBase):
                              ((10, 10)),
                              (self.bt_append_plot),
                              (self.cb_plotpanel,
-                              wx.EXPAND|wx.ADJUST_MINSIZE, 5),
+                              wx.EXPAND | wx.ADJUST_MINSIZE, 5),
                              ((5, 5)),
                              ((5, 5)),
-                             (self.bt_import, 0, wx.EXPAND|wx.RIGHT, 5),
+                             (self.bt_import, 0, wx.EXPAND | wx.RIGHT, 5),
                              (self.perspective_cbox,
-                              wx.EXPAND|wx.ADJUST_MINSIZE, 5),
+                              wx.EXPAND | wx.ADJUST_MINSIZE, 5),
                              ((10, 10)),
                              (self.sizer4),
                              ((10, 10)),
@@ -400,9 +402,9 @@ class DataPanel(ScrolledPanel, PanelBase):
                                              style=wx.RB_GROUP)
         self.rb_batch_mode = wx.RadioButton(self, -1, 'Batch Mode')
         self.Bind(wx.EVT_RADIOBUTTON, self.on_single_mode,
-                     id=self.rb_single_mode.GetId())
+                  id=self.rb_single_mode.GetId())
         self.Bind(wx.EVT_RADIOBUTTON, self.on_batch_mode,
-                   id=self.rb_batch_mode.GetId())
+                  id=self.rb_batch_mode.GetId())
 
         self.rb_single_mode.SetValue(not self.parent.batch_on)
         self.rb_batch_mode.SetValue(self.parent.batch_on)
@@ -432,13 +434,13 @@ class DataPanel(ScrolledPanel, PanelBase):
             :param event: UI event
         """
         data = None
-        #selection = event.GetSelection()
+        # selection = event.GetSelection()
         id, _, _ = self.FindFocus().GetSelection().GetData()
         data_list, theory_list = \
-                        self.parent.get_data_manager().get_by_id(id_list=[id])
+            self.parent.get_data_manager().get_by_id(id_list=[id])
         if data_list:
             data = data_list.values()[0]
-        if data == None:
+        if data is None:
             data = theory_list.values()[0][0]
         return data
 
@@ -460,7 +462,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         data = self._get_data_selection(event)
         from sas.sasgui.guiframe.local_perspectives.plotting.masking \
-        import FloatPanel as Float3dDialog
+            import FloatPanel as Float3dDialog
 
         panel = Float3dDialog(base=self, data=data,
                               dimension=3, id=wx.NewId())
@@ -475,15 +477,15 @@ class DataPanel(ScrolledPanel, PanelBase):
             dimension = 2
         else:
             dimension = 1
-        #panel = QucikPlotDialog(base=self, data=data,
+        # panel = QucikPlotDialog(base=self, data=data,
         #                        dimension=dimension, id=wx.NewId())
         frame = QucikPlotDialog(self, -1, "Plot " + data.name, 'log_{10}')
         self.parent.put_icon(frame)
         frame.add_plot(data)
-        #frame.SetTitle(title)
+        # frame.SetTitle(title)
         frame.Show(True)
         frame.SetFocus()
-        #panel.ShowModal()
+        # panel.ShowModal()
 
     def on_data_info(self, event):
         """
@@ -500,12 +502,12 @@ class DataPanel(ScrolledPanel, PanelBase):
         Save data as a file
         """
         data = self._get_data_selection(event)
-        #path = None
+        # path = None
         default_name = data.name
         if default_name.count('.') > 0:
             default_name = default_name.split('.')[0]
         default_name += "_out"
-        if self.parent != None:
+        if self.parent is not None:
             if issubclass(data.__class__, Data1D):
                 self.parent.save_data1d(data, default_name)
             elif issubclass(data.__class__, Data2D):
@@ -522,7 +524,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.tree_ctrl = DataTreeCtrl(parent=self, style=wx.SUNKEN_BORDER)
         self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_CHECKING, self.on_check_item)
         self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_MENU, self.on_right_click_data)
-        ## Create context menu for page
+        # Create context menu for page
         self.data_menu = wx.Menu()
         id = wx.NewId()
         name = "Data Info"
@@ -557,15 +559,15 @@ class DataPanel(ScrolledPanel, PanelBase):
         tree_ctrl_theory_label = wx.StaticText(self, -1, "Theory")
         tree_ctrl_theory_label.SetForegroundColour('blue')
         self.tree_ctrl_theory = DataTreeCtrl(parent=self,
-                                                    style=wx.SUNKEN_BORDER)
+                                             style=wx.SUNKEN_BORDER)
         self.tree_ctrl_theory.Bind(CT.EVT_TREE_ITEM_CHECKING,
-                                                    self.on_check_item)
+                                   self.on_check_item)
         self.tree_ctrl_theory.Bind(CT.EVT_TREE_ITEM_MENU,
                                    self.on_right_click_theory)
         self.sizer1.Add(tree_ctrl_label, 0, wx.LEFT, 10)
-        self.sizer1.Add(self.tree_ctrl, 1, wx.EXPAND|wx.ALL, 10)
+        self.sizer1.Add(self.tree_ctrl, 1, wx.EXPAND | wx.ALL, 10)
         self.sizer1.Add(tree_ctrl_theory_label, 0,  wx.LEFT, 10)
-        self.sizer1.Add(self.tree_ctrl_theory, 1, wx.EXPAND|wx.ALL, 10)
+        self.sizer1.Add(self.tree_ctrl_theory, 1, wx.EXPAND | wx.ALL, 10)
 
     def on_right_click_theory(self, event):
         """
@@ -587,12 +589,12 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         Allow Editing Data
         """
-        #selection = event.GetSelection()
+        # selection = event.GetSelection()
         is_data = True
         try:
             id, data_class_name, _ = self.tree_ctrl.GetSelection().GetData()
             data_list, _ = \
-                        self.parent.get_data_manager().get_by_id(id_list=[id])
+                self.parent.get_data_manager().get_by_id(id_list=[id])
             if not data_list:
                 is_data = False
         except:
@@ -609,11 +611,10 @@ class DataPanel(ScrolledPanel, PanelBase):
         Retrieve the state selected state
         """
         # Skipping the save state functionality for release 0.9.0
-        #return
+        # return
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
         self.PopupMenu(self.popUpMenu, pos)
-
 
     def on_check_item(self, event):
         """
@@ -635,9 +636,9 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.list_of_perspective = plugin
         if self.parent is None or \
             not hasattr(self.parent, "get_current_perspective") or \
-            len(self.list_of_perspective) == 0:
+                        len(self.list_of_perspective) == 0:
             return
-        if self.parent is not None and self.perspective_cbox  is not None:
+        if self.parent is not None and self.perspective_cbox is not None:
             for plug in self.list_of_perspective:
                 if plug.get_perspective():
                     self.perspective_cbox.Append(plug.sub_menu, plug)
@@ -665,26 +666,29 @@ class DataPanel(ScrolledPanel, PanelBase):
                     data_id = data.id
                     s_path = str(path)
                     if state_id not in self.list_cb_data:
-                        #new state
+                        # new state
                         data_c = self.tree_ctrl.InsertItem(self.tree_ctrl.root,
-                                        0, data_name, ct_type=1,
+                                                           0, data_name,
+                                                           ct_type=1,
                                         data=(data_id, data_class, state_id))
                         data_c.Check(True)
                         d_i_c = self.tree_ctrl.AppendItem(data_c, 'Info')
                         d_t_c = self.tree_ctrl.AppendItem(d_i_c,
-                                                      'Title: %s' % data_title)
+                                                          'Title: %s' %
+                                                          data_title)
                         r_n_c = self.tree_ctrl.AppendItem(d_i_c,
-                                                      'Run: %s' % data_run)
+                                                          'Run: %s' % data_run)
                         i_c_c = self.tree_ctrl.AppendItem(d_i_c,
-                                                      'Type: %s' % data_class)
+                                                          'Type: %s' %
+                                                          data_class)
                         p_c_c = self.tree_ctrl.AppendItem(d_i_c,
-                                                      "Path: '%s'" % s_path)
+                                                          "Path: '%s'" % s_path)
                         d_p_c = self.tree_ctrl.AppendItem(d_i_c, 'Process')
 
                         for process in process_list:
-                            process_str = str(process).replace('\n',' ')
-                            if len(process_str)>20:
-                                process_str = process_str[:20]+' [...]'
+                            process_str = str(process).replace('\n', ' ')
+                            if len(process_str) > 20:
+                                process_str = process_str[:20] + ' [...]'
                             self.tree_ctrl.AppendItem(d_p_c, process_str)
                         theory_child = self.tree_ctrl.AppendItem(data_c,
                                                                  "THEORIES")
@@ -697,8 +701,8 @@ class DataPanel(ScrolledPanel, PanelBase):
                                                        d_p_c,
                                                        theory_child]
                     else:
-                        data_ctrl_list =  self.list_cb_data[state_id]
-                        #This state is already display replace it contains
+                        data_ctrl_list = self.list_cb_data[state_id]
+                        # This state is already display replace it contains
                         data_c, d_i_c, d_t_c, r_n_c,  i_c_c, p_c_c, d_p_c, _ \
                                 = data_ctrl_list
                         self.tree_ctrl.SetItemText(data_c, data_name)
@@ -712,7 +716,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                         for process in process_list:
                             if not process.is_empty():
                                 _ = self.tree_ctrl.AppendItem(d_p_c,
-                                                              process.single_line_desc())
+                                                    process.single_line_desc())
                 wx.CallAfter(self.append_theory, state_id, theory_list)
             # Sort by data name
             if self.tree_ctrl.root:
@@ -756,13 +760,12 @@ class DataPanel(ScrolledPanel, PanelBase):
                                        state_id=state_id,
                                        theory_list=theory_list)
 
-
     def append_theory_helper(self, tree, root, state_id, theory_list):
         """
         Append theory helper
         """
         if state_id in self.list_cb_theory.keys():
-            #update current list of theory for this data
+            # update current list of theory for this data
             theory_list_ctrl = self.list_cb_theory[state_id]
 
             for theory_id, item in theory_list.iteritems():
@@ -776,11 +779,11 @@ class DataPanel(ScrolledPanel, PanelBase):
                     name = theory_data.name
                     theory_class = theory_data.__class__.__name__
                     theory_id = theory_data.id
-                    #if theory_state is not None:
+                    # if theory_state is not None:
                     #    name = theory_state.model.name
                     temp = (theory_id, theory_class, state_id)
                 if theory_id not in theory_list_ctrl:
-                    #add new theory
+                    # add new theory
                     t_child = tree.AppendItem(root,
                                                     name, ct_type=1, data=temp)
                     t_i_c = tree.AppendItem(t_child, 'Info')
@@ -794,7 +797,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                                                    i_c_c,
                                                    t_p_c]
                 else:
-                    #replace theory
+                    # replace theory
                     t_child, i_c_c, t_p_c = theory_list_ctrl[theory_id]
                     tree.SetItemText(t_child, name)
                     tree.SetItemPyData(t_child, temp)
@@ -804,7 +807,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                         tree.AppendItem(t_p_c, process.__str__())
 
         else:
-            #data didn't have a theory associated it before
+            # data didn't have a theory associated it before
             theory_list_ctrl = {}
             for theory_id, item in theory_list.iteritems():
                 theory_data, _ = item
@@ -812,7 +815,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                     name = theory_data.name
                     theory_class = theory_data.__class__.__name__
                     theory_id = theory_data.id
-                    #if theory_state is not None:
+                    # if theory_state is not None:
                     #    name = theory_state.model.name
                     temp = (theory_id, theory_class, state_id)
                     t_child = tree.AppendItem(root,
@@ -827,10 +830,8 @@ class DataPanel(ScrolledPanel, PanelBase):
                         tree.AppendItem(t_p_c, process.__str__())
 
                     theory_list_ctrl[theory_id] = [t_child, i_c_c, t_p_c]
-                #self.list_cb_theory[data_id] = theory_list_ctrl
+                # self.list_cb_theory[data_id] = theory_list_ctrl
                 self.list_cb_theory[state_id] = theory_list_ctrl
-
-
 
     def set_data_helper(self):
         """
@@ -888,23 +889,22 @@ class DataPanel(ScrolledPanel, PanelBase):
         if self.parent is not None:
             wx.PostEvent(self.parent, NewLoadDataEvent())
 
-
-    def on_remove(self, event, msg=""):
+    def on_remove(self, event, prompt=True):
         """
         Get a list of item checked and remove them from the treectrl
         Ask the parent to remove reference to this item
         """
-        if msg == "":
+        if prompt:
             msg = "This operation will delete the data sets checked "
             msg += "and all the dependents."
-        msg_box = wx.MessageDialog(None, msg, 'Warning', wx.OK|wx.CANCEL)
-        if msg_box.ShowModal() != wx.ID_OK:
-            return True
+            msg_box = wx.MessageDialog(None, msg, 'Warning', wx.OK|wx.CANCEL)
+            if msg_box.ShowModal() != wx.ID_OK:
+                return
 
         data_to_remove, theory_to_remove, _ = self.set_data_helper()
         data_key = []
         theory_key = []
-        #remove  data from treectrl
+        # remove  data from treectrl
         for d_key, item in self.list_cb_data.iteritems():
             data_c, _, _, _,  _, _, _, _ = item
             if data_c.IsChecked():
@@ -915,7 +915,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                     theory_to_remove += theory_list_ctrl.keys()
         # Remove theory from treectrl
         for _, theory_dict in self.list_cb_theory.iteritems():
-            for  key, value in theory_dict.iteritems():
+            for key, value in theory_dict.iteritems():
                 item, _, _ = value
                 if item.IsChecked():
                     try:
@@ -924,16 +924,16 @@ class DataPanel(ScrolledPanel, PanelBase):
                         pass
                     theory_key.append(key)
 
-        #Remove data and related theory references
+        # Remove data and related theory references
         for key in data_key:
             del self.list_cb_data[key]
             if key in theory_key:
                 del self.list_cb_theory[key]
-        #remove theory  references independently of data
+        # remove theory  references independently of data
         for key in theory_key:
             for _, theory_dict in self.list_cb_theory.iteritems():
                 if key in theory_dict:
-                    for  key, value in theory_dict.iteritems():
+                    for key, value in theory_dict.iteritems():
                         item, _, _ = value
                         if item.IsChecked():
                             try:
@@ -941,7 +941,6 @@ class DataPanel(ScrolledPanel, PanelBase):
                             except:
                                 pass
                     del theory_dict[key]
-
 
         self.parent.remove_data(data_id=data_to_remove,
                                   theory_id=theory_to_remove)
@@ -953,7 +952,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         Get all select data and set them to the current active perspetive
         """
-        if event != None:
+        if event is not None:
             event.Skip()
         data_id, theory_id, state_id = self.set_data_helper()
         temp = data_id + state_id
@@ -985,7 +984,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         On close
         """
-        if event != None:
+        if event is not None:
             event.Skip()
         # send parent to update menu with no show nor hide action
         self.parent.show_data_panel(action=False)
@@ -1015,7 +1014,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         get an event with attribute name and caption to delete existing name
         from the combobox of the current panel
         """
-        #name = event.name
+        # name = event.name
         caption = event.caption
         if self.cb_plotpanel is not None:
             pos = self.cb_plotpanel.FindString(str(caption))
@@ -1033,7 +1032,7 @@ class DataPanel(ScrolledPanel, PanelBase):
             name_plot_panel = str(value.window_caption)
             if name_plot_panel not in self.cb_plotpanel.GetItems():
                 self.cb_plotpanel.Append(name_plot_panel, value)
-            if name != None and name == name_plot_panel:
+            if name is not None and name == name_plot_panel:
                 self.cb_plotpanel.SetStringSelection(name_plot_panel)
                 break
         self.enable_append()
@@ -1059,7 +1058,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         On source combobox selection
         """
-        if event != None:
+        if event is not None:
             combo = event.GetEventObject()
             event.Skip()
         else:
@@ -1106,7 +1105,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         webbrowser does not pass anything past the # to the browser when it is
         running "file:///...."
 
-    :param evt: Triggers on clicking the help button
+    :param event: Triggers on clicking the help button
     """
 
         #import documentation window here to avoid circular imports
@@ -1155,7 +1154,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         enable or disable send button
         """
         n_t = 0
-        if self.tree_ctrl != None:
+        if self.tree_ctrl is not None:
             n_t = self.tree_ctrl.GetCount()
         if n_t > 0 and len(self.list_of_perspective) > 0:
             self.bt_import.Enable()
@@ -1174,9 +1173,9 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         n_t = 0
         n_t_t = 0
-        if self.tree_ctrl != None:
+        if self.tree_ctrl is not None:
             n_t = self.tree_ctrl.GetCount()
-        if self.tree_ctrl_theory != None:
+        if self.tree_ctrl_theory is not None:
             n_t_t = self.tree_ctrl_theory.GetCount()
         if n_t + n_t_t <= 0:
             self.bt_plot.Disable()
@@ -1190,9 +1189,9 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         n_t = 0
         n_t_t = 0
-        if self.tree_ctrl != None:
+        if self.tree_ctrl is not None:
             n_t = self.tree_ctrl.GetCount()
-        if self.tree_ctrl_theory != None:
+        if self.tree_ctrl_theory is not None:
             n_t_t = self.tree_ctrl_theory.GetCount()
         if n_t + n_t_t <= 0:
             self.bt_append_plot.Disable()
@@ -1214,7 +1213,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         n_t_t = 0
         n_l = 0
-        if self.tree_ctrl_theory != None:
+        if self.tree_ctrl_theory is not None:
             n_t_t = self.tree_ctrl_theory.GetCount()
         n_l = len(self.list_cb_theory)
         if (n_t_t + n_l > 0):
@@ -1228,11 +1227,11 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         n_t = 0
         n_t_t = 0
-        if self.tree_ctrl != None:
+        if self.tree_ctrl is not None:
             n_t = self.tree_ctrl.GetCount()
-        if self.tree_ctrl_theory != None:
+        if self.tree_ctrl_theory is not None:
             n_t_t = self.tree_ctrl_theory.GetCount()
-        if n_t + n_t_t > 0 and self.selection_cbox != None:
+        if n_t + n_t_t > 0 and self.selection_cbox is not None:
             self.selection_cbox.Enable()
         else:
             self.selection_cbox.Disable()
@@ -1254,7 +1253,6 @@ class DataPanel(ScrolledPanel, PanelBase):
         except:
             #self.bt_remove.Hide()
             self.bt_add.Hide()
-
 
 
 WIDTH = 400
@@ -1287,7 +1285,7 @@ class DataDialog(wx.Dialog):
         """
         if not data_list or len(data_list) <= 1:
             return
-        #add text
+        # add text
 
         text = "Deleting these file reset some panels.\n"
         text += "Do you want to proceed?\n"
@@ -1295,13 +1293,13 @@ class DataDialog(wx.Dialog):
         self._sizer_txt.Add(text_ctrl)
         iy = 0
         ix = 0
-        #data_count = 0
+        # data_count = 0
         for (data_name, in_use, sub_menu) in range(len(data_list)):
-            if in_use == True:
+            if in_use:
                 ctrl_name = wx.StaticBox(self, -1, str(data_name))
                 ctrl_in_use = wx.StaticBox(self, -1, " is used by ")
                 plug_name = str(sub_menu) + "\n"
-                #ctrl_sub_menu = wx.StaticBox(self, -1, plug_name)
+                # ctrl_sub_menu = wx.StaticBox(self, -1, plug_name)
                 self.sizer.Add(ctrl_name, (iy, ix),
                            (1, 1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
                 ix += 1
@@ -1312,7 +1310,7 @@ class DataDialog(wx.Dialog):
                                         wx.EXPAND|wx.ADJUST_MINSIZE, 0)
             iy += 1
         self._panel.SetSizer(self.sizer)
-        #add sizer
+        # add sizer
         self._sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         button_cancel = wx.Button(self, wx.ID_CANCEL, "Cancel")
         self._sizer_button.Add(button_cancel, 0,
@@ -1375,9 +1373,9 @@ class DataFrame(wx.Frame):
         self.panel.load_data_list(list=list)
 
 
-
 from sas.sasgui.guiframe.dataFitting import Theory1D
 from sas.sasgui.guiframe.data_state import DataState
+
 
 class State():
     """
@@ -1390,6 +1388,7 @@ class State():
         self.msg += "params : \n"
         self.msg += "name  value\n"
         return self.msg
+
 
 def set_data_state(data=None, path=None, theory=None, state=None):
     """
@@ -1405,7 +1404,7 @@ if __name__ == "__main__":
 
     app = wx.App()
     try:
-        #list_of_perspective = [('perspective2', False), ('perspective1', True)]
+        # list_of_perspective = [('perspective2', False), ('perspective1', True)]
         data_list1 = {}
         # state 1
         data1 = Data2D()
@@ -1420,7 +1419,7 @@ if __name__ == "__main__":
         path1 = "path1"
         state1 = State()
         data_list1['1'] = set_data_state(data1, path1, theory1, state1)
-        #state 2
+        # state 2
         data1 = Data2D()
         data1.name = "data2"
         data1.id = 76
@@ -1428,7 +1427,7 @@ if __name__ == "__main__":
         theory1.id = 78
         theory1.name = "CoreShell 07/24/25"
         path1 = "path2"
-        #state3
+        # state3
         state1 = State()
         data_list1['2'] = set_data_state(data1, path1, theory1, state1)
         data1 = Data1D()
@@ -1445,11 +1444,11 @@ if __name__ == "__main__":
         process1 = data1.process[len(data1.process)-1]
         process1.data = "07/22/2010"
         data_list1['4'] = set_data_state(data1, path1, theory1, state1)
-        #state 4
+        # state 4
         temp_data_list = {}
         data1.name = "data5 erasing data2"
         temp_data_list['4'] = set_data_state(data1, path1, theory1, state1)
-        #state 5
+        # state 5
         data1 = Data2D()
         data1.name = "data3"
         data1.id = 5
@@ -1482,7 +1481,7 @@ if __name__ == "__main__":
         window.Show(True)
         window.load_data_list(list=temp_data_list)
     except:
-        #raise
+        # raise
         print "error", sys.exc_value
 
     app.MainLoop()
