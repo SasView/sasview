@@ -117,7 +117,9 @@ class FormulaValidator(QtGui.QValidator):
 class SldPanel(QtGui.QDialog):
 
     def __init__(self, parent=None):
-        super(SldPanel, self).__init__(parent)
+        super(SldPanel, self).__init__()
+
+        self.manager = parent
 
         self.setupUi()
         self.setupModel()
@@ -148,10 +150,8 @@ class SldPanel(QtGui.QDialog):
         self.ui.editWavelength.setValidator(QtGui.QRegExpValidator(rx, self.ui.editWavelength))
 
         # signals
-        QtCore.QObject.connect(
-            self.ui.buttonBox.button(QtGui.QDialogButtonBox.Reset),
-            QtCore.SIGNAL("clicked(bool)"),
-            lambda checked: self.modelReset())
+        self.ui.buttonBox.button(QtGui.QDialogButtonBox.Reset).clicked.connect(self.modelReset)
+        self.ui.buttonBox.button(QtGui.QDialogButtonBox.Help).clicked.connect(self.displayHelp)
 
     def setupModel(self):
         self.model = QtGui.QStandardItemModel(self)
@@ -231,3 +231,14 @@ class SldPanel(QtGui.QDialog):
         finally:
             pass
             #self.model.endResetModel()
+
+    def displayHelp(self):
+        try:
+            location = self.manager.HELP_DIRECTORY_LOCATION + \
+                "/user/sasgui/perspectives/calculator/sld_calculator_help.html"
+            self.manager._helpView.load(QtCore.QUrl(location))
+            self.manager._helpView.show()
+        except AttributeError:
+            # No manager defined - testing and standalone runs
+            pass
+

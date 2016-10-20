@@ -6,12 +6,22 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>633</width>
-    <height>293</height>
+    <width>290</width>
+    <height>178</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Density/Volume Calculator</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="main_resources.qrc">
+    <normaloff>:/res/ball.ico</normaloff>:/res/ball.ico</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
@@ -133,11 +143,17 @@
    </item>
    <item row="2" column="0">
     <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Close|QDialogButtonBox::Reset</set>
+      <set>QDialogButtonBox::Close|QDialogButtonBox::Help|QDialogButtonBox::Reset</set>
      </property>
      <property name="centerButtons">
       <bool>true</bool>
@@ -153,7 +169,9 @@
   <tabstop>editMassDensity</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="main_resources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

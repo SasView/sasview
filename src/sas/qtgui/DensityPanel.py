@@ -1,5 +1,7 @@
 # global
 import logging
+import functools
+
 from periodictable import formula as Formula
 
 from PyQt4 import QtGui, QtCore
@@ -58,10 +60,10 @@ class FormulaValidator(QtGui.QValidator):
 class DensityPanel(QtGui.QDialog):
 
     def __init__(self, parent=None):
-        super(DensityPanel, self).__init__(parent)
+        super(DensityPanel, self).__init__()
 
         self.mode = None
-
+        self.manager = parent
         self.setupUi()
         self.setupModel()
         self.setupMapper()
@@ -78,18 +80,11 @@ class DensityPanel(QtGui.QDialog):
         self.ui.editMassDensity.setValidator(QtGui.QRegExpValidator(rx, self.ui.editMassDensity))
 
         # signals
-        QtCore.QObject.connect(
-            self.ui.editMolarVolume,
-            QtCore.SIGNAL("textEdited(QString)"),
-            lambda text: self.setMode(MODES.VOLUME_TO_DENSITY))
-        QtCore.QObject.connect(
-            self.ui.editMassDensity,
-            QtCore.SIGNAL("textEdited(QString)"),
-            lambda text: self.setMode(MODES.DENSITY_TO_VOLUME))
-        QtCore.QObject.connect(
-            self.ui.buttonBox.button(QtGui.QDialogButtonBox.Reset),
-            QtCore.SIGNAL("clicked(bool)"),
-            lambda checked: self.modelReset())
+        self.ui.editMolarVolume.textEdited.connect(functools.partial(self.setMode, MODES.VOLUME_TO_DENSITY))
+        self.ui.editMassDensity.textEdited.connect(functools.partial(self.setMode, MODES.DENSITY_TO_VOLUME))
+
+        self.ui.buttonBox.button(QtGui.QDialogButtonBox.Reset).clicked.connect(self.modelReset)
+        self.ui.buttonBox.button(QtGui.QDialogButtonBox.Help).clicked.connect(self.displayHelp)
 
     def setupModel(self):
         self.model = QtGui.QStandardItemModel(self)
@@ -98,10 +93,7 @@ class DensityPanel(QtGui.QDialog):
         self.model.setItem(MODEL.MOLAR_VOLUME     , QtGui.QStandardItem())
         self.model.setItem(MODEL.MASS_DENSITY     , QtGui.QStandardItem())
 
-        QtCore.QObject.connect(
-            self.model,
-            QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"),
-            self.dataChanged)
+        self.model.dataChanged.connect(self.dataChanged)
 
         self.modelReset()
 
@@ -169,3 +161,13 @@ class DensityPanel(QtGui.QDialog):
         finally:
             pass
             #self.model.endResetModel()
+
+    def displayHelp(self):
+        try:
+            location = self.manager.HELP_DIRECTORY_LOCATION + \
+                "/user/sasgui/perspectives/calculator/density_calculator_help.html"
+            self.manager._helpView.load(QtCore.QUrl(location))
+            self.manager._helpView.show()
+        except AttributeError:
+            # No manager defined - testing and standalone runs
+            pass

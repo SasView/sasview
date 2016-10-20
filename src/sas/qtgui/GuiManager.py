@@ -23,6 +23,8 @@ from UI.AcknowledgementsUI import Ui_Acknowledgements
 from AboutBox import AboutBox
 from IPythonWidget import IPythonWidget
 from WelcomePanel import WelcomePanel
+from SldPanel import SldPanel
+from DensityPanel import DensityPanel
 
 # Perspectives
 from Perspectives.Invariant.InvariantPerspective import InvariantWindow
@@ -130,6 +132,10 @@ class GuiManager(object):
         # Add other, minor widgets
         self.ackWidget = Acknowledgements()
         self.aboutWidget = AboutBox()
+
+        # Add calculators - floating for usability
+        self.SLDCalculator = SldPanel(self)
+        self.DVCalculator = DensityPanel(self)
 
     def statusBarSetup(self):
         """
@@ -512,14 +518,12 @@ class GuiManager(object):
     def actionSLD_Calculator(self):
         """
         """
-        print("actionSLD_Calculator TRIGGERED")
-        pass
+        self.SLDCalculator.show()
 
     def actionDensity_Volume_Calculator(self):
         """
         """
-        print("actionDensity_Volume_Calculator TRIGGERED")
-        pass
+        self.DVCalculator.show()
 
     def actionSlit_Size_Calculator(self):
         """
