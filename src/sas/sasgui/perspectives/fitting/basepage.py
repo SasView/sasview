@@ -16,7 +16,7 @@ from collections import defaultdict
 from wx.lib.scrolledpanel import ScrolledPanel
 
 from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
-from sasmodels.core import HAVE_OPENCL
+
 from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.guiframe.utils import format_number, check_float, IdList, \
     check_int
@@ -1455,10 +1455,10 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.create_default_data()
                 self.state_change = True
                 self._draw_model()
-                #Time delay introduced to prevent double compilation on systems
-                #without OPENCL. It seems to be threading related issue that
-                #triggers compilation twice at the same time
-                if HAVE_OPENCL == False:
+                #Time delay introduced to prevent double compilation on Windows
+                #It seems to be threading related issue that triggers
+                #compilation twice at the same time
+                if ON_MAC == False:
                     time.sleep(0.1)
                 self.Refresh()
 
