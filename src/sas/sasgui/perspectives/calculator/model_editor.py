@@ -510,10 +510,10 @@ class TextDialog(wx.Dialog):
         """
         fill the current combobox with the operator
         """
-        operator_list = [' +', ' *']
+        operator_list = ['+', '*']
         for oper in operator_list:
             pos = self._operator_choice.Append(str(oper))
-            self._operator_choice.SetClientData(pos, str(oper.strip()))
+            self._operator_choice.SetClientData(pos, str(oper))
         self._operator_choice.SetSelection(0)
 
     def get_textnames(self):
