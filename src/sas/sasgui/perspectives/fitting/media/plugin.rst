@@ -26,7 +26,7 @@ If you write your own model and save it to the the SasView *plugin_models* folde
   *C:\\Users\\{username}\\.sasview\\plugin_models* (on Windows)
 
 the next time SasView is started it will compile the plugin and add
-it to the list of *Plugin Models* in a FitPage.
+it to the list of *Customized Models* in a FitPage.
 
 SasView models can be of three types:
 
@@ -60,7 +60,7 @@ as required, where "mymodel" is the name for the model you are creating.
 - No capitalization and thus no CamelCase
 - If necessary use underscore to separate words (i.e. barbell not BarBell or
   broad_peak not BroadPeak)
-- Do not include â€œmodelâ€� in the name (i.e. barbell not BarBellModel)
+- Do not include "model" in the name (i.e. barbell not BarBellModel)
 
 
 Edit New Model Files
@@ -485,7 +485,7 @@ This expands into the equivalent C code::
 *Iqxy* is similar to *Iq*, except it uses parameters *qx, qy* instead of *q*,
 and it includes orientation parameters.
 
-*form_volume* defines the volume of the shape. As in python models,
+*form_volume* defines the volume of the shape. As in python models, it 
 includes only the volume parameters.
 
 *Iqxy* will default to *Iq(sqrt(qx**2 + qy**2), par1, ...)* and
@@ -672,27 +672,27 @@ need to be aware of.  Your code may work fine on some platforms or for some
 models, but then return bad values on other platforms.  Some examples of
 particular problems:
 
-  (1) Code is too complex, or uses too much memory.  GPU devices only have a
+  **(1) Code is too complex, or uses too much memory.**  GPU devices only have a
   limited amount of memory available for each processor.  If you run programs
   which take too much memory, then rather than running multiple values in parallel
   as it usually does, the GPU may only run a single version of the code at a
   time, making it slower than running on the CPU.  It may fail to run on
   some platforms, or worse, cause the screen to go blank or the system to reboot.
 
-  (2) Code takes too long.  Because GPU devices are used for the computer
+  **(2) Code takes too long.**  Because GPU devices are used for the computer
   display, the OpenCL drivers are very careful about the amount of time they
   will allow any code to run.  For example, on OS X, the model will stop running
-  after 5 seconds regardless if the computation is complete.  You may end up
-  with only some of your 2-D array defined, with the rest containing random
+  after 5 seconds regardless of whether the computation is complete.  You may end up
+  with only some of your 2D array defined, with the rest containing random
   data. Or it may cause the screen to go blank or the system to reboot.
 
-  (3) Memory is not *aligned*.  The GPU hardware is specialized to operate on
-  multiple values simultaneously.  To keep the GPU simpler the values in memory
+  **(3) Memory is not aligned**.  The GPU hardware is specialized to operate on
+  multiple values simultaneously.  To keep the GPU simple the values in memory
   must be aligned with the different GPU compute engines.  Not following these
   rules can lead to unexpected values being loaded into memory, and wrong answers
   computed.  The conclusion from a very long and strange debugging session was
   that any arrays that you declare in your model should be a multiple of four.
-  For example
+  For example::
 
       double Iq(q, p1, p2, ...)
       {
@@ -701,8 +701,8 @@ particular problems:
       }
 
 The first step when your model is behaving strangely is to set **single=False**.
-This automatically restricts the model to only run on the CPU, or on high end
-GPU cards.  There can still be problems even on high end cards, so you can force
+This automatically restricts the model to only run on the CPU, or on high-end
+GPU cards.  There can still be problems even on high-end cards, so you can force
 the model off the GPU by setting **opencl=False**.  This runs the model
 as a normal C program without any GPU restrictions so you know that
 strange results are probably from your code rather than the environment.  Once
@@ -944,4 +944,4 @@ consider adding your model to the
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 10Oct2016
+.. note::  This help document was last changed by Steve King, 25Oct2016
