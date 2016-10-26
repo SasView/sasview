@@ -614,25 +614,25 @@ which appear on some platforms but not others. So use them where needed!!!
         $\text{erf}(x) = \frac{1}{\sqrt\pi}\int_0^x e^{-t^2}\,dt$
         and complementary error function
         $\text{erfc}(x) = \frac{1}{\sqrt\pi}\int_x^\inf e^{-t^2}\,dt$.
-        The standard manth library erf and erfc are slower and broken
+        The standard math library erf and erfc are slower and broken
         on some platforms.
 
         :code:`source = ["lib/polevl.c", "lib/sas_erf.c", ...]`
 
     sas_J0:
-        Bessel functions of the first kind where
+        Bessel function of the first kind where
         $J_0(x) = \frac{1}{\pi}\int_0^\pi \cos(x\sin(\tau))\,d\tau$.
 
         :code:`source = ["lib/polevl.c", "lib/sas_J0.c", ...]`
 
     sas_J1:
-        Bessel functions of the first kind where
+        Bessel function of the first kind where
         $J_1(x) = \frac{1}{\pi}\int_0^\pi \cos(\tau - x\sin(\tau))\,d\tau$.
 
         :code:`source = ["lib/polevl.c", "lib/sas_J1.c", ...]`
 
     sas_JN:
-        Bessel functions of the first kind where
+        Bessel function of the first kind where
         $J_n(x) = \frac{1}{\pi}\int_0^\pi \cos(n\tau - x\sin(\tau))\,d\tau$.
 
         :code:`source = ["lib/polevl.c", "lib/sas_J0.c", "lib/sas_J1.c", "lib/sas_JN.c", ...]`
@@ -653,7 +653,7 @@ which appear on some platforms but not others. So use them where needed!!!
     sas_J1c(qr):
         Bessel form $F(qr) = 2 J_1(qr)/{(qr)}$, with a limiting value of 1 at $qr=0$.
 
-        :code:`source = ["lib/polevl.c", "lib/sas_J1c.c", ...]`
+        :code:`source = ["lib/polevl.c", "lib/sas_J1.c", ...]`
 
     Gauss76z[i], Gauss76Wt[i]:
         Points $z_i$ and weights $w_i$ for 76-point Gaussian quadrature,
