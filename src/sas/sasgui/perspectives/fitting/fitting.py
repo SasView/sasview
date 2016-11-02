@@ -863,7 +863,10 @@ class Plugin(PluginBase):
             self.draw_model(model=model, data=data, page_id=uid, smearer=smear,
                 enable1D=enable1D, enable2D=enable2D,
                 qmin=qmin, qmax=qmax, weight=weight)
-            self._mac_sleep(0.2)
+            #self._mac_sleep(0.2)
+            #Wojtek P. Adding here to prevent crushing Windows but it doesn't
+            # solve underlying issue
+            time.sleep(0.2)
 
     def _mac_sleep(self, sec=0.2):
         """
