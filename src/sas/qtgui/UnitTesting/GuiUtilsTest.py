@@ -198,9 +198,9 @@ class GuiUtilsTest(unittest.TestCase):
         with self.assertRaises(AttributeError):
             retrieveData1d("BOOP")
 
-        data = Data1D()
-        with self.assertRaises(ValueError):
-            retrieveData1d(data)
+        #data = Data1D()
+        #with self.assertRaises(ValueError):
+        #    retrieveData1d(data)
 
         data = Data1D(x=[1.0, 2.0, 3.0], y=[10.0, 11.0, 12.0])
 

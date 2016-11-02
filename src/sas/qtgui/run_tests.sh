@@ -6,5 +6,6 @@ python -m UnitTesting.MainWindowTest
 python -m UnitTesting.GuiUtilsTest
 python -m UnitTesting.AboutBoxTest
 python -m UnitTesting.DroppableDataLoadWidgetTest
-python -m UnitTesting.SasviewLoggerTest
 python -m UnitTesting.PlotHelperTest
+python -m UnitTesting.SasviewLoggerTest
+python -m UnitTesting.DensityCalculatorTest

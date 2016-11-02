@@ -137,7 +137,7 @@ class DensityPanel(QtGui.QDialog):
             molarDensity = molarMass / molarVolume
             self.model.item(MODEL.MASS_DENSITY).setText(str(molarDensity))
 
-        except:
+        except (ArithmeticError, ValueError):
             self.model.item(MODEL.MASS_DENSITY).setText("")
 
     def _updateVolume(self):
@@ -148,7 +148,7 @@ class DensityPanel(QtGui.QDialog):
             molarVolume = molarMass / molarDensity
             self.model.item(MODEL.MOLAR_VOLUME).setText(str(molarVolume))
 
-        except:
+        except (ArithmeticError, ValueError):
             self.model.item(MODEL.MOLAR_VOLUME).setText("")
 
     def modelReset(self):
@@ -166,6 +166,7 @@ class DensityPanel(QtGui.QDialog):
         try:
             location = self.manager.HELP_DIRECTORY_LOCATION + \
                 "/user/sasgui/perspectives/calculator/density_calculator_help.html"
+
             self.manager._helpView.load(QtCore.QUrl(location))
             self.manager._helpView.show()
         except AttributeError:
