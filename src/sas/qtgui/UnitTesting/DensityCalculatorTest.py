@@ -15,7 +15,6 @@ import LocalSetup
 from DensityPanel import DensityPanel
 from DensityPanel import toMolarMass
 from DensityPanel import FormulaValidator
-from UnitTesting.TestUtils import mousePress
 
 import LocalConfig
 
@@ -84,6 +83,7 @@ class DensityCalculatorTest(unittest.TestCase):
         self.assertEqual(self.widget.ui.editMolecularFormula.styleSheet(), '')
         self.assertEqual(self.widget.model.columnCount(), 1)
         self.assertEqual(self.widget.model.rowCount(), 4)
+        self.assertEqual(self.widget.sizePolicy().Policy(), QtGui.QSizePolicy.Fixed)
 
     def testSimpleEntry(self):
         ''' Default compound calculations '''

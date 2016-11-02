@@ -72,6 +72,9 @@ class DensityPanel(QtGui.QDialog):
         self.ui = Ui_DensityPanel()
         self.ui.setupUi(self)
 
+        # no reason to have this widget resizable
+        self.setFixedSize(self.minimumSizeHint())
+
         # set validators
         self.ui.editMolecularFormula.setValidator(FormulaValidator(self.ui.editMolecularFormula))
 
