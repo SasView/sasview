@@ -1,10 +1,12 @@
 # global
 import logging
+from PyQt4 import QtGui, QtCore
+
 from periodictable import formula as Formula
 from periodictable.xsf import xray_energy, xray_sld_from_atoms
 from periodictable.nsf import neutron_scattering
 
-from PyQt4 import QtGui, QtCore
+from GuiUtils import FormulaValidator
 
 # Local UI
 from UI.SldPanel import Ui_SldPanel
@@ -90,28 +92,6 @@ def sldAlgorithm(molecular_formula, mass_density, wavelength):
         cu_ka_sld_real, cu_ka_sld_imag,
         mo_ka_sld_real, mo_ka_sld_imag,
         neutron_inc_xs, neutron_abs_xs, neutron_length)
-
-
-class FormulaValidator(QtGui.QValidator):
-    def __init__(self, parent=None):
-        super(FormulaValidator, self).__init__(parent)
-  
-    def validate(self, input, pos):
-        try:
-            Formula(str(input))
-            self._setStyleSheet("")
-            return QtGui.QValidator.Acceptable, pos
-
-        except Exception as e:
-            self._setStyleSheet("background-color:pink;")
-            return QtGui.QValidator.Intermediate, pos
-
-    def _setStyleSheet(self, value):
-        try:
-            if self.parent():
-                self.parent().setStyleSheet(value)
-        except:
-            pass
 
 
 class SldPanel(QtGui.QDialog):

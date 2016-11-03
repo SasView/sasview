@@ -1,10 +1,11 @@
 # global
 import logging
 import functools
+from PyQt4 import QtGui, QtCore
 
 from periodictable import formula as Formula
 
-from PyQt4 import QtGui, QtCore
+from GuiUtils import FormulaValidator
 
 # Local UI
 from UI.DensityPanel import Ui_DensityPanel
@@ -33,28 +34,6 @@ def toMolarMass(formula):
         return "%g" % (f.molecular_mass * AVOGADRO)
     except:
         return ""
-
-
-class FormulaValidator(QtGui.QValidator):
-    def __init__(self, parent=None):
-        super(FormulaValidator, self).__init__(parent)
-  
-    def validate(self, input, pos):
-        try:
-            Formula(str(input))
-            self._setStyleSheet("")
-            return QtGui.QValidator.Acceptable, pos
-
-        except Exception as e:
-            self._setStyleSheet("background-color:pink;")
-            return QtGui.QValidator.Intermediate, pos
-
-    def _setStyleSheet(self, value):
-        try:
-            if self.parent():
-                self.parent().setStyleSheet(value)
-        except:
-            pass
 
 
 class DensityPanel(QtGui.QDialog):

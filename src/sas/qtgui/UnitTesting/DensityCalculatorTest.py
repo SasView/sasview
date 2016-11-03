@@ -14,7 +14,7 @@ import LocalSetup
 # Local
 from DensityPanel import DensityPanel
 from DensityPanel import toMolarMass
-from DensityPanel import FormulaValidator
+from GuiUtils import FormulaValidator
 
 import LocalConfig
 
@@ -36,33 +36,6 @@ class ToMolarMassTest(unittest.TestCase):
 
     def testBadInputStr(self):
         self.assertEqual(toMolarMass("Im a bad string"), "")
-
-class FormulaValidatorTest(unittest.TestCase):
-    """ Test the formula validator """
-    def setUp(self):
-        '''Create the validator'''
-        self.validator = FormulaValidator()
-
-    def tearDown(self):
-        '''Destroy the validator'''
-        self.validator = None
-
-    def testValidateGood(self):
-        """Test a valid Formula """
-        formula_good = "H24O12C4C6N2Pu"
-        self.assertEqual(self.validator.validate(formula_good, 1)[0], QtGui.QValidator.Acceptable)
-
-        formula_good = "(H2O)0.5(D2O)0.5"
-        self.assertEqual(self.validator.validate(formula_good, 1)[0], QtGui.QValidator.Acceptable)
-
-    def testValidateBad(self):
-        """Test a valid Formula """
-        formula_bad = "H24 %%%O12C4C6N2Pu"
-        self.assertRaises(self.validator.validate(formula_bad, 1)[0])
-        self.assertEqual(self.validator.validate(formula_bad, 1)[0], QtGui.QValidator.Intermediate)
-
-        formula_bad = [1]
-        self.assertEqual(self.validator.validate(formula_bad, 1)[0], QtGui.QValidator.Intermediate)
 
 class DensityCalculatorTest(unittest.TestCase):
     '''Test the DensityCalculator'''

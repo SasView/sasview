@@ -25,6 +25,8 @@ from PyQt4 import QtGui
 #from sas.sasgui.guiframe.events import StatusEvent
 #from sas.sasgui.guiframe.events import NewPlotEvent
 
+from periodictable import formula as Formula
+
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import Data2D
 from sas.sascalc.dataloader.loader import Loader
@@ -534,3 +536,24 @@ def saveData2D(data):
 
     if os.path.splitext(filename)[1].lower() == ext_format:
         loader.save(filename, data, ext_format)
+
+class FormulaValidator(QtGui.QValidator):
+    def __init__(self, parent=None):
+        super(FormulaValidator, self).__init__(parent)
+  
+    def validate(self, input, pos):
+        try:
+            Formula(str(input))
+            self._setStyleSheet("")
+            return QtGui.QValidator.Acceptable, pos
+
+        except Exception as e:
+            self._setStyleSheet("background-color:pink;")
+            return QtGui.QValidator.Intermediate, pos
+
+    def _setStyleSheet(self, value):
+        try:
+            if self.parent():
+                self.parent().setStyleSheet(value)
+        except:
+            pass
