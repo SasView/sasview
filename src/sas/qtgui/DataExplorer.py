@@ -323,40 +323,36 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Freeze selected theory rows.
 
-        "Freezing" means taking the plottable data from the filename item
-        and copying it to a separate top-level item.
+        "Freezing" means taking the plottable data from the Theory item
+        and copying it to a separate top-level item in Data.
         """
-        # Figure out which _inner_ rows are checked
+        # Figure out which rows are checked
         # Use 'while' so the row count is forced at every iteration
         outer_index = -1
         theories_copied = 0
-        while outer_index < self.model.rowCount():
+        while outer_index < self.theory_model.rowCount():
             outer_index += 1
-            outer_item = self.model.item(outer_index)
+            outer_item = self.theory_model.item(outer_index)
             if not outer_item:
                 continue
-            # Should be just two rows: data and Info
-            for inner_index in xrange(outer_item.rowCount()):
-                subitem = outer_item.child(inner_index)
-                if subitem and \
-                   subitem.isCheckable() and \
-                   subitem.checkState() == QtCore.Qt.Checked:
-                    theories_copied += 1
-                    new_item = self.recursivelyCloneItem(subitem)
-                    # Append a "unique" descriptor to the name
-                    time_bit = str(time.time())[7:-1].replace('.', '')
-                    new_name = new_item.text() + '_@' + time_bit
-                    new_item.setText(new_name)
-                    self.theory_model.appendRow(new_item)
-            self.theory_model.reset()
+            if outer_item.isCheckable() and \
+                   outer_item.checkState() == QtCore.Qt.Checked:
+                theories_copied += 1
+                new_item = self.recursivelyCloneItem(outer_item)
+                # Append a "unique" descriptor to the name
+                time_bit = str(time.time())[7:-1].replace('.', '')
+                new_name = new_item.text() + '_@' + time_bit
+                new_item.setText(new_name)
+                self.model.appendRow(new_item)
+            self.model.reset()
 
         freeze_msg = ""
         if theories_copied == 0:
             return
         elif theories_copied == 1:
-            freeze_msg = "1 theory copied to the Theory tab as a data set"
+            freeze_msg = "1 theory copied from the Theory tab as a data set"
         elif theories_copied > 1:
-            freeze_msg = "%i theories copied to the Theory tab as data sets" % theories_copied
+            freeze_msg = "%i theories copied from the Theory tab as data sets" % theories_copied
         else:
             freeze_msg = "Unexpected number of theories copied: %i" % theories_copied
             raise AttributeError, freeze_msg
