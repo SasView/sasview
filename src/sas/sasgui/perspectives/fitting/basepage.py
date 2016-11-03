@@ -1156,6 +1156,11 @@ class BasicPage(ScrolledPanel, PanelBase):
             # to support older version
             category_pos = int(state.categorycombobox)
         except:
+            import sasmodels.convert as convert
+            if state.formfactorcombobox is not None:
+                state.formfactorcombobox, state.parameters = \
+                    convert.convert_model(state.formfactorcombobox,
+                                          state.parameters)
             state.formfactorcombobox = state.formfactorcombobox.lower()
             state.formfactorcombobox = \
                 state.formfactorcombobox.replace('model', '')
@@ -1527,7 +1532,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                     if self.data is not None:
                         index_data = ((self.qmin_x <= self.data.x) &
                                       (self.data.x <= self.qmax_x))
-                        val = str(len(self.data.x[index_data is True]))
+                        val = str(len([index_data is True]))
                         self.Npts_fit.SetValue(val)
                     else:
                         # No data in the panel
