@@ -1204,14 +1204,17 @@ class FitPage(BasicPage):
                     self._set_bookmark_flag(not self.batch_on)
                     self._keep.Enable(not self.batch_on)
                     self._set_save_flag(True)
-                    self._set_smear(self.data)
+            #Setting smearing for cases with and without data.
+            self._set_smear(self.data)
 
             # more disables for 2D
             self._set_smear_buttons()
 
             try:
                 # update smearer sizer
-                self.onSmear(None)
+                #This call for smearing set up caused double evaluation of
+                #I(q) and double compilation as results
+                #self.onSmear(None)
                 temp_smear = None
                 if not self.disable_smearer.GetValue():
                     # Set the smearer environments

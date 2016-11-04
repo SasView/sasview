@@ -863,11 +863,6 @@ class Plugin(PluginBase):
             self.draw_model(model=model, data=data, page_id=uid, smearer=smear,
                 enable1D=enable1D, enable2D=enable2D,
                 qmin=qmin, qmax=qmax, weight=weight)
-            # Replacing self._mac_sleep(0.2) with time.sleep(0.2) to prevent
-            # _handle error on Windows. It fixes the bug but doesn't resolve
-            # underlying issue of calling this code twice (threading related)
-            # Wojtek P., Nov 3 2016
-            time.sleep(0.2)
 
     def _mac_sleep(self, sec=0.2):
         """
