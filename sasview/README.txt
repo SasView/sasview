@@ -3,6 +3,13 @@ Release Notes
 
 1- Features
 ===========
+    - New in Version 4.0.1
+      --------------------
+      This release is specifically to address the problems with P(Q)*S(Q) in
+      v4.0.0 that resulted as side-effects of the model infrastructure redesign.
+
+      The behaviour of P(Q)*S(Q) is now correct.
+
     - New in Version 4.0
       ------------------
       This release fixes the various bugs found during the alpha and beta testing
