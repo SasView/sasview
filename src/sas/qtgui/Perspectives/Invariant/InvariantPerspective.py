@@ -14,7 +14,7 @@ from sas.sasgui.guiframe.dataFitting import Data1D
 import GuiUtils
 
 # local
-from UI.TabbedInvariantUI import tabbedInvariantUI
+from UI.TabbedInvariantUI import Ui_tabbedInvariantUI
 from InvariantDetails import DetailsDialog
 from InvariantUtils import WIDGETS
 
@@ -34,11 +34,13 @@ class MyModel(object):
         item = QtGui.QStandardItem(str(item))
         self._model.appendRow(item)
 
-class InvariantWindow(tabbedInvariantUI):
+class InvariantWindow(QtGui.QDialog, Ui_tabbedInvariantUI):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
     def __init__(self, manager=None, parent=None):
         super(InvariantWindow, self).__init__(parent)
+        self.setupUi(self)
+
         self.setWindowTitle("Invariant Perspective")
 
         # initial input params
@@ -68,15 +70,18 @@ class InvariantWindow(tabbedInvariantUI):
 
         self.communicate = GuiUtils.Communicate()
 
+        self._data = None
+        self._path = ""
+
         # Mask file selector
         ###################################################
-        self._path = "cyl_400_20.txt"
-        from sas.sascalc.dataloader.loader import  Loader
-        loader = Loader()
-        try:
-            self._data = loader.load(self._path)
-        except:
-            raise
+        #self._path = "cyl_400_20.txt"
+        #from sas.sascalc.dataloader.loader import  Loader
+        #loader = Loader()
+        #try:
+        #    self._data = loader.load(self._path)
+        #except:
+        #    raise
         ###################################################
 
         self.lineEdit_8.setText(str(Q_MINIMUM))
@@ -421,10 +426,12 @@ class InvariantWindow(tabbedInvariantUI):
         self.model.setItem(WIDGETS.W_FILENAME, item)
 
         # add Q parameters to the model
-        qmin = min(self._data.x)
+        #qmin = min(self._data.x)
+        qmin = 0.0
         item = QtGui.QStandardItem(str(qmin))
         self.model.setItem(WIDGETS.W_QMIN, item)
-        item = QtGui.QStandardItem(str(max(self._data.x)))
+        qmax = 0.0
+        item = QtGui.QStandardItem(str(qmax))
         self.model.setItem(WIDGETS.W_QMAX, item)
 
         # add custom input params
@@ -522,6 +529,11 @@ class InvariantWindow(tabbedInvariantUI):
 
         # Extract data on 1st child - this is the Data1D/2D component
         data = self._model_item.child(0).data().toPyObject()
+        self.model.item(WIDGETS.W_FILENAME).setData(QtCore.QVariant(self._model_item.text()))
+
+        ##### DEBUG ####
+        # set data in the debug tree view window
+        self.treeView.setModel(self.model)
 
         self.calculate(data_list=[data])
         

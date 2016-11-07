@@ -563,6 +563,21 @@ font: bold 8pt &quot;MS Shell Dlg 2&quot;;</string>
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>View on model</string>
+      </attribute>
+      <widget class="QTreeView" name="treeView">
+       <property name="geometry">
+        <rect>
+         <x>5</x>
+         <y>11</y>
+         <width>431</width>
+         <height>311</height>
+        </rect>
+       </property>
+      </widget>
+     </widget>
     </widget>
    </item>
    <item row="1" column="0">

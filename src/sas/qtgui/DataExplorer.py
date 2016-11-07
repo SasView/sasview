@@ -310,14 +310,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             retval = msgbox.exec_()
             return
 
-        # Dig up the item
-        data = selected_items
-
         # TODO
         # New plot or appended?
 
         # Notify the GuiManager about the send request
-        self._perspective.setData(data_item=data)
+        self._perspective.setData(data_item=selected_items)
 
     def freezeTheory(self, event):
         """

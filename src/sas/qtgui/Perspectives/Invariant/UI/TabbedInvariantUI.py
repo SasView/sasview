@@ -309,6 +309,12 @@ class Ui_tabbedInvariantUI(object):
         self.gridLayout_10.addWidget(self.groupBox_6, 1, 1, 1, 1)
         self.gridLayout_6.addWidget(self.groupBox_4, 1, 0, 1, 1)
         self.tabWidget.addTab(self.tabOptions, _fromUtf8(""))
+        self.tab = QtGui.QWidget()
+        self.tab.setObjectName(_fromUtf8("tab"))
+        self.treeView = QtGui.QTreeView(self.tab)
+        self.treeView.setGeometry(QtCore.QRect(5, 11, 431, 311))
+        self.treeView.setObjectName(_fromUtf8("treeView"))
+        self.tabWidget.addTab(self.tab, _fromUtf8(""))
         self.gridLayout_11.addWidget(self.tabWidget, 0, 0, 1, 1)
         spacerItem = QtGui.QSpacerItem(20, 2, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.gridLayout_11.addItem(spacerItem, 1, 0, 1, 1)
@@ -377,14 +383,8 @@ class Ui_tabbedInvariantUI(object):
         self.radioButton_8.setText(_translate("tabbedInvariantUI", "Fix", None))
         self.label_19.setText(_translate("tabbedInvariantUI", "Power:", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabOptions), _translate("tabbedInvariantUI", "Options", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("tabbedInvariantUI", "View on model", None))
         self.pushButton.setText(_translate("tabbedInvariantUI", "Calculate", None))
         self.pushButton_2.setText(_translate("tabbedInvariantUI", "Status", None))
         self.pushButton_3.setText(_translate("tabbedInvariantUI", "Help", None))
-
-
-class tabbedInvariantUI(QtGui.QDialog, Ui_tabbedInvariantUI):
-    def __init__(self, parent=None, f=QtCore.Qt.WindowFlags()):
-        QtGui.QDialog.__init__(self, parent, f)
-
-        self.setupUi(self)
 
