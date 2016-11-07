@@ -80,10 +80,10 @@ class FitPage(BasicPage):
         """
         flag = check_data_validity(self.data) & (self.model is not None)
         self.btFit.Enable(flag)
-        
+
     def on_set_focus(self, event):
         """
-        Override the basepage focus method to ensure the save flag is set 
+        Override the basepage focus method to ensure the save flag is set
         properly when focusing on the fit page.
         """
         flag = check_data_validity(self.data) & (self.model is not None)
@@ -237,7 +237,7 @@ class FitPage(BasicPage):
         sizer_smearer_box.SetMinSize((_DATA_BOX_WIDTH, 60))
 
         weighting_set_box = wx.StaticBox(self, wx.ID_ANY,
-                                'Set Weighting by Selecting dI Source')
+                                         'Set Weighting by Selecting dI Source')
         weighting_box = wx.StaticBoxSizer(weighting_set_box, wx.HORIZONTAL)
         sizer_weighting = wx.BoxSizer(wx.HORIZONTAL)
         weighting_box.SetMinSize((_DATA_BOX_WIDTH, 40))
@@ -1163,9 +1163,9 @@ class FitPage(BasicPage):
         is_poly_enabled = None
         if event is not None:
             if (event.GetEventObject() == self.formfactorbox
-                        and self.structurebox.GetLabel() != 'None')\
-                        or event.GetEventObject() == self.structurebox\
-                        or event.GetEventObject() == self.multifactorbox:
+                    and self.structurebox.GetLabel() != 'None')\
+                    or event.GetEventObject() == self.structurebox\
+                    or event.GetEventObject() == self.multifactorbox:
                 copy_flag = self.get_copy_params()
                 is_poly_enabled = self.enable_disp.GetValue()
 
@@ -1228,12 +1228,12 @@ class FitPage(BasicPage):
 
             # set smearing value whether or not data contain the smearing info
             evt = ModelEventbox(model=self.model,
-                            smearer=temp_smear,
-                            enable_smearer=not self.disable_smearer.GetValue(),
-                            qmin=float(self.qmin_x),
-                            uid=self.uid,
-                            caption=self.window_caption,
-                            qmax=float(self.qmax_x))
+                                smearer=temp_smear,
+                                enable_smearer=not self.disable_smearer.GetValue(),
+                                qmin=float(self.qmin_x),
+                                uid=self.uid,
+                                caption=self.window_caption,
+                                qmax=float(self.qmax_x))
 
             self._manager._on_model_panel(evt=evt)
             self.mbox_description.SetLabel("Model [ %s ]" %
