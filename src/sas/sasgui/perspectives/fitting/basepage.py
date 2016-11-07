@@ -2401,7 +2401,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         self._set_sizer_dispersion()
 
         # Redraw the model
-        self._draw_model()
+        #  Wojtek P. Nov 7, 2016: Redrawing seems to be unnecessary here
+        # self._draw_model()
         # self._undo.Enable(True)
         event = PageInfoEvent(page=self)
         wx.PostEvent(self.parent, event)
