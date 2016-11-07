@@ -1455,10 +1455,17 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.create_default_data()
                 self.state_change = True
                 self._draw_model()
-                #Time delay introduced to prevent double compilation on Windows
-                #It seems to be threading related issue that triggers
-                #compilation twice at the same time
-                if ON_MAC == False:
+                # Time delay has been introduced to prevent _handle error
+                # on Windows
+                # This part of code is executed when model is selected and
+                # it's parameters are changed (with respect to previously
+                # selected model). There are two evaluations of Iq occuring one
+                # after another and therefore there may be compilation error
+                # if model is calculted for the first time.
+                # The proper solution (other than time delay) requires more
+                # fundemental code refatoring
+                # Wojtek P. Nov 7, 2016
+                if not ON_MAC:
                     time.sleep(0.1)
                 self.Refresh()
 
