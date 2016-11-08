@@ -1151,7 +1151,7 @@ class EditorPanel(wx.ScrolledWindow):
     """
 
         _TreeLocation = "user/sasgui/perspectives/fitting/fitting_help.html"
-        _PageAnchor = "#New_Plugin_Model"
+        _PageAnchor = "#new-plugin-model"
         _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, _PageAnchor,
                                           "Plugin Model Editor Help")
 
