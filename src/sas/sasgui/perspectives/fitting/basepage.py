@@ -1459,11 +1459,12 @@ class BasicPage(ScrolledPanel, PanelBase):
                 # on Windows
                 # This part of code is executed when model is selected and
                 # it's parameters are changed (with respect to previously
-                # selected model). There are two evaluations of Iq occuring one
+                # selected model). There are two Iq evaluations occuring one
                 # after another and therefore there may be compilation error
-                # if model is calculted for the first time.
-                # The proper solution (other than time delay) requires more
-                # fundemental code refatoring
+                # if model is calculated for the first time.
+                # This seems to be Windows only issue - haven't tested on Linux
+                # though.The proper solution (other than time delay) requires
+                # more fundemental code refatoring
                 # Wojtek P. Nov 7, 2016
                 if not ON_MAC:
                     time.sleep(0.1)
