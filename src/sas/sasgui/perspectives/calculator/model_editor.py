@@ -631,7 +631,7 @@ class EditorPanel(wx.ScrolledWindow):
         self.font.SetPointSize(10)
         self.reader = None
         self.name = 'untitled'
-        self.overwrite_name = True
+        self.overwrite_name = False
         self.is_2d = False
         self.fname = None
         self.main_sizer = None
@@ -683,13 +683,12 @@ class EditorPanel(wx.ScrolledWindow):
         #title name [string]
         name_txt = wx.StaticText(self, -1, 'Function Name : ')
         overwrite_cb = wx.CheckBox(self, -1, "Overwrite existing plugin model of this name?", (10, 10))
-        overwrite_cb.SetValue(True)
+        overwrite_cb.SetValue(False)
         overwrite_cb.SetToolTipString("Overwrite it if already exists?")
         wx.EVT_CHECKBOX(self, overwrite_cb.GetId(), self.on_over_cb)
-        #overwrite_cb.Show(False)
         self.name_tcl = wx.TextCtrl(self, -1, size=(PANEL_WIDTH * 3 / 5, -1))
         self.name_tcl.Bind(wx.EVT_TEXT_ENTER, self.on_change_name)
-        self.name_tcl.SetValue('MyFunction')
+        self.name_tcl.SetValue('')
         self.name_tcl.SetFont(self.font)
         hint_name = "Unique Model Function Name."
         self.name_tcl.SetToolTipString(hint_name)
@@ -946,7 +945,8 @@ class EditorPanel(wx.ScrolledWindow):
         # Sort out the errors if occur
         # First check for valid python name then if the name already exists
         if not name or not bool(re.match('^[A-Za-z0-9_]*$', name)):
-            msg = "is not a valid python name. Name must not be empty and \n"
+            msg = '"%s" '%name
+            msg += "is not a valid model name. Name must not be empty and \n"
             msg += "may include only alpha numeric or underline characters \n"
             msg += "and no spaces"
         elif self.check_name():
