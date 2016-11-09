@@ -525,9 +525,6 @@ class DataPanel(ScrolledPanel, PanelBase):
         splitter.SetMinimumPaneSize(50)
         splitter.SetSashGravity(1.0)
 
-        file_panel = wx.Panel(splitter, -1)
-        theory_panel = wx.Panel(splitter, -1)
-
         file_sizer = wx.BoxSizer(wx.VERTICAL)
         file_sizer.SetMinSize(wx.Size(w/13, h*2/5))
         theory_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -575,13 +572,9 @@ class DataPanel(ScrolledPanel, PanelBase):
                                    self.on_check_item)
         self.tree_ctrl_theory.Bind(CT.EVT_TREE_ITEM_MENU,
                                    self.on_right_click_theory)
-
-        _ = self.tree_ctrl.InsertItem(self.tree_ctrl.root,
-                                            -999, " Data")
-
-        _ = self.tree_ctrl_theory.InsertItem(self.tree_ctrl_theory.root,
-                                            -1, " Theory")
-
+        self.tree_ctrl.InsertItem(self.tree_ctrl.root, -1, " Data")
+        self.tree_ctrl_theory.InsertItem(self.tree_ctrl_theory.root,
+                                         -1, " Theory")
         splitter.SplitHorizontally(self.tree_ctrl, self.tree_ctrl_theory)
         self.sizer1.Add(splitter, 1, wx.EXPAND | wx.ALL, 10)
 
