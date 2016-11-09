@@ -1156,15 +1156,8 @@ class BasicPage(ScrolledPanel, PanelBase):
             # to support older version
             category_pos = int(state.categorycombobox)
         except:
-            import sasmodels.convert as convert
             if state.formfactorcombobox is not None:
-                state.formfactorcombobox, state.parameters = \
-                    convert.convert_model(state.formfactorcombobox,
-                                          state.parameters)
-            state.formfactorcombobox = state.formfactorcombobox.lower()
-            state.formfactorcombobox = \
-                state.formfactorcombobox.replace('model', '')
-            state.formfactorcombobox = unicode(state.formfactorcombobox)
+                state._convert_to_sasmodels()
             state.categorycombobox = unicode(state.categorycombobox)
             if state.categorycombobox in self.categorybox.Items:
                 category_pos = self.categorybox.Items.index(

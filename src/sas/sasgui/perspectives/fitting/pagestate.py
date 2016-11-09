@@ -355,6 +355,60 @@ class PageState(object):
             obj.saved_states[copy_name] = copy_state
         return obj
 
+    def _convert_to_sasmodels(self):
+        """
+        Convert parameters to a form usable by sasmodels converter
+
+        :return: None
+        """
+        from sasmodels import convert
+        # Create conversion dictionary to send to sasmodels
+        p = dict()
+        for fittable, name, value, _, uncert, lower, upper, units in \
+                self.parameters:
+            if not value:
+                value = numpy.nan
+            if not uncert or uncert[1] == '':
+                uncert[0] = False
+                uncert[1] = numpy.nan
+            if not upper or upper[1] == '':
+                upper[0] = False
+                upper[1] = numpy.nan
+            if not lower or lower[1] == '':
+                lower[0] = False
+                lower[1] = numpy.nan
+            p[name] = {
+                "fittable" : bool(fittable),
+                "value" : float(value),
+                "std" : float(uncert[1]),
+                "upper" : float(upper[1]),
+                "lower" : float(lower[1]),
+                "units" : units,
+            }
+        name, params = convert.convert_model(self.formfactorcombobox, p)
+
+        # Only convert if old != new, otherwise all the same
+        if name != self.formfactorcombobox:
+            self.formfactorcombobox = name
+            self.parameters = []
+            for name, info in params.iteritems():
+                if info.get("std") is not numpy.nan:
+                    std = ['True', str(info.get("std"))]
+                else:
+                    std = ['False', '']
+                if info.get("lower") is not numpy.nan:
+                    lower = ['True', str(info.get("lower"))]
+                else:
+                    lower = ['False', '']
+                if info.get("upper") is not numpy.nan:
+                    upper = ['True', str(info.get("upper"))]
+                else:
+                    upper = ['False', '']
+                param_list = [info.get("fittable"), name, info.get("value"),
+                              "+/-", std, lower, upper]
+                self.parameters.append(param_list)
+
+
     def _repr_helper(self, list, rep):
         """
         Helper method to print a state
