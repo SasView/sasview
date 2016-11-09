@@ -451,7 +451,7 @@ class PlotPanel(wx.Panel):
         to perform the drag
         """
         self.cusor_line(event)
-        if self.gotLegend == 1:
+        if self.gotLegend == 1 and self.leftdown:
             self._on_legend_motion(event)
             return
 
