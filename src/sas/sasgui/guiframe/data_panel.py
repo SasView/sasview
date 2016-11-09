@@ -519,9 +519,22 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         Add a listcrtl in the panel
         """
-        tree_ctrl_label = wx.StaticText(self, -1, "Data")
-        tree_ctrl_label.SetForegroundColour('blue')
-        self.tree_ctrl = DataTreeCtrl(parent=self, style=wx.SUNKEN_BORDER)
+        # Add splitter
+        w, h = self.parent.GetSize()
+        splitter = wx.SplitterWindow(self)
+        splitter.SetMinimumPaneSize(50)
+        splitter.SetSashGravity(1.0)
+
+        file_panel = wx.Panel(splitter, -1)
+        theory_panel = wx.Panel(splitter, -1)
+
+        file_sizer = wx.BoxSizer(wx.VERTICAL)
+        file_sizer.SetMinSize(wx.Size(w/13, h*2/5))
+        theory_sizer = wx.BoxSizer(wx.VERTICAL)
+        theory_sizer.SetMinSize(wx.Size(w/13, h*2/5))
+
+        self.tree_ctrl = DataTreeCtrl(parent=splitter, style=wx.SUNKEN_BORDER)
+
         self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_CHECKING, self.on_check_item)
         self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_MENU, self.on_right_click_data)
         # Create context menu for page
@@ -556,18 +569,21 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.data_menu.Append(self.editmask_id, name, msg)
         wx.EVT_MENU(self, self.editmask_id, self.on_edit_data)
 
-        tree_ctrl_theory_label = wx.StaticText(self, -1, "Theory")
-        tree_ctrl_theory_label.SetForegroundColour('blue')
-        self.tree_ctrl_theory = DataTreeCtrl(parent=self,
+        self.tree_ctrl_theory = DataTreeCtrl(parent=splitter,
                                              style=wx.SUNKEN_BORDER)
         self.tree_ctrl_theory.Bind(CT.EVT_TREE_ITEM_CHECKING,
                                    self.on_check_item)
         self.tree_ctrl_theory.Bind(CT.EVT_TREE_ITEM_MENU,
                                    self.on_right_click_theory)
-        self.sizer1.Add(tree_ctrl_label, 0, wx.LEFT, 10)
-        self.sizer1.Add(self.tree_ctrl, 1, wx.EXPAND | wx.ALL, 10)
-        self.sizer1.Add(tree_ctrl_theory_label, 0,  wx.LEFT, 10)
-        self.sizer1.Add(self.tree_ctrl_theory, 1, wx.EXPAND | wx.ALL, 10)
+
+        _ = self.tree_ctrl.InsertItem(self.tree_ctrl.root,
+                                            -999, " Data")
+
+        _ = self.tree_ctrl_theory.InsertItem(self.tree_ctrl_theory.root,
+                                            -1, " Theory")
+
+        splitter.SplitHorizontally(self.tree_ctrl, self.tree_ctrl_theory)
+        self.sizer1.Add(splitter, 1, wx.EXPAND | wx.ALL, 10)
 
     def on_right_click_theory(self, event):
         """
