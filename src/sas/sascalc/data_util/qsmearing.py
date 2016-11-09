@@ -14,8 +14,14 @@ import logging
 import sys
 from sasmodels import sesans
 
+import numpy as np  # type: ignore
+from numpy import pi, exp  # type: ignore
+from scipy.special import jv as besselj
+
 from sasmodels.resolution import Slit1D, Pinhole1D, SESANS1D
 from sasmodels.resolution2d import Pinhole2D
+from src.sas.sascalc.data_util.nxsunit import Converter
+
 
 def smear_selection(data, model = None):
     """
@@ -36,25 +42,37 @@ def smear_selection(data, model = None):
     """
     # Sanity check. If we are not dealing with a SAS Data1D
     # object, just return None
+
+    # This checks for 2D data (does not throw exception because fail is common)
     if  data.__class__.__name__ not in ['Data1D', 'Theory1D']:
         if data == None:
             return None
         elif data.dqx_data == None or data.dqy_data == None:
             return None
         return Pinhole2D(data)
-
+    # This checks for 1D data with smearing info in the data itself (again, fail is likely; no exceptions)
     if  not hasattr(data, "dx") and not hasattr(data, "dxl")\
          and not hasattr(data, "dxw"):
         return None
 
     # Look for resolution smearing data
+    # This is the code that checks for SESANS data; it looks for the file loader
+    # TODO: change other sanity checks to check for file loader instead of data structure?
     _found_sesans = False
     if data.dx is not None and data.meta_data['loader']=='SESANS':
         if data.dx[0] > 0.0:
             _found_sesans = True
 
     if _found_sesans == True:
-        return sesans_smear(data, model)
+        #Pre-computing the Hankel matrix
+        Rmax = 1000000
+        q_calc = sesans.make_q(data.sample.zacceptance, Rmax)
+        SElength = Converter(data._xunit)(data.x, "A")
+        dq = q_calc[1] - q_calc[0]
+        H0 = dq / (2 * pi) * q_calc
+        H = dq / (2 * pi) * besselj(0, np.outer(q_calc, SElength))
+
+        return PySmear(SESANS1D(data, H0, H, q_calc), model)
 
     _found_resolution = False
     if data.dx is not None and len(data.dx) == len(data.x):
@@ -168,4 +186,7 @@ def sesans_smear(data, model=None):
     #Here assume a number
     Rmax = 1000000
     q_calc = sesans.make_q(data.sample.zacceptance, Rmax)
-    return PySmear(SESANS1D(data,q_calc),model)
+    SElength=Converter(data._xunit)(data.x, "A")
+    #return sesans.HankelTransform(q_calc, SElength)
+    #Old return statement, running through the smearer
+    #return PySmear(SESANS1D(data,q_calc),model)

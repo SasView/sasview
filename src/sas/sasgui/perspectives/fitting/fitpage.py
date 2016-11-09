@@ -228,6 +228,7 @@ class FitPage(BasicPage):
             data = self.dataSource.GetClientData(0)
             self.set_data(data)
         elif self.dataSource.GetCount() > 0:
+
             pos = self.dataSource.GetSelection()
             data = self.dataSource.GetClientData(pos)
             self.set_data(data)
