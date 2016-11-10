@@ -12,6 +12,7 @@ import numpy
 import math
 import logging
 import sys
+import time
 from sasmodels import sesans
 
 import numpy as np  # type: ignore
@@ -64,14 +65,18 @@ def smear_selection(data, model = None):
             _found_sesans = True
 
     if _found_sesans == True:
-        #Pre-computing the Hankel matrix
+        #Pre-computing the Hankel matrix (H)
+
         Rmax = 1000000
         q_calc = sesans.make_q(data.sample.zacceptance, Rmax)
         SElength = Converter(data._xunit)(data.x, "A")
         dq = q_calc[1] - q_calc[0]
         H0 = dq / (2 * pi) * q_calc
-        H = dq / (2 * pi) * besselj(0, np.outer(q_calc, SElength))
-
+        repSE, repq = np.meshgrid(SElength,q_calc)
+        hankelt=time.time()
+        H = dq / (2 * pi) * besselj(0, np.outer(q_calc, SElength))*repq
+        hankelt=time.time()-hankelt
+        print("Hankel transform took "+str(hankelt)+" s")
         return PySmear(SESANS1D(data, H0, H, q_calc), model)
 
     _found_resolution = False
