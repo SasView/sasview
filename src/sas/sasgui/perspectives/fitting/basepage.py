@@ -1434,7 +1434,10 @@ class BasicPage(ScrolledPanel, PanelBase):
                 if tempmax != self.qmax_x:
                     self.qmax_x = tempmax
                     is_modified = True
-                is_modified = self._validate_Npts()
+                if is_2Ddata:
+                    is_modified = self._validate_Npts()
+                else:
+                    is_modified = self._validate_Npts_1D()
             else:
                 self.fitrange = False
 
@@ -2165,7 +2168,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.fitrange = False
                 flag = False
             else:
-                self.Npts_fit.SetValue(str(len(index_data[index_data is True])))
+                val = index_data[index_data is True]
+                val = len(val) if isinstance(val, list) else 1
+                self.Npts_fit.SetValue(str(val))
                 self.fitrange = True
 
         return flag
