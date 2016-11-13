@@ -58,16 +58,7 @@ class Reader:
                 except:
                     raise  RuntimeError, "sesans_reader: cannot open %s" % path
                 buff = input_f.read()
-#                print buff
                 lines = buff.splitlines()
-#                print lines
-                #Jae could not find python universal line spliter:
-                #keep the below for now
-                # some ascii data has \r line separator,
-                # try it when the data is on only one long line
-#                if len(lines) < 2 :
-#                    lines = buff.split('\r')
-                 
                 x  = numpy.zeros(0)
                 y  = numpy.zeros(0)
                 dy = numpy.zeros(0)
@@ -82,26 +73,9 @@ class Reader:
                 tlam  = numpy.zeros(0)
                 tdlam = numpy.zeros(0)
                 tdx = numpy.zeros(0)
-#                print "all good"
                 output = Data1D(x=x, y=y, lam=lam, dy=dy, dx=dx, dlam=dlam, isSesans=True )
-#                print output                
                 self.filename = output.filename = basename
 
-#                #Initialize counters for data lines and header lines.
-#                is_data = False  # Has more than 5 lines
-#                # More than "5" lines of data is considered as actual
-#                # data unless that is the only data
-#                mum_data_lines = 5
-#                # To count # of current data candidate lines
-#                i = -1
-#                # To count total # of previous data candidate lines
-#                i1 = -1
-#                # To count # of header lines
-#                j = -1
-#                # Helps to count # of header lines
-#                j1 = -1
-#                #minimum required number of columns of data; ( <= 4).
-#                lentoks = 2
                 paramnames=[]
                 paramvals=[]
                 zvals=[]
@@ -110,8 +84,6 @@ class Reader:
                 dlamvals=[]
                 Pvals=[]
                 dPvals=[]
-#                print x
-#                print zvals
                 for line in lines:
                     # Initial try for CSV (split on ,)
                     line=line.strip()
@@ -120,13 +92,6 @@ class Reader:
                         paramnames.append(toks[0])
                         paramvals.append(toks[1])
                     if len(toks)>5:
-                       #zvals.append(toks[0])
-                        #dzvals.append(toks[1])
-                        #lamvals.append(toks[2])
-                        #dlamvals.append(toks[3])
-                        #Pvals.append(toks[4])
-                        #dPvals.append(toks[5])
-
                         zvals.append(toks[0])
                         dzvals.append(toks[3])
                         lamvals.append(toks[4])

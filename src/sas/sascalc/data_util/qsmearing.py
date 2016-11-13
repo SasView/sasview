@@ -17,7 +17,7 @@ from sasmodels import sesans
 
 import numpy as np  # type: ignore
 from numpy import pi, exp  # type: ignore
-from scipy.special import jv as besselj
+#from scipy.special import j as besselj
 
 from sasmodels.resolution import Slit1D, Pinhole1D, SESANS1D
 from sasmodels.resolution2d import Pinhole2D
@@ -65,18 +65,9 @@ def smear_selection(data, model = None):
             _found_sesans = True
 
     if _found_sesans == True:
-        #Pre-computing the Hankel matrix (H)
-
-        Rmax = 1000000
-        q_calc = sesans.make_q(data.sample.zacceptance, Rmax)
-        SElength = Converter(data._xunit)(data.x, "A")
-        dq = q_calc[1] - q_calc[0]
-        H0 = dq / (2 * pi) * q_calc
-        repSE, repq = np.meshgrid(SElength,q_calc)
-        hankelt=time.time()
-        H = dq / (2 * pi) * besselj(0, np.outer(q_calc, SElength))*repq
-        hankelt=time.time()-hankelt
-        print("Hankel transform took "+str(hankelt)+" s")
+        #Pre-compute the Hankel matrix (H)
+        H0,H, q_calc = sesans.Hankelconstructor(data)
+        # Then return the actual transform, as if it were a smearing function
         return PySmear(SESANS1D(data, H0, H, q_calc), model)
 
     _found_resolution = False
