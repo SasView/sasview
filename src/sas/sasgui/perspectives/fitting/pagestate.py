@@ -362,6 +362,7 @@ class PageState(object):
         :return: None
         """
         from sasmodels import convert
+        import re
         # Create conversion dictionary to send to sasmodels
         p = dict()
         for fittable, name, value, _, uncert, lower, upper, units in \
@@ -377,14 +378,12 @@ class PageState(object):
             if not lower or lower[1] == '':
                 lower[0] = False
                 lower[1] = numpy.nan
-            p[name] = {
-                "fittable" : bool(fittable),
-                "value" : float(value),
-                "std" : float(uncert[1]),
-                "upper" : float(upper[1]),
-                "lower" : float(lower[1]),
-                "units" : units,
-            }
+            p[name] = float(value)
+            p[name + ".fittable"] = bool(fittable)
+            p[name + ".std"] = float(uncert[1])
+            p[name + ".upper"] = float(upper[1])
+            p[name + ".lower"] = float(lower[1])
+            p[name + ".units"] = units
         name, params = convert.convert_model(self.formfactorcombobox, p)
 
         # Only convert if old != new, otherwise all the same
@@ -392,21 +391,30 @@ class PageState(object):
             self.formfactorcombobox = name
             self.parameters = []
             for name, info in params.iteritems():
-                if info.get("std") is not numpy.nan:
-                    std = ['True', str(info.get("std"))]
+                if ".fittable" in name or ".std" in name or ".upper" in name or\
+                        ".lower" in name or ".units" in name:
+                    pass
                 else:
-                    std = ['False', '']
-                if info.get("lower") is not numpy.nan:
-                    lower = ['True', str(info.get("lower"))]
-                else:
-                    lower = ['False', '']
-                if info.get("upper") is not numpy.nan:
-                    upper = ['True', str(info.get("upper"))]
-                else:
-                    upper = ['False', '']
-                param_list = [info.get("fittable"), name, info.get("value"),
-                              "+/-", std, lower, upper]
-                self.parameters.append(param_list)
+                    fittable = params.get(name + ".fittable")
+                    std = params.get(name + ".std")
+                    upper = params.get(name + ".upper")
+                    lower = params.get(name + ".lower")
+                    units = params.get(name + ".units")
+                    if std is not None:
+                        std = [True, str(std)]
+                    else:
+                        std = [False, '']
+                    if lower is not None:
+                        lower = [True, str(lower)]
+                    else:
+                        lower = [False, '']
+                    if upper is not None:
+                        upper = [True, str(upper)]
+                    else:
+                        upper = [False, '']
+                    param_list = [bool(fittable), str(name), str(info),
+                                  "+/-", std, lower, upper, str(units)]
+                    self.parameters.append(param_list)
 
 
     def _repr_helper(self, list, rep):

@@ -1574,6 +1574,14 @@ class BasicPage(ScrolledPanel, PanelBase):
         if len(statelist) != len(listtorestore):
             return
 
+        ordered_list = []
+        for i in range(len(listtorestore)) :
+            for param in statelist:
+                if param[1] == listtorestore[i][1]:
+                    ordered_list.append(param)
+                    break
+        statelist = ordered_list
+
         for j in range(len(listtorestore)):
             item_page = listtorestore[j]
             item_page_info = statelist[j]
