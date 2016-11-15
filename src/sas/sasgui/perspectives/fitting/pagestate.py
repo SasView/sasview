@@ -400,7 +400,7 @@ class PageState(object):
                     upper = params.get(name + ".upper")
                     lower = params.get(name + ".lower")
                     units = params.get(name + ".units")
-                    if std is not None:
+                    if std is not None and std is not numpy.nan:
                         std = [True, str(std)]
                     else:
                         std = [False, '']

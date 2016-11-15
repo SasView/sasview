@@ -1571,8 +1571,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         if len(statelist) == 0 or len(listtorestore) == 0:
             return
-        if len(statelist) != len(listtorestore):
-            return
 
         ordered_list = []
         for i in range(len(listtorestore)) :
@@ -1580,11 +1578,17 @@ class BasicPage(ScrolledPanel, PanelBase):
                 if param[1] == listtorestore[i][1]:
                     ordered_list.append(param)
                     break
+        if len(ordered_list) != len(statelist):
+            return
         statelist = ordered_list
 
-        for j in range(len(listtorestore)):
+        for j in range(len(statelist)) if len(statelist) < len(listtorestore) \
+                else range(len(listtorestore)):
             item_page = listtorestore[j]
             item_page_info = statelist[j]
+            if (item_page_info[1] == "theta" or item_page_info[1] == "phi") \
+                and not self._is_2D():
+                break
             # change the state of the check box for simple parameters
             if item_page[0] is not None:
                 item_page[0].SetValue(item_page_info[0])
