@@ -384,11 +384,17 @@ class PageState(object):
             p[name + ".upper"] = float(upper[1])
             p[name + ".lower"] = float(lower[1])
             p[name + ".units"] = units
-        name, params = convert.convert_model(self.formfactorcombobox, p)
+
+        structurefactor, params = \
+            convert.convert_model(self.structurecombobox, p)
+        formfactor, params = \
+            convert.convert_model(self.formfactorcombobox, params)
 
         # Only convert if old != new, otherwise all the same
-        if name != self.formfactorcombobox:
-            self.formfactorcombobox = name
+        if formfactor != self.formfactorcombobox or \
+                        structurefactor != self.structurecombobox:
+            self.formfactorcombobox = formfactor
+            self.structurecombobox = structurefactor
             self.parameters = []
             for name, info in params.iteritems():
                 if ".fittable" in name or ".std" in name or ".upper" in name or\
