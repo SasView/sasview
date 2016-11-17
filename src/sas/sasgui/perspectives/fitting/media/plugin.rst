@@ -595,73 +595,129 @@ The following special functions and scattering calculations are defined in
 `sasmodels/models/lib <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib>`_.
 These functions have been tuned to be fast and numerically stable down
 to $q=0$ even in single precision.  In some cases they work around bugs
-which appear on some platforms but not others. So use them where needed!!!
+which appear on some platforms but not others. So use them where needed.
+The list in :code:`source` gives the required dependencies, related to the described function, that have to be added to your model !!!
+
 
     polevl(x, c, n):
         Polynomial evaluation $p(x) = \sum_{i=0}^n c_i x^{n-i}$ using Horner's
         method so it is faster and more accurate.
 
-        :code:`source = ["lib/polevl.c", ...]`
+        $c = \{c_i\}$ is the table of coefficients' values (sorted from the highest order to the constant one).
 
-    sas_gamma:
-        Gamma function $\text{sas_gamma}(x) = \Gamma(x)$.  The standard math
-        library gamma function, tgamma(x) is unstable below 1 on some platforms.
+        :code:`source = ["lib/polevl.c" ...]` (`link to code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/polevl.c>`_)
+
+    p1evl(x, c, n):
+        Evaluation of normalized polynomial $p(x) = x^n + \sum_{i=1}^n c_i x^{n-i}$ using Horner's
+        method so it is faster and more accurate.
+
+        $c = \{c_i\}$ is the table of coefficients' values (sorted from the highest order to the constant one)
+        with $c[n]=c_0=1.0$.
+
+        :code:`source = ["lib/polevl.c", ...]`
+        (`link to code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/polevl.c>`_)
+
+    sas_gamma(x):
+        Gamma function $\text{sas_gamma}(x) = \Gamma(x)$.
+
+        The standard math library gamma function, tgamma(x) is unstable for x below 1 on some platforms.
 
         :code:`source = ["lib/sasgamma.c", ...]`
+        (`link to code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/sas_gamma.c>`_)
 
-    erf, erfc:
+    sas_erf(x), sas_erfc(x):
         Error function
-        $\text{erf}(x) = \frac{1}{\sqrt\pi}\int_0^x e^{-t^2}\,dt$
+        $\text{sas_erf}(x) = \frac{1}{\sqrt\pi}\int_0^x e^{-t^2}\,dt$
         and complementary error function
-        $\text{erfc}(x) = \frac{1}{\sqrt\pi}\int_x^\inf e^{-t^2}\,dt$.
+        $\text{sas_erfc}(x) = \frac{1}{\sqrt\pi}\int_x^{\infty} e^{-t^2}\,dt$.
+
         The standard math library erf and erfc are slower and broken
         on some platforms.
 
         :code:`source = ["lib/polevl.c", "lib/sas_erf.c", ...]`
+        (`link to error functions' code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/sas_erf.c>`_)
 
-    sas_J0:
-        Bessel function of the first kind where
+    sas_J0(x):
+        Bessel function of the first kind $\text{sas_J0}(x)=J_0(x)$ where
         $J_0(x) = \frac{1}{\pi}\int_0^\pi \cos(x\sin(\tau))\,d\tau$.
 
         :code:`source = ["lib/polevl.c", "lib/sas_J0.c", ...]`
+        (`link to Bessel function's code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/sas_J0.c>`_)
 
-    sas_J1:
-        Bessel function of the first kind where
+    sas_J1(x):
+        Bessel function of the first kind  $\text{sas_J1}(x)=J_1(x)$ where
         $J_1(x) = \frac{1}{\pi}\int_0^\pi \cos(\tau - x\sin(\tau))\,d\tau$.
 
         :code:`source = ["lib/polevl.c", "lib/sas_J1.c", ...]`
+        (`link to Bessel function's code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/sas_J1.c>`_)
 
-    sas_JN:
-        Bessel function of the first kind where
+    sas_JN(n, x):
+        Bessel function of the first kind and integer order $n$: $\text{sas_JN}(n, x)=J_n(x)$ where
         $J_n(x) = \frac{1}{\pi}\int_0^\pi \cos(n\tau - x\sin(\tau))\,d\tau$.
 
-        :code:`source = ["lib/polevl.c", "lib/sas_J0.c", "lib/sas_J1.c", "lib/sas_JN.c", ...]`
+        If $n$ = 0 or 1, it uses sas_J0(x) or sas_J1(x), respectively.
 
-    Si:
+        :code:`source = ["lib/polevl.c", "lib/sas_J0.c", "lib/sas_J1.c", "lib/sas_JN.c", ...]`
+        (`link to Bessel function's code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/sas_JN.c>`_)
+
+    Si(x):
         Sine integral $\text{Si}(x) = \int_0^x \tfrac{\sin t}{t}\,dt$.
 
-        :code:`soure = ["lib/Si.c", ...]`
+        This function uses Taylor series for small and large arguments:
 
-    sph_j1c(qr):
+        For large arguments,
+
+        .. math::
+
+           \begin{equation}
+             \text{Si}(x) \sim \frac{\pi}{2} - \frac{\cos(x)}{x}\big(1 - \frac{2!}{x^2} + \frac{4!}{x^4}
+             - \frac{6!}{x^6} \big) - \frac{\sin(x)}{x} \big(\frac{1}{x} - \frac{3!}{x^3} + \frac{5!}{x^5}
+             - \frac{7!}{x^7}\big)
+           \end{equation}
+
+        For small arguments,
+
+        .. math::
+
+          \begin{equation}
+           \text{Si}(x) \sim x - \frac{x^3}{3\times 3!} + \frac{x^5}{5 \times 5!} - \frac{x^7}{7 \times 7!}
+           + \frac{x^9}{9\times 9!} - \frac{x^{11}}{11\times 11!}
+           \end{equation}
+
+        :code:`source = ["lib/Si.c", ...]`
+        (`link to code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/Si.c>`_)
+
+    sph_j1c(x):
         Spherical Bessel form
-        $F(qr) = 3 j_1(qr)/(qr) = 3 (\sin(qr) - qr \cos(qr))/{(qr)^3}$,
-        with a limiting value of 1 at $qr=0$.  This function uses a Taylor
-        series for small $qr$ for numerical accuracy.
+        $\text{sph_j1c}(x) = 3 j_1(x)/(x) = 3 (\sin(x) - x \cos(x))/{(x)^3}$,
+        with a limiting value of 1 at $x=0$, where $j_1(x)$ is the spherical Bessel function of the first kind
+        and first order.
+
+        This function uses a Taylor series for small $x$ for numerical accuracy.
 
         :code:`source = ["lib/sph_j1c.c", ...]`
+        (`link to code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/sph_j1c.c>`_)
 
-    sas_J1c(qr):
-        Bessel form $F(qr) = 2 J_1(qr)/{(qr)}$, with a limiting value of 1 at $qr=0$.
+
+    sas_J1c(x):
+        Bessel form $\text{sas_J1c}(x) = 2 J_1(x)/{(x)}$, with a limiting value of 1 at $x=0$,
+        where $J_1(x)$ is the Bessel function of first kind and first order.
 
         :code:`source = ["lib/polevl.c", "lib/sas_J1.c", ...]`
+        (`link to Bessel form's code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/sas_J1.c>`_)
 
-    Gauss76z[i], Gauss76Wt[i]:
-        Points $z_i$ and weights $w_i$ for 76-point Gaussian quadrature,
+
+    Gauss76Z[i], Gauss76Wt[i]:
+        Points $z_i$ and weights $w_i$ for 76-point Gaussian quadrature, respectively,
         computing $\int_{-1}^1 f(z)\,dz \approx \sum_{i=1}^{76} w_i f(z_i)$.
-        Similar arrays are available in :code:`gauss20.c` for 20 point
-        quadrature and in :code:`gauss150.c` for 150 point quadrature.
 
-        :code:`source = ["gauss76.c", ...]`
+        Similar arrays are available in :code:`gauss20.c` for 20-point
+        quadrature and in :code:`gauss150.c` for 150-point quadrature.
+
+        :code:`source = ["lib/gauss76.c", ...]`
+        (`link to code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/gauss76.c>`_)
+
+
 
 Problems with C models
 ......................
