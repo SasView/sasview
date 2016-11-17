@@ -24,6 +24,7 @@ import xml.dom.minidom
 from xml.dom.minidom import parseString
 from lxml import etree
 
+from sasmodels import convert
 import sasmodels.weights
 
 import sas.sascalc.dataloader
@@ -355,14 +356,23 @@ class PageState(object):
             obj.saved_states[copy_name] = copy_state
         return obj
 
+    def _is_sasmodels(self):
+        """
+        A check to see if the loaded save state was saved in SasView v4_0+
+        :return: None
+        """
+        newname = convert._conversion_target(self.formfactorcombobox)
+        if newname == None:
+            return True
+        else:
+            return False
+
     def _convert_to_sasmodels(self):
         """
         Convert parameters to a form usable by sasmodels converter
 
         :return: None
         """
-        from sasmodels import convert
-        import re
         # Create conversion dictionary to send to sasmodels
         p = dict()
         for fittable, name, value, _, uncert, lower, upper, units in \
