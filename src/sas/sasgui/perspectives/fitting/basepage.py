@@ -1105,8 +1105,11 @@ class BasicPage(ScrolledPanel, PanelBase):
         :return: combo_box_position
         """
         for key, value in self.master_category_dict.iteritems():
+            formfactor = state.formfactorcombobox.split(":")
+            if isinstance(formfactor, list):
+                formfactor = formfactor[0]
             for list_item in value:
-                if state.formfactorcombobox in list_item:
+                if formfactor in list_item:
                     return self.categorybox.Items.index(key)
         return 0
 
