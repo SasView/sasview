@@ -96,7 +96,7 @@ class PlotPanel(wx.Panel):
     figure is triggered by an Idle event.
     """
     def __init__(self, parent, id=-1, xtransform=None,
-                 ytransform=None, scale='log_10',
+                 ytransform=None, scale='log_{10}',
                  color=None, dpi=None, **kwargs):
         """
         """

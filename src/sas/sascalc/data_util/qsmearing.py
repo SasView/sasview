@@ -12,12 +12,11 @@ import numpy
 import math
 import logging
 import sys
-import time
 from sasmodels import sesans
 
 import numpy as np  # type: ignore
 from numpy import pi, exp  # type: ignore
-#from scipy.special import j as besselj
+#from scipy.special import jv as besselj
 
 from sasmodels.resolution import Slit1D, Pinhole1D, SESANS1D
 from sasmodels.resolution2d import Pinhole2D
@@ -174,15 +173,3 @@ def pinhole_smear(data, model=None):
     q = data.x
     width = data.dx if data.dx is not None else 0
     return PySmear(Pinhole1D(q, width), model)
-
-def sesans_smear(data, model=None):
-    #This should be calculated characteristic length scale
-    #Probably not a data prameter either
-    #Need function to calculate this based on model
-    #Here assume a number
-    Rmax = 1000000
-    q_calc = sesans.make_q(data.sample.zacceptance, Rmax)
-    SElength=Converter(data._xunit)(data.x, "A")
-    #return sesans.HankelTransform(q_calc, SElength)
-    #Old return statement, running through the smearer
-    #return PySmear(SESANS1D(data,q_calc),model)
