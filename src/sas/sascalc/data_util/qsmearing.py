@@ -73,8 +73,6 @@ def smear_selection(data, model = None):
         zaccept = Converter(qunits)(qmax, "1/A"),
         Rmax = 1000000)
         # Then return the actual transform, as if it were a smearing function
-        # applying evalDistribution to a model, with a q-space as param, returns the I(q) values that go with the q-values
-
         return PySmear(SESANS1D(data, hankel._H0, hankel._H, hankel.q), model)
 
     _found_resolution = False
