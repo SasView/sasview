@@ -54,9 +54,6 @@ class FitPage(BasicPage):
         self.fit_started = False
         self.weightbt_string = None
         self.m_name = None
-        # transform implementation
-        self._fill_Trafo_sizer()
-       # self.Trafobt_string()
         # get smear info from data
         self._get_smear_info()
         self._fill_model_sizer(self.sizer1)
@@ -94,63 +91,6 @@ class FitPage(BasicPage):
         self._set_save_flag(flag)
         self.parent.on_set_focus(event)
         self.on_tap_focus()
-
-    def onTrafo(self, event):
-        """
-        On Trafo radio button event, sets the Trafobt_string
-        """
-        self.Trafobt_string = event.GetEventObject().GetLabelText()
-        self._set_Trafo()
-
-    def _fill_Trafo_sizer(self):
-
-        title = "Transform"
-        box_description_trafo = wx.StaticBox(self, wx.ID_ANY, str(title))
-        box_description_trafo.SetForegroundColour(wx.BLUE)
-        #boxsizer_trafo = wx.StaticBoxSizer(box_description_trafo, wx.VERTICAL)
-        boxsizer_trafo = wx.StaticBoxSizer(box_description_trafo, wx.HORIZONTAL)
-        #sizer_trafo = wx.StaticBoxSizer(box_description_trafo, wx.HORIZONTAL)
-        #weighting_set_box = wx.StaticBox(self, wx.ID_ANY,
-         #                              'Select the type of SESANS analysis')
-
-        #sizer_weighting = wx.BoxSizer(wx.HORIZONTAL)
-          #      weighting_box.SetMinSize((_DATA_BOX_WIDTH, 60))
-
-        #For every radio button (each statement x3):
-        self.no_transform = wx.RadioButton(self, wx.ID_ANY,
-                                                  'None', style=wx.RB_GROUP)
-
-        #self.Bind(wx.EVT_RADIOBUTTON, self.onTrafo,
-         #                 id=self.no_transform.GetId())
-        self.hankel = wx.RadioButton(self, wx.ID_ANY,
-                                                  'Hankel')
-        #self.Bind(wx.EVT_RADIOBUTTON, self.onTrafo,
-        #                  id=self.hankel.GetId())
-        self.cosine = wx.RadioButton(self, wx.ID_ANY,
-                                                  'Cosine')
-        #self.Bind(wx.EVT_RADIOBUTTON, self.onTrafo,
-         #                 id=self.cosine.GetId())
-
-        #Not sure about this (only once though)
-        self.no_transform.SetValue(True)
-
-        #For every radio button (each statement x3):
-        boxsizer_trafo.Add(self.no_transform, 0, wx.LEFT, 10)
-        boxsizer_trafo.Add((14, 10))
-        boxsizer_trafo.Add(self.hankel)
-        boxsizer_trafo.Add((14, 10))
-        boxsizer_trafo.Add(self.cosine)
-        boxsizer_trafo.Add((14, 10))
-            #Default for weighting is False, but these need to be on by default!
-        self.no_transform.Enable(True)
-
-        #Not sure about this (only once though)
-        #weighting_box.Add(sizer_trafo)
-
-        self.sizerTrafo.Clear(True)
-        self.sizerTrafo.Add(boxsizer_trafo, 0, wx.EXPAND | wx.ALL, 10)
-        #self.sizerTrafo.Add(sizer_trafo, 0, wx.EXPAND | wx.ALL, 10)
-        self.sizerTrafo.Layout()
 
     def _fill_data_sizer(self):
         """

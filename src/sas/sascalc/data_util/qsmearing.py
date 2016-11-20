@@ -13,12 +13,11 @@ import math
 import logging
 import sys
 from sasmodels import sesans
-
 import numpy as np  # type: ignore
 from numpy import pi, exp  # type: ignore
-#from scipy.special import jv as besselj
 
-from sasmodels.resolution import Slit1D, Pinhole1D, SESANS1D
+from sasmodels.resolution import Slit1D, Pinhole1D
+from sasmodels.sesans import SESANS1D
 from sasmodels.resolution2d import Pinhole2D
 from src.sas.sascalc.data_util.nxsunit import Converter
 
@@ -59,15 +58,21 @@ def smear_selection(data, model = None):
     # This is the code that checks for SESANS data; it looks for the file loader
     # TODO: change other sanity checks to check for file loader instead of data structure?
     _found_sesans = False
-    if data.dx is not None and data.meta_data['loader']=='SESANS':
+    #if data.dx is not None and data.meta_data['loader']=='SESANS':
+    if data.dx is not None and data.isSesans:
         if data.dx[0] > 0.0:
             _found_sesans = True
 
     if _found_sesans == True:
         #Pre-compute the Hankel matrix (H)
-        H0,H, q_calc = sesans.Hankelconstructor(data)
+        qmax, qunits = data.sample.zacceptance
+        hankel=sesans.SesansTransform()
+        sesans.SesansTransform.set_transform(hankel,
+        SE = Converter(data._xunit)(data.x, "A"),
+        zaccept = Converter(qunits)(qmax, "1/A"),
+        Rmax = 1000000)
         # Then return the actual transform, as if it were a smearing function
-        return PySmear(SESANS1D(data, H0, H, q_calc), model)
+        return PySmear(SESANS1D(data, hankel._H0, hankel._H, hankel.q), model)
 
     _found_resolution = False
     if data.dx is not None and len(data.dx) == len(data.x):
