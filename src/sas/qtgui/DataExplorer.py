@@ -20,6 +20,7 @@ from sas.sasgui.guiframe.dataFitting import Data2D
 import GuiUtils
 import PlotHelper
 from Plotter import Plotter
+from Plotter2D import Plotter2D
 from DroppableDataLoadWidget import DroppableDataLoadWidget
 
 # This is how to get data1/2D from the model item
@@ -392,23 +393,31 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         plots = GuiUtils.plotsFromCheckedItems(self.model)
 
         # Call show on requested plots
-        new_plot = Plotter(self)
         for plot_set in plots:
+            new_plot = None
+            if isinstance(plot_set, Data1D):
+                new_plot = Plotter(self)
+            elif isinstance(plot_set, Data2D):
+                new_plot = Plotter2D(self)
+            else:
+                msg = "Incorrect data type passed to Plotting"
+                raise AttributeError, msg
+
             new_plot.data(plot_set)
             new_plot.plot()
 
-        # Update the global plot counter
-        title = "Graph"+str(PlotHelper.idOfPlot(new_plot))
-        new_plot.setWindowTitle(title)
+            # Update the global plot counter
+            title = "Graph"+str(PlotHelper.idOfPlot(new_plot))
+            new_plot.setWindowTitle(title)
 
-        # Add the plot to the workspace
-        self.parent.workspace().addWindow(new_plot)
+            # Add the plot to the workspace
+            self.parent.workspace().addWindow(new_plot)
 
-        # Show the plot
-        new_plot.show()
+            # Show the plot
+            new_plot.show()
 
-        # Update the active chart list
-        self.active_plots.append(title)
+            # Update the active chart list
+            self.active_plots.append(title)
 
     def appendPlot(self):
         """
