@@ -387,8 +387,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
     def newPlot(self):
         """
         Create a new matplotlib chart from selected data
-
-        TODO: Add 2D-functionality
         """
         plots = GuiUtils.plotsFromCheckedItems(self.model)
 
@@ -436,10 +434,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         old_plot = PlotHelper.plotById(plot_id)
 
-        # Add new data to the old plot
+        # Add new data to the old plot, if data type is the same.
         for plot_set in new_plots:
-            old_plot.data(plot_set)
-            old_plot.plot()
+            if type(plot_set) is type(old_plot._data):
+                old_plot.data(plot_set)
+                old_plot.plot()
 
     def chooseFiles(self):
         """
