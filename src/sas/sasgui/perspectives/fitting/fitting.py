@@ -192,6 +192,10 @@ class Plugin(PluginBase):
         self.bumps_options_menu = self.menu1.FindItemById(self.id_bumps_options)
         self.bumps_options_menu.Enable(True)
 
+        self.id_gpu_options_panel = wx.NewId()
+        self.menu1.Append(self.id_gpu_options_panel, "GPU Options", "Choose how to compile models")
+        wx.EVT_MENU(owner, self.id_gpu_options_panel, self.on_gpu_options)
+
         self.id_result_panel = wx.NewId()
         self.menu1.Append(self.id_result_panel, "Fit Results", "Show fit results panel")
         wx.EVT_MENU(owner, self.id_result_panel, self.on_fit_results)
@@ -800,6 +804,14 @@ class Plugin(PluginBase):
         """
         self.result_frame.Show()
         self.result_frame.Raise()
+
+    def on_gpu_options(self, event=None):
+        """
+        Make the Fit Results panel visible.
+        """
+        import sas.sasgui.perspectives.fitting.gpu_options as GpuOptions
+        dialog = GpuOptions.GpuOptions(None, -1, "")
+        dialog.ShowModal()
 
     def stop_fit(self, uid):
         """
