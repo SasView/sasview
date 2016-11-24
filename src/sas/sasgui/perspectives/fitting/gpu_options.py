@@ -43,23 +43,27 @@ class GpuOptions(wx.Dialog):
         kwds["style"] = wx.DEFAULT_DIALOG_STYLE
         wx.Dialog.__init__(self, *args, **kwds)
 
-        #TODO:
-        #Read in values for opencl context
-        #Tycially will be something like
-        #0 = GPU
-        #1 = CPU
-        #None for None
+        try:
+            from sasmodels.kernelcl import environment
+            env = environment()
+            clinfo = [ctx.devices[0].name
+                    for ctx in env.context]
+            clinfo.append("No OpenCL")
+        except ImportError:
+            clinfo = None
 
         #####################################
         self.panel1 = wx.Panel(self, -1)
         static_box1 = wx.StaticBox(self.panel1, -1, "OpenCL Options")
 
-        contextes = ("GPU","CPU","None")
-        rows = len(contextes)
+        #contextes = ("Intel(R) Iris(TM) Graphics 6100",
+        #             "Intel(R) Core(TM) i7-5557U CPU @ 3.10GHz",
+        #             "No OpenCL")
+        rows = len(clinfo)
 
         flexsizer = wx.FlexGridSizer(rows, 1, hgap=20, vgap=10)
         self.fitter_button = {}
-        for fitter in contextes:
+        for fitter in clinfo:
             button = wx.RadioButton(self.panel1, -1,
                     label=fitter, name=fitter)
             self.fitter_button[fitter] = button
@@ -96,7 +100,7 @@ class GpuOptions(wx.Dialog):
         #self.preamble.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, ""))
         self.SetTitle("Fitting on GPU Options")
         #Increased size of box from (525, 225), SMK, 04/10/16
-        self.SetSize((600, 300))
+        self.SetSize((400, 150))
         # end wxGlade
 
     def __do_layout(self):
