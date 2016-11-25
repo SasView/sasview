@@ -2,8 +2,8 @@ import functools
 from PyQt4 import QtGui
 
 import sas.sasview
-import LocalConfig
-import GuiUtils
+import sas.qtgui.LocalConfig as LocalConfig
+import sas.qtgui.GuiUtils as GuiUtils
 
 from UI.AboutUI import Ui_AboutUI
 

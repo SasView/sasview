@@ -4,6 +4,10 @@ import unittest
 from PyQt4.QtGui import QApplication
 from PyQt4.QtTest import QTest
 from PyQt4 import QtCore
+
+# set up import paths
+import path_prepare
+
 from DroppableDataLoadWidget import DroppableDataLoadWidget
 from GuiUtils import *
 from UnitTesting.TestUtils import QtSignalSpy

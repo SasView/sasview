@@ -10,25 +10,24 @@ from PyQt4 import QtGui
 from PyQt4 import QtWebKit
 
 from twisted.internet import reactor
-
 # General SAS imports
+
 from sas.sasgui.guiframe.data_manager import DataManager
 from sas.sasgui.guiframe.proxy import Connection
+from sas.qtgui.SasviewLogger import XStream
+import sas.qtgui.LocalConfig as LocalConfig
+import sas.qtgui.GuiUtils as GuiUtils
+from sas.qtgui.UI.AcknowledgementsUI import Ui_Acknowledgements
+from sas.qtgui.AboutBox import AboutBox
+from sas.qtgui.IPythonWidget import IPythonWidget
+from sas.qtgui.WelcomePanel import WelcomePanel
 
-from SasviewLogger import XStream
-
-import LocalConfig
-import GuiUtils
-from UI.AcknowledgementsUI import Ui_Acknowledgements
-from AboutBox import AboutBox
-from IPythonWidget import IPythonWidget
-from WelcomePanel import WelcomePanel
-from SldPanel import SldPanel
-from DensityPanel import DensityPanel
+from sas.qtgui.SldPanel import SldPanel
+from sas.qtgui.DensityPanel import DensityPanel
 
 # Perspectives
-from Perspectives.Invariant.InvariantPerspective import InvariantWindow
-from DataExplorer import DataExplorerWindow
+from sas.qtgui.Perspectives.Invariant.InvariantPerspective import InvariantWindow
+from sas.qtgui.DataExplorer import DataExplorerWindow
 
 class Acknowledgements(QtGui.QDialog, Ui_Acknowledgements):
     def __init__(self, parent=None):
@@ -39,7 +38,8 @@ class GuiManager(object):
     """
     Main SasView window functionality
     """
-    HELP_DIRECTORY_LOCATION = "html"
+    ## TODO: CHANGE FOR SHIPPED PATH IN RELEASE
+    HELP_DIRECTORY_LOCATION = "docs/sphinx-docs/build/html"
 
     def __init__(self, mainWindow=None, reactor=None, parent=None):
         """
@@ -91,9 +91,9 @@ class GuiManager(object):
         self._helpLocation = self.HELP_DIRECTORY_LOCATION + "/index.html"
 
         # Current tutorial location
-        self._tutorialLocation = os.path.join(self.HELP_DIRECTORY_LOCATION,
+        self._tutorialLocation = os.path.abspath(os.path.join(self.HELP_DIRECTORY_LOCATION,
                                               "_downloads",
-                                              "Tutorial.pdf")
+                                              "Tutorial.pdf"))
 
         #==========================================================
         # TEMP PROTOTYPE

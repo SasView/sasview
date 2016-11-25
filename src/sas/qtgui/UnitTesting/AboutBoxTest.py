@@ -7,9 +7,12 @@ from PyQt4.QtTest import QTest
 from PyQt4.QtCore import *
 from mock import MagicMock
 
+# set up import paths
+import path_prepare
+
 # Local
 from AboutBox import AboutBox
-import LocalConfig
+import sas.qtgui.LocalConfig as LocalConfig
 
 app = QApplication(sys.argv)
 

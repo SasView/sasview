@@ -45,23 +45,23 @@ def get_app_dir():
         app_path = os.path.dirname(app_path)
     if os.path.isfile(os.path.join(app_path, "custom_config.py")):
         app_path = os.path.abspath(app_path)
-        logging.info("Using application path: %s", app_path)
+        #logging.info("Using application path: %s", app_path)
         return app_path
 
     # Next, try the current working directory
     if os.path.isfile(os.path.join(os.getcwd(), "custom_config.py")):
-        logging.info("Using application path: %s", os.getcwd())
+        #logging.info("Using application path: %s", os.getcwd())
         return os.path.abspath(os.getcwd())
 
     # Finally, try the directory of the sasview module
     # TODO: gui_manager will have to know about sasview until we
     # clean all these module variables and put them into a config class
     # that can be passed by sasview.py.
-    logging.info(sys.executable)
-    logging.info(str(sys.argv))
+    #logging.info(sys.executable)
+    #logging.info(str(sys.argv))
     from sas import sasview as sasview
     app_path = os.path.dirname(sasview.__file__)
-    logging.info("Using application path: %s", app_path)
+    #logging.info("Using application path: %s", app_path)
     return app_path
 
 def get_user_directory():
@@ -83,11 +83,12 @@ def _find_local_config(confg_file, path):
         fObj, path_config, descr = imp.find_module(confg_file, [path])
         config_module = imp.load_module(confg_file, fObj, path_config, descr)
     except ImportError:
-        logging.error("Error loading %s/%s: %s" % (path, confg_file, sys.exc_value))
+        pass
+        #logging.error("Error loading %s/%s: %s" % (path, confg_file, sys.exc_value))
     finally:
         if fObj is not None:
             fObj.close()
-    logging.info("GuiManager loaded %s/%s" % (path, confg_file))
+    #logging.info("GuiManager loaded %s/%s" % (path, confg_file))
     return config_module
 
 # Get APP folder
@@ -99,16 +100,19 @@ DATAPATH = PATH_APP
 # Read in the local config, which can either be with the main
 # application or in the installation directory
 config = _find_local_config('local_config', PATH_APP)
+
 if config is None:
     config = _find_local_config('local_config', os.getcwd())
     if config is None:
         # Didn't find local config, load the default
         import sas.sasgui.guiframe.config as config
-        logging.info("using default local_config")
+        #logging.info("using default local_config")
     else:
-        logging.info("found local_config in %s", os.getcwd())
+        pass
+        #logging.info("found local_config in %s", os.getcwd())
 else:
-    logging.info("found local_config in %s", PATH_APP)
+    pass
+    #logging.info("found local_config in %s", PATH_APP)
 
 
 from sas.sasgui.guiframe.customdir  import SetupCustom
@@ -118,11 +122,13 @@ if custom_config is None:
     custom_config = _find_local_config('custom_config', os.getcwd())
     if custom_config is None:
         msgConfig = "Custom_config file was not imported"
-        logging.info(msgConfig)
+        #logging.info(msgConfig)
     else:
-        logging.info("using custom_config in %s", os.getcwd())
+        pass
+        #logging.info("using custom_config in %s", os.getcwd())
 else:
-    logging.info("using custom_config from %s", c_conf_dir)
+    pass
+    #logging.info("using custom_config from %s", c_conf_dir)
 
 #read some constants from config
 APPLICATION_STATE_EXTENSION = config.APPLICATION_STATE_EXTENSION
@@ -349,7 +355,7 @@ def retrieveData1d(data):
     except:
         msg = "Unable to find min/max of \n data named %s" % \
                     data.filename
-        logging.error(msg)
+        #logging.error(msg)
         raise ValueError, msg
 
     text = data.__str__()

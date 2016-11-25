@@ -15,8 +15,8 @@ import matplotlib.pyplot as plt
 
 DEFAULT_CMAP = pylab.cm.jet
 
-import PlotUtilities
-import PlotHelper
+import sas.qtgui.PlotUtilities as PlotUtilities
+import sas.qtgui.PlotHelper as PlotHelper
 
 class Plotter2D(QtGui.QDialog):
     def __init__(self, parent=None):
@@ -47,6 +47,9 @@ class Plotter2D(QtGui.QDialog):
         self._data = []
         self._qx_data = []
         self._qy_data = []
+        self._color=0
+        self._symbol=0
+        self._scale = 'linear'
 
         # default color map
         self._cmap = DEFAULT_CMAP
@@ -58,6 +61,11 @@ class Plotter2D(QtGui.QDialog):
         # Notify the listeners
         self.parent.communicator.activeGraphsSignal.emit(PlotHelper.currentPlots())
 
+    @property
+    def data(self):
+        return self._data
+
+    @data.setter
     def data(self, data=None):
         """ data setter """
         self._data = data
@@ -69,11 +77,7 @@ class Plotter2D(QtGui.QDialog):
         self._ymax=data.ymax
         self._zmin=data.zmin
         self._zmax=data.zmax
-        self._color=0
-        self._symbol=0
         self._label=data.name
-        self._scale = 'linear'
-
         self.x_label(xlabel=data._xaxis + data._xunit)
         self.y_label(ylabel=data._yaxis + data._yunit)
         self.title(title=data.title)

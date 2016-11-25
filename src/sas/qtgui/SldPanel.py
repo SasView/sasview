@@ -6,10 +6,10 @@ from periodictable import formula as Formula
 from periodictable.xsf import xray_energy, xray_sld_from_atoms
 from periodictable.nsf import neutron_scattering
 
-from GuiUtils import FormulaValidator
+from sas.qtgui.GuiUtils import FormulaValidator
 
 # Local UI
-from UI.SldPanel import Ui_SldPanel
+from sas.qtgui.UI.SldPanel import Ui_SldPanel
 
 def enum(*sequential, **named):
     enums = dict(zip(sequential, range(len(sequential))), **named)

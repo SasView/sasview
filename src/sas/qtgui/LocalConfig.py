@@ -56,9 +56,10 @@ _authors = []
 _paper = "http://sourceforge.net/p/sasview/tickets/"
 _license = "mailto:help@sasview.org"
 
-
 icon_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "images"))
-logging.info("icon path: %s", icon_path)
+
+#logging.info("icon path: %s", icon_path)
+
 media_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "media"))
 test_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "test"))
 
@@ -133,7 +134,6 @@ DEFAULT_PERSPECTIVE = 'None'
 
 # Time out for updating sasview
 UPDATE_TIMEOUT = 2
-
 def printEVT(message):
     """
     Post a debug message to console/file

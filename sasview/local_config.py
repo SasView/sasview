@@ -57,7 +57,7 @@ _license = "mailto:help@sasview.org"
 
 
 icon_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "images"))
-logging.info("icon path: %s" % icon_path)
+# logging.info("icon path: %s" % icon_path)
 media_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "media"))
 test_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "test"))
 

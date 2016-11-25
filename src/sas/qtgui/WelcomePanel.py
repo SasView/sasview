@@ -6,9 +6,9 @@ from PyQt4 import QtGui
 from PyQt4 import QtWebKit
 
 import sas.sasview
-import LocalConfig
+import sas.qtgui.LocalConfig as LocalConfig
 
-from UI.WelcomePanelUI import Ui_WelcomePanelUI
+from sas.qtgui.UI.WelcomePanelUI import Ui_WelcomePanelUI
 
 class WelcomePanel(QtGui.QDialog, Ui_WelcomePanelUI):
     def __init__(self, parent=None):

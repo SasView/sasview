@@ -5,10 +5,10 @@ from PyQt4 import QtGui, QtCore
 
 from periodictable import formula as Formula
 
-from GuiUtils import FormulaValidator
+from sas.qtgui.GuiUtils import FormulaValidator
 
 # Local UI
-from UI.DensityPanel import Ui_DensityPanel
+from sas.qtgui.UI.DensityPanel import Ui_DensityPanel
 
 def enum(*sequential, **named):
     enums = dict(zip(sequential, range(len(sequential))), **named)

@@ -6,6 +6,9 @@ from PyQt4 import QtTest
 from PyQt4 import QtCore
 from mock import MagicMock
 
+# set up import paths
+import path_prepare
+
 # Local
 from MainWindow import MainSasViewWindow
 from MainWindow import SplashScreen

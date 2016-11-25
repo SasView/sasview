@@ -2,7 +2,7 @@
 from PyQt4 import QtGui, QtCore
 
 # UI
-from UI.DataExplorerUI import Ui_DataLoadWidget
+from sas.qtgui.UI.DataExplorerUI import Ui_DataLoadWidget
 
 class DroppableDataLoadWidget(QtGui.QTabWidget, Ui_DataLoadWidget):
     """

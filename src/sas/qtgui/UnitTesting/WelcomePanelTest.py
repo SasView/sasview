@@ -5,6 +5,9 @@ from PyQt4.QtGui import *
 from PyQt4.QtTest import QTest
 from PyQt4.QtCore import *
 
+# set up import paths
+import path_prepare
+
 # Local
 from WelcomePanel import WelcomePanel
 

@@ -10,7 +10,7 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
 
-import PlotHelper
+import sas.qtgui.PlotHelper as PlotHelper
 
 class Plotter(QtGui.QDialog):
     def __init__(self, parent=None):
@@ -50,9 +50,15 @@ class Plotter(QtGui.QDialog):
         # Notify the listeners
         self.parent.communicator.activeGraphsSignal.emit(PlotHelper.currentPlots())
 
-    def data(self, data=None):
+    @property
+    def data(self):
+        """ data getter """
+        return self._data
+
+    @data.setter
+    def data(self, value):
         """ data setter """
-        self._data = data
+        self._data = value
 
     def title(self, title=""):
         """ title setter """

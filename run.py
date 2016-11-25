@@ -56,7 +56,6 @@ def import_dll(modname, build_path):
     ext = sysconfig.get_config_var('SO')
     # build_path comes from context
     path = joinpath(build_path, *modname.split('.'))+ext
-    #print "importing", modname, "from", path
     return imp.load_dynamic(modname, path)
 
 def prepare():
@@ -76,23 +75,12 @@ def prepare():
     # place than it otherwise would be.
     os.environ['SASVIEW_DOC_PATH'] = joinpath(build_path, "doc")
 
-    # Make sure that we have a private version of mplconfig
-    #mplconfig = joinpath(abspath(dirname(__file__)), '.mplconfig')
-    #os.environ['MPLCONFIGDIR'] = mplconfig
-    #if not os.path.exists(mplconfig): os.mkdir(mplconfig)
-    #import matplotlib
-    #matplotlib.use('Agg')
-    #print matplotlib.__file__
-    #import pylab; pylab.hold(False)
     # add periodictable to the path
     try: import periodictable
     except: addpath(joinpath(root, '..','periodictable'))
 
     try: import bumps
     except: addpath(joinpath(root, '..','bumps'))
-
-    # select wx version
-    #addpath(os.path.join(root, '..','wxPython-src-3.0.0.0','wxPython'))
 
     # Build project if the build directory does not already exist.
     if not os.path.exists(build_path):
@@ -111,9 +99,6 @@ def prepare():
     import sas
     sas.sasview = import_package('sas.sasview', joinpath(root,'sasview'))
 
-    # The sas.models package Compiled Model files should be pulled in from the build directory even though
-    # the source is stored in src/sas/models.
-
     # Compiled modules need to be pulled from the build directory.
     # Some packages are not where they are needed, so load them explicitly.
     import sas.sascalc.pr
@@ -128,9 +113,7 @@ def prepare():
 
     sys.path.append(build_path)
 
-    #print "\n".join(sys.path)
-
 if __name__ == "__main__":
     prepare()
-    from sas.sasview.sasview import run
+    from sas.qtgui.MainWindow import run
     run()

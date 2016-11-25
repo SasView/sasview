@@ -14,9 +14,9 @@ import LocalSetup
 # Local
 from DensityPanel import DensityPanel
 from DensityPanel import toMolarMass
-from GuiUtils import FormulaValidator
+from sas.qtgui.GuiUtils import FormulaValidator
 
-import LocalConfig
+import sas.qtgui.LocalConfig
 
 app = QtGui.QApplication(sys.argv)
 

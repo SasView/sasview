@@ -6,6 +6,9 @@ from PyQt4 import QtCore
 from PyQt4 import QtGui
 from mock import MagicMock
 
+# set up import paths
+import path_prepare
+
 # SV imports
 from sas.sascalc.dataloader.loader import Loader
 from sas.sasgui.guiframe.data_manager import DataManager

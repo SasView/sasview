@@ -11,7 +11,8 @@ from twisted.internet import reactor
 # sas-global
 from sas.sascalc.invariant import invariant
 from sas.sasgui.guiframe.dataFitting import Data1D
-import GuiUtils
+#import GuiUtils
+import sas.qtgui.GuiUtils as GuiUtils
 
 # local
 from UI.TabbedInvariantUI import Ui_tabbedInvariantUI
@@ -342,7 +343,8 @@ class InvariantWindow(QtGui.QDialog, Ui_tabbedInvariantUI):
     def help(self):
         """
         """
-        _TreeLocation = "html/user/sasgui/perspectives/invariant/invariant_help.html"
+        _TreeLocation = self._manager.HELP_DIRECTORY_LOCATION + \
+            "/user/sasgui/perspectives/invariant/invariant_help.html"
         self._helpView.load(QtCore.QUrl(_TreeLocation))
         self._helpView.show()
 

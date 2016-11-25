@@ -5,6 +5,9 @@ import logging
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
+# set up import paths
+import path_prepare
+
 # Local
 from SasviewLogger import XStream
 from SasviewLogger import QtHandler
