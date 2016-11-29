@@ -193,7 +193,7 @@ class Plugin(PluginBase):
         self.bumps_options_menu.Enable(True)
 
         self.id_gpu_options_panel = wx.NewId()
-        self.menu1.Append(self.id_gpu_options_panel, "GPU Options", "Choose how to compile models")
+        self.menu1.Append(self.id_gpu_options_panel, "OpenCL Options", "Choose OpenCL driver or turn it off")
         wx.EVT_MENU(owner, self.id_gpu_options_panel, self.on_gpu_options)
 
         self.id_result_panel = wx.NewId()

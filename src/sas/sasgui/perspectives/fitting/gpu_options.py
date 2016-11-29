@@ -1,18 +1,16 @@
 '''
-Created on Feb 18, 2015
+Created on Nov 29, 2016
 
-@author: jkrzywon
+@author: wpotrzebowski
 '''
-
-__id__ = "$Id: acknoweldgebox.py 2015-18-02 jkrzywon $"
-__revision__ = "$Revision: 1193 $"
 
 import wx
 import wx.richtext
 import wx.lib.hyperlink
-import random
-import os.path
 import os
+
+from sas.sasgui.guiframe.documentation_window import DocumentationWindow
+
 try:
     # Try to find a local config
     import imp
@@ -43,17 +41,9 @@ class GpuOptions(wx.Dialog):
         kwds["style"] = wx.DEFAULT_DIALOG_STYLE
         wx.Dialog.__init__(self, *args, **kwds)
 
-        try:
-            from sasmodels.kernelcl import environment
-            env = environment()
-            clinfo = [ctx.devices[0].name
-                    for ctx in env.context]
-            clinfo.append("No OpenCL")
-        except ImportError:
-            clinfo = None
-
+        clinfo = self._get_clinfo()
         self.panel1 = wx.Panel(self, -1)
-        static_box1 = wx.StaticBox(self.panel1, -1, "OpenCL Options")
+        static_box1 = wx.StaticBox(self.panel1, -1, "Available OpenCL Options:")
 
         rows = len(clinfo)
 
@@ -115,40 +105,25 @@ class GpuOptions(wx.Dialog):
         self.vbox.Fit(self)
 
         self.Centre()
-        #self.__set_properties()
-        #self.__do_layout()
 
-    def __set_properties(self):
-        """
-        :TODO - add method documentation
-        """
-        self.SetTitle("Fitting on GPU Options")
-        self.SetSize((400, 150))
-        # end wxGlade
-
-    def __do_layout(self):
-        """
-        :TODO - add method documentation
-        """
-        sizer_main = wx.BoxSizer(wx.VERTICAL)
-
-        self.SetAutoLayout(True)
-        self.SetSizer(sizer_main)
-        self.Layout()
-        self.Centre()
-        # end wxGlade
+    def _get_clinfo(self):
+        try:
+            import pyopencl as cl
+            devices = cl.get_platforms()[0].get_devices()
+            clinfo = [dev.name for dev in devices]
+            clinfo.append("No OpenCL")
+        except:
+            warnings.warn(str(exc))
+            warnings.warn("pyopencl import failed")
+            clinfo = None
+        return clinfo
 
     def OnRadio(self, event):
         import sasmodels
         button = event.GetEventObject()
-        print(self.option_button[button.Name])
         os.environ["SAS_OPENCL"] = self.option_button[button.Name]
         sasmodels.kernelcl.ENV = None
         reload(sasmodels.core)
-        #if self.option_button[button.Name] == "None":
-        #    sasmodels.core.HAVE_OPENCL = False
-        #else:
-        #    sasmodels.kernelcl.ENV.
 
     def OnAccept(self, event):
         """
@@ -160,8 +135,10 @@ class GpuOptions(wx.Dialog):
         """
         Provide help on the selected fitter.
         """
-        #if self.help is not None:
-        #    self.help(self._get_fitter())
+        _TreeLocation = "user/gpu_computations.html"
+        _anchor = "#device-selection"
+        DocumentationWindow(self, -1,
+                            _TreeLocation, _anchor, "OpenCL Options Help")
 
     def OnClose(self, event):
         """
