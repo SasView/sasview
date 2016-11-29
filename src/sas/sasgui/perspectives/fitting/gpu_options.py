@@ -42,12 +42,11 @@ class GpuOptions(wx.Dialog):
         wx.Dialog.__init__(self, *args, **kwds)
 
         clinfo = self._get_clinfo()
+
         self.panel1 = wx.Panel(self, -1)
         static_box1 = wx.StaticBox(self.panel1, -1, "Available OpenCL Options:")
 
-        rows = len(clinfo)
-
-        flexsizer = wx.FlexGridSizer(rows, 1, hgap=20, vgap=10)
+        boxsizer = wx.BoxSizer(orient=wx.VERTICAL)
         self.option_button = {}
         for index, fitter in enumerate(clinfo):
             button = wx.RadioButton(self.panel1, -1,
@@ -57,10 +56,10 @@ class GpuOptions(wx.Dialog):
             else:
                 self.option_button[fitter] = "None"
             self.Bind(wx.EVT_RADIOBUTTON, self.OnRadio, id=button.GetId())
-            flexsizer.Add(button, 0, 0)
+            boxsizer.Add(button, 0, 0)
 
         fit_hsizer = wx.StaticBoxSizer(static_box1, orient=wx.VERTICAL)
-        fit_hsizer.Add(flexsizer, 0, wx.ALL, 5)
+        fit_hsizer.Add(boxsizer, 0, wx.ALL, 5)
 
         self.panel1.SetSizer(fit_hsizer)
 
@@ -71,37 +70,24 @@ class GpuOptions(wx.Dialog):
         accept_btn.SetToolTipString("Accept new options for GPU")
 
         help_btn = wx.Button(self, wx.ID_HELP, 'Help')
-        #help_btn = wx.Button(self, wx.ID_ANY, 'Help')
         help_btn.SetToolTipString("Help on the GPU options")
 
         self.Bind(wx.EVT_BUTTON, self.OnAccept, accept_btn)
-        #self.Bind(wx.EVT_BUTTON, self.OnCancel, cancel_btn)
         if help is not None:
             self.Bind(wx.EVT_BUTTON, self.OnHelp, help_btn)
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
-        # Create the button sizer that will put the buttons in a row, right
-        # justified, and with a fixed amount of space between them.  This
-        # emulates the Windows convention for placing a set of buttons at the
-        # bottom right of the window.
         btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
         btn_sizer.Add((10,20), 1)  # stretchable whitespace
         btn_sizer.Add(accept_btn, 0)
-        #btn_sizer.Add((10,20), 0)  # non-stretchable whitespace
-        #btn_sizer.Add(cancel_btn, 0)
-        #btn_sizer.Add((10,20), 0)  # non-stretchable whitespace
         btn_sizer.Add((10,20), 0)  # non-stretchable whitespace
         btn_sizer.Add(help_btn, 0)
 
         # Add the button sizer to the main sizer.
         self.vbox.Add(btn_sizer, 0, wx.EXPAND|wx.ALL, 10)
 
-        # Finalize the sizer and establish the dimensions of the dialog box.
-        # The minimum width is explicitly set because the sizer is not able to
-        # take into consideration the width of the enclosing frame's title.
         self.SetSizer(self.vbox)
-        #self.vbox.SetMinSize((size[0], -1))
         self.vbox.Fit(self)
 
         self.Centre()
@@ -127,13 +113,13 @@ class GpuOptions(wx.Dialog):
 
     def OnAccept(self, event):
         """
-        Save the current fitter and options to the fit config.
+        Close window on accpetance
         """
         event.Skip()
 
     def OnHelp(self, event):
         """
-        Provide help on the selected fitter.
+        Provide help on opencl options.
         """
         _TreeLocation = "user/gpu_computations.html"
         _anchor = "#device-selection"
@@ -142,7 +128,7 @@ class GpuOptions(wx.Dialog):
 
     def OnClose(self, event):
         """
-        Don't close the window, just hide it.
+        Close window
         """
         event.Skip()
 
