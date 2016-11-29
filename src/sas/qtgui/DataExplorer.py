@@ -23,9 +23,6 @@ from sas.qtgui.Plotter import Plotter
 from sas.qtgui.Plotter2D import Plotter2D
 from sas.qtgui.DroppableDataLoadWidget import DroppableDataLoadWidget
 
-# This is how to get data1/2D from the model item
-# data = [selected_items[0].child(0).data().toPyObject()]
-
 class DataExplorerWindow(DroppableDataLoadWidget):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
@@ -628,7 +625,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 item.setCheckState(QtCore.Qt.Unchecked)
 
                 try:
-                    is1D = isinstance(item.child(0).data().toPyObject(), Data1D)
+                    is1D = isinstance(GuiUtils.dataFromItem(item), Data1D)
                 except AttributeError:
                     msg = "Bad structure of the data model."
                     raise RuntimeError, msg
@@ -642,7 +639,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 item = self.model.item(index)
 
                 try:
-                    is1D = isinstance(item.child(0).data().toPyObject(), Data1D)
+                    is1D = isinstance(GuiUtils.dataFromItem(item), Data1D)
                 except AttributeError:
                     msg = "Bad structure of the data model."
                     raise RuntimeError, msg
@@ -656,7 +653,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 item = self.model.item(index)
                 item.setCheckState(QtCore.Qt.Unchecked)
                 try:
-                    is2D = isinstance(item.child(0).data().toPyObject(), Data2D)
+                    is2D = isinstance(GuiUtils.dataFromItem(item), Data2D)
                 except AttributeError:
                     msg = "Bad structure of the data model."
                     raise RuntimeError, msg
@@ -670,7 +667,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 item = self.model.item(index)
 
                 try:
-                    is2D = isinstance(item.child(0).data().toPyObject(), Data2D)
+                    is2D = isinstance(GuiUtils.dataFromItem(item), Data2D)
                 except AttributeError:
                     msg = "Bad structure of the data model."
                     raise RuntimeError, msg
@@ -714,7 +711,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             orig_index = model_item.isCheckable()
             if orig_index:
                 # Check the data to enable/disable actions
-                is_2D = isinstance(model_item.child(0).data().toPyObject(), Data2D)
+                is_2D = isinstance(GuiUtils.dataFromItem(model_item), Data2D)
                 self.actionQuick3DPlot.setEnabled(is_2D)
                 self.actionEditMask.setEnabled(is_2D)
                 # Fire up the menu
@@ -726,7 +723,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         index = self.treeView.selectedIndexes()[0]
         model_item = self.model.itemFromIndex(self.data_proxy.mapToSource(index))
-        data = model_item.child(0).data().toPyObject()
+        data = GuiUtils.dataFromItem(model_item)
         if isinstance(data, Data1D):
             text_to_show = GuiUtils.retrieveData1d(data)
             # Hardcoded sizes to enable full width rendering with default font
@@ -753,7 +750,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         index = self.treeView.selectedIndexes()[0]
         model_item = self.model.itemFromIndex(self.data_proxy.mapToSource(index))
-        data = model_item.child(0).data().toPyObject()
+        data = GuiUtils.dataFromItem(model_item)
         if isinstance(data, Data1D):
             GuiUtils.saveData1D(data)
         else:
@@ -765,7 +762,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         index = self.treeView.selectedIndexes()[0]
         model_item = self.model.itemFromIndex(self.data_proxy.mapToSource(index))
-        data = model_item.child(0).data().toPyObject()
+        data = GuiUtils.dataFromItem(model_item)
 
         dimension = 1 if isinstance(data, Data1D) else 2
 

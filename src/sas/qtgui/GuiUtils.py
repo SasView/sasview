@@ -229,7 +229,7 @@ class Communicate(QtCore.QObject):
     activeGraphsSignal = QtCore.pyqtSignal(list)
 
 
-def updateModelItem(item, update_data, name=""):
+def updateModelItemWithPlot(item, update_data, name=""):
     """
     Adds a checkboxed row named "name" to QStandardItem
     Adds QVariant 'update_data' to that row.
@@ -263,6 +263,22 @@ def updateModelItem(item, update_data, name=""):
 
     # Append the new row to the main item
     item.appendRow(checkbox_item)
+
+def updateModelItem(item, update_data, name=""):
+    """
+    Adds a simple named child to QStandardItem
+    """
+    assert isinstance(item, QtGui.QStandardItem)
+    assert isinstance(update_data, list)
+
+    # Add the actual Data1D/Data2D object
+    object_item = QtGui.QStandardItem()
+    object_item.setText(name)
+    object_item.setData(QtCore.QVariant(update_data))
+
+    # Append the new row to the main item
+    item.appendRow(object_item)
+
 
 def plotsFromCheckedItems(model_item):
     """
@@ -563,3 +579,10 @@ class FormulaValidator(QtGui.QValidator):
                 self.parent().setStyleSheet(value)
         except:
             pass
+
+def dataFromItem(item):
+    """
+    Retrieve Data1D/2D component from QStandardItem.
+    The assumption - data stored in SasView standard, in child 0
+    """
+    return item.child(0).data().toPyObject()

@@ -72,10 +72,28 @@ class GuiUtilsTest(unittest.TestCase):
         for signal in list_of_signals:
             self.assertIn(signal, dir(com))
 
-
-    def testUpdateModelItem(self):
+    def testupdateModelItem(self):
         """
-        Test the QModelItem update method
+        Test the generic QModelItem update method
+        """
+        test_item = QtGui.QStandardItem()
+        test_list = ['aa', 4, True, ]
+        name = "Black Sabbath"
+
+        # update the item
+        updateModelItem(test_item, test_list, name)
+
+        # Make sure test_item got all data added
+        self.assertEqual(test_item.child(0).text(), name)
+        list_from_item = test_item.child(0).data().toList()
+        self.assertIsInstance(list_from_item, list)
+        self.assertEqual(list_from_item[0].toPyObject(), test_list[0])
+        self.assertEqual(list_from_item[1].toPyObject(), test_list[1])
+        self.assertEqual(list_from_item[2].toPyObject(), test_list[2])
+
+    def testupdateModelItemWithPlot(self):
+        """
+        Test the QModelItem checkbox update method
         """
         test_item = QtGui.QStandardItem()
         test_list = ['aa','11']
@@ -83,7 +101,7 @@ class GuiUtilsTest(unittest.TestCase):
         name = "Black Sabbath"
 
         # update the item
-        updateModelItem(test_item, update_data, name)
+        updateModelItemWithPlot(test_item, update_data, name)
         
         # Make sure test_item got all data added
         self.assertEqual(test_item.child(0).text(), name)
