@@ -94,9 +94,10 @@ class GpuOptions(wx.Dialog):
 
     def _get_clinfo(self):
         try:
+            #TODO: Is PYOPENCL_CTX setup up in this order?
             import pyopencl as cl
-            devices = cl.get_platforms()[0].get_devices()
-            clinfo = [dev.name for dev in devices]
+            for platform in cl.get_platforms():
+                clinfo = [device.name for device in platform.get_devices()]
             clinfo.append("No OpenCL")
         except:
             warnings.warn(str(exc))
