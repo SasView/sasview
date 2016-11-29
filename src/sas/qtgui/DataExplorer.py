@@ -292,12 +292,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Set the signal handlers
         self.communicator.updateModelFromPerspectiveSignal.connect(self.updateModelFromPerspective)
 
-        # Figure out which rows are checked
-        selected_items = []
-        for index in range(self.model.rowCount()):
+        def isItemReady(index):
             item = self.model.item(index)
-            if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
-                selected_items.append(item)
+            return item.isCheckable() and item.checkState() == QtCore.Qt.Checked
+
+        # Figure out which rows are checked
+        selected_items = [self.model.item(index)
+                          for index in xrange(self.model.rowCount())
+                          if isItemReady(index)]
 
         if len(selected_items) < 1:
             return
@@ -311,9 +313,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             msgbox.setStandardButtons(QtGui.QMessageBox.Ok)
             retval = msgbox.exec_()
             return
-
-        # TODO
-        # New plot or appended?
 
         # Notify the GuiManager about the send request
         self._perspective.setData(data_item=selected_items)
@@ -377,8 +376,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         orig_text = self.cbgraph.currentText()
         self.cbgraph.clear()
         graph_titles = []
-        for graph in graph_list:
-            graph_titles.append("Graph"+str(graph))
+        graph_titles= ["Graph"+str(graph) for graph in graph_list]
+
         self.cbgraph.insertItems(0, graph_titles)
         ind = self.cbgraph.findText(orig_text)
         if ind > 0:
@@ -394,19 +393,25 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Call show on requested plots
         # All same-type charts in one plot
         new_plot = Plotter(self)
+
+        def addDataPlot(plot, plot_set):
+            plot.data = plot_set
+            plot.plot()
+
+        def addDataPlot2D(plot_set):
+            plot2D = Plotter2D(self)
+            addDataPlot(plot2D, plot_set)
+            self.plotAdd(plot2D)
+
         for plot_set in plots:
             if isinstance(plot_set, Data1D):
-                new_plot.data = plot_set
-                new_plot.plot()
+                addDataPlot(new_plot, plot_set)
             elif isinstance(plot_set, Data2D):
-                # Separate 2D plot
-                plot2D = Plotter2D(self)
-                plot2D.data = plot_set
-                plot2D.plot()
-                self.plotAdd(plot2D)
+                addDataPlot2D(plot_set)
             else:
                 msg = "Incorrect data type passed to Plotting"
                 raise AttributeError, msg
+
 
         if plots and \
            hasattr(new_plot, 'data') and \
