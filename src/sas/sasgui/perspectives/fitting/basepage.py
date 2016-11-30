@@ -1582,10 +1582,12 @@ class BasicPage(ScrolledPanel, PanelBase):
                 if param[1] == listtorestore[i][1]:
                     ordered_list.append(param)
                     break
-        if len(ordered_list) != len(statelist):
+        if len(ordered_list) != len(statelist) \
+                and len(ordered_list) != len(listtorestore):
             return
         statelist = ordered_list
 
+        #FIXME: Get rid of check above and simple assign params based on name
         for j in range(len(statelist)) if len(statelist) < len(listtorestore) \
                 else range(len(listtorestore)):
             item_page = listtorestore[j]
@@ -1597,6 +1599,8 @@ class BasicPage(ScrolledPanel, PanelBase):
             if item_page[0] is not None:
                 item_page[0].SetValue(item_page_info[0])
             if item_page[2] is not None:
+                # TODO: On loading save state, should try to coerce length and
+                # TODO: scale params to positive values
                 item_page[2].SetValue(item_page_info[2])
                 if item_page[2].__class__.__name__ == "ComboBox":
                     if item_page_info[2] in self.model.fun_list:

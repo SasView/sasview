@@ -411,10 +411,10 @@ class PageState(object):
                         ".lower" in name or ".units" in name:
                     pass
                 else:
-                    fittable = params.get(name + ".fittable")
-                    std = params.get(name + ".std")
-                    upper = params.get(name + ".upper")
-                    lower = params.get(name + ".lower")
+                    fittable = params.get(name + ".fittable", True)
+                    std = params.get(name + ".std", '0.0')
+                    upper = params.get(name + ".upper", 'inf')
+                    lower = params.get(name + ".lower", '-inf')
                     units = params.get(name + ".units")
                     if std is not None and std is not numpy.nan:
                         std = [True, str(std)]
