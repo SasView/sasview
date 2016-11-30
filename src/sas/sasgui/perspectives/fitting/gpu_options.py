@@ -109,7 +109,7 @@ class GpuOptions(wx.Dialog):
         """
         event.Skip()
 
-    def on_help(self):
+    def on_help(self, event):
         """
         Provide help on opencl options.
         """
