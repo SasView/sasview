@@ -48,13 +48,13 @@ class GpuOptions(wx.Dialog):
 
         boxsizer = wx.BoxSizer(orient=wx.VERTICAL)
         self.option_button = {}
-        for index, fitter in enumerate(clinfo):
+        for index, clopt in enumerate(clinfo):
             button = wx.RadioButton(self.panel1, -1,
-                    label=fitter, name=fitter)
-            if fitter != "No OpenCL":
-                self.option_button[fitter] = str(index)
+                    label=clopt, name=clopt)
+            if clopt != "No OpenCL":
+                self.option_button[clopt] = str(index)
             else:
-                self.option_button[fitter] = "None"
+                self.option_button[clopt] = "None"
             self.Bind(wx.EVT_RADIOBUTTON, self.OnRadio, id=button.GetId())
             boxsizer.Add(button, 0, 0)
 
@@ -67,15 +67,13 @@ class GpuOptions(wx.Dialog):
         self.vbox.Add(self.panel1, 0, wx.ALL, 10)
 
         accept_btn = wx.Button(self, wx.ID_OK)
-        accept_btn.SetToolTipString("Accept new options for GPU")
+        accept_btn.SetToolTipString("Accept OpenCL settings")
 
         help_btn = wx.Button(self, wx.ID_HELP, 'Help')
         help_btn.SetToolTipString("Help on the GPU options")
 
         self.Bind(wx.EVT_BUTTON, self.OnAccept, accept_btn)
-        if help is not None:
-            self.Bind(wx.EVT_BUTTON, self.OnHelp, help_btn)
-
+        self.Bind(wx.EVT_BUTTON, self.OnHelp, help_btn)
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
         btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -112,6 +110,7 @@ class GpuOptions(wx.Dialog):
         button = event.GetEventObject()
         os.environ["SAS_OPENCL"] = self.option_button[button.Name]
         sasmodels.kernelcl.ENV = None
+        #Need to reload sasmodels.core module to account SAS_OPENCL = "None"
         reload(sasmodels.core)
 
     def OnAccept(self, event):
