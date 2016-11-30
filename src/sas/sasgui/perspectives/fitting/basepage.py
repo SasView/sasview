@@ -1576,58 +1576,49 @@ class BasicPage(ScrolledPanel, PanelBase):
         if len(statelist) == 0 or len(listtorestore) == 0:
             return
 
-        ordered_list = []
-        for i in range(len(listtorestore)) :
+        for j in range(len(listtorestore)):
             for param in statelist:
-                if param[1] == listtorestore[i][1]:
-                    ordered_list.append(param)
+                if param[1] == listtorestore[j][1]:
+                    item_page = listtorestore[j]
+                    item_page_info = statelist[j]
+                    if (item_page_info[1] == "theta" or item_page_info[1] ==
+                            "phi") and not self._is_2D():
+                        break
+                    # change the state of the check box for simple parameters
+                    if item_page[0] is not None:
+                        item_page[0].SetValue(item_page_info[0])
+                    if item_page[2] is not None:
+                        # TODO: On loading save state, should try to coerce
+                        # TODO: length and scale params to positive values
+                        item_page[2].SetValue(item_page_info[2])
+                        if item_page[2].__class__.__name__ == "ComboBox":
+                            if item_page_info[2] in self.model.fun_list:
+                                fun_val = self.model.fun_list[item_page_info[2]]
+                                self.model.setParam(item_page_info[1], fun_val)
+                    if item_page[3] is not None:
+                        # show or hide text +/-
+                        if item_page_info[2]:
+                            item_page[3].Show(True)
+                        else:
+                            item_page[3].Hide()
+                    if item_page[4] is not None:
+                        # show of hide the text crtl for fitting error
+                        if item_page_info[4][0]:
+                            item_page[4].Show(True)
+                            item_page[4].SetValue(item_page_info[4][1])
+                        else:
+                            item_page[3].Hide()
+                    if item_page[5] is not None:
+                        # show of hide the text crtl for fitting error
+                        item_page[5].Show(item_page_info[5][0])
+                        item_page[5].SetValue(item_page_info[5][1])
+
+                    if item_page[6] is not None:
+                        # show of hide the text crtl for fitting error
+                        item_page[6].Show(item_page_info[6][0])
+                        item_page[6].SetValue(item_page_info[6][1])
+
                     break
-        if len(ordered_list) != len(statelist) \
-                and len(ordered_list) != len(listtorestore):
-            return
-        statelist = ordered_list
-
-        #FIXME: Get rid of check above and simple assign params based on name
-        for j in range(len(statelist)) if len(statelist) < len(listtorestore) \
-                else range(len(listtorestore)):
-            item_page = listtorestore[j]
-            item_page_info = statelist[j]
-            if (item_page_info[1] == "theta" or item_page_info[1] == "phi") \
-                and not self._is_2D():
-                break
-            # change the state of the check box for simple parameters
-            if item_page[0] is not None:
-                item_page[0].SetValue(item_page_info[0])
-            if item_page[2] is not None:
-                # TODO: On loading save state, should try to coerce length and
-                # TODO: scale params to positive values
-                item_page[2].SetValue(item_page_info[2])
-                if item_page[2].__class__.__name__ == "ComboBox":
-                    if item_page_info[2] in self.model.fun_list:
-                        fun_val = self.model.fun_list[item_page_info[2]]
-                        self.model.setParam(item_page_info[1], fun_val)
-            if item_page[3] is not None:
-                # show or hide text +/-
-                if item_page_info[2]:
-                    item_page[3].Show(True)
-                else:
-                    item_page[3].Hide()
-            if item_page[4] is not None:
-                # show of hide the text crtl for fitting error
-                if item_page_info[4][0]:
-                    item_page[4].Show(True)
-                    item_page[4].SetValue(item_page_info[4][1])
-                else:
-                    item_page[3].Hide()
-            if item_page[5] is not None:
-                # show of hide the text crtl for fitting error
-                item_page[5].Show(item_page_info[5][0])
-                item_page[5].SetValue(item_page_info[5][1])
-
-            if item_page[6] is not None:
-                # show of hide the text crtl for fitting error
-                item_page[6].Show(item_page_info[6][0])
-                item_page[6].SetValue(item_page_info[6][1])
 
     def _reset_strparam_state(self, listtorestore, statelist):
         """
