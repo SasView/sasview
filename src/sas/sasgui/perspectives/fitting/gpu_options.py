@@ -76,16 +76,17 @@ class GpuOptions(wx.Dialog):
         self.Centre()
 
     def _get_clinfo(self):
+        clinfo = []
+
         try:
             import pyopencl as cl
-            clinfo = []
             for platform in cl.get_platforms():
                 for device in platform.get_devices():
                     clinfo.append(device.name)
-            clinfo.append("No OpenCL")
         except ImportError:
-            warnings.warn("pyopencl import failed")
-            clinfo = None
+            warnings.warn("pyopencl import failed. Please check installation")
+
+        clinfo.append("No OpenCL")
         return clinfo
 
     def on_radio(self, event):
