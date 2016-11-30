@@ -4,28 +4,14 @@ Created on Nov 29, 2016
 @author: wpotrzebowski
 '''
 
+import os
+import warnings
+
 import wx
 import wx.richtext
 import wx.lib.hyperlink
-import os
 
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
-
-try:
-    # Try to find a local config
-    import imp
-    path = os.getcwd()
-    if(os.path.isfile("%s/%s.py" % (path, 'local_config'))) or \
-      (os.path.isfile("%s/%s.pyc" % (path, 'local_config'))):
-        fObj, path, descr = imp.find_module('local_config', [path])
-        config = imp.load_module('local_config', fObj, path, descr)
-    else:
-        # Try simply importing local_config
-        import local_config as config
-except:
-    # Didn't find local config, load the default
-    import config
-
 
 class GpuOptions(wx.Dialog):
     """
@@ -49,13 +35,12 @@ class GpuOptions(wx.Dialog):
         boxsizer = wx.BoxSizer(orient=wx.VERTICAL)
         self.option_button = {}
         for index, clopt in enumerate(clinfo):
-            button = wx.RadioButton(self.panel1, -1,
-                    label=clopt, name=clopt)
+            button = wx.RadioButton(self.panel1, -1, label=clopt, name=clopt)
             if clopt != "No OpenCL":
                 self.option_button[clopt] = str(index)
             else:
                 self.option_button[clopt] = "None"
-            self.Bind(wx.EVT_RADIOBUTTON, self.OnRadio, id=button.GetId())
+            self.Bind(wx.EVT_RADIOBUTTON, self.on_radio, id=button.GetId())
             boxsizer.Add(button, 0, 0)
 
         fit_hsizer = wx.StaticBoxSizer(static_box1, orient=wx.VERTICAL)
@@ -72,14 +57,14 @@ class GpuOptions(wx.Dialog):
         help_btn = wx.Button(self, wx.ID_HELP, 'Help')
         help_btn.SetToolTipString("Help on the GPU options")
 
-        self.Bind(wx.EVT_BUTTON, self.OnAccept, accept_btn)
-        self.Bind(wx.EVT_BUTTON, self.OnHelp, help_btn)
-        self.Bind(wx.EVT_CLOSE, self.OnClose)
+        self.Bind(wx.EVT_BUTTON, self.on_accept, accept_btn)
+        self.Bind(wx.EVT_BUTTON, self.on_help, help_btn)
+        self.Bind(wx.EVT_CLOSE, self.on_close)
 
         btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        btn_sizer.Add((10,20), 1)  # stretchable whitespace
+        btn_sizer.Add((10, 20), 1) # stretchable whitespace
         btn_sizer.Add(accept_btn, 0)
-        btn_sizer.Add((10,20), 0)  # non-stretchable whitespace
+        btn_sizer.Add((10, 20), 0) # non-stretchable whitespace
         btn_sizer.Add(help_btn, 0)
 
         # Add the button sizer to the main sizer.
@@ -92,20 +77,24 @@ class GpuOptions(wx.Dialog):
 
     def _get_clinfo(self):
         try:
-            #TODO: Is PYOPENCL_CTX setup up in this order?
             import pyopencl as cl
             clinfo = []
             for platform in cl.get_platforms():
                 for device in platform.get_devices():
                     clinfo.append(device.name)
             clinfo.append("No OpenCL")
-        except:
-            warnings.warn(str(exc))
+        except ImportError:
             warnings.warn("pyopencl import failed")
             clinfo = None
         return clinfo
 
-    def OnRadio(self, event):
+    def on_radio(self, event):
+        """
+        Action triggered when button is selected
+        :param event:
+        :return:
+        """
+
         import sasmodels
         button = event.GetEventObject()
         os.environ["SAS_OPENCL"] = self.option_button[button.Name]
@@ -113,45 +102,23 @@ class GpuOptions(wx.Dialog):
         #Need to reload sasmodels.core module to account SAS_OPENCL = "None"
         reload(sasmodels.core)
 
-    def OnAccept(self, event):
+    def on_accept(self, event):
         """
         Close window on accpetance
         """
         event.Skip()
 
-    def OnHelp(self, event):
+    def on_help(self):
         """
         Provide help on opencl options.
         """
-        _TreeLocation = "user/gpu_computations.html"
-        _anchor = "#device-selection"
+        TreeLocation = "user/gpu_computations.html"
+        anchor = "#device-selection"
         DocumentationWindow(self, -1,
-                            _TreeLocation, _anchor, "OpenCL Options Help")
+                            TreeLocation, anchor, "OpenCL Options Help")
 
-    def OnClose(self, event):
+    def on_close(self, event):
         """
         Close window
         """
         event.Skip()
-
-##### testing code ############################################################
-class MyApp(wx.App):
-    """
-    Class for running module as stand alone for testing
-    """
-    def OnInit(self):
-        """
-        Defines an init when running as standalone
-        """
-        wx.InitAllImageHandlers()
-        dialog = GpuOptions(None, -1, "")
-        self.SetTopWindow(dialog)
-        dialog.ShowModal()
-        dialog.Destroy()
-        return 1
-
-# end of class MyApp
-
-if __name__ == "__main__":
-    app = MyApp(0)
-    app.MainLoop()
