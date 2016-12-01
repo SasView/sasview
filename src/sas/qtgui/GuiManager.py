@@ -24,6 +24,7 @@ from sas.qtgui.WelcomePanel import WelcomePanel
 
 from sas.qtgui.SldPanel import SldPanel
 from sas.qtgui.DensityPanel import DensityPanel
+from sas.qtgui.KiessigPanel import KiessigPanel
 
 # Perspectives
 from sas.qtgui.Perspectives.Invariant.InvariantPerspective import InvariantWindow
@@ -136,7 +137,8 @@ class GuiManager(object):
         # Add calculators - floating for usability
         self.SLDCalculator = SldPanel(self)
         self.DVCalculator = DensityPanel(self)
-
+        #self.KIESSIGCalculator = DensityPanel(self)#KiessigPanel(self)
+        self.KIESSIGCalculator =  KiessigPanel(self)
     def statusBarSetup(self):
         """
         Define the status bar.
@@ -352,6 +354,8 @@ class GuiManager(object):
         self._workspace.actionData_Operation.triggered.connect(self.actionData_Operation)
         self._workspace.actionSLD_Calculator.triggered.connect(self.actionSLD_Calculator)
         self._workspace.actionDensity_Volume_Calculator.triggered.connect(self.actionDensity_Volume_Calculator)
+        self._workspace.actionKeissig_Calculator.triggered.connect(self.actionKiessig_Calculator)
+        #self._workspace.actionKIESSING_Calculator.triggered.connect(self.actionKIESSING_Calculator)
         self._workspace.actionSlit_Size_Calculator.triggered.connect(self.actionSlit_Size_Calculator)
         self._workspace.actionSAS_Resolution_Estimator.triggered.connect(self.actionSAS_Resolution_Estimator)
         self._workspace.actionGeneric_Scattering_Calculator.triggered.connect(self.actionGeneric_Scattering_Calculator)
@@ -524,6 +528,12 @@ class GuiManager(object):
         """
         """
         self.DVCalculator.show()
+
+    def actionKiessig_Calculator(self):
+        """
+        """
+        #self.DVCalculator.show()
+        self.KIESSIGCalculator.show()
 
     def actionSlit_Size_Calculator(self):
         """
