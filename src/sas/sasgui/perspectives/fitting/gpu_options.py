@@ -40,6 +40,7 @@ class GpuOptions(wx.Dialog):
                 self.option_button[clopt] = str(index)
             else:
                 self.option_button[clopt] = "None"
+            self.Bind(wx.EVT_LEFT_DOWN, self.on_radio_default, id=button.GetId())
             self.Bind(wx.EVT_RADIOBUTTON, self.on_radio, id=button.GetId())
             boxsizer.Add(button, 0, 0)
 
@@ -88,6 +89,9 @@ class GpuOptions(wx.Dialog):
 
         clinfo.append("No OpenCL")
         return clinfo
+
+    def on_radio_default(self, event):
+        event.GetEventObject().SetValue(not event.GetEventObject().GetValue())
 
     def on_radio(self, event):
         """

@@ -811,7 +811,7 @@ class Plugin(PluginBase):
         """
         import sas.sasgui.perspectives.fitting.gpu_options as GpuOptions
         dialog = GpuOptions.GpuOptions(None, -1, "")
-        dialog.ShowModal()
+        dialog.Show()
 
     def stop_fit(self, uid):
         """
