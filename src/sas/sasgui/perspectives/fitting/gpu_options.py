@@ -36,11 +36,11 @@ class GpuOptions(wx.Dialog):
         self.option_button = {}
         for index, clopt in enumerate(clinfo):
             button = wx.RadioButton(self.panel1, -1, label=clopt, name=clopt)
+            button.SetValue(0)
             if clopt != "No OpenCL":
                 self.option_button[clopt] = str(index)
             else:
                 self.option_button[clopt] = "None"
-            self.Bind(wx.EVT_LEFT_DOWN, self.on_radio_default, id=button.GetId())
             self.Bind(wx.EVT_RADIOBUTTON, self.on_radio, id=button.GetId())
             boxsizer.Add(button, 0, 0)
 
