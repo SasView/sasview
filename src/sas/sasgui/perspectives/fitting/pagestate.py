@@ -399,6 +399,9 @@ class PageState(object):
             convert.convert_model(self.structurecombobox, p)
         formfactor, params = \
             convert.convert_model(self.formfactorcombobox, params)
+        # if len(self.str_parameters) > 0:
+        #     formfactor, str_params = \
+        #         convert.convert_model(formfactor, self.str_parameters)
 
         # Only convert if old != new, otherwise all the same
         if formfactor != self.formfactorcombobox or \
@@ -420,14 +423,14 @@ class PageState(object):
                         std = [True, str(std)]
                     else:
                         std = [False, '']
-                    if lower is not None:
+                    if lower is not None and lower is not numpy.nan:
                         lower = [True, str(lower)]
                     else:
-                        lower = [False, '']
-                    if upper is not None:
+                        lower = [True, '-inf']
+                    if upper is not None and upper is not numpy.nan:
                         upper = [True, str(upper)]
                     else:
-                        upper = [False, '']
+                        upper = [True, 'inf']
                     param_list = [bool(fittable), str(name), str(info),
                                   "+/-", std, lower, upper, str(units)]
                     self.parameters.append(param_list)

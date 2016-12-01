@@ -1176,6 +1176,10 @@ class BasicPage(ScrolledPanel, PanelBase):
             # to support older version
             formfactor_pos = int(state.formfactorcombobox)
         except:
+            if self.categorybox.GetValue() == 'Customized Models' \
+                    and '[plug-in]' not in state.formfactorcombobox:
+                state.formfactorcombobox = \
+                    '[plug-in] ' + state.formfactorcombobox
             formfactor_pos = 0
             for ind_form in range(self.formfactorbox.GetCount()):
                 if self.formfactorbox.GetString(ind_form) == \
@@ -1580,7 +1584,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             for param in statelist:
                 if param[1] == listtorestore[j][1]:
                     item_page = listtorestore[j]
-                    item_page_info = statelist[j]
+                    item_page_info = param
                     if (item_page_info[1] == "theta" or item_page_info[1] ==
                             "phi") and not self._is_2D():
                         break
