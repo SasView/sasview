@@ -409,7 +409,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 msg = "Incorrect data type passed to Plotting"
                 raise AttributeError, msg
 
-
         if plots and \
            hasattr(new_plot, 'data') and \
            len(new_plot.data.x) > 0:
@@ -764,11 +763,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         model_item = self.model.itemFromIndex(self.data_proxy.mapToSource(index))
         data = GuiUtils.dataFromItem(model_item)
 
-        dimension = 1 if isinstance(data, Data1D) else 2
+        method_name = 'Plotter'
+        if isinstance(data, Data2D):
+            method_name='Plotter2D'
 
         # TODO: Replace this with the proper MaskPlotPanel from plottools
-        new_plot = Plotter(self)
-        new_plot.data(data)
+        new_plot = globals()[method_name](self, quickplot=True)
+        new_plot.data = data
         new_plot.plot(marker='o', linestyle='')
 
         # Update the global plot counter

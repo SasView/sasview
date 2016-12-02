@@ -27,8 +27,8 @@ def deletePlot(plot_id):
     """
     Deletes an existing plot from the dictionary
     """
-    assert plot_id in this._plots
-    del this._plots[plot_id]
+    if plot_id in this._plots:
+        del this._plots[plot_id]
 
 def currentPlots():
     """
@@ -40,9 +40,7 @@ def plotById(plot_id):
     """
     Returns the plot referenced by the ID
     """
-    assert plot_id in this._plots
-
-    return this._plots[plot_id]
+    return this._plots[plot_id] if plot_id in this._plots else None
 
 def idOfPlot(plot):
     """
