@@ -34,17 +34,40 @@ class KiessigCalculatorTest(unittest.TestCase):
         """ Assure help file is shown """
 
         # this should not rise
-        self.widget.on_help()
+        self.widget.onHelp()
 
     def testComplexEntryNumbers(self):
         """ User entered compound calculations and subsequent reset"""
 
-        self.widget.deltaq_in.insert("2.0")
-
+        self.widget.deltaq_in.clear()
+        self.widget.deltaq_in.insert('0.05')
+        #
         # Push Compute with the left mouse button
         computeButton = self.widget.computeButton
         QTest.mouseClick(computeButton, Qt.LeftButton)
-        self.assertEqual(self.widget.lengthscale_out.text(), '3.1416')
+        self.assertEqual(self.widget.lengthscale_out.text(), '125.664')
+
+    def testComplexEntryNumbers2(self):
+        """ User entered compound calculations and subsequent reset"""
+
+        self.widget.deltaq_in.clear()
+        self.widget.deltaq_in.insert('1.0')
+        #
+        # Push Compute with the left mouse button
+        computeButton = self.widget.computeButton
+        QTest.mouseClick(computeButton, Qt.LeftButton)
+        self.assertEqual(self.widget.lengthscale_out.text(), '6.283')
+
+    def testComplexEntryNumbers3(self):
+        """ User entered compound calculations and subsequent reset"""
+
+        self.widget.deltaq_in.clear()
+        self.widget.deltaq_in.insert('2.0')
+        #
+        # Push Compute with the left mouse button
+        computeButton = self.widget.computeButton
+        QTest.mouseClick(computeButton, Qt.LeftButton)
+        self.assertEqual(self.widget.lengthscale_out.text(), '3.142')
 
     def testComplexEntryLetters(self):
         """ User entered compound calculations and subsequent reset"""

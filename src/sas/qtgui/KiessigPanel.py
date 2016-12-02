@@ -16,15 +16,17 @@ class KiessigPanel(QtGui.QDialog, Ui_KiessigPanel):
         self.manager = parent
         self.thickness = KiessigThicknessCalculator()
 
+        self.deltaq_in.setText("0.05")
+
         # signals
-        self.helpButton.clicked.connect(self.on_help)
-        self.computeButton.clicked.connect(self.on_compute)
-        self.closeButton.clicked.connect(self.on_close)
+        self.helpButton.clicked.connect(self.onHelp)
+        self.computeButton.clicked.connect(self.onCompute)
+        self.closeButton.clicked.connect(self.onClose)
 
         # no reason to have this widget resizable
         self.setFixedSize(self.minimumSizeHint())
 
-    def on_help(self):
+    def onHelp(self):
         """
         Bring up the Kiessig fringe calculator Documentation whenever
         the HELP button is clicked.
@@ -41,19 +43,19 @@ class KiessigPanel(QtGui.QDialog, Ui_KiessigPanel):
             # No manager defined - testing and standalone runs
             pass
 
-    def on_compute(self):
+    def onCompute(self):
         """
         Execute the computation of thickness
         """
         try:
             self.thickness.set_deltaq(dq=float(self.deltaq_in.text()))
             kiessing_result = self.thickness.compute_thickness()
-            float_as_str = "{:5.4f}".format(kiessing_result)
+            float_as_str = "{:.3f}".format(kiessing_result)
             self.lengthscale_out.setText(float_as_str)
         except (ArithmeticError, ValueError):
             self.lengthscale_out.setText("")
 
-    def on_close(self):
+    def onClose(self):
         """
         close the window containing this panel
         """
