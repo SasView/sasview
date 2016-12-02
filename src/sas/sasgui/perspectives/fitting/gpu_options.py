@@ -56,7 +56,8 @@ class GpuOptions(wx.Dialog):
         accept_btn = wx.Button(self, wx.ID_OK)
         accept_btn.SetToolTipString("Accept OpenCL settings")
 
-        help_btn = wx.Button(self, wx.ID_HELP, 'Help')
+        help_id = wx.NewId()
+        help_btn = wx.Button(self, help_id, 'Help')
         help_btn.SetToolTipString("Help on the GPU options")
 
         self.Bind(wx.EVT_BUTTON, self.on_accept, accept_btn)
