@@ -34,14 +34,15 @@ class GpuOptions(wx.Dialog):
 
         boxsizer = wx.BoxSizer(orient=wx.VERTICAL)
         self.option_button = {}
+        self.buttons = []
         for index, clopt in enumerate(clinfo):
-            button = wx.RadioButton(self.panel1, -1, label=clopt, name=clopt)
-            button.SetValue(0)
+            button = wx.CheckBox(self.panel1, -1, label=clopt, name=clopt)
             if clopt != "No OpenCL":
                 self.option_button[clopt] = str(index)
             else:
                 self.option_button[clopt] = "None"
-            self.Bind(wx.EVT_RADIOBUTTON, self.on_radio, id=button.GetId())
+            self.Bind(wx.EVT_CHECKBOX, self.on_radio, id=button.GetId())
+            self.buttons.append(button)
             boxsizer.Add(button, 0, 0)
 
         fit_hsizer = wx.StaticBoxSizer(static_box1, orient=wx.VERTICAL)
@@ -99,10 +100,12 @@ class GpuOptions(wx.Dialog):
         :param event:
         :return:
         """
-
         import sasmodels
-        button = event.GetEventObject()
-        os.environ["SAS_OPENCL"] = self.option_button[button.Name]
+        selected_button = event.GetEventObject()
+        for btn in self.buttons:
+            if btn != selected_button:
+                btn.SetValue(0)
+        os.environ["SAS_OPENCL"] = self.option_button[selected_button.Name]
         sasmodels.kernelcl.ENV = None
         #Need to reload sasmodels.core module to account SAS_OPENCL = "None"
         reload(sasmodels.core)
