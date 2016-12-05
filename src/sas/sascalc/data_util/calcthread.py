@@ -254,6 +254,7 @@ class CalcThread:
         # difficult to avoid.  Rather than polling, I will exit the
         # thread when the queue is empty and start a new thread when
         # there is more work to be done.
+        errors = 0
         while 1:
             self._lock.acquire()
             self._time_for_nap = clock() + self.worktime
@@ -269,7 +270,9 @@ class CalcThread:
             except KeyboardInterrupt:
                 pass
             except:
-                self.exception()
+                errors += 1
+        if errors > 0:
+            self.exception()
         self._running = False
 
 
