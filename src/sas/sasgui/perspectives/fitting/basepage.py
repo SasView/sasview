@@ -1389,9 +1389,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         # self.state.shape_indep_rbutton = self.shape_indep_rbutton.GetValue()
         # self.state.struct_rbutton = self.struct_rbutton.GetValue()
         # self.state.plugin_rbutton = self.plugin_rbutton.GetValue()
-        self.state.structurecombobox = self.structurebox.GetLabel()
-        self.state.formfactorcombobox = self.formfactorbox.GetLabel()
-        self.state.categorycombobox = self.categorybox.GetLabel()
+        self.state.structurecombobox = self.structurebox.GetValue()
+        self.state.formfactorcombobox = self.formfactorbox.GetValue()
+        self.state.categorycombobox = self.categorybox.GetValue()
 
         # post state to fit panel
         event = PageInfoEvent(page=self)
