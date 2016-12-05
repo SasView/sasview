@@ -63,7 +63,7 @@ class GpuOptions(wx.Dialog):
 
         accept_btn = wx.Button(self, wx.ID_OK)
         accept_btn.SetToolTipString("Accept new OpenCL settings. This will"
-                                    "overwrite SAS_OPENCL variable if set")
+                                    " overwrite SAS_OPENCL variable if set")
 
         help_id = wx.NewId()
         help_btn = wx.Button(self, help_id, 'Help')
@@ -90,16 +90,20 @@ class GpuOptions(wx.Dialog):
 
         self.SetSizer(self.vbox)
         self.vbox.Fit(self)
-
+        self.SetTitle("OpenCL options")
         self.Centre()
 
     def _get_clinfo(self):
+        """
+        Reading in information about available OpenCL infrastructure
+        :return:
+        """
         clinfo = []
         try:
             import pyopencl as cl
             for platform in cl.get_platforms():
                 for device in platform.get_devices():
-                    clinfo.append(device.name)
+                    clinfo.append(":".join([platform.name,device.name]))
         except ImportError:
             warnings.warn("pyopencl import failed. Please check installation")
 
@@ -116,7 +120,10 @@ class GpuOptions(wx.Dialog):
         for btn in self.buttons:
             if btn != selected_button:
                 btn.SetValue(0)
-        self.sas_opencl = self.option_button[selected_button.Name]
+        if selected_button.GetValue():
+            self.sas_opencl = self.option_button[selected_button.Name]
+        else:
+            self.sas_opencl = None
 
     def on_OK(self, event):
         """
