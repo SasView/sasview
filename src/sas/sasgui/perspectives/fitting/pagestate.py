@@ -361,22 +361,50 @@ class PageState(object):
         A check to see if the loaded save state was saved in SasView v4_0+
         :return: None
         """
+        if self.formfactorcombobox == '':
+            if self.categorycombobox == '' and len(self.parameters) == 3:
+                self.categorycombobox = "Shape-Independent"
+                self.formfactorcombobox = 'PowerLawAbsModel'
+            elif self.categorycombobox == '' and len(self.parameters) == 9:
+                self.categorycombobox = 'Cylinder'
+                self.formfactorcombobox = 'barbell'
+            elif self.categorycombobox == 'Shapes':
+                self.formfactorcombobox = 'BCCrystalModel'
+            elif self.categorycombobox == 'Uncategorized':
+                self.formfactorcombobox = 'LineModel'
+            elif self.categorycombobox == 'StructureFactor':
+                self.structurecombobox = 'HardsphereStructure'
+            elif self.categorycombobox == 'Customized Models':
+                self.formfactorcombobox = 'MySumFunction'
+            elif self.categorycombobox == 'Ellipsoid':
+                self.formfactorcombobox = 'core_shell_ellipsoid'
+            elif self.categorycombobox == 'Lamellae':
+                self.formfactorcombobox = 'lamellar'
+            elif self.categorycombobox == 'Paracrystal':
+                self.formfactorcombobox = 'bcc_paracrystal'
+            elif self.categorycombobox == 'Parallelepiped':
+                self.formfactorcombobox = 'core_shell_parallelepiped'
+            elif self.categorycombobox == 'Shape Independent':
+                self.formfactorcombobox = 'be_polyelectrolyte'
+            elif self.categorycombobox == 'Sphere':
+                self.formfactorcombobox = 'adsorbed_layer'
+            elif self.categorycombobox == 'Structure Factor':
+                self.formfactorcombobox = 'hardsphere'
         newname = convert._conversion_target(self.formfactorcombobox)
         if newname == None:
             return True
         else:
             return False
 
-    def _convert_to_sasmodels(self):
+    def param_remap_to_sasmodels_convert(self, params):
         """
-        Convert parameters to a form usable by sasmodels converter
+        Remaps the parameters for sasmodels conversion
 
-        :return: None
+        :param params: list of parameters (likely self.parameters)
+        :return: remapped dictionary of parameters
         """
-        # Create conversion dictionary to send to sasmodels
         p = dict()
-        for fittable, name, value, _, uncert, lower, upper, units in \
-                self.parameters:
+        for fittable, name, value, _, uncert, lower, upper, units in params:
             if not value:
                 value = numpy.nan
             if not uncert or uncert[1] == '':
@@ -394,14 +422,59 @@ class PageState(object):
             p[name + ".upper"] = float(upper[1])
             p[name + ".lower"] = float(lower[1])
             p[name + ".units"] = units
+        return p
 
+    def param_remap_from_sasmodels_convert(self, params):
+        """
+        Converts {name : value} map back to [] param list
+        :param params: parameter map returned from sasmodels
+        :return: None
+        """
+        p_map = []
+        for name, info in params.iteritems():
+            if ".fittable" in name or ".std" in name or ".upper" in name or \
+                            ".lower" in name or ".units" in name:
+                pass
+            else:
+                fittable = params.get(name + ".fittable", True)
+                std = params.get(name + ".std", '0.0')
+                upper = params.get(name + ".upper", 'inf')
+                lower = params.get(name + ".lower", '-inf')
+                units = params.get(name + ".units")
+                if std is not None and std is not numpy.nan:
+                    std = [True, str(std)]
+                else:
+                    std = [False, '']
+                if lower is not None and lower is not numpy.nan:
+                    lower = [True, str(lower)]
+                else:
+                    lower = [True, '-inf']
+                if upper is not None and upper is not numpy.nan:
+                    upper = [True, str(upper)]
+                else:
+                    upper = [True, 'inf']
+                param_list = [bool(fittable), str(name), str(info),
+                              "+/-", std, lower, upper, str(units)]
+                p_map.append(param_list)
+        return p_map
+
+    def _convert_to_sasmodels(self):
+        """
+        Convert parameters to a form usable by sasmodels converter
+
+        :return: None
+        """
+        # Create conversion dictionary to send to sasmodels
+        p = self.param_remap_to_sasmodels_convert(self.parameters)
         structurefactor, params = \
             convert.convert_model(self.structurecombobox, p)
         formfactor, params = \
             convert.convert_model(self.formfactorcombobox, params)
-        # if len(self.str_parameters) > 0:
-        #     formfactor, str_params = \
-        #         convert.convert_model(formfactor, self.str_parameters)
+        if len(self.str_parameters) > 0:
+            str_p = self.param_remap_to_sasmodels_convert(self.str_parameters)
+            formfactor, str_params = convert.convert_model(formfactor, str_p)
+        else:
+            str_params = None
 
         # Only convert if old != new, otherwise all the same
         if formfactor != self.formfactorcombobox or \
@@ -409,32 +482,10 @@ class PageState(object):
             self.formfactorcombobox = formfactor
             self.structurecombobox = structurefactor
             self.parameters = []
-            for name, info in params.iteritems():
-                if ".fittable" in name or ".std" in name or ".upper" in name or\
-                        ".lower" in name or ".units" in name:
-                    pass
-                else:
-                    fittable = params.get(name + ".fittable", True)
-                    std = params.get(name + ".std", '0.0')
-                    upper = params.get(name + ".upper", 'inf')
-                    lower = params.get(name + ".lower", '-inf')
-                    units = params.get(name + ".units")
-                    if std is not None and std is not numpy.nan:
-                        std = [True, str(std)]
-                    else:
-                        std = [False, '']
-                    if lower is not None and lower is not numpy.nan:
-                        lower = [True, str(lower)]
-                    else:
-                        lower = [True, '-inf']
-                    if upper is not None and upper is not numpy.nan:
-                        upper = [True, str(upper)]
-                    else:
-                        upper = [True, 'inf']
-                    param_list = [bool(fittable), str(name), str(info),
-                                  "+/-", std, lower, upper, str(units)]
-                    self.parameters.append(param_list)
-
+            self.parameters = self.param_remap_from_sasmodels_convert(params)
+            if str_params:
+                self.str_parameters = \
+                    self.param_remap_from_sasmodels_convert(str_params)
 
     def _repr_helper(self, list, rep):
         """
