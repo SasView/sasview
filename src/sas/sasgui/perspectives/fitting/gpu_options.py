@@ -35,12 +35,20 @@ class GpuOptions(wx.Dialog):
         boxsizer = wx.BoxSizer(orient=wx.VERTICAL)
         self.option_button = {}
         self.buttons = []
+        #Check if SAS_OPENCL is already set
+        self.sas_opencl = os.environ.get("SAS_OPENCL","")
         for index, clopt in enumerate(clinfo):
             button = wx.CheckBox(self.panel1, -1, label=clopt, name=clopt)
+
             if clopt != "No OpenCL":
                 self.option_button[clopt] = str(index)
+                if self.sas_opencl == str(index):
+                    button.SetValue(1)
             else:
                 self.option_button[clopt] = "None"
+                if self.sas_opencl.lower() == "none" :
+                    button.SetValue(1)
+
             self.Bind(wx.EVT_CHECKBOX, self.on_check, id=button.GetId())
             self.buttons.append(button)
             boxsizer.Add(button, 0, 0)
@@ -54,18 +62,26 @@ class GpuOptions(wx.Dialog):
         self.vbox.Add(self.panel1, 0, wx.ALL, 10)
 
         accept_btn = wx.Button(self, wx.ID_OK)
-        accept_btn.SetToolTipString("Accept OpenCL settings")
+        accept_btn.SetToolTipString("Accept new OpenCL settings. This will"
+                                    "overwrite SAS_OPENCL variable if set")
 
         help_id = wx.NewId()
         help_btn = wx.Button(self, help_id, 'Help')
         help_btn.SetToolTipString("Help on the GPU options")
 
+        reset_id = wx.NewId()
+        reset_btn = wx.Button(self, reset_id, 'Reset')
+        reset_btn.SetToolTipString("Restore initial settings")
+
         self.Bind(wx.EVT_BUTTON, self.on_OK, accept_btn)
+        self.Bind(wx.EVT_BUTTON, self.on_reset, reset_btn)
         self.Bind(wx.EVT_BUTTON, self.on_help, help_btn)
 
         btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
         btn_sizer.Add((10, 20), 1) # stretchable whitespace
         btn_sizer.Add(accept_btn, 0)
+        btn_sizer.Add((10, 20), 0) # non-stretchable whitespace
+        btn_sizer.Add(reset_btn, 0)
         btn_sizer.Add((10, 20), 0) # non-stretchable whitespace
         btn_sizer.Add(help_btn, 0)
 
@@ -79,7 +95,6 @@ class GpuOptions(wx.Dialog):
 
     def _get_clinfo(self):
         clinfo = []
-
         try:
             import pyopencl as cl
             for platform in cl.get_platforms():
@@ -101,17 +116,31 @@ class GpuOptions(wx.Dialog):
         for btn in self.buttons:
             if btn != selected_button:
                 btn.SetValue(0)
-        os.environ["SAS_OPENCL"] = self.option_button[selected_button.Name]
+        self.sas_opencl = self.option_button[selected_button.Name]
 
     def on_OK(self, event):
         """
         Close window on accpetance
         """
         import sasmodels
+        #If statement added to handle Reset
+        if self.sas_opencl:
+            os.environ["SAS_OPENCL"] = self.sas_opencl
+        else:
+            if "SAS_OPENCL" in os.environ:
+                del(os.environ["SAS_OPENCL"])
         sasmodels.kernelcl.ENV = None
         #Need to reload sasmodels.core module to account SAS_OPENCL = "None"
         reload(sasmodels.core)
         event.Skip()
+
+    def on_reset(self, event):
+        """
+        Close window on accpetance
+        """
+        for btn in self.buttons:
+            btn.SetValue(0)
+        self.sas_opencl=None
 
     def on_help(self, event):
         """
