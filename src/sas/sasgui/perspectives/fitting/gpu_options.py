@@ -105,7 +105,7 @@ class GpuOptions(wx.Dialog):
                 for device in platform.get_devices():
                     clinfo.append(":".join([platform.name,device.name]))
         except ImportError:
-            warnings.warn("pyopencl import failed. Please check installation")
+            warnings.warn("pyopencl import failed. Using only CPU computations")
 
         clinfo.append("No OpenCL")
         return clinfo
