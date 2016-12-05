@@ -1,4 +1,7 @@
 '''
+Module provides dialog for setting SAS_OPENCL variable, which defines
+device choice for OpenCL calculation
+
 Created on Nov 29, 2016
 
 @author: wpotrzebowski
@@ -6,19 +9,16 @@ Created on Nov 29, 2016
 
 import os
 import warnings
-
 import wx
-import wx.richtext
-import wx.lib.hyperlink
 
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
 class GpuOptions(wx.Dialog):
     """
-    "Acknowledgement" Dialog Box
+    "OpenCL options" Dialog Box
 
-    Shows the current method for acknowledging SasView in
-    scholarly publications.
+    Provides dialog for setting SAS_OPENCL variable, which defines
+    device choice for OpenCL calculation
 
     """
 
@@ -41,7 +41,7 @@ class GpuOptions(wx.Dialog):
                 self.option_button[clopt] = str(index)
             else:
                 self.option_button[clopt] = "None"
-            self.Bind(wx.EVT_CHECKBOX, self.on_radio, id=button.GetId())
+            self.Bind(wx.EVT_CHECKBOX, self.on_check, id=button.GetId())
             self.buttons.append(button)
             boxsizer.Add(button, 0, 0)
 
@@ -60,9 +60,8 @@ class GpuOptions(wx.Dialog):
         help_btn = wx.Button(self, help_id, 'Help')
         help_btn.SetToolTipString("Help on the GPU options")
 
-        self.Bind(wx.EVT_BUTTON, self.on_accept, accept_btn)
+        self.Bind(wx.EVT_BUTTON, self.on_OK, accept_btn)
         self.Bind(wx.EVT_BUTTON, self.on_help, help_btn)
-        self.Bind(wx.EVT_CLOSE, self.on_close)
 
         btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
         btn_sizer.Add((10, 20), 1) # stretchable whitespace
@@ -92,29 +91,26 @@ class GpuOptions(wx.Dialog):
         clinfo.append("No OpenCL")
         return clinfo
 
-    def on_radio_default(self, event):
-        event.GetEventObject().SetValue(not event.GetEventObject().GetValue())
-
-    def on_radio(self, event):
+    def on_check(self, event):
         """
         Action triggered when button is selected
         :param event:
         :return:
         """
-        import sasmodels
         selected_button = event.GetEventObject()
         for btn in self.buttons:
             if btn != selected_button:
                 btn.SetValue(0)
         os.environ["SAS_OPENCL"] = self.option_button[selected_button.Name]
-        sasmodels.kernelcl.ENV = None
-        #Need to reload sasmodels.core module to account SAS_OPENCL = "None"
-        reload(sasmodels.core)
 
-    def on_accept(self, event):
+    def on_OK(self, event):
         """
         Close window on accpetance
         """
+        import sasmodels
+        sasmodels.kernelcl.ENV = None
+        #Need to reload sasmodels.core module to account SAS_OPENCL = "None"
+        reload(sasmodels.core)
         event.Skip()
 
     def on_help(self, event):
@@ -125,9 +121,3 @@ class GpuOptions(wx.Dialog):
         anchor = "#device-selection"
         DocumentationWindow(self, -1,
                             TreeLocation, anchor, "OpenCL Options Help")
-
-    def on_close(self, event):
-        """
-        Close window
-        """
-        event.Skip()

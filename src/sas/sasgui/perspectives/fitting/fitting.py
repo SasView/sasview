@@ -44,6 +44,7 @@ from sas.sasgui.perspectives.calculator.model_editor import TextDialog
 from sas.sasgui.perspectives.calculator.model_editor import EditorWindow
 from sas.sasgui.guiframe.gui_manager import MDIFrame
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
+from sas.sasgui.perspectives.fitting.gpu_options import GpuOptions
 
 from . import models
 
@@ -809,8 +810,7 @@ class Plugin(PluginBase):
         """
         Make the Fit Results panel visible.
         """
-        import sas.sasgui.perspectives.fitting.gpu_options as GpuOptions
-        dialog = GpuOptions.GpuOptions(None, -1, "")
+        dialog = GpuOptions(None, wx.ID_ANY, "")
         dialog.Show()
 
     def stop_fit(self, uid):
