@@ -1,7 +1,3 @@
-# global
-#import sys
-#import os
-#from PyQt4 import QtCore
 from PyQt4 import QtGui
 
 import sas.sasview
@@ -35,6 +31,8 @@ class ScaleProperties(QtGui.QDialog, Ui_scalePropertiesUI):
 
         # Connect combobox index change to a custom method
         self.cbView.currentIndexChanged.connect(self.viewIndexChanged)
+        self.cbX.currentIndexChanged.connect(self.xyIndexChanged)
+        self.cbY.currentIndexChanged.connect(self.xyIndexChanged)
 
     def getValues(self):
         """
@@ -47,5 +45,20 @@ class ScaleProperties(QtGui.QDialog, Ui_scalePropertiesUI):
         Update X and Y labels based on the "View" index
         """
         if index > 0:
+            # Disable signals so xyIndexChanged() doesn't get called
+            self.cbX.blockSignals(True)
+            self.cbY.blockSignals(True)
+
+            # Update the sub-controls
             self.cbX.setCurrentIndex(view_to_xy[view_values[index]][0])
             self.cbY.setCurrentIndex(view_to_xy[view_values[index]][1])
+            # Re-enable the signals
+
+            self.cbX.blockSignals(False)
+            self.cbY.blockSignals(False)
+
+    def xyIndexChanged(self, index):
+        """
+        Update View label based on the "X" and "Y" index
+        """
+        self.cbView.setCurrentIndex(0)

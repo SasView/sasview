@@ -505,7 +505,7 @@ class DataExplorerTest(unittest.TestCase):
         # Assure add_data on data_manager was called (last call)
         self.assertTrue(self.form.manager.add_data.called)
 
-    def testNewPlot(self):
+    def testNewPlot1D(self):
         """
         Creating new plots from Data1D/2D
         """
@@ -520,6 +520,39 @@ class DataExplorerTest(unittest.TestCase):
 
         # get Data1D
         p_file="cyl_400_20.txt"
+        output_object = loader.load(p_file)
+        new_data = [manager.create_gui_data(output_object, p_file)]
+
+        # Mask retrieval of the data
+        self.form.plotsFromCheckedItems = MagicMock(return_value=new_data)
+
+        # Mask plotting
+        self.form.parent.workspace = MagicMock()
+
+        # Call the plotting method
+        self.form.newPlot()
+
+        # The plot was registered
+        self.assertEqual(len(PlotHelper.currentPlots()), 1)
+
+        self.assertTrue(self.form.cbgraph.isEnabled())
+        self.assertTrue(self.form.cmdAppend.isEnabled())
+
+    def testNewPlot2D(self):
+        """
+        Creating new plots from Data1D/2D
+        """
+        loader = Loader()
+        manager = DataManager()
+        PlotHelper.clear()
+        self.form.enableGraphCombo(None)
+
+        # Make sure the controls are disabled
+        self.assertFalse(self.form.cbgraph.isEnabled())
+        self.assertFalse(self.form.cmdAppend.isEnabled())
+
+        # get Data2D
+        p_file="Dec07031.ASC"
         output_object = loader.load(p_file)
         new_data = [manager.create_gui_data(output_object, p_file)]
 

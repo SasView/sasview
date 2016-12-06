@@ -34,14 +34,14 @@ plot_backend = "WXAgg"
 
 # Sort out matplotlib version
 import matplotlib
-try:
-    import pkg_resources
-    pkg_resources.require("matplotlib>=" + plot_version)
-except:
-    from distutils.version import LooseVersion as Version
-    if Version(matplotlib.__version__) < Version(plot_version):
-        msg = "Matplotlib version must be %s or newer" % (plot_version, )
-        raise ImportError(msg)
+#try:
+#    import pkg_resources
+#    pkg_resources.require("matplotlib>=" + plot_version)
+#except:
+#    from distutils.version import LooseVersion as Version
+#    if Version(matplotlib.__version__) < Version(plot_version):
+#        msg = "Matplotlib version must be %s or newer" % (plot_version, )
+#        raise ImportError(msg)
 
 # Sort out matplotlib backend
 #import matplotlib
@@ -50,7 +50,8 @@ if 'matplotlib.backends' not in sys.modules:
     matplotlib.use(plot_backend)
 elif matplotlib.get_backend() != plot_backend:
     # if a backend has already been selected, make sure it is the correct one.
-    raise ImportError("Matplotlib not using backend " + plot_backend)
+    #raise ImportError("Matplotlib not using backend " + plot_backend)
+    pass
 
 # set global plot style
 param = 'legend.handletextpad'
