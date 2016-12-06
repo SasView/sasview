@@ -1159,8 +1159,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             # to support older version
             category_pos = int(state.categorycombobox)
         except:
-            if not state._is_sasmodels():
-                state._convert_to_sasmodels()
+            state._convert_to_sasmodels()
             state.categorycombobox = unicode(state.categorycombobox)
             if state.categorycombobox in self.categorybox.Items:
                 category_pos = self.categorybox.Items.index(
@@ -1591,8 +1590,6 @@ class BasicPage(ScrolledPanel, PanelBase):
                     if item_page[0] is not None:
                         item_page[0].SetValue(item_page_info[0])
                     if item_page[2] is not None:
-                        # TODO: On loading save state, should try to coerce
-                        # TODO: length and scale params to positive values
                         item_page[2].SetValue(item_page_info[2])
                         if item_page[2].__class__.__name__ == "ComboBox":
                             if item_page_info[2] in self.model.fun_list:
@@ -1608,19 +1605,17 @@ class BasicPage(ScrolledPanel, PanelBase):
                         # show of hide the text crtl for fitting error
                         if item_page_info[4][0]:
                             item_page[4].Show(True)
-                            item_page[4].SetValue(item_page_info[4][1])
+                            item_page[4].SetValue(str(item_page_info[4][1]))
                         else:
                             item_page[3].Hide()
                     if item_page[5] is not None:
                         # show of hide the text crtl for fitting error
-                        item_page[5].Show(item_page_info[5][0])
-                        item_page[5].SetValue(item_page_info[5][1])
-
+                        item_page[5].Show(True)
+                        item_page[5].SetValue(str(item_page_info[5][1]))
                     if item_page[6] is not None:
                         # show of hide the text crtl for fitting error
-                        item_page[6].Show(item_page_info[6][0])
-                        item_page[6].SetValue(item_page_info[6][1])
-
+                        item_page[6].Show(True)
+                        item_page[6].SetValue(str(item_page_info[6][1]))
                     break
 
     def _reset_strparam_state(self, listtorestore, statelist):

@@ -356,7 +356,7 @@ class PageState(object):
             obj.saved_states[copy_name] = copy_state
         return obj
 
-    def _is_sasmodels(self):
+    def _old_first_model(self):
         """
         A check to see if the loaded save state was saved in SasView v4_0+
         :return: None
@@ -390,11 +390,6 @@ class PageState(object):
                 self.formfactorcombobox = 'adsorbed_layer'
             elif self.categorycombobox == 'Structure Factor':
                 self.formfactorcombobox = 'hardsphere'
-        newname = convert._conversion_target(self.formfactorcombobox)
-        if newname == None:
-            return True
-        else:
-            return False
 
     def param_remap_to_sasmodels_convert(self, params):
         """
@@ -465,6 +460,7 @@ class PageState(object):
         :return: None
         """
         # Create conversion dictionary to send to sasmodels
+        self._old_first_model()
         p = self.param_remap_to_sasmodels_convert(self.parameters)
         structurefactor, params = \
             convert.convert_model(self.structurecombobox, p)
