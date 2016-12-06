@@ -559,7 +559,7 @@ This includes the following:
 Some non-standard constants and functions are also provided:
 
     M_PI_180, M_4PI_3:
-        $\pi/{180}$, $\tfrac{4}{3}\pi$
+        $\frac{\pi}{180}$, $\frac{4\pi}{3}$
     SINCOS(x, s, c):
         Macro which sets s=sin(x) and c=cos(x). The variables *c* and *s*
         must be declared first.
@@ -595,24 +595,25 @@ The following special functions and scattering calculations are defined in
 `sasmodels/models/lib <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib>`_.
 These functions have been tuned to be fast and numerically stable down
 to $q=0$ even in single precision.  In some cases they work around bugs
-which appear on some platforms but not others. So use them where needed.
-The list in :code:`source` gives the required dependencies, related to the described function, that have to be added to your model !!!
-
+which appear on some platforms but not others, so use them where needed.
+Add the files listed in :code:`source = ["lib/file.c", ...]` to your *model.py*
+file in the order given, otherwise these functions will not be available.
 
     polevl(x, c, n):
-        Polynomial evaluation $p(x) = \sum_{i=0}^n c_i x^{n-i}$ using Horner's
+        Polynomial evaluation $p(x) = \sum_{i=0}^n c_i x^i$ using Horner's
         method so it is faster and more accurate.
 
-        $c = \{c_i\}$ is the table of coefficients' values (sorted from the highest order to the constant one).
+        $c = \{c_n, c_{n-1}, \ldots, c_0 \}$ is the table of coefficients,
+        sorted from highest to lowest.
 
-        :code:`source = ["lib/polevl.c" ...]` (`link to code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/polevl.c>`_)
+        :code:`source = ["lib/polevl.c", ...]` (`link to code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/polevl.c>`_)
 
     p1evl(x, c, n):
-        Evaluation of normalized polynomial $p(x) = x^n + \sum_{i=1}^n c_i x^{n-i}$ using Horner's
-        method so it is faster and more accurate.
+        Evaluation of normalized polynomial $p(x) = x^n + \sum_{i=0}^{n-1} c_i x^i$
+        using Horner's method so it is faster and more accurate.
 
-        $c = \{c_i\}$ is the table of coefficients' values (sorted from the highest order to the constant one)
-        with $c[n]=c_0=1.0$.
+        $c = \{c_{n-1}, c_{n-2} \ldots, c_0 \}$ is the table of coefficients,
+        sorted from highest to lowest.
 
         :code:`source = ["lib/polevl.c", ...]`
         (`link to code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/polevl.c>`_)
@@ -620,18 +621,19 @@ The list in :code:`source` gives the required dependencies, related to the descr
     sas_gamma(x):
         Gamma function $\text{sas_gamma}(x) = \Gamma(x)$.
 
-        The standard math library gamma function, tgamma(x) is unstable for x below 1 on some platforms.
+        The standard math function, tgamma(x) is unstable for $x < 1$
+        on some platforms.
 
         :code:`source = ["lib/sasgamma.c", ...]`
         (`link to code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/sas_gamma.c>`_)
 
     sas_erf(x), sas_erfc(x):
         Error function
-        $\text{sas_erf}(x) = \frac{1}{\sqrt\pi}\int_0^x e^{-t^2}\,dt$
+        $\text{sas_erf}(x) = \frac{2}{\sqrt\pi}\int_0^x e^{-t^2}\,dt$
         and complementary error function
-        $\text{sas_erfc}(x) = \frac{1}{\sqrt\pi}\int_x^{\infty} e^{-t^2}\,dt$.
+        $\text{sas_erfc}(x) = \frac{2}{\sqrt\pi}\int_x^{\infty} e^{-t^2}\,dt$.
 
-        The standard math library erf and erfc are slower and broken
+        The standard math functions erf(x) and erfc(x) are slower and broken
         on some platforms.
 
         :code:`source = ["lib/polevl.c", "lib/sas_erf.c", ...]`
@@ -641,6 +643,8 @@ The list in :code:`source` gives the required dependencies, related to the descr
         Bessel function of the first kind $\text{sas_J0}(x)=J_0(x)$ where
         $J_0(x) = \frac{1}{\pi}\int_0^\pi \cos(x\sin(\tau))\,d\tau$.
 
+        The standard math function j0(x) is not available on all platforms.
+
         :code:`source = ["lib/polevl.c", "lib/sas_J0.c", ...]`
         (`link to Bessel function's code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/sas_J0.c>`_)
 
@@ -648,14 +652,18 @@ The list in :code:`source` gives the required dependencies, related to the descr
         Bessel function of the first kind  $\text{sas_J1}(x)=J_1(x)$ where
         $J_1(x) = \frac{1}{\pi}\int_0^\pi \cos(\tau - x\sin(\tau))\,d\tau$.
 
+        The standard math function j1(x) is not available on all platforms.
+
         :code:`source = ["lib/polevl.c", "lib/sas_J1.c", ...]`
         (`link to Bessel function's code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/sas_J1.c>`_)
 
     sas_JN(n, x):
-        Bessel function of the first kind and integer order $n$: $\text{sas_JN}(n, x)=J_n(x)$ where
+        Bessel function of the first kind and integer order $n$:
+        $\text{sas_JN}(n, x)=J_n(x)$ where
         $J_n(x) = \frac{1}{\pi}\int_0^\pi \cos(n\tau - x\sin(\tau))\,d\tau$.
-
         If $n$ = 0 or 1, it uses sas_J0(x) or sas_J1(x), respectively.
+
+        The standard math function jn(n, x) is not available on all platforms.
 
         :code:`source = ["lib/polevl.c", "lib/sas_J0.c", "lib/sas_J1.c", "lib/sas_JN.c", ...]`
         (`link to Bessel function's code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/sas_JN.c>`_)
@@ -669,29 +677,26 @@ The list in :code:`source` gives the required dependencies, related to the descr
 
         .. math::
 
-           \begin{equation}
-             \text{Si}(x) \sim \frac{\pi}{2} - \frac{\cos(x)}{x}\big(1 - \frac{2!}{x^2} + \frac{4!}{x^4}
-             - \frac{6!}{x^6} \big) - \frac{\sin(x)}{x} \big(\frac{1}{x} - \frac{3!}{x^3} + \frac{5!}{x^5}
-             - \frac{7!}{x^7}\big)
-           \end{equation}
+             \text{Si}(x) \sim \frac{\pi}{2}
+             - \frac{\cos(x)}{x}\left(1 - \frac{2!}{x^2} + \frac{4!}{x^4} - \frac{6!}{x^6} \right)
+             - \frac{\sin(x)}{x}\left(\frac{1}{x} - \frac{3!}{x^3} + \frac{5!}{x^5} - \frac{7!}{x^7}\right)
 
         For small arguments,
 
         .. math::
 
-          \begin{equation}
-           \text{Si}(x) \sim x - \frac{x^3}{3\times 3!} + \frac{x^5}{5 \times 5!} - \frac{x^7}{7 \times 7!}
+           \text{Si}(x) \sim x
+           - \frac{x^3}{3\times 3!} + \frac{x^5}{5 \times 5!} - \frac{x^7}{7 \times 7!}
            + \frac{x^9}{9\times 9!} - \frac{x^{11}}{11\times 11!}
-           \end{equation}
 
         :code:`source = ["lib/Si.c", ...]`
         (`link to code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/Si.c>`_)
 
     sph_j1c(x):
         Spherical Bessel form
-        $\text{sph_j1c}(x) = 3 j_1(x)/(x) = 3 (\sin(x) - x \cos(x))/{(x)^3}$,
-        with a limiting value of 1 at $x=0$, where $j_1(x)$ is the spherical Bessel function of the first kind
-        and first order.
+        $\text{sph_j1c}(x) = 3 j_1(x)/x = 3 (\sin(x) - x \cos(x))/x^3$,
+        with a limiting value of 1 at $x=0$, where $j_1(x)$ is the spherical
+        Bessel function of the first kind and first order.
 
         This function uses a Taylor series for small $x$ for numerical accuracy.
 
@@ -700,8 +705,9 @@ The list in :code:`source` gives the required dependencies, related to the descr
 
 
     sas_J1c(x):
-        Bessel form $\text{sas_J1c}(x) = 2 J_1(x)/{(x)}$, with a limiting value of 1 at $x=0$,
-        where $J_1(x)$ is the Bessel function of first kind and first order.
+        Bessel form $\text{sas_J1c}(x) = 2 J_1(x)/x$, with a limiting value
+        of 1 at $x=0$, where $J_1(x)$ is the Bessel function of first kind
+        and first order.
 
         :code:`source = ["lib/polevl.c", "lib/sas_J1.c", ...]`
         (`link to Bessel form's code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/sas_J1.c>`_)
@@ -709,7 +715,7 @@ The list in :code:`source` gives the required dependencies, related to the descr
 
     Gauss76Z[i], Gauss76Wt[i]:
         Points $z_i$ and weights $w_i$ for 76-point Gaussian quadrature, respectively,
-        computing $\int_{-1}^1 f(z)\,dz \approx \sum_{i=1}^{76} w_i f(z_i)$.
+        computing $\int_{-1}^1 f(z)\,dz \approx \sum_{i=1}^{76} w_i\,f(z_i)$.
 
         Similar arrays are available in :code:`gauss20.c` for 20-point
         quadrature and in :code:`gauss150.c` for 150-point quadrature.
