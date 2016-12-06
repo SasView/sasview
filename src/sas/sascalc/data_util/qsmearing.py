@@ -60,9 +60,12 @@ def smear_selection(data, model = None):
     _found_sesans = False
     #if data.dx is not None and data.meta_data['loader']=='SESANS':
     if data.dx is not None and data.isSesans:
-        if data.dx[0] > 0.0:
+        #if data.dx[0] > 0.0:
+        if numpy.size(data.dx[data.dx <= 0]) == 0:
             _found_sesans = True
-
+        #if data.dx[0] <= 0.0:
+        if numpy.size(data.dx[data.dx <= 0]) > 0:
+            raise ValueError('one or more of your dx values are negative, please check the data file!')
     if _found_sesans == True:
         #Pre-compute the Hankel matrix (H)
         qmax, qunits = data.sample.zacceptance
@@ -119,7 +122,7 @@ class PySmear(object):
         self.model = model
         self.resolution = resolution
         if hasattr(self.resolution, 'data'):
-            if self.resolution.data.meta_data['loader'] == 'SESANS':
+            if self.resolution.data.meta_data['loader'] == 'SESANS': # Always True if file extension is '.ses'!
                 self.offset = 0
             # This is default behaviour, for future resolution/transform functions this needs to be revisited.
             else:
