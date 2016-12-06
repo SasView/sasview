@@ -767,7 +767,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if isinstance(data, Data2D):
             method_name='Plotter2D'
 
-        # TODO: Replace this with the proper MaskPlotPanel from plottools
         new_plot = globals()[method_name](self, quickplot=True)
         new_plot.data = data
         new_plot.plot(marker='o', linestyle='')
@@ -781,9 +780,22 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
     def quickData3DPlot(self):
         """
+        Slowish 3D plot
         """
-        print "quickData3DPlot"
-        pass
+        index = self.treeView.selectedIndexes()[0]
+        model_item = self.model.itemFromIndex(self.data_proxy.mapToSource(index))
+        data = GuiUtils.dataFromItem(model_item)
+
+        new_plot = Plotter2D(self, quickplot=True, dimension=3)
+        new_plot.data = data
+        new_plot.plot(marker='o', linestyle='')
+
+        # Update the global plot counter
+        title = "Plot " + data.name
+        new_plot.setWindowTitle(title)
+
+        # Show the plot
+        new_plot.show()
 
     def showEditDataMask(self):
         """

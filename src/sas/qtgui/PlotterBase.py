@@ -51,7 +51,6 @@ class PlotterBase(QtGui.QDialog):
         self.qy_data = []
         self.color=0
         self.symbol=0
-        self.dimension=1
         self.grid_on = False
         self.scale = 'linear'
         self.x_label = "log10(x)"
