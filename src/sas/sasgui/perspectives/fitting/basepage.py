@@ -2131,7 +2131,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.fitrange = False
                 flag = False
             else:
-                self.Npts_fit.SetValue(str(len(index_data[index_data is True])))
+                self.Npts_fit.SetValue(str(len(index_data[index_data])))
                 self.fitrange = True
 
         return flag
