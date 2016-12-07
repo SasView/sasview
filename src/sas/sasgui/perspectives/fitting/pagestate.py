@@ -402,13 +402,13 @@ class PageState(object):
         for fittable, name, value, _, uncert, lower, upper, units in params:
             if not value:
                 value = numpy.nan
-            if not uncert or uncert[1] == '':
+            if not uncert or uncert[1] == '' or uncert[1] == 'None':
                 uncert[0] = False
                 uncert[1] = numpy.nan
-            if not upper or upper[1] == '':
+            if not upper or upper[1] == '' or upper[1] == 'None':
                 upper[0] = False
                 upper[1] = numpy.nan
-            if not lower or lower[1] == '':
+            if not lower or lower[1] == '' or lower[1] == 'None':
                 lower[0] = False
                 lower[1] = numpy.nan
             p[name] = float(value)
