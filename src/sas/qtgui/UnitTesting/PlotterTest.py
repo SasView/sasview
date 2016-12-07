@@ -99,17 +99,47 @@ class PlotterTest(unittest.TestCase):
         """ Assure the unit/legend transformation is correct"""
         self.plotter.data = self.data
 
-        self.plotter.xyTransform(xLabel="ln(x)", yLabel="ln(y)")
-        self.assertEqual(self.plotter.ax.get_xlabel(), "$\\ln{()}()$")
-        self.assertEqual(self.plotter.ax.get_ylabel(), "$\\ln{()}()$")
+        self.plotter.xyTransform(xLabel="x", yLabel="y")
+        self.assertEqual(self.plotter.ax.get_xlabel(), "$()$")
+        self.assertEqual(self.plotter.ax.get_ylabel(), "$()$")
 
-        self.plotter.xyTransform(xLabel="ln(x)", yLabel="ln(y)")
-        self.assertEqual(self.plotter.ax.get_xlabel(), "$\\ln{()}()$")
-        self.assertEqual(self.plotter.ax.get_ylabel(), "$\\ln{()}()$")
-
-        self.plotter.xyTransform(xLabel="x^(2)", yLabel="1/sqrt(y)")
+        self.plotter.xyTransform(xLabel="x^(2)", yLabel="1/y")
         self.assertEqual(self.plotter.ax.get_xlabel(), "$^{2}(()^{2})$")
+        self.assertEqual(self.plotter.ax.get_ylabel(), "$1/(()^{-1})$")
+
+        self.plotter.xyTransform(xLabel="x^(4)", yLabel="ln(y)")
+        self.assertEqual(self.plotter.ax.get_xlabel(), "$^{4}(()^{4})$")
+        self.assertEqual(self.plotter.ax.get_ylabel(), "$\\ln{()}()$")
+
+        self.plotter.xyTransform(xLabel="ln(x)", yLabel="y^(2)")
+        self.assertEqual(self.plotter.ax.get_xlabel(), "$\\ln{()}()$")
+        self.assertEqual(self.plotter.ax.get_ylabel(), "$^{2}(()^{2})$")
+
+        self.plotter.xyTransform(xLabel="log10(x)", yLabel="y*x^(2)")
+        self.assertEqual(self.plotter.ax.get_xlabel(), "$()$")
+        self.assertEqual(self.plotter.ax.get_ylabel(), "$ \\ \\ ^{2}(()^{2})$")
+
+        self.plotter.xyTransform(xLabel="log10(x^(4))", yLabel="y*x^(4)")
+        self.assertEqual(self.plotter.ax.get_xlabel(), "$^{4}(()^{4})$")
+        self.assertEqual(self.plotter.ax.get_ylabel(), "$ \\ \\ ^{4}(()^{16})$")
+
+        self.plotter.xyTransform(xLabel="x", yLabel="1/sqrt(y)")
         self.assertEqual(self.plotter.ax.get_ylabel(), "$1/\\sqrt{}(()^{-0.5})$")
+
+        self.plotter.xyTransform(xLabel="x", yLabel="log10(y)")
+        self.assertEqual(self.plotter.ax.get_ylabel(), "$()$")
+
+        self.plotter.xyTransform(xLabel="x", yLabel="ln(y*x)")
+        self.assertEqual(self.plotter.ax.get_ylabel(), "$\\ln{( \\ \\ )}()$")
+
+        self.plotter.xyTransform(xLabel="x", yLabel="ln(y*x^(2))")
+        self.assertEqual(self.plotter.ax.get_ylabel(), "$\\ln ( \\ \\ ^{2})(()^{2})$")
+
+        self.plotter.xyTransform(xLabel="x", yLabel="ln(y*x^(4))")
+        self.assertEqual(self.plotter.ax.get_ylabel(), "$\\ln ( \\ \\ ^{4})(()^{4})$")
+
+        self.plotter.xyTransform(xLabel="x", yLabel="log10(y*x^(4))")
+        self.assertEqual(self.plotter.ax.get_ylabel(), "$ \\ \\ ^{4}(()^{4})$")
 
 if __name__ == "__main__":
     unittest.main()

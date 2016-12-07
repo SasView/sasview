@@ -118,6 +118,8 @@ class GuiManagerTest(unittest.TestCase):
         """
         Test that the custom exit method is called on shutdown
         """
+        self.manager._workspace.show()
+
         # Must mask sys.exit, otherwise the whole testing process stops.
         sys.exit = MagicMock()
 

@@ -8,6 +8,7 @@ DEFAULT_CMAP = pylab.cm.jet
 
 import sas.qtgui.PlotUtilities as PlotUtilities
 from sas.qtgui.PlotterBase import PlotterBase
+from mpl_toolkits.mplot3d import Axes3D
 
 class Plotter2D(PlotterBase):
     def __init__(self, parent=None, quickplot=False, dimension=2):
@@ -39,7 +40,7 @@ class Plotter2D(PlotterBase):
         """
         Plot 2D self._data
         """
-        # create an axis object
+        # Toggle the scale
         zmin_2D_temp = self.zmin
         zmax_2D_temp = self.zmax
         if self.scale == 'log_{10}':
@@ -59,12 +60,15 @@ class Plotter2D(PlotterBase):
             if not self.zmax is None:
                 zmax_2D_temp = numpy.log10(self.zmax)
 
-        self.image(data=self.data.data, qx_data=self.qx_data,
-                   qy_data=self.qy_data, xmin=self.xmin,
-                   xmax=self.xmax,
-                   ymin=self.ymin, ymax=self.ymax,
-                   cmap=self.cmap, zmin=zmin_2D_temp,
-                   zmax=zmax_2D_temp)
+        # Prepare and show the plot
+        self.showPlot(data=self.data.data,
+                      qx_data=self.qx_data,
+                      qy_data=self.qy_data,
+                      xmin=self.xmin,
+                      xmax=self.xmax,
+                      ymin=self.ymin, ymax=self.ymax,
+                      cmap=self.cmap, zmin=zmin_2D_temp,
+                      zmax=zmax_2D_temp)
 
     def contextMenuQuickPlot(self):
         """
@@ -95,11 +99,11 @@ class Plotter2D(PlotterBase):
         """
         self.plot()
 
-    def image(self, data, qx_data, qy_data, xmin, xmax, ymin, ymax,
-              zmin, zmax, color=0, symbol=0, markersize=0,
-              label='data2D', cmap=DEFAULT_CMAP):
+    def showPlot(self, data, qx_data, qy_data, xmin, xmax, ymin, ymax,
+                 zmin, zmax, color=0, symbol=0, markersize=0,
+                 label='data2D', cmap=DEFAULT_CMAP):
         """
-        Render the current data
+        Render and show the current data
         """
         self.qx_data = qx_data
         self.qy_data = qy_data
@@ -151,7 +155,6 @@ class Plotter2D(PlotterBase):
             cbax = self.figure.add_axes([0.84, 0.2, 0.02, 0.7])
         else:
             # clear the previous 2D from memory
-            # mpl is not clf, so we do
             self.figure.clear()
 
             self.figure.subplots_adjust(left=0.1, right=.8, bottom=.1)
@@ -160,23 +163,14 @@ class Plotter2D(PlotterBase):
             Y = self._data.y_bins[0:-1]
             X, Y = numpy.meshgrid(X, Y)
 
-            try:
-                # mpl >= 1.0.0
-                ax = self.figure.gca(projection='3d')
-                cbax = self.figure.add_axes([0.84, 0.1, 0.02, 0.8])
-                if len(X) > 60:
-                    ax.disable_mouse_rotation()
-            except:
-                # mpl < 1.0.0
-                try:
-                    from mpl_toolkits.mplot3d import Axes3D
-                except:
-                    logging.error("PlotPanel could not import Axes3D")
-                self.figure.clear()
-                ax = Axes3D(self.figure)
-                if len(X) > 60:
-                    ax.cla()
-                cbax = None
+            ax = Axes3D(self.figure)
+            cbax = self.figure.add_axes([0.84, 0.1, 0.02, 0.8])
+            # Disable rotation for large sets.
+            # TODO: Define "large" for a dataset
+            SET_TOO_LARGE = 500
+            if len(X) > SET_TOO_LARGE:
+                ax.disable_mouse_rotation()
+
             self.figure.canvas.resizing = False
             im = ax.plot_surface(X, Y, output, rstride=1, cstride=1, cmap=cmap,
                                  linewidth=0, antialiased=False)
@@ -189,6 +183,7 @@ class Plotter2D(PlotterBase):
             cb = self.figure.colorbar(im, cax=cbax)
         cb.update_bruteforce(im)
         cb.set_label('$' + self.scale + '$')
+
         if self.dimension != 3:
             self.figure.canvas.draw_idle()
         else:

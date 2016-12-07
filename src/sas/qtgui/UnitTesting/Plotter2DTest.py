@@ -5,6 +5,7 @@ from PyQt4 import QtGui
 from PyQt4 import QtCore
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from mock import MagicMock
+from mpl_toolkits.mplot3d import Axes3D
 
 ####### TEMP
 import LocalSetup
@@ -53,11 +54,21 @@ class Plotter2DTest(unittest.TestCase):
         """ Look at the plotting """
         self.plotter.data = self.data
         self.plotter.show()
-        FigureCanvas.draw = MagicMock()
+        FigureCanvas.draw_idle = MagicMock()
 
         self.plotter.plot()
 
-        #self.assertTrue(FigureCanvas.draw.called)
+        self.assertTrue(FigureCanvas.draw_idle.called)
+
+    def testOnToggleScale(self):
+        """ Respond to the event by replotting """
+        self.plotter.data = self.data
+        self.plotter.show()
+        FigureCanvas.draw_idle = MagicMock()
+
+        self.plotter.onToggleScale(None)
+
+        self.assertTrue(FigureCanvas.draw_idle.called)
 
     def testContextMenuQuickPlot(self):
         """ Test the right click menu """
@@ -98,9 +109,66 @@ class Plotter2DTest(unittest.TestCase):
 
         # Trigger Change Scale and make sure the method is called
         self.assertEqual(actions[6].text(), "Toggle Linear/Log Scale")
-        FigureCanvas.draw = MagicMock()
+        FigureCanvas.draw_idle = MagicMock()
         actions[6].trigger()
-        #self.assertTrue(FigureCanvas.draw.called)
+        self.assertTrue(FigureCanvas.draw_idle.called)
+
+    def testShowNoPlot(self):
+        """ Test the plot rendering and generation """
+
+        FigureCanvas.draw_idle = MagicMock()
+        FigureCanvas.draw = MagicMock()
+
+        # Test early return on no data
+        self.plotter.showPlot(data=None,
+                              qx_data=self.data.qx_data,
+                              qy_data=self.data.qy_data,
+                              xmin=self.data.xmin,
+                              xmax=self.data.xmax,
+                              ymin=self.data.ymin, ymax=self.data.ymax,
+                              cmap=None, zmin=None,
+                              zmax=None)
+
+        self.assertFalse(FigureCanvas.draw_idle.called)
+        self.assertFalse(FigureCanvas.draw.called)
+
+    def testShow3DPlot(self):
+        """ Test the 3Dplot rendering and generation """
+        # Test 3D printout
+        FigureCanvas.draw = MagicMock()
+        Axes3D.plot_surface = MagicMock()
+        self.plotter.figure.colorbar = MagicMock()
+
+        self.plotter.dimension = 3
+        self.plotter.data = self.data
+        self.plotter.showPlot(data=self.plotter.data.data,
+                              qx_data=self.data.qx_data,
+                              qy_data=self.data.qy_data,
+                              xmin=self.data.xmin,
+                              xmax=self.data.xmax,
+                              ymin=self.data.ymin, ymax=self.data.ymax,
+                              cmap=None, zmin=None,
+                              zmax=None)
+        self.assertTrue(Axes3D.plot_surface.called)
+        self.assertTrue(FigureCanvas.draw.called)
+
+    def testShow2DPlot(self):
+        """ Test the 2Dplot rendering and generation """
+        # Test 2D printout
+        FigureCanvas.draw_idle = MagicMock()
+        self.plotter.figure.colorbar = MagicMock()
+
+        self.plotter.dimension = 2
+        self.plotter.data = self.data
+        self.plotter.showPlot(data=self.plotter.data.data,
+                              qx_data=self.data.qx_data,
+                              qy_data=self.data.qy_data,
+                              xmin=self.data.xmin,
+                              xmax=self.data.xmax,
+                              ymin=self.data.ymin, ymax=self.data.ymax,
+                              cmap=None, zmin=None,
+                              zmax=None)
+        self.assertTrue(FigureCanvas.draw_idle.called)
 
 
 if __name__ == "__main__":

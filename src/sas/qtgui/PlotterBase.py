@@ -89,10 +89,6 @@ class PlotterBase(QtGui.QDialog):
         """ title setter """
         self._title = title
 
-    #def id(self, id=""):
-    #    """ id setter """
-    #    self.id = id
-
     @property
     def xLabel(self, xlabel=""):
         """ x-label setter """
