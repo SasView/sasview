@@ -3,6 +3,7 @@ BumpsFitting module runs the bumps optimizer.
 """
 import os
 from datetime import timedelta, datetime
+import traceback
 
 import numpy
 
@@ -291,8 +292,11 @@ class BumpsFit(FitEngine):
             # TODO: should scale stderr by sqrt(chisq/DOF) if dy is unknown
             R.success = result['success']
             if R.success:
-                R.stderr = numpy.hstack((result['stderr'][fitted_index],
-                                         numpy.NaN*numpy.ones(len(fitness.computed_pars))))
+                if result['stderr'] is None:
+                    R.stderr = numpy.NaN*numpy.ones(len(param_list))
+                else:
+                    R.stderr = numpy.hstack((result['stderr'][fitted_index],
+                                             numpy.NaN*numpy.ones(len(fitness.computed_pars))))
                 R.pvec = numpy.hstack((result['value'][fitted_index],
                                       [p.value for p in fitness.computed_pars]))
                 R.fitness = numpy.sum(R.residuals**2)/(fitness.numpoints() - len(fitted_index))
@@ -304,6 +308,7 @@ class BumpsFit(FitEngine):
             if result['uncertainty'] is not None:
                 R.uncertainty_state = result['uncertainty']
             all_results.append(R)
+        all_results[0].mesg = result['errors']
 
         if q is not None:
             q.put(all_results)
@@ -342,9 +347,10 @@ def run_bumps(problem, handler, curr_thread):
     #import time; T0 = time.time()
     try:
         best, fbest = fitdriver.fit()
-    except:
-        import traceback; traceback.print_exc()
-        raise
+        errors = []
+    except Exception as exc:
+        best, fbest = None, numpy.NaN
+        errors = [str(exc), traceback.traceback.format_exc()]
     finally:
         mapper.stop_mapper(fitdriver.mapper)
 
@@ -354,11 +360,18 @@ def run_bumps(problem, handler, curr_thread):
                    if convergence_list else numpy.empty((0,1),'d'))
 
     success = best is not None
+    try:
+        stderr = fitdriver.stderr() if success else None
+    except Exception as exc:
+        errors.append(str(exc))
+        errors.append(traceback.format_exc())
+        stderr = None
     return {
         'value': best if success else None,
-        'stderr': fitdriver.stderr() if success else None,
+        'stderr': stderr,
         'success': success,
         'convergence': convergence,
         'uncertainty': getattr(fitdriver.fitter, 'state', None),
+        'errors': '\n'.join(errors),
         }
 

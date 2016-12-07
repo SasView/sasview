@@ -371,7 +371,8 @@ target_wx_client = Target(
     dest_base = "SasView"
     )
 
-bundle_option = 2
+# bundle_option = 2
+bundle_option = 3
 if is_64bits:
     bundle_option = 3
 generate_installer()
