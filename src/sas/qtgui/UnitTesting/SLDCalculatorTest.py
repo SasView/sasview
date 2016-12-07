@@ -8,7 +8,7 @@ from PyQt4 import QtCore
 from mock import MagicMock
 
 ####### TEMP
-import LocalSetup
+import path_prepare
 #######
 
 # Local

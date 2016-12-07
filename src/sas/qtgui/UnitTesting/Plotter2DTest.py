@@ -8,7 +8,7 @@ from mock import MagicMock
 from mpl_toolkits.mplot3d import Axes3D
 
 ####### TEMP
-import LocalSetup
+import path_prepare
 #######
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import Data2D

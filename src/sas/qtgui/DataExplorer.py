@@ -22,6 +22,7 @@ import sas.qtgui.PlotHelper as PlotHelper
 from sas.qtgui.Plotter import Plotter
 from sas.qtgui.Plotter2D import Plotter2D
 from sas.qtgui.DroppableDataLoadWidget import DroppableDataLoadWidget
+from sas.qtgui.MaskEditor import MaskEditor
 
 class DataExplorerWindow(DroppableDataLoadWidget):
     # The controller which is responsible for managing signal slots connections
@@ -800,8 +801,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
     def showEditDataMask(self):
         """
         """
-        print "showEditDataMask"
-        pass
+        index = self.treeView.selectedIndexes()[0]
+        model_item = self.model.itemFromIndex(self.data_proxy.mapToSource(index))
+        data = GuiUtils.dataFromItem(model_item)
+
+        mask_editor = MaskEditor(self, data)
+
+        mask_editor.exec_()
 
     def loadComplete(self, output):
         """

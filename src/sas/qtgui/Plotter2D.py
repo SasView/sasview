@@ -10,10 +10,10 @@ import sas.qtgui.PlotUtilities as PlotUtilities
 from sas.qtgui.PlotterBase import PlotterBase
 from mpl_toolkits.mplot3d import Axes3D
 
-class Plotter2D(PlotterBase):
-    def __init__(self, parent=None, quickplot=False, dimension=2):
+class Plotter2DWidget(PlotterBase):
+    def __init__(self, parent=None, manager=None, quickplot=False, dimension=2):
         self.dimension = dimension
-        super(Plotter2D, self).__init__(parent, quickplot=quickplot)
+        super(Plotter2DWidget, self).__init__(parent, manager=manager, quickplot=quickplot)
 
     @property
     def data(self):
@@ -188,3 +188,9 @@ class Plotter2D(PlotterBase):
             self.figure.canvas.draw_idle()
         else:
             self.figure.canvas.draw()
+
+class Plotter2D(QtGui.QDialog, Plotter2DWidget):
+    def __init__(self, parent=None, quickplot=False, dimension=2):
+
+        QtGui.QDialog.__init__(self)
+        Plotter2DWidget.__init__(self, manager=parent, quickplot=quickplot, dimension=2)

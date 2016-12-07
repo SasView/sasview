@@ -16,12 +16,12 @@ from sas.qtgui.ScaleProperties import ScaleProperties
 import sas.qtgui.PlotUtilities as PlotUtilities
 import sas.qtgui.PlotHelper as PlotHelper
 
-class PlotterBase(QtGui.QDialog):
-    def __init__(self, parent=None, quickplot=False):
+class PlotterBase(QtGui.QWidget):
+    def __init__(self, parent=None, manager=None, quickplot=False):
         super(PlotterBase, self).__init__(parent)
 
         # Required for the communicator
-        self.parent = parent
+        self.manager = manager
         self.quickplot = quickplot
 
         # a figure instance to plot on
@@ -70,7 +70,7 @@ class PlotterBase(QtGui.QDialog):
             # Add the context menu
             self.contextMenu()
             # Notify the listeners
-            self.parent.communicator.activeGraphsSignal.emit(PlotHelper.currentPlots())
+            self.manager.communicator.activeGraphsSignal.emit(PlotHelper.currentPlots())
         else:
             self.contextMenuQuickPlot()
 
@@ -180,7 +180,7 @@ class PlotterBase(QtGui.QDialog):
         # Please remove me from your database.
         PlotHelper.deletePlot(PlotHelper.idOfPlot(self))
         # Notify the listeners
-        self.parent.communicator.activeGraphsSignal.emit(PlotHelper.currentPlots())
+        self.manager.communicator.activeGraphsSignal.emit(PlotHelper.currentPlots())
         event.accept()
 
     def onImageSave(self):

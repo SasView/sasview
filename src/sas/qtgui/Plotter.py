@@ -6,9 +6,9 @@ from sas.sasgui.plottools import transform
 from sas.sasgui.plottools.convert_units import convert_unit
 from sas.qtgui.PlotterBase import PlotterBase
 
-class Plotter(PlotterBase):
-    def __init__(self, parent=None, quickplot=False):
-        super(Plotter, self).__init__(parent, quickplot=quickplot)
+class PlotterWidget(PlotterBase):
+    def __init__(self, parent=None, manager=None, quickplot=False):
+        super(PlotterWidget, self).__init__(parent, manager=manager, quickplot=quickplot)
 
     @property
     def data(self):
@@ -198,3 +198,11 @@ class Plotter(PlotterBase):
 
         # Plot the updated chart
         self.plot(marker='o', linestyle='')
+
+
+class Plotter(QtGui.QDialog, PlotterWidget):
+    def __init__(self, parent=None, quickplot=False):
+
+        QtGui.QDialog.__init__(self)
+        PlotterWidget.__init__(self, manager=parent, quickplot=quickplot)
+
