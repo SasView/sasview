@@ -10,7 +10,13 @@ import sas.qtgui.PlotUtilities as PlotUtilities
 from sas.qtgui.PlotterBase import PlotterBase
 from mpl_toolkits.mplot3d import Axes3D
 
+# Minimum value of Z for which we will present data.
+MIN_Z=-32
+
 class Plotter2DWidget(PlotterBase):
+    """
+    2D Plot widget for use with a QDialog
+    """
     def __init__(self, parent=None, manager=None, quickplot=False, dimension=2):
         self.dimension = dimension
         super(Plotter2DWidget, self).__init__(parent, manager=manager, quickplot=quickplot)
@@ -23,17 +29,17 @@ class Plotter2DWidget(PlotterBase):
     def data(self, data=None):
         """ data setter """
         self._data = data
-        self.qx_data=data.qx_data
-        self.qy_data=data.qy_data
-        self.xmin=data.xmin
-        self.xmax=data.xmax
-        self.ymin=data.ymin
-        self.ymax=data.ymax
-        self.zmin=data.zmin
-        self.zmax=data.zmax
-        self.label=data.name
-        self.xLabel="%s(%s)"%(data._xaxis, data._xunit)
-        self.yLabel="%s(%s)"%(data._yaxis, data._yunit)
+        self.qx_data = data.qx_data
+        self.qy_data = data.qy_data
+        self.xmin = data.xmin
+        self.xmax = data.xmax
+        self.ymin = data.ymin
+        self.ymax = data.ymax
+        self.zmin = data.zmin
+        self.zmax = data.zmax
+        self.label = data.name
+        self.xLabel = "%s(%s)"%(data._xaxis, data._xunit)
+        self.yLabel = "%s(%s)"%(data._yaxis, data._yunit)
         self.title(title=data.title)
 
     def plot(self, marker=None, linestyle=None):
@@ -43,6 +49,7 @@ class Plotter2DWidget(PlotterBase):
         # Toggle the scale
         zmin_2D_temp = self.zmin
         zmax_2D_temp = self.zmax
+        # self.scale predefined in the baseclass
         if self.scale == 'log_{10}':
             self.scale = 'linear'
             if not self.zmin is None:
@@ -54,7 +61,7 @@ class Plotter2DWidget(PlotterBase):
             if not self.zmin is None:
                 # min log value: no log(negative)
                 if self.zmin <= 0:
-                    zmin_2D_temp = -32
+                    zmin_2D_temp = MIN_Z
                 else:
                     zmin_2D_temp = numpy.log10(self.zmin)
             if not self.zmax is None:
@@ -114,7 +121,7 @@ class Plotter2DWidget(PlotterBase):
         self.zmin = zmin
         self.zmax = zmax
         # If we don't have any data, skip.
-        if data == None:
+        if data is None:
             return
         if data.ndim == 1:
             output = PlotUtilities.build_matrix(data, self.qx_data, self.qy_data)
@@ -131,7 +138,7 @@ class Plotter2DWidget(PlotterBase):
                 elif self.zmin <= 0:
                     zmin_temp = self.zmin
                     output[output > 0] = numpy.zeros(len(output))
-                    output[output <= 0] = -32
+                    output[output <= 0] = MIN_Z
                 else:
                     zmin_temp = self.zmin
                     output[output > 0] = numpy.log10(output[output > 0])
@@ -162,6 +169,14 @@ class Plotter2DWidget(PlotterBase):
             if not self.quickplot:
                 self.ax.set_title(label=self._title)
 
+            if cbax is None:
+                ax.set_frame_on(False)
+                cb = self.figure.colorbar(im, shrink=0.8, aspect=20)
+            else:
+                cb = self.figure.colorbar(im, cax=cbax)
+
+            cb.update_bruteforce(im)
+            cb.set_label('$' + self.scale + '$')
 
         else:
             # clear the previous 2D from memory
@@ -174,7 +189,7 @@ class Plotter2DWidget(PlotterBase):
             X, Y = numpy.meshgrid(X, Y)
 
             ax = Axes3D(self.figure)
-            cbax = self.figure.add_axes([0.84, 0.1, 0.02, 0.8])
+            #cbax = self.figure.add_axes([0.84, 0.1, 0.02, 0.8])
 
             # Disable rotation for large sets.
             # TODO: Define "large" for a dataset
@@ -186,15 +201,6 @@ class Plotter2DWidget(PlotterBase):
             im = ax.plot_surface(X, Y, output, rstride=1, cstride=1, cmap=cmap,
                                  linewidth=0, antialiased=False)
             self.ax.set_axis_off()
-
-        if cbax == None:
-            ax.set_frame_on(False)
-            cb = self.figure.colorbar(im, shrink=0.8, aspect=20)
-        else:
-            cb = self.figure.colorbar(im, cax=cbax)
-
-        cb.update_bruteforce(im)
-        cb.set_label('$' + self.scale + '$')
 
         if self.dimension != 3:
             self.figure.canvas.draw_idle()

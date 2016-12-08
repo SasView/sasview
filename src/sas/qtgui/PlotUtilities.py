@@ -12,7 +12,7 @@ def build_matrix(data, qx_data, qy_data):
 
     """
     # No qx or qy given in a vector format
-    if qx_data == None or qy_data == None \
+    if qx_data is None or qy_data is None \
             or qx_data.ndim != 1 or qy_data.ndim != 1:
         return data
 
@@ -71,7 +71,7 @@ def get_bins(qx_data, qy_data):
     where each one corresponds to  x, or y axis values
     """
     # No qx or qy given in a vector format
-    if qx_data == None or qy_data == None \
+    if qx_data is None or qy_data is None \
             or qx_data.ndim != 1 or qy_data.ndim != 1:
         return data
 

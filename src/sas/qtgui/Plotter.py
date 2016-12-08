@@ -7,6 +7,9 @@ from sas.sasgui.plottools.convert_units import convert_unit
 from sas.qtgui.PlotterBase import PlotterBase
 
 class PlotterWidget(PlotterBase):
+    """
+    1D Plot widget for use with a QDialog
+    """
     def __init__(self, parent=None, manager=None, quickplot=False):
         super(PlotterWidget, self).__init__(parent, manager=manager, quickplot=quickplot)
 
