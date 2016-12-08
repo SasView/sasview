@@ -6,6 +6,7 @@ from PyQt4.QtTest import QTest
 from PyQt4.QtCore import *
 from mock import MagicMock
 from mock import patch
+from mpl_toolkits.mplot3d import Axes3D
 
 # set up import paths
 import path_prepare
@@ -20,6 +21,7 @@ from GuiManager import GuiManager
 from sas.qtgui.GuiUtils import *
 from UnitTesting.TestUtils import QtSignalSpy
 from sas.qtgui.Plotter import Plotter
+from sas.qtgui.Plotter2D import Plotter2D
 import sas.qtgui.PlotHelper as PlotHelper
 
 app = QApplication(sys.argv)
@@ -757,10 +759,48 @@ class DataExplorerTest(unittest.TestCase):
     def testQuickDataPlot(self):
         """
         Quick data plot generation.
+        """
+        # get Data1D
+        p_file=["cyl_400_20.txt"]
+        # Read in the file
+        output, message = self.form.readData(p_file)
+        self.form.loadComplete((output, message))
+
+        # select the data
+        self.form.treeView.selectAll()
+
+        Plotter.show = MagicMock() # for masking the display
+
+        self.form.quickDataPlot()
+        self.assertTrue(Plotter.show.called)
+
+    def testQuickData3DPlot(self):
+        """
+        Slow(er) 3D data plot generation.
+        """
+        # get Data1D
+        p_file=["Dec07031.ASC"]
+        # Read in the file
+        output, message = self.form.readData(p_file)
+        self.form.loadComplete((output, message))
+
+        # select the data
+        self.form.treeView.selectAll()
+
+        Plotter2D.show = MagicMock() # for masking the display
+
+        self.form.quickData3DPlot()
+
+        self.assertTrue(Plotter2D.show.called)
+
+    def testShowEditMask(self):
+        """
+        Edit mask on a 2D plot.
 
         TODO: add content once plotting finalized
         """
         pass
+
 
 if __name__ == "__main__":
     unittest.main()

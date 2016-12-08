@@ -800,13 +800,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
     def showEditDataMask(self):
         """
+        Mask Editor for 2D plots
         """
         index = self.treeView.selectedIndexes()[0]
         model_item = self.model.itemFromIndex(self.data_proxy.mapToSource(index))
         data = GuiUtils.dataFromItem(model_item)
 
         mask_editor = MaskEditor(self, data)
-
+        # Modal dialog here.
         mask_editor.exec_()
 
     def loadComplete(self, output):

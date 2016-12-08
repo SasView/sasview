@@ -46,9 +46,9 @@ class Plotter2DWidget(PlotterBase):
         if self.scale == 'log_{10}':
             self.scale = 'linear'
             if not self.zmin is None:
-                zmin_2D_temp = numpy.pow(10, self.zmin)
+                zmin_2D_temp = numpy.power(10, self.zmin)
             if not self.zmax is None:
-                zmax_2D_temp = numpy.pow(10, self.zmax)
+                zmax_2D_temp = numpy.power(10, self.zmax)
         else:
             self.scale = 'log_{10}'
             if not self.zmin is None:
@@ -193,4 +193,4 @@ class Plotter2D(QtGui.QDialog, Plotter2DWidget):
     def __init__(self, parent=None, quickplot=False, dimension=2):
 
         QtGui.QDialog.__init__(self)
-        Plotter2DWidget.__init__(self, manager=parent, quickplot=quickplot, dimension=2)
+        Plotter2DWidget.__init__(self, manager=parent, quickplot=quickplot, dimension=dimension)

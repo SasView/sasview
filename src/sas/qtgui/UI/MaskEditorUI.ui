@@ -25,42 +25,42 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QRadioButton" name="radioButton">
+       <widget class="QRadioButton" name="rbWings">
         <property name="text">
          <string>Double Wings</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="radioButton_3">
+       <widget class="QRadioButton" name="rbCircularDisk">
         <property name="text">
          <string>Circular Disk</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="radioButton_2">
+       <widget class="QRadioButton" name="rbRectangularDisk">
         <property name="text">
          <string>Rectangular Disk</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="radioButton_4">
+       <widget class="QRadioButton" name="rbDoubleWingWindow">
         <property name="text">
          <string>Double Wing Window</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="radioButton_5">
+       <widget class="QRadioButton" name="rbCircularWindow">
         <property name="text">
          <string>Circular Window</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="radioButton_6">
+       <widget class="QRadioButton" name="rbRectangularWindow">
         <property name="text">
          <string>Rectangular Window</string>
         </property>
@@ -96,7 +96,7 @@
     </spacer>
    </item>
    <item row="2" column="0">
-    <widget class="QPushButton" name="pushButton">
+    <widget class="QPushButton" name="btnAdd">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -109,7 +109,7 @@
     </widget>
    </item>
    <item row="3" column="0">
-    <widget class="QPushButton" name="pushButton_2">
+    <widget class="QPushButton" name="btnReset">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -122,7 +122,7 @@
     </widget>
    </item>
    <item row="4" column="0">
-    <widget class="QPushButton" name="pushButton_3">
+    <widget class="QPushButton" name="btnClear">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
        <horstretch>0</horstretch>

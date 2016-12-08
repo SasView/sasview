@@ -675,11 +675,11 @@ class View(object):
         """
         # Sanity check
         # Do the transofrmation only when x and y are empty
-        has_err_x = not (dx == None or len(dx) == 0)
-        has_err_y = not (dy == None or len(dy) == 0)
+        has_err_x = not (dx is None or len(dx) == 0)
+        has_err_y = not (dy is None or len(dy) == 0)
 
-        if(x != None) and (y != None):
-            if not dx == None and not len(dx) == 0 and not len(x) == len(dx):
+        if(x is not None) and (y is not None):
+            if not dx is None and not len(dx) == 0 and not len(x) == len(dx):
                 msg = "Plottable.View: Given x and dx are not"
                 msg += " of the same length"
                 raise ValueError, msg
@@ -689,7 +689,7 @@ class View(object):
                 msg += "and x are not of the same length"
                 raise ValueError, msg
 
-            if not dy == None and not len(dy) == 0 and not len(y) == len(dy):
+            if not dy is None and not len(dy) == 0 and not len(y) == len(dy):
                 msg = "Plottable.View: Given y and dy are not of the same "
                 msg += "length: len(y)=%s, len(dy)=%s" % (len(y), len(dy))
                 raise ValueError, msg

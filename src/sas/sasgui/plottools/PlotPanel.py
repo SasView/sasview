@@ -9,7 +9,7 @@ import wx
 import matplotlib
 matplotlib.interactive(False)
 #Use the WxAgg back end. The Wx one takes too long to render
-matplotlib.use('WXAgg')
+#matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
 from matplotlib.figure import Figure
 import os

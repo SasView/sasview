@@ -30,7 +30,8 @@ import sys
 __all__ = []
 
 plot_version = "0.98"
-plot_backend = "WXAgg"
+#plot_backend = "WXAgg"
+plot_backend = "Qt4Agg"
 
 # Sort out matplotlib version
 import matplotlib
