@@ -22,7 +22,7 @@ class PlotterWidget(PlotterBase):
         self.yLabel = "%s(%s)"%(value._yaxis, value._yunit)
         self.title(title=value.title)
 
-    def plot(self, marker=None, linestyle=None):
+    def plot(self, marker=None, linestyle=None, hide_error=False):
         """
         Plot self._data
         """
@@ -33,14 +33,23 @@ class PlotterWidget(PlotterBase):
             marker = 'o'
 
         if linestyle == None:
-            linestyle = '-'
+            linestyle = ''
 
-        # plot data with title
-        ax.plot(self._data.view.x,
-                self._data.view.y,
-                marker=marker,
-                linestyle=linestyle,
-                label=self._title)
+        # plot data with/without errorbars
+        if hide_error:
+            ax.plot(self._data.view.x, self._data.view.y,
+                    marker=marker,
+                    linestyle=linestyle,
+                    label=self._title)
+        else:
+            ax.errorbar(self._data.view.x, self._data.view.y,
+                        yerr=self._data.view.dx, xerr=None,
+                        capsize=2, linestyle='',
+                        barsabove=False,
+                        marker=marker,
+                        lolims=False, uplims=False,
+                        xlolims=False, xuplims=False,
+                        label=self._title)
 
         # Now add the legend with some customizations.
         legend = ax.legend(loc='upper right', shadow=True)
@@ -205,4 +214,8 @@ class Plotter(QtGui.QDialog, PlotterWidget):
 
         QtGui.QDialog.__init__(self)
         PlotterWidget.__init__(self, manager=parent, quickplot=quickplot)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/res/ball.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.setWindowIcon(icon)
+
 

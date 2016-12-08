@@ -153,6 +153,16 @@ class Plotter2DWidget(PlotterBase):
                                         self.ymin, self.ymax))
 
             cbax = self.figure.add_axes([0.84, 0.2, 0.02, 0.7])
+
+            # Current labels for axes
+            self.ax.set_ylabel(self.y_label)
+            self.ax.set_xlabel(self.x_label)
+
+            # Title only for regular charts
+            if not self.quickplot:
+                self.ax.set_title(label=self._title)
+
+
         else:
             # clear the previous 2D from memory
             self.figure.clear()
@@ -165,6 +175,7 @@ class Plotter2DWidget(PlotterBase):
 
             ax = Axes3D(self.figure)
             cbax = self.figure.add_axes([0.84, 0.1, 0.02, 0.8])
+
             # Disable rotation for large sets.
             # TODO: Define "large" for a dataset
             SET_TOO_LARGE = 500
@@ -181,6 +192,7 @@ class Plotter2DWidget(PlotterBase):
             cb = self.figure.colorbar(im, shrink=0.8, aspect=20)
         else:
             cb = self.figure.colorbar(im, cax=cbax)
+
         cb.update_bruteforce(im)
         cb.set_label('$' + self.scale + '$')
 
@@ -194,3 +206,6 @@ class Plotter2D(QtGui.QDialog, Plotter2DWidget):
 
         QtGui.QDialog.__init__(self)
         Plotter2DWidget.__init__(self, manager=parent, quickplot=quickplot, dimension=dimension)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/res/ball.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.setWindowIcon(icon)

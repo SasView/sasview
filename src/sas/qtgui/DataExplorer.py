@@ -410,10 +410,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 msg = "Incorrect data type passed to Plotting"
                 raise AttributeError, msg
 
+
         if plots and \
-           hasattr(new_plot, 'data') and \
-           len(new_plot.data.x) > 0:
-            self.plotAdd(new_plot)
+            hasattr(new_plot, 'data') and \
+            isinstance(new_plot.data, Data1D):
+                self.plotAdd(new_plot)
 
     def plotAdd(self, new_plot):
         """

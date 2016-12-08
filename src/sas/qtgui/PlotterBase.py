@@ -13,7 +13,6 @@ import matplotlib.pyplot as plt
 
 DEFAULT_CMAP = pylab.cm.jet
 from sas.qtgui.ScaleProperties import ScaleProperties
-import sas.qtgui.PlotUtilities as PlotUtilities
 import sas.qtgui.PlotHelper as PlotHelper
 
 class PlotterBase(QtGui.QWidget):
@@ -49,8 +48,8 @@ class PlotterBase(QtGui.QWidget):
         self._yscale = 'log'
         self.qx_data = []
         self.qy_data = []
-        self.color=0
-        self.symbol=0
+        self.color = 0
+        self.symbol = 0
         self.grid_on = False
         self.scale = 'linear'
         self.x_label = "log10(x)"
@@ -78,6 +77,7 @@ class PlotterBase(QtGui.QWidget):
 
     @property
     def data(self):
+        """ data getter """
         return self._data
 
     @data.setter
@@ -157,7 +157,7 @@ class PlotterBase(QtGui.QWidget):
         """
         Display the context menu
         """
-        self.contextMenu.exec_( self.canvas.mapToGlobal(event.pos()) )
+        self.contextMenu.exec_(self.canvas.mapToGlobal(event.pos()))
 
     def clean(self):
         """
@@ -200,12 +200,13 @@ class PlotterBase(QtGui.QWidget):
         dialog = QtGui.QPrintDialog(printer)
         dialog.setModal(True)
         dialog.setWindowTitle("Print")
-        if(dialog.exec_() != QtGui.QDialog.Accepted):
+        if dialog.exec_() != QtGui.QDialog.Accepted:
             return
 
         painter = QtGui.QPainter(printer)
-        # Create a label with pixmap drawn
+        # Grab the widget screenshot
         pmap = QtGui.QPixmap.grabWidget(self)
+        # Create a label with pixmap drawn
         printLabel = QtGui.QLabel()
         printLabel.setPixmap(pmap)
 
