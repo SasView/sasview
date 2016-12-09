@@ -8,6 +8,7 @@ python -m UnitTesting.AboutBoxTest
 python -m UnitTesting.DroppableDataLoadWidgetTest
 python -m UnitTesting.PlotHelperTest
 python -m UnitTesting.SasviewLoggerTest
+python -m UnitTesting.PlotterBaseTest
 python -m UnitTesting.PlotterTest
 python -m UnitTesting.Plotter2DTest
 python -m UnitTesting.ScalePropertiesTest

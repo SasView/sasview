@@ -26,22 +26,18 @@ class PlotterBase(QtGui.QWidget):
         # a figure instance to plot on
         self.figure = plt.figure()
 
-        # this is the Canvas Widget that displays the `figure`
-        # it takes the `figure` instance as a parameter to __init__
+        # Define canvas for the figure to be placed on
         self.canvas = FigureCanvas(self.figure)
 
-        # this is the Navigation widget
-        # it takes the Canvas widget and a parent
+        # ... and the toolbar with all the default MPL buttons
         self.toolbar = NavigationToolbar(self.canvas, self)
 
-        self.properties = ScaleProperties(self)
-
-        # set the layout
+        # Set the layout and place the canvas widget in it.
         layout = QtGui.QVBoxLayout()
         layout.setMargin(0)
         layout.addWidget(self.canvas)
 
-        # defaults
+        # 1D plotter defaults
         self.current_plot = 111
         self._data = [] # Original 1D/2D object
         self._xscale = 'log'
@@ -55,21 +51,29 @@ class PlotterBase(QtGui.QWidget):
         self.x_label = "log10(x)"
         self.y_label = "log10(y)"
 
+        # Pre-define the Scale properties dialog
+        self.properties = ScaleProperties(self,
+                                          init_scale_x=self.x_label,
+                                          init_scale_y=self.y_label)
+
         # default color map
         self.cmap = DEFAULT_CMAP
 
+        # Add the axes object -> subplot
+        # TODO: self.ax will have to be tracked and exposed
+        # to enable subplot specific operations
         self.ax = self.figure.add_subplot(self.current_plot)
+
+        # Set the background color to white
         self.canvas.figure.set_facecolor('#FFFFFF')
 
         if not quickplot:
             # set the layout
             layout.addWidget(self.toolbar)
-            # Notify the helper
-            PlotHelper.addPlot(self)
             # Add the context menu
             self.contextMenu()
-            # Notify the listeners
-            self.manager.communicator.activeGraphsSignal.emit(PlotHelper.currentPlots())
+            # Notify PlotHelper about the new plot
+            self.upatePlotHelper()
         else:
             self.contextMenuQuickPlot()
 
@@ -82,8 +86,8 @@ class PlotterBase(QtGui.QWidget):
 
     @data.setter
     def data(self, data=None):
-        """ virtual data setter """
-        raise ImportError("Data setter must be implemented in derived class.")
+        """ Pure virtual data setter """
+        raise NotImplementedError("Data setter must be implemented in derived class.")
 
     def title(self, title=""):
         """ title setter """
@@ -131,9 +135,19 @@ class PlotterBase(QtGui.QWidget):
         self.ax.set_xscale(scale)
         self._xscale = scale
 
+    def upatePlotHelper(self):
+        """
+        Notify the plot helper about the new plot
+        """
+        # Notify the helper
+        PlotHelper.addPlot(self)
+        # Notify the listeners about a new graph
+        self.manager.communicator.activeGraphsSignal.emit(PlotHelper.currentPlots())
+
     def contextMenu(self):
         """
-        Define context menu and associated actions for the MPL widget
+        Define common context menu and associated actions for the MPL widget
+        TODO: move to plotter1d/plotter2d
         """
         # Actions
         self.contextMenu = QtGui.QMenu(self)
@@ -151,7 +165,7 @@ class PlotterBase(QtGui.QWidget):
         """
         Define context menu and associated actions for the quickplot MPL widget
         """
-        raise ImportError("Context menu method must be implemented in derived class.")
+        raise NotImplementedError("Context menu method must be implemented in derived class.")
 
     def contextMenuEvent(self, event):
         """
@@ -168,10 +182,10 @@ class PlotterBase(QtGui.QWidget):
 
     def plot(self, marker=None, linestyle=None):
         """
-        VIRTUAL
+        PURE VIRTUAL
         Plot the content of self._data
         """
-        raise ImportError("Plot method must be implemented in derived class.")
+        raise NotImplementedError("Plot method must be implemented in derived class.")
 
     def closeEvent(self, event):
         """

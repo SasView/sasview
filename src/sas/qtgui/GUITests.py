@@ -9,6 +9,7 @@ from UnitTesting import GuiUtilsTest
 from UnitTesting import MainWindowTest
 from UnitTesting import TestUtilsTest
 from UnitTesting import PlotHelperTest
+from UnitTesting import PlotterBaseTest
 from UnitTesting import PlotterTest
 from UnitTesting import Plotter2DTest
 from UnitTesting import SasviewLoggerTest
@@ -27,6 +28,7 @@ def suite():
         unittest.makeSuite(MainWindowTest.MainWindowTest,      'test'),
         unittest.makeSuite(TestUtilsTest.TestUtilsTest,        'test'),
         unittest.makeSuite(PlotHelperTest.PlotHelperTest,       'test'),
+        unittest.makeSuite(PlotterBaseTest.PlotterBaseTest,     'test'),
         unittest.makeSuite(PlotterTest.PlotterTest,          'test'),
         unittest.makeSuite(Plotter2DTest.Plotter2DTest,        'test'),
         unittest.makeSuite(SasviewLoggerTest.SasviewLoggerTest,    'test'),

@@ -66,8 +66,8 @@ class PlotterWidget(PlotterBase):
             ax.set_title(label=self._title)
 
         # Include scaling (log vs. linear)
-        ax.set_yscale(self.xscale)
         ax.set_xscale(self.xscale)
+        ax.set_yscale(self.yscale)
 
         # refresh canvas
         self.canvas.draw()
