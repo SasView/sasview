@@ -25,6 +25,7 @@ from sas.qtgui.WelcomePanel import WelcomePanel
 from sas.qtgui.SldPanel import SldPanel
 from sas.qtgui.DensityPanel import DensityPanel
 from sas.qtgui.KiessigPanel import KiessigPanel
+from sas.qtgui.SlitSizeCalculator import SlitSizeCalculator
 
 # Perspectives
 from sas.qtgui.Perspectives.Invariant.InvariantPerspective import InvariantWindow
@@ -138,7 +139,8 @@ class GuiManager(object):
         self.SLDCalculator = SldPanel(self)
         self.DVCalculator = DensityPanel(self)
         #self.KIESSIGCalculator = DensityPanel(self)#KiessigPanel(self)
-        self.KIESSIGCalculator =  KiessigPanel(self)
+        self.KIESSIGCalculator = KiessigPanel(self)
+        self.SlitSizeCalculator = SlitSizeCalculator(self._parent, self, manager=self._data_manager)
     def statusBarSetup(self):
         """
         Define the status bar.
@@ -538,8 +540,7 @@ class GuiManager(object):
     def actionSlit_Size_Calculator(self):
         """
         """
-        print("actionSlit_Size_Calculator TRIGGERED")
-        pass
+        self.SlitSizeCalculator.show()
 
     def actionSAS_Resolution_Estimator(self):
         """
