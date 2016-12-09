@@ -1155,50 +1155,38 @@ class BasicPage(ScrolledPanel, PanelBase):
         # fill model combobox
         self._show_combox_helper()
         # select the current model
-        try:
-            # to support older version
-            category_pos = int(state.categorycombobox)
-        except:
-            state._convert_to_sasmodels()
-            state.categorycombobox = unicode(state.categorycombobox)
-            if state.categorycombobox in self.categorybox.Items:
-                category_pos = self.categorybox.Items.index(
-                    state.categorycombobox)
-            else:
-                # Look in master list for model name (model.lower)
-                category_pos = self.get_cat_combo_box_pos(state)
+        state._convert_to_sasmodels()
+        state.categorycombobox = unicode(state.categorycombobox)
+        if state.categorycombobox in self.categorybox.Items:
+            category_pos = self.categorybox.Items.index(
+                state.categorycombobox)
+        else:
+            # Look in master list for model name (model.lower)
+            category_pos = self.get_cat_combo_box_pos(state)
 
         self.categorybox.Select(category_pos)
         self._show_combox(None)
-        try:
-            # to support older version
-            formfactor_pos = int(state.formfactorcombobox)
-        except:
-            if self.categorybox.GetValue() == 'Customized Models' \
-                    and '[plug-in]' not in state.formfactorcombobox:
-                state.formfactorcombobox = \
-                    '[plug-in] ' + state.formfactorcombobox
-            formfactor_pos = 0
-            for ind_form in range(self.formfactorbox.GetCount()):
-                if self.formfactorbox.GetString(ind_form) == \
-                                                    (state.formfactorcombobox):
-                    formfactor_pos = int(ind_form)
-                    break
+        if self.categorybox.GetValue() == 'Customized Models' \
+                and '[plug-in]' not in state.formfactorcombobox:
+            state.formfactorcombobox = \
+                '[plug-in] ' + state.formfactorcombobox
+        formfactor_pos = 0
+        for ind_form in range(self.formfactorbox.GetCount()):
+            if self.formfactorbox.GetString(ind_form) == \
+                                                (state.formfactorcombobox):
+                formfactor_pos = int(ind_form)
+                break
 
         self.formfactorbox.Select(formfactor_pos)
 
         structfactor_pos = 0
-        try:
-            # to support older version
-            structfactor_pos = int(state.structurecombobox)
-        except:
-            if state.structurecombobox is not None:
-                state.structurecombobox = unicode(state.structurecombobox)
-                for ind_struct in range(self.structurebox.GetCount()):
-                    if self.structurebox.GetString(ind_struct) == \
-                                                    (state.structurecombobox):
-                        structfactor_pos = int(ind_struct)
-                        break
+        if state.structurecombobox is not None:
+            state.structurecombobox = unicode(state.structurecombobox)
+            for ind_struct in range(self.structurebox.GetCount()):
+                if self.structurebox.GetString(ind_struct) == \
+                                                (state.structurecombobox):
+                    structfactor_pos = int(ind_struct)
+                    break
 
         self.structurebox.SetSelection(structfactor_pos)
 

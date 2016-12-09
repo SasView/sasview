@@ -391,7 +391,7 @@ class PageState(object):
             elif self.categorycombobox == 'Structure Factor':
                 self.formfactorcombobox = 'hardsphere'
 
-    def param_remap_to_sasmodels_convert(self, params):
+    def param_remap_to_sasmodels_convert(self, params, is_string=False):
         """
         Remaps the parameters for sasmodels conversion
 
@@ -411,7 +411,10 @@ class PageState(object):
             if not lower or lower[1] == '' or lower[1] == 'None':
                 lower[0] = False
                 lower[1] = numpy.nan
-            p[name] = float(value)
+            if is_string:
+                p[name] = str(value)
+            else:
+                p[name] = float(value)
             p[name + ".fittable"] = bool(fittable)
             p[name + ".std"] = float(uncert[1])
             p[name + ".upper"] = float(upper[1])
@@ -467,21 +470,23 @@ class PageState(object):
         formfactor, params = \
             convert.convert_model(self.formfactorcombobox, params)
         if len(self.str_parameters) > 0:
-            str_p = self.param_remap_to_sasmodels_convert(self.str_parameters)
-            formfactor, str_params = convert.convert_model(formfactor, str_p)
-        else:
-            str_params = None
+            str_pars = self.param_remap_to_sasmodels_convert(
+                self.str_parameters, True)
+            formfactor, str_params = convert.convert_model(
+                self.formfactorcombobox, str_pars)
+            for key, value in str_params.iteritems():
+                params[key] = value
 
         # Only convert if old != new, otherwise all the same
         if formfactor != self.formfactorcombobox or \
                         structurefactor != self.structurecombobox:
+            # Spherical SLD number of layers changed between 3.1.2 and 4.0
+            if self.formfactorcombobox == 'SphericalSLDModel':
+                self.multi_factor += 1
             self.formfactorcombobox = formfactor
             self.structurecombobox = structurefactor
             self.parameters = []
             self.parameters = self.param_remap_from_sasmodels_convert(params)
-            if str_params:
-                self.str_parameters = \
-                    self.param_remap_from_sasmodels_convert(str_params)
 
     def _repr_helper(self, list, rep):
         """
