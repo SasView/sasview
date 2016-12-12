@@ -142,7 +142,7 @@ class _Slab(object):
         :param maj_min: min value on the major axis
         :return: Data1D object
         """
-        if len(data2D.detector) != 1:
+        if len(data2D.detector) > 1:
             msg = "_Slab._avg: invalid number of "
             msg += " detectors: %g" % len(data2D.detector)
             raise RuntimeError, msg
@@ -298,7 +298,7 @@ class Boxsum(object):
         :return: number of counts,
             error on number of counts, number of entries summed
         """
-        if len(data2D.detector) != 1:
+        if len(data2D.detector) > 1:
             msg = "Circular averaging: invalid number "
             msg += "of detectors: %g" % len(data2D.detector)
             raise RuntimeError, msg
