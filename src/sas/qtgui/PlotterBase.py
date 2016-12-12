@@ -144,10 +144,10 @@ class PlotterBase(QtGui.QWidget):
         # Notify the listeners about a new graph
         self.manager.communicator.activeGraphsSignal.emit(PlotHelper.currentPlots())
 
-    def contextMenu(self):
+    def defaultContextMenu(self):
         """
-        Define common context menu and associated actions for the MPL widget
-        TODO: move to plotter1d/plotter2d
+        Content of the dialog-universal context menu:
+        Save, Print and Copy
         """
         # Actions
         self.contextMenu = QtGui.QMenu(self)
@@ -160,6 +160,13 @@ class PlotterBase(QtGui.QWidget):
         self.actionSaveImage.triggered.connect(self.onImageSave)
         self.actionPrintImage.triggered.connect(self.onImagePrint)
         self.actionCopyToClipboard.triggered.connect(self.onClipboardCopy)
+
+    def contextMenu(self):
+        """
+        Define common context menu and associated actions for the MPL widget
+        TODO: move to plotter1d/plotter2d
+        """
+        raise NotImplementedError("Context menu method must be implemented in derived class.")
 
     def contextMenuQuickPlot(self):
         """

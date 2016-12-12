@@ -72,24 +72,26 @@ class PlotterWidget(PlotterBase):
         # refresh canvas
         self.canvas.draw()
 
+    def contextMenu(self):
+        """
+        Define common context menu and associated actions for the MPL widget
+        """
+        self.defaultContextMenu()
+
+
     def contextMenuQuickPlot(self):
         """
         Define context menu and associated actions for the quickplot MPL widget
         """
-        # Actions
-        self.contextMenu = QtGui.QMenu(self)
-        self.actionSaveImage = self.contextMenu.addAction("Save Image")
-        self.actionPrintImage = self.contextMenu.addAction("Print Image")
-        self.actionCopyToClipboard = self.contextMenu.addAction("Copy to Clipboard")
-        self.contextMenu.addSeparator()
+        # Default actions
+        self.defaultContextMenu()
+
+        # Additional actions
         self.actionToggleGrid = self.contextMenu.addAction("Toggle Grid On/Off")
         self.contextMenu.addSeparator()
         self.actionChangeScale = self.contextMenu.addAction("Change Scale")
 
         # Define the callbacks
-        self.actionSaveImage.triggered.connect(self.onImageSave)
-        self.actionPrintImage.triggered.connect(self.onImagePrint)
-        self.actionCopyToClipboard.triggered.connect(self.onClipboardCopy)
         self.actionToggleGrid.triggered.connect(self.onGridToggle)
         self.actionChangeScale.triggered.connect(self.onScaleChange)
 

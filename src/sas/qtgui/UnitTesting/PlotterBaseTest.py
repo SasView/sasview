@@ -1,6 +1,6 @@
 import sys
 import unittest
-from mock import MagicMock
+from mock import patch, MagicMock
 
 from PyQt4 import QtGui
 import matplotlib.pyplot as plt
@@ -14,6 +14,7 @@ import path_prepare
 from sas.qtgui.ScaleProperties import ScaleProperties
 #import sas.qtgui.GuiUtils as GuiUtils
 from sas.qtgui.GuiUtils import *
+import sas.qtgui.PlotHelper as PlotHelper
 
 # Tested module
 import sas.qtgui.PlotterBase as PlotterBase
@@ -29,9 +30,6 @@ class PlotterBaseTest(unittest.TestCase):
                 return Communicate()
             def perspective(self):
                 return MyPerspective()
-
-        #PlotterBase.PlotterBase.updatePlotHelper = MagicMock()
-        #self.plotter = PlotterBase.PlotterBase(None, manager=dummy_manager())
 
         PlotterBase.PlotterBase.contextMenuQuickPlot = MagicMock()
         self.plotter = PlotterBase.PlotterBase(None, manager=dummy_manager(), quickplot=True)
@@ -63,40 +61,98 @@ class PlotterBaseTest(unittest.TestCase):
 
     def testContextMenu(self):
         ''' Test the default context menu '''
-        pass
-
-    def testContextMenuQuickPlot(self):
-        ''' Test the default quick context menu '''
-        pass
+        with self.assertRaises(NotImplementedError):
+            self.plotter.contextMenu()
 
     def testClean(self):
         ''' test the graph cleanup '''
-        pass
+        self.plotter.figure.delaxes = MagicMock()
+        self.plotter.clean()
+        self.assertTrue(self.plotter.figure.delaxes.called)
 
     def testPlot(self):
         ''' test the pure virtual method '''
         with self.assertRaises(NotImplementedError):
             self.plotter.plot()
 
-    def testOnCloseEvent(self):
+    def notestOnCloseEvent(self):
         ''' test the plotter close behaviour '''
-        pass
+        PlotHelper.deletePlot = MagicMock()
+        self.plotter.closeEvent(None)
+        self.assertTrue(PlotHelper.deletePlot.called)
 
     def testOnImageSave(self):
         ''' test the workspace save '''
-        pass
+        self.plotter.toolbar.save_figure = MagicMock()
+        self.plotter.onImageSave()
+        self.assertTrue(self.plotter.toolbar.save_figure.called)
 
     def testOnImagePrint(self):
         ''' test the workspace print '''
-        pass
+        QtGui.QPainter.end = MagicMock()
+        QtGui.QLabel.render = MagicMock()
 
-    def tesOonClipboardCopy(self):
-        ''' test the workspace copy '''
-        pass
+        # First, let's cancel printing
+        QtGui.QPrintDialog.exec_ = MagicMock(return_value=QtGui.QDialog.Rejected)
+        self.plotter.onImagePrint()
+        self.assertFalse(QtGui.QPainter.end.called)
+        self.assertFalse(QtGui.QLabel.render.called)
+
+        # Let's print now
+        QtGui.QPrintDialog.exec_ = MagicMock(return_value=QtGui.QDialog.Accepted)
+        self.plotter.onImagePrint()
+        self.assertTrue(QtGui.QPainter.end.called)
+        self.assertTrue(QtGui.QLabel.render.called)
+
+    def testOnClipboardCopy(self):
+        ''' test the workspace screen copy '''
+        QtGui.QClipboard.setPixmap = MagicMock()
+        self.plotter.onClipboardCopy()
+        self.assertTrue(QtGui.QClipboard.setPixmap.called)
 
     def testOnGridToggle(self):
         ''' test toggling the grid lines '''
-        pass
+        # Check the toggle
+        orig_toggle = self.plotter.grid_on
+        
+        FigureCanvas.draw_idle = MagicMock()
+        self.plotter.onGridToggle()
+
+        self.assertTrue(FigureCanvas.draw_idle.called)
+        self.assertTrue(self.plotter.grid_on != orig_toggle)
+
+    def testDefaultContextMenu(self):
+        """ Test the right click default menu """
+
+        self.plotter.defaultContextMenu()
+
+        actions = self.plotter.contextMenu.actions()
+        self.assertEqual(len(actions), 4)
+
+        # Trigger Save Image and make sure the method is called
+        self.assertEqual(actions[0].text(), "Save Image")
+        self.plotter.toolbar.save_figure = MagicMock()
+        actions[0].trigger()
+        self.assertTrue(self.plotter.toolbar.save_figure.called)
+
+        # Trigger Print Image and make sure the method is called
+        self.assertEqual(actions[1].text(), "Print Image")
+        QtGui.QPrintDialog.exec_ = MagicMock(return_value=QtGui.QDialog.Rejected)
+        actions[1].trigger()
+        self.assertTrue(QtGui.QPrintDialog.exec_.called)
+
+        # Trigger Copy to Clipboard and make sure the method is called
+        self.assertEqual(actions[2].text(), "Copy to Clipboard")
+
+        # Spy on cliboard's dataChanged() signal
+        self.clipboard_called = False
+        def done():
+            self.clipboard_called = True
+        QtCore.QObject.connect(app.clipboard(), QtCore.SIGNAL("dataChanged()"), done)
+        actions[2].trigger()
+        QtGui.qApp.processEvents()
+        # Make sure clipboard got updated.
+        self.assertTrue(self.clipboard_called)
 
 
 if __name__ == "__main__":

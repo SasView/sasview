@@ -77,28 +77,27 @@ class Plotter2DWidget(PlotterBase):
                       cmap=self.cmap, zmin=zmin_2D_temp,
                       zmax=zmax_2D_temp)
 
+    def contextMenu(self):
+        """
+        Define common context menu and associated actions for the MPL widget
+        """
+        self.defaultContextMenu()
+
     def contextMenuQuickPlot(self):
         """
         Define context menu and associated actions for the quickplot MPL widget
         """
-        # Actions
-        self.contextMenu = QtGui.QMenu(self)
-        self.actionSaveImage = self.contextMenu.addAction("Save Image")
-        self.actionPrintImage = self.contextMenu.addAction("Print Image")
-        self.actionCopyToClipboard = self.contextMenu.addAction("Copy to Clipboard")
-        self.contextMenu.addSeparator()
+        self.defaultContextMenu()
+
         if self.dimension == 2:
             self.actionToggleGrid = self.contextMenu.addAction("Toggle Grid On/Off")
             self.contextMenu.addSeparator()
         self.actionChangeScale = self.contextMenu.addAction("Toggle Linear/Log Scale")
 
         # Define the callbacks
-        self.actionSaveImage.triggered.connect(self.onImageSave)
-        self.actionPrintImage.triggered.connect(self.onImagePrint)
-        self.actionCopyToClipboard.triggered.connect(self.onClipboardCopy)
+        self.actionChangeScale.triggered.connect(self.onToggleScale)
         if self.dimension == 2:
             self.actionToggleGrid.triggered.connect(self.onGridToggle)
-        self.actionChangeScale.triggered.connect(self.onToggleScale)
 
     def onToggleScale(self, event):
         """
