@@ -73,7 +73,7 @@ def smear_selection(data, model = None):
         sesans.SesansTransform.set_transform(hankel,
         SE = Converter(data._xunit)(data.x, "A"),
         zaccept = Converter(qunits)(qmax, "1/A"),
-        Rmax = 1000000)
+        Rmax = 10000000)
         # Then return the actual transform, as if it were a smearing function
         return PySmear(SESANS1D(data, hankel._H0, hankel._H, hankel.q), model)
 
