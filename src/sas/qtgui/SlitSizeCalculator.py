@@ -6,17 +6,15 @@ from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import Data2D
 from sas.sascalc.calculator.slit_length_calculator import SlitlengthCalculator
 
-import sys
+import os
 
 class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
-    def __init__(self, parent=None, guimanager=None, manager=None):
+    def __init__(self, parent=None):
         super(SlitSizeCalculator, self).__init__()
         self.setupUi(self)
 
         self.setWindowTitle("Slit Size Calculator")
         self._parent = parent
-        self._guimanager = guimanager
-        self._manager = manager
 
         self.thickness = SlitlengthCalculator()
 
@@ -27,6 +25,7 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
 
         # no reason to have this widget resizable
         self.setFixedSize(self.minimumSizeHint())
+
 
     def onHelp(self):
         """
@@ -55,10 +54,9 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
         loader = Loader()
         data = loader.load(path_str)
 
-        self.deltaq_in.setText(path_str)
+        self.data_file.setText(os.path.basename(path_str))
         #We are loading data for one model only therefor index 0
-        self.complete_loading(data)
-        #Complete loading here
+        self.calculateSlitSize(data)
 
     def chooseFile(self):
         """
@@ -68,7 +66,7 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
         # Location is automatically saved - no need to keep track of the last dir
         # But only with Qt built-in dialog (non-platform native)
         path = QtGui.QFileDialog.getOpenFileName(self, "Choose a file", "",
-                "SAS data 1D (*.txt *.TXT *.dat *.DAT)", None,
+                "SAXSess 1D data (*.txt *.TXT *.dat *.DAT)", None,
                 QtGui.QFileDialog.DontUseNativeDialog)
         if path is None:
             return
@@ -84,7 +82,7 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
         """
         self.close()
 
-    def complete_loading(self, data=None):
+    def calculateSlitSize(self, data=None):
         """
             Complete the loading and compute the slit size
         """
@@ -111,8 +109,8 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
              msg = "Slit Size Calculator: %s" % (sys.exc_value)
              raise RuntimeError, msg
 
-        print("Slit lenght", slit_length)
-        self.lengthscale_out.setText(str(slit_length))
+        slit_length_str = "{:.5f}".format(slit_length)
+        self.slit_length_out.setText(slit_length_str)
         #Display unit
-        self.lineEdit.setText("[UNKNOWN]")
+        self.unit_out.setText("[Unknown]")
 
