@@ -1,0 +1,127 @@
+name: sasviewqt_new
+channels: !!python/tuple
+- !!python/unicode
+  'defaults'
+dependencies:
+- anaconda::alabaster=0.7.9=py27_0
+- anaconda::astroid=1.4.7=py27_0
+- anaconda::babel=2.3.4=py27_0
+- anaconda::backports=1.0=py27_0
+- anaconda::backports_abc=0.5=py27_0
+- anaconda::cairo=1.12.18=6
+- anaconda::decorator=4.0.10=py27_1
+- anaconda::docutils=0.12=py27_2
+- anaconda::enum34=1.1.6=py27_0
+- anaconda::fontconfig=2.11.1=6
+- anaconda::freetype=2.5.5=1
+- anaconda::funcsigs=1.0.2=py27_0
+- anaconda::get_terminal_size=1.0.0=py27_0
+- anaconda::glib=2.43.0=1
+- anaconda::harfbuzz=0.9.39=1
+- anaconda::html5lib=0.999=py27_0
+- anaconda::imagesize=0.7.1=py27_0
+- anaconda::ipykernel=4.5.2=py27_0
+- anaconda::ipython=5.1.0=py27_0
+- anaconda::ipython-qtconsole=4.0.1=py27_0
+- anaconda::ipython_genutils=0.1.0=py27_0
+- anaconda::jbig=2.1=0
+- anaconda::jinja2=2.8=py27_1
+- anaconda::jpeg=8d=2
+- anaconda::jupyter_client=4.4.0=py27_0
+- anaconda::jupyter_core=4.2.1=py27_0
+- anaconda::lazy-object-proxy=1.2.1=py27_0
+- anaconda::libffi=3.2.1=0
+- anaconda::libgfortran=3.0.0=1
+- anaconda::libiconv=1.14=0
+- anaconda::libpng=1.6.17=0
+- anaconda::libsodium=1.0.10=0
+- anaconda::libtiff=4.0.6=2
+- anaconda::libxml2=2.9.4=0
+- anaconda::libxslt=1.1.28=0
+- anaconda::lxml=3.6.4=py27_0
+- anaconda::markupsafe=0.23=py27_2
+- anaconda::mkl=11.3.3=0
+- anaconda::mock=2.0.0=py27_0
+- anaconda::openssl=1.0.2j=0
+- anaconda::pango=1.39.0=1
+- anaconda::path.py=8.2.1=py27_0
+- anaconda::pathlib2=2.1.0=py27_0
+- anaconda::pbr=1.10.0=py27_0
+- anaconda::pexpect=4.0.1=py27_0
+- anaconda::pickleshare=0.7.4=py27_0
+- anaconda::pillow=3.4.2=py27_0
+- anaconda::pip=9.0.1=py27_1
+- anaconda::pixman=0.32.6=0
+- anaconda::prompt_toolkit=1.0.9=py27_0
+- anaconda::ptyprocess=0.5.1=py27_0
+- anaconda::py2cairo=1.10.0=py27_2
+- anaconda::pygments=2.1.3=py27_0
+- anaconda::pylint=1.5.4=py27_1
+- anaconda::pyparsing=2.0.3=py27_0
+- anaconda::pyqt=4.11.4=py27_4
+- anaconda::python=2.7.12=1
+- anaconda::python-dateutil=2.4.2=py27_0
+- anaconda::pytz=2016.10=py27_0
+- anaconda::pyzmq=16.0.2=py27_0
+- anaconda::qt=4.8.7=4
+- anaconda::qtconsole=4.2.1=py27_0
+- anaconda::readline=6.2=2
+- anaconda::reportlab=3.3.0=py27_0
+- anaconda::setuptools=19.2=py27_0
+- anaconda::simplegeneric=0.8.1=py27_1
+- anaconda::singledispatch=3.4.0.3=py27_0
+- anaconda::sip=4.18=py27_0
+- anaconda::six=1.10.0=py27_0
+- anaconda::snowballstemmer=1.2.1=py27_0
+- anaconda::sphinx=1.4.8=py27_0
+- anaconda::sqlite=3.13.0=0
+- anaconda::ssl_match_hostname=3.4.0.2=py27_1
+- anaconda::tk=8.5.18=0
+- anaconda::tornado=4.4.2=py27_0
+- anaconda::traitlets=4.3.1=py27_0
+- anaconda::wcwidth=0.1.7=py27_0
+- anaconda::wheel=0.29.0=py27_0
+- anaconda::wrapt=1.10.8=py27_0
+- anaconda::wxpython=3.0.0.0=py27_2
+- anaconda::xz=5.2.2=0
+- anaconda::zeromq=4.1.5=0
+- anaconda::zlib=1.2.8=3
+- h5py=2.5.0=np19py27_3
+- hdf5=1.8.15.1=3
+- matplotlib=1.4.3=np19py27_2
+- numpy=1.9.3=py27_3
+- py=1.4.31=py27_0
+- pytest=3.0.5=py27_0
+- scipy=0.17.1=np19py27_1
+- timrudge::appdirs=1.4.0=py27_0
+- timrudge::mako=1.0.1=py27_0
+- timrudge::pyopencl=2014.1=np19py27_0
+- timrudge::pytools=2014.3.5=py27_0
+- pip:
+  - backports-abc==0.5
+  - backports.shutil-get-terminal-size==1.0.0
+  - backports.ssl-match-hostname==3.4.0.2
+  - bumps==0.7.6
+  - cffi==1.9.1
+  - constantly==15.1.0
+  - incremental==16.10.1
+  - ipython-genutils==0.1.0
+  - jupyter-client==4.4.0
+  - jupyter-core==4.2.1
+  - periodictable==1.4.1
+  - pisa==3.0.33
+  - prompt-toolkit==1.0.9
+  - pycparser==2.17
+  - pyinstaller==3.2
+  - pypdf2==1.26.0
+  - qt4reactor==1.6
+  - sasmodels==0.94
+  - sasview==4.0
+  - stdeb==0.8.5
+  - twisted==16.5.0
+  - unittest-xml-reporting==2.1.0
+  - wxpython-common==3.0.0.0
+  - xhtml2pdf==0.0.6
+  - zope.interface==4.3.2
+prefix: /home/vagrant/miniconda2/envs/sasviewqt_new
+
