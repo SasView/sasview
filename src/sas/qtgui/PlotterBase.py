@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 
 DEFAULT_CMAP = pylab.cm.jet
 from sas.qtgui.ScaleProperties import ScaleProperties
+from sas.qtgui.WindowTitle import WindowTitle
 import sas.qtgui.PlotHelper as PlotHelper
 
 class PlotterBase(QtGui.QWidget):
@@ -250,3 +251,18 @@ class PlotterBase(QtGui.QWidget):
         self.grid_on = (not self.grid_on)
         self.ax.grid(self.grid_on)
         self.canvas.draw_idle()
+
+    def onWindowsTitle(self):
+        """
+        Show a dialog allowing chart title customisation
+        """
+        current_title = self.windowTitle()
+        titleWidget = WindowTitle(self, new_title=current_title)
+        result = titleWidget.exec_()
+        if result != QtGui.QDialog.Accepted:
+            return
+
+        title = titleWidget.title()
+        self.setWindowTitle(title)
+        # Notify the listeners about a new graph title
+        self.manager.communicator.activeGraphName.emit((current_title, title))

@@ -66,6 +66,7 @@ class GuiUtilsTest(unittest.TestCase):
             'updateModelFromPerspectiveSignal',
             'plotRequestedSignal',
             'progressBarUpdateSignal',
+            'activeGraphName',
         ]
 
         # Assure all signals are defined.

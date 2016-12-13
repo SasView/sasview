@@ -12,6 +12,7 @@ import path_prepare
 #######
 
 from sas.qtgui.ScaleProperties import ScaleProperties
+from sas.qtgui.WindowTitle import WindowTitle
 #import sas.qtgui.GuiUtils as GuiUtils
 from sas.qtgui.GuiUtils import *
 import sas.qtgui.PlotHelper as PlotHelper
@@ -154,6 +155,20 @@ class PlotterBaseTest(unittest.TestCase):
         # Make sure clipboard got updated.
         self.assertTrue(self.clipboard_called)
 
+    def testOnWindowsTitle(self):
+        ''' test changing the plot title'''
+        # Mock the modal dialog's response
+        QtGui.QDialog.exec_ = MagicMock(return_value=QtGui.QDialog.Accepted)
+        self.plotter.show()
+        # Assure the original title is none
+        self.assertEqual(self.plotter.windowTitle(), "")
+        self.plotter.manager.communicator = MagicMock()
+
+        WindowTitle.title = MagicMock(return_value="I am a new title")
+        # Change the title
+        self.plotter.onWindowsTitle()
+
+        self.assertEqual(self.plotter.windowTitle(), "I am a new title")
 
 if __name__ == "__main__":
     unittest.main()

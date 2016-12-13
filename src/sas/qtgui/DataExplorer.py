@@ -79,6 +79,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator = self.parent.communicator()
         self.communicator.fileReadSignal.connect(self.loadFromURL)
         self.communicator.activeGraphsSignal.connect(self.updateGraphCombo)
+        self.communicator.activeGraphName.connect(self.updatePlotName)
         self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
 
@@ -367,6 +368,15 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             new_item.setChild(child_index, child_item)
         return new_item
 
+    def updatePlotName(self, name_tuple):
+        """
+        Modify the name of the current plot
+        """
+        old_name, current_name = name_tuple
+        ind = self.cbgraph.findText(old_name)
+        self.cbgraph.setCurrentIndex(ind)
+        self.cbgraph.setItemText(ind, current_name)
+
     def updateGraphCombo(self, graph_list):
         """
         Modify Graph combo box on graph add/delete
@@ -436,15 +446,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
     def appendPlot(self):
         """
         Add data set(s) to the existing matplotlib chart
-
-        TODO: Add 2D-functionality
         """
         # new plot data
         new_plots = GuiUtils.plotsFromCheckedItems(self.model)
 
         # old plot data
-        plot_id = self.cbgraph.currentText()
-        plot_id = int(plot_id[5:])
+        plot_id = self.cbgraph.currentIndex() + 1
 
         assert plot_id in PlotHelper.currentPlots(), "No such plot: Graph%s"%str(plot_id)
 

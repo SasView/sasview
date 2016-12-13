@@ -16,6 +16,7 @@ from UnitTesting import SasviewLoggerTest
 from UnitTesting import ScalePropertiesTest
 from UnitTesting import KiessigCalculatorTest
 from UnitTesting import DensityCalculatorTest
+from UnitTesting import WindowTitleTest
 
 def suite():
     suites = (
@@ -35,6 +36,7 @@ def suite():
         unittest.makeSuite(ScalePropertiesTest.ScalePropertiesTest,  'test'),
         unittest.makeSuite(KiessigCalculatorTest.KiessigCalculatorTest, 'test'),
         unittest.makeSuite(DensityCalculatorTest.DensityCalculatorTest, 'test'),
+        unittest.makeSuite(WindowTitleTest.WindowTitleTest, 'test'),
     )
     return unittest.TestSuite(suites)
 

@@ -12,6 +12,7 @@ class PlotterWidget(PlotterBase):
     """
     def __init__(self, parent=None, manager=None, quickplot=False):
         super(PlotterWidget, self).__init__(parent, manager=manager, quickplot=quickplot)
+        self.parent = parent
 
     @property
     def data(self):
@@ -78,6 +79,32 @@ class PlotterWidget(PlotterBase):
         """
         self.defaultContextMenu()
 
+        # Additional menu items
+        self.contextMenu.addSeparator()
+        self.actionModifyGraphAppearance =\
+            self.contextMenu.addAction("Modify Graph Appearance")
+        self.contextMenu.addSeparator()
+        self.actionAddText = self.contextMenu.addAction("Add Text")
+        self.actionRemoveText = self.contextMenu.addAction("Remove Text")
+        self.contextMenu.addSeparator()
+        self.actionChangeScale = self.contextMenu.addAction("Change Scale")
+        self.contextMenu.addSeparator()
+        self.actionSetGraphRange = self.contextMenu.addAction("Set Graph Range")
+        self.actionResetGraphRange =\
+            self.contextMenu.addAction("Reset Graph Range")
+        # Add the title change for dialogs
+        if self.parent:
+            self.contextMenu.addSeparator()
+            self.actionWindowTitle = self.contextMenu.addAction("Window Title")
+
+        # Define the callbacks
+        self.actionModifyGraphAppearance.triggered.connect(self.onModifyGraph)
+        self.actionAddText.triggered.connect(self.onAddText)
+        self.actionRemoveText.triggered.connect(self.onRemoveText)
+        self.actionChangeScale.triggered.connect(self.onScaleChange)
+        self.actionSetGraphRange.triggered.connect(self.onSetGraphRange)
+        self.actionResetGraphRange.triggered.connect(self.onResetGraphRange)
+        self.actionWindowTitle.triggered.connect(self.onWindowsTitle)
 
     def contextMenuQuickPlot(self):
         """
@@ -102,6 +129,41 @@ class PlotterWidget(PlotterBase):
         if self.properties.exec_() == QtGui.QDialog.Accepted:
             xLabel, yLabel = self.properties.getValues()
             self.xyTransform(xLabel, yLabel)
+
+    def onModifyGraph(self):
+        """
+        Show a dialog allowing chart manipulations
+        """
+        print ("onModifyGraph")
+        pass
+
+    def onAddText(self):
+        """
+        Show a dialog allowing adding custom text to the chart
+        """
+        print("onAddText")
+        pass
+
+    def onRemoveText(self):
+        """
+        Remove the most recent added text
+        """
+        print("onRemoveText")
+        pass
+
+    def onSetGraphRange(self):
+        """
+        Show a dialog allowing setting the chart ranges
+        """
+        print("onSetGraphRange")
+        pass
+
+    def onResetGraphRange(self):
+        """
+        Resets the chart X and Y ranges to the original values
+        """
+        print("onResetGraphRange")
+        pass
 
     def xyTransform(self, xLabel="", yLabel=""):
         """

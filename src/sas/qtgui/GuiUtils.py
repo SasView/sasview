@@ -228,6 +228,9 @@ class Communicate(QtCore.QObject):
     # Workspace charts added/removed
     activeGraphsSignal = QtCore.pyqtSignal(list)
 
+    # Current workspace chart's name changed
+    activeGraphName = QtCore.pyqtSignal(tuple)
+
 
 def updateModelItemWithPlot(item, update_data, name=""):
     """

@@ -15,3 +15,5 @@ python -m UnitTesting.PlotterBaseTest
 python -m UnitTesting.PlotterTest
 python -m UnitTesting.Plotter2DTest
 python -m UnitTesting.ScalePropertiesTest
+python -m UnitTesting.WindowTitleTest
+
