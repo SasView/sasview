@@ -1,12 +1,12 @@
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 from UI.SlitSizeCalculator import Ui_SlitSizeCalculator
-from twisted.internet import threads
-import logging
-
-# sas-global
+from sas.sascalc.dataloader.loader import Loader
+from sas.sasgui.guiframe.dataFitting import Data1D
+from sas.sasgui.guiframe.dataFitting import Data2D
 from sas.sascalc.calculator.slit_length_calculator import SlitlengthCalculator
-from DataExplorer import DataExplorerWindow
+
+import sys
 
 class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
     def __init__(self, parent=None, guimanager=None, manager=None):
@@ -49,42 +49,34 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
         """
         Execute the computation of thickness
         """
-        path_str = self.chooseFiles()
+        path_str = self.chooseFile()
         if not path_str:
             return
-        self.loadFromURL(path_str)
-        #Path_str is a list - it needs to be changed, so that only one file can be uploaded
-        self.deltaq_in.setText(path_str[0])
+        loader = Loader()
+        data = loader.load(path_str)
 
-    def loadFromURL(self, url):
-        """
-        Threaded file load
-        """
-        data_explorer = DataExplorerWindow(parent=self._parent, guimanager=self._guimanager)
-        load_thread = threads.deferToThread(data_explorer.readData, url)
-        load_thread.addCallback(data_explorer.loadComplete)
-        #On complete loading
+        self.deltaq_in.setText(path_str)
+        #We are loading data for one model only therefor index 0
+        self.complete_loading(data)
+        #Complete loading here
 
-    def chooseFiles(self):
+    def chooseFile(self):
         """
         Shows the Open file dialog and returns the chosen path(s)
         """
 
         # Location is automatically saved - no need to keep track of the last dir
         # But only with Qt built-in dialog (non-platform native)
-        paths = QtGui.QFileDialog.getOpenFileNames(self, "Choose a file", "",
-                "SAXSess Data 1D (*.txt *.TXT *.dat *.DAT)", None,
+        path = QtGui.QFileDialog.getOpenFileName(self, "Choose a file", "",
+                "SAS data 1D (*.txt *.TXT *.dat *.DAT)", None,
                 QtGui.QFileDialog.DontUseNativeDialog)
-        if paths is None:
+        if path is None:
             return
 
-        if isinstance(paths, QtCore.QStringList):
-            paths = [str(f) for f in paths]
+        if isinstance(path, QtCore.QString):
+            path = str(path)
 
-        if not isinstance(paths, list):
-            paths = [paths]
-
-        return paths
+        return path
 
     def onClose(self):
         """
@@ -96,40 +88,31 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
         """
             Complete the loading and compute the slit size
         """
-        #TODO: Provided we have an access to data then it should be fairly easy
-        index = self.treeView.selectedIndexes()[0]
-        model_item = self.model.itemFromIndex(self.data_proxy.mapToSource(index))
-        data = GuiUtils.dataFromItem(model_item)
 
-        if data is None or isinstance(data, Data2D):
-            #I guess this doesn't apply
-            if self.parent.parent is None:
-                return
+        if data is None:
+            msg = "ERROR: Data hasn't been loaded correctly"
+            raise RuntimeError, msg
+
+        if isinstance(data, Data2D):
             msg = "Slit Length cannot be computed for 2D Data"
-            logging.info(msg)
-            return
-        self.data_name_tcl.SetValue(str(data.filename))
+            raise Exception, msg
+
         #compute the slit size
         try:
-            x = data.x
-            y = data.y
-            if x == [] or  x is None or y == [] or y is None:
-                msg = "The current data is empty please check x and y"
-                raise ValueError, msg
-            slit_length_calculator = SlitlengthCalculator()
-            slit_length_calculator.set_data(x=x, y=y)
-            slit_length = slit_length_calculator.calculate_slit_length()
+             x = data.x
+             y = data.y
+             if x == [] or  x is None or y == [] or y is None:
+                 msg = "The current data is empty please check x and y"
+                 raise ValueError, msg
+             slit_length_calculator = SlitlengthCalculator()
+             slit_length_calculator.set_data(x=x, y=y)
+             slit_length = slit_length_calculator.calculate_slit_length()
         except:
-            if self.parent.parent is None:
-                return
-            msg = "Slit Size Calculator: %s" % (sys.exc_value)
-            logging.info(msg)
-            return
-        self.slit_size_tcl.SetValue(str(slit_length))
+             msg = "Slit Size Calculator: %s" % (sys.exc_value)
+             raise RuntimeError, msg
+
+        print("Slit lenght", slit_length)
+        self.lengthscale_out.setText(str(slit_length))
         #Display unit
-        self.slit_size_unit_tcl.SetValue('[Unknown]')
-        if self.parent.parent is None:
-            return
-        msg = "Load Complete"
-        logging.info(msg)
+        self.lineEdit.setText("[UNKNOWN]")
 

@@ -489,7 +489,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         any_error = False
         data_error = False
         error_message = ""
-
         number_of_files = len(path)
         self.communicator.progressBarUpdateSignal.emit(0.0)
 
