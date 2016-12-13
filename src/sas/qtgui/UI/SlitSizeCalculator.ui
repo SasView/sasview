@@ -51,6 +51,12 @@
         </item>
         <item>
          <widget class="QLineEdit" name="deltaq_in">
+          <property name="minimumSize">
+           <size>
+            <width>300</width>
+            <height>21</height>
+           </size>
+          </property>
           <property name="readOnly">
            <bool>true</bool>
           </property>
@@ -88,6 +94,12 @@
         </item>
         <item>
          <widget class="QLineEdit" name="lengthscale_out">
+          <property name="minimumSize">
+           <size>
+            <width>125</width>
+            <height>21</height>
+           </size>
+          </property>
           <property name="readOnly">
            <bool>true</bool>
           </property>
@@ -105,7 +117,14 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit"/>
+         <widget class="QLineEdit" name="lineEdit">
+          <property name="minimumSize">
+           <size>
+            <width>120</width>
+            <height>21</height>
+           </size>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
