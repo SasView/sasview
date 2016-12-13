@@ -7,8 +7,12 @@ from sas.sasgui.plottools.convert_units import convert_unit
 from sas.qtgui.PlotterBase import PlotterBase
 
 class PlotterWidget(PlotterBase):
+    """
+    1D Plot widget for use with a QDialog
+    """
     def __init__(self, parent=None, manager=None, quickplot=False):
         super(PlotterWidget, self).__init__(parent, manager=manager, quickplot=quickplot)
+        self.parent = parent
 
     @property
     def data(self):
@@ -22,7 +26,7 @@ class PlotterWidget(PlotterBase):
         self.yLabel = "%s(%s)"%(value._yaxis, value._yunit)
         self.title(title=value.title)
 
-    def plot(self, marker=None, linestyle=None):
+    def plot(self, marker=None, linestyle=None, hide_error=False):
         """
         Plot self._data
         """
@@ -33,14 +37,23 @@ class PlotterWidget(PlotterBase):
             marker = 'o'
 
         if linestyle == None:
-            linestyle = '-'
+            linestyle = ''
 
-        # plot data with title
-        ax.plot(self._data.view.x,
-                self._data.view.y,
-                marker=marker,
-                linestyle=linestyle,
-                label=self._title)
+        # plot data with/without errorbars
+        if hide_error:
+            ax.plot(self._data.view.x, self._data.view.y,
+                    marker=marker,
+                    linestyle=linestyle,
+                    label=self._title)
+        else:
+            ax.errorbar(self._data.view.x, self._data.view.y,
+                        yerr=self._data.view.dx, xerr=None,
+                        capsize=2, linestyle='',
+                        barsabove=False,
+                        marker=marker,
+                        lolims=False, uplims=False,
+                        xlolims=False, xuplims=False,
+                        label=self._title)
 
         # Now add the legend with some customizations.
         legend = ax.legend(loc='upper right', shadow=True)
@@ -54,30 +67,58 @@ class PlotterWidget(PlotterBase):
             ax.set_title(label=self._title)
 
         # Include scaling (log vs. linear)
-        ax.set_yscale(self.xscale)
         ax.set_xscale(self.xscale)
+        ax.set_yscale(self.yscale)
 
         # refresh canvas
         self.canvas.draw()
+
+    def contextMenu(self):
+        """
+        Define common context menu and associated actions for the MPL widget
+        """
+        self.defaultContextMenu()
+
+        # Additional menu items
+        self.contextMenu.addSeparator()
+        self.actionModifyGraphAppearance =\
+            self.contextMenu.addAction("Modify Graph Appearance")
+        self.contextMenu.addSeparator()
+        self.actionAddText = self.contextMenu.addAction("Add Text")
+        self.actionRemoveText = self.contextMenu.addAction("Remove Text")
+        self.contextMenu.addSeparator()
+        self.actionChangeScale = self.contextMenu.addAction("Change Scale")
+        self.contextMenu.addSeparator()
+        self.actionSetGraphRange = self.contextMenu.addAction("Set Graph Range")
+        self.actionResetGraphRange =\
+            self.contextMenu.addAction("Reset Graph Range")
+        # Add the title change for dialogs
+        if self.parent:
+            self.contextMenu.addSeparator()
+            self.actionWindowTitle = self.contextMenu.addAction("Window Title")
+
+        # Define the callbacks
+        self.actionModifyGraphAppearance.triggered.connect(self.onModifyGraph)
+        self.actionAddText.triggered.connect(self.onAddText)
+        self.actionRemoveText.triggered.connect(self.onRemoveText)
+        self.actionChangeScale.triggered.connect(self.onScaleChange)
+        self.actionSetGraphRange.triggered.connect(self.onSetGraphRange)
+        self.actionResetGraphRange.triggered.connect(self.onResetGraphRange)
+        self.actionWindowTitle.triggered.connect(self.onWindowsTitle)
 
     def contextMenuQuickPlot(self):
         """
         Define context menu and associated actions for the quickplot MPL widget
         """
-        # Actions
-        self.contextMenu = QtGui.QMenu(self)
-        self.actionSaveImage = self.contextMenu.addAction("Save Image")
-        self.actionPrintImage = self.contextMenu.addAction("Print Image")
-        self.actionCopyToClipboard = self.contextMenu.addAction("Copy to Clipboard")
-        self.contextMenu.addSeparator()
+        # Default actions
+        self.defaultContextMenu()
+
+        # Additional actions
         self.actionToggleGrid = self.contextMenu.addAction("Toggle Grid On/Off")
         self.contextMenu.addSeparator()
         self.actionChangeScale = self.contextMenu.addAction("Change Scale")
 
         # Define the callbacks
-        self.actionSaveImage.triggered.connect(self.onImageSave)
-        self.actionPrintImage.triggered.connect(self.onImagePrint)
-        self.actionCopyToClipboard.triggered.connect(self.onClipboardCopy)
         self.actionToggleGrid.triggered.connect(self.onGridToggle)
         self.actionChangeScale.triggered.connect(self.onScaleChange)
 
@@ -88,6 +129,41 @@ class PlotterWidget(PlotterBase):
         if self.properties.exec_() == QtGui.QDialog.Accepted:
             xLabel, yLabel = self.properties.getValues()
             self.xyTransform(xLabel, yLabel)
+
+    def onModifyGraph(self):
+        """
+        Show a dialog allowing chart manipulations
+        """
+        print ("onModifyGraph")
+        pass
+
+    def onAddText(self):
+        """
+        Show a dialog allowing adding custom text to the chart
+        """
+        print("onAddText")
+        pass
+
+    def onRemoveText(self):
+        """
+        Remove the most recent added text
+        """
+        print("onRemoveText")
+        pass
+
+    def onSetGraphRange(self):
+        """
+        Show a dialog allowing setting the chart ranges
+        """
+        print("onSetGraphRange")
+        pass
+
+    def onResetGraphRange(self):
+        """
+        Resets the chart X and Y ranges to the original values
+        """
+        print("onResetGraphRange")
+        pass
 
     def xyTransform(self, xLabel="", yLabel=""):
         """
@@ -205,4 +281,8 @@ class Plotter(QtGui.QDialog, PlotterWidget):
 
         QtGui.QDialog.__init__(self)
         PlotterWidget.__init__(self, manager=parent, quickplot=quickplot)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/res/ball.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.setWindowIcon(icon)
+
 

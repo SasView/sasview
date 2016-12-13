@@ -11,6 +11,9 @@ python -m UnitTesting.DroppableDataLoadWidgetTest
 python -m UnitTesting.SasviewLoggerTest
 python -m UnitTesting.PlotHelperTest
 python -m UnitTesting.KiessigCalculatorTest
+python -m UnitTesting.PlotterBaseTest
 python -m UnitTesting.PlotterTest
 python -m UnitTesting.Plotter2DTest
 python -m UnitTesting.ScalePropertiesTest
+python -m UnitTesting.WindowTitleTest
+

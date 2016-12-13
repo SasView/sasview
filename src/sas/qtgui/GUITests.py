@@ -9,12 +9,14 @@ from UnitTesting import GuiUtilsTest
 from UnitTesting import MainWindowTest
 from UnitTesting import TestUtilsTest
 from UnitTesting import PlotHelperTest
+from UnitTesting import PlotterBaseTest
 from UnitTesting import PlotterTest
 from UnitTesting import Plotter2DTest
 from UnitTesting import SasviewLoggerTest
 from UnitTesting import ScalePropertiesTest
 from UnitTesting import KiessigCalculatorTest
 from UnitTesting import DensityCalculatorTest
+from UnitTesting import WindowTitleTest
 
 def suite():
     suites = (
@@ -27,12 +29,14 @@ def suite():
         unittest.makeSuite(MainWindowTest.MainWindowTest,      'test'),
         unittest.makeSuite(TestUtilsTest.TestUtilsTest,        'test'),
         unittest.makeSuite(PlotHelperTest.PlotHelperTest,       'test'),
+        unittest.makeSuite(PlotterBaseTest.PlotterBaseTest,     'test'),
         unittest.makeSuite(PlotterTest.PlotterTest,          'test'),
         unittest.makeSuite(Plotter2DTest.Plotter2DTest,        'test'),
         unittest.makeSuite(SasviewLoggerTest.SasviewLoggerTest,    'test'),
         unittest.makeSuite(ScalePropertiesTest.ScalePropertiesTest,  'test'),
         unittest.makeSuite(KiessigCalculatorTest.KiessigCalculatorTest, 'test'),
         unittest.makeSuite(DensityCalculatorTest.DensityCalculatorTest, 'test'),
+        unittest.makeSuite(WindowTitleTest.WindowTitleTest, 'test'),
     )
     return unittest.TestSuite(suites)
 

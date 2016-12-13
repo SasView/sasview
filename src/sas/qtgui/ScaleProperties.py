@@ -18,7 +18,7 @@ view_to_xy = {
     view_values[5]: [0, 4], # Kratky
 }
 class ScaleProperties(QtGui.QDialog, Ui_scalePropertiesUI):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, init_scale_x='x', init_scale_y='y'):
         super(ScaleProperties, self).__init__(parent)
         self.setupUi(self)
 
@@ -28,6 +28,12 @@ class ScaleProperties(QtGui.QDialog, Ui_scalePropertiesUI):
         self.cbView.addItems(view_values)
         # Resize the dialog only AFTER the boxes are populated
         self.setFixedSize(self.minimumSizeHint())
+
+        # Set up the initial values for x and y.
+        # This avoids keeping a QModel instance here.
+        if init_scale_x in x_values and init_scale_y in y_values:
+            self.cbX.setCurrentIndex(x_values.index(init_scale_x))
+            self.cbY.setCurrentIndex(y_values.index(init_scale_y))
 
         # Connect combobox index change to a custom method
         self.cbView.currentIndexChanged.connect(self.viewIndexChanged)
