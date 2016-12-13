@@ -7,6 +7,7 @@ from sas.sasgui.guiframe.dataFitting import Data2D
 from sas.sascalc.calculator.slit_length_calculator import SlitlengthCalculator
 
 import os
+import sys
 
 class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
     def __init__(self, parent=None):
@@ -91,7 +92,7 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
             msg = "ERROR: Data hasn't been loaded correctly"
             raise RuntimeError, msg
 
-        if isinstance(data, Data2D):
+        if isinstance(data, Data2D) or data.__class__.__name__ == 'Data2D':
             msg = "Slit Length cannot be computed for 2D Data"
             raise Exception, msg
 
