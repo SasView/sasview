@@ -26,7 +26,7 @@ C: Build SasView
 9. run sasview: python run.py
 10. cd SasView/sasview/src/sas/qtgui
 11. make gui: ./make_ui.sh
-12.python run.py / python Main\_Window.py depending on on your cloned githash
+12. python run.py / python Main\_Window.py depending on on your cloned githash
 
 Tips:
 ----
@@ -47,5 +47,5 @@ To deactivate this environment, use:
 Known problems:
 ---------------
 
-    - libxml2 not installed.
+   - libxml2 not installed.
 
