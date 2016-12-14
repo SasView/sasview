@@ -140,7 +140,7 @@ class GuiManager(object):
         self.DVCalculator = DensityPanel(self)
         #self.KIESSIGCalculator = DensityPanel(self)#KiessigPanel(self)
         self.KIESSIGCalculator = KiessigPanel(self)
-        self.SlitSizeCalculator = SlitSizeCalculator(self._parent)
+        self.SlitSizeCalculator = SlitSizeCalculator(self)
     def statusBarSetup(self):
         """
         Define the status bar.
