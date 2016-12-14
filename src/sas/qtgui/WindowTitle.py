@@ -1,6 +1,8 @@
+"""
+Allows users to change the title of the current graph
+from "Graph_n" to any ASCII text.
+"""
 from PyQt4 import QtGui
-
-import sas.sasview
 
 from sas.qtgui.UI.WindowTitleUI import Ui_WindowTitle
 
@@ -12,5 +14,6 @@ class WindowTitle(QtGui.QDialog, Ui_WindowTitle):
         self.txtTitle.setText(new_title)
 
     def title(self):
+        """ Return the new title """
         return self.txtTitle.text()
 
