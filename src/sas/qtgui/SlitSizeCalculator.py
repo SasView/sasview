@@ -1,11 +1,15 @@
+"""
+Slit Size Calculator Panel
+"""
+import os
+import sys
+
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 from UI.SlitSizeCalculator import Ui_SlitSizeCalculator
 from sas.sascalc.dataloader.loader import Loader
 from sas.sascalc.calculator.slit_length_calculator import SlitlengthCalculator
 
-import os
-import sys
 
 class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
     """
@@ -67,8 +71,8 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
         # Location is automatically saved - no need to keep track of the last dir
         # But only with Qt built-in dialog (non-platform native)
         path = QtGui.QFileDialog.getOpenFileName(self, "Choose a file", "",
-                "SAXSess 1D data (*.txt *.TXT *.dat *.DAT)", None,
-                QtGui.QFileDialog.DontUseNativeDialog)
+                                                 "SAXSess 1D data (*.txt *.TXT *.dat *.DAT)", None,
+                                                 QtGui.QFileDialog.DontUseNativeDialog)
 
         if path is None:
             return
@@ -99,17 +103,17 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
 
         #compute the slit size
         try:
-             x = data.x
-             y = data.y
-             if x == [] or x is None or y == [] or y is None:
-                 msg = "The current data is empty please check x and y"
-                 raise ValueError, msg
-             slit_length_calculator = SlitlengthCalculator()
-             slit_length_calculator.set_data(x=x, y=y)
-             slit_length = slit_length_calculator.calculate_slit_length()
+            xdata = data.x
+            ydata = data.y
+            if xdata == [] or xdata is None or ydata == [] or ydata is None:
+                msg = "The current data is empty please check x and y"
+                raise ValueError, msg
+            slit_length_calculator = SlitlengthCalculator()
+            slit_length_calculator.set_data(x=xdata, y=ydata)
+            slit_length = slit_length_calculator.calculate_slit_length()
         except:
-             msg = "Slit Size Calculator: %s" % (sys.exc_value)
-             raise RuntimeError, msg
+            msg = "Slit Size Calculator: %s" % (sys.exc_value)
+            raise RuntimeError, msg
 
         slit_length_str = "{:.5f}".format(slit_length)
         self.slit_length_out.setText(slit_length_str)
