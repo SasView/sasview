@@ -383,14 +383,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         orig_text = self.cbgraph.currentText()
         self.cbgraph.clear()
-        graph_titles = []
         graph_titles= ["Graph"+str(graph) for graph in graph_list]
 
         self.cbgraph.insertItems(0, graph_titles)
         ind = self.cbgraph.findText(orig_text)
         if ind > 0:
             self.cbgraph.setCurrentIndex(ind)
-        pass
 
     def newPlot(self):
         """
