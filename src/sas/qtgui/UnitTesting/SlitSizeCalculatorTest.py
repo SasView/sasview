@@ -37,42 +37,6 @@ class SlitSizeCalculatorTest(unittest.TestCase):
         # this should not rise
         self.widget.onHelp()
 
-    def testCalculateSlitSize(self):
-        """ User entered compound calculations and subsequent reset"""
-
-        filename = "beam_profile.DAT"
-        loader = Loader()
-        data = loader.load(filename)
-
-        self.widget.calculateSlitSize(data)
-        # The value "5.5858" was obtained by manual calculation.
-        # It turns out our slit length is FWHM/2
-        self.assertAlmostEqual(float(self.widget.slit_length_out.text()), 5.5858/2, 3)
-
-    def testCalculateSlitSize2D(self):
-        """ User entered compound calculations and subsequent reset"""
-
-        #TODO: Test for 2D and check if exception is being raised
-        filename = "beam_profile.DAT"
-        loader = Loader()
-        data = loader.load(filename)
-
-        self.widget.calculateSlitSize(data)
-        # The value "5.5858" was obtained by manual calculation.
-        # It turns out our slit length is FWHM/2
-        self.assertAlmostEqual(float(self.widget.slit_length_out.text()), 5.5858/2, 3)
-
-    # def testDataEntryNumbers(self):
-    #      """ User entered compound calculations and subsequent reset"""
-    #
-    #      self.widget.data_file.clear()
-    #      self.widget.data_file.insert("beam profile.DAT")
-    #      #
-    #      # Push Compute with the left mouse button
-    #      computeButton = self.widget.computeButton
-    #      QTest.mouseClick(computeButton, Qt.LeftButton)
-    #      self.assertEqual(self.widget.lengthscale_out.text(), '6.283')
-
     def testBrowseButton(self):
         browseButton = self.widget.browseButton
 
@@ -99,27 +63,41 @@ class SlitSizeCalculatorTest(unittest.TestCase):
         self.assertTrue(QtGui.QFileDialog.getOpenFileName.called)
         QtGui.QFileDialog.getOpenFileName.assert_called_once()
 
-    # def testDataEntryNumbers(self):
-    #     """ User entered compound calculations and subsequent reset"""
-    #
-    #     self.widget.data_file.clear()
-    #     self.widget.data_file.insert("beam profile.DAT")
-    #     #
-    #     # Push Compute with the left mouse button
-    #     computeButton = self.widget.computeButton
-    #     QTest.mouseClick(computeButton, Qt.LeftButton)
-    #     self.assertEqual(self.widget.lengthscale_out.text(), '6.283')
-    #
-    #
-    # def testComplexEntryLetters(self):
-    #     """ User entered compound calculations and subsequent reset"""
-    #
-    #     self.widget.deltaq_in.insert("xyz")
-    #
-    #     # Push Compute with the left mouse button
-    #     computeButton = self.widget.computeButton
-    #     QTest.mouseClick(computeButton, Qt.LeftButton)
-    #     self.assertEqual(self.widget.lengthscale_out.text(), '')
+
+    def testCalculateSlitSize(self):
+        """ Test slit size calculated value """
+
+        filename = "beam_profile.DAT"
+        loader = Loader()
+        data = loader.load(filename)
+
+        self.widget.calculateSlitSize(data)
+        # The value "5.5858" was obtained by manual calculation.
+        # It turns out our slit length is FWHM/2
+        self.assertAlmostEqual(float(self.widget.slit_length_out.text()), 5.5858/2, 3)
+
+    def testWrongInput(self):
+        """ Test on wrong input data """
+
+        filename = "Dec07031.ASC"
+        loader = Loader()
+        data = loader.load(filename)
+        self.assertRaisesRegexp(Exception,
+                                "Slit Length cannot be computed for 2D Data",
+                                self.widget.calculateSlitSize, data)
+
+        filename = "empty_file.txt"
+        loader = Loader()
+        data = loader.load(filename)
+        self.assertRaisesRegexp(RuntimeError,
+                                "ERROR: Data hasn't been loaded correctly",
+                                self.widget.calculateSlitSize, data)
+
+        data = None
+        self.assertRaisesRegexp(RuntimeError,
+                                "ERROR: Data hasn't been loaded correctly",
+                                self.widget.calculateSlitSize, data)
+
 
 if __name__ == "__main__":
     unittest.main()

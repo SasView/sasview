@@ -2,14 +2,15 @@ from PyQt4 import QtGui
 from PyQt4 import QtCore
 from UI.SlitSizeCalculator import Ui_SlitSizeCalculator
 from sas.sascalc.dataloader.loader import Loader
-from sas.sasgui.guiframe.dataFitting import Data1D
-from sas.sasgui.guiframe.dataFitting import Data2D
 from sas.sascalc.calculator.slit_length_calculator import SlitlengthCalculator
 
 import os
 import sys
 
 class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
+    """
+    Provides the slit length calculator GUI.
+    """
     def __init__(self, parent=None):
         super(SlitSizeCalculator, self).__init__()
         self.setupUi(self)
@@ -30,7 +31,7 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
 
     def onHelp(self):
         """
-        Bring up the Kiessig fringe calculator Documentation whenever
+        Bring up the Slit Size Calculator calculator Documentation whenever
         the HELP button is clicked.
         Calls DocumentationWindow with the path of the location within the
         documentation tree (after /doc/ ....".
@@ -47,7 +48,7 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
 
     def onBrowse(self):
         """
-        Execute the computation of thickness
+        Browse the file and calculate slit lenght upon loading
         """
         path_str = self.chooseFile()
         if not path_str:
@@ -56,7 +57,6 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
         data = loader.load(path_str)
 
         self.data_file.setText(os.path.basename(path_str))
-        #We are loading data for one model only therefor index 0
         self.calculateSlitSize(data)
 
     def chooseFile(self):
@@ -69,6 +69,7 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
         path = QtGui.QFileDialog.getOpenFileName(self, "Choose a file", "",
                 "SAXSess 1D data (*.txt *.TXT *.dat *.DAT)", None,
                 QtGui.QFileDialog.DontUseNativeDialog)
+
         if path is None:
             return
 
@@ -85,14 +86,14 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
 
     def calculateSlitSize(self, data=None):
         """
-            Complete the loading and compute the slit size
+        Computes slit lenght from given 1D data
         """
 
         if data is None:
             msg = "ERROR: Data hasn't been loaded correctly"
             raise RuntimeError, msg
 
-        if isinstance(data, Data2D) or data.__class__.__name__ == 'Data2D':
+        if data.__class__.__name__ == 'Data2D':
             msg = "Slit Length cannot be computed for 2D Data"
             raise Exception, msg
 
@@ -100,7 +101,7 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
         try:
              x = data.x
              y = data.y
-             if x == [] or  x is None or y == [] or y is None:
+             if x == [] or x is None or y == [] or y is None:
                  msg = "The current data is empty please check x and y"
                  raise ValueError, msg
              slit_length_calculator = SlitlengthCalculator()
@@ -112,6 +113,7 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
 
         slit_length_str = "{:.5f}".format(slit_length)
         self.slit_length_out.setText(slit_length_str)
-        #Display unit
+
+        #Display unit, which most likely needs to be 1/Ang but needs to be confirmed
         self.unit_out.setText("[Unknown]")
 
