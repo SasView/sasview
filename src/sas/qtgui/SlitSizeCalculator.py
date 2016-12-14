@@ -88,18 +88,27 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
         """
         self.close()
 
+    def clearResults(self):
+        """
+        Clear the content of output LineEdits
+        """
+        self.slit_length_out.setText("ERROR!")
+        self.unit_out.clear()
+
     def calculateSlitSize(self, data=None):
         """
         Computes slit lenght from given 1D data
         """
 
         if data is None:
+            self.clearResults()
             msg = "ERROR: Data hasn't been loaded correctly"
             raise RuntimeError, msg
 
         if data.__class__.__name__ == 'Data2D':
+            self.clearResults()
             msg = "Slit Length cannot be computed for 2D Data"
-            raise Exception, msg
+            raise RuntimeError, msg
 
         #compute the slit size
         try:
@@ -112,6 +121,7 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
             slit_length_calculator.set_data(x=xdata, y=ydata)
             slit_length = slit_length_calculator.calculate_slit_length()
         except:
+            self.clearResults()
             msg = "Slit Size Calculator: %s" % (sys.exc_value)
             raise RuntimeError, msg
 

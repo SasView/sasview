@@ -82,7 +82,7 @@ class SlitSizeCalculatorTest(unittest.TestCase):
         filename = "Dec07031.ASC"
         loader = Loader()
         data = loader.load(filename)
-        self.assertRaisesRegexp(Exception,
+        self.assertRaisesRegexp(RuntimeError,
                                 "Slit Length cannot be computed for 2D Data",
                                 self.widget.calculateSlitSize, data)
 
