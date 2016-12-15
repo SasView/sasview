@@ -36,7 +36,7 @@ make html
 cd $WORKSPACE
 cd sasmodels
 $PYTHON setup.py bdist_egg
-
+$PYTHON -m sasmodels.model_test all
 
 # SASVIEW
 cd $WORKSPACE
