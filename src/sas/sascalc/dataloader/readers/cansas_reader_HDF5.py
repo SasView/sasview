@@ -162,6 +162,9 @@ class Reader():
                     else:
                         self.current_dataset.x = data_set.flatten()
                     continue
+                elif key == u'Qdev':
+                    self.current_dataset.dx = data_set.flatten()
+                    continue
                 elif key == u'Qy':
                     self.current_dataset.yaxis("Q_y", unit)
                     self.current_dataset.qy_data = data_set.flatten()
