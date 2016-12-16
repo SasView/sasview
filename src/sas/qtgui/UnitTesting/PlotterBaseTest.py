@@ -156,7 +156,7 @@ class PlotterBaseTest(unittest.TestCase):
         self.assertTrue(self.clipboard_called)
 
     def testOnWindowsTitle(self):
-        ''' test changing the plot title'''
+        """ Test changing the plot title"""
         # Mock the modal dialog's response
         QtGui.QDialog.exec_ = MagicMock(return_value=QtGui.QDialog.Accepted)
         self.plotter.show()
@@ -169,6 +169,26 @@ class PlotterBaseTest(unittest.TestCase):
         self.plotter.onWindowsTitle()
 
         self.assertEqual(self.plotter.windowTitle(), "I am a new title")
+
+    def testOnMplMouseDown(self):
+        """ Test what happens on mouse click down in chart """
+        pass
+
+    def testOnMplMouseUp(self):
+        """ Test what happens on mouse release in chart """
+        pass
+
+    def testOnMplMouseMotion(self):
+        """ Test what happens on mouse move in chart """
+        pass
+
+    def testOnMplPick(self):
+        """ Test what happens on mouse pick in chart """
+        pass
+
+    def testOnMplWheel(self):
+        """ Test what happens on mouse pick in chart """
+        pass
 
 if __name__ == "__main__":
     unittest.main()

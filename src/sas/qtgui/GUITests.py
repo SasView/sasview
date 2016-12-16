@@ -1,6 +1,7 @@
 import unittest
 
 from UnitTesting import AboutBoxTest
+from UnitTesting import AddTextTest
 from UnitTesting import DataExplorerTest
 from UnitTesting import WelcomePanelTest
 from UnitTesting import DroppableDataLoadWidgetTest
@@ -21,6 +22,7 @@ from UnitTesting import WindowTitleTest
 def suite():
     suites = (
         unittest.makeSuite(AboutBoxTest.AboutBoxTest,          'test'),
+        unittest.makeSuite(AddTextTest.AddTextTest,          'test'),
         unittest.makeSuite(DataExplorerTest.DataExplorerTest,  'test'),
         unittest.makeSuite(WelcomePanelTest.WelcomePanelTest,  'test'),
         unittest.makeSuite(DroppableDataLoadWidgetTest.DroppableDataLoadWidgetTest, 'test'),

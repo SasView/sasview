@@ -174,3 +174,49 @@ def fillup_pixels(image=None, weights=None):
     image[ind] = temp_image[ind] / weit[ind]
 
     return image
+
+def rescale(lo, hi, step, pt=None, bal=None, scale='linear'):
+    """
+    Rescale (lo,hi) by step, returning the new (lo,hi)
+    The scaling is centered on pt, with positive values of step
+    driving lo/hi away from pt and negative values pulling them in.
+    If bal is given instead of point, it is already in [0,1] coordinates.
+
+    This is a helper function for step-based zooming.
+    """
+    # Convert values into the correct scale for a linear transformation
+    # TODO: use proper scale transformers
+    loprev = lo
+    hiprev = hi
+    if scale == 'log':
+        assert lo > 0
+        if lo > 0:
+            lo = numpy.log10(lo)
+        if hi > 0:
+            hi = numpy.log10(hi)
+        if pt is not None:
+            pt = numpy.log10(pt)
+
+    # Compute delta from axis range * %, or 1-% if persent is negative
+    if step > 0:
+        delta = float(hi - lo) * step / 100
+    else:
+        delta = float(hi - lo) * step / (100 - step)
+
+    # Add scale factor proportionally to the lo and hi values,
+    # preserving the
+    # point under the mouse
+    if bal is None:
+        bal = float(pt - lo) / (hi - lo)
+    lo = lo - (bal * delta)
+    hi = hi + (1 - bal) * delta
+
+    # Convert transformed values back to the original scale
+    if scale == 'log':
+        if (lo <= -250) or (hi >= 250):
+            lo = loprev
+            hi = hiprev
+        else:
+            lo, hi = numpy.power(10., lo), numpy.power(10., hi)
+    return (lo, hi)
+

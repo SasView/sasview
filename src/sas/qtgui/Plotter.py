@@ -1,10 +1,13 @@
 from PyQt4 import QtGui
 
 import matplotlib.pyplot as plt
+from matplotlib.font_manager import FontProperties
 
+from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.plottools import transform
 from sas.sasgui.plottools.convert_units import convert_unit
 from sas.qtgui.PlotterBase import PlotterBase
+from sas.qtgui.AddText import AddText
 
 class PlotterWidget(PlotterBase):
     """
@@ -26,10 +29,15 @@ class PlotterWidget(PlotterBase):
         self.yLabel = "%s(%s)"%(value._yaxis, value._yunit)
         self.title(title=value.title)
 
-    def plot(self, marker=None, linestyle=None, hide_error=False):
+    def plot(self, data=None, marker=None, linestyle=None, hide_error=False):
         """
         Plot self._data
         """
+        # Data1D
+        if isinstance(data, Data1D):
+            self.data = data
+        assert(self._data)
+
         # Shortcut for an axis
         ax = self.ax
 
@@ -44,7 +52,8 @@ class PlotterWidget(PlotterBase):
             ax.plot(self._data.view.x, self._data.view.y,
                     marker=marker,
                     linestyle=linestyle,
-                    label=self._title)
+                    label=self._title,
+                    picker=True)
         else:
             ax.errorbar(self._data.view.x, self._data.view.y,
                         yerr=self._data.view.dx, xerr=None,
@@ -53,10 +62,13 @@ class PlotterWidget(PlotterBase):
                         marker=marker,
                         lolims=False, uplims=False,
                         xlolims=False, xuplims=False,
-                        label=self._title)
+                        label=self._title,
+                        picker=True)
 
         # Now add the legend with some customizations.
-        legend = ax.legend(loc='upper right', shadow=True)
+        self.legend = ax.legend(loc='upper right', shadow=True)
+        #self.legend.get_frame().set_alpha(0.4)
+        self.legend.set_picker(True)
 
         # Current labels for axes
         ax.set_ylabel(self.y_label)
@@ -141,15 +153,53 @@ class PlotterWidget(PlotterBase):
         """
         Show a dialog allowing adding custom text to the chart
         """
-        print("onAddText")
-        pass
+        self.addText = AddText(self)
+        if self.addText.exec_() == QtGui.QDialog.Accepted:
+            # Retrieve the new text, its font and color
+            extra_text = self.addText.text()
+            extra_font = self.addText.font()
+            extra_color = self.addText.color()
+
+            # Place the text on the screen at (0,0)
+            pos_x = self.x_click
+            pos_y = self.y_click
+
+            # Map QFont onto MPL font
+            mpl_font = FontProperties()
+            mpl_font.set_size(int(extra_font.pointSize()))
+            mpl_font.set_family(str(extra_font.family()))
+            mpl_font.set_weight(int(extra_font.weight()))
+            # MPL style names
+            styles = ['normal', 'italic', 'oblique']
+            # QFont::Style maps directly onto the above
+            try:
+                mpl_font.set_style(styles[extra_font.style()])
+            except:
+                pass
+
+            if len(extra_text) > 0:
+                new_text = self.ax.text(str(pos_x),
+                                        str(pos_y),
+                                        extra_text,
+                                        color=extra_color,
+                                        fontproperties=mpl_font)
+                # Update the list of annotations
+                self.textList.append(new_text)
+                self.canvas.draw_idle()
 
     def onRemoveText(self):
         """
-        Remove the most recent added text
+        Remove the most recently added text
         """
-        print("onRemoveText")
-        pass
+        num_text = len(self.textList)
+        if num_text < 1:
+            return
+        txt = self.textList[num_text - 1]
+        text_remove = txt.get_text()
+        txt.remove()
+        self.textList.remove(txt)
+
+        self.canvas.draw_idle()
 
     def onSetGraphRange(self):
         """
@@ -171,6 +221,7 @@ class PlotterWidget(PlotterBase):
         """
         # Clear the plot first
         plt.cla()
+        self.ax.cla()
 
         # Changing the scale might be incompatible with
         # currently displayed data (for instance, going

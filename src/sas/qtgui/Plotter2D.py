@@ -5,10 +5,11 @@ import pylab
 from PyQt4 import QtGui
 
 DEFAULT_CMAP = pylab.cm.jet
+from mpl_toolkits.mplot3d import Axes3D
 
 import sas.qtgui.PlotUtilities as PlotUtilities
 from sas.qtgui.PlotterBase import PlotterBase
-from mpl_toolkits.mplot3d import Axes3D
+from sas.sasgui.guiframe.dataFitting import Data2D
 
 # Minimum value of Z for which we will present data.
 MIN_Z=-32
@@ -42,10 +43,16 @@ class Plotter2DWidget(PlotterBase):
         self.yLabel = "%s(%s)"%(data._yaxis, data._yunit)
         self.title(title=data.title)
 
-    def plot(self, marker=None, linestyle=None):
+    def plot(self, data=None, marker=None, linestyle=None):
         """
         Plot 2D self._data
         """
+        # Assing data
+        if isinstance(data, Data2D):
+            self.data = data
+
+        assert(self._data)
+
         # Toggle the scale
         zmin_2D_temp = self.zmin
         zmax_2D_temp = self.zmax

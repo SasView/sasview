@@ -153,5 +153,14 @@ class PlotterTest(unittest.TestCase):
         self.plotter.xyTransform(xLabel="x", yLabel="log10(y*x^(4))")
         self.assertEqual(self.plotter.ax.get_ylabel(), "$ \\ \\ ^{4}(()^{4})$")
 
+    def testAddText(self):
+        """ Checks the functionality of adding text to graph """
+        pass
+
+    def testOnRemoveText(self):
+        """ Cheks if annotations can be removed from the graph """
+        pass
+
+
 if __name__ == "__main__":
     unittest.main()
