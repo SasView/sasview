@@ -1949,7 +1949,6 @@ class ViewerFrame(PARENT_FRAME):
                 for key, value in theory_dict.iteritems():
                     item, _, _ = value
                     item.Check(True)
-            self._data_panel.on_remove(None, False)
 
             wx.PostEvent(self, StatusEvent(status="Loading Project file..."))
             dlg = wx.FileDialog(self, "Choose a file",
@@ -1962,6 +1961,7 @@ class ViewerFrame(PARENT_FRAME):
                 dlg.Destroy()
                 # Reset to a base state
                 self._on_reset_state()
+                self._data_panel.on_remove(None, False)
                 # Load the project file
                 self.load_state(path=path, is_project=True)
 
@@ -2455,7 +2455,6 @@ class ViewerFrame(PARENT_FRAME):
                 wx.PostEvent(self, NewPlotEvent(id=new_plot.id,
                                                 group_id=group_id,
                                                 action='remove'))
-                # remove res plot: Todo: improve
                 wx.CallAfter(self._remove_res_plot, new_plot.id)
         self._data_manager.delete_data(data_id=data_id,
                                        theory_id=theory_id)
