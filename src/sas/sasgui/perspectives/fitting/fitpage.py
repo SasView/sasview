@@ -167,7 +167,6 @@ class FitPage(BasicPage):
             data = self.dataSource.GetClientData(0)
             self.set_data(data)
         elif self.dataSource.GetCount() > 0:
-
             pos = self.dataSource.GetSelection()
             data = self.dataSource.GetClientData(pos)
             self.set_data(data)
@@ -617,7 +616,7 @@ class FitPage(BasicPage):
 
         # fill a sizer with the combobox to select dispersion type
         model_disp = wx.StaticText(self, wx.ID_ANY, 'Function')
-        CHECK_STATE = self.cb1.GetValue()
+        CHECK_STATE = False
 
         ix = 0
         iy = 0
@@ -961,7 +960,6 @@ class FitPage(BasicPage):
         self.state.disp_cb_dict = copy.deepcopy(self.disp_cb_dict)
 
         self.state.model = self.model.clone()
-
         # save state into
         self._copy_parameters_state(self.parameters, self.state.parameters)
         self._copy_parameters_state(self.orientation_params_disp,
@@ -972,7 +970,6 @@ class FitPage(BasicPage):
 
         wx.PostEvent(self.parent,
                      StatusEvent(status=" Selected Distribution: Gaussian"))
-
         # Fill the list of fittable parameters
         self.get_all_checked_params()
         self.Layout()
@@ -2684,7 +2681,6 @@ class FitPage(BasicPage):
                 param2fit.append(item[1])
         self._manager.set_param2fit(self.uid, param2fit)
 
-
     def select_param(self, event=None):
         """
         Select TextCtrl  checked for fitting purpose and stores them
@@ -2731,12 +2727,6 @@ class FitPage(BasicPage):
         # Total num. of angle parameters
         if len(self.fittable_param) > 0:
             len_orient_para *= 2
-        #Set the value of checkbox that selected every checkbox or not
-        if len(self.parameters) + len(self.fittable_param) - len_orient_para \
-            == len(self.param_toFit):
-            self.cb1.SetValue(True)
-        else:
-            self.cb1.SetValue(False)
 
         self.save_current_state_fit()
         if event is not None:
@@ -2838,14 +2828,8 @@ class FitPage(BasicPage):
 
         iy = 0
         ix = 0
-        select_text = "Select All"
-        self.cb1 = wx.CheckBox(self, wx.ID_ANY, str(select_text), (10, 10))
-        wx.EVT_CHECKBOX(self, self.cb1.GetId(), self.select_all_param)
-        self.cb1.SetToolTipString("To check/uncheck all the boxes below.")
-        self.cb1.SetValue(True)
-
-        sizer.Add(self.cb1, (iy, ix), (1, 1), \
-                             wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 5)
+        sizer.Add(wx.StaticText(self, wx.ID_ANY, 'Parameter'),
+                  (iy, ix), (1, 1), wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         ix += 1
         self.text2_2 = wx.StaticText(self, wx.ID_ANY, 'Value')
         sizer.Add(self.text2_2, (iy, ix), (1, 1),
@@ -2872,7 +2856,7 @@ class FitPage(BasicPage):
                   wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         self.text2_4.Hide()
 
-        CHECK_STATE = self.cb1.GetValue()
+        CHECK_STATE = False
         for item in keys:
 
             if item not in self.disp_list and not item in \

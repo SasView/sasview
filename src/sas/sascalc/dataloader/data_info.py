@@ -24,6 +24,60 @@
 from sas.sascalc.data_util.uncertainty import Uncertainty
 import numpy
 import math
+
+class plottable_sesans1D(object):
+    """
+    SESANS is a place holder for 1D SESANS plottables.
+
+    #TODO: This was directly copied from the plottables_1D. Modified Somewhat.
+    #Class has been updated.
+    """
+    # The presence of these should be mutually
+    # exclusive with the presence of Qdev (dx)
+    x = None
+    y = None
+    lam = None
+    dx = None
+    dy = None
+    dlam = None
+    ## Slit smearing length
+    dxl = None
+    ## Slit smearing width
+    dxw = None
+
+    # Units
+    _xaxis = ''
+    _xunit = ''
+    _yaxis = ''
+    _yunit = ''
+
+    def __init__(self, x, y, lam, dx=None, dy=None, dlam=None):
+#        print "SESANS plottable working"
+        self.x = numpy.asarray(x)
+        self.y = numpy.asarray(y)
+        self.lam = numpy.asarray(lam)
+        if dx is not None:
+            self.dx = numpy.asarray(dx)
+        if dy is not None:
+            self.dy = numpy.asarray(dy)
+        if dlam is not None:
+            self.dlam = numpy.asarray(dlam)
+
+    def xaxis(self, label, unit):
+        """
+        set the x axis label and unit
+        """
+        self._xaxis = label
+        self._xunit = unit
+
+    def yaxis(self, label, unit):
+        """
+        set the y axis label and unit
+        """
+        self._yaxis = label
+        self._yunit = unit
+
+
 class plottable_1D(object):
     """
     Data1D is a place holder for 1D plottables.
@@ -39,18 +93,13 @@ class plottable_1D(object):
     ## Slit smearing width
     dxw = None
 
-    ## SESANS specific params (wavelengths for spin echo length calculation)
-
-    lam = None
-    dlam = None
-
     # Units
     _xaxis = ''
     _xunit = ''
     _yaxis = ''
     _yunit = ''
 
-    def __init__(self, x, y, dx=None, dy=None, dxl=None, dxw=None, lam=None, dlam=None):
+    def __init__(self, x, y, dx=None, dy=None, dxl=None, dxw=None):
         self.x = numpy.asarray(x)
         self.y = numpy.asarray(y)
         if dx is not None:
@@ -61,10 +110,6 @@ class plottable_1D(object):
             self.dxl = numpy.asarray(dxl)
         if dxw is not None:
             self.dxw = numpy.asarray(dxw)
-        if lam is not None:
-            self.lam = numpy.asarray(lam)
-        if dlam is not None:
-            self.dlam = numpy.asarray(dlam)
 
     def xaxis(self, label, unit):
         """
@@ -690,31 +735,72 @@ class DataInfo(object):
         """
         return self._perform_union(other)
 
+class SESANSData1D(plottable_sesans1D, DataInfo):
+    """
+    SESANS 1D data class
+    """
+    x_unit = 'nm'
+    y_unit = 'pol'
+
+    def __init__(self, x=None, y=None, lam=None, dx=None, dy=None, dlam=None):
+        DataInfo.__init__(self)
+        plottable_sesans1D.__init__(self, x, y, lam, dx, dy, dlam)
+
+    def __str__(self):
+        """
+        Nice printout
+        """
+        _str = "%s\n" % DataInfo.__str__(self)
+        _str += "Data:\n"
+        _str += "   Type:         %s\n" % self.__class__.__name__
+        _str += "   X-axis:       %s\t[%s]\n" % (self._xaxis, self._xunit)
+        _str += "   Y-axis:       %s\t[%s]\n" % (self._yaxis, self._yunit)
+        _str += "   Length:       %g\n" % len(self.x)
+        return _str
+
+    def clone_without_data(self, length=0, clone=None):
+        """
+        Clone the current object, without copying the data (which
+        will be filled out by a subsequent operation).
+        The data arrays will be initialized to zero.
+
+        :param length: length of the data array to be initialized
+        :param clone: if provided, the data will be copied to clone
+        """
+        from copy import deepcopy
+        if clone is None or not issubclass(clone.__class__, Data1D):
+            x = numpy.zeros(length)
+            dx = numpy.zeros(length)
+            y = numpy.zeros(length)
+            dy = numpy.zeros(length)
+            clone = Data1D(x, y, dx=dx, dy=dy)
+
+        clone.title = self.title
+        clone.run = self.run
+        clone.filename = self.filename
+        clone.instrument = self.instrument
+        clone.notes = deepcopy(self.notes)
+        clone.process = deepcopy(self.process)
+        clone.detector = deepcopy(self.detector)
+        clone.sample = deepcopy(self.sample)
+        clone.source = deepcopy(self.source)
+        clone.collimation = deepcopy(self.collimation)
+        clone.trans_spectrum = deepcopy(self.trans_spectrum)
+        clone.meta_data = deepcopy(self.meta_data)
+        clone.errors = deepcopy(self.errors)
+
+        return clone
+
 class Data1D(plottable_1D, DataInfo):
     """
     1D data class
     """
-    #if plottable_1D.lam is None: # This means it's SANS data!
-     #   x_unit = '1/A'
-      #  y_unit = '1/cm'
-    #elif plottable_1D.lam is not None: # This means it's SESANS data!
-     #   x_unit = 'A'
-      #  y_unit = 'pol'
-    #else: # and if it's neither, you get punished!
-     #   raise(TypeError,'This is neither SANS nor SESANS data, what the hell are you doing??')
+    x_unit = '1/A'
+    y_unit = '1/cm'
 
-    def __init__(self, x=None, y=None, dx=None, dy=None, lam=None, dlam=None, isSesans=False):
-        self.isSesans = isSesans
+    def __init__(self, x, y, dx=None, dy=None):
         DataInfo.__init__(self)
-        plottable_1D.__init__(self, x, y, dx, dy,None, None, lam, dlam)
-        if self.isSesans:
-            x_unit = 'A'
-            y_unit = 'pol'
-        elif not self.isSesans: # it's SANS data! (Could also be simple else statement, but i prefer exhaustive conditionals...-JHB)
-            x_unit = '1/A'
-            y_unit = '1/cm'
-        else: # and if it's neither, you get punished!
-            raise(TypeError,'This is neither SANS nor SESANS data, what the hell are you doing??')
+        plottable_1D.__init__(self, x, y, dx, dy)
 
     def __str__(self):
         """
@@ -756,9 +842,7 @@ class Data1D(plottable_1D, DataInfo):
             dx = numpy.zeros(length)
             y = numpy.zeros(length)
             dy = numpy.zeros(length)
-            lam = numpy.zeros(length)
-            dlam = numpy.zeros(length)
-            clone = Data1D(x, y, lam=lam, dx=dx, dy=dy, dlam=dlam )
+            clone = Data1D(x, y, dx=dx, dy=dy)
 
         clone.title = self.title
         clone.run = self.run

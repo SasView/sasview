@@ -16,16 +16,15 @@ from sas.sascalc.dataloader.data_info import Data2D as LoadData2D
 class Data1D(PlotData1D, LoadData1D):
     """
     """
-    def __init__(self, x=None, y=None, dx=None, dy=None, lam=None, dlam=None, isSesans=False):
+    def __init__(self, x=None, y=None, dx=None, dy=None):
         """
         """
         if x is None:
             x = []
         if y is None:
             y = []
-        self.isSesans = isSesans
-        PlotData1D.__init__(self, x, y, dx, dy, lam, dlam)
-        LoadData1D.__init__(self, x, y, dx, dy, lam, dlam, isSesans)
+        PlotData1D.__init__(self, x, y, dx, dy)
+        LoadData1D.__init__(self, x, y, dx, dy)
         self.id = None
         self.list_group_id = []
         self.group_id = None
@@ -68,7 +67,7 @@ class Data1D(PlotData1D, LoadData1D):
         """
         # First, check the data compatibility
         dy, dy_other = self._validity_check(other)
-        result = Data1D(x=[], y=[], lam=[], dx=None, dy=None, dlam=None)
+        result = Data1D(x=[], y=[], dx=None, dy=None)
         result.clone_without_data(length=len(self.x), clone=self)
         result.copy_from_datainfo(data1d=self)
         if self.dxw == None:
@@ -115,13 +114,9 @@ class Data1D(PlotData1D, LoadData1D):
         """
         # First, check the data compatibility
         self._validity_check_union(other)
-        result = Data1D(x=[], y=[], lam=[], dx=None, dy=None, dlam=None)
+        result = Data1D(x=[], y=[], dx=None, dy=None)
         tot_length = len(self.x) + len(other.x)
         result = self.clone_without_data(length=tot_length, clone=result)
-        if self.dlam == None or other.dlam is None:
-            result.dlam = None
-        else:
-            result.dlam = numpy.zeros(tot_length)
         if self.dy == None or other.dy is None:
             result.dy = None
         else:
@@ -145,11 +140,6 @@ class Data1D(PlotData1D, LoadData1D):
         result.x = result.x[ind]
         result.y = numpy.append(self.y, other.y)
         result.y = result.y[ind]
-        result.lam = numpy.append(self.lam, other.lam)
-        result.lam = result.lam[ind]
-        if result.dlam != None:
-            result.dlam = numpy.append(self.dlam, other.dlam)
-            result.dlam = result.dlam[ind]
         if result.dy != None:
             result.dy = numpy.append(self.dy, other.dy)
             result.dy = result.dy[ind]
@@ -269,13 +259,9 @@ class Theory1D(PlotTheory1D, LoadData1D):
         """
         # First, check the data compatibility
         self._validity_check_union(other)
-        result = Data1D(x=[], y=[], lam=[], dx=None, dy=None, dlam=[])
+        result = Data1D(x=[], y=[], dx=None, dy=None)
         tot_length = len(self.x)+len(other.x)
         result.clone_without_data(length=tot_length, clone=self)
-        if self.dlam == None or other.dlam is None:
-            result.dlam = None
-        else:
-            result.dlam = numpy.zeros(tot_length)
         if self.dy == None or other.dy is None:
             result.dy = None
         else:
@@ -298,8 +284,6 @@ class Theory1D(PlotTheory1D, LoadData1D):
         result.x = result.x[ind]
         result.y = numpy.append(self.y, other.y)
         result.y = result.y[ind]
-        result.lam = numpy.append(self.lam, other.lam)
-        result.lam = result.lam[ind]
         if result.dy != None:
             result.dy = numpy.append(self.dy, other.dy)
             result.dy = result.dy[ind]
