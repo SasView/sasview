@@ -1434,11 +1434,10 @@ class BasicPage(ScrolledPanel, PanelBase):
                 if tempmax != self.qmax_x:
                     self.qmax_x = tempmax
                     is_modified = True
-
                 if is_2Ddata:
-                    # set mask
                     is_modified = self._validate_Npts()
-
+                else:
+                    is_modified = self._validate_Npts_1D()
             else:
                 self.fitrange = False
 
@@ -1453,6 +1452,8 @@ class BasicPage(ScrolledPanel, PanelBase):
             if is_modified and self.fitrange:
                 # Theory case: need to get npts value to draw
                 self.npts_x = float(self.Npts_total.GetValue())
+                self.Npts_fit.SetValue(str(self.Npts_total.GetValue()))
+                self._save_plotting_range()
                 self.create_default_data()
                 self.state_change = True
                 self._draw_model()
@@ -1527,8 +1528,10 @@ class BasicPage(ScrolledPanel, PanelBase):
                     if self.data is not None:
                         index_data = ((self.qmin_x <= self.data.x) &
                                       (self.data.x <= self.qmax_x))
-                        val = str(len([index_data is True]))
-                        self.Npts_fit.SetValue(val)
+                        val = self.data.x[index_data is True]
+                        val = len(val) if isinstance(val, list) else 1
+                        self.Npts_fit.SetValue(str(val))
+
                     else:
                         # No data in the panel
                         try:
@@ -2166,7 +2169,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.fitrange = False
                 flag = False
             else:
-                self.Npts_fit.SetValue(str(len(index_data[index_data is True])))
+                val = index_data[index_data is True]
+                val = len(val) if isinstance(val, list) else 1
+                self.Npts_fit.SetValue(str(val))
                 self.fitrange = True
 
         return flag
