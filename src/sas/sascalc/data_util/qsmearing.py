@@ -4,7 +4,7 @@
 #####################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation. 
+#project funded by the US National Science Foundation.
 #See the license text in license.txt
 #copyright 2008, University of Tennessee
 ######################################################################
@@ -12,9 +12,15 @@ import numpy
 import math
 import logging
 import sys
+from sasmodels import sesans
+import numpy as np  # type: ignore
+from numpy import pi, exp  # type: ignore
 
 from sasmodels.resolution import Slit1D, Pinhole1D
+from sasmodels.sesans import SESANS1D
 from sasmodels.resolution2d import Pinhole2D
+from src.sas.sascalc.data_util.nxsunit import Converter
+
 
 def smear_selection(data, model = None):
     """
@@ -35,18 +41,42 @@ def smear_selection(data, model = None):
     """
     # Sanity check. If we are not dealing with a SAS Data1D
     # object, just return None
+
+    # This checks for 2D data (does not throw exception because fail is common)
     if  data.__class__.__name__ not in ['Data1D', 'Theory1D']:
         if data == None:
             return None
         elif data.dqx_data == None or data.dqy_data == None:
             return None
         return Pinhole2D(data)
-
+    # This checks for 1D data with smearing info in the data itself (again, fail is likely; no exceptions)
     if  not hasattr(data, "dx") and not hasattr(data, "dxl")\
          and not hasattr(data, "dxw"):
         return None
 
     # Look for resolution smearing data
+    # This is the code that checks for SESANS data; it looks for the file loader
+    # TODO: change other sanity checks to check for file loader instead of data structure?
+    _found_sesans = False
+    #if data.dx is not None and data.meta_data['loader']=='SESANS':
+    if data.dx is not None and data.isSesans:
+        #if data.dx[0] > 0.0:
+        if numpy.size(data.dx[data.dx <= 0]) == 0:
+            _found_sesans = True
+        #if data.dx[0] <= 0.0:
+        if numpy.size(data.dx[data.dx <= 0]) > 0:
+            raise ValueError('one or more of your dx values are negative, please check the data file!')
+    if _found_sesans == True:
+        #Pre-compute the Hankel matrix (H)
+        qmax, qunits = data.sample.zacceptance
+        hankel=sesans.SesansTransform()
+        sesans.SesansTransform.set_transform(hankel,
+        SE = Converter(data._xunit)(data.x, "A"),
+        zaccept = Converter(qunits)(qmax, "1/A"),
+        Rmax = 10000000)
+        # Then return the actual transform, as if it were a smearing function
+        return PySmear(SESANS1D(data, hankel._H0, hankel._H, hankel.q), model)
+
     _found_resolution = False
     if data.dx is not None and len(data.dx) == len(data.x):
 
@@ -91,7 +121,16 @@ class PySmear(object):
     def __init__(self, resolution, model):
         self.model = model
         self.resolution = resolution
-        self.offset = numpy.searchsorted(self.resolution.q_calc, self.resolution.q[0])
+        if hasattr(self.resolution, 'data'):
+            if self.resolution.data.meta_data['loader'] == 'SESANS': # Always True if file extension is '.ses'!
+                self.offset = 0
+            # This is default behaviour, for future resolution/transform functions this needs to be revisited.
+            else:
+                self.offset = numpy.searchsorted(self.resolution.q_calc, self.resolution.q[0])
+        else:
+            self.offset = numpy.searchsorted(self.resolution.q_calc, self.resolution.q[0])
+
+        #self.offset = numpy.searchsorted(self.resolution.q_calc, self.resolution.q[0])
 
     def apply(self, iq_in, first_bin=0, last_bin=None):
         """
@@ -125,6 +164,7 @@ class PySmear(object):
         indices, not the range limits.  That is, the complete range will be
         q[first:last+1].
         """
+
         q = self.resolution.q
         first = numpy.searchsorted(q, q_min)
         last = numpy.searchsorted(q, q_max)

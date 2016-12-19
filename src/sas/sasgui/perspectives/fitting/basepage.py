@@ -142,6 +142,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.theory_qmax = None
         self.theory_qmin_x = None
         self.theory_qmax_x = None
+        self.cb1 = None
         self.btEditMask = None
         self.btFit = None
         self.sld_axes = None
@@ -280,8 +281,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         x = numpy.linspace(start=self.qmin_x, stop=self.qmax_x,
                            num=self.npts_x, endpoint=True)
         self.data = Data1D(x=x)
-        self.data.xaxis('\\rm{Q}', "A^{-1}")
-        self.data.yaxis('\\rm{Intensity}', "cm^{-1}")
+        #self.data.xaxis('\\rm{Q}', "A^{-1}")
+        self.data.xaxis('\\rm{X}', "")
+        #self.data.yaxis('\\rm{Intensity}', "cm^{-1}")
+        self.data.yaxis('\\rm{Y}', "")
         self.data.is_data = False
         self.data.id = str(self.uid) + " data"
         self.data.group_id = str(self.uid) + " Model1D"
@@ -306,8 +309,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         x = numpy.logspace(start=qmin, stop=qmax,
                            num=self.npts_x, endpoint=True, base=10.0)
         self.data = Data1D(x=x)
-        self.data.xaxis('\\rm{Q}', "A^{-1}")
-        self.data.yaxis('\\rm{Intensity}', "cm^{-1}")
+        #self.data.xaxis('\\rm{Q}', "A^{-1}")
+        #self.data.yaxis('\\rm{Intensity}', "cm^{-1}")
+        self.data.xaxis('\\rm{X}', "")
+        self.data.yaxis('\\rm{Y}', "")
         self.data.is_data = False
         self.data.id = str(self.uid) + " data"
         self.data.group_id = str(self.uid) + " Model1D"
@@ -1123,6 +1128,9 @@ class BasicPage(ScrolledPanel, PanelBase):
             return
         # set data, etc. from the state
         # reset page between theory and fitting from bookmarking
+        #if state.data == None:
+        #    data = None
+        #else:
         data = state.data
 
         if data is None:
@@ -1339,6 +1347,10 @@ class BasicPage(ScrolledPanel, PanelBase):
                             item[2].Disable()
                         except Exception:
                             logging.error(traceback.format_exc())
+
+        # Make sure the check box updated when all checked
+        if self.cb1.GetValue():
+            self.select_all_param(None)
 
     def _selectDlg(self):
         """
@@ -2480,8 +2492,10 @@ class BasicPage(ScrolledPanel, PanelBase):
                     else:
                         item[2].Enable()
 
-            # Make sure the check box updated
-            self.get_all_checked_params()
+            # Make sure the check box updated when all checked
+            if self.cb1.GetValue():
+                #self.select_all_param(None)
+                self.get_all_checked_params()
 
             # update params
             self._update_paramv_on_fit()
@@ -3659,6 +3673,10 @@ class BasicPage(ScrolledPanel, PanelBase):
     def _on_select_model(self, event=None):
         """
         call back for model selection if implemented
+        """
+    def select_all_param(self, event):
+        """
+        set to true or false all checkBox if implemented
         """
     def get_weight_flag(self):
         """
