@@ -188,12 +188,11 @@ class FitPanel(nb, PanelBase):
 
         # use while-loop, for-loop will not do the job well.
         while (self.GetPageCount() > 0):
-            # delete the first page until no page exists
-            page = self.GetPage(0)
+            page = self.GetPage(self.GetPageCount() - 1)
             if self._manager.parent.panel_on_focus == page:
                 self._manager.parent.panel_on_focus = None
             self._close_helper(selected_page=page)
-            self.DeletePage(0)
+            self.DeletePage(self.GetPageCount() - 1)
         # Clear list of names
         self.fit_page_name = {}
         # Clear list of opened pages
@@ -399,6 +398,15 @@ class FitPanel(nb, PanelBase):
                     self.on_close_page(event=None)
                     temp = self.GetSelection()
                     self.DeletePage(temp)
+            if self.sim_page is not None:
+                if len(self.sim_page.model_list) == 0:
+                    pos = self.GetPageIndex(self.sim_page)
+                    self.SetSelection(pos)
+                    self.on_close_page(event=None)
+                    temp = self.GetSelection()
+                    self.DeletePage(temp)
+                    self.sim_page = None
+                    self.batch_on = False
             if self.GetPageCount() == 0:
                 self._manager.on_add_new_page(event=None)
 
