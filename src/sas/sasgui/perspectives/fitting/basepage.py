@@ -1531,6 +1531,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                         val = self.data.x[index_data is True]
                         val = len(val) if isinstance(val, list) else 1
                         self.Npts_fit.SetValue(str(val))
+
                     else:
                         # No data in the panel
                         try:

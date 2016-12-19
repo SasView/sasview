@@ -1520,13 +1520,12 @@ class Plugin(PluginBase):
             # Update all fit pages
             for uid in page_id:
                 res = result[index]
+                fit_msg = res.mesg
                 if res.fitness is None or \
                     not numpy.isfinite(res.fitness) or \
                     numpy.any(res.pvec == None) or \
                     not numpy.all(numpy.isfinite(res.pvec)):
-                    msg = "Fitting did not converge!!!"
-                    evt = StatusEvent(status=msg, info="warning", type="stop")
-                    wx.PostEvent(self.parent, evt)
+                    fit_msg += "\nFitting did not converge!!!"
                     wx.CallAfter(self._update_fit_button, page_id)
                 else:
                     #set the panel when fit result are float not list
@@ -1549,13 +1548,12 @@ class Plugin(PluginBase):
                         index += 1
                         wx.CallAfter(cpage._on_fit_complete)
                     except KeyboardInterrupt:
-                        msg = "Singular point: Fitting Stoped."
-                        evt = StatusEvent(status=msg, info="info", type="stop")
-                        wx.PostEvent(self.parent, evt)
+                        fit_msg += "\nSingular point: Fitting stopped."
                     except:
-                        msg = "Singular point: Fitting Error occurred."
-                        evt = StatusEvent(status=msg, info="error", type="stop")
-                        wx.PostEvent(self.parent, evt)
+                        fit_msg += "\nSingular point: Fitting error occurred."
+                if fit_msg:
+                   evt = StatusEvent(status=fit_msg, info="warning", type="stop")
+                   wx.PostEvent(self.parent, evt)
 
         except:
             msg = ("Fit completed but the following error occurred: %s"

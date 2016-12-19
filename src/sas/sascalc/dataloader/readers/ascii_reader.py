@@ -171,7 +171,8 @@ class Reader:
 
                 input_f.close()
                 if not is_data:
-                    return None
+                    msg = "ascii_reader: x has no data"
+                    raise RuntimeError, msg
                 # Sanity check
                 if has_error_dy == True and not len(ty) == len(tdy):
                     msg = "ascii_reader: y and dy have different length"
