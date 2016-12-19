@@ -161,6 +161,13 @@ class PlotterTest(unittest.TestCase):
         """ Cheks if annotations can be removed from the graph """
         pass
 
+    def testOnSetGraphRange(self):
+        """ Cheks if the graph can be resized for range """
+        pass
+
+    def testOnResetGraphRange(self):
+        """ Cheks if the graph can be reset after resizing for range """
+        pass
 
 if __name__ == "__main__":
     unittest.main()

@@ -18,6 +18,7 @@ from UnitTesting import ScalePropertiesTest
 from UnitTesting import KiessigCalculatorTest
 from UnitTesting import DensityCalculatorTest
 from UnitTesting import WindowTitleTest
+from UnitTesting import SetGraphRangeTest
 
 def suite():
     suites = (
@@ -39,6 +40,7 @@ def suite():
         unittest.makeSuite(KiessigCalculatorTest.KiessigCalculatorTest, 'test'),
         unittest.makeSuite(DensityCalculatorTest.DensityCalculatorTest, 'test'),
         unittest.makeSuite(WindowTitleTest.WindowTitleTest, 'test'),
+        unittest.makeSuite(SetGraphRangeTest.SetGraphRangeTest, 'test'),
     )
     return unittest.TestSuite(suites)
 

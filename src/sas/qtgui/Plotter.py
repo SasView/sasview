@@ -8,6 +8,7 @@ from sas.sasgui.plottools import transform
 from sas.sasgui.plottools.convert_units import convert_unit
 from sas.qtgui.PlotterBase import PlotterBase
 from sas.qtgui.AddText import AddText
+from sas.qtgui.SetGraphRange import SetGraphRange
 
 class PlotterWidget(PlotterBase):
     """
@@ -205,15 +206,29 @@ class PlotterWidget(PlotterBase):
         """
         Show a dialog allowing setting the chart ranges
         """
-        print("onSetGraphRange")
-        pass
+        # min and max of data
+        x_range = self.ax.get_xlim()
+        y_range = self.ax.get_ylim()
+        self.setRange = SetGraphRange(parent=self,
+            x_range=x_range, y_range=y_range)
+        if self.setRange.exec_() == QtGui.QDialog.Accepted:
+            x_range = self.setRange.xrange()
+            y_range = self.setRange.yrange()
+            if x_range is not None and y_range is not None:
+                self.ax.set_xlim(x_range)
+                self.ax.set_ylim(y_range)
+                self.canvas.draw_idle()
 
     def onResetGraphRange(self):
         """
-        Resets the chart X and Y ranges to the original values
+        Resets the chart X and Y ranges to their original values
         """
-        print("onResetGraphRange")
-        pass
+        x_range = (self.data.x.min(), self.data.x.max())
+        y_range = (self.data.y.min(), self.data.y.max())
+        if x_range is not None and y_range is not None:
+            self.ax.set_xlim(x_range)
+            self.ax.set_ylim(y_range)
+            self.canvas.draw_idle()
 
     def xyTransform(self, xLabel="", yLabel=""):
         """
