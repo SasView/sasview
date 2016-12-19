@@ -392,7 +392,7 @@ class PageState(object):
                 self.formfactorcombobox = 'hardsphere'
 
     @staticmethod
-    def param_remap_to_sasmodels_convert(self, params, is_string=False):
+    def param_remap_to_sasmodels_convert(params, is_string=False):
         """
         Remaps the parameters for sasmodels conversion
 
@@ -424,7 +424,7 @@ class PageState(object):
         return p
 
     @staticmethod
-    def param_remap_from_sasmodels_convert(self, params):
+    def param_remap_from_sasmodels_convert(params):
         """
         Converts {name : value} map back to [] param list
         :param params: parameter map returned from sasmodels
