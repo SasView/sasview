@@ -52,7 +52,6 @@ else:
     FONT_VARIANT = 1
     ON_MAC = True
 
-
 class BasicPage(ScrolledPanel, PanelBase):
     """
     This class provide general structure of  fitpanel page
@@ -1457,6 +1456,19 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.create_default_data()
                 self.state_change = True
                 self._draw_model()
+                # Time delay has been introduced to prevent _handle error
+                # on Windows
+                # This part of code is executed when model is selected and
+                # it's parameters are changed (with respect to previously
+                # selected model). There are two Iq evaluations occuring one
+                # after another and therefore there may be compilation error
+                # if model is calculated for the first time.
+                # This seems to be Windows only issue - haven't tested on Linux
+                # though.The proper solution (other than time delay) requires
+                # more fundemental code refatoring
+                # Wojtek P. Nov 7, 2016
+                if not ON_MAC:
+                    time.sleep(0.1)
                 self.Refresh()
 
         # logging.info("is_modified flag set to %g",is_modified)
@@ -2395,7 +2407,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         self._set_sizer_dispersion()
 
         # Redraw the model
-        self._draw_model()
+        #  Wojtek P. Nov 7, 2016: Redrawing seems to be unnecessary here
+        # self._draw_model()
         # self._undo.Enable(True)
         event = PageInfoEvent(page=self)
         wx.PostEvent(self.parent, event)
