@@ -38,7 +38,6 @@ class GpuOptions(wx.Dialog):
         #Check if SAS_OPENCL is already set
         self.sas_opencl = os.environ.get("SAS_OPENCL","")
         for clopt in clinfo:
-            print("clopt",clopt)
             button = wx.CheckBox(self.panel1, -1, label=clopt[1], name=clopt[1])
 
             if clopt != "No OpenCL":
