@@ -1989,8 +1989,9 @@ class ViewerFrame(PARENT_FRAME):
                 self.cpanel_on_focus.on_save(event)
                 wx.PostEvent(self,
                              StatusEvent(status="Completed saving."))
-            except:
+            except Exception:
                 msg = "Error occurred while saving: "
+                msg += traceback.format_exc()
                 msg += "To save, the application panel should have a data set.."
                 wx.PostEvent(self, StatusEvent(status=msg))
 
@@ -2039,8 +2040,9 @@ class ViewerFrame(PARENT_FRAME):
                 msg += "No project was saved to %s" % (str(path))
                 logging.warning(msg)
                 wx.PostEvent(self, StatusEvent(status=msg, info="error"))
-        except:
+        except Exception:
             msg = "Error occurred while saving: "
+            msg += traceback.format_exc()
             msg += "To save, at least one application panel "
             msg += "should have a data set.."
             wx.PostEvent(self, StatusEvent(status=msg, info="error"))

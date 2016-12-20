@@ -81,16 +81,15 @@ class Calc2D(CalcThread):
             fn = self.smearer
             fn.set_model(self.model)
             fn.set_index(index_model)
-            # Get necessary data from self.data and set the data for smearing
-            fn.get_data()
             # Calculate smeared Intensity
             #(by Gaussian averaging): DataLoader/smearing2d/Smearer2D()
             value = fn.get_value()
         else:
             # calculation w/o smearing
-            value = self.model.evalDistribution(\
-                [self.data.qx_data[index_model],
-                 self.data.qy_data[index_model]])
+            value = self.model.evalDistribution([
+                self.data.qx_data[index_model],
+                self.data.qy_data[index_model]
+            ])
         output = numpy.zeros(len(self.data.qx_data))
         # output default is None
         # This method is to distinguish between masked
