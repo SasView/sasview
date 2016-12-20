@@ -37,12 +37,13 @@ class GpuOptions(wx.Dialog):
         self.buttons = []
         #Check if SAS_OPENCL is already set
         self.sas_opencl = os.environ.get("SAS_OPENCL","")
-        for index, clopt in enumerate(clinfo):
-            button = wx.CheckBox(self.panel1, -1, label=clopt, name=clopt)
+        for clopt in clinfo:
+            print("clopt",clopt)
+            button = wx.CheckBox(self.panel1, -1, label=clopt[1], name=clopt[1])
 
             if clopt != "No OpenCL":
-                self.option_button[clopt] = str(index)
-                if self.sas_opencl == str(index):
+                self.option_button[clopt[1]] = clopt[0]
+                if self.sas_opencl == clopt[0]:
                     button.SetValue(1)
             else:
                 self.option_button[clopt] = "None"
@@ -101,13 +102,20 @@ class GpuOptions(wx.Dialog):
         clinfo = []
         try:
             import pyopencl as cl
-            for platform in cl.get_platforms():
+            platforms = cl.get_platforms()
+            p_index = 0
+            for platform in platforms:
+                d_index = 0
                 for device in platform.get_devices():
-                    clinfo.append(":".join([platform.name,device.name]))
+                    combined_index = ":".join(str(p_index),str(d_index)) \
+                        if len(platforms) > 1 else str(d_index)
+                    clinfo.append((combined_index, ":".join([platform.name,device.name])))
+                    d_index+=1
+                p_index+=1
         except ImportError:
             warnings.warn("pyopencl import failed. Using only CPU computations")
 
-        clinfo.append("No OpenCL")
+        clinfo.append(("None","No OpenCL"))
         return clinfo
 
     def on_check(self, event):
