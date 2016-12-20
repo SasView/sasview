@@ -1166,10 +1166,11 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         self.categorybox.Select(category_pos)
         self._show_combox(None)
+        from models import PLUGIN_NAME_BASE
         if self.categorybox.GetValue() == 'Customized Models' \
-                and '[plug-in]' not in state.formfactorcombobox:
+                and PLUGIN_NAME_BASE not in state.formfactorcombobox:
             state.formfactorcombobox = \
-                '[plug-in] ' + state.formfactorcombobox
+                PLUGIN_NAME_BASE + state.formfactorcombobox
         formfactor_pos = 0
         for ind_form in range(self.formfactorbox.GetCount()):
             if self.formfactorbox.GetString(ind_form) == \

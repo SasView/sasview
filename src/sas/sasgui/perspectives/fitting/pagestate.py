@@ -358,7 +358,9 @@ class PageState(object):
 
     def _old_first_model(self):
         """
-        A check to see if the loaded save state was saved in SasView v4_0+
+        Handle save states from 4.0.1 and before where the first item in the
+        selection boxes of category, formfactor and structurefactor were not
+        saved.
         :return: None
         """
         if self.formfactorcombobox == '':
