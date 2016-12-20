@@ -52,7 +52,6 @@ else:
     FONT_VARIANT = 1
     ON_MAC = True
 
-
 class BasicPage(ScrolledPanel, PanelBase):
     """
     This class provide general structure of  fitpanel page
@@ -1041,7 +1040,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                         # Create the dispersion objects
                         disp_model = POLYDISPERSITY_MODELS['array']()
                         if hasattr(state, "values") and \
-                                 self.disp_cb_dict[item].GetValue() is True:
+                                 self.disp_cb_dict[item].GetValue():
                             if len(state.values) > 0:
                                 self.values = state.values
                                 self.weights = state.weights
@@ -1434,11 +1433,10 @@ class BasicPage(ScrolledPanel, PanelBase):
                 if tempmax != self.qmax_x:
                     self.qmax_x = tempmax
                     is_modified = True
-
                 if is_2Ddata:
-                    # set mask
                     is_modified = self._validate_Npts()
-
+                else:
+                    is_modified = self._validate_Npts_1D()
             else:
                 self.fitrange = False
 
@@ -1453,9 +1451,24 @@ class BasicPage(ScrolledPanel, PanelBase):
             if is_modified and self.fitrange:
                 # Theory case: need to get npts value to draw
                 self.npts_x = float(self.Npts_total.GetValue())
+                self.Npts_fit.SetValue(str(self.Npts_total.GetValue()))
+                self._save_plotting_range()
                 self.create_default_data()
                 self.state_change = True
                 self._draw_model()
+                # Time delay has been introduced to prevent _handle error
+                # on Windows
+                # This part of code is executed when model is selected and
+                # it's parameters are changed (with respect to previously
+                # selected model). There are two Iq evaluations occuring one
+                # after another and therefore there may be compilation error
+                # if model is calculated for the first time.
+                # This seems to be Windows only issue - haven't tested on Linux
+                # though.The proper solution (other than time delay) requires
+                # more fundemental code refatoring
+                # Wojtek P. Nov 7, 2016
+                if not ON_MAC:
+                    time.sleep(0.1)
                 self.Refresh()
 
         # logging.info("is_modified flag set to %g",is_modified)
@@ -2166,7 +2179,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.fitrange = False
                 flag = False
             else:
-                self.Npts_fit.SetValue(str(len(index_data[index_data is True])))
+                self.Npts_fit.SetValue(str(len(index_data[index_data])))
                 self.fitrange = True
 
         return flag
@@ -2390,7 +2403,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         self._set_sizer_dispersion()
 
         # Redraw the model
-        self._draw_model()
+        #  Wojtek P. Nov 7, 2016: Redrawing seems to be unnecessary here
+        # self._draw_model()
         # self._undo.Enable(True)
         event = PageInfoEvent(page=self)
         wx.PostEvent(self.parent, event)
@@ -2609,7 +2623,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             Note: This 1sec helps for Mac not to crash on self.
             Layout after self._draw_model
         """
-        if ON_MAC is True:
+        if ON_MAC:
             time.sleep(1)
 
     def _find_polyfunc_selection(self, disp_func=None):
