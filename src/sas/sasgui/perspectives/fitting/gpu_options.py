@@ -107,7 +107,7 @@ class GpuOptions(wx.Dialog):
             for platform in platforms:
                 d_index = 0
                 for device in platform.get_devices():
-                    combined_index = ":".join(str(p_index),str(d_index)) \
+                    combined_index = ":".join([str(p_index),str(d_index)]) \
                         if len(platforms) > 1 else str(d_index)
                     clinfo.append((combined_index, ":".join([platform.name,device.name])))
                     d_index+=1
