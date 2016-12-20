@@ -106,12 +106,19 @@ class GpuOptions(wx.Dialog):
             p_index = 0
             for platform in platforms:
                 d_index = 0
-                for device in platform.get_devices():
-                    combined_index = ":".join([str(p_index),str(d_index)]) \
-                        if len(platforms) > 1 else str(d_index)
+                devices = platform.get_devices()
+                for device in devices:
+                    if len(devices) > 1 and len(platforms) > 1:
+                        combined_index = ":".join([str(p_index),str(d_index)])
+                    elif len(platforms) > 1:
+                        combined_index = str(p_index)
+                    else:
+                        combined_index = str(d_index)
+                    #combined_index = ":".join([str(p_index),str(d_index)]) \
+                    #    if len(platforms) > 1 else str(d_index)
                     clinfo.append((combined_index, ":".join([platform.name,device.name])))
-                    d_index+=1
-                p_index+=1
+                    d_index += 1
+                p_index += 1
         except ImportError:
             warnings.warn("pyopencl import failed. Using only CPU computations")
 
