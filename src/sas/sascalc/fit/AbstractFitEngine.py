@@ -358,9 +358,6 @@ class FitData2D(Data2D):
         """
         if self.smearer != None:
             fn.set_index(self.idx)
-            # Get necessary data from self.data and set the data for smearing
-            fn.get_data()
-
             gn = fn.get_value()
         else:
             gn = fn([self.qx_data[self.idx],

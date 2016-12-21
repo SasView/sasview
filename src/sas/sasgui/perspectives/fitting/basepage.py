@@ -1040,7 +1040,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                         # Create the dispersion objects
                         disp_model = POLYDISPERSITY_MODELS['array']()
                         if hasattr(state, "values") and \
-                                 self.disp_cb_dict[item].GetValue() is True:
+                                 self.disp_cb_dict[item].GetValue():
                             if len(state.values) > 0:
                                 self.values = state.values
                                 self.weights = state.weights
@@ -1540,10 +1540,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                     if self.data is not None:
                         index_data = ((self.qmin_x <= self.data.x) &
                                       (self.data.x <= self.qmax_x))
-                        val = self.data.x[index_data is True]
-                        val = len(val) if isinstance(val, list) else 1
-                        self.Npts_fit.SetValue(str(val))
-
+                        val = str(len(self.data.x[index_data]))
+                        self.Npts_fit.SetValue(val)
                     else:
                         # No data in the panel
                         try:
@@ -2146,7 +2144,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.fitrange = False
                 flag = False
             else:
-                self.Npts_fit.SetValue(str(len(index_data[index_data is True])))
+                self.Npts_fit.SetValue(str(len(index_data[index_data])))
                 self.fitrange = True
 
         return flag
@@ -2181,9 +2179,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.fitrange = False
                 flag = False
             else:
-                val = index_data[index_data is True]
-                val = len(val) if isinstance(val, list) else 1
-                self.Npts_fit.SetValue(str(val))
+                self.Npts_fit.SetValue(str(len(index_data[index_data])))
                 self.fitrange = True
 
         return flag
@@ -2627,7 +2623,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             Note: This 1sec helps for Mac not to crash on self.
             Layout after self._draw_model
         """
-        if ON_MAC is True:
+        if ON_MAC:
             time.sleep(1)
 
     def _find_polyfunc_selection(self, disp_func=None):
