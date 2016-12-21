@@ -73,13 +73,21 @@ class GpuOptions(wx.Dialog):
         reset_btn = wx.Button(self, reset_id, 'Reset')
         reset_btn.SetToolTipString("Restore initial settings")
 
+        test_id = wx.NewId()
+        test_btn = wx.Button(self, test_id, 'Test')
+        test_btn.SetToolTipString("Test if models compile on the given infrastructure")
+
         self.Bind(wx.EVT_BUTTON, self.on_OK, accept_btn)
+        self.Bind(wx.EVT_BUTTON, self.on_test, test_btn)
         self.Bind(wx.EVT_BUTTON, self.on_reset, reset_btn)
         self.Bind(wx.EVT_BUTTON, self.on_help, help_btn)
+
 
         btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
         btn_sizer.Add((10, 20), 1) # stretchable whitespace
         btn_sizer.Add(accept_btn, 0)
+        btn_sizer.Add((10, 20), 0) # non-stretchable whitespace
+        btn_sizer.Add(test_btn, 0)
         btn_sizer.Add((10, 20), 0) # non-stretchable whitespace
         btn_sizer.Add(reset_btn, 0)
         btn_sizer.Add((10, 20), 0) # non-stretchable whitespace
@@ -162,6 +170,42 @@ class GpuOptions(wx.Dialog):
         for btn in self.buttons:
             btn.SetValue(0)
         self.sas_opencl=None
+
+    def on_test(self, event):
+        """
+        Run sasmodels check from here and report results from
+        """
+        import json
+        import platform
+
+        import sasmodels
+        from sasmodels.model_test import model_tests
+        try:
+            from sasmodels.kernelcl import environment
+            env = environment()
+            clinfo = [(ctx.devices[0].platform.vendor,
+                      ctx.devices[0].platform.version,
+                      ctx.devices[0].vendor,
+                      ctx.devices[0].name,
+                      ctx.devices[0].version)
+                    for ctx in env.context]
+        except ImportError:
+            clinfo = None
+
+        failures = []
+        for test in model_tests():
+            try:
+                test()
+            except Exception:
+                failures.append(test.description)
+
+        info = {
+            'version':  sasmodels.__version__,
+            'platform': platform.uname(),
+            'opencl': clinfo,
+            'failing tests': failures,
+        }
+        print(json.dumps(info['failing tests']))
 
     def on_help(self, event):
         """
