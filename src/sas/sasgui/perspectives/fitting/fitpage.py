@@ -80,10 +80,10 @@ class FitPage(BasicPage):
         """
         flag = check_data_validity(self.data) & (self.model is not None)
         self.btFit.Enable(flag)
-        
+
     def on_set_focus(self, event):
         """
-        Override the basepage focus method to ensure the save flag is set 
+        Override the basepage focus method to ensure the save flag is set
         properly when focusing on the fit page.
         """
         flag = check_data_validity(self.data) & (self.model is not None)
@@ -237,7 +237,7 @@ class FitPage(BasicPage):
         sizer_smearer_box.SetMinSize((_DATA_BOX_WIDTH, 60))
 
         weighting_set_box = wx.StaticBox(self, wx.ID_ANY,
-                                'Set Weighting by Selecting dI Source')
+                                         'Set Weighting by Selecting dI Source')
         weighting_box = wx.StaticBoxSizer(weighting_set_box, wx.HORIZONTAL)
         sizer_weighting = wx.BoxSizer(wx.HORIZONTAL)
         weighting_box.SetMinSize((_DATA_BOX_WIDTH, 40))
@@ -1163,9 +1163,9 @@ class FitPage(BasicPage):
         is_poly_enabled = None
         if event is not None:
             if (event.GetEventObject() == self.formfactorbox
-                        and self.structurebox.GetLabel() != 'None')\
-                        or event.GetEventObject() == self.structurebox\
-                        or event.GetEventObject() == self.multifactorbox:
+                    and self.structurebox.GetLabel() != 'None')\
+                    or event.GetEventObject() == self.structurebox\
+                    or event.GetEventObject() == self.multifactorbox:
                 copy_flag = self.get_copy_params()
                 is_poly_enabled = self.enable_disp.GetValue()
 
@@ -1205,14 +1205,17 @@ class FitPage(BasicPage):
                     self._set_bookmark_flag(not self.batch_on)
                     self._keep.Enable(not self.batch_on)
                     self._set_save_flag(True)
-                    self._set_smear(self.data)
+            #Setting smearing for cases with and without data.
+            self._set_smear(self.data)
 
             # more disables for 2D
             self._set_smear_buttons()
 
             try:
                 # update smearer sizer
-                self.onSmear(None)
+                #This call for smearing set up caused double evaluation of
+                #I(q) and double compilation as results
+                #self.onSmear(None)
                 temp_smear = None
                 if not self.disable_smearer.GetValue():
                     # Set the smearer environments
@@ -1226,12 +1229,12 @@ class FitPage(BasicPage):
 
             # set smearing value whether or not data contain the smearing info
             evt = ModelEventbox(model=self.model,
-                            smearer=temp_smear,
-                            enable_smearer=not self.disable_smearer.GetValue(),
-                            qmin=float(self.qmin_x),
-                            uid=self.uid,
-                            caption=self.window_caption,
-                            qmax=float(self.qmax_x))
+                                smearer=temp_smear,
+                                enable_smearer=not self.disable_smearer.GetValue(),
+                                qmin=float(self.qmin_x),
+                                uid=self.uid,
+                                caption=self.window_caption,
+                                qmax=float(self.qmax_x))
 
             self._manager._on_model_panel(evt=evt)
             self.mbox_description.SetLabel("Model [ %s ]" %
@@ -1615,7 +1618,7 @@ class FitPage(BasicPage):
             else:
                 return
         # check if it is pinhole smear and get min max if it is.
-        if data.dx is not None and not numpy.any(data.dx):
+        if data.dx is not None and numpy.any(data.dx):
             self.smear_type = "Pinhole"
             self.dq_l = data.dx[0]
             self.dq_r = data.dx[-1]

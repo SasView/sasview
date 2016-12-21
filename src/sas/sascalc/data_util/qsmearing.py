@@ -40,7 +40,7 @@ def smear_selection(data, model = None):
             return None
         elif data.dqx_data == None or data.dqy_data == None:
             return None
-        return Pinhole2D(data)
+        return PySmear2D(data, model)
 
     if  not hasattr(data, "dx") and not hasattr(data, "dxl")\
          and not hasattr(data, "dxw"):
@@ -141,3 +141,79 @@ def pinhole_smear(data, model=None):
     q = data.x
     width = data.dx if data.dx is not None else 0
     return PySmear(Pinhole1D(q, width), model)
+
+
+class PySmear2D(object):
+    """
+    Q smearing class for SAS 2d pinhole data
+    """
+
+    def __init__(self, data=None, model=None):
+        self.data = data
+        self.model = model
+        self.accuracy = 'Low'
+        self.limit = 3.0
+        self.index = None
+        self.coords = 'polar'
+        self.smearer = True
+
+    def set_accuracy(self, accuracy='Low'):
+        """
+        Set accuracy.
+
+        :param accuracy:  string
+        """
+        self.accuracy = accuracy
+
+    def set_smearer(self, smearer=True):
+        """
+        Set whether or not smearer will be used
+
+        :param smearer: smear object
+
+        """
+        self.smearer = smearer
+
+    def set_data(self, data=None):
+        """
+        Set data.
+
+        :param data: DataLoader.Data_info type
+        """
+        self.data = data
+
+    def set_model(self, model=None):
+        """
+        Set model.
+
+        :param model: sas.models instance
+        """
+        self.model = model
+
+    def set_index(self, index=None):
+        """
+        Set index.
+
+        :param index: 1d arrays
+        """
+        self.index = index
+
+    def get_value(self):
+        """
+        Over sampling of r_nbins times phi_nbins, calculate Gaussian weights,
+        then find smeared intensity
+        """
+        if self.smearer:
+            res = Pinhole2D(data=self.data, index=self.index,
+                            nsigma=3.0, accuracy=self.accuracy,
+                            coords=self.coords)
+            val = self.model.evalDistribution(res.q_calc)
+            return res.apply(val)
+        else:
+            index = self.index if self.index is not None else slice(None)
+            qx_data = self.data.qx_data[index]
+            qy_data = self.data.qy_data[index]
+            q_calc = [qx_data, qy_data]
+            val = self.model.evalDistribution(q_calc)
+            return val
+
