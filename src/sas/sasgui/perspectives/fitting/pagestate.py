@@ -350,6 +350,7 @@ class PageState(object):
         obj.npts = copy.deepcopy(self.npts)
         obj.cb1 = copy.deepcopy(self.cb1)
         obj.smearer = copy.deepcopy(self.smearer)
+        obj.version = copy.deepcopy(self.version)
 
         for name, state in self.saved_states.iteritems():
             copy_name = copy.deepcopy(name)
@@ -478,20 +479,16 @@ class PageState(object):
             str_pars = self.param_remap_to_sasmodels_convert(
                 self.str_parameters, True)
             formfactor, str_params = convert.convert_model(
-                self.formfactorcombobox, str_pars)
+                self.formfactorcombobox, str_pars, False, self.version)
             for key, value in str_params.iteritems():
                 params[key] = value
 
-        # Only convert if old != new, otherwise all the same
-        if formfactor != self.formfactorcombobox or \
-                        structurefactor != self.structurecombobox:
-            # Spherical SLD number of layers changed between 3.1.2 and 4.0
-            if self.formfactorcombobox == 'SphericalSLDModel':
-                self.multi_factor += 1
-            self.formfactorcombobox = formfactor
-            self.structurecombobox = structurefactor
-            self.parameters = []
-            self.parameters = self.param_remap_from_sasmodels_convert(params)
+        if self.formfactorcombobox == 'SphericalSLDModel':
+            self.multi_factor += 1
+        self.formfactorcombobox = formfactor
+        self.structurecombobox = structurefactor
+        self.parameters = []
+        self.parameters = self.param_remap_from_sasmodels_convert(params)
 
     def _repr_helper(self, list, rep):
         """
@@ -1015,9 +1012,15 @@ class PageState(object):
             raise RuntimeError, msg
 
         if node.get('version'):
-
+            # Get the version for model conversion purposes
             self.version = tuple(int(e) for e in
                                  str.split(node.get('version'), "."))
+            # The tuple must be at least 3 items long
+            while len(self.version) < 3:
+                ver_list = list(self.version)
+                ver_list.append(0)
+                self.version = tuple(ver_list)
+
             # Get file name
             entry = get_content('ns:filename', node)
             if entry is not None:
@@ -1833,6 +1836,7 @@ class Reader(CansasReader):
                     else:
                         name = original_fname
                     state.data.group_id = name
+                    state.version = fitstate.version
                     # store state in fitting
                     self.call_back(state=state,
                                    datainfo=output[ind], format=ext)
