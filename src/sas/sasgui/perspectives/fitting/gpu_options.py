@@ -10,7 +10,7 @@ Created on Nov 29, 2016
 import os
 import warnings
 import wx
-
+import logging
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
 class GpuOptions(wx.Dialog):
@@ -24,6 +24,21 @@ class GpuOptions(wx.Dialog):
 
     def __init__(self, *args, **kwds):
 
+        from sas.sasgui.guiframe.customdir import SetupCustom
+
+        c_conf_dir = SetupCustom().setup_dir(PATH_APP)
+        self.custom_config = _find_local_config('custom_config', c_conf_dir)
+        if self.custom_config is None:
+            self.custom_config = _find_local_config('custom_config', os.getcwd())
+            if self.custom_config is None:
+                msgConfig = "Custom_config file was not imported"
+                logging.info(msgConfig)
+            else:
+                logging.info("using custom_config in %s" % os.getcwd())
+        else:
+            logging.info("using custom_config from %s" % c_conf_dir)
+        SAS_OPENCL_CUSTOM = custom_config.SAS_OPENCL
+
         kwds["style"] = wx.DEFAULT_DIALOG_STYLE
         wx.Dialog.__init__(self, *args, **kwds)
 
@@ -35,8 +50,11 @@ class GpuOptions(wx.Dialog):
         boxsizer = wx.BoxSizer(orient=wx.VERTICAL)
         self.option_button = {}
         self.buttons = []
-        #Check if SAS_OPENCL is already set
-        self.sas_opencl = os.environ.get("SAS_OPENCL","")
+        #Check if SAS_OPENCL is already set as enviromental variable
+        self.sas_opencl =  os.environ["SAS_OPENCL"] \
+            if "SAS_OPENCL" in os.environ else SAS_OPENCL_CUSTOM
+        #or as a custom variable in the config file
+
         for clopt in clinfo:
             button = wx.CheckBox(self.panel1, -1, label=clopt[1], name=clopt[1])
 
@@ -155,10 +173,13 @@ class GpuOptions(wx.Dialog):
         #If statement added to handle Reset
         if self.sas_opencl:
             os.environ["SAS_OPENCL"] = self.sas_opencl
-        else:
+            else:
             if "SAS_OPENCL" in os.environ:
                 del(os.environ["SAS_OPENCL"])
         sasmodels.kernelcl.ENV = None
+        #TODO: Write to config.py
+        self.custom_config.SAS_OPENCL = self.sas_opencl
+
         #Need to reload sasmodels.core module to account SAS_OPENCL = "None"
         reload(sasmodels.core)
         event.Skip()
