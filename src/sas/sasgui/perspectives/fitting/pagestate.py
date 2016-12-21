@@ -271,6 +271,7 @@ class PageState(object):
         self.cb1 = False
         # store value of chisqr
         self.tcChi = None
+        self.version = (1,0,0)
 
     def clone(self):
         """
@@ -469,10 +470,10 @@ class PageState(object):
         # Create conversion dictionary to send to sasmodels
         self._old_first_model()
         p = self.param_remap_to_sasmodels_convert(self.parameters)
-        structurefactor, params = \
-            convert.convert_model(self.structurecombobox, p)
-        formfactor, params = \
-            convert.convert_model(self.formfactorcombobox, params)
+        structurefactor, params = convert.convert_model(self.structurecombobox,
+                                                        p, False, self.version)
+        formfactor, params = convert.convert_model(self.formfactorcombobox,
+                                                   params, False, self.version)
         if len(self.str_parameters) > 0:
             str_pars = self.param_remap_to_sasmodels_convert(
                 self.str_parameters, True)
@@ -818,7 +819,9 @@ class PageState(object):
                     entry_node.appendChild(top_element)
 
         attr = newdoc.createAttribute("version")
-        attr.nodeValue = '1.0'
+        import sasview
+        attr.nodeValue = sasview.__version__
+        # attr.nodeValue = '1.0'
         top_element.setAttributeNode(attr)
 
         # File name
@@ -1011,8 +1014,10 @@ class PageState(object):
             msg += " format for fitting files"
             raise RuntimeError, msg
 
-        if node.get('version') and node.get('version') == '1.0':
+        if node.get('version'):
 
+            self.version = tuple(int(e) for e in
+                                 str.split(node.get('version'), "."))
             # Get file name
             entry = get_content('ns:filename', node)
             if entry is not None:
