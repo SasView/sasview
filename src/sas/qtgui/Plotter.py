@@ -17,6 +17,7 @@ class PlotterWidget(PlotterBase):
     def __init__(self, parent=None, manager=None, quickplot=False):
         super(PlotterWidget, self).__init__(parent, manager=manager, quickplot=quickplot)
         self.parent = parent
+        self.addText = AddText(self)
 
     @property
     def data(self):
@@ -82,6 +83,10 @@ class PlotterWidget(PlotterBase):
         # Include scaling (log vs. linear)
         ax.set_xscale(self.xscale)
         ax.set_yscale(self.yscale)
+
+        # define the ranges
+        self.setRange = SetGraphRange(parent=self,
+            x_range=self.ax.get_xlim(), y_range=self.ax.get_ylim())
 
         # refresh canvas
         self.canvas.draw()
@@ -154,7 +159,6 @@ class PlotterWidget(PlotterBase):
         """
         Show a dialog allowing adding custom text to the chart
         """
-        self.addText = AddText(self)
         if self.addText.exec_() == QtGui.QDialog.Accepted:
             # Retrieve the new text, its font and color
             extra_text = self.addText.text()
@@ -207,10 +211,6 @@ class PlotterWidget(PlotterBase):
         Show a dialog allowing setting the chart ranges
         """
         # min and max of data
-        x_range = self.ax.get_xlim()
-        y_range = self.ax.get_ylim()
-        self.setRange = SetGraphRange(parent=self,
-            x_range=x_range, y_range=y_range)
         if self.setRange.exec_() == QtGui.QDialog.Accepted:
             x_range = self.setRange.xrange()
             y_range = self.setRange.yrange()

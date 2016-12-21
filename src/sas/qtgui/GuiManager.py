@@ -45,6 +45,7 @@ class GuiManager(object):
 
     def __init__(self, mainWindow=None, reactor=None, parent=None):
         """
+        Initialize the manager as a child of MainWindow.
         """
         self._workspace = mainWindow
         self._parent = parent
@@ -184,23 +185,19 @@ class GuiManager(object):
 
 
     def communicator(self):
-        """
-        """
+        """ Accessor for the communicator """
         return self.communicate
 
     def reactor(self):
-        """
-        """
+        """ Accessor for the reactor """
         return self._reactor
 
     def setReactor(self, reactor):
-        """
-        """
+        """ Reactor setter """
         self._reactor = reactor
 
     def perspective(self):
-        """
-        """
+        """ Accessor for the perspective """
         return self._current_perspective
 
     def updateProgressBar(self, value):

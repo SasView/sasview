@@ -5,6 +5,7 @@ from PyQt4 import QtGui
 from PyQt4 import QtCore
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from mock import MagicMock
+from mock import patch
 
 ####### TEMP
 import path_prepare
@@ -22,6 +23,7 @@ class PlotterTest(unittest.TestCase):
     '''Test the Plotter 1D class'''
     def setUp(self):
         '''create'''
+
         self.plotter = Plotter.Plotter(None, quickplot=True)
         self.data = Data1D(x=[1.0, 2.0, 3.0],
                            y=[10.0, 11.0, 12.0],
@@ -109,7 +111,7 @@ class PlotterTest(unittest.TestCase):
 
     def testXYTransform(self):
         """ Assure the unit/legend transformation is correct"""
-        self.plotter.data = self.data
+        self.plotter.plot(self.data)
 
         self.plotter.xyTransform(xLabel="x", yLabel="y")
         self.assertEqual(self.plotter.ax.get_xlabel(), "$()$")
@@ -155,19 +157,95 @@ class PlotterTest(unittest.TestCase):
 
     def testAddText(self):
         """ Checks the functionality of adding text to graph """
-        pass
+
+        self.plotter.plot(self.data)
+        self.plotter.x_click = 100.0
+        self.plotter.y_click = 100.0
+        # modify the text edit control
+        test_text = "Smoke in cabin"
+        test_font = QtGui.QFont("Arial", 16, QtGui.QFont.Bold)
+        test_color = "#00FF00"
+        self.plotter.addText.textEdit.setText(test_text)
+
+        # Return the requested font parameters
+        self.plotter.addText.font = MagicMock(return_value = test_font)
+        self.plotter.addText.color = MagicMock(return_value = test_color)
+        # Return OK from the dialog
+        self.plotter.addText.exec_ = MagicMock(return_value = QtGui.QDialog.Accepted)
+        # Add text to graph
+        self.plotter.onAddText()
+        self.plotter.show()
+        # Check if the text was added properly
+        self.assertEqual(len(self.plotter.textList), 1)
+        self.assertEqual(self.plotter.textList[0].get_text(), test_text)
+        self.assertEqual(self.plotter.textList[0].get_color(), test_color)
+        self.assertEqual(self.plotter.textList[0].get_fontproperties().get_family()[0], 'Arial')
+        self.assertEqual(self.plotter.textList[0].get_fontproperties().get_size(), 16)
 
     def testOnRemoveText(self):
         """ Cheks if annotations can be removed from the graph """
-        pass
+
+        # Add some text
+        self.plotter.plot(self.data)
+        test_text = "Safety instructions"
+        self.plotter.addText.textEdit.setText(test_text)
+        # Return OK from the dialog
+        self.plotter.addText.exec_ = MagicMock(return_value = QtGui.QDialog.Accepted)
+        # Add text to graph
+        self.plotter.onAddText()
+        self.plotter.show()
+        # Check if the text was added properly
+        self.assertEqual(len(self.plotter.textList), 1)
+
+        # Now, remove the text
+        self.plotter.onRemoveText()
+
+        # And assure no text is displayed
+        self.assertEqual(self.plotter.textList, [])
+
+        # Attempt removal on empty and check
+        self.plotter.onRemoveText()
+        self.assertEqual(self.plotter.textList, [])
 
     def testOnSetGraphRange(self):
         """ Cheks if the graph can be resized for range """
-        pass
+        new_x = (1,2)
+        new_y = (10,11)
+        self.plotter.plot(self.data)
+        self.plotter.show()
+        self.plotter.setRange.exec_ = MagicMock(return_value = QtGui.QDialog.Accepted)
+        self.plotter.setRange.xrange = MagicMock(return_value = new_x)
+        self.plotter.setRange.yrange = MagicMock(return_value = new_y)
+
+        # Call the tested method
+        self.plotter.onSetGraphRange()
+        # See that ranges changed accordingly
+        self.assertEqual(self.plotter.ax.get_xlim(), new_x)
+        self.assertEqual(self.plotter.ax.get_ylim(), new_y)
 
     def testOnResetGraphRange(self):
         """ Cheks if the graph can be reset after resizing for range """
-        pass
+        # New values
+        new_x = (1,2)
+        new_y = (10,11)
+        # define the plot
+        self.plotter.plot(self.data)
+        self.plotter.show()
+
+        # mock setRange methods
+        self.plotter.setRange.exec_ = MagicMock(return_value = QtGui.QDialog.Accepted)
+        self.plotter.setRange.xrange = MagicMock(return_value = new_x)
+        self.plotter.setRange.yrange = MagicMock(return_value = new_y)
+
+        # Change the axes range
+        self.plotter.onSetGraphRange()
+
+        # Now, reset the range back
+        self.plotter.onResetGraphRange()
+
+        # See that ranges are changed
+        self.assertNotEqual(self.plotter.ax.get_xlim(), new_x)
+        self.assertNotEqual(self.plotter.ax.get_ylim(), new_y)
 
 if __name__ == "__main__":
     unittest.main()
