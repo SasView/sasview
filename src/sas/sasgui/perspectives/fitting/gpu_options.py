@@ -12,6 +12,7 @@ import warnings
 import wx
 import logging
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
+import imp
 
 class GpuOptions(wx.Dialog):
     """
@@ -24,20 +25,25 @@ class GpuOptions(wx.Dialog):
 
     def __init__(self, *args, **kwds):
 
-        from sas.sasgui.guiframe.customdir import SetupCustom
+        # from sas.sasgui.guiframe.customdir import SetupCustom
+        # from sas.sasgui.guiframe.gui_manager import get_app_dir, _find_local_config
+        #
+        # PATH_APP = get_app_dir()
+        # c_conf_dir = SetupCustom().setup_dir(PATH_APP)
+        # self.custom_config = _find_local_config('custom_config', c_conf_dir)
+        # if self.custom_config is None:
+        #     self.custom_config = _find_local_config('custom_config', os.getcwd())
+        #     if self.custom_config is None:
+        #         msgConfig = "Custom_config file was not imported"
+        #         logging.info(msgConfig)
+        #     else:
+        #         logging.info("using custom_config in %s" % os.getcwd())
+        # else:
+        #     logging.info("using custom_config from %s" % c_conf_dir)
 
-        c_conf_dir = SetupCustom().setup_dir(PATH_APP)
-        self.custom_config = _find_local_config('custom_config', c_conf_dir)
-        if self.custom_config is None:
-            self.custom_config = _find_local_config('custom_config', os.getcwd())
-            if self.custom_config is None:
-                msgConfig = "Custom_config file was not imported"
-                logging.info(msgConfig)
-            else:
-                logging.info("using custom_config in %s" % os.getcwd())
-        else:
-            logging.info("using custom_config from %s" % c_conf_dir)
-        SAS_OPENCL_CUSTOM = custom_config.SAS_OPENCL
+        # SAS_OPENCL_CUSTOM = None
+        # if self.custom_config.SAS_OPENCL:
+        #     SAS_OPENCL_CUSTOM = self.custom_config.SAS_OPENCL
 
         kwds["style"] = wx.DEFAULT_DIALOG_STYLE
         wx.Dialog.__init__(self, *args, **kwds)
@@ -51,9 +57,9 @@ class GpuOptions(wx.Dialog):
         self.option_button = {}
         self.buttons = []
         #Check if SAS_OPENCL is already set as enviromental variable
-        self.sas_opencl =  os.environ["SAS_OPENCL"] \
-            if "SAS_OPENCL" in os.environ else SAS_OPENCL_CUSTOM
-        #or as a custom variable in the config file
+        self.sas_opencl = os.environ.get("SAS_OPENCL","")
+        #self.sas_opencl =  os.environ["SAS_OPENCL"] \
+        #    if "SAS_OPENCL" in os.environ else SAS_OPENCL_CUSTOM
 
         for clopt in clinfo:
             button = wx.CheckBox(self.panel1, -1, label=clopt[1], name=clopt[1])
@@ -64,7 +70,7 @@ class GpuOptions(wx.Dialog):
                     button.SetValue(1)
             else:
                 self.option_button[clopt] = "None"
-                if self.sas_opencl.lower() == "none" :
+                if self.sas_opencl.lower() == "none":
                     button.SetValue(1)
 
             self.Bind(wx.EVT_CHECKBOX, self.on_check, id=button.GetId())
@@ -173,12 +179,18 @@ class GpuOptions(wx.Dialog):
         #If statement added to handle Reset
         if self.sas_opencl:
             os.environ["SAS_OPENCL"] = self.sas_opencl
-            else:
+        else:
             if "SAS_OPENCL" in os.environ:
                 del(os.environ["SAS_OPENCL"])
-        sasmodels.kernelcl.ENV = None
-        #TODO: Write to config.py
-        self.custom_config.SAS_OPENCL = self.sas_opencl
+
+        try:
+            imp.find_module('sasmodels.kernelcl')
+            kernelcl_exist = True
+        except:
+            kernelcl_exist = False
+        if kernelcl_exist:
+            sasmodels.kernelcl.ENV = None
+            #self.custom_config.SAS_OPENCL = self.sas_opencl
 
         #Need to reload sasmodels.core module to account SAS_OPENCL = "None"
         reload(sasmodels.core)

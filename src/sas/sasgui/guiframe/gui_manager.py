@@ -151,6 +151,7 @@ WELCOME_PANEL_ON = config.WELCOME_PANEL_ON
 SPLASH_SCREEN_WIDTH = config.SPLASH_SCREEN_WIDTH
 SPLASH_SCREEN_HEIGHT = config.SPLASH_SCREEN_HEIGHT
 SS_MAX_DISPLAY_TIME = config.SS_MAX_DISPLAY_TIME
+SAS_OPENCL = config.SAS_OPENCL
 if not WELCOME_PANEL_ON:
     WELCOME_PANEL_SHOW = False
 else:
@@ -175,6 +176,7 @@ try:
         DEFAULT_OPEN_FOLDER = os.path.abspath(open_folder)
     else:
         DEFAULT_OPEN_FOLDER = PATH_APP
+    SAS_OPENCL = custom_config.SAS_OPENCL
 except:
     DATALOADER_SHOW = True
     TOOLBAR_SHOW = True
@@ -189,7 +191,7 @@ except:
     DEFAULT_PERSPECTIVE = None
     CLEANUP_PLOT = False
     DEFAULT_OPEN_FOLDER = PATH_APP
-
+    SAS_OPENCL = None
 DEFAULT_STYLE = config.DEFAULT_STYLE
 
 PLUGIN_STATE_EXTENSIONS = config.PLUGIN_STATE_EXTENSIONS
@@ -224,6 +226,9 @@ if sys.platform.count("win32") < 1:
         PARENT_FRAME = wx.Frame
         CHILD_FRAME = wx.Frame
 
+#Initiliaze enviromental variable with custom setting but only if variable not set
+if SAS_OPENCL and not "SAS_OPENCL" in os.environ:
+    os.environ["SAS_OPENCL"] = SAS_OPENCL
 
 class ViewerFrame(PARENT_FRAME):
     """
