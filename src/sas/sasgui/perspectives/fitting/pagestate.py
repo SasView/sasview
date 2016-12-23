@@ -395,7 +395,6 @@ class PageState(object):
             elif self.categorycombobox == 'Structure Factor':
                 self.formfactorcombobox = 'hardsphere'
 
-    @staticmethod
     def param_remap_to_sasmodels_convert(params, is_string=False):
         """
         Remaps the parameters for sasmodels conversion
@@ -427,7 +426,6 @@ class PageState(object):
             p[name + ".units"] = units
         return p
 
-    @staticmethod
     def param_remap_from_sasmodels_convert(params):
         """
         Converts {name : value} map back to [] param list
