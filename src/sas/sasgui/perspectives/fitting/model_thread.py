@@ -203,7 +203,7 @@ class Calc1D(CalcThread):
         if isinstance(self.model, MultiplicationModel):
             s_model = self.model.s_model
             p_model = self.model.p_model
-        else:
+        elif hasattr(self.model, "get_composition_models"):
             p_model, s_model = self.model.get_composition_models()
 
         if p_model is not None and s_model is not None:
