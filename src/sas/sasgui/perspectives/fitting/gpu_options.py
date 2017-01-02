@@ -25,26 +25,6 @@ class GpuOptions(wx.Dialog):
 
     def __init__(self, *args, **kwds):
 
-        # from sas.sasgui.guiframe.customdir import SetupCustom
-        # from sas.sasgui.guiframe.gui_manager import get_app_dir, _find_local_config
-        #
-        # PATH_APP = get_app_dir()
-        # c_conf_dir = SetupCustom().setup_dir(PATH_APP)
-        # self.custom_config = _find_local_config('custom_config', c_conf_dir)
-        # if self.custom_config is None:
-        #     self.custom_config = _find_local_config('custom_config', os.getcwd())
-        #     if self.custom_config is None:
-        #         msgConfig = "Custom_config file was not imported"
-        #         logging.info(msgConfig)
-        #     else:
-        #         logging.info("using custom_config in %s" % os.getcwd())
-        # else:
-        #     logging.info("using custom_config from %s" % c_conf_dir)
-
-        # SAS_OPENCL_CUSTOM = None
-        # if self.custom_config.SAS_OPENCL:
-        #     SAS_OPENCL_CUSTOM = self.custom_config.SAS_OPENCL
-
         kwds["style"] = wx.DEFAULT_DIALOG_STYLE
         wx.Dialog.__init__(self, *args, **kwds)
 
@@ -155,6 +135,26 @@ class GpuOptions(wx.Dialog):
 
         clinfo.append(("None","No OpenCL"))
         return clinfo
+
+    def write_to_config_file(self):
+        from sas.sasgui.guiframe.customdir import SetupCustom
+        from sas.sasgui.guiframe.gui_manager import get_app_dir, _find_local_config
+
+        PATH_APP = get_app_dir()
+        c_conf_dir = SetupCustom().setup_dir(PATH_APP)
+        self.custom_config = _find_local_config('custom_config', c_conf_dir)
+        if self.custom_config is None:
+            self.custom_config = _find_local_config('custom_config', os.getcwd())
+            if self.custom_config is None:
+                msgConfig = "Custom_config file was not imported"
+                logging.info(msgConfig)
+            else:
+                logging.info("using custom_config in %s" % os.getcwd())
+        else:
+            logging.info("using custom_config from %s" % c_conf_dir)
+
+        #How to store it in file
+        self.custom_config.SAS_OPENCL = self.sas_opencl
 
     def on_check(self, event):
         """
