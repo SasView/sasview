@@ -81,16 +81,15 @@ class Calc2D(CalcThread):
             fn = self.smearer
             fn.set_model(self.model)
             fn.set_index(index_model)
-            # Get necessary data from self.data and set the data for smearing
-            fn.get_data()
             # Calculate smeared Intensity
             #(by Gaussian averaging): DataLoader/smearing2d/Smearer2D()
             value = fn.get_value()
         else:
             # calculation w/o smearing
-            value = self.model.evalDistribution(\
-                [self.data.qx_data[index_model],
-                 self.data.qy_data[index_model]])
+            value = self.model.evalDistribution([
+                self.data.qx_data[index_model],
+                self.data.qy_data[index_model]
+            ])
         output = numpy.zeros(len(self.data.qx_data))
         # output default is None
         # This method is to distinguish between masked
@@ -197,13 +196,21 @@ class Calc1D(CalcThread):
         else:
             output[index] = self.model.evalDistribution(self.data.x[index])
 
-        sq_model = None
-        pq_model = None
+        sq_values = None
+        pq_values = None
+        s_model = None
+        p_model = None
         if isinstance(self.model, MultiplicationModel):
-            sq_model = numpy.zeros((len(self.data.x)))
-            pq_model = numpy.zeros((len(self.data.x)))
-            sq_model[index] = self.model.s_model.evalDistribution(self.data.x[index])
-            pq_model[index] = self.model.p_model.evalDistribution(self.data.x[index])
+            s_model = self.model.s_model
+            p_model = self.model.p_model
+        elif hasattr(self.model, "get_composition_models"):
+            p_model, s_model = self.model.get_composition_models()
+
+        if p_model is not None and s_model is not None:
+            sq_values = numpy.zeros((len(self.data.x)))
+            pq_values = numpy.zeros((len(self.data.x)))
+            sq_values[index] = s_model.evalDistribution(self.data.x[index])
+            pq_values[index] = p_model.evalDistribution(self.data.x[index])
 
         elapsed = time.time() - self.starttime
 
@@ -220,8 +227,8 @@ class Calc1D(CalcThread):
                       unsmeared_model=unsmeared_output,
                       unsmeared_data=unsmeared_data,
                       unsmeared_error=unsmeared_error,
-                      pq_model=pq_model,
-                      sq_model=sq_model)
+                      pq_model=pq_values,
+                      sq_model=sq_values)
 
     def results(self):
         """
