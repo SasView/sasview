@@ -14,6 +14,17 @@ import logging
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 import imp
 
+
+class CustomMessageBox(wx.Dialog):
+    def __init__(self, parent, msg, title):
+        wx.Dialog.__init__(self, parent, title=title)
+        text = wx.TextCtrl(self, style=wx.TE_READONLY|wx.BORDER_NONE)
+        text.SetValue(msg)
+        text.SetBackgroundColour(self.GetBackgroundColour())
+        self.ShowModal()
+        self.Destroy()
+
+
 class GpuOptions(wx.Dialog):
     """
     "OpenCL options" Dialog Box
@@ -136,25 +147,38 @@ class GpuOptions(wx.Dialog):
         clinfo.append(("None","No OpenCL"))
         return clinfo
 
-    def write_to_config_file(self):
-        from sas.sasgui.guiframe.customdir import SetupCustom
-        from sas.sasgui.guiframe.gui_manager import get_app_dir, _find_local_config
 
-        PATH_APP = get_app_dir()
-        c_conf_dir = SetupCustom().setup_dir(PATH_APP)
+    def _write_to_config_file(self):
+        from sas.sasgui.guiframe.customdir import SetupCustom
+        from sas.sasgui.guiframe.gui_manager import _find_local_config
+
+        c_conf_dir = SetupCustom().find_dir()
         self.custom_config = _find_local_config('custom_config', c_conf_dir)
         if self.custom_config is None:
             self.custom_config = _find_local_config('custom_config', os.getcwd())
-            if self.custom_config is None:
-                msgConfig = "Custom_config file was not imported"
-                logging.info(msgConfig)
-            else:
-                logging.info("using custom_config in %s" % os.getcwd())
-        else:
-            logging.info("using custom_config from %s" % c_conf_dir)
 
         #How to store it in file
-        self.custom_config.SAS_OPENCL = self.sas_opencl
+        new_config_lines = []
+        config_file = open(self.custom_config.__file__[:-1])
+        if self.custom_config is not None:
+            config_lines = config_file.readlines()
+            for line in config_lines:
+                if "SAS_OPENCL" in line:
+                    if self.sas_opencl:
+                        new_config_lines.append("SAS_OPENCL = \""+self.sas_opencl+"\"")
+                    else:
+                        new_config_lines.append("SAS_OPENCL = None")
+                else:
+                    new_config_lines.append(line)
+        config_file.close()
+        new_config_file = open(self.custom_config.__file__[:-1],"w")
+        new_config_file.writelines(new_config_lines)
+        new_config_file.close()
+
+        #After file is touched module needs to be reloaded
+        self.custom_config = _find_local_config('custom_config', c_conf_dir)
+        if self.custom_config is None:
+            self.custom_config = _find_local_config('custom_config', os.getcwd())
 
     def on_check(self, event):
         """
@@ -182,7 +206,6 @@ class GpuOptions(wx.Dialog):
         else:
             if "SAS_OPENCL" in os.environ:
                 del(os.environ["SAS_OPENCL"])
-
         try:
             imp.find_module('sasmodels.kernelcl')
             kernelcl_exist = True
@@ -190,8 +213,8 @@ class GpuOptions(wx.Dialog):
             kernelcl_exist = False
         if kernelcl_exist:
             sasmodels.kernelcl.ENV = None
-            #self.custom_config.SAS_OPENCL = self.sas_opencl
 
+        self._write_to_config_file()
         #Need to reload sasmodels.core module to account SAS_OPENCL = "None"
         reload(sasmodels.core)
         event.Skip()
@@ -200,9 +223,24 @@ class GpuOptions(wx.Dialog):
         """
         Close window on accpetance
         """
+        import sasmodels
         for btn in self.buttons:
             btn.SetValue(0)
+
         self.sas_opencl=None
+        del(os.environ["SAS_OPENCL"])
+
+        try:
+            imp.find_module('sasmodels.kernelcl')
+            kernelcl_exist = True
+        except:
+            kernelcl_exist = False
+        if kernelcl_exist:
+            sasmodels.kernelcl.ENV = None
+
+        self._write_to_config_file()
+        reload(sasmodels.core)
+        event.Skip()
 
     def on_test(self, event):
         """
@@ -210,9 +248,9 @@ class GpuOptions(wx.Dialog):
         """
         import json
         import platform
-
         import sasmodels
         from sasmodels.model_test import model_tests
+
         try:
             from sasmodels.kernelcl import environment
             env = environment()
@@ -238,7 +276,22 @@ class GpuOptions(wx.Dialog):
             'opencl': clinfo,
             'failing tests': failures,
         }
-        print(json.dumps(info['failing tests']))
+
+        msg_info = "OpenCL tests"
+        msg = "OpenCL test completed!\n"
+        msg += "Sasmodels version: "
+        msg += info['version']+"\n"
+        msg += "Platform used: "
+        msg += json.dumps(info['platform'])+"\n"
+        msg += "OpenCL driver: "
+        msg += json.dumps(info['opencl'])+"\n"
+        if len(failures) > 0:
+            msg += 'Failing tests:\n'
+            msg += json.dumps(info['failing tests'])
+        else:
+            msg+="All tests passed\n"
+
+        CustomMessageBox(self.panel1, msg, msg_info)
 
     def on_help(self, event):
         """
