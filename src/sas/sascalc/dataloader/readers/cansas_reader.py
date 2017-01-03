@@ -19,9 +19,12 @@ import sys
 import datetime
 import inspect
 # For saving individual sections of data
-from sas.sascalc.dataloader.data_info import Data1D, DataInfo, plottable_1D
-from sas.sascalc.dataloader.data_info import Collimation, TransmissionSpectrum, Detector, Process, Aperture
-from sas.sascalc.dataloader.data_info import combine_data_info_with_plottable as combine_data
+from sas.sascalc.dataloader.data_info import Data1D, Data2D, DataInfo, \
+    plottable_1D
+from sas.sascalc.dataloader.data_info import Collimation, TransmissionSpectrum, \
+    Detector, Process, Aperture
+from sas.sascalc.dataloader.data_info import \
+    combine_data_info_with_plottable as combine_data
 import sas.sascalc.dataloader.readers.xml_reader as xml_reader
 from sas.sascalc.dataloader.readers.xml_reader import XMLreader
 from sas.sascalc.dataloader.readers.cansas_constants import CansasConstants, CurrentLevel
@@ -791,8 +794,8 @@ class Reader(XMLreader):
 
         :param datainfo: Data1D object
         """
-        if not issubclass(datainfo.__class__, Data1D):
-            raise RuntimeError, "The cansas writer expects a Data1D instance"
+        if issubclass(datainfo.__class__, Data2D):
+            is_2d = True
 
         # Get PIs and create root element
         pi_string = self._get_pi_string()
@@ -812,7 +815,10 @@ class Reader(XMLreader):
         # Add Run to SASentry
         self._write_run_names(datainfo, entry_node)
         # Add Data info to SASEntry
-        self._write_data(datainfo, entry_node)
+        if is_2d:
+            self._write_data_2d(datainfo, entry_node)
+        else:
+            self._write_data(datainfo, entry_node)
         # Transmission Spectrum Info
         self._write_trans_spectrum(datainfo, entry_node)
         # Sample info
@@ -906,7 +912,7 @@ class Reader(XMLreader):
 
     def _write_data(self, datainfo, entry_node):
         """
-        Writes the I and Q data to the XML file
+        Writes 1D I and Q data to the XML file
 
         :param datainfo: The Data1D object the information is coming from
         :param entry_node: lxml node ElementTree object to be appended to
@@ -934,6 +940,37 @@ class Reader(XMLreader):
             if datainfo.dxl is not None and len(datainfo.dxl) > i:
                 self.write_node(point, "dQl", datainfo.dxl[i],
                                 {'unit': datainfo.x_unit})
+
+    def _write_data_2d(self, datainfo, entry_node):
+        """
+        Writes 2D data to the XML file
+
+        :param datainfo: The Data2D object the information is coming from
+        :param entry_node: lxml node ElementTree object to be appended to
+        """
+        node = self.create_element("SASdata")
+        self.append(node, entry_node)
+
+        for i in range(len(datainfo.data)):
+            point = self.create_element("Idata")
+            node.append(point)
+            self.write_node(point, "Qx", datainfo.qx_data[i],
+                            {'unit': datainfo._xunit})
+            self.write_node(point, "Qy", datainfo.qy_data[i],
+                            {'unit': datainfo._yunit})
+            self.write_node(point, "I", datainfo.data[i],
+                            {'unit': datainfo._zunit})
+            if datainfo.err_data is not None and len(datainfo.err_data) > i:
+                self.write_node(point, "Idev", datainfo.err_data[i],
+                                {'unit': datainfo._zunit})
+            if datainfo.dqy_data is not None and len(datainfo.dqy_data) > i:
+                self.write_node(point, "Qydev", datainfo.dqy_data[i],
+                                {'unit': datainfo._yunit})
+            if datainfo.dqx_data is not None and len(datainfo.dqx_data) > i:
+                self.write_node(point, "Qxdev", datainfo.dqx_data[i],
+                                {'unit': datainfo._xunit})
+            if datainfo.mask is not None and len(datainfo.mask) > i:
+                self.write_node(point, "Mask", datainfo.err_data[i])
 
     def _write_trans_spectrum(self, datainfo, entry_node):
         """
