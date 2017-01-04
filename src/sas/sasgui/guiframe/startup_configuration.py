@@ -45,7 +45,7 @@ try:
                        'WELCOME_PANEL_SHOW':CURRENT.WELCOME_PANEL_SHOW,
                        'CLEANUP_PLOT':CURRENT.CLEANUP_PLOT,
                        'DEFAULT_PERSPECTIVE':CURRENT.DEFAULT_PERSPECTIVE,
-                       'DEFAULT_OPEN_FOLDER':CURRENT.DEFAULT_OPEN_FOLDER,
+                       'DEFAULT_OPEN_FOLDER':CURRENT.DEFAULT_OPEN_FOLDE,
                        'SAS_OPENCL': None}
 except:
     CURRENT_STRINGS = DEFAULT_STRINGS

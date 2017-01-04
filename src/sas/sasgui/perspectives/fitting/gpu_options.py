@@ -17,10 +17,40 @@ import imp
 
 class CustomMessageBox(wx.Dialog):
     def __init__(self, parent, msg, title):
+
         wx.Dialog.__init__(self, parent, title=title)
-        text = wx.TextCtrl(self, style=wx.TE_READONLY|wx.BORDER_NONE)
+
+        panel = wx.Panel(self, -1)
+        static_box = wx.StaticBox(panel, -1, "OpenCL test completed!")
+        boxsizer = wx.BoxSizer(orient=wx.VERTICAL)
+
+        text = wx.TextCtrl(self, style=wx.TE_READONLY|wx.TE_MULTILINE
+                                       |wx.BORDER_NONE, size=(400,200))
         text.SetValue(msg)
         text.SetBackgroundColour(self.GetBackgroundColour())
+
+        boxsizer.Add(text, 0)
+
+        fit_hsizer = wx.StaticBoxSizer(static_box, orient=wx.VERTICAL)
+        fit_hsizer.Add(boxsizer, 0, wx.ALL, 5)
+
+        panel.SetSizer(fit_hsizer)
+
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        vbox.Add(panel, 0, wx.ALL, 10)
+
+        ok_btn = wx.Button(self, wx.ID_OK)
+
+        btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        btn_sizer.Add((10, 20), 1) # stretchable whitespace
+        btn_sizer.Add(ok_btn, 0)
+
+        vbox.Add(btn_sizer, 0, wx.EXPAND|wx.ALL, 10)
+
+        self.SetSizer(vbox)
+        vbox.Fit(self)
+
+        self.Centre()
         self.ShowModal()
         self.Destroy()
 
@@ -49,8 +79,7 @@ class GpuOptions(wx.Dialog):
         self.buttons = []
         #Check if SAS_OPENCL is already set as enviromental variable
         self.sas_opencl = os.environ.get("SAS_OPENCL","")
-        #self.sas_opencl =  os.environ["SAS_OPENCL"] \
-        #    if "SAS_OPENCL" in os.environ else SAS_OPENCL_CUSTOM
+        print("SAS_OPENCL: ",self.sas_opencl)
 
         for clopt in clinfo:
             button = wx.CheckBox(self.panel1, -1, label=clopt[1], name=clopt[1])
@@ -147,7 +176,7 @@ class GpuOptions(wx.Dialog):
         clinfo.append(("None","No OpenCL"))
         return clinfo
 
-
+    #TODO: Dont want to mess with writting to configuration file before end of
     def _write_to_config_file(self):
         from sas.sasgui.guiframe.customdir import SetupCustom
         from sas.sasgui.guiframe.gui_manager import _find_local_config
@@ -182,7 +211,7 @@ class GpuOptions(wx.Dialog):
 
     def on_check(self, event):
         """
-        Action triggered when button is selected
+        Action triggered when box is selected
         :param event:
         :return:
         """
@@ -206,15 +235,7 @@ class GpuOptions(wx.Dialog):
         else:
             if "SAS_OPENCL" in os.environ:
                 del(os.environ["SAS_OPENCL"])
-        try:
-            imp.find_module('sasmodels.kernelcl')
-            kernelcl_exist = True
-        except:
-            kernelcl_exist = False
-        if kernelcl_exist:
-            sasmodels.kernelcl.ENV = None
-
-        self._write_to_config_file()
+        sasmodels.kernelcl.ENV = None
         #Need to reload sasmodels.core module to account SAS_OPENCL = "None"
         reload(sasmodels.core)
         event.Skip()
@@ -223,24 +244,10 @@ class GpuOptions(wx.Dialog):
         """
         Close window on accpetance
         """
-        import sasmodels
         for btn in self.buttons:
             btn.SetValue(0)
 
         self.sas_opencl=None
-        del(os.environ["SAS_OPENCL"])
-
-        try:
-            imp.find_module('sasmodels.kernelcl')
-            kernelcl_exist = True
-        except:
-            kernelcl_exist = False
-        if kernelcl_exist:
-            sasmodels.kernelcl.ENV = None
-
-        self._write_to_config_file()
-        reload(sasmodels.core)
-        event.Skip()
 
     def on_test(self, event):
         """
@@ -278,18 +285,21 @@ class GpuOptions(wx.Dialog):
         }
 
         msg_info = "OpenCL tests"
-        msg = "OpenCL test completed!\n"
-        msg += "Sasmodels version: "
-        msg += info['version']+"\n"
-        msg += "Platform used: "
-        msg += json.dumps(info['platform'])+"\n"
-        msg += "OpenCL driver: "
-        msg += json.dumps(info['opencl'])+"\n"
+
+        msg = "Results: "
         if len(failures) > 0:
             msg += 'Failing tests:\n'
             msg += json.dumps(info['failing tests'])
         else:
-            msg+="All tests passed\n"
+            msg+="All tests passed!\n"
+
+        msg +="\nDetails:\n"
+        msg += "Sasmodels version: "
+        msg += info['version']+"\n"
+        msg += "\nPlatform used: "
+        msg += json.dumps(info['platform'])+"\n"
+        msg += "\nOpenCL driver: "
+        msg += json.dumps(info['opencl'])+"\n"
 
         CustomMessageBox(self.panel1, msg, msg_info)
 

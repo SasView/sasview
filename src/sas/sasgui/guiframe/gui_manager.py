@@ -2108,9 +2108,36 @@ class ViewerFrame(PARENT_FRAME):
         """
         Quit the application
         """
+        #IF SAS_OPENCL is set, settings are stored in the custom config file
+        if "SAS_OPENCL" in os.environ:
+            self._write_opencl_config_file()
         logging.info(" --- SasView session was closed --- \n")
         wx.Exit()
         sys.exit()
+
+    def _write_opencl_config_file(self):
+        #from sas.sasgui.guiframe.customdir import SetupCustom
+        #from sas.sasgui.guiframe.gui_manager import _find_local_config
+
+        sas_opencl = os.environ.get("SAS_OPENCL","")
+        #How to store it in file
+        new_config_lines = []
+        config_file = open(custom_config.__file__)
+        if custom_config is not None:
+            config_lines = config_file.readlines()
+            for line in config_lines:
+                if "SAS_OPENCL" in line:
+                    if sas_opencl:
+                        new_config_lines.append("SAS_OPENCL = \""+sas_opencl+"\"")
+                    else:
+                        new_config_lines.append("SAS_OPENCL = None")
+                else:
+                    new_config_lines.append(line)
+        config_file.close()
+        new_config_file = open(custom_config.__file__,"w")
+        new_config_file.writelines(new_config_lines)
+        new_config_file.close()
+
 
     def _check_update(self, event=None):
         """
