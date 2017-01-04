@@ -30,6 +30,7 @@ class PlotterTest(unittest.TestCase):
                            dx=[0.1, 0.2, 0.3],
                            dy=[0.1, 0.2, 0.3])
         self.data.title="Test data"
+        self.data.name="Test name"
         self.data.id = 1
 
     def tearDown(self):
@@ -41,7 +42,7 @@ class PlotterTest(unittest.TestCase):
         self.plotter.data = self.data
 
         self.assertEqual(self.plotter.data, self.data)
-        self.assertEqual(self.plotter._title, self.data.title)
+        self.assertEqual(self.plotter._title, self.data.name)
         self.assertEqual(self.plotter.xLabel, "$()$")
         self.assertEqual(self.plotter.yLabel, "$()$")
 
@@ -69,6 +70,7 @@ class PlotterTest(unittest.TestCase):
 
     def testContextMenuQuickPlot(self):
         """ Test the right click menu """
+        self.plotter.createContextMenuQuick()
         actions = self.plotter.contextMenu.actions()
         self.assertEqual(len(actions), 7)
 

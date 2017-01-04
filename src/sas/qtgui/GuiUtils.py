@@ -27,6 +27,8 @@ from PyQt4 import QtGui
 
 from periodictable import formula as Formula
 
+from sas.sasgui.plottools import transform
+from sas.sasgui.plottools.convert_units import convert_unit
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import Data2D
 from sas.sascalc.dataloader.loader import Loader
@@ -582,6 +584,107 @@ class FormulaValidator(QtGui.QValidator):
                 self.parent().setStyleSheet(value)
         except:
             pass
+
+def xyTransform(data, xLabel="", yLabel=""):
+    """
+    Transforms x and y in View and set the scale
+    """
+    # Changing the scale might be incompatible with
+    # currently displayed data (for instance, going
+    # from ln to log when all plotted values have
+    # negative natural logs).
+    # Go linear and only change the scale at the end.
+    xscale = 'linear'
+    yscale = 'linear'
+    # Local data is either 1D or 2D
+    if data.id == 'fit':
+        return
+
+    # control axis labels from the panel itself
+    yname, yunits = data.get_yaxis()
+    xname, xunits = data.get_xaxis()
+
+    # Goes through all possible scales
+    # self.x_label is already wrapped with Latex "$", so using the argument
+
+    # X
+    if xLabel == "x":
+        data.transformX(transform.toX, transform.errToX)
+        xLabel = "%s(%s)" % (xname, xunits)
+    if xLabel == "x^(2)":
+        data.transformX(transform.toX2, transform.errToX2)
+        xunits = convert_unit(2, xunits)
+        xLabel = "%s^{2}(%s)" % (xname, xunits)
+    if xLabel == "x^(4)":
+        data.transformX(transform.toX4, transform.errToX4)
+        xunits = convert_unit(4, xunits)
+        xLabel = "%s^{4}(%s)" % (xname, xunits)
+    if xLabel == "ln(x)":
+        data.transformX(transform.toLogX, transform.errToLogX)
+        xLabel = "\ln{(%s)}(%s)" % (xname, xunits)
+    if xLabel == "log10(x)":
+        data.transformX(transform.toX_pos, transform.errToX_pos)
+        xscale = 'log'
+        xLabel = "%s(%s)" % (xname, xunits)
+    if xLabel == "log10(x^(4))":
+        data.transformX(transform.toX4, transform.errToX4)
+        xunits = convert_unit(4, xunits)
+        xLabel = "%s^{4}(%s)" % (xname, xunits)
+        xscale = 'log'
+
+    # Y
+    if yLabel == "ln(y)":
+        data.transformY(transform.toLogX, transform.errToLogX)
+        yLabel = "\ln{(%s)}(%s)" % (yname, yunits)
+    if yLabel == "y":
+        data.transformY(transform.toX, transform.errToX)
+        yLabel = "%s(%s)" % (yname, yunits)
+    if yLabel == "log10(y)":
+        data.transformY(transform.toX_pos, transform.errToX_pos)
+        yscale = 'log'
+        yLabel = "%s(%s)" % (yname, yunits)
+    if yLabel == "y^(2)":
+        data.transformY(transform.toX2, transform.errToX2)
+        yunits = convert_unit(2, yunits)
+        yLabel = "%s^{2}(%s)" % (yname, yunits)
+    if yLabel == "1/y":
+        data.transformY(transform.toOneOverX, transform.errOneOverX)
+        yunits = convert_unit(-1, yunits)
+        yLabel = "1/%s(%s)" % (yname, yunits)
+    if yLabel == "y*x^(2)":
+        data.transformY(transform.toYX2, transform.errToYX2)
+        xunits = convert_unit(2, xunits)
+        yLabel = "%s \ \ %s^{2}(%s%s)" % (yname, xname, yunits, xunits)
+    if yLabel == "y*x^(4)":
+        data.transformY(transform.toYX4, transform.errToYX4)
+        xunits = convert_unit(4, xunits)
+        yLabel = "%s \ \ %s^{4}(%s%s)" % (yname, xname, yunits, xunits)
+    if yLabel == "1/sqrt(y)":
+        data.transformY(transform.toOneOverSqrtX,
+                                transform.errOneOverSqrtX)
+        yunits = convert_unit(-0.5, yunits)
+        yLabel = "1/\sqrt{%s}(%s)" % (yname, yunits)
+    if yLabel == "ln(y*x)":
+        data.transformY(transform.toLogXY, transform.errToLogXY)
+        yLabel = "\ln{(%s \ \ %s)}(%s%s)" % (yname, xname, yunits, xunits)
+    if yLabel == "ln(y*x^(2))":
+        data.transformY(transform.toLogYX2, transform.errToLogYX2)
+        xunits = convert_unit(2, xunits)
+        yLabel = "\ln (%s \ \ %s^{2})(%s%s)" % (yname, xname, yunits, xunits)
+    if yLabel == "ln(y*x^(4))":
+        data.transformY(transform.toLogYX4, transform.errToLogYX4)
+        xunits = convert_unit(4, xunits)
+        yLabel = "\ln (%s \ \ %s^{4})(%s%s)" % (yname, xname, yunits, xunits)
+    if yLabel == "log10(y*x^(4))":
+        data.transformY(transform.toYX4, transform.errToYX4)
+        xunits = convert_unit(4, xunits)
+        yscale = 'log'
+        yLabel = "%s \ \ %s^{4}(%s%s)" % (yname, xname, yunits, xunits)
+
+    # Perform the transformation of data in data1d->View
+    data.transformView()
+
+    return (xLabel, yLabel, xscale, yscale)
 
 def dataFromItem(item):
     """

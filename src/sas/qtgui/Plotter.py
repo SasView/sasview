@@ -1,12 +1,14 @@
 from PyQt4 import QtGui
+from PyQt4 import QtCore
+import functools
+import copy
 
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 
 from sas.sasgui.guiframe.dataFitting import Data1D
-from sas.sasgui.plottools import transform
-from sas.sasgui.plottools.convert_units import convert_unit
 from sas.qtgui.PlotterBase import PlotterBase
+import sas.qtgui.GuiUtils as GuiUtils
 from sas.qtgui.AddText import AddText
 from sas.qtgui.SetGraphRange import SetGraphRange
 
@@ -19,6 +21,12 @@ class PlotterWidget(PlotterBase):
         self.parent = parent
         self.addText = AddText(self)
 
+        # Dictionary of {plot_id:Data1d}
+        self.plot_dict = {}
+
+        # Simple window for data display
+        self.txt_widget = QtGui.QTextEdit(None)
+
     @property
     def data(self):
         return self._data
@@ -29,11 +37,11 @@ class PlotterWidget(PlotterBase):
         self._data = value
         self.xLabel = "%s(%s)"%(value._xaxis, value._xunit)
         self.yLabel = "%s(%s)"%(value._yaxis, value._yunit)
-        self.title(title=value.title)
+        self.title(title=value.name)
 
     def plot(self, data=None, marker=None, linestyle=None, hide_error=False):
         """
-        Plot self._data
+        Add a new plot of self._data to the chart.
         """
         # Data1D
         if isinstance(data, Data1D):
@@ -49,16 +57,19 @@ class PlotterWidget(PlotterBase):
         if linestyle == None:
             linestyle = ''
 
+        if not self._title:
+            self.title(title=self.data.name)
+
         # plot data with/without errorbars
         if hide_error:
-            ax.plot(self._data.view.x, self._data.view.y,
+            line = ax.plot(self._data.view.x, self._data.view.y,
                     marker=marker,
                     linestyle=linestyle,
                     label=self._title,
                     picker=True)
         else:
-            ax.errorbar(self._data.view.x, self._data.view.y,
-                        yerr=self._data.view.dx, xerr=None,
+            line = ax.errorbar(self._data.view.x, self._data.view.y,
+                        yerr=self._data.view.dy, xerr=None,
                         capsize=2, linestyle='',
                         barsabove=False,
                         marker=marker,
@@ -67,9 +78,11 @@ class PlotterWidget(PlotterBase):
                         label=self._title,
                         picker=True)
 
+        # Update the list of data sets (plots) in chart
+        self.plot_dict[self._data.id] = self.data
+
         # Now add the legend with some customizations.
         self.legend = ax.legend(loc='upper right', shadow=True)
-        #self.legend.get_frame().set_alpha(0.4)
         self.legend.set_picker(True)
 
         # Current labels for axes
@@ -91,11 +104,14 @@ class PlotterWidget(PlotterBase):
         # refresh canvas
         self.canvas.draw()
 
-    def contextMenu(self):
+    def createContextMenu(self):
         """
         Define common context menu and associated actions for the MPL widget
         """
         self.defaultContextMenu()
+
+        # Separate plots
+        self.addPlotsToContextMenu()
 
         # Additional menu items
         self.contextMenu.addSeparator()
@@ -111,9 +127,9 @@ class PlotterWidget(PlotterBase):
         self.actionResetGraphRange =\
             self.contextMenu.addAction("Reset Graph Range")
         # Add the title change for dialogs
-        if self.parent:
-            self.contextMenu.addSeparator()
-            self.actionWindowTitle = self.contextMenu.addAction("Window Title")
+        #if self.parent:
+        self.contextMenu.addSeparator()
+        self.actionWindowTitle = self.contextMenu.addAction("Window Title")
 
         # Define the callbacks
         self.actionModifyGraphAppearance.triggered.connect(self.onModifyGraph)
@@ -124,7 +140,54 @@ class PlotterWidget(PlotterBase):
         self.actionResetGraphRange.triggered.connect(self.onResetGraphRange)
         self.actionWindowTitle.triggered.connect(self.onWindowsTitle)
 
-    def contextMenuQuickPlot(self):
+    def addPlotsToContextMenu(self):
+        """
+        Adds operations on all plotted sets of data to the context menu
+        """
+        for id in self.plot_dict.keys():
+            plot = self.plot_dict[id]
+            name = plot.name
+            plot_menu = self.contextMenu.addMenu('&%s' % name)
+
+            self.actionDataInfo = plot_menu.addAction("&DataInfo")
+            self.actionDataInfo.triggered.connect(
+                                functools.partial(self.onDataInfo, plot))
+
+            self.actionSavePointsAsFile = plot_menu.addAction("&Save Points as a File")
+            self.actionSavePointsAsFile.triggered.connect(
+                                functools.partial(self.onSavePoints, plot))
+            plot_menu.addSeparator()
+
+            if plot.id != 'fit':
+                self.actionLinearFit = plot_menu.addAction('&Linear Fit')
+                self.actionLinearFit.triggered.connect(self.onLinearFit)
+                plot_menu.addSeparator()
+
+            self.actionRemovePlot = plot_menu.addAction("Remove")
+            self.actionRemovePlot.triggered.connect(
+                                functools.partial(self.onRemovePlot, id))
+
+            if not plot.is_data:
+                self.actionFreeze = plot_menu.addAction('&Freeze')
+                self.actionFreeze.triggered.connect(
+                                functools.partial(self.onFreeze, id))
+            plot_menu.addSeparator()
+
+            if plot.is_data:
+                self.actionHideError = plot_menu.addAction("Hide Error Bar")
+                if plot.dy is not None and plot.dy != []:
+                    if plot.hide_error:
+                        self.actionHideError.setText('Show Error Bar')
+                else:
+                    self.actionHideError.setEnabled(False)
+                self.actionHideError.triggered.connect(
+                                functools.partial(self.onToggleHideError, id))
+                plot_menu.addSeparator()
+
+            self.actionModifyPlot = plot_menu.addAction('&Modify Plot Property')
+            self.actionModifyPlot.triggered.connect(self.onModifyPlot)
+
+    def createContextMenuQuick(self):
         """
         Define context menu and associated actions for the quickplot MPL widget
         """
@@ -230,6 +293,95 @@ class PlotterWidget(PlotterBase):
             self.ax.set_ylim(y_range)
             self.canvas.draw_idle()
 
+    def onDataInfo(self, plot_data):
+        """
+        Displays data info text window for the selected plot
+        """
+        text_to_show = GuiUtils.retrieveData1d(plot_data)
+        # Hardcoded sizes to enable full width rendering with default font
+        self.txt_widget.resize(420,600)
+
+        self.txt_widget.setReadOnly(True)
+        self.txt_widget.setWindowFlags(QtCore.Qt.Window)
+        self.txt_widget.setWindowIcon(QtGui.QIcon(":/res/ball.ico"))
+        self.txt_widget.setWindowTitle("Data Info: %s" % plot_data.filename)
+        self.txt_widget.insertPlainText(text_to_show)
+
+        self.txt_widget.show()
+        # Move the slider all the way up, if present
+        vertical_scroll_bar = self.txt_widget.verticalScrollBar()
+        vertical_scroll_bar.triggerAction(QtGui.QScrollBar.SliderToMinimum)
+
+    def onSavePoints(self, plot_data):
+        """
+        Saves plot data to a file
+        """
+        GuiUtils.saveData1D(plot_data)
+
+    def onLinearFit(self):
+        """
+        Creates and displays a simple linear fit for the selected plot
+        """
+        pass
+
+    def onRemovePlot(self, id):
+        """
+        Deletes the selected plot from the chart
+        """
+        selected_plot = self.plot_dict[id]
+
+        plot_dict = copy.deepcopy(self.plot_dict)
+
+        self.plot_dict = {}
+
+        plt.cla()
+        self.ax.cla()
+
+        for ids in plot_dict:
+            if ids != id:
+                self.plot(data=plot_dict[ids], hide_error=plot_dict[ids].hide_error)                
+
+        if len(self.plot_dict) == 0:
+            # last plot: graph is empty must be the panel must be destroyed
+                self.parent.close()
+
+    def onFreeze(self, id):
+        """
+        Freezes the selected plot to a separate chart
+        """
+        plot = self.plot_dict[id]
+        self.manager.add_data(data_list=[plot])
+
+    def onModifyPlot(self):
+        """
+        Allows for MPL modifications to the selected plot
+        """
+        pass
+
+    def onToggleHideError(self, id):
+        """
+        Toggles hide error/show error menu item
+        """
+        selected_plot = self.plot_dict[id]
+        current = selected_plot.hide_error
+
+        # Flip the flag
+        selected_plot.hide_error = not current
+
+        plot_dict = copy.deepcopy(self.plot_dict)
+        self.plot_dict = {}
+
+        # Clean the canvas
+        plt.cla()
+        self.ax.cla()
+
+        # Recreate the plots but reverse the error flag for the current
+        for ids in plot_dict:
+            if ids == id:
+                self.plot(data=plot_dict[ids], hide_error=(not current))
+            else:
+                self.plot(data=plot_dict[ids], hide_error=plot_dict[ids].hide_error)                
+
     def xyTransform(self, xLabel="", yLabel=""):
         """
         Transforms x and y in View and set the scale
@@ -238,105 +390,11 @@ class PlotterWidget(PlotterBase):
         plt.cla()
         self.ax.cla()
 
-        # Changing the scale might be incompatible with
-        # currently displayed data (for instance, going
-        # from ln to log when all plotted values have
-        # negative natural logs).
-        # Go linear and only change the scale at the end.
-        self._xscale = "linear"
-        self._yscale = "linear"
-        _xscale = 'linear'
-        _yscale = 'linear'
-        # Local data is either 1D or 2D
-        if self.data.id == 'fit':
-            return
-
-        # control axis labels from the panel itself
-        yname, yunits = self.data.get_yaxis()
-        xname, xunits = self.data.get_xaxis()
-
-        # Goes through all possible scales
-        # self.x_label is already wrapped with Latex "$", so using the argument
-
-        # X
-        if xLabel == "x":
-            self.data.transformX(transform.toX, transform.errToX)
-            self.xLabel = "%s(%s)" % (xname, xunits)
-        if xLabel == "x^(2)":
-            self.data.transformX(transform.toX2, transform.errToX2)
-            xunits = convert_unit(2, xunits)
-            self.xLabel = "%s^{2}(%s)" % (xname, xunits)
-        if xLabel == "x^(4)":
-            self.data.transformX(transform.toX4, transform.errToX4)
-            xunits = convert_unit(4, xunits)
-            self.xLabel = "%s^{4}(%s)" % (xname, xunits)
-        if xLabel == "ln(x)":
-            self.data.transformX(transform.toLogX, transform.errToLogX)
-            self.xLabel = "\ln{(%s)}(%s)" % (xname, xunits)
-        if xLabel == "log10(x)":
-            self.data.transformX(transform.toX_pos, transform.errToX_pos)
-            _xscale = 'log'
-            self.xLabel = "%s(%s)" % (xname, xunits)
-        if xLabel == "log10(x^(4))":
-            self.data.transformX(transform.toX4, transform.errToX4)
-            xunits = convert_unit(4, xunits)
-            self.xLabel = "%s^{4}(%s)" % (xname, xunits)
-            _xscale = 'log'
-
-        # Y
-        if yLabel == "ln(y)":
-            self.data.transformY(transform.toLogX, transform.errToLogX)
-            self.yLabel = "\ln{(%s)}(%s)" % (yname, yunits)
-        if yLabel == "y":
-            self.data.transformY(transform.toX, transform.errToX)
-            self.yLabel = "%s(%s)" % (yname, yunits)
-        if yLabel == "log10(y)":
-            self.data.transformY(transform.toX_pos, transform.errToX_pos)
-            _yscale = 'log'
-            self.yLabel = "%s(%s)" % (yname, yunits)
-        if yLabel == "y^(2)":
-            self.data.transformY(transform.toX2, transform.errToX2)
-            yunits = convert_unit(2, yunits)
-            self.yLabel = "%s^{2}(%s)" % (yname, yunits)
-        if yLabel == "1/y":
-            self.data.transformY(transform.toOneOverX, transform.errOneOverX)
-            yunits = convert_unit(-1, yunits)
-            self.yLabel = "1/%s(%s)" % (yname, yunits)
-        if yLabel == "y*x^(2)":
-            self.data.transformY(transform.toYX2, transform.errToYX2)
-            xunits = convert_unit(2, xunits)
-            self.yLabel = "%s \ \ %s^{2}(%s%s)" % (yname, xname, yunits, xunits)
-        if yLabel == "y*x^(4)":
-            self.data.transformY(transform.toYX4, transform.errToYX4)
-            xunits = convert_unit(4, xunits)
-            self.yLabel = "%s \ \ %s^{4}(%s%s)" % (yname, xname, yunits, xunits)
-        if yLabel == "1/sqrt(y)":
-            self.data.transformY(transform.toOneOverSqrtX,
-                                 transform.errOneOverSqrtX)
-            yunits = convert_unit(-0.5, yunits)
-            self.yLabel = "1/\sqrt{%s}(%s)" % (yname, yunits)
-        if yLabel == "ln(y*x)":
-            self.data.transformY(transform.toLogXY, transform.errToLogXY)
-            self.yLabel = "\ln{(%s \ \ %s)}(%s%s)" % (yname, xname, yunits, xunits)
-        if yLabel == "ln(y*x^(2))":
-            self.data.transformY(transform.toLogYX2, transform.errToLogYX2)
-            xunits = convert_unit(2, xunits)
-            self.yLabel = "\ln (%s \ \ %s^{2})(%s%s)" % (yname, xname, yunits, xunits)
-        if yLabel == "ln(y*x^(4))":
-            self.data.transformY(transform.toLogYX4, transform.errToLogYX4)
-            xunits = convert_unit(4, xunits)
-            self.yLabel = "\ln (%s \ \ %s^{4})(%s%s)" % (yname, xname, yunits, xunits)
-        if yLabel == "log10(y*x^(4))":
-            self.data.transformY(transform.toYX4, transform.errToYX4)
-            xunits = convert_unit(4, xunits)
-            _yscale = 'log'
-            self.yLabel = "%s \ \ %s^{4}(%s%s)" % (yname, xname, yunits, xunits)
-
-        # Perform the transformation of data in data1d->View
-        self.data.transformView()
-
-        self.xscale = _xscale
-        self.yscale = _yscale
+        new_xlabel, new_ylabel, xscale, yscale = GuiUtils.xyTransform(self.data, xLabel, yLabel)
+        self.xscale = xscale
+        self.yscale = yscale
+        self.xLabel = new_xlabel
+        self.yLabel = new_ylabel
 
         # Plot the updated chart
         self.plot(marker='o', linestyle='')
@@ -346,7 +404,7 @@ class Plotter(QtGui.QDialog, PlotterWidget):
     def __init__(self, parent=None, quickplot=False):
 
         QtGui.QDialog.__init__(self)
-        PlotterWidget.__init__(self, manager=parent, quickplot=quickplot)
+        PlotterWidget.__init__(self, parent=self, manager=parent, quickplot=quickplot)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/res/ball.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.setWindowIcon(icon)

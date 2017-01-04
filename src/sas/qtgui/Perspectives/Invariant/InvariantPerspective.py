@@ -268,6 +268,7 @@ class InvariantWindow(QtGui.QDialog, Ui_tabbedInvariantUI):
 
             # Convert the data into plottable
             extrapolated_data = self._manager.createGuiData(extrapolated_data)
+            extrapolated_data.name = title
 
             # Add the plot to the model item
             # variant_item = QtCore.QVariant(self._plotter)
@@ -288,6 +289,7 @@ class InvariantWindow(QtGui.QDialog, Ui_tabbedInvariantUI):
 
             # Convert the data into plottable
             high_out_data = self._manager.createGuiData(high_out_data)
+            high_out_data.name = title
 
             # find how to add this plot to the existing plot for low_extrapolate
             # Plot the chart

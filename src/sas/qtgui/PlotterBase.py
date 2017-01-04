@@ -93,15 +93,13 @@ class PlotterBase(QtGui.QWidget):
         self.canvas.mpl_connect('pick_event', self.onMplPick)
         self.canvas.mpl_connect('scroll_event', self.onMplWheel)
 
+        self.contextMenu = QtGui.QMenu(self)
+
         if not quickplot:
-            # set the layout
+            # Add the toolbar
             layout.addWidget(self.toolbar)
-            # Add the context menu
-            self.contextMenu()
             # Notify PlotHelper about the new plot
             self.upatePlotHelper()
-        else:
-            self.contextMenuQuickPlot()
 
         self.setLayout(layout)
 
@@ -176,7 +174,7 @@ class PlotterBase(QtGui.QWidget):
         Save, Print and Copy
         """
         # Actions
-        self.contextMenu = QtGui.QMenu(self)
+        self.contextMenu.clear()
         self.actionSaveImage = self.contextMenu.addAction("Save Image")
         self.actionPrintImage = self.contextMenu.addAction("Print Image")
         self.actionCopyToClipboard = self.contextMenu.addAction("Copy to Clipboard")
@@ -187,13 +185,13 @@ class PlotterBase(QtGui.QWidget):
         self.actionPrintImage.triggered.connect(self.onImagePrint)
         self.actionCopyToClipboard.triggered.connect(self.onClipboardCopy)
 
-    def contextMenu(self):
+    def createContextMenu(self):
         """
         Define common context menu and associated actions for the MPL widget
         """
         raise NotImplementedError("Context menu method must be implemented in derived class.")
 
-    def contextMenuQuickPlot(self):
+    def createContextMenuQuick(self):
         """
         Define context menu and associated actions for the quickplot MPL widget
         """
@@ -203,6 +201,11 @@ class PlotterBase(QtGui.QWidget):
         """
         Display the context menu
         """
+        if not self.quickplot:
+            self.createContextMenu()
+        else:
+            self.createContextMenuQuick()
+
         event_pos = event.pos()
         self.contextMenu.exec_(self.canvas.mapToGlobal(event_pos))
 

@@ -43,8 +43,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.loader = Loader()
         self.manager = manager if manager is not None else DataManager()
         self.txt_widget = QtGui.QTextEdit(None)
-        # self.txt_widget = GuiUtils.DisplayWindow()
-
 
         # Be careful with twisted threads.
         self.mutex = QMutex()

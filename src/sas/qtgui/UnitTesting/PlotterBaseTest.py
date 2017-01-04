@@ -32,7 +32,7 @@ class PlotterBaseTest(unittest.TestCase):
             def perspective(self):
                 return MyPerspective()
 
-        PlotterBase.PlotterBase.contextMenuQuickPlot = MagicMock()
+        #PlotterBase.PlotterBase.contextMenuQuickPlot = MagicMock()
         self.plotter = PlotterBase.PlotterBase(None, manager=dummy_manager(), quickplot=True)
 
     def tearDown(self):
@@ -63,7 +63,7 @@ class PlotterBaseTest(unittest.TestCase):
     def testContextMenu(self):
         ''' Test the default context menu '''
         with self.assertRaises(NotImplementedError):
-            self.plotter.contextMenu()
+            self.plotter.createContextMenu()
 
     def testClean(self):
         ''' test the graph cleanup '''
