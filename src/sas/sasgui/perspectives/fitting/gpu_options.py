@@ -10,9 +10,8 @@ Created on Nov 29, 2016
 import os
 import warnings
 import wx
-import logging
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
-import imp
+
 
 
 class CustomMessageBox(wx.Dialog):
@@ -79,8 +78,7 @@ class GpuOptions(wx.Dialog):
         self.buttons = []
         #Check if SAS_OPENCL is already set as enviromental variable
         self.sas_opencl = os.environ.get("SAS_OPENCL","")
-        print("SAS_OPENCL: ",self.sas_opencl)
-
+        
         for clopt in clinfo:
             button = wx.CheckBox(self.panel1, -1, label=clopt[1], name=clopt[1])
 
@@ -176,39 +174,6 @@ class GpuOptions(wx.Dialog):
         clinfo.append(("None","No OpenCL"))
         return clinfo
 
-    #TODO: Dont want to mess with writting to configuration file before end of
-    def _write_to_config_file(self):
-        from sas.sasgui.guiframe.customdir import SetupCustom
-        from sas.sasgui.guiframe.gui_manager import _find_local_config
-
-        c_conf_dir = SetupCustom().find_dir()
-        self.custom_config = _find_local_config('custom_config', c_conf_dir)
-        if self.custom_config is None:
-            self.custom_config = _find_local_config('custom_config', os.getcwd())
-
-        #How to store it in file
-        new_config_lines = []
-        config_file = open(self.custom_config.__file__[:-1])
-        if self.custom_config is not None:
-            config_lines = config_file.readlines()
-            for line in config_lines:
-                if "SAS_OPENCL" in line:
-                    if self.sas_opencl:
-                        new_config_lines.append("SAS_OPENCL = \""+self.sas_opencl+"\"")
-                    else:
-                        new_config_lines.append("SAS_OPENCL = None")
-                else:
-                    new_config_lines.append(line)
-        config_file.close()
-        new_config_file = open(self.custom_config.__file__[:-1],"w")
-        new_config_file.writelines(new_config_lines)
-        new_config_file.close()
-
-        #After file is touched module needs to be reloaded
-        self.custom_config = _find_local_config('custom_config', c_conf_dir)
-        if self.custom_config is None:
-            self.custom_config = _find_local_config('custom_config', os.getcwd())
-
     def on_check(self, event):
         """
         Action triggered when box is selected
@@ -235,7 +200,13 @@ class GpuOptions(wx.Dialog):
         else:
             if "SAS_OPENCL" in os.environ:
                 del(os.environ["SAS_OPENCL"])
-        sasmodels.kernelcl.ENV = None
+
+        #Sasmodels kernelcl doesn't exist when initiated with None
+        try:
+            sasmodels.kernelcl.ENV = None
+        except:
+            pass
+
         #Need to reload sasmodels.core module to account SAS_OPENCL = "None"
         reload(sasmodels.core)
         event.Skip()
