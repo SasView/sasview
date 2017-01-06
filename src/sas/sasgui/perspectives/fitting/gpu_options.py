@@ -78,7 +78,7 @@ class GpuOptions(wx.Dialog):
         self.buttons = []
         #Check if SAS_OPENCL is already set as enviromental variable
         self.sas_opencl = os.environ.get("SAS_OPENCL","")
-        
+
         for clopt in clinfo:
             button = wx.CheckBox(self.panel1, -1, label=clopt[1], name=clopt[1])
 
@@ -105,7 +105,7 @@ class GpuOptions(wx.Dialog):
 
         accept_btn = wx.Button(self, wx.ID_OK)
         accept_btn.SetToolTipString("Accept new OpenCL settings. This will"
-                                    " overwrite SAS_OPENCL variable if set")
+                                    " override SAS_OPENCL variable if set")
 
         help_id = wx.NewId()
         help_btn = wx.Button(self, help_id, 'Help')

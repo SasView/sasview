@@ -33,6 +33,11 @@ def _setup_conf_dir(path):
     try:
         if not os.path.isfile(config_file):
             shutil.copyfile(os.path.join(path, "custom_config.py"), config_file)
+
+        #Adding SAS_OPENCL if it doesn't exist in the config file
+        # - to support backcompability
+        if not "SAS_OPENCL" in open(config_file).read():
+            open(config_file,"a+").write("SAS_OPENCL = \"None\"\n")
     except:
         # Check for data path next to exe/zip file.
         #Look for maximum n_dir up of the current dir to find plugins dir
