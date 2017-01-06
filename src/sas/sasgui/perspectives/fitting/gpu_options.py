@@ -124,6 +124,9 @@ class GpuOptions(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self.on_reset, reset_btn)
         self.Bind(wx.EVT_BUTTON, self.on_help, help_btn)
 
+        test_text = wx.StaticText(self, -1,"WARNING: Running tests can take a few minutes!")
+        test_text.SetFont(wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, ""))
+        self.vbox.Add(test_text, 0, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
 
         btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
         btn_sizer.Add((10, 20), 1) # stretchable whitespace
@@ -205,6 +208,7 @@ class GpuOptions(wx.Dialog):
         try:
             sasmodels.kernelcl.ENV = None
         except:
+            #TODO: Need to provide reasonable exception case
             pass
 
         #Need to reload sasmodels.core module to account SAS_OPENCL = "None"
