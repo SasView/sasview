@@ -692,3 +692,21 @@ def dataFromItem(item):
     The assumption - data stored in SasView standard, in child 0
     """
     return item.child(0).data().toPyObject()
+
+def formatNumber(value, high=False):
+    """
+    Return a float in a standardized, human-readable formatted string.
+    This is used to output readable (e.g. x.xxxe-y) values to the panel.
+    """
+    try:
+        value = float(value)
+    except:
+        output = "NaN"
+        return output.lstrip().rstrip()
+
+    if high:
+        output = "%-6.4g" % value
+
+    else:
+        output = "%-5.3g" % value
+    return output.lstrip().rstrip()

@@ -11,6 +11,7 @@ from sas.qtgui.PlotterBase import PlotterBase
 import sas.qtgui.GuiUtils as GuiUtils
 from sas.qtgui.AddText import AddText
 from sas.qtgui.SetGraphRange import SetGraphRange
+from sas.qtgui.LinearFit import LinearFit
 
 class PlotterWidget(PlotterBase):
     """
@@ -18,6 +19,7 @@ class PlotterWidget(PlotterBase):
     """
     def __init__(self, parent=None, manager=None, quickplot=False):
         super(PlotterWidget, self).__init__(parent, manager=manager, quickplot=quickplot)
+
         self.parent = parent
         self.addText = AddText(self)
 
@@ -26,6 +28,21 @@ class PlotterWidget(PlotterBase):
 
         # Simple window for data display
         self.txt_widget = QtGui.QTextEdit(None)
+
+        self.xLogLabel = "log10(x)"
+        self.yLogLabel = "log10(y)"
+
+        # Data container for the linear fit
+        self.fit_result = Data1D(x=[], y=[], dy=None)
+        self.fit_result.symbol = 13
+        self.fit_result.name = "Fit"
+
+        # Add a slot for receiving update signal from LinearFit
+        # NEW style signals - don't work!
+        #self.updatePlot = QtCore.pyqtSignal(tuple)
+        #self.updatePlot.connect(self.updateWithData)
+        # OLD style signals - work perfectly
+        QtCore.QObject.connect(self, QtCore.SIGNAL('updatePlot'), self.onFitDisplay)
 
     @property
     def data(self):
@@ -47,6 +64,8 @@ class PlotterWidget(PlotterBase):
         if isinstance(data, Data1D):
             self.data = data
         assert(self._data)
+
+        is_fit = (self._data.id=="fit")
 
         # Shortcut for an axis
         ax = self.ax
@@ -86,11 +105,13 @@ class PlotterWidget(PlotterBase):
         self.legend.set_picker(True)
 
         # Current labels for axes
-        ax.set_ylabel(self.y_label)
-        ax.set_xlabel(self.x_label)
+        if self.y_label and not is_fit:
+            ax.set_ylabel(self.y_label)
+        if self.x_label and not is_fit:
+            ax.set_xlabel(self.x_label)
 
         # Title only for regular charts
-        if not self.quickplot:
+        if not self.quickplot and not is_fit:
             ax.set_title(label=self._title)
 
         # Include scaling (log vs. linear)
@@ -160,7 +181,8 @@ class PlotterWidget(PlotterBase):
 
             if plot.id != 'fit':
                 self.actionLinearFit = plot_menu.addAction('&Linear Fit')
-                self.actionLinearFit.triggered.connect(self.onLinearFit)
+                self.actionLinearFit.triggered.connect(
+                                functools.partial(self.onLinearFit, id))
                 plot_menu.addSeparator()
 
             self.actionRemovePlot = plot_menu.addAction("Remove")
@@ -208,8 +230,8 @@ class PlotterWidget(PlotterBase):
         Show a dialog allowing axes rescaling
         """
         if self.properties.exec_() == QtGui.QDialog.Accepted:
-            xLabel, yLabel = self.properties.getValues()
-            self.xyTransform(xLabel, yLabel)
+            self.xLogLabel, self.yLogLabel = self.properties.getValues()
+            self.xyTransform(self.xLogLabel, self.yLogLabel)
 
     def onModifyGraph(self):
         """
@@ -318,16 +340,41 @@ class PlotterWidget(PlotterBase):
         """
         GuiUtils.saveData1D(plot_data)
 
-    def onLinearFit(self):
+    def onLinearFit(self, id):
         """
         Creates and displays a simple linear fit for the selected plot
         """
-        pass
+        selected_plot = self.plot_dict[id]
+
+        maxrange = (min(selected_plot.x), max(selected_plot.x))
+        fitrange = self.ax.get_xlim()
+
+        fit_dialog = LinearFit(parent=self,
+                    data=selected_plot,
+                    max_range=maxrange,
+                    fit_range=fitrange,
+                    xlabel=self.xLogLabel,
+                    ylabel=self.yLogLabel)
+        if fit_dialog.exec_() == QtGui.QDialog.Accepted:
+            return
 
     def onRemovePlot(self, id):
         """
+        Responds to the plot delete action
+        """
+        self.removePlot(id)
+
+        if len(self.plot_dict) == 0:
+            # last plot: graph is empty must be the panel must be destroyed
+                self.parent.close()
+
+    def removePlot(self, id):
+        """
         Deletes the selected plot from the chart
         """
+        if id not in self.plot_dict:
+            return
+
         selected_plot = self.plot_dict[id]
 
         plot_dict = copy.deepcopy(self.plot_dict)
@@ -340,10 +387,6 @@ class PlotterWidget(PlotterBase):
         for ids in plot_dict:
             if ids != id:
                 self.plot(data=plot_dict[ids], hide_error=plot_dict[ids].hide_error)                
-
-        if len(self.plot_dict) == 0:
-            # last plot: graph is empty must be the panel must be destroyed
-                self.parent.close()
 
     def onFreeze(self, id):
         """
@@ -386,18 +429,51 @@ class PlotterWidget(PlotterBase):
         """
         Transforms x and y in View and set the scale
         """
-        # Clear the plot first
-        plt.cla()
-        self.ax.cla()
+        # Transform all the plots on the chart
+        for id in self.plot_dict.keys():
+            current_plot = self.plot_dict[id]
+            if current_plot.id == "fit":
+                self.removePlot(id)
+                continue
+            new_xlabel, new_ylabel, xscale, yscale =\
+                GuiUtils.xyTransform(current_plot, xLabel, yLabel)
+            self.xscale = xscale
+            self.yscale = yscale
+            self.xLabel = new_xlabel
+            self.yLabel = new_ylabel
+            # Plot the updated chart
+            self.removePlot(id)
+            self.plot(data=current_plot, marker='o', linestyle='')
 
-        new_xlabel, new_ylabel, xscale, yscale = GuiUtils.xyTransform(self.data, xLabel, yLabel)
-        self.xscale = xscale
-        self.yscale = yscale
-        self.xLabel = new_xlabel
-        self.yLabel = new_ylabel
+        pass # debug hook
 
-        # Plot the updated chart
-        self.plot(marker='o', linestyle='')
+    def onFitDisplay(self, fit_data):
+        """
+        Add a linear fitting line to the chart
+        """
+        # Create new data structure with fitting result
+        tempx = fit_data[0]
+        tempy = fit_data[1]
+        self.fit_result.x = []
+        self.fit_result.y = []
+        self.fit_result.x = tempx
+        self.fit_result.y = tempy
+        self.fit_result.dx = None
+        self.fit_result.dy = None
+
+        #Remove another Fit, if exists
+        self.removePlot("fit")
+
+        self.fit_result.reset_view()
+        #self.offset_graph()
+
+        # Set plot properties
+        self.fit_result.id = 'fit'
+        self.fit_result.title = 'Fit'
+        self.fit_result.name = 'Fit'
+
+        # Plot the line
+        self.plot(data=self.fit_result, marker='', linestyle='solid', hide_error=True)
 
 
 class Plotter(QtGui.QDialog, PlotterWidget):

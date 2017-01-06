@@ -57,6 +57,10 @@ class PlotterBase(QtGui.QWidget):
         self.y_label = "log10(y)"
 
         # Mouse click related
+        self._scale_xlo = None
+        self._scale_xhi = None
+        self._scale_ylo = None
+        self._scale_yhi = None
         self.x_click = None
         self.y_click = None
         self.event_pos = None
@@ -69,8 +73,8 @@ class PlotterBase(QtGui.QWidget):
 
         # Pre-define the Scale properties dialog
         self.properties = ScaleProperties(self,
-                                          init_scale_x=self.x_label,
-                                          init_scale_y=self.y_label)
+                                init_scale_x=self.x_label,
+                                init_scale_y=self.y_label)
 
         # default color map
         self.cmap = DEFAULT_CMAP
@@ -459,3 +463,13 @@ class PlotterBase(QtGui.QWidget):
         self.setWindowTitle(title)
         # Notify the listeners about a new graph title
         self.manager.communicator.activeGraphName.emit((current_title, title))
+
+    def offset_graph(self):
+        """
+        Zoom and offset the graph to the last known settings
+        """
+        for ax in self.axes:
+            if self._scale_xhi is not None and self._scale_xlo is not None:
+                ax.set_xlim(self._scale_xlo, self._scale_xhi)
+            if self._scale_yhi is not None and self._scale_ylo is not None:
+                ax.set_ylim(self._scale_ylo, self._scale_yhi)
