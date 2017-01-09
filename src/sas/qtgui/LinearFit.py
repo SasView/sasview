@@ -1,6 +1,7 @@
 """
 Adds a linear fit plot to the chart
 """
+import re
 import numpy
 from PyQt4 import QtGui
 from PyQt4 import QtCore
@@ -45,13 +46,17 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
         self.txtAerr.setText("0")
         self.txtBerr.setText("0")
         self.txtChi2.setText("0")
+
         # Initial ranges
         self.txtRangeMin.setText(str(max_range[0]))
         self.txtRangeMax.setText(str(max_range[1]))
         self.txtFitRangeMin.setText(str(fit_range[0]))
         self.txtFitRangeMax.setText(str(fit_range[1]))
 
-        self.lblRange.setText('Fit range of ' + self.xLabel)
+        # cast xLabel into html
+        label = re.sub(r'\^\((.)\)(.*)', r'<span style=" vertical-align:super;">\1</span>\2',
+                      str(self.xLabel).rstrip())
+        self.lblRange.setText('Fit range of ' + label)
 
         self.model = LineModel()
         # Display the fittings values
@@ -61,6 +66,7 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
         self.cstB = fittings.Parameter(self.model, 'B', self.default_B)
         self.transform = transform
 
+        # connect Fit button
         self.cmdFit.clicked.connect(self.fit)
 
     def setRangeLabel(self, label=""):
@@ -107,8 +113,12 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
         xmax = xmaxView
         # Set the qmin and qmax in the panel that matches the
         # transformed min and max
-        self.txtRangeMin.setText(formatNumber(self.floatInvTransform(xmin)))
-        self.txtRangeMax.setText(formatNumber(self.floatInvTransform(xmax)))
+        #value_xmin = X_VAL_DICT[self.xLabel].floatTransform(xmin)
+        #value_xmax = X_VAL_DICT[self.xLabel].floatTransform(xmax)
+        value_xmin = self.floatInvTransform(xmin)
+        value_xmax = self.floatInvTransform(xmax)
+        self.txtRangeMin.setText(formatNumber(value_xmin))
+        self.txtRangeMax.setText(formatNumber(value_xmax))
 
         # Store the transformed values of view x, y and dy before the fit
         xmin_check = numpy.log10(xmin)
@@ -232,31 +242,6 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
                 item.setPalette(p_pink)
         return flag
 
-    #def checkFitRanges(self, usermin, usermax):
-    #    """
-    #    Ensure that fields parameter contains a min and a max value
-    #    within x min and x max range
-    #    """
-    #    self.mini = float(self.xminFit.GetValue())
-    #    self.maxi = float(self.xmaxFit.GetValue())
-    #    flag = True
-    #    try:
-    #        mini = float(usermin.GetValue())
-    #        maxi = float(usermax.GetValue())
-    #        if mini < maxi:
-    #            usermin.SetBackgroundColour(wx.WHITE)
-    #            usermin.Refresh()
-    #        else:
-    #            flag = False
-    #            usermin.SetBackgroundColour("pink")
-    #            usermin.Refresh()
-    #    except:
-    #        # Check for possible values entered
-    #        flag = False
-    #        usermin.SetBackgroundColour("pink")
-    #        usermin.Refresh()
-
-    #    return flag
     def floatInvTransform(self, x):
         """
         transform a float.It is used to determine the x.View min and x.View

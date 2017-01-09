@@ -21,14 +21,16 @@ class PlotterWidget(PlotterBase):
         super(PlotterWidget, self).__init__(parent, manager=manager, quickplot=quickplot)
 
         self.parent = parent
-        self.addText = AddText(self)
 
         # Dictionary of {plot_id:Data1d}
         self.plot_dict = {}
 
         # Simple window for data display
         self.txt_widget = QtGui.QTextEdit(None)
+        # Window for text add
+        self.addText = AddText(self)
 
+        # Log-ness of the axes
         self.xLogLabel = "log10(x)"
         self.yLogLabel = "log10(y)"
 
@@ -38,10 +40,10 @@ class PlotterWidget(PlotterBase):
         self.fit_result.name = "Fit"
 
         # Add a slot for receiving update signal from LinearFit
-        # NEW style signals - don't work!
+        # NEW style signals
         #self.updatePlot = QtCore.pyqtSignal(tuple)
-        #self.updatePlot.connect(self.updateWithData)
-        # OLD style signals - work perfectly
+        # self.updatePlot.connect(self.onFitDisplay)
+        # OLD style signals
         QtCore.QObject.connect(self, QtCore.SIGNAL('updatePlot'), self.onFitDisplay)
 
     @property
@@ -67,7 +69,7 @@ class PlotterWidget(PlotterBase):
 
         is_fit = (self._data.id=="fit")
 
-        # Shortcut for an axis
+        # Shortcut for the current axis
         ax = self.ax
 
         if marker == None:
@@ -435,6 +437,7 @@ class PlotterWidget(PlotterBase):
             if current_plot.id == "fit":
                 self.removePlot(id)
                 continue
+
             new_xlabel, new_ylabel, xscale, yscale =\
                 GuiUtils.xyTransform(current_plot, xLabel, yLabel)
             self.xscale = xscale

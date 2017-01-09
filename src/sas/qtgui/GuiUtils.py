@@ -8,6 +8,7 @@ import imp
 import warnings
 import webbrowser
 import urlparse
+import numpy
 
 warnings.simplefilter("ignore")
 import logging

@@ -44,7 +44,7 @@ class ScaleProperties(QtGui.QDialog, Ui_scalePropertiesUI):
         """
         Return current values from comboboxes
         """
-        return self.cbX.currentText(), self.cbY.currentText()
+        return str(self.cbX.currentText()), str(self.cbY.currentText())
 
     def viewIndexChanged(self, index):
         """
