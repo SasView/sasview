@@ -446,7 +446,9 @@ class PlotterWidget(PlotterBase):
             self.yLabel = new_ylabel
             # Plot the updated chart
             self.removePlot(id)
-            self.plot(data=current_plot, marker='o', linestyle='')
+            # Directly overwrite the data to avoid label reassignment
+            self._data = current_plot
+            self.plot(marker='o', linestyle='')
 
         pass # debug hook
 
