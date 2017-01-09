@@ -68,7 +68,7 @@ class PlotterTest(unittest.TestCase):
         self.assertEqual(self.plotter.ax.get_yscale(), 'log')
         self.assertTrue(FigureCanvas.draw.called)
 
-    def testContextMenuQuickPlot(self):
+    def testCreateContextMenuQuick(self):
         """ Test the right click menu """
         self.plotter.createContextMenuQuick()
         actions = self.plotter.contextMenu.actions()
@@ -111,51 +111,22 @@ class PlotterTest(unittest.TestCase):
         actions[6].trigger()
         self.assertTrue(self.plotter.properties.exec_.called)
 
-    def testXYTransform(self):
-        """ Assure the unit/legend transformation is correct"""
+    def testXyTransform(self):
+        """ Tests the XY transformation and new chart update """
         self.plotter.plot(self.data)
 
-        self.plotter.xyTransform(xLabel="x", yLabel="y")
-        self.assertEqual(self.plotter.ax.get_xlabel(), "$()$")
-        self.assertEqual(self.plotter.ax.get_ylabel(), "$()$")
-
-        self.plotter.xyTransform(xLabel="x^(2)", yLabel="1/y")
-        self.assertEqual(self.plotter.ax.get_xlabel(), "$^{2}(()^{2})$")
-        self.assertEqual(self.plotter.ax.get_ylabel(), "$1/(()^{-1})$")
-
-        self.plotter.xyTransform(xLabel="x^(4)", yLabel="ln(y)")
-        self.assertEqual(self.plotter.ax.get_xlabel(), "$^{4}(()^{4})$")
-        self.assertEqual(self.plotter.ax.get_ylabel(), "$\\ln{()}()$")
-
-        self.plotter.xyTransform(xLabel="ln(x)", yLabel="y^(2)")
-        self.assertEqual(self.plotter.ax.get_xlabel(), "$\\ln{()}()$")
-        self.assertEqual(self.plotter.ax.get_ylabel(), "$^{2}(()^{2})$")
-
-        self.plotter.xyTransform(xLabel="log10(x)", yLabel="y*x^(2)")
-        self.assertEqual(self.plotter.ax.get_xlabel(), "$()$")
-        self.assertEqual(self.plotter.ax.get_ylabel(), "$ \\ \\ ^{2}(()^{2})$")
-
-        self.plotter.xyTransform(xLabel="log10(x^(4))", yLabel="y*x^(4)")
-        self.assertEqual(self.plotter.ax.get_xlabel(), "$^{4}(()^{4})$")
-        self.assertEqual(self.plotter.ax.get_ylabel(), "$ \\ \\ ^{4}(()^{16})$")
-
-        self.plotter.xyTransform(xLabel="x", yLabel="1/sqrt(y)")
-        self.assertEqual(self.plotter.ax.get_ylabel(), "$1/\\sqrt{}(()^{-0.5})$")
-
+        # Transform the points
         self.plotter.xyTransform(xLabel="x", yLabel="log10(y)")
+
+        # Assure new plot has correct labels
+        self.assertEqual(self.plotter.ax.get_xlabel(), "$()$")
         self.assertEqual(self.plotter.ax.get_ylabel(), "$()$")
-
-        self.plotter.xyTransform(xLabel="x", yLabel="ln(y*x)")
-        self.assertEqual(self.plotter.ax.get_ylabel(), "$\\ln{( \\ \\ )}()$")
-
-        self.plotter.xyTransform(xLabel="x", yLabel="ln(y*x^(2))")
-        self.assertEqual(self.plotter.ax.get_ylabel(), "$\\ln ( \\ \\ ^{2})(()^{2})$")
-
-        self.plotter.xyTransform(xLabel="x", yLabel="ln(y*x^(4))")
-        self.assertEqual(self.plotter.ax.get_ylabel(), "$\\ln ( \\ \\ ^{4})(()^{4})$")
-
-        self.plotter.xyTransform(xLabel="x", yLabel="log10(y*x^(4))")
-        self.assertEqual(self.plotter.ax.get_ylabel(), "$ \\ \\ ^{4}(()^{4})$")
+        # ... and scale
+        self.assertEqual(self.plotter.xscale, "linear")
+        self.assertEqual(self.plotter.yscale, "log")
+        # See that just one plot is present
+        self.assertEqual(len(self.plotter.plot_dict), 1)
+        self.assertEqual(len(self.plotter.ax.collections), 1)
 
     def testAddText(self):
         """ Checks the functionality of adding text to graph """
@@ -248,6 +219,26 @@ class PlotterTest(unittest.TestCase):
         # See that ranges are changed
         self.assertNotEqual(self.plotter.ax.get_xlim(), new_x)
         self.assertNotEqual(self.plotter.ax.get_ylim(), new_y)
+
+    def testOnLinearFit(self):
+        """ Checks the response to LinearFit call """
+        pass
+
+    def testOnRemovePlot(self):
+        """ Assure plots get removed when requested """
+        pass
+
+    def testRemovePlot(self):
+        """ Test plot removal """
+        pass
+
+    def testOnToggleHideError(self):
+        """ Test the error bar toggle on plots """
+        pass
+
+    def testOnFitDisplay(self):
+        """ Test the fit line display on the chart """
+        pass
 
 if __name__ == "__main__":
     unittest.main()

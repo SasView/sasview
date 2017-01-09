@@ -84,13 +84,13 @@ class Plotter2DWidget(PlotterBase):
                       cmap=self.cmap, zmin=zmin_2D_temp,
                       zmax=zmax_2D_temp)
 
-    def contextMenu(self):
+    def createContextMenu(self):
         """
         Define common context menu and associated actions for the MPL widget
         """
         self.defaultContextMenu()
 
-    def contextMenuQuickPlot(self):
+    def createContextMenuQuick(self):
         """
         Define context menu and associated actions for the quickplot MPL widget
         """

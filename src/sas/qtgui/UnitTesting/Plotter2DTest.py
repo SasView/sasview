@@ -73,6 +73,7 @@ class Plotter2DTest(unittest.TestCase):
     def testContextMenuQuickPlot(self):
         """ Test the right click menu """
         self.plotter.data = self.data
+        self.plotter.createContextMenuQuick()
         actions = self.plotter.contextMenu.actions()
         self.assertEqual(len(actions), 7)
 

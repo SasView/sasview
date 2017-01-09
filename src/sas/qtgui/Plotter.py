@@ -381,6 +381,10 @@ class PlotterWidget(PlotterBase):
 
         plot_dict = copy.deepcopy(self.plot_dict)
 
+        # Labels might have been changed
+        xl = self.ax.xaxis.label.get_text()
+        yl = self.ax.yaxis.label.get_text()
+
         self.plot_dict = {}
 
         plt.cla()
@@ -388,7 +392,12 @@ class PlotterWidget(PlotterBase):
 
         for ids in plot_dict:
             if ids != id:
-                self.plot(data=plot_dict[ids], hide_error=plot_dict[ids].hide_error)                
+                self.plot(data=plot_dict[ids], hide_error=plot_dict[ids].hide_error)
+
+        # Reset the labels
+        self.ax.set_xlabel(xl)
+        self.ax.set_ylabel(yl)
+        self.canvas.draw()
 
     def onFreeze(self, id):
         """
@@ -442,10 +451,13 @@ class PlotterWidget(PlotterBase):
                 GuiUtils.xyTransform(current_plot, xLabel, yLabel)
             self.xscale = xscale
             self.yscale = yscale
-            self.xLabel = new_xlabel
-            self.yLabel = new_ylabel
+
             # Plot the updated chart
             self.removePlot(id)
+
+            # This assignment will wrap the label in Latex "$"
+            self.xLabel = new_xlabel
+            self.yLabel = new_ylabel
             # Directly overwrite the data to avoid label reassignment
             self._data = current_plot
             self.plot(marker='o', linestyle='')

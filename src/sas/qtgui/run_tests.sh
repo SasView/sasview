@@ -17,3 +17,4 @@ python -m UnitTesting.DensityCalculatorTest
 python -m UnitTesting.WindowTitleTest
 python -m UnitTesting.AddTextTest
 python -m UnitTesting.SetGraphRangeTest
+python -m UnitTesting.LinearFitTest

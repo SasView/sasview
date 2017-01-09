@@ -345,6 +345,70 @@ class GuiUtilsTest(unittest.TestCase):
         saveData2D(data)
         self.assertFalse(os.path.isfile(file_name))
 
+    def testXYTransform(self):
+        """ Assure the unit/legend transformation is correct"""
+        data = Data1D(x=[1.0, 2.0, 3.0], y=[10.0, 11.0, 12.0],
+                      dx=[0.1, 0.2, 0.3], dy=[0.1, 0.2, 0.3])
+
+        xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x", yLabel="y")
+        self.assertEqual(xLabel, "()")
+        self.assertEqual(xscale, "linear")
+        self.assertEqual(yscale, "linear")
+
+        xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x^(2)", yLabel="1/y")
+        self.assertEqual(xLabel, "^{2}(()^{2})")
+        self.assertEqual(yLabel, "1/(()^{-1})")
+        self.assertEqual(xscale, "linear")
+        self.assertEqual(yscale, "linear")
+
+        xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x^(4)", yLabel="ln(y)")
+        self.assertEqual(xLabel, "^{4}(()^{4})")
+        self.assertEqual(yLabel, "\\ln{()}()")
+        self.assertEqual(xscale, "linear")
+        self.assertEqual(yscale, "linear")
+
+        xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="ln(x)", yLabel="y^(2)")
+        self.assertEqual(xLabel, "\\ln{()}()")
+        self.assertEqual(yLabel, "^{2}(()^{2})")
+        self.assertEqual(xscale, "linear")
+        self.assertEqual(yscale, "linear")
+
+        xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="log10(x)", yLabel="y*x^(2)")
+        self.assertEqual(xLabel, "()")
+        self.assertEqual(yLabel, " \\ \\ ^{2}(()^{2})")
+        self.assertEqual(xscale, "log")
+        self.assertEqual(yscale, "linear")
+
+        xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="log10(x^(4))", yLabel="y*x^(4)")
+        self.assertEqual(xLabel, "^{4}(()^{4})")
+        self.assertEqual(yLabel, " \\ \\ ^{4}(()^{16})")
+        self.assertEqual(xscale, "log")
+        self.assertEqual(yscale, "linear")
+
+        xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x", yLabel="1/sqrt(y)")
+        self.assertEqual(yLabel, "1/\\sqrt{}(()^{-0.5})")
+        self.assertEqual(yscale, "linear")
+
+        xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x", yLabel="log10(y)")
+        self.assertEqual(yLabel, "()")
+        self.assertEqual(yscale, "log")
+
+        xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x", yLabel="ln(y*x)")
+        self.assertEqual(yLabel, "\\ln{( \\ \\ )}()")
+        self.assertEqual(yscale, "linear")
+
+        xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x", yLabel="ln(y*x^(2))")
+        self.assertEqual(yLabel, "\\ln ( \\ \\ ^{2})(()^{2})")
+        self.assertEqual(yscale, "linear")
+
+        xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x", yLabel="ln(y*x^(4))")
+        self.assertEqual(yLabel, "\\ln ( \\ \\ ^{4})(()^{4})")
+        self.assertEqual(yscale, "linear")
+
+        xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x", yLabel="log10(y*x^(4))")
+        self.assertEqual(yLabel, " \\ \\ ^{4}(()^{4})")
+        self.assertEqual(yscale, "log")
+
 class FormulaValidatorTest(unittest.TestCase):
     """ Test the formula validator """
     def setUp(self):

@@ -37,6 +37,9 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
         self.xLabel = xlabel
         self.yLabel = ylabel
 
+        self.x_is_log = self.xLabel == "log10(x)"
+        self.y_is_log = self.yLabel == "log10(y)"
+
         self.txtFitRangeMin.setValidator(QtGui.QDoubleValidator())
         self.txtFitRangeMax.setValidator(QtGui.QDoubleValidator())
 
@@ -107,63 +110,37 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
 
         self.xminFit, self.xmaxFit = self.range()
 
-        xminView = self.xminFit
-        xmaxView = self.xmaxFit
-        xmin = xminView
-        xmax = xmaxView
+        xmin = self.xminFit
+        xmax = self.xmaxFit
+        xminView = xmin
+        xmaxView = xmax
+
         # Set the qmin and qmax in the panel that matches the
         # transformed min and max
         #value_xmin = X_VAL_DICT[self.xLabel].floatTransform(xmin)
         #value_xmax = X_VAL_DICT[self.xLabel].floatTransform(xmax)
+
         value_xmin = self.floatInvTransform(xmin)
         value_xmax = self.floatInvTransform(xmax)
         self.txtRangeMin.setText(formatNumber(value_xmin))
         self.txtRangeMax.setText(formatNumber(value_xmax))
 
-        # Store the transformed values of view x, y and dy before the fit
-        xmin_check = numpy.log10(xmin)
-        x = self.data.view.x
-        y = self.data.view.y
-        dy = self.data.view.dy
-
-        if self.yLabel == "log10(y)":
-            if self.xLabel == "log10(x)":
-                tempy  = [numpy.log10(y[i])
-                         for i in range(len(x)) if x[i] >= xmin_check]
-                tempdy = [transform.errToLogX(y[i], 0, dy[i], 0)
-                         for i in range(len(x)) if x[i] >= xmin_check]
-            else:
-                tempy = map(numpy.log10, y)
-                tempdy = map(lambda t1,t2:transform.errToLogX(t1,0,t2,0),y,dy)
-        else:
-            tempy = y
-            tempdy = dy
-
-        if self.xLabel == "log10(x)":
-            tempx = [numpy.log10(x) for x in self.data.view.x if x > xmin_check]
-        else:
-            tempx = self.data.view.x
+        tempx, tempy, tempdy = self.origData()
 
         # Find the fitting parameters
-        # Always use the same defaults, so that fit history
-        # doesn't play a role!
         self.cstA = fittings.Parameter(self.model, 'A', self.default_A)
         self.cstB = fittings.Parameter(self.model, 'B', self.default_B)
         tempdy = numpy.asarray(tempdy)
         tempdy[tempdy == 0] = 1
 
-        if self.xLabel == "log10(x)":
-            chisqr, out, cov = fittings.sasfit(self.model,
-                                               [self.cstA, self.cstB],
-                                               tempx, tempy,
-                                               tempdy,
-                                               numpy.log10(xmin),
-                                               numpy.log10(xmax))
-        else:
-            chisqr, out, cov = fittings.sasfit(self.model,
-                                               [self.cstA, self.cstB],
-                                               tempx, tempy, tempdy,
-                                               xminView, xmaxView)
+        if self.x_is_log:
+            xmin = numpy.log10(xmin)
+            xmax = numpy.log10(xmax)
+
+        chisqr, out, cov = fittings.sasfit(self.model,
+                                           [self.cstA, self.cstB],
+                                           tempx, tempy, tempdy,
+                                           xmin, xmax)
         # Use chi2/dof
         if len(tempx) > 0:
             chisqr = chisqr / len(tempx)
@@ -181,31 +158,17 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
         tempx = []
         tempy = []
         y_model = 0.0
-        # load tempy with the minimum transformation
-        if self.xLabel == "log10(x)":
-            y_model = self.model.run(numpy.log10(xmin))
-            tempx.append(xmin)
-        else:
-            y_model = self.model.run(xminView)
-            tempx.append(xminView)
 
-        if self.yLabel == "log10(y)":
-            tempy.append(numpy.power(10, y_model))
-        else:
-            tempy.append(y_model)
+        # load tempy with the minimum transformation
+        y_model = self.model.run(xmin)
+        tempx.append(xminView)
+        tempy.append(numpy.power(10, y_model) if self.y_is_log else y_model)
 
         # load tempy with the maximum transformation
-        if self.xLabel == "log10(x)":
-            y_model = self.model.run(numpy.log10(xmax))
-            tempx.append(xmax)
-        else:
-            y_model = self.model.run(xmaxView)
-            tempx.append(xmaxView)
+        y_model = self.model.run(xmax)
+        tempx.append(xmaxView)
+        tempy.append(numpy.power(10, y_model) if self.y_is_log else y_model)
 
-        if self.yLabel == "log10(y)":
-            tempy.append(numpy.power(10, y_model))
-        else:
-            tempy.append(y_model)
         # Set the fit parameter display when  FitDialog is opened again
         self.Avalue = cstA
         self.Bvalue = cstB
@@ -223,6 +186,34 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
         #self.parent.updatePlot.emit((tempx, tempy))
         self.parent.emit(QtCore.SIGNAL('updatePlot'), (tempx, tempy))
 
+    def origData(self):
+        # Store the transformed values of view x, y and dy before the fit
+        xmin_check = numpy.log10(self.xminFit)
+        # Local shortcuts
+        x = self.data.view.x
+        y = self.data.view.y
+        dy = self.data.view.dy
+
+        if self.y_is_log:
+            if self.x_is_log:
+                tempy  = [numpy.log10(y[i])
+                         for i in range(len(x)) if x[i] >= xmin_check]
+                tempdy = [transform.errToLogX(y[i], 0, dy[i], 0)
+                         for i in range(len(x)) if x[i] >= xmin_check]
+            else:
+                tempy = map(numpy.log10, y)
+                tempdy = map(lambda t1,t2:transform.errToLogX(t1,0,t2,0),y,dy)
+        else:
+            tempy = y
+            tempdy = dy
+
+        if self.x_is_log:
+            tempx = [numpy.log10(x) for x in self.data.view.x if x > xmin_check]
+        else:
+            tempx = x
+
+        return tempx, tempy, tempdy
+
     def checkFitValues(self, item):
         """
         Check the validity of input values
@@ -233,8 +224,9 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
         p_white.setColor(item.backgroundRole(), QtCore.Qt.white)
         p_pink = item.palette()
         p_pink.setColor(item.backgroundRole(), QtGui.QColor(255, 128, 128))
+        item.setAutoFillBackground(True)
         # Check for possible values entered
-        if self.xLabel == "log10(x)":
+        if self.x_is_log:
             if float(value) > 0:
                 item.setPalette(p_white)
             else:
@@ -258,7 +250,7 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
         elif self.xLabel == "x^(2)":
             return numpy.sqrt(x)
         elif self.xLabel == "x^(4)":
-            return numpy.sqrt(math.sqrt(x))
+            return numpy.sqrt(numpy.sqrt(x))
         elif self.xLabel == "log10(x)":
             return numpy.power(10, x)
         elif self.xLabel == "ln(x)":
