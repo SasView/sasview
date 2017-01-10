@@ -25,10 +25,10 @@ class CustomMessageBox(wx.Dialog):
 
         self.text = wx.TextCtrl(self, -1, size=(500, 400),
                            style=wx.TE_MULTILINE|wx.TE_READONLY
-                                 |wx.SUNKEN_BORDER|wx.HSCROLL)
+                                 |wx.SUNKEN_BORDER)
         self.text.SetValue(msg)
         self.text.SetBackgroundColour(self.GetBackgroundColour())
-
+        self.text.SetFocus()
         self.boxsizer.Add(self.text, proportion=1, flag=wx.EXPAND)
 
         self.fit_hsizer = wx.StaticBoxSizer(self.static_box, orient=wx.VERTICAL)
@@ -42,10 +42,9 @@ class CustomMessageBox(wx.Dialog):
         self.message_text = wx.StaticText(self, -1,"If tests fail on OpenCL devices, "
                                 "please select No OpenCL option.\n\n"
                                 "In case of large number of failing tests, "
-                                "please consider sending above\n"
-                                "report to help@sasview.org.")
+                                "please consider sending\n"
+                                "above report to help@sasview.org.")
 
-        self.message_text.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, ""))
         self.vbox.Add(self.message_text, 0, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
 
         self.ok_btn = wx.Button(self, wx.ID_OK)
@@ -59,7 +58,7 @@ class CustomMessageBox(wx.Dialog):
         self.SetSizer(self.vbox)
         self.vbox.Fit(self)
 
-        self.Centre()
+        self.SetAutoLayout(True)
         self.ShowModal()
         self.Destroy()
 
@@ -135,7 +134,6 @@ class GpuOptions(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self.on_help, help_btn)
 
         test_text = wx.StaticText(self, -1,"WARNING: Running tests can take a few minutes!")
-        test_text.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, ""))
         self.vbox.Add(test_text, 0, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
 
         btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
