@@ -24,7 +24,7 @@ class CustomMessageBox(wx.Dialog):
         boxsizer = wx.BoxSizer(orient=wx.VERTICAL)
 
         text = wx.TextCtrl(self, style=wx.TE_READONLY|wx.TE_MULTILINE
-                                       |wx.BORDER_NONE, size=(400,200))
+                                       |wx.BORDER_NONE, size=(400,300))
         text.SetValue(msg)
         text.SetBackgroundColour(self.GetBackgroundColour())
 
@@ -44,7 +44,7 @@ class CustomMessageBox(wx.Dialog):
                                 "please consider sending above\n"
                                 "report to help@sasview.org.")
 
-        message_text.SetFont(wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, ""))
+        message_text.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, ""))
         vbox.Add(message_text, 0, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
 
         ok_btn = wx.Button(self, wx.ID_OK)
@@ -134,7 +134,7 @@ class GpuOptions(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self.on_help, help_btn)
 
         test_text = wx.StaticText(self, -1,"WARNING: Running tests can take a few minutes!")
-        test_text.SetFont(wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, ""))
+        test_text.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, ""))
         self.vbox.Add(test_text, 0, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
 
         btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
