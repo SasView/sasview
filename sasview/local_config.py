@@ -96,11 +96,11 @@ APPLICATION_WLIST = 'SasView files (*.svs)|*.svs'
 APPLICATION_STATE_EXTENSION = '.svs'
 GUIFRAME_WIDTH = 1150
 GUIFRAME_HEIGHT = 840
-PLUGIN_STATE_EXTENSIONS = ['.fitv', '.inv', '.prv', '.cor']
+PLUGIN_STATE_EXTENSIONS = ['.fitv', '.inv', '.prv', '.crf']
 PLUGINS_WLIST = ['Fitting files (*.fitv)|*.fitv',
                  'Invariant files (*.inv)|*.inv',
                  'P(r) files (*.prv)|*.prv',
-                 'Corfunc files (*.cor)|*.cor']
+                 'Corfunc files (*.crf)|*.crf']
 PLOPANEL_WIDTH = 415
 PLOPANEL_HEIGTH = 370
 DATAPANEL_WIDTH = 235

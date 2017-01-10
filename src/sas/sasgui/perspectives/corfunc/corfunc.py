@@ -31,7 +31,7 @@ class Plugin(PluginBase):
         logging.info("Correlation function plug-in started")
         self._always_active = True
         self.state_reader = Reader(self.set_state)
-        self._extensions = '.cor'
+        self._extensions = '.crf'
 
     def get_panels(self, parent):
         """
@@ -47,7 +47,7 @@ class Plugin(PluginBase):
         self.perspective.append(self.corfunc_panel.window_name)
 
         l = Loader()
-        l.associate_file_reader('.cor', self.state_reader)
+        l.associate_file_reader('.crf', self.state_reader)
 
         return [self.corfunc_panel]
 
@@ -80,7 +80,7 @@ class Plugin(PluginBase):
 
     def set_state(self, state=None, datainfo=None):
         """
-        Callback for CorfuncState reader. Called when a .cor file is loaded
+        Callback for CorfuncState reader. Called when a .crf file is loaded
         """
         if isinstance(datainfo, list):
             data = datainfo[0]
