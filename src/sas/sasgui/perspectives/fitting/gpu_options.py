@@ -243,8 +243,11 @@ class GpuOptions(wx.Dialog):
 
         #The same block of code as for OK but it is needed if we want to have
         #active response to Test button
+        no_opencl_msg = False
         if self.sas_opencl:
             os.environ["SAS_OPENCL"] = self.sas_opencl
+            if self.sas_opencl.lower() == "none":
+                no_opencl_msg = True
         else:
             if "SAS_OPENCL" in os.environ:
                 del(os.environ["SAS_OPENCL"])
@@ -302,12 +305,12 @@ class GpuOptions(wx.Dialog):
         else:
             msg+="All tests passed!\n"
 
-        msg +="\nHardware Details:\n"
+        msg +="\nPlatform Details:\n\n"
         msg += "Sasmodels version: "
         msg += info['version']+"\n"
         msg += "\nPlatform used: "
         msg += json.dumps(info['platform'])+"\n"
-        if self.sas_opencl.lower() == "none":
+        if no_opencl_msg:
             msg += "\nOpenCL driver: None"
         else:
             msg += "\nOpenCL driver: "
