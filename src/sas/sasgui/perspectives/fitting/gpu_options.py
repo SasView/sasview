@@ -38,6 +38,15 @@ class CustomMessageBox(wx.Dialog):
         vbox = wx.BoxSizer(wx.VERTICAL)
         vbox.Add(panel, 0, wx.ALL, 10)
 
+        message_text = wx.StaticText(self, -1,"If tests fail on OpenCL devices, "
+                                "please select No OpenCL option.\n\n"
+                                "In case of large number of failing tests, "
+                                "please consider sending above\n"
+                                "report to help@sasview.org.")
+
+        message_text.SetFont(wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, ""))
+        vbox.Add(message_text, 0, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
+
         ok_btn = wx.Button(self, wx.ID_OK)
 
         btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -231,6 +240,26 @@ class GpuOptions(wx.Dialog):
         import json
         import platform
         import sasmodels
+
+        #The same block of code as for OK but it is needed if we want to have
+        #active response to Test button
+        if self.sas_opencl:
+            os.environ["SAS_OPENCL"] = self.sas_opencl
+        else:
+            if "SAS_OPENCL" in os.environ:
+                del(os.environ["SAS_OPENCL"])
+
+        #Sasmodels kernelcl doesn't exist when initiated with None
+        try:
+            sasmodels.kernelcl.ENV = None
+        except:
+            #TODO: Need to provide reasonable exception case
+            pass
+
+        #Need to reload sasmodels.core module to account SAS_OPENCL = "None"
+        reload(sasmodels.core)
+
+
         from sasmodels.model_test import model_tests
 
         try:
@@ -246,11 +275,14 @@ class GpuOptions(wx.Dialog):
             clinfo = None
 
         failures = []
+        tests_completed = 0
         for test in model_tests():
             try:
                 test()
             except Exception:
                 failures.append(test.description)
+
+            tests_completed += 1
 
         info = {
             'version':  sasmodels.__version__,
@@ -259,22 +291,27 @@ class GpuOptions(wx.Dialog):
             'failing tests': failures,
         }
 
-        msg_info = "OpenCL tests"
+        msg_info = 'OpenCL tests results'
 
-        msg = "Results: "
+        msg = str(tests_completed)+' tests completed.\n'
         if len(failures) > 0:
-            msg += 'Failing tests:\n'
+            msg += str(len(failures))+' tests failed.\n'
+            msg += 'Failing tests: '
             msg += json.dumps(info['failing tests'])
+            msg +="\n"
         else:
             msg+="All tests passed!\n"
 
-        msg +="\nDetails:\n"
+        msg +="\nHardware Details:\n"
         msg += "Sasmodels version: "
         msg += info['version']+"\n"
         msg += "\nPlatform used: "
         msg += json.dumps(info['platform'])+"\n"
-        msg += "\nOpenCL driver: "
-        msg += json.dumps(info['opencl'])+"\n"
+        if self.sas_opencl.lower() == "none":
+            msg += "\nOpenCL driver: None"
+        else:
+            msg += "\nOpenCL driver: "
+            msg += json.dumps(info['opencl'])+"\n"
 
         CustomMessageBox(self.panel1, msg, msg_info)
 
