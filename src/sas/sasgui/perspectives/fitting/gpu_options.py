@@ -25,10 +25,10 @@ class CustomMessageBox(wx.Dialog):
 
         self.text = wx.TextCtrl(self, -1, size=(500, 400),
                            style=wx.TE_MULTILINE|wx.TE_READONLY
-                                 |wx.SUNKEN_BORDER|wx.HSCROLL)
+                                 |wx.SUNKEN_BORDER)
         self.text.SetValue(msg)
         self.text.SetBackgroundColour(self.GetBackgroundColour())
-
+        self.text.SetFocus()
         self.boxsizer.Add(self.text, proportion=1, flag=wx.EXPAND)
 
         self.fit_hsizer = wx.StaticBoxSizer(self.static_box, orient=wx.VERTICAL)
@@ -59,7 +59,7 @@ class CustomMessageBox(wx.Dialog):
         self.SetSizer(self.vbox)
         self.vbox.Fit(self)
 
-        self.Centre()
+        self.SetAutoLayout(True)
         self.ShowModal()
         self.Destroy()
 
