@@ -19,44 +19,45 @@ class CustomMessageBox(wx.Dialog):
 
         wx.Dialog.__init__(self, parent, title=title)
 
-        panel = wx.Panel(self, -1)
-        static_box = wx.StaticBox(panel, -1, "OpenCL test completed!")
-        boxsizer = wx.BoxSizer(orient=wx.VERTICAL)
+        self.panel = wx.Panel(self, -1)
+        self.static_box = wx.StaticBox(self.panel, -1, "OpenCL test completed!")
+        self.boxsizer = wx.BoxSizer(orient=wx.VERTICAL)
 
-        text = wx.TextCtrl(self, style=wx.TE_READONLY|wx.TE_MULTILINE
-                                       |wx.BORDER_NONE, size=(400,300))
-        text.SetValue(msg)
-        text.SetBackgroundColour(self.GetBackgroundColour())
+        self.text = wx.TextCtrl(self, -1, size=(500, 400),
+                           style=wx.TE_MULTILINE|wx.TE_READONLY
+                                 |wx.SUNKEN_BORDER|wx.HSCROLL)
+        self.text.SetValue(msg)
+        self.text.SetBackgroundColour(self.GetBackgroundColour())
 
-        boxsizer.Add(text, 0)
+        self.boxsizer.Add(self.text, proportion=1, flag=wx.EXPAND)
 
-        fit_hsizer = wx.StaticBoxSizer(static_box, orient=wx.VERTICAL)
-        fit_hsizer.Add(boxsizer, 0, wx.ALL, 5)
+        self.fit_hsizer = wx.StaticBoxSizer(self.static_box, orient=wx.VERTICAL)
+        self.fit_hsizer.Add(self.boxsizer, 0, wx.ALL, 5)
 
-        panel.SetSizer(fit_hsizer)
+        self.panel.SetSizer(self.fit_hsizer)
 
-        vbox = wx.BoxSizer(wx.VERTICAL)
-        vbox.Add(panel, 0, wx.ALL, 10)
+        self.vbox = wx.BoxSizer(wx.VERTICAL)
+        self.vbox.Add(self.panel, 0, wx.ALL, 10)
 
-        message_text = wx.StaticText(self, -1,"If tests fail on OpenCL devices, "
+        self.message_text = wx.StaticText(self, -1,"If tests fail on OpenCL devices, "
                                 "please select No OpenCL option.\n\n"
                                 "In case of large number of failing tests, "
                                 "please consider sending above\n"
                                 "report to help@sasview.org.")
 
-        message_text.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, ""))
-        vbox.Add(message_text, 0, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
+        self.message_text.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, ""))
+        self.vbox.Add(self.message_text, 0, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
 
-        ok_btn = wx.Button(self, wx.ID_OK)
+        self.ok_btn = wx.Button(self, wx.ID_OK)
 
-        btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        btn_sizer.Add((10, 20), 1) # stretchable whitespace
-        btn_sizer.Add(ok_btn, 0)
+        self.btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.btn_sizer.Add((10, 20), 1) # stretchable whitespace
+        self.btn_sizer.Add(self.ok_btn, 0)
 
-        vbox.Add(btn_sizer, 0, wx.EXPAND|wx.ALL, 10)
+        self.vbox.Add(self.btn_sizer, 0, wx.EXPAND|wx.ALL, 10)
 
-        self.SetSizer(vbox)
-        vbox.Fit(self)
+        self.SetSizer(self.vbox)
+        self.vbox.Fit(self)
 
         self.Centre()
         self.ShowModal()
