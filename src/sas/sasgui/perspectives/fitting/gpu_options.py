@@ -8,6 +8,7 @@ Created on Nov 29, 2016
 '''
 
 import os
+import sys
 import warnings
 import wx
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
@@ -24,8 +25,7 @@ class CustomMessageBox(wx.Dialog):
         self.boxsizer = wx.BoxSizer(orient=wx.VERTICAL)
 
         self.text = wx.TextCtrl(self, -1, size=(500, 400),
-                           style=wx.TE_MULTILINE|wx.TE_READONLY
-                                 |wx.SUNKEN_BORDER)
+                           style=wx.TE_MULTILINE|wx.TE_READONLY)
         self.text.SetValue(msg)
         self.text.SetBackgroundColour(self.GetBackgroundColour())
         self.text.SetFocus()
@@ -213,13 +213,9 @@ class GpuOptions(wx.Dialog):
                 del(os.environ["SAS_OPENCL"])
 
         #Sasmodels kernelcl doesn't exist when initiated with None
-        try:
+        if 'sasmodels.kernelcl' in sys.modules:
             sasmodels.kernelcl.ENV = None
-        except:
-            #TODO: Need to provide reasonable exception case
-            pass
 
-        #Need to reload sasmodels.core module to account SAS_OPENCL = "None"
         reload(sasmodels.core)
         event.Skip()
 
@@ -252,11 +248,9 @@ class GpuOptions(wx.Dialog):
                 del(os.environ["SAS_OPENCL"])
 
         #Sasmodels kernelcl doesn't exist when initiated with None
-        try:
+        if 'sasmodels.kernelcl' in sys.modules:
             sasmodels.kernelcl.ENV = None
-        except:
-            #TODO: Need to provide reasonable exception case
-            pass
+
 
         #Need to reload sasmodels.core module to account SAS_OPENCL = "None"
         reload(sasmodels.core)
