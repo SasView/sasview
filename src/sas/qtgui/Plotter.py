@@ -12,6 +12,8 @@ import sas.qtgui.GuiUtils as GuiUtils
 from sas.qtgui.AddText import AddText
 from sas.qtgui.SetGraphRange import SetGraphRange
 from sas.qtgui.LinearFit import LinearFit
+from sas.qtgui.PlotProperties import PlotProperties
+import sas.qtgui.PlotUtilities as PlotUtilities
 
 class PlotterWidget(PlotterBase):
     """
@@ -58,7 +60,7 @@ class PlotterWidget(PlotterBase):
         self.yLabel = "%s(%s)"%(value._yaxis, value._yunit)
         self.title(title=value.name)
 
-    def plot(self, data=None, marker=None, linestyle=None, hide_error=False):
+    def plot(self, data=None, color=None, marker=None, hide_error=False):
         """
         Add a new plot of self._data to the chart.
         """
@@ -67,37 +69,66 @@ class PlotterWidget(PlotterBase):
             self.data = data
         assert(self._data)
 
-        is_fit = (self._data.id=="fit")
+        is_fit = (self.data.id=="fit")
 
-        # Shortcut for the current axis
+        # Shortcuts
         ax = self.ax
+        x = self._data.view.x
+        y = self._data.view.y
 
-        if marker == None:
-            marker = 'o'
+        # Marker symbol. Passed marker is one of matplotlib.markers characters
+        # Alternatively, picked up from Data1D as an int index of PlotUtilities.SHAPES dict
+        if marker is None:
+            marker = self.data.symbol
+            marker = PlotUtilities.SHAPES.values()[marker]
 
-        if linestyle == None:
-            linestyle = ''
+        # Plot name
+        self.title(title=self.data.title)
 
-        if not self._title:
-            self.title(title=self.data.name)
+        # Error marker toggle
+        if hide_error is None:
+            hide_error = self.data.hide_error
 
-        # plot data with/without errorbars
-        if hide_error:
-            line = ax.plot(self._data.view.x, self._data.view.y,
-                    marker=marker,
-                    linestyle=linestyle,
-                    label=self._title,
-                    picker=True)
+        # Plot color
+        if color is None:
+            color = self.data.custom_color
+
+        color = PlotUtilities.getValidColor(color)
+
+        markersize = self._data.markersize
+
+        # Draw non-standard markers
+        l_width = markersize * 0.4
+        if marker == '-' or marker == '--':
+            line = self.ax.plot(x, y, color=color, lw=l_width, marker='',
+                             linestyle=marker, label=self._title, zorder=10)[0]
+
+        elif marker == 'vline':
+            y_min = min(y)*9.0/10.0 if min(y) < 0 else 0.0
+            line = self.ax.vlines(x=x, ymin=y_min, ymax=y, color=color,
+                            linestyle='-', label=self._title, lw=l_width, zorder=1)
+
+        elif marker == 'step':
+            line = self.ax.step(x, y, color=color, marker='', linestyle='-',
+                                label=self._title, lw=l_width, zorder=1)[0]
+
         else:
-            line = ax.errorbar(self._data.view.x, self._data.view.y,
-                        yerr=self._data.view.dy, xerr=None,
-                        capsize=2, linestyle='',
-                        barsabove=False,
-                        marker=marker,
-                        lolims=False, uplims=False,
-                        xlolims=False, xuplims=False,
-                        label=self._title,
-                        picker=True)
+            # plot data with/without errorbars
+            if hide_error:
+                line = ax.plot(x, y, marker=marker, color=color, markersize=markersize,
+                        linestyle='', label=self._title, picker=True)
+            else:
+                line = ax.errorbar(x, y,
+                            yerr=self._data.view.dy, xerr=None,
+                            capsize=2, linestyle='',
+                            barsabove=False,
+                            color=color,
+                            marker=marker,
+                            markersize=markersize,
+                            lolims=False, uplims=False,
+                            xlolims=False, xuplims=False,
+                            label=self._title,
+                            picker=True)
 
         # Update the list of data sets (plots) in chart
         self.plot_dict[self._data.id] = self.data
@@ -111,10 +142,6 @@ class PlotterWidget(PlotterBase):
             ax.set_ylabel(self.y_label)
         if self.x_label and not is_fit:
             ax.set_xlabel(self.x_label)
-
-        # Title only for regular charts
-        if not self.quickplot and not is_fit:
-            ax.set_title(label=self._title)
 
         # Include scaling (log vs. linear)
         ax.set_xscale(self.xscale)
@@ -169,7 +196,8 @@ class PlotterWidget(PlotterBase):
         """
         for id in self.plot_dict.keys():
             plot = self.plot_dict[id]
-            name = plot.name
+            #name = plot.name
+            name = plot.title
             plot_menu = self.contextMenu.addMenu('&%s' % name)
 
             self.actionDataInfo = plot_menu.addAction("&DataInfo")
@@ -209,7 +237,8 @@ class PlotterWidget(PlotterBase):
                 plot_menu.addSeparator()
 
             self.actionModifyPlot = plot_menu.addAction('&Modify Plot Property')
-            self.actionModifyPlot.triggered.connect(self.onModifyPlot)
+            self.actionModifyPlot.triggered.connect(
+                                functools.partial(self.onModifyPlot, id))
 
     def createContextMenuQuick(self):
         """
@@ -360,6 +389,14 @@ class PlotterWidget(PlotterBase):
         if fit_dialog.exec_() == QtGui.QDialog.Accepted:
             return
 
+    def replacePlot(self, id, new_plot):
+        """
+        Remove plot 'id' and add 'new_plot' to the chart.
+        This effectlvely refreshes the chart with changes to one of its plots
+        """
+        self.removePlot(id)
+        self.plot(data=new_plot)
+
     def onRemovePlot(self, id):
         """
         Responds to the plot delete action
@@ -406,11 +443,41 @@ class PlotterWidget(PlotterBase):
         plot = self.plot_dict[id]
         self.manager.add_data(data_list=[plot])
 
-    def onModifyPlot(self):
+    def onModifyPlot(self, id):
         """
         Allows for MPL modifications to the selected plot
         """
-        pass
+        selected_plot = self.plot_dict[id]
+        current = selected_plot.hide_error
+
+        # Old style color - single integer for enum color
+        # New style color - #hhhhhh
+        color = selected_plot.custom_color
+        # marker symbol and size
+        marker = selected_plot.symbol
+        marker_size = selected_plot.markersize
+        # plot name
+        legend = selected_plot.title
+
+        plotPropertiesWidget = PlotProperties(self,
+                                color=color,
+                                marker=marker,
+                                marker_size=marker_size,
+                                legend=legend)
+        if plotPropertiesWidget.exec_() == QtGui.QDialog.Accepted:
+            marker = plotPropertiesWidget.marker()
+            marker_size = plotPropertiesWidget.markersize()
+            color = plotPropertiesWidget.color()
+            legend = plotPropertiesWidget.legend()
+
+            # Update Data1d
+            selected_plot.markersize = marker_size
+            selected_plot.custom_color = color
+            selected_plot.symbol = marker
+            selected_plot.title = legend
+
+            # Redraw the plot
+            self.replacePlot(id, selected_plot)
 
     def onToggleHideError(self, id):
         """
@@ -460,7 +527,7 @@ class PlotterWidget(PlotterBase):
             self.yLabel = new_ylabel
             # Directly overwrite the data to avoid label reassignment
             self._data = current_plot
-            self.plot(marker='o', linestyle='')
+            self.plot()
 
         pass # debug hook
 
@@ -490,7 +557,7 @@ class PlotterWidget(PlotterBase):
         self.fit_result.name = 'Fit'
 
         # Plot the line
-        self.plot(data=self.fit_result, marker='', linestyle='solid', hide_error=True)
+        self.plot(data=self.fit_result, marker='-', hide_error=True)
 
 
 class Plotter(QtGui.QDialog, PlotterWidget):

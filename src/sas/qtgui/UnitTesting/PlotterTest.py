@@ -12,12 +12,13 @@ import path_prepare
 #######
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import Data2D
-from UnitTesting.TestUtils import QtSignalSpy
+from UnitTesting.TestUtils import WarningNotImplemented
 
 # Tested module
 import sas.qtgui.Plotter as Plotter
 
 app = QtGui.QApplication(sys.argv)
+
 
 class PlotterTest(unittest.TestCase):
     '''Test the Plotter 1D class'''
@@ -222,23 +223,35 @@ class PlotterTest(unittest.TestCase):
 
     def testOnLinearFit(self):
         """ Checks the response to LinearFit call """
-        pass
+        WarningNotImplemented(sys._getframe().f_code.co_name)
 
     def testOnRemovePlot(self):
         """ Assure plots get removed when requested """
-        pass
+        WarningNotImplemented(sys._getframe().f_code.co_name)
 
     def testRemovePlot(self):
         """ Test plot removal """
-        pass
+        WarningNotImplemented(sys._getframe().f_code.co_name)
 
     def testOnToggleHideError(self):
         """ Test the error bar toggle on plots """
-        pass
+        WarningNotImplemented(sys._getframe().f_code.co_name)
 
     def testOnFitDisplay(self):
         """ Test the fit line display on the chart """
-        pass
+        WarningNotImplemented(sys._getframe().f_code.co_name)
+
+    def testReplacePlot(self):
+        """ Test the plot refresh functionality """
+        WarningNotImplemented(sys._getframe().f_code.co_name)
+
+    def testReplacePlot(self):
+        """ Test the plot refresh functionality """
+        WarningNotImplemented(sys._getframe().f_code.co_name)
+
+    def testOnModifyPlot(self):
+        """ Test the functionality for changing plot properties """
+        WarningNotImplemented(sys._getframe().f_code.co_name)
 
 if __name__ == "__main__":
     unittest.main()

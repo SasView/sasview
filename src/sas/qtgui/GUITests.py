@@ -20,6 +20,8 @@ from UnitTesting import DensityCalculatorTest
 from UnitTesting import WindowTitleTest
 from UnitTesting import SetGraphRangeTest
 from UnitTesting import LinearFitTest
+from UnitTesting import PlotPropertiesTest
+from UnitTesting import PlotUtilitiesTest
 
 def suite():
     suites = (
@@ -43,6 +45,8 @@ def suite():
         unittest.makeSuite(WindowTitleTest.WindowTitleTest, 'test'),
         unittest.makeSuite(SetGraphRangeTest.SetGraphRangeTest, 'test'),
         unittest.makeSuite(LinearFitTest.LinearFitTest, 'test'),
+        unittest.makeSuite(PlotPropertiesTest.PlotPropertiesTest, 'test'),
+        unittest.makeSuite(PlotUtilitiesTest.PlotUtilitiesTest, 'test'),
     )
     return unittest.TestSuite(suites)
 

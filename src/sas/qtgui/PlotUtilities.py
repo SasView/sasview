@@ -1,6 +1,41 @@
 import sys
 import numpy
+from collections import OrderedDict
 
+SHAPES = OrderedDict([
+        ('Circle' , 'o'),
+        ('Point' , '.'),
+        ('Pixel' , ','),
+        ('Triangle Down' , 'v'),
+        ('Triangle Up' , '^'),
+        ('Triangle Left' , '<'),
+        ('Triangle Right' , '>'),
+        ('Octagon' , '8'),
+        ('Square' , 's'),
+        ('Pentagon' , 'p'),
+        ('Star' , '*'),
+        ('Hexagon1' , 'h'),
+        ('Hexagon2' , 'H'),
+        ('Cross +' , 'p'),
+        ('Cross X ' , 'x'),
+        ('Diamond' , 'D'),
+        ('Thin Diamond' , 'd'),
+        ('Line' , '-'),
+        ('Dash' , '--'),
+        ('Vline' , 'vline'),
+        ('Step' , 'step'),
+])
+
+COLORS = OrderedDict([
+        ('Blue', 'b'),
+        ('Green', 'g'),
+        ('Red', 'r'),
+        ('Cyan', 'c'),
+        ('Magenta', 'm'),
+        ('Yellow', 'y'),
+        ('Black', 'k'),
+        ('Custom', 'x'),
+])
 
 def build_matrix(data, qx_data, qy_data):
     """
@@ -56,7 +91,7 @@ def build_matrix(data, qx_data, qy_data):
     while not(numpy.isfinite(image[weights == 0])).all():
         if loop >= max_loop:  # this protects never-ending loop
             break
-        image = fillup_pixels(image=image, weights=weights)
+        image = fillupPixels(image=image, weights=weights)
         loop += 1
 
     return image
@@ -107,7 +142,7 @@ def get_bins(qx_data, qy_data):
     #set x_bins and y_bins
     return x_bins, y_bins
 
-def fillup_pixels(image=None, weights=None):
+def fillupPixels(image=None, weights=None):
     """
     Fill z values of the empty cells of 2d image matrix
     with the average over up-to next nearest neighbor points
@@ -220,3 +255,24 @@ def rescale(lo, hi, step, pt=None, bal=None, scale='linear'):
             lo, hi = numpy.power(10., lo), numpy.power(10., hi)
     return (lo, hi)
 
+def getValidColor(color):
+    '''
+    Returns a valid matplotlib color
+    '''
+
+    if color is not None:
+        # Check if it's an int
+        if isinstance(color, int):
+            # Check if it's within the range
+            if 0 <= color <=6:
+                color = COLORS.values()[color]
+        # Check if it's an RGB string
+        elif isinstance(color, str):
+            # Assure the correctnes of the string
+            assert(color[0]=="#" and len(color) == 7)
+            import string
+            assert(all(c in string.hexdigits for c in color[1:]))
+        else:
+            raise AttributeError
+
+    return color

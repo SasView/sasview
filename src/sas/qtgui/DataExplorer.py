@@ -768,7 +768,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         new_plot = globals()[method_name](self, quickplot=True)
         new_plot.data = data
-        new_plot.plot(marker='o', linestyle='')
+        new_plot.plot(marker='o')
 
         # Update the global plot counter
         title = "Plot " + data.name

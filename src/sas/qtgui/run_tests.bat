@@ -19,3 +19,5 @@ python -m UnitTesting.WindowTitleTest
 python -m UnitTesting.AddTextTest
 python -m UnitTesting.SetGraphRangeTest
 python -m UnitTesting.LinearFitTest
+python -m UnitTesting.PlotPropertiesTest
+python -m UnitTesting.PlotUtilitiesTest

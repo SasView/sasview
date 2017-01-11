@@ -258,3 +258,5 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
         elif self.xLabel == "log10(x^(4))":
             return numpy.sqrt(numpy.sqrt(numpy.power(10, x)))
         return x
+
+

@@ -2,6 +2,10 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.QtTest import *
 
+def WarningNotImplemented(method_name):
+    """ Prints warning about a non-implemented test """
+    print("\nWARNING: %s needs implementing!"%method_name)
+
 class QtSignalSpy(QObject):
     """
     Helper class for testing Qt signals.
