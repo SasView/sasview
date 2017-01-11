@@ -16,6 +16,9 @@ from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
 
 class CustomMessageBox(wx.Dialog):
+    """
+    Custom message box for OpenCL results
+    """
     def __init__(self, parent, msg, title):
 
         wx.Dialog.__init__(self, parent, title=title)
@@ -25,7 +28,7 @@ class CustomMessageBox(wx.Dialog):
         self.boxsizer = wx.BoxSizer(orient=wx.VERTICAL)
 
         self.text = wx.TextCtrl(self, -1, size=(500, 400),
-                           style=wx.TE_MULTILINE|wx.TE_READONLY)
+                                style=wx.TE_MULTILINE|wx.TE_READONLY)
         self.text.SetValue(msg)
         self.text.SetBackgroundColour(self.GetBackgroundColour())
         self.text.SetFocus()
@@ -39,11 +42,11 @@ class CustomMessageBox(wx.Dialog):
         self.vbox = wx.BoxSizer(wx.VERTICAL)
         self.vbox.Add(self.panel, 0, wx.ALL, 10)
 
-        self.message_text = wx.StaticText(self, -1,"If tests fail on OpenCL devices, "
-                                "please select No OpenCL option.\n\n"
-                                "In case of large number of failing tests, "
-                                "please consider sending\n"
-                                "above report to help@sasview.org.")
+        self.message_text = wx.StaticText(self, -1, "If tests fail on OpenCL devices, "
+                                                    "please select No OpenCL option.\n\n"
+                                                    "In case of large number of failing tests, "
+                                                    "please consider sending\n"
+                                                    "above report to help@sasview.org.")
 
         self.vbox.Add(self.message_text, 0, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
 
@@ -86,7 +89,7 @@ class GpuOptions(wx.Dialog):
         self.option_button = {}
         self.buttons = []
         #Check if SAS_OPENCL is already set as enviromental variable
-        self.sas_opencl = os.environ.get("SAS_OPENCL","")
+        self.sas_opencl = os.environ.get("SAS_OPENCL", "")
 
         for clopt in clinfo:
             button = wx.CheckBox(self.panel1, -1, label=clopt[1], name=clopt[1])
@@ -133,7 +136,7 @@ class GpuOptions(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self.on_reset, reset_btn)
         self.Bind(wx.EVT_BUTTON, self.on_help, help_btn)
 
-        test_text = wx.StaticText(self, -1,"WARNING: Running tests can take a few minutes!")
+        test_text = wx.StaticText(self, -1, "WARNING: Running tests can take a few minutes!")
         self.vbox.Add(test_text, 0, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
 
         btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -169,20 +172,18 @@ class GpuOptions(wx.Dialog):
                 devices = platform.get_devices()
                 for device in devices:
                     if len(devices) > 1 and len(platforms) > 1:
-                        combined_index = ":".join([str(p_index),str(d_index)])
+                        combined_index = ":".join([str(p_index), str(d_index)])
                     elif len(platforms) > 1:
                         combined_index = str(p_index)
                     else:
                         combined_index = str(d_index)
-                    #combined_index = ":".join([str(p_index),str(d_index)]) \
-                    #    if len(platforms) > 1 else str(d_index)
-                    clinfo.append((combined_index, ":".join([platform.name,device.name])))
+                    clinfo.append((combined_index, ":".join([platform.name, device.name])))
                     d_index += 1
                 p_index += 1
         except ImportError:
             warnings.warn("pyopencl import failed. Using only CPU computations")
 
-        clinfo.append(("None","No OpenCL"))
+        clinfo.append(("None", "No OpenCL"))
         return clinfo
 
     def on_check(self, event):
@@ -210,7 +211,7 @@ class GpuOptions(wx.Dialog):
             os.environ["SAS_OPENCL"] = self.sas_opencl
         else:
             if "SAS_OPENCL" in os.environ:
-                del(os.environ["SAS_OPENCL"])
+                del os.environ["SAS_OPENCL"]
 
         #Sasmodels kernelcl doesn't exist when initiated with None
         if 'sasmodels.kernelcl' in sys.modules:
@@ -226,7 +227,7 @@ class GpuOptions(wx.Dialog):
         for btn in self.buttons:
             btn.SetValue(0)
 
-        self.sas_opencl=None
+        self.sas_opencl = None
 
     def on_test(self, event):
         """
@@ -245,7 +246,7 @@ class GpuOptions(wx.Dialog):
                 no_opencl_msg = True
         else:
             if "SAS_OPENCL" in os.environ:
-                del(os.environ["SAS_OPENCL"])
+                del os.environ["SAS_OPENCL"]
 
         #Sasmodels kernelcl doesn't exist when initiated with None
         if 'sasmodels.kernelcl' in sys.modules:
@@ -262,11 +263,11 @@ class GpuOptions(wx.Dialog):
             from sasmodels.kernelcl import environment
             env = environment()
             clinfo = [(ctx.devices[0].platform.vendor,
-                      ctx.devices[0].platform.version,
-                      ctx.devices[0].vendor,
-                      ctx.devices[0].name,
-                      ctx.devices[0].version)
-                    for ctx in env.context]
+                       ctx.devices[0].platform.version,
+                       ctx.devices[0].vendor,
+                       ctx.devices[0].name,
+                       ctx.devices[0].version)
+                      for ctx in env.context]
         except ImportError:
             clinfo = None
 
@@ -294,11 +295,11 @@ class GpuOptions(wx.Dialog):
             msg += str(len(failures))+' tests failed.\n'
             msg += 'Failing tests: '
             msg += json.dumps(info['failing tests'])
-            msg +="\n"
+            msg += "\n"
         else:
-            msg+="All tests passed!\n"
+            msg += "All tests passed!\n"
 
-        msg +="\nPlatform Details:\n\n"
+        msg += "\nPlatform Details:\n\n"
         msg += "Sasmodels version: "
         msg += info['version']+"\n"
         msg += "\nPlatform used: "
