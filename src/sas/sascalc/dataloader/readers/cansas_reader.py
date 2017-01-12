@@ -243,7 +243,11 @@ class Reader(XMLreader):
                     self.aperture.type = type
                 self.add_intermediate()
             else:
-                data_point, unit = self._get_node_value(node, tagname)
+                if isinstance(self.current_dataset, plottable_2D):
+                    data_point = node.text
+                    unit = attr.get('unit', '')
+                else:
+                    data_point, unit = self._get_node_value(node, tagname)
 
                 # If this is a dataset, store the data appropriately
                 if tagname == 'Run':
@@ -273,26 +277,28 @@ class Reader(XMLreader):
                     pass
                 elif tagname == 'Shadowfactor':
                     pass
+
                 # I and Qx, Qy - 2D data
                 elif tagname == 'I' and isinstance(self.current_dataset, plottable_2D):
                     self.current_dataset.yaxis("Intensity", unit)
-                    self.current_dataset.data = np.append(self.current_dataset.data, data_point)
+                    self.current_dataset.data = np.fromstring(data_point, dtype=float, sep=",")
                 elif tagname == 'Idev' and isinstance(self.current_dataset, plottable_2D):
-                    self.current_dataset.err_data = np.append(self.current_dataset.err_data, data_point)
+                    self.current_dataset.err_data = np.fromstring(data_point, dtype=float, sep=",")
                 elif tagname == 'Qx':
                     self.current_dataset.xaxis("Qx", unit)
-                    self.current_dataset.qx_data = np.append(self.current_dataset.qx_data, data_point)
+                    self.current_dataset.qx_data = np.fromstring(data_point, dtype=float, sep=",")
                 elif tagname == 'Qy':
                     self.current_dataset.yaxis("Qy", unit)
-                    self.current_dataset.qy_data = np.append(self.current_dataset.qy_data, data_point)
+                    self.current_dataset.qy_data = np.fromstring(data_point, dtype=float, sep=",")
                 elif tagname == 'Qxdev':
                     self.current_dataset.xaxis("Qxdev", unit)
-                    self.current_dataset.dqx_data = np.append(self.current_dataset.dqx_data, data_point)
+                    self.current_dataset.dqx_data = np.fromstring(data_point, dtype=float, sep=",")
                 elif tagname == 'Qydev':
                     self.current_dataset.yaxis("Qydev", unit)
-                    self.current_dataset.dqy_data = np.append(self.current_dataset.dqy_data, data_point)
+                    self.current_dataset.dqy_data = np.fromstring(data_point, dtype=float, sep=",")
                 elif tagname == 'Mask':
-                    self.current_dataset.mask = np.append(self.current_dataset.mask, bool(data_point))
+                    inter = data_point.split(",")
+                    self.current_dataset.mask = np.asarray(inter, dtype=bool)
 
                 # Sample Information
                 elif tagname == 'ID' and self.parent_class == 'SASsample':
@@ -623,29 +629,22 @@ class Reader(XMLreader):
                 np.trim_zeros(dataset.y)
                 np.trim_zeros(dataset.dy)
             elif isinstance(dataset, plottable_2D):
-                dataset.data = np.delete(dataset.data, [0])
                 dataset.data = dataset.data.astype(np.float64)
-                dataset.qx_data = np.delete(dataset.qx_data, [0])
                 dataset.qx_data = dataset.qx_data.astype(np.float64)
                 dataset.xmin = np.min(dataset.qx_data)
                 dataset.xmax = np.max(dataset.qx_data)
-                dataset.qy_data = np.delete(dataset.qy_data, [0])
                 dataset.qy_data = dataset.qy_data.astype(np.float64)
                 dataset.ymin = np.min(dataset.qy_data)
                 dataset.ymax = np.max(dataset.qy_data)
                 dataset.q_data = np.sqrt(dataset.qx_data * dataset.qx_data
                                          + dataset.qy_data * dataset.qy_data)
                 if dataset.err_data is not None:
-                    dataset.err_data = np.delete(dataset.err_data, [0])
                     dataset.err_data = dataset.err_data.astype(np.float64)
                 if dataset.dqx_data is not None:
-                    dataset.dqx_data = np.delete(dataset.dqx_data, [0])
                     dataset.dqx_data = dataset.dqx_data.astype(np.float64)
                 if dataset.dqy_data is not None:
-                    dataset.dqy_data = np.delete(dataset.dqy_data, [0])
                     dataset.dqy_data = dataset.dqy_data.astype(np.float64)
                 if dataset.mask is not None:
-                    dataset.mask = np.delete(dataset.mask, [0])
                     dataset.mask = dataset.mask.astype(dtype=bool)
 
                 if len(dataset.shape) == 2:
@@ -1044,33 +1043,40 @@ class Reader(XMLreader):
         :param datainfo: The Data2D object the information is coming from
         :param entry_node: lxml node ElementTree object to be appended to
         """
-        node = self.create_element("SASdata")
         attr = {}
         if datainfo.data.shape:
-            attr["x_bins"] = len(datainfo.x_bins)
-            attr["y_bins"] = len(datainfo.y_bins)
+            attr["x_bins"] = str(len(datainfo.x_bins))
+            attr["y_bins"] = str(len(datainfo.y_bins))
+        node = self.create_element("SASdata", attr)
         self.append(node, entry_node)
 
-        for i in range(len(datainfo.data)):
-            point = self.create_element("Idata")
-            node.append(point)
-            self.write_node(point, "Qx", datainfo.qx_data[i],
-                            {'unit': datainfo._xunit})
-            self.write_node(point, "Qy", datainfo.qy_data[i],
-                            {'unit': datainfo._yunit})
-            self.write_node(point, "I", datainfo.data[i],
+        point = self.create_element("Idata")
+        node.append(point)
+        qx = ','.join([str(datainfo.qx_data[i]) for i in xrange(len(datainfo.qx_data))])
+        qy = ','.join([str(datainfo.qy_data[i]) for i in xrange(len(datainfo.qy_data))])
+        intensity = ','.join([str(datainfo.data[i]) for i in xrange(len(datainfo.data))])
+        err = ','.join([str(datainfo.err_data[i]) for i in xrange(len(datainfo.err_data))])
+        dqy = ','.join([str(datainfo.dqy_data[i]) for i in xrange(len(datainfo.dqy_data))])
+        dqx = ','.join([str(datainfo.dqx_data[i]) for i in xrange(len(datainfo.dqx_data))])
+        mask = ','.join([str(datainfo.mask[i]) for i in xrange(len(datainfo.mask))])
+
+        self.write_node(point, "Qx", qx,
+                        {'unit': datainfo._xunit})
+        self.write_node(point, "Qy", qy,
+                        {'unit': datainfo._yunit})
+        self.write_node(point, "I", intensity,
+                        {'unit': datainfo._zunit})
+        if datainfo.err_data is not None:
+            self.write_node(point, "Idev", err,
                             {'unit': datainfo._zunit})
-            if datainfo.err_data is not None and len(datainfo.err_data) > i:
-                self.write_node(point, "Idev", datainfo.err_data[i],
-                                {'unit': datainfo._zunit})
-            if datainfo.dqy_data is not None and len(datainfo.dqy_data) > i:
-                self.write_node(point, "Qydev", datainfo.dqy_data[i],
-                                {'unit': datainfo._yunit})
-            if datainfo.dqx_data is not None and len(datainfo.dqx_data) > i:
-                self.write_node(point, "Qxdev", datainfo.dqx_data[i],
-                                {'unit': datainfo._xunit})
-            if datainfo.mask is not None and len(datainfo.mask) > i:
-                self.write_node(point, "Mask", datainfo.mask[i])
+        if datainfo.dqy_data is not None:
+            self.write_node(point, "Qydev", dqy,
+                            {'unit': datainfo._yunit})
+        if datainfo.dqx_data is not None:
+            self.write_node(point, "Qxdev", dqx,
+                            {'unit': datainfo._xunit})
+        if datainfo.mask is not None:
+            self.write_node(point, "Mask", mask)
 
     def _write_trans_spectrum(self, datainfo, entry_node):
         """
