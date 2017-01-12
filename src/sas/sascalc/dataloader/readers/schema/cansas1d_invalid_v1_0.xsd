@@ -61,6 +61,8 @@ in the file LICENSE that is included with this distribution.
 		</sequence>
 		<attribute name="name" type="string" use="optional" default="" />
 		<attribute name="timestamp" type="dateTime" use="optional" />
+		<attribute name="x_bins" type="string" use="optional" />
+		<attribute name="y_bins" type="string" use="optional" />
 	</complexType>
 
 	<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
