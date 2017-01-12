@@ -26,7 +26,7 @@ class PlotProperties(QtGui.QDialog, Ui_PlotPropertiesUI):
         self.custom_color = False
 
         # Fill out the color combobox
-        self.cbColor.addItems(COLORS.keys())
+        self.cbColor.addItems(COLORS.keys()[:-1])
         # data1d.custom_color can now be a simple integer,
         # specifying COLORS dict index or a string containing
         # the hex RGB value, e.g. #00FF00

@@ -1,10 +1,19 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.QtTest import *
+import inspect
 
-def WarningNotImplemented(method_name):
-    """ Prints warning about a non-implemented test """
-    print("\nWARNING: %s needs implementing!"%method_name)
+def WarningTestNotImplemented(method_name=None):
+    """
+    Prints warning about a non-implemented test.
+    Test name retrieved from stack trace.
+    """
+    if method_name is not None:
+        print("\nWARNING: %s needs implementing!"%method_name)
+    else:
+        (frame, filename, line_number,
+            function_name, lines, index) = inspect.getouterframes(inspect.currentframe())[1]
+        print("\nWARNING: %s needs implementing!"%function_name)
 
 class QtSignalSpy(QObject):
     """
