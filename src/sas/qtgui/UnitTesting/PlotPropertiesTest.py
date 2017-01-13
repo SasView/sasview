@@ -17,7 +17,7 @@ class PlotPropertiesTest(unittest.TestCase):
     def setUp(self):
         '''Create the PlotProperties'''
 
-        self.widget = PlotProperties(None, 
+        self.widget = PlotProperties(None,
                          color=1,
                          marker=3,
                          marker_size=10,
@@ -35,9 +35,21 @@ class PlotPropertiesTest(unittest.TestCase):
 
         # Check the combo boxes
         self.assertEqual(self.widget.cbColor.currentText(), "Green")
+        self.assertEqual(self.widget.cbColor.count(), 7)
         self.assertEqual(self.widget.cbShape.currentText(), "Triangle Down")
         self.assertEqual(self.widget.txtLegend.text(), "LL")
         self.assertEqual(self.widget.sbSize.value(), 10)
+
+    def testDefaultsWithCustomColor(self):
+        '''Test the GUI when called with custom color'''
+        widget = PlotProperties(None,
+                         color="#FF00FF",
+                         marker=7,
+                         marker_size=10,
+                         legend="LL")
+
+        self.assertEqual(widget.cbColor.currentText(), "Custom")
+        self.assertEqual(widget.cbColor.count(), 8)
         
     def testOnColorChange(self):
         '''Test the response to color change event'''

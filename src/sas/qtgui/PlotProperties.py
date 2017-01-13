@@ -33,6 +33,8 @@ class PlotProperties(QtGui.QDialog, Ui_PlotPropertiesUI):
         if isinstance(self._color, int):
             self.cbColor.setCurrentIndex(self._color)
         else:
+            # Need the Custom entry here. "Custom" is always last.
+            self.cbColor.addItems([COLORS.keys()[-1]])
             self.cbColor.setCurrentIndex(COLORS.keys().index("Custom"))
 
         # Fill out the marker combobox

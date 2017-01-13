@@ -165,9 +165,6 @@ class PlotterWidget(PlotterBase):
 
         # Additional menu items
         self.contextMenu.addSeparator()
-        self.actionModifyGraphAppearance =\
-            self.contextMenu.addAction("Modify Graph Appearance")
-        self.contextMenu.addSeparator()
         self.actionAddText = self.contextMenu.addAction("Add Text")
         self.actionRemoveText = self.contextMenu.addAction("Remove Text")
         self.contextMenu.addSeparator()
@@ -182,7 +179,6 @@ class PlotterWidget(PlotterBase):
         self.actionWindowTitle = self.contextMenu.addAction("Window Title")
 
         # Define the callbacks
-        self.actionModifyGraphAppearance.triggered.connect(self.onModifyGraph)
         self.actionAddText.triggered.connect(self.onAddText)
         self.actionRemoveText.triggered.connect(self.onRemoveText)
         self.actionChangeScale.triggered.connect(self.onScaleChange)
@@ -263,13 +259,6 @@ class PlotterWidget(PlotterBase):
         if self.properties.exec_() == QtGui.QDialog.Accepted:
             self.xLogLabel, self.yLogLabel = self.properties.getValues()
             self.xyTransform(self.xLogLabel, self.yLogLabel)
-
-    def onModifyGraph(self):
-        """
-        Show a dialog allowing chart manipulations
-        """
-        print ("onModifyGraph")
-        pass
 
     def onAddText(self):
         """

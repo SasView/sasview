@@ -29,7 +29,7 @@ import sys
 
 __all__ = []
 
-plot_version = "0.98"
+#plot_version = "0.98"
 #plot_backend = "WXAgg"
 plot_backend = "Qt4Agg"
 
@@ -59,6 +59,8 @@ param = 'legend.handletextpad'
 if param not in matplotlib.rcParams: param = 'legend.handletextsep'
 matplotlib.rcParams[param] = 0.05
 matplotlib.rcParams['legend.numpoints'] = 1
+#matplotlib.rcParams['interactive'] = True
+
 
 # this should happen after initial matplotlib configuration
 from .toolbar import NavigationToolBar

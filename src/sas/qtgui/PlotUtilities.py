@@ -2,6 +2,8 @@ import sys
 import numpy
 from collections import OrderedDict
 
+# MPL shapes dictionary with some extra styles rendered internally.
+# Ordered for consistent display in combo boxes
 SHAPES = OrderedDict([
         ('Circle' , 'o'),
         ('Point' , '.'),
@@ -26,6 +28,7 @@ SHAPES = OrderedDict([
         ('Step' , 'step'),
 ])
 
+# MPL Colors dictionary. Ordered for consistent display
 COLORS = OrderedDict([
         ('Blue', 'b'),
         ('Green', 'g'),
