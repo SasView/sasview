@@ -2115,14 +2115,14 @@ class ViewerFrame(PARENT_FRAME):
         sys.exit()
 
     def _write_opencl_config_file(self):
-        #from sas.sasgui.guiframe.customdir import SetupCustom
-        #from sas.sasgui.guiframe.gui_manager import _find_local_config
-
-        sas_opencl = os.environ.get("SAS_OPENCL",None)
-        #How to store it in file
-        new_config_lines = []
-        config_file = open(custom_config.__file__)
+        """
+        Writes OpenCL settings to custom config file, so they can be remmbered
+        from session to session
+        """
         if custom_config is not None:
+            sas_opencl = os.environ.get("SAS_OPENCL",None)
+            new_config_lines = []
+            config_file = open(custom_config.__file__)
             config_lines = config_file.readlines()
             for line in config_lines:
                 if "SAS_OPENCL" in line:
@@ -2132,10 +2132,14 @@ class ViewerFrame(PARENT_FRAME):
                         new_config_lines.append("SAS_OPENCL = None")
                 else:
                     new_config_lines.append(line)
-        config_file.close()
-        new_config_file = open(custom_config.__file__,"w")
-        new_config_file.writelines(new_config_lines)
-        new_config_file.close()
+            config_file.close()
+
+            #If custom_config is None, settings will not be remmbered
+            new_config_file = open(custom_config.__file__,"w")
+            new_config_file.writelines(new_config_lines)
+            new_config_file.close()
+        else:
+            logging.info("Failed to save OPENCL settings in custom config file")
 
 
     def _check_update(self, event=None):

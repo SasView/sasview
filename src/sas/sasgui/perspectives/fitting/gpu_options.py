@@ -11,6 +11,7 @@ import os
 import sys
 import warnings
 import wx
+import sasmodels
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
 
@@ -163,25 +164,27 @@ class GpuOptions(wx.Dialog):
         :return:
         """
         clinfo = []
+        platforms = []
         try:
             import pyopencl as cl
             platforms = cl.get_platforms()
-            p_index = 0
-            for platform in platforms:
-                d_index = 0
-                devices = platform.get_devices()
-                for device in devices:
-                    if len(devices) > 1 and len(platforms) > 1:
-                        combined_index = ":".join([str(p_index), str(d_index)])
-                    elif len(platforms) > 1:
-                        combined_index = str(p_index)
-                    else:
-                        combined_index = str(d_index)
-                    clinfo.append((combined_index, ":".join([platform.name, device.name])))
-                    d_index += 1
-                p_index += 1
         except ImportError:
             warnings.warn("pyopencl import failed. Using only CPU computations")
+
+        p_index = 0
+        for platform in platforms:
+            d_index = 0
+            devices = platform.get_devices()
+            for device in devices:
+                if len(devices) > 1 and len(platforms) > 1:
+                    combined_index = ":".join([str(p_index), str(d_index)])
+                elif len(platforms) > 1:
+                    combined_index = str(p_index)
+                else:
+                    combined_index = str(d_index)
+                clinfo.append((combined_index, ":".join([platform.name, device.name])))
+                d_index += 1
+            p_index += 1
 
         clinfo.append(("None", "No OpenCL"))
         return clinfo
@@ -205,7 +208,7 @@ class GpuOptions(wx.Dialog):
         """
         Close window on accpetance
         """
-        import sasmodels
+
         #If statement added to handle Reset
         if self.sas_opencl:
             os.environ["SAS_OPENCL"] = self.sas_opencl
@@ -222,7 +225,7 @@ class GpuOptions(wx.Dialog):
 
     def on_reset(self, event):
         """
-        Close window on accpetance
+        Resets selected values
         """
         for btn in self.buttons:
             btn.SetValue(0)
@@ -235,7 +238,7 @@ class GpuOptions(wx.Dialog):
         """
         import json
         import platform
-        import sasmodels
+        #import sasmodels
 
         #The same block of code as for OK but it is needed if we want to have
         #active response to Test button
