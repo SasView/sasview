@@ -273,7 +273,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         import numpy as np
         plot_x = transform.x[np.where(transform.x <= 200)]
         plot_y = transform.y[np.where(transform.x <= 200)]
-        self._manager.show_data(Data1D(plot_x, plot_y), TRANSFORM_LABEL)
+        self._manager.show_data(Data1D(plot_x, plot_y), TRANSFORM_LABEL1)
         # Only enable extract params button if a fourier trans. has been done
         if self.transform_type == 'fourier':
             self._extract_btn.Enable()
