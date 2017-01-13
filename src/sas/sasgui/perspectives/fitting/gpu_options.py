@@ -24,24 +24,22 @@ class CustomMessageBox(wx.Dialog):
 
         wx.Dialog.__init__(self, parent, title=title)
 
-        self.panel = wx.Panel(self, -1)
-        self.static_box = wx.StaticBox(self.panel, -1, "OpenCL test completed!")
+        self.static_box = wx.StaticBox(self, -1, "OpenCL test completed!")
         self.boxsizer = wx.BoxSizer(orient=wx.VERTICAL)
 
-        self.text = wx.TextCtrl(self, -1, size=(500, 400),
+        self.text = wx.TextCtrl(self, -1, size=(500, 300),
                                 style=wx.TE_MULTILINE|wx.TE_READONLY)
         self.text.SetValue(msg)
         self.text.SetBackgroundColour(self.GetBackgroundColour())
         self.text.SetFocus()
+        self.text.SetInsertionPoint(self.text.GetLastPosition())
         self.boxsizer.Add(self.text, proportion=1, flag=wx.EXPAND)
 
         self.fit_hsizer = wx.StaticBoxSizer(self.static_box, orient=wx.VERTICAL)
         self.fit_hsizer.Add(self.boxsizer, 0, wx.ALL, 5)
 
-        self.panel.SetSizer(self.fit_hsizer)
-
         self.vbox = wx.BoxSizer(wx.VERTICAL)
-        self.vbox.Add(self.panel, 0, wx.ALL, 10)
+        self.vbox.Add(self.fit_hsizer, 0, wx.ALL, 10)
 
         self.message_text = wx.StaticText(self, -1, "If tests fail on OpenCL devices, "
                                                     "please select No OpenCL option.\n\n"
