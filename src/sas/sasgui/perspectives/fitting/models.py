@@ -22,6 +22,7 @@ from sasmodels.sasview_model import load_custom_model, load_standard_models
 PLUGIN_DIR = 'plugin_models'
 PLUGIN_LOG = os.path.join(os.path.expanduser("~"), '.sasview', PLUGIN_DIR,
                           "plugins.log")
+PLUGIN_NAME_BASE = '[plug-in] '
 
 def get_model_python_path():
     """
@@ -180,7 +181,7 @@ def _findModels(dir):
             path = os.path.abspath(os.path.join(dir, filename))
             try:
                 model = load_custom_model(path)
-                model.name = "[plug-in] "+model.name
+                model.name = PLUGIN_NAME_BASE + model.name
                 plugins[model.name] = model
             except Exception:
                 msg = traceback.format_exc()

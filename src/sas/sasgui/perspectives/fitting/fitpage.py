@@ -1189,8 +1189,9 @@ class FitPage(BasicPage):
         self.state.pinhole_smearer = self.pinhole_smearer.GetValue()
         self.state.slit_smearer = self.slit_smearer.GetValue()
 
-        self.state.structurecombobox = self.structurebox.GetLabel()
-        self.state.formfactorcombobox = self.formfactorbox.GetLabel()
+        self.state.structurecombobox = self.structurebox.GetValue()
+        self.state.formfactorcombobox = self.formfactorbox.GetValue()
+        self.state.categorycombobox = self.categorybox.GetValue()
         self.enable_fit_button()
         if self.model is not None:
             self.m_name = self.model.name

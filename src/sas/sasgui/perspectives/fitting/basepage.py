@@ -1104,8 +1104,11 @@ class BasicPage(ScrolledPanel, PanelBase):
         :return: combo_box_position
         """
         for key, value in self.master_category_dict.iteritems():
+            formfactor = state.formfactorcombobox.split(":")
+            if isinstance(formfactor, list):
+                formfactor = formfactor[0]
             for list_item in value:
-                if state.formfactorcombobox in list_item:
+                if formfactor in list_item:
                     return self.categorybox.Items.index(key)
         return 0
 
@@ -1151,49 +1154,39 @@ class BasicPage(ScrolledPanel, PanelBase):
         # fill model combobox
         self._show_combox_helper()
         # select the current model
-        try:
-            # to support older version
-            category_pos = int(state.categorycombobox)
-        except:
-            state.formfactorcombobox = state.formfactorcombobox.lower()
-            state.formfactorcombobox = \
-                state.formfactorcombobox.replace('model', '')
-            state.formfactorcombobox = unicode(state.formfactorcombobox)
-            state.categorycombobox = unicode(state.categorycombobox)
-            if state.categorycombobox in self.categorybox.Items:
-                category_pos = self.categorybox.Items.index(
-                    state.categorycombobox)
-            else:
-                # Look in master list for model name (model.lower)
-                category_pos = self.get_cat_combo_box_pos(state)
+        state._convert_to_sasmodels()
+        state.categorycombobox = unicode(state.categorycombobox)
+        if state.categorycombobox in self.categorybox.Items:
+            category_pos = self.categorybox.Items.index(
+                state.categorycombobox)
+        else:
+            # Look in master list for model name (model.lower)
+            category_pos = self.get_cat_combo_box_pos(state)
 
         self.categorybox.Select(category_pos)
         self._show_combox(None)
-        try:
-            # to support older version
-            formfactor_pos = int(state.formfactorcombobox)
-        except:
-            formfactor_pos = 0
-            for ind_form in range(self.formfactorbox.GetCount()):
-                if self.formfactorbox.GetString(ind_form) == \
-                                                    (state.formfactorcombobox):
-                    formfactor_pos = int(ind_form)
-                    break
+        from models import PLUGIN_NAME_BASE
+        if self.categorybox.GetValue() == 'Customized Models' \
+                and PLUGIN_NAME_BASE not in state.formfactorcombobox:
+            state.formfactorcombobox = \
+                PLUGIN_NAME_BASE + state.formfactorcombobox
+        formfactor_pos = 0
+        for ind_form in range(self.formfactorbox.GetCount()):
+            if self.formfactorbox.GetString(ind_form) == \
+                                                (state.formfactorcombobox):
+                formfactor_pos = int(ind_form)
+                break
 
         self.formfactorbox.Select(formfactor_pos)
 
         structfactor_pos = 0
-        try:
-            # to support older version
-            structfactor_pos = int(state.structurecombobox)
-        except:
-            if state.structurecombobox is not None:
-                state.structurecombobox = unicode(state.structurecombobox)
-                for ind_struct in range(self.structurebox.GetCount()):
-                    if self.structurebox.GetString(ind_struct) == \
-                                                    (state.structurecombobox):
-                        structfactor_pos = int(ind_struct)
-                        break
+        if state.structurecombobox is not None:
+            state.structurecombobox = unicode(state.structurecombobox)
+            for ind_struct in range(self.structurebox.GetCount()):
+                if self.structurebox.GetString(ind_struct) == \
+                                                (state.structurecombobox):
+                    structfactor_pos = int(ind_struct)
+                    break
 
         self.structurebox.SetSelection(structfactor_pos)
 
@@ -1383,9 +1376,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         # self.state.shape_indep_rbutton = self.shape_indep_rbutton.GetValue()
         # self.state.struct_rbutton = self.struct_rbutton.GetValue()
         # self.state.plugin_rbutton = self.plugin_rbutton.GetValue()
-        self.state.structurecombobox = self.structurebox.GetLabel()
-        self.state.formfactorcombobox = self.formfactorbox.GetLabel()
-        self.state.categorycombobox = self.categorybox.GetLabel()
+        self.state.structurecombobox = self.structurebox.GetValue()
+        self.state.formfactorcombobox = self.formfactorbox.GetValue()
+        self.state.categorycombobox = self.categorybox.GetValue()
 
         # post state to fit panel
         event = PageInfoEvent(page=self)
@@ -1586,43 +1579,46 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         if len(statelist) == 0 or len(listtorestore) == 0:
             return
-        if len(statelist) != len(listtorestore):
-            return
 
         for j in range(len(listtorestore)):
-            item_page = listtorestore[j]
-            item_page_info = statelist[j]
-            # change the state of the check box for simple parameters
-            if item_page[0] is not None:
-                item_page[0].SetValue(item_page_info[0])
-            if item_page[2] is not None:
-                item_page[2].SetValue(item_page_info[2])
-                if item_page[2].__class__.__name__ == "ComboBox":
-                    if item_page_info[2] in self.model.fun_list:
-                        fun_val = self.model.fun_list[item_page_info[2]]
-                        self.model.setParam(item_page_info[1], fun_val)
-            if item_page[3] is not None:
-                # show or hide text +/-
-                if item_page_info[2]:
-                    item_page[3].Show(True)
-                else:
-                    item_page[3].Hide()
-            if item_page[4] is not None:
-                # show of hide the text crtl for fitting error
-                if item_page_info[4][0]:
-                    item_page[4].Show(True)
-                    item_page[4].SetValue(item_page_info[4][1])
-                else:
-                    item_page[3].Hide()
-            if item_page[5] is not None:
-                # show of hide the text crtl for fitting error
-                item_page[5].Show(item_page_info[5][0])
-                item_page[5].SetValue(item_page_info[5][1])
-
-            if item_page[6] is not None:
-                # show of hide the text crtl for fitting error
-                item_page[6].Show(item_page_info[6][0])
-                item_page[6].SetValue(item_page_info[6][1])
+            for param in statelist:
+                if param[1] == listtorestore[j][1]:
+                    item_page = listtorestore[j]
+                    item_page_info = param
+                    if (item_page_info[1] == "theta" or item_page_info[1] ==
+                            "phi") and not self._is_2D():
+                        break
+                    # change the state of the check box for simple parameters
+                    if item_page[0] is not None:
+                        item_page[0].SetValue(item_page_info[0])
+                    if item_page[2] is not None:
+                        item_page[2].SetValue(item_page_info[2])
+                        if item_page[2].__class__.__name__ == "ComboBox":
+                            if item_page_info[2] in self.model.fun_list:
+                                fun_val = self.model.fun_list[item_page_info[2]]
+                                self.model.setParam(item_page_info[1], fun_val)
+                    if item_page[3] is not None:
+                        # show or hide text +/-
+                        if item_page_info[2]:
+                            item_page[3].Show(True)
+                        else:
+                            item_page[3].Hide()
+                    if item_page[4] is not None:
+                        # show of hide the text crtl for fitting error
+                        if item_page_info[4][0]:
+                            item_page[4].Show(True)
+                            item_page[4].SetValue(str(item_page_info[4][1]))
+                        else:
+                            item_page[3].Hide()
+                    if item_page[5] is not None:
+                        # show of hide the text crtl for fitting error
+                        item_page[5].Show(True)
+                        item_page[5].SetValue(str(item_page_info[5][1]))
+                    if item_page[6] is not None:
+                        # show of hide the text crtl for fitting error
+                        item_page[6].Show(True)
+                        item_page[6].SetValue(str(item_page_info[6][1]))
+                    break
 
     def _reset_strparam_state(self, listtorestore, statelist):
         """
