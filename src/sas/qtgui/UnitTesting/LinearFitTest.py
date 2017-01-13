@@ -3,13 +3,11 @@ import unittest
 import numpy
 
 from PyQt4 import QtGui
-from PyQt4 import QtCore
 from mock import MagicMock
 
 # set up import paths
 import path_prepare
 
-from UnitTesting.TestUtils import QtSignalSpy
 from sas.sasgui.guiframe.dataFitting import Data1D
 import sas.qtgui.Plotter as Plotter
 
@@ -60,7 +58,8 @@ class LinearFitTest(unittest.TestCase):
         return_values = self.widget.parent.emit.call_args[0][1]
         # Compare
         self.assertItemsEqual(return_values[0], [1.0, 3.0])
-        self.assertItemsEqual(return_values[1], [10.004054329087303, 12.030439848443539])
+        self.assertAlmostEqual(return_values[1][0], 10.004054329, 6)
+        self.assertAlmostEqual(return_values[1][1], 12.030439848, 6)
 
         # Set the log scale
         self.widget.x_is_log = True
@@ -68,7 +67,8 @@ class LinearFitTest(unittest.TestCase):
         return_values = self.widget.parent.emit.call_args[0][1]
         # Compare
         self.assertItemsEqual(return_values[0], [1.0, 3.0])
-        self.assertItemsEqual(return_values[1], [9.9877329376711437, 11.843650824649025])
+        self.assertAlmostEqual(return_values[1][0], 9.987732937, 6)
+        self.assertAlmostEqual(return_values[1][1], 11.84365082, 6)
 
     def testOrigData(self):
         ''' Assure the un-logged data is returned'''
@@ -80,8 +80,12 @@ class LinearFitTest(unittest.TestCase):
         x, y, dy = self.widget.origData()
 
         self.assertItemsEqual(x, orig_x)
-        self.assertItemsEqual(y, orig_y)
-        self.assertItemsEqual(dy, orig_dy)
+        self.assertEqual(y[0], orig_y[0])
+        self.assertAlmostEqual(y[1], orig_y[1], 8)
+        self.assertAlmostEqual(y[2], orig_y[2], 8)
+        self.assertEqual(dy[0], orig_dy[0])
+        self.assertAlmostEqual(dy[1], orig_dy[1], 8)
+        self.assertAlmostEqual(dy[2], orig_dy[2], 8)
 
         # x, y
         self.widget.x_is_log = False
@@ -106,14 +110,19 @@ class LinearFitTest(unittest.TestCase):
         x, y, dy = self.widget.origData()
 
         self.assertItemsEqual(x, orig_x)
-        self.assertItemsEqual(y, orig_y)
-        self.assertItemsEqual(dy, orig_dy)
+        self.assertEqual(y[0], orig_y[0])
+        self.assertAlmostEqual(y[1], orig_y[1], 8)
+        self.assertAlmostEqual(y[2], orig_y[2], 8)
+        self.assertEqual(dy[0], orig_dy[0])
+        self.assertAlmostEqual(dy[1], orig_dy[1], 8)
+        self.assertAlmostEqual(dy[2], orig_dy[2], 8)
 
     def testCheckFitValues(self):
         '''Assure fit values are correct'''
         # Good values
         self.assertTrue(self.widget.checkFitValues(self.widget.txtFitRangeMin))
-        self.assertEqual(self.widget.txtFitRangeMin.palette().color(10).name(), "#f0f0f0")
+        # Colors platform dependent
+        #self.assertEqual(self.widget.txtFitRangeMin.palette().color(10).name(), "#f0f0f0")
         # Bad values
         self.widget.x_is_log = True
         self.widget.txtFitRangeMin.setText("-1.0")

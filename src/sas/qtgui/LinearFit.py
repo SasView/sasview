@@ -69,6 +69,8 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
         self.cstB = fittings.Parameter(self.model, 'B', self.default_B)
         self.transform = transform
 
+        self.setFixedSize(self.minimumSizeHint())
+
         # connect Fit button
         self.cmdFit.clicked.connect(self.fit)
 
@@ -78,15 +80,6 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
         """
         assert(isinstance(label, basestring))
         self.lblRange.setText(label)
-
-    def a(self):
-        return (float(self.txtA.text()), float(self.txtAerr.text()))
-
-    def b(self):
-        return (float(self.txtB.text()), float(self.txtBerr.text()))
-
-    def chi(self):
-        return float(self.txtChi2.text())
 
     def range(self):
         return (float(self.txtFitRangeMin.text()), float(self.txtFitRangeMax.text()))

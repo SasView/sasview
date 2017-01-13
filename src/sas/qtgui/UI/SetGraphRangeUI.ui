@@ -19,6 +19,10 @@
   <property name="windowTitle">
    <string>Set Graph Range</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="main_resources.qrc">
+    <normaloff>:/res/ball.ico</normaloff>:/res/ball.ico</iconset>
+  </property>
   <property name="modal">
    <bool>true</bool>
   </property>
@@ -92,7 +96,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="main_resources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

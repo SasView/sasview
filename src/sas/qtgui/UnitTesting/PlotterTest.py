@@ -13,6 +13,8 @@ import path_prepare
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import Data2D
 from UnitTesting.TestUtils import WarningTestNotImplemented
+from sas.qtgui.LinearFit import LinearFit
+from sas.qtgui.PlotProperties import PlotProperties
 
 # Tested module
 import sas.qtgui.Plotter as Plotter
@@ -223,35 +225,190 @@ class PlotterTest(unittest.TestCase):
 
     def testOnLinearFit(self):
         """ Checks the response to LinearFit call """
-        WarningTestNotImplemented()
+        self.plotter.plot(self.data)
+        self.plotter.show()
+        QtGui.QDialog.exec_ = MagicMock(return_value=QtGui.QDialog.Accepted)
+
+        # Just this one plot
+        self.assertEqual(len(self.plotter.plot_dict.keys()), 1)
+        self.plotter.onLinearFit(1)
+
+        # Check that exec_ got called
+        self.assertTrue(QtGui.QDialog.exec_.called)
 
     def testOnRemovePlot(self):
         """ Assure plots get removed when requested """
-        WarningTestNotImplemented()
+        # Add two plots
+        self.plotter.show()
+        self.plotter.plot(self.data)
+        data2 = Data1D(x=[1.0, 2.0, 3.0],
+                       y=[11.0, 12.0, 13.0],
+                       dx=[0.1, 0.2, 0.3],
+                       dy=[0.1, 0.2, 0.3])
+        data2.title="Test data 2"
+        data2.name="Test name 2"
+        data2.id = 2
+        self.plotter.plot(data2)
+
+        # Assure the plotter window is visible
+        self.assertTrue(self.plotter.isVisible())
+
+        # Assure we have two sets
+        self.assertEqual(len(self.plotter.plot_dict.keys()), 2)
+
+        # Delete one set
+        self.plotter.onRemovePlot(2)
+        # Assure we have two sets
+        self.assertEqual(len(self.plotter.plot_dict.keys()), 1)
+
+        self.plotter.manager = MagicMock()
+
+        # Delete the remaining set
+        self.plotter.onRemovePlot(1)
+        # Assure we have no plots
+        self.assertEqual(len(self.plotter.plot_dict.keys()), 0)
+        # Assure the plotter window is closed
+        self.assertFalse(self.plotter.isVisible())
+
 
     def testRemovePlot(self):
         """ Test plot removal """
-        WarningTestNotImplemented()
+        # Add two plots
+        self.plotter.show()
+        self.plotter.plot(self.data)
+        data2 = Data1D(x=[1.0, 2.0, 3.0],
+                       y=[11.0, 12.0, 13.0],
+                       dx=[0.1, 0.2, 0.3],
+                       dy=[0.1, 0.2, 0.3])
+        data2.title="Test data 2"
+        data2.name="Test name 2"
+        data2.id = 2
+        data2._xaxis = "XAXIS"
+        data2._xunit = "furlong*fortnight^{-1}"
+        data2._yaxis = "YAXIS"
+        data2._yunit = "cake"
+        data2.hide_error = True
+        self.plotter.plot(data2)
+
+        # delete plot 1
+        self.plotter.removePlot(1)
+
+        # See that the labels didn't change
+        xl = self.plotter.ax.xaxis.label.get_text()
+        yl = self.plotter.ax.yaxis.label.get_text()
+        self.assertEqual(xl, "$XAXIS(furlong*fortnight^{-1})$")
+        self.assertEqual(yl, "$YAXIS(cake)$")
+        # The hide_error flag should also remain
+        self.assertTrue(self.plotter.plot_dict[2].hide_error)
 
     def testOnToggleHideError(self):
         """ Test the error bar toggle on plots """
-        WarningTestNotImplemented()
+        # Add two plots
+        self.plotter.show()
+        self.plotter.plot(self.data)
+        data2 = Data1D(x=[1.0, 2.0, 3.0],
+                       y=[11.0, 12.0, 13.0],
+                       dx=[0.1, 0.2, 0.3],
+                       dy=[0.1, 0.2, 0.3])
+        data2.title="Test data 2"
+        data2.name="Test name 2"
+        data2.id = 2
+        data2._xaxis = "XAXIS"
+        data2._xunit = "furlong*fortnight^{-1}"
+        data2._yaxis = "YAXIS"
+        data2._yunit = "cake"
+        error_status = True
+        data2.hide_error = error_status
+        self.plotter.plot(data2)
+
+        # Reverse the toggle
+        self.plotter.onToggleHideError(2)
+        # See that the labels didn't change
+        xl = self.plotter.ax.xaxis.label.get_text()
+        yl = self.plotter.ax.yaxis.label.get_text()
+        self.assertEqual(xl, "$XAXIS(furlong*fortnight^{-1})$")
+        self.assertEqual(yl, "$YAXIS(cake)$")
+        # The hide_error flag should toggle
+        self.assertEqual(self.plotter.plot_dict[2].hide_error, not error_status)
 
     def testOnFitDisplay(self):
         """ Test the fit line display on the chart """
-        WarningTestNotImplemented()
+        self.assertIsInstance(self.plotter.fit_result, Data1D)
+        self.assertEqual(self.plotter.fit_result.symbol, 13)
+        self.assertEqual(self.plotter.fit_result.name, "Fit")
+
+        # fudge some init data
+        fit_data = [[0.0,0.0], [5.0,5.0]]
+        # Call the method
+        self.plotter.plot = MagicMock()
+        self.plotter.onFitDisplay(fit_data)
+        self.assertTrue(self.plotter.plot.called)
+        # Look at arguments passed to .plot()
+        self.plotter.plot.assert_called_with(data=self.plotter.fit_result,
+                                             hide_error=True, marker='-')
 
     def testReplacePlot(self):
         """ Test the plot refresh functionality """
-        WarningTestNotImplemented()
+        # Add original data
+        self.plotter.show()
+        self.plotter.plot(self.data)
+        # See the default labels
+        xl = self.plotter.ax.xaxis.label.get_text()
+        yl = self.plotter.ax.yaxis.label.get_text()
+        self.assertEqual(xl, "$()$")
+        self.assertEqual(yl, "$()$")
 
-    def testReplacePlot(self):
-        """ Test the plot refresh functionality """
-        WarningTestNotImplemented(sys._getframe().f_code.co_name)
+        # Prepare new data
+        data2 = Data1D(x=[1.0, 2.0, 3.0],
+                       y=[11.0, 12.0, 13.0],
+                       dx=[0.1, 0.2, 0.3],
+                       dy=[0.1, 0.2, 0.3])
+        data2.title="Test data 2"
+        data2.name="Test name 2"
+        data2.id = 2
+        data2._xaxis = "XAXIS"
+        data2._xunit = "furlong*fortnight^{-1}"
+        data2._yaxis = "YAXIS"
+        data2._yunit = "cake"
+        error_status = True
+        data2.hide_error = error_status
+
+        # Replace data in plot
+        self.plotter.replacePlot(1, data2)
+
+        # See that the labels changed
+        xl = self.plotter.ax.xaxis.label.get_text()
+        yl = self.plotter.ax.yaxis.label.get_text()
+        self.assertEqual(xl, "$XAXIS(furlong*fortnight^{-1})$")
+        self.assertEqual(yl, "$YAXIS(cake)$")
+        # The hide_error flag should be as set
+        self.assertEqual(self.plotter.plot_dict[2].hide_error, error_status)
 
     def testOnModifyPlot(self):
         """ Test the functionality for changing plot properties """
-        WarningTestNotImplemented()
+        # Prepare new data
+        data2 = Data1D(x=[1.0, 2.0, 3.0],
+                       y=[11.0, 12.0, 13.0],
+                       dx=[0.1, 0.2, 0.3],
+                       dy=[0.1, 0.2, 0.3])
+        data2.title="Test data 2"
+        data2.name="Test name 2"
+        data2.id = 2
+        data2.custom_color = None
+        data2.symbol = 1
+        data2.markersize = 11
+
+        self.plotter.plot(data2)
+
+        with patch('PlotProperties.PlotProperties') as mock:
+            instance = mock.return_value
+            QtGui.QDialog.exec_ = MagicMock(return_value=QtGui.QDialog.Accepted)
+            instance.symbol.return_value = 7
+
+            self.plotter.onModifyPlot(2)
+
+            #print self.plotter.plot_dict[2].symbol
+
 
 if __name__ == "__main__":
     unittest.main()
