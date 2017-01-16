@@ -1,7 +1,5 @@
 from PyQt4 import QtGui
 
-import sas.sasview
-
 from sas.qtgui.PlotUtilities import COLORS, SHAPES
 
 from sas.qtgui.UI.PlotPropertiesUI import Ui_PlotPropertiesUI
@@ -23,7 +21,7 @@ class PlotProperties(QtGui.QDialog, Ui_PlotPropertiesUI):
         self._color = color if color else 0
         self._legend = legend
         self._markersize = marker_size if marker_size else 5
-        self.custom_color = False
+        self.custom_color = False if isinstance(self._color, int) else True
 
         # Fill out the color combobox
         self.cbColor.addItems(COLORS.keys()[:-1])
@@ -67,14 +65,14 @@ class PlotProperties(QtGui.QDialog, Ui_PlotPropertiesUI):
         else:
             return self.cbColor.currentIndex()
 
-    def onColorChange(self, event):
+    def onColorChange(self):
         """
         Pop up the standard Qt color change dialog
         """
         # Pick up the chosen color
-        self._color = QtGui.QColorDialog.getColor(parent=self)
+        proposed_color = QtGui.QColorDialog.getColor(parent=self)
         # Update the text control
-        if self._color.isValid():
+        if proposed_color.isValid():
             # Block currentIndexChanged
             self.cbColor.blockSignals(True)
             # Add Custom to the color combo box
@@ -84,9 +82,9 @@ class PlotProperties(QtGui.QDialog, Ui_PlotPropertiesUI):
             self.cbColor.blockSignals(False)
             # Save the color as #RRGGBB
             self.custom_color = True
-            self._color = str(self._color.name())
+            self._color = str(proposed_color.name())
    
-    def onColorIndexChange(self, index):
+    def onColorIndexChange(self):
         """
         Dynamically add/remove "Custom" color index
         """
@@ -95,6 +93,4 @@ class PlotProperties(QtGui.QDialog, Ui_PlotPropertiesUI):
         self.custom_color = False
         if custom_index > -1:
             self.cbColor.removeItem(custom_index)
-
-        pass # debug hook
         

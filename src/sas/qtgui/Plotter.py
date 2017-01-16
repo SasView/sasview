@@ -437,7 +437,6 @@ class PlotterWidget(PlotterBase):
         Allows for MPL modifications to the selected plot
         """
         selected_plot = self.plot_dict[id]
-        current = selected_plot.hide_error
 
         # Old style color - single integer for enum color
         # New style color - #hhhhhh
@@ -454,16 +453,11 @@ class PlotterWidget(PlotterBase):
                                 marker_size=marker_size,
                                 legend=legend)
         if plotPropertiesWidget.exec_() == QtGui.QDialog.Accepted:
-            marker = plotPropertiesWidget.marker()
-            marker_size = plotPropertiesWidget.markersize()
-            color = plotPropertiesWidget.color()
-            legend = plotPropertiesWidget.legend()
-
             # Update Data1d
-            selected_plot.markersize = marker_size
-            selected_plot.custom_color = color
-            selected_plot.symbol = marker
-            selected_plot.title = legend
+            selected_plot.markersize = plotPropertiesWidget.markersize()
+            selected_plot.custom_color = plotPropertiesWidget.color()
+            selected_plot.symbol = plotPropertiesWidget.marker()
+            selected_plot.title = plotPropertiesWidget.legend()
 
             # Redraw the plot
             self.replacePlot(id, selected_plot)

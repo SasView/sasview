@@ -56,7 +56,7 @@ class PlotPropertiesTest(unittest.TestCase):
         # Accept the new color
         QtGui.QColorDialog.getColor = MagicMock(return_value=QtGui.QColor(255, 0, 255))
 
-        self.widget.onColorChange(None)
+        self.widget.onColorChange()
 
         self.assertEqual(self.widget.color(), "#ff00ff")
         self.assertTrue(self.widget.custom_color)
@@ -71,7 +71,7 @@ class PlotPropertiesTest(unittest.TestCase):
         # Cancel the dialog now
         bad_color = QtGui.QColor() # constructs an invalid color
         QtGui.QColorDialog.getColor = MagicMock(return_value=bad_color)
-        self.widget.onColorChange(None)
+        self.widget.onColorChange()
 
         self.assertEqual(self.widget.color(), 1)
         self.assertFalse(self.widget.custom_color)
@@ -82,7 +82,7 @@ class PlotPropertiesTest(unittest.TestCase):
     def testOnColorIndexChange(self):
         '''Test the response to color index change event'''
         # Intitial population of the color combo box
-        self.widget.onColorIndexChange(0)
+        self.widget.onColorIndexChange()
         self.assertEqual(self.widget.cbColor.count(), 7)
         # Block the callback so we can update the cb
         self.widget.cbColor.blockSignals(True)
@@ -93,7 +93,7 @@ class PlotPropertiesTest(unittest.TestCase):
         # Assert the new CB
         self.assertEqual(self.widget.cbColor.count(), 8)
         # Call the method
-        self.widget.onColorIndexChange(0)
+        self.widget.onColorIndexChange()
         # see that the Custom entry disappeared
         self.assertEqual(self.widget.cbColor.count(), 7)
         self.assertEqual(self.widget.cbColor.findText("Custom"), -1)
