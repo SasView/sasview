@@ -58,16 +58,7 @@ class Reader:
                 except:
                     raise  RuntimeError, "sesans_reader: cannot open %s" % path
                 buff = input_f.read()
-#                print buff
                 lines = buff.splitlines()
-#                print lines
-                #Jae could not find python universal line spliter:
-                #keep the below for now
-                # some ascii data has \r line separator,
-                # try it when the data is on only one long line
-#                if len(lines) < 2 :
-#                    lines = buff.split('\r')
-                 
                 x  = numpy.zeros(0)
                 y  = numpy.zeros(0)
                 dy = numpy.zeros(0)
@@ -82,26 +73,9 @@ class Reader:
                 tlam  = numpy.zeros(0)
                 tdlam = numpy.zeros(0)
                 tdx = numpy.zeros(0)
-#                print "all good"
-                output = SESANSData1D(x=x, y=y, lam=lam, dy=dy, dx=dx, dlam=dlam)
-#                print output                
+                output = Data1D(x=x, y=y, lam=lam, dy=dy, dx=dx, dlam=dlam, isSesans=True)
                 self.filename = output.filename = basename
 
-#                #Initialize counters for data lines and header lines.
-#                is_data = False  # Has more than 5 lines
-#                # More than "5" lines of data is considered as actual
-#                # data unless that is the only data
-#                mum_data_lines = 5
-#                # To count # of current data candidate lines
-#                i = -1
-#                # To count total # of previous data candidate lines
-#                i1 = -1
-#                # To count # of header lines
-#                j = -1
-#                # Helps to count # of header lines
-#                j1 = -1
-#                #minimum required number of columns of data; ( <= 4).
-#                lentoks = 2
                 paramnames=[]
                 paramvals=[]
                 zvals=[]
@@ -110,8 +84,7 @@ class Reader:
                 dlamvals=[]
                 Pvals=[]
                 dPvals=[]
-#                print x
-#                print zvals
+
                 for line in lines:
                     # Initial try for CSV (split on ,)
                     line=line.strip()
@@ -121,11 +94,11 @@ class Reader:
                         paramvals.append(toks[1])
                     if len(toks)>5:
                         zvals.append(toks[0])
-                        dzvals.append(toks[1])
-                        lamvals.append(toks[2])
-                        dlamvals.append(toks[3])
-                        Pvals.append(toks[4])
-                        dPvals.append(toks[5])
+                        dzvals.append(toks[3])
+                        lamvals.append(toks[4])
+                        dlamvals.append(toks[5])
+                        Pvals.append(toks[1])
+                        dPvals.append(toks[2])
                     else:
                         continue
 
@@ -139,8 +112,10 @@ class Reader:
                 data_conv_z = None
                 default_z_unit = "A"
                 data_conv_P = None
-                default_p_unit = " "
+                default_p_unit = " " # Adjust unit for axis (L^-3)
                 lam_unit = lam_header[1].replace("[","").replace("]","")
+                if lam_unit == 'AA':
+                    lam_unit = 'A'
                 varheader=[zvals[0],dzvals[0],lamvals[0],dlamvals[0],Pvals[0],dPvals[0]]
                 valrange=range(1, len(zvals))
                 for i in valrange:
@@ -160,24 +135,25 @@ class Reader:
 
                 output.x, output.x_unit = self._unit_conversion(x, lam_unit, default_z_unit)
                 output.y = y
+                output.y_unit = '\AA^{-2} cm^{-1}'  # output y_unit added
                 output.dx, output.dx_unit = self._unit_conversion(dx, lam_unit, default_z_unit)
                 output.dy = dy
                 output.lam, output.lam_unit = self._unit_conversion(lam, lam_unit, default_z_unit)
                 output.dlam, output.dlam_unit = self._unit_conversion(dlam, lam_unit, default_z_unit)
 
-                output.xaxis("\rm{z}", output.x_unit)
-                output.yaxis("\\rm{P/P0}", output.y_unit)
+                output.xaxis("\\rm{z}", output.x_unit)
+                output.yaxis("\\rm{ln(P)/(t \lambda^2)}", output.y_unit)  # Adjust label to ln P/(lam^2 t), remove lam column refs
                 # Store loading process information
                 output.meta_data['loader'] = self.type_name
-                output.sample.thickness = float(paramvals[6])
+                #output.sample.thickness = float(paramvals[6])
                 output.sample.name = paramvals[1]
                 output.sample.ID = paramvals[0]
                 zaccept_unit_split = paramnames[7].split("[")
                 zaccept_unit = zaccept_unit_split[1].replace("]","")
-                if zaccept_unit.strip() == '\AA^-1':
+                if zaccept_unit.strip() == '\AA^-1' or zaccept_unit.strip() == '\A^-1':
                     zaccept_unit = "1/A"
                 output.sample.zacceptance=(float(paramvals[7]),zaccept_unit)
-                output.vars=varheader
+                output.vars = varheader
 
                 if len(output.x) < 1:
                     raise RuntimeError, "%s is empty" % path

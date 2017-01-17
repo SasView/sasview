@@ -141,6 +141,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.theory_qmax = None
         self.theory_qmin_x = None
         self.theory_qmax_x = None
+        self.cb1 = None # TODO: remove?
         self.btEditMask = None
         self.btFit = None
         self.sld_axes = None
