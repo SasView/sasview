@@ -7,7 +7,7 @@
 """
 import numpy
 import os
-from sas.sascalc.dataloader.data_info import SESANSData1D
+from sas.sascalc.dataloader.data_info import Data1D
 
 # Check whether we have a converter available
 has_converter = True

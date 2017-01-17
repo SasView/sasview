@@ -25,59 +25,6 @@ from sas.sascalc.data_util.uncertainty import Uncertainty
 import numpy
 import math
 
-class plottable_sesans1D(object):
-    """
-    SESANS is a place holder for 1D SESANS plottables.
-
-    #TODO: This was directly copied from the plottables_1D. Modified Somewhat.
-    #Class has been updated.
-    """
-    # The presence of these should be mutually
-    # exclusive with the presence of Qdev (dx)
-    x = None
-    y = None
-    lam = None
-    dx = None
-    dy = None
-    dlam = None
-    ## Slit smearing length
-    dxl = None
-    ## Slit smearing width
-    dxw = None
-
-    # Units
-    _xaxis = ''
-    _xunit = ''
-    _yaxis = ''
-    _yunit = ''
-
-    def __init__(self, x, y, lam, dx=None, dy=None, dlam=None):
-#        print "SESANS plottable working"
-        self.x = numpy.asarray(x)
-        self.y = numpy.asarray(y)
-        self.lam = numpy.asarray(lam)
-        if dx is not None:
-            self.dx = numpy.asarray(dx)
-        if dy is not None:
-            self.dy = numpy.asarray(dy)
-        if dlam is not None:
-            self.dlam = numpy.asarray(dlam)
-
-    def xaxis(self, label, unit):
-        """
-        set the x axis label and unit
-        """
-        self._xaxis = label
-        self._xunit = unit
-
-    def yaxis(self, label, unit):
-        """
-        set the y axis label and unit
-        """
-        self._yaxis = label
-        self._yunit = unit
-
-
 class plottable_1D(object):
     """
     Data1D is a place holder for 1D plottables.
