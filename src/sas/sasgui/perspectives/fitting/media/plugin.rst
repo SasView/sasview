@@ -567,7 +567,7 @@ Some non-standard constants and functions are also provided:
         $x^2$
     cube(x):
         $x^3$
-    sinc(x):
+    sas_sinx_x(x):
         $\sin(x)/x$, with limit $\sin(0)/0 = 1$.
     powr(x, y):
         $x^y$ for $x \ge 0$; this is faster than general $x^y$ on some GPUs.
@@ -668,7 +668,7 @@ file in the order given, otherwise these functions will not be available.
         :code:`source = ["lib/polevl.c", "lib/sas_J0.c", "lib/sas_J1.c", "lib/sas_JN.c", ...]`
         (`link to Bessel function's code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/sas_JN.c>`_)
 
-    Si(x):
+    sas_Si(x):
         Sine integral $\text{Si}(x) = \int_0^x \tfrac{\sin t}{t}\,dt$.
 
         This function uses Taylor series for small and large arguments:
@@ -692,7 +692,7 @@ file in the order given, otherwise these functions will not be available.
         :code:`source = ["lib/Si.c", ...]`
         (`link to code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/Si.c>`_)
 
-    sph_j1c(x):
+    sas_3j1x_x(x):
         Spherical Bessel form
         $\text{sph_j1c}(x) = 3 j_1(x)/x = 3 (\sin(x) - x \cos(x))/x^3$,
         with a limiting value of 1 at $x=0$, where $j_1(x)$ is the spherical
@@ -700,11 +700,11 @@ file in the order given, otherwise these functions will not be available.
 
         This function uses a Taylor series for small $x$ for numerical accuracy.
 
-        :code:`source = ["lib/sph_j1c.c", ...]`
-        (`link to code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/sph_j1c.c>`_)
+        :code:`source = ["lib/sas_3j1x_x.c", ...]`
+        (`link to code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/sas_3j1x_x.c>`_)
 
 
-    sas_J1c(x):
+    sas_2J1x_x(x):
         Bessel form $\text{sas_J1c}(x) = 2 J_1(x)/x$, with a limiting value
         of 1 at $x=0$, where $J_1(x)$ is the Bessel function of first kind
         and first order.
