@@ -44,6 +44,7 @@ from sas.sasgui.perspectives.calculator.model_editor import TextDialog
 from sas.sasgui.perspectives.calculator.model_editor import EditorWindow
 from sas.sasgui.guiframe.gui_manager import MDIFrame
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
+from sas.sasgui.perspectives.fitting.gpu_options import GpuOptions
 
 from . import models
 
@@ -191,6 +192,10 @@ class Plugin(PluginBase):
         wx.EVT_MENU(owner, self.id_bumps_options, self.on_bumps_options)
         self.bumps_options_menu = self.menu1.FindItemById(self.id_bumps_options)
         self.bumps_options_menu.Enable(True)
+
+        self.id_gpu_options_panel = wx.NewId()
+        self.menu1.Append(self.id_gpu_options_panel, "OpenCL Options", "Choose OpenCL driver or turn it off")
+        wx.EVT_MENU(owner, self.id_gpu_options_panel, self.on_gpu_options)
 
         self.id_result_panel = wx.NewId()
         self.menu1.Append(self.id_result_panel, "Fit Results", "Show fit results panel")
@@ -800,6 +805,13 @@ class Plugin(PluginBase):
         """
         self.result_frame.Show()
         self.result_frame.Raise()
+
+    def on_gpu_options(self, event=None):
+        """
+        Make the Fit Results panel visible.
+        """
+        dialog = GpuOptions(None, wx.ID_ANY, "")
+        dialog.Show()
 
     def stop_fit(self, uid):
         """

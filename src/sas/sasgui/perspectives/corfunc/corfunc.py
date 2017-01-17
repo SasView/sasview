@@ -66,7 +66,7 @@ class Plugin(PluginBase):
         if graph.selected_plottable not in plotpanel.plots:
             return []
         data = plotpanel.plots[graph.selected_plottable]
-        if data.id == IQ_DATA_LABEL or data.id == IQ_EXTRAPOLATED_DATA_LABEL or data.id == TRANSFORM_LABEL:
+        if data.id == IQ_DATA_LABEL or data.id == IQ_EXTRAPOLATED_DATA_LABEL or data.id == TRANSFORM_LABEL1 or data.id == TRANSFORM_LABEL3:
             return []
         item = plotpanel.plots[graph.selected_plottable]
         if item.__class__.__name__ is "Data2D":
@@ -178,7 +178,7 @@ class Plugin(PluginBase):
             if label == IQ_EXTRAPOLATED_DATA_LABEL:
                 # Show the extrapolation as a curve instead of points
                 new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
-        elif label == TRANSFORM_LABEL:
+        elif label == TRANSFORM_LABEL1 or label == TRANSFORM_LABEL3:
             new_plot.xaxis("{x}", 'A')
             new_plot.yaxis("{\\Gamma}", '')
             # Show transform on a linear scale

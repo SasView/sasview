@@ -151,6 +151,7 @@ WELCOME_PANEL_ON = config.WELCOME_PANEL_ON
 SPLASH_SCREEN_WIDTH = config.SPLASH_SCREEN_WIDTH
 SPLASH_SCREEN_HEIGHT = config.SPLASH_SCREEN_HEIGHT
 SS_MAX_DISPLAY_TIME = config.SS_MAX_DISPLAY_TIME
+SAS_OPENCL = config.SAS_OPENCL
 if not WELCOME_PANEL_ON:
     WELCOME_PANEL_SHOW = False
 else:
@@ -175,6 +176,7 @@ try:
         DEFAULT_OPEN_FOLDER = os.path.abspath(open_folder)
     else:
         DEFAULT_OPEN_FOLDER = PATH_APP
+    SAS_OPENCL = custom_config.SAS_OPENCL
 except:
     DATALOADER_SHOW = True
     TOOLBAR_SHOW = True
@@ -189,7 +191,7 @@ except:
     DEFAULT_PERSPECTIVE = None
     CLEANUP_PLOT = False
     DEFAULT_OPEN_FOLDER = PATH_APP
-
+    SAS_OPENCL = None
 DEFAULT_STYLE = config.DEFAULT_STYLE
 
 PLUGIN_STATE_EXTENSIONS = config.PLUGIN_STATE_EXTENSIONS
@@ -224,6 +226,9 @@ if sys.platform.count("win32") < 1:
         PARENT_FRAME = wx.Frame
         CHILD_FRAME = wx.Frame
 
+#Initiliaze enviromental variable with custom setting but only if variable not set
+if SAS_OPENCL and not "SAS_OPENCL" in os.environ:
+    os.environ["SAS_OPENCL"] = SAS_OPENCL
 
 class ViewerFrame(PARENT_FRAME):
     """
@@ -2103,9 +2108,39 @@ class ViewerFrame(PARENT_FRAME):
         """
         Quit the application
         """
+        #IF SAS_OPENCL is set, settings are stored in the custom config file
+        self._write_opencl_config_file()
         logging.info(" --- SasView session was closed --- \n")
         wx.Exit()
         sys.exit()
+
+    def _write_opencl_config_file(self):
+        """
+        Writes OpenCL settings to custom config file, so they can be remmbered
+        from session to session
+        """
+        if custom_config is not None:
+            sas_opencl = os.environ.get("SAS_OPENCL",None)
+            new_config_lines = []
+            config_file = open(custom_config.__file__)
+            config_lines = config_file.readlines()
+            for line in config_lines:
+                if "SAS_OPENCL" in line:
+                    if sas_opencl:
+                        new_config_lines.append("SAS_OPENCL = \""+sas_opencl+"\"")
+                    else:
+                        new_config_lines.append("SAS_OPENCL = None")
+                else:
+                    new_config_lines.append(line)
+            config_file.close()
+
+            #If custom_config is None, settings will not be remmbered
+            new_config_file = open(custom_config.__file__,"w")
+            new_config_file.writelines(new_config_lines)
+            new_config_file.close()
+        else:
+            logging.info("Failed to save OPENCL settings in custom config file")
+
 
     def _check_update(self, event=None):
         """
