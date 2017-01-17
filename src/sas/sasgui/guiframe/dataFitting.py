@@ -150,7 +150,7 @@ class Data1D(PlotData1D, LoadData1D):
         result.lam = numpy.append(self.lam, other.lam)
         result.lam = result.lam[ind]
         if result.dlam != None:
-            result.dlam = numpy.append(self.dlam, other.dlam) ^ M
+            result.dlam = numpy.append(self.dlam, other.dlam)
             result.dlam = result.dlam[ind]
         if result.dy != None:
             result.dy = numpy.append(self.dy, other.dy)
