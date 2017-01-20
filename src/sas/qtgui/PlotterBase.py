@@ -2,6 +2,7 @@ import pylab
 import numpy
 
 from PyQt4 import QtGui
+from PyQt4 import QtCore
 
 # TODO: Replace the qt4agg calls below with qt5 equivalent.
 # Requires some code modifications.
@@ -15,6 +16,8 @@ import matplotlib.pyplot as plt
 DEFAULT_CMAP = pylab.cm.jet
 from sas.sasgui.plottools.binder import BindArtist
 
+import sas.qtgui.GuiUtils as GuiUtils
+from sas.sasgui.guiframe.dataFitting import Data1D, Data2D
 from sas.qtgui.ScaleProperties import ScaleProperties
 from sas.qtgui.WindowTitle import WindowTitle
 import sas.qtgui.PlotHelper as PlotHelper
@@ -36,6 +39,9 @@ class PlotterBase(QtGui.QWidget):
 
         # ... and the toolbar with all the default MPL buttons
         self.toolbar = NavigationToolbar(self.canvas, self)
+
+        # Simple window for data display
+        self.txt_widget = QtGui.QTextEdit(None)
 
         # Set the layout and place the canvas widget in it.
         layout = QtGui.QVBoxLayout()
@@ -473,3 +479,34 @@ class PlotterBase(QtGui.QWidget):
                 ax.set_xlim(self._scale_xlo, self._scale_xhi)
             if self._scale_yhi is not None and self._scale_ylo is not None:
                 ax.set_ylim(self._scale_ylo, self._scale_yhi)
+
+    def onDataInfo(self, plot_data):
+        """
+        Displays data info text window for the selected plot
+        """
+        if isinstance(plot_data, Data1D):
+            text_to_show = GuiUtils.retrieveData1d(plot_data)
+        else:
+            text_to_show = GuiUtils.retrieveData2d(plot_data)
+        # Hardcoded sizes to enable full width rendering with default font
+        self.txt_widget.resize(420,600)
+
+        self.txt_widget.setReadOnly(True)
+        self.txt_widget.setWindowFlags(QtCore.Qt.Window)
+        self.txt_widget.setWindowIcon(QtGui.QIcon(":/res/ball.ico"))
+        self.txt_widget.setWindowTitle("Data Info: %s" % plot_data.filename)
+        self.txt_widget.insertPlainText(text_to_show)
+
+        self.txt_widget.show()
+        # Move the slider all the way up, if present
+        vertical_scroll_bar = self.txt_widget.verticalScrollBar()
+        vertical_scroll_bar.triggerAction(QtGui.QScrollBar.SliderToMinimum)
+
+    def onSavePoints(self, plot_data):
+        """
+        Saves plot data to a file
+        """
+        if isinstance(plot_data, Data1D):
+            GuiUtils.saveData1D(plot_data)
+        else:
+            GuiUtils.saveData2D(plot_data)

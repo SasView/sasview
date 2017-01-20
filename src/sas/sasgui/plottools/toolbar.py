@@ -34,8 +34,8 @@ class NavigationToolBar(NavigationToolbar2WxAgg):
         NavigationToolbar2WxAgg.__init__(self, canvas)
 
     # CRUFT: mpl 1.1 uses save rather than save_figure
-    try: save_figure = NavigationToolbar2WxAgg.save
-    except AttributeError: pass
+    #try: save_figure = NavigationToolbar2WxAgg.save
+    #except AttributeError: pass
     
     def _init_toolbar(self):
         self._parent = self.canvas.GetParent()

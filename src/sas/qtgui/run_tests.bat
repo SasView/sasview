@@ -21,3 +21,4 @@ python -m UnitTesting.SetGraphRangeTest
 python -m UnitTesting.LinearFitTest
 python -m UnitTesting.PlotPropertiesTest
 python -m UnitTesting.PlotUtilitiesTest
+python -m UnitTesting.ColorMapTest

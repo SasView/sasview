@@ -27,8 +27,6 @@ class PlotterWidget(PlotterBase):
         # Dictionary of {plot_id:Data1d}
         self.plot_dict = {}
 
-        # Simple window for data display
-        self.txt_widget = QtGui.QTextEdit(None)
         # Window for text add
         self.addText = AddText(self)
 
@@ -334,31 +332,6 @@ class PlotterWidget(PlotterBase):
             self.ax.set_xlim(x_range)
             self.ax.set_ylim(y_range)
             self.canvas.draw_idle()
-
-    def onDataInfo(self, plot_data):
-        """
-        Displays data info text window for the selected plot
-        """
-        text_to_show = GuiUtils.retrieveData1d(plot_data)
-        # Hardcoded sizes to enable full width rendering with default font
-        self.txt_widget.resize(420,600)
-
-        self.txt_widget.setReadOnly(True)
-        self.txt_widget.setWindowFlags(QtCore.Qt.Window)
-        self.txt_widget.setWindowIcon(QtGui.QIcon(":/res/ball.ico"))
-        self.txt_widget.setWindowTitle("Data Info: %s" % plot_data.filename)
-        self.txt_widget.insertPlainText(text_to_show)
-
-        self.txt_widget.show()
-        # Move the slider all the way up, if present
-        vertical_scroll_bar = self.txt_widget.verticalScrollBar()
-        vertical_scroll_bar.triggerAction(QtGui.QScrollBar.SliderToMinimum)
-
-    def onSavePoints(self, plot_data):
-        """
-        Saves plot data to a file
-        """
-        GuiUtils.saveData1D(plot_data)
 
     def onLinearFit(self, id):
         """

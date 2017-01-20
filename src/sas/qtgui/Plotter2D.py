@@ -1,14 +1,17 @@
 import copy
 import numpy
 import pylab
+import functools
 
 from PyQt4 import QtGui
+from PyQt4 import QtCore
 
 DEFAULT_CMAP = pylab.cm.jet
 from mpl_toolkits.mplot3d import Axes3D
 
 import sas.qtgui.PlotUtilities as PlotUtilities
 from sas.qtgui.PlotterBase import PlotterBase
+from sas.qtgui.ColorMap import ColorMap
 from sas.sasgui.guiframe.dataFitting import Data2D
 
 # Minimum value of Z for which we will present data.
@@ -21,6 +24,10 @@ class Plotter2DWidget(PlotterBase):
     def __init__(self, parent=None, manager=None, quickplot=False, dimension=2):
         self.dimension = dimension
         super(Plotter2DWidget, self).__init__(parent, manager=manager, quickplot=quickplot)
+
+        self.cmap = DEFAULT_CMAP.name
+        # Default scale
+        self.scale = 'log_{10}'
 
     @property
     def data(self):
@@ -54,25 +61,7 @@ class Plotter2DWidget(PlotterBase):
         assert(self._data)
 
         # Toggle the scale
-        zmin_2D_temp = self.zmin
-        zmax_2D_temp = self.zmax
-        # self.scale predefined in the baseclass
-        if self.scale == 'log_{10}':
-            self.scale = 'linear'
-            if not self.zmin is None:
-                zmin_2D_temp = numpy.power(10, self.zmin)
-            if not self.zmax is None:
-                zmax_2D_temp = numpy.power(10, self.zmax)
-        else:
-            self.scale = 'log_{10}'
-            if not self.zmin is None:
-                # min log value: no log(negative)
-                if self.zmin <= 0:
-                    zmin_2D_temp = MIN_Z
-                else:
-                    zmin_2D_temp = numpy.log10(self.zmin)
-            if not self.zmax is None:
-                zmax_2D_temp = numpy.log10(self.zmax)
+        zmin_2D_temp, zmax_2D_temp = self.calculateDepth()
 
         # Prepare and show the plot
         self.showPlot(data=self.data.data,
@@ -84,11 +73,67 @@ class Plotter2DWidget(PlotterBase):
                       cmap=self.cmap, zmin=zmin_2D_temp,
                       zmax=zmax_2D_temp)
 
+    def calculateDepth(self):
+        """
+        Re-calculate the plot depth parameters depending on the scale
+        """
+        # Toggle the scale
+        zmin_temp = self.zmin
+        zmax_temp = self.zmax
+        # self.scale predefined in the baseclass
+        if self.scale == 'log_{10}':
+            if self.zmin is not None:
+                zmin_temp = numpy.power(10, self.zmin)
+            if self.zmax is not None:
+                zmax_temp = numpy.power(10, self.zmax)
+        else:
+            if self.zmin is not None:
+                # min log value: no log(negative)
+                zmin_temp = MIN_Z if self.zmin <= 0 else numpy.log10(self.zmin)
+            if self.zmax is not None:
+                zmax_temp = numpy.log10(self.zmax)
+
+        return (zmin_temp, zmax_temp)
+
+
     def createContextMenu(self):
         """
         Define common context menu and associated actions for the MPL widget
         """
         self.defaultContextMenu()
+
+        self.contextMenu.addSeparator()
+        self.actionDataInfo = self.contextMenu.addAction("&DataInfo")
+        self.actionDataInfo.triggered.connect(
+                              functools.partial(self.onDataInfo, self.data))
+
+        self.actionSavePointsAsFile = self.contextMenu.addAction("&Save Points as a File")
+        self.actionSavePointsAsFile.triggered.connect(
+                                functools.partial(self.onSavePoints, self.data))
+        self.contextMenu.addSeparator()
+
+        self.actionCircularAverage = self.contextMenu.addAction("&Perform Circular Average")
+        self.actionCircularAverage.triggered.connect(self.onCircularAverage)
+
+        self.actionSectorView = self.contextMenu.addAction("&Sector [Q View]")
+        self.actionSectorView.triggered.connect(self.onSectorView)
+        self.actionAnnulusView = self.contextMenu.addAction("&Annulus [Phi View]")
+        self.actionAnnulusView.triggered.connect(self.onAnnulusView)
+        self.actionBoxSum = self.contextMenu.addAction("&Box Sum")
+        self.actionBoxSum.triggered.connect(self.onBoxSum)
+        self.actionBoxAveragingX = self.contextMenu.addAction("&Box Averaging in Qx")
+        self.actionBoxAveragingX.triggered.connect(self.onBoxAveragingX)
+        self.actionBoxAveragingY = self.contextMenu.addAction("&Box Averaging in Qy")
+        self.actionBoxAveragingY.triggered.connect(self.onBoxAveragingY)
+        self.contextMenu.addSeparator()
+        self.actionEditGraphLabel = self.contextMenu.addAction("&Edit Graph Label")
+        self.actionEditGraphLabel.triggered.connect(self.onEditgraphLabel)
+        self.contextMenu.addSeparator()
+        self.actionColorMap = self.contextMenu.addAction("&2D Color Map")
+        self.actionColorMap.triggered.connect(self.onColorMap)
+        self.contextMenu.addSeparator()
+        self.actionChangeScale = self.contextMenu.addAction("Toggle Linear/Log Scale")
+        self.actionChangeScale.triggered.connect(self.onToggleScale)
 
     def createContextMenuQuick(self):
         """
@@ -110,7 +155,64 @@ class Plotter2DWidget(PlotterBase):
         """
         Toggle axis and replot image
         """
+        # self.scale predefined in the baseclass
+        if self.scale == 'log_{10}':
+            self.scale = 'linear'
+        else:
+            self.scale = 'log_{10}'
+
         self.plot()
+
+    def onCircularAverage(self):
+        """
+        """
+        pass
+
+    def onSectorView(self):
+        """
+        """
+        pass
+
+    def onAnnulusView(self):
+        """
+        """
+        pass
+
+    def onBoxSum(self):
+        """
+        """
+        pass
+
+    def onBoxAveragingX(self):
+        """
+        """
+        pass
+
+    def onBoxAveragingY(self):
+        """
+        """
+        pass
+
+    def onEditgraphLabel(self):
+        """
+        """
+        pass
+
+    def onColorMap(self):
+        """
+        Display the color map dialog and modify the plot's map accordingly
+        """
+        color_map_dialog = ColorMap(self, cmap=self.cmap,
+                                    zmin=self.vmin,
+                                    zmax=self.vmax,
+                                    data=self.data)
+
+        if color_map_dialog.exec_() == QtGui.QDialog.Accepted:
+            self.cmap = color_map_dialog.cmap()
+            self.vmin, self.vmax = color_map_dialog.norm()
+            # Redraw the chart with new cmap
+            self.plot()
+        pass
 
     def showPlot(self, data, qx_data, qy_data, xmin, xmax, ymin, ymax,
                  zmin, zmax, color=0, symbol=0, markersize=0,
@@ -139,7 +241,7 @@ class Plotter2DWidget(PlotterBase):
         if self.scale == 'log_{10}':
             try:
                 if  self.zmin <= 0  and len(output[output > 0]) > 0:
-                    zmin_temp = self.zmin_2D
+                    zmin_temp = self.zmin
                     output[output > 0] = numpy.log10(output[output > 0])
                 elif self.zmin <= 0:
                     zmin_temp = self.zmin
@@ -183,6 +285,9 @@ class Plotter2DWidget(PlotterBase):
 
             cb.update_bruteforce(im)
             cb.set_label('$' + self.scale + '$')
+
+            self.vmin = cb.vmin
+            self.vmax = cb.vmax
 
         else:
             # clear the previous 2D from memory

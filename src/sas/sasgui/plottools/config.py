@@ -63,9 +63,9 @@ matplotlib.rcParams['legend.numpoints'] = 1
 
 
 # this should happen after initial matplotlib configuration
-from .toolbar import NavigationToolBar
-from matplotlib.backends import backend_wxagg
-backend_wxagg.NavigationToolbar2WxAgg = NavigationToolBar
+#from .toolbar import NavigationToolBar
+#from matplotlib.backends import backend_wxagg
+#backend_wxagg.NavigationToolbar2WxAgg = NavigationToolBar
 
 # CRUFT: bumps 0.7.5.6 and older uses wrong toolbar
-backend_wxagg.NavigationToolbar2Wx = NavigationToolBar
+#backend_wxagg.NavigationToolbar2Wx = NavigationToolBar

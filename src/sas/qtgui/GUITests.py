@@ -22,6 +22,7 @@ from UnitTesting import SetGraphRangeTest
 from UnitTesting import LinearFitTest
 from UnitTesting import PlotPropertiesTest
 from UnitTesting import PlotUtilitiesTest
+from UnitTesting import ColorMapTest
 
 def suite():
     suites = (
@@ -47,6 +48,7 @@ def suite():
         unittest.makeSuite(LinearFitTest.LinearFitTest, 'test'),
         unittest.makeSuite(PlotPropertiesTest.PlotPropertiesTest, 'test'),
         unittest.makeSuite(PlotUtilitiesTest.PlotUtilitiesTest, 'test'),
+        unittest.makeSuite(ColorMapTest.ColorMapTest, 'test'),
     )
     return unittest.TestSuite(suites)
 

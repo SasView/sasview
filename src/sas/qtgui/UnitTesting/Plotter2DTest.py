@@ -12,6 +12,7 @@ import path_prepare
 #######
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import Data2D
+from UnitTesting.TestUtils import WarningTestNotImplemented
 
 # Tested module
 import sas.qtgui.Plotter2D as Plotter2D
@@ -59,6 +60,14 @@ class Plotter2DTest(unittest.TestCase):
         self.plotter.plot()
 
         self.assertTrue(FigureCanvas.draw_idle.called)
+
+    def testCalculateDepth(self):
+        ''' Test the depth calculator '''
+        WarningTestNotImplemented()
+
+    def testOnColorMap(self):
+        ''' Respond to the color map event '''
+        WarningTestNotImplemented()
 
     def testOnToggleScale(self):
         """ Respond to the event by replotting """
