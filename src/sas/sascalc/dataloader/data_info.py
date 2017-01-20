@@ -488,6 +488,9 @@ class DataInfo(object):
     meta_data = None
     ## Loading errors
     errors = None
+    ## SESANS data check
+    isSesans = None
+
 
     def __init__(self):
         """
@@ -520,6 +523,8 @@ class DataInfo(object):
         self.meta_data = {}
         ## Loading errors
         self.errors = []
+        ## SESANS data check
+        self.isSesans = False
 
     def append_empty_process(self):
         """
@@ -693,18 +698,19 @@ class Data1D(plottable_1D, DataInfo):
     """
     1D data class
     """
-    def __init__(self, x=None, y=None, dx=None, dy=None, lam=None, dlam=None, isSesans=False):
-        self.isSesans = isSesans
+    def __init__(self, x=None, y=None, dx=None, dy=None, lam=None, dlam=None, isSesans=None):
         DataInfo.__init__(self)
         plottable_1D.__init__(self, x, y, dx, dy,None, None, lam, dlam)
-        if self.isSesans:
-            x_unit = 'A'
-            y_unit = 'pol'
-        elif not self.isSesans: # it's SANS data! (Could also be simple else statement, but i prefer exhaustive conditionals...-JHB)
-            x_unit = '1/A'
-            y_unit = '1/cm'
-        else: # and if it's neither, you get punished!
-            raise(TypeError,'This is neither SANS nor SESANS data, what the hell are you doing??')
+        self.isSesans = isSesans
+        try:
+            if self.isSesans: # the data is SESANS
+                x_unit = 'A'
+                y_unit = 'pol'
+            elif not self.isSesans: # the data is SANS
+                x_unit = '1/A'
+                y_unit = '1/cm'
+        except: # the data is not recognized/supported, and the user is notified
+            raise(TypeError, 'data not recognized, check documentation for supported 1D data formats')
 
     def __str__(self):
         """
@@ -926,12 +932,14 @@ class Data2D(plottable_2D, DataInfo):
 
     def __init__(self, data=None, err_data=None, qx_data=None,
                  qy_data=None, q_data=None, mask=None,
-                 dqx_data=None, dqy_data=None):
-        self.y_bins = []
-        self.x_bins = []
+                 dqx_data=None, dqy_data=None, isSesans=None):
         DataInfo.__init__(self)
         plottable_2D.__init__(self, data, err_data, qx_data,
                               qy_data, q_data, mask, dqx_data, dqy_data)
+        self.y_bins = []
+        self.x_bins = []
+        self.isSesans=isSesans
+
         if len(self.detector) > 0:
             raise RuntimeError, "Data2D: Detector bank already filled at init"
 

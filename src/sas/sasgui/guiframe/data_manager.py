@@ -60,11 +60,15 @@ class DataManager(object):
         """
         
         if issubclass(Data2D, data.__class__):
-            new_plot = Data2D(image=None, err_image=None) 
-        elif data.meta_data['loader'] == 'SESANS':
-            new_plot = Data1D(x=[], y=[], dx=None, dy=None, lam=None, dlam=None, isSesans=True)
+            new_plot = Data2D(image=None, err_image=None, isSesans=data.isSesans) # For now, isSesans for 2D data is always false
         else:
-            new_plot = Data1D(x=[], y=[], dx=None, dy=None, lam=None, dlam=None) #SESANS check???
+            new_plot = Data1D(x=[], y=[], dx=None, dy=None, lam=None, dlam=None, isSesans=data.isSesans)
+
+
+        #elif data.meta_data['loader'] == 'SESANS':
+        #    new_plot = Data1D(x=[], y=[], dx=None, dy=None, lam=None, dlam=None, isSesans=True)
+        #else:
+        #    new_plot = Data1D(x=[], y=[], dx=None, dy=None, lam=None, dlam=None) #SESANS check???
 
         new_plot.copy_from_datainfo(data)
         data.clone_without_data(clone=new_plot)
