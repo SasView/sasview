@@ -1275,7 +1275,7 @@ class Plugin(PluginBase):
                 if len(data_1d_list) == 0:
                     wx.PostEvent(self.parent, StatusEvent(status=msg, info='error'))
                     return
-                msg += "Prview does not allow multiple data!\n"
+                msg = "Prview does not allow multiple data!\n"
                 msg += "Please select one.\n"
                 if len(data_list) > 1:
                     from pr_widgets import DataDialog

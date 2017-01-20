@@ -12,6 +12,7 @@ Copyright 2012 Institut Laue-Langevin
 import wx
 import sys
 import os
+import logging
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 from collections import defaultdict
 import json
@@ -365,19 +366,13 @@ class CategoryManager(wx.Frame):
         Read in categorization info from file
         """
         try:
-            file = CategoryInstaller.get_user_file()
-            if os.path.isfile(file):
-                cat_file = open(file, 'rb')
-#               self.master_category_dict = pickle.load(cat_file)
-                self.master_category_dict = json.load(cat_file)
-            else:
-                cat_file = open(CategoryInstaller.get_default_file(), 'rb')
-#        		self.master_category_dict = pickle.load(cat_file)
-                self.master_category_dict = json.load(cat_file)
-            cat_file.close()
+            cat_file = CategoryInstaller.get_user_file()
+            self.master_category_dict = {}
+            if os.path.isfile(cat_file):
+                with open(cat_file, 'rb') as f:
+                    self.master_category_dict = json.load(f)
         except IOError:
-            print 'Problem reading in category file. Please review'
-
+            logging.error('Problem reading in category file.')
 
         self._regenerate_model_dict()
 

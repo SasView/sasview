@@ -91,9 +91,12 @@ class abs_reader(unittest.TestCase):
             Only last four lines should be read.
         """
         # Test .ABS file loaded as ascii
-        f = self.loader.load("ascii_test_6.txt")
+        f = None
+        try:
+            f = self.loader.load("ascii_test_6.txt")
         # The length of the data is 5
-        self.assertEqual(f, None)
+        except:
+            self.assertEqual(f, None)
         
 if __name__ == '__main__':
     unittest.main()

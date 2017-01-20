@@ -15,6 +15,7 @@ import wx
 import sys
 from sas.sasgui.guiframe.events import EVT_NEW_PLOT
 from sas.sasgui.guiframe.events import EVT_PLOT_QRANGE
+from sas.sasgui.guiframe.events import EVT_PLOT_LIM
 from sas.sasgui.guiframe.events import DeletePlotPanelEvent
 from sas.sasgui.guiframe.plugin_base import PluginBase
 from sas.sasgui.guiframe.dataFitting import Data1D
@@ -78,6 +79,7 @@ class Plugin(PluginBase):
         # Connect to plotting events
         self.parent.Bind(EVT_NEW_PLOT, self._on_plot_event)
         self.parent.Bind(EVT_PLOT_QRANGE, self._on_plot_qrange)
+        self.parent.Bind(EVT_PLOT_LIM, self._on_plot_lim)
         # We have no initial panels for this plug-in
         return []
 
@@ -94,6 +96,21 @@ class Plugin(PluginBase):
         else:
             return
         panel.on_plot_qrange(event)
+
+    def _on_plot_lim(self, event=None):
+        if event == None:
+            return
+        if event.id in self.plot_panels.keys():
+            panel = self.plot_panels[event.id]
+        elif event.group_id in self.plot_panels.keys():
+            panel = self.plot_panels[event.group_id]
+        else:
+            return
+        if hasattr(event, 'xlim'):
+            panel.subplot.set_xlim(event.xlim)
+        if hasattr(event, 'ylim'):
+            panel.subplot.set_ylim(event.ylim)
+
 
     def _on_show_panel(self, event):
         """show plug-in panel"""
@@ -311,4 +328,8 @@ class Plugin(PluginBase):
 
                 new_panel = self.create_2d_panel(data, group_id)
             self.create_panel_helper(new_panel, data, group_id, title)
+            if hasattr(event, 'xlim'):
+                new_panel.subplot.set_xlim(event.xlim)
+            if hasattr(event, 'ylim'):
+                new_panel.subplot.set_ylim(event.ylim)
         return

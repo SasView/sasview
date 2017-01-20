@@ -115,7 +115,7 @@ O. Glatter and O. Kratky
 Chapter 2 in *Small Angle X-Ray Scattering*
 Academic Press, New York, 1982
 
-http://physchem.kfunigraz.ac.at/sm/
+http://web.archive.org/web/20110824105537/http://physchem.kfunigraz.ac.at/sm/Service/Glatter_Kratky_SAXS_1982.zip
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 

@@ -42,6 +42,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         self.SetupScrolling()
         #Set window's font size
         self.SetWindowVariant(variant=FONT_VARIANT)
+        self._set_analysis(False)
 
         self.plots = plots
         self.radio_buttons = {}
@@ -395,11 +396,16 @@ class InversionControl(ScrolledPanel, PanelBase):
         if state.bck is not None:
             self.bck = state.bck
 
+        # We have the data available for serialization
+        self._set_analysis(True)
+
         # Perform inversion
         self._on_invert(None)
 
     def set_manager(self, manager):
         self._manager = manager
+        if manager is not None:
+            self._set_analysis(False)
 
     def _do_layout(self):
         vbox = wx.GridBagSizer(0, 0)
@@ -751,6 +757,8 @@ class InversionControl(ScrolledPanel, PanelBase):
         self.alpha_estimate_ctl.SetLabel("")
         self.nterms_estimate_ctl.Enable(False)
         self.nterms_estimate_ctl.SetLabel("")
+        self._set_analysis(False)
+
         self._on_pars_changed()
 
     def _on_pars_changed(self, evt=None):
@@ -935,6 +943,7 @@ class InversionControl(ScrolledPanel, PanelBase):
                 self._manager.show_data(data=data, reset=True)
                 self._on_pars_changed(None)
                 self._on_invert(None)
+                self._set_analysis(True)
             except:
                 msg = "InversionControl._change_file: %s" % sys.exc_value
                 logging.error(msg)

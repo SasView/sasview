@@ -1,4 +1,4 @@
-__version__ = "4.0b1"
+__version__ = "4.0"
 __build__ = "GIT_COMMIT"
 try:
     import logging

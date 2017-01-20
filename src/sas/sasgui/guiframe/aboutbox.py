@@ -105,7 +105,8 @@ class DialogAbout(wx.Dialog):
         self.static_line_2 = wx.StaticLine(self, -1)
         self.bitmap_button_nist = wx.BitmapButton(self, -1, wx.NullBitmap)
         self.bitmap_button_umd = wx.BitmapButton(self, -1, wx.NullBitmap)
-        self.bitmap_button_sns = wx.BitmapButton(self, -1, wx.NullBitmap)
+        self.bitmap_button_ornl = wx.BitmapButton(self, -1, wx.NullBitmap)
+        #self.bitmap_button_sns = wx.BitmapButton(self, -1, wx.NullBitmap)
         #self.bitmap_button_nsf = wx.BitmapButton(self, -1,
         #                                         wx.NullBitmap)
         #self.bitmap_button_danse = wx.BitmapButton(self, -1, wx.NullBitmap)
@@ -114,6 +115,8 @@ class DialogAbout(wx.Dialog):
         self.bitmap_button_isis = wx.BitmapButton(self, -1, wx.NullBitmap)
         self.bitmap_button_ess = wx.BitmapButton(self, -1, wx.NullBitmap)
         self.bitmap_button_ill = wx.BitmapButton(self, -1, wx.NullBitmap)
+        self.bitmap_button_ansto = wx.BitmapButton(self, -1, wx.NullBitmap)
+        self.bitmap_button_tudelft = wx.BitmapButton(self, -1, wx.NullBitmap)
         
         self.static_line_3 = wx.StaticLine(self, -1)
         self.button_OK = wx.Button(self, wx.ID_OK, "OK")
@@ -123,13 +126,16 @@ class DialogAbout(wx.Dialog):
         
         self.Bind(wx.EVT_BUTTON, self.onNistLogo, self.bitmap_button_nist)
         self.Bind(wx.EVT_BUTTON, self.onUmdLogo, self.bitmap_button_umd)
-        self.Bind(wx.EVT_BUTTON, self.onSnsLogo, self.bitmap_button_sns)
+        #self.Bind(wx.EVT_BUTTON, self.onSnsLogo, self.bitmap_button_sns)
+        self.Bind(wx.EVT_BUTTON, self.onOrnlLogo, self.bitmap_button_ornl)
         #self.Bind(wx.EVT_BUTTON, self.onNsfLogo, self.bitmap_button_nsf)
         #self.Bind(wx.EVT_BUTTON, self.onDanseLogo, self.bitmap_button_danse)
         self.Bind(wx.EVT_BUTTON, self.onUTLogo, self.bitmap_button_msu)
         self.Bind(wx.EVT_BUTTON, self.onIsisLogo, self.bitmap_button_isis)
         self.Bind(wx.EVT_BUTTON, self.onEssLogo, self.bitmap_button_ess)
         self.Bind(wx.EVT_BUTTON, self.onIllLogo, self.bitmap_button_ill)
+        self.Bind(wx.EVT_BUTTON, self.onAnstoLogo, self.bitmap_button_ansto)
+        self.Bind(wx.EVT_BUTTON, self.onTudelftLogo, self.bitmap_button_tudelft)
         # end wxGlade
         # fill in acknowledgements
         #self.text_ctrl_acknowledgement.SetValue(__acknowledgement__)
@@ -162,14 +168,19 @@ class DialogAbout(wx.Dialog):
         logo = wx.Bitmap(image)        
         self.bitmap_button_umd.SetBitmapLabel(logo)
 
-        
+        image = file_dir + "/images/ornl_logo.png"
+        if os.path.isfile(config._ornl_logo):
+            image = config._ornl_logo
+        logo = wx.Bitmap(image)        
+        self.bitmap_button_ornl.SetBitmapLabel(logo)
+
+        """
         image = file_dir + "/images/sns_logo.png"
         if os.path.isfile(config._sns_logo):
             image = config._sns_logo
         logo = wx.Bitmap(image)        
         self.bitmap_button_sns.SetBitmapLabel(logo)
         
-        """
         image = file_dir + "/images/nsf_logo.png"
         if os.path.isfile(config._nsf_logo):
             image = config._nsf_logo
@@ -205,6 +216,18 @@ class DialogAbout(wx.Dialog):
             image = config._ill_logo
         logo = wx.Bitmap(image)
         self.bitmap_button_ill.SetBitmapLabel(logo)
+        
+        image = file_dir + "/images/ansto_logo.png"
+        if os.path.isfile(config._ansto_logo):
+            image = config._ansto_logo
+        logo = wx.Bitmap(image)
+        self.bitmap_button_ansto.SetBitmapLabel(logo)
+        
+        image = file_dir + "/images/tudelft_logo.png"
+        if os.path.isfile(config._tudelft_logo):
+            image = config._tudelft_logo
+        logo = wx.Bitmap(image)
+        self.bitmap_button_tudelft.SetBitmapLabel(logo)
                 
         # resize dialog window to fit version number nicely
         if wx.VERSION >= (2, 7, 2, 0):
@@ -226,13 +249,16 @@ class DialogAbout(wx.Dialog):
         self.hyperlink_paper.Enable(True)
         self.bitmap_button_nist.SetSize(self.bitmap_button_nist.GetBestSize())
         self.bitmap_button_umd.SetSize(self.bitmap_button_umd.GetBestSize())
-        self.bitmap_button_sns.SetSize(self.bitmap_button_sns.GetBestSize())
+        self.bitmap_button_ornl.SetSize(self.bitmap_button_ornl.GetBestSize())
+        #self.bitmap_button_sns.SetSize(self.bitmap_button_sns.GetBestSize())
         #self.bitmap_button_nsf.SetSize(self.bitmap_button_nsf.GetBestSize())
         #self.bitmap_button_danse.SetSize(self.bitmap_button_danse.GetBestSize())
         self.bitmap_button_msu.SetSize(self.bitmap_button_msu.GetBestSize())
         self.bitmap_button_isis.SetSize(self.bitmap_button_isis.GetBestSize())
         self.bitmap_button_ess.SetSize(self.bitmap_button_ess.GetBestSize())
         self.bitmap_button_ill.SetSize(self.bitmap_button_ill.GetBestSize())
+        self.bitmap_button_ansto.SetSize(self.bitmap_button_ansto.GetBestSize())
+        self.bitmap_button_tudelft.SetSize(self.bitmap_button_tudelft.GetBestSize())
         # end wxGlade
 
     def __do_layout(self):
@@ -284,13 +310,19 @@ class DialogAbout(wx.Dialog):
                         wx.LEFT|wx.ADJUST_MINSIZE, 2)
         sizer_logos.Add(self.bitmap_button_nist, 0, 
                         wx.LEFT|wx.ADJUST_MINSIZE, 2)
-        sizer_logos.Add(self.bitmap_button_sns, 0, 
+        #sizer_logos.Add(self.bitmap_button_sns, 0, 
+        #                wx.LEFT|wx.ADJUST_MINSIZE, 2)
+        sizer_logos.Add(self.bitmap_button_ornl, 0, 
                         wx.LEFT|wx.ADJUST_MINSIZE, 2)
         sizer_logos.Add(self.bitmap_button_isis, 0, 
                         wx.LEFT|wx.ADJUST_MINSIZE, 2)
         sizer_logos.Add(self.bitmap_button_ess, 0, 
                         wx.LEFT|wx.ADJUST_MINSIZE, 2)
         sizer_logos.Add(self.bitmap_button_ill, 0, 
+                        wx.LEFT|wx.ADJUST_MINSIZE, 2)
+        sizer_logos.Add(self.bitmap_button_ansto, 0, 
+                        wx.LEFT|wx.ADJUST_MINSIZE, 2)
+        sizer_logos.Add(self.bitmap_button_tudelft, 0, 
                         wx.LEFT|wx.ADJUST_MINSIZE, 2)
                 
         sizer_logos.Add((10, 50), 0, wx.ADJUST_MINSIZE, 0)
@@ -318,6 +350,13 @@ class DialogAbout(wx.Dialog):
         """
         # wxGlade: DialogAbout.<event_handler>
         launchBrowser(config._umd_url)
+        event.Skip()
+        
+    def onOrnlLogo(self, event): 
+        """
+        """
+        # wxGlade: DialogAbout.<event_handler>
+        launchBrowser(config._ornl_url)
         event.Skip()
         
     def onSnsLogo(self, event): 
@@ -367,6 +406,20 @@ class DialogAbout(wx.Dialog):
         """ 
         # wxGlade: DialogAbout.<event_handler>
         launchBrowser(config._ill_url)
+        event.Skip()
+
+    def onAnstoLogo(self, event):
+        """
+        """ 
+        # wxGlade: DialogAbout.<event_handler>
+        launchBrowser(config._ansto_url)
+        event.Skip()
+
+    def onTudelftLogo(self, event):
+        """
+        """ 
+        # wxGlade: DialogAbout.<event_handler>
+        launchBrowser(config._tudelft_url)
         event.Skip()
 
 # end of class DialogAbout

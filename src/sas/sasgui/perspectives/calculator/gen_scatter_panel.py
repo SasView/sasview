@@ -180,7 +180,9 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         self.shape_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.hint_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.qrange_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.button_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.button_sizer1 = wx.BoxSizer(wx.HORIZONTAL)
+        self.button_sizer2 = wx.BoxSizer(wx.HORIZONTAL)
 
     def _layout_data_name(self):
         """
@@ -391,11 +393,13 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         self.bt_close.Bind(wx.EVT_BUTTON, self.on_panel_close)
         self.bt_close.SetToolTipString("Close this window")
 
-        self.button_sizer.AddMany([(self.time_text , 0, wx.LEFT, 20),
-                                   (self.orient_combo , 0, wx.LEFT, 20),
-                                   (self.bt_compute, 0, wx.LEFT, 20),
+        self.button_sizer1.AddMany([(self.bt_compute, 0, wx.LEFT, 20),
+                                   (self.orient_combo , 0, wx.LEFT, 20)])
+        self.button_sizer2.AddMany([(self.time_text , 0, wx.LEFT, 20),
                                    (self.bt_help, 0, wx.LEFT, 20),
-                                   (self.bt_close, 0, wx.LEFT, 5)])
+                                   (self.bt_close, 0, wx.LEFT, 20)])
+        self.button_sizer.AddMany([(self.button_sizer1 , 0, wx.BOTTOM|wx.LEFT, 10),
+                                   (self.button_sizer2 , 0, wx.LEFT, 10)])
 
     def estimate_ctime(self):
         """
@@ -599,7 +603,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             else:
                 raise
             self.orient_combo.Show(is_pdbdata)
-            self.button_sizer.Layout()
+            #self.button_sizer.Layout()
+            self.FitInside()
             self._set_sld_data_helper(True)
         except:
             if self.parent.parent is None:

@@ -64,7 +64,6 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.frame = None
         # context menu
         self._slicerpop = None
-
         self._available_data = []
         self._symbol_labels = self.get_symbol_label()
         self._color_labels = self.get_color_label()
@@ -93,6 +92,9 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.canvas.set_resizing(self.resizing)
         self.Bind(wx.EVT_SIZE, self._OnReSize)
         self.parent.SetFocus()
+
+        # If true, there are 3 qrange bars
+        self.is_corfunc = False
 
 
     def get_symbol_label(self):
@@ -213,6 +215,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
         active_ctrl = event.active
         if active_ctrl == None:
             return
+        if hasattr(event, 'is_corfunc'):
+            self.is_corfunc = event.is_corfunc
         if event.id in self.plots.keys():
             ctrl = event.ctrl
             self.cursor_id = event.id
@@ -221,6 +225,9 @@ class ModelPanel1D(PlotPanel, PanelBase):
             x_data = self.plots[self.cursor_id].x
             values = [max(x_data.min(), float(ctrl[0].GetValue())),
                       min(x_data.max(), float(ctrl[1].GetValue()))]
+            if len(ctrl) == 3:
+                colors.append('purple')
+                values.append(min(x_data.max(), float(ctrl[2].GetValue())))
             if self.ly == None:
                 self.ly = []
                 for c, v in zip(colors, values):
@@ -231,7 +238,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 # Display x,y in the status bar if possible
                 xval = float(active_ctrl.GetValue())
                 position = self.get_data_xy_vals(xval)
-                if position != None:
+                if position != None and not self.is_corfunc:
                     wx.PostEvent(self.parent, StatusEvent(status=position))
             except:
                 logging.error(sys.exc_value)
@@ -292,6 +299,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
         ly = self.ly
         ly0x = ly[0].get_xdata()
         ly1x = ly[1].get_xdata()
+        ly2x = None
+        if self.is_corfunc: ly2x = ly[2].get_xdata()
         self.q_ctrl[0].SetBackgroundColour('white')
         self.q_ctrl[1].SetBackgroundColour('white')
         if ly0x >= ly1x:
@@ -305,6 +314,16 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 ly[0].set_zorder(nop)
                 self.q_ctrl[0].SetValue(str(pos_x))
                 self.q_ctrl[1].SetBackgroundColour('pink')
+        elif ly2x is not None and ly1x >= ly2x:
+            if self.vl_ind == 1:
+                ly[2].set_xdata(posx)
+                ly[2].set_zorder(nop)
+                self.q_ctrl[2].SetValue(str(pos_x))
+            elif self.vl_ind == 2:
+                ly[1].set_xdata(posx)
+                ly[1].set_zorder(nop)
+                self.q_ctrl[1].SetValue(str(pos_x))
+
 
     def _get_cusor_lines(self, event):
         """
@@ -324,11 +343,16 @@ class ModelPanel1D(PlotPanel, PanelBase):
             # Selecting a new line if cursor lines are displayed already
             dqmin = math.fabs(event.xdata - self.ly[0].get_xdata())
             dqmax = math.fabs(event.xdata - self.ly[1].get_xdata())
-            is_qmax = dqmin > dqmax
-            if is_qmax:
-                self.vl_ind = 1
+            if not self.is_corfunc:
+                is_qmax = dqmin > dqmax
+                if is_qmax:
+                    self.vl_ind = 1
+                else:
+                    self.vl_ind = 0
             else:
-                self.vl_ind = 0
+                dqmax2 = math.fabs(event.xdata - self.ly[2].get_xdata())
+                closest = min(dqmin, dqmax, dqmax2)
+                self.vl_ind = { dqmin: 0, dqmax: 1, dqmax2: 2 }.get(closest)
 
     def cusor_line(self, event):
         """
@@ -706,6 +730,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 self.subplot.set_xlim(x_range)
                 self.subplot.set_ylim(y_range)
                 self.subplot.figure.canvas.draw_idle()
+                self.is_zoomed = True
         d.Destroy()
 
     def onFreeze(self, event):

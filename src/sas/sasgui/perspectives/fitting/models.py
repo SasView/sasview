@@ -180,6 +180,7 @@ def _findModels(dir):
             path = os.path.abspath(os.path.join(dir, filename))
             try:
                 model = load_custom_model(path)
+                model.name = "[plug-in] "+model.name
                 plugins[model.name] = model
             except Exception:
                 msg = traceback.format_exc()
@@ -354,7 +355,7 @@ class ModelManagerBase:
 
         """
         if int(evt.GetId()) in self.form_factor_dict.keys():
-            from sas.sascalc.fit.MultiplicationModel import MultiplicationModel
+            from sasmodels.sasview_model import MultiplicationModel
             self.model_dictionary[MultiplicationModel.__name__] = MultiplicationModel
             model1, model2 = self.form_factor_dict[int(evt.GetId())]
             model = MultiplicationModel(model1, model2)
@@ -411,7 +412,7 @@ class ModelManager(object):
     implement model
     """
     __modelmanager = ModelManagerBase()
-    cat_model_list = [model_name for model_name \
+    cat_model_list = [__modelmanager.model_dictionary[model_name] for model_name \
                       in __modelmanager.model_dictionary.keys() \
                       if model_name not in __modelmanager.stored_plugins.keys()]
 
