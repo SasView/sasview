@@ -3,6 +3,13 @@ Release Notes
 
 1- Features
 ===========
+    - New in Version 4.0.1
+      ------------------
+      This release fixes the critical bug #750 in P(Q)*S(Q).  Most damaging
+      it appears that the background term was being added to S(Q) prior to
+      multiplication by P(Q).
+
+
     - New in Version 4.0
       ------------------
       This release fixes the various bugs found during the alpha and beta testing
