@@ -1,46 +1,47 @@
-import wx
-import math
 import numpy
-from sas.sasgui.guiframe.events import NewPlotEvent
-from sas.sasgui.guiframe.events import StatusEvent
-from sas.sasgui.guiframe.events import SlicerParameterEvent
-from sas.sasgui.guiframe.events import EVT_SLICER_PARS
+from PyQt4 import QtGui
+from PyQt4 import QtCore
+
 from BaseInteractor import _BaseInteractor
 from sas.sasgui.guiframe.dataFitting import Data1D
+import sas.qtgui.GuiUtils as GuiUtils
+from sas.qtgui.SlicerModel import SlicerModel
 
 
-class BoxInteractor(_BaseInteractor):
+class BoxInteractor(_BaseInteractor, SlicerModel):
     """
     BoxInteractor define a rectangle that return data1D average of Data2D
     in a rectangle area defined by -x, x ,y, -y
     """
-    def __init__(self, base, axes, color='black', zorder=3):
+    def __init__(self, base, axes, item=None, color='black', zorder=3):
         _BaseInteractor.__init__(self, base, axes, color=color)
-        # # Class initialization
+        SlicerModel.__init__(self)
+        # Class initialization
         self.markers = []
         self.axes = axes
-        # #connecting artist
+        self._item = item
+        #connecting artist
         self.connect = self.base.connect
-        # # which direction is the preferred interaction direction
+        # which direction is the preferred interaction direction
         self.direction = None
-        # # determine x y  values
-        self.x = 0.5 * min(math.fabs(self.base.data2D.xmax),
-                           math.fabs(self.base.data2D.xmin))
-        self.y = 0.5 * min(math.fabs(self.base.data2D.xmax),
-                           math.fabs(self.base.data2D.xmin))
-        # # when reach qmax reset the graph
-        self.qmax = max(self.base.data2D.xmax, self.base.data2D.xmin,
-                        self.base.data2D.ymax, self.base.data2D.ymin)
-        # # Number of points on the plot
+        # determine x y  values
+        self.x = 0.5 * min(numpy.fabs(self.base.data.xmax),
+                           numpy.fabs(self.base.data.xmin))
+        self.y = 0.5 * min(numpy.fabs(self.base.data.xmax),
+                           numpy.fabs(self.base.data.xmin))
+        # when reach qmax reset the graph
+        self.qmax = max(self.base.data.xmax, self.base.data.xmin,
+                        self.base.data.ymax, self.base.data.ymin)
+        # Number of points on the plot
         self.nbins = 30
-        # # If True, I(|Q|) will be return, otherwise,
+        # If True, I(|Q|) will be return, otherwise,
         # negative q-values are allowed
         self.fold = True
-        # # reference of the current  Slab averaging
+        # reference of the current  Slab averaging
         self.averager = None
-        # # Create vertical and horizaontal lines for the rectangle
+        # Create vertical and horizaontal lines for the rectangle
         self.vertical_lines = VerticalLines(self,
-                                            self.base.subplot,
+                                            self.axes,
                                             color='blue',
                                             zorder=zorder,
                                             y=self.y,
@@ -48,32 +49,17 @@ class BoxInteractor(_BaseInteractor):
         self.vertical_lines.qmax = self.qmax
 
         self.horizontal_lines = HorizontalLines(self,
-                                                self.base.subplot,
+                                                self.axes,
                                                 color='green',
                                                 zorder=zorder,
                                                 x=self.x,
                                                 y=self.y)
         self.horizontal_lines.qmax = self.qmax
-        # # draw the rectangle and plost the data 1D resulting
-        # # of averaging data2D
+        # draw the rectangle and plost the data 1D resulting
+        # of averaging data2D
         self.update()
         self._post_data()
-        # # Bind to slice parameter events
-        self.base.Bind(EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
-
-    def _onEVT_SLICER_PARS(self, event):
-        """
-        receive an event containing parameters values to reset the slicer
-
-        :param event: event of type SlicerParameterEvent with params as
-            attribute
-        """
-        wx.PostEvent(self.base.parent,
-                     StatusEvent(status="BoxSlicer._onEVT_SLICER_PARS"))
-        event.Skip()
-        if event.type == self.__class__.__name__:
-            self.set_params(event.params)
-            self.base.update()
+        self.setModelFromParams()
 
     def update_and_post(self):
         """
@@ -101,7 +87,6 @@ class BoxInteractor(_BaseInteractor):
         self.horizontal_lines.clear()
         self.vertical_lines.clear()
         self.base.connect.clearall()
-        self.base.Unbind(EVT_SLICER_PARS)
 
     def update(self):
         """
@@ -122,7 +107,6 @@ class BoxInteractor(_BaseInteractor):
         Remember the roughness for this layer and the next so that we
         can restore on Esc.
         """
-        self.base.freeze_axes()
         self.vertical_lines.save(ev)
         self.horizontal_lines.save(ev)
 
@@ -138,18 +122,18 @@ class BoxInteractor(_BaseInteractor):
         :param direction: the direction of averaging
 
         """
-        if self.direction == None:
+        if self.direction is None:
             self.direction = direction
 
-        x_min = -1 * math.fabs(self.vertical_lines.x)
-        x_max = math.fabs(self.vertical_lines.x)
-        y_min = -1 * math.fabs(self.horizontal_lines.y)
-        y_max = math.fabs(self.horizontal_lines.y)
+        x_min = -1 * numpy.fabs(self.vertical_lines.x)
+        x_max = numpy.fabs(self.vertical_lines.x)
+        y_min = -1 * numpy.fabs(self.horizontal_lines.y)
+        y_max = numpy.fabs(self.horizontal_lines.y)
 
-        if nbins != None:
+        if nbins is not None:
             self.nbins = nbins
-        if self.averager == None:
-            if new_slab == None:
+        if self.averager is None:
+            if new_slab is None:
                 msg = "post data:cannot average , averager is empty"
                 raise ValueError, msg
             self.averager = new_slab
@@ -157,13 +141,13 @@ class BoxInteractor(_BaseInteractor):
             if self.fold:
                 x_low = 0
             else:
-                x_low = math.fabs(x_min)
+                x_low = numpy.fabs(x_min)
             bin_width = (x_max + x_low) / self.nbins
         elif self.direction == "Y":
             if self.fold:
                 y_low = 0
             else:
-                y_low = math.fabs(y_min)
+                y_low = numpy.fabs(y_min)
             bin_width = (y_max + y_low) / self.nbins
         else:
             msg = "post data:no Box Average direction was supplied"
@@ -172,7 +156,7 @@ class BoxInteractor(_BaseInteractor):
         box = self.averager(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
                             bin_width=bin_width)
         box.fold = self.fold
-        boxavg = box(self.base.data2D)
+        boxavg = box(self.base.data)
         # 3 Create Data1D to plot
         if hasattr(boxavg, "dxl"):
             dxl = boxavg.dxl
@@ -186,27 +170,31 @@ class BoxInteractor(_BaseInteractor):
         new_plot.dxl = dxl
         new_plot.dxw = dxw
         new_plot.name = str(self.averager.__name__) + \
-                        "(" + self.base.data2D.name + ")"
-        new_plot.source = self.base.data2D.source
+                        "(" + self.base.data.name + ")"
+        new_plot.title = str(self.averager.__name__) + \
+                        "(" + self.base.data.name + ")"
+        new_plot.source = self.base.data.source
         new_plot.interactive = True
-        new_plot.detector = self.base.data2D.detector
+        new_plot.detector = self.base.data.detector
         # # If the data file does not tell us what the axes are, just assume...
         new_plot.xaxis("\\rm{Q}", "A^{-1}")
         new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
 
-        data = self.base.data2D
+        data = self.base.data
         if hasattr(data, "scale") and data.scale == 'linear' and \
-                self.base.data2D.name.count("Residuals") > 0:
+                self.base.data.name.count("Residuals") > 0:
             new_plot.ytransform = 'y'
             new_plot.yaxis("\\rm{Residuals} ", "/")
 
-        new_plot.group_id = "2daverage" + self.base.data2D.name
-        new_plot.id = (self.averager.__name__) + self.base.data2D.name
+        new_plot.group_id = "2daverage" + self.base.data.name
+        new_plot.id = (self.averager.__name__) + self.base.data.name
         new_plot.is_data = True
-        self.base.parent.update_theory(data_id=self.base.data2D.id, \
-                                       theory=new_plot)
-        wx.PostEvent(self.base.parent,
-                     NewPlotEvent(plot=new_plot, title=str(self.averager.__name__)))
+        variant_plot = QtCore.QVariant(new_plot)
+        GuiUtils.updateModelItemWithPlot(self._item, variant_plot, new_plot.id)
+
+        if self.update_model:
+            self.setModelFromParams()
+        self.draw()
 
     def moveend(self, ev):
         """
@@ -214,13 +202,6 @@ class BoxInteractor(_BaseInteractor):
         Post the slicer new parameters and creates a new Data1D
         corresponding to the new average
         """
-        self.base.thaw_axes()
-        # Post paramters
-        event = SlicerParameterEvent()
-        event.type = self.__class__.__name__
-        event.params = self.get_params()
-        wx.PostEvent(self.base.parent, event)
-        # create the new data1D
         self._post_data()
 
     def restore(self):
@@ -239,7 +220,7 @@ class BoxInteractor(_BaseInteractor):
     def set_cursor(self, x, y):
         pass
 
-    def get_params(self):
+    def getParams(self):
         """
         Store a copy of values of parameters of the slicer into a dictionary.
 
@@ -247,12 +228,12 @@ class BoxInteractor(_BaseInteractor):
 
         """
         params = {}
-        params["x_max"] = math.fabs(self.vertical_lines.x)
-        params["y_max"] = math.fabs(self.horizontal_lines.y)
+        params["x_max"] = numpy.fabs(self.vertical_lines.x)
+        params["y_max"] = numpy.fabs(self.horizontal_lines.y)
         params["nbins"] = self.nbins
         return params
 
-    def set_params(self, params):
+    def setParams(self, params):
         """
         Receive a dictionary and reset the slicer with values contained
         in the values of the dictionary.
@@ -260,23 +241,13 @@ class BoxInteractor(_BaseInteractor):
         :param params: a dictionary containing name of slicer parameters and
             values the user assigned to the slicer.
         """
-        self.x = float(math.fabs(params["x_max"]))
-        self.y = float(math.fabs(params["y_max"]))
+        self.x = float(numpy.fabs(params["x_max"]))
+        self.y = float(numpy.fabs(params["y_max"]))
         self.nbins = params["nbins"]
 
         self.horizontal_lines.update(x=self.x, y=self.y)
         self.vertical_lines.update(x=self.x, y=self.y)
         self.post_data(nbins=None)
-
-    def freeze_axes(self):
-        """
-        """
-        self.base.freeze_axes()
-
-    def thaw_axes(self):
-        """
-        """
-        self.base.thaw_axes()
 
     def draw(self):
         """
@@ -293,16 +264,16 @@ class HorizontalLines(_BaseInteractor):
         """
         """
         _BaseInteractor.__init__(self, base, axes, color=color)
-        # #Class initialization
+        # Class initialization
         self.markers = []
         self.axes = axes
-        # # Saving the end points of two lines
+        # Saving the end points of two lines
         self.x = x
         self.save_x = x
 
         self.y = y
         self.save_y = y
-        # # Creating a marker
+        # Creating a marker
         # Inner circle marker
         self.inner_marker = self.axes.plot([0], [self.y], linestyle='',
                                            marker='s', markersize=10,
@@ -310,16 +281,16 @@ class HorizontalLines(_BaseInteractor):
                                            pickradius=5, label="pick",
                                            zorder=zorder,
                                            visible=True)[0]
-        # # Define 2 horizontal lines
+        # Define 2 horizontal lines
         self.top_line = self.axes.plot([self.x, -self.x], [self.y, self.y],
                                        linestyle='-', marker='',
                                        color=self.color, visible=True)[0]
         self.bottom_line = self.axes.plot([self.x, -self.x], [-self.y, -self.y],
                                           linestyle='-', marker='',
                                           color=self.color, visible=True)[0]
-        # # Flag to check the motion of the lines
+        # Flag to check the motion of the lines
         self.has_move = False
-        # # Connecting markers to mouse events and draw
+        # Connecting markers to mouse events and draw
         self.connect_markers([self.top_line, self.inner_marker])
         self.update()
 
@@ -338,14 +309,9 @@ class HorizontalLines(_BaseInteractor):
         Clear this slicer  and its markers
         """
         self.clear_markers()
-        try:
-            self.inner_marker.remove()
-            self.top_line.remove()
-            self.bottom_line.remove()
-        except:
-            # Old version of matplotlib
-            for item in range(len(self.axes.lines)):
-                del self.axes.lines[0]
+        self.inner_marker.remove()
+        self.top_line.remove()
+        self.bottom_line.remove()
 
     def update(self, x=None, y=None):
         """
@@ -355,12 +321,12 @@ class HorizontalLines(_BaseInteractor):
         :param y: y-coordinates to reset current class y
 
         """
-        # # Reset x, y- coordinates if send as parameters
-        if x != None:
-            self.x = numpy.sign(self.x) * math.fabs(x)
-        if y != None:
-            self.y = numpy.sign(self.y) * math.fabs(y)
-        # # Draw lines and markers
+        # Reset x, y- coordinates if send as parameters
+        if x is not None:
+            self.x = numpy.sign(self.x) * numpy.fabs(x)
+        if y is not None:
+            self.y = numpy.sign(self.y) * numpy.fabs(y)
+        # Draw lines and markers
         self.inner_marker.set(xdata=[0], ydata=[self.y])
         self.top_line.set(xdata=[self.x, -self.x], ydata=[self.y, self.y])
         self.bottom_line.set(xdata=[self.x, -self.x], ydata=[-self.y, -self.y])
@@ -372,7 +338,6 @@ class HorizontalLines(_BaseInteractor):
         """
         self.save_x = self.x
         self.save_y = self.y
-        self.base.freeze_axes()
 
     def moveend(self, ev):
         """
@@ -408,9 +373,9 @@ class VerticalLines(_BaseInteractor):
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
-        self.x = math.fabs(x)
+        self.x = numpy.fabs(x)
         self.save_x = self.x
-        self.y = math.fabs(y)
+        self.y = numpy.fabs(y)
         self.save_y = y
         # Inner circle marker
         self.inner_marker = self.axes.plot([self.x], [0], linestyle='',
@@ -445,14 +410,9 @@ class VerticalLines(_BaseInteractor):
         Clear this slicer  and its markers
         """
         self.clear_markers()
-        try:
-            self.inner_marker.remove()
-            self.left_line.remove()
-            self.right_line.remove()
-        except:
-            # Old version of matplotlib
-            for item in range(len(self.axes.lines)):
-                del self.axes.lines[0]
+        self.inner_marker.remove()
+        self.left_line.remove()
+        self.right_line.remove()
 
     def update(self, x=None, y=None):
         """
@@ -462,12 +422,12 @@ class VerticalLines(_BaseInteractor):
         :param y: y-coordinates to reset current class y
 
         """
-        # # reset x, y -coordinates if given as parameters
-        if x != None:
-            self.x = numpy.sign(self.x) * math.fabs(x)
-        if y != None:
-            self.y = numpy.sign(self.y) * math.fabs(y)
-        # # draw lines and markers
+        # Reset x, y -coordinates if given as parameters
+        if x is not None:
+            self.x = numpy.sign(self.x) * numpy.fabs(x)
+        if y is not None:
+            self.y = numpy.sign(self.y) * numpy.fabs(y)
+        # Draw lines and markers
         self.inner_marker.set(xdata=[self.x], ydata=[0])
         self.left_line.set(xdata=[-self.x, -self.x], ydata=[self.y, -self.y])
         self.right_line.set(xdata=[self.x, self.x], ydata=[self.y, -self.y])
@@ -479,7 +439,6 @@ class VerticalLines(_BaseInteractor):
         """
         self.save_x = self.x
         self.save_y = self.y
-        self.base.freeze_axes()
 
     def moveend(self, ev):
         """
@@ -509,8 +468,8 @@ class BoxInteractorX(BoxInteractor):
     """
     Average in Qx direction
     """
-    def __init__(self, base, axes, color='black', zorder=3):
-        BoxInteractor.__init__(self, base, axes, color=color)
+    def __init__(self, base, axes, item=None, color='black', zorder=3):
+        BoxInteractor.__init__(self, base, axes, item=item, color=color)
         self.base = base
         self._post_data()
 
@@ -526,8 +485,8 @@ class BoxInteractorY(BoxInteractor):
     """
     Average in Qy direction
     """
-    def __init__(self, base, axes, color='black', zorder=3):
-        BoxInteractor.__init__(self, base, axes, color=color)
+    def __init__(self, base, axes, item=None, color='black', zorder=3):
+        BoxInteractor.__init__(self, base, axes, item=item, color=color)
         self.base = base
         self._post_data()
 

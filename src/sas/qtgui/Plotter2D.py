@@ -10,12 +10,24 @@ DEFAULT_CMAP = pylab.cm.jet
 from mpl_toolkits.mplot3d import Axes3D
 
 import sas.qtgui.PlotUtilities as PlotUtilities
+import sas.qtgui.GuiUtils as GuiUtils
 from sas.qtgui.PlotterBase import PlotterBase
 from sas.qtgui.ColorMap import ColorMap
+from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import Data2D
+from sas.sascalc.dataloader.manipulations import CircularAverage
+from sas.sasgui.guiframe.local_perspectives.plotting.binder import BindArtist
+from sas.qtgui.BoxSum import BoxSum
+from sas.qtgui.GuiUtils import formatNumber
+from sas.qtgui.SlicerParameters import SlicerParameters
+from sas.sasgui.guiframe.local_perspectives.plotting.boxSlicer import BoxInteractorX
+from sas.sasgui.guiframe.local_perspectives.plotting.AnnulusSlicer import AnnulusInteractor
+from sas.sasgui.guiframe.local_perspectives.plotting.SectorSlicer import SectorInteractor
+from sas.sasgui.guiframe.local_perspectives.plotting.boxSum import BoxSumCalculator
+from sas.sasgui.guiframe.local_perspectives.plotting.boxSlicer import BoxInteractorY
 
 # Minimum value of Z for which we will present data.
-MIN_Z=-32
+MIN_Z = -32
 
 class Plotter2DWidget(PlotterBase):
     """
@@ -28,6 +40,12 @@ class Plotter2DWidget(PlotterBase):
         self.cmap = DEFAULT_CMAP.name
         # Default scale
         self.scale = 'log_{10}'
+        # to set the order of lines drawn first.
+        self.slicer_z = 5
+        # Reference to the current slicer
+        self.slicer = None
+        # Create Artist and bind it
+        self.connect = BindArtist(self.figure)
         self.vmin = None
         self.vmax = None
 
@@ -52,7 +70,17 @@ class Plotter2DWidget(PlotterBase):
         self.yLabel = "%s(%s)"%(data._yaxis, data._yunit)
         self.title(title=data.title)
 
-    def plot(self, data=None, marker=None, linestyle=None):
+    @property
+    def item(self):
+        ''' getter for this plot's QStandardItem '''
+        return self._item
+
+    @item.setter
+    def item(self, item=None):
+        ''' setter for this plot's QStandardItem '''
+        self._item = item
+
+    def plot(self, data=None):
         """
         Plot 2D self._data
         """
@@ -60,7 +88,7 @@ class Plotter2DWidget(PlotterBase):
         if isinstance(data, Data2D):
             self.data = data
 
-        assert(self._data)
+        assert self._data
 
         # Toggle the scale
         zmin_2D_temp, zmax_2D_temp = self.calculateDepth()
@@ -127,9 +155,12 @@ class Plotter2DWidget(PlotterBase):
         self.actionBoxAveragingX.triggered.connect(self.onBoxAveragingX)
         self.actionBoxAveragingY = self.contextMenu.addAction("&Box Averaging in Qy")
         self.actionBoxAveragingY.triggered.connect(self.onBoxAveragingY)
-        self.contextMenu.addSeparator()
-        self.actionEditGraphLabel = self.contextMenu.addAction("&Edit Graph Label")
-        self.actionEditGraphLabel.triggered.connect(self.onEditgraphLabel)
+        # Additional items for slicer interaction
+        if self.slicer:
+            self.actionClearSlicer = self.contextMenu.addAction("&Clear Slicer")
+            self.actionClearSlicer.triggered.connect(self.onClearSlicer)
+            self.actionEditSlicer = self.contextMenu.addAction("&Edit Slicer Parameters")
+            self.actionEditSlicer.triggered.connect(self.onEditSlicer)
         self.contextMenu.addSeparator()
         self.actionColorMap = self.contextMenu.addAction("&2D Color Map")
         self.actionColorMap.triggered.connect(self.onColorMap)
@@ -165,40 +196,135 @@ class Plotter2DWidget(PlotterBase):
 
         self.plot()
 
+    def onClearSlicer(self):
+        """
+        Remove all sclicers from the chart
+        """
+        if self.slicer:
+            self.slicer.clear()
+            self.canvas.draw()
+            self.slicer = None
+
+    def onEditSlicer(self):
+        """
+        Present a small dialog for manipulating the current slicer
+        """
+        assert self.slicer
+
+        self.param_model = self.slicer.model()
+         # Pass the model to the Slicer Parameters widget
+        self.slicer_widget = SlicerParameters(self, model=self.param_model)
+        self.slicer_widget.show()
+
     def onCircularAverage(self):
         """
+        Perform circular averaging on Data2D
         """
-        pass
+        # Find the best number of bins
+        npt = numpy.sqrt(len(self.data.data[numpy.isfinite(self.data.data)]))
+        npt = numpy.floor(npt)
+        # compute the maximum radius of data2D
+        self.qmax = max(numpy.fabs(self.data.xmax),
+                        numpy.fabs(self.data.xmin))
+        self.ymax = max(numpy.fabs(self.data.ymax),
+                        numpy.fabs(self.data.ymin))
+        self.radius = numpy.sqrt(numpy.power(self.qmax, 2) + numpy.power(self.ymax, 2))
+        #Compute beam width
+        bin_width = (self.qmax + self.qmax) / npt
+        # Create data1D circular average of data2D
+        circle = CircularAverage(r_min=0, r_max=self.radius, bin_width=bin_width)
+        circ = circle(self.data)
+        dxl = circ.dxl if hasattr(circ, "dxl") else None
+        dxw = circ.dxw if hasattr(circ, "dxw") else None
+
+        new_plot = Data1D(x=circ.x, y=circ.y, dy=circ.dy, dx=circ.dx)
+        new_plot.dxl = dxl
+        new_plot.dxw = dxw
+        new_plot.name = new_plot.title = "Circ avg " + self.data.name
+        new_plot.source = self.data.source
+        new_plot.interactive = True
+        new_plot.detector = self.data.detector
+
+        # Define axes if not done yet.
+        new_plot.xaxis("\\rm{Q}", "A^{-1}")
+        if hasattr(self.data, "scale") and \
+                    self.data.scale == 'linear':
+            new_plot.ytransform = 'y'
+            new_plot.yaxis("\\rm{Residuals} ", "normalized")
+        else:
+            new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
+
+        new_plot.group_id = "2daverage" + self.data.name
+        new_plot.id = "Circ avg " + self.data.name
+        new_plot.is_data = True
+        variant_plot = QtCore.QVariant(new_plot)
+        GuiUtils.updateModelItemWithPlot(self._item, variant_plot, new_plot.id)
+        # TODO: force immediate display (?)
+
+    def setSlicer(self, slicer):
+        """
+        Clear the previous slicer and create a new one.
+        slicer: slicer class to create
+        """
+        # Clear current slicer
+        if self.slicer is not None:
+            self.slicer.clear()
+        # Create a new slicer
+        self.slicer_z += 1
+        self.slicer = slicer(self, self.ax, item=self._item, zorder=self.slicer_z)
+        self.ax.set_ylim(self.data.ymin, self.data.ymax)
+        self.ax.set_xlim(self.data.xmin, self.data.xmax)
+        # Draw slicer
+        self.figure.canvas.draw()
+        self.slicer.update()
 
     def onSectorView(self):
         """
+        Perform sector averaging on Q and draw sector slicer
         """
-        pass
+        self.setSlicer(slicer=SectorInteractor)
 
     def onAnnulusView(self):
         """
+        Perform sector averaging on Phi and draw annulus slicer
         """
-        pass
+        self.setSlicer(slicer=AnnulusInteractor)
 
     def onBoxSum(self):
         """
+        Perform 2D Data averaging Qx and Qy.
+        Display box slicer details.
         """
-        pass
+        self.onClearSlicer()
+        self.slicer_z += 1
+        self.slicer = BoxSumCalculator(self, self.ax, zorder=self.slicer_z)
+
+        self.ax.set_ylim(self.data.ymin, self.data.ymax)
+        self.ax.set_xlim(self.data.xmin, self.data.xmax)
+        self.figure.canvas.draw()
+        self.slicer.update()
+
+        # Get the BoxSumCalculator model.
+        self.box_sum_model = self.slicer.model()
+        # Pass the BoxSumCalculator model to the BoxSum widget
+        self.boxwidget = BoxSum(self, model=self.box_sum_model)
+        # Add the plot to the workspace
+        self.manager.parent.workspace().addWindow(self.boxwidget)
+        self.boxwidget.show()
 
     def onBoxAveragingX(self):
         """
+        Perform 2D data averaging on Qx
+        Create a new slicer.
         """
-        pass
+        self.setSlicer(slicer=BoxInteractorX)
 
     def onBoxAveragingY(self):
         """
+        Perform 2D data averaging on Qy
+        Create a new slicer .
         """
-        pass
-
-    def onEditgraphLabel(self):
-        """
-        """
-        pass
+        self.setSlicer(slicer=BoxInteractorY)
 
     def onColorMap(self):
         """
@@ -224,8 +350,7 @@ class Plotter2DWidget(PlotterBase):
         self.plot()
 
     def showPlot(self, data, qx_data, qy_data, xmin, xmax, ymin, ymax,
-                 zmin, zmax, color=0, symbol=0, markersize=0,
-                 label='data2D', cmap=DEFAULT_CMAP):
+                 zmin, zmax, label='data2D', cmap=DEFAULT_CMAP):
         """
         Render and show the current data
         """
@@ -309,20 +434,20 @@ class Plotter2DWidget(PlotterBase):
 
             self.figure.subplots_adjust(left=0.1, right=.8, bottom=.1)
 
-            X = self._data.x_bins[0:-1]
-            Y = self._data.y_bins[0:-1]
-            X, Y = numpy.meshgrid(X, Y)
+            data_x, data_y = numpy.meshgrid(self._data.x_bins[0:-1],
+                                            self._data.y_bins[0:-1])
 
             ax = Axes3D(self.figure)
 
             # Disable rotation for large sets.
             # TODO: Define "large" for a dataset
             SET_TOO_LARGE = 500
-            if len(X) > SET_TOO_LARGE:
+            if len(data_x) > SET_TOO_LARGE:
                 ax.disable_mouse_rotation()
 
             self.figure.canvas.resizing = False
-            im = ax.plot_surface(X, Y, output, rstride=1, cstride=1, cmap=cmap,
+            im = ax.plot_surface(data_x, data_y, output, rstride=1,
+                                 cstride=1, cmap=cmap,
                                  linewidth=0, antialiased=False)
             self.ax.set_axis_off()
 
@@ -331,9 +456,18 @@ class Plotter2DWidget(PlotterBase):
         else:
             self.figure.canvas.draw()
 
-class Plotter2D(QtGui.QDialog, Plotter2DWidget):
-    def __init__(self, parent=None, quickplot=False, dimension=2):
+    def update(self):
+        self.figure.canvas.draw()
 
+    def draw(self):
+        self.figure.canvas.draw()
+
+
+class Plotter2D(QtGui.QDialog, Plotter2DWidget):
+    """
+    Plotter widget implementation
+    """
+    def __init__(self, parent=None, quickplot=False, dimension=2):
         QtGui.QDialog.__init__(self)
         Plotter2DWidget.__init__(self, manager=parent, quickplot=quickplot, dimension=dimension)
         icon = QtGui.QIcon()

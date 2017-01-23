@@ -1,5 +1,6 @@
 import sys
 import unittest
+import numpy
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
@@ -23,7 +24,15 @@ class Plotter2DTest(unittest.TestCase):
     '''Test the Plotter 2D class'''
     def setUp(self):
         '''create'''
-        self.plotter = Plotter2D.Plotter2D(None, quickplot=True)
+        class dummy_manager(object):
+            def communicator(self):
+                return Communicate()
+            def perspective(self):
+                return MyPerspective()
+            def workspace(self):
+                return None
+
+        self.plotter = Plotter2D.Plotter2D(parent=dummy_manager(), quickplot=True)
 
         self.data = Data2D(image=[0.1]*4,
                            qx_data=[1.0, 2.0, 3.0, 4.0],
@@ -102,6 +111,26 @@ class Plotter2DTest(unittest.TestCase):
         self.plotter.onToggleScale(None)
 
         self.assertTrue(FigureCanvas.draw_idle.called)
+
+    def testOnBoxSum(self):
+        """ Test the box sum display and functionality """
+
+        # hacky way to make things work in manipulations._sum
+        self.data.detector = [1]
+        self.data.err_data = numpy.array([0.0, 0.0, 0.1, 0.0])
+        self.plotter.data = self.data
+        self.plotter.show()
+
+        # Mock the main window
+        self.plotter.manager.parent = MagicMock()
+
+        # Call the main tested method
+        self.plotter.onBoxSum()
+
+        # Test various properties
+        self.assertIsInstance(self.plotter.slicer.model(), QtGui.QStandardItemModel)
+        self.assertTrue(self.plotter.boxwidget.isVisible())
+        self.assertIsInstance(self.plotter.boxwidget.model, QtGui.QStandardItemModel)
 
     def testContextMenuQuickPlot(self):
         """ Test the right click menu """

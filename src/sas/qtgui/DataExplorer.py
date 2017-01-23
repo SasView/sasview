@@ -398,16 +398,17 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # All same-type charts in one plot
         new_plot = Plotter(self)
 
-        def addDataPlot2D(plot_set):
+        def addDataPlot2D(plot_set, item):
             plot2D = Plotter2D(self)
+            plot2D.item = item
             plot2D.plot(plot_set)
             self.plotAdd(plot2D)
 
-        for plot_set in plots:
+        for item, plot_set in plots:
             if isinstance(plot_set, Data1D):
                 new_plot.plot(plot_set)
             elif isinstance(plot_set, Data2D):
-                addDataPlot2D(plot_set)
+                addDataPlot2D(plot_set, item)
             else:
                 msg = "Incorrect data type passed to Plotting"
                 raise AttributeError, msg
@@ -449,7 +450,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         old_plot = PlotHelper.plotById(plot_id)
 
         # Add new data to the old plot, if data type is the same.
-        for plot_set in new_plots:
+        for _, plot_set in new_plots:
             if type(plot_set) is type(old_plot._data):
                 old_plot.data = plot_set
                 old_plot.plot()

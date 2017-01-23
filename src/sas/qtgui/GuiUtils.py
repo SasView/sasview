@@ -241,6 +241,16 @@ def updateModelItemWithPlot(item, update_data, name=""):
     """
     assert isinstance(item, QtGui.QStandardItem)
     assert isinstance(update_data, QtCore.QVariant)
+    py_update_data = update_data.toPyObject()
+
+    # Check if data with the same ID is already present
+    for index in range(item.rowCount()):
+        plot_item = item.child(index)
+        if plot_item.isCheckable():
+            plot_data = plot_item.child(0).data().toPyObject()
+            if plot_data.id == py_update_data.id:
+                item.removeRow(index)
+                break
 
     checkbox_item = QtGui.QStandardItem(True)
     checkbox_item.setCheckable(True)
@@ -248,7 +258,6 @@ def updateModelItemWithPlot(item, update_data, name=""):
     checkbox_item.setText(name)
 
     # Add "Info" item
-    py_update_data = update_data.toPyObject()
     if isinstance(py_update_data, (Data1D or Data2D)):
         # If Data1/2D added - extract Info from it
         info_item = infoFromData(py_update_data)
@@ -297,13 +306,13 @@ def plotsFromCheckedItems(model_item):
         item = model_item.item(index)
         if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
             # TODO: assure item type is correct (either data1/2D or Plotter)
-            plot_data.append(item.child(0).data().toPyObject())
+            plot_data.append((item, item.child(0).data().toPyObject()))
         # Going 1 level deeper only
         for index_2 in range(item.rowCount()):
             item_2 = item.child(index_2)
             if item_2 and item_2.isCheckable() and item_2.checkState() == QtCore.Qt.Checked:
                 # TODO: assure item type is correct (either data1/2D or Plotter)
-                plot_data.append(item_2.child(0).data().toPyObject())
+                plot_data.append((item_2, item_2.child(0).data().toPyObject()))
 
     return plot_data
 
