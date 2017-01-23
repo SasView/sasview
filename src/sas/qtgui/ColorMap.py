@@ -79,7 +79,7 @@ class ColorMap(QtGui.QDialog, Ui_ColorMapUI):
         """
         return (self._norm.vmin, self._norm.vmax)
 
-    def onReset(self, event):
+    def onReset(self):
         """
         Respond to the Reset button click
         """
@@ -205,5 +205,3 @@ class ColorMap(QtGui.QDialog, Ui_ColorMapUI):
         self._norm = mpl.colors.Normalize(vmin=min_amp, vmax=max_amp)
         self.redrawColorBar()
         self.canvas.draw()
-
-        pass

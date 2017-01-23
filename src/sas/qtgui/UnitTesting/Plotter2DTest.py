@@ -63,11 +63,35 @@ class Plotter2DTest(unittest.TestCase):
 
     def testCalculateDepth(self):
         ''' Test the depth calculator '''
-        WarningTestNotImplemented()
+        self.plotter.data = self.data
+
+        # Default, log scale
+        depth = self.plotter.calculateDepth()
+        self.assertEqual(depth, (0.1, 1.e20))
+
+        # Change the scale to linear
+        self.plotter.scale = 'linear'
+        depth = self.plotter.calculateDepth()
+        self.assertEqual(depth[0], -32.)
+        self.assertAlmostEqual(depth[1], 1.30103, 5)
 
     def testOnColorMap(self):
         ''' Respond to the color map event '''
-        WarningTestNotImplemented()
+        self.plotter.data = self.data
+        self.plotter.plot()
+        self.plotter.show()
+
+        QtGui.QDialog.exec_ = MagicMock(return_value=QtGui.QDialog.Accepted)
+
+        # Just this one plot
+        self.plotter.onColorMap()
+
+        # Check that exec_ got called
+        self.assertTrue(QtGui.QDialog.exec_.called)
+
+        self.assertEqual(self.plotter.cmap, "jet")
+        self.assertEqual(self.plotter.vmin, -0.1)
+        self.assertEqual(self.plotter.vmax, 0.1)
 
     def testOnToggleScale(self):
         """ Respond to the event by replotting """

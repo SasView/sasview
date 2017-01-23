@@ -203,8 +203,8 @@ class Plotter2DWidget(PlotterBase):
         Display the color map dialog and modify the plot's map accordingly
         """
         color_map_dialog = ColorMap(self, cmap=self.cmap,
-                                    zmin=self.vmin,
-                                    zmax=self.vmax,
+                                    vmin=self.vmin,
+                                    vmax=self.vmax,
                                     data=self.data)
 
         if color_map_dialog.exec_() == QtGui.QDialog.Accepted:

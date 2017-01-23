@@ -4,6 +4,7 @@ import numpy
 
 from PyQt4 import QtGui
 from mock import MagicMock
+import matplotlib as mpl
 
 # set up import paths
 import path_prepare
@@ -46,37 +47,110 @@ class ColorMapTest(unittest.TestCase):
         '''Test the GUI in its default state'''
         self.assertIsInstance(self.widget, QtGui.QDialog)
 
-        WarningTestNotImplemented()
+        self.assertEqual(self.widget._cmap_orig, "jet")
+        self.assertEqual(len(self.widget.all_maps), 144)
+        self.assertEqual(len(self.widget.maps), 72)
+        self.assertEqual(len(self.widget.rmaps), 72)
+
+        self.assertEqual(self.widget.lblWidth.text(), "0")
+        self.assertEqual(self.widget.lblHeight.text(), "0")
+        self.assertEqual(self.widget.lblQmax.text(), "15.8")
+        self.assertEqual(self.widget.lblStopRadius.text(), "-1")
+        self.assertFalse(self.widget.chkReverse.isChecked())
+        self.assertEqual(self.widget.cbColorMap.count(), 72)
+        self.assertEqual(self.widget.cbColorMap.currentIndex(), 60)
+
+        # validators
+        self.assertIsInstance(self.widget.txtMinAmplitude.validator(), QtGui.QDoubleValidator)
+        self.assertIsInstance(self.widget.txtMaxAmplitude.validator(), QtGui.QDoubleValidator)
 
     def testOnReset(self):
         '''Check the dialog reset function'''
-        WarningTestNotImplemented()
+        # Set some controls to non-default state
+        self.widget.cbColorMap.setCurrentIndex(20)
+        self.widget.chkReverse.setChecked(True)
+        self.widget.txtMinAmplitude.setText("20.0")
 
-    def testInitDetectorData(self):
-        '''Check the detector data generator'''
-        # possibly to fold into testDefaults
-        WarningTestNotImplemented()
+        # Reset the widget state
+        self.widget.onReset()
+
+        # Assure things went back to default
+        self.assertEqual(self.widget.cbColorMap.currentIndex(), 20)
+        self.assertFalse(self.widget.chkReverse.isChecked())
+        self.assertEqual(self.widget.txtMinAmplitude.text(), "")
 
     def testInitMapCombobox(self):
         '''Test the combo box initializer'''
-        # possible to fold into testDefaults
-        WarningTestNotImplemented()
+        # Set a color map from the direct list
+        self.widget._cmap = "gnuplot"
+        self.widget.initMapCombobox()
+
+        # Check the combobox
+        self.assertEqual(self.widget.cbColorMap.currentIndex(), 55)
+        self.assertFalse(self.widget.chkReverse.isChecked())
+
+        # Set a reversed value
+        self.widget._cmap = "hot_r"
+        self.widget.initMapCombobox()
+        # Check the combobox
+        self.assertEqual(self.widget.cbColorMap.currentIndex(), 56)
+        self.assertTrue(self.widget.chkReverse.isChecked())
+
 
     def testOnMapIndexChange(self):
         '''Test the response to the combo box index change'''
-        WarningTestNotImplemented()
 
-    def testRedrawColorBar(self):
-        '''Test the color bar redrawing'''
-        WarningTestNotImplemented()
+        self.widget.canvas.draw = MagicMock()
+        mpl.colorbar.ColorbarBase = MagicMock()
+
+        # simulate index change
+        self.widget.cbColorMap.setCurrentIndex(1)
+
+        # Check that draw() got called
+        self.assertTrue(self.widget.canvas.draw.called)
+        self.assertTrue(mpl.colorbar.ColorbarBase.called)
 
     def testOnColorMapReversed(self):
         '''Test reversing the color map functionality'''
-        WarningTestNotImplemented()
+        # Check the defaults
+        self.assertEqual(self.widget._cmap, "jet")
+        self.widget.cbColorMap.addItems = MagicMock()
+
+        # Reverse the choice
+        self.widget.onColorMapReversed(True)
+
+        # check the behaviour
+        self.assertEqual(self.widget._cmap, "jet_r")
+        self.assertTrue(self.widget.cbColorMap.addItems.called)
 
     def testOnAmplitudeChange(self):
         '''Check the callback method for responding to changes in textboxes'''
-        WarningTestNotImplemented()
+        self.widget.canvas.draw = MagicMock()
+        mpl.colors.Normalize = MagicMock()
+        mpl.colorbar.ColorbarBase = MagicMock()
+
+        self.widget.vmin = 0.0
+        self.widget.vmax = 100.0
+
+        # good values in fields
+        self.widget.txtMinAmplitude.setText("1.0")
+        self.widget.txtMaxAmplitude.setText("10.0")
+
+        self.widget.onAmplitudeChange()
+
+        # Check the arguments to Normalize
+        mpl.colors.Normalize.assert_called_with(vmin=1.0, vmax=10.0)
+        self.assertTrue(self.widget.canvas.draw.called)
+
+        # Bad values in fields
+        self.widget.txtMinAmplitude.setText("cake")
+        self.widget.txtMaxAmplitude.setText("more cake")
+
+        self.widget.onAmplitudeChange()
+
+        # Check the arguments to Normalize - should be defaults
+        mpl.colors.Normalize.assert_called_with(vmin=0.0, vmax=100.0)
+        self.assertTrue(self.widget.canvas.draw.called)
 
 
 if __name__ == "__main__":
