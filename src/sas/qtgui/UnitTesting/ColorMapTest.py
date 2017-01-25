@@ -12,6 +12,7 @@ import path_prepare
 from sas.sasgui.guiframe.dataFitting import Data2D
 import sas.qtgui.Plotter2D as Plotter2D
 from UnitTesting.TestUtils import WarningTestNotImplemented
+from UnitTesting.TestUtils import QtSignalSpy
 
 # Local
 from sas.qtgui.ColorMap import ColorMap
@@ -64,6 +65,11 @@ class ColorMapTest(unittest.TestCase):
         self.assertIsInstance(self.widget.txtMinAmplitude.validator(), QtGui.QDoubleValidator)
         self.assertIsInstance(self.widget.txtMaxAmplitude.validator(), QtGui.QDoubleValidator)
 
+        # Ranges
+        self.assertEqual(self.widget.txtMinAmplitude.text(), "0")
+        self.assertEqual(self.widget.txtMaxAmplitude.text(), "100")
+        self.assertIsInstance(self.widget.slider, QtGui.QSlider)
+
     def testOnReset(self):
         '''Check the dialog reset function'''
         # Set some controls to non-default state
@@ -77,7 +83,24 @@ class ColorMapTest(unittest.TestCase):
         # Assure things went back to default
         self.assertEqual(self.widget.cbColorMap.currentIndex(), 20)
         self.assertFalse(self.widget.chkReverse.isChecked())
-        self.assertEqual(self.widget.txtMinAmplitude.text(), "")
+        self.assertEqual(self.widget.txtMinAmplitude.text(), "0")
+
+    def testOnApply(self):
+        '''Check the dialog apply function'''
+        # Set some controls to non-default state
+        self.widget.show()
+        self.widget.cbColorMap.setCurrentIndex(20) # PuRd_r
+        self.widget.chkReverse.setChecked(True)
+        self.widget.txtMinAmplitude.setText("20.0")
+
+        spy_apply = QtSignalSpy(self.widget, self.widget.apply_signal)
+        # Reset the widget state
+        self.widget.onApply()
+
+        # Assure the widget is still up and the signal was sent.
+        self.assertTrue(self.widget.isVisible())
+        self.assertEqual(spy_apply.count(), 1)
+        self.assertIn('PuRd_r', spy_apply.called()[0]['args'][1])
 
     def testInitMapCombobox(self):
         '''Test the combo box initializer'''
@@ -96,6 +119,26 @@ class ColorMapTest(unittest.TestCase):
         self.assertEqual(self.widget.cbColorMap.currentIndex(), 56)
         self.assertTrue(self.widget.chkReverse.isChecked())
 
+    def testInitRangeSlider(self):
+        '''Test the range slider initializer'''
+        # Set a color map from the direct list
+        self.widget._cmap = "gnuplot"
+        self.widget.initRangeSlider()
+
+        # Check the values
+        self.assertEqual(self.widget.slider.minimum(), 0)
+        self.assertEqual(self.widget.slider.maximum(), 100)
+        self.assertEqual(self.widget.slider.orientation(), 1)
+
+        # Emit new low value
+        self.widget.slider.lowValueChanged.emit(5)
+        # Assure the widget received changes
+        self.assertEqual(self.widget.txtMinAmplitude.text(), "5")
+
+        # Emit new high value
+        self.widget.slider.highValueChanged.emit(45)
+        # Assure the widget received changes
+        self.assertEqual(self.widget.txtMinAmplitude.text(), "45")
 
     def testOnMapIndexChange(self):
         '''Test the response to the combo box index change'''

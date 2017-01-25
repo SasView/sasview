@@ -12,6 +12,7 @@ import numpy
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from sas.sasgui.guiframe.dataFitting import Data2D
 from sas.qtgui.GuiUtils import formatNumber
+from rangeSlider import RangeSlider
 
 DEFAULT_MAP = 'jet'
 
@@ -19,6 +20,7 @@ DEFAULT_MAP = 'jet'
 from sas.qtgui.UI.ColorMapUI import Ui_ColorMapUI
 
 class ColorMap(QtGui.QDialog, Ui_ColorMapUI):
+    apply_signal = QtCore.pyqtSignal(tuple, str)
     def __init__(self, parent=None, cmap=None, vmin=0.0, vmax=100.0, data=None):
         super(ColorMap, self).__init__()
 
@@ -31,14 +33,16 @@ class ColorMap(QtGui.QDialog, Ui_ColorMapUI):
         self.maps = sorted(m for m in self.all_maps if not m.endswith("_r"))
         self.rmaps = sorted(set(self.all_maps) - set(self.maps))
 
-        self.vmin = vmin
-        self.vmax = vmax
+        self.vmin = self.vmin_orig = vmin
+        self.vmax = self.vmax_orig = vmax
 
         # Initialize detector labels
         self.initDetectorData()
 
         # Initialize the combo box
         self.initMapCombobox()
+
+        self.initRangeSlider()
 
         # Add the color map component
         self.initColorMap()
@@ -51,6 +55,10 @@ class ColorMap(QtGui.QDialog, Ui_ColorMapUI):
         validator_max.setNotation(0)
         self.txtMaxAmplitude.setValidator(validator_max)
 
+        # Set the initial amplitudes
+        self.txtMinAmplitude.setText(formatNumber(self.vmin))
+        self.txtMaxAmplitude.setText(formatNumber(self.vmax))
+
         # Enforce constant size on the widget
         self.setFixedSize(self.minimumSizeHint())
 
@@ -60,8 +68,11 @@ class ColorMap(QtGui.QDialog, Ui_ColorMapUI):
         # Handle checkbox changes
         self.chkReverse.stateChanged.connect(self.onColorMapReversed)
 
-        # Handle the reset button click
+        # Handle the Reset button click
         self.buttonBox.button(QtGui.QDialogButtonBox.Reset).clicked.connect(self.onReset)
+
+        # Handle the Apply button click
+        self.buttonBox.button(QtGui.QDialogButtonBox.Apply).clicked.connect(self.onApply)
 
         # Handle the amplitude setup
         self.txtMinAmplitude.editingFinished.connect(self.onAmplitudeChange)
@@ -85,13 +96,26 @@ class ColorMap(QtGui.QDialog, Ui_ColorMapUI):
         """
         # Go back to original settings
         self._cmap = self._cmap_orig
+        self.vmin = self.vmin_orig
+        self.vmax = self.vmax_orig
         self._norm = mpl.colors.Normalize(vmin=self.vmin, vmax=self.vmax)
-        self.txtMaxAmplitude.clear()
-        self.txtMinAmplitude.clear()
+        self.txtMinAmplitude.setText(formatNumber(self.vmin))
+        self.txtMaxAmplitude.setText(formatNumber(self.vmax))
         self.initMapCombobox()
+        self.slider.setMinimum(self.vmin)
+        self.slider.setMaximum(self.vmax)
+        self.slider.setLowValue(self.vmin)
+        self.slider.setHighValue(self.vmax)
         # Redraw the widget
         self.redrawColorBar()
         self.canvas.draw()
+
+    def onApply(self):
+        """
+        Respond to the Apply button click.
+        Send a signal to the plotter with vmin/vmax/cmap for chart update
+        """
+        self.apply_signal.emit(self.norm(), self.cmap())
 
     def initDetectorData(self):
         """
@@ -124,17 +148,53 @@ class ColorMap(QtGui.QDialog, Ui_ColorMapUI):
         # Set the default/passed map
         self.cbColorMap.setCurrentIndex(self.cbColorMap.findText(self._cmap))
 
+    def initRangeSlider(self):
+        """
+        Create and display the double slider for data range mapping.
+        """
+        self.slider = RangeSlider()
+        self.slider.setMinimum(self.vmin)
+        self.slider.setMaximum(self.vmax)
+        self.slider.setLowValue(self.vmin)
+        self.slider.setHighValue(self.vmax)
+        self.slider.setOrientation(QtCore.Qt.Horizontal)
+
+        self.slider_label = QtGui.QLabel()
+        self.slider_label.setText("Drag the sliders to adjust color range.")
+
+        def set_vmin(value):
+            self.vmin = value
+            self.txtMinAmplitude.setText(str(value))
+            self.updateMap()
+        def set_vmax(value):
+            self.vmax = value
+            self.txtMaxAmplitude.setText(str(value))
+            self.updateMap()
+
+        self.slider.lowValueChanged.connect(set_vmin)
+        self.slider.highValueChanged.connect(set_vmin)
+
+    def updateMap(self):
+        self._norm = mpl.colors.Normalize(vmin=self.vmin, vmax=self.vmax)
+        self.redrawColorBar()
+        self.canvas.draw()
+
     def initColorMap(self):
         """
         Prepare and display the color map
         """
         self.fig = mpl.figure.Figure(figsize=(4, 1))
         self.ax1 = self.fig.add_axes([0.05, 0.65, 0.9, 0.15])
+
         self._norm = mpl.colors.Normalize(vmin=self.vmin, vmax=self.vmax)
         self.redrawColorBar()
         self.canvas = FigureCanvas(self.fig)
+
         layout = QtGui.QVBoxLayout()
+        layout.addWidget(self.slider_label)
+        layout.addWidget(self.slider)
         layout.addWidget(self.canvas)
+
         self.widget.setLayout(layout)
 
     def onMapIndexChange(self, index):
@@ -153,7 +213,7 @@ class ColorMap(QtGui.QDialog, Ui_ColorMapUI):
         self.cb = mpl.colorbar.ColorbarBase(self.ax1, cmap=self._cmap,
                                             norm=self._norm,
                                             orientation='horizontal')
-        self.cb.set_label('Detector Colors')
+        self.cb.set_label('Color map range')
 
     def onColorMapReversed(self, isChecked):
         """
@@ -176,7 +236,7 @@ class ColorMap(QtGui.QDialog, Ui_ColorMapUI):
                 new_map = maps[0]
 
         self._cmap = new_map
-        # Clearning the content of the combobox.
+        # Clear the content of the combobox.
         # Needs signal blocking, or else onMapIndexChange() spoils it all
         self.cbColorMap.blockSignals(True)
         self.cbColorMap.clear()

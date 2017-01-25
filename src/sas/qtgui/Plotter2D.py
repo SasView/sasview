@@ -28,6 +28,8 @@ class Plotter2DWidget(PlotterBase):
         self.cmap = DEFAULT_CMAP.name
         # Default scale
         self.scale = 'log_{10}'
+        self.vmin = None
+        self.vmax = None
 
     @property
     def data(self):
@@ -207,12 +209,19 @@ class Plotter2DWidget(PlotterBase):
                                     vmax=self.vmax,
                                     data=self.data)
 
+        color_map_dialog.apply_signal.connect(self.onApplyMap)
+
         if color_map_dialog.exec_() == QtGui.QDialog.Accepted:
-            self.cmap = color_map_dialog.cmap()
-            self.vmin, self.vmax = color_map_dialog.norm()
-            # Redraw the chart with new cmap
-            self.plot()
-        pass
+            self.onApplyMap(color_map_dialog.norm(), color_map_dialog.cmap())
+
+    def onApplyMap(self, v_values, cmap):
+        """
+        Update the chart color map based on data passed from the widget
+        """
+        self.cmap = str(cmap)
+        self.vmin, self.vmax = v_values
+        # Redraw the chart with new cmap
+        self.plot()
 
     def showPlot(self, data, qx_data, qy_data, xmin, xmax, ymin, ymax,
                  zmin, zmax, color=0, symbol=0, markersize=0,
@@ -260,9 +269,14 @@ class Plotter2DWidget(PlotterBase):
             #Re-adjust colorbar
             self.figure.subplots_adjust(left=0.2, right=.8, bottom=.2)
 
+            zmax_temp = self.zmax
+            if self.vmin is not None:
+                zmin_temp = self.vmin
+                zmax_temp = self.vmax
+
             im = self.ax.imshow(output, interpolation='nearest',
                                 origin='lower',
-                                vmin=zmin_temp, vmax=self.zmax,
+                                vmin=zmin_temp, vmax=zmax_temp,
                                 cmap=self.cmap,
                                 extent=(self.xmin, self.xmax,
                                         self.ymin, self.ymax))
@@ -300,7 +314,6 @@ class Plotter2DWidget(PlotterBase):
             X, Y = numpy.meshgrid(X, Y)
 
             ax = Axes3D(self.figure)
-            #cbax = self.figure.add_axes([0.84, 0.1, 0.02, 0.8])
 
             # Disable rotation for large sets.
             # TODO: Define "large" for a dataset
