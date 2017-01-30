@@ -24,6 +24,7 @@ import xml.dom.minidom
 from xml.dom.minidom import parseString
 from lxml import etree
 
+from sasmodels import convert
 import sasmodels.weights
 
 import sas.sascalc.dataloader
@@ -270,6 +271,7 @@ class PageState(object):
         self.cb1 = False
         # store value of chisqr
         self.tcChi = None
+        self.version = (1,0,0)
 
     def clone(self):
         """
@@ -348,12 +350,145 @@ class PageState(object):
         obj.npts = copy.deepcopy(self.npts)
         obj.cb1 = copy.deepcopy(self.cb1)
         obj.smearer = copy.deepcopy(self.smearer)
+        obj.version = copy.deepcopy(self.version)
 
         for name, state in self.saved_states.iteritems():
             copy_name = copy.deepcopy(name)
             copy_state = state.clone()
             obj.saved_states[copy_name] = copy_state
         return obj
+
+    def _old_first_model(self):
+        """
+        Handle save states from 4.0.1 and before where the first item in the
+        selection boxes of category, formfactor and structurefactor were not
+        saved.
+        :return: None
+        """
+        if self.formfactorcombobox == '':
+            if self.categorycombobox == '' and len(self.parameters) == 3:
+                self.categorycombobox = "Shape-Independent"
+                self.formfactorcombobox = 'PowerLawAbsModel'
+            elif self.categorycombobox == '' and len(self.parameters) == 9:
+                self.categorycombobox = 'Cylinder'
+                self.formfactorcombobox = 'barbell'
+            elif self.categorycombobox == 'Shapes':
+                self.formfactorcombobox = 'BCCrystalModel'
+            elif self.categorycombobox == 'Uncategorized':
+                self.formfactorcombobox = 'LineModel'
+            elif self.categorycombobox == 'StructureFactor':
+                self.structurecombobox = 'HardsphereStructure'
+            elif self.categorycombobox == 'Customized Models':
+                self.formfactorcombobox = 'MySumFunction'
+            elif self.categorycombobox == 'Ellipsoid':
+                self.formfactorcombobox = 'core_shell_ellipsoid'
+            elif self.categorycombobox == 'Lamellae':
+                self.formfactorcombobox = 'lamellar'
+            elif self.categorycombobox == 'Paracrystal':
+                self.formfactorcombobox = 'bcc_paracrystal'
+            elif self.categorycombobox == 'Parallelepiped':
+                self.formfactorcombobox = 'core_shell_parallelepiped'
+            elif self.categorycombobox == 'Shape Independent':
+                self.formfactorcombobox = 'be_polyelectrolyte'
+            elif self.categorycombobox == 'Sphere':
+                self.formfactorcombobox = 'adsorbed_layer'
+            elif self.categorycombobox == 'Structure Factor':
+                self.formfactorcombobox = 'hardsphere'
+
+    @staticmethod
+    def param_remap_to_sasmodels_convert(params, is_string=False):
+        """
+        Remaps the parameters for sasmodels conversion
+
+        :param params: list of parameters (likely self.parameters)
+        :return: remapped dictionary of parameters
+        """
+        p = dict()
+        for fittable, name, value, _, uncert, lower, upper, units in params:
+            if not value:
+                value = numpy.nan
+            if not uncert or uncert[1] == '' or uncert[1] == 'None':
+                uncert[0] = False
+                uncert[1] = numpy.nan
+            if not upper or upper[1] == '' or upper[1] == 'None':
+                upper[0] = False
+                upper[1] = numpy.nan
+            if not lower or lower[1] == '' or lower[1] == 'None':
+                lower[0] = False
+                lower[1] = numpy.nan
+            if is_string:
+                p[name] = str(value)
+            else:
+                p[name] = float(value)
+            p[name + ".fittable"] = bool(fittable)
+            p[name + ".std"] = float(uncert[1])
+            p[name + ".upper"] = float(upper[1])
+            p[name + ".lower"] = float(lower[1])
+            p[name + ".units"] = units
+        return p
+
+    @staticmethod
+    def param_remap_from_sasmodels_convert(params):
+        """
+        Converts {name : value} map back to [] param list
+        :param params: parameter map returned from sasmodels
+        :return: None
+        """
+        p_map = []
+        for name, info in params.iteritems():
+            if ".fittable" in name or ".std" in name or ".upper" in name or \
+                            ".lower" in name or ".units" in name:
+                pass
+            else:
+                fittable = params.get(name + ".fittable", True)
+                std = params.get(name + ".std", '0.0')
+                upper = params.get(name + ".upper", 'inf')
+                lower = params.get(name + ".lower", '-inf')
+                units = params.get(name + ".units")
+                if std is not None and std is not numpy.nan:
+                    std = [True, str(std)]
+                else:
+                    std = [False, '']
+                if lower is not None and lower is not numpy.nan:
+                    lower = [True, str(lower)]
+                else:
+                    lower = [True, '-inf']
+                if upper is not None and upper is not numpy.nan:
+                    upper = [True, str(upper)]
+                else:
+                    upper = [True, 'inf']
+                param_list = [bool(fittable), str(name), str(info),
+                              "+/-", std, lower, upper, str(units)]
+                p_map.append(param_list)
+        return p_map
+
+    def _convert_to_sasmodels(self):
+        """
+        Convert parameters to a form usable by sasmodels converter
+
+        :return: None
+        """
+        # Create conversion dictionary to send to sasmodels
+        self._old_first_model()
+        p = self.param_remap_to_sasmodels_convert(self.parameters)
+        structurefactor, params = convert.convert_model(self.structurecombobox,
+                                                        p, False, self.version)
+        formfactor, params = convert.convert_model(self.formfactorcombobox,
+                                                   params, False, self.version)
+        if len(self.str_parameters) > 0:
+            str_pars = self.param_remap_to_sasmodels_convert(
+                self.str_parameters, True)
+            formfactor, str_params = convert.convert_model(
+                self.formfactorcombobox, str_pars, False, self.version)
+            for key, value in str_params.iteritems():
+                params[key] = value
+
+        if self.formfactorcombobox == 'SphericalSLDModel':
+            self.multi_factor += 1
+        self.formfactorcombobox = formfactor
+        self.structurecombobox = structurefactor
+        self.parameters = []
+        self.parameters = self.param_remap_from_sasmodels_convert(params)
 
     def _repr_helper(self, list, rep):
         """
@@ -681,7 +816,9 @@ class PageState(object):
                     entry_node.appendChild(top_element)
 
         attr = newdoc.createAttribute("version")
-        attr.nodeValue = '1.0'
+        import sasview
+        attr.nodeValue = sasview.__version__
+        # attr.nodeValue = '1.0'
         top_element.setAttributeNode(attr)
 
         # File name
@@ -874,7 +1011,15 @@ class PageState(object):
             msg += " format for fitting files"
             raise RuntimeError, msg
 
-        if node.get('version') and node.get('version') == '1.0':
+        if node.get('version'):
+            # Get the version for model conversion purposes
+            self.version = tuple(int(e) for e in
+                                 str.split(node.get('version'), "."))
+            # The tuple must be at least 3 items long
+            while len(self.version) < 3:
+                ver_list = list(self.version)
+                ver_list.append(0)
+                self.version = tuple(ver_list)
 
             # Get file name
             entry = get_content('ns:filename', node)
@@ -1691,6 +1836,7 @@ class Reader(CansasReader):
                     else:
                         name = original_fname
                     state.data.group_id = name
+                    state.version = fitstate.version
                     # store state in fitting
                     self.call_back(state=state,
                                    datainfo=output[ind], format=ext)
