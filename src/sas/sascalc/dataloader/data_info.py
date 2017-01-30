@@ -704,11 +704,11 @@ class Data1D(plottable_1D, DataInfo):
         self.isSesans = isSesans
         try:
             if self.isSesans: # the data is SESANS
-                x_unit = 'A'
-                y_unit = 'pol'
+                self.x_unit = 'A'
+                self.y_unit = 'pol'
             elif not self.isSesans: # the data is SANS
-                x_unit = '1/A'
-                y_unit = '1/cm'
+                self.x_unit = '1/A'
+                self.y_unit = '1/cm'
         except: # the data is not recognized/supported, and the user is notified
             raise(TypeError, 'data not recognized, check documentation for supported 1D data formats')
 
