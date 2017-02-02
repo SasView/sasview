@@ -67,13 +67,11 @@ def smear_selection(data, model = None):
     if _found_sesans == True:
         #Pre-compute the Hankel matrix (H)
         qmax, qunits = data.sample.zacceptance
-        hankel = sesans.SesansTransform()
-        sesans.SesansTransform.set_transform(hankel,
-        SE = Converter(data._xunit)(data.x, "A"),
-        zaccept = Converter(qunits)(qmax, "1/A"),
-        Rmax = 10000000)
+        hankel = sesans.SesansTransform(SE=Converter(data._xunit)(data.x, "A"),
+                                        zaccept=Converter(qunits)(qmax, "1/A"),
+                                        Rmax=10000000)
         # Then return the actual transform, as if it were a smearing function
-        return PySmear(SESANS1D(data, hankel._H0, hankel._H, hankel.q), model)
+        return PySmear(SESANS1D(data, hankel.H0, hankel.H, hankel.q), model)
 
     _found_resolution = False
     if data.dx is not None and len(data.dx) == len(data.x):
@@ -121,7 +119,8 @@ class PySmear(object):
         self.resolution = resolution
 
         if hasattr(self.resolution, 'data'):
-            if self.resolution.data.meta_data['loader'] == 'SESANS':  # Always True if file extension is '.ses'!
+            #if self.resolution.data.meta_data['loader'] == 'SESANS':  # Always True if file extension is '.ses'!
+            if self.resolution.data.isSesans:
                 self.offset = 0
             # This is default behaviour, for future resolution/transform functions this needs to be revisited.
             else:
