@@ -110,6 +110,13 @@ class ColorMap(QtGui.QDialog, Ui_ColorMapUI):
         self.redrawColorBar()
         self.canvas.draw()
 
+    def onApply(self):
+        """
+        Respond to the Apply button click.
+        Send a signal to the plotter with vmin/vmax/cmap for chart update
+        """
+        self.apply_signal.emit(self.norm(), self.cmap())
+
     def initDetectorData(self):
         """
         Fill out the Detector labels
@@ -206,7 +213,7 @@ class ColorMap(QtGui.QDialog, Ui_ColorMapUI):
         self.cb = mpl.colorbar.ColorbarBase(self.ax1, cmap=self._cmap,
                                             norm=self._norm,
                                             orientation='horizontal')
-        self.cb.set_label('Detector Colors')
+        self.cb.set_label('Color map range')
 
     def onColorMapReversed(self, isChecked):
         """

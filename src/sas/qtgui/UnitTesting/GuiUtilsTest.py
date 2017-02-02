@@ -158,11 +158,12 @@ class GuiUtilsTest(unittest.TestCase):
 
         # Make sure only the checked data is present
         # FRIDAY IN
-        self.assertIn(test_list0, plot_list)
+        self.assertIn(test_list0, plot_list[0])
         # SATURDAY IN
-        self.assertIn(test_list1, plot_list)
+        self.assertIn(test_list1, plot_list[1])
         # MONDAY NOT IN
-        self.assertNotIn(test_list2, plot_list)
+        self.assertNotIn(test_list2, plot_list[0])
+        self.assertNotIn(test_list2, plot_list[1])
 
     def testInfoFromData(self):
         """

@@ -99,8 +99,8 @@ class Plotter2DTest(unittest.TestCase):
         self.assertTrue(QtGui.QDialog.exec_.called)
 
         self.assertEqual(self.plotter.cmap, "jet")
-        self.assertEqual(self.plotter.vmin, -0.1)
-        self.assertEqual(self.plotter.vmax, 0.1)
+        self.assertAlmostEqual(self.plotter.vmin, 0.1, 6)
+        self.assertAlmostEqual(self.plotter.vmax, 1e+20, 6)
 
     def testOnToggleScale(self):
         """ Respond to the event by replotting """

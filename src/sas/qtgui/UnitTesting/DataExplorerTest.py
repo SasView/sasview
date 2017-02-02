@@ -591,7 +591,8 @@ class DataExplorerTest(unittest.TestCase):
         # get Data1D
         p_file="cyl_400_20.txt"
         output_object = loader.load(p_file)
-        new_data = [manager.create_gui_data(output_object, p_file)]
+        output_item = QtGui.QStandardItem()
+        new_data = [(output_item, manager.create_gui_data(output_object, p_file))]
 
         # Mask plotting
         self.form.parent.workspace = MagicMock()
