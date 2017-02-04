@@ -200,10 +200,12 @@ class Plotter2DWidget(PlotterBase):
         """
         Remove all sclicers from the chart
         """
-        if self.slicer:
-            self.slicer.clear()
-            self.canvas.draw()
-            self.slicer = None
+        if self.slicer is None:
+            return
+
+        self.slicer.clear()
+        self.canvas.draw()
+        self.slicer = None
 
     def onEditSlicer(self):
         """
@@ -214,6 +216,8 @@ class Plotter2DWidget(PlotterBase):
         self.param_model = self.slicer.model()
          # Pass the model to the Slicer Parameters widget
         self.slicer_widget = SlicerParameters(self, model=self.param_model)
+        self.manager.parent.workspace().addWindow(self.slicer_widget)
+
         self.slicer_widget.show()
 
     def onCircularAverage(self):

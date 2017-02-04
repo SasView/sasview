@@ -30,6 +30,9 @@ class SlicerParameters(QtGui.QDialog, Ui_SlicerParametersUI):
         # Disallow edit of the parameter name column.
         self.lstParams.model().setColumnReadOnly(0, True)
 
+        # Disable row number display
+        self.lstParams.verticalHeader().setVisible(False)
+
         # Specify the validator on the parameter value column.
         self.lstParams.setItemDelegate(ValidatedItemDelegate())
 
@@ -67,6 +70,8 @@ class ValidatedItemDelegate(QtGui.QStyledItemDelegate):
         if index.column() == 1: # Edir only cells in the second column
             editor = QtGui.QLineEdit(widget)
             validator = QtGui.QDoubleValidator()
+            # Don't use the scientific notation, cause 'e'.
+            validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
             editor.setValidator(validator)
             return editor
         return super(ValidatedItemDelegate, self).createEditor(widget, option, index)

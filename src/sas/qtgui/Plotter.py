@@ -81,7 +81,10 @@ class PlotterWidget(PlotterBase):
             marker = PlotUtilities.SHAPES.values()[marker]
 
         # Plot name
-        self.title(title=self.data.title)
+        if self.data.title:
+            self.title(title=self.data.title)
+        else:
+            self.title(title=self.data.name)
 
         # Error marker toggle
         if hide_error is None:
@@ -133,7 +136,8 @@ class PlotterWidget(PlotterBase):
 
         # Now add the legend with some customizations.
         self.legend = ax.legend(loc='upper right', shadow=True)
-        self.legend.set_picker(True)
+        if self.legend:
+            self.legend.set_picker(True)
 
         # Current labels for axes
         if self.y_label and not is_fit:
@@ -190,8 +194,8 @@ class PlotterWidget(PlotterBase):
         """
         for id in self.plot_dict.keys():
             plot = self.plot_dict[id]
-            #name = plot.name
-            name = plot.title
+
+            name = plot.name if plot.name else plot.title
             plot_menu = self.contextMenu.addMenu('&%s' % name)
 
             self.actionDataInfo = plot_menu.addAction("&DataInfo")
