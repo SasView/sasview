@@ -12,11 +12,10 @@ import numpy
 import math
 import logging
 import sys
-from sasmodels import sesans
 import numpy as np  # type: ignore
 from numpy import pi, exp # type:ignore
 from sasmodels.resolution import Slit1D, Pinhole1D
-from sasmodels.sesans import SESANS1D
+from sasmodels.sesans import SesansTransform
 from sasmodels.resolution2d import Pinhole2D
 from src.sas.sascalc.data_util.nxsunit import Converter
 
@@ -67,11 +66,12 @@ def smear_selection(data, model = None):
     if _found_sesans == True:
         #Pre-compute the Hankel matrix (H)
         qmax, qunits = data.sample.zacceptance
-        hankel = sesans.SesansTransform(SE=Converter(data._xunit)(data.x, "A"),
-                                        zaccept=Converter(qunits)(qmax, "1/A"),
-                                        Rmax=10000000)
+        SElength = Converter(data._xunit)(data.x, "A")
+        zaccept = Converter(qunits)(qmax, "1/A"),
+        Rmax = 10000000
+        hankel = SesansTransform(data.x, SElength, zaccept, Rmax)
         # Then return the actual transform, as if it were a smearing function
-        return PySmear(SESANS1D(data, hankel.H0, hankel.H, hankel.q), model)
+        return PySmear(hankel, model, offset=0)
 
     _found_resolution = False
     if data.dx is not None and len(data.dx) == len(data.x):
@@ -114,21 +114,12 @@ class PySmear(object):
     """
     Wrapper for pure python sasmodels resolution functions.
     """
-    def __init__(self, resolution, model):
+    def __init__(self, resolution, model, offset=None):
         self.model = model
         self.resolution = resolution
-
-        if hasattr(self.resolution, 'data'):
-            #if self.resolution.data.meta_data['loader'] == 'SESANS':  # Always True if file extension is '.ses'!
-            if self.resolution.data.isSesans:
-                self.offset = 0
-            # This is default behaviour, for future resolution/transform functions this needs to be revisited.
-            else:
-                self.offset = numpy.searchsorted(self.resolution.q_calc, self.resolution.q[0])
-        else:
-            self.offset = numpy.searchsorted(self.resolution.q_calc, self.resolution.q[0])
-
-        # self.offset = numpy.searchsorted(self.resolution.q_calc, self.resolution.q[0])
+        if offset is None:
+            offset = numpy.searchsorted(self.resolution.q_calc, self.resolution.q[0])
+        self.offset = offset
 
     def apply(self, iq_in, first_bin=0, last_bin=None):
         """
