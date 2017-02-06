@@ -246,12 +246,20 @@ class Reader(XMLreader):
 
                 ## I and Q Data
                 elif tagname == 'I':
-                    self.current_dataset.yaxis("Intensity", unit)
+                    unit_list = unit.split(" | ")
+                    if len(unit_list) > 1:
+                        self.current_dataset.yaxis(unit_list[0], unit_list[1])
+                    else:
+                        self.current_dataset.yaxis("Intensity", unit)
                     self.current_dataset.y = np.append(self.current_dataset.y, data_point)
                 elif tagname == 'Idev':
                     self.current_dataset.dy = np.append(self.current_dataset.dy, data_point)
                 elif tagname == 'Q':
-                    self.current_dataset.xaxis("Q", unit)
+                    unit_list = unit.split(" | ")
+                    if len(unit_list) > 1:
+                        self.current_dataset.xaxis(unit_list[0], unit_list[1])
+                    else:
+                        self.current_dataset.xaxis("Q", unit)
                     self.current_dataset.x = np.append(self.current_dataset.x, data_point)
                 elif tagname == 'Qdev':
                     self.current_dataset.dx = np.append(self.current_dataset.dx, data_point)
@@ -263,6 +271,10 @@ class Reader(XMLreader):
                     pass
                 elif tagname == 'Shadowfactor':
                     pass
+                elif tagname == 'Sesans':
+                    self.current_datainfo.isSesans = bool(data_point)
+                elif tagname == 'zacceptance':
+                    self.current_datainfo.sample.zacceptance = (data_point, unit)
 
                 ## Sample Information
                 elif tagname == 'ID' and self.parent_class == 'SASsample':
@@ -918,22 +930,29 @@ class Reader(XMLreader):
             point = self.create_element("Idata")
             node.append(point)
             self.write_node(point, "Q", datainfo.x[i],
-                            {'unit': datainfo.x_unit})
+                            {'unit': datainfo._xaxis + " | " + datainfo._xunit})
             if len(datainfo.y) >= i:
                 self.write_node(point, "I", datainfo.y[i],
-                                {'unit': datainfo.y_unit})
+                                {'unit': datainfo._yaxis + " | " + datainfo._yunit})
             if datainfo.dy is not None and len(datainfo.dy) > i:
                 self.write_node(point, "Idev", datainfo.dy[i],
-                                {'unit': datainfo.y_unit})
+                                {'unit': datainfo._yaxis + " | " + datainfo._yunit})
             if datainfo.dx is not None and len(datainfo.dx) > i:
                 self.write_node(point, "Qdev", datainfo.dx[i],
-                                {'unit': datainfo.x_unit})
+                                {'unit': datainfo._xaxis + " | " + datainfo._xunit})
             if datainfo.dxw is not None and len(datainfo.dxw) > i:
                 self.write_node(point, "dQw", datainfo.dxw[i],
-                                {'unit': datainfo.x_unit})
+                                {'unit': datainfo._xaxis + " | " + datainfo._xunit})
             if datainfo.dxl is not None and len(datainfo.dxl) > i:
                 self.write_node(point, "dQl", datainfo.dxl[i],
-                                {'unit': datainfo.x_unit})
+                                {'unit': datainfo._xaxis + " | " + datainfo._xunit})
+        if datainfo.isSesans:
+            sesans = self.create_element("Sesans")
+            sesans.text = str(datainfo.isSesans)
+            node.append(sesans)
+            self.write_node(node, "zacceptance", datainfo.sample.zacceptance[0],
+                             {'unit': datainfo.sample.zacceptance[1]})
+
 
     def _write_trans_spectrum(self, datainfo, entry_node):
         """

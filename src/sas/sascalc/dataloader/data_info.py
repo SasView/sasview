@@ -351,6 +351,8 @@ class Sample(object):
     orientation_unit = 'degree'
     ## Details
     details = None
+    ## SESANS zacceptance
+    zacceptance = None
 
     def __init__(self):
         self.position = Vector()
@@ -544,6 +546,7 @@ class DataInfo(object):
         _str = "File:            %s\n" % self.filename
         _str += "Title:           %s\n" % self.title
         _str += "Run:             %s\n" % str(self.run)
+        _str += "SESANS:          %s\n" % str(self.isSesans)
         _str += "Instrument:      %s\n" % str(self.instrument)
         _str += "%s\n" % str(self.sample)
         _str += "%s\n" % str(self.source)
@@ -1178,6 +1181,7 @@ def combine_data_info_with_plottable(data, datainfo):
     final_dataset.ymax = data.ymax
     final_dataset.xmin = data.xmin
     final_dataset.ymin = data.ymin
+    final_dataset.isSesans = datainfo.isSesans
     final_dataset.title = datainfo.title
     final_dataset.run = datainfo.run
     final_dataset.run_name = datainfo.run_name
