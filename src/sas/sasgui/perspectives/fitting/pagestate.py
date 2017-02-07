@@ -366,34 +366,32 @@ class PageState(object):
         :return: None
         """
         if self.formfactorcombobox == '':
-            if self.categorycombobox == '' and len(self.parameters) == 3:
-                self.categorycombobox = "Shape-Independent"
-                self.formfactorcombobox = 'PowerLawAbsModel'
-            elif self.categorycombobox == '' and len(self.parameters) == 9:
-                self.categorycombobox = 'Cylinder'
-                self.formfactorcombobox = 'barbell'
-            elif self.categorycombobox == 'Shapes':
-                self.formfactorcombobox = 'BCCrystalModel'
-            elif self.categorycombobox == 'Uncategorized':
-                self.formfactorcombobox = 'LineModel'
-            elif self.categorycombobox == 'StructureFactor':
-                self.structurecombobox = 'HardsphereStructure'
-            elif self.categorycombobox == 'Customized Models':
-                self.formfactorcombobox = 'MySumFunction'
-            elif self.categorycombobox == 'Ellipsoid':
-                self.formfactorcombobox = 'core_shell_ellipsoid'
-            elif self.categorycombobox == 'Lamellae':
-                self.formfactorcombobox = 'lamellar'
-            elif self.categorycombobox == 'Paracrystal':
-                self.formfactorcombobox = 'bcc_paracrystal'
-            elif self.categorycombobox == 'Parallelepiped':
-                self.formfactorcombobox = 'core_shell_parallelepiped'
-            elif self.categorycombobox == 'Shape Independent':
-                self.formfactorcombobox = 'be_polyelectrolyte'
-            elif self.categorycombobox == 'Sphere':
-                self.formfactorcombobox = 'adsorbed_layer'
-            elif self.categorycombobox == 'Structure Factor':
-                self.formfactorcombobox = 'hardsphere'
+            FIRST_FORM = {
+                'Shapes' : 'BCCrystalModel',
+                'Uncategorized' : 'LineModel',
+                'StructureFactor' : 'HardsphereStructure',
+                'Ellipsoid' : 'core_shell_ellipsoid',
+                'Lamellae' : 'lamellar',
+                'Paracrystal' : 'bcc_paracrystal',
+                'Parallelepiped' : 'core_shell_parallelepiped',
+                'Shape Independent' : 'be_polyelectrolyte',
+                'Sphere' : 'adsorbed_layer',
+                'Structure Factor' : 'hardsphere',
+                'Customized Models' : ''
+            }
+            if self.categorycombobox == '':
+                if len(self.parameters) == 3:
+                    self.categorycombobox = "Shape-Independent"
+                    self.formfactorcombobox = 'PowerLawAbsModel'
+                elif len(self.parameters) == 9:
+                    self.categorycombobox = 'Cylinder'
+                    self.formfactorcombobox = 'barbell'
+                else:
+                    msg = "Save state does not have enough information to load"
+                    msg += " the all of the data."
+                    logging.warning(msg=msg)
+            else:
+                self.formfactorcombobox = FIRST_FORM[self.categorycombobox]
 
     @staticmethod
     def param_remap_to_sasmodels_convert(params, is_string=False):
