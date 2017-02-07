@@ -297,7 +297,7 @@ class Reader(XMLreader):
                     self.current_dataset.yaxis("Qydev", unit)
                     self.current_dataset.dqy_data = np.fromstring(data_point, dtype=float, sep=",")
                 elif tagname == 'Mask':
-                    inter = data_point.split(",")
+                    inter = [item == "1" for item in data_point.split(",")]
                     self.current_dataset.mask = np.asarray(inter, dtype=bool)
 
                 # Sample Information
@@ -1079,7 +1079,8 @@ class Reader(XMLreader):
                             {'unit': datainfo._xunit})
         if datainfo.mask is not None:
             mask = ','.join(
-                [str(datainfo.mask[i]) for i in xrange(len(datainfo.mask))])
+                ["1" if datainfo.mask[i] else "0"
+                 for i in xrange(len(datainfo.mask))])
             self.write_node(point, "Mask", mask)
 
     def _write_trans_spectrum(self, datainfo, entry_node):
