@@ -24,6 +24,7 @@ import xml.dom.minidom
 from xml.dom.minidom import parseString
 from lxml import etree
 
+from sasmodels import convert
 import sasmodels.weights
 
 import sas.sascalc.dataloader
@@ -270,6 +271,7 @@ class PageState(object):
         self.cb1 = False
         # store value of chisqr
         self.tcChi = None
+        self.version = (1,0,0)
 
     def clone(self):
         """
@@ -348,12 +350,143 @@ class PageState(object):
         obj.npts = copy.deepcopy(self.npts)
         obj.cb1 = copy.deepcopy(self.cb1)
         obj.smearer = copy.deepcopy(self.smearer)
+        obj.version = copy.deepcopy(self.version)
 
         for name, state in self.saved_states.iteritems():
             copy_name = copy.deepcopy(name)
             copy_state = state.clone()
             obj.saved_states[copy_name] = copy_state
         return obj
+
+    def _old_first_model(self):
+        """
+        Handle save states from 4.0.1 and before where the first item in the
+        selection boxes of category, formfactor and structurefactor were not
+        saved.
+        :return: None
+        """
+        if self.formfactorcombobox == '':
+            FIRST_FORM = {
+                'Shapes' : 'BCCrystalModel',
+                'Uncategorized' : 'LineModel',
+                'StructureFactor' : 'HardsphereStructure',
+                'Ellipsoid' : 'core_shell_ellipsoid',
+                'Lamellae' : 'lamellar',
+                'Paracrystal' : 'bcc_paracrystal',
+                'Parallelepiped' : 'core_shell_parallelepiped',
+                'Shape Independent' : 'be_polyelectrolyte',
+                'Sphere' : 'adsorbed_layer',
+                'Structure Factor' : 'hardsphere',
+                'Customized Models' : ''
+            }
+            if self.categorycombobox == '':
+                if len(self.parameters) == 3:
+                    self.categorycombobox = "Shape-Independent"
+                    self.formfactorcombobox = 'PowerLawAbsModel'
+                elif len(self.parameters) == 9:
+                    self.categorycombobox = 'Cylinder'
+                    self.formfactorcombobox = 'barbell'
+                else:
+                    msg = "Save state does not have enough information to load"
+                    msg += " the all of the data."
+                    logging.warning(msg=msg)
+            else:
+                self.formfactorcombobox = FIRST_FORM[self.categorycombobox]
+
+    @staticmethod
+    def param_remap_to_sasmodels_convert(params, is_string=False):
+        """
+        Remaps the parameters for sasmodels conversion
+
+        :param params: list of parameters (likely self.parameters)
+        :return: remapped dictionary of parameters
+        """
+        p = dict()
+        for fittable, name, value, _, uncert, lower, upper, units in params:
+            if not value:
+                value = numpy.nan
+            if not uncert or uncert[1] == '' or uncert[1] == 'None':
+                uncert[0] = False
+                uncert[1] = numpy.nan
+            if not upper or upper[1] == '' or upper[1] == 'None':
+                upper[0] = False
+                upper[1] = numpy.nan
+            if not lower or lower[1] == '' or lower[1] == 'None':
+                lower[0] = False
+                lower[1] = numpy.nan
+            if is_string:
+                p[name] = str(value)
+            else:
+                p[name] = float(value)
+            p[name + ".fittable"] = bool(fittable)
+            p[name + ".std"] = float(uncert[1])
+            p[name + ".upper"] = float(upper[1])
+            p[name + ".lower"] = float(lower[1])
+            p[name + ".units"] = units
+        return p
+
+    @staticmethod
+    def param_remap_from_sasmodels_convert(params):
+        """
+        Converts {name : value} map back to [] param list
+        :param params: parameter map returned from sasmodels
+        :return: None
+        """
+        p_map = []
+        for name, info in params.iteritems():
+            if ".fittable" in name or ".std" in name or ".upper" in name or \
+                            ".lower" in name or ".units" in name:
+                pass
+            else:
+                fittable = params.get(name + ".fittable", True)
+                std = params.get(name + ".std", '0.0')
+                upper = params.get(name + ".upper", 'inf')
+                lower = params.get(name + ".lower", '-inf')
+                units = params.get(name + ".units")
+                if std is not None and std is not numpy.nan:
+                    std = [True, str(std)]
+                else:
+                    std = [False, '']
+                if lower is not None and lower is not numpy.nan:
+                    lower = [True, str(lower)]
+                else:
+                    lower = [True, '-inf']
+                if upper is not None and upper is not numpy.nan:
+                    upper = [True, str(upper)]
+                else:
+                    upper = [True, 'inf']
+                param_list = [bool(fittable), str(name), str(info),
+                              "+/-", std, lower, upper, str(units)]
+                p_map.append(param_list)
+        return p_map
+
+    def _convert_to_sasmodels(self):
+        """
+        Convert parameters to a form usable by sasmodels converter
+
+        :return: None
+        """
+        # Create conversion dictionary to send to sasmodels
+        self._old_first_model()
+        p = self.param_remap_to_sasmodels_convert(self.parameters)
+        structurefactor, params = convert.convert_model(self.structurecombobox,
+                                                        p, False, self.version)
+        formfactor, params = convert.convert_model(self.formfactorcombobox,
+                                                   params, False, self.version)
+        if len(self.str_parameters) > 0:
+            str_pars = self.param_remap_to_sasmodels_convert(
+                self.str_parameters, True)
+            formfactor, str_params = convert.convert_model(
+                self.formfactorcombobox, str_pars, False, self.version)
+            for key, value in str_params.iteritems():
+                params[key] = value
+
+        if self.formfactorcombobox == 'SphericalSLDModel':
+            self.multi_factor += 1
+        self.formfactorcombobox = formfactor
+        self.structurecombobox = structurefactor
+        self.parameters = []
+        self.parameters = self.param_remap_from_sasmodels_convert(params)
 
     def _repr_helper(self, list, rep):
         """
@@ -681,7 +814,9 @@ class PageState(object):
                     entry_node.appendChild(top_element)
 
         attr = newdoc.createAttribute("version")
-        attr.nodeValue = '1.0'
+        import sasview
+        attr.nodeValue = sasview.__version__
+        # attr.nodeValue = '1.0'
         top_element.setAttributeNode(attr)
 
         # File name
@@ -874,7 +1009,15 @@ class PageState(object):
             msg += " format for fitting files"
             raise RuntimeError, msg
 
-        if node.get('version') and node.get('version') == '1.0':
+        if node.get('version'):
+            # Get the version for model conversion purposes
+            self.version = tuple(int(e) for e in
+                                 str.split(node.get('version'), "."))
+            # The tuple must be at least 3 items long
+            while len(self.version) < 3:
+                ver_list = list(self.version)
+                ver_list.append(0)
+                self.version = tuple(ver_list)
 
             # Get file name
             entry = get_content('ns:filename', node)
@@ -1033,251 +1176,6 @@ class Reader(CansasReader):
         if self.cansas:
             return self._read_cansas(path)
 
-    def _data2d_to_xml_doc(self, datainfo):
-        """
-        Create an XML document to contain the content of a Data2D
-
-        :param datainfo: Data2D object
-
-        """
-        if not issubclass(datainfo.__class__, Data2D):
-            raise RuntimeError, "The cansas writer expects a Data2D instance"
-
-        title = "cansas1d/%s" % self.version
-        title += "http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd"
-        doc = xml.dom.minidom.Document()
-        main_node = doc.createElement("SASroot")
-        main_node.setAttribute("version", self.version)
-        main_node.setAttribute("xmlns", "cansas1d/%s" % self.version)
-        main_node.setAttribute("xmlns:xsi",
-                               "http://www.w3.org/2001/XMLSchema-instance")
-        main_node.setAttribute("xsi:schemaLocation", title)
-
-        doc.appendChild(main_node)
-
-        entry_node = doc.createElement("SASentry")
-        main_node.appendChild(entry_node)
-
-        write_node(doc, entry_node, "Title", datainfo.title)
-        if datainfo is not None:
-            write_node(doc, entry_node, "data_class",
-                       datainfo.__class__.__name__)
-        for item in datainfo.run:
-            runname = {}
-            if item in datainfo.run_name and \
-                            len(str(datainfo.run_name[item])) > 1:
-                runname = {'name': datainfo.run_name[item]}
-            write_node(doc, entry_node, "Run", item, runname)
-        # Data info
-        new_node = doc.createElement("SASdata")
-        entry_node.appendChild(new_node)
-        for item in LIST_OF_DATA_2D_ATTR:
-            element = doc.createElement(item[0])
-            element.setAttribute(item[0], str(getattr(datainfo, item[1])))
-            new_node.appendChild(element)
-
-        for item in LIST_OF_DATA_2D_VALUES:
-            root_node = doc.createElement(item[0])
-            new_node.appendChild(root_node)
-            temp_list = getattr(datainfo, item[1])
-
-            if temp_list is None or len(temp_list) == 0:
-                element = doc.createElement(item[0])
-                element.appendChild(doc.createTextNode(str(temp_list)))
-                root_node.appendChild(element)
-            else:
-                for value in temp_list:
-                    element = doc.createElement(item[0])
-                    element.setAttribute(item[0], str(value))
-                    root_node.appendChild(element)
-
-        # Sample info
-        sample = doc.createElement("SASsample")
-        if datainfo.sample.name is not None:
-            sample.setAttribute("name", str(datainfo.sample.name))
-        entry_node.appendChild(sample)
-        write_node(doc, sample, "ID", str(datainfo.sample.ID))
-        write_node(doc, sample, "thickness", datainfo.sample.thickness,
-                   {"unit": datainfo.sample.thickness_unit})
-        write_node(doc, sample, "transmission", datainfo.sample.transmission)
-        write_node(doc, sample, "temperature", datainfo.sample.temperature,
-                   {"unit": datainfo.sample.temperature_unit})
-
-        for item in datainfo.sample.details:
-            write_node(doc, sample, "details", item)
-
-        pos = doc.createElement("position")
-        written = write_node(doc, pos, "x", datainfo.sample.position.x,
-                             {"unit": datainfo.sample.position_unit})
-        written = written | write_node(doc, pos, "y",
-                                       datainfo.sample.position.y,
-                                       {"unit": datainfo.sample.position_unit})
-        written = written | write_node(doc, pos, "z",
-                                       datainfo.sample.position.z,
-                                       {"unit": datainfo.sample.position_unit})
-        if written:
-            sample.appendChild(pos)
-
-        ori = doc.createElement("orientation")
-        written = write_node(doc, ori, "roll", datainfo.sample.orientation.x,
-                             {"unit": datainfo.sample.orientation_unit})
-        written = written | write_node(doc, ori, "pitch",
-                                       datainfo.sample.orientation.y,
-                                       {"unit":
-                                            datainfo.sample.orientation_unit})
-        written = written | write_node(doc, ori, "yaw",
-                                       datainfo.sample.orientation.z,
-                                       {"unit":
-                                            datainfo.sample.orientation_unit})
-        if written:
-            sample.appendChild(ori)
-
-        # Instrument info
-        instr = doc.createElement("SASinstrument")
-        entry_node.appendChild(instr)
-
-        write_node(doc, instr, "name", datainfo.instrument)
-
-        #   Source
-        source = doc.createElement("SASsource")
-        if datainfo.source.name is not None:
-            source.setAttribute("name", str(datainfo.source.name))
-        instr.appendChild(source)
-
-        write_node(doc, source, "radiation", datainfo.source.radiation)
-        write_node(doc, source, "beam_shape", datainfo.source.beam_shape)
-        size = doc.createElement("beam_size")
-        if datainfo.source.beam_size_name is not None:
-            size.setAttribute("name", str(datainfo.source.beam_size_name))
-        written = write_node(doc, size, "x", datainfo.source.beam_size.x,
-                             {"unit": datainfo.source.beam_size_unit})
-        written = written | write_node(doc, size, "y",
-                                       datainfo.source.beam_size.y,
-                                       {"unit": datainfo.source.beam_size_unit})
-        written = written | write_node(doc, size, "z",
-                                       datainfo.source.beam_size.z,
-                                       {"unit": datainfo.source.beam_size_unit})
-        if written:
-            source.appendChild(size)
-
-        write_node(doc, source, "wavelength", datainfo.source.wavelength,
-                   {"unit": datainfo.source.wavelength_unit})
-        write_node(doc, source, "wavelength_min",
-                   datainfo.source.wavelength_min,
-                   {"unit": datainfo.source.wavelength_min_unit})
-        write_node(doc, source, "wavelength_max",
-                   datainfo.source.wavelength_max,
-                   {"unit": datainfo.source.wavelength_max_unit})
-        write_node(doc, source, "wavelength_spread",
-                   datainfo.source.wavelength_spread,
-                   {"unit": datainfo.source.wavelength_spread_unit})
-
-        #   Collimation
-        for item in datainfo.collimation:
-            coll = doc.createElement("SAScollimation")
-            if item.name is not None:
-                coll.setAttribute("name", str(item.name))
-            instr.appendChild(coll)
-
-            write_node(doc, coll, "length", item.length,
-                       {"unit": item.length_unit})
-
-            for apert in item.aperture:
-                ap = doc.createElement("aperture")
-                if apert.name is not None:
-                    ap.setAttribute("name", str(apert.name))
-                if apert.type is not None:
-                    ap.setAttribute("type", str(apert.type))
-                coll.appendChild(ap)
-
-                write_node(doc, ap, "distance", apert.distance,
-                           {"unit": apert.distance_unit})
-
-                size = doc.createElement("size")
-                if apert.size_name is not None:
-                    size.setAttribute("name", str(apert.size_name))
-                written = write_node(doc, size, "x", apert.size.x,
-                                     {"unit": apert.size_unit})
-                written = written | write_node(doc, size, "y", apert.size.y,
-                                               {"unit": apert.size_unit})
-                written = written | write_node(doc, size, "z", apert.size.z,
-                                               {"unit": apert.size_unit})
-                if written:
-                    ap.appendChild(size)
-
-        #   Detectors
-        for item in datainfo.detector:
-            det = doc.createElement("SASdetector")
-            written = write_node(doc, det, "name", item.name)
-            written = written | write_node(doc, det, "SDD", item.distance,
-                                           {"unit": item.distance_unit})
-            written = written | write_node(doc, det, "slit_length",
-                                           item.slit_length,
-                                           {"unit": item.slit_length_unit})
-            if written:
-                instr.appendChild(det)
-
-            off = doc.createElement("offset")
-            written = write_node(doc, off, "x", item.offset.x,
-                                 {"unit": item.offset_unit})
-            written = written | write_node(doc, off, "y", item.offset.y,
-                                           {"unit": item.offset_unit})
-            written = written | write_node(doc, off, "z", item.offset.z,
-                                           {"unit": item.offset_unit})
-            if written:
-                det.appendChild(off)
-
-            center = doc.createElement("beam_center")
-            written = write_node(doc, center, "x", item.beam_center.x,
-                                 {"unit": item.beam_center_unit})
-            written = written | write_node(doc, center, "y",
-                                           item.beam_center.y,
-                                           {"unit": item.beam_center_unit})
-            written = written | write_node(doc, center, "z",
-                                           item.beam_center.z,
-                                           {"unit": item.beam_center_unit})
-            if written:
-                det.appendChild(center)
-
-            pix = doc.createElement("pixel_size")
-            written = write_node(doc, pix, "x", item.pixel_size.x,
-                                 {"unit": item.pixel_size_unit})
-            written = written | write_node(doc, pix, "y", item.pixel_size.y,
-                                           {"unit": item.pixel_size_unit})
-            written = written | write_node(doc, pix, "z", item.pixel_size.z,
-                                           {"unit": item.pixel_size_unit})
-            if written:
-                det.appendChild(pix)
-
-            ori = doc.createElement("orientation")
-            written = write_node(doc, ori, "roll", item.orientation.x,
-                                 {"unit": item.orientation_unit})
-            written = written | write_node(doc, ori, "pitch",
-                                           item.orientation.y,
-                                           {"unit": item.orientation_unit})
-            written = written | write_node(doc, ori, "yaw", item.orientation.z,
-                                           {"unit": item.orientation_unit})
-            if written:
-                det.appendChild(ori)
-
-        # Processes info
-        for item in datainfo.process:
-            node = doc.createElement("SASprocess")
-            entry_node.appendChild(node)
-
-            write_node(doc, node, "name", item.name)
-            write_node(doc, node, "date", item.date)
-            write_node(doc, node, "description", item.description)
-            for term in item.term:
-                value = term['value']
-                del term['value']
-                write_node(doc, node, "term", value, term)
-            for note in item.notes:
-                write_node(doc, node, "SASprocessnote", note)
-        # Return the document, and the SASentry node associated with
-        # the data we just wrote
-        return doc, entry_node
-
     def _parse_state(self, entry):
         """
         Read a fit result from an XML node
@@ -1353,264 +1251,8 @@ class Reader(CansasReader):
 
         """
         node = dom.xpath('ns:data_class', namespaces={'ns': CANSAS_NS})
-        if not node or node[0].text.lstrip().rstrip() != "Data2D":
-            return_value, _ = self._parse_entry(dom)
-            numpy.trim_zeros(return_value.x)
-            numpy.trim_zeros(return_value.y)
-            numpy.trim_zeros(return_value.dy)
-            size_dx = return_value.dx.size
-            size_dxl = return_value.dxl.size
-            size_dxw = return_value.dxw.size
-            if size_dxl == 0 and size_dxw == 0:
-                return_value.dxl = None
-                return_value.dxw = None
-                numpy.trim_zeros(return_value.dx)
-            elif size_dx == 0:
-                return_value.dx = None
-                size_dx = size_dxl
-                numpy.trim_zeros(return_value.dxl)
-                numpy.trim_zeros(return_value.dxw)
-
-            return return_value, _
-
-        # Parse 2D
-        data_info = Data2D()
-
-        # Look up title
-        self._store_content('ns:Title', dom, 'title', data_info)
-
-        # Look up run number
-        nodes = dom.xpath('ns:Run', namespaces={'ns': CANSAS_NS})
-        for item in nodes:
-            if item.text is not None:
-                value = item.text.strip()
-                if len(value) > 0:
-                    data_info.run.append(value)
-                    if item.get('name') is not None:
-                        data_info.run_name[value] = item.get('name')
-
-        # Look up instrument name
-        self._store_content('ns:SASinstrument/ns:name', dom,
-                            'instrument', data_info)
-
-        # Notes
-        note_list = dom.xpath('ns:SASnote', namespaces={'ns': CANSAS_NS})
-        for note in note_list:
-            try:
-                if note.text is not None:
-                    note_value = note.text.strip()
-                    if len(note_value) > 0:
-                        data_info.notes.append(note_value)
-            except Exception:
-                err_mess = "cansas_reader.read: error processing entry notes\n"
-                err_mess += "  %s" % sys.exc_value
-                self.errors.append(err_mess)
-                logging.error(err_mess)
-
-        # Sample info ###################
-        entry = get_content('ns:SASsample', dom)
-        if entry is not None:
-            data_info.sample.name = entry.get('name')
-
-        self._store_content('ns:SASsample/ns:ID', dom, 'ID', data_info.sample)
-        self._store_float('ns:SASsample/ns:thickness', dom, 'thickness',
-                          data_info.sample)
-        self._store_float('ns:SASsample/ns:transmission', dom, 'transmission',
-                          data_info.sample)
-        self._store_float('ns:SASsample/ns:temperature', dom, 'temperature',
-                          data_info.sample)
-
-        nodes = dom.xpath('ns:SASsample/ns:details',
-                          namespaces={'ns': CANSAS_NS})
-        for item in nodes:
-            try:
-                if item.text is not None:
-                    detail_value = item.text.strip()
-                    if len(detail_value) > 0:
-                        data_info.sample.details.append(detail_value)
-            except Exception:
-                err_mess = "cansas_reader.read: error processing entry notes\n"
-                err_mess += "  %s" % sys.exc_value
-                self.errors.append(err_mess)
-                logging.error(err_mess)
-
-        # Position (as a vector)
-        self._store_float('ns:SASsample/ns:position/ns:x', dom, 'position.x',
-                          data_info.sample)
-        self._store_float('ns:SASsample/ns:position/ns:y', dom, 'position.y',
-                          data_info.sample)
-        self._store_float('ns:SASsample/ns:position/ns:z', dom, 'position.z',
-                          data_info.sample)
-
-        # Orientation (as a vector)
-        self._store_float('ns:SASsample/ns:orientation/ns:roll',
-                          dom, 'orientation.x', data_info.sample)
-        self._store_float('ns:SASsample/ns:orientation/ns:pitch',
-                          dom, 'orientation.y', data_info.sample)
-        self._store_float('ns:SASsample/ns:orientation/ns:yaw',
-                          dom, 'orientation.z', data_info.sample)
-
-        # Source info ###################
-        entry = get_content('ns:SASinstrument/ns:SASsource', dom)
-        if entry is not None:
-            data_info.source.name = entry.get('name')
-
-        self._store_content('ns:SASinstrument/ns:SASsource/ns:radiation',
-                            dom, 'radiation', data_info.source)
-        self._store_content('ns:SASinstrument/ns:SASsource/ns:beam_shape',
-                            dom, 'beam_shape', data_info.source)
-        self._store_float('ns:SASinstrument/ns:SASsource/ns:wavelength',
-                          dom, 'wavelength', data_info.source)
-        self._store_float('ns:SASinstrument/ns:SASsource/ns:wavelength_min',
-                          dom, 'wavelength_min', data_info.source)
-        self._store_float('ns:SASinstrument/ns:SASsource/ns:wavelength_max',
-                          dom, 'wavelength_max', data_info.source)
-        self._store_float('ns:SASinstrument/ns:SASsource/ns:wavelength_spread',
-                          dom, 'wavelength_spread', data_info.source)
-
-        # Beam size (as a vector)
-        entry = get_content('ns:SASinstrument/ns:SASsource/ns:beam_size', dom)
-        if entry is not None:
-            data_info.source.beam_size_name = entry.get('name')
-
-        self._store_float('ns:SASinstrument/ns:SASsource/ns:beam_size/ns:x',
-                          dom, 'beam_size.x', data_info.source)
-        self._store_float('ns:SASinstrument/ns:SASsource/ns:beam_size/ns:y',
-                          dom, 'beam_size.y', data_info.source)
-        self._store_float('ns:SASinstrument/ns:SASsource/ns:beam_size/ns:z',
-                          dom, 'beam_size.z', data_info.source)
-
-        # Collimation info ###################
-        nodes = dom.xpath('ns:SASinstrument/ns:SAScollimation',
-                          namespaces={'ns': CANSAS_NS})
-        for item in nodes:
-            collim = Collimation()
-            if item.get('name') is not None:
-                collim.name = item.get('name')
-            self._store_float('ns:length', item, 'length', collim)
-
-            # Look for apertures
-            apert_list = item.xpath('ns:aperture',
-                                    namespaces={'ns': CANSAS_NS})
-            for apert in apert_list:
-                aperture = Aperture()
-
-                # Get the name and type of the aperture
-                aperture.name = apert.get('name')
-                aperture.type = apert.get('type')
-
-                self._store_float('ns:distance', apert, 'distance', aperture)
-
-                entry = get_content('ns:size', apert)
-                if entry is not None:
-                    aperture.size_name = entry.get('name')
-
-                self._store_float('ns:size/ns:x', apert, 'size.x', aperture)
-                self._store_float('ns:size/ns:y', apert, 'size.y', aperture)
-                self._store_float('ns:size/ns:z', apert, 'size.z', aperture)
-
-                collim.aperture.append(aperture)
-
-            data_info.collimation.append(collim)
-
-        # Detector info ######################
-        nodes = dom.xpath('ns:SASinstrument/ns:SASdetector',
-                          namespaces={'ns': CANSAS_NS})
-        for item in nodes:
-
-            detector = Detector()
-
-            self._store_content('ns:name', item, 'name', detector)
-            self._store_float('ns:SDD', item, 'distance', detector)
-
-            # Detector offset (as a vector)
-            self._store_float('ns:offset/ns:x', item, 'offset.x', detector)
-            self._store_float('ns:offset/ns:y', item, 'offset.y', detector)
-            self._store_float('ns:offset/ns:z', item, 'offset.z', detector)
-
-            # Detector orientation (as a vector)
-            self._store_float('ns:orientation/ns:roll', item,
-                              'orientation.x', detector)
-            self._store_float('ns:orientation/ns:pitch', item,
-                              'orientation.y', detector)
-            self._store_float('ns:orientation/ns:yaw', item,
-                              'orientation.z', detector)
-
-            # Beam center (as a vector)
-            self._store_float('ns:beam_center/ns:x', item,
-                              'beam_center.x', detector)
-            self._store_float('ns:beam_center/ns:y', item,
-                              'beam_center.y', detector)
-            self._store_float('ns:beam_center/ns:z', item,
-                              'beam_center.z', detector)
-
-            # Pixel size (as a vector)
-            self._store_float('ns:pixel_size/ns:x', item,
-                              'pixel_size.x', detector)
-            self._store_float('ns:pixel_size/ns:y', item,
-                              'pixel_size.y', detector)
-            self._store_float('ns:pixel_size/ns:z', item,
-                              'pixel_size.z', detector)
-
-            self._store_float('ns:slit_length', item, 'slit_length', detector)
-
-            data_info.detector.append(detector)
-
-        # Processes info ######################
-        nodes = dom.xpath('ns:SASprocess', namespaces={'ns': CANSAS_NS})
-        for item in nodes:
-            process = Process()
-            self._store_content('ns:name', item, 'name', process)
-            self._store_content('ns:date', item, 'date', process)
-            self._store_content('ns:description', item, 'description', process)
-
-            term_list = item.xpath('ns:term', namespaces={'ns': CANSAS_NS})
-            for term in term_list:
-                try:
-                    term_attr = {}
-                    for attr in term.keys():
-                        term_attr[attr] = term.get(attr).strip()
-                    if term.text is not None:
-                        term_attr['value'] = term.text.strip()
-                        process.term.append(term_attr)
-                except:
-                    err_mess = "cansas_reader.read: error processing "
-                    err_mess += "entry notes\n  %s" % sys.exc_value
-                    self.errors.append(err_mess)
-                    logging.error(err_mess)
-
-            note_list = item.xpath('ns:SASprocessnote',
-                                   namespaces={'ns': CANSAS_NS})
-            for note in note_list:
-                if note.text is not None:
-                    process.notes.append(note.text.strip())
-
-            data_info.process.append(process)
-
-        # Data info ######################
-        nodes = dom.xpath('ns:SASdata', namespaces={'ns': CANSAS_NS})
-        if len(nodes) > 1:
-            raise RuntimeError, "CanSAS reader is not compatible with" + \
-                                " multiple SASdata entries"
-
-        for entry in nodes:
-            for item in LIST_OF_DATA_2D_ATTR:
-                # get node
-                node = get_content('ns:%s' % item[0], entry)
-                setattr(data_info, item[1], parse_entry_helper(node, item))
-
-            for item in LIST_OF_DATA_2D_VALUES:
-                field = get_content('ns:%s' % item[0], entry)
-                value_list = []
-                if field is not None:
-                    value_list = \
-                        [parse_entry_helper(node, item) for node in field]
-                if len(value_list) < 2:
-                    setattr(data_info, item[0], None)
-                else:
-                    setattr(data_info, item[0], numpy.array(value_list))
-
-        return data_info
+        return_value, _ = self._parse_entry(dom)
+        return return_value, _
 
     def _read_cansas(self, path):
         """
@@ -1691,6 +1333,7 @@ class Reader(CansasReader):
                     else:
                         name = original_fname
                     state.data.group_id = name
+                    state.version = fitstate.version
                     # store state in fitting
                     self.call_back(state=state,
                                    datainfo=output[ind], format=ext)
@@ -1744,13 +1387,8 @@ class Reader(CansasReader):
             state.data.run = [str(state.data.name)]
             state.data.run_name[0] = state.data.name
 
-        if issubclass(state.data.__class__,
-                      sas.sascalc.dataloader.data_info.Data1D):
-            data = state.data
-            doc, sasentry = self._to_xml_doc(data)
-        else:
-            data = state.data
-            doc, sasentry = self._data2d_to_xml_doc(data)
+        data = state.data
+        doc, sasentry = self._to_xml_doc(data)
 
         if state is not None:
             doc = state.to_xml(doc=doc, file=data.filename, entry_node=sasentry,

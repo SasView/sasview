@@ -133,9 +133,7 @@ class Plugin(PluginBase):
         Clear and Hide all plot panels, and remove them from menu
         """
         for group_id in self.plot_panels.keys():
-            panel = self.plot_panels[group_id]
-            panel.graph.reset()
-            self.hide_panel(group_id)
+            self.clear_panel_by_id(group_id)
         self.plot_panels = {}
 
     def clear_panel_by_id(self, group_id):
