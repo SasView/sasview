@@ -1055,14 +1055,6 @@ class Reader(XMLreader):
         qx = ','.join([str(datainfo.qx_data[i]) for i in xrange(len(datainfo.qx_data))])
         qy = ','.join([str(datainfo.qy_data[i]) for i in xrange(len(datainfo.qy_data))])
         intensity = ','.join([str(datainfo.data[i]) for i in xrange(len(datainfo.data))])
-        if datainfo.err_data is not None:
-            err = ','.join([str(datainfo.err_data[i]) for i in xrange(len(datainfo.err_data))])
-        if datainfo.dqy_data is not None:
-            dqy = ','.join([str(datainfo.dqy_data[i]) for i in xrange(len(datainfo.dqy_data))])
-        if datainfo.dqx_data is not None:
-            dqx = ','.join([str(datainfo.dqx_data[i]) for i in xrange(len(datainfo.dqx_data))])
-        if datainfo.mask is not None:
-            mask = ','.join([str(datainfo.mask[i]) for i in xrange(len(datainfo.mask))])
 
         self.write_node(point, "Qx", qx,
                         {'unit': datainfo._xunit})
@@ -1071,15 +1063,23 @@ class Reader(XMLreader):
         self.write_node(point, "I", intensity,
                         {'unit': datainfo._zunit})
         if datainfo.err_data is not None:
+            err = ','.join([str(datainfo.err_data[i]) for i in
+                            xrange(len(datainfo.err_data))])
             self.write_node(point, "Idev", err,
                             {'unit': datainfo._zunit})
         if datainfo.dqy_data is not None:
+            dqy = ','.join([str(datainfo.dqy_data[i]) for i in
+                            xrange(len(datainfo.dqy_data))])
             self.write_node(point, "Qydev", dqy,
                             {'unit': datainfo._yunit})
         if datainfo.dqx_data is not None:
+            dqx = ','.join([str(datainfo.dqx_data[i]) for i in
+                            xrange(len(datainfo.dqx_data))])
             self.write_node(point, "Qxdev", dqx,
                             {'unit': datainfo._xunit})
         if datainfo.mask is not None:
+            mask = ','.join(
+                [str(datainfo.mask[i]) for i in xrange(len(datainfo.mask))])
             self.write_node(point, "Mask", mask)
 
     def _write_trans_spectrum(self, datainfo, entry_node):
