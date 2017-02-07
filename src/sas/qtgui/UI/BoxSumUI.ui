@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>529</width>
-    <height>492</height>
+    <width>447</width>
+    <height>315</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -29,10 +29,10 @@
      <property name="title">
       <string>Box dimensions</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_3">
+     <layout class="QGridLayout" name="gridLayout_4">
       <item row="0" column="0">
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
+       <layout class="QGridLayout" name="gridLayout_3">
+        <item row="0" column="0">
          <widget class="QGroupBox" name="groupBox_4">
           <property name="title">
            <string>Box size</string>
@@ -89,7 +89,7 @@
           </layout>
          </widget>
         </item>
-        <item>
+        <item row="0" column="1">
          <widget class="QGroupBox" name="groupBox_2">
           <property name="title">
            <string>Box center</string>
@@ -112,6 +112,13 @@
              </property>
             </widget>
            </item>
+           <item row="0" column="2">
+            <widget class="QLabel" name="label_13">
+             <property name="text">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
            <item row="1" column="0">
             <widget class="QLabel" name="label_4">
              <property name="toolTip">
@@ -129,6 +136,13 @@
              </property>
              <property name="text">
               <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QLabel" name="label_12">
+             <property name="text">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
            </item>
