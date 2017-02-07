@@ -34,7 +34,11 @@ class Data1D(PlotData1D, LoadData1D):
         self.is_data = True
         self.path = None
         self.xtransform = None
+        if self.isSesans:
+            self.xtransform = "x"
         self.ytransform = None
+        if self.isSesans:
+            self.ytransform = "y"
         self.title = ""
         self.scale = None
         
