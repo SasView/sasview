@@ -25,6 +25,7 @@ from UnitTesting import PlotUtilitiesTest
 from UnitTesting import ColorMapTest
 from UnitTesting import BoxSumTest
 from UnitTesting import SlicerModelTest
+from UnitTesting import SlicerParametersTest
 
 def suite():
     suites = (
@@ -53,6 +54,7 @@ def suite():
         unittest.makeSuite(ColorMapTest.ColorMapTest, 'test'),
         unittest.makeSuite(BoxSumTest.BoxSumTest, 'test'),
         unittest.makeSuite(SlicerModelTest.SlicerModelTest, 'test'),
+        unittest.makeSuite(SlicerParametersTest.SlicerParametersTest, 'test'),
     )
     return unittest.TestSuite(suites)
 

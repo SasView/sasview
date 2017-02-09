@@ -1,8 +1,10 @@
 """
 Allows users to modify the box slicer parameters.
 """
+import functools
 from PyQt4 import QtGui
 from PyQt4 import QtCore
+from PyQt4 import QtWebKit
 
 # Local UI
 from sas.qtgui.UI.SlicerParametersUI import Ui_SlicerParametersUI
@@ -12,6 +14,7 @@ class SlicerParameters(QtGui.QDialog, Ui_SlicerParametersUI):
     Interaction between the QTableView and the underlying model,
     passed from a slicer instance.
     """
+    close_signal = QtCore.pyqtSignal()
     def __init__(self, parent=None, model=None):
         super(SlicerParameters, self).__init__()
 
@@ -30,11 +33,50 @@ class SlicerParameters(QtGui.QDialog, Ui_SlicerParametersUI):
         # Disallow edit of the parameter name column.
         self.lstParams.model().setColumnReadOnly(0, True)
 
-        # Disable row number display
-        self.lstParams.verticalHeader().setVisible(False)
-
         # Specify the validator on the parameter value column.
         self.lstParams.setItemDelegate(ValidatedItemDelegate())
+
+        # Display Help on clicking the button
+        self.buttonBox.button(QtGui.QDialogButtonBox.Help).clicked.connect(self.onHelp)
+
+        # Close doesn't trigger closeEvent automatically, so force it
+        self.buttonBox.button(QtGui.QDialogButtonBox.Close).clicked.connect(functools.partial(self.closeEvent,None))
+
+        # Disable row number display
+        self.lstParams.verticalHeader().setVisible(False)
+        self.lstParams.setAlternatingRowColors(True)
+        self.lstParams.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Expanding)
+
+        # Header properties for nicer display
+        header = self.lstParams.horizontalHeader()
+        header.setResizeMode(QtGui.QHeaderView.Stretch)
+        header.setStretchLastSection(True)
+
+
+    def setModel(self, model):
+        """ Model setter """
+        self.model = model
+        self.proxy.setSourceModel(self.model)
+
+    def closeEvent(self, event):
+        """
+        Overwritten close widget method in order to send the close
+        signal to the parent.
+        """
+        self.close_signal.emit()
+        if event:
+            event.accept()
+
+    def onHelp(self):
+        """
+        Display generic data averaging help
+        """
+        location = "docs/sphinx-docs/build/html" + \
+            "/user/sasgui/guiframe/graph_help.html#d-data-averaging"
+        self._helpView = QtWebKit.QWebView()
+        self._helpView.load(QtCore.QUrl(location))
+        self._helpView.show()
+
 
 class ProxyModel(QtGui.QIdentityProxyModel):
     """

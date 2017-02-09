@@ -1,7 +1,7 @@
 """
     Sector interactor
 """
-import math
+import numpy
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 
@@ -10,6 +10,7 @@ from sas.sasgui.guiframe.dataFitting import Data1D
 import sas.qtgui.GuiUtils as GuiUtils
 from sas.qtgui.SlicerModel import SlicerModel
 
+MIN_PHI = 0.05
 
 class SectorInteractor(_BaseInteractor, SlicerModel):
     """
@@ -27,17 +28,17 @@ class SectorInteractor(_BaseInteractor, SlicerModel):
         self.connect = self.base.connect
 
         # Compute qmax limit to reset the graph
-        x = math.pow(max(self.base.data.xmax,
-                         math.fabs(self.base.data.xmin)), 2)
-        y = math.pow(max(self.base.data.ymax,
-                         math.fabs(self.base.data.ymin)), 2)
-        self.qmax = math.sqrt(x + y)
+        x = numpy.power(max(self.base.data.xmax,
+                         numpy.fabs(self.base.data.xmin)), 2)
+        y = numpy.power(max(self.base.data.ymax,
+                         numpy.fabs(self.base.data.ymin)), 2)
+        self.qmax = numpy.sqrt(x + y)
         # Number of points on the plot
         self.nbins = 20
         # Angle of the middle line
-        self.theta2 = math.pi / 3
+        self.theta2 = numpy.pi / 3
         # Absolute value of the Angle between the middle line and any side line
-        self.phi = math.pi / 12
+        self.phi = numpy.pi / 12
         # Middle line
         self.main_line = LineInteractor(self, self.axes, color='blue',
                                         zorder=zorder, r=self.qmax,
@@ -134,8 +135,8 @@ class SectorInteractor(_BaseInteractor, SlicerModel):
         if nbins == None:
             nbins = 20
         sect = SectorQ(r_min=0.0, r_max=radius,
-                       phi_min=phimin + math.pi,
-                       phi_max=phimax + math.pi, nbins=nbins)
+                       phi_min=phimin + numpy.pi,
+                       phi_max=phimax + numpy.pi, nbins=nbins)
 
         sector = sect(self.base.data)
         # Create 1D data resulting from average
@@ -208,12 +209,12 @@ class SectorInteractor(_BaseInteractor, SlicerModel):
         params = {}
         # Always make sure that the left and the right line are at phi
         # angle of the middle line
-        if math.fabs(self.left_line.phi) != math.fabs(self.right_line.phi):
+        if numpy.fabs(self.left_line.phi) != numpy.fabs(self.right_line.phi):
             msg = "Phi left and phi right are different"
             msg += " %f, %f" % (self.left_line.phi, self.right_line.phi)
             raise ValueError, msg
-        params["Phi [deg]"] = self.main_line.theta * 180 / math.pi
-        params["Delta_Phi [deg]"] = math.fabs(self.left_line.phi * 180 / math.pi)
+        params["Phi [deg]"] = self.main_line.theta * 180 / numpy.pi
+        params["Delta_Phi [deg]"] = numpy.fabs(self.left_line.phi * 180 / numpy.pi)
         params["nbins"] = self.nbins
         return params
 
@@ -225,8 +226,14 @@ class SectorInteractor(_BaseInteractor, SlicerModel):
         :param params: a dictionary containing name of slicer parameters and
             values the user assigned to the slicer.
         """
-        main = params["Phi [deg]"] * math.pi / 180
-        phi = math.fabs(params["Delta_Phi [deg]"] * math.pi / 180)
+        main = params["Phi [deg]"] * numpy.pi / 180
+        phi = numpy.fabs(params["Delta_Phi [deg]"] * numpy.pi / 180)
+
+        # phi should not be too close.
+        if numpy.fabs(phi) < MIN_PHI:
+            phi = MIN_PHI
+            params["Delta_Phi [deg]"] = MIN_PHI
+
         self.nbins = int(params["nbins"])
         self.main_line.theta = main
         # Reset the slicer parameters
@@ -240,6 +247,7 @@ class SectorInteractor(_BaseInteractor, SlicerModel):
 
     def draw(self):
         """
+        Redraw canvas
         """
         self.base.draw()
 
@@ -253,7 +261,7 @@ class SideInteractor(_BaseInteractor):
 
     """
     def __init__(self, base, axes, color='black', zorder=5, r=1.0,
-                 phi=math.pi / 4, theta2=math.pi / 3):
+                 phi=numpy.pi / 4, theta2=numpy.pi / 3):
         """
         """
         _BaseInteractor.__init__(self, base, axes, color=color)
@@ -271,10 +279,10 @@ class SideInteractor(_BaseInteractor):
         # phi is the phase between the current line and the middle line
         self.phi = phi
         # End points polar coordinates
-        x1 = self.radius * math.cos(self.theta)
-        y1 = self.radius * math.sin(self.theta)
-        x2 = -1 * self.radius * math.cos(self.theta)
-        y2 = -1 * self.radius * math.sin(self.theta)
+        x1 = self.radius * numpy.cos(self.theta)
+        y1 = self.radius * numpy.sin(self.theta)
+        x2 = -1 * self.radius * numpy.cos(self.theta)
+        y2 = -1 * self.radius * numpy.sin(self.theta)
         # Defining a new marker
         self.inner_marker = self.axes.plot([x1 / 2.5], [y1 / 2.5], linestyle='',
                                            marker='s', markersize=10,
@@ -330,10 +338,10 @@ class SideInteractor(_BaseInteractor):
         if delta == None:
             delta = 0
         if  right:
-            self.phi = -1 * math.fabs(self.phi)
+            self.phi = -1 * numpy.fabs(self.phi)
             #delta=-delta
         else:
-            self.phi = math.fabs(self.phi)
+            self.phi = numpy.fabs(self.phi)
         if side:
             self.theta = mline.theta + self.phi
 
@@ -346,10 +354,10 @@ class SideInteractor(_BaseInteractor):
             theta3 = self.theta + delta
         else:
             theta3 = self.theta2 + delta
-        x1 = self.radius * math.cos(theta3)
-        y1 = self.radius * math.sin(theta3)
-        x2 = -1 * self.radius * math.cos(theta3)
-        y2 = -1 * self.radius * math.sin(theta3)
+        x1 = self.radius * numpy.cos(theta3)
+        y1 = self.radius * numpy.sin(theta3)
+        x2 = -1 * self.radius * numpy.cos(theta3)
+        y2 = -1 * self.radius * numpy.sin(theta3)
         self.inner_marker.set(xdata=[x1 / 2.5], ydata=[y1 / 2.5])
         self.line.set(xdata=[x1, x2], ydata=[y1, y2])
 
@@ -376,7 +384,7 @@ class SideInteractor(_BaseInteractor):
         """
         Process move to a new position, making sure that the move is allowed.
         """
-        self.theta = math.atan2(y, x)
+        self.theta = numpy.arctan2(y, x)
         self.has_move = True
         if not self.left_moving:
             if  self.theta2 - self.theta <= 0 and self.theta2 > 0:
@@ -387,19 +395,19 @@ class SideInteractor(_BaseInteractor):
                 self.restore()
                 return
             elif  self.theta2 < 0 and self.theta > 0 and \
-                (self.theta2 + 2 * math.pi - self.theta) >= math.pi / 2:
+                (self.theta2 + 2 * numpy.pi - self.theta) >= numpy.pi / 2:
                 self.restore()
                 return
             elif  self.theta2 < 0 and self.theta < 0 and \
-                (self.theta2 - self.theta) >= math.pi / 2:
+                (self.theta2 - self.theta) >= numpy.pi / 2:
                 self.restore()
                 return
-            elif self.theta2 > 0 and (self.theta2 - self.theta >= math.pi / 2 or \
-                (self.theta2 - self.theta >= math.pi / 2)):
+            elif self.theta2 > 0 and (self.theta2 - self.theta >= numpy.pi / 2 or \
+                (self.theta2 - self.theta >= numpy.pi / 2)):
                 self.restore()
                 return
         else:
-            if  self.theta < 0 and (self.theta + math.pi * 2 - self.theta2) <= 0:
+            if  self.theta < 0 and (self.theta + numpy.pi * 2 - self.theta2) <= 0:
                 self.restore()
                 return
             elif self.theta2 < 0 and (self.theta - self.theta2) <= 0:
@@ -408,15 +416,15 @@ class SideInteractor(_BaseInteractor):
             elif  self.theta > 0 and self.theta - self.theta2 <= 0:
                 self.restore()
                 return
-            elif self.theta - self.theta2 >= math.pi / 2 or  \
-                ((self.theta + math.pi * 2 - self.theta2) >= math.pi / 2 and \
+            elif self.theta - self.theta2 >= numpy.pi / 2 or  \
+                ((self.theta + numpy.pi * 2 - self.theta2) >= numpy.pi / 2 and \
                  self.theta < 0 and self.theta2 > 0):
                 self.restore()
                 return
 
-        self.phi = math.fabs(self.theta2 - self.theta)
-        if self.phi > math.pi:
-            self.phi = 2 * math.pi - math.fabs(self.theta2 - self.theta)
+        self.phi = numpy.fabs(self.theta2 - self.theta)
+        if self.phi > numpy.pi:
+            self.phi = 2 * numpy.pi - numpy.fabs(self.theta2 - self.theta)
         self.base.base.update()
 
     def set_cursor(self, x, y):
@@ -445,7 +453,7 @@ class LineInteractor(_BaseInteractor):
     Select an annulus through a 2D plot
     """
     def __init__(self, base, axes, color='black',
-                 zorder=5, r=1.0, theta=math.pi / 4):
+                 zorder=5, r=1.0, theta=numpy.pi / 4):
         """
         """
         _BaseInteractor.__init__(self, base, axes, color=color)
@@ -457,10 +465,10 @@ class LineInteractor(_BaseInteractor):
         self.radius = r
         self.scale = 10.0
         # Inner circle
-        x1 = self.radius * math.cos(self.theta)
-        y1 = self.radius * math.sin(self.theta)
-        x2 = -1 * self.radius * math.cos(self.theta)
-        y2 = -1 * self.radius * math.sin(self.theta)
+        x1 = self.radius * numpy.cos(self.theta)
+        y1 = self.radius * numpy.sin(self.theta)
+        x2 = -1 * self.radius * numpy.cos(self.theta)
+        y2 = -1 * self.radius * numpy.sin(self.theta)
         # Inner circle marker
         self.inner_marker = self.axes.plot([x1 / 2.5], [y1 / 2.5], linestyle='',
                                            marker='s', markersize=10,
@@ -501,10 +509,10 @@ class LineInteractor(_BaseInteractor):
 
         if theta != None:
             self.theta = theta
-        x1 = self.radius * math.cos(self.theta)
-        y1 = self.radius * math.sin(self.theta)
-        x2 = -1 * self.radius * math.cos(self.theta)
-        y2 = -1 * self.radius * math.sin(self.theta)
+        x1 = self.radius * numpy.cos(self.theta)
+        y1 = self.radius * numpy.sin(self.theta)
+        x2 = -1 * self.radius * numpy.cos(self.theta)
+        y2 = -1 * self.radius * numpy.sin(self.theta)
 
         self.inner_marker.set(xdata=[x1 / 2.5], ydata=[y1 / 2.5])
         self.line.set(xdata=[x1, x2], ydata=[y1, y2])
@@ -532,7 +540,7 @@ class LineInteractor(_BaseInteractor):
         """
         Process move to a new position, making sure that the move is allowed.
         """
-        self.theta = math.atan2(y, x)
+        self.theta = numpy.arctan2(y, x)
         self.has_move = True
         self.base.base.update()
 

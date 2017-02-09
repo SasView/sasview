@@ -44,6 +44,7 @@ class Plotter2DWidget(PlotterBase):
         self.slicer_z = 5
         # Reference to the current slicer
         self.slicer = None
+        self.slicer_widget = None
         # Create Artist and bind it
         self.connect = BindArtist(self.figure)
         self.vmin = None
@@ -159,8 +160,9 @@ class Plotter2DWidget(PlotterBase):
         if self.slicer:
             self.actionClearSlicer = self.contextMenu.addAction("&Clear Slicer")
             self.actionClearSlicer.triggered.connect(self.onClearSlicer)
-            self.actionEditSlicer = self.contextMenu.addAction("&Edit Slicer Parameters")
-            self.actionEditSlicer.triggered.connect(self.onEditSlicer)
+            if self.slicer.__class__.__name__ != "BoxSumCalculator":
+                self.actionEditSlicer = self.contextMenu.addAction("&Edit Slicer Parameters")
+                self.actionEditSlicer.triggered.connect(self.onEditSlicer)
         self.contextMenu.addSeparator()
         self.actionColorMap = self.contextMenu.addAction("&2D Color Map")
         self.actionColorMap.triggered.connect(self.onColorMap)
@@ -212,11 +214,19 @@ class Plotter2DWidget(PlotterBase):
         Present a small dialog for manipulating the current slicer
         """
         assert self.slicer
+        # Only show the dialog if not currently shown
+        if self.slicer_widget:
+            return
+        def slicer_closed():
+            # Need to disconnect the signal!!
+            self.slicer_widget.close_signal.disconnect()
+            # reset slicer_widget on "Edit Slicer Parameters" window close
+            self.slicer_widget = None
 
         self.param_model = self.slicer.model()
-         # Pass the model to the Slicer Parameters widget
+        # Pass the model to the Slicer Parameters widget
         self.slicer_widget = SlicerParameters(self, model=self.param_model)
-        self.manager.parent.workspace().addWindow(self.slicer_widget)
+        self.slicer_widget.close_signal.connect(slicer_closed)
 
         self.slicer_widget.show()
 
@@ -282,11 +292,18 @@ class Plotter2DWidget(PlotterBase):
         self.figure.canvas.draw()
         self.slicer.update()
 
+        # Reset the model on the Edit slicer parameters widget
+        self.param_model = self.slicer.model()
+        if self.slicer_widget:
+            self.slicer_widget.setModel(self.param_model)
+
+
     def onSectorView(self):
         """
         Perform sector averaging on Q and draw sector slicer
         """
         self.setSlicer(slicer=SectorInteractor)
+
 
     def onAnnulusView(self):
         """

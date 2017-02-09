@@ -23,3 +23,4 @@ python -m UnitTesting.PlotUtilitiesTest
 python -m UnitTesting.ColorMapTest
 python -m UnitTesting.BoxSumTest
 python -m UnitTesting.SlicerModelTest
+python -m UnitTesting.SlicerParametersTest
