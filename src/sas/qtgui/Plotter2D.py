@@ -225,8 +225,10 @@ class Plotter2DWidget(PlotterBase):
 
         self.param_model = self.slicer.model()
         # Pass the model to the Slicer Parameters widget
-        self.slicer_widget = SlicerParameters(self, model=self.param_model)
+        self.slicer_widget = SlicerParameters(model=self.param_model)
         self.slicer_widget.close_signal.connect(slicer_closed)
+        # Add the plot to the workspace
+        self.manager.parent.workspace().addWindow(self.slicer_widget)
 
         self.slicer_widget.show()
 

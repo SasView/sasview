@@ -15,7 +15,7 @@ class SlicerParameters(QtGui.QDialog, Ui_SlicerParametersUI):
     passed from a slicer instance.
     """
     close_signal = QtCore.pyqtSignal()
-    def __init__(self, parent=None, model=None):
+    def __init__(self, model=None):
         super(SlicerParameters, self).__init__()
 
         self.setupUi(self)
@@ -40,7 +40,7 @@ class SlicerParameters(QtGui.QDialog, Ui_SlicerParametersUI):
         self.buttonBox.button(QtGui.QDialogButtonBox.Help).clicked.connect(self.onHelp)
 
         # Close doesn't trigger closeEvent automatically, so force it
-        self.buttonBox.button(QtGui.QDialogButtonBox.Close).clicked.connect(functools.partial(self.closeEvent,None))
+        self.buttonBox.button(QtGui.QDialogButtonBox.Close).clicked.connect(functools.partial(self.closeEvent, None))
 
         # Disable row number display
         self.lstParams.verticalHeader().setVisible(False)
@@ -73,9 +73,9 @@ class SlicerParameters(QtGui.QDialog, Ui_SlicerParametersUI):
         """
         location = "docs/sphinx-docs/build/html" + \
             "/user/sasgui/guiframe/graph_help.html#d-data-averaging"
-        self._helpView = QtWebKit.QWebView()
-        self._helpView.load(QtCore.QUrl(location))
-        self._helpView.show()
+        self.helpView = QtWebKit.QWebView()
+        self.helpView.load(QtCore.QUrl(location))
+        self.helpView.show()
 
 
 class ProxyModel(QtGui.QIdentityProxyModel):
@@ -87,15 +87,18 @@ class ProxyModel(QtGui.QIdentityProxyModel):
         self._columns = set()
 
     def columnReadOnly(self, column):
+        '''Returns True if column is read only, false otherwise'''
         return column in self._columns
 
     def setColumnReadOnly(self, column, readonly=True):
+        '''Add/removes a column from the readonly list'''
         if readonly:
             self._columns.add(column)
         else:
             self._columns.discard(column)
 
     def flags(self, index):
+        '''Sets column flags'''
         flags = super(ProxyModel, self).flags(index)
         if self.columnReadOnly(index.column()):
             flags &= ~QtCore.Qt.ItemIsEditable
@@ -107,6 +110,7 @@ class ValidatedItemDelegate(QtGui.QStyledItemDelegate):
     Simple delegate enabling adding a validator to a cell editor.
     """
     def createEditor(self, widget, option, index):
+        '''Overwrite default editor'''
         if not index.isValid():
             return 0
         if index.column() == 1: # Edir only cells in the second column
