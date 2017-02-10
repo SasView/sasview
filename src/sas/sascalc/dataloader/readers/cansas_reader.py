@@ -208,6 +208,7 @@ class Reader(XMLreader):
             attr = node.attrib
             name = attr.get("name", "")
             type = attr.get("type", "")
+            unit = attr.get("unit", "")
             # Get the element name and set the current names level
             tagname = node.tag.replace(self.base_ns, "")
             tagname_original = tagname
@@ -243,11 +244,61 @@ class Reader(XMLreader):
                     self.aperture.type = type
                 self.add_intermediate()
             else:
-                if isinstance(self.current_dataset, plottable_2D):
+                # I and Q - 1D data
+                if tagname == 'I' and isinstance(self.current_dataset,
+                                                   plottable_1D):
+                    self.current_dataset.yaxis("Intensity", unit)
+                    data_list = node.text.split(',')
+                    for item in data_list:
+                        data_point, unit = self._get_node_value_from_text(node,
+                                                                          item)
+                        self.current_dataset.y = np.append(
+                            self.current_dataset.y, data_point)
+                elif tagname == 'Idev' and isinstance(self.current_dataset,
+                                                      plottable_1D):
+                    data_list = node.text.split(',')
+                    for item in data_list:
+                        data_point, unit = self._get_node_value_from_text(node,
+                                                                          item)
+                        self.current_dataset.dy = np.append(
+                            self.current_dataset.dy, data_point)
+                elif tagname == 'Q':
+                    data_list = node.text.split(',')
+                    for item in data_list:
+                        data_point, unit = self._get_node_value_from_text(node,
+                                                                          item)
+                        self.current_dataset.x = np.append(
+                            self.current_dataset.x, data_point)
+                elif tagname == 'Qdev':
+                    data_list = node.text.split(',')
+                    for item in data_list:
+                        data_point, unit = self._get_node_value_from_text(node,
+                                                                          item)
+                        self.current_dataset.dx = np.append(
+                            self.current_dataset.dx, data_point)
+                elif tagname == 'dQw':
+                    data_list = node.text.split(',')
+                    for item in data_list:
+                        data_point, unit = self._get_node_value_from_text(node,
+                                                                          item)
+                        self.current_dataset.dqw = np.append(
+                            self.current_dataset.dqw, data_point)
+                elif tagname == 'dQl':
+                    data_list = node.text.split(',')
+                    for item in data_list:
+                        data_point, unit = self._get_node_value_from_text(node,
+                                                                          item)
+                        self.current_dataset.dql = np.append(
+                            self.current_dataset.dql, data_point)
+                elif tagname == 'Qmean':
+                    pass
+                elif tagname == 'Shadowfactor':
+                    pass
+                elif isinstance(self.current_dataset, plottable_2D):
                     data_point = node.text
                     unit = attr.get('unit', '')
                 else:
-                    data_point, unit = self._get_node_value(node, tagname)
+                    data_point, unit = self._get_node_value(node)
 
                 # If this is a dataset, store the data appropriately
                 if tagname == 'Run':
@@ -257,26 +308,6 @@ class Reader(XMLreader):
                     self.current_datainfo.title = data_point
                 elif tagname == 'SASnote':
                     self.current_datainfo.notes.append(data_point)
-
-                # I and Q - 1D data
-                elif tagname == 'I' and isinstance(self.current_dataset, plottable_1D):
-                    self.current_dataset.yaxis("Intensity", unit)
-                    self.current_dataset.y = np.append(self.current_dataset.y, data_point)
-                elif tagname == 'Idev' and isinstance(self.current_dataset, plottable_1D):
-                    self.current_dataset.dy = np.append(self.current_dataset.dy, data_point)
-                elif tagname == 'Q':
-                    self.current_dataset.xaxis("Q", unit)
-                    self.current_dataset.x = np.append(self.current_dataset.x, data_point)
-                elif tagname == 'Qdev':
-                    self.current_dataset.dx = np.append(self.current_dataset.dx, data_point)
-                elif tagname == 'dQw':
-                    self.current_dataset.dxw = np.append(self.current_dataset.dxw, data_point)
-                elif tagname == 'dQl':
-                    self.current_dataset.dxl = np.append(self.current_dataset.dxl, data_point)
-                elif tagname == 'Qmean':
-                    pass
-                elif tagname == 'Shadowfactor':
-                    pass
 
                 # I and Qx, Qy - 2D data
                 elif tagname == 'I' and isinstance(self.current_dataset, plottable_2D):
@@ -676,7 +707,37 @@ class Reader(XMLreader):
             name = self._create_unique_key(dictionary, name, numb)
         return name
 
-    def _get_node_value(self, node, tagname):
+    def _get_node_value_from_text(self, node, node_text):
+        """
+        Get the value of a node and any applicable units
+
+        :param node: The XML node to get the value of
+        :param tagname: The tagname of the node
+        """
+        units = ""
+        # If the value is a float, compile with units.
+        if self.ns_list.ns_datatype == "float":
+            # If an empty value is given, set as zero.
+            if node_text is None or node_text.isspace() \
+                    or node_text.lower() == "nan":
+                node_text = "0.0"
+            # Convert the value to the base units
+            tag = node.tag.replace(self.base_ns, "")
+            node_text, units = self._unit_conversion(node, tag, node_text)
+
+        # If the value is a timestamp, convert to a datetime object
+        elif self.ns_list.ns_datatype == "timestamp":
+            if node_text is None or node_text.isspace():
+                pass
+            else:
+                try:
+                    node_text = \
+                        datetime.datetime.fromtimestamp(node_text)
+                except ValueError:
+                    node_text = None
+        return node_text, units
+
+    def _get_node_value(self, node):
         """
         Get the value of a node and any applicable units
 
@@ -690,26 +751,7 @@ class Reader(XMLreader):
             node_value = ' '.join(node_value.split())
         else:
             node_value = ""
-
-        # If the value is a float, compile with units.
-        if self.ns_list.ns_datatype == "float":
-            # If an empty value is given, set as zero.
-            if node_value is None or node_value.isspace() \
-                                    or node_value.lower() == "nan":
-                node_value = "0.0"
-            #Convert the value to the base units
-            node_value, units = self._unit_conversion(node, tagname, node_value)
-
-        # If the value is a timestamp, convert to a datetime object
-        elif self.ns_list.ns_datatype == "timestamp":
-            if node_value is None or node_value.isspace():
-                pass
-            else:
-                try:
-                    node_value = \
-                        datetime.datetime.fromtimestamp(node_value)
-                except ValueError:
-                    node_value = None
+        node_value, units = self._get_node_value_from_text(node, node_value)
         return node_value, units
 
     def _unit_conversion(self, node, tagname, node_value):
@@ -913,7 +955,10 @@ class Reader(XMLreader):
         if is_2d:
             self._write_data_2d(datainfo, entry_node)
         else:
-            self._write_data(datainfo, entry_node)
+            if self._check_root():
+                self._write_data(datainfo, entry_node)
+            else:
+                self._write_data_linearized(datainfo, entry_node)
         # Transmission Spectrum Info
         self._write_trans_spectrum(datainfo, entry_node)
         # Sample info
@@ -1035,6 +1080,39 @@ class Reader(XMLreader):
             if datainfo.dxl is not None and len(datainfo.dxl) > i:
                 self.write_node(point, "dQl", datainfo.dxl[i],
                                 {'unit': datainfo.x_unit})
+
+    def _write_data_linearized(self, datainfo, entry_node):
+        """
+        Writes 1D I and Q data to an XML file is a single Idata element
+
+        :param datainfo: The Data1D object the information is coming from
+        :param entry_node: lxml node ElementTree object to be appended to
+        """
+        node = self.create_element("SASdata")
+        self.append(node, entry_node)
+
+        point = self.create_element("Idata")
+        node.append(point)
+        x = ','.join([str(datainfo.x[i]) for i in xrange(len(datainfo.x))])
+        self.write_node(point, "Q", x, {'unit': datainfo.x_unit})
+        y = ','.join([str(datainfo.y[i]) for i in xrange(len(datainfo.y))])
+        self.write_node(point, "I", y, {'unit': datainfo.y_unit})
+        if datainfo.dy is not None:
+            dy = ','.join(
+                [str(datainfo.dy[i]) for i in xrange(len(datainfo.dy))])
+            self.write_node(point, "Idev", dy, {'unit': datainfo.y_unit})
+        if datainfo.dx is not None:
+            dx = ','.join(
+                [str(datainfo.dx[i]) for i in xrange(len(datainfo.dx))])
+            self.write_node(point, "Qdev", dx, {'unit': datainfo.x_unit})
+        if datainfo.dxw is not None:
+            dxw = ','.join(
+                [str(datainfo.dxw[i]) for i in xrange(len(datainfo.dxw))])
+            self.write_node(point, "dQw", dxw, {'unit': datainfo.x_unit})
+        if datainfo.dxl is not None:
+            dxl = ','.join(
+                [str(datainfo.dxl[i]) for i in xrange(len(datainfo.dxl))])
+            self.write_node(point, "dQl", dxl, {'unit': datainfo.x_unit})
 
     def _write_data_2d(self, datainfo, entry_node):
         """
@@ -1329,7 +1407,6 @@ class Reader(XMLreader):
             self.write_node(det, "slit_length", item.slit_length,
                 {"unit": item.slit_length_unit})
 
-
     def _write_process_notes(self, datainfo, entry_node):
         """
         Writes the process notes to the XML file
@@ -1377,7 +1454,7 @@ class Reader(XMLreader):
                 self.write_text(node, item)
                 self.append(node, entry_node)
 
-    def _check_origin(self, entry_node, doc):
+    def _check_root(self):
         """
         Return the document, and the SASentry node associated with
         the data we just wrote.
@@ -1393,7 +1470,19 @@ class Reader(XMLreader):
         mod_name = mod_name.replace(".py", "")
         mod = mod_name.split("sas/")
         mod_name = mod[1]
-        if mod_name != "sascalc/dataloader/readers/cansas_reader":
+        return mod_name == "sascalc/dataloader/readers/cansas_reader"
+
+    def _check_origin(self, entry_node, doc):
+        """
+        Return the document, and the SASentry node associated with
+        the data we just wrote.
+        If the calling function was not the cansas reader, return a minidom
+        object rather than an lxml object.
+
+        :param entry_node: lxml node ElementTree object to be appended to
+        :param doc: entire xml tree
+        """
+        if not self._check_root():
             string = self.to_string(doc, pretty_print=False)
             doc = parseString(string)
             node_name = entry_node.tag
