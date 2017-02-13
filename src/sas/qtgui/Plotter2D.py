@@ -18,7 +18,6 @@ from sas.sasgui.guiframe.dataFitting import Data2D
 from sas.sascalc.dataloader.manipulations import CircularAverage
 from sas.sasgui.guiframe.local_perspectives.plotting.binder import BindArtist
 from sas.qtgui.BoxSum import BoxSum
-from sas.qtgui.GuiUtils import formatNumber
 from sas.qtgui.SlicerParameters import SlicerParameters
 from sas.sasgui.guiframe.local_perspectives.plotting.boxSlicer import BoxInteractorX
 from sas.sasgui.guiframe.local_perspectives.plotting.AnnulusSlicer import AnnulusInteractor
@@ -136,11 +135,11 @@ class Plotter2DWidget(PlotterBase):
         self.contextMenu.addSeparator()
         self.actionDataInfo = self.contextMenu.addAction("&DataInfo")
         self.actionDataInfo.triggered.connect(
-                              functools.partial(self.onDataInfo, self.data))
+            functools.partial(self.onDataInfo, self.data))
 
         self.actionSavePointsAsFile = self.contextMenu.addAction("&Save Points as a File")
         self.actionSavePointsAsFile.triggered.connect(
-                                functools.partial(self.onSavePoints, self.data))
+            functools.partial(self.onSavePoints, self.data))
         self.contextMenu.addSeparator()
 
         self.actionCircularAverage = self.contextMenu.addAction("&Perform Circular Average")
