@@ -288,8 +288,8 @@ class Reader(XMLreader):
                     for item in data_list:
                         data_point, unit = self._get_node_value_from_text(node,
                                                                           item)
-                        self.current_dataset.dql = np.append(
-                            self.current_dataset.dql, data_point)
+                        self.current_dataset.dxl = np.append(
+                            self.current_dataset.dxl, data_point)
                 elif tagname == 'Qmean':
                     pass
                 elif tagname == 'Shadowfactor':
