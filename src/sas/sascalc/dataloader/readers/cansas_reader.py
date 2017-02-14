@@ -1465,7 +1465,7 @@ class Reader(XMLreader):
         :param doc: entire xml tree
         """
         if not self.frm:
-            self.frm = inspect.stack()[1]
+            self.frm = inspect.stack()[2]
         mod_name = self.frm[1].replace("\\", "/").replace(".pyc", "")
         mod_name = mod_name.replace(".py", "")
         mod = mod_name.split("sas/")
