@@ -876,13 +876,6 @@ class Plugin(PluginBase):
                 enable1D=enable1D, enable2D=enable2D,
                 qmin=qmin, qmax=qmax, weight=weight)
 
-    def _mac_sleep(self, sec=0.2):
-        """
-        Give sleep to MAC
-        """
-        if ON_MAC:
-            time.sleep(sec)
-
     def draw_model(self, model, page_id, data=None, smearer=None,
                    enable1D=True, enable2D=False,
                    state=None,
@@ -1030,7 +1023,6 @@ class Plugin(PluginBase):
         handler = ConsoleUpdate(parent=self.parent,
                                 manager=self,
                                 improvement_delta=0.1)
-        self._mac_sleep(0.2)
 
         # batch fit
         batch_inputs = {}
@@ -1270,7 +1262,6 @@ class Plugin(PluginBase):
         :param page_id: list of page ids which called fit function
         :param elapsed: time spent at the fitting level
         """
-        self._mac_sleep(0.2)
         uid = page_id[0]
         if uid in self.fit_thread_list.keys():
             del self.fit_thread_list[uid]
@@ -1520,7 +1511,6 @@ class Plugin(PluginBase):
         if page_id is None:
             page_id = []
         ## fit more than 1 model at the same time
-        self._mac_sleep(0.2)
         try:
             index = 0
             # Update potential simfit page(s)

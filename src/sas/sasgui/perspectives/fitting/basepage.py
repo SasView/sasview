@@ -1449,19 +1449,6 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.create_default_data()
                 self.state_change = True
                 self._draw_model()
-                # Time delay has been introduced to prevent _handle error
-                # on Windows
-                # This part of code is executed when model is selected and
-                # it's parameters are changed (with respect to previously
-                # selected model). There are two Iq evaluations occuring one
-                # after another and therefore there may be compilation error
-                # if model is calculated for the first time.
-                # This seems to be Windows only issue - haven't tested on Linux
-                # though.The proper solution (other than time delay) requires
-                # more fundemental code refatoring
-                # Wojtek P. Nov 7, 2016
-                if not ON_MAC:
-                    time.sleep(0.1)
                 self.Refresh()
 
         # logging.info("is_modified flag set to %g",is_modified)
@@ -2609,18 +2596,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         :Note: Mac seems to like this better when self.
             Layout is called after fitting.
         """
-        self._sleep4sec()
         self.Layout()
         return
-
-    def _sleep4sec(self):
-        """
-            sleep for 1 sec only applied on Mac
-            Note: This 1sec helps for Mac not to crash on self.
-            Layout after self._draw_model
-        """
-        if ON_MAC:
-            time.sleep(1)
 
     def _find_polyfunc_selection(self, disp_func=None):
         """

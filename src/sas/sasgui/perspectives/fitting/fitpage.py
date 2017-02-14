@@ -1829,13 +1829,6 @@ class FitPage(BasicPage):
         if not flag:
             self.onSmear(None)
 
-    def _mac_sleep(self, sec=0.2):
-        """
-        Give sleep to MAC
-        """
-        if self.is_mac:
-            time.sleep(sec)
-
     def get_view_mode(self):
         """
         return True if the panel allow 2D or False if 1D
@@ -2195,10 +2188,6 @@ class FitPage(BasicPage):
         # save current state
         self.save_current_state()
 
-        if not self.is_mac:
-            self.Layout()
-            self.Refresh()
-        self._mac_sleep(0.1)
         # plot model ( when drawing, do not update chisqr value again)
         self._draw_model(update_chisqr=False, source='fit')
 
