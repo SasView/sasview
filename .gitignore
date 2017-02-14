@@ -13,6 +13,7 @@
 .pydevproject
 .vagrant
 .idea
+.settings/
 build
 dist
 sasview.egg-info
