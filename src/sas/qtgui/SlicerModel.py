@@ -51,3 +51,7 @@ class SlicerModel(object):
         ''' pure virtual '''
         raise NotImplementedError("Parameter setter must be implemented in derived class.")
 
+    def validate(self):
+        ''' pure virtual '''
+        raise NotImplementedError("Validator must be implemented in derived class.")
+

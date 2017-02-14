@@ -181,6 +181,14 @@ class SectorInteractor(_BaseInteractor):
         wx.PostEvent(self.base.parent,
                      NewPlotEvent(plot=new_plot, title=str(new_sector.__name__)))
 
+
+    def validate(self, param_name, param_value):
+        """
+        Test the proposed new value "value" for row "row" of parameters
+        """
+        # Here, always return true
+        return True
+
     def moveend(self, ev):
         #TODO: why is this empty?
         pass

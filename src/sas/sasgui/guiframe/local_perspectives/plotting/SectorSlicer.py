@@ -175,6 +175,25 @@ class SectorInteractor(_BaseInteractor, SlicerModel):
             self.setModelFromParams()
         self.draw()
 
+    def validate(self, param_name, param_value):
+        """
+        Test the proposed new value "value" for row "row" of parameters
+        """
+        MIN_DIFFERENCE = 0.01
+        isValid = True
+
+        if param_name == 'Delta_Phi [deg]':
+            # First, check the closeness
+            if numpy.fabs(param_value) < MIN_DIFFERENCE:
+                print("Sector angles too close. Please adjust.")
+                isValid = False
+        elif param_name == 'nbins':
+            # Can't be 0
+            if param_value < 1:
+                print("Number of bins cannot be less than or equal to 0. Please adjust.")
+                isValid = False
+        return isValid
+
     def moveend(self, ev):
         """
         Called a dragging motion ends.Get slicer event

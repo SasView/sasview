@@ -1,6 +1,7 @@
 """
 Allows users to modify the box slicer parameters.
 """
+import numpy
 import functools
 from PyQt4 import QtGui
 from PyQt4 import QtCore
@@ -15,13 +16,15 @@ class SlicerParameters(QtGui.QDialog, Ui_SlicerParametersUI):
     passed from a slicer instance.
     """
     close_signal = QtCore.pyqtSignal()
-    def __init__(self, model=None):
+    def __init__(self, model=None, validate_method=None):
         super(SlicerParameters, self).__init__()
 
         self.setupUi(self)
+
         assert isinstance(model, QtGui.QStandardItemModel)
 
         self.model = model
+        self.validate_method = validate_method
 
         # Define a proxy model so cell enablement can be finegrained.
         self.proxy = ProxyModel(self)
@@ -34,7 +37,9 @@ class SlicerParameters(QtGui.QDialog, Ui_SlicerParametersUI):
         self.lstParams.model().setColumnReadOnly(0, True)
 
         # Specify the validator on the parameter value column.
-        self.lstParams.setItemDelegate(ValidatedItemDelegate())
+        self.delegate = EditDelegate(self, validate_method=self.validate_method)
+        self.lstParams.setItemDelegate(self.delegate)
+        self.delegate.refocus_signal.connect(self.onFocus)
 
         # Display Help on clicking the button
         self.buttonBox.button(QtGui.QDialogButtonBox.Help).clicked.connect(self.onHelp)
@@ -52,6 +57,12 @@ class SlicerParameters(QtGui.QDialog, Ui_SlicerParametersUI):
         header.setResizeMode(QtGui.QHeaderView.Stretch)
         header.setStretchLastSection(True)
 
+    def onFocus(self, row, column):
+        """ Set the focus on the cell (row, column) """
+        selection_model = self.lstParams.selectionModel()
+        selection_model.select(self.model.index(row, column), QtGui.QItemSelectionModel.Select)
+        self.lstParams.setSelectionModel(selection_model)
+        self.lstParams.setCurrentIndex(self.model.index(row, column))
 
     def setModel(self, model):
         """ Model setter """
@@ -104,20 +115,61 @@ class ProxyModel(QtGui.QIdentityProxyModel):
             flags &= ~QtCore.Qt.ItemIsEditable
         return flags
 
+class PositiveDoubleEditor(QtGui.QLineEdit):
+    # a signal to tell the delegate when we have finished editing
+    editingFinished = QtCore.Signal()
 
-class ValidatedItemDelegate(QtGui.QStyledItemDelegate):
-    """
-    Simple delegate enabling adding a validator to a cell editor.
-    """
-    def createEditor(self, widget, option, index):
-        '''Overwrite default editor'''
-        if not index.isValid():
-            return 0
-        if index.column() == 1: # Edir only cells in the second column
-            editor = QtGui.QLineEdit(widget)
+    def __init__(self, parent=None):
+            # Initialize the editor object
+            super(PositiveDoubleEditor, self).__init__(parent)
+            self.setAutoFillBackground(True)
             validator = QtGui.QDoubleValidator()
             # Don't use the scientific notation, cause 'e'.
             validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
-            editor.setValidator(validator)
-            return editor
-        return super(ValidatedItemDelegate, self).createEditor(widget, option, index)
+
+            self.setValidator(validator)
+
+    def focusOutEvent(self, event):
+            # Once focus is lost, tell the delegate we're done editing
+            self.editingFinished.emit()
+
+
+class EditDelegate(QtGui.QStyledItemDelegate):
+    refocus_signal = QtCore.pyqtSignal(int, int)
+    def __init__(self, parent=None, validate_method=None):
+        super(EditDelegate, self).__init__(parent)
+        self.editor = None
+        self.index = None
+        self.validate_method = validate_method
+
+    def createEditor(self, parent, option, index):
+        # Creates and returns the custom editor object we will use to edit the cell
+        if not index.isValid():
+            return 0
+
+        result = index.column()
+        if result==1:
+                self.editor = PositiveDoubleEditor(parent)
+                self.index = index
+                return self.editor
+        else:
+                return QtGui.QStyledItemDelegate.createEditor(self, parent, option, index)
+
+    def setModelData(self, editor, model, index):
+        """
+        Custom version of the model update, rejecting bad values
+        """
+        self.index = index
+
+        # Find out the changed parameter name and proposed value
+        new_value = self.editor.text().toFloat()[0]
+        param_name = str(model.sourceModel().item(index.row(),0).text())
+
+        validated = True
+        if self.validate_method:
+            # Validate the proposed value in the slicer
+            value_accepted = self.validate_method(param_name, new_value)
+
+        if value_accepted:
+            # Update the model only if value accepted
+            return super(EditDelegate, self).setModelData(editor, model, index)          

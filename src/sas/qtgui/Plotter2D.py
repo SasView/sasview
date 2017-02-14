@@ -135,11 +135,11 @@ class Plotter2DWidget(PlotterBase):
         self.contextMenu.addSeparator()
         self.actionDataInfo = self.contextMenu.addAction("&DataInfo")
         self.actionDataInfo.triggered.connect(
-            functools.partial(self.onDataInfo, self.data))
+             functools.partial(self.onDataInfo, self.data))
 
         self.actionSavePointsAsFile = self.contextMenu.addAction("&Save Points as a File")
         self.actionSavePointsAsFile.triggered.connect(
-            functools.partial(self.onSavePoints, self.data))
+             functools.partial(self.onSavePoints, self.data))
         self.contextMenu.addSeparator()
 
         self.actionCircularAverage = self.contextMenu.addAction("&Perform Circular Average")
@@ -224,7 +224,8 @@ class Plotter2DWidget(PlotterBase):
 
         self.param_model = self.slicer.model()
         # Pass the model to the Slicer Parameters widget
-        self.slicer_widget = SlicerParameters(model=self.param_model)
+        self.slicer_widget = SlicerParameters(model=self.param_model,
+                                              validate_method=self.slicer.validate)
         self.slicer_widget.close_signal.connect(slicer_closed)
         # Add the plot to the workspace
         self.manager.parent.workspace().addWindow(self.slicer_widget)
