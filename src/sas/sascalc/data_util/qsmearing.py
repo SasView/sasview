@@ -44,7 +44,7 @@ def smear_selection(data, model = None):
             return None
         elif data.dqx_data == None or data.dqy_data == None:
             return None
-        return Pinhole2D(data)
+        return PySmear2D(data)
     # This checks for 1D data with smearing info in the data itself (again, fail is likely; no exceptions)
     if  not hasattr(data, "dx") and not hasattr(data, "dxl")\
          and not hasattr(data, "dxw"):

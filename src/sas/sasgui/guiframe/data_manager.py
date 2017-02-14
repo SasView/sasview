@@ -60,7 +60,7 @@ class DataManager(object):
         """
         
         if issubclass(Data2D, data.__class__):
-            new_plot = Data2D(image=None, err_image=None, isSesans=data.isSesans) # For now, isSesans for 2D data is always false
+            new_plot = Data2D(image=None, err_image=None) # For now, isSesans for 2D data is always false
         else:
             new_plot = Data1D(x=[], y=[], dx=None, dy=None, lam=None, dlam=None, isSesans=data.isSesans)
 

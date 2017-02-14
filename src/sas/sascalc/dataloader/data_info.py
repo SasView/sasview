@@ -932,16 +932,17 @@ class Data2D(plottable_2D, DataInfo):
     x_bins = None
     ## Vector of Q-values at the center of each bin in y
     y_bins = None
+    ## No 2D SESANS data as of yet. Always set it to False
+    isSesans = False
 
     def __init__(self, data=None, err_data=None, qx_data=None,
                  qy_data=None, q_data=None, mask=None,
-                 dqx_data=None, dqy_data=None, isSesans=None):
+                 dqx_data=None, dqy_data=None):
         DataInfo.__init__(self)
         plottable_2D.__init__(self, data, err_data, qx_data,
                               qy_data, q_data, mask, dqx_data, dqy_data)
         self.y_bins = []
         self.x_bins = []
-        self.isSesans=isSesans
 
         if len(self.detector) > 0:
             raise RuntimeError, "Data2D: Detector bank already filled at init"
