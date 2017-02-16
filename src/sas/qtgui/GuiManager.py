@@ -28,7 +28,9 @@ from sas.qtgui.KiessigPanel import KiessigPanel
 from sas.qtgui.SlitSizeCalculator import SlitSizeCalculator
 
 # Perspectives
+import Perspectives
 from sas.qtgui.Perspectives.Invariant.InvariantPerspective import InvariantWindow
+from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 from sas.qtgui.DataExplorer import DataExplorerWindow
 
 class Acknowledgements(QtGui.QDialog, Ui_Acknowledgements):
@@ -97,15 +99,11 @@ class GuiManager(object):
         self._tutorialLocation = os.path.abspath(os.path.join(self.HELP_DIRECTORY_LOCATION,
                                               "_downloads",
                                               "Tutorial.pdf"))
+        # Current displayed perspective
+        self._current_perspective = None
 
-        #==========================================================
-        # TEMP PROTOTYPE
-        # Add InvariantWindow to the workspace.
-        self.invariantWidget = InvariantWindow(self)
-        self._workspace.workspace.addWindow(self.invariantWidget)
-
-        # Default perspective
-        self._current_perspective = self.invariantWidget
+        # Invoke the initial perspective
+        self.perspectiveChanged("Fitting")
 
     def addWidgets(self):
         """
@@ -119,6 +117,7 @@ class GuiManager(object):
 
         self.dockedFilesWidget = QtGui.QDockWidget("Data Explorer", self._workspace)
         self.dockedFilesWidget.setWidget(self.filesWidget)
+
         # Disable maximize/minimize and close buttons
         self.dockedFilesWidget.setFeatures(QtGui.QDockWidget.NoDockWidgetFeatures)
         self._workspace.addDockWidget(QtCore.Qt.LeftDockWidgetArea,
@@ -142,6 +141,7 @@ class GuiManager(object):
         #self.KIESSIGCalculator = DensityPanel(self)#KiessigPanel(self)
         self.KIESSIGCalculator = KiessigPanel(self)
         self.SlitSizeCalculator = SlitSizeCalculator(self)
+
     def statusBarSetup(self):
         """
         Define the status bar.
@@ -172,6 +172,18 @@ class GuiManager(object):
         Accessor for the main window workspace
         """
         return self._workspace.workspace
+
+    def perspectiveChanged(self, perspective_name):
+        """
+        Respond to change of the perspective signal
+        """
+        # Close the previous perspective
+        if self._current_perspective:
+            self._current_perspective.close()
+        # Default perspective
+        self._current_perspective = Perspectives.PERSPECTIVES[str(perspective_name)](self)
+        self._workspace.workspace.addWindow(self._current_perspective)
+        self._current_perspective.show()
 
     def updatePerspective(self, data):
         """
@@ -321,6 +333,7 @@ class GuiManager(object):
         self.communicate.statusBarUpdateSignal.connect(self.updateStatusBar)
         self.communicate.updatePerspectiveWithDataSignal.connect(self.updatePerspective)
         self.communicate.progressBarUpdateSignal.connect(self.updateProgressBar)
+        self.communicate.perspectiveChangedSignal.connect(self.perspectiveChanged)
 
     def addTriggers(self):
         """

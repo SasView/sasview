@@ -38,6 +38,7 @@ class MyModel(object):
 class InvariantWindow(QtGui.QDialog, Ui_tabbedInvariantUI):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
+    name = "Invariant" # For displaying in the combo box
     def __init__(self, manager=None, parent=None):
         super(InvariantWindow, self).__init__(parent)
         self.setupUi(self)
@@ -101,12 +102,12 @@ class InvariantWindow(QtGui.QDialog, Ui_tabbedInvariantUI):
         # Set up the mapper
         self.setupMapper()
 
-    def closeEvent(self, event):
-        """
-        Overwrite the default close method of QWidget
-        """
-        # No close on perspectives - one must always be active.
-        event.ignore()
+    #def closeEvent(self, event):
+    #    """
+    #    Overwrite the default close method of QWidget
+    #    """
+    #    # No close on perspectives - one must always be active.
+    #    event.ignore()
 
     def communicator(self):
         """ Getter for the communicator """
