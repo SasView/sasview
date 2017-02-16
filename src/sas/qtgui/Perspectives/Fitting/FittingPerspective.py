@@ -4,7 +4,7 @@ import  os
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 
-from UI.fitting import Ui_Dialog
+from UI.FittingUI import Ui_FittingUI
 
 from sasmodels import generate
 from sasmodels import modelinfo
@@ -12,9 +12,10 @@ from sasmodels import modelinfo
 from collections import defaultdict
 from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 
-class prototype(QtGui.QDialog, Ui_Dialog):
-    def __init__(self):
-        super(prototype, self).__init__()
+class FittingWindow(QtGui.QDialog, Ui_FittingUI):
+    name = "Fitting" # For displaying in the combo box
+    def __init__(self, manager=None, parent=None):
+        super(FittingWindow, self).__init__()
         self._model_model = QtGui.QStandardItemModel()
         self._poly_model = QtGui.QStandardItemModel()
         self.setupUi(self)
@@ -174,6 +175,6 @@ class prototype(QtGui.QDialog, Ui_Dialog):
 
 if __name__ == "__main__":
     app = QtGui.QApplication([])
-    dlg = prototype()
+    dlg = FittingWindow()
     dlg.show()
     sys.exit(app.exec_())

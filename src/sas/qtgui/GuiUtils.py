@@ -233,6 +233,9 @@ class Communicate(QtCore.QObject):
     # Current workspace chart's name changed
     activeGraphName = QtCore.pyqtSignal(tuple)
 
+    # Current perspective changed
+    perspectiveChangedSignal = QtCore.pyqtSignal(str)
+
 
 def updateModelItemWithPlot(item, update_data, name=""):
     """

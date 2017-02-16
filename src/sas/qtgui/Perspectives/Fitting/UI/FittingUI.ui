@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Dialog</class>
- <widget class="QDialog" name="Dialog">
+ <class>FittingUI</class>
+ <widget class="QDialog" name="FittingUI">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Fitting Perspective</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../../../UI/main_resources.qrc">
+    <normaloff>:/res/ball.ico</normaloff>:/res/ball.ico</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_15">
    <item row="0" column="0">
@@ -635,6 +639,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../../UI/main_resources.qrc"/>
+ </resources>
  <connections/>
 </ui>
