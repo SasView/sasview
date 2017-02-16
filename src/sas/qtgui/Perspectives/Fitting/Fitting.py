@@ -1,8 +1,16 @@
 import sys
+import json
+import  os
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 
 from UI.fitting import Ui_Dialog
+
+from sasmodels import generate
+from sasmodels import modelinfo
+
+from collections import defaultdict
+from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 
 class prototype(QtGui.QDialog, Ui_Dialog):
     def __init__(self):
@@ -11,8 +19,15 @@ class prototype(QtGui.QDialog, Ui_Dialog):
         self._poly_model = QtGui.QStandardItemModel()
         self.setupUi(self)
 
+        self._readCategoryInfo()
+        cat_list = sorted(self.master_category_dict.keys())
+        self.comboBox.addItems(cat_list)
         self.tableView.setModel(self._model_model)
-        self.setModelModel()
+
+        model_list = self.master_category_dict['Cylinder']
+        for (model, enabled) in model_list:
+            self.comboBox_2.addItem(model)
+        self.setModelModel('barbell')
 
         self.pushButton.setEnabled(False)
         self.checkBox_3.setEnabled(False)
@@ -33,60 +48,74 @@ class prototype(QtGui.QDialog, Ui_Dialog):
             i = self.tableView_2.model().index(row,6)
             self.tableView_2.setIndexWidget(i,c)
 
+    def _readCategoryInfo(self):
+        """
+        Reads the categories in from file
+        """
+        self.master_category_dict = defaultdict(list)
+        self.by_model_dict = defaultdict(list)
+        self.model_enabled_dict = defaultdict(bool)
+
+        try:
+            categorization_file = CategoryInstaller.get_user_file()
+            if not os.path.isfile(categorization_file):
+                categorization_file = CategoryInstaller.get_default_file()
+            cat_file = open(categorization_file, 'rb')
+            self.master_category_dict = json.load(cat_file)
+            self._regenerate_model_dict()
+            cat_file.close()
+        except IOError:
+            raise
+            print 'Problem reading in category file.'
+            print 'We even looked for it, made sure it was there.'
+            print 'An existential crisis if there ever was one.'
+
+    def _regenerate_model_dict(self):
+        """
+        regenerates self.by_model_dict which has each model name as the
+        key and the list of categories belonging to that model
+        along with the enabled mapping
+        """
+        self.by_model_dict = defaultdict(list)
+        for category in self.master_category_dict:
+            for (model, enabled) in self.master_category_dict[category]:
+                self.by_model_dict[model].append(category)
+                self.model_enabled_dict[model] = enabled
+
         
-    def setModelModel(self):
+    def setModelModel(self, model_name):
         # Crete/overwrite model items
 
-        parameters=[]
-        p=["scale", "1", "0", "inf", ""]
-        for i in xrange(1):
-            #for parameter in parameters.keys():
-            item1 = QtGui.QStandardItem("background")
-            item1.setCheckable(True)
-            item2 = QtGui.QStandardItem("0.001")
-            item3 = QtGui.QStandardItem("-inf")
-            item4 = QtGui.QStandardItem("inf")
-            item5 = QtGui.QStandardItem("1/cm")
-            self._model_model.appendRow([item1, item2, item3, item4, item5])
+        model_name = str(model_name)
+        kernel_module = generate.load_kernel_module(model_name)
+        parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
 
-            item1 = QtGui.QStandardItem("l_radius")
-            item1.setCheckable(True)
-            item2 = QtGui.QStandardItem("100")
-            item3 = QtGui.QStandardItem("0")
-            item4 = QtGui.QStandardItem("inf")
-            item5 = QtGui.QStandardItem("A")
-            self._model_model.appendRow([item1, item2, item3, item4, item5])
+        #TODO: scaale and background are implicit in sasmodels and needs to be added
+        item1 = QtGui.QStandardItem('scale')
+        item1.setCheckable(True)
+        item2 = QtGui.QStandardItem('1.0')
+        item3 = QtGui.QStandardItem('0.0')
+        item4 = QtGui.QStandardItem('inf')
+        item5 = QtGui.QStandardItem('')
+        self._model_model.appendRow([item1, item2, item3, item4, item5])
 
-            item1 = QtGui.QStandardItem("ls_sld")
-            item1.setCheckable(True)
-            item2 = QtGui.QStandardItem("3.5e-06")
-            item3 = QtGui.QStandardItem("0")
-            item4 = QtGui.QStandardItem("inf")
-            item5 = QtGui.QStandardItem("1/A^2")
-            self._model_model.appendRow([item1, item2, item3, item4, item5])
+        item1 = QtGui.QStandardItem('background')
+        item1.setCheckable(True)
+        item2 = QtGui.QStandardItem('0.001')
+        item3 = QtGui.QStandardItem('-inf')
+        item4 = QtGui.QStandardItem('inf')
+        item5 = QtGui.QStandardItem('1/cm')
+        self._model_model.appendRow([item1, item2, item3, item4, item5])
 
-            item1 = QtGui.QStandardItem("s_radius")
+        #TODO: iq_parameters are used here. If orientation paramateres or magnetic are needed kernel_paramters should be used instead
+        #For orientation and magentic parameters param.type needs to be checked
+        for param in parameters.iq_parameters:
+            item1 = QtGui.QStandardItem(param.name)
             item1.setCheckable(True)
-            item2 = QtGui.QStandardItem("25")
-            item3 = QtGui.QStandardItem("0")
-            item4 = QtGui.QStandardItem("inf")
-            item5 = QtGui.QStandardItem("A")
-            self._model_model.appendRow([item1, item2, item3, item4, item5])
-
-            item1 = QtGui.QStandardItem("solvent_sld")
-            item1.setCheckable(True)
-            item2 = QtGui.QStandardItem("6.36e-06")
-            item3 = QtGui.QStandardItem("0")
-            item4 = QtGui.QStandardItem("inf")
-            item5 = QtGui.QStandardItem("1/A^2")
-            self._model_model.appendRow([item1, item2, item3, item4, item5])
-
-            item1 = QtGui.QStandardItem("vol_frac_ls")
-            item1.setCheckable(True)
-            item2 = QtGui.QStandardItem("0.1")
-            item3 = QtGui.QStandardItem("0")
-            item4 = QtGui.QStandardItem("inf")
-            item5 = QtGui.QStandardItem("")
+            item2 = QtGui.QStandardItem(str(param.default))
+            item3 = QtGui.QStandardItem(str(param.limits[0]))
+            item4 = QtGui.QStandardItem(str(param.limits[1]))
+            item5 = QtGui.QStandardItem(param.units)
             self._model_model.appendRow([item1, item2, item3, item4, item5])
 
         self._model_model.setHeaderData(0, QtCore.Qt.Horizontal, QtCore.QVariant("Parameter"))
