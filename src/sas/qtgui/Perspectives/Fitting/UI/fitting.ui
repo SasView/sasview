@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>613</width>
+    <width>674</width>
     <height>723</height>
    </rect>
   </property>
@@ -128,32 +128,10 @@
                  </widget>
                 </item>
                 <item row="1" column="0">
-                 <widget class="QComboBox" name="comboBox">
-                  <item>
-                   <property name="text">
-                    <string>Shapes</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Shape-independent</string>
-                   </property>
-                  </item>
-                 </widget>
+                 <widget class="QComboBox" name="comboBox"/>
                 </item>
                 <item row="1" column="1">
-                 <widget class="QComboBox" name="comboBox_2">
-                  <item>
-                   <property name="text">
-                    <string>Binary HS Model</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>None</string>
-                   </property>
-                  </item>
-                 </widget>
+                 <widget class="QComboBox" name="comboBox_2"/>
                 </item>
                 <item row="1" column="2">
                  <widget class="QComboBox" name="comboBox_3">
