@@ -14,7 +14,7 @@
    <string>Fitting Perspective</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../../UI/main_resources.qrc">
+   <iconset>
     <normaloff>:/res/ball.ico</normaloff>:/res/ball.ico</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_15">
@@ -661,8 +661,6 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../../../UI/main_resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
