@@ -28,6 +28,13 @@ class FittingWindow(QtGui.QDialog, Ui_FittingUI):
 
         category = self.comboBox.currentText()
 
+        #self.comboBox_2.addItem('Select Model')
+        item = QtGui.QStandardItem('Select Model')
+        item.setForeground(QtGui.QColor('red'))
+        self.comboBox_2.model().appendRow(item)
+        #This should disable selectin "Select Model" but it doesn't work
+        self.comboBox.setItemData(0, False, QtCore.Qt.UserRole - 1)
+
         model_list = self.master_category_dict[str(category)]
         for (model, enabled) in model_list:
             self.comboBox_2.addItem(model)
