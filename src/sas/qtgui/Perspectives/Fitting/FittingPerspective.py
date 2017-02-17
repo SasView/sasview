@@ -24,11 +24,15 @@ class FittingWindow(QtGui.QDialog, Ui_FittingUI):
         cat_list = sorted(self.master_category_dict.keys())
         self.comboBox.addItems(cat_list)
         self.tableView.setModel(self._model_model)
+        self.comboBox.currentIndexChanged.connect(self.selectCategoryModels)
 
-        model_list = self.master_category_dict['Cylinder']
+        category = self.comboBox.currentText()
+
+        model_list = self.master_category_dict[str(category)]
         for (model, enabled) in model_list:
             self.comboBox_2.addItem(model)
-        self.setModelModel('barbell')
+
+        self.comboBox_2.currentIndexChanged.connect(self.selectModel)
 
         self.pushButton.setEnabled(False)
         self.checkBox_3.setEnabled(False)
@@ -48,6 +52,18 @@ class FittingWindow(QtGui.QDialog, Ui_FittingUI):
             c.addItems(['rectangle','array','lognormal','gaussian','schulz',])
             i = self.tableView_2.model().index(row,6)
             self.tableView_2.setIndexWidget(i,c)
+
+    def selectCategoryModels(self, index):
+        self.comboBox_2.clear()
+        category = self.comboBox.currentText()
+        model_list = self.master_category_dict[str(category)]
+        for (model, enabled) in model_list:
+            self.comboBox_2.addItem(model)
+
+    def selectModel(self, index):
+
+        model = self.comboBox_2.currentText()
+        self.setModelModel(model)
 
     def _readCategoryInfo(self):
         """
@@ -86,7 +102,7 @@ class FittingWindow(QtGui.QDialog, Ui_FittingUI):
         
     def setModelModel(self, model_name):
         # Crete/overwrite model items
-
+        self._model_model.clear()
         model_name = str(model_name)
         kernel_module = generate.load_kernel_module(model_name)
         parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
