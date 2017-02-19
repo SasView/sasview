@@ -23,6 +23,7 @@ in the file LICENSE that is included with this distribution.
 	</complexType>
 
 	<complexType name="IdataType">
+		<xsd:choice>
 		<sequence>
 			<element name="Q" minOccurs="1" maxOccurs="1"    type="tns:floatUnitType" />
 			<element name="I" minOccurs="1" maxOccurs="1"    type="tns:floatUnitType" />
@@ -39,6 +40,16 @@ in the file LICENSE that is included with this distribution.
 			<element name="Shadowfactor" minOccurs="0" maxOccurs="1" type="string" default="1.0" />
 			<xsd:any minOccurs="0" maxOccurs="unbounded" processContents="lax" namespace="##other" />
 		</sequence>
+		<sequence>
+			<element name="Qx" minOccurs="1" maxOccurs="1"    type="tns:floatUnitType" />
+			<element name="Qy" minOccurs="1" maxOccurs="1"    type="tns:floatUnitType" />
+			<element name="I" minOccurs="1" maxOccurs="1"    type="tns:floatUnitType" />
+			<element name="Idev" minOccurs="0" maxOccurs="1" type="tns:floatUnitType" default="0" />
+			<element name="Qydev" minOccurs="0" maxOccurs="1" type="tns:floatUnitType" default="0" />
+			<element name="Qxdev" minOccurs="0" maxOccurs="1" type="tns:floatUnitType" default="0" />
+			<element name="Mask" minOccurs="0" maxOccurs="1" type="string" default="0" />
+		</sequence>
+		</xsd:choice>
 	</complexType>
 	
 	<complexType name="SASdataType">
@@ -50,6 +61,8 @@ in the file LICENSE that is included with this distribution.
 		</sequence>
 		<attribute name="name" type="string" use="optional" default="" />
 		<attribute name="timestamp" type="dateTime" use="optional" />
+		<attribute name="x_bins" type="string" use="optional" />
+		<attribute name="y_bins" type="string" use="optional" />
 	</complexType>
 
 	<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
