@@ -52,6 +52,9 @@ else:
     FONT_VARIANT = 1
     ON_MAC = True
 
+CUSTOM_MODEL = 'Plugin Models'
+CUSTOM_MODEL_OLD = 'Customized Models'
+
 class BasicPage(ScrolledPanel, PanelBase):
     """
     This class provide general structure of the fitpanel page
@@ -1155,6 +1158,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         self._show_combox_helper()
         # select the current model
         state._convert_to_sasmodels()
+        if state.categorycombobox == CUSTOM_MODEL_OLD:
+            state.categorycombobox = CUSTOM_MODEL
         state.categorycombobox = unicode(state.categorycombobox)
         if state.categorycombobox in self.categorybox.Items:
             category_pos = self.categorybox.Items.index(
@@ -1166,7 +1171,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.categorybox.Select(category_pos)
         self._show_combox(None)
         from models import PLUGIN_NAME_BASE
-        if self.categorybox.GetValue() == 'Customized Models' \
+        if self.categorybox.GetValue() == CUSTOM_MODEL \
                 and PLUGIN_NAME_BASE not in state.formfactorcombobox:
             state.formfactorcombobox = \
                 PLUGIN_NAME_BASE + state.formfactorcombobox
@@ -1797,7 +1802,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Fill panel's combo box according to the type of model selected
         """
-        custom_model = 'Plugin Models'
+
         mod_cat = self.categorybox.GetStringSelection()
         self.structurebox.SetSelection(0)
         self.structurebox.Disable()
@@ -1806,7 +1811,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             return
         m_list = []
         try:
-            if mod_cat == custom_model:
+            if mod_cat == CUSTOM_MODEL:
                 for model in self.model_list_box[mod_cat]:
                     m_list.append(self.model_dict[model.name])
             else:

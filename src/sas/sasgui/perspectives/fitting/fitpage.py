@@ -30,7 +30,7 @@ _BOX_WIDTH = 76
 _DATA_BOX_WIDTH = 300
 SMEAR_SIZE_L = 0.00
 SMEAR_SIZE_H = 0.00
-
+CUSTOM_MODEL = 'Plugin Models'
 
 class FitPage(BasicPage):
     """
@@ -1248,7 +1248,7 @@ class FitPage(BasicPage):
             new_event = PageInfoEvent(page=self)
             wx.PostEvent(self.parent, new_event)
             # update list of plugins if new plugin is available
-            custom_model = 'Customized Models'
+            custom_model = CUSTOM_MODEL
             mod_cat = self.categorybox.GetStringSelection()
             if mod_cat == custom_model:
                 temp = self.parent.update_model_list()
