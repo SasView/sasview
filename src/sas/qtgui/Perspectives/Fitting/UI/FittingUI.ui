@@ -132,18 +132,13 @@
                  </widget>
                 </item>
                 <item row="1" column="0">
-                 <widget class="QComboBox" name="comboBox"/>
+                 <widget class="QComboBox" name="cbCategory"/>
                 </item>
                 <item row="1" column="1">
-                 <widget class="QComboBox" name="comboBox_2"/>
+                 <widget class="QComboBox" name="cbModel"/>
                 </item>
                 <item row="1" column="2">
-                 <widget class="QComboBox" name="comboBox_3">
-                  <item>
-                   <property name="text">
-                    <string>Hard Sphere Structure</string>
-                   </property>
-                  </item>
+                 <widget class="QComboBox" name="cbStructureFactor">
                   <item>
                    <property name="text">
                     <string>None</string>
@@ -173,7 +168,7 @@
              </property>
              <layout class="QGridLayout" name="gridLayout_16">
               <item row="0" column="0">
-               <widget class="QCheckBox" name="checkBox_3">
+               <widget class="QCheckBox" name="chkPolydispersity">
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
@@ -186,7 +181,7 @@
                </widget>
               </item>
               <item row="1" column="0">
-               <widget class="QCheckBox" name="checkBox_4">
+               <widget class="QCheckBox" name="chkSmearing">
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
@@ -210,42 +205,42 @@
               <item row="0" column="0">
                <layout class="QGridLayout" name="gridLayout_8">
                 <item row="0" column="0">
-                 <widget class="QLabel" name="label_16">
+                 <widget class="QLabel" name="lblMinRange">
                   <property name="text">
                    <string>Min range</string>
                   </property>
                  </widget>
                 </item>
                 <item row="0" column="1">
-                 <widget class="QLabel" name="label_20">
+                 <widget class="QLabel" name="lblMinRangeDef">
                   <property name="text">
                    <string>0.005</string>
                   </property>
                  </widget>
                 </item>
                 <item row="0" column="2">
-                 <widget class="QLabel" name="label_17">
+                 <widget class="QLabel" name="lblMinRangeUnit">
                   <property name="text">
                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
                  </widget>
                 </item>
                 <item row="1" column="0">
-                 <widget class="QLabel" name="label_18">
+                 <widget class="QLabel" name="lblMaxRange">
                   <property name="text">
                    <string>Max range</string>
                   </property>
                  </widget>
                 </item>
                 <item row="1" column="1">
-                 <widget class="QLabel" name="label_21">
+                 <widget class="QLabel" name="lblMaxRangeDef">
                   <property name="text">
                    <string>0.1</string>
                   </property>
                  </widget>
                 </item>
                 <item row="1" column="2">
-                 <widget class="QLabel" name="label_19">
+                 <widget class="QLabel" name="lblMaxRangeUnit">
                   <property name="text">
                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
@@ -278,14 +273,14 @@
               <item row="0" column="0">
                <layout class="QHBoxLayout" name="horizontalLayout_2">
                 <item>
-                 <widget class="QLabel" name="label_23">
+                 <widget class="QLabel" name="lblChi2">
                   <property name="text">
                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;χ&lt;/span&gt;&lt;span style=&quot; font-weight:600; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="label_24">
+                 <widget class="QLabel" name="lblChi2Value">
                   <property name="text">
                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;0.01625&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>

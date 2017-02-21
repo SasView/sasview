@@ -1,6 +1,8 @@
 import sys
 import json
 import  os
+from collections import defaultdict
+
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 
@@ -8,45 +10,52 @@ from UI.FittingUI import Ui_FittingUI
 
 from sasmodels import generate
 from sasmodels import modelinfo
-
-from collections import defaultdict
 from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 
 class FittingWindow(QtGui.QDialog, Ui_FittingUI):
+    """
+    Main window for selecting form and structure factor models
+    """
     name = "Fitting" # For displaying in the combo box
     def __init__(self, manager=None, parent=None):
+        """
+
+        :param manager:
+        :param parent:
+        :return:
+        """
         super(FittingWindow, self).__init__()
+
         self._model_model = QtGui.QStandardItemModel()
         self._poly_model = QtGui.QStandardItemModel()
         self.setupUi(self)
+        self.tableView.setModel(self._model_model)
 
         self._readCategoryInfo()
-        cat_list = sorted(self.master_category_dict.keys())
-        self.comboBox.addItems(cat_list)
-        self.tableView.setModel(self._model_model)
-        self.comboBox.currentIndexChanged.connect(self.selectCategoryModels)
 
-        category = self.comboBox.currentText()
+        structure_factor_list = self.master_category_dict.pop('Structure Factor')
+        for (structure_factor, enabled) in structure_factor_list:
+            self.cbStructureFactor.addItem(structure_factor)
+        self.cbStructureFactor.currentIndexChanged.connect(self.selectStructureFactor)
 
-        #self.comboBox_2.addItem('Select Model')
-        item = QtGui.QStandardItem('Select Model')
-        item.setForeground(QtGui.QColor('red'))
-        self.comboBox_2.model().appendRow(item)
-        #This should disable selectin "Select Model" but it doesn't work
-        self.comboBox.setItemData(0, False, QtCore.Qt.UserRole - 1)
+        category_list = sorted(self.master_category_dict.keys())
+        self.cbCategory.addItems(category_list)
+        self.cbCategory.currentIndexChanged.connect(self.selectCategory)
 
+        category = self.cbCategory.currentText()
         model_list = self.master_category_dict[str(category)]
         for (model, enabled) in model_list:
-            self.comboBox_2.addItem(model)
-
-        self.comboBox_2.currentIndexChanged.connect(self.selectModel)
+            self.cbModel.addItem(model)
+        self.cbModel.currentIndexChanged.connect(self.selectModel)
 
         self.pushButton.setEnabled(False)
-        self.checkBox_3.setEnabled(False)
-        self.checkBox_4.setEnabled(False)
-        self.label_20.setText("---")
-        self.label_21.setText("---")
-        self.label_24.setText("---")
+        self.chkPolydispersity.setEnabled(False)
+        self.chkSmearing.setEnabled(False)
+
+        #TODO: Can these be removed?
+        self.lblMinRangeDef.setText("---")
+        self.lblMaxRangeDef.setText("---")
+        self.lblChi2Value.setText("---")
 
         #self.setTableProperties(self.tableView)
 
@@ -60,17 +69,32 @@ class FittingWindow(QtGui.QDialog, Ui_FittingUI):
             i = self.tableView_2.model().index(row,6)
             self.tableView_2.setIndexWidget(i,c)
 
-    def selectCategoryModels(self, index):
-        self.comboBox_2.clear()
-        category = self.comboBox.currentText()
+    def selectCategory(self):
+        """
+        Select Category from list
+        :return:
+        """
+        self.cbModel.clear()
+        category = self.cbCategory.currentText()
         model_list = self.master_category_dict[str(category)]
         for (model, enabled) in model_list:
-            self.comboBox_2.addItem(model)
+            self.cbModel.addItem(model)
 
-    def selectModel(self, index):
-
-        model = self.comboBox_2.currentText()
+    def selectModel(self):
+        """
+        Select Model from list
+        :return:
+        """
+        model = self.cbModel.currentText()
         self.setModelModel(model)
+
+    def selectStructureFactor(self):
+        """
+        Select Structure Factor from list
+        :param:
+        :return:
+        """
+
 
     def _readCategoryInfo(self):
         """
@@ -108,6 +132,11 @@ class FittingWindow(QtGui.QDialog, Ui_FittingUI):
 
         
     def setModelModel(self, model_name):
+        """
+        Setting model parameters into table based on selected
+        :param model_name:
+        :return:
+        """
         # Crete/overwrite model items
         self._model_model.clear()
         model_name = str(model_name)
@@ -149,7 +178,11 @@ class FittingWindow(QtGui.QDialog, Ui_FittingUI):
         self._model_model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("[Units]"))
 
     def setTableProperties(self, table):
-
+        """
+        Setting table properties
+        :param table:
+        :return:
+        """
         table.setStyleSheet("background-image: url(model.png);")
 
         # Table properties
@@ -163,6 +196,10 @@ class FittingWindow(QtGui.QDialog, Ui_FittingUI):
         header.setStretchLastSection(True)
 
     def setPolyModel(self):
+        """
+        Set polydispersity values
+        :return:
+        """
         item1 = QtGui.QStandardItem("Distribution of radius")
         item1.setCheckable(True)
         item2 = QtGui.QStandardItem("0")
