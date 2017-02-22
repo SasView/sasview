@@ -1940,44 +1940,39 @@ class FitPage(BasicPage):
                 self.slit_smearer.Disable()
                 self.pinhole_smearer.Enable(True)
                 self.default_mask = copy.deepcopy(self.data.mask)
-                if self.data.err_data is None \
-                        or numpy.all(err == 1 for err in self.data.err_data) \
-                        or not numpy.any(self.data.err_data):
+                if self.data.err_data is not None \
+                        and numpy.any(self.data.err_data):
                     di_flag = True
-                if self.data.dqx is None \
-                        or numpy.all(err == 1 for err in self.data.dqx) \
-                        or not numpy.any(self.data.dqx):
+                if self.data.dqx_data is not None \
+                        and numpy.any(self.data.dqx_data):
                     dq_flag = True
             else:
                 self.slit_smearer.Enable(True)
                 self.pinhole_smearer.Enable(True)
-                if self.data.dy is None \
-                        or numpy.all(self.data.dy == 1) \
-                        or not numpy.any(self.data.dy):
+                if self.data.dy is not None and numpy.any(self.data.dy):
                     di_flag = True
-                if self.data.dx is None \
-                        or numpy.all(self.data.dx == 1) \
-                        or not numpy.any(self.data.dx):
+                if self.data.dx is not None and numpy.any(self.data.dx):
+                    dq_flag = True
+                elif self.data.dxl is not None and numpy.any(self.data.dxl):
                     dq_flag = True
 
             if dq_flag:
-                self.enable_smearer.Disable()
-                self.disable_smearer.Enable(True)
-                self.disable_smearer.SetValue(True)
-            else:
                 self.enable_smearer.Enable(True)
                 self.enable_smearer.SetValue(True)
                 self.disable_smearer.SetValue(False)
-            self.onSmear(event=None)
+            else:
+                self.enable_smearer.Disable()
+                self.disable_smearer.Enable(True)
+                self.disable_smearer.SetValue(True)
 
             if di_flag:
-                self.dI_didata.Enable(False)
-                self.dI_noweight.SetValue(True)
-                self.weightbt_string = self.dI_noweight.GetLabelText()
-            else:
                 self.dI_didata.Enable(True)
                 self.dI_didata.SetValue(True)
                 self.weightbt_string = self.dI_didata.GetLabelText()
+            else:
+                self.dI_didata.Enable(False)
+                self.dI_noweight.SetValue(True)
+                self.weightbt_string = self.dI_noweight.GetLabelText()
 
             # Enable weighting radio buttons
             self.dI_noweight.Enable(True)
@@ -2020,6 +2015,7 @@ class FitPage(BasicPage):
             self.btEditMask.Disable()
             self.EditMask_title.Disable()
 
+        self.onSmear(event=None)
         self.on_set_focus(None)
         self.Refresh()
         # update model plot with new data information
