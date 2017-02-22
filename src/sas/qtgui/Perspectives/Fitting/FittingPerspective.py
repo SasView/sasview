@@ -16,7 +16,6 @@ class FittingWindow(QtGui.QDialog, Ui_FittingUI):
     """
     Main window for selecting form and structure factor models
     """
-    name = "Fitting" # For displaying in the combo box
     def __init__(self, manager=None, parent=None):
         """
 
@@ -25,10 +24,11 @@ class FittingWindow(QtGui.QDialog, Ui_FittingUI):
         :return:
         """
         super(FittingWindow, self).__init__()
+        self.setupUi(self)
 
+        self.setWindowTitle("Fitting")
         self._model_model = QtGui.QStandardItemModel()
         self._poly_model = QtGui.QStandardItemModel()
-        self.setupUi(self)
         self.tableView.setModel(self._model_model)
 
         self._readCategoryInfo()
@@ -52,7 +52,6 @@ class FittingWindow(QtGui.QDialog, Ui_FittingUI):
         self.chkPolydispersity.setEnabled(False)
         self.chkSmearing.setEnabled(False)
 
-        #TODO: Can these be removed?
         self.lblMinRangeDef.setText("---")
         self.lblMaxRangeDef.setText("---")
         self.lblChi2Value.setText("---")
