@@ -30,8 +30,8 @@ class FittingWindow(QtGui.QDialog, Ui_FittingUI):
         self._model_model = QtGui.QStandardItemModel()
         self._poly_model = QtGui.QStandardItemModel()
         self.tableView.setModel(self._model_model)
-
         self._readCategoryInfo()
+        self.model_parameters = None
 
         structure_factor_list = self.master_category_dict.pop('Structure Factor')
         for (structure_factor, enabled) in structure_factor_list:
@@ -61,12 +61,6 @@ class FittingWindow(QtGui.QDialog, Ui_FittingUI):
         self.tableView_2.setModel(self._poly_model)
         self.setPolyModel()
         self.setTableProperties(self.tableView_2)
-
-        for row in range(2):
-            c = QtGui.QComboBox()
-            c.addItems(['rectangle','array','lognormal','gaussian','schulz',])
-            i = self.tableView_2.model().index(row,6)
-            self.tableView_2.setIndexWidget(i,c)
 
     def selectCategory(self):
         """
@@ -140,7 +134,7 @@ class FittingWindow(QtGui.QDialog, Ui_FittingUI):
         self._model_model.clear()
         model_name = str(model_name)
         kernel_module = generate.load_kernel_module(model_name)
-        parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
+        self.model_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
 
         #TODO: scaale and background are implicit in sasmodels and needs to be added
         item1 = QtGui.QStandardItem('scale')
@@ -161,7 +155,7 @@ class FittingWindow(QtGui.QDialog, Ui_FittingUI):
 
         #TODO: iq_parameters are used here. If orientation paramateres or magnetic are needed kernel_paramters should be used instead
         #For orientation and magentic parameters param.type needs to be checked
-        for param in parameters.iq_parameters:
+        for param in self.model_parameters.iq_parameters:
             item1 = QtGui.QStandardItem(param.name)
             item1.setCheckable(True)
             item2 = QtGui.QStandardItem(str(param.default))
@@ -175,6 +169,8 @@ class FittingWindow(QtGui.QDialog, Ui_FittingUI):
         self._model_model.setHeaderData(2, QtCore.Qt.Horizontal, QtCore.QVariant("Min"))
         self._model_model.setHeaderData(3, QtCore.Qt.Horizontal, QtCore.QVariant("Max"))
         self._model_model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("[Units]"))
+
+        self.setPolyModel()
 
     def setTableProperties(self, table):
         """
@@ -199,24 +195,25 @@ class FittingWindow(QtGui.QDialog, Ui_FittingUI):
         Set polydispersity values
         :return:
         """
-        item1 = QtGui.QStandardItem("Distribution of radius")
-        item1.setCheckable(True)
-        item2 = QtGui.QStandardItem("0")
-        item3 = QtGui.QStandardItem("")
-        item4 = QtGui.QStandardItem("")
-        item5 = QtGui.QStandardItem("35")
-        item6 = QtGui.QStandardItem("3")
-        item7 = QtGui.QStandardItem("")
-        self._poly_model.appendRow([item1, item2, item3, item4, item5, item6, item7])
-        item1 = QtGui.QStandardItem("Distribution of thickness")
-        item1.setCheckable(True)
-        item2 = QtGui.QStandardItem("0")
-        item3 = QtGui.QStandardItem("")
-        item4 = QtGui.QStandardItem("")
-        item5 = QtGui.QStandardItem("35")
-        item6 = QtGui.QStandardItem("3")
-        item7 = QtGui.QStandardItem("")
-        self._poly_model.appendRow([item1, item2, item3, item4, item5, item6, item7])
+
+        if self.model_parameters:
+            for row, param in enumerate(self.model_parameters.form_volume_parameters):
+                item1 = QtGui.QStandardItem("Distribution of "+param.name)
+                item1.setCheckable(True)
+                item2 = QtGui.QStandardItem("0")
+                item3 = QtGui.QStandardItem("")
+                item4 = QtGui.QStandardItem("")
+                item5 = QtGui.QStandardItem("35")
+                item6 = QtGui.QStandardItem("3")
+                item7 = QtGui.QStandardItem("")
+
+                self._poly_model.appendRow([item1, item2, item3, item4, item5, item6, item7])
+
+                #TODO: Need to find cleaner way to input functions
+                func = QtGui.QComboBox()
+                func.addItems(['rectangle','array','lognormal','gaussian','schulz',])
+                func_index = self.tableView_2.model().index(row,6)
+                self.tableView_2.setIndexWidget(func_index,func)
 
         self._poly_model.setHeaderData(0, QtCore.Qt.Horizontal, QtCore.QVariant("Parameter"))
         self._poly_model.setHeaderData(1, QtCore.Qt.Horizontal, QtCore.QVariant("PD[ratio]"))
@@ -230,7 +227,6 @@ class FittingWindow(QtGui.QDialog, Ui_FittingUI):
         header = self.tableView_2.horizontalHeader()
         header.ResizeMode(QtGui.QHeaderView.Stretch)
         header.setStretchLastSection(True)
-
 
 if __name__ == "__main__":
     app = QtGui.QApplication([])
