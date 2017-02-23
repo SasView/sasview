@@ -97,6 +97,20 @@ class FittingPerspectiveTest(unittest.TestCase):
         self.assertNotEqual(fittingWindow.cbModel.findText("stacked_disks"),-1)
 
 
+    def testSelectPolydispersity(self):
+        """
+        Test if models have been loaded properly
+        :return:
+        """
+        fittingWindow =  FittingWindow(None)
+
+        #Test loading from json categories
+        fittingWindow.setModelModel("cylinder")
+        pd_index = fittingWindow.tableView_2.model().index(0,0)
+        self.assertEqual(str(pd_index.data().toString()), "Distribution of radius")
+        pd_index = fittingWindow.tableView_2.model().index(1,0)
+        self.assertEqual(str(pd_index.data().toString()), "Distribution of length")
+
     def testSelectStructureFactor(self):
         """
         Test if structure factors have been loaded properly
