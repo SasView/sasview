@@ -135,14 +135,15 @@ class Reader:
 
                 output.x, output.x_unit = self._unit_conversion(x, lam_unit, default_z_unit)
                 output.y = y
-                output.y_unit = '\AA^{-2} cm^{-1}'  # output y_unit added
+                output.y_unit = r'\AA^{-2} cm^{-1}'  # output y_unit added
                 output.dx, output.dx_unit = self._unit_conversion(dx, lam_unit, default_z_unit)
                 output.dy = dy
                 output.lam, output.lam_unit = self._unit_conversion(lam, lam_unit, default_z_unit)
                 output.dlam, output.dlam_unit = self._unit_conversion(dlam, lam_unit, default_z_unit)
+                
+                output.xaxis(r"\rm{z}", output.x_unit)
+                output.yaxis(r"\rm{ln(P)/(t \lambda^2)}", output.y_unit)  # Adjust label to ln P/(lam^2 t), remove lam column refs
 
-                output.xaxis("\\rm{z}", output.x_unit)
-                output.yaxis("\\rm{ln(P)/(t \lambda^2)}", output.y_unit)  # Adjust label to ln P/(lam^2 t), remove lam column refs
                 # Store loading process information
                 output.meta_data['loader'] = self.type_name
                 #output.sample.thickness = float(paramvals[6])
@@ -150,7 +151,7 @@ class Reader:
                 output.sample.ID = paramvals[0]
                 zaccept_unit_split = paramnames[7].split("[")
                 zaccept_unit = zaccept_unit_split[1].replace("]","")
-                if zaccept_unit.strip() == '\AA^-1' or zaccept_unit.strip() == '\A^-1':
+                if zaccept_unit.strip() == r'\AA^-1' or zaccept_unit.strip() == r'\A^-1':
                     zaccept_unit = "1/A"
                 output.sample.zacceptance=(float(paramvals[7]),zaccept_unit)
                 output.vars = varheader
