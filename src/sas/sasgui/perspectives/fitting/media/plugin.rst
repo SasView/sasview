@@ -26,7 +26,7 @@ If you write your own model and save it to the the SasView *plugin_models* folde
   *C:\\Users\\{username}\\.sasview\\plugin_models* (on Windows)
 
 the next time SasView is started it will compile the plugin and add
-it to the list of *Customized Models* in a FitPage.
+it to the list of *Plugin Models* in a FitPage.
 
 SasView models can be of three types:
 
