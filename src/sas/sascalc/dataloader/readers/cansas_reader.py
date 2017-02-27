@@ -260,18 +260,20 @@ class Reader(XMLreader):
 
                 # I and Q - 1D data
                 elif tagname == 'I' and isinstance(self.current_dataset, plottable_1D):
-                    unit_list = unit.split(" | ")
+                    unit_list = unit.split("|")
                     if len(unit_list) > 1:
-                        self.current_dataset.yaxis(unit_list[0], unit_list[1])
+                        self.current_dataset.yaxis(unit_list[0].strip(),
+                                                   unit_list[1].strip())
                     else:
                         self.current_dataset.yaxis("Intensity", unit)
                     self.current_dataset.y = np.append(self.current_dataset.y, data_point)
                 elif tagname == 'Idev' and isinstance(self.current_dataset, plottable_1D):
                     self.current_dataset.dy = np.append(self.current_dataset.dy, data_point)
                 elif tagname == 'Q':
-                    unit_list = unit.split(" | ")
+                    unit_list = unit.split("|")
                     if len(unit_list) > 1:
-                        self.current_dataset.xaxis(unit_list[0], unit_list[1])
+                        self.current_dataset.xaxis(unit_list[0].strip(),
+                                                   unit_list[1].strip())
                     else:
                         self.current_dataset.xaxis("Q", unit)
                     self.current_dataset.x = np.append(self.current_dataset.x, data_point)
