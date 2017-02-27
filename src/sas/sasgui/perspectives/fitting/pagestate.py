@@ -32,9 +32,13 @@ from sas.sascalc.dataloader.readers.cansas_reader import Reader as CansasReader
 from sas.sascalc.dataloader.readers.cansas_reader import get_content, write_node
 from sas.sascalc.dataloader.data_info import Data2D, Collimation, Detector
 from sas.sascalc.dataloader.data_info import Process, Aperture
+
 # Information to read/write state as xml
 FITTING_NODE_NAME = 'fitting_plug_in'
 CANSAS_NS = "cansas1d/1.0"
+
+CUSTOM_MODEL = 'Plugin Models'
+CUSTOM_MODEL_OLD = 'Customized Models'
 
 LIST_OF_DATA_ATTRIBUTES = [["is_data", "is_data", "bool"],
                            ["group_id", "data_group_id", "string"],
@@ -365,6 +369,8 @@ class PageState(object):
         saved.
         :return: None
         """
+        if self.categorycombobox == CUSTOM_MODEL_OLD:
+            self.categorycombobox = CUSTOM_MODEL
         if self.formfactorcombobox == '':
             FIRST_FORM = {
                 'Shapes' : 'BCCrystalModel',
@@ -377,7 +383,7 @@ class PageState(object):
                 'Shape Independent' : 'be_polyelectrolyte',
                 'Sphere' : 'adsorbed_layer',
                 'Structure Factor' : 'hardsphere',
-                'Customized Models' : ''
+                CUSTOM_MODEL : ''
             }
             if self.categorycombobox == '':
                 if len(self.parameters) == 3:

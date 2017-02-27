@@ -52,9 +52,11 @@ else:
     FONT_VARIANT = 1
     ON_MAC = True
 
+CUSTOM_MODEL = 'Plugin Models'
+
 class BasicPage(ScrolledPanel, PanelBase):
     """
-    This class provide general structure of  fitpanel page
+    This class provide general structure of the fitpanel page
     """
     # Internal name for the AUI manager
     window_name = "Fit Page"
@@ -676,9 +678,9 @@ class BasicPage(ScrolledPanel, PanelBase):
 
     def _copy_info(self, flag):
         """
-        Send event dpemding on flag
+        Send event depending on flag
 
-        : Param flag: flag that distinguish event
+        : Param flag: flag that distinguishes the event
         """
         # messages depending on the flag
         if flag is None:
@@ -1118,7 +1120,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         :precondition: the page is already drawn or created
 
-        :postcondition: the state of the underlying data change as well as the
+        :postcondition: the state of the underlying data changes as well as the
             state of the graphic interface
         """
         if state is None:
@@ -1166,7 +1168,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.categorybox.Select(category_pos)
         self._show_combox(None)
         from models import PLUGIN_NAME_BASE
-        if self.categorybox.GetValue() == 'Customized Models' \
+        if self.categorybox.GetValue() == CUSTOM_MODEL \
                 and PLUGIN_NAME_BASE not in state.formfactorcombobox:
             state.formfactorcombobox = \
                 PLUGIN_NAME_BASE + state.formfactorcombobox
@@ -1334,7 +1336,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
     def _selectDlg(self):
         """
-        open a dialog file to selected the customized dispersity
+        open a dialog file to select the customized polydispersity function
         """
         if self.parent is not None:
             self._default_save_location = \
@@ -1759,7 +1761,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
     def _set_multfactor_combobox(self, multiplicity=10):
         """
-        Set comboBox for muitfactor of CoreMultiShellModel
+        Set comboBox for multitfactor of CoreMultiShellModel
         :param multiplicit: no. of multi-functionality
         """
         # build content of the combobox
@@ -1797,7 +1799,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Fill panel's combo box according to the type of model selected
         """
-        custom_model = 'Customized Models'
+
         mod_cat = self.categorybox.GetStringSelection()
         self.structurebox.SetSelection(0)
         self.structurebox.Disable()
@@ -1806,7 +1808,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             return
         m_list = []
         try:
-            if mod_cat == custom_model:
+            if mod_cat == CUSTOM_MODEL:
                 for model in self.model_list_box[mod_cat]:
                     m_list.append(self.model_dict[model.name])
             else:
@@ -3452,7 +3454,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         fills out the category list box
         """
-        uncat_str = 'Customized Models'
+        uncat_str = 'Plugin Models'
         self._read_category_info()
 
         self.categorybox.Clear()
@@ -3481,7 +3483,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             return
         self.model_box.Clear()
 
-        if category == 'Customized Models':
+        if category == 'Plugin Models':
             for model in self.model_list_box[category]:
                 str_m = str(model).split(".")[0]
                 self.model_box.Append(str_m)
