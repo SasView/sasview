@@ -53,7 +53,6 @@ else:
     ON_MAC = True
 
 CUSTOM_MODEL = 'Plugin Models'
-CUSTOM_MODEL_OLD = 'Customized Models'
 
 class BasicPage(ScrolledPanel, PanelBase):
     """
@@ -1158,8 +1157,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         self._show_combox_helper()
         # select the current model
         state._convert_to_sasmodels()
-        if state.categorycombobox == CUSTOM_MODEL_OLD:
-            state.categorycombobox = CUSTOM_MODEL
         state.categorycombobox = unicode(state.categorycombobox)
         if state.categorycombobox in self.categorybox.Items:
             category_pos = self.categorybox.Items.index(

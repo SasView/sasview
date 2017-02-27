@@ -381,9 +381,10 @@ class PageState(object):
                 'Shape Independent' : 'be_polyelectrolyte',
                 'Sphere' : 'adsorbed_layer',
                 'Structure Factor' : 'hardsphere',
-                CUSTOM_MODEL_OLD : '',
                 CUSTOM_MODEL : ''
             }
+            if self.categorycombobox == CUSTOM_MODEL_OLD:
+                self.categorycombobox = CUSTOM_MODEL
             if self.categorycombobox == '':
                 if len(self.parameters) == 3:
                     self.categorycombobox = "Shape-Independent"
