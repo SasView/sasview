@@ -1963,7 +1963,8 @@ class Plugin(PluginBase):
                 ## stop just raises the flag -- the thread is supposed to 
                 ## then kill itself but cannot.  Paul Kienzle came up with
                 ## this fix to prevent threads from stepping on each other
-                ## which was causing a simple custom model to crash Sasview.
+                ## which was causing a simple custom plugin model to crash
+                ##Sasview.
                 ## We still don't know why the fit sometimes lauched a second
                 ## thread -- something which should also be investigated.
                 ## The thread approach was implemented in order to be able
