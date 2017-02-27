@@ -1,232 +1,73 @@
 import sys
-import json
-import  os
-from collections import defaultdict
 
-from PyQt4 import QtGui
 from PyQt4 import QtCore
+from PyQt4 import QtGui
 
-from UI.FittingUI import Ui_FittingUI
+from FittingWidget import FittingWidget
 
-from sasmodels import generate
-from sasmodels import modelinfo
-from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
-
-class FittingWindow(QtGui.QDialog, Ui_FittingUI):
+class FittingWindow(QtGui.QTabWidget):
     """
-    Main window for selecting form and structure factor models
     """
-    def __init__(self, manager=None, parent=None):
-        """
-
-        :param manager:
-        :param parent:
-        :return:
-        """
+    name = "Fitting" # For displaying in the combo box in DataExplorer
+    def __init__(self, manager=None, parent=None, data=None):
         super(FittingWindow, self).__init__()
-        self.setupUi(self)
 
-        self.setWindowTitle("Fitting")
-        self._model_model = QtGui.QStandardItemModel()
-        self._poly_model = QtGui.QStandardItemModel()
-        self.tableView.setModel(self._model_model)
-        self._readCategoryInfo()
-        self.model_parameters = None
+        self.manager = manager
+        self.parent = parent
+        self._data = data
 
-        structure_factor_list = self.master_category_dict.pop('Structure Factor')
-        for (structure_factor, enabled) in structure_factor_list:
-            self.cbStructureFactor.addItem(structure_factor)
-        self.cbStructureFactor.currentIndexChanged.connect(self.selectStructureFactor)
+        #r = raw_input("A")
+        #r = 1
 
-        category_list = sorted(self.master_category_dict.keys())
-        self.cbCategory.addItems(category_list)
-        self.cbCategory.currentIndexChanged.connect(self.selectCategory)
+        # List of active fits
+        self.tabs = []
 
-        category = self.cbCategory.currentText()
-        model_list = self.master_category_dict[str(category)]
-        for (model, enabled) in model_list:
-            self.cbModel.addItem(model)
-        self.cbModel.currentIndexChanged.connect(self.selectModel)
+        # Max index for adding new, non-clashing tab names
+        self.maxIndex = 0
 
-        self.pushButton.setEnabled(False)
-        self.chkPolydispersity.setEnabled(False)
-        self.chkSmearing.setEnabled(False)
+        # Index of the current tab
+        self.currentTab = 0
 
-        self.lblMinRangeDef.setText("---")
-        self.lblMaxRangeDef.setText("---")
-        self.lblChi2Value.setText("---")
+        # The current optimizer
+        self.optimizer = 'DREAM'
 
-        #self.setTableProperties(self.tableView)
+        # The tabs need to be closeable
+        self.setTabsClosable(True)
 
-        self.tableView_2.setModel(self._poly_model)
-        self.setPolyModel()
-        self.setTableProperties(self.tableView_2)
+        # Initialize the first tab
+        self.addFit(None)
 
-    def selectCategory(self):
+        # Deal with signals
+        self.tabCloseRequested.connect(self.tabCloses)
+    
+        self.setWindowTitle('Fit panel - Active Fitting Optimizer: %s' % self.optimizer)
+
+    def addFit(self, data):
         """
-        Select Category from list
-        :return:
+        Add a new tab for passed data
         """
-        self.cbModel.clear()
-        category = self.cbCategory.currentText()
-        model_list = self.master_category_dict[str(category)]
-        for (model, enabled) in model_list:
-            self.cbModel.addItem(model)
+        tab	= FittingWidget(manager=self.manager, parent=self.parent, data=data)
+        self.tabs.append(tab)
+        self.maxIndex += 1
+        self.addTab(tab, self.tabName())
 
-    def selectModel(self):
+    def tabName(self):
         """
-        Select Model from list
-        :return:
+        Get the new tab name, based on the number of fitting tabs so far
         """
-        model = self.cbModel.currentText()
-        self.setModelModel(model)
-
-    def selectStructureFactor(self):
-        """
-        Select Structure Factor from list
-        :param:
-        :return:
-        """
-
-
-    def _readCategoryInfo(self):
-        """
-        Reads the categories in from file
-        """
-        self.master_category_dict = defaultdict(list)
-        self.by_model_dict = defaultdict(list)
-        self.model_enabled_dict = defaultdict(bool)
-
-        try:
-            categorization_file = CategoryInstaller.get_user_file()
-            if not os.path.isfile(categorization_file):
-                categorization_file = CategoryInstaller.get_default_file()
-            cat_file = open(categorization_file, 'rb')
-            self.master_category_dict = json.load(cat_file)
-            self._regenerate_model_dict()
-            cat_file.close()
-        except IOError:
-            raise
-            print 'Problem reading in category file.'
-            print 'We even looked for it, made sure it was there.'
-            print 'An existential crisis if there ever was one.'
-
-    def _regenerate_model_dict(self):
-        """
-        regenerates self.by_model_dict which has each model name as the
-        key and the list of categories belonging to that model
-        along with the enabled mapping
-        """
-        self.by_model_dict = defaultdict(list)
-        for category in self.master_category_dict:
-            for (model, enabled) in self.master_category_dict[category]:
-                self.by_model_dict[model].append(category)
-                self.model_enabled_dict[model] = enabled
-
+        page_name = "FitPage" + str(self.maxIndex)
+        return page_name
         
-    def setModelModel(self, model_name):
+    def tabCloses(self, index):
         """
-        Setting model parameters into table based on selected
-        :param model_name:
-        :return:
+        Update local bookkeeping on tab close
         """
-        # Crete/overwrite model items
-        self._model_model.clear()
-        model_name = str(model_name)
-        kernel_module = generate.load_kernel_module(model_name)
-        self.model_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
-
-        #TODO: scaale and background are implicit in sasmodels and needs to be added
-        item1 = QtGui.QStandardItem('scale')
-        item1.setCheckable(True)
-        item2 = QtGui.QStandardItem('1.0')
-        item3 = QtGui.QStandardItem('0.0')
-        item4 = QtGui.QStandardItem('inf')
-        item5 = QtGui.QStandardItem('')
-        self._model_model.appendRow([item1, item2, item3, item4, item5])
-
-        item1 = QtGui.QStandardItem('background')
-        item1.setCheckable(True)
-        item2 = QtGui.QStandardItem('0.001')
-        item3 = QtGui.QStandardItem('-inf')
-        item4 = QtGui.QStandardItem('inf')
-        item5 = QtGui.QStandardItem('1/cm')
-        self._model_model.appendRow([item1, item2, item3, item4, item5])
-
-        #TODO: iq_parameters are used here. If orientation paramateres or magnetic are needed kernel_paramters should be used instead
-        #For orientation and magentic parameters param.type needs to be checked
-        for param in self.model_parameters.iq_parameters:
-            item1 = QtGui.QStandardItem(param.name)
-            item1.setCheckable(True)
-            item2 = QtGui.QStandardItem(str(param.default))
-            item3 = QtGui.QStandardItem(str(param.limits[0]))
-            item4 = QtGui.QStandardItem(str(param.limits[1]))
-            item5 = QtGui.QStandardItem(param.units)
-            self._model_model.appendRow([item1, item2, item3, item4, item5])
-
-        self._model_model.setHeaderData(0, QtCore.Qt.Horizontal, QtCore.QVariant("Parameter"))
-        self._model_model.setHeaderData(1, QtCore.Qt.Horizontal, QtCore.QVariant("Value"))
-        self._model_model.setHeaderData(2, QtCore.Qt.Horizontal, QtCore.QVariant("Min"))
-        self._model_model.setHeaderData(3, QtCore.Qt.Horizontal, QtCore.QVariant("Max"))
-        self._model_model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("[Units]"))
-
-        self.setPolyModel()
-
-    def setTableProperties(self, table):
-        """
-        Setting table properties
-        :param table:
-        :return:
-        """
-        table.setStyleSheet("background-image: url(model.png);")
-
-        # Table properties
-        table.verticalHeader().setVisible(False)
-        table.setAlternatingRowColors(True)
-        table.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Expanding)
-        table.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-        # Header
-        header = table.horizontalHeader()
-        header.setResizeMode(QtGui.QHeaderView.Stretch)
-        header.setStretchLastSection(True)
-
-    def setPolyModel(self):
-        """
-        Set polydispersity values
-        :return:
-        """
-
-        if self.model_parameters:
-            for row, param in enumerate(self.model_parameters.form_volume_parameters):
-                item1 = QtGui.QStandardItem("Distribution of "+param.name)
-                item1.setCheckable(True)
-                item2 = QtGui.QStandardItem("0")
-                item3 = QtGui.QStandardItem("")
-                item4 = QtGui.QStandardItem("")
-                item5 = QtGui.QStandardItem("35")
-                item6 = QtGui.QStandardItem("3")
-                item7 = QtGui.QStandardItem("")
-
-                self._poly_model.appendRow([item1, item2, item3, item4, item5, item6, item7])
-
-                #TODO: Need to find cleaner way to input functions
-                func = QtGui.QComboBox()
-                func.addItems(['rectangle','array','lognormal','gaussian','schulz',])
-                func_index = self.tableView_2.model().index(row,6)
-                self.tableView_2.setIndexWidget(func_index,func)
-
-        self._poly_model.setHeaderData(0, QtCore.Qt.Horizontal, QtCore.QVariant("Parameter"))
-        self._poly_model.setHeaderData(1, QtCore.Qt.Horizontal, QtCore.QVariant("PD[ratio]"))
-        self._poly_model.setHeaderData(2, QtCore.Qt.Horizontal, QtCore.QVariant("Min"))
-        self._poly_model.setHeaderData(3, QtCore.Qt.Horizontal, QtCore.QVariant("Max"))
-        self._poly_model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("Npts"))
-        self._poly_model.setHeaderData(5, QtCore.Qt.Horizontal, QtCore.QVariant("Nsigs"))
-        self._poly_model.setHeaderData(6, QtCore.Qt.Horizontal, QtCore.QVariant("Function"))
-
-        self.tableView_2.resizeColumnsToContents()
-        header = self.tableView_2.horizontalHeader()
-        header.ResizeMode(QtGui.QHeaderView.Stretch)
-        header.setStretchLastSection(True)
+        assert(len(self.tabs) >= index)
+        # don't remove the last tab
+        if len(self.tabs) <= 1:
+            return
+        del self.tabs[index]
+        self.removeTab(index)
 
 if __name__ == "__main__":
     app = QtGui.QApplication([])

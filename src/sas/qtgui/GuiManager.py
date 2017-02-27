@@ -586,9 +586,13 @@ class GuiManager(object):
     #============ FITTING =================
     def actionNew_Fit_Page(self):
         """
+        Add a new, empty Fit page in the fitting perspective.
         """
-        print("actionNew_Fit_Page TRIGGERED")
-        pass
+        # Make sure the perspective is correct
+        per = self.perspective()
+        if not isinstance(per, FittingWindow):
+            return
+        per.addFit(None)
 
     def actionConstrained_Fit(self):
         """

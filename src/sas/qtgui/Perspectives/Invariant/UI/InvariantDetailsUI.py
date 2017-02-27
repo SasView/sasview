@@ -143,10 +143,3 @@ class Ui_Dialog(object):
         self.groupBox_3.setTitle(_translate("Dialog", "Warnings", None))
         self.lblWarning.setText(_translate("Dialog", "<html><head/><body><p>No Details on calculations available...</p></body></html>", None))
 
-
-class Dialog(QtGui.QDialog, Ui_Dialog):
-    def __init__(self, parent=None, f=QtCore.Qt.WindowFlags()):
-        QtGui.QDialog.__init__(self, parent, f)
-
-        self.setupUi(self)
-

@@ -4,14 +4,16 @@ from PyQt4 import QtCore
 from PyQt4 import QtGui
 
 # local
-from UI.InvariantDetailsUI import Dialog
+from UI.InvariantDetailsUI import Ui_Dialog
 from InvariantUtils import WIDGETS
 
-class DetailsDialog(Dialog):
+class DetailsDialog(QtGui.QDialog, Ui_Dialog):
     """
     """
     def __init__(self, parent):
-        Dialog.__init__(self, parent)
+        super(DetailsDialog, self).__init__(parent)
+
+        self.setupUi(self)
 
         self.progressBar.setMinimum(0)
         self.progressBar.setMaximum(100)
