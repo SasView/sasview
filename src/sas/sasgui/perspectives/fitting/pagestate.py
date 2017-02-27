@@ -369,6 +369,8 @@ class PageState(object):
         saved.
         :return: None
         """
+        if self.categorycombobox == CUSTOM_MODEL_OLD:
+            self.categorycombobox = CUSTOM_MODEL
         if self.formfactorcombobox == '':
             FIRST_FORM = {
                 'Shapes' : 'BCCrystalModel',
@@ -383,8 +385,6 @@ class PageState(object):
                 'Structure Factor' : 'hardsphere',
                 CUSTOM_MODEL : ''
             }
-            if self.categorycombobox == CUSTOM_MODEL_OLD:
-                self.categorycombobox = CUSTOM_MODEL
             if self.categorycombobox == '':
                 if len(self.parameters) == 3:
                     self.categorycombobox = "Shape-Independent"
