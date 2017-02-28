@@ -132,6 +132,8 @@ class CansasConstants(object):
     SASDATA = {"attributes" : {"name" : {}},
                "variable" : None,
                "children" : {"Idata" : SASDATA_IDATA,
+                             "Sesans": {"storeas": "content"},
+                             "zacceptance": {"storeas": "float"},
                              "<any>" : ANY
                             }
               }
