@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>680</width>
+    <width>514</width>
     <height>721</height>
    </rect>
   </property>
@@ -652,7 +652,64 @@ angles</string>
      </widget>
     </widget>
    </item>
-   <item row="2" column="1" colspan="2">
+   <item row="2" column="3">
+    <widget class="QPushButton" name="cmdPlot">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>75</width>
+       <height>23</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Show Plot</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="4">
+    <widget class="QPushButton" name="cmdFit">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>75</width>
+       <height>23</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Fit</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="5">
+    <widget class="QPushButton" name="cmdHelp">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>75</width>
+       <height>23</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Help</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="3">
     <spacer name="horizontalSpacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -664,27 +721,6 @@ angles</string>
       </size>
      </property>
     </spacer>
-   </item>
-   <item row="2" column="3">
-    <widget class="QPushButton" name="cmdPlot">
-     <property name="text">
-      <string>Show Plot</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="4">
-    <widget class="QPushButton" name="cmdFit">
-     <property name="text">
-      <string>Fit</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="5">
-    <widget class="QPushButton" name="cmdHelp">
-     <property name="text">
-      <string>Help</string>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>

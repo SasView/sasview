@@ -17,9 +17,8 @@ TAB_POLY = 3
 
 class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
     """
-    Main window for selecting form and structure factor models
+    Main widget for selecting form and structure factor models
     """
-    name = "Fitting" # For displaying in the combo box in DataExplorer
     def __init__(self, manager=None, parent=None, data=None):
         """
 
@@ -33,6 +32,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self._data = data
         self.is2D = False
         self.modelHasShells = False
+        self.data_assigned = False
 
         self.setupUi(self)
 
@@ -105,7 +105,12 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
     def data(self, value):
         """ data setter """
         self._data = value
+        self.data_assigned = True
         # TODO: update ranges, chi2 etc
+
+    def acceptsData(self):
+        """ Tells the caller this widget can accept new dataset """
+        return not self.data_assigned
 
     def selectCategory(self):
         """
@@ -167,6 +172,19 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
                 self.by_model_dict[model].append(category)
                 self.model_enabled_dict[model] = enabled
 
+    def checkMultiplicity(self, model):
+        """
+        """
+        iter_param = ""
+        iter_length = 0
+        for param in model.iq_parameters:
+            name = param.name
+            if "[" in name:
+                # pull out the iterator parameter name
+                #iter_param = name[name.index('[')+1:-1]
+                iter_length = param.length
+                iter_param = param.length_control
+        return (iter_param, iter_length)
         
     def setModelModel(self, model_name):
         """
@@ -197,10 +215,20 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         item5 = QtGui.QStandardItem('1/cm')
         self._model_model.appendRow([item1, item2, item3, item4, item5])
 
-        #TODO: iq_parameters are used here. If orientation paramateres or magnetic are needed kernel_paramters should be used instead
+        multishell_param_name, multishell_param_length = self.checkMultiplicity(self.model_parameters)
+        multishell_param_fullname = "[%s]" % multishell_param_name
+        #TODO: iq_parameters are used here. If orientation paramateres or magnetic are needed
+        # kernel_paramters should be used instead
         #For orientation and magentic parameters param.type needs to be checked
         for param in self.model_parameters.iq_parameters:
-            item1 = QtGui.QStandardItem(param.name)
+            # don't include shell parameters
+            if param.name == multishell_param_name:
+                continue
+            # Modify parameter name from <param>[n] to <param>1
+            item_name = param.name
+            if multishell_param_fullname in param.name:
+                item_name = self.replaceShellName(param.name, 1)
+            item1 = QtGui.QStandardItem(item_name)
             item1.setCheckable(True)
             item2 = QtGui.QStandardItem(str(param.default))
             item3 = QtGui.QStandardItem(str(param.limits[0]))
@@ -214,13 +242,18 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self._model_model.setHeaderData(3, QtCore.Qt.Horizontal, QtCore.QVariant("Max"))
         self._model_model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("[Units]"))
 
-        self.modelHasShells = True # Test
-        if self.modelHasShells:
-            self.addExtraShells()
+        self.addExtraShells()
 
         self.setPolyModel()
         self.setMagneticModel()
         self.model_is_loaded = True
+
+    def replaceShellName(self, param_name, value):
+        """
+        Updates parameter name from <param_name>[n_shell] to <param_name>value
+        """
+        new_name  = param_name[:param_name.index('[')]+str(value)
+        return new_name
 
     def setTableProperties(self, table):
         """
@@ -233,10 +266,15 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         table.setAlternatingRowColors(True)
         table.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Expanding)
         table.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        table.resizeColumnsToContents()
+
         # Header
         header = table.horizontalHeader()
-        header.setResizeMode(QtGui.QHeaderView.Stretch)
-        header.setStretchLastSection(True)
+        header.setResizeMode(QtGui.QHeaderView.ResizeToContents)
+
+        header.ResizeMode(QtGui.QHeaderView.Interactive)
+        header.setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
+        header.setResizeMode(6, QtGui.QHeaderView.ResizeToContents)
 
     def setPolyModel(self):
         """
@@ -269,11 +307,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self._poly_model.setHeaderData(5, QtCore.Qt.Horizontal, QtCore.QVariant("Nsigs"))
         self._poly_model.setHeaderData(6, QtCore.Qt.Horizontal, QtCore.QVariant("Function"))
 
-        self.lstPoly.resizeColumnsToContents()
-        header = self.lstPoly.horizontalHeader()
-        header.ResizeMode(QtGui.QHeaderView.Stretch)
-        #header.setStretchLastSection(True)
-
     def setMagneticModel(self):
         """
         Set magnetism values on model
@@ -305,24 +338,27 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self._magnet_model.setHeaderData(5, QtCore.Qt.Horizontal, QtCore.QVariant("Nsigs"))
         self._magnet_model.setHeaderData(6, QtCore.Qt.Horizontal, QtCore.QVariant("Function"))
 
-        self.lstMagnetic.resizeColumnsToContents()
-        header = self.lstMagnetic.horizontalHeader()
-        header.ResizeMode(QtGui.QHeaderView.Stretch)
-        header.setStretchLastSection(True)
-
     def addExtraShells(self):
         """
+        Add a combobox for multiple shell display
         """
-        func = QtGui.QComboBox()
-        func.addItems(['No extra shell','Add 1 shell','Ad 2 shells'])
+        param_name, param_length = self.checkMultiplicity(self.model_parameters)
 
-        item = QtGui.QStandardItem("")
-        self._model_model.appendRow([item])
+        if param_length == 0:
+            return
+
+        item1 = QtGui.QStandardItem(param_name)
+
+        func = QtGui.QComboBox()
+        func.addItems([str(i+1) for i in xrange(param_length)])
+
+        item2 = QtGui.QStandardItem()
+        self._model_model.appendRow([item1, item2])
 
         shell_row = self._model_model.rowCount()
-        shell_index = self._model_model.index(shell_row-1, 0)
+        shell_index = self._model_model.index(shell_row-1, 1)
         self.lstParams.setIndexWidget(shell_index, func)
-        self.lstParams.setSpan(shell_row-1,1,1,4)
+        self.lstParams.setSpan(shell_row-1,2,2,4)
 
     def togglePoly(self, isChecked):
         """
@@ -340,8 +376,3 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.chkMagnetism.setEnabled(isChecked)
         self.is2D = isChecked
 
-if __name__ == "__main__":
-    app = QtGui.QApplication([])
-    dlg = FittingWidget()
-    dlg.show()
-    sys.exit(app.exec_())

@@ -16,9 +16,6 @@ class FittingWindow(QtGui.QTabWidget):
         self.parent = parent
         self._data = data
 
-        #r = raw_input("A")
-        #r = 1
-
         # List of active fits
         self.tabs = []
 
@@ -39,7 +36,7 @@ class FittingWindow(QtGui.QTabWidget):
 
         # Deal with signals
         self.tabCloseRequested.connect(self.tabCloses)
-    
+
         self.setWindowTitle('Fit panel - Active Fitting Optimizer: %s' % self.optimizer)
 
     def addFit(self, data):
@@ -57,7 +54,7 @@ class FittingWindow(QtGui.QTabWidget):
         """
         page_name = "FitPage" + str(self.maxIndex)
         return page_name
-        
+
     def tabCloses(self, index):
         """
         Update local bookkeeping on tab close
@@ -68,6 +65,32 @@ class FittingWindow(QtGui.QTabWidget):
             return
         del self.tabs[index]
         self.removeTab(index)
+
+    def allowBatch(self):
+        """
+        Tell the caller that we accept multiple data instances
+        """
+        return True
+
+    def setData(self, data=None):
+        """
+        Assign new dataset to the fitting instance
+        """
+        assert(data is not None)
+
+        # find an unassigned tab.
+        # if none, open a new tab.
+        tab_to_send = None
+        for tab in self.tabs:
+            if tab.acceptsData():
+                tab_to_send = tab
+                break
+        # send data
+        if tab_to_send is None:
+            self.addFit(data)
+        else:
+            tab_to_send.data = data
+        pass
 
 if __name__ == "__main__":
     app = QtGui.QApplication([])
