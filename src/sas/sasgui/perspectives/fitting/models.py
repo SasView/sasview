@@ -324,7 +324,7 @@ class ModelManagerBase:
                     self.stored_plugins[name] = plug
                     self.plugins.append(plug)
                     self.model_dictionary[name] = plug
-            self.model_combobox.set_list("Customized Models", self.plugins)
+            self.model_combobox.set_list("Plugin Models", self.plugins)
             return self.model_combobox.get_list()
         else:
             return {}
@@ -345,7 +345,7 @@ class ModelManagerBase:
             self.plugins.append(plug)
             self.model_dictionary[name] = plug
 
-        self.model_combobox.reset_list("Customized Models", self.plugins)
+        self.model_combobox.reset_list("Plugin Models", self.plugins)
         return self.model_combobox.get_list()
 
     def _on_model(self, evt):
@@ -388,7 +388,7 @@ class ModelManagerBase:
 #        self.model_combobox.set_list("Shape-Independent",
 #                                     self.shape_indep_list)
         self.model_combobox.set_list("Structure Factors", self.struct_list)
-        self.model_combobox.set_list("Customized Models", self.plugins)
+        self.model_combobox.set_list("Plugin Models", self.plugins)
         self.model_combobox.set_list("P(Q)*S(Q)", self.multiplication_factor)
         self.model_combobox.set_list("multiplication",
                                      self.multiplication_factor)

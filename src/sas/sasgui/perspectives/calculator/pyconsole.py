@@ -301,7 +301,7 @@ class PyConsole(editor.EditorNotebookFrame):
         fname = self.editor.getStatus()[0]
         success = show_model_output(self, fname)
 
-        # Update custom model list in fitpage combobox
+        # Update plugin model list in fitpage combobox
         if success and self._manager != None and self.panel != None:
             self._manager.set_edit_menu_helper(self.parent)
             wx.CallAfter(self._manager.update_custom_combo)
