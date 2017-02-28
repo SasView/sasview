@@ -163,10 +163,8 @@ class FitPage(BasicPage):
         """
         On_select_data
         """
-        pos = 0
-        if event is not None:
-            pos = self.dataSource.GetSelection()
-        elif self.dataSource.GetCount() > 0:
+        if self.dataSource.GetCount() > 0:
+            pos = self.dataSource.GetSelection() if event is not None else 0
             data = self.dataSource.GetClientData(pos)
             self.set_data(data)
 
