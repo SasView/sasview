@@ -72,25 +72,21 @@ class FittingWindow(QtGui.QTabWidget):
         """
         return True
 
-    def setData(self, data=None):
+    def setData(self, data_item=None):
         """
         Assign new dataset to the fitting instance
         """
-        assert(data is not None)
+        assert(data_item is not None)
 
-        # find an unassigned tab.
-        # if none, open a new tab.
-        tab_to_send = None
-        for tab in self.tabs:
-            if tab.acceptsData():
-                tab_to_send = tab
-                break
-        # send data
-        if tab_to_send is None:
-            self.addFit(data)
+        # Find an unassigned tab.
+        # If none, open a new tab.
+        available_tabs = list(map(lambda tab:tab.acceptsData(), self.tabs))
+
+        if True in available_tabs:
+            self.tabs[available_tabs.index(True)].data = data_item
         else:
-            tab_to_send.data = data
-        pass
+            self.addFit(data_item)
+
 
 if __name__ == "__main__":
     app = QtGui.QApplication([])
