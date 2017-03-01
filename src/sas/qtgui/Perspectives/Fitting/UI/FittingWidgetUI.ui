@@ -93,18 +93,7 @@
              <widget class="QComboBox" name="cbModel"/>
             </item>
             <item row="1" column="2">
-             <widget class="QComboBox" name="cbStructureFactor">
-              <item>
-               <property name="text">
-                <string>Hard Sphere Structure</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>None</string>
-               </property>
-              </item>
-             </widget>
+             <widget class="QComboBox" name="cbStructureFactor"/>
             </item>
            </layout>
           </item>

@@ -1,4 +1,5 @@
 import sys
+import numpy
 
 from PyQt4 import QtCore
 from PyQt4 import QtGui
@@ -82,7 +83,7 @@ class FittingWindow(QtGui.QTabWidget):
         # If none, open a new tab.
         available_tabs = list(map(lambda tab:tab.acceptsData(), self.tabs))
 
-        if True in available_tabs:
+        if numpy.any(available_tabs):
             self.tabs[available_tabs.index(True)].data = data_item
         else:
             self.addFit(data_item)

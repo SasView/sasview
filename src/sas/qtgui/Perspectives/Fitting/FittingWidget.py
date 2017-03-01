@@ -58,18 +58,19 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.setMagneticModel()
         self.setTableProperties(self.lstMagnetic)
 
-        # Fill in the combo boxes
-        structure_factor_list = self.master_category_dict.pop('Structure Factor')
-        for (structure_factor, enabled) in structure_factor_list:
-            self.cbStructureFactor.addItem(structure_factor)
+        # Defaults for the strcutre factors
+        self.setDefaultStructureCombo()
 
+        # make structure factor and model CBs disabled
+        self.disableModelCombo()
+        self.disableStructureCombo()
+
+        # Generate the category list for display
         category_list = sorted(self.master_category_dict.keys())
+        self.cbCategory.addItem("Choose category...")
         self.cbCategory.addItems(category_list)
-
-        category = self.cbCategory.currentText()
-        model_list = self.master_category_dict[str(category)]
-        for (model, enabled) in model_list:
-            self.cbModel.addItem(model)
+        self.cbCategory.addItem("Structure Factor")
+        self.cbCategory.setCurrentIndex(0)
 
         # Connect GUI element signals
         self.cbStructureFactor.currentIndexChanged.connect(self.selectStructureFactor)
@@ -112,16 +113,53 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """ Tells the caller this widget can accept new dataset """
         return not self.data_assigned
 
+    def disableModelCombo(self):
+        self.cbModel.setEnabled(False)
+        self.label_3.setEnabled(False)
+
+    def enableModelCombo(self):
+        self.cbModel.setEnabled(True)
+        self.label_3.setEnabled(True)
+
+    def disableStructureCombo(self):
+        self.cbStructureFactor.setEnabled(False)
+        self.label_4.setEnabled(False)
+
+    def enableStructureCombo(self):
+        self.cbStructureFactor.setEnabled(True)
+        self.label_4.setEnabled(True)
+
+    def setDefaultStructureCombo(self):
+        # Fill in the structure factors combo box with defaults
+        structure_factor_list = self.master_category_dict.pop('Structure Factor')
+        structure_factors = []
+        self.cbStructureFactor.clear()
+        for (structure_factor, _) in structure_factor_list:
+            structure_factors.append(structure_factor)
+        self.cbStructureFactor.addItems(sorted(structure_factors))
+
     def selectCategory(self):
         """
         Select Category from list
         :return:
         """
-        self.cbModel.clear()
         category = self.cbCategory.currentText()
+        if category == "Structure Factor":
+            self.disableModelCombo()
+            self.enableStructureCombo()
+            return
+
+        self.cbModel.blockSignals(True)
+        self.cbModel.clear()
+        self.cbModel.blockSignals(False)
+        self.enableModelCombo()
+        self.disableStructureCombo()
+
         model_list = self.master_category_dict[str(category)]
-        for (model, enabled) in model_list:
-            self.cbModel.addItem(model)
+        models = []
+        for (model, _) in model_list:
+            models.append(model)
+        self.cbModel.addItems(sorted(models))
 
     def selectModel(self):
         """
@@ -137,6 +175,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         :param:
         :return:
         """
+        model = self.cbStructureFactor.currentText()
+        self.setModelModel(model)
 
     def _readCategoryInfo(self):
         """
@@ -172,18 +212,27 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
                 self.by_model_dict[model].append(category)
                 self.model_enabled_dict[model] = enabled
 
-    def checkMultiplicity(self, model):
+    def getIterParams(self, model):
         """
+        Returns a list of all multi-shell parameters in 'model'
+        """
+        iter_params = list(filter(lambda par: "[" in par.name, model.iq_parameters))
+
+        return iter_params
+
+    def getMultiplicity(self, model):
+        """
+        Finds out if 'model' has multishell parameters.
+        If so, returns the name of the counter parameter and the number of shells
         """
         iter_param = ""
         iter_length = 0
-        for param in model.iq_parameters:
-            name = param.name
-            if "[" in name:
-                # pull out the iterator parameter name
-                #iter_param = name[name.index('[')+1:-1]
-                iter_length = param.length
-                iter_param = param.length_control
+
+        iter_params = self.getIterParams(model)
+        # pull out the iterator parameter name and length
+        if iter_params:
+            iter_length = iter_params[0].length
+            iter_param = iter_params[0].length_control
         return (iter_param, iter_length)
         
     def setModelModel(self, model_name):
@@ -215,8 +264,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         item5 = QtGui.QStandardItem('1/cm')
         self._model_model.appendRow([item1, item2, item3, item4, item5])
 
-        multishell_param_name, multishell_param_length = self.checkMultiplicity(self.model_parameters)
-        multishell_param_fullname = "[%s]" % multishell_param_name
+        multishell_parameters = self.getIterParams(self.model_parameters)
+        multishell_param_name, _ = self.getMultiplicity(self.model_parameters)
+
         #TODO: iq_parameters are used here. If orientation paramateres or magnetic are needed
         # kernel_paramters should be used instead
         #For orientation and magentic parameters param.type needs to be checked
@@ -226,7 +276,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
                 continue
             # Modify parameter name from <param>[n] to <param>1
             item_name = param.name
-            if multishell_param_fullname in param.name:
+            if param in multishell_parameters:
                 item_name = self.replaceShellName(param.name, 1)
             item1 = QtGui.QStandardItem(item_name)
             item1.setCheckable(True)
@@ -252,8 +302,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Updates parameter name from <param_name>[n_shell] to <param_name>value
         """
-        new_name  = param_name[:param_name.index('[')]+str(value)
-        return new_name
+        assert('[' in param_name)
+        return param_name[:param_name.index('[')]+str(value)
 
     def setTableProperties(self, table):
         """
@@ -342,19 +392,22 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Add a combobox for multiple shell display
         """
-        param_name, param_length = self.checkMultiplicity(self.model_parameters)
+        param_name, param_length = self.getMultiplicity(self.model_parameters)
 
         if param_length == 0:
             return
 
+        # cell 1: variable name
         item1 = QtGui.QStandardItem(param_name)
 
         func = QtGui.QComboBox()
         func.addItems([str(i+1) for i in xrange(param_length)])
 
+        # cell 2: combobox
         item2 = QtGui.QStandardItem()
         self._model_model.appendRow([item1, item2])
 
+        # Beautify the row:  span columns 2-4
         shell_row = self._model_model.rowCount()
         shell_index = self._model_model.index(shell_row-1, 1)
         self.lstParams.setIndexWidget(shell_index, func)
@@ -362,16 +415,19 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
     def togglePoly(self, isChecked):
         """
+        Enable/disable the polydispersity tab
         """
         self.tabFitting.setTabEnabled(TAB_POLY, isChecked)
 
     def toggleMagnetism(self, isChecked):
         """
+        Enable/disable the magnetism tab
         """
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, isChecked)
 
     def toggle2D(self, isChecked):
         """
+        Enable/disable the controls dependent on 1D/2D data instance
         """
         self.chkMagnetism.setEnabled(isChecked)
         self.is2D = isChecked
