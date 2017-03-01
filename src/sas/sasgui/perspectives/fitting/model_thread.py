@@ -176,6 +176,7 @@ class Calc1D(CalcThread):
             mask = self.data.x[first_bin:last_bin+1]
             unsmeared_output = numpy.zeros((len(self.data.x)))
             unsmeared_output[first_bin:last_bin+1] = self.model.evalDistribution(mask)
+            self.smearer.model = self.model
             output = self.smearer(unsmeared_output, first_bin, last_bin)
 
             # Rescale data to unsmeared model

@@ -107,9 +107,9 @@ class PySmear(object):
         start, end = first_bin + self.offset, last_bin + self.offset
         q_calc = self.resolution.q_calc
         iq_calc = numpy.empty_like(q_calc)
-        if start > 0 and self.model is not None:
+        if start > 0:
             iq_calc[:start] = self.model.evalDistribution(q_calc[:start])
-        if end+1 < len(q_calc) and self.model is not None:
+        if end+1 < len(q_calc):
             iq_calc[end+1:] = self.model.evalDistribution(q_calc[end+1:])
         iq_calc[start:end+1] = iq_in[first_bin:last_bin+1]
         smeared = self.resolution.apply(iq_calc)
