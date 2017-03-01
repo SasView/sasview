@@ -315,7 +315,7 @@ class ModelPanel2D(ModelPanel1D):
         wx.EVT_MENU(self, wx_id, self._onSave)
 
         slicerpop.AppendSeparator()
-        if len(self.data2D.detector) == 1:
+        if len(self.data2D.detector) <= 1:
             item_list = self.parent.get_current_context_menu(self)
             if (not item_list == None) and (not len(item_list) == 0) and\
                 self.data2D.name.split(" ")[0] != 'Residuals':

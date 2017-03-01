@@ -273,7 +273,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         import numpy as np
         plot_x = transform.x[np.where(transform.x <= 200)]
         plot_y = transform.y[np.where(transform.x <= 200)]
-        self._manager.show_data(Data1D(plot_x, plot_y), TRANSFORM_LABEL)
+        self._manager.show_data(Data1D(plot_x, plot_y), TRANSFORM_LABEL1)
         # Only enable extract params button if a fourier trans. has been done
         if self.transform_type == 'fourier':
             self._extract_btn.Enable()
@@ -324,7 +324,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
 
         dlg = wx.FileDialog(self, "Choose a file",
                             default_save_location, \
-                            self.window_caption, "*.cor", wx.SAVE)
+                            self.window_caption, "*.crf", wx.SAVE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             default_save_location = os.path.dirname(path)
@@ -335,7 +335,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
 
         dlg.Destroy()
         # MAC always needs the extension for saving
-        extens = ".cor"
+        extens = ".crf"
         # Make sure the ext included in the file name
         f_name = os.path.splitext(path)[0] + extens
         self._manager.state_reader.write(f_name, self._data, self.get_state())

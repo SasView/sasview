@@ -211,6 +211,7 @@ class Graph(object):
             else:
                 self.color += plottable.colors()
                 self.plottables[plottable] = self.color
+                plottable.custom_color = self.color
 
     def changed(self):
         """Detect if any graphed plottables have changed"""
@@ -1021,7 +1022,7 @@ class Data1D(Plottable):
     Data plottable: scatter plot of x,y with errors in x and y.
     """
 
-    def __init__(self, x, y, dx=None, dy=None):
+    def __init__(self, x, y, dx=None, dy=None, lam=None, dlam=None):
         """
         Draw points specified by x[i],y[i] in the current color/symbol.
         Uncertainty in x is given by dx[i], or by (xlo[i],xhi[i]) if the
@@ -1035,8 +1036,10 @@ class Data1D(Plottable):
         self.label = "data"
         self.x = x
         self.y = y
+        self.lam = lam
         self.dx = dx
         self.dy = dy
+        self.dlam = dlam
         self.source = None
         self.detector = None
         self.xaxis('', '')

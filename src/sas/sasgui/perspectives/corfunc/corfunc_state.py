@@ -95,7 +95,7 @@ class CorfuncState(object):
         elif name == 'background_tcl':
             self.background = value
 
-    def toXML(self, filename='corfunc_state.cor', doc=None, entry_node=None):
+    def toXML(self, filename='corfunc_state.crf', doc=None, entry_node=None):
         """
         Writes the state of the CorfuncPanel panel to file, as XML.
 
@@ -256,10 +256,10 @@ class Reader(CansasReader):
 
     type_name = "Corfunc"
 
-    type = ["Corfunc file (*.cor)|*.cor",
+    type = ["Corfunc file (*.crf)|*.crf",
             "SASView file (*.svs)|*.svs"]
 
-    ext = ['.cor', '.COR', '.svs', '.SVS']
+    ext = ['.crf', '.CRF', '.svs', '.SVS']
 
     def __init__(self, callback):
         self.callback = callback

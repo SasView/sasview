@@ -44,6 +44,7 @@ from sas.sasgui.perspectives.calculator.model_editor import TextDialog
 from sas.sasgui.perspectives.calculator.model_editor import EditorWindow
 from sas.sasgui.guiframe.gui_manager import MDIFrame
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
+from sas.sasgui.perspectives.fitting.gpu_options import GpuOptions
 
 from . import models
 
@@ -192,6 +193,10 @@ class Plugin(PluginBase):
         self.bumps_options_menu = self.menu1.FindItemById(self.id_bumps_options)
         self.bumps_options_menu.Enable(True)
 
+        self.id_gpu_options_panel = wx.NewId()
+        self.menu1.Append(self.id_gpu_options_panel, "OpenCL Options", "Choose OpenCL driver or turn it off")
+        wx.EVT_MENU(owner, self.id_gpu_options_panel, self.on_gpu_options)
+
         self.id_result_panel = wx.NewId()
         self.menu1.Append(self.id_result_panel, "Fit Results", "Show fit results panel")
         wx.EVT_MENU(owner, self.id_result_panel, self.on_fit_results)
@@ -219,9 +224,8 @@ class Plugin(PluginBase):
             raise
 
         self.id_edit = wx.NewId()
-        editmodel_help = "Edit customized model sample file"
         self.menu1.AppendMenu(self.id_edit, "Plugin Model Operations",
-                              self.edit_model_menu, editmodel_help)
+                              self.edit_model_menu)
         #create  menubar items
         return [(self.menu1, self.sub_menu)]
 
@@ -254,8 +258,8 @@ class Plugin(PluginBase):
                 os.remove(p_path)
             self.update_custom_combo()
             if os.path.isfile(p_path):
-                msg = "Sorry! Could not be able to delete the default "
-                msg += "custom model... \n"
+                msg = "Sorry! unable to delete the default "
+                msg += "plugin model... \n"
                 msg += "Please manually remove the files (.py, .pyc) "
                 msg += "in the 'plugin_models' folder \n"
                 msg += "inside of the SasView application, "
@@ -268,7 +272,7 @@ class Plugin(PluginBase):
                 for item in self.edit_menu.GetMenuItems():
                     if item.GetLabel() == label:
                         self.edit_menu.DeleteItem(item)
-                        msg = "The custom model, %s, has been deleted." % label
+                        msg = "The plugin model, %s, has been deleted." % label
                         evt = StatusEvent(status=msg, type='stop', info='info')
                         wx.PostEvent(self.parent, evt)
                         break
@@ -325,7 +329,7 @@ class Plugin(PluginBase):
             self.set_edit_menu_helper(self.parent, self.delete_custom_model)
             temp = self.fit_panel.reset_pmodel_list()
             if temp:
-                # Set the new custom model list for all fit pages
+                # Set the new plugin model list for all fit pages
                 for uid, page in self.fit_panel.opened_pages.iteritems():
                     if hasattr(page, "formfactorbox"):
                         page.model_list_box = temp
@@ -801,6 +805,13 @@ class Plugin(PluginBase):
         self.result_frame.Show()
         self.result_frame.Raise()
 
+    def on_gpu_options(self, event=None):
+        """
+        Make the Fit Results panel visible.
+        """
+        dialog = GpuOptions(None, wx.ID_ANY, "")
+        dialog.Show()
+
     def stop_fit(self, uid):
         """
         Stop the fit
@@ -863,7 +874,6 @@ class Plugin(PluginBase):
             self.draw_model(model=model, data=data, page_id=uid, smearer=smear,
                 enable1D=enable1D, enable2D=enable2D,
                 qmin=qmin, qmax=qmax, weight=weight)
-            self._mac_sleep(0.2)
 
     def _mac_sleep(self, sec=0.2):
         """
@@ -1520,13 +1530,12 @@ class Plugin(PluginBase):
             # Update all fit pages
             for uid in page_id:
                 res = result[index]
+                fit_msg = res.mesg
                 if res.fitness is None or \
                     not numpy.isfinite(res.fitness) or \
                     numpy.any(res.pvec == None) or \
                     not numpy.all(numpy.isfinite(res.pvec)):
-                    msg = "Fitting did not converge!!!"
-                    evt = StatusEvent(status=msg, info="warning", type="stop")
-                    wx.PostEvent(self.parent, evt)
+                    fit_msg += "\nFitting did not converge!!!"
                     wx.CallAfter(self._update_fit_button, page_id)
                 else:
                     #set the panel when fit result are float not list
@@ -1549,13 +1558,12 @@ class Plugin(PluginBase):
                         index += 1
                         wx.CallAfter(cpage._on_fit_complete)
                     except KeyboardInterrupt:
-                        msg = "Singular point: Fitting Stoped."
-                        evt = StatusEvent(status=msg, info="info", type="stop")
-                        wx.PostEvent(self.parent, evt)
+                        fit_msg += "\nSingular point: Fitting stopped."
                     except:
-                        msg = "Singular point: Fitting Error occurred."
-                        evt = StatusEvent(status=msg, info="error", type="stop")
-                        wx.PostEvent(self.parent, evt)
+                        fit_msg += "\nSingular point: Fitting error occurred."
+                if fit_msg:
+                   evt = StatusEvent(status=fit_msg, info="warning", type="stop")
+                   wx.PostEvent(self.parent, evt)
 
         except:
             msg = ("Fit completed but the following error occurred: %s"
@@ -1955,7 +1963,8 @@ class Plugin(PluginBase):
                 ## stop just raises the flag -- the thread is supposed to 
                 ## then kill itself but cannot.  Paul Kienzle came up with
                 ## this fix to prevent threads from stepping on each other
-                ## which was causing a simple custom model to crash Sasview.
+                ## which was causing a simple custom plugin model to crash
+                ##Sasview.
                 ## We still don't know why the fit sometimes lauched a second
                 ## thread -- something which should also be investigated.
                 ## The thread approach was implemented in order to be able
@@ -1965,7 +1974,7 @@ class Plugin(PluginBase):
                 ## It seems thus that the whole thread approach used here
                 ## May need rethinking  
                 ##
-                ##    -PDB August 12, 2014                  
+                ##    -PDB August 12, 2014
                 while self.calc_1D.isrunning():
                     time.sleep(0.1)
             self.calc_1D = Calc1D(data=data,

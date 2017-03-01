@@ -1,4 +1,5 @@
 #include <Python.h>
+//#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/arrayobject.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,10 +21,10 @@ static PyObject *CLoader_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 
 static PyObject *CLoader_init(CLoader *self, PyObject *args, PyObject *kwds) {
     const char *filename;
-    const int n_frames;
-    const int n_pixels;
-    const int n_rasters;
-    const int swap_bytes;
+    int n_frames;
+    int n_pixels;
+    int n_rasters;
+    int swap_bytes;
 
     if (self != NULL) {
         if (!PyArg_ParseTuple(args, "siiii", &filename, &n_frames, &n_pixels, &n_rasters, &swap_bytes))

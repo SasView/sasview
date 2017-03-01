@@ -422,7 +422,10 @@ class InvariantState(object):
                 if entry is not None:
                     for item in DEFAULT_STATE:
                         input_field = get_content('ns:%s' % item, entry)
-                        val = str(input_field.text.strip())
+                        if input_field.text is not None:
+                            val = str(input_field.text.strip())
+                        else:
+                            val = ''
                         if input_field is not None:
                             temp_state[item] = val
                             self.state_list[str(ind)] = temp_state
@@ -432,7 +435,10 @@ class InvariantState(object):
             if entry is not None:
                 for item in DEFAULT_STATE:
                     input_field = get_content('ns:%s' % item, entry)
-                    val = str(input_field.text.strip())
+                    if input_field.text is not None:
+                        val = str(input_field.text.strip())
+                    else:
+                        val = ''
                     if input_field is not None:
                         self.set_saved_state(name=item, value=val)
             self.file = file_name

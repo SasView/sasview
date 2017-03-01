@@ -64,7 +64,6 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.frame = None
         # context menu
         self._slicerpop = None
-
         self._available_data = []
         self._symbol_labels = self.get_symbol_label()
         self._color_labels = self.get_color_label()
@@ -731,6 +730,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 self.subplot.set_xlim(x_range)
                 self.subplot.set_ylim(y_range)
                 self.subplot.figure.canvas.draw_idle()
+                self.is_zoomed = True
         d.Destroy()
 
     def onFreeze(self, event):

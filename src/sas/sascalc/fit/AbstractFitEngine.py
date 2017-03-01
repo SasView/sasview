@@ -130,7 +130,7 @@ class FitData1D(Data1D):
         FitData1D inherits from DataLoader.data_info.Data1D. Implements
         a way to get residuals from data.
     """
-    def __init__(self, x, y, dx=None, dy=None, smearer=None, data=None):
+    def __init__(self, x, y, dx=None, dy=None, smearer=None, data=None, lam=None, dlam=None):
         """
             :param smearer: is an object of class QSmearer or SlitSmearer
                that will smear the theory data (slit smearing or resolution
@@ -151,7 +151,7 @@ class FitData1D(Data1D):
                 Setting it back to None will turn smearing off.
                 
         """
-        Data1D.__init__(self, x=x, y=y, dx=dx, dy=dy)
+        Data1D.__init__(self, x=x, y=y, dx=dx, dy=dy, lam=lam, dlam=dlam)
         self.num_points = len(x)
         self.sas_data = data
         self.smearer = smearer
@@ -358,9 +358,6 @@ class FitData2D(Data2D):
         """
         if self.smearer != None:
             fn.set_index(self.idx)
-            # Get necessary data from self.data and set the data for smearing
-            fn.get_data()
-
             gn = fn.get_value()
         else:
             gn = fn([self.qx_data[self.idx],

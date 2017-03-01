@@ -30,7 +30,7 @@ _BOX_WIDTH = 76
 _DATA_BOX_WIDTH = 300
 SMEAR_SIZE_L = 0.00
 SMEAR_SIZE_H = 0.00
-
+CUSTOM_MODEL = 'Plugin Models'
 
 class FitPage(BasicPage):
     """
@@ -80,10 +80,10 @@ class FitPage(BasicPage):
         """
         flag = check_data_validity(self.data) & (self.model is not None)
         self.btFit.Enable(flag)
-        
+
     def on_set_focus(self, event):
         """
-        Override the basepage focus method to ensure the save flag is set 
+        Override the basepage focus method to ensure the save flag is set
         properly when focusing on the fit page.
         """
         flag = check_data_validity(self.data) & (self.model is not None)
@@ -237,7 +237,7 @@ class FitPage(BasicPage):
         sizer_smearer_box.SetMinSize((_DATA_BOX_WIDTH, 60))
 
         weighting_set_box = wx.StaticBox(self, wx.ID_ANY,
-                                'Set Weighting by Selecting dI Source')
+                                         'Set Weighting by Selecting dI Source')
         weighting_box = wx.StaticBoxSizer(weighting_set_box, wx.HORIZONTAL)
         sizer_weighting = wx.BoxSizer(wx.HORIZONTAL)
         weighting_box.SetMinSize((_DATA_BOX_WIDTH, 40))
@@ -361,7 +361,7 @@ class FitPage(BasicPage):
                   id=self.pinhole_smearer.GetId())
         self.Bind(wx.EVT_RADIOBUTTON, self.onSlitSmear,
                   id=self.slit_smearer.GetId())
-        self.enable_smearer.SetValue(True)
+        self.disable_smearer.SetValue(True)
 
         sizer_smearer.Add(self.disable_smearer, 0, wx.LEFT, 10)
         sizer_smearer.Add(self.enable_smearer)
@@ -1163,9 +1163,9 @@ class FitPage(BasicPage):
         is_poly_enabled = None
         if event is not None:
             if (event.GetEventObject() == self.formfactorbox
-                        and self.structurebox.GetLabel() != 'None')\
-                        or event.GetEventObject() == self.structurebox\
-                        or event.GetEventObject() == self.multifactorbox:
+                    and self.structurebox.GetLabel() != 'None')\
+                    or event.GetEventObject() == self.structurebox\
+                    or event.GetEventObject() == self.multifactorbox:
                 copy_flag = self.get_copy_params()
                 is_poly_enabled = self.enable_disp.GetValue()
 
@@ -1189,8 +1189,9 @@ class FitPage(BasicPage):
         self.state.pinhole_smearer = self.pinhole_smearer.GetValue()
         self.state.slit_smearer = self.slit_smearer.GetValue()
 
-        self.state.structurecombobox = self.structurebox.GetLabel()
-        self.state.formfactorcombobox = self.formfactorbox.GetLabel()
+        self.state.structurecombobox = self.structurebox.GetValue()
+        self.state.formfactorcombobox = self.formfactorbox.GetValue()
+        self.state.categorycombobox = self.categorybox.GetValue()
         self.enable_fit_button()
         if self.model is not None:
             self.m_name = self.model.name
@@ -1204,14 +1205,17 @@ class FitPage(BasicPage):
                     self._set_bookmark_flag(not self.batch_on)
                     self._keep.Enable(not self.batch_on)
                     self._set_save_flag(True)
-                    self._set_smear(self.data)
+            #Setting smearing for cases with and without data.
+            self._set_smear(self.data)
 
             # more disables for 2D
             self._set_smear_buttons()
 
             try:
                 # update smearer sizer
-                self.onSmear(None)
+                #This call for smearing set up caused double evaluation of
+                #I(q) and double compilation as results
+                #self.onSmear(None)
                 temp_smear = None
                 if not self.disable_smearer.GetValue():
                     # Set the smearer environments
@@ -1225,12 +1229,12 @@ class FitPage(BasicPage):
 
             # set smearing value whether or not data contain the smearing info
             evt = ModelEventbox(model=self.model,
-                            smearer=temp_smear,
-                            enable_smearer=not self.disable_smearer.GetValue(),
-                            qmin=float(self.qmin_x),
-                            uid=self.uid,
-                            caption=self.window_caption,
-                            qmax=float(self.qmax_x))
+                                smearer=temp_smear,
+                                enable_smearer=not self.disable_smearer.GetValue(),
+                                qmin=float(self.qmin_x),
+                                uid=self.uid,
+                                caption=self.window_caption,
+                                qmax=float(self.qmax_x))
 
             self._manager._on_model_panel(evt=evt)
             self.mbox_description.SetLabel("Model [ %s ]" %
@@ -1244,7 +1248,7 @@ class FitPage(BasicPage):
             new_event = PageInfoEvent(page=self)
             wx.PostEvent(self.parent, new_event)
             # update list of plugins if new plugin is available
-            custom_model = 'Customized Models'
+            custom_model = CUSTOM_MODEL
             mod_cat = self.categorybox.GetStringSelection()
             if mod_cat == custom_model:
                 temp = self.parent.update_model_list()
@@ -1614,7 +1618,7 @@ class FitPage(BasicPage):
             else:
                 return
         # check if it is pinhole smear and get min max if it is.
-        if data.dx is not None and not numpy.any(data.dx):
+        if data.dx is not None and numpy.any(data.dx):
             self.smear_type = "Pinhole"
             self.dq_l = data.dx[0]
             self.dq_r = data.dx[-1]
@@ -1929,35 +1933,47 @@ class FitPage(BasicPage):
                 self._set_preview_flag(True)
 
             # more disables for 2D
+            di_flag = False
+            dq_flag = False
             if self.data.__class__.__name__ == "Data2D" or \
                         self.enable2D:
                 self.slit_smearer.Disable()
                 self.pinhole_smearer.Enable(True)
                 self.default_mask = copy.deepcopy(self.data.mask)
-                if self.data.err_data is None or\
-                        numpy.all(err == 1 for err in self.data.err_data) or \
-                        not numpy.any(self.data.err_data):
-                    self.dI_didata.Enable(False)
-                    self.dI_noweight.SetValue(True)
-                    self.weightbt_string = self.dI_noweight.GetLabelText()
-                else:
-                    self.dI_didata.Enable(True)
-                    self.dI_didata.SetValue(True)
-                    self.weightbt_string = self.dI_didata.GetLabelText()
+                if self.data.err_data is not None \
+                        and numpy.any(self.data.err_data):
+                    di_flag = True
+                if self.data.dqx_data is not None \
+                        and numpy.any(self.data.dqx_data):
+                    dq_flag = True
             else:
                 self.slit_smearer.Enable(True)
                 self.pinhole_smearer.Enable(True)
+                if self.data.dy is not None and numpy.any(self.data.dy):
+                    di_flag = True
+                if self.data.dx is not None and numpy.any(self.data.dx):
+                    dq_flag = True
+                elif self.data.dxl is not None and numpy.any(self.data.dxl):
+                    dq_flag = True
 
-                if self.data.dy is None or\
-                     numpy.all(self.data.dy == 1) or\
-                     not numpy.any(self.data.dy):
-                    self.dI_didata.Enable(False)
-                    self.dI_noweight.SetValue(True)
-                    self.weightbt_string = self.dI_noweight.GetLabelText()
-                else:
-                    self.dI_didata.Enable(True)
-                    self.dI_didata.SetValue(True)
-                    self.weightbt_string = self.dI_didata.GetLabelText()
+            if dq_flag:
+                self.enable_smearer.Enable(True)
+                self.enable_smearer.SetValue(True)
+                self.disable_smearer.SetValue(False)
+            else:
+                self.enable_smearer.Disable()
+                self.disable_smearer.Enable(True)
+                self.disable_smearer.SetValue(True)
+
+            if di_flag:
+                self.dI_didata.Enable(True)
+                self.dI_didata.SetValue(True)
+                self.weightbt_string = self.dI_didata.GetLabelText()
+            else:
+                self.dI_didata.Enable(False)
+                self.dI_noweight.SetValue(True)
+                self.weightbt_string = self.dI_noweight.GetLabelText()
+
             # Enable weighting radio buttons
             self.dI_noweight.Enable(True)
             self.dI_sqrdata.Enable(True)
@@ -1999,6 +2015,7 @@ class FitPage(BasicPage):
             self.btEditMask.Disable()
             self.EditMask_title.Disable()
 
+        self.onSmear(event=None)
         self.on_set_focus(None)
         self.Refresh()
         # update model plot with new data information

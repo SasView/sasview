@@ -31,7 +31,7 @@ class Plugin(PluginBase):
         logging.info("Correlation function plug-in started")
         self._always_active = True
         self.state_reader = Reader(self.set_state)
-        self._extensions = '.cor'
+        self._extensions = '.crf'
 
     def get_panels(self, parent):
         """
@@ -47,7 +47,7 @@ class Plugin(PluginBase):
         self.perspective.append(self.corfunc_panel.window_name)
 
         l = Loader()
-        l.associate_file_reader('.cor', self.state_reader)
+        l.associate_file_reader('.crf', self.state_reader)
 
         return [self.corfunc_panel]
 
@@ -66,7 +66,7 @@ class Plugin(PluginBase):
         if graph.selected_plottable not in plotpanel.plots:
             return []
         data = plotpanel.plots[graph.selected_plottable]
-        if data.id == IQ_DATA_LABEL or data.id == IQ_EXTRAPOLATED_DATA_LABEL or data.id == TRANSFORM_LABEL:
+        if data.id == IQ_DATA_LABEL or data.id == IQ_EXTRAPOLATED_DATA_LABEL or data.id == TRANSFORM_LABEL1 or data.id == TRANSFORM_LABEL3:
             return []
         item = plotpanel.plots[graph.selected_plottable]
         if item.__class__.__name__ is "Data2D":
@@ -80,7 +80,7 @@ class Plugin(PluginBase):
 
     def set_state(self, state=None, datainfo=None):
         """
-        Callback for CorfuncState reader. Called when a .cor file is loaded
+        Callback for CorfuncState reader. Called when a .crf file is loaded
         """
         if isinstance(datainfo, list):
             data = datainfo[0]
@@ -178,7 +178,7 @@ class Plugin(PluginBase):
             if label == IQ_EXTRAPOLATED_DATA_LABEL:
                 # Show the extrapolation as a curve instead of points
                 new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
-        elif label == TRANSFORM_LABEL:
+        elif label == TRANSFORM_LABEL1 or label == TRANSFORM_LABEL3:
             new_plot.xaxis("{x}", 'A')
             new_plot.yaxis("{\\Gamma}", '')
             # Show transform on a linear scale

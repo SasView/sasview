@@ -9,8 +9,8 @@ P(r) Calculation
 Description
 -----------
 
-This tool calculates a real-space distance distribution function, *P(r)*, using 
-the inversion approach (Moore, 1908).
+This tool calculates a real-space distance distribution function, *P(r)*, using
+the inversion approach (Moore, 1980).
 
 *P(r)* is set to be equal to an expansion of base functions of the type
 
@@ -23,12 +23,12 @@ a least square fit with the following fit function
 .. math::
 
   \chi^2=\frac{\sum_i (I_{meas}(Q_i)-I_{th}(Q_i))^2}{error^2}+Reg\_term
-  
+
 
 where $I_{meas}(Q_i)$ is the measured scattering intensity and $I_{th}(Q_i)$ is
-the prediction from the Fourier transform of the *P(r)* expansion. 
+the prediction from the Fourier transform of the *P(r)* expansion.
 
-The $Reg\_term$ term is a regularization term set to the second derivative 
+The $Reg\_term$ term is a regularization term set to the second derivative
 $d^2P(r)/d^2r$ integrated over $r$. It is used to produce a smooth *P(r)* output.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
@@ -39,7 +39,7 @@ Using P(r) inversion
 The user must enter
 
 *  *Number of terms*: the number of base functions in the P(r) expansion.
-   
+
 *  *Regularization constant*: a multiplicative constant to set the size of
    the regularization term.
 

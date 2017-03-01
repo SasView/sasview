@@ -22,6 +22,7 @@ from sasmodels.sasview_model import load_custom_model, load_standard_models
 PLUGIN_DIR = 'plugin_models'
 PLUGIN_LOG = os.path.join(os.path.expanduser("~"), '.sasview', PLUGIN_DIR,
                           "plugins.log")
+PLUGIN_NAME_BASE = '[plug-in] '
 
 def get_model_python_path():
     """
@@ -180,7 +181,7 @@ def _findModels(dir):
             path = os.path.abspath(os.path.join(dir, filename))
             try:
                 model = load_custom_model(path)
-                model.name = "[plug-in] "+model.name
+                model.name = PLUGIN_NAME_BASE + model.name
                 plugins[model.name] = model
             except Exception:
                 msg = traceback.format_exc()
@@ -323,7 +324,7 @@ class ModelManagerBase:
                     self.stored_plugins[name] = plug
                     self.plugins.append(plug)
                     self.model_dictionary[name] = plug
-            self.model_combobox.set_list("Customized Models", self.plugins)
+            self.model_combobox.set_list("Plugin Models", self.plugins)
             return self.model_combobox.get_list()
         else:
             return {}
@@ -344,7 +345,7 @@ class ModelManagerBase:
             self.plugins.append(plug)
             self.model_dictionary[name] = plug
 
-        self.model_combobox.reset_list("Customized Models", self.plugins)
+        self.model_combobox.reset_list("Plugin Models", self.plugins)
         return self.model_combobox.get_list()
 
     def _on_model(self, evt):
@@ -387,7 +388,7 @@ class ModelManagerBase:
 #        self.model_combobox.set_list("Shape-Independent",
 #                                     self.shape_indep_list)
         self.model_combobox.set_list("Structure Factors", self.struct_list)
-        self.model_combobox.set_list("Customized Models", self.plugins)
+        self.model_combobox.set_list("Plugin Models", self.plugins)
         self.model_combobox.set_list("P(Q)*S(Q)", self.multiplication_factor)
         self.model_combobox.set_list("multiplication",
                                      self.multiplication_factor)
