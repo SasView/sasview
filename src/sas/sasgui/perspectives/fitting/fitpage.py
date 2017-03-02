@@ -163,11 +163,8 @@ class FitPage(BasicPage):
         """
         On_select_data
         """
-        if event is None and self.dataSource.GetCount() > 0:
-            data = self.dataSource.GetClientData(0)
-            self.set_data(data)
-        elif self.dataSource.GetCount() > 0:
-            pos = self.dataSource.GetSelection()
+        if self.dataSource.GetCount() > 0:
+            pos = self.dataSource.GetSelection() if event is not None else 0
             data = self.dataSource.GetClientData(pos)
             self.set_data(data)
 
@@ -255,7 +252,7 @@ class FitPage(BasicPage):
                   id=self.dI_sqrdata.GetId())
         self.Bind(wx.EVT_RADIOBUTTON, self.onWeighting,
                   id=self.dI_idata.GetId())
-        self.dI_didata.SetValue(True)
+        self.dI_noweight.SetValue(True)
         # add 4 types of weighting to the sizer
         sizer_weighting.Add(self.dI_noweight, 0, wx.LEFT, 10)
         sizer_weighting.Add((14, 10))
@@ -265,7 +262,7 @@ class FitPage(BasicPage):
         sizer_weighting.Add((14, 10))
         sizer_weighting.Add(self.dI_idata)
         sizer_weighting.Add((10, 10))
-        self.dI_noweight.Enable(False)
+        self.dI_noweight.Enable(True)
         self.dI_didata.Enable(False)
         self.dI_sqrdata.Enable(False)
         self.dI_idata.Enable(False)
@@ -1270,7 +1267,7 @@ class FitPage(BasicPage):
             # Keep the previous param values
             if copy_flag:
                 self.get_paste_params(copy_flag)
-                wx.CallAfter(self._onDraw, None)
+            wx.CallAfter(self._onDraw, None)
 
         else:
             self._draw_model()
@@ -1626,9 +1623,9 @@ class FitPage(BasicPage):
         # check if it is slit smear and get min max if it is.
         elif data.dxl is not None or data.dxw is not None:
             self.smear_type = "Slit"
-            if data.dxl is not None and not numpy.all(data.dxl, 0):
+            if data.dxl is not None and numpy.all(data.dxl, 0):
                 self.dq_l = data.dxl[0]
-            if data.dxw is not None and not numpy.all(data.dxw, 0):
+            if data.dxw is not None and numpy.all(data.dxw, 0):
                 self.dq_r = data.dxw[0]
         # return self.smear_type,self.dq_l,self.dq_r
 
@@ -2015,7 +2012,7 @@ class FitPage(BasicPage):
             self.btEditMask.Disable()
             self.EditMask_title.Disable()
 
-        self.onSmear(event=None)
+        self.on_smear_helper()
         self.on_set_focus(None)
         self.Refresh()
         # update model plot with new data information
