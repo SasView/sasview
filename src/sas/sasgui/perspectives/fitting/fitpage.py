@@ -1267,7 +1267,7 @@ class FitPage(BasicPage):
             # Keep the previous param values
             if copy_flag:
                 self.get_paste_params(copy_flag)
-                wx.CallAfter(self._onDraw, None)
+            wx.CallAfter(self._onDraw, None)
 
         else:
             self._draw_model()
