@@ -2012,7 +2012,7 @@ class FitPage(BasicPage):
             self.btEditMask.Disable()
             self.EditMask_title.Disable()
 
-        self.onSmear(event=None)
+        self.on_smear_helper()
         self.on_set_focus(None)
         self.Refresh()
         # update model plot with new data information
