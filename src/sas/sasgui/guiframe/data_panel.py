@@ -73,7 +73,7 @@ class DataTreeCtrl(CT.CustomTreeCtrl):
     """
     Check list control to be used for Data Panel
     """
-    def __init__(self, parent, *args, **kwds):
+    def __init__(self, parent, root, *args, **kwds):
         # agwstyle is introduced in wx.2.8.11 but is not working for mac
         if IS_MAC and wx_version < 812:
             try:
@@ -96,7 +96,7 @@ class DataTreeCtrl(CT.CustomTreeCtrl):
                 except:
                     del kwds['style']
                     CT.CustomTreeCtrl.__init__(self, parent, *args, **kwds)
-        self.root = self.AddRoot("Available Data")
+        self.root = self.AddRoot(root)
 
     def OnCompareItems(self, item1, item2):
         """
@@ -530,7 +530,9 @@ class DataPanel(ScrolledPanel, PanelBase):
         theory_sizer = wx.BoxSizer(wx.VERTICAL)
         theory_sizer.SetMinSize(wx.Size(w/13, h*2/5))
 
-        self.tree_ctrl = DataTreeCtrl(parent=splitter, style=wx.SUNKEN_BORDER)
+        self.tree_ctrl = DataTreeCtrl(parent=splitter,
+                                      style=wx.SUNKEN_BORDER,
+                                      root="Available Data")
 
         self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_CHECKING, self.on_check_item)
         self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_MENU, self.on_right_click_data)
@@ -567,14 +569,12 @@ class DataPanel(ScrolledPanel, PanelBase):
         wx.EVT_MENU(self, self.editmask_id, self.on_edit_data)
 
         self.tree_ctrl_theory = DataTreeCtrl(parent=splitter,
-                                             style=wx.SUNKEN_BORDER)
+                                             style=wx.SUNKEN_BORDER,
+                                             root="Available Theory")
         self.tree_ctrl_theory.Bind(CT.EVT_TREE_ITEM_CHECKING,
                                    self.on_check_item)
         self.tree_ctrl_theory.Bind(CT.EVT_TREE_ITEM_MENU,
                                    self.on_right_click_theory)
-        self.tree_ctrl.InsertItem(self.tree_ctrl.root, -1, " Data")
-        self.tree_ctrl_theory.InsertItem(self.tree_ctrl_theory.root,
-                                         -1, " Theory")
         splitter.SplitHorizontally(self.tree_ctrl, self.tree_ctrl_theory)
         self.sizer1.Add(splitter, 1, wx.EXPAND | wx.ALL, 10)
 
