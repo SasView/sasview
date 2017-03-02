@@ -65,8 +65,8 @@ else:
     FONT_VARIANT = 1
     IS_MAC = True
 
-STYLE_FLAG = wx.RAISED_BORDER | CT.TR_HAS_BUTTONS | CT.TR_HIDE_ROOT |\
-                    wx.WANTS_CHARS | CT.TR_HAS_VARIABLE_ROW_HEIGHT
+STYLE_FLAG = (wx.RAISED_BORDER | CT.TR_HAS_BUTTONS |
+                    wx.WANTS_CHARS | CT.TR_HAS_VARIABLE_ROW_HEIGHT)
 
 
 class DataTreeCtrl(CT.CustomTreeCtrl):
