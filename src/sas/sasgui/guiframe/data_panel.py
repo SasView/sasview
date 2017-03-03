@@ -730,6 +730,9 @@ class DataPanel(ScrolledPanel, PanelBase):
             # Sort by data name
             if self.tree_ctrl.root:
                 self.tree_ctrl.SortChildren(self.tree_ctrl.root)
+            # Expand root if # of data sets > 0
+            if self.tree_ctrl.GetCount() > 0:
+                self.tree_ctrl.root.Expand()
         self.enable_remove()
         self.enable_import()
         self.enable_plot()
@@ -768,6 +771,8 @@ class DataPanel(ScrolledPanel, PanelBase):
             wx.CallAfter(self.append_theory_helper, tree=tree, root=root,
                                        state_id=state_id,
                                        theory_list=theory_list)
+        if self.tree_ctrl_theory.GetCount() > 0:
+            self.tree_ctrl_theory.root.Expand()
 
     def append_theory_helper(self, tree, root, state_id, theory_list):
         """
