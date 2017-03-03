@@ -65,15 +65,15 @@ else:
     FONT_VARIANT = 1
     IS_MAC = True
 
-STYLE_FLAG = wx.RAISED_BORDER | CT.TR_HAS_BUTTONS | CT.TR_HIDE_ROOT |\
-                    wx.WANTS_CHARS | CT.TR_HAS_VARIABLE_ROW_HEIGHT
+STYLE_FLAG = (wx.RAISED_BORDER | CT.TR_HAS_BUTTONS |
+                    wx.WANTS_CHARS | CT.TR_HAS_VARIABLE_ROW_HEIGHT)
 
 
 class DataTreeCtrl(CT.CustomTreeCtrl):
     """
     Check list control to be used for Data Panel
     """
-    def __init__(self, parent, *args, **kwds):
+    def __init__(self, parent, root, *args, **kwds):
         # agwstyle is introduced in wx.2.8.11 but is not working for mac
         if IS_MAC and wx_version < 812:
             try:
@@ -96,7 +96,7 @@ class DataTreeCtrl(CT.CustomTreeCtrl):
                 except:
                     del kwds['style']
                     CT.CustomTreeCtrl.__init__(self, parent, *args, **kwds)
-        self.root = self.AddRoot("Available Data")
+        self.root = self.AddRoot(root)
 
     def OnCompareItems(self, item1, item2):
         """
@@ -519,9 +519,21 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         Add a listcrtl in the panel
         """
-        tree_ctrl_label = wx.StaticText(self, -1, "Data")
-        tree_ctrl_label.SetForegroundColour('blue')
-        self.tree_ctrl = DataTreeCtrl(parent=self, style=wx.SUNKEN_BORDER)
+        # Add splitter
+        w, h = self.parent.GetSize()
+        splitter = wx.SplitterWindow(self)
+        splitter.SetMinimumPaneSize(50)
+        splitter.SetSashGravity(1.0)
+
+        file_sizer = wx.BoxSizer(wx.VERTICAL)
+        file_sizer.SetMinSize(wx.Size(w/13, h*2/5))
+        theory_sizer = wx.BoxSizer(wx.VERTICAL)
+        theory_sizer.SetMinSize(wx.Size(w/13, h*2/5))
+
+        self.tree_ctrl = DataTreeCtrl(parent=splitter,
+                                      style=wx.SUNKEN_BORDER,
+                                      root="Available Data")
+
         self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_CHECKING, self.on_check_item)
         self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_MENU, self.on_right_click_data)
         # Create context menu for page
@@ -556,18 +568,15 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.data_menu.Append(self.editmask_id, name, msg)
         wx.EVT_MENU(self, self.editmask_id, self.on_edit_data)
 
-        tree_ctrl_theory_label = wx.StaticText(self, -1, "Theory")
-        tree_ctrl_theory_label.SetForegroundColour('blue')
-        self.tree_ctrl_theory = DataTreeCtrl(parent=self,
-                                             style=wx.SUNKEN_BORDER)
+        self.tree_ctrl_theory = DataTreeCtrl(parent=splitter,
+                                             style=wx.SUNKEN_BORDER,
+                                             root="Available Theory")
         self.tree_ctrl_theory.Bind(CT.EVT_TREE_ITEM_CHECKING,
                                    self.on_check_item)
         self.tree_ctrl_theory.Bind(CT.EVT_TREE_ITEM_MENU,
                                    self.on_right_click_theory)
-        self.sizer1.Add(tree_ctrl_label, 0, wx.LEFT, 10)
-        self.sizer1.Add(self.tree_ctrl, 1, wx.EXPAND | wx.ALL, 10)
-        self.sizer1.Add(tree_ctrl_theory_label, 0,  wx.LEFT, 10)
-        self.sizer1.Add(self.tree_ctrl_theory, 1, wx.EXPAND | wx.ALL, 10)
+        splitter.SplitHorizontally(self.tree_ctrl, self.tree_ctrl_theory)
+        self.sizer1.Add(splitter, 1, wx.EXPAND | wx.ALL, 10)
 
     def on_right_click_theory(self, event):
         """
@@ -721,6 +730,9 @@ class DataPanel(ScrolledPanel, PanelBase):
             # Sort by data name
             if self.tree_ctrl.root:
                 self.tree_ctrl.SortChildren(self.tree_ctrl.root)
+            # Expand root if # of data sets > 0
+            if self.tree_ctrl.GetCount() > 0:
+                self.tree_ctrl.root.Expand()
         self.enable_remove()
         self.enable_import()
         self.enable_plot()
@@ -759,6 +771,8 @@ class DataPanel(ScrolledPanel, PanelBase):
             wx.CallAfter(self.append_theory_helper, tree=tree, root=root,
                                        state_id=state_id,
                                        theory_list=theory_list)
+        if self.tree_ctrl_theory.GetCount() > 0:
+            self.tree_ctrl_theory.root.Expand()
 
     def append_theory_helper(self, tree, root, state_id, theory_list):
         """
