@@ -14,6 +14,7 @@ from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 
 TAB_MAGNETISM = 4
 TAB_POLY = 3
+CATEGORY_DEFAULT="Choose category..."
 
 class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
     """
@@ -28,25 +29,31 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         super(FittingWidget, self).__init__()
 
+        # Necessary globals
         self.model_is_loaded = False
         self._data = data
         self.is2D = False
-        self.modelHasShells = False
+        self.model_has_shells = False
         self.data_assigned = False
+        self._previous_category_index = 0
+        self._last_model_row = 0
 
+        # Main GUI setup up
         self.setupUi(self)
-
         self.setWindowTitle("Fitting")
 
-        # set the main models
+        # Set the main models
         self._model_model = QtGui.QStandardItemModel()
         self._poly_model = QtGui.QStandardItemModel()
         self._magnet_model = QtGui.QStandardItemModel()
+        # Proxy model for custom views on the main _model_model
+        self.proxyModel = QtGui.QSortFilterProxyModel()
 
         # Param model displayed in param list
         self.lstParams.setModel(self._model_model)
         self._readCategoryInfo()
         self.model_parameters = None
+        self.lstParams.setAlternatingRowColors(True)
 
         # Poly model displayed in poly list
         self.lstPoly.setModel(self._poly_model)
@@ -67,36 +74,16 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         # Generate the category list for display
         category_list = sorted(self.master_category_dict.keys())
-        self.cbCategory.addItem("Choose category...")
+        self.cbCategory.addItem(CATEGORY_DEFAULT)
         self.cbCategory.addItems(category_list)
         self.cbCategory.addItem("Structure Factor")
         self.cbCategory.setCurrentIndex(0)
 
-        # Connect GUI element signals
-        self.cbStructureFactor.currentIndexChanged.connect(self.selectStructureFactor)
-        self.cbCategory.currentIndexChanged.connect(self.selectCategory)
-        self.cbModel.currentIndexChanged.connect(self.selectModel)
-        self.chk2DView.toggled.connect(self.toggle2D)
-        self.chkPolydispersity.toggled.connect(self.togglePoly)
-        self.chkMagnetism.toggled.connect(self.toggleMagnetism)
+        # Connect signals to controls
+        self.initializeSignals()
 
-        # Set initial control enablement
-        self.cmdFit.setEnabled(False)
-        self.cmdPlot.setEnabled(True)
-        self.chkPolydispersity.setEnabled(True)
-        self.chkPolydispersity.setCheckState(False)
-        self.chk2DView.setEnabled(True)
-        self.chk2DView.setCheckState(False)
-        self.chkMagnetism.setEnabled(False)
-        self.chkMagnetism.setCheckState(False)
-
-        self.tabFitting.setTabEnabled(TAB_POLY, False)
-        self.tabFitting.setTabEnabled(TAB_MAGNETISM, False)
-
-        # set initial labels
-        self.lblMinRangeDef.setText("---")
-        self.lblMaxRangeDef.setText("---")
-        self.lblChi2Value.setText("---")
+        # Initial control state
+        self.initializeControls()
 
     @property
     def data(self):
@@ -129,6 +116,37 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.cbStructureFactor.setEnabled(True)
         self.label_4.setEnabled(True)
 
+    def initializeControls(self):
+        """
+        Set initial control enablement
+        """
+        self.cmdFit.setEnabled(False)
+        self.cmdPlot.setEnabled(True)
+        self.chkPolydispersity.setEnabled(True)
+        self.chkPolydispersity.setCheckState(False)
+        self.chk2DView.setEnabled(True)
+        self.chk2DView.setCheckState(False)
+        self.chkMagnetism.setEnabled(False)
+        self.chkMagnetism.setCheckState(False)
+        # tabs
+        self.tabFitting.setTabEnabled(TAB_POLY, False)
+        self.tabFitting.setTabEnabled(TAB_MAGNETISM, False)
+        # set initial labels
+        self.lblMinRangeDef.setText("---")
+        self.lblMaxRangeDef.setText("---")
+        self.lblChi2Value.setText("---")
+
+    def initializeSignals(self):
+        """
+        Connect GUI element signals
+        """
+        self.cbStructureFactor.currentIndexChanged.connect(self.selectStructureFactor)
+        self.cbCategory.currentIndexChanged.connect(self.selectCategory)
+        self.cbModel.currentIndexChanged.connect(self.selectModel)
+        self.chk2DView.toggled.connect(self.toggle2D)
+        self.chkPolydispersity.toggled.connect(self.togglePoly)
+        self.chkMagnetism.toggled.connect(self.toggleMagnetism)
+
     def setDefaultStructureCombo(self):
         # Fill in the structure factors combo box with defaults
         structure_factor_list = self.master_category_dict.pop('Structure Factor')
@@ -144,6 +162,14 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         :return:
         """
         category = self.cbCategory.currentText()
+        # Check if the user chose "Choose category entry"
+        if str(category) == CATEGORY_DEFAULT:
+            # if the previous category was not the default, keep it.
+            # Otherwise, just return
+            if self._previous_category_index != 0:
+                self.cbCategory.setCurrentIndex(self._previous_category_index)
+            return
+
         if category == "Structure Factor":
             self.disableModelCombo()
             self.enableStructureCombo()
@@ -155,6 +181,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.enableModelCombo()
         self.disableStructureCombo()
 
+        self._previous_category_index = self.cbCategory.currentIndex()
         model_list = self.master_category_dict[str(category)]
         models = []
         for (model, _) in model_list:
@@ -234,7 +261,53 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             iter_length = iter_params[0].length
             iter_param = iter_params[0].length_control
         return (iter_param, iter_length)
-        
+
+    def addBackgroundToModel(self, model):
+        """
+        Adds background parameter with default values to the model
+        """
+        assert(isinstance(model, QtGui.QStandardItemModel))
+
+        checked_list = ['background', '0.001', '-inf', 'inf', '1/cm']
+        self.addCheckedListToModel(model, checked_list)
+
+    def addScaleToModel(self, model):
+        """
+        Adds scale parameter with default values to the model
+        """
+        assert(isinstance(model, QtGui.QStandardItemModel))
+
+        checked_list = ['scale', '1.0', '0.0', 'inf', '']
+        self.addCheckedListToModel(model, checked_list)
+
+    def addCheckedListToModel(self, model, param_list):
+        assert(isinstance(model, QtGui.QStandardItemModel))
+        item_list = [QtGui.QStandardItem(item) for item in param_list]
+        item_list[0].setCheckable(True)
+        model.appendRow(item_list)
+
+    def addHeadersToModel(self, model):
+        """
+        Adds predefined headers to the model
+        """
+        model.setHeaderData(0, QtCore.Qt.Horizontal, QtCore.QVariant("Parameter"))
+        model.setHeaderData(1, QtCore.Qt.Horizontal, QtCore.QVariant("Value"))
+        model.setHeaderData(2, QtCore.Qt.Horizontal, QtCore.QVariant("Min"))
+        model.setHeaderData(3, QtCore.Qt.Horizontal, QtCore.QVariant("Max"))
+        model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("[Units]"))
+
+    def addPolyHeadersToModel(self, model):
+        """
+        Adds predefined headers to the model
+        """
+        model.setHeaderData(0, QtCore.Qt.Horizontal, QtCore.QVariant("Parameter"))
+        model.setHeaderData(1, QtCore.Qt.Horizontal, QtCore.QVariant("PD[ratio]"))
+        model.setHeaderData(2, QtCore.Qt.Horizontal, QtCore.QVariant("Min"))
+        model.setHeaderData(3, QtCore.Qt.Horizontal, QtCore.QVariant("Max"))
+        model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("Npts"))
+        model.setHeaderData(5, QtCore.Qt.Horizontal, QtCore.QVariant("Nsigs"))
+        model.setHeaderData(6, QtCore.Qt.Horizontal, QtCore.QVariant("Function"))
+
     def setModelModel(self, model_name):
         """
         Setting model parameters into table based on selected
@@ -247,30 +320,30 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         kernel_module = generate.load_kernel_module(model_name)
         self.model_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
 
-        #TODO: scaale and background are implicit in sasmodels and needs to be added
-        item1 = QtGui.QStandardItem('scale')
-        item1.setCheckable(True)
-        item2 = QtGui.QStandardItem('1.0')
-        item3 = QtGui.QStandardItem('0.0')
-        item4 = QtGui.QStandardItem('inf')
-        item5 = QtGui.QStandardItem('')
-        self._model_model.appendRow([item1, item2, item3, item4, item5])
+        #TODO: scale and background are implicit in sasmodels and needs to be added
+        self.addScaleToModel(self._model_model)
+        self.addBackgroundToModel(self._model_model)
 
-        item1 = QtGui.QStandardItem('background')
-        item1.setCheckable(True)
-        item2 = QtGui.QStandardItem('0.001')
-        item3 = QtGui.QStandardItem('-inf')
-        item4 = QtGui.QStandardItem('inf')
-        item5 = QtGui.QStandardItem('1/cm')
-        self._model_model.appendRow([item1, item2, item3, item4, item5])
+        self.addParametersToModel(self.model_parameters, self._model_model)
 
-        multishell_parameters = self.getIterParams(self.model_parameters)
-        multishell_param_name, _ = self.getMultiplicity(self.model_parameters)
+        self.addHeadersToModel(self._model_model)
+
+        self.addExtraShells()
+
+        self.setPolyModel()
+        self.setMagneticModel()
+        self.model_is_loaded = True
+
+    def addParametersToModel(self, parameters, model):
+        """
+        Update local ModelModel with sasmodel parameters
+        """
+        multishell_parameters = self.getIterParams(parameters)
+        multishell_param_name, _ = self.getMultiplicity(parameters)
 
         #TODO: iq_parameters are used here. If orientation paramateres or magnetic are needed
         # kernel_paramters should be used instead
-        #For orientation and magentic parameters param.type needs to be checked
-        for param in self.model_parameters.iq_parameters:
+        for param in parameters.iq_parameters:
             # don't include shell parameters
             if param.name == multishell_param_name:
                 continue
@@ -278,25 +351,38 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             item_name = param.name
             if param in multishell_parameters:
                 item_name = self.replaceShellName(param.name, 1)
+
             item1 = QtGui.QStandardItem(item_name)
             item1.setCheckable(True)
+            # check for polydisp params
+            if param.polydisperse:
+                poly_item = QtGui.QStandardItem("Polydispersity")
+                item1_1 = QtGui.QStandardItem("Distribution")
+                # Find param in volume_params
+                for p in parameters.form_volume_parameters:
+                    if p.name == param.name:
+                        item1_2 = QtGui.QStandardItem(str(p.default))
+                        item1_3 = QtGui.QStandardItem(str(p.limits[0]))
+                        item1_4 = QtGui.QStandardItem(str(p.limits[1]))
+                        item1_5 = QtGui.QStandardItem(p.units)
+                        poly_item.appendRow([item1_1, item1_2, item1_3, item1_4, item1_5])
+                        break
+
+                item1.appendRow([poly_item])
+
             item2 = QtGui.QStandardItem(str(param.default))
             item3 = QtGui.QStandardItem(str(param.limits[0]))
             item4 = QtGui.QStandardItem(str(param.limits[1]))
             item5 = QtGui.QStandardItem(param.units)
-            self._model_model.appendRow([item1, item2, item3, item4, item5])
+            model.appendRow([item1, item2, item3, item4, item5])
 
-        self._model_model.setHeaderData(0, QtCore.Qt.Horizontal, QtCore.QVariant("Parameter"))
-        self._model_model.setHeaderData(1, QtCore.Qt.Horizontal, QtCore.QVariant("Value"))
-        self._model_model.setHeaderData(2, QtCore.Qt.Horizontal, QtCore.QVariant("Min"))
-        self._model_model.setHeaderData(3, QtCore.Qt.Horizontal, QtCore.QVariant("Max"))
-        self._model_model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("[Units]"))
+        self._last_model_row = self._model_model.rowCount()
 
-        self.addExtraShells()
-
-        self.setPolyModel()
-        self.setMagneticModel()
-        self.model_is_loaded = True
+    def modelToFittingParameters(self):
+        """
+        Prepare the fitting data object, based on current ModelModel
+        """
+        pass
 
     def replaceShellName(self, param_name, value):
         """
@@ -330,63 +416,51 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Set polydispersity values
         """
-        if self.model_parameters:
-            for row, param in enumerate(self.model_parameters.form_volume_parameters):
-                item1 = QtGui.QStandardItem("Distribution of "+param.name)
-                item1.setCheckable(True)
-                item2 = QtGui.QStandardItem("0")
-                item3 = QtGui.QStandardItem("")
-                item4 = QtGui.QStandardItem("")
-                item5 = QtGui.QStandardItem("35")
-                item6 = QtGui.QStandardItem("3")
-                item7 = QtGui.QStandardItem("")
+        ### TODO: apply proper proxy model filtering from the main _model_model
 
-                self._poly_model.appendRow([item1, item2, item3, item4, item5, item6, item7])
+        if not self.model_parameters:
+            return
+        self._poly_model.clear()
+        for row, param in enumerate(self.model_parameters.form_volume_parameters):
+            # Counters should not be included
+            if not param.polydisperse:
+                continue
 
-                #TODO: Need to find cleaner way to input functions
-                func = QtGui.QComboBox()
-                func.addItems(['rectangle','array','lognormal','gaussian','schulz',])
-                func_index = self.lstPoly.model().index(row,6)
-                self.lstPoly.setIndexWidget(func_index,func)
+            # Potential multishell params
+            #length_control = param.length_control
+            #if length_control in param.name:
 
-        self._poly_model.setHeaderData(0, QtCore.Qt.Horizontal, QtCore.QVariant("Parameter"))
-        self._poly_model.setHeaderData(1, QtCore.Qt.Horizontal, QtCore.QVariant("PD[ratio]"))
-        self._poly_model.setHeaderData(2, QtCore.Qt.Horizontal, QtCore.QVariant("Min"))
-        self._poly_model.setHeaderData(3, QtCore.Qt.Horizontal, QtCore.QVariant("Max"))
-        self._poly_model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("Npts"))
-        self._poly_model.setHeaderData(5, QtCore.Qt.Horizontal, QtCore.QVariant("Nsigs"))
-        self._poly_model.setHeaderData(6, QtCore.Qt.Horizontal, QtCore.QVariant("Function"))
+            checked_list = ["Distribution of "+param.name, str(param.default),
+                            str(param.limits[0]),str(param.limits[1]),
+                            "35", "3", ""]
+            self.addCheckedListToModel(self._poly_model, checked_list)
+
+            #TODO: Need to find cleaner way to input functions
+            func = QtGui.QComboBox()
+            func.addItems(['rectangle','array','lognormal','gaussian','schulz',])
+            func_index = self.lstPoly.model().index(row,6)
+            self.lstPoly.setIndexWidget(func_index,func)
+
+        self.addPolyHeadersToModel(self._poly_model)
 
     def setMagneticModel(self):
         """
         Set magnetism values on model
         """
-        if self.model_parameters:
-            for row, param in enumerate(self.model_parameters.form_volume_parameters):
-                item1 = QtGui.QStandardItem("Distribution of "+param.name)
-                item1.setCheckable(True)
-                item2 = QtGui.QStandardItem("0")
-                item3 = QtGui.QStandardItem("")
-                item4 = QtGui.QStandardItem("")
-                item5 = QtGui.QStandardItem("35")
-                item6 = QtGui.QStandardItem("3")
-                item7 = QtGui.QStandardItem("")
+        if not self.model_parameters:
+            return
+        self._magnet_model.clear()
+        for param in self.model_parameters.call_parameters:
+            if param.type != "magnetic":
+                continue
+            checked_list = [param.name,
+                            str(param.default),
+                            str(param.limits[0]),
+                            str(param.limits[1]),
+                            param.units]
+            self.addCheckedListToModel(self._magnet_model, checked_list)
 
-                self._magnet_model.appendRow([item1, item2, item3, item4, item5, item6, item7])
-
-                #TODO: Need to find cleaner way to input functions
-                func = QtGui.QComboBox()
-                func.addItems(['rectangle','array','lognormal','gaussian','schulz',])
-                func_index = self.lstMagnetic.model().index(row,6)
-                self.lstMagnetic.setIndexWidget(func_index,func)
-
-        self._magnet_model.setHeaderData(0, QtCore.Qt.Horizontal, QtCore.QVariant("Parameter"))
-        self._magnet_model.setHeaderData(1, QtCore.Qt.Horizontal, QtCore.QVariant("PD[ratio]"))
-        self._magnet_model.setHeaderData(2, QtCore.Qt.Horizontal, QtCore.QVariant("Min"))
-        self._magnet_model.setHeaderData(3, QtCore.Qt.Horizontal, QtCore.QVariant("Max"))
-        self._magnet_model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("Npts"))
-        self._magnet_model.setHeaderData(5, QtCore.Qt.Horizontal, QtCore.QVariant("Nsigs"))
-        self._magnet_model.setHeaderData(6, QtCore.Qt.Horizontal, QtCore.QVariant("Function"))
+        self.addHeadersToModel(self._magnet_model)
 
     def addExtraShells(self):
         """
@@ -402,6 +476,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         func = QtGui.QComboBox()
         func.addItems([str(i+1) for i in xrange(param_length)])
+        func.currentIndexChanged.connect(self.modifyShellsInList)
 
         # cell 2: combobox
         item2 = QtGui.QStandardItem()
@@ -411,7 +486,49 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         shell_row = self._model_model.rowCount()
         shell_index = self._model_model.index(shell_row-1, 1)
         self.lstParams.setIndexWidget(shell_index, func)
-        self.lstParams.setSpan(shell_row-1,2,2,4)
+
+        self._last_model_row = self._model_model.rowCount()
+
+
+    def modifyShellsInList(self, index):
+        """
+        Add/remove additional multishell parameters
+        """
+        # Find row location of the combobox
+        last_row = self._last_model_row
+        remove_rows = self._model_model.rowCount() - last_row
+
+        if remove_rows > 1:
+            self._model_model.removeRows(last_row, remove_rows)
+
+        multishell_parameters = self.getIterParams(self.model_parameters)
+
+        for i in xrange(index):
+            for par in multishell_parameters:
+                param_name = self.replaceShellName(par.name, i+2)
+                #param_name = str(p.name) + str(i+2)
+                item1 = QtGui.QStandardItem(param_name)
+                item1.setCheckable(True)
+                # check for polydisp params
+                if par.polydisperse:
+                    poly_item = QtGui.QStandardItem("Polydispersity")
+                    item1_1 = QtGui.QStandardItem("Distribution")
+                    # Find param in volume_params
+                    for p in self.model_parameters.form_volume_parameters:
+                        if p.name == par.name:
+                            item1_2 = QtGui.QStandardItem(str(p.default))
+                            item1_3 = QtGui.QStandardItem(str(p.limits[0]))
+                            item1_4 = QtGui.QStandardItem(str(p.limits[1]))
+                            item1_5 = QtGui.QStandardItem(p.units)
+                            poly_item.appendRow([item1_1, item1_2, item1_3, item1_4, item1_5])
+                            break
+                    item1.appendRow([poly_item])
+
+                item2 = QtGui.QStandardItem(str(par.default))
+                item3 = QtGui.QStandardItem(str(par.limits[0]))
+                item4 = QtGui.QStandardItem(str(par.limits[1]))
+                item5 = QtGui.QStandardItem(par.units)
+                self._model_model.appendRow([item1, item2, item3, item4, item5])
 
     def togglePoly(self, isChecked):
         """
