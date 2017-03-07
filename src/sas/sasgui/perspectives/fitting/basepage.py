@@ -1244,9 +1244,9 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         # we have two more options for smearing
         if self.pinhole_smearer.GetValue():
-            self.dx_percent = state.dx_max
+            self.dx_percent = state.dx_percent
             if self.dx_percent is not None:
-                self.smear_pinhole_max.SetValue(str(self.dx_percent))
+                self.smear_pinhole_percent.SetValue(str(self.dx_percent))
             self.onPinholeSmear(event=None)
         elif self.slit_smearer.GetValue():
             self.dxl = state.dxl

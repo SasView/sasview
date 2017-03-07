@@ -73,8 +73,7 @@ LIST_OF_STATE_ATTRIBUTES = [["qmin", "qmin", "float"],
                             ["smear_type", "smear_type", "string"],
                             ["dq_l", "dq_l", "float"],
                             ["dq_r", "dq_r", "float"],
-                            ["dx_max", "dx_max", "float"],
-                            ["dx_min", "dx_min", "float"],
+                            ["dx_percent", "dx_percent", "float"],
                             ["dxl", "dxl", "float"],
                             ["dxw", "dxw", "float"]]
 
@@ -214,8 +213,7 @@ class PageState(object):
         self.smear_type = None
         self.dq_l = None
         self.dq_r = None
-        self.dx_max = None
-        self.dx_min = None
+        self.dx_percent = None
         self.dxl = None
         self.dxw = None
         # list of dispersion parameters
@@ -342,8 +340,7 @@ class PageState(object):
         obj.dI_idata = copy.deepcopy(self.dI_idata)
         obj.dq_l = copy.deepcopy(self.dq_l)
         obj.dq_r = copy.deepcopy(self.dq_r)
-        obj.dx_max = copy.deepcopy(self.dx_max)
-        obj.dx_min = copy.deepcopy(self.dx_min)
+        obj.dx_percent = copy.deepcopy(self.dx_percent)
         obj.dxl = copy.deepcopy(self.dxl)
         obj.dxw = copy.deepcopy(self.dxw)
         obj.disp_box = copy.deepcopy(self.disp_box)
@@ -561,8 +558,7 @@ class PageState(object):
         rep += "Smear type : %s\n" % self.smear_type
         rep += "dq_l  : %s\n" % self.dq_l
         rep += "dq_r  : %s\n" % self.dq_r
-        rep += "dx_max  : %s\n" % str(self.dx_max)
-        rep += "dx_min : %s\n" % str(self.dx_min)
+        rep += "dx_percent  : %s\n" % str(self.dx_percent)
         rep += "dxl  : %s\n" % str(self.dxl)
         rep += "dxw : %s\n" % str(self.dxw)
         rep += "model  : %s\n\n" % str(self.model)
@@ -1048,7 +1044,19 @@ class PageState(object):
                     setattr(self, item[0], parse_entry_helper(node, item))
 
                 for item in LIST_OF_STATE_ATTRIBUTES:
-                    node = get_content('ns:%s' % item[0], entry)
+                    try:
+                        node = get_content('ns:%s' % item[0], entry)
+                    except Exception as e:
+                        if item[0] == "dx_percent":
+                            msg = "Custom pinhole smearing has changed "
+                            msg += "as of v4.1.0. dx_min will be used to "
+                            msg += "calculate %Q for smearing purposes."
+                            logging.warning(msg)
+                            node = get_content('ns:%s' % 'dx_min', entry)
+                        else:
+                            msg = "Could not find node %s.\n" % item[0]
+                            msg += e.message
+                            logging.error(msg)
                     setattr(self, item[0], parse_entry_helper(node, item))
 
                 for item in LIST_OF_STATE_PARAMETERS:

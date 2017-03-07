@@ -2308,18 +2308,17 @@ class FitPage(BasicPage):
         else:
             if len_data < 2:
                 len_data = 2
-            self.dx_percent = float(get_pin_percent.GetValue()) / 100
+            self.dx_percent = float(get_pin_percent.GetValue())
             if self.dx_percent < 0:
                 get_pin_percent.SetBackgroundColour("pink")
                 msg = "Model Error:This value can not be negative!!!"
             elif self.dx_percent is not None:
+                percent = self.dx_percent/100
                 if self._is_2D():
-                    data.dqx_data[data.dqx_data == 0] = \
-                        self.dx_percent * data.qx_data
-                    data.dqy_data[data.dqy_data == 0] = \
-                        self.dx_percent * data.qy_data
+                    data.dqx_data[data.dqx_data == 0] = percent * data.qx_data
+                    data.dqy_data[data.dqy_data == 0] = percent * data.qy_data
                 else:
-                    data.dx = self.dx_percent * data.x
+                    data.dx = percent * data.x
             self.current_smearer = smear_selection(data, self.model)
             # 2D need to set accuracy
             if self._is_2D():
