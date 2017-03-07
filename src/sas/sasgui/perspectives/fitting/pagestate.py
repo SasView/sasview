@@ -214,6 +214,7 @@ class PageState(object):
         self.dq_l = None
         self.dq_r = None
         self.dx_percent = None
+        self.dx_old = False
         self.dxl = None
         self.dxw = None
         # list of dispersion parameters
@@ -341,6 +342,7 @@ class PageState(object):
         obj.dq_l = copy.deepcopy(self.dq_l)
         obj.dq_r = copy.deepcopy(self.dq_r)
         obj.dx_percent = copy.deepcopy(self.dx_percent)
+        obj.dx_old = copy.deepcopy(self.dx_old)
         obj.dxl = copy.deepcopy(self.dxl)
         obj.dxw = copy.deepcopy(self.dxw)
         obj.disp_box = copy.deepcopy(self.disp_box)
@@ -1044,20 +1046,14 @@ class PageState(object):
                     setattr(self, item[0], parse_entry_helper(node, item))
 
                 for item in LIST_OF_STATE_ATTRIBUTES:
-                    try:
+                    node = get_content('ns:%s' % 'dx_min', entry)
+                    if item[0] == "dx_percent" and node is not None:
+                        dxmin = ["dx_min", "dx_percent", "float"]
+                        setattr(self, item[0], parse_entry_helper(node, dxmin))
+                        self.dx_old = True
+                    else:
                         node = get_content('ns:%s' % item[0], entry)
-                    except Exception as e:
-                        if item[0] == "dx_percent":
-                            msg = "Custom pinhole smearing has changed "
-                            msg += "as of v4.1.0. dx_min will be used to "
-                            msg += "calculate %Q for smearing purposes."
-                            logging.warning(msg)
-                            node = get_content('ns:%s' % 'dx_min', entry)
-                        else:
-                            msg = "Could not find node %s.\n" % item[0]
-                            msg += e.message
-                            logging.error(msg)
-                    setattr(self, item[0], parse_entry_helper(node, item))
+                        setattr(self, item[0], parse_entry_helper(node, item))
 
                 for item in LIST_OF_STATE_PARAMETERS:
                     node = get_content("ns:%s" % item[0], entry)
