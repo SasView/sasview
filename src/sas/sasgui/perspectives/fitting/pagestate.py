@@ -1045,11 +1045,12 @@ class PageState(object):
                     node = get_content('ns:%s' % item[0], entry)
                     setattr(self, item[0], parse_entry_helper(node, item))
 
+                dx_old_node = get_content('ns:%s' % 'dx_min', entry)
                 for item in LIST_OF_STATE_ATTRIBUTES:
-                    node = get_content('ns:%s' % 'dx_min', entry)
-                    if item[0] == "dx_percent" and node is not None:
-                        dxmin = ["dx_min", "dx_percent", "float"]
-                        setattr(self, item[0], parse_entry_helper(node, dxmin))
+                    if item[0] == "dx_percent" and dx_old_node is not None:
+                        dxmin = ["dx_min", "dx_min", "float"]
+                        setattr(self, item[0], parse_entry_helper(dx_old_node,
+                                                                  dxmin))
                         self.dx_old = True
                     else:
                         node = get_content('ns:%s' % item[0], entry)
