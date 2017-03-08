@@ -299,7 +299,7 @@
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QLineEdit" name="lineEdit"/>
+             <widget class="QLineEdit" name="txtMinRange"/>
             </item>
             <item row="0" column="2">
              <widget class="QLabel" name="label_7">
@@ -316,7 +316,7 @@
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QLineEdit" name="lineEdit_2"/>
+             <widget class="QLineEdit" name="txtMaxRange"/>
             </item>
             <item row="1" column="2">
              <widget class="QLabel" name="label_8">
@@ -373,7 +373,7 @@
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QLineEdit" name="lineEdit_3"/>
+             <widget class="QLineEdit" name="txtNpts"/>
             </item>
             <item row="0" column="2">
              <widget class="QCheckBox" name="checkBox">
@@ -390,7 +390,7 @@
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QLineEdit" name="lineEdit_4"/>
+             <widget class="QLineEdit" name="txtNptsFit"/>
             </item>
             <item row="2" column="0">
              <widget class="QLabel" name="label_12">
@@ -400,7 +400,7 @@
              </widget>
             </item>
             <item row="2" column="1">
-             <widget class="QLineEdit" name="lineEdit_5"/>
+             <widget class="QLineEdit" name="txtChi2"/>
             </item>
             <item row="2" column="3">
              <widget class="QPushButton" name="pushButton_5">

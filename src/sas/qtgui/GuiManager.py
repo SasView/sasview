@@ -72,6 +72,12 @@ class GuiManager(object):
         #
         # Widgets
         #
+        # Current displayed perspective
+        self._current_perspective = None
+
+        # Invoke the initial perspective
+        self.perspectiveChanged("Fitting")
+
         self.addWidgets()
 
         # Fork off logging messages to the Log Window
@@ -99,12 +105,6 @@ class GuiManager(object):
         self._tutorialLocation = os.path.abspath(os.path.join(self.HELP_DIRECTORY_LOCATION,
                                               "_downloads",
                                               "Tutorial.pdf"))
-        # Current displayed perspective
-        self._current_perspective = None
-
-        # Invoke the initial perspective
-        self.perspectiveChanged("Fitting")
-
     def addWidgets(self):
         """
         Populate the main window with widgets

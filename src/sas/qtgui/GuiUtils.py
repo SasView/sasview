@@ -220,6 +220,9 @@ class Communicate(QtCore.QObject):
     # New data in current perspective
     updateModelFromPerspectiveSignal = QtCore.pyqtSignal(QtGui.QStandardItem)
 
+    # New theory data in current perspective
+    updateTheoryFromPerspectiveSignal = QtCore.pyqtSignal(QtGui.QStandardItem)
+
     # New plot requested from the GUI manager
     # Old "NewPlotEvent"
     plotRequestedSignal = QtCore.pyqtSignal(str)
@@ -255,13 +258,27 @@ def updateModelItemWithPlot(item, update_data, name=""):
                 item.removeRow(index)
                 break
 
-    checkbox_item = QtGui.QStandardItem(True)
+    # Create the new item
+    checkbox_item = createModelItemWithPlot(update_data, name)
+
+    # Append the new row to the main item
+    item.appendRow(checkbox_item)
+
+def createModelItemWithPlot(update_data, name=""):
+    """
+    Creates a checkboxed QStandardItem named "name"
+    Adds QVariant 'update_data' to that row.
+    """
+    assert isinstance(update_data, QtCore.QVariant)
+    py_update_data = update_data.toPyObject()
+
+    checkbox_item = QtGui.QStandardItem()
     checkbox_item.setCheckable(True)
     checkbox_item.setCheckState(QtCore.Qt.Checked)
     checkbox_item.setText(name)
 
     # Add "Info" item
-    if isinstance(py_update_data, (Data1D or Data2D)):
+    if isinstance(py_update_data, (Data1D, Data2D)):
         # If Data1/2D added - extract Info from it
         info_item = infoFromData(py_update_data)
     else:
@@ -278,8 +295,8 @@ def updateModelItemWithPlot(item, update_data, name=""):
     # Set info_item as the second child
     checkbox_item.setChild(1, info_item)
 
-    # Append the new row to the main item
-    item.appendRow(checkbox_item)
+    # And return the newly created item
+    return checkbox_item
 
 def updateModelItem(item, update_data, name=""):
     """

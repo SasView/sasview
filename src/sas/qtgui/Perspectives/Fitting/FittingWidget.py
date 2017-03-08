@@ -1,16 +1,29 @@
 import sys
 import json
 import  os
+import numpy
 from collections import defaultdict
+
+import logging
+import traceback
+
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 
-from UI.FittingWidgetUI import Ui_FittingWidgetUI
-
 from sasmodels import generate
 from sasmodels import modelinfo
+from sasmodels.sasview_model import load_standard_models
+
 from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
+from sas.sasgui.guiframe.dataFitting import Data1D
+from sas.sasgui.guiframe.dataFitting import Data2D
+import sas.qtgui.GuiUtils as GuiUtils
+from sas.sascalc.dataloader.data_info import Detector
+from sas.sascalc.dataloader.data_info import Source
+from sas.sasgui.perspectives.fitting.model_thread import Calc1D
+
+from UI.FittingWidgetUI import Ui_FittingWidgetUI
 
 TAB_MAGNETISM = 4
 TAB_POLY = 3
@@ -20,7 +33,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
     """
     Main widget for selecting form and structure factor models
     """
-    def __init__(self, manager=None, parent=None, data=None):
+    signalTheory =  QtCore.pyqtSignal(QtGui.QStandardItem)
+
+    def __init__(self, manager=None, parent=None, data=None, id=1):
         """
 
         :param manager:
@@ -31,16 +46,28 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         # Necessary globals
         self.model_is_loaded = False
-        self._data = data
+        self.data_is_loaded = False
+        self.kernel_module = None
         self.is2D = False
         self.model_has_shells = False
-        self.data_assigned = False
         self._previous_category_index = 0
         self._last_model_row = 0
+        self._current_parameter_name = None
+        self.models = {}
+
+        # Which tab is this widget displayed in?
+        self.tab_id = id
+
+        # Parameters
+        self.q_range_min = 0.0005
+        self.q_range_max = 0.5
+        self.npts = 20
+        self._data = None
 
         # Main GUI setup up
         self.setupUi(self)
         self.setWindowTitle("Fitting")
+        self.communicate = GuiUtils.Communicate()
 
         # Set the main models
         self._model_model = QtGui.QStandardItemModel()
@@ -51,7 +78,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         # Param model displayed in param list
         self.lstParams.setModel(self._model_model)
-        self._readCategoryInfo()
+        self.readCategoryInfo()
         self.model_parameters = None
         self.lstParams.setAlternatingRowColors(True)
 
@@ -65,10 +92,10 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.setMagneticModel()
         self.setTableProperties(self.lstMagnetic)
 
-        # Defaults for the strcutre factors
+        # Defaults for the structure factors
         self.setDefaultStructureCombo()
 
-        # make structure factor and model CBs disabled
+        # Make structure factor and model CBs disabled
         self.disableModelCombo()
         self.disableStructureCombo()
 
@@ -78,6 +105,10 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.cbCategory.addItems(category_list)
         self.cbCategory.addItem("Structure Factor")
         self.cbCategory.setCurrentIndex(0)
+
+        self._index = data
+        if data is not None:
+            self.data = data
 
         # Connect signals to controls
         self.initializeSignals()
@@ -92,13 +123,15 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
     @data.setter
     def data(self, value):
         """ data setter """
-        self._data = value
-        self.data_assigned = True
-        # TODO: update ranges, chi2 etc
+        self._index = value
+        self._data = GuiUtils.dataFromItem(value[0])
+        self.data_is_loaded = True
+        self.updateQRange()
+        self.cmdFit.setEnabled(True)
 
     def acceptsData(self):
         """ Tells the caller this widget can accept new dataset """
-        return not self.data_assigned
+        return not self.data_is_loaded
 
     def disableModelCombo(self):
         self.cbModel.setEnabled(False)
@@ -116,6 +149,20 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.cbStructureFactor.setEnabled(True)
         self.label_4.setEnabled(True)
 
+    def updateQRange(self):
+        """
+        Updates Q Range display
+        """
+        if self.data_is_loaded:
+            self.q_range_min, self.q_range_max, self.npts = self.computeDataRange(self.data)
+        # set Q range labels
+        self.lblMinRangeDef.setText(str(self.q_range_min))
+        self.lblMaxRangeDef.setText(str(self.q_range_max))
+
+        self.txtMaxRange.setText(str(self.q_range_max))
+        self.txtMinRange.setText(str(self.q_range_min))
+        self.txtNpts.setText(str(self.npts))
+
     def initializeControls(self):
         """
         Set initial control enablement
@@ -131,10 +178,10 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # tabs
         self.tabFitting.setTabEnabled(TAB_POLY, False)
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, False)
-        # set initial labels
-        self.lblMinRangeDef.setText("---")
-        self.lblMaxRangeDef.setText("---")
         self.lblChi2Value.setText("---")
+    
+        # Update Q Ranges
+        self.updateQRange()
 
     def initializeSignals(self):
         """
@@ -146,6 +193,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.chk2DView.toggled.connect(self.toggle2D)
         self.chkPolydispersity.toggled.connect(self.togglePoly)
         self.chkMagnetism.toggled.connect(self.toggleMagnetism)
+        self.cmdFit.clicked.connect(self.onFit)
 
     def setDefaultStructureCombo(self):
         # Fill in the structure factors combo box with defaults
@@ -190,11 +238,24 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
     def selectModel(self):
         """
-        Select Model from list
-        :return:
+        Respond to select Model from list event
         """
         model = self.cbModel.currentText()
+        self._current_parameter_name = model
+
+        # SasModel -> QModel
         self.setModelModel(model)
+
+        if self._index is None:
+            if self.is2D:
+                self.createDefault2dData()
+            else:
+                self.createDefault1dData()
+            self.createTheoryIndex()
+        else:
+            # TODO: 2D case
+            # TODO: attach the chart to index
+            self.calculate1DForModel()
 
     def selectStructureFactor(self):
         """
@@ -205,7 +266,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         model = self.cbStructureFactor.currentText()
         self.setModelModel(model)
 
-    def _readCategoryInfo(self):
+    def readCategoryInfo(self):
         """
         Reads the categories in from file
         """
@@ -219,7 +280,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
                 categorization_file = CategoryInstaller.get_default_file()
             cat_file = open(categorization_file, 'rb')
             self.master_category_dict = json.load(cat_file)
-            self._regenerate_model_dict()
+            self.regenerateModelDict()
             cat_file.close()
         except IOError:
             raise
@@ -227,7 +288,12 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             print 'We even looked for it, made sure it was there.'
             print 'An existential crisis if there ever was one.'
 
-    def _regenerate_model_dict(self):
+        # Load the model dict
+        models = load_standard_models()
+        for model in models:
+            self.models[model.name] = model
+
+    def regenerateModelDict(self):
         """
         regenerates self.by_model_dict which has each model name as the
         key and the list of categories belonging to that model
@@ -312,27 +378,70 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Setting model parameters into table based on selected
         :param model_name:
-        :return:
         """
         # Crete/overwrite model items
         self._model_model.clear()
         model_name = str(model_name)
+
         kernel_module = generate.load_kernel_module(model_name)
+        #model_info = modelinfo.make_model_info(kernel_module)
+        #self.kernel_module = _make_model_from_info(model_info)
         self.model_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
 
-        #TODO: scale and background are implicit in sasmodels and needs to be added
+        # Instantiate the current model
+        self.kernel_module = self.models[model_name]()
+
+        # Explicitly add scale and background with default values
         self.addScaleToModel(self._model_model)
         self.addBackgroundToModel(self._model_model)
 
+        # Update the QModel
         self.addParametersToModel(self.model_parameters, self._model_model)
-
         self.addHeadersToModel(self._model_model)
-
+        # Multishell models need additional treatment
         self.addExtraShells()
 
+        # Add polydispersity to the model
         self.setPolyModel()
+        # Add magnetic parameters to the model
         self.setMagneticModel()
+
+        # Now we claim the model has been loaded
         self.model_is_loaded = True
+
+        # Update Q Ranges
+        self.updateQRange()
+
+    def computeDataRange(self, data):
+        """
+        compute the minimum and the maximum range of the data
+        return the npts contains in data
+        """
+        assert(data is not None)
+        assert((isinstance(data, Data1D) or isinstance(data, Data2D)))
+        qmin, qmax, npts = None, None, None
+        if isinstance(data, Data1D):
+            try:
+                qmin = min(data.x)
+                qmax = max(data.x)
+                npts = len(data.x)
+            except:
+                msg = "Unable to find min/max/length of \n data named %s" % \
+                            data.filename
+                raise ValueError, msg
+
+        else:
+            qmin = 0
+            try:
+                x = max(numpy.fabs(data.xmin), numpy.fabs(data.xmax))
+                y = max(numpy.fabs(data.ymin), numpy.fabs(data.ymax))
+            except:
+                msg = "Unable to find min/max of \n data named %s" % \
+                            data.filename
+                raise ValueError, msg
+            qmax = math.sqrt(x * x + y * y)
+            npts = len(data.data)
+        return qmin, qmax, npts
 
     def addParametersToModel(self, parameters, model):
         """
@@ -378,11 +487,153 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         self._last_model_row = self._model_model.rowCount()
 
-    def modelToFittingParameters(self):
+    def createDefault1dData(self):
+        """
+        Create default data for fitting perspective
+        Only when the page is on theory mode.
+        """
+        x = numpy.linspace(start=self.q_range_min, stop=self.q_range_max,
+                           num=self.npts, endpoint=True)
+        self._data = Data1D(x=x)
+        self._data.xaxis('\\rm{Q}', "A^{-1}")
+        self._data.yaxis('\\rm{Intensity}', "cm^{-1}")
+        self._data.is_data = False
+        self._data.id = str(self.tab_id) + " data"
+        self._data.group_id = str(self.tab_id) + " Model1D"
+
+    def createDefault2dData(self):
+        """
+        Create 2D data by default
+        Only when the page is on theory mode.
+        """
+        self._data = Data2D()
+        qmax = self.q_range_max / numpy.sqrt(2)
+        self._data.xaxis('\\rm{Q_{x}}', 'A^{-1}')
+        self._data.yaxis('\\rm{Q_{y}}', 'A^{-1}')
+        self._data.is_data = False
+        self._data.id = str(self.tab_id) + " data"
+        self._data.group_id = str(self.tab_id) + " Model2D"
+
+        # Default detector
+        self._data.detector.append(Detector())
+        index = len(self._data.detector) - 1
+        self._data.detector[index].distance = 8000   # mm
+        self._data.source.wavelength = 6             # A
+        self._data.detector[index].pixel_size.x = 5  # mm
+        self._data.detector[index].pixel_size.y = 5  # mm
+        self._data.detector[index].beam_center.x = qmax
+        self._data.detector[index].beam_center.y = qmax
+        # theory default: assume the beam
+        #center is located at the center of sqr detector
+        xmax = qmax
+        xmin = -qmax
+        ymax = qmax
+        ymin = -qmax
+        qstep = self.npts
+
+        x = numpy.linspace(start=xmin, stop=xmax, num=qstep, endpoint=True)
+        y = numpy.linspace(start=ymin, stop=ymax, num=qstep, endpoint=True)
+        # Use data info instead
+        new_x = numpy.tile(x, (len(y), 1))
+        new_y = numpy.tile(y, (len(x), 1))
+        new_y = new_y.swapaxes(0, 1)
+
+        # all data required in 1d array
+        qx_data = new_x.flatten()
+        qy_data = new_y.flatten()
+        q_data = numpy.sqrt(qx_data * qx_data + qy_data * qy_data)
+
+        # set all True (standing for unmasked) as default
+        mask = numpy.ones(len(qx_data), dtype=bool)
+        # calculate the range of qx and qy: this way,
+        # it is a little more independent
+        # store x and y bin centers in q space
+        x_bins = x
+        y_bins = y
+
+        self._data.source = Source()
+        self._data.data = numpy.ones(len(mask))
+        self._data.err_data = numpy.ones(len(mask))
+        self._data.qx_data = qx_data
+        self._data.qy_data = qy_data
+        self._data.q_data = q_data
+        self._data.mask = mask
+        self._data.x_bins = x_bins
+        self._data.y_bins = y_bins
+        # max and min taking account of the bin sizes
+        self._data.xmin = xmin
+        self._data.xmax = xmax
+        self._data.ymin = ymin
+        self._data.ymax = ymax
+
+    def createTheoryIndex(self):
+        """
+        Create a QStandardModelIndex containing default model data
+        """
+        name = self._current_parameter_name
+        if self.is2D:
+            name += "2d"
+        name = "M%i [%s]" % (self.tab_id, name)
+        new_item = GuiUtils.createModelItemWithPlot(QtCore.QVariant(self.data), name=name)
+        self.signalTheory.emit(new_item)
+
+    def onFit(self):
+        """
+        Perform fitting on the current data
+        """
+        # TEST FOR DISPLAY.
+        self.calculate1DForModel()
+
+    def calculate1DForModel(self):
         """
         Prepare the fitting data object, based on current ModelModel
         """
-        pass
+        data = self.data
+        model = self.kernel_module
+        page_id = 0
+        qmin = self.q_range_min
+        qmax = self.q_range_max
+        smearer = None
+        state = None
+        weight = None
+        fid = None
+        toggle_mode_on = False
+        update_chisqr = False
+        source = None
+
+        self.calc_1D = Calc1D(data=data,
+                              model=model,
+                              page_id=page_id,
+                              qmin=qmin,
+                              qmax=qmax,
+                              smearer=smearer,
+                              state=state,
+                              weight=weight,
+                              fid=fid,
+                              toggle_mode_on=toggle_mode_on,
+                              completefn=self.complete1D,
+                              update_chisqr=update_chisqr,
+                              exception_handler=self.calcException,
+                              source=source)
+        self.calc_1D.queue()
+
+    def complete1D(self, x, y, page_id, elapsed, index, model,
+                   weight=None, fid=None,
+                   toggle_mode_on=False, state=None,
+                   data=None, update_chisqr=True,
+                   source='model', plot_result=True):
+        """
+        Plot the current data
+        Should be a rewrite of fitting.py/_complete1D
+        """
+        print "THREAD FINISHED"
+
+    def calcException(self, etype, value, tb):
+        """
+        """
+        print "THREAD EXCEPTION"
+        logging.error("".join(traceback.format_exception(etype, value, tb)))
+        msg = traceback.format_exception(etype, value, tb, limit=1)
 
     def replaceShellName(self, param_name, value):
         """

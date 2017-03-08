@@ -81,8 +81,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.fileReadSignal.connect(self.loadFromURL)
         self.communicator.activeGraphsSignal.connect(self.updateGraphCombo)
         self.communicator.activeGraphName.connect(self.updatePlotName)
+        #self.communicator.updateTheoryFromPerspectiveSignal.connect(self.updateTheoryFromPerspective)
         self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
+
+        self._perspective = self.parent.perspective()
+        self._perspective.updateTheoryFromPerspectiveSignal.connect(self.updateTheoryFromPerspective)
 
         # Proxy model for showing a subset of Data1D/Data2D content
         self.data_proxy = QtGui.QSortFilterProxyModel(self)
@@ -786,7 +790,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         new_plot = globals()[method_name](self, quickplot=True)
         new_plot.data = data
-        new_plot.plot(marker='o')
+        #new_plot.plot(marker='o')
+        new_plot.plot()
 
         # Update the global plot counter
         title = "Plot " + data.name
@@ -898,6 +903,33 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Reset the view
         self.model.reset()
+
+        # Pass acting as a debugger anchor
+        pass
+
+    def updateTheoryFromPerspective(self, model_item):
+        """
+        Receive an update theory item from a perspective
+        Make sure it is valid and if so, replace/add in the model
+        """
+        # Assert the correct type
+        if not isinstance(model_item, QtGui.QStandardItem):
+            msg = "Wrong data type returned from calculations."
+            raise AttributeError, msg
+
+        # Check if there are any other items for this tab
+        # If so, delete them
+        current_tab_name = model_item.text()[:2]
+        for current_index in xrange(self.theory_model.rowCount()):
+            if current_tab_name in self.theory_model.item(current_index).text():
+                self.theory_model.removeRow(current_index)
+                break
+
+        # Reset the view
+        self.model.reset()
+
+        # Reset the view
+        self.theory_model.appendRow(model_item)
 
         # Pass acting as a debugger anchor
         pass
