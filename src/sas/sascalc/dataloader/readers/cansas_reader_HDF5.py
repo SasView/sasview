@@ -54,7 +54,7 @@ class Reader():
     # List of allowed extensions
     ext = ['.h5', '.H5']
     # Flag to bypass extension check
-    allow_all = False
+    allow_all = True
     # List of files to return
     output = None
 
@@ -192,17 +192,17 @@ class Reader():
                     self.current_dataset.mask = data_set.flatten()
                     continue
                 # Transmission Spectrum
-                elif key == u'T' and self.parent_class == \
-                        u'SAStransmission_spectrum':
+                elif (key == u'T') \
+                        and (self.parent_class == u'SAStransmission_spectrum'):
                     self.trans_spectrum.transmission = data_set.flatten()
                     continue
-                elif key == u'Tdev' and self.parent_class == \
-                        u'SAStransmission_spectrum':
+                elif (key == u'Tdev') \
+                        and (self.parent_class == u'SAStransmission_spectrum'):
                     self.trans_spectrum.transmission_deviation = \
                         data_set.flatten()
                     continue
-                elif key == u'lambda' and self.parent_class == \
-                        u'SAStransmission_spectrum':
+                elif (key == u'lambda') \
+                        and (self.parent_class == u'SAStransmission_spectrum'):
                     self.trans_spectrum.wavelength = data_set.flatten()
                     continue
 
@@ -233,20 +233,20 @@ class Reader():
                     # NXcanSAS format
                     elif key == u'ID' and self.parent_class == u'SASsample':
                         self.current_datainfo.sample.name = data_point
-                    elif key == u'thickness' and self.parent_class == \
-                            u'SASsample':
+                    elif (key == u'thickness') and (self.parent_class ==
+                                                    u'SASsample'):
                         self.current_datainfo.sample.thickness = data_point
-                    elif key == u'temperature' and self.parent_class == \
-                            u'SASsample':
+                    elif (key == u'temperature') and (self.parent_class ==
+                                                      u'SASsample'):
                         self.current_datainfo.sample.temperature = data_point
-                    elif key == u'transmission' and self.parent_class == \
-                            u'SASsample':
+                    elif (key == u'transmission') and (self.parent_class ==
+                                                       u'SASsample'):
                         self.current_datainfo.sample.transmission = data_point
-                    elif key == u'x_position' and self.parent_class == \
-                            u'SASsample':
+                    elif (key == u'x_position') and (self.parent_class ==
+                                                     u'SASsample'):
                         self.current_datainfo.sample.position.x = data_point
-                    elif key == u'y_position' and self.parent_class == \
-                            u'SASsample':
+                    elif (key == u'y_position') and (self.parent_class ==
+                                                     u'SASsample'):
                         self.current_datainfo.sample.position.y = data_point
                     elif key == u'pitch' and self.parent_class == u'SASsample':
                         self.current_datainfo.sample.orientation.x = data_point
@@ -254,33 +254,33 @@ class Reader():
                         self.current_datainfo.sample.orientation.y = data_point
                     elif key == u'roll' and self.parent_class == u'SASsample':
                         self.current_datainfo.sample.orientation.z = data_point
-                    elif key == u'details' and self.parent_class == \
-                            u'SASsample':
+                    elif (key == u'details') and (self.parent_class ==
+                                                  u'SASsample'):
                         self.current_datainfo.sample.details.append(data_point)
 
                     # Instrumental Information
-                    elif key == u'name' and self.parent_class == \
-                            u'SASinstrument':
+                    elif (key == u'name') and (self.parent_class ==
+                                               u'SASinstrument'):
                         self.current_datainfo.instrument = data_point
                     elif key == u'name' and self.parent_class == u'SASdetector':
                         self.detector.name = data_point
                     elif key == u'SDD' and self.parent_class == u'SASdetector':
                         self.detector.distance = float(data_point)
                         self.detector.distance_unit = unit
-                    elif key == u'slit_length' and self.parent_class == \
-                            u'SASdetector':
+                    elif (key == u'slit_length') and (self.parent_class ==
+                                                      u'SASdetector'):
                         self.detector.slit_length = float(data_point)
                         self.detector.slit_length_unit = unit
-                    elif key == u'x_position' and self.parent_class == \
-                            u'SASdetector':
+                    elif (key == u'x_position') and (self.parent_class ==
+                                                     u'SASdetector'):
                         self.detector.offset.x = float(data_point)
                         self.detector.offset_unit = unit
-                    elif key == u'y_position' and self.parent_class == \
-                            u'SASdetector':
+                    elif (key == u'y_position') and (self.parent_class ==
+                                                     u'SASdetector'):
                         self.detector.offset.y = float(data_point)
                         self.detector.offset_unit = unit
-                    elif key == u'pitch' and self.parent_class == \
-                            u'SASdetector':
+                    elif (key == u'pitch') and (self.parent_class ==
+                                                u'SASdetector'):
                         self.detector.orientation.x = float(data_point)
                         self.detector.orientation_unit = unit
                     elif key == u'roll' and self.parent_class == u'SASdetector':
@@ -289,48 +289,48 @@ class Reader():
                     elif key == u'yaw' and self.parent_class == u'SASdetector':
                         self.detector.orientation.y = float(data_point)
                         self.detector.orientation_unit = unit
-                    elif key == u'beam_center_x' and self.parent_class == \
-                            u'SASdetector':
+                    elif (key == u'beam_center_x') and (self.parent_class ==
+                                                        u'SASdetector'):
                         self.detector.beam_center.x = float(data_point)
                         self.detector.beam_center_unit = unit
-                    elif key == u'beam_center_y' and self.parent_class == \
-                            u'SASdetector':
+                    elif (key == u'beam_center_y') and (self.parent_class ==
+                                                        u'SASdetector'):
                         self.detector.beam_center.y = float(data_point)
                         self.detector.beam_center_unit = unit
-                    elif key == u'x_pixel_size' and self.parent_class == \
-                            u'SASdetector':
+                    elif (key == u'x_pixel_size') and (self.parent_class ==
+                                                       u'SASdetector'):
                         self.detector.pixel_size.x = float(data_point)
                         self.detector.pixel_size_unit = unit
-                    elif key == u'y_pixel_size' and self.parent_class == \
-                            u'SASdetector':
+                    elif (key == u'y_pixel_size') and (self.parent_class ==
+                                                       u'SASdetector'):
                         self.detector.pixel_size.y = float(data_point)
                         self.detector.pixel_size_unit = unit
-                    elif key == u'distance' and self.parent_class == \
-                            u'SAScollimation':
+                    elif (key == u'distance') and (self.parent_class ==
+                                                   u'SAScollimation'):
                         self.collimation.length = data_point
                         self.collimation.length_unit = unit
-                    elif key == u'name' and self.parent_class == \
-                            u'SAScollimation':
+                    elif (key == u'name') and (self.parent_class ==
+                                               u'SAScollimation'):
                         self.collimation.name = data_point
-                    elif key == u'shape' and self.parent_class == \
-                            u'SASaperture':
+                    elif (key == u'shape') and (self.parent_class ==
+                                                u'SASaperture'):
                         self.aperture.shape = data_point
-                    elif key == u'x_gap' and self.parent_class == \
-                            u'SASaperture':
+                    elif (key == u'x_gap') and (self.parent_class ==
+                                                u'SASaperture'):
                         self.aperture.size.x = data_point
-                    elif key == u'y_gap' and self.parent_class == \
-                            u'SASaperture':
+                    elif (key == u'y_gap') and (self.parent_class ==
+                                                u'SASaperture'):
                         self.aperture.size.y = data_point
 
                     # Process Information
-                    elif key == u'Title' and self.parent_class == \
-                            u'SASprocess': # CanSAS 2.0 format
+                    elif (key == u'Title') and (self.parent_class ==
+                                                u'SASprocess'): # CanSAS 2.0
                         self.process.name = data_point
-                    elif key == u'name' and self.parent_class == \
-                            u'SASprocess': # NXcanSAS format
+                    elif (key == u'name') and (self.parent_class ==
+                                               u'SASprocess'): # NXcanSAS
                         self.process.name = data_point
-                    elif key == u'description' and self.parent_class == \
-                            u'SASprocess':
+                    elif (key == u'description') and (self.parent_class ==
+                                                      u'SASprocess'):
                         self.process.description = data_point
                     elif key == u'date' and self.parent_class == u'SASprocess':
                         self.process.date = data_point
@@ -340,44 +340,44 @@ class Reader():
                         self.process.notes.append(data_point)
 
                     # Source
-                    elif key == u'wavelength' and self.parent_class == \
-                            u'SASdata':
+                    elif (key == u'wavelength') and (self.parent_class ==
+                                                     u'SASdata'):
                         self.current_datainfo.source.wavelength = data_point
                         self.current_datainfo.source.wavelength_unit = unit
-                    elif key == u'incident_wavelength' and self.parent_class == \
-                            u'SASsource':
+                    elif (key == u'incident_wavelength') and \
+                        (self.parent_class == 'SASsource'):
                         self.current_datainfo.source.wavelength = data_point
                         self.current_datainfo.source.wavelength_unit = unit
-                    elif key == u'wavelength_max' and self.parent_class == \
-                            u'SASsource':
+                    elif (key == u'wavelength_max') and (self.parent_class ==
+                                                         u'SASsource'):
                         self.current_datainfo.source.wavelength_max = data_point
                         self.current_datainfo.source.wavelength_max_unit = unit
-                    elif key == u'wavelength_min' and self.parent_class == \
-                            u'SASsource':
+                    elif (key == u'wavelength_min') and (self.parent_class ==
+                                                         u'SASsource'):
                         self.current_datainfo.source.wavelength_min = data_point
                         self.current_datainfo.source.wavelength_min_unit = unit
                     elif key == u'incident_wavelength_spread' and \
-                                    self.parent_class == u'SASsource':
+                            (self.parent_class == u'SASsource'):
                         self.current_datainfo.source.wavelength_spread = \
                             data_point
                         self.current_datainfo.source.wavelength_spread_unit = \
                             unit
-                    elif key == u'beam_size_x' and self.parent_class == \
-                            u'SASsource':
+                    elif (key == u'beam_size_x') and (self.parent_class ==
+                                                      u'SASsource'):
                         self.current_datainfo.source.beam_size.x = data_point
                         self.current_datainfo.source.beam_size_unit = unit
-                    elif key == u'beam_size_y' and self.parent_class == \
-                            u'SASsource':
+                    elif (key == u'beam_size_y') and (self.parent_class ==
+                                                      u'SASsource'):
                         self.current_datainfo.source.beam_size.y = data_point
                         self.current_datainfo.source.beam_size_unit = unit
-                    elif key == u'beam_shape' and self.parent_class == \
-                            u'SASsource':
+                    elif (key == u'beam_shape') and (self.parent_class ==
+                                                     u'SASsource'):
                         self.current_datainfo.source.beam_shape = data_point
-                    elif key == u'radiation' and self.parent_class == \
-                            u'SASsource':
+                    elif (key == u'radiation') and (self.parent_class ==
+                                                    u'SASsource'):
                         self.current_datainfo.source.radiation = data_point
-                    elif key == u'transmission' and self.parent_class == \
-                            u'SASdata':
+                    elif (key == u'transmission') and (self.parent_class ==
+                                                       u'SASdata'):
                         self.current_datainfo.sample.transmission = data_point
 
                     # Everything else goes in meta_data
@@ -476,8 +476,10 @@ class Reader():
             # Calculate the actual Q matrix
             try:
                 if dataset.q_data.size <= 1:
-                    dataset.q_data = np.sqrt(dataset.qx_data * dataset.qx_data +
-                                             dataset.qy_data * dataset.qy_data)
+                    dataset.q_data = np.sqrt(dataset.qx_data
+                                             * dataset.qx_data
+                                             + dataset.qy_data
+                                             * dataset.qy_data)
             except:
                 dataset.q_data = None
 
@@ -593,7 +595,7 @@ class Reader():
         :return: unit for the value passed to the method
         """
         unit = value.attrs.get(u'units')
-        if unit == None:
+        if unit is None:
             unit = value.attrs.get(u'unit')
         # Convert the unit formats
         if unit == "1/A":
