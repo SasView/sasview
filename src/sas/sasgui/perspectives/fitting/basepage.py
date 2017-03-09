@@ -1247,7 +1247,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             self.dx_percent = state.dx_percent
             if self.dx_percent is not None:
                 if state.dx_old:
-                    self.dx_percent = self.data.x[0] / self.dx_percent
+                    self.dx_percent = 100 * (self.dx_percent / self.data.x[0])
                 self.smear_pinhole_percent.SetValue("%.2f" % self.dx_percent)
             self.onPinholeSmear(event=None)
         elif self.slit_smearer.GetValue():
