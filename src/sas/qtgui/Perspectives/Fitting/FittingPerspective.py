@@ -11,7 +11,6 @@ from FittingWidget import FittingWidget
 class FittingWindow(QtGui.QTabWidget):
     """
     """
-    updateTheoryFromPerspectiveSignal =  QtCore.pyqtSignal(QtGui.QStandardItem)
     name = "Fitting" # For displaying in the combo box in DataExplorer
     def __init__(self, manager=None, parent=None, data=None):
         super(FittingWindow, self).__init__()
@@ -43,7 +42,8 @@ class FittingWindow(QtGui.QTabWidget):
 
         self.setWindowTitle('Fit panel - Active Fitting Optimizer: %s' % self.optimizer)
 
-        self.communicate = GuiUtils.Communicate()
+        #self.communicate = GuiUtils.Communicate()
+        self.communicate = self.parent.communicator()
 
     def addFit(self, data):
         """
@@ -53,7 +53,6 @@ class FittingWindow(QtGui.QTabWidget):
         self.tabs.append(tab)
         self.maxIndex += 1
         self.addTab(tab, self.tabName())
-        tab.signalTheory.connect(self.passSignal)
 
     def tabName(self):
         """
@@ -66,7 +65,7 @@ class FittingWindow(QtGui.QTabWidget):
         """
         Update local bookkeeping on tab close
         """
-        assert(len(self.tabs) >= index)
+        assert len(self.tabs) >= index
         # don't remove the last tab
         if len(self.tabs) <= 1:
             return
@@ -85,7 +84,7 @@ class FittingWindow(QtGui.QTabWidget):
         Obtain a QStandardItem object and dissect it to get Data1D/2D
         Pass it over to the calculator
         """
-        assert(data_item is not None)
+        assert data_item is not None
 
         if not isinstance(data_item, list):
             msg = "Incorrect type passed to the Fitting Perspective"
@@ -97,28 +96,11 @@ class FittingWindow(QtGui.QTabWidget):
 
         self._model_item = data_item[0]
 
-        # Extract data on 1st child - this is the Data1D/2D component
-        data = GuiUtils.dataFromItem(self._model_item)
-
-        # self.model.item(WIDGETS.W_FILENAME).setData(QtCore.QVariant(self._model_item.text()))
-
         # Find the first unassigned tab.
         # If none, open a new tab.
-        available_tabs = list(map(lambda tab:tab.acceptsData(), self.tabs))
+        available_tabs = list(map(lambda tab: tab.acceptsData(), self.tabs))
 
         if numpy.any(available_tabs):
             self.tabs[available_tabs.index(True)].data = data_item
         else:
             self.addFit(data_item)
-
-
-    def passSignal(self, theory_item):
-        """
-        """
-        self.updateTheoryFromPerspectiveSignal.emit(theory_item)
-
-if __name__ == "__main__":
-    app = QtGui.QApplication([])
-    dlg = FittingWindow()
-    dlg.show()
-    sys.exit(app.exec_())

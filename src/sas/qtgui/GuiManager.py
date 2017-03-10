@@ -181,7 +181,7 @@ class GuiManager(object):
         if self._current_perspective:
             self._current_perspective.close()
         # Default perspective
-        self._current_perspective = Perspectives.PERSPECTIVES[str(perspective_name)](self)
+        self._current_perspective = Perspectives.PERSPECTIVES[str(perspective_name)](manager=self, parent=self)
         self._workspace.workspace.addWindow(self._current_perspective)
         self._current_perspective.show()
 
@@ -334,6 +334,7 @@ class GuiManager(object):
         self.communicate.updatePerspectiveWithDataSignal.connect(self.updatePerspective)
         self.communicate.progressBarUpdateSignal.connect(self.updateProgressBar)
         self.communicate.perspectiveChangedSignal.connect(self.perspectiveChanged)
+        self.communicate.updateTheoryFromPerspectiveSignal.connect(self.updateTheoryFromPerspective)
 
     def addTriggers(self):
         """
@@ -720,5 +721,12 @@ class GuiManager(object):
         """
         self.checkUpdate()
 
-        pass
+    def updateTheoryFromPerspective(self, index):
+        """
+        Catch the theory update signal from a perspective
+        Send the request to the DataExplorer for updating the theory model.
+        """
+        self.filesWidget.updateTheoryFromPerspective(index)
+
+
 

@@ -72,21 +72,23 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.treeView.customContextMenuRequested.connect(self.onCustomContextMenu)
         self.contextMenu()
 
+        # Same menus for the theory view
+        self.freezeView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.freezeView.customContextMenuRequested.connect(self.onCustomContextMenu)
+
         # Connect the comboboxes
         self.cbSelect.currentIndexChanged.connect(self.selectData)
 
         #self.closeEvent.connect(self.closeEvent)
-        # self.aboutToQuit.connect(self.closeEvent)
+        self.currentChanged.connect(self.onTabSwitch)
         self.communicator = self.parent.communicator()
         self.communicator.fileReadSignal.connect(self.loadFromURL)
         self.communicator.activeGraphsSignal.connect(self.updateGraphCombo)
         self.communicator.activeGraphName.connect(self.updatePlotName)
-        #self.communicator.updateTheoryFromPerspectiveSignal.connect(self.updateTheoryFromPerspective)
         self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
 
         self._perspective = self.parent.perspective()
-        self._perspective.updateTheoryFromPerspectiveSignal.connect(self.updateTheoryFromPerspective)
 
         # Proxy model for showing a subset of Data1D/Data2D content
         self.data_proxy = QtGui.QSortFilterProxyModel(self)
@@ -110,11 +112,21 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         self.enableGraphCombo(None)
 
+        # Current view on model
+        self.current_view = self.treeView
+
     def closeEvent(self, event):
         """
         Overwrite the close event - no close!
         """
         event.ignore()
+
+    def onTabSwitch(self, index):
+        """ Callback for tab switching signal """
+        if index == 0:
+            self.current_view = self.treeView
+        else:
+            self.current_view = self.freezeView
 
     def displayHelp(self):
         """
@@ -724,9 +736,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Show the right-click context menu in the data treeview
         """
-        index = self.treeView.indexAt(position)
+        index = self.current_view.indexAt(position)
+        proxy = self.current_view.model()
+        model = proxy.sourceModel()
+
         if index.isValid():
-            model_item = self.model.itemFromIndex(self.data_proxy.mapToSource(index))
+            model_item = model.itemFromIndex(proxy.mapToSource(index))
             # Find the mapped index
             orig_index = model_item.isCheckable()
             if orig_index:
@@ -735,14 +750,17 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 self.actionQuick3DPlot.setEnabled(is_2D)
                 self.actionEditMask.setEnabled(is_2D)
                 # Fire up the menu
-                self.context_menu.exec_(self.treeView.mapToGlobal(position))
+                self.context_menu.exec_(self.current_view.mapToGlobal(position))
 
     def showDataInfo(self):
         """
         Show a simple read-only text edit with data information.
         """
-        index = self.treeView.selectedIndexes()[0]
-        model_item = self.model.itemFromIndex(self.data_proxy.mapToSource(index))
+        index = self.current_view.selectedIndexes()[0]
+        proxy = self.current_view.model()
+        model = proxy.sourceModel()
+        model_item = model.itemFromIndex(proxy.mapToSource(index))
+
         data = GuiUtils.dataFromItem(model_item)
         if isinstance(data, Data1D):
             text_to_show = GuiUtils.retrieveData1d(data)
@@ -768,8 +786,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Save the data points as either txt or xml
         """
-        index = self.treeView.selectedIndexes()[0]
-        model_item = self.model.itemFromIndex(self.data_proxy.mapToSource(index))
+        index = self.current_view.selectedIndexes()[0]
+        proxy = self.current_view.model()
+        model = proxy.sourceModel()
+        model_item = model.itemFromIndex(proxy.mapToSource(index))
+
         data = GuiUtils.dataFromItem(model_item)
         if isinstance(data, Data1D):
             GuiUtils.saveData1D(data)
@@ -780,8 +801,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Frozen plot - display an image of the plot
         """
-        index = self.treeView.selectedIndexes()[0]
-        model_item = self.model.itemFromIndex(self.data_proxy.mapToSource(index))
+        index = self.current_view.selectedIndexes()[0]
+        proxy = self.current_view.model()
+        model = proxy.sourceModel()
+        model_item = model.itemFromIndex(proxy.mapToSource(index))
+
         data = GuiUtils.dataFromItem(model_item)
 
         method_name = 'Plotter'
@@ -804,8 +828,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Slowish 3D plot
         """
-        index = self.treeView.selectedIndexes()[0]
-        model_item = self.model.itemFromIndex(self.data_proxy.mapToSource(index))
+        index = self.current_view.selectedIndexes()[0]
+        proxy = self.current_view.model()
+        model = proxy.sourceModel()
+        model_item = model.itemFromIndex(proxy.mapToSource(index))
+
         data = GuiUtils.dataFromItem(model_item)
 
         new_plot = Plotter2D(self, quickplot=True, dimension=3)
@@ -823,8 +850,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Mask Editor for 2D plots
         """
-        index = self.treeView.selectedIndexes()[0]
-        model_item = self.model.itemFromIndex(self.data_proxy.mapToSource(index))
+        index = self.current_view.selectedIndexes()[0]
+        proxy = self.current_view.model()
+        model = proxy.sourceModel()
+        model_item = model.itemFromIndex(proxy.mapToSource(index))
+
         data = GuiUtils.dataFromItem(model_item)
 
         mask_editor = MaskEditor(self, data)
