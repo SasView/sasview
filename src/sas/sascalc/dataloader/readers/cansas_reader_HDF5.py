@@ -52,7 +52,7 @@ class Reader():
     ## List of allowed extensions
     ext = ['.h5', '.H5']
     ## Flag to bypass extension check
-    allow_all = False
+    allow_all = True
     ## List of files to return
     output = None
 

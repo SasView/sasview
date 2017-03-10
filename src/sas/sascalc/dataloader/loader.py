@@ -30,6 +30,7 @@ from sas.sascalc.data_util.registry import ExtensionRegistry
 import readers
 from readers import ascii_reader
 from readers import cansas_reader
+from readers import cansas_reader_HDF5
 
 class Registry(ExtensionRegistry):
     """
@@ -72,8 +73,12 @@ class Registry(ExtensionRegistry):
                 ascii_loader = ascii_reader.Reader()
                 return ascii_loader.read(path)
             except:
-                cansas_loader = cansas_reader.Reader()
-                return cansas_loader.read(path)
+                try:
+                    cansas_loader = cansas_reader.Reader()
+                    return cansas_loader.read(path)
+                except:
+                    cansas_nexus_loader = cansas_reader_HDF5.Reader()
+                    return cansas_nexus_loader.read(path)
 
     def find_plugins(self, dir):
         """
