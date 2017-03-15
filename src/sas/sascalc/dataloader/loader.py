@@ -77,8 +77,15 @@ class Registry(ExtensionRegistry):
                     cansas_loader = cansas_reader.Reader()
                     return cansas_loader.read(path)
                 except:
-                    cansas_nexus_loader = cansas_reader_HDF5.Reader()
-                    return cansas_nexus_loader.read(path)
+                    try:
+                        cansas_nexus_loader = cansas_reader_HDF5.Reader()
+                        return cansas_nexus_loader.read(path)
+                    except:
+                        msg = "\n\tUnknown data format: %s.\n" % path
+                        msg += "\tThe file is not a known format for SasView. "
+                        msg += "The most common formats are multi-column "
+                        msg += "ASCII, CanSAS XML, andCanSAS NeXuS."
+                        raise Exception(msg)
 
     def find_plugins(self, dir):
         """
