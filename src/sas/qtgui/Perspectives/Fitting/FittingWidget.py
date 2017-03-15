@@ -1,6 +1,6 @@
 import sys
 import json
-import  os
+import os
 import numpy
 from collections import defaultdict
 
@@ -81,18 +81,37 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.communicate = self.parent.communicate
 
         # Set the main models
+        # We can't use a single model here, due to restrictions on flattening
+        # the model tree with subclassed QAbstractProxyModel...
         self._model_model = QtGui.QStandardItemModel()
         self._poly_model = QtGui.QStandardItemModel()
         self._magnet_model = QtGui.QStandardItemModel()
 
+        # Set the proxy models for display
+        #   Main display
+        self._model_proxy = QtGui.QSortFilterProxyModel()
+        self._model_proxy.setSourceModel(self._model_model)
+        #self._model_proxy.setFilterRegExp(r"[^()]")
+
+        #   Proxy display
+        self._poly_proxy = QtGui.QSortFilterProxyModel()
+        self._poly_proxy.setSourceModel(self._poly_model)
+        self._poly_proxy.setFilterRegExp(r"[^()]")
+
+        #   Magnetism display
+        self._magnet_proxy = QtGui.QSortFilterProxyModel()
+        self._magnet_proxy.setSourceModel(self._magnet_model)
+        #self._magnet_proxy.setFilterRegExp(r"[^()]")
+
         # Param model displayed in param list
         self.lstParams.setModel(self._model_model)
+        #self.lstParams.setModel(self._model_proxy)
         self.readCategoryInfo()
         self.model_parameters = None
         self.lstParams.setAlternatingRowColors(True)
 
         # Poly model displayed in poly list
-        self.lstPoly.setModel(self._poly_model)
+        self.lstPoly.setModel(self._poly_proxy)
         self.setPolyModel()
         self.setTableProperties(self.lstPoly)
 
@@ -203,9 +222,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         Connect GUI element signals
         """
         # Comboboxes
-        self.cbStructureFactor.currentIndexChanged.connect(self.selectStructureFactor)
-        self.cbCategory.currentIndexChanged.connect(self.selectCategory)
-        self.cbModel.currentIndexChanged.connect(self.selectModel)
+        self.cbStructureFactor.currentIndexChanged.connect(self.onSelectStructureFactor)
+        self.cbCategory.currentIndexChanged.connect(self.onSelectCategory)
+        self.cbModel.currentIndexChanged.connect(self.onSelectModel)
         # Checkboxes
         self.chk2DView.toggled.connect(self.toggle2D)
         self.chkPolydispersity.toggled.connect(self.togglePoly)
@@ -220,19 +239,22 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         # Respond to change in parameters from the UI
         self._model_model.itemChanged.connect(self.updateParamsFromModel)
+        self._poly_model.itemChanged.connect(self.onPolyModelChange)
+        # TODO after the poly_model prototype accepted
+        #self._magnet_model.itemChanged.connect(self.onMagneticModelChange)
 
     def setDefaultStructureCombo(self):
         """
         Fill in the structure factors combo box with defaults
         """
         structure_factor_list = self.master_category_dict.pop('Structure Factor')
-        structure_factors = []
+        structure_factors = ["None"]
         self.cbStructureFactor.clear()
         for (structure_factor, _) in structure_factor_list:
             structure_factors.append(structure_factor)
         self.cbStructureFactor.addItems(sorted(structure_factors))
 
-    def selectCategory(self):
+    def onSelectCategory(self):
         """
         Select Category from list
         """
@@ -266,7 +288,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             models.append(model)
         self.cbModel.addItems(sorted(models))
 
-    def selectModel(self):
+    def onSelectModel(self):
         """
         Respond to select Model from list event
         """
@@ -291,12 +313,13 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
                 self.calculate1DForModel()
             # TODO: attach the chart to index
 
-    def selectStructureFactor(self):
+    def onSelectStructureFactor(self):
         """
         Select Structure Factor from list
         """
-        model = str(self.cbStructureFactor.currentText())
-        self.setModelModel(model)
+        model = str(self.cbModel.currentText())
+        structure = str(self.cbStructureFactor.currentText())
+        self.setModelModel(model, structure_factor=structure)
 
     def readCategoryInfo(self):
         """
@@ -395,12 +418,10 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         model.setHeaderData(5, QtCore.Qt.Horizontal, QtCore.QVariant("Nsigs"))
         model.setHeaderData(6, QtCore.Qt.Horizontal, QtCore.QVariant("Function"))
 
-    def setModelModel(self, model_name):
+    def setModelModel(self, model_name, structure_factor=None):
         """
         Setting model parameters into table based on selected category
         """
-        assert isinstance(model_name, str)
-
         # Crete/overwrite model items
         self._model_model.clear()
 
@@ -417,6 +438,15 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Update the QModel
         self.addParametersToModel(self.model_parameters, self._model_model)
         self.addHeadersToModel(self._model_model)
+
+        # Add structure factor
+        if structure_factor is not None and structure_factor != "None":
+            structure_module = generate.load_kernel_module(structure_factor)
+            structure_parameters = modelinfo.make_parameter_table(getattr(structure_module, 'parameters', []))
+            self.addSimpleParametersToModel(structure_parameters, self._model_model)
+        else:
+            self.addStructureFactor()
+
         # Multishell models need additional treatment
         self.addExtraShells()
 
@@ -431,15 +461,56 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Update Q Ranges
         self.updateQRange()
 
+    def onPolyModelChange(self, item):
+        """
+        Callback method for updating the main model and sasmodel
+        parameters with the GUI values in the polydispersity view
+        """
+        model_column = item.column()
+        model_row = item.row()
+        name_index = self._poly_model.index(model_row, 0)
+        # Extract changed value. Assumes proper validation by QValidator/Delegate
+        value = float(item.text())
+        parameter_name = str(self._poly_model.data(name_index).toPyObject()) # "distribution of sld" etc.
+        if "Distribution of" in parameter_name:
+            parameter_name = parameter_name[16:]
+        property_name = str(self._poly_model.headerData(model_column, 1).toPyObject()) # Value, min, max, etc.
+        print "%s(%s) => %d" % (parameter_name, property_name, value)
+
+        # Update the sasmodel
+        #self.kernel_module.params[parameter_name] = value
+
+        # Reload the main model - may not be required if no variable is shown in main view
+        #model = str(self.cbModel.currentText())
+        #self.setModelModel(model)
+
+        pass # debug anchor
+
     def updateParamsFromModel(self, item):
         """
         Callback method for updating the sasmodel parameters with the GUI values
         """
-        # Extract changed value. Assumes proper validation by QValidator/Delegate
-        value = float(item.text())
         model_column = item.column()
         model_row = item.row()
         name_index = self._model_model.index(model_row, 0)
+
+        if model_column == 0:
+            # Assure we're dealing with checkboxes
+            if not item.isCheckable():
+                return
+            status = item.checkState()
+            # If multiple rows selected - toggle all of them
+            rows = [s.row() for s in self.lstParams.selectionModel().selectedRows()]
+
+            # Switch off signaling from the model to avoid multiple calls
+            self._model_model.blockSignals(True)
+            # Convert to proper indices and set requested enablement
+            items = [self._model_model.item(row, 0).setCheckState(status) for row in rows]
+            self._model_model.blockSignals(False)
+            return
+
+        # Extract changed value. Assumes proper validation by QValidator/Delegate
+        value = float(item.text())
         parameter_name = str(self._model_model.data(name_index).toPyObject()) # sld, background etc.
         property_name = str(self._model_model.headerData(1, model_column).toPyObject()) # Value, min, max, etc.
 
@@ -489,8 +560,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         multishell_parameters = self.getIterParams(parameters)
         multishell_param_name, _ = self.getMultiplicity(parameters)
 
-        #TODO: iq_parameters are used here. If orientation paramateres or magnetic are needed
-        # kernel_paramters should be used instead
         for param in parameters.iq_parameters:
             # don't include shell parameters
             if param.name == multishell_param_name:
@@ -518,6 +587,28 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
                     break
                 # Add the polydisp item as a child
                 item1.appendRow([poly_item])
+            # Param values
+            item2 = QtGui.QStandardItem(str(param.default))
+            # TODO: the error column.
+            # Either add a proxy model or a custom view delegate
+            #item_err = QtGui.QStandardItem()
+            item3 = QtGui.QStandardItem(str(param.limits[0]))
+            item4 = QtGui.QStandardItem(str(param.limits[1]))
+            item5 = QtGui.QStandardItem(param.units)
+            model.appendRow([item1, item2, item3, item4, item5])
+
+        # Update the counter used for multishell display
+        self._last_model_row = self._model_model.rowCount()
+
+    def addSimpleParametersToModel(self, parameters, model):
+        """
+        Update local ModelModel with sasmodel parameters
+        """
+        for param in parameters.iq_parameters:
+            # Modify parameter name from <param>[n] to <param>1
+            item_name = param.name
+            item1 = QtGui.QStandardItem(item_name)
+            item1.setCheckable(True)
             # Param values
             item2 = QtGui.QStandardItem(str(param.default))
             # TODO: the error column.
@@ -655,10 +746,10 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # assumes type/value correctness achieved with QValidator
         try:
             self.q_range_min = float(text)
-            # set Q range labels on the main tab
-            self.lblMinRangeDef.setText(str(self.q_range_min))
         except:
             pass
+        # set Q range labels on the main tab
+        self.lblMinRangeDef.setText(str(self.q_range_min))
 
     def onMaxRange(self, text):
         """
@@ -667,10 +758,10 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # assumes type/value correctness achieved with QValidator
         try:
             self.q_range_max = float(text)
-            # set Q range labels on the main tab
-            self.lblMaxRangeDef.setText(str(self.q_range_max))
         except:
             pass
+        # set Q range labels on the main tab
+        self.lblMaxRangeDef.setText(str(self.q_range_max))
 
     def calculate1DForModel(self):
         """
@@ -847,8 +938,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Set polydispersity values
         """
-        ### TODO: apply proper proxy model filtering from the main _model_model
-
         if not self.model_parameters:
             return
         self._poly_model.clear()
@@ -889,6 +978,15 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             self.addCheckedListToModel(self._magnet_model, checked_list)
 
         self.addHeadersToModel(self._magnet_model)
+
+    def addStructureFactor(self):
+        """
+        Add structure factors to the list of parameters
+        """
+        if self.kernel_module.is_form_factor:
+            self.enableStructureCombo()
+        else:
+            self.disableStructureCombo()
 
     def addExtraShells(self):
         """
