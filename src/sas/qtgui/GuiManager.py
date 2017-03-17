@@ -181,7 +181,7 @@ class GuiManager(object):
         if self._current_perspective:
             self._current_perspective.close()
         # Default perspective
-        self._current_perspective = Perspectives.PERSPECTIVES[str(perspective_name)](manager=self, parent=self)
+        self._current_perspective = Perspectives.PERSPECTIVES[str(perspective_name)](parent=self)
         self._workspace.workspace.addWindow(self._current_perspective)
         self._current_perspective.show()
 

@@ -40,8 +40,8 @@ from sas.sasgui.perspectives.fitting.resultpanel import ResultPanel, PlotResultE
 from sas.sasgui.perspectives.fitting.fit_thread import FitThread
 from sas.sasgui.perspectives.fitting.pagestate import Reader
 from sas.sasgui.perspectives.fitting.fitpage import Chi2UpdateEvent
-from sas.sasgui.perspectives.calculator.model_editor import TextDialog
-from sas.sasgui.perspectives.calculator.model_editor import EditorWindow
+#from sas.sasgui.perspectives.calculator.model_editor import TextDialog
+#from sas.sasgui.perspectives.calculator.model_editor import EditorWindow
 from sas.sasgui.guiframe.gui_manager import MDIFrame
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 

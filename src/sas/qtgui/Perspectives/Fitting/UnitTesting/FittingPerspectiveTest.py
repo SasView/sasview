@@ -1,131 +1,107 @@
 import sys
 import unittest
+import webbrowser
 
 from PyQt4 import QtGui
 from PyQt4 import QtTest
 from PyQt4 import QtCore
 from mock import MagicMock
 
+# set up import paths
+import sas.qtgui.path_prepare
+
 # Local
-from FittingPerspective import FittingWindow
+import sas.qtgui.GuiUtils as GuiUtils
+from sas.sasgui.guiframe.dataFitting import Data1D
+
+from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 
 app = QtGui.QApplication(sys.argv)
 
 class FittingPerspectiveTest(unittest.TestCase):
-    """Test the Main Window GUI"""
+    '''Test the Fitting Perspective'''
     def setUp(self):
-        """Create the GUI"""
+        class dummy_manager(object):
+            def communicator(self):
+                return GuiUtils.Communicate()
+            def communicate(self):
+                return GuiUtils.Communicate()
 
-        self.widget = FittingWindow(None)
+        '''Create the perspective'''
+        self.widget = FittingWindow(dummy_manager())
 
     def tearDown(self):
-        """Destroy the GUI"""
+        '''Destroy the perspective'''
         self.widget.close()
         self.widget = None
 
     def testDefaults(self):
-        """Test the GUI in its default state"""
+        '''Test the GUI in its default state'''
         self.assertIsInstance(self.widget, QtGui.QWidget)
-        self.assertEqual(self.widget.windowTitle(), "Fitting")
-        self.assertEqual(self.widget.sizePolicy().Policy(), QtGui.QSizePolicy.Fixed)
+        self.assertIn("Fit panel", self.widget.windowTitle())
+        self.assertEqual(self.widget.optimizer, "DREAM")
+        self.assertEqual(len(self.widget.tabs), 1)
+        self.assertEqual(self.widget.maxIndex, 1)
+        self.assertEqual(self.widget.tabName(), "FitPage1")
 
-    def testSelectCategory(self):
-        """
-        Test if categories have been load properly
-        :return:
-        """
-        fittingWindow =  FittingWindow(None)
+    def testAddTab(self):
+        '''Add a tab and test it'''
 
-        #Test loading from json categories
-        category_list = fittingWindow.master_category_dict.keys()
-        self.assertTrue("Cylinder" in category_list)
-        self.assertTrue("Ellipsoid" in category_list)
-        self.assertTrue("Lamellae" in category_list)
-        self.assertTrue("Paracrystal" in category_list)
-        self.assertTrue("Parallelepiped" in category_list)
-        self.assertTrue("Shape Independent" in category_list)
-        self.assertTrue("Sphere" in category_list)
+        # Add an empty tab
+        self.widget.addFit(None)
+        self.assertEqual(len(self.widget.tabs), 2)
+        self.assertEqual(self.widget.tabName(), "FitPage2")
+        self.assertEqual(self.widget.maxIndex, 2)
 
-        #Test for existence in combobox
-        self.assertNotEqual(fittingWindow.cbCategory.findText("Cylinder"),-1)
-        self.assertNotEqual(fittingWindow.cbCategory.findText("Ellipsoid"),-1)
-        self.assertNotEqual(fittingWindow.cbCategory.findText("Lamellae"),-1)
-        self.assertNotEqual(fittingWindow.cbCategory.findText("Paracrystal"),-1)
-        self.assertNotEqual(fittingWindow.cbCategory.findText("Parallelepiped"),-1)
-        self.assertNotEqual(fittingWindow.cbCategory.findText("Shape Independent"),-1)
-        self.assertNotEqual(fittingWindow.cbCategory.findText("Sphere"),-1)
+    def testCloseTab(self):
+        '''Delete a tab and test'''
+        # Add an empty tab
+        self.widget.addFit(None)
 
-        #Test what is current text in the combobox
-        self.assertTrue(fittingWindow.cbCategory.currentText(), "Cylinder")
+        # Remove the original tab
+        self.widget.tabCloses(1)
+        self.assertEqual(len(self.widget.tabs), 1)
+        self.assertEqual(self.widget.maxIndex, 2)
+        self.assertEqual(self.widget.tabName(), "FitPage2")
 
-    def testSelectModel(self):
-        """
-        Test if models have been loaded properly
-        :return:
-        """
-        fittingWindow =  FittingWindow(None)
+        # Attemtp to remove the last tab
+        self.widget.tabCloses(1)
+        # The tab should still be there
+        self.assertEqual(len(self.widget.tabs), 1)
+        self.assertEqual(self.widget.maxIndex, 2)
+        self.assertEqual(self.widget.tabName(), "FitPage2")
 
-        #Test loading from json categories
-        model_list = fittingWindow.master_category_dict["Cylinder"]
-        self.assertTrue(['cylinder', True] in model_list)
-        self.assertTrue(['core_shell_cylinder', True] in model_list)
-        self.assertTrue(['barbell', True] in model_list)
-        self.assertTrue(['core_shell_bicelle', True] in model_list)
-        self.assertTrue(['flexible_cylinder', True] in model_list)
-        self.assertTrue(['flexible_cylinder_elliptical', True] in model_list)
-        self.assertTrue(['pearl_necklace', True] in model_list)
-        self.assertTrue(['capped_cylinder', True] in model_list)
-        self.assertTrue(['elliptical_cylinder', True] in model_list)
-        self.assertTrue(['pringle', True] in model_list)
-        self.assertTrue(['hollow_cylinder', True] in model_list)
-        self.assertTrue(['core_shell_bicelle_elliptical', True] in model_list)
-        self.assertTrue(['stacked_disks', True] in model_list)
+    def testAllowBatch(self):
+        '''Assure the perspective allows multiple datasets'''
+        self.assertTrue(self.widget.allowBatch())
 
-        #Test for existence in combobox
-        self.assertNotEqual(fittingWindow.cbModel.findText("cylinder"),-1)
-        self.assertNotEqual(fittingWindow.cbModel.findText("core_shell_cylinder"),-1)
-        self.assertNotEqual(fittingWindow.cbModel.findText("barbell"),-1)
-        self.assertNotEqual(fittingWindow.cbModel.findText("core_shell_bicelle"),-1)
-        self.assertNotEqual(fittingWindow.cbModel.findText("flexible_cylinder"),-1)
-        self.assertNotEqual(fittingWindow.cbModel.findText("flexible_cylinder_elliptical"),-1)
-        self.assertNotEqual(fittingWindow.cbModel.findText("pearl_necklace"),-1)
-        self.assertNotEqual(fittingWindow.cbModel.findText("capped_cylinder"),-1)
-        self.assertNotEqual(fittingWindow.cbModel.findText("elliptical_cylinder"),-1)
-        self.assertNotEqual(fittingWindow.cbModel.findText("pringle"),-1)
-        self.assertNotEqual(fittingWindow.cbModel.findText("hollow_cylinder"),-1)
-        self.assertNotEqual(fittingWindow.cbModel.findText("core_shell_bicelle_elliptical"),-1)
-        self.assertNotEqual(fittingWindow.cbModel.findText("stacked_disks"),-1)
+    def testSetData(self):
+        ''' Assure that setting data is correct'''
+        with self.assertRaises(AssertionError):
+            self.widget.setData(None)
 
+        with self.assertRaises(AttributeError):
+            self.widget.setData("BOOP")
 
-    def testSelectPolydispersity(self):
-        """
-        Test if models have been loaded properly
-        :return:
-        """
-        fittingWindow =  FittingWindow(None)
+        # Mock the datafromitem() call from FittingWidget
+        data = Data1D(x=[1,2], y=[1,2])
+        GuiUtils.dataFromItem = MagicMock(return_value=data)
 
-        #Test loading from json categories
-        fittingWindow.setModelModel("cylinder")
-        pd_index = fittingWindow.tableView_2.model().index(0,0)
-        self.assertEqual(str(pd_index.data().toString()), "Distribution of radius")
-        pd_index = fittingWindow.tableView_2.model().index(1,0)
-        self.assertEqual(str(pd_index.data().toString()), "Distribution of length")
+        item = QtGui.QStandardItem("test")
+        self.widget.setData([item])
 
-    def testSelectStructureFactor(self):
-        """
-        Test if structure factors have been loaded properly
-        :return:
-        """
-        fittingWindow =  FittingWindow(None)
+        # Look at the data in tab
+        self.assertEqual(self.widget._model_item, item)
 
-        #Test for existence in combobox
-        self.assertNotEqual(fittingWindow.cbStructureFactor.findText("stickyhardsphere"),-1)
-        self.assertNotEqual(fittingWindow.cbStructureFactor.findText("hayter_msa"),-1)
-        self.assertNotEqual(fittingWindow.cbStructureFactor.findText("squarewell"),-1)
-        self.assertNotEqual(fittingWindow.cbStructureFactor.findText("hardsphere"),-1)
+        # First tab should accept data
+        self.assertEqual(len(self.widget.tabs), 1)
 
-        #Test what is current text in the combobox
-        self.assertTrue(fittingWindow.cbCategory.currentText(), "None")
+        # Add another set of data
+        self.widget.setData([item])
+
+        # Now we should have two tabs
+        self.assertEqual(len(self.widget.tabs), 2)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -12,10 +12,9 @@ class FittingWindow(QtGui.QTabWidget):
     """
     """
     name = "Fitting" # For displaying in the combo box in DataExplorer
-    def __init__(self, manager=None, parent=None, data=None):
+    def __init__(self, parent=None, data=None):
         super(FittingWindow, self).__init__()
 
-        self.manager = manager
         self.parent = parent
         self._data = data
 
@@ -34,6 +33,8 @@ class FittingWindow(QtGui.QTabWidget):
         # The tabs need to be closeable
         self.setTabsClosable(True)
 
+        self.communicate = self.parent.communicator()
+
         # Initialize the first tab
         self.addFit(None)
 
@@ -42,14 +43,11 @@ class FittingWindow(QtGui.QTabWidget):
 
         self.setWindowTitle('Fit panel - Active Fitting Optimizer: %s' % self.optimizer)
 
-        #self.communicate = GuiUtils.Communicate()
-        self.communicate = self.parent.communicator()
-
     def addFit(self, data):
         """
         Add a new tab for passed data
         """
-        tab	= FittingWidget(manager=self.manager, parent=self.parent, data=data, id=self.maxIndex+1)
+        tab	= FittingWidget(parent=self.parent, data=data, id=self.maxIndex+1)
         self.tabs.append(tab)
         self.maxIndex += 1
         self.addTab(tab, self.tabName())

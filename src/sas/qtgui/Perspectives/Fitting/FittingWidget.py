@@ -37,13 +37,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
     """
     Main widget for selecting form and structure factor models
     """
-    def __init__(self, manager=None, parent=None, data=None, id=1):
-        """
+    def __init__(self, parent=None, data=None, id=1):
 
-        :param manager:
-        :param parent:
-        :return:
-        """
         super(FittingWidget, self).__init__()
 
         # Necessary globals
@@ -68,10 +63,11 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Which tab is this widget displayed in?
         self.tab_id = id
 
-        # Parameters
+        # Range parameters
         self.q_range_min = QMIN_DEFAULT
         self.q_range_max = QMAX_DEFAULT
         self.npts = NPTS_DEFAULT
+
         # Main Data[12]D holder
         self._data = None
 
@@ -87,31 +83,14 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self._poly_model = QtGui.QStandardItemModel()
         self._magnet_model = QtGui.QStandardItemModel()
 
-        # Set the proxy models for display
-        #   Main display
-        self._model_proxy = QtGui.QSortFilterProxyModel()
-        self._model_proxy.setSourceModel(self._model_model)
-        #self._model_proxy.setFilterRegExp(r"[^()]")
-
-        #   Proxy display
-        self._poly_proxy = QtGui.QSortFilterProxyModel()
-        self._poly_proxy.setSourceModel(self._poly_model)
-        self._poly_proxy.setFilterRegExp(r"[^()]")
-
-        #   Magnetism display
-        self._magnet_proxy = QtGui.QSortFilterProxyModel()
-        self._magnet_proxy.setSourceModel(self._magnet_model)
-        #self._magnet_proxy.setFilterRegExp(r"[^()]")
-
         # Param model displayed in param list
         self.lstParams.setModel(self._model_model)
-        #self.lstParams.setModel(self._model_proxy)
         self.readCategoryInfo()
         self.model_parameters = None
         self.lstParams.setAlternatingRowColors(True)
 
         # Poly model displayed in poly list
-        self.lstPoly.setModel(self._poly_proxy)
+        self.lstPoly.setModel(self._poly_model)
         self.setPolyModel()
         self.setTableProperties(self.lstPoly)
 
@@ -250,8 +229,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         structure_factor_list = self.master_category_dict.pop('Structure Factor')
         structure_factors = ["None"]
         self.cbStructureFactor.clear()
-        for (structure_factor, _) in structure_factor_list:
-            structure_factors.append(structure_factor)
+        structure_factors = [factor[0] for factor in structure_factor_list]
         self.cbStructureFactor.addItems(sorted(structure_factors))
 
     def onSelectCategory(self):
@@ -364,15 +342,10 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         Finds out if 'model' has multishell parameters.
         If so, returns the name of the counter parameter and the number of shells
         """
-        iter_param = ""
-        iter_length = 0
-
         iter_params = self.getIterParams(model)
-        # pull out the iterator parameter name and length
-        if iter_params:
-            iter_length = iter_params[0].length
-            iter_param = iter_params[0].length_control
-        return (iter_param, iter_length)
+        # return the iterator parameter name and length
+        return (iter_params[0].length_control if iter_params else "",
+                iter_params[0].length if iter_params else 0)
 
     def addBackgroundToModel(self, model):
         """
@@ -391,6 +364,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.addCheckedListToModel(model, checked_list)
 
     def addCheckedListToModel(self, model, param_list):
+        """
+        Add a QItem to model. Makes the QItem checkable
+        """
         assert isinstance(model, QtGui.QStandardItemModel)
         item_list = [QtGui.QStandardItem(item) for item in param_list]
         item_list[0].setCheckable(True)

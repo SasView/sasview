@@ -27,6 +27,12 @@ from UnitTesting import BoxSumTest
 from UnitTesting import SlicerModelTest
 from UnitTesting import SlicerParametersTest
 
+# Perspectives
+import path_prepare
+from Perspectives.Fitting.UnitTesting import FittingWidgetTest
+from Perspectives.Fitting.UnitTesting import FittingPerspectiveTest
+
+
 def suite():
     suites = (
         unittest.makeSuite(AboutBoxTest.AboutBoxTest,          'test'),
@@ -55,6 +61,8 @@ def suite():
         unittest.makeSuite(BoxSumTest.BoxSumTest, 'test'),
         unittest.makeSuite(SlicerModelTest.SlicerModelTest, 'test'),
         unittest.makeSuite(SlicerParametersTest.SlicerParametersTest, 'test'),
+        unittest.makeSuite(FittingPerspectiveTest.FittingPerspectiveTest, 'test'),
+        unittest.makeSuite(FittingWidgetTest.FittingWidgetTest, 'test'),
     )
     return unittest.TestSuite(suites)
 
