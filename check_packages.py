@@ -14,6 +14,8 @@ except ImportError:
 else:
     sys.modules['Image'] = PIL.Image
 
+if sys.version_info[0] > 2:
+    print("To use the sasview GUI you must use Python 2\n")
 
 common_required_package_list = {
     'setuptools': {'version': '0.6c11', 'import_name': 'setuptools', 'test': '__version__'},
@@ -48,8 +50,7 @@ deprecated_package_list = {
     'pyPdf': {'version': '1.13', 'import_name': 'pyPdf', 'test': '__version__'},
 }
 
-print("Checking Required Package Versions....")
-print("")
+print("Checking Required Package Versions....\n")
 print("Common Packages")
 
 for package_name, test_vals in common_required_package_list.items():
