@@ -1,27 +1,31 @@
 Quick Intro for Building Sasview
 ================================
 
+Note - at the current time sasview will only run in gui form under Python 2.
 
-The build works in the usualy pythonic way:
+Before trying to install and run sasview you'll need to check what
+dependencies are required:
+
+$ python check_packages.py
+
+Many of these are available from PyPi, but some (e.g. h5py) may require more
+involvement to build and install. If you use the conda package manager then
+many of the pre-built dependencies are available there. This may be the easiest
+route if you are on windows.
+
+The build works in the pythonic way:
 
 $ python setup.py build      # will build the package underneath 'build/'
-$ python setup.py install    # will install the package
-
+$ python setup.py install    # will install the package into site-packages
 
 
 If you want to check the build without installing:
 
 $ python run.py              # will run the code in place (building the C code once, if required)
 
+On OSX or windows you may need to use:
 
-
-To check all dependencies are met:
-
-$ python deps.py
-$ python check_packages.py 
-
-Both tell you different parts of the story, unfortunately.
-
+$ pythonw run.py
 
 
 Build scripts that are used on http://build.sasview.org/ are in
