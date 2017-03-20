@@ -31,6 +31,8 @@ from UnitTesting import SlicerParametersTest
 import path_prepare
 from Perspectives.Fitting.UnitTesting import FittingWidgetTest
 from Perspectives.Fitting.UnitTesting import FittingPerspectiveTest
+from Perspectives.Fitting.UnitTesting import FittingLogicTest
+from Perspectives.Fitting.UnitTesting import FittingUtilitiesTest
 
 
 def suite():
@@ -63,6 +65,8 @@ def suite():
         unittest.makeSuite(SlicerParametersTest.SlicerParametersTest, 'test'),
         unittest.makeSuite(FittingPerspectiveTest.FittingPerspectiveTest, 'test'),
         unittest.makeSuite(FittingWidgetTest.FittingWidgetTest, 'test'),
+        unittest.makeSuite(FittingLogicTest.FittingLogicTest, 'test'),
+        unittest.makeSuite(FittingUtilitiesTest.FittingUtilitiesTest, 'test'),
     )
     return unittest.TestSuite(suites)
 

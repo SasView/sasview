@@ -73,7 +73,7 @@ def addSimpleParametersToModel(parameters, model):
     Update local ModelModel with sasmodel parameters
     """
     for param in parameters.iq_parameters:
-        # Modify parameter name from <param>[n] to <param>1
+        # Create the top level, checkable item
         item_name = param.name
         item1 = QtGui.QStandardItem(item_name)
         item1.setCheckable(True)

@@ -13,6 +13,9 @@ class FittingLogic(object):
     """
     def __init__(self, data=None):
         self._data = data
+        self.data_is_loaded = False
+        if data is not None:
+            self.data_is_loaded = True
 
     @property
     def data(self):
@@ -118,8 +121,6 @@ class FittingLogic(object):
         new_plot.title = data.name
 
         new_plot.group_id = data.group_id
-        if new_plot.group_id == None:
-            new_plot.group_id = data.group_id
         #new_plot.id = str(self.tab_id) + " " + data.name
         new_plot.name = model.name + " [" + data.name + "]"
         new_plot.xaxis(_xaxis, _xunit)

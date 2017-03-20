@@ -70,11 +70,11 @@ class FittingWidgetTest(unittest.TestCase):
         GuiUtils.dataFromItem = MagicMock(return_value=data)
         item = QtGui.QStandardItem("test")
 
-        widget_with_data = FittingWidget(dummy_manager(), data=[data], id=3)
+        widget_with_data = FittingWidget(dummy_manager(), data=[item], id=3)
 
         self.assertEqual(widget_with_data.data, data)
         self.assertTrue(widget_with_data.data_is_loaded)
-        self.assertTrue(widget_with_data.cmdFit.isEnabled())
+        # self.assertTrue(widget_with_data.cmdFit.isEnabled())
         self.assertFalse(widget_with_data.acceptsData())
 
     def notestSelectModel(self):
@@ -124,7 +124,7 @@ class FittingWidgetTest(unittest.TestCase):
         fittingWindow =  self.widget
 
         #Test loading from json categories
-        fittingWindow.setModelModel("cylinder")
+        fittingWindow.SASModelToQModel("cylinder")
         pd_index = fittingWindow.lstPoly.model().index(0,0)
         self.assertEqual(str(pd_index.data().toString()), "Distribution of radius")
         pd_index = fittingWindow.lstPoly.model().index(1,0)
@@ -176,24 +176,6 @@ class FittingWidgetTest(unittest.TestCase):
         """
         pass
 
-    def testGetIterParams(self):
-        """
-        Assure the right multishell parameters are returned
-        """
-        pass
-
-    def testGetMultiplicity(self):
-        """
-        Assure more multishell parameters are evaluated correctly
-        """
-        pass
-
-    def testAddCheckedListToModel(self):
-        """
-        Test for utility function
-        """
-        pass
-
     def testUpdateParamsFromModel(self):
         """
         Checks the sasmodel parameter update from QModel items
@@ -203,18 +185,6 @@ class FittingWidgetTest(unittest.TestCase):
     def testComputeDataRange(self):
         """
         Tests the data range calculator on Data1D/Data2D
-        """
-        pass
-
-    def testAddParametersToModel(self):
-        """
-        Checks the QModel update from Sasmodel parameters
-        """
-        pass
-
-    def testAddSimpleParametersToModel(self):
-        """
-        Checks the QModel update from Sasmodel parameters - no polydisp
         """
         pass
 
@@ -257,12 +227,6 @@ class FittingWidgetTest(unittest.TestCase):
     def testComplete2D(self):
         """
         Check that a new 2D plot is generated
-        """
-        pass
-
-    def testReplaceShellName(self):
-        """
-        Test the utility function for string manipulation
         """
         pass
 
