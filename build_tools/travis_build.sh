@@ -1,4 +1,4 @@
-# Simplified build for Travic CI
+# Simplified build for Travis CI
 # No documentation is built
 export PATH=$PATH:/usr/local/bin/
 
