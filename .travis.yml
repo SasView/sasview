@@ -41,11 +41,11 @@ before_install:
     # could install other dependencies, but they're locked to specific
     # versions in build/requirements.txt
     - conda install --yes python=$PY numpy scipy cython pylint wxpython
-    - sudo apt-get update; sudo apt-get install python-pyopencl python-matplotlib
-    
+    - sudo apt-get update; sudo apt-get install python-pyopencl
 
 install:
   - pip install -r build_tools/requirements.txt
+  - pip install matplotlib
 
 before_script:
   - "export DISPLAY=:99.0"
