@@ -40,7 +40,7 @@ before_install:
 
     # could install other dependencies, but they're locked to specific
     # versions in build/requirements.txt
-    - conda install --yes python=$PY numpy scipy cython pylint
+    - conda install --yes python=$PY numpy scipy cython pylint wxpython
     - sudo apt-get update; sudo apt-get install python-pyopencl python-matplotlib
     
 
@@ -57,15 +57,14 @@ script:
   # this should be the directory above the sasview directory, where we want to
   # clone the sasmodels
   - export WORKSPACE=$(pwd)
-  #- export WORKSPACE=/home/travis/build/SasView/
-  #- cd $WORKSPACE
   - git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git sasmodels
-  #- export PYTHONPATH=$WORKSPACE/sasview/sasview-install:$WORKSPACE/sasview/utils:$PYTHONPATH
-  - cd $WORKSPACE
+
+  # required for documentation
+  - git clone --depth=50 --branch=master https://github.com/bumps/bumps.git
+
   - ls -ltr
   - if [ ! -d "utils" ]; then mkdir utils; fi
   - /bin/sh -xe sasview/build_tools/travis_build.sh
-#  - /bin/sh -xe sasview/build_tools/jenkins_linux_test.sh
   - export LC_ALL=en_US.UTF-8
   - export LANG=en_US.UTF-8
 #  - python setup.py docs; echo 0
