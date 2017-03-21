@@ -30,6 +30,7 @@ from sas.sascalc.data_util.registry import ExtensionRegistry
 import readers
 from readers import ascii_reader
 from readers import cansas_reader
+from readers import cansas_reader_HDF5
 
 class Registry(ExtensionRegistry):
     """
@@ -60,20 +61,32 @@ class Registry(ExtensionRegistry):
         :param format: explicit extension, to force the use
             of a particular reader
 
-        Defaults to the ascii (multi-column) reader
-        if no reader was registered for the file's
-        extension.
+        Defaults to the ascii (multi-column), cansas XML, and cansas NeXuS
+        readers if no reader was registered for the file's extension.
         """
         try:
             return super(Registry, self).load(path, format=format)
-        except:
-            try:
-                # No reader was found. Default to the ascii reader.
-                ascii_loader = ascii_reader.Reader()
-                return ascii_loader.read(path)
-            except:
-                cansas_loader = cansas_reader.Reader()
-                return cansas_loader.read(path)
+        except Exception:
+            pass # try the ASCII reader
+        try:
+            ascii_loader = ascii_reader.Reader()
+            return ascii_loader.read(path)
+        except Exception:
+            pass # try the cansas XML reader
+        try:
+            cansas_loader = cansas_reader.Reader()
+            return cansas_loader.read(path)
+        except Exception:
+            pass # try the cansas NeXuS reader
+        try:
+            cansas_nexus_loader = cansas_reader_HDF5.Reader()
+            return cansas_nexus_loader.read(path)
+        except Exception:
+            # No known reader available. Give up and throw an error
+            msg = "\n\tUnknown data format: %s.\n\tThe file is not a " % path
+            msg += "known format for SasView. The most common formats are "
+            msg += "multi-column ASCII, CanSAS XML, and CanSAS NeXuS."
+            raise Exception(msg)
 
     def find_plugins(self, dir):
         """
