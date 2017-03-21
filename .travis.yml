@@ -40,7 +40,7 @@ before_install:
 
     # could install other dependencies, but they're locked to specific
     # versions in build/requirements.txt
-    - conda install --yes python=$PY numpy scipy matplotlib cython pylint
+    - conda install --yes python=$PY numpy scipy matplotlib cython pylint pyparsing=1.5.5
     - sudo apt-get update; sudo apt-get install python-pyopencl
     
 
@@ -53,10 +53,14 @@ before_script:
   - sleep 3 # give xvfb some time to start
   
 script:
-  - export WORKSPACE=/home/travis/build/SasView/
-  - cd $WORKSPACE
+  - cd ..
+  # this should be the directory above the sasview directory, where we want to
+  # clone the sasmodels
+  - export WORKSPACE=$(pwd)
+  #- export WORKSPACE=/home/travis/build/SasView/
+  #- cd $WORKSPACE
   - git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git sasmodels
-  - export PYTHONPATH=$WORKSPACE/sasview-install:$WORKSPACE/utils:$PYTHONPATH
+  #- export PYTHONPATH=$WORKSPACE/sasview/sasview-install:$WORKSPACE/sasview/utils:$PYTHONPATH
   - cd $WORKSPACE
   - ls -ltr
   - if [ ! -d "utils" ]; then mkdir utils; fi
