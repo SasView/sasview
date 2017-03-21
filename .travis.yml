@@ -40,8 +40,8 @@ before_install:
 
     # could install other dependencies, but they're locked to specific
     # versions in build/requirements.txt
-    - conda install --yes python=$PY numpy scipy matplotlib cython pylint pyparsing=1.5.5
-    - sudo apt-get update; sudo apt-get install python-pyopencl
+    - conda install --yes python=$PY numpy scipy cython pylint
+    - sudo apt-get update; sudo apt-get install python-pyopencl python-matplotlib
     
 
 install:
