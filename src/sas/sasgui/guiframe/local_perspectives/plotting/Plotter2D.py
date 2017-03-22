@@ -127,6 +127,7 @@ class ModelPanel2D(ModelPanel1D):
         self.title_label = None
         self.title_font = None
         self.title_color = 'black'
+        self.batch_slicer = None
         ## Graph
         self.graph = Graph()
         self.graph.xaxis("\\rm{Q}", 'A^{-1}')
@@ -358,7 +359,8 @@ class ModelPanel2D(ModelPanel1D):
                 wx.EVT_MENU(self, wx_id, self.onClearSlicer)
                 if self.slicer.__class__.__name__ != "BoxSum":
                     wx_id = ids.next()
-                    slicerpop.Append(wx_id, '&Edit Slicer Parameters')
+                    name = '&Edit Slicer Parameters and Batch Slicing'
+                    slicerpop.Append(wx_id, name)
                     wx.EVT_MENU(self, wx_id, self._onEditSlicer)
             slicerpop.AppendSeparator()
 
@@ -557,7 +559,6 @@ class ModelPanel2D(ModelPanel1D):
 
         """
         self.onCircular(event, True)
-
     def onCircular(self, event, ismask=False):
         """
         perform circular averaging on Data2D
@@ -627,7 +628,7 @@ class ModelPanel2D(ModelPanel1D):
 
         """
         if self.slicer != None:
-            from SlicerParameters import SlicerParameterPanel
+            from parameters_panel_slicer import SlicerParameterPanel
             dialog = SlicerParameterPanel(self, -1, "Slicer Parameters")
             dialog.set_slicer(self.slicer.__class__.__name__,
                               self.slicer.get_params())
@@ -665,7 +666,7 @@ class ModelPanel2D(ModelPanel1D):
         ## Value used to initially set the slicer panel
         params = self.slicer.get_params()
         ## Create a new panel to display results of summation of Data2D
-        from slicerpanel import SlicerPanel
+        from parameters_panel_boxsum import SlicerPanel
         win = MDIFrame(self.parent, None, 'None', (100, 200))
         new_panel = SlicerPanel(parent=win, id=-1,
                                 base=self, type=self.slicer.__class__.__name__,

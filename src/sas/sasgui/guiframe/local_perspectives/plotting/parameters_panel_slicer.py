@@ -6,7 +6,7 @@ import wx.lib.newevent
 from sas.sasgui.guiframe.events import EVT_SLICER_PARS
 from sas.sasgui.guiframe.utils import format_number
 from sas.sasgui.guiframe.events import EVT_SLICER
-from sas.sasgui.guiframe.events import SlicerParameterEvent
+from sas.sasgui.guiframe.events import SlicerParameterEvent, SlicerEvent
 
 
 class SlicerParameterPanel(wx.Dialog):
@@ -55,19 +55,21 @@ class SlicerParameterPanel(wx.Dialog):
         Rebuild the panel
         """
         self.bck.Clear(True)
+        self.bck.Add((5, 5), (0, 0), (1, 1),
+                     wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 5)
         self.type = type
         if type == None:
             label = "Right-click on 2D plot for slicer options"
             title = wx.StaticText(self, -1, label, style=wx.ALIGN_LEFT)
-            self.bck.Add(title, (0, 0), (1, 2),
+            self.bck.Add(title, (1, 0), (1, 2),
                          flag=wx.LEFT | wx.ALIGN_CENTER_VERTICAL, border=15)
         else:
             title = wx.StaticText(self, -1,
                                   "Slicer Parameters", style=wx.ALIGN_LEFT)
-            self.bck.Add(title, (0, 0), (1, 2),
+            self.bck.Add(title, (1, 0), (1, 2),
                          flag=wx.LEFT | wx.ALIGN_CENTER_VERTICAL, border=15)
             ix = 0
-            iy = 0
+            iy = 1
             self.parameters = []
             keys = params.keys()
             keys.sort()
@@ -103,10 +105,39 @@ class SlicerParameterPanel(wx.Dialog):
                     ix = 1
                     self.bck.Add(ctl, (iy, ix), (1, 1),
                                  wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+            ix = 0
+            iy += 1
+
+            # Change slicer within the window
+            txt = "Slicer"
+            text = wx.StaticText(self, -1, txt, style=wx.ALIGN_LEFT)
+            self.bck.Add(text, (iy, ix), (1, 1),
+                         wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+            type_list = ["SectorInteractor", "AnnulusInteractor",
+                         "BoxInteractorX", "BoxInteractorY"]
+            self.type_select = wx.ComboBox(parent=self, choices=type_list)
+            self.Bind(wx.EVT_COMBOBOX, self.onChangeSlicer)
+            index = self.type_select.FindString(self.type)
+            self.type_select.SetSelection(index)
+            self.bck.Add(self.type_select, (iy, 1), (1, 1),
+                         wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+
+            # batch slicing parameters
+            iy += 1
+            button_label = "Batch Slicing"
+            self.batch_slicer_button = wx.Button(parent=self, label=button_label)
+            self.Bind(wx.EVT_BUTTON, self.onToggleBatchSlicing)
+            self.bck.Add(self.batch_slicer_button, (iy, ix), (1, 1),
+                             wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+            self.batch_slice_params = wx.GridBagSizer(5, 5)
+            self.bck.Hide(item=self.batch_slice_params, recursive=True)
+            iy += 1
+            self.bck.Add(self.batch_slice_params, (iy, ix), (1, 1),
+                         wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
             iy += 1
             ix = 1
-            self.bck.Add((20, 20), (iy, ix), (1, 1),
-                         wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+            self.bck.Add((5, 5), (iy, ix), (1, 1),
+                         wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 5)
         self.bck.Layout()
         self.bck.Fit(self)
         self.parent.GetSizer().Layout()
@@ -144,3 +175,29 @@ class SlicerParameterPanel(wx.Dialog):
             ##parent hier is plotter2D
             event = SlicerParameterEvent(type=self.type, params=params)
             wx.PostEvent(self.parent, event)
+
+    def onToggleBatchSlicing(self, evt=None):
+        """
+        Batch slicing parameters button is pushed
+        :param evt: Event triggering hide/show of the batch slicer parameters
+        """
+        if self.bck.IsShown(item=self.batch_slice_params):
+            self.bck.Hide(item=self.batch_slice_params, recursive=True)
+        else:
+            self.bck.Show(item=self.batch_slice_params, recursive=True)
+
+    def onChangeSlicer(self, evt):
+        """
+        Change the slicer type when changed in the dropdown
+        :param evt: Event triggering this change
+        """
+        type = self.type_select.GetStringSelection()
+        if self.type != type:
+            if type == "SectorInteractor":
+                self.parent.onSectorQ(None)
+            elif type == "AnnulusInteractor":
+                self.parent.onSectorPhi(None)
+            elif type == "BoxInteractorX":
+                self.parent.onBoxavgX(None)
+            elif type == "BoxInteractorY":
+                self.parent.onBoxavgY(None)
