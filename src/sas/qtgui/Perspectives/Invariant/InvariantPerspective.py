@@ -39,8 +39,10 @@ class InvariantWindow(QtGui.QDialog, Ui_tabbedInvariantUI):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
     name = "Invariant" # For displaying in the combo box
-    def __init__(self, manager=None, parent=None):
-        super(InvariantWindow, self).__init__(parent)
+    #def __init__(self, manager=None, parent=None):
+    def __init__(self, parent=None):
+        #super(InvariantWindow, self).__init__(parent)
+        super(InvariantWindow, self).__init__()
         self.setupUi(self)
 
         self.setWindowTitle("Invariant Perspective")
@@ -54,7 +56,8 @@ class InvariantWindow(QtGui.QDialog, Ui_tabbedInvariantUI):
         self._npoints_high = 10
         self._power_low = 4
 
-        self._manager = manager
+        self._manager = parent
+        #self._manager = manager
         self._reactor = self._manager.reactor()
         self._model_item = QtGui.QStandardItem()
 

@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>517</width>
+    <width>389</width>
     <height>693</height>
    </rect>
   </property>
   <property name="sizePolicy">
    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
     <horstretch>0</horstretch>
-    <verstretch>0</verstretch>
+    <verstretch>5</verstretch>
    </sizepolicy>
   </property>
   <property name="windowTitle">
@@ -41,8 +41,45 @@
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
           <widget class="QPushButton" name="cmdLoad">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+             <horstretch>5</horstretch>
+             <verstretch>5</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>154</width>
+             <height>50</height>
+            </size>
+           </property>
+           <property name="baseSize">
+            <size>
+             <width>100</width>
+             <height>50</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Load a file with data</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">font: 13pt &quot;MS Shell Dlg 2&quot;;</string>
+           </property>
            <property name="text">
-            <string>Load</string>
+            <string>Load data</string>
+           </property>
+           <property name="icon">
+            <iconset resource="main_resources.qrc">
+             <normaloff>:/res/down-grey.png</normaloff>:/res/down-grey.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>48</width>
+             <height>48</height>
+            </size>
+           </property>
+           <property name="shortcut">
+            <string>Ctrl+R</string>
            </property>
           </widget>
          </item>
@@ -142,31 +179,47 @@
        <item row="2" column="0">
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
-          <spacer name="horizontalSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+          <widget class="QPushButton" name="cmdSendTo">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+             <horstretch>5</horstretch>
+             <verstretch>5</verstretch>
+            </sizepolicy>
            </property>
-           <property name="sizeHint" stdset="0">
+           <property name="minimumSize">
             <size>
-             <width>58</width>
-             <height>20</height>
+             <width>170</width>
+             <height>50</height>
             </size>
            </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QToolButton" name="cmdSendTo">
+           <property name="baseSize">
+            <size>
+             <width>100</width>
+             <height>50</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>13</pointsize>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>Send data to perspective</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">font: 13pt &quot;MS Shell Dlg 2&quot;;</string>
+           </property>
            <property name="text">
-            <string>...</string>
+            <string>Send data to</string>
            </property>
            <property name="icon">
             <iconset resource="main_resources.qrc">
-             <normaloff>:/res/file_send-128.png</normaloff>:/res/file_send-128.png</iconset>
+             <normaloff>:/res/right-grey.png</normaloff>:/res/right-grey.png</iconset>
            </property>
            <property name="iconSize">
             <size>
-             <width>32</width>
-             <height>32</height>
+             <width>48</width>
+             <height>48</height>
             </size>
            </property>
           </widget>
@@ -217,6 +270,12 @@
        <widget class="QGroupBox" name="groupBox_3">
         <property name="title">
          <string>Plot</string>
+        </property>
+        <property name="flat">
+         <bool>false</bool>
+        </property>
+        <property name="checkable">
+         <bool>false</bool>
         </property>
         <layout class="QGridLayout" name="gridLayout_3">
          <item row="0" column="0">

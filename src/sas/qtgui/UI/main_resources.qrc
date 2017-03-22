@@ -1,5 +1,7 @@
 <RCC>
   <qresource>
+    <file>res/down-grey.png</file>
+    <file>res/right-grey.png</file>
     <file>res/file_send-128.png</file>
     <file>res/SendTo512.png</file>
     <file>res/ball.ico</file>
