@@ -65,7 +65,7 @@ class SlicerParameterPanel(wx.Dialog):
                          flag=wx.LEFT | wx.ALIGN_CENTER_VERTICAL, border=15)
         else:
             title = wx.StaticText(self, -1,
-                                  "Slicer Parameters", style=wx.ALIGN_LEFT)
+                                  "Slicer Parameters:", style=wx.ALIGN_LEFT)
             self.bck.Add(title, (1, 0), (1, 2),
                          flag=wx.LEFT | wx.ALIGN_CENTER_VERTICAL, border=15)
             ix = 0
@@ -123,19 +123,37 @@ class SlicerParameterPanel(wx.Dialog):
                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
 
             # batch slicing parameters
+            title_text = "Batch Slicing Options:"
+            title = wx.StaticText(self, -1, title_text, style=wx.ALIGN_LEFT)
             iy += 1
-            button_label = "Batch Slicing"
-            self.batch_slicer_button = wx.Button(parent=self, label=button_label)
-            self.Bind(wx.EVT_BUTTON, self.onToggleBatchSlicing)
-            self.bck.Add(self.batch_slicer_button, (iy, ix), (1, 1),
-                             wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
-            self.batch_slice_params = wx.GridBagSizer(5, 5)
-            self.bck.Hide(item=self.batch_slice_params, recursive=True)
-            iy += 1
-            self.bck.Add(self.batch_slice_params, (iy, ix), (1, 1),
+            ln = wx.StaticLine(self, -1, style=wx.LI_VERTICAL)
+            ln.SetSize((60,60))
+            self.bck.Add(ln, (iy, ix), (1, 2),
                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
             iy += 1
-            ix = 1
+            self.bck.Add(title, (iy, ix), (1, 1),
+                         wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+            iy += 1
+            id = wx.NewId()
+            # TODO: Get list of data objects already loaded
+            choices = ("a", "b", "c", "d")
+            self.data_list = wx.CheckListBox(parent=self, id=id,
+                                        choices=choices,
+                                        name="Apply Slicer to Data Sets:")
+            self.bck.Add(self.data_list, (iy, ix), (1, 1),
+                         wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+            iy += 1
+            button_label = "Apply Slicer to Selected Files"
+            self.batch_slicer_button = wx.Button(parent=self,
+                                                 label=button_label)
+            self.Bind(wx.EVT_BUTTON, self.onBatchSlice)
+            self.bck.Add(self.batch_slicer_button, (iy, ix), (1, 1),
+                             wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+            # TODO: Check box for saving file
+            # TODO: append to file information and file type
+            # TODO: Send to fitting options
+
+            iy += 1
             self.bck.Add((5, 5), (iy, ix), (1, 1),
                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 5)
         self.bck.Layout()
@@ -177,15 +195,21 @@ class SlicerParameterPanel(wx.Dialog):
             event = SlicerParameterEvent(type=self.type, params=params)
             wx.PostEvent(self.parent, event)
 
-    def onToggleBatchSlicing(self, evt=None):
+    def onBatchSlice(self, evt=None):
         """
-        Batch slicing parameters button is pushed
+        Batch slicing button is pushed
         :param evt: Event triggering hide/show of the batch slicer parameters
         """
-        if self.bck.IsShown(item=self.batch_slice_params):
-            self.bck.Hide(item=self.batch_slice_params, recursive=True)
-        else:
-            self.bck.Show(item=self.batch_slice_params, recursive=True)
+        for item in self.data_list.Checked:
+            print item
+            # Process each data file
+            # TODO: plot data
+            # TODO: apply slicer
+            # TODO: save file (if desired)
+            # TODO: send to fitting (if desired)
+            plot = None
+            slicer = None
+            f_name = None
 
     def onChangeSlicer(self, evt):
         """
