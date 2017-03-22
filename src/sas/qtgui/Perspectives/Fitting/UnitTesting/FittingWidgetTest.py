@@ -5,6 +5,7 @@ from PyQt4 import QtGui
 from PyQt4 import QtTest
 from PyQt4 import QtCore
 from mock import MagicMock
+from twisted.internet import threads
 
 # set up import paths
 import sas.qtgui.path_prepare
@@ -12,7 +13,8 @@ import sas.qtgui.path_prepare
 # Local
 from sas.qtgui.GuiUtils import *
 from sas.qtgui.Perspectives.Fitting.FittingWidget import *
-#from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
+from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
+
 from sas.sasgui.guiframe.dataFitting import Data1D
 
 app = QtGui.QApplication(sys.argv)
@@ -148,7 +150,7 @@ class FittingWidgetTest(unittest.TestCase):
 
     def testSignals(self):
         """
-        Test the widget exmitted signals
+        Test the widget emitted signals
         """
         pass
 
@@ -156,91 +158,218 @@ class FittingWidgetTest(unittest.TestCase):
         """
         Assure proper behaviour on changing category
         """
-        pass
+        self.widget.show()
+        self.assertEqual(self.widget._previous_category_index, 0)
+        # confirm the model combo contains no models
+        self.assertEqual(self.widget.cbModel.count(), 0)
+
+        # invoke the method by changing the index
+        self.widget.cbCategory.setCurrentIndex(1)
+
+        # test the model combo content
+        self.assertEqual(self.widget.cbModel.count(), 29)
+
+        # Try to change back to default
+        self.widget.cbCategory.setCurrentIndex(0)
+
+        # Observe no such luck
+        self.assertEqual(self.widget.cbCategory.currentIndex(), 1)
+        self.assertEqual(self.widget.cbModel.count(), 29)
+
+        # Set the structure factor
+        structure_index=self.widget.cbCategory.findText(CATEGORY_STRUCTURE)
+        self.widget.cbCategory.setCurrentIndex(structure_index)
+        # check the enablement of controls
+        self.assertFalse(self.widget.cbModel.isEnabled())
+        self.assertTrue(self.widget.cbStructureFactor.isEnabled())
 
     def testSelectModel(self):
         """
         Assure proper behaviour on changing model
         """
-        pass
+        self.widget.show()
+        # Change the category index so we have some models
+        self.widget.cbCategory.setCurrentIndex(1)
+
+        # check the enablement of controls
+        self.assertTrue(self.widget.cbModel.isEnabled())
+        self.assertFalse(self.widget.cbStructureFactor.isEnabled())
+
+        # set up the model update spy
+        # spy = QtSignalSpy(self.widget._model_model, self.widget._model_model.itemChanged)
+
+        # mock the tested methods
+        self.widget.SASModelToQModel = MagicMock()
+        self.widget.createDefaultDataset = MagicMock()
+        self.widget.calculateDataForModel = MagicMock()
+        # 
+        # Now change the model
+        self.widget.cbModel.setCurrentIndex(3)
+        self.assertEqual(self.widget.cbModel.currentText(),'correlation_length')
+
+        # No data sent -> no index set, only createDefaultDataset called
+        self.assertTrue(self.widget.createDefaultDataset.called)
+        self.assertTrue(self.widget.SASModelToQModel.called)
+        self.assertFalse(self.widget.calculateDataForModel.called)
+
+        # Let's set a dummy index on widget
+        self.widget._index = QtGui.QStandardItem()
+        # Reset the sasmodel index
+        self.widget.cbModel.setCurrentIndex(1)
+        self.assertEqual(self.widget.cbModel.currentText(),'be_polyelectrolyte')
+
+        # Observe calculateDataForModel called
+        self.assertTrue(self.widget.calculateDataForModel.called)
 
     def testSelectFactor(self):
         """
         Assure proper behaviour on changing structure factor
         """
-        pass
+        self.widget.show()
+        # Change the category index so we have some models
+        self.widget.cbCategory.setCurrentIndex(1)
+        # Change the model to one that supports structure factors
+        model_index = self.widget.cbModel.findText('fractal_core_shell')
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        # Check that the factor combo is active and the default is chosen
+        self.assertTrue(self.widget.cbStructureFactor.isEnabled())
+        self.assertEqual(self.widget.cbStructureFactor.currentText(), STRUCTURE_DEFAULT)
+
+        # We have this many rows in the model
+        rowcount = self.widget._model_model.rowCount()
+        #self.assertEqual(self.widget._model_model.rowCount(), 8)
+
+        # Change structure factor to something more exciting
+        structure_index = self.widget.cbStructureFactor.findText('squarewell')
+        self.widget.cbStructureFactor.setCurrentIndex(structure_index)
+
+        # We have 4 more rows now
+        self.assertEqual(self.widget._model_model.rowCount(), rowcount+4)
+
+        # Switch models
+        self.widget.cbModel.setCurrentIndex(0)
+
+        # Observe factor reset to None
+        self.assertEqual(self.widget.cbStructureFactor.currentText(), STRUCTURE_DEFAULT)
+
+
+        # TODO once functionality fixed
+        ## Switch category to structure factor
+        #structure_index=self.widget.cbCategory.findText(CATEGORY_STRUCTURE)
+        #self.widget.cbCategory.setCurrentIndex(structure_index)
+        ## Choose the last factor
+        #last_index = self.widget.cbStructureFactor.count()
+        #self.widget.cbStructureFactor.setCurrentIndex(last_index-1)
 
     def testReadCategoryInfo(self):
         """
         Check the category file reader
         """
+        # Tested in default checks
         pass
 
     def testUpdateParamsFromModel(self):
         """
         Checks the sasmodel parameter update from QModel items
         """
+        # Tested in default checks
         pass
 
-    def testComputeDataRange(self):
-        """
-        Tests the data range calculator on Data1D/Data2D
-        """
-        pass
-
-    def testCreateDefault1dData(self):
-        """
-        Tests the default 1D set
-        """
-        pass
-
-    def testCreateDefault2dData(self):
-        """
-        Tests the default 2D set
-        """
-        pass
-
-    def testCreateTheoryIndex(self):
+    def notestCreateTheoryIndex(self):
         """
         Test the data->QIndex conversion
         """
-        pass
+        # set up the model update spy
+        spy = QtSignalSpy(self.widget._model_model, self.widget.communicate.updateTheoryFromPerspectiveSignal)
 
-    def testCalculate1DForModel(self):
+        self.widget.show()
+        # Change the category index so we have some models
+        self.widget.cbCategory.setCurrentIndex(1)
+
+        # Create the index
+        self.widget.createTheoryIndex()
+
+        # Check the signal sent
+        print spy
+
+        # Check the index
+
+    def testCalculateDataForModel(self):
         """
         Check that the fitting 1D data object is ready
         """
-        pass
-
-    def testCalculate2DForModel(self):
-        """
-        Check that the fitting 2D data object is ready
-        """
-        pass
+        # Mock the thread creation
+        threads.deferToThread = MagicMock()
+        # Call the tested method
+        self.widget.calculateDataForModel()
+        # Test the mock
+        self.assertTrue(threads.deferToThread.called)
+        self.assertEqual(threads.deferToThread.call_args_list[0][0][0].__name__, "compute")
 
     def testComplete1D(self):
         """
         Check that a new 1D plot is generated
         """
+        # TODO when chisqr method coded
         pass
 
     def testComplete2D(self):
         """
         Check that a new 2D plot is generated
         """
+        # TODO when chisqr method coded
         pass
 
     def testSetPolyModel(self):
         """
         Test the polydispersity model setup
         """
-        pass
+        self.widget.show()
+        # Change the category index so we have a model with no poly
+        self.widget.cbCategory.setCurrentIndex(1)
+        # Check the poly model
+        self.assertEqual(self.widget._poly_model.rowCount(), 0)
+        self.assertEqual(self.widget._poly_model.columnCount(), 0)
+
+        # Change the category index so we have a model available
+        self.widget.cbCategory.setCurrentIndex(2)
+
+        # Check the poly model
+        self.assertEqual(self.widget._poly_model.rowCount(), 3)
+        self.assertEqual(self.widget._poly_model.columnCount(), 7)
+
+        # Test the header
+        self.assertEqual(self.widget.lstPoly.horizontalHeader().count(), 7)
+        self.assertFalse(self.widget.lstPoly.horizontalHeader().stretchLastSection())
+
+        # Test presence of comboboxes in last column
+        for row in xrange(self.widget._poly_model.rowCount()):
+            func_index = self.widget._poly_model.index(row, 6)
+            self.assertTrue(isinstance(self.widget.lstPoly.indexWidget(func_index), QtGui.QComboBox))
+            self.assertIn('Distribution of', self.widget._poly_model.item(row, 0).text())
 
     def testSetMagneticModel(self):
         """
         Test the magnetic model setup
         """
-        pass
+        self.widget.show()
+        # Change the category index so we have a model available
+        self.widget.cbCategory.setCurrentIndex(2)
+
+        # Check the magnetic model
+        self.assertEqual(self.widget._magnet_model.rowCount(), 9)
+        self.assertEqual(self.widget._magnet_model.columnCount(), 5)
+
+        # Test the header
+        self.assertEqual(self.widget.lstMagnetic.horizontalHeader().count(), 5)
+        self.assertFalse(self.widget.lstMagnetic.horizontalHeader().stretchLastSection())
+
+        # Test rows
+        for row in xrange(self.widget._magnet_model.rowCount()):
+            func_index = self.widget._magnet_model.index(row, 0)
+            self.assertIn(':', self.widget._magnet_model.item(row, 0).text())
+
 
     def testAddExtraShells(self):
         """
@@ -252,7 +381,26 @@ class FittingWidgetTest(unittest.TestCase):
         """
         Test the additional rows added by modifying the shells combobox
         """
-        pass
+        self.widget.show()
+        # Change the model to multi shell
+        self.widget.cbCategory.setCurrentIndex(2)
+        self.widget.cbModel.setCurrentIndex(4)
+
+        # Assure we have the combobox available
+        last_row = self.widget._last_model_row
+        func_index = self.widget._model_model.index(last_row-1, 1)
+        self.assertIsInstance(self.widget.lstParams.indexWidget(func_index), QtGui.QComboBox)
+
+        # Change the combo box index
+        self.widget.lstParams.indexWidget(func_index).setCurrentIndex(3)
+
+        # Check that the number of rows increased
+        more_rows = self.widget._model_model.rowCount() - last_row
+        self.assertEqual(more_rows, 6) # 6 new rows: 2 params per index
+
+        # Back to 0
+        self.widget.lstParams.indexWidget(func_index).setCurrentIndex(0)
+        self.assertEqual(self.widget._model_model.rowCount(), last_row)
 
 
 if __name__ == "__main__":

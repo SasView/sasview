@@ -30,6 +30,7 @@ TAB_MAGNETISM = 4
 TAB_POLY = 3
 CATEGORY_DEFAULT = "Choose category..."
 CATEGORY_STRUCTURE = "Structure Factor"
+STRUCTURE_DEFAULT = "None"
 QMIN_DEFAULT = 0.0005
 QMAX_DEFAULT = 0.5
 NPTS_DEFAULT = 50
@@ -230,10 +231,10 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         Fill in the structure factors combo box with defaults
         """
         structure_factor_list = self.master_category_dict.pop(CATEGORY_STRUCTURE)
-        structure_factors = ["None"]
+        factors = [factor[0] for factor in structure_factor_list]
+        factors.insert(0, STRUCTURE_DEFAULT)
         self.cbStructureFactor.clear()
-        structure_factors = [factor[0] for factor in structure_factor_list]
-        self.cbStructureFactor.addItems(sorted(structure_factors))
+        self.cbStructureFactor.addItems(sorted(factors))
 
     def onSelectCategory(self):
         """
@@ -245,7 +246,10 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             # if the previous category was not the default, keep it.
             # Otherwise, just return
             if self._previous_category_index != 0:
+                # We need to block signals, or else state changes on perceived unchanged conditions
+                self.cbCategory.blockSignals(True)
                 self.cbCategory.setCurrentIndex(self._previous_category_index)
+                self.cbCategory.blockSignals(False)
             return
 
         if category == CATEGORY_STRUCTURE:
@@ -286,6 +290,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         Respond to select Model from list event
         """
         model = str(self.cbModel.currentText())
+
+        # Reset structure factor
+        self.cbStructureFactor.setCurrentIndex(0)
 
         # SasModel -> QModel
         self.SASModelToQModel(model)
@@ -356,6 +363,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Setting model parameters into table based on selected category
         """
+        # TODO - modify for structure factor-only choice
+
         # Crete/overwrite model items
         self._model_model.clear()
 
@@ -414,7 +423,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         if "Distribution of" in parameter_name:
             parameter_name = parameter_name[16:]
         property_name = str(self._poly_model.headerData(model_column, 1).toPyObject()) # Value, min, max, etc.
-        print "%s(%s) => %d" % (parameter_name, property_name, value)
+        # print "%s(%s) => %d" % (parameter_name, property_name, value)
 
         # Update the sasmodel
         #self.kernel_module.params[parameter_name] = value
@@ -453,7 +462,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         parameter_name = str(self._model_model.data(name_index).toPyObject()) # sld, background etc.
         property_name = str(self._model_model.headerData(1, model_column).toPyObject()) # Value, min, max, etc.
 
-        print "%s(%s) => %d" % (parameter_name, property_name, value)
+        # print "%s(%s) => %d" % (parameter_name, property_name, value)
         self.kernel_module.params[parameter_name] = value
 
         # min/max to be changed in self.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
@@ -689,7 +698,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         self.lstParams.setIndexWidget(shell_index, func)
         self._last_model_row = self._model_model.rowCount()
-
 
     def modifyShellsInList(self, index):
         """

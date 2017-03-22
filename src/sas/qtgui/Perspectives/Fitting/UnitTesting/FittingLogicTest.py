@@ -124,8 +124,8 @@ class FittingLogicTest(unittest.TestCase):
         dqy_0 = numpy.arange(25)/100
         q_0 = numpy.sqrt(qx_0 * qx_0 + qy_0 * qy_0)
 
-        data = Data2D(image=x_0, err_image=dx_0, qx_data=qx_0, 
-                      qy_data=qy_0, q_data=q_0, mask=mask_0, 
+        data = Data2D(image=x_0, err_image=dx_0, qx_data=qx_0,
+                      qy_data=qy_0, q_data=q_0, mask=mask_0,
                       dqx_data=dqx_0, dqy_data=dqy_0)
 
         data.name = "boop"
