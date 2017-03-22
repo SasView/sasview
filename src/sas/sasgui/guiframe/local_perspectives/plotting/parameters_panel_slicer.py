@@ -45,7 +45,7 @@ class SlicerParameterPanel(wx.Dialog):
         :param event: EVT_SLICER event
         """
         event.Skip()
-        if event.obj_class == None:
+        if event.obj_class is None:
             self.set_slicer(None, None)
         else:
             self.set_slicer(event.type, event.params)
@@ -58,7 +58,7 @@ class SlicerParameterPanel(wx.Dialog):
         self.bck.Add((5, 5), (0, 0), (1, 1),
                      wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 5)
         self.type = type
-        if type == None:
+        if type is None:
             label = "Right-click on 2D plot for slicer options"
             title = wx.StaticText(self, -1, label, style=wx.ALIGN_LEFT)
             self.bck.Add(title, (1, 0), (1, 2),
@@ -163,16 +163,17 @@ class SlicerParameterPanel(wx.Dialog):
         for item in self.parameters:
             try:
                 params[item[0]] = float(item[1].GetValue())
-                item[1].SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
+                item[1].SetBackgroundColour(
+                    wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
                 item[1].Refresh()
             except:
                 has_error = True
                 item[1].SetBackgroundColour("pink")
                 item[1].Refresh()
 
-        if has_error == False:
+        if not has_error:
             # Post parameter event
-            ##parent hier is plotter2D
+            # parent here is plotter2D
             event = SlicerParameterEvent(type=self.type, params=params)
             wx.PostEvent(self.parent, event)
 

@@ -531,15 +531,15 @@ class ModelPanel2D(ModelPanel1D):
         :param slicer: slicer class to create
 
         """
-        ## Clear current slicer
+        # Clear current slicer
         if not self.slicer == None:
             self.slicer.clear()
-        ## Create a new slicer
+        # Create a new slicer
         self.slicer_z += 1
         self.slicer = slicer(self, self.subplot, zorder=self.slicer_z)
         self.subplot.set_ylim(self.data2D.ymin, self.data2D.ymax)
         self.subplot.set_xlim(self.data2D.xmin, self.data2D.xmax)
-        ## Draw slicer
+        # Draw slicer
         self.update()
         self.slicer.update()
         msg = "Plotter2D._setSlicer  %s" % self.slicer.__class__.__name__
@@ -559,6 +559,7 @@ class ModelPanel2D(ModelPanel1D):
 
         """
         self.onCircular(event, True)
+
     def onCircular(self, event, ismask=False):
         """
         perform circular averaging on Data2D
@@ -570,15 +571,15 @@ class ModelPanel2D(ModelPanel1D):
         npt = math.sqrt(len(self.data2D.data[numpy.isfinite(self.data2D.data)]))
         npt = math.floor(npt)
         from sas.sascalc.dataloader.manipulations import CircularAverage
-        ## compute the maximum radius of data2D
+        # compute the maximum radius of data2D
         self.qmax = max(math.fabs(self.data2D.xmax),
                         math.fabs(self.data2D.xmin))
         self.ymax = max(math.fabs(self.data2D.ymax),
                         math.fabs(self.data2D.ymin))
         self.radius = math.sqrt(math.pow(self.qmax, 2) + math.pow(self.ymax, 2))
-        ##Compute beam width
+        # Compute beam width
         bin_width = (self.qmax + self.qmax) / npt
-        ## Create data1D circular average of data2D
+        # Create data1D circular average of data2D
         Circle = CircularAverage(r_min=0, r_max=self.radius,
                                  bin_width=bin_width)
         circ = Circle(self.data2D, ismask=ismask)
@@ -597,11 +598,11 @@ class ModelPanel2D(ModelPanel1D):
         new_plot.dxw = dxw
         new_plot.name = "Circ avg " + self.data2D.name
         new_plot.source = self.data2D.source
-        #new_plot.info = self.data2D.info
+        # new_plot.info = self.data2D.info
         new_plot.interactive = True
         new_plot.detector = self.data2D.detector
 
-        ## If the data file does not tell us what the axes are, just assume...
+        # If the data file does not tell us what the axes are, just assume...
         new_plot.xaxis("\\rm{Q}", "A^{-1}")
         if hasattr(self.data2D, "scale") and \
                     self.data2D.scale == 'linear':
@@ -613,8 +614,7 @@ class ModelPanel2D(ModelPanel1D):
         new_plot.group_id = "2daverage" + self.data2D.name
         new_plot.id = "Circ avg " + self.data2D.name
         new_plot.is_data = True
-        self.parent.update_theory(data_id=self.data2D.id, \
-                                       theory=new_plot)
+        self.parent.update_theory(data_id=self.data2D.id, theory=new_plot)
         wx.PostEvent(self.parent,
                      NewPlotEvent(plot=new_plot, title=new_plot.name))
 
@@ -627,7 +627,7 @@ class ModelPanel2D(ModelPanel1D):
         :param event: wx.menu event
 
         """
-        if self.slicer != None:
+        if self.slicer is not None:
             from parameters_panel_slicer import SlicerParameterPanel
             dialog = SlicerParameterPanel(self, -1, "Slicer Parameters")
             dialog.set_slicer(self.slicer.__class__.__name__,
@@ -717,7 +717,7 @@ class ModelPanel2D(ModelPanel1D):
         """
         Clear the slicer on the plot
         """
-        if not self.slicer == None:
+        if self.slicer is not None:
             self.slicer.clear()
             self.subplot.figure.canvas.draw()
             self.slicer = None
@@ -733,7 +733,7 @@ class ModelPanel2D(ModelPanel1D):
 
         """
         event_id = str(evt.GetId())
-        if self.parent != None:
+        if self.parent is not None:
             self._default_save_location = self.parent._default_save_location
         default_name = self.plots[self.graph.selected_plottable].label
         if default_name.count('.') > 0:
@@ -756,12 +756,12 @@ class ModelPanel2D(ModelPanel1D):
         default_name = data.label
         if default_name.count('.') > 0:
             default_name = default_name.split('.')[0]
-        #default_name += "_out"
-        if self.parent != None:
+        if self.parent is not None:
             self.parent.show_data2d(data, default_name)
 
     def modifyGraphAppearance(self, e):
-        self.graphApp = graphAppearance(self, 'Modify graph appearance', legend=False)
+        self.graphApp = graphAppearance(self, 'Modify graph appearance',
+                                        legend=False)
         self.graphApp.setDefaults(self.grid_on, self.legend_on,
                                   self.xaxis_label, self.yaxis_label,
                                   self.xaxis_unit, self.yaxis_unit,
