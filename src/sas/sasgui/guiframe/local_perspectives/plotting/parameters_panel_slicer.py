@@ -203,12 +203,11 @@ class SlicerParameterPanel(wx.Dialog):
         """
         # Process each data file individually
         for item in self.data_list.CheckedStrings:
-            print item
             # Get data_id
             data_dict = self.parent.parent._data_manager.get_by_name([item])
             data_ids = data_dict.keys()
             # Plot data
-            self.parent.parent.plot_data(state_id=[], data_id=data_ids[0], theory_id=[])
+            self.parent.parent.plot_data(state_id=[], data_id=data_ids, theory_id=[])
             # TODO: apply slicer
             # TODO: save file (if desired)
             # TODO: send to fitting (if desired)
