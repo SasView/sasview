@@ -255,6 +255,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         if category == CATEGORY_STRUCTURE:
             self.disableModelCombo()
             self.enableStructureCombo()
+            self._model_model.clear()
             return
 
         # Safely clear and enable the model combo
@@ -308,7 +309,10 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         Select Structure Factor from list
         """
         model = str(self.cbModel.currentText())
+        category = str(self.cbCategory.currentText())
         structure = str(self.cbStructureFactor.currentText())
+        if category == CATEGORY_STRUCTURE:
+            model = None
         self.SASModelToQModel(model, structure_factor=structure)
 
     def readCategoryInfo(self):
@@ -418,7 +422,11 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         model_row = item.row()
         name_index = self._poly_model.index(model_row, 0)
         # Extract changed value. Assumes proper validation by QValidator/Delegate
-        value = float(item.text())
+        # Checkbox in column 0
+        if model_column == 0:
+            value = item.checkState()
+        else:
+            value = float(item.text())
         parameter_name = str(self._poly_model.data(name_index).toPyObject()) # "distribution of sld" etc.
         if "Distribution of" in parameter_name:
             parameter_name = parameter_name[16:]

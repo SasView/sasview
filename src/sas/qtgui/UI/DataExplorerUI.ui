@@ -60,7 +60,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Load a file with data</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Load a file with data&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="styleSheet">
             <string notr="true">font: 13pt &quot;MS Shell Dlg 2&quot;;</string>
@@ -204,7 +204,7 @@
             </font>
            </property>
            <property name="toolTip">
-            <string>Send data to perspective</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Send data to perspective&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="styleSheet">
             <string notr="true">font: 13pt &quot;MS Shell Dlg 2&quot;;</string>
