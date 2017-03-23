@@ -135,8 +135,9 @@ class SlicerParameterPanel(wx.Dialog):
                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
             iy += 1
             id = wx.NewId()
-            # TODO: Get list of data objects already loaded
-            choices = ("a", "b", "c", "d")
+            main_window = self.parent.parent
+            self.loaded_data = main_window._data_manager.data_name_dict
+            choices = self.loaded_data.keys()
             self.data_list = wx.CheckListBox(parent=self, id=id,
                                         choices=choices,
                                         name="Apply Slicer to Data Sets:")
@@ -200,10 +201,14 @@ class SlicerParameterPanel(wx.Dialog):
         Batch slicing button is pushed
         :param evt: Event triggering hide/show of the batch slicer parameters
         """
-        for item in self.data_list.Checked:
+        # Process each data file individually
+        for item in self.data_list.CheckedStrings:
             print item
-            # Process each data file
-            # TODO: plot data
+            # Get data_id
+            data_dict = self.parent.parent._data_manager.get_by_name([item])
+            data_ids = data_dict.keys()
+            # Plot data
+            self.parent.parent.plot_data(state_id=[], data_id=data_ids[0], theory_id=[])
             # TODO: apply slicer
             # TODO: save file (if desired)
             # TODO: send to fitting (if desired)
