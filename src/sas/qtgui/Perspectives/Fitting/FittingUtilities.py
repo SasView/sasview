@@ -38,7 +38,8 @@ def addParametersToModel(parameters, model):
         # Modify parameter name from <param>[n] to <param>1
         item_name = param.name
         if param in multishell_parameters:
-            item_name = replaceShellName(param.name, 1)
+            continue
+        #    item_name = replaceShellName(param.name, 1)
 
         item1 = QtGui.QStandardItem(item_name)
         item1.setCheckable(True)
@@ -126,7 +127,8 @@ def addShellsToModel(parameters, model, index):
 
     for i in xrange(index):
         for par in multishell_parameters:
-            param_name = replaceShellName(par.name, i+2)
+            # Create the name: <param>[<i>], e.g. "sld1" for parameter "sld[n]"
+            param_name = replaceShellName(par.name, i+1)
             item1 = QtGui.QStandardItem(param_name)
             item1.setCheckable(True)
             # check for polydisp params

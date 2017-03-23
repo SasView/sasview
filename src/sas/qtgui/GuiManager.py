@@ -179,6 +179,7 @@ class GuiManager(object):
         """
         # Close the previous perspective
         if self._current_perspective:
+            self._current_perspective.setClosable()
             self._current_perspective.close()
         # Default perspective
         self._current_perspective = Perspectives.PERSPECTIVES[str(perspective_name)](parent=self)

@@ -78,6 +78,15 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.setWindowTitle("Fitting")
         self.communicate = self.parent.communicate
 
+        # Define bold font for use in various controls
+        self.boldFont=QtGui.QFont()
+        self.boldFont.setBold(True)
+
+        # Set data label
+        self.label.setFont(self.boldFont)
+        self.label.setText("No data loaded")
+        self.lblFilename.setText("")
+
         # Set the main models
         # We can't use a single model here, due to restrictions on flattening
         # the model tree with subclassed QAbstractProxyModel...
@@ -115,7 +124,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.cbCategory.addItem(CATEGORY_STRUCTURE)
         self.cbCategory.setCurrentIndex(0)
 
-        self._index = data
+        self._index = None
         if data is not None:
             self.data = data
 
@@ -135,11 +144,14 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         assert isinstance(value[0], QtGui.QStandardItem)
         # _index contains the QIndex with data
         self._index = value
+
         # Update logics with data items
         self.logic.data = GuiUtils.dataFromItem(value[0])
 
         self.data_is_loaded = True
         # Tag along functionality
+        self.label.setText("Data loaded from: ")
+        self.lblFilename.setText(self.logic.data.title)
         self.updateQRange()
         self.cmdFit.setEnabled(True)
 
@@ -150,22 +162,22 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
     def disableModelCombo(self):
         """ Disable the combobox """
         self.cbModel.setEnabled(False)
-        self.label_3.setEnabled(False)
+        self.lblModel.setEnabled(False)
 
     def enableModelCombo(self):
         """ Enable the combobox """
         self.cbModel.setEnabled(True)
-        self.label_3.setEnabled(True)
+        self.lblModel.setEnabled(True)
 
     def disableStructureCombo(self):
         """ Disable the combobox """
         self.cbStructureFactor.setEnabled(False)
-        self.label_4.setEnabled(False)
+        self.lblStructure.setEnabled(False)
 
     def enableStructureCombo(self):
         """ Enable the combobox """
         self.cbStructureFactor.setEnabled(True)
-        self.label_4.setEnabled(True)
+        self.lblStructure.setEnabled(True)
 
     def updateQRange(self):
         """
@@ -270,7 +282,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         model_list = self.master_category_dict[category]
         models = []
         # Populate the models combobox
-        self.cbModel.addItems(sorted([model for (model,_) in model_list]))
+        self.cbModel.addItems(sorted([model for (model, _) in model_list]))
 
     def createDefaultDataset(self):
         """
@@ -302,7 +314,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             # Create default datasets if no data passed
             self.createDefaultDataset()
         else:
-            self.calculateDataForModel()
+            self.calculateQGridForModel()
 
     def onSelectStructureFactor(self):
         """
@@ -426,7 +438,12 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         if model_column == 0:
             value = item.checkState()
         else:
-            value = float(item.text())
+            try:
+                value = float(item.text())
+            except ValueError:
+                # Can't be converted properly, bring back the old value and exit
+                return
+
         parameter_name = str(self._poly_model.data(name_index).toPyObject()) # "distribution of sld" etc.
         if "Distribution of" in parameter_name:
             parameter_name = parameter_name[16:]
@@ -505,7 +522,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # TODO: reimplement basepage.py/_update_paramv_on_fit
         if self.data is None or not self.data.is_data:
             self.createDefaultDataset()
-        self.calculateDataForModel()
+        self.calculateQGridForModel()
 
     def onNpts(self, text):
         """
@@ -514,7 +531,10 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # assumes type/value correctness achieved with QValidator
         try:
             self.npts = int(text)
-        except:
+        except ValueError:
+            # TODO
+            # This will return the old value to model/view and return
+            # notifying the user about format available.
             pass
 
     def onMinRange(self, text):
@@ -524,8 +544,11 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # assumes type/value correctness achieved with QValidator
         try:
             self.q_range_min = float(text)
-        except:
-            pass
+        except ValueError:
+            # TODO
+            # This will return the old value to model/view and return
+            # notifying the user about format available.
+            return
         # set Q range labels on the main tab
         self.lblMinRangeDef.setText(str(self.q_range_min))
 
@@ -549,7 +572,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         '''return the method for result parsin on calc complete '''
         return self.complete1D if isinstance(self.data, Data1D) else self.complete2D
 
-    def calculateDataForModel(self):
+    def calculateQGridForModel(self):
         """
         Prepare the fitting data object, based on current ModelModel
         """
@@ -602,10 +625,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
     def calcException(self, etype, value, tb):
         """
-        Something horrible happened in the deferred. Cry me a river.
+        Something horrible happened in the deferred.
         """
         logging.error("".join(traceback.format_exception(etype, value, tb)))
-        msg = traceback.format_exception(etype, value, tb, limit=1)
 
     def setTableProperties(self, table):
         """
@@ -623,6 +645,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         header.setResizeMode(QtGui.QHeaderView.ResizeToContents)
 
         header.ResizeMode(QtGui.QHeaderView.Interactive)
+        # Resize column 0 and 6 to content
         header.setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
         header.setResizeMode(6, QtGui.QHeaderView.ResizeToContents)
 
@@ -693,7 +716,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         item1 = QtGui.QStandardItem(param_name)
 
         func = QtGui.QComboBox()
-        func.addItems([str(i+1) for i in xrange(param_length)])
+        # Available range of shells displayed in the combobox
+        func.addItems([str(i) for i in xrange(param_length+1)])
+        # Respond to index change
         func.currentIndexChanged.connect(self.modifyShellsInList)
 
         # cell 2: combobox

@@ -73,14 +73,14 @@
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QLabel" name="label_3">
+             <widget class="QLabel" name="lblModel">
               <property name="text">
                <string>Model name</string>
               </property>
              </widget>
             </item>
             <item row="0" column="2">
-             <widget class="QLabel" name="label_4">
+             <widget class="QLabel" name="lblStructure">
               <property name="text">
                <string>Structure factor</string>
               </property>

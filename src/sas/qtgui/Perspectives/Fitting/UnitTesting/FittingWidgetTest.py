@@ -164,7 +164,8 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertEqual(self.widget.cbModel.count(), 0)
 
         # invoke the method by changing the index
-        self.widget.cbCategory.setCurrentIndex(1)
+        category_index = self.widget.cbCategory.findText("Shape-Independent")
+        self.widget.cbCategory.setCurrentIndex(category_index)
 
         # test the model combo content
         self.assertEqual(self.widget.cbModel.count(), 29)
@@ -189,7 +190,8 @@ class FittingWidgetTest(unittest.TestCase):
         """
         self.widget.show()
         # Change the category index so we have some models
-        self.widget.cbCategory.setCurrentIndex(1)
+        category_index = self.widget.cbCategory.findText("Shape-Independent")
+        self.widget.cbCategory.setCurrentIndex(category_index)
 
         # check the enablement of controls
         self.assertTrue(self.widget.cbModel.isEnabled())
@@ -201,7 +203,7 @@ class FittingWidgetTest(unittest.TestCase):
         # mock the tested methods
         self.widget.SASModelToQModel = MagicMock()
         self.widget.createDefaultDataset = MagicMock()
-        self.widget.calculateDataForModel = MagicMock()
+        self.widget.calculateQGridForModel = MagicMock()
         # 
         # Now change the model
         self.widget.cbModel.setCurrentIndex(3)
@@ -210,7 +212,7 @@ class FittingWidgetTest(unittest.TestCase):
         # No data sent -> no index set, only createDefaultDataset called
         self.assertTrue(self.widget.createDefaultDataset.called)
         self.assertTrue(self.widget.SASModelToQModel.called)
-        self.assertFalse(self.widget.calculateDataForModel.called)
+        self.assertFalse(self.widget.calculateQGridForModel.called)
 
         # Let's set a dummy index on widget
         self.widget._index = QtGui.QStandardItem()
@@ -218,8 +220,8 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.cbModel.setCurrentIndex(1)
         self.assertEqual(self.widget.cbModel.currentText(),'be_polyelectrolyte')
 
-        # Observe calculateDataForModel called
-        self.assertTrue(self.widget.calculateDataForModel.called)
+        # Observe calculateQGridForModel called
+        self.assertTrue(self.widget.calculateQGridForModel.called)
 
     def testSelectFactor(self):
         """
@@ -227,7 +229,8 @@ class FittingWidgetTest(unittest.TestCase):
         """
         self.widget.show()
         # Change the category index so we have some models
-        self.widget.cbCategory.setCurrentIndex(1)
+        category_index = self.widget.cbCategory.findText("Shape-Independent")
+        self.widget.cbCategory.setCurrentIndex(category_index)
         # Change the model to one that supports structure factors
         model_index = self.widget.cbModel.findText('fractal_core_shell')
         self.widget.cbModel.setCurrentIndex(model_index)
@@ -295,14 +298,14 @@ class FittingWidgetTest(unittest.TestCase):
 
         # Check the index
 
-    def testCalculateDataForModel(self):
+    def testCalculateQGridForModel(self):
         """
         Check that the fitting 1D data object is ready
         """
         # Mock the thread creation
         threads.deferToThread = MagicMock()
         # Call the tested method
-        self.widget.calculateDataForModel()
+        self.widget.calculateQGridForModel()
         # Test the mock
         self.assertTrue(threads.deferToThread.called)
         self.assertEqual(threads.deferToThread.call_args_list[0][0][0].__name__, "compute")
@@ -327,7 +330,8 @@ class FittingWidgetTest(unittest.TestCase):
         """
         self.widget.show()
         # Change the category index so we have a model with no poly
-        self.widget.cbCategory.setCurrentIndex(1)
+        category_index = self.widget.cbCategory.findText("Shape-Independent")
+        self.widget.cbCategory.setCurrentIndex(category_index)
         # Check the poly model
         self.assertEqual(self.widget._poly_model.rowCount(), 0)
         self.assertEqual(self.widget._poly_model.columnCount(), 0)
@@ -355,7 +359,8 @@ class FittingWidgetTest(unittest.TestCase):
         """
         self.widget.show()
         # Change the category index so we have a model available
-        self.widget.cbCategory.setCurrentIndex(2)
+        category_index = self.widget.cbCategory.findText("Shapes")
+        self.widget.cbCategory.setCurrentIndex(category_index)
 
         # Check the magnetic model
         self.assertEqual(self.widget._magnet_model.rowCount(), 9)
@@ -383,8 +388,10 @@ class FittingWidgetTest(unittest.TestCase):
         """
         self.widget.show()
         # Change the model to multi shell
-        self.widget.cbCategory.setCurrentIndex(2)
-        self.widget.cbModel.setCurrentIndex(4)
+        category_index = self.widget.cbCategory.findText("Shapes")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+        model_index = self.widget.cbModel.findText("core_multi_shell")
+        self.widget.cbModel.setCurrentIndex(model_index)
 
         # Assure we have the combobox available
         last_row = self.widget._last_model_row

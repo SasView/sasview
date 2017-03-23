@@ -78,6 +78,8 @@ class InvariantWindow(QtGui.QDialog, Ui_tabbedInvariantUI):
         self._data = None
         self._path = ""
 
+        self._allow_close = False
+
         # Mask file selector
         ###################################################
         #self._path = "cyl_400_20.txt"
@@ -105,12 +107,26 @@ class InvariantWindow(QtGui.QDialog, Ui_tabbedInvariantUI):
         # Set up the mapper
         self.setupMapper()
 
-    #def closeEvent(self, event):
-    #    """
-    #    Overwrite the default close method of QWidget
-    #    """
-    #    # No close on perspectives - one must always be active.
-    #    event.ignore()
+    def setClosable(self, value=True):
+        """
+        Allow outsiders close this widget
+        """
+        assert isinstance(value, bool)
+
+        self._allow_close = value
+
+    def closeEvent(self, event):
+        """
+        Overwrite QDialog close method to allow for custom widget close
+        """
+        if self._allow_close:
+            # reset the closability flag
+            self.setClosable(value=False)
+            event.accept()
+        else:
+            event.ignore()
+            # Maybe we should just minimize
+            self.setWindowState(QtCore.Qt.WindowMinimized)
 
     def communicator(self):
         """ Getter for the communicator """

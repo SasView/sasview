@@ -41,7 +41,31 @@ class FittingWindow(QtGui.QTabWidget):
         # Deal with signals
         self.tabCloseRequested.connect(self.tabCloses)
 
+        # Perspective window not allowed to close by default
+        self._allow_close = False
+
         self.setWindowTitle('Fit panel - Active Fitting Optimizer: %s' % self.optimizer)
+
+    def setClosable(self, value=True):
+        """
+        Allow outsiders close this widget
+        """
+        assert isinstance(value, bool)
+
+        self._allow_close = value
+
+    def closeEvent(self, event):
+        """
+        Overwrite QDialog close method to allow for custom widget close
+        """
+        if self._allow_close:
+            # reset the closability flag
+            self.setClosable(value=False)
+            event.accept()
+        else:
+            event.ignore()
+            # Maybe we should just minimize
+            self.setWindowState(QtCore.Qt.WindowMinimized)
 
     def addFit(self, data):
         """

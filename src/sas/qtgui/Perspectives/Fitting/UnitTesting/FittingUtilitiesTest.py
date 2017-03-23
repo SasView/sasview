@@ -113,16 +113,11 @@ class FittingUtilitiesTest(unittest.TestCase):
         FittingUtilities.addParametersToModel(multi_parameters, model)
 
         # Test the resulting model
-        self.assertEqual(model.rowCount(), 5)
+        self.assertEqual(model.rowCount(), 3)
         self.assertTrue(model.item(0).isCheckable())
         self.assertEqual(model.item(0).text(), "sld_core")
-        self.assertFalse(model.item(3).hasChildren())
         self.assertEqual(model.item(1).text(), "radius")
         self.assertEqual(model.item(2).text(), "sld_solvent")
-        self.assertEqual(model.item(3).text(), "sld1")
-
-        self.assertEqual(model.item(4).text(), "thickness1")
-        self.assertTrue(model.item(4).hasChildren())
 
     def testAddSimpleParametersToModel(self):
         """
@@ -138,7 +133,7 @@ class FittingUtilitiesTest(unittest.TestCase):
         FittingUtilities.addParametersToModel(multi_parameters, model)
 
         # Test the resulting model
-        self.assertEqual(model.rowCount(), 5)
+        self.assertEqual(model.rowCount(), 3)
         self.assertTrue(model.item(0).isCheckable())
         self.assertEqual(model.item(0).text(), "sld_core")
         self.assertEqual(model.item(1).text(), "radius")
