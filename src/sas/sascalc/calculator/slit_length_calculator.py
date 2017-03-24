@@ -15,7 +15,7 @@ class SlitlengthCalculator(object):
         self.x = None
         # y data
         self.y = None
-        #default slit length
+        # default slit length
         self.slit_length = 0.0
 
         # The unit is unknown from SAXSess profile:
@@ -41,7 +41,7 @@ class SlitlengthCalculator(object):
         :return: the slit length calculated value.
         """
         # None data do nothing
-        if self.y == None or self.x == None:
+        if self.y is None or self.x is None:
             return
         # set local variable
         y = self.y
@@ -53,7 +53,7 @@ class SlitlengthCalculator(object):
         # initial values
         y_sum = 0.0
         y_max = 0.0
-        ind = 0.0
+        ind = 0
 
         # sum 10 or more y values until getting max_y,
         while True:
@@ -69,7 +69,7 @@ class SlitlengthCalculator(object):
 
         # defaults
         y_half_d = 0.0
-        ind = 0.0
+        ind = 0
         # find indices where it crosses y = y_half.
         while True:
             # no need to check when ind == 0
@@ -80,19 +80,19 @@ class SlitlengthCalculator(object):
                 break
 
         # y value and ind just before passed the spot of the half height
-        y_half_u = y[ind-1]
+        y_half_u = y[ind - 1]
 
         # get corresponding x values
         x_half_d = x[ind]
-        x_half_u = x[ind-1]
+        x_half_u = x[ind - 1]
 
         # calculate x at y = y_half using linear interpolation
         if y_half_u == y_half_d:
             x_half = (x_half_d + x_half_u)/2.0
         else:
-            x_half = (x_half_u * (y_half - y_half_d)  \
-                       + x_half_d * (y_half_u - y_half)) \
-                        / (y_half_u - y_half_d)
+            x_half = ((x_half_u * (y_half - y_half_d)
+                       + x_half_d * (y_half_u - y_half))
+                       / (y_half_u - y_half_d))
 
         # Our slit length is half width, so just give half beam value
         slit_length = x_half
