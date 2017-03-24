@@ -7,6 +7,7 @@ from sas.sasgui.guiframe.events import EVT_SLICER_PARS
 from sas.sasgui.guiframe.utils import format_number
 from sas.sasgui.guiframe.events import EVT_SLICER
 from sas.sasgui.guiframe.events import SlicerParameterEvent, SlicerEvent
+from Plotter2D import ModelPanel2D
 
 
 class SlicerParameterPanel(wx.Dialog):
@@ -137,6 +138,8 @@ class SlicerParameterPanel(wx.Dialog):
             id = wx.NewId()
             main_window = self.parent.parent
             self.loaded_data = main_window._data_manager.data_name_dict
+            # TODO: remove 1D data from choices
+            # TODO: auto check current data set
             choices = self.loaded_data.keys()
             self.data_list = wx.CheckListBox(parent=self, id=id,
                                         choices=choices,
@@ -204,29 +207,69 @@ class SlicerParameterPanel(wx.Dialog):
         # Process each data file individually
         for item in self.data_list.CheckedStrings:
             # Get data_id
-            data_dict = self.parent.parent._data_manager.get_by_name([item])
-            data_ids = data_dict.keys()
-            # Plot data
-            self.parent.parent.plot_data(state_id=[], data_id=data_ids, theory_id=[])
-            # TODO: apply slicer
+            num = len(item)
+            spp = self.parent.parent
+            data_panel = spp._data_panel
+            data_list = data_panel.list_cb_data
+            for key in data_list:
+                loaded_key = (key[:num]) if len(key) > num else key
+                if loaded_key == item:
+                    selection = key
+                    break
+            # Check the data checkbox
+            data_ctrl = data_list[selection][0]
+            self.check_item_and_children(data_ctrl=data_ctrl, check_value=True)
+            # Plot all checked data
+            data_panel.on_plot()
+            panel = plot_mgr = None
+            plot_mgrs = spp.plot_panels
+            for key, mgr in plot_mgrs.iteritems():
+                if isinstance(mgr, ModelPanel2D):
+                    plot_mgr = mgr
+                    break
+            if plot_mgr is not None:
+                # TODO: find proper plot window
+                panels = plot_mgr._manager.plot_panels
+                for _, pane in panels.iteritems():
+                    if pane.window_name == item:
+                        panel = pane
+                # TODO: apply slicer
+                print(panels)
+                if panel is not None:
+                    self._apply_slicer_to_plot(panel)
             # TODO: save file (if desired)
             # TODO: send to fitting (if desired)
-            plot = None
-            slicer = None
-            f_name = None
 
     def onChangeSlicer(self, evt):
         """
-        Change the slicer type when changed in the dropdown
+        Event driven slicer change when self.type_select changes
         :param evt: Event triggering this change
+        """
+        self._apply_slicer_to_plot(self.parent)
+
+    def _apply_slicer_to_plot(self, plot):
+        """
+        Apply a slicer to *any* plot window, not just parent window
+        :param plot:
+        :return:
         """
         type = self.type_select.GetStringSelection()
         if self.type != type:
             if type == "SectorInteractor":
-                self.parent.onSectorQ(None)
+                plot.onSectorQ(None)
             elif type == "AnnulusInteractor":
-                self.parent.onSectorPhi(None)
+                plot.onSectorPhi(None)
             elif type == "BoxInteractorX":
-                self.parent.onBoxavgX(None)
+                plot.onBoxavgX(None)
             elif type == "BoxInteractorY":
-                self.parent.onBoxavgY(None)
+                plot.onBoxavgY(None)
+
+    def check_item_and_children(self, data_ctrl, check_value=True):
+        self.parent.parent._data_panel.tree_ctrl.CheckItem(data_ctrl, check_value)
+        if data_ctrl.HasChildren():
+            if check_value and not data_ctrl.IsExpanded():
+                # Only select children if control is expanded
+                # Always deselect children, regardless (see ticket #259)
+                return
+            for child_ctrl in data_ctrl.GetChildren():
+                self.tree_ctrl.CheckItem(child_ctrl, check_value)
