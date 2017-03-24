@@ -65,6 +65,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Which tab is this widget displayed in?
         self.tab_id = id
 
+        # Which shell is being currently displayed?
+        self.current_shell_displayed = 0
+
         # Range parameters
         self.q_range_min = QMIN_DEFAULT
         self.q_range_max = QMAX_DEFAULT
@@ -419,6 +422,10 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Add magnetic parameters to the model
         self.setMagneticModel()
 
+        # Adjust the table cells width
+        self.lstParams.resizeColumnToContents(0)
+        self.lstParams.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Expanding)
+
         # Now we claim the model has been loaded
         self.model_is_loaded = True
 
@@ -718,6 +725,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         func = QtGui.QComboBox()
         # Available range of shells displayed in the combobox
         func.addItems([str(i) for i in xrange(param_length+1)])
+
         # Respond to index change
         func.currentIndexChanged.connect(self.modifyShellsInList)
 
@@ -732,6 +740,10 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.lstParams.setIndexWidget(shell_index, func)
         self._last_model_row = self._model_model.rowCount()
 
+        # Set the index to the state-kept value
+        func.setCurrentIndex(self.current_shell_displayed
+                             if self.current_shell_displayed < func.count() else 0)
+
     def modifyShellsInList(self, index):
         """
         Add/remove additional multishell parameters
@@ -744,6 +756,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             self._model_model.removeRows(last_row, remove_rows)
 
         FittingUtilities.addShellsToModel(self.model_parameters, self._model_model, index)
+        self.current_shell_displayed = index
 
     def togglePoly(self, isChecked):
         """

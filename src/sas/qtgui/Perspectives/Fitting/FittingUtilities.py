@@ -20,9 +20,14 @@ def getMultiplicity(model):
     If so, returns the name of the counter parameter and the number of shells
     """
     iter_params = getIterParams(model)
-    # return the iterator parameter name and length
-    return (iter_params[0].length_control if iter_params else "",
-            iter_params[0].length if iter_params else 0)
+    param_name = ""
+    param_length = 0
+    if iter_params:
+        param_length = iter_params[0].length
+        param_name = iter_params[0].length_control
+        if param_name is None and '[' in iter_params[0].name:
+            param_name = iter_params[0].name[:iter_params[0].name.index('[')]
+    return (param_name, param_length)
 
 def addParametersToModel(parameters, model):
     """
