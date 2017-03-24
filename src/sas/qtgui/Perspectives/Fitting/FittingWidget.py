@@ -151,7 +151,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.data_is_loaded = True
         # Tag along functionality
         self.label.setText("Data loaded from: ")
-        self.lblFilename.setText(self.logic.data.title)
+        self.lblFilename.setText(self.logic.data.filename)
         self.updateQRange()
         self.cmdFit.setEnabled(True)
 
