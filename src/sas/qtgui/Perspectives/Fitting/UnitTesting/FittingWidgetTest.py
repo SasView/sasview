@@ -164,7 +164,7 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertEqual(self.widget.cbModel.count(), 0)
 
         # invoke the method by changing the index
-        category_index = self.widget.cbCategory.findText("Shape-Independent")
+        category_index = self.widget.cbCategory.findText("Shape Independent")
         self.widget.cbCategory.setCurrentIndex(category_index)
 
         # test the model combo content
@@ -174,7 +174,7 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.cbCategory.setCurrentIndex(0)
 
         # Observe no such luck
-        self.assertEqual(self.widget.cbCategory.currentIndex(), 1)
+        self.assertEqual(self.widget.cbCategory.currentIndex(), 6)
         self.assertEqual(self.widget.cbModel.count(), 29)
 
         # Set the structure factor
@@ -190,7 +190,7 @@ class FittingWidgetTest(unittest.TestCase):
         """
         self.widget.show()
         # Change the category index so we have some models
-        category_index = self.widget.cbCategory.findText("Shape-Independent")
+        category_index = self.widget.cbCategory.findText("Shape Independent")
         self.widget.cbCategory.setCurrentIndex(category_index)
 
         # check the enablement of controls
@@ -207,7 +207,7 @@ class FittingWidgetTest(unittest.TestCase):
         # 
         # Now change the model
         self.widget.cbModel.setCurrentIndex(3)
-        self.assertEqual(self.widget.cbModel.currentText(),'correlation_length')
+        self.assertEqual(self.widget.cbModel.currentText(),'dab')
 
         # No data sent -> no index set, only createDefaultDataset called
         self.assertTrue(self.widget.createDefaultDataset.called)
@@ -218,7 +218,7 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget._index = QtGui.QStandardItem()
         # Reset the sasmodel index
         self.widget.cbModel.setCurrentIndex(1)
-        self.assertEqual(self.widget.cbModel.currentText(),'be_polyelectrolyte')
+        self.assertEqual(self.widget.cbModel.currentText(),'broad_peak')
 
         # Observe calculateQGridForModel called
         self.assertTrue(self.widget.calculateQGridForModel.called)
@@ -229,7 +229,7 @@ class FittingWidgetTest(unittest.TestCase):
         """
         self.widget.show()
         # Change the category index so we have some models
-        category_index = self.widget.cbCategory.findText("Shape-Independent")
+        category_index = self.widget.cbCategory.findText("Shape Independent")
         self.widget.cbCategory.setCurrentIndex(category_index)
         # Change the model to one that supports structure factors
         model_index = self.widget.cbModel.findText('fractal_core_shell')
@@ -330,7 +330,7 @@ class FittingWidgetTest(unittest.TestCase):
         """
         self.widget.show()
         # Change the category index so we have a model with no poly
-        category_index = self.widget.cbCategory.findText("Shape-Independent")
+        category_index = self.widget.cbCategory.findText("Shape Independent")
         self.widget.cbCategory.setCurrentIndex(category_index)
         # Check the poly model
         self.assertEqual(self.widget._poly_model.rowCount(), 0)
@@ -340,7 +340,7 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.cbCategory.setCurrentIndex(2)
 
         # Check the poly model
-        self.assertEqual(self.widget._poly_model.rowCount(), 3)
+        self.assertEqual(self.widget._poly_model.rowCount(), 4)
         self.assertEqual(self.widget._poly_model.columnCount(), 7)
 
         # Test the header
@@ -359,7 +359,7 @@ class FittingWidgetTest(unittest.TestCase):
         """
         self.widget.show()
         # Change the category index so we have a model available
-        category_index = self.widget.cbCategory.findText("Shapes")
+        category_index = self.widget.cbCategory.findText("Sphere")
         self.widget.cbCategory.setCurrentIndex(category_index)
 
         # Check the magnetic model
@@ -388,7 +388,7 @@ class FittingWidgetTest(unittest.TestCase):
         """
         self.widget.show()
         # Change the model to multi shell
-        category_index = self.widget.cbCategory.findText("Shapes")
+        category_index = self.widget.cbCategory.findText("Sphere")
         self.widget.cbCategory.setCurrentIndex(category_index)
         model_index = self.widget.cbModel.findText("core_multi_shell")
         self.widget.cbModel.setCurrentIndex(model_index)
