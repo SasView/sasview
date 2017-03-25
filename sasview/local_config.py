@@ -34,8 +34,8 @@ _acknowledgement_preamble =\
 _acknowledgement_preamble_bullet1 =\
 '''Acknowledge its use in your publications as suggested below;'''
 _acknowledgement_preamble_bullet2 =\
-'''Reference SasView as : M. Doucet, et al. SasView Version 4.0, Zenodo''' +\
-''', http://doi.org/10.5281/zenodo.159083;'''
+'''Reference SasView as : M. Doucet, et al. SasView Version 4.1, Zenodo''' +\
+''', 10.5281/zenodo.438138;'''
 _acknowledgement_preamble_bullet3 =\
 '''Reference the model you used if appropriate (see documentation for refs);'''
 _acknowledgement_preamble_bullet4 =\
@@ -43,12 +43,15 @@ _acknowledgement_preamble_bullet4 =\
 _acknowledgement_publications = \
 '''This work benefited from the use of the SasView application, originally developed under NSF Award 
 DMR-0520547. SasView also contains code developed with funding from the EU Horizon 2020 programme 
-under the SINE2020 project Grant No 654000, and by Patrick O'Brien & Adam Washington.'''
+under the SINE2020 project Grant No 654000.'''
 
 _acknowledgement =  \
 '''This work was originally developed as part of the DANSE project funded by the US NSF under Award DMR-0520547, but is currently maintained 
-by a collaboration between UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO and TU Delft. SasView also contains code developed with funding from the 
-EU Horizon 2020 programme under the SINE2020 project (Grant No 654000), and by Patrick O'Brien (pycrust) and Adam Washington (corfunc-py).'''
+by a collaboration between UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO and TU Delft and the scattering community. SasView also contains code developed with funding from the 
+EU Horizon 2020 programme under the SINE2020 project (Grant No 654000).
+
+A list of individual contributors can be found at: https://github.com/orgs/SasView/people
+'''
 
 _homepage = "http://www.sasview.org"
 _download = __download_page__
