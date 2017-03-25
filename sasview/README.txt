@@ -6,7 +6,30 @@ Release Notes
     - New in Version 4.1.0
       ------------------
       This incremental release brings a series of new features and improvements,
-      and a host of bug fixes.
+      and a host of bug fixes. Of particular note are:
+      
+      - Correlation Function Analysis (Corfunc)
+      	This performs a correlation function analysis of one-dimensional SAXS/SANS data, 
+	or generates a model-independent volume fraction profile from the SANS from an 
+	adsorbed polymer/surfactant layer.
+
+	A correlation function may be interpreted in terms of an imaginary rod moving 
+	through the structure of the material. Γ1D(R) is the probability that a rod of 
+	length R moving through the material has equal electron/neutron scattering 
+	length density at either end. Hence a frequently occurring spacing within a 
+	structure manifests itself as a peak.
+
+	A volume fraction profile \Phi(z) describes how the density of polymer 
+	segments/surfactant molecules varies with distance from an (assumed locally flat)
+	interface.
+
+      - Fitting of SESANS Data
+      	Data from Spin-Echo SANS measurements can now be loaded and fitted. The data will 
+	be plotted against the correct axes and models will automatically perform a Hankel 
+	transform in order to calculate SESANS from a SANS model.
+
+      - Documentation
+      	The documentation has undergone significant checking and updating.
 
       - Improvements
         - Correlation function (corfunc) analysis of 1D SAS data added from CCP13
