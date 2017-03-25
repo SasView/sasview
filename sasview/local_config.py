@@ -32,25 +32,20 @@ _acknowledgement_preamble =\
 '''To ensure the long term support and development of this software please''' +\
 ''' remember to:'''
 _acknowledgement_preamble_bullet1 =\
-'''Acknowledge its use in your publications as suggested below;'''
+'''Acknowledge its use in your publications as :'''
 _acknowledgement_preamble_bullet2 =\
-'''Reference SasView as : M. Doucet, et al. SasView Version 4.1, Zenodo''' +\
-''', 10.5281/zenodo.438138;'''
+'''Reference SasView as:'''
 _acknowledgement_preamble_bullet3 =\
-'''Reference the model you used if appropriate (see documentation for refs);'''
+'''Reference the model you used if appropriate (see documentation for refs)'''
 _acknowledgement_preamble_bullet4 =\
 '''Send us your reference for our records: developers@sasview.org'''
 _acknowledgement_publications = \
-'''This work benefited from the use of the SasView application, originally developed under NSF Award 
-DMR-0520547. SasView also contains code developed with funding from the EU Horizon 2020 programme 
-under the SINE2020 project Grant No 654000.'''
+'''This work benefited from the use of the SasView application, originally developed under NSF Award DMR-0520547. SasView also contains code developed with funding from the EU Horizon 2020 programme under the SINE2020 project Grant No 654000.'''
+_acknowledgement_citation = \
+'''M. Doucet et al. SasView Version 4.1, Zenodo, 10.5281/zenodo.438138'''
 
 _acknowledgement =  \
-'''This work was originally developed as part of the DANSE project funded by the US NSF under Award DMR-0520547, but is currently maintained 
-by a collaboration between UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO and TU Delft and the scattering community. SasView also contains code developed with funding from the 
-EU Horizon 2020 programme under the SINE2020 project (Grant No 654000).
-
-A list of individual contributors can be found at: https://github.com/orgs/SasView/people
+'''This work was originally developed as part of the DANSE project funded by the US NSF under Award DMR-0520547,\n but is currently maintained by a collaboration between UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO and TU Delft and the scattering community.\n\n SasView also contains code developed with funding from the EU Horizon 2020 programme under the SINE2020 project (Grant No 654000).\nA list of individual contributors can be found at: https://github.com/orgs/SasView/people
 '''
 
 _homepage = "http://www.sasview.org"
@@ -91,7 +86,7 @@ _danse_url = "http://www.cacr.caltech.edu/projects/danse/release/index.html"
 _inst_url = "http://www.utk.edu"
 _corner_image = os.path.join(icon_path, "angles_flat.png")
 _welcome_image = os.path.join(icon_path, "SVwelcome.png")
-_copyright = "(c) 2009 - 2016, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO and TU Delft"
+_copyright = "(c) 2009 - 2017, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO and TU Delft"
 marketplace_url = "http://marketplace.sasview.org/"
 
 #edit the list of file state your plugin can read
