@@ -70,7 +70,7 @@ class DialogAcknowledge(wx.Dialog):
         self.preamble.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, ""))
         self.SetTitle("Acknowledging SasView")
         #Increased size of box from (525, 225), SMK, 04/10/16
-        self.SetSize((600, 320))
+        self.SetClientSize((600, 320))
         # end wxGlade
 
     def __do_layout(self):
@@ -93,6 +93,7 @@ class DialogAcknowledge(wx.Dialog):
         self.SetSizer(sizer_main)
         self.Layout()
         self.Centre()
+        #self.SetClientSize(sizer_main.GetSize())
         # end wxGlade
 
 
