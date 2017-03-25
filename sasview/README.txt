@@ -3,6 +3,40 @@ Release Notes
 
 1- Features
 ===========
+    - New in Version 4.1.0
+      ------------------
+      This incremental release brings a series of new features and improvements,
+      and a host of bug fixes.
+
+      - Improvements
+        - Correlation function (corfunc) analysis of 1D SAS data added from CCP13
+        - File converter tool for multi-file single column data sets
+        - SESANS data loading and direct fitting using the Hankel transformation
+        - Saving and loading of simultaneous and constrained fits now supported
+        - Save states from SasView v3.x.y now loaded using sasmodel model names
+        - Saving and loading of projects with 2D fits now supported
+        - Loading a project removes all existing data, fits, and plots
+        - Structure factor and form factor can be plotted independently
+        - OpenCL is disabled by default and can be enabled through a fit menu
+        - Data and theory fields are now independently expandable
+      - Bug Fixes
+        - Fixes #667: Models computed multiple times on parameters changes
+        - Fixes #673: Custom models override built in models of same name
+        - Fixes #678: Hard crash when running complex models on GPU
+        - Fixes $774: Old style plugin models unloadable
+        - Fixes #789: stacked disk scale doesn't match cylinder model
+        - Fixes #792: core_shell_fractal uses wrong effective radius
+        - Fixes #800: Plot range reset on plot redraws
+        - Fixes #811 and #825: 2D smearing broken
+        - Fixes #815: Integer model parameter handling
+        - Fixes #824: Cannot apply sector averaging when no detector data present
+        - Fixes #830: Cansas HDF5 reader fully compliant with NXCanSAS v1.0 format
+        - Fixes #835: Fractal model breaks with negative Q values
+        - Fixes #843: Multilayer vesicle does not define effective radius
+        - Fixes #858: Hayter MSA S(Q) returns errors
+        - Numerous grammatical and contexual errors in documention
+
+
     - New in Version 4.0.1
       ------------------
       This release fixes the critical bug #750 in P(Q)*S(Q).  Most damaging
