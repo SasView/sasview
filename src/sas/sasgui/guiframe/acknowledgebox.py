@@ -36,7 +36,6 @@ class DialogAcknowledge(wx.Dialog):
 
     Shows the current method for acknowledging SasView in
     scholarly publications.
-
     """
 
     def __init__(self, *args, **kwds):
@@ -54,10 +53,10 @@ class DialogAcknowledge(wx.Dialog):
                  config._acknowledgement_preamble_bullet2,
                  config._acknowledgement_preamble_bullet3,
                  config._acknowledgement_preamble_bullet4]
-        self.list1 = wx.StaticText(self, -1, "\t(1) " + items[0])
-        self.list2 = wx.StaticText(self, -1, "\t(2) " + items[1])
-        self.list3 = wx.StaticText(self, -1, "\t(3) " + items[2])
-        self.list4 = wx.StaticText(self, -1, "\t(4) " + items[3])
+        self.list1 = wx.StaticText(self, -1, "(1) " + items[0])
+        self.list2 = wx.StaticText(self, -1, "(2) " + items[1])
+        self.list3 = wx.StaticText(self, -1, "(3) " + items[2])
+        self.list4 = wx.StaticText(self, -1, "(4) " + items[3])
         self.static_line = wx.StaticLine(self, 0)
         self.__set_properties()
         self.__do_layout()
@@ -71,7 +70,7 @@ class DialogAcknowledge(wx.Dialog):
         self.preamble.SetFont(wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, ""))
         self.SetTitle("Acknowledging SasView")
         #Increased size of box from (525, 225), SMK, 04/10/16
-        self.SetSize((600, 300))
+        self.SetSize((600, 320))
         # end wxGlade
 
     def __do_layout(self):
