@@ -9,7 +9,7 @@ Release Notes
       and a host of bug fixes.
 
       - Improvements
-        - Corfunc perspective added for Guinier and Porod extrapolation
+        - Correlation function (corfunc) analysis of 1D SAS data added from CCP13
         - File converter tool for multi-file single column data sets
         - SESANS data loading and direct fitting using the Hankel transformation
         - Saving and loading of simultaneous and constrained fits now supported
