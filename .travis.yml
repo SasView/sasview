@@ -2,11 +2,17 @@
 
 language: python
 
-# can eventually include OSX here.
 matrix:
     include:
         - os: linux
-          env: PY=2.7
+          env:
+            - PY=2.7
+            - NUMPYSPEC=numpy
+        - os: osx
+          language: generic
+          env:
+            - PY=2.7
+            - NUMPYSPEC=numpy
 
 # whitelist
 branches:
@@ -29,7 +35,16 @@ before_install:
     - echo $TRAVIS_OS_NAME
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
           wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+          sudo apt-get update; sudo apt-get install python-pyopencl;
+      elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+          wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
       fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+        "export DISPLAY=:99.0";
+        "sh -e /etc/init.d/xvfb start";
+        sleep 3; # give xvfb some time to start
+      fi
+
     - bash miniconda.sh -b -p $HOME/miniconda
     - export PATH="$HOME/miniconda/bin:$PATH"
     - hash -r
@@ -40,18 +55,13 @@ before_install:
 
     # could install other dependencies, but they're locked to specific
     # versions in build/requirements.txt
-    - conda install --yes python=$PY numpy scipy cython pylint wxpython
-    - sudo apt-get update; sudo apt-get install python-pyopencl
+    - conda install --yes python=$PY $NUMPYSPEC scipy cython pylint wxpython
 
 install:
   - pip install -r build_tools/requirements.txt
   - pip install matplotlib
 
-before_script:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-  - sleep 3 # give xvfb some time to start
-  
+
 script:
   - cd ..
   # this should be the directory above the sasview directory, where we want to
