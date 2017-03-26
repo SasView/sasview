@@ -3,16 +3,16 @@
 language: python
 
 matrix:
-    include:
-        - os: linux
-          env:
-            - PY=2.7
-            - NUMPYSPEC=numpy
-        - os: osx
-          language: generic
-          env:
-            - PY=2.7
-            - NUMPYSPEC=numpy
+  include:
+    - os: linux
+      env:
+        - PY=2.7
+        - NUMPYSPEC=numpy
+    - os: osx
+      language: generic
+      env:
+        - PY=2.7
+        - NUMPYSPEC=numpy
 
 # whitelist
 branches:
@@ -20,47 +20,46 @@ branches:
     - master
 
 addons:
-    apt:
-        packages:
-            - opencl-headers
-            - fglrx
-            - libblas-dev
-            - libatlas-dev
-            - libatlas-base-dev
-            - liblapack-dev
-            - gfortran
-            - libhdf5-serial-dev
+  apt:
+    packages:
+      - opencl-headers
+      - fglrx
+      - libblas-dev
+      - libatlas-dev
+      - libatlas-base-dev
+      - liblapack-dev
+      - gfortran
+      - libhdf5-serial-dev
 
 before_install:
-    - echo $TRAVIS_OS_NAME
-    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-          wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-          sudo apt-get update; sudo apt-get install python-pyopencl;
-      elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-          wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
-      fi
-    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-        "export DISPLAY=:99.0";
-        "sh -e /etc/init.d/xvfb start";
-        sleep 3; # give xvfb some time to start
-      fi
+  - echo $TRAVIS_OS_NAME
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+        wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+        sudo apt-get update; sudo apt-get install python-pyopencl;
+    elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
+    fi
 
-    - bash miniconda.sh -b -p $HOME/miniconda
-    - export PATH="$HOME/miniconda/bin:$PATH"
-    - hash -r
-    - conda update --yes conda
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda update --yes conda
 
-    # Useful for debugging any issues with conda
-    - conda info -a
+  # Useful for debugging any issues with conda
+  - conda info -a
 
-    # could install other dependencies, but they're locked to specific
-    # versions in build/requirements.txt
-    - conda install --yes python=$PY $NUMPYSPEC scipy cython pylint wxpython
+  # could install other dependencies, but they're locked to specific
+  # versions in build/requirements.txt
+  - conda install --yes python=$PY $NUMPYSPEC scipy cython pylint wxpython
 
 install:
   - pip install -r build_tools/requirements.txt
   - pip install matplotlib
 
+before_script:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+        "export DISPLAY=:99.0"; "sh -e /etc/init.d/xvfb start"; sleep 3; # give xvfb some time to start
+    fi
 
 script:
   - cd ..
