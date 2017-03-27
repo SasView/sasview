@@ -818,7 +818,7 @@ class PageState(object):
                     entry_node.appendChild(top_element)
 
         attr = newdoc.createAttribute("version")
-        import sasview
+        from sas import sasview
         attr.nodeValue = sasview.__version__
         # attr.nodeValue = '1.0'
         top_element.setAttributeNode(attr)
