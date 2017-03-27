@@ -3,11 +3,10 @@
 """
 
 import unittest
-import numpy, math
+import numpy as np
 from sas.sascalc.dataloader.loader import  Loader
 from sas.sascalc.dataloader.data_info import Data1D
  
-import os.path
 
 class abs_reader(unittest.TestCase):
     
@@ -312,9 +311,9 @@ class cansas_reader(unittest.TestCase):
     def test_writer(self):
         from sas.sascalc.dataloader.readers.cansas_reader import Reader
         r = Reader()
-        x = numpy.ones(5)
-        y = numpy.ones(5)
-        dy = numpy.ones(5)
+        x = np.ones(5)
+        y = np.ones(5)
+        dy = np.ones(5)
         
         filename = "write_test.xml"
         r.write(filename, self.data)

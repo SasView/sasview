@@ -12,7 +12,7 @@
 #copyright 2008, University of Tennessee
 #############################################################################
 import os
-import numpy
+import numpy as np
 import math
 #import logging
 from sas.sascalc.dataloader.data_info import Data2D
@@ -117,8 +117,8 @@ class Reader:
         #print "i_tot", i_tot_row
         size_x = i_tot_row  # 192#128
         size_y = i_tot_row  # 192#128
-        output.data = numpy.zeros([size_x, size_y])
-        output.err_data = numpy.zeros([size_x, size_y])
+        output.data = np.zeros([size_x, size_y])
+        output.err_data = np.zeros([size_x, size_y])
      
         #Read Header and 2D data
         for line in lines:

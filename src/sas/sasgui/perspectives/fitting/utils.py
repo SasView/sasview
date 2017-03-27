@@ -1,7 +1,7 @@
 """
 Module contains functions frequently used in this package
 """
-import numpy
+import numpy as np
 
 
 def get_weight(data, is2d, flag=None):
@@ -18,11 +18,11 @@ def get_weight(data, is2d, flag=None):
         dy_data = data.dy
         data = data.y
     if flag == 0:
-        weight = numpy.ones_like(data)
+        weight = np.ones_like(data)
     elif flag == 1:
         weight = dy_data
     elif flag == 2:
-        weight = numpy.sqrt(numpy.abs(data))
+        weight = np.sqrt(np.abs(data))
     elif flag == 3:
-        weight = numpy.abs(data)
+        weight = np.abs(data)
     return weight

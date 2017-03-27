@@ -6,7 +6,7 @@ import sas.sascalc.calculator.core.sld2i as mod
 from sas.sascalc.calculator.BaseComponent import BaseComponent
 from periodictable import formula
 from periodictable import nsf
-import numpy
+import numpy as np
 import os
 import copy
 import sys
@@ -79,13 +79,13 @@ class GenSAS(BaseComponent):
         self.description = 'GenSAS'
         ## Parameter details [units, min, max]
         self.details = {}
-        self.details['scale'] = ['', 0.0, numpy.inf]
-        self.details['background'] = ['[1/cm]', 0.0, numpy.inf]
-        self.details['solvent_SLD'] = ['1/A^(2)', -numpy.inf, numpy.inf]
-        self.details['total_volume'] = ['A^(3)', 0.0, numpy.inf]
+        self.details['scale'] = ['', 0.0, np.inf]
+        self.details['background'] = ['[1/cm]', 0.0, np.inf]
+        self.details['solvent_SLD'] = ['1/A^(2)', -np.inf, np.inf]
+        self.details['total_volume'] = ['A^(3)', 0.0, np.inf]
         self.details['Up_frac_in'] = ['[u/(u+d)]', 0.0, 1.0]
         self.details['Up_frac_out'] = ['[u/(u+d)]', 0.0, 1.0]
-        self.details['Up_theta'] = ['[deg]', -numpy.inf, numpy.inf]
+        self.details['Up_theta'] = ['[deg]', -np.inf, np.inf]
         # fixed parameters
         self.fixed = []
 
@@ -170,7 +170,7 @@ class GenSAS(BaseComponent):
             if len(x[1]) > 0:
                 msg = "Not a 1D."
                 raise ValueError, msg
-            i_out = numpy.zeros_like(x[0])
+            i_out = np.zeros_like(x[0])
             # 1D I is found at y =0 in the 2D pattern
             out = self._gen(x[0], [], i_out)
             return out
@@ -186,7 +186,7 @@ class GenSAS(BaseComponent):
         :Use this runXY() for the computation
         """
         if x.__class__.__name__ == 'list':
-            i_out = numpy.zeros_like(x[0])
+            i_out = np.zeros_like(x[0])
             out = self._gen(x[0], x[1], i_out)
             return out
         else:
@@ -236,34 +236,34 @@ class OMF2SLD(object):
         """
         self.omfdata = omfdata
         length = int(omfdata.xnodes * omfdata.ynodes * omfdata.znodes)
-        pos_x = numpy.arange(omfdata.xmin,
+        pos_x = np.arange(omfdata.xmin,
                              omfdata.xnodes*omfdata.xstepsize + omfdata.xmin,
                              omfdata.xstepsize)
-        pos_y = numpy.arange(omfdata.ymin,
+        pos_y = np.arange(omfdata.ymin,
                              omfdata.ynodes*omfdata.ystepsize + omfdata.ymin,
                              omfdata.ystepsize)
-        pos_z = numpy.arange(omfdata.zmin,
+        pos_z = np.arange(omfdata.zmin,
                              omfdata.znodes*omfdata.zstepsize + omfdata.zmin,
                              omfdata.zstepsize)
-        self.pos_x = numpy.tile(pos_x, int(omfdata.ynodes * omfdata.znodes))
+        self.pos_x = np.tile(pos_x, int(omfdata.ynodes * omfdata.znodes))
         self.pos_y = pos_y.repeat(int(omfdata.xnodes))
-        self.pos_y = numpy.tile(self.pos_y, int(omfdata.znodes))
+        self.pos_y = np.tile(self.pos_y, int(omfdata.znodes))
         self.pos_z = pos_z.repeat(int(omfdata.xnodes * omfdata.ynodes))
         self.mx = omfdata.mx
         self.my = omfdata.my
         self.mz = omfdata.mz
-        self.sld_n = numpy.zeros(length)
+        self.sld_n = np.zeros(length)
 
         if omfdata.mx == None:
-            self.mx = numpy.zeros(length)
+            self.mx = np.zeros(length)
         if omfdata.my == None:
-            self.my = numpy.zeros(length)
+            self.my = np.zeros(length)
         if omfdata.mz == None:
-            self.mz = numpy.zeros(length)
+            self.mz = np.zeros(length)
 
         self._check_data_length(length)
         self.remove_null_points(False, False)
-        mask = numpy.ones(len(self.sld_n), dtype=bool)
+        mask = np.ones(len(self.sld_n), dtype=bool)
         if shape.lower() == 'ellipsoid':
             try:
                 # Pixel (step) size included
@@ -327,8 +327,8 @@ class OMF2SLD(object):
         Removes any mx, my, and mz = 0 points
         """
         if remove:
-            is_nonzero = (numpy.fabs(self.mx) + numpy.fabs(self.my) +
-                          numpy.fabs(self.mz)).nonzero()
+            is_nonzero = (np.fabs(self.mx) + np.fabs(self.my) +
+                          np.fabs(self.mz)).nonzero()
             if len(is_nonzero[0]) > 0:
                 self.pos_x = self.pos_x[is_nonzero]
                 self.pos_y = self.pos_y[is_nonzero]
@@ -368,9 +368,9 @@ class OMFReader(object):
         :return: x, y, z, sld_n, sld_mx, sld_my, sld_mz
         """
         desc = ""
-        mx = numpy.zeros(0)
-        my = numpy.zeros(0)
-        mz = numpy.zeros(0)
+        mx = np.zeros(0)
+        my = np.zeros(0)
+        mz = np.zeros(0)
         try:
             input_f = open(path, 'rb')
             buff = input_f.read()
@@ -388,9 +388,9 @@ class OMFReader(object):
                     _mx = mag2sld(_mx, valueunit)
                     _my = mag2sld(_my, valueunit)
                     _mz = mag2sld(_mz, valueunit)
-                    mx = numpy.append(mx, _mx)
-                    my = numpy.append(my, _my)
-                    mz = numpy.append(mz, _mz)
+                    mx = np.append(mx, _mx)
+                    my = np.append(my, _my)
+                    mz = np.append(mz, _mz)
                 except:
                     # Skip non-data lines
                     logging.error(sys.exc_value)
@@ -500,15 +500,15 @@ class PDBReader(object):
         :return: MagSLD
         :raise RuntimeError: when the file can't be opened
         """
-        pos_x = numpy.zeros(0)
-        pos_y = numpy.zeros(0)
-        pos_z = numpy.zeros(0)
-        sld_n = numpy.zeros(0)
-        sld_mx = numpy.zeros(0)
-        sld_my = numpy.zeros(0)
-        sld_mz = numpy.zeros(0)
-        vol_pix = numpy.zeros(0)
-        pix_symbol = numpy.zeros(0)
+        pos_x = np.zeros(0)
+        pos_y = np.zeros(0)
+        pos_z = np.zeros(0)
+        sld_n = np.zeros(0)
+        sld_mx = np.zeros(0)
+        sld_my = np.zeros(0)
+        sld_mz = np.zeros(0)
+        vol_pix = np.zeros(0)
+        pix_symbol = np.zeros(0)
         x_line = []
         y_line = []
         z_line = []
@@ -542,25 +542,25 @@ class PDBReader(object):
                         _pos_x = float(line[30:38].strip())
                         _pos_y = float(line[38:46].strip())
                         _pos_z = float(line[46:54].strip())
-                        pos_x = numpy.append(pos_x, _pos_x)
-                        pos_y = numpy.append(pos_y, _pos_y)
-                        pos_z = numpy.append(pos_z, _pos_z)
+                        pos_x = np.append(pos_x, _pos_x)
+                        pos_y = np.append(pos_y, _pos_y)
+                        pos_z = np.append(pos_z, _pos_z)
                         try:
                             val = nsf.neutron_sld(atom_name)[0]
                             # sld in Ang^-2 unit
                             val *= 1.0e-6
-                            sld_n = numpy.append(sld_n, val)
+                            sld_n = np.append(sld_n, val)
                             atom = formula(atom_name)
                             # cm to A units
                             vol = 1.0e+24 * atom.mass / atom.density / NA
-                            vol_pix = numpy.append(vol_pix, vol)
+                            vol_pix = np.append(vol_pix, vol)
                         except:
                             print "Error: set the sld of %s to zero"% atom_name
-                            sld_n = numpy.append(sld_n, 0.0)
-                        sld_mx = numpy.append(sld_mx, 0)
-                        sld_my = numpy.append(sld_my, 0)
-                        sld_mz = numpy.append(sld_mz, 0)
-                        pix_symbol = numpy.append(pix_symbol, atom_name)
+                            sld_n = np.append(sld_n, 0.0)
+                        sld_mx = np.append(sld_mx, 0)
+                        sld_my = np.append(sld_my, 0)
+                        sld_mz = np.append(sld_mz, 0)
+                        pix_symbol = np.append(pix_symbol, atom_name)
                     elif line[0:6].strip().count('CONECT') > 0:
                         toks = line.split()
                         num = int(toks[1]) - 1
@@ -629,27 +629,27 @@ class SLDReader(object):
         :raise ValueError: when the length of the data vectors are inconsistent
         """
         try:
-            pos_x = numpy.zeros(0)
-            pos_y = numpy.zeros(0)
-            pos_z = numpy.zeros(0)
-            sld_n = numpy.zeros(0)
-            sld_mx = numpy.zeros(0)
-            sld_my = numpy.zeros(0)
-            sld_mz = numpy.zeros(0)
+            pos_x = np.zeros(0)
+            pos_y = np.zeros(0)
+            pos_z = np.zeros(0)
+            sld_n = np.zeros(0)
+            sld_mx = np.zeros(0)
+            sld_my = np.zeros(0)
+            sld_mz = np.zeros(0)
             try:
                 # Use numpy to speed up loading
-                input_f = numpy.loadtxt(path, dtype='float', skiprows=1,
+                input_f = np.loadtxt(path, dtype='float', skiprows=1,
                                         ndmin=1, unpack=True)
-                pos_x = numpy.array(input_f[0])
-                pos_y = numpy.array(input_f[1])
-                pos_z = numpy.array(input_f[2])
-                sld_n = numpy.array(input_f[3])
-                sld_mx = numpy.array(input_f[4])
-                sld_my = numpy.array(input_f[5])
-                sld_mz = numpy.array(input_f[6])
+                pos_x = np.array(input_f[0])
+                pos_y = np.array(input_f[1])
+                pos_z = np.array(input_f[2])
+                sld_n = np.array(input_f[3])
+                sld_mx = np.array(input_f[4])
+                sld_my = np.array(input_f[5])
+                sld_mz = np.array(input_f[6])
                 ncols = len(input_f)
                 if ncols == 8:
-                    vol_pix = numpy.array(input_f[7])
+                    vol_pix = np.array(input_f[7])
                 elif ncols == 7:
                     vol_pix = None
             except:
@@ -668,16 +668,16 @@ class SLDReader(object):
                         _sld_mx = float(toks[4])
                         _sld_my = float(toks[5])
                         _sld_mz = float(toks[6])
-                        pos_x = numpy.append(pos_x, _pos_x)
-                        pos_y = numpy.append(pos_y, _pos_y)
-                        pos_z = numpy.append(pos_z, _pos_z)
-                        sld_n = numpy.append(sld_n, _sld_n)
-                        sld_mx = numpy.append(sld_mx, _sld_mx)
-                        sld_my = numpy.append(sld_my, _sld_my)
-                        sld_mz = numpy.append(sld_mz, _sld_mz)
+                        pos_x = np.append(pos_x, _pos_x)
+                        pos_y = np.append(pos_y, _pos_y)
+                        pos_z = np.append(pos_z, _pos_z)
+                        sld_n = np.append(sld_n, _sld_n)
+                        sld_mx = np.append(sld_mx, _sld_mx)
+                        sld_my = np.append(sld_my, _sld_my)
+                        sld_mz = np.append(sld_mz, _sld_mz)
                         try:
                             _vol_pix = float(toks[7])
-                            vol_pix = numpy.append(vol_pix, _vol_pix)
+                            vol_pix = np.append(vol_pix, _vol_pix)
                         except:
                             vol_pix = None
                     except:
@@ -711,12 +711,12 @@ class SLDReader(object):
         length = len(x_val)
         sld_n = data.sld_n
         if sld_n == None:
-            sld_n = numpy.zeros(length)
+            sld_n = np.zeros(length)
         sld_mx = data.sld_mx
         if sld_mx == None:
-            sld_mx = numpy.zeros(length)
-            sld_my = numpy.zeros(length)
-            sld_mz = numpy.zeros(length)
+            sld_mx = np.zeros(length)
+            sld_my = np.zeros(length)
+            sld_mz = np.zeros(length)
         else:
             sld_my = data.sld_my
             sld_mz = data.sld_mz
@@ -892,17 +892,17 @@ class MagSLD(object):
         if sld_n.__class__.__name__ == 'float':
             if self.is_data:
                 # For data, put the value to only the pixels w non-zero M
-                is_nonzero = (numpy.fabs(self.sld_mx) +
-                              numpy.fabs(self.sld_my) +
-                              numpy.fabs(self.sld_mz)).nonzero()
-                self.sld_n = numpy.zeros(len(self.pos_x))
+                is_nonzero = (np.fabs(self.sld_mx) +
+                              np.fabs(self.sld_my) +
+                              np.fabs(self.sld_mz)).nonzero()
+                self.sld_n = np.zeros(len(self.pos_x))
                 if len(self.sld_n[is_nonzero]) > 0:
                     self.sld_n[is_nonzero] = sld_n
                 else:
                     self.sld_n.fill(sld_n)
             else:
                 # For non-data, put the value to all the pixels
-                self.sld_n = numpy.ones(len(self.pos_x)) * sld_n
+                self.sld_n = np.ones(len(self.pos_x)) * sld_n
         else:
             self.sld_n = sld_n
 
@@ -911,19 +911,19 @@ class MagSLD(object):
         Sets (\|m\|, m_theta, m_phi)
         """
         if sld_mx.__class__.__name__ == 'float':
-            self.sld_mx = numpy.ones(len(self.pos_x)) * sld_mx
+            self.sld_mx = np.ones(len(self.pos_x)) * sld_mx
         else:
             self.sld_mx = sld_mx
         if sld_my.__class__.__name__ == 'float':
-            self.sld_my = numpy.ones(len(self.pos_x)) * sld_my
+            self.sld_my = np.ones(len(self.pos_x)) * sld_my
         else:
             self.sld_my = sld_my
         if sld_mz.__class__.__name__ == 'float':
-            self.sld_mz = numpy.ones(len(self.pos_x)) * sld_mz
+            self.sld_mz = np.ones(len(self.pos_x)) * sld_mz
         else:
             self.sld_mz = sld_mz
 
-        sld_m = numpy.sqrt(sld_mx * sld_mx + sld_my * sld_my + \
+        sld_m = np.sqrt(sld_mx * sld_mx + sld_my * sld_my + \
                                 sld_mz * sld_mz)
         self.sld_m = sld_m
 
@@ -935,7 +935,7 @@ class MagSLD(object):
         if self.sld_n == None:
             return
         if symbol.__class__.__name__ == 'str':
-            self.pix_symbol = numpy.repeat(symbol, len(self.sld_n))
+            self.pix_symbol = np.repeat(symbol, len(self.sld_n))
         else:
             self.pix_symbol = symbol
 
@@ -949,7 +949,7 @@ class MagSLD(object):
         if vol.__class__.__name__ == 'ndarray':
             self.vol_pix = vol
         elif vol.__class__.__name__.count('float') > 0:
-            self.vol_pix = numpy.repeat(vol, len(self.sld_n))
+            self.vol_pix = np.repeat(vol, len(self.sld_n))
         else:
             self.vol_pix = None
 
@@ -992,18 +992,18 @@ class MagSLD(object):
                 zpos_pre = self.pos_z[0]
                 for x_pos in self.pos_x:
                     if xpos_pre != x_pos:
-                        self.xstepsize = numpy.fabs(x_pos - xpos_pre)
+                        self.xstepsize = np.fabs(x_pos - xpos_pre)
                         break
                 for y_pos in self.pos_y:
                     if ypos_pre != y_pos:
-                        self.ystepsize = numpy.fabs(y_pos - ypos_pre)
+                        self.ystepsize = np.fabs(y_pos - ypos_pre)
                         break
                 for z_pos in self.pos_z:
                     if zpos_pre != z_pos:
-                        self.zstepsize = numpy.fabs(z_pos - zpos_pre)
+                        self.zstepsize = np.fabs(z_pos - zpos_pre)
                         break
                 #default pix volume
-                self.vol_pix = numpy.ones(len(self.pos_x))
+                self.vol_pix = np.ones(len(self.pos_x))
                 vol = self.xstepsize * self.ystepsize * self.zstepsize
                 self.set_pixel_volumes(vol)
                 self.has_stepsize = True
@@ -1070,16 +1070,16 @@ def test_load():
     x2 = output.pos_x+output.sld_mx/max_m * gap
     y2 = output.pos_y+output.sld_my/max_m * gap
     z2 = output.pos_z+output.sld_mz/max_m * gap
-    x_arrow = numpy.column_stack((output.pos_x, x2))
-    y_arrow = numpy.column_stack((output.pos_y, y2))
-    z_arrow = numpy.column_stack((output.pos_z, z2))
+    x_arrow = np.column_stack((output.pos_x, x2))
+    y_arrow = np.column_stack((output.pos_y, y2))
+    z_arrow = np.column_stack((output.pos_z, z2))
     unit_x2 = output.sld_mx / max_m
     unit_y2 = output.sld_my / max_m
     unit_z2 = output.sld_mz / max_m
-    color_x = numpy.fabs(unit_x2 * 0.8)
-    color_y = numpy.fabs(unit_y2 * 0.8)
-    color_z = numpy.fabs(unit_z2 * 0.8)
-    colors = numpy.column_stack((color_x, color_y, color_z))
+    color_x = np.fabs(unit_x2 * 0.8)
+    color_y = np.fabs(unit_y2 * 0.8)
+    color_z = np.fabs(unit_z2 * 0.8)
+    colors = np.column_stack((color_x, color_y, color_z))
     plt.show()
 
 def test():
@@ -1102,9 +1102,9 @@ def test():
                  foutput.output)
     model = GenSAS()
     model.set_sld_data(foutput.output)
-    x = numpy.arange(1000)/10000. + 1e-5
-    y = numpy.arange(1000)/10000. + 1e-5
-    i = numpy.zeros(1000)
+    x = np.arange(1000)/10000. + 1e-5
+    y = np.arange(1000)/10000. + 1e-5
+    i = np.zeros(1000)
     model.runXY([x, y, i])
 
 if __name__ == "__main__":
