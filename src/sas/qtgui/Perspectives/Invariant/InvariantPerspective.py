@@ -58,7 +58,7 @@ class InvariantWindow(QtGui.QDialog, Ui_tabbedInvariantUI):
 
         self._manager = parent
         #self._manager = manager
-        self._reactor = self._manager.reactor()
+        self._reactor = reactor
         self._model_item = QtGui.QStandardItem()
 
         self._helpView = QtWebKit.QWebView()

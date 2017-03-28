@@ -214,8 +214,8 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertTrue(self.widget.SASModelToQModel.called)
         self.assertFalse(self.widget.calculateQGridForModel.called)
 
-        # Let's set a dummy index on widget
-        self.widget._index = QtGui.QStandardItem()
+        # Let's tell the widget that data has been loaded
+        self.widget.data_is_loaded = True
         # Reset the sasmodel index
         self.widget.cbModel.setCurrentIndex(1)
         self.assertEqual(self.widget.cbModel.currentText(),'broad_peak')

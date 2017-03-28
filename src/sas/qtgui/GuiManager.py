@@ -45,14 +45,14 @@ class GuiManager(object):
     ## TODO: CHANGE FOR SHIPPED PATH IN RELEASE
     HELP_DIRECTORY_LOCATION = "docs/sphinx-docs/build/html"
 
-    def __init__(self, mainWindow=None, reactor=None, parent=None):
+    def __init__(self, parent=None):
         """
         Initialize the manager as a child of MainWindow.
         """
-        self._workspace = mainWindow
+        self._workspace = parent
         self._parent = parent
 
-        # Reactor passed from above
+        # Reactor - singleton
         self.setReactor(reactor)
 
         # Add signal callbacks

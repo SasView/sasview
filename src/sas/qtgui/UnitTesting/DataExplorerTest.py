@@ -62,12 +62,12 @@ class DataExplorerTest(unittest.TestCase):
         self.assertEqual(self.form.count(), 2)
 
         # Buttons - data tab
-        self.assertEqual(self.form.cmdLoad.text(), "Load")
+        self.assertEqual(self.form.cmdLoad.text(), "Load data")
         self.assertEqual(self.form.cmdDeleteData.text(), "Delete")
         self.assertEqual(self.form.cmdDeleteTheory.text(), "Delete")
         self.assertEqual(self.form.cmdFreeze.text(), "Freeze Theory")
-        self.assertEqual(self.form.cmdSendTo.text(), "...")
-        self.assertEqual(self.form.cmdSendTo.iconSize(), QSize(32, 32))
+        self.assertEqual(self.form.cmdSendTo.text(), "Send data to")
+        self.assertEqual(self.form.cmdSendTo.iconSize(), QSize(48, 48))
         self.assertIsInstance(self.form.cmdSendTo.icon(), QIcon)
         self.assertEqual(self.form.chkBatch.text(), "Batch mode")
         self.assertFalse(self.form.chkBatch.isChecked())

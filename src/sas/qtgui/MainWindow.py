@@ -10,7 +10,7 @@ import SasviewLogger
 
 class MainSasViewWindow(QtGui.QMainWindow, Ui_MainWindow):
     # Main window of the application
-    def __init__(self, reactor, parent=None):
+    def __init__(self, parent=None):
         super(MainSasViewWindow, self).__init__(parent)
         self.setupUi(self)
 
@@ -20,7 +20,7 @@ class MainSasViewWindow(QtGui.QMainWindow, Ui_MainWindow):
 
         # Create the gui manager
         from GuiManager import GuiManager
-        self.guiManager = GuiManager(self, reactor, self)
+        self.guiManager = GuiManager(self)
 
     def closeEvent(self, event):
         if self.guiManager.quitApplication():
@@ -56,7 +56,7 @@ def run():
     from twisted.internet import reactor
 
     # Show the main SV window
-    mainwindow = MainSasViewWindow(reactor)
+    mainwindow = MainSasViewWindow()
     mainwindow.showMaximized()
 
     # no more splash screen

@@ -78,8 +78,13 @@ class PlotterWidget(PlotterBase):
         # Alternatively, picked up from Data1D as an int index of PlotUtilities.SHAPES dict
         if marker is None:
             marker = self.data.symbol
-            marker = PlotUtilities.SHAPES.values()[marker]
+            # Try name first
+            try:
+                marker = PlotUtilities.SHAPES[marker]
+            except KeyError:
+                marker = PlotUtilities.SHAPES.values()[marker]
 
+        assert marker is not None
         # Plot name
         if self.data.title:
             self.title(title=self.data.title)

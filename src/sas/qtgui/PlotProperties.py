@@ -37,7 +37,11 @@ class PlotProperties(QtGui.QDialog, Ui_PlotPropertiesUI):
 
         # Fill out the marker combobox
         self.cbShape.addItems(SHAPES.keys())
-        self.cbShape.setCurrentIndex(self._marker)
+        try:
+            self.cbShape.setCurrentIndex(self._marker)
+        except TypeError:
+            marker_index = self.cbShape.findText(self._marker)
+            self.cbShape.setCurrentIndex(marker_index)
         if self._legend:
             self.txtLegend.setText(self._legend)
         self.sbSize.setValue(self._markersize)

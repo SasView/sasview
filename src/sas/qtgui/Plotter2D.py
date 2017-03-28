@@ -80,7 +80,7 @@ class Plotter2DWidget(PlotterBase):
         ''' setter for this plot's QStandardItem '''
         self._item = item
 
-    def plot(self, marker=None, data=None):
+    def plot(self, data=None, marker=None):
         """
         Plot 2D self._data
         marker - unused

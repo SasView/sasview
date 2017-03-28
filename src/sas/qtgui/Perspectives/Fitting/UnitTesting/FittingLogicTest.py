@@ -103,13 +103,13 @@ class FittingLogicTest(unittest.TestCase):
                         0, True, 0.0, 1, data,
                         data, False, None)
 
-        self.logic.new1DPlot(return_data=return_data)
+        new_plot = self.logic.new1DPlot(return_data=return_data)
 
-        self.assertIsInstance(self.logic.data, Data1D)
-        self.assertFalse(self.logic.data.is_data)
-        self.assertEqual(self.logic.data.dy.size, 3)
-        self.assertEqual(self.logic.data.title, "boop")
-        self.assertEqual(self.logic.data.name, "boop [boop]")
+        self.assertIsInstance(new_plot, Data1D)
+        self.assertFalse(new_plot.is_data)
+        self.assertEqual(new_plot.dy.size, 3)
+        self.assertEqual(new_plot.title, "boop")
+        self.assertEqual(new_plot.name, "boop [boop]")
 
     def testNew2DPlot(self):
         """
@@ -141,12 +141,12 @@ class FittingLogicTest(unittest.TestCase):
                         True, 0.0, 1, 0, qmin, qmax,
                         0.1, False, None)
 
-        self.logic.new2DPlot(return_data=return_data)
+        new_plot = self.logic.new2DPlot(return_data=return_data)
 
-        self.assertIsInstance(self.logic.data, Data2D)
-        self.assertFalse(self.logic.data.is_data)
-        self.assertEqual(self.logic.data.title, "Analytical model 2D ")
-        self.assertEqual(self.logic.data.name, "boop [boop]")
+        self.assertIsInstance(new_plot, Data2D)
+        self.assertFalse(new_plot.is_data)
+        self.assertEqual(new_plot.title, "Analytical model 2D ")
+        self.assertEqual(new_plot.name, "boop [boop]")
 
 
 

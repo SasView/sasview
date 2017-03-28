@@ -146,7 +146,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """ data setter """
         assert isinstance(value[0], QtGui.QStandardItem)
         # _index contains the QIndex with data
-        self._index = value
+        self._index = value[0]
 
         # Update logics with data items
         self.logic.data = GuiUtils.dataFromItem(value[0])
@@ -313,11 +313,11 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # SasModel -> QModel
         self.SASModelToQModel(model)
 
-        if self._index is None:
+        if self.data_is_loaded:
+            self.calculateQGridForModel()
+        else:
             # Create default datasets if no data passed
             self.createDefaultDataset()
-        else:
-            self.calculateQGridForModel()
 
     def onSelectStructureFactor(self):
         """
@@ -502,23 +502,53 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # magnetic params in self.kernel_module.details['M0:parameter_name'] = value
         # multishell params in self.kernel_module.details[??] = value
 
-
-    def createTheoryIndex(self):
+    def nameForFittedData(self, name):
         """
-        Create a QStandardModelIndex containing default model data
+        Generate name for the current fit
         """
-        name = self.kernel_module.name
         if self.is2D:
             name += "2d"
         name = "M%i [%s]" % (self.tab_id, name)
-        new_item = GuiUtils.createModelItemWithPlot(QtCore.QVariant(self.data), name=name)
-        # Notify the GUI manager so it can update the theory model in DataExplorer
+        return name
+
+    def createNewIndex(self, fitted_data):
+        """
+        Create a model or theory index with passed Data1D/Data2D
+        """
+        if self.data_is_loaded:
+            self.updateModelIndex(fitted_data)
+        else:
+            self.createTheoryIndex(fitted_data)
+
+    def updateModelIndex(self, fitted_data):
+        """
+        Update a QStandardModelIndex containing model data
+        """
+        name = self.nameForFittedData(self.logic.data.filename)
+        fitted_data.title = name
+        fitted_data.name = name
+        # Make this a line
+        fitted_data.symbol = 'Line'
+        # Notify the GUI manager so it can update the main model in DataExplorer
+        GuiUtils.updateModelItemWithPlot(self._index, QtCore.QVariant(fitted_data), name)
+
+    def createTheoryIndex(self, fitted_data):
+        """
+        Create a QStandardModelIndex containing model data
+        """
+        name = self.nameForFittedData(self.kernel_module.name)
+        fitted_data.title = name
+        fitted_data.name = name
+        fitted_data.filename = name
+        # Notify the GUI manager so it can create the theory model in DataExplorer
+        new_item = GuiUtils.createModelItemWithPlot(QtCore.QVariant(fitted_data), name=name)
         self.communicate.updateTheoryFromPerspectiveSignal.emit(new_item)
 
     def onFit(self):
         """
         Perform fitting on the current data
         """
+        # TODO: everything here
         #self.calculate1DForModel()
         pass
 
@@ -526,8 +556,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Plot the current set of data
         """
-        # TODO: reimplement basepage.py/_update_paramv_on_fit
-        if self.data is None or not self.data.is_data:
+        if self.data is None :#or not self.data.is_data:
             self.createDefaultDataset()
         self.calculateQGridForModel()
 
@@ -606,29 +635,31 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Plot the current 1D data
         """
-        self.logic.new1DPlot(return_data)
-        self.createTheoryIndex()
-
-        #output=self._cal_chisqr(data=data,
-        #                        fid=fid,
-        #                        weight=weight,
-        #                        page_id=page_id,
-        #                        index=index)
+        fitted_data = self.logic.new1DPlot(return_data)
+        self.calculateResiduals(self.logic.new1DPlot(return_data))
 
     def complete2D(self, return_data):
         """
         Plot the current 2D data
         """
-        self.logic.new2DPlot(return_data)
-        self.createTheoryIndex()
+        fitted_data = self.logic.new2DPlot(return_data)
+        self.calculateResiduals(fitted_data)
 
-        #output=self._cal_chisqr(data=data,
-        #                        weight=weight,
+    def calculateResiduals(self, fitted_data):
+        """
+        Calculate and print Chi2 and display chart of residuals
+        """
+        # Create a new index for holding data
+        self.createNewIndex(fitted_data)
+        # Calculate difference between return_data and logic.data
+        chi2 = FittingUtilities.calculateChi2(fitted_data, self.logic.data)
+        # Update the control
+        self.lblChi2Value.setText(GuiUtils.formatNumber(chi2, high=True))
+
+        # TODO: plot residuals
+        #self._plot_residuals(page_id=page_id, data=current_data,
         #                        fid=fid,
-        #                        page_id=page_id,
-        #                        index=index)
-        #    self._plot_residuals(page_id=page_id, data=data, fid=fid,
-        #                            index=index, weight=weight)
+        #                        weight=weight, index=index)
 
     def calcException(self, etype, value, tb):
         """

@@ -1,6 +1,12 @@
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 
+import numpy
+from copy import deepcopy
+
+from sas.sasgui.guiframe.dataFitting import Data1D
+from sas.sasgui.guiframe.dataFitting import Data2D
+
 def replaceShellName(param_name, value):
     """
     Updates parameter name from <param_name>[n_shell] to <param_name>value
@@ -157,4 +163,64 @@ def addShellsToModel(parameters, model, index):
             item4 = QtGui.QStandardItem(str(par.limits[1]))
             item5 = QtGui.QStandardItem(par.units)
             model.appendRow([item1, item2, item3, item4, item5])
+
+def calculateChi2(reference_data, current_data):
+    """
+    Calculate Chi2 value between two sets of data
+    """
+
+    # WEIGHING INPUT
+    #from sas.sasgui.perspectives.fitting.utils import get_weight
+    #flag = self.get_weight_flag()
+    #weight = get_weight(data=self.data, is2d=self._is_2D(), flag=flag)
+
+    if reference_data == None:
+       return chisqr
+
+    # temporary default values for index and weight
+    index = None
+    weight = None
+
+    # Get data: data I, theory I, and data dI in order
+    if isinstance(reference_data, Data2D):
+        if index == None:
+            index = numpy.ones(len(current_data.data), dtype=bool)
+        if weight != None:
+            current_data.err_data = weight
+        # get rid of zero error points
+        index = index & (current_data.err_data != 0)
+        index = index & (numpy.isfinite(current_data.data))
+        fn = current_data.data[index]
+        gn = reference_data.data[index]
+        en = current_data.err_data[index]
+    else:
+        # 1 d theory from model_thread is only in the range of index
+        if index == None:
+            index = numpy.ones(len(current_data.y), dtype=bool)
+        if weight != None:
+            current_data.dy = weight
+        if current_data.dy == None or current_data.dy == []:
+            dy = numpy.ones(len(current_data.y))
+        else:
+            ## Set consistently w/AbstractFitengine:
+            # But this should be corrected later.
+            dy = deepcopy(current_data.dy)
+            dy[dy == 0] = 1
+        fn = current_data.y[index]
+        gn = reference_data.y
+        en = dy[index]
+    # Calculate the residual
+    try:
+        res = (fn - gn) / en
+    except ValueError:
+        print "Chi2 calculations: Unmatched lengths %s, %s, %s" % (len(fn), len(gn), len(en))
+        return
+
+    residuals = res[numpy.isfinite(res)]
+    chisqr = numpy.average(residuals * residuals)
+
+    return chisqr
+
+def binary_encode(i, digits):
+    return [i >> d & 1 for d in xrange(digits)]
 

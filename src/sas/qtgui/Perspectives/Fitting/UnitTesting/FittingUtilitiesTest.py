@@ -2,8 +2,11 @@ import sys
 import unittest
 from PyQt4 import QtGui
 
+from sas.sasgui.guiframe.dataFitting import Data1D
+from sas.sasgui.guiframe.dataFitting import Data2D
+
 from UnitTesting.TestUtils import WarningTestNotImplemented
-#from sasmodels.sasview_model import load_standard_models
+
 from sasmodels import generate
 from sasmodels import modelinfo
 
@@ -178,6 +181,74 @@ class FittingUtilitiesTest(unittest.TestCase):
         self.assertEqual(model.item(1).child(0).text(), "Polydispersity")
         self.assertEqual(model.item(1).child(0).child(0).text(), "Distribution")
         self.assertEqual(model.item(1).child(0).child(0,1).text(), "40.0")
+
+    def testCalculate1DChi2(self):
+        """
+        Test the chi2 calculator for Data1D
+        """
+        reference_data = Data1D(x=[0.1, 0.2], y=[0.0, 0.0])
+
+        # 1. identical data
+        current_data = Data1D(x=[0.1, 0.2], y=[0.0, 0.0])
+
+        chi = FittingUtilities.calculateChi2(reference_data, current_data)
+
+        # Should be zero
+        self.assertAlmostEqual(chi, 0.0, 8)
+
+        # 2. far data
+        current_data = Data1D(x=[0.1, 0.2], y=[200.0, 150.0])
+
+        chi = FittingUtilities.calculateChi2(reference_data, current_data)
+
+        # Should not be zero
+        self.assertAlmostEqual(chi, 31250.0, 8)
+
+        # 3. Wrong data
+        current_data = Data1D(x=[0.1, 0.2], y=[200.0, 150.0, 200.0])
+        chi = FittingUtilities.calculateChi2(reference_data, current_data)
+        # Should be None
+        self.assertIsNone(chi)
+
+    def testCalculate2DChi2(self):
+        """
+        Test the chi2 calculator for Data2D
+        """
+        reference_data = Data2D(image=[1.0, 2.0, 3.0],
+                      err_image=[0.01, 0.02, 0.03],
+                      qx_data=[0.1, 0.2, 0.3],
+                      qy_data=[0.1, 0.2, 0.3])
+
+        # 1. identical data
+        current_data = Data2D(image=[1.0, 2.0, 3.0],
+                      err_image=[0.01, 0.02, 0.03],
+                      qx_data=[0.1, 0.2, 0.3],
+                      qy_data=[0.1, 0.2, 0.3])
+
+        chi = FittingUtilities.calculateChi2(reference_data, current_data)
+
+        # Should be zero
+        self.assertAlmostEqual(chi, 0.0, 8)
+
+        # 2. far data
+        current_data = Data2D(image=[100.0, 200.0, 300.0],
+                      err_image=[1.01, 2.02, 3.03],
+                      qx_data=[0.1, 0.2, 0.3],
+                      qy_data=[100.0, 200., 300.])
+
+        chi = FittingUtilities.calculateChi2(reference_data, current_data)
+
+        # Should not be zero
+        self.assertAlmostEqual(chi, 9607.88, 2)
+
+        # 3. Wrong data
+        current_data = Data2D(image=[1.0, 2.0, 3.0],
+                      err_image=[0.01, 0.02],
+                      qx_data=[0.1, 0.2],
+                      qy_data=[0.1, 0.2, 0.3])
+        # Should throw
+        with self.assertRaises(ValueError):
+            chi = FittingUtilities.calculateChi2(reference_data, current_data)
 
 if __name__ == "__main__":
     unittest.main()

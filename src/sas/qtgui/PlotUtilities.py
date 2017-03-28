@@ -1,5 +1,7 @@
 import sys
 import numpy
+import string
+
 from collections import OrderedDict
 
 # MPL shapes dictionary with some extra styles rendered internally.
@@ -74,9 +76,9 @@ def build_matrix(data, qx_data, qy_data):
                                                 weights=weights_data)
     # get histogram of data, all points into a bin in a way of summing
     image, xedges, yedges = numpy.histogram2d(x=qy_data,
-                                                y=qx_data,
-                                                bins=[y_bins, x_bins],
-                                                weights=data)
+                                              y=qx_data,
+                                              bins=[y_bins, x_bins],
+                                              weights=data)
     # Now, normalize the image by weights only for weights>1:
     # If weight == 1, there is only one data point in the bin so
     # that no normalization is required.
@@ -263,19 +265,20 @@ def getValidColor(color):
     Returns a valid matplotlib color
     '''
 
-    if color is not None:
-        # Check if it's an int
-        if isinstance(color, int):
-            # Check if it's within the range
-            if 0 <= color <=6:
-                color = COLORS.values()[color]
-        # Check if it's an RGB string
-        elif isinstance(color, str):
-            # Assure the correctnes of the string
-            assert(color[0]=="#" and len(color) == 7)
-            import string
-            assert(all(c in string.hexdigits for c in color[1:]))
-        else:
-            raise AttributeError
+    if color is None:
+        return color
+
+    # Check if it's an int
+    if isinstance(color, int):
+        # Check if it's within the range
+        if 0 <= color <=6:
+            color = COLORS.values()[color]
+    # Check if it's an RGB string
+    elif isinstance(color, str):
+        # Assure the correctnes of the string
+        assert(color[0]=="#" and len(color) == 7)
+        assert(all(c in string.hexdigits for c in color[1:]))
+    else:
+        raise AttributeError
 
     return color
