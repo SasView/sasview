@@ -21,7 +21,7 @@ def addPlot(plot):
     Adds a new plot to the current dictionary of plots
     """
     this._plot_id += 1
-    this._plots[this._plot_id] = plot
+    this._plots["Graph%s"%str(this._plot_id)] = plot
 
 def deletePlot(plot_id):
     """

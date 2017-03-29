@@ -182,19 +182,24 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.cbStructureFactor.setEnabled(True)
         self.lblStructure.setEnabled(True)
 
-    def updateQRange(self):
+    def togglePoly(self, isChecked):
         """
-        Updates Q Range display
+        Enable/disable the polydispersity tab
         """
-        if self.data_is_loaded:
-            self.q_range_min, self.q_range_max, self.npts = self.logic.computeDataRange()
-        # set Q range labels on the main tab
-        self.lblMinRangeDef.setText(str(self.q_range_min))
-        self.lblMaxRangeDef.setText(str(self.q_range_max))
-        # set Q range labels on the options tab
-        self.txtMaxRange.setText(str(self.q_range_max))
-        self.txtMinRange.setText(str(self.q_range_min))
-        self.txtNpts.setText(str(self.npts))
+        self.tabFitting.setTabEnabled(TAB_POLY, isChecked)
+
+    def toggleMagnetism(self, isChecked):
+        """
+        Enable/disable the magnetism tab
+        """
+        self.tabFitting.setTabEnabled(TAB_MAGNETISM, isChecked)
+
+    def toggle2D(self, isChecked):
+        """
+        Enable/disable the controls dependent on 1D/2D data instance
+        """
+        self.chkMagnetism.setEnabled(isChecked)
+        self.is2D = isChecked
 
     def initializeControls(self):
         """
@@ -241,15 +246,34 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # TODO after the poly_model prototype accepted
         #self._magnet_model.itemChanged.connect(self.onMagneticModelChange)
 
-    def setDefaultStructureCombo(self):
+    def onSelectModel(self):
         """
-        Fill in the structure factors combo box with defaults
+        Respond to select Model from list event
         """
-        structure_factor_list = self.master_category_dict.pop(CATEGORY_STRUCTURE)
-        factors = [factor[0] for factor in structure_factor_list]
-        factors.insert(0, STRUCTURE_DEFAULT)
-        self.cbStructureFactor.clear()
-        self.cbStructureFactor.addItems(sorted(factors))
+        model = str(self.cbModel.currentText())
+
+        # Reset structure factor
+        self.cbStructureFactor.setCurrentIndex(0)
+
+        # SasModel -> QModel
+        self.SASModelToQModel(model)
+
+        if self.data_is_loaded:
+            self.calculateQGridForModel()
+        else:
+            # Create default datasets if no data passed
+            self.createDefaultDataset()
+
+    def onSelectStructureFactor(self):
+        """
+        Select Structure Factor from list
+        """
+        model = str(self.cbModel.currentText())
+        category = str(self.cbCategory.currentText())
+        structure = str(self.cbStructureFactor.currentText())
+        if category == CATEGORY_STRUCTURE:
+            model = None
+        self.SASModelToQModel(model, structure_factor=structure)
 
     def onSelectCategory(self):
         """
@@ -287,6 +311,114 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Populate the models combobox
         self.cbModel.addItems(sorted([model for (model, _) in model_list]))
 
+    def onPolyModelChange(self, item):
+        """
+        Callback method for updating the main model and sasmodel
+        parameters with the GUI values in the polydispersity view
+        """
+        model_column = item.column()
+        model_row = item.row()
+        name_index = self._poly_model.index(model_row, 0)
+        # Extract changed value. Assumes proper validation by QValidator/Delegate
+        # Checkbox in column 0
+        if model_column == 0:
+            value = item.checkState()
+        else:
+            try:
+                value = float(item.text())
+            except ValueError:
+                # Can't be converted properly, bring back the old value and exit
+                return
+
+        parameter_name = str(self._poly_model.data(name_index).toPyObject()) # "distribution of sld" etc.
+        if "Distribution of" in parameter_name:
+            parameter_name = parameter_name[16:]
+        property_name = str(self._poly_model.headerData(model_column, 1).toPyObject()) # Value, min, max, etc.
+        # print "%s(%s) => %d" % (parameter_name, property_name, value)
+
+        # Update the sasmodel
+        #self.kernel_module.params[parameter_name] = value
+
+        # Reload the main model - may not be required if no variable is shown in main view
+        #model = str(self.cbModel.currentText())
+        #self.SASModelToQModel(model)
+
+        pass # debug anchor
+
+    def onFit(self):
+        """
+        Perform fitting on the current data
+        """
+        # TODO: everything here
+        #self.calculate1DForModel()
+        #calc_fit = FitThread(handler=handler,
+        #                     fn=fitter_list,
+        #                     batch_inputs=batch_inputs,
+        #                     batch_outputs=batch_outputs,
+        #                     page_id=list_page_id,
+        #                     updatefn=handler.update_fit,
+        #                     completefn=self._fit_completed)
+
+        pass
+
+    def onPlot(self):
+        """
+        Plot the current set of data
+        """
+        if self.data is None :#or not self.data.is_data:
+            self.createDefaultDataset()
+        self.calculateQGridForModel()
+
+    def onNpts(self, text):
+        """
+        Callback for number of points line edit update
+        """
+        # assumes type/value correctness achieved with QValidator
+        try:
+            self.npts = int(text)
+        except ValueError:
+            # TODO
+            # This will return the old value to model/view and return
+            # notifying the user about format available.
+            pass
+
+    def onMinRange(self, text):
+        """
+        Callback for minimum range of points line edit update
+        """
+        # assumes type/value correctness achieved with QValidator
+        try:
+            self.q_range_min = float(text)
+        except ValueError:
+            # TODO
+            # This will return the old value to model/view and return
+            # notifying the user about format available.
+            return
+        # set Q range labels on the main tab
+        self.lblMinRangeDef.setText(str(self.q_range_min))
+
+    def onMaxRange(self, text):
+        """
+        Callback for maximum range of points line edit update
+        """
+        # assumes type/value correctness achieved with QValidator
+        try:
+            self.q_range_max = float(text)
+        except:
+            pass
+        # set Q range labels on the main tab
+        self.lblMaxRangeDef.setText(str(self.q_range_max))
+
+    def setDefaultStructureCombo(self):
+        """
+        Fill in the structure factors combo box with defaults
+        """
+        structure_factor_list = self.master_category_dict.pop(CATEGORY_STRUCTURE)
+        factors = [factor[0] for factor in structure_factor_list]
+        factors.insert(0, STRUCTURE_DEFAULT)
+        self.cbStructureFactor.clear()
+        self.cbStructureFactor.addItems(sorted(factors))
+
     def createDefaultDataset(self):
         """
         Generate default Dataset 1D/2D for the given model
@@ -300,35 +432,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             interval = numpy.linspace(start=self.q_range_min, stop=self.q_range_max,
                         num=self.npts, endpoint=True)
             self.logic.createDefault1dData(interval, self.tab_id)
-
-    def onSelectModel(self):
-        """
-        Respond to select Model from list event
-        """
-        model = str(self.cbModel.currentText())
-
-        # Reset structure factor
-        self.cbStructureFactor.setCurrentIndex(0)
-
-        # SasModel -> QModel
-        self.SASModelToQModel(model)
-
-        if self.data_is_loaded:
-            self.calculateQGridForModel()
-        else:
-            # Create default datasets if no data passed
-            self.createDefaultDataset()
-
-    def onSelectStructureFactor(self):
-        """
-        Select Structure Factor from list
-        """
-        model = str(self.cbModel.currentText())
-        category = str(self.cbCategory.currentText())
-        structure = str(self.cbStructureFactor.currentText())
-        if category == CATEGORY_STRUCTURE:
-            model = None
-        self.SASModelToQModel(model, structure_factor=structure)
 
     def readCategoryInfo(self):
         """
@@ -377,6 +480,20 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         assert isinstance(model, QtGui.QStandardItemModel)
         checked_list = ['scale', '1.0', '0.0', 'inf', '']
         FittingUtilities.addCheckedListToModel(model, checked_list)
+
+    def updateQRange(self):
+        """
+        Updates Q Range display
+        """
+        if self.data_is_loaded:
+            self.q_range_min, self.q_range_max, self.npts = self.logic.computeDataRange()
+        # set Q range labels on the main tab
+        self.lblMinRangeDef.setText(str(self.q_range_min))
+        self.lblMaxRangeDef.setText(str(self.q_range_max))
+        # set Q range labels on the options tab
+        self.txtMaxRange.setText(str(self.q_range_max))
+        self.txtMinRange.setText(str(self.q_range_min))
+        self.txtNpts.setText(str(self.npts))
 
     def SASModelToQModel(self, model_name, structure_factor=None):
         """
@@ -432,40 +549,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Update Q Ranges
         self.updateQRange()
 
-    def onPolyModelChange(self, item):
-        """
-        Callback method for updating the main model and sasmodel
-        parameters with the GUI values in the polydispersity view
-        """
-        model_column = item.column()
-        model_row = item.row()
-        name_index = self._poly_model.index(model_row, 0)
-        # Extract changed value. Assumes proper validation by QValidator/Delegate
-        # Checkbox in column 0
-        if model_column == 0:
-            value = item.checkState()
-        else:
-            try:
-                value = float(item.text())
-            except ValueError:
-                # Can't be converted properly, bring back the old value and exit
-                return
-
-        parameter_name = str(self._poly_model.data(name_index).toPyObject()) # "distribution of sld" etc.
-        if "Distribution of" in parameter_name:
-            parameter_name = parameter_name[16:]
-        property_name = str(self._poly_model.headerData(model_column, 1).toPyObject()) # Value, min, max, etc.
-        # print "%s(%s) => %d" % (parameter_name, property_name, value)
-
-        # Update the sasmodel
-        #self.kernel_module.params[parameter_name] = value
-
-        # Reload the main model - may not be required if no variable is shown in main view
-        #model = str(self.cbModel.currentText())
-        #self.SASModelToQModel(model)
-
-        pass # debug anchor
-
     def updateParamsFromModel(self, item):
         """
         Callback method for updating the sasmodel parameters with the GUI values
@@ -516,19 +599,33 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         Create a model or theory index with passed Data1D/Data2D
         """
         if self.data_is_loaded:
+            if not fitted_data.name:
+                name = self.nameForFittedData(self.data.filename)
+                fitted_data.title = name
+                fitted_data.name = name
+                fitted_data.filename = name
             self.updateModelIndex(fitted_data)
         else:
+            name = self.nameForFittedData(self.kernel_module.name)
+            fitted_data.title = name
+            fitted_data.name = name
+            fitted_data.filename = name
+            fitted_data.symbol = "Line"
             self.createTheoryIndex(fitted_data)
 
     def updateModelIndex(self, fitted_data):
         """
         Update a QStandardModelIndex containing model data
         """
-        name = self.nameForFittedData(self.logic.data.filename)
-        fitted_data.title = name
-        fitted_data.name = name
-        # Make this a line
-        fitted_data.symbol = 'Line'
+        if fitted_data.name is None:
+            name = self.nameForFittedData(self.logic.data.filename)
+            fitted_data.title = name
+            fitted_data.name = name
+        else:
+            name = fitted_data.name
+        # Make this a line if no other defined
+        if fitted_data.symbol is None:
+            fitted_data.symbol = 'Line'
         # Notify the GUI manager so it can update the main model in DataExplorer
         GuiUtils.updateModelItemWithPlot(self._index, QtCore.QVariant(fitted_data), name)
 
@@ -536,69 +633,16 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Create a QStandardModelIndex containing model data
         """
-        name = self.nameForFittedData(self.kernel_module.name)
-        fitted_data.title = name
-        fitted_data.name = name
-        fitted_data.filename = name
+        if fitted_data.name is None:
+            name = self.nameForFittedData(self.kernel_module.name)
+            fitted_data.title = name
+            fitted_data.name = name
+            fitted_data.filename = name
+        else:
+            name = fitted_data.name
         # Notify the GUI manager so it can create the theory model in DataExplorer
         new_item = GuiUtils.createModelItemWithPlot(QtCore.QVariant(fitted_data), name=name)
         self.communicate.updateTheoryFromPerspectiveSignal.emit(new_item)
-
-    def onFit(self):
-        """
-        Perform fitting on the current data
-        """
-        # TODO: everything here
-        #self.calculate1DForModel()
-        pass
-
-    def onPlot(self):
-        """
-        Plot the current set of data
-        """
-        if self.data is None :#or not self.data.is_data:
-            self.createDefaultDataset()
-        self.calculateQGridForModel()
-
-    def onNpts(self, text):
-        """
-        Callback for number of points line edit update
-        """
-        # assumes type/value correctness achieved with QValidator
-        try:
-            self.npts = int(text)
-        except ValueError:
-            # TODO
-            # This will return the old value to model/view and return
-            # notifying the user about format available.
-            pass
-
-    def onMinRange(self, text):
-        """
-        Callback for minimum range of points line edit update
-        """
-        # assumes type/value correctness achieved with QValidator
-        try:
-            self.q_range_min = float(text)
-        except ValueError:
-            # TODO
-            # This will return the old value to model/view and return
-            # notifying the user about format available.
-            return
-        # set Q range labels on the main tab
-        self.lblMinRangeDef.setText(str(self.q_range_min))
-
-    def onMaxRange(self, text):
-        """
-        Callback for maximum range of points line edit update
-        """
-        # assumes type/value correctness achieved with QValidator
-        try:
-            self.q_range_max = float(text)
-        except:
-            pass
-        # set Q range labels on the main tab
-        self.lblMaxRangeDef.setText(str(self.q_range_max))
 
     def methodCalculateForData(self):
         '''return the method for data calculation'''
@@ -635,8 +679,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Plot the current 1D data
         """
-        fitted_data = self.logic.new1DPlot(return_data)
-        self.calculateResiduals(self.logic.new1DPlot(return_data))
+        fitted_plot = self.logic.new1DPlot(return_data)
+        self.calculateResiduals(fitted_plot)
 
     def complete2D(self, return_data):
         """
@@ -656,10 +700,10 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Update the control
         self.lblChi2Value.setText(GuiUtils.formatNumber(chi2, high=True))
 
-        # TODO: plot residuals
-        #self._plot_residuals(page_id=page_id, data=current_data,
-        #                        fid=fid,
-        #                        weight=weight, index=index)
+        # Plot residuals if actual data
+        if self.data_is_loaded:
+            residuals_plot = FittingUtilities.plotResiduals(self.data, fitted_data)
+            self.createNewIndex(residuals_plot)
 
     def calcException(self, etype, value, tb):
         """
@@ -788,23 +832,4 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         FittingUtilities.addShellsToModel(self.model_parameters, self._model_model, index)
         self.current_shell_displayed = index
-
-    def togglePoly(self, isChecked):
-        """
-        Enable/disable the polydispersity tab
-        """
-        self.tabFitting.setTabEnabled(TAB_POLY, isChecked)
-
-    def toggleMagnetism(self, isChecked):
-        """
-        Enable/disable the magnetism tab
-        """
-        self.tabFitting.setTabEnabled(TAB_MAGNETISM, isChecked)
-
-    def toggle2D(self, isChecked):
-        """
-        Enable/disable the controls dependent on 1D/2D data instance
-        """
-        self.chkMagnetism.setEnabled(isChecked)
-        self.is2D = isChecked
 

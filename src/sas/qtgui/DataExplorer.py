@@ -57,6 +57,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cmdFreeze.clicked.connect(self.freezeTheory)
         self.cmdSendTo.clicked.connect(self.sendData)
         self.cmdNew.clicked.connect(self.newPlot)
+        self.cmdNew_2.clicked.connect(self.newPlot)
         self.cmdAppend.clicked.connect(self.appendPlot)
         self.cmdHelp.clicked.connect(self.displayHelp)
         self.cmdHelp_2.clicked.connect(self.displayHelp)
@@ -408,9 +409,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         orig_text = self.cbgraph.currentText()
         self.cbgraph.clear()
-        graph_titles= ["Graph"+str(graph) for graph in graph_list]
+        #graph_titles= [str(graph) for graph in graph_list]
 
-        self.cbgraph.insertItems(0, graph_titles)
+        #self.cbgraph.insertItems(0, graph_titles)
+        self.cbgraph.insertItems(0, graph_list)
         ind = self.cbgraph.findText(orig_text)
         if ind > 0:
             self.cbgraph.setCurrentIndex(ind)
@@ -425,7 +427,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Create a new matplotlib chart from selected data
         """
-        plots = GuiUtils.plotsFromCheckedItems(self.model)
+        # Check which tab is currently active
+        if self.current_view == self.treeView:
+            plots = GuiUtils.plotsFromCheckedItems(self.model)
+        else:
+            plots = GuiUtils.plotsFromCheckedItems(self.theory_model)
 
         # Call show on requested plots
         # All same-type charts in one plot
@@ -456,7 +462,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Helper method for plot bookkeeping
         """
         # Update the global plot counter
-        title = "Graph"+str(PlotHelper.idOfPlot(new_plot))
+        title = str(PlotHelper.idOfPlot(new_plot))
         new_plot.setWindowTitle(title)
 
         # Add the plot to the workspace
@@ -476,9 +482,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         new_plots = GuiUtils.plotsFromCheckedItems(self.model)
 
         # old plot data
-        plot_id = self.cbgraph.currentIndex() + 1
+        plot_id = str(self.cbgraph.currentText())
 
-        assert plot_id in PlotHelper.currentPlots(), "No such plot: Graph%s"%str(plot_id)
+        assert plot_id in PlotHelper.currentPlots(), "No such plot: %s"%(plot_id)
 
         old_plot = PlotHelper.plotById(plot_id)
 

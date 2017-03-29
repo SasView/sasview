@@ -118,11 +118,11 @@ class FittingLogic(object):
         new_plot.dy = numpy.zeros(len(y))
         _yaxis, _yunit = data.get_yaxis()
         _xaxis, _xunit = data.get_xaxis()
-        new_plot.title = data.name
 
         new_plot.group_id = data.group_id
         #new_plot.id = str(self.tab_id) + " " + data.name
         new_plot.name = model.name + " [" + data.name + "]"
+        new_plot.title = new_plot.name
         new_plot.xaxis(_xaxis, _xunit)
         new_plot.yaxis(_yaxis, _yunit)
 

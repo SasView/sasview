@@ -108,7 +108,7 @@ class FittingLogicTest(unittest.TestCase):
         self.assertIsInstance(new_plot, Data1D)
         self.assertFalse(new_plot.is_data)
         self.assertEqual(new_plot.dy.size, 3)
-        self.assertEqual(new_plot.title, "boop")
+        self.assertEqual(new_plot.title, "boop [boop]")
         self.assertEqual(new_plot.name, "boop [boop]")
 
     def testNew2DPlot(self):

@@ -625,11 +625,11 @@ class DataExplorerTest(unittest.TestCase):
         """
         PlotHelper.clear()
 
-        graph_list=[1,2,3]
+        graph_list=["1","2","3"]
         self.form.updateGraphCombo(graph_list)
 
         self.assertEqual(self.form.cbgraph.count(), 3)
-        self.assertEqual(self.form.cbgraph.currentText(), 'Graph1')
+        self.assertEqual(self.form.cbgraph.currentText(), '1')
 
         graph_list=[]
         self.form.updateGraphCombo(graph_list)

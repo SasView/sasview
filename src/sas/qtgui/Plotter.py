@@ -529,21 +529,21 @@ class PlotterWidget(PlotterBase):
         Left button down and ready to drag
         """
         # Check that the LEFT button was pressed
-        if event.button == 1:
-            self.leftdown = True
-            ax = event.inaxes
-            for text in self.textList:
-                if text.contains(event)[0]: # If user has clicked on text
-                    self.selectedText = text
-                    return
+        if event.button != 1:
+            return
 
-            if ax != None:
-                self.xInit, self.yInit = event.xdata, event.ydata
-                try:
-                    self.x_click = float(event.xdata)  # / size_x
-                    self.y_click = float(event.ydata)  # / size_y
-                except:
-                    self.position = None
+        self.leftdown = True
+        for text in self.textList:
+            if text.contains(event)[0]: # If user has clicked on text
+                self.selectedText = text
+                return
+        if event.inaxes is None:
+            return
+        try:
+            self.x_click = float(event.xdata)  # / size_x
+            self.y_click = float(event.ydata)  # / size_y
+        except:
+            self.position = None
 
     def onMplMouseUp(self, event):
         """
@@ -555,7 +555,6 @@ class PlotterWidget(PlotterBase):
         # Check that the LEFT button was released
         if event.button == 1:
             self.leftdown = False
-            #self.leftup = True
             self.selectedText = None
 
         #release the legend
@@ -571,36 +570,38 @@ class PlotterWidget(PlotterBase):
             self.onLegendMotion(event)
             return
 
-        if self.leftdown and self.selectedText is not None:
-            # User has clicked on text and is dragging
-            ax = event.inaxes
-            if ax != None:
-                # Only move text if mouse is within axes
-                self.selectedText.set_position((event.xdata, event.ydata))
-                self.canvas.draw_idle()
-            else:
-                # User has dragged outside of axes
-                self.selectedText = None
+        #if self.leftdown and self.selectedText is not None:
+        if self.leftdown or self.selectedText is None:
             return
+        # User has clicked on text and is dragging
+        if event.inaxes is  None:
+            # User has dragged outside of axes
+            self.selectedText = None
+        else:
+            # Only move text if mouse is within axes
+            self.selectedText.set_position((event.xdata, event.ydata))
+            self.canvas.draw_idle()
+        return
 
     def onMplPick(self, event):
         """
         On pick legend
         """
         legend = self.legend
-        if event.artist == legend:
-            # Get the box of the legend.
-            bbox = self.legend.get_window_extent()
-            # Get mouse coordinates at time of pick.
-            self.mouse_x = event.mouseevent.x
-            self.mouse_y = event.mouseevent.y
-            # Get legend coordinates at time of pick.
-            self.legend_x = bbox.xmin
-            self.legend_y = bbox.ymin
-            # Indicate we picked up the legend.
-            self.gotLegend = 1
+        if event.artist != legend:
+            return
+        # Get the box of the legend.
+        bbox = self.legend.get_window_extent()
+        # Get mouse coordinates at time of pick.
+        self.mouse_x = event.mouseevent.x
+        self.mouse_y = event.mouseevent.y
+        # Get legend coordinates at time of pick.
+        self.legend_x = bbox.xmin
+        self.legend_y = bbox.ymin
+        # Indicate we picked up the legend.
+        self.gotLegend = 1
 
-            #self.legend.legendPatch.set_alpha(0.5)
+        #self.legend.legendPatch.set_alpha(0.5)
 
     def onLegendMotion(self, event):
         """

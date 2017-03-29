@@ -214,12 +214,119 @@ def calculateChi2(reference_data, current_data):
         res = (fn - gn) / en
     except ValueError:
         print "Chi2 calculations: Unmatched lengths %s, %s, %s" % (len(fn), len(gn), len(en))
-        return
+        return None
 
     residuals = res[numpy.isfinite(res)]
     chisqr = numpy.average(residuals * residuals)
 
     return chisqr
+
+def residualsData1D(reference_data, current_data):
+    """
+    """
+    # temporary default values for index and weight
+    index = None
+    weight = None
+
+    # 1d theory from model_thread is only in the range of index
+    if current_data.dy == None or current_data.dy == []:
+        dy = numpy.ones(len(current_data.y))
+    else:
+        if weight == None:
+            dy = numpy.ones(len(current_data.y))
+        else:
+            dy = weight
+        dy[dy == 0] = 1
+    fn = current_data.y[index][0]
+    gn = reference_data.y
+    en = dy[index][0]
+    # build residuals
+    residuals = Data1D()
+    try:
+        y = (fn - gn)/en
+        residuals.y = -y
+    except:
+        msg = "ResidualPlot Error: different # of data points in theory"
+        print msg
+        y = (fn - gn[index][0]) / en
+        residuals.y = y
+    residuals.x = current_data.x[index][0]
+    residuals.dy = numpy.ones(len(residuals.y))
+    residuals.dx = None
+    residuals.dxl = None
+    residuals.dxw = None
+    residuals.ytransform = 'y'
+    # For latter scale changes 
+    residuals.xaxis('\\rm{Q} ', 'A^{-1}')
+    residuals.yaxis('\\rm{Residuals} ', 'normalized')
+
+    return residuals
+
+def residualsData2D(reference_data, current_data):
+    """
+    """
+    # temporary default values for index and weight
+    index = None
+    weight = None
+
+    # build residuals
+    residuals = Data2D()
+    # Not for trunk the line below, instead use the line above
+    current_data.clone_without_data(len(current_data.data), residuals)
+    residuals.data = None
+    fn = current_data.data
+    gn = reference_data.data
+    if weight == None:
+        en = current_data.err_data
+    else:
+        en = weight
+    residuals.data = (fn - gn) / en
+    residuals.qx_data = current_data.qx_data
+    residuals.qy_data = current_data.qy_data
+    residuals.q_data = current_data.q_data
+    residuals.err_data = numpy.ones(len(residuals.data))
+    residuals.xmin = min(residuals.qx_data)
+    residuals.xmax = max(residuals.qx_data)
+    residuals.ymin = min(residuals.qy_data)
+    residuals.ymax = max(residuals.qy_data)
+    residuals.q_data = current_data.q_data
+    residuals.mask = current_data.mask
+    residuals.scale = 'linear'
+    # check the lengths
+    if len(residuals.data) != len(residuals.q_data):
+        return None
+    return residuals
+
+def plotResiduals(reference_data, current_data):
+    """
+    Create Data1D/Data2D with residuals, ready for plotting
+    """
+    data_copy = deepcopy(current_data)
+    # Get data: data I, theory I, and data dI in order
+
+    method_name = current_data.__class__.__name__
+    residuals_dict = {"Data1D": residualsData1D,
+                      "Data2D": residualsData2D}
+
+    residuals = residuals_dict[method_name](reference_data, data_copy)
+
+    theory_name = str(current_data.name.split()[0])
+    residuals.name = "Residuals for " + str(theory_name) + "[" + \
+                    str(reference_data.filename) + "]"
+    residuals.title = residuals.name
+    # when 2 data have the same id override the 1 st plotted
+    # include the last part if keeping charts for separate models is required
+    residuals.id = "res" + str(reference_data.id) # + str(theory_name)
+    # group_id specify on which panel to plot this data
+    group_id = reference_data.group_id
+    residuals.group_id = "res" + str(group_id)
+    
+    # Symbol
+    residuals.symbol = 0
+    residuals.hide_error = False
+
+    return residuals
+
 
 def binary_encode(i, digits):
     return [i >> d & 1 for d in xrange(digits)]
