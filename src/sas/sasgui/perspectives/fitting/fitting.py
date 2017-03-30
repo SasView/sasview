@@ -1754,15 +1754,14 @@ class Plugin(PluginBase):
                                           data_description="Data unsmeared",
                                           data_id="Data  " + data.name + " unsmeared",
                                           dy=unsmeared_error)
-                
-            if sq_model is not None and pq_model is not None:
-                self.create_theory_1D(x, sq_model, page_id, model, data, state,
-                                      data_description=model.name + " S(q)",
-                                      data_id=str(page_id) + " " + data.name + " S(q)")
-                self.create_theory_1D(x, pq_model, page_id, model, data, state,
-                                      data_description=model.name + " P(q)",
-                                      data_id=str(page_id) + " " + data.name + " P(q)")
-
+            # Comment this out until we can get P*S models with correctly populated parameters
+            #if sq_model is not None and pq_model is not None:
+            #    self.create_theory_1D(x, sq_model, page_id, model, data, state,
+            #                          data_description=model.name + " S(q)",
+            #                          data_id=str(page_id) + " " + data.name + " S(q)")
+            #    self.create_theory_1D(x, pq_model, page_id, model, data, state,
+            #                          data_description=model.name + " P(q)",
+            #                          data_id=str(page_id) + " " + data.name + " P(q)")
 
             current_pg = self.fit_panel.get_page_by_id(page_id)
             title = new_plot.title
