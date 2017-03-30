@@ -8,6 +8,7 @@ from sas.sasgui.guiframe.utils import format_number
 from sas.sasgui.guiframe.events import EVT_SLICER
 from sas.sasgui.guiframe.events import SlicerParameterEvent, SlicerEvent
 from Plotter2D import ModelPanel2D
+from sas.sascalc.dataloader.data_info import Data1D, Data2D
 
 
 class SlicerParameterPanel(wx.Dialog):
@@ -135,15 +136,7 @@ class SlicerParameterPanel(wx.Dialog):
             self.bck.Add(title, (iy, ix), (1, 1),
                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
             iy += 1
-            id = wx.NewId()
-            main_window = self.parent.parent
-            self.loaded_data = main_window._data_manager.data_name_dict
-            # TODO: remove 1D data from choices
-            # TODO: auto check current data set
-            choices = self.loaded_data.keys()
-            self.data_list = wx.CheckListBox(parent=self, id=id,
-                                        choices=choices,
-                                        name="Apply Slicer to Data Sets:")
+            self.process_list()
             self.bck.Add(self.data_list, (iy, ix), (1, 1),
                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
             iy += 1
@@ -273,3 +266,23 @@ class SlicerParameterPanel(wx.Dialog):
                 return
             for child_ctrl in data_ctrl.GetChildren():
                 self.tree_ctrl.CheckItem(child_ctrl, check_value)
+
+    def process_list(self):
+        main_window = self.parent.parent
+        self.loaded_data = []
+        id = wx.NewId()
+        for key, value in main_window._data_manager.stored_data.iteritems():
+            if isinstance(value.data, Data2D):
+                self.loaded_data.append(value.data.name)
+            if key == self.parent.data2D.id:
+                self.checkme = self.loaded_data.index(value.data.name)
+        self.data_list = wx.CheckListBox(parent=self, id=id,
+                                         choices=self.loaded_data,
+                                         name="Apply Slicer to Data Sets:")
+        self.data_list.Check(self.checkme)
+        self.data_list.Bind(wx.EVT_CHECKLISTBOX, self.onCheckBoxList)
+
+    def onCheckBoxList(self, e):
+        index = e.GetSelection()
+        if index == self.checkme:
+            self.data_list.Check(index)

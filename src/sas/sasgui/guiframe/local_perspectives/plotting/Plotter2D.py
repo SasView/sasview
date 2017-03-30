@@ -127,7 +127,6 @@ class ModelPanel2D(ModelPanel1D):
         self.title_label = None
         self.title_font = None
         self.title_color = 'black'
-        self.batch_slicer = None
         ## Graph
         self.graph = Graph()
         self.graph.xaxis("\\rm{Q}", 'A^{-1}')
