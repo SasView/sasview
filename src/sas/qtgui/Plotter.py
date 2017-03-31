@@ -571,10 +571,10 @@ class PlotterWidget(PlotterBase):
             return
 
         #if self.leftdown and self.selectedText is not None:
-        if self.leftdown or self.selectedText is None:
+        if not self.leftdown or self.selectedText is None:
             return
         # User has clicked on text and is dragging
-        if event.inaxes is  None:
+        if event.inaxes is None:
             # User has dragged outside of axes
             self.selectedText = None
         else:

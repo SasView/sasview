@@ -236,9 +236,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.cmdFit.clicked.connect(self.onFit)
         self.cmdPlot.clicked.connect(self.onPlot)
         # Line edits
-        self.txtNpts.textChanged.connect(self.onNpts)
-        self.txtMinRange.textChanged.connect(self.onMinRange)
-        self.txtMaxRange.textChanged.connect(self.onMaxRange)
+        self.txtNpts.editingFinished.connect(self.onNpts)
+        self.txtMinRange.editingFinished.connect(self.onMinRange)
+        self.txtMaxRange.editingFinished.connect(self.onMaxRange)
 
         # Respond to change in parameters from the UI
         self._model_model.itemChanged.connect(self.updateParamsFromModel)
@@ -365,30 +365,35 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Plot the current set of data
         """
-        if self.data is None :#or not self.data.is_data:
+        if self.data is None :
             self.createDefaultDataset()
         self.calculateQGridForModel()
 
-    def onNpts(self, text):
+    #def onNpts(self, text):
+    def onNpts(self):
         """
         Callback for number of points line edit update
         """
         # assumes type/value correctness achieved with QValidator
         try:
-            self.npts = int(text)
+            self.npts = int(self.txtNpts.text())
         except ValueError:
             # TODO
             # This will return the old value to model/view and return
             # notifying the user about format available.
             pass
+        # Force redisplay
+        if self.model_is_loaded:
+            self.onPlot()
 
-    def onMinRange(self, text):
+    #def onMinRange(self, text):
+    def onMinRange(self):
         """
         Callback for minimum range of points line edit update
         """
         # assumes type/value correctness achieved with QValidator
         try:
-            self.q_range_min = float(text)
+            self.q_range_min = float(self.txtMinRange.text())
         except ValueError:
             # TODO
             # This will return the old value to model/view and return
@@ -396,18 +401,23 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             return
         # set Q range labels on the main tab
         self.lblMinRangeDef.setText(str(self.q_range_min))
+        if self.model_is_loaded:
+            self.onPlot()
 
-    def onMaxRange(self, text):
+    #def onMaxRange(self, text):
+    def onMaxRange(self):
         """
         Callback for maximum range of points line edit update
         """
         # assumes type/value correctness achieved with QValidator
         try:
-            self.q_range_max = float(text)
+            self.q_range_max = float(self.txtMaxRange.text())
         except:
             pass
         # set Q range labels on the main tab
         self.lblMaxRangeDef.setText(str(self.q_range_max))
+        if self.model_is_loaded:
+            self.onPlot()
 
     def setDefaultStructureCombo(self):
         """
@@ -632,7 +642,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             fitted_data.symbol = 'Line'
         # Notify the GUI manager so it can update the main model in DataExplorer
         GuiUtils.updateModelItemWithPlot(self._index, QtCore.QVariant(fitted_data), name)
-        # Force redisplay
 
     def createTheoryIndex(self, fitted_data):
         """
@@ -711,6 +720,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             residuals_plot = FittingUtilities.plotResiduals(self.data, fitted_data)
             residuals_plot.id = "Residual " + residuals_plot.id
             self.createNewIndex(residuals_plot)
+            self.communicate.plotUpdateSignal.emit([residuals_plot])
 
         self.communicate.plotUpdateSignal.emit([fitted_data])
 

@@ -276,7 +276,6 @@ class Plotter2DWidget(PlotterBase):
         new_plot.is_data = True
         variant_plot = QtCore.QVariant(new_plot)
         GuiUtils.updateModelItemWithPlot(self._item, variant_plot, new_plot.id)
-        # TODO: force immediate display (?)
 
     def setSlicer(self, slicer):
         """
