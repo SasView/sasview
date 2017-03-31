@@ -48,7 +48,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.mutex = QMutex()
 
         # Active plots
-        self.active_plots = []
+        self.active_plots = {}
 
         # Connect the buttons
         self.cmdLoad.clicked.connect(self.loadFile)
@@ -86,6 +86,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.fileReadSignal.connect(self.loadFromURL)
         self.communicator.activeGraphsSignal.connect(self.updateGraphCombo)
         self.communicator.activeGraphName.connect(self.updatePlotName)
+        self.communicator.plotUpdateSignal.connect(self.updatePlot)
         self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
 
@@ -472,7 +473,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         new_plot.show()
 
         # Update the active chart list
-        self.active_plots.append(title)
+        self.active_plots[new_plot.data.id] = new_plot
+        print "ADDING ", new_plot.data.id
 
     def appendPlot(self):
         """
@@ -493,6 +495,17 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if type(plot_set) is type(old_plot._data):
                 old_plot.data = plot_set
                 old_plot.plot()
+
+    def updatePlot(self, new_data):
+        """
+        Modify existing plot for immediate response
+        """
+        data = new_data[0]
+        assert type(data).__name__ in ['Data1D', 'Data2D']
+
+        id = data.id
+        if data.id in self.active_plots.keys():
+            self.active_plots[id].replacePlot(id, data)
 
     def chooseFiles(self):
         """
@@ -939,7 +952,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Reset the view
         self.model.reset()
-
         # Pass acting as a debugger anchor
         pass
 

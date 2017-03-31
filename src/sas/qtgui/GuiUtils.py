@@ -227,6 +227,9 @@ class Communicate(QtCore.QObject):
     # Old "NewPlotEvent"
     plotRequestedSignal = QtCore.pyqtSignal(str)
 
+    # Plot update requested from a perspective
+    plotUpdateSignal = QtCore.pyqtSignal(list)
+
     # Progress bar update value
     progressBarUpdateSignal = QtCore.pyqtSignal(int)
 
@@ -254,9 +257,12 @@ def updateModelItemWithPlot(item, update_data, name=""):
         plot_item = item.child(index)
         if plot_item.isCheckable():
             plot_data = plot_item.child(0).data().toPyObject()
-            if plot_data.id == py_update_data.id:
-                item.removeRow(index)
-                break
+            if plot_data.id is not None and plot_data.id == py_update_data.id:
+                # replace data section in item
+                plot_item.child(0).setData(update_data)
+                plot_item.setText(name)
+                # Force redisplay
+                return
 
     # Create the new item
     checkbox_item = createModelItemWithPlot(update_data, name)

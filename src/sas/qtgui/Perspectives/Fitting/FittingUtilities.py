@@ -223,6 +223,7 @@ def calculateChi2(reference_data, current_data):
 
 def residualsData1D(reference_data, current_data):
     """
+    Calculate the residuals for difference of two Data1D sets
     """
     # temporary default values for index and weight
     index = None
@@ -264,6 +265,7 @@ def residualsData1D(reference_data, current_data):
 
 def residualsData2D(reference_data, current_data):
     """
+    Calculate the residuals for difference of two Data2D sets
     """
     # temporary default values for index and weight
     index = None
@@ -303,7 +305,6 @@ def plotResiduals(reference_data, current_data):
     """
     data_copy = deepcopy(current_data)
     # Get data: data I, theory I, and data dI in order
-
     method_name = current_data.__class__.__name__
     residuals_dict = {"Data1D": residualsData1D,
                       "Data2D": residualsData2D}

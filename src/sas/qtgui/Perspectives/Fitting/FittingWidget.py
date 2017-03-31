@@ -585,6 +585,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # magnetic params in self.kernel_module.details['M0:parameter_name'] = value
         # multishell params in self.kernel_module.details[??] = value
 
+        # Force the chart update
+        self.onPlot()
+
     def nameForFittedData(self, name):
         """
         Generate name for the current fit
@@ -604,6 +607,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
                 fitted_data.title = name
                 fitted_data.name = name
                 fitted_data.filename = name
+                fitted_data.symbol = "Line"
             self.updateModelIndex(fitted_data)
         else:
             name = self.nameForFittedData(self.kernel_module.name)
@@ -624,10 +628,11 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         else:
             name = fitted_data.name
         # Make this a line if no other defined
-        if fitted_data.symbol is None:
+        if hasattr(fitted_data, 'symbol') and fitted_data.symbol is None:
             fitted_data.symbol = 'Line'
         # Notify the GUI manager so it can update the main model in DataExplorer
         GuiUtils.updateModelItemWithPlot(self._index, QtCore.QVariant(fitted_data), name)
+        # Force redisplay
 
     def createTheoryIndex(self, fitted_data):
         """
@@ -679,7 +684,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Plot the current 1D data
         """
-        fitted_plot = self.logic.new1DPlot(return_data)
+        fitted_plot = self.logic.new1DPlot(return_data, self.tab_id)
         self.calculateResiduals(fitted_plot)
 
     def complete2D(self, return_data):
@@ -694,6 +699,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         Calculate and print Chi2 and display chart of residuals
         """
         # Create a new index for holding data
+        fitted_data.symbol = "Line"
         self.createNewIndex(fitted_data)
         # Calculate difference between return_data and logic.data
         chi2 = FittingUtilities.calculateChi2(fitted_data, self.logic.data)
@@ -703,7 +709,10 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Plot residuals if actual data
         if self.data_is_loaded:
             residuals_plot = FittingUtilities.plotResiduals(self.data, fitted_data)
+            residuals_plot.id = "Residual " + residuals_plot.id
             self.createNewIndex(residuals_plot)
+
+        self.communicate.plotUpdateSignal.emit([fitted_data])
 
     def calcException(self, etype, value, tb):
         """

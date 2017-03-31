@@ -102,7 +102,7 @@ class FittingLogic(object):
         self._data.ymin = ymin
         self._data.ymax = ymax
 
-    def new1DPlot(self, return_data):
+    def new1DPlot(self, return_data, tab_id):
         """
         Create a new 1D data instance based on fitting results
         """
@@ -120,7 +120,7 @@ class FittingLogic(object):
         _xaxis, _xunit = data.get_xaxis()
 
         new_plot.group_id = data.group_id
-        #new_plot.id = str(self.tab_id) + " " + data.name
+        new_plot.id = str(tab_id) + " " + data.name
         new_plot.name = model.name + " [" + data.name + "]"
         new_plot.title = new_plot.name
         new_plot.xaxis(_xaxis, _xunit)
@@ -134,7 +134,6 @@ class FittingLogic(object):
         """
         Create a new 2D data instance based on fitting results
         """
-
         image, data, page_id, model, state, toggle_mode_on,\
         elapsed, index, fid, qmin, qmax, weight, \
         update_chisqr, source = return_data
