@@ -474,7 +474,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Update the active chart list
         self.active_plots[new_plot.data.id] = new_plot
-        print "ADDING ", new_plot.data.id
 
     def appendPlot(self):
         """

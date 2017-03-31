@@ -126,8 +126,6 @@ class FittingLogic(object):
         new_plot.xaxis(_xaxis, _xunit)
         new_plot.yaxis(_yaxis, _yunit)
 
-        # Assign the new Data1D object-wide
-        #self._data = new_plot
         return new_plot
 
     def new2DPlot(self, return_data):
