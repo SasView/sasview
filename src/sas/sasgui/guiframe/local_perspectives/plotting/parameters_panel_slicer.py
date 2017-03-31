@@ -2,6 +2,7 @@
 
 import wx
 import wx.lib.newevent
+import time
 #from copy import deepcopy
 from sas.sasgui.guiframe.events import EVT_SLICER_PARS
 from sas.sasgui.guiframe.utils import format_number
@@ -70,7 +71,6 @@ class SlicerParameterPanel(wx.Dialog):
                                   "Slicer Parameters:", style=wx.ALIGN_LEFT)
             self.bck.Add(title, (1, 0), (1, 2),
                          flag=wx.LEFT | wx.ALIGN_CENTER_VERTICAL, border=15)
-            ix = 0
             iy = 1
             self.parameters = []
             keys = params.keys()
@@ -146,6 +146,7 @@ class SlicerParameterPanel(wx.Dialog):
             self.Bind(wx.EVT_BUTTON, self.onBatchSlice)
             self.bck.Add(self.batch_slicer_button, (iy, ix), (1, 1),
                              wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+            # TODO: Select all button
             # TODO: Check box for saving file
             # TODO: append to file information and file type
             # TODO: Send to fitting options
@@ -197,41 +198,47 @@ class SlicerParameterPanel(wx.Dialog):
         Batch slicing button is pushed
         :param evt: Event triggering hide/show of the batch slicer parameters
         """
+        self.parent.parent._data_panel._uncheck_all()
+        apply_to_list = []
+        plot_list = []
+        spp = self.parent.parent
+        data_panel = spp._data_panel
+        data_list = data_panel.list_cb_data
+        params = self.parent.slicer.get_params()
+        type = self.type_select.GetStringSelection()
+
         # Process each data file individually
         for item in self.data_list.CheckedStrings:
             # Get data_id
             num = len(item)
-            spp = self.parent.parent
-            data_panel = spp._data_panel
-            data_list = data_panel.list_cb_data
             for key in data_list:
                 loaded_key = (key[:num]) if len(key) > num else key
                 if loaded_key == item:
                     selection = key
                     break
+
             # Check the data checkbox
             data_ctrl = data_list[selection][0]
             self.check_item_and_children(data_ctrl=data_ctrl, check_value=True)
-            # Plot all checked data
-            data_panel.on_plot()
-            panel = plot_mgr = None
-            plot_mgrs = spp.plot_panels
-            for key, mgr in plot_mgrs.iteritems():
-                if isinstance(mgr, ModelPanel2D):
-                    plot_mgr = mgr
-                    break
-            if plot_mgr is not None:
-                # TODO: find proper plot window
-                panels = plot_mgr._manager.plot_panels
-                for _, pane in panels.iteritems():
-                    if pane.window_name == item:
-                        panel = pane
-                # TODO: apply slicer
-                print(panels)
-                if panel is not None:
-                    self._apply_slicer_to_plot(panel)
-            # TODO: save file (if desired)
-            # TODO: send to fitting (if desired)
+            plot_list.append(item)
+
+        # Plot all checked data
+        data_panel.on_plot()
+        time.sleep(1.0)
+
+        # Find loaded 2D data panels
+        for key, mgr in spp.plot_panels.iteritems():
+            if mgr.graph.prop['title'] in plot_list:
+                apply_to_list.append(mgr)
+
+        # Apply slicer to selected panels
+        for item in apply_to_list:
+            self._apply_slicer_to_plot(item, type)
+            item.slicer.set_params(params)
+            item.slicer.base.update()
+
+        # TODO: save file (if desired)
+        # TODO: send to fitting (if desired)
 
     def onChangeSlicer(self, evt):
         """
@@ -240,25 +247,26 @@ class SlicerParameterPanel(wx.Dialog):
         """
         self._apply_slicer_to_plot(self.parent)
 
-    def _apply_slicer_to_plot(self, plot):
+    def _apply_slicer_to_plot(self, plot, type=None):
         """
         Apply a slicer to *any* plot window, not just parent window
         :param plot:
         :return:
         """
-        type = self.type_select.GetStringSelection()
-        if self.type != type:
-            if type == "SectorInteractor":
-                plot.onSectorQ(None)
-            elif type == "AnnulusInteractor":
-                plot.onSectorPhi(None)
-            elif type == "BoxInteractorX":
-                plot.onBoxavgX(None)
-            elif type == "BoxInteractorY":
-                plot.onBoxavgY(None)
+        if type is None:
+            type = self.type_select.GetStringSelection()
+        if type == "SectorInteractor":
+            plot.onSectorQ(None)
+        elif type == "AnnulusInteractor":
+            plot.onSectorPhi(None)
+        elif type == "BoxInteractorX":
+            plot.onBoxavgX(None)
+        elif type == "BoxInteractorY":
+            plot.onBoxavgY(None)
 
     def check_item_and_children(self, data_ctrl, check_value=True):
-        self.parent.parent._data_panel.tree_ctrl.CheckItem(data_ctrl, check_value)
+        self.parent.parent._data_panel.tree_ctrl.CheckItem(data_ctrl,
+                                                           check_value)
         if data_ctrl.HasChildren():
             if check_value and not data_ctrl.IsExpanded():
                 # Only select children if control is expanded
