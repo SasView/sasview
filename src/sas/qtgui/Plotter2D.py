@@ -300,13 +300,11 @@ class Plotter2DWidget(PlotterBase):
         if self.slicer_widget:
             self.slicer_widget.setModel(self.param_model)
 
-
     def onSectorView(self):
         """
         Perform sector averaging on Q and draw sector slicer
         """
         self.setSlicer(slicer=SectorInteractor)
-
 
     def onAnnulusView(self):
         """
@@ -485,6 +483,13 @@ class Plotter2DWidget(PlotterBase):
 
     def draw(self):
         self.figure.canvas.draw()
+
+    def replacePlot(self, id, new_plot):
+        """
+        Replace data in current chart.
+        This effectlvely refreshes the chart with changes to one of its plots
+        """
+        self.plot(data=new_plot)
 
 
 class Plotter2D(QtGui.QDialog, Plotter2DWidget):
