@@ -205,7 +205,6 @@ ext_modules.append( Extension("sas.sascalc.calculator.core.sld2i",
     )
 )
 
-
 # sas.sascalc.pr
 srcdir  = os.path.join("src", "sas", "sascalc", "pr", "c_extensions")
 package_dir["sas.sascalc.pr.core"] = srcdir
@@ -228,6 +227,10 @@ ext_modules.append( Extension("sas.sascalc.file_converter.core.bsl_loader",
                               include_dirs=[numpy.get_include()],
                               ) )
 
+#sas.sascalc.corfunc
+package_dir["sas.sascalc.corfunc"] = os.path.join("src", "sas", "sascalc", "corfunc")
+packages.extend(["sas.sascalc.corfunc"])
+
 # sas.sascalc.fit
 package_dir["sas.sascalc.fit"] = os.path.join("src", "sas", "sascalc", "fit")
 packages.append("sas.sascalc.fit")
@@ -236,7 +239,7 @@ packages.append("sas.sascalc.fit")
 package_dir["sas.sasgui.perspectives"] = os.path.join("src", "sas", "sasgui", "perspectives")
 package_dir["sas.sasgui.perspectives.pr"] = os.path.join("src", "sas", "sasgui", "perspectives", "pr")
 packages.extend(["sas.sasgui.perspectives","sas.sasgui.perspectives.pr"])
-package_data["sas.sasgui.perspectives.pr"] = ['images/*']
+package_data["sas.sasgui.perspectives.pr"] = ['media/*']
 
 package_dir["sas.sasgui.perspectives.invariant"] = os.path.join("src", "sas", "sasgui", "perspectives", "invariant")
 packages.extend(["sas.sasgui.perspectives.invariant"])
@@ -249,6 +252,14 @@ package_data['sas.sasgui.perspectives.fitting'] = ['media/*', 'plugin_models/*']
 
 packages.extend(["sas.sasgui.perspectives", "sas.sasgui.perspectives.calculator"])
 package_data['sas.sasgui.perspectives.calculator'] = ['images/*', 'media/*']
+
+package_dir["sas.sasgui.perspectives.corfunc"] = os.path.join("src", "sas", "sasgui", "perspectives", "corfunc")
+packages.extend(["sas.sasgui.perspectives.corfunc"])
+package_data['sas.sasgui.perspectives.corfunc'] = ['media/*']
+
+package_dir["sas.sasgui.perspectives.file_converter"] = os.path.join("src", "sas", "sasgui", "perspectives", "file_converter")
+packages.extend(["sas.sasgui.perspectives.file_converter"])
+package_data['sas.sasgui.perspectives.file_converter'] = ['media/*']
 
 # Data util
 package_dir["sas.sascalc.data_util"] = os.path.join("src", "sas", "sascalc", "data_util")
@@ -303,9 +314,14 @@ package_data['sas.sasview'] = ['images/*',
                                'test/*.txt',
                                'test/1d_data/*',
                                'test/2d_data/*',
+                               'test/convertible_files/*',
+                               'test/coordinate_data/*',
+                               'test/image_data/*',
+                               'test/media/*',
+                               'test/other_files/*',
                                'test/save_states/*',
-                               'test/upcoming_formats/*',
-                                 'default_categories.json']
+                               'test/sesans_data/*'
+                               ]
 packages.append("sas.sasview")
 
 required = [
