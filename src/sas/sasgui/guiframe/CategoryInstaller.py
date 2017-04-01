@@ -122,7 +122,8 @@ class CategoryInstaller:
         makes sure categories.json exists and if not
         compile it and install
         :param homefile: Override the default home directory
-        :param model_list: List of model names except customized models
+        :param model_list: List of model names except those in Plugin Models
+               which are user supplied.
         """
         _model_dict = { model.name: model for model in model_list}
         _model_list = _model_dict.keys()

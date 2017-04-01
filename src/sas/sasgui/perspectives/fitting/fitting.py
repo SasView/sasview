@@ -224,9 +224,8 @@ class Plugin(PluginBase):
             raise
 
         self.id_edit = wx.NewId()
-        editmodel_help = "Edit customized model sample file"
         self.menu1.AppendMenu(self.id_edit, "Plugin Model Operations",
-                              self.edit_model_menu, editmodel_help)
+                              self.edit_model_menu)
         #create  menubar items
         return [(self.menu1, self.sub_menu)]
 
@@ -259,8 +258,8 @@ class Plugin(PluginBase):
                 os.remove(p_path)
             self.update_custom_combo()
             if os.path.isfile(p_path):
-                msg = "Sorry! Could not be able to delete the default "
-                msg += "custom model... \n"
+                msg = "Sorry! unable to delete the default "
+                msg += "plugin model... \n"
                 msg += "Please manually remove the files (.py, .pyc) "
                 msg += "in the 'plugin_models' folder \n"
                 msg += "inside of the SasView application, "
@@ -273,7 +272,7 @@ class Plugin(PluginBase):
                 for item in self.edit_menu.GetMenuItems():
                     if item.GetLabel() == label:
                         self.edit_menu.DeleteItem(item)
-                        msg = "The custom model, %s, has been deleted." % label
+                        msg = "The plugin model, %s, has been deleted." % label
                         evt = StatusEvent(status=msg, type='stop', info='info')
                         wx.PostEvent(self.parent, evt)
                         break
@@ -330,7 +329,7 @@ class Plugin(PluginBase):
             self.set_edit_menu_helper(self.parent, self.delete_custom_model)
             temp = self.fit_panel.reset_pmodel_list()
             if temp:
-                # Set the new custom model list for all fit pages
+                # Set the new plugin model list for all fit pages
                 for uid, page in self.fit_panel.opened_pages.iteritems():
                     if hasattr(page, "formfactorbox"):
                         page.model_list_box = temp
@@ -1755,15 +1754,14 @@ class Plugin(PluginBase):
                                           data_description="Data unsmeared",
                                           data_id="Data  " + data.name + " unsmeared",
                                           dy=unsmeared_error)
-                
-            if sq_model is not None and pq_model is not None:
-                self.create_theory_1D(x, sq_model, page_id, model, data, state,
-                                      data_description=model.name + " S(q)",
-                                      data_id=str(page_id) + " " + data.name + " S(q)")
-                self.create_theory_1D(x, pq_model, page_id, model, data, state,
-                                      data_description=model.name + " P(q)",
-                                      data_id=str(page_id) + " " + data.name + " P(q)")
-
+            # Comment this out until we can get P*S models with correctly populated parameters
+            #if sq_model is not None and pq_model is not None:
+            #    self.create_theory_1D(x, sq_model, page_id, model, data, state,
+            #                          data_description=model.name + " S(q)",
+            #                          data_id=str(page_id) + " " + data.name + " S(q)")
+            #    self.create_theory_1D(x, pq_model, page_id, model, data, state,
+            #                          data_description=model.name + " P(q)",
+            #                          data_id=str(page_id) + " " + data.name + " P(q)")
 
             current_pg = self.fit_panel.get_page_by_id(page_id)
             title = new_plot.title
@@ -1964,7 +1962,8 @@ class Plugin(PluginBase):
                 ## stop just raises the flag -- the thread is supposed to 
                 ## then kill itself but cannot.  Paul Kienzle came up with
                 ## this fix to prevent threads from stepping on each other
-                ## which was causing a simple custom model to crash Sasview.
+                ## which was causing a simple custom plugin model to crash
+                ##Sasview.
                 ## We still don't know why the fit sometimes lauched a second
                 ## thread -- something which should also be investigated.
                 ## The thread approach was implemented in order to be able
