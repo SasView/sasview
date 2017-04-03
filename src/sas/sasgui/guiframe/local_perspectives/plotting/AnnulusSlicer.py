@@ -148,6 +148,7 @@ class AnnulusInteractor(_BaseInteractor, SlicerModel):
         new_plot.ytransform = "y"
         variant_plot = QtCore.QVariant(new_plot)
         GuiUtils.updateModelItemWithPlot(self._item, variant_plot, new_plot.id)
+        self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
 
         if self.update_model:
             self.setModelFromParams()
