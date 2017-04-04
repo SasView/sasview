@@ -272,53 +272,29 @@ if os.path.isfile("BUILD_NUMBER"):
 
 # Copying the images directory to the distribution directory.
 for f in findall(images_dir):
-    if not ".svn" in f:
-        data_files.append(("images", [f]))
+    data_files.append(("images", [f]))
 
 # Copying the HTML help docs
 for f in findall(media_dir):
-    if not ".svn" in f:
-        data_files.append(("media", [f]))
+    data_files.append(("media", [f]))
 
-# Copying the sample data user data
+# Copying the sample user data
 for f in findall(test_1d_dir):
-    if not ".svn" in f:
-        data_files.append(("test\\1d_data", [f]))
-
-# Copying the sample data user data
+    data_files.append(("test\\1d_data", [f]))
 for f in findall(test_2d_dir):
-    if not ".svn" in f:
-        data_files.append(("test\\2d_data", [f]))
-
-# Copying the sample data user data
+    data_files.append(("test\\2d_data", [f]))
 for f in findall(test_save_dir):
-    if not ".svn" in f:
-        data_files.append(("test\\save_states", [f]))
-
-# Copying the sample data user data
+    data_files.append(("test\\save_states", [f]))
 for f in findall(test_sesans_dir):
-    if not ".svn" in f:
-        data_files.append(("test\\sesans_data", [f]))
-
-# Copying the sample data user data
+    data_files.append(("test\\sesans_data", [f]))
 for f in findall(test_convertible_dir):
-    if not ".svn" in f:
-        data_files.append(("test\\convertible_files", [f]))
-
-# Copying the sample data user data
+    data_files.append(("test\\convertible_files", [f]))
 for f in findall(test_coord_dir):
-    if not ".svn" in f:
-        data_files.append(("test\\coordinate_data", [f]))
-
-# Copying the sample data user data
+    data_files.append(("test\\coordinate_data", [f]))
 for f in findall(test_image_dir):
-    if not ".svn" in f:
-        data_files.append(("test\\image_data", [f]))
-
-# Copying the sample data user data
+    data_files.append(("test\\image_data", [f]))
 for f in findall(test_other_dir):
-    if not ".svn" in f:
-        data_files.append(("test\\other_files", [f]))
+    data_files.append(("test\\other_files", [f]))
 
 # Copying opencl include files
 for f in findall(opencl_include_dir):
