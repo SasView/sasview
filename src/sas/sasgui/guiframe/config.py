@@ -45,7 +45,7 @@ _acknowledgement_citation = \
 '''M. Doucet et al. SasView Version 4.1, Zenodo, 10.5281/zenodo.438138'''
 
 _acknowledgement =  \
-'''This work was originally developed as part of the DANSE project funded by the US NSF under Award DMR-0520547,\n but is currently maintained by a collaboration between UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO and TU Delft and the scattering community.\n\n SasView also contains code developed with funding from the EU Horizon 2020 programme under the SINE2020 project (Grant No 654000).\nA list of individual contributors can be found at: https://github.com/orgs/SasView/people
+'''This work was originally developed as part of the DANSE project funded by the US NSF under Award DMR-0520547,\n but is currently maintained by a collaboration between UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft, DLS, and the scattering community.\n\n SasView also contains code developed with funding from the EU Horizon 2020 programme under the SINE2020 project (Grant No 654000).\nA list of individual contributors can be found at: https://github.com/orgs/SasView/people
 '''
 
 _homepage = "http://www.sasview.org"
@@ -82,11 +82,12 @@ _ess_url = "http://ess-scandinavia.eu/"
 _ill_url = "http://www.ill.eu/"
 _ansto_url = "http://www.ansto.gov.au/"
 _tudelft_url = "http://www.tnw.tudelft.nl/en/cooperation/facilities/reactor-instituut-delft/"
+_dls_url = "http://www.diamond.ac.uk/"
 _danse_url = "http://www.cacr.caltech.edu/projects/danse/release/index.html"
 _inst_url = "http://www.utk.edu"
 _corner_image = os.path.join(icon_path, "angles_flat.png")
 _welcome_image = os.path.join(icon_path, "SVwelcome.png")
-_copyright = "(c) 2009 - 2017, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO and TU Delft"
+_copyright = "(c) 2009 - 2017, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft, and DLS"
 marketplace_url = "http://marketplace.sasview.org/"
 
 #edit the list of file state your plugin can read
