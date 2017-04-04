@@ -119,13 +119,11 @@ class Reader:
         Performs unit conversion on a measurement.
 
         :param value: The magnitude of the measurement
-        :type value: Number
         :param value_unit: a string containing the final desired unit
-        :type value_unit: String
         :param default_unit: a string containing the units of the original measurement
-        :type default_unit: String
         :return: The magnitude of the measurement in the new units
         """
+        # (float, string, string) -> float
         if has_converter and value_unit != default_unit:
             data_conv_q = Converter(value_unit)
             value = data_conv_q(value, units=default_unit)
@@ -143,11 +141,10 @@ class Reader:
          self._header_fetch(d, "Length") == 17
 
         :param header: A dictionary of values
-        :type header: Dictionary
         :param key: A string which is a prefix for one of the keys in the dict
-        :type key: String
         :return: The value of the dictionary for the specified key
         """
+        # (dict<string, x>, string) -> x
         index = [k for k in headers.keys()
                  if k.startswith(key)][0]
         return headers[index]
@@ -163,12 +160,11 @@ class Reader:
         :param header: A dictionary of values, where the keys are strings
         with the units for the values appended onto the string within square
         brackets (See the example above)
-        :type header: Dictionary
         :param key: A string with the prefix of the dictionary key whose unit
         is being fetched
-        :type key: String
         :return: A string containing the unit specifed in the header
         """
+        # (dict<string, _>, string) -> string
         index = [k for k in params.keys()
                  if k.startswith(key)][0]
         unit = index.strip().split()[-1][1:-1]
