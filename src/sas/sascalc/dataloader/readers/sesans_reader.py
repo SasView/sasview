@@ -48,69 +48,68 @@ class Reader:
         if os.path.isfile(path):
             basename = os.path.basename(path)
             _, extension = os.path.splitext(basename)
-            if self.allow_all or extension.lower() in self.ext:
-                with open(path, 'r') as input_f:
-                    # Read in binary mode since GRASP frequently has no-ascii
-                    # characters that brakes the open operation
-                    line = input_f.readline()
-                    params = {}
-                    while line.strip() != "":
-                        terms = line.strip().split("\t")
-                        params[terms[0].strip()] = " ".join(terms[1:]).strip()
-                        line = input_f.readline()
-                    headers_temp = input_f.readline().strip().split("\t")
-                    headers = {}
-                    for h in headers_temp:
-                        temp = h.strip().split()
-                        headers[h[:-1].strip()] = temp[-1][1:-1]
-                    data = np.loadtxt(input_f)
-                    if data.size < 1:
-                        raise RuntimeError("{} is empty".format(path))
-                    x = data[:, 0]
-                    dx = data[:, 3]
-                    lam = data[:, 4]
-                    dlam = data[:, 5]
-                    y = data[:, 1]
-                    dy = data[:, 2]
-
-                    lam_unit = self._header_fetch(headers, "wavelength")
-                    if lam_unit == "AA":
-                        lam_unit = "A"
-
-                    x, x_unit = self._unit_conversion(
-                        x, lam_unit,
-                        self._fetch_unit(headers, "spin echo length"))
-                    dx, dx_unit = self._unit_conversion(
-                        dx, lam_unit,
-                        self._fetch_unit(headers, "error SEL"))
-                    dlam, dlam_unit = self._unit_conversion(
-                        dlam, lam_unit,
-                        self._fetch_unit(headers, "error wavelength"))
-                    y_unit = r'\AA^{-2} cm^{-1}'
-
-                    output = Data1D(x=x, y=y, lam=lam, dy=dy, dx=dx, dlam=dlam,
-                                    isSesans=True)
-                    self.filename = output.filename = basename
-                    output.xaxis(r"\rm{z}", x_unit)
-                    # Adjust label to ln P/(lam^2 t), remove lam column refs
-                    output.yaxis(r"\rm{ln(P)/(t \lambda^2)}", y_unit)
-                    # Store loading process information
-                    output.meta_data['loader'] = self.type_name
-                    output.sample.name = params["Sample"]
-                    output.sample.ID = params["DataFileTitle"]
-
-                    output.sample.zacceptance = (
-                        float(self._header_fetch(params, "Q_zmax")),
-                        self._fetch_unit(params, "Q_zmax"))
-
-                    output.sample.yacceptance = (
-                        float(self._header_fetch(params, "Q_ymax")),
-                        self._fetch_unit(params, "Q_ymax"))
-                    return output
-
+            if not (self.allow_all or extension.lower() in self.ext):
+                raise RuntimeError("{} has an unrecognized file extension".format(path))
         else:
-            raise RuntimeError("%s is not a file" % path)
-        return None
+            raise RunetimeError("{} is not a file".format(path))
+        with open(path, 'r') as input_f:
+            # Read in binary mode since GRASP frequently has no-ascii
+            # characters that brakes the open operation
+            line = input_f.readline()
+            params = {}
+            while line.strip() != "":
+                terms = line.strip().split("\t")
+                params[terms[0].strip()] = " ".join(terms[1:]).strip()
+                line = input_f.readline()
+            headers_temp = input_f.readline().strip().split("\t")
+            headers = {}
+            for h in headers_temp:
+                temp = h.strip().split()
+                headers[h[:-1].strip()] = temp[-1][1:-1]
+            data = np.loadtxt(input_f)
+            if data.size < 1:
+                raise RuntimeError("{} is empty".format(path))
+            x = data[:, 0]
+            dx = data[:, 3]
+            lam = data[:, 4]
+            dlam = data[:, 5]
+            y = data[:, 1]
+            dy = data[:, 2]
+
+            lam_unit = self._header_fetch(headers, "wavelength")
+            if lam_unit == "AA":
+                lam_unit = "A"
+
+            x, x_unit = self._unit_conversion(
+                x, lam_unit,
+                self._fetch_unit(headers, "spin echo length"))
+            dx, dx_unit = self._unit_conversion(
+                dx, lam_unit,
+                self._fetch_unit(headers, "error SEL"))
+            dlam, dlam_unit = self._unit_conversion(
+                dlam, lam_unit,
+                self._fetch_unit(headers, "error wavelength"))
+            y_unit = r'\AA^{-2} cm^{-1}'
+
+            output = Data1D(x=x, y=y, lam=lam, dy=dy, dx=dx, dlam=dlam,
+                            isSesans=True)
+            self.filename = output.filename = basename
+            output.xaxis(r"\rm{z}", x_unit)
+            # Adjust label to ln P/(lam^2 t), remove lam column refs
+            output.yaxis(r"\rm{ln(P)/(t \lambda^2)}", y_unit)
+            # Store loading process information
+            output.meta_data['loader'] = self.type_name
+            output.sample.name = params["Sample"]
+            output.sample.ID = params["DataFileTitle"]
+
+            output.sample.zacceptance = (
+                float(self._header_fetch(params, "Q_zmax")),
+                self._fetch_unit(params, "Q_zmax"))
+
+            output.sample.yacceptance = (
+                float(self._header_fetch(params, "Q_ymax")),
+                self._fetch_unit(params, "Q_ymax"))
+            return output
 
     @staticmethod
     def _unit_conversion(value, value_unit, default_unit):
