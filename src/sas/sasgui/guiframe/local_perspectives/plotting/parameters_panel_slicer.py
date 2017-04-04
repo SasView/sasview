@@ -10,14 +10,15 @@ from sas.sasgui.guiframe.events import EVT_SLICER
 from sas.sasgui.guiframe.events import SlicerParameterEvent, SlicerEvent
 from Plotter2D import ModelPanel2D
 from sas.sascalc.dataloader.data_info import Data1D, Data2D
+ApplyParams, EVT_APPLY_PARAMS = wx.lib.newevent.NewEvent()
 
 
 class SlicerParameterPanel(wx.Dialog):
     """
     Panel class to show the slicer parameters
     """
-    #TODO: show units
-    #TODO: order parameters properly
+    # TODO: show units
+    # TODO: order parameters properly
 
     def __init__(self, parent, *args, **kwargs):
         """
@@ -39,6 +40,7 @@ class SlicerParameterPanel(wx.Dialog):
         # Bindings
         self.parent.Bind(EVT_SLICER, self.onEVT_SLICER)
         self.parent.Bind(EVT_SLICER_PARS, self.onParamChange)
+        self.Bind(EVT_APPLY_PARAMS, self.apply_params_list)
 
     def onEVT_SLICER(self, event):
         """
@@ -140,7 +142,7 @@ class SlicerParameterPanel(wx.Dialog):
             self.bck.Add(self.data_list, (iy, ix), (1, 1),
                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
             iy += 1
-            button_label = "Apply Slicer to Selected Files"
+            button_label = "Apply Slicer to Selected Plots"
             self.batch_slicer_button = wx.Button(parent=self,
                                                  label=button_label)
             self.Bind(wx.EVT_BUTTON, self.onBatchSlice)
@@ -195,47 +197,25 @@ class SlicerParameterPanel(wx.Dialog):
 
     def onBatchSlice(self, evt=None):
         """
-        Batch slicing button is pushed
+        Method invoked with batch slicing button is pressed
         :param evt: Event triggering hide/show of the batch slicer parameters
         """
-        self.parent.parent._data_panel._uncheck_all()
         apply_to_list = []
-        plot_list = []
         spp = self.parent.parent
-        data_panel = spp._data_panel
-        data_list = data_panel.list_cb_data
         params = self.parent.slicer.get_params()
         type = self.type_select.GetStringSelection()
 
-        # Process each data file individually
-        for item in self.data_list.CheckedStrings:
-            # Get data_id
-            num = len(item)
-            for key in data_list:
-                loaded_key = (key[:num]) if len(key) > num else key
-                if loaded_key == item:
-                    selection = key
-                    break
-
-            # Check the data checkbox
-            data_ctrl = data_list[selection][0]
-            self.check_item_and_children(data_ctrl=data_ctrl, check_value=True)
-            plot_list.append(item)
-
-        # Plot all checked data
-        data_panel.on_plot()
-        time.sleep(1.0)
-
         # Find loaded 2D data panels
         for key, mgr in spp.plot_panels.iteritems():
-            if mgr.graph.prop['title'] in plot_list:
+            if mgr.graph.prop['title'] in self.data_list.CheckedStrings:
                 apply_to_list.append(mgr)
 
         # Apply slicer to selected panels
         for item in apply_to_list:
             self._apply_slicer_to_plot(item, type)
-            item.slicer.set_params(params)
-            item.slicer.base.update()
+
+        event = ApplyParams(params=params, plot_list=apply_to_list)
+        wx.PostEvent(self, event)
 
         # TODO: save file (if desired)
         # TODO: send to fitting (if desired)
@@ -250,8 +230,9 @@ class SlicerParameterPanel(wx.Dialog):
     def _apply_slicer_to_plot(self, plot, type=None):
         """
         Apply a slicer to *any* plot window, not just parent window
-        :param plot:
-        :return:
+        :param plot: 2D plot panel to apply a slicer to
+        :param type: The type of slicer to apply to the panel
+        :return: Return the plot with the slicer applied
         """
         if type is None:
             type = self.type_select.GetStringSelection()
@@ -264,33 +245,34 @@ class SlicerParameterPanel(wx.Dialog):
         elif type == "BoxInteractorY":
             plot.onBoxavgY(None)
 
-    def check_item_and_children(self, data_ctrl, check_value=True):
-        self.parent.parent._data_panel.tree_ctrl.CheckItem(data_ctrl,
-                                                           check_value)
-        if data_ctrl.HasChildren():
-            if check_value and not data_ctrl.IsExpanded():
-                # Only select children if control is expanded
-                # Always deselect children, regardless (see ticket #259)
-                return
-            for child_ctrl in data_ctrl.GetChildren():
-                self.tree_ctrl.CheckItem(child_ctrl, check_value)
-
     def process_list(self):
+        self.checkme = None
         main_window = self.parent.parent
         self.loaded_data = []
         id = wx.NewId()
-        for key, value in main_window._data_manager.stored_data.iteritems():
-            if isinstance(value.data, Data2D):
-                self.loaded_data.append(value.data.name)
-            if key == self.parent.data2D.id:
-                self.checkme = self.loaded_data.index(value.data.name)
+        for key, value in main_window.plot_panels.iteritems():
+            if isinstance(value, ModelPanel2D):
+                self.loaded_data.append(value.data2D.name)
+                if value.data2D.id == self.parent.data2D.id:
+                    self.checkme = self.loaded_data.index(value.data2D.name)
         self.data_list = wx.CheckListBox(parent=self, id=id,
                                          choices=self.loaded_data,
-                                         name="Apply Slicer to Data Sets:")
-        self.data_list.Check(self.checkme)
+                                         name="Apply Slicer to 2D Plots:")
+        if self.checkme is not None:
+            self.data_list.Check(self.checkme)
         self.data_list.Bind(wx.EVT_CHECKLISTBOX, self.onCheckBoxList)
 
     def onCheckBoxList(self, e):
+        """
+        Do not allow a checkbox to be unchecked
+        :param e: Event triggered when a checkbox list item is checked
+        """
         index = e.GetSelection()
         if index == self.checkme:
             self.data_list.Check(index)
+
+    def apply_params_list(self, evt=None):
+        for item in evt.plot_list:
+            item.slicer.set_params(evt.params)
+            item.slicer.base.update()
+        self.Destroy()
