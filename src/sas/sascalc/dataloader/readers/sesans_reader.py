@@ -115,7 +115,8 @@ class Reader:
             raise RuntimeError("%s is not a file" % path)
         return None
 
-    def _unit_conversion(self, value, value_unit, default_unit):
+    @staticmethod
+    def _unit_conversion(value, value_unit, default_unit):
         """
         Performs unit conversion on a measurement.
 
@@ -135,7 +136,8 @@ class Reader:
             new_unit = value_unit
         return value, new_unit
 
-    def _header_fetch(self, headers, key):
+    @staticmethod
+    def _header_fetch(headers, key):
         """
         Pull the value of a unit defined header from a dict. Example::
 
@@ -152,7 +154,8 @@ class Reader:
                  if k.startswith(key)][0]
         return headers[index]
 
-    def _fetch_unit(self, params, key):
+    @staticmethod
+    def _fetch_unit(params, key):
         """
         Pull the unit off of a dictionary header. Example::
 
