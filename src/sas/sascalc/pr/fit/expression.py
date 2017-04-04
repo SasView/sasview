@@ -270,7 +270,7 @@ def _check(msg,pairs):
             raise Exception,"%s expect %s before %s in %s for %s"%(msg,lo,hi,n,pairs)
 
 def test_deps():
-    import numpy
+    import numpy as np
 
     # Null case
     _check("test empty",[])
@@ -278,7 +278,7 @@ def test_deps():
     # Some dependencies
     _check("test1",[(2,7),(1,5),(1,4),(2,1),(3,1),(5,6)])
     _check("test1 renumbered",[(6,1),(7,3),(7,4),(6,7),(5,7),(3,2)])
-    _check("test1 numpy",numpy.array([(2,7),(1,5),(1,4),(2,1),(3,1),(5,6)]))
+    _check("test1 numpy",np.array([(2,7),(1,5),(1,4),(2,1),(3,1),(5,6)]))
 
     # No dependencies
     _check("test2",[(4,1),(3,2),(8,4)])
@@ -290,16 +290,16 @@ def test_deps():
     else: raise Exception,"test3 expect ValueError exception for %s"%(pairs,)
 
     # large test for gross speed check
-    A = numpy.random.randint(4000,size=(1000,2))
+    A = np.random.randint(4000,size=(1000,2))
     A[:,1] += 4000  # Avoid cycles
     _check("test-large",A)
 
     # depth tests
     k = 200
-    A = numpy.array([range(0,k),range(1,k+1)]).T
+    A = np.array([range(0,k),range(1,k+1)]).T
     _check("depth-1",A)
 
-    A = numpy.array([range(1,k+1),range(0,k)]).T
+    A = np.array([range(1,k+1),range(0,k)]).T
     _check("depth-2",A)
 
 def test_expr():

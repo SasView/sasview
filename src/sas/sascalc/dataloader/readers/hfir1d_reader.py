@@ -8,7 +8,7 @@
 #See the license text in license.txt
 #copyright 2008, University of Tennessee
 ######################################################################
-import numpy
+import numpy as np
 import os
 from sas.sascalc.dataloader.data_info import Data1D
 
@@ -51,10 +51,10 @@ class Reader(object):
                     raise  RuntimeError, "hfir1d_reader: cannot open %s" % path
                 buff = input_f.read()
                 lines = buff.split('\n')
-                x = numpy.zeros(0)
-                y = numpy.zeros(0)
-                dx = numpy.zeros(0)
-                dy = numpy.zeros(0)
+                x = np.zeros(0)
+                y = np.zeros(0)
+                dx = np.zeros(0)
+                dy = np.zeros(0)
                 output = Data1D(x, y, dx=dx, dy=dy)
                 self.filename = output.filename = basename
            
@@ -87,10 +87,10 @@ class Reader(object):
                             _y = data_conv_i(_y, units=output.y_unit)
                             _dy = data_conv_i(_dy, units=output.y_unit)
                                                     
-                        x = numpy.append(x, _x)
-                        y = numpy.append(y, _y)
-                        dx = numpy.append(dx, _dx)
-                        dy = numpy.append(dy, _dy)
+                        x = np.append(x, _x)
+                        y = np.append(y, _y)
+                        dx = np.append(dx, _dx)
+                        dy = np.append(dy, _dy)
                     except:
                         # Couldn't parse this line, skip it 
                         pass

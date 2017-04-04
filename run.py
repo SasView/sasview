@@ -19,6 +19,20 @@ import imp
 from contextlib import contextmanager
 from os.path import abspath, dirname, join as joinpath
 
+class TeeStream:
+    def __init__(self, filename):
+        self.logfile = open(filename, 'a')
+        self.console = sys.stderr
+    def write(self, buf):
+        self.logfile.write(buf)
+        self.console.write(buf)
+
+def tee_logging():
+    import logging
+    stream = TeeStream(os.path.join(os.path.expanduser("~"), 'sasview.log'))
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s %(levelname)s %(message)s',
+                        stream=stream)
 
 def addpath(path):
     """
@@ -138,5 +152,6 @@ def prepare():
 
 if __name__ == "__main__":
     prepare()
+    tee_logging()
     from sas.sasview.sasview import run
     run()

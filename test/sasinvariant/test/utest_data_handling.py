@@ -8,7 +8,8 @@ See the license text in license.txt
 copyright 2010, University of Tennessee
 """
 import unittest
-import numpy, math
+import math
+import numpy as np
 from sas.sascalc.dataloader.loader import  Loader
 from sas.sascalc.dataloader.data_info import Data1D
 
@@ -19,8 +20,8 @@ class TestLinearFit(unittest.TestCase):
         Test Line fit 
     """
     def setUp(self):
-        x = numpy.asarray([1.,2.,3.,4.,5.,6.,7.,8.,9.])
-        y = numpy.asarray([1.,2.,3.,4.,5.,6.,7.,8.,9.])
+        x = np.asarray([1.,2.,3.,4.,5.,6.,7.,8.,9.])
+        y = np.asarray([1.,2.,3.,4.,5.,6.,7.,8.,9.])
         dy = y/10.0
         
         self.data = Data1D(x=x,y=y,dy=dy)
@@ -134,8 +135,8 @@ class TestInvariantCalculator(unittest.TestCase):
         self.assertRaises(ValueError, invariant.InvariantCalculator, Incompatible())
         
     def test_error_treatment(self):
-        x = numpy.asarray(numpy.asarray([0,1,2,3]))
-        y = numpy.asarray(numpy.asarray([1,1,1,1]))
+        x = np.asarray(np.asarray([0,1,2,3]))
+        y = np.asarray(np.asarray([1,1,1,1]))
         
         # These are all the values of the dy array that would cause
         # us to set all dy values to 1.0 at __init__ time.
@@ -339,8 +340,8 @@ class TestGuinierExtrapolation(unittest.TestCase):
         """
         self.scale = 1.5
         self.rg = 30.0
-        x = numpy.arange(0.0001, 0.1, 0.0001)
-        y = numpy.asarray([self.scale * math.exp( -(q*self.rg)**2 / 3.0 ) for q in x])
+        x = np.arange(0.0001, 0.1, 0.0001)
+        y = np.asarray([self.scale * math.exp( -(q*self.rg)**2 / 3.0 ) for q in x])
         dy = y*.1
         self.data = Data1D(x=x, y=y, dy=dy)
         
@@ -382,8 +383,8 @@ class TestPowerLawExtrapolation(unittest.TestCase):
         """
         self.scale = 1.5
         self.m = 3.0
-        x = numpy.arange(0.0001, 0.1, 0.0001)
-        y = numpy.asarray([self.scale * math.pow(q ,-1.0*self.m) for q in x])                
+        x = np.arange(0.0001, 0.1, 0.0001)
+        y = np.asarray([self.scale * math.pow(q ,-1.0*self.m) for q in x])
         dy = y*.1
         self.data = Data1D(x=x, y=y, dy=dy)
         
@@ -426,8 +427,8 @@ class TestLinearization(unittest.TestCase):
             Check that the linearization process filters out points
             that can't be transformed
         """
-        x = numpy.asarray(numpy.asarray([0,1,2,3]))
-        y = numpy.asarray(numpy.asarray([1,1,1,1]))
+        x = np.asarray(np.asarray([0,1,2,3]))
+        y = np.asarray(np.asarray([1,1,1,1]))
         g = invariant.Guinier()
         data_in = Data1D(x=x, y=y)
         data_out = g.linearize_data(data_in)
@@ -437,9 +438,9 @@ class TestLinearization(unittest.TestCase):
         self.assertEqual(len(dy_out), 3)
         
     def test_allowed_bins(self):
-        x = numpy.asarray(numpy.asarray([0,1,2,3]))
-        y = numpy.asarray(numpy.asarray([1,1,1,1]))
-        dy = numpy.asarray(numpy.asarray([1,1,1,1]))
+        x = np.asarray(np.asarray([0,1,2,3]))
+        y = np.asarray(np.asarray([1,1,1,1]))
+        dy = np.asarray(np.asarray([1,1,1,1]))
         g = invariant.Guinier()
         data = Data1D(x=x, y=y, dy=dy)
         self.assertEqual(g.get_allowed_bins(data), [False, True, True, True])
@@ -464,8 +465,8 @@ class TestDataExtraLow(unittest.TestCase):
         """
         self.scale = 1.5
         self.rg = 30.0
-        x = numpy.arange(0.0001, 0.1, 0.0001)
-        y = numpy.asarray([self.scale * math.exp( -(q*self.rg)**2 / 3.0 ) for q in x])
+        x = np.arange(0.0001, 0.1, 0.0001)
+        y = np.asarray([self.scale * math.exp( -(q*self.rg)**2 / 3.0 ) for q in x])
         dy = y*.1
         self.data = Data1D(x=x, y=y, dy=dy)
         
@@ -512,8 +513,8 @@ class TestDataExtraLowSlitGuinier(unittest.TestCase):
         """
         self.scale = 1.5
         self.rg = 30.0
-        x = numpy.arange(0.0001, 0.1, 0.0001)
-        y = numpy.asarray([self.scale * math.exp( -(q*self.rg)**2 / 3.0 ) for q in x])
+        x = np.arange(0.0001, 0.1, 0.0001)
+        y = np.asarray([self.scale * math.exp( -(q*self.rg)**2 / 3.0 ) for q in x])
         dy = y*.1
         self.data = Data1D(x=x, y=y, dy=dy)
         self.npts = len(x)-10
@@ -599,8 +600,8 @@ class TestDataExtraHighSlitPowerLaw(unittest.TestCase):
         """
         self.scale = 1.5
         self.m = 3.0
-        x = numpy.arange(0.0001, 0.1, 0.0001)
-        y = numpy.asarray([self.scale * math.pow(q ,-1.0*self.m) for q in x])                
+        x = np.arange(0.0001, 0.1, 0.0001)
+        y = np.asarray([self.scale * math.pow(q ,-1.0*self.m) for q in x])
         dy = y*.1
         self.data = Data1D(x=x, y=y, dy=dy)
         self.npts = 20

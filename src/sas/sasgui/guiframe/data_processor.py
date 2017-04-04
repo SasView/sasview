@@ -1090,7 +1090,7 @@ class Notebook(nb, PanelBase):
         except:
             # When inputs are from an external file
             return inputs, outputs
-        inds = numpy.lexsort((to_be_sort, to_be_sort))
+        inds = np.lexsort((to_be_sort, to_be_sort))
         for key in outputs.keys():
             key_list = outputs[key]
             temp_key = [item for item in key_list]
@@ -1378,7 +1378,7 @@ class GridPanel(SPanel):
             wx.PostEvent(self.parent.parent, StatusEvent(status=msg, info="error"))
             return
         if dy == None:
-            dy = numpy.zeros(len(y))
+            dy = np.zeros(len(y))
         #plotting
         new_plot = Data1D(x=x, y=y, dy=dy)
         new_plot.id = wx.NewId()

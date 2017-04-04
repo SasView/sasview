@@ -4,7 +4,7 @@ GUI for the data operations panel (sum and multiply)
 import wx
 import sys
 import time
-import numpy
+import numpy as np
 from sas.sascalc.dataloader.data_info import Data1D
 from sas.sasgui.plottools.PlotPanel import PlotPanel
 from sas.sasgui.plottools.plottables import Graph
@@ -540,9 +540,9 @@ class DataOperPanel(wx.ScrolledWindow):
                     theory_list = self._data[id].get_theory()
                     theory, _ = theory_list.values()[0]
                     dnames.append(theory.name)
-        ind = numpy.argsort(dnames)
+        ind = np.argsort(dnames)
         if len(ind) > 0:
-            val_list = numpy.array(self._data.values())[ind]
+            val_list = np.array(self._data.values())[ind]
             for datastate in val_list:
                 data = datastate.data
                 if data != None:
