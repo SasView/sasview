@@ -32,7 +32,7 @@ from wx.py.editwindow import EditWindow
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 from .pyconsole import show_model_output, check_model
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 if sys.platform.count("win32") > 0:

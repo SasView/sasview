@@ -18,7 +18,7 @@ from sas.sascalc.fit.pluginmodel import Model1DPlugin
 from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 from sasmodels.sasview_model import load_custom_model, load_standard_models
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 PLUGIN_DIR = 'plugin_models'

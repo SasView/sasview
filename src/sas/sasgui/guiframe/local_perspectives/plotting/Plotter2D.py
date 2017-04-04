@@ -30,7 +30,7 @@ from matplotlib.font_manager import FontProperties
 from graphAppearance import graphAppearance
 (InternalEvent, EVT_INTERNAL) = wx.lib.newevent.NewEvent()
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 DEFAULT_QMAX = 0.05
 DEFAULT_QSTEP = 0.001

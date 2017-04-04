@@ -18,7 +18,7 @@ import logging
 from lxml import etree
 from lxml.builder import E
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 PARSER = etree.ETCompatXMLParser(remove_comments=True, remove_pis=False)
 

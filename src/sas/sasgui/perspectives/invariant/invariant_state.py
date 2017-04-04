@@ -16,7 +16,7 @@ from sas.sasgui.guiframe.utils import format_number
 from sas.sasgui.guiframe.gui_style import GUIFRAME_ID
 from sas.sasgui.guiframe.dataFitting import Data1D
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 INVNODE_NAME = 'invariant'
 CANSAS_NS = "cansas1d/1.0"

@@ -24,7 +24,7 @@ from sas.sasgui.guiframe.gui_style import GUIFRAME_ICON
 from appearanceDialog import appearanceDialog
 from graphAppearance import graphAppearance
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 DEFAULT_QMAX = 0.05
 DEFAULT_QSTEP = 0.001

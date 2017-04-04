@@ -20,7 +20,7 @@ import logging
 
 from sas.sasgui.guiframe.report_dialog import BaseReportDialog
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 class ReportDialog(BaseReportDialog):
     """

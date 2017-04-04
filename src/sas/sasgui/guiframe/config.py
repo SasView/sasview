@@ -8,7 +8,7 @@ import sas.sasview
 import logging
 
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 # Version of the application

@@ -22,7 +22,7 @@ else:
     from time import clock
     from time import sleep
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class CalcThread:

@@ -21,7 +21,7 @@ import warnings
 from lxml import etree
 from xml.dom import minidom
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 warnings.simplefilter("ignore")
 

@@ -20,7 +20,7 @@ from sas.sasgui.guiframe.events import ChangeCategoryEvent
 from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 IS_MAC = (sys.platform == 'darwin')
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 """ Notes
 The category manager mechanism works from 3 data structures used:

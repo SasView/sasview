@@ -34,7 +34,7 @@ from math import fabs
 from sas.sasgui.perspectives.calculator import calculator_widgets as widget
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 _BOX_WIDTH = 100
 _Q_DEFAULT = 0.0

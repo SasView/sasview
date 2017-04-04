@@ -10,7 +10,7 @@ import sas.sascalc.dataloader
 from sas.sascalc.dataloader.loader import  Loader
 
 import logging
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 # Check whether we should test image loading on this system 
 HAS_IMAGE = False

@@ -20,7 +20,7 @@ import webbrowser
 import urllib
 import sys
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 SPHINX_DOC_ENV = "SASVIEW_DOC_PATH"
 WX_SUPPORTS_HTML2 = True

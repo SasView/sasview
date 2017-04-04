@@ -11,7 +11,7 @@ from wx.lib import newevent
 import wx.richtext
 from sas.sasgui.guiframe.gui_style import GUIFRAME_ICON
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 # Number of fields on the status bar
 NB_FIELDS = 4

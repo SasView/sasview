@@ -47,7 +47,7 @@ from sas.sascalc.dataloader.loader import Loader
 from sas.sasgui.guiframe.proxy import Connection
 from matplotlib import _pylab_helpers
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 warnings.simplefilter("ignore")
 

@@ -18,7 +18,7 @@ from numpy.linalg import lstsq
 from scipy import optimize
 from sas.sascalc.pr.core.pr_inversion import Cinvertor
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 def help():
     """

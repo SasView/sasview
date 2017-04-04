@@ -19,7 +19,7 @@ import logging
 from sas.sascalc.dataloader.data_info import Data2D, Detector
 from sas.sascalc.dataloader.manipulations import reader2D_converter
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 # Look for unit converter
 has_converter = True

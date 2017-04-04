@@ -5,7 +5,7 @@ import sys
 import logging
 from sas.sascalc.pr.invertor import Invertor
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 class NTermEstimator(object):
     """

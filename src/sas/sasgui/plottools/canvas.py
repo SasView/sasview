@@ -10,7 +10,7 @@ from matplotlib.backend_bases import MouseEvent, RendererBase
 from matplotlib.backends.backend_wx import GraphicsContextWx, PrintoutWx
 from matplotlib.backends.backend_wx import RendererWx
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 def draw_image(self, x, y, im, bbox, clippath=None, clippath_trans=None):

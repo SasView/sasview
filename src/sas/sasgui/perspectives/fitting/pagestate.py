@@ -33,7 +33,7 @@ from sas.sascalc.dataloader.readers.cansas_reader import get_content, write_node
 from sas.sascalc.dataloader.data_info import Data2D, Collimation, Detector
 from sas.sascalc.dataloader.data_info import Process, Aperture
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 # Information to read/write state as xml
 FITTING_NODE_NAME = 'fitting_plug_in'

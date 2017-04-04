@@ -7,7 +7,7 @@ import logging
 import sys
 import wx.html as html
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 ISPDF = False
 if sys.platform == "win32":

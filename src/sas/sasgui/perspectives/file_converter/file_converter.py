@@ -6,7 +6,7 @@ import logging
 from sas.sasgui.guiframe.plugin_base import PluginBase
 from sas.sasgui.perspectives.file_converter.converter_panel import ConverterWindow
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 class Plugin(PluginBase):
     """

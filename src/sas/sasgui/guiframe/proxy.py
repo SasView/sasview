@@ -7,7 +7,7 @@ import logging
 import re
 
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 '''
 HTTP Proxy parser and Connection

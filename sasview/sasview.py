@@ -20,7 +20,7 @@ import traceback
 LOGGER_CONFIG_FILE = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.ini')
 logging.config.fileConfig(LOGGER_CONFIG_FILE, disable_existing_loggers=False)
 logging.captureWarnings(True)
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 # Log the start of the session

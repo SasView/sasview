@@ -6,7 +6,7 @@ from matplotlib.backends.backend_wxagg import NavigationToolbar2WxAgg
 from matplotlib.backends.backend_wx import _load_bitmap
 import logging
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 # Event binding code changed after version 2.5
 if wx.VERSION_STRING >= '2.5':

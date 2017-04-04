@@ -22,7 +22,7 @@ import numpy
 import logging
 import sys
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 # Avoid Matplotlib complaining about the lack of legend on the plot
 import warnings

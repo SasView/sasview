@@ -33,7 +33,7 @@ from sas.sascalc.dataloader.readers.cansas_constants import CansasConstants, Cur
 import xml.dom.minidom
 from xml.dom.minidom import parseString
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 PREPROCESS = "xmlpreprocess"
 ENCODING = "encoding"

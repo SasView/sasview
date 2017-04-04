@@ -26,7 +26,7 @@ from sas.sascalc.dataloader.loader import Loader
 from sas.sasgui.perspectives.invariant.invariant_panel import InvariantPanel
 from sas.sasgui.guiframe.plugin_base import PluginBase
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 class Plugin(PluginBase):
     """

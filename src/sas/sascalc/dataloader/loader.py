@@ -31,7 +31,7 @@ import readers
 from readers import ascii_reader
 from readers import cansas_reader
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 class Registry(ExtensionRegistry):
     """

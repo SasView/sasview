@@ -17,7 +17,7 @@ from pr_widgets import DataFileTextCtrl
 from pr_widgets import OutputTextCtrl
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 if sys.platform.count("win32") > 0:
     FONT_VARIANT = 0

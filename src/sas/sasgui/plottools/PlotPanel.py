@@ -33,7 +33,7 @@ import numpy
 from sas.sasgui.guiframe.events import StatusEvent
 from .toolbar import NavigationToolBar, PlotPrintout, bind
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 def show_tree(obj, d=0):
     """Handy function for displaying a tree of graph objects"""

@@ -7,7 +7,7 @@ from sas.sasgui.guiframe.gui_style import GUIFRAME
 import sas.sasview
 import logging
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 # Version of the application
 __appname__ = "SasView"

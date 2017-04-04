@@ -21,7 +21,7 @@ from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sascalc.dataloader.readers.cansas_reader import Reader as CansasReader
 from sas.sascalc.dataloader.readers.cansas_reader import get_content
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 PRNODE_NAME = 'pr_inversion'
 CANSAS_NS = "cansas1d/1.0"

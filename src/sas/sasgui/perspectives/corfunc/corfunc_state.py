@@ -12,7 +12,7 @@ from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sascalc.dataloader.data_info import Data1D as LoaderData1D
 from sas.sascalc.dataloader.loader import Loader
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 CORNODE_NAME = 'corfunc'
 CANSAS_NS = 'cansas1d/1.0'

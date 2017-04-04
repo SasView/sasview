@@ -7,7 +7,7 @@ import sys
 import wx
 import logging
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 from sas.sascalc.dataloader.loader import Loader
 from sas.sasgui.guiframe.plugin_base import PluginBase

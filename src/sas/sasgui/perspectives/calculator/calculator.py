@@ -27,7 +27,7 @@ from sas.sasgui.perspectives.calculator.image_viewer import ImageView
 from sas.sasgui.perspectives.calculator.pyconsole import PyConsole
 import logging
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 class Plugin(PluginBase):
     """

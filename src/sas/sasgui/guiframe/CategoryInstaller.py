@@ -16,7 +16,7 @@ from collections import defaultdict, OrderedDict
 
 USER_FILE = 'categories.json'
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 class CategoryInstaller:
     """

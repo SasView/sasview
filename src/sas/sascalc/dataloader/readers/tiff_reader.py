@@ -16,7 +16,7 @@ import numpy
 from sas.sascalc.dataloader.data_info import Data2D
 from sas.sascalc.dataloader.manipulations import reader2D_converter
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 class Reader:
     """

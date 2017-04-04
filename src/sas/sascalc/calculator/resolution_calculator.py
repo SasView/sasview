@@ -15,7 +15,7 @@ import numpy
 import sys
 import logging
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 #Plank's constant in cgs unit
 _PLANK_H = 6.62606896E-27

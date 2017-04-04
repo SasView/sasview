@@ -18,7 +18,7 @@ import sys
 import logging
 import json
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 FILE_NAME = 'defaults.json'
 

@@ -2,7 +2,7 @@ __version__ = "4.1"
 __build__ = "GIT_COMMIT"
 
 import logging
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 try:
     import subprocess

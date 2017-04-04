@@ -19,7 +19,7 @@ from sas.sascalc.dataloader.loader import Loader
 import sas.sascalc.dataloader
 from plot_labels import *
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 class Plugin(PluginBase):
     """

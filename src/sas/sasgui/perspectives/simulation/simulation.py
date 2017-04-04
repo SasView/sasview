@@ -24,7 +24,7 @@ import sas.sascalc.realspace.VolumeCanvas as VolumeCanvas
 from sas.sascalc.data_util.calcthread import CalcThread
 from sas.guicomm.events import NewPlotEvent, StatusEvent    
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 class Calc1D(CalcThread):
     """

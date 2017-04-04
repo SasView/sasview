@@ -25,7 +25,7 @@ from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import Data2D
 import time
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 class DataManager(object):
     """

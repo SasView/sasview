@@ -46,7 +46,7 @@ import numpy
 import sys
 import logging
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 if 'any' not in dir(__builtins__):
     def any(L):

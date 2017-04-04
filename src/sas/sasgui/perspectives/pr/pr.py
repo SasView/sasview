@@ -34,7 +34,7 @@ import sas.sascalc.dataloader
 from pr_widgets import load_error
 from sas.sasgui.guiframe.plugin_base import PluginBase
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 PR_FIT_LABEL = r"$P_{fit}(r)$"

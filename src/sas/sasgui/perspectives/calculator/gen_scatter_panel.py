@@ -38,7 +38,7 @@ from sas.sasgui.perspectives.calculator import calculator_widgets as widget
 from sas.sasgui.guiframe.events import NewPlotEvent
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 _BOX_WIDTH = 76
 #Slit length panel size 

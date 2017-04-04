@@ -48,7 +48,7 @@ from sas.sasgui.perspectives.fitting.gpu_options import GpuOptions
 
 from . import models
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 MAX_NBR_DATA = 4
 

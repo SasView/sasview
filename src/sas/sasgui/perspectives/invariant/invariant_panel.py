@@ -24,7 +24,7 @@ from sas.sasgui.perspectives.invariant.invariant_state import InvariantState as 
 from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 # The minimum q-value to be used when extrapolating
 Q_MINIMUM = 1e-5

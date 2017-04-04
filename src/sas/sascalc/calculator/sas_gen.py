@@ -12,7 +12,7 @@ import copy
 import sys
 import logging
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 MFACTOR_AM = 2.853E-12
 MFACTOR_MT = 2.3164E-9
