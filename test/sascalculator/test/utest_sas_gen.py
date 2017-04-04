@@ -7,9 +7,6 @@ warnings.simplefilter("ignore")
 import unittest
 from sas.sascalc.calculator import sas_gen
 
-import numpy
- 
-import os.path
 
 class sas_gen_test(unittest.TestCase):
     
@@ -50,6 +47,7 @@ class sas_gen_test(unittest.TestCase):
         self.assertEqual(output.pos_y[0], 0.0)
         self.assertEqual(output.pos_z[0], 0.0)
 
+
 if __name__ == '__main__':
     unittest.main()
-   
+

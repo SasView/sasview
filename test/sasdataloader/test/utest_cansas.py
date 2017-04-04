@@ -14,7 +14,7 @@ import urllib2
 import StringIO
 import pylint as pylint
 import unittest
-import numpy
+import numpy as np
 import logging
 import warnings
 

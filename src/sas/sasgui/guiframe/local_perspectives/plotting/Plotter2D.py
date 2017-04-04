@@ -13,7 +13,7 @@
 import wx
 import sys
 import math
-import numpy
+import numpy as np
 import logging
 from sas.sasgui.plottools.PlotPanel import PlotPanel
 from sas.sasgui.plottools.plottables import Graph
@@ -568,7 +568,7 @@ class ModelPanel2D(ModelPanel1D):
 
         """
         # Find the best number of bins
-        npt = math.sqrt(len(self.data2D.data[numpy.isfinite(self.data2D.data)]))
+        npt = math.sqrt(len(self.data2D.data[np.isfinite(self.data2D.data)]))
         npt = math.floor(npt)
         from sas.sascalc.dataloader.manipulations import CircularAverage
         ## compute the maximum radius of data2D

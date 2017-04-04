@@ -1,5 +1,5 @@
 import math
-import numpy
+import numpy as np
 import copy
 import sys
 import logging
@@ -153,9 +153,9 @@ class NTermEstimator(object):
 #For testing
 def load(path):
     # Read the data from the data file
-    data_x = numpy.zeros(0)
-    data_y = numpy.zeros(0)
-    data_err = numpy.zeros(0)
+    data_x = np.zeros(0)
+    data_y = np.zeros(0)
+    data_err = np.zeros(0)
     scale = None
     min_err = 0.0
     if not path == None:
@@ -177,9 +177,9 @@ def load(path):
                     err = scale * math.sqrt(test_y) + min_err
                     #err = 0
 
-                data_x = numpy.append(data_x, test_x)
-                data_y = numpy.append(data_y, test_y)
-                data_err = numpy.append(data_err, err)
+                data_x = np.append(data_x, test_x)
+                data_y = np.append(data_y, test_y)
+                data_err = np.append(data_err, err)
             except:
                 logger.error(sys.exc_value)
 

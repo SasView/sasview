@@ -38,8 +38,8 @@
 import wx
 from sas.sasgui.plottools.PlotPanel import PlotPanel
 from sas.sasgui.plottools.plottables import Data1D
-import  sys
-import numpy
+import sys
+import numpy as np
 import random, math
 
 
@@ -156,14 +156,14 @@ class ViewerFrame(wx.Frame):
            
     def _add_data(self, event):
         data_len = 50
-        x  = numpy.zeros(data_len)
-        y  = numpy.zeros(data_len)
-        x2  = numpy.zeros(data_len)
-        y2  = numpy.zeros(data_len)
-        dy2  = numpy.zeros(data_len)
-        x3  = numpy.zeros(data_len)
-        y3  = numpy.zeros(data_len)
-        dy3  = numpy.zeros(data_len)
+        x  = np.zeros(data_len)
+        y  = np.zeros(data_len)
+        x2  = np.zeros(data_len)
+        y2  = np.zeros(data_len)
+        dy2  = np.zeros(data_len)
+        x3  = np.zeros(data_len)
+        y3  = np.zeros(data_len)
+        dy3  = np.zeros(data_len)
         for i in range(len(x)):
             x[i] = i
             x2[i] = i-0.1+0.2*random.random()

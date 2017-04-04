@@ -14,7 +14,7 @@
 import math
 import os
 import sys
-import numpy
+import numpy as np
 import logging
 from sas.sascalc.dataloader.data_info import Data2D, Detector
 from sas.sascalc.dataloader.manipulations import reader2D_converter
@@ -80,8 +80,8 @@ class Reader:
             detector = Detector()
             output.detector.append(detector)
             
-            output.data = numpy.zeros([size_x,size_y])
-            output.err_data = numpy.zeros([size_x, size_y])
+            output.data = np.zeros([size_x,size_y])
+            output.err_data = np.zeros([size_x, size_y])
             
             data_conv_q = None
             data_conv_i = None

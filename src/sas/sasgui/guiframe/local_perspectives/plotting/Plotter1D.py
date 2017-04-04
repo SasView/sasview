@@ -13,7 +13,7 @@
 import wx
 import sys
 import math
-import numpy
+import numpy as np
 import logging
 from sas.sasgui.plottools.PlotPanel import PlotPanel
 from sas.sasgui.guiframe.events import StatusEvent
@@ -289,7 +289,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         :Param array: numpy array
         :Param value: float
         """
-        idx = (numpy.abs(array - value)).argmin()
+        idx = (np.abs(array - value)).argmin()
         return int(idx)  # array.flat[idx]
 
     def _check_line_positions(self, pos_x=None, nop=None):
