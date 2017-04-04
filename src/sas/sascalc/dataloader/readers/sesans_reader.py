@@ -1,9 +1,9 @@
 """
     SESANS reader (based on ASCII reader)
-    
+
     Reader for .ses or .sesans file format
-    
-    Jurrian Bakker 
+
+    Jurrian Bakker
 """
 import numpy as np
 import os
@@ -23,27 +23,27 @@ class Reader:
     """
     ## File type
     type_name = "SESANS"
-    
+
     ## Wildcards
     type = ["SESANS files (*.ses)|*.ses",
             "SESANS files (*..sesans)|*.sesans"]
     ## List of allowed extensions
     ext = ['.ses', '.SES', '.sesans', '.SESANS']
-    
+
     ## Flag to bypass extension check
     allow_all = True
-    
+
     def read(self, path):
-        
+
 #        print "reader triggered"
-        
+
         """
         Load data file
-        
+
         :param path: file path
-        
+
         :return: SESANSData1D object, or None
-        
+
         :raise RuntimeError: when the file can't be opened
         :raise ValueError: when the length of the data vectors are inconsistent
         """
