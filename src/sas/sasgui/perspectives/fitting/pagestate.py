@@ -17,7 +17,7 @@ import sys
 import wx
 import copy
 import logging
-import numpy
+import numpy as np
 import traceback
 
 import xml.dom.minidom
@@ -409,16 +409,16 @@ class PageState(object):
         p = dict()
         for fittable, name, value, _, uncert, lower, upper, units in params:
             if not value:
-                value = numpy.nan
+                value = np.nan
             if not uncert or uncert[1] == '' or uncert[1] == 'None':
                 uncert[0] = False
-                uncert[1] = numpy.nan
+                uncert[1] = np.nan
             if not upper or upper[1] == '' or upper[1] == 'None':
                 upper[0] = False
-                upper[1] = numpy.nan
+                upper[1] = np.nan
             if not lower or lower[1] == '' or lower[1] == 'None':
                 lower[0] = False
-                lower[1] = numpy.nan
+                lower[1] = np.nan
             if is_string:
                 p[name] = str(value)
             else:
@@ -448,15 +448,15 @@ class PageState(object):
                 upper = params.get(name + ".upper", 'inf')
                 lower = params.get(name + ".lower", '-inf')
                 units = params.get(name + ".units")
-                if std is not None and std is not numpy.nan:
+                if std is not None and std is not np.nan:
                     std = [True, str(std)]
                 else:
                     std = [False, '']
-                if lower is not None and lower is not numpy.nan:
+                if lower is not None and lower is not np.nan:
                     lower = [True, str(lower)]
                 else:
                     lower = [True, '-inf']
-                if upper is not None and upper is not numpy.nan:
+                if upper is not None and upper is not np.nan:
                     upper = [True, str(upper)]
                 else:
                     upper = [True, 'inf']
@@ -1099,7 +1099,7 @@ class PageState(object):
                                 msg = ("Error reading %r from %s %s\n"
                                        % (line, tagname, name))
                                 logging.error(msg + traceback.format_exc())
-                        dic[name] = numpy.array(value_list)
+                        dic[name] = np.array(value_list)
                     setattr(self, varname, dic)
 
     def set_plot_state(self, figs, canvases):

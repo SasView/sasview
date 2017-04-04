@@ -29,7 +29,7 @@ import wx
 from sas.sasgui.plottools.PlotPanel import PlotPanel
 from sas.sasgui.plottools.plottables import Plottable, Graph, Data1D, Theory1D
 import  sys
-import numpy
+import numpy as np
 
 
 class ReflPlotPanel(PlotPanel):
@@ -77,13 +77,13 @@ class ReflPlotPanel(PlotPanel):
 def sample_graph():
     # Construct a simple graph
     if False:
-        x = numpy.array([1,2,3,4,5,6],'d')
-        y = numpy.array([4,5,26,5,4,-1],'d')
-        dy = numpy.array([0.2, 0.3, 0.1, 0.2, 0.9, 0.3])
+        x = np.array([1,2,3,4,5,6],'d')
+        y = np.array([4,5,26,5,4,-1],'d')
+        dy = np.array([0.2, 0.3, 0.1, 0.2, 0.9, 0.3])
     else:
-        x = numpy.linspace(0,2.0, 50)
-        y = numpy.sin(2*numpy.pi*x*2.8)
-        dy = numpy.sqrt(100*numpy.abs(y))/100
+        x = np.linspace(0,2.0, 50)
+        y = np.sin(2*np.pi*x*2.8)
+        dy = np.sqrt(100*np.abs(y))/100
 
     from sas.sasgui.plottools.plottables import Data1D, Theory1D, Chisq , Graph
     data = Data1D(x,y,dy=dy)
