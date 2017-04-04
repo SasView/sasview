@@ -13,13 +13,10 @@
 #############################################################################
 import os
 
-import numpy as np
-import math
-#import logging
-
 from sas.sascalc.dataloader.data_info import Data2D
 from sas.sascalc.dataloader.data_info import Detector
 from sas.sascalc.dataloader.manipulations import reader2D_converter
+import numpy as np
 
 # Look for unit converter
 has_converter = True
@@ -64,37 +61,6 @@ class Reader:
             # Test it
             data_conv_i(1.0, output.I_unit)
 
-        for line in lines:
-            
-            # Find setup info line
-            if isInfo:
-                isInfo = False
-                line_toks = line.split()
-                # Wavelength in Angstrom
-                try:
-                    wavelength = float(line_toks[1])
-                except:
-                    msg = "IgorReader: can't read this file, missing wavelength"
-                    raise ValueError, msg
-                
-            #Find # of bins in a row assuming the detector is square.
-            if dataStarted == True:
-                try:
-                    value = float(line)
-                except:
-                    # Found a non-float entry, skip it
-                    continue
-                
-                # Get total bin number
-                
-            i_tot_row += 1
-        i_tot_row = math.ceil(math.sqrt(i_tot_row)) - 1
-        #print "i_tot", i_tot_row
-        size_x = i_tot_row  # 192#128
-        size_y = i_tot_row  # 192#128
-        output.data = np.zeros([size_x, size_y])
-        output.err_data = np.zeros([size_x, size_y])
-  
         data_row = 0
         wavelength = distance = center_x = center_y = None
         dataStarted = isInfo = isCenter = False

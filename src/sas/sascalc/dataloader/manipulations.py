@@ -13,7 +13,7 @@ are performed in Q-space
 
 #TODO: copy the meta data from the 2D object to the resulting 1D object
 import math
-import numpy as np
+import numpy
 
 #from data_info import plottable_2D
 from data_info import Data1D
@@ -81,20 +81,19 @@ def reader2D_converter(data2d=None):
     """
     if data2d.data is None or data2d.x_bins is None or data2d.y_bins is None:
         raise ValueError, "Can't convert this data: data=None..."
-    new_x = np.tile(data2d.x_bins, (len(data2d.y_bins), 1))
-    new_y = np.tile(data2d.y_bins, (len(data2d.x_bins), 1))
+    new_x = numpy.tile(data2d.x_bins, (len(data2d.y_bins), 1))
+    new_y = numpy.tile(data2d.y_bins, (len(data2d.x_bins), 1))
     new_y = new_y.swapaxes(0, 1)
 
     new_data = data2d.data.flatten()
     qx_data = new_x.flatten()
     qy_data = new_y.flatten()
-    q_data = np.sqrt(qx_data * qx_data + qy_data * qy_data)
-    if data2d.err_data == None or np.any(data2d.err_data <= 0):
-        new_err_data = np.sqrt(np.abs(new_data))
-
+    q_data = numpy.sqrt(qx_data * qx_data + qy_data * qy_data)
+    if data2d.err_data is None or numpy.any(data2d.err_data <= 0):
+        new_err_data = numpy.sqrt(numpy.abs(new_data))
     else:
         new_err_data = data2d.err_data.flatten()
-    mask = np.ones(len(new_data), dtype=bool)
+    mask = numpy.ones(len(new_data), dtype=bool)
 
     #TODO: make sense of the following two lines...
     #from sas.sascalc.dataloader.data_info import Data2D
@@ -149,10 +148,10 @@ class _Slab(object):
             raise RuntimeError, msg
 
         # Get data
-        data = data2D.data[np.isfinite(data2D.data)]
-        err_data = data2D.err_data[np.isfinite(data2D.data)]
-        qx_data = data2D.qx_data[np.isfinite(data2D.data)]
-        qy_data = data2D.qy_data[np.isfinite(data2D.data)]
+        data = data2D.data[numpy.isfinite(data2D.data)]
+        err_data = data2D.err_data[numpy.isfinite(data2D.data)]
+        qx_data = data2D.qx_data[numpy.isfinite(data2D.data)]
+        qy_data = data2D.qy_data[numpy.isfinite(data2D.data)]
 
         # Build array of Q intervals
         if maj == 'x':
@@ -170,10 +169,10 @@ class _Slab(object):
         else:
             raise RuntimeError, "_Slab._avg: unrecognized axis %s" % str(maj)
 
-        x = np.zeros(nbins)
-        y = np.zeros(nbins)
-        err_y = np.zeros(nbins)
-        y_counts = np.zeros(nbins)
+        x = numpy.zeros(nbins)
+        y = numpy.zeros(nbins)
+        err_y = numpy.zeros(nbins)
+        y_counts = numpy.zeros(nbins)
 
         # Average pixelsize in q space
         for npts in range(len(data)):
@@ -225,7 +224,7 @@ class _Slab(object):
         err_y = err_y / y_counts
         y = y / y_counts
         x = x / y_counts
-        idx = (np.isfinite(y) & np.isfinite(x))
+        idx = (numpy.isfinite(y) & numpy.isfinite(x))
 
         if not idx.any():
             msg = "Average Error: No points inside ROI to average..."
@@ -304,10 +303,10 @@ class Boxsum(object):
             msg += "of detectors: %g" % len(data2D.detector)
             raise RuntimeError, msg
         # Get data
-        data = data2D.data[np.isfinite(data2D.data)]
-        err_data = data2D.err_data[np.isfinite(data2D.data)]
-        qx_data = data2D.qx_data[np.isfinite(data2D.data)]
-        qy_data = data2D.qy_data[np.isfinite(data2D.data)]
+        data = data2D.data[numpy.isfinite(data2D.data)]
+        err_data = data2D.err_data[numpy.isfinite(data2D.data)]
+        qx_data = data2D.qx_data[numpy.isfinite(data2D.data)]
+        qy_data = data2D.qy_data[numpy.isfinite(data2D.data)]
 
         y = 0.0
         err_y = 0.0
@@ -414,10 +413,10 @@ class CircularAverage(object):
         :return: Data1D object
         """
         # Get data W/ finite values
-        data = data2D.data[np.isfinite(data2D.data)]
-        q_data = data2D.q_data[np.isfinite(data2D.data)]
-        err_data = data2D.err_data[np.isfinite(data2D.data)]
-        mask_data = data2D.mask[np.isfinite(data2D.data)]
+        data = data2D.data[numpy.isfinite(data2D.data)]
+        q_data = data2D.q_data[numpy.isfinite(data2D.data)]
+        err_data = data2D.err_data[numpy.isfinite(data2D.data)]
+        mask_data = data2D.mask[numpy.isfinite(data2D.data)]
 
         dq_data = None
 
@@ -448,20 +447,20 @@ class CircularAverage(object):
             # get dq at q=0.
             dq_overlap_y *= dq_overlap_y
 
-            dq_overlap = np.sqrt((dq_overlap_x + dq_overlap_y) / 2.0)
+            dq_overlap = numpy.sqrt((dq_overlap_x + dq_overlap_y) / 2.0)
             # Final protection of dq
             if dq_overlap < 0:
                 dq_overlap = y_min
-            dqx_data = data2D.dqx_data[np.isfinite(data2D.data)]
-            dqy_data = data2D.dqy_data[np.isfinite(data2D.data)] - dq_overlap
+            dqx_data = data2D.dqx_data[numpy.isfinite(data2D.data)]
+            dqy_data = data2D.dqy_data[numpy.isfinite(data2D.data)] - dq_overlap
             # def; dqx_data = dq_r dqy_data = dq_phi
             # Convert dq 2D to 1D here
             dqx = dqx_data * dqx_data
             dqy = dqy_data * dqy_data
-            dq_data = np.add(dqx, dqy)
-            dq_data = np.sqrt(dq_data)
+            dq_data = numpy.add(dqx, dqy)
+            dq_data = numpy.sqrt(dq_data)
 
-        #q_data_max = np.max(q_data)
+        #q_data_max = numpy.max(q_data)
         if len(data2D.q_data) == None:
             msg = "Circular averaging: invalid q_data: %g" % data2D.q_data
             raise RuntimeError, msg
@@ -469,11 +468,11 @@ class CircularAverage(object):
         # Build array of Q intervals
         nbins = int(math.ceil((self.r_max - self.r_min) / self.bin_width))
 
-        x = np.zeros(nbins)
-        y = np.zeros(nbins)
-        err_y = np.zeros(nbins)
-        err_x = np.zeros(nbins)
-        y_counts = np.zeros(nbins)
+        x = numpy.zeros(nbins)
+        y = numpy.zeros(nbins)
+        err_y = numpy.zeros(nbins)
+        err_x = numpy.zeros(nbins)
+        y_counts = numpy.zeros(nbins)
 
         for npt in range(len(data)):
 
@@ -527,10 +526,10 @@ class CircularAverage(object):
             #    err_x[n] = math.sqrt(err_x[n])
 
         err_y = err_y / y_counts
-        err_y[err_y == 0] = np.average(err_y)
+        err_y[err_y == 0] = numpy.average(err_y)
         y = y / y_counts
         x = x / y_counts
-        idx = (np.isfinite(y)) & (np.isfinite(x))
+        idx = (numpy.isfinite(y)) & (numpy.isfinite(x))
 
         if err_x != None:
             d_x = err_x[idx] / y_counts[idx]
@@ -585,17 +584,17 @@ class Ring(object):
         Pi = math.pi
 
         # Get data
-        data = data2D.data[np.isfinite(data2D.data)]
-        q_data = data2D.q_data[np.isfinite(data2D.data)]
-        err_data = data2D.err_data[np.isfinite(data2D.data)]
-        qx_data = data2D.qx_data[np.isfinite(data2D.data)]
-        qy_data = data2D.qy_data[np.isfinite(data2D.data)]
+        data = data2D.data[numpy.isfinite(data2D.data)]
+        q_data = data2D.q_data[numpy.isfinite(data2D.data)]
+        err_data = data2D.err_data[numpy.isfinite(data2D.data)]
+        qx_data = data2D.qx_data[numpy.isfinite(data2D.data)]
+        qy_data = data2D.qy_data[numpy.isfinite(data2D.data)]
 
         # Set space for 1d outputs
-        phi_bins = np.zeros(self.nbins_phi)
-        phi_counts = np.zeros(self.nbins_phi)
-        phi_values = np.zeros(self.nbins_phi)
-        phi_err = np.zeros(self.nbins_phi)
+        phi_bins = numpy.zeros(self.nbins_phi)
+        phi_counts = numpy.zeros(self.nbins_phi)
+        phi_values = numpy.zeros(self.nbins_phi)
+        phi_err = numpy.zeros(self.nbins_phi)
 
         # Shift to apply to calculated phi values in order
         # to center first bin at zero
@@ -636,7 +635,7 @@ class Ring(object):
             phi_err[i] = math.sqrt(phi_err[i]) / phi_counts[i]
             phi_values[i] = 2.0 * math.pi / self.nbins_phi * (1.0 * i)
 
-        idx = (np.isfinite(phi_bins))
+        idx = (numpy.isfinite(phi_bins))
 
         if not idx.any():
             msg = "Average Error: No points inside ROI to average..."
@@ -769,11 +768,11 @@ class _Sector(object):
         Pi = math.pi
 
         # Get the all data & info
-        data = data2D.data[np.isfinite(data2D.data)]
-        q_data = data2D.q_data[np.isfinite(data2D.data)]
-        err_data = data2D.err_data[np.isfinite(data2D.data)]
-        qx_data = data2D.qx_data[np.isfinite(data2D.data)]
-        qy_data = data2D.qy_data[np.isfinite(data2D.data)]
+        data = data2D.data[numpy.isfinite(data2D.data)]
+        q_data = data2D.q_data[numpy.isfinite(data2D.data)]
+        err_data = data2D.err_data[numpy.isfinite(data2D.data)]
+        qx_data = data2D.qx_data[numpy.isfinite(data2D.data)]
+        qy_data = data2D.qy_data[numpy.isfinite(data2D.data)]
         dq_data = None
 
         # Get the dq for resolution averaging
@@ -803,24 +802,24 @@ class _Sector(object):
             # get dq at q=0.
             dq_overlap_y *= dq_overlap_y
 
-            dq_overlap = np.sqrt((dq_overlap_x + dq_overlap_y) / 2.0)
+            dq_overlap = numpy.sqrt((dq_overlap_x + dq_overlap_y) / 2.0)
             if dq_overlap < 0:
                 dq_overlap = y_min
-            dqx_data = data2D.dqx_data[np.isfinite(data2D.data)]
-            dqy_data = data2D.dqy_data[np.isfinite(data2D.data)] - dq_overlap
+            dqx_data = data2D.dqx_data[numpy.isfinite(data2D.data)]
+            dqy_data = data2D.dqy_data[numpy.isfinite(data2D.data)] - dq_overlap
             # def; dqx_data = dq_r dqy_data = dq_phi
             # Convert dq 2D to 1D here
             dqx = dqx_data * dqx_data
             dqy = dqy_data * dqy_data
-            dq_data = np.add(dqx, dqy)
-            dq_data = np.sqrt(dq_data)
+            dq_data = numpy.add(dqx, dqy)
+            dq_data = numpy.sqrt(dq_data)
 
         #set space for 1d outputs
-        x = np.zeros(self.nbins)
-        y = np.zeros(self.nbins)
-        y_err = np.zeros(self.nbins)
-        x_err = np.zeros(self.nbins)
-        y_counts = np.zeros(self.nbins)
+        x = numpy.zeros(self.nbins)
+        y = numpy.zeros(self.nbins)
+        y_err = numpy.zeros(self.nbins)
+        x_err = numpy.zeros(self.nbins)
+        y_counts = numpy.zeros(self.nbins)
 
         # Get the min and max into the region: 0 <= phi < 2Pi
         phi_min = flip_phi(self.phi_min)
@@ -923,8 +922,8 @@ class _Sector(object):
                 #r_outer = r_inner + delta_r
                 #x[i] = math.sqrt((r_inner * r_inner + r_outer * r_outer) / 2)
                 x[i] = x[i] / y_counts[i]
-        y_err[y_err == 0] = np.average(y_err)
-        idx = (np.isfinite(y) & np.isfinite(y_err))
+        y_err[y_err == 0] = numpy.average(y_err)
+        idx = (numpy.isfinite(y) & numpy.isfinite(y_err))
         if x_err != None:
             d_x = x_err[idx] / y_counts[idx]
         else:
@@ -1012,7 +1011,7 @@ class Ringcut(object):
         # Get data
         qx_data = data2D.qx_data
         qy_data = data2D.qy_data
-        q_data = np.sqrt(qx_data * qx_data + qy_data * qy_data)
+        q_data = numpy.sqrt(qx_data * qx_data + qy_data * qy_data)
 
         # check whether or not the data point is inside ROI
         out = (self.r_min <= q_data) & (self.r_max >= q_data)
@@ -1113,7 +1112,7 @@ class Sectorcut(object):
         qy_data = data2D.qy_data
 
         # get phi from data
-        phi_data = np.arctan2(qy_data, qx_data)
+        phi_data = numpy.arctan2(qy_data, qx_data)
 
         # Get the min and max into the region: -pi <= phi < Pi
         phi_min_major = flip_phi(self.phi_min + Pi) - Pi
