@@ -64,6 +64,8 @@ class Reader:
                         temp = h.strip().split()
                         headers[h[:-1].strip()] = temp[-1][1:-1]
                     data = np.loadtxt(input_f)
+                    if data.size < 1:
+                        raise RuntimeError("{} is empty".format(path))
                     x = data[:, 0]
                     dx = data[:, 3]
                     lam = data[:, 4]
@@ -104,10 +106,7 @@ class Reader:
                     output.sample.yacceptance = (
                         float(self._header_fetch(params, "Q_ymax")),
                         self._fetch_unit(params, "Q_ymax"))
-
-                if len(output.x) < 1:
-                    raise RuntimeError("%s is empty" % path)
-                return output
+                    return output
 
         else:
             raise RuntimeError("%s is not a file" % path)
