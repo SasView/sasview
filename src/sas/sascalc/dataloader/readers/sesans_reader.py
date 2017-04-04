@@ -55,8 +55,6 @@ class Reader:
                     line = input_f.readline()
                     params = {}
                     while line.strip() != "":
-                        if line.strip() == "":
-                            break
                         terms = line.strip().split("\t")
                         params[terms[0].strip()] = " ".join(terms[1:]).strip()
                         line = input_f.readline()
