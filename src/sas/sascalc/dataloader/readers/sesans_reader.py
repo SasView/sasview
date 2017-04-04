@@ -5,7 +5,7 @@
     
     Jurrian Bakker 
 """
-import numpy
+import numpy as np
 import os
 from sas.sascalc.dataloader.data_info import Data1D
 
@@ -51,110 +51,61 @@ class Reader:
             basename = os.path.basename(path)
             _, extension = os.path.splitext(basename)
             if self.allow_all or extension.lower() in self.ext:
-                try:
+                with open(path, 'r') as input_f:
                     # Read in binary mode since GRASP frequently has no-ascii
                     # characters that brakes the open operation
-                    input_f = open(path,'rb')
-                except:
-                    raise  RuntimeError, "sesans_reader: cannot open %s" % path
-                buff = input_f.read()
-                lines = buff.splitlines()
-                x  = numpy.zeros(0)
-                y  = numpy.zeros(0)
-                dy = numpy.zeros(0)
-                lam  = numpy.zeros(0)
-                dlam = numpy.zeros(0)
-                dx = numpy.zeros(0)
-                
-               #temp. space to sort data
-                tx  = numpy.zeros(0)
-                ty  = numpy.zeros(0)
-                tdy = numpy.zeros(0)
-                tlam  = numpy.zeros(0)
-                tdlam = numpy.zeros(0)
-                tdx = numpy.zeros(0)
-                output = Data1D(x=x, y=y, lam=lam, dy=dy, dx=dx, dlam=dlam, isSesans=True)
-                self.filename = output.filename = basename
+                    line = input_f.readline()
+                    params = {}
+                    while line.strip() != "":
+                        if line.strip() == "":
+                            break
+                        terms = line.strip().split("\t")
+                        params[terms[0].strip()] = " ".join(terms[1:]).strip()
+                        line = input_f.readline()
+                    headers_temp = input_f.readline().strip().split("\t")
+                    headers = {}
+                    for h in headers_temp:
+                        temp = h.strip().split()
+                        headers[h[:-1].strip()] = temp[-1][1:-1]
+                    data = np.loadtxt(input_f)
+                    x = data[:, 0]
+                    dx = data[:, 3]
+                    lam = data[:, 4]
+                    dlam = data[:, 5]
+                    y = data[:, 1]
+                    dy = data[:, 2]
 
-                paramnames=[]
-                paramvals=[]
-                zvals=[]
-                dzvals=[]
-                lamvals=[]
-                dlamvals=[]
-                Pvals=[]
-                dPvals=[]
+                    lam_unit = _header_fetch(headers, "wavelength")
+                    if lam_unit == "AA":
+                        lam_unit = "A"
+                    p_unit = headers["polarisation"]
 
-                for line in lines:
-                    # Initial try for CSV (split on ,)
-                    line=line.strip()
-                    toks = line.split('\t')
-                    if len(toks)==2:
-                        paramnames.append(toks[0])
-                        paramvals.append(toks[1])
-                    if len(toks)>5:
-                        zvals.append(toks[0])
-                        dzvals.append(toks[3])
-                        lamvals.append(toks[4])
-                        dlamvals.append(toks[5])
-                        Pvals.append(toks[1])
-                        dPvals.append(toks[2])
-                    else:
-                        continue
+                    x, x_unit = self._unit_conversion(x, lam_unit,
+                                                      _fetch_unit(headers,
+                                                                  "spin echo length"))
+                    dx, dx_unit = self._unit_conversion(dx, lam_unit,
+                                                        _fetch_unit(headers,
+                                                                    "error SEL"))
+                    dlam, dlam_unit = self._unit_conversion(dlam, lam_unit,
+                                                            _fetch_unit(headers,
+                                                                        "error wavelength"))
+                    y_unit = r'\AA^{-2} cm^{-1}'
 
-                x=[]
-                y=[]
-                lam=[]
-                dx=[]
-                dy=[]
-                dlam=[]
-                lam_header = lamvals[0].split()
-                data_conv_z = None
-                default_z_unit = "A"
-                data_conv_P = None
-                default_p_unit = " " # Adjust unit for axis (L^-3)
-                lam_unit = lam_header[1].replace("[","").replace("]","")
-                if lam_unit == 'AA':
-                    lam_unit = 'A'
-                varheader=[zvals[0],dzvals[0],lamvals[0],dlamvals[0],Pvals[0],dPvals[0]]
-                valrange=range(1, len(zvals))
-                for i in valrange:
-                    x.append(float(zvals[i]))
-                    y.append(float(Pvals[i]))
-                    lam.append(float(lamvals[i]))
-                    dy.append(float(dPvals[i]))
-                    dx.append(float(dzvals[i]))
-                    dlam.append(float(dlamvals[i]))
+                    output = Data1D(x=x, y=y, lam=lam, dy = dy, dx=dx, dlam=dlam, isSesans=True)
+                    self.filename = output.filename = basename
+                    output.xaxis(r"\rm{z}", x_unit)
+                    output.yaxis(r"\rm{ln(P)/(t \lambda^2)}", y_unit)  # Adjust label to ln P/(lam^2 t), remove lam column refs
+                    # Store loading process information
+                    output.meta_data['loader'] = self.type_name
+                    #output.sample.thickness = float(paramvals[6])
+                    output.sample.name = params["Sample"]
+                    output.sample.ID = params["DataFileTitle"]
 
-                x,y,lam,dy,dx,dlam = [
-                   numpy.asarray(v, 'double')
-                   for v in (x,y,lam,dy,dx,dlam)
-                ]
+                    output.sample.zacceptance = (float(_header_fetch(params, "Q_zmax")),
+                                                 _fetch_unit(params, "Q_zmax"))
 
-                input_f.close()
-
-                output.x, output.x_unit = self._unit_conversion(x, lam_unit, default_z_unit)
-                output.y = y
-                output.y_unit = r'\AA^{-2} cm^{-1}'  # output y_unit added
-                output.dx, output.dx_unit = self._unit_conversion(dx, lam_unit, default_z_unit)
-                output.dy = dy
-                output.lam, output.lam_unit = self._unit_conversion(lam, lam_unit, default_z_unit)
-                output.dlam, output.dlam_unit = self._unit_conversion(dlam, lam_unit, default_z_unit)
-                
-                output.xaxis(r"\rm{z}", output.x_unit)
-                output.yaxis(r"\rm{ln(P)/(t \lambda^2)}", output.y_unit)  # Adjust label to ln P/(lam^2 t), remove lam column refs
-
-                # Store loading process information
-                output.meta_data['loader'] = self.type_name
-                #output.sample.thickness = float(paramvals[6])
-                output.sample.name = paramvals[1]
-                output.sample.ID = paramvals[0]
-                zaccept_unit_split = paramnames[7].split("[")
-                zaccept_unit = zaccept_unit_split[1].replace("]","")
-                if zaccept_unit.strip() == r'\AA^-1' or zaccept_unit.strip() == r'\A^-1':
-                    zaccept_unit = "1/A"
-                output.sample.zacceptance=(float(paramvals[7]),zaccept_unit)
-                output.vars = varheader
+                    output.sample.yacceptance = (float(_header_fetch(params, "Q_ymax")),
+                                                 _fetch_unit(params, "Q_ymax"))
 
                 if len(output.x) < 1:
                     raise RuntimeError, "%s is empty" % path
@@ -172,3 +123,17 @@ class Reader:
         else:
             new_unit = value_unit
         return value, new_unit
+
+
+def _header_fetch(headers, key):
+    index = [k for k in headers.keys()
+             if k.startswith(key)][0]
+    return headers[index]
+
+def _fetch_unit(params, key):
+    index = [k for k in params.keys()
+             if k.startswith(key)][0]
+    unit = index.strip().split()[-1][1:-1]
+    if unit.startswith(r"\A"):
+        unit = "1/A"
+    return unit
