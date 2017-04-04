@@ -3,13 +3,13 @@
 """
 
 import unittest
-
 import math
 import numpy as np
 from sas.sascalc.dataloader.loader import Loader
 from sas.sascalc.dataloader.readers.IgorReader import Reader as IgorReader
 from sas.sascalc.dataloader.data_info import Data1D
  
+import os.path
 
 class abs_reader(unittest.TestCase):
     
