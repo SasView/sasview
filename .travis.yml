@@ -1,36 +1,79 @@
 # Test Travis CL
 
 language: python
-python:
-  - "2.7"
+
+matrix:
+  include:
+    - os: linux
+      env:
+        - PY=2.7
+        - NUMPYSPEC=numpy
+    - os: osx
+      language: generic
+      env:
+        - PY=2.7
+        - NUMPYSPEC=numpy
+
 # whitelist
 branches:
   only:
     - master
-# command to install dependencies
-virtualenv:
-  system_site_packages: true
+
+addons:
+  apt:
+    packages:
+      - opencl-headers
+      - fglrx
+      - libblas-dev
+      - libatlas-dev
+      - libatlas-base-dev
+      - liblapack-dev
+      - gfortran
+      - libhdf5-serial-dev
+
 before_install:
-  - 'if [ $TRAVIS_PYTHON_VERSION == "2.7" ]; then sudo apt-get update;sudo apt-get install python-matplotlib libhdf5-serial-dev python-h5py fglrx opencl-headers python-pyopencl gfortran libblas-dev liblapack-dev libatlas-dev; fi'
+  - echo $TRAVIS_OS_NAME
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+        wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+        sudo apt-get update; sudo apt-get install python-pyopencl;
+    elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
+    fi
+
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda update --yes conda
+
+  # Useful for debugging any issues with conda
+  - conda info -a
+
+  # could install other dependencies, but they're locked to specific
+  # versions in build/requirements.txt
+  - conda install --yes python=$PY $NUMPYSPEC scipy cython pylint wxpython
 
 install:
   - pip install -r build_tools/requirements.txt
+  - pip install matplotlib
 
-before_script:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-  - sleep 3 # give xvfb some time to start
-  
+#before_script:
+#  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+#        "export DISPLAY=:99.0"; "sh -e /etc/init.d/xvfb start"; sleep 3; # give xvfb some time to start
+#    fi
+
 script:
-  - export WORKSPACE=/home/travis/build/SasView/
-  - cd $WORKSPACE
+  - cd ..
+  # this should be the directory above the sasview directory, where we want to
+  # clone the sasmodels
+  - export WORKSPACE=$(pwd)
   - git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git sasmodels
-  - export PYTHONPATH=$WORKSPACE/sasview-install:$WORKSPACE/utils:$PYTHONPATH
-  - cd $WORKSPACE
+
+  # required for documentation
+  - git clone --depth=50 --branch=master https://github.com/bumps/bumps.git
+
   - ls -ltr
   - if [ ! -d "utils" ]; then mkdir utils; fi
   - /bin/sh -xe sasview/build_tools/travis_build.sh
-#  - /bin/sh -xe sasview/build_tools/jenkins_linux_test.sh
   - export LC_ALL=en_US.UTF-8
   - export LANG=en_US.UTF-8
 #  - python setup.py docs; echo 0
