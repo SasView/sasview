@@ -9,7 +9,7 @@
 #copyright 2008, University of Tennessee
 ######################################################################
 import os
-import numpy
+import numpy as np
 import math
 from sas.sascalc.dataloader.data_info import Data2D, Detector
 
@@ -197,10 +197,10 @@ class Reader:
                 col_num = len(line_toks)
                 break
         # Make numpy array to remove header lines using index
-        lines_array = numpy.array(lines)
+        lines_array = np.array(lines)
 
         # index for lines_array
-        lines_index = numpy.arange(len(lines))
+        lines_index = np.arange(len(lines))
         
         # get the data lines
         data_lines = lines_array[lines_index >= (line_num - 1)]
@@ -224,7 +224,7 @@ class Reader:
         data_list1 = map(check_point, data_list)
 
         # numpy array form
-        data_array = numpy.array(data_list1)
+        data_array = np.array(data_list1)
         # Redimesion based on the row_num and col_num,
         #otherwise raise an error.
         try:
@@ -234,11 +234,11 @@ class Reader:
             raise ValueError, msg
         ## Get the all data: Let's HARDcoding; Todo find better way
         # Defaults
-        dqx_data = numpy.zeros(0)
-        dqy_data = numpy.zeros(0)
-        err_data = numpy.ones(row_num)
-        qz_data = numpy.zeros(row_num)
-        mask = numpy.ones(row_num, dtype=bool)
+        dqx_data = np.zeros(0)
+        dqy_data = np.zeros(0)
+        err_data = np.ones(row_num)
+        qz_data = np.zeros(row_num)
+        mask = np.ones(row_num, dtype=bool)
         # Get from the array
         qx_data = data_point[0]
         qy_data = data_point[1]
@@ -253,7 +253,7 @@ class Reader:
         if col_num > (5 + ver):
             dqy_data = data_point[(5 + ver)]
         #if col_num > (6 + ver): mask[data_point[(6 + ver)] < 1] = False
-        q_data = numpy.sqrt(qx_data*qx_data+qy_data*qy_data+qz_data*qz_data)
+        q_data = np.sqrt(qx_data*qx_data+qy_data*qy_data+qz_data*qz_data)
            
         # Extra protection(it is needed for some data files): 
         # If all mask elements are False, put all True
@@ -261,10 +261,10 @@ class Reader:
             mask[mask == False] = True
   
         # Store limits of the image in q space
-        xmin = numpy.min(qx_data)
-        xmax = numpy.max(qx_data)
-        ymin = numpy.min(qy_data)
-        ymax = numpy.max(qy_data)
+        xmin = np.min(qx_data)
+        xmax = np.max(qx_data)
+        ymin = np.min(qy_data)
+        ymax = np.max(qy_data)
 
         # units
         if has_converter == True and output.Q_unit != '1/A':
@@ -286,8 +286,8 @@ class Reader:
         ystep = y_size / (npix_y - 1)
         
         # store x and y axis bin centers in q space
-        x_bins = numpy.arange(xmin, xmax + xstep, xstep)
-        y_bins = numpy.arange(ymin, ymax + ystep, ystep)
+        x_bins = np.arange(xmin, xmax + xstep, xstep)
+        y_bins = np.arange(ymin, ymax + ystep, ystep)
        
         # get the limits of q values
         xmin = xmin - xstep / 2
@@ -299,7 +299,7 @@ class Reader:
         #TODO: Check the lengths
         output.data = data
         if (err_data == 1).all():
-            output.err_data = numpy.sqrt(numpy.abs(data))
+            output.err_data = np.sqrt(np.abs(data))
             output.err_data[output.err_data == 0.0] = 1.0
         else:
             output.err_data = err_data
@@ -334,14 +334,14 @@ class Reader:
                 # Currently we do not support dq parr, perp.
                 # tranfer the comp. to cartesian coord. for newer version.
                 if ver != 1:
-                    diag = numpy.sqrt(qx_data * qx_data + qy_data * qy_data)
+                    diag = np.sqrt(qx_data * qx_data + qy_data * qy_data)
                     cos_th = qx_data / diag
                     sin_th = qy_data / diag
-                    output.dqx_data = numpy.sqrt((dqx_data * cos_th) * \
+                    output.dqx_data = np.sqrt((dqx_data * cos_th) * \
                                                  (dqx_data * cos_th) \
                                                  + (dqy_data * sin_th) * \
                                                   (dqy_data * sin_th))
-                    output.dqy_data = numpy.sqrt((dqx_data * sin_th) * \
+                    output.dqy_data = np.sqrt((dqx_data * sin_th) * \
                                                  (dqx_data * sin_th) \
                                                  + (dqy_data * cos_th) * \
                                                   (dqy_data * cos_th))

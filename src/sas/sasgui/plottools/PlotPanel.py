@@ -28,7 +28,7 @@ import math
 import pylab
 DEFAULT_CMAP = pylab.cm.jet
 import copy
-import numpy
+import numpy as np
 
 from sas.sasgui.guiframe.events import StatusEvent
 from .toolbar import NavigationToolBar, PlotPrintout, bind
@@ -1451,18 +1451,18 @@ class PlotPanel(wx.Panel):
             try:
                 if  self.zmin_2D <= 0  and len(output[output > 0]) > 0:
                     zmin_temp = self.zmin_2D
-                    output[output > 0] = numpy.log10(output[output > 0])
+                    output[output > 0] = np.log10(output[output > 0])
                     #In log scale Negative values are not correct in general
-                    #output[output<=0] = math.log(numpy.min(output[output>0]))
+                    #output[output<=0] = math.log(np.min(output[output>0]))
                 elif self.zmin_2D <= 0:
                     zmin_temp = self.zmin_2D
-                    output[output > 0] = numpy.zeros(len(output))
+                    output[output > 0] = np.zeros(len(output))
                     output[output <= 0] = -32
                 else:
                     zmin_temp = self.zmin_2D
-                    output[output > 0] = numpy.log10(output[output > 0])
+                    output[output > 0] = np.log10(output[output > 0])
                     #In log scale Negative values are not correct in general
-                    #output[output<=0] = math.log(numpy.min(output[output>0]))
+                    #output[output<=0] = math.log(np.min(output[output>0]))
             except:
                 #Too many problems in 2D plot with scale
                 pass
@@ -1491,7 +1491,7 @@ class PlotPanel(wx.Panel):
 
             X = self.x_bins[0:-1]
             Y = self.y_bins[0:-1]
-            X, Y = numpy.meshgrid(X, Y)
+            X, Y = np.meshgrid(X, Y)
 
             try:
                 # mpl >= 1.0.0
@@ -1554,15 +1554,15 @@ class PlotPanel(wx.Panel):
         # 'cause too many data points (>10000)<=JHC.
         # 1d array to use for weighting the data point averaging
         #when they fall into a same bin.
-        weights_data = numpy.ones([self.data.size])
+        weights_data = np.ones([self.data.size])
         # get histogram of ones w/len(data); this will provide
         #the weights of data on each bins
-        weights, xedges, yedges = numpy.histogram2d(x=self.qy_data,
+        weights, xedges, yedges = np.histogram2d(x=self.qy_data,
                                                     y=self.qx_data,
                                                     bins=[self.y_bins, self.x_bins],
                                                     weights=weights_data)
         # get histogram of data, all points into a bin in a way of summing
-        image, xedges, yedges = numpy.histogram2d(x=self.qy_data,
+        image, xedges, yedges = np.histogram2d(x=self.qy_data,
                                                   y=self.qx_data,
                                                   bins=[self.y_bins, self.x_bins],
                                                   weights=self.data)
@@ -1580,7 +1580,7 @@ class PlotPanel(wx.Panel):
 
         # do while loop until all vacant bins are filled up up
         #to loop = max_loop
-        while not(numpy.isfinite(image[weights == 0])).all():
+        while not(np.isfinite(image[weights == 0])).all():
             if loop >= max_loop:  # this protects never-ending loop
                 break
             image = self._fillup_pixels(image=image, weights=weights)
@@ -1629,8 +1629,8 @@ class PlotPanel(wx.Panel):
         ymin = ymin - ystep / 2.0
 
         # store x and y bin centers in q space
-        x_bins = numpy.linspace(xmin, xmax, npix_x)
-        y_bins = numpy.linspace(ymin, ymax, npix_y)
+        x_bins = np.linspace(xmin, xmax, npix_x)
+        y_bins = np.linspace(ymin, ymax, npix_y)
 
         #set x_bins and y_bins
         self.x_bins = x_bins
@@ -1649,52 +1649,52 @@ class PlotPanel(wx.Panel):
 
         """
         # No image matrix given
-        if image == None or numpy.ndim(image) != 2 \
-                or numpy.isfinite(image).all() \
+        if image == None or np.ndim(image) != 2 \
+                or np.isfinite(image).all() \
                 or weights == None:
             return image
         # Get bin size in y and x directions
         len_y = len(image)
         len_x = len(image[1])
-        temp_image = numpy.zeros([len_y, len_x])
-        weit = numpy.zeros([len_y, len_x])
+        temp_image = np.zeros([len_y, len_x])
+        weit = np.zeros([len_y, len_x])
         # do for-loop for all pixels
         for n_y in range(len(image)):
             for n_x in range(len(image[1])):
                 # find only null pixels
-                if weights[n_y][n_x] > 0 or numpy.isfinite(image[n_y][n_x]):
+                if weights[n_y][n_x] > 0 or np.isfinite(image[n_y][n_x]):
                     continue
                 else:
                     # find 4 nearest neighbors
                     # check where or not it is at the corner
-                    if n_y != 0 and numpy.isfinite(image[n_y - 1][n_x]):
+                    if n_y != 0 and np.isfinite(image[n_y - 1][n_x]):
                         temp_image[n_y][n_x] += image[n_y - 1][n_x]
                         weit[n_y][n_x] += 1
-                    if n_x != 0 and numpy.isfinite(image[n_y][n_x - 1]):
+                    if n_x != 0 and np.isfinite(image[n_y][n_x - 1]):
                         temp_image[n_y][n_x] += image[n_y][n_x - 1]
                         weit[n_y][n_x] += 1
-                    if n_y != len_y - 1 and numpy.isfinite(image[n_y + 1][n_x]):
+                    if n_y != len_y - 1 and np.isfinite(image[n_y + 1][n_x]):
                         temp_image[n_y][n_x] += image[n_y + 1][n_x]
                         weit[n_y][n_x] += 1
-                    if n_x != len_x - 1 and numpy.isfinite(image[n_y][n_x + 1]):
+                    if n_x != len_x - 1 and np.isfinite(image[n_y][n_x + 1]):
                         temp_image[n_y][n_x] += image[n_y][n_x + 1]
                         weit[n_y][n_x] += 1
                     # go 4 next nearest neighbors when no non-zero
                     # neighbor exists
-                    if n_y != 0 and n_x != 0 and\
-                         numpy.isfinite(image[n_y - 1][n_x - 1]):
+                    if n_y != 0 and n_x != 0 and \
+                            np.isfinite(image[n_y - 1][n_x - 1]):
                         temp_image[n_y][n_x] += image[n_y - 1][n_x - 1]
                         weit[n_y][n_x] += 1
                     if n_y != len_y - 1 and n_x != 0 and \
-                        numpy.isfinite(image[n_y + 1][n_x - 1]):
+                            np.isfinite(image[n_y + 1][n_x - 1]):
                         temp_image[n_y][n_x] += image[n_y + 1][n_x - 1]
                         weit[n_y][n_x] += 1
                     if n_y != len_y and n_x != len_x - 1 and \
-                        numpy.isfinite(image[n_y - 1][n_x + 1]):
+                            np.isfinite(image[n_y - 1][n_x + 1]):
                         temp_image[n_y][n_x] += image[n_y - 1][n_x + 1]
                         weit[n_y][n_x] += 1
                     if n_y != len_y - 1 and n_x != len_x - 1 and \
-                        numpy.isfinite(image[n_y + 1][n_x + 1]):
+                            np.isfinite(image[n_y + 1][n_x + 1]):
                         temp_image[n_y][n_x] += image[n_y + 1][n_x + 1]
                         weit[n_y][n_x] += 1
 

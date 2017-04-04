@@ -1,6 +1,6 @@
 import copy
 
-import numpy
+import numpy as np
 
 from sas.sascalc.calculator.BaseComponent import BaseComponent
 
@@ -51,8 +51,8 @@ class MultiplicationModel(BaseComponent):
 
         ## Parameter details [units, min, max]
         self._set_details()
-        self.details['scale_factor'] = ['', 0.0, numpy.inf]
-        self.details['background'] = ['',-numpy.inf,numpy.inf]
+        self.details['scale_factor'] = ['', 0.0, np.inf]
+        self.details['background'] = ['',-np.inf,np.inf]
 
         #list of parameter that can be fitted
         self._set_fixed_params()
