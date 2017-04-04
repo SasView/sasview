@@ -73,19 +73,19 @@ class Reader:
                     y = data[:, 1]
                     dy = data[:, 2]
 
-                    lam_unit = _header_fetch(headers, "wavelength")
+                    lam_unit = self._header_fetch(headers, "wavelength")
                     if lam_unit == "AA":
                         lam_unit = "A"
 
                     x, x_unit = self._unit_conversion(
                         x, lam_unit,
-                        _fetch_unit(headers, "spin echo length"))
+                        self._fetch_unit(headers, "spin echo length"))
                     dx, dx_unit = self._unit_conversion(
                         dx, lam_unit,
-                        _fetch_unit(headers, "error SEL"))
+                        self._fetch_unit(headers, "error SEL"))
                     dlam, dlam_unit = self._unit_conversion(
                         dlam, lam_unit,
-                        _fetch_unit(headers, "error wavelength"))
+                        self._fetch_unit(headers, "error wavelength"))
                     y_unit = r'\AA^{-2} cm^{-1}'
 
                     output = Data1D(x=x, y=y, lam=lam, dy=dy, dx=dx, dlam=dlam,
@@ -100,12 +100,12 @@ class Reader:
                     output.sample.ID = params["DataFileTitle"]
 
                     output.sample.zacceptance = (
-                        float(_header_fetch(params, "Q_zmax")),
-                        _fetch_unit(params, "Q_zmax"))
+                        float(self._header_fetch(params, "Q_zmax")),
+                        self._fetch_unit(params, "Q_zmax"))
 
                     output.sample.yacceptance = (
-                        float(_header_fetch(params, "Q_ymax")),
-                        _fetch_unit(params, "Q_ymax"))
+                        float(self._header_fetch(params, "Q_ymax")),
+                        self._fetch_unit(params, "Q_ymax"))
 
                 if len(output.x) < 1:
                     raise RuntimeError("%s is empty" % path)
@@ -124,17 +124,15 @@ class Reader:
             new_unit = value_unit
         return value, new_unit
 
+    def _header_fetch(self, headers, key):
+        index = [k for k in headers.keys()
+                 if k.startswith(key)][0]
+        return headers[index]
 
-def _header_fetch(headers, key):
-    index = [k for k in headers.keys()
-             if k.startswith(key)][0]
-    return headers[index]
-
-
-def _fetch_unit(params, key):
-    index = [k for k in params.keys()
-             if k.startswith(key)][0]
-    unit = index.strip().split()[-1][1:-1]
-    if unit.startswith(r"\A"):
-        unit = "1/A"
-    return unit
+    def _fetch_unit(self, params, key):
+        index = [k for k in params.keys()
+                 if k.startswith(key)][0]
+        unit = index.strip().split()[-1][1:-1]
+        if unit.startswith(r"\A"):
+            unit = "1/A"
+        return unit
