@@ -178,8 +178,12 @@ images_dir = os.path.join(path, "images")
 test_dir = os.path.join(path, "test")
 test_1d_dir = os.path.join(path, "test\\1d_data")
 test_2d_dir = os.path.join(path, "test\\2d_data")
+test_sesans_dir = os.path.join(path, "test\\sesans_data")
+test_convertible_dir = os.path.join(path, "test\\convertible_data")
 test_save_dir = os.path.join(path, "test\\save_states")
-test_upcoming_dir = os.path.join(path, "test\\upcoming_formats")
+test_coord_dir = os.path.join(path, "test\\coordinate_data")
+test_image_dir = os.path.join(path, "test\\image_data")
+test_other_dir = os.path.join(path, "test\\other_files")
 
 matplotlibdatadir = matplotlib.get_data_path()
 matplotlibdata = findall(matplotlibdatadir)
@@ -292,9 +296,29 @@ for f in findall(test_save_dir):
         data_files.append(("test\\save_states", [f]))
 
 # Copying the sample data user data
-for f in findall(test_upcoming_dir):
+for f in findall(test_sesans_dir):
     if not ".svn" in f:
-        data_files.append(("test\\upcoming_formats", [f]))
+        data_files.append(("test\\sesans_data", [f]))
+
+# Copying the sample data user data
+for f in findall(test_convertible_dir):
+    if not ".svn" in f:
+        data_files.append(("test\\convertible_files", [f]))
+
+# Copying the sample data user data
+for f in findall(test_coord_dir):
+    if not ".svn" in f:
+        data_files.append(("test\\coordinate_data", [f]))
+
+# Copying the sample data user data
+for f in findall(test_image_dir):
+    if not ".svn" in f:
+        data_files.append(("test\\image_data", [f]))
+
+# Copying the sample data user data
+for f in findall(test_other_dir):
+    if not ".svn" in f:
+        data_files.append(("test\\other_files", [f]))
 
 # Copying opencl include files
 for f in findall(opencl_include_dir):
