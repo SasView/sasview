@@ -79,7 +79,7 @@ def reader2D_converter(data2d=None):
     :return: 1d arrays of Data2D object
 
     """
-    if data2d.data == None or data2d.x_bins == None or data2d.y_bins == None:
+    if data2d.data is None or data2d.x_bins is None or data2d.y_bins is None:
         raise ValueError, "Can't convert this data: data=None..."
     new_x = np.tile(data2d.x_bins, (len(data2d.y_bins), 1))
     new_y = np.tile(data2d.y_bins, (len(data2d.x_bins), 1))
@@ -91,6 +91,7 @@ def reader2D_converter(data2d=None):
     q_data = np.sqrt(qx_data * qx_data + qy_data * qy_data)
     if data2d.err_data == None or np.any(data2d.err_data <= 0):
         new_err_data = np.sqrt(np.abs(new_data))
+
     else:
         new_err_data = data2d.err_data.flatten()
     mask = np.ones(len(new_data), dtype=bool)

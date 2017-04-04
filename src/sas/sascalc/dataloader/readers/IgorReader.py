@@ -12,9 +12,11 @@
 #copyright 2008, University of Tennessee
 #############################################################################
 import os
+
 import numpy as np
 import math
 #import logging
+
 from sas.sascalc.dataloader.data_info import Data2D
 from sas.sascalc.dataloader.data_info import Detector
 from sas.sascalc.dataloader.manipulations import reader2D_converter
@@ -39,56 +41,29 @@ class Reader:
     def read(self, filename=None):
         """ Read file """
         if not os.path.isfile(filename):
-            raise ValueError, \
-            "Specified file %s is not a regular file" % filename
+            raise ValueError("Specified file %s is not a regular "
+                             "file" % filename)
         
-        # Read file
-        f = open(filename, 'r')
-        buf = f.read()
-        
-        # Instantiate data object
         output = Data2D()
+
         output.filename = os.path.basename(filename)
         detector = Detector()
-        if len(output.detector) > 0:
-            print str(output.detector[0])
+        if len(output.detector):
+            print(str(output.detector[0]))
         output.detector.append(detector)
-                
-        # Get content
-        dataStarted = False
+
+        data_conv_q = data_conv_i = None
         
-        lines = buf.split('\n')
-        itot = 0
-        x = []
-        y = []
-        
-        ncounts = 0
-        
-        xmin = None
-        xmax = None
-        ymin = None
-        ymax = None
-        
-        i_x = 0
-        i_y = -1
-        i_tot_row = 0
-        
-        isInfo = False
-        isCenter = False
-       
-        data_conv_q = None
-        data_conv_i = None
-        
-        if has_converter == True and output.Q_unit != '1/A':
+        if has_converter and output.Q_unit != '1/A':
             data_conv_q = Converter('1/A')
             # Test it
             data_conv_q(1.0, output.Q_unit)
             
-        if has_converter == True and output.I_unit != '1/cm':
+        if has_converter and output.I_unit != '1/cm':
             data_conv_i = Converter('1/cm')
             # Test it
             data_conv_i(1.0, output.I_unit)
-         
+
         for line in lines:
             
             # Find setup info line
@@ -119,133 +94,125 @@ class Reader:
         size_y = i_tot_row  # 192#128
         output.data = np.zeros([size_x, size_y])
         output.err_data = np.zeros([size_x, size_y])
-     
-        #Read Header and 2D data
-        for line in lines:
-            # Find setup info line
-            if isInfo:
-                isInfo = False
-                line_toks = line.split()
-                # Wavelength in Angstrom
-                try:
-                    wavelength = float(line_toks[1])
-                except:
-                    msg = "IgorReader: can't read this file, missing wavelength"
-                    raise ValueError, msg
-                # Distance in meters
-                try:
-                    distance = float(line_toks[3])
-                except:
-                    msg = "IgorReader: can't read this file, missing distance"
-                    raise ValueError, msg
-                
-                # Distance in meters
-                try:
-                    transmission = float(line_toks[4])
-                except:
-                    msg = "IgorReader: can't read this file, "
-                    msg += "missing transmission"
-                    raise ValueError, msg
-                                            
-            if line.count("LAMBDA") > 0:
-                isInfo = True
-                
-            # Find center info line
-            if isCenter:
-                isCenter = False
-                line_toks = line.split()
-                
-                # Center in bin number: Must substrate 1 because
-                #the index starts from 1
-                center_x = float(line_toks[0]) - 1
-                center_y = float(line_toks[1]) - 1
+  
+        data_row = 0
+        wavelength = distance = center_x = center_y = None
+        dataStarted = isInfo = isCenter = False
 
-            if line.count("BCENT") > 0:
-                isCenter = True
-                
-            # Find data start
-            if line.count("***")>0:
-                dataStarted = True
-                
-                # Check that we have all the info
-                if wavelength == None \
-                    or distance == None \
-                    or center_x == None \
-                    or center_y == None:
-                    msg = "IgorReader:Missing information in data file"
-                    raise ValueError, msg
-                
-            if dataStarted == True:
-                try:
-                    value = float(line)
-                except:
-                    # Found a non-float entry, skip it
-                    continue
-                
-                # Get bin number
-                if math.fmod(itot, i_tot_row) == 0:
-                    i_x = 0
-                    i_y += 1
-                else:
-                    i_x += 1
-                    
-                output.data[i_y][i_x] = value
-                ncounts += 1
-                
-                # Det 640 x 640 mm
-                # Q = 4pi/lambda sin(theta/2)
-                # Bin size is 0.5 cm 
-                #REmoved +1 from theta = (i_x-center_x+1)*0.5 / distance
-                # / 100.0 and 
-                #REmoved +1 from theta = (i_y-center_y+1)*0.5 /
-                # distance / 100.0
-                #ToDo: Need  complete check if the following
-                # covert process is consistent with fitting.py.
-                theta = (i_x - center_x) * 0.5 / distance / 100.0
-                qx = 4.0 * math.pi / wavelength * math.sin(theta/2.0)
+        with open(filename, 'r') as f:
+            for line in f:
+                data_row += 1
+                # Find setup info line
+                if isInfo:
+                    isInfo = False
+                    line_toks = line.split()
+                    # Wavelength in Angstrom
+                    try:
+                        wavelength = float(line_toks[1])
+                    except ValueError:
+                        msg = "IgorReader: can't read this file, missing wavelength"
+                        raise ValueError(msg)
+                    # Distance in meters
+                    try:
+                        distance = float(line_toks[3])
+                    except ValueError:
+                        msg = "IgorReader: can't read this file, missing distance"
+                        raise ValueError(msg)
 
-                if has_converter == True and output.Q_unit != '1/A':
-                    qx = data_conv_q(qx, units=output.Q_unit)
+                    # Distance in meters
+                    try:
+                        transmission = float(line_toks[4])
+                    except:
+                        msg = "IgorReader: can't read this file, "
+                        msg += "missing transmission"
+                        raise ValueError(msg)
 
-                if xmin == None or qx < xmin:
-                    xmin = qx
-                if xmax == None or qx > xmax:
-                    xmax = qx
-                
-                theta = (i_y - center_y) * 0.5 / distance / 100.0
-                qy = 4.0 * math.pi / wavelength * math.sin(theta / 2.0)
+                if line.count("LAMBDA"):
+                    isInfo = True
 
-                if has_converter == True and output.Q_unit != '1/A':
-                    qy = data_conv_q(qy, units=output.Q_unit)
-                
-                if ymin == None or qy < ymin:
-                    ymin = qy
-                if ymax == None or qy > ymax:
-                    ymax = qy
-                
-                if not qx in x:
-                    x.append(qx)
-                if not qy in y:
-                    y.append(qy)
-                
-                itot += 1
-                  
-                  
+                # Find center info line
+                if isCenter:
+                    isCenter = False
+                    line_toks = line.split()
+
+                    # Center in bin number: Must subtract 1 because
+                    # the index starts from 1
+                    center_x = float(line_toks[0]) - 1
+                    center_y = float(line_toks[1]) - 1
+
+                if line.count("BCENT"):
+                    isCenter = True
+
+                # Find data start
+                if line.count("***"):
+                    # now have to continue to blank line
+                    dataStarted = True
+
+                    # Check that we have all the info
+                    if (wavelength is None
+                            or distance is None
+                            or center_x is None
+                            or center_y is None):
+                        msg = "IgorReader:Missing information in data file"
+                        raise ValueError(msg)
+
+                if dataStarted:
+                    if len(line.rstrip()):
+                        continue
+                    else:
+                        break
+
+        # The data is loaded in row major order (last index changing most
+        # rapidly). However, the original data is in column major order (first
+        # index changing most rapidly). The swap to column major order is done
+        # in reader2D_converter at the end of this method.
+        data = np.loadtxt(filename, skiprows=data_row)
+        size_x = size_y = int(np.rint(np.sqrt(data.size)))
+        output.data = np.reshape(data, (size_x, size_y))
+        output.err_data = np.zeros_like(output.data)
+
+        # Det 640 x 640 mm
+        # Q = 4 * pi/lambda * sin(theta/2)
+        # Bin size is 0.5 cm
+        # Removed +1 from theta = (i_x - center_x + 1)*0.5 / distance
+        # / 100.0 and
+        # Removed +1 from theta = (i_y - center_y + 1)*0.5 /
+        # distance / 100.0
+        # ToDo: Need  complete check if the following
+        # convert process is consistent with fitting.py.
+
+        # calculate qx, qy bin centers of each pixel in the image
+        theta = (np.arange(size_x) - center_x) * 0.5 / distance / 100.
+        qx = 4 * np.pi / wavelength * np.sin(theta/2)
+
+        theta = (np.arange(size_y) - center_y) * 0.5 / distance / 100.
+        qy = 4 * np.pi / wavelength * np.sin(theta/2)
+
+        if has_converter and output.Q_unit != '1/A':
+            qx = data_conv_q(qx, units=output.Q_unit)
+            qy = data_conv_q(qx, units=output.Q_unit)
+
+        xmax = np.max(qx)
+        xmin = np.min(qx)
+        ymax = np.max(qy)
+        ymin = np.min(qy)
+
+        # calculate edge offset in q.
         theta = 0.25 / distance / 100.0
-        xstep = 4.0 * math.pi / wavelength * math.sin(theta / 2.0)
+        xstep = 4.0 * np.pi / wavelength * np.sin(theta / 2.0)
         
         theta = 0.25 / distance / 100.0
-        ystep = 4.0 * math.pi/ wavelength * math.sin(theta / 2.0)
+        ystep = 4.0 * np.pi/ wavelength * np.sin(theta / 2.0)
         
         # Store all data ######################################
         # Store wavelength
-        if has_converter == True and output.source.wavelength_unit != 'A':
+        if has_converter and output.source.wavelength_unit != 'A':
             conv = Converter('A')
             wavelength = conv(wavelength, units=output.source.wavelength_unit)
         output.source.wavelength = wavelength
 
         # Store distance
-        if has_converter == True and detector.distance_unit != 'm':
+        if has_converter and detector.distance_unit != 'm':
             conv = Converter('m')
             distance = conv(distance, units=detector.distance_unit)
         detector.distance = distance
@@ -253,9 +220,9 @@ class Reader:
         # Store transmission
         output.sample.transmission = transmission
         
-        # Store pixel size
+        # Store pixel size (mm)
         pixel = 5.0
-        if has_converter == True and detector.pixel_size_unit != 'mm':
+        if has_converter and detector.pixel_size_unit != 'mm':
             conv = Converter('mm')
             pixel = conv(pixel, units=detector.pixel_size_unit)
         detector.pixel_size.x = pixel
@@ -266,11 +233,11 @@ class Reader:
         detector.beam_center.y = center_y * pixel
         
         # Store limits of the image (2D array)
-        xmin = xmin - xstep / 2.0
-        xmax = xmax + xstep / 2.0
-        ymin = ymin - ystep / 2.0
-        ymax = ymax + ystep / 2.0
-        if has_converter == True and output.Q_unit != '1/A':
+        xmin -= xstep / 2.0
+        xmax += xstep / 2.0
+        ymin -= ystep / 2.0
+        ymax += ystep / 2.0
+        if has_converter and output.Q_unit != '1/A':
             xmin = data_conv_q(xmin, units=output.Q_unit)
             xmax = data_conv_q(xmax, units=output.Q_unit)
             ymin = data_conv_q(ymin, units=output.Q_unit)
@@ -281,8 +248,8 @@ class Reader:
         output.ymax = ymax
         
         # Store x and y axis bin centers
-        output.x_bins = x
-        output.y_bins = y
+        output.x_bins = qx.tolist()
+        output.y_bins = qy.tolist()
         
         # Units
         if data_conv_q is not None:

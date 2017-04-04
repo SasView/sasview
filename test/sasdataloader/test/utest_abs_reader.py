@@ -3,8 +3,11 @@
 """
 
 import unittest
+
+import math
 import numpy as np
-from sas.sascalc.dataloader.loader import  Loader
+from sas.sascalc.dataloader.loader import Loader
+from sas.sascalc.dataloader.readers.IgorReader import Reader as IgorReader
 from sas.sascalc.dataloader.data_info import Data1D
  
 
@@ -84,8 +87,11 @@ class hfir_reader(unittest.TestCase):
 class igor_reader(unittest.TestCase):
     
     def setUp(self):
-        self.data = Loader().load("MAR07232_rest.ASC")
-        
+        # the IgorReader should be able to read this filetype
+        # if it can't, stop here.
+        reader = IgorReader()
+        self.data = reader.read("MAR07232_rest.ASC")
+
     def test_igor_checkdata(self):
         """
             Check the data content to see whether 
@@ -106,16 +112,27 @@ class igor_reader(unittest.TestCase):
         self.assertEqual(self.data.sample.transmission, 0.84357)
         
         self.assertEqual(self.data.detector[0].beam_center_unit, 'mm')
-        center_x = (68.76-1)*5.0
-        center_y = (62.47-1)*5.0
+        center_x = (68.76 - 1)*5.0
+        center_y = (62.47 - 1)*5.0
         self.assertEqual(self.data.detector[0].beam_center.x, center_x)
         self.assertEqual(self.data.detector[0].beam_center.y, center_y)
         
         self.assertEqual(self.data.I_unit, '1/cm')
-        self.assertEqual(self.data.data[0], 0.279783)
-        self.assertEqual(self.data.data[1], 0.28951)
-        self.assertEqual(self.data.data[2], 0.167634)
-        
+        # 3 points should be suffcient to check that the data is in column
+        # major order.
+        np.testing.assert_almost_equal(self.data.data[0:3],
+                                       [0.279783, 0.28951, 0.167634])
+        np.testing.assert_almost_equal(self.data.qx_data[0:3],
+                                       [-0.01849072, -0.01821785, -0.01794498])
+        np.testing.assert_almost_equal(self.data.qy_data[0:3],
+                                       [-0.01677435, -0.01677435, -0.01677435])
+
+    def test_generic_loader(self):
+        # the generic loader should direct the file to IgorReader as well
+        data = Loader().load("MAR07232_rest.ASC")
+        self.assertEqual(data.meta_data['loader'], "IGOR 2D")
+
+
 class danse_reader(unittest.TestCase):
     
     def setUp(self):

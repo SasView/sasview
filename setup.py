@@ -314,9 +314,14 @@ package_data['sas.sasview'] = ['images/*',
                                'test/*.txt',
                                'test/1d_data/*',
                                'test/2d_data/*',
+                               'test/convertible_files/*',
+                               'test/coordinate_data/*',
+                               'test/image_data/*',
+                               'test/media/*',
+                               'test/other_files/*',
                                'test/save_states/*',
-                               'test/upcoming_formats/*',
-                                 'default_categories.json']
+                               'test/sesans_data/*'
+                               ]
 packages.append("sas.sasview")
 
 required = [

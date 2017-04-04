@@ -875,13 +875,6 @@ class Plugin(PluginBase):
                 enable1D=enable1D, enable2D=enable2D,
                 qmin=qmin, qmax=qmax, weight=weight)
 
-    def _mac_sleep(self, sec=0.2):
-        """
-        Give sleep to MAC
-        """
-        if ON_MAC:
-            time.sleep(sec)
-
     def draw_model(self, model, page_id, data=None, smearer=None,
                    enable1D=True, enable2D=False,
                    state=None,
@@ -1029,7 +1022,6 @@ class Plugin(PluginBase):
         handler = ConsoleUpdate(parent=self.parent,
                                 manager=self,
                                 improvement_delta=0.1)
-        self._mac_sleep(0.2)
 
         # batch fit
         batch_inputs = {}
@@ -1269,7 +1261,6 @@ class Plugin(PluginBase):
         :param page_id: list of page ids which called fit function
         :param elapsed: time spent at the fitting level
         """
-        self._mac_sleep(0.2)
         uid = page_id[0]
         if uid in self.fit_thread_list.keys():
             del self.fit_thread_list[uid]
@@ -1519,7 +1510,6 @@ class Plugin(PluginBase):
         if page_id is None:
             page_id = []
         ## fit more than 1 model at the same time
-        self._mac_sleep(0.2)
         try:
             index = 0
             # Update potential simfit page(s)
@@ -1754,15 +1744,14 @@ class Plugin(PluginBase):
                                           data_description="Data unsmeared",
                                           data_id="Data  " + data.name + " unsmeared",
                                           dy=unsmeared_error)
-                
-            if sq_model is not None and pq_model is not None:
-                self.create_theory_1D(x, sq_model, page_id, model, data, state,
-                                      data_description=model.name + " S(q)",
-                                      data_id=str(page_id) + " " + data.name + " S(q)")
-                self.create_theory_1D(x, pq_model, page_id, model, data, state,
-                                      data_description=model.name + " P(q)",
-                                      data_id=str(page_id) + " " + data.name + " P(q)")
-
+            # Comment this out until we can get P*S models with correctly populated parameters
+            #if sq_model is not None and pq_model is not None:
+            #    self.create_theory_1D(x, sq_model, page_id, model, data, state,
+            #                          data_description=model.name + " S(q)",
+            #                          data_id=str(page_id) + " " + data.name + " S(q)")
+            #    self.create_theory_1D(x, pq_model, page_id, model, data, state,
+            #                          data_description=model.name + " P(q)",
+            #                          data_id=str(page_id) + " " + data.name + " P(q)")
 
             current_pg = self.fit_panel.get_page_by_id(page_id)
             title = new_plot.title
