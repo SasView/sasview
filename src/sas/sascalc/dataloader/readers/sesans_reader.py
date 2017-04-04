@@ -116,6 +116,17 @@ class Reader:
         return None
 
     def _unit_conversion(self, value, value_unit, default_unit):
+        """
+        Performs unit conversion on a measurement.
+
+        :param value: The magnitude of the measurement
+        :type value: Number
+        :param value_unit: a string containing the final desired unit
+        :type value_unit: String
+        :param default_unit: a string containing the units of the original measurement
+        :type default_unit: String
+        :return: The magnitude of the measurement in the new units
+        """
         if has_converter and value_unit != default_unit:
             data_conv_q = Converter(value_unit)
             value = data_conv_q(value, units=default_unit)
@@ -125,11 +136,38 @@ class Reader:
         return value, new_unit
 
     def _header_fetch(self, headers, key):
+        """
+        Pull the value of a unit defined header from a dict. Example::
+
+         d = {"Length [m]": 17}
+         self._header_fetch(d, "Length") == 17
+
+        :param header: A dictionary of values
+        :type header: Dictionary
+        :param key: A string which is a prefix for one of the keys in the dict
+        :type key: String
+        :return: The value of the dictionary for the specified key
+        """
         index = [k for k in headers.keys()
                  if k.startswith(key)][0]
         return headers[index]
 
     def _fetch_unit(self, params, key):
+        """
+        Pull the unit off of a dictionary header. Example::
+
+         d = {"Length [m]": 17}
+         self._fetch_unit(d, "Length") == "m"
+
+        :param header: A dictionary of values, where the keys are strings
+        with the units for the values appended onto the string within square
+        brackets (See the example above)
+        :type header: Dictionary
+        :param key: A string with the prefix of the dictionary key whose unit
+        is being fetched
+        :type key: String
+        :return: A string containing the unit specifed in the header
+        """
         index = [k for k in params.keys()
                  if k.startswith(key)][0]
         unit = index.strip().split()[-1][1:-1]
