@@ -13,35 +13,15 @@ Base module for loading and running the main SasView application.
 import os
 import sys
 import logging
+import logging.config
 import traceback
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s %(levelname)s %(message)s',
-                    filename=os.path.join(os.path.expanduser("~"),
-                                          'sasview.log'))
+
+LOGGER_CONFIG_FILE = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.ini')
+logging.config.fileConfig(LOGGER_CONFIG_FILE, disable_existing_loggers=False)
 logging.captureWarnings(True)
+logger = logging.getLogger()
 
-class StreamToLogger(object):
-    """
-        File-like stream object that redirects writes to a logger instance.
-    """
-    def __init__(self, logger, log_level=logging.INFO):
-        self.logger = logger
-        self.log_level = log_level
-        self.linebuf = ''
-
-    def write(self, buf):
-        """
-        Main logging method
-        """
-        # Write the message to stdout so we can see it when running interactively
-        sys.stdout.write(buf)
-        for line in buf.rstrip().splitlines():
-            self.logger.log(self.log_level, line.rstrip())
-
-stderr_logger = logging.getLogger('STDERR')
-sl = StreamToLogger(stderr_logger, logging.ERROR)
-sys.stderr = sl
 
 # Log the start of the session
 logging.info(" --- SasView session started ---")
