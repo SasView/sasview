@@ -15,7 +15,9 @@ import os
 import numpy
 from sas.sascalc.dataloader.data_info import Data2D
 from sas.sascalc.dataloader.manipulations import reader2D_converter
-    
+
+logger = logging.getLogger()
+
 class Reader:
     """
     Example data manipulation
@@ -75,7 +77,7 @@ class Reader:
             try:
                 value = float(val)
             except:
-                logging.error("tiff_reader: had to skip a non-float point")
+                logger.error("tiff_reader: had to skip a non-float point")
                 continue
             
             # Get bin number

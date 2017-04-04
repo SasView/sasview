@@ -24,6 +24,8 @@ from sas.sasgui.guiframe.gui_style import GUIFRAME_ICON
 from appearanceDialog import appearanceDialog
 from graphAppearance import graphAppearance
 
+logger = logging.getLogger()
+
 DEFAULT_QMAX = 0.05
 DEFAULT_QSTEP = 0.001
 DEFAULT_BEAM = 0.005
@@ -241,7 +243,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 if position != None and not self.is_corfunc:
                     wx.PostEvent(self.parent, StatusEvent(status=position))
             except:
-                logging.error(sys.exc_value)
+                logger.error(sys.exc_value)
             if not event.leftdown:
                 # text event
                 try:
@@ -254,7 +256,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                     if is_moved:
                         self.canvas.draw()
                 except:
-                    logging.error(sys.exc_value)
+                    logger.error(sys.exc_value)
                 event.Skip()
                 return
             self.q_ctrl = ctrl
@@ -408,7 +410,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             self.canvas.draw()
             self.q_ctrl[vl_ind].SetValue(str(pos_x))
         except:
-            logging.error(sys.exc_value)
+            logger.error(sys.exc_value)
 
     def set_resizing(self, resizing=False):
         """

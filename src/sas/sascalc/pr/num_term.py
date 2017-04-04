@@ -5,6 +5,8 @@ import sys
 import logging
 from sas.sascalc.pr.invertor import Invertor
 
+logger = logging.getLogger()
+
 class NTermEstimator(object):
     """
     """
@@ -179,7 +181,7 @@ def load(path):
                 data_y = numpy.append(data_y, test_y)
                 data_err = numpy.append(data_err, err)
             except:
-                logging.error(sys.exc_value)
+                logger.error(sys.exc_value)
 
     return data_x, data_y, data_err
 

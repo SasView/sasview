@@ -3,11 +3,18 @@ import os
 import subprocess
 import re
 import sys
+
+import logging
+import logging.config
+LOGGER_CONFIG_FILE = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.ini')
+logging.config.fileConfig(LOGGER_CONFIG_FILE, disable_existing_loggers=False)
+logger = logging.getLogger()
+
 try:
     import xmlrunner
 except:
-    print "xmlrunner needs to be installed to run these tests"
-    print "Try easy_install unittest-xml-reporting"
+    logger.error("xmlrunner needs to be installed to run these tests")
+    logger.error("Try easy_install unittest-xml-reporting")
     sys.exit(1)
 
 # Check whether we have matplotlib installed

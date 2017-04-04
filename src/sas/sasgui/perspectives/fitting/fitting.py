@@ -48,6 +48,8 @@ from sas.sasgui.perspectives.fitting.gpu_options import GpuOptions
 
 from . import models
 
+logger = logging.getLogger()
+
 MAX_NBR_DATA = 4
 
 (PageInfoEvent, EVT_PAGE_INFO) = wx.lib.newevent.NewEvent()
@@ -118,7 +120,7 @@ class Plugin(PluginBase):
         # take care of saving  data, model and page associated with each other
         self.page_finder = {}
         # Log startup
-        logging.info("Fitting plug-in started")
+        logger.info("Fitting plug-in started")
         self.batch_capable = self.get_batch_capable()
 
     def get_batch_capable(self):
@@ -345,7 +347,7 @@ class Plugin(PluginBase):
                             else:
                                 page.formfactorbox.SetLabel(current_val)
         except:
-            logging.error("update_custom_combo: %s", sys.exc_value)
+            logger.error("update_custom_combo: %s", sys.exc_value)
 
     def set_edit_menu(self, owner):
         """
@@ -585,7 +587,7 @@ class Plugin(PluginBase):
             except Exception:
                 msg = "Fitting: cannot deal with the theory received"
                 evt = StatusEvent(status=msg, info="error")
-                logging.error("set_theory " + msg + "\n" + str(sys.exc_value))
+                logger.error("set_theory " + msg + "\n" + str(sys.exc_value))
                 wx.PostEvent(self.parent, evt)
 
     def set_state(self, state=None, datainfo=None, format=None):
@@ -1805,7 +1807,7 @@ class Plugin(PluginBase):
         """
         Handle exception from calculator by posting it as an error.
         """
-        logging.error("".join(traceback.format_exception(etype, value, tb)))
+        logger.error("".join(traceback.format_exception(etype, value, tb)))
         msg = traceback.format_exception(etype, value, tb, limit=1)
         evt = StatusEvent(status="".join(msg), type="stop", info="error")
         wx.PostEvent(self.parent, evt)

@@ -7,6 +7,7 @@
 import thread
 import traceback
 import sys
+import logging
 
 if sys.platform.count("darwin") > 0:
     import time
@@ -20,6 +21,8 @@ if sys.platform.count("darwin") > 0:
 else:
     from time import clock
     from time import sleep
+
+logger = logging.getLogger()
 
 
 class CalcThread:
@@ -243,7 +246,7 @@ class CalcThread:
             except Exception:
                 pass
         import logging
-        logging.error(traceback.format_exc())
+        logger.error(traceback.format_exc())
         #print 'CalcThread exception',
 
     def _run(self):

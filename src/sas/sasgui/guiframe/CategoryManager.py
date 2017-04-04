@@ -20,6 +20,8 @@ from sas.sasgui.guiframe.events import ChangeCategoryEvent
 from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 IS_MAC = (sys.platform == 'darwin')
 
+logger = logging.getLogger()
+
 """ Notes
 The category manager mechanism works from 3 data structures used:
 - self.master_category_dict: keys are the names of categories, 
@@ -372,7 +374,7 @@ class CategoryManager(wx.Frame):
                 with open(cat_file, 'rb') as f:
                     self.master_category_dict = json.load(f)
         except IOError:
-            logging.error('Problem reading in category file.')
+            logger.error('Problem reading in category file.')
 
         self._regenerate_model_dict()
 

@@ -18,6 +18,8 @@ from numpy.linalg import lstsq
 from scipy import optimize
 from sas.sascalc.pr.core.pr_inversion import Cinvertor
 
+logger = logging.getLogger()
+
 def help():
     """
     Provide general online help text
@@ -494,7 +496,7 @@ class Invertor(Cinvertor):
         except:
             # We were not able to estimate the errors
             # Return an empty error matrix
-            logging.error(sys.exc_value)
+            logger.error(sys.exc_value)
 
         # Keep a copy of the last output
         if self.has_bck == False:
@@ -540,7 +542,7 @@ class Invertor(Cinvertor):
             # If we fail, estimate alpha and return the default
             # number of terms
             best_alpha, _, _ = self.estimate_alpha(self.nfunc)
-            logging.warning("Invertor.estimate_numterms: %s" % sys.exc_value)
+            logger.warning("Invertor.estimate_numterms: %s" % sys.exc_value)
             return self.nfunc, best_alpha, "Could not estimate number of terms"
 
     def estimate_alpha(self, nfunc):

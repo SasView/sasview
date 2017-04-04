@@ -19,6 +19,7 @@ from sas.sascalc.dataloader.loader import Loader
 import sas.sascalc.dataloader
 from plot_labels import *
 
+logger = logging.getLogger()
 
 class Plugin(PluginBase):
     """
@@ -28,7 +29,7 @@ class Plugin(PluginBase):
 
     def __init__(self):
         PluginBase.__init__(self, name="Correlation Function")
-        logging.info("Correlation function plug-in started")
+        logger.info("Correlation function plug-in started")
         self._always_active = True
         self.state_reader = Reader(self.set_state)
         self._extensions = '.crf'

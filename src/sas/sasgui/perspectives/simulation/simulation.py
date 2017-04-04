@@ -24,6 +24,8 @@ import sas.sascalc.realspace.VolumeCanvas as VolumeCanvas
 from sas.sascalc.data_util.calcthread import CalcThread
 from sas.guicomm.events import NewPlotEvent, StatusEvent    
 
+logger = logging.getLogger()
+
 class Calc1D(CalcThread):
     """
         Thread object to simulate I(q)
@@ -92,7 +94,7 @@ class Plugin:
         # Default save location
         self._default_save_location = os.getcwd()
         # Log startup
-        logging.info("Simulation plug-in started")
+        logger.info("Simulation plug-in started")
         
     def get_panels(self, parent):
         """

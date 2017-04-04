@@ -21,6 +21,8 @@ import warnings
 from lxml import etree
 from xml.dom import minidom
 
+logger = logging.getLogger()
+
 warnings.simplefilter("ignore")
 
 CANSAS_FORMAT = CansasConstants.CANSAS_FORMAT
@@ -56,7 +58,7 @@ class cansas_reader_xml(unittest.TestCase):
 
     def test_invalid_xml(self):
         """
-        Should fail gracefully and send a message to logging.info()
+        Should fail gracefully and send a message to logger.info()
         """
         invalid = StringIO.StringIO('<a><c></b></a>')
         reader = XMLreader(invalid)

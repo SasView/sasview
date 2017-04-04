@@ -18,6 +18,8 @@ import sys
 import logging
 import json
 
+logger = logging.getLogger()
+
 FILE_NAME = 'defaults.json'
 
 def read_associations(loader, settings=FILE_NAME):
@@ -66,7 +68,7 @@ def read_associations(loader, settings=FILE_NAME):
                 except:
                     msg = "read_associations: skipping association"
                     msg += " for %s\n  %s" % (ext.lower(), sys.exc_value)
-                    logging.error(msg)
+                    logger.error(msg)
     else:
         print "Could not find reader association settings\n  %s [%s]" % (__file__, os.getcwd())
          
@@ -80,7 +82,7 @@ def register_readers(registry_function):
 
     :param registry_function: function to be called to register each reader
     """
-    logging.info("register_readers is now obsolete: use read_associations()")
+    logger.info("register_readers is now obsolete: use read_associations()")
     import abs_reader
     import ascii_reader
     import cansas_reader

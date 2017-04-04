@@ -24,6 +24,8 @@ from sas.sasgui.perspectives.invariant.invariant_state import InvariantState as 
 from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
+logger = logging.getLogger()
+
 # The minimum q-value to be used when extrapolating
 Q_MINIMUM = 1e-5
 # The maximum q-value to be used when extrapolating
@@ -459,7 +461,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             try:
                 self._manager.plot_theory(name="Low-Q extrapolation")
             except:
-                logging.error(sys.exc_value)
+                logger.error(sys.exc_value)
 
     def get_high_qstar(self, inv, high_q=False):
         """
@@ -493,7 +495,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             try:
                 self._manager.plot_theory(name="High-Q extrapolation")
             except:
-                logging.error(sys.exc_value)
+                logger.error(sys.exc_value)
 
     def get_qstar(self, inv):
         """
@@ -844,7 +846,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                 value = str(value)
             attr.SetValue(value)
         except:
-            logging.error("Invariant state: %s", sys.exc_value)
+            logger.error("Invariant state: %s", sys.exc_value)
 
     def get_bookmark_by_num(self, num=None):
         """
@@ -861,7 +863,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         try:
             _, _, current_state, comp_state = self.state.bookmark_list[int(num)]
         except:
-            logging.error(sys.exc_value)
+            logger.error(sys.exc_value)
             raise ValueError, "No such bookmark exists"
 
         # set the parameters
@@ -956,7 +958,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             self.state.state_list[str(self.state.state_num)] = \
                     self.state.clone_state()
         except:
-            logging.error(sys.exc_value)
+            logger.error(sys.exc_value)
 
         self._set_undo_flag(True)
         self._set_redo_flag(False)
@@ -1000,7 +1002,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             try:
                 del self.state.state_list[str(i)]
             except:
-                logging.error(sys.exc_value)
+                logger.error(sys.exc_value)
         # Enable the undo button if it was not
         self._set_undo_flag(True)
         self._set_redo_flag(False)
@@ -1065,7 +1067,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             try:
                 del self.state.state_list[str(i)]
             except:
-                logging.error(sys.exc_value)
+                logger.error(sys.exc_value)
 
         # try to add new state of the text changes in the state_list
         try:
@@ -1080,7 +1082,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             self.state.state_num = self.state.saved_state['state_num']
             self.state.state_list[str(self.state.state_num)] = self.state.clone_state()
         except:
-            logging.error(sys.exc_value)
+            logger.error(sys.exc_value)
 
         self._set_undo_flag(True)
         self._set_redo_flag(False)
@@ -1102,7 +1104,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             self.state.saved_state[name] = str(value)
             self.state.state_list[str(self.state.state_num)] = self.state.clone_state()
         except:
-            logging.error(sys.exc_value)
+            logger.error(sys.exc_value)
 
     def _get_input_list(self):
         """

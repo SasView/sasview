@@ -20,6 +20,8 @@ import webbrowser
 import urllib
 import sys
 
+logger = logging.getLogger()
+
 SPHINX_DOC_ENV = "SASVIEW_DOC_PATH"
 WX_SUPPORTS_HTML2 = True
 try:
@@ -70,7 +72,7 @@ class DocumentationWindow(wx.Frame):
         url = "file:///" + urllib.quote(file_path, r'/\:')+ url_instruction
 
         if not os.path.exists(file_path):
-            logging.error("Could not find Sphinx documentation at %s \
+            logger.error("Could not find Sphinx documentation at %s \
             -- has it been built?", file_path)
         elif WX_SUPPORTS_HTML2:
             # Complete HTML/CSS support!
@@ -78,7 +80,7 @@ class DocumentationWindow(wx.Frame):
             self.view.LoadURL(url)
             self.Show()
         else:
-            logging.error("No html2 support, popping up a web browser")
+            logger.error("No html2 support, popping up a web browser")
             #For cases that do not build against current version dependency
             # Wx 3.0 we provide a webbrowser call - this is particularly for
             #Red hat used at SNS for which Wx 3.0 is not available.  This

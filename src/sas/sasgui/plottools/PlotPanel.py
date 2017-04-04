@@ -33,6 +33,8 @@ import numpy
 from sas.sasgui.guiframe.events import StatusEvent
 from .toolbar import NavigationToolBar, PlotPrintout, bind
 
+logger = logging.getLogger()
+
 def show_tree(obj, d=0):
     """Handy function for displaying a tree of graph objects"""
     print "%s%s" % ("-"*d, obj.__class__.__name__)
@@ -1505,7 +1507,7 @@ class PlotPanel(wx.Panel):
                 try:
                     from mpl_toolkits.mplot3d import Axes3D
                 except:
-                    logging.error("PlotPanel could not import Axes3D")
+                    logger.error("PlotPanel could not import Axes3D")
                 self.subplot.figure.clear()
                 ax = Axes3D(self.subplot.figure)
                 if len(X) > 60:

@@ -7,6 +7,10 @@ from sas.sasgui.guiframe.gui_style import GUIFRAME
 import sas.sasview
 import logging
 
+
+logger = logging.getLogger()
+
+
 # Version of the application
 __appname__ = "SasView"
 __version__ = sas.sasview.__version__
@@ -56,7 +60,7 @@ _license = "mailto:help@sasview.org"
 
 
 icon_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "images"))
-logging.info("icon path: %s" % icon_path)
+logger.info("icon path: %s" % icon_path)
 media_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "media"))
 test_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "test"))
 

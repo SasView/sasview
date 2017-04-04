@@ -25,6 +25,8 @@ from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import Data2D
 import time
 
+logger = logging.getLogger()
+
 class DataManager(object):
     """
     Manage a list of data
@@ -135,7 +137,7 @@ class DataManager(object):
             if id  in self.stored_data:
                 msg = "Data manager already stores %s" % str(data.name)
                 msg += ""
-                logging.info(msg)
+                logger.info(msg)
                 data_state = self.stored_data[id]
                 data_state.data = data
             else:

@@ -18,6 +18,8 @@ from sas.sascalc.fit.pluginmodel import Model1DPlugin
 from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 from sasmodels.sasview_model import load_custom_model, load_standard_models
 
+logger = logging.getLogger()
+
 
 PLUGIN_DIR = 'plugin_models'
 PLUGIN_LOG = os.path.join(os.path.expanduser("~"), '.sasview', PLUGIN_DIR,
@@ -167,12 +169,12 @@ def _findModels(dir):
     # Go through files in plug-in directory
     if not os.path.isdir(dir):
         msg = "SasView couldn't locate Model plugin folder %r." % dir
-        logging.warning(msg)
+        logger.warning(msg)
         return {}
 
     plugin_log("looking for models in: %s" % str(dir))
     #compile_file(dir)  #always recompile the folder plugin
-    logging.info("plugin model dir: %s" % str(dir))
+    logger.info("plugin model dir: %s" % str(dir))
 
     plugins = {}
     for filename in os.listdir(dir):
@@ -187,7 +189,7 @@ def _findModels(dir):
                 msg = traceback.format_exc()
                 msg += "\nwhile accessing model in %r" % path
                 plugin_log(msg)
-                logging.warning("Failed to load plugin %r. See %s for details"
+                logger.warning("Failed to load plugin %r. See %s for details"
                                 % (path, PLUGIN_LOG))
             
     return plugins
@@ -260,7 +262,7 @@ class ModelManagerBase:
         temp = {}
         if self.is_changed():
             return  _findModels(dir)
-        logging.info("plugin model : %s" % str(temp))
+        logger.info("plugin model : %s" % str(temp))
         return temp
 
     def _getModelList(self):

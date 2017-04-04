@@ -11,6 +11,8 @@ from wx.lib import newevent
 import wx.richtext
 from sas.sasgui.guiframe.gui_style import GUIFRAME_ICON
 
+logger = logging.getLogger()
+
 # Number of fields on the status bar
 NB_FIELDS = 4
 #position of the status bar's fields
@@ -70,12 +72,12 @@ class ConsolePanel(wx.Panel):
         if hasattr(event, "info"):
             icon_type = event.info.lower()
             if icon_type == "warning":
-                logging.warning(status)
+                logger.warning(status)
                 color = (0, 0, 255) # blue
                 icon_bmp = wx.ArtProvider.GetBitmap(wx.ART_WARNING,
                                                     wx.ART_TOOLBAR)
             if icon_type == "error":
-                logging.error(status)
+                logger.error(status)
                 color = (255, 0, 0) # red
                 icon_bmp = wx.ArtProvider.GetBitmap(wx.ART_ERROR,
                                                     wx.ART_TOOLBAR)

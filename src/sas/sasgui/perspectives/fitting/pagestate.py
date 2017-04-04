@@ -33,6 +33,8 @@ from sas.sascalc.dataloader.readers.cansas_reader import get_content, write_node
 from sas.sascalc.dataloader.data_info import Data2D, Collimation, Detector
 from sas.sascalc.dataloader.data_info import Process, Aperture
 
+logger = logging.getLogger()
+
 # Information to read/write state as xml
 FITTING_NODE_NAME = 'fitting_plug_in'
 CANSAS_NS = "cansas1d/1.0"
@@ -394,7 +396,7 @@ class PageState(object):
                 else:
                     msg = "Save state does not have enough information to load"
                     msg += " the all of the data."
-                    logging.warning(msg=msg)
+                    logger.warning(msg=msg)
             else:
                 self.formfactorcombobox = FIRST_FORM[self.categorycombobox]
 
@@ -619,7 +621,7 @@ class PageState(object):
                 value = content[1]
             except Exception:
                 msg = "Report string expected 'name: value' but got %r" % line
-                logging.error(msg)
+                logger.error(msg)
             if name.count("State created"):
                 repo_time = "" + value
             if name.count("parameter name"):
@@ -661,7 +663,7 @@ class PageState(object):
                         title_name = HEADER % title
                 except Exception:
                     msg = "While parsing 'data: ...'\n"
-                    logging.error(msg + traceback.format_exc())
+                    logger.error(msg + traceback.format_exc())
             if name == "model name ":
                 try:
                     modelname = "Model name:" + content[1]
@@ -677,7 +679,7 @@ class PageState(object):
                     q_range = CENTRE % q_name
                 except Exception:
                     msg = "While parsing 'Plotting Range: ...'\n"
-                    logging.error(msg + traceback.format_exc())
+                    logger.error(msg + traceback.format_exc())
         paramval = ""
         for lines in param_string.split(":"):
             line = lines.split(",")
@@ -1036,7 +1038,7 @@ class PageState(object):
                 except:
                     msg = "PageState.fromXML: Could not"
                     msg += " read timestamp\n %s" % sys.exc_value
-                    logging.error(msg)
+                    logger.error(msg)
 
             if entry is not None:
                 # Parse fitting attributes
@@ -1076,7 +1078,7 @@ class PageState(object):
                                 value = cls.type
                             except Exception:
                                 base = "unable to load distribution %r for %s"
-                                logging.error(base % (value, parameter))
+                                logger.error(base % (value, parameter))
                                 continue
                         _disp_obj_dict = getattr(self, varname)
                         _disp_obj_dict[parameter] = value
@@ -1098,7 +1100,7 @@ class PageState(object):
                                 # pass if line is empty (it happens)
                                 msg = ("Error reading %r from %s %s\n"
                                        % (line, tagname, name))
-                                logging.error(msg + traceback.format_exc())
+                                logger.error(msg + traceback.format_exc())
                         dic[name] = numpy.array(value_list)
                     setattr(self, varname, dic)
 
@@ -1206,7 +1208,7 @@ class Reader(CansasReader):
                 state.from_xml(node=nodes[0])
 
         except:
-            logging.info("XML document does not contain fitting information.\n"
+            logger.info("XML document does not contain fitting information.\n"
                          + traceback.format_exc())
 
         return state

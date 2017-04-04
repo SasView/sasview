@@ -9,6 +9,7 @@
 #
 # Feel free to add more stuff to this as and when it becomes an issue.
 
+.DS_Store
 .project
 .pydevproject
 .vagrant

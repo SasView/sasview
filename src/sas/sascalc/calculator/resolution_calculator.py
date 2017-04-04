@@ -15,6 +15,8 @@ import numpy
 import sys
 import logging
 
+logger = logging.getLogger()
+
 #Plank's constant in cgs unit
 _PLANK_H = 6.62606896E-27
 #Gravitational acc. in cgs unit
@@ -1005,7 +1007,7 @@ class ResolutionCalculator(object):
         try:
             detector_offset = self.sample2detector_distance[1]
         except:
-            logging.error(sys.exc_value)
+            logger.error(sys.exc_value)
 
         # detector size in [no of pix_x,no of pix_y]
         detector_pix_nums_x = self.detector_size[0]
@@ -1092,7 +1094,7 @@ class ResolutionCalculator(object):
             output.qx_data = qx_value
             output.qy_data = qy_value
         except:
-            logging.error(sys.exc_value)
+            logger.error(sys.exc_value)
 
         return output
 

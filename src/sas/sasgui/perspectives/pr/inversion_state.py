@@ -21,6 +21,8 @@ from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sascalc.dataloader.readers.cansas_reader import Reader as CansasReader
 from sas.sascalc.dataloader.readers.cansas_reader import get_content
 
+logger = logging.getLogger()
+
 PRNODE_NAME = 'pr_inversion'
 CANSAS_NS = "cansas1d/1.0"
 
@@ -249,7 +251,7 @@ class InversionState(object):
                 except:
                     msg = "InversionState.fromXML: Could not read "
                     msg += "timestamp\n %s" % sys.exc_value
-                    logging.error(msg)
+                    logger.error(msg)
 
             # Parse inversion inputs
             entry = get_content('ns:inputs', node)
@@ -305,7 +307,7 @@ class InversionState(object):
                         err_msg += "number of coefficients: "
                         err_msg += "%d %d" % (len(self.coefficients),
                                               self.nfunc)
-                        logging.error(err_msg)
+                        logger.error(err_msg)
                         self.coefficients = None
 
                 # Look for covariance matrix
@@ -342,7 +344,7 @@ class InversionState(object):
                         err_msg += "inconsistant dimensions of the "
                         err_msg += " covariance matrix: "
                         err_msg += "%d %d" % (len(self.covariance), self.nfunc)
-                        logging.error(err_msg)
+                        logger.error(err_msg)
                         self.covariance = None
 
 class Reader(CansasReader):
@@ -429,7 +431,7 @@ class Reader(CansasReader):
         except:
             msg = "XML document does not contain P(r) "
             msg += "information.\n %s" % sys.exc_value
-            logging.info(msg)
+            logger.info(msg)
 
         return state
 

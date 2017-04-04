@@ -19,6 +19,8 @@ import logging
 from sas.sascalc.dataloader.data_info import Data2D, Detector
 from sas.sascalc.dataloader.manipulations import reader2D_converter
 
+logger = logging.getLogger()
+
 # Look for unit converter
 has_converter = True
 try:
@@ -141,7 +143,7 @@ class Reader:
                             data.append(val)
                             error.append(err)
                         except:
-                            logging.info("Skipping line:%s,%s" %(data_str,
+                            logger.info("Skipping line:%s,%s" %(data_str,
                                                                 sys.exc_value))
             
             # Initialize
@@ -195,7 +197,7 @@ class Reader:
                     # stored as strings at this point.
                     msg = "Skipping entry (v1.0):%s,%s" % (str(data[i_pt]),
                                                            sys.exc_value)
-                    logging.info(msg)
+                    logger.info(msg)
                 
                 # Get bin number
                 if math.fmod(i_pt, size_x) == 0:
@@ -270,7 +272,7 @@ class Reader:
                 msg = "Danse_reader can't read this file %s" % filename
                 raise ValueError, msg
             else:
-                logging.info("Danse_reader Reading %s \n" % filename)
+                logger.info("Danse_reader Reading %s \n" % filename)
             
             # Store loading process information
             output.meta_data['loader'] = self.type_name
