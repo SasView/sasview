@@ -5,7 +5,7 @@
     
     Jurrian Bakker 
 """
-import numpy
+import numpy as np
 import os
 from sas.sascalc.dataloader.data_info import Data1D
 
@@ -59,20 +59,20 @@ class Reader:
                     raise  RuntimeError, "sesans_reader: cannot open %s" % path
                 buff = input_f.read()
                 lines = buff.splitlines()
-                x  = numpy.zeros(0)
-                y  = numpy.zeros(0)
-                dy = numpy.zeros(0)
-                lam  = numpy.zeros(0)
-                dlam = numpy.zeros(0)
-                dx = numpy.zeros(0)
+                x  = np.zeros(0)
+                y  = np.zeros(0)
+                dy = np.zeros(0)
+                lam  = np.zeros(0)
+                dlam = np.zeros(0)
+                dx = np.zeros(0)
                 
                #temp. space to sort data
-                tx  = numpy.zeros(0)
-                ty  = numpy.zeros(0)
-                tdy = numpy.zeros(0)
-                tlam  = numpy.zeros(0)
-                tdlam = numpy.zeros(0)
-                tdx = numpy.zeros(0)
+                tx  = np.zeros(0)
+                ty  = np.zeros(0)
+                tdy = np.zeros(0)
+                tlam  = np.zeros(0)
+                tdlam = np.zeros(0)
+                tdx = np.zeros(0)
                 output = Data1D(x=x, y=y, lam=lam, dy=dy, dx=dx, dlam=dlam, isSesans=True)
                 self.filename = output.filename = basename
 
@@ -127,7 +127,7 @@ class Reader:
                     dlam.append(float(dlamvals[i]))
 
                 x,y,lam,dy,dx,dlam = [
-                   numpy.asarray(v, 'double')
+                    np.asarray(v, 'double')
                    for v in (x,y,lam,dy,dx,dlam)
                 ]
 

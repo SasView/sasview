@@ -4,7 +4,7 @@ Base Page for fitting
 import sys
 import os
 import wx
-import numpy
+import numpy as np
 import time
 import copy
 import math
@@ -99,7 +99,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.uid = wx.NewId()
         self.graph_id = None
         # Q range for data set
-        self.qmin_data_set = numpy.inf
+        self.qmin_data_set = np.inf
         self.qmax_data_set = None
         self.npts_data_set = 0
         # Q range
@@ -119,8 +119,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.dxl = None
         self.dxw = None
         # pinhole smear
-        self.dx_min = None
-        self.dx_max = None
+        self.dx_percent = None
         # smear attrbs
         self.enable_smearer = None
         self.disable_smearer = None
@@ -278,7 +277,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         :warning: This data is never plotted.
 
         """
-        x = numpy.linspace(start=self.qmin_x, stop=self.qmax_x,
+        x = np.linspace(start=self.qmin_x, stop=self.qmax_x,
                            num=self.npts_x, endpoint=True)
         self.data = Data1D(x=x)
         self.data.xaxis('\\rm{Q}', "A^{-1}")
@@ -295,16 +294,16 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         """
         if self.qmin_x >= 1.e-10:
-            qmin = numpy.log10(self.qmin_x)
+            qmin = np.log10(self.qmin_x)
         else:
             qmin = -10.
 
         if self.qmax_x <= 1.e10:
-            qmax = numpy.log10(self.qmax_x)
+            qmax = np.log10(self.qmax_x)
         else:
             qmax = 10.
 
-        x = numpy.logspace(start=qmin, stop=qmax,
+        x = np.logspace(start=qmin, stop=qmax,
                            num=self.npts_x, endpoint=True, base=10.0)
         self.data = Data1D(x=x)
         self.data.xaxis('\\rm{Q}', "A^{-1}")
@@ -341,25 +340,25 @@ class BasicPage(ScrolledPanel, PanelBase):
         ymin = -qmax
         qstep = self.npts_x
 
-        x = numpy.linspace(start=xmin, stop=xmax, num=qstep, endpoint=True)
-        y = numpy.linspace(start=ymin, stop=ymax, num=qstep, endpoint=True)
+        x = np.linspace(start=xmin, stop=xmax, num=qstep, endpoint=True)
+        y = np.linspace(start=ymin, stop=ymax, num=qstep, endpoint=True)
         # use data info instead
-        new_x = numpy.tile(x, (len(y), 1))
-        new_y = numpy.tile(y, (len(x), 1))
+        new_x = np.tile(x, (len(y), 1))
+        new_y = np.tile(y, (len(x), 1))
         new_y = new_y.swapaxes(0, 1)
         # all data reuire now in 1d array
         qx_data = new_x.flatten()
         qy_data = new_y.flatten()
-        q_data = numpy.sqrt(qx_data * qx_data + qy_data * qy_data)
+        q_data = np.sqrt(qx_data * qx_data + qy_data * qy_data)
         # set all True (standing for unmasked) as default
-        mask = numpy.ones(len(qx_data), dtype=bool)
+        mask = np.ones(len(qx_data), dtype=bool)
         # store x and y bin centers in q space
         x_bins = x
         y_bins = y
 
         self.data.source = Source()
-        self.data.data = numpy.ones(len(mask))
-        self.data.err_data = numpy.ones(len(mask))
+        self.data.data = np.ones(len(mask))
+        self.data.err_data = np.ones(len(mask))
         self.data.qx_data = qx_data
         self.data.qy_data = qy_data
         self.data.q_data = q_data
@@ -783,7 +782,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 except Exception:
                     # Skip non-data lines
                     logging.error(traceback.format_exc())
-            return numpy.array(angles), numpy.array(weights)
+            return np.array(angles), np.array(weights)
         except:
             raise
 
@@ -848,8 +847,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         self.state.pinhole_smearer = \
                                 copy.deepcopy(self.pinhole_smearer.GetValue())
-        self.state.dx_max = copy.deepcopy(self.dx_max)
-        self.state.dx_min = copy.deepcopy(self.dx_min)
+        self.state.dx_percent = copy.deepcopy(self.dx_percent)
         self.state.dxl = copy.deepcopy(self.dxl)
         self.state.dxw = copy.deepcopy(self.dxw)
         self.state.slit_smearer = copy.deepcopy(self.slit_smearer.GetValue())
@@ -1246,12 +1244,11 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         # we have two more options for smearing
         if self.pinhole_smearer.GetValue():
-            self.dx_min = state.dx_min
-            self.dx_max = state.dx_max
-            if self.dx_min is not None:
-                self.smear_pinhole_min.SetValue(str(self.dx_min))
-            if self.dx_max is not None:
-                self.smear_pinhole_max.SetValue(str(self.dx_max))
+            self.dx_percent = state.dx_percent
+            if self.dx_percent is not None:
+                if state.dx_old:
+                    self.dx_percent = 100 * (self.dx_percent / self.data.x[0])
+                self.smear_pinhole_percent.SetValue("%.2f" % self.dx_percent)
             self.onPinholeSmear(event=None)
         elif self.slit_smearer.GetValue():
             self.dxl = state.dxl
@@ -1451,19 +1448,6 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.create_default_data()
                 self.state_change = True
                 self._draw_model()
-                # Time delay has been introduced to prevent _handle error
-                # on Windows
-                # This part of code is executed when model is selected and
-                # it's parameters are changed (with respect to previously
-                # selected model). There are two Iq evaluations occuring one
-                # after another and therefore there may be compilation error
-                # if model is calculated for the first time.
-                # This seems to be Windows only issue - haven't tested on Linux
-                # though.The proper solution (other than time delay) requires
-                # more fundemental code refatoring
-                # Wojtek P. Nov 7, 2016
-                if not ON_MAC:
-                    time.sleep(0.1)
                 self.Refresh()
 
         # logging.info("is_modified flag set to %g",is_modified)
@@ -2122,13 +2106,13 @@ class BasicPage(ScrolledPanel, PanelBase):
             return flag
         for data in self.data_list:
             # q value from qx and qy
-            radius = numpy.sqrt(data.qx_data * data.qx_data +
+            radius = np.sqrt(data.qx_data * data.qx_data +
                                 data.qy_data * data.qy_data)
             # get unmasked index
             index_data = (float(self.qmin.GetValue()) <= radius) & \
                          (radius <= float(self.qmax.GetValue()))
             index_data = (index_data) & (data.mask)
-            index_data = (index_data) & (numpy.isfinite(data.data))
+            index_data = (index_data) & (np.isfinite(data.data))
 
             if len(index_data[index_data]) < 10:
                 # change the color pink.
@@ -2163,7 +2147,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             # get unmasked index
             index_data = (float(self.qmin.GetValue()) <= radius) & \
                          (radius <= float(self.qmax.GetValue()))
-            index_data = (index_data) & (numpy.isfinite(data.y))
+            index_data = (index_data) & (np.isfinite(data.y))
 
             if len(index_data[index_data]) < 5:
                 # change the color pink.
@@ -2235,8 +2219,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                     continue
 
                 # Check that min is less than max
-                low = -numpy.inf if min_str == "" else float(min_str)
-                high = numpy.inf if max_str == "" else float(max_str)
+                low = -np.inf if min_str == "" else float(min_str)
+                high = np.inf if max_str == "" else float(max_str)
                 if high < low:
                     min_ctrl.SetBackgroundColour("pink")
                     min_ctrl.Refresh()
@@ -2611,18 +2595,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         :Note: Mac seems to like this better when self.
             Layout is called after fitting.
         """
-        self._sleep4sec()
         self.Layout()
         return
-
-    def _sleep4sec(self):
-        """
-            sleep for 1 sec only applied on Mac
-            Note: This 1sec helps for Mac not to crash on self.
-            Layout after self._draw_model
-        """
-        if ON_MAC:
-            time.sleep(1)
 
     def _find_polyfunc_selection(self, disp_func=None):
         """
@@ -2656,7 +2630,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             y = max(math.fabs(self.data.ymin), math.fabs(self.data.ymax))
             self.qmin_x = data_min
             self.qmax_x = math.sqrt(x * x + y * y)
-            # self.data.mask = numpy.ones(len(self.data.data),dtype=bool)
+            # self.data.mask = np.ones(len(self.data.data),dtype=bool)
             # check smearing
             if not self.disable_smearer.GetValue():
                 # set smearing value whether or
@@ -3368,8 +3342,8 @@ class BasicPage(ScrolledPanel, PanelBase):
             disp_model = dispersity()
 
             if value[1] == 'array':
-                pd_vals = numpy.array(value[2])
-                pd_weights = numpy.array(value[3])
+                pd_vals = np.array(value[2])
+                pd_weights = np.array(value[3])
                 if len(pd_vals) == 0 or len(pd_vals) != len(pd_weights):
                     msg = ("bad array distribution parameters for %s"
                            % param_name)

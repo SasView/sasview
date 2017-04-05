@@ -8,7 +8,7 @@
 #copyright 2008, University of Tennessee
 ######################################################################
 
-import numpy
+import numpy as np
 import os
 from sas.sascalc.dataloader.data_info import Data1D
 from sas.sascalc.dataloader.data_info import Detector
@@ -52,10 +52,10 @@ class Reader:
                     raise  RuntimeError, "abs_reader: cannot open %s" % path
                 buff = input_f.read()
                 lines = buff.split('\n')
-                x  = numpy.zeros(0)
-                y  = numpy.zeros(0)
-                dy = numpy.zeros(0)
-                dx = numpy.zeros(0)
+                x  = np.zeros(0)
+                y  = np.zeros(0)
+                dy = np.zeros(0)
+                dx = np.zeros(0)
                 output = Data1D(x, y, dy=dy, dx=dx)
                 detector = Detector()
                 output.detector.append(detector)
@@ -203,10 +203,10 @@ class Reader:
                                 _y = data_conv_i(_y, units=output.y_unit)
                                 _dy = data_conv_i(_dy, units=output.y_unit)
                            
-                            x = numpy.append(x, _x)
-                            y = numpy.append(y, _y)
-                            dy = numpy.append(dy, _dy)
-                            dx = numpy.append(dx, _dx)
+                            x = np.append(x, _x)
+                            y = np.append(y, _y)
+                            dy = np.append(dy, _dy)
+                            dx = np.append(dx, _dx)
                             
                         except:
                             # Could not read this data line. If we are here

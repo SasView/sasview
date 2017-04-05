@@ -17,7 +17,7 @@ import sys
 import wx
 import copy
 import logging
-import numpy
+import numpy as np
 import traceback
 
 import xml.dom.minidom
@@ -73,8 +73,7 @@ LIST_OF_STATE_ATTRIBUTES = [["qmin", "qmin", "float"],
                             ["smear_type", "smear_type", "string"],
                             ["dq_l", "dq_l", "float"],
                             ["dq_r", "dq_r", "float"],
-                            ["dx_max", "dx_max", "float"],
-                            ["dx_min", "dx_min", "float"],
+                            ["dx_percent", "dx_percent", "float"],
                             ["dxl", "dxl", "float"],
                             ["dxw", "dxw", "float"]]
 
@@ -214,8 +213,8 @@ class PageState(object):
         self.smear_type = None
         self.dq_l = None
         self.dq_r = None
-        self.dx_max = None
-        self.dx_min = None
+        self.dx_percent = None
+        self.dx_old = False
         self.dxl = None
         self.dxw = None
         # list of dispersion parameters
@@ -342,8 +341,8 @@ class PageState(object):
         obj.dI_idata = copy.deepcopy(self.dI_idata)
         obj.dq_l = copy.deepcopy(self.dq_l)
         obj.dq_r = copy.deepcopy(self.dq_r)
-        obj.dx_max = copy.deepcopy(self.dx_max)
-        obj.dx_min = copy.deepcopy(self.dx_min)
+        obj.dx_percent = copy.deepcopy(self.dx_percent)
+        obj.dx_old = copy.deepcopy(self.dx_old)
         obj.dxl = copy.deepcopy(self.dxl)
         obj.dxw = copy.deepcopy(self.dxw)
         obj.disp_box = copy.deepcopy(self.disp_box)
@@ -410,16 +409,16 @@ class PageState(object):
         p = dict()
         for fittable, name, value, _, uncert, lower, upper, units in params:
             if not value:
-                value = numpy.nan
+                value = np.nan
             if not uncert or uncert[1] == '' or uncert[1] == 'None':
                 uncert[0] = False
-                uncert[1] = numpy.nan
+                uncert[1] = np.nan
             if not upper or upper[1] == '' or upper[1] == 'None':
                 upper[0] = False
-                upper[1] = numpy.nan
+                upper[1] = np.nan
             if not lower or lower[1] == '' or lower[1] == 'None':
                 lower[0] = False
-                lower[1] = numpy.nan
+                lower[1] = np.nan
             if is_string:
                 p[name] = str(value)
             else:
@@ -449,15 +448,15 @@ class PageState(object):
                 upper = params.get(name + ".upper", 'inf')
                 lower = params.get(name + ".lower", '-inf')
                 units = params.get(name + ".units")
-                if std is not None and std is not numpy.nan:
+                if std is not None and std is not np.nan:
                     std = [True, str(std)]
                 else:
                     std = [False, '']
-                if lower is not None and lower is not numpy.nan:
+                if lower is not None and lower is not np.nan:
                     lower = [True, str(lower)]
                 else:
                     lower = [True, '-inf']
-                if upper is not None and upper is not numpy.nan:
+                if upper is not None and upper is not np.nan:
                     upper = [True, str(upper)]
                 else:
                     upper = [True, 'inf']
@@ -561,8 +560,7 @@ class PageState(object):
         rep += "Smear type : %s\n" % self.smear_type
         rep += "dq_l  : %s\n" % self.dq_l
         rep += "dq_r  : %s\n" % self.dq_r
-        rep += "dx_max  : %s\n" % str(self.dx_max)
-        rep += "dx_min : %s\n" % str(self.dx_min)
+        rep += "dx_percent  : %s\n" % str(self.dx_percent)
         rep += "dxl  : %s\n" % str(self.dxl)
         rep += "dxw : %s\n" % str(self.dxw)
         rep += "model  : %s\n\n" % str(self.model)
@@ -820,7 +818,7 @@ class PageState(object):
                     entry_node.appendChild(top_element)
 
         attr = newdoc.createAttribute("version")
-        import sasview
+        from sas import sasview
         attr.nodeValue = sasview.__version__
         # attr.nodeValue = '1.0'
         top_element.setAttributeNode(attr)
@@ -1047,9 +1045,16 @@ class PageState(object):
                     node = get_content('ns:%s' % item[0], entry)
                     setattr(self, item[0], parse_entry_helper(node, item))
 
+                dx_old_node = get_content('ns:%s' % 'dx_min', entry)
                 for item in LIST_OF_STATE_ATTRIBUTES:
-                    node = get_content('ns:%s' % item[0], entry)
-                    setattr(self, item[0], parse_entry_helper(node, item))
+                    if item[0] == "dx_percent" and dx_old_node is not None:
+                        dxmin = ["dx_min", "dx_min", "float"]
+                        setattr(self, item[0], parse_entry_helper(dx_old_node,
+                                                                  dxmin))
+                        self.dx_old = True
+                    else:
+                        node = get_content('ns:%s' % item[0], entry)
+                        setattr(self, item[0], parse_entry_helper(node, item))
 
                 for item in LIST_OF_STATE_PARAMETERS:
                     node = get_content("ns:%s" % item[0], entry)
@@ -1094,7 +1099,7 @@ class PageState(object):
                                 msg = ("Error reading %r from %s %s\n"
                                        % (line, tagname, name))
                                 logging.error(msg + traceback.format_exc())
-                        dic[name] = numpy.array(value_list)
+                        dic[name] = np.array(value_list)
                     setattr(self, varname, dic)
 
     def set_plot_state(self, figs, canvases):

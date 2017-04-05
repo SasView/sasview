@@ -32,23 +32,21 @@ _acknowledgement_preamble =\
 '''To ensure the long term support and development of this software please''' +\
 ''' remember to:'''
 _acknowledgement_preamble_bullet1 =\
-'''Acknowledge its use in your publications as suggested below;'''
+'''Acknowledge its use in your publications as :'''
 _acknowledgement_preamble_bullet2 =\
-'''Reference SasView as : M. Doucet, et al. SasView Version 4.0, Zenodo''' +\
-''', http://doi.org/10.5281/zenodo.159083;'''
+'''Reference SasView as:'''
 _acknowledgement_preamble_bullet3 =\
-'''Reference the model you used if appropriate (see documentation for refs);'''
+'''Reference the model you used if appropriate (see documentation for refs)'''
 _acknowledgement_preamble_bullet4 =\
 '''Send us your reference for our records: developers@sasview.org'''
 _acknowledgement_publications = \
-'''This work benefited from the use of the SasView application, originally developed under NSF Award 
-DMR-0520547. SasView also contains code developed with funding from the EU Horizon 2020 programme 
-under the SINE2020 project Grant No 654000, and by Patrick O'Brien & Adam Washington.'''
+'''This work benefited from the use of the SasView application, originally developed under NSF Award DMR-0520547. SasView also contains code developed with funding from the EU Horizon 2020 programme under the SINE2020 project Grant No 654000.'''
+_acknowledgement_citation = \
+'''M. Doucet et al. SasView Version 4.1, Zenodo, 10.5281/zenodo.438138'''
 
 _acknowledgement =  \
-'''This work was originally developed as part of the DANSE project funded by the US NSF under Award DMR-0520547, but is currently maintained 
-by a collaboration between UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO and TU Delft. SasView also contains code developed with funding from the 
-EU Horizon 2020 programme under the SINE2020 project (Grant No 654000), and by Patrick O'Brien (pycrust) and Adam Washington (corfunc-py).'''
+'''This work was originally developed as part of the DANSE project funded by the US NSF under Award DMR-0520547,\n but is currently maintained by a collaboration between UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft, DLS, and the scattering community.\n\n SasView also contains code developed with funding from the EU Horizon 2020 programme under the SINE2020 project (Grant No 654000).\nA list of individual contributors can be found at: https://github.com/orgs/SasView/people
+'''
 
 _homepage = "http://www.sasview.org"
 _download = __download_page__
@@ -71,6 +69,7 @@ _ess_logo = os.path.join(icon_path, "ess_logo.png")
 _ill_logo = os.path.join(icon_path, "ill_logo.png")
 _ansto_logo = os.path.join(icon_path, "ansto_logo.png")
 _tudelft_logo = os.path.join(icon_path, "tudelft_logo.png")
+_dls_logo = os.path.join(icon_path, "dls_logo.png")
 _nsf_logo = os.path.join(icon_path, "nsf_logo.png")
 _danse_logo = os.path.join(icon_path, "danse_logo.png")
 _inst_logo = os.path.join(icon_path, "utlogo.gif")
@@ -84,11 +83,12 @@ _ess_url = "http://ess-scandinavia.eu/"
 _ill_url = "http://www.ill.eu/"
 _ansto_url = "http://www.ansto.gov.au/"
 _tudelft_url = "http://www.tnw.tudelft.nl/en/cooperation/facilities/reactor-instituut-delft/"
+_dls_url = "http://www.diamond.ac.uk/"
 _danse_url = "http://www.cacr.caltech.edu/projects/danse/release/index.html"
 _inst_url = "http://www.utk.edu"
 _corner_image = os.path.join(icon_path, "angles_flat.png")
 _welcome_image = os.path.join(icon_path, "SVwelcome.png")
-_copyright = "(c) 2009 - 2016, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO and TU Delft"
+_copyright = "(c) 2009 - 2017, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft and DLS"
 marketplace_url = "http://marketplace.sasview.org/"
 
 #edit the list of file state your plugin can read

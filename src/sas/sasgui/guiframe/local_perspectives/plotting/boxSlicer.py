@@ -1,6 +1,6 @@
 import wx
 import math
-import numpy
+import numpy as np
 from sas.sasgui.guiframe.events import NewPlotEvent
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.events import SlicerParameterEvent
@@ -357,9 +357,9 @@ class HorizontalLines(_BaseInteractor):
         """
         # # Reset x, y- coordinates if send as parameters
         if x != None:
-            self.x = numpy.sign(self.x) * math.fabs(x)
+            self.x = np.sign(self.x) * math.fabs(x)
         if y != None:
-            self.y = numpy.sign(self.y) * math.fabs(y)
+            self.y = np.sign(self.y) * math.fabs(y)
         # # Draw lines and markers
         self.inner_marker.set(xdata=[0], ydata=[self.y])
         self.top_line.set(xdata=[self.x, -self.x], ydata=[self.y, self.y])
@@ -464,9 +464,9 @@ class VerticalLines(_BaseInteractor):
         """
         # # reset x, y -coordinates if given as parameters
         if x != None:
-            self.x = numpy.sign(self.x) * math.fabs(x)
+            self.x = np.sign(self.x) * math.fabs(x)
         if y != None:
-            self.y = numpy.sign(self.y) * math.fabs(y)
+            self.y = np.sign(self.y) * math.fabs(y)
         # # draw lines and markers
         self.inner_marker.set(xdata=[self.x], ydata=[0])
         self.left_line.set(xdata=[-self.x, -self.x], ydata=[self.y, -self.y])

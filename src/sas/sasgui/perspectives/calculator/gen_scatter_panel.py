@@ -6,7 +6,7 @@ This module relies on guiframe manager.
 import wx
 import sys
 import os
-import numpy
+import numpy as np
 #import math
 import wx.aui as aui
 #import wx.lib.agw.aui as aui
@@ -740,8 +740,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         if output.pix_type == 'atom':
             marker = 'o'
             m_size = 3.5
-        sld_tot = (numpy.fabs(sld_mx) + numpy.fabs(sld_my) + \
-                   numpy.fabs(sld_mz) + numpy.fabs(output.sld_n))
+        sld_tot = (np.fabs(sld_mx) + np.fabs(sld_my) + \
+                   np.fabs(sld_mz) + np.fabs(output.sld_n))
         is_nonzero = sld_tot > 0.0
         is_zero = sld_tot == 0.0
         # I. Plot null points
@@ -756,17 +756,17 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             sld_mz = sld_mz[is_nonzero]
             pix_symbol = output.pix_symbol[is_nonzero]
         # II. Plot selective points in color
-        other_color = numpy.ones(len(pix_symbol), dtype='bool')
+        other_color = np.ones(len(pix_symbol), dtype='bool')
         for key in color_dic.keys():
             chosen_color = pix_symbol == key
-            if numpy.any(chosen_color):
+            if np.any(chosen_color):
                 other_color = other_color & (chosen_color != True)
                 color = color_dic[key]
                 ax.plot(pos_x[chosen_color], pos_z[chosen_color],
                         pos_y[chosen_color], marker, c=color, alpha=0.5,
                         markeredgecolor=color, markersize=m_size, label=key)
         # III. Plot All others        
-        if numpy.any(other_color):
+        if np.any(other_color):
             a_name = ''
             if output.pix_type == 'atom':
                 # Get atom names not in the list
@@ -794,9 +794,9 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                 """
                 draw magnetic vectors w/arrow
                 """
-                max_mx = max(numpy.fabs(sld_mx))
-                max_my = max(numpy.fabs(sld_my))
-                max_mz = max(numpy.fabs(sld_mz))
+                max_mx = max(np.fabs(sld_mx))
+                max_my = max(np.fabs(sld_my))
+                max_mz = max(np.fabs(sld_mz))
                 max_m = max(max_mx, max_my, max_mz)
                 try:
                     max_step = max(output.xstepsize, output.ystepsize,
@@ -811,16 +811,16 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                         unit_y2 = sld_my / max_m
                         unit_z2 = sld_mz / max_m
                         # 0.8 is for avoiding the color becomes white=(1,1,1))
-                        color_x = numpy.fabs(unit_x2 * 0.8)
-                        color_y = numpy.fabs(unit_y2 * 0.8)
-                        color_z = numpy.fabs(unit_z2 * 0.8)
+                        color_x = np.fabs(unit_x2 * 0.8)
+                        color_y = np.fabs(unit_y2 * 0.8)
+                        color_z = np.fabs(unit_z2 * 0.8)
                         x2 = pos_x + unit_x2 * max_step
                         y2 = pos_y + unit_y2 * max_step
                         z2 = pos_z + unit_z2 * max_step
-                        x_arrow = numpy.column_stack((pos_x, x2))
-                        y_arrow = numpy.column_stack((pos_y, y2))
-                        z_arrow = numpy.column_stack((pos_z, z2))
-                        colors = numpy.column_stack((color_x, color_y, color_z))
+                        x_arrow = np.column_stack((pos_x, x2))
+                        y_arrow = np.column_stack((pos_y, y2))
+                        z_arrow = np.column_stack((pos_z, z2))
+                        colors = np.column_stack((color_x, color_y, color_z))
                         arrows = Arrow3D(panel, x_arrow, z_arrow, y_arrow,
                                         colors, mutation_scale=10, lw=1,
                                         arrowstyle="->", alpha=0.5)
@@ -879,11 +879,11 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             self.set_input_params()
             if self.is_avg or self.is_avg == None:
                 self._create_default_1d_data()
-                i_out = numpy.zeros(len(self.data.y))
+                i_out = np.zeros(len(self.data.y))
                 inputs = [self.data.x, [], i_out]
             else:
                 self._create_default_2d_data()
-                i_out = numpy.zeros(len(self.data.data))
+                i_out = np.zeros(len(self.data.data))
                 inputs = [self.data.qx_data, self.data.qy_data, i_out]
 
             msg = "Computation is in progress..."
@@ -988,7 +988,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         Gen compute complete function
         :Param input: input list [qx_data, qy_data, i_out]
         """
-        out = numpy.empty(0)
+        out = np.empty(0)
         #s = time.time()
         for ind in range(len(input[0])):
             if self.is_avg:
@@ -997,7 +997,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                     time.sleep(0.1)
                 inputi = [input[0][ind:ind + 1], [], input[2][ind:ind + 1]]
                 outi = self.model.run(inputi)
-                out = numpy.append(out, outi)
+                out = np.append(out, outi)
             else:
                 if ind % 50 == 0  and update != None:
                     update()
@@ -1005,7 +1005,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                 inputi = [input[0][ind:ind + 1], input[1][ind:ind + 1],
                           input[2][ind:ind + 1]]
                 outi = self.model.runXY(inputi)
-                out = numpy.append(out, outi)
+                out = np.append(out, outi)
         #print time.time() - s
         if self.is_avg or self.is_avg == None:
             self._draw1D(out)
@@ -1026,7 +1026,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         self.qmax_x = float(self.qmax_ctl.GetValue())
         self.npts_x = int(float(self.npt_ctl.GetValue()))
         self.data = Data2D()
-        qmax = self.qmax_x #/ numpy.sqrt(2)
+        qmax = self.qmax_x #/ np.sqrt(2)
         self.data.xaxis('\\rm{Q_{x}}', '\AA^{-1}')
         self.data.yaxis('\\rm{Q_{y}}', '\AA^{-1}')
         self.data.is_data = False
@@ -1047,24 +1047,24 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         ymin = -qmax
         qstep = self.npts_x
 
-        x = numpy.linspace(start=xmin, stop=xmax, num=qstep, endpoint=True)
-        y = numpy.linspace(start=ymin, stop=ymax, num=qstep, endpoint=True)
+        x = np.linspace(start=xmin, stop=xmax, num=qstep, endpoint=True)
+        y = np.linspace(start=ymin, stop=ymax, num=qstep, endpoint=True)
         ## use data info instead
-        new_x = numpy.tile(x, (len(y), 1))
-        new_y = numpy.tile(y, (len(x), 1))
+        new_x = np.tile(x, (len(y), 1))
+        new_y = np.tile(y, (len(x), 1))
         new_y = new_y.swapaxes(0, 1)
         # all data reuire now in 1d array
         qx_data = new_x.flatten()
         qy_data = new_y.flatten()
-        q_data = numpy.sqrt(qx_data * qx_data + qy_data * qy_data)
+        q_data = np.sqrt(qx_data * qx_data + qy_data * qy_data)
         # set all True (standing for unmasked) as default
-        mask = numpy.ones(len(qx_data), dtype=bool)
+        mask = np.ones(len(qx_data), dtype=bool)
         # store x and y bin centers in q space
         x_bins = x
         y_bins = y
         self.data.source = Source()
-        self.data.data = numpy.ones(len(mask))
-        self.data.err_data = numpy.ones(len(mask))
+        self.data.data = np.ones(len(mask))
+        self.data.err_data = np.ones(len(mask))
         self.data.qx_data = qx_data
         self.data.qy_data = qy_data
         self.data.q_data = q_data
@@ -1083,24 +1083,24 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         Only when the page is on theory mode.
         :warning: This data is never plotted.
                     residuals.x = data_copy.x[index]
-            residuals.dy = numpy.ones(len(residuals.y))
+            residuals.dy = np.ones(len(residuals.y))
             residuals.dx = None
             residuals.dxl = None
             residuals.dxw = None
         """
         self.qmax_x = float(self.qmax_ctl.GetValue())
         self.npts_x = int(float(self.npt_ctl.GetValue()))
-        qmax = self.qmax_x #/ numpy.sqrt(2)
+        qmax = self.qmax_x #/ np.sqrt(2)
         ## Default values
         xmax = qmax
         xmin = qmax * _Q1D_MIN
         qstep = self.npts_x
-        x = numpy.linspace(start=xmin, stop=xmax, num=qstep, endpoint=True)
+        x = np.linspace(start=xmin, stop=xmax, num=qstep, endpoint=True)
         # store x and y bin centers in q space
         #self.data.source = Source()
-        y = numpy.ones(len(x))
-        dy = numpy.zeros(len(x))
-        dx = numpy.zeros(len(x))
+        y = np.ones(len(x))
+        dy = np.zeros(len(x))
+        dx = np.zeros(len(x))
         self.data = Data1D(x=x, y=y)
         self.data.dx = dx
         self.data.dy = dy
@@ -1170,7 +1170,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         qmin = 0.0
         state = None
 
-        numpy.nan_to_num(image)
+        np.nan_to_num(image)
         new_plot = Data2D(image=image, err_image=data.err_data)
         new_plot.name = model.name + '2d'
         new_plot.title = "Generic model 2D "
@@ -1639,9 +1639,9 @@ class OmfPanel(ScrolledPanel, PanelBase):
         for ctr_list in self.slds:
             for key in sld_list.keys():
                 if ctr_list[0] == key:
-                    min_val = numpy.min(sld_list[key])
-                    max_val = numpy.max(sld_list[key])
-                    mean_val = numpy.mean(sld_list[key])
+                    min_val = np.min(sld_list[key])
+                    max_val = np.max(sld_list[key])
+                    mean_val = np.mean(sld_list[key])
                     enable = (min_val == max_val) and \
                              sld_data.pix_type == 'pixel'
                     ctr_list[1].SetValue(format_number(mean_val, True))
@@ -1732,7 +1732,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
                     item[1].SetBackgroundColour("pink")
                     npts = -1
                     break
-                if numpy.isfinite(n_val):
+                if np.isfinite(n_val):
                     npts *= int(n_val)
             if npts > 0:
                 nop = self.set_npts_from_slddata()
@@ -1769,7 +1769,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
                         item[1].SetBackgroundColour("pink")
                         ctl.Refresh()
                         return
-                    if numpy.isfinite(s_val):
+                    if np.isfinite(s_val):
                         s_size *= s_val
                 self.sld_data.set_pixel_volumes(s_size)
                 if ctl.IsEnabled():
@@ -1786,7 +1786,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         """
         try:
             sld_data = self.parent.get_sld_from_omf()
-            #nop = (nop * numpy.pi) / 6
+            #nop = (nop * np.pi) / 6
             nop = len(sld_data.sld_n)
         except:
             nop = None

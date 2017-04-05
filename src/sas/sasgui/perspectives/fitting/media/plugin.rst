@@ -364,6 +364,9 @@ implicit to all models, so they do not need to be included in the parameter tabl
   - the limits will show up as the default limits for the fit making it easy,
     for example, to force the radius to always be greater than zero.
 
+  - these are hard limits defining the valid range of parameter values;
+    polydisperity distributions will be truncated at the limits.
+
 - **"type"** can be one of: "", "sld", "volume", or "orientation".
 
   - "sld" parameters can have magnetic moments when fitting magnetic models;

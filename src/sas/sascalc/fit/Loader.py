@@ -1,7 +1,7 @@
 # class Loader  to load any king of file
 #import wx
 #import string
-import numpy
+import numpy as np
 
 class Load:
     """
@@ -51,7 +51,7 @@ class Load:
                     self.x.append(x)
                     self.y.append(y)
                     self.dy.append(dy)
-                    self.dx = numpy.zeros(len(self.x))
+                    self.dx = np.zeros(len(self.x))
                 except:
                     print "READ ERROR", line
             # Sanity check

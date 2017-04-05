@@ -8,7 +8,7 @@ import shutil
 from setuptools import setup, Extension
 from distutils.command.build_ext import build_ext
 from distutils.core import Command
-import numpy
+import numpy as np
 
 # Manage version number ######################################
 import sasview
@@ -224,7 +224,7 @@ package_dir["sas.sascalc.file_converter"] = os.path.join("src","sas", "sascalc",
 packages.extend(["sas.sascalc.file_converter","sas.sascalc.file_converter.core"])
 ext_modules.append( Extension("sas.sascalc.file_converter.core.bsl_loader",
                               sources = [os.path.join(mydir, "bsl_loader.c")],
-                              include_dirs=[numpy.get_include()],
+                              include_dirs=[np.get_include()],
                               ) )
 
 #sas.sascalc.corfunc
@@ -314,9 +314,14 @@ package_data['sas.sasview'] = ['images/*',
                                'test/*.txt',
                                'test/1d_data/*',
                                'test/2d_data/*',
+                               'test/convertible_files/*',
+                               'test/coordinate_data/*',
+                               'test/image_data/*',
+                               'test/media/*',
+                               'test/other_files/*',
                                'test/save_states/*',
-                               'test/upcoming_formats/*',
-                                 'default_categories.json']
+                               'test/sesans_data/*'
+                               ]
 packages.append("sas.sasview")
 
 required = [

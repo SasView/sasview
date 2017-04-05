@@ -18,7 +18,7 @@ their distribution as a function of D_max.
 
 
 import wx
-import numpy
+import numpy as np
 import logging
 import sys
 
@@ -64,10 +64,10 @@ class OutputPlot(PlotPanel):
         self.npts = DEFAULT_NPTS
 
         step = (self.max - self.min) / (self.npts - 1)
-        self.x = numpy.arange(self.min, self.max + step * 0.01, step)
-        dx = numpy.zeros(len(self.x))
-        y = numpy.ones(len(self.x))
-        dy = numpy.zeros(len(self.x))
+        self.x = np.arange(self.min, self.max + step * 0.01, step)
+        dx = np.zeros(len(self.x))
+        y = np.ones(len(self.x))
+        dy = np.zeros(len(self.x))
 
         # Plot area
         self.plot = Model1D(self.x, y=y, dy=dy)

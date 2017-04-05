@@ -929,7 +929,8 @@ class Reader(XMLreader):
         else:
             self._write_data(datainfo, entry_node)
         # Transmission Spectrum Info
-        self._write_trans_spectrum(datainfo, entry_node)
+        # TODO: fix the writer to linearize all data, including T_spectrum
+        # self._write_trans_spectrum(datainfo, entry_node)
         # Sample info
         self._write_sample_info(datainfo, entry_node)
         # Instrument info
