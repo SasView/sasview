@@ -18,7 +18,7 @@ try:
     import Image
     HAS_IMAGE = True
 except:
-    print "IMAGE TESTS WILL NOT BE PERFORMED: MISSING PIL MODULE"
+    logger.info("IMAGE TESTS WILL NOT BE PERFORMED: MISSING PIL MODULE")
     
 import os.path
 
