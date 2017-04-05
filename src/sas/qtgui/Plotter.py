@@ -69,6 +69,11 @@ class PlotterWidget(PlotterBase):
 
         is_fit = (self.data.id=="fit")
 
+        # Transform data if required.
+        # TODO: it properly!
+        #if data.xtransform is not None or data.ytransform is not None:
+        #    a, b, c, d = GuiUtils.xyTransform(self.data, self.data.xtransform, self.data.ytransform)
+
         # Shortcuts
         ax = self.ax
         x = self._data.view.x

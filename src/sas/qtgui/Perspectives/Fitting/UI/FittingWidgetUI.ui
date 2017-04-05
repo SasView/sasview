@@ -427,6 +427,9 @@
               <property name="text">
                <string>None</string>
               </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
              </widget>
             </item>
             <item>
@@ -484,7 +487,7 @@
           <item row="0" column="0">
            <widget class="QComboBox" name="comboBox_4">
             <property name="currentIndex">
-             <number>2</number>
+             <number>0</number>
             </property>
             <item>
              <property name="text">

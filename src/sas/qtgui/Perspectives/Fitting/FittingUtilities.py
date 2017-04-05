@@ -54,6 +54,7 @@ def addParametersToModel(parameters, model):
 
         item1 = QtGui.QStandardItem(item_name)
         item1.setCheckable(True)
+        item_err = QtGui.QStandardItem()
         # check for polydisp params
         if param.polydisperse:
             poly_item = QtGui.QStandardItem("Polydispersity")
@@ -93,11 +94,11 @@ def addSimpleParametersToModel(parameters, model):
         item2 = QtGui.QStandardItem(str(param.default))
         # TODO: the error column.
         # Either add a proxy model or a custom view delegate
-        #item_err = QtGui.QStandardItem()
-        item3 = QtGui.QStandardItem(str(param.limits[0]))
-        item4 = QtGui.QStandardItem(str(param.limits[1]))
-        item5 = QtGui.QStandardItem(param.units)
-        model.appendRow([item1, item2, item3, item4, item5])
+        item_err = QtGui.QStandardItem()
+        item4 = QtGui.QStandardItem(str(param.limits[0]))
+        item5 = QtGui.QStandardItem(str(param.limits[1]))
+        item6 = QtGui.QStandardItem(param.units)
+        model.appendRow([item1, item2, item4, item5, item6])
 
 def addCheckedListToModel(model, param_list):
     """
@@ -117,6 +118,17 @@ def addHeadersToModel(model):
     model.setHeaderData(2, QtCore.Qt.Horizontal, QtCore.QVariant("Min"))
     model.setHeaderData(3, QtCore.Qt.Horizontal, QtCore.QVariant("Max"))
     model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("[Units]"))
+
+def addErrorHeadersToModel(model):
+    """
+    Adds predefined headers to the model
+    """
+    model.setHeaderData(0, QtCore.Qt.Horizontal, QtCore.QVariant("Parameter"))
+    model.setHeaderData(1, QtCore.Qt.Horizontal, QtCore.QVariant("Value"))
+    model.setHeaderData(2, QtCore.Qt.Horizontal, QtCore.QVariant("Error"))
+    model.setHeaderData(3, QtCore.Qt.Horizontal, QtCore.QVariant("Min"))
+    model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("Max"))
+    model.setHeaderData(5, QtCore.Qt.Horizontal, QtCore.QVariant("[Units]"))
 
 def addPolyHeadersToModel(model):
     """
@@ -315,6 +327,8 @@ def plotResiduals(reference_data, current_data):
     residuals.name = "Residuals for " + str(theory_name) + "[" + \
                     str(reference_data.filename) + "]"
     residuals.title = residuals.name
+    residuals.ytransform = 'y'
+
     # when 2 data have the same id override the 1 st plotted
     # include the last part if keeping charts for separate models is required
     residuals.id = "res" + str(reference_data.id) # + str(theory_name)

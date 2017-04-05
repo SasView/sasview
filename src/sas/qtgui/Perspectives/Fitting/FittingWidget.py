@@ -14,6 +14,8 @@ from PyQt4 import QtCore
 from sasmodels import generate
 from sasmodels import modelinfo
 from sasmodels.sasview_model import load_standard_models
+from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
+from sas.sasgui.perspectives.fitting.fit_thread import FitThread
 
 from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 from sas.sasgui.guiframe.dataFitting import Data1D
@@ -61,12 +63,15 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self._last_model_row = 0
         # Dictionary of {model name: model class} for the current category
         self.models = {}
+        # Parameters to fit
+        self.parameters_to_fit = None
 
         # Which tab is this widget displayed in?
         self.tab_id = id
 
         # Which shell is being currently displayed?
         self.current_shell_displayed = 0
+        self.has_error_column = False
 
         # Range parameters
         self.q_range_min = QMIN_DEFAULT
@@ -255,6 +260,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Reset structure factor
         self.cbStructureFactor.setCurrentIndex(0)
 
+        # Reset parameters to fit
+        self.parameters_to_fit = None
+
         # SasModel -> QModel
         self.SASModelToQModel(model)
 
@@ -349,17 +357,149 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Perform fitting on the current data
         """
-        # TODO: everything here
-        #self.calculate1DForModel()
-        #calc_fit = FitThread(handler=handler,
-        #                     fn=fitter_list,
-        #                     batch_inputs=batch_inputs,
-        #                     batch_outputs=batch_outputs,
-        #                     page_id=list_page_id,
-        #                     updatefn=handler.update_fit,
-        #                     completefn=self._fit_completed)
+        fitter = Fit()
+
+        # Data going in
+        data = self.logic.data
+        model = self.kernel_module
+        qmin = self.q_range_min
+        qmax = self.q_range_max
+        params_to_fit = self.parameters_to_fit
+
+        # These should be updating somehow?
+        fit_id = 0
+        constraints = []
+        smearer = None
+        page_id = [210]
+        handler = None
+        batch_inputs = {}
+        batch_outputs = {}
+        list_page_id = [page_id]
+        #---------------------------------
+
+        # Parameterize the fitter
+        fitter.set_model(model, fit_id, params_to_fit, data=data,
+                         constraints=constraints)
+        fitter.set_data(data=data, id=fit_id, smearer=smearer, qmin=qmin,
+                        qmax=qmax)
+        fitter.select_problem_for_fit(id=fit_id, value=1)
+
+        fitter.fitter_id = page_id
+
+        # Create the fitting thread, based on the fitter
+        calc_fit = FitThread(handler=handler,
+                             fn=[fitter],
+                             batch_inputs=batch_inputs,
+                             batch_outputs=batch_outputs,
+                             page_id=list_page_id,
+                             updatefn=self.updateFit,
+                             completefn=None)
+
+        # start the trhrhread
+        calc_thread = threads.deferToThread(calc_fit.compute)
+        calc_thread.addCallback(self.fitComplete)
+
+        #disable the Fit button
+        self.cmdFit.setText("Calculating...")
+        self.cmdFit.setEnabled(False)
+
+    def updateFit(self):
+        """
+        """
+        print "UPDATE FIT"
+        pass
+
+    def fitComplete(self, result):
+        """
+        Receive and display fitting results
+
+        "result" is a tuple of actual result list and the fit time in seconds
+        """
+        #re-enable the Fit button
+        self.cmdFit.setText("Fit")
+        self.cmdFit.setEnabled(True)
+        res_list = result[0]
+        res = res_list[0]
+        if res.fitness is None or \
+            not numpy.isfinite(res.fitness) or \
+            numpy.any(res.pvec == None) or \
+            not numpy.all(numpy.isfinite(res.pvec)):
+            msg = "Fitting did not converge!!!"
+            logging.error(msg)
+            return
+
+        elapsed = result[1]
+        msg = "Fitting completed successfully in: %s s.\n" % GuiUtils.formatNumber(elapsed)
+
+        self.communicate.statusBarUpdateSignal.emit(msg)
+
+        fitness = res.fitness
+        param_list = res.param_list
+        param_values = res.pvec
+        param_stderr = res.stderr
+        from itertools import izip
+        # TODO: add errors to the dict so they can propagate to the view
+        params_and_errors = zip(param_values, param_stderr)
+        param_dict = dict(izip(param_list, params_and_errors))
+
+        # Dictionary of fitted parameter: value, error
+        # e.g. param_dic = {"sld":(1.703, 0.0034), "length":(33.455, -0.0983)}
+        self.updateModelFromList(param_dict)
+
+        # Read only value - we can get away by just printing it here
+        chi2_repr = GuiUtils.formatNumber(fitness, high=True)
+        self.lblChi2Value.setText(chi2_repr)
 
         pass
+
+    def iterateOverModel(self, func):
+        """
+        Take func and throw it inside the model row loop
+        """
+        #assert isinstance(func, function)
+        for row_i in xrange(self._model_model.rowCount()):
+            func(row_i)
+
+    def updateModelFromList(self, param_dict):
+        """
+        Update the model with new parameters, create the errors column
+        """
+        assert isinstance(param_dict, dict)
+        if not dict:
+            return
+
+        def updateValues(row_i):
+            # Utility function for main model update
+            param_name = str(self._model_model.item(row_i, 0).text())
+            if param_name not in param_dict.keys():
+                return
+            # modify the param value
+            self._model_model.item(row_i, 1).setText(str(param_dict[param_name][0]))
+            if self.has_error_column:
+                self._model_model.item(row_i, 2).setText(str(param_dict[param_name][1]))
+
+        def createColumn(row_i):
+            # Utility function for error column update
+            item = QtGui.QStandardItem()
+            for param_name in param_dict.keys():
+                if str(self._model_model.item(row_i, 0).text()) != param_name:
+                    continue
+                error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
+                item.setText(error_repr)
+            error_column.append(item)
+
+        self.iterateOverModel(updateValues)
+
+        if self.has_error_column:
+            return
+
+        error_column = []
+        self.iterateOverModel(createColumn)
+
+        self.has_error_column = True
+        self._model_model.insertColumn(2, error_column)
+        FittingUtilities.addErrorHeadersToModel(self._model_model)
+
 
     def onPlot(self):
         """
@@ -369,7 +509,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             self.createDefaultDataset()
         self.calculateQGridForModel()
 
-    #def onNpts(self, text):
     def onNpts(self):
         """
         Callback for number of points line edit update
@@ -386,7 +525,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         if self.model_is_loaded:
             self.onPlot()
 
-    #def onMinRange(self, text):
     def onMinRange(self):
         """
         Callback for minimum range of points line edit update
@@ -404,7 +542,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         if self.model_is_loaded:
             self.onPlot()
 
-    #def onMaxRange(self, text):
     def onMaxRange(self):
         """
         Callback for maximum range of points line edit update
@@ -536,6 +673,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             structure_module = generate.load_kernel_module(structure_factor)
             structure_parameters = modelinfo.make_parameter_table(getattr(structure_module, 'parameters', []))
             FittingUtilities.addSimpleParametersToModel(structure_parameters, self._model_model)
+            # Set the error column width to 0
+            self.lstParams.setColumnWidth(2, 20)
             # Update the counter used for multishell display
             self._last_model_row = self._model_model.rowCount()
         else:
@@ -564,39 +703,53 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         Callback method for updating the sasmodel parameters with the GUI values
         """
         model_column = item.column()
-        model_row = item.row()
-        name_index = self._model_model.index(model_row, 0)
 
         if model_column == 0:
-            # Assure we're dealing with checkboxes
-            if not item.isCheckable():
-                return
-            status = item.checkState()
-            # If multiple rows selected - toggle all of them
-            rows = [s.row() for s in self.lstParams.selectionModel().selectedRows()]
-
-            # Switch off signaling from the model to avoid multiple calls
-            self._model_model.blockSignals(True)
-            # Convert to proper indices and set requested enablement
-            items = [self._model_model.item(row, 0).setCheckState(status) for row in rows]
-            self._model_model.blockSignals(False)
+            self.checkboxSelected(item)
             return
+
+        model_row = item.row()
+        name_index = self._model_model.index(model_row, 0)
 
         # Extract changed value. Assumes proper validation by QValidator/Delegate
         value = float(item.text())
         parameter_name = str(self._model_model.data(name_index).toPyObject()) # sld, background etc.
         property_name = str(self._model_model.headerData(1, model_column).toPyObject()) # Value, min, max, etc.
 
-        # print "%s(%s) => %d" % (parameter_name, property_name, value)
         self.kernel_module.params[parameter_name] = value
 
         # min/max to be changed in self.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
-
         # magnetic params in self.kernel_module.details['M0:parameter_name'] = value
         # multishell params in self.kernel_module.details[??] = value
 
         # Force the chart update
         self.onPlot()
+
+    def checkboxSelected(self, item):
+        # Assure we're dealing with checkboxes
+        if not item.isCheckable():
+            return
+        status = item.checkState()
+
+        def isChecked(row):
+            return self._model_model.item(row, 0).checkState() == QtCore.Qt.Checked
+
+        def isCheckable(row):
+            return self._model_model.item(row, 0).isCheckable()
+
+        # If multiple rows selected - toggle all of them, filtering uncheckable
+        rows = [s.row() for s in self.lstParams.selectionModel().selectedRows() if isCheckable(s.row())]
+
+        # Switch off signaling from the model to avoid recursion
+        self._model_model.blockSignals(True)
+        # Convert to proper indices and set requested enablement
+        items = [self._model_model.item(row, 0).setCheckState(status) for row in rows]
+        self._model_model.blockSignals(False)
+
+        # update the list of parameters to fit
+        self.parameters_to_fit = [str(self._model_model.item(row_index, 0).text())
+                                  for row_index in xrange(self._model_model.rowCount())
+                                  if isChecked(row_index)]
 
     def nameForFittedData(self, name):
         """
@@ -713,7 +866,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Calculate difference between return_data and logic.data
         chi2 = FittingUtilities.calculateChi2(fitted_data, self.logic.data)
         # Update the control
-        self.lblChi2Value.setText(GuiUtils.formatNumber(chi2, high=True))
+        chi2_repr = "---" if chi2 is None else GuiUtils.formatNumber(chi2, high=True)
+        #self.lblChi2Value.setText(GuiUtils.formatNumber(chi2, high=True))
+        self.lblChi2Value.setText(chi2_repr)
 
         # Plot residuals if actual data
         if self.data_is_loaded:
