@@ -7,7 +7,8 @@ import sys
 import logging
 import logging.config
 LOGGER_CONFIG_FILE = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.ini')
-logging.config.fileConfig(LOGGER_CONFIG_FILE, disable_existing_loggers=False)
+print LOGGER_CONFIG_FILE
+logging.config.fileConfig(LOGGER_CONFIG_FILE)
 logger = logging.getLogger(__name__)
 
 try:
