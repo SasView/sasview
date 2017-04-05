@@ -3,7 +3,6 @@
 import wx
 import wx.lib.newevent
 import time
-#from copy import deepcopy
 from sas.sasgui.guiframe.events import EVT_SLICER_PARS
 from sas.sasgui.guiframe.utils import format_number
 from sas.sasgui.guiframe.events import EVT_SLICER
@@ -138,17 +137,18 @@ class SlicerParameterPanel(wx.Dialog):
             self.bck.Add(title, (iy, ix), (1, 1),
                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
             iy += 1
+            # Create a list box with all of the 2D plots
             self.process_list()
             self.bck.Add(self.data_list, (iy, ix), (1, 1),
                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
             iy += 1
+            # Button to start batch slicing
             button_label = "Apply Slicer to Selected Plots"
             self.batch_slicer_button = wx.Button(parent=self,
                                                  label=button_label)
             self.Bind(wx.EVT_BUTTON, self.onBatchSlice)
             self.bck.Add(self.batch_slicer_button, (iy, ix), (1, 1),
                              wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
-            # TODO: Select all button
             # TODO: Check box for saving file
             # TODO: append to file information and file type
             # TODO: Send to fitting options
@@ -205,18 +205,19 @@ class SlicerParameterPanel(wx.Dialog):
         params = self.parent.slicer.get_params()
         type = self.type_select.GetStringSelection()
 
-        # Find loaded 2D data panels
+        # Find desired 2D data panels
         for key, mgr in spp.plot_panels.iteritems():
             if mgr.graph.prop['title'] in self.data_list.CheckedStrings:
                 apply_to_list.append(mgr)
 
-        # Apply slicer to selected panels
+        # Apply slicer type to selected panels
         for item in apply_to_list:
             self._apply_slicer_to_plot(item, type)
 
+        # Post an event to apply appropriate slicer params to each slicer
+        # Event needed due to how apply_slicer_to_plot works
         event = ApplyParams(params=params, plot_list=apply_to_list)
         wx.PostEvent(self, event)
-
         # TODO: save file (if desired)
         # TODO: send to fitting (if desired)
 
@@ -232,7 +233,6 @@ class SlicerParameterPanel(wx.Dialog):
         Apply a slicer to *any* plot window, not just parent window
         :param plot: 2D plot panel to apply a slicer to
         :param type: The type of slicer to apply to the panel
-        :return: Return the plot with the slicer applied
         """
         if type is None:
             type = self.type_select.GetStringSelection()
@@ -246,25 +246,31 @@ class SlicerParameterPanel(wx.Dialog):
             plot.onBoxavgY(None)
 
     def process_list(self):
+        """
+        Populate the check list from the currently plotted 2D data
+        """
         self.checkme = None
         main_window = self.parent.parent
         self.loaded_data = []
         id = wx.NewId()
+        # Iterate over the loaded plots and find all 2D panels
         for key, value in main_window.plot_panels.iteritems():
             if isinstance(value, ModelPanel2D):
                 self.loaded_data.append(value.data2D.name)
                 if value.data2D.id == self.parent.data2D.id:
+                    # Set current plot panel as uncheckable
                     self.checkme = self.loaded_data.index(value.data2D.name)
         self.data_list = wx.CheckListBox(parent=self, id=id,
                                          choices=self.loaded_data,
                                          name="Apply Slicer to 2D Plots:")
-        if self.checkme is not None:
-            self.data_list.Check(self.checkme)
+        # Check all items bty default
+        for item in range(len(self.data_list.Items)):
+            self.data_list.Check(item)
         self.data_list.Bind(wx.EVT_CHECKLISTBOX, self.onCheckBoxList)
 
     def onCheckBoxList(self, e):
         """
-        Do not allow a checkbox to be unchecked
+        Prevent a checkbox item from being unchecked
         :param e: Event triggered when a checkbox list item is checked
         """
         index = e.GetSelection()
@@ -272,7 +278,14 @@ class SlicerParameterPanel(wx.Dialog):
             self.data_list.Check(index)
 
     def apply_params_list(self, evt=None):
+        """
+        Event based parameter setting.
+        :param evt: Event triggered to apply parameters to a list of plots
+                    evt should have attrs plot_list and params
+        """
+        # Apply parameter list to each plot as desired
         for item in evt.plot_list:
             item.slicer.set_params(evt.params)
             item.slicer.base.update()
+        # Close the slicer window
         self.Destroy()
