@@ -69,8 +69,8 @@ class XMLreader():
             self.xml = xml
             self.xmldoc = etree.parse(self.xml, parser=PARSER)
             self.xmlroot = self.xmldoc.getroot()
-        except etree.XMLSyntaxError as xml_error:
-            logging.info(xml_error)
+        except etree.XMLSyntaxError:
+            raise
         except Exception:
             self.xml = None
             self.xmldoc = None

@@ -12,6 +12,7 @@ from sas.sascalc.dataloader.data_info import plottable_1D, plottable_2D,\
     Data1D, Data2D, DataInfo, Process, Aperture, Collimation, \
     TransmissionSpectrum, Detector
 from sas.sascalc.dataloader.data_info import combine_data_info_with_plottable
+from sas.sascalc.dataloader.loader_exceptions import FileContentsException
 
 
 class Reader():
@@ -74,7 +75,10 @@ class Reader():
             # If the file type is not allowed, return empty list
             if extension in self.ext or self.allow_all:
                 # Load the data file
-                self.raw_data = h5py.File(filename, 'r')
+                try:
+                    self.raw_data = h5py.File(filename, 'r')
+                except Exception as e:
+                    raise FileContentsException, e
                 # Read in all child elements of top level SASroot
                 self.read_children(self.raw_data, [])
                 # Add the last data set to the list of outputs

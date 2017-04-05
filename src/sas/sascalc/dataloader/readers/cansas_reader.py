@@ -28,6 +28,7 @@ from sas.sascalc.dataloader.data_info import \
 import sas.sascalc.dataloader.readers.xml_reader as xml_reader
 from sas.sascalc.dataloader.readers.xml_reader import XMLreader
 from sas.sascalc.dataloader.readers.cansas_constants import CansasConstants, CurrentLevel
+from sas.sascalc.dataloader.loader_exceptions import FileContentsException
 
 # The following 2 imports *ARE* used. Do not remove either.
 import xml.dom.minidom
@@ -533,7 +534,12 @@ class Reader(XMLreader):
         base = base_name.split("/sas/")[0]
 
         # Load in xml file and get the cansas version from the header
-        self.set_xml_file(xml_file)
+        from lxml import etree
+        try:
+            self.set_xml_file(xml_file)
+        except etree.XMLSyntaxError:
+            msg = "Cansas cannot load this file"
+            raise FileContentsException, msg
         self.cansas_version = self.xmlroot.get("version", "1.0")
 
         # Generic values for the cansas file based on the version

@@ -8,6 +8,7 @@ import wx
 import logging
 
 from sas.sascalc.dataloader.loader import Loader
+from sas.sascalc.dataloader.loader_exceptions import NoKnownLoaderException
 from sas.sasgui.guiframe.plugin_base import PluginBase
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.gui_style import GUIFRAME
@@ -38,6 +39,7 @@ EXTENSIONS = config.PLUGIN_STATE_EXTENSIONS + extension_list
 PLUGINS_WLIST = config.PLUGINS_WLIST
 APPLICATION_WLIST = config.APPLICATION_WLIST
 
+
 class Plugin(PluginBase):
 
     def __init__(self):
@@ -53,12 +55,10 @@ class Plugin(PluginBase):
         add load file menu item and load folder item
         """
         # menu for data files
-        menu_list = []
         data_file_hint = "load one or more data in the application"
         menu_list = [('&Load Data File(s)', data_file_hint, self.load_data)]
         gui_style = self.parent.get_style()
         style = gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
-        style1 = gui_style & GUIFRAME.DATALOADER_ON
         if style == GUIFRAME.MULTIPLE_APPLICATIONS:
             # menu for data from folder
             data_folder_hint = "load multiple data in the application"
@@ -99,13 +99,11 @@ class Plugin(PluginBase):
         self.parent._default_save_location = self._default_save_location
         self.get_data(file_list)
 
-
     def can_load_data(self):
         """
         if return True, then call handler to laod data
         """
         return True
-
 
     def _load_folder(self, event):
         """
@@ -113,7 +111,7 @@ class Plugin(PluginBase):
         """
         path = None
         self._default_save_location = self.parent._default_save_location
-        if self._default_save_location == None:
+        if self._default_save_location is None:
             self._default_save_location = os.getcwd()
         dlg = wx.DirDialog(self.parent, "Choose a directory",
                            self._default_save_location,
@@ -137,7 +135,8 @@ class Plugin(PluginBase):
         :param error: details error message to be displayed
         """
         if error is not None or str(error).strip() != "":
-            dial = wx.MessageDialog(self.parent, str(error), 'Error Loading File',
+            dial = wx.MessageDialog(self.parent, str(error),
+                                    'Error Loading File',
                                     wx.OK | wx.ICON_EXCLAMATION)
             dial.ShowModal()
 
@@ -146,7 +145,8 @@ class Plugin(PluginBase):
         Receive a list containing folder then return a list of file
         """
         if os.path.isdir(path):
-            return [os.path.join(os.path.abspath(path), filename) for filename in os.listdir(path)]
+            return [os.path.join(os.path.abspath(path), filename) for filename
+                    in os.listdir(path)]
 
     def _process_data_and_errors(self, item, p_file, output, message):
         """
@@ -219,17 +219,24 @@ class Plugin(PluginBase):
                 message="Loaded {}\n".format(p_file),
                 info="info")
 
+            except NoKnownLoaderException as e:
+                logging.error(e.message)
+                self.load_update(output=None, message=e.message, info="warning")
+                self.load_complete(output=None,
+                                   message="Loading data failed!",
+                                   info="warning")
             except:
                 logging.error(sys.exc_value)
 
-                error_message = "The Data file you selected could not be loaded.\n"
-                error_message += "Make sure the content of your file"
+                error_message = "The Data file you selected could not be "
+                error_message += "loaded.\nMake sure the content of your file"
                 error_message += " is properly formatted.\n"
                 error_message += "When contacting the SasView team, mention the"
                 error_message += " following:\n"
                 error_message += "Error: " + str(sys.exc_info()[1])
                 file_errors[basename] = [error_message]
-                self.load_update(output=output, message=error_message, info="warning")
+                self.load_update(output=output, message=error_message,
+                                 info="warning")
 
         if len(file_errors) > 0:
             error_message = ""
@@ -242,7 +249,7 @@ class Plugin(PluginBase):
             self.load_update(output=output, message=error_message, info="error")
 
         self.load_complete(output=output, message="Loading data complete!",
-            info="info")
+                           info="info")
 
     def load_update(self, output=None, message="", info="warning"):
         """
@@ -251,14 +258,11 @@ class Plugin(PluginBase):
         if message != "":
             wx.PostEvent(self.parent, StatusEvent(status=message, info=info,
                                                   type="progress"))
-    def load_complete(self, output, message="", error_message="", path=None,
-                      info="warning"):
+
+    def load_complete(self, output, message="", info="warning"):
         """
-         post message to  status bar and return list of data
+         post message to status bar and return list of data
         """
-        wx.PostEvent(self.parent, StatusEvent(status=message,
-                                              info=info,
+        wx.PostEvent(self.parent, StatusEvent(status=message, info=info,
                                               type="stop"))
-        # if error_message != "":
-        #    self.load_error(error_message)
         self.parent.add_data(data_list=output)
