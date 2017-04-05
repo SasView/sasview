@@ -3,6 +3,7 @@
 .. This is a port of the original SasView html help file to ReSTructured text
 .. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
 .. WG Bouwman, DUT, added during CodeCamp-V in Oct 2016 the SESANS data format
+.. WG Bouwman, DUT, updated during CodeCamp-VI in Apr 2017 the SESANS data format
 
 .. _Formats:
 
@@ -81,15 +82,17 @@ SasView version 4.1 onwards will read ASCII ('text') files in a prototype SESANS
 
 The file format has a list of name-value pairs at the top of the file which detail the general experimental parameters necessary for fitting and analyzing data. This list should contain all the information necessary for the file to be 'portable' between users.
 
-Following the header is a 6 column list of instrument experimental variables:
+Following the header is a 8 (only the first 4 are really needed) column list of instrument experimental variables:
 
 - Spin echo length (z, in Angstroms)
+- depolarization (:math:`log(P/P_0)/(lambda^2 * thickness)`, in Angstrom^-1 cm^-1)
+- depolarization error in the same unit) (measurement error)
 - Spin echo length error (:math:`\Delta`\ z, in Angstroms) (experimental resolution)
-- Neutron wavelength (:math:`\lambda`, in Angstroms) (essential for ToF instruments)
+- Neutron wavelength (:math:`\lambda`, in Angstroms)
 - Neutron wavelength error (:math:`\Delta \lambda`, in Angstroms)
 - Normalized polarization (:math:`P/P_0`, unitless)
 - Normalized polarization error (:math:`\Delta(P/P_0)`, unitless) (measurement error)
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 07Oct2016
+.. note::  This help document was last changed by Wim Bouwman, 05Apr2017
