@@ -13,7 +13,7 @@
 #############################################################################
 
 
-import numpy
+import numpy as np
 import os
 from sas.sascalc.dataloader.data_info import Data1D
 
@@ -68,10 +68,10 @@ class Reader:
                 lines = buff.splitlines()
 
                 # Arrays for data storage
-                tx = numpy.zeros(0)
-                ty = numpy.zeros(0)
-                tdy = numpy.zeros(0)
-                tdx = numpy.zeros(0)
+                tx = np.zeros(0)
+                ty = np.zeros(0)
+                tdy = np.zeros(0)
+                tdx = np.zeros(0)
 
                 # The first good line of data will define whether
                 # we have 2-column or 3-column ascii
@@ -139,19 +139,19 @@ class Reader:
                         if candidate_lines == 1 and -1 < candidate_lines_previous < min_data_pts and \
                             is_data == False:
                             try:
-                                tx = numpy.zeros(0)
-                                ty = numpy.zeros(0)
-                                tdy = numpy.zeros(0)
-                                tdx = numpy.zeros(0)
+                                tx = np.zeros(0)
+                                ty = np.zeros(0)
+                                tdy = np.zeros(0)
+                                tdx = np.zeros(0)
                             except:
                                 pass
 
                         if has_error_dy == True:
-                            tdy = numpy.append(tdy, _dy)
+                            tdy = np.append(tdy, _dy)
                         if has_error_dx == True:
-                            tdx = numpy.append(tdx, _dx)
-                        tx = numpy.append(tx, _x)
-                        ty = numpy.append(ty, _y)
+                            tdx = np.append(tdx, _dx)
+                        tx = np.append(tx, _x)
+                        ty = np.append(ty, _y)
 
                         #To remember the # of columns on the current line
                         # for the next line of data
@@ -187,11 +187,11 @@ class Reader:
 
                 #Let's re-order the data to make cal.
                 # curve look better some cases
-                ind = numpy.lexsort((ty, tx))
-                x = numpy.zeros(len(tx))
-                y = numpy.zeros(len(ty))
-                dy = numpy.zeros(len(tdy))
-                dx = numpy.zeros(len(tdx))
+                ind = np.lexsort((ty, tx))
+                x = np.zeros(len(tx))
+                y = np.zeros(len(ty))
+                dy = np.zeros(len(tdy))
+                dx = np.zeros(len(tdx))
                 output = Data1D(x, y, dy=dy, dx=dx)
                 self.filename = output.filename = basename
 
@@ -211,9 +211,9 @@ class Reader:
                 output.x = x[x != 0]
                 output.y = y[x != 0]
                 output.dy = dy[x != 0] if has_error_dy == True\
-                    else numpy.zeros(len(output.y))
+                    else np.zeros(len(output.y))
                 output.dx = dx[x != 0] if has_error_dx == True\
-                    else numpy.zeros(len(output.x))
+                    else np.zeros(len(output.x))
 
                 output.xaxis("\\rm{Q}", 'A^{-1}')
                 output.yaxis("\\rm{Intensity}", "cm^{-1}")

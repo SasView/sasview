@@ -23,7 +23,7 @@ import time
 import matplotlib.cm as cm
 import math
 import copy
-import numpy
+import numpy as np
 from sas.sasgui.plottools.PlotPanel import PlotPanel
 from sas.sasgui.plottools.plottables import Graph
 from binder import BindArtist
@@ -297,7 +297,7 @@ class MaskPanel(wx.Dialog):
                               zorder=self.slicer_z, side=True)
         self.subplot.set_ylim(self.data.ymin, self.data.ymax)
         self.subplot.set_xlim(self.data.xmin, self.data.xmax)
-        mask = numpy.ones(len(self.data.mask), dtype=bool)
+        mask = np.ones(len(self.data.mask), dtype=bool)
         self.data.mask = mask
         # update mask plot
         self._check_display_mask(mask, event)
@@ -342,7 +342,7 @@ class MaskPanel(wx.Dialog):
         else:
             self.mask = mask
         # make temperary data to plot
-        temp_mask = numpy.zeros(len(mask))
+        temp_mask = np.zeros(len(mask))
         temp_data = copy.deepcopy(self.data)
         # temp_data default is None
         # This method is to distinguish between masked point and data point = 0.

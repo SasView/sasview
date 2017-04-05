@@ -2,7 +2,7 @@
 Adapters for fitting module
 """
 import copy
-import numpy
+import numpy as np
 import math
 from sas.sascalc.data_util.uncertainty import Uncertainty
 from sas.sasgui.plottools.plottables import Data1D as PlotData1D
@@ -80,11 +80,11 @@ class Data1D(PlotData1D, LoadData1D):
         if self.dxw == None:
             result.dxw = None
         else:
-            result.dxw = numpy.zeros(len(self.x))
+            result.dxw = np.zeros(len(self.x))
         if self.dxl == None:
             result.dxl = None
         else:
-            result.dxl = numpy.zeros(len(self.x))
+            result.dxl = np.zeros(len(self.x))
 
         for i in range(len(self.x)):
             result.x[i] = self.x[i]
@@ -127,46 +127,46 @@ class Data1D(PlotData1D, LoadData1D):
         if self.dlam == None or other.dlam is None:
             result.dlam = None
         else:
-            result.dlam = numpy.zeros(tot_length)
+            result.dlam = np.zeros(tot_length)
         if self.dy == None or other.dy is None:
             result.dy = None
         else:
-            result.dy = numpy.zeros(tot_length)
+            result.dy = np.zeros(tot_length)
         if self.dx == None or other.dx is None:
             result.dx = None
         else:
-            result.dx = numpy.zeros(tot_length)
+            result.dx = np.zeros(tot_length)
         if self.dxw == None or other.dxw is None:
             result.dxw = None
         else:
-            result.dxw = numpy.zeros(tot_length)
+            result.dxw = np.zeros(tot_length)
         if self.dxl == None or other.dxl is None:
             result.dxl = None
         else:
-            result.dxl = numpy.zeros(tot_length)
+            result.dxl = np.zeros(tot_length)
 
-        result.x = numpy.append(self.x, other.x)
+        result.x = np.append(self.x, other.x)
         #argsorting
-        ind = numpy.argsort(result.x)
+        ind = np.argsort(result.x)
         result.x = result.x[ind]
-        result.y = numpy.append(self.y, other.y)
+        result.y = np.append(self.y, other.y)
         result.y = result.y[ind]
-        result.lam = numpy.append(self.lam, other.lam)
+        result.lam = np.append(self.lam, other.lam)
         result.lam = result.lam[ind]
         if result.dlam != None:
-            result.dlam = numpy.append(self.dlam, other.dlam)
+            result.dlam = np.append(self.dlam, other.dlam)
             result.dlam = result.dlam[ind]
         if result.dy != None:
-            result.dy = numpy.append(self.dy, other.dy)
+            result.dy = np.append(self.dy, other.dy)
             result.dy = result.dy[ind]
         if result.dx is not None:
-            result.dx = numpy.append(self.dx, other.dx)
+            result.dx = np.append(self.dx, other.dx)
             result.dx = result.dx[ind]
         if result.dxw is not None:
-            result.dxw = numpy.append(self.dxw, other.dxw)
+            result.dxw = np.append(self.dxw, other.dxw)
             result.dxw = result.dxw[ind]
         if result.dxl is not None:
-            result.dxl = numpy.append(self.dxl, other.dxl)
+            result.dxl = np.append(self.dxl, other.dxl)
             result.dxl = result.dxl[ind]
         return result
     
@@ -229,13 +229,13 @@ class Theory1D(PlotTheory1D, LoadData1D):
         if self.dxw == None:
             result.dxw = None
         else:
-            result.dxw = numpy.zeros(len(self.x))
+            result.dxw = np.zeros(len(self.x))
         if self.dxl == None:
             result.dxl = None
         else:
-            result.dxl = numpy.zeros(len(self.x))
+            result.dxl = np.zeros(len(self.x))
 
-        for i in range(numpy.size(self.x)):
+        for i in range(np.size(self.x)):
             result.x[i] = self.x[i]
             if self.dx is not None and len(self.x) == len(self.dx):
                 result.dx[i] = self.dx[i]
@@ -281,42 +281,42 @@ class Theory1D(PlotTheory1D, LoadData1D):
         if self.dlam == None or other.dlam is None:
             result.dlam = None
         else:
-            result.dlam = numpy.zeros(tot_length)
+            result.dlam = np.zeros(tot_length)
         if self.dy == None or other.dy is None:
             result.dy = None
         else:
-            result.dy = numpy.zeros(tot_length)
+            result.dy = np.zeros(tot_length)
         if self.dx == None or other.dx is None:
             result.dx = None
         else:
-            result.dx = numpy.zeros(tot_length)
+            result.dx = np.zeros(tot_length)
         if self.dxw == None or other.dxw is None:
             result.dxw = None
         else:
-            result.dxw = numpy.zeros(tot_length)
+            result.dxw = np.zeros(tot_length)
         if self.dxl == None or other.dxl is None:
             result.dxl = None
         else:
-            result.dxl = numpy.zeros(tot_length)
-        result.x = numpy.append(self.x, other.x)
+            result.dxl = np.zeros(tot_length)
+        result.x = np.append(self.x, other.x)
         #argsorting
-        ind = numpy.argsort(result.x)
+        ind = np.argsort(result.x)
         result.x = result.x[ind]
-        result.y = numpy.append(self.y, other.y)
+        result.y = np.append(self.y, other.y)
         result.y = result.y[ind]
-        result.lam = numpy.append(self.lam, other.lam)
+        result.lam = np.append(self.lam, other.lam)
         result.lam = result.lam[ind]
         if result.dy != None:
-            result.dy = numpy.append(self.dy, other.dy)
+            result.dy = np.append(self.dy, other.dy)
             result.dy = result.dy[ind]
         if result.dx is not None:
-            result.dx = numpy.append(self.dx, other.dx)
+            result.dx = np.append(self.dx, other.dx)
             result.dx = result.dx[ind]
         if result.dxw is not None:
-            result.dxw = numpy.append(self.dxw, other.dxw)
+            result.dxw = np.append(self.dxw, other.dxw)
             result.dxw = result.dxw[ind]
         if result.dxl is not None:
-            result.dxl = numpy.append(self.dxl, other.dxl)
+            result.dxl = np.append(self.dxl, other.dxl)
             result.dxl = result.dxl[ind]
         return result
  
@@ -408,12 +408,12 @@ class Data2D(PlotData2D, LoadData2D):
             result.dqx_data = None
             result.dqy_data = None
         else:
-            result.dqx_data = numpy.zeros(len(self.data))
-            result.dqy_data = numpy.zeros(len(self.data))
-        for i in range(numpy.size(self.data)):
+            result.dqx_data = np.zeros(len(self.data))
+            result.dqy_data = np.zeros(len(self.data))
+        for i in range(np.size(self.data)):
             result.data[i] = self.data[i]
             if self.err_data is not None and \
-                numpy.size(self.data) == numpy.size(self.err_data):
+                            np.size(self.data) == np.size(self.err_data):
                 result.err_data[i] = self.err_data[i]    
             if self.dqx_data is not None:
                 result.dqx_data[i] = self.dqx_data[i]
@@ -472,22 +472,22 @@ class Data2D(PlotData2D, LoadData2D):
             result.dqx_data = None
             result.dqy_data = None
         else:
-            result.dqx_data = numpy.zeros(len(self.data) + \
-                                         numpy.size(other.data))
-            result.dqy_data = numpy.zeros(len(self.data) + \
-                                         numpy.size(other.data))
+            result.dqx_data = np.zeros(len(self.data) + \
+                                       np.size(other.data))
+            result.dqy_data = np.zeros(len(self.data) + \
+                                       np.size(other.data))
         
-        result.data = numpy.append(self.data, other.data)
-        result.qx_data = numpy.append(self.qx_data, other.qx_data)
-        result.qy_data = numpy.append(self.qy_data, other.qy_data)
-        result.q_data = numpy.append(self.q_data, other.q_data)
-        result.mask = numpy.append(self.mask, other.mask)
+        result.data = np.append(self.data, other.data)
+        result.qx_data = np.append(self.qx_data, other.qx_data)
+        result.qy_data = np.append(self.qy_data, other.qy_data)
+        result.q_data = np.append(self.q_data, other.q_data)
+        result.mask = np.append(self.mask, other.mask)
         if result.err_data is not None:
-            result.err_data = numpy.append(self.err_data, other.err_data) 
+            result.err_data = np.append(self.err_data, other.err_data)
         if self.dqx_data is not None:
-            result.dqx_data = numpy.append(self.dqx_data, other.dqx_data)
+            result.dqx_data = np.append(self.dqx_data, other.dqx_data)
         if self.dqy_data is not None:
-            result.dqy_data = numpy.append(self.dqy_data, other.dqy_data)
+            result.dqy_data = np.append(self.dqy_data, other.dqy_data)
 
         return result
         
