@@ -1,6 +1,6 @@
 """
     File handler to support different file extensions.
-    Uses reflectometry's registry utility.
+    Uses reflectometer registry utility.
 
     The default readers are found in the 'readers' sub-module
     and registered by default at initialization time.
@@ -28,26 +28,27 @@ from zipfile import ZipFile
 from sas.sascalc.data_util.registry import ExtensionRegistry
 # Default readers are defined in the readers sub-module
 import readers
+from loader_exceptions import NoKnownLoaderException, FileContentsException
 from readers import ascii_reader
 from readers import cansas_reader
 from readers import cansas_reader_HDF5
+
 
 class Registry(ExtensionRegistry):
     """
     Registry class for file format extensions.
     Readers and writers are supported.
     """
-
     def __init__(self):
         super(Registry, self).__init__()
 
-        ## Writers
+        # Writers
         self.writers = {}
 
-        ## List of wildcards
+        # List of wildcards
         self.wildcards = ['All (*.*)|*.*']
 
-        ## Creation time, for testing
+        # Creation time, for testing
         self._created = time.time()
 
         # Register default readers
@@ -66,27 +67,28 @@ class Registry(ExtensionRegistry):
         """
         try:
             return super(Registry, self).load(path, format=format)
-        except Exception:
-            pass # try the ASCII reader
+        except NoKnownLoaderException as e:
+            pass  # try the ASCII reader
+        except FileContentsException as e:
+            pass
         try:
             ascii_loader = ascii_reader.Reader()
             return ascii_loader.read(path)
-        except Exception:
-            pass # try the cansas XML reader
+        except FileContentsException:
+            pass  # try the cansas XML reader
         try:
             cansas_loader = cansas_reader.Reader()
             return cansas_loader.read(path)
-        except Exception:
-            pass # try the cansas NeXuS reader
+        except FileContentsException:
+            pass  # try the cansas NeXuS reader
         try:
             cansas_nexus_loader = cansas_reader_HDF5.Reader()
             return cansas_nexus_loader.read(path)
-        except Exception:
+        except FileContentsException:
             # No known reader available. Give up and throw an error
             msg = "\n\tUnknown data format: %s.\n\tThe file is not a " % path
-            msg += "known format for SasView. The most common formats are "
-            msg += "multi-column ASCII, CanSAS XML, and CanSAS NeXuS."
-            raise Exception(msg)
+            msg += "known format that can be loaded by SasView."
+            raise NoKnownLoaderException(msg)
 
     def find_plugins(self, dir):
         """
