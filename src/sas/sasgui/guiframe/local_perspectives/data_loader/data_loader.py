@@ -175,6 +175,15 @@ class Plugin(PluginBase):
 
         for p_file in path:
             basename = os.path.basename(p_file)
+            # Skip files that start with a period
+            if basename.startswith("."):
+                msg = "The folder included a potential hidden file - %s." \
+                      % basename
+                msg += " Do you wish to load this file as data?"
+                msg_box = wx.MessageDialog(None, msg, 'Warning',
+                                           wx.OK | wx.CANCEL)
+                if msg_box.ShowModal() == wx.ID_CANCEL:
+                    continue
             _, extension = os.path.splitext(basename)
             if extension.lower() in EXTENSIONS:
                 log_msg = "Data Loader cannot "
