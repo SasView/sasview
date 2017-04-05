@@ -10,7 +10,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
 # Version of the application
 __appname__ = "SasView"
 __version__ = sas.sasview.__version__

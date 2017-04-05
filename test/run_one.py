@@ -8,10 +8,12 @@ import imp
 from os.path import abspath, dirname, split as splitpath, join as joinpath
 
 import logging
-import logging.config
-LOGGER_CONFIG_FILE = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.ini')
-logging.config.fileConfig(LOGGER_CONFIG_FILE, disable_existing_loggers=False)
 logger = logging.getLogger(__name__)
+if not logger.root.handlers:
+    import logging.config
+    LOGGER_CONFIG_FILE = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.ini')
+    logging.config.fileConfig(LOGGER_CONFIG_FILE, disable_existing_loggers=False)
+
 
 run_py = joinpath(dirname(dirname(abspath(__file__))), 'run.py')
 run = imp.load_source('sasview_run', run_py)

@@ -16,18 +16,17 @@ import logging
 import logging.config
 import traceback
 
-
-LOGGER_CONFIG_FILE = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.ini')
-logging.config.fileConfig(LOGGER_CONFIG_FILE, disable_existing_loggers=False)
-logging.captureWarnings(True)
 logger = logging.getLogger(__name__)
-
+if not logger.root.handlers:
+    print "This should NOT appear in called from run.py: %s", logger.handlers
+    LOGGER_CONFIG_FILE = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.ini')
+    logging.config.fileConfig(LOGGER_CONFIG_FILE, disable_existing_loggers=False)
+    logging.captureWarnings(True)
 
 # Log the start of the session
-logging.info(" --- SasView session started ---")
-
+logger.info(" --- SasView session started ---")
 # Log the python version
-logging.info("Python: %s" % sys.version)
+logger.info("Python: %s" % sys.version)
 
 # Allow the dynamic selection of wxPython via an environment variable, when devs
 # who have multiple versions of the module installed want to pick between them.
@@ -36,23 +35,23 @@ logging.info("Python: %s" % sys.version)
 # new version of wx.
 WX_ENV_VAR = "SASVIEW_WX_VERSION"
 if WX_ENV_VAR in os.environ:
-    logging.info("You have set the %s environment variable to %s." % \
+    logger.info("You have set the %s environment variable to %s." % \
                  (WX_ENV_VAR, os.environ[WX_ENV_VAR]))
     import wxversion
     if wxversion.checkInstalled(os.environ[WX_ENV_VAR]):
-        logging.info("Version %s of wxPython is installed, so using that version." % os.environ[WX_ENV_VAR])
+        logger.info("Version %s of wxPython is installed, so using that version." % os.environ[WX_ENV_VAR])
         wxversion.select(os.environ[WX_ENV_VAR])
     else:
-        logging.error("Version %s of wxPython is not installed, so using default version." % os.environ[WX_ENV_VAR])
+        logger.error("Version %s of wxPython is not installed, so using default version." % os.environ[WX_ENV_VAR])
 else:
-    logging.info("You have not set the %s environment variable, so using default version of wxPython." % WX_ENV_VAR)
+    logger.info("You have not set the %s environment variable, so using default version of wxPython." % WX_ENV_VAR)
 
 import wx
 
 try:
-    logging.info("Wx version: %s" % wx.__version__)
+    logger.info("Wx version: %s" % wx.__version__)
 except:
-    logging.error("Wx version: error reading version")
+    logger.error("Wx version: error reading version")
 
 import wxcruft
 wxcruft.call_later_fix()
@@ -105,8 +104,8 @@ class SasView():
             fitting_plug = module.Plugin()
             self.gui.add_perspective(fitting_plug)
         except Exception:
-            logging.error("%s: could not find Fitting plug-in module"% APP_NAME)
-            logging.error(traceback.format_exc())
+            logger.error("%s: could not find Fitting plug-in module"% APP_NAME)
+            logger.error(traceback.format_exc())
 
         # P(r) perspective
         try:
@@ -114,8 +113,8 @@ class SasView():
             pr_plug = module.Plugin()
             self.gui.add_perspective(pr_plug)
         except:
-            logging.error("%s: could not find P(r) plug-in module"% APP_NAME)
-            logging.error(traceback.format_exc())
+            logger.error("%s: could not find P(r) plug-in module"% APP_NAME)
+            logger.error(traceback.format_exc())
 
         #Invariant perspective
         try:
@@ -123,9 +122,9 @@ class SasView():
             invariant_plug = module.Plugin()
             self.gui.add_perspective(invariant_plug)
         except Exception as e :
-            logging.error("%s: could not find Invariant plug-in module"% \
+            logger.error("%s: could not find Invariant plug-in module"% \
                           APP_NAME)
-            logging.error(traceback.format_exc())
+            logger.error(traceback.format_exc())
 
         # Corfunc perspective
         try:
@@ -133,7 +132,7 @@ class SasView():
             corfunc_plug = module.Plugin()
             self.gui.add_perspective(corfunc_plug)
         except:
-            logging.error("Unable to load corfunc module")
+            logger.error("Unable to load corfunc module")
 
         #Calculator perspective
         try:
@@ -141,9 +140,9 @@ class SasView():
             calculator_plug = module.Plugin()
             self.gui.add_perspective(calculator_plug)
         except:
-            logging.error("%s: could not find Calculator plug-in module"% \
+            logger.error("%s: could not find Calculator plug-in module"% \
                                                         APP_NAME)
-            logging.error(traceback.format_exc())
+            logger.error(traceback.format_exc())
 
         # File converter tool
         try:
@@ -151,9 +150,9 @@ class SasView():
             converter_plug = module.Plugin()
             self.gui.add_perspective(converter_plug)
         except:
-            logging.error("%s: could not find File Converter plug-in module"% \
+            logger.error("%s: could not find File Converter plug-in module"% \
                                                         APP_NAME)
-            logging.error(traceback.format_exc())
+            logger.error(traceback.format_exc())
 
 
         # Add welcome page

@@ -51,7 +51,6 @@ logger = logging.getLogger(__name__)
 
 warnings.simplefilter("ignore")
 
-
 def get_app_dir():
     """
         The application directory is the one where the default custom_config.py

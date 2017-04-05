@@ -245,7 +245,6 @@ class CalcThread:
                 return
             except Exception:
                 pass
-        import logging
         logger.error(traceback.format_exc())
         #print 'CalcThread exception',
 
