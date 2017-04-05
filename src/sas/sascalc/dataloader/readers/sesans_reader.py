@@ -5,6 +5,7 @@
 
     Jurrian Bakker
 """
+import logging
 import numpy as np
 import os
 from sas.sascalc.dataloader.data_info import Data1D
@@ -90,6 +91,8 @@ class Reader:
 
             output.y_unit = y_unit
             output.x_unit = x_unit
+            output.source.wavelength_unit = lam_unit
+            output.source.wavelength = lam
             self.filename = output.filename = basename
             output.xaxis(r"\rm{z}", x_unit)
             # Adjust label to ln P/(lam^2 t), remove lam column refs
