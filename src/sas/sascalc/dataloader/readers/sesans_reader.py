@@ -57,42 +57,39 @@ class Reader:
             # characters that brakes the open operation
             line = input_f.readline()
             params = {}
-            while line.strip() != "":
-                terms = line.strip().split("\t")
-                params[terms[0].strip()] = " ".join(terms[1:]).strip()
+            while not line.startswith("BEGIN_DATA"):
+                terms = line.split()
+                if len(terms) >= 2:
+                    params[terms[0]] = " ".join(terms[1:])
                 line = input_f.readline()
-            headers_temp = input_f.readline().strip().split("\t")
-            headers = {}
-            for h in headers_temp:
-                temp = h.strip().split()
-                headers[h[:-1].strip()] = temp[-1][1:-1]
+            self.params = params
+            headers = input_f.readline().split()
+
             data = np.loadtxt(input_f)
             if data.size < 1:
                 raise RuntimeError("{} is empty".format(path))
-            x = data[:, 0]
-            dx = data[:, 3]
-            lam = data[:, 4]
-            dlam = data[:, 5]
-            y = data[:, 1]
-            dy = data[:, 2]
+            x = data[:, headers.index("SpinEchoLength")]
+            dx = data[:, headers.index("SpinEchoLength_error")]
+            lam = data[:, headers.index("Wavelength")]
+            dlam = data[:, headers.index("Wavelength_error")]
+            y = data[:, headers.index("Depolarisation")]
+            dy = data[:, headers.index("Depolarisation_error")]
 
-            lam_unit = self._header_fetch(headers, "wavelength")
-            if lam_unit == "AA":
-                lam_unit = "A"
-
-            x, x_unit = self._unit_conversion(
-                x, lam_unit,
-                self._fetch_unit(headers, "spin echo length"))
+            lam_unit = self._unit_fetch("Wavelength")
+            x, x_unit = self._unit_conversion(x, "A", self._unit_fetch("SpinEchoLength"))
             dx, dx_unit = self._unit_conversion(
                 dx, lam_unit,
-                self._fetch_unit(headers, "error SEL"))
+                self._unit_fetch("SpinEchoLength"))
             dlam, dlam_unit = self._unit_conversion(
                 dlam, lam_unit,
-                self._fetch_unit(headers, "error wavelength"))
-            y_unit = r'\AA^{-2} cm^{-1}'
+                self._unit_fetch("Wavelength"))
+            y_unit = self._unit_fetch("Depolarisation")
 
             output = Data1D(x=x, y=y, lam=lam, dy=dy, dx=dx, dlam=dlam,
                             isSesans=True)
+
+            output.y_unit = y_unit
+            output.x_unit = x_unit
             self.filename = output.filename = basename
             output.xaxis(r"\rm{z}", x_unit)
             # Adjust label to ln P/(lam^2 t), remove lam column refs
@@ -101,14 +98,17 @@ class Reader:
             output.meta_data['loader'] = self.type_name
             output.sample.name = params["Sample"]
             output.sample.ID = params["DataFileTitle"]
+            output.sample.thickness = float(
+                self._unit_conversion(
+                    params["Thickness"], "cm", self._unit_fetch("Thickness"))[0])
 
             output.sample.zacceptance = (
-                float(self._header_fetch(params, "Q_zmax")),
-                self._fetch_unit(params, "Q_zmax"))
+                float(params["Theta_zmax"]),
+                self._unit_fetch("Theta_zmax"))
 
             output.sample.yacceptance = (
-                float(self._header_fetch(params, "Q_ymax")),
-                self._fetch_unit(params, "Q_ymax"))
+                float(params["Theta_ymax"]),
+                self._unit_fetch("Theta_ymax"))
             return output
 
     @staticmethod
@@ -130,42 +130,5 @@ class Reader:
             new_unit = value_unit
         return value, new_unit
 
-    @staticmethod
-    def _header_fetch(headers, key):
-        """
-        Pull the value of a unit defined header from a dict. Example::
-
-         d = {"Length [m]": 17}
-         self._header_fetch(d, "Length") == 17
-
-        :param header: A dictionary of values
-        :param key: A string which is a prefix for one of the keys in the dict
-        :return: The value of the dictionary for the specified key
-        """
-        # (dict<string, x>, string) -> x
-        index = [k for k in headers.keys()
-                 if k.startswith(key)][0]
-        return headers[index]
-
-    @staticmethod
-    def _fetch_unit(params, key):
-        """
-        Pull the unit off of a dictionary header. Example::
-
-         d = {"Length [m]": 17}
-         self._fetch_unit(d, "Length") == "m"
-
-        :param header: A dictionary of values, where the keys are strings
-        with the units for the values appended onto the string within square
-        brackets (See the example above)
-        :param key: A string with the prefix of the dictionary key whose unit
-        is being fetched
-        :return: A string containing the unit specifed in the header
-        """
-        # (dict<string, _>, string) -> string
-        index = [k for k in params.keys()
-                 if k.startswith(key)][0]
-        unit = index.strip().split()[-1][1:-1]
-        if unit.startswith(r"\A"):
-            unit = "1/A"
-        return unit
+    def _unit_fetch(self, unit):
+        return self.params[unit+"_unit"]
