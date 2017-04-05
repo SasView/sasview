@@ -1023,7 +1023,7 @@ class Reader(XMLreader):
         if version == "1.1":
             url = "http://www.cansas.org/formats/1.1/"
         else:
-            url = "http://svn.smallangles.net/svn/canSAS/1dwg/trunk/"
+            url = "http://www.cansas.org/formats/1.0/"
         schema_location = "{0} {1}cansas1d.xsd".format(n_s, url)
         attrib = {"{" + xsi + "}schemaLocation" : schema_location,
                   "version" : version}

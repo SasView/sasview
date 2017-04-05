@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://www.smallangles.net/cansas1d"
+	xmlns:tns="http://www.smallangles.net/cansas1d"
+	elementFormDefault="qualified">
+
+	<complexType name="floatUnitType">
+		<simpleContent>
+			<extension base="float">
+				<attribute name="unit" type="string" use="required" />
+			</extension>
+		</simpleContent>
+	</complexType>
+
+	<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+	<group name="positionGroup">
+		<sequence>
+			<element name="x" type="tns:floatUnitType" minOccurs="0"
+				maxOccurs="1" />
+			<element name="y" type="tns:floatUnitType" minOccurs="0"
+				maxOccurs="1" />
+			<element name="z" type="tns:floatUnitType" minOccurs="0"
+				maxOccurs="1" />
+		</sequence>
+	</group>
+
+	<complexType name="positionType">
+		<group ref="tns:positionGroup" />
+		<attribute name="name" type="string" use="optional" />
+	</complexType>
+
+	<group name="orientationGroup">
+		<sequence>
+			<element name="roll" type="tns:floatUnitType" minOccurs="0"
+				maxOccurs="1" />
+			<element name="pitch" type="tns:floatUnitType"
+				minOccurs="0" maxOccurs="1" />
+			<element name="yaw" type="tns:floatUnitType" minOccurs="0"
+				maxOccurs="1" />
+		</sequence>
+	</group>
+
+	<complexType name="orientationType">
+		<group ref="tns:orientationGroup" />
+		<attribute name="name" type="string" use="optional" />
+	</complexType>
+
+	<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+	<complexType name="IdataType">
+		<sequence>
+			<element name="Q" minOccurs="1" maxOccurs="1"
+				type="tns:floatUnitType" />
+			<element name="I" minOccurs="1" maxOccurs="1"
+				type="tns:floatUnitType" />
+			<element name="Qdev" minOccurs="0" maxOccurs="1"
+				type="tns:floatUnitType" default="0" />
+			<element name="Idev" minOccurs="0" maxOccurs="1"
+				type="tns:floatUnitType" default="0" />
+			<element name="Qfwhm" minOccurs="0" maxOccurs="1"
+				type="tns:floatUnitType" default="0" />
+			<element name="Qmean" minOccurs="0" maxOccurs="1"
+				type="tns:floatUnitType" default="0" />
+			<element name="Shadowfactor" minOccurs="0" maxOccurs="1"
+				type="float" default="1.0" />
+		</sequence>
+	</complexType>
+
+	<complexType name="SASdataType">
+		<sequence>
+			<element name="Idata" minOccurs="1" maxOccurs="unbounded"
+				type="tns:IdataType" />
+		</sequence>
+		<attribute name="name" type="string" use="optional" />
+	</complexType>
+
+	<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+	<complexType name="SASsampleType">
+		<sequence>
+			<element name="ID" minOccurs="1" maxOccurs="1"
+				type="string" />
+			<element name="thickness" minOccurs="0" maxOccurs="1"
+				type="tns:floatUnitType" />
+			<element name="transmission" minOccurs="0" maxOccurs="1"
+				type="float" />
+			<element name="temperature" minOccurs="0" maxOccurs="1"
+				type="tns:floatUnitType" />
+			<element name="position" minOccurs="0" maxOccurs="1"
+				type="tns:positionType" />
+			<element name="orientation" minOccurs="0" maxOccurs="1"
+				type="tns:orientationType" />
+			<element name="details" minOccurs="0" maxOccurs="unbounded" />
+		</sequence>
+		<attribute name="name" type="string" use="optional" />
+	</complexType>
+
+	<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+	<complexType name="SASprocessType">
+		<sequence>
+			<element name="name" minOccurs="0" maxOccurs="1"
+				type="string" />
+			<element name="date" minOccurs="0" maxOccurs="1"
+				type="string" />
+			<element name="description" minOccurs="0" maxOccurs="1" />
+			<element name="term" minOccurs="0" maxOccurs="unbounded">
+				<complexType>
+					<simpleContent>
+						<extension base="string">
+							<attribute name="name" type="string"
+								use="required" />
+							<attribute name="unit" type="string"
+								use="optional" />
+						</extension>
+					</simpleContent>
+				</complexType>
+			</element>
+			<element name="SASprocessnote" minOccurs="1"
+				maxOccurs="unbounded" />
+		</sequence>
+		<attribute name="name" type="string" use="optional" />
+	</complexType>
+
+	<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+	<complexType name="SASsourceType">
+		<sequence>
+			<element name="radiation" minOccurs="1" maxOccurs="1"
+				type="string" />
+			<element name="beam_size" minOccurs="0" maxOccurs="1"
+				type="tns:positionType" />
+			<element name="beam_shape" minOccurs="0" maxOccurs="1"
+				type="string" />
+			<element name="wavelength" minOccurs="0" maxOccurs="1"
+				type="tns:floatUnitType" />
+			<element name="wavelength_min" minOccurs="0" maxOccurs="1"
+				type="tns:floatUnitType" />
+			<element name="wavelength_max" minOccurs="0" maxOccurs="1"
+				type="tns:floatUnitType" />
+			<element name="wavelength_spread" minOccurs="0"
+				maxOccurs="1" type="tns:floatUnitType" />
+		</sequence>
+		<attribute name="name" type="string" use="optional" />
+	</complexType>
+
+	<complexType name="SAScollimationType">
+		<sequence>
+			<element name="distance" minOccurs="0" maxOccurs="1"
+				type="tns:floatUnitType" />
+			<element name="aperture" minOccurs="0"
+				maxOccurs="unbounded">
+				<complexType>
+					<sequence>
+						<element name="size" minOccurs="0" maxOccurs="1"
+							type="tns:positionType" />
+						<element name="distance" minOccurs="0"
+							maxOccurs="1" type="tns:floatUnitType" />
+					</sequence>
+					<attribute name="name" type="string" use="optional" />
+					<attribute name="type" type="string" use="optional" />
+				</complexType>
+			</element>
+		</sequence>
+		<attribute name="name" type="string" use="optional" />
+	</complexType>
+
+	<complexType name="SASdetectorType">
+		<sequence>
+			<element name="name" minOccurs="1" maxOccurs="1"
+				type="string" />
+			<element name="SDD" minOccurs="0" maxOccurs="1"
+				type="tns:floatUnitType" />
+			<element name="offset" minOccurs="0" maxOccurs="1"
+				type="tns:positionType" />
+			<element name="orientation" minOccurs="0" maxOccurs="1"
+				type="tns:orientationType" />
+			<element name="beam_center" minOccurs="0" maxOccurs="1"
+				type="tns:positionType" />
+			<element name="pixel_size" minOccurs="0" maxOccurs="1"
+				type="tns:positionType" />
+			<element name="slit_length" minOccurs="0" maxOccurs="1"
+				type="tns:floatUnitType" />
+		</sequence>
+		<attribute name="name" type="string" use="optional" />
+	</complexType>
+
+	<complexType name="SASinstrumentType">
+		<sequence>
+			<element name="name" type="string" minOccurs="1"
+				maxOccurs="1" />
+			<element name="SASsource" type="tns:SASsourceType" />
+			<element name="SAScollimation"
+				type="tns:SAScollimationType" />
+			<element name="SASdetector" type="tns:SASdetectorType"
+				minOccurs="1" maxOccurs="unbounded" />
+		</sequence>
+		<attribute name="name" type="string" use="optional" />
+	</complexType>
+
+	<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+	<complexType name="SASentryType">
+		<sequence>
+			<element name="Title" minOccurs="1" maxOccurs="1"
+				type="string" />
+			<element name="Run" minOccurs="1" maxOccurs="unbounded"
+				type="string" />
+			<element name="SASdata" type="tns:SASdataType" />
+			<element name="SASsample" type="tns:SASsampleType" />
+			<element name="SASinstrument" type="tns:SASinstrumentType"
+				minOccurs="1" maxOccurs="1" />
+			<element name="SASprocess" type="tns:SASprocessType"
+				minOccurs="0" maxOccurs="unbounded" />
+			<element name="SASnote" />
+		</sequence>
+		<attribute name="name" type="string" use="optional" />
+	</complexType>
+
+	<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+	<complexType name="SASrootType">
+		<sequence>
+			<element name="SASentry" minOccurs="1" maxOccurs="unbounded"
+				type="tns:SASentryType">
+			</element>
+		</sequence>
+		<attribute name="version" type="string" fixed="1.0"
+			use="required" />
+	</complexType>
+
+	<element name="SASroot" type="tns:SASrootType" />
+
+</schema>
