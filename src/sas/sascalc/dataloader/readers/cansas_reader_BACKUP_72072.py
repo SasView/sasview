@@ -244,7 +244,57 @@ class Reader(XMLreader):
                     self.aperture.type = type
                 self.add_intermediate()
             else:
-                if isinstance(self.current_dataset, plottable_2D):
+                # I and Q - 1D data
+                if tagname == 'I' and isinstance(self.current_dataset,
+                                                   plottable_1D):
+                    self.current_dataset.yaxis("Intensity", unit)
+                    data_list = node.text.split(',')
+                    for item in data_list:
+                        data_point, unit = self._get_node_value_from_text(node,
+                                                                          item)
+                        self.current_dataset.y = np.append(
+                            self.current_dataset.y, data_point)
+                elif tagname == 'Idev' and isinstance(self.current_dataset,
+                                                      plottable_1D):
+                    data_list = node.text.split(',')
+                    for item in data_list:
+                        data_point, unit = self._get_node_value_from_text(node,
+                                                                          item)
+                        self.current_dataset.dy = np.append(
+                            self.current_dataset.dy, data_point)
+                elif tagname == 'Q':
+                    data_list = node.text.split(',')
+                    for item in data_list:
+                        data_point, unit = self._get_node_value_from_text(node,
+                                                                          item)
+                        self.current_dataset.x = np.append(
+                            self.current_dataset.x, data_point)
+                elif tagname == 'Qdev':
+                    data_list = node.text.split(',')
+                    for item in data_list:
+                        data_point, unit = self._get_node_value_from_text(node,
+                                                                          item)
+                        self.current_dataset.dx = np.append(
+                            self.current_dataset.dx, data_point)
+                elif tagname == 'dQw':
+                    data_list = node.text.split(',')
+                    for item in data_list:
+                        data_point, unit = self._get_node_value_from_text(node,
+                                                                          item)
+                        self.current_dataset.dqw = np.append(
+                            self.current_dataset.dqw, data_point)
+                elif tagname == 'dQl':
+                    data_list = node.text.split(',')
+                    for item in data_list:
+                        data_point, unit = self._get_node_value_from_text(node,
+                                                                          item)
+                        self.current_dataset.dxl = np.append(
+                            self.current_dataset.dxl, data_point)
+                elif tagname == 'Qmean':
+                    pass
+                elif tagname == 'Shadowfactor':
+                    pass
+                elif isinstance(self.current_dataset, plottable_2D):
                     data_point = node.text
                     unit = attr.get('unit', '')
                 else:
@@ -259,6 +309,8 @@ class Reader(XMLreader):
                 elif tagname == 'SASnote':
                     self.current_datainfo.notes.append(data_point)
 
+<<<<<<< HEAD
+=======
                 # I and Q - 1D data
                 elif tagname == 'I' and isinstance(self.current_dataset, plottable_1D):
                     unit_list = unit.split("|")
@@ -293,6 +345,7 @@ class Reader(XMLreader):
                 elif tagname == 'zacceptance':
                     self.current_datainfo.sample.zacceptance = (data_point, unit)
 
+>>>>>>> origin/master
                 # I and Qx, Qy - 2D data
                 elif tagname == 'I' and isinstance(self.current_dataset, plottable_2D):
                     self.current_dataset.yaxis("Intensity", unit)
@@ -1072,6 +1125,39 @@ class Reader(XMLreader):
             self.write_node(node, "zacceptance", datainfo.sample.zacceptance[0],
                              {'unit': datainfo.sample.zacceptance[1]})
 
+
+    def _write_data_linearized(self, datainfo, entry_node):
+        """
+        Writes 1D I and Q data to an XML file is a single Idata element
+
+        :param datainfo: The Data1D object the information is coming from
+        :param entry_node: lxml node ElementTree object to be appended to
+        """
+        node = self.create_element("SASdata")
+        self.append(node, entry_node)
+
+        point = self.create_element("Idata")
+        node.append(point)
+        x = ','.join([str(datainfo.x[i]) for i in xrange(len(datainfo.x))])
+        self.write_node(point, "Q", x, {'unit': datainfo.x_unit})
+        y = ','.join([str(datainfo.y[i]) for i in xrange(len(datainfo.y))])
+        self.write_node(point, "I", y, {'unit': datainfo.y_unit})
+        if datainfo.dy is not None:
+            dy = ','.join(
+                [str(datainfo.dy[i]) for i in xrange(len(datainfo.dy))])
+            self.write_node(point, "Idev", dy, {'unit': datainfo.y_unit})
+        if datainfo.dx is not None:
+            dx = ','.join(
+                [str(datainfo.dx[i]) for i in xrange(len(datainfo.dx))])
+            self.write_node(point, "Qdev", dx, {'unit': datainfo.x_unit})
+        if datainfo.dxw is not None:
+            dxw = ','.join(
+                [str(datainfo.dxw[i]) for i in xrange(len(datainfo.dxw))])
+            self.write_node(point, "dQw", dxw, {'unit': datainfo.x_unit})
+        if datainfo.dxl is not None:
+            dxl = ','.join(
+                [str(datainfo.dxl[i]) for i in xrange(len(datainfo.dxl))])
+            self.write_node(point, "dQl", dxl, {'unit': datainfo.x_unit})
 
     def _write_data_2d(self, datainfo, entry_node):
         """

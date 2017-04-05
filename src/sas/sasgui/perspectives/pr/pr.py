@@ -20,7 +20,7 @@ import wx
 import logging
 import time
 import math
-import numpy
+import numpy as np
 import pylab
 from sas.sasgui.guiframe.gui_manager import MDIFrame
 from sas.sasgui.guiframe.dataFitting import Data1D
@@ -206,8 +206,8 @@ class Plugin(PluginBase):
 
         r = pylab.arange(0.01, d_max, d_max / 51.0)
         M = len(r)
-        y = numpy.zeros(M)
-        pr_err = numpy.zeros(M)
+        y = np.zeros(M)
+        pr_err = np.zeros(M)
 
         total = 0.0
         for j in range(M):
@@ -252,7 +252,7 @@ class Plugin(PluginBase):
         """
         """
         # Show P(r)
-        y_true = numpy.zeros(len(x))
+        y_true = np.zeros(len(x))
 
         sum_true = 0.0
         for i in range(len(x)):
@@ -306,8 +306,8 @@ class Plugin(PluginBase):
             maxq = pr.q_max
 
         x = pylab.arange(minq, maxq, maxq / 301.0)
-        y = numpy.zeros(len(x))
-        err = numpy.zeros(len(x))
+        y = np.zeros(len(x))
+        err = np.zeros(len(x))
         for i in range(len(x)):
             value = pr.iq(out, x[i])
             y[i] = value
@@ -336,8 +336,8 @@ class Plugin(PluginBase):
         # If we have used slit smearing, plot the smeared I(q) too
         if pr.slit_width > 0 or pr.slit_height > 0:
             x = pylab.arange(minq, maxq, maxq / 301.0)
-            y = numpy.zeros(len(x))
-            err = numpy.zeros(len(x))
+            y = np.zeros(len(x))
+            err = np.zeros(len(x))
             for i in range(len(x)):
                 value = pr.iq_smeared(out, x[i])
                 y[i] = value
@@ -381,13 +381,13 @@ class Plugin(PluginBase):
         # Show P(r)
         x = pylab.arange(0.0, pr.d_max, pr.d_max / self._pr_npts)
 
-        y = numpy.zeros(len(x))
-        dy = numpy.zeros(len(x))
-        y_true = numpy.zeros(len(x))
+        y = np.zeros(len(x))
+        dy = np.zeros(len(x))
+        y_true = np.zeros(len(x))
 
         total = 0.0
         pmax = 0.0
-        cov2 = numpy.ascontiguousarray(cov)
+        cov2 = np.ascontiguousarray(cov)
 
         for i in range(len(x)):
             if cov2 == None:
@@ -479,9 +479,9 @@ class Plugin(PluginBase):
         Load 2- or 3- column ascii
         """
         # Read the data from the data file
-        data_x = numpy.zeros(0)
-        data_y = numpy.zeros(0)
-        data_err = numpy.zeros(0)
+        data_x = np.zeros(0)
+        data_y = np.zeros(0)
+        data_err = np.zeros(0)
         scale = None
         min_err = 0.0
         if not path == None:
@@ -503,9 +503,9 @@ class Plugin(PluginBase):
                         err = scale * math.sqrt(y) + min_err
                         #err = 0
 
-                    data_x = numpy.append(data_x, x)
-                    data_y = numpy.append(data_y, y)
-                    data_err = numpy.append(data_err, err)
+                    data_x = np.append(data_x, x)
+                    data_y = np.append(data_y, y)
+                    data_err = np.append(data_err, err)
                 except:
                     logging.error(sys.exc_value)
 
@@ -527,9 +527,9 @@ class Plugin(PluginBase):
 
         """
         # Read the data from the data file
-        data_x = numpy.zeros(0)
-        data_y = numpy.zeros(0)
-        data_err = numpy.zeros(0)
+        data_x = np.zeros(0)
+        data_y = np.zeros(0)
+        data_err = np.zeros(0)
         scale = None
         min_err = 0.0
 
@@ -554,9 +554,9 @@ class Plugin(PluginBase):
                             err = scale * math.sqrt(y) + min_err
                             #err = 0
 
-                        data_x = numpy.append(data_x, x)
-                        data_y = numpy.append(data_y, y)
-                        data_err = numpy.append(data_err, err)
+                        data_x = np.append(data_x, x)
+                        data_y = np.append(data_y, y)
+                        data_err = np.append(data_err, err)
                     except:
                         logging.error(sys.exc_value)
                 elif line.find("The 6 columns") >= 0:
@@ -639,7 +639,7 @@ class Plugin(PluginBase):
 
         # Now replot the original added data
         for plot in self._added_plots:
-            self._added_plots[plot].y = numpy.copy(self._default_Iq[plot])
+            self._added_plots[plot].y = np.copy(self._default_Iq[plot])
             wx.PostEvent(self.parent,
                          NewPlotEvent(plot=self._added_plots[plot],
                                       title=self._added_plots[plot].name,
@@ -663,7 +663,7 @@ class Plugin(PluginBase):
 
         # Now scale the added plots too
         for plot in self._added_plots:
-            total = numpy.sum(self._added_plots[plot].y)
+            total = np.sum(self._added_plots[plot].y)
             npts = len(self._added_plots[plot].x)
             total *= self._added_plots[plot].x[npts - 1] / npts
             y = self._added_plots[plot].y / total
@@ -813,7 +813,7 @@ class Plugin(PluginBase):
 
         # Save Pr invertor
         self.pr = pr
-        cov = numpy.ascontiguousarray(cov)
+        cov = np.ascontiguousarray(cov)
 
         # Show result on control panel
         self.control_panel.chi2 = pr.chi2
@@ -981,7 +981,7 @@ class Plugin(PluginBase):
         err = self.current_plottable.dy
         all_zeros = True
         if err == None:
-            err = numpy.zeros(len(pr.y))
+            err = np.zeros(len(pr.y))
         else:
             for i in range(len(err)):
                 if err[i] > 0:
@@ -1087,8 +1087,8 @@ class Plugin(PluginBase):
 
         # If we have not errors, add statistical errors
         if y is not None:
-            if err == None or numpy.all(err) == 0:
-                err = numpy.zeros(len(y))
+            if err == None or np.all(err) == 0:
+                err = np.zeros(len(y))
                 scale = None
                 min_err = 0.0
                 for i in range(len(y)):

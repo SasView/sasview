@@ -208,7 +208,6 @@ class Reader(XMLreader):
             attr = node.attrib
             name = attr.get("name", "")
             type = attr.get("type", "")
-            unit = attr.get("unit", "")
             # Get the element name and set the current names level
             tagname = node.tag.replace(self.base_ns, "")
             tagname_original = tagname
@@ -248,7 +247,7 @@ class Reader(XMLreader):
                     data_point = node.text
                     unit = attr.get('unit', '')
                 else:
-                    data_point, unit = self._get_node_value(node)
+                    data_point, unit = self._get_node_value(node, tagname)
 
                 # If this is a dataset, store the data appropriately
                 if tagname == 'Run':
@@ -691,37 +690,7 @@ class Reader(XMLreader):
             name = self._create_unique_key(dictionary, name, numb)
         return name
 
-    def _get_node_value_from_text(self, node, node_text):
-        """
-        Get the value of a node and any applicable units
-
-        :param node: The XML node to get the value of
-        :param tagname: The tagname of the node
-        """
-        units = ""
-        # If the value is a float, compile with units.
-        if self.ns_list.ns_datatype == "float":
-            # If an empty value is given, set as zero.
-            if node_text is None or node_text.isspace() \
-                    or node_text.lower() == "nan":
-                node_text = "0.0"
-            # Convert the value to the base units
-            tag = node.tag.replace(self.base_ns, "")
-            node_text, units = self._unit_conversion(node, tag, node_text)
-
-        # If the value is a timestamp, convert to a datetime object
-        elif self.ns_list.ns_datatype == "timestamp":
-            if node_text is None or node_text.isspace():
-                pass
-            else:
-                try:
-                    node_text = \
-                        datetime.datetime.fromtimestamp(node_text)
-                except ValueError:
-                    node_text = None
-        return node_text, units
-
-    def _get_node_value(self, node):
+    def _get_node_value(self, node, tagname):
         """
         Get the value of a node and any applicable units
 
@@ -735,7 +704,26 @@ class Reader(XMLreader):
             node_value = ' '.join(node_value.split())
         else:
             node_value = ""
-        node_value, units = self._get_node_value_from_text(node, node_value)
+
+        # If the value is a float, compile with units.
+        if self.ns_list.ns_datatype == "float":
+            # If an empty value is given, set as zero.
+            if node_value is None or node_value.isspace() \
+                                    or node_value.lower() == "nan":
+                node_value = "0.0"
+            #Convert the value to the base units
+            node_value, units = self._unit_conversion(node, tagname, node_value)
+
+        # If the value is a timestamp, convert to a datetime object
+        elif self.ns_list.ns_datatype == "timestamp":
+            if node_value is None or node_value.isspace():
+                pass
+            else:
+                try:
+                    node_value = \
+                        datetime.datetime.fromtimestamp(node_value)
+                except ValueError:
+                    node_value = None
         return node_value, units
 
     def _unit_conversion(self, node, tagname, node_value):
@@ -939,10 +927,7 @@ class Reader(XMLreader):
         if is_2d:
             self._write_data_2d(datainfo, entry_node)
         else:
-            if self._check_root():
-                self._write_data(datainfo, entry_node)
-            else:
-                self._write_data_linearized(datainfo, entry_node)
+            self._write_data(datainfo, entry_node)
         # Transmission Spectrum Info
         # TODO: fix the writer to linearize all data, including T_spectrum
         # self._write_trans_spectrum(datainfo, entry_node)
@@ -1008,7 +993,7 @@ class Reader(XMLreader):
         if version == "1.1":
             url = "http://www.cansas.org/formats/1.1/"
         else:
-            url = "http://www.cansas.org/formats/1.0/"
+            url = "http://svn.smallangles.net/svn/canSAS/1dwg/trunk/"
         schema_location = "{0} {1}cansas1d.xsd".format(n_s, url)
         attrib = {"{" + xsi + "}schemaLocation" : schema_location,
                   "version" : version}
@@ -1366,6 +1351,7 @@ class Reader(XMLreader):
             self.write_node(det, "slit_length", item.slit_length,
                 {"unit": item.slit_length_unit})
 
+
     def _write_process_notes(self, datainfo, entry_node):
         """
         Writes the process notes to the XML file
@@ -1413,24 +1399,6 @@ class Reader(XMLreader):
                 self.write_text(node, item)
                 self.append(node, entry_node)
 
-    def _check_root(self):
-        """
-        Return the document, and the SASentry node associated with
-        the data we just wrote.
-        If the calling function was not the cansas reader, return a minidom
-        object rather than an lxml object.
-
-        :param entry_node: lxml node ElementTree object to be appended to
-        :param doc: entire xml tree
-        """
-        if not self.frm:
-            self.frm = inspect.stack()[2]
-        mod_name = self.frm[1].replace("\\", "/").replace(".pyc", "")
-        mod_name = mod_name.replace(".py", "")
-        mod = mod_name.split("sas/")
-        mod_name = mod[1]
-        return mod_name == "sascalc/dataloader/readers/cansas_reader"
-
     def _check_origin(self, entry_node, doc):
         """
         Return the document, and the SASentry node associated with
@@ -1441,7 +1409,13 @@ class Reader(XMLreader):
         :param entry_node: lxml node ElementTree object to be appended to
         :param doc: entire xml tree
         """
-        if not self._check_root():
+        if not self.frm:
+            self.frm = inspect.stack()[1]
+        mod_name = self.frm[1].replace("\\", "/").replace(".pyc", "")
+        mod_name = mod_name.replace(".py", "")
+        mod = mod_name.split("sas/")
+        mod_name = mod[1]
+        if mod_name != "sascalc/dataloader/readers/cansas_reader":
             string = self.to_string(doc, pretty_print=False)
             doc = parseString(string)
             node_name = entry_node.tag

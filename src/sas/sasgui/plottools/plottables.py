@@ -42,7 +42,7 @@ distinctiveness rather than a simple colour number.
 
 # Support for ancient python versions
 import copy
-import numpy
+import numpy as np
 import sys
 import logging
 
@@ -705,9 +705,9 @@ class View(object):
             else:
                 self.dy = None
             if not has_err_x:
-                dx = numpy.zeros(len(x))
+                dx = np.zeros(len(x))
             if not has_err_y:
-                dy = numpy.zeros(len(y))
+                dy = np.zeros(len(y))
             for i in range(len(x)):
                 try:
                     tempx = self.funcx(x[i], y[i])
@@ -795,9 +795,9 @@ class View(object):
         tempy = []
         tempdy = []
         if self.dx == None:
-            self.dx = numpy.zeros(len(self.x))
+            self.dx = np.zeros(len(self.x))
         if self.dy == None:
-            self.dy = numpy.zeros(len(self.y))
+            self.dy = np.zeros(len(self.y))
         if self.xLabel == "log10(x)":
             for i in range(len(self.x)):
                 try:
@@ -825,9 +825,9 @@ class View(object):
         tempy = []
         tempdy = []
         if self.dx == None:
-            self.dx = numpy.zeros(len(self.x))
+            self.dx = np.zeros(len(self.x))
         if self.dy == None:
-            self.dy = numpy.zeros(len(self.y))
+            self.dy = np.zeros(len(self.y))
         if self.yLabel == "log10(y)":
             for i in range(len(self.x)):
                 try:
@@ -858,9 +858,9 @@ class View(object):
         tempy = []
         tempdy = []
         if self.dx == None:
-            self.dx = numpy.zeros(len(self.x))
+            self.dx = np.zeros(len(self.x))
         if self.dy == None:
-            self.dy = numpy.zeros(len(self.y))
+            self.dy = np.zeros(len(self.y))
         if xmin != None and xmax != None:
             for i in range(len(self.x)):
                 if self.x[i] >= xmin and self.x[i] <= xmax:
@@ -1022,7 +1022,7 @@ class Data1D(Plottable):
     Data plottable: scatter plot of x,y with errors in x and y.
     """
 
-    def __init__(self, x, y, dx=None, dy=None):
+    def __init__(self, x, y, dx=None, dy=None, lam=None, dlam=None):
         """
         Draw points specified by x[i],y[i] in the current color/symbol.
         Uncertainty in x is given by dx[i], or by (xlo[i],xhi[i]) if the
@@ -1036,8 +1036,10 @@ class Data1D(Plottable):
         self.label = "data"
         self.x = x
         self.y = y
+        self.lam = lam
         self.dx = dx
         self.dy = dy
+        self.dlam = dlam
         self.source = None
         self.detector = None
         self.xaxis('', '')
@@ -1225,17 +1227,17 @@ class Chisq(Plottable):
 ######################################################
 
 def sample_graph():
-    import numpy as nx
+    import numpy as np
 
     # Construct a simple graph
     if False:
-        x = nx.array([1, 2, 3, 4, 5, 6], 'd')
-        y = nx.array([4, 5, 6, 5, 4, 5], 'd')
-        dy = nx.array([0.2, 0.3, 0.1, 0.2, 0.9, 0.3])
+        x = np.array([1, 2, 3, 4, 5, 6], 'd')
+        y = np.array([4, 5, 6, 5, 4, 5], 'd')
+        dy = np.array([0.2, 0.3, 0.1, 0.2, 0.9, 0.3])
     else:
-        x = nx.linspace(0, 1., 10000)
-        y = nx.sin(2 * nx.pi * x * 2.8)
-        dy = nx.sqrt(100 * nx.abs(y)) / 100
+        x = np.linspace(0, 1., 10000)
+        y = np.sin(2 * np.pi * x * 2.8)
+        dy = np.sqrt(100 * np.abs(y)) / 100
     data = Data1D(x, y, dy=dy)
     data.xaxis('distance', 'm')
     data.yaxis('time', 's')

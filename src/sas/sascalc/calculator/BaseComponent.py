@@ -8,7 +8,7 @@ Provide base functionality for all model components
 import copy
 from collections import OrderedDict
 
-import numpy
+import numpy as np
 #TO DO: that about a way to make the parameter
 #is self return if it is fittable or not
 
@@ -118,7 +118,7 @@ class BaseComponent:
 
         Then get ::
 
-            q = numpy.sqrt(qx_prime^2+qy_prime^2)
+            q = np.sqrt(qx_prime^2+qy_prime^2)
 
         that is a qr in 1D array; ::
 
@@ -149,9 +149,9 @@ class BaseComponent:
             qy = qdist[1]
 
             # calculate q_r component for 2D isotropic
-            q = numpy.sqrt(qx**2+qy**2)
+            q = np.sqrt(qx**2+qy**2)
             # vectorize the model function runXY
-            v_model = numpy.vectorize(self.runXY, otypes=[float])
+            v_model = np.vectorize(self.runXY, otypes=[float])
             # calculate the scattering
             iq_array = v_model(q)
 
@@ -159,7 +159,7 @@ class BaseComponent:
 
         elif qdist.__class__.__name__ == 'ndarray':
             # We have a simple 1D distribution of q-values
-            v_model = numpy.vectorize(self.runXY, otypes=[float])
+            v_model = np.vectorize(self.runXY, otypes=[float])
             iq_array = v_model(qdist)
             return iq_array
 

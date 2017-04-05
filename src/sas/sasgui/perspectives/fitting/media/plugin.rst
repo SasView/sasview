@@ -26,7 +26,7 @@ If you write your own model and save it to the the SasView *plugin_models* folde
   *C:\\Users\\{username}\\.sasview\\plugin_models* (on Windows)
 
 the next time SasView is started it will compile the plugin and add
-it to the list of *Customized Models* in a FitPage.
+it to the list of *Plugin Models* in a FitPage.
 
 SasView models can be of three types:
 
@@ -363,6 +363,9 @@ implicit to all models, so they do not need to be included in the parameter tabl
 
   - the limits will show up as the default limits for the fit making it easy,
     for example, to force the radius to always be greater than zero.
+
+  - these are hard limits defining the valid range of parameter values;
+    polydisperity distributions will be truncated at the limits.
 
 - **"type"** can be one of: "", "sld", "volume", or "orientation".
 

@@ -11,7 +11,7 @@ from instrument import Aperture
 from math import pi
 from math import sqrt
 import math
-import numpy
+import numpy as np
 import sys
 import logging
 
@@ -392,9 +392,9 @@ class ResolutionCalculator(object):
         # Make an empty graph in the detector scale
         dx_size = (self.qx_max - self.qx_min) / (1000 - 1)
         dy_size = (self.qy_max - self.qy_min) / (1000 - 1)
-        x_val = numpy.arange(self.qx_min, self.qx_max, dx_size)
-        y_val = numpy.arange(self.qy_max, self.qy_min, -dy_size)
-        q_1, q_2 = numpy.meshgrid(x_val, y_val)
+        x_val = np.arange(self.qx_min, self.qx_max, dx_size)
+        y_val = np.arange(self.qy_max, self.qy_min, -dy_size)
+        q_1, q_2 = np.meshgrid(x_val, y_val)
         #q_phi = numpy.arctan(q_1,q_2)
         # check whether polar or cartesian
         if coord == 'polar':
@@ -886,14 +886,14 @@ class ResolutionCalculator(object):
         # phi values at each points (not at the center)
         x_value = x_val - x0_val
         y_value = y_val - y0_val
-        phi_i = numpy.arctan2(y_val, x_val)
+        phi_i = np.arctan2(y_val, x_val)
 
         # phi correction due to the gravity shift (in phi)
         phi_0 = math.atan2(y0_val, x0_val)
         phi_i = phi_i - phi_0 + self.gravity_phi
 
-        sin_phi = numpy.sin(self.gravity_phi)
-        cos_phi = numpy.cos(self.gravity_phi)
+        sin_phi = np.sin(self.gravity_phi)
+        cos_phi = np.cos(self.gravity_phi)
 
         x_p = x_value * cos_phi + y_value * sin_phi
         y_p = -x_value * sin_phi + y_value * cos_phi
@@ -907,7 +907,7 @@ class ResolutionCalculator(object):
 
         nu_value = -0.5 * (new_x * new_x + new_y * new_y)
 
-        gaussian = numpy.exp(nu_value)
+        gaussian = np.exp(nu_value)
         # normalizing factor correction
         gaussian /= gaussian.sum()
 
@@ -953,7 +953,7 @@ class ResolutionCalculator(object):
             nu_value = (value - mean) / sigma
             nu_value *= nu_value
             nu_value *= -0.5
-            gaussian *= numpy.exp(nu_value)
+            gaussian *= np.exp(nu_value)
             gaussian /= sigma
             # normalize
             gaussian /= sqrt(2 * pi)
@@ -1025,8 +1025,8 @@ class ResolutionCalculator(object):
                                                            detector_pix_nums_y,
                                                            offset_x, offset_y)
         # distance [cm] from the beam center on detector plane
-        detector_ind_x = numpy.arange(detector_pix_nums_x)
-        detector_ind_y = numpy.arange(detector_pix_nums_y)
+        detector_ind_x = np.arange(detector_pix_nums_x)
+        detector_ind_y = np.arange(detector_pix_nums_y)
 
         # shif 0.5 pixel so that pix position is at the center of the pixel
         detector_ind_x = detector_ind_x + 0.5
@@ -1040,8 +1040,8 @@ class ResolutionCalculator(object):
         detector_ind_x = detector_ind_x * pix_x_size
         detector_ind_y = detector_ind_y * pix_y_size
 
-        qx_value = numpy.zeros(len(detector_ind_x))
-        qy_value = numpy.zeros(len(detector_ind_y))
+        qx_value = np.zeros(len(detector_ind_x))
+        qy_value = np.zeros(len(detector_ind_y))
         i = 0
 
         for indx in detector_ind_x:
@@ -1060,10 +1060,10 @@ class ResolutionCalculator(object):
         qy_value = qy_value.transpose()
 
         # p min and max values among the center of pixels
-        self.qx_min = numpy.min(qx_value)
-        self.qx_max = numpy.max(qx_value)
-        self.qy_min = numpy.min(qy_value)
-        self.qy_max = numpy.max(qy_value)
+        self.qx_min = np.min(qx_value)
+        self.qx_max = np.max(qx_value)
+        self.qy_min = np.min(qy_value)
+        self.qy_max = np.max(qy_value)
 
         # Appr. min and max values of the detector display limits
         # i.e., edges of the last pixels.
@@ -1087,7 +1087,7 @@ class ResolutionCalculator(object):
         try:
             from sas.sascalc.dataloader.data_info import Data2D
             output = Data2D()
-            inten = numpy.zeros_like(qx_value)
+            inten = np.zeros_like(qx_value)
             output.data = inten
             output.qx_data = qx_value
             output.qy_data = qy_value
@@ -1106,8 +1106,8 @@ class ResolutionCalculator(object):
         # Distance from beam center in the plane of detector
         plane_dist = dx_size
         # full scattering angle on the x-axis
-        theta = numpy.arctan(plane_dist / det_dist)
-        qx_value = (2.0 * pi / wavelength) * numpy.sin(theta)
+        theta = np.arctan(plane_dist / det_dist)
+        qx_value = (2.0 * pi / wavelength) * np.sin(theta)
         return qx_value
 
     def _get_polar_value(self, qx_value, qy_value):

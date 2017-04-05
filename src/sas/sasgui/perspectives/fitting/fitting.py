@@ -15,7 +15,7 @@ import sys
 import os
 import wx
 import logging
-import numpy
+import numpy as np
 import time
 from copy import deepcopy
 import traceback
@@ -224,9 +224,8 @@ class Plugin(PluginBase):
             raise
 
         self.id_edit = wx.NewId()
-        editmodel_help = "Edit customized model sample file"
         self.menu1.AppendMenu(self.id_edit, "Plugin Model Operations",
-                              self.edit_model_menu, editmodel_help)
+                              self.edit_model_menu)
         #create  menubar items
         return [(self.menu1, self.sub_menu)]
 
@@ -259,8 +258,8 @@ class Plugin(PluginBase):
                 os.remove(p_path)
             self.update_custom_combo()
             if os.path.isfile(p_path):
-                msg = "Sorry! Could not be able to delete the default "
-                msg += "custom model... \n"
+                msg = "Sorry! unable to delete the default "
+                msg += "plugin model... \n"
                 msg += "Please manually remove the files (.py, .pyc) "
                 msg += "in the 'plugin_models' folder \n"
                 msg += "inside of the SasView application, "
@@ -273,7 +272,7 @@ class Plugin(PluginBase):
                 for item in self.edit_menu.GetMenuItems():
                     if item.GetLabel() == label:
                         self.edit_menu.DeleteItem(item)
-                        msg = "The custom model, %s, has been deleted." % label
+                        msg = "The plugin model, %s, has been deleted." % label
                         evt = StatusEvent(status=msg, type='stop', info='info')
                         wx.PostEvent(self.parent, evt)
                         break
@@ -330,7 +329,7 @@ class Plugin(PluginBase):
             self.set_edit_menu_helper(self.parent, self.delete_custom_model)
             temp = self.fit_panel.reset_pmodel_list()
             if temp:
-                # Set the new custom model list for all fit pages
+                # Set the new plugin model list for all fit pages
                 for uid, page in self.fit_panel.opened_pages.iteritems():
                     if hasattr(page, "formfactorbox"):
                         page.model_list_box = temp
@@ -876,13 +875,6 @@ class Plugin(PluginBase):
                 enable1D=enable1D, enable2D=enable2D,
                 qmin=qmin, qmax=qmax, weight=weight)
 
-    def _mac_sleep(self, sec=0.2):
-        """
-        Give sleep to MAC
-        """
-        if ON_MAC:
-            time.sleep(sec)
-
     def draw_model(self, model, page_id, data=None, smearer=None,
                    enable1D=True, enable2D=False,
                    state=None,
@@ -1030,7 +1022,6 @@ class Plugin(PluginBase):
         handler = ConsoleUpdate(parent=self.parent,
                                 manager=self,
                                 improvement_delta=0.1)
-        self._mac_sleep(0.2)
 
         # batch fit
         batch_inputs = {}
@@ -1270,7 +1261,6 @@ class Plugin(PluginBase):
         :param page_id: list of page ids which called fit function
         :param elapsed: time spent at the fitting level
         """
-        self._mac_sleep(0.2)
         uid = page_id[0]
         if uid in self.fit_thread_list.keys():
             del self.fit_thread_list[uid]
@@ -1332,7 +1322,7 @@ class Plugin(PluginBase):
                     copy_data = deepcopy(data)
                     new_theory = copy_data.data
                     new_theory[res.index] = res.theory
-                    new_theory[res.index == False] = numpy.nan
+                    new_theory[res.index == False] = np.nan
                     correct_result = True
                 #get all fittable parameters of the current model
                 param_list = model.getParamList()
@@ -1341,9 +1331,9 @@ class Plugin(PluginBase):
                         param in param_list:
                         param_list.remove(param)
                 if not correct_result or res.fitness is None or \
-                    not numpy.isfinite(res.fitness) or \
-                    numpy.any(res.pvec == None) or not \
-                    numpy.all(numpy.isfinite(res.pvec)):
+                    not np.isfinite(res.fitness) or \
+                        np.any(res.pvec == None) or not \
+                        np.all(np.isfinite(res.pvec)):
                     data_name = str(None)
                     if data is not None:
                         data_name = str(data.name)
@@ -1352,7 +1342,7 @@ class Plugin(PluginBase):
                         model_name = str(model.name)
                     msg += "Data %s and Model %s did not fit.\n" % (data_name,
                                                                     model_name)
-                    ERROR = numpy.NAN
+                    ERROR = np.NAN
                     cell = BatchCell()
                     cell.label = res.fitness
                     cell.value = res.fitness
@@ -1366,9 +1356,9 @@ class Plugin(PluginBase):
                             batch_outputs[param].append(ERROR)
                             batch_inputs["error on %s" % str(param)].append(ERROR)
                 else:
-                    # TODO: Why sometimes res.pvec comes with numpy.float64?
+                    # TODO: Why sometimes res.pvec comes with np.float64?
                     # probably from scipy lmfit
-                    if res.pvec.__class__ == numpy.float64:
+                    if res.pvec.__class__ == np.float64:
                         res.pvec = [res.pvec]
 
                     cell = BatchCell()
@@ -1520,7 +1510,6 @@ class Plugin(PluginBase):
         if page_id is None:
             page_id = []
         ## fit more than 1 model at the same time
-        self._mac_sleep(0.2)
         try:
             index = 0
             # Update potential simfit page(s)
@@ -1533,18 +1522,18 @@ class Plugin(PluginBase):
                 res = result[index]
                 fit_msg = res.mesg
                 if res.fitness is None or \
-                    not numpy.isfinite(res.fitness) or \
-                    numpy.any(res.pvec == None) or \
-                    not numpy.all(numpy.isfinite(res.pvec)):
+                    not np.isfinite(res.fitness) or \
+                        np.any(res.pvec == None) or \
+                    not np.all(np.isfinite(res.pvec)):
                     fit_msg += "\nFitting did not converge!!!"
                     wx.CallAfter(self._update_fit_button, page_id)
                 else:
                     #set the panel when fit result are float not list
-                    if res.pvec.__class__ == numpy.float64:
+                    if res.pvec.__class__ == np.float64:
                         pvec = [res.pvec]
                     else:
                         pvec = res.pvec
-                    if res.stderr.__class__ == numpy.float64:
+                    if res.stderr.__class__ == np.float64:
                         stderr = [res.stderr]
                     else:
                         stderr = res.stderr
@@ -1692,7 +1681,7 @@ class Plugin(PluginBase):
         new_plot = Data1D(x=x, y=y)
         if dy is None:
             new_plot.is_data = False
-            new_plot.dy = numpy.zeros(len(y))
+            new_plot.dy = np.zeros(len(y))
             # If this is a theory curve, pick the proper symbol to make it a curve
             new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
         else:
@@ -1741,7 +1730,7 @@ class Plugin(PluginBase):
             @param unsmeared_error: data error, rescaled to unsmeared model
         """
         try:
-            numpy.nan_to_num(y)
+            np.nan_to_num(y)
             new_plot = self.create_theory_1D(x, y, page_id, model, data, state,
                                              data_description=model.name,
                                              data_id=str(page_id) + " " + data.name)
@@ -1755,15 +1744,14 @@ class Plugin(PluginBase):
                                           data_description="Data unsmeared",
                                           data_id="Data  " + data.name + " unsmeared",
                                           dy=unsmeared_error)
-                
-            if sq_model is not None and pq_model is not None:
-                self.create_theory_1D(x, sq_model, page_id, model, data, state,
-                                      data_description=model.name + " S(q)",
-                                      data_id=str(page_id) + " " + data.name + " S(q)")
-                self.create_theory_1D(x, pq_model, page_id, model, data, state,
-                                      data_description=model.name + " P(q)",
-                                      data_id=str(page_id) + " " + data.name + " P(q)")
-
+            # Comment this out until we can get P*S models with correctly populated parameters
+            #if sq_model is not None and pq_model is not None:
+            #    self.create_theory_1D(x, sq_model, page_id, model, data, state,
+            #                          data_description=model.name + " S(q)",
+            #                          data_id=str(page_id) + " " + data.name + " S(q)")
+            #    self.create_theory_1D(x, pq_model, page_id, model, data, state,
+            #                          data_description=model.name + " P(q)",
+            #                          data_id=str(page_id) + " " + data.name + " P(q)")
 
             current_pg = self.fit_panel.get_page_by_id(page_id)
             title = new_plot.title
@@ -1826,7 +1814,7 @@ class Plugin(PluginBase):
         Complete get the result of modelthread and create model 2D
         that can be plot.
         """
-        numpy.nan_to_num(image)
+        np.nan_to_num(image)
         new_plot = Data2D(image=image, err_image=data.err_data)
         new_plot.name = model.name + '2d'
         new_plot.title = "Analytical model 2D "
@@ -1964,7 +1952,8 @@ class Plugin(PluginBase):
                 ## stop just raises the flag -- the thread is supposed to 
                 ## then kill itself but cannot.  Paul Kienzle came up with
                 ## this fix to prevent threads from stepping on each other
-                ## which was causing a simple custom model to crash Sasview.
+                ## which was causing a simple custom plugin model to crash
+                ##Sasview.
                 ## We still don't know why the fit sometimes lauched a second
                 ## thread -- something which should also be investigated.
                 ## The thread approach was implemented in order to be able
@@ -2017,12 +2006,12 @@ class Plugin(PluginBase):
         # Get data: data I, theory I, and data dI in order
         if data_copy.__class__.__name__ == "Data2D":
             if index == None:
-                index = numpy.ones(len(data_copy.data), dtype=bool)
+                index = np.ones(len(data_copy.data), dtype=bool)
             if weight != None:
                 data_copy.err_data = weight
             # get rid of zero error points
             index = index & (data_copy.err_data != 0)
-            index = index & (numpy.isfinite(data_copy.data))
+            index = index & (np.isfinite(data_copy.data))
             fn = data_copy.data[index]
             theory_data = self.page_finder[page_id].get_theory_data(fid=data_copy.id)
             if theory_data == None:
@@ -2032,11 +2021,11 @@ class Plugin(PluginBase):
         else:
             # 1 d theory from model_thread is only in the range of index
             if index == None:
-                index = numpy.ones(len(data_copy.y), dtype=bool)
+                index = np.ones(len(data_copy.y), dtype=bool)
             if weight != None:
                 data_copy.dy = weight
             if data_copy.dy == None or data_copy.dy == []:
-                dy = numpy.ones(len(data_copy.y))
+                dy = np.ones(len(data_copy.y))
             else:
                 ## Set consistently w/AbstractFitengine:
                 # But this should be corrected later.
@@ -2057,9 +2046,9 @@ class Plugin(PluginBase):
             print "Unmatch lengths %s, %s, %s" % (len(fn), len(gn), len(en))
             return
 
-        residuals = res[numpy.isfinite(res)]
+        residuals = res[np.isfinite(res)]
         # get chisqr only w/finite
-        chisqr = numpy.average(residuals * residuals)
+        chisqr = np.average(residuals * residuals)
 
         self._plot_residuals(page_id=page_id, data=data_copy,
                              fid=fid,
@@ -2096,7 +2085,7 @@ class Plugin(PluginBase):
             residuals.qx_data = data_copy.qx_data
             residuals.qy_data = data_copy.qy_data
             residuals.q_data = data_copy.q_data
-            residuals.err_data = numpy.ones(len(residuals.data))
+            residuals.err_data = np.ones(len(residuals.data))
             residuals.xmin = min(residuals.qx_data)
             residuals.xmax = max(residuals.qx_data)
             residuals.ymin = min(residuals.qy_data)
@@ -2110,10 +2099,10 @@ class Plugin(PluginBase):
         else:
             # 1 d theory from model_thread is only in the range of index
             if data_copy.dy == None or data_copy.dy == []:
-                dy = numpy.ones(len(data_copy.y))
+                dy = np.ones(len(data_copy.y))
             else:
                 if weight == None:
-                    dy = numpy.ones(len(data_copy.y))
+                    dy = np.ones(len(data_copy.y))
                 ## Set consitently w/AbstractFitengine:
                 ## But this should be corrected later.
                 else:
@@ -2132,7 +2121,7 @@ class Plugin(PluginBase):
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
                 residuals.y = (fn - gn[index]) / en
             residuals.x = data_copy.x[index]
-            residuals.dy = numpy.ones(len(residuals.y))
+            residuals.dy = np.ones(len(residuals.y))
             residuals.dx = None
             residuals.dxl = None
             residuals.dxw = None

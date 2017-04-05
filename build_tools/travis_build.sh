@@ -1,4 +1,4 @@
-# Simplified build for Travic CI
+# Simplified build for Travis CI
 # No documentation is built
 export PATH=$PATH:/usr/local/bin/
 
@@ -37,7 +37,8 @@ $EASY_INSTALL -d $WORKSPACE/sasview/utils sasmodels*.egg
 # BUILD SASVIEW
 cd $WORKSPACE/sasview
 $PYTHON setup.py clean
-$PYTHON setup.py build docs bdist_egg
+# $PYTHON setup.py build docs bdist_egg
+$PYTHON setup.py bdist_egg
 
 # INSTALL SASVIEW
 cd $WORKSPACE/sasview/dist
