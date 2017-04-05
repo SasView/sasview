@@ -27,6 +27,8 @@ from sas.sasgui.perspectives.calculator.image_viewer import ImageView
 from sas.sasgui.perspectives.calculator.pyconsole import PyConsole
 import logging
 
+logger = logging.getLogger(__name__)
+
 class Plugin(PluginBase):
     """
     This class defines the interface for a Plugin class
@@ -35,7 +37,7 @@ class Plugin(PluginBase):
     def __init__(self):
         PluginBase.__init__(self, name="Calculator")
         # Log startup
-        logging.info("Calculator plug-in started")
+        logger.info("Calculator plug-in started")
         self.sub_menu = "Tool"
         self.data_edit_frame = None
         # data operator use one frame all the time

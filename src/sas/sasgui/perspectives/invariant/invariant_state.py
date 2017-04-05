@@ -16,6 +16,8 @@ from sas.sasgui.guiframe.utils import format_number
 from sas.sasgui.guiframe.gui_style import GUIFRAME_ID
 from sas.sasgui.guiframe.dataFitting import Data1D
 
+logger = logging.getLogger(__name__)
+
 INVNODE_NAME = 'invariant'
 CANSAS_NS = "cansas1d/1.0"
 
@@ -380,7 +382,7 @@ class InvariantState(object):
                 except:
                     msg = "InvariantSate.fromXML: Could not read"
                     msg += " timestamp\n %s" % sys.exc_value
-                    logging.error(msg)
+                    logger.error(msg)
 
             # Parse bookmarks
             entry_bookmark = get_content('ns:bookmark', node)
@@ -693,7 +695,7 @@ class Reader(CansasReader):
         except:
             msg = "XML document does not contain invariant"
             msg += " information.\n %s" % sys.exc_value
-            logging.info(msg)
+            logger.info(msg)
         return state
 
     def _read_cansas(self, path):
