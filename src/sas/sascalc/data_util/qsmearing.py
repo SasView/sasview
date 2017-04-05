@@ -68,7 +68,7 @@ def smear_selection(data, model = None):
         #Pre-compute the Hankel matrix (H)
         qmax, qunits = data.sample.zacceptance
         SElength = Converter(data._xunit)(data.x, "A")
-        zaccept = Converter(qunits)(qmax, "1/A"),
+        zaccept = Converter(qunits)(qmax, "radians"),
         Rmax = 10000000
         hankel = SesansTransform(data.x, SElength, zaccept, Rmax)
         # Then return the actual transform, as if it were a smearing function
