@@ -7,7 +7,6 @@ import sys
 import logging
 import logging.config
 LOGGER_CONFIG_FILE = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.ini')
-print LOGGER_CONFIG_FILE
 logging.config.fileConfig(LOGGER_CONFIG_FILE)
 logger = logging.getLogger(__name__)
 
@@ -49,6 +48,7 @@ def run_tests(dirs=None, all=False):
         if d in SKIPPED_DIRS:
             continue
         
+
         # Go through modules looking for unit tests
         module_dir = os.path.join(test_root, d, "test")
         if os.path.isdir(module_dir):
