@@ -12,6 +12,8 @@ import copy
 import sys
 import logging
 
+logger = logging.getLogger(__name__)
+
 MFACTOR_AM = 2.853E-12
 MFACTOR_MT = 2.3164E-9
 METER2ANG = 1.0E+10
@@ -284,7 +286,7 @@ class OMF2SLD(object):
                 z_dir2 *= z_dir2
                 mask = (x_dir2 + y_dir2 + z_dir2) <= 1.0
             except:
-                logging.error(sys.exc_value)
+                logger.error(sys.exc_value)
         self.output = MagSLD(self.pos_x[mask], self.pos_y[mask],
                              self.pos_z[mask], self.sld_n[mask],
                              self.mx[mask], self.my[mask], self.mz[mask])
@@ -393,7 +395,7 @@ class OMFReader(object):
                     mz = np.append(mz, _mz)
                 except:
                     # Skip non-data lines
-                    logging.error(sys.exc_value)
+                    logger.error(sys.exc_value)
                 #Reading Header; Segment count ignored
                 s_line = line.split(":", 1)
                 if s_line[0].lower().count("oommf") > 0:
@@ -588,7 +590,7 @@ class PDBReader(object):
                         y_lines.append(y_line)
                         z_lines.append(z_line)
                 except:
-                    logging.error(sys.exc_value)
+                    logger.error(sys.exc_value)
 
             output = MagSLD(pos_x, pos_y, pos_z, sld_n, sld_mx, sld_my, sld_mz)
             output.set_conect_lines(x_line, y_line, z_line)
@@ -682,7 +684,7 @@ class SLDReader(object):
                             vol_pix = None
                     except:
                         # Skip non-data lines
-                        logging.error(sys.exc_value)
+                        logger.error(sys.exc_value)
             output = MagSLD(pos_x, pos_y, pos_z, sld_n,
                             sld_mx, sld_my, sld_mz)
             output.filename = os.path.basename(path)

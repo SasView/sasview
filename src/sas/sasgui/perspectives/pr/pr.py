@@ -34,6 +34,8 @@ import sas.sascalc.dataloader
 from pr_widgets import load_error
 from sas.sasgui.guiframe.plugin_base import PluginBase
 
+logger = logging.getLogger(__name__)
+
 
 PR_FIT_LABEL = r"$P_{fit}(r)$"
 PR_LOADED_LABEL = r"$P_{loaded}(r)$"
@@ -112,7 +114,7 @@ class Plugin(PluginBase):
         #l.associate_file_reader(".svs", self.state_reader)
 
         # Log startup
-        logging.info("Pr(r) plug-in started")
+        logger.info("Pr(r) plug-in started")
 
     def delete_data(self, data_id):
         """
@@ -180,7 +182,7 @@ class Plugin(PluginBase):
                                                    title=self.current_plottable.title))
             self.control_panel.set_state(state)
         except:
-            logging.error("prview.set_state: %s" % sys.exc_value)
+            logger.error("prview.set_state: %s" % sys.exc_value)
 
 
     def help(self, evt):
@@ -507,7 +509,7 @@ class Plugin(PluginBase):
                     data_y = np.append(data_y, y)
                     data_err = np.append(data_err, err)
                 except:
-                    logging.error(sys.exc_value)
+                    logger.error(sys.exc_value)
 
         if not scale == None:
             message = "The loaded file had no error bars, statistical errors are assumed."
@@ -558,7 +560,7 @@ class Plugin(PluginBase):
                         data_y = np.append(data_y, y)
                         data_err = np.append(data_err, err)
                     except:
-                        logging.error(sys.exc_value)
+                        logger.error(sys.exc_value)
                 elif line.find("The 6 columns") >= 0:
                     data_started = True
 
@@ -1200,7 +1202,7 @@ class Plugin(PluginBase):
             panel.graph.selected_plottable in panel.plots:
             dataset = panel.plots[panel.graph.selected_plottable].name
         else:
-            logging.info("Prview Error: No data is available")
+            logger.info("Prview Error: No data is available")
             return
 
         # Store a reference to the current plottable
@@ -1210,13 +1212,13 @@ class Plugin(PluginBase):
             self.control_panel.alpha = estimate
         except:
             self.control_panel.alpha = self.alpha
-            logging.info("Prview :Alpha Not estimate yet")
+            logger.info("Prview :Alpha Not estimate yet")
         try:
             estimate = int(self.control_panel.nterms_estimate)
             self.control_panel.nfunc = estimate
         except:
             self.control_panel.nfunc = self.nfunc
-            logging.info("Prview : ntemrs Not estimate yet")
+            logger.info("Prview : ntemrs Not estimate yet")
 
         self.current_plottable = panel.plots[panel.graph.selected_plottable]
         self.set_data([self.current_plottable])

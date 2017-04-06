@@ -7,7 +7,8 @@ contortions in the code and worse incorrect calculations until now for at least
 some of the functions.  This seemed the easiest to fix particularly since this
 function should disappear in a future iteration (see notes in fitDialog)
 
-                -PDB   July 10, 2016
+PDB   July 10, 2016
+
 """
 
 import math
@@ -69,7 +70,7 @@ class LineModel(object):
         the y(xmin) and y(xmax), but the only difference between this and
         runXY is when the if statement is true. I however cannot see what that
         function is for.  It needs to be documented here or removed.
-        -PDB 7/10/16 
+        PDB 7/10/16 
 
         :param x: simple value
 
@@ -91,7 +92,7 @@ class LineModel(object):
         :note: This is to be what is called by fitDialog for the actual fit
         but the only difference between this and run is when the if 
         statement is true. I however cannot see what that function
-        is for.  It needs to be documented here or removed. -PDB 7/10/16 
+        is for.  It needs to be documented here or removed. PDB 7/10/16 
 
         :param x: simple value
 

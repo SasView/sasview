@@ -17,6 +17,8 @@ from pr_widgets import DataFileTextCtrl
 from pr_widgets import OutputTextCtrl
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
+logger = logging.getLogger(__name__)
+
 if sys.platform.count("win32") > 0:
     FONT_VARIANT = 0
 else:
@@ -709,10 +711,10 @@ class InversionControl(ScrolledPanel, PanelBase):
             float(alpha)
             self.alpha_ctl.SetValue(alpha)
         except ValueError:
-            logging.error("InversionControl._on_accept_alpha got a value that was not a number: %s" % alpha )
+            logger.error("InversionControl._on_accept_alpha got a value that was not a number: %s" % alpha )
         except:
             # No estimate or bad estimate, either do nothing
-            logging.error("InversionControl._on_accept_alpha: %s" % sys.exc_value)
+            logger.error("InversionControl._on_accept_alpha: %s" % sys.exc_value)
 
     def _on_accept_nterms(self, evt):
         """
@@ -725,10 +727,10 @@ class InversionControl(ScrolledPanel, PanelBase):
             float(nterms)
             self.nfunc_ctl.SetValue(nterms)
         except ValueError:
-            logging.error("InversionControl._on_accept_nterms got a value that was not a number: %s" % nterms )
+            logger.error("InversionControl._on_accept_nterms got a value that was not a number: %s" % nterms )
         except:
             # No estimate or bad estimate, either do nothing
-            logging.error("InversionControl._on_accept_nterms: %s" % sys.exc_value)
+            logger.error("InversionControl._on_accept_nterms: %s" % sys.exc_value)
 
     def clear_panel(self):
         """
@@ -946,7 +948,7 @@ class InversionControl(ScrolledPanel, PanelBase):
                 self._set_analysis(True)
             except:
                 msg = "InversionControl._change_file: %s" % sys.exc_value
-                logging.error(msg)
+                logger.error(msg)
 
     def on_help(self, event):
         """

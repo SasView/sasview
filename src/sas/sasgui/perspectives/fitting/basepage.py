@@ -33,6 +33,7 @@ from sas.sasgui.perspectives.fitting.pagestate import PageState
 from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
+logger = logging.getLogger(__name__)
 
 (PageInfoEvent, EVT_PAGE_INFO) = wx.lib.newevent.NewEvent()
 (PreviousStateEvent, EVT_PREVIOUS_STATE) = wx.lib.newevent.NewEvent()
@@ -781,7 +782,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                     weights.append(weight)
                 except Exception:
                     # Skip non-data lines
-                    logging.error(traceback.format_exc())
+                    logger.error(traceback.format_exc())
             return np.array(angles), np.array(weights)
         except:
             raise
@@ -1303,7 +1304,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.model._persistency_dict[key] = \
                     [state.values, state.weights]
             except Exception:
-                logging.error(traceback.format_exc())
+                logger.error(traceback.format_exc())
             selection = self._find_polyfunc_selection(disp_model)
             for list in self.fittable_param:
                 if list[1] == key and list[7] is not None:
@@ -1320,7 +1321,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                             list[5].Disable()
                             list[6].Disable()
                         except Exception:
-                            logging.error(traceback.format_exc())
+                            logger.error(traceback.format_exc())
             # For array, disable all fixed params
             if selection == 1:
                 for item in self.fixed_param:
@@ -1329,7 +1330,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                         try:
                             item[2].Disable()
                         except Exception:
-                            logging.error(traceback.format_exc())
+                            logger.error(traceback.format_exc())
 
     def _selectDlg(self):
         """
@@ -1450,7 +1451,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self._draw_model()
                 self.Refresh()
 
-        # logging.info("is_modified flag set to %g",is_modified)
+        # logger.info("is_modified flag set to %g",is_modified)
         return is_modified
 
     def _update_paramv_on_fit(self):
@@ -1555,7 +1556,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         try:
             self.save_current_state()
         except Exception:
-            logging.error(traceback.format_exc())
+            logger.error(traceback.format_exc())
 
         return flag, is_modified
 
@@ -2370,7 +2371,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 try:
                     self.model.set_dispersion(p, disp_model)
                 except Exception:
-                    logging.error(traceback.format_exc())
+                    logger.error(traceback.format_exc())
 
         # save state into
         self.save_current_state()
@@ -2485,7 +2486,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             self._draw_model()
             self.Refresh()
         except Exception:
-            logging.error(traceback.format_exc())
+            logger.error(traceback.format_exc())
             # Error msg
             msg = "Error occurred:"
             msg += " Could not select the distribution function..."
@@ -2586,7 +2587,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 del self.model._persistency_dict[name.split('.')[0]]
                 del self.state.model._persistency_dict[name.split('.')[0]]
         except Exception:
-            logging.error(traceback.format_exc())
+            logger.error(traceback.format_exc())
 
     def _lay_out(self):
         """
@@ -2718,7 +2719,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                         canvases.append(item2.canvas)
             except Exception:
                 # Not for control panels
-                logging.error(traceback.format_exc())
+                logger.error(traceback.format_exc())
         # Make sure the resduals plot goes to the last
         if res_item is not None:
             graphs.append(res_item[0])
@@ -3051,7 +3052,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 if item[7].__class__.__name__ == 'ComboBox':
                     disfunc = str(item[7].GetValue())
             except Exception:
-                logging.error(traceback.format_exc())
+                logger.error(traceback.format_exc())
 
             # 2D
             if self.data.__class__.__name__ == "Data2D":
@@ -3094,7 +3095,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                     for weight in self.weights[name]:
                         disfunc += ' ' + str(weight)
             except Exception:
-                logging.error(traceback.format_exc())
+                logger.error(traceback.format_exc())
             content += name + ',' + str(check) + ',' + value + disfunc + ',' + \
                        bound_lo + ',' + bound_hi + ':'
 
@@ -3365,7 +3366,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.state.weights = self.weights
 
         except Exception:
-            logging.error(traceback.format_exc())
+            logger.error(traceback.format_exc())
             print "Error in BasePage._paste_poly_help: %s" % \
                   sys.exc_info()[1]
 

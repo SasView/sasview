@@ -30,6 +30,8 @@ from matplotlib.font_manager import FontProperties
 from graphAppearance import graphAppearance
 (InternalEvent, EVT_INTERNAL) = wx.lib.newevent.NewEvent()
 
+logger = logging.getLogger(__name__)
+
 DEFAULT_QMAX = 0.05
 DEFAULT_QSTEP = 0.001
 DEFAULT_BEAM = 0.005
@@ -432,7 +434,7 @@ class ModelPanel2D(ModelPanel1D):
                     self.subplot.figure.canvas.draw_idle()
             except:
                 msg = "Add Text: Error. Check your property values..."
-                logging.error(msg)
+                logger.error(msg)
                 if self.parent != None:
                     wx.PostEvent(self.parent, StatusEvent(status=msg))
         dial.Destroy()
