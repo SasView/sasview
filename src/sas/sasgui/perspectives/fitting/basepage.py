@@ -1708,6 +1708,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             inputVariables = threadedDrawQueue.get()
             self._draw_model_after(inputVariables[0], inputVariables[1])
             self.threadedDrawQueue.task_done()
+            wx.PostEvent(self._manager.parent, StatusEvent(status="Computation is in progress...", type = "progress"))
 
     def _draw_model_after(self, update_chisqr=True, source='model'):
         """
