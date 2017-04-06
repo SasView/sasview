@@ -25,7 +25,7 @@ smaller than *V*.
 Assuming that all the pixel sizes are the same, the elastic scattering 
 intensity from the particle is
 
-.. image:: gen_i.gif
+.. image:: gen_i.png
 
 Equation 1.
 
@@ -34,7 +34,7 @@ the position of the j'th pixel respectively.
 
 The total volume *V*
 
-.. image:: v_j.gif
+.. image:: v_j.png
 
 for |beta|\ :sub:`j` |noteql|\0 where *v*\ :sub:`j` is the volume of the j'th 
 pixel (or the j'th natural atomic volume (= atomic mass / (natural molar 
@@ -57,11 +57,11 @@ For magnetic scattering, only the magnetization component, *M*\ :sub:`perp`\ ,
 perpendicular to the scattering vector *Q* contributes to the magnetic 
 scattering length.
 
-.. image:: mag_vector.bmp
+.. image:: mag_vector.png
 
 The magnetic scattering length density is then
 
-.. image:: dm_eq.gif
+.. image:: dm_eq.png
 
 where the gyromagnetic ratio |gamma| = -1.913, |mu|\ :sub:`B` is the Bohr 
 magneton, *r*\ :sub:`0` is the classical radius of electron, and |sigma| is the 
@@ -76,7 +76,7 @@ scattering from the sample are then
 *  Non-spin flips: (+ +) and (- -)
 *  Spin flips:     (+ -) and (- +)
 
-.. image:: gen_mag_pic.bmp
+.. image:: gen_mag_pic.png
 
 Now let us assume that the angles of the *Q* vector and the spin-axis (x') 
 to the x-axis are |phi| and |theta|\ :sub:`up` respectively (see above). Then, 
@@ -86,23 +86,23 @@ are given as
 
 *  for non-spin-flips
 
-   .. image:: sld1.gif
+   .. image:: sld1.png
 
 *  for spin-flips
 
-   .. image:: sld2.gif
+   .. image:: sld2.png
 
 where
 
-.. image:: mxp.gif
+.. image:: mxp.png
 
-.. image:: myp.gif
+.. image:: myp.png
 
-.. image:: mzp.gif
+.. image:: mzp.png
 
-.. image:: mqx.gif
+.. image:: mqx.png
 
-.. image:: mqy.gif
+.. image:: mqy.png
 
 Here the *M0*\ :sub:`x`\ , *M0*\ :sub:`y` and *M0*\ :sub:`z` are the x, y and z 
 components of the magnetisation vector in the laboratory xyz frame. 
@@ -112,7 +112,7 @@ components of the magnetisation vector in the laboratory xyz frame.
 Using the tool
 --------------
 
-.. image:: gen_gui_help.bmp
+.. image:: gen_gui_help.png
 
 After computation the result will appear in the *Theory* box in the SasView  
 *Data Explorer* panel.
@@ -145,7 +145,7 @@ The calculation for fixed orientation uses Equation 1 above resulting in a 2D
 output, whereas the scattering calculation averaged over all the orientations 
 uses the Debye equation below providing a 1D output
 
-.. image:: gen_debye_eq.gif
+.. image:: gen_debye_eq.png
 
 where *v*\ :sub:`j` |beta|\ :sub:`j` |equiv| *b*\ :sub:`j` is the scattering 
 length of the j'th atom. The calculation output is passed to the *Data Explorer* 

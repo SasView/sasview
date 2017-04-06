@@ -372,6 +372,17 @@ def build():
     html = os.path.join(SPHINX_BUILD, "html")
     copy_tree(html, SASVIEW_DOCS)
 
+    print "=== Build Latex Docs from Rest Files ==="
+    subprocess.call(["sphinx-build",
+                     "-b", "latex", # Builder name. TODO: accept as arg to setup.py.
+                     "-d", os.path.join(SPHINX_BUILD, "doctrees"),
+                     SPHINX_SOURCE,
+                     os.path.join(SPHINX_BUILD, "latex")])
+
+    print "=== Copy Latex Docs to Build Directory ==="
+    latex = os.path.join(SPHINX_BUILD, "latex")
+    copy_tree(latex, SASVIEW_DOCS)
+
 def rebuild():
     clean()
     setup_source_temp()

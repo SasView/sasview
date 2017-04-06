@@ -195,7 +195,7 @@ class DialogAbout(wx.Dialog):
         logo = wx.Bitmap(image)
         self.bitmap_button_danse.SetBitmapLabel(logo)
         """
-        image = file_dir + "/images/utlogo.gif"
+        image = file_dir + "/images/utlogo.png"
         if os.path.isfile(config._inst_logo):
             image = config._inst_logo
         logo = wx.Bitmap(image)

@@ -3,15 +3,15 @@
 .. This is a port of the original SasView html help file to ReSTructured text
 .. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
 
-.. |inlineimage004| image:: sm_image004.gif
-.. |inlineimage005| image:: sm_image005.gif
-.. |inlineimage008| image:: sm_image008.gif
-.. |inlineimage009| image:: sm_image009.gif
-.. |inlineimage010| image:: sm_image010.gif
-.. |inlineimage011| image:: sm_image011.gif
-.. |inlineimage012| image:: sm_image012.gif
-.. |inlineimage018| image:: sm_image018.gif
-.. |inlineimage019| image:: sm_image019.gif
+.. |inlineimage004| image:: sm_image004.png
+.. |inlineimage005| image:: sm_image005.png
+.. |inlineimage008| image:: sm_image008.png
+.. |inlineimage009| image:: sm_image009.png
+.. |inlineimage010| image:: sm_image010.png
+.. |inlineimage011| image:: sm_image011.png
+.. |inlineimage012| image:: sm_image012.png
+.. |inlineimage018| image:: sm_image018.png
+.. |inlineimage019| image:: sm_image019.png
 
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ

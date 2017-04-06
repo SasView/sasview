@@ -64,7 +64,7 @@ Using the tool
 8) A summary of the calculation is written to the SasView *Console* at the 
    bottom of the main SasView window.
 
-.. image:: resolution_tutor.gif
+.. image:: resolution_tutor.png
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -73,16 +73,16 @@ Theory
 
 The scattering wave transfer vector is by definition
 
-.. image:: q.gif
+.. image:: q.png
 
 In the small-angle limit, the variance of Q is to a first-order 
 approximation
 
-.. image:: sigma_q.gif
+.. image:: sigma_q.png
 
 The geometric and gravitational contributions can then be summarised as
 
-.. image:: sigma_table.gif
+.. image:: sigma_table.png
 
 Finally, a Gaussian function is used to describe the 2D weighting distribution 
 of the uncertainty in Q.

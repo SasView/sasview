@@ -16,7 +16,7 @@ For two phase systems, the scattering invariant is defined as the integral of
 the square of the wave transfer (Q) multiplied by the scattering cross section 
 over the full range of Q from zero to infinity, that is
 
-.. image:: image001.gif
+.. image:: image001.png
 
 where *g = q* for pinhole geometry (SAS) and *g = q*\ :sub:`v` (the slit height) for  
 slit geometry (USAS).
@@ -77,7 +77,7 @@ Using invariant analysis
    The details of the calculation are available by clicking the *Details* 
    button in the middle of the panel.
 
-.. image:: image005.gif
+.. image:: image005.png
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -89,11 +89,11 @@ Volume Fraction
 
 The volume fraction |phi| is related to Q*\  by
 
-.. image:: image002.gif
+.. image:: image002.png
 
 where |bigdelta|\ |rho| is the SLD contrast.
 
-.. image:: image003.gif
+.. image:: image003.png
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -102,7 +102,7 @@ Specific Surface Area
 
 The specific surface area *Sv* is related to Q*\  by
 
-.. image:: image004.gif
+.. image:: image004.png
 
 where *Cp* is the Porod constant.
 

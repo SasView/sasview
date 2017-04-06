@@ -41,7 +41,7 @@
 # \image html real-space-class-diagram.png
 #
 # \subsection behav Behavior Enumeration:
-# \image html enum.gif
+# \image html enum.png
 #
 # \subsection Tutorial
 # To create an empty canvas:

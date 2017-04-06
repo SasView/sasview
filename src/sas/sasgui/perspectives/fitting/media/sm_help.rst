@@ -3,15 +3,15 @@
 .. This is a port of the original SasView html help file to ReSTructured text
 .. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
 
-.. |inlineimage004| image:: sm_image004.gif
-.. |inlineimage005| image:: sm_image005.gif
-.. |inlineimage008| image:: sm_image008.gif
-.. |inlineimage009| image:: sm_image009.gif
-.. |inlineimage010| image:: sm_image010.gif
-.. |inlineimage011| image:: sm_image011.gif
-.. |inlineimage012| image:: sm_image012.gif
-.. |inlineimage018| image:: sm_image018.gif
-.. |inlineimage019| image:: sm_image019.gif
+.. |inlineimage004| image:: sm_image004.png
+.. |inlineimage005| image:: sm_image005.png
+.. |inlineimage008| image:: sm_image008.png
+.. |inlineimage009| image:: sm_image009.png
+.. |inlineimage010| image:: sm_image010.png
+.. |inlineimage011| image:: sm_image011.png
+.. |inlineimage012| image:: sm_image012.png
+.. |inlineimage018| image:: sm_image018.png
+.. |inlineimage019| image:: sm_image019.png
 
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
@@ -56,11 +56,11 @@ Slit Smearing
 
 The slit-smeared scattering intensity is defined by
 
-.. image:: sm_image002.gif
+.. image:: sm_image002.png
 
 where *Norm* is given by
 
-.. image:: sm_image003.gif
+.. image:: sm_image003.png
 
 **[Equation 1]**
 
@@ -69,13 +69,13 @@ refer to the slit width weighting function and the slit height weighting
 determined at the given *q* point, respectively. It is assumed that the weighting
 function is described by a rectangular function, such that
 
-.. image:: sm_image006.gif
+.. image:: sm_image006.png
 
 **[Equation 2]**
 
 and
 
-.. image:: sm_image007.gif
+.. image:: sm_image007.png
 
 **[Equation 3]**
 
@@ -86,7 +86,7 @@ the slit height (FWHM/2) and the slit width (FWHM/2) in *q* space.
 
 This simplifies the integral in Equation 1 to
 
-.. image:: sm_image013.gif
+.. image:: sm_image013.png
 
 **[Equation 4]**
 
@@ -97,13 +97,13 @@ Solution 1
 
 **For** |inlineimage012| **= 0 and** |inlineimage011| **= constant.**
 
-.. image:: sm_image016.gif
+.. image:: sm_image016.png
 
 For discrete *q* values, at the *q* values of the data points and at the *q*
 values extended up to *q*\ :sub:`N`\ = *q*\ :sub:`i` + |inlineimage011| the smeared
 intensity can be approximately calculated as
 
-.. image:: sm_image017.gif
+.. image:: sm_image017.png
 
 **[Equation 5]**
 
@@ -137,7 +137,7 @@ An alternative approach is used in SasView which assumes
 slit width << slit height. This method combines Solution 1 with the
 numerical integration for the slit width. Then
 
-.. image:: sm_image020.gif
+.. image:: sm_image020.png
 
 **[Equation 7]**
 
@@ -157,7 +157,7 @@ The pinhole smearing computation is performed in a similar fashion to the slit-
 smeared case above except that the weight function used is a Gaussian. Thus
 Equation 6 becomes
 
-.. image:: sm_image021.gif
+.. image:: sm_image021.png
 
 **[Equation 8]**
 
@@ -170,7 +170,7 @@ The 2D smearing computation is performed in a similar fashion to the 1D pinhole
 smearing above except that the weight function used is a 2D elliptical Gaussian.
 Thus
 
-.. image:: sm_image022.gif
+.. image:: sm_image022.png
 
 **[Equation 9]**
 
@@ -181,14 +181,14 @@ the z-axis (see the figure below) so that *x'*\ :sub:`0` = *x*\ :sub:`0` cos(|th
 *y*\ :sub:`0` cos(|theta|). Note that the rotation angle is zero for a x-y symmetric
 elliptical Gaussian distribution. The *A* is a normalization factor.
 
-.. image:: sm_image023.gif
+.. image:: sm_image023.png
 
 Now we consider a numerical integration where each of the bins in |theta| and *R* are
 *evenly* (this is to simplify the equation below) distributed by |bigdelta|\ |theta|
 and |bigdelta|\ R, respectively, and it is further assumed that *I(x',y')* is constant
 within the bins. Then
 
-.. image:: sm_image024.gif
+.. image:: sm_image024.png
 
 **[Equation 10]**
 
@@ -198,23 +198,23 @@ transform *x'-y'* back to *x-y* coordinates (by rotating it by -|theta| around t
 
 Then, for a polar symmetric smear
 
-.. image:: sm_image025.gif
+.. image:: sm_image025.png
 
 **[Equation 11]**
 
 where
 
-.. image:: sm_image026.gif
+.. image:: sm_image026.png
 
 while for a *x-y* symmetric smear
 
-.. image:: sm_image027.gif
+.. image:: sm_image027.png
 
 **[Equation 12]**
 
 where
 
-.. image:: sm_image028.gif
+.. image:: sm_image028.png
 
 The current version of the SasView uses Equation 11 for 2D smearing, assuming
 that all the Gaussian weighting functions are aligned in the polar coordinate.
