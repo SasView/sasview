@@ -16,7 +16,7 @@ class sesans_reader(unittest.TestCase):
         """
             Test .SES file loading
         """
-        f =self.loader.load("sphere3micron.ses")
+        f = self.loader.load("sphere2micron.ses")
         # self.assertEqual(f, 5)
         self.assertEqual(len(f.x), 40)
         self.assertEqual(f.x[0], 391.56)
