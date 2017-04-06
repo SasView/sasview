@@ -1708,6 +1708,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         # # So, if a whole pile of jobs are submitted in quick succession, 
         # # let's say in less than 0.1 sec, we'll filter them out, assuming something is running!
+
         if ((self._manager.calc_1D is not None) and self._manager.calc_1D.isrunning()) or ((self._manager.calc_2D is not None) and self._manager.calc_2D.isrunning()):
             if currentTime > (self.lastTimeFitSubmitted + 0.1):
                 # Assuming that things have been 'sensibly' submitted, but there's another
@@ -1716,7 +1717,13 @@ class BasicPage(ScrolledPanel, PanelBase):
                     self.threadedDrawQueue.put([update_chisqr, source])
                     print 'here'
                 else:
+                    while self.threadedDrawQueue.empty() != True:
+                        self.threadedDrawQueue.get()
+                        self.threadedDrawQueue.task_done()
+
+                    self.threadedDrawQueue.put([update_chisqr, source])
                     print 'rejected'
+        
         else:
             self.threadedDrawQueue.put([update_chisqr, source])
 
@@ -1724,10 +1731,14 @@ class BasicPage(ScrolledPanel, PanelBase):
 
     def _threaded_draw_worker(self, threadedDrawQueue):
         while True:
-            inputVariables = threadedDrawQueue.get()
-            self._draw_model_after(inputVariables[0], inputVariables[1])
-            wx.PostEvent(self._manager.parent, StatusEvent(status="Computation is in progress...", type = "progress"))
-            threadedDrawQueue.task_done()
+            if ((self._manager.calc_1D is not None) and self._manager.calc_1D.isrunning()) or ((self._manager.calc_2D is not None) and self._manager.calc_2D.isrunning()):
+                pass
+            else:
+                inputVariables = threadedDrawQueue.get()
+                self._draw_model_after(inputVariables[0], inputVariables[1])
+                wx.PostEvent(self._manager.parent, StatusEvent(status="Computation is in progress...", type = "progress"))
+                threadedDrawQueue.task_done()
+                print 'added'
 
     def _draw_model_after(self, update_chisqr=True, source='model'):
         """
