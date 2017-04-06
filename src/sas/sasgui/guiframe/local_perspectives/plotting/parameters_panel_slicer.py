@@ -163,6 +163,8 @@ class SlicerParameterPanel(wx.Dialog):
             self.bck.Add(self.auto_save, (iy, ix), (1, 1),
                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
             iy += 1
+            # TODO: Get list of loaded data, not plots - plot again
+            # TODO: try/catch block to catch wx._core.PyDeadObjectError (pass)
             # File browser
             save_to = "Save files to:"
             save = wx.StaticText(self, -1, save_to, style=wx.ALIGN_LEFT)
@@ -248,7 +250,7 @@ class SlicerParameterPanel(wx.Dialog):
             # Post parameter event
             # parent here is plotter2D
             event = SlicerParameterEvent(type=self.type, params=params)
-            wx.PostEvent(self.parent, event)
+            wx.PostEvent(self, event)
 
     def on_batch_slicer(self, evt=None):
         """
@@ -365,21 +367,16 @@ class SlicerParameterPanel(wx.Dialog):
             return
         writer = Reader()
         main_window = self.parent.parent
-        data_list = []
+        data_dic = {}
         append = evt.append_to_name
         for key, plot in main_window.plot_panels.iteritems():
             if not hasattr(plot, "data2D"):
                 for item in plot.plots:
-                    data_list.append(item)
-        for item in data_list:
-            data1d = item.plots
-            base = item.name.split(".")[0]
-            save_to = evt.path + base + ".xml"
-            writer.write(path, data1d)
-
-        # TODO: determine data sets
-        # TODO: generate file names
-        # TODO: link one to the other
+                    data_dic[item] = plot.plots[item]
+        for item, data1d in data_dic.iteritems():
+            base = item.split(".")[0]
+            save_to = evt.path + "\\" + base + append + ".xml"
+            writer.write(save_to, data1d)
         # TODO: save all files
 
     def on_auto_save_checked(self, evt=None):
