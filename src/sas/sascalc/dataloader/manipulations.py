@@ -71,11 +71,163 @@ def flip_phi(phi):
         phi_out = phi
     return phi_out
 
+def get_pixel_fraction_square(x, xmin, xmax):
+    """
+    Return the fraction of the length
+    from xmin to x.::
+
+           A            B
+       +-----------+---------+
+       xmin        x         xmax
+
+    :param x: x-value
+    :param xmin: minimum x for the length considered
+    :param xmax: minimum x for the length considered
+    :return: (x-xmin)/(xmax-xmin) when xmin < x < xmax
+
+    """
+    if x <= xmin:
+        return 0.0
+    if x > xmin and x < xmax:
+        return (x - xmin) / (xmax - xmin)
+    else:
+        return 1.0
+
+def get_intercept(q, q_0, q_1):
+    """
+    Returns the fraction of the side at which the
+    q-value intercept the pixel, None otherwise.
+    The values returned is the fraction ON THE SIDE
+    OF THE LOWEST Q. ::
+
+            A           B
+        +-----------+--------+    <--- pixel size
+        0                    1
+        Q_0 -------- Q ----- Q_1   <--- equivalent Q range
+        if Q_1 > Q_0, A is returned
+        if Q_1 < Q_0, B is returned
+        if Q is outside the range of [Q_0, Q_1], None is returned
+
+    """
+    if q_1 > q_0:
+        if q > q_0 and q <= q_1:
+            return (q - q_0) / (q_1 - q_0)
+    else:
+        if q > q_1 and q <= q_0:
+            return (q - q_1) / (q_0 - q_1)
+    return None
+
+def get_pixel_fraction(qmax, q_00, q_01, q_10, q_11):
+    """
+    Returns the fraction of the pixel defined by
+    the four corners (q_00, q_01, q_10, q_11) that
+    has q < qmax.::
+
+                q_01                q_11
+        y=1         +--------------+
+                    |              |
+                    |              |
+                    |              |
+        y=0         +--------------+
+                q_00                q_10
+
+                    x=0            x=1
+
+    """
+    # y side for x = minx
+    x_0 = get_intercept(qmax, q_00, q_01)
+    # y side for x = maxx
+    x_1 = get_intercept(qmax, q_10, q_11)
+
+    # x side for y = miny
+    y_0 = get_intercept(qmax, q_00, q_10)
+    # x side for y = maxy
+    y_1 = get_intercept(qmax, q_01, q_11)
+
+    # surface fraction for a 1x1 pixel
+    frac_max = 0
+
+    if x_0 and x_1:
+        frac_max = (x_0 + x_1) / 2.0
+    elif y_0 and y_1:
+        frac_max = (y_0 + y_1) / 2.0
+    elif x_0 and y_0:
+        if q_00 < q_10:
+            frac_max = x_0 * y_0 / 2.0
+        else:
+            frac_max = 1.0 - x_0 * y_0 / 2.0
+    elif x_0 and y_1:
+        if q_00 < q_10:
+            frac_max = x_0 * y_1 / 2.0
+        else:
+            frac_max = 1.0 - x_0 * y_1 / 2.0
+    elif x_1 and y_0:
+        if q_00 > q_10:
+            frac_max = x_1 * y_0 / 2.0
+        else:
+            frac_max = 1.0 - x_1 * y_0 / 2.0
+    elif x_1 and y_1:
+        if q_00 < q_10:
+            frac_max = 1.0 - (1.0 - x_1) * (1.0 - y_1) / 2.0
+        else:
+            frac_max = (1.0 - x_1) * (1.0 - y_1) / 2.0
+
+    # If we make it here, there is no intercept between
+    # this pixel and the constant-q ring. We only need
+    # to know if we have to include it or exclude it.
+    elif (q_00 + q_01 + q_10 + q_11) / 4.0 < qmax:
+        frac_max = 1.0
+
+    return frac_max
+
+def get_dq_data(data2D):
+    '''
+    Get the dq for resolution averaging
+    The pinholes and det. pix contribution present
+    in both direction of the 2D which must be subtracted when
+    converting to 1D: dq_overlap should calculated ideally at
+    q = 0. Note This method works on only pinhole geometry.
+    Extrapolate dqx(r) and dqy(phi) at q = 0, and take an average.
+    '''
+    z_max = max(data2D.q_data)
+    z_min = min(data2D.q_data)
+    x_max = data2D.dqx_data[data2D.q_data[z_max]]
+    x_min = data2D.dqx_data[data2D.q_data[z_min]]
+    y_max = data2D.dqy_data[data2D.q_data[z_max]]
+    y_min = data2D.dqy_data[data2D.q_data[z_min]]
+    # Find qdx at q = 0
+    dq_overlap_x = (x_min * z_max - x_max * z_min) / (z_max - z_min)
+    # when extrapolation goes wrong
+    if dq_overlap_x > min(data2D.dqx_data):
+        dq_overlap_x = min(data2D.dqx_data)
+    dq_overlap_x *= dq_overlap_x
+    # Find qdx at q = 0
+    dq_overlap_y = (y_min * z_max - y_max * z_min) / (z_max - z_min)
+    # when extrapolation goes wrong
+    if dq_overlap_y > min(data2D.dqy_data):
+        dq_overlap_y = min(data2D.dqy_data)
+    # get dq at q=0.
+    dq_overlap_y *= dq_overlap_y
+
+    dq_overlap = np.sqrt((dq_overlap_x + dq_overlap_y) / 2.0)
+    # Final protection of dq
+    if dq_overlap < 0:
+        dq_overlap = y_min
+    dqx_data = data2D.dqx_data[np.isfinite(data2D.data)]
+    dqy_data = data2D.dqy_data[np.isfinite(
+        data2D.data)] - dq_overlap
+    # def; dqx_data = dq_r dqy_data = dq_phi
+    # Convert dq 2D to 1D here
+    dq_data = np.sqrt(dqx_data**2 + dqx_data**2) 
+    return dq_data
+
+################################################################################
 
 def reader2D_converter(data2d=None):
     """
     convert old 2d format opened by IhorReader or danse_reader
     to new Data2D format
+    This is mainly used by the Readers
 
     :param data2d: 2d array of Data2D object
     :return: 1d arrays of Data2D object
@@ -110,6 +262,7 @@ def reader2D_converter(data2d=None):
 
     return output
 
+################################################################################
 
 class _Slab(object):
     """
@@ -263,6 +416,7 @@ class SlabX(_Slab):
         """
         return self._avg(data2D, 'x')
 
+################################################################################
 
 class Boxsum(object):
     """
@@ -373,29 +527,7 @@ class Boxavg(Boxsum):
 
         return counts, error
 
-
-def get_pixel_fraction_square(x, xmin, xmax):
-    """
-    Return the fraction of the length
-    from xmin to x.::
-
-           A            B
-       +-----------+---------+
-       xmin        x         xmax
-
-    :param x: x-value
-    :param xmin: minimum x for the length considered
-    :param xmax: minimum x for the length considered
-    :return: (x-xmin)/(xmax-xmin) when xmin < x < xmax
-
-    """
-    if x <= xmin:
-        return 0.0
-    if x > xmin and x < xmax:
-        return (x - xmin) / (xmax - xmin)
-    else:
-        return 1.0
-
+################################################################################
 
 class CircularAverage(object):
     """
@@ -427,47 +559,8 @@ class CircularAverage(object):
         mask_data = data2D.mask[np.isfinite(data2D.data)]
 
         dq_data = None
-
-        # Get the dq for resolution averaging
         if data2D.dqx_data != None and data2D.dqy_data != None:
-            # The pinholes and det. pix contribution present
-            # in both direction of the 2D which must be subtracted when
-            # converting to 1D: dq_overlap should calculated ideally at
-            # q = 0. Note This method works on only pinhole geometry.
-            # Extrapolate dqx(r) and dqy(phi) at q = 0, and take an average.
-            z_max = max(data2D.q_data)
-            z_min = min(data2D.q_data)
-            x_max = data2D.dqx_data[data2D.q_data[z_max]]
-            x_min = data2D.dqx_data[data2D.q_data[z_min]]
-            y_max = data2D.dqy_data[data2D.q_data[z_max]]
-            y_min = data2D.dqy_data[data2D.q_data[z_min]]
-            # Find qdx at q = 0
-            dq_overlap_x = (x_min * z_max - x_max * z_min) / (z_max - z_min)
-            # when extrapolation goes wrong
-            if dq_overlap_x > min(data2D.dqx_data):
-                dq_overlap_x = min(data2D.dqx_data)
-            dq_overlap_x *= dq_overlap_x
-            # Find qdx at q = 0
-            dq_overlap_y = (y_min * z_max - y_max * z_min) / (z_max - z_min)
-            # when extrapolation goes wrong
-            if dq_overlap_y > min(data2D.dqy_data):
-                dq_overlap_y = min(data2D.dqy_data)
-            # get dq at q=0.
-            dq_overlap_y *= dq_overlap_y
-
-            dq_overlap = np.sqrt((dq_overlap_x + dq_overlap_y) / 2.0)
-            # Final protection of dq
-            if dq_overlap < 0:
-                dq_overlap = y_min
-            dqx_data = data2D.dqx_data[np.isfinite(data2D.data)]
-            dqy_data = data2D.dqy_data[np.isfinite(
-                data2D.data)] - dq_overlap
-            # def; dqx_data = dq_r dqy_data = dq_phi
-            # Convert dq 2D to 1D here
-            dqx = dqx_data * dqx_data
-            dqy = dqy_data * dqy_data
-            dq_data = np.add(dqx, dqy)
-            dq_data = np.sqrt(dq_data)
+            dq_data = get_dq_data(data2D)
 
         #q_data_max = np.max(q_data)
         if len(data2D.q_data) == None:
@@ -551,6 +644,7 @@ class CircularAverage(object):
 
         return Data1D(x=x[idx], y=y[idx], dy=err_y[idx], dx=d_x)
 
+################################################################################
 
 class Ring(object):
     """
@@ -654,95 +748,7 @@ class Ring(object):
         #,"empty bin(s) due to tight binning..."
         return Data1D(x=phi_values[idx], y=phi_bins[idx], dy=phi_err[idx])
 
-
-def get_pixel_fraction(qmax, q_00, q_01, q_10, q_11):
-    """
-    Returns the fraction of the pixel defined by
-    the four corners (q_00, q_01, q_10, q_11) that
-    has q < qmax.::
-
-                q_01                q_11
-        y=1         +--------------+
-                    |              |
-                    |              |
-                    |              |
-        y=0         +--------------+
-                q_00                q_10
-
-                    x=0            x=1
-
-    """
-    # y side for x = minx
-    x_0 = get_intercept(qmax, q_00, q_01)
-    # y side for x = maxx
-    x_1 = get_intercept(qmax, q_10, q_11)
-
-    # x side for y = miny
-    y_0 = get_intercept(qmax, q_00, q_10)
-    # x side for y = maxy
-    y_1 = get_intercept(qmax, q_01, q_11)
-
-    # surface fraction for a 1x1 pixel
-    frac_max = 0
-
-    if x_0 and x_1:
-        frac_max = (x_0 + x_1) / 2.0
-    elif y_0 and y_1:
-        frac_max = (y_0 + y_1) / 2.0
-    elif x_0 and y_0:
-        if q_00 < q_10:
-            frac_max = x_0 * y_0 / 2.0
-        else:
-            frac_max = 1.0 - x_0 * y_0 / 2.0
-    elif x_0 and y_1:
-        if q_00 < q_10:
-            frac_max = x_0 * y_1 / 2.0
-        else:
-            frac_max = 1.0 - x_0 * y_1 / 2.0
-    elif x_1 and y_0:
-        if q_00 > q_10:
-            frac_max = x_1 * y_0 / 2.0
-        else:
-            frac_max = 1.0 - x_1 * y_0 / 2.0
-    elif x_1 and y_1:
-        if q_00 < q_10:
-            frac_max = 1.0 - (1.0 - x_1) * (1.0 - y_1) / 2.0
-        else:
-            frac_max = (1.0 - x_1) * (1.0 - y_1) / 2.0
-
-    # If we make it here, there is no intercept between
-    # this pixel and the constant-q ring. We only need
-    # to know if we have to include it or exclude it.
-    elif (q_00 + q_01 + q_10 + q_11) / 4.0 < qmax:
-        frac_max = 1.0
-
-    return frac_max
-
-
-def get_intercept(q, q_0, q_1):
-    """
-    Returns the fraction of the side at which the
-    q-value intercept the pixel, None otherwise.
-    The values returned is the fraction ON THE SIDE
-    OF THE LOWEST Q. ::
-
-            A           B
-        +-----------+--------+    <--- pixel size
-        0                    1
-        Q_0 -------- Q ----- Q_1   <--- equivalent Q range
-        if Q_1 > Q_0, A is returned
-        if Q_1 < Q_0, B is returned
-        if Q is outside the range of [Q_0, Q_1], None is returned
-
-    """
-    if q_1 > q_0:
-        if q > q_0 and q <= q_1:
-            return (q - q_0) / (q_1 - q_0)
-    else:
-        if q > q_1 and q <= q_0:
-            return (q - q_1) / (q_0 - q_1)
-    return None
-
+################################################################################
 
 class _Sector(object):
     """
@@ -775,7 +781,6 @@ class _Sector(object):
         """
         if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
             raise RuntimeError("Ring averaging only take plottable_2D objects")
-        Pi = math.pi
 
         # Get the all data & info
         data = data2D.data[np.isfinite(data2D.data)]
@@ -783,47 +788,10 @@ class _Sector(object):
         err_data = data2D.err_data[np.isfinite(data2D.data)]
         qx_data = data2D.qx_data[np.isfinite(data2D.data)]
         qy_data = data2D.qy_data[np.isfinite(data2D.data)]
+
         dq_data = None
-
-        # Get the dq for resolution averaging
         if data2D.dqx_data != None and data2D.dqy_data != None:
-            # The pinholes and det. pix contribution present
-            # in both direction of the 2D which must be subtracted when
-            # converting to 1D: dq_overlap should calculated ideally at
-            # q = 0.
-            # Extrapolate dqy(perp) at q = 0
-            z_max = max(data2D.q_data)
-            z_min = min(data2D.q_data)
-            x_max = data2D.dqx_data[data2D.q_data[z_max]]
-            x_min = data2D.dqx_data[data2D.q_data[z_min]]
-            y_max = data2D.dqy_data[data2D.q_data[z_max]]
-            y_min = data2D.dqy_data[data2D.q_data[z_min]]
-            # Find qdx at q = 0
-            dq_overlap_x = (x_min * z_max - x_max * z_min) / (z_max - z_min)
-            # when extrapolation goes wrong
-            if dq_overlap_x > min(data2D.dqx_data):
-                dq_overlap_x = min(data2D.dqx_data)
-            dq_overlap_x *= dq_overlap_x
-            # Find qdx at q = 0
-            dq_overlap_y = (y_min * z_max - y_max * z_min) / (z_max - z_min)
-            # when extrapolation goes wrong
-            if dq_overlap_y > min(data2D.dqy_data):
-                dq_overlap_y = min(data2D.dqy_data)
-            # get dq at q=0.
-            dq_overlap_y *= dq_overlap_y
-
-            dq_overlap = np.sqrt((dq_overlap_x + dq_overlap_y) / 2.0)
-            if dq_overlap < 0:
-                dq_overlap = y_min
-            dqx_data = data2D.dqx_data[np.isfinite(data2D.data)]
-            dqy_data = data2D.dqy_data[np.isfinite(
-                data2D.data)] - dq_overlap
-            # def; dqx_data = dq_r dqy_data = dq_phi
-            # Convert dq 2D to 1D here
-            dqx = dqx_data * dqx_data
-            dqy = dqy_data * dqy_data
-            dq_data = np.add(dqx, dqy)
-            dq_data = np.sqrt(dq_data)
+            dq_data = get_dq_data(data2D)
 
         # set space for 1d outputs
         x = np.zeros(self.nbins)
@@ -837,7 +805,6 @@ class _Sector(object):
         phi_max = flip_phi(self.phi_max)
 
         for n in range(len(data)):
-            frac = 0
 
             # q-value at the pixel (j,i)
             q_value = q_data[n]
@@ -847,19 +814,18 @@ class _Sector(object):
             is_in = False
 
             # phi-value of the pixel (j,i)
-            phi_value = math.atan2(qy_data[n], qx_data[n]) + Pi
+            phi_value = math.atan2(qy_data[n], qx_data[n]) + math.pi
 
             # No need to calculate the frac when all data are within range
-            if self.r_min <= q_value and q_value <= self.r_max:
-                frac = 1
-            if frac == 0:
+            if self.r_min > q_value or q_value > self.r_max:
                 continue
+
             # In case of two ROIs (symmetric major and minor regions)(for 'q2')
             if run.lower() == 'q2':
                 # For minor sector wing
                 # Calculate the minor wing phis
-                phi_min_minor = flip_phi(phi_min - Pi)
-                phi_max_minor = flip_phi(phi_max - Pi)
+                phi_min_minor = flip_phi(phi_min - math.pi)
+                phi_max_minor = flip_phi(phi_max - math.pi)
                 # Check if phis of the minor ring is within 0 to 2pi
                 if phi_min_minor > phi_max_minor:
                     is_in = (phi_value > phi_min_minor or
@@ -878,8 +844,6 @@ class _Sector(object):
                                   phi_value < phi_max)
 
             if not is_in:
-                frac = 0
-            if frac == 0:
                 continue
             # Check which type of averaging we need
             if run.lower() == 'phi':
@@ -896,24 +860,24 @@ class _Sector(object):
                 i_bin = self.nbins - 1
 
             # Get the total y
-            y[i_bin] += frac * data_n
-            x[i_bin] += frac * q_value
+            y[i_bin] += data_n
+            x[i_bin] += q_value
             if err_data[n] == None or err_data[n] == 0.0:
                 if data_n < 0:
                     data_n = -data_n
-                y_err[i_bin] += frac * frac * data_n
+                y_err[i_bin] +=  data_n
             else:
-                y_err[i_bin] += frac * frac * err_data[n] * err_data[n]
+                y_err[i_bin] += err_data[n] * err_data[n]
 
             if dq_data != None:
                 # To be consistent with dq calculation in 1d reduction,
                 # we need just the averages (not quadratures) because
                 # it should not depend on the number of the q points
                 # in the qr bins.
-                x_err[i_bin] += frac * dq_data[n]
+                x_err[i_bin] += dq_data[n]
             else:
                 x_err = None
-            y_counts[i_bin] += frac
+            y_counts[i_bin] += 1
 
         # Organize the results
         for i in range(self.nbins):
@@ -987,6 +951,7 @@ class SectorQ(_Sector):
         """
         return self._agv(data2D, 'q2')
 
+################################################################################
 
 class Ringcut(object):
     """
@@ -1031,6 +996,7 @@ class Ringcut(object):
         out = (self.r_min <= q_data) & (self.r_max >= q_data)
         return out
 
+################################################################################
 
 class Boxcut(object):
     """
@@ -1080,6 +1046,7 @@ class Boxcut(object):
 
         return outx & outy
 
+################################################################################
 
 class Sectorcut(object):
     """
