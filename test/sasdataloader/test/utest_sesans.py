@@ -36,6 +36,10 @@ class sesans_reader(unittest.TestCase):
         self.assertEqual(len(f.x), 57)
         self.assertEqual(f.x[-1], 19303.4)
         self.assertEqual(f.source.wavelength[-1], 13.893668)
+        self.assertEqual(f.source.wavelength[0], 1.612452)
+        self.assertEqual(f.sample.yacceptance, (0.09, "radians"))
+        self.assertEqual(f.sample.zacceptance, (0.09, "radians"))
+        self.assertEqual(f.sample.thickness, 0.2)
 
 
 if __name__ == "__main__":
