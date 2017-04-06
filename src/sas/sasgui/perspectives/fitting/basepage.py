@@ -1703,13 +1703,20 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         :param chisqr: update chisqr value [bool]
         """
-
+        # Get the time
         currentTime = time()
+
         # # So, if a whole pile of jobs are submitted in quick succession, 
         # # let's say in less than 0.1 sec, we'll filter them out, assuming something is running!
         if ((self._manager.calc_1D is not None) and self._manager.calc_1D.isrunning()) or ((self._manager.calc_2D is not None) and self._manager.calc_2D.isrunning()):
             if currentTime > (self.lastTimeFitSubmitted + 0.1):
-                self.threadedDrawQueue.put([update_chisqr, source])
+                # Assuming that things have been 'sensibly' submitted, but there's another
+                # job going, dump the currently queued job and just execute the job requested last
+                if self.threadedDrawQueue.empty() == True:
+                    self.threadedDrawQueue.put([update_chisqr, source])
+                    print 'here'
+                else:
+                    print 'rejected'
         else:
             self.threadedDrawQueue.put([update_chisqr, source])
 
@@ -1719,8 +1726,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         while True:
             inputVariables = threadedDrawQueue.get()
             self._draw_model_after(inputVariables[0], inputVariables[1])
-            self.threadedDrawQueue.task_done()
             wx.PostEvent(self._manager.parent, StatusEvent(status="Computation is in progress...", type = "progress"))
+            threadedDrawQueue.task_done()
 
     def _draw_model_after(self, update_chisqr=True, source='model'):
         """
