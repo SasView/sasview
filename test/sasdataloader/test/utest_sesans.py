@@ -5,7 +5,6 @@
 import unittest
 from sas.sascalc.dataloader.loader import Loader
 
-import os.path
 
 class sesans_reader(unittest.TestCase):
 
@@ -28,6 +27,16 @@ class sesans_reader(unittest.TestCase):
         self.assertEqual(f.sample.thickness, 0.2)
         self.assertEqual(f.sample.zacceptance, (0.0168, "radians"))
         self.assertEqual(f.isSesans, True)
+
+    def test_sesans_tof(self):
+        """
+            Test .SES loading on a TOF dataset
+        """
+        f = self.loader.load("sphere_isis.ses")
+        self.assertEqual(len(f.x), 57)
+        self.assertEqual(f.x[-1], 19303.4)
+        self.assertEqual(f.source.wavelength[-1], 13.893668)
+
 
 if __name__ == "__main__":
     unittest.main()
