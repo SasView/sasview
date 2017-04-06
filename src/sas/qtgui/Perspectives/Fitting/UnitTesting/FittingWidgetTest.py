@@ -72,7 +72,7 @@ class FittingWidgetTest(unittest.TestCase):
         GuiUtils.dataFromItem = MagicMock(return_value=data)
         item = QtGui.QStandardItem("test")
 
-        widget_with_data = FittingWidget(dummy_manager(), data=[item], id=3)
+        widget_with_data = FittingWidget(dummy_manager(), data=item, id=3)
 
         self.assertEqual(widget_with_data.data, data)
         self.assertTrue(widget_with_data.data_is_loaded)

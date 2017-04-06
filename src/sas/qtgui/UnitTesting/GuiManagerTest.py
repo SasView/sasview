@@ -147,7 +147,7 @@ class GuiManagerTest(unittest.TestCase):
         """
         self.manager.processVersion = MagicMock()
         version = {'update_url'  : 'http://www.sasview.org/sasview.latestversion', 
-                   'version'     : '4.0.1',
+                   'version'     : '4.1.0',
                    'download_url': 'https://github.com/SasView/sasview/releases'}
         self.manager.checkUpdate()
 

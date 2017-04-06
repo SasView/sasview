@@ -90,9 +90,6 @@ class FittingPerspectiveTest(unittest.TestCase):
         item = QtGui.QStandardItem("test")
         self.widget.setData([item])
 
-        # Look at the data in tab
-        self.assertEqual(self.widget._model_item, item)
-
         # First tab should accept data
         self.assertEqual(len(self.widget.tabs), 1)
 
@@ -101,6 +98,12 @@ class FittingPerspectiveTest(unittest.TestCase):
 
         # Now we should have two tabs
         self.assertEqual(len(self.widget.tabs), 2)
+
+        # Add two more items in a list
+        self.widget.setData([item, item])
+
+        # Check for 4 tabs
+        self.assertEqual(len(self.widget.tabs), 4)
 
 
 if __name__ == "__main__":

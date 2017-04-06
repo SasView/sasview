@@ -417,7 +417,7 @@ class DataExplorerTest(unittest.TestCase):
         self.form.readData(filename)
 
         # Expected two status bar updates
-        self.assertEqual(spy_status_update.count(), 1)
+        self.assertEqual(spy_status_update.count(), 2)
         self.assertIn(filename[0], str(spy_status_update.called()[0]['args'][0]))
 
 

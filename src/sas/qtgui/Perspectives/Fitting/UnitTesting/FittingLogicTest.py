@@ -103,7 +103,7 @@ class FittingLogicTest(unittest.TestCase):
                         0, True, 0.0, 1, data,
                         data, False, None)
 
-        new_plot = self.logic.new1DPlot(return_data=return_data)
+        new_plot = self.logic.new1DPlot(return_data=return_data, tab_id=0)
 
         self.assertIsInstance(new_plot, Data1D)
         self.assertFalse(new_plot.is_data)
