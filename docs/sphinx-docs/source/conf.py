@@ -203,6 +203,10 @@ html_add_permalinks = ""
 LATEX_PREAMBLE=r"""
 \renewcommand{\AA}{\text{\r{A}}} % Allow \AA in math mode
 \usepackage[utf8]{inputenc}      % Allow unicode symbols in text
+\usepackage[T1]{fontenc}      % Taking care of underscores
+\catcode`\_=12                % Moving underscore to category 12
+\newcommand{\lt}{<}           %lower than symbol handling
+\newcommand{\gt}{>}           %greater than symbol handling
 \DeclareUnicodeCharacter {00B7} {\ensuremath{\cdot}}   % cdot
 \DeclareUnicodeCharacter {00B0} {\ensuremath{^\circ}}  % degrees
 \DeclareUnicodeCharacter {212B} {\AA}                  % Angstrom
