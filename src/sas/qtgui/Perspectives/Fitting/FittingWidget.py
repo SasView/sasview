@@ -142,8 +142,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self._index = None
         if data is not None:
             self.data = data
-        # Update Q Ranges
-        #self.updateQRange()
 
     @property
     def data(self):
@@ -165,7 +163,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.lblFilename.setText(self.logic.data.filename)
         self.updateQRange()
         self.cmdFit.setEnabled(True)
-        print "set to ", self.cmdFit.isEnabled()
 
     def acceptsData(self):
         """ Tells the caller this widget can accept new dataset """
@@ -258,6 +255,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         # Reset parameters to fit
         self.parameters_to_fit = None
+        self.has_error_column = False
 
         # SasModel -> QModel
         self.SASModelToQModel(model)
@@ -396,7 +394,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         calc_thread.addCallback(self.fitComplete)
 
         #disable the Fit button
-        self.cmdFit.setText("Calculating...")
+        self.cmdFit.setText('Calculating...')
+        self.communicate.statusBarUpdateSignal.emit('Fitting started...')
         self.cmdFit.setEnabled(False)
 
     def updateFit(self):
@@ -413,6 +412,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         #re-enable the Fit button
         self.cmdFit.setText("Fit")
         self.cmdFit.setEnabled(True)
+
+        assert result is not None
+
         res_list = result[0]
         res = res_list[0]
         if res.fitness is None or \
@@ -439,11 +441,12 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # e.g. param_dic = {"sld":(1.703, 0.0034), "length":(33.455, -0.0983)}
         self.updateModelFromList(param_dict)
 
+        # update charts
+        self.onPlot()
+
         # Read only value - we can get away by just printing it here
         chi2_repr = GuiUtils.formatNumber(fitness, high=True)
         self.lblChi2Value.setText(chi2_repr)
-
-        # Generate charts
 
     def iterateOverModel(self, func):
         """
@@ -461,8 +464,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         if not dict:
             return
 
-        def updateValues(row_i):
+        def updateFittedValues(row_i):
             # Utility function for main model update
+            # internal so can use closure for param_dict
             param_name = str(self._model_model.item(row_i, 0).text())
             if param_name not in param_dict.keys():
                 return
@@ -473,7 +477,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
                 error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
                 self._model_model.item(row_i, 2).setText(error_repr)
 
-        def createColumn(row_i):
+        def createErrorColumn(row_i):
             # Utility function for error column update
             item = QtGui.QStandardItem()
             for param_name in param_dict.keys():
@@ -483,17 +487,27 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
                 item.setText(error_repr)
             error_column.append(item)
 
-        self.iterateOverModel(updateValues)
+        self.iterateOverModel(updateFittedValues)
 
         if self.has_error_column:
             return
 
         error_column = []
-        self.iterateOverModel(createColumn)
+        self.iterateOverModel(createErrorColumn)
+
+        # switch off reponse to model change
+        self._model_model.blockSignals(True)
+        self._model_model.insertColumn(2, error_column)
+        self._model_model.blockSignals(False)
+        FittingUtilities.addErrorHeadersToModel(self._model_model)
+        # Adjust the table cells width.
+        # TODO: find a way to dynamically adjust column width while resized expanding
+        self.lstParams.resizeColumnToContents(0)
+        self.lstParams.resizeColumnToContents(4)
+        self.lstParams.resizeColumnToContents(5)
+        self.lstParams.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Expanding)
 
         self.has_error_column = True
-        self._model_model.insertColumn(2, error_column)
-        FittingUtilities.addErrorHeadersToModel(self._model_model)
 
     def onPlot(self):
         """
@@ -709,13 +723,15 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         property_name = str(self._model_model.headerData(1, model_column).toPyObject()) # Value, min, max, etc.
 
         self.kernel_module.params[parameter_name] = value
+        print "UPDATED %s / %s with %0.3f." %(parameter_name, property_name, value)
 
         # min/max to be changed in self.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
         # magnetic params in self.kernel_module.details['M0:parameter_name'] = value
         # multishell params in self.kernel_module.details[??] = value
 
-        # Force the chart update
-        self.onPlot()
+        # Force the chart update when actual parameters changed
+        if model_column == 1:
+            self.onPlot()
 
     def checkboxSelected(self, item):
         # Assure we're dealing with checkboxes
@@ -859,7 +875,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         chi2 = FittingUtilities.calculateChi2(fitted_data, self.logic.data)
         # Update the control
         chi2_repr = "---" if chi2 is None else GuiUtils.formatNumber(chi2, high=True)
-        #self.lblChi2Value.setText(GuiUtils.formatNumber(chi2, high=True))
         self.lblChi2Value.setText(chi2_repr)
 
         # Plot residuals if actual data
