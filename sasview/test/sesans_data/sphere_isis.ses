@@ -3,9 +3,9 @@ DataFileTitle           PMMA in Mixed Deuterated decalin
 Sample                  Ostensibly 40$ 100nm radius PMMA hard spheres in mixed deuterarted decalin.
 Thickness               2
 Thickness_unit          mm
-Theta_zmax              0.0168
+Theta_zmax              0.09
 Theta_zmax_unit         radians
-Theta_ymax              0.0168
+Theta_ymax              0.09
 Theta_ymax_unit         radians
 Orientation             Z
 SpinEchoLength_unit     A
