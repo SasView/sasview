@@ -352,8 +352,8 @@ class Sample(object):
     ## Details
     details = None
     ## SESANS zacceptance
-    zacceptance = None
-    yacceptance = None
+    zacceptance = (0,"")
+    yacceptance = (0,"")
 
     def __init__(self):
         self.position = Vector()
