@@ -12,6 +12,9 @@ import json
 import logging
 import traceback
 
+from Queue import Queue
+from threading import Thread
+
 from collections import defaultdict
 from wx.lib.scrolledpanel import ScrolledPanel
 
@@ -237,6 +240,14 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         # layout
         self.set_layout()
+
+        # Putting matplotlib in the background so as not to hang the interface
+        self.threadedDrawQueue = Queue()
+
+        self.threadedDrawWorker = Thread(target = self._threaded_draw_worker, args = (self.threadedDrawQueue,))
+        self.threadedDrawWorker.setDaemon(True)
+        self.threadedDrawWorker.start()
+
 
     def set_index_model(self, index):
         """
@@ -1690,7 +1701,13 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         :param chisqr: update chisqr value [bool]
         """
-        wx.CallAfter(self._draw_model_after, update_chisqr, source)
+        self.threadedDrawQueue.put([update_chisqr, source])
+
+    def _threaded_draw_worker(self, threadedDrawQueue):
+        while True:
+            inputVariables = threadedDrawQueue.get()
+            self._draw_model_after(inputVariables[0], inputVariables[1])
+            self.threadedDrawQueue.task_done()
 
     def _draw_model_after(self, update_chisqr=True, source='model'):
         """
