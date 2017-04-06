@@ -12,9 +12,9 @@ import json
 import logging
 import traceback
 
+from time import time
 from Queue import Queue
 from threading import Thread
-
 from collections import defaultdict
 from wx.lib.scrolledpanel import ScrolledPanel
 
@@ -241,13 +241,15 @@ class BasicPage(ScrolledPanel, PanelBase):
         # layout
         self.set_layout()
 
-        # Putting matplotlib in the background so as not to hang the interface
+        # Setting up a thread for the fitting
         self.threadedDrawQueue = Queue()
 
         self.threadedDrawWorker = Thread(target = self._threaded_draw_worker, args = (self.threadedDrawQueue,))
         self.threadedDrawWorker.setDaemon(True)
         self.threadedDrawWorker.start()
 
+        # And a home for the thread submission times
+        self.lastTimeFitSubmitted = None
 
     def set_index_model(self, index):
         """
@@ -1701,7 +1703,17 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         :param chisqr: update chisqr value [bool]
         """
-        self.threadedDrawQueue.put([update_chisqr, source])
+
+        currentTime = time()
+        # # So, if a whole pile of jobs are submitted in quick succession, 
+        # # let's say in less than 0.1 sec, we'll filter them out, assuming something is running!
+        if ((self._manager.calc_1D is not None) and self._manager.calc_1D.isrunning()) or ((self._manager.calc_2D is not None) and self._manager.calc_2D.isrunning()):
+            if currentTime > (self.lastTimeFitSubmitted + 0.1):
+                self.threadedDrawQueue.put([update_chisqr, source])
+        else:
+            self.threadedDrawQueue.put([update_chisqr, source])
+
+        self.lastTimeFitSubmitted = currentTime
 
     def _threaded_draw_worker(self, threadedDrawQueue):
         while True:
@@ -1731,6 +1743,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             weight = get_weight(data=self.data, is2d=self._is_2D(), flag=flag)
             toggle_mode_on = self.model_view.IsEnabled()
             is_2d = self._is_2D()
+
             self._manager.draw_model(self.model,
                                      data=self.data,
                                      smearer=temp_smear,
