@@ -291,6 +291,8 @@ class Reader(XMLreader):
                     pass
                 elif tagname == 'Sesans':
                     self.current_datainfo.isSesans = bool(data_point)
+                elif tagname == 'yacceptance':
+                    self.current_datainfo.sample.yacceptance = (data_point, unit)
                 elif tagname == 'zacceptance':
                     self.current_datainfo.sample.zacceptance = (data_point, unit)
 
@@ -1056,6 +1058,8 @@ class Reader(XMLreader):
             sesans = self.create_element("Sesans")
             sesans.text = str(datainfo.isSesans)
             node.append(sesans)
+            self.write_node(node, "yacceptance", datainfo.sample.yacceptance[0],
+                             {'unit': datainfo.sample.yacceptance[1]})
             self.write_node(node, "zacceptance", datainfo.sample.zacceptance[0],
                              {'unit': datainfo.sample.zacceptance[1]})
 

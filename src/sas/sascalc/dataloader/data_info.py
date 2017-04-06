@@ -353,6 +353,7 @@ class Sample(object):
     details = None
     ## SESANS zacceptance
     zacceptance = None
+    yacceptance = None
 
     def __init__(self):
         self.position = Vector()
