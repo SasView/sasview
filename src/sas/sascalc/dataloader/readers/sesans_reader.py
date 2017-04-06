@@ -107,9 +107,9 @@ class Reader:
             output.meta_data['loader'] = self.type_name
             output.sample.name = params["Sample"]
             output.sample.ID = params["DataFileTitle"]
-            output.sample.thickness = float(
-                self._unit_conversion(
-                    params["Thickness"], "cm", self._unit_fetch("Thickness"))[0])
+            output.sample.thickness = self._unit_conversion(
+                float(params["Thickness"]), "cm",
+                self._unit_fetch("Thickness"))[0]
 
             output.sample.zacceptance = (
                 float(params["Theta_zmax"]),
@@ -132,8 +132,8 @@ class Reader:
         """
         # (float, string, string) -> float
         if has_converter and value_unit != default_unit:
-            data_conv_q = Converter(value_unit)
-            value = data_conv_q(value, units=default_unit)
+            data_conv_q = Converter(default_unit)
+            value = data_conv_q(value, units=value_unit)
             new_unit = default_unit
         else:
             new_unit = value_unit
