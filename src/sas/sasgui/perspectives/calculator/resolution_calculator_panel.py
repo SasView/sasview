@@ -34,6 +34,8 @@ from math import fabs
 from sas.sasgui.perspectives.calculator import calculator_widgets as widget
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
+logger = logging.getLogger(__name__)
+
 _BOX_WIDTH = 100
 _Q_DEFAULT = 0.0
 #Slit length panel size
@@ -1097,7 +1099,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                 value = float(string_split[ind])
                 new_string.append(value)
             except:
-                logging.error(sys.exc_value)
+                logger.error(sys.exc_value)
 
         return new_string
 
@@ -1139,7 +1141,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                         out = self._string2inputlist(string)
                         return out
                 except:
-                    logging.error(sys.exc_value)
+                    logger.error(sys.exc_value)
 
     def _on_xy_coordinate(self, event=None):
         """
@@ -1317,7 +1319,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                     intensity.append(intens)
                 except:
                     # Skip non-data lines
-                    logging.error(sys.exc_value)
+                    logger.error(sys.exc_value)
 
             return [wavelength, intensity]
         except:

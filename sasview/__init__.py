@@ -1,7 +1,10 @@
 __version__ = "4.1"
 __build__ = "GIT_COMMIT"
+
+import logging
+logger = logging.getLogger(__name__)
+
 try:
-    import logging
     import subprocess
     import os
     import platform
@@ -15,4 +18,4 @@ try:
                     shell=True)
     __build__ = str(git_revision).strip()
 except subprocess.CalledProcessError as cpe:
-    logging.warning("Error while determining build number\n  Using command:\n %s \n Output:\n %s"% (cpe.cmd,cpe.output))
+    logger.warning("Error while determining build number\n  Using command:\n %s \n Output:\n %s"% (cpe.cmd,cpe.output))

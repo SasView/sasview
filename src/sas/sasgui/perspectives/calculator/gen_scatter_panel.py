@@ -38,6 +38,8 @@ from sas.sasgui.perspectives.calculator import calculator_widgets as widget
 from sas.sasgui.guiframe.events import NewPlotEvent
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
+logger = logging.getLogger(__name__)
+
 _BOX_WIDTH = 76
 #Slit length panel size 
 if sys.platform.count("win32") > 0:
@@ -698,7 +700,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                 from mpl_toolkits.mplot3d import Axes3D
                 ax = Axes3D(panel.figure)
             except:
-                logging.error("PlotPanel could not import Axes3D")
+                logger.error("PlotPanel could not import Axes3D")
                 raise
         panel.dimension = 3
         graph_title = self._sld_plot_helper(ax, output, has_arrow)
@@ -1343,7 +1345,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         except:
             msg = "OMF Panel: %s" % sys.exc_value
             infor = 'Error'
-            #logging.error(msg)
+            #logger.error(msg)
             if self.parent.parent != None:
                 # inform msg to wx
                 wx.PostEvent(self.parent.parent,
@@ -1695,7 +1697,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
             else:
                 msg = "%s cannot write %s\n" % ('Generic Scattering', str(path))
                 infor = 'Error'
-                #logging.error(msg)
+                #logger.error(msg)
                 if self.parent.parent != None:
                     # inform msg to wx
                     wx.PostEvent(self.parent.parent,

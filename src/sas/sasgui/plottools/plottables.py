@@ -46,6 +46,8 @@ import numpy as np
 import sys
 import logging
 
+logger = logging.getLogger(__name__)
+
 if 'any' not in dir(__builtins__):
     def any(L):
         for cond in L:
@@ -807,8 +809,8 @@ class View(object):
                         tempy.append(self.y[i])
                         tempdy.append(self.dy[i])
                 except:
-                    logging.error("check_data_logX: skipping point x %g", self.x[i])
-                    logging.error(sys.exc_value)
+                    logger.error("check_data_logX: skipping point x %g", self.x[i])
+                    logger.error(sys.exc_value)
             self.x = tempx
             self.y = tempy
             self.dx = tempdx
@@ -837,8 +839,8 @@ class View(object):
                         tempy.append(self.y[i])
                         tempdy.append(self.dy[i])
                 except:
-                    logging.error("check_data_logY: skipping point %g", self.y[i])
-                    logging.error(sys.exc_value)
+                    logger.error("check_data_logY: skipping point %g", self.y[i])
+                    logger.error(sys.exc_value)
 
             self.x = tempx
             self.y = tempy

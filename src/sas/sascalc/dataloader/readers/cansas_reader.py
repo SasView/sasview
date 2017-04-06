@@ -33,6 +33,8 @@ from sas.sascalc.dataloader.readers.cansas_constants import CansasConstants, Cur
 import xml.dom.minidom
 from xml.dom.minidom import parseString
 
+logger = logging.getLogger(__name__)
+
 PREPROCESS = "xmlpreprocess"
 ENCODING = "encoding"
 RUN_NAME_DEFAULT = "None"
@@ -1474,7 +1476,7 @@ class Reader(XMLreader):
                                 % (variable, units, local_unit, exc_value)
                             self.errors.add(err_mess)
                             if optional:
-                                logging.info(err_mess)
+                                logger.info(err_mess)
                             else:
                                 raise ValueError, err_mess
                     else:
@@ -1483,7 +1485,7 @@ class Reader(XMLreader):
                         err_mess += " expecting [%s]" % local_unit
                         self.errors.add(err_mess)
                         if optional:
-                            logging.info(err_mess)
+                            logger.info(err_mess)
                         else:
                             raise ValueError, err_mess
                 else:
