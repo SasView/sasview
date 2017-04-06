@@ -11,7 +11,7 @@ Theta_zmax              0.0168
 Theta_zmax_unit         radians
 Theta_ymax              0.0168
 Theta_ymax_unit         radians
-Orientation             0 0 1
+Orientation             Z
 SpinEchoLength_unit     A
 Depolarisation_unit     A-2 cm-1
 Wavelength_unit         A
