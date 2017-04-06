@@ -194,306 +194,477 @@ class Reader(XMLreader):
         :param dom: dom object with a namespace base of names
         """
 
-        if not self._is_call_local() and not recurse:
-            self.reset_state()
-            self.add_data_set()
-            self.names.append("SASentry")
-            self.parent_class = "SASentry"
+        self.reset_state()
         self._check_for_empty_data()
+        self._initialize_new_data_set(dom)
+        self.add_data_set()
+
+        self.names.append("SASentry")
+        self.parent_class = "SASentry"
+
         self.base_ns = "{0}{1}{2}".format("{", \
                             CANSAS_NS.get(self.cansas_version).get("ns"), "}")
 
+        self.ns_list = CONSTANTS.iterate_namespace(self.names)
+        
         # Go through each child in the parent element
-        for node in dom:
-            attr = node.attrib
-            name = attr.get("name", "")
-            type = attr.get("type", "")
-            unit = attr.get("unit", "")
-            # Get the element name and set the current names level
-            tagname = node.tag.replace(self.base_ns, "")
-            tagname_original = tagname
-            # Skip this iteration when loading in save state information
-            if tagname == "fitting_plug_in" or tagname == "pr_inversion" or tagname == "invariant":
+        for sasNode in dom:
+            # Add a new data home
+            # self.add_data_set()
+            # Get the element name and set the current name's level
+            currentTagName = sasNode.tag.replace(self.base_ns, "")
+            # As this is the most likely tag to examine, lets put it first!
+            if currentTagName == "SASdata":
+                # Are there multiple entries here?
+                if len(sasNode) <= 1:
+                    multipleEntries = False
+                else:
+                    multipleEntries = True
+
+                for setupNode in sasNode[0]:
+                    # Iterating through the tags in the unit node, getting their tag name and respective unit
+                    setupTagName = setupNode.tag.replace(self.base_ns, "")
+                    units = setupNode.attrib.get("unit", "")
+
+                    # Creating our data array first, if there's only one dataNode we will handle this...
+                    startArray = np.fromstring(setupNode.text, dtype=float, sep=",")
+                    
+                    if multipleEntries == True:
+                        setupArray = np.zeros((len(sasNode), len(startArray)))
+                        setupArray[0] = startArray
+                    else:
+                        setupArray = startArray
+
+                    # Now put this into the relevant location
+                    if setupTagName == "I":
+                        self.current_dataset.yaxis("Intensity", units)
+                        self.current_dataset.y = setupArray
+                    elif setupTagName == "Q":
+                        self.current_dataset.xaxis("Q", units)
+                        self.current_dataset.x = setupArray
+
+                    elif setupTagName == "Idev":
+                        self.current_dataset.dy = setupArray  
+                    elif setupTagName == "Qdev":
+                        self.current_dataset.err_data = setupArray 
+
+                    elif setupTagName == "Qx":
+                        self.current_dataset.xaxis("Qx", units)
+                        self.current_dataset.qx_data = setupArray
+                    elif setupTagName == "Qy":
+                        self.current_dataset.yaxis("Qy", units)
+                        self.current_dataset.qy_data = setupArray
+                    elif setupTagName == "Qxdev":
+                        self.current_dataset.xaxis("Qxdev", units)
+                        self.current_dataset.dqx_data = setupArray
+                    elif setupTagName == "Qydev":
+                        self.current_dataset.yaxis("Qydev", units)
+                        self.current_dataset.dqy_data = setupArray
+                    elif setupTagName == "dQw":
+                        self.current_dataset.dxw = setupArray
+                    elif setupTagName == "dQl":
+                        self.current_dataset.dxl = setupArray
+
+                    elif setupTagName == "Mask":
+                        self.current_dataset.mask = np.ndarray.astype(setupArray, dtype=bool)
+                    elif setupTagName == "Sesans":
+                        self.current_datainfo.isSesans = bool(setupNode.text)
+
+                    elif setupTagName == "zacceptance":
+                        self.current_datainfo.sample.zacceptance = (setupNode.text, units)
+                    elif setupTagName == "Qmean":
+                        pass
+                    elif setupTagName == "Shadowfactor":
+                        pass
+
+                # If there's more data present, let's deal with that too
+                for loopIter in range(1, len(sasNode)):
+                    for dataNode in sasNode[loopIter]:
+                        # Iterating through the tags in the unit node, getting their tag name and respective unit
+                        dataTagName = dataNode.tag.replace(self.base_ns, "")
+                        # Creating our data array first
+                        dataArray = np.fromstring(dataNode.text, dtype=float, sep=",")
+
+                        if dataTagName == "I":
+                            self.current_dataset.y[loopIter] = dataArray
+                        elif dataTagName == "Q":
+                            self.current_dataset.x[loopIter] = dataArray
+                        elif dataTagName == "Idev":
+                            self.current_dataset.dy[loopIter] = dataArray
+                        elif dataTagName == "Qdev":
+                            self.current_dataset.err_data[loopIter] = dataArray
+                        elif dataTagName == "Qx":
+                            self.current_dataset.qx_data[loopIter] = dataArray
+                        elif dataTagName == "Qy":
+                            self.current_dataset.qy_data[loopIter] = dataArray
+                        elif dataTagName == "Qxdev":
+                            self.current_dataset.dqx_data[loopIter] = dataArray
+                        elif dataTagName == "Qydev":
+                            self.current_dataset.dqy_data[loopIter] = dataArray
+                        elif dataTagName == "dQw":
+                            self.current_dataset.dxw[loopIter] = dataArray
+                        elif dataTagName == "dQl":
+                            self.current_dataset.dxl[loopIter] = dataArray
+
+                if len(dataArray) == 1:
+                    self.current_dataset.x = self.current_dataset.x.reshape(len(sasNode))
+                    self.current_dataset.y = self.current_dataset.y.reshape(len(sasNode))
+                    self.current_dataset.err_data = self.current_dataset.err_data.reshape(len(sasNode))
+                    self.current_dataset.dy = self.current_dataset.dy.reshape(len(sasNode))
+
+
+                self.add_intermediate()
+
+            # If it's not data, let's check for other tags starting with skippable ones...
+            elif currentTagName == "fitting_plug_in" or currentTagName == "pr_inversion" or currentTagName == "invariant":
                 continue
 
-            # Get where to store content
-            self.names.append(tagname_original)
-            self.ns_list = CONSTANTS.iterate_namespace(self.names)
-            # If the element is a child element, recurse
-            if len(node.getchildren()) > 0:
-                self.parent_class = tagname_original
-                if tagname == 'SASdata':
-                    self._initialize_new_data_set(node)
-                    if isinstance(self.current_dataset, plottable_2D):
-                        x_bins = attr.get("x_bins", "")
-                        y_bins = attr.get("y_bins", "")
-                        if x_bins is not "" and y_bins is not "":
-                            self.current_dataset.shape = (x_bins, y_bins)
-                        else:
-                            self.current_dataset.shape = ()
-                # Recursion step to access data within the group
-                self._parse_entry(node, True)
-                if tagname == "SASsample":
-                    self.current_datainfo.sample.name = name
-                elif tagname == "beam_size":
-                    self.current_datainfo.source.beam_size_name = name
-                elif tagname == "SAScollimation":
-                    self.collimation.name = name
-                elif tagname == "aperture":
-                    self.aperture.name = name
-                    self.aperture.type = type
-                self.add_intermediate()
+            # If we'e dealing with a title node then extract the text of the node and put it in the right place
+            elif currentTagName == "Title":
+                self.current_datainfo.title = sasNode.text
+
+
+            # If we'e dealing with a run node then extract the name and text of the node and put it in the right place
+            elif currentTagName == "Run":
+                    self.current_datainfo.run_name[sasNode.text] = sasNode.attrib.get("name", "")
+                    self.current_datainfo.run.append(sasNode.text)
+
+            # If we'e dealing with a sample node
+            elif currentTagName == "SASsample":
+                for sampleNode in sasNode:
+                    # Get the variables
+                    sampleTagName = sampleNode.tag.replace(self.base_ns, "")
+                    sampleUnits = sampleNode.attrib.get("unit", "")
+                    sampleData = sampleNode.text
+
+                    # Populate it via if switching
+                    if sampleTagName == "ID":
+                        self.current_datainfo.sample.ID = sampleData
+                    elif sampleTagName == "Title":
+                        self.current_datainfo.sample.name = sampleData
+                    elif sampleTagName == "thickness":
+                        self.current_datainfo.sample.thickness = sampleData
+                        self.current_datainfo.sample.thickness_unit = sampleUnits
+                    elif sampleTagName == "transmission":
+                        self.current_datainfo.sample.transmission = sampleData
+                    elif sampleTagName == "temperature":
+                        self.current_datainfo.sample.temperature = sampleData
+                        self.current_datainfo.sample.temperature_unit = sampleUnits
+                    elif sampleTagName == "details":
+                        self.current_datainfo.sample.details.append(sampleData)
+
+                    # Extract the positional data
+                    elif sampleTagName == "position":
+                        for positionNode in sampleNode:
+                            positionTagName = positionNode.tag.replace(self.base_ns, "")
+                            positionUnits = positionNode.attrib.get("unit", "")
+                            positionData = positionNode.text
+
+                            # Extract specific tags
+                            if positionTagName == "x":
+                                self.current_datainfo.sample.position.x = positionData
+                                self.current_datainfo.sample.position_unit = positionUnits
+                            elif positionTagName == "y":
+                                self.current_datainfo.sample.position.y = positionData
+                                self.current_datainfo.sample.position_unit = positionUnits
+                            elif positionTagName == "z":
+                                self.current_datainfo.sample.position.z = positionData
+                                self.current_datainfo.sample.position_unit = positionUnits
+
+                    # Extract the orientation data
+                    elif sampleTagName == "orientation":
+                        for orientationNode in sampleNode:
+                            orientationTagName = orientationNode.tag.replace(self.base_ns, "")
+                            orientationUnits = orientationNode.attrib.get("unit", "")
+                            orientationData = orientationNode.text
+
+                            # Extract specific tags
+                            if orientationTagName == "roll":
+                                self.current_datainfo.sample.orientation.x = orientationData
+                                self.current_datainfo.sample.orientation_unit = orientationUnits
+                            elif orientationTagName == "pitch":
+                                self.current_datainfo.sample.orientation.y = orientationData
+                                self.current_datainfo.sample.orientation_unit = orientationUnits
+                            elif orientationTagName == "yaw":
+                                self.current_datainfo.sample.orientation.z = orientationData
+                                self.current_datainfo.sample.orientation_unit = orientationUnits
+
+            # If we're dealing with an instrument node
+            elif currentTagName == "SASinstrument":
+                for instrumentNode in sasNode:
+                    instrumentTagName = instrumentNode.tag.replace(self.base_ns, "")
+                    instrumentUnits = instrumentNode.attrib.get("unit", "")
+                    instrumentData = instrumentNode.text
+
+                    # Extract the source name
+                    if instrumentTagName == "SASsource":
+                        self.name = instrumentNode.attrib.get("name", "")
+
+                        for sourceNode in instrumentNode:
+                            sourceTagName = sourceNode.tag.replace(self.base_ns, "")
+                            sourceUnits = sourceNode.attrib.get("unit", "")
+                            sourceData = sourceNode.text
+
+                            ## Source Information
+                            if sourceTagName == "wavelength":
+                                self.current_datainfo.source.wavelength = sourceData
+                                self.current_datainfo.source.wavelength_unit = sourceUnits
+                            elif sourceTagName == "wavelength_min":
+                                self.current_datainfo.source.wavelength_min = sourceData
+                                self.current_datainfo.source.wavelength_min_unit = sourceUnits
+                            elif sourceTagName == "wavelength_max":
+                                self.current_datainfo.source.wavelength_max = sourceData
+                                self.current_datainfo.source.wavelength_max_unit = sourceUnits
+                            elif sourceTagName == "wavelength_spread":
+                                self.current_datainfo.source.wavelength_spread = sourceData
+                                self.current_datainfo.source.wavelength_spread_unit = sourceUnits
+                            elif sourceTagName == "radiation":
+                                self.current_datainfo.source.radiation = sourceData
+                            elif sourceTagName == "beam_shape":
+                                self.current_datainfo.source.beam_shape = sourceData
+
+                            elif sourceTagName == "beam_size":
+                                for beamNode in sourceNode:
+                                    beamTagName = beamNode.tag.replace(self.base_ns, "")
+                                    beamUnits = beamNode.attrib.get("unit", "")
+                                    beamData = beamNode.text
+
+                                    if beamTagName == "x" and self.parent_class == "beam_size":
+                                       self.current_datainfo.source.beam_size.x = beamData
+                                       self.current_datainfo.source.beam_size_unit = beamUnits
+                                    elif beamTagName == "y" and self.parent_class == "beam_size":
+                                        self.current_datainfo.source.beam_size.y = beamData
+                                        self.current_datainfo.source.beam_size_unit = beamUnits
+
+                            elif sourceTagName == "pixel_size":
+                                for pixelNode in sourceNode:
+                                    pixelTagName = pixelNode.tag.replace(self.base_ns, "")
+                                    pixelUnits = pixelNode.attrib.get("unit", "")
+                                    pixelData = pixelNode.text
+                                        
+                                    if pixelTagName == "z":
+                                        self.current_datainfo.source.data_point.z = pixelData
+                                        self.current_datainfo.source.beam_size_unit = pixelUnits
+
+                    # Extract the collimation
+                    elif instrumentTagName == "SAScollimation":
+                        self.collimation.name = instrumentNode.attrib.get("name", "")
+
+                        for collimationNode in instrumentNode:
+                            collimationTagName = pixelNode.tag.replace(self.base_ns, "")
+                            collimationUnits = pixelNode.attrib.get("unit", "")
+                            collimationData = pixelNode.text
+
+                            if collimationTagName == "length":
+                                self.collimation.length = collimationData
+                                self.collimation.length_unit = collimationUnits
+                            elif collimationTagName == "name":
+                                self.collimation.name = collimationData
+
+                            if collimationTagName == "aperture":
+                                for apertureNode in collimationNode:
+                                    apertureTagName = apertureNode.tag.replace(self.base_ns, "")
+                                    apertureUnits = apertureNode.attrib.get("unit", "")
+                                    apertureData = apertureNode.text
+
+                                if tagname == "distance":
+                                    self.aperture.distance = apertureData
+                                    self.aperture.distance_unit = apertureUnits
+
+                            if collimationTagName == "size":
+                                for sizeNode in collimationNode:
+                                    sizeTagName = sizeNode.tag.replace(self.base_ns, "")
+                                    sizeUnits = sizeNode.attrib.get("unit", "")
+                                    sizeData = sizeNode.text
+
+                                if tagname == "x":
+                                    self.aperture.size.x = sizeData
+                                    self.collimation.size_unit = sizeUnits
+                                elif tagname == "y":
+                                    self.aperture.size.y = sizeData
+                                    self.collimation.size_unit = sizeUnits
+                                elif tagname == "z":
+                                    self.aperture.size.z = sizeData
+                                    self.collimation.size_unit = sizeUnits
+
+                    # Extract the detector
+                    elif instrumentTagName == "SASdetector":
+                        self.name = instrumentNode.attrib.get("name", "")
+
+                        for detectorNode in instrumentNode:
+                            detectorTagName = detectorNode.tag.replace(self.base_ns, "")
+                            detectorUnits = detectorNode.attrib.get("unit", "")
+                            detectorData = detectorNode.text
+
+                            if detectorTagName == "name":
+                                self.detector.name = detectorData
+                            elif detectorTagName == "SDD":
+                                self.detector.distance = detectorData
+                                self.detector.distance_unit = detectorUnits
+                            elif detectorTagName == "slit_length":
+                                self.detector.slit_length = detectorData
+                                self.detector.slit_length_unit = detectorUnits
+
+                            elif detectorTagName == "offset":
+                                for offsetNode in detectorNode:
+                                    offsetTagName = offsetNode.tag.replace(self.base_ns, "")
+                                    offsetUnits = offsetNode.attrib.get("unit", "")
+                                    offsetData = offsetNode.text
+
+                                    if offsetTagName == "x":
+                                        self.detector.offset.x = offsetData
+                                        self.detector.offset_unit = offsetUnits
+                                    elif offsetTagName == "y":
+                                        self.detector.offset.y = offsetData
+                                        self.detector.offset_unit = offsetUnits
+                                    elif offsetTagName == "z":
+                                        self.detector.offset.z = offsetData
+                                        self.detector.offset_unit = offsetUnits
+
+                            elif detectorTagName == "beam_center":
+                                for beamCenterNode in detectorNode:
+                                    beamCenterTagName = beamCenterNode.tag.replace(self.base_ns, "")
+                                    beamCenterUnits = beamCenterNode.attrib.get("unit", "")
+                                    beamCenterData = beamCenterNode.text     
+
+                                    if beamCenterTagName == "x":
+                                        self.detector.beam_center.x = beamCenterData
+                                        self.detector.beam_center_unit = beamCenterUnits
+                                    elif beamCenterTagName == "y":
+                                        self.detector.beam_center.y = beamCenterData
+                                        self.detector.beam_center_unit = beamCenterUnits
+                                    elif beamCenterTagName == "z":
+                                        self.detector.beam_center.z = beamCenterData
+                                        self.detector.beam_center_unit = beamCenterUnits
+
+                            elif detectorTagName == "pixel_size":
+                                for pixelSizeNode in detectorNode:
+                                    pixelSizeTagName = pixelSizeNode.tag.replace(self.base_ns, "")
+                                    pixelSizeUnits = pixelSizeNode.attrib.get("unit", "")
+                                    pixelSizeData = pixelSizeNode.text
+
+                                    if pixelSizeTagName == "x":
+                                        self.detector.pixel_size.x = pixelSizeData
+                                        self.detector.pixel_size_unit = pixelSizeUnits
+                                    elif pixelSizeTagName == "y":
+                                        self.detector.pixel_size.y = pixelSizeData
+                                        self.detector.pixel_size_unit = pixelSizeUnits
+                                    elif pixelSizeTagName == "z":
+                                        self.detector.pixel_size.z = pixelSizeData
+                                        self.detector.pixel_size_unit = pixelSizeUnits
+
+                            elif detectorTagName == "orientation":
+                                for orientationNode in detectorNode:
+                                    orientationTagName = orientationNode.tag.replace(self.base_ns, "")
+                                    orientationUnits = orientationNode.attrib.get("unit", "")
+                                    orientationData = orientationNode.text
+
+                                    if orientationTagName == "roll":
+                                        self.detector.orientation.x = orientationData
+                                        self.detector.orientation_unit = orientationUnits
+                                    elif orientationTagName == "pitch":
+                                        self.detector.orientation.y = orientationData
+                                        self.detector.orientation_unit = orientationUnits
+                                    elif orientationTagName == "yaw":
+                                        self.detector.orientation.z = orientationData
+                                        self.detector.orientation_unit = orientationUnits
+
+            ## If we'e dealing with a process node
+            elif currentTagName == "SASprocess":
+                for processNode in sasNode:
+                    setupTagName = setupNode.tag.replace(self.base_ns, "")
+                    units = setupNode.attrib.get("unit", "")
+
+                    if processTagName == "name":
+                        self.process.name = processNode.text
+                    elif processTagName == "description":
+                        self.process.description = processNode.text
+                    elif processTagName == "date":
+                        try:
+                            self.process.date = datetime.datetime.fromtimestamp(processNode.text)
+                        except:
+                            self.process.date = processNode.text
+                    elif processTagName == "term":
+                        unit = attr.get("unit", "")
+                        dic = {}
+                        dic["name"] = processNode.attrib.get("name", "")
+                        dic["value"] = processNode.text
+                        dic["unit"] = processNode.attrib.get("unit", "")
+                        self.process.term.append(dic)
+                
+            # If we're dealing with a process note node
+            elif currentTagName == "SASprocessnote":
+                for processNoteNode in sasNode:
+                    self.process.notes.append(processNoteNode.text)
+
+            # If we're dealing with a sas note node
+            elif currentTagName == "SASnote":
+                for noteNode in sasNode:
+                    print '1'
+                    self.current_datainfo.notes.append(noteNode.text)
+
+            # If we're dealing with a transmission data node
+            elif currentTagName == "Tdata":
+                for transmissionDataNode in sasNode:
+                    transmissionDataTagName = transmissionDataNode.tag.replace(self.base_ns, "")
+                    transmissionDataUnits = transmissionDataNode.attrib.get("unit", "")
+                    transmissionDataData = transmissionDataNode.text
+
+                # Are there multiple entries here?
+                if len(sasNode) <= 1:
+                    multipleEntries == False
+                else:
+                    multipleEntries == True
+
+                for setupNode in sasNode[0]:
+                    # Iterating through the tags in the unit node, getting their tag name and respective unit
+                    setupTagName = setupNode.tag.replace(self.base_ns, "")
+                    transmissionDataUnits = setupNode.attrib.get("unit", "")
+
+                    # Creating our data array first, if there's only one dataNode we will handle this...
+                    startArray = np.fromstring(setupNode.text, dtype=float, sep=",")
+
+                    if multipleEntries == True:
+                        setupArray = np.zeros((len(sasNode), len(startArray)))
+                        setupArray[0] = startArray
+                    else:
+                        setupArray = startArray
+
+                    ## Transmission Spectrum
+                    if setupTagName == "T":
+                        self.transspectrum.transmission = setupArray
+                        self.transspectrum.transmission_unit = transmissionDataUnits
+                    elif setupTagName == "Tdev":
+                        self.transspectrum.transmission_deviation = setupArray
+                        self.transspectrum.transmission_deviation_unit = transmissionDataUnits
+                    elif setupTagName == "Lambda":
+                        self.transspectrum.wavelength = setupArray
+                        self.transspectrum.wavelength_unit = transmissionDataUnits
+
+                # If there's more data present, let's deal with that too
+                for loopIter in range(1, len(sasNode)):
+                    for dataNode in sasNode[loopIter]:
+                        dataTagName = dataNode.tag.replace(self.base_ns, "")
+                        dataArray = np.fromstring(dataNode.text, dtype=float, sep=",")
+
+                    if dataTagName == "T":
+                        self.transspectrum.transmission[loopIter] = setupArray
+                    elif dataTagName == "Tdev":
+                        self.transspectrum.transmission_deviation[loopIter] = setupArray
+                    elif dataTagName == "Lambda":
+                        self.transspectrum.wavelength[loopIter] = setupArray
+
+            ## Everything else goes in meta_data
             else:
-                if isinstance(self.current_dataset, plottable_2D):
-                    data_point = node.text
-                    unit = attr.get('unit', '')
-                else:
-                    data_point, unit = self._get_node_value(node)
+                new_key = self._create_unique_key(self.current_datainfo.meta_data, currentTagName)
+                self.current_datainfo.meta_data[new_key] = sasNode.text
 
-                # If this is a dataset, store the data appropriately
-                if tagname == 'Run':
-                    self.current_datainfo.run_name[data_point] = name
-                    self.current_datainfo.run.append(data_point)
-                elif tagname == 'Title':
-                    self.current_datainfo.title = data_point
-                elif tagname == 'SASnote':
-                    self.current_datainfo.notes.append(data_point)
+        self._final_cleanup()
+        print self.current_dataset.y
+        print len(self.current_dataset.y)
 
-                # I and Q - 1D data
-                elif tagname == 'I' and isinstance(self.current_dataset, plottable_1D):
-                    unit_list = unit.split("|")
-
-                    if len(unit_list) > 1:
-                        self.current_dataset.yaxis(unit_list[0].strip(),
-                                                   unit_list[1].strip())
-                    else:
-                        self.current_dataset.yaxis("Intensity", unit)
-
-                    self.current_dataset.y = np.append(self.current_dataset.y, data_point)
-                    print data_point
-
-                elif tagname == 'Idev' and isinstance(self.current_dataset, plottable_1D):
-                    self.current_dataset.dy = np.append(self.current_dataset.dy, data_point)
-
-                elif tagname == 'Q':
-                    unit_list = unit.split("|")
-                    if len(unit_list) > 1:
-                        self.current_dataset.xaxis(unit_list[0].strip(),
-                                                   unit_list[1].strip())
-                    else:
-                        self.current_dataset.xaxis("Q", unit)
-                    self.current_dataset.x = np.append(self.current_dataset.x, data_point)
-                elif tagname == 'Qdev':
-                    self.current_dataset.dx = np.append(self.current_dataset.dx, data_point)
-                elif tagname == 'dQw':
-                    self.current_dataset.dxw = np.append(self.current_dataset.dxw, data_point)
-                elif tagname == 'dQl':
-                    self.current_dataset.dxl = np.append(self.current_dataset.dxl, data_point)
-                elif tagname == 'Qmean':
-                    pass
-                elif tagname == 'Shadowfactor':
-                    pass
-                elif tagname == 'Sesans':
-                    self.current_datainfo.isSesans = bool(data_point)
-                elif tagname == 'zacceptance':
-                    self.current_datainfo.sample.zacceptance = (data_point, unit)
-
-                # I and Qx, Qy - 2D data
-                elif tagname == 'I' and isinstance(self.current_dataset, plottable_2D):
-                    self.current_dataset.yaxis("Intensity", unit)
-                    self.current_dataset.data = np.fromstring(data_point, dtype=float, sep=",")
-                elif tagname == 'Idev' and isinstance(self.current_dataset, plottable_2D):
-                    self.current_dataset.err_data = np.fromstring(data_point, dtype=float, sep=",")
-                elif tagname == 'Qx':
-                    self.current_dataset.xaxis("Qx", unit)
-                    self.current_dataset.qx_data = np.fromstring(data_point, dtype=float, sep=",")
-                elif tagname == 'Qy':
-                    self.current_dataset.yaxis("Qy", unit)
-                    self.current_dataset.qy_data = np.fromstring(data_point, dtype=float, sep=",")
-                elif tagname == 'Qxdev':
-                    self.current_dataset.xaxis("Qxdev", unit)
-                    self.current_dataset.dqx_data = np.fromstring(data_point, dtype=float, sep=",")
-                elif tagname == 'Qydev':
-                    self.current_dataset.yaxis("Qydev", unit)
-                    self.current_dataset.dqy_data = np.fromstring(data_point, dtype=float, sep=",")
-                elif tagname == 'Mask':
-                    inter = [item == "1" for item in data_point.split(",")]
-                    self.current_dataset.mask = np.asarray(inter, dtype=bool)
-
-                # Sample Information
-                elif tagname == 'ID' and self.parent_class == 'SASsample':
-                    self.current_datainfo.sample.ID = data_point
-                elif tagname == 'Title' and self.parent_class == 'SASsample':
-                    self.current_datainfo.sample.name = data_point
-                elif tagname == 'thickness' and self.parent_class == 'SASsample':
-                    self.current_datainfo.sample.thickness = data_point
-                    self.current_datainfo.sample.thickness_unit = unit
-                elif tagname == 'transmission' and self.parent_class == 'SASsample':
-                    self.current_datainfo.sample.transmission = data_point
-                elif tagname == 'temperature' and self.parent_class == 'SASsample':
-                    self.current_datainfo.sample.temperature = data_point
-                    self.current_datainfo.sample.temperature_unit = unit
-                elif tagname == 'details' and self.parent_class == 'SASsample':
-                    self.current_datainfo.sample.details.append(data_point)
-                elif tagname == 'x' and self.parent_class == 'position':
-                    self.current_datainfo.sample.position.x = data_point
-                    self.current_datainfo.sample.position_unit = unit
-                elif tagname == 'y' and self.parent_class == 'position':
-                    self.current_datainfo.sample.position.y = data_point
-                    self.current_datainfo.sample.position_unit = unit
-                elif tagname == 'z' and self.parent_class == 'position':
-                    self.current_datainfo.sample.position.z = data_point
-                    self.current_datainfo.sample.position_unit = unit
-                elif tagname == 'roll' and self.parent_class == 'orientation' and 'SASsample' in self.names:
-                    self.current_datainfo.sample.orientation.x = data_point
-                    self.current_datainfo.sample.orientation_unit = unit
-                elif tagname == 'pitch' and self.parent_class == 'orientation' and 'SASsample' in self.names:
-                    self.current_datainfo.sample.orientation.y = data_point
-                    self.current_datainfo.sample.orientation_unit = unit
-                elif tagname == 'yaw' and self.parent_class == 'orientation' and 'SASsample' in self.names:
-                    self.current_datainfo.sample.orientation.z = data_point
-                    self.current_datainfo.sample.orientation_unit = unit
-
-                # Instrumental Information
-                elif tagname == 'name' and self.parent_class == 'SASinstrument':
-                    self.current_datainfo.instrument = data_point
-                # Detector Information
-                elif tagname == 'name' and self.parent_class == 'SASdetector':
-                    self.detector.name = data_point
-                elif tagname == 'SDD' and self.parent_class == 'SASdetector':
-                    self.detector.distance = data_point
-                    self.detector.distance_unit = unit
-                elif tagname == 'slit_length' and self.parent_class == 'SASdetector':
-                    self.detector.slit_length = data_point
-                    self.detector.slit_length_unit = unit
-                elif tagname == 'x' and self.parent_class == 'offset':
-                    self.detector.offset.x = data_point
-                    self.detector.offset_unit = unit
-                elif tagname == 'y' and self.parent_class == 'offset':
-                    self.detector.offset.y = data_point
-                    self.detector.offset_unit = unit
-                elif tagname == 'z' and self.parent_class == 'offset':
-                    self.detector.offset.z = data_point
-                    self.detector.offset_unit = unit
-                elif tagname == 'x' and self.parent_class == 'beam_center':
-                    self.detector.beam_center.x = data_point
-                    self.detector.beam_center_unit = unit
-                elif tagname == 'y' and self.parent_class == 'beam_center':
-                    self.detector.beam_center.y = data_point
-                    self.detector.beam_center_unit = unit
-                elif tagname == 'z' and self.parent_class == 'beam_center':
-                    self.detector.beam_center.z = data_point
-                    self.detector.beam_center_unit = unit
-                elif tagname == 'x' and self.parent_class == 'pixel_size':
-                    self.detector.pixel_size.x = data_point
-                    self.detector.pixel_size_unit = unit
-                elif tagname == 'y' and self.parent_class == 'pixel_size':
-                    self.detector.pixel_size.y = data_point
-                    self.detector.pixel_size_unit = unit
-                elif tagname == 'z' and self.parent_class == 'pixel_size':
-                    self.detector.pixel_size.z = data_point
-                    self.detector.pixel_size_unit = unit
-                elif tagname == 'roll' and self.parent_class == 'orientation' and 'SASdetector' in self.names:
-                    self.detector.orientation.x = data_point
-                    self.detector.orientation_unit = unit
-                elif tagname == 'pitch' and self.parent_class == 'orientation' and 'SASdetector' in self.names:
-                    self.detector.orientation.y = data_point
-                    self.detector.orientation_unit = unit
-                elif tagname == 'yaw' and self.parent_class == 'orientation' and 'SASdetector' in self.names:
-                    self.detector.orientation.z = data_point
-                    self.detector.orientation_unit = unit
-                # Collimation and Aperture
-                elif tagname == 'length' and self.parent_class == 'SAScollimation':
-                    self.collimation.length = data_point
-                    self.collimation.length_unit = unit
-                elif tagname == 'name' and self.parent_class == 'SAScollimation':
-                    self.collimation.name = data_point
-                elif tagname == 'distance' and self.parent_class == 'aperture':
-                    self.aperture.distance = data_point
-                    self.aperture.distance_unit = unit
-                elif tagname == 'x' and self.parent_class == 'size':
-                    self.aperture.size.x = data_point
-                    self.collimation.size_unit = unit
-                elif tagname == 'y' and self.parent_class == 'size':
-                    self.aperture.size.y = data_point
-                    self.collimation.size_unit = unit
-                elif tagname == 'z' and self.parent_class == 'size':
-                    self.aperture.size.z = data_point
-                    self.collimation.size_unit = unit
-
-                # Process Information
-                elif tagname == 'name' and self.parent_class == 'SASprocess':
-                    self.process.name = data_point
-                elif tagname == 'description' and self.parent_class == 'SASprocess':
-                    self.process.description = data_point
-                elif tagname == 'date' and self.parent_class == 'SASprocess':
-                    try:
-                        self.process.date = datetime.datetime.fromtimestamp(data_point)
-                    except:
-                        self.process.date = data_point
-                elif tagname == 'SASprocessnote':
-                    self.process.notes.append(data_point)
-                elif tagname == 'term' and self.parent_class == 'SASprocess':
-                    unit = attr.get("unit", "")
-                    dic = {}
-                    dic["name"] = name
-                    dic["value"] = data_point
-                    dic["unit"] = unit
-                    self.process.term.append(dic)
-
-                # Transmission Spectrum
-                elif tagname == 'T' and self.parent_class == 'Tdata':
-                    self.transspectrum.transmission = np.append(self.transspectrum.transmission, data_point)
-                    self.transspectrum.transmission_unit = unit
-                elif tagname == 'Tdev' and self.parent_class == 'Tdata':
-                    self.transspectrum.transmission_deviation = np.append(self.transspectrum.transmission_deviation, data_point)
-                    self.transspectrum.transmission_deviation_unit = unit
-                elif tagname == 'Lambda' and self.parent_class == 'Tdata':
-                    self.transspectrum.wavelength = np.append(self.transspectrum.wavelength, data_point)
-                    self.transspectrum.wavelength_unit = unit
-
-                # Source Information
-                elif tagname == 'wavelength' and (self.parent_class == 'SASsource' or self.parent_class == 'SASData'):
-                    self.current_datainfo.source.wavelength = data_point
-                    self.current_datainfo.source.wavelength_unit = unit
-                elif tagname == 'wavelength_min' and self.parent_class == 'SASsource':
-                    self.current_datainfo.source.wavelength_min = data_point
-                    self.current_datainfo.source.wavelength_min_unit = unit
-                elif tagname == 'wavelength_max' and self.parent_class == 'SASsource':
-                    self.current_datainfo.source.wavelength_max = data_point
-                    self.current_datainfo.source.wavelength_max_unit = unit
-                elif tagname == 'wavelength_spread' and self.parent_class == 'SASsource':
-                    self.current_datainfo.source.wavelength_spread = data_point
-                    self.current_datainfo.source.wavelength_spread_unit = unit
-                elif tagname == 'x' and self.parent_class == 'beam_size':
-                    self.current_datainfo.source.beam_size.x = data_point
-                    self.current_datainfo.source.beam_size_unit = unit
-                elif tagname == 'y' and self.parent_class == 'beam_size':
-                    self.current_datainfo.source.beam_size.y = data_point
-                    self.current_datainfo.source.beam_size_unit = unit
-                elif tagname == 'z' and self.parent_class == 'pixel_size':
-                    self.current_datainfo.source.data_point.z = data_point
-                    self.current_datainfo.source.beam_size_unit = unit
-                elif tagname == 'radiation' and self.parent_class == 'SASsource':
-                    self.current_datainfo.source.radiation = data_point
-                elif tagname == 'beam_shape' and self.parent_class == 'SASsource':
-                    self.current_datainfo.source.beam_shape = data_point
-
-                # Everything else goes in meta_data
-                else:
-                    new_key = self._create_unique_key(self.current_datainfo.meta_data, tagname)
-                    self.current_datainfo.meta_data[new_key] = data_point
-
-            self.names.remove(tagname_original)
-            length = 0
-            if len(self.names) > 1:
-                length = len(self.names) - 1
-            self.parent_class = self.names[length]
-        if not self._is_call_local() and not recurse:
-            self.frm = ""
-            self.add_data_set()
-            empty = None
-            return self.output[0], empty
+        # As before in the code, I guess in case we have to return a tuple for some reason...
+        return self.output, None
 
 
     def _is_call_local(self):
