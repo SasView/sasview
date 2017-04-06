@@ -635,7 +635,60 @@ types of expression :
      [minimum row index2 :  maximum  row index2]
 
      Example: radius [2 : 5] , radius [10 : 25]
+     
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+Combined Batch Fit Mode
+-----------------------
+
+Batch mode does not allow for multiple models.  In other words in batch mode
+all the data sets must be fit with single model and set of parameter.  At times
+there may be a shape change occuring in the series that requires changing the
+model part way through the series.  In this case set up two batch fit pages
+following the instructions in :ref:`Batch Fit Mode`.  However *be careful!* each
+time a batch fit panel runs fit it will overwrite the table of values.
+
+However there may be occassion when one wants to run these two (or more) batch
+fits and then plot one of the common parameters (e.g. radius of shere and
+eventually cylinder).  In this case the Combined Batch Fit can be used.
+Similarly to the Simultaneous Fit page a new page will appear.  In this case,
+instead of a check box for each fitpage model there will be a check box for each
+batchpage.  Clicking the Fit button will run each batch fit *in sequence*. 
+
+.. image:: combine_batch_page.png
+
+The batch table will then pop up at the end as before with the following
+caveats:
+
+.. note::
+   The order matters.  The parameters in the table will be taken from the model
+   used in the first batch page of the list.  Any parameters from the
+   second and on batch pages that have the same name as a parameter in the first
+   will show up allowing for plotting of that parameter across the models.
+.. note::
+   a corralary of the above is that currently models created as a sum|multiply
+   model will not work as desired because the generated model parameters have a
+   p#_ appended to the beginning and thus radius and p1_radius will not be
+   recognized as the same parameter.
+   
+.. image:: combine_batch_grid.png
+
+In this case the series is a time series.  Unfortunately the time is not listed
+in the file but the file name contains the information.  A column can be added
+manually, in this case called time.  Clicking on the top of a column will select
+it. Clicking next on the Add button next to the x or y row will add the cell
+information to use in a plot.  The axis labels will be automatically populated
+from the top row information.  Units can be specified as well using text and a
+subset of in line Latex.  Once this is set up, in this case using the peak
+position from the two different models for the y axis and time on the x axis,
+one clicks the Plot button.  
+
+.. image:: combine_batch_plot.png
+
+Note the discontinuity in the peak position.  This
+is due to the fact that the Guassian fit is actually pretty bad and is not
+actually finding the peak.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 10Oct2016
+.. note::  This help document was last changed by Paul Butler, 06April2017
