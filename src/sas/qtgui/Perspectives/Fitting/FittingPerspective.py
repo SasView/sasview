@@ -116,13 +116,12 @@ class FittingWindow(QtGui.QTabWidget):
             msg = "Incorrect type passed to the Fitting Perspective"
             raise AttributeError, msg
 
-        self._model_item = data_item[0]
+        for data in data_item:
+            # Find the first unassigned tab.
+            # If none, open a new tab.
+            available_tabs = list(map(lambda tab: tab.acceptsData(), self.tabs))
 
-        # Find the first unassigned tab.
-        # If none, open a new tab.
-        available_tabs = list(map(lambda tab: tab.acceptsData(), self.tabs))
-
-        if numpy.any(available_tabs):
-            self.tabs[available_tabs.index(True)].data = data_item
-        else:
-            self.addFit(data_item)
+            if numpy.any(available_tabs):
+                self.tabs[available_tabs.index(True)].data = data
+            else:
+                self.addFit(data)

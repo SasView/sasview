@@ -626,6 +626,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         message += log_msg
         # Notify the progress bar that the updates are over.
         self.communicator.progressBarUpdateSignal.emit(-1)
+        self.communicator.statusBarUpdateSignal.emit(message)
 
         return output, message
 

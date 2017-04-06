@@ -3,6 +3,7 @@ import json
 import os
 import numpy
 from collections import defaultdict
+from itertools import izip
 
 import logging
 import traceback
@@ -132,15 +133,17 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.cbCategory.addItem(CATEGORY_STRUCTURE)
         self.cbCategory.setCurrentIndex(0)
 
-        self._index = None
-        if data is not None:
-            self.data = data
-
         # Connect signals to controls
         self.initializeSignals()
 
         # Initial control state
         self.initializeControls()
+
+        self._index = None
+        if data is not None:
+            self.data = data
+        # Update Q Ranges
+        #self.updateQRange()
 
     @property
     def data(self):
@@ -149,12 +152,12 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
     @data.setter
     def data(self, value):
         """ data setter """
-        assert isinstance(value[0], QtGui.QStandardItem)
+        assert isinstance(value, QtGui.QStandardItem)
         # _index contains the QIndex with data
-        self._index = value[0]
+        self._index = value
 
         # Update logics with data items
-        self.logic.data = GuiUtils.dataFromItem(value[0])
+        self.logic.data = GuiUtils.dataFromItem(value)
 
         self.data_is_loaded = True
         # Tag along functionality
@@ -162,6 +165,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.lblFilename.setText(self.logic.data.filename)
         self.updateQRange()
         self.cmdFit.setEnabled(True)
+        print "set to ", self.cmdFit.isEnabled()
 
     def acceptsData(self):
         """ Tells the caller this widget can accept new dataset """
@@ -188,21 +192,15 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.lblStructure.setEnabled(True)
 
     def togglePoly(self, isChecked):
-        """
-        Enable/disable the polydispersity tab
-        """
+        """ Enable/disable the polydispersity tab """
         self.tabFitting.setTabEnabled(TAB_POLY, isChecked)
 
     def toggleMagnetism(self, isChecked):
-        """
-        Enable/disable the magnetism tab
-        """
+        """ Enable/disable the magnetism tab """
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, isChecked)
 
     def toggle2D(self, isChecked):
-        """
-        Enable/disable the controls dependent on 1D/2D data instance
-        """
+        """ Enable/disable the controls dependent on 1D/2D data instance """
         self.chkMagnetism.setEnabled(isChecked)
         self.is2D = isChecked
 
@@ -222,8 +220,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.tabFitting.setTabEnabled(TAB_POLY, False)
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, False)
         self.lblChi2Value.setText("---")
-        # Update Q Ranges
-        self.updateQRange()
 
     def initializeSignals(self):
         """
@@ -412,7 +408,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
     def fitComplete(self, result):
         """
         Receive and display fitting results
-
         "result" is a tuple of actual result list and the fit time in seconds
         """
         #re-enable the Fit button
@@ -425,20 +420,18 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             numpy.any(res.pvec == None) or \
             not numpy.all(numpy.isfinite(res.pvec)):
             msg = "Fitting did not converge!!!"
+            self.communicate.statusBarUpdateSignal.emit(msg)
             logging.error(msg)
             return
 
         elapsed = result[1]
         msg = "Fitting completed successfully in: %s s.\n" % GuiUtils.formatNumber(elapsed)
-
         self.communicate.statusBarUpdateSignal.emit(msg)
 
         fitness = res.fitness
         param_list = res.param_list
         param_values = res.pvec
         param_stderr = res.stderr
-        from itertools import izip
-        # TODO: add errors to the dict so they can propagate to the view
         params_and_errors = zip(param_values, param_stderr)
         param_dict = dict(izip(param_list, params_and_errors))
 
@@ -450,7 +443,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         chi2_repr = GuiUtils.formatNumber(fitness, high=True)
         self.lblChi2Value.setText(chi2_repr)
 
-        pass
+        # Generate charts
 
     def iterateOverModel(self, func):
         """
@@ -474,9 +467,11 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             if param_name not in param_dict.keys():
                 return
             # modify the param value
-            self._model_model.item(row_i, 1).setText(str(param_dict[param_name][0]))
+            param_repr = GuiUtils.formatNumber(param_dict[param_name][0], high=True)
+            self._model_model.item(row_i, 1).setText(param_repr)
             if self.has_error_column:
-                self._model_model.item(row_i, 2).setText(str(param_dict[param_name][1]))
+                error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
+                self._model_model.item(row_i, 2).setText(error_repr)
 
         def createColumn(row_i):
             # Utility function for error column update
@@ -499,7 +494,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.has_error_column = True
         self._model_model.insertColumn(2, error_column)
         FittingUtilities.addErrorHeadersToModel(self._model_model)
-
 
     def onPlot(self):
         """
@@ -673,8 +667,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             structure_module = generate.load_kernel_module(structure_factor)
             structure_parameters = modelinfo.make_parameter_table(getattr(structure_module, 'parameters', []))
             FittingUtilities.addSimpleParametersToModel(structure_parameters, self._model_model)
-            # Set the error column width to 0
-            self.lstParams.setColumnWidth(2, 20)
             # Update the counter used for multishell display
             self._last_model_row = self._model_model.rowCount()
         else:
