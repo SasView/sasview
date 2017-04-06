@@ -14,12 +14,14 @@ import urllib2
 import StringIO
 import pylint as pylint
 import unittest
-import numpy
+import numpy as np
 import logging
 import warnings
 
 from lxml import etree
 from xml.dom import minidom
+
+logger = logging.getLogger(__name__)
 
 warnings.simplefilter("ignore")
 
@@ -56,7 +58,7 @@ class cansas_reader_xml(unittest.TestCase):
 
     def test_invalid_xml(self):
         """
-        Should fail gracefully and send a message to logging.info()
+        Should fail gracefully and send a message to logger.info()
         """
         invalid = StringIO.StringIO('<a><c></b></a>')
         reader = XMLreader(invalid)

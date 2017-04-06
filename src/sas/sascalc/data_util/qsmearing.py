@@ -8,7 +8,6 @@
 #See the license text in license.txt
 #copyright 2008, University of Tennessee
 ######################################################################
-import numpy
 import math
 import logging
 import sys
@@ -59,10 +58,10 @@ def smear_selection(data, model = None):
     #if data.dx is not None and data.meta_data['loader']=='SESANS':
     if data.dx is not None and data.isSesans:
         #if data.dx[0] > 0.0:
-        if numpy.size(data.dx[data.dx <= 0]) == 0:
+        if np.size(data.dx[data.dx <= 0]) == 0:
             _found_sesans = True
         # if data.dx[0] <= 0.0:
-        if numpy.size(data.dx[data.dx <= 0]) > 0:
+        if np.size(data.dx[data.dx <= 0]) > 0:
             raise ValueError('one or more of your dx values are negative, please check the data file!')
 
     if _found_sesans == True:
@@ -120,7 +119,7 @@ class PySmear(object):
         self.model = model
         self.resolution = resolution
         if offset is None:
-            offset = numpy.searchsorted(self.resolution.q_calc, self.resolution.q[0])
+            offset = np.searchsorted(self.resolution.q_calc, self.resolution.q[0])
         self.offset = offset
 
     def apply(self, iq_in, first_bin=0, last_bin=None):
@@ -136,7 +135,7 @@ class PySmear(object):
         if last_bin is None: last_bin = len(iq_in)
         start, end = first_bin + self.offset, last_bin + self.offset
         q_calc = self.resolution.q_calc
-        iq_calc = numpy.empty_like(q_calc)
+        iq_calc = np.empty_like(q_calc)
         if start > 0:
             iq_calc[:start] = self.model.evalDistribution(q_calc[:start])
         if end+1 < len(q_calc):
@@ -156,8 +155,8 @@ class PySmear(object):
         q[first:last+1].
         """
         q = self.resolution.q
-        first = numpy.searchsorted(q, q_min)
-        last = numpy.searchsorted(q, q_max)
+        first = np.searchsorted(q, q_min)
+        last = np.searchsorted(q, q_max)
         return first, min(last,len(q)-1)
 
 def slit_smear(data, model=None):

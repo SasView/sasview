@@ -3,18 +3,14 @@
     log file "test_log.txt" contains all errors when running loader
     It is create in the folder where test is runned
 """
-import logging
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)s %(message)s',
-                    filename='test_log.txt',
-                    filemode='w')
-
-
 
 import unittest
 import math
 import sas.sascalc.dataloader
 from sas.sascalc.dataloader.loader import  Loader
+
+import logging
+logger = logging.getLogger(__name__)
 
 # Check whether we should test image loading on this system 
 HAS_IMAGE = False
@@ -22,7 +18,7 @@ try:
     import Image
     HAS_IMAGE = True
 except:
-    print "IMAGE TESTS WILL NOT BE PERFORMED: MISSING PIL MODULE"
+    logger.info("IMAGE TESTS WILL NOT BE PERFORMED: MISSING PIL MODULE")
     
 import os.path
 
@@ -41,7 +37,7 @@ class designtest(unittest.TestCase):
                          b._get_registry_creation_time())
 
 class testLoader(unittest.TestCase):
-    logging.debug("Inside testLoad module")
+    logger.debug("Inside testLoad module")
     
     """ test fitting """
     def setUp(self):
@@ -117,8 +113,8 @@ class testLoader(unittest.TestCase):
         #tested corrupted file.asc
         try:self.L.load('AR07232_rest.ASC')
         except ValueError,msg:
-           #logging.log(10,str(msg))
-           logging.error(str(msg))
+           #logger.log(10,str(msg))
+           logger.error(str(msg))
 
     def testload3_lowercase(self):
         """ Testing loading Igor data"""
@@ -132,8 +128,8 @@ class testLoader(unittest.TestCase):
         #tested corrupted file.asc
         try:self.L.load('AR07232_rest.ASC')
         except ValueError,msg:
-           #logging.log(10,str(msg))
-           logging.error(str(msg))
+           #logger.log(10,str(msg))
+           logger.error(str(msg))
     def testload4(self):
         """ Testing loading danse file"""
         #tested good file.sans
@@ -144,8 +140,8 @@ class testLoader(unittest.TestCase):
         #tested corrupted file.sans
         try: self.L.load('P_New.sans')
         except ValueError,msg:
-           #logging.log(40,str(msg))
-           logging.error(str(msg))
+           #logger.log(40,str(msg))
+           logger.error(str(msg))
         #else: raise ValueError,"No error raised for missing extension"
         
     def testload5(self):

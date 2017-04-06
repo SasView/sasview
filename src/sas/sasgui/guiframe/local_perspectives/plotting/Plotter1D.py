@@ -13,7 +13,7 @@
 import wx
 import sys
 import math
-import numpy
+import numpy as np
 import logging
 from sas.sasgui.plottools.PlotPanel import PlotPanel
 from sas.sasgui.guiframe.events import StatusEvent
@@ -23,6 +23,8 @@ from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.guiframe.gui_style import GUIFRAME_ICON
 from appearanceDialog import appearanceDialog
 from graphAppearance import graphAppearance
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_QMAX = 0.05
 DEFAULT_QSTEP = 0.001
@@ -241,7 +243,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 if position != None and not self.is_corfunc:
                     wx.PostEvent(self.parent, StatusEvent(status=position))
             except:
-                logging.error(sys.exc_value)
+                logger.error(sys.exc_value)
             if not event.leftdown:
                 # text event
                 try:
@@ -254,7 +256,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                     if is_moved:
                         self.canvas.draw()
                 except:
-                    logging.error(sys.exc_value)
+                    logger.error(sys.exc_value)
                 event.Skip()
                 return
             self.q_ctrl = ctrl
@@ -287,7 +289,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         :Param array: numpy array
         :Param value: float
         """
-        idx = (numpy.abs(array - value)).argmin()
+        idx = (np.abs(array - value)).argmin()
         return int(idx)  # array.flat[idx]
 
     def _check_line_positions(self, pos_x=None, nop=None):
@@ -408,7 +410,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             self.canvas.draw()
             self.q_ctrl[vl_ind].SetValue(str(pos_x))
         except:
-            logging.error(sys.exc_value)
+            logger.error(sys.exc_value)
 
     def set_resizing(self, resizing=False):
         """

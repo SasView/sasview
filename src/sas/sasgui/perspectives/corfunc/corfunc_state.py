@@ -12,6 +12,8 @@ from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sascalc.dataloader.data_info import Data1D as LoaderData1D
 from sas.sascalc.dataloader.loader import Loader
 
+logger = logging.getLogger(__name__)
+
 CORNODE_NAME = 'corfunc'
 CANSAS_NS = 'cansas1d/1.0'
 
@@ -215,7 +217,7 @@ class CorfuncState(object):
                 except:
                     msg = ("CorfuncState.fromXML: Could not read timestamp",
                         "\n{}").format(sys.exc_value)
-                    logging.error(msg)
+                    logger.error(msg)
 
             # Parse current state
             entry = get_content('ns:state', node)
@@ -359,5 +361,5 @@ class Reader(CansasReader):
         except:
             msg = "XML document does not contain CorfuncState information\n{}"
             msg.format(sys.exc_value)
-            logging.info(msg)
+            logger.info(msg)
         return state

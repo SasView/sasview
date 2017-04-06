@@ -20,6 +20,8 @@ import logging
 
 from sas.sasgui.guiframe.report_dialog import BaseReportDialog
 
+logger = logging.getLogger(__name__)
+
 class ReportDialog(BaseReportDialog):
     """
     The report dialog box.
@@ -91,7 +93,7 @@ class ReportDialog(BaseReportDialog):
                         os.system("open %s" % fName)
                     except:
                         # DO not open
-                        logging.error("Could not open file: %s" % sys.exc_value)
+                        logger.error("Could not open file: %s" % sys.exc_value)
             # delete image file
             os.remove(pic_fname)
             return

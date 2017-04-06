@@ -7,7 +7,7 @@ import time
 import numpy as np
 from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 from sas.sascalc.dataloader.data_info import Data1D
-import matplotlib.pyplot as plt
+
 
 class TestCalculator(unittest.TestCase):
 
@@ -67,7 +67,6 @@ class TestCalculator(unittest.TestCase):
         self.assertIsNotNone(params)
         self.assertEqual(len(params), 6)
         self.assertLess(abs(params['max']-75), 2.5) # L_p ~= 75
-
 
     # Ensure tests are ran in correct order;
     # Each test depends on the one before it

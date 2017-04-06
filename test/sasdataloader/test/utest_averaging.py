@@ -1,11 +1,11 @@
 
 import unittest
+import math
 
 from sas.sascalc.dataloader.loader import  Loader
 from sas.sascalc.dataloader.manipulations import Ring, CircularAverage, SectorPhi, get_q,reader2D_converter
- 
-import os.path
-import numpy, math
+
+import numpy as np
 import sas.sascalc.dataloader.data_info as data_info
 
 class Averaging(unittest.TestCase):
@@ -17,8 +17,8 @@ class Averaging(unittest.TestCase):
             Create a flat 2D distribution. All averaging results
             should return the predefined height of the distribution (1.0).
         """
-        x_0  = numpy.ones([100,100])
-        dx_0 = numpy.ones([100,100])
+        x_0  = np.ones([100,100])
+        dx_0 = np.ones([100,100])
         
         self.data = data_info.Data2D(data=x_0, err_data=dx_0)
         detector = data_info.Detector()
@@ -41,11 +41,11 @@ class Averaging(unittest.TestCase):
         self.qmax = get_q(49.5, 49.5, detector.distance, source.wavelength)
         
         self.qstep = len(x_0)
-        x=  numpy.linspace(start= -1*self.qmax,
+        x=  np.linspace(start= -1*self.qmax,
                                stop= self.qmax,
                                num= self.qstep,
                                endpoint=True )  
-        y = numpy.linspace(start= -1*self.qmax,
+        y = np.linspace(start= -1*self.qmax,
                                stop= self.qmax,
                                num= self.qstep,
                                endpoint=True )

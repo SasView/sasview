@@ -9,7 +9,7 @@ copyright 2009, University of Tennessee
 """
 import wx
 import os
-import numpy
+import numpy as np
 import time
 import logging
 
@@ -23,6 +23,8 @@ import sas.sascalc.realspace.VolumeCanvas as VolumeCanvas
 
 from sas.sascalc.data_util.calcthread import CalcThread
 from sas.guicomm.events import NewPlotEvent, StatusEvent    
+
+logger = logging.getLogger(__name__)
 
 class Calc1D(CalcThread):
     """
@@ -45,8 +47,8 @@ class Calc1D(CalcThread):
         
     def compute(self):
         x = self.x
-        output = numpy.zeros(len(x))
-        error = numpy.zeros(len(x))
+        output = np.zeros(len(x))
+        error = np.zeros(len(x))
         
         self.starttime = time.time()
         
@@ -92,7 +94,7 @@ class Plugin:
         # Default save location
         self._default_save_location = os.getcwd()
         # Log startup
-        logging.info("Simulation plug-in started")
+        logger.info("Simulation plug-in started")
         
     def get_panels(self, parent):
         """
@@ -122,7 +124,7 @@ class Plugin:
         
         # Q-values for plotting simulated I(Q)
         step = (self.q_max-self.q_min)/(self.q_npts-1)
-        self.x = numpy.arange(self.q_min, self.q_max+step*0.01, step)        
+        self.x = np.arange(self.q_min, self.q_max+step*0.01, step)
         
         # Set the list of panels that are part of the simulation perspective
         self.perspective = []
@@ -186,7 +188,7 @@ class Plugin:
         
         # Q-values for plotting simulated I(Q)
         step = (self.q_max-self.q_min)/(self.q_npts-1)
-        self.x = numpy.arange(self.q_min, self.q_max+step*0.01, step)    
+        self.x = np.arange(self.q_min, self.q_max+step*0.01, step)
          
         # Compute the simulated I(Q)
         self._simulate_Iq()
