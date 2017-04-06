@@ -70,9 +70,15 @@ class Reader:
             if data.size < 1:
                 raise RuntimeError("{} is empty".format(path))
             x = data[:, headers.index("SpinEchoLength")]
-            dx = data[:, headers.index("SpinEchoLength_error")]
+            if "SpinEchoLength_error" in headers:
+                dx = data[:, headers.index("SpinEchoLength_error")]
+            else:
+                dx = x*0.05
             lam = data[:, headers.index("Wavelength")]
-            dlam = data[:, headers.index("Wavelength_error")]
+            if "Wavelength_error" in headers:
+                dlam = data[:, headers.index("Wavelength_error")]
+            else:
+                dlam = lam*0.05
             y = data[:, headers.index("Depolarisation")]
             dy = data[:, headers.index("Depolarisation_error")]
 
