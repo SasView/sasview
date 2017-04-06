@@ -73,7 +73,7 @@ def smear_selection(data, model = None):
         zaccept = Converter("1/A")(q_max, "1/" + data.source.wavelength_unit),
 
         Rmax = 10000000
-        hankel = SesansTransform(data.x, SElength, zaccept, Rmax)
+        hankel = SesansTransform(data.x, SElength, data.source.wavelength, zaccept, Rmax)
         # Then return the actual transform, as if it were a smearing function
         return PySmear(hankel, model, offset=0)
 
