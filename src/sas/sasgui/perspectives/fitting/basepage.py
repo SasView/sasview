@@ -12,7 +12,6 @@ import json
 import logging
 import traceback
 
-from time import time
 from Queue import Queue
 from threading import Thread
 from collections import defaultdict
@@ -1705,7 +1704,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         :param chisqr: update chisqr value [bool]
         """
         # Get the time
-        current_time = time()
+        current_time = time.time()
 
         # When loading we slam a number of fits through here
         # let's filter these out to start with
