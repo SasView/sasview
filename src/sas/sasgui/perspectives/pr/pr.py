@@ -1046,7 +1046,7 @@ class Plugin(PluginBase):
 
         try:
             pr = self._create_file_pr(data)
-            if not pr is None:
+            if pr is not None:
                 self.pr = pr
                 self.perform_estimate()
         except:
