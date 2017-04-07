@@ -378,17 +378,17 @@ class VolumeCanvas(BaseComponent):
         
         # If a shape identifier was given, look the shape up
         # in the dictionary
-        if len(toks)>1:
-            if toks[0] in self.shapes.keys():
+        if len(toks):
+            if toks[0] in self.shapes:
                 # The shape was found, now look for the parameter
                 if toks[1] in self.shapes[toks[0]].params:
                     # The parameter was found, now change it
                     self.shapes[toks[0]].params[toks[1]] = value
                     self._model_changed()
                 else:
-                    raise ValueError, "Could not find parameter %s" % name
+                    raise ValueError("Could not find parameter %s" % name)
             else:
-                raise ValueError, "Could not find shape %s" % toks[0]
+                raise ValueError("Could not find shape %s" % toks[0])
         
         else:
             # If we are not accessing the parameters of a 
@@ -409,12 +409,10 @@ class VolumeCanvas(BaseComponent):
         toks = name.split('.')
         if len(toks) == 1:
             try:
-                a = self.params[toks[0]]
+                value = self.params[toks[0]]
             except KeyError:
                 raise ValueError("VolumeCanvas.getParam: Could not find"
                                  " %s" % name)
-
-            value = self.params[toks[0]]
             if isinstance(value, ShapeDescriptor):
                 raise ValueError("VolumeCanvas.getParam: Cannot get parameter"
                                  " value.")
@@ -423,16 +421,12 @@ class VolumeCanvas(BaseComponent):
 
         elif len(toks) == 2:
             try:
-                a = self.shapes[toks[0]]
+                shapeinstance = self.shapes[toks[0]]
             except KeyError:
                 raise ValueError("VolumeCanvas.getParam: Could not find "
                                  "%s" % name)
 
-            shapeinstance = self.shapes[toks[0]]
-
-            try:
-                a = shapeinstance.params[toks[1]]
-            except KeyError:
+            if not toks[1] in shapeinstance.params:
                 raise ValueError("VolumeCanvas.getParam: Could not find "
                                  "%s" % name)
 
@@ -441,7 +435,7 @@ class VolumeCanvas(BaseComponent):
         else:
             raise ValueError("VolumeCanvas.getParam: Could not find %s" % name)
             
-    def getParamList(self, shapeid = None):
+    def getParamList(self, shapeid=None):
         """
 	       return a full list of all available parameters from 
            self.params.keys(). If a key in self.params is a instance
@@ -454,20 +448,18 @@ class VolumeCanvas(BaseComponent):
 
         param_list = []
         if shapeid is None:
-            for key1 in self.params.keys():
+            for key1 in self.params:
                 #value1 = self.params[key1]
                 param_list.append(key1)
-            for key2 in self.shapes.keys():
+            for key2 in self.shapes:
                 value2 = self.shapes[key2]
                 header = key2 + '.'
-                for key3 in value2.params.keys():   
+                for key3 in value2.params:
                     fullname = header + key3                 
                     param_list.append(fullname)
      
         else:
-            try:
-                a = self.shapes[shapeid]
-            except KeyError:
+            if not shapeid in self.shapes:
                 raise ValueError("VolumeCanvas: getParamList: Could not find "
                                  "%s" % shapeid)
 
@@ -486,7 +478,7 @@ class VolumeCanvas(BaseComponent):
             create shapeobject based on shapeDesc
             @param shapeDesc: shape description
         """
-        #Create the object model
+        # Create the object model
         shapeDesc.create()
                     
         if shapeDesc.params['is_lores']:
@@ -601,7 +593,7 @@ class VolumeCanvas(BaseComponent):
         # Through an exception if it's not a
         # type we recognize
         else:
-            raise ValueError, "run(q): bad type for q"
+            raise ValueError("run(q): bad type for q")
     
     def runXY(self, q = 0):
         """
@@ -621,7 +613,7 @@ class VolumeCanvas(BaseComponent):
         # Through an exception if it's not a
         # type we recognize
         else:
-            raise ValueError, "runXY(q): bad type for q"
+            raise ValueError("runXY(q): bad type for q")
     
     def _create_modelObject(self):
         """
