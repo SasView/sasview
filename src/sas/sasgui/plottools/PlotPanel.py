@@ -1402,19 +1402,19 @@ class PlotPanel(wx.Panel):
         zmax_2D_temp = self.zmax_2D
         if self.scale == 'log_{10}':
             self.scale = 'linear'
-            if not self.zmin_2D is None:
+            if self.zmin_2D is not None:
                 zmin_2D_temp = math.pow(10, self.zmin_2D)
-            if not self.zmax_2D is None:
+            if self.zmax_2D is not None:
                 zmax_2D_temp = math.pow(10, self.zmax_2D)
         else:
             self.scale = 'log_{10}'
-            if not self.zmin_2D is None:
+            if self.zmin_2D is not None:
                 # min log value: no log(negative)
                 if self.zmin_2D <= 0:
                     zmin_2D_temp = -32
                 else:
                     zmin_2D_temp = math.log10(self.zmin_2D)
-            if not self.zmax_2D is None:
+            if self.zmax_2D is not None:
                 zmax_2D_temp = math.log10(self.zmax_2D)
 
         self.image(data=self.data, qx_data=self.qx_data,
