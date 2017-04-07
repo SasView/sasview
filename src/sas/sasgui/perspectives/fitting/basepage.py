@@ -1712,7 +1712,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         if currentTime > (self.lastTimeFitSubmitted + 0.1):
             # Submitting the rest
             self.threadedDrawQueue.put([update_chisqr, source])
-            print 'submitted!'
         else:
             pass
 
@@ -1727,12 +1726,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                 # If a manager is running a calculation 
                 # then trim the queue
                 if self.threadedDrawQueue.qsize() > 1:
-                    print '2'
                     for loopIter in range(threadedDrawQueue.qsize() - 1):
                         dump = self.threadedDrawQueue.get()
                         self.threadedDrawQueue.task_done()
-                        print 'bounced'
-                    print 'one element left'
             else:
                 # Otherwise, just run
                 inputVariables = threadedDrawQueue.get()
@@ -1740,7 +1736,6 @@ class BasicPage(ScrolledPanel, PanelBase):
                 wx.PostEvent(self._manager.parent, StatusEvent(status = 
                             "Computation is in progress...", type = "progress"))
                 threadedDrawQueue.task_done()
-                print 'run'                
 
     def _draw_model_after(self, update_chisqr=True, source='model'):
         """
