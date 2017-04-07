@@ -380,13 +380,13 @@ the corresponding uncertainties on the optimised values.
 *'correlated').*
 
 In the bottom left corner of the *Fit Page* is a box displaying the normalised value
-of the statistical |chi|\  :sup:`2` parameter returned by the optimiser.
+of the statistical $\chi^2$ parameter returned by the optimiser.
 
 Now check the box for another model parameter and click *Fit* again. Repeat this
 process until most or all parameters are checked and have been optimised. As the
 fit of the theory to the experimental data improves the value of 'chi2/Npts' will
 decrease. A good model fit should easily produce values of 'chi2/Npts' that are
-close to zero, and certainly <100. See :ref:`Assessing_Fit_Quality`.
+close to one, and certainly <100. See :ref:`Assessing_Fit_Quality`.
 
 SasView has a number of different optimisers (see the section :ref:`Fitting_Options`).
 The DREAM optimiser is the most sophisticated, but may not necessarily be the best

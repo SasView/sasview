@@ -908,8 +908,8 @@ class MagSLD(object):
 
     def set_sldms(self, sld_mx, sld_my, sld_mz):
         r"""
-        Sets (\|m\|, m_theta, m_phi)
-        """
+        Sets mx, my, mz and abs(m).
+        """ # Note: escaping
         if sld_mx.__class__.__name__ == 'float':
             self.sld_mx = np.ones(len(self.pos_x)) * sld_mx
         else:
