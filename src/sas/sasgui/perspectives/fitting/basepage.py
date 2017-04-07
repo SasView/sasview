@@ -249,7 +249,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.threadedDrawWorker.start()
 
         # And a home for the thread submission times
-        self.lastTimeFitSubmitted = None
+        self.lastTimeFitSubmitted = 0.00
 
     def set_index_model(self, index):
         """
@@ -1706,39 +1706,37 @@ class BasicPage(ScrolledPanel, PanelBase):
         # Get the time
         currentTime = time()
 
-        # # So, if a whole pile of jobs are submitted in quick succession, 
-        # # let's say in less than 0.1 sec, we'll filter them out, assuming something is running!
-
-        if ((self._manager.calc_1D is not None) and self._manager.calc_1D.isrunning()) or ((self._manager.calc_2D is not None) and self._manager.calc_2D.isrunning()):
-            if currentTime > (self.lastTimeFitSubmitted + 0.1):
-                # Assuming that things have been 'sensibly' submitted, but there's another
-                # job going, dump the currently queued job and just execute the job requested last
-                if self.threadedDrawQueue.empty() == True:
-                    self.threadedDrawQueue.put([update_chisqr, source])
-                    print 'here'
-                else:
-                    while self.threadedDrawQueue.empty() != True:
-                        self.threadedDrawQueue.get()
-                        self.threadedDrawQueue.task_done()
-
-                    self.threadedDrawQueue.put([update_chisqr, source])
-                    print 'rejected'
-        
-        else:
+        # When loading we slam a number of fits through here
+        # let's filter these out to start with
+        if currentTime > (self.lastTimeFitSubmitted + 0.1):
+            # Submitting the rest
             self.threadedDrawQueue.put([update_chisqr, source])
+            print 'submitted!'
+        else:
+            pass
 
         self.lastTimeFitSubmitted = currentTime
 
     def _threaded_draw_worker(self, threadedDrawQueue):
         while True:
-            if ((self._manager.calc_1D is not None) and self._manager.calc_1D.isrunning()) or ((self._manager.calc_2D is not None) and self._manager.calc_2D.isrunning()):
-                pass
+            # Check if a manager exists and it's running
+            if ((self._manager.calc_1D is not None) and (self._manager.calc_1D.isrunning() == True)) or ((self._manager.calc_2D is not None) and (self._manager.calc_2D.isrunning() == True)):
+                # If a manager is running a calculation 
+                # then trim the queue
+                if self.threadedDrawQueue.qsize() > 1:
+                    print '2'
+                    for loopIter in range(threadedDrawQueue.qsize() - 1):
+                        dump = self.threadedDrawQueue.get()
+                        self.threadedDrawQueue.task_done()
+                        print 'bounced'
+                    print 'one element left'
             else:
+                # Otherwise, just run
                 inputVariables = threadedDrawQueue.get()
                 self._draw_model_after(inputVariables[0], inputVariables[1])
                 wx.PostEvent(self._manager.parent, StatusEvent(status="Computation is in progress...", type = "progress"))
                 threadedDrawQueue.task_done()
-                print 'added'
+                print 'run'                
 
     def _draw_model_after(self, update_chisqr=True, source='model'):
         """
