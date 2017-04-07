@@ -8,12 +8,10 @@ from sas.sasgui.guiframe.events import EVT_SLICER_PARS
 from sas.sasgui.guiframe.utils import format_number
 from sas.sasgui.guiframe.events import EVT_SLICER
 from sas.sasgui.guiframe.events import SlicerParameterEvent, SlicerEvent
-from Plotter1D import ModelPanel1D
 from Plotter2D import ModelPanel2D
 from sas.sascalc.dataloader.data_info import Data1D, Data2D
 apply_params, EVT_APPLY_PARAMS = wx.lib.newevent.NewEvent()
 auto_save, EVT_AUTO_SAVE = wx.lib.newevent.NewEvent()
-auto_close, EVT_ON_CLOSE = wx.lib.newevent.NewEvent()
 
 
 class SlicerParameterPanel(wx.Dialog):
@@ -53,7 +51,6 @@ class SlicerParameterPanel(wx.Dialog):
         self.parent.Bind(EVT_SLICER_PARS, self.onParamChange)
         self.Bind(EVT_APPLY_PARAMS, self.apply_params_list_and_process)
         self.Bind(EVT_AUTO_SAVE, self.save_files)
-        self.Bind(EVT_ON_CLOSE, self.on_close)
 
     def onEVT_SLICER(self, event):
         """
@@ -156,15 +153,12 @@ class SlicerParameterPanel(wx.Dialog):
 
             # Checkbox for autosaving data
             iy += 1
-
             self.auto_save = wx.CheckBox(parent=self, id=wx.NewId(),
                                          label="Auto save generated 1D:")
             self.Bind(wx.EVT_CHECKBOX, self.on_auto_save_checked)
             self.bck.Add(self.auto_save, (iy, ix), (1, 1),
                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
             iy += 1
-            # TODO: Get list of loaded data, not plots - plot again
-            # TODO: try/catch block to catch wx._core.PyDeadObjectError (pass)
             # File browser
             save_to = "Save files to:"
             save = wx.StaticText(self, -1, save_to, style=wx.ALIGN_LEFT)
@@ -177,9 +171,10 @@ class SlicerParameterPanel(wx.Dialog):
                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
             # Append to file
             iy += 1
-            default_value = "_{0}".format(self.type)
+            default_value = ""
             for key in params:
-                default_value += "_%d.2" % params[key]
+                default_value += "_{0}-".format(key)
+                default_value += "{:.5f}".format(params[key])
             append_text = "Append to file name:"
             append = wx.StaticText(self, -1, append_text, style=wx.ALIGN_LEFT)
             self.append_name.SetValue(default_value)
@@ -278,9 +273,7 @@ class SlicerParameterPanel(wx.Dialog):
         # Event needed due to how apply_slicer_to_plot works
         event = apply_params(params=params, plot_list=apply_to_list,
                              auto_save=save, append=append,
-                             path=path)
-        wx.PostEvent(self, event)
-        event = auto_close()
+                             path=path, type=type)
         wx.PostEvent(self, event)
 
     def onChangeSlicer(self, evt):
@@ -296,6 +289,9 @@ class SlicerParameterPanel(wx.Dialog):
         :param plot: 2D plot panel to apply a slicer to
         :param type: The type of slicer to apply to the panel
         """
+        # Skip redrawing the current plot if no change
+        if self.parent == plot and self.type == type:
+            return
         if type is None:
             type = self.type_select.GetStringSelection()
         if type == "SectorInteractor":
@@ -349,13 +345,13 @@ class SlicerParameterPanel(wx.Dialog):
         """
         # Apply parameter list to each plot as desired
         for item in evt.plot_list:
-            item.slicer.set_params(evt.params)
-            item.slicer.base.update()
+            event = SlicerParameterEvent(type=evt.type, params=evt.params)
+            wx.PostEvent(item, event)
         # Post an event to save each data set to file
         if evt.auto_save:
             event = auto_save(append_to_name=evt.append,
                               file_list=evt.plot_list,
-                              path=evt.path)
+                              path=evt.path, type=evt.type)
             wx.PostEvent(self, event)
 
     def save_files(self, evt=None):
@@ -369,15 +365,23 @@ class SlicerParameterPanel(wx.Dialog):
         main_window = self.parent.parent
         data_dic = {}
         append = evt.append_to_name
+        names = []
+        convert_dict = {"SectorInteractor": "SectorQ",
+                        "AnnulusInteractor": "AnnulusPhi",
+                        "BoxInteractorX": "SlabX",
+                        "BoxInteractorY": "SlabY"}
+        for f_name in evt.file_list:
+            names.append(f_name.data2D.label)
         for key, plot in main_window.plot_panels.iteritems():
             if not hasattr(plot, "data2D"):
                 for item in plot.plots:
-                    data_dic[item] = plot.plots[item]
+                    base = item.replace(convert_dict[evt.type], "")
+                    if base in names:
+                        data_dic[item] = plot.plots[item]
         for item, data1d in data_dic.iteritems():
             base = item.split(".")[0]
             save_to = evt.path + "\\" + base + append + ".xml"
             writer.write(save_to, data1d)
-        # TODO: save all files
 
     def on_auto_save_checked(self, evt=None):
         """
@@ -386,9 +390,3 @@ class SlicerParameterPanel(wx.Dialog):
         """
         self.append_name.Enable(self.auto_save.IsChecked())
         self.path.Enable(self.auto_save.IsChecked())
-    
-    def on_close(self, evt=None):
-        """
-        Auto close the panel
-        """
-        self.Destroy()
