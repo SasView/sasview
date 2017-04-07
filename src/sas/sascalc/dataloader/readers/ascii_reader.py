@@ -146,20 +146,20 @@ class Reader:
                             except:
                                 pass
 
-                        if has_error_dy == True:
+                        if has_error_dy:
                             tdy = np.append(tdy, _dy)
-                        if has_error_dx == True:
+                        if has_error_dx:
                             tdx = np.append(tdx, _dx)
                         tx = np.append(tx, _x)
                         ty = np.append(ty, _y)
 
-                        #To remember the # of columns on the current line
+                        # To remember the # of columns on the current line
                         # for the next line of data
                         lentoks = new_lentoks
                         candidate_lines_previous = candidate_lines
                     except ValueError:
                         # It is data and meet non - number, then stop reading
-                        if is_data == True:
+                        if is_data:
                             break
                         lentoks = 2
                         has_error_dx = None
@@ -174,10 +174,10 @@ class Reader:
                     msg = "ascii_reader: x has no data"
                     raise RuntimeError, msg
                 # Sanity check
-                if has_error_dy == True and not len(ty) == len(tdy):
+                if has_error_dy and not len(ty) == len(tdy):
                     msg = "ascii_reader: y and dy have different length"
                     raise RuntimeError, msg
-                if has_error_dx == True and not len(tx) == len(tdx):
+                if has_error_dx and not len(tx) == len(tdx):
                     msg = "ascii_reader: y and dy have different length"
                     raise RuntimeError, msg
                 # If the data length is zero, consider this as
@@ -198,9 +198,9 @@ class Reader:
                 for i in ind:
                     x[i] = tx[ind[i]]
                     y[i] = ty[ind[i]]
-                    if has_error_dy == True:
+                    if has_error_dy:
                         dy[i] = tdy[ind[i]]
-                    if has_error_dx == True:
+                    if has_error_dx:
                         dx[i] = tdx[ind[i]]
                 # Zeros in dx, dy
                 if has_error_dx:
@@ -210,9 +210,9 @@ class Reader:
                 #Data
                 output.x = x[x != 0]
                 output.y = y[x != 0]
-                output.dy = dy[x != 0] if has_error_dy == True\
+                output.dy = dy[x != 0] if has_error_dy\
                     else np.zeros(len(output.y))
-                output.dx = dx[x != 0] if has_error_dx == True\
+                output.dx = dx[x != 0] if has_error_dx\
                     else np.zeros(len(output.x))
 
                 output.xaxis("\\rm{Q}", 'A^{-1}')
@@ -242,4 +242,5 @@ class Reader:
         # Now go for whitespace
         if len(toks) < 2:
             toks = line.split()
+
         return toks

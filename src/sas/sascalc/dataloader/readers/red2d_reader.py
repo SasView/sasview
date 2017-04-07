@@ -106,12 +106,12 @@ class Reader:
         data_conv_i = None
         
         # Set units: This is the unit assumed for Q and I in the data file.
-        if has_converter == True and output.Q_unit != '1/A':
+        if has_converter and output.Q_unit != '1/A':
             data_conv_q = Converter('1/A')
             # Test it
             data_conv_q(1.0, output.Q_unit)
             
-        if has_converter == True and output.I_unit != '1/cm':
+        if has_converter and output.I_unit != '1/cm':
             data_conv_i = Converter('1/cm')
             # Test it
             data_conv_i(1.0, output.I_unit)
@@ -139,7 +139,7 @@ class Reader:
                 try:
                     wavelength = float(line_toks[1])
                     # Units
-                    if has_converter == True and \
+                    if has_converter and \
                     output.source.wavelength_unit != 'A':
                         conv = Converter('A')
                         wavelength = conv(wavelength,
@@ -151,7 +151,7 @@ class Reader:
                 try:
                     distance = float(line_toks[3])
                     # Units
-                    if has_converter == True and detector.distance_unit != 'm':
+                    if has_converter and detector.distance_unit != 'm':
                         conv = Converter('m')
                         distance = conv(distance, units=detector.distance_unit)
                 except:
@@ -188,7 +188,7 @@ class Reader:
                 continue
 
             ## Read and get data.
-            if dataStarted == True:
+            if dataStarted:
                 line_toks = line.split()
                 if len(line_toks) == 0:
                     #empty line
@@ -267,7 +267,7 @@ class Reader:
         ymax = np.max(qy_data)
 
         # units
-        if has_converter == True and output.Q_unit != '1/A':
+        if has_converter and output.Q_unit != '1/A':
             xmin = data_conv_q(xmin, units=output.Q_unit)
             xmax = data_conv_q(xmax, units=output.Q_unit)
             ymin = data_conv_q(ymin, units=output.Q_unit)
