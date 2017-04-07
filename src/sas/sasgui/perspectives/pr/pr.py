@@ -328,7 +328,7 @@ class Plugin(PluginBase):
         new_plot.title = title
 
         # If we have a group ID, use it
-        if pr.info.has_key("plot_group_id"):
+        if 'plot_group_id' in pr.info:
             new_plot.group_id = pr.info["plot_group_id"]
         new_plot.id = IQ_FIT_LABEL
         self.parent.update_theory(data_id=self.data_id, theory=new_plot)
@@ -347,7 +347,7 @@ class Plugin(PluginBase):
                     err[i] = math.sqrt(math.fabs(value))
                 except:
                     err[i] = 1.0
-                    print "Error getting error", value, x[i]
+                    print("Error getting error", value, x[i])
 
             new_plot = Data1D(x, y)
             new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
@@ -355,7 +355,7 @@ class Plugin(PluginBase):
             new_plot.xaxis("\\rm{Q}", 'A^{-1}')
             new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
             # If we have a group ID, use it
-            if pr.info.has_key("plot_group_id"):
+            if 'plot_group_id' in pr.info:
                 new_plot.group_id = pr.info["plot_group_id"]
             new_plot.id = IQ_SMEARED_LABEL
             new_plot.title = title

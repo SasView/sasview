@@ -31,7 +31,7 @@ class testRegistry(unittest.TestCase):
         """
         output = self.L.load('test_data.test')
         self.assertEqual(output.x[0], 1234.)
-        self.assertTrue(self.L.loaders.has_key('.test'))
+        self.assertTrue('.test' in self.L.loaders)
         
 class testZip(unittest.TestCase):
     
@@ -60,7 +60,7 @@ class testZip(unittest.TestCase):
         self.L.find_plugins('.')
         output = self.L.load('test_data.test')
         self.assertEqual(output.x[0], 1234.)
-        self.assertTrue(self.L.loaders.has_key('.test'))
+        self.assertTrue('.test' in self.L.loaders)
         
         
 if __name__ == '__main__':
