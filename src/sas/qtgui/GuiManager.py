@@ -183,7 +183,14 @@ class GuiManager(object):
             self._current_perspective.close()
         # Default perspective
         self._current_perspective = Perspectives.PERSPECTIVES[str(perspective_name)](parent=self)
+
         self._workspace.workspace.addWindow(self._current_perspective)
+        # Resize to the workspace height
+        workspace_height = self._workspace.workspace.sizeHint().height()
+        perspective_size = self._current_perspective.sizeHint()
+        if workspace_height < perspective_size.height:
+            perspective_width = perspective_size.width()
+            self._current_perspective.resize(perspective_width, workspace_height-10)
         self._current_perspective.show()
 
     def updatePerspective(self, data):
