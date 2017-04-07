@@ -1719,7 +1719,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
     def _threaded_draw_worker(self, threadedDrawQueue):
         while True:
-            # Check if a manager exists and it's running
+            # Check to see is a manager is running and a calc is running
             if ((self._manager.calc_1D is not None) and (self._manager.calc_1D.isrunning() == True)) or ((self._manager.calc_2D is not None) and (self._manager.calc_2D.isrunning() == True)):
                 # If a manager is running a calculation 
                 # then trim the queue
