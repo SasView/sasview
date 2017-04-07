@@ -242,15 +242,15 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.set_layout()
 
         # Setting up a thread for the fitting
-        self.threadedDrawQueue = Queue()
+        self.threaded_draw_queue = Queue()
 
-        self.threadedDrawWorker = Thread(target = self._threaded_draw_worker,
-                                         args = (self.threadedDrawQueue,))
-        self.threadedDrawWorker.setDaemon(True)
-        self.threadedDrawWorker.start()
+        self.draw_worker_thread = Thread(target = self._threaded_draw_worker,
+                                         args = (self.threaded_draw_queue,))
+        self.draw_worker_thread.setDaemon(True)
+        self.draw_worker_thread.start()
 
         # And a home for the thread submission times
-        self.lastTimeFitSubmitted = 0.00
+        self.last_time_fit_submitted = 0.00
 
     def set_index_model(self, index):
         """
@@ -1705,19 +1705,19 @@ class BasicPage(ScrolledPanel, PanelBase):
         :param chisqr: update chisqr value [bool]
         """
         # Get the time
-        currentTime = time()
+        current_time = time()
 
         # When loading we slam a number of fits through here
         # let's filter these out to start with
-        if currentTime > (self.lastTimeFitSubmitted + 0.1):
+        if current_time > (self.last_time_fit_submitted + 0.1):
             # Submitting the rest
-            self.threadedDrawQueue.put([update_chisqr, source])
+            self.threaded_draw_queue.put([update_chisqr, source])
         else:
             pass
 
-        self.lastTimeFitSubmitted = currentTime
+        self.last_time_fit_submitted = current_time
 
-    def _threaded_draw_worker(self, threadedDrawQueue):
+    def _threaded_draw_worker(self, threaded_draw_queue):
         while True:
             # Check to see is a manager is running and a calc is running
             if ((self._manager.calc_1D is not None) and (self._manager.calc_1D.\
@@ -1725,17 +1725,17 @@ class BasicPage(ScrolledPanel, PanelBase):
                 and (self._manager.calc_2D.isrunning() == True)):
                 # If a manager is running a calculation 
                 # then trim the queue
-                if self.threadedDrawQueue.qsize() > 1:
-                    for loopIter in range(threadedDrawQueue.qsize() - 1):
-                        dump = self.threadedDrawQueue.get()
-                        self.threadedDrawQueue.task_done()
+                if self.threaded_draw_queue.qsize() > 1:
+                    for loopIter in range(threaded_draw_queue.qsize() - 1):
+                        dump = self.threaded_draw_queue.get()
+                        self.threaded_draw_queue.task_done()
             else:
                 # Otherwise, just run
-                inputVariables = threadedDrawQueue.get()
-                self._draw_model_after(inputVariables[0], inputVariables[1])
+                input_variables = threaded_draw_queue.get()
+                self._draw_model_after(input_variables[0], input_variables[1])
                 wx.PostEvent(self._manager.parent, StatusEvent(status = 
                             "Computation is in progress...", type = "progress"))
-                threadedDrawQueue.task_done()
+                threaded_draw_queue.task_done()
 
     def _draw_model_after(self, update_chisqr=True, source='model'):
         """
