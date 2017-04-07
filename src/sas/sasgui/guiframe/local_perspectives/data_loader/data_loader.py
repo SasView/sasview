@@ -91,7 +91,7 @@ class Plugin(PluginBase):
                             style=style)
         if dlg.ShowModal() == wx.ID_OK:
             file_list = dlg.GetPaths()
-            if len(file_list) >= 0 and not file_list[0] is None:
+            if len(file_list) >= 0 and file_list[0] is not None:
                 self._default_save_location = os.path.dirname(file_list[0])
                 path = self._default_save_location
         dlg.Destroy()
