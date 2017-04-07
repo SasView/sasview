@@ -302,7 +302,7 @@ class VolumeCanvas(BaseComponent):
         self.shapes[id] = shapeDesc
         self.shapecount += 1
 
-        #model changed, need to recalculate P(r)
+        # model changed, need to recalculate P(r)
         self._model_changed()
 
         return id
@@ -327,14 +327,14 @@ class VolumeCanvas(BaseComponent):
         if id == None:
             id = "shape"+str(self.shapecount)
  
-        #shapeDesc = ShapeDescriptor(shape.lower())
+        # shapeDesc = ShapeDescriptor(shape.lower())
         if shape.lower() in shape_dict:
             shapeDesc = shape_dict[shape.lower()]()
         elif os.path.isfile(shape):
             # A valid filename was supplier, create a PDB object
             shapeDesc = PDBDescriptor(shape)
         else:
-            raise ValueError, "VolumeCanvas.add: Unknown shape %s" % shape
+            raise ValueError("VolumeCanvas.add: Unknown shape %s" % shape)
         
         return self.addObject(shapeDesc, id)
 
@@ -344,12 +344,12 @@ class VolumeCanvas(BaseComponent):
             @param id: string handle for the object [string] [optional]
         """
 
-        if self.shapes.has_key(id):
+        if id in self.shapes:
             del self.shapes[id]
         else:
-            raise KeyError, "VolumeCanvas.delete: could not find shape ID"
+            raise KeyError("VolumeCanvas.delete: could not find shape ID")
 
-        #model changed, need to recalculate P(r)
+        # model changed, need to recalculate P(r)
         self._model_changed()
 
 
@@ -409,38 +409,37 @@ class VolumeCanvas(BaseComponent):
         toks = name.split('.')
         if len(toks) == 1:
             try:
-                self.params.has_key(toks[0])
+                a = self.params[toks[0]]
             except KeyError:
-                raise ValueError, \
-                    "VolumeCanvas.getParam: Could not find %s" % name
+                raise ValueError("VolumeCanvas.getParam: Could not find"
+                                 " %s" % name)
 
             value = self.params[toks[0]]
             if isinstance(value, ShapeDescriptor):
-                raise ValueError, \
-                    "VolumeCanvas.getParam: Cannot get parameter value." 
+                raise ValueError("VolumeCanvas.getParam: Cannot get parameter"
+                                 " value.")
             else:
                 return value
 
         elif len(toks) == 2:
             try:
-                self.shapes.has_key(toks[0])
+                a = self.shapes[toks[0]]
             except KeyError:
-                raise ValueError, \
-                    "VolumeCanvas.getParam: Could not find %s" % name
+                raise ValueError("VolumeCanvas.getParam: Could not find "
+                                 "%s" % name)
 
             shapeinstance = self.shapes[toks[0]]
 
             try:
-                shapeinstance.params.has_key(toks[1])
+                a = shapeinstance.params[toks[1]]
             except KeyError:
-                raise ValueError, \
-                    "VolumeCanvas.getParam: Could not find %s" % name
+                raise ValueError("VolumeCanvas.getParam: Could not find "
+                                 "%s" % name)
 
             return shapeinstance.params[toks[1]]
 
         else:
-            raise ValueError, \
-                "VolumeCanvas.getParam: Could not find %s" % name
+            raise ValueError("VolumeCanvas.getParam: Could not find %s" % name)
             
     def getParamList(self, shapeid = None):
         """
@@ -454,7 +453,7 @@ class VolumeCanvas(BaseComponent):
         """
 
         param_list = []
-        if shapeid == None:        
+        if shapeid is None:
             for key1 in self.params.keys():
                 #value1 = self.params[key1]
                 param_list.append(key1)
@@ -467,15 +466,13 @@ class VolumeCanvas(BaseComponent):
      
         else:
             try:
-                self.shapes.has_key(shapeid)
+                a = self.shapes[shapeid]
             except KeyError:
-                raise ValueError, \
-                    "VolumeCanvas: getParamList: Could not find %s" % shapeid
-            header = shapeid + '.'
-            param_list = self.shapes[shapeid].params.keys()  
-            for i in range(len(param_list)):
-                param_list[i] = header + param_list[i]
+                raise ValueError("VolumeCanvas: getParamList: Could not find "
+                                 "%s" % shapeid)
 
+            header = shapeid + '.'
+            param_list = [header + param for param in self.shapes[shapeid].params]
         return param_list
 
     def getShapeList(self):
