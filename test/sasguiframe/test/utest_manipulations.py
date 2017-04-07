@@ -10,11 +10,11 @@ import unittest
 import numpy as np
 
 from sas.sascalc.dataloader.loader import Loader
-from sas.sasgui.guiframe.dataFitting import Data1D as Theory1D
+from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import Data2D
 
 
-class data_info_tests(unittest.TestCase):
+class DataInfoTests(unittest.TestCase):
 
     def setUp(self):
         data = Loader().load("cansas1d.xml")
@@ -31,7 +31,7 @@ class data_info_tests(unittest.TestCase):
                 self.data.detector[i].distance, clone.detector[i].distance)
 
 
-class theory1d_tests(unittest.TestCase):
+class Theory1DTests(unittest.TestCase):
 
     def setUp(self):
         data = Loader().load("cansas1d.xml")
@@ -41,7 +41,7 @@ class theory1d_tests(unittest.TestCase):
         """
             Test basic cloning
         """
-        theory = Theory1D(x=[], y=[], dy=None)
+        theory = Data1D(x=[], y=[], dy=None)
         theory.clone_without_data(clone=self.data)
         theory.copy_from_datainfo(data1d=self.data)
         for i in range(len(self.data.detector)):
@@ -54,7 +54,7 @@ class theory1d_tests(unittest.TestCase):
             self.assertEqual(self.data.dy[i], theory.dy[i])
 
 
-class manip_tests(unittest.TestCase):
+class ManipTests(unittest.TestCase):
 
     def setUp(self):
         # Create two data sets to play with
@@ -159,7 +159,7 @@ class manip_tests(unittest.TestCase):
             self.assertEqual(result.dy[i], 6.0 * 0.5 / 4.0)
 
 
-class manip_2D(unittest.TestCase):
+class Manin2DTests(unittest.TestCase):
 
     def setUp(self):
         # Create two data sets to play with
@@ -269,7 +269,7 @@ class manip_2D(unittest.TestCase):
             self.assertEqual(result.err_data[i], 6.0 * 0.5 / 4.0)
 
 
-class extra_manip_2D(unittest.TestCase):
+class ExtraManip2DTests(unittest.TestCase):
 
     def setUp(self):
         # Create two data sets to play with

@@ -1,3 +1,4 @@
+from __future__ import division
 """
 Data manipulations for 2D data sets.
 Using the meta data information, various types of averaging
@@ -559,11 +560,11 @@ class CircularAverage(object):
         mask_data = data2D.mask[np.isfinite(data2D.data)]
 
         dq_data = None
-        if data2D.dqx_data != None and data2D.dqy_data != None:
+        if data2D.dqx_data is not None and data2D.dqy_data is not None:
             dq_data = get_dq_data(data2D)
 
         #q_data_max = np.max(q_data)
-        if len(data2D.q_data) == None:
+        if len(data2D.q_data) is None:
             msg = "Circular averaging: invalid q_data: %g" % data2D.q_data
             raise RuntimeError(msg)
 
@@ -609,7 +610,7 @@ class CircularAverage(object):
                 err_y[i_q] += frac * frac * data_n
             else:
                 err_y[i_q] += frac * frac * err_data[npt] * err_data[npt]
-            if dq_data != None:
+            if dq_data is not None:
                 # To be consistent with dq calculation in 1d reduction,
                 # we need just the averages (not quadratures) because
                 # it should not depend on the number of the q points
@@ -624,7 +625,7 @@ class CircularAverage(object):
             if err_y[n] < 0:
                 err_y[n] = -err_y[n]
             err_y[n] = math.sqrt(err_y[n])
-            # if err_x != None:
+            # if err_x is not None:
             #    err_x[n] = math.sqrt(err_x[n])
 
         err_y = err_y / y_counts
@@ -633,7 +634,7 @@ class CircularAverage(object):
         x = x / y_counts
         idx = (np.isfinite(y)) & (np.isfinite(x))
 
-        if err_x != None:
+        if err_x is not None:
             d_x = err_x[idx] / y_counts[idx]
         else:
             d_x = None
@@ -790,7 +791,7 @@ class _Sector(object):
         qy_data = data2D.qy_data[np.isfinite(data2D.data)]
 
         dq_data = None
-        if data2D.dqx_data != None and data2D.dqy_data != None:
+        if data2D.dqx_data is not None and data2D.dqy_data is not None:
             dq_data = get_dq_data(data2D)
 
         # set space for 1d outputs
@@ -798,7 +799,7 @@ class _Sector(object):
         y = np.zeros(self.nbins)
         y_err = np.zeros(self.nbins)
         x_err = np.zeros(self.nbins)
-        y_counts = np.zeros(self.nbins)
+        y_counts = np.zeros(self.nbins) # Cycle counts (for the mean)
 
         # Get the min and max into the region: 0 <= phi < 2Pi
         phi_min = flip_phi(self.phi_min)
@@ -816,7 +817,7 @@ class _Sector(object):
             # phi-value of the pixel (j,i)
             phi_value = math.atan2(qy_data[n], qx_data[n]) + math.pi
 
-            # No need to calculate the frac when all data are within range
+            # No need to calculate: data outside of the radius
             if self.r_min > q_value or q_value > self.r_max:
                 continue
 
@@ -843,17 +844,19 @@ class _Sector(object):
                 is_in = is_in or (phi_value >= phi_min and
                                   phi_value < phi_max)
 
+            # data oustide of the phi range
             if not is_in:
                 continue
+        
             # Check which type of averaging we need
             if run.lower() == 'phi':
                 temp_x = (self.nbins) * (phi_value - self.phi_min)
                 temp_y = (self.phi_max - self.phi_min)
-                i_bin = int(math.floor(temp_x / temp_y))
             else:
                 temp_x = (self.nbins) * (q_value - self.r_min)
                 temp_y = (self.r_max - self.r_min)
-                i_bin = int(math.floor(temp_x / temp_y))
+            # Bin index calulation
+            i_bin = int(math.floor(temp_x / temp_y))
 
             # Take care of the edge case at phi = 2pi.
             if i_bin == self.nbins:
@@ -862,14 +865,14 @@ class _Sector(object):
             # Get the total y
             y[i_bin] += data_n
             x[i_bin] += q_value
-            if err_data[n] == None or err_data[n] == 0.0:
+            if err_data[n] is None or err_data[n] == 0.0:
                 if data_n < 0:
                     data_n = -data_n
-                y_err[i_bin] +=  data_n
+                y_err[i_bin] += data_n
             else:
-                y_err[i_bin] += err_data[n] * err_data[n]
+                y_err[i_bin] += err_data[n]**2
 
-            if dq_data != None:
+            if dq_data is not None:
                 # To be consistent with dq calculation in 1d reduction,
                 # we need just the averages (not quadratures) because
                 # it should not depend on the number of the q points
@@ -899,7 +902,7 @@ class _Sector(object):
                 x[i] = x[i] / y_counts[i]
         y_err[y_err == 0] = np.average(y_err)
         idx = (np.isfinite(y) & np.isfinite(y_err))
-        if x_err != None:
+        if x_err is not None:
             d_x = x_err[idx] / y_counts[idx]
         else:
             d_x = None
