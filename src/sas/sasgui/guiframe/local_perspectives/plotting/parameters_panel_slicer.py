@@ -2,7 +2,6 @@
 
 import wx
 import wx.lib.newevent
-import time
 from sas.sascalc.dataloader.readers.cansas_reader import Reader
 from sas.sasgui.guiframe.events import EVT_SLICER_PARS
 from sas.sasgui.guiframe.utils import format_number
@@ -36,11 +35,9 @@ class SlicerParameterPanel(wx.Dialog):
         self.SetSizer(self.bck)
         self.auto_save = None
         self.path = None
-        self.type_list = ["SectorInteractor", "AnnulusInteractor",
-                          "BoxInteractorX", "BoxInteractorY"]
-        self.type_select = wx.ComboBox(parent=self, choices=self.type_list)
-        self.append_name = wx.TextCtrl(parent=self, id=wx.NewId(),
-                                       name="Append to file name:")
+        self.type_list = []
+        self.type_select = None
+        self.append_name = None
         self.data_list = None
         label = "Right-click on 2D plot for slicer options"
         title = wx.StaticText(self, -1, label, style=wx.ALIGN_LEFT)
@@ -48,7 +45,7 @@ class SlicerParameterPanel(wx.Dialog):
                      flag=wx.LEFT | wx.ALIGN_CENTER_VERTICAL, border=15)
         # Bindings
         self.parent.Bind(EVT_SLICER, self.onEVT_SLICER)
-        self.parent.Bind(EVT_SLICER_PARS, self.onParamChange)
+        self.Bind(EVT_SLICER_PARS, self.onParamChange)
         self.Bind(EVT_APPLY_PARAMS, self.apply_params_list_and_process)
         self.Bind(EVT_AUTO_SAVE, self.save_files)
 
@@ -127,6 +124,9 @@ class SlicerParameterPanel(wx.Dialog):
             text = wx.StaticText(self, -1, txt, style=wx.ALIGN_LEFT)
             self.bck.Add(text, (iy, ix), (1, 1),
                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+            self.type_list = ["SectorInteractor", "AnnulusInteractor",
+                              "BoxInteractorX", "BoxInteractorY"]
+            self.type_select = wx.ComboBox(parent=self, choices=self.type_list)
             self.Bind(wx.EVT_COMBOBOX, self.onChangeSlicer)
             index = self.type_select.FindString(type)
             self.type_select.SetSelection(index)
@@ -173,10 +173,12 @@ class SlicerParameterPanel(wx.Dialog):
             iy += 1
             default_value = ""
             for key in params:
-                default_value += "_{0}-".format(key)
-                default_value += "{:.5f}".format(params[key])
+                default_value += "_{0}".format(key).split(" [")[0]
+                default_value += "-{:.5f}".format(params[key])
             append_text = "Append to file name:"
             append = wx.StaticText(self, -1, append_text, style=wx.ALIGN_LEFT)
+            self.append_name = wx.TextCtrl(parent=self, id=wx.NewId(),
+                                           name="Append to file name:")
             self.append_name.SetValue(default_value)
             self.append_name.Enable(False)
             self.bck.Add(append, (iy, ix), (1, 1),
@@ -245,11 +247,11 @@ class SlicerParameterPanel(wx.Dialog):
             # Post parameter event
             # parent here is plotter2D
             event = SlicerParameterEvent(type=self.type, params=params)
-            wx.PostEvent(self, event)
+            wx.PostEvent(self.parent, event)
 
     def on_batch_slicer(self, evt=None):
         """
-        Method invoked with batch slicing button is pressed
+        Method invoked when batch slicing button is pressed
         :param evt: Event triggering hide/show of the batch slicer parameters
         """
         apply_to_list = []
@@ -270,11 +272,10 @@ class SlicerParameterPanel(wx.Dialog):
             self._apply_slicer_to_plot(item, type)
 
         # Post an event to apply appropriate slicer params to each slicer
-        # Event needed due to how apply_slicer_to_plot works
-        event = apply_params(params=params, plot_list=apply_to_list,
+        event_params = apply_params(params=params, apply_to_list=apply_to_list,
                              auto_save=save, append=append,
                              path=path, type=type)
-        wx.PostEvent(self, event)
+        wx.PostEvent(self, event_params)
 
     def onChangeSlicer(self, evt):
         """
@@ -291,6 +292,9 @@ class SlicerParameterPanel(wx.Dialog):
         """
         # Skip redrawing the current plot if no change
         if self.parent == plot and self.type == type:
+            return
+        # Do not draw a slicer on a 1D plot
+        if not isinstance(plot, ModelPanel2D):
             return
         if type is None:
             type = self.type_select.GetStringSelection()
@@ -344,13 +348,13 @@ class SlicerParameterPanel(wx.Dialog):
                     evt should have attrs plot_list and params
         """
         # Apply parameter list to each plot as desired
-        for item in evt.plot_list:
+        for item in evt.apply_to_list:
             event = SlicerParameterEvent(type=evt.type, params=evt.params)
             wx.PostEvent(item, event)
         # Post an event to save each data set to file
         if evt.auto_save:
             event = auto_save(append_to_name=evt.append,
-                              file_list=evt.plot_list,
+                              file_list=evt.apply_to_list,
                               path=evt.path, type=evt.type)
             wx.PostEvent(self, event)
 
@@ -379,7 +383,7 @@ class SlicerParameterPanel(wx.Dialog):
                     if base in names:
                         data_dic[item] = plot.plots[item]
         for item, data1d in data_dic.iteritems():
-            base = item.split(".")[0]
+            base = ('.').join(item.split('.')[:-1])
             save_to = evt.path + "\\" + base + append + ".xml"
             writer.write(save_to, data1d)
 
