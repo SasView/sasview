@@ -394,17 +394,14 @@ class FitPanel(nb, PanelBase):
                 pos = self.GetPageIndex(page)
                 temp_data = page.get_data()
                 if temp_data is not None and temp_data.id in data:
-                    self.SetSelection(pos)
-                    self.on_close_page(event=None)
-                    temp = self.GetSelection()
-                    self.DeletePage(temp)
+                    self.close_page_with_data(temp_data)
             if self.sim_page is not None:
                 if len(self.sim_page.model_list) == 0:
                     pos = self.GetPageIndex(self.sim_page)
                     self.SetSelection(pos)
                     self.on_close_page(event=None)
                     temp = self.GetSelection()
-                    self.DeletePage(temp)
+                    self.DeletePage(pos)
                     self.sim_page = None
                     self.batch_on = False
             if self.GetPageCount() == 0:
