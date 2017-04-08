@@ -11,6 +11,11 @@ from Plotter2D import ModelPanel2D
 apply_params, EVT_APPLY_PARAMS = wx.lib.newevent.NewEvent()
 auto_save, EVT_AUTO_SAVE = wx.lib.newevent.NewEvent()
 
+FIT_OPTIONS = ["No fitting", "Fitting"]
+CONVERT_DICT = {"SectorInteractor": "SectorQ",
+                "AnnulusInteractor": "AnnulusPhi",
+                "BoxInteractorX": "SlabX",
+                "BoxInteractorY": "SlabY"}
 
 class SlicerParameterPanel(wx.Dialog):
     """
@@ -35,6 +40,7 @@ class SlicerParameterPanel(wx.Dialog):
         self.SetSizer(self.bck)
         self.auto_save = None
         self.path = None
+        self.fitting_options = None
         self.type_list = []
         self.type_select = None
         self.append_name = None
@@ -127,7 +133,7 @@ class SlicerParameterPanel(wx.Dialog):
             self.type_list = ["SectorInteractor", "AnnulusInteractor",
                               "BoxInteractorX", "BoxInteractorY"]
             self.type_select = wx.ComboBox(parent=self, choices=self.type_list)
-            self.Bind(wx.EVT_COMBOBOX, self.onChangeSlicer)
+            self.type_select.Bind(wx.EVT_COMBOBOX, self.onChangeSlicer)
             index = self.type_select.FindString(type)
             self.type_select.SetSelection(index)
             self.bck.Add(self.type_select, (iy, 1), (1, 1),
@@ -186,18 +192,18 @@ class SlicerParameterPanel(wx.Dialog):
             self.bck.Add(self.append_name, (iy, 1), (1, 1),
                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
 
-            # TODO: Fix fitting options combobox/radiobox
             # Combobox for selecting fitting options
-            # iy += 1
-            # self.fitting_radio = wx.RadioBox(parent=self, id=wx.NewId(),
-            #                                  size=(4,1))
-            # self.fitting_radio.SetString(0, "No fitting")
-            # self.fitting_radio.SetString(1, "Batch Fitting")
-            # self.fitting_radio.SetString(2, "Fitting")
-            # self.fitting_radio.SetString(3, "Simultaneous and Constrained Fit")
-            # self.fitting_radio.SetValue(0)
-            # self.bck.Add(self.fitting_radio, (iy, ix), (1, 1),
-            #              wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+            iy += 1
+            fit_text = "Fitting Options:"
+            fit_text_item = wx.StaticText(self, -1, fit_text, style=wx.ALIGN_LEFT)
+            self.bck.Add(fit_text_item, (iy, ix), (1, 1),
+                         wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+            self.fitting_options = wx.ComboBox(parent=self, choices=FIT_OPTIONS)
+            self.fitting_options.SetSelection(0)
+            self.bck.Add(self.fitting_options, (iy, 1), (1, 1),
+                         wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+            self.fitting_options.Enable(False)
+            self.fitting_options.Bind(wx.EVT_COMBOBOX, None)
 
             # Button to start batch slicing
             iy += 1
@@ -261,6 +267,7 @@ class SlicerParameterPanel(wx.Dialog):
         save = self.auto_save.IsChecked()
         append = self.append_name.GetValue()
         path = self.path.GetPath()
+        fit = self.fitting_options.GetValue()
 
         # Find desired 2D data panels
         for key, mgr in spp.plot_panels.iteritems():
@@ -273,7 +280,7 @@ class SlicerParameterPanel(wx.Dialog):
 
         # Post an event to apply appropriate slicer params to each slicer
         event_params = apply_params(params=params, apply_to_list=apply_to_list,
-                             auto_save=save, append=append,
+                             auto_save=save, append=append, fit=fit,
                              path=path, type=type)
         wx.PostEvent(self, event_params)
 
@@ -353,9 +360,9 @@ class SlicerParameterPanel(wx.Dialog):
             wx.PostEvent(item, event)
         # Post an event to save each data set to file
         if evt.auto_save:
-            event = auto_save(append_to_name=evt.append,
-                              file_list=evt.apply_to_list,
-                              path=evt.path, type=evt.type)
+            event = auto_save(append_to_name=evt.append, path=evt.path,
+                              type=evt.type, file_list=evt.apply_to_list,
+                              fit=evt.fit)
             wx.PostEvent(self, event)
 
     def save_files(self, evt=None):
@@ -363,8 +370,9 @@ class SlicerParameterPanel(wx.Dialog):
         Automatically save the sliced data to file.
         :param evt: Event that triggered the call to the method
         """
+
+        # Send the event to the end of the wx event queue
         if self.iter == 0:
-            # Forces the event to be processed after dynamically generated evts
             clone = evt.Clone()
             wx.PostEvent(self, clone)
             self.iter += 1
@@ -378,30 +386,92 @@ class SlicerParameterPanel(wx.Dialog):
         data_dic = {}
         append = evt.append_to_name
         names = []
-        file_list = []
-        convert_dict = {"SectorInteractor": "SectorQ",
-                        "AnnulusInteractor": "AnnulusPhi",
-                        "BoxInteractorX": "SlabX",
-                        "BoxInteractorY": "SlabY"}
+        f_name_list = []
+        f_path_list = []
+
         # Get list of 2D data names for saving
         for f_name in evt.file_list:
             names.append(f_name.data2D.label)
+
         # Find the correct plots to save
         for key, plot in main_window.plot_panels.iteritems():
             if not hasattr(plot, "data2D"):
                 for item in plot.plots:
-                    base = item.replace(convert_dict[evt.type], "")
+                    base = item.replace(CONVERT_DICT[evt.type], "")
                     if base in names:
                         data_dic[item] = plot.plots[item]
+
         # Save files as XML
         for item, data1d in data_dic.iteritems():
             base = ('.').join(item.split('.')[:-1])
-            save_to = evt.path + "\\" + base + append + ".xml"
+            file_name = base + append + ".xml"
+            save_to = evt.path + "\\" + file_name
             writer.write(save_to, data1d)
-            file_list.append(save_to)
+            f_path_list.append(save_to)
+            f_name_list.append(file_name)
+
         # Load files into GUI
-        for item in file_list:
-            self.parent.parent.load_data(item)
+        for item in f_path_list:
+            main_window.load_data(item)
+
+        # Send to fitting
+        self.send_to_fitting(evt.fit, f_name_list)
+
+    def send_to_fitting(self, fit=FIT_OPTIONS[0], file_list=None):
+        """
+        Send a list of data to the fitting perspective
+        :param fit: fit type desired 
+        :param file_list: list of loaded file names to send to fit
+        """
+        if fit != FIT_OPTIONS[0] and file_list is not None:
+            # Method variable definitions
+            main_window = self.parent.parent
+            datapanel = main_window._data_panel
+            # Set perspective to fitting
+            int = datapanel.perspective_cbox.FindString("Fitting")
+            datapanel.perspective_cbox.SetSelection(int)
+            datapanel._on_perspective_selection(None)
+            # Unselect all loaded data
+            datapanel.selection_cbox.SetValue('Unselect all Data')
+            datapanel._on_selection_type(None)
+            # Click each sliced data file
+            for f_name in file_list:
+                num = len(f_name)
+                data_list = datapanel.list_cb_data
+                for key in data_list:
+                    loaded_key = (key[:num]) if len(key) > num else key
+                    if loaded_key == f_name:
+                        selection = key
+                        data_ctrl = data_list[selection][0]
+                        self.check_item_and_children(data_ctrl=data_ctrl,
+                                                     check_value=True)
+            # TODO: Batch fitting
+            # # Switch to batch mode if selected
+            # if fit == FIT_OPTIONS[2]:
+            #     datapanel.rb_single_mode.SetValue(False)
+            #     datapanel.rb_batch_mode.SetValue(True)
+            #     evt = wx.PyCommandEvent(wx.EVT_RADIOBUTTON.typeId,
+            #                             datapanel.rb_batch_mode.GetId())
+            #     wx.PostEvent(datapanel, evt)
+            # else:
+            #     datapanel.rb_single_mode.SetValue(True)
+            #     datapanel.rb_batch_mode.SetValue(False)
+            #     evt = wx.PyCommandEvent(wx.EVT_RADIOBUTTON.typeId,
+            #                             datapanel.rb_single_mode.GetId())
+            #     wx.PostEvent(datapanel, evt)
+
+            # Post button click event to send data to fitting
+            evt = wx.PyCommandEvent(wx.EVT_BUTTON.typeId,
+                                    datapanel.bt_import.GetId())
+            wx.PostEvent(datapanel, evt)
+
+            # TODO: Simultaneous/Constrained fitting
+            # # Create event to open simfitpage if selected
+            # if fit == FIT_OPTIONS[3]:
+            #     fit_pers = main_window._current_perspective
+            #     evt = wx.PyCommandEvent(wx.EVT_MENU.typeId,
+            #                         fit_pers.id_simfit)
+            #     wx.PostEvent(datapanel, evt)
 
     def on_auto_save_checked(self, evt=None):
         """
@@ -410,3 +480,15 @@ class SlicerParameterPanel(wx.Dialog):
         """
         self.append_name.Enable(self.auto_save.IsChecked())
         self.path.Enable(self.auto_save.IsChecked())
+        self.fitting_options.Enable(self.auto_save.IsChecked())
+
+    def check_item_and_children(self, data_ctrl, check_value=True):
+        self.parent.parent._data_panel.tree_ctrl.CheckItem(data_ctrl,
+                                                           check_value)
+        if data_ctrl.HasChildren():
+            if check_value and not data_ctrl.IsExpanded():
+                # Only select children if control is expanded
+                # Always deselect children, regardless (see ticket #259)
+                return
+            for child_ctrl in data_ctrl.GetChildren():
+                self.tree_ctrl.CheckItem(child_ctrl, check_value)
