@@ -71,9 +71,13 @@ def smear_selection(data, model = None):
         SElength = Converter(data._xunit)(data.x, "A")
         zaccept = Converter(qunits)(qmax, "1/A"),
         Rmax = 10000000
-        hankel = SesansTransform(data.x, SElength, zaccept, Rmax)
+        # data must have the isoriented flag here!
+        coshankel = SesansTransform(data.x, SElength, zaccept, Rmax)
         # Then return the actual transform, as if it were a smearing function
-        return PySmear(hankel, model, offset=0)
+        if data.isoriented:
+            return PySmear2D(coshankel)
+        else:
+            return PySmear(coshankel, model, offset=0)
 
     _found_resolution = False
     if data.dx is not None and len(data.dx) == len(data.x):
