@@ -320,10 +320,9 @@ class ModelManagerBase:
         new_plugins = self.findModels()
         if len(new_plugins) > 0:
             for name, plug in  new_plugins.iteritems():
-                if name not in self.stored_plugins.keys():
-                    self.stored_plugins[name] = plug
-                    self.plugins.append(plug)
-                    self.model_dictionary[name] = plug
+                self.stored_plugins[name] = plug
+                self.plugins.append(plug)
+                self.model_dictionary[name] = plug
             self.model_combobox.set_list("Plugin Models", self.plugins)
             return self.model_combobox.get_list()
         else:
