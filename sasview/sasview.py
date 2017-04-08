@@ -18,7 +18,7 @@ import traceback
 
 logger = logging.getLogger(__name__)
 if not logger.root.handlers:
-    LOGGER_CONFIG_FILE = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.ini')
+    LOGGER_CONFIG_FILE = os.path.join(os.path.abspath(os.path.dirname("__file__")), 'logging.ini')
     logging.config.fileConfig(LOGGER_CONFIG_FILE, disable_existing_loggers=False)
     logging.captureWarnings(True)
 
