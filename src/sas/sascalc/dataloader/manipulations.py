@@ -3,6 +3,12 @@ from __future__ import division
 Data manipulations for 2D data sets.
 Using the meta data information, various types of averaging
 are performed in Q-space
+
+To test this module use:
+```
+cd test
+PYTHONPATH=../src/ python2  -m sasdataloader.test.utest_averaging DataInfoTests.test_sectorphi_quarter
+```
 """
 #####################################################################
 # This software was developed by the University of Tennessee as part of the
@@ -12,12 +18,12 @@ are performed in Q-space
 # copyright 2008, University of Tennessee
 ######################################################################
 
-# If you want to run just a single test from this file:
-# PYTHONPATH=../src/ python2  -m sasdataloader.test.utest_averaging data_info_tests.test_sectorq_full
+
 # TODO: copy the meta data from the 2D object to the resulting 1D object
 import math
 import numpy as np
-
+import sys
+ 
 #from data_info import plottable_2D
 from data_info import Data1D
 
@@ -262,6 +268,38 @@ def reader2D_converter(data2d=None):
     output.mask = mask
 
     return output
+
+################################################################################
+
+class Binning(object):
+    '''
+    This class just creates a binning object
+    either linear or log
+    '''
+
+    def __init__(self, min_value, max_value, n_bins, base=None):
+        '''
+        if base is None: Linear binning
+        '''
+        self.min = min_value if min_value > 0 else 0.0001
+        self.max = max_value
+        self.n_bins = n_bins
+        self.base = base
+
+    def get_bin_index(self, value):
+        '''
+        The general formula logarithm binning is:
+        bin = floor(N * (log(x) - log(min)) / (log(max) - log(min)))
+        '''
+        if self.base:
+            temp_x = self.n_bins * (math.log(value, self.base) - math.log(self.min, self.base))
+            temp_y = math.log(self.max, self.base) - math.log(self.min, self.base)
+        else:
+            temp_x = self.n_bins * (value - self.min)
+            temp_y = self.max - self.min
+        # Bin index calulation
+        return int(math.floor(temp_x / temp_y))
+
 
 ################################################################################
 
@@ -764,12 +802,13 @@ class _Sector(object):
     starting from the x- axis on the left-hand side
     """
 
-    def __init__(self, r_min, r_max, phi_min=0, phi_max=2 * math.pi, nbins=20):
+    def __init__(self, r_min, r_max, phi_min=0, phi_max=2 * math.pi, nbins=20, base = None):
         self.r_min = r_min
         self.r_max = r_max
         self.phi_min = phi_min
         self.phi_max = phi_max
         self.nbins = nbins
+        self.base = base
 
     def _agv(self, data2D, run='phi'):
         """
@@ -804,7 +843,13 @@ class _Sector(object):
         # Get the min and max into the region: 0 <= phi < 2Pi
         phi_min = flip_phi(self.phi_min)
         phi_max = flip_phi(self.phi_max)
-
+        
+        #  binning object
+        if run.lower() == 'phi':
+            binning = Binning(self.phi_min, self.phi_max, self.nbins, self.base)
+        else:
+            binning = Binning(self.r_min, self.r_max, self.nbins, self.base)
+        
         for n in range(len(data)):
 
             # q-value at the pixel (j,i)
@@ -847,16 +892,12 @@ class _Sector(object):
             # data oustide of the phi range
             if not is_in:
                 continue
-        
-            # Check which type of averaging we need
+
+            # Get the binning index
             if run.lower() == 'phi':
-                temp_x = (self.nbins) * (phi_value - self.phi_min)
-                temp_y = (self.phi_max - self.phi_min)
+                i_bin = binning.get_bin_index(phi_value)
             else:
-                temp_x = (self.nbins) * (q_value - self.r_min)
-                temp_y = (self.r_max - self.r_min)
-            # Bin index calulation
-            i_bin = int(math.floor(temp_x / temp_y))
+                i_bin = binning.get_bin_index(q_value)
 
             # Take care of the edge case at phi = 2pi.
             if i_bin == self.nbins:
