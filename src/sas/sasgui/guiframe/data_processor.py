@@ -18,7 +18,7 @@ The organization of the classes goes as:
 
 """
 import wx
-import numpy
+import numpy as np
 import math
 import re
 import os
