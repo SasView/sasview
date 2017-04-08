@@ -31,6 +31,8 @@ import readers
 from readers import ascii_reader
 from readers import cansas_reader
 
+logger = logging.getLogger(__name__)
+
 class Registry(ExtensionRegistry):
     """
     Registry class for file format extensions.
@@ -98,7 +100,7 @@ class Registry(ExtensionRegistry):
         if not os.path.isdir(dir):
             msg = "DataLoader couldn't locate DataLoader plugin folder."
             msg += """ "%s" does not exist""" % dir
-            logging.warning(msg)
+            logger.warning(msg)
             return readers_found
 
         for item in os.listdir(dir):
@@ -116,7 +118,7 @@ class Registry(ExtensionRegistry):
                     except:
                         msg = "Loader: Error importing "
                         msg += "%s\n  %s" % (item, sys.exc_value)
-                        logging.error(msg)
+                        logger.error(msg)
 
                 # Process zip files
                 elif item.endswith('.zip'):
@@ -138,12 +140,12 @@ class Registry(ExtensionRegistry):
                             except:
                                 msg = "Loader: Error importing"
                                 msg += " %s\n  %s" % (mfile, sys.exc_value)
-                                logging.error(msg)
+                                logger.error(msg)
 
                     except:
                         msg = "Loader: Error importing "
                         msg += " %s\n  %s" % (item, sys.exc_value)
-                        logging.error(msg)
+                        logger.error(msg)
 
         return readers_found
 
@@ -189,7 +191,7 @@ class Registry(ExtensionRegistry):
             except:
                 msg = "Loader: Error accessing"
                 msg += " Reader in %s\n  %s" % (module.__name__, sys.exc_value)
-                logging.error(msg)
+                logger.error(msg)
         return reader_found
 
     def associate_file_reader(self, ext, loader):
@@ -222,7 +224,7 @@ class Registry(ExtensionRegistry):
         except:
             msg = "Loader: Error accessing Reader "
             msg += "in %s\n  %s" % (loader.__name__, sys.exc_value)
-            logging.error(msg)
+            logger.error(msg)
         return reader_found
 
     def _identify_plugin(self, module):
@@ -267,7 +269,7 @@ class Registry(ExtensionRegistry):
             except:
                 msg = "Loader: Error accessing Reader"
                 msg += " in %s\n  %s" % (module.__name__, sys.exc_value)
-                logging.error(msg)
+                logger.error(msg)
         return reader_found
 
     def lookup_writers(self, path):

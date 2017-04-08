@@ -4,6 +4,8 @@ Extension to MPL to support the binding of artists to key/mouse events.
 import sys
 import logging
 
+logger = logging.getLogger(__name__)
+
 class Selection(object):
     """
     Store and compare selections.
@@ -120,7 +122,7 @@ class BindArtist(object):
         try:
             for cid in self._connections: self.canvas.mpl_disconnect(cid)
         except:
-            logging.error("Error disconnection canvas: %s" % sys.exc_value)
+            logger.error("Error disconnection canvas: %s" % sys.exc_value)
         self._connections = []
 
     def __del__(self):

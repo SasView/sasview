@@ -7,6 +7,8 @@ import sys
 import wx
 import logging
 
+logger = logging.getLogger(__name__)
+
 from sas.sascalc.dataloader.loader import Loader
 from sas.sasgui.guiframe.plugin_base import PluginBase
 from sas.sasgui.guiframe.events import StatusEvent
@@ -89,7 +91,7 @@ class Plugin(PluginBase):
                             style=style)
         if dlg.ShowModal() == wx.ID_OK:
             file_list = dlg.GetPaths()
-            if len(file_list) >= 0 and not file_list[0] is None:
+            if len(file_list) >= 0 and file_list[0] is not None:
                 self._default_save_location = os.path.dirname(file_list[0])
                 path = self._default_save_location
         dlg.Destroy()
@@ -159,7 +161,7 @@ class Plugin(PluginBase):
                 data_error = True
                 message += "\tError: {0}\n".format(error_data)
         else:
-            logging.error("Loader returned an invalid object:\n %s" % str(item))
+            logger.error("Loader returned an invalid object:\n %s" % str(item))
             data_error = True
 
         data = self.parent.create_gui_data(item, p_file)
@@ -181,7 +183,7 @@ class Plugin(PluginBase):
                 log_msg += "load: {}\n".format(str(p_file))
                 log_msg += "Please try to open that file from \"open project\""
                 log_msg += "or \"open analysis\" menu."
-                logging.info(log_msg)
+                logger.info(log_msg)
                 file_errors[basename] = [log_msg]
                 continue
 
@@ -211,7 +213,7 @@ class Plugin(PluginBase):
                 info="info")
 
             except:
-                logging.error(sys.exc_value)
+                logger.error(sys.exc_value)
 
                 error_message = "The Data file you selected could not be loaded.\n"
                 error_message += "Make sure the content of your file"

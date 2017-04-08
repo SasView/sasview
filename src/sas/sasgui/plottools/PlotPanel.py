@@ -33,6 +33,8 @@ import numpy as np
 from sas.sasgui.guiframe.events import StatusEvent
 from .toolbar import NavigationToolBar, PlotPrintout, bind
 
+logger = logging.getLogger(__name__)
+
 def show_tree(obj, d=0):
     """Handy function for displaying a tree of graph objects"""
     print "%s%s" % ("-"*d, obj.__class__.__name__)
@@ -1400,19 +1402,19 @@ class PlotPanel(wx.Panel):
         zmax_2D_temp = self.zmax_2D
         if self.scale == 'log_{10}':
             self.scale = 'linear'
-            if not self.zmin_2D is None:
+            if self.zmin_2D is not None:
                 zmin_2D_temp = math.pow(10, self.zmin_2D)
-            if not self.zmax_2D is None:
+            if self.zmax_2D is not None:
                 zmax_2D_temp = math.pow(10, self.zmax_2D)
         else:
             self.scale = 'log_{10}'
-            if not self.zmin_2D is None:
+            if self.zmin_2D is not None:
                 # min log value: no log(negative)
                 if self.zmin_2D <= 0:
                     zmin_2D_temp = -32
                 else:
                     zmin_2D_temp = math.log10(self.zmin_2D)
-            if not self.zmax_2D is None:
+            if self.zmax_2D is not None:
                 zmax_2D_temp = math.log10(self.zmax_2D)
 
         self.image(data=self.data, qx_data=self.qx_data,
@@ -1505,7 +1507,7 @@ class PlotPanel(wx.Panel):
                 try:
                     from mpl_toolkits.mplot3d import Axes3D
                 except:
-                    logging.error("PlotPanel could not import Axes3D")
+                    logger.error("PlotPanel could not import Axes3D")
                 self.subplot.figure.clear()
                 ax = Axes3D(self.subplot.figure)
                 if len(X) > 60:

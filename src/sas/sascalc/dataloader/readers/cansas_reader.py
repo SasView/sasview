@@ -33,6 +33,8 @@ from sas.sascalc.dataloader.readers.cansas_constants import CansasConstants, Cur
 import xml.dom.minidom
 from xml.dom.minidom import parseString
 
+logger = logging.getLogger(__name__)
+
 PREPROCESS = "xmlpreprocess"
 ENCODING = "encoding"
 RUN_NAME_DEFAULT = "None"
@@ -289,6 +291,8 @@ class Reader(XMLreader):
                     pass
                 elif tagname == 'Sesans':
                     self.current_datainfo.isSesans = bool(data_point)
+                elif tagname == 'yacceptance':
+                    self.current_datainfo.sample.yacceptance = (data_point, unit)
                 elif tagname == 'zacceptance':
                     self.current_datainfo.sample.zacceptance = (data_point, unit)
 
@@ -1054,6 +1058,8 @@ class Reader(XMLreader):
             sesans = self.create_element("Sesans")
             sesans.text = str(datainfo.isSesans)
             node.append(sesans)
+            self.write_node(node, "yacceptance", datainfo.sample.yacceptance[0],
+                             {'unit': datainfo.sample.yacceptance[1]})
             self.write_node(node, "zacceptance", datainfo.sample.zacceptance[0],
                              {'unit': datainfo.sample.zacceptance[1]})
 
@@ -1470,7 +1476,7 @@ class Reader(XMLreader):
                                 % (variable, units, local_unit, exc_value)
                             self.errors.add(err_mess)
                             if optional:
-                                logging.info(err_mess)
+                                logger.info(err_mess)
                             else:
                                 raise ValueError, err_mess
                     else:
@@ -1479,7 +1485,7 @@ class Reader(XMLreader):
                         err_mess += " expecting [%s]" % local_unit
                         self.errors.add(err_mess)
                         if optional:
-                            logging.info(err_mess)
+                            logger.info(err_mess)
                         else:
                             raise ValueError, err_mess
                 else:

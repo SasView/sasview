@@ -134,6 +134,7 @@ class CansasConstants(object):
                "children" : {"Idata" : SASDATA_IDATA,
                              "Sesans": {"storeas": "content"},
                              "zacceptance": {"storeas": "float"},
+                             "yacceptance": {"storeas": "float"},
                              "<any>" : ANY
                             }
               }
