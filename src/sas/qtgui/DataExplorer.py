@@ -443,6 +443,17 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             plot2D.item = item
             plot2D.plot(plot_set)
             self.plotAdd(plot2D)
+            #============================================
+            ## Attach silx
+            #from silx.gui import qt
+            #from silx.gui.plot import StackView
+            #sv = StackView()
+            #sv.setColormap("jet", autoscale=True)
+            #sv.setStack(plot_set.data.reshape(1,100,100))
+            ##sv.setLabels(["x: -10 to 10 (200 samples)",
+            ##              "y: -10 to 5 (150 samples)"])
+            #sv.show()
+            #============================================
 
         for item, plot_set in plots:
             if isinstance(plot_set, Data1D):

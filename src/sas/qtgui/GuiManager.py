@@ -195,6 +195,7 @@ class GuiManager(object):
 
     def updatePerspective(self, data):
         """
+        Update perspective with data sent.
         """
         assert isinstance(data, list)
         if self._current_perspective is not None:
@@ -202,7 +203,6 @@ class GuiManager(object):
         else:
             msg = "No perspective is currently active."
             logging.info(msg)
-
 
     def communicator(self):
         """ Accessor for the communicator """
@@ -236,8 +236,8 @@ class GuiManager(object):
 
     def updateStatusBar(self, text):
         """
+        Set the status bar text
         """
-        #self._workspace.statusbar.showMessage(text)
         self.statusLabel.setText(text)
 
     def createGuiData(self, item, p_file=None):
@@ -286,15 +286,16 @@ class GuiManager(object):
         version_info = {"version": "0.0.0"}
         c = Connection(LocalConfig.__update_URL__, LocalConfig.UPDATE_TIMEOUT)
         response = c.connect()
-        if response is not None:
-            try:
-                content = response.read().strip()
-                logging.info("Connected to www.sasview.org. Latest version: %s"
-                             % (content))
-                version_info = json.loads(content)
-            except ValueError, ex:
-                logging.info("Failed to connect to www.sasview.org:", ex)
-        self.processVersion(version_info)
+        if response is None:
+            return
+        try:
+            content = response.read().strip()
+            logging.info("Connected to www.sasview.org. Latest version: %s"
+                            % (content))
+            version_info = json.loads(content)
+            self.processVersion(version_info)
+        except ValueError, ex:
+            logging.info("Failed to connect to www.sasview.org:", ex)
 
     def processVersion(self, version_info):
         """
@@ -310,7 +311,6 @@ class GuiManager(object):
             if version == "0.0.0":
                 msg = "Could not connect to the application server."
                 msg += " Please try again later."
-                #self.SetStatusText(msg)
                 self.communicate.statusBarUpdateSignal.emit(msg)
 
             elif cmp(version, LocalConfig.__version__) > 0:
