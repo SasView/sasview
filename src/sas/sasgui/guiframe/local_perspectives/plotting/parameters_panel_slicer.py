@@ -8,7 +8,6 @@ from sas.sasgui.guiframe.utils import format_number
 from sas.sasgui.guiframe.events import EVT_SLICER
 from sas.sasgui.guiframe.events import SlicerParameterEvent, SlicerEvent
 from Plotter2D import ModelPanel2D
-from sas.sascalc.dataloader.data_info import Data1D, Data2D
 apply_params, EVT_APPLY_PARAMS = wx.lib.newevent.NewEvent()
 auto_save, EVT_AUTO_SAVE = wx.lib.newevent.NewEvent()
 
@@ -27,6 +26,7 @@ class SlicerParameterPanel(wx.Dialog):
         """
         wx.Dialog.__init__(self, parent, *args, **kwargs)
         self.params = {}
+        self.iter = 0
         self.parent = parent
         self.type = None
         self.listeners = []
@@ -363,29 +363,45 @@ class SlicerParameterPanel(wx.Dialog):
         Automatically save the sliced data to file.
         :param evt: Event that triggered the call to the method
         """
+        if self.iter == 0:
+            # Forces the event to be processed after dynamically generated evts
+            clone = evt.Clone()
+            wx.PostEvent(self, clone)
+            self.iter += 1
+            return
         if evt is None:
             return
+
+        # Start definitions
         writer = Reader()
         main_window = self.parent.parent
         data_dic = {}
         append = evt.append_to_name
         names = []
+        file_list = []
         convert_dict = {"SectorInteractor": "SectorQ",
                         "AnnulusInteractor": "AnnulusPhi",
                         "BoxInteractorX": "SlabX",
                         "BoxInteractorY": "SlabY"}
+        # Get list of 2D data names for saving
         for f_name in evt.file_list:
             names.append(f_name.data2D.label)
+        # Find the correct plots to save
         for key, plot in main_window.plot_panels.iteritems():
             if not hasattr(plot, "data2D"):
                 for item in plot.plots:
                     base = item.replace(convert_dict[evt.type], "")
                     if base in names:
                         data_dic[item] = plot.plots[item]
+        # Save files as XML
         for item, data1d in data_dic.iteritems():
             base = ('.').join(item.split('.')[:-1])
             save_to = evt.path + "\\" + base + append + ".xml"
             writer.write(save_to, data1d)
+            file_list.append(save_to)
+        # Load files into GUI
+        for item in file_list:
+            self.parent.parent.load_data(item)
 
     def on_auto_save_checked(self, evt=None):
         """
