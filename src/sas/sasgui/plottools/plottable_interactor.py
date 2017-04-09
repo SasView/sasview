@@ -49,18 +49,18 @@ class PointInteractor(_BaseInteractor):
         if self._symbol(symbol) == 'step':
             l_width = markersize * 0.4
             return self.step(x=x, y=y, color=color, label=label, width=l_width)
-        if not self.marker == None:
+        if self.marker is not None:
             self.base.connect.clear([self.marker])
         self.color = self._color(color)
-        if self.markersize != None:
+        if self.markersize is not None:
             markersize = self.markersize
         # Convert tuple (lo,hi) to array [(x-lo),(hi-x)]
-        if dx != None and type(dx) == type(()):
+        if dx is not None and type(dx) == type(()):
             dx = nx.vstack((x - dx[0], dx[1] - x)).transpose()
-        if dy != None and type(dy) == type(()):
+        if dy is not None and type(dy) == type(()):
             dy = nx.vstack((y - dy[0], dy[1] - y)).transpose()
 
-        if dx == None and dy == None:
+        if dx is None and dy is None:
             # zorder = 1
             self.marker = self.axes.plot(x, y, color=self.color,
                                          marker=self._symbol(symbol),
@@ -99,7 +99,7 @@ class PointInteractor(_BaseInteractor):
               label=None, width=2.0):
         """
         """
-        if not self.marker == None:
+        if self.marker is not None:
             self.base.connect.clear([self.marker])
         self.color = self._color(color)
         self.marker = self.axes.plot(x, y, color=self.color, lw=width,
@@ -114,7 +114,7 @@ class PointInteractor(_BaseInteractor):
               label=None, width=2.0):
         """
         """
-        if not self.marker == None:
+        if self.marker is not None:
             self.base.connect.clear([self.marker])
         self.color = self._color(color)
         if min(y) < 0:
@@ -132,7 +132,7 @@ class PointInteractor(_BaseInteractor):
              label=None, width=2.0):
         """
         """
-        if not self.marker == None:
+        if self.marker is not None:
             self.base.connect.clear([self.marker])
         self.color = self._color(color)
         self.marker = self.axes.step(x, y, color=self.color,

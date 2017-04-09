@@ -56,7 +56,7 @@ print("Common Packages")
 for package_name, test_vals in common_required_package_list.items():
     try:
         i = __import__(test_vals['import_name'], fromlist=[''])
-        if test_vals['test'] == None:
+        if test_vals['test'] is None:
             print("%s Installed (Unknown version)" % package_name)
         elif package_name == 'lxml':
             verstring = str(getattr(i, 'LXML_VERSION'))

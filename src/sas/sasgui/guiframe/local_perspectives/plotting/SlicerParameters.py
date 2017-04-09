@@ -45,7 +45,7 @@ class SlicerParameterPanel(wx.Dialog):
         :param event: EVT_SLICER event
         """
         event.Skip()
-        if event.obj_class == None:
+        if event.obj_class is None:
             self.set_slicer(None, None)
         else:
             self.set_slicer(event.type, event.params)
@@ -56,7 +56,7 @@ class SlicerParameterPanel(wx.Dialog):
         """
         self.bck.Clear(True)
         self.type = type
-        if type == None:
+        if type is None:
             label = "Right-click on 2D plot for slicer options"
             title = wx.StaticText(self, -1, label, style=wx.ALIGN_LEFT)
             self.bck.Add(title, (0, 0), (1, 2),

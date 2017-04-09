@@ -69,7 +69,7 @@ class ImageView:
                                           right=0.95, top=0.95)
                 plot_frame.SetTitle('Picture -- %s --' % basename)
                 plot_frame.Show(True)
-                if parent != None:
+                if parent is not None:
                     parent.put_icon(plot_frame)
             except:
                 err_msg += "Failed to load '%s'.\n" % basename
@@ -84,7 +84,7 @@ class ImageView:
         Open a file dialog to allow loading a file
         """
         path = None
-        if location == None:
+        if location is None:
             location = os.getcwd()
         dlg = wx.FileDialog(self.parent, "Image Viewer: Choose a image file",
                             location, "", "", style=wx.FD_OPEN | wx.FD_MULTIPLE)
@@ -402,7 +402,7 @@ class SetDialog(wx.Dialog):
         output.meta_data['loader'] = self.title.split('.')[-1] + "Reader"
         output.is_data = True
         output = reader2D_converter(output)
-        if self.base != None:
+        if self.base is not None:
             data = self.base.create_gui_data(output, self.title)
             self.base.add_data({data.id:data})
 
