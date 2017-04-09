@@ -17,15 +17,10 @@ import logging
 import logging.config
 import traceback
 
-logger = logging.getLogger(__name__)
-if not logger.root.handlers:
-    # Scripts running under py2exe do not have a __file__ global. Detect this and use sys.argv[0] instead.
-    try:
-        LOGGER_CONFIG_FILE = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.ini')
-    except NameError:  # We are the main py2exe script, not a module
-        LOGGER_CONFIG_FILE = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), 'logging.ini')
-    logging.config.fileConfig(LOGGER_CONFIG_FILE, disable_existing_loggers=False)
-    logging.captureWarnings(True)
+from logger_config import SetupLogger
+
+l = SetupLogger(__name__)
+logger = l.config_production()
 
 # Log the start of the session
 logger.info(" --- SasView session started ---")

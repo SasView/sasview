@@ -13,29 +13,20 @@ Without arguments run.py runs sasview.  With arguments, run.py will run
 the given module or script.
 """
 
-import os
-import sys
 import imp
 import logging
 import logging.config
-
+import os
+import sys
 from contextlib import contextmanager
-from os.path import abspath, dirname, join as joinpath
+from os.path import join as joinpath
+from os.path import abspath, dirname
 
+from sasview.logger_config import SetupLogger
 
-LOGGER_CONFIG_FILE = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'sasview/logging.ini')
-logging.config.fileConfig(LOGGER_CONFIG_FILE, disable_existing_loggers=True)
-logger = logging.getLogger(__name__)
+l = SetupLogger(__name__)
+logger = l.config_development()
 
-def update_all_logs_to_debug(logger):
-    '''
-    This updates all loggers and respective handlers to DEBUG
-    '''
-    for handler in logger.handlers or logger.parent.handlers:
-        handler.setLevel(logging.DEBUG)
-    for name,_ in logging.Logger.manager.loggerDict.items():
-        logging.getLogger(name).setLevel(logging.DEBUG)
-        
 def addpath(path):
     """
     Add a directory to the python path environment, and to the PYTHONPATH
@@ -153,8 +144,8 @@ def prepare():
     #print "\n".join(sys.path)
 
 if __name__ == "__main__":
-    update_all_logs_to_debug(logger)
+    logger.debug("Starting SASVIEW in debug mode.")
     prepare()
     from sas.sasview.sasview import run
     run()
-    
+    logger.debug("Ending SASVIEW in debug mode.")
