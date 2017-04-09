@@ -23,6 +23,7 @@ from os.path import join as joinpath
 from os.path import abspath, dirname
 
 try:
+    # running from a local computer as developer
     from sasview.logger_config import SetupLogger
 except ImportError:
     from logger_config import SetupLogger
