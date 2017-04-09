@@ -44,7 +44,7 @@ class sesans_reader(unittest.TestCase):
 
     def test_sesans_no_data(self):
         """
-            Test .SES loading on a TOF dataset
+            Confirm that sesans files with no actual data won't load.
         """
         self.assertRaises(
             RuntimeError,
