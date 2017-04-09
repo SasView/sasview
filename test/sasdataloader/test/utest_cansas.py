@@ -102,7 +102,7 @@ class cansas_reader_xml(unittest.TestCase):
         self.assertTrue(data.detector[0].distance == 575.0)
         self.assertAlmostEqual(data.detector[1].distance, 4145.02)
         self.assertTrue(data.process[0].name == "Mantid generated CanSAS1D XML")
-        self.assertTrue(data.meta_data["xmlpreprocess"] != None)
+        self.assertTrue(data.meta_data["xmlpreprocess"] is not None)
 
 
     def _check_data_1_1(self, data):

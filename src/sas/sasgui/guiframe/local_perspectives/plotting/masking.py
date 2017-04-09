@@ -99,7 +99,7 @@ class MaskPanel(wx.Dialog):
         kwds["size"] = wx.Size(_STATICBOX_WIDTH * 0.8, PANEL_SIZE)
         wx.Dialog.__init__(self, parent, id=id, *args, **kwds)
 
-        if data != None:
+        if data is not None:
             # Font size
             kwds = []
             self.SetWindowVariant(variant=FONT_VARIANT)
@@ -234,7 +234,7 @@ class MaskPanel(wx.Dialog):
         # get ready for next evt
         event.Skip()
         # from boxMask import BoxMask
-        if event != None:
+        if event is not None:
             self._on_clear_slicer(event)
         self.slicer_z += 1
         self.slicer = slicer(self, self.subplot,
@@ -248,7 +248,7 @@ class MaskPanel(wx.Dialog):
         """
         Add new mask to old mask
         """
-        if not self.slicer == None:
+        if self.slicer is not None:
             data = Data2D()
             data = self.data
             self.slicer_mask = self.slicer.update()
@@ -268,7 +268,7 @@ class MaskPanel(wx.Dialog):
         """
         Erase new mask from old mask
         """
-        if not self.slicer == None:
+        if self.slicer is not None:
             self.slicer_mask = self.slicer.update()
             mask = self.data.mask
             mask[self.slicer_mask == False] = True
@@ -306,7 +306,7 @@ class MaskPanel(wx.Dialog):
         """
         Clear the slicer on the plot
         """
-        if not self.slicer == None:
+        if self.slicer is not None:
             self.slicer.clear()
             self.subplot.figure.canvas.draw()
             self.slicer = None
@@ -335,7 +335,7 @@ class MaskPanel(wx.Dialog):
         Respond to changes in masking
         """
         # the case of liitle numbers of True points
-        if len(mask[mask]) < 10 and self.data != None:
+        if len(mask[mask]) < 10 and self.data is not None:
             self.ShowMessage()
             mask = copy.deepcopy(self.mask)
             self.data.mask = mask
@@ -354,7 +354,7 @@ class MaskPanel(wx.Dialog):
         # TODO: refactor this horrible logic
         temp_data.data[mask == False] = temp_mask[mask == False]
         self.plotpanel.clear()
-        if self.slicer != None:
+        if self.slicer is not None:
             self.slicer.clear()
             self.slicer = None
         # Post slicer None event
@@ -459,7 +459,7 @@ class FloatPanel(wx.Dialog):
         kwds["size"] = wx.Size(PANEL_SIZE * 1.5, PANEL_SIZE * 1.5)
         wx.Dialog.__init__(self, parent, id=id, *args, **kwds)
 
-        if data != None:
+        if data is not None:
             # Font size
             kwds = []
             self.SetWindowVariant(variant=FONT_VARIANT)
@@ -709,7 +709,7 @@ class Maskplotpanel(PlotPanel):
         """
         Status msg
         """
-        if self.parent.parent.parent != None:
+        if self.parent.parent.parent is not None:
             wx.PostEvent(self.parent.parent.parent,
                          StatusEvent(status=msg, type=type))
 
