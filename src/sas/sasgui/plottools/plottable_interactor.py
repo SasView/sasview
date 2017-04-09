@@ -99,7 +99,7 @@ class PointInteractor(_BaseInteractor):
               label=None, width=2.0):
         """
         """
-        if not self.marker is None:
+        if self.marker is not None:
             self.base.connect.clear([self.marker])
         self.color = self._color(color)
         self.marker = self.axes.plot(x, y, color=self.color, lw=width,
@@ -114,7 +114,7 @@ class PointInteractor(_BaseInteractor):
               label=None, width=2.0):
         """
         """
-        if not self.marker is None:
+        if self.marker is not None:
             self.base.connect.clear([self.marker])
         self.color = self._color(color)
         if min(y) < 0:
@@ -132,7 +132,7 @@ class PointInteractor(_BaseInteractor):
              label=None, width=2.0):
         """
         """
-        if not self.marker is None:
+        if self.marker is not None:
             self.base.connect.clear([self.marker])
         self.color = self._color(color)
         self.marker = self.axes.step(x, y, color=self.color,

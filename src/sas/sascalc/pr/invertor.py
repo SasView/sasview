@@ -657,7 +657,7 @@ class Invertor(Cinvertor):
         else:
             file.write("#has_bck=0\n")
         file.write("#alpha_estimate=%g\n" % self.suggested_alpha)
-        if not self.out is None:
+        if self.out is not None:
             if len(self.out) == len(self.cov):
                 for i in range(len(self.out)):
                     file.write("#C_%i=%s+-%s\n" % (i, str(self.out[i]),
