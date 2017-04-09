@@ -91,6 +91,13 @@ class Reader:
             self._insist_header(headers, "Wavelength")
 
             data = np.loadtxt(input_f)
+
+            if data.shape[1] != len(headers):
+                raise RuntimeError(
+                    "File has {} headers, but {} columns".format(
+                        len(headers),
+                        data.shape[1]))
+
             if data.size < 1:
                 raise RuntimeError("{} is empty".format(path))
             x = data[:, headers.index("SpinEchoLength")]
