@@ -69,5 +69,13 @@ class sesans_reader(unittest.TestCase):
             self.loader,
             "sesans_examples/no_version.ses")
 
+    def test_sesans_future_version(self):
+        """
+            Confirm that sesans files that, according to semantic version, are from a future, backwards-incompatible version of the SES file format throw an exception.
+        """
+        self.assertRaises(
+            RuntimeError,
+            self.loader,
+            "sesans_examples/next_gen.ses")
 if __name__ == "__main__":
     unittest.main()

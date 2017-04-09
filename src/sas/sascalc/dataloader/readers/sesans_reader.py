@@ -68,6 +68,8 @@ class Reader:
 
             if "FileFormatVersion" not in self.params:
                 raise RuntimeError("SES file missing FileFormatVersion")
+            if float(self.params["FileFormatVersion"]) >= 2.0:
+                raise RuntimeError("SASView only supports SES version 1")
 
             if "SpinEchoLength_unit" not in self.params:
                 raise RuntimeError("SpinEchoLength has no units")
