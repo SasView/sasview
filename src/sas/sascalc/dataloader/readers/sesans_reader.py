@@ -50,9 +50,10 @@ class Reader:
             basename = os.path.basename(path)
             _, extension = os.path.splitext(basename)
             if not (self.allow_all or extension.lower() in self.ext):
-                raise RuntimeError("{} has an unrecognized file extension".format(path))
+                raise RuntimeError(
+                    "{} has an unrecognized file extension".format(path))
         else:
-            raise RunetimeError("{} is not a file".format(path))
+            raise RuntimeError("{} is not a file".format(path))
         with open(path, 'r') as input_f:
             # Read in binary mode since GRASP frequently has no-ascii
             # characters that brakes the open operation
@@ -69,6 +70,13 @@ class Reader:
                 raise RuntimeError("SpinEchoLength has no units")
             if "Wavelength_unit" not in self.params:
                 raise RuntimeError("Wavelength has no units")
+            if params["SpinEchoLength_unit"] != params["Wavelength_unit"]:
+                raise RuntimeError("The spin echo data has rudely used "
+                                   "different units for the spin echo length "
+                                   "and the wavelength.  While sasview could "
+                                   "handle this instance, it is a violation "
+                                   "of the file format and will not be "
+                                   "handled by other software.")
 
             headers = input_f.readline().split()
 

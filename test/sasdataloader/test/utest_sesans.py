@@ -51,5 +51,14 @@ class sesans_reader(unittest.TestCase):
             self.loader,
             "sesans_examples/sesans_no_data.ses")
 
+    def test_sesans_no_spin_echo_unit(self):
+        """
+            Confirm that sesans files with no units from the spin echo length raise an appropriate error
+        """
+        self.assertRaises(
+            RuntimeError,
+            self.loader,
+            "sesans_examples/no_spin_echo_unit.ses")
+
 if __name__ == "__main__":
     unittest.main()
