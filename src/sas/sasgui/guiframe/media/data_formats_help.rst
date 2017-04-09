@@ -85,7 +85,7 @@ The file format has a list of name-value pairs at the top of the file which deta
 Following the header is a 8 (only the first 4 are really needed) column list of instrument experimental variables:
 
 - Spin echo length (z, in Angstroms)
-- depolarization (:math:`log(P/P_0)/(lambda^2 * thickness)`, in Angstrom^-1 cm^-1)
+- depolarization (:math:`log(P/P_0)/(lambda^2 * thickness)`, in Angstrom :sup:`-1` cm :sup:`-1`\ )
 - depolarization error in the same unit) (measurement error)
 - Spin echo length error (:math:`\Delta`\ z, in Angstroms) (experimental resolution)
 - Neutron wavelength (:math:`\lambda`, in Angstroms)

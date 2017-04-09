@@ -291,6 +291,8 @@ class Reader(XMLreader):
                     pass
                 elif tagname == 'Sesans':
                     self.current_datainfo.isSesans = bool(data_point)
+                elif tagname == 'yacceptance':
+                    self.current_datainfo.sample.yacceptance = (data_point, unit)
                 elif tagname == 'zacceptance':
                     self.current_datainfo.sample.zacceptance = (data_point, unit)
 
@@ -804,7 +806,7 @@ class Reader(XMLreader):
 
         :param data1d: presumably a Data1D object
         """
-        if self.current_dataset == None:
+        if self.current_dataset is None:
             x_vals = np.empty(0)
             y_vals = np.empty(0)
             dx_vals = np.empty(0)
@@ -892,7 +894,7 @@ class Reader(XMLreader):
         doc, _ = self._to_xml_doc(datainfo)
         # Write the file
         file_ref = open(filename, 'w')
-        if self.encoding == None:
+        if self.encoding is None:
             self.encoding = "UTF-8"
         doc.write(file_ref, encoding=self.encoding,
                   pretty_print=True, xml_declaration=True)
@@ -1012,7 +1014,7 @@ class Reader(XMLreader):
         :param datainfo: The Data1D object the information is coming from
         :param entry_node: lxml node ElementTree object to be appended to
         """
-        if datainfo.run == None or datainfo.run == []:
+        if datainfo.run is None or datainfo.run == []:
             datainfo.run.append(RUN_NAME_DEFAULT)
             datainfo.run_name[RUN_NAME_DEFAULT] = RUN_NAME_DEFAULT
         for item in datainfo.run:
@@ -1056,6 +1058,8 @@ class Reader(XMLreader):
             sesans = self.create_element("Sesans")
             sesans.text = str(datainfo.isSesans)
             node.append(sesans)
+            self.write_node(node, "yacceptance", datainfo.sample.yacceptance[0],
+                             {'unit': datainfo.sample.yacceptance[1]})
             self.write_node(node, "zacceptance", datainfo.sample.zacceptance[0],
                              {'unit': datainfo.sample.zacceptance[1]})
 
@@ -1128,7 +1132,7 @@ class Reader(XMLreader):
                                 {'unit': spectrum.wavelength_unit})
                 self.write_node(point, "T", spectrum.transmission[i],
                                 {'unit': spectrum.transmission_unit})
-                if spectrum.transmission_deviation != None \
+                if spectrum.transmission_deviation is not None \
                 and len(spectrum.transmission_deviation) >= i:
                     self.write_node(point, "Tdev",
                                     spectrum.transmission_deviation[i],
@@ -1208,7 +1212,7 @@ class Reader(XMLreader):
             self.write_attribute(source, "name",
                                  str(datainfo.source.name))
         self.append(source, instr)
-        if datainfo.source.radiation == None or datainfo.source.radiation == '':
+        if datainfo.source.radiation is None or datainfo.source.radiation == '':
             datainfo.source.radiation = "neutron"
         self.write_node(source, "radiation", datainfo.source.radiation)
 
@@ -1249,7 +1253,7 @@ class Reader(XMLreader):
         :param datainfo: The Data1D object the information is coming from
         :param instr: lxml node ElementTree object to be appended to
         """
-        if datainfo.collimation == [] or datainfo.collimation == None:
+        if datainfo.collimation == [] or datainfo.collimation is None:
             coll = Collimation()
             datainfo.collimation.append(coll)
         for item in datainfo.collimation:
@@ -1294,7 +1298,7 @@ class Reader(XMLreader):
         :param datainfo: The Data1D object the information is coming from
         :param inst: lxml instrument node to be appended to
         """
-        if datainfo.detector == None or datainfo.detector == []:
+        if datainfo.detector is None or datainfo.detector == []:
             det = Detector()
             det.name = ""
             datainfo.detector.append(det)
@@ -1459,7 +1463,7 @@ class Reader(XMLreader):
                 toks = variable.split('.')
                 local_unit = None
                 exec "local_unit = storage.%s_unit" % toks[0]
-                if local_unit != None and units.lower() != local_unit.lower():
+                if local_unit is not None and units.lower() != local_unit.lower():
                     if HAS_CONVERTER == True:
                         try:
                             conv = Converter(units)

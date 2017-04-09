@@ -527,7 +527,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
     """
         if not self.batch_on:
             _PageAnchor = "#simultaneous-fit-mode"
-        else: 
+        else:
             _PageAnchor = "#combined-batch-fit-mode"
         _TreeLocation = "user/sasgui/perspectives/fitting/fitting_help.html"
         _doc_viewer = DocumentationWindow(self, self.ID_DOC, _TreeLocation,

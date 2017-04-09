@@ -127,12 +127,12 @@ class Reader:
                         # If a 3rd row is present, consider it dy
                         if new_lentoks > 2:
                             _dy = float(toks[2])
-                        has_error_dy = False if _dy == None else True
+                        has_error_dy = False if _dy is None else True
 
                         # If a 4th row is present, consider it dx
                         if new_lentoks > 3:
                             _dx = float(toks[3])
-                        has_error_dx = False if _dx == None else True
+                        has_error_dx = False if _dx is None else True
 
                         # Delete the previously stored lines of data candidates if
                         # the list is not data
