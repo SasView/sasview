@@ -3,19 +3,20 @@
 """
 
 import unittest
-from sas.sascalc.dataloader.loader import Loader
+from sas.sascalc.dataloader.readers.sesans_reader import Reader
 
 
 class sesans_reader(unittest.TestCase):
 
     def setUp(self):
-        self.loader = Loader()
+        reader = Reader()
+        self.loader = reader.read
 
     def test_sesans_load(self):
         """
             Test .SES file loading
         """
-        f = self.loader.load("sesans_examples/sphere2micron.ses")
+        f = self.loader("sesans_examples/sphere2micron.ses")
         # self.assertEqual(f, 5)
         self.assertEqual(len(f.x), 40)
         self.assertEqual(f.x[0], 391.56)
@@ -32,7 +33,7 @@ class sesans_reader(unittest.TestCase):
         """
             Test .SES loading on a TOF dataset
         """
-        f = self.loader.load("sesans_examples/sphere_isis.ses")
+        f = self.loader("sesans_examples/sphere_isis.ses")
         self.assertEqual(len(f.x), 57)
         self.assertEqual(f.x[-1], 19303.4)
         self.assertEqual(f.source.wavelength[-1], 13.893668)
@@ -45,14 +46,10 @@ class sesans_reader(unittest.TestCase):
         """
             Test .SES loading on a TOF dataset
         """
-        f = self.loader.load("sesans_examples/sesans_no_data.ses")
-        self.assertEqual(len(f.x), 57)
-        self.assertEqual(f.x[-1], 19303.4)
-        self.assertEqual(f.source.wavelength[-1], 13.893668)
-        self.assertEqual(f.source.wavelength[0], 1.612452)
-        self.assertEqual(f.sample.yacceptance, (0.09, "radians"))
-        self.assertEqual(f.sample.zacceptance, (0.09, "radians"))
-        self.assertEqual(f.sample.thickness, 0.2)
+        self.assertRaises(
+            RuntimeError,
+            self.loader,
+            "sesans_examples/sesans_no_data.ses")
 
 if __name__ == "__main__":
     unittest.main()
