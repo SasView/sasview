@@ -16,7 +16,7 @@ class CansasWriter(CansasReader):
         doc, _ = self._to_xml_doc(frame_data, sasentry_attrs)
         # Write the file
         file_ref = open(filename, 'w')
-        if self.encoding == None:
+        if self.encoding is None:
             self.encoding = "UTF-8"
         doc.write(file_ref, encoding=self.encoding,
                   pretty_print=True, xml_declaration=True)

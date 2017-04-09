@@ -293,12 +293,12 @@ class FitData2D(Data2D):
         y_max = max(math.fabs(sas_data2d.ymin), math.fabs(sas_data2d.ymax))
         
         ## fitting range
-        if qmin == None:
+        if qmin is None:
             self.qmin = 1e-16
-        if qmax == None:
+        if qmax is None:
             self.qmax = math.sqrt(x_max * x_max + y_max * y_max)
         ## new error image for fitting purpose
-        if self.err_data == None or self.err_data == []:
+        if self.err_data is None or self.err_data == []:
             self.res_err_data = np.ones(len(self.data))
         else:
             self.res_err_data = copy.deepcopy(self.err_data)
@@ -317,7 +317,7 @@ class FitData2D(Data2D):
         """
             Set smearer
         """
-        if smearer == None:
+        if smearer is None:
             return
         self.smearer = smearer
         self.smearer.set_index(self.idx)
@@ -614,7 +614,7 @@ class FResult(object):
     def __str__(self):
         """
         """
-        if self.pvec == None and self.model is None and self.param_list is None:
+        if self.pvec is None and self.model is None and self.param_list is None:
             return "No results"
 
         sasmodel = self.model.model

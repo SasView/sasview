@@ -84,7 +84,7 @@ class ImageView:
         Open a file dialog to allow loading a file
         """
         path = None
-        if location == None:
+        if location is None:
             location = os.getcwd()
         dlg = wx.FileDialog(self.parent, "Image Viewer: Choose a image file",
                             location, "", "", style=wx.FD_OPEN | wx.FD_MULTIPLE)

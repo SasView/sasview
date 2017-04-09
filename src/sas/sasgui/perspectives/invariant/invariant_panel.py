@@ -239,9 +239,9 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         set state when loading it from a .inv/.svs file
         """
 
-        if state == None and data == None:
+        if state is None and data is None:
             self.state = IState()
-        elif state == None or data == None:
+        elif state is None or data is None:
             return
         else:
             new_state = copy.deepcopy(state)
@@ -603,7 +603,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         compute invariant
         """
-        if self._data == None:
+        if self._data is None:
             msg = "\n\nData must be loaded first in order"
             msg += " to perform a compution..."
             wx.PostEvent(self.parent, StatusEvent(status=msg))
@@ -791,7 +791,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
 
         : param state_num: the given state number
         """
-        if state_num == None:
+        if state_num is None:
             return
 
         backup_state_list = copy.deepcopy(self.state.state_list)
@@ -923,7 +923,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
 
         :param event: rb/cb event
         """
-        if event == None:
+        if event is None:
             return
         obj = event.GetEventObject()
         name = str(obj.GetName())
@@ -933,7 +933,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                    ['fit_enable_high', 'fix_enable_high']]
 
         try:
-            if value == None or value.lstrip().rstrip() == '':
+            if value is None or value.lstrip().rstrip() == '':
                 value = 'None'
             setattr(self.state, name, str(value))
             self.state.saved_state[name] = str(value)
@@ -1012,7 +1012,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         Reset the state_list just before data was loading:
         Used in 'set_current_data()'
         """
-        #if data == None: return
+        #if data is None: return
         #temp_state = self.state.clone_state()
         #copy.deepcopy(self.state.saved_state)
         # Clear the list
@@ -1048,7 +1048,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         :param event: txtctr event ; assumes not None
 
         """
-        if self._data == None:
+        if self._data is None:
             return
         # check if this event is from do/undo button
         if self.state.saved_state['is_time_machine'] or self.new_state:
@@ -1071,7 +1071,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
 
         # try to add new state of the text changes in the state_list
         try:
-            if value.strip() == None:
+            if value.strip() is None:
                 value = ''
             setattr(self.state, name, str(value))
             self.state.saved_state[name] = str(value)
@@ -1139,9 +1139,9 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         Save the panel state in memory and add the list on
         the popup menu on bookmark context menu event
         """
-        if self._data == None:
+        if self._data is None:
             return
-        if event == None:
+        if event is None:
             return
         self.bookmark_num += 1
         # date and time of the event
@@ -1205,7 +1205,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
 
         : event: popUpMenu event
         """
-        if event == None:
+        if event is None:
             return
         # get the object
         menu = event.GetEventObject()
@@ -1245,7 +1245,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         path = None
         if self.parent != None:
             self._default_save_location = self.parent.get_save_location()
-        if self._default_save_location == None:
+        if self._default_save_location is None:
             self._default_save_location = os.getcwd()
         dlg = wx.FileDialog(self, "Choose a file",
                             self._default_save_location, \

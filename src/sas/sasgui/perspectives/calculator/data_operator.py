@@ -197,14 +197,14 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         self.send_warnings('')
         msg = ''
-        if name == None:
+        if name is None:
             text = self.data_namectr.GetValue().strip()
         else:
             text = name
         state_list = self.get_datalist().values()
         name_list = []
         for state in state_list:
-            if state.data == None:
+            if state.data is None:
                 theory_list = state.get_theory()
                 theory, _ = theory_list.values()[0]
                 d_name = str(theory.name)
@@ -277,7 +277,7 @@ class DataOperPanel(wx.ScrolledWindow):
         item = event.GetEventObject()
         pos = item.GetCurrentSelection()
         data = item.GetClientData(pos)
-        if data == None:
+        if data is None:
             content = "?"
             self.put_text_pic(self.data1_pic, content)
         else:
@@ -312,7 +312,7 @@ class DataOperPanel(wx.ScrolledWindow):
         data = item.GetClientData(pos)
         content = "?"
         if not (self.numberctr.IsShown() and self.numberctr.IsEnabled()):
-            if data == None:
+            if data is None:
                 content = "?"
                 self.put_text_pic(self.data2_pic, content)
             else:
@@ -354,13 +354,13 @@ class DataOperPanel(wx.ScrolledWindow):
         flag = False
         pos1 = self.data1_cbox.GetCurrentSelection()
         data1 = self.data1_cbox.GetClientData(pos1)
-        if data1 == None:
+        if data1 is None:
             self.output = None
             return flag
         pos2 = self.data2_cbox.GetCurrentSelection()
         data2 = self.data2_cbox.GetClientData(pos2)
 
-        if data2 == None:
+        if data2 is None:
             self.output = None
             return flag
         if self.numberctr.IsShown():
@@ -421,7 +421,7 @@ class DataOperPanel(wx.ScrolledWindow):
         Draw output data(temp)
         """
         out = self.out_pic
-        if output == None:
+        if output is None:
             content = "?"
             self.put_text_pic(out, content)
         else:
@@ -591,7 +591,7 @@ class DataOperPanel(wx.ScrolledWindow):
         name = self.data_namectr.GetValue().strip()
         name_list = []
         for state in state_list:
-            if state.data == None:
+            if state.data is None:
                 theory_list = state.get_theory()
                 theory, _ = theory_list.values()[0]
                 d_name = str(theory.name)
@@ -608,7 +608,7 @@ class DataOperPanel(wx.ScrolledWindow):
             msg = "Please type the output data name first...   "
             wx.MessageBox(msg, 'Error')
             return
-        if self.output == None:
+        if self.output is None:
             msg = "No Output Data has been generated...   "
             wx.MessageBox(msg, 'Error')
             return

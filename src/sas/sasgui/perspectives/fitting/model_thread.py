@@ -52,9 +52,9 @@ class Calc2D(CalcThread):
         """
         self.starttime = time.time()
         # Determine appropriate q range
-        if self.qmin == None:
+        if self.qmin is None:
             self.qmin = 0
-        if self.qmax == None:
+        if self.qmax is None:
             if self.data != None:
                 newx = math.pow(max(math.fabs(self.data.xmax),
                                    math.fabs(self.data.xmin)), 2)

@@ -179,7 +179,7 @@ class MultiplicationModel(BaseComponent):
         value = self.params['volfraction']
         if value != None:
             factor = self.p_model.calculate_VR()
-            if factor == None or factor == NotImplemented or factor == 0.0:
+            if factor is None or factor == NotImplemented or factor == 0.0:
                 val = value
             else:
                 val = value / factor

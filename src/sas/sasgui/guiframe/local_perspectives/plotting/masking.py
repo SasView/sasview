@@ -248,7 +248,7 @@ class MaskPanel(wx.Dialog):
         """
         Add new mask to old mask
         """
-        if not self.slicer == None:
+        if not self.slicer is None:
             data = Data2D()
             data = self.data
             self.slicer_mask = self.slicer.update()
@@ -268,7 +268,7 @@ class MaskPanel(wx.Dialog):
         """
         Erase new mask from old mask
         """
-        if not self.slicer == None:
+        if not self.slicer is None:
             self.slicer_mask = self.slicer.update()
             mask = self.data.mask
             mask[self.slicer_mask == False] = True
@@ -306,7 +306,7 @@ class MaskPanel(wx.Dialog):
         """
         Clear the slicer on the plot
         """
-        if not self.slicer == None:
+        if not self.slicer is None:
             self.slicer.clear()
             self.subplot.figure.canvas.draw()
             self.slicer = None

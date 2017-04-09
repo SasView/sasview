@@ -838,7 +838,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         Draw lines in image if applicable
         : Param image: pylab object
         """
-        if image == None:
+        if image is None:
             return
         if color == 'g':
             # Get the params from resolution
@@ -972,7 +972,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         # check length
         if len(qx) != len(qy):
             return None
-        if qx == None or qy == None:
+        if qx is None or qy is None:
             return None
         return qx, qy
 
@@ -1260,7 +1260,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         selection = self.spectrum_cb.GetValue()
         if selection == 'Add new':
             path = self._selectDlg()
-            if path == None:
+            if path is None:
                 self.spectrum_cb.SetValue('Flat')
                 self.resolution.set_spectrum(self.spectrum_dic['Flat'])
                 msg = "No file has been chosen."
@@ -1300,7 +1300,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
 
         """
         try:
-            if path == None:
+            if path is None:
                 wx.PostEvent(self.parent.parent, StatusEvent(status=\
                             " Selected Distribution was not loaded: %s" % path))
                 return None, None

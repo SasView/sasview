@@ -138,7 +138,7 @@ class BoxInteractor(_BaseInteractor):
         :param direction: the direction of averaging
 
         """
-        if self.direction == None:
+        if self.direction is None:
             self.direction = direction
 
         x_min = -1 * math.fabs(self.vertical_lines.x)
@@ -148,8 +148,8 @@ class BoxInteractor(_BaseInteractor):
 
         if nbins != None:
             self.nbins = nbins
-        if self.averager == None:
-            if new_slab == None:
+        if self.averager is None:
+            if new_slab is None:
                 msg = "post data:cannot average , averager is empty"
                 raise ValueError, msg
             self.averager = new_slab

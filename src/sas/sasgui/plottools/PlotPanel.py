@@ -417,7 +417,7 @@ class PlotPanel(wx.Panel):
         On legend in motion
         """
         ax = event.inaxes
-        if ax == None:
+        if ax is None:
             return
         # Event occurred inside a plotting area
         lo_x, hi_x = ax.get_xlim()
@@ -478,7 +478,7 @@ class PlotPanel(wx.Panel):
             if ax != None:  # the dragging is perform inside the figure
                 self.xFinal, self.yFinal = event.xdata, event.ydata
                 # Check whether this is the first point
-                if self.xInit == None:
+                if self.xInit is None:
                     self.xInit = self.xFinal
                     self.yInit = self.yFinal
 
@@ -1366,7 +1366,7 @@ class PlotPanel(wx.Panel):
             dx = nx.vstack((x - dx[0], dx[1] - x)).transpose()
         if dy != None and type(dy) == type(()):
             dy = nx.vstack((y - dy[0], dy[1] - y)).transpose()
-        if dx == None and dy == None:
+        if dx is None and dy is None:
             self.subplot.plot(x, y, color=self._color(color),
                               marker=self._symbol(symbol),
                               markersize=marker_size,
@@ -1442,7 +1442,7 @@ class PlotPanel(wx.Panel):
         self.zmax_2D = zmax
         c = self._color(color)
         # If we don't have any data, skip.
-        if self.data == None:
+        if self.data is None:
             return
         if self.data.ndim == 1:
             output = self._build_matrix()
@@ -1518,7 +1518,7 @@ class PlotPanel(wx.Panel):
                                  linewidth=0, antialiased=False)
             self.subplot.set_axis_off()
 
-        if cbax == None:
+        if cbax is None:
             ax.set_frame_on(False)
             cb = self.subplot.figure.colorbar(im, shrink=0.8, aspect=20)
         else:
@@ -1540,7 +1540,7 @@ class PlotPanel(wx.Panel):
 
         """
         # No qx or qy given in a vector format
-        if self.qx_data == None or self.qy_data == None \
+        if self.qx_data is None or self.qy_data is None \
                 or self.qx_data.ndim != 1 or self.qy_data.ndim != 1:
             # do we need deepcopy here?
             return copy.deepcopy(self.data)
@@ -1600,7 +1600,7 @@ class PlotPanel(wx.Panel):
         where each one corresponds to  x, or y axis values
         """
         # No qx or qy given in a vector format
-        if self.qx_data == None or self.qy_data == None \
+        if self.qx_data is None or self.qy_data is None \
                 or self.qx_data.ndim != 1 or self.qy_data.ndim != 1:
             # do we need deepcopy here?
             return copy.deepcopy(self.data)
@@ -1651,9 +1651,9 @@ class PlotPanel(wx.Panel):
 
         """
         # No image matrix given
-        if image == None or np.ndim(image) != 2 \
+        if image is None or np.ndim(image) != 2 \
                 or np.isfinite(image).all() \
-                or weights == None:
+                or weights is None:
             return image
         # Get bin size in y and x directions
         len_y = len(image)
@@ -1939,7 +1939,7 @@ class PlotPanel(wx.Panel):
     def onChangeCaption(self, event):
         """
         """
-        if self.parent == None:
+        if self.parent is None:
             return
         # get current caption
         old_caption = self.window_caption

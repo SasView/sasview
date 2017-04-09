@@ -121,7 +121,7 @@ class AnnulusInteractor(_BaseInteractor):
         # Data to average
         data = self.base.data2D
         # If we have no data, just return
-        if data == None:
+        if data is None:
             return
 
         from sas.sascalc.dataloader.manipulations import Ring
@@ -131,7 +131,7 @@ class AnnulusInteractor(_BaseInteractor):
                    math.fabs(self.outer_circle.get_radius()))
         # if the user does not specify the numbers of points to plot
         # the default number will be nbins= 36
-        if nbins == None:
+        if nbins is None:
             self.nbins = 36
         else:
             self.nbins = nbins
@@ -520,7 +520,7 @@ class CircularMask(_BaseInteractor):
         data = self.base.data
 
         # If we have no data, just return
-        if data == None:
+        if data is None:
             return
         mask = data.mask
         from sas.sascalc.dataloader.manipulations import Ringcut

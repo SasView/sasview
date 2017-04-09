@@ -128,9 +128,9 @@ class StartupConfiguration(wx.Dialog):
                 #p_panel = self.parent._mgr.GetPane(panel.window_name)
                 width, _ = panel.frame.GetSizeTuple()
                 if panel.frame.IsShown():
-                    if p_size == None or width > p_size:
+                    if p_size is None or width > p_size:
                         p_size = width
-            if p_size == None:
+            if p_size is None:
                 p_size = CURRENT_STRINGS['PLOPANEL_WIDTH']
             self.current_string['PLOPANEL_WIDTH'] = p_size
             
@@ -144,7 +144,7 @@ class StartupConfiguration(wx.Dialog):
                 self.current_string['CONTROL_HEIGHT'] = -1
                 
             data_pw, _ = self.parent.panels["data_panel"].frame.GetSizeTuple()
-            if data_pw == None:
+            if data_pw is None:
                 data_pw = CURRENT_STRINGS['DATAPANEL_WIDTH']
             self.current_string['DATAPANEL_WIDTH'] = data_pw
             

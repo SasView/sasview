@@ -786,9 +786,9 @@ class Reader(CansasReader):
             msg += " instance: %s" % str(datainfo.__class__.__name__)
             raise RuntimeError, msg
         # make sure title and data run is filled up.
-        if datainfo.title == None or datainfo.title == '':
+        if datainfo.title is None or datainfo.title == '':
             datainfo.title = datainfo.name
-        if datainfo.run_name == None or datainfo.run_name == {}:
+        if datainfo.run_name is None or datainfo.run_name == {}:
             datainfo.run = [str(datainfo.name)]
             datainfo.run_name[0] = datainfo.name
         # Create basic XML document

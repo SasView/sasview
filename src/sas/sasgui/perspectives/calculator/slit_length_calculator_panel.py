@@ -156,7 +156,7 @@ class SlitLengthCalculatorPanel(wx.Panel, PanelBase):
     def choose_data_file(self, location=None):
         path = None
         filename = ''
-        if location == None:
+        if location is None:
             location = os.getcwd()
 
         wildcard = "SAXSess Data 1D (*.DAT, *.dat)|*.DAT"

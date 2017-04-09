@@ -49,7 +49,7 @@ class PointInteractor(_BaseInteractor):
         if self._symbol(symbol) == 'step':
             l_width = markersize * 0.4
             return self.step(x=x, y=y, color=color, label=label, width=l_width)
-        if not self.marker == None:
+        if not self.marker is None:
             self.base.connect.clear([self.marker])
         self.color = self._color(color)
         if self.markersize != None:
@@ -60,7 +60,7 @@ class PointInteractor(_BaseInteractor):
         if dy != None and type(dy) == type(()):
             dy = nx.vstack((y - dy[0], dy[1] - y)).transpose()
 
-        if dx == None and dy == None:
+        if dx is None and dy is None:
             # zorder = 1
             self.marker = self.axes.plot(x, y, color=self.color,
                                          marker=self._symbol(symbol),
@@ -99,7 +99,7 @@ class PointInteractor(_BaseInteractor):
               label=None, width=2.0):
         """
         """
-        if not self.marker == None:
+        if not self.marker is None:
             self.base.connect.clear([self.marker])
         self.color = self._color(color)
         self.marker = self.axes.plot(x, y, color=self.color, lw=width,
@@ -114,7 +114,7 @@ class PointInteractor(_BaseInteractor):
               label=None, width=2.0):
         """
         """
-        if not self.marker == None:
+        if not self.marker is None:
             self.base.connect.clear([self.marker])
         self.color = self._color(color)
         if min(y) < 0:
@@ -132,7 +132,7 @@ class PointInteractor(_BaseInteractor):
              label=None, width=2.0):
         """
         """
-        if not self.marker == None:
+        if not self.marker is None:
             self.base.connect.clear([self.marker])
         self.color = self._color(color)
         self.marker = self.axes.step(x, y, color=self.color,

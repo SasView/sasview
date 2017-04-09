@@ -1387,7 +1387,7 @@ class Model(Model1DPlugin):
         return name
 
     def _get_upper_name(self, name=None):
-        if name == None:
+        if name is None:
             return ""
         upper_name = ""
         str_name = str(name)

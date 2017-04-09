@@ -80,7 +80,7 @@ class ArcInteractor(_BaseInteractor):
             self.theta2 -= (2 * math.pi)
         npts = int((self.theta2 - self.theta1) / (math.pi / 120))
 
-        if r == None:
+        if r is None:
             self.radius = math.sqrt(math.pow(self._mouse_x, 2) + \
                                      math.pow(self._mouse_y, 2))
         else:

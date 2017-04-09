@@ -211,11 +211,11 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         On Qmin Qmax vertical line event
         """
-        if event == None:
+        if event is None:
             return
         event.Skip()
         active_ctrl = event.active
-        if active_ctrl == None:
+        if active_ctrl is None:
             return
         if hasattr(event, 'is_corfunc'):
             self.is_corfunc = event.is_corfunc
@@ -230,7 +230,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             if len(ctrl) == 3:
                 colors.append('purple')
                 values.append(min(x_data.max(), float(ctrl[2].GetValue())))
-            if self.ly == None:
+            if self.ly is None:
                 self.ly = []
                 for c, v in zip(colors, values):
                     h = self.subplot.axvline(x=v, color=c, lw=2.5, alpha=0.7)
@@ -335,7 +335,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         ax = event.inaxes
         if hasattr(event, "action"):
             dclick = event.action == 'dclick'
-            if ax == None or dclick:
+            if ax is None or dclick:
                 # remove the vline
                 self._check_zoom_plot()
                 self.canvas.draw()
@@ -360,7 +360,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         Move the cursor line to write Q range
         """
-        if self.q_ctrl == None:
+        if self.q_ctrl is None:
             return
         # release a q range vline
         if self.ly != None and not self.leftdown:
@@ -369,7 +369,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 self.canvas.draw()
             return
         ax = event.inaxes
-        if ax == None or not hasattr(event, 'action'):
+        if ax is None or not hasattr(event, 'action'):
             return
         end_drag = event.action != 'drag' and event.xdata != None
         nop = len(self.plots)
@@ -617,7 +617,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
 
             # add menu of other plugins
             item_list = self.parent.get_current_context_menu(self)
-            if (not item_list == None) and (not len(item_list) == 0):
+            if (not item_list is None) and (not len(item_list) == 0):
                 for item, wx_id in zip(item_list, [ids.next() for i in range(len(item_list))]):
 
                     try:
@@ -810,7 +810,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         curr_size = self.appearance_selected_plot.markersize
         curr_label = self.appearance_selected_plot.label
 
-        if curr_color == None:
+        if curr_color is None:
             curr_color = self._color_labels['Blue']
             curr_symbol = 13
 

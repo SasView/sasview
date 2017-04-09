@@ -143,14 +143,14 @@ class SectorInteractor(_BaseInteractor):
         ## get the data2D to average
         data = self.base.data2D
         # If we have no data, just return
-        if data == None:
+        if data is None:
             return
         ## Averaging
         from sas.sascalc.dataloader.manipulations import SectorQ
         radius = self.qmax
         phimin = -self.left_line.phi + self.main_line.theta
         phimax = self.left_line.phi + self.main_line.theta
-        if nbins == None:
+        if nbins is None:
             nbins = 20
         sect = SectorQ(r_min=0.0, r_max=radius,
                        phi_min=phimin + math.pi,
@@ -363,7 +363,7 @@ class SideInteractor(_BaseInteractor):
         theta3 = 0
         if phi != None:
             self.phi = phi
-        if delta == None:
+        if delta is None:
             delta = 0
         if  right:
             self.phi = -1 * math.fabs(self.phi)

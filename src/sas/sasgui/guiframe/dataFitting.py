@@ -77,11 +77,11 @@ class Data1D(PlotData1D, LoadData1D):
         result = Data1D(x=[], y=[], lam=[], dx=None, dy=None, dlam=None)
         result.clone_without_data(length=len(self.x), clone=self)
         result.copy_from_datainfo(data1d=self)
-        if self.dxw == None:
+        if self.dxw is None:
             result.dxw = None
         else:
             result.dxw = np.zeros(len(self.x))
-        if self.dxl == None:
+        if self.dxl is None:
             result.dxl = None
         else:
             result.dxl = np.zeros(len(self.x))
@@ -124,23 +124,23 @@ class Data1D(PlotData1D, LoadData1D):
         result = Data1D(x=[], y=[], lam=[], dx=None, dy=None, dlam=None)
         tot_length = len(self.x) + len(other.x)
         result = self.clone_without_data(length=tot_length, clone=result)
-        if self.dlam == None or other.dlam is None:
+        if self.dlam is None or other.dlam is None:
             result.dlam = None
         else:
             result.dlam = np.zeros(tot_length)
-        if self.dy == None or other.dy is None:
+        if self.dy is None or other.dy is None:
             result.dy = None
         else:
             result.dy = np.zeros(tot_length)
-        if self.dx == None or other.dx is None:
+        if self.dx is None or other.dx is None:
             result.dx = None
         else:
             result.dx = np.zeros(tot_length)
-        if self.dxw == None or other.dxw is None:
+        if self.dxw is None or other.dxw is None:
             result.dxw = None
         else:
             result.dxw = np.zeros(tot_length)
-        if self.dxl == None or other.dxl is None:
+        if self.dxl is None or other.dxl is None:
             result.dxl = None
         else:
             result.dxl = np.zeros(tot_length)
@@ -226,11 +226,11 @@ class Theory1D(PlotTheory1D, LoadData1D):
         dy, dy_other = self._validity_check(other)
         result = self.clone_without_data(len(self.x))
         result.copy_from_datainfo(data1d=self)
-        if self.dxw == None:
+        if self.dxw is None:
             result.dxw = None
         else:
             result.dxw = np.zeros(len(self.x))
-        if self.dxl == None:
+        if self.dxl is None:
             result.dxl = None
         else:
             result.dxl = np.zeros(len(self.x))
@@ -278,23 +278,23 @@ class Theory1D(PlotTheory1D, LoadData1D):
         result = Data1D(x=[], y=[], lam=[], dx=None, dy=None, dlam=[])
         tot_length = len(self.x)+len(other.x)
         result.clone_without_data(length=tot_length, clone=self)
-        if self.dlam == None or other.dlam is None:
+        if self.dlam is None or other.dlam is None:
             result.dlam = None
         else:
             result.dlam = np.zeros(tot_length)
-        if self.dy == None or other.dy is None:
+        if self.dy is None or other.dy is None:
             result.dy = None
         else:
             result.dy = np.zeros(tot_length)
-        if self.dx == None or other.dx is None:
+        if self.dx is None or other.dx is None:
             result.dx = None
         else:
             result.dx = np.zeros(tot_length)
-        if self.dxw == None or other.dxw is None:
+        if self.dxw is None or other.dxw is None:
             result.dxw = None
         else:
             result.dxw = np.zeros(tot_length)
-        if self.dxl == None or other.dxl is None:
+        if self.dxl is None or other.dxl is None:
             result.dxl = None
         else:
             result.dxl = np.zeros(tot_length)
@@ -404,7 +404,7 @@ class Data2D(PlotData2D, LoadData2D):
         result.xmax = self.xmax
         result.ymin = self.ymin
         result.ymax = self.ymax
-        if self.dqx_data == None or self.dqy_data == None:
+        if self.dqx_data is None or self.dqy_data is None:
             result.dqx_data = None
             result.dqy_data = None
         else:
@@ -467,8 +467,8 @@ class Data2D(PlotData2D, LoadData2D):
         result.xmax = self.xmax
         result.ymin = self.ymin
         result.ymax = self.ymax
-        if self.dqx_data == None or self.dqy_data == None or \
-                other.dqx_data == None or other.dqy_data == None :
+        if self.dqx_data is None or self.dqy_data is None or \
+                other.dqx_data is None or other.dqy_data is None :
             result.dqx_data = None
             result.dqy_data = None
         else:

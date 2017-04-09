@@ -290,7 +290,7 @@ class Plugin(PluginBase):
             Display computed I(q)
         """
         qtemp = pr.x
-        if not q == None:
+        if not q is None:
             qtemp = q
 
         # Make a plot
@@ -302,9 +302,9 @@ class Plugin(PluginBase):
         minq = 0.001
 
         # Check for user min/max
-        if not pr.q_min == None:
+        if not pr.q_min is None:
             minq = pr.q_min
-        if not pr.q_max == None:
+        if not pr.q_max is None:
             maxq = pr.q_max
 
         x = pylab.arange(minq, maxq, maxq / 301.0)
@@ -392,7 +392,7 @@ class Plugin(PluginBase):
         cov2 = np.ascontiguousarray(cov)
 
         for i in range(len(x)):
-            if cov2 == None:
+            if cov2 is None:
                 value = pr.pr(out, x[i])
             else:
                 (value, dy[i]) = pr.pr_err(out, cov2, x[i])
@@ -411,7 +411,7 @@ class Plugin(PluginBase):
             y = y / pmax
             dy = dy / pmax
 
-        if cov2 == None:
+        if cov2 is None:
             new_plot = Data1D(x, y)
             new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
         else:
@@ -486,7 +486,7 @@ class Plugin(PluginBase):
         data_err = np.zeros(0)
         scale = None
         min_err = 0.0
-        if not path == None:
+        if not path is None:
             input_f = open(path, 'r')
             buff = input_f.read()
             lines = buff.split('\n')
@@ -498,7 +498,7 @@ class Plugin(PluginBase):
                     if len(toks) > 2:
                         err = float(toks[2])
                     else:
-                        if scale == None:
+                        if scale is None:
                             scale = 0.05 * math.sqrt(y)
                             #scale = 0.05/math.sqrt(y)
                             min_err = 0.01 * y
@@ -511,7 +511,7 @@ class Plugin(PluginBase):
                 except:
                     logger.error(sys.exc_value)
 
-        if not scale == None:
+        if not scale is None:
             message = "The loaded file had no error bars, statistical errors are assumed."
             wx.PostEvent(self.parent, StatusEvent(status=message))
         else:
@@ -536,7 +536,7 @@ class Plugin(PluginBase):
         min_err = 0.0
 
         data_started = False
-        if not path == None:
+        if not path is None:
             input_f = open(path, 'r')
             buff = input_f.read()
             lines = buff.split('\n')
@@ -549,7 +549,7 @@ class Plugin(PluginBase):
                         if len(toks) > 2:
                             err = float(toks[2])
                         else:
-                            if scale == None:
+                            if scale is None:
                                 scale = 0.05 * math.sqrt(y)
                                 #scale = 0.05/math.sqrt(y)
                                 min_err = 0.01 * y
@@ -564,7 +564,7 @@ class Plugin(PluginBase):
                 elif line.find("The 6 columns") >= 0:
                     data_started = True
 
-        if not scale == None:
+        if not scale is None:
             message = "The loaded file had no error bars, statistical errors are assumed."
             wx.PostEvent(self.parent, StatusEvent(status=message))
         else:
@@ -760,7 +760,7 @@ class Plugin(PluginBase):
         # Save useful info
         self.elapsed = elapsed
         self.control_panel.alpha_estimate = alpha
-        if not message == None:
+        if not message is None:
             wx.PostEvent(self.parent, StatusEvent(status=str(message)))
         self.perform_estimateNT()
 
@@ -778,7 +778,7 @@ class Plugin(PluginBase):
         self.elapsed = elapsed
         self.control_panel.nterms_estimate = nterms
         self.control_panel.alpha_estimate = alpha
-        if not message == None:
+        if not message is None:
             wx.PostEvent(self.parent, StatusEvent(status=str(message)))
 
     def _completed(self, out, cov, pr, elapsed):
@@ -857,7 +857,7 @@ class Plugin(PluginBase):
             self.pr = pr
 
         # Make a plot of I(q) data
-        if self.pr.err == None:
+        if self.pr.err is None:
             new_plot = Data1D(self.pr.x, self.pr.y)
             new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
         else:
@@ -920,7 +920,7 @@ class Plugin(PluginBase):
 
         try:
             pr = self._create_plot_pr()
-            if not pr == None:
+            if not pr is None:
                 self.pr = pr
                 self.perform_inversion()
         except:
@@ -943,7 +943,7 @@ class Plugin(PluginBase):
 
         try:
             pr = self._create_plot_pr()
-            if not pr == None:
+            if not pr is None:
                 self.pr = pr
                 self.perform_estimate()
         except:
@@ -982,7 +982,7 @@ class Plugin(PluginBase):
         # Fill in errors if none were provided
         err = self.current_plottable.dy
         all_zeros = True
-        if err == None:
+        if err is None:
             err = np.zeros(len(pr.y))
         else:
             for i in range(len(err)):
@@ -994,7 +994,7 @@ class Plugin(PluginBase):
             min_err = 0.0
             for i in range(len(pr.y)):
                 # Scale the error so that we can fit over several decades of Q
-                if scale == None:
+                if scale is None:
                     scale = 0.05 * math.sqrt(pr.y[i])
                     min_err = 0.01 * pr.y[i]
                 err[i] = scale * math.sqrt(math.fabs(pr.y[i])) + min_err
@@ -1023,7 +1023,7 @@ class Plugin(PluginBase):
 
         try:
             pr = self._create_file_pr(data)
-            if not pr == None:
+            if not pr is None:
                 self.pr = pr
                 self.perform_inversion()
         except:
@@ -1089,13 +1089,13 @@ class Plugin(PluginBase):
 
         # If we have not errors, add statistical errors
         if y is not None:
-            if err == None or np.all(err) == 0:
+            if err is None or np.all(err) == 0:
                 err = np.zeros(len(y))
                 scale = None
                 min_err = 0.0
                 for i in range(len(y)):
                     # Scale the error so that we can fit over several decades of Q
-                    if scale == None:
+                    if scale is None:
                         scale = 0.05 * math.sqrt(y[i])
                         min_err = 0.01 * y[i]
                     err[i] = scale * math.sqrt(math.fabs(y[i])) + min_err

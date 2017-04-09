@@ -89,9 +89,9 @@ class DetectorDialog(wx.Dialog):
         try:
             zmin = self.reset_zmin_ctl
             zmax = self.reset_zmax_ctl
-            if zmin == None:
+            if zmin is None:
                 zmin = ""
-            if zmax == None:
+            if zmax is None:
                 zmax = ""
             self.zmin_ctl.SetValue(str(zmin))
             self.zmax_ctl.SetValue(str(zmax))

@@ -158,7 +158,7 @@ def load(path):
     data_err = np.zeros(0)
     scale = None
     min_err = 0.0
-    if not path == None:
+    if not path is None:
         input_f = open(path, 'r')
         buff = input_f.read()
         lines = buff.split('\n')
@@ -170,7 +170,7 @@ def load(path):
                 if len(toks) > 2:
                     err = float(toks[2])
                 else:
-                    if scale == None:
+                    if scale is None:
                         scale = 0.05 * math.sqrt(test_y)
                         #scale = 0.05/math.sqrt(y)
                         min_err = 0.01 * y

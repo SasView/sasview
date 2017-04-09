@@ -486,7 +486,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         """
         path = None
         filename = ''
-        if location == None:
+        if location is None:
             location = os.getcwd()
 
         exts = "*" + self.omfreader.ext[0]
@@ -863,7 +863,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             self.SetFocus()
             return
         self.sld_data = self.parent.get_sld_from_omf()
-        if self.sld_data == None:
+        if self.sld_data is None:
             if self.parent.parent != None:
                 infor = 'Error'
                 msg = 'Error: No data has been selected.'
@@ -879,7 +879,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         try:
             self.model.set_sld_data(self.sld_data)
             self.set_input_params()
-            if self.is_avg or self.is_avg == None:
+            if self.is_avg or self.is_avg is None:
                 self._create_default_1d_data()
                 i_out = np.zeros(len(self.data.y))
                 inputs = [self.data.x, [], i_out]
@@ -978,7 +978,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         """
         Update the progress bar
         """
-        if self.parent.parent == None:
+        if self.parent.parent is None:
             return
         type = "progress"
         msg = "Please wait. Computing... (Note: Window may look frozen.)"
@@ -1009,7 +1009,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                 outi = self.model.runXY(inputi)
                 out = np.append(out, outi)
         #print time.time() - s
-        if self.is_avg or self.is_avg == None:
+        if self.is_avg or self.is_avg is None:
             self._draw1D(out)
         else:
             #out = self.model.runXY(input)
@@ -1286,15 +1286,15 @@ class OmfPanel(ScrolledPanel, PanelBase):
         for key in sld_sets.keys():
             key_low = key.lower()
             if key_low.count('mx') > 0:
-                if sld_sets[key] == None:
+                if sld_sets[key] is None:
                     sld_sets[key] = self.sld_data.sld_mx
                 mx = sld_sets[key]
             elif key_low.count('my') > 0:
-                if sld_sets[key] == None:
+                if sld_sets[key] is None:
                     sld_sets[key] = self.sld_data.sld_my
                 my = sld_sets[key]
             elif key_low.count('mz') > 0:
-                if sld_sets[key] == None:
+                if sld_sets[key] is None:
                     sld_sets[key] = self.sld_data.sld_mz
                 mz = sld_sets[key]
             else:
@@ -1367,7 +1367,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         Set the textctr box values
         """
 
-        if omfdata == None:
+        if omfdata is None:
             self._set_none_text()
             return
         nodes_list = self._get_nodes_key_list(omfdata)
@@ -1436,7 +1436,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         """
         self.slds = []
         omfdata = self.sld_data
-        if omfdata == None:
+        if omfdata is None:
             raise
         sld_key_list = self._get_slds_key_list(omfdata)
         # Dic is not sorted
@@ -1476,7 +1476,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         """
         self.nodes = []
         omfdata = self.sld_data
-        if omfdata == None:
+        if omfdata is None:
             raise
         key_list = self._get_nodes_key_list(omfdata)
         is_data = self.sld_data.is_data
@@ -1511,7 +1511,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         """
         self.stepsize = []
         omfdata = self.sld_data
-        if omfdata == None:
+        if omfdata is None:
             raise
         key_list = self._get_step_key_list(omfdata)
         is_data = self.sld_data.is_data
@@ -1630,7 +1630,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         """
         Set sld textctrls
         """
-        if sld_data == None:
+        if sld_data is None:
             for ctr_list in self.slds:
                 ctr_list[1].Enable(False)
                 #break   
@@ -1738,7 +1738,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
                     npts *= int(n_val)
             if npts > 0:
                 nop = self.set_npts_from_slddata()
-                if nop == None:
+                if nop is None:
                     nop = npts
                 self.display_npts(nop)
 
@@ -1910,10 +1910,10 @@ class SasGenWindow(widget.CHILD_FRAME):
         """
         Set omfdata
         """
-        if data == None:
+        if data is None:
             return
         self.sld_data = data
-        enable = (not data == None)
+        enable = (not data is None)
         self._set_omfpanel_sld_data(self.sld_data)
         self.omfpanel.bt_save.Enable(enable)
         self.set_etime()

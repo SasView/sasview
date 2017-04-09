@@ -116,7 +116,7 @@ class SectorMask(_BaseInteractor):
         ## get the data to average
         data = self.base.data
         # If we have no data, just return
-        if data == None:
+        if data is None:
             return
         ## Averaging
         from sas.sascalc.dataloader.manipulations import Sectorcut

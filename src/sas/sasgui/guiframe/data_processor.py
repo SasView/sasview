@@ -314,7 +314,7 @@ class GridPage(sheet.CSheet):
         row, _ = event.GetRow(), event.GetCol()
         if row > self.max_row_touse:
             self.max_row_touse = row
-        if self.data == None:
+        if self.data is None:
             self.data = {}
         event.Skip()
 
@@ -813,9 +813,9 @@ class GridPage(sheet.CSheet):
         paste options
         """
 
-        if self.data == None:
+        if self.data is None:
             self.data = {}
-        if self.file_name == None:
+        if self.file_name is None:
             self.file_name = 'copied_data'
         self.Paste()
 
@@ -1016,7 +1016,7 @@ class Notebook(nb, PanelBase):
                             temp_list.insert(index, (None, None))
                             if index - 1 >= 0:
                                 new_row, _ = temp_list[index - 1]
-                                if not new_row == None and new_row != ' ':
+                                if not new_row is None and new_row != ' ':
                                     label += create_label(col_name, None,
                                                           int(new_row) + 1)
                                 else:
@@ -1024,7 +1024,7 @@ class Notebook(nb, PanelBase):
                                 label += ","
                             if index + 1 < len(temp_list):
                                 new_row, _ = temp_list[index + 1]
-                                if not new_row == None:
+                                if not new_row is None:
                                     label += create_label(col_name,
                                                           int(new_row) + 1, None)
                     if row_min != None and row_max != None:
@@ -1084,7 +1084,7 @@ class Notebook(nb, PanelBase):
         """
 
         # Let's re-order the data from the keys in 'Data' name.
-        if outputs == None:
+        if outputs is None:
             return
         try:
             # For outputs from batch
@@ -1379,7 +1379,7 @@ class GridPanel(SPanel):
             msg += "Got Y length = %s, dY length = %s" % (str(len(y)), str(len(dy)))
             wx.PostEvent(self.parent.parent, StatusEvent(status=msg, info="error"))
             return
-        if dy == None:
+        if dy is None:
             dy = np.zeros(len(y))
         #plotting
         new_plot = Data1D(x=x, y=y, dy=dy)
@@ -1440,7 +1440,7 @@ class GridPanel(SPanel):
         for tok, (col_name, list) in dict.iteritems():
             col = column_names[col_name]
             axis = self.get_plot_axis(col, list)
-            if axis == None:
+            if axis is None:
                 return None
             sentence = sentence.replace(tok, "numpy.array(%s)" % str(axis))
         for key, value in FUNC_DICT.iteritems():

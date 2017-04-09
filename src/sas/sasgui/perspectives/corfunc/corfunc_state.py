@@ -326,7 +326,7 @@ class Reader(CansasReader):
             raise RuntimeError, msg
         if datainfo.title is None or datainfo.title == '':
             datainfo.title = datainfo.name
-        if datainfo.run_name == None or datainfo.run_name == '':
+        if datainfo.run_name is None or datainfo.run_name == '':
             datainfo.run = [str(datainfo.name)]
             datainfo.run_name[0] = datainfo.name
 

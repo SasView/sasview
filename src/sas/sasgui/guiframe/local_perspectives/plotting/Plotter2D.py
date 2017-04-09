@@ -143,7 +143,7 @@ class ModelPanel2D(ModelPanel1D):
         On Qmin Qmax vertical line event
         """
         # Not implemented
-        if event == None:
+        if event is None:
             return
         event.Skip()
 
@@ -226,7 +226,7 @@ class ModelPanel2D(ModelPanel1D):
         self.graph.yaxis(data._yaxis, data._yunit)
         if self._is_changed_legend_label:
             data.label = self.title_label
-        if data.label == None:
+        if data.label is None:
             data.label = data.name
         if not self.title_font:
             self.graph.title(data.label)
@@ -319,7 +319,7 @@ class ModelPanel2D(ModelPanel1D):
         slicerpop.AppendSeparator()
         if len(self.data2D.detector) <= 1:
             item_list = self.parent.get_current_context_menu(self)
-            if (not item_list == None) and (not len(item_list) == 0) and\
+            if (not item_list is None) and (not len(item_list) == 0) and\
                 self.data2D.name.split(" ")[0] != 'Residuals':
                 for item, wx_id in zip(item_list, [ids.next() for i in range(len(item_list))]):
                     try:
@@ -532,7 +532,7 @@ class ModelPanel2D(ModelPanel1D):
 
         """
         ## Clear current slicer
-        if not self.slicer == None:
+        if not self.slicer is None:
             self.slicer.clear()
         ## Create a new slicer
         self.slicer_z += 1
@@ -718,7 +718,7 @@ class ModelPanel2D(ModelPanel1D):
         """
         Clear the slicer on the plot
         """
-        if not self.slicer == None:
+        if not self.slicer is None:
             self.slicer.clear()
             self.subplot.figure.canvas.draw()
             self.slicer = None

@@ -209,7 +209,7 @@ class _Slab(object):
             x[i_q] += frac * q_value
             y[i_q] += frac * data[npts]
 
-            if err_data == None or err_data[npts] == 0.0:
+            if err_data is None or err_data[npts] == 0.0:
                 if data[npts] < 0:
                     data[npts] = -data[npts]
                 err_y[i_q] += frac * frac * data[npts]
@@ -332,7 +332,7 @@ class Boxsum(object):
             if frac == 0:
                 continue
             y += frac * data[npts]
-            if err_data == None or err_data[npts] == 0.0:
+            if err_data is None or err_data[npts] == 0.0:
                 if data[npts] < 0:
                     data[npts] = -data[npts]
                 err_y += frac * frac * data[npts]
@@ -461,7 +461,7 @@ class CircularAverage(object):
             dq_data = numpy.sqrt(dq_data)
 
         #q_data_max = numpy.max(q_data)
-        if len(data2D.q_data) == None:
+        if len(data2D.q_data) is None:
             msg = "Circular averaging: invalid q_data: %g" % data2D.q_data
             raise RuntimeError, msg
 
@@ -501,7 +501,7 @@ class CircularAverage(object):
             y[i_q] += frac * data_n
             # Take dqs from data to get the q_average
             x[i_q] += frac * q_value
-            if err_data == None or err_data[npt] == 0.0:
+            if err_data is None or err_data[npt] == 0.0:
                 if data_n < 0:
                     data_n = -data_n
                 err_y[i_q] += frac * frac * data_n
@@ -622,7 +622,7 @@ class Ring(object):
                 i_phi = 0
             phi_bins[i_phi] += frac * data[npt]
 
-            if err_data == None or err_data[npt] == 0.0:
+            if err_data is None or err_data[npt] == 0.0:
                 if data_n < 0:
                     data_n = -data_n
                 phi_err[i_phi] += frac * frac * math.fabs(data_n)
@@ -887,7 +887,7 @@ class _Sector(object):
             ## Get the total y
             y[i_bin] += frac * data_n
             x[i_bin] += frac * q_value
-            if err_data[n] == None or err_data[n] == 0.0:
+            if err_data[n] is None or err_data[n] == 0.0:
                 if data_n < 0:
                     data_n = -data_n
                 y_err[i_bin] += frac * frac * data_n

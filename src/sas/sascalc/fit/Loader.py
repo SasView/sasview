@@ -33,7 +33,7 @@ class Load:
     
     def set_values(self):
         """ Store the values loaded from file in local variables"""
-        if not self.filename == None:
+        if not self.filename is None:
             input_f =  open(self.filename, 'r')
             buff = input_f.read()
             lines = buff.split('\n')
