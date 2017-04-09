@@ -17,17 +17,19 @@ The organization of the classes goes as:
    :align: center
 
 """
-import wx
-import numpy
-import math
-import re
 import os
 import sys
 import copy
-from wx.lib.scrolledpanel import ScrolledPanel
+import math
+import re
+import wx
+import numpy as np
+
 import wx.aui
 from wx.aui import AuiNotebook as nb
 import wx.lib.sheet as sheet
+from wx.lib.scrolledpanel import ScrolledPanel
+
 from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.guiframe.events import NewPlotEvent
 from sas.sasgui.guiframe.events import StatusEvent
