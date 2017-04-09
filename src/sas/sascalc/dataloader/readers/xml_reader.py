@@ -127,6 +127,9 @@ class XMLreader():
         try:
             first_error = schema.assertValid(self.xmldoc)
         except etree.DocumentInvalid as err:
+            # Suppress errors for <'any'> elements
+            if "##other" in str(err):
+                return first_error
             first_error = str(err)
         return first_error
 
