@@ -31,7 +31,7 @@ class Validator:
             @param density: point density of simulation
             #return: mean, error
         """
-        if not density is None:
+        if density is not None:
             self.density = density
             self.create()
         
@@ -44,7 +44,7 @@ class Validator:
             @param density: point density of simulation
             #return: mean, error
         """
-        if not density is None:
+        if density is not None:
             self.density = density
             self.create()
         

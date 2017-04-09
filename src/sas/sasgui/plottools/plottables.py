@@ -228,7 +228,7 @@ class Graph(object):
         for p in self.plottables:
             if p.hidden == True:
                 continue
-            if not p.x is None:
+            if p.x is not None:
                 for x_i in p.x:
                     if min_value is None or x_i < min_value:
                         min_value = x_i

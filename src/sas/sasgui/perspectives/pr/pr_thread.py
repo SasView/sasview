@@ -41,7 +41,7 @@ class CalcPr(CalcThread):
             # Thread was interrupted, just proceed
             pass
         except:
-            if not self.error_func is None:
+            if self.error_func is not None:
                 self.error_func("CalcPr.compute: %s" % sys.exc_value)
 
 class EstimatePr(CalcThread):
@@ -69,7 +69,7 @@ class EstimatePr(CalcThread):
             # Thread was interrupted, just proceed
             pass
         except:
-            if not self.error_func is None:
+            if self.error_func is not None:
                 self.error_func("EstimatePr.compute: %s" % sys.exc_value)
 
 class EstimateNT(CalcThread):
@@ -109,5 +109,5 @@ class EstimateNT(CalcThread):
             # Thread was interrupted, just proceed
             pass
         except:
-            if not self.error_func is None:
+            if self.error_func is not None:
                 self.error_func("EstimatePr2.compute: %s" % sys.exc_value)

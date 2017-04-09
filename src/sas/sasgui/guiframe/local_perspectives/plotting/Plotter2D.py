@@ -319,8 +319,8 @@ class ModelPanel2D(ModelPanel1D):
         slicerpop.AppendSeparator()
         if len(self.data2D.detector) <= 1:
             item_list = self.parent.get_current_context_menu(self)
-            if (not item_list is None) and (not len(item_list) == 0) and\
-                self.data2D.name.split(" ")[0] != 'Residuals':
+            if ((item_list is not None) and len(item_list) and
+                self.data2D.name.split(" ")[0] != 'Residuals'):
                 for item, wx_id in zip(item_list, [ids.next() for i in range(len(item_list))]):
                     try:
                         slicerpop.Append(wx_id, item[0], item[1])
@@ -532,7 +532,7 @@ class ModelPanel2D(ModelPanel1D):
 
         """
         ## Clear current slicer
-        if not self.slicer is None:
+        if self.slicer is not None:
             self.slicer.clear()
         ## Create a new slicer
         self.slicer_z += 1
@@ -718,7 +718,7 @@ class ModelPanel2D(ModelPanel1D):
         """
         Clear the slicer on the plot
         """
-        if not self.slicer is None:
+        if self.slicer is not None:
             self.slicer.clear()
             self.subplot.figure.canvas.draw()
             self.slicer = None

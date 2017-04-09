@@ -1913,7 +1913,7 @@ class SasGenWindow(widget.CHILD_FRAME):
         if data is None:
             return
         self.sld_data = data
-        enable = (not data is None)
+        enable = (data is not None)
         self._set_omfpanel_sld_data(self.sld_data)
         self.omfpanel.bt_save.Enable(enable)
         self.set_etime()

@@ -325,7 +325,7 @@ class TestOrdering(unittest.TestCase):
         handle = self.canvas.add('sphere')
         self.canvas.setParam('%s.radius' % handle, self.outer_radius)
         self.canvas.setParam('%s.contrast' % handle, self.shell_sld)
-        if not order1 is None:
+        if order1 is not None:
             self.canvas.setParam('%s.order' % handle, order1)
        
         handle2 = self.canvas.add('sphere')

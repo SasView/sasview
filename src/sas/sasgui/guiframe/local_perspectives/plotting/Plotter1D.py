@@ -617,9 +617,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
 
             # add menu of other plugins
             item_list = self.parent.get_current_context_menu(self)
-            if (not item_list is None) and (not len(item_list) == 0):
+            if (item_list is not None) and (len(item_list)):
                 for item, wx_id in zip(item_list, [ids.next() for i in range(len(item_list))]):
-
                     try:
                         plot_menu.Append(wx_id, item[0], name)
                         wx.EVT_MENU(self, wx_id, item[2])

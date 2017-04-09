@@ -49,10 +49,10 @@ class PointInteractor(_BaseInteractor):
         if self._symbol(symbol) == 'step':
             l_width = markersize * 0.4
             return self.step(x=x, y=y, color=color, label=label, width=l_width)
-        if not self.marker is None:
+        if self.marker is not None:
             self.base.connect.clear([self.marker])
         self.color = self._color(color)
-        if self.markersize != None:
+        if self.markersize is not None:
             markersize = self.markersize
         # Convert tuple (lo,hi) to array [(x-lo),(hi-x)]
         if dx != None and type(dx) == type(()):

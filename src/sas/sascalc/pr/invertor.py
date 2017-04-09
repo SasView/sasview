@@ -394,9 +394,9 @@ class Invertor(Cinvertor):
         """
         Check q-value against user-defined range
         """
-        if not self.q_min is None and q < self.q_min:
+        if self.q_min is not None and q < self.q_min:
             return False
-        if not self.q_max is None and q > self.q_max:
+        if self.q_max is not None and q > self.q_max:
             return False
         return True
 

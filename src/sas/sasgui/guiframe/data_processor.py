@@ -1016,7 +1016,7 @@ class Notebook(nb, PanelBase):
                             temp_list.insert(index, (None, None))
                             if index - 1 >= 0:
                                 new_row, _ = temp_list[index - 1]
-                                if not new_row is None and new_row != ' ':
+                                if new_row is not None and new_row != ' ':
                                     label += create_label(col_name, None,
                                                           int(new_row) + 1)
                                 else:
@@ -1024,7 +1024,7 @@ class Notebook(nb, PanelBase):
                                 label += ","
                             if index + 1 < len(temp_list):
                                 new_row, _ = temp_list[index + 1]
-                                if not new_row is None:
+                                if new_row is not None:
                                     label += create_label(col_name,
                                                           int(new_row) + 1, None)
                     if row_min != None and row_max != None:

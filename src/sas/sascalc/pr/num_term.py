@@ -158,7 +158,7 @@ def load(path):
     data_err = np.zeros(0)
     scale = None
     min_err = 0.0
-    if not path is None:
+    if path is not None:
         input_f = open(path, 'r')
         buff = input_f.read()
         lines = buff.split('\n')

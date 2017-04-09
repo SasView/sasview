@@ -290,7 +290,7 @@ class Plugin(PluginBase):
             Display computed I(q)
         """
         qtemp = pr.x
-        if not q is None:
+        if q is not None:
             qtemp = q
 
         # Make a plot
@@ -302,9 +302,9 @@ class Plugin(PluginBase):
         minq = 0.001
 
         # Check for user min/max
-        if not pr.q_min is None:
+        if pr.q_min is not None:
             minq = pr.q_min
-        if not pr.q_max is None:
+        if pr.q_max is not None:
             maxq = pr.q_max
 
         x = pylab.arange(minq, maxq, maxq / 301.0)
@@ -486,7 +486,7 @@ class Plugin(PluginBase):
         data_err = np.zeros(0)
         scale = None
         min_err = 0.0
-        if not path is None:
+        if path is not None:
             input_f = open(path, 'r')
             buff = input_f.read()
             lines = buff.split('\n')
@@ -511,7 +511,7 @@ class Plugin(PluginBase):
                 except:
                     logger.error(sys.exc_value)
 
-        if not scale is None:
+        if scale is not None:
             message = "The loaded file had no error bars, statistical errors are assumed."
             wx.PostEvent(self.parent, StatusEvent(status=message))
         else:
@@ -536,7 +536,7 @@ class Plugin(PluginBase):
         min_err = 0.0
 
         data_started = False
-        if not path is None:
+        if path is not None:
             input_f = open(path, 'r')
             buff = input_f.read()
             lines = buff.split('\n')
@@ -564,7 +564,7 @@ class Plugin(PluginBase):
                 elif line.find("The 6 columns") >= 0:
                     data_started = True
 
-        if not scale is None:
+        if scale is not None:
             message = "The loaded file had no error bars, statistical errors are assumed."
             wx.PostEvent(self.parent, StatusEvent(status=message))
         else:
@@ -760,7 +760,7 @@ class Plugin(PluginBase):
         # Save useful info
         self.elapsed = elapsed
         self.control_panel.alpha_estimate = alpha
-        if not message is None:
+        if message is not None:
             wx.PostEvent(self.parent, StatusEvent(status=str(message)))
         self.perform_estimateNT()
 
@@ -778,7 +778,7 @@ class Plugin(PluginBase):
         self.elapsed = elapsed
         self.control_panel.nterms_estimate = nterms
         self.control_panel.alpha_estimate = alpha
-        if not message is None:
+        if message is not None:
             wx.PostEvent(self.parent, StatusEvent(status=str(message)))
 
     def _completed(self, out, cov, pr, elapsed):
@@ -920,7 +920,7 @@ class Plugin(PluginBase):
 
         try:
             pr = self._create_plot_pr()
-            if not pr is None:
+            if pr is not None:
                 self.pr = pr
                 self.perform_inversion()
         except:
@@ -943,7 +943,7 @@ class Plugin(PluginBase):
 
         try:
             pr = self._create_plot_pr()
-            if not pr is None:
+            if pr is not None:
                 self.pr = pr
                 self.perform_estimate()
         except:
@@ -1023,7 +1023,7 @@ class Plugin(PluginBase):
 
         try:
             pr = self._create_file_pr(data)
-            if not pr is None:
+            if pr is not None:
                 self.pr = pr
                 self.perform_inversion()
         except:

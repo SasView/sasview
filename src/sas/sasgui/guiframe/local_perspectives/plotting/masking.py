@@ -248,7 +248,7 @@ class MaskPanel(wx.Dialog):
         """
         Add new mask to old mask
         """
-        if not self.slicer is None:
+        if self.slicer is not None:
             data = Data2D()
             data = self.data
             self.slicer_mask = self.slicer.update()
