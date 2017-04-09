@@ -607,7 +607,7 @@ class ResolutionCalculator(object):
         # unit correction (1/cm to 1/A) for A and d_distance below
         a_value *= 1.0E-16
         # if lamda is give (broad meanning of A)  return 2* lamda^2 * A
-        if lamda != None:
+        if lamda is not None:
             a_value *= (4 * lamda * lamda)
         return a_value
 

@@ -207,7 +207,7 @@ class StartupConfiguration(wx.Dialog):
         out_f.write("#Application appearance custom configuration\n" )
         for key, item in strings.iteritems():
             if (key == 'DEFAULT_PERSPECTIVE') or \
-                (key == 'DEFAULT_OPEN_FOLDER' and item != None):
+                (key == 'DEFAULT_OPEN_FOLDER' and item is not None):
                 out_f.write("%s = \"%s\"\n" % (key,str(item)))
             else:
                 out_f.write("%s = %s\n" % (key,str(item)))

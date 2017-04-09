@@ -302,7 +302,7 @@ class SlitLengthCalculatorWindow(widget.CHILD_FRAME):
         """
         Close event
         """
-        if self.manager != None:
+        if self.manager is not None:
             self.manager.cal_slit_frame = None
         self.Destroy()
 

@@ -361,7 +361,7 @@ class SideInteractor(_BaseInteractor):
         #print "update left or right ", self.has_move
         self.left_moving = left
         theta3 = 0
-        if phi != None:
+        if phi is not None:
             self.phi = phi
         if delta is None:
             delta = 0
@@ -373,7 +373,7 @@ class SideInteractor(_BaseInteractor):
         if side:
             self.theta = mline.theta + self.phi
 
-        if mline != None:
+        if mline is not None:
             if delta != 0:
                 self.theta2 = mline + delta
             else:
@@ -537,7 +537,7 @@ class LineInteractor(_BaseInteractor):
         Draw the new roughness on the graph.
         """
 
-        if theta != None:
+        if theta is not None:
             self.theta = theta
         x1 = self.radius * math.cos(self.theta)
         y1 = self.radius * math.sin(self.theta)

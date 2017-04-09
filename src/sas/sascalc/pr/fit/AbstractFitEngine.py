@@ -189,9 +189,9 @@ class FitData1D(Data1D):
         # ToDo: Find better way to do it.
         if qmin == 0.0 and not np.isfinite(self.y[qmin]):
             self.qmin = min(self.x[self.x != 0])
-        elif qmin != None:
+        elif qmin is not None:
             self.qmin = qmin
-        if qmax != None:
+        if qmax is not None:
             self.qmax = qmax
         # Determine the range needed in unsmeared-Q to cover
         # the smeared Q range
@@ -201,7 +201,7 @@ class FitData1D(Data1D):
         self._first_unsmeared_bin = 0
         self._last_unsmeared_bin = len(self.x) - 1
         
-        if self.smearer != None:
+        if self.smearer is not None:
             self._first_unsmeared_bin, self._last_unsmeared_bin = \
                     self.smearer.get_bin_range(self.qmin, self.qmax)
             self._qmin_unsmeared = self.x[self._first_unsmeared_bin]
@@ -329,9 +329,9 @@ class FitData2D(Data2D):
         """
         if qmin == 0.0:
             self.qmin = 1e-16
-        elif qmin != None:
+        elif qmin is not None:
             self.qmin = qmin
-        if qmax != None:
+        if qmax is not None:
             self.qmax = qmax
         self.radius = np.sqrt(self.qx_data**2 + self.qy_data**2)
         self.idx = ((self.qmin <= self.radius) &\
@@ -356,7 +356,7 @@ class FitData2D(Data2D):
         """
         return the residuals
         """
-        if self.smearer != None:
+        if self.smearer is not None:
             fn.set_index(self.idx)
             # Get necessary data from self.data and set the data for smearing
             fn.get_data()

@@ -497,7 +497,7 @@ class CircularMask(_BaseInteractor):
         """
         # Update locations
         self.outer_circle.update()
-        # if self.is_inside != None:
+        # if self.is_inside is not None:
         out = self._post_data()
         return out
 

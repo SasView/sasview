@@ -292,7 +292,7 @@ class Reader(CansasReader):
                 sas_entry, _ = self._parse_entry(entry)
                 corstate = self._parse_state(entry)
 
-                if corstate != None:
+                if corstate is not None:
                     sas_entry.meta_data['corstate'] = corstate
                     sas_entry.filename = corstate.file
                     output.append(sas_entry)

@@ -95,7 +95,7 @@ class SectorMask(_BaseInteractor):
                                    side=True, left=False, right=True)
             self.left_line.update(phi=self.right_line.phi, delta=None,
                                   mline=self.main_line, side=True, left=False)
-        #if self.is_inside != None:
+        #if self.is_inside is not None:
         out = self._post_data()
         return out
 

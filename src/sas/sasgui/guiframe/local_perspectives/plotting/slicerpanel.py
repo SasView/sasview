@@ -113,7 +113,7 @@ class SlicerPanel(wx.Panel, PanelBase):
         self.bck.Layout()
         self.Layout()
         psizer = self.parent.GetSizer()
-        if psizer != None:
+        if psizer is not None:
             psizer.Layout()
 
     def onSetFocus(self, evt):

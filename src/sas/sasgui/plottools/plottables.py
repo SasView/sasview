@@ -681,7 +681,7 @@ class View(object):
         has_err_x = not (dx is None or len(dx) == 0)
         has_err_y = not (dy is None or len(dy) == 0)
 
-        if(x != None) and (y != None):
+        if(x is not None) and (y is not None):
             if not dx is None and not len(dx) == 0 and not len(x) == len(dx):
                 msg = "Plottable.View: Given x and dx are not"
                 msg += " of the same length"
@@ -863,7 +863,7 @@ class View(object):
             self.dx = np.zeros(len(self.x))
         if self.dy is None:
             self.dy = np.zeros(len(self.y))
-        if xmin != None and xmax != None:
+        if xmin is not None and xmax is not None:
             for i in range(len(self.x)):
                 if self.x[i] >= xmin and self.x[i] <= xmax:
                     tempx.append(self.x[i])

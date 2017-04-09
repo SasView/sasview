@@ -655,7 +655,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         if event is not None:
             event.Skip()
         # Clear the plot
-        if self.image != None:
+        if self.image is not None:
             self.image.clf()
             # reset image
             self.image = None
@@ -673,7 +673,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         Execute the computation of resolution
         """
         # Skip event for next event
-        if event != None:
+        if event is not None:
             event.Skip()
             msg = "Please Check your input values "
             msg += "before starting the computation..."
@@ -707,7 +707,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                         self.wavelength_spread_tcl.GetValue().split(';')[0])
             # Validate the wave inputs
             wave_input = self._validate_q_input(wavelength, wavelength_spread)
-            if wave_input != None:
+            if wave_input is not None:
                 wavelength, wavelength_spread = wave_input
 
             self.resolution.set_wave(wavelength)
@@ -756,7 +756,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
 
         # Validate the q inputs
         q_input = self._validate_q_input(self.qx, self.qy)
-        if q_input != None:
+        if q_input is not None:
             self.qx, self.qy = q_input
 
         # Make list of q min max for mapping
@@ -768,7 +768,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
             qy_max.append(ymax)
 
         # Compute the resolution
-        if self.image != None:
+        if self.image is not None:
             #_pylab_helpers.Gcf.set_active(self.fm)
             _pylab_helpers.Gcf.figs = {}
             # Clear the image before redraw
@@ -981,7 +981,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         Execute the reset
         """
         # skip for another event
-        if event != None:
+        if event is not None:
             event.Skip()
         # init resolution_calculator
         self.resolution = ResolutionCalculator()
@@ -1147,7 +1147,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         """
         Set the detector coordinate for sigmas to x-y coordinate
         """
-        if event != None:
+        if event is not None:
             event.Skip()
         # Set the coordinate in Cartesian
         self.det_coordinate = 'cartesian'
@@ -1159,7 +1159,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         """
         Set the detector coordinate for sigmas to polar coordinate
         """
-        if event != None:
+        if event is not None:
             event.Skip()
         # Set the coordinate in polar
         self.det_coordinate = 'polar'
@@ -1180,7 +1180,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.compute_button.Enable(able)
         self.compute_button.SetLabel(label)
         self.compute_button.SetToolTipString(label)
-        if self.parent.parent != None:
+        if self.parent.parent is not None:
             wx.PostEvent(self.parent.parent,
                          StatusEvent(status=msg, type=type))
 
@@ -1195,7 +1195,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         """
         On source combobox selection
         """
-        if event != None:
+        if event is not None:
             combo = event.GetEventObject()
             event.Skip()
         else:
@@ -1214,7 +1214,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         """
         On source color combobox selection
         """
-        if event != None:
+        if event is not None:
             #combo = event.GetEventObject()
             event.Skip()
         #else:
@@ -1252,7 +1252,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         """
         On spectrum ComboBox event
         """
-        if event != None:
+        if event is not None:
             #combo = event.GetEventObject()
             event.Skip()
         else:
@@ -1347,7 +1347,7 @@ class ResolutionWindow(widget.CHILD_FRAME):
         On close event
         """
         _pylab_helpers.Gcf.figs = {}
-        if self.manager != None:
+        if self.manager is not None:
             self.manager.cal_res_frame = None
         self.Destroy()
 

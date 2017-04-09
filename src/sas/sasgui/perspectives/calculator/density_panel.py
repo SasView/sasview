@@ -437,7 +437,7 @@ class DensityWindow(widget.CHILD_FRAME):
         """
         On close event
         """
-        if self.manager != None:
+        if self.manager is not None:
             self.manager.cal_md_frame = None
         self.Destroy()
 

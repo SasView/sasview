@@ -280,7 +280,7 @@ class InvariantState(object):
 
         # File name
         element = newdoc.createElement("filename")
-        if self.file != None and self.file != '':
+        if self.file is not None and self.file != '':
             element.appendChild(newdoc.createTextNode(str(self.file)))
         else:
             element.appendChild(newdoc.createTextNode(str(file)))
@@ -733,7 +733,7 @@ class Reader(CansasReader):
 
                     # invstate could be None when .svs file is loaded
                     # in this case, skip appending to output
-                    if invstate != None:
+                    if invstate is not None:
                         sas_entry.meta_data['invstate'] = invstate
                         sas_entry.filename = invstate.file
                         output.append(sas_entry)

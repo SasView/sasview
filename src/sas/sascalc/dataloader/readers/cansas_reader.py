@@ -1132,7 +1132,7 @@ class Reader(XMLreader):
                                 {'unit': spectrum.wavelength_unit})
                 self.write_node(point, "T", spectrum.transmission[i],
                                 {'unit': spectrum.transmission_unit})
-                if spectrum.transmission_deviation != None \
+                if spectrum.transmission_deviation is not None \
                 and len(spectrum.transmission_deviation) >= i:
                     self.write_node(point, "Tdev",
                                     spectrum.transmission_deviation[i],
@@ -1463,7 +1463,7 @@ class Reader(XMLreader):
                 toks = variable.split('.')
                 local_unit = None
                 exec "local_unit = storage.%s_unit" % toks[0]
-                if local_unit != None and units.lower() != local_unit.lower():
+                if local_unit is not None and units.lower() != local_unit.lower():
                     if HAS_CONVERTER == True:
                         try:
                             conv = Converter(units)

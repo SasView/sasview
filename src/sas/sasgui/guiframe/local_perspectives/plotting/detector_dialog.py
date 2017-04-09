@@ -154,9 +154,9 @@ class DetectorDialog(wx.Dialog):
         self.ynpts_ctl.SetLabel(str(format_number(ynpts)))
         self.qmax_ctl.SetLabel(str(format_number(qmax)))
         self.beam_ctl.SetLabel(str(format_number(beam)))
-        if zmin != None:
+        if zmin is not None:
             self.zmin_ctl.SetValue(str(format_number(zmin)))
-        if zmax != None:
+        if zmax is not None:
             self.zmax_ctl.SetValue(str(format_number(zmax)))
 
     def getContent(self):

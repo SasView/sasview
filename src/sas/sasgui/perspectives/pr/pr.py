@@ -720,7 +720,7 @@ class Plugin(PluginBase):
         from pr_thread import CalcPr
 
         # If a thread is already started, stop it
-        if self.calc_thread != None and self.calc_thread.isrunning():
+        if self.calc_thread is not None and self.calc_thread.isrunning():
             self.calc_thread.stop()
             ## stop just raises the flag -- the thread is supposed to
             ## then kill itself. In August 2014 it was shown that this is
@@ -1128,7 +1128,7 @@ class Plugin(PluginBase):
         from pr_thread import EstimatePr
 
         # If a thread is already started, stop it
-        if self.estimation_thread != None and \
+        if self.estimation_thread is not None and \
             self.estimation_thread.isrunning():
             self.estimation_thread.stop()
             ## stop just raises the flag -- the thread is supposed to
@@ -1158,7 +1158,7 @@ class Plugin(PluginBase):
         from pr_thread import EstimateNT
 
         # If a thread is already started, stop it
-        if self.estimation_thread != None and self.estimation_thread.isrunning():
+        if self.estimation_thread is not None and self.estimation_thread.isrunning():
             self.estimation_thread.stop()
             ## stop just raises the flag -- the thread is supposed to
             ## then kill itself. In August 2014 it was shown that this is

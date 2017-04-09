@@ -1027,7 +1027,7 @@ class Notebook(nb, PanelBase):
                                 if new_row is not None:
                                     label += create_label(col_name,
                                                           int(new_row) + 1, None)
-                    if row_min != None and row_max != None:
+                    if row_min is not None and row_max is not None:
                         if index == 0:
                             label += create_label(col_name,
                                                   int(row_min) + 1, None)
@@ -1373,7 +1373,7 @@ class GridPanel(SPanel):
             msg += "Got X length = %s, Y length = %s" % (str(len(x)), str(len(y)))
             wx.PostEvent(self.parent.parent, StatusEvent(status=msg, info="error"))
             return
-        if dy != None and (len(y) != len(dy)):
+        if dy is not None and (len(y) != len(dy)):
             msg = "Need same length for Y and dY axis and both greater than 0"
             msg += " to plot.\n"
             msg += "Got Y length = %s, dY length = %s" % (str(len(y)), str(len(dy)))
@@ -1571,9 +1571,9 @@ class GridPanel(SPanel):
         get controls to modify
         """
 
-        if label != None:
+        if label is not None:
             tcrtl_label.SetValue(str(label))
-        if title != None:
+        if title is not None:
             tcrtl_title.SetValue(str(title))
 
     def add_column(self):
@@ -1684,7 +1684,7 @@ class GridFrame(wx.Frame):
         """
         # I Believe this is no longer used now that we have removed the 
         # edit menu from the menubar - PDB July 12, 2015
-        if event != None:
+        if event is not None:
             event.Skip()
         pos = self.panel.notebook.GetSelection()
         grid = self.panel.notebook.GetPage(pos)
@@ -1696,7 +1696,7 @@ class GridFrame(wx.Frame):
         """
         # I Believe this is no longer used now that we have removed the 
         # edit menu from the menubar - PDB July 12, 2015
-        if event != None:
+        if event is not None:
             event.Skip()
         pos = self.panel.notebook.GetSelection()
         grid = self.panel.notebook.GetPage(pos)
@@ -1738,7 +1738,7 @@ class GridFrame(wx.Frame):
         if self.file == event.GetMenu():
             pos = self.panel.notebook.GetSelection()
             grid = self.panel.notebook.GetPage(pos)
-            has_data = (grid.data != None and grid.data != {})
+            has_data = (grid.data is not None and grid.data != {})
             self.open_excel_menu.Enable(has_data)
             self.save_menu.Enable(has_data)
 
@@ -1821,7 +1821,7 @@ class GridFrame(wx.Frame):
                 if dlg.ShowModal() == wx.ID_OK:
                     path = dlg.GetPath()
                 dlg.Destroy()
-                if path != None:
+                if path is not None:
                     if self.parent is not None:
                         data = grid.get_grid_view()
                         self.parent.write_batch_tofile(data=data,
@@ -2006,7 +2006,7 @@ class BatchOutputFrame(wx.Frame):
                 if dlg.ShowModal() == wx.ID_OK:
                     path = dlg.GetPath()
                 dlg.Destroy()
-                if path != None:
+                if path is not None:
                     if self.parent is not None and  self.data is not None:
                         self.parent.write_batch_tofile(data=self.data,
                                                        file_name=path,

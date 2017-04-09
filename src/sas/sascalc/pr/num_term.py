@@ -66,7 +66,7 @@ class NTermEstimator(object):
         self.err_list = []
         self.alpha_list = []
         for k in range(self.nterm_min, self.nterm_max, 1):
-            if self.isquit_func != None:
+            if self.isquit_func is not None:
                 self.isquit_func()
             best_alpha, message, _ = inver.estimate_alpha(k)
             inver.alpha = best_alpha

@@ -301,7 +301,7 @@ class Plugin(PluginBase):
         """
         Make new model
         """
-        if self.new_model_frame != None:
+        if self.new_model_frame is not None:
             self.new_model_frame.Show(False)
             self.new_model_frame.Show(True)
         else:
@@ -440,7 +440,7 @@ class Plugin(PluginBase):
             msg = "%s already opened\n" % str(page.window_caption)
             wx.PostEvent(self.parent, StatusEvent(status=msg))
 
-        if page != None:
+        if page is not None:
             return set_focus_page(page)
         if caption == "Const & Simul Fit":
             self.sim_page = self.fit_panel.add_sim_page(caption=caption)
@@ -633,7 +633,7 @@ class Plugin(PluginBase):
             # Load fitting state
             state = self.temp_state[self.state_index]
             #panel state should have model selection to set_state
-            if state.formfactorcombobox != None:
+            if state.formfactorcombobox is not None:
                 #set state
                 data = self.parent.create_gui_data(state.data)
                 data.group_id = state.data.group_id
@@ -1015,7 +1015,7 @@ class Plugin(PluginBase):
                 wx.PostEvent(self.parent, evt)
                 return False
         ## If a thread is already started, stop it
-        #if self.calc_fit!= None and self.calc_fit.isrunning():
+        #if self.calc_fitis not None and self.calc_fit.isrunning():
         #    self.calc_fit.stop()
         msg = "Fitting is in progress..."
         wx.PostEvent(self.parent, StatusEvent(status=msg, type="progress"))
@@ -1105,7 +1105,7 @@ class Plugin(PluginBase):
         try:
             page = self.fit_panel.add_empty_page()
             # add data associated to the page created
-            if page != None:
+            if page is not None:
                 evt = StatusEvent(status="Page Created", info="info")
                 wx.PostEvent(self.parent, evt)
             else:
@@ -1215,7 +1215,7 @@ class Plugin(PluginBase):
         if len(param) > 0:
             for item in param:
                 ## check if constraint
-                if item[0] != None and item[1] != None:
+                if item[0] is not None and item[1] is not None:
                     listOfConstraint.append((item[0], item[1]))
         new_model = model
         fitter.set_model(new_model, fit_id, pars, data=data,
@@ -1456,7 +1456,7 @@ class Plugin(PluginBase):
         cell.label = data.name
         cell.value = index
 
-        if theory_data != None:
+        if theory_data is not None:
             #Suucessful fit
             theory_data.id = wx.NewId()
             theory_data.name = model.name + "[%s]" % str(data.name)
@@ -1543,7 +1543,7 @@ class Plugin(PluginBase):
                     # Make sure we got all results
                     #(CallAfter is important to MAC)
                     try:
-                        #if res != None:
+                        #if res is not None:
                         wx.CallAfter(cpage.onsetValues, res.fitness,
                                      res.param_list,
                                      pvec, stderr)
@@ -2009,7 +2009,7 @@ class Plugin(PluginBase):
         if data_copy.__class__.__name__ == "Data2D":
             if index is None:
                 index = np.ones(len(data_copy.data), dtype=bool)
-            if weight != None:
+            if weight is not None:
                 data_copy.err_data = weight
             # get rid of zero error points
             index = index & (data_copy.err_data != 0)
@@ -2024,7 +2024,7 @@ class Plugin(PluginBase):
             # 1 d theory from model_thread is only in the range of index
             if index is None:
                 index = np.ones(len(data_copy.y), dtype=bool)
-            if weight != None:
+            if weight is not None:
                 data_copy.dy = weight
             if data_copy.dy is None or data_copy.dy == []:
                 dy = np.ones(len(data_copy.y))

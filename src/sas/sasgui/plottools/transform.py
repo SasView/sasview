@@ -187,7 +187,7 @@ def errToX2(x, y=None, dx=None, dy=None):
     :param dx: float value
 
     """
-    if  dx != None:
+    if  dx is not None:
         err = 2 * x * dx
         return math.fabs(err)
     else:
@@ -203,7 +203,7 @@ def errFromX2(x, y=None, dx=None, dy=None):
 
     """
     if x > 0:
-        if dx != None:
+        if dx is not None:
             err = dx / (2 * math.sqrt(x))
         else:
             err = 0
@@ -221,7 +221,7 @@ def errToX4(x, y=None, dx=None, dy=None):
     :param dx: float value
 
     """
-    if dx != None:
+    if dx is not None:
         err = 4 * math.pow(x, 3) * dx
         return math.fabs(err)
     else:
@@ -237,7 +237,7 @@ def errFromX4(x, y=None, dx=None, dy=None):
 
     """
     if x > 0:
-        if dx != None:
+        if dx is not None:
             err = dx / (4 * math.pow(x, 3 / 4))
         else:
             err = 0

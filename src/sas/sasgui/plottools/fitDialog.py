@@ -578,7 +578,7 @@ class LinearFit(wx.Dialog):
                     val = np.exp(cstB)
                     self.I0_tctr.SetValue(format_number(val))
             if self.Rgerr_tctr.IsShown():
-                if rg != None and rg != 0:
+                if rg is not None and rg != 0:
                     value = format_number(3 * float(errA) / (2 * rg))
                 else:
                     value = ''
@@ -592,7 +592,7 @@ class LinearFit(wx.Dialog):
                 value = format_number(_diam)
                 self.Diameter_tctr.SetValue(value)
             if self.Diametererr_tctr.IsShown():
-                if rg != None and rg != 0:
+                if rg is not None and rg != 0:
                     value = format_number(8 * float(errA) / _diam)
                 else:
                     value = ''

@@ -690,7 +690,7 @@ class SLDReader(object):
             output.filename = os.path.basename(path)
             output.set_pix_type('pixel')
             output.set_pixel_symbols('pixel')
-            if vol_pix != None:
+            if vol_pix is not None:
                 output.set_pixel_volumes(vol_pix)
             return output
         except:
@@ -866,7 +866,7 @@ class MagSLD(object):
         self.sld_phi = None
         self.sld_theta = None
         self.pix_symbol = None
-        if sld_mx != None and sld_my != None and sld_mz != None:
+        if sld_mx is not None and sld_my is not None and sld_mz is not None:
             self.set_sldms(sld_mx, sld_my, sld_mz)
         self.set_nodes()
 

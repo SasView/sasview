@@ -55,7 +55,7 @@ class Calc2D(CalcThread):
         if self.qmin is None:
             self.qmin = 0
         if self.qmax is None:
-            if self.data != None:
+            if self.data is not None:
                 newx = math.pow(max(math.fabs(self.data.xmax),
                                    math.fabs(self.data.xmin)), 2)
                 newy = math.pow(max(math.fabs(self.data.ymax),

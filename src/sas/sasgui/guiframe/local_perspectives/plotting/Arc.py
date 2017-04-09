@@ -70,9 +70,9 @@ class ArcInteractor(_BaseInteractor):
         # Plot inner circle
         x = []
         y = []
-        if theta1 != None:
+        if theta1 is not None:
             self.theta1 = theta1
-        if theta2 != None:
+        if theta2 is not None:
             self.theta2 = theta2
         while self.theta2 < self.theta1:
             self.theta2 += (2 * math.pi)

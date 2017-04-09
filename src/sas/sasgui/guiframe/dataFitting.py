@@ -153,10 +153,10 @@ class Data1D(PlotData1D, LoadData1D):
         result.y = result.y[ind]
         result.lam = np.append(self.lam, other.lam)
         result.lam = result.lam[ind]
-        if result.dlam != None:
+        if result.dlam is not None:
             result.dlam = np.append(self.dlam, other.dlam)
             result.dlam = result.dlam[ind]
-        if result.dy != None:
+        if result.dy is not None:
             result.dy = np.append(self.dy, other.dy)
             result.dy = result.dy[ind]
         if result.dx is not None:
@@ -306,7 +306,7 @@ class Theory1D(PlotTheory1D, LoadData1D):
         result.y = result.y[ind]
         result.lam = np.append(self.lam, other.lam)
         result.lam = result.lam[ind]
-        if result.dy != None:
+        if result.dy is not None:
             result.dy = np.append(self.dy, other.dy)
             result.dy = result.dy[ind]
         if result.dx is not None:

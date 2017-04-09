@@ -328,7 +328,7 @@ class Extrapolator(object):
                                            dy=sigma[idx])
 
         ##power is given only for function = power_law
-        if power != None:
+        if power is not None:
             sigma2 = linearized_data.dy * linearized_data.dy
             a = -(power)
             b = (np.sum(linearized_data.y / sigma2) \
@@ -388,7 +388,7 @@ class InvariantCalculator(object):
         # The data should be private
         self._data = self._get_data(data)
         # get the dxl if the data is smeared: This is done only once on init.
-        if self._data.dxl != None and self._data.dxl.all() > 0:
+        if self._data.dxl is not None and self._data.dxl.all() > 0:
             # assumes constant dxl
             self._smeared = self._data.dxl[0]
 
@@ -578,7 +578,7 @@ class InvariantCalculator(object):
         diq = model.evaluate_model_errors(q)
 
         result_data = LoaderData1D(x=q, y=iq, dy=diq)
-        if self._smeared != None:
+        if self._smeared is not None:
             result_data.dxl = self._smeared * np.ones(len(q))
         return result_data
 

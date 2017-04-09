@@ -906,7 +906,7 @@ class Data1D(plottable_1D, DataInfo):
         result.x = result.x[ind]
         result.y = np.append(self.y, other.y)
         result.y = result.y[ind]
-        if result.dy != None:
+        if result.dy is not None:
             result.dy = np.append(self.dy, other.dy)
             result.dy = result.dy[ind]
         if result.dx is not None:

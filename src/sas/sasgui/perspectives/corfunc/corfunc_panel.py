@@ -319,7 +319,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         # Ask the user the location of the file to write to.
         path = None
         default_save_location = os.getcwd()
-        if self._manager.parent != None:
+        if self._manager.parent is not None:
             default_save_location = self._manager.parent.get_save_location()
 
         dlg = wx.FileDialog(self, "Choose a file",
@@ -328,7 +328,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             default_save_location = os.path.dirname(path)
-            if self._manager.parent != None:
+            if self._manager.parent is not None:
                 self._manager.parent._default_save_location = default_save_location
         else:
             return None

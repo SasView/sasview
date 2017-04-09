@@ -608,7 +608,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             msg += " to perform a compution..."
             wx.PostEvent(self.parent, StatusEvent(status=msg))
         # set a state for this computation for saving
-        elif event != None:
+        elif event is not None:
             self._set_compute_state(state='compute')
             self._set_bookmark_flag(True)
             msg = "\n\nStarting a new invariant computation..."
@@ -717,7 +717,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         #enable the button_ok for more details
         self._set_preview_flag(True)
 
-        if event != None:
+        if event is not None:
             self._set_preview_flag(True)
             self._set_save_flag(True)
             wx.PostEvent(self.parent,
@@ -1021,7 +1021,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         # Set defaults
         self.state.saved_state['state_num'] = 0
         self.state.saved_state['compute_num'] = 0
-        if self._data != None:
+        if self._data is not None:
             self.state.saved_state['file'] = str(self._data.name)
         else:
             self.state.saved_state['file'] = 'None'
@@ -1243,7 +1243,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         # Ask the user the location of the file to write to.
         path = None
-        if self.parent != None:
+        if self.parent is not None:
             self._default_save_location = self.parent.get_save_location()
         if self._default_save_location is None:
             self._default_save_location = os.getcwd()
@@ -1253,7 +1253,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             self._default_save_location = os.path.dirname(path)
-            if self.parent != None:
+            if self.parent is not None:
                 self.parent._default_save_location = \
                     self._default_save_location
         else:
@@ -1392,7 +1392,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         Enable and disable the power value editing
         """
-        if event != None:
+        if event is not None:
             self._set_bookmark_flag(True)
             self._set_preview_flag(False)
 
@@ -1410,7 +1410,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         Disable or enable some button if the user enable low q extrapolation
         """
-        if event != None:
+        if event is not None:
             self._set_bookmark_flag(True)
             self._set_preview_flag(False)
 
@@ -1437,7 +1437,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         Enable editing power law section at low q range
         """
-        if event != None:
+        if event is not None:
             self._set_bookmark_flag(True)
             self._set_preview_flag(False)
         if self.guinier.GetValue():
@@ -1536,7 +1536,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         Enable and disable the power value editing
         """
-        if event != None:
+        if event is not None:
             self._set_bookmark_flag(True)
 
             self._set_preview_flag(False)
@@ -1553,7 +1553,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         Disable or enable some button if the user enable high q extrapolation
         """
-        if event != None:
+        if event is not None:
             self._set_bookmark_flag(True)
             self._set_preview_flag(False)
         if self.enable_high_cbox.GetValue():
