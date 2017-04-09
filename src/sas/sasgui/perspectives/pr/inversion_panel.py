@@ -939,7 +939,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         """
         Choose a new input file for I(q)
         """
-        if not self._manager is None:
+        if self._manager is not None:
             self.plot_data.SetValue(str(data.name))
             try:
                 self._manager.show_data(data=data, reset=True)

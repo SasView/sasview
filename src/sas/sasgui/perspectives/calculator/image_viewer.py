@@ -41,15 +41,15 @@ class ImageView:
         load image files
         """
         parent = self.parent
-        if parent == None:
+        if parent is None:
             location = os.getcwd()
         else:
             location = parent._default_save_location
         path_list = self.choose_data_file(location=location)
-        if path_list == None:
+        if path_list is None:
             return
-        if len(path_list) >= 0 and not(path_list[0]is None):
-            if parent != None:
+        if len(path_list) >= 0 and path_list[0] is not None:
+            if parent is not None:
                 parent._default_save_location = os.path.dirname(path_list[0])
         err_msg = ''
         for file_path in path_list:
