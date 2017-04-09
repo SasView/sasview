@@ -59,28 +59,31 @@ class SldPanel(wx.Panel, PanelBase):
         self.SetWindowVariant(variant=FONT_VARIANT)
         # Object that receive status event
         self.base = base
-        self.wavelength = WAVELENGTH
+        self.neutron_wavelength = WAVELENGTH
+        self.xray_wavelength = WAVELENGTH
         self.parent = parent
         #layout attribute
         self.compound_ctl = None
         self.density_ctl = None
         self.compound = ""
         self.density = ""
-        self.wavelength_ctl = None
+        self.neutron_wavelength_ctl = None
+        self.xray_wavelength_ctl = None
+        self.xray_cbox = None
         self.neutron_sld_real_ctl = None
         self.neutron_sld_im_ctl = None
-        self.mo_ka_sld_real_ctl = None
-        self.mo_ka_sld_im_ctl = None
-        self.cu_ka_sld_real_ctl = None
-        self.cu_ka_sld_im_ctl = None
+        self.xray_sld_real_ctl = None
+        self.xray_sld_im_ctl = None
         self.neutron_abs_ctl = None
         self.neutron_inc_ctl = None
         self.neutron_length_ctl = None
         self.button_calculate = None
+        self.xray_source = None
         #Draw the panel
         self._do_layout()
         self.SetAutoLayout(True)
         self.Layout()
+        self.fill_xray_cbox()
 
     def _do_layout(self):
         """
@@ -107,10 +110,19 @@ class SldPanel(wx.Panel, PanelBase):
         density_txt = wx.StaticText(self, -1, 'Density ')
         self.density_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, -1))
         unit_density_txt = wx.StaticText(self, -1, unit_density)
-        wavelength_txt = wx.StaticText(self, -1, 'Wavelength ')
-        self.wavelength_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, -1))
-        self.wavelength_ctl.SetValue(str(self.wavelength))
-        unit_a_txt = wx.StaticText(self, -1, unit_a)
+        neutron_wavelength_txt = wx.StaticText(self, -1, 'Neutron wavelength')
+        self.neutron_wavelength_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, -1))
+        self.neutron_wavelength_ctl.SetValue(str(self.neutron_wavelength))
+        xray_wavelength_txt = wx.StaticText(self, -1, 'X-ray wavelength')
+        self.xray_wavelength_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, -1))
+        self.xray_wavelength_ctl.SetValue(str(self.xray_wavelength))
+        neutron_unit_a_txt = wx.StaticText(self, -1, unit_a)
+
+        self.xray_cbox = wx.ComboBox(self, -1, size=(70, 20), style=wx.CB_READONLY)
+        xray_cbox_tip = "Select an element, wavelength or energy"
+        self.xray_cbox.SetToolTipString(xray_cbox_tip)
+        wx.EVT_COMBOBOX(self.xray_cbox, -1, self.on_select_xray)
+
         iy = 0
         ix = 0
         sizer_input.Add(compound_txt, (iy, ix), (1, 1),
@@ -130,13 +142,23 @@ class SldPanel(wx.Panel, PanelBase):
                             wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         iy += 1
         ix = 0
-        sizer_input.Add(wavelength_txt, (iy, ix), (1, 1),
+        sizer_input.Add(neutron_wavelength_txt, (iy, ix), (1, 1),
                              wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
         ix += 1
-        sizer_input.Add(self.wavelength_ctl, (iy, ix), (1, 1),
+        sizer_input.Add(self.neutron_wavelength_ctl, (iy, ix), (1, 1),
                             wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         ix += 1
-        sizer_input.Add(unit_a_txt, (iy, ix), (1, 1),
+        sizer_input.Add(neutron_unit_a_txt, (iy, ix), (1, 1),
+                            wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+        iy += 1
+        ix = 0
+        sizer_input.Add(xray_wavelength_txt, (iy, ix), (1, 1),
+                             wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+        ix += 1
+        sizer_input.Add(self.xray_wavelength_ctl, (iy, ix), (1, 1),
+                            wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+        ix += 1
+        sizer_input.Add(self.xray_cbox, (iy, ix), (1, 1),
                             wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         boxsizer1.Add(sizer_input)
         sizer1.Add(boxsizer1, 0, wx.EXPAND | wx.ALL, 10)
@@ -150,34 +172,23 @@ class SldPanel(wx.Panel, PanelBase):
         self.neutron_sld_real_ctl = wx.TextCtrl(self, -1,
                                                  size=(_BOX_WIDTH, -1))
         self.neutron_sld_real_ctl.SetEditable(False)
-        self.neutron_sld_real_ctl.SetToolTipString("Neutron SLD real.")
+        self.neutron_sld_real_ctl.SetToolTipString("Neutron SLD real")
         self.neutron_sld_im_ctl = wx.TextCtrl(self, -1,
                                               size=(_BOX_WIDTH, -1))
         self.neutron_sld_im_ctl.SetEditable(False)
-        self.neutron_sld_im_ctl.SetToolTipString("Neutron SLD imaginary.")
+        self.neutron_sld_im_ctl.SetToolTipString("Neutron SLD imaginary")
         neutron_sld_units_txt = wx.StaticText(self, -1, unit_sld)
 
-        cu_ka_sld_txt = wx.StaticText(self, -1, 'Cu Ka SLD')
-        self.cu_ka_sld_real_ctl = wx.TextCtrl(self, -1,
+        xray_sld_txt = wx.StaticText(self, -1, 'X-ray SLD')
+        self.xray_sld_real_ctl = wx.TextCtrl(self, -1,
                                                size=(_BOX_WIDTH, -1))
-        self.cu_ka_sld_real_ctl.SetEditable(False)
-        self.cu_ka_sld_real_ctl.SetToolTipString("Cu Ka SLD real.")
-        self.cu_ka_sld_im_ctl = wx.TextCtrl(self, -1,
+        self.xray_sld_real_ctl.SetEditable(False)
+        self.xray_sld_real_ctl.SetToolTipString("X-ray SLD real")
+        self.xray_sld_im_ctl = wx.TextCtrl(self, -1,
                                             size=(_BOX_WIDTH, -1))
-        self.cu_ka_sld_im_ctl.SetEditable(False)
-        self.cu_ka_sld_im_ctl.SetToolTipString("Cu Ka SLD imaginary.")
-        cu_ka_sld_units_txt = wx.StaticText(self, -1, unit_sld)
-
-        mo_ka_sld_txt = wx.StaticText(self, -1, 'Mo Ka SLD')
-        self.mo_ka_sld_real_ctl = wx.TextCtrl(self, -1,
-                                               size=(_BOX_WIDTH, -1))
-        self.mo_ka_sld_real_ctl.SetEditable(False)
-        self.mo_ka_sld_real_ctl.SetToolTipString("Mo Ka SLD real.")
-        self.mo_ka_sld_im_ctl = wx.TextCtrl(self, -1,
-                                             size=(_BOX_WIDTH, -1))
-        self.mo_ka_sld_im_ctl.SetEditable(False)
-        self.mo_ka_sld_im_ctl.SetToolTipString("Mo Ka SLD imaginary.")
-        mo_ka_sld_units_txt = wx.StaticText(self, -1, unit_sld)
+        self.xray_sld_im_ctl.SetEditable(False)
+        self.xray_sld_im_ctl.SetToolTipString("X-ray SLD imaginary")
+        xray_sld_units_txt = wx.StaticText(self, -1, unit_sld)
 
         neutron_inc_txt = wx.StaticText(self, -1, 'Neutron Inc. Xs')
         self.neutron_inc_ctl = wx.TextCtrl(self, -1,
@@ -218,35 +229,19 @@ class SldPanel(wx.Panel, PanelBase):
                          (iy, ix), (1, 1), wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         iy += 1
         ix = 0
-        sizer_output.Add(cu_ka_sld_txt, (iy, ix), (1, 1),
+        sizer_output.Add(xray_sld_txt, (iy, ix), (1, 1),
                              wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
         ix += 1
-        sizer_output.Add(self.cu_ka_sld_real_ctl, (iy, ix), (1, 1),
+        sizer_output.Add(self.xray_sld_real_ctl, (iy, ix), (1, 1),
                             wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         ix += 1
         sizer_output.Add(wx.StaticText(self, -1, i_complex),
                          (iy, ix), (1, 1), wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         ix += 1
-        sizer_output.Add(self.cu_ka_sld_im_ctl,
+        sizer_output.Add(self.xray_sld_im_ctl,
                          (iy, ix), (1, 1), wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         ix += 1
-        sizer_output.Add(cu_ka_sld_units_txt,
-                         (iy, ix), (1, 1), wx.EXPAND | wx.ADJUST_MINSIZE, 0)
-        iy += 1
-        ix = 0
-        sizer_output.Add(mo_ka_sld_txt, (iy, ix), (1, 1),
-                             wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
-        ix += 1
-        sizer_output.Add(self.mo_ka_sld_real_ctl, (iy, ix), (1, 1),
-                            wx.EXPAND | wx.ADJUST_MINSIZE, 0)
-        ix += 1
-        sizer_output.Add(wx.StaticText(self, -1, i_complex),
-                         (iy, ix), (1, 1), wx.EXPAND | wx.ADJUST_MINSIZE, 0)
-        ix += 1
-        sizer_output.Add(self.mo_ka_sld_im_ctl,
-                         (iy, ix), (1, 1), wx.EXPAND | wx.ADJUST_MINSIZE, 0)
-        ix += 1
-        sizer_output.Add(mo_ka_sld_units_txt,
+        sizer_output.Add(xray_sld_units_txt,
                          (iy, ix), (1, 1), wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         iy += 1
         ix = 0
@@ -309,6 +304,24 @@ class SldPanel(wx.Panel, PanelBase):
         vbox.Fit(self)
         self.SetSizer(vbox)
 
+    def fill_xray_cbox(self):
+        """
+        fill the x-ray combobox with the sources
+        """
+        # source_list = ['Element', 'Energy (keV)', 'Wavelength (A)']
+        source_list = ['[A]', '[keV]', 'Element']
+        for source in source_list:
+            pos = self.xray_cbox.Append(str(source))
+            self.xray_cbox.SetClientData(pos, str(source.strip()))
+        self.xray_cbox.SetSelection(0)
+
+    def on_select_xray(self, event=None):
+        """
+        On Selecting a source
+        """
+        item = event.GetEventObject()
+        self.xray_source = item.GetValue().strip()
+
     def on_help(self, event):
         """
         Bring up the SLD Documentation whenever
@@ -362,16 +375,31 @@ class SldPanel(wx.Panel, PanelBase):
             flag = False
             msg += "Error for Density value :expect float"
 
-        self.wavelength = self.wavelength_ctl.GetValue()
-        if str(self.wavelength).lstrip().rstrip() == "":
-            self.wavelength = WAVELENGTH
-            self.wavelength_ctl.SetValue(str(WAVELENGTH))
-            self.wavelength_ctl.SetBackgroundColour(wx.WHITE)
-            self.wavelength_ctl.Refresh()
+        self.neutron_wavelength = self.neutron_wavelength_ctl.GetValue()
+        self.xray_wavelength = self.xray_wavelength_ctl.GetValue()
+
+        if str(self.neutron_wavelength).lstrip().rstrip() == "":
+            self.neutron_wavelength = WAVELENGTH
+            self.neutron_wavelength_ctl.SetValue(str(WAVELENGTH))
+            self.neutron_wavelength_ctl.SetBackgroundColour(wx.WHITE)
+            self.neutron_wavelength_ctl.Refresh()
             msg += "Default value for wavelength is 6.0"
         else:
-            if check_float(self.wavelength_ctl):
-                self.wavelength = float(self.wavelength)
+            if check_float(self.neutron_wavelength_ctl):
+                self.neutron_wavelength = float(self.neutron_wavelength)
+            else:
+                flag = False
+                msg += "Error for wavelength value :expect float"
+
+        if str(self.xray_wavelength).lstrip().rstrip() == "":
+            self.xray_wavelength = WAVELENGTH
+            self.xray_wavelength_ctl.SetValue(str(WAVELENGTH))
+            self.xray_wavelength_ctl.SetBackgroundColour(wx.WHITE)
+            self.xray_wavelength_ctl.Refresh()
+            msg += "Default value for wavelength is 6.0"
+        else:
+            if check_float(self.xray_wavelength_ctl):
+                self.xray_wavelength = float(self.xray_wavelength)
             else:
                 flag = False
                 msg += "Error for wavelength value :expect float"
@@ -429,33 +457,39 @@ class SldPanel(wx.Panel, PanelBase):
             (sld_real, sld_im, _), (_, absorp, incoh), \
                         length = neutron_scattering(compound=self.compound,
                                    density=self.density,
-                                   wavelength=self.wavelength)
-            cu_real, cu_im = self.calculate_sld_helper(element="Cu",
-                                                 density=self.density,
-                                        molecule_formula=self.sld_formula)
-            mo_real, mo_im = self.calculate_sld_helper(element="Mo",
-                                                       density=self.density,
-                                     molecule_formula=self.sld_formula)
+                                   wavelength=self.neutron_wavelength)
+            if self.xray_source == "[A]":
+                # xray_real, xray_im = self.calculate_sld_helper(element=self.xray_wavelength,
+                #                                      density=self.density,
+                #                             molecule_formula=self.sld_formula)
+                pass
+            elif self.xray_source == "[keV]":
+                # xray_real, xray_im = self.calculate_sld_helper(element=self.xray_wavelength,
+                #                                      density=self.density,
+                #                             molecule_formula=self.sld_formula)
+                pass
+            elif self.xray_source == "Element":
+                # xray_real, xray_im = self.calculate_sld_helper(element=self.xray_wavelength,
+                #                                      density=self.density,
+                #                             molecule_formula=self.sld_formula)
+                pass
             # set neutron sld values
             val = format_number(sld_real * _SCALE)
             self.neutron_sld_real_ctl.SetValue(val)
             val = format_number(math.fabs(sld_im) * _SCALE)
             self.neutron_sld_im_ctl.SetValue(val)
             # Compute the Cu SLD
-            self.cu_ka_sld_real_ctl.SetValue(format_number(cu_real * _SCALE))
-            val = format_number(math.fabs(cu_im) * _SCALE)
-            self.cu_ka_sld_im_ctl.SetValue(val)
-            # Compute the Mo SLD
-            self.mo_ka_sld_real_ctl.SetValue(format_number(mo_real * _SCALE))
-            val = format_number(math.fabs(mo_im) * _SCALE)
-            self.mo_ka_sld_im_ctl.SetValue(val)
+            self.xray_sld_real_ctl.SetValue(format_number(xray_real * _SCALE))
+            val = format_number(math.fabs(xray_im) * _SCALE)
+            self.xray_sld_im_ctl.SetValue(val)
             # set incoherence and absorption
             self.neutron_inc_ctl.SetValue(format_number(incoh))
             self.neutron_abs_ctl.SetValue(format_number(absorp))
             # Neutron length
             self.neutron_length_ctl.SetValue(format_number(length))
             # display wavelength
-            self.wavelength_ctl.SetValue(str(self.wavelength))
+            #self.wavelength_ctl.SetValue(str(self.wavelength))
+            #self.wavelength_ctl.SetValue(str(self.wavelength))
         except:
             if self.base is not None:
                 msg = "SLD Calculator: %s" % (sys.exc_value)
