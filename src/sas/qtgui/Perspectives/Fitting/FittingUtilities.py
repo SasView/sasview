@@ -35,14 +35,15 @@ def getMultiplicity(model):
             param_name = iter_params[0].name[:iter_params[0].name.index('[')]
     return (param_name, param_length)
 
-def addParametersToModel(parameters, model):
+def addParametersToModel(parameters, is2D):
     """
     Update local ModelModel with sasmodel parameters
     """
     multishell_parameters = getIterParams(parameters)
     multishell_param_name, _ = getMultiplicity(parameters)
-
-    for param in parameters.iq_parameters:
+    params = parameters.iqxy_parameters if is2D else parameters.iq_parameters
+    item = []
+    for param in params:
         # don't include shell parameters
         if param.name == multishell_param_name:
             continue
@@ -79,13 +80,16 @@ def addParametersToModel(parameters, model):
         item3 = QtGui.QStandardItem(str(param.limits[0]))
         item4 = QtGui.QStandardItem(str(param.limits[1]))
         item5 = QtGui.QStandardItem(param.units)
-        model.appendRow([item1, item2, item3, item4, item5])
+        item.append([item1, item2, item3, item4, item5])
+    return item
 
-def addSimpleParametersToModel(parameters, model):
+def addSimpleParametersToModel(parameters, is2D):
     """
     Update local ModelModel with sasmodel parameters
     """
-    for param in parameters.iq_parameters:
+    params = parameters.iqxy_parameters if is2D else parameters.iq_parameters
+    item = []
+    for param in params:
         # Create the top level, checkable item
         item_name = param.name
         item1 = QtGui.QStandardItem(item_name)
@@ -98,7 +102,8 @@ def addSimpleParametersToModel(parameters, model):
         item4 = QtGui.QStandardItem(str(param.limits[0]))
         item5 = QtGui.QStandardItem(str(param.limits[1]))
         item6 = QtGui.QStandardItem(param.units)
-        model.appendRow([item1, item2, item4, item5, item6])
+        item.append([item1, item2, item4, item5, item6])
+    return item
 
 def addCheckedListToModel(model, param_list):
     """

@@ -200,6 +200,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """ Enable/disable the controls dependent on 1D/2D data instance """
         self.chkMagnetism.setEnabled(isChecked)
         self.is2D = isChecked
+        # Reload the current model
+        self.onSelectModel()
 
     def initializeControls(self):
         """
@@ -670,7 +672,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.addBackgroundToModel(self._model_model)
 
         # Update the QModel
-        FittingUtilities.addParametersToModel(self.model_parameters, self._model_model)
+        new_rows = FittingUtilities.addParametersToModel(self.model_parameters, self.is2D)
+        for row in new_rows:
+            self._model_model.appendRow(row)
         # Update the counter used for multishell display
         self._last_model_row = self._model_model.rowCount()
 
@@ -680,7 +684,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         if structure_factor is not None and structure_factor != "None":
             structure_module = generate.load_kernel_module(structure_factor)
             structure_parameters = modelinfo.make_parameter_table(getattr(structure_module, 'parameters', []))
-            FittingUtilities.addSimpleParametersToModel(structure_parameters, self._model_model)
+            new_rows = FittingUtilities.addSimpleParametersToModel(structure_parameters, self.is2D)
+            for row in new_rows:
+                self._model_model.appendRow(row)
             # Update the counter used for multishell display
             self._last_model_row = self._model_model.rowCount()
         else:
@@ -723,7 +729,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         property_name = str(self._model_model.headerData(1, model_column).toPyObject()) # Value, min, max, etc.
 
         self.kernel_module.params[parameter_name] = value
-        print "UPDATED %s / %s with %0.3f." %(parameter_name, property_name, value)
 
         # min/max to be changed in self.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
         # magnetic params in self.kernel_module.details['M0:parameter_name'] = value

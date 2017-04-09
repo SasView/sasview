@@ -24,6 +24,8 @@ from sas.qtgui.Plotter2D import Plotter2D
 from sas.qtgui.DroppableDataLoadWidget import DroppableDataLoadWidget
 from sas.qtgui.MaskEditor import MaskEditor
 
+import Perspectives
+
 class DataExplorerWindow(DroppableDataLoadWidget):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
@@ -90,8 +92,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
 
-        self._perspective = self.parent.perspective()
-
         # Proxy model for showing a subset of Data1D/Data2D content
         self.data_proxy = QtGui.QSortFilterProxyModel(self)
         self.data_proxy.setSourceModel(self.model)
@@ -150,9 +150,19 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Populate the Perspective combobox and define callbacks
         """
+        available_perspectives = sorted([p for p in Perspectives.PERSPECTIVES.keys()])
+        if available_perspectives:
+            self.cbFitting.clear()
+            self.cbFitting.addItems(available_perspectives)
         self.cbFitting.currentIndexChanged.connect(self.updatePerspectiveCombo)
         # Set the index so we see the default (Fitting)
         self.updatePerspectiveCombo(0)
+
+    def _perspective(self):
+        """
+        Returns the current perspective
+        """
+        return self.parent.perspective()
 
     def loadFromURL(self, url):
         """
@@ -312,9 +322,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Send selected item data to the current perspective and set the relevant notifiers
         """
-        # should this reside on GuiManager or here?
-        self._perspective = self.parent.perspective()
-
         # Set the signal handlers
         self.communicator.updateModelFromPerspectiveSignal.connect(self.updateModelFromPerspective)
 
@@ -331,8 +338,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             return
 
         # Which perspective has been selected?
-        if len(selected_items) > 1 and not self._perspective.allowBatch():
-            msg = self._perspective.title() + " does not allow multiple data."
+        if len(selected_items) > 1 and not self._perspective().allowBatch():
+            msg = self._perspective().title() + " does not allow multiple data."
             msgbox = QtGui.QMessageBox()
             msgbox.setIcon(QtGui.QMessageBox.Critical)
             msgbox.setText(msg)
@@ -341,7 +348,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             return
 
         # Notify the GuiManager about the send request
-        self._perspective.setData(data_item=selected_items)
+        self._perspective().setData(data_item=selected_items)
 
     def freezeTheory(self, event):
         """
@@ -423,6 +430,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Notify the gui manager about the new perspective chosen.
         """
         self.communicator.perspectiveChangedSignal.emit(self.cbFitting.currentText())
+        self.chkBatch.setEnabled(self.parent.perspective().allowBatch())
 
     def newPlot(self):
         """
