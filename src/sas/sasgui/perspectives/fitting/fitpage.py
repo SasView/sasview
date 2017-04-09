@@ -1238,7 +1238,11 @@ class FitPage(BasicPage):
             custom_model = CUSTOM_MODEL
             mod_cat = self.categorybox.GetStringSelection()
             if mod_cat == custom_model:
+                temp_id = self.model.id
                 temp = self.parent.update_model_list()
+                for v in self.parent.model_dictionary.values():
+                    if v.id == temp_id:
+                        self.model = v()
                 if temp:
                     self.model_list_box = temp
                     current_val = self.formfactorbox.GetLabel()
