@@ -15,7 +15,7 @@ class sesans_reader(unittest.TestCase):
         """
             Test .SES file loading
         """
-        f = self.loader.load("sphere2micron.ses")
+        f = self.loader.load("sesans_examples/sphere2micron.ses")
         # self.assertEqual(f, 5)
         self.assertEqual(len(f.x), 40)
         self.assertEqual(f.x[0], 391.56)
@@ -32,7 +32,7 @@ class sesans_reader(unittest.TestCase):
         """
             Test .SES loading on a TOF dataset
         """
-        f = self.loader.load("sphere_isis.ses")
+        f = self.loader.load("sesans_examples/sphere_isis.ses")
         self.assertEqual(len(f.x), 57)
         self.assertEqual(f.x[-1], 19303.4)
         self.assertEqual(f.source.wavelength[-1], 13.893668)
