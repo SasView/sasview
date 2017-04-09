@@ -96,31 +96,28 @@ class FittingUtilitiesTest(unittest.TestCase):
         kernel_module = generate.load_kernel_module(model_name)
         barbell_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
 
-        model = QtGui.QStandardItemModel()
-
-        FittingUtilities.addParametersToModel(barbell_parameters, model)
+        params = FittingUtilities.addParametersToModel(barbell_parameters, True)
 
         # Test the resulting model
-        self.assertEqual(model.rowCount(), 5)
-        self.assertTrue(model.item(0).isCheckable())
-        self.assertEqual(model.item(0).text(), "sld")
-        self.assertEqual(model.item(1).text(), "sld_solvent")
+        self.assertEqual(len(params), 7)
+        self.assertEqual(len(params[0]), 5)
+        self.assertTrue(params[0][0].isCheckable())
+        self.assertEqual(params[0][0].text(), "sld")
+        self.assertEqual(params[1][0].text(), "sld_solvent")
 
         # Use a multi-shell parameter to see that the method includes shell params
         model_name = "core_multi_shell"
         kernel_module = generate.load_kernel_module(model_name)
         multi_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
 
-        model = QtGui.QStandardItemModel()
-
-        FittingUtilities.addParametersToModel(multi_parameters, model)
+        params = FittingUtilities.addParametersToModel(multi_parameters, False)
 
         # Test the resulting model
-        self.assertEqual(model.rowCount(), 3)
-        self.assertTrue(model.item(0).isCheckable())
-        self.assertEqual(model.item(0).text(), "sld_core")
-        self.assertEqual(model.item(1).text(), "radius")
-        self.assertEqual(model.item(2).text(), "sld_solvent")
+        self.assertEqual(len(params), 3)
+        self.assertEqual(len(params[0]), 5)
+        self.assertTrue(params[0][0].isCheckable())
+        self.assertEqual(params[0][0].text(), "sld_core")
+        self.assertEqual(params[1][0].text(), "radius")
 
     def testAddSimpleParametersToModel(self):
         """
@@ -131,15 +128,14 @@ class FittingUtilitiesTest(unittest.TestCase):
         kernel_module = generate.load_kernel_module(model_name)
         multi_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
 
-        model = QtGui.QStandardItemModel()
-
-        FittingUtilities.addParametersToModel(multi_parameters, model)
+        params = FittingUtilities.addParametersToModel(multi_parameters, True)
 
         # Test the resulting model
-        self.assertEqual(model.rowCount(), 3)
-        self.assertTrue(model.item(0).isCheckable())
-        self.assertEqual(model.item(0).text(), "sld_core")
-        self.assertEqual(model.item(1).text(), "radius")
+        self.assertEqual(len(params), 3)
+        self.assertEqual(len(params[0]), 5)
+        self.assertTrue(params[0][0].isCheckable())
+        self.assertEqual(params[0][0].text(), "sld_core")
+        self.assertEqual(params[1][0].text(), "radius")
 
     def testAddCheckedListToModel(self):
         """
