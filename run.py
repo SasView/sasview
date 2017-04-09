@@ -22,7 +22,10 @@ from contextlib import contextmanager
 from os.path import join as joinpath
 from os.path import abspath, dirname
 
-from sasview.logger_config import SetupLogger
+try:
+    from sasview.logger_config import SetupLogger
+except ImportError:
+    from logger_config import SetupLogger
 
 l = SetupLogger(__name__)
 logger = l.config_development()
