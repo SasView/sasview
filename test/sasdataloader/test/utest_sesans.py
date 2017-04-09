@@ -77,5 +77,15 @@ class sesans_reader(unittest.TestCase):
             RuntimeError,
             self.loader,
             "sesans_examples/next_gen.ses")
+
+    def test_sesans_mandatory_headers(self):
+        """
+            Confirm that sesans files throw an exception if one of the mandator headers is missing.
+        """
+        self.assertRaises(
+            RuntimeError,
+            self.loader,
+            "sesans_examples/no_wavelength.ses")
+
 if __name__ == "__main__":
     unittest.main()

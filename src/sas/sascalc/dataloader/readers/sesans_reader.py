@@ -85,6 +85,11 @@ class Reader:
 
             headers = input_f.readline().split()
 
+            self._insist_header(headers, "SpinEchoLength")
+            self._insist_header(headers, "Depolarisation")
+            self._insist_header(headers, "Depolarisation_error")
+            self._insist_header(headers, "Wavelength")
+
             data = np.loadtxt(input_f)
             if data.size < 1:
                 raise RuntimeError("{} is empty".format(path))
@@ -138,6 +143,12 @@ class Reader:
                 float(params["Theta_ymax"]),
                 self._unit_fetch("Theta_ymax"))
             return output
+
+    @staticmethod
+    def _insist_header(headers, name):
+        if name not in headers:
+            raise RuntimeError(
+                "Missing {} column in spin echo data".format(name))
 
     @staticmethod
     def _unit_conversion(value, value_unit, default_unit):
