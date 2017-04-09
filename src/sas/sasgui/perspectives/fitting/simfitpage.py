@@ -525,8 +525,11 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
 
     :param event: Triggers on clicking the help button
     """
+        if not self.batch_on:
+            _PageAnchor = "#simultaneous-fit-mode"
+        else: 
+            _PageAnchor = "#combined-batch-fit-mode"
         _TreeLocation = "user/sasgui/perspectives/fitting/fitting_help.html"
-        _PageAnchor = "#simultaneous-fit-mode"
         _doc_viewer = DocumentationWindow(self, self.ID_DOC, _TreeLocation,
                                           _PageAnchor,
                                           "Simultaneous/Constrained Fitting Help")
