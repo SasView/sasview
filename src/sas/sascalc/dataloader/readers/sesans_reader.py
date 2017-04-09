@@ -66,6 +66,9 @@ class Reader:
                 line = input_f.readline()
             self.params = params
 
+            if "FileFormatVersion" not in self.params:
+                raise RuntimeError("SES file missing FileFormatVersion")
+
             if "SpinEchoLength_unit" not in self.params:
                 raise RuntimeError("SpinEchoLength has no units")
             if "Wavelength_unit" not in self.params:
