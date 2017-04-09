@@ -318,8 +318,8 @@ class ModelManagerBase:
         new models were added else return empty dictionary
         """
         new_plugins = self.findModels()
-        if len(new_plugins) > 0:
-            for name, plug in  new_plugins.iteritems():
+        if new_plugins:
+            for name, plug in  new_plugins.items():
                 self.stored_plugins[name] = plug
                 self.plugins.append(plug)
                 self.model_dictionary[name] = plug
