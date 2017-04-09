@@ -5,7 +5,6 @@
 
     Jurrian Bakker
 """
-import logging
 import numpy as np
 import os
 from sas.sascalc.dataloader.data_info import Data1D
@@ -112,7 +111,9 @@ class Reader:
             dy = data[:, headers.index("Depolarisation_error")]
 
             lam_unit = self._unit_fetch("Wavelength")
-            x, x_unit = self._unit_conversion(x, "A", self._unit_fetch("SpinEchoLength"))
+            x, x_unit = self._unit_conversion(x, "A",
+                                              self._unit_fetch(
+                                                  "SpinEchoLength"))
             dx, dx_unit = self._unit_conversion(
                 dx, lam_unit,
                 self._unit_fetch("SpinEchoLength"))
@@ -162,7 +163,7 @@ class Reader:
 
         :param value: The magnitude of the measurement
         :param value_unit: a string containing the final desired unit
-        :param default_unit: a string containing the units of the original measurement
+        :param default_unit: string with the units of the original measurement
         :return: The magnitude of the measurement in the new units
         """
         # (float, string, string) -> float
