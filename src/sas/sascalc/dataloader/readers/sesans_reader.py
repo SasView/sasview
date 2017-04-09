@@ -55,8 +55,6 @@ class Reader:
         else:
             raise RuntimeError("{} is not a file".format(path))
         with open(path, 'r') as input_f:
-            # Read in binary mode since GRASP frequently has no-ascii
-            # characters that brakes the open operation
             line = input_f.readline()
             params = {}
             while not line.startswith("BEGIN_DATA"):
