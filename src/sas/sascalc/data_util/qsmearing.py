@@ -4,7 +4,7 @@
 #####################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation. 
+#project funded by the US National Science Foundation.
 #See the license text in license.txt
 #copyright 2008, University of Tennessee
 ######################################################################
@@ -17,7 +17,7 @@ import numpy as np  # type: ignore
 from numpy import pi, exp # type:ignore
 
 from sasmodels.resolution import Slit1D, Pinhole1D
-from sasmodels.sesans import SesansTransform
+from sasmodels.sesans import SesansTransform, OrientedSesansTransform
 from sasmodels.resolution2d import Pinhole2D
 from .nxsunit import Converter
 
@@ -72,12 +72,13 @@ def smear_selection(data, model = None):
         zaccept = Converter(qunits)(qmax, "1/A"),
         Rmax = 10000000
         # data must have the isoriented flag here!
-        coshankel = SesansTransform(data.x, SElength, zaccept, Rmax)
         # Then return the actual transform, as if it were a smearing function
-        if data.isoriented:
-            return PySmear2D(coshankel)
+        if getattr(data, 'isoriented', False):
+            costransform = OrientedSesansTransform(data.x, SElength, zaccept, Rmax)
+            return PySmear(costransform, model, offset=0)
         else:
-            return PySmear(coshankel, model, offset=0)
+            hankel = SesansTransform(data.x, SElength, zaccept, Rmax)
+            return PySmear(hankel, model, offset=0)
 
     _found_resolution = False
     if data.dx is not None and len(data.dx) == len(data.x):
@@ -137,15 +138,19 @@ class PySmear(object):
         The returned value is of the same length as iq_in, with the range
         first_bin:last_bin set to the resolution smeared values.
         """
-        if last_bin is None: last_bin = len(iq_in)
-        start, end = first_bin + self.offset, last_bin + self.offset
         q_calc = self.resolution.q_calc
-        iq_calc = numpy.empty_like(q_calc)
-        if start > 0:
-            iq_calc[:start] = self.model.evalDistribution(q_calc[:start])
-        if end+1 < len(q_calc):
-            iq_calc[end+1:] = self.model.evalDistribution(q_calc[end+1:])
-        iq_calc[start:end+1] = iq_in[first_bin:last_bin+1]
+        if isinstance(q_calc, tuple):
+            # We are 2D -> 1D!
+            iq_calc = self.model.evalDistribution(q_calc)
+        else:
+            if last_bin is None: last_bin = len(iq_in)
+            start, end = first_bin + self.offset, last_bin + self.offset
+            iq_calc = numpy.empty_like(q_calc)
+            if start > 0:
+                iq_calc[:start] = self.model.evalDistribution(q_calc[:start])
+            if end+1 < len(q_calc):
+                iq_calc[end+1:] = self.model.evalDistribution(q_calc[end+1:])
+            iq_calc[start:end+1] = iq_in[first_bin:last_bin+1]
         smeared = self.resolution.apply(iq_calc)
         return smeared
     __call__ = apply
