@@ -1732,6 +1732,12 @@ class Plugin(PluginBase):
             @param unsmeared_error: data error, rescaled to unsmeared model
         """
         try:
+            number_finite = np.count_nonzero(np.isfinite(y))
+            if number_finite == 0:
+                logger.error("Using the present parameters the model does not return any finite value. ")
+                wx.PostEvent(self.parent, StatusEvent(status=\
+                    "Computing Error: %s" % str("Model did not return any finite value."), info="error"))
+                return
             np.nan_to_num(y)
             new_plot = self.create_theory_1D(x, y, page_id, model, data, state,
                                              data_description=model.name,
@@ -1788,8 +1794,13 @@ class Plugin(PluginBase):
                     self._plot_residuals(page_id=page_id, data=data, fid=fid,
                                          index=index, weight=weight)
 
-            msg = "Computation  completed!"
+            msg = "Computation completed!"
+            if number_finite != len(y):
+                msg += ' PROBLEM: For some Q values the model returns non finite intensities!'
+                logger.error("For some Q values the model returns non finite intensities.")
+            
             wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
+            
         except:
             raise
 
@@ -1816,6 +1827,12 @@ class Plugin(PluginBase):
         Complete get the result of modelthread and create model 2D
         that can be plot.
         """
+        number_finite = np.count_nonzero(np.isfinite(image))
+        if number_finite == 0:
+            logger.error("Using the present parameters the model does not return any finite value. ")
+            wx.PostEvent(self.parent, StatusEvent(status = "Computing Error: %s" % 
+            str("Model did not return any finite value."), info="error"))
+            return
         np.nan_to_num(image)
         new_plot = Data2D(image=image, err_image=data.err_data)
         new_plot.name = model.name + '2d'
@@ -1875,6 +1892,9 @@ class Plugin(PluginBase):
                 self._plot_residuals(page_id=page_id, data=data, fid=fid,
                                       index=index, weight=weight)
         msg = "Computation  completed!"
+        if number_finite != len(image):
+            msg += ' PROBLEM: For some Qx,Qy values the model returns non finite intensities!'
+            logger.error("For some Qx,Qy values the model returns non finite intensities.")
         wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
 
     def _draw_model2D(self, model, page_id, qmin,
