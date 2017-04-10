@@ -2121,7 +2121,7 @@ class ViewerFrame(PARENT_FRAME):
         from session to session
         """
         if custom_config is not None:
-            sas_opencl = os.environ.get("SAS_OPENCL",None)
+            sas_opencl = os.environ.get("SAS_OPENCL")
             new_config_lines = []
             config_file = open(custom_config.__file__)
             config_lines = config_file.readlines()

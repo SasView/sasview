@@ -48,7 +48,7 @@ class KiessigThicknessCalculator(object):
         except:
             return None
         # check if delta_q is zero
-        if dq == 0.0 or dq == None:
+        if dq == 0.0 or dq is None:
             return None
         else:
             # calculate thickness

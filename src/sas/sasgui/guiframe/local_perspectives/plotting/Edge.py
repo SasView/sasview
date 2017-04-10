@@ -62,11 +62,11 @@ class RadiusInteractor(_BaseInteractor):
         """
         Draw the new roughness on the graph.
         """
-        if r1 != None:
+        if r1 is not None:
             self.r1 = r1
-        if r2 != None:
+        if r2 is not None:
             self.r2 = r2
-        if theta != None:
+        if theta is not None:
             self.theta = theta
         x1 = self.r1 * math.cos(self.theta)
         y1 = self.r1 * math.sin(self.theta)

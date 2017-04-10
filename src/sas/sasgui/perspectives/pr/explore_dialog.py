@@ -268,7 +268,7 @@ class ExploreDialog(wx.Dialog):
         # display the results.
         # Note: by design, the output type should always be part of the
         #       results object.
-        if self.results.outputs.has_key(output_type):
+        if output_type in self.results.outputs:
             self.plotpanel.plot.x = self.results.d_max
             self.plotpanel.plot.y = self.results.outputs[output_type][2]
             self.plotpanel.plot.name = '_nolegend_'
