@@ -268,6 +268,8 @@ class Reader(XMLreader):
                     elif setupTagName == "Sesans":
                         self.current_datainfo.isSesans = bool(setupNode.text)
 
+                    elif setupTagName == "yacceptance":
+                        self.current_datainfo.sample.yacceptance = (setupNode.text, units)
                     elif setupTagName == "zacceptance":
                         self.current_datainfo.sample.zacceptance = (setupNode.text, units)
                     elif setupTagName == "Qmean":
@@ -421,10 +423,10 @@ class Reader(XMLreader):
                                     beamUnits = beamNode.attrib.get("unit", "")
                                     beamData = beamNode.text
 
-                                    if beamTagName == "x" and self.parent_class == "beam_size":
+                                    if beamTagName == "x":
                                        self.current_datainfo.source.beam_size.x = beamData
                                        self.current_datainfo.source.beam_size_unit = beamUnits
-                                    elif beamTagName == "y" and self.parent_class == "beam_size":
+                                    elif beamTagName == "y":
                                         self.current_datainfo.source.beam_size.y = beamData
                                         self.current_datainfo.source.beam_size_unit = beamUnits
 
