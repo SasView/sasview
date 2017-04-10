@@ -60,7 +60,7 @@ class SldPanel(wx.Panel, PanelBase):
         # Object that receive status event
         self.base = base
         self.neutron_wavelength = WAVELENGTH
-        self.xray_wavelength = WAVELENGTH
+        self.xray_source_input = WAVELENGTH
         self.parent = parent
         #layout attribute
         self.compound_ctl = None
@@ -68,7 +68,7 @@ class SldPanel(wx.Panel, PanelBase):
         self.compound = ""
         self.density = ""
         self.neutron_wavelength_ctl = None
-        self.xray_wavelength_ctl = None
+        self.xray_source_input_ctl = None
         self.xray_cbox = None
         self.neutron_sld_real_ctl = None
         self.neutron_sld_im_ctl = None
@@ -113,9 +113,9 @@ class SldPanel(wx.Panel, PanelBase):
         neutron_wavelength_txt = wx.StaticText(self, -1, 'Neutron wavelength')
         self.neutron_wavelength_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, -1))
         self.neutron_wavelength_ctl.SetValue(str(self.neutron_wavelength))
-        xray_wavelength_txt = wx.StaticText(self, -1, 'X-ray wavelength')
-        self.xray_wavelength_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, -1))
-        self.xray_wavelength_ctl.SetValue(str(self.xray_wavelength))
+        xray_source_input_txt = wx.StaticText(self, -1, 'X-ray wavelength')
+        self.xray_source_input_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, -1))
+        self.xray_source_input_ctl.SetValue(str(self.xray_source_input))
         neutron_unit_a_txt = wx.StaticText(self, -1, unit_a)
 
         self.xray_cbox = wx.ComboBox(self, -1, size=(70, 20), style=wx.CB_READONLY)
@@ -152,10 +152,10 @@ class SldPanel(wx.Panel, PanelBase):
                             wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         iy += 1
         ix = 0
-        sizer_input.Add(xray_wavelength_txt, (iy, ix), (1, 1),
+        sizer_input.Add(xray_source_input_txt, (iy, ix), (1, 1),
                              wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
         ix += 1
-        sizer_input.Add(self.xray_wavelength_ctl, (iy, ix), (1, 1),
+        sizer_input.Add(self.xray_source_input_ctl, (iy, ix), (1, 1),
                             wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         ix += 1
         sizer_input.Add(self.xray_cbox, (iy, ix), (1, 1),
@@ -308,12 +308,12 @@ class SldPanel(wx.Panel, PanelBase):
         """
         fill the x-ray combobox with the sources
         """
-        # source_list = ['Element', 'Energy (keV)', 'Wavelength (A)']
         source_list = ['[A]', '[keV]', 'Element']
         for source in source_list:
             pos = self.xray_cbox.Append(str(source))
             self.xray_cbox.SetClientData(pos, str(source.strip()))
         self.xray_cbox.SetSelection(0)
+        self.xray_source = source_list[0]
 
     def on_select_xray(self, event=None):
         """
@@ -376,7 +376,7 @@ class SldPanel(wx.Panel, PanelBase):
             msg += "Error for Density value :expect float"
 
         self.neutron_wavelength = self.neutron_wavelength_ctl.GetValue()
-        self.xray_wavelength = self.xray_wavelength_ctl.GetValue()
+        self.xray_source_input = self.xray_source_input_ctl.GetValue()
 
         if str(self.neutron_wavelength).lstrip().rstrip() == "":
             self.neutron_wavelength = WAVELENGTH
@@ -391,18 +391,28 @@ class SldPanel(wx.Panel, PanelBase):
                 flag = False
                 msg += "Error for wavelength value :expect float"
 
-        if str(self.xray_wavelength).lstrip().rstrip() == "":
-            self.xray_wavelength = WAVELENGTH
-            self.xray_wavelength_ctl.SetValue(str(WAVELENGTH))
-            self.xray_wavelength_ctl.SetBackgroundColour(wx.WHITE)
-            self.xray_wavelength_ctl.Refresh()
+        if str(self.xray_source_input).lstrip().rstrip() == "":
+            self.xray_source_input = WAVELENGTH
+            self.xray_source_input_ctl.SetValue(str(WAVELENGTH))
+            self.xray_source_input_ctl.SetBackgroundColour(wx.WHITE)
+            self.xray_source_input_ctl.Refresh()
             msg += "Default value for wavelength is 6.0"
         else:
-            if check_float(self.xray_wavelength_ctl):
-                self.xray_wavelength = float(self.xray_wavelength)
-            else:
-                flag = False
-                msg += "Error for wavelength value :expect float"
+            if (self.xray_source == '[A]') or (self.xray_source == '[keV]'):
+                if check_float(self.xray_source_input_ctl):
+                    self.xray_source_input = float(self.xray_source_input)
+                else:
+                    flag = False
+                    msg += "Error for wavelength value :expect float"
+            elif (self.xray_source == 'Element'):
+                try:
+                    import periodictable
+                    exec("periodictable." + self.xray_source_input)
+                except AttributeError:
+                    flag = False
+                    msg += "X-ray element supplied isn't in the database"
+
+
 
         self.compound = self.compound_ctl.GetValue().lstrip().rstrip()
         if self.compound != "":
@@ -437,7 +447,6 @@ class SldPanel(wx.Panel, PanelBase):
         atom = molecule_formula.atoms
         return xray_sld_from_atoms(atom, density=density, energy=energy)
 
-
     def calculateSld(self, event):
         """
             Calculate the neutron scattering density length of a molecule
@@ -459,20 +468,18 @@ class SldPanel(wx.Panel, PanelBase):
                                    density=self.density,
                                    wavelength=self.neutron_wavelength)
             if self.xray_source == "[A]":
-                # xray_real, xray_im = self.calculate_sld_helper(element=self.xray_wavelength,
-                #                                      density=self.density,
-                #                             molecule_formula=self.sld_formula)
-                pass
+                energy = xray_energy(self.xray_source_input)
+                xray_real, xray_im = xray_sld_from_atoms(self.sld_formula.atoms,
+                                                         density=self.density,
+                                                         energy=energy)
             elif self.xray_source == "[keV]":
-                # xray_real, xray_im = self.calculate_sld_helper(element=self.xray_wavelength,
-                #                                      density=self.density,
-                #                             molecule_formula=self.sld_formula)
-                pass
+                xray_real, xray_im = xray_sld_from_atoms(self.sld_formula.atoms,
+                                                         density=self.density,
+                                                         energy=self.xray_source_input)
             elif self.xray_source == "Element":
-                # xray_real, xray_im = self.calculate_sld_helper(element=self.xray_wavelength,
-                #                                      density=self.density,
-                #                             molecule_formula=self.sld_formula)
-                pass
+                xray_real, xray_im = self.calculate_sld_helper(element=self.xray_source_input,
+                                                               density=self.density,
+                                                               molecule_formula=self.sld_formula)
             # set neutron sld values
             val = format_number(sld_real * _SCALE)
             self.neutron_sld_real_ctl.SetValue(val)
@@ -503,10 +510,8 @@ class SldPanel(wx.Panel, PanelBase):
         """
         self.neutron_sld_real_ctl.SetValue("")
         self.neutron_sld_im_ctl.SetValue("")
-        self.mo_ka_sld_real_ctl.SetValue("")
-        self.mo_ka_sld_im_ctl.SetValue("")
-        self.cu_ka_sld_real_ctl.SetValue("")
-        self.cu_ka_sld_im_ctl.SetValue("")
+        self.xray_sld_real_ctl.SetValue("")
+        self.xray_sld_im_ctl.SetValue("")
         self.neutron_abs_ctl.SetValue("")
         self.neutron_inc_ctl.SetValue("")
         self.neutron_length_ctl.SetValue("")
