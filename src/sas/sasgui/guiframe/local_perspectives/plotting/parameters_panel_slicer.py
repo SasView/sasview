@@ -11,7 +11,7 @@ from Plotter2D import ModelPanel2D
 apply_params, EVT_APPLY_PARAMS = wx.lib.newevent.NewEvent()
 auto_save, EVT_AUTO_SAVE = wx.lib.newevent.NewEvent()
 
-FIT_OPTIONS = ["No fitting", "Fitting"]
+FIT_OPTIONS = ["No fitting", "Fitting", "Batch Fitting"]
 CONVERT_DICT = {"SectorInteractor": "SectorQ",
                 "AnnulusInteractor": "AnnulusPhi",
                 "BoxInteractorX": "SlabX",
@@ -464,14 +464,6 @@ class SlicerParameterPanel(wx.Dialog):
             evt = wx.PyCommandEvent(wx.EVT_BUTTON.typeId,
                                     datapanel.bt_import.GetId())
             wx.PostEvent(datapanel, evt)
-
-            # TODO: Simultaneous/Constrained fitting
-            # # Create event to open simfitpage if selected
-            # if fit == FIT_OPTIONS[3]:
-            #     fit_pers = main_window._current_perspective
-            #     evt = wx.PyCommandEvent(wx.EVT_MENU.typeId,
-            #                         fit_pers.id_simfit)
-            #     wx.PostEvent(datapanel, evt)
 
     def on_auto_save_checked(self, evt=None):
         """
