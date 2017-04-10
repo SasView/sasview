@@ -1733,10 +1733,10 @@ class Plugin(PluginBase):
         """
         try:
             number_finite = np.count_nonzero(np.isfinite(y))
-            if number_finite == 0:
+            if not number_finite:
                 logger.error("Using the present parameters the model does not return any finite value. ")
-                wx.PostEvent(self.parent, StatusEvent(status=\
-                    "Computing Error: %s" % str("Model did not return any finite value."), info="error"))
+                wx.PostEvent(self.parent, StatusEvent(status = "Computing Error: %s" % 
+                    str("Model did not return any finite value."), info="error"))
                 return
             np.nan_to_num(y)
             new_plot = self.create_theory_1D(x, y, page_id, model, data, state,
@@ -1795,7 +1795,7 @@ class Plugin(PluginBase):
                                          index=index, weight=weight)
 
             msg = "Computation completed!"
-            if number_finite != len(y):
+            if number_finite != y.size:
                 msg += ' PROBLEM: For some Q values the model returns non finite intensities!'
                 logger.error("For some Q values the model returns non finite intensities.")
             
@@ -1828,10 +1828,10 @@ class Plugin(PluginBase):
         that can be plot.
         """
         number_finite = np.count_nonzero(np.isfinite(image))
-        if number_finite == 0:
+        if not number_finite:
             logger.error("Using the present parameters the model does not return any finite value. ")
             wx.PostEvent(self.parent, StatusEvent(status = "Computing Error: %s" % 
-            str("Model did not return any finite value."), info="error"))
+                str("Model did not return any finite value."), info="error"))
             return
         np.nan_to_num(image)
         new_plot = Data2D(image=image, err_image=data.err_data)
@@ -1892,7 +1892,7 @@ class Plugin(PluginBase):
                 self._plot_residuals(page_id=page_id, data=data, fid=fid,
                                       index=index, weight=weight)
         msg = "Computation  completed!"
-        if number_finite != len(image):
+        if number_finite != image.size:
             msg += ' PROBLEM: For some Qx,Qy values the model returns non finite intensities!'
             logger.error("For some Qx,Qy values the model returns non finite intensities.")
         wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
