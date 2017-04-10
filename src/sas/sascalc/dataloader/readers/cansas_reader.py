@@ -457,31 +457,31 @@ class Reader(XMLreader):
                             elif collimationTagName == "name":
                                 self.collimation.name = collimationData
 
-                            if collimationTagName == "aperture":
+                            elif collimationTagName == "aperture":
                                 for apertureNode in collimationNode:
                                     apertureTagName = apertureNode.tag.replace(self.base_ns, "")
                                     apertureUnits = apertureNode.attrib.get("unit", "")
                                     apertureData = apertureNode.text
 
-                                if tagname == "distance":
-                                    self.aperture.distance = apertureData
-                                    self.aperture.distance_unit = apertureUnits
+                                    if apertureTagName == "distance":
+                                        self.aperture.distance = apertureData
+                                        self.aperture.distance_unit = apertureUnits
 
-                            if collimationTagName == "size":
+                            elif collimationTagName == "size":
                                 for sizeNode in collimationNode:
                                     sizeTagName = sizeNode.tag.replace(self.base_ns, "")
                                     sizeUnits = sizeNode.attrib.get("unit", "")
                                     sizeData = sizeNode.text
 
-                                if tagname == "x":
-                                    self.aperture.size.x = sizeData
-                                    self.collimation.size_unit = sizeUnits
-                                elif tagname == "y":
-                                    self.aperture.size.y = sizeData
-                                    self.collimation.size_unit = sizeUnits
-                                elif tagname == "z":
-                                    self.aperture.size.z = sizeData
-                                    self.collimation.size_unit = sizeUnits
+                                    if sizeTagName == "x":
+                                        self.aperture.size.x = sizeData
+                                        self.collimation.size_unit = sizeUnits
+                                    elif sizeTagName == "y":
+                                        self.aperture.size.y = sizeData
+                                        self.collimation.size_unit = sizeUnits
+                                    elif sizeTagName == "z":
+                                        self.aperture.size.z = sizeData
+                                        self.collimation.size_unit = sizeUnits
 
                         self.current_datainfo.collimation.append(self.collimation)
                         self.collimation = Collimation()
