@@ -24,6 +24,8 @@ import sas.sascalc.realspace.VolumeCanvas as VolumeCanvas
 from sas.sascalc.data_util.calcthread import CalcThread
 from sas.guicomm.events import NewPlotEvent, StatusEvent    
 
+logger = logging.getLogger(__name__)
+
 class Calc1D(CalcThread):
     """
         Thread object to simulate I(q)
@@ -92,7 +94,7 @@ class Plugin:
         # Default save location
         self._default_save_location = os.getcwd()
         # Log startup
-        logging.info("Simulation plug-in started")
+        logger.info("Simulation plug-in started")
         
     def get_panels(self, parent):
         """
@@ -210,7 +212,7 @@ class Plugin:
             return
         
         # If a computation thread is running, stop it
-        if self.calc_thread_1D != None and self.calc_thread_1D.isrunning():
+        if self.calc_thread_1D is not None and self.calc_thread_1D.isrunning():
             self.calc_thread_1D.stop()
             ## stop just raises the flag -- the thread is supposed to 
             ## then kill itself. In August 2014 it was shown that this is

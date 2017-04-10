@@ -87,7 +87,7 @@ class Plugin(PluginBase):
         """
         On Qmin Qmax vertical line event
         """
-        if event == None:
+        if event is None:
             return
         if event.id in self.plot_panels.keys():
             panel = self.plot_panels[event.id]
@@ -98,7 +98,7 @@ class Plugin(PluginBase):
         panel.on_plot_qrange(event)
 
     def _on_plot_lim(self, event=None):
-        if event == None:
+        if event is None:
             return
         if event.id in self.plot_panels.keys():
             panel = self.plot_panels[event.id]

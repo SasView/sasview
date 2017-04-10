@@ -7,6 +7,7 @@
 import thread
 import traceback
 import sys
+import logging
 
 if sys.platform.count("darwin") > 0:
     import time
@@ -20,6 +21,8 @@ if sys.platform.count("darwin") > 0:
 else:
     from time import clock
     from time import sleep
+
+logger = logging.getLogger(__name__)
 
 
 class CalcThread:
@@ -201,7 +204,7 @@ class CalcThread:
 
     def update(self, **kwargs):
         """Update GUI with the lastest results from the current work unit."""
-        if self.updatefn != None and clock() > self._time_for_update:
+        if self.updatefn is not None and clock() > self._time_for_update:
             self._lock.acquire()
             self._time_for_update = clock() + self._delay
             self._lock.release()
@@ -217,7 +220,7 @@ class CalcThread:
 
     def complete(self, **kwargs):
         """Update the GUI with the completed results from a work unit."""
-        if self.completefn != None:
+        if self.completefn is not None:
             self.completefn(**kwargs)
             sleep(self.yieldtime)
         return
@@ -242,8 +245,7 @@ class CalcThread:
                 return
             except Exception:
                 pass
-        import logging
-        logging.error(traceback.format_exc())
+        logger.error(traceback.format_exc())
         #print 'CalcThread exception',
 
     def _run(self):

@@ -3,11 +3,18 @@ import os
 import subprocess
 import re
 import sys
+
+import logging
+import logging.config
+LOGGER_CONFIG_FILE = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.ini')
+logging.config.fileConfig(LOGGER_CONFIG_FILE)
+logger = logging.getLogger(__name__)
+
 try:
     import xmlrunner
 except:
-    print "xmlrunner needs to be installed to run these tests"
-    print "Try easy_install unittest-xml-reporting"
+    logger.error("xmlrunner needs to be installed to run these tests")
+    logger.error("Try easy_install unittest-xml-reporting")
     sys.exit(1)
 
 # Check whether we have matplotlib installed
@@ -41,6 +48,7 @@ def run_tests(dirs=None, all=False):
         if d in SKIPPED_DIRS:
             continue
         
+
         # Go through modules looking for unit tests
         module_dir = os.path.join(test_root, d, "test")
         if os.path.isdir(module_dir):

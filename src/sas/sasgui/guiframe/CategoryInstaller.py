@@ -16,6 +16,8 @@ from collections import defaultdict, OrderedDict
 
 USER_FILE = 'categories.json'
 
+logger = logging.getLogger(__name__)
+
 class CategoryInstaller:
     """
     Class for making sure all category stuff is installed
@@ -113,7 +115,7 @@ class CategoryInstaller:
 
     @staticmethod
     def get_default_file():
-        logging.warning("CategoryInstaller.get_default_file is deprecated.")
+        logger.warning("CategoryInstaller.get_default_file is deprecated.")
 
     @staticmethod
     def check_install(homedir = None, model_list=None):
@@ -129,7 +131,7 @@ class CategoryInstaller:
         _model_list = _model_dict.keys()
 
         serialized_file = None
-        if homedir == None:
+        if homedir is None:
             serialized_file = CategoryInstaller.get_user_file()
         else:
             serialized_file = os.path.join(homedir, USER_FILE)
@@ -152,7 +154,7 @@ class CategoryInstaller:
                         by_model_dict.pop(model_name)
                         model_enabled_dict.pop(model_name)
                     except:
-                        logging.error("CategoryInstaller: %s", sys.exc_value)
+                        logger.error("CategoryInstaller: %s", sys.exc_value)
                 else:
                     add_list.remove(model_name)
         if del_name or (len(add_list) > 0):

@@ -5,6 +5,8 @@ import sys
 import logging
 from sas.sascalc.pr.invertor import Invertor
 
+logger = logging.getLogger(__name__)
+
 class NTermEstimator(object):
     """
     """
@@ -64,7 +66,7 @@ class NTermEstimator(object):
         self.err_list = []
         self.alpha_list = []
         for k in range(self.nterm_min, self.nterm_max, 1):
-            if self.isquit_func != None:
+            if self.isquit_func is not None:
                 self.isquit_func()
             best_alpha, message, _ = inver.estimate_alpha(k)
             inver.alpha = best_alpha
@@ -156,7 +158,7 @@ def load(path):
     data_err = np.zeros(0)
     scale = None
     min_err = 0.0
-    if not path == None:
+    if path is not None:
         input_f = open(path, 'r')
         buff = input_f.read()
         lines = buff.split('\n')
@@ -168,7 +170,7 @@ def load(path):
                 if len(toks) > 2:
                     err = float(toks[2])
                 else:
-                    if scale == None:
+                    if scale is None:
                         scale = 0.05 * math.sqrt(test_y)
                         #scale = 0.05/math.sqrt(y)
                         min_err = 0.01 * y
@@ -179,7 +181,7 @@ def load(path):
                 data_y = np.append(data_y, test_y)
                 data_err = np.append(data_err, err)
             except:
-                logging.error(sys.exc_value)
+                logger.error(sys.exc_value)
 
     return data_x, data_y, data_err
 
