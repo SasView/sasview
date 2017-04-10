@@ -4,7 +4,7 @@
 
 import unittest
 from sas.sascalc.dataloader.readers.sesans_reader import Reader
-
+from sas.sascalc.dataloader.loader import  Loader
 
 class sesans_reader(unittest.TestCase):
 
@@ -12,11 +12,11 @@ class sesans_reader(unittest.TestCase):
         reader = Reader()
         self.loader = reader.read
 
-    def test_sesans_load(self):
+    def test_full_load(self):
         """
-            Test .SES file loading
+            Test .SES in the full loader to make sure that the file type is correctly accepted
         """
-        f = self.loader("sesans_examples/sphere2micron.ses")
+        f = Loader().load("sesans_examples/sphere2micron.ses")
         # self.assertEqual(f, 5)
         self.assertEqual(len(f.x), 40)
         self.assertEqual(f.x[0], 391.56)
