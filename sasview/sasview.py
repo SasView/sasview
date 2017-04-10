@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Base module for loading and running the main SasView application.
 """
