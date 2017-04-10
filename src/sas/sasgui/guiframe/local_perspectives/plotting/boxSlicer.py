@@ -138,7 +138,7 @@ class BoxInteractor(_BaseInteractor):
         :param direction: the direction of averaging
 
         """
-        if self.direction == None:
+        if self.direction is None:
             self.direction = direction
 
         x_min = -1 * math.fabs(self.vertical_lines.x)
@@ -146,10 +146,10 @@ class BoxInteractor(_BaseInteractor):
         y_min = -1 * math.fabs(self.horizontal_lines.y)
         y_max = math.fabs(self.horizontal_lines.y)
 
-        if nbins != None:
+        if nbins is not None:
             self.nbins = nbins
-        if self.averager == None:
-            if new_slab == None:
+        if self.averager is None:
+            if new_slab is None:
                 msg = "post data:cannot average , averager is empty"
                 raise ValueError, msg
             self.averager = new_slab
@@ -356,9 +356,9 @@ class HorizontalLines(_BaseInteractor):
 
         """
         # # Reset x, y- coordinates if send as parameters
-        if x != None:
+        if x is not None:
             self.x = np.sign(self.x) * math.fabs(x)
-        if y != None:
+        if y is not None:
             self.y = np.sign(self.y) * math.fabs(y)
         # # Draw lines and markers
         self.inner_marker.set(xdata=[0], ydata=[self.y])
@@ -463,9 +463,9 @@ class VerticalLines(_BaseInteractor):
 
         """
         # # reset x, y -coordinates if given as parameters
-        if x != None:
+        if x is not None:
             self.x = np.sign(self.x) * math.fabs(x)
-        if y != None:
+        if y is not None:
             self.y = np.sign(self.y) * math.fabs(y)
         # # draw lines and markers
         self.inner_marker.set(xdata=[self.x], ydata=[0])

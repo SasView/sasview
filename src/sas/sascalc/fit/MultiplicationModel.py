@@ -177,9 +177,9 @@ class MultiplicationModel(BaseComponent):
         Set scale=volfraction for P model
         """
         value = self.params['volfraction']
-        if value != None:
+        if value is not None:
             factor = self.p_model.calculate_VR()
-            if factor == None or factor == NotImplemented or factor == 0.0:
+            if factor is None or factor == NotImplemented or factor == 0.0:
                 val = value
             else:
                 val = value / factor
@@ -194,7 +194,7 @@ class MultiplicationModel(BaseComponent):
             return
         effective_radius = self.p_model.calculate_ER()
         #Reset the effective_radius of s_model just before the run
-        if effective_radius != None and effective_radius != NotImplemented:
+        if effective_radius is not None and effective_radius != NotImplemented:
             self.s_model.setParam('radius_effective', effective_radius)
 
     def setParam(self, name, value):

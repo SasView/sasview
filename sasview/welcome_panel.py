@@ -68,7 +68,7 @@ class WelcomePanel(wx.aui.AuiNotebook, PanelBase):
         """
         """
         self.frame = frame
-        if frame != None:
+        if frame is not None:
             self.frame.Bind(wx.EVT_CLOSE, self.on_close_page)
 
     def get_frame(self):
