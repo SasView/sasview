@@ -281,31 +281,32 @@ class Reader(XMLreader):
                 # If there's more data present, let's deal with that too
                 for loopIter in range(1, len(sasNode)):
                     for dataNode in sasNode[loopIter]:
-                        # Iterating through the tags in the unit node, getting their tag name and respective unit
-                        dataTagName = dataNode.tag.replace(self.base_ns, "")
-                        # Creating our data array first
-                        dataArray = np.fromstring(dataNode.text, dtype=float, sep=",")
+                        if dataNode.text is not None:
+                            # Iterating through the tags in the unit node, getting their tag name and respective unit
+                            dataTagName = dataNode.tag.replace(self.base_ns, "")
+                            # Creating our data array first
+                            dataArray = np.fromstring(dataNode.text, dtype=float, sep=",")
 
-                        if dataTagName == "I":
-                            self.current_dataset.y[loopIter] = dataArray
-                        elif dataTagName == "Q":
-                            self.current_dataset.x[loopIter] = dataArray
-                        elif dataTagName == "Idev":
-                            self.current_dataset.dy[loopIter] = dataArray
-                        elif dataTagName == "Qdev":
-                            self.current_dataset.dx[loopIter] = dataArray
-                        elif dataTagName == "Qx":
-                            self.current_dataset.qx_data[loopIter] = dataArray
-                        elif dataTagName == "Qy":
-                            self.current_dataset.qy_data[loopIter] = dataArray
-                        elif dataTagName == "Qxdev":
-                            self.current_dataset.dqx_data[loopIter] = dataArray
-                        elif dataTagName == "Qydev":
-                            self.current_dataset.dqy_data[loopIter] = dataArray
-                        elif dataTagName == "dQw":
-                            self.current_dataset.dxw[loopIter] = dataArray
-                        elif dataTagName == "dQl":
-                            self.current_dataset.dxl[loopIter] = dataArray
+                            if dataTagName == "I":
+                                self.current_dataset.y[loopIter] = dataArray
+                            elif dataTagName == "Q":
+                                self.current_dataset.x[loopIter] = dataArray
+                            elif dataTagName == "Idev":
+                                self.current_dataset.dy[loopIter] = dataArray
+                            elif dataTagName == "Qdev":
+                                self.current_dataset.dx[loopIter] = dataArray
+                            elif dataTagName == "Qx":
+                                self.current_dataset.qx_data[loopIter] = dataArray
+                            elif dataTagName == "Qy":
+                                self.current_dataset.qy_data[loopIter] = dataArray
+                            elif dataTagName == "Qxdev":
+                                self.current_dataset.dqx_data[loopIter] = dataArray
+                            elif dataTagName == "Qydev":
+                                self.current_dataset.dqy_data[loopIter] = dataArray
+                            elif dataTagName == "dQw":
+                                self.current_dataset.dxw[loopIter] = dataArray
+                            elif dataTagName == "dQl":
+                                self.current_dataset.dxl[loopIter] = dataArray
 
                 self._check_for_empty_resolution()
                 self.data.append(self.current_dataset)
@@ -586,7 +587,6 @@ class Reader(XMLreader):
                         except:
                             self.process.date = processNode.text
                     elif processTagName == "term":
-                        unit = attr.get("unit", "")
                         dic = {}
                         dic["name"] = processNode.attrib.get("name", "")
                         dic["value"] = processNode.text
@@ -643,15 +643,16 @@ class Reader(XMLreader):
                 # If there's more data present, let's deal with that too
                 for loopIter in range(1, len(sasNode)):
                     for dataNode in sasNode[loopIter]:
-                        dataTagName = dataNode.tag.replace(self.base_ns, "")
-                        dataArray = np.fromstring(dataNode.text, dtype=float, sep=",")
+                        if dataNode.text is not None:
+                            dataTagName = dataNode.tag.replace(self.base_ns, "")
+                            dataArray = np.fromstring(dataNode.text, dtype=float, sep=",")
 
-                        if dataTagName == "T":
-                            self.transspectrum.transmission[loopIter] = dataArray
-                        elif dataTagName == "Tdev":
-                            self.transspectrum.transmission_deviation[loopIter] = dataArray
-                        elif dataTagName == "Lambda":
-                            self.transspectrum.wavelength[loopIter] = dataArray
+                            if dataTagName == "T":
+                                self.transspectrum.transmission[loopIter] = dataArray
+                            elif dataTagName == "Tdev":
+                                self.transspectrum.transmission_deviation[loopIter] = dataArray
+                            elif dataTagName == "Lambda":
+                                self.transspectrum.wavelength[loopIter] = dataArray
 
                 self.current_datainfo.trans_spectrum.append(self.transspectrum)
                 self.transspectrum = TransmissionSpectrum()
