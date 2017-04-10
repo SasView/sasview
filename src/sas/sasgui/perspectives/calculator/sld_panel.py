@@ -113,7 +113,7 @@ class SldPanel(wx.Panel, PanelBase):
         neutron_wavelength_txt = wx.StaticText(self, -1, 'Neutron wavelength')
         self.neutron_wavelength_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, -1))
         self.neutron_wavelength_ctl.SetValue(str(self.neutron_wavelength))
-        xray_source_input_txt = wx.StaticText(self, -1, 'X-ray wavelength')
+        self.xray_source_input_txt = wx.StaticText(self, -1, 'X-ray wavelength')
         self.xray_source_input_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, -1))
         self.xray_source_input_ctl.SetValue(str(self.xray_source_input))
         neutron_unit_a_txt = wx.StaticText(self, -1, unit_a)
@@ -152,7 +152,7 @@ class SldPanel(wx.Panel, PanelBase):
                             wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         iy += 1
         ix = 0
-        sizer_input.Add(xray_source_input_txt, (iy, ix), (1, 1),
+        sizer_input.Add(self.xray_source_input_txt, (iy, ix), (1, 1),
                              wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
         ix += 1
         sizer_input.Add(self.xray_source_input_ctl, (iy, ix), (1, 1),
@@ -321,6 +321,13 @@ class SldPanel(wx.Panel, PanelBase):
         """
         item = event.GetEventObject()
         self.xray_source = item.GetValue().strip()
+
+        if self.xray_source == "[A]":
+            self.xray_source_input_txt.SetLabel("X-ray wavelength")
+        elif self.xray_source == "[keV]":
+            self.xray_source_input_txt.SetLabel("X-ray energy")
+        elif self.xray_source == "Element":
+            self.xray_source_input_txt.SetLabel("X-ray source")
 
     def on_help(self, event):
         """
