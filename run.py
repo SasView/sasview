@@ -36,19 +36,6 @@ def addpath(path):
     os.environ['PYTHONPATH'] = PYTHONPATH
     sys.path.insert(0, path)
 
-root = abspath(dirname(__file__))
-addpath(joinpath(root, 'sasview'))
-from logger_config import SetupLogger
-
-#try:
-#    # running from a local computer as developer
-#    from sasview.logger_config import SetupLogger
-#except ImportError:
-#    from logger_config import SetupLogger
-
-l = SetupLogger(__name__)
-logger = l.config_development()
-
 @contextmanager
 def cd(path):
     """
@@ -153,6 +140,13 @@ def prepare():
     #print "\n".join(sys.path)
 
 if __name__ == "__main__":
+    #Need to add absolute path before actual prepare call,
+    #so logging can be done during initialization process too
+    root = abspath(dirname(__file__))
+    addpath(joinpath(root, 'sasview'))
+    from logger_config import SetupLogger
+    logger = SetupLogger(__name__).config_development()
+
     logger.debug("Starting SASVIEW in debug mode.")
     prepare()
     from sas.sasview.sasview import run
