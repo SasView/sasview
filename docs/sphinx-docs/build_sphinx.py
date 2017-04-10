@@ -205,6 +205,7 @@ def retrieve_user_docs():
                     fromhere=os.path.join(SASMODELS_SOURCE_PROLOG,files)
                     tohere=os.path.join(SASMODELS_DEST_PROLOG,files)
                     shutil.copy(fromhere,tohere)
+    else: print "no source directory",SASMODELS_SOURCE_PROLOG, "was found"
 
     if os.path.exists(SASMODELS_SOURCE_GPU):
         print "Found docs folder SASMODELS_SOURCE_GPU at ", SASMODELS_SOURCE_GPU
@@ -216,6 +217,7 @@ def retrieve_user_docs():
                     fromhere=os.path.join(SASMODELS_SOURCE_GPU,files)
                     tohere=os.path.join(SPHINX_SOURCE_USER,files)
                     shutil.copy(fromhere,tohere)
+    else: print "no source directory",SASMODELS_SOURCE_GPU," was found"
 
     if os.path.exists(SASMODELS_SOURCE_SESANS):
         print "Found docs folder SASMODELS_SOURCE_SESANS at ", SASMODELS_SOURCE_SESANS
@@ -227,6 +229,7 @@ def retrieve_user_docs():
                     fromhere=os.path.join(SASMODELS_SOURCE_SESANS,files)
                     tohere=os.path.join(SPHINX_SOURCE_USER,files)
                     shutil.copy(fromhere,tohere)
+    else: print "no source directory",SASMODELS_SOURCE_SESANS," was found"
 
     if os.path.exists(SASMODELS_SOURCE_MAGNETISM):
         print "Found docs folder SASMODELS_SOURCE_MAGNETISM at ", SASMODELS_SOURCE_MAGNETISM
@@ -238,6 +241,7 @@ def retrieve_user_docs():
                     fromhere=os.path.join(SASMODELS_SOURCE_MAGNETISM,files)
                     tohere=os.path.join(SASMODELS_DEST_REF_MODELS,files)
                     shutil.copy(fromhere,tohere)
+    else: print "no source directory",SASMODELS_SOURCE_MAGNETISM," was found"
 
     if os.path.exists(SASMODELS_SOURCE_MAGIMG):
         print "Found img folder SASMODELS_SOURCE_MAGIMG   at ", SASMODELS_SOURCE_MAGIMG
@@ -275,21 +279,22 @@ def retrieve_user_docs():
                     fromhere=os.path.join(SASMODELS_SOURCE_REF_MODELS,files)
                     tohere=os.path.join(SASMODELS_DEST_REF_MODELS,files)
                     shutil.copy(fromhere,tohere)
-    # But need to change the path to the model docs in the tocs
-    for files in os.listdir(SASMODELS_DEST_REF_MODELS):
-#        print files
-        if files.startswith("shape"):
-            print "Changing toc paths in", files
-            inplace_change(os.path.join(SASMODELS_DEST_REF_MODELS,files), "../../model/", "models/")
-        if files.startswith("sphere"):
-            print "Changing toc paths in", files
-            inplace_change(os.path.join(SASMODELS_DEST_REF_MODELS,files), "../../model/", "models/")
-        if files.startswith("custom"):
-            print "Changing toc paths in", files
-            inplace_change(os.path.join(SASMODELS_DEST_REF_MODELS,files), "../../model/", "models/")
-        if files.startswith("structure"):
-            print "Changing toc paths in", files
-            inplace_change(os.path.join(SASMODELS_DEST_REF_MODELS,files), "../../model/", "models/")
+            # But need to change the path to the model docs in the tocs
+            for files in os.listdir(SASMODELS_DEST_REF_MODELS):
+        #        print files
+                if files.startswith("shape"):
+                    print "Changing toc paths in", files
+                    inplace_change(os.path.join(SASMODELS_DEST_REF_MODELS,files), "../../model/", "models/")
+                if files.startswith("sphere"):
+                    print "Changing toc paths in", files
+                    inplace_change(os.path.join(SASMODELS_DEST_REF_MODELS,files), "../../model/", "models/")
+                if files.startswith("custom"):
+                    print "Changing toc paths in", files
+                    inplace_change(os.path.join(SASMODELS_DEST_REF_MODELS,files), "../../model/", "models/")
+                if files.startswith("structure"):
+                    print "Changing toc paths in", files
+                    inplace_change(os.path.join(SASMODELS_DEST_REF_MODELS,files), "../../model/", "models/")
+    else: print "no source directory",SASMODELS_SOURCE_REF_MODELS," was found"
 
     if os.path.exists(SASMODELS_SOURCE_MODELS):
         print "Found docs folder SASMODELS_SOURCE_MODELS at ", SASMODELS_SOURCE_MODELS
@@ -319,6 +324,7 @@ def retrieve_user_docs():
                 fromhere=os.path.join(SASMODELS_DEST_IMG,files)
                 tohere=os.path.join(SASMODELS_DEST_BUILDIMG,files)
                 shutil.copy(fromhere,tohere)
+    else: print "no source directory",SASMODELS_SOURCE_MODELS," was found.\n !!!!NO MODEL DOCS WILL BE BUILT!!!!"
 
 
 def retrieve_bumps_docs():

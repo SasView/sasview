@@ -151,6 +151,20 @@ class BuildSphinxCommand(Command):
         self.cwd = os.getcwd()
 
     def run(self):
+        ''' First builds the sasmodels documentation if the directory
+        is present. Then builds the sasview docs.
+        '''
+        ### AJJ - Add code for building sasmodels docs here:
+        # check for doc path
+        SASMODELS_PATH = '../sasmodels'
+        if os.path.exists(SASMODELS_PATH):
+            if os.path.isdir(SASMODELS_PATH):
+                # if available, build sasmodels docs
+            else:
+                # if not available warning message
+                print "WARNING!! sasmodels directory not found. Cannot build model docs."
+
+        #Now build sasview (+sasmodels) docs
         sys.path.append("docs/sphinx-docs")
         import build_sphinx
         build_sphinx.rebuild()
