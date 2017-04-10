@@ -219,95 +219,96 @@ class Reader(XMLreader):
                 else:
                     multipleEntries = True
 
-                for setupNode in sasNode[0]:
-                    # Iterating through the tags in the unit node, getting their tag name and respective unit
-                    setupTagName = setupNode.tag.replace(self.base_ns, "")
-                    units = setupNode.attrib.get("unit", "")
-
-                    # Creating our data array first, if there's only one dataNode we will handle this...
-                    startArray = np.fromstring(setupNode.text, dtype=float, sep=",")
-                    
-                    if multipleEntries == True:
-                        setupArray = np.zeros((len(sasNode), len(startArray)))
-                        setupArray[0] = startArray
-                    else:
-                        setupArray = startArray
-
-                    # Now put this into the relevant location
-                    if setupTagName == "I":
-                        self.current_dataset.yaxis("Intensity", units)
-                        self.current_dataset.y = setupArray
-                    elif setupTagName == "Q":
-                        self.current_dataset.xaxis("Q", units)
-                        self.current_dataset.x = setupArray
-
-                    elif setupTagName == "Idev":
-                        self.current_dataset.dy = setupArray  
-                    elif setupTagName == "Qdev":
-                        self.current_dataset.dx = setupArray 
-
-                    elif setupTagName == "Qx":
-                        self.current_dataset.xaxis("Qx", units)
-                        self.current_dataset.qx_data = setupArray
-                    elif setupTagName == "Qy":
-                        self.current_dataset.yaxis("Qy", units)
-                        self.current_dataset.qy_data = setupArray
-                    elif setupTagName == "Qxdev":
-                        self.current_dataset.xaxis("Qxdev", units)
-                        self.current_dataset.dqx_data = setupArray
-                    elif setupTagName == "Qydev":
-                        self.current_dataset.yaxis("Qydev", units)
-                        self.current_dataset.dqy_data = setupArray
-                    elif setupTagName == "dQw":
-                        self.current_dataset.dxw = setupArray
-                    elif setupTagName == "dQl":
-                        self.current_dataset.dxl = setupArray
-
-                    elif setupTagName == "Mask":
-                        self.current_dataset.mask = np.ndarray.astype(setupArray, dtype=bool)
-                    elif setupTagName == "Sesans":
-                        self.current_datainfo.isSesans = bool(setupNode.text)
-
-                    elif setupTagName == "yacceptance":
-                        self.current_datainfo.sample.yacceptance = (setupNode.text, units)
-                    elif setupTagName == "zacceptance":
-                        self.current_datainfo.sample.zacceptance = (setupNode.text, units)
-                    elif setupTagName == "Qmean":
-                        pass
-                    elif setupTagName == "Shadowfactor":
-                        pass
-
-                # If there's more data present, let's deal with that too
-                for loopIter in range(1, len(sasNode)):
-                    for dataNode in sasNode[loopIter]:
+                if sasNode[0].text is not None:
+                    for setupNode in sasNode[0]:
                         # Iterating through the tags in the unit node, getting their tag name and respective unit
-                        dataTagName = dataNode.tag.replace(self.base_ns, "")
-                        # Creating our data array first
-                        dataArray = np.fromstring(dataNode.text, dtype=float, sep=",")
+                        setupTagName = setupNode.tag.replace(self.base_ns, "")
+                        units = setupNode.attrib.get("unit", "")
 
-                        if dataTagName == "I":
-                            self.current_dataset.y[loopIter] = dataArray
-                        elif dataTagName == "Q":
-                            self.current_dataset.x[loopIter] = dataArray
-                        elif dataTagName == "Idev":
-                            self.current_dataset.dy[loopIter] = dataArray
-                        elif dataTagName == "Qdev":
-                            self.current_dataset.dx[loopIter] = dataArray
-                        elif dataTagName == "Qx":
-                            self.current_dataset.qx_data[loopIter] = dataArray
-                        elif dataTagName == "Qy":
-                            self.current_dataset.qy_data[loopIter] = dataArray
-                        elif dataTagName == "Qxdev":
-                            self.current_dataset.dqx_data[loopIter] = dataArray
-                        elif dataTagName == "Qydev":
-                            self.current_dataset.dqy_data[loopIter] = dataArray
-                        elif dataTagName == "dQw":
-                            self.current_dataset.dxw[loopIter] = dataArray
-                        elif dataTagName == "dQl":
-                            self.current_dataset.dxl[loopIter] = dataArray
+                        # Creating our data array first, if there's only one dataNode we will handle this...
+                        startArray = np.fromstring(setupNode.text, dtype=float, sep=",")
+                        
+                        if multipleEntries == True:
+                            setupArray = np.zeros((len(sasNode), len(startArray)))
+                            setupArray[0] = startArray
+                        else:
+                            setupArray = startArray
 
-                self._check_for_empty_resolution()
-                self.data.append(self.current_dataset)
+                        # Now put this into the relevant location
+                        if setupTagName == "I":
+                            self.current_dataset.yaxis("Intensity", units)
+                            self.current_dataset.y = setupArray
+                        elif setupTagName == "Q":
+                            self.current_dataset.xaxis("Q", units)
+                            self.current_dataset.x = setupArray
+
+                        elif setupTagName == "Idev":
+                            self.current_dataset.dy = setupArray  
+                        elif setupTagName == "Qdev":
+                            self.current_dataset.dx = setupArray 
+
+                        elif setupTagName == "Qx":
+                            self.current_dataset.xaxis("Qx", units)
+                            self.current_dataset.qx_data = setupArray
+                        elif setupTagName == "Qy":
+                            self.current_dataset.yaxis("Qy", units)
+                            self.current_dataset.qy_data = setupArray
+                        elif setupTagName == "Qxdev":
+                            self.current_dataset.xaxis("Qxdev", units)
+                            self.current_dataset.dqx_data = setupArray
+                        elif setupTagName == "Qydev":
+                            self.current_dataset.yaxis("Qydev", units)
+                            self.current_dataset.dqy_data = setupArray
+                        elif setupTagName == "dQw":
+                            self.current_dataset.dxw = setupArray
+                        elif setupTagName == "dQl":
+                            self.current_dataset.dxl = setupArray
+
+                        elif setupTagName == "Mask":
+                            self.current_dataset.mask = np.ndarray.astype(setupArray, dtype=bool)
+                        elif setupTagName == "Sesans":
+                            self.current_datainfo.isSesans = bool(setupNode.text)
+
+                        elif setupTagName == "yacceptance":
+                            self.current_datainfo.sample.yacceptance = (setupNode.text, units)
+                        elif setupTagName == "zacceptance":
+                            self.current_datainfo.sample.zacceptance = (setupNode.text, units)
+                        elif setupTagName == "Qmean":
+                            pass
+                        elif setupTagName == "Shadowfactor":
+                            pass
+
+                    # If there's more data present, let's deal with that too
+                    for loopIter in range(1, len(sasNode)):
+                        for dataNode in sasNode[loopIter]:
+                            # Iterating through the tags in the unit node, getting their tag name and respective unit
+                            dataTagName = dataNode.tag.replace(self.base_ns, "")
+                            # Creating our data array first
+                            dataArray = np.fromstring(dataNode.text, dtype=float, sep=",")
+
+                            if dataTagName == "I":
+                                self.current_dataset.y[loopIter] = dataArray
+                            elif dataTagName == "Q":
+                                self.current_dataset.x[loopIter] = dataArray
+                            elif dataTagName == "Idev":
+                                self.current_dataset.dy[loopIter] = dataArray
+                            elif dataTagName == "Qdev":
+                                self.current_dataset.dx[loopIter] = dataArray
+                            elif dataTagName == "Qx":
+                                self.current_dataset.qx_data[loopIter] = dataArray
+                            elif dataTagName == "Qy":
+                                self.current_dataset.qy_data[loopIter] = dataArray
+                            elif dataTagName == "Qxdev":
+                                self.current_dataset.dqx_data[loopIter] = dataArray
+                            elif dataTagName == "Qydev":
+                                self.current_dataset.dqy_data[loopIter] = dataArray
+                            elif dataTagName == "dQw":
+                                self.current_dataset.dxw[loopIter] = dataArray
+                            elif dataTagName == "dQl":
+                                self.current_dataset.dxl[loopIter] = dataArray
+
+                    self._check_for_empty_resolution()
+                    self.data.append(self.current_dataset)
 
             # If it's not data, let's check for other tags starting with skippable ones...
             elif currentTagName == "fitting_plug_in" or currentTagName == "pr_inversion" or currentTagName == "invariant":
@@ -572,7 +573,7 @@ class Reader(XMLreader):
             ## If we'e dealing with a process node
             elif currentTagName == "SASprocess":
                 for processNode in sasNode:
-                    setupTagName = setupNode.tag.replace(self.base_ns, "")
+                    processTagName = setupNode.tag.replace(self.base_ns, "")
                     units = setupNode.attrib.get("unit", "")
 
                     if processTagName == "name":
@@ -607,57 +608,53 @@ class Reader(XMLreader):
 
             # If we're dealing with a transmission data node
             elif currentTagName == "Tdata":
-                for transmissionDataNode in sasNode:
-                    transmissionDataTagName = transmissionDataNode.tag.replace(self.base_ns, "")
-                    transmissionDataUnits = transmissionDataNode.attrib.get("unit", "")
-                    transmissionDataData = transmissionDataNode.text
-
                 # Are there multiple entries here?
                 if len(sasNode) <= 1:
                     multipleEntries == False
                 else:
                     multipleEntries == True
 
-                for setupNode in sasNode[0]:
-                    # Iterating through the tags in the unit node, getting their tag name and respective unit
-                    setupTagName = setupNode.tag.replace(self.base_ns, "")
-                    transmissionDataUnits = setupNode.attrib.get("unit", "")
+                if sasNode[0].text is not None:
+                    for setupNode in sasNode[0]:
+                        # Iterating through the tags in the unit node, getting their tag name and respective unit
+                        setupTagName = setupNode.tag.replace(self.base_ns, "")
+                        transmissionDataUnits = setupNode.attrib.get("unit", "")
 
-                    # Creating our data array first, if there's only one dataNode we will handle this...
-                    startArray = np.fromstring(setupNode.text, dtype=float, sep=",")
+                        # Creating our data array first, if there's only one dataNode we will handle this...
+                        startArray = np.fromstring(setupNode.text, dtype=float, sep=",")
 
-                    if multipleEntries == True:
-                        setupArray = np.zeros((len(sasNode), len(startArray)))
-                        setupArray[0] = startArray
-                    else:
-                        setupArray = startArray
+                        if multipleEntries == True:
+                            setupArray = np.zeros((len(sasNode), len(startArray)))
+                            setupArray[0] = startArray
+                        else:
+                            setupArray = startArray
 
-                    ## Transmission Spectrum
-                    if setupTagName == "T":
-                        self.transspectrum.transmission = setupArray
-                        self.transspectrum.transmission_unit = transmissionDataUnits
-                    elif setupTagName == "Tdev":
-                        self.transspectrum.transmission_deviation = setupArray
-                        self.transspectrum.transmission_deviation_unit = transmissionDataUnits
-                    elif setupTagName == "Lambda":
-                        self.transspectrum.wavelength = setupArray
-                        self.transspectrum.wavelength_unit = transmissionDataUnits
+                        ## Transmission Spectrum
+                        if setupTagName == "T":
+                            self.transspectrum.transmission = setupArray
+                            self.transspectrum.transmission_unit = transmissionDataUnits
+                        elif setupTagName == "Tdev":
+                            self.transspectrum.transmission_deviation = setupArray
+                            self.transspectrum.transmission_deviation_unit = transmissionDataUnits
+                        elif setupTagName == "Lambda":
+                            self.transspectrum.wavelength = setupArray
+                            self.transspectrum.wavelength_unit = transmissionDataUnits
 
-                # If there's more data present, let's deal with that too
-                for loopIter in range(1, len(sasNode)):
-                    for dataNode in sasNode[loopIter]:
-                        dataTagName = dataNode.tag.replace(self.base_ns, "")
-                        dataArray = np.fromstring(dataNode.text, dtype=float, sep=",")
+                    # If there's more data present, let's deal with that too
+                    for loopIter in range(1, len(sasNode)):
+                        for dataNode in sasNode[loopIter]:
+                            dataTagName = dataNode.tag.replace(self.base_ns, "")
+                            dataArray = np.fromstring(dataNode.text, dtype=float, sep=",")
 
-                    if dataTagName == "T":
-                        self.transspectrum.transmission[loopIter] = setupArray
-                    elif dataTagName == "Tdev":
-                        self.transspectrum.transmission_deviation[loopIter] = setupArray
-                    elif dataTagName == "Lambda":
-                        self.transspectrum.wavelength[loopIter] = setupArray
+                            if dataTagName == "T":
+                                self.transspectrum.transmission[loopIter] = dataArray
+                            elif dataTagName == "Tdev":
+                                self.transspectrum.transmission_deviation[loopIter] = dataArray
+                            elif dataTagName == "Lambda":
+                                self.transspectrum.wavelength[loopIter] = dataArray
 
-                self.current_datainfo.trans_spectrum.append(self.transspectrum)
-                self.transspectrum = TransmissionSpectrum()
+                    self.current_datainfo.trans_spectrum.append(self.transspectrum)
+                    self.transspectrum = TransmissionSpectrum()
 
 
             ## Everything else goes in meta_data
