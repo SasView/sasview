@@ -143,7 +143,7 @@ class ModelPanel2D(ModelPanel1D):
         On Qmin Qmax vertical line event
         """
         # Not implemented
-        if event == None:
+        if event is None:
             return
         event.Skip()
 
@@ -155,7 +155,7 @@ class ModelPanel2D(ModelPanel1D):
         # Check that the LEFT button was pressed
         PlotPanel.onLeftDown(self, event)
         ax = event.inaxes
-        if ax != None:
+        if ax is not None:
             # data coordinate position
             pos_x = "%8.3g" % event.xdata
             pos_y = "%8.3g" % event.ydata
@@ -226,7 +226,7 @@ class ModelPanel2D(ModelPanel1D):
         self.graph.yaxis(data._yaxis, data._yunit)
         if self._is_changed_legend_label:
             data.label = self.title_label
-        if data.label == None:
+        if data.label is None:
             data.label = data.name
         if not self.title_font:
             self.graph.title(data.label)
@@ -263,14 +263,14 @@ class ModelPanel2D(ModelPanel1D):
         data = self.data2D
         # control axis labels from the panel itself
         yname, yunits = data.get_yaxis()
-        if self.yaxis_label != None:
+        if self.yaxis_label is not None:
             yname = self.yaxis_label
             yunits = self.yaxis_unit
         else:
             self.yaxis_label = yname
             self.yaxis_unit = yunits
         xname, xunits = data.get_xaxis()
-        if self.xaxis_label != None:
+        if self.xaxis_label is not None:
             xname = self.xaxis_label
             xunits = self.xaxis_unit
         else:
@@ -319,8 +319,8 @@ class ModelPanel2D(ModelPanel1D):
         slicerpop.AppendSeparator()
         if len(self.data2D.detector) <= 1:
             item_list = self.parent.get_current_context_menu(self)
-            if (not item_list == None) and (not len(item_list) == 0) and\
-                self.data2D.name.split(" ")[0] != 'Residuals':
+            if ((item_list is not None) and len(item_list) and
+                self.data2D.name.split(" ")[0] != 'Residuals'):
                 for item, wx_id in zip(item_list, [ids.next() for i in range(len(item_list))]):
                     try:
                         slicerpop.Append(wx_id, item[0], item[1])
@@ -354,14 +354,13 @@ class ModelPanel2D(ModelPanel1D):
             wx_id = ids.next()
             slicerpop.Append(wx_id, '&Box Averaging in Qy')
             wx.EVT_MENU(self, wx_id, self.onBoxavgY)
-            if self.slicer != None:
+            if self.slicer is not None:
                 wx_id = ids.next()
                 slicerpop.Append(wx_id, '&Clear Slicer')
                 wx.EVT_MENU(self, wx_id, self.onClearSlicer)
                 if self.slicer.__class__.__name__ != "BoxSum":
                     wx_id = ids.next()
-                    name = '&Edit Slicer Parameters and Batch Slicing'
-                    slicerpop.Append(wx_id, name)
+                    slicerpop.Append(wx_id, '&Edit Slicer Parameters')
                     wx.EVT_MENU(self, wx_id, self._onEditSlicer)
             slicerpop.AppendSeparator()
 
@@ -435,7 +434,7 @@ class ModelPanel2D(ModelPanel1D):
             except:
                 msg = "Add Text: Error. Check your property values..."
                 logger.error(msg)
-                if self.parent != None:
+                if self.parent is not None:
                     wx.PostEvent(self.parent, StatusEvent(status=msg))
         dial.Destroy()
 
@@ -532,15 +531,15 @@ class ModelPanel2D(ModelPanel1D):
         :param slicer: slicer class to create
 
         """
-        # Clear current slicer
-        if not self.slicer == None:
+        ## Clear current slicer
+        if self.slicer is not None:
             self.slicer.clear()
-        # Create a new slicer
+        ## Create a new slicer
         self.slicer_z += 1
         self.slicer = slicer(self, self.subplot, zorder=self.slicer_z)
         self.subplot.set_ylim(self.data2D.ymin, self.data2D.ymax)
         self.subplot.set_xlim(self.data2D.xmin, self.data2D.xmax)
-        # Draw slicer
+        ## Draw slicer
         self.update()
         self.slicer.update()
         msg = "Plotter2D._setSlicer  %s" % self.slicer.__class__.__name__
@@ -572,15 +571,15 @@ class ModelPanel2D(ModelPanel1D):
         npt = math.sqrt(len(self.data2D.data[np.isfinite(self.data2D.data)]))
         npt = math.floor(npt)
         from sas.sascalc.dataloader.manipulations import CircularAverage
-        # compute the maximum radius of data2D
+        ## compute the maximum radius of data2D
         self.qmax = max(math.fabs(self.data2D.xmax),
                         math.fabs(self.data2D.xmin))
         self.ymax = max(math.fabs(self.data2D.ymax),
                         math.fabs(self.data2D.ymin))
         self.radius = math.sqrt(math.pow(self.qmax, 2) + math.pow(self.ymax, 2))
-        # Compute beam width
+        ##Compute beam width
         bin_width = (self.qmax + self.qmax) / npt
-        # Create data1D circular average of data2D
+        ## Create data1D circular average of data2D
         Circle = CircularAverage(r_min=0, r_max=self.radius,
                                  bin_width=bin_width)
         circ = Circle(self.data2D, ismask=ismask)
@@ -599,11 +598,11 @@ class ModelPanel2D(ModelPanel1D):
         new_plot.dxw = dxw
         new_plot.name = "Circ avg " + self.data2D.name
         new_plot.source = self.data2D.source
-        # new_plot.info = self.data2D.info
+        #new_plot.info = self.data2D.info
         new_plot.interactive = True
         new_plot.detector = self.data2D.detector
 
-        # If the data file does not tell us what the axes are, just assume...
+        ## If the data file does not tell us what the axes are, just assume...
         new_plot.xaxis("\\rm{Q}", "A^{-1}")
         if hasattr(self.data2D, "scale") and \
                     self.data2D.scale == 'linear':
@@ -615,7 +614,8 @@ class ModelPanel2D(ModelPanel1D):
         new_plot.group_id = "2daverage" + self.data2D.name
         new_plot.id = "Circ avg " + self.data2D.name
         new_plot.is_data = True
-        self.parent.update_theory(data_id=self.data2D.id, theory=new_plot)
+        self.parent.update_theory(data_id=self.data2D.id, \
+                                       theory=new_plot)
         wx.PostEvent(self.parent,
                      NewPlotEvent(plot=new_plot, title=new_plot.name))
 
@@ -629,7 +629,7 @@ class ModelPanel2D(ModelPanel1D):
 
         """
         if self.slicer is not None:
-            from parameters_panel_slicer import SlicerParameterPanel
+            from SlicerParameters import SlicerParameterPanel
             dialog = SlicerParameterPanel(self, -1, "Slicer Parameters")
             dialog.set_slicer(self.slicer.__class__.__name__,
                               self.slicer.get_params())
@@ -667,7 +667,7 @@ class ModelPanel2D(ModelPanel1D):
         ## Value used to initially set the slicer panel
         params = self.slicer.get_params()
         ## Create a new panel to display results of summation of Data2D
-        from parameters_panel_boxsum import SlicerPanel
+        from slicerpanel import SlicerPanel
         win = MDIFrame(self.parent, None, 'None', (100, 200))
         new_panel = SlicerPanel(parent=win, id=-1,
                                 base=self, type=self.slicer.__class__.__name__,
@@ -757,12 +757,12 @@ class ModelPanel2D(ModelPanel1D):
         default_name = data.label
         if default_name.count('.') > 0:
             default_name = default_name.split('.')[0]
+        #default_name += "_out"
         if self.parent is not None:
             self.parent.show_data2d(data, default_name)
 
     def modifyGraphAppearance(self, e):
-        self.graphApp = graphAppearance(self, 'Modify graph appearance',
-                                        legend=False)
+        self.graphApp = graphAppearance(self, 'Modify graph appearance', legend=False)
         self.graphApp.setDefaults(self.grid_on, self.legend_on,
                                   self.xaxis_label, self.yaxis_label,
                                   self.xaxis_unit, self.yaxis_unit,

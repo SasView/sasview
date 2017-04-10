@@ -270,7 +270,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         """
         # Ask the user the location of the file to write to.
         path = None
-        if self.parent != None:
+        if self.parent is not None:
             self._default_save_location = self.parent._default_save_location
         dlg = wx.FileDialog(self, "Choose a file",
                             self._default_save_location,
@@ -278,7 +278,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             self._default_save_location = os.path.dirname(path)
-            if self.parent != None:
+            if self.parent is not None:
                 self.parent._default_save_location = self._default_save_location
         else:
             return None
@@ -919,7 +919,7 @@ class InversionControl(ScrolledPanel, PanelBase):
 
         if flag:
             dataset = self.plot_data.GetValue()
-            if dataset == None or len(dataset.strip()) == 0:
+            if dataset is None or len(dataset.strip()) == 0:
                 message = "No data to invert. Select a data set before"
                 message += " proceeding with P(r) inversion."
                 wx.PostEvent(self._manager.parent, StatusEvent(status=message))
@@ -939,7 +939,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         """
         Choose a new input file for I(q)
         """
-        if not self._manager is None:
+        if self._manager is not None:
             self.plot_data.SetValue(str(data.name))
             try:
                 self._manager.show_data(data=data, reset=True)

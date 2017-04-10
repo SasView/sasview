@@ -472,7 +472,7 @@ class Reader(CansasReader):
                     prstate = self._parse_prstate(entry)
                     #prstate could be None when .svs file is loaded
                     #in this case, skip appending to output
-                    if prstate != None:
+                    if prstate is not None:
                         sas_entry.meta_data['prstate'] = prstate
                         sas_entry.filename = prstate.file
                         output.append(sas_entry)

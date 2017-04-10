@@ -418,7 +418,7 @@ class DataEditorPanel(wx.ScrolledWindow):
         Open a file dialog to allow loading a file
         """
         path = None
-        if location == None:
+        if location is None:
             location = os.getcwd()
 
         l = Loader()

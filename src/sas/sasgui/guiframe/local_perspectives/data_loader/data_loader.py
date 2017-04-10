@@ -74,7 +74,7 @@ class Plugin(PluginBase):
         """
         path = None
         self._default_save_location = self.parent._default_save_location
-        if self._default_save_location == None:
+        if self._default_save_location is None:
             self._default_save_location = os.getcwd()
 
         cards = self.loader.get_wildcards()
@@ -91,7 +91,7 @@ class Plugin(PluginBase):
                             style=style)
         if dlg.ShowModal() == wx.ID_OK:
             file_list = dlg.GetPaths()
-            if len(file_list) >= 0 and not file_list[0] is None:
+            if len(file_list) >= 0 and file_list[0] is not None:
                 self._default_save_location = os.path.dirname(file_list[0])
                 path = self._default_save_location
         dlg.Destroy()
@@ -115,7 +115,7 @@ class Plugin(PluginBase):
         """
         path = None
         self._default_save_location = self.parent._default_save_location
-        if self._default_save_location == None:
+        if self._default_save_location is None:
             self._default_save_location = os.getcwd()
         dlg = wx.DirDialog(self.parent, "Choose a directory",
                            self._default_save_location,

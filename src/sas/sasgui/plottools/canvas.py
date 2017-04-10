@@ -152,7 +152,7 @@ class FigureCanvas(FigureCanvasWxAgg):
         Render after a delay if no other render requests have been made.
         """
         self.panel.subplot.grid(self.panel.grid_on)
-        if self.panel.legend != None and self.panel.legend_pos_loc:
+        if self.panel.legend is not None and self.panel.legend_pos_loc:
             self.panel.legend._loc = self.panel.legend_pos_loc
         self.idletimer.Restart(5, *args, **kwargs)  # Delay by 5 ms
 
