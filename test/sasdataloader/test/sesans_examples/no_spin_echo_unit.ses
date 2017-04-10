@@ -13,10 +13,6 @@ Wavelength_unit         A
 
 BEGIN_DATA
 SpinEchoLength Depolarisation Depolarisation_error Wavelength
-            ntif "Theta_zmax_unit" not in self.params:
-                raise RuntimeError("Wavelength has no units")
-            if "Theta_unit" not in self.params:
-                raise RuntimeError("Wavelength has no units")
 260.0 -1.42E-3 2.04E-3 1.612452
 280.8 -1.45E-3 1.87E-3 1.675709
 303.264 -1.64E-3 1.23E-3 1.741448
