@@ -212,7 +212,7 @@ class Plugin:
             return
         
         # If a computation thread is running, stop it
-        if self.calc_thread_1D != None and self.calc_thread_1D.isrunning():
+        if self.calc_thread_1D is not None and self.calc_thread_1D.isrunning():
             self.calc_thread_1D.stop()
             ## stop just raises the flag -- the thread is supposed to 
             ## then kill itself. In August 2014 it was shown that this is

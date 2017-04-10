@@ -60,7 +60,7 @@ def add_icon(parent, frame):
     """
     Add icon in the frame
     """
-    if parent != None:
+    if parent is not None:
         if hasattr(frame, "IsIconized"):
             if not frame.IsIconized():
                 try:
@@ -73,12 +73,12 @@ def _set_error(panel, item, show_msg=False):
     """
     Set_error dialog
     """
-    if item != None:
+    if item is not None:
         item.SetBackgroundColour("pink")
         item.Refresh()
     if show_msg:
         msg = "Error: wrong (or out of range) value entered."
-        if panel.parent.parent != None:
+        if panel.parent.parent is not None:
             wx.PostEvent(panel.parent.parent,
                      StatusEvent(status=msg, info='Error'))
             panel.SetFocus()
@@ -424,7 +424,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         Set text for est. computation time
         """
         unit = 'sec'
-        if self.time_text != None:
+        if self.time_text is not None:
             self.time_text.SetForegroundColour('black')
             etime = self.estimate_ctime()
             if etime > 60:
@@ -486,7 +486,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         """
         path = None
         filename = ''
-        if location == None:
+        if location is None:
             location = os.getcwd()
 
         exts = "*" + self.omfreader.ext[0]
@@ -632,7 +632,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         self.model.set_is_avg(self.is_avg)
         self.model.set_sld_data(self.sld_data)
 
-        self.draw_button.Enable(self.sld_data != None)
+        self.draw_button.Enable(self.sld_data is not None)
         wx.CallAfter(self.parent.set_sld_data, self.sld_data)
         self._update_model_params()
         if is_draw:
@@ -854,7 +854,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         Compute I(qx, qy)
         """
         flag = self.parent.check_omfpanel_inputs()
-        if not flag and self.parent.parent != None:
+        if not flag and self.parent.parent is not None:
             infor = 'Error'
             msg = 'Error: Wrong inputs in the SLD info panel.'
             # inform msg to wx
@@ -863,8 +863,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             self.SetFocus()
             return
         self.sld_data = self.parent.get_sld_from_omf()
-        if self.sld_data == None:
-            if self.parent.parent != None:
+        if self.sld_data is None:
+            if self.parent.parent is not None:
                 infor = 'Error'
                 msg = 'Error: No data has been selected.'
                 # inform msg to wx
@@ -879,7 +879,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         try:
             self.model.set_sld_data(self.sld_data)
             self.set_input_params()
-            if self.is_avg or self.is_avg == None:
+            if self.is_avg or self.is_avg is None:
                 self._create_default_1d_data()
                 i_out = np.zeros(len(self.data.y))
                 inputs = [self.data.x, [], i_out]
@@ -970,7 +970,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         self.bt_compute.Enable(able)
         self.bt_compute.SetLabel(label)
         self.bt_compute.SetToolTipString(label)
-        if self.parent.parent != None:
+        if self.parent.parent is not None:
             wx.PostEvent(self.parent.parent,
                              StatusEvent(status=msg, type=type))
 
@@ -978,7 +978,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         """
         Update the progress bar
         """
-        if self.parent.parent == None:
+        if self.parent.parent is None:
             return
         type = "progress"
         msg = "Please wait. Computing... (Note: Window may look frozen.)"
@@ -994,14 +994,14 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         #s = time.time()
         for ind in range(len(input[0])):
             if self.is_avg:
-                if ind % 1 == 0 and update != None:
+                if ind % 1 == 0 and update is not None:
                     update()
                     time.sleep(0.1)
                 inputi = [input[0][ind:ind + 1], [], input[2][ind:ind + 1]]
                 outi = self.model.run(inputi)
                 out = np.append(out, outi)
             else:
-                if ind % 50 == 0  and update != None:
+                if ind % 50 == 0  and update is not None:
                     update()
                     time.sleep(0.001)
                 inputi = [input[0][ind:ind + 1], input[1][ind:ind + 1],
@@ -1009,7 +1009,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                 outi = self.model.runXY(inputi)
                 out = np.append(out, outi)
         #print time.time() - s
-        if self.is_avg or self.is_avg == None:
+        if self.is_avg or self.is_avg is None:
             self._draw1D(out)
         else:
             #out = self.model.runXY(input)
@@ -1150,7 +1150,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         new_plot.name = new_plot.id
         new_plot.label = new_plot.id
         #theory_data = deepcopy(new_plot)
-        if self.parent.parent != None:
+        if self.parent.parent is not None:
             self.parent.parent.update_theory(data_id=new_plot.id,
                                            theory=new_plot,
                                            state=state)
@@ -1209,7 +1209,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         new_plot.name = new_plot.id
         new_plot.label = new_plot.id
         #theory_data = deepcopy(new_plot)
-        if self.parent.parent != None:
+        if self.parent.parent is not None:
             self.parent.parent.update_theory(data_id=data.id,
                                            theory=new_plot,
                                            state=state)
@@ -1286,19 +1286,19 @@ class OmfPanel(ScrolledPanel, PanelBase):
         for key in sld_sets.keys():
             key_low = key.lower()
             if key_low.count('mx') > 0:
-                if sld_sets[key] == None:
+                if sld_sets[key] is None:
                     sld_sets[key] = self.sld_data.sld_mx
                 mx = sld_sets[key]
             elif key_low.count('my') > 0:
-                if sld_sets[key] == None:
+                if sld_sets[key] is None:
                     sld_sets[key] = self.sld_data.sld_my
                 my = sld_sets[key]
             elif key_low.count('mz') > 0:
-                if sld_sets[key] == None:
+                if sld_sets[key] is None:
                     sld_sets[key] = self.sld_data.sld_mz
                 mz = sld_sets[key]
             else:
-                if sld_sets[key] != None:
+                if sld_sets[key] is not None:
                     self.sld_data.set_sldn(sld_sets[key])
         self.sld_data.set_sldms(mx, my, mz)
         self._set_slddata_ctr_val(self.sld_data)
@@ -1346,7 +1346,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
             msg = "OMF Panel: %s" % sys.exc_value
             infor = 'Error'
             #logger.error(msg)
-            if self.parent.parent != None:
+            if self.parent.parent is not None:
                 # inform msg to wx
                 wx.PostEvent(self.parent.parent,
                         StatusEvent(status=msg, info=infor))
@@ -1367,7 +1367,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         Set the textctr box values
         """
 
-        if omfdata == None:
+        if omfdata is None:
             self._set_none_text()
             return
         nodes_list = self._get_nodes_key_list(omfdata)
@@ -1436,7 +1436,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         """
         self.slds = []
         omfdata = self.sld_data
-        if omfdata == None:
+        if omfdata is None:
             raise
         sld_key_list = self._get_slds_key_list(omfdata)
         # Dic is not sorted
@@ -1476,7 +1476,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         """
         self.nodes = []
         omfdata = self.sld_data
-        if omfdata == None:
+        if omfdata is None:
             raise
         key_list = self._get_nodes_key_list(omfdata)
         is_data = self.sld_data.is_data
@@ -1511,7 +1511,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         """
         self.stepsize = []
         omfdata = self.sld_data
-        if omfdata == None:
+        if omfdata is None:
             raise
         key_list = self._get_step_key_list(omfdata)
         is_data = self.sld_data.is_data
@@ -1630,7 +1630,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         """
         Set sld textctrls
         """
-        if sld_data == None:
+        if sld_data is None:
             for ctr_list in self.slds:
                 ctr_list[1].Enable(False)
                 #break   
@@ -1689,7 +1689,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
 
             data = self.parent.get_sld_data()
             fName = os.path.splitext(path)[0] + '.' + extension.split('.')[-1]
-            if data != None:
+            if data is not None:
                 try:
                     reader.write(fName, data)
                 except:
@@ -1698,7 +1698,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
                 msg = "%s cannot write %s\n" % ('Generic Scattering', str(path))
                 infor = 'Error'
                 #logger.error(msg)
-                if self.parent.parent != None:
+                if self.parent.parent is not None:
                     # inform msg to wx
                     wx.PostEvent(self.parent.parent,
                             StatusEvent(status=msg, info=infor))
@@ -1707,7 +1707,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         except:
             msg = "Error occurred while saving. "
             infor = 'Error'
-            if self.parent.parent != None:
+            if self.parent.parent is not None:
                 # inform msg to wx
                 wx.PostEvent(self.parent.parent,
                         StatusEvent(status=msg, info=infor))
@@ -1717,7 +1717,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         """
         """
         flag = True
-        if event != None:
+        if event is not None:
             event.Skip()
             ctl = event.GetEventObject()
             ctl.SetBackgroundColour("white")
@@ -1738,7 +1738,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
                     npts *= int(n_val)
             if npts > 0:
                 nop = self.set_npts_from_slddata()
-                if nop == None:
+                if nop is None:
                     nop = npts
                 self.display_npts(nop)
 
@@ -1757,7 +1757,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         On stepsize event
         """
         flag = True
-        if event != None:
+        if event is not None:
             event.Skip()
             ctl = event.GetEventObject()
             ctl.SetBackgroundColour("white")
@@ -1910,10 +1910,10 @@ class SasGenWindow(widget.CHILD_FRAME):
         """
         Set omfdata
         """
-        if data == None:
+        if data is None:
             return
         self.sld_data = data
-        enable = (not data == None)
+        enable = (data is not None)
         self._set_omfpanel_sld_data(self.sld_data)
         self.omfpanel.bt_save.Enable(enable)
         self.set_etime()
@@ -1973,7 +1973,7 @@ class SasGenWindow(widget.CHILD_FRAME):
         """
         Send full draw to gui frame
         """
-        if self.parent != None:
+        if self.parent is not None:
             self.parent.set_schedule_full_draw(panel, func)
 
     def get_npix(self):
@@ -2049,7 +2049,7 @@ class SasGenWindow(widget.CHILD_FRAME):
         """
         Close
         """
-        if self.base != None:
+        if self.base is not None:
             self.base.gen_frame = None
         self.Destroy()
 

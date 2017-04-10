@@ -575,7 +575,7 @@ def load(path = "sphere_60_q0_2.txt"):
     data_y   = np.zeros(0)
     data_err = np.zeros(0)
     scale    = None
-    if not path == None:
+    if path is not None:
         input_f = open(path,'r')
         buff    = input_f.read()
         lines   = buff.split('\n')

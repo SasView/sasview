@@ -189,9 +189,9 @@ class FitData1D(Data1D):
         # ToDo: Find better way to do it.
         if qmin == 0.0 and not np.isfinite(self.y[qmin]):
             self.qmin = min(self.x[self.x != 0])
-        elif qmin != None:
+        elif qmin is not None:
             self.qmin = qmin
-        if qmax != None:
+        if qmax is not None:
             self.qmax = qmax
         # Determine the range needed in unsmeared-Q to cover
         # the smeared Q range
@@ -201,7 +201,7 @@ class FitData1D(Data1D):
         self._first_unsmeared_bin = 0
         self._last_unsmeared_bin = len(self.x) - 1
         
-        if self.smearer != None:
+        if self.smearer is not None:
             self._first_unsmeared_bin, self._last_unsmeared_bin = \
                     self.smearer.get_bin_range(self.qmin, self.qmax)
             self._qmin_unsmeared = self.x[self._first_unsmeared_bin]
@@ -293,12 +293,12 @@ class FitData2D(Data2D):
         y_max = max(math.fabs(sas_data2d.ymin), math.fabs(sas_data2d.ymax))
         
         ## fitting range
-        if qmin == None:
+        if qmin is None:
             self.qmin = 1e-16
-        if qmax == None:
+        if qmax is None:
             self.qmax = math.sqrt(x_max * x_max + y_max * y_max)
         ## new error image for fitting purpose
-        if self.err_data == None or self.err_data == []:
+        if self.err_data is None or self.err_data == []:
             self.res_err_data = np.ones(len(self.data))
         else:
             self.res_err_data = copy.deepcopy(self.err_data)
@@ -317,7 +317,7 @@ class FitData2D(Data2D):
         """
             Set smearer
         """
-        if smearer == None:
+        if smearer is None:
             return
         self.smearer = smearer
         self.smearer.set_index(self.idx)
@@ -329,9 +329,9 @@ class FitData2D(Data2D):
         """
         if qmin == 0.0:
             self.qmin = 1e-16
-        elif qmin != None:
+        elif qmin is not None:
             self.qmin = qmin
-        if qmax != None:
+        if qmax is not None:
             self.qmax = qmax
         self.radius = np.sqrt(self.qx_data**2 + self.qy_data**2)
         self.idx = ((self.qmin <= self.radius) &\
@@ -356,7 +356,7 @@ class FitData2D(Data2D):
         """
         return the residuals
         """
-        if self.smearer != None:
+        if self.smearer is not None:
             fn.set_index(self.idx)
             gn = fn.get_value()
         else:
@@ -611,7 +611,7 @@ class FResult(object):
     def __str__(self):
         """
         """
-        if self.pvec == None and self.model is None and self.param_list is None:
+        if self.pvec is None and self.model is None and self.param_list is None:
             return "No results"
 
         sasmodel = self.model.model

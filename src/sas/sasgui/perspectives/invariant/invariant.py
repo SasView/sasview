@@ -330,7 +330,7 @@ class Plugin(PluginBase):
         new_plot.id = str(self.__data.id) + name
         new_plot.title = self.__data.title
         # Save theory_data in a state
-        if data != None:
+        if data is not None:
             name_head = name.split('-')
             if name_head[0] == 'Low':
                 self.invariant_panel.state.theory_lowQ = copy.deepcopy(new_plot)
@@ -352,7 +352,7 @@ class Plugin(PluginBase):
         new_plot.title = self.__data.title
 
         # Save data in a state: but seems to never happen
-        if new_plot != None:
+        if new_plot is not None:
             self.invariant_panel.state.data = copy.deepcopy(new_plot)
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                                                title=new_plot.title))

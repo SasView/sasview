@@ -549,7 +549,7 @@ class SldWindow(widget.CHILD_FRAME):
         """
         On close event
         """
-        if self.manager != None:
+        if self.manager is not None:
             self.manager.sld_frame = None
         self.Destroy()
 

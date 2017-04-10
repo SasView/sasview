@@ -204,7 +204,7 @@ class CalcThread:
 
     def update(self, **kwargs):
         """Update GUI with the lastest results from the current work unit."""
-        if self.updatefn != None and clock() > self._time_for_update:
+        if self.updatefn is not None and clock() > self._time_for_update:
             self._lock.acquire()
             self._time_for_update = clock() + self._delay
             self._lock.release()
@@ -220,7 +220,7 @@ class CalcThread:
 
     def complete(self, **kwargs):
         """Update the GUI with the completed results from a work unit."""
-        if self.completefn != None:
+        if self.completefn is not None:
             self.completefn(**kwargs)
             sleep(self.yieldtime)
         return
