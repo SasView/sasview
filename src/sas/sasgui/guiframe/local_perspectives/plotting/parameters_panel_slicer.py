@@ -1,15 +1,16 @@
 
 
+import os
 import wx
 import wx.lib.newevent
 from sas.sascalc.dataloader.readers.cansas_reader import Reader
 from sas.sasgui.guiframe.events import EVT_SLICER_PARS
 from sas.sasgui.guiframe.utils import format_number
 from sas.sasgui.guiframe.events import EVT_SLICER
-from sas.sasgui.guiframe.events import SlicerParameterEvent, SlicerEvent
+from sas.sasgui.guiframe.events import SlicerParameterEvent
 from Plotter2D import ModelPanel2D
 apply_params, EVT_APPLY_PARAMS = wx.lib.newevent.NewEvent()
-auto_save, EVT_AUTO_SAVE = wx.lib.newevent.NewEvent()
+save_files, EVT_AUTO_SAVE = wx.lib.newevent.NewEvent()
 
 FIT_OPTIONS = ["No fitting", "Fitting", "Batch Fitting"]
 CONVERT_DICT = {"SectorInteractor": "SectorQ",
@@ -17,12 +18,12 @@ CONVERT_DICT = {"SectorInteractor": "SectorQ",
                 "BoxInteractorX": "SlabX",
                 "BoxInteractorY": "SlabY"}
 
+
 class SlicerParameterPanel(wx.Dialog):
     """
-    Panel class to show the slicer parameters
+    Panel for dynamically changing slicer parameters and apply the same slicer
+    to multiple 2D plot panels
     """
-    # TODO: show units
-    # TODO: order parameters properly
 
     def __init__(self, parent, *args, **kwargs):
         """
@@ -33,6 +34,8 @@ class SlicerParameterPanel(wx.Dialog):
         self.params = {}
         self.iter = 0
         self.parent = parent
+        self.main_window = parent.parent
+        self.data_panel = self.main_window._data_panel
         self.type = None
         self.listeners = []
         self.parameters = []
@@ -42,20 +45,24 @@ class SlicerParameterPanel(wx.Dialog):
         self.path = None
         self.fitting_options = None
         self.type_list = []
+        self.loaded_data = []
+        self.always_on = None
         self.type_select = None
         self.append_name = None
         self.data_list = None
+        self.default_value = ""
+        self.batch_slicer_button = None
         label = "Right-click on 2D plot for slicer options"
         title = wx.StaticText(self, -1, label, style=wx.ALIGN_LEFT)
         self.bck.Add(title, (0, 0), (1, 2),
                      flag=wx.LEFT | wx.ALIGN_CENTER_VERTICAL, border=15)
         # Bindings
-        self.parent.Bind(EVT_SLICER, self.onEVT_SLICER)
-        self.Bind(EVT_SLICER_PARS, self.onParamChange)
+        self.parent.Bind(EVT_SLICER, self.on_evt_slicer)
+        self.Bind(EVT_SLICER_PARS, self.on_param_change)
         self.Bind(EVT_APPLY_PARAMS, self.apply_params_list_and_process)
         self.Bind(EVT_AUTO_SAVE, self.save_files)
 
-    def onEVT_SLICER(self, event):
+    def on_evt_slicer(self, event):
         """
         Process EVT_SLICER events
         When the slicer changes, update the panel
@@ -93,7 +100,7 @@ class SlicerParameterPanel(wx.Dialog):
             for item in keys:
                 iy += 1
                 ix = 0
-                if not item in ["count", "errors"]:
+                if item not in ["count", "errors"]:
                     text = wx.StaticText(self, -1, item, style=wx.ALIGN_LEFT)
                     self.bck.Add(text, (iy, ix), (1, 1),
                                  wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
@@ -104,7 +111,7 @@ class SlicerParameterPanel(wx.Dialog):
                     ctl.SetToolTipString(hint_msg)
                     ix = 1
                     ctl.SetValue(format_number(str(params[item])))
-                    self.Bind(wx.EVT_TEXT_ENTER, self.onTextEnter)
+                    self.Bind(wx.EVT_TEXT_ENTER, self.on_text_enter)
                     self.parameters.append([item, ctl])
                     self.bck.Add(ctl, (iy, ix), (1, 1),
                                  wx.EXPAND | wx.ADJUST_MINSIZE, 0)
@@ -130,10 +137,9 @@ class SlicerParameterPanel(wx.Dialog):
             text = wx.StaticText(self, -1, txt, style=wx.ALIGN_LEFT)
             self.bck.Add(text, (iy, ix), (1, 1),
                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
-            self.type_list = ["SectorInteractor", "AnnulusInteractor",
-                              "BoxInteractorX", "BoxInteractorY"]
+            self.type_list = CONVERT_DICT.keys()
             self.type_select = wx.ComboBox(parent=self, choices=self.type_list)
-            self.type_select.Bind(wx.EVT_COMBOBOX, self.onChangeSlicer)
+            self.type_select.Bind(wx.EVT_COMBOBOX, self.on_change_slicer)
             index = self.type_select.FindString(type)
             self.type_select.SetSelection(index)
             self.bck.Add(self.type_select, (iy, 1), (1, 1),
@@ -157,7 +163,7 @@ class SlicerParameterPanel(wx.Dialog):
             self.bck.Add(self.data_list, (iy, ix), (1, 1),
                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
 
-            # Checkbox for autosaving data
+            # Checkbox to enable saving and fitting options
             iy += 1
             self.auto_save = wx.CheckBox(parent=self, id=wx.NewId(),
                                          label="Auto save generated 1D:")
@@ -168,7 +174,8 @@ class SlicerParameterPanel(wx.Dialog):
             # File browser
             save_to = "Save files to:"
             save = wx.StaticText(self, -1, save_to, style=wx.ALIGN_LEFT)
-            self.path = wx.DirPickerCtrl(self, id=wx.NewId(), path="",
+            path = os.getcwd()
+            self.path = wx.DirPickerCtrl(self, id=wx.NewId(), path=path,
                                          message=save_to)
             self.path.Enable(False)
             self.bck.Add(save, (iy, ix), (1, 1),
@@ -177,15 +184,15 @@ class SlicerParameterPanel(wx.Dialog):
                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
             # Append to file
             iy += 1
-            default_value = ""
-            for key in params:
-                default_value += "_{0}".format(key).split(" [")[0]
-                default_value += "-{:.5f}".format(params[key])
+            self.update_file_append(params)
             append_text = "Append to file name:"
             append = wx.StaticText(self, -1, append_text, style=wx.ALIGN_LEFT)
             self.append_name = wx.TextCtrl(parent=self, id=wx.NewId(),
                                            name="Append to file name:")
-            self.append_name.SetValue(default_value)
+            append_tool_tip = "Files will be saved as <SlicerType><FileName>"
+            append_tool_tip += "<AppendToText>.xml"
+            self.append_name.SetToolTipString(append_tool_tip)
+            self.append_name.SetValue(self.default_value)
             self.append_name.Enable(False)
             self.bck.Add(append, (iy, ix), (1, 1),
                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
@@ -195,7 +202,8 @@ class SlicerParameterPanel(wx.Dialog):
             # Combobox for selecting fitting options
             iy += 1
             fit_text = "Fitting Options:"
-            fit_text_item = wx.StaticText(self, -1, fit_text, style=wx.ALIGN_LEFT)
+            fit_text_item = wx.StaticText(self, -1, fit_text,
+                                          style=wx.ALIGN_LEFT)
             self.bck.Add(fit_text_item, (iy, ix), (1, 1),
                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
             self.fitting_options = wx.ComboBox(parent=self, choices=FIT_OPTIONS)
@@ -220,7 +228,7 @@ class SlicerParameterPanel(wx.Dialog):
         self.bck.Fit(self)
         self.parent.GetSizer().Layout()
 
-    def onParamChange(self, evt):
+    def on_param_change(self, evt):
         """
         receive an event end reset value text fields
         inside self.parameters
@@ -232,7 +240,7 @@ class SlicerParameterPanel(wx.Dialog):
                     item[1].SetValue("%-5.3g" % evt.params[item[0]])
                     item[1].Refresh()
 
-    def onTextEnter(self, evt):
+    def on_text_enter(self, evt):
         """
         Parameters have changed
         """
@@ -252,18 +260,21 @@ class SlicerParameterPanel(wx.Dialog):
         if not has_error:
             # Post parameter event
             # parent here is plotter2D
+            self.update_file_append(params)
+            self.append_name.SetValue(self.default_value)
+            self.append_name.Refresh()
             event = SlicerParameterEvent(type=self.type, params=params)
             wx.PostEvent(self.parent, event)
 
     def on_batch_slicer(self, evt=None):
         """
-        Method invoked when batch slicing button is pressed
-        :param evt: Event triggering hide/show of the batch slicer parameters
+        Event triggered when batch slicing button is pressed
+        :param evt: Event triggering the batch slicing
         """
         apply_to_list = []
         spp = self.parent.parent
         params = self.parent.slicer.get_params()
-        type = self.type_select.GetStringSelection()
+        slicer_type = self.type_select.GetStringSelection()
         save = self.auto_save.IsChecked()
         append = self.append_name.GetValue()
         path = self.path.GetPath()
@@ -276,60 +287,57 @@ class SlicerParameterPanel(wx.Dialog):
 
         # Apply slicer type to selected panels
         for item in apply_to_list:
-            self._apply_slicer_to_plot(item, type)
+            self._apply_slicer_to_plot(item, slicer_type)
 
         # Post an event to apply appropriate slicer params to each slicer
+        # Pass all variables, including class variables
         event_params = apply_params(params=params, apply_to_list=apply_to_list,
-                             auto_save=save, append=append, fit=fit,
-                             path=path, type=type)
+                                    auto_save=save, append=append, fit=fit,
+                                    path=path, type=slicer_type)
         wx.PostEvent(self, event_params)
 
-    def onChangeSlicer(self, evt):
+    def on_change_slicer(self, evt):
         """
         Event driven slicer change when self.type_select changes
         :param evt: Event triggering this change
         """
         self._apply_slicer_to_plot(self.parent)
 
-    def _apply_slicer_to_plot(self, plot, type=None):
+    def _apply_slicer_to_plot(self, plot, slicer_type=None):
         """
         Apply a slicer to *any* plot window, not just parent window
         :param plot: 2D plot panel to apply a slicer to
-        :param type: The type of slicer to apply to the panel
+        :param slicer_type: The type of slicer to apply to the panel
         """
-        # Skip redrawing the current plot if no change
-        if self.parent == plot and self.type == type:
+        # Skip redrawing the current plot if no change in slicer type
+        if self.parent == plot and self.type == slicer_type:
             return
         # Do not draw a slicer on a 1D plot
         if not isinstance(plot, ModelPanel2D):
             return
-        if type is None:
-            type = self.type_select.GetStringSelection()
-        if type == "SectorInteractor":
+        if slicer_type is None:
+            slicer_type = self.type_select.GetStringSelection()
+        if slicer_type == self.type_list[0]:
             plot.onSectorQ(None)
-        elif type == "AnnulusInteractor":
+        elif slicer_type == self.type_list[1]:
             plot.onSectorPhi(None)
-        elif type == "BoxInteractorX":
+        elif slicer_type == self.type_list[2]:
             plot.onBoxavgX(None)
-        elif type == "BoxInteractorY":
+        elif slicer_type == self.type_list[3]:
             plot.onBoxavgY(None)
 
     def process_list(self):
         """
         Populate the check list from the currently plotted 2D data
         """
-        self.checkme = None
-        main_window = self.parent.parent
-        self.loaded_data = []
-        id = wx.NewId()
         # Iterate over the loaded plots and find all 2D panels
-        for key, value in main_window.plot_panels.iteritems():
+        for key, value in self.main_window.plot_panels.iteritems():
             if isinstance(value, ModelPanel2D):
                 self.loaded_data.append(value.data2D.name)
                 if value.data2D.id == self.parent.data2D.id:
                     # Set current plot panel as uncheckable
-                    self.checkme = self.loaded_data.index(value.data2D.name)
-        self.data_list = wx.CheckListBox(parent=self, id=id,
+                    self.always_on = self.loaded_data.index(value.data2D.name)
+        self.data_list = wx.CheckListBox(parent=self, id=wx.NewId(),
                                          choices=self.loaded_data,
                                          name="Apply Slicer to 2D Plots:")
         # Check all items by default
@@ -340,12 +348,12 @@ class SlicerParameterPanel(wx.Dialog):
     def on_check_box_list(self, evt=None):
         """
         Prevent a checkbox item from being unchecked
-        :param e: Event triggered when a checkbox list item is checked
+        :param evt: Event triggered when a checkbox list item is checked
         """
         if evt is None:
             return
         index = evt.GetSelection()
-        if index == self.checkme:
+        if index == self.always_on:
             self.data_list.Check(index)
 
     def apply_params_list_and_process(self, evt=None):
@@ -354,15 +362,17 @@ class SlicerParameterPanel(wx.Dialog):
         :param evt: Event triggered to apply parameters to a list of plots
                     evt should have attrs plot_list and params
         """
+        if evt is None:
+            return
         # Apply parameter list to each plot as desired
         for item in evt.apply_to_list:
             event = SlicerParameterEvent(type=evt.type, params=evt.params)
             wx.PostEvent(item, event)
         # Post an event to save each data set to file
         if evt.auto_save:
-            event = auto_save(append_to_name=evt.append, path=evt.path,
-                              type=evt.type, file_list=evt.apply_to_list,
-                              fit=evt.fit)
+            event = save_files(append_to_name=evt.append, path=evt.path,
+                               type=evt.type, file_list=evt.apply_to_list,
+                               fit=evt.fit)
             wx.PostEvent(self, event)
 
     def save_files(self, evt=None):
@@ -371,7 +381,9 @@ class SlicerParameterPanel(wx.Dialog):
         :param evt: Event that triggered the call to the method
         """
 
-        # Send the event to the end of the wx event queue
+        # Events triggered after this event pass other events to wx that are
+        # necessary before this event is called. If this is the first time
+        # reaching this event, send it to the end of the wx event queue
         if self.iter == 0:
             clone = evt.Clone()
             wx.PostEvent(self, clone)
@@ -382,7 +394,6 @@ class SlicerParameterPanel(wx.Dialog):
 
         # Start definitions
         writer = Reader()
-        main_window = self.parent.parent
         data_dic = {}
         append = evt.append_to_name
         names = []
@@ -394,7 +405,7 @@ class SlicerParameterPanel(wx.Dialog):
             names.append(f_name.data2D.label)
 
         # Find the correct plots to save
-        for key, plot in main_window.plot_panels.iteritems():
+        for key, plot in self.main_window.plot_panels.iteritems():
             if not hasattr(plot, "data2D"):
                 for item in plot.plots:
                     base = item.replace(CONVERT_DICT[evt.type], "")
@@ -403,7 +414,7 @@ class SlicerParameterPanel(wx.Dialog):
 
         # Save files as XML
         for item, data1d in data_dic.iteritems():
-            base = ('.').join(item.split('.')[:-1])
+            base = '.'.join(item.split('.')[:-1])
             file_name = base + append + ".xml"
             save_to = evt.path + "\\" + file_name
             writer.write(save_to, data1d)
@@ -412,7 +423,7 @@ class SlicerParameterPanel(wx.Dialog):
 
         # Load files into GUI
         for item in f_path_list:
-            main_window.load_data(item)
+            self.main_window.load_data(item)
 
         # Send to fitting
         self.send_to_fitting(evt.fit, f_name_list)
@@ -424,20 +435,17 @@ class SlicerParameterPanel(wx.Dialog):
         :param file_list: list of loaded file names to send to fit
         """
         if fit != FIT_OPTIONS[0] and file_list is not None:
-            # Method variable definitions
-            main_window = self.parent.parent
-            datapanel = main_window._data_panel
             # Set perspective to fitting
-            int = datapanel.perspective_cbox.FindString("Fitting")
-            datapanel.perspective_cbox.SetSelection(int)
-            datapanel._on_perspective_selection(None)
+            int = self.data_panel.perspective_cbox.FindString("Fitting")
+            self.data_panel.perspective_cbox.SetSelection(int)
+            self.data_panel._on_perspective_selection(None)
             # Unselect all loaded data
-            datapanel.selection_cbox.SetValue('Unselect all Data')
-            datapanel._on_selection_type(None)
+            self.data_panel.selection_cbox.SetValue('Unselect all Data')
+            self.data_panel._on_selection_type(None)
             # Click each sliced data file
             for f_name in file_list:
                 num = len(f_name)
-                data_list = datapanel.list_cb_data
+                data_list = self.data_panel.list_cb_data
                 for key in data_list:
                     loaded_key = (key[:num]) if len(key) > num else key
                     if loaded_key == f_name:
@@ -445,21 +453,20 @@ class SlicerParameterPanel(wx.Dialog):
                         data_ctrl = data_list[selection][0]
                         self.check_item_and_children(data_ctrl=data_ctrl,
                                                      check_value=True)
-            # TODO: Batch fitting
             # Switch to batch mode if selected
             if fit == FIT_OPTIONS[2]:
-                datapanel.rb_single_mode.SetValue(False)
-                datapanel.rb_batch_mode.SetValue(True)
-                datapanel.on_batch_mode(None)
+                self.data_panel.rb_single_mode.SetValue(False)
+                self.data_panel.rb_batch_mode.SetValue(True)
+                self.data_panel.on_batch_mode(None)
             else:
-                datapanel.rb_single_mode.SetValue(True)
-                datapanel.rb_batch_mode.SetValue(False)
-                datapanel.on_single_mode(None)
+                self.data_panel.rb_single_mode.SetValue(True)
+                self.data_panel.rb_batch_mode.SetValue(False)
+                self.data_panel.on_single_mode(None)
 
             # Post button click event to send data to fitting
             evt = wx.PyCommandEvent(wx.EVT_BUTTON.typeId,
-                                    datapanel.bt_import.GetId())
-            wx.PostEvent(datapanel, evt)
+                                    self.data_panel.bt_import.GetId())
+            wx.PostEvent(self.data_panel, evt)
 
     def on_auto_save_checked(self, evt=None):
         """
@@ -471,12 +478,21 @@ class SlicerParameterPanel(wx.Dialog):
         self.fitting_options.Enable(self.auto_save.IsChecked())
 
     def check_item_and_children(self, data_ctrl, check_value=True):
-        self.parent.parent._data_panel.tree_ctrl.CheckItem(data_ctrl,
-                                                           check_value)
+        self.data_panel.tree_ctrl.CheckItem(data_ctrl, check_value)
         if data_ctrl.HasChildren():
             if check_value and not data_ctrl.IsExpanded():
-                # Only select children if control is expanded
-                # Always deselect children, regardless (see ticket #259)
                 return
             for child_ctrl in data_ctrl.GetChildren():
-                self.tree_ctrl.CheckItem(child_ctrl, check_value)
+                self.data_panel.CheckItem(child_ctrl, check_value)
+
+    def update_file_append(self, params=None):
+        """
+        Update default_value when any parameters are changed
+        :param params: dictionary of parameters
+        """
+        self.default_value = ""
+        if params is None:
+            params = self.params
+        for key in params:
+            self.default_value += "_{0}".format(key).split(" [")[0]
+            self.default_value += "-{:.2f}".format(params[key])
