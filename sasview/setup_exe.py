@@ -164,7 +164,7 @@ class Target:
         # for the versioninfo resources
         self.version = local_config.__version__
         self.company_name = "SasView.org"
-        self.copyright = "copyright 2009 - 2013"
+        self.copyright = "copyright 2009 - 2016"
         self.name = "SasView"
         
 #
@@ -238,9 +238,9 @@ f = 'local_config.py'
 if os.path.isfile(f):
     data_files.append(('.', [f]))
 
-f = 'default_categories.json'
-if os.path.isfile(f):
-    data_files.append(('.', [f]))
+#f = 'default_categories.json'
+#if os.path.isfile(f):
+#    data_files.append(('.', [f]))
 
 # numerical libraries
 def dll_check(dll_path, dlls):
@@ -371,7 +371,8 @@ target_wx_client = Target(
     dest_base = "SasView"
     )
 
-bundle_option = 2
+# bundle_option = 2
+bundle_option = 3
 if is_64bits:
     bundle_option = 3
 generate_installer()

@@ -20,8 +20,7 @@ Vagrant.configure(2) do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
-  config.vm.box = "ubuntu1404"
-  config.vm.box_url = "https://github.com/hnakamur/packer-templates/releases/download/v1.0.2/ubuntu-14-04-x64-virtualbox.box"
+  config.vm.box = "ubuntu/trusty64"
   #config.vm.box = "fedora19"
   #config.vm.box_url = "https://dl.dropboxusercontent.com/u/86066173/fedora-19.box"
   #config.vm.box = "fedora20"

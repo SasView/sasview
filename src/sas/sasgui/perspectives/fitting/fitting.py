@@ -44,6 +44,7 @@ from sas.sasgui.perspectives.fitting.fitpage import Chi2UpdateEvent
 #from sas.sasgui.perspectives.calculator.model_editor import EditorWindow
 from sas.sasgui.guiframe.gui_manager import MDIFrame
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
+from sas.sasgui.perspectives.fitting.gpu_options import GpuOptions
 
 from . import models
 
@@ -192,6 +193,10 @@ class Plugin(PluginBase):
         self.bumps_options_menu = self.menu1.FindItemById(self.id_bumps_options)
         self.bumps_options_menu.Enable(True)
 
+        self.id_gpu_options_panel = wx.NewId()
+        self.menu1.Append(self.id_gpu_options_panel, "OpenCL Options", "Choose OpenCL driver or turn it off")
+        wx.EVT_MENU(owner, self.id_gpu_options_panel, self.on_gpu_options)
+
         self.id_result_panel = wx.NewId()
         self.menu1.Append(self.id_result_panel, "Fit Results", "Show fit results panel")
         wx.EVT_MENU(owner, self.id_result_panel, self.on_fit_results)
@@ -220,7 +225,7 @@ class Plugin(PluginBase):
 
         self.id_edit = wx.NewId()
         editmodel_help = "Edit customized model sample file"
-        self.menu1.AppendMenu(self.id_edit, "Edit Custom Model",
+        self.menu1.AppendMenu(self.id_edit, "Plugin Model Operations",
                               self.edit_model_menu, editmodel_help)
         #create  menubar items
         return [(self.menu1, self.sub_menu)]
@@ -235,7 +240,7 @@ class Plugin(PluginBase):
         filename = os.path.join(models.find_plugins_dir(), label)
         frame = PyConsole(parent=self.parent, manager=self,
                           panel=self.fit_panel,
-                          title='Advanced Custom Model Editor',
+                          title='Advanced Plugin Model Editor',
                           filename=filename)
         self.put_icon(frame)
         frame.Show(True)
@@ -301,7 +306,7 @@ class Plugin(PluginBase):
         else:
             event_id = event.GetId()
             dir_path = models.find_plugins_dir()
-            title = "New Custom Model Function"
+            title = "New Plugin Model Function"
             self.new_model_frame = EditorWindow(parent=self, base=self,
                                                 path=dir_path, title=title)
             self.put_icon(self.new_model_frame)
@@ -312,13 +317,13 @@ class Plugin(PluginBase):
         Update of models in plugin_models folder
         """
         event_id = event.GetId()
-        self.update_custom_combo()        
+        self.update_custom_combo()
 
     def update_custom_combo(self):
         """
         Update custom model list in the fitpage combo box
         """
-        custom_model = 'Customized Models'
+        custom_model = 'Plugin Models'
         try:
             # Update edit menus
             self.set_edit_menu_helper(self.parent, self.edit_custom_model)
@@ -341,8 +346,7 @@ class Plugin(PluginBase):
                             else:
                                 page.formfactorbox.SetLabel(current_val)
         except:
-            pass
-
+            logging.error("update_custom_combo: %s", sys.exc_value)
 
     def set_edit_menu(self, owner):
         """
@@ -350,7 +354,7 @@ class Plugin(PluginBase):
         """
         wx_id = wx.NewId()
         #new_model_menu = wx.Menu()
-        self.edit_model_menu.Append(wx_id, 'New',
+        self.edit_model_menu.Append(wx_id, 'New Plugin Model',
                                    'Add a new model function')
         wx.EVT_MENU(owner, wx_id, self.make_new_model)
         
@@ -362,20 +366,20 @@ class Plugin(PluginBase):
         e_id = wx.NewId()
         self.edit_menu = wx.Menu()
         self.edit_model_menu.AppendMenu(e_id,
-                                    'Advanced', self.edit_menu)
+                                    'Advanced Plugin Editor', self.edit_menu)
         self.set_edit_menu_helper(owner, self.edit_custom_model)
 
         d_id = wx.NewId()
         self.delete_menu = wx.Menu()
         self.edit_model_menu.AppendMenu(d_id,
-                                        'Delete', self.delete_menu)
+                                        'Delete Plugin Models', self.delete_menu)
         self.set_edit_menu_helper(owner, self.delete_custom_model)
 
         wx_id = wx.NewId()
-        self.edit_model_menu.Append(wx_id, 'Load Models',
+        self.edit_model_menu.Append(wx_id, 'Load Plugin Models',
           '(Re)Load all models present in user plugin_models folder')
         wx.EVT_MENU(owner, wx_id, self.load_plugin_models)
-
+                
     def set_edit_menu_helper(self, owner=None, menu=None):
         """
         help for setting list of the edit model menu labels
@@ -593,11 +597,13 @@ class Plugin(PluginBase):
         : param state: PageState object
         : param datainfo: data
         """
-        #state = self.state_reader.get_state()
-        if state != None:
+        from pagestate import PageState
+        from simfitpage import SimFitPageState
+        if isinstance(state, PageState):
             state = state.clone()
-            # store fitting state in temp_state
             self.temp_state.append(state)
+        elif isinstance(state, SimFitPageState):
+            state.load_from_save_state(self)
         else:
             self.temp_state = []
         # index to start with for a new set_state
@@ -800,6 +806,13 @@ class Plugin(PluginBase):
         self.result_frame.Show()
         self.result_frame.Raise()
 
+    def on_gpu_options(self, event=None):
+        """
+        Make the Fit Results panel visible.
+        """
+        dialog = GpuOptions(None, wx.ID_ANY, "")
+        dialog.Show()
+
     def stop_fit(self, uid):
         """
         Stop the fit
@@ -862,7 +875,6 @@ class Plugin(PluginBase):
             self.draw_model(model=model, data=data, page_id=uid, smearer=smear,
                 enable1D=enable1D, enable2D=enable2D,
                 qmin=qmin, qmax=qmax, weight=weight)
-            self._mac_sleep(0.2)
 
     def _mac_sleep(self, sec=0.2):
         """
@@ -1519,13 +1531,12 @@ class Plugin(PluginBase):
             # Update all fit pages
             for uid in page_id:
                 res = result[index]
+                fit_msg = res.mesg
                 if res.fitness is None or \
                     not numpy.isfinite(res.fitness) or \
                     numpy.any(res.pvec == None) or \
                     not numpy.all(numpy.isfinite(res.pvec)):
-                    msg = "Fitting did not converge!!!"
-                    evt = StatusEvent(status=msg, info="warning", type="stop")
-                    wx.PostEvent(self.parent, evt)
+                    fit_msg += "\nFitting did not converge!!!"
                     wx.CallAfter(self._update_fit_button, page_id)
                 else:
                     #set the panel when fit result are float not list
@@ -1548,13 +1559,12 @@ class Plugin(PluginBase):
                         index += 1
                         wx.CallAfter(cpage._on_fit_complete)
                     except KeyboardInterrupt:
-                        msg = "Singular point: Fitting Stoped."
-                        evt = StatusEvent(status=msg, info="info", type="stop")
-                        wx.PostEvent(self.parent, evt)
+                        fit_msg += "\nSingular point: Fitting stopped."
                     except:
-                        msg = "Singular point: Fitting Error occurred."
-                        evt = StatusEvent(status=msg, info="error", type="stop")
-                        wx.PostEvent(self.parent, evt)
+                        fit_msg += "\nSingular point: Fitting error occurred."
+                if fit_msg:
+                   evt = StatusEvent(status=fit_msg, info="warning", type="stop")
+                   wx.PostEvent(self.parent, evt)
 
         except:
             msg = ("Fit completed but the following error occurred: %s"
@@ -1665,47 +1675,96 @@ class Plugin(PluginBase):
         msg = "Plot updating ... "
         wx.PostEvent(self.parent, StatusEvent(status=msg, type="update"))
 
+    def create_theory_1D(self, x, y, page_id, model, data, state,
+                         data_description, data_id, dy=None):
+        """
+            Create a theory object associate with an existing Data1D
+            and add it to the data manager.
+            @param x: x-values of the data
+            @param y: y_values of the data
+            @param page_id: fit page ID
+            @param model: model used for fitting
+            @param data: Data1D object to create the theory for
+            @param state: model state
+            @param data_description: title to use in the data manager
+            @param data_id: unique data ID
+        """
+        new_plot = Data1D(x=x, y=y)
+        if dy is None:
+            new_plot.is_data = False
+            new_plot.dy = numpy.zeros(len(y))
+            # If this is a theory curve, pick the proper symbol to make it a curve
+            new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
+        else:
+            new_plot.is_data = True
+            new_plot.dy = dy
+        new_plot.interactive = True
+        new_plot.dx = None
+        new_plot.dxl = None
+        new_plot.dxw = None
+        _yaxis, _yunit = data.get_yaxis()
+        _xaxis, _xunit = data.get_xaxis()
+        new_plot.title = data.name
+        new_plot.group_id = data.group_id
+        if new_plot.group_id == None:
+            new_plot.group_id = data.group_id
+        new_plot.id = data_id
+        # Find if this theory was already plotted and replace that plot given
+        # the same id
+        self.page_finder[page_id].get_theory_data(fid=data.id)
+
+        if data.is_data:
+            data_name = str(data.name)
+        else:
+            data_name = str(model.__class__.__name__)
+
+        new_plot.name = data_description + " [" + data_name + "]"
+        new_plot.xaxis(_xaxis, _xunit)
+        new_plot.yaxis(_yaxis, _yunit)
+        self.page_finder[page_id].set_theory_data(data=new_plot,
+                                                  fid=data.id)
+        self.parent.update_theory(data_id=data.id, theory=new_plot,
+                                   state=state)
+        return new_plot
+
     def _complete1D(self, x, y, page_id, elapsed, index, model,
                     weight=None, fid=None,
                     toggle_mode_on=False, state=None,
                     data=None, update_chisqr=True,
-                    source='model', plot_result=True):
+                    source='model', plot_result=True,
+                    unsmeared_model=None, unsmeared_data=None,
+                    unsmeared_error=None, sq_model=None, pq_model=None):
         """
-        Complete plotting 1D data
+            Complete plotting 1D data
+            @param unsmeared_model: fit model, without smearing
+            @param unsmeared_data: data, rescaled to unsmeared model
+            @param unsmeared_error: data error, rescaled to unsmeared model
         """
         try:
             numpy.nan_to_num(y)
+            new_plot = self.create_theory_1D(x, y, page_id, model, data, state,
+                                             data_description=model.name,
+                                             data_id=str(page_id) + " " + data.name)
+            if unsmeared_model is not None:
+                self.create_theory_1D(x, unsmeared_model, page_id, model, data, state,
+                                      data_description=model.name + " unsmeared",
+                                      data_id=str(page_id) + " " + data.name + " unsmeared")
 
-            new_plot = Data1D(x=x, y=y)
-            new_plot.is_data = False
-            new_plot.dy = numpy.zeros(len(y))
-            new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
-            _yaxis, _yunit = data.get_yaxis()
-            _xaxis, _xunit = data.get_xaxis()
-            new_plot.title = data.name
+                if unsmeared_data is not None and unsmeared_error is not None:
+                    self.create_theory_1D(x, unsmeared_data, page_id, model, data, state,
+                                          data_description="Data unsmeared",
+                                          data_id="Data  " + data.name + " unsmeared",
+                                          dy=unsmeared_error)
+                
+            if sq_model is not None and pq_model is not None:
+                self.create_theory_1D(x, sq_model, page_id, model, data, state,
+                                      data_description=model.name + " S(q)",
+                                      data_id=str(page_id) + " " + data.name + " S(q)")
+                self.create_theory_1D(x, pq_model, page_id, model, data, state,
+                                      data_description=model.name + " P(q)",
+                                      data_id=str(page_id) + " " + data.name + " P(q)")
 
-            new_plot.group_id = data.group_id
-            if new_plot.group_id == None:
-                new_plot.group_id = data.group_id
-            new_plot.id = str(page_id) + " " + data.name
-            #if new_plot.id in self.color_dict:
-            #    new_plot.custom_color = self.color_dict[new_plot.id]
-            #find if this theory was already plotted and replace that plot given
-            #the same id
-            self.page_finder[page_id].get_theory_data(fid=data.id)
 
-            if data.is_data:
-                data_name = str(data.name)
-            else:
-                data_name = str(model.__class__.__name__)
-
-            new_plot.name = model.name + " [" + data_name + "]"
-            new_plot.xaxis(_xaxis, _xunit)
-            new_plot.yaxis(_yaxis, _yunit)
-            self.page_finder[page_id].set_theory_data(data=new_plot,
-                                                      fid=data.id)
-            self.parent.update_theory(data_id=data.id, theory=new_plot,
-                                       state=state)
             current_pg = self.fit_panel.get_page_by_id(page_id)
             title = new_plot.title
             batch_on = self.fit_panel.get_page_by_id(page_id).batch_on
@@ -1915,7 +1974,7 @@ class Plugin(PluginBase):
                 ## It seems thus that the whole thread approach used here
                 ## May need rethinking  
                 ##
-                ##    -PDB August 12, 2014                  
+                ##    -PDB August 12, 2014
                 while self.calc_1D.isrunning():
                     time.sleep(0.1)
             self.calc_1D = Calc1D(data=data,

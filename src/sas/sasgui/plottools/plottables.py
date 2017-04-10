@@ -211,6 +211,7 @@ class Graph(object):
             else:
                 self.color += plottable.colors()
                 self.plottables[plottable] = self.color
+                plottable.custom_color = self.color
 
     def changed(self):
         """Detect if any graphed plottables have changed"""

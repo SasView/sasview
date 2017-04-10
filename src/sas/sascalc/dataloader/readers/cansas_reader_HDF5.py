@@ -22,6 +22,11 @@ class Reader():
     SESANS data.
 
     Any number of SASdata sets may be present in a SASentry and the data within can be either 1D I(Q) or 2D I(Qx, Qy).
+<<<<<<< HEAD
+=======
+
+    Also supports reading NXcanSAS formatted HDF5 files
+>>>>>>> master
 
     :Dependencies:
         The CanSAS HDF5 reader requires h5py => v2.5.0 or later.
@@ -75,6 +80,8 @@ class Reader():
                 self.read_children(self.raw_data, [])
                 ## Add the last data set to the list of outputs
                 self.add_data_set()
+                ## Close the data file
+                self.raw_data.close()
         ## Return data set(s)
         return self.output
 
@@ -188,7 +195,9 @@ class Reader():
                         self.current_datainfo.notes.append(data_point)
 
                     ## Sample Information
-                    elif key == u'Title' and self.parent_class == u'SASsample':
+                    elif key == u'Title' and self.parent_class == u'SASsample': # CanSAS 2.0 format
+                        self.current_datainfo.sample.name = data_point
+                    elif key == u'ID' and self.parent_class == u'SASsample': # NXcanSAS format
                         self.current_datainfo.sample.name = data_point
                     elif key == u'thickness' and self.parent_class == u'SASsample':
                         self.current_datainfo.sample.thickness = data_point
@@ -212,8 +221,6 @@ class Reader():
                     ## Process Information
                     elif key == u'name' and self.parent_class == u'SASprocess':
                         self.process.name = data_point
-                    elif key == u'Title' and self.parent_class == u'SASprocess':
-                        self.process.name = data_point
                     elif key == u'description' and self.parent_class == u'SASprocess':
                         self.process.description = data_point
                     elif key == u'date' and self.parent_class == u'SASprocess':
@@ -229,10 +236,30 @@ class Reader():
                     elif key == u'lambda' and self.parent_class == u'SAStransmission_spectrum':
                         self.trans_spectrum.wavelength.append(data_point)
 
-                    ## Other Information
+                    ## Source
                     elif key == u'wavelength' and self.parent_class == u'SASdata':
                         self.current_datainfo.source.wavelength = data_point
-                        self.current_datainfo.source.wavelength.unit = unit
+                        self.current_datainfo.source.wavelength_unit = unit
+                    elif key == u'incident_wavelength' and self.parent_class == u'SASsource':
+                        self.current_datainfo.source.wavelength = data_point
+                        self.current_datainfo.source.wavelength_unit = unit
+                    elif key == u'wavelength_max' and self.parent_class == u'SASsource':
+                        self.current_datainfo.source.wavelength_max = data_point
+                        self.current_datainfo.source.wavelength_max_unit = unit
+                    elif key == u'wavelength_min' and self.parent_class == u'SASsource':
+                        self.current_datainfo.source.wavelength_min = data_point
+                        self.current_datainfo.source.wavelength_min_unit = unit
+                    elif key == u'wavelength_spread' and self.parent_class == u'SASsource':
+                        self.current_datainfo.source.wavelength_spread = data_point
+                        self.current_datainfo.source.wavelength_spread_unit = unit
+                    elif key == u'beam_size_x' and self.parent_class == u'SASsource':
+                        self.current_datainfo.source.beam_size.x = data_point
+                        self.current_datainfo.source.beam_size_unit = unit
+                    elif key == u'beam_size_y' and self.parent_class == u'SASsource':
+                        self.current_datainfo.source.beam_size.y = data_point
+                        self.current_datainfo.source.beam_size_unit = unit
+                    elif key == u'beam_shape' and self.parent_class == u'SASsource':
+                        self.current_datainfo.source.beam_shape = data_point
                     elif key == u'radiation' and self.parent_class == u'SASsource':
                         self.current_datainfo.source.radiation = data_point
                     elif key == u'transmission' and self.parent_class == u'SASdata':

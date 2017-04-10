@@ -202,8 +202,8 @@ def write_file():
     msg += """Flags: recursesubdirs createallsubdirs\n"""
     msg += """Source: "dist\config\custom_config.py";\tDestDir: "{userdesktop}\..\.sasview\config";\t""" 
     msg += """Flags: recursesubdirs createallsubdirs\n"""
-    msg += """Source: "dist\default_categories.json";    DestDir: "{userdesktop}\..\.sasview";\t""" 
-    msg += """DestName: "categories.json";\n"""
+    #msg += """Source: "dist\default_categories.json";    DestDir: "{userdesktop}\..\.sasview";\t""" 
+    #msg += """DestName: "categories.json";\n"""
     msg += """;\tNOTE: Don't use "Flags: ignoreversion" on any shared system files"""
     return msg
 

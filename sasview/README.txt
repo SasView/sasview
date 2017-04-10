@@ -3,6 +3,60 @@ Release Notes
 
 1- Features
 ===========
+    - New in Version 4.0.1
+      ------------------
+      This release fixes the critical bug #750 in P(Q)*S(Q).  Most damaging
+      it appears that the background term was being added to S(Q) prior to
+      multiplication by P(Q).
+
+
+    - New in Version 4.0
+      ------------------
+      This release fixes the various bugs found during the alpha and beta testing
+      - Improvements
+        - Support for reading data files from Anton Paar Saxess instruments
+        - Adds documentation on how to write custom models in the new framework
+      - Bug Fixes
+        - Fixes bug #604 Pringle model questions
+        - Fixes bug #472 Reparameterize Teubner-Strey
+        - Fixes bug #530 Numerical instabilities in Teubner Strey model
+        - Fixes bug #658 ASCII reader very broken
+
+
+    - New in Version 4.0 beta 1
+      --------------------
+      This beta adds support for the magnetic and multilevel models of 3.1.2
+      and along with a host of bug fixes found in the alpha.
+
+      - Model package changes and improvements
+         - All 3.1.2 models now available in new interface
+         - Old custom models should now still work
+            - '''NOTE:''' These will be deprecated in a future version. Old
+            custom models should be converted to the new model format which
+            is now the same as the built in models and offers much better
+            support.
+         - Custom model editor now creates new style models
+         - Custom model editor supports better error checking
+      - Documentation improvements
+        - Continued general cleanup
+      - Other improvements/additions
+         - Support for new canSAS 2D data files added
+         - Plot axes range can now be set manually as well as by zooming
+         - Plot annotations can now be moved around after being placed on plot.
+         - The active optimizer is now listed on the top of the fit panel.
+         - Linear fits now update qmin and max when the x scale limits are
+         changed.  Also the plot range no longer resets after a fit.
+      - Bug fixes
+         - Fixes bug #511 Errors in linearized fits and clean up of interface
+         including Kratky representation
+         - Fixes bug #186 Data operation Tool now executes when something is
+         entered in the text box and does not wait for the user to hit enter
+         - Fixes bug #459 plot context menu bug
+         - Fixes bug #559 copy to clipboard in graph menu broken
+         - Fixes bug #466 cannot remove a linear fit from graph
+         - Numerous bugs introduced in the alpha
+
+
 
     - New in Version 4.0 beta 1
       --------------------
@@ -78,14 +132,14 @@ Release Notes
 
    - New in Version 3.1.2
      --------------------
-     This release is a major stability improvement, having fixed a serious bug 
+     This release is a major stability improvement, having fixed a serious bug
      that came to light since release 3.1.1. All users should upgrade.
 
-     - Fixes bug #468 broken remove constraint buttons in 
+     - Fixes bug #468 broken remove constraint buttons in
        simultaneous/constrained fitting panel
-     - Fixes bug #474 resulting from changes in 3.1.1 that had 
+     - Fixes bug #474 resulting from changes in 3.1.1 that had
        introduced an error in the high-Q of slit-smeared models.
-     - Fixes bug #478 which would cause wx to run out of IDs and result 
+     - Fixes bug #478 which would cause wx to run out of IDs and result
        in SasView crashing even if left alone.
      - Fixes bug #479 missing help button on simultaneous/constrained fit page
      - Fixes bug #480 GUI resizing issues on simultaneous fit page
@@ -109,9 +163,9 @@ Release Notes
          sub panels if appropriate, linking to the appropriate section in the
          documentation.
        - The model help has been split so that the Details button now brings up
-         a very short pop-up giving the equation being used while HELP goes to 
+         a very short pop-up giving the equation being used while HELP goes to
          the section in the full documentation describing the model.
-       - Extensive help has also been added for the new optimizer engine (see 
+       - Extensive help has also been added for the new optimizer engine (see
          below) including rules of thumb on how and when to choose a given
          optimizer and what the parameters do.
      - The optimizer engine has been completely replaced. The new optimizer
@@ -126,7 +180,7 @@ Release Notes
          - A Quasi-Newton BFGS optimizer
          - A Nelder-Mead Simplex optimizer
          - A Differential Evolution optimizer
-         - A Monte Carlo optimizer (DREAM) 
+         - A Monte Carlo optimizer (DREAM)
      - New models were added:
          - MicelleSphCoreModel (currently residing in the Uncategorized category)
      - Existing models were updated:
@@ -135,7 +189,7 @@ Release Notes
          - RectangularHollowPrismModel
          - RectangularHollowPrismInfThinWallsModel
      - Infrastructure to allow SESANS data to be fit with models was added. This
-       will become available in a future release but can currently be used from 
+       will become available in a future release but can currently be used from
        the command line with some caveats.
      - A number of bugs were fixed including a thread crashing issue and an
        incorrect slit smearing resolution calculation.
@@ -160,28 +214,28 @@ Release Notes
        Windows users by using MDI frames. Graph windows are also now free-
        floating.
      - Five new models have been added: PringlesModel, CoreShellEllipsoidXTModel,
-       RectangularPrismModel, RectangularHollowPrismModel and 
+       RectangularPrismModel, RectangularHollowPrismModel and
        RectangularHollowPrismInfThinWallsModel.
-     - The data loader now supports ILL DAT data files and reads the full meta 
+     - The data loader now supports ILL DAT data files and reads the full meta
        information from canSAS file formats.
      - Redefined convention for specifying angular parameters for anisotropic
        models.
-     - A number of minor features have been added such as permitting a log 
-       distribution of points when using a model to simulate data, and the 
+     - A number of minor features have been added such as permitting a log
+       distribution of points when using a model to simulate data, and the
        addition of a Kratky plot option to the linear plots.
      - A number of bugs have also been fixed.
      - Save Project and Save Analysis now work more reliably.
-     - BETA: Magnetic contrast supporting full polarization analysis has been 
+     - BETA: Magnetic contrast supporting full polarization analysis has been
        implemented for some spherical and cylindrical models.
      - BETA: Two new tools have been added:
-       - A generic scattering calculator which takes an atomic, magnetic or 
-         SLD distribution in space and generates the appropriate 2D 
-         scattering pattern. In some cases the orientationally averaged 
-         (powder) 1D scattering can also be computed. Supported formats 
-         include: SLD or text, PDB, and OMF magnetic moment distribution 
+       - A generic scattering calculator which takes an atomic, magnetic or
+         SLD distribution in space and generates the appropriate 2D
+         scattering pattern. In some cases the orientationally averaged
+         (powder) 1D scattering can also be computed. Supported formats
+         include: SLD or text, PDB, and OMF magnetic moment distribution
          file.
-       - An image viewer/converter for data in image format; this reads in 
-         an image file and will attempt to convert the image pixels to 
+       - An image viewer/converter for data in image format; this reads in
+         an image file and will attempt to convert the image pixels to
          data. Supported formats include: TIFF, TIF, PNG, BMP, JPG.
 
    - New in Version 2.2.1
@@ -209,22 +263,22 @@ Release Notes
        editor
      - Added more plot symbols options for 1d plots
      - Added improved trapping of compiling errors to the 'New model editor'
-     - Added some intelligent outputs (e.g., Rg, background, or rod diameter 
+     - Added some intelligent outputs (e.g., Rg, background, or rod diameter
        depending on the choice of axis scale of the plot) to the linear fits
      - Added more models
-     
-   - Feature set from previous versions 	
+
+   - Feature set from previous versions
      -----------------------------------
      - Perspectives Available
        - Invariant calculator: Calculates the invariant, volume fraction, and
          specific surface area.
        - P(r) inversion calculator: Indirect Fourier transformation method.
-       - Fitting: the tool used for modeling and fitting 1D and 2D data to 
+       - Fitting: the tool used for modeling and fitting 1D and 2D data to
          analytical model functions
        - Tools: provides a number of useful supplementary tools such as SLD
-         calculation  
-    
-     - Fitting 
+         calculation
+
+     - Fitting
        - Includes a large number of model functions, both form factors and structure factors.
        - Support P(Q)*S(Q) for form factors that flag they can be so multiplied.
        - Supports Gaussian, lognormal, Shulz, rectangular and custom distribution
@@ -232,10 +286,10 @@ Release Notes
          distributions if appropriate.
        - Anisotropic shapes and magnetic moment modeling in 2D allow for a non-uniform
          distribution of orientations of a given axis leading to modeling and fitting
-         capabilities of non azimuthaly symmetric data.  
+         capabilities of non azimuthaly symmetric data.
        - User can choose to weight fits or not. If using weights, the user can choose
          the error bar on each point if provided in the file, the square root
-         of the intensity or the intensity itself. 
+         of the intensity or the intensity itself.
        - Instrumental resolution smearing of model or fits is provided with several
          options: read the resolution/point fromt he file. Input a pinhole resolution
          or a slit resolution.
@@ -248,8 +302,8 @@ Release Notes
        - Simultaneous/(advanced)constrained fitting allows for fitting a single
          data set or several different sets simultaneously with the application
          of advanced constraints relating fit parameters to functions of other
-         parameters (including from a different set). For example thickness of 
-         shell = sin(30) times the length.  
+         parameters (including from a different set). For example thickness of
+         shell = sin(30) times the length.
        - Models that are the sum of two other models can be easily generated through the
          SUM Model menubar item.
        - New Python models can be added on the fly by creating an appropriate Python
@@ -258,13 +312,13 @@ Release Notes
          models by supplying only the parameters and their default value (box 1)
          and the mathematical function of the model (box 2) and generating the
          necessary *.py file.  A separate advanced model editor provides a full Python
-         file editor.  Either way once saved the model becomes immediately available 
-         to the application. 
+         file editor.  Either way once saved the model becomes immediately available
+         to the application.
        - A batch fitting capability allows for the analysis of a series of data sets to
          a single model and provides the results in a tabular form suitable for saving
          or plotting the evolution of the fit parameters with error bars (from within
          the application).
- 
+
      - Tools
        - A scattering length density calculator,including some X-ray information
          is provided.
@@ -274,7 +328,7 @@ Release Notes
          TOF effects is provided
        - A slit size calculator optimized for Anton Paar Saxess is provided.
        - A kiessig fringe thickness calculator is provided
-         
+
      - Plots and plot management
        - A 3D graphing option (for 2d data/results) is provided with the view
          controlled by the mouse
@@ -288,28 +342,28 @@ Release Notes
          plot can currently only have a single plot).
        - Extensive context sensitive plot/fitting/manipulation options are available
          through a right mouse click pop-up menu on plots.
-           
+
      - Data management
        - Supports 2 + column 1D ASCII data, NIST 1D and 2D data, and canSAS data
-         via plug-in mechanism which can easily allow other readers as appropriate. 
+         via plug-in mechanism which can easily allow other readers as appropriate.
        - 2D data is expected in Q space but for historical reasons accepts the
          NIST 2D raw pixel format and will do conversion internally.
        - The full data and metadata available to SasView is viewable in ASCII via
          right clicking on a data set and choosing Data Info in the DataExplorer
          or on the plots
-       - Supports loading a single file, multiple files, or a whole folder   
+       - Supports loading a single file, multiple files, or a whole folder
        - An optional Data Explorer is provided (default) which simplifies managing,
          plotting, deleting, or setup for computation. Most functions however do
          not require access to the explorer/manager and can be accessed through
          right click menus and the toolbar.  The data explorer can be re-started
          from the menu bar.
-           
+
      - Data manipulation
        - Support various 2D averaging methods : Circular, sectors, annular,
          boxsum, boxQx and boxQy.
        - A 2D data maks editor is provided
        - 2D mask can be applied to the circular averaging.
-         
+
      - Miscellaneous features
        - limited reports can be generated in pdf format
        - Provides multiprocessor support(Windows only)
@@ -330,7 +384,7 @@ Release Notes
 
 2- Downloading and Installing
 =============================
-	
+
    *** Note 1:  Much more information is available at www.sasview.org under links.
 	            Look in the 'For Developers' section and particularly the wiki at
                 www.sasview.org/trac/wiki.
@@ -369,7 +423,7 @@ Release Notes
 
         - The following modules are required (version numbers are what are used
           in the windows release build):
-          
+
           - Common Packages
             - reportlab 3.1.44
             - lxml 3.4.4.0 (MAC 3.4.2.0)
@@ -386,22 +440,22 @@ Release Notes
             - numpy Version Installed: 1.9.2 (MAC 1.6.2)
             - html5lib Version Installed: 0.99999
             - wx Version Installed: 3.0.2.0
-          
+
           - Windows Specific Packages
             - pywin 219
             - py2exe 0.6.9
             - comtypes 1.1.1
             - MinGW w/ gcc version 4.6.1 (WIN)
-            - vcredist_x86.exe (version 9.0.21022.8  -microsoft visual C 2008 
+            - vcredist_x86.exe (version 9.0.21022.8  -microsoft visual C 2008
               re-distributable)
             - Innosetup (WIN - isetup 5.4.2-unicode) - used to create distributable
 
             *** Note: Windows build dependencies can be set up using anaconda. Instructions
                 can be found at http://trac.sasview.org/wiki/AnacondaSetup
-            
+
           - MAC Specifc Packages
             - py2app 0.7.1
-          
+
 
 3- Known Issues
 ===============
@@ -411,16 +465,16 @@ Release Notes
           it is called. Also, an internet connection is required before
           equations will render properly. Until then they will show in their
           original TeX format.
-        - If the documentation window remains stubbornly blank, try installing a 
+        - If the documentation window remains stubbornly blank, try installing a
           different browser and set that as your default browser. Issues have
           been noted with Internet Explorer 11.
-        - Check for Updates may fail (with the status bar message ' Cannot 
-          connect to the application server') if your internet connection uses 
-          a proxy server. Tested resolutions for this are described on the 
+        - Check for Updates may fail (with the status bar message ' Cannot
+          connect to the application server') if your internet connection uses
+          a proxy server. Tested resolutions for this are described on the
           website FAQ.
         - The copy and paste functions (^C, ^V) in the batch mode results grid
           require two clicks: one to select the cell and a second to select the
-          contents of the cell. 
+          contents of the cell.
         - The tutorial has not yet been updated and is somewhat out of date
         - Very old computers may struggle to run the 3.x and later releases
         - Polydispersity on multiple parameters included in a simultaneous/
@@ -435,19 +489,19 @@ Release Notes
           the iner radius gets large enough (ticket #288)
         - The angular distribution angles are not clearly defined and may in
           some cases lead to incorrect calculations(ticket #332)
-          
+
    3.2- Windows:
         - If installed to same directory as old version without first removing
           the old version, the old desktop icon will remain but point to the
           new exe version. Likewise all the start menu folders and items will
           have the old name even though pointing to the new version.  Usually
           safest to uninstall old version prior to installing new version anyway.
-		
+
    3.3- MAC:
         - Application normally starts up hidden. Click icon in Dock to view/use
-          application. 
+          application.
         - Multiprocessing does not currently work on MAC OS
-		
+
    3.4- Linux:
         - Not well tested
 
@@ -455,7 +509,7 @@ Release Notes
 4- SasView website
 ==================
 
-   - www.sasview.org.  This main project site is the gateway to all 
+   - www.sasview.org.  This main project site is the gateway to all
      information about the sasview project.  It includes information
      about the project, a FAQ page and links to all developer and user
      information, tools and resources.
@@ -474,5 +528,3 @@ Release Notes
      - https://github.com/SasView/sasview/releases
    - Latest developer builds
      - https://jenkins.esss.dk/sasview/view/Master-Builds/
-
-    

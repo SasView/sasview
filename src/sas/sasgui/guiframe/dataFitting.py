@@ -362,75 +362,7 @@ class Data2D(PlotData2D, LoadData2D):
         """
         _str = "%s\n" % LoadData2D.__str__(self)
         return _str 
-    
-    def _validity_check(self, other):
-        """
-        Checks that the data lengths are compatible.
-        Checks that the x vectors are compatible.
-        Returns errors vectors equal to original
-        errors vectors if they were present or vectors
-        of zeros when none was found.
-        
-        :param other: other data set for operation
-        
-        :return: dy for self, dy for other [numpy arrays]
-        
-        :raise ValueError: when lengths are not compatible
-        
-        """
-        err_other = None
-        if isinstance(other, Data2D):
-            # Check that data lengths are the same
-            if len(self.data) != len(other.data) or \
-                len(self.qx_data) != len(other.qx_data) or \
-                len(self.qy_data) != len(other.qy_data):
-                msg = "Unable to perform operation: data length are not equal"
-                raise ValueError, msg
-            #if len(self.data) < 1:
-            #    msg = "Incompatible data sets: I-values do not match"
-            #    raise ValueError, msg 
-            for ind in range(len(self.data)):
-                if self.qx_data[ind] != other.qx_data[ind]:
-                    msg = "Incompatible data sets: qx-values do not match"
-                    raise ValueError, msg
-                if self.qy_data[ind] != other.qy_data[ind]:
-                    msg = "Incompatible data sets: qy-values do not match"
-                    raise ValueError, msg
-                   
-            # Check that the scales match
-            err_other = other.err_data
-            if other.err_data == None or \
-                (len(other.err_data) != len(other.data)):
-                err_other = numpy.zeros(len(other.data))
-            
-        # Check that we have errors, otherwise create zero vector
-        err = self.err_data
-        if self.err_data == None or \
-            (len(self.err_data) != len(self.data)):
-            err = numpy.zeros(len(other.data))
-            
-        return err, err_other
 
-    def _validity_check_union(self, other):
-        """
-        Checks that the data lengths are compatible.
-        Checks that the x vectors are compatible.
-        Returns errors vectors equal to original
-        errors vectors if they were present or vectors
-        of zeros when none was found.
-        
-        :param other: other data set for operation
-        
-        :return: bool
-        
-        :raise ValueError: when data types are not compatible
-        
-        """
-        if not isinstance(other, Data2D):
-            msg = "Unable to perform operation: different types of data set"
-            raise ValueError, msg   
-        return True
-    
     def _perform_operation(self, other, operation):
         """
         Perform 2D operations between data sets

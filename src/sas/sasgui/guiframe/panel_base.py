@@ -316,7 +316,16 @@ class PanelBase:
         Get the drag flag to update appropriately the tool bar
         """
         return self._drag_flag
-    
+
+    def _set_analysis(self, flag):
+        """
+        Set the Analysis Save state flag and informs the manager
+        so it refreshes the menu/whole panel
+        """
+        self._set_save_flag(flag)
+        if self._manager is not None:
+            wx.PostEvent(self._manager.parent, PanelOnFocusEvent(panel=self))
+
     def _set_reset_flag(self, flag=True):
         """
         The derivative class sets the reset flag value to indicate that it

@@ -880,9 +880,9 @@ class Data1D(plottable_1D, DataInfo):
                 msg = "Unable to perform operation: data length are not equal"
                 raise ValueError, msg
             # Here we could also extrapolate between data points
-            ZERO = 1.0e-12
+            TOLERANCE = 0.01
             for i in range(len(self.x)):
-                if math.fabs(self.x[i] - other.x[i]) > ZERO:
+                if math.fabs((self.x[i] - other.x[i])/self.x[i]) > TOLERANCE:
                     msg = "Incompatible data sets: x-values do not match"
                     raise ValueError, msg
 
@@ -1092,6 +1092,7 @@ class Data2D(plottable_2D, DataInfo):
         :raise ValueError: when lengths are not compatible
         """
         err_other = None
+        TOLERANCE = 0.01
         if isinstance(other, Data2D):
             # Check that data lengths are the same
             if len(self.data) != len(other.data) or \
@@ -1100,11 +1101,11 @@ class Data2D(plottable_2D, DataInfo):
                 msg = "Unable to perform operation: data length are not equal"
                 raise ValueError, msg
             for ind in range(len(self.data)):
-                if self.qx_data[ind] != other.qx_data[ind]:
-                    msg = "Incompatible data sets: qx-values do not match"
+                if math.fabs((self.qx_data[ind] - other.qx_data[ind])/self.qx_data[ind]) > TOLERANCE:
+                    msg = "Incompatible data sets: qx-values do not match: %s %s" % (self.qx_data[ind], other.qx_data[ind])
                     raise ValueError, msg
-                if self.qy_data[ind] != other.qy_data[ind]:
-                    msg = "Incompatible data sets: qy-values do not match"
+                if math.fabs((self.qy_data[ind] - other.qy_data[ind])/self.qy_data[ind]) > TOLERANCE:
+                    msg = "Incompatible data sets: qy-values do not match: %s %s" % (self.qy_data[ind], other.qy_data[ind])
                     raise ValueError, msg
 
             # Check that the scales match
