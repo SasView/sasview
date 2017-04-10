@@ -41,7 +41,8 @@ class SetupLogger(object):
     def _read_config_file(self):
         '''
         '''
-        logging.config.fileConfig(self.config_file)
+        if self.config_file is not None:
+            logging.config.fileConfig(self.config_file)
 
     def _update_all_logs_to_debug(self, logger):
         '''
@@ -65,7 +66,7 @@ class SetupLogger(object):
         # NotImplementedError: resource_filename() only supported for .egg, not .zip
         try:
             places_to_look_for_conf_file.append(
-                pkg_resources.resource_filename(__name__, filename))
+                pkg_resources.resource_filename("tempfile", filename))
         except NotImplementedError:
             pass
 
@@ -73,5 +74,5 @@ class SetupLogger(object):
             if os.path.exists(filepath):
                 self.config_file = filepath
                 return
-        raise Exception("%s not found...", filename)
-
+        print("%s not found...", filename)
+        self.config_file = None
