@@ -447,9 +447,9 @@ class Reader(XMLreader):
                         self.collimation.name = instrumentNode.attrib.get("name", "")
 
                         for collimationNode in instrumentNode:
-                            collimationTagName = pixelNode.tag.replace(self.base_ns, "")
-                            collimationUnits = pixelNode.attrib.get("unit", "")
-                            collimationData = pixelNode.text
+                            collimationTagName = collimationNode.tag.replace(self.base_ns, "")
+                            collimationUnits = collimationNode.attrib.get("unit", "")
+                            collimationData = collimationNode.text
 
                             if collimationTagName == "length":
                                 self.collimation.length = collimationData
