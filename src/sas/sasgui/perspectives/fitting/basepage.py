@@ -251,7 +251,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         if not hasattr(self, "model_view"):
             return
-        toggle_mode_on = self.model_view.IsEnabled()
+        toggle_mode_on = self.model_view.IsEnabled() or self.data is None
         if toggle_mode_on:
             if self.enable2D and not check_data_validity(self.data):
                 self._create_default_2d_data()
