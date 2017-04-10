@@ -194,11 +194,8 @@ class Reader(XMLreader):
         :param dom: dom object with a namespace base of names
         """
 
-        # self.reset_state()
         self._check_for_empty_data()
         self._initialize_new_data_set(dom)
-        # self.current_dataset = plottable_1D(np.array(0), np.array(0))
-        # self.add_data_set()
 
         self.names.append("SASentry")
         self.parent_class = "SASentry"
@@ -210,8 +207,6 @@ class Reader(XMLreader):
         
         # Go through each child in the parent element
         for sasNode in dom:
-            # Add a new data home
-            # self.add_data_set()
             # Get the element name and set the current name's level
             currentTagName = sasNode.tag.replace(self.base_ns, "")
             # As this is the most likely tag to examine, lets put it first!
@@ -666,12 +661,10 @@ class Reader(XMLreader):
                 new_key = self._create_unique_key(self.current_datainfo.meta_data, currentTagName)
                 self.current_datainfo.meta_data[new_key] = sasNode.text
 
-        # self._final_cleanup()
         self.add_intermediate()
 
         # As before in the code, I guess in case we have to return a tuple for some reason...
-        # return self.output, None
-
+        return self.output, None
 
     def _is_call_local(self):
         """
