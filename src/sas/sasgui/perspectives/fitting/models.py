@@ -259,7 +259,9 @@ class ModelManagerBase:
         """
         temp = {}
         if self.is_changed():
-            return  _findModels(dir)
+            temp =  _findModels(dir)
+            self.last_time_dir_modified = time.time()
+            return temp
         logging.info("plugin model : %s" % str(temp))
         return temp
 
@@ -306,7 +308,7 @@ class ModelManagerBase:
         plugin_dir = find_plugins_dir()
         if os.path.isdir(plugin_dir):
             temp = os.path.getmtime(plugin_dir)
-            if  self.last_time_dir_modified != temp:
+            if  self.last_time_dir_modified < temp:
                 is_modified = True
                 self.last_time_dir_modified = temp
 
