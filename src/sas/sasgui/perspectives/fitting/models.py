@@ -17,6 +17,7 @@ import shutil
 from sas.sascalc.fit.pluginmodel import Model1DPlugin
 from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 from sasmodels.sasview_model import load_custom_model, load_standard_models
+from sas.sasgui.perspectives.fitting.fitpage import CUSTOM_MODEL
 
 
 PLUGIN_DIR = 'plugin_models'
@@ -326,7 +327,7 @@ class ModelManagerBase:
                 self.stored_plugins[name] = plug
                 self.plugins.append(plug)
                 self.model_dictionary[name] = plug
-            self.model_combobox.set_list("Plugin Models", self.plugins)
+            self.model_combobox.set_list(CUSTOM_MODEL, self.plugins)
             return self.model_combobox.get_list()
         else:
             return {}
