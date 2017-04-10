@@ -4,6 +4,7 @@
 """
 import sys
 import os
+import subprocess
 import shutil
 from setuptools import setup, Extension
 from distutils.command.build_ext import build_ext
@@ -156,13 +157,16 @@ class BuildSphinxCommand(Command):
         '''
         ### AJJ - Add code for building sasmodels docs here:
         # check for doc path
-        SASMODELS_PATH = '../sasmodels'
-        if os.path.exists(SASMODELS_PATH):
-            if os.path.isdir(SASMODELS_PATH):
+        SASMODELS_DOCPATH = os.path.abspath(os.path.join(os.getcwd(),'..','sasmodels','doc'))
+        print "========= check for sasmodels at "+SASMODELS_DOCPATH+"============"
+        if os.path.exists(SASMODELS_DOCPATH):
+            if os.path.isdir(SASMODELS_DOCPATH):
                 # if available, build sasmodels docs
-            else:
-                # if not available warning message
-                print "WARNING!! sasmodels directory not found. Cannot build model docs."
+                print "============= Building sasmodels model documentation ==============="
+                smdocbuild = subprocess.call(["make","-C",SASMODELS_DOCPATH,"html"])
+        else:
+            # if not available warning message
+            print " == !!WARNING!! sasmodels directory not found. Cannot build model docs. =="
 
         #Now build sasview (+sasmodels) docs
         sys.path.append("docs/sphinx-docs")
