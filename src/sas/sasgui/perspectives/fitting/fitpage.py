@@ -1235,10 +1235,14 @@ class FitPage(BasicPage):
             new_event = PageInfoEvent(page=self)
             wx.PostEvent(self.parent, new_event)
             # update list of plugins if new plugin is available
-            custom_model = CUSTOM_MODEL
             mod_cat = self.categorybox.GetStringSelection()
-            if mod_cat == custom_model:
+            if mod_cat == CUSTOM_MODEL:
+                temp_id = self.model.id
                 temp = self.parent.update_model_list()
+                for v in self.parent.model_dictionary.values():
+                    if v.id == temp_id:
+                        self.model = v()
+                        break
                 if temp:
                     self.model_list_box = temp
                     current_val = self.formfactorbox.GetLabel()
