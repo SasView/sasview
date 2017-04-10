@@ -22,14 +22,6 @@ from contextlib import contextmanager
 from os.path import join as joinpath
 from os.path import abspath, dirname
 
-try:
-    # running from a local computer as developer
-    from sasview.logger_config import SetupLogger
-except ImportError:
-    from logger_config import SetupLogger
-
-l = SetupLogger(__name__)
-logger = l.config_development()
 
 def addpath(path):
     """
@@ -43,6 +35,19 @@ def addpath(path):
         PYTHONPATH = path
     os.environ['PYTHONPATH'] = PYTHONPATH
     sys.path.insert(0, path)
+
+root = abspath(dirname(__file__))
+addpath(joinpath(root, 'sasview'))
+from logger_config import SetupLogger
+
+#try:
+#    # running from a local computer as developer
+#    from sasview.logger_config import SetupLogger
+#except ImportError:
+#    from logger_config import SetupLogger
+
+l = SetupLogger(__name__)
+logger = l.config_development()
 
 @contextmanager
 def cd(path):
