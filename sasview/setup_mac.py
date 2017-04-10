@@ -50,6 +50,8 @@ DATA_FILES += guiframe.data_files()
 #CANSAxml reader data files
 RESOURCES_FILES.append(os.path.join(sas.sascalc.dataloader.readers.get_data_path(),'defaults.json'))
 
+RESOURCES_FILES.append('logging.ini')
+
 # Locate libxml2 library
 lib_locs = ['/usr/local/lib', '/usr/lib']
 libxml_path = None
@@ -61,7 +63,7 @@ if libxml_path == None:
     raise RuntimeError, "Could not find libxml2 on the system"
 
 APP = ['sasview.py']
-DATA_FILES += ['images','test','media', 'custom_config.py', 'local_config.py', 'logging.ini']
+DATA_FILES += ['images','test','media', 'custom_config.py', 'local_config.py']
 if os.path.isfile("BUILD_NUMBER"):
     DATA_FILES.append("BUILD_NUMBER")
 

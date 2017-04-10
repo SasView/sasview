@@ -74,5 +74,5 @@ class SetupLogger(object):
             if os.path.exists(filepath):
                 self.config_file = filepath
                 return
-        print("%s not found...", filename)
+        print("Logging.ini not found...")
         self.config_file = None
