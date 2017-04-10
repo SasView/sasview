@@ -18,7 +18,7 @@ import logging
 import logging.config
 import traceback
 
-from logger_config import SetupLogger
+from sas.sasview.logger_config import SetupLogger
 
 l = SetupLogger(__name__)
 logger = l.config_production()
