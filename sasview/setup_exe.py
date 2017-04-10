@@ -238,6 +238,10 @@ f = 'local_config.py'
 if os.path.isfile(f):
     data_files.append(('.', [f]))
 
+f = 'logging.ini'
+if os.path.isfile(f):
+    data_files.append(('.', [f]))
+
 #f = 'default_categories.json'
 #if os.path.isfile(f):
 #    data_files.append(('.', [f]))
