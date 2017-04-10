@@ -446,19 +446,15 @@ class SlicerParameterPanel(wx.Dialog):
                         self.check_item_and_children(data_ctrl=data_ctrl,
                                                      check_value=True)
             # TODO: Batch fitting
-            # # Switch to batch mode if selected
-            # if fit == FIT_OPTIONS[2]:
-            #     datapanel.rb_single_mode.SetValue(False)
-            #     datapanel.rb_batch_mode.SetValue(True)
-            #     evt = wx.PyCommandEvent(wx.EVT_RADIOBUTTON.typeId,
-            #                             datapanel.rb_batch_mode.GetId())
-            #     wx.PostEvent(datapanel, evt)
-            # else:
-            #     datapanel.rb_single_mode.SetValue(True)
-            #     datapanel.rb_batch_mode.SetValue(False)
-            #     evt = wx.PyCommandEvent(wx.EVT_RADIOBUTTON.typeId,
-            #                             datapanel.rb_single_mode.GetId())
-            #     wx.PostEvent(datapanel, evt)
+            # Switch to batch mode if selected
+            if fit == FIT_OPTIONS[2]:
+                datapanel.rb_single_mode.SetValue(False)
+                datapanel.rb_batch_mode.SetValue(True)
+                datapanel.on_batch_mode(None)
+            else:
+                datapanel.rb_single_mode.SetValue(True)
+                datapanel.rb_batch_mode.SetValue(False)
+                datapanel.on_single_mode(None)
 
             # Post button click event to send data to fitting
             evt = wx.PyCommandEvent(wx.EVT_BUTTON.typeId,
