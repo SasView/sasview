@@ -194,10 +194,11 @@ class Reader(XMLreader):
         :param dom: dom object with a namespace base of names
         """
 
-        self.reset_state()
+        # self.reset_state()
         self._check_for_empty_data()
         self._initialize_new_data_set(dom)
-        self.add_data_set()
+        # self.current_dataset = plottable_1D(np.array(0), np.array(0))
+        # self.add_data_set()
 
         self.names.append("SASentry")
         self.parent_class = "SASentry"
@@ -246,7 +247,7 @@ class Reader(XMLreader):
                     elif setupTagName == "Idev":
                         self.current_dataset.dy = setupArray  
                     elif setupTagName == "Qdev":
-                        self.current_dataset.err_data = setupArray 
+                        self.current_dataset.dx = setupArray 
 
                     elif setupTagName == "Qx":
                         self.current_dataset.xaxis("Qx", units)
@@ -292,7 +293,7 @@ class Reader(XMLreader):
                         elif dataTagName == "Idev":
                             self.current_dataset.dy[loopIter] = dataArray
                         elif dataTagName == "Qdev":
-                            self.current_dataset.err_data[loopIter] = dataArray
+                            self.current_dataset.dx[loopIter] = dataArray
                         elif dataTagName == "Qx":
                             self.current_dataset.qx_data[loopIter] = dataArray
                         elif dataTagName == "Qy":
@@ -306,14 +307,8 @@ class Reader(XMLreader):
                         elif dataTagName == "dQl":
                             self.current_dataset.dxl[loopIter] = dataArray
 
-                if len(dataArray) == 1:
-                    self.current_dataset.x = self.current_dataset.x.reshape(len(sasNode))
-                    self.current_dataset.y = self.current_dataset.y.reshape(len(sasNode))
-                    self.current_dataset.err_data = self.current_dataset.err_data.reshape(len(sasNode))
-                    self.current_dataset.dy = self.current_dataset.dy.reshape(len(sasNode))
-
-
-                self.add_intermediate()
+                self._check_for_empty_resolution()
+                self.data.append(self.current_dataset)
 
             # If it's not data, let's check for other tags starting with skippable ones...
             elif currentTagName == "fitting_plug_in" or currentTagName == "pr_inversion" or currentTagName == "invariant":
@@ -487,6 +482,9 @@ class Reader(XMLreader):
                                     self.aperture.size.z = sizeData
                                     self.collimation.size_unit = sizeUnits
 
+                        self.current_datainfo.collimation.append(self.collimation)
+                        self.collimation = Collimation()
+
                     # Extract the detector
                     elif instrumentTagName == "SASdetector":
                         self.name = instrumentNode.attrib.get("name", "")
@@ -569,6 +567,9 @@ class Reader(XMLreader):
                                         self.detector.orientation.z = orientationData
                                         self.detector.orientation_unit = orientationUnits
 
+                        self.current_datainfo.detector.append(self.detector)
+                        self.detector = Detector()
+
             ## If we'e dealing with a process node
             elif currentTagName == "SASprocess":
                 for processNode in sasNode:
@@ -591,6 +592,9 @@ class Reader(XMLreader):
                         dic["value"] = processNode.text
                         dic["unit"] = processNode.attrib.get("unit", "")
                         self.process.term.append(dic)
+
+                self.current_datainfo.process.append(self.process)
+                self.process = Process()
                 
             # If we're dealing with a process note node
             elif currentTagName == "SASprocessnote":
@@ -600,7 +604,6 @@ class Reader(XMLreader):
             # If we're dealing with a sas note node
             elif currentTagName == "SASnote":
                 for noteNode in sasNode:
-                    print '1'
                     self.current_datainfo.notes.append(noteNode.text)
 
             # If we're dealing with a transmission data node
@@ -654,17 +657,20 @@ class Reader(XMLreader):
                     elif dataTagName == "Lambda":
                         self.transspectrum.wavelength[loopIter] = setupArray
 
+                self.current_datainfo.trans_spectrum.append(self.transspectrum)
+                self.transspectrum = TransmissionSpectrum()
+
+
             ## Everything else goes in meta_data
             else:
                 new_key = self._create_unique_key(self.current_datainfo.meta_data, currentTagName)
                 self.current_datainfo.meta_data[new_key] = sasNode.text
 
-        self._final_cleanup()
-        print self.current_dataset.y
-        print len(self.current_dataset.y)
+        # self._final_cleanup()
+        self.add_intermediate()
 
         # As before in the code, I guess in case we have to return a tuple for some reason...
-        return self.output, None
+        # return self.output, None
 
 
     def _is_call_local(self):
