@@ -311,6 +311,7 @@ append_file(file_sources, gen_dir)
 package_dir["sas.sasview"] = "sasview"
 package_data['sas.sasview'] = ['images/*',
                                'media/*',
+                               'logging.ini',
                                'test/*.txt',
                                'test/1d_data/*',
                                'test/2d_data/*',

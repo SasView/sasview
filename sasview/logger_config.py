@@ -55,10 +55,21 @@ class SetupLogger(object):
     def _find_config_file(self, filename="logging.ini"):
         '''
         '''
-        for filepath in [
-                os.path.join(os.path.abspath(os.path.dirname(__file__)), filename),
-                pkg_resources.resource_filename(__name__, filename),
-            ]:
+        places_to_look_for_conf_file = [
+            os.path.join(os.path.abspath(os.path.dirname(__file__)), filename),
+            os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", filename),
+            os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "..", filename),
+        ]
+
+        # To avoid the exception in OSx
+        # NotImplementedError: resource_filename() only supported for .egg, not .zip
+        try:
+            places_to_look_for_conf_file.append(
+                pkg_resources.resource_filename(__name__, filename))
+        except NotImplementedError:
+            pass
+
+        for filepath in places_to_look_for_conf_file:
             if os.path.exists(filepath):
                 self.config_file = filepath
                 return
