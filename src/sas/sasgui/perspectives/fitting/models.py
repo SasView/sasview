@@ -319,6 +319,7 @@ class ModelManagerBase:
         return a dictionary of model if
         new models were added else return empty dictionary
         """
+        self.plugins = []
         new_plugins = self.findModels()
         if new_plugins:
             for name, plug in  new_plugins.items():
