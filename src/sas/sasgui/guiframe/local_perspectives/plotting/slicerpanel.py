@@ -36,7 +36,7 @@ class SlicerPanel(wx.Panel, PanelBase):
         self.parameters = []
         self.bck = wx.GridBagSizer(5, 5)
         self.SetSizer(self.bck)
-        if type == None and params == None:
+        if type is None and params is None:
             label = "Right-click on 2D plot for slicer options"
             title = wx.StaticText(self, -1, label, style=wx.ALIGN_LEFT)
             self.bck.Add(title, (0, 0), (1, 2),
@@ -56,7 +56,7 @@ class SlicerPanel(wx.Panel, PanelBase):
 
         """
         event.Skip()
-        if event.obj_class == None:
+        if event.obj_class is None:
             self.set_slicer(None, None)
         else:
             self.set_slicer(event.type, event.params)
@@ -67,7 +67,7 @@ class SlicerPanel(wx.Panel, PanelBase):
         """
         self.bck.Clear(True)
         self.type = type
-        if type == None:
+        if type is None:
             label = "Right-click on 2D plot for slicer options"
             title = wx.StaticText(self, -1, label, style=wx.ALIGN_LEFT)
             self.bck.Add(title, (0, 0), (1, 2),
@@ -113,7 +113,7 @@ class SlicerPanel(wx.Panel, PanelBase):
         self.bck.Layout()
         self.Layout()
         psizer = self.parent.GetSizer()
-        if psizer != None:
+        if psizer is not None:
             psizer.Layout()
 
     def onSetFocus(self, evt):

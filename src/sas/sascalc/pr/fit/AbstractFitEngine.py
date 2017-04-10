@@ -3,7 +3,7 @@ import  copy
 #import logging
 import sys
 import math
-import numpy
+import numpy as np
 
 from sas.sascalc.dataloader.data_info import Data1D
 from sas.sascalc.dataloader.data_info import Data2D
@@ -161,14 +161,14 @@ class FitData1D(Data1D):
         # TODO: Should provide an option for users to set it like percent,
         # constant, or dy data
         if dy is None or dy == [] or dy.all() == 0:
-            self.dy = numpy.ones(len(y))
+            self.dy = np.ones(len(y))
         else:
-            self.dy = numpy.asarray(dy).copy()
+            self.dy = np.asarray(dy).copy()
 
         ## Min Q-value
         #Skip the Q=0 point, especially when y(q=0)=None at x[0].
         if min(self.x) == 0.0 and self.x[0] == 0 and\
-                     not numpy.isfinite(self.y[0]):
+                     not np.isfinite(self.y[0]):
             self.qmin = min(self.x[self.x != 0])
         else:
             self.qmin = min(self.x)
@@ -187,11 +187,11 @@ class FitData1D(Data1D):
         """ to set the fit range"""
         # Skip Q=0 point, (especially for y(q=0)=None at x[0]).
         # ToDo: Find better way to do it.
-        if qmin == 0.0 and not numpy.isfinite(self.y[qmin]):
+        if qmin == 0.0 and not np.isfinite(self.y[qmin]):
             self.qmin = min(self.x[self.x != 0])
-        elif qmin != None:
+        elif qmin is not None:
             self.qmin = qmin
-        if qmax != None:
+        if qmax is not None:
             self.qmax = qmax
         # Determine the range needed in unsmeared-Q to cover
         # the smeared Q range
@@ -201,7 +201,7 @@ class FitData1D(Data1D):
         self._first_unsmeared_bin = 0
         self._last_unsmeared_bin = len(self.x) - 1
         
-        if self.smearer != None:
+        if self.smearer is not None:
             self._first_unsmeared_bin, self._last_unsmeared_bin = \
                     self.smearer.get_bin_range(self.qmin, self.qmax)
             self._qmin_unsmeared = self.x[self._first_unsmeared_bin]
@@ -238,7 +238,7 @@ class FitData1D(Data1D):
             :return: residuals
         """
         # Compute theory data f(x)
-        fx = numpy.zeros(len(self.x))
+        fx = np.zeros(len(self.x))
         fx[self.idx_unsmeared] = fn(self.x[self.idx_unsmeared])
        
         ## Smear theory data
@@ -246,9 +246,9 @@ class FitData1D(Data1D):
             fx = self.smearer(fx, self._first_unsmeared_bin,
                               self._last_unsmeared_bin)
         ## Sanity check
-        if numpy.size(self.dy) != numpy.size(fx):
+        if np.size(self.dy) != np.size(fx):
             msg = "FitData1D: invalid error array "
-            msg += "%d <> %d" % (numpy.shape(self.dy), numpy.size(fx))
+            msg += "%d <> %d" % (np.shape(self.dy), np.size(fx))
             raise RuntimeError, msg
         return (self.y[self.idx] - fx[self.idx]) / self.dy[self.idx], fx[self.idx]
             
@@ -293,31 +293,31 @@ class FitData2D(Data2D):
         y_max = max(math.fabs(sas_data2d.ymin), math.fabs(sas_data2d.ymax))
         
         ## fitting range
-        if qmin == None:
+        if qmin is None:
             self.qmin = 1e-16
-        if qmax == None:
+        if qmax is None:
             self.qmax = math.sqrt(x_max * x_max + y_max * y_max)
         ## new error image for fitting purpose
-        if self.err_data == None or self.err_data == []:
-            self.res_err_data = numpy.ones(len(self.data))
+        if self.err_data is None or self.err_data == []:
+            self.res_err_data = np.ones(len(self.data))
         else:
             self.res_err_data = copy.deepcopy(self.err_data)
         #self.res_err_data[self.res_err_data==0]=1
         
-        self.radius = numpy.sqrt(self.qx_data**2 + self.qy_data**2)
+        self.radius = np.sqrt(self.qx_data**2 + self.qy_data**2)
         
         # Note: mask = True: for MASK while mask = False for NOT to mask
         self.idx = ((self.qmin <= self.radius) &\
                             (self.radius <= self.qmax))
         self.idx = (self.idx) & (self.mask)
-        self.idx = (self.idx) & (numpy.isfinite(self.data))
-        self.num_points = numpy.sum(self.idx)
+        self.idx = (self.idx) & (np.isfinite(self.data))
+        self.num_points = np.sum(self.idx)
 
     def set_smearer(self, smearer):
         """
             Set smearer
         """
-        if smearer == None:
+        if smearer is None:
             return
         self.smearer = smearer
         self.smearer.set_index(self.idx)
@@ -329,15 +329,15 @@ class FitData2D(Data2D):
         """
         if qmin == 0.0:
             self.qmin = 1e-16
-        elif qmin != None:
+        elif qmin is not None:
             self.qmin = qmin
-        if qmax != None:
+        if qmax is not None:
             self.qmax = qmax
-        self.radius = numpy.sqrt(self.qx_data**2 + self.qy_data**2)
+        self.radius = np.sqrt(self.qx_data**2 + self.qy_data**2)
         self.idx = ((self.qmin <= self.radius) &\
                             (self.radius <= self.qmax))
         self.idx = (self.idx) & (self.mask)
-        self.idx = (self.idx) & (numpy.isfinite(self.data))
+        self.idx = (self.idx) & (np.isfinite(self.data))
         self.idx = (self.idx) & (self.res_err_data != 0)
 
     def get_fit_range(self):
@@ -350,13 +350,13 @@ class FitData2D(Data2D):
         """
         Number of measurement points in data set after masking, etc.
         """
-        return numpy.sum(self.idx)
+        return np.sum(self.idx)
 
     def residuals(self, fn):
         """
         return the residuals
         """
-        if self.smearer != None:
+        if self.smearer is not None:
             fn.set_index(self.idx)
             # Get necessary data from self.data and set the data for smearing
             fn.get_data()
@@ -614,7 +614,7 @@ class FResult(object):
     def __str__(self):
         """
         """
-        if self.pvec == None and self.model is None and self.param_list is None:
+        if self.pvec is None and self.model is None and self.param_list is None:
             return "No results"
 
         sasmodel = self.model.model

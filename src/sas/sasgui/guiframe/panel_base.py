@@ -440,7 +440,7 @@ class PanelBase:
     def get_frame(self):
         """
         """
-        if self._manager == None:
+        if self._manager is None:
             return None
         return self._manager.frame
     

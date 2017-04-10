@@ -6,6 +6,8 @@ import logging
 from sas.sasgui.guiframe.plugin_base import PluginBase
 from sas.sasgui.perspectives.file_converter.converter_panel import ConverterWindow
 
+logger = logging.getLogger(__name__)
+
 class Plugin(PluginBase):
     """
     This class defines the interface for a Plugin class
@@ -14,7 +16,7 @@ class Plugin(PluginBase):
 
     def __init__(self):
         PluginBase.__init__(self, name="File Converter")
-        logging.info("File Converter plug-in started")
+        logger.info("File Converter plug-in started")
         self._sub_menu = "Tool"
         self.converter_frame = None
 

@@ -567,13 +567,15 @@ def pr_theory(r, R):
         return 0.0
     
 def load(path = "sphere_60_q0_2.txt"):
-    import numpy, math, sys
+    import numpy as np
+    import math
+    import sys
     # Read the data from the data file
-    data_x   = numpy.zeros(0)
-    data_y   = numpy.zeros(0)
-    data_err = numpy.zeros(0)
+    data_x   = np.zeros(0)
+    data_y   = np.zeros(0)
+    data_err = np.zeros(0)
     scale    = None
-    if not path == None:
+    if path is not None:
         input_f = open(path,'r')
         buff    = input_f.read()
         lines   = buff.split('\n')
@@ -588,9 +590,9 @@ def load(path = "sphere_60_q0_2.txt"):
                     if scale==None:
                         scale = 0.15*math.sqrt(y)
                     err = scale*math.sqrt(y)
-                data_x = numpy.append(data_x, x)
-                data_y = numpy.append(data_y, y)
-                data_err = numpy.append(data_err, err)
+                data_x = np.append(data_x, x)
+                data_y = np.append(data_y, y)
+                data_err = np.append(data_err, err)
             except:
                 pass
                

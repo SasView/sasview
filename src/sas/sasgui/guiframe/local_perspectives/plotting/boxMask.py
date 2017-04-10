@@ -122,7 +122,7 @@ class BoxMask(_BaseInteractor):
             self.horizontal_lines.update(x1=self.vertical_lines.x1,
                                          x2=self.vertical_lines.x2,
                                          width=self.vertical_lines.half_width)
-        # if self.is_inside != None:
+        # if self.is_inside is not None:
         out = self._post_data()
         return out
 

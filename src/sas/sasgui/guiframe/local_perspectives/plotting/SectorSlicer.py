@@ -143,14 +143,14 @@ class SectorInteractor(_BaseInteractor):
         ## get the data2D to average
         data = self.base.data2D
         # If we have no data, just return
-        if data == None:
+        if data is None:
             return
         ## Averaging
         from sas.sascalc.dataloader.manipulations import SectorQ
         radius = self.qmax
         phimin = -self.left_line.phi + self.main_line.theta
         phimax = self.left_line.phi + self.main_line.theta
-        if nbins == None:
+        if nbins is None:
             nbins = 20
         sect = SectorQ(r_min=0.0, r_max=radius,
                        phi_min=phimin + math.pi,
@@ -361,9 +361,9 @@ class SideInteractor(_BaseInteractor):
         #print "update left or right ", self.has_move
         self.left_moving = left
         theta3 = 0
-        if phi != None:
+        if phi is not None:
             self.phi = phi
-        if delta == None:
+        if delta is None:
             delta = 0
         if  right:
             self.phi = -1 * math.fabs(self.phi)
@@ -373,7 +373,7 @@ class SideInteractor(_BaseInteractor):
         if side:
             self.theta = mline.theta + self.phi
 
-        if mline != None:
+        if mline is not None:
             if delta != 0:
                 self.theta2 = mline + delta
             else:
@@ -537,7 +537,7 @@ class LineInteractor(_BaseInteractor):
         Draw the new roughness on the graph.
         """
 
-        if theta != None:
+        if theta is not None:
             self.theta = theta
         x1 = self.radius * math.cos(self.theta)
         y1 = self.radius * math.sin(self.theta)

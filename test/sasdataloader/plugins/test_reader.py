@@ -7,7 +7,8 @@ See the license text in license.txt
 
 copyright 2008, University of Tennessee
 """
-import numpy, os
+import os
+import numpy as np
 from sas.sascalc.dataloader.data_info import Data1D
 
 
@@ -39,14 +40,14 @@ class Reader:
                     raise  RuntimeError, "ascii_reader: cannot open %s" % path
                 buff = input_f.read()
                 lines = buff.split('\n')
-                x  = numpy.zeros(0)
-                y  = numpy.zeros(0)
-                dy = numpy.zeros(0)
+                x  = np.zeros(0)
+                y  = np.zeros(0)
+                dy = np.zeros(0)
                 output = Data1D(x, y, dy=dy)
                 self.filename = output.filename = basename
            
                 for line in lines:
-                    x  = numpy.append(x,  float(line)) 
+                    x  = np.append(x,  float(line))
                     
                 output.x = x
                 return output

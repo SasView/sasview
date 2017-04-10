@@ -42,9 +42,11 @@ distinctiveness rather than a simple colour number.
 
 # Support for ancient python versions
 import copy
-import numpy
+import numpy as np
 import sys
 import logging
+
+logger = logging.getLogger(__name__)
 
 if 'any' not in dir(__builtins__):
     def any(L):
@@ -226,11 +228,11 @@ class Graph(object):
         for p in self.plottables:
             if p.hidden == True:
                 continue
-            if not p.x == None:
+            if p.x is not None:
                 for x_i in p.x:
-                    if min_value == None or x_i < min_value:
+                    if min_value is None or x_i < min_value:
                         min_value = x_i
-                    if max_value == None or x_i > max_value:
+                    if max_value is None or x_i > max_value:
                         max_value = x_i
         return min_value, max_value
 
@@ -559,8 +561,8 @@ class Plottable(object):
         """
         Returns True if there is no data stored in the plottable
         """
-        if not self.x == None and len(self.x) == 0 \
-            and not self.y == None and len(self.y) == 0:
+        if (self.x is not None and len(self.x) == 0
+            and self.y is not None and len(self.y) == 0):
             return True
         return False
 
@@ -676,11 +678,11 @@ class View(object):
         """
         # Sanity check
         # Do the transofrmation only when x and y are empty
-        has_err_x = not (dx == None or len(dx) == 0)
-        has_err_y = not (dy == None or len(dy) == 0)
+        has_err_x = not (dx is None or len(dx) == 0)
+        has_err_y = not (dy is None or len(dy) == 0)
 
-        if(x != None) and (y != None):
-            if not dx == None and not len(dx) == 0 and not len(x) == len(dx):
+        if(x is not None) and (y is not None):
+            if dx is not None and not len(dx) == 0 and not len(x) == len(dx):
                 msg = "Plottable.View: Given x and dx are not"
                 msg += " of the same length"
                 raise ValueError, msg
@@ -690,7 +692,7 @@ class View(object):
                 msg += "and x are not of the same length"
                 raise ValueError, msg
 
-            if not dy == None and not len(dy) == 0 and not len(y) == len(dy):
+            if dy is not None and not len(dy) == 0 and not len(y) == len(dy):
                 msg = "Plottable.View: Given y and dy are not of the same "
                 msg += "length: len(y)=%s, len(dy)=%s" % (len(y), len(dy))
                 raise ValueError, msg
@@ -705,9 +707,9 @@ class View(object):
             else:
                 self.dy = None
             if not has_err_x:
-                dx = numpy.zeros(len(x))
+                dx = np.zeros(len(x))
             if not has_err_y:
-                dy = numpy.zeros(len(y))
+                dy = np.zeros(len(y))
             for i in range(len(x)):
                 try:
                     tempx = self.funcx(x[i], y[i])
@@ -794,10 +796,10 @@ class View(object):
         tempdx = []
         tempy = []
         tempdy = []
-        if self.dx == None:
-            self.dx = numpy.zeros(len(self.x))
-        if self.dy == None:
-            self.dy = numpy.zeros(len(self.y))
+        if self.dx is None:
+            self.dx = np.zeros(len(self.x))
+        if self.dy is None:
+            self.dy = np.zeros(len(self.y))
         if self.xLabel == "log10(x)":
             for i in range(len(self.x)):
                 try:
@@ -807,8 +809,8 @@ class View(object):
                         tempy.append(self.y[i])
                         tempdy.append(self.dy[i])
                 except:
-                    logging.error("check_data_logX: skipping point x %g", self.x[i])
-                    logging.error(sys.exc_value)
+                    logger.error("check_data_logX: skipping point x %g", self.x[i])
+                    logger.error(sys.exc_value)
             self.x = tempx
             self.y = tempy
             self.dx = tempdx
@@ -824,10 +826,10 @@ class View(object):
         tempdx = []
         tempy = []
         tempdy = []
-        if self.dx == None:
-            self.dx = numpy.zeros(len(self.x))
-        if self.dy == None:
-            self.dy = numpy.zeros(len(self.y))
+        if self.dx is None:
+            self.dx = np.zeros(len(self.x))
+        if self.dy is None:
+            self.dy = np.zeros(len(self.y))
         if self.yLabel == "log10(y)":
             for i in range(len(self.x)):
                 try:
@@ -837,8 +839,8 @@ class View(object):
                         tempy.append(self.y[i])
                         tempdy.append(self.dy[i])
                 except:
-                    logging.error("check_data_logY: skipping point %g", self.y[i])
-                    logging.error(sys.exc_value)
+                    logger.error("check_data_logY: skipping point %g", self.y[i])
+                    logger.error(sys.exc_value)
 
             self.x = tempx
             self.y = tempy
@@ -857,11 +859,11 @@ class View(object):
         tempdx = []
         tempy = []
         tempdy = []
-        if self.dx == None:
-            self.dx = numpy.zeros(len(self.x))
-        if self.dy == None:
-            self.dy = numpy.zeros(len(self.y))
-        if xmin != None and xmax != None:
+        if self.dx is None:
+            self.dx = np.zeros(len(self.x))
+        if self.dy is None:
+            self.dy = np.zeros(len(self.y))
+        if xmin is not None and xmax is not None:
             for i in range(len(self.x)):
                 if self.x[i] >= xmin and self.x[i] <= xmax:
                     tempx.append(self.x[i])
@@ -1203,7 +1205,7 @@ class Chisq(Plottable):
     def render(self, plot, **kw):
         """
         """
-        if  self._chisq == None:
+        if  self._chisq is None:
             chisqTxt = r'$\chi^2=$'
         else:
             chisqTxt = r'$\chi^2=%g$' % (float(self._chisq))
@@ -1227,17 +1229,17 @@ class Chisq(Plottable):
 ######################################################
 
 def sample_graph():
-    import numpy as nx
+    import numpy as np
 
     # Construct a simple graph
     if False:
-        x = nx.array([1, 2, 3, 4, 5, 6], 'd')
-        y = nx.array([4, 5, 6, 5, 4, 5], 'd')
-        dy = nx.array([0.2, 0.3, 0.1, 0.2, 0.9, 0.3])
+        x = np.array([1, 2, 3, 4, 5, 6], 'd')
+        y = np.array([4, 5, 6, 5, 4, 5], 'd')
+        dy = np.array([0.2, 0.3, 0.1, 0.2, 0.9, 0.3])
     else:
-        x = nx.linspace(0, 1., 10000)
-        y = nx.sin(2 * nx.pi * x * 2.8)
-        dy = nx.sqrt(100 * nx.abs(y)) / 100
+        x = np.linspace(0, 1., 10000)
+        y = np.sin(2 * np.pi * x * 2.8)
+        dy = np.sqrt(100 * np.abs(y)) / 100
     data = Data1D(x, y, dy=dy)
     data.xaxis('distance', 'm')
     data.yaxis('time', 's')

@@ -8,7 +8,7 @@ import shutil
 from setuptools import setup, Extension
 from distutils.command.build_ext import build_ext
 from distutils.core import Command
-import numpy
+import numpy as np
 
 # Manage version number ######################################
 import sasview
@@ -52,7 +52,7 @@ if os.path.isdir(sas_dir):
     #             file_path =  os.path.join(f_path, f)
     #             os.remove(file_path)
     if os.path.exists(SASVIEW_BUILD):
-        print "Removing existing build directory", SASVIEW_BUILD, "for a clean build"
+        print("Removing existing build directory", SASVIEW_BUILD, "for a clean build")
         shutil.rmtree(SASVIEW_BUILD)
 
 # 'sys.maxsize' and 64bit: Not supported for python2.5
@@ -73,7 +73,7 @@ if sys.platform =='darwin':
             if darwin_ver >= 12:
                 enable_openmp = False
         except:
-            print "PROBLEM determining Darwin version"
+            print("PROBLEM determining Darwin version")
 
 # Options to enable OpenMP
 copt =  {'msvc': ['/openmp'],
@@ -94,7 +94,7 @@ if sys.platform =='darwin':
         if darwin_ver >= 13 and darwin_ver < 14:
             platform_copt = {'unix' : ['-Wno-error=unused-command-line-argument-hard-error-in-future']}
     except:
-        print "PROBLEM determining Darwin version"
+        print("PROBLEM determining Darwin version")
 
 class DisableOpenMPCommand(Command):
     description = "The version of MinGW that comes with Anaconda does not come with OpenMP :( "\
@@ -117,23 +117,23 @@ class build_ext_subclass( build_ext ):
     def build_extensions(self):
         # Get 64-bitness
         c = self.compiler.compiler_type
-        print "Compiling with %s (64bit=%s)" % (c, str(is_64bits))
+        print("Compiling with %s (64bit=%s)" % (c, str(is_64bits)))
 
         # OpenMP build options
         if enable_openmp:
-            if copt.has_key(c):
+            if c in copt:
                 for e in self.extensions:
                     e.extra_compile_args = copt[ c ]
-            if lopt.has_key(c):
+            if c in lopt:
                 for e in self.extensions:
                     e.extra_link_args = lopt[ c ]
 
         # Platform-specific build options
-        if platform_lopt.has_key(c):
+        if c in platform_lopt:
             for e in self.extensions:
                 e.extra_link_args = platform_lopt[ c ]
 
-        if platform_copt.has_key(c):
+        if c in platform_copt:
             for e in self.extensions:
                 e.extra_compile_args = platform_copt[ c ]
 
@@ -224,7 +224,7 @@ package_dir["sas.sascalc.file_converter"] = os.path.join("src","sas", "sascalc",
 packages.extend(["sas.sascalc.file_converter","sas.sascalc.file_converter.core"])
 ext_modules.append( Extension("sas.sascalc.file_converter.core.bsl_loader",
                               sources = [os.path.join(mydir, "bsl_loader.c")],
-                              include_dirs=[numpy.get_include()],
+                              include_dirs=[np.get_include()],
                               ) )
 
 #sas.sascalc.corfunc

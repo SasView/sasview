@@ -5,7 +5,7 @@
 import sys
 import wx
 import wx.lib.newevent
-import numpy
+import numpy as np
 import copy
 import math
 import time
@@ -1114,13 +1114,13 @@ class FitPage(BasicPage):
         for item in button_list:
             if item.GetValue():
                 if button_list.index(item) == 0:
-                    flag = 0  # dy = numpy.ones_like(dy_data)
+                    flag = 0  # dy = np.ones_like(dy_data)
                 elif button_list.index(item) == 1:
                     flag = 1  # dy = dy_data
                 elif button_list.index(item) == 2:
-                    flag = 2  # dy = numpy.sqrt(numpy.abs(data))
+                    flag = 2  # dy = np.sqrt(np.abs(data))
                 elif button_list.index(item) == 3:
-                    flag = 3  # dy = numpy.abs(data)
+                    flag = 3  # dy = np.abs(data)
                 break
         return flag
 
@@ -1421,7 +1421,7 @@ class FitPage(BasicPage):
             return
         key = event.GetKeyCode()
         length = len(self.data.x)
-        indx = (numpy.abs(self.data.x - x_data)).argmin()
+        indx = (np.abs(self.data.x - x_data)).argmin()
         # return array.flat[idx]
         if key == wx.WXK_PAGEUP or key == wx.WXK_NUMPAD_PAGEUP:
             indx += 1
@@ -1476,11 +1476,11 @@ class FitPage(BasicPage):
             if self.data.__class__.__name__ == "Data2D" or \
                     self.enable2D:
                 # set mask
-                radius = numpy.sqrt(self.data.qx_data * self.data.qx_data +
+                radius = np.sqrt(self.data.qx_data * self.data.qx_data +
                                     self.data.qy_data * self.data.qy_data)
                 index_data = ((self.qmin_x <= radius) & (radius <= self.qmax_x))
                 index_data = (index_data) & (self.data.mask)
-                index_data = (index_data) & (numpy.isfinite(self.data.data))
+                index_data = (index_data) & (np.isfinite(self.data.data))
                 if len(index_data[index_data]) < 10:
                     msg = "Cannot Plot :No or too little npts in"
                     msg += " that data range!!!  "
@@ -1597,13 +1597,13 @@ class FitPage(BasicPage):
                 and data.dqx_data.any() != 0 \
                 and data.dqx_data.any() != 0:
                 self.smear_type = "Pinhole2d"
-                self.dq_l = format_number(numpy.average(data.dqx_data))
-                self.dq_r = format_number(numpy.average(data.dqy_data))
+                self.dq_l = format_number(np.average(data.dqx_data))
+                self.dq_r = format_number(np.average(data.dqy_data))
                 return
             else:
                 return
         # check if it is pinhole smear and get min max if it is.
-        if data.dx is not None and numpy.any(data.dx):
+        if data.dx is not None and np.any(data.dx):
             self.smear_type = "Pinhole"
             self.dq_l = data.dx[0]
             self.dq_r = data.dx[-1]
@@ -1611,9 +1611,9 @@ class FitPage(BasicPage):
         # check if it is slit smear and get min max if it is.
         elif data.dxl is not None or data.dxw is not None:
             self.smear_type = "Slit"
-            if data.dxl is not None and numpy.all(data.dxl, 0):
+            if data.dxl is not None and np.all(data.dxl, 0):
                 self.dq_l = data.dxl[0]
-            if data.dxw is not None and numpy.all(data.dxw, 0):
+            if data.dxw is not None and np.all(data.dxw, 0):
                 self.dq_r = data.dxw[0]
         # return self.smear_type,self.dq_l,self.dq_r
 
@@ -1808,13 +1808,6 @@ class FitPage(BasicPage):
         if not flag:
             self.onSmear(None)
 
-    def _mac_sleep(self, sec=0.2):
-        """
-        Give sleep to MAC
-        """
-        if self.is_mac:
-            time.sleep(sec)
-
     def get_view_mode(self):
         """
         return True if the panel allow 2D or False if 1D
@@ -1920,19 +1913,19 @@ class FitPage(BasicPage):
                 self.pinhole_smearer.Enable(True)
                 self.default_mask = copy.deepcopy(self.data.mask)
                 if self.data.err_data is not None \
-                        and numpy.any(self.data.err_data):
+                        and np.any(self.data.err_data):
                     di_flag = True
                 if self.data.dqx_data is not None \
-                        and numpy.any(self.data.dqx_data):
+                        and np.any(self.data.dqx_data):
                     dq_flag = True
             else:
                 self.slit_smearer.Enable(True)
                 self.pinhole_smearer.Enable(True)
-                if self.data.dy is not None and numpy.any(self.data.dy):
+                if self.data.dy is not None and np.any(self.data.dy):
                     di_flag = True
-                if self.data.dx is not None and numpy.any(self.data.dx):
+                if self.data.dx is not None and np.any(self.data.dx):
                     dq_flag = True
-                elif self.data.dxl is not None and numpy.any(self.data.dxl):
+                elif self.data.dxl is not None and np.any(self.data.dxl):
                     dq_flag = True
 
             if dq_flag:
@@ -2066,11 +2059,11 @@ class FitPage(BasicPage):
         qmin, qmax = self.get_range()
         if self.data.__class__.__name__ == "Data2D" or \
                         self.enable2D:
-            radius = numpy.sqrt(self.data.qx_data * self.data.qx_data +
+            radius = np.sqrt(self.data.qx_data * self.data.qx_data +
                                 self.data.qy_data * self.data.qy_data)
             index_data = (self.qmin_x <= radius) & (radius <= self.qmax_x)
             index_data = (index_data) & (self.data.mask)
-            index_data = (index_data) & (numpy.isfinite(self.data.data))
+            index_data = (index_data) & (np.isfinite(self.data.data))
             npts2fit = len(self.data.data[index_data])
         else:
             for qx in self.data.x:
@@ -2103,7 +2096,7 @@ class FitPage(BasicPage):
 
         # make sure stop button to fit button all the time
         self._on_fit_complete()
-        if out is None or not numpy.isfinite(chisqr):
+        if out is None or not np.isfinite(chisqr):
             raise ValueError, "Fit error occured..."
 
         is_modified = False
@@ -2114,7 +2107,7 @@ class FitPage(BasicPage):
         self._clear_Err_on_Fit()
 
         # Check if chi2 is finite
-        if chisqr is not None and numpy.isfinite(chisqr):
+        if chisqr is not None and np.isfinite(chisqr):
             # format chi2
             chi2 = format_number(chisqr, True)
             self.tcChi.SetValue(chi2)
@@ -2166,7 +2159,7 @@ class FitPage(BasicPage):
                             pass
 
                         if cov[ind] is not None:
-                            if numpy.isfinite(float(cov[ind])):
+                            if np.isfinite(float(cov[ind])):
                                 val_err = format_number(cov[ind], True)
                                 item[4].SetForegroundColour(wx.BLACK)
                             else:
@@ -2187,10 +2180,6 @@ class FitPage(BasicPage):
         # save current state
         self.save_current_state()
 
-        if not self.is_mac:
-            self.Layout()
-            self.Refresh()
-        self._mac_sleep(0.1)
         # plot model ( when drawing, do not update chisqr value again)
         self._draw_model(update_chisqr=False, source='fit')
 
@@ -2290,12 +2279,12 @@ class FitPage(BasicPage):
         if self._is_2D():
             self.smear_type = 'Pinhole2d'
             len_data = len(data.data)
-            data.dqx_data = numpy.zeros(len_data)
-            data.dqy_data = numpy.zeros(len_data)
+            data.dqx_data = np.zeros(len_data)
+            data.dqy_data = np.zeros(len_data)
         else:
             self.smear_type = 'Pinhole'
             len_data = len(data.x)
-            data.dx = numpy.zeros(len_data)
+            data.dx = np.zeros(len_data)
             data.dxl = None
             data.dxw = None
         msg = None
@@ -2468,11 +2457,11 @@ class FitPage(BasicPage):
 
         try:
             self.dxl = float(self.smear_slit_height.GetValue())
-            data.dxl = self.dxl * numpy.ones(data_len)
+            data.dxl = self.dxl * np.ones(data_len)
             self.smear_slit_height.SetBackgroundColour(wx.WHITE)
         except:
             self.dxl = None
-            data.dxl = numpy.zeros(data_len)
+            data.dxl = np.zeros(data_len)
             if self.smear_slit_height.GetValue().lstrip().rstrip() != "":
                 self.smear_slit_height.SetBackgroundColour("pink")
                 msg = "Wrong value entered... "
@@ -2481,10 +2470,10 @@ class FitPage(BasicPage):
         try:
             self.dxw = float(self.smear_slit_width.GetValue())
             self.smear_slit_width.SetBackgroundColour(wx.WHITE)
-            data.dxw = self.dxw * numpy.ones(data_len)
+            data.dxw = self.dxw * np.ones(data_len)
         except:
             self.dxw = None
-            data.dxw = numpy.zeros(data_len)
+            data.dxw = np.zeros(data_len)
             if self.smear_slit_width.GetValue().lstrip().rstrip() != "":
                 self.smear_slit_width.SetBackgroundColour("pink")
                 msg = "Wrong Fit value entered... "
@@ -2611,7 +2600,7 @@ class FitPage(BasicPage):
         try:
             if event is None:
                 output = "-"
-            elif not numpy.isfinite(event.output):
+            elif not np.isfinite(event.output):
                 output = "-"
             else:
                 output = event.output

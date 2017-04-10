@@ -16,10 +16,26 @@ the given module or script.
 import os
 import sys
 import imp
+import logging
+import logging.config
+
 from contextlib import contextmanager
 from os.path import abspath, dirname, join as joinpath
 
 
+LOGGER_CONFIG_FILE = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'sasview/logging.ini')
+logging.config.fileConfig(LOGGER_CONFIG_FILE, disable_existing_loggers=True)
+logger = logging.getLogger(__name__)
+
+def update_all_logs_to_debug(logger):
+    '''
+    This updates all loggers and respective handlers to DEBUG
+    '''
+    for handler in logger.handlers or logger.parent.handlers:
+        handler.setLevel(logging.DEBUG)
+    for name,_ in logging.Logger.manager.loggerDict.items():
+        logging.getLogger(name).setLevel(logging.DEBUG)
+        
 def addpath(path):
     """
     Add a directory to the python path environment, and to the PYTHONPATH
@@ -137,6 +153,8 @@ def prepare():
     #print "\n".join(sys.path)
 
 if __name__ == "__main__":
+    update_all_logs_to_debug(logger)
     prepare()
     from sas.sasview.sasview import run
     run()
+    
