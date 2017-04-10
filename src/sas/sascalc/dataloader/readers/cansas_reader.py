@@ -155,8 +155,9 @@ class Reader(XMLreader):
                 except RuntimeError:
                     # If the file does not match the schema, raise this error
                     invalid_xml = self.find_invalid_xml()
-                    invalid_xml = INVALID_XML.format(basename + extension) + invalid_xml
-                    self.errors.add(invalid_xml)
+                    if invalid_xml != "":
+                        invalid_xml = INVALID_XML.format(basename + extension) + invalid_xml
+                        self.errors.add(invalid_xml)
                     # Try again with an invalid CanSAS schema, that requires only a data set in each
                     base_name = xml_reader.__file__
                     base_name = base_name.replace("\\", "/")
@@ -260,22 +261,12 @@ class Reader(XMLreader):
 
                 # I and Q - 1D data
                 elif tagname == 'I' and isinstance(self.current_dataset, plottable_1D):
-                    unit_list = unit.split("|")
-                    if len(unit_list) > 1:
-                        self.current_dataset.yaxis(unit_list[0].strip(),
-                                                   unit_list[1].strip())
-                    else:
-                        self.current_dataset.yaxis("Intensity", unit)
+                    self.current_dataset.yaxis("Intensity", unit)
                     self.current_dataset.y = np.append(self.current_dataset.y, data_point)
                 elif tagname == 'Idev' and isinstance(self.current_dataset, plottable_1D):
                     self.current_dataset.dy = np.append(self.current_dataset.dy, data_point)
                 elif tagname == 'Q':
-                    unit_list = unit.split("|")
-                    if len(unit_list) > 1:
-                        self.current_dataset.xaxis(unit_list[0].strip(),
-                                                   unit_list[1].strip())
-                    else:
-                        self.current_dataset.xaxis("Q", unit)
+                    self.current_dataset.xaxis("Q", unit)
                     self.current_dataset.x = np.append(self.current_dataset.x, data_point)
                 elif tagname == 'Qdev':
                     self.current_dataset.dx = np.append(self.current_dataset.dx, data_point)
@@ -289,6 +280,10 @@ class Reader(XMLreader):
                     pass
                 elif tagname == 'Sesans':
                     self.current_datainfo.isSesans = bool(data_point)
+                    self.current_dataset.xaxis(attr.get('x_axis'),
+                                                attr.get('x_unit'))
+                    self.current_dataset.yaxis(attr.get('y_axis'),
+                                                attr.get('y_unit'))
                 elif tagname == 'zacceptance':
                     self.current_datainfo.sample.zacceptance = (data_point, unit)
 
@@ -780,10 +775,13 @@ class Reader(XMLreader):
                 else:
                     value_unit = local_unit
             except KeyError:
-                err_msg = "CanSAS reader: unexpected "
-                err_msg += "\"{0}\" unit [{1}]; "
-                err_msg = err_msg.format(tagname, local_unit)
-                err_msg += "expecting [{0}]".format(default_unit)
+                # Do not throw an error for loading Sesans data in cansas xml
+                # This is a temporary fix.
+                if local_unit != "A" and local_unit != 'pol':
+                    err_msg = "CanSAS reader: unexpected "
+                    err_msg += "\"{0}\" unit [{1}]; "
+                    err_msg = err_msg.format(tagname, local_unit)
+                    err_msg += "expecting [{0}]".format(default_unit)
                 value_unit = local_unit
             except:
                 err_msg = "CanSAS reader: unknown error converting "
@@ -1034,27 +1032,31 @@ class Reader(XMLreader):
             point = self.create_element("Idata")
             node.append(point)
             self.write_node(point, "Q", datainfo.x[i],
-                            {'unit': datainfo._xaxis + " | " + datainfo._xunit})
+                            {'unit': datainfo.x_unit})
             if len(datainfo.y) >= i:
                 self.write_node(point, "I", datainfo.y[i],
-                                {'unit': datainfo._yaxis + " | " + datainfo._yunit})
+                                {'unit': datainfo.y_unit})
             if datainfo.dy is not None and len(datainfo.dy) > i:
                 self.write_node(point, "Idev", datainfo.dy[i],
-                                {'unit': datainfo._yaxis + " | " + datainfo._yunit})
+                                {'unit': datainfo.y_unit})
             if datainfo.dx is not None and len(datainfo.dx) > i:
                 self.write_node(point, "Qdev", datainfo.dx[i],
-                                {'unit': datainfo._xaxis + " | " + datainfo._xunit})
+                                {'unit': datainfo.x_unit})
             if datainfo.dxw is not None and len(datainfo.dxw) > i:
                 self.write_node(point, "dQw", datainfo.dxw[i],
-                                {'unit': datainfo._xaxis + " | " + datainfo._xunit})
+                                {'unit': datainfo.x_unit})
             if datainfo.dxl is not None and len(datainfo.dxl) > i:
                 self.write_node(point, "dQl", datainfo.dxl[i],
-                                {'unit': datainfo._xaxis + " | " + datainfo._xunit})
+                                {'unit': datainfo.x_unit})
         if datainfo.isSesans:
-            sesans = self.create_element("Sesans")
+            sesans_attrib = {'x_axis': datainfo._xaxis,
+                             'y_axis': datainfo._yaxis,
+                             'x_unit': datainfo.x_unit,
+                             'y_unit': datainfo.y_unit}
+            sesans = self.create_element("Sesans", attrib=sesans_attrib)
             sesans.text = str(datainfo.isSesans)
-            node.append(sesans)
-            self.write_node(node, "zacceptance", datainfo.sample.zacceptance[0],
+            entry_node.append(sesans)
+            self.write_node(entry_node, "zacceptance", datainfo.sample.zacceptance[0],
                              {'unit': datainfo.sample.zacceptance[1]})
 
 
