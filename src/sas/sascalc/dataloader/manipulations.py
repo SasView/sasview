@@ -429,10 +429,10 @@ class CircularAverage(object):
             # Extrapolate dqx(r) and dqy(phi) at q = 0, and take an average.
             z_max = max(data2D.q_data)
             z_min = min(data2D.q_data)
-            x_max = data2D.dqx_data[data2D.q_data[z_max]]
-            x_min = data2D.dqx_data[data2D.q_data[z_min]]
-            y_max = data2D.dqy_data[data2D.q_data[z_max]]
-            y_min = data2D.dqy_data[data2D.q_data[z_min]]
+            x_max = data2D.dqx_data[numpy.where(data2D.q_data == z_max)]
+            x_min = data2D.dqx_data[numpy.where(data2D.q_data == z_min)]
+            y_max = data2D.dqy_data[numpy.where(data2D.q_data == z_max)]
+            y_min = data2D.dqy_data[numpy.where(data2D.q_data == z_min)]
             # Find qdx at q = 0
             dq_overlap_x = (x_min * z_max - x_max * z_min) / (z_max - z_min)
             # when extrapolation goes wrong
@@ -784,10 +784,10 @@ class _Sector(object):
             # Extrapolate dqy(perp) at q = 0
             z_max = max(data2D.q_data)
             z_min = min(data2D.q_data)
-            x_max = data2D.dqx_data[data2D.q_data[z_max]]
-            x_min = data2D.dqx_data[data2D.q_data[z_min]]
-            y_max = data2D.dqy_data[data2D.q_data[z_max]]
-            y_min = data2D.dqy_data[data2D.q_data[z_min]]
+            x_max = data2D.dqx_data[numpy.where(data2D.q_data == z_max)]
+            x_min = data2D.dqx_data[numpy.where(data2D.q_data == z_min)]
+            y_max = data2D.dqy_data[numpy.where(data2D.q_data == z_max)]
+            y_min = data2D.dqy_data[numpy.where(data2D.q_data == z_min)]
             # Find qdx at q = 0
             dq_overlap_x = (x_min * z_max - x_max * z_min) / (z_max - z_min)
             # when extrapolation goes wrong

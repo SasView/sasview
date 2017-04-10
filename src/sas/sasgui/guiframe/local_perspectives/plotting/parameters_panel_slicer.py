@@ -13,6 +13,8 @@ apply_params, EVT_APPLY_PARAMS = wx.lib.newevent.NewEvent()
 save_files, EVT_AUTO_SAVE = wx.lib.newevent.NewEvent()
 
 FIT_OPTIONS = ["No fitting", "Fitting", "Batch Fitting"]
+CONVERT_KEYS = ["SectorInteractor", "AnnulusInteractor", "BoxInteractorX",
+                "BoxInteractorY"]
 CONVERT_DICT = {"SectorInteractor": "SectorQ",
                 "AnnulusInteractor": "AnnulusPhi",
                 "BoxInteractorX": "SlabX",
@@ -137,7 +139,7 @@ class SlicerParameterPanel(wx.Dialog):
             text = wx.StaticText(self, -1, txt, style=wx.ALIGN_LEFT)
             self.bck.Add(text, (iy, ix), (1, 1),
                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
-            self.type_list = CONVERT_DICT.keys()
+            self.type_list = CONVERT_KEYS
             self.type_select = wx.ComboBox(parent=self, choices=self.type_list)
             self.type_select.Bind(wx.EVT_COMBOBOX, self.on_change_slicer)
             index = self.type_select.FindString(type)
@@ -330,6 +332,8 @@ class SlicerParameterPanel(wx.Dialog):
         """
         Populate the check list from the currently plotted 2D data
         """
+        # Reinitialize loaded data list on redraw
+        self.loaded_data = []
         # Iterate over the loaded plots and find all 2D panels
         for key, value in self.main_window.plot_panels.iteritems():
             if isinstance(value, ModelPanel2D):
