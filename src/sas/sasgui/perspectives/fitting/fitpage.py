@@ -1242,6 +1242,7 @@ class FitPage(BasicPage):
                 for v in self.parent.model_dictionary.values():
                     if v.id == temp_id:
                         self.model = v()
+                        break
                 if temp:
                     self.model_list_box = temp
                     current_val = self.formfactorbox.GetLabel()
