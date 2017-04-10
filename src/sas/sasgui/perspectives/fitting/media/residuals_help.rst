@@ -33,7 +33,7 @@ data set and an expected dataset (or 'theory').
 
 .. math::
 
-  \chi^2/N_{pts} =  \sum[(Y_i - Y_{theory}_i)^2 / (Y_error_i)^2] } / N_{pts}
+  \chi^2/N_{pts} =  \sum[(Y_i - Y_{theory}_i)^2 / (Y_error_i)^2] / N_{pts}
 
 This differs slightly from what is sometimes called the 'reduced $\chi^2$'
 because it does not take into account the number of fitting parameters (to
