@@ -55,6 +55,11 @@ class SetupLogger(object):
 
     def _find_config_file(self, filename="logging.ini"):
         '''
+        The config file is in:
+        Debug ./sasview/
+        Packaging: sas/sasview/
+        Packaging / production does not work well with absolute paths
+        thus the multiple paths below
         '''
         places_to_look_for_conf_file = [
             os.path.join(os.path.abspath(os.path.dirname(__file__)), filename),
@@ -71,13 +76,9 @@ class SetupLogger(object):
         except NotImplementedError:
             pass
 
-        print("Running python in: %s"%os.getcwd())
-        print("Full path for %s is: %s"%(__file__, os.path.dirname(__file__)))
-
         for filepath in places_to_look_for_conf_file:
-            print("Checking if path exists: %s"%filepath)
             if os.path.exists(filepath):
                 self.config_file = filepath
                 return
-        print("Logging.ini not found...")
+        print("ERROR: Logging.ini not found...")
         self.config_file = None
