@@ -157,13 +157,13 @@ class BuildSphinxCommand(Command):
         '''
         ### AJJ - Add code for building sasmodels docs here:
         # check for doc path
-        SASMODELS_DOCPATH = os.path.abspath(os.path.join(os.getcwd(),'..','sasmodels','doc'))
-        print("========= check for sasmodels at",SASMODELS_DOCPATH,"============")
+        SASMODELS_DOCPATH = os.path.abspath(os.path.join(os.getcwd(), '..', 'sasmodels', 'doc'))
+        print("========= check for sasmodels at", SASMODELS_DOCPATH, "============")
         if os.path.exists(SASMODELS_DOCPATH):
             if os.path.isdir(SASMODELS_DOCPATH):
                 # if available, build sasmodels docs
                 print("============= Building sasmodels model documentation ===============")
-                smdocbuild = subprocess.call(["make","-C",SASMODELS_DOCPATH,"html"])
+                smdocbuild = subprocess.call(["make", "-C", SASMODELS_DOCPATH, "html"])
         else:
             # if not available warning message
             print("== !!WARNING!! sasmodels directory not found. Cannot build model docs. ==")
@@ -197,15 +197,15 @@ package_data["sas.sasgui.guiframe"] = ['images/*', 'media/*']
 packages.extend(["sas.sasgui.guiframe", "sas.sasgui.guiframe.local_perspectives"])
 # build local plugin
 for d in os.listdir(os.path.join(guiframe_path, "local_perspectives")):
-    if d not in ['.svn','__init__.py', '__init__.pyc']:
+    if d not in ['.svn', '__init__.py', '__init__.pyc']:
         package_name = "sas.sasgui.guiframe.local_perspectives." + d
         packages.append(package_name)
         package_dir[package_name] = os.path.join(guiframe_path, "local_perspectives", d)
 
 # sas.sascalc.dataloader
 package_dir["sas.sascalc.dataloader"] = os.path.join("src", "sas", "sascalc", "dataloader")
-package_data["sas.sascalc.dataloader.readers"] = ['defaults.json','schema/*.xsd']
-packages.extend(["sas.sascalc.dataloader","sas.sascalc.dataloader.readers","sas.sascalc.dataloader.readers.schema"])
+package_data["sas.sascalc.dataloader.readers"] = ['defaults.json', 'schema/*.xsd']
+packages.extend(["sas.sascalc.dataloader", "sas.sascalc.dataloader.readers", "sas.sascalc.dataloader.readers.schema"])
 
 # sas.sascalc.calculator
 gen_dir = os.path.join("src", "sas", "sascalc", "calculator", "c_extensions")
@@ -226,7 +226,7 @@ ext_modules.append( Extension("sas.sascalc.calculator.core.sld2i",
 # sas.sascalc.pr
 srcdir  = os.path.join("src", "sas", "sascalc", "pr", "c_extensions")
 package_dir["sas.sascalc.pr.core"] = srcdir
-package_dir["sas.sascalc.pr"] = os.path.join("src","sas", "sascalc", "pr")
+package_dir["sas.sascalc.pr"] = os.path.join("src", "sas", "sascalc", "pr")
 packages.extend(["sas.sascalc.pr","sas.sascalc.pr.core"])
 ext_modules.append( Extension("sas.sascalc.pr.core.pr_inversion",
                               sources = [os.path.join(srcdir, "Cinvertor.c"),
@@ -238,8 +238,8 @@ ext_modules.append( Extension("sas.sascalc.pr.core.pr_inversion",
 # sas.sascalc.file_converter
 mydir = os.path.join("src", "sas", "sascalc", "file_converter", "c_ext")
 package_dir["sas.sascalc.file_converter.core"] = mydir
-package_dir["sas.sascalc.file_converter"] = os.path.join("src","sas", "sascalc", "file_converter")
-packages.extend(["sas.sascalc.file_converter","sas.sascalc.file_converter.core"])
+package_dir["sas.sascalc.file_converter"] = os.path.join("src", "sas", "sascalc", "file_converter")
+packages.extend(["sas.sascalc.file_converter", "sas.sascalc.file_converter.core"])
 ext_modules.append( Extension("sas.sascalc.file_converter.core.bsl_loader",
                               sources = [os.path.join(mydir, "bsl_loader.c")],
                               include_dirs=[np.get_include()],
