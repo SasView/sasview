@@ -5,13 +5,14 @@ Functions for building sphinx docs.
 For more information on the invocation of sphinx see:
 http://sphinx-doc.org/invocation.html
 """
+from __future__ import print_function
+
 import subprocess
 import os
 import sys
 import fnmatch
 import shutil
 import imp
-from __future__ import print_function
 
 from glob import glob
 from distutils.dir_util import copy_tree
@@ -206,7 +207,7 @@ def retrieve_user_docs():
                     tohere=os.path.join(SPHINX_SOURCE_USER,files)
                     shutil.copy(fromhere,tohere)
     else:
-        print "no source directory",SASMODELS_SOURCE_GPU,"was found"
+        print("no source directory",SASMODELS_SOURCE_GPU,"was found")
 
     if os.path.exists(SASMODELS_SOURCE_SESANS):
         print("Found docs folder SASMODELS_SOURCE_SESANS at", SASMODELS_SOURCE_SESANS)
@@ -337,11 +338,10 @@ def retrieve_bumps_docs():
             shutil.copy(f, BUMPS_TARGET)
     else:
         print("""
-*** Error *** missing directory %s
+======= Error =======
+missing directory %s
 The documentation will not include the optimizer selection section.
 Checkout the bumps source tree and rebuild the docs.
-
-
 """ % BUMPS_DOCS)
 
 def apidoc():
