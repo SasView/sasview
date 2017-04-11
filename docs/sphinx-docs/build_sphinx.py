@@ -11,8 +11,9 @@ import sys
 import fnmatch
 import shutil
 import imp
-from glob import glob
+from __future__ import print_function
 
+from glob import glob
 from distutils.dir_util import copy_tree
 from distutils.util import get_platform
 from shutil import copy
@@ -54,21 +55,6 @@ SASMODELS_DEST_MAGIMG = os.path.join(SASMODELS_DEST_PROLOG, "user", "mag_img")
 SASMODELS_DEST_SESANSIMG = os.path.join(SASMODELS_DEST_PROLOG, "user", "sesans_img")
 SASMODELS_DEST_BUILDIMG = os.path.join(SASMODELS_DEST_PROLOG, "user", "models", "img")
 
-#if os.path.exists(SASMODELS_SOURCE_PROLOG):
-#    print "Found models prolog folder at", SASMODELS_SOURCE_PROLOG
-#if os.path.exists(SASMODELS_SOURCE_REF_MODELS):
-#    print "Found models ref folder at", SASMODELS_SOURCE_REF_MODELS
-#if os.path.exists(SASMODELS_SOURCE_MODELS):
-#    print "Found models folder at", SASMODELS_SOURCE_MODELS
-#if os.path.exists(SASMODELS_SOURCE_IMG):
-#    print "Found img folder at", SASMODELS_SOURCE_IMG
-#if os.path.exists(SASMODELS_DEST_REF_MODELS):
-#    print "Found models ref folder at", SASMODELS_DEST_REF_MODELS
-#if os.path.exists(SASMODELS_DEST_MODELS):
-#    print "Found models folder at", SASMODELS_DEST_MODELS
-#if os.path.exists(SASMODELS_DEST_IMG):
-#    print "Found img folder at", SASMODELS_DEST_IMG
-#sys.exit()
 
 SPHINX_BUILD = os.path.join(CURRENT_SCRIPT_DIR, "build")
 SPHINX_SOURCE = os.path.join(CURRENT_SCRIPT_DIR, "source-temp")
@@ -87,19 +73,19 @@ def inplace_change(filename, old_string, new_string):
 # Thanks to http://stackoverflow.com/questions/4128144/replace-string-within-file-contents
         s=open(filename).read()
         if old_string in s:
-                print 'Changing "{old_string}" to "{new_string}"'.format(**locals())
+                print('Changing "{old_string}" to "{new_string}"'.format(**locals()))
                 s=s.replace(old_string, new_string)
                 f=open(filename, 'w')
                 f.write(s)
                 f.flush()
                 f.close()
         else:
-                print 'No occurences of "{old_string}" found.'.format(**locals())
+                print('No occurences of "{old_string}" found.'.format(**locals()))
 
 def _remove_dir(dir_path):
     """Removes the given directory."""
     if os.path.isdir(dir_path):
-        print "Removing \"%s\"... " % dir_path
+        print("Removing \"%s\"... " % dir_path)
         shutil.rmtree(dir_path)
 
 def clean():
@@ -207,7 +193,7 @@ def retrieve_user_docs():
                     tohere=os.path.join(SASMODELS_DEST_PROLOG,files)
                     shutil.copy(fromhere,tohere)
     else:
-        print "no source directory",SASMODELS_SOURCE_PROLOG, "was found"
+        print("no source directory",SASMODELS_SOURCE_PROLOG, "was found")
 
     if os.path.exists(SASMODELS_SOURCE_GPU):
         print("Found docs folder SASMODELS_SOURCE_GPU at", SASMODELS_SOURCE_GPU)

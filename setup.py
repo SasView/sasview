@@ -158,15 +158,15 @@ class BuildSphinxCommand(Command):
         ### AJJ - Add code for building sasmodels docs here:
         # check for doc path
         SASMODELS_DOCPATH = os.path.abspath(os.path.join(os.getcwd(),'..','sasmodels','doc'))
-        print "========= check for sasmodels at "+SASMODELS_DOCPATH+"============"
+        print("========= check for sasmodels at",SASMODELS_DOCPATH,"============")
         if os.path.exists(SASMODELS_DOCPATH):
             if os.path.isdir(SASMODELS_DOCPATH):
                 # if available, build sasmodels docs
-                print "============= Building sasmodels model documentation ==============="
+                print("============= Building sasmodels model documentation ===============")
                 smdocbuild = subprocess.call(["make","-C",SASMODELS_DOCPATH,"html"])
         else:
             # if not available warning message
-            print " == !!WARNING!! sasmodels directory not found. Cannot build model docs. =="
+            print("== !!WARNING!! sasmodels directory not found. Cannot build model docs. ==")
 
         #Now build sasview (+sasmodels) docs
         sys.path.append("docs/sphinx-docs")
