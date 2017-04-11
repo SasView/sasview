@@ -173,7 +173,7 @@ def _findModels(dir):
         return {}
 
     plugin_log("looking for models in: %s" % str(dir))
-    #compile_file(dir)  #always recompile the folder plugin
+    # compile_file(dir)  #always recompile the folder plugin
     logger.info("plugin model dir: %s" % str(dir))
 
     plugins = {}
@@ -190,8 +190,8 @@ def _findModels(dir):
                 msg += "\nwhile accessing model in %r" % path
                 plugin_log(msg)
                 logger.warning("Failed to load plugin %r. See %s for details"
-                                % (path, PLUGIN_LOG))
-            
+                               % (path, PLUGIN_LOG))
+
     return plugins
 
 
