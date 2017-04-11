@@ -358,7 +358,7 @@ class Plugin(PluginBase):
         self.edit_model_menu.Append(wx_id, 'New Plugin Model',
                                    'Add a new model function')
         wx.EVT_MENU(owner, wx_id, self.make_new_model)
-        
+
         wx_id = wx.NewId()
         self.edit_model_menu.Append(wx_id, 'Sum|Multi(p1, p2)',
                                     'Sum of two model functions')
@@ -380,7 +380,7 @@ class Plugin(PluginBase):
         self.edit_model_menu.Append(wx_id, 'Load Plugin Models',
           '(Re)Load all models present in user plugin_models folder')
         wx.EVT_MENU(owner, wx_id, self.load_plugin_models)
-                
+   
     def set_edit_menu_helper(self, owner=None, menu=None):
         """
         help for setting list of the edit model menu labels
@@ -1747,13 +1747,13 @@ class Plugin(PluginBase):
                                           data_id="Data  " + data.name + " unsmeared",
                                           dy=unsmeared_error)
             # Comment this out until we can get P*S models with correctly populated parameters
-            #if sq_model is not None and pq_model is not None:
-            #    self.create_theory_1D(x, sq_model, page_id, model, data, state,
-            #                          data_description=model.name + " S(q)",
-            #                          data_id=str(page_id) + " " + data.name + " S(q)")
-            #    self.create_theory_1D(x, pq_model, page_id, model, data, state,
-            #                          data_description=model.name + " P(q)",
-            #                          data_id=str(page_id) + " " + data.name + " P(q)")
+            if sq_model is not None and pq_model is not None:
+                self.create_theory_1D(x, sq_model, page_id, model, data, state,
+                                      data_description=model.name + " S(q)",
+                                      data_id=str(page_id) + " " + data.name + " S(q)")
+                self.create_theory_1D(x, pq_model, page_id, model, data, state,
+                                      data_description=model.name + " P(q)",
+                                      data_id=str(page_id) + " " + data.name + " P(q)")
 
             current_pg = self.fit_panel.get_page_by_id(page_id)
             title = new_plot.title
@@ -1909,7 +1909,7 @@ class Plugin(PluginBase):
                 ## an actual problem.  Seems the fix should also go here
                 ## and may be the cause of other noted instabilities
                 ##
-                ##    -PDB August 12, 2014 
+                ##    -PDB August 12, 2014
                 while self.calc_2D.isrunning():
                     time.sleep(0.1)
             self.calc_2D = Calc2D(model=model,
@@ -1951,7 +1951,7 @@ class Plugin(PluginBase):
             ## If a thread is already started, stop it
             if (self.calc_1D is not None) and self.calc_1D.isrunning():
                 self.calc_1D.stop()
-                ## stop just raises the flag -- the thread is supposed to 
+                ## stop just raises the flag -- the thread is supposed to
                 ## then kill itself but cannot.  Paul Kienzle came up with
                 ## this fix to prevent threads from stepping on each other
                 ## which was causing a simple custom plugin model to crash
@@ -1963,7 +1963,7 @@ class Plugin(PluginBase):
                 ## that the GUI can still respond to user input including
                 ## a request to stop the computation.
                 ## It seems thus that the whole thread approach used here
-                ## May need rethinking  
+                ## May need rethinking
                 ##
                 ##    -PDB August 12, 2014
                 while self.calc_1D.isrunning():
@@ -2128,7 +2128,7 @@ class Plugin(PluginBase):
             residuals.dxl = None
             residuals.dxw = None
             residuals.ytransform = 'y'
-            # For latter scale changes 
+            # For latter scale changes
             residuals.xaxis('\\rm{Q} ', 'A^{-1}')
             residuals.yaxis('\\rm{Residuals} ', 'normalized')
         theory_name = str(theory_data.name.split()[0])
