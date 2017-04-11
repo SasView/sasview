@@ -29,8 +29,7 @@ from sas.qtgui.SlitSizeCalculator import SlitSizeCalculator
 
 # Perspectives
 import Perspectives
-#from sas.qtgui.Perspectives.Invariant.InvariantPerspective import InvariantWindow
-#from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
+from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 from sas.qtgui.DataExplorer import DataExplorerWindow
 
 class Acknowledgements(QtGui.QDialog, Ui_Acknowledgements):

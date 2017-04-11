@@ -163,6 +163,12 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.lblFilename.setText(self.logic.data.filename)
         self.updateQRange()
         self.cmdFit.setEnabled(True)
+        self.boxWeighting.setEnabled(True)
+        self.cmdMaskEdit.setEnabled(True)
+        # Switch off txtNpts related controls
+        self.txtNpts.setEnabled(False)
+        self.txtNptsFit.setEnabled(False)
+        self.chkLogData.setEnabled(False)
 
     def acceptsData(self):
         """ Tells the caller this widget can accept new dataset """
@@ -203,12 +209,17 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Reload the current model
         self.onSelectModel()
 
+    def toggleLogData(self, isChecked):
+        """ Toggles between log and linear data sets """
+        pass
+
     def initializeControls(self):
         """
         Set initial control enablement
         """
         self.cmdFit.setEnabled(False)
         self.cmdPlot.setEnabled(True)
+        self.cmdComputePoints.setVisible(False) # probably redundant
         self.chkPolydispersity.setEnabled(True)
         self.chkPolydispersity.setCheckState(False)
         self.chk2DView.setEnabled(True)
@@ -219,6 +230,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.tabFitting.setTabEnabled(TAB_POLY, False)
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, False)
         self.lblChi2Value.setText("---")
+        # group boxes
+        self.boxWeighting.setEnabled(False)
+        self.cmdMaskEdit.setEnabled(False)
 
     def initializeSignals(self):
         """
@@ -228,17 +242,23 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.cbStructureFactor.currentIndexChanged.connect(self.onSelectStructureFactor)
         self.cbCategory.currentIndexChanged.connect(self.onSelectCategory)
         self.cbModel.currentIndexChanged.connect(self.onSelectModel)
+        self.cbSmearing.currentIndexChanged.connect(self.onSelectSmearing)
         # Checkboxes
         self.chk2DView.toggled.connect(self.toggle2D)
         self.chkPolydispersity.toggled.connect(self.togglePoly)
         self.chkMagnetism.toggled.connect(self.toggleMagnetism)
+        self.chkLogData.toggled.connect(self.toggleLogData)
         # Buttons
         self.cmdFit.clicked.connect(self.onFit)
         self.cmdPlot.clicked.connect(self.onPlot)
+        self.cmdMaskEdit.clicked.connect(self.onMaskEdit)
+        self.cmdReset.clicked.connect(self.onReset)
         # Line edits
         self.txtNpts.editingFinished.connect(self.onNpts)
         self.txtMinRange.editingFinished.connect(self.onMinRange)
         self.txtMaxRange.editingFinished.connect(self.onMaxRange)
+        self.txtSmearUp.editingFinished.connect(self.onSmearUp)
+        self.txtSmearDown.editingFinished.connect(self.onSmearDown)
 
         # Respond to change in parameters from the UI
         self._model_model.itemChanged.connect(self.updateParamsFromModel)
@@ -314,6 +334,24 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         models = []
         # Populate the models combobox
         self.cbModel.addItems(sorted([model for (model, _) in model_list]))
+
+    def onSelectSmearing(self):
+        """
+        Select Smearing type from list
+        """
+        pass
+
+    def onSmearUp(self):
+        """
+        Update state based on entered smear value
+        """
+        pass
+
+    def onSmearDown(self):
+        """
+        Update state based on entered smear value
+        """
+        pass
 
     def onPolyModelChange(self, item):
         """
@@ -548,7 +586,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             # notifying the user about format available.
             return
         # set Q range labels on the main tab
-        self.lblMinRangeDef.setText(str(self.q_range_min))
+        #self.lblMinRangeDef.setText(str(self.q_range_min))
         if self.model_is_loaded:
             self.onPlot()
 
@@ -565,6 +603,18 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.lblMaxRangeDef.setText(str(self.q_range_max))
         if self.model_is_loaded:
             self.onPlot()
+
+    def onMaskEdit(self):
+        """
+        Callback for running the mask editor
+        """
+        pass
+
+    def onReset(self):
+        """
+        Callback for resetting qmin/qmax
+        """
+        pass
 
     def setDefaultStructureCombo(self):
         """
@@ -651,6 +701,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.txtMaxRange.setText(str(self.q_range_max))
         self.txtMinRange.setText(str(self.q_range_min))
         self.txtNpts.setText(str(self.npts))
+        self.txtNptsFit.setText(str(self.npts))
 
     def SASModelToQModel(self, model_name, structure_factor=None):
         """

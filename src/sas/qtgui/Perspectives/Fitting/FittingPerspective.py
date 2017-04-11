@@ -7,6 +7,7 @@ from PyQt4 import QtGui
 import sas.qtgui.GuiUtils as GuiUtils
 
 from FittingWidget import FittingWidget
+from FitPage import FitPage
 
 class FittingWindow(QtGui.QTabWidget):
     """

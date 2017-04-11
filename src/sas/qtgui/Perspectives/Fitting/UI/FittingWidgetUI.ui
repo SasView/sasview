@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>514</width>
-    <height>721</height>
+    <height>669</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,6 +36,76 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>459</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="2" column="3">
+    <widget class="QPushButton" name="cmdPlot">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>75</width>
+       <height>23</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Show Plot</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="4">
+    <widget class="QPushButton" name="cmdFit">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>75</width>
+       <height>23</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Fit</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="5">
+    <widget class="QPushButton" name="cmdHelp">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>75</width>
+       <height>23</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Help</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="3">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>273</width>
        <height>20</height>
       </size>
      </property>
@@ -341,14 +411,14 @@
            </spacer>
           </item>
           <item row="0" column="2">
-           <widget class="QPushButton" name="pushButton_3">
+           <widget class="QPushButton" name="cmdReset">
             <property name="text">
              <string>Reset</string>
             </property>
            </widget>
           </item>
           <item row="1" column="2">
-           <widget class="QPushButton" name="pushButton_4">
+           <widget class="QPushButton" name="cmdMaskEdit">
             <property name="text">
              <string>Mask Editor</string>
             </property>
@@ -376,7 +446,7 @@
              <widget class="QLineEdit" name="txtNpts"/>
             </item>
             <item row="0" column="2">
-             <widget class="QCheckBox" name="checkBox">
+             <widget class="QCheckBox" name="chkLogData">
               <property name="text">
                <string>Log spaced points</string>
               </property>
@@ -403,11 +473,24 @@
              <widget class="QLineEdit" name="txtChi2"/>
             </item>
             <item row="2" column="3">
-             <widget class="QPushButton" name="pushButton_5">
+             <widget class="QPushButton" name="cmdComputePoints">
               <property name="text">
                <string>Compute</string>
               </property>
              </widget>
+            </item>
+            <item row="1" column="2">
+             <spacer name="horizontalSpacer_7">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
           </item>
@@ -415,7 +498,7 @@
         </widget>
        </item>
        <item row="2" column="0">
-        <widget class="QGroupBox" name="groupBox_5">
+        <widget class="QGroupBox" name="boxWeighting">
          <property name="title">
           <string>Weighting</string>
          </property>
@@ -485,7 +568,7 @@
          </property>
          <layout class="QGridLayout" name="gridLayout_13">
           <item row="0" column="0">
-           <widget class="QComboBox" name="comboBox_4">
+           <widget class="QComboBox" name="cbSmearing">
             <property name="currentIndex">
              <number>0</number>
             </property>
@@ -514,14 +597,14 @@
           <item row="0" column="1">
            <layout class="QGridLayout" name="gridLayout_11">
             <item row="0" column="0">
-             <widget class="QLabel" name="label_9">
+             <widget class="QLabel" name="lblSmearUp">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;dQ&lt;span style=&quot; vertical-align:sub;&quot;&gt;low&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QLineEdit" name="lineEdit_6"/>
+             <widget class="QLineEdit" name="txtSmearUp"/>
             </item>
             <item row="0" column="2">
              <widget class="QLabel" name="label_14">
@@ -531,14 +614,14 @@
              </widget>
             </item>
             <item row="1" column="0">
-             <widget class="QLabel" name="label_13">
+             <widget class="QLabel" name="lblSmearDown">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;dQ&lt;span style=&quot; vertical-align:sub;&quot;&gt;high&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QLineEdit" name="lineEdit_7"/>
+             <widget class="QLineEdit" name="txtSmearDown"/>
             </item>
             <item row="1" column="2">
              <widget class="QLabel" name="label_15">
@@ -563,7 +646,7 @@
            </spacer>
           </item>
          </layout>
-         <zorder>comboBox_4</zorder>
+         <zorder>cbSmearing</zorder>
          <zorder>horizontalSpacer_2</zorder>
         </widget>
        </item>
@@ -643,76 +726,6 @@ angles</string>
       </layout>
      </widget>
     </widget>
-   </item>
-   <item row="2" column="3">
-    <widget class="QPushButton" name="cmdPlot">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>75</width>
-       <height>23</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>Show Plot</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="4">
-    <widget class="QPushButton" name="cmdFit">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>75</width>
-       <height>23</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>Fit</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="5">
-    <widget class="QPushButton" name="cmdHelp">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>75</width>
-       <height>23</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>Help</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0" colspan="3">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>273</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
    </item>
   </layout>
  </widget>
