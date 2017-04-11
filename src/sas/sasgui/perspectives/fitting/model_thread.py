@@ -205,10 +205,6 @@ class Calc1D(CalcThread):
         if isinstance(self.model, MultiplicationModel):
             s_model = self.model.s_model
             p_model = self.model.p_model
-            #sq_values = np.zeros((len(self.data.x)))
-            #pq_values = np.zeros((len(self.data.x)))
-            #sq_values[index] = s_model.evalDistribution(self.data.x[index])
-            #pq_values[index] = p_model.evalDistribution(self.data.x[index])
             sq_values = s_model.evalDistribution(x)
             pq_values = p_model.evalDistribution(x)
         elif hasattr(self.model, "calc_composition_models"):

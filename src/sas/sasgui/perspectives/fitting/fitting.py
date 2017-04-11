@@ -1746,7 +1746,6 @@ class Plugin(PluginBase):
                                           data_description="Data unsmeared",
                                           data_id="Data  " + data.name + " unsmeared",
                                           dy=unsmeared_error)
-            # Comment this out until we can get P*S models with correctly populated parameters
             if sq_model is not None and pq_model is not None:
                 self.create_theory_1D(x, sq_model, page_id, model, data, state,
                                       data_description=model.name + " S(q)",
