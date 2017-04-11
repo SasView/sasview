@@ -34,6 +34,8 @@ import sas.sascalc.dataloader
 from pr_widgets import load_error
 from sas.sasgui.guiframe.plugin_base import PluginBase
 
+logger = logging.getLogger(__name__)
+
 
 PR_FIT_LABEL = r"$P_{fit}(r)$"
 PR_LOADED_LABEL = r"$P_{loaded}(r)$"
@@ -112,7 +114,7 @@ class Plugin(PluginBase):
         #l.associate_file_reader(".svs", self.state_reader)
 
         # Log startup
-        logging.info("Pr(r) plug-in started")
+        logger.info("Pr(r) plug-in started")
 
     def delete_data(self, data_id):
         """
@@ -180,7 +182,7 @@ class Plugin(PluginBase):
                                                    title=self.current_plottable.title))
             self.control_panel.set_state(state)
         except:
-            logging.error("prview.set_state: %s" % sys.exc_value)
+            logger.error("prview.set_state: %s" % sys.exc_value)
 
 
     def help(self, evt):
@@ -288,7 +290,7 @@ class Plugin(PluginBase):
             Display computed I(q)
         """
         qtemp = pr.x
-        if not q == None:
+        if q is not None:
             qtemp = q
 
         # Make a plot
@@ -300,9 +302,9 @@ class Plugin(PluginBase):
         minq = 0.001
 
         # Check for user min/max
-        if not pr.q_min == None:
+        if pr.q_min is not None:
             minq = pr.q_min
-        if not pr.q_max == None:
+        if pr.q_max is not None:
             maxq = pr.q_max
 
         x = pylab.arange(minq, maxq, maxq / 301.0)
@@ -326,7 +328,7 @@ class Plugin(PluginBase):
         new_plot.title = title
 
         # If we have a group ID, use it
-        if pr.info.has_key("plot_group_id"):
+        if 'plot_group_id' in pr.info:
             new_plot.group_id = pr.info["plot_group_id"]
         new_plot.id = IQ_FIT_LABEL
         self.parent.update_theory(data_id=self.data_id, theory=new_plot)
@@ -345,7 +347,7 @@ class Plugin(PluginBase):
                     err[i] = math.sqrt(math.fabs(value))
                 except:
                     err[i] = 1.0
-                    print "Error getting error", value, x[i]
+                    print("Error getting error", value, x[i])
 
             new_plot = Data1D(x, y)
             new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
@@ -353,7 +355,7 @@ class Plugin(PluginBase):
             new_plot.xaxis("\\rm{Q}", 'A^{-1}')
             new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
             # If we have a group ID, use it
-            if pr.info.has_key("plot_group_id"):
+            if 'plot_group_id' in pr.info:
                 new_plot.group_id = pr.info["plot_group_id"]
             new_plot.id = IQ_SMEARED_LABEL
             new_plot.title = title
@@ -390,7 +392,7 @@ class Plugin(PluginBase):
         cov2 = np.ascontiguousarray(cov)
 
         for i in range(len(x)):
-            if cov2 == None:
+            if cov2 is None:
                 value = pr.pr(out, x[i])
             else:
                 (value, dy[i]) = pr.pr_err(out, cov2, x[i])
@@ -409,7 +411,7 @@ class Plugin(PluginBase):
             y = y / pmax
             dy = dy / pmax
 
-        if cov2 == None:
+        if cov2 is None:
             new_plot = Data1D(x, y)
             new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
         else:
@@ -484,7 +486,7 @@ class Plugin(PluginBase):
         data_err = np.zeros(0)
         scale = None
         min_err = 0.0
-        if not path == None:
+        if path is not None:
             input_f = open(path, 'r')
             buff = input_f.read()
             lines = buff.split('\n')
@@ -496,7 +498,7 @@ class Plugin(PluginBase):
                     if len(toks) > 2:
                         err = float(toks[2])
                     else:
-                        if scale == None:
+                        if scale is None:
                             scale = 0.05 * math.sqrt(y)
                             #scale = 0.05/math.sqrt(y)
                             min_err = 0.01 * y
@@ -507,9 +509,9 @@ class Plugin(PluginBase):
                     data_y = np.append(data_y, y)
                     data_err = np.append(data_err, err)
                 except:
-                    logging.error(sys.exc_value)
+                    logger.error(sys.exc_value)
 
-        if not scale == None:
+        if scale is not None:
             message = "The loaded file had no error bars, statistical errors are assumed."
             wx.PostEvent(self.parent, StatusEvent(status=message))
         else:
@@ -534,7 +536,7 @@ class Plugin(PluginBase):
         min_err = 0.0
 
         data_started = False
-        if not path == None:
+        if path is not None:
             input_f = open(path, 'r')
             buff = input_f.read()
             lines = buff.split('\n')
@@ -547,7 +549,7 @@ class Plugin(PluginBase):
                         if len(toks) > 2:
                             err = float(toks[2])
                         else:
-                            if scale == None:
+                            if scale is None:
                                 scale = 0.05 * math.sqrt(y)
                                 #scale = 0.05/math.sqrt(y)
                                 min_err = 0.01 * y
@@ -558,11 +560,11 @@ class Plugin(PluginBase):
                         data_y = np.append(data_y, y)
                         data_err = np.append(data_err, err)
                     except:
-                        logging.error(sys.exc_value)
+                        logger.error(sys.exc_value)
                 elif line.find("The 6 columns") >= 0:
                     data_started = True
 
-        if not scale == None:
+        if scale is not None:
             message = "The loaded file had no error bars, statistical errors are assumed."
             wx.PostEvent(self.parent, StatusEvent(status=message))
         else:
@@ -718,7 +720,7 @@ class Plugin(PluginBase):
         from pr_thread import CalcPr
 
         # If a thread is already started, stop it
-        if self.calc_thread != None and self.calc_thread.isrunning():
+        if self.calc_thread is not None and self.calc_thread.isrunning():
             self.calc_thread.stop()
             ## stop just raises the flag -- the thread is supposed to
             ## then kill itself. In August 2014 it was shown that this is
@@ -758,7 +760,7 @@ class Plugin(PluginBase):
         # Save useful info
         self.elapsed = elapsed
         self.control_panel.alpha_estimate = alpha
-        if not message == None:
+        if message is not None:
             wx.PostEvent(self.parent, StatusEvent(status=str(message)))
         self.perform_estimateNT()
 
@@ -776,7 +778,7 @@ class Plugin(PluginBase):
         self.elapsed = elapsed
         self.control_panel.nterms_estimate = nterms
         self.control_panel.alpha_estimate = alpha
-        if not message == None:
+        if message is not None:
             wx.PostEvent(self.parent, StatusEvent(status=str(message)))
 
     def _completed(self, out, cov, pr, elapsed):
@@ -855,7 +857,7 @@ class Plugin(PluginBase):
             self.pr = pr
 
         # Make a plot of I(q) data
-        if self.pr.err == None:
+        if self.pr.err is None:
             new_plot = Data1D(self.pr.x, self.pr.y)
             new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
         else:
@@ -918,7 +920,7 @@ class Plugin(PluginBase):
 
         try:
             pr = self._create_plot_pr()
-            if not pr == None:
+            if pr is not None:
                 self.pr = pr
                 self.perform_inversion()
         except:
@@ -941,7 +943,7 @@ class Plugin(PluginBase):
 
         try:
             pr = self._create_plot_pr()
-            if not pr == None:
+            if pr is not None:
                 self.pr = pr
                 self.perform_estimate()
         except:
@@ -980,7 +982,7 @@ class Plugin(PluginBase):
         # Fill in errors if none were provided
         err = self.current_plottable.dy
         all_zeros = True
-        if err == None:
+        if err is None:
             err = np.zeros(len(pr.y))
         else:
             for i in range(len(err)):
@@ -992,7 +994,7 @@ class Plugin(PluginBase):
             min_err = 0.0
             for i in range(len(pr.y)):
                 # Scale the error so that we can fit over several decades of Q
-                if scale == None:
+                if scale is None:
                     scale = 0.05 * math.sqrt(pr.y[i])
                     min_err = 0.01 * pr.y[i]
                 err[i] = scale * math.sqrt(math.fabs(pr.y[i])) + min_err
@@ -1021,7 +1023,7 @@ class Plugin(PluginBase):
 
         try:
             pr = self._create_file_pr(data)
-            if not pr == None:
+            if pr is not None:
                 self.pr = pr
                 self.perform_inversion()
         except:
@@ -1044,7 +1046,7 @@ class Plugin(PluginBase):
 
         try:
             pr = self._create_file_pr(data)
-            if not pr is None:
+            if pr is not None:
                 self.pr = pr
                 self.perform_estimate()
         except:
@@ -1087,13 +1089,13 @@ class Plugin(PluginBase):
 
         # If we have not errors, add statistical errors
         if y is not None:
-            if err == None or np.all(err) == 0:
+            if err is None or np.all(err) == 0:
                 err = np.zeros(len(y))
                 scale = None
                 min_err = 0.0
                 for i in range(len(y)):
                     # Scale the error so that we can fit over several decades of Q
-                    if scale == None:
+                    if scale is None:
                         scale = 0.05 * math.sqrt(y[i])
                         min_err = 0.01 * y[i]
                     err[i] = scale * math.sqrt(math.fabs(y[i])) + min_err
@@ -1126,7 +1128,7 @@ class Plugin(PluginBase):
         from pr_thread import EstimatePr
 
         # If a thread is already started, stop it
-        if self.estimation_thread != None and \
+        if self.estimation_thread is not None and \
             self.estimation_thread.isrunning():
             self.estimation_thread.stop()
             ## stop just raises the flag -- the thread is supposed to
@@ -1156,7 +1158,7 @@ class Plugin(PluginBase):
         from pr_thread import EstimateNT
 
         # If a thread is already started, stop it
-        if self.estimation_thread != None and self.estimation_thread.isrunning():
+        if self.estimation_thread is not None and self.estimation_thread.isrunning():
             self.estimation_thread.stop()
             ## stop just raises the flag -- the thread is supposed to
             ## then kill itself. In August 2014 it was shown that this is
@@ -1200,7 +1202,7 @@ class Plugin(PluginBase):
             panel.graph.selected_plottable in panel.plots:
             dataset = panel.plots[panel.graph.selected_plottable].name
         else:
-            logging.info("Prview Error: No data is available")
+            logger.info("Prview Error: No data is available")
             return
 
         # Store a reference to the current plottable
@@ -1210,13 +1212,13 @@ class Plugin(PluginBase):
             self.control_panel.alpha = estimate
         except:
             self.control_panel.alpha = self.alpha
-            logging.info("Prview :Alpha Not estimate yet")
+            logger.info("Prview :Alpha Not estimate yet")
         try:
             estimate = int(self.control_panel.nterms_estimate)
             self.control_panel.nfunc = estimate
         except:
             self.control_panel.nfunc = self.nfunc
-            logging.info("Prview : ntemrs Not estimate yet")
+            logger.info("Prview : ntemrs Not estimate yet")
 
         self.current_plottable = panel.plots[panel.graph.selected_plottable]
         self.set_data([self.current_plottable])

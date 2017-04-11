@@ -32,6 +32,8 @@ from wx.py.editwindow import EditWindow
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 from .pyconsole import show_model_output, check_model
 
+logger = logging.getLogger(__name__)
+
 
 if sys.platform.count("win32") > 0:
     FONT_VARIANT = 0
@@ -384,7 +386,7 @@ class TextDialog(wx.Dialog):
             color = 'red'
         self._msg_box.SetLabel(msg)
         self._msg_box.SetForegroundColour(color)
-        if self.parent.parent != None:
+        if self.parent.parent is not None:
             from sas.sasgui.guiframe.events import StatusEvent
             wx.PostEvent(self.parent.parent, StatusEvent(status=msg,
                                                          info=info))
@@ -475,7 +477,7 @@ class TextDialog(wx.Dialog):
         On Select an Operator
         """
         # For Mac
-        if event != None:
+        if event is not None:
             event.Skip()
         item = event.GetEventObject()
         text = item.GetValue()
@@ -976,7 +978,7 @@ class EditorPanel(wx.ScrolledWindow):
             msg = "Name exists already."
 
         # Prepare the messagebox
-        if self.base != None and not msg:
+        if self.base is not None and not msg:
             self.base.update_custom_combo()
             # Passed exception in import test as it will fail for sasmodels.sasview_model class
             # Should add similar test for new style?
@@ -984,7 +986,7 @@ class EditorPanel(wx.ScrolledWindow):
             try:
                 exec "from %s import Model" % name
             except:
-                logging.error(sys.exc_value)
+                logger.error(sys.exc_value)
 
         # Prepare the messagebox
         if msg:
@@ -999,7 +1001,7 @@ class EditorPanel(wx.ScrolledWindow):
         self._msg_box.SetLabel(msg)
         self._msg_box.SetForegroundColour(color)
         # Send msg to the top window
-        if self.base != None:
+        if self.base is not None:
             from sas.sasgui.guiframe.events import StatusEvent
             wx.PostEvent(self.base.parent,
                          StatusEvent(status=msg+check_err, info=info))
@@ -1187,7 +1189,7 @@ class EditorWindow(wx.Frame):
         On close event
         """
         self.Show(False)
-        #if self.parent != None:
+        #if self.parent is not None:
         #    self.parent.new_model_frame = None
         #self.Destroy()
 
@@ -1385,7 +1387,7 @@ class Model(Model1DPlugin):
         return name
 
     def _get_upper_name(self, name=None):
-        if name == None:
+        if name is None:
             return ""
         upper_name = ""
         str_name = str(name)

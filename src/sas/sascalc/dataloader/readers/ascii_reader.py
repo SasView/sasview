@@ -16,7 +16,6 @@
 import numpy as np
 import os
 from sas.sascalc.dataloader.data_info import Data1D
-from sas.sascalc.dataloader.loader_exceptions import FileContentsException
 
 # Check whether we have a converter available
 has_converter = True
@@ -128,12 +127,12 @@ class Reader:
                         # If a 3rd row is present, consider it dy
                         if new_lentoks > 2:
                             _dy = float(toks[2])
-                        has_error_dy = False if _dy == None else True
+                        has_error_dy = False if _dy is None else True
 
                         # If a 4th row is present, consider it dx
                         if new_lentoks > 3:
                             _dx = float(toks[3])
-                        has_error_dx = False if _dx == None else True
+                        has_error_dx = False if _dx is None else True
 
                         # Delete the previously stored lines of data candidates if
                         # the list is not data
@@ -173,18 +172,18 @@ class Reader:
                 input_f.close()
                 if not is_data:
                     msg = "ascii_reader: x has no data"
-                    raise FileContentsException, msg
+                    raise RuntimeError, msg
                 # Sanity check
                 if has_error_dy == True and not len(ty) == len(tdy):
                     msg = "ascii_reader: y and dy have different length"
-                    raise FileContentsException, msg
+                    raise RuntimeError, msg
                 if has_error_dx == True and not len(tx) == len(tdx):
                     msg = "ascii_reader: y and dy have different length"
-                    raise FileContentsException, msg
+                    raise RuntimeError, msg
                 # If the data length is zero, consider this as
                 # though we were not able to read the file.
                 if len(tx) == 0:
-                    raise FileContentsException, "ascii_reader: could not load file"
+                    raise RuntimeError, "ascii_reader: could not load file"
 
                 #Let's re-order the data to make cal.
                 # curve look better some cases

@@ -181,7 +181,7 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         On data name typing
         """
-        if event != None:
+        if event is not None:
             event.Skip()
         item = event.GetEventObject()
         if item.IsEnabled():
@@ -197,14 +197,14 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         self.send_warnings('')
         msg = ''
-        if name == None:
+        if name is None:
             text = self.data_namectr.GetValue().strip()
         else:
             text = name
         state_list = self.get_datalist().values()
         name_list = []
         for state in state_list:
-            if state.data == None:
+            if state.data is None:
                 theory_list = state.get_theory()
                 theory, _ = theory_list.values()[0]
                 d_name = str(theory.name)
@@ -263,7 +263,7 @@ class DataOperPanel(wx.ScrolledWindow):
 
         self.put_text_pic(self.data2_pic, content=str(val))
         self.check_data_inputs()
-        if self.output != None:
+        if self.output is not None:
             self.output.name = str(self.data_namectr.GetValue())
         self.draw_output(self.output)
         self.Refresh()
@@ -277,13 +277,13 @@ class DataOperPanel(wx.ScrolledWindow):
         item = event.GetEventObject()
         pos = item.GetCurrentSelection()
         data = item.GetClientData(pos)
-        if data == None:
+        if data is None:
             content = "?"
             self.put_text_pic(self.data1_pic, content)
         else:
             self.data1_pic.add_image(data)
         self.check_data_inputs()
-        if self.output != None:
+        if self.output is not None:
             self.output.name = str(self.data_namectr.GetValue())
         self.draw_output(self.output)
 
@@ -296,7 +296,7 @@ class DataOperPanel(wx.ScrolledWindow):
         text = item.GetValue().strip()
         self.put_text_pic(self.operator_pic, content=text)
         self.check_data_inputs()
-        if self.output != None:
+        if self.output is not None:
             self.output.name = str(self.data_namectr.GetValue())
         self.draw_output(self.output)
 
@@ -312,7 +312,7 @@ class DataOperPanel(wx.ScrolledWindow):
         data = item.GetClientData(pos)
         content = "?"
         if not (self.numberctr.IsShown() and self.numberctr.IsEnabled()):
-            if data == None:
+            if data is None:
                 content = "?"
                 self.put_text_pic(self.data2_pic, content)
             else:
@@ -328,12 +328,12 @@ class DataOperPanel(wx.ScrolledWindow):
                 content = "?"
                 data = None
             item.SetClientData(pos, data)
-            if data != None:
+            if data is not None:
                 self.check_data_inputs()
 
             self.put_text_pic(self.data2_pic, content)
 
-        if self.output != None:
+        if self.output is not None:
             self.output.name = str(self.data_namectr.GetValue())
         self.draw_output(self.output)
 
@@ -354,13 +354,13 @@ class DataOperPanel(wx.ScrolledWindow):
         flag = False
         pos1 = self.data1_cbox.GetCurrentSelection()
         data1 = self.data1_cbox.GetClientData(pos1)
-        if data1 == None:
+        if data1 is None:
             self.output = None
             return flag
         pos2 = self.data2_cbox.GetCurrentSelection()
         data2 = self.data2_cbox.GetClientData(pos2)
 
-        if data2 == None:
+        if data2 is None:
             self.output = None
             return flag
         if self.numberctr.IsShown():
@@ -421,7 +421,7 @@ class DataOperPanel(wx.ScrolledWindow):
         Draw output data(temp)
         """
         out = self.out_pic
-        if output == None:
+        if output is None:
             content = "?"
             self.put_text_pic(out, content)
         else:
@@ -471,7 +471,7 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         On Focus at this window
         """
-        if event != None:
+        if event is not None:
             event.Skip()
         self._data = self.get_datalist()
         if ON_MAC:
@@ -533,8 +533,8 @@ class DataOperPanel(wx.ScrolledWindow):
         dnames = []
         ids = self._data.keys()
         for id in ids:
-            if id != None:
-                if self._data[id].data != None:
+            if id is not None:
+                if self._data[id].data is not None:
                     dnames.append(self._data[id].data.name)
                 else:
                     theory_list = self._data[id].get_theory()
@@ -545,7 +545,7 @@ class DataOperPanel(wx.ScrolledWindow):
             val_list = np.array(self._data.values())[ind]
             for datastate in val_list:
                 data = datastate.data
-                if data != None:
+                if data is not None:
                     name = data.name
                     pos1 = self.data1_cbox.Append(str(name))
                     self.data1_cbox.SetClientData(pos1, data)
@@ -576,7 +576,7 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         """
         data_manager = self.parent.parent.get_data_manager()
-        if data_manager != None:
+        if data_manager is not None:
             return  data_manager.get_all_data()
         else:
             return {}
@@ -591,7 +591,7 @@ class DataOperPanel(wx.ScrolledWindow):
         name = self.data_namectr.GetValue().strip()
         name_list = []
         for state in state_list:
-            if state.data == None:
+            if state.data is None:
                 theory_list = state.get_theory()
                 theory, _ = theory_list.values()[0]
                 d_name = str(theory.name)
@@ -608,7 +608,7 @@ class DataOperPanel(wx.ScrolledWindow):
             msg = "Please type the output data name first...   "
             wx.MessageBox(msg, 'Error')
             return
-        if self.output == None:
+        if self.output is None:
             msg = "No Output Data has been generated...   "
             wx.MessageBox(msg, 'Error')
             return
@@ -982,7 +982,7 @@ class DataOperatorWindow(widget.CHILD_FRAME):
         """
         On close event
         """
-        if self.manager != None:
+        if self.manager is not None:
             self.manager.data_operator_frame = None
         self.panel.disconnect_panels()
         self.Destroy()
