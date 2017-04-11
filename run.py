@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
+
 """
 Run sasview in place.  This allows sasview to use the python
 files in the source tree without having to call setup.py install
@@ -15,8 +16,6 @@ the given module or script.
 """
 
 import imp
-import logging
-import logging.config
 import os
 import sys
 from contextlib import contextmanager
@@ -37,6 +36,7 @@ def addpath(path):
     os.environ['PYTHONPATH'] = PYTHONPATH
     sys.path.insert(0, path)
 
+
 @contextmanager
 def cd(path):
     """
@@ -47,21 +47,24 @@ def cd(path):
     yield
     os.chdir(old_dir)
 
+
 def import_package(modname, path):
     """Import a package into a particular point in the python namespace"""
-    mod = imp.load_source(modname, abspath(joinpath(path,'__init__.py')))
+    mod = imp.load_source(modname, abspath(joinpath(path, '__init__.py')))
     sys.modules[modname] = mod
     mod.__path__ = [abspath(path)]
     return mod
+
 
 def import_dll(modname, build_path):
     """Import a DLL from the build directory"""
     import sysconfig
     ext = sysconfig.get_config_var('SO')
     # build_path comes from context
-    path = joinpath(build_path, *modname.split('.'))+ext
-    #print "importing", modname, "from", path
+    path = joinpath(build_path, *modname.split('.')) + ext
+    # print "importing", modname, "from", path
     return imp.load_dynamic(modname, path)
+
 
 def prepare():
     # Don't create *.pyc files
@@ -73,8 +76,8 @@ def prepare():
     # find the directories for the source and build
     from distutils.util import get_platform
     root = abspath(dirname(__file__))
-    platform = '%s-%s'%(get_platform(),sys.version[:3])
-    build_path = joinpath(root, 'build','lib.'+platform)
+    platform = '%s-%s' % (get_platform(), sys.version[:3])
+    build_path = joinpath(root, 'build', 'lib.' + platform)
 
     # Notify the help menu that the Sphinx documentation is in a different
     # place than it otherwise would be.
@@ -85,15 +88,19 @@ def prepare():
     #os.environ['MPLCONFIGDIR'] = mplconfig
     #if not os.path.exists(mplconfig): os.mkdir(mplconfig)
     #import matplotlib
-    #matplotlib.use('Agg')
-    #print matplotlib.__file__
+    # matplotlib.use('Agg')
+    # print matplotlib.__file__
     #import pylab; pylab.hold(False)
     # add periodictable to the path
-    try: import periodictable
-    except: addpath(joinpath(root, '..','periodictable'))
+    try:
+        import periodictable
+    except:
+        addpath(joinpath(root, '..', 'periodictable'))
 
-    try: import bumps
-    except: addpath(joinpath(root, '..','bumps'))
+    try:
+        import bumps
+    except:
+        addpath(joinpath(root, '..', 'bumps'))
 
     # select wx version
     #addpath(os.path.join(root, '..','wxPython-src-3.0.0.0','wxPython'))
@@ -113,7 +120,7 @@ def prepare():
     # Import the sasview package from root/sasview as sas.sasview.  It would
     # be better to just store the package in src/sas/sasview.
     import sas
-    sas.sasview = import_package('sas.sasview', joinpath(root,'sasview'))
+    sas.sasview = import_package('sas.sasview', joinpath(root, 'sasview'))
 
     # The sas.models package Compiled Model files should be pulled in from the build directory even though
     # the source is stored in src/sas/models.
@@ -122,27 +129,28 @@ def prepare():
     # Some packages are not where they are needed, so load them explicitly.
     import sas.sascalc.pr
     sas.sascalc.pr.core = import_package('sas.sascalc.pr.core',
-                                  joinpath(build_path, 'sas', 'sascalc', 'pr', 'core'))
+                                         joinpath(build_path, 'sas', 'sascalc', 'pr', 'core'))
 
     # Compiled modules need to be pulled from the build directory.
     # Some packages are not where they are needed, so load them explicitly.
     import sas.sascalc.file_converter
     sas.sascalc.file_converter.core = import_package('sas.sascalc.file_converter.core',
-                                  joinpath(build_path, 'sas', 'sascalc', 'file_converter', 'core'))                    
+                                                     joinpath(build_path, 'sas', 'sascalc', 'file_converter', 'core'))
 
     # Compiled modules need to be pulled from the build directory.
     # Some packages are not where they are needed, so load them explicitly.
     import sas.sascalc.calculator
     sas.sascalc.calculator.core = import_package('sas.sascalc.calculator.core',
-                                  joinpath(build_path, 'sas', 'sascalc', 'calculator', 'core'))
+                                                 joinpath(build_path, 'sas', 'sascalc', 'calculator', 'core'))
 
     sys.path.append(build_path)
 
-    #print "\n".join(sys.path)
+    # print "\n".join(sys.path)
+
 
 if __name__ == "__main__":
-    #Need to add absolute path before actual prepare call,
-    #so logging can be done during initialization process too
+    # Need to add absolute path before actual prepare call,
+    # so logging can be done during initialization process too
     root = abspath(dirname(__file__))
     addpath(joinpath(root, 'sasview'))
     from logger_config import SetupLogger

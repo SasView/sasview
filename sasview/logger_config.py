@@ -1,14 +1,17 @@
 from __future__ import print_function
 
-'''
-Module that manages the global logging
-'''
-
 import logging
 import logging.config
 import os
 import os.path
+
 import pkg_resources
+
+
+'''
+Module that manages the global logging
+'''
+
 
 class SetupLogger(object):
     '''
@@ -20,8 +23,6 @@ class SetupLogger(object):
         self.name = logger_name
 
     def config_production(self):
-        '''
-        '''
         logger = logging.getLogger(self.name)
         if not logger.root.handlers:
             self._read_config_file()
@@ -39,8 +40,6 @@ class SetupLogger(object):
         return logger
 
     def _read_config_file(self):
-        '''
-        '''
         if self.config_file is not None:
             logging.config.fileConfig(self.config_file)
 
