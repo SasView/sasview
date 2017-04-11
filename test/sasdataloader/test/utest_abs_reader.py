@@ -338,6 +338,8 @@ class cansas_reader(unittest.TestCase):
         self.data = data[0]
         self.assertEqual(self.data.filename, filename)
         self._checkdata()
+        if os.path.isfile(filename):
+            os.remove(filename)
         
     def test_units(self):
         """
