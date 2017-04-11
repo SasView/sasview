@@ -66,11 +66,12 @@ class SetupLogger(object):
         # NotImplementedError: resource_filename() only supported for .egg, not .zip
         try:
             places_to_look_for_conf_file.append(
-                pkg_resources.resource_filename("tempfile", filename))
+                pkg_resources.resource_filename(__name__, filename))
         except NotImplementedError:
             pass
 
         for filepath in places_to_look_for_conf_file:
+            print("Checking if path exists: %s"%filepath)
             if os.path.exists(filepath):
                 self.config_file = filepath
                 return

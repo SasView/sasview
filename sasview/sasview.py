@@ -20,8 +20,7 @@ import traceback
 
 from sas.sasview.logger_config import SetupLogger
 
-l = SetupLogger(__name__)
-logger = l.config_production()
+logger = SetupLogger(__name__).config_production()
 
 # Log the start of the session
 logger.info(" --- SasView session started ---")
