@@ -165,22 +165,22 @@ def _findModels():
     Find custom models
     """
     # List of plugin objects
-    dir = find_plugins_dir()
+    directory = find_plugins_dir()
     # Go through files in plug-in directory
-    if not os.path.isdir(dir):
-        msg = "SasView couldn't locate Model plugin folder %r." % dir
+    if not os.path.isdir(directory):
+        msg = "SasView couldn't locate Model plugin folder %r." % directory
         logger.warning(msg)
         return {}
 
-    plugin_log("looking for models in: %s" % str(dir))
-    # compile_file(dir)  #always recompile the folder plugin
-    logger.info("plugin model dir: %s" % str(dir))
+    plugin_log("looking for models in: %s" % str(directory))
+    # compile_file(directory)  #always recompile the folder plugin
+    logger.info("plugin model dir: %s" % str(directory))
 
     plugins = {}
-    for filename in os.listdir(dir):
+    for filename in os.listdir(directory):
         name, ext = os.path.splitext(filename)
         if ext == '.py' and not name == '__init__':
-            path = os.path.abspath(os.path.join(dir, filename))
+            path = os.path.abspath(os.path.join(directory, filename))
             try:
                 model = load_custom_model(path)
                 model.name = PLUGIN_NAME_BASE + model.name
