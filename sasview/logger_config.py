@@ -58,8 +58,9 @@ class SetupLogger(object):
         '''
         places_to_look_for_conf_file = [
             os.path.join(os.path.abspath(os.path.dirname(__file__)), filename),
-            os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", filename),
-            os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "..", filename),
+            filename,
+            os.path.join("sas", "sasview", filename),
+            os.path.join(os.getcwd(), "sas", "sasview", filename),
         ]
 
         # To avoid the exception in OSx
@@ -69,6 +70,9 @@ class SetupLogger(object):
                 pkg_resources.resource_filename(__name__, filename))
         except NotImplementedError:
             pass
+
+        print("Running python in: %s"%os.getcwd())
+        print("Full path for %s is: %s"%(__file__, os.path.dirname(__file__)))
 
         for filepath in places_to_look_for_conf_file:
             print("Checking if path exists: %s"%filepath)
