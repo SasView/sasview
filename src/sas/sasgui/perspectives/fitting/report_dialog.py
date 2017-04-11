@@ -38,7 +38,7 @@ class ReportDialog(BaseReportDialog):
         # number of images of plot
         self.nimages = len(self.report_list[2])
 
-        if self.report_list[2] != None:
+        if self.report_list[2] is not None:
             # put image path in the report string
             if len(self.report_list[2]) == 1:
                 self.report_html = self.report_list[0] % \

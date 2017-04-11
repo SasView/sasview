@@ -7,6 +7,7 @@
 """
 
 import os
+import subprocess
 import shutil
 import sys
 from distutils.command.build_ext import build_ext
@@ -161,6 +162,23 @@ class BuildSphinxCommand(Command):
         self.cwd = os.getcwd()
 
     def run(self):
+        ''' First builds the sasmodels documentation if the directory
+        is present. Then builds the sasview docs.
+        '''
+        ### AJJ - Add code for building sasmodels docs here:
+        # check for doc path
+        SASMODELS_DOCPATH = os.path.abspath(os.path.join(os.getcwd(), '..', 'sasmodels', 'doc'))
+        print("========= check for sasmodels at", SASMODELS_DOCPATH, "============")
+        if os.path.exists(SASMODELS_DOCPATH):
+            if os.path.isdir(SASMODELS_DOCPATH):
+                # if available, build sasmodels docs
+                print("============= Building sasmodels model documentation ===============")
+                smdocbuild = subprocess.call(["make", "-C", SASMODELS_DOCPATH, "html"])
+        else:
+            # if not available warning message
+            print("== !!WARNING!! sasmodels directory not found. Cannot build model docs. ==")
+
+        #Now build sasview (+sasmodels) docs
         sys.path.append("docs/sphinx-docs")
         import build_sphinx
         build_sphinx.rebuild()
@@ -207,6 +225,7 @@ package_data["sas.sascalc.dataloader.readers"] = [
 packages.extend(["sas.sascalc.dataloader", "sas.sascalc.dataloader.readers",
                  "sas.sascalc.dataloader.readers.schema"])
 
+
 # sas.sascalc.calculator
 gen_dir = os.path.join("src", "sas", "sascalc", "calculator", "c_extensions")
 package_dir["sas.sascalc.calculator.core"] = gen_dir
@@ -236,6 +255,7 @@ ext_modules.append(Extension("sas.sascalc.pr.core.pr_inversion",
                              include_dirs=[],
                              ))
 
+
 # sas.sascalc.file_converter
 mydir = os.path.join("src", "sas", "sascalc", "file_converter", "c_ext")
 package_dir["sas.sascalc.file_converter.core"] = mydir
@@ -251,6 +271,7 @@ ext_modules.append(Extension("sas.sascalc.file_converter.core.bsl_loader",
 # sas.sascalc.corfunc
 package_dir["sas.sascalc.corfunc"] = os.path.join(
     "src", "sas", "sascalc", "corfunc")
+
 packages.extend(["sas.sascalc.corfunc"])
 
 # sas.sascalc.fit

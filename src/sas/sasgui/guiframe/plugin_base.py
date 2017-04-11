@@ -160,7 +160,7 @@ class PluginBase(object):
         """
         Sets default frame config
         """
-        if self.frame != None:
+        if self.frame is not None:
             self.frame.EnableCloseButton(False)
             self.frame.Show(False)
 
@@ -229,14 +229,14 @@ class PluginBase(object):
         """
         old_frame = None
         old_persp = self.parent.get_current_perspective()
-        if old_persp != None:
+        if old_persp is not None:
             old_frame = old_persp.get_frame()
         self.parent.check_multimode(self)
         self.parent.set_current_perspective(self)
         self.parent.set_perspective(self.perspective)
 
-        if self.frame != None:
-            if old_frame != None:
+        if self.frame is not None:
+            if old_frame is not None:
                 pos_x, pos_y = old_frame.GetPositionTuple()
                 self.frame.SetPosition((pos_x, pos_y))
             if not self.frame.IsShown():

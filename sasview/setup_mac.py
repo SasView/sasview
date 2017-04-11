@@ -59,7 +59,7 @@ for item in lib_locs:
     libxml_path_test = '%s/libxml2.2.dylib' % item
     if os.path.isfile(libxml_path_test):
         libxml_path = libxml_path_test
-if libxml_path == None:
+if libxml_path is None:
     raise RuntimeError, "Could not find libxml2 on the system"
 
 APP = ['sasview.py']
