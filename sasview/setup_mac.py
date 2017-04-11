@@ -50,6 +50,8 @@ DATA_FILES += guiframe.data_files()
 #CANSAxml reader data files
 RESOURCES_FILES.append(os.path.join(sas.sascalc.dataloader.readers.get_data_path(),'defaults.json'))
 
+DATA_FILES.append('logging.ini')
+
 # Locate libxml2 library
 lib_locs = ['/usr/local/lib', '/usr/lib']
 libxml_path = None
