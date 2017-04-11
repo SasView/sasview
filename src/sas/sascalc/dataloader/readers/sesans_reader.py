@@ -165,7 +165,7 @@ class Reader:
         return None
 
     def _unit_conversion(self, value, value_unit, default_unit):
-        if has_converter == True and value_unit != default_unit:
+        if has_converter and value_unit != default_unit:
             data_conv_q = Converter(value_unit)
             value = data_conv_q(value, units=default_unit)
             new_unit = default_unit

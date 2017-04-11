@@ -64,7 +64,7 @@ def smear_selection(data, model = None):
         if np.size(data.dx[data.dx <= 0]) > 0:
             raise ValueError('one or more of your dx values are negative, please check the data file!')
 
-    if _found_sesans == True:
+    if _found_sesans:
         #Pre-compute the Hankel matrix (H)
         qmax, qunits = data.sample.zacceptance
         SElength = Converter(data._xunit)(data.x, "A")
@@ -83,7 +83,7 @@ def smear_selection(data, model = None):
             #print "_found_resolution",_found_resolution
             #print "data1D.dx[0]",data1D.dx[0],data1D.dxl[0]
     # If we found resolution smearing data, return a QSmearer
-    if _found_resolution == True:
+    if _found_resolution:
          return pinhole_smear(data, model)
 
     # Look for slit smearing data
@@ -106,7 +106,7 @@ def smear_selection(data, model = None):
                 _found_resolution = False
                 break
     # If we found slit smearing data, return a slit smearer
-    if _found_slit == True:
+    if _found_slit:
         return slit_smear(data, model)
     return None
 

@@ -61,12 +61,12 @@ class Reader(object):
                 data_conv_q = None
                 data_conv_i = None
                 
-                if has_converter == True and output.x_unit != '1/A':
+                if has_converter and output.x_unit != '1/A':
                     data_conv_q = Converter('1/A')
                     # Test it
                     data_conv_q(1.0, output.x_unit)
                     
-                if has_converter == True and output.y_unit != '1/cm':
+                if has_converter and output.y_unit != '1/cm':
                     data_conv_i = Converter('1/cm')
                     # Test it
                     data_conv_i(1.0, output.y_unit)

@@ -68,12 +68,12 @@ class Reader:
                 data_conv_q = None
                 data_conv_i = None
                 
-                if has_converter == True and output.x_unit != '1/A':
+                if has_converter and output.x_unit != '1/A':
                     data_conv_q = Converter('1/A')
                     # Test it
                     data_conv_q(1.0, output.x_unit)
                     
-                if has_converter == True and output.y_unit != '1/cm':
+                if has_converter and output.y_unit != '1/cm':
                     data_conv_i = Converter('1/cm')
                     # Test it
                     data_conv_i(1.0, output.y_unit)
@@ -81,14 +81,14 @@ class Reader:
                 for line in lines:
                     
                     # Information line 1
-                    if is_info == True:
+                    if is_info:
                         is_info = False
                         line_toks = line.split()
                         
                         # Wavelength in Angstrom
                         try:
                             value = float(line_toks[1])
-                            if has_converter == True and \
+                            if has_converter and \
                                 output.source.wavelength_unit != 'A':
                                 conv = Converter('A')
                                 output.source.wavelength = conv(value,
@@ -103,7 +103,7 @@ class Reader:
                         # Distance in meters
                         try:
                             value = float(line_toks[3])
-                            if has_converter == True and \
+                            if has_converter and \
                                 detector.distance_unit != 'm':
                                 conv = Converter('m')
                                 detector.distance = conv(value,
@@ -124,7 +124,7 @@ class Reader:
                         # Thickness in mm
                         try:
                             value = float(line_toks[5])
-                            if has_converter == True and \
+                            if has_converter and \
                                 output.sample.thickness_unit != 'cm':
                                 conv = Converter('cm')
                                 output.sample.thickness = conv(value,
@@ -141,7 +141,7 @@ class Reader:
                         is_info = True
                         
                     # Find center info line
-                    if is_center == True:
+                    if is_center:
                         is_center = False
                         line_toks = line.split()
                         # Center in bin number
@@ -149,7 +149,7 @@ class Reader:
                         center_y = float(line_toks[1])
                         
                         # Bin size
-                        if has_converter == True and \
+                        if has_converter and \
                             detector.pixel_size_unit != 'mm':
                             conv = Converter('mm')
                             detector.pixel_size.x = conv(5.0,
@@ -162,7 +162,7 @@ class Reader:
                         
                         # Store beam center in distance units
                         # Det 640 x 640 mm
-                        if has_converter == True and \
+                        if has_converter and \
                             detector.beam_center_unit != 'mm':
                             conv = Converter('mm')
                             detector.beam_center.x = conv(center_x * 5.0,
@@ -186,7 +186,7 @@ class Reader:
                         is_center = True
                         
                     # Parse the data
-                    if is_data_started == True:
+                    if is_data_started:
                         toks = line.split()
 
                         try:

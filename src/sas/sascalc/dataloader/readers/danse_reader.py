@@ -86,12 +86,12 @@ class Reader:
             data_conv_q = None
             data_conv_i = None
             
-            if has_converter == True and output.Q_unit != '1/A':
+            if has_converter and output.Q_unit != '1/A':
                 data_conv_q = Converter('1/A')
                 # Test it
                 data_conv_q(1.0, output.Q_unit)
                 
-            if has_converter == True and output.I_unit != '1/cm':
+            if has_converter and output.I_unit != '1/cm':
                 data_conv_i = Converter('1/cm')
                 # Test it
                 data_conv_i(1.0, output.I_unit)
@@ -161,7 +161,7 @@ class Reader:
                 theta = (i_x - center_x + 1) * pixel / distance / 100.0
                 qx = 4.0 * math.pi / wavelength * math.sin(theta / 2.0)
                 
-                if has_converter == True and output.Q_unit != '1/A':
+                if has_converter and output.Q_unit != '1/A':
                     qx = data_conv_q(qx, units=output.Q_unit)
                 
                 x_vals.append(qx)
@@ -176,7 +176,7 @@ class Reader:
                 theta = (i_y - center_y + 1) * pixel / distance / 100.0
                 qy = 4.0 * math.pi / wavelength * math.sin(theta/2.0)
                 
-                if has_converter == True and output.Q_unit != '1/A':
+                if has_converter and output.Q_unit != '1/A':
                     qy = data_conv_q(qy, units=output.Q_unit)
                 
                 y_vals.append(qy)
@@ -212,20 +212,20 @@ class Reader:
                 
             # Store all data
             # Store wavelength
-            if has_converter == True and output.source.wavelength_unit != 'A':
+            if has_converter and output.source.wavelength_unit != 'A':
                 conv = Converter('A')
                 wavelength = conv(wavelength,
                                   units=output.source.wavelength_unit)
             output.source.wavelength = wavelength
                 
             # Store distance
-            if has_converter == True and detector.distance_unit != 'm':
+            if has_converter and detector.distance_unit != 'm':
                 conv = Converter('m')
                 distance = conv(distance, units=detector.distance_unit)
             detector.distance = distance
             
             # Store pixel size
-            if has_converter == True and detector.pixel_size_unit != 'mm':
+            if has_converter and detector.pixel_size_unit != 'mm':
                 conv = Converter('mm')
                 pixel = conv(pixel, units=detector.pixel_size_unit)
             detector.pixel_size.x = pixel
@@ -241,7 +241,7 @@ class Reader:
             ymin = ymin - stepq /2.0
             ymax = ymax + stepq / 2.0
             
-            if has_converter == True and output.Q_unit != '1/A':
+            if has_converter and output.Q_unit != '1/A':
                 xmin = data_conv_q(xmin, units=output.Q_unit)
                 xmax = data_conv_q(xmax, units=output.Q_unit)
                 ymin = data_conv_q(ymin, units=output.Q_unit)
@@ -280,3 +280,4 @@ class Reader:
             return output
         
         return None
+

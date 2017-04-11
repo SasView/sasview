@@ -773,7 +773,7 @@ class Reader(XMLreader):
                 exec "default_unit = self.{0}.{1}".format(save_in, unitname)
                 if local_unit and default_unit and local_unit.lower() != default_unit.lower() \
                         and local_unit.lower() != "none":
-                    if HAS_CONVERTER == True:
+                    if HAS_CONVERTER:
                         # Check local units - bad units raise KeyError
                         data_conv_q = Converter(local_unit)
                         value_unit = default_unit
@@ -1169,7 +1169,7 @@ class Reader(XMLreader):
         written = written | self.write_node( \
             pos, "z", datainfo.sample.position.z,
             {"unit": datainfo.sample.position_unit})
-        if written == True:
+        if written:
             self.append(pos, sample)
 
         ori = self.create_element("orientation")
@@ -1182,7 +1182,7 @@ class Reader(XMLreader):
         written = written | self.write_node( \
             ori, "yaw", datainfo.sample.orientation.z,
             {"unit": datainfo.sample.orientation_unit})
-        if written == True:
+        if written:
             self.append(ori, sample)
 
         for item in datainfo.sample.details:
@@ -1229,7 +1229,7 @@ class Reader(XMLreader):
         written = written | self.write_node( \
             size, "z", datainfo.source.beam_size.z,
             {"unit": datainfo.source.beam_size_unit})
-        if written == True:
+        if written:
             self.append(size, source)
 
         self.write_node(source, "beam_shape", datainfo.source.beam_shape)
@@ -1285,7 +1285,7 @@ class Reader(XMLreader):
                 written = written | self.write_node( \
                     size, "z", aperture.size.z,
                     {"unit": aperture.size_unit})
-                if written == True:
+                if written:
                     self.append(size, apert)
 
                 self.write_node(apert, "distance", aperture.distance,
@@ -1308,7 +1308,7 @@ class Reader(XMLreader):
             written = self.write_node(det, "name", item.name)
             written = written | self.write_node(det, "SDD", item.distance,
                                                 {"unit": item.distance_unit})
-            if written == True:
+            if written:
                 self.append(det, instr)
 
             off = self.create_element("offset")
@@ -1318,7 +1318,7 @@ class Reader(XMLreader):
                                                 {"unit": item.offset_unit})
             written = written | self.write_node(off, "z", item.offset.z,
                                                 {"unit": item.offset_unit})
-            if written == True:
+            if written:
                 self.append(off, det)
 
             ori = self.create_element("orientation")
@@ -1330,7 +1330,7 @@ class Reader(XMLreader):
             written = written | self.write_node(ori, "yaw",
                                                 item.orientation.z,
                                                 {"unit": item.orientation_unit})
-            if written == True:
+            if written:
                 self.append(ori, det)
 
             center = self.create_element("beam_center")
@@ -1342,7 +1342,7 @@ class Reader(XMLreader):
             written = written | self.write_node(center, "z",
                                                 item.beam_center.z,
                                                 {"unit": item.beam_center_unit})
-            if written == True:
+            if written:
                 self.append(center, det)
 
             pix = self.create_element("pixel_size")
@@ -1352,7 +1352,7 @@ class Reader(XMLreader):
                                                 {"unit": item.pixel_size_unit})
             written = written | self.write_node(pix, "z", item.pixel_size.z,
                                                 {"unit": item.pixel_size_unit})
-            if written == True:
+            if written:
                 self.append(pix, det)
             self.write_node(det, "slit_length", item.slit_length,
                 {"unit": item.slit_length_unit})
@@ -1464,7 +1464,7 @@ class Reader(XMLreader):
                 local_unit = None
                 exec "local_unit = storage.%s_unit" % toks[0]
                 if local_unit is not None and units.lower() != local_unit.lower():
-                    if HAS_CONVERTER == True:
+                    if HAS_CONVERTER:
                         try:
                             conv = Converter(units)
                             exec "storage.%s = %g" % \
