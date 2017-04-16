@@ -352,9 +352,9 @@ class PointInteractor(_BaseInteractor):
         """
             Draw the new roughness on the graph.
         """
-        if center_x != None:
+        if center_x is not None:
             self.x = center_x
-        if center_y != None:
+        if center_y is not None:
             self.y = center_y
         self.center_marker.set(xdata=[self.x], ydata=[self.y])
         self.center.set(xdata=[self.x], ydata=[self.y])
@@ -489,13 +489,13 @@ class VerticalDoubleLine(_BaseInteractor):
         :param center: provided x, y  coordinates of the center point
         """
         # # save the new height, witdh of the rectangle if given as a param
-        if width != None:
+        if width is not None:
             self.half_width = width
-        if height != None:
+        if height is not None:
             self.half_height = height
         # # If new  center coordinates are given draw the rectangle
         # #given these value
-        if center != None:
+        if center is not None:
             self.center_x = center.x
             self.center_y = center.y
             self.x1 = self.half_width + self.center_x
@@ -510,13 +510,13 @@ class VerticalDoubleLine(_BaseInteractor):
                                ydata=[self.y1, self.y2])
             return
         # # if x1, y1, y2, y3 are given draw the rectangle with this value
-        if x1 != None:
+        if x1 is not None:
             self.x1 = x1
-        if x2 != None:
+        if x2 is not None:
             self.x2 = x2
-        if y1 != None:
+        if y1 is not None:
             self.y1 = y1
-        if y2 != None:
+        if y2 is not None:
             self.y2 = y2
         # # Draw 2 vertical lines and a marker
         self.right_marker.set(xdata=[self.x1], ydata=[self.center_y])
@@ -656,13 +656,13 @@ class HorizontalDoubleLine(_BaseInteractor):
         :param center: provided x, y  coordinates of the center point
         """
         # # save the new height, witdh of the rectangle if given as a param
-        if width != None:
+        if width is not None:
             self.half_width = width
-        if height != None:
+        if height is not None:
             self.half_height = height
         # # If new  center coordinates are given draw the rectangle
         # #given these value
-        if center != None:
+        if center is not None:
             self.center_x = center.x
             self.center_y = center.y
             self.x1 = self.half_width + self.center_x
@@ -678,13 +678,13 @@ class HorizontalDoubleLine(_BaseInteractor):
                                  ydata=[self.y2, self.y2])
             return
         # # if x1, y1, y2, y3 are given draw the rectangle with this value
-        if x1 != None:
+        if x1 is not None:
             self.x1 = x1
-        if x2 != None:
+        if x2 is not None:
             self.x2 = x2
-        if y1 != None:
+        if y1 is not None:
             self.y1 = y1
-        if y2 != None:
+        if y2 is not None:
             self.y2 = y2
         # # Draw 2 vertical lines and a marker
         self.top_marker.set(xdata=[self.center_x], ydata=[self.y1])

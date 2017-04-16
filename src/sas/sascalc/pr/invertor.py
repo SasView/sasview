@@ -161,11 +161,11 @@ class Invertor(Cinvertor):
                 raise ValueError, msg
             return self.set_dmax(value)
         elif name == 'q_min':
-            if value == None:
+            if value is None:
                 return self.set_qmin(-1.0)
             return self.set_qmin(value)
         elif name == 'q_max':
-            if value == None:
+            if value is None:
                 return self.set_qmax(-1.0)
             return self.set_qmax(value)
         elif name == 'alpha':
@@ -394,9 +394,9 @@ class Invertor(Cinvertor):
         """
         Check q-value against user-defined range
         """
-        if not self.q_min == None and q < self.q_min:
+        if self.q_min is not None and q < self.q_min:
             return False
-        if not self.q_max == None and q > self.q_max:
+        if self.q_max is not None and q > self.q_max:
             return False
         return True
 
@@ -657,7 +657,7 @@ class Invertor(Cinvertor):
         else:
             file.write("#has_bck=0\n")
         file.write("#alpha_estimate=%g\n" % self.suggested_alpha)
-        if not self.out == None:
+        if self.out is not None:
             if len(self.out) == len(self.cov):
                 for i in range(len(self.out)):
                     file.write("#C_%i=%s+-%s\n" % (i, str(self.out[i]),

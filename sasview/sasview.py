@@ -1,26 +1,25 @@
+# -*- coding: utf-8 -*-
 """
 Base module for loading and running the main SasView application.
 """
 ################################################################################
-#This software was developed by the University of Tennessee as part of the
-#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation.
+# This software was developed by the University of Tennessee as part of the
+# Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+# project funded by the US National Science Foundation.
 #
-#See the license text in license.txt
+# See the license text in license.txt
 #
-#copyright 2009, University of Tennessee
+# copyright 2009, University of Tennessee
 ################################################################################
 import os
+import os.path
 import sys
-import logging
-import logging.config
 import traceback
 
-logger = logging.getLogger(__name__)
-if not logger.root.handlers:
-    LOGGER_CONFIG_FILE = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.ini')
-    logging.config.fileConfig(LOGGER_CONFIG_FILE, disable_existing_loggers=False)
-    logging.captureWarnings(True)
+from sas.sasview.logger_config import SetupLogger
+
+logger = SetupLogger(__name__).config_production()
+
 
 # Log the start of the session
 logger.info(" --- SasView session started ---")
@@ -54,11 +53,11 @@ except:
 
 import wxcruft
 wxcruft.call_later_fix()
-#wxcruft.trace_new_id()
+# wxcruft.trace_new_id()
 
-#Always use private .matplotlib setup to avoid conflicts with other
-#uses of matplotlib
-#Have to check if .sasview exists first
+# Always use private .matplotlib setup to avoid conflicts with other
+# uses of matplotlib
+# Have to check if .sasview exists first
 sasdir = os.path.join(os.path.expanduser("~"),'.sasview')
 if not os.path.exists(sasdir):
     os.mkdir(sasdir)
@@ -71,8 +70,7 @@ sys.setdefaultencoding("iso-8859-1")
 from sas.sasgui.guiframe import gui_manager
 from sas.sasgui.guiframe.gui_style import GUIFRAME
 from welcome_panel import WelcomePanel
-# For py2exe, import config here
-import local_config
+
 PLUGIN_MODEL_DIR = 'plugin_models'
 APP_NAME = 'SasView'
 
@@ -86,7 +84,7 @@ class SasView():
     def __init__(self):
         """
         """
-        #from gui_manager import ViewApp
+        # from gui_manager import ViewApp
         self.gui = gui_manager.SasViewApp(0)
         # Set the application manager for the GUI
         self.gui.set_manager(self)
@@ -115,7 +113,7 @@ class SasView():
             logger.error("%s: could not find P(r) plug-in module"% APP_NAME)
             logger.error(traceback.format_exc())
 
-        #Invariant perspective
+        # Invariant perspective
         try:
             import sas.sasgui.perspectives.invariant as module
             invariant_plug = module.Plugin()
@@ -133,7 +131,7 @@ class SasView():
         except:
             logger.error("Unable to load corfunc module")
 
-        #Calculator perspective
+        # Calculator perspective
         try:
             import sas.sasgui.perspectives.calculator as module
             calculator_plug = module.Plugin()
@@ -152,7 +150,6 @@ class SasView():
             logger.error("%s: could not find File Converter plug-in module"% \
                                                         APP_NAME)
             logger.error(traceback.format_exc())
-
 
         # Add welcome page
         self.gui.set_welcome_panel(WelcomePanel)
@@ -173,7 +170,7 @@ def run():
     freeze_support()
     if len(sys.argv) > 1:
         ## Run sasview as an interactive python interpreter
-        #if sys.argv[1] == "-i":
+        # if sys.argv[1] == "-i":
         #    sys.argv = ["ipython", "--pylab"]
         #    from IPython import start_ipython
         #    sys.exit(start_ipython())
@@ -186,6 +183,7 @@ def run():
             runpy.run_module(thing_to_run, run_name="__main__")
     else:
         SasView()
+
 
 if __name__ == "__main__":
     run()

@@ -1,10 +1,10 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# This allows you to build sasview using vagrant 
+# This allows you to build sasview using vagrant
 # for the moment you can build Ubuntu on any platform supported by vagrant
 # (Linux, Mac, Windows)
-# You will need VirtualBox as well. 
+# You will need VirtualBox as well.
 # Download pages:
 # http://www.vagrantup.com/downloads
 # https://www.virtualbox.org/wiki/Downloads
@@ -20,7 +20,7 @@ Vagrant.configure(2) do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
-  config.vm.box = "ubuntu/trusty64"
+  config.vm.box = "ubuntu/xenial64"
   #config.vm.box = "fedora19"
   #config.vm.box_url = "https://dl.dropboxusercontent.com/u/86066173/fedora-19.box"
   #config.vm.box = "fedora20"
@@ -39,5 +39,9 @@ Vagrant.configure(2) do |config|
      vb.cpus = "1"
   end
   #
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+  config.vm.synced_folder ".", "/sasview-docs-test/sasview", disabled: false
+  config.vm.synced_folder "../sasmodels", "/sasview-docs-test/sasmodels", disabled: false
+
   config.vm.provision :shell, :path => "Vagrantprovision.sh"
 end

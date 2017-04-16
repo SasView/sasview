@@ -239,7 +239,7 @@ class XMLreader():
 
         :param name: The name of the element to be created
         """
-        if attrib == None:
+        if attrib is None:
             attrib = {}
         return etree.Element(name, attrib, nsmap)
 
@@ -298,7 +298,7 @@ class XMLreader():
         :param attrib: A dictionary of attribute names to attribute values
         """
         text = str(text)
-        if attrib == None:
+        if attrib is None:
             attrib = {}
         elem = E(elementname, attrib, text)
         parent = parent.append(elem)
