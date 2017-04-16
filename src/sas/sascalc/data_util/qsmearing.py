@@ -41,9 +41,9 @@ def smear_selection(data, model = None):
     # object, just return None
     # This checks for 2D data (does not throw exception because fail is common)
     if  data.__class__.__name__ not in ['Data1D', 'Theory1D']:
-        if data == None:
+        if data is None:
             return None
-        elif data.dqx_data == None or data.dqy_data == None:
+        elif data.dqx_data is None or data.dqy_data is None:
             return None
         return PySmear2D(data)
     # This checks for 1D data with smearing info in the data itself (again, fail is likely; no exceptions)

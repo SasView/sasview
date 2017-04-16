@@ -165,9 +165,9 @@ class Reader:
                     qx = data_conv_q(qx, units=output.Q_unit)
                 
                 x_vals.append(qx)
-                if xmin == None or qx < xmin:
+                if xmin is None or qx < xmin:
                     xmin = qx
-                if xmax == None or qx > xmax:
+                if xmax is None or qx > xmax:
                     xmax = qx
             
             ymin = None
@@ -180,9 +180,9 @@ class Reader:
                     qy = data_conv_q(qy, units=output.Q_unit)
                 
                 y_vals.append(qy)
-                if ymin == None or qy < ymin:
+                if ymin is None or qy < ymin:
                     ymin = qy
-                if ymax == None or qy > ymax:
+                if ymax is None or qy > ymax:
                     ymax = qy
             
             # Store the data in the 2D array

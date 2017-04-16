@@ -88,7 +88,7 @@ def split_list(separator, mylist, n=0):
     """
     list = []
     for item in mylist:
-        if re.search(separator,item)!= None:
+        if re.search(separator,item)is not None:
             if n > 0:
                 word = re.split(separator, item, int(n))
             else:
