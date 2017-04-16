@@ -732,8 +732,8 @@ class Ring(object):
         qy_data = data2D.qy_data[np.isfinite(data2D.data)]
 
         # Set space for 1d outputs
-    phi_bins = np.zeros(self.nbins_phi)
-    phi_counts = np.zeros(self.nbins_phi)
+        phi_bins = np.zeros(self.nbins_phi)
+        phi_counts = np.zeros(self.nbins_phi)
         phi_values = np.zeros(self.nbins_phi)
         phi_err = np.zeros(self.nbins_phi)
 
