@@ -96,7 +96,7 @@ class GenSAS(BaseComponent):
         Set the volume of a pixel in (A^3) unit
         :Param volume: pixel volume [float]
         """
-        if self.data_vol == None:
+        if self.data_vol is None:
             raise
         self.data_vol = volume
 
@@ -118,7 +118,7 @@ class GenSAS(BaseComponent):
         pos_y = self.data_y
         pos_z = self.data_z
         len_x = len(pos_x)
-        if self.is_avg == None:
+        if self.is_avg is None:
             len_x *= -1
             pos_x, pos_y, pos_z = transform_center(pos_x, pos_y, pos_z)
         len_q = len(x)
@@ -256,11 +256,11 @@ class OMF2SLD(object):
         self.mz = omfdata.mz
         self.sld_n = np.zeros(length)
 
-        if omfdata.mx == None:
+        if omfdata.mx is None:
             self.mx = np.zeros(length)
-        if omfdata.my == None:
+        if omfdata.my is None:
             self.my = np.zeros(length)
-        if omfdata.mz == None:
+        if omfdata.mz is None:
             self.mz = np.zeros(length)
 
         self._check_data_length(length)
@@ -690,7 +690,7 @@ class SLDReader(object):
             output.filename = os.path.basename(path)
             output.set_pix_type('pixel')
             output.set_pixel_symbols('pixel')
-            if vol_pix != None:
+            if vol_pix is not None:
                 output.set_pixel_volumes(vol_pix)
             return output
         except:
@@ -702,9 +702,9 @@ class SLDReader(object):
         :Param path: file path
         :Param data: MagSLD data object
         """
-        if path == None:
+        if path is None:
             raise ValueError, "Missing the file path."
-        if data == None:
+        if data is None:
             raise ValueError, "Missing the data to save."
         x_val = data.pos_x
         y_val = data.pos_y
@@ -712,10 +712,10 @@ class SLDReader(object):
         vol_pix = data.vol_pix
         length = len(x_val)
         sld_n = data.sld_n
-        if sld_n == None:
+        if sld_n is None:
             sld_n = np.zeros(length)
         sld_mx = data.sld_mx
-        if sld_mx == None:
+        if sld_mx is None:
             sld_mx = np.zeros(length)
             sld_my = np.zeros(length)
             sld_mz = np.zeros(length)
@@ -866,7 +866,7 @@ class MagSLD(object):
         self.sld_phi = None
         self.sld_theta = None
         self.pix_symbol = None
-        if sld_mx != None and sld_my != None and sld_mz != None:
+        if sld_mx is not None and sld_my is not None and sld_mz is not None:
             self.set_sldms(sld_mx, sld_my, sld_mz)
         self.set_nodes()
 
@@ -934,7 +934,7 @@ class MagSLD(object):
         Set pixel
         :Params pixel: str; pixel or atomic symbol, or array of strings
         """
-        if self.sld_n == None:
+        if self.sld_n is None:
             return
         if symbol.__class__.__name__ == 'str':
             self.pix_symbol = np.repeat(symbol, len(self.sld_n))
@@ -946,7 +946,7 @@ class MagSLD(object):
         Set pixel volumes
         :Params pixel: str; pixel or atomic symbol, or array of strings
         """
-        if self.sld_n == None:
+        if self.sld_n is None:
             return
         if vol.__class__.__name__ == 'ndarray':
             self.vol_pix = vol

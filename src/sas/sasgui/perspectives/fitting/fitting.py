@@ -301,7 +301,7 @@ class Plugin(PluginBase):
         """
         Make new model
         """
-        if self.new_model_frame != None:
+        if self.new_model_frame is not None:
             self.new_model_frame.Show(False)
             self.new_model_frame.Show(True)
         else:
@@ -385,7 +385,7 @@ class Plugin(PluginBase):
         """
         help for setting list of the edit model menu labels
         """
-        if menu == None:
+        if menu is None:
             menu = self.edit_custom_model
         list_fnames = os.listdir(models.find_plugins_dir())
         list_fnames.sort()
@@ -440,7 +440,7 @@ class Plugin(PluginBase):
             msg = "%s already opened\n" % str(page.window_caption)
             wx.PostEvent(self.parent, StatusEvent(status=msg))
 
-        if page != None:
+        if page is not None:
             return set_focus_page(page)
         if caption == "Const & Simul Fit":
             self.sim_page = self.fit_panel.add_sim_page(caption=caption)
@@ -633,7 +633,7 @@ class Plugin(PluginBase):
             # Load fitting state
             state = self.temp_state[self.state_index]
             #panel state should have model selection to set_state
-            if state.formfactorcombobox != None:
+            if state.formfactorcombobox is not None:
                 #set state
                 data = self.parent.create_gui_data(state.data)
                 data.group_id = state.data.group_id
@@ -1015,7 +1015,7 @@ class Plugin(PluginBase):
                 wx.PostEvent(self.parent, evt)
                 return False
         ## If a thread is already started, stop it
-        #if self.calc_fit!= None and self.calc_fit.isrunning():
+        #if self.calc_fitis not None and self.calc_fit.isrunning():
         #    self.calc_fit.stop()
         msg = "Fitting is in progress..."
         wx.PostEvent(self.parent, StatusEvent(status=msg, type="progress"))
@@ -1105,7 +1105,7 @@ class Plugin(PluginBase):
         try:
             page = self.fit_panel.add_empty_page()
             # add data associated to the page created
-            if page != None:
+            if page is not None:
                 evt = StatusEvent(status="Page Created", info="info")
                 wx.PostEvent(self.parent, evt)
             else:
@@ -1124,7 +1124,7 @@ class Plugin(PluginBase):
         """
         page = self.fit_panel.set_data(data)
         # page could be None when loading state files
-        if page == None:
+        if page is None:
             return page
         #append Data1D to the panel containing its theory
         #if theory already plotted
@@ -1192,7 +1192,7 @@ class Plugin(PluginBase):
         unschedule or schedule all fitproblem to be fit
         """
         # case that uid is not specified
-        if uid == None:
+        if uid is None:
             for page_id in self.page_finder.keys():
                 self.page_finder[page_id].schedule_tofit(value)
         # when uid is given
@@ -1215,7 +1215,7 @@ class Plugin(PluginBase):
         if len(param) > 0:
             for item in param:
                 ## check if constraint
-                if item[0] != None and item[1] != None:
+                if item[0] is not None and item[1] is not None:
                     listOfConstraint.append((item[0], item[1]))
         new_model = model
         fitter.set_model(new_model, fit_id, pars, data=data,
@@ -1230,7 +1230,7 @@ class Plugin(PluginBase):
         added to self.page_finder
         """
         panel = self.plot_panel
-        if panel == None:
+        if panel is None:
             raise ValueError, "Fitting:_onSelect: NonType panel"
         Plugin.on_perspective(self, event=event)
         self.select_data(panel)
@@ -1334,7 +1334,7 @@ class Plugin(PluginBase):
                         param_list.remove(param)
                 if not correct_result or res.fitness is None or \
                     not np.isfinite(res.fitness) or \
-                        np.any(res.pvec == None) or not \
+                        np.any(res.pvec is None) or not \
                         np.all(np.isfinite(res.pvec)):
                     data_name = str(None)
                     if data is not None:
@@ -1456,7 +1456,7 @@ class Plugin(PluginBase):
         cell.label = data.name
         cell.value = index
 
-        if theory_data != None:
+        if theory_data is not None:
             #Suucessful fit
             theory_data.id = wx.NewId()
             theory_data.name = model.name + "[%s]" % str(data.name)
@@ -1525,7 +1525,7 @@ class Plugin(PluginBase):
                 fit_msg = res.mesg
                 if res.fitness is None or \
                     not np.isfinite(res.fitness) or \
-                        np.any(res.pvec == None) or \
+                        np.any(res.pvec is None) or \
                     not np.all(np.isfinite(res.pvec)):
                     fit_msg += "\nFitting did not converge!!!"
                     wx.CallAfter(self._update_fit_button, page_id)
@@ -1543,7 +1543,7 @@ class Plugin(PluginBase):
                     # Make sure we got all results
                     #(CallAfter is important to MAC)
                     try:
-                        #if res != None:
+                        #if res is not None:
                         wx.CallAfter(cpage.onsetValues, res.fitness,
                                      res.param_list,
                                      pvec, stderr)
@@ -1586,7 +1586,7 @@ class Plugin(PluginBase):
         Set batch_reset_flag
         """
         event.Skip()
-        if self.menu1 == None:
+        if self.menu1 is None:
             return
         menu_item = self.menu1.FindItemById(self.id_reset_flag)
         flag = menu_item.IsChecked()
@@ -1645,7 +1645,7 @@ class Plugin(PluginBase):
         qmax = evt.qmax
         caption = evt.caption
         enable_smearer = evt.enable_smearer
-        if model == None:
+        if model is None:
             return
         if uid not in self.page_finder.keys():
             return
@@ -1697,7 +1697,7 @@ class Plugin(PluginBase):
         _xaxis, _xunit = data.get_xaxis()
         new_plot.title = data.name
         new_plot.group_id = data.group_id
-        if new_plot.group_id == None:
+        if new_plot.group_id is None:
             new_plot.group_id = data.group_id
         new_plot.id = data_id
         # Find if this theory was already plotted and replace that plot given
@@ -2001,32 +2001,32 @@ class Plugin(PluginBase):
         # default chisqr
         chisqr = None
         #to compute chisq make sure data has valid data
-        # return None if data == None
-        if not check_data_validity(data_copy) or data_copy == None:
+        # return None if data is None
+        if not check_data_validity(data_copy) or data_copy is None:
             return chisqr
 
         # Get data: data I, theory I, and data dI in order
         if data_copy.__class__.__name__ == "Data2D":
-            if index == None:
+            if index is None:
                 index = np.ones(len(data_copy.data), dtype=bool)
-            if weight != None:
+            if weight is not None:
                 data_copy.err_data = weight
             # get rid of zero error points
             index = index & (data_copy.err_data != 0)
             index = index & (np.isfinite(data_copy.data))
             fn = data_copy.data[index]
             theory_data = self.page_finder[page_id].get_theory_data(fid=data_copy.id)
-            if theory_data == None:
+            if theory_data is None:
                 return chisqr
             gn = theory_data.data[index]
             en = data_copy.err_data[index]
         else:
             # 1 d theory from model_thread is only in the range of index
-            if index == None:
+            if index is None:
                 index = np.ones(len(data_copy.y), dtype=bool)
-            if weight != None:
+            if weight is not None:
                 data_copy.dy = weight
-            if data_copy.dy == None or data_copy.dy == []:
+            if data_copy.dy is None or data_copy.dy == []:
                 dy = np.ones(len(data_copy.y))
             else:
                 ## Set consistently w/AbstractFitengine:
@@ -2036,7 +2036,7 @@ class Plugin(PluginBase):
             fn = data_copy.y[index]
 
             theory_data = self.page_finder[page_id].get_theory_data(fid=data_copy.id)
-            if theory_data == None:
+            if theory_data is None:
                 return chisqr
             gn = theory_data.y
             en = dy[index]
@@ -2079,7 +2079,7 @@ class Plugin(PluginBase):
             fn = data_copy.data
             theory_data = self.page_finder[page_id].get_theory_data(fid=data_copy.id)
             gn = theory_data.data
-            if weight == None:
+            if weight is None:
                 en = data_copy.err_data
             else:
                 en = weight
@@ -2100,10 +2100,10 @@ class Plugin(PluginBase):
                 return
         else:
             # 1 d theory from model_thread is only in the range of index
-            if data_copy.dy == None or data_copy.dy == []:
+            if data_copy.dy is None or data_copy.dy == []:
                 dy = np.ones(len(data_copy.y))
             else:
-                if weight == None:
+                if weight is None:
                     dy = np.ones(len(data_copy.y))
                 ## Set consitently w/AbstractFitengine:
                 ## But this should be corrected later.
@@ -2141,7 +2141,7 @@ class Plugin(PluginBase):
         new_plot.id = "res" + str(data_copy.id) + str(theory_name)
         ##group_id specify on which panel to plot this data
         group_id = self.page_finder[page_id].get_graph_id()
-        if group_id == None:
+        if group_id is None:
             group_id = data.group_id
         new_plot.group_id = "res" + str(group_id)
         #new_plot.is_data = True

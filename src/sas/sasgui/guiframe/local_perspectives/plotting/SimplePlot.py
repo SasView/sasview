@@ -86,7 +86,7 @@ class SimplePlotPanel(PlotPanel):
             pos_x, pos_y = self.toolbar.GetPositionTuple()
             pos = (pos_x, pos_y + 5)
         self.PopupMenu(slicerpop, pos)
-        if self.scale != None:
+        if self.scale is not None:
             self.parent.scale2d = self.scale
 
     def on_grid_onoff(self, event):
@@ -105,7 +105,7 @@ class SimplePlotPanel(PlotPanel):
         if event.button == 1:
             self.leftdown = True
             ax = event.inaxes
-            if ax != None:
+            if ax is not None:
                 self.xInit, self.yInit = event.xdata, event.ydata
                 try:
                     pos_x = float(event.xdata)  # / size_x
@@ -122,7 +122,7 @@ class SimplePlotPanel(PlotPanel):
         On response of the resize of a panel, set axes_visiable False
         """
         self.resizing = False
-        if self.x_size != None:
+        if self.x_size is not None:
             if self.x_size == self.GetSize():
                 self.canvas.set_resizing(self.resizing)
                 return
@@ -160,9 +160,9 @@ class SimplePlotPanel(PlotPanel):
         self.data = plot
         self.plots[plot.name] = plot
         # Axis scales
-        if plot.xtransform != None:
+        if plot.xtransform is not None:
             self.xLabel = plot.xtransform
-        if plot.ytransform != None:
+        if plot.ytransform is not None:
             self.yLabel = plot.ytransform
         # Init graph
         self.graph = Graph()

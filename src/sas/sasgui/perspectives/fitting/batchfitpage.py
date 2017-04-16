@@ -199,10 +199,10 @@ class BatchFitPage(FitPage):
 #         self.state.structurecombobox = self.structurebox.GetCurrentSelection()
 #         self.state.formfactorcombobox = self.formfactorbox.GetCurrentSelection()
 #       
-#         if self.model != None:
+#         if self.model is not None:
 #             self._set_copy_flag(True)
 #             self._set_paste_flag(True)
-#             if self.data != None:
+#             if self.data is not None:
 #                 self._set_bookmark_flag(False)
 #                 self._keep.Enable(False)
 #                 
@@ -224,7 +224,7 @@ class BatchFitPage(FitPage):
 #             self.state.model.name = self.model.name
 # 
 #             
-#         if event != None:
+#         if event is not None:
 #             ## post state to fit panel
 #             new_event = PageInfoEvent(page = self)
 #             wx.PostEvent(self.parent, new_event) 
@@ -253,7 +253,7 @@ class BatchFitPage(FitPage):
 #         self.fitrange = True
 #         is_modified = False
 # 
-#         if self.model != None:           
+#         if self.model is not None:
 #             ##Check the values
 #             self._check_value_enter( self.fittable_param)
 #             self._check_value_enter( self.fixed_param)
@@ -290,7 +290,7 @@ class BatchFitPage(FitPage):
 #                 self.btEditMask.Disable()
 #         else:
 #             #self.btFit.Enable(True)
-#             if self._is_2D() and  self.data != None:
+#             if self._is_2D() and  self.data is not None:
 #                 self.btEditMask.Enable(True)
 # 
 #         if not flag:
@@ -334,7 +334,7 @@ class BatchFitPage(FitPage):
 #             self._keep.Enable(False)
 #             self._set_save_flag(False)
 #         else:
-#             if self.model != None:
+#             if self.model is not None:
 #                 self._set_bookmark_flag(False)
 #                 self._keep.Enable(False)
 #             self._set_save_flag(False)

@@ -23,7 +23,7 @@ PYTHONPATH=../src/ python2  -m sasdataloader.test.utest_averaging DataInfoTests.
 import math
 import numpy as np
 import sys
- 
+
 #from data_info import plottable_2D
 from data_info import Data1D
 
@@ -225,7 +225,7 @@ def get_dq_data(data2D):
         data2D.data)] - dq_overlap
     # def; dqx_data = dq_r dqy_data = dq_phi
     # Convert dq 2D to 1D here
-    dq_data = np.sqrt(dqx_data**2 + dqx_data**2) 
+    dq_data = np.sqrt(dqx_data**2 + dqx_data**2)
     return dq_data
 
 ################################################################################
@@ -601,8 +601,7 @@ class CircularAverage(object):
         if data2D.dqx_data is not None and data2D.dqy_data is not None:
             dq_data = get_dq_data(data2D)
 
-        #q_data_max = np.max(q_data)
-        if len(data2D.q_data) is None:
+        if len(q_data) == 0:
             msg = "Circular averaging: invalid q_data: %g" % data2D.q_data
             raise RuntimeError(msg)
 
@@ -733,8 +732,8 @@ class Ring(object):
         qy_data = data2D.qy_data[np.isfinite(data2D.data)]
 
         # Set space for 1d outputs
-        phi_bins = np.zeros(self.nbins_phi)
-        phi_counts = np.zeros(self.nbins_phi)
+    phi_bins = np.zeros(self.nbins_phi)
+    phi_counts = np.zeros(self.nbins_phi)
         phi_values = np.zeros(self.nbins_phi)
         phi_err = np.zeros(self.nbins_phi)
 
@@ -843,13 +842,13 @@ class _Sector(object):
         # Get the min and max into the region: 0 <= phi < 2Pi
         phi_min = flip_phi(self.phi_min)
         phi_max = flip_phi(self.phi_max)
-        
+
         #  binning object
         if run.lower() == 'phi':
             binning = Binning(self.phi_min, self.phi_max, self.nbins, self.base)
         else:
             binning = Binning(self.r_min, self.r_max, self.nbins, self.base)
-        
+
         for n in range(len(data)):
 
             # q-value at the pixel (j,i)

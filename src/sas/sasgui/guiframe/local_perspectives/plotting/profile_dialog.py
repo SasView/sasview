@@ -43,7 +43,7 @@ class SLDPanel(wx.Dialog):
         kwds["size"] = wx.Size(_STATICBOX_WIDTH, PANEL_SIZE)
         wx.Dialog.__init__(self, parent, id=id, *args, **kwds)
 
-        if data != None:
+        if data is not None:
             #Font size
             kwds = []
             self.SetWindowVariant(variant=FONT_VARIANT)
@@ -283,7 +283,7 @@ class SLDplotpanel(PlotPanel):
         if default_name.count('.') > 0:
             default_name = default_name.split('.')[0]
         default_name += "_out"
-        if self.parent != None:
+        if self.parent is not None:
             # What an ancestor!
             fit_panel = self.parent.parent.parent
             fit_panel._manager.parent.save_data1d(data, default_name)

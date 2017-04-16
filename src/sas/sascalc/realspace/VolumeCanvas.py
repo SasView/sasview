@@ -292,7 +292,7 @@ class VolumeCanvas(BaseComponent):
             @return: string handle for the object
         """
         # If the handle is not provided, create one
-        if id == None:
+        if id is None:
             id = shapeDesc.params["type"]+str(self.shapecount)
          
         # Self the order number
@@ -324,7 +324,7 @@ class VolumeCanvas(BaseComponent):
             @return: string handle for the object
         """
         # If the handle is not provided, create one
-        if id == None:
+        if id is None:
             id = "shape"+str(self.shapecount)
  
         # shapeDesc = ShapeDescriptor(shape.lower())
@@ -662,11 +662,11 @@ class VolumeCanvas(BaseComponent):
         
         # If this is the first simulation call, we need to generate the
         # space points
-        if self.points == None:
+        if self.points is None:
             self._create_modelObject()
             
             # Protect against empty model
-            if self.points == None:
+            if self.points is None:
                 return 0
                
         # Evalute I(q) 
