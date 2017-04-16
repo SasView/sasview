@@ -1719,10 +1719,11 @@ class BasicPage(ScrolledPanel, PanelBase):
     def _threaded_draw_worker(self, threaded_draw_queue):
         while True:
             # Check to see is a manager is running and a calc is running
-            if ((self._manager.calc_1D is not None) and (self._manager.calc_1D.\
-                isrunning() == True)) or ((self._manager.calc_2D is not None)\
-                and (self._manager.calc_2D.isrunning() == True)):
-                # If a manager is running a calculation 
+            if ((self._manager.calc_1D is not None
+                 and self._manager.calc_1D.isrunning()) or
+                (self._manager.calc_2D is not None
+                 and self._manager.calc_2D.isrunning())):
+                # If a manager is running a calculation
                 # then trim the queue
                 if self.threaded_draw_queue.qsize() > 1:
                     for loopIter in range(threaded_draw_queue.qsize() - 1):
@@ -1732,8 +1733,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                 # Otherwise, just run
                 input_variables = threaded_draw_queue.get()
                 self._draw_model_after(input_variables[0], input_variables[1])
-                wx.PostEvent(self._manager.parent, StatusEvent(status = 
-                            "Computation is in progress...", type = "progress"))
+                event = StatusEvent(status="Computation is in progress...",
+                                    type="progress")
+                wx.PostEvent(self._manager.parent, event)
                 threaded_draw_queue.task_done()
 
     def _draw_model_after(self, update_chisqr=True, source='model'):
