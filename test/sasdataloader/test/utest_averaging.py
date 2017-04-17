@@ -2,7 +2,7 @@
 import unittest
 import math
 
-from sas.sascalc.dataloader.loader import  Loader
+from sas.sascalc.dataloader.loader import Loader
 from sas.sascalc.dataloader.manipulations import Ring, CircularAverage, SectorPhi, get_q,reader2D_converter
 
 import numpy as np
@@ -109,7 +109,8 @@ class data_info_tests(unittest.TestCase):
         ##r.nbins_phi = 20
         
         o = r(self.data)
-        answer = Loader().load('ring_testdata.txt')
+        data_list = Loader().load('ring_testdata.txt')
+        answer = data_list[0]
         
         for i in range(r.nbins_phi - 1):
             self.assertAlmostEqual(o.x[i + 1], answer.x[i], 4)

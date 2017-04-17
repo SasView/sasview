@@ -1,11 +1,12 @@
 """
-This is the base file reader class all file readers should inherit from.
+This is the base file reader class most file readers should inherit from.
 All generic functionality required for a file loader/reader is built into this
 class
 """
 
 import os
 import logging
+import numpy as np
 from abc import abstractmethod
 from loader_exceptions import NoKnownLoaderException, FileContentsException,\
     DataReaderException
@@ -18,16 +19,24 @@ logger = logging.getLogger(__name__)
 class FileReader(object):
     # List of Data1D and Data2D objects to be sent back to data_loader
     output = []
-    # Current plottable1D/2D object being loaded in
+    # Current plottable_(1D/2D) object being loaded in
     current_dataset = None
-    # Current DataInfo objecct being loaded in
+    # Current DataInfo object being loaded in
     current_datainfo = None
-    # Wildcards
-    type = ["Text files (*.txt)"]
+    # String to describe the type of data this reader can load
+    type_name = "ASCII"
+    # Wildcards to display
+    type = ["Text files (*.txt|*.TXT)"]
     # List of allowed extensions
     ext = ['.txt']
     # Bypass extension check and try to load anyway
     allow_all = False
+    # Able to import the unit converter
+    has_converter = True
+    # Open file handle
+    f_open = None
+    # Default value of zero
+    _ZERO = 1e-16
 
     def read(self, filepath):
         """
@@ -41,21 +50,31 @@ class FileReader(object):
             if extension in self.ext or self.allow_all:
                 # Try to load the file, but raise an error if unable to.
                 try:
-                    input_f = open(filepath, 'rb')
-                    self.get_file_contents(input_f)
+                    self.unit_converter()
+                    self.f_open = open(filepath, 'rb')
+                    self.get_file_contents()
+                    self.sort_one_d_data()
                 except RuntimeError:
+                    # Reader specific errors
+                    # TODO: Give a specific error.
                     pass
                 except OSError as e:
+                    # If the file cannot be opened
                     msg = "Unable to open file: {}\n".format(filepath)
                     msg += e.message
                     self.handle_error_message(msg)
                 except Exception as e:
-                    self.handle_error_message(e.message)
+                    # Handle any other generic error
+                    # TODO: raise or log?
+                    raise
+                finally:
+                    if not self.f_open.closed:
+                        self.f_open.close()
         else:
             msg = "Unable to find file at: {}\n".format(filepath)
             msg += "Please check your file path and try again."
             self.handle_error_message(msg)
-        # Return a list of parsed entries that dataloader can manage
+        # Return a list of parsed entries that data_loader can manage
         return self.output
 
     def handle_error_message(self, msg):
@@ -78,10 +97,62 @@ class FileReader(object):
                                                     self.current_datainfo)
         self.output.append(data_obj)
 
-    @abstractmethod
-    def get_file_contents(self, contents):
+    def unit_converter(self):
         """
-        All reader classes that inherit from here should implement
-        :param contents: 
+        Generic unit conversion import 
+        """
+        # Check whether we have a converter available
+        self.has_converter = True
+        try:
+            from sas.sascalc.data_util.nxsunit import Converter
+        except:
+            self.has_converter = False
+
+    def sort_one_d_data(self):
+        """
+        Sort 1D data along the X axis for consistency
+        """
+        final_list = []
+        for data in self.output:
+            if isinstance(data, Data1D):
+                ind = np.lexsort((data.y, data.x))
+                data.x = np.asarray([data.x[i] for i in ind])
+                data.y = np.asarray([data.y[i] for i in ind])
+                if data.dx is not None:
+                    data.dx = np.asarray([data.dx[i] for i in ind])
+                if data.dxl is not None:
+                    data.dxl = np.asarray([data.dxl[i] for i in ind])
+                if data.dxw is not None:
+                    data.dxw = np.asarray([data.dxw[i] for i in ind])
+                if data.dy is not None:
+                    data.dy = np.asarray([data.dy[i] for i in ind])
+                if data.lam is not None:
+                    data.lam = np.asarray([data.lam[i] for i in ind])
+                if data.dlam is not None:
+                    data.dlam = np.asarray([data.dlam[i] for i in ind])
+            final_list.append(data)
+        self.output = final_list
+
+    @staticmethod
+    def splitline(line):
+        """
+        Splits a line into pieces based on common delimeters
+        :param line: A single line of text
+        :return: list of values
+        """
+        # Initial try for CSV (split on ,)
+        toks = line.split(',')
+        # Now try SCSV (split on ;)
+        if len(toks) < 2:
+            toks = line.split(';')
+        # Now go for whitespace
+        if len(toks) < 2:
+            toks = line.split()
+        return toks
+
+    @abstractmethod
+    def get_file_contents(self):
+        """
+        All reader classes that inherit from FileReader must implement
         """
         pass
