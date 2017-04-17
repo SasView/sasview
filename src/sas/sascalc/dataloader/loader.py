@@ -24,11 +24,13 @@ import os
 import sys
 import logging
 import time
+import mimetypes
 from zipfile import ZipFile
 from sas.sascalc.data_util.registry import ExtensionRegistry
 # Default readers are defined in the readers sub-module
 import readers
-from loader_exceptions import NoKnownLoaderException, FileContentsException
+from loader_exceptions import NoKnownLoaderException, FileContentsException,\
+    DefaultReaderException
 from readers import ascii_reader
 from readers import cansas_reader
 from readers import cansas_reader_HDF5
@@ -74,23 +76,32 @@ class Registry(ExtensionRegistry):
         try:
             ascii_loader = ascii_reader.Reader()
             return ascii_loader.read(path)
-        except FileContentsException:
-            pass  # try the cansas XML reader
+        except DefaultReaderException:
+            pass  # Loader specific error to try the cansas XML reader
         try:
             cansas_loader = cansas_reader.Reader()
             return cansas_loader.read(path)
+        except DefaultReaderException:
+            pass  # Loader specific error to try the cansas NeXuS reader
         except FileContentsException:
-            pass  # try the cansas NeXuS reader
+            # TODO: Handle errors properly
+            pass
+        except Exception as csr:
+            # TODO: Modify cansas reader to throw DefaultReaderException
+            pass
         try:
             cansas_nexus_loader = cansas_reader_HDF5.Reader()
             return cansas_nexus_loader.read(path)
-        except FileContentsException:
+        except DefaultReaderException:
             logging.errors("No default loader can load the data")
             # No known reader available. Give up and throw an error
             msg = "\n\tUnknown data format: %s.\n\tThe file is not a " % path
             msg += "known format that can be loaded by SasView.\n"
             msg += "Traceback:\n%s" % e.message
             raise NoKnownLoaderException, msg
+        except FileContentsException:
+            # TODO: Handle error(s) properly
+            pass
 
     def find_plugins(self, dir):
         """

@@ -9,7 +9,7 @@ import logging
 import numpy as np
 from abc import abstractmethod
 from loader_exceptions import NoKnownLoaderException, FileContentsException,\
-    DataReaderException
+    DataReaderException, DefaultReaderException
 from data_info import Data1D, Data2D, DataInfo, plottable_1D, plottable_2D,\
     combine_data_info_with_plottable
 
@@ -46,28 +46,24 @@ class FileReader(object):
         """
         if os.path.isfile(filepath):
             basename, extension = os.path.splitext(os.path.basename(filepath))
+            self.extension = extension.lower()
             # If the file type is not allowed, return nothing
-            if extension in self.ext or self.allow_all:
+            if self.extension in self.ext or self.allow_all:
                 # Try to load the file, but raise an error if unable to.
                 try:
-                    self.unit_converter()
+                    self.load_unit_converter()
                     self.f_open = open(filepath, 'rb')
                     self.get_file_contents()
                     self.sort_one_d_data()
-                except RuntimeError:
-                    # Reader specific errors
-                    # TODO: Give a specific error.
-                    pass
+                except FileContentsException as e:
+                    self.handle_error_message(e.message)
                 except OSError as e:
                     # If the file cannot be opened
                     msg = "Unable to open file: {}\n".format(filepath)
                     msg += e.message
                     self.handle_error_message(msg)
-                except Exception as e:
-                    # Handle any other generic error
-                    # TODO: raise or log?
-                    raise
                 finally:
+                    # Close the file handle if it is open
                     if not self.f_open.closed:
                         self.f_open.close()
         else:
@@ -97,7 +93,7 @@ class FileReader(object):
                                                     self.current_datainfo)
         self.output.append(data_obj)
 
-    def unit_converter(self):
+    def load_unit_converter(self):
         """
         Generic unit conversion import 
         """
@@ -132,6 +128,14 @@ class FileReader(object):
                     data.dlam = np.asarray([data.dlam[i] for i in ind])
             final_list.append(data)
         self.output = final_list
+
+    def set_all_to_none(self):
+        """
+        Set all mutable values to None for error handling purposes
+        """
+        self.current_dataset = None
+        self.current_datainfo = None
+        self.output = []
 
     @staticmethod
     def splitline(line):

@@ -16,6 +16,8 @@ import logging
 import numpy as np
 from sas.sascalc.dataloader.file_reader_base_class import FileReader
 from sas.sascalc.dataloader.data_info import DataInfo, plottable_1D
+from sas.sascalc.dataloader.loader_exceptions import FileContentsException,\
+    DefaultReaderException
 
 logger = logging.getLogger(__name__)
 
@@ -109,6 +111,7 @@ class Reader(FileReader):
                 lentoks = new_lentoks
                 line_no += 1
             except ValueError:
+                # ValueError is raised when non numeric strings conv. to float
                 # It is data and meet non - number, then stop reading
                 if is_data:
                     break
@@ -120,30 +123,33 @@ class Reader(FileReader):
                 has_error_dy = None
                 # Reset # of lines of data candidates
                 candidate_lines = 0
-            except Exception:
-                # Handle any unexpected exceptions
-                raise
 
         if not is_data:
-            # TODO: Check file extension - primary reader, throw error.
-            # TODO: Secondary check, pass and try next reader
-            msg = "ascii_reader: x has no data"
-            raise RuntimeError(msg)
+            self.set_all_to_none()
+            if self.extension in self.ext:
+                msg = "ASCII Reader error: Fewer than five Q data points found "
+                msg += "in {}.".format(filepath)
+                raise FileContentsException(msg)
+            else:
+                msg = "ASCII Reader could not load the file {}".format(filepath)
+                raise DefaultReaderException(msg)
         # Sanity check
         if has_error_dy and not len(self.current_dataset.y) == \
                 len(self.current_dataset.dy):
-            msg = "ascii_reader: y and dy have different length"
-            raise RuntimeError(msg)
+            msg = "ASCII Reader error: Number of I and dI data points are"
+            msg += " different in {}.".format(filepath)
+            # TODO: Add error to self.current_datainfo.errors instead?
+            self.set_all_to_none()
+            raise FileContentsException(msg)
         if has_error_dx and not len(self.current_dataset.x) == \
                 len(self.current_dataset.dx):
-            msg = "ascii_reader: y and dy have different length"
-            raise RuntimeError(msg)
-        # If the data length is zero, consider this as
-        # though we were not able to read the file.
-        if len(self.current_dataset.x) < 1:
-            raise RuntimeError("ascii_reader: could not load file")
+            msg = "ASCII Reader error: Number of Q and dQ data points are"
+            msg += " different in {}.".format(filepath)
+            # TODO: Add error to self.current_datainfo.errors instead?
+            self.set_all_to_none()
+            raise FileContentsException(msg)
 
-        # Data
+        # Remove any point where Q == 0
         x = self.current_dataset.x
         self.current_dataset.x = self.current_dataset.x[x != 0]
         self.current_dataset.y = self.current_dataset.y[x != 0]

@@ -22,6 +22,15 @@ class FileContentsException(Exception):
         self.message = e
 
 
+class DefaultReaderException(Exception):
+    """
+    Exception for files with no associated reader. This should be thrown by
+    default readers only to tell Loader to try the next reader.
+    """
+    def __init__(self, e):
+        self.message = e
+
+
 class DataReaderException(Exception):
     """
     Exception for files that were able to mostly load, but had minor issues
