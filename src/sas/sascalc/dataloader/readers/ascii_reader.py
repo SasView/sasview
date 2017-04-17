@@ -84,25 +84,25 @@ class Reader(FileReader):
                     candidate_lines = 0
                     self.reset_data_list(len(lines) - line_no)
 
-                candidate_lines += 1
-                # If 5 or more lines, this is considering the set data
-                if candidate_lines >= self.min_data_pts:
-                    is_data = True
-
-                self.current_dataset.x[candidate_lines - 1] = float(toks[0])
-                self.current_dataset.y[candidate_lines - 1] = float(toks[1])
+                self.current_dataset.x[candidate_lines] = float(toks[0])
+                self.current_dataset.y[candidate_lines] = float(toks[1])
 
                 # If a 3rd row is present, consider it dy
                 if new_lentoks > 2:
-                    self.current_dataset.dy[candidate_lines - 1] = \
+                    self.current_dataset.dy[candidate_lines] = \
                         float(toks[2])
                     has_error_dy = True
 
                 # If a 4th row is present, consider it dx
                 if new_lentoks > 3:
-                    self.current_dataset.dx[candidate_lines - 1] = \
+                    self.current_dataset.dx[candidate_lines] = \
                         float(toks[3])
                     has_error_dx = True
+
+                candidate_lines += 1
+                # If 5 or more lines, this is considering the set data
+                if candidate_lines >= self.min_data_pts:
+                    is_data = True
 
                 # To remember the # of columns on the current line
                 # for the next line of data
@@ -142,19 +142,15 @@ class Reader(FileReader):
         # though we were not able to read the file.
         if len(self.current_dataset.x) < 1:
             raise RuntimeError("ascii_reader: could not load file")
-            return None
 
         # Data
-        self.current_dataset.x = \
-            self.current_dataset.x[self.current_dataset.x != 0]
-        self.current_dataset.y = \
-            self.current_dataset.y[self.current_dataset.x != 0]
-        self.current_dataset.dy = \
-            self.current_dataset.dy[self.current_dataset.x != 0] if \
-                has_error_dy else np.zeros(len(self.current_dataset.y))
-        self.current_dataset.dx = \
-            self.current_dataset.dx[self.current_dataset.x != 0] if \
-                has_error_dx else np.zeros(len(self.current_dataset.x))
+        x = self.current_dataset.x
+        self.current_dataset.x = self.current_dataset.x[x != 0]
+        self.current_dataset.y = self.current_dataset.y[x != 0]
+        self.current_dataset.dy = self.current_dataset.dy[x != 0] if \
+            has_error_dy else np.zeros(len(self.current_dataset.y))
+        self.current_dataset.dx = self.current_dataset.dx[x != 0] if \
+            has_error_dx else np.zeros(len(self.current_dataset.x))
 
         self.current_dataset.xaxis("\\rm{Q}", 'A^{-1}')
         self.current_dataset.yaxis("\\rm{Intensity}", "cm^{-1}")
