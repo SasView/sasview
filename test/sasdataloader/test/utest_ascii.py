@@ -22,7 +22,7 @@ class ABSReaderTests(unittest.TestCase):
         self.f4 = self.f4_list[0]
         self.f5_list = self.loader.load("ascii_test_5.txt")
         self.f5 = self.f5_list[0]
-        
+
     def test_checkdata(self):
         """
             Test .ABS file loaded as ascii
@@ -35,7 +35,7 @@ class ABSReaderTests(unittest.TestCase):
         self.assertEqual(self.f1.y_unit, '1/cm')
         
         self.assertEqual(self.f1.meta_data['loader'],"ASCII")
-        
+
     def test_truncated_1(self):
         """
             Test an ascii file with header and a 
@@ -49,7 +49,7 @@ class ABSReaderTests(unittest.TestCase):
         self.assertEqual(len(self.f2.x), 5)
         self.assertEqual(self.f2.x[0],0.002618)
         self.assertEqual(self.f2.x[4],0.02356)
-        
+
     def test_truncated_2(self):
         """
             Test a 6-col ascii file with header and a 
@@ -61,7 +61,7 @@ class ABSReaderTests(unittest.TestCase):
         self.assertEqual(len(self.f3.x), 5)
         self.assertEqual(self.f3.x[0],0.002618)
         self.assertEqual(self.f3.x[4],0.02356)
-        
+
     def test_truncated_3(self):
         """
             Test a 6-col ascii file with complex header and 
@@ -73,7 +73,7 @@ class ABSReaderTests(unittest.TestCase):
         self.assertEqual(len(self.f4.x), 5)
         self.assertEqual(self.f4.x[0],0.012654)
         self.assertEqual(self.f4.x[4],0.02654)
-        
+
     def test_truncated_4(self):
         """
             Test mix of 6-col and 2-col.
@@ -83,7 +83,7 @@ class ABSReaderTests(unittest.TestCase):
         self.assertEqual(len(self.f5.x), 5)
         self.assertEqual(self.f5.x[0],0.02879)
         self.assertEqual(self.f5.x[4],0.0497)
-        
+
     def test_truncated_5(self):
         """
             Test a 6-col ascii file with complex header where one of them has a
@@ -97,7 +97,7 @@ class ABSReaderTests(unittest.TestCase):
         # The length of the data is 5
         except:
             self.assertEqual(f, None)
-        
+
 if __name__ == '__main__':
     unittest.main()
    

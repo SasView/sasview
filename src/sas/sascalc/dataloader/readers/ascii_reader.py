@@ -149,29 +149,10 @@ class Reader(FileReader):
             self.set_all_to_none()
             raise FileContentsException(msg)
 
-        # Remove any point where Q == 0
-        x = self.current_dataset.x
-        self.current_dataset.x = self.current_dataset.x[x != 0]
-        self.current_dataset.y = self.current_dataset.y[x != 0]
-        self.current_dataset.dy = self.current_dataset.dy[x != 0] if \
-            has_error_dy else np.zeros(len(self.current_dataset.y))
-        self.current_dataset.dx = self.current_dataset.dx[x != 0] if \
-            has_error_dx else np.zeros(len(self.current_dataset.x))
-
+        self.remove_empty_q_values(has_error_dx, has_error_dy)
         self.current_dataset.xaxis("\\rm{Q}", 'A^{-1}')
         self.current_dataset.yaxis("\\rm{Intensity}", "cm^{-1}")
 
         # Store loading process information
         self.current_datainfo.meta_data['loader'] = self.type_name
         self.send_to_output()
-
-    def reset_data_list(self, no_lines):
-        """
-        Reset the plottable_1D object
-        """
-        # Initialize data sets with arrays the maximum possible size
-        x = np.zeros(no_lines)
-        y = np.zeros(no_lines)
-        dy = np.zeros(no_lines)
-        dx = np.zeros(no_lines)
-        self.current_dataset = plottable_1D(x, y, dx, dy)

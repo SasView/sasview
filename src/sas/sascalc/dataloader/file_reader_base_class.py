@@ -51,7 +51,6 @@ class FileReader(object):
             if self.extension in self.ext or self.allow_all:
                 # Try to load the file, but raise an error if unable to.
                 try:
-                    self.load_unit_converter()
                     self.f_open = open(filepath, 'rb')
                     self.get_file_contents()
                     self.sort_one_d_data()
@@ -93,17 +92,6 @@ class FileReader(object):
                                                     self.current_datainfo)
         self.output.append(data_obj)
 
-    def load_unit_converter(self):
-        """
-        Generic unit conversion import 
-        """
-        # Check whether we have a converter available
-        self.has_converter = True
-        try:
-            from sas.sascalc.data_util.nxsunit import Converter
-        except:
-            self.has_converter = False
-
     def sort_one_d_data(self):
         """
         Sort 1D data along the X axis for consistency
@@ -137,6 +125,29 @@ class FileReader(object):
         self.current_datainfo = None
         self.output = []
 
+    def remove_empty_q_values(self, has_error_dx=False, has_error_dy=False):
+        """
+        Remove any point where Q == 0
+        """
+        x = self.current_dataset.x
+        self.current_dataset.x = self.current_dataset.x[x != 0]
+        self.current_dataset.y = self.current_dataset.y[x != 0]
+        self.current_dataset.dy = self.current_dataset.dy[x != 0] if \
+            has_error_dy else np.zeros(len(self.current_dataset.y))
+        self.current_dataset.dx = self.current_dataset.dx[x != 0] if \
+            has_error_dx else np.zeros(len(self.current_dataset.x))
+
+    def reset_data_list(self, no_lines=0):
+        """
+        Reset the plottable_1D object
+        """
+        # Initialize data sets with arrays the maximum possible size
+        x = np.zeros(no_lines)
+        y = np.zeros(no_lines)
+        dy = np.zeros(no_lines)
+        dx = np.zeros(no_lines)
+        self.current_dataset = plottable_1D(x, y, dx, dy)
+
     @staticmethod
     def splitline(line):
         """
@@ -157,6 +168,7 @@ class FileReader(object):
     @abstractmethod
     def get_file_contents(self):
         """
+        Reader specific class to access the contents of the file
         All reader classes that inherit from FileReader must implement
         """
         pass

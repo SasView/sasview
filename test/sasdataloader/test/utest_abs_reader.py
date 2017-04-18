@@ -3,19 +3,17 @@
 """
 
 import unittest
-import math
 import numpy as np
 from sas.sascalc.dataloader.loader import Loader
 from sas.sascalc.dataloader.readers.IgorReader import Reader as IgorReader
-from sas.sascalc.dataloader.data_info import Data1D
- 
-import os.path
+from sas.sascalc.dataloader.readers.abs_reader import Reader as ABSReader
 
-class abs_reader(unittest.TestCase):
+
+class ABSReaderTests(unittest.TestCase):
     
     def setUp(self):
-        from sas.sascalc.dataloader.readers.abs_reader import Reader
-        self.data = Reader().read("jan08002.ABS")
+        self.data_list = ABSReader().read("jan08002.ABS")
+        self.data = self.data_list[0]
         
     def test_abs_checkdata(self):
         """
@@ -37,8 +35,8 @@ class abs_reader(unittest.TestCase):
         self.assertEqual(self.data.sample.transmission, 0.5667)
         
         self.assertEqual(self.data.detector[0].beam_center_unit, 'mm')
-        center_x = 114.58*5.0
-        center_y = 64.22*5.0
+        center_x = 114.58*5.08
+        center_y = 64.22*5.08
         self.assertEqual(self.data.detector[0].beam_center.x, center_x)
         self.assertEqual(self.data.detector[0].beam_center.y, center_y)
         
@@ -60,12 +58,13 @@ class abs_reader(unittest.TestCase):
         
     def test_checkdata2(self):
         self.assertEqual(self.data.dy[126], 1)
-        
-class hfir_reader(unittest.TestCase):
-    
+
+
+class HFIRReaderTests(unittest.TestCase):
+
     def setUp(self):
         self.data = Loader().load("S2-30dq.d1d")
-        
+
     def test_hfir_checkdata(self):
         """
             Check the data content to see whether 
@@ -82,9 +81,9 @@ class hfir_reader(unittest.TestCase):
         self.assertEqual(self.data.y[1], 0.003010)
         self.assertEqual(self.data.dy[1], 0.000315)
         self.assertEqual(self.data.dx[1], 0.008249)
-        
 
-class igor_reader(unittest.TestCase):
+
+class IgorReaderTests(unittest.TestCase):
     
     def setUp(self):
         # the IgorReader should be able to read this filetype
@@ -133,7 +132,7 @@ class igor_reader(unittest.TestCase):
         self.assertEqual(data.meta_data['loader'], "IGOR 2D")
 
 
-class danse_reader(unittest.TestCase):
+class DanseReaderTests(unittest.TestCase):
     
     def setUp(self):
         self.data = Loader().load("MP_New.sans")
@@ -320,11 +319,8 @@ class cansas_reader(unittest.TestCase):
                     _found_term1 = True
                     
         if _found_term1==False or _found_term2==False:
-            raise RuntimeError, "Could not find all process terms %s %s" % (_found_term1, _found_term2) 
-            
-        
-        
-        
+            raise RuntimeError, "Could not find all process terms %s %s" % (_found_term1, _found_term2)
+
     def test_writer(self):
         from sas.sascalc.dataloader.readers.cansas_reader import Reader
         r = Reader()
@@ -338,7 +334,7 @@ class cansas_reader(unittest.TestCase):
         self.data = data[0]
         self.assertEqual(self.data.filename, filename)
         self._checkdata()
-        
+
     def test_units(self):
         """
             Check units.
@@ -349,7 +345,7 @@ class cansas_reader(unittest.TestCase):
         self.data = data[0]
         self.assertEqual(self.data.filename, filename)
         self._checkdata()
-        
+
     def test_badunits(self):
         """
             Check units.
@@ -367,8 +363,7 @@ class cansas_reader(unittest.TestCase):
         self.assertEqual(self.data.meta_data['loader'], "CanSAS XML 1D")
         print self.data.errors
         self.assertEqual(len(self.data.errors), 1)
-        
-        
+
     def test_slits(self):
         """
             Check slit data
@@ -396,8 +391,7 @@ class cansas_reader(unittest.TestCase):
         self.assertEqual(self.data.dy[1], 4)
         self.assertEqual(self.data.run_name['1234'], 'run name')
         self.assertEqual(self.data.title, "Test title")
-        
-            
+
 
 if __name__ == '__main__':
     unittest.main()
