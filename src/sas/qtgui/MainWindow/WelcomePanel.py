@@ -7,6 +7,8 @@ from PyQt4 import QtWebKit
 
 import sas.sasview
 import sas.qtgui.Utilities.LocalConfig as LocalConfig
+from sas.qtgui.UI import images_rc
+from sas.qtgui.UI import main_resources_rc
 
 from sas.qtgui.MainWindow.UI.WelcomePanelUI import Ui_WelcomePanelUI
 

@@ -3,6 +3,7 @@
 from PyQt4 import QtGui
 
 # Local UI
+from sas.qtgui.UI import main_resources_rc
 from UI.MainWindowUI import Ui_MainWindow
 
 # Initialize logging

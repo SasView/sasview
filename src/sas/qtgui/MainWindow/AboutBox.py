@@ -4,6 +4,8 @@ from PyQt4 import QtGui
 import sas.sasview
 import sas.qtgui.Utilities.LocalConfig as LocalConfig
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.UI import images_rc
+from sas.qtgui.UI import main_resources_rc
 
 from UI.AboutUI import Ui_AboutUI
 

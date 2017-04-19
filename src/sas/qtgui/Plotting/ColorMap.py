@@ -17,6 +17,7 @@ from rangeSlider import RangeSlider
 DEFAULT_MAP = 'jet'
 
 # Local UI
+from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.ColorMapUI import Ui_ColorMapUI
 
 class ColorMap(QtGui.QDialog, Ui_ColorMapUI):

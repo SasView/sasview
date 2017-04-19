@@ -20,7 +20,7 @@
    <string>TabWidget</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../UI/main_resources.qrc">
+   <iconset>
     <normaloff>:/res/ball.ico</normaloff>:/res/ball.ico</iconset>
   </property>
   <property name="currentIndex">
@@ -69,7 +69,7 @@
             <string>Load data</string>
            </property>
            <property name="icon">
-            <iconset resource="../../UI/main_resources.qrc">
+            <iconset>
              <normaloff>:/res/down-grey.png</normaloff>:/res/down-grey.png</iconset>
            </property>
            <property name="iconSize">
@@ -182,7 +182,7 @@
             <string>Send data to</string>
            </property>
            <property name="icon">
-            <iconset resource="../../UI/main_resources.qrc">
+            <iconset>
              <normaloff>:/res/right-grey.png</normaloff>:/res/right-grey.png</iconset>
            </property>
            <property name="iconSize">
@@ -481,8 +481,6 @@
    </property>
   </action>
  </widget>
- <resources>
-  <include location="../../UI/main_resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

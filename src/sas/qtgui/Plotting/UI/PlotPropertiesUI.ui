@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>319</width>
-    <height>172</height>
+    <height>285</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -20,7 +20,7 @@
    <string>Modify Plot Properties</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="main_resources.qrc">
+   <iconset>
     <normaloff>:/res/ball.ico</normaloff>:/res/ball.ico</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
@@ -120,9 +120,7 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="main_resources.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>

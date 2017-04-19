@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1107</width>
+    <width>827</width>
     <height>449</height>
    </rect>
   </property>
@@ -242,9 +242,6 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../../UI/main_resources.qrc"/>
-  <include location="../images/images.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

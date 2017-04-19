@@ -7,6 +7,7 @@ from periodictable.xsf import xray_energy, xray_sld_from_atoms
 from periodictable.nsf import neutron_scattering
 
 from sas.qtgui.Utilities.GuiUtils import FormulaValidator
+from sas.qtgui.UI import main_resources_rc
 
 # Local UI
 from sas.qtgui.Calculators.UI.SldPanel import Ui_SldPanel

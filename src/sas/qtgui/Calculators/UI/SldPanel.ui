@@ -20,7 +20,7 @@
    <string>SLD Calculator</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="main_resources.qrc">
+   <iconset>
     <normaloff>:/res/ball.ico</normaloff>:/res/ball.ico</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
@@ -336,9 +336,7 @@
   <tabstop>editNeutronLength</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
- <resources>
-  <include location="main_resources.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>

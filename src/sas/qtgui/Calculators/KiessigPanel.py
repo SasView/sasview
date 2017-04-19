@@ -1,5 +1,7 @@
 from PyQt4 import QtGui
 from PyQt4 import QtCore
+
+from sas.qtgui.UI import main_resources_rc
 from UI.KiessigPanel import Ui_KiessigPanel
 
 # sas-global

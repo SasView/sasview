@@ -14,7 +14,7 @@
    <string>MainWindow</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../UI/main_resources.qrc">
+   <iconset>
     <normaloff>:/res/ball.ico</normaloff>:/res/ball.ico</iconset>
   </property>
   <widget class="QWidget" name="centralwidget"/>
@@ -179,7 +179,7 @@
   </widget>
   <action name="actionReset">
    <property name="icon">
-    <iconset resource="../../UI/main_resources.qrc">
+    <iconset>
      <normaloff>:/res/reset.png</normaloff>:/res/reset.png</iconset>
    </property>
    <property name="text">
@@ -191,7 +191,7 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset resource="../../UI/main_resources.qrc">
+    <iconset>
      <normaloff>:/res/save.png</normaloff>:/res/save.png</iconset>
    </property>
    <property name="text">
@@ -203,7 +203,7 @@
   </action>
   <action name="actionReport">
    <property name="icon">
-    <iconset resource="../../UI/main_resources.qrc">
+    <iconset>
      <normaloff>:/res/report.png</normaloff>:/res/report.png</iconset>
    </property>
    <property name="text">
@@ -215,7 +215,7 @@
   </action>
   <action name="actionUndo">
    <property name="icon">
-    <iconset resource="../../UI/main_resources.qrc">
+    <iconset>
      <normaloff>:/res/undo.png</normaloff>
      <normalon>res/undo.png</normalon>:/res/undo.png</iconset>
    </property>
@@ -225,7 +225,7 @@
   </action>
   <action name="actionRedo">
    <property name="icon">
-    <iconset resource="../../UI/main_resources.qrc">
+    <iconset>
      <normaloff>:/res/redo.png</normaloff>:/res/redo.png</iconset>
    </property>
    <property name="text">
@@ -237,7 +237,7 @@
   </action>
   <action name="actionCopy">
    <property name="icon">
-    <iconset resource="../../UI/main_resources.qrc">
+    <iconset>
      <normaloff>:/res/copy.png</normaloff>:/res/copy.png</iconset>
    </property>
    <property name="text">
@@ -249,7 +249,7 @@
   </action>
   <action name="actionPaste">
    <property name="icon">
-    <iconset resource="../../UI/main_resources.qrc">
+    <iconset>
      <normaloff>:/res/paste.png</normaloff>:/res/paste.png</iconset>
    </property>
    <property name="text">
@@ -264,7 +264,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../UI/main_resources.qrc">
+    <iconset>
      <normaloff>:/res/bookmark.png</normaloff>:/res/bookmark.png</iconset>
    </property>
    <property name="text">
@@ -496,8 +496,6 @@
    </property>
   </action>
  </widget>
- <resources>
-  <include location="../../UI/main_resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

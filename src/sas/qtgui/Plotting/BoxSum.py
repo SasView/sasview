@@ -5,6 +5,7 @@ from PyQt4 import QtGui
 from PyQt4 import QtCore
 
 # Local UI
+from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.BoxSumUI import Ui_BoxSumUI
 
 class BoxSum(QtGui.QDialog, Ui_BoxSumUI):

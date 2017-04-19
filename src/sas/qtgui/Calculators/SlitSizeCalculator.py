@@ -6,6 +6,9 @@ import sys
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
+
+from sas.qtgui.UI import main_resources_rc
+
 from UI.SlitSizeCalculator import Ui_SlitSizeCalculator
 from sas.sascalc.dataloader.loader import Loader
 from sas.sascalc.calculator.slit_length_calculator import SlitlengthCalculator

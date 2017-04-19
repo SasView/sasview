@@ -3,6 +3,7 @@ from PyQt4 import QtGui
 from sas.sasgui.guiframe.dataFitting import Data2D
 
 # Local UI
+from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.MaskEditorUI import Ui_MaskEditorUI
 from sas.qtgui.Plotting.Plotter2D import Plotter2DWidget
 

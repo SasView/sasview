@@ -6,6 +6,7 @@ from PyQt4 import QtGui, QtCore
 from periodictable import formula as Formula
 
 from sas.qtgui.Utilities.GuiUtils import FormulaValidator
+from sas.qtgui.UI import main_resources_rc
 
 # Local UI
 from sas.qtgui.Calculators.UI.DensityPanel import Ui_DensityPanel

@@ -14,7 +14,7 @@
    <string>Color Map</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="main_resources.qrc">
+   <iconset>
     <normaloff>:/res/ball.ico</normaloff>:/res/ball.ico</iconset>
   </property>
   <property name="modal">
@@ -233,9 +233,7 @@
   <zorder>groupBox_2</zorder>
   <zorder>verticalSpacer</zorder>
  </widget>
- <resources>
-  <include location="main_resources.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>

@@ -26,7 +26,7 @@ out_file = 'main_resources_rc.py'
 pyrrc(os.path.join(ui_root, rc_file), os.path.join(ui_root, out_file))
 
 # Images
-ui_root = 'images'
+images_root = 'images'
 rc_file = 'images.qrc'
 out_file = 'images_rc.py'
-pyrrc(os.path.join(ui_root, rc_file), os.path.join(ui_root, out_file))
+pyrrc(os.path.join(images_root, rc_file), os.path.join(ui_root, out_file))

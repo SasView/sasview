@@ -8,6 +8,7 @@ from PyQt4 import QtCore
 from PyQt4 import QtWebKit
 
 # Local UI
+from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.SlicerParametersUI import Ui_SlicerParametersUI
 
 class SlicerParameters(QtGui.QDialog, Ui_SlicerParametersUI):

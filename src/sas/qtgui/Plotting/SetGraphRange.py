@@ -4,6 +4,7 @@ Allows users to change the range of the current graph
 from PyQt4 import QtGui
 
 # Local UI
+from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.SetGraphRangeUI import Ui_setGraphRangeUI
 
 class SetGraphRange(QtGui.QDialog, Ui_setGraphRangeUI):

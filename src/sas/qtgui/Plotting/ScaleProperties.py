@@ -1,7 +1,9 @@
 from PyQt4 import QtGui
 
 import sas.sasview
+from sas.qtgui.UI import main_resources_rc
 
+from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.ScalePropertiesUI import Ui_scalePropertiesUI
 
 x_values = ["x", "x^(2)", "x^(4)", "ln(x)", "log10(x)", "log10(x^(4))"]

@@ -14,6 +14,7 @@ from sas.sasgui.plottools import transform
 from sas.sasgui.plottools.LineModel import LineModel
 
 # Local UI
+from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.LinearFitUI import Ui_LinearFitUI
 
 class LinearFit(QtGui.QDialog, Ui_LinearFitUI):

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>746</width>
-    <height>947</height>
+    <width>658</width>
+    <height>737</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap resource="../../UI/main_resources.qrc">:/res/SVwelcome.png</pixmap>
+      <pixmap>:/res/SVwelcome.png</pixmap>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -78,9 +78,6 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../../UI/main_resources.qrc"/>
-  <include location="main_resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
