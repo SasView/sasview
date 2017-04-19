@@ -5,13 +5,13 @@ the sum of pixel of a Data.
 import numpy
 from PyQt4 import QtGui
 from PyQt4 import QtCore
-from sas.qtgui.GuiUtils import formatNumber
+from sas.qtgui.Utilities.GuiUtils import formatNumber
 
 from BaseInteractor import _BaseInteractor
 from sas.sascalc.dataloader.manipulations import Boxavg
 from sas.sascalc.dataloader.manipulations import Boxsum
 
-from sas.qtgui.SlicerModel import SlicerModel
+from sas.qtgui.Plotting.SlicerModel import SlicerModel
 
 
 class BoxSumCalculator(_BaseInteractor):

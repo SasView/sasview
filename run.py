@@ -121,5 +121,5 @@ def prepare():
 
 if __name__ == "__main__":
     prepare()
-    from sas.qtgui.MainWindow import run
+    from sas.qtgui.MainWindow.MainWindow import run
     run()

@@ -7,8 +7,8 @@ from PyQt4 import QtCore
 
 from BaseInteractor import _BaseInteractor
 from sas.sasgui.guiframe.dataFitting import Data1D
-import sas.qtgui.GuiUtils as GuiUtils
-from sas.qtgui.SlicerModel import SlicerModel
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Plotting.SlicerModel import SlicerModel
 
 MIN_PHI = 0.05
 

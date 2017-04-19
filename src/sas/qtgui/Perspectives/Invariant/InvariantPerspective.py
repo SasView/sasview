@@ -11,8 +11,7 @@ from twisted.internet import reactor
 # sas-global
 from sas.sascalc.invariant import invariant
 from sas.sasgui.guiframe.dataFitting import Data1D
-#import GuiUtils
-import sas.qtgui.GuiUtils as GuiUtils
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # local
 from UI.TabbedInvariantUI import Ui_tabbedInvariantUI

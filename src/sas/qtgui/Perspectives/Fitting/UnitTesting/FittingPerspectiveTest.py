@@ -11,7 +11,7 @@ from mock import MagicMock
 import sas.qtgui.path_prepare
 
 # Local
-import sas.qtgui.GuiUtils as GuiUtils
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.sasgui.guiframe.dataFitting import Data1D
 
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow

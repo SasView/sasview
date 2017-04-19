@@ -7,31 +7,22 @@ Running
 -------
 Compile UI resources first:
 
-in shell (Linux, OSX, Cygwin):
-
-    ./make_ui.sh
-
-or in windows cmd window
-
-    make_ui.bat 
+    cd src/sas/qtgui
+    python convertUI.py
 
 Run the GUI with:
 
-    python MainWindow.py
+    python run.py
 
 
 
 Unit testing
 ------------
 
-Unit testing suite can be run with either
+Unit testing suite can be run with
 
      python GUITesting.py
 
-or
-
-     ./run_tests.sh 
-     run_tests.bat
 
 Requirements
 ------------

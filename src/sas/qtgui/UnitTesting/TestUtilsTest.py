@@ -7,8 +7,8 @@ from PyQt4.QtCore import *
 from mock import MagicMock
 
 # Local
-from GuiUtils import Communicate
-from UnitTesting.TestUtils import *
+from sas.qtgui.Utilities.GuiUtils import Communicate
+from sas.qtgui.UnitTesting.TestUtils import *
 
 app = QApplication(sys.argv)
 

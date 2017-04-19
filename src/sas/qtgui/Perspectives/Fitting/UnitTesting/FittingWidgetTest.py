@@ -11,7 +11,7 @@ from twisted.internet import threads
 import sas.qtgui.path_prepare
 
 # Local
-from sas.qtgui.GuiUtils import *
+from sas.qtgui.Utilities.GuiUtils import *
 from sas.qtgui.Perspectives.Fitting.FittingWidget import *
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 

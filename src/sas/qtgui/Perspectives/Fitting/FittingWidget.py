@@ -21,7 +21,7 @@ from sas.sasgui.perspectives.fitting.fit_thread import FitThread
 from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import Data2D
-import sas.qtgui.GuiUtils as GuiUtils
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.sasgui.perspectives.fitting.model_thread import Calc1D
 from sas.sasgui.perspectives.fitting.model_thread import Calc2D
 

@@ -8,7 +8,7 @@ from mock import MagicMock
 import sas.qtgui.path_prepare
 
 # Local
-from sas.qtgui.GuiUtils import *
+from sas.qtgui.Utilities.GuiUtils import *
 from sas.qtgui.Perspectives.Fitting.FittingWidget import *
 from sas.sasgui.guiframe.dataFitting import Data1D
 

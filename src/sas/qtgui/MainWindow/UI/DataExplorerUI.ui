@@ -1,0 +1,488 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DataLoadWidget</class>
+ <widget class="QTabWidget" name="DataLoadWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>405</width>
+    <height>630</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>5</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>TabWidget</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../../UI/main_resources.qrc">
+    <normaloff>:/res/ball.ico</normaloff>:/res/ball.ico</iconset>
+  </property>
+  <property name="currentIndex">
+   <number>0</number>
+  </property>
+  <widget class="QWidget" name="dataTab">
+   <attribute name="title">
+    <string>Data</string>
+   </attribute>
+   <layout class="QGridLayout" name="gridLayout_11">
+    <item row="0" column="0">
+     <widget class="QGroupBox" name="groupBox">
+      <property name="title">
+       <string>Data</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_9">
+       <item row="0" column="0">
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0" rowspan="2">
+          <widget class="QPushButton" name="cmdLoad">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+             <horstretch>5</horstretch>
+             <verstretch>5</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>154</width>
+             <height>50</height>
+            </size>
+           </property>
+           <property name="baseSize">
+            <size>
+             <width>100</width>
+             <height>50</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Load a file with data&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">font: 13pt &quot;MS Shell Dlg 2&quot;;</string>
+           </property>
+           <property name="text">
+            <string>Load data</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../../UI/main_resources.qrc">
+             <normaloff>:/res/down-grey.png</normaloff>:/res/down-grey.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>48</width>
+             <height>48</height>
+            </size>
+           </property>
+           <property name="shortcut">
+            <string>Ctrl+R</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QPushButton" name="cmdDeleteData">
+           <property name="text">
+            <string>Delete</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QComboBox" name="cbSelect">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <item>
+            <property name="text">
+             <string>Select all</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Unselect all</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Select all 1D</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Unselect all 1D</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Select all 2D</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Unselect all 2D</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="0" column="1">
+        <spacer name="horizontalSpacer_7">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>92</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="2" column="0">
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="0" column="0" rowspan="2">
+          <widget class="QPushButton" name="cmdSendTo">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+             <horstretch>5</horstretch>
+             <verstretch>5</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>170</width>
+             <height>50</height>
+            </size>
+           </property>
+           <property name="baseSize">
+            <size>
+             <width>100</width>
+             <height>50</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>13</pointsize>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Send data to perspective&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">font: 13pt &quot;MS Shell Dlg 2&quot;;</string>
+           </property>
+           <property name="text">
+            <string>Send data to</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../../UI/main_resources.qrc">
+             <normaloff>:/res/right-grey.png</normaloff>:/res/right-grey.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>48</width>
+             <height>48</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QComboBox" name="cbFitting">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="sizeAdjustPolicy">
+            <enum>QComboBox::AdjustToContents</enum>
+           </property>
+           <item>
+            <property name="text">
+             <string>Fitting</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Pr inversion</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Invariant</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QCheckBox" name="chkBatch">
+           <property name="text">
+            <string>Batch mode</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="1" column="0" colspan="2">
+        <widget class="QTreeView" name="treeView">
+         <property name="contextMenuPolicy">
+          <enum>Qt::NoContextMenu</enum>
+         </property>
+         <property name="acceptDrops">
+          <bool>true</bool>
+         </property>
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
+         <property name="dragEnabled">
+          <bool>true</bool>
+         </property>
+         <property name="dragDropOverwriteMode">
+          <bool>true</bool>
+         </property>
+         <property name="dragDropMode">
+          <enum>QAbstractItemView::DropOnly</enum>
+         </property>
+         <property name="defaultDropAction">
+          <enum>Qt::CopyAction</enum>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
+         <attribute name="headerVisible">
+          <bool>false</bool>
+         </attribute>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <layout class="QGridLayout" name="gridLayout_10">
+      <item row="0" column="0" rowspan="2">
+       <layout class="QGridLayout" name="gridLayout_6">
+        <item row="0" column="0">
+         <widget class="QGroupBox" name="groupBox_3">
+          <property name="title">
+           <string>Plot</string>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
+          </property>
+          <property name="checkable">
+           <bool>false</bool>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_3">
+           <item row="0" column="0">
+            <widget class="QPushButton" name="cmdNew">
+             <property name="text">
+              <string>Create New</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QPushButton" name="cmdAppend">
+             <property name="text">
+              <string>Append to</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QComboBox" name="cbgraph">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="sizeAdjustPolicy">
+              <enum>QComboBox::AdjustToContents</enum>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <spacer name="horizontalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>103</width>
+            <height>48</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="cmdHelp">
+        <property name="text">
+         <string>Help</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="theoryTab">
+   <attribute name="title">
+    <string>Theory</string>
+   </attribute>
+   <layout class="QGridLayout" name="gridLayout_8">
+    <item row="0" column="0">
+     <widget class="QGroupBox" name="groupBox_2">
+      <property name="title">
+       <string>Theory</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="0" column="0">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QPushButton" name="cmdFreeze">
+           <property name="text">
+            <string>Freeze Theory</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_5">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>218</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="cmdDeleteTheory">
+           <property name="text">
+            <string>Delete</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="1" column="0">
+        <widget class="QTreeView" name="freezeView">
+         <attribute name="headerVisible">
+          <bool>false</bool>
+         </attribute>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <layout class="QGridLayout" name="gridLayout_5">
+      <item row="0" column="0">
+       <widget class="QGroupBox" name="groupBox_4">
+        <property name="title">
+         <string>Plot</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_7">
+         <item row="0" column="0">
+          <widget class="QPushButton" name="cmdNew_2">
+           <property name="text">
+            <string>Create New</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QPushButton" name="cmdAppend_2">
+           <property name="text">
+            <string>Append to</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QComboBox" name="cbgraph_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="sizeAdjustPolicy">
+            <enum>QComboBox::AdjustToContents</enum>
+           </property>
+           <item>
+            <property name="text">
+             <string>Graph1</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>108</width>
+          <height>111</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="2" alignment="Qt::AlignBottom">
+       <widget class="QPushButton" name="cmdHelp_2">
+        <property name="text">
+         <string>Help</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <action name="actionDataInfo">
+   <property name="text">
+    <string>Data Info</string>
+   </property>
+  </action>
+  <action name="actionSaveAs">
+   <property name="text">
+    <string>Save As</string>
+   </property>
+  </action>
+  <action name="actionQuickPlot">
+   <property name="text">
+    <string>Quick Plot</string>
+   </property>
+  </action>
+  <action name="actionQuick3DPlot">
+   <property name="text">
+    <string>Quick 3DPlot (slow)</string>
+   </property>
+  </action>
+  <action name="actionEditMask">
+   <property name="text">
+    <string>Edit Mask</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="../../UI/main_resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>
