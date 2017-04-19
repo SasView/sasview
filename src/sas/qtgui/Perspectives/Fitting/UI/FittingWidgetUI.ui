@@ -506,7 +506,7 @@
           <item row="0" column="0">
            <layout class="QVBoxLayout" name="verticalLayout">
             <item>
-             <widget class="QRadioButton" name="radioButton">
+             <widget class="QRadioButton" name="rbWeighting1">
               <property name="text">
                <string>None</string>
               </property>
@@ -516,21 +516,21 @@
              </widget>
             </item>
             <item>
-             <widget class="QRadioButton" name="radioButton_2">
+             <widget class="QRadioButton" name="rbWeighting2">
               <property name="text">
                <string>Use dI Data</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QRadioButton" name="radioButton_3">
+             <widget class="QRadioButton" name="rbWeighting3">
               <property name="text">
                <string>Use |sqrt(I Data)|</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QRadioButton" name="radioButton_4">
+             <widget class="QRadioButton" name="rbWeighting4">
               <property name="text">
                <string>Use |I Data|</string>
               </property>

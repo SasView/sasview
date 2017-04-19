@@ -24,6 +24,7 @@ from sas.sasgui.guiframe.dataFitting import Data2D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.sasgui.perspectives.fitting.model_thread import Calc1D
 from sas.sasgui.perspectives.fitting.model_thread import Calc2D
+from sas.sasgui.perspectives.fitting.utils import get_weight
 
 from UI.FittingWidgetUI import Ui_FittingWidgetUI
 from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
@@ -66,6 +67,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.models = {}
         # Parameters to fit
         self.parameters_to_fit = None
+        # Weight radio box group
+        self.weightingGroup = QtGui.QButtonGroup()
 
         # Which tab is this widget displayed in?
         self.tab_id = id
@@ -230,9 +233,14 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.tabFitting.setTabEnabled(TAB_POLY, False)
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, False)
         self.lblChi2Value.setText("---")
-        # group boxes
+        # Group boxes
         self.boxWeighting.setEnabled(False)
         self.cmdMaskEdit.setEnabled(False)
+        # Button groups
+        self.weightingGroup.addButton(self.rbWeighting1)
+        self.weightingGroup.addButton(self.rbWeighting2)
+        self.weightingGroup.addButton(self.rbWeighting3)
+        self.weightingGroup.addButton(self.rbWeighting4)
 
     def initializeSignals(self):
         """
@@ -259,6 +267,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.txtMaxRange.editingFinished.connect(self.onMaxRange)
         self.txtSmearUp.editingFinished.connect(self.onSmearUp)
         self.txtSmearDown.editingFinished.connect(self.onSmearDown)
+        # Button groups
+        self.weightingGroup.buttonClicked.connect(self.onWeightingChoice)
 
         # Respond to change in parameters from the UI
         self._model_model.itemChanged.connect(self.updateParamsFromModel)
@@ -353,6 +363,15 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         pass
 
+    def onWeightingChoice(self, button):
+        """
+        Update weighting in the fit state
+        """
+        button_id = button.group().checkedId()
+        button_id = abs(button_id + 2)
+        #self.fitPage.weighting = button_id
+        print button_id
+
     def onPolyModelChange(self, item):
         """
         Callback method for updating the main model and sasmodel
@@ -399,6 +418,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         qmin = self.q_range_min
         qmax = self.q_range_max
         params_to_fit = self.parameters_to_fit
+
+        # Potential weights added
+        self.addWeightingToData(data)
 
         # These should be updating somehow?
         fit_id = 0
@@ -687,6 +709,22 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         assert isinstance(model, QtGui.QStandardItemModel)
         checked_list = ['scale', '1.0', '0.0', 'inf', '']
         FittingUtilities.addCheckedListToModel(model, checked_list)
+
+    def addWeightingToData(self, data):
+        """
+        Adds weighting contribution to fitting data
+        """
+        # Check the state of the Weighting radio buttons
+        button_id = self.weightingGroup.checkedId()
+        button_id = abs(button_id + 2)
+        if button_id == 0:
+            return
+        # Send original data for weighting
+        weight = get_weight(data=data, is2d=self.is2D, flag=button_id)
+        if self.is2D:
+            data.err_data = weight
+        else:
+            data.dy = weight
 
     def updateQRange(self):
         """

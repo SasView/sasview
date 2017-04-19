@@ -52,9 +52,6 @@ class GuiManager(object):
         self._workspace = parent
         self._parent = parent
 
-        # Reactor - singleton
-        self.setReactor(reactor)
-
         # Add signal callbacks
         self.addCallbacks()
 
@@ -161,7 +158,7 @@ class GuiManager(object):
         self.progress.setTextVisible(True)
         self.progress.setVisible(False)
 
-    def fileRead(self, data):
+    def fileWasRead(self, data):
         """
         Callback for fileDataReceivedSignal
         """
@@ -207,14 +204,6 @@ class GuiManager(object):
     def communicator(self):
         """ Accessor for the communicator """
         return self.communicate
-
-    def reactor(self):
-        """ Accessor for the reactor """
-        return self._reactor
-
-    def setReactor(self, reactor):
-        """ Reactor setter """
-        self._reactor = reactor
 
     def perspective(self):
         """ Accessor for the perspective """
@@ -337,7 +326,7 @@ class GuiManager(object):
         Method defining all signal connections for the gui manager
         """
         self.communicate = GuiUtils.Communicate()
-        self.communicate.fileDataReceivedSignal.connect(self.fileRead)
+        self.communicate.fileDataReceivedSignal.connect(self.fileWasRead)
         self.communicate.statusBarUpdateSignal.connect(self.updateStatusBar)
         self.communicate.updatePerspectiveWithDataSignal.connect(self.updatePerspective)
         self.communicate.progressBarUpdateSignal.connect(self.updateProgressBar)
