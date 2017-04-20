@@ -13,7 +13,6 @@
 #############################################################################
 
 import logging
-import numpy as np
 from sas.sascalc.dataloader.file_reader_base_class import FileReader
 from sas.sascalc.dataloader.data_info import DataInfo, plottable_1D
 from sas.sascalc.dataloader.loader_exceptions import FileContentsException,\
@@ -87,7 +86,9 @@ class Reader(FileReader):
                     self.reset_data_list(len(lines) - line_no)
 
                 self.current_dataset.x[candidate_lines] = float(toks[0])
-                self.current_dataset.y[candidate_lines] = float(toks[1])
+
+                if new_lentoks > 1:
+                    self.current_dataset.y[candidate_lines] = float(toks[1])
 
                 # If a 3rd row is present, consider it dy
                 if new_lentoks > 2:
