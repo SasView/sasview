@@ -220,8 +220,7 @@ for d in os.listdir(os.path.join(guiframe_path, "local_perspectives")):
 # sas.sascalc.dataloader
 package_dir["sas.sascalc.dataloader"] = os.path.join(
     "src", "sas", "sascalc", "dataloader")
-package_data["sas.sascalc.dataloader.readers"] = [
-    'defaults.json', 'schema/*.xsd']
+package_data["sas.sascalc.dataloader.readers"] = ['schema/*.xsd']
 packages.extend(["sas.sascalc.dataloader", "sas.sascalc.dataloader.readers",
                  "sas.sascalc.dataloader.readers.schema"])
 
