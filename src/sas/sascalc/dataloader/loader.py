@@ -13,18 +13,17 @@
     look for new readers/writers.
 """
 #####################################################################
-#This software was developed by the University of Tennessee as part of the
-#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation.
-#See the license text in license.txt
-#copyright 2008, University of Tennessee
+# This software was developed by the University of Tennessee as part of the
+# Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+# project funded by the US National Science Foundation.
+# See the license text in license.txt
+# copyright 2008, University of Tennessee
 ######################################################################
 
 import os
 import sys
 import logging
 import time
-import mimetypes
 from zipfile import ZipFile
 from sas.sascalc.data_util.registry import ExtensionRegistry
 # Default readers are defined in the readers sub-module
@@ -35,8 +34,8 @@ from readers import ascii_reader
 from readers import cansas_reader
 from readers import cansas_reader_HDF5
 
-
 logger = logging.getLogger(__name__)
+
 
 class Registry(ExtensionRegistry):
     """

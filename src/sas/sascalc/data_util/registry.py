@@ -1,4 +1,3 @@
-# This program is public domain
 """
 File extension registry.
 
@@ -21,7 +20,7 @@ class ExtensionRegistry(object):
 
         # Add an association by setting an element
         registry['.zip'] = unzip
-        
+
         # Multiple extensions for one loader
         registry['.tgz'] = untar
         registry['.tar.gz'] = untar
@@ -37,7 +36,7 @@ class ExtensionRegistry(object):
 
         # Show registered extensions
         print registry.extensions()
-        
+
         # Can also register a format name for explicit control from caller
         registry['cx3'] = cx3
         print registry.formats()
