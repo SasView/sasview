@@ -56,9 +56,9 @@ class Load:
                     print "READ ERROR", line
             # Sanity check
             if not len(self.x) == len(self.dx):
-                raise ValueError, "x and dx have different length"
+                raise ValueError("x and dx have different length")
             if not len(self.y) == len(self.dy):
-                raise ValueError, "y and dy have different length"
+                raise ValueError("y and dy have different length")
             
             
     def get_values(self):

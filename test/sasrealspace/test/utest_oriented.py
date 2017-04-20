@@ -241,7 +241,7 @@ class TestEllipsoid(unittest.TestCase):
             self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
         except:
             print "Error", ana_val, sim_val, sim_val/ana_val
-            raise sys.exc_type, sys.exc_value
+            raise sys.exc_type(sys.exc_value)
 
 class TestCoreShell(unittest.TestCase):
     """ Tests for oriented (2D) systems """
@@ -395,7 +395,7 @@ class TestRunMethods(unittest.TestCase):
             self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
         except:
             print "Error", ana_val, sim_val, sim_val/ana_val
-            raise sys.exc_type, sys.exc_value
+            raise sys.exc_type(sys.exc_value)
 
     def testRunXY_float(self):
         """ Testing ellipsoid along X """
@@ -407,7 +407,7 @@ class TestRunMethods(unittest.TestCase):
             self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
         except:
             print "Error", ana_val, sim_val, sim_val/ana_val
-            raise sys.exc_type, sys.exc_value
+            raise sys.exc_type(sys.exc_value)
 
     def testRun_float(self):
         """ Testing ellipsoid along X """
@@ -419,7 +419,7 @@ class TestRunMethods(unittest.TestCase):
             self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
         except:
             print "Error", ana_val, sim_val, sim_val/ana_val
-            raise sys.exc_type, sys.exc_value
+            raise sys.exc_type(sys.exc_value)
 
     def testRun_list(self):
         """ Testing ellipsoid along X """
@@ -431,7 +431,7 @@ class TestRunMethods(unittest.TestCase):
             self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
         except:
             print "Error", ana_val, sim_val, sim_val/ana_val
-            raise sys.exc_type, sys.exc_value
+            raise sys.exc_type(sys.exc_value)
 
 class TestParamChange(unittest.TestCase):
     """ Tests for oriented (2D) systems """

@@ -34,7 +34,7 @@ class Model1DPlugin(BaseComponent):
             y_val = x[0]*math.sin(x[1])
             return self.function(x_val)*self.function(y_val)
         elif x.__class__.__name__ == 'tuple':
-            raise ValueError, "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError("Tuples are not allowed as input to BaseComponent models")
         else:
             return self.function(x)
 
@@ -51,7 +51,7 @@ class Model1DPlugin(BaseComponent):
         if x.__class__.__name__ == 'list':
             return self.function(x[0])*self.function(x[1])
         elif x.__class__.__name__ == 'tuple':
-            raise ValueError, "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError("Tuples are not allowed as input to BaseComponent models")
         else:
             return self.function(x)
 

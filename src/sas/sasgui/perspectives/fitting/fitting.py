@@ -1231,7 +1231,7 @@ class Plugin(PluginBase):
         """
         panel = self.plot_panel
         if panel is None:
-            raise ValueError, "Fitting:_onSelect: NonType panel"
+            raise ValueError("Fitting:_onSelect: NonType panel")
         Plugin.on_perspective(self, event=event)
         self.select_data(panel)
 

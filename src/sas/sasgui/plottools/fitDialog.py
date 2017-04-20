@@ -670,7 +670,7 @@ class LinearFit(wx.Dialog):
             if x > 0:
                 return x
             else:
-                raise ValueError, "cannot compute log of a negative number"
+                raise ValueError("cannot compute log of a negative number")
 
     def floatInvTransform(self, x):
         """
@@ -733,7 +733,7 @@ class LinearFit(wx.Dialog):
             float(xmax)
         except:
             msg = "LinearFit.set_fit_region: fit range must be floats"
-            raise ValueError, msg
+            raise ValueError(msg)
         self.xminFit.SetValue(format_number(xmin))
         self.xmaxFit.SetValue(format_number(xmax))
 

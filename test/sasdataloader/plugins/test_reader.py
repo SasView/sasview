@@ -37,7 +37,7 @@ class Reader:
                 try:
                     input_f =  open(path,'r')
                 except :
-                    raise  RuntimeError, "ascii_reader: cannot open %s" % path
+                    raise  RuntimeError("ascii_reader: cannot open %s" % path)
                 buff = input_f.read()
                 lines = buff.split('\n')
                 x  = np.zeros(0)
@@ -52,7 +52,7 @@ class Reader:
                 output.x = x
                 return output
         else:
-            raise RuntimeError, "%s is not a file" % path
+            raise RuntimeError("%s is not a file" % path)
         return None
     
 if __name__ == "__main__": 

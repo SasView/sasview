@@ -53,7 +53,7 @@ class FitThread(CalcThread):
             CalcThread.isquit(self)
         except KeyboardInterrupt:
             msg = "Fitting: terminated by the user."
-            raise KeyboardInterrupt, msg
+            raise KeyboardInterrupt(msg)
 
     def compute(self):
         """

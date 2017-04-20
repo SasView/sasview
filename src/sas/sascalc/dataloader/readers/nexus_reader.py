@@ -34,7 +34,7 @@ class Reader:
         except:
             msg = "Error reading Nexus file: Nexus package is missing.\n"
             msg += "  Get it from http://http://www.nexusformat.org/"
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
         
         # Instantiate data object
         output = Data2D()

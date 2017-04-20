@@ -69,8 +69,7 @@ class Reader:
     def read(self, filename=None):
         """ Read file """
         if not os.path.isfile(filename):
-            raise ValueError, \
-            "Specified file %s is not a regular file" % filename
+            raise ValueError("Specified file %s is not a regular file" % filename)
 
         # Read file
         f = open(filename, 'r')
@@ -231,7 +230,7 @@ class Reader:
             data_point = data_array.reshape(row_num, col_num).transpose()
         except:
             msg = "red2d_reader: Can't read this file: Not a proper file format"
-            raise ValueError, msg
+            raise ValueError(msg)
         ## Get the all data: Let's HARDcoding; Todo find better way
         # Defaults
         dqx_data = np.zeros(0)

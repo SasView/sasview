@@ -41,12 +41,12 @@ def convert_unit(power, unit):
                         else:
                             unit = toks[0] + "^{" + str(powerer) + "}"
                 else:
-                    raise ValueError, "missing } in unit expression"
+                    raise ValueError("missing } in unit expression")
         else:  # no powerer
             if  power != 1:
                 unit = "(" + unit + ")" + "^{" + str(power) + "}"
     else:
-        raise ValueError, "empty unit ,enter a powerer different from zero"
+        raise ValueError("empty unit ,enter a powerer different from zero")
     return unit
 
 

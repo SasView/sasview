@@ -2612,7 +2612,7 @@ class ViewerFrame(PARENT_FRAME):
                         data.filename
             wx.PostEvent(self, StatusEvent(status=msg,
                                            info="error"))
-            raise ValueError, msg
+            raise ValueError(msg)
         # text = str(data)
         text = data.__str__()
         text += 'Data Min Max:\n'

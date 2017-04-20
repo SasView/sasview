@@ -49,7 +49,7 @@ class Reader:
                 try:
                     input_f = open(path,'r')
                 except:
-                    raise  RuntimeError, "abs_reader: cannot open %s" % path
+                    raise  RuntimeError("abs_reader: cannot open %s" % path)
                 buff = input_f.read()
                 lines = buff.split('\n')
                 x  = np.zeros(0)
@@ -98,7 +98,7 @@ class Reader:
                         except:
                             #goes to ASC reader
                             msg = "abs_reader: cannot open %s" % path
-                            raise  RuntimeError, msg
+                            raise  RuntimeError(msg)
                         
                         # Distance in meters
                         try:
@@ -113,7 +113,7 @@ class Reader:
                         except:
                             #goes to ASC reader
                             msg = "abs_reader: cannot open %s" % path
-                            raise  RuntimeError, msg
+                            raise  RuntimeError(msg)
                         # Transmission
                         try:
                             output.sample.transmission = float(line_toks[4])
@@ -222,11 +222,11 @@ class Reader:
                 # Sanity check
                 if not len(y) == len(dy):
                     msg = "abs_reader: y and dy have different length"
-                    raise ValueError, msg
+                    raise ValueError(msg)
                 # If the data length is zero, consider this as
                 # though we were not able to read the file.
                 if len(x) == 0:
-                    raise ValueError, "ascii_reader: could not load file"
+                    raise ValueError("ascii_reader: could not load file")
                 
                 output.x = x[x != 0]
                 output.y = y[x != 0]
@@ -245,5 +245,5 @@ class Reader:
                 output.meta_data['loader'] = self.type_name
                 return output
         else:
-            raise RuntimeError, "%s is not a file" % path
+            raise RuntimeError("%s is not a file" % path)
         return None

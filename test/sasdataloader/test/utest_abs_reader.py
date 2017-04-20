@@ -274,7 +274,7 @@ class cansas_reader(unittest.TestCase):
                 _found2 = True
                 
         if _found1==False or _found2==False:
-            raise RuntimeError, "Could not find all data %s %s" % (_found1, _found2) 
+            raise RuntimeError("Could not find all data %s %s" % (_found1, _found2)) 
             
         # Detector
         self.assertEqual(self.data.detector[0].name, "fictional hybrid")
@@ -320,7 +320,7 @@ class cansas_reader(unittest.TestCase):
                     _found_term1 = True
                     
         if _found_term1==False or _found_term2==False:
-            raise RuntimeError, "Could not find all process terms %s %s" % (_found_term1, _found_term2) 
+            raise RuntimeError("Could not find all process terms %s %s" % (_found_term1, _found_term2)) 
             
         
         

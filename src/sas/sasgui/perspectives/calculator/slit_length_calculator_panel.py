@@ -261,7 +261,7 @@ class SlitLengthCalculatorPanel(wx.Panel, PanelBase):
             y = data.y
             if x == [] or  x is None or y == [] or y is None:
                 msg = "The current data is empty please check x and y"
-                raise ValueError, msg
+                raise ValueError(msg)
             slit_length_calculator = SlitlengthCalculator()
             slit_length_calculator.set_data(x=x, y=y)
             slit_length = slit_length_calculator.calculate_slit_length()

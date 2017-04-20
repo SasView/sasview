@@ -283,7 +283,7 @@ class Reader(CansasReader):
             basename = os.path.basename(path)
             root, ext = os.path.splitext(basename)
             if not ext.lower() in self.ext:
-                raise IOError, "{} is not a supported file type".format(ext)
+                raise IOError("{} is not a supported file type".format(ext))
             tree = etree.parse(path, parser=etree.ETCompatXMLParser())
             root = tree.getroot()
             entry_list = root.xpath('/ns:SASroot/ns:SASentry',
@@ -299,7 +299,7 @@ class Reader(CansasReader):
         else:
             # File not found
             msg = "{} is not a valid file path or doesn't exist".format(path)
-            raise IOError, msg
+            raise IOError(msg)
 
         if len(output) == 0:
             return None
@@ -323,7 +323,7 @@ class Reader(CansasReader):
         elif not (isinstance(datainfo, Data1D) or isinstance(datainfo, LoaderData1D)):
             msg = ("The CanSAS writer expects a Data1D instance. {} was "
                 "provided").format(datainfo.__class__.__name__)
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
         if datainfo.title is None or datainfo.title == '':
             datainfo.title = datainfo.name
         if datainfo.run_name is None or datainfo.run_name == '':

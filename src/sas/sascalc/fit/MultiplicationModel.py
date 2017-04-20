@@ -244,7 +244,7 @@ class MultiplicationModel(BaseComponent):
                     self.params[item] = value
                     return
 
-        raise ValueError, "Model does not contain parameter %s" % name
+        raise ValueError("Model does not contain parameter %s" % name)
 
 
     def _set_fixed_params(self):

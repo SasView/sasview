@@ -234,7 +234,7 @@ class InversionState(object):
         if file is not None:
             msg = "InversionState no longer supports non-CanSAS"
             msg += " format for P(r) files"
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
 
         if node.get('version') and node.get('version') == '1.0':
 
@@ -477,7 +477,7 @@ class Reader(CansasReader):
                         sas_entry.filename = prstate.file
                         output.append(sas_entry)
         else:
-            raise RuntimeError, "%s is not a file" % path
+            raise RuntimeError("%s is not a file" % path)
 
         # Return output consistent with the loader's api
         if len(output) == 0:
@@ -521,7 +521,7 @@ class Reader(CansasReader):
         elif not issubclass(datainfo.__class__, Data1D):
             msg = "The cansas writer expects a Data1D "
             msg += "instance: %s" % str(datainfo.__class__.__name__)
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
 
         # Create basic XML document
         doc, sasentry = self._to_xml_doc(datainfo)

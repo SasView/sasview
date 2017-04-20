@@ -364,7 +364,7 @@ class InvariantState(object):
         if file is not None:
             msg = "InvariantSate no longer supports non-CanSAS"
             msg += " format for invariant files"
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
 
         if node.get('version')\
             and node.get('version') == '1.0':
@@ -738,7 +738,7 @@ class Reader(CansasReader):
                         sas_entry.filename = invstate.file
                         output.append(sas_entry)
         else:
-            raise RuntimeError, "%s is not a file" % path
+            raise RuntimeError("%s is not a file" % path)
 
         # Return output consistent with the loader's api
         if len(output) == 0:
@@ -784,7 +784,7 @@ class Reader(CansasReader):
         elif not issubclass(datainfo.__class__, sas.sascalc.dataloader.data_info.Data1D):
             msg = "The cansas writer expects a Data1D"
             msg += " instance: %s" % str(datainfo.__class__.__name__)
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
         # make sure title and data run is filled up.
         if datainfo.title is None or datainfo.title == '':
             datainfo.title = datainfo.name

@@ -207,7 +207,7 @@ class ResolutionCalculator(object):
 
         if wavelength == 0:
             msg = "Can't compute the resolution: the wavelength is zero..."
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
         return self.intensity
 
     def compute(self, wavelength, wavelength_spread, qx_value, qy_value,
@@ -502,7 +502,7 @@ class ResolutionCalculator(object):
             y_comp = size[1] * phi_y
         # otherwise
         else:
-            raise ValueError, " Improper input..."
+            raise ValueError(" Improper input...")
         # get them squared
         sigma = x_comp * x_comp
         sigma += y_comp * y_comp
@@ -765,7 +765,7 @@ class ResolutionCalculator(object):
         : param size: [dia_value] or [x_value, y_value]
         """
         if len(size) < 1 or len(size) > 2:
-            raise RuntimeError, "The length of the size must be one or two."
+            raise RuntimeError("The length of the size must be one or two.")
         self.aperture.set_source_size(size)
 
     def set_neutron_mass(self, mass):
@@ -782,7 +782,7 @@ class ResolutionCalculator(object):
         : param size: [dia_value] or [xheight_value, yheight_value]
         """
         if len(size) < 1 or len(size) > 2:
-            raise RuntimeError, "The length of the size must be one or two."
+            raise RuntimeError("The length of the size must be one or two.")
         self.aperture.set_sample_size(size)
 
     def set_detector_pix_size(self, size):
@@ -805,7 +805,7 @@ class ResolutionCalculator(object):
         : param distance: [distance, x_offset]
         """
         if len(distance) < 1 or len(distance) > 2:
-            raise RuntimeError, "The length of the size must be one or two."
+            raise RuntimeError("The length of the size must be one or two.")
         self.aperture.set_sample_distance(distance)
 
     def set_sample2sample_distance(self, distance):
@@ -815,7 +815,7 @@ class ResolutionCalculator(object):
         : param distance: [distance, x_offset]
         """
         if len(distance) < 1 or len(distance) > 2:
-            raise RuntimeError, "The length of the size must be one or two."
+            raise RuntimeError("The length of the size must be one or two.")
         self.sample.set_distance(distance)
 
     def set_sample2detector_distance(self, distance):
@@ -825,7 +825,7 @@ class ResolutionCalculator(object):
         : param distance: [distance, x_offset]
         """
         if len(distance) < 1 or len(distance) > 2:
-            raise RuntimeError, "The length of the size must be one or two."
+            raise RuntimeError("The length of the size must be one or two.")
         self.detector.set_distance(distance)
 
     def get_all_instrument_params(self):
@@ -997,7 +997,7 @@ class ResolutionCalculator(object):
             pix_x_size = detector_pix_size[0]
             pix_y_size = detector_pix_size[1]
         else:
-            raise ValueError, " Input value format error..."
+            raise ValueError(" Input value format error...")
         # Sample to detector distance = sample slit to detector
         # minus sample offset
         sample2detector_distance = self.sample2detector_distance[0] - \
