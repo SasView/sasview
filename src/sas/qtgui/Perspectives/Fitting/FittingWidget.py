@@ -29,6 +29,7 @@ from sas.sasgui.perspectives.fitting.utils import get_weight
 from UI.FittingWidgetUI import Ui_FittingWidgetUI
 from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
+from SmearingWidget import SmearingWidget
 
 TAB_MAGNETISM = 4
 TAB_POLY = 3
@@ -89,6 +90,13 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.setupUi(self)
         self.setWindowTitle("Fitting")
         self.communicate = self.parent.communicate
+
+        # Smearing widget
+        layout = QtGui.QGridLayout()
+        self.smearing_widget = SmearingWidget(self)
+        layout.addWidget(self.smearing_widget) 
+        #self.tabFitting.removeTab(2)
+        self.tabFitting.insertTab(2, self.smearing_widget, "Resolution")
 
         # Define bold font for use in various controls
         self.boldFont=QtGui.QFont()
@@ -160,7 +168,18 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Update logics with data items
         self.logic.data = GuiUtils.dataFromItem(value)
 
+        # Overwrite data type descriptor
+        self.is2D = True if isinstance(self.logic.data, Data2D) else False
+
         self.data_is_loaded = True
+
+        # Enable/disable UI components
+        self.setEnablementOnDataLoad()
+
+    def setEnablementOnDataLoad(self):
+        """
+        Enable/disable various UI elements based on data loaded
+        """
         # Tag along functionality
         self.label.setText("Data loaded from: ")
         self.lblFilename.setText(self.logic.data.filename)
@@ -172,6 +191,38 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.txtNpts.setEnabled(False)
         self.txtNptsFit.setEnabled(False)
         self.chkLogData.setEnabled(False)
+        # Switch off Data2D control
+        self.chk2DView.setEnabled(False)
+        self.chk2DView.setVisible(False)
+        self.chkMagnetism.setEnabled(True)
+
+        # Weighting and smearing controls
+        if self.is2D:
+            #self.slit_smearer.Disable()
+            #self.pinhole_smearer.Enable(True)
+            #self.default_mask = copy.deepcopy(self.data.mask)
+            if self.logic.data.err_data is None or\
+                    numpy.all(err == 1 for err in self.logic.data.err_data) or \
+                    not numpy.any(self.logic.data.err_data):
+                self.rbWeighting2.setEnabled(False)
+                self.rbWeighting1.setChecked(True)
+            else:
+                self.rbWeighting2.setEnabled(True)
+                self.rbWeighting2.setChecked(True)
+        else:
+            #self.slit_smearer.Enable(True)
+            #self.pinhole_smearer.Enable(True)
+            if self.logic.data.dy is None or\
+                    numpy.all(self.logic.data.dy == 1) or\
+                    not numpy.any(self.logic.data.dy):
+                self.rbWeighting2.setEnabled(False)
+                self.rbWeighting1.setChecked(True)
+            else:
+                self.rbWeighting2.setEnabled(True)
+                self.rbWeighting2.setChecked(True)
+
+        # Smearing tab
+        self.smearing_widget.updateSmearing(self.data)
 
     def acceptsData(self):
         """ Tells the caller this widget can accept new dataset """
@@ -210,7 +261,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.chkMagnetism.setEnabled(isChecked)
         self.is2D = isChecked
         # Reload the current model
-        self.onSelectModel()
+        if self.kernel_module:
+            self.onSelectModel()
 
     def toggleLogData(self, isChecked):
         """ Toggles between log and linear data sets """
@@ -241,6 +293,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.weightingGroup.addButton(self.rbWeighting2)
         self.weightingGroup.addButton(self.rbWeighting3)
         self.weightingGroup.addButton(self.rbWeighting4)
+        # Smearing tab
+        self.smearing_widget.updateSmearing(self.data)
 
     def initializeSignals(self):
         """
@@ -250,7 +304,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.cbStructureFactor.currentIndexChanged.connect(self.onSelectStructureFactor)
         self.cbCategory.currentIndexChanged.connect(self.onSelectCategory)
         self.cbModel.currentIndexChanged.connect(self.onSelectModel)
-        self.cbSmearing.currentIndexChanged.connect(self.onSelectSmearing)
+        #self.cbSmearing.currentIndexChanged.connect(self.onSelectSmearing)
         # Checkboxes
         self.chk2DView.toggled.connect(self.toggle2D)
         self.chkPolydispersity.toggled.connect(self.togglePoly)
@@ -265,8 +319,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.txtNpts.editingFinished.connect(self.onNpts)
         self.txtMinRange.editingFinished.connect(self.onMinRange)
         self.txtMaxRange.editingFinished.connect(self.onMaxRange)
-        self.txtSmearUp.editingFinished.connect(self.onSmearUp)
-        self.txtSmearDown.editingFinished.connect(self.onSmearDown)
+        #self.txtSmearUp.editingFinished.connect(self.onSmearUp)
+        #self.txtSmearDown.editingFinished.connect(self.onSmearDown)
         # Button groups
         self.weightingGroup.buttonClicked.connect(self.onWeightingChoice)
 
@@ -716,8 +770,10 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         # Check the state of the Weighting radio buttons
         button_id = self.weightingGroup.checkedId()
+        # Cast the id to a valid index
         button_id = abs(button_id + 2)
         if button_id == 0:
+            # No weight added
             return
         # Send original data for weighting
         weight = get_weight(data=data, is2d=self.is2D, flag=button_id)
