@@ -11,6 +11,10 @@ from sas.sasgui.guiframe.dataFitting import Data2D
 from UI.SmearingWidgetUI import Ui_SmearingWidgetUI
 
 class DataWidgetMapper(QtGui.QDataWidgetMapper):
+    """
+    Custom version of the standard QDataWidgetMapper allowing for proper
+    response to index change in comboboxes
+    """
     def addMapping(self, widget, section, propertyName=None):
         if propertyName is None:
             super(DataWidgetMapper, self).addMapping(widget, section)
@@ -35,11 +39,21 @@ class SmearingWidget(QtGui.QWidget, Ui_SmearingWidgetUI):
         super(SmearingWidget, self).__init__()
 
         self.setupUi(self)
+
+        # Have we loaded data yet? If so, what kind
+        self.is_data = None
+        # Local model for holding data
+        self.model = None
+        # Mapper for model update
+        self.mapper = None
+
+        # Let only floats in the line edits
+        self.txtSmearDown.setValidator(QtGui.QDoubleValidator())
+        self.txtSmearUp.setValidator(QtGui.QDoubleValidator())
+
+        # Attach slots
         self.cbSmearing.currentIndexChanged.connect(self.onIndexChange)
         self.cbSmearing.setCurrentIndex(0)
-        self.is_data = None
-        self.model = None
-        self.mapper = None
 
         self.initModel()
         self.initMapper()
@@ -51,16 +65,13 @@ class SmearingWidget(QtGui.QWidget, Ui_SmearingWidgetUI):
         self.model = QtGui.QStandardItemModel()
         for model_item in xrange(len(MODEL)):
             self.model.setItem(model_item, QtGui.QStandardItem())
-
+        # Attach slot
         self.model.dataChanged.connect(self.onModelChange)
-
-        ##self.modelReset()
 
     def initMapper(self):
         """
         Initialize model item <-> UI element mapping
         """
-        #self.mapper = QtGui.QDataWidgetMapper(self)
         self.mapper = DataWidgetMapper(self)
 
         self.mapper.setModel(self.model)
@@ -106,8 +117,10 @@ class SmearingWidget(QtGui.QWidget, Ui_SmearingWidgetUI):
 
     def onModelChange(self, top, bottom):
         """
+        Respond to model change by updating
         """
-        print "MODEL CHANGED: ", top, bottom
+        print "MODEL CHANGED for property: %s. The value is now: %s" % \
+            (MODEL[top.row()], str(self.model.item(top.row()).text()))
         pass
 
     def setElementsVisibility(self, visible):
@@ -149,4 +162,10 @@ class SmearingWidget(QtGui.QWidget, Ui_SmearingWidgetUI):
         """
         Returns current state of controls
         """
-        
+        # or model-held values
+        smearing = str(self.model.item(MODEL.index('SMEARING')).text())
+        accuracy = str(self.model.item(MODEL.index('ACCURACY')).text())
+        d_down = float(self.model.item(MODEL.index('PINHOLE_MIN')).text())
+        d_up = float(self.model.item(MODEL.index('PINHOLE_MAX')).text())
+
+        return (smearing, accuracy, d_down, d_up)

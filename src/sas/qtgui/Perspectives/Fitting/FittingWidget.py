@@ -196,11 +196,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.chk2DView.setVisible(False)
         self.chkMagnetism.setEnabled(True)
 
-        # Weighting and smearing controls
+        # Weighting controls
         if self.is2D:
-            #self.slit_smearer.Disable()
-            #self.pinhole_smearer.Enable(True)
-            #self.default_mask = copy.deepcopy(self.data.mask)
             if self.logic.data.err_data is None or\
                     numpy.all(err == 1 for err in self.logic.data.err_data) or \
                     not numpy.any(self.logic.data.err_data):
@@ -210,8 +207,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
                 self.rbWeighting2.setEnabled(True)
                 self.rbWeighting2.setChecked(True)
         else:
-            #self.slit_smearer.Enable(True)
-            #self.pinhole_smearer.Enable(True)
             if self.logic.data.dy is None or\
                     numpy.all(self.logic.data.dy == 1) or\
                     not numpy.any(self.logic.data.dy):
@@ -304,7 +299,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.cbStructureFactor.currentIndexChanged.connect(self.onSelectStructureFactor)
         self.cbCategory.currentIndexChanged.connect(self.onSelectCategory)
         self.cbModel.currentIndexChanged.connect(self.onSelectModel)
-        #self.cbSmearing.currentIndexChanged.connect(self.onSelectSmearing)
         # Checkboxes
         self.chk2DView.toggled.connect(self.toggle2D)
         self.chkPolydispersity.toggled.connect(self.togglePoly)
@@ -319,8 +313,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.txtNpts.editingFinished.connect(self.onNpts)
         self.txtMinRange.editingFinished.connect(self.onMinRange)
         self.txtMaxRange.editingFinished.connect(self.onMaxRange)
-        #self.txtSmearUp.editingFinished.connect(self.onSmearUp)
-        #self.txtSmearDown.editingFinished.connect(self.onSmearDown)
         # Button groups
         self.weightingGroup.buttonClicked.connect(self.onWeightingChoice)
 
@@ -399,24 +391,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Populate the models combobox
         self.cbModel.addItems(sorted([model for (model, _) in model_list]))
 
-    def onSelectSmearing(self):
-        """
-        Select Smearing type from list
-        """
-        pass
-
-    def onSmearUp(self):
-        """
-        Update state based on entered smear value
-        """
-        pass
-
-    def onSmearDown(self):
-        """
-        Update state based on entered smear value
-        """
-        pass
-
     def onWeightingChoice(self, button):
         """
         Update weighting in the fit state
@@ -475,6 +449,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         # Potential weights added
         self.addWeightingToData(data)
+
+        # Potential smearing added
+        smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
 
         # These should be updating somehow?
         fit_id = 0
