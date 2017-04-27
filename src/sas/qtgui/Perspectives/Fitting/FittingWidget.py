@@ -1,7 +1,7 @@
 import sys
 import json
 import os
-import numpy
+import numpy as np
 from collections import defaultdict
 from itertools import izip
 
@@ -30,15 +30,13 @@ from UI.FittingWidgetUI import Ui_FittingWidgetUI
 from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from SmearingWidget import SmearingWidget
+from OptionsWidget import OptionsWidget
 
 TAB_MAGNETISM = 4
 TAB_POLY = 3
 CATEGORY_DEFAULT = "Choose category..."
 CATEGORY_STRUCTURE = "Structure Factor"
 STRUCTURE_DEFAULT = "None"
-QMIN_DEFAULT = 0.0005
-QMAX_DEFAULT = 0.5
-NPTS_DEFAULT = 50
 
 class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
     """
@@ -68,8 +66,12 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.models = {}
         # Parameters to fit
         self.parameters_to_fit = None
-        # Weight radio box group
-        self.weightingGroup = QtGui.QButtonGroup()
+        # Fit options
+        self.q_range_min = 0.005
+        self.q_range_max = 0.1
+        self.npts = 25
+        self.log_points = False
+        self.weighting = 0
 
         # Which tab is this widget displayed in?
         self.tab_id = id
@@ -77,11 +79,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Which shell is being currently displayed?
         self.current_shell_displayed = 0
         self.has_error_column = False
-
-        # Range parameters
-        self.q_range_min = QMIN_DEFAULT
-        self.q_range_max = QMAX_DEFAULT
-        self.npts = NPTS_DEFAULT
 
         # Main Data[12]D holder
         self.logic = FittingLogic(data=data)
@@ -91,12 +88,17 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.setWindowTitle("Fitting")
         self.communicate = self.parent.communicate
 
+        # Options widget
+        layout = QtGui.QGridLayout()
+        self.options_widget = OptionsWidget(self, self.logic)
+        layout.addWidget(self.options_widget) 
+        self.tabOptions.setLayout(layout)
+
         # Smearing widget
         layout = QtGui.QGridLayout()
         self.smearing_widget = SmearingWidget(self)
         layout.addWidget(self.smearing_widget) 
-        #self.tabFitting.removeTab(2)
-        self.tabFitting.insertTab(2, self.smearing_widget, "Resolution")
+        self.tabResolution.setLayout(layout)
 
         # Define bold font for use in various controls
         self.boldFont=QtGui.QFont()
@@ -185,36 +187,12 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.lblFilename.setText(self.logic.data.filename)
         self.updateQRange()
         self.cmdFit.setEnabled(True)
-        self.boxWeighting.setEnabled(True)
-        self.cmdMaskEdit.setEnabled(True)
-        # Switch off txtNpts related controls
-        self.txtNpts.setEnabled(False)
-        self.txtNptsFit.setEnabled(False)
-        self.chkLogData.setEnabled(False)
         # Switch off Data2D control
         self.chk2DView.setEnabled(False)
         self.chk2DView.setVisible(False)
         self.chkMagnetism.setEnabled(True)
-
-        # Weighting controls
-        if self.is2D:
-            if self.logic.data.err_data is None or\
-                    numpy.all(err == 1 for err in self.logic.data.err_data) or \
-                    not numpy.any(self.logic.data.err_data):
-                self.rbWeighting2.setEnabled(False)
-                self.rbWeighting1.setChecked(True)
-            else:
-                self.rbWeighting2.setEnabled(True)
-                self.rbWeighting2.setChecked(True)
-        else:
-            if self.logic.data.dy is None or\
-                    numpy.all(self.logic.data.dy == 1) or\
-                    not numpy.any(self.logic.data.dy):
-                self.rbWeighting2.setEnabled(False)
-                self.rbWeighting1.setChecked(True)
-            else:
-                self.rbWeighting2.setEnabled(True)
-                self.rbWeighting2.setChecked(True)
+        # Similarly on other tabs
+        self.options_widget.setEnablementOnDataLoad()
 
         # Smearing tab
         self.smearing_widget.updateSmearing(self.data)
@@ -259,17 +237,13 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         if self.kernel_module:
             self.onSelectModel()
 
-    def toggleLogData(self, isChecked):
-        """ Toggles between log and linear data sets """
-        pass
-
     def initializeControls(self):
         """
         Set initial control enablement
         """
         self.cmdFit.setEnabled(False)
         self.cmdPlot.setEnabled(True)
-        self.cmdComputePoints.setVisible(False) # probably redundant
+        self.options_widget.cmdComputePoints.setVisible(False) # probably redundant
         self.chkPolydispersity.setEnabled(True)
         self.chkPolydispersity.setCheckState(False)
         self.chk2DView.setEnabled(True)
@@ -280,16 +254,10 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.tabFitting.setTabEnabled(TAB_POLY, False)
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, False)
         self.lblChi2Value.setText("---")
-        # Group boxes
-        self.boxWeighting.setEnabled(False)
-        self.cmdMaskEdit.setEnabled(False)
-        # Button groups
-        self.weightingGroup.addButton(self.rbWeighting1)
-        self.weightingGroup.addButton(self.rbWeighting2)
-        self.weightingGroup.addButton(self.rbWeighting3)
-        self.weightingGroup.addButton(self.rbWeighting4)
         # Smearing tab
         self.smearing_widget.updateSmearing(self.data)
+        # Line edits in the option tab
+        self.updateQRange()
 
     def initializeSignals(self):
         """
@@ -303,24 +271,18 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.chk2DView.toggled.connect(self.toggle2D)
         self.chkPolydispersity.toggled.connect(self.togglePoly)
         self.chkMagnetism.toggled.connect(self.toggleMagnetism)
-        self.chkLogData.toggled.connect(self.toggleLogData)
         # Buttons
         self.cmdFit.clicked.connect(self.onFit)
         self.cmdPlot.clicked.connect(self.onPlot)
-        self.cmdMaskEdit.clicked.connect(self.onMaskEdit)
-        self.cmdReset.clicked.connect(self.onReset)
-        # Line edits
-        self.txtNpts.editingFinished.connect(self.onNpts)
-        self.txtMinRange.editingFinished.connect(self.onMinRange)
-        self.txtMaxRange.editingFinished.connect(self.onMaxRange)
-        # Button groups
-        self.weightingGroup.buttonClicked.connect(self.onWeightingChoice)
 
         # Respond to change in parameters from the UI
         self._model_model.itemChanged.connect(self.updateParamsFromModel)
         self._poly_model.itemChanged.connect(self.onPolyModelChange)
         # TODO after the poly_model prototype accepted
         #self._magnet_model.itemChanged.connect(self.onMagneticModelChange)
+
+        # Signals from separate tabs asking for replot
+        self.options_widget.plot_signal.connect(self.onOptionsUpdate)
 
     def onSelectModel(self):
         """
@@ -391,15 +353,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Populate the models combobox
         self.cbModel.addItems(sorted([model for (model, _) in model_list]))
 
-    def onWeightingChoice(self, button):
-        """
-        Update weighting in the fit state
-        """
-        button_id = button.group().checkedId()
-        button_id = abs(button_id + 2)
-        #self.fitPage.weighting = button_id
-        print button_id
-
     def onPolyModelChange(self, item):
         """
         Callback method for updating the main model and sasmodel
@@ -447,10 +400,12 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         qmax = self.q_range_max
         params_to_fit = self.parameters_to_fit
 
-        # Potential weights added
+        # Potential weights added directly to data
         self.addWeightingToData(data)
 
         # Potential smearing added
+        # Remember that smearing_min/max can be None ->
+        # deal with it until Python gets discriminated unions
         smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
 
         # These should be updating somehow?
@@ -511,9 +466,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         res_list = result[0]
         res = res_list[0]
         if res.fitness is None or \
-            not numpy.isfinite(res.fitness) or \
-            numpy.any(res.pvec == None) or \
-            not numpy.all(numpy.isfinite(res.pvec)):
+            not np.isfinite(res.fitness) or \
+            np.any(res.pvec == None) or \
+            not np.all(np.isfinite(res.pvec)):
             msg = "Fitting did not converge!!!"
             self.communicate.statusBarUpdateSignal.emit(msg)
             logging.error(msg)
@@ -606,68 +561,17 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Plot the current set of data
         """
-        if self.data is None :
+        if not self.data_is_loaded:
             self.createDefaultDataset()
         self.calculateQGridForModel()
 
-    def onNpts(self):
+    def onOptionsUpdate(self):
         """
-        Callback for number of points line edit update
+        Update local option values and replot
         """
-        # assumes type/value correctness achieved with QValidator
-        try:
-            self.npts = int(self.txtNpts.text())
-        except ValueError:
-            # TODO
-            # This will return the old value to model/view and return
-            # notifying the user about format available.
-            pass
-        # Force redisplay
-        if self.model_is_loaded:
-            self.onPlot()
-
-    def onMinRange(self):
-        """
-        Callback for minimum range of points line edit update
-        """
-        # assumes type/value correctness achieved with QValidator
-        try:
-            self.q_range_min = float(self.txtMinRange.text())
-        except ValueError:
-            # TODO
-            # This will return the old value to model/view and return
-            # notifying the user about format available.
-            return
-        # set Q range labels on the main tab
-        #self.lblMinRangeDef.setText(str(self.q_range_min))
-        if self.model_is_loaded:
-            self.onPlot()
-
-    def onMaxRange(self):
-        """
-        Callback for maximum range of points line edit update
-        """
-        # assumes type/value correctness achieved with QValidator
-        try:
-            self.q_range_max = float(self.txtMaxRange.text())
-        except:
-            pass
-        # set Q range labels on the main tab
-        self.lblMaxRangeDef.setText(str(self.q_range_max))
-        if self.model_is_loaded:
-            self.onPlot()
-
-    def onMaskEdit(self):
-        """
-        Callback for running the mask editor
-        """
-        pass
-
-    def onReset(self):
-        """
-        Callback for resetting qmin/qmax
-        """
-        pass
+        self.q_range_min, self.q_range_max, self.npts, self.log_points, self.weighting = \
+            self.options_widget.state()
+        self.onPlot()
 
     def setDefaultStructureCombo(self):
         """
@@ -685,13 +589,18 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         # Create default datasets if no data passed
         if self.is2D:
-            qmax = self.q_range_max/numpy.sqrt(2)
+            qmax = self.q_range_max/np.sqrt(2)
             qstep = self.npts
             self.logic.createDefault2dData(qmax, qstep, self.tab_id)
+            return
+        elif self.log_points:
+            qmin = -10.0 if self.q_range_min < 1.e-10 else np.log10(self.q_range_min)
+            qmax =  10.0 if self.q_range_max > 1.e10 else np.log10(self.q_range_max)
+            interval = np.logspace(start=qmin, stop=qmax, num=self.npts, endpoint=True, base=10.0)
         else:
-            interval = numpy.linspace(start=self.q_range_min, stop=self.q_range_max,
-                        num=self.npts, endpoint=True)
-            self.logic.createDefault1dData(interval, self.tab_id)
+            interval = np.linspace(start=self.q_range_min, stop=self.q_range_max,
+                    num=self.npts, endpoint=True)
+        self.logic.createDefault1dData(interval, self.tab_id)
 
     def readCategoryInfo(self):
         """
@@ -744,20 +653,11 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
     def addWeightingToData(self, data):
         """
         Adds weighting contribution to fitting data
-        """
-        # Check the state of the Weighting radio buttons
-        button_id = self.weightingGroup.checkedId()
-        # Cast the id to a valid index
-        button_id = abs(button_id + 2)
-        if button_id == 0:
-            # No weight added
-            return
+        #"""
         # Send original data for weighting
-        weight = get_weight(data=data, is2d=self.is2D, flag=button_id)
-        if self.is2D:
-            data.err_data = weight
-        else:
-            data.dy = weight
+        weight = get_weight(data=data, is2d=self.is2D, flag=self.weighting)
+        update_module = data.err_data if self.is2D else data.dy
+        update_module = weight
 
     def updateQRange(self):
         """
@@ -769,10 +669,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.lblMinRangeDef.setText(str(self.q_range_min))
         self.lblMaxRangeDef.setText(str(self.q_range_max))
         # set Q range labels on the options tab
-        self.txtMaxRange.setText(str(self.q_range_max))
-        self.txtMinRange.setText(str(self.q_range_min))
-        self.txtNpts.setText(str(self.npts))
-        self.txtNptsFit.setText(str(self.npts))
+        self.options_widget.updateQRange(self.q_range_min, self.q_range_max, self.npts)
 
     def SASModelToQModel(self, model_name, structure_factor=None):
         """
@@ -958,6 +855,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Prepare the fitting data object, based on current ModelModel
         """
+        if self.kernel_module is None:
+            return
         # Awful API to a backend method.
         method = self.methodCalculateForData()(data=self.data,
                               model=self.kernel_module,

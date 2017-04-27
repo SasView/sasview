@@ -230,7 +230,7 @@ def calculateChi2(reference_data, current_data):
     try:
         res = (fn - gn) / en
     except ValueError:
-        print "Chi2 calculations: Unmatched lengths %s, %s, %s" % (len(fn), len(gn), len(en))
+        #print "Chi2 calculations: Unmatched lengths %s, %s, %s" % (len(fn), len(gn), len(en))
         return None
 
     residuals = res[numpy.isfinite(res)]
@@ -247,27 +247,31 @@ def residualsData1D(reference_data, current_data):
     weight = None
 
     # 1d theory from model_thread is only in the range of index
-    if current_data.dy == None or current_data.dy == []:
+    if current_data.dy is None or current_data.dy == []:
         dy = numpy.ones(len(current_data.y))
     else:
-        if weight == None:
-            dy = numpy.ones(len(current_data.y))
-        else:
-            dy = weight
+        dy = weight if weight is not None else numpy.ones(len(current_data.y))
         dy[dy == 0] = 1
     fn = current_data.y[index][0]
     gn = reference_data.y
     en = dy[index][0]
     # build residuals
     residuals = Data1D()
-    try:
+    if len(fn) == len(gn):
         y = (fn - gn)/en
         residuals.y = -y
-    except:
-        msg = "ResidualPlot Error: different # of data points in theory"
-        print msg
+    else:
         y = (fn - gn[index][0]) / en
         residuals.y = y
+
+    #try:
+    #    y = (fn - gn)/en
+    #    residuals.y = -y
+    #except ValueError:
+    #    msg = "ResidualPlot Error: different number of data points in theory"
+    #    print msg
+    #    y = (fn - gn[index][0]) / en
+    #    residuals.y = y
     residuals.x = current_data.x[index][0]
     residuals.dy = numpy.ones(len(residuals.y))
     residuals.dx = None
@@ -295,10 +299,7 @@ def residualsData2D(reference_data, current_data):
     residuals.data = None
     fn = current_data.data
     gn = reference_data.data
-    if weight == None:
-        en = current_data.err_data
-    else:
-        en = weight
+    en = current_data.err_data if weight is None else weight
     residuals.data = (fn - gn) / en
     residuals.qx_data = current_data.qx_data
     residuals.qy_data = current_data.qy_data

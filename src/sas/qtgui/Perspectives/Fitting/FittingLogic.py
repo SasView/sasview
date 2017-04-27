@@ -27,6 +27,10 @@ class FittingLogic(object):
         self._data = value
         self.data_is_loaded = True
 
+    def isLoadedData(self):
+        """ accessor """
+        return self.data_is_loaded
+
     def createDefault1dData(self, interval, tab_id=0):
         """
         Create default data for fitting perspective

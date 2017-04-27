@@ -41,7 +41,7 @@ class SmearingWidget(QtGui.QWidget, Ui_SmearingWidgetUI):
         self.setupUi(self)
 
         # Have we loaded data yet? If so, what kind
-        self.is_data = None
+        self.have_data = None
         # Local model for holding data
         self.model = None
         # Mapper for model update
@@ -95,10 +95,10 @@ class SmearingWidget(QtGui.QWidget, Ui_SmearingWidgetUI):
             self.setElementsVisibility(False)
         elif isinstance(data, Data1D):
             self.cbSmearing.addItems(SMEARING_1D)
-            self.is_data = Data1D
+            self.have_data = Data1D
         else:
             self.cbSmearing.addItems(SMEARING_2D)
-            self.is_data = Data2D
+            self.have_data = Data2D
         self.cbSmearing.setCurrentIndex(0)
 
     def onIndexChange(self, index):
@@ -119,8 +119,8 @@ class SmearingWidget(QtGui.QWidget, Ui_SmearingWidgetUI):
         """
         Respond to model change by updating
         """
-        print "MODEL CHANGED for property: %s. The value is now: %s" % \
-            (MODEL[top.row()], str(self.model.item(top.row()).text()))
+        #print "MODEL CHANGED for property: %s. The value is now: %s" % \
+        #    (MODEL[top.row()], str(self.model.item(top.row()).text()))
         pass
 
     def setElementsVisibility(self, visible):
@@ -139,7 +139,7 @@ class SmearingWidget(QtGui.QWidget, Ui_SmearingWidgetUI):
         """
         Accuracy combobox visibility
         """
-        if self.is_data == Data2D and self.cbSmearing.currentIndex() == 1:
+        if self.have_data == Data2D and self.cbSmearing.currentIndex() == 1:
             self.cbAccuracy.setVisible(True)
         else:
             self.cbAccuracy.setVisible(False)
@@ -164,8 +164,18 @@ class SmearingWidget(QtGui.QWidget, Ui_SmearingWidgetUI):
         """
         # or model-held values
         smearing = str(self.model.item(MODEL.index('SMEARING')).text())
-        accuracy = str(self.model.item(MODEL.index('ACCURACY')).text())
-        d_down = float(self.model.item(MODEL.index('PINHOLE_MIN')).text())
-        d_up = float(self.model.item(MODEL.index('PINHOLE_MAX')).text())
+        accuracy = ""
+        d_down = None
+        d_up = None
+        if smearing != "None":
+            accuracy = str(self.model.item(MODEL.index('ACCURACY')).text())
+            try:
+                d_down = float(self.model.item(MODEL.index('PINHOLE_MIN')).text())
+            except ValueError:
+                d_down = None
+            try:
+                d_up = float(self.model.item(MODEL.index('PINHOLE_MAX')).text())
+            except ValueError:
+                d_up = None
 
         return (smearing, accuracy, d_down, d_up)
