@@ -121,6 +121,13 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.readCategoryInfo()
         self.model_parameters = None
         self.lstParams.setAlternatingRowColors(True)
+        stylesheet = """
+            QTreeView{
+                alternate-background-color: #f6fafb;
+                background: #e8f4fc;
+            }
+        """
+        self.lstParams.setStyleSheet(stylesheet)
 
         # Poly model displayed in poly list
         self.lstPoly.setModel(self._poly_model)
@@ -571,6 +578,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         self.q_range_min, self.q_range_max, self.npts, self.log_points, self.weighting = \
             self.options_widget.state()
+        # set Q range labels on the main tab
+        self.lblMinRangeDef.setText(str(self.q_range_min))
+        self.lblMaxRangeDef.setText(str(self.q_range_max))
         self.onPlot()
 
     def setDefaultStructureCombo(self):

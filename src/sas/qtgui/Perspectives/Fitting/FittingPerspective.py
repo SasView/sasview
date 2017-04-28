@@ -5,7 +5,7 @@ from PyQt4 import QtCore
 from PyQt4 import QtGui
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-import sas.qtgui.ObjectFactory as ObjectFactory
+import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 
 from FittingWidget import FittingWidget
 from FitPage import FitPage
@@ -74,8 +74,8 @@ class FittingWindow(QtGui.QTabWidget):
         Add a new tab for passed data
         """
         tab	= FittingWidget(parent=self.parent, data=data, id=self.maxIndex+1)
-        # Add this tab to the object factory so it can be retrieved by scripting/jupyter
-        ObjectFactory.addObject(self.tabName(), tab)
+        # Add this tab to the object library so it can be retrieved by scripting/jupyter
+        ObjectLibrary.addObject(self.tabName(), tab)
         self.tabs.append(tab)
         self.maxIndex += 1
         self.addTab(tab, self.tabName())
@@ -95,7 +95,7 @@ class FittingWindow(QtGui.QTabWidget):
         # don't remove the last tab
         if len(self.tabs) <= 1:
             return
-        ObjectFactory.deleteObject(self.tabs[index].accessibleName())
+        ObjectLibrary.deleteObjectByRef(self.tabs[index])
         del self.tabs[index]
         self.removeTab(index)
 

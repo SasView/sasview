@@ -140,8 +140,9 @@ class OptionsWidget(QtGui.QWidget, Ui_tabOptions):
         """
         #print "MODEL CHANGED for property: %s. The value is now: %s" % \
         #    (MODEL[top.row()], str(self.model.item(top.row()).text()))
+
         # update if there's something to update
-        if str(self.model.item(top.row()).text()): #and 'RANGE' in MODEL[top.row()]:
+        if str(self.model.item(top.row()).text()):
             self.plot_signal.emit()
 
     def setEnablementOnDataLoad(self):

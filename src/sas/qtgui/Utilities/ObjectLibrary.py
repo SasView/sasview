@@ -7,7 +7,13 @@ this._objects = {}
 def addObject(obj_name, obj):
     this._objects[obj_name] = obj
 
-def deleteObject(obj_name):
+def deleteObjectByRef(obj):
+    for name, object in this._objects.iteritems():
+        if object == obj:
+            del this._objects[name]
+            break
+
+def deleteObjectByName(obj_name):
     if obj_name in this._objects:
         del this._objects[obj_name]
 
