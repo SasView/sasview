@@ -363,8 +363,8 @@ def generate_installer():
     f = open(path,'w') 
     f.write(TEMPLATE)
     f.close()
-    print "Generate Inno setup installer script complete"
-    print "A new file %s.iss should be created.Please refresh your directory" % str(INSTALLER_FILE)
+    print("Generate Inno setup installer script complete")
+    print("A new file %s.iss should be created.Please refresh your directory" % str(INSTALLER_FILE))
     
 if __name__ == "__main__":
     generate_installer()

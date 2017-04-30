@@ -53,7 +53,7 @@ class Load:
                     self.dy.append(dy)
                     self.dx = np.zeros(len(self.x))
                 except:
-                    print "READ ERROR", line
+                    print("READ ERROR", line)
             # Sanity check
             if not len(self.x) == len(self.dx):
                 raise ValueError, "x and dx have different length"
@@ -79,8 +79,8 @@ class Load:
 if __name__ == "__main__": 
     load = Load()
     load.set_filename("testdata_line.txt")
-    print load.get_filename() 
+    print(load.get_filename()) 
     load.set_values()
-    print load.get_values()
+    print(load.get_values())
     
             

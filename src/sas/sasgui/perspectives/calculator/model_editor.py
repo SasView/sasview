@@ -870,7 +870,7 @@ class EditorPanel(wx.ScrolledWindow):
         self.function_tcl.InsertText(pos, label)
         # Put the cursor at appropriate position
         length = len(label)
-        print length
+        print(length)
         if label[length-1] == ')':
             length -= 1
         f_pos = pos + length

@@ -105,5 +105,5 @@ def calcCommandline(event):
     y = line.run()
     chisqr, out, cov = sasfit(line, [cstA, cstB], event.x, y, 0)
     # print "Output parameters:", out
-    print "The right answer is [70.0, 1.0]"
-    print chisqr, out, cov
+    print("The right answer is [70.0, 1.0]")
+    print(chisqr, out, cov)

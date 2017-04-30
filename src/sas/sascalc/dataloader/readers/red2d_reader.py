@@ -81,7 +81,7 @@ class Reader:
         output.filename = os.path.basename(filename)
         detector = Detector()
         if len(output.detector) > 0:
-            print str(output.detector[0])
+            print(str(output.detector[0]))
         output.detector.append(detector)
                 
         # Get content

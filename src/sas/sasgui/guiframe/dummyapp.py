@@ -31,7 +31,7 @@ class TestPlugin(PluginBase):
         # Fill your menu
         plug_menu.Append(id, '&Do something')
         def _on_do_something(event):
-            print "Do something"
+            print("Do something")
         wx.EVT_MENU(self.parent, id, _on_do_something)
     
         # Returns the menu and a name for it.

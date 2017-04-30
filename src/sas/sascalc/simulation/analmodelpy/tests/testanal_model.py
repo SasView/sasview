@@ -17,14 +17,14 @@ if __name__ == "__main__":
     from SASsimulation import iqPy
     from SASsimulation import geoshapespy
 
-    print "copyright information:"
-    print "   ", analmodelpymodule.copyright()
+    print("copyright information:")
+    print("   ", analmodelpymodule.copyright())
 
-    print
-    print "module information:"
-    print "    file:", analmodelpymodule.__file__
-    print "    doc:", analmodelpymodule.__doc__
-    print "    contents:", dir(analmodelpymodule)
+    print()
+    print("module information:")
+    print("    file:", analmodelpymodule.__file__)
+    print("    doc:", analmodelpymodule.__doc__)
+    print("    contents:", dir(analmodelpymodule))
 
     a = geoshapespy.new_sphere(1.0)
     iq = iqPy.new_iq(10,0.001, 0.3)

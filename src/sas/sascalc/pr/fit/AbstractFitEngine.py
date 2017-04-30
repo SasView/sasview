@@ -629,4 +629,4 @@ class FResult(object):
     def print_summary(self):
         """
         """
-        print str(self)
+        print(str(self))

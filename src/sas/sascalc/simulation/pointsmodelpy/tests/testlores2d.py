@@ -44,10 +44,10 @@ def get2d():
 
   value_grid = zeros((100,100),Float)
   width, height = value_grid.shape
-  print width,height
+  print(width,height)
 
   I = pointsmodelpy.calculateI_Qxy(lm,0.00001,0.000002)
-  print I
+  print(I)
 
   Imax = 0
   for i in range(width):
@@ -85,10 +85,10 @@ def get2d_2():
 
   value_grid = zeros((100,100),Float)
   width, height = value_grid.shape
-  print width,height
+  print(width,height)
 
   I = pointsmodelpy.calculateI_Qxy(lm,0.00001,0.000002)
-  print I
+  print(I)
 
   Imax = 0
   for i in range(width):
@@ -108,8 +108,8 @@ def get2d_2():
   
 if __name__ == "__main__":
 
-  print "start to test lores 2D"
+  print("start to test lores 2D")
 #  test_lores2d(10)
   value_grid = get2d_2()
-  print value_grid
-  print "pass"
+  print(value_grid)
+  print("pass")

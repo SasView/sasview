@@ -2034,6 +2034,6 @@ if __name__ == "__main__":
         frame = GridFrame(data_outputs=data, data_inputs=data_input)
         frame.Show(True)
     except:
-        print sys.exc_value
+        print(sys.exc_value)
 
     app.MainLoop()

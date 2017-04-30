@@ -70,7 +70,7 @@ def read_associations(loader, settings=FILE_NAME):
                     msg += " for %s\n  %s" % (ext.lower(), sys.exc_value)
                     logger.error(msg)
     else:
-        print "Could not find reader association settings\n  %s [%s]" % (__file__, os.getcwd())
+        print("Could not find reader association settings\n  %s [%s]" % (__file__, os.getcwd()))
          
          
 def register_readers(registry_function):

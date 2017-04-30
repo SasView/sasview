@@ -149,7 +149,7 @@ def printEVT(message):
         """
         :TODO - Need method doc string
         """
-        print "%g:  %s" % (time.clock(), message)
+        print("%g:  %s" % (time.clock(), message))
 
         if __EVT_DEBUG_2_FILE__:
             out = open(__EVT_DEBUG_FILENAME__, 'a')

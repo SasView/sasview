@@ -156,6 +156,6 @@ if __name__ == "__main__":
     c = Connection()
     response = c.connect()
     if response is not None:
-        print 50 * '-'
+        print(50 * '-')
         content = json.loads(response.read().strip())
         pprint(content)

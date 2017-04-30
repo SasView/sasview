@@ -140,7 +140,7 @@ class ReportProblem:
     def __nonzero__(self):
         type, value, tb = sys.exc_info()
         if type is not None and issubclass(type, py_compile.PyCompileError):
-            print "Problem with", repr(value)
+            print("Problem with", repr(value))
             raise type, value, tb
         return 1
 

@@ -155,7 +155,7 @@ class PointInteractor(_BaseInteractor):
             connect('key', h, self.onKey)
 
     def clear(self):
-        print "plottable_interactor.clear()"
+        print("plottable_interactor.clear()")
 
     def _on_click(self, evt):
         """

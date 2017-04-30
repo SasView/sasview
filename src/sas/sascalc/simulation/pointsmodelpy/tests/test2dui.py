@@ -45,7 +45,7 @@ class ImagePlotApplicationWindow( PlotApplicationWindow ):
         index_vals = (arange(value_grid.shape[0]), arange(value_grid.shape[1]))
 
         data = ImageData(value_grid, index_vals)
-        print value_grid, index_vals
+        print(value_grid, index_vals)
         
         # Create the index axes
         xaxis = PlotAxis(tick_visible=False, grid_visible=False)

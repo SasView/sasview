@@ -9,12 +9,12 @@ if __name__ == "__main__":
 #    print "   ", pointsmodelpy.copyright()
 #    print "   ", pointsmodelpymodule.copyright()
 
-    print
-    print "module information:"
-    print "    file:", pointsmodelpy.__file__
-    print "    doc:", pointsmodelpy.__doc__
-    print "    contents:", dir(pointsmodelpy)
-    print "    contents:", dir(geoshapespy)
+    print()
+    print("module information:")
+    print("    file:", pointsmodelpy.__file__)
+    print("    doc:", pointsmodelpy.__doc__)
+    print("    contents:", dir(pointsmodelpy))
+    print("    contents:", dir(geoshapespy))
 
 #    a = geoshapespy.new_singlehelix(10,2,30,2)
     #a = geoshapespy.new_sphere(20)
@@ -45,17 +45,17 @@ if __name__ == "__main__":
     pointsmodelpy.get_lorespoints(lm,vp)
     pointsmodelpy.outputPDB(lm,vp,"modelpy.pseudo.pdb")
 
-    print "calculating distance distribution"
+    print("calculating distance distribution")
     rmax = pointsmodelpy.get_lores_pr(lm,vp)
-    print "finish calculating get_lores_pr, and rmax is:", rmax
+    print("finish calculating get_lores_pr, and rmax is:", rmax)
     pointsmodelpy.outputPR(lm,"testlores.pr")
     pointsmodelpy.get_lores_iq(lm,iq)
 
     iqPy.OutputIQ(iq, "testlores.iq")
 
-    print "Testing get I from a single q"
+    print("Testing get I from a single q")
     result = pointsmodelpy.get_lores_i(lm,0.1)
-    print "The I(0.1) is: %s" % str(result) 
+    print("The I(0.1) is: %s" % str(result)) 
 
 # version
 __id__ = "$Id$"

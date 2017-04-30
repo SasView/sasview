@@ -557,7 +557,7 @@ class PDBReader(object):
                             vol = 1.0e+24 * atom.mass / atom.density / NA
                             vol_pix = np.append(vol_pix, vol)
                         except:
-                            print "Error: set the sld of %s to zero"% atom_name
+                            print("Error: set the sld of %s to zero"% atom_name)
                             sld_n = np.append(sld_n, 0.0)
                         sld_mx = np.append(sld_mx, 0)
                         sld_my = np.append(sld_my, 0)
@@ -608,7 +608,7 @@ class PDBReader(object):
         """
         Write
         """
-        print "Not implemented... "
+        print("Not implemented... ")
 
 class SLDReader(object):
     """
@@ -1043,7 +1043,7 @@ def test_load():
     """
     from mpl_toolkits.mplot3d import Axes3D
     current_dir = os.path.abspath(os.path.curdir)
-    print current_dir
+    print(current_dir)
     for i in range(6):
         current_dir, _ = os.path.split(current_dir)
         tfile = os.path.join(current_dir, "test", "CoreXY_ShellZ.txt")

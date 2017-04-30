@@ -196,4 +196,4 @@ if __name__ == "__main__":
     invert.err = erro
     # Testing estimator
     est = NTermEstimator(invert)
-    print est.num_terms()
+    print(est.num_terms())

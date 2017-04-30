@@ -1252,7 +1252,7 @@ class Plugin(PluginBase):
     def update_fit(self, result=None, msg=""):
         """
         """
-        print "update_fit result", result
+        print("update_fit result", result)
 
     def _batch_fit_complete(self, result, pars, page_id,
                             batch_outputs, batch_inputs, elapsed=None):
@@ -2045,7 +2045,7 @@ class Plugin(PluginBase):
         try:
             res = (fn - gn) / en
         except ValueError:
-            print "Unmatch lengths %s, %s, %s" % (len(fn), len(gn), len(en))
+            print("Unmatch lengths %s, %s, %s" % (len(fn), len(gn), len(en)))
             return
 
         residuals = res[np.isfinite(res)]

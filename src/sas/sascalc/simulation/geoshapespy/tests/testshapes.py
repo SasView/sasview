@@ -15,11 +15,11 @@ if __name__ == "__main__":
 
     from SASsimulation import geoshapespy
 
-    print
-    print "module information:"
-    print "    file:", geoshapespy.__file__
-    print "    doc:", geoshapespy.__doc__
-    print "    contents:", dir(geoshapespy)
+    print()
+    print("module information:")
+    print("    file:", geoshapespy.__file__)
+    print("    doc:", geoshapespy.__doc__)
+    print("    contents:", dir(geoshapespy))
 
     sp = geoshapespy.new_sphere(10)
 #    geoshapespy.set_orientation(sp,10,20,10)

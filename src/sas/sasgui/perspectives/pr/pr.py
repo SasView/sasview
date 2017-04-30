@@ -229,7 +229,7 @@ class Plugin(PluginBase):
         pr.err = pr_err
         out, cov = pr.pr_fit()
         for i in range(len(out)):
-            print "%g +- %g" % (out[i], math.sqrt(cov[i][i]))
+            print("%g +- %g" % (out[i], math.sqrt(cov[i][i])))
 
         # Show input P(r)
         title = "Pr"
@@ -317,7 +317,7 @@ class Plugin(PluginBase):
                 err[i] = math.sqrt(math.fabs(value))
             except:
                 err[i] = 1.0
-                print "Error getting error", value, x[i]
+                print("Error getting error", value, x[i])
 
         new_plot = Data1D(x, y)
         new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
