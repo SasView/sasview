@@ -62,7 +62,7 @@ for item in lib_locs:
     if os.path.isfile(libxml_path_test):
         libxml_path = libxml_path_test
 if libxml_path is None:
-    raise RuntimeError, "Could not find libxml2 on the system"
+    raise RuntimeError("Could not find libxml2 on the system")
 
 APP = ['sasview.py']
 DATA_FILES += ['images','test','media', 'custom_config.py', 'local_config.py']

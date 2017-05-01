@@ -1478,7 +1478,7 @@ class Reader(XMLreader):
                             if optional:
                                 logger.info(err_mess)
                             else:
-                                raise ValueError, err_mess
+                                raise ValueError(err_mess)
                     else:
                         err_mess = "CanSAS reader: unrecognized %s unit [%s];"\
                         % (variable, units)
@@ -1487,7 +1487,7 @@ class Reader(XMLreader):
                         if optional:
                             logger.info(err_mess)
                         else:
-                            raise ValueError, err_mess
+                            raise ValueError(err_mess)
                 else:
                     exec "storage.%s = value" % variable
             else:

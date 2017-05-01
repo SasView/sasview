@@ -142,7 +142,7 @@ class BaseComponent:
                 qdist[0].__class__.__name__ != 'ndarray' or \
                 qdist[1].__class__.__name__ != 'ndarray':
                 msg = "evalDistribution expects a list of 2 ndarrays"
-                raise RuntimeError, msg
+                raise RuntimeError(msg)
 
             # Extract qx and qy for code clarity
             qx = qdist[0]
@@ -166,7 +166,7 @@ class BaseComponent:
         else:
             mesg = "evalDistribution is expecting an ndarray of scalar q-values"
             mesg += " or a list [qx,qy] where qx,qy are 2D ndarrays."
-            raise RuntimeError, mesg
+            raise RuntimeError(mesg)
 
 
 
@@ -227,7 +227,7 @@ class BaseComponent:
                     self.params[item] = value
                     return
 
-        raise ValueError, "Model does not contain parameter %s" % name
+        raise ValueError("Model does not contain parameter %s" % name)
 
     def getParam(self, name):
         """
@@ -249,7 +249,7 @@ class BaseComponent:
                 if item.lower()==name.lower():
                     return self.params[item]
 
-        raise ValueError, "Model does not contain parameter %s" % name
+        raise ValueError("Model does not contain parameter %s" % name)
 
     def getParamList(self):
         """
@@ -293,22 +293,22 @@ class BaseComponent:
         """
         add
         """
-        raise ValueError, "Model operation are no longer supported"
+        raise ValueError("Model operation are no longer supported")
     def __sub__(self, other):
         """
         sub
         """
-        raise ValueError, "Model operation are no longer supported"
+        raise ValueError("Model operation are no longer supported")
     def __mul__(self, other):
         """
         mul
         """
-        raise ValueError, "Model operation are no longer supported"
+        raise ValueError("Model operation are no longer supported")
     def __div__(self, other):
         """
         div
         """
-        raise ValueError, "Model operation are no longer supported"
+        raise ValueError("Model operation are no longer supported")
 
 
 def _ordered_keys(d):

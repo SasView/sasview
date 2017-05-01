@@ -132,7 +132,7 @@ class Plugin(PluginBase):
         if not issubclass(data.__class__, Data1D):
             name = data.__class__.__name__
             msg = "Invariant use only Data1D got: [%s] " % str(name)
-            raise ValueError, msg
+            raise ValueError(msg)
         self.compute_helper(data=data)
 
     def set_data(self, data_list=None):
@@ -239,7 +239,7 @@ class Plugin(PluginBase):
         else:
             msg = "invariant.save_file: the data being saved is"
             msg += " not a sas.sascalc.dataloader.data_info.Data1D object"
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
 
     def set_state(self, state=None, datainfo=None):
         """
@@ -257,7 +257,7 @@ class Plugin(PluginBase):
             if data is None:
                 msg = "invariant.set_state: datainfo parameter cannot"
                 msg += " be None in standalone mode"
-                raise RuntimeError, msg
+                raise RuntimeError(msg)
             # Make sure the user sees the invariant panel after loading
             # self.parent.set_perspective(self.perspective)
             self.on_perspective(event=None)
@@ -319,7 +319,7 @@ class Plugin(PluginBase):
             new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
         else:
             msg = "Scale can not be zero."
-            raise ValueError, msg
+            raise ValueError(msg)
         if len(new_plot.x) == 0:
             return
 

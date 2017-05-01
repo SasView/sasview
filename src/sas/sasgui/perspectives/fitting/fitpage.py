@@ -1846,7 +1846,7 @@ class FitPage(BasicPage):
                                 data.filename
                     wx.PostEvent(self._manager.parent, StatusEvent(status=msg,
                                                info="error"))
-                    raise ValueError, msg
+                    raise ValueError(msg)
 
             else:
                 qmin = 0
@@ -1858,7 +1858,7 @@ class FitPage(BasicPage):
                                 data.filename
                     wx.PostEvent(self._manager.parent, StatusEvent(status=msg,
                                                info="error"))
-                    raise ValueError, msg
+                    raise ValueError(msg)
                 # Maximum value of data
                 qmax = math.sqrt(x * x + y * y)
                 npts = len(data.data)
@@ -2097,7 +2097,7 @@ class FitPage(BasicPage):
         # make sure stop button to fit button all the time
         self._on_fit_complete()
         if out is None or not np.isfinite(chisqr):
-            raise ValueError, "Fit error occured..."
+            raise ValueError("Fit error occured...")
 
         is_modified = False
         has_error = False
@@ -2172,7 +2172,7 @@ class FitPage(BasicPage):
                             has_error = True
                 i += 1
             else:
-                raise ValueError, "onsetValues: Invalid parameters..."
+                raise ValueError("onsetValues: Invalid parameters...")
         # Show error title when any errors displayed
         if has_error:
             if not self.text2_3.IsShown():

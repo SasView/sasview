@@ -48,7 +48,7 @@ class Reader(object):
                 try:
                     input_f = open(path,'r')
                 except:
-                    raise  RuntimeError, "hfir1d_reader: cannot open %s" % path
+                    raise  RuntimeError("hfir1d_reader: cannot open %s" % path)
                 buff = input_f.read()
                 lines = buff.split('\n')
                 x = np.zeros(0)
@@ -98,15 +98,15 @@ class Reader(object):
                 # Sanity check
                 if not len(y) == len(dy):
                     msg = "hfir1d_reader: y and dy have different length"
-                    raise RuntimeError, msg
+                    raise RuntimeError(msg)
                 if not len(x) == len(dx):
                     msg = "hfir1d_reader: x and dx have different length"
-                    raise RuntimeError, msg
+                    raise RuntimeError(msg)
 
                 # If the data length is zero, consider this as
                 # though we were not able to read the file.
                 if len(x) == 0:
-                    raise RuntimeError, "hfir1d_reader: could not load file"
+                    raise RuntimeError("hfir1d_reader: could not load file")
                
                 output.x = x
                 output.y = y
@@ -125,5 +125,5 @@ class Reader(object):
                 output.meta_data['loader'] = self.type_name
                 return output
         else:
-            raise RuntimeError, "%s is not a file" % path
+            raise RuntimeError("%s is not a file" % path)
         return None

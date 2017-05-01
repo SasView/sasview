@@ -294,7 +294,7 @@ class Registry(ExtensionRegistry):
             writers = L
         # Raise an error if there are no matching extensions
         if len(writers) == 0:
-            raise ValueError, "Unknown file type for " + path
+            raise ValueError("Unknown file type for " + path)
         # All done
         return writers
 

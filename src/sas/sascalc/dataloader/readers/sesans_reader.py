@@ -56,7 +56,7 @@ class Reader:
                     # characters that brakes the open operation
                     input_f = open(path,'rb')
                 except:
-                    raise  RuntimeError, "sesans_reader: cannot open %s" % path
+                    raise  RuntimeError("sesans_reader: cannot open %s" % path)
                 buff = input_f.read()
                 lines = buff.splitlines()
                 x  = np.zeros(0)
@@ -157,11 +157,11 @@ class Reader:
                 output.vars = varheader
 
                 if len(output.x) < 1:
-                    raise RuntimeError, "%s is empty" % path
+                    raise RuntimeError("%s is empty" % path)
                 return output
 
         else:
-            raise RuntimeError, "%s is not a file" % path
+            raise RuntimeError("%s is not a file" % path)
         return None
 
     def _unit_conversion(self, value, value_unit, default_unit):

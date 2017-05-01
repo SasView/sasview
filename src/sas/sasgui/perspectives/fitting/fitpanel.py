@@ -124,7 +124,7 @@ class FitPanel(nb, PanelBase):
         """
         if uid not in self.opened_pages:
             msg = "Fitpanel cannot find ID: %s in self.opened_pages" % str(uid)
-            raise ValueError, msg
+            raise ValueError(msg)
         else:
             return self.opened_pages[uid]
 
@@ -388,7 +388,7 @@ class FitPanel(nb, PanelBase):
         Delete the given data
         """
         if data.__class__.__name__ != "list":
-            raise ValueError, "Fitpanel delete_data expect list of id"
+            raise ValueError("Fitpanel delete_data expect list of id")
         else:
             for page in self.opened_pages.values():
                 pos = self.GetPageIndex(page)

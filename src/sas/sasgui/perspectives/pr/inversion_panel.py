@@ -853,7 +853,7 @@ class InversionControl(ScrolledPanel, PanelBase):
                 message = "Number of function terms should be smaller "
                 message += "than the number of points"
                 wx.PostEvent(self._manager.parent, StatusEvent(status=message))
-                raise ValueError, message
+                raise ValueError(message)
             self.nfunc_ctl.SetBackgroundColour(wx.WHITE)
             self.nfunc_ctl.Refresh()
         except:

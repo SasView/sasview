@@ -80,7 +80,7 @@ def reader2D_converter(data2d=None):
 
     """
     if data2d.data is None or data2d.x_bins is None or data2d.y_bins is None:
-        raise ValueError, "Can't convert this data: data=None..."
+        raise ValueError("Can't convert this data: data=None...")
     new_x = numpy.tile(data2d.x_bins, (len(data2d.y_bins), 1))
     new_y = numpy.tile(data2d.y_bins, (len(data2d.x_bins), 1))
     new_y = new_y.swapaxes(0, 1)
@@ -145,7 +145,7 @@ class _Slab(object):
         if len(data2D.detector) > 1:
             msg = "_Slab._avg: invalid number of "
             msg += " detectors: %g" % len(data2D.detector)
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
 
         # Get data
         data = data2D.data[numpy.isfinite(data2D.data)]
@@ -167,7 +167,7 @@ class _Slab(object):
                 y_min = self.y_min
             nbins = int(math.ceil((self.y_max - y_min) / self.bin_width))
         else:
-            raise RuntimeError, "_Slab._avg: unrecognized axis %s" % str(maj)
+            raise RuntimeError("_Slab._avg: unrecognized axis %s" % str(maj))
 
         x = numpy.zeros(nbins)
         y = numpy.zeros(nbins)
@@ -228,7 +228,7 @@ class _Slab(object):
 
         if not idx.any():
             msg = "Average Error: No points inside ROI to average..."
-            raise ValueError, msg
+            raise ValueError(msg)
         return Data1D(x=x[idx], y=y[idx], dy=err_y[idx])
 
 
@@ -301,7 +301,7 @@ class Boxsum(object):
         if len(data2D.detector) > 1:
             msg = "Circular averaging: invalid number "
             msg += "of detectors: %g" % len(data2D.detector)
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
         # Get data
         data = data2D.data[numpy.isfinite(data2D.data)]
         err_data = data2D.err_data[numpy.isfinite(data2D.data)]
@@ -463,7 +463,7 @@ class CircularAverage(object):
         #q_data_max = numpy.max(q_data)
         if len(data2D.q_data) is None:
             msg = "Circular averaging: invalid q_data: %g" % data2D.q_data
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
 
         # Build array of Q intervals
         nbins = int(math.ceil((self.r_max - self.r_min) / self.bin_width))
@@ -487,7 +487,7 @@ class CircularAverage(object):
 
             ## No need to calculate the frac when all data are within range
             if self.r_min >= self.r_max:
-                raise ValueError, "Limit Error: min > max"
+                raise ValueError("Limit Error: min > max")
 
             if self.r_min <= q_value and q_value <= self.r_max:
                 frac = 1
@@ -538,7 +538,7 @@ class CircularAverage(object):
 
         if not idx.any():
             msg = "Average Error: No points inside ROI to average..."
-            raise ValueError, msg
+            raise ValueError(msg)
 
         return Data1D(x=x[idx], y=y[idx], dy=err_y[idx], dx=d_x)
 
@@ -579,7 +579,7 @@ class Ring(object):
         :return: Data1D object
         """
         if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
-            raise RuntimeError, "Ring averaging only take plottable_2D objects"
+            raise RuntimeError("Ring averaging only take plottable_2D objects")
 
         Pi = math.pi
 
@@ -639,7 +639,7 @@ class Ring(object):
 
         if not idx.any():
             msg = "Average Error: No points inside ROI to average..."
-            raise ValueError, msg
+            raise ValueError(msg)
         #elif len(phi_bins[idx])!= self.nbins_phi:
         #    print "resulted",self.nbins_phi- len(phi_bins[idx])
         #,"empty bin(s) due to tight binning..."
@@ -764,7 +764,7 @@ class _Sector(object):
         :return: Data1D object
         """
         if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
-            raise RuntimeError, "Ring averaging only take plottable_2D objects"
+            raise RuntimeError("Ring averaging only take plottable_2D objects")
         Pi = math.pi
 
         # Get the all data & info
@@ -930,7 +930,7 @@ class _Sector(object):
             d_x = None
         if not idx.any():
             msg = "Average Error: No points inside sector of ROI to average..."
-            raise ValueError, msg
+            raise ValueError(msg)
         #elif len(y[idx])!= self.nbins:
         #    print "resulted",self.nbins- len(y[idx]),
         #"empty bin(s) due to tight binning..."
@@ -1006,7 +1006,7 @@ class Ringcut(object):
         :return: index array in the range
         """
         if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
-            raise RuntimeError, "Ring cut only take plottable_2D objects"
+            raise RuntimeError("Ring cut only take plottable_2D objects")
 
         # Get data
         qx_data = data2D.qx_data
@@ -1054,7 +1054,7 @@ class Boxcut(object):
            with Trues where the data points are inside ROI, otherwise Falses
         """
         if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
-            raise RuntimeError, "Boxcut take only plottable_2D objects"
+            raise RuntimeError("Boxcut take only plottable_2D objects")
         # Get qx_ and qy_data
         qx_data = data2D.qx_data
         qy_data = data2D.qy_data
@@ -1105,7 +1105,7 @@ class Sectorcut(object):
         with Trues where the data points are inside ROI, otherwise Falses
         """
         if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
-            raise RuntimeError, "Sectorcut take only plottable_2D objects"
+            raise RuntimeError("Sectorcut take only plottable_2D objects")
         Pi = math.pi
         # Get data
         qx_data = data2D.qx_data

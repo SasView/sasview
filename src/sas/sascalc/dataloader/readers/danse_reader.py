@@ -55,7 +55,7 @@ class Reader:
             try:
                 datafile = open(filename, 'r')
             except:
-                raise  RuntimeError,"danse_reader cannot open %s" % (filename)
+                raise  RuntimeError("danse_reader cannot open %s" % (filename))
         
             # defaults
             # wavelength in Angstrom
@@ -270,7 +270,7 @@ class Reader:
            
             if not fversion >= 1.0:
                 msg = "Danse_reader can't read this file %s" % filename
-                raise ValueError, msg
+                raise ValueError(msg)
             else:
                 logger.info("Danse_reader Reading %s \n" % filename)
             

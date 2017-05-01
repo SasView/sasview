@@ -317,12 +317,12 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         background = self.background_tcl.GetValue().lstrip().rstrip()
         if background == "":
-            raise ValueError, "Need a background"
+            raise ValueError("Need a background")
         if check_float(self.background_tcl):
             return float(background)
         else:
             msg = "Receive invalid value for background : %s" % (background)
-            raise ValueError, msg
+            raise ValueError(msg)
 
     def get_scale(self):
         """
@@ -330,16 +330,16 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         scale = self.scale_tcl.GetValue().lstrip().rstrip()
         if scale == "":
-            raise ValueError, "Need a background"
+            raise ValueError("Need a background")
         if check_float(self.scale_tcl):
             if float(scale) <= 0.0:
                 self.scale_tcl.SetBackgroundColour("pink")
                 self.scale_tcl.Refresh()
                 msg = "Receive invalid value for scale: %s" % (scale)
-                raise ValueError, msg
+                raise ValueError(msg)
             return float(scale)
         else:
-            raise ValueError, "Receive invalid value for scale : %s" % (scale)
+            raise ValueError("Receive invalid value for scale : %s" % (scale))
 
     def get_contrast(self):
         """
@@ -864,7 +864,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             _, _, current_state, comp_state = self.state.bookmark_list[int(num)]
         except:
             logger.error(sys.exc_value)
-            raise ValueError, "No such bookmark exists"
+            raise ValueError("No such bookmark exists")
 
         # set the parameters
         for key in comp_state:

@@ -323,7 +323,7 @@ class Neutron(object):
             plt.legend(['Spectrum'], loc='best')
             plt.show()
         except:
-            raise RuntimeError, "Can't import matplotlib required to plot..."
+            raise RuntimeError("Can't import matplotlib required to plot...")
 
 
 class TOF(Neutron):

@@ -1081,7 +1081,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
             else:
                 msg = "The numbers must be one or two (separated by ',')..."
                 self._status_info(msg, 'stop')
-                raise RuntimeError, msg
+                raise RuntimeError(msg)
 
         return new_string
 

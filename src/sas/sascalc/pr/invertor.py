@@ -147,7 +147,7 @@ class Invertor(Cinvertor):
             if 0.0 in value:
                 msg = "Invertor: one of your q-values is zero. "
                 msg += "Delete that entry before proceeding"
-                raise ValueError, msg
+                raise ValueError(msg)
             return self.set_x(value)
         elif name == 'y':
             return self.set_y(value)
@@ -158,7 +158,7 @@ class Invertor(Cinvertor):
             if value <= 0.0:
                 msg = "Invertor: d_max must be greater than zero."
                 msg += "Correct that entry before proceeding"
-                raise ValueError, msg
+                raise ValueError(msg)
             return self.set_dmax(value)
         elif name == 'q_min':
             if value is None:
@@ -180,7 +180,7 @@ class Invertor(Cinvertor):
             elif value == False:
                 return self.set_has_bck(0)
             else:
-                raise ValueError, "Invertor: has_bck can only be True or False"
+                raise ValueError("Invertor: has_bck can only be True or False")
 
         return Cinvertor.__setattr__(self, name, value)
 
@@ -324,7 +324,7 @@ class Invertor(Cinvertor):
         # First, check that the current data is valid
         if self.is_valid() <= 0:
             msg = "Invertor.invert: Data array are of different length"
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
 
         p = np.ones(nfunc)
         t_0 = time.time()
@@ -357,7 +357,7 @@ class Invertor(Cinvertor):
         # First, check that the current data is valid
         if self.is_valid() <= 0:
             msg = "Invertor.invert: Data arrays are of different length"
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
 
         p = np.ones(nfunc)
         t_0 = time.time()
@@ -441,7 +441,7 @@ class Invertor(Cinvertor):
 
         if self.is_valid() < 0:
             msg = "Invertor: invalid data; incompatible data lengths."
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
 
         self.nfunc = nfunc
         # a -- An M x N matrix.
@@ -466,7 +466,7 @@ class Invertor(Cinvertor):
         try:
             self._get_matrix(nfunc, nq, a, b)
         except:
-            raise RuntimeError, "Invertor: could not invert I(Q)\n  %s" % sys.exc_value
+            raise RuntimeError("Invertor: could not invert I(Q)\n  %s" % sys.exc_value)
 
         # Perform the inversion (least square fit)
         c, chi2, _, _ = lstsq(a, b)
@@ -750,7 +750,7 @@ class Invertor(Cinvertor):
 
             except:
                 msg = "Invertor.from_file: corrupted file\n%s" % sys.exc_value
-                raise RuntimeError, msg
+                raise RuntimeError(msg)
         else:
             msg = "Invertor.from_file: '%s' is not a file" % str(path)
-            raise RuntimeError, msg
+            raise RuntimeError(msg)

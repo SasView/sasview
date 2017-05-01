@@ -1013,7 +1013,7 @@ class PageState(object):
         if file is not None:
             msg = "PageState no longer supports non-CanSAS"
             msg += " format for fitting files"
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
 
         if node.get('version'):
             # Get the version for model conversion purposes
@@ -1309,7 +1309,7 @@ class Reader(CansasReader):
 
             else:
                 self.call_back(format=ext)
-                raise RuntimeError, "%s is not a file" % path
+                raise RuntimeError("%s is not a file" % path)
 
             # Return output consistent with the loader's api
             if len(output) == 0:

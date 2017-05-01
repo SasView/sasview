@@ -43,7 +43,7 @@ class Reader:
             Image._initialized=2
         except:
             msg = "tiff_reader: could not load file. Missing Image module."
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
         
         # Instantiate data object
         output = Data2D()
@@ -53,7 +53,7 @@ class Reader:
         try:
             im = Image.open(filename)
         except:
-            raise  RuntimeError, "cannot open %s"%(filename)
+            raise  RuntimeError("cannot open %s"%(filename))
         data = im.getdata()
 
         # Initiazed the output data object

@@ -149,7 +149,7 @@ class Plugin(PluginBase):
             if data is None:
                 msg = "Pr.set_state: datainfo parameter cannot "
                 msg += "be None in standalone mode"
-                raise RuntimeError, msg
+                raise RuntimeError(msg)
 
             # Ensuring that plots are coordinated correctly
             t = time.localtime(data.meta_data['prstate'].timestamp)
@@ -450,7 +450,7 @@ class Plugin(PluginBase):
         dataread = data
         # Notify the user if we could not read the file
         if dataread is None:
-            raise RuntimeError, "Invalid data"
+            raise RuntimeError("Invalid data")
 
         x = None
         y = None
@@ -470,7 +470,7 @@ class Plugin(PluginBase):
             else:
                 if dataread is None:
                     return x, y, err
-                raise RuntimeError, "This tool can only read 1D data"
+                raise RuntimeError("This tool can only read 1D data")
 
         self._current_file_data.x = x
         self._current_file_data.y = y
@@ -849,11 +849,11 @@ class Plugin(PluginBase):
             except:
                 status = "Problem reading data: %s" % sys.exc_value
                 wx.PostEvent(self.parent, StatusEvent(status=status))
-                raise RuntimeError, status
+                raise RuntimeError(status)
 
             # If the file contains nothing, just return
             if pr is None:
-                raise RuntimeError, "Loaded data is invalid"
+                raise RuntimeError("Loaded data is invalid")
 
             self.pr = pr
 
@@ -903,7 +903,7 @@ class Plugin(PluginBase):
         else:
             msg = "pr.save_data: the data being saved is not a"
             msg += " sas.data_info.Data1D object"
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
 
     def setup_plot_inversion(self, alpha, nfunc, d_max, q_min=None, q_max=None,
                              bck=False, height=0, width=0):

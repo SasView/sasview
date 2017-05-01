@@ -198,7 +198,7 @@ class Plugin(PluginBase):
             return  new_panel
 
         msg = "1D Panel of group ID %s could not be created" % str(group_id)
-        raise ValueError, msg
+        raise ValueError(msg)
 
     def create_2d_panel(self, data, group_id):
         """
@@ -216,7 +216,7 @@ class Plugin(PluginBase):
             new_panel.frame = win
             return new_panel
         msg = "2D Panel of group ID %s could not be created" % str(group_id)
-        raise ValueError, msg
+        raise ValueError(msg)
 
     def update_panel(self, data, panel):
         """
@@ -236,7 +236,7 @@ class Plugin(PluginBase):
             msg = "Cannot add %s" % str(data.name)
             msg += " to panel %s\n" % str(panel.window_caption)
             msg += "Please edit %s's units, labels" % str(data.name)
-            raise ValueError, msg
+            raise ValueError(msg)
         else:
             if panel.group_id not in data.list_group_id:
                 data.list_group_id.append(panel.group_id)

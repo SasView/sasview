@@ -423,7 +423,7 @@ class InvariantCalculator(object):
         """
         if not issubclass(data.__class__, LoaderData1D):
             #Process only data that inherited from DataLoader.Data_info.Data1D
-            raise ValueError, "Data must be of type DataLoader.Data1D"
+            raise ValueError("Data must be of type DataLoader.Data1D")
         #from copy import deepcopy
         new_data = (self._scale * data) - self._background
 
@@ -483,7 +483,7 @@ class InvariantCalculator(object):
         if len(data.x) <= 1 or len(data.y) <= 1 or len(data.x) != len(data.y):
             msg = "Length x and y must be equal"
             msg += " and greater than 1; got x=%s, y=%s" % (len(data.x), len(data.y))
-            raise ValueError, msg
+            raise ValueError(msg)
         else:
             # Take care of smeared data
             if self._smeared is None:
@@ -532,7 +532,7 @@ class InvariantCalculator(object):
             (data.dy is not None and (len(data.dy) != len(data.y))):
             msg = "Length of data.x and data.y must be equal"
             msg += " and greater than 1; got x=%s, y=%s" % (len(data.x), len(data.y))
-            raise ValueError, msg
+            raise ValueError(msg)
         else:
             #Create error for data without dy error
             if data.dy is None:
@@ -741,16 +741,16 @@ class InvariantCalculator(object):
         """
         range = range.lower()
         if range not in ['high', 'low']:
-            raise ValueError, "Extrapolation range should be 'high' or 'low'"
+            raise ValueError("Extrapolation range should be 'high' or 'low'")
         function = function.lower()
         if function not in ['power_law', 'guinier']:
             msg = "Extrapolation function should be 'guinier' or 'power_law'"
-            raise ValueError, msg
+            raise ValueError(msg)
 
         if range == 'high':
             if function != 'power_law':
                 msg = "Extrapolation only allows a power law at high Q"
-                raise ValueError, msg
+                raise ValueError(msg)
             self._high_extrapolation_npts = npts
             self._high_extrapolation_power = power
             self._high_extrapolation_power_fitted = power
@@ -851,14 +851,14 @@ class InvariantCalculator(object):
         :note: volume fraction must have no unit
         """
         if contrast <= 0:
-            raise ValueError, "The contrast parameter must be greater than zero"
+            raise ValueError("The contrast parameter must be greater than zero")
 
         # Make sure Q star is up to date
         self.get_qstar(extrapolation)
 
         if self._qstar <= 0:
             msg = "Invalid invariant: Invariant Q* must be greater than zero"
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
 
         # Compute intermediate constant
         k = 1.e-8 * self._qstar / (2 * (math.pi * math.fabs(float(contrast))) ** 2)
@@ -868,7 +868,7 @@ class InvariantCalculator(object):
         # Compute volume fraction
         if discrim < 0:
             msg = "Could not compute the volume fraction: negative discriminant"
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
         elif discrim == 0:
             return 1 / 2
         else:
@@ -880,7 +880,7 @@ class InvariantCalculator(object):
             elif 0 <= volume2 and volume2 <= 1:
                 return volume2
             msg = "Could not compute the volume fraction: inconsistent results"
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
 
     def get_qstar_with_error(self, extrapolation=None):
         """

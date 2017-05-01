@@ -63,7 +63,7 @@ class Reader:
                     # characters that breaks the open operation
                     input_f = open(path,'rb')
                 except:
-                    raise  RuntimeError, "ascii_reader: cannot open %s" % path
+                    raise  RuntimeError("ascii_reader: cannot open %s" % path)
                 buff = input_f.read()
                 lines = buff.splitlines()
 
@@ -172,18 +172,18 @@ class Reader:
                 input_f.close()
                 if not is_data:
                     msg = "ascii_reader: x has no data"
-                    raise RuntimeError, msg
+                    raise RuntimeError(msg)
                 # Sanity check
                 if has_error_dy == True and not len(ty) == len(tdy):
                     msg = "ascii_reader: y and dy have different length"
-                    raise RuntimeError, msg
+                    raise RuntimeError(msg)
                 if has_error_dx == True and not len(tx) == len(tdx):
                     msg = "ascii_reader: y and dy have different length"
-                    raise RuntimeError, msg
+                    raise RuntimeError(msg)
                 # If the data length is zero, consider this as
                 # though we were not able to read the file.
                 if len(tx) == 0:
-                    raise RuntimeError, "ascii_reader: could not load file"
+                    raise RuntimeError("ascii_reader: could not load file")
 
                 #Let's re-order the data to make cal.
                 # curve look better some cases
@@ -221,11 +221,11 @@ class Reader:
                 # Store loading process information
                 output.meta_data['loader'] = self.type_name
                 if len(output.x) < 1:
-                    raise RuntimeError, "%s is empty" % path
+                    raise RuntimeError("%s is empty" % path)
                 return output
 
         else:
-            raise RuntimeError, "%s is not a file" % path
+            raise RuntimeError("%s is not a file" % path)
         return None
 
     def splitline(self, line):
