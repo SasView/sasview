@@ -1,6 +1,7 @@
 """
     Unit tests for data manipulations
 """
+from __future__ import print_function
 
 import unittest
 import math
@@ -308,7 +309,7 @@ class cansas_reader(unittest.TestCase):
             self.assertTrue(item.name in ['NCNR-IGOR', 'spol'])
             self.assertTrue(item.date in ['04-Sep-2007 18:35:02',
                                           '03-SEP-2006 11:42:47'])
-            print item.term
+            print(item.term)
             for t in item.term:
                 if t['name']=="ABS:DSTAND" \
                     and t['unit']=='mm' \
@@ -367,7 +368,7 @@ class cansas_reader(unittest.TestCase):
         self.assertAlmostEqual(self.data.sample.transmission, 0.327)
         
         self.assertEqual(self.data.meta_data['loader'], "CanSAS XML 1D")
-        print self.data.errors
+        print(self.data.errors)
         self.assertEqual(len(self.data.errors), 1)
         
         

@@ -12,6 +12,7 @@
 # Attention should be paid to dynamic imports. Data files can
 # be added to the distribution directory for that purpose.
 # See for example the 'images' directory below.
+from __future__ import print_function
 
 import os
 import sys
@@ -61,8 +62,8 @@ try:
         del sys.argv[path_flag_idx+1]
         sys.argv.remove('--extrapath')
 except:
-    print("Error processing extra python path needed to build SasView\n  %s" % \
-                sys.exc_value)
+    print("Error processing extra python path needed to build SasView\n  %s" %
+          sys.exc_value)
 
 
 # Solution taken from here: http://www.py2exe.org/index.cgi/win32com.shell

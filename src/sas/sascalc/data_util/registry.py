@@ -5,6 +5,7 @@ File extension registry.
 This provides routines for opening files based on extension,
 and registers the built-in file extensions.
 """
+from __future__ import print_function
 
 import os.path
 

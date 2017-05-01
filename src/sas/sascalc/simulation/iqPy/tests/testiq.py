@@ -16,7 +16,7 @@ if __name__ == "__main__":
 	from SASsimulation import iqPy
 	iqPy.new_iq(10,0.01,0.4)
 
-	print "pass."
+	print("pass.")
 
 # version
 __id__ = "$Id$"

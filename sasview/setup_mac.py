@@ -10,6 +10,8 @@ NOTES:
                mf.import_hook('pytz.tzinfo', m, ['UTC'])
    12/05/2011: Needs macholib >= 1.4.3 and py2app >= 0.6.4 to create a 64-bit app
 """
+from __future__ import print_function
+
 from setuptools import setup
 import periodictable.xsf
 import sas.sascalc.dataloader.readers
@@ -27,7 +29,7 @@ root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 platform = '%s-%s'%(get_platform(),sys.version[:3])
 build_path = os.path.join(root, 'build','lib.'+platform)
 sys.path.insert(0, build_path)
-print "BUILDING PATH INSIDE", build_path
+print("BUILDING PATH INSIDE", build_path)
 ICON = local_config.SetupIconFile_mac
 EXTENSIONS_LIST = []
 DATA_FILES = []
@@ -69,7 +71,7 @@ if os.path.isfile("BUILD_NUMBER"):
 
 # See if the documentation has been built, and if so include it.
 doc_path = os.path.join(build_path, "doc")
-print doc_path
+print(doc_path)
 if os.path.exists(doc_path):
     for dirpath, dirnames, filenames in os.walk(doc_path):
         for filename in filenames:

@@ -1,3 +1,4 @@
+from __future__ import print_function
 
 import  copy
 #import logging
@@ -629,4 +630,4 @@ class FResult(object):
     def print_summary(self):
         """
         """
-        print str(self)
+        print(str(self))

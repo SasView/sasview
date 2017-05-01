@@ -7,6 +7,8 @@ See the license text in license.txt
 
 copyright 2008, University of Tennessee
 """
+from __future__ import print_function
+
 import os
 import numpy as np
 from sas.sascalc.dataloader.data_info import Data1D
@@ -58,7 +60,7 @@ class Reader:
 if __name__ == "__main__": 
     reader = Reader()
     output = reader.read("../test/test_data.test")
-    print output.x
+    print(output.x)
     
     
                         

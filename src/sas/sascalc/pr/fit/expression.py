@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 # This program is public domain
 """
 Parameter expression evaluator.
