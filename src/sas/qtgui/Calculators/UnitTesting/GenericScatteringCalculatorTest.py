@@ -15,12 +15,12 @@ import path_prepare
 from mpl_toolkits.mplot3d import Axes3D
 from UnitTesting.TestUtils import QtSignalSpy
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from GenericScatteringCalculator import GenericScatteringCalculator
-from GenericScatteringCalculator import Plotter3D
+from sas.qtgui.Calculators.GenericScatteringCalculator import GenericScatteringCalculator
+from sas.qtgui.Calculators.GenericScatteringCalculator import Plotter3D
 
 from sas.sasgui.guiframe.data_manager import DataManager
-from GuiManager import GuiManager
-from sas.qtgui.GuiUtils import *
+from sas.qtgui.MainWindow.GuiManager import GuiManager
+from sas.qtgui.Utilities.GuiUtils import *
 from sas.sascalc.calculator import sas_gen
 
 app = QtGui.QApplication(sys.argv)
@@ -172,7 +172,7 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         """
         Load sld data and check modifications of GUI
         """
-        filename = "../../../sasview/test/save_states/sld_file.sld"
+        filename = os.path.join("UnitTesting", "sld_file.sld")
         QtGui.QFileDialog.getOpenFileName = MagicMock(return_value=filename)
         self.widget.loadFile()
 
@@ -204,11 +204,11 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         # check values and enabled / disabled for
         # Mx,y,z x,y,znodes and x,y,zstepsize buttons
         self.assertFalse(self.widget.txtMx.isEnabled())
-        self.assertEqual(self.widget.txtMx.text(), '8.0795e-07')
+        self.assertAlmostEqual(float(self.widget.txtMx.text()), 8.0795e-07, 4)
         self.assertFalse(self.widget.txtMy.isEnabled())
-        self.assertEqual(self.widget.txtMy.text(), '8.0795e-07')
+        self.assertAlmostEqual(float(self.widget.txtMy.text()), 8.0795e-07, 4)
         self.assertFalse(self.widget.txtMz.isEnabled())
-        self.assertEqual(self.widget.txtMz.text(), '3.1739e-07')
+        self.assertAlmostEqual(float(self.widget.txtMz.text()), 3.1739e-07, 4)
         self.assertTrue(self.widget.txtNucl.isEnabled())
         self.assertEqual(self.widget.txtNucl.text(), '0')
 
@@ -235,7 +235,8 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         """
         Load pdb data and check modifications of GUI
         """
-        filename = "diamdsml.pdb"
+        filename = os.path.join("UnitTesting", "diamdsml.pdb")
+
         QtGui.QFileDialog.getOpenFileName = MagicMock(return_value=filename)
         self.widget.loadFile()
 
@@ -274,7 +275,7 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         self.assertFalse(self.widget.txtMz.isEnabled())
         self.assertEqual(self.widget.txtMz.text(), '0')
         self.assertFalse(self.widget.txtNucl.isEnabled())
-        self.assertEqual(self.widget.txtNucl.text(), '7.0003e-06')
+        self.assertAlmostEqual(float(self.widget.txtNucl.text()), 7.0003e-06, 4)
 
         self.assertFalse(self.widget.txtXnodes.isEnabled())
         self.assertEqual(self.widget.txtXnodes.text(), 'NaN')
@@ -297,7 +298,8 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         """
         Load omf data and check modifications of GUI
         """
-        filename = "../../../sasview/test/1d_data/A_Raw_Example-1.omf"
+        filename = os.path.join("UnitTesting", "A_Raw_Example-1.omf")
+
         QtGui.QFileDialog.getOpenFileName = MagicMock(return_value=filename)
         self.widget.loadFile()
         self.assertEqual(self.widget.cmdLoad.text(), 'Loading...')
@@ -324,11 +326,11 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         # check values and enabled / disabled for
         # Mx,y,z x,y,znodes and x,y,zstepsize buttons
         self.assertFalse(self.widget.txtMx.isEnabled())
-        self.assertEqual(self.widget.txtMx.text(), '7.855e-09')
+        self.assertAlmostEqual(float(self.widget.txtMx.text()), 7.855e-09, 4)
         self.assertFalse(self.widget.txtMy.isEnabled())
-        self.assertEqual(self.widget.txtMy.text(), '4.5169e-08')
+        self.assertAlmostEqual(float(self.widget.txtMy.text()), 4.517e-08, 4)
         self.assertFalse(self.widget.txtMz.isEnabled())
-        self.assertEqual(self.widget.txtMz.text(), '9.9511e-10')
+        self.assertAlmostEqual(float(self.widget.txtMz.text()), 9.9511e-10, 4)
         self.assertTrue(self.widget.txtNucl.isEnabled())
         self.assertEqual(self.widget.txtNucl.text(), '0')
 
@@ -363,7 +365,8 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         Test compute button
         """
         # load data
-        filename = "diamdsml.pdb"
+        filename = os.path.join("UnitTesting", "diamdsml.pdb")
+
         QtGui.QFileDialog.getOpenFileName = MagicMock(return_value=filename)
         self.widget.loadFile()
         time.sleep(1)
@@ -382,8 +385,7 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         Test Draw buttons for 3D plots with and without arrows
         """
         self.assertFalse(self.widget.cmdDraw.isEnabled())
-        # filename = "../../../sasview/test/upcoming_formats/dna.pdb"
-        filename = "diamdsml.pdb"
+        filename = os.path.join("UnitTesting", "diamdsml.pdb")
         QtGui.QFileDialog.getOpenFileName = MagicMock(return_value=filename)
         self.widget.loadFile()
         self.assertEqual(self.widget.cmdLoad.text(), 'Loading...')
@@ -402,13 +404,14 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         """
         Test Save feature to .sld file
         """
-        filename = "../../../sasview/test/save_states/sld_file.sld"
+        filename = os.path.join("UnitTesting", "sld_file.sld")
+
         QtGui.QFileDialog.getOpenFileName = MagicMock(return_value=filename)
         self.widget.loadFile()
 
         time.sleep(0.1)
 
-        filename1 = "../../../sasview/test/save_states/test"
+        filename1 = "test"
         QtGui.QFileDialog.getSaveFileName = MagicMock(return_value=filename1)
 
         QTest.mouseClick(self.widget.cmdSave, Qt.LeftButton)
@@ -416,7 +419,7 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
         self.assertTrue(os.path.isfile(filename1 + '.sld'))
         self.assertTrue(os.path.getsize(filename1 + '.sld') > 0)
 
-        os.remove("../../../sasview/test/save_states/test.sld")
+        os.remove("test.sld")
 
 
 class Plotter3DTest(unittest.TestCase):
