@@ -3,9 +3,12 @@ This module generates .iss file according to the local config of
 the current application. Please make sure a file named "local_config.py"
 exists in the current directory. Edit local_config.py according to your needs.
 """
+from __future__ import print_function
+
 import local_config
 import os 
 import string
+
 
 REG_PROGRAM = """{app}\MYPROG.EXE"" ""%1"""
 APPLICATION = str(local_config.__appname__ )+ '.exe'

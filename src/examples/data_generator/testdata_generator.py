@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 """
     Generate two correlated sets of data
         1- A line: y = ax + b

@@ -1,6 +1,8 @@
 """
     Application settings
 """
+from __future__ import print_function
+
 import time
 import os
 from sas.sasgui.guiframe.gui_style import GUIFRAME

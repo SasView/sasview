@@ -2,6 +2,7 @@
 Generic Scattering panel.
 This module relies on guiframe manager.
 """
+from __future__ import print_function
 
 import wx
 import sys

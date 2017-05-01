@@ -13,6 +13,8 @@ The readers are tried in order they appear when reading a file.
 #This work benefited from DANSE software developed under NSF award DMR-0520547.
 #copyright 2009, University of Tennessee
 #############################################################################
+from __future__ import print_function
+
 import os
 import sys
 import logging

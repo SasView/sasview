@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import inspect
 import wx
 from wx import Timer

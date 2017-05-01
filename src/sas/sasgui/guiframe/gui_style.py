@@ -2,6 +2,8 @@
 """
 Provide the style for guiframe
 """
+from __future__ import print_function
+
 import wx
 import os
 from sas.sasgui.guiframe import get_data_path

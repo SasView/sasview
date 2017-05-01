@@ -8,6 +8,8 @@
 #See the license text in license.txt
 #copyright 2008, University of Tennessee
 ######################################################################
+from __future__ import print_function
+
 import os
 import numpy as np
 import math

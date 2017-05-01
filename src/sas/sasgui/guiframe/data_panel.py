@@ -10,6 +10,8 @@
 """
 This module provides Graphic interface for the data_manager module.
 """
+from __future__ import print_function
+
 import wx
 from wx.build import build_options
 

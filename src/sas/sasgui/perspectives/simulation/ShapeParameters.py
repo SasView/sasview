@@ -7,6 +7,8 @@ See the license text in license.txt
 
 copyright 2009, University of Tennessee
 """
+from __future__ import print_function
+
 import wx
 import sys
 import wx.lib.newevent

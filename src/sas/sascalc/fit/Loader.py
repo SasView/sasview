@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 # class Loader  to load any king of file
 #import wx
 #import string

@@ -22,6 +22,8 @@ the names of the first and second model and the operator to be used).
 #
 #copyright 2009, University of Tennessee
 ################################################################################
+from __future__ import print_function
+
 import wx
 import sys
 import os

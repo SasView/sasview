@@ -2,6 +2,8 @@
 Dummy application.
 Allows the user to set an external data manager
 """
+from __future__ import print_function
+
 import sas.sasgui.guiframe.gui_manager as gui_manager
 
 from sas.sasgui.guiframe.plugin_base import PluginBase

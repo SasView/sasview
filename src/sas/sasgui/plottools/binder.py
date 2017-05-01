@@ -1,6 +1,8 @@
 """
 Extension to MPL to support the binding of artists to key/mouse events.
 """
+from __future__ import print_function
+
 import sys
 import logging
 

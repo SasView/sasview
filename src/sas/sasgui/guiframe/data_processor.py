@@ -17,6 +17,8 @@ The organization of the classes goes as:
    :align: center
 
 """
+from __future__ import print_function
+
 import os
 import sys
 import copy

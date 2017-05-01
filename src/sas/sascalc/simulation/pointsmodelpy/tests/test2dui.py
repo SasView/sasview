@@ -6,6 +6,7 @@ Demonstration of drawing a 2D image plot using the "hot" colormap
 #--------------------------------------------------------------------------------
 #  Imports:
 #--------------------------------------------------------------------------------
+from __future__ import print_function
 
 import wx
 

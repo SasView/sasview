@@ -1,3 +1,6 @@
+from __future__ import print_function
+
+
 if __name__ == "__main__":
 
     from sasModeling.iqPy import iqPy

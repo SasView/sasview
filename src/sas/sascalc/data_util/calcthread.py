@@ -3,6 +3,7 @@
 ## \file
 #  \brief Abstract class for defining calculation threads.
 #
+from __future__ import print_function
 
 import thread
 import traceback

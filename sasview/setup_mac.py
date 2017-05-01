@@ -10,6 +10,8 @@ NOTES:
                mf.import_hook('pytz.tzinfo', m, ['UTC'])
    12/05/2011: Needs macholib >= 1.4.3 and py2app >= 0.6.4 to create a 64-bit app
 """
+from __future__ import print_function
+
 from setuptools import setup
 import periodictable.xsf
 import sas.sascalc.dataloader.readers

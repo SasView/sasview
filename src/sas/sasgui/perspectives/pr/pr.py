@@ -14,6 +14,7 @@
 
 # Make sure the option of saving each curve is available
 # Use the I(q) curve as input and compare the output to P(r)
+from __future__ import print_function
 
 import sys
 import wx

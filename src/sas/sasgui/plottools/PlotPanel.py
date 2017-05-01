@@ -1,6 +1,8 @@
 """
     Plot panel.
 """
+from __future__ import print_function
+
 import logging
 import traceback
 import wx

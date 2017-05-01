@@ -13,6 +13,8 @@ collimation of SANS but may be good for SAXS.  It is completely wrong for
 slit smeared data. 
 
 """
+from __future__ import print_function
+
 from scipy import optimize
 
 

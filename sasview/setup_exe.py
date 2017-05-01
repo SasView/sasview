@@ -12,6 +12,7 @@
 # Attention should be paid to dynamic imports. Data files can
 # be added to the distribution directory for that purpose.
 # See for example the 'images' directory below.
+from __future__ import print_function
 
 import os
 import sys
