@@ -8,16 +8,22 @@ import math
 import numpy as np
 from sas.sascalc.dataloader.loader import Loader
 from sas.sascalc.dataloader.readers.IgorReader import Reader as IgorReader
+from sas.sascalc.dataloader.readers.abs_reader import Reader as AbsReader
+from sas.sascalc.dataloader.readers.hfir1d_reader import Reader as HFIRReader
+from sas.sascalc.dataloader.readers.danse_reader import Reader as DANSEReader
+from sas.sascalc.dataloader.readers.cansas_reader import Reader as CANSASReader
+
 from sas.sascalc.dataloader.data_info import Data1D
  
 import os.path
 
+
 class abs_reader(unittest.TestCase):
     
     def setUp(self):
-        from sas.sascalc.dataloader.readers.abs_reader import Reader
-        self.data = Reader().read("jan08002.ABS")
-        
+        reader = AbsReader()
+        self.data = reader.read("jan08002.ABS")
+
     def test_abs_checkdata(self):
         """
             Check the data content to see whether 
@@ -61,12 +67,19 @@ class abs_reader(unittest.TestCase):
         
     def test_checkdata2(self):
         self.assertEqual(self.data.dy[126], 1)
-        
+
+    def test_generic_loader(self):
+        # the generic loader should work as well
+        data = Loader().load("jan08002.ABS")
+        self.assertEqual(data.meta_data['loader'], "IGOR 1D")
+
+
 class hfir_reader(unittest.TestCase):
-    
+
     def setUp(self):
-        self.data = Loader().load("S2-30dq.d1d")
-        
+        reader = HFIRReader()
+        self.data = reader.read("S2-30dq.d1d")
+
     def test_hfir_checkdata(self):
         """
             Check the data content to see whether 
@@ -83,7 +96,12 @@ class hfir_reader(unittest.TestCase):
         self.assertEqual(self.data.y[1], 0.003010)
         self.assertEqual(self.data.dy[1], 0.000315)
         self.assertEqual(self.data.dx[1], 0.008249)
-        
+
+    def test_generic_loader(self):
+        # the generic loader should work as well
+        data = Loader().load("S2-30dq.d1d")
+        self.assertEqual(data.meta_data['loader'], "HFIR 1D")
+
 
 class igor_reader(unittest.TestCase):
     
@@ -137,7 +155,8 @@ class igor_reader(unittest.TestCase):
 class danse_reader(unittest.TestCase):
     
     def setUp(self):
-        self.data = Loader().load("MP_New.sans")
+        reader = DANSEReader()
+        self.data = reader.read("MP_New.sans")
 
     def test_checkdata(self):
         """
@@ -171,13 +190,24 @@ class danse_reader(unittest.TestCase):
         self.assertEqual(self.data.err_data[1], 1.77569)
         self.assertEqual(self.data.err_data[2], 2.06313)
 
+    def test_generic_loader(self):
+        # the generic loader should work as well
+        data = Loader().load("MP_New.sans")
+        self.assertEqual(data.meta_data['loader'], "DANSE")
+
  
 class cansas_reader(unittest.TestCase):
     
     def setUp(self):
-        data = Loader().load("cansas1d.xml")
+        reader = CANSASReader()
+        data = reader.read("cansas1d.xml")
         self.data = data[0]
- 
+
+    def test_generic_loader(self):
+        # the generic loader should work as well
+        data = Loader().load("cansas1d.xml")
+        self.assertEqual(data[0].meta_data['loader'], "CanSAS XML 1D")
+
     def test_cansas_checkdata(self):
         self.assertEqual(self.data.filename, "cansas1d.xml")
         self._checkdata()
@@ -190,7 +220,6 @@ class cansas_reader(unittest.TestCase):
             Data1D defaults changed. Otherwise the
             tests won't pass
         """
-        
         self.assertEqual(self.data.run[0], "1234")
         self.assertEqual(self.data.meta_data['loader'], "CanSAS XML 1D")
         
@@ -264,17 +293,17 @@ class cansas_reader(unittest.TestCase):
             self.assertEqual(item.size_unit,'mm')
             self.assertEqual(item.distance_unit,'mm')
 
-            if item.size.x==50 \
-                and item.distance==11000.0 \
-                and item.name=='source' \
-                and item.type=='radius':
+            if item.size.x == 50 \
+                and item.distance == 11000.0 \
+                and item.name == 'source' \
+                and item.type == 'radius':
                 _found1 = True
-            elif item.size.x==1.0 \
-                and item.name=='sample' \
-                and item.type=='radius':
+            elif item.size.x == 1.0 \
+                and item.name == 'sample' \
+                and item.type == 'radius':
                 _found2 = True
                 
-        if _found1==False or _found2==False:
+        if not _found1 or not _found2:
             raise RuntimeError("Could not find all data %s %s" % (_found1, _found2)) 
             
         # Detector
@@ -311,28 +340,21 @@ class cansas_reader(unittest.TestCase):
                                           '03-SEP-2006 11:42:47'])
             print(item.term)
             for t in item.term:
-                if t['name']=="ABS:DSTAND" \
-                    and t['unit']=='mm' \
-                    and float(t['value'])==1.0:
+                if (t['name'] == "ABS:DSTAND"
+                    and t['unit'] == 'mm'
+                    and float(t['value']) == 1.0):
                     _found_term2 = True
-                elif t['name']=="radialstep" \
-                    and t['unit']=='mm' \
-                    and float(t['value'])==10.0:
+                elif (t['name'] == "radialstep"
+                      and t['unit'] == 'mm'
+                      and float(t['value']) == 10.0):
                     _found_term1 = True
                     
-        if _found_term1==False or _found_term2==False:
+        if not _found_term1 or not _found_term2:
             raise RuntimeError("Could not find all process terms %s %s" % (_found_term1, _found_term2)) 
-            
-        
-        
         
     def test_writer(self):
-        from sas.sascalc.dataloader.readers.cansas_reader import Reader
-        r = Reader()
-        x = np.ones(5)
-        y = np.ones(5)
-        dy = np.ones(5)
-        
+        r = CANSASReader()
+
         filename = "write_test.xml"
         r.write(filename, self.data)
         data = Loader().load(filename)
@@ -348,7 +370,7 @@ class cansas_reader(unittest.TestCase):
             Note that not all units are available.
         """
         filename = "cansas1d_units.xml"
-        data = Loader().load(filename)
+        data = CANSASReader().read(filename)
         self.data = data[0]
         self.assertEqual(self.data.filename, filename)
         self._checkdata()
@@ -359,7 +381,7 @@ class cansas_reader(unittest.TestCase):
             Note that not all units are available.
         """
         filename = "cansas1d_badunits.xml"
-        data = Loader().load(filename)
+        data = CANSASReader().read(filename)
         self.data = data[0]
         self.assertEqual(self.data.filename, filename)
         # The followed should not have been loaded
@@ -370,14 +392,13 @@ class cansas_reader(unittest.TestCase):
         self.assertEqual(self.data.meta_data['loader'], "CanSAS XML 1D")
         print(self.data.errors)
         self.assertEqual(len(self.data.errors), 1)
-        
-        
+
     def test_slits(self):
         """
             Check slit data
         """
         filename = "cansas1d_slit.xml"
-        data = Loader().load(filename)
+        data = CANSASReader().read(filename)
         self.data = data[0]
         self.assertEqual(self.data.filename, filename)
         self.assertEqual(self.data.run[0], "1234")
@@ -399,8 +420,7 @@ class cansas_reader(unittest.TestCase):
         self.assertEqual(self.data.dy[1], 4)
         self.assertEqual(self.data.run_name['1234'], 'run name')
         self.assertEqual(self.data.title, "Test title")
-        
-            
+
 
 if __name__ == '__main__':
     unittest.main()
