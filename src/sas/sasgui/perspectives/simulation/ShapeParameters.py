@@ -7,6 +7,8 @@ See the license text in license.txt
 
 copyright 2009, University of Tennessee
 """
+from __future__ import print_function
+
 import wx
 import sys
 import wx.lib.newevent
@@ -311,7 +313,7 @@ class ShapeParameterPanel(wx.Panel):
         try:
             self.parent.GetSizer().Layout()
         except:
-            print "TODO: move the Layout call of editShape up to the caller"
+            print("TODO: move the Layout call of editShape up to the caller")
 
     def _readCtrlFloat(self, ctrl):
         """
@@ -391,8 +393,8 @@ class ShapeParameterPanel(wx.Panel):
                 if not tmp==None:
                     self.current_shape.params[item[0]] = tmp 
         except:
-            print "Could not create"
-            print sys.exc_value
+            print("Could not create")
+            print(sys.exc_value)
                 
     def _onCreate(self, evt):
         """
@@ -484,6 +486,6 @@ class ShapeParameterPanel(wx.Panel):
         """
         indices = self.shape_listbox.GetSelections()
         if len(indices)>0:
-            print "NOT YET IMPLMENTED"
-            print "renaming", self.shape_listbox.GetString(indices[0])
+            print("NOT YET IMPLMENTED")
+            print("renaming", self.shape_listbox.GetString(indices[0]))
                 

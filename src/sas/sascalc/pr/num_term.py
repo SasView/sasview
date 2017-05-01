@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import math
 import numpy as np
 import copy
@@ -196,4 +198,4 @@ if __name__ == "__main__":
     invert.err = erro
     # Testing estimator
     est = NTermEstimator(invert)
-    print est.num_terms()
+    print(est.num_terms())

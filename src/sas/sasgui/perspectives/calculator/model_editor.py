@@ -22,6 +22,8 @@ the names of the first and second model and the operator to be used).
 #
 #copyright 2009, University of Tennessee
 ################################################################################
+from __future__ import print_function
+
 import wx
 import sys
 import os
@@ -870,7 +872,7 @@ class EditorPanel(wx.ScrolledWindow):
         self.function_tcl.InsertText(pos, label)
         # Put the cursor at appropriate position
         length = len(label)
-        print length
+        print(length)
         if label[length-1] == ')':
             length -= 1
         f_pos = pos + length
