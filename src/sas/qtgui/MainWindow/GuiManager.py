@@ -27,6 +27,7 @@ from sas.qtgui.Calculators.SldPanel import SldPanel
 from sas.qtgui.Calculators.DensityPanel import DensityPanel
 from sas.qtgui.Calculators.KiessigPanel import KiessigPanel
 from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
+from sas.qtgui.Calculators.GenericScatteringCalculator import GenericScatteringCalculator
 
 # Perspectives
 import sas.qtgui.Perspectives as Perspectives
@@ -138,6 +139,7 @@ class GuiManager(object):
         #self.KIESSIGCalculator = DensityPanel(self)#KiessigPanel(self)
         self.KIESSIGCalculator = KiessigPanel(self)
         self.SlitSizeCalculator = SlitSizeCalculator(self)
+        self.GENSASCalculator = GenericScatteringCalculator(self)
 
     def statusBarSetup(self):
         """
@@ -559,8 +561,7 @@ class GuiManager(object):
     def actionGeneric_Scattering_Calculator(self):
         """
         """
-        print("actionGeneric_Scattering_Calculator TRIGGERED")
-        pass
+        self.GENSASCalculator.show()
 
     def actionPython_Shell_Editor(self):
         """

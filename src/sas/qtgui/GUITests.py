@@ -28,6 +28,7 @@ from Plotting.UnitTesting import SlicerParametersTest
 # Calculators
 from Calculators.UnitTesting import KiessigCalculatorTest
 from Calculators.UnitTesting import DensityCalculatorTest
+from Calculators.UnitTesting import GenericScatteringCalculatorTest
 
 # Utilities
 from Utilities.UnitTesting import GuiUtilsTest
@@ -79,6 +80,7 @@ def suite():
         # Calculators
         unittest.makeSuite(KiessigCalculatorTest.KiessigCalculatorTest, 'test'),
         unittest.makeSuite(DensityCalculatorTest.DensityCalculatorTest, 'test'),
+        unittest.makeSuite(GenericScatteringCalculatorTest.GenericScatteringCalculatorTest, 'test'),
 
         # Perspectives
         unittest.makeSuite(FittingPerspectiveTest.FittingPerspectiveTest, 'test'),
