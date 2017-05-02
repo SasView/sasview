@@ -5,10 +5,13 @@ main SasView window.
 import wx
 import sys
 import logging
+import datetime
 from wx import StatusBar as wxStatusB
 from wx.lib import newevent
 import wx.richtext
 from sas.sasgui.guiframe.gui_style import GUIFRAME_ICON
+
+logger = logging.getLogger(__name__)
 
 # Number of fields on the status bar
 NB_FIELDS = 4
@@ -45,7 +48,9 @@ class ConsolePanel(wx.Panel):
                                    style=wx.VSCROLL|wx.HSCROLL|wx.NO_BORDER)
 
         self.msg_txt.SetEditable(False)
-        self.msg_txt.SetValue('No message available')
+        timestamp = datetime.datetime.now()
+        status = '{:%Y-%m-%d %H:%M:%S} : No message available'.format(timestamp)
+        self.msg_txt.SetValue(status)
         self.sizer.Add(self.msg_txt, 1, wx.EXPAND|wx.ALL, 10)
         self.SetSizer(self.sizer)
 
@@ -59,17 +64,20 @@ class ConsolePanel(wx.Panel):
         status = str(status)
         if status.strip() == "":
             return
+        # Add timestamp
+        timestamp = datetime.datetime.now()
+        status = '{:%Y-%m-%d %H:%M:%S} : '.format(timestamp) + status
         color = (0, 0, 0) #black
         icon_bmp = wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, wx.ART_TOOLBAR)
         if hasattr(event, "info"):
             icon_type = event.info.lower()
             if icon_type == "warning":
-                logging.warning(status)
+                logger.warning(status)
                 color = (0, 0, 255) # blue
                 icon_bmp = wx.ArtProvider.GetBitmap(wx.ART_WARNING,
                                                     wx.ART_TOOLBAR)
             if icon_type == "error":
-                logging.error(status)
+                logger.error(status)
                 color = (255, 0, 0) # red
                 icon_bmp = wx.ArtProvider.GetBitmap(wx.ART_ERROR,
                                                     wx.ART_TOOLBAR)

@@ -40,6 +40,10 @@
          {
             "-extension":".nxs",
             "-reader":"nexus_reader"
+         },
+         {
+            "-extension":".pdh",
+            "-reader":"anton_paar_saxs_reader"
          }
       ]
    }

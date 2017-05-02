@@ -13,7 +13,7 @@
 import wx
 import sys
 import math
-import numpy
+import numpy as np
 import logging
 from sas.sasgui.plottools.PlotPanel import PlotPanel
 from sas.sasgui.guiframe.events import StatusEvent
@@ -23,6 +23,8 @@ from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.guiframe.gui_style import GUIFRAME_ICON
 from appearanceDialog import appearanceDialog
 from graphAppearance import graphAppearance
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_QMAX = 0.05
 DEFAULT_QSTEP = 0.001
@@ -64,7 +66,6 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.frame = None
         # context menu
         self._slicerpop = None
-
         self._available_data = []
         self._symbol_labels = self.get_symbol_label()
         self._color_labels = self.get_color_label()
@@ -93,6 +94,9 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.canvas.set_resizing(self.resizing)
         self.Bind(wx.EVT_SIZE, self._OnReSize)
         self.parent.SetFocus()
+
+        # If true, there are 3 qrange bars
+        self.is_corfunc = False
 
 
     def get_symbol_label(self):
@@ -178,12 +182,12 @@ class ModelPanel1D(PlotPanel, PanelBase):
         # It was found that wx >= 2.9.3 sends an event even if no size changed.
         # So manually recode the size (=x_size) and compare here.
         # Massy code to work around:<
-        if self.parent._mgr != None:
+        if self.parent._mgr is not None:
             max_panel = self.parent._mgr.GetPane(self)
             if max_panel.IsMaximized():
                 self.parent._mgr.RestorePane(max_panel)
                 max_panel.Maximize()
-        if self.x_size != None:
+        if self.x_size is not None:
             if self.x_size == self.GetSize():
                 self.resizing = False
                 self.canvas.set_resizing(self.resizing)
@@ -207,12 +211,14 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         On Qmin Qmax vertical line event
         """
-        if event == None:
+        if event is None:
             return
         event.Skip()
         active_ctrl = event.active
-        if active_ctrl == None:
+        if active_ctrl is None:
             return
+        if hasattr(event, 'is_corfunc'):
+            self.is_corfunc = event.is_corfunc
         if event.id in self.plots.keys():
             ctrl = event.ctrl
             self.cursor_id = event.id
@@ -221,7 +227,10 @@ class ModelPanel1D(PlotPanel, PanelBase):
             x_data = self.plots[self.cursor_id].x
             values = [max(x_data.min(), float(ctrl[0].GetValue())),
                       min(x_data.max(), float(ctrl[1].GetValue()))]
-            if self.ly == None:
+            if len(ctrl) == 3:
+                colors.append('purple')
+                values.append(min(x_data.max(), float(ctrl[2].GetValue())))
+            if self.ly is None:
                 self.ly = []
                 for c, v in zip(colors, values):
                     h = self.subplot.axvline(x=v, color=c, lw=2.5, alpha=0.7)
@@ -231,10 +240,10 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 # Display x,y in the status bar if possible
                 xval = float(active_ctrl.GetValue())
                 position = self.get_data_xy_vals(xval)
-                if position != None:
+                if position is not None and not self.is_corfunc:
                     wx.PostEvent(self.parent, StatusEvent(status=position))
             except:
-                logging.error(sys.exc_value)
+                logger.error(sys.exc_value)
             if not event.leftdown:
                 # text event
                 try:
@@ -247,7 +256,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                     if is_moved:
                         self.canvas.draw()
                 except:
-                    logging.error(sys.exc_value)
+                    logger.error(sys.exc_value)
                 event.Skip()
                 return
             self.q_ctrl = ctrl
@@ -280,7 +289,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         :Param array: numpy array
         :Param value: float
         """
-        idx = (numpy.abs(array - value)).argmin()
+        idx = (np.abs(array - value)).argmin()
         return int(idx)  # array.flat[idx]
 
     def _check_line_positions(self, pos_x=None, nop=None):
@@ -292,6 +301,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
         ly = self.ly
         ly0x = ly[0].get_xdata()
         ly1x = ly[1].get_xdata()
+        ly2x = None
+        if self.is_corfunc: ly2x = ly[2].get_xdata()
         self.q_ctrl[0].SetBackgroundColour('white')
         self.q_ctrl[1].SetBackgroundColour('white')
         if ly0x >= ly1x:
@@ -305,6 +316,16 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 ly[0].set_zorder(nop)
                 self.q_ctrl[0].SetValue(str(pos_x))
                 self.q_ctrl[1].SetBackgroundColour('pink')
+        elif ly2x is not None and ly1x >= ly2x:
+            if self.vl_ind == 1:
+                ly[2].set_xdata(posx)
+                ly[2].set_zorder(nop)
+                self.q_ctrl[2].SetValue(str(pos_x))
+            elif self.vl_ind == 2:
+                ly[1].set_xdata(posx)
+                ly[1].set_zorder(nop)
+                self.q_ctrl[1].SetValue(str(pos_x))
+
 
     def _get_cusor_lines(self, event):
         """
@@ -314,38 +335,43 @@ class ModelPanel1D(PlotPanel, PanelBase):
         ax = event.inaxes
         if hasattr(event, "action"):
             dclick = event.action == 'dclick'
-            if ax == None or dclick:
+            if ax is None or dclick:
                 # remove the vline
                 self._check_zoom_plot()
                 self.canvas.draw()
                 self.q_ctrl = None
                 return
-        if self.ly != None and event.xdata != None:
+        if self.ly is not None and event.xdata is not None:
             # Selecting a new line if cursor lines are displayed already
             dqmin = math.fabs(event.xdata - self.ly[0].get_xdata())
             dqmax = math.fabs(event.xdata - self.ly[1].get_xdata())
-            is_qmax = dqmin > dqmax
-            if is_qmax:
-                self.vl_ind = 1
+            if not self.is_corfunc:
+                is_qmax = dqmin > dqmax
+                if is_qmax:
+                    self.vl_ind = 1
+                else:
+                    self.vl_ind = 0
             else:
-                self.vl_ind = 0
+                dqmax2 = math.fabs(event.xdata - self.ly[2].get_xdata())
+                closest = min(dqmin, dqmax, dqmax2)
+                self.vl_ind = { dqmin: 0, dqmax: 1, dqmax2: 2 }.get(closest)
 
     def cusor_line(self, event):
         """
         Move the cursor line to write Q range
         """
-        if self.q_ctrl == None:
+        if self.q_ctrl is None:
             return
         # release a q range vline
-        if self.ly != None and not self.leftdown:
+        if self.ly is not None and not self.leftdown:
             for ly in self.ly:
                 ly.set_alpha(0.7)
                 self.canvas.draw()
             return
         ax = event.inaxes
-        if ax == None or not hasattr(event, 'action'):
+        if ax is None or not hasattr(event, 'action'):
             return
-        end_drag = event.action != 'drag' and event.xdata != None
+        end_drag = event.action != 'drag' and event.xdata is not None
         nop = len(self.plots)
         pos_x, _ = float(event.xdata), float(event.ydata)
         try:
@@ -384,7 +410,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             self.canvas.draw()
             self.q_ctrl[vl_ind].SetValue(str(pos_x))
         except:
-            logging.error(sys.exc_value)
+            logger.error(sys.exc_value)
 
     def set_resizing(self, resizing=False):
         """
@@ -487,7 +513,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self._get_cusor_lines(event)
         ax = event.inaxes
         PlotPanel.onLeftDown(self, event)
-        if ax != None:
+        if ax is not None:
             try:
                 pos_x = float(event.xdata)  # / size_x
                 pos_y = float(event.ydata)  # / size_y
@@ -526,6 +552,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             # Recover the x,y limits
             self.subplot.set_xlim((xlo, xhi))
             self.subplot.set_ylim((ylo, yhi))
+        self.graph.selected_plottable = None
 
 
     def _onRemove(self, event):
@@ -554,21 +581,21 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self._slicerpop.set_plots(self.plots)
         self._slicerpop.set_graph(self.graph)
         ids = iter(self._menu_ids)
-        if not self.graph.selected_plottable in self.plots:
-            # Various plot options
-            wx_id = ids.next()
-            self._slicerpop.Append(wx_id, '&Save Image', 'Save image as PNG')
-            wx.EVT_MENU(self, wx_id, self.onSaveImage)
-            wx_id = ids.next()
-            self._slicerpop.Append(wx_id, '&Print Image', 'Print image ')
-            wx.EVT_MENU(self, wx_id, self.onPrint)
 
-            wx_id = ids.next()
-            self._slicerpop.Append(wx_id, '&Copy to Clipboard',
-                                   'Copy to the clipboard')
-            wx.EVT_MENU(self, wx_id, self.OnCopyFigureMenu)
+        # Various plot options
+        wx_id = ids.next()
+        self._slicerpop.Append(wx_id, '&Save Image', 'Save image as PNG')
+        wx.EVT_MENU(self, wx_id, self.onSaveImage)
+        wx_id = ids.next()
+        self._slicerpop.Append(wx_id, '&Print Image', 'Print image ')
+        wx.EVT_MENU(self, wx_id, self.onPrint)
 
-            self._slicerpop.AppendSeparator()
+        wx_id = ids.next()
+        self._slicerpop.Append(wx_id, '&Copy to Clipboard',
+                               'Copy to the clipboard')
+        wx.EVT_MENU(self, wx_id, self.OnCopyFigureMenu)
+
+        self._slicerpop.AppendSeparator()
 
         for plot in self.plots.values():
             # title = plot.title
@@ -590,14 +617,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
 
             # add menu of other plugins
             item_list = self.parent.get_current_context_menu(self)
-            if (not item_list == None) and (not len(item_list) == 0):
-                # Note: reusing menu ids in submenu.  This code works because
-                # IdItems is set up as a lazy iterator returning each id in
-                # sequence, creating new ids as needed so it never runs out.
-                # zip() is set up to stop when any iterator is empty, so it
-                # only asks for the number of ids in item_list.
-                for item, wx_id in zip(item_list, self._menu_ids):
-
+            if (item_list is not None) and (len(item_list)):
+                for item, wx_id in zip(item_list, [ids.next() for i in range(len(item_list))]):
                     try:
                         plot_menu.Append(wx_id, item[0], name)
                         wx.EVT_MENU(self, wx_id, item[2])
@@ -608,10 +629,11 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 plot_menu.AppendSeparator()
 
             if self.parent.ClassName.count('wxDialog') == 0:
-                wx_id = ids.next()
-                plot_menu.Append(wx_id, '&Linear Fit', name)
-                wx.EVT_MENU(self, wx_id, self.onFitting)
-                plot_menu.AppendSeparator()
+                if plot.id != 'fit':
+                    wx_id = ids.next()
+                    plot_menu.Append(wx_id, '&Linear Fit', name)
+                    wx.EVT_MENU(self, wx_id, self.onFitting)
+                    plot_menu.AppendSeparator()
 
                 wx_id = ids.next()
                 plot_menu.Append(wx_id, "Remove", name)
@@ -645,42 +667,45 @@ class ModelPanel1D(PlotPanel, PanelBase):
             self._slicerpop.AppendMenu(wx_id, '&%s' % name, plot_menu)
             # Option to hide
             # TODO: implement functionality to hide a plottable (legend click)
-        if not self.graph.selected_plottable in self.plots:
-            self._slicerpop.AppendSeparator()
-            loc_menu = wx.Menu()
-            for label in self._loc_labels:
-                wx_id = ids.next()
-                loc_menu.Append(wx_id, str(label), str(label))
-                wx.EVT_MENU(self, wx_id, self.onChangeLegendLoc)
 
+        self._slicerpop.AppendSeparator()
+        loc_menu = wx.Menu()
+        for label in self._loc_labels:
             wx_id = ids.next()
-            self._slicerpop.Append(wx_id, '&Modify Graph Appearance',
-                                   'Modify graph appearance')
-            wx.EVT_MENU(self, wx_id, self.modifyGraphAppearance)
-            self._slicerpop.AppendSeparator()
+            loc_menu.Append(wx_id, str(label), str(label))
+            wx.EVT_MENU(self, wx_id, self.onChangeLegendLoc)
+
+        wx_id = ids.next()
+        self._slicerpop.Append(wx_id, '&Modify Graph Appearance',
+                               'Modify graph appearance')
+        wx.EVT_MENU(self, wx_id, self.modifyGraphAppearance)
+        self._slicerpop.AppendSeparator()
 
 
-            if self.position != None:
-                wx_id = ids.next()
-                self._slicerpop.Append(wx_id, '&Add Text')
-                wx.EVT_MENU(self, wx_id, self._on_addtext)
-                wx_id = ids.next()
-                self._slicerpop.Append(wx_id, '&Remove Text')
-                wx.EVT_MENU(self, wx_id, self._on_removetext)
-                self._slicerpop.AppendSeparator()
+        if self.position is not None:
             wx_id = ids.next()
-            self._slicerpop.Append(wx_id, '&Change Scale')
-            wx.EVT_MENU(self, wx_id, self._onProperties)
+            self._slicerpop.Append(wx_id, '&Add Text')
+            wx.EVT_MENU(self, wx_id, self._on_addtext)
+            wx_id = ids.next()
+            self._slicerpop.Append(wx_id, '&Remove Text')
+            wx.EVT_MENU(self, wx_id, self._on_removetext)
+            self._slicerpop.AppendSeparator()
+        wx_id = ids.next()
+        self._slicerpop.Append(wx_id, '&Change Scale')
+        wx.EVT_MENU(self, wx_id, self._onProperties)
+        self._slicerpop.AppendSeparator()
+        wx_id = ids.next()
+        self._slicerpop.Append(wx_id, '&Set Graph Range')
+        wx.EVT_MENU(self, wx_id, self.onSetRange)
+        wx_id = ids.next()
+        self._slicerpop.Append(wx_id, '&Reset Graph Range')
+        wx.EVT_MENU(self, wx_id, self.onResetGraph)
+
+        if self.parent.ClassName.count('wxDialog') == 0:
             self._slicerpop.AppendSeparator()
             wx_id = ids.next()
-            self._slicerpop.Append(wx_id, '&Reset Graph Range')
-            wx.EVT_MENU(self, wx_id, self.onResetGraph)
-
-            if self.parent.ClassName.count('wxDialog') == 0:
-                self._slicerpop.AppendSeparator()
-                wx_id = ids.next()
-                self._slicerpop.Append(wx_id, '&Window Title')
-                wx.EVT_MENU(self, wx_id, self.onChangeCaption)
+            self._slicerpop.Append(wx_id, '&Window Title')
+            wx.EVT_MENU(self, wx_id, self.onChangeCaption)
         try:
             pos_evt = event.GetPosition()
             pos = self.ScreenToClient(pos_evt)
@@ -688,6 +713,26 @@ class ModelPanel1D(PlotPanel, PanelBase):
             pos_x, pos_y = self.toolbar.GetPositionTuple()
             pos = (pos_x, pos_y + 5)
         self.PopupMenu(self._slicerpop, pos)
+
+    def onSetRange(self, event):
+        # Display dialog
+        # self.subplot.set_xlim((low, high))
+        # self.subplot.set_ylim((low, high))
+        from sas.sasgui.plottools.RangeDialog import RangeDialog
+        d = RangeDialog(self, -1)
+        xlim = self.subplot.get_xlim()
+        ylim = self.subplot.get_ylim()
+        d.SetXRange(xlim)
+        d.SetYRange(ylim)
+        if d.ShowModal() == wx.ID_OK:
+            x_range = d.GetXRange()
+            y_range = d.GetYRange()
+            if x_range is not None and y_range is not None:
+                self.subplot.set_xlim(x_range)
+                self.subplot.set_ylim(y_range)
+                self.subplot.figure.canvas.draw_idle()
+                self.is_zoomed = True
+        d.Destroy()
 
     def onFreeze(self, event):
         """
@@ -714,7 +759,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         if default_name.count('.') > 0:
             default_name = default_name.split('.')[0]
         default_name += "_out"
-        if self.parent != None:
+        if self.parent is not None:
             self.parent.save_data1d(data, default_name)
 
     def _onDataShow(self, evt):
@@ -732,7 +777,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         if default_name.count('.') > 0:
             default_name = default_name.split('.')[0]
         # default_name += "_out"
-        if self.parent != None:
+        if self.parent is not None:
             self.parent.show_data1d(data, default_name)
 
     def _on_hide(self, event):
@@ -764,7 +809,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         curr_size = self.appearance_selected_plot.markersize
         curr_label = self.appearance_selected_plot.label
 
-        if curr_color == None:
+        if curr_color is None:
             curr_color = self._color_labels['Blue']
             curr_symbol = 13
 
@@ -775,6 +820,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                                str(appearanceDialog.find_key(self.get_symbol_label(),
                                                              int(curr_symbol))), curr_label)
         self.appD.Bind(wx.EVT_CLOSE, self.on_AppDialog_close)
+        self.graph.selected_plottable = None
 
     def on_AppDialog_close(self, event):
         """

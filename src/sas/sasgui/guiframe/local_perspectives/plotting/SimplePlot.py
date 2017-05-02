@@ -86,7 +86,7 @@ class SimplePlotPanel(PlotPanel):
             pos_x, pos_y = self.toolbar.GetPositionTuple()
             pos = (pos_x, pos_y + 5)
         self.PopupMenu(slicerpop, pos)
-        if self.scale != None:
+        if self.scale is not None:
             self.parent.scale2d = self.scale
 
     def on_grid_onoff(self, event):
@@ -105,7 +105,7 @@ class SimplePlotPanel(PlotPanel):
         if event.button == 1:
             self.leftdown = True
             ax = event.inaxes
-            if ax != None:
+            if ax is not None:
                 self.xInit, self.yInit = event.xdata, event.ydata
                 try:
                     pos_x = float(event.xdata)  # / size_x
@@ -122,7 +122,7 @@ class SimplePlotPanel(PlotPanel):
         On response of the resize of a panel, set axes_visiable False
         """
         self.resizing = False
-        if self.x_size != None:
+        if self.x_size is not None:
             if self.x_size == self.GetSize():
                 self.canvas.set_resizing(self.resizing)
                 return
@@ -160,9 +160,9 @@ class SimplePlotPanel(PlotPanel):
         self.data = plot
         self.plots[plot.name] = plot
         # Axis scales
-        if plot.xtransform != None:
+        if plot.xtransform is not None:
             self.xLabel = plot.xtransform
-        if plot.ytransform != None:
+        if plot.ytransform is not None:
             self.yLabel = plot.ytransform
         # Init graph
         self.graph = Graph()
@@ -187,7 +187,7 @@ class PlotFrame(wx.Frame):
     Frame for simple plot
     """
     def __init__(self, parent, id, title, scale='log_{10}',
-                 size=wx.Size(550, 470)):
+                 size=wx.Size(550, 470), show_menu_icons=True):
         """
         comment
         :param parent: parent panel/container
@@ -201,6 +201,7 @@ class PlotFrame(wx.Frame):
         self.menu_bar = None
         self._default_save_location = None
         self.scale = scale
+        self._show_menu_icons = show_menu_icons
         self.plotpanel = SimplePlotPanel(self, -1)
         self._build_menubar()
 
@@ -212,38 +213,39 @@ class PlotFrame(wx.Frame):
         save_bmp = wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE_AS, wx.ART_TOOLBAR, tsize)
         quit_bmp = wx.ArtProvider.GetBitmap(wx.ART_QUIT, wx.ART_TOOLBAR, tsize)
         print_bmp = wx.ArtProvider.GetBitmap(wx.ART_PRINT, wx.ART_TOOLBAR, tsize)
-        preview_bmp = wx.ArtProvider.GetBitmap(wx.ART_REPORT_VIEW, wx.ART_TOOLBAR, tsize)
         copy_bmp = wx.ArtProvider.GetBitmap(wx.ART_COPY, wx.ART_TOOLBAR, tsize)
         menu_bar = wx.MenuBar()
 
         menu = wx.Menu()
         id = wx.NewId()
-        item = wx.MenuItem(menu, id, "&Save Image")
-        item.SetBitmap(save_bmp)
-        menu.AppendItem(item)
+        save_item = wx.MenuItem(menu, id, "&Save Image")
+        menu.AppendItem(save_item)
         wx.EVT_MENU(self, id, self.on_save_file)
 
         id = wx.NewId()
-        item = wx.MenuItem(menu, id, "&Print Image")
-        item.SetBitmap(print_bmp)
-        menu.AppendItem(item)
+        print_item = wx.MenuItem(menu, id, "&Print Image")
+        menu.AppendItem(print_item)
         wx.EVT_MENU(self, id, self.on_print_image)
 
         menu.AppendSeparator()
         id = wx.NewId()
-        item = wx.MenuItem(menu, id, "&Quit")
-        item.SetBitmap(quit_bmp)
-        menu.AppendItem(item)
+        quit_item = wx.MenuItem(menu, id, "&Quit")
+        menu.AppendItem(quit_item)
 
         menu_bar.Append(menu, "&File")
         wx.EVT_MENU(self, id, self.on_close)
 
         menu_edit = wx.Menu()
         id = wx.NewId()
-        item = wx.MenuItem(menu_edit, id, "&Copy")
-        item.SetBitmap(copy_bmp)
-        menu_edit.AppendItem(item)
+        copy_item = wx.MenuItem(menu_edit, id, "&Copy")
+        menu_edit.AppendItem(copy_item)
         wx.EVT_MENU(self, id, self.on_copy_image)
+
+        if self._show_menu_icons:
+            save_item.SetBitmap(save_bmp)
+            print_item.SetBitmap(print_bmp)
+            quit_item.SetBitmap(quit_bmp)
+            copy_item.SetBitmap(copy_bmp)
 
         menu_bar.Append(menu_edit, "&Edit")
         self.menu_bar = menu_bar
@@ -323,4 +325,3 @@ class PlotFrame(wx.Frame):
             self.parent.on_panel_close(event)
         except:
             self.Destroy()
-

@@ -30,6 +30,41 @@ except:
     WX_SUPPORTS_HTML2 = False
 
 
+=======
+"""
+documentation module provides a simple means to add help throughout the
+application. It checks for the existence of html2 package needed to support
+fully html panel which supports css.  The class defined here takes a title for
+the particular help panel, a pointer to the html documentation file of interest
+within the documentation tree along with a 'command' string such as a page
+anchor or a query string etc.  The path to the doc directory is retrieved
+automatically by the class itself.  Thus with these three pieces of information
+the class generates a panel with the appropriate title bar and help file
+formatted according the style sheets called in the html file.  Finally, if an
+old version of Python is running and the html2 package is not available the
+class brings up the default browser and passes the file:/// string to it.  In
+this case however the instruction portion is usually not passed for security
+reasons.
+"""
+import os
+import logging
+import webbrowser
+import urllib
+import sys
+
+import wx
+try:
+    import wx.html2 as html
+    WX_SUPPORTS_HTML2 = True
+except:
+    WX_SUPPORTS_HTML2 = False
+
+from sas.sasgui import get_app_dir
+
+logger = logging.getLogger(__name__)
+
+SPHINX_DOC_ENV = "SASVIEW_DOC_PATH"
+
 class DocumentationWindow(wx.Frame):
     """
     DocumentationWindow inherits from wx.Frame and provides a centralized
@@ -69,7 +104,7 @@ class DocumentationWindow(wx.Frame):
         url = "file:///" + urllib.quote(file_path, r'/\:')+ url_instruction
 
         if not os.path.exists(file_path):
-            logging.error("Could not find Sphinx documentation at %s \
+            logger.error("Could not find Sphinx documentation at %s \
             -- has it been built?", file_path)
         elif WX_SUPPORTS_HTML2:
             # Complete HTML/CSS support!
@@ -77,7 +112,7 @@ class DocumentationWindow(wx.Frame):
             self.view.LoadURL(url)
             self.Show()
         else:
-            logging.error("No html2 support, popping up a web browser")
+            logger.error("No html2 support, popping up a web browser")
             #For cases that do not build against current version dependency
             # Wx 3.0 we provide a webbrowser call - this is particularly for
             #Red hat used at SNS for which Wx 3.0 is not available.  This

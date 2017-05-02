@@ -1,28 +1,54 @@
-# Test Travis CL
-
 language: python
-python:
-  - "2.7"
-# whitelist
+matrix:
+  include:
+  - os: linux
+    env:
+    - PY=2.7
+    - NUMPYSPEC=numpy
+  - os: osx
+    language: generic
+    env:
+    - PY=2.7
+    - NUMPYSPEC=numpy
 branches:
   only:
-    - master
-# command to install dependencies
-virtualenv:
-  system_site_packages: true
+  - master
+addons:
+  apt:
+    packages:
+    - opencl-headers
+    - fglrx
+    - libblas-dev
+    - libatlas-dev
+    - libatlas-base-dev
+    - liblapack-dev
+    - gfortran
+    - libhdf5-serial-dev
 before_install:
-  - 'if [ $TRAVIS_PYTHON_VERSION == "2.7" ]; then sudo apt-get update;sudo apt-get install python-numpy python-scipy python-matplotlib; fi'
-
+- echo $TRAVIS_OS_NAME
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+  -O miniconda.sh; sudo apt-get update; sudo apt-get install python-pyopencl; elif
+  [[ "$TRAVIS_OS_NAME" == "osx" ]]; then wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
+  -O miniconda.sh; fi
+- bash miniconda.sh -b -p $HOME/miniconda
+- export PATH="$HOME/miniconda/bin:$PATH"
+- hash -r
+- conda update --yes conda
+- conda info -a
+- conda install --yes python=$PY $NUMPYSPEC scipy cython pylint wxpython
 install:
-  - pip install -r build_tools/requirements.txt
+- pip install -r build_tools/requirements.txt
+- pip install matplotlib
 script:
-  - export WORKSPACE=/home/travis/build/SasView/sasview/
-  - export PYTHONPATH=$WORKSPACE/sasview-install:$WORKSPACE/utils:$PYTHONPATH
-  - if [ ! -d "utils" ]; then mkdir utils; fi
-  - /bin/sh -xe build_tools/jenkins_linux_build.sh
-  - /bin/sh -xe build_tools/jenkins_linux_test.sh
-  - export LC_ALL=en_US.UTF-8
-  - export LANG=en_US.UTF-8
-  - python setup.py docs; echo 0
-  - python setup.py bdist_egg --skip-build
-
+- cd ..
+- export WORKSPACE=$(pwd)
+- git clone --depth=50 --branch=master https://github.com/SasView/sasmodels.git sasmodels
+- git clone --depth=50 --branch=master https://github.com/bumps/bumps.git
+- ls -ltr
+- if [ ! -d "utils" ]; then mkdir utils; fi
+- /bin/sh -xe sasview/build_tools/travis_build.sh
+- export LC_ALL=en_US.UTF-8
+- export LANG=en_US.UTF-8
+notifications:
+  slack:
+    secure: TlsEpZiMLmOOgnmdG0I/oB4tq3bbQYeBBQi6S5qLlkYE9EjUTbbfg7oz0JYUsQ56FAsdFR8zswpBsX7PebZerzrq0ZmvfHSiJhOFIdBfY5Nb7bmLW8/9pUNWV57ON/8Gw2fE5ytc7FgvCGR64yb2QISI/150SIUwvdL5HXTxRWI=

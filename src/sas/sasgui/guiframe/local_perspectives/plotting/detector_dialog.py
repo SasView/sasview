@@ -6,7 +6,7 @@ import sys
 from sas.sasgui.guiframe.utils import format_number
 from sas.sasgui.guiframe.events import StatusEvent
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as Canvas
-from matplotlib import mpl
+import matplotlib as mpl
 from matplotlib import pylab
 # FONT size
 if sys.platform.count("win32") > 0:
@@ -89,9 +89,9 @@ class DetectorDialog(wx.Dialog):
         try:
             zmin = self.reset_zmin_ctl
             zmax = self.reset_zmax_ctl
-            if zmin == None:
+            if zmin is None:
                 zmin = ""
-            if zmax == None:
+            if zmax is None:
                 zmax = ""
             self.zmin_ctl.SetValue(str(zmin))
             self.zmax_ctl.SetValue(str(zmax))
@@ -154,9 +154,9 @@ class DetectorDialog(wx.Dialog):
         self.ynpts_ctl.SetLabel(str(format_number(ynpts)))
         self.qmax_ctl.SetLabel(str(format_number(qmax)))
         self.beam_ctl.SetLabel(str(format_number(beam)))
-        if zmin != None:
+        if zmin is not None:
             self.zmin_ctl.SetValue(str(format_number(zmin)))
-        if zmax != None:
+        if zmax is not None:
             self.zmax_ctl.SetValue(str(format_number(zmax)))
 
     def getContent(self):

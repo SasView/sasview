@@ -161,7 +161,7 @@ def errToX(x, y=None, dx=None, dy=None):
     :param dx: float value
 
     """
-    if dx == None:
+    if dx is None:
         dx = 0
     return dx
 
@@ -174,7 +174,7 @@ def errToX_pos(x, y=None, dx=None, dy=None):
     :param dx: float value
 
     """
-    if dx == None:
+    if dx is None:
         dx = 0
     return dx
 
@@ -187,7 +187,7 @@ def errToX2(x, y=None, dx=None, dy=None):
     :param dx: float value
 
     """
-    if  dx != None:
+    if  dx is not None:
         err = 2 * x * dx
         return math.fabs(err)
     else:
@@ -203,7 +203,7 @@ def errFromX2(x, y=None, dx=None, dy=None):
 
     """
     if x > 0:
-        if dx != None:
+        if dx is not None:
             err = dx / (2 * math.sqrt(x))
         else:
             err = 0
@@ -221,7 +221,7 @@ def errToX4(x, y=None, dx=None, dy=None):
     :param dx: float value
 
     """
-    if dx != None:
+    if dx is not None:
         err = 4 * math.pow(x, 3) * dx
         return math.fabs(err)
     else:
@@ -237,7 +237,7 @@ def errFromX4(x, y=None, dx=None, dy=None):
 
     """
     if x > 0:
-        if dx != None:
+        if dx is not None:
             err = dx / (4 * math.pow(x, 3 / 4))
         else:
             err = 0
@@ -255,7 +255,7 @@ def errToLog10X(x, y=None, dx=None, dy=None):
     :param dx: float value
 
     """
-    if dx == None:
+    if dx is None:
         dx = 0
 
     # Check that the point on the graph is positive
@@ -279,7 +279,7 @@ def errToLogX(x, y=None, dx=None, dy=None):
     :param dx: float value
 
     """
-    if dx == None:
+    if dx is None:
         dx = 0
 
     # Check that the x point on the graph is zero
@@ -290,12 +290,12 @@ def errToLogX(x, y=None, dx=None, dy=None):
     return dx
 
 
-def errToYX2(x, y, dx=None, dy=None):
+def errToYX2(y, x, dy=None, dx=None):
     """
     """
-    if dx == None:
+    if dx is None:
         dx = 0
-    if dy == None:
+    if dy is None:
         dy = 0
     err = math.sqrt((2 * x * y * dx) ** 2 + ((x ** 2) * dy) ** 2)
     return err
@@ -313,9 +313,9 @@ def errToLogXY(x, y, dx=None, dy=None):
         msg += " that are consistent with zero."
         raise ValueError, msg
     if x != 0 and y != 0:
-        if dx == None:
+        if dx is None:
             dx = 0
-        if dy == None:
+        if dy is None:
             dy = 0
         err = (dx / x) ** 2 + (dy / y) ** 2
     else:
@@ -324,7 +324,7 @@ def errToLogXY(x, y, dx=None, dy=None):
     return math.sqrt(math.fabs(err))
 
 
-def errToLogYX2(x, y, dx=None, dy=None):
+def errToLogYX2(y, x, dy=None, dx=None):
     """
     calculate error of Log(yx**2)
 
@@ -336,9 +336,9 @@ def errToLogYX2(x, y, dx=None, dy=None):
         msg += " that are consistent with zero."
         raise ValueError, msg
     if x > 0 and y > 0:
-        if dx == None:
+        if dx is None:
             dx = 0
-        if dy == None:
+        if dy is None:
             dy = 0
         err = (2.0 * dx / x) ** 2 + (dy / y) ** 2
     else:
@@ -352,7 +352,7 @@ def errOneOverX(x, y=None, dx=None, dy=None):
 
     """
     if x != 0:
-        if dx == None:
+        if dx is None:
             dx = 0
         err = dx / x ** 2
     else:
@@ -366,7 +366,7 @@ def errOneOverSqrtX(x, y=None, dx=None, dy=None):
 
     """
     if x > 0:
-        if dx == None:
+        if dx is None:
             dx = 0
         err = -1 / 2 * math.pow(x, -3.0 / 2.0) * dx
     else:
@@ -374,7 +374,7 @@ def errOneOverSqrtX(x, y=None, dx=None, dy=None):
     return math.fabs(err)
 
 
-def errToLogYX4(x, y=None, dx=None, dy=None):
+def errToLogYX4(y, x, dy=None, dx=None):
     """
     error for ln(y*x^(4))
 
@@ -387,15 +387,15 @@ def errToLogYX4(x, y=None, dx=None, dy=None):
         msg = "Transformation does not accept point "
         msg += " that are consistent with zero."
         raise ValueError, msg
-    if dx == None:
+    if dx is None:
         dx = 0
-    if dy == None:
+    if dy is None:
         dy = 0
     err = math.sqrt((4.0 * dx / x) ** 2 + (dy / y) ** 2)
     return err
 
 
-def errToYX4(x, y=None, dx=None, dy=None):
+def errToYX4(y, x, dy=None, dx=None):
     """
     error for (y*x^(4))
 
@@ -405,9 +405,9 @@ def errToYX4(x, y=None, dx=None, dy=None):
     # Check that the point on the graph is positive
     # within errors
 
-    if dx == None:
+    if dx is None:
         dx = 0
-    if dy == None:
+    if dy is None:
         dy = 0
     err = math.sqrt((dy * pow(x, 4)) ** 2 + (4 * y * dx * math.pow(x, 3)) ** 2)
     return err

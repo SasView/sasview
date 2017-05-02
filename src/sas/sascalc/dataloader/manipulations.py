@@ -79,7 +79,7 @@ def reader2D_converter(data2d=None):
     :return: 1d arrays of Data2D object
 
     """
-    if data2d.data == None or data2d.x_bins == None or data2d.y_bins == None:
+    if data2d.data is None or data2d.x_bins is None or data2d.y_bins is None:
         raise ValueError, "Can't convert this data: data=None..."
     new_x = numpy.tile(data2d.x_bins, (len(data2d.y_bins), 1))
     new_y = numpy.tile(data2d.y_bins, (len(data2d.x_bins), 1))
@@ -89,7 +89,7 @@ def reader2D_converter(data2d=None):
     qx_data = new_x.flatten()
     qy_data = new_y.flatten()
     q_data = numpy.sqrt(qx_data * qx_data + qy_data * qy_data)
-    if data2d.err_data == None or numpy.any(data2d.err_data <= 0):
+    if data2d.err_data is None or numpy.any(data2d.err_data <= 0):
         new_err_data = numpy.sqrt(numpy.abs(new_data))
     else:
         new_err_data = data2d.err_data.flatten()
@@ -142,7 +142,7 @@ class _Slab(object):
         :param maj_min: min value on the major axis
         :return: Data1D object
         """
-        if len(data2D.detector) != 1:
+        if len(data2D.detector) > 1:
             msg = "_Slab._avg: invalid number of "
             msg += " detectors: %g" % len(data2D.detector)
             raise RuntimeError, msg
@@ -209,7 +209,7 @@ class _Slab(object):
             x[i_q] += frac * q_value
             y[i_q] += frac * data[npts]
 
-            if err_data == None or err_data[npts] == 0.0:
+            if err_data is None or err_data[npts] == 0.0:
                 if data[npts] < 0:
                     data[npts] = -data[npts]
                 err_y[i_q] += frac * frac * data[npts]
@@ -298,7 +298,7 @@ class Boxsum(object):
         :return: number of counts,
             error on number of counts, number of entries summed
         """
-        if len(data2D.detector) != 1:
+        if len(data2D.detector) > 1:
             msg = "Circular averaging: invalid number "
             msg += "of detectors: %g" % len(data2D.detector)
             raise RuntimeError, msg
@@ -332,7 +332,7 @@ class Boxsum(object):
             if frac == 0:
                 continue
             y += frac * data[npts]
-            if err_data == None or err_data[npts] == 0.0:
+            if err_data is None or err_data[npts] == 0.0:
                 if data[npts] < 0:
                     data[npts] = -data[npts]
                 err_y += frac * frac * data[npts]
@@ -421,7 +421,7 @@ class CircularAverage(object):
         dq_data = None
 
         # Get the dq for resolution averaging
-        if data2D.dqx_data != None and data2D.dqy_data != None:
+        if data2D.dqx_data is not None and data2D.dqy_data is not None:
             # The pinholes and det. pix contribution present
             # in both direction of the 2D which must be subtracted when
             # converting to 1D: dq_overlap should calculated ideally at
@@ -461,7 +461,7 @@ class CircularAverage(object):
             dq_data = numpy.sqrt(dq_data)
 
         #q_data_max = numpy.max(q_data)
-        if len(data2D.q_data) == None:
+        if len(data2D.q_data) is None:
             msg = "Circular averaging: invalid q_data: %g" % data2D.q_data
             raise RuntimeError, msg
 
@@ -501,13 +501,13 @@ class CircularAverage(object):
             y[i_q] += frac * data_n
             # Take dqs from data to get the q_average
             x[i_q] += frac * q_value
-            if err_data == None or err_data[npt] == 0.0:
+            if err_data is None or err_data[npt] == 0.0:
                 if data_n < 0:
                     data_n = -data_n
                 err_y[i_q] += frac * frac * data_n
             else:
                 err_y[i_q] += frac * frac * err_data[npt] * err_data[npt]
-            if dq_data != None:
+            if dq_data is not None:
                 # To be consistent with dq calculation in 1d reduction,
                 # we need just the averages (not quadratures) because
                 # it should not depend on the number of the q points
@@ -522,7 +522,7 @@ class CircularAverage(object):
             if err_y[n] < 0:
                 err_y[n] = -err_y[n]
             err_y[n] = math.sqrt(err_y[n])
-            #if err_x != None:
+            #if err_x is not None:
             #    err_x[n] = math.sqrt(err_x[n])
 
         err_y = err_y / y_counts
@@ -531,7 +531,7 @@ class CircularAverage(object):
         x = x / y_counts
         idx = (numpy.isfinite(y)) & (numpy.isfinite(x))
 
-        if err_x != None:
+        if err_x is not None:
             d_x = err_x[idx] / y_counts[idx]
         else:
             d_x = None
@@ -622,7 +622,7 @@ class Ring(object):
                 i_phi = 0
             phi_bins[i_phi] += frac * data[npt]
 
-            if err_data == None or err_data[npt] == 0.0:
+            if err_data is None or err_data[npt] == 0.0:
                 if data_n < 0:
                     data_n = -data_n
                 phi_err[i_phi] += frac * frac * math.fabs(data_n)
@@ -776,7 +776,7 @@ class _Sector(object):
         dq_data = None
 
         # Get the dq for resolution averaging
-        if data2D.dqx_data != None and data2D.dqy_data != None:
+        if data2D.dqx_data is not None and data2D.dqy_data is not None:
             # The pinholes and det. pix contribution present
             # in both direction of the 2D which must be subtracted when
             # converting to 1D: dq_overlap should calculated ideally at
@@ -887,14 +887,14 @@ class _Sector(object):
             ## Get the total y
             y[i_bin] += frac * data_n
             x[i_bin] += frac * q_value
-            if err_data[n] == None or err_data[n] == 0.0:
+            if err_data[n] is None or err_data[n] == 0.0:
                 if data_n < 0:
                     data_n = -data_n
                 y_err[i_bin] += frac * frac * data_n
             else:
                 y_err[i_bin] += frac * frac * err_data[n] * err_data[n]
 
-            if dq_data != None:
+            if dq_data is not None:
                 # To be consistent with dq calculation in 1d reduction,
                 # we need just the averages (not quadratures) because
                 # it should not depend on the number of the q points
@@ -924,7 +924,7 @@ class _Sector(object):
                 x[i] = x[i] / y_counts[i]
         y_err[y_err == 0] = numpy.average(y_err)
         idx = (numpy.isfinite(y) & numpy.isfinite(y_err))
-        if x_err != None:
+        if x_err is not None:
             d_x = x_err[idx] / y_counts[idx]
         else:
             d_x = None

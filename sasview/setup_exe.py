@@ -2,16 +2,17 @@
 
 #
 # The setup to create a Windows executable.
-# Inno Setup can then be used with the installer.iss file 
-# in the top source directory to create an installer. 
+# Inno Setup can then be used with the installer.iss file
+# in the top source directory to create an installer.
 #
 # Setuptools clashes with py2exe 0.6.8 (and probably later too).
 # For that reason, most of the code needs to have direct imports
-# that are not going through pkg_resources. 
+# that are not going through pkg_resources.
 #
 # Attention should be paid to dynamic imports. Data files can
 # be added to the distribution directory for that purpose.
 # See for example the 'images' directory below.
+from __future__ import print_function
 
 import os
 import sys
@@ -61,8 +62,8 @@ try:
         del sys.argv[path_flag_idx+1]
         sys.argv.remove('--extrapath')
 except:
-    print "Error processing extra python path needed to build SasView\n  %s" % \
-                sys.exc_value
+    print("Error processing extra python path needed to build SasView\n  %s" %
+          sys.exc_value)
 
 
 # Solution taken from here: http://www.py2exe.org/index.cgi/win32com.shell
@@ -82,14 +83,13 @@ try:
     for p in win32com.__path__[1:]:
         modulefinder.AddPackagePath(win32_folder, p)
     for extra in ["win32com.shell", "win32com.adsi", "win32com.axcontrol",
-                    "win32com.axscript", "win32com.bits", "win32com.ifilter",
-                    "win32com.internet", "win32com.mapi", "win32com.propsys",
-                    "win32com.taskscheduler"]:
-        
-            __import__(extra)
-            m = sys.modules[extra]
-            for p in m.__path__[1:]:
-                modulefinder.AddPackagePath(extra, p)
+                  "win32com.axscript", "win32com.bits", "win32com.ifilter",
+                  "win32com.internet", "win32com.mapi", "win32com.propsys",
+                  "win32com.taskscheduler"]:
+        __import__(extra)
+        m = sys.modules[extra]
+        for p in m.__path__[1:]:
+            modulefinder.AddPackagePath(extra, p)
 
 except ImportError:
     # no build path setup, no worries.
@@ -164,9 +164,9 @@ class Target:
         # for the versioninfo resources
         self.version = local_config.__version__
         self.company_name = "SasView.org"
-        self.copyright = "copyright 2009 - 2013"
+        self.copyright = "copyright 2009 - 2016"
         self.name = "SasView"
-        
+
 #
 # Adapted from http://www.py2exe.org/index.cgi/MatPlotLib
 # to use the MatPlotLib.
@@ -222,18 +222,21 @@ if os.path.isfile(reader_config):
 
 # Copy the config files
 sasview_path = os.path.join('..','src','sas','sasview')
-custom_config_file = os.path.join(sasview_path, 'custom_config.py')
-local_config_file = os.path.join(sasview_path, 'local_config.py')
-DATA_FILES.append(('.', [custom_config_file]))
-DATA_FILES.append(('config', [custom_config_file]))
-DATA_FILES.append(('.', [local_config_file]))
+config_files = [
+    'custom_config.py',
+    'local_config.py',
+    'logging.init',
+    #'default_categories.json',
+    ]
+DATA_FILES.append(('.', [os.path.join(sasview_path, v) for v in config_files]))
+DATA_FILES.append(('config', [os.path.join(sasview_path, 'custom_config.py')]))
 
 # default_categories.json is beside the config files
 category_config = os.path.join(os.path.dirname(local_config_file),
                                'default_categories.json')
 if os.path.isfile(category_config):
     DATA_FILES.append(('.', [category_config]))
-    
+
 if os.path.isfile("BUILD_NUMBER"):
     DATA_FILES.append(('.', ["BUILD_NUMBER"]))
 
@@ -275,6 +278,25 @@ opencl_include_dir = os.path.join(site_loc, "pyopencl", "cl")
 for f in findall(opencl_include_dir):
     DATA_FILES.append((os.path.join("includes","pyopencl"), [f]))
 
+# Numerical libraries
+python_root = os.path.dirname(os.path.abspath(sys.executable))
+def dll_check(dll_path, dlls):
+    dll_includes = [os.path.join(dll_path, dll+'.dll') for dll in dlls]
+    return [dll for dll in dll_includes if os.path.exists(dll)]
+
+# Check for ATLAS
+numpy_path = os.path.join(python_root, 'lib', 'site-packages', 'numpy', 'core')
+atlas_dlls = dll_check(numpy_path, ['numpy-atlas'])
+
+# Check for MKL
+mkl_path = os.path.join(python_root, 'Library', 'bin')
+mkl_dlls = dll_check(mkl_path, ['mkl_core', 'mkl_def', 'libiomp5md'])
+
+if atlas_dlls:
+    DATA_FILES.append(('.', atlas_dlls))
+elif mkl_dlls:
+    DATA_FILES.append(('.', mkl_dlls))
+
 # See if the documentation has been built, and if so include it.
 if os.path.exists(doc_path):
     for dirpath, dirnames, filenames in os.walk(doc_path):
@@ -310,6 +332,7 @@ packages.extend([
     'reportlab.platypus',
     ])
 packages.append('periodictable.core') # not found automatically
+
 # For an interactive interpreter, SasViewCom
 packages.extend(['IPython','pyreadline','pyreadline.unicode_helper'])
 
@@ -323,13 +346,13 @@ if tinycc:
 excludes = ['Tkinter', 'PyQt4', '_tkagg', 'sip', 'pytz', 'sympy']
 
 
-dll_excludes = [
     # Various matplotlib backends we are not using
     'libgdk_pixbuf-2.0-0.dll', 'libgobject-2.0-0.dll', 'libgdk-win32-2.0-0.dll',
     'tcl84.dll', 'tk84.dll', 'QtGui4.dll', 'QtCore4.dll',
     # numpy 1.8 openmp bindings (still seems to use all the cores without them)
     # ... but we seem to need them when building from anaconda, so don't exclude ...
     #'libiomp5md.dll', 'libifcoremd.dll', 'libmmd.dll', 'svml_dispmd.dll','libifportMD.dll',
+    'numpy-atlas.dll',
     # microsoft C runtime (not allowed to ship with the app; need to ship vcredist
     'msvcp90.dll',
     # 32-bit windows console piping
@@ -340,23 +363,13 @@ dll_excludes = [
     'OpenCL.dll'
     ]
 
-# extra dlls not found automatically
-python_root = os.path.dirname(os.path.abspath(sys.executable))
-dll_path = os.path.join(python_root, 'Library', 'bin')
-# the following are found already: 'mkl_intel_thread', 'libmmd', 'libifcoremd'
-dll_includes = ['mkl_core', 'mkl_def', 'libiomp5md']
-dll_includes = [os.path.join(dll_path, dll+'.dll') for dll in dll_includes]
-dll_includes = [dll for dll in dll_includes if os.path.exists(dll)]
-if dll_includes:
-   DATA_FILES.append(('.', dll_includes))
-
 target_wx_client = Target(
     description = 'SasView',
     script = 'sasview_gui.py',
     icon_resources = [(1, local_config.SetupIconFile_win)],
     other_resources = [(24, 1, manifest)],
     dest_base = "SasView"
-    )
+)
 
 target_console_client = Target(
     description = 'SasView console',
@@ -366,9 +379,7 @@ target_console_client = Target(
     dest_base = "SasViewCom"
 )
 
-bundle_option = 2
-if is_64bits:
-    bundle_option = 3
+bundle_option = 3 if is_64bits else 2
 generate_installer()
 #initialize category stuff
 #from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller

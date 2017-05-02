@@ -3,8 +3,9 @@ BumpsFitting module runs the bumps optimizer.
 """
 import os
 from datetime import timedelta, datetime
+import traceback
 
-import numpy
+import numpy as np
 
 from bumps import fitters
 try:
@@ -95,7 +96,7 @@ class ConvergenceMonitor(object):
         best = history.value[0]
         try:
             p = history.population_values[0]
-            n,p = len(p), numpy.sort(p)
+            n,p = len(p), np.sort(p)
             QI,Qmid, = int(0.2*n),int(0.5*n)
             self.convergence.append((best, p[0],p[QI],p[Qmid],p[-1-QI],p[-1]))
         except:
@@ -192,10 +193,10 @@ class SasFitness(object):
             self._dirty = False
 
     def numpoints(self):
-        return numpy.sum(self.data.idx) # number of fitted points
+        return np.sum(self.data.idx) # number of fitted points
 
     def nllf(self):
-        return 0.5*numpy.sum(self.residuals()**2)
+        return 0.5*np.sum(self.residuals()**2)
 
     def theory(self):
         self._recalculate()
@@ -292,19 +293,23 @@ class BumpsFit(FitEngine):
             # TODO: should scale stderr by sqrt(chisq/DOF) if dy is unknown
             R.success = result['success']
             if R.success:
-                R.stderr = numpy.hstack((result['stderr'][fitted_index],
-                                         numpy.NaN*numpy.ones(len(fitness.computed_pars))))
-                R.pvec = numpy.hstack((result['value'][fitted_index],
+                if result['stderr'] is None:
+                    R.stderr = np.NaN*np.ones(len(param_list))
+                else:
+                    R.stderr = np.hstack((result['stderr'][fitted_index],
+                                          np.NaN*np.ones(len(fitness.computed_pars))))
+                R.pvec = np.hstack((result['value'][fitted_index],
                                       [p.value for p in fitness.computed_pars]))
-                R.fitness = numpy.sum(R.residuals**2)/(fitness.numpoints() - len(fitted_index))
+                R.fitness = np.sum(R.residuals**2)/(fitness.numpoints() - len(fitted_index))
             else:
-                R.stderr = numpy.NaN*numpy.ones(len(param_list))
-                R.pvec = numpy.asarray( [p.value for p in fitness.fitted_pars+fitness.computed_pars])
-                R.fitness = numpy.NaN
+                R.stderr = np.NaN*np.ones(len(param_list))
+                R.pvec = np.asarray( [p.value for p in fitness.fitted_pars+fitness.computed_pars])
+                R.fitness = np.NaN
             R.convergence = result['convergence']
             if result['uncertainty'] is not None:
                 R.uncertainty_state = result['uncertainty']
             all_results.append(R)
+        all_results[0].mesg = result['errors']
 
         if q is not None:
             q.put(all_results)
@@ -330,7 +335,7 @@ def run_bumps(problem, handler, curr_thread):
         steps = (samples+pop-1)/pop if pop != 0 else samples
     max_step = steps + options.get('burn', 0)
     pars = [p.name for p in problem._parameters]
-    #x0 = numpy.asarray([p.value for p in problem._parameters])
+    #x0 = np.asarray([p.value for p in problem._parameters])
     options['monitors'] = [
         BumpsMonitor(handler, max_step, pars, problem.dof),
         ConvergenceMonitor(),
@@ -343,23 +348,31 @@ def run_bumps(problem, handler, curr_thread):
     #import time; T0 = time.time()
     try:
         best, fbest = fitdriver.fit()
-    except:
-        import traceback; traceback.print_exc()
-        raise
+        errors = []
+    except Exception as exc:
+        best, fbest = None, np.NaN
+        errors = [str(exc), traceback.format_exc()]
     finally:
         mapper.stop_mapper(fitdriver.mapper)
 
 
     convergence_list = options['monitors'][-1].convergence
-    convergence = (2*numpy.asarray(convergence_list)/problem.dof
-                   if convergence_list else numpy.empty((0,1),'d'))
+    convergence = (2*np.asarray(convergence_list)/problem.dof
+                   if convergence_list else np.empty((0,1),'d'))
 
     success = best is not None
+    try:
+        stderr = fitdriver.stderr() if success else None
+    except Exception as exc:
+        errors.append(str(exc))
+        errors.append(traceback.format_exc())
+        stderr = None
     return {
         'value': best if success else None,
-        'stderr': fitdriver.stderr() if success else None,
+        'stderr': stderr,
         'success': success,
         'convergence': convergence,
         'uncertainty': getattr(fitdriver.fitter, 'state', None),
+        'errors': '\n'.join(errors),
         }
 

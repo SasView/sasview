@@ -1,42 +1,32 @@
+# -*- coding: utf-8 -*-
 """
 Base module for loading and running the main SasView application.
 """
 ################################################################################
-#This software was developed by the University of Tennessee as part of the
-#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation.
+# This software was developed by the University of Tennessee as part of the
+# Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+# project funded by the US National Science Foundation.
 #
-#See the license text in license.txt
+# See the license text in license.txt
 #
-#copyright 2009, University of Tennessee
+# copyright 2009, University of Tennessee
 ################################################################################
 import os
+import os.path
 import sys
-import logging
 import traceback
 
+from sas.sasview.logger_config import SetupLogger
 
 reload(sys)
 sys.setdefaultencoding("iso-8859-1")
 
+logger = SetupLogger(__name__).config_production()
+# Log the start of the session
+logger.info(" --- SasView session started ---")
+# Log the python version
+logger.info("Python: %s" % sys.version)
 
-class StreamToLogger(object):
-    """
-        File-like stream object that redirects writes to a logger instance.
-    """
-    def __init__(self, logger, log_level=logging.INFO):
-        self.logger = logger
-        self.log_level = log_level
-        self.linebuf = ''
-
-    def write(self, buf):
-        """
-        Main logging method
-        """
-        # Write the message to stdout so we can see it when running interactively
-        sys.stdout.write(buf)
-        for line in buf.rstrip().splitlines():
-            self.logger.log(self.log_level, line.rstrip())
 
 PLUGIN_MODEL_DIR = 'plugin_models'
 APP_NAME = 'SasView'
@@ -65,8 +55,8 @@ class SasView():
             fitting_plug = module.Plugin()
             self.gui.add_perspective(fitting_plug)
         except Exception:
-            logging.error("%s: could not find Fitting plug-in module"% APP_NAME)
-            logging.error(traceback.format_exc())
+            logger.error("%s: could not find Fitting plug-in module"% APP_NAME)
+            logger.error(traceback.format_exc())
 
         # P(r) perspective
         try:
@@ -74,29 +64,46 @@ class SasView():
             pr_plug = module.Plugin()
             self.gui.add_perspective(pr_plug)
         except:
-            logging.error("%s: could not find P(r) plug-in module"% APP_NAME)
-            logging.error(traceback.format_exc())
+            logger.error("%s: could not find P(r) plug-in module"% APP_NAME)
+            logger.error(traceback.format_exc())
 
-        #Invariant perspective
+        # Invariant perspective
         try:
             import sas.sasgui.perspectives.invariant as module
             invariant_plug = module.Plugin()
             self.gui.add_perspective(invariant_plug)
         except Exception as e :
-            logging.error("%s: could not find Invariant plug-in module"% \
+            logger.error("%s: could not find Invariant plug-in module"% \
                           APP_NAME)
-            logging.error(traceback.format_exc())
+            logger.error(traceback.format_exc())
 
-        #Calculator perspective
+        # Corfunc perspective
+        try:
+            import sas.sasgui.perspectives.corfunc as module
+            corfunc_plug = module.Plugin()
+            self.gui.add_perspective(corfunc_plug)
+        except:
+            logger.error("Unable to load corfunc module")
+
+        # Calculator perspective
         try:
             import sas.sasgui.perspectives.calculator as module
             calculator_plug = module.Plugin()
             self.gui.add_perspective(calculator_plug)
         except:
-            logging.error("%s: could not find Calculator plug-in module"% \
+            logger.error("%s: could not find Calculator plug-in module"% \
                                                         APP_NAME)
-            logging.error(traceback.format_exc())
+            logger.error(traceback.format_exc())
 
+        # File converter tool
+        try:
+            import sas.sasgui.perspectives.file_converter as module
+            converter_plug = module.Plugin()
+            self.gui.add_perspective(converter_plug)
+        except:
+            logger.error("%s: could not find File Converter plug-in module"% \
+                                                        APP_NAME)
+            logger.error(traceback.format_exc())
 
         # Add welcome page
         from .welcome_panel import WelcomePanel
@@ -137,23 +144,23 @@ def setup_wx():
     # new version of wx.
     WX_ENV_VAR = "SASVIEW_WX_VERSION"
     if WX_ENV_VAR in os.environ:
-        logging.info("You have set the %s environment variable to %s." % \
+        logger.info("You have set the %s environment variable to %s." % \
                      (WX_ENV_VAR, os.environ[WX_ENV_VAR]))
         import wxversion
         if wxversion.checkInstalled(os.environ[WX_ENV_VAR]):
-            logging.info("Version %s of wxPython is installed, so using that version." % os.environ[WX_ENV_VAR])
+            logger.info("Version %s of wxPython is installed, so using that version." % os.environ[WX_ENV_VAR])
             wxversion.select(os.environ[WX_ENV_VAR])
         else:
-            logging.error("Version %s of wxPython is not installed, so using default version." % os.environ[WX_ENV_VAR])
+            logger.error("Version %s of wxPython is not installed, so using default version." % os.environ[WX_ENV_VAR])
     else:
-        logging.info("You have not set the %s environment variable, so using default version of wxPython." % WX_ENV_VAR)
+        logger.info("You have not set the %s environment variable, so using default version of wxPython." % WX_ENV_VAR)
 
     import wx
 
     try:
-        logging.info("Wx version: %s" % wx.__version__)
+        logger.info("Wx version: %s" % wx.__version__)
     except:
-        logging.error("Wx version: error reading version")
+        logger.error("Wx version: error reading version")
 
     from . import wxcruft
     wxcruft.call_later_fix()
@@ -164,6 +171,7 @@ def setup_wx():
 
 def setup_mpl():
     import sas.sasgui
+    # Always use private .matplotlib setup to avoid conflicts with other
     mplconfigdir = os.path.join(sas.sasgui.get_user_dir(), '.matplotlib')
     if not os.path.exists(mplconfigdir):
         os.mkdir(mplconfigdir)
@@ -174,6 +182,9 @@ def setup_mpl():
     # path as we can
     os.environ['MPLBACKEND'] = 'WXAgg'
 
+
+    from matplotlib import backend_bases
+    backend_bases.FigureCanvasBase.filetypes.pop('pgf', None)
 
 def run_gui():
     """
@@ -196,6 +207,11 @@ def run_cli():
         sys.exit(start_ipython())
     else:
         # Run sasview as a python script interpreter
+        ## Run sasview as an interactive python interpreter
+        # if sys.argv[1] == "-i":
+        #    sys.argv = ["ipython", "--pylab"]
+        #    from IPython import start_ipython
+        #    sys.exit(start_ipython())
         thing_to_run = sys.argv[1]
         sys.argv = sys.argv[1:]
         import runpy
@@ -204,6 +220,6 @@ def run_cli():
         else:
             runpy.run_module(thing_to_run, run_name="__main__")
 
+
 if __name__ == "__main__":
     run_gui()
-

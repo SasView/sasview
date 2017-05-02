@@ -182,27 +182,28 @@ APP = ['sasview_gui.py']
 EXCLUDES = ['PyQt4', 'sip', 'QtGui']
 
 OPTIONS = {'argv_emulation': True,
-           'packages': ['lxml','numpy', 'scipy', 'pytz', 'encodings',
-                        'encodings','matplotlib', 'periodictable',
-                        'reportlab','sasmodels',"pyopencl", "h5py"
-                        ],
+           'packages': ['lxml', 'numpy', 'scipy', 'pytz', 'encodings',
+                        'encodings', 'matplotlib', 'periodictable',
+                        'reportlab', 'sasmodels', 'pyopencl', 'h5py',
+                       ],
            'iconfile': ICON,
-           'frameworks':[libxml_path],
+           'frameworks': [libxml_path],
            'resources': RESOURCES_FILES,
-           'plist':plist,
+           'plist': plist,
            'excludes' : EXCLUDES,
-           }
+          }
 setup(
     name=APPNAME,
     app=APP,
     data_files=DATA_FILES,
-    include_package_data= True,
+    include_package_data=True,
     options={'py2app': OPTIONS},
     setup_requires=['py2app'],
 )
 
 #Build dmg
-DMG="dist/%s.dmg"%DMGNAME
-if os.path.exists(DMG): os.unlink(DMG)
-os.system('cd dist && ../../build_tools/dmgpack.sh "%s" "%s.app"'%(DMGNAME,APPNAME))
+DMG = "dist/%s.dmg"%DMGNAME
+if os.path.exists(DMG):
+    os.unlink(DMG)
+os.system('cd dist && ../../build_tools/dmgpack.sh "%s" "%s.app"'%(DMGNAME, APPNAME))
 os.system('chmod a+r "%s"'%DMG)

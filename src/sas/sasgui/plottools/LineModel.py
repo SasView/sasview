@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 """
-Provide Line function (y= A + Bx)
+Provide Line function (y= Ax + B). Until July 10, 2016 this function provided
+(y= A + Bx).  This however was contrary to all the other code using it which 
+assumed (y= mx+b) or in this nomenclature (y=Ax + B). This lead to some
+contortions in the code and worse incorrect calculations until now for at least
+some of the functions.  This seemed the easiest to fix particularly since this
+function should disappear in a future iteration (see notes in fitDialog)
+
+PDB   July 10, 2016
+
 """
 
 import math
@@ -9,11 +17,11 @@ class LineModel(object):
     """
     Class that evaluates a linear model.
 
-    f(x) = A + Bx
+    f(x) = Ax + B
 
     List of default parameters:
-    A = 0.0
-    B = 0.0
+    A = 1.0
+    B = 1.0
     """
 
     def __init__(self):
@@ -52,11 +60,17 @@ class LineModel(object):
         :return: function value
 
         """
-        return  self.params['A'] + (x * self.params['B'])
+        return  (self.params['A'] * x) + self.params['B']
 
     def run(self, x=0.0):
         """
         Evaluate the model
+
+        :note: This is the function called by fitDialog to calculate the
+        the y(xmin) and y(xmax), but the only difference between this and
+        runXY is when the if statement is true. I however cannot see what that
+        function is for.  It needs to be documented here or removed.
+        PDB 7/10/16 
 
         :param x: simple value
 
@@ -73,7 +87,12 @@ class LineModel(object):
 
     def runXY(self, x=0.0):
         """
-        Evaluate the model
+        Evaluate the model.
+        
+        :note: This is to be what is called by fitDialog for the actual fit
+        but the only difference between this and run is when the if 
+        statement is true. I however cannot see what that function
+        is for.  It needs to be documented here or removed. PDB 7/10/16 
 
         :param x: simple value
 

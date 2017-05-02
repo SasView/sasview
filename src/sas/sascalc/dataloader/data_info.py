@@ -15,6 +15,7 @@
 #copyright 2008, University of Tennessee
 ######################################################################
 
+from __future__ import print_function
 
 #TODO: Keep track of data manipulation in the 'process' data structure.
 #TODO: This module should be independent of plottables. We should write
@@ -22,61 +23,8 @@
 
 #from sas.guitools.plottables import Data1D as plottable_1D
 from sas.sascalc.data_util.uncertainty import Uncertainty
-import numpy
+import numpy as np
 import math
-
-class plottable_sesans1D(object):
-    """
-    SESANS is a place holder for 1D SESANS plottables.
-
-    #TODO: This was directly copied from the plottables_1D. Modified Somewhat.
-    #Class has been updated.
-    """
-    # The presence of these should be mutually
-    # exclusive with the presence of Qdev (dx)
-    x = None
-    y = None
-    lam = None
-    dx = None
-    dy = None
-    dlam = None
-    ## Slit smearing length
-    dxl = None
-    ## Slit smearing width
-    dxw = None
-
-    # Units
-    _xaxis = ''
-    _xunit = ''
-    _yaxis = ''
-    _yunit = ''
-
-    def __init__(self, x, y, lam, dx=None, dy=None, dlam=None):
-#        print "SESANS plottable working"
-        self.x = numpy.asarray(x)
-        self.y = numpy.asarray(y)
-        self.lam = numpy.asarray(lam)
-        if dx is not None:
-            self.dx = numpy.asarray(dx)
-        if dy is not None:
-            self.dy = numpy.asarray(dy)
-        if dlam is not None:
-            self.dlam = numpy.asarray(dlam)
-
-    def xaxis(self, label, unit):
-        """
-        set the x axis label and unit
-        """
-        self._xaxis = label
-        self._xunit = unit
-
-    def yaxis(self, label, unit):
-        """
-        set the y axis label and unit
-        """
-        self._yaxis = label
-        self._yunit = unit
-
 
 class plottable_1D(object):
     """
@@ -92,6 +40,9 @@ class plottable_1D(object):
     dxl = None
     ## Slit smearing width
     dxw = None
+    ## SESANS specific params (wavelengths for spin echo length calculation)
+    lam = None
+    dlam = None
 
     # Units
     _xaxis = ''
@@ -99,17 +50,21 @@ class plottable_1D(object):
     _yaxis = ''
     _yunit = ''
 
-    def __init__(self, x, y, dx=None, dy=None, dxl=None, dxw=None):
-        self.x = numpy.asarray(x)
-        self.y = numpy.asarray(y)
+    def __init__(self, x, y, dx=None, dy=None, dxl=None, dxw=None, lam=None, dlam=None):
+        self.x = np.asarray(x)
+        self.y = np.asarray(y)
         if dx is not None:
-            self.dx = numpy.asarray(dx)
+            self.dx = np.asarray(dx)
         if dy is not None:
-            self.dy = numpy.asarray(dy)
+            self.dy = np.asarray(dy)
         if dxl is not None:
-            self.dxl = numpy.asarray(dxl)
+            self.dxl = np.asarray(dxl)
         if dxw is not None:
-            self.dxw = numpy.asarray(dxw)
+            self.dxw = np.asarray(dxw)
+        if lam is not None:
+            self.lam = np.asarray(lam)
+        if dlam is not None:
+            self.dlam = np.asarray(dlam)
 
     def xaxis(self, label, unit):
         """
@@ -154,16 +109,16 @@ class plottable_2D(object):
     def __init__(self, data=None, err_data=None, qx_data=None,
                  qy_data=None, q_data=None, mask=None,
                  dqx_data=None, dqy_data=None):
-        self.data = numpy.asarray(data)
-        self.qx_data = numpy.asarray(qx_data)
-        self.qy_data = numpy.asarray(qy_data)
-        self.q_data = numpy.asarray(q_data)
-        self.mask = numpy.asarray(mask)
-        self.err_data = numpy.asarray(err_data)
+        self.data = np.asarray(data)
+        self.qx_data = np.asarray(qx_data)
+        self.qy_data = np.asarray(qy_data)
+        self.q_data = np.asarray(q_data)
+        self.mask = np.asarray(mask)
+        self.err_data = np.asarray(err_data)
         if dqx_data is not None:
-            self.dqx_data = numpy.asarray(dqx_data)
+            self.dqx_data = np.asarray(dqx_data)
         if dqy_data is not None:
-            self.dqy_data = numpy.asarray(dqy_data)
+            self.dqy_data = np.asarray(dqy_data)
 
     def xaxis(self, label, unit):
         """
@@ -397,6 +352,9 @@ class Sample(object):
     orientation_unit = 'degree'
     ## Details
     details = None
+    ## SESANS zacceptance
+    zacceptance = (0,"")
+    yacceptance = (0,"")
 
     def __init__(self):
         self.position = Vector()
@@ -444,13 +402,13 @@ class Process(object):
         """
         return len(self.name) == 0 and len(self.date) == 0 and len(self.description) == 0 \
             and len(self.term) == 0 and len(self.notes) == 0
-            
+
     def single_line_desc(self):
         """
             Return a single line string representing the process
         """
         return "%s %s %s" % (self.name, self.date, self.description)
-     
+
     def __str__(self):
         _str = "Process:\n"
         _str += "   Name:         %s\n" % self.name
@@ -534,6 +492,9 @@ class DataInfo(object):
     meta_data = None
     ## Loading errors
     errors = None
+    ## SESANS data check
+    isSesans = None
+
 
     def __init__(self):
         """
@@ -566,6 +527,8 @@ class DataInfo(object):
         self.meta_data = {}
         ## Loading errors
         self.errors = []
+        ## SESANS data check
+        self.isSesans = False
 
     def append_empty_process(self):
         """
@@ -585,6 +548,7 @@ class DataInfo(object):
         _str = "File:            %s\n" % self.filename
         _str += "Title:           %s\n" % self.title
         _str += "Run:             %s\n" % str(self.run)
+        _str += "SESANS:          %s\n" % str(self.isSesans)
         _str += "Instrument:      %s\n" % str(self.instrument)
         _str += "%s\n" % str(self.sample)
         _str += "%s\n" % str(self.source)
@@ -735,72 +699,23 @@ class DataInfo(object):
         """
         return self._perform_union(other)
 
-class SESANSData1D(plottable_sesans1D, DataInfo):
-    """
-    SESANS 1D data class
-    """
-    x_unit = 'nm'
-    y_unit = 'pol'
-
-    def __init__(self, x=None, y=None, lam=None, dx=None, dy=None, dlam=None):
-        DataInfo.__init__(self)
-        plottable_sesans1D.__init__(self, x, y, lam, dx, dy, dlam)
-
-    def __str__(self):
-        """
-        Nice printout
-        """
-        _str = "%s\n" % DataInfo.__str__(self)
-        _str += "Data:\n"
-        _str += "   Type:         %s\n" % self.__class__.__name__
-        _str += "   X-axis:       %s\t[%s]\n" % (self._xaxis, self._xunit)
-        _str += "   Y-axis:       %s\t[%s]\n" % (self._yaxis, self._yunit)
-        _str += "   Length:       %g\n" % len(self.x)
-        return _str
-
-    def clone_without_data(self, length=0, clone=None):
-        """
-        Clone the current object, without copying the data (which
-        will be filled out by a subsequent operation).
-        The data arrays will be initialized to zero.
-
-        :param length: length of the data array to be initialized
-        :param clone: if provided, the data will be copied to clone
-        """
-        from copy import deepcopy
-        if clone is None or not issubclass(clone.__class__, Data1D):
-            x = numpy.zeros(length)
-            dx = numpy.zeros(length)
-            y = numpy.zeros(length)
-            dy = numpy.zeros(length)
-            clone = Data1D(x, y, dx=dx, dy=dy)
-
-        clone.title = self.title
-        clone.run = self.run
-        clone.filename = self.filename
-        clone.instrument = self.instrument
-        clone.notes = deepcopy(self.notes)
-        clone.process = deepcopy(self.process)
-        clone.detector = deepcopy(self.detector)
-        clone.sample = deepcopy(self.sample)
-        clone.source = deepcopy(self.source)
-        clone.collimation = deepcopy(self.collimation)
-        clone.trans_spectrum = deepcopy(self.trans_spectrum)
-        clone.meta_data = deepcopy(self.meta_data)
-        clone.errors = deepcopy(self.errors)
-
-        return clone
-
 class Data1D(plottable_1D, DataInfo):
     """
     1D data class
     """
-    x_unit = '1/A'
-    y_unit = '1/cm'
-
-    def __init__(self, x, y, dx=None, dy=None):
+    def __init__(self, x=None, y=None, dx=None, dy=None, lam=None, dlam=None, isSesans=None):
         DataInfo.__init__(self)
-        plottable_1D.__init__(self, x, y, dx, dy)
+        plottable_1D.__init__(self, x, y, dx, dy,None, None, lam, dlam)
+        self.isSesans = isSesans
+        try:
+            if self.isSesans: # the data is SESANS
+                self.x_unit = 'A'
+                self.y_unit = 'pol'
+            elif not self.isSesans: # the data is SANS
+                self.x_unit = '1/A'
+                self.y_unit = '1/cm'
+        except: # the data is not recognized/supported, and the user is notified
+            raise(TypeError, 'data not recognized, check documentation for supported 1D data formats')
 
     def __str__(self):
         """
@@ -820,7 +735,7 @@ class Data1D(plottable_1D, DataInfo):
         :return: True is slit smearing info is present, False otherwise
         """
         def _check(v):
-            if (v.__class__ == list or v.__class__ == numpy.ndarray) \
+            if (v.__class__ == list or v.__class__ == np.ndarray) \
                 and len(v) > 0 and min(v) > 0:
                 return True
             return False
@@ -838,11 +753,13 @@ class Data1D(plottable_1D, DataInfo):
         from copy import deepcopy
 
         if clone is None or not issubclass(clone.__class__, Data1D):
-            x = numpy.zeros(length)
-            dx = numpy.zeros(length)
-            y = numpy.zeros(length)
-            dy = numpy.zeros(length)
-            clone = Data1D(x, y, dx=dx, dy=dy)
+            x = np.zeros(length)
+            dx = np.zeros(length)
+            y = np.zeros(length)
+            dy = np.zeros(length)
+            lam = np.zeros(length)
+            dlam = np.zeros(length)
+            clone = Data1D(x, y, lam=lam, dx=dx, dy=dy, dlam=dlam)
 
         clone.title = self.title
         clone.run = self.run
@@ -880,22 +797,22 @@ class Data1D(plottable_1D, DataInfo):
                 msg = "Unable to perform operation: data length are not equal"
                 raise ValueError, msg
             # Here we could also extrapolate between data points
-            ZERO = 1.0e-12
+            TOLERANCE = 0.01
             for i in range(len(self.x)):
-                if math.fabs(self.x[i] - other.x[i]) > ZERO:
+                if math.fabs((self.x[i] - other.x[i])/self.x[i]) > TOLERANCE:
                     msg = "Incompatible data sets: x-values do not match"
                     raise ValueError, msg
 
             # Check that the other data set has errors, otherwise
             # create zero vector
             dy_other = other.dy
-            if other.dy == None or (len(other.dy) != len(other.y)):
-                dy_other = numpy.zeros(len(other.y))
+            if other.dy is None or (len(other.dy) != len(other.y)):
+                dy_other = np.zeros(len(other.y))
 
         # Check that we have errors, otherwise create zero vector
         dy = self.dy
-        if self.dy == None or (len(self.dy) != len(self.y)):
-            dy = numpy.zeros(len(self.y))
+        if self.dy is None or (len(self.dy) != len(self.y)):
+            dy = np.zeros(len(self.y))
 
         return dy, dy_other
 
@@ -905,14 +822,14 @@ class Data1D(plottable_1D, DataInfo):
         # First, check the data compatibility
         dy, dy_other = self._validity_check(other)
         result = self.clone_without_data(len(self.x))
-        if self.dxw == None:
+        if self.dxw is None:
             result.dxw = None
         else:
-            result.dxw = numpy.zeros(len(self.x))
-        if self.dxl == None:
+            result.dxw = np.zeros(len(self.x))
+        if self.dxl is None:
             result.dxl = None
         else:
-            result.dxl = numpy.zeros(len(self.x))
+            result.dxl = np.zeros(len(self.x))
 
         for i in range(len(self.x)):
             result.x[i] = self.x[i]
@@ -967,40 +884,40 @@ class Data1D(plottable_1D, DataInfo):
         # First, check the data compatibility
         self._validity_check_union(other)
         result = self.clone_without_data(len(self.x) + len(other.x))
-        if self.dy == None or other.dy is None:
+        if self.dy is None or other.dy is None:
             result.dy = None
         else:
-            result.dy = numpy.zeros(len(self.x) + len(other.x))
-        if self.dx == None or other.dx is None:
+            result.dy = np.zeros(len(self.x) + len(other.x))
+        if self.dx is None or other.dx is None:
             result.dx = None
         else:
-            result.dx = numpy.zeros(len(self.x) + len(other.x))
-        if self.dxw == None or other.dxw is None:
+            result.dx = np.zeros(len(self.x) + len(other.x))
+        if self.dxw is None or other.dxw is None:
             result.dxw = None
         else:
-            result.dxw = numpy.zeros(len(self.x) + len(other.x))
-        if self.dxl == None or other.dxl is None:
+            result.dxw = np.zeros(len(self.x) + len(other.x))
+        if self.dxl is None or other.dxl is None:
             result.dxl = None
         else:
-            result.dxl = numpy.zeros(len(self.x) + len(other.x))
+            result.dxl = np.zeros(len(self.x) + len(other.x))
 
-        result.x = numpy.append(self.x, other.x)
+        result.x = np.append(self.x, other.x)
         #argsorting
-        ind = numpy.argsort(result.x)
+        ind = np.argsort(result.x)
         result.x = result.x[ind]
-        result.y = numpy.append(self.y, other.y)
+        result.y = np.append(self.y, other.y)
         result.y = result.y[ind]
-        if result.dy != None:
-            result.dy = numpy.append(self.dy, other.dy)
+        if result.dy is not None:
+            result.dy = np.append(self.dy, other.dy)
             result.dy = result.dy[ind]
         if result.dx is not None:
-            result.dx = numpy.append(self.dx, other.dx)
+            result.dx = np.append(self.dx, other.dx)
             result.dx = result.dx[ind]
         if result.dxw is not None:
-            result.dxw = numpy.append(self.dxw, other.dxw)
+            result.dxw = np.append(self.dxw, other.dxw)
             result.dxw = result.dxw[ind]
         if result.dxl is not None:
-            result.dxl = numpy.append(self.dxl, other.dxl)
+            result.dxl = np.append(self.dxl, other.dxl)
             result.dxl = result.dxl[ind]
         return result
 
@@ -1017,15 +934,18 @@ class Data2D(plottable_2D, DataInfo):
     x_bins = None
     ## Vector of Q-values at the center of each bin in y
     y_bins = None
+    ## No 2D SESANS data as of yet. Always set it to False
+    isSesans = False
 
     def __init__(self, data=None, err_data=None, qx_data=None,
                  qy_data=None, q_data=None, mask=None,
                  dqx_data=None, dqy_data=None):
-        self.y_bins = []
-        self.x_bins = []
         DataInfo.__init__(self)
         plottable_2D.__init__(self, data, err_data, qx_data,
                               qy_data, q_data, mask, dqx_data, dqy_data)
+        self.y_bins = []
+        self.x_bins = []
+
         if len(self.detector) > 0:
             raise RuntimeError, "Data2D: Detector bank already filled at init"
 
@@ -1036,6 +956,7 @@ class Data2D(plottable_2D, DataInfo):
         _str += "   X- & Y-axis:  %s\t[%s]\n" % (self._yaxis, self._yunit)
         _str += "   Z-axis:       %s\t[%s]\n" % (self._zaxis, self._zunit)
         _str += "   Length:       %g \n" % (len(self.data))
+        _str += "   Shape:        (%d, %d)\n" % (len(self.y_bins), len(self.x_bins))
         return _str
 
     def clone_without_data(self, length=0, clone=None):
@@ -1050,12 +971,12 @@ class Data2D(plottable_2D, DataInfo):
         from copy import deepcopy
 
         if clone is None or not issubclass(clone.__class__, Data2D):
-            data = numpy.zeros(length)
-            err_data = numpy.zeros(length)
-            qx_data = numpy.zeros(length)
-            qy_data = numpy.zeros(length)
-            q_data = numpy.zeros(length)
-            mask = numpy.zeros(length)
+            data = np.zeros(length)
+            err_data = np.zeros(length)
+            qx_data = np.zeros(length)
+            qy_data = np.zeros(length)
+            q_data = np.zeros(length)
+            mask = np.zeros(length)
             dqx_data = None
             dqy_data = None
             clone = Data2D(data=data, err_data=err_data,
@@ -1072,6 +993,7 @@ class Data2D(plottable_2D, DataInfo):
         clone.sample = deepcopy(self.sample)
         clone.source = deepcopy(self.source)
         clone.collimation = deepcopy(self.collimation)
+        clone.trans_spectrum = deepcopy(self.trans_spectrum)
         clone.meta_data = deepcopy(self.meta_data)
         clone.errors = deepcopy(self.errors)
 
@@ -1090,6 +1012,7 @@ class Data2D(plottable_2D, DataInfo):
         :raise ValueError: when lengths are not compatible
         """
         err_other = None
+        TOLERANCE = 0.01
         if isinstance(other, Data2D):
             # Check that data lengths are the same
             if len(self.data) != len(other.data) or \
@@ -1098,24 +1021,24 @@ class Data2D(plottable_2D, DataInfo):
                 msg = "Unable to perform operation: data length are not equal"
                 raise ValueError, msg
             for ind in range(len(self.data)):
-                if self.qx_data[ind] != other.qx_data[ind]:
-                    msg = "Incompatible data sets: qx-values do not match"
+                if math.fabs((self.qx_data[ind] - other.qx_data[ind])/self.qx_data[ind]) > TOLERANCE:
+                    msg = "Incompatible data sets: qx-values do not match: %s %s" % (self.qx_data[ind], other.qx_data[ind])
                     raise ValueError, msg
-                if self.qy_data[ind] != other.qy_data[ind]:
-                    msg = "Incompatible data sets: qy-values do not match"
+                if math.fabs((self.qy_data[ind] - other.qy_data[ind])/self.qy_data[ind]) > TOLERANCE:
+                    msg = "Incompatible data sets: qy-values do not match: %s %s" % (self.qy_data[ind], other.qy_data[ind])
                     raise ValueError, msg
 
             # Check that the scales match
             err_other = other.err_data
-            if other.err_data == None or \
+            if other.err_data is None or \
                 (len(other.err_data) != len(other.data)):
-                err_other = numpy.zeros(len(other.data))
+                err_other = np.zeros(len(other.data))
 
         # Check that we have errors, otherwise create zero vector
         err = self.err_data
-        if self.err_data == None or \
+        if self.err_data is None or \
             (len(self.err_data) != len(self.data)):
-            err = numpy.zeros(len(other.data))
+            err = np.zeros(len(other.data))
         return err, err_other
 
     def _perform_operation(self, other, operation):
@@ -1127,17 +1050,17 @@ class Data2D(plottable_2D, DataInfo):
         """
         # First, check the data compatibility
         dy, dy_other = self._validity_check(other)
-        result = self.clone_without_data(numpy.size(self.data))
-        if self.dqx_data == None or self.dqy_data == None:
+        result = self.clone_without_data(np.size(self.data))
+        if self.dqx_data is None or self.dqy_data is None:
             result.dqx_data = None
             result.dqy_data = None
         else:
-            result.dqx_data = numpy.zeros(len(self.data))
-            result.dqy_data = numpy.zeros(len(self.data))
-        for i in range(numpy.size(self.data)):
+            result.dqx_data = np.zeros(len(self.data))
+            result.dqy_data = np.zeros(len(self.data))
+        for i in range(np.size(self.data)):
             result.data[i] = self.data[i]
             if self.err_data is not None and \
-                numpy.size(self.data) == numpy.size(self.err_data):
+                            np.size(self.data) == np.size(self.err_data):
                 result.err_data[i] = self.err_data[i]
             if self.dqx_data is not None:
                 result.dqx_data[i] = self.dqx_data[i]
@@ -1196,32 +1119,84 @@ class Data2D(plottable_2D, DataInfo):
         """
         # First, check the data compatibility
         self._validity_check_union(other)
-        result = self.clone_without_data(numpy.size(self.data) + \
-                                         numpy.size(other.data))
+        result = self.clone_without_data(np.size(self.data) + \
+                                         np.size(other.data))
         result.xmin = self.xmin
         result.xmax = self.xmax
         result.ymin = self.ymin
         result.ymax = self.ymax
-        if self.dqx_data == None or self.dqy_data == None or \
-                other.dqx_data == None or other.dqy_data == None:
+        if self.dqx_data is None or self.dqy_data is None or \
+                other.dqx_data is None or other.dqy_data is None:
             result.dqx_data = None
             result.dqy_data = None
         else:
-            result.dqx_data = numpy.zeros(len(self.data) + \
-                                         numpy.size(other.data))
-            result.dqy_data = numpy.zeros(len(self.data) + \
-                                         numpy.size(other.data))
+            result.dqx_data = np.zeros(len(self.data) + \
+                                       np.size(other.data))
+            result.dqy_data = np.zeros(len(self.data) + \
+                                       np.size(other.data))
 
-        result.data = numpy.append(self.data, other.data)
-        result.qx_data = numpy.append(self.qx_data, other.qx_data)
-        result.qy_data = numpy.append(self.qy_data, other.qy_data)
-        result.q_data = numpy.append(self.q_data, other.q_data)
-        result.mask = numpy.append(self.mask, other.mask)
+        result.data = np.append(self.data, other.data)
+        result.qx_data = np.append(self.qx_data, other.qx_data)
+        result.qy_data = np.append(self.qy_data, other.qy_data)
+        result.q_data = np.append(self.q_data, other.q_data)
+        result.mask = np.append(self.mask, other.mask)
         if result.err_data is not None:
-            result.err_data = numpy.append(self.err_data, other.err_data) 
+            result.err_data = np.append(self.err_data, other.err_data)
         if self.dqx_data is not None:
-            result.dqx_data = numpy.append(self.dqx_data, other.dqx_data)
+            result.dqx_data = np.append(self.dqx_data, other.dqx_data)
         if self.dqy_data is not None:
-            result.dqy_data = numpy.append(self.dqy_data, other.dqy_data)
+            result.dqy_data = np.append(self.dqy_data, other.dqy_data)
 
         return result
+
+
+def combine_data_info_with_plottable(data, datainfo):
+    """
+    A function that combines the DataInfo data in self.current_datainto with a plottable_1D or 2D data object.
+
+    :param data: A plottable_1D or plottable_2D data object
+    :return: A fully specified Data1D or Data2D object
+    """
+
+    final_dataset = None
+    if isinstance(data, plottable_1D):
+        final_dataset = Data1D(data.x, data.y)
+        final_dataset.dx = data.dx
+        final_dataset.dy = data.dy
+        final_dataset.dxl = data.dxl
+        final_dataset.dxw = data.dxw
+        final_dataset.xaxis(data._xaxis, data._xunit)
+        final_dataset.yaxis(data._yaxis, data._yunit)
+    elif isinstance(data, plottable_2D):
+        final_dataset = Data2D(data.data, data.err_data, data.qx_data, data.qy_data, data.q_data,
+                               data.mask, data.dqx_data, data.dqy_data)
+        final_dataset.xaxis(data._xaxis, data._xunit)
+        final_dataset.yaxis(data._yaxis, data._yunit)
+        final_dataset.zaxis(data._zaxis, data._zunit)
+        final_dataset.x_bins = data.x_bins
+        final_dataset.y_bins = data.y_bins
+    else:
+        return_string = "Should Never Happen: _combine_data_info_with_plottable input is not a plottable1d or " + \
+                        "plottable2d data object"
+        return return_string
+
+    final_dataset.xmax = data.xmax
+    final_dataset.ymax = data.ymax
+    final_dataset.xmin = data.xmin
+    final_dataset.ymin = data.ymin
+    final_dataset.isSesans = datainfo.isSesans
+    final_dataset.title = datainfo.title
+    final_dataset.run = datainfo.run
+    final_dataset.run_name = datainfo.run_name
+    final_dataset.filename = datainfo.filename
+    final_dataset.notes = datainfo.notes
+    final_dataset.process = datainfo.process
+    final_dataset.instrument = datainfo.instrument
+    final_dataset.detector = datainfo.detector
+    final_dataset.sample = datainfo.sample
+    final_dataset.source = datainfo.source
+    final_dataset.collimation = datainfo.collimation
+    final_dataset.trans_spectrum = datainfo.trans_spectrum
+    final_dataset.meta_data = datainfo.meta_data
+    final_dataset.errors = datainfo.errors
+    return final_dataset

@@ -3,8 +3,10 @@ This module generates .iss file according to the local config of
 the current application. Please make sure a file named "local_config.py"
 exists in the current directory. Edit local_config.py according to your needs.
 """
+from __future__ import print_function
+
+import local_config
 import os
-import sys
 import string
 
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -16,18 +18,18 @@ APPLICATION = str(local_config.__appname__ )+ '.exe'
 AppName = str(local_config.__appname__ )
 AppVerName = str(local_config.__appname__ )+'-'+ str(local_config.__version__)
 Dev = ''
-if 'dev' in AppVerName.lower():
+if AppVerName.lower().count('dev') > 0:
     Dev = '-Dev'
 AppPublisher = local_config._copyright
 AppPublisherURL = local_config._homepage
 AppSupportURL = local_config._homepage
 AppUpdatesURL = local_config._homepage
 ChangesEnvironment = 'true'
-DefaultDirName = os.path.join("{pf}" , AppName+Dev) 
+DefaultDirName = os.path.join("{pf}" , AppName+Dev)
 DefaultGroupName = os.path.join(local_config.DefaultGroupName, AppVerName)
-                                
+
 OutputBaseFilename = local_config.OutputBaseFilename
-SetupIconFile = local_config.SetupIconFile_win
+SetupIconFile = "images\\ball.ico"
 LicenseFile = 'license.txt'
 DisableProgramGroupPage = 'yes'
 Compression = 'lzma'
@@ -46,7 +48,7 @@ def find_extension():
     list_data = []
     list_app =[]
     try:
-        
+
         #(ext, type, name, flags)
         from sas.sascalc.dataloader.loader import Loader
         wild_cards = Loader().get_wildcards()
@@ -67,7 +69,7 @@ def find_extension():
         for item in local_config.PLUGINS_WLIST:
             file_type, ext = string.split(item, "|*", 1)
             if ext.strip() not in ['.', ''] and ext.strip() not in list_app:
-                list_app.append((ext, 'string', file_type)) 
+                list_app.append((ext, 'string', file_type))
     except:
         pass
     return list_data, list_app
@@ -91,12 +93,12 @@ def write_registry(data_extension=None, app_extension=None):
         msg += """Root: HKCR; Subkey: "applications\%s\shell\open\command";\t"""\
                               %  str(APPLICATION)
         msg += """ValueType: %s; """ % str('string')
-        msg += """ValueName: "%s";\t""" %str('') 
+        msg += """ValueName: "%s";\t""" %str('')
         msg += """ValueData: \"""{app}\%s""  ""%s1\"""; \t"""% (str(APPLICATION),
-                                                          str('%'))    
+                                                          str('%'))
         msg += """ Flags: %s""" % str('uninsdeletevalue noerror')
         msg += "\n"
-        user_list = "Software\Classes" 
+        user_list = "Software\Classes"
         for (ext, type, _) in data_extension:
             list = os.path.join(user_list, ext, openwithlist)
             msg +=  """Root: HKCU;\tSubkey: "%s";\t""" % str(list)
@@ -107,16 +109,16 @@ def write_registry(data_extension=None, app_extension=None):
         msg += """Root: HKCU; Subkey: "%s\%s\shell\open\command";\t"""\
                               %  (str(user_list), str(APPLICATION))
         msg += """ValueType: %s; """ % str('string')
-        msg += """ValueName: "%s";\t""" %str('') 
+        msg += """ValueName: "%s";\t""" %str('')
         msg += """ValueData: \"""{app}\%s""  ""%s1\"""; \t"""% (str(APPLICATION),
-                                                          str('%'))    
+                                                          str('%'))
         msg += """ Flags: %s""" % str('uninsdeletevalue noerror')
-        msg += "\n"        
+        msg += "\n"
     if app_extension is not None and app_extension:
         for (ext, type, _) in app_extension:
             msg +=  """Root: HKCR;\tSubkey: "%s";\t""" % str(ext)
             msg += """ValueType: %s;\t""" % str(type)
-            #file type empty set the current application as the default 
+            #file type empty set the current application as the default
             #reader for this file. change the value of file_type to another
             #string modify the default reader
             file_type = ''
@@ -126,58 +128,58 @@ def write_registry(data_extension=None, app_extension=None):
             msg += "\n"
     msg += """Root: HKCR; Subkey: "{app}\%s";\t""" % str(APPLICATION)
     msg += """ValueType: %s; """ % str('string')
-    msg += """ValueName: "%s";\t""" % str('') 
-    msg += """ValueData: "{app}\%s";\t""" % str("SasView File") 
+    msg += """ValueName: "%s";\t""" % str('')
+    msg += """ValueData: "{app}\%s";\t""" % str("SasView File")
     msg += """ Flags: %s \t""" % str("uninsdeletekey  noerror")
     msg += "\n"
-        
+
     #execute the file on double-click
     msg += """Root: HKCR; Subkey: "{app}\%s\shell\open\command";\t"""  %  str(APPLICATION)
     msg += """ValueType: %s; """ % str('string')
-    msg += """ValueName: "%s";\t""" %str('') 
+    msg += """ValueName: "%s";\t""" %str('')
     msg += """ValueData: \"""{app}\%s""  ""%s1\""";\t"""% (str(APPLICATION),
-                                                          str('%'))  
+                                                          str('%'))
     msg += """ Flags: %s \t""" % str("uninsdeletevalue noerror")
-    msg += "\n"                                                      
+    msg += "\n"
     #create default icon
     msg += """Root: HKCR; Subkey: "{app}\%s";\t""" % str(SetupIconFile)
     msg += """ValueType: %s; """ % str('string')
-    msg += """ValueName: "%s";\t""" % str('') 
+    msg += """ValueName: "%s";\t""" % str('')
     msg += """ValueData: "{app}\%s,0";\t""" % str(APPLICATION)
     msg += """ Flags: %s \t""" % str("uninsdeletevalue noerror")
-    msg += "\n"  
+    msg += "\n"
 
-    
+
     #SASVIEWPATH
     msg += """Root: HKLM; Subkey: "%s";\t"""  %  str('SYSTEM\CurrentControlSet\Control\Session Manager\Environment')
     msg += """ValueType: %s; """ % str('expandsz')
-    msg += """ValueName: "%s";\t""" % str('SASVIEWPATH') 
+    msg += """ValueName: "%s";\t""" % str('SASVIEWPATH')
     msg += """ValueData: "{app}";\t"""
     msg += """ Flags: %s""" % str('uninsdeletevalue noerror')
     msg += "\n"
-    
+
     #PATH
     msg += """; Write to PATH (below) is disabled; need more tests\n"""
     msg += """;Root: HKCU; Subkey: "%s";\t"""  %  str('Environment')
     msg += """ValueType: %s; """ % str('expandsz')
-    msg += """ValueName: "%s";\t""" % str('PATH') 
+    msg += """ValueName: "%s";\t""" % str('PATH')
     msg += """ValueData: "%s;{olddata}";\t""" % str('%SASVIEWPATH%')
     msg += """ Check: %s""" % str('NeedsAddPath()')
     msg += "\n"
-        
+
     return msg
 
-def write_language(language=['english'], msfile="compiler:Default.isl"):  
+def write_language(language=['english'], msfile="compiler:Default.isl"):
     """
     define the language of the application
-    """ 
+    """
     msg = ''
     if language:
         msg = "\n\n[Languages]\n"
         for lang in language:
-            msg += """Name: "%s";\tMessagesFile: "%s"\n""" % (str(lang), 
+            msg += """Name: "%s";\tMessagesFile: "%s"\n""" % (str(lang),
                                                            str(msfile))
-    return msg 
+    return msg
 
 def write_tasks():
     """
@@ -201,13 +203,13 @@ def write_file():
     msg += """Source: "dist\*";\tDestDir: "{app}";\t"""
     msg += """Flags: ignoreversion recursesubdirs createallsubdirs\n"""
     msg += """Source: "dist\plugin_models\*";\tDestDir: "{userdesktop}\..\.sasview\plugin_models";\t"""
-    msg += """Flags: recursesubdirs createallsubdirs\n""" 
+    msg += """Flags: recursesubdirs createallsubdirs\n"""
     msg += """Source: "dist\compiled_models\*";\tDestDir: "{userdesktop}\..\.sasmodels\compiled_models";\t"""
     msg += """Flags: recursesubdirs createallsubdirs\n"""
-    msg += """Source: "dist\config\custom_config.py";\tDestDir: "{userdesktop}\..\.sasview\config";\t""" 
+    msg += """Source: "dist\config\custom_config.py";\tDestDir: "{userdesktop}\..\.sasview\config";\t"""
     msg += """Flags: recursesubdirs createallsubdirs\n"""
-    msg += """Source: "dist\default_categories.json";    DestDir: "{userdesktop}\..\.sasview";\t""" 
-    msg += """DestName: "categories.json";\n"""
+    #msg += """Source: "dist\default_categories.json";    DestDir: "{userdesktop}\..\.sasview";\t"""
+    #msg += """DestName: "categories.json";\n"""
     msg += """;\tNOTE: Don't use "Flags: ignoreversion" on any shared system files"""
     return msg
 
@@ -235,7 +237,7 @@ def write_run():
     """
     msg = """\n\n[Run]\n"""
     msg += """Filename: "{app}\%s";\t""" % str(APPLICATION)
-    msg += """Description: "{cm:LaunchProgram, %s}";\t""" %str(AppName) 
+    msg += """Description: "{cm:LaunchProgram, %s}";\t""" %str(AppName)
     msg += """Flags: nowait postinstall skipifsilent\n"""
     msg += """; Install the Microsoft C++ DLL redistributable package if it is """
     msg += """provided and the DLLs are not present on the target system.\n"""
@@ -260,28 +262,28 @@ def write_dirs():
     """
     msg = """\n\n[Dirs]\n"""
     msg += """Name: "{app}\%s";\t""" % str('')
-    msg += """Permissions: everyone-modify\t""" 
-    msg += """\n"""  
+    msg += """Permissions: everyone-modify\t"""
+    msg += """\n"""
     return msg
 
 def write_code():
     """
-    Code that checks the existing path and snaviewpath 
+    Code that checks the existing path and snaviewpath
     in the environmental viriables/PATH
     """
     msg = """\n\n[Code]\n"""
-    msg += """function InstallVC90CRT(): Boolean;\n""" 
+    msg += """function InstallVC90CRT(): Boolean;\n"""
     msg += """begin\n"""
     msg += """    Result := not DirExists('C:\WINDOWS\WinSxS\\x86_Microsoft.VC90."""
     msg += """CRT_1fc8b3b9a1e18e3b_9.0.21022.8_x-ww_d08d0375');\n"""
     msg += """end;\n\n"""
-    msg += """function NeedsAddPath(): boolean;\n""" 
-    msg += """var\n""" 
+    msg += """function NeedsAddPath(): boolean;\n"""
+    msg += """var\n"""
     msg += """  oldpath: string;\n"""
-    msg += """  newpath: string;\n""" 
-    msg += """  pathArr:    TArrayOfString;\n""" 
-    msg += """  i:        Integer;\n""" 
-    msg += """begin\n""" 
+    msg += """  newpath: string;\n"""
+    msg += """  pathArr:    TArrayOfString;\n"""
+    msg += """  i:        Integer;\n"""
+    msg += """begin\n"""
     msg += """  RegQueryStringValue(HKEY_CURRENT_USER,'Environment',"""
     msg += """'PATH', oldpath)\n"""
     msg += """  oldpath := oldpath + ';';\n"""
@@ -324,7 +326,7 @@ def write_uninstalldelete():
     msg += """did not create it during the previous\n"""
     msg += """; installation.\n"""
     msg += """Type: dirifempty; Name: "{app}"\n"""
-    msg += """\n"""  
+    msg += """\n"""
     return msg
 
 def generate_installer():
@@ -333,7 +335,7 @@ def generate_installer():
     TEMPLATE = "\n; Script generated by the Inno Setup Script Wizard\n"
     TEMPLATE += "\n; and local_config.py located in this directory.\n "
     TEMPLATE += "; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!"
-    TEMPLATE += "\n[Setup]\n\n" 
+    TEMPLATE += "\n[Setup]\n\n"
     TEMPLATE += "ChangesAssociations=%s\n" %str('yes')
     TEMPLATE += "AppName=%s\n" % str(AppName)
     TEMPLATE += "AppVerName=%s\n" % str(AppVerName)
@@ -352,7 +354,7 @@ def generate_installer():
     TEMPLATE += "SolidCompression=%s\n" % str(SolidCompression)
     TEMPLATE += "PrivilegesRequired=%s\n" % str(PrivilegesRequired)
     TEMPLATE += "UsePreviousAppDir=no\n"
-   
+
     TEMPLATE += write_registry(data_extension=DATA_EXTENSION,
                                 app_extension=APP_EXTENSION)
     TEMPLATE += write_language()
@@ -364,11 +366,11 @@ def generate_installer():
     TEMPLATE += write_code()
     TEMPLATE += write_uninstalldelete()
     path = '%s.iss' % str(INSTALLER_FILE)
-    f = open(path,'w') 
+    f = open(path,'w')
     f.write(TEMPLATE)
     f.close()
-    print "Generate Inno setup installer script complete"
-    print "A new file %s.iss should be created.Please refresh your directory" % str(INSTALLER_FILE)
-    
+    print("Generate Inno setup installer script complete")
+    print("A new file %s.iss should be created.Please refresh your directory" % str(INSTALLER_FILE))
+
 if __name__ == "__main__":
     generate_installer()

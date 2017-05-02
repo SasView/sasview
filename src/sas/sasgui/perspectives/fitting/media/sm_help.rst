@@ -19,17 +19,32 @@
 Smearing Functions
 ==================
 
-Sometimes it will be necessary to correct reduced experimental data for the
-physical effects of the instrumental geometry in use. This process is called
-*desmearing*. However, calculated/simulated data - which by definition will be
-perfect/exact - can be *smeared* to make it more representative of what might
-actually be measured experimentally.
+Sometimes the instrumental geometry used to acquire the experimental data has 
+an impact on the clarity of features in the reduced scattering curve. For 
+example, peaks or fringes might be slightly broadened. This is known as 
+*Q resolution smearing*. To compensate for this effect one can either try and 
+remove the resolution contribution - a process called *desmearing* - or add the 
+resolution contribution into a model calculation/simulation (which by definition 
+will be exact) to make it more representative of what has been measured 
+experimentally - a process called *smearing*. SasView will do the latter.
 
-SasView provides the following three smearing algorithms:
+Both smearing and desmearing rely on functions to describe the resolution 
+effect. SasView provides three smearing algorithms:
 
 *  *Slit Smearing*
 *  *Pinhole Smearing*
 *  *2D Smearing*
+
+SasView also has an option to use Q resolution data (estimated at the time of 
+data reduction) supplied in a reduced data file: the *Use dQ data* radio button.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+dQ Smearing
+-----------
+ 
+If this option is checked, SasView will assume that the supplied dQ values 
+represent the standard deviations of Gaussian functions.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 

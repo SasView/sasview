@@ -4,7 +4,7 @@ GUI for the data operations panel (sum and multiply)
 import wx
 import sys
 import time
-import numpy
+import numpy as np
 from sas.sascalc.dataloader.data_info import Data1D
 from sas.sasgui.plottools.PlotPanel import PlotPanel
 from sas.sasgui.plottools.plottables import Graph
@@ -14,7 +14,7 @@ from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.perspectives.calculator import calculator_widgets as widget
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
-#Control panel width 
+#Control panel width
 if sys.platform.count("win32") > 0:
     PANEL_TOP = 0
     PANEL_WIDTH = 790
@@ -155,7 +155,7 @@ class DataOperPanel(wx.ScrolledWindow):
         self._show_numctrl(self.numberctr, False)
 
         wx.EVT_TEXT_ENTER(self.data_namectr, -1, self.on_name)
-        wx.EVT_TEXT_ENTER(self.numberctr, -1, self.on_number)
+        wx.EVT_TEXT(self.numberctr, -1, self.on_number)
         wx.EVT_COMBOBOX(self.data1_cbox, -1, self.on_select_data1)
         wx.EVT_COMBOBOX(self.operator_cbox, -1, self.on_select_operator)
         wx.EVT_COMBOBOX(self.data2_cbox, -1, self.on_select_data2)
@@ -181,7 +181,7 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         On data name typing
         """
-        if event != None:
+        if event is not None:
             event.Skip()
         item = event.GetEventObject()
         if item.IsEnabled():
@@ -197,14 +197,14 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         self.send_warnings('')
         msg = ''
-        if name == None:
+        if name is None:
             text = self.data_namectr.GetValue().strip()
         else:
             text = name
         state_list = self.get_datalist().values()
         name_list = []
         for state in state_list:
-            if state.data == None:
+            if state.data is None:
                 theory_list = state.get_theory()
                 theory, _ = theory_list.values()[0]
                 d_name = str(theory.name)
@@ -234,12 +234,16 @@ class DataOperPanel(wx.ScrolledWindow):
             ctrl.SetBackgroundColour(color)
         self.name_sizer.Layout()
 
-    def on_number(self, event=None):
+    def on_number(self, event=None, control=None):
         """
         On selecting Number for Data2
         """
         self.send_warnings('')
-        item = event.GetEventObject()
+        item = control
+        if item is None and event is not None:
+            item = event.GetEventObject()
+        elif item is None:
+            raise ValueError("Event or control must be supplied")
         text = item.GetValue().strip()
         if self.numberctr.IsShown():
             if self.numberctr.IsEnabled():
@@ -250,18 +254,20 @@ class DataOperPanel(wx.ScrolledWindow):
                     self.data2_cbox.SetClientData(pos, val)
                 except:
                     self._set_textctrl_color(self.numberctr, 'pink')
-                    msg = "DataOperation: Number requires a float number."
-                    self.send_warnings(msg, 'error')
-                    return
+                    if event is None:
+                        msg = "DataOperation: Number requires a float number."
+                        self.send_warnings(msg, 'error')
+                    return False
             else:
                 self._set_textctrl_color(self.numberctr, self.color)
 
         self.put_text_pic(self.data2_pic, content=str(val))
         self.check_data_inputs()
-        if self.output != None:
+        if self.output is not None:
             self.output.name = str(self.data_namectr.GetValue())
         self.draw_output(self.output)
         self.Refresh()
+        return True
 
     def on_select_data1(self, event=None):
         """
@@ -271,13 +277,13 @@ class DataOperPanel(wx.ScrolledWindow):
         item = event.GetEventObject()
         pos = item.GetCurrentSelection()
         data = item.GetClientData(pos)
-        if data == None:
+        if data is None:
             content = "?"
             self.put_text_pic(self.data1_pic, content)
         else:
             self.data1_pic.add_image(data)
         self.check_data_inputs()
-        if self.output != None:
+        if self.output is not None:
             self.output.name = str(self.data_namectr.GetValue())
         self.draw_output(self.output)
 
@@ -290,7 +296,7 @@ class DataOperPanel(wx.ScrolledWindow):
         text = item.GetValue().strip()
         self.put_text_pic(self.operator_pic, content=text)
         self.check_data_inputs()
-        if self.output != None:
+        if self.output is not None:
             self.output.name = str(self.data_namectr.GetValue())
         self.draw_output(self.output)
 
@@ -306,7 +312,7 @@ class DataOperPanel(wx.ScrolledWindow):
         data = item.GetClientData(pos)
         content = "?"
         if not (self.numberctr.IsShown() and self.numberctr.IsEnabled()):
-            if data == None:
+            if data is None:
                 content = "?"
                 self.put_text_pic(self.data2_pic, content)
             else:
@@ -322,12 +328,12 @@ class DataOperPanel(wx.ScrolledWindow):
                 content = "?"
                 data = None
             item.SetClientData(pos, data)
-            if data != None:
+            if data is not None:
                 self.check_data_inputs()
 
             self.put_text_pic(self.data2_pic, content)
 
-        if self.output != None:
+        if self.output is not None:
             self.output.name = str(self.data_namectr.GetValue())
         self.draw_output(self.output)
 
@@ -348,13 +354,13 @@ class DataOperPanel(wx.ScrolledWindow):
         flag = False
         pos1 = self.data1_cbox.GetCurrentSelection()
         data1 = self.data1_cbox.GetClientData(pos1)
-        if data1 == None:
+        if data1 is None:
             self.output = None
             return flag
         pos2 = self.data2_cbox.GetCurrentSelection()
         data2 = self.data2_cbox.GetClientData(pos2)
 
-        if data2 == None:
+        if data2 is None:
             self.output = None
             return flag
         if self.numberctr.IsShown():
@@ -390,7 +396,7 @@ class DataOperPanel(wx.ScrolledWindow):
             self._check_newname()
             self._set_textctrl_color(self.data1_cbox, 'pink')
             self._set_textctrl_color(self.data2_cbox, 'pink')
-            msg = "DataOperation: Data types must be same."
+            msg = "DataOperation: %s" % sys.exc_value
             self.send_warnings(msg, 'error')
             self.output = None
             return flag
@@ -415,7 +421,7 @@ class DataOperPanel(wx.ScrolledWindow):
         Draw output data(temp)
         """
         out = self.out_pic
-        if output == None:
+        if output is None:
             content = "?"
             self.put_text_pic(out, content)
         else:
@@ -465,7 +471,7 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         On Focus at this window
         """
-        if event != None:
+        if event is not None:
             event.Skip()
         self._data = self.get_datalist()
         if ON_MAC:
@@ -527,19 +533,19 @@ class DataOperPanel(wx.ScrolledWindow):
         dnames = []
         ids = self._data.keys()
         for id in ids:
-            if id != None:
-                if self._data[id].data != None:
+            if id is not None:
+                if self._data[id].data is not None:
                     dnames.append(self._data[id].data.name)
                 else:
                     theory_list = self._data[id].get_theory()
                     theory, _ = theory_list.values()[0]
                     dnames.append(theory.name)
-        ind = numpy.argsort(dnames)
+        ind = np.argsort(dnames)
         if len(ind) > 0:
-            val_list = numpy.array(self._data.values())[ind]
+            val_list = np.array(self._data.values())[ind]
             for datastate in val_list:
                 data = datastate.data
-                if data != None:
+                if data is not None:
                     name = data.name
                     pos1 = self.data1_cbox.Append(str(name))
                     self.data1_cbox.SetClientData(pos1, data)
@@ -570,7 +576,7 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         """
         data_manager = self.parent.parent.get_data_manager()
-        if data_manager != None:
+        if data_manager is not None:
             return  data_manager.get_all_data()
         else:
             return {}
@@ -585,7 +591,7 @@ class DataOperPanel(wx.ScrolledWindow):
         name = self.data_namectr.GetValue().strip()
         name_list = []
         for state in state_list:
-            if state.data == None:
+            if state.data is None:
                 theory_list = state.get_theory()
                 theory, _ = theory_list.values()[0]
                 d_name = str(theory.name)
@@ -602,10 +608,14 @@ class DataOperPanel(wx.ScrolledWindow):
             msg = "Please type the output data name first...   "
             wx.MessageBox(msg, 'Error')
             return
-        if self.output == None:
+        if self.output is None:
             msg = "No Output Data has been generated...   "
             wx.MessageBox(msg, 'Error')
             return
+        if self.numberctr.IsEnabled() and self.numberctr.IsShown():
+            valid_num = self.on_number(control=self.numberctr)
+            if not valid_num:
+                return
         # send data to data manager
         self.output.name = name
         self.output.run = "Data Operation"
@@ -730,7 +740,7 @@ class SmallPanel(PlotPanel):
 
         #add plot
         self.graph.add(plot)
-        #draw        
+        #draw
         self.graph.render(self)
 
         try:
@@ -972,7 +982,7 @@ class DataOperatorWindow(widget.CHILD_FRAME):
         """
         On close event
         """
-        if self.manager != None:
+        if self.manager is not None:
             self.manager.data_operator_frame = None
         self.panel.disconnect_panels()
         self.Destroy()
@@ -984,4 +994,3 @@ if __name__ == "__main__":
     widget.CHILD_FRAME = wx.Frame
     window = DataOperatorWindow(parent=None, data=[], title="Data Editor")
     app.MainLoop()
-

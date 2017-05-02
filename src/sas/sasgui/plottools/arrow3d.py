@@ -28,7 +28,7 @@ class Arrow3D(FancyArrowPatch):
         self.colors = colors
         self.base = base
 
-        if base != None:
+        if base is not None:
             # To turn the updating off during dragging
             base.canvas.mpl_connect('button_press_event', self.on_left_down)
             base.canvas.mpl_connect('button_release_event', self.on_left_up)

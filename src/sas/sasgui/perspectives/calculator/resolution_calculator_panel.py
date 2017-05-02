@@ -34,6 +34,8 @@ from math import fabs
 from sas.sasgui.perspectives.calculator import calculator_widgets as widget
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
+logger = logging.getLogger(__name__)
+
 _BOX_WIDTH = 100
 _Q_DEFAULT = 0.0
 #Slit length panel size
@@ -62,7 +64,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
     Provides the Resolution calculator GUI.
     """
     ## Internal nickname for the window, used by the AUI manager
-    window_name = "SAS Resolution Estimator"
+    window_name = "Q Resolution Estimator"
     ## Name to appear on the window title bar
     window_caption = ""
     ## Flag to tell the AUI manager to put this panel in the center pane
@@ -653,7 +655,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         if event is not None:
             event.Skip()
         # Clear the plot
-        if self.image != None:
+        if self.image is not None:
             self.image.clf()
             # reset image
             self.image = None
@@ -671,7 +673,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         Execute the computation of resolution
         """
         # Skip event for next event
-        if event != None:
+        if event is not None:
             event.Skip()
             msg = "Please Check your input values "
             msg += "before starting the computation..."
@@ -705,7 +707,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                         self.wavelength_spread_tcl.GetValue().split(';')[0])
             # Validate the wave inputs
             wave_input = self._validate_q_input(wavelength, wavelength_spread)
-            if wave_input != None:
+            if wave_input is not None:
                 wavelength, wavelength_spread = wave_input
 
             self.resolution.set_wave(wavelength)
@@ -754,7 +756,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
 
         # Validate the q inputs
         q_input = self._validate_q_input(self.qx, self.qy)
-        if q_input != None:
+        if q_input is not None:
             self.qx, self.qy = q_input
 
         # Make list of q min max for mapping
@@ -766,7 +768,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
             qy_max.append(ymax)
 
         # Compute the resolution
-        if self.image != None:
+        if self.image is not None:
             #_pylab_helpers.Gcf.set_active(self.fm)
             _pylab_helpers.Gcf.figs = {}
             # Clear the image before redraw
@@ -836,7 +838,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         Draw lines in image if applicable
         : Param image: pylab object
         """
-        if image == None:
+        if image is None:
             return
         if color == 'g':
             # Get the params from resolution
@@ -970,7 +972,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         # check length
         if len(qx) != len(qy):
             return None
-        if qx == None or qy == None:
+        if qx is None or qy is None:
             return None
         return qx, qy
 
@@ -979,7 +981,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         Execute the reset
         """
         # skip for another event
-        if event != None:
+        if event is not None:
             event.Skip()
         # init resolution_calculator
         self.resolution = ResolutionCalculator()
@@ -1097,7 +1099,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                 value = float(string_split[ind])
                 new_string.append(value)
             except:
-                logging.error(sys.exc_value)
+                logger.error(sys.exc_value)
 
         return new_string
 
@@ -1139,13 +1141,13 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                         out = self._string2inputlist(string)
                         return out
                 except:
-                    logging.error(sys.exc_value)
+                    logger.error(sys.exc_value)
 
     def _on_xy_coordinate(self, event=None):
         """
         Set the detector coordinate for sigmas to x-y coordinate
         """
-        if event != None:
+        if event is not None:
             event.Skip()
         # Set the coordinate in Cartesian
         self.det_coordinate = 'cartesian'
@@ -1157,7 +1159,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         """
         Set the detector coordinate for sigmas to polar coordinate
         """
-        if event != None:
+        if event is not None:
             event.Skip()
         # Set the coordinate in polar
         self.det_coordinate = 'polar'
@@ -1178,7 +1180,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.compute_button.Enable(able)
         self.compute_button.SetLabel(label)
         self.compute_button.SetToolTipString(label)
-        if self.parent.parent != None:
+        if self.parent.parent is not None:
             wx.PostEvent(self.parent.parent,
                          StatusEvent(status=msg, type=type))
 
@@ -1193,7 +1195,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         """
         On source combobox selection
         """
-        if event != None:
+        if event is not None:
             combo = event.GetEventObject()
             event.Skip()
         else:
@@ -1212,7 +1214,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         """
         On source color combobox selection
         """
-        if event != None:
+        if event is not None:
             #combo = event.GetEventObject()
             event.Skip()
         #else:
@@ -1250,7 +1252,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         """
         On spectrum ComboBox event
         """
-        if event != None:
+        if event is not None:
             #combo = event.GetEventObject()
             event.Skip()
         else:
@@ -1258,7 +1260,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         selection = self.spectrum_cb.GetValue()
         if selection == 'Add new':
             path = self._selectDlg()
-            if path == None:
+            if path is None:
                 self.spectrum_cb.SetValue('Flat')
                 self.resolution.set_spectrum(self.spectrum_dic['Flat'])
                 msg = "No file has been chosen."
@@ -1298,7 +1300,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
 
         """
         try:
-            if path == None:
+            if path is None:
                 wx.PostEvent(self.parent.parent, StatusEvent(status=\
                             " Selected Distribution was not loaded: %s" % path))
                 return None, None
@@ -1317,7 +1319,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                     intensity.append(intens)
                 except:
                     # Skip non-data lines
-                    logging.error(sys.exc_value)
+                    logger.error(sys.exc_value)
 
             return [wavelength, intensity]
         except:
@@ -1328,7 +1330,7 @@ class ResolutionWindow(widget.CHILD_FRAME):
     Resolution Window
     """
     def __init__(self, parent=None, manager=None,
-                 title="SAS Resolution Estimator",
+                 title="Q Resolution Estimator",
                  size=(PANEL_WIDTH * 2, PANEL_HEIGHT), *args, **kwds):
         kwds['title'] = title
         kwds['size'] = size
@@ -1345,7 +1347,7 @@ class ResolutionWindow(widget.CHILD_FRAME):
         On close event
         """
         _pylab_helpers.Gcf.figs = {}
-        if self.manager != None:
+        if self.manager is not None:
             self.manager.cal_res_frame = None
         self.Destroy()
 

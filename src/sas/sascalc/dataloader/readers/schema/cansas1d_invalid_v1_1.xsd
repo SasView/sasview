@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="xsd-documentation.xsl" ?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"  jaxb:version="2.0"
+	targetNamespace="urn:cansas1d:1.1" xmlns:tns="urn:cansas1d:1.1"
+	elementFormDefault="qualified">
+
+<!-- 
+Copyright (c) 2013, UChicago Argonne, LLC
+This file is distributed subject to a Software License Agreement found
+in the file LICENSE that is included with this distribution. 
+ -->
+ 
+<!-- JAXB: http://java.sun.com/developer/technicalArticles/WebServices/jaxb/ -->
+
+	<complexType name="floatUnitType">
+		<simpleContent>
+			<extension base="string">
+				<attribute name="unit" type="string" use="required" />
+			</extension>
+		</simpleContent>
+	</complexType>
+
+	<complexType name="IdataType">
+		<xsd:choice>
+		<sequence>
+			<element name="Q" minOccurs="1" maxOccurs="1"    type="tns:floatUnitType" />
+			<element name="I" minOccurs="1" maxOccurs="1"    type="tns:floatUnitType" />
+			<element name="Idev" minOccurs="0" maxOccurs="1" type="tns:floatUnitType" default="0" />
+			<xsd:choice>
+				<!-- [ [Qdev] | [[dQw] | [dQl]] ] -->
+				<element name="Qdev" minOccurs="0" maxOccurs="1" type="tns:floatUnitType" default="0" />
+				<xsd:sequence>
+					<element name="dQw" minOccurs="0" maxOccurs="1" type="tns:floatUnitType" default="0" />
+					<element name="dQl" minOccurs="0" maxOccurs="1" type="tns:floatUnitType" default="0" />
+				</xsd:sequence>
+			</xsd:choice>
+			<element name="Qmean" minOccurs="0" maxOccurs="1" type="tns:floatUnitType" default="0" />
+			<element name="Shadowfactor" minOccurs="0" maxOccurs="1" type="string" default="1.0" />
+			<xsd:any minOccurs="0" maxOccurs="unbounded" processContents="lax" namespace="##other" />
+		</sequence>
+		<sequence>
+			<element name="Qx" minOccurs="1" maxOccurs="1"    type="tns:floatUnitType" />
+			<element name="Qy" minOccurs="1" maxOccurs="1"    type="tns:floatUnitType" />
+			<element name="I" minOccurs="1" maxOccurs="1"    type="tns:floatUnitType" />
+			<element name="Idev" minOccurs="0" maxOccurs="1" type="tns:floatUnitType" default="0" />
+			<element name="Qydev" minOccurs="0" maxOccurs="1" type="tns:floatUnitType" default="0" />
+			<element name="Qxdev" minOccurs="0" maxOccurs="1" type="tns:floatUnitType" default="0" />
+			<element name="Mask" minOccurs="0" maxOccurs="1" type="string" default="0" />
+		</sequence>
+		</xsd:choice>
+	</complexType>
+	
+	<complexType name="SASdataType">
+		<sequence minOccurs="1" maxOccurs="1">  <!-- http://svn.cansas.org/trac/ticket/21 -->
+			<sequence>
+				<element name="Idata" minOccurs="1" maxOccurs="unbounded" type="tns:IdataType" />
+			</sequence>
+			<xsd:any minOccurs="0" maxOccurs="unbounded" processContents="lax" namespace="##other" />
+		</sequence>
+		<attribute name="name" type="string" use="optional" default="" />
+		<attribute name="timestamp" type="dateTime" use="optional" />
+		<attribute name="x_bins" type="string" use="optional" />
+		<attribute name="y_bins" type="string" use="optional" />
+	</complexType>
+
+	<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+	<complexType name="SASentryType">
+		<sequence>
+			<xsd:any minOccurs="0" maxOccurs="unbounded" processContents="lax" />
+			<element name="SASdata" minOccurs="1" maxOccurs="unbounded" type="tns:SASdataType" />
+			<xsd:any minOccurs="0" maxOccurs="unbounded" processContents="lax">
+				<!-- Is a second *any* element needed here? -->
+				<annotation>
+					<appinfo>
+						<!-- Remap collision of Any when using JAXB --> 
+						<jaxb:property name="SASentryAny2" />
+					</appinfo>
+				</annotation>
+			</xsd:any>
+		</sequence>
+		<attribute name="name" type="string" use="optional" default="" />
+	</complexType>
+
+	<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+	<complexType name="SASrootType">
+		<sequence>
+			<element name="SASentry" minOccurs="1" maxOccurs="unbounded" type="tns:SASentryType" />
+		</sequence>
+		<attribute name="version" type="string" fixed="1.1" use="optional" />
+	</complexType>
+
+	<element name="SASroot" type="tns:SASrootType" />
+
+</schema>

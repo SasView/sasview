@@ -13,7 +13,7 @@
 import wx
 import sys
 import math
-import numpy
+import numpy as np
 import logging
 from sas.sasgui.plottools.PlotPanel import PlotPanel
 from sas.sasgui.plottools.plottables import Graph
@@ -29,6 +29,8 @@ from sas.sasgui.plottools.toolbar import NavigationToolBar
 from matplotlib.font_manager import FontProperties
 from graphAppearance import graphAppearance
 (InternalEvent, EVT_INTERNAL) = wx.lib.newevent.NewEvent()
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_QMAX = 0.05
 DEFAULT_QSTEP = 0.001
@@ -141,7 +143,7 @@ class ModelPanel2D(ModelPanel1D):
         On Qmin Qmax vertical line event
         """
         # Not implemented
-        if event == None:
+        if event is None:
             return
         event.Skip()
 
@@ -153,7 +155,7 @@ class ModelPanel2D(ModelPanel1D):
         # Check that the LEFT button was pressed
         PlotPanel.onLeftDown(self, event)
         ax = event.inaxes
-        if ax != None:
+        if ax is not None:
             # data coordinate position
             pos_x = "%8.3g" % event.xdata
             pos_y = "%8.3g" % event.ydata
@@ -224,7 +226,7 @@ class ModelPanel2D(ModelPanel1D):
         self.graph.yaxis(data._yaxis, data._yunit)
         if self._is_changed_legend_label:
             data.label = self.title_label
-        if data.label == None:
+        if data.label is None:
             data.label = data.name
         if not self.title_font:
             self.graph.title(data.label)
@@ -261,14 +263,14 @@ class ModelPanel2D(ModelPanel1D):
         data = self.data2D
         # control axis labels from the panel itself
         yname, yunits = data.get_yaxis()
-        if self.yaxis_label != None:
+        if self.yaxis_label is not None:
             yname = self.yaxis_label
             yunits = self.yaxis_unit
         else:
             self.yaxis_label = yname
             self.yaxis_unit = yunits
         xname, xunits = data.get_xaxis()
-        if self.xaxis_label != None:
+        if self.xaxis_label is not None:
             xname = self.xaxis_label
             xunits = self.xaxis_unit
         else:
@@ -292,7 +294,7 @@ class ModelPanel2D(ModelPanel1D):
         slicerpop.set_graph(self.graph)
 
         wx_id = ids.next()
-        slicerpop.Append(wx_id, '&Save Image')
+        slicerpop.Append(wx_id, '&Save Image', 'Save image as png')
         wx.EVT_MENU(self, wx_id, self.onSaveImage)
 
         wx_id = ids.next()
@@ -315,13 +317,11 @@ class ModelPanel2D(ModelPanel1D):
         wx.EVT_MENU(self, wx_id, self._onSave)
 
         slicerpop.AppendSeparator()
-        if len(self.data2D.detector) == 1:
+        if len(self.data2D.detector) <= 1:
             item_list = self.parent.get_current_context_menu(self)
-            if (not item_list == None) and (not len(item_list) == 0) and\
-                self.data2D.name.split(" ")[0] != 'Residuals':
-                # The line above; Not for trunk
-                # Note: reusing menu ids for the sub-menus.  See Plotter1D.
-                for item, wx_id in zip(item_list, self._menu_ids):
+            if ((item_list is not None) and len(item_list) and
+                self.data2D.name.split(" ")[0] != 'Residuals'):
+                for item, wx_id in zip(item_list, [ids.next() for i in range(len(item_list))]):
                     try:
                         slicerpop.Append(wx_id, item[0], item[1])
                         wx.EVT_MENU(self, wx_id, item[2])
@@ -354,7 +354,7 @@ class ModelPanel2D(ModelPanel1D):
             wx_id = ids.next()
             slicerpop.Append(wx_id, '&Box Averaging in Qy')
             wx.EVT_MENU(self, wx_id, self.onBoxavgY)
-            if self.slicer != None:
+            if self.slicer is not None:
                 wx_id = ids.next()
                 slicerpop.Append(wx_id, '&Clear Slicer')
                 wx.EVT_MENU(self, wx_id, self.onClearSlicer)
@@ -433,8 +433,8 @@ class ModelPanel2D(ModelPanel1D):
                     self.subplot.figure.canvas.draw_idle()
             except:
                 msg = "Add Text: Error. Check your property values..."
-                logging.error(msg)
-                if self.parent != None:
+                logger.error(msg)
+                if self.parent is not None:
                     wx.PostEvent(self.parent, StatusEvent(status=msg))
         dial.Destroy()
 
@@ -532,7 +532,7 @@ class ModelPanel2D(ModelPanel1D):
 
         """
         ## Clear current slicer
-        if not self.slicer == None:
+        if self.slicer is not None:
             self.slicer.clear()
         ## Create a new slicer
         self.slicer_z += 1
@@ -568,7 +568,7 @@ class ModelPanel2D(ModelPanel1D):
 
         """
         # Find the best number of bins
-        npt = math.sqrt(len(self.data2D.data[numpy.isfinite(self.data2D.data)]))
+        npt = math.sqrt(len(self.data2D.data[np.isfinite(self.data2D.data)]))
         npt = math.floor(npt)
         from sas.sascalc.dataloader.manipulations import CircularAverage
         ## compute the maximum radius of data2D
@@ -628,7 +628,7 @@ class ModelPanel2D(ModelPanel1D):
         :param event: wx.menu event
 
         """
-        if self.slicer != None:
+        if self.slicer is not None:
             from SlicerParameters import SlicerParameterPanel
             dialog = SlicerParameterPanel(self, -1, "Slicer Parameters")
             dialog.set_slicer(self.slicer.__class__.__name__,
@@ -718,7 +718,7 @@ class ModelPanel2D(ModelPanel1D):
         """
         Clear the slicer on the plot
         """
-        if not self.slicer == None:
+        if self.slicer is not None:
             self.slicer.clear()
             self.subplot.figure.canvas.draw()
             self.slicer = None
@@ -734,7 +734,7 @@ class ModelPanel2D(ModelPanel1D):
 
         """
         event_id = str(evt.GetId())
-        if self.parent != None:
+        if self.parent is not None:
             self._default_save_location = self.parent._default_save_location
         default_name = self.plots[self.graph.selected_plottable].label
         if default_name.count('.') > 0:
@@ -758,7 +758,7 @@ class ModelPanel2D(ModelPanel1D):
         if default_name.count('.') > 0:
             default_name = default_name.split('.')[0]
         #default_name += "_out"
-        if self.parent != None:
+        if self.parent is not None:
             self.parent.show_data2d(data, default_name)
 
     def modifyGraphAppearance(self, e):

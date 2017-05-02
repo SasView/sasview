@@ -4,11 +4,11 @@ the easy editor which provides a simple interface with tooltip help to enter
 the parameters of the model and their default value and a panel to input a
 function of y (usually the intensity).  It also provides a drop down of
 standard available math functions.  Finally a full python editor panel for
-complete customizatin is provided.
+complete customization is provided.
 
-:TODO the writiong of the file and name checking (and maybe some other
-funtions?) should be moved to a computational module which could be called
-fropm a python script.  Basically one just needs to pass the name,
+:TODO the writing of the file and name checking (and maybe some other
+functions?) should be moved to a computational module which could be called
+from a python script.  Basically one just needs to pass the name,
 description text and function text (or in the case of the composite editor
 the names of the first and second model and the operator to be used).
 '''
@@ -22,14 +22,19 @@ the names of the first and second model and the operator to be used).
 #
 #copyright 2009, University of Tennessee
 ################################################################################
+from __future__ import print_function
+
 import wx
 import sys
 import os
 import math
 import re
+import logging
 from wx.py.editwindow import EditWindow
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 from .pyconsole import show_model_output, check_model
+
+logger = logging.getLogger(__name__)
 
 
 if sys.platform.count("win32") > 0:
@@ -59,7 +64,7 @@ def _delete_file(path):
 class TextDialog(wx.Dialog):
     """
     Dialog for easy custom composite models.  Provides a wx.Dialog panel
-    to choose two existing models (including pre-existing custom models which
+    to choose two existing models (including pre-existing Plugin Models which
     may themselves be composite models) as well as an operation on those models
     (add or multiply) the resulting model will add a scale parameter for summed
     models and a background parameter for a multiplied model.
@@ -69,7 +74,7 @@ class TextDialog(wx.Dialog):
     model is saved.
 
     This Dialog pops up for the user when they press 'Sum|Multi(p1,p2)' under
-    'Edit Custom Model' under 'Fitting' menu.  This is currently called as
+    'Plugin Model Operations' under 'Fitting' menu.  This is currently called as
     a Modal Dialog.
 
     :TODO the build in compiler currently balks at when it tries to import
@@ -378,17 +383,15 @@ class TextDialog(wx.Dialog):
             info = 'Info'
             color = 'blue'
         except:
-            msg = "Easy Custom Sum/Multipy: Error occurred..."
+            msg = "Easy Sum/Multipy Plugin: Error occurred..."
             info = 'Error'
             color = 'red'
         self._msg_box.SetLabel(msg)
         self._msg_box.SetForegroundColour(color)
-        if self.parent.parent != None:
+        if self.parent.parent is not None:
             from sas.sasgui.guiframe.events import StatusEvent
             wx.PostEvent(self.parent.parent, StatusEvent(status=msg,
                                                          info=info))
-        else:
-            raise
 
     def on_help(self, event):
         """
@@ -476,7 +479,7 @@ class TextDialog(wx.Dialog):
         On Select an Operator
         """
         # For Mac
-        if event != None:
+        if event is not None:
             event.Skip()
         item = event.GetEventObject()
         text = item.GetValue()
@@ -501,7 +504,7 @@ class TextDialog(wx.Dialog):
 
         self.factor = factor
         self._operator = operator
-        self.explanation = "  Custom Model = %s %s (model1 %s model2)\n" % \
+        self.explanation = "  Plugin Model = %s %s (model1 %s model2)\n" % \
                            (self.factor, f_oper, self._operator)
         self.explanationctr.SetLabel(self.explanation)
         self.name = name + M_NAME
@@ -511,10 +514,10 @@ class TextDialog(wx.Dialog):
         """
         fill the current combobox with the operator
         """
-        operator_list = [' +', ' *']
+        operator_list = ['+', '*']
         for oper in operator_list:
             pos = self._operator_choice.Append(str(oper))
-            self._operator_choice.SetClientData(pos, str(oper.strip()))
+            self._operator_choice.SetClientData(pos, str(oper))
         self._operator_choice.SetSelection(0)
 
     def get_textnames(self):
@@ -617,7 +620,7 @@ class TextDialog(wx.Dialog):
 
 class EditorPanel(wx.ScrolledWindow):
     """
-    Custom model function editor
+    Simple Plugin Model function editor
     """
     def __init__(self, parent, base, path, title, *args, **kwds):
         kwds['name'] = title
@@ -652,7 +655,9 @@ class EditorPanel(wx.ScrolledWindow):
         self._msg_box = None
         self.msg_sizer = None
         self.warning = ""
-        self._description = "New Custom Model"
+        #This does not seem to be used anywhere so commenting out for now
+        #    -- PDB 2/26/17 
+        #self._description = "New Plugin Model"
         self.function_tcl = None
         self.math_combo = None
         self.bt_apply = None
@@ -683,14 +688,13 @@ class EditorPanel(wx.ScrolledWindow):
         """
         #title name [string]
         name_txt = wx.StaticText(self, -1, 'Function Name : ')
-        overwrite_cb = wx.CheckBox(self, -1, "Overwrite?", (10, 10))
+        overwrite_cb = wx.CheckBox(self, -1, "Overwrite existing plugin model of this name?", (10, 10))
         overwrite_cb.SetValue(False)
         overwrite_cb.SetToolTipString("Overwrite it if already exists?")
         wx.EVT_CHECKBOX(self, overwrite_cb.GetId(), self.on_over_cb)
-        #overwrite_cb.Show(False)
         self.name_tcl = wx.TextCtrl(self, -1, size=(PANEL_WIDTH * 3 / 5, -1))
         self.name_tcl.Bind(wx.EVT_TEXT_ENTER, self.on_change_name)
-        self.name_tcl.SetValue('MyFunction')
+        self.name_tcl.SetValue('')
         self.name_tcl.SetFont(self.font)
         hint_name = "Unique Model Function Name."
         self.name_tcl.SetToolTipString(hint_name)
@@ -868,7 +872,7 @@ class EditorPanel(wx.ScrolledWindow):
         self.function_tcl.InsertText(pos, label)
         # Put the cursor at appropriate position
         length = len(label)
-        print length
+        print(length)
         if label[length-1] == ')':
             length -= 1
         f_pos = pos + length
@@ -946,9 +950,11 @@ class EditorPanel(wx.ScrolledWindow):
         result, check_err = '', ''
         # Sort out the errors if occur
         # First check for valid python name then if the name already exists
-        if not re.match('^[A-Za-z0-9_]*$', name):
-            msg = "not a valid python name. Name must include only alpha \n"
-            msg += "numeric or underline characters and no spaces"
+        if not name or not bool(re.match('^[A-Za-z0-9_]*$', name)):
+            msg = '"%s" '%name
+            msg += "is not a valid model name. Name must not be empty and \n"
+            msg += "may include only alpha numeric or underline characters \n"
+            msg += "and no spaces"
         elif self.check_name():
             description = self.desc_tcl.GetValue()
             param_str = self.param_tcl.GetText()
@@ -965,25 +971,6 @@ class EditorPanel(wx.ScrolledWindow):
                         import traceback
                         result, msg = None, "error building model"
                         check_err = "\n"+traceback.format_exc(limit=2)
-
-                    # Modified compiling test, as it will fail for sasmodels.sasview_model class
-                    # Should add a test to check that the class is correctly built 
-                    # by sasview_model.make_class_from_file?
-#                    try: 
-#                        tr_msg = _compile_file(self.fname)
-#                        msg = str(tr_msg.__str__())
-#                        # Compile error
-#                        if msg:
-#                            msg.replace("  ", "\n")
-#                            msg += "\nCompiling Failed"
-#                            try:
-#                                # try to remove pyc file if exists
-#                                _delete_file(self.fname)
-#                                _delete_file(self.fname + "c")
-#                            except:
-#                                pass
-#                    except:
-#                        pass
                 else:
                     msg = "Error: The func(x) must 'return' a value at least.\n"
                     msg += "For example: \n\nreturn 2*x"
@@ -993,7 +980,7 @@ class EditorPanel(wx.ScrolledWindow):
             msg = "Name exists already."
 
         # Prepare the messagebox
-        if self.base != None and not msg:
+        if self.base is not None and not msg:
             self.base.update_custom_combo()
             # Passed exception in import test as it will fail for sasmodels.sasview_model class
             # Should add similar test for new style?
@@ -1001,42 +988,22 @@ class EditorPanel(wx.ScrolledWindow):
             try:
                 exec "from %s import Model" % name
             except:
-                pass
-#            except:
-#                msg = 'new model fails to import in python'
-#                try:
-#                    # try to remove pyc file if exists
-#                    _delete_file(self.fname + "c")
-#                except:
-#                    pass
-#
-# And also need to test if model runs            
-#        if self.base != None and not msg:
-#            try:
-#                Model().run(0.01)
-#            except:
-#                msg = "new model fails on run method:"
-#                _, value, _ = sys.exc_info()
-#                msg += "in %s:\n%s\n" % (name, value)
-#                try:
-#                    # try to remove pyc file if exists
-#                    _delete_file(self.fname + "c")
-#                except:
-#                    pass
+                logger.error(sys.exc_value)
+
         # Prepare the messagebox
         if msg:
             info = 'Error'
             color = 'red'
         else:
             self._notes = result
-            msg = "Successful! Please look for %s in Customized Models."%name
+            msg = "Successful! Please look for %s in Plugin Models."%name
             msg += "  " + self._notes
             info = 'Info'
             color = 'blue'
         self._msg_box.SetLabel(msg)
         self._msg_box.SetForegroundColour(color)
         # Send msg to the top window
-        if self.base != None:
+        if self.base is not None:
             from sas.sasgui.guiframe.events import StatusEvent
             wx.PostEvent(self.base.parent,
                          StatusEvent(status=msg+check_err, info=info))
@@ -1176,7 +1143,7 @@ class EditorPanel(wx.ScrolledWindow):
 
     def on_help(self, event):
         """
-        Bring up the Custom Model Editor Documentation whenever
+        Bring up the New Plugin Model Editor Documentation whenever
         the HELP button is clicked.
 
         Calls DocumentationWindow with the path of the location within the
@@ -1190,9 +1157,9 @@ class EditorPanel(wx.ScrolledWindow):
     """
 
         _TreeLocation = "user/sasgui/perspectives/fitting/fitting_help.html"
-        _PageAnchor = "#custom-model-editor"
+        _PageAnchor = "#new-plugin-model"
         _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, _PageAnchor,
-                                          "Custom Model Editor Help")
+                                          "Plugin Model Editor Help")
 
     def on_close(self, event):
         """
@@ -1224,30 +1191,11 @@ class EditorWindow(wx.Frame):
         On close event
         """
         self.Show(False)
-        #if self.parent != None:
+        #if self.parent is not None:
         #    self.parent.new_model_frame = None
         #self.Destroy()
 
-## Templates for custom models
-#CUSTOM_TEMPLATE = """
-#from sas.models.pluginmodel import Model1DPlugin
-#from math import *
-#import os
-#import sys
-#import numpy
-##import scipy?
-#class Model(Model1DPlugin):
-#    name = basename without extension of __file__
-#    def __init__(self):
-#        Model1DPlugin.__init__(self, name=self.name)
-#        #set name same as file name
-#        #self.params here
-#        self.description = "%s"
-#        self.set_details()
-#    def function(self, x=0.0%s):
-#        #local params here
-#        #function here
-#"""
+## Templates for plugin models
 
 CUSTOM_TEMPLATE = """
 from math import *
@@ -1418,6 +1366,7 @@ class Model(Model1DPlugin):
         self.multiplicity_info = []
 
     def _clone(self, obj):
+        import copy
         obj.params     = copy.deepcopy(self.params)
         obj.description     = copy.deepcopy(self.description)
         obj.details    = copy.deepcopy(self.details)
@@ -1440,7 +1389,7 @@ class Model(Model1DPlugin):
         return name
 
     def _get_upper_name(self, name=None):
-        if name == None:
+        if name is None:
             return ""
         upper_name = ""
         str_name = str(name)

@@ -4,7 +4,8 @@
 #TODO: what happens if you add a Data1D to a Data2D?
 
 import unittest
-import numpy, math
+import math
+import numpy as np
 from sas.sascalc.dataloader.loader import  Loader
 from sas.sasgui.guiframe.dataFitting import Data1D, Data2D
 from sas.sasgui.guiframe.dataFitting import Data1D as Theory1D
@@ -51,17 +52,17 @@ class manip_tests(unittest.TestCase):
     
     def setUp(self):
         # Create two data sets to play with
-        x_0 = numpy.ones(5)
+        x_0 = np.ones(5)
         for i in range(5):
             x_0[i] = x_0[i]*(i+1.0)
             
-        y_0 = 2.0*numpy.ones(5)
-        dy_0 = 0.5*numpy.ones(5)
+        y_0 = 2.0*np.ones(5)
+        dy_0 = 0.5*np.ones(5)
         self.data = Data1D(x_0, y_0, dy=dy_0)
         
         x = self.data.x
-        y = numpy.ones(5)
-        dy = numpy.ones(5)
+        y = np.ones(5)
+        dy = np.ones(5)
         self.data2 = Data1D(x, y, dy=dy)
         
         
@@ -154,24 +155,24 @@ class manip_2D(unittest.TestCase):
     
     def setUp(self):
         # Create two data sets to play with
-        x_0 = 2.0*numpy.ones(25)
-        dx_0 = 0.5*numpy.ones(25)
-        qx_0 = numpy.arange(25)
-        qy_0 = numpy.arange(25)
-        mask_0 = numpy.zeros(25)
-        dqx_0 = numpy.arange(25)/100
-        dqy_0 = numpy.arange(25)/100
-        q_0 = numpy.sqrt(qx_0 * qx_0 + qy_0 * qy_0)
+        x_0 = 2.0*np.ones(25)
+        dx_0 = 0.5*np.ones(25)
+        qx_0 = np.arange(25)
+        qy_0 = np.arange(25)
+        mask_0 = np.zeros(25)
+        dqx_0 = np.arange(25)/100
+        dqy_0 = np.arange(25)/100
+        q_0 = np.sqrt(qx_0 * qx_0 + qy_0 * qy_0)
         self.data = Data2D(image=x_0, err_image=dx_0, qx_data=qx_0, 
                            qy_data=qy_0, q_data=q_0, mask=mask_0, 
                            dqx_data=dqx_0, dqy_data=dqy_0)
         
-        y = numpy.ones(25)
-        dy = numpy.ones(25)
-        qx = numpy.arange(25)
-        qy = numpy.arange(25)
-        mask = numpy.zeros(25)
-        q = numpy.sqrt(qx * qx + qy * qy)
+        y = np.ones(25)
+        dy = np.ones(25)
+        qx = np.arange(25)
+        qy = np.arange(25)
+        mask = np.zeros(25)
+        q = np.sqrt(qx * qx + qy * qy)
         self.data2 = Data2D(image=y, err_image=dy, qx_data=qx, qy_data=qy, 
                             q_data=q, mask=mask)
         
@@ -181,7 +182,7 @@ class manip_2D(unittest.TestCase):
             Test whether the test file was loaded properly
         """
         # There should be 5 entries in the file
-        self.assertEqual(numpy.size(self.data.data), 25)
+        self.assertEqual(np.size(self.data.data), 25)
         
         for i in range(25):
             # All y-error values should be 0.5
@@ -262,24 +263,24 @@ class extra_manip_2D(unittest.TestCase):
     
     def setUp(self):
         # Create two data sets to play with
-        x_0 = 2.0*numpy.ones(25)
-        dx_0 = 0.5*numpy.ones(25)
-        qx_0 = numpy.arange(25)
-        qy_0 = numpy.arange(25)
-        mask_0 = numpy.zeros(25)
-        dqx_0 = numpy.arange(25)/100
-        dqy_0 = numpy.arange(25)/100
-        q_0 = numpy.sqrt(qx_0 * qx_0 + qy_0 * qy_0)
+        x_0 = 2.0*np.ones(25)
+        dx_0 = 0.5*np.ones(25)
+        qx_0 = np.arange(25)
+        qy_0 = np.arange(25)
+        mask_0 = np.zeros(25)
+        dqx_0 = np.arange(25)/100
+        dqy_0 = np.arange(25)/100
+        q_0 = np.sqrt(qx_0 * qx_0 + qy_0 * qy_0)
         self.data = Data2D(image=x_0, err_image=dx_0, qx_data=qx_0, 
                            qy_data=qy_0, q_data=q_0, mask=mask_0, 
                            dqx_data=dqx_0, dqy_data=dqy_0)
         
-        y = numpy.ones(25)
-        dy = numpy.ones(25)
-        qx = numpy.arange(25)
-        qy = numpy.arange(25)
-        mask = numpy.zeros(25)
-        q = numpy.sqrt(qx * qx + qy * qy)
+        y = np.ones(25)
+        dy = np.ones(25)
+        qx = np.arange(25)
+        qy = np.arange(25)
+        mask = np.zeros(25)
+        q = np.sqrt(qx * qx + qy * qy)
         self.data2 = Data2D(image=y, err_image=dy, qx_data=qx, qy_data=qy, 
                             q_data=q, mask=mask)
         
@@ -289,7 +290,7 @@ class extra_manip_2D(unittest.TestCase):
             Test whether the test file was loaded properly
         """
         # There should be 5 entries in the file
-        self.assertEqual(numpy.size(self.data.data), 25)
+        self.assertEqual(np.size(self.data.data), 25)
         
         for i in range(25):
             # All y-error values should be 0.5

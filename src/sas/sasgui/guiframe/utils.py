@@ -45,7 +45,23 @@ def check_float(item):
         item.Refresh()
     return flag
 
-    
+
+def check_int(item):
+    """
+    :param item: txtcrtl containing a value
+    """
+    flag = True
+    try:
+        mini = int(item.GetValue())
+        item.SetBackgroundColour(wx.WHITE)
+        item.Refresh()
+    except:
+        flag = False
+        item.SetBackgroundColour("pink")
+        item.Refresh()
+    return flag
+
+
 class PanelMenu(wx.Menu):
     """
     """
@@ -72,7 +88,7 @@ def split_list(separator, mylist, n=0):
     """
     list = []
     for item in mylist:
-        if re.search(separator,item)!= None:
+        if re.search(separator,item)is not None:
             if n > 0:
                 word = re.split(separator, item, int(n))
             else:

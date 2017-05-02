@@ -14,4 +14,9 @@ Working with SasView
    
    Test Data <../test/testdata_help.rst>
       
-   Tutorial <tutorial.rst>
+   Tutorials <tutorial.rst>
+   
+   Writing a Plugin Model <sasgui/perspectives/fitting/plugin.rst>
+   
+   Computations with a GPU <gpu_computations>
+   

@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import print_function
+
 import urllib2
 import sys
 import json
 import logging
 import re
+
+
+logger = logging.getLogger(__name__)
 
 '''
 HTTP Proxy parser and Connection
@@ -70,13 +75,13 @@ class Connection(object):
         '''
         proxy_url_list = []
         for this_pac_url in pac_urls_list:
-            logging.debug('Trying pac file (%s)...' % this_pac_url)
+            logger.debug('Trying pac file (%s)...' % this_pac_url)
             try:
                 response = urllib2.urlopen(
                     this_pac_url, timeout=self.timeout)
-                logging.debug('Succeeded (%s)...' % this_pac_url)
+                logger.debug('Succeeded (%s)...' % this_pac_url)
             except Exception:
-                logging.debug('Failled (%s)...' % this_pac_url)
+                logger.debug('Failled (%s)...' % this_pac_url)
                 continue
             pacStr = response.read()
             possProxies = re.findall(
@@ -119,32 +124,32 @@ class Connection(object):
         req = urllib2.Request(self.url)
         response = None
         try:
-            logging.debug("Trying Direct connection to %s..."%self.url)
+            logger.debug("Trying Direct connection to %s..."%self.url)
             response = urllib2.urlopen(req, timeout=self.timeout)
         except Exception, e:
-            logging.debug("Failed!")
-            logging.debug(e)
+            logger.debug("Failed!")
+            logger.debug(e)
             try:
-                logging.debug("Trying to use system proxy if it exists...")
+                logger.debug("Trying to use system proxy if it exists...")
                 self._set_proxy()
                 response = urllib2.urlopen(req, timeout=self.timeout)
             except Exception, e:
-                logging.debug("Failed!")
-                logging.debug(e)
+                logger.debug("Failed!")
+                logger.debug(e)
                 pac_urls = self._get_addresses_of_proxy_pac()
                 proxy_urls = self._parse_proxy_pac(pac_urls)
                 for proxy in proxy_urls:
                     try:
-                        logging.debug("Trying to use the proxy %s found in proxy.pac configuration"%proxy)
+                        logger.debug("Trying to use the proxy %s found in proxy.pac configuration"%proxy)
                         self._set_proxy(proxy)
                         response = urllib2.urlopen(req, timeout=self.timeout)
                     except Exception, e:
-                        logging.debug("Failed!")
-                        logging.debug(e)
+                        logger.debug("Failed!")
+                        logger.debug(e)
         if response is not None:
-            logging.debug("The connection to %s was successful."%self.url)
+            logger.debug("The connection to %s was successful."%self.url)
         else:
-            logging.warning("Connection to %s failed..."%self.url)
+            logger.warning("Connection to %s failed..."%self.url)
         return response
 
 
@@ -153,6 +158,6 @@ if __name__ == "__main__":
     c = Connection()
     response = c.connect()
     if response is not None:
-        print 50 * '-'
+        print(50 * '-')
         content = json.loads(response.read().strip())
         pprint(content)

@@ -17,6 +17,8 @@ from pr_widgets import DataFileTextCtrl
 from pr_widgets import OutputTextCtrl
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
+logger = logging.getLogger(__name__)
+
 if sys.platform.count("win32") > 0:
     FONT_VARIANT = 0
 else:
@@ -42,6 +44,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         self.SetupScrolling()
         #Set window's font size
         self.SetWindowVariant(variant=FONT_VARIANT)
+        self._set_analysis(False)
 
         self.plots = plots
         self.radio_buttons = {}
@@ -267,7 +270,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         """
         # Ask the user the location of the file to write to.
         path = None
-        if self.parent != None:
+        if self.parent is not None:
             self._default_save_location = self.parent._default_save_location
         dlg = wx.FileDialog(self, "Choose a file",
                             self._default_save_location,
@@ -275,7 +278,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             self._default_save_location = os.path.dirname(path)
-            if self.parent != None:
+            if self.parent is not None:
                 self.parent._default_save_location = self._default_save_location
         else:
             return None
@@ -395,11 +398,16 @@ class InversionControl(ScrolledPanel, PanelBase):
         if state.bck is not None:
             self.bck = state.bck
 
+        # We have the data available for serialization
+        self._set_analysis(True)
+
         # Perform inversion
         self._on_invert(None)
 
     def set_manager(self, manager):
         self._manager = manager
+        if manager is not None:
+            self._set_analysis(False)
 
     def _do_layout(self):
         vbox = wx.GridBagSizer(0, 0)
@@ -703,10 +711,10 @@ class InversionControl(ScrolledPanel, PanelBase):
             float(alpha)
             self.alpha_ctl.SetValue(alpha)
         except ValueError:
-            logging.error("InversionControl._on_accept_alpha got a value that was not a number: %s" % alpha )
+            logger.error("InversionControl._on_accept_alpha got a value that was not a number: %s" % alpha )
         except:
             # No estimate or bad estimate, either do nothing
-            logging.error("InversionControl._on_accept_alpha: %s" % sys.exc_value)
+            logger.error("InversionControl._on_accept_alpha: %s" % sys.exc_value)
 
     def _on_accept_nterms(self, evt):
         """
@@ -719,10 +727,10 @@ class InversionControl(ScrolledPanel, PanelBase):
             float(nterms)
             self.nfunc_ctl.SetValue(nterms)
         except ValueError:
-            logging.error("InversionControl._on_accept_nterms got a value that was not a number: %s" % nterms )
+            logger.error("InversionControl._on_accept_nterms got a value that was not a number: %s" % nterms )
         except:
             # No estimate or bad estimate, either do nothing
-            logging.error("InversionControl._on_accept_nterms: %s" % sys.exc_value)
+            logger.error("InversionControl._on_accept_nterms: %s" % sys.exc_value)
 
     def clear_panel(self):
         """
@@ -751,6 +759,8 @@ class InversionControl(ScrolledPanel, PanelBase):
         self.alpha_estimate_ctl.SetLabel("")
         self.nterms_estimate_ctl.Enable(False)
         self.nterms_estimate_ctl.SetLabel("")
+        self._set_analysis(False)
+
         self._on_pars_changed()
 
     def _on_pars_changed(self, evt=None):
@@ -909,7 +919,7 @@ class InversionControl(ScrolledPanel, PanelBase):
 
         if flag:
             dataset = self.plot_data.GetValue()
-            if dataset == None or len(dataset.strip()) == 0:
+            if dataset is None or len(dataset.strip()) == 0:
                 message = "No data to invert. Select a data set before"
                 message += " proceeding with P(r) inversion."
                 wx.PostEvent(self._manager.parent, StatusEvent(status=message))
@@ -929,15 +939,16 @@ class InversionControl(ScrolledPanel, PanelBase):
         """
         Choose a new input file for I(q)
         """
-        if not self._manager is None:
+        if self._manager is not None:
             self.plot_data.SetValue(str(data.name))
             try:
                 self._manager.show_data(data=data, reset=True)
                 self._on_pars_changed(None)
                 self._on_invert(None)
+                self._set_analysis(True)
             except:
                 msg = "InversionControl._change_file: %s" % sys.exc_value
-                logging.error(msg)
+                logger.error(msg)
 
     def on_help(self, event):
         """

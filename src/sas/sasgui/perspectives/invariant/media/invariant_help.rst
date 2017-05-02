@@ -3,8 +3,8 @@
 .. This is a port of the original SasView html help file to ReSTructured text
 .. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
 
-Invariant Calculation Perspective
-=================================
+Invariant Calculation
+=====================
 
 Description
 -----------
@@ -44,17 +44,17 @@ Low-*Q* region (<= *Qmin* in data)
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-Using the perspective
----------------------
+Using invariant analysis
+------------------------
 
 1) Select *Invariant* from the *Analysis* menu on the SasView toolbar.
 
 2) Load some data with the *Data Explorer*.
 
 3) Select a dataset and use the *Send To* button on the *Data Explorer* to load 
-   the dataset into the *Invariant* perspective.
+   the dataset into the *Invariant* panel.
 
-4) Use the *Customised Input* boxes on the *Invariant* perspective to subtract 
+4) Use the *Customised Input* boxes on the *Invariant* panel to subtract 
    any background, specify the contrast (i.e. difference in SLDs - this must be 
    specified for the eventual value of Q*\  to be on an absolute scale), or to 
    rescale the data.
@@ -72,7 +72,7 @@ Using the perspective
    extrapolation can also be specified.
 
 8) If the value of Q*\  calculated with the extrapolated regions is invalid, a 
-   red warning will appear at the top of the *Invariant* perspective panel.
+   red warning will appear at the top of the *Invariant* panel.
 
    The details of the calculation are available by clicking the *Details* 
    button in the middle of the panel.
@@ -115,7 +115,7 @@ O. Glatter and O. Kratky
 Chapter 2 in *Small Angle X-Ray Scattering*
 Academic Press, New York, 1982
 
-http://physchem.kfunigraz.ac.at/sm/
+http://web.archive.org/web/20110824105537/http://physchem.kfunigraz.ac.at/sm/Service/Glatter_Kratky_SAXS_1982.zip
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 

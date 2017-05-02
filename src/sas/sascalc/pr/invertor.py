@@ -6,7 +6,7 @@ The module contains the Invertor class.
 FIXME: The way the Invertor interacts with its C component should be cleaned up
 """
 
-import numpy
+import numpy as np
 import sys
 import math
 import time
@@ -17,6 +17,8 @@ import logging
 from numpy.linalg import lstsq
 from scipy import optimize
 from sas.sascalc.pr.core.pr_inversion import Cinvertor
+
+logger = logging.getLogger(__name__)
 
 def help():
     """
@@ -153,13 +155,17 @@ class Invertor(Cinvertor):
             value2 = abs(value)
             return self.set_err(value2)
         elif name == 'd_max':
+            if value <= 0.0:
+                msg = "Invertor: d_max must be greater than zero."
+                msg += "Correct that entry before proceeding"
+                raise ValueError, msg
             return self.set_dmax(value)
         elif name == 'q_min':
-            if value == None:
+            if value is None:
                 return self.set_qmin(-1.0)
             return self.set_qmin(value)
         elif name == 'q_max':
-            if value == None:
+            if value is None:
                 return self.set_qmax(-1.0)
             return self.set_qmax(value)
         elif name == 'alpha':
@@ -184,15 +190,15 @@ class Invertor(Cinvertor):
         """
         #import numpy
         if name == 'x':
-            out = numpy.ones(self.get_nx())
+            out = np.ones(self.get_nx())
             self.get_x(out)
             return out
         elif name == 'y':
-            out = numpy.ones(self.get_ny())
+            out = np.ones(self.get_ny())
             self.get_y(out)
             return out
         elif name == 'err':
-            out = numpy.ones(self.get_nerr())
+            out = np.ones(self.get_nerr())
             self.get_err(out)
             return out
         elif name == 'd_max':
@@ -320,7 +326,7 @@ class Invertor(Cinvertor):
             msg = "Invertor.invert: Data array are of different length"
             raise RuntimeError, msg
 
-        p = numpy.ones(nfunc)
+        p = np.ones(nfunc)
         t_0 = time.time()
         out, cov_x, _, _, _ = optimize.leastsq(self.residuals, p, full_output=1)
 
@@ -336,7 +342,7 @@ class Invertor(Cinvertor):
         self.elapsed = time.time() - t_0
 
         if cov_x is None:
-            cov_x = numpy.ones([nfunc, nfunc])
+            cov_x = np.ones([nfunc, nfunc])
             cov_x *= math.fabs(chisqr)
         return out, cov_x
 
@@ -353,7 +359,7 @@ class Invertor(Cinvertor):
             msg = "Invertor.invert: Data arrays are of different length"
             raise RuntimeError, msg
 
-        p = numpy.ones(nfunc)
+        p = np.ones(nfunc)
         t_0 = time.time()
         out, cov_x, _, _, _ = optimize.leastsq(self.pr_residuals, p, full_output=1)
 
@@ -388,9 +394,9 @@ class Invertor(Cinvertor):
         """
         Check q-value against user-defined range
         """
-        if not self.q_min == None and q < self.q_min:
+        if self.q_min is not None and q < self.q_min:
             return False
-        if not self.q_max == None and q > self.q_max:
+        if self.q_max is not None and q > self.q_max:
             return False
         return True
 
@@ -430,7 +436,7 @@ class Invertor(Cinvertor):
 
         """
         # Note: To make sure an array is contiguous:
-        # blah = numpy.ascontiguousarray(blah_original)
+        # blah = np.ascontiguousarray(blah_original)
         # ... before passing it to C
 
         if self.is_valid() < 0:
@@ -451,9 +457,9 @@ class Invertor(Cinvertor):
             nfunc_0 = nfunc
             nfunc += 1
 
-        a = numpy.zeros([npts + nq, nfunc])
-        b = numpy.zeros(npts + nq)
-        err = numpy.zeros([nfunc, nfunc])
+        a = np.zeros([npts + nq, nfunc])
+        b = np.zeros(npts + nq)
+        err = np.zeros([nfunc, nfunc])
 
         # Construct the a matrix and b vector that represent the problem
         t_0 = time.time()
@@ -471,7 +477,7 @@ class Invertor(Cinvertor):
             chi2 = -1.0
         self.chi2 = chi2
 
-        inv_cov = numpy.zeros([nfunc, nfunc])
+        inv_cov = np.zeros([nfunc, nfunc])
         # Get the covariance matrix, defined as inv_cov = a_transposed * a
         self._get_invcov_matrix(nfunc, nr, a, inv_cov)
 
@@ -485,12 +491,12 @@ class Invertor(Cinvertor):
         self.suggested_alpha = new_alpha
 
         try:
-            cov = numpy.linalg.pinv(inv_cov)
+            cov = np.linalg.pinv(inv_cov)
             err = math.fabs(chi2 / float(npts - nfunc)) * cov
         except:
             # We were not able to estimate the errors
             # Return an empty error matrix
-            logging.error(sys.exc_value)
+            logger.error(sys.exc_value)
 
         # Keep a copy of the last output
         if self.has_bck == False:
@@ -500,8 +506,8 @@ class Invertor(Cinvertor):
         else:
             self.background = c[0]
 
-            err_0 = numpy.zeros([nfunc, nfunc])
-            c_0 = numpy.zeros(nfunc)
+            err_0 = np.zeros([nfunc, nfunc])
+            c_0 = np.zeros(nfunc)
 
             for i in range(nfunc_0):
                 c_0[i] = c[i + 1]
@@ -536,7 +542,7 @@ class Invertor(Cinvertor):
             # If we fail, estimate alpha and return the default
             # number of terms
             best_alpha, _, _ = self.estimate_alpha(self.nfunc)
-            logging.warning("Invertor.estimate_numterms: %s" % sys.exc_value)
+            logger.warning("Invertor.estimate_numterms: %s" % sys.exc_value)
             return self.nfunc, best_alpha, "Could not estimate number of terms"
 
     def estimate_alpha(self, nfunc):
@@ -651,13 +657,13 @@ class Invertor(Cinvertor):
         else:
             file.write("#has_bck=0\n")
         file.write("#alpha_estimate=%g\n" % self.suggested_alpha)
-        if not self.out == None:
+        if self.out is not None:
             if len(self.out) == len(self.cov):
                 for i in range(len(self.out)):
                     file.write("#C_%i=%s+-%s\n" % (i, str(self.out[i]),
                                                    str(self.cov[i][i])))
         file.write("<r>  <Pr>  <dPr>\n")
-        r = numpy.arange(0.0, self.d_max, self.d_max / npts)
+        r = np.arange(0.0, self.d_max, self.d_max / npts)
 
         for r_i in r:
             (value, err) = self.pr_err(self.out, self.cov, r_i)
@@ -689,8 +695,8 @@ class Invertor(Cinvertor):
                     elif line.startswith('#nfunc='):
                         toks = line.split('=')
                         self.nfunc = int(toks[1])
-                        self.out = numpy.zeros(self.nfunc)
-                        self.cov = numpy.zeros([self.nfunc, self.nfunc])
+                        self.out = np.zeros(self.nfunc)
+                        self.cov = np.zeros([self.nfunc, self.nfunc])
                     elif line.startswith('#alpha='):
                         toks = line.split('=')
                         self.alpha = float(toks[1])

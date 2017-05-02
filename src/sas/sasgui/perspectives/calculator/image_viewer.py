@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import os
 import sys
 import wx
@@ -41,15 +43,15 @@ class ImageView:
         load image files
         """
         parent = self.parent
-        if parent == None:
+        if parent is None:
             location = os.getcwd()
         else:
             location = parent._default_save_location
         path_list = self.choose_data_file(location=location)
-        if path_list == None:
+        if path_list is None:
             return
-        if len(path_list) >= 0 and not(path_list[0]is None):
-            if parent != None:
+        if len(path_list) >= 0 and path_list[0] is not None:
+            if parent is not None:
                 parent._default_save_location = os.path.dirname(path_list[0])
         err_msg = ''
         for file_path in path_list:
@@ -69,23 +71,22 @@ class ImageView:
                                           right=0.95, top=0.95)
                 plot_frame.SetTitle('Picture -- %s --' % basename)
                 plot_frame.Show(True)
-                if parent != None:
+                if parent is not None:
                     parent.put_icon(plot_frame)
             except:
-                print "parent", parent
                 err_msg += "Failed to load '%s'.\n" % basename
         if err_msg:
             if parent is not None:
                 wx.PostEvent(parent, StatusEvent(status=err_msg, info="error"))
             else:
-                print err_msg
+                print(err_msg)
 
     def choose_data_file(self, location=None):
         """
         Open a file dialog to allow loading a file
         """
         path = None
-        if location == None:
+        if location is None:
             location = os.getcwd()
         dlg = wx.FileDialog(self.parent, "Image Viewer: Choose a image file",
                             location, "", "", style=wx.FD_OPEN | wx.FD_MULTIPLE)
@@ -108,7 +109,8 @@ class ImageFrame(PlotFrame):
         :param parent: parent panel/container
         """
         # Initialize the Frame object
-        PlotFrame.__init__(self, parent, id, title, scale, size)
+        PlotFrame.__init__(self, parent, id, title, scale, size,
+            show_menu_icons=False)
         self.parent = parent
         self.data = image
         self.file_name = title
@@ -300,7 +302,7 @@ class SetDialog(wx.Dialog):
                 wx.PostEvent(self.base, StatusEvent(status=err_msg,
                                                     info="error"))
             else:
-                print err_msg
+                print(err_msg)
         return flag
 
     def _on_z_enter(self, event=None):
@@ -331,7 +333,7 @@ class SetDialog(wx.Dialog):
                 wx.PostEvent(self.base, StatusEvent(status=err_msg,
                                                     info="error"))
             else:
-                print err_msg
+                print(err_msg)
         return flag
 
     def on_set(self, event):
@@ -360,7 +362,7 @@ class SetDialog(wx.Dialog):
                 wx.PostEvent(self.base, StatusEvent(status=err_msg,
                                                     info="error"))
             else:
-                print err_msg
+                print(err_msg)
 
         self.OnClose(event)
 
@@ -402,7 +404,7 @@ class SetDialog(wx.Dialog):
         output.meta_data['loader'] = self.title.split('.')[-1] + "Reader"
         output.is_data = True
         output = reader2D_converter(output)
-        if self.base != None:
+        if self.base is not None:
             data = self.base.create_gui_data(output, self.title)
             self.base.add_data({data.id:data})
 
@@ -436,4 +438,3 @@ if __name__ == "__main__":
     app = wx.App()
     ImageView(None).load()
     app.MainLoop()
-

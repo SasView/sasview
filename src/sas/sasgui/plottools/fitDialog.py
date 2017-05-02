@@ -1,7 +1,7 @@
 import wx
 from plottables import Theory1D
 import math
-import numpy
+import numpy as np
 import fittings
 import transform
 import sys
@@ -19,7 +19,8 @@ RG_ON = True
 
 def format_number(value, high=False):
     """
-    Return a float in a standardized, human-readable formatted string
+    Return a float in a standardized, human-readable formatted string.
+    This is used to output readable (e.g. x.xxxe-y) values to the panel.
     """
     try:
         value = float(value)
@@ -39,7 +40,26 @@ class LinearFit(wx.Dialog):
     def __init__(self, parent, plottable, push_data, transform, title):
         """
         Dialog window pops- up when select Linear fit on Context menu
-        Displays fitting parameters
+        Displays fitting parameters. This class handles the linearized
+        fitting and derives and displays specialized output parameters based
+        on the scale choice of the plot calling it.
+        
+        :note1: The fitting is currently a bit convoluted as besides using
+        plottools.transform.py to handle all the conversions, it uses
+        LineModel to define a linear model and calculate a number of
+        things like residuals etc as well as the function itself given an x
+        value. It also uses fittings.py to set up the defined LineModel for
+        fitting and then send it to the SciPy NLLSQ method.  As these are by
+        definition "linear nodels" it would make more sense to just call
+        a linear solver such as scipy.stats.linregress or bumps.wsolve directly.
+        This would considerably simplify the code and remove the need I think
+        for LineModel.py and possibly fittins.py altogether.   -PDB 7/10/16
+        
+        :note2: The linearized fits do not take resolution into account. This
+        means that for poor resolution such as slit smearing the answers will
+        be completely wrong --- Rg would be OK but I0 would be orders of
+        magnitude off.  Eventually we should fix this to account properly for
+        resolution.   -PDB  7/10/16
         """
         wx.Dialog.__init__(self, parent, title=title,
                            size=(PNL_WIDTH, 350))
@@ -49,43 +69,114 @@ class LinearFit(wx.Dialog):
         self.SetWindowVariant(variant=FONT_VARIANT)
         # Registered owner for close event
         self._registered_close = None
-
         # dialog panel self call function to plot the fitting function
+        # calls the calling PlotPanel method onFitDisplay
         self.push_data = push_data
-        # dialog self plottable
+        # dialog self plottable - basically the plot we are working with
+        # passed in by the caller
         self.plottable = plottable
+        # is this a Guinier fit
         self.rg_on = False
-        # Receive transformations of x and y
+        # Receive transformations of x and y - basically transform is passed
+        # as caller method that returns its current value for these
         self.xLabel, self.yLabel, self.Avalue, self.Bvalue, \
                self.ErrAvalue, self.ErrBvalue, self.Chivalue = self.transform()
 
-        # Dialog interface
+        # Now set up the dialog interface
+        self.layout()
+        # Receives the type of model for the fitting
+        from LineModel import LineModel
+        self.model = LineModel()
+        # Display the fittings values
+        self.default_A = self.model.getParam('A')
+        self.default_B = self.model.getParam('B')
+        self.cstA = fittings.Parameter(self.model, 'A', self.default_A)
+        self.cstB = fittings.Parameter(self.model, 'B', self.default_B)
+
+        # Set default value of parameter in the dialog panel
+        if self.Avalue is None:
+            self.tcA.SetValue(format_number(self.default_A))
+        else:
+            self.tcA.SetLabel(format_number(self.Avalue))
+        if self.Bvalue is None:
+            self.tcB.SetValue(format_number(self.default_B))
+        else:
+            self.tcB.SetLabel(format_number(self.Bvalue))
+        if self.ErrAvalue is None:
+            self.tcErrA.SetLabel(format_number(0.0))
+        else:
+            self.tcErrA.SetLabel(format_number(self.ErrAvalue))
+        if self.ErrBvalue is None:
+            self.tcErrB.SetLabel(format_number(0.0))
+        else:
+            self.tcErrB.SetLabel(format_number(self.ErrBvalue))
+        if self.Chivalue is None:
+            self.tcChi.SetLabel(format_number(0.0))
+        else:
+            self.tcChi.SetLabel(format_number(self.Chivalue))
+        if self.plottable.x != []:
+            # store the values of View in self.x,self.y,self.dx,self.dy
+            self.x, self.y, self.dx, \
+                     self.dy = self.plottable.returnValuesOfView()
+            try:
+                self.mini = self.floatForwardTransform(min(self.x))
+            except:
+                self.mini = "Invalid"
+            try:
+                self.maxi = self.floatForwardTransform(max(self.x))
+            except:
+                self.maxi = "Invalid"
+
+            self.initXmin.SetValue(format_number(min(self.plottable.x)))
+            self.initXmax.SetValue(format_number(max(self.plottable.x)))
+            self.mini = min(self.x)
+            self.maxi = max(self.x)
+            self.xminFit.SetValue(format_number(self.mini))
+            self.xmaxFit.SetValue(format_number(self.maxi))
+
+    def layout(self):
+        """
+        Sets up the panel layout for the linear fit including all the
+        labels, text entry boxes, and buttons.
+
+        """
+
+        # set up sizers first. 
+        # vbox is the panel sizer and is a vertical sizer
+        # The first element of the panel is sizer which is a gridbagsizer
+        # and contains most of the text fields
+        # this is followed by a line separator added to vbox
+        # and finally the sizer_button (a horizontal sizer) adds the buttons
         vbox = wx.BoxSizer(wx.VERTICAL)
         sizer = wx.GridBagSizer(5, 5)
+        sizer_button = wx.BoxSizer(wx.HORIZONTAL)
+        
+        #size of string boxes in pixels
         _BOX_WIDTH = 100
-
-        self.tcA = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20))
+        _BOX_HEIGHT = 20
+        #now set up all the text fields
+        self.tcA = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, _BOX_HEIGHT))
         self.tcA.SetToolTipString("Fit value for the slope parameter.")
-        self.tcErrA = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20))
+        self.tcErrA = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, _BOX_HEIGHT))
         self.tcErrA.SetToolTipString("Error on the slope parameter.")
-        self.tcB = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20))
+        self.tcB = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, _BOX_HEIGHT))
         self.tcA.SetToolTipString("Fit value for the constant parameter.")
-        self.tcErrB = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20))
+        self.tcErrB = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, _BOX_HEIGHT))
         self.tcErrB.SetToolTipString("Error on the constant parameter.")
-        self.tcChi = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20))
+        self.tcChi = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, _BOX_HEIGHT))
         self.tcChi.SetToolTipString("Chi^2 over degrees of freedom.")
-        self.xminFit = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20))
+        self.xminFit = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, _BOX_HEIGHT))
         msg = "Enter the minimum value on "
         msg += "the x-axis to be included in the fit."
         self.xminFit.SetToolTipString(msg)
-        self.xmaxFit = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20))
+        self.xmaxFit = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, _BOX_HEIGHT))
         msg = "Enter the maximum value on "
         msg += " the x-axis to be included in the fit."
         self.xmaxFit.SetToolTipString(msg)
-        self.initXmin = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20))
+        self.initXmin = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, _BOX_HEIGHT))
         msg = "Minimum value on the x-axis for the plotted data."
         self.initXmin.SetToolTipString(msg)
-        self.initXmax = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20))
+        self.initXmax = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, _BOX_HEIGHT))
         msg = "Maximum value on the x-axis for the plotted data."
         self.initXmax.SetToolTipString(msg)
 
@@ -97,32 +188,38 @@ class LinearFit(wx.Dialog):
         self.initXmax.SetEditable(False)
         self.initXmax.SetBackgroundColour(_BACKGROUND_COLOR)
 
-        # Buttons on the bottom
+        #set some flags for specific types of fits like Guinier (Rg) and
+        #Porod (bg) -- this will determine WHAT boxes show up in the
+        #sizer layout and depends on the active axis transform
         self.bg_on = False
-        self.static_line_1 = wx.StaticLine(self, -1)
-        self.btFit = wx.Button(self, -1, 'Fit')
-        self.btFit.Bind(wx.EVT_BUTTON, self._onFit)
-        self.btFit.SetToolTipString("Perform fit.")
-        self.btClose = wx.Button(self, wx.ID_CANCEL, 'Close')
-        self.btClose.Bind(wx.EVT_BUTTON, self._on_close)
         if RG_ON:
             if (self.yLabel == "ln(y)" or self.yLabel == "ln(y*x)") and \
                     (self.xLabel == "x^(2)"):
                 self.rg_on = True
             if (self.xLabel == "x^(4)") and (self.yLabel == "y*x^(4)"):
                 self.bg_on = True
-        # Intro
-        explanation = "Perform fit for y(x) = ax + b"
+
+        # Finally set up static text strings
+        warning = "WARNING! Resolution is NOT accounted for. \n"
+        warning += "Thus slit smeared data will give very wrong answers!"
+        self.textwarn = wx.StaticText(self, -1, warning)
+        self.textwarn.SetForegroundColour(wx.RED)
+        explanation = "Perform fit for y(x) = ax + b \n"
         if self.bg_on:
             param_a = 'Background (= Parameter a)'
         else:
             param_a = 'Parameter a'
-        vbox.Add(sizer)
+
+
+        #Now set this all up in the GridBagSizer sizer
         ix = 0
-        iy = 1
+        iy = 0
+        sizer.Add(self.textwarn, (iy, ix),
+                  (2, 3), wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+        iy += 2
         sizer.Add(wx.StaticText(self, -1, explanation), (iy, ix),
                   (1, 1), wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
-        iy += 2
+        iy += 1
         sizer.Add(wx.StaticText(self, -1, param_a), (iy, ix),
                   (1, 1), wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
         ix += 1
@@ -280,70 +377,32 @@ class LinearFit(wx.Dialog):
             sizer.Add(self.RgQmax_tctr, (iy, ix), (1, 1),
                       wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 0)
 
+        #Now add some space before the separation line
         iy += 1
-        ix = 1
+        ix = 0
+        sizer.Add((20,20), (iy, ix), (1, 1),
+                      wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 0)
 
-        vbox.Add(self.static_line_1, 0, wx.EXPAND, 0)
-        sizer_button = wx.BoxSizer(wx.HORIZONTAL)
+        # Buttons on the bottom
+        self.btFit = wx.Button(self, -1, 'Fit')
+        self.btFit.Bind(wx.EVT_BUTTON, self._onFit)
+        self.btFit.SetToolTipString("Perform fit.")
+        self.btClose = wx.Button(self, wx.ID_CANCEL, 'Close')
+        self.btClose.Bind(wx.EVT_BUTTON, self._on_close)
         sizer_button.Add((20, 20), 1, wx.EXPAND | wx.ADJUST_MINSIZE, 0)
-        sizer_button.Add(self.btFit, 0, wx.LEFT | wx.RIGHT | wx.ADJUST_MINSIZE, 10)
+        sizer_button.Add(self.btFit, 0,
+                         wx.LEFT | wx.RIGHT | wx.ADJUST_MINSIZE, 10)
         sizer_button.Add(self.btClose, 0,
                          wx.LEFT | wx.RIGHT | wx.ADJUST_MINSIZE, 10)
+        
+        vbox.Add(sizer)
+        self.static_line_1 = wx.StaticLine(self, -1)        
+        vbox.Add(self.static_line_1, 0, wx.EXPAND, 0)
         vbox.Add(sizer_button, 0, wx.EXPAND | wx.BOTTOM | wx.TOP, 10)
 
-        sizer.Add(self.btFit, (iy, ix), (1, 1), wx.LEFT | wx.ADJUST_MINSIZE, 0)
         # panel.SetSizer(sizer)
         self.SetSizer(vbox)
         self.Centre()
-        # Receives the type of model for the fitting
-        from LineModel import LineModel
-        self.model = LineModel()
-        # Display the fittings values
-        self.default_A = self.model.getParam('A')
-        self.default_B = self.model.getParam('B')
-        self.cstA = fittings.Parameter(self.model, 'A', self.default_A)
-        self.cstB = fittings.Parameter(self.model, 'B', self.default_B)
-
-        # Set default value of parameter in fit dialog
-        if self.Avalue == None:
-            self.tcA.SetValue(format_number(self.default_A))
-        else:
-            self.tcA.SetLabel(format_number(self.Avalue))
-        if self.Bvalue == None:
-            self.tcB.SetValue(format_number(self.default_B))
-        else:
-            self.tcB.SetLabel(format_number(self.Bvalue))
-        if self.ErrAvalue == None:
-            self.tcErrA.SetLabel(format_number(0.0))
-        else:
-            self.tcErrA.SetLabel(format_number(self.ErrAvalue))
-        if self.ErrBvalue == None:
-            self.tcErrB.SetLabel(format_number(0.0))
-        else:
-            self.tcErrB.SetLabel(format_number(self.ErrBvalue))
-        if self.Chivalue == None:
-            self.tcChi.SetLabel(format_number(0.0))
-        else:
-            self.tcChi.SetLabel(format_number(self.Chivalue))
-        if self.plottable.x != []:
-            # store the values of View in self.x,self.y,self.dx,self.dy
-            self.x, self.y, self.dx, \
-                     self.dy = self.plottable.returnValuesOfView()
-            try:
-                self.mini = self.floatForwardTransform(min(self.x))
-            except:
-                self.mini = "Invalid"
-            try:
-                self.maxi = self.floatForwardTransform(max(self.x))
-            except:
-                self.maxi = "Invalid"
-
-            self.initXmin.SetValue(format_number(min(self.plottable.x)))
-            self.initXmax.SetValue(format_number(max(self.plottable.x)))
-            self.mini = min(self.x)
-            self.maxi = max(self.x)
-            self.xminFit.SetValue(format_number(self.mini))
-            self.xmaxFit.SetValue(format_number(self.maxi))
 
     def register_close(self, owner):
         """
@@ -370,7 +429,7 @@ class LinearFit(wx.Dialog):
         Performs the fit. Receive an event when clicking on
         the button Fit.Computes chisqr ,
         A and B parameters of the best linear fit y=Ax +B
-        Push a plottable to
+        Push a plottable to the caller
         """
         tempx = []
         tempy = []
@@ -388,6 +447,10 @@ class LinearFit(wx.Dialog):
                 xmaxView = float(self.xmaxFit.GetValue())
                 xmin = xminView
                 xmax = xmaxView
+                # Set the qmin and qmax in the panel that matches the
+                # transformed min and max
+                self.initXmin.SetValue(format_number(self.floatInvTransform(xmin)))
+                self.initXmax.SetValue(format_number(self.floatInvTransform(xmax)))
                 # Store the transformed values of view x, y,dy
                 # in variables  before the fit
                 if self.yLabel.lower() == "log10(y)":
@@ -418,7 +481,7 @@ class LinearFit(wx.Dialog):
                 self.cstB = fittings.Parameter(self.model, 'B', self.default_B)
 
                 if self.xLabel.lower() == "log10(x)":
-                    tempdy = numpy.asarray(tempdy)
+                    tempdy = np.asarray(tempdy)
                     tempdy[tempdy == 0] = 1
                     chisqr, out, cov = fittings.sasfit(self.model,
                                                        [self.cstA, self.cstB],
@@ -427,7 +490,7 @@ class LinearFit(wx.Dialog):
                                                        math.log10(xmin),
                                                        math.log10(xmax))
                 else:
-                    tempdy = numpy.asarray(tempdy)
+                    tempdy = np.asarray(tempdy)
                     tempdy[tempdy == 0] = 1
                     chisqr, out, cov = fittings.sasfit(self.model,
                                                        [self.cstA, self.cstB],
@@ -438,13 +501,13 @@ class LinearFit(wx.Dialog):
                     chisqr = chisqr / len(tempx)
 
                 # Check that cov and out are iterable before displaying them
-                if cov == None:
+                if cov is None:
                     errA = 0.0
                     errB = 0.0
                 else:
                     errA = math.sqrt(cov[0][0])
                     errB = math.sqrt(cov[1][1])
-                if out == None:
+                if out is None:
                     cstA = 0.0
                     cstB = 0.0
                 else:
@@ -484,8 +547,8 @@ class LinearFit(wx.Dialog):
                 else:
                     tempy.append(y_model)
                 # Set the fit parameter display when  FitDialog is opened again
-                self.Avalue = cstB
-                self.Bvalue = cstA
+                self.Avalue = cstA
+                self.Bvalue = cstB
                 self.ErrAvalue = errA
                 self.ErrBvalue = errB
                 self.Chivalue = chisqr
@@ -493,13 +556,14 @@ class LinearFit(wx.Dialog):
                                xmin, xmax, self._ongetValues())
 
                 # Display the fitting value on the Fit Dialog
-                self._onsetValues(cstB, cstA, errA, errB, chisqr)
+                self._onsetValues(cstA, cstB, errA, errB, chisqr)
 
     def _onsetValues(self, cstA, cstB, errA, errB, Chi):
         """
         Display  the value on fit Dialog
         """
         rg = None
+        _diam = None
         self.tcA.SetValue(format_number(cstA))
         self.tcB.SetValue(format_number(cstB))
         self.tcErrA.SetValue(format_number(errA))
@@ -507,36 +571,37 @@ class LinearFit(wx.Dialog):
         self.tcChi.SetValue(format_number(Chi))
         if self.rg_on:
             if self.Rg_tctr.IsShown():
-                rg = numpy.sqrt(-3 * float(cstA))
+                rg = np.sqrt(-3 * float(cstA))
                 value = format_number(rg)
                 self.Rg_tctr.SetValue(value)
                 if self.I0_tctr.IsShown():
-                    val = numpy.exp(cstB)
+                    val = np.exp(cstB)
                     self.I0_tctr.SetValue(format_number(val))
             if self.Rgerr_tctr.IsShown():
-                if rg != None and rg != 0:
-                    value = format_number(3 * float(cstA) / (2 * rg))
+                if rg is not None and rg != 0:
+                    value = format_number(3 * float(errA) / (2 * rg))
                 else:
                     value = ''
                 self.Rgerr_tctr.SetValue(value)
                 if self.I0err_tctr.IsShown():
-                    val = numpy.abs(numpy.exp(cstB) - numpy.exp(cstB + errB))
+                    val = np.abs(np.exp(cstB) * errB)
                     self.I0err_tctr.SetValue(format_number(val))
             if self.Diameter_tctr.IsShown():
-                rg = 4 * numpy.sqrt(-float(cstA))
-                value = format_number(rg)
+                rg = np.sqrt(-2 * float(cstA))
+                _diam = 4 * np.sqrt(-float(cstA))
+                value = format_number(_diam)
                 self.Diameter_tctr.SetValue(value)
             if self.Diametererr_tctr.IsShown():
-                if rg != None and rg != 0:
-                    value = format_number(8 * float(cstA) / rg)
+                if rg is not None and rg != 0:
+                    value = format_number(8 * float(errA) / _diam)
                 else:
                     value = ''
                 self.Diametererr_tctr.SetValue(value)
             if self.RgQmin_tctr.IsShown():
-                value = format_number(rg * self.mini)
+                value = format_number(rg * self.floatInvTransform(self.mini))
                 self.RgQmin_tctr.SetValue(value)
             if self.RgQmax_tctr.IsShown():
-                value = format_number(rg * self.maxi)
+                value = format_number(rg * self.floatInvTransform(self.maxi))
                 self.RgQmax_tctr.SetValue(value)
 
     def _ongetValues(self):
@@ -609,19 +674,27 @@ class LinearFit(wx.Dialog):
 
     def floatInvTransform(self, x):
         """
-        transform a float.It is use to determine the x.View min and x.View
-        max for values not in x
+        transform a float.It is used to determine the x.View min and x.View
+        max for values not in x.  Also used to properly calculate RgQmin,
+        RgQmax and to update qmin and qmax in the linear range boxes on the
+        panel.
 
         """
         # TODO: refactor this. This is just a hack to make the
         # functionality work without rewritting the whole code
         # with good design (which really should be done...).
-        if self.xLabel == "x^(2)":
+        if self.xLabel == "x":
+            return x
+        elif self.xLabel == "x^(2)":
             return math.sqrt(x)
+        elif self.xLabel == "x^(4)":
+            return math.sqrt(math.sqrt(x))
         elif self.xLabel == "log10(x)":
             return math.pow(10, x)
         elif self.xLabel == "ln(x)":
             return math.exp(x)
+        elif self.xLabel == "log10(x^(4))":
+            return math.sqrt(math.sqrt(math.pow(10, x)))
         return x
 
     def checkFitValues(self, item):

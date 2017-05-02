@@ -7,6 +7,8 @@ import sys
 import wx
 import logging
 
+logger = logging.getLogger(__name__)
+
 from sas.sascalc.dataloader.loader import Loader
 
 from sas.sasgui import get_local_config
@@ -57,7 +59,7 @@ class Plugin(PluginBase):
         """
         path = None
         self._default_save_location = self.parent._default_save_location
-        if self._default_save_location == None:
+        if self._default_save_location is None:
             self._default_save_location = os.getcwd()
 
         cards = self.loader.get_wildcards()
@@ -74,7 +76,7 @@ class Plugin(PluginBase):
                             style=style)
         if dlg.ShowModal() == wx.ID_OK:
             file_list = dlg.GetPaths()
-            if len(file_list) >= 0 and not file_list[0] is None:
+            if len(file_list) >= 0 and file_list[0] is not None:
                 self._default_save_location = os.path.dirname(file_list[0])
                 path = self._default_save_location
         dlg.Destroy()
@@ -98,7 +100,7 @@ class Plugin(PluginBase):
         """
         path = None
         self._default_save_location = self.parent._default_save_location
-        if self._default_save_location == None:
+        if self._default_save_location is None:
             self._default_save_location = os.getcwd()
         dlg = wx.DirDialog(self.parent, "Choose a directory",
                            self._default_save_location,
@@ -144,9 +146,9 @@ class Plugin(PluginBase):
                 data_error = True
                 message += "\tError: {0}\n".format(error_data)
         else:
-            logging.error("Loader returned an invalid object:\n %s" % str(item))
+            logger.error("Loader returned an invalid object:\n %s" % str(item))
             data_error = True
-        
+
         data = self.parent.create_gui_data(item, p_file)
         output[data.id] = data
         return output, message, data_error
@@ -154,71 +156,71 @@ class Plugin(PluginBase):
     def get_data(self, path, format=None):
         """
         """
-        message = ""
-        log_msg = ''
+        file_errors = {}
         output = {}
-        any_error = False
-        data_error = False
-        error_message = ""
+        exception_occurred = False
+
         for p_file in path:
-            info = "info"
             basename = os.path.basename(p_file)
             _, extension = os.path.splitext(basename)
             if extension.lower() in EXTENSIONS:
-                any_error = True
                 log_msg = "Data Loader cannot "
-                log_msg += "load: %s\n" % str(p_file)
-                log_msg += """Please try to open that file from "open project" """
-                log_msg += """or "open analysis" menu\n"""
-                error_message = log_msg + "\n"
-                logging.info(log_msg)
+                log_msg += "load: {}\n".format(str(p_file))
+                log_msg += "Please try to open that file from \"open project\""
+                log_msg += "or \"open analysis\" menu."
+                logger.info(log_msg)
+                file_errors[basename] = [log_msg]
                 continue
 
             try:
-                message = "Loading Data... " + str(p_file) + "\n"
-                self.load_update(output=output, message=message, info=info)
+                message = "Loading {}...\n".format(p_file)
+                self.load_update(output=output, message=message, info="info")
                 temp = self.loader.load(p_file, format)
-                if temp.__class__.__name__ == "list":
-                    for item in temp:
-                        output, error_message, data_error = \
-                            self._process_data_and_errors(item,
-                                                          p_file,
-                                                          output,
-                                                          error_message)
-                else:
+                if not isinstance(temp, list):
+                    temp = [temp]
+                for item in temp:
+                    error_message = ""
                     output, error_message, data_error = \
-                            self._process_data_and_errors(temp,
-                                                          p_file,
-                                                          output,
-                                                          error_message)
+                        self._process_data_and_errors(item,
+                                                      p_file,
+                                                      output,
+                                                      error_message)
+                    if data_error:
+                        if basename in file_errors.keys():
+                            file_errors[basename] += [error_message]
+                        else:
+                            file_errors[basename] = [error_message]
+                        self.load_update(output=output,
+                            message=error_message, info="warning")
+
+                self.load_update(output=output,
+                message="Loaded {}\n".format(p_file),
+                info="info")
+
             except:
-                logging.error(sys.exc_value)
-                any_error = True
-            if any_error or error_message != "":
-                if error_message == "":
-                    error = "Error: " + str(sys.exc_info()[1]) + "\n"
-                    error += "while loading Data: \n%s\n" % str(basename)
-                    error_message += "The data file you selected could not be loaded.\n"
-                    error_message += "Make sure the content of your file"
-                    error_message += " is properly formatted.\n\n"
-                    error_message += "When contacting the SasView team, mention the"
-                    error_message += " following:\n%s" % str(error)
-                elif data_error:
-                    base_message = "Errors occurred while loading "
-                    base_message += "{0}\n".format(basename)
-                    base_message += "The data file loaded but with errors.\n"
-                    error_message = base_message + error_message
-                else:
-                    error_message += "%s\n" % str(p_file)
-                info = "error"
-        
-        if any_error or error_message:
-            self.load_update(output=output, message=error_message, info=info)
-        else:
-            message = "Loading Data Complete! "
-        message += log_msg
-        self.load_complete(output=output, error_message=error_message,
-                           message=message, path=path, info='info')
+                logger.error(sys.exc_value)
+
+                error_message = "The Data file you selected could not be loaded.\n"
+                error_message += "Make sure the content of your file"
+                error_message += " is properly formatted.\n"
+                error_message += "When contacting the SasView team, mention the"
+                error_message += " following:\n"
+                error_message += "Error: " + str(sys.exc_info()[1])
+                file_errors[basename] = [error_message]
+                self.load_update(output=output, message=error_message, info="warning")
+
+        if len(file_errors) > 0:
+            error_message = ""
+            for filename, error_array in file_errors.iteritems():
+                error_message += "The following errors occured whilst "
+                error_message += "loading {}:\n".format(filename)
+                for message in error_array:
+                    error_message += message + "\n"
+                error_message += "\n"
+            self.load_update(output=output, message=error_message, info="error")
+
+        self.load_complete(output=output, message="Loading data complete!",
+            info="info")
 
     def load_update(self, output=None, message="", info="warning"):
         """
@@ -238,6 +240,3 @@ class Plugin(PluginBase):
         # if error_message != "":
         #    self.load_error(error_message)
         self.parent.add_data(data_list=output)
-
-
-

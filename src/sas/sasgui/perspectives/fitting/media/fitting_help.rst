@@ -14,8 +14,10 @@
 .. |inlineimage019| image:: sm_image019.gif
 
 
-Fitting Perspective
-===================
+Fitting
+=======
+
+.. note:: If some code blocks are not readable, expand the documentation window
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -23,8 +25,7 @@ Preparing to fit data
 ---------------------
 
 To fit some data you must first load some data, activate one or more data sets,
-send those data sets to the fitting perspective, and select a model to fit to
-each data set.
+send those data sets to fitting, and select a model to fit to each data set.
 
 Instructions on how to load and activate data are in the section :ref:`Loading_data`.
 
@@ -32,7 +33,9 @@ SasView can fit data in one of three ways:
 
 *  in *Single* fit mode - individual data sets are fitted independently one-by-one
 
-*  in *Simultaneous* fit mode - multiple data sets are fitted simultaneously to the *same* model with/without constrained parameters (this might be useful, for example, if you have measured the same sample at different contrasts)
+*  in *Simultaneous* fit mode - multiple data sets are fitted simultaneously to
+   the *same* model with/without constrained parameters (this might be useful,
+   for example, if you have measured the same sample at different contrasts)
 
 *  in *Batch* fit mode - multiple data sets are fitted sequentially to the *same* model (this might be useful, for example, if you have performed a kinetic or time-resolved experiment and have *lots* of data sets!)
 
@@ -41,13 +44,19 @@ SasView can fit data in one of three ways:
 Selecting a model
 -----------------
 
-By default, the models in SasView are grouped into five categories
+The models in SasView are grouped into categories. By default these consist of:
 
-*  *Shapes* - models describing 'objects' (spheres, cylinders, etc)
+*  *Cylinder* - cylindrical shapes (disc, right cylinder, cylinder with endcaps
+   etc)
+*  *Ellipsoid* - ellipsoidal shapes (oblate,prolate, core shell, etc)
+*  *Parellelepiped* - as the name implies
+*  *Sphere* - sheroidal shapes (sphere, core multishell, vesicle, etc)
+*  *Lamellae* - lamellar shapes (lamellar, core shell lamellar, stacked
+   lamellar, etc)
 *  *Shape-Independent* - models describing structure in terms of density correlation functions, fractals, peaks, power laws, etc
-*  *Customized Models* - SasView- or User-created (non-library) Python models
-*  *Uncategorised* - other models (for reflectivity, etc)
+*  *Paracrystal* - semi ordered structures (bcc, fcc, etc)
 *  *Structure Factor* - S(Q) models
+*  *Plugin Models* - User-created (custom/non-library) Python models
 
 Use the *Category* drop-down menu to chose a category of model, then select
 a model from the drop-down menu beneath. A graph of the chosen model, calculated
@@ -82,18 +91,18 @@ To change the model categorizations, either choose *Category Manager* from the
 
 .. image:: cat_fig0.bmp
 
-The categorization of all models except the customized models can be reassigned,
-added to, and removed using *Category Manager*. Models can also be hidden from view
-in the drop-down menus.
+The categorization of all models except the user supplied Plugin Models can be
+reassigned, added to, and removed using *Category Manager*. Models can also be
+hidden from view in the drop-down menus.
 
 .. image:: cat_fig1.bmp
 
 Changing category
 ^^^^^^^^^^^^^^^^^
 
-To change category, highlight a model in the list by left-clicking on its entry and
-then click the *Modify* button. Use the *Change Category* panel that appears to make
-the required changes.
+To change category, highlight a model in the list by left-clicking on its entry
+and then click the *Modify* button. Use the *Change Category* panel that appears
+to make the required changes.
 
 .. image:: cat_fig2.bmp
 
@@ -104,9 +113,9 @@ button. Then click *Done*.
 Showing/hiding models
 ^^^^^^^^^^^^^^^^^^^^^
 
-Use the *Enable All / Disable All* buttons and the check boxes beside each model to
-select the models to show/hide. To apply the selection, click *Ok*. Otherwise click
-*Cancel*.
+Use the *Enable All / Disable All* buttons and the check boxes beside each model
+to select the models to show/hide. To apply the selection, click *Ok*. Otherwise
+click *Cancel*.
 
 *NB: It may be necessary to change to a different category and then back again*
 *before any changes take effect.*
@@ -116,7 +125,8 @@ select the models to show/hide. To apply the selection, click *Ok*. Otherwise cl
 Model Functions
 ---------------
 
-For a complete list of all the library models available in SasView, see the Model Documentation.
+For a complete list of all the library models available in SasView, see
+the `Model Documentation <../../../index.html>`_ .
 
 It is also possible to add your own models.
 
@@ -124,110 +134,123 @@ It is also possible to add your own models.
 
 .. _Adding_your_own_models:
 
-Adding your own models
+Adding your own Models
 ----------------------
 
-There are currently two ways to add your own models to SasView:
+There are essentially three ways to generate new fitting models for SasView:
 
-* Using the :ref:`Custom_Model_Editor`
-* By :ref:`Writing_a_Plugin`
+*  Using the SasView :ref:`New_Plugin_Model` helper dialog (best for beginners
+   and/or relatively simple models)
+*  By copying/editing an existing model (this can include models generated by
+   the New Plugin Model* dialog) in the :ref:`Python_shell` or 
+   :ref:`Advanced_Plugin_Editor` (suitable for all use cases)
+*  By writing a model from scratch outside of SasView (only recommended for code
+   monkeys!)
 
-*NB: Because of the way these options are implemented, it is not possible for them*
-*to use the polydispersity algorithms in SasView. Only models in the model library*
-*can do this. At the time of writing (Release 3.1.0) work is in hand to make it*
-*easier to add new models to the model library.*
+Please read the guidance on :ref:`Writing_a_Plugin` before proceeding.
+
+**To be found by SasView your model must reside in the *~\\.sasview\\plugin_models* folder.**
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Custom_Model_Editor:
+.. _Plugin_Model_Operations:
 
-Custom Model Editor
--------------------
+Plugin Model Operations
+-----------------------
 
-From the *Fitting* option in the menu bar, select *Edit Custom Model*.
+From the *Fitting* option in the menu bar, select *Plugin Model Operations*
 
-.. image:: edit_model_menu.bmp
+.. image:: edit_model_menu.png
 
-and then one of the options
+and then one of the sub-options
 
-*  *New* - to create a new custom model template
-*  *Sum|Multi(p1,p2)* - to create a new model by summing/multiplying existing models in the model library
-*  *Advanced* - to edit a new custom model
-*  *Delete* - to delete a custom model
+*  *New Plugin Model* - to create a plugin model template with a helper dialog
+*  *Sum|Multi(p1,p2)* - to create a plugin model by summing/multiplying *existing models* in the model library
+*  *Advanced Plugin Editor* - to create/edit a plugin model in a Python shell
+*  *Delete Plugin Models* - to delete a plugin model
+*  *Load Plugin Models* - to (re-)load plugin models
 
-New
-^^^^
+.. _New_Plugin_Model:
+
+New Plugin Model
+^^^^^^^^^^^^^^^^
+
+Relatively straightforward models can be programmed directly from the SasView
+GUI using the *New Plugin Model Function*.
 
 .. image:: new_model.bmp
 
-A model template generated by this option can be viewed and further modified using
-the :ref:`Advanced` option.
+When using this feature, be aware that even if your code has errors, including 
+syntax errors, a model file is still generated. When you then correct the errors 
+and click 'Apply' again to re-compile you will get an error informing you that 
+the model already exists if the 'Overwrite' box is not checked. In this case you 
+will need to supply a new model function name. By default the 'Overwrite' box is 
+*checked*\ .
+
+Also note that the 'Fit Parameters' have been split into two sections: those
+which can be polydisperse (shape and orientation parameters) and those which are
+not (eg, scattering length densities).
+
+A model file generated by this option can be viewed and further modified using
+the :ref:`Advanced_Plugin_Editor` .
 
 Sum|Multi(p1,p2)
 ^^^^^^^^^^^^^^^^
 
 .. image:: sum_model.bmp
 
-This option creates a custom model of the form
+This option creates a custom Plugin Model of the form::
 
-Custom Model = scale_factor \* (model1 +/\* model2)
+     Plugin Model = scale_factor * {(scale_1 * model_1) +/- (scale_2 * model_2)} + background
 
-In the *Easy Sum/Multi Editor* give the new custom model a function name and brief
-description (to appear under the *Details* button on the *Fit Page*). Then select
+or::
+
+     Plugin Model = scale_factor * model_1 /* model_2 + background
+
+In the *Easy Sum/Multi Editor* give the new model a function name and brief
+description (to appear under the *Details* button on the *FitPage*). Then select
 two existing models, as p1 and p2, and the required operator, '+' or '*' between
 them. Finally, click the *Apply* button to generate the model and then click *Close*.
 
-*NB: Any changes to a custom model generated in this way only become effective after*
-*it is re-selected from the model drop-down menu on the Fit Page.*
+Any changes to a plugin model generated in this way only become effective *after* it is re-selected from the model drop-down menu on the FitPage.
 
-.. _Advanced:
+.. _Advanced_Plugin_Editor:
 
-Advanced
-^^^^^^^^
+Advanced Plugin Editor
+^^^^^^^^^^^^^^^^^^^^^^
 
-Selecting this option shows all the custom models in the plugin model folder
+Selecting this option shows all the plugin models in the plugin model folder, on Windows this is
 
-  *C:\\Users\\[username]\\.sasview\\plugin_models* - (on Windows)
+  *C:\\Users\\{username}\\.sasview\\plugin_models*
 
 You can edit, modify, and save the Python code in any of these models using the
-*Advanced Custom Model Editor*.
+*Advanced Plugin Model Editor*. Note that this is actually the same tool as the :ref:`Python_shell` .
 
-*NB: Unless you are confident about what you are doing, it is recommended that you*
-*only modify lines denoted with the ## <----- comments!*
+For details of the SasView plugin model format see :ref:`Writing_a_Plugin` .
 
-When editing is complete, select *Run -> Compile* from the *Model Editor* menu bar. An
-*Info* box will appear with the results of the compilation and model unit tests. The
-model will only be usable if the tests 'pass'.
+.. note:: Model files generated with the Sum/Multi option are still using the SasView 3.x model format. Unless you are confident about what you are doing, it is recommended that you only modify lines denoted with the ## <----- comments!
 
-To use the model, go to the relevant *Fit Page*, select the *Customized Models*
+When editing is complete, select *Run* > *Check Model* from the *Advanced Plugin Model Editor* menu bar. An *Info* box will appear with the results of the compilation and model unit tests. The model will only be usable if the tests 'pass'.
+
+.. image:: ../calculator/new_pycrust_example_2.png
+
+To use the model, go to the relevant *Fit Page*, select the *Plugin Models*
 category and then select the model from the drop-down menu.
 
-*NB: Any changes to a custom model generated in this way only become effective after*
-*it is re-selected from the model drop-down menu on the Fit Page.*
+Any changes to a plugin model generated in this way only become effective *after* it is re-selected from the model drop-down menu on the FitPage.
 
-Delete
-^^^^^^
+Delete Plugin Models
+^^^^^^^^^^^^^^^^^^^^
 
-Simply highlight the custom model to be removed. This operation is final!
+Simply highlight the plugin model to be removed. The operation is final!!!
 
-*NB: Custom models shipped with SasView cannot be removed in this way.*
+*NB: Models shipped with SasView cannot be removed in this way.*
 
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+Load Plugin Models
+^^^^^^^^^^^^^^^^^^
 
-.. _Writing_a_Plugin:
-
-Writing a Plugin
-----------------
-
-Advanced users can write their own model in Python and save it to the the SasView
-*plugin_models* folder
-
-  *C:\\Users\\[username]\\.sasview\\plugin_models* - (on Windows)
-
-in .py format. The next time SasView is started it will compile the plugin and add
-it to the list of *Customized Models*.
-
-It is recommended that existing plugin models be used as templates.
+This option loads (or re-loads) all models present in the
+*~\\.sasview\\plugin_models* folder.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -330,8 +353,7 @@ Single Fit Mode
 
 This mode fits one data set.
 
-When data is sent to the fitting perspective it is plotted in a graph window as
-markers.
+When data is sent to the fitting it is plotted in a graph window as markers.
 
 If a graph does not appear, or a graph window appears but is empty, then the data
 has not loaded correctly. Check to see if there is a message in the :ref:`Status_Bar`
@@ -391,8 +413,8 @@ load that file, *Unselect All Data*, select just those data sets to be fitted, a
 it may be helpful to minimise the residuals plots for clarity. Also see
 :ref:`Assessing_Fit_Quality`.
 
-*NB: If you need to use a customized model, you must ensure that model is available*
-*first (see* :ref:`Adding_your_own_models` *).*
+*NB: If you need to use a custom Plugin Model, you must ensure that model is
+available first (see* :ref:`Adding_your_own_models` *).*
 
 Method
 ^^^^^^
@@ -475,10 +497,10 @@ between data sets.
 If the data to be fit are in multiple files, load each file in the *Data Explorer*.
 If multiple data sets are in one file, load just that file. *Unselect All Data*, then
 select a single initial data set to be fitted. Fit that selected data set as described
-above under :ref:`Single_Fit_Mode` .
+above under :ref:`Single_Fit_Mode`.
 
-*NB: If you need to use a customized model, you must ensure that model is available*
-*first (see* :ref:`Adding_your_own_models` *).*
+*NB: If you need to use a custom Plugin Model, you must ensure that model is
+available first (see* :ref:`Adding_your_own_models` *).*
 
 Method
 ^^^^^^
@@ -616,4 +638,4 @@ types of expression :
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 04Jun2015
+.. note::  This help document was last changed by Steve King, 10Oct2016

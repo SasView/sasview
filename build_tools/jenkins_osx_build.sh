@@ -14,6 +14,13 @@ export LANG=en_US.UTF-8
 
 cd $WORKSPACE
 
+# SET SASVIEW GITHASH
+cd $WORKSPACE
+cd sasview/sasview
+githash=$( git rev-parse HEAD )
+sed -i.bak s/GIT_COMMIT/$githash/g __init__.py
+
+
 # SASMODLES
 cd $WORKSPACE
 cd sasmodels
@@ -29,10 +36,11 @@ $PYTHON setup.py build
 cd  doc
 make html
 
+#SASMODELS - BUILDING AND TESTING
 cd $WORKSPACE
 cd sasmodels
 $PYTHON setup.py bdist_egg
-
+$PYTHON -m sasmodels.model_test all
 
 # SASVIEW
 cd $WORKSPACE

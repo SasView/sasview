@@ -2,6 +2,7 @@ import sys
 import os
 from os.path import exists, expanduser, dirname, realpath, join as joinpath
 
+
 def dirn(path, n):
     path = realpath(path)
     for _ in range(n):
@@ -44,7 +45,6 @@ USER_FOLDER = make_user_folder()
 APP_FOLDER = find_app_folder()
 
 
-
 def get_app_dir():
     if APP_FOLDER is None:
         raise RuntimeError("Need to initialize sas.sasgui.USER_FOLDER")
@@ -54,6 +54,14 @@ def get_user_dir():
     if USER_FOLDER is None:
         raise RuntimeError("Need to initialize sas.sasgui.USER_FOLDER")
     return USER_FOLDER
+
+def get_custom_config_path():
+    dirname = os.path.join(get_user_dir(), 'config')
+    # If the directory doesn't exist, create it
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+    path = os.path.join(dirname, "custom_config.py")
+    return path
 
 _config_cache = None
 def get_local_config():
@@ -68,6 +76,7 @@ def _load_config():
     import imp
     import logging
 
+    logger = logging.getLogger(__name__)
     dirname = get_app_dir()
     filename = 'local_config.py'
     path = os.path.join(dirname, filename)
@@ -76,14 +85,15 @@ def _load_config():
             fObj = None
             fObj, config_path, descr = imp.find_module('local_config', [APP_FOLDER])
             config = imp.load_module('local_config', fObj, config_path, descr)
-            logging.info("GuiManager loaded %s" % config_path)
+            logger.info("GuiManager loaded %s" % config_path)
             return config
         except Exception:
-            import traceback; logging.error(traceback.format_exc())
-            logging.error("Error loading %s: %s" % (path, sys.exc_value))
+            import traceback; logger.error(traceback.format_exc())
+            logger.error("Error loading %s: %s" % (path, sys.exc_value))
         finally:
             if fObj is not None:
                 fObj.close()
     from sas.sasgui.guiframe import config
-    logging.info("GuiManager config defaults to sas.sasgui.guiframe")
+    logger.info("GuiManager config defaults to sas.sasgui.guiframe")
     return config
+

@@ -3,10 +3,12 @@
 ## \file
 #  \brief Abstract class for defining calculation threads.
 #
+from __future__ import print_function
 
 import thread
 import traceback
 import sys
+import logging
 
 if sys.platform.count("darwin") > 0:
     import time
@@ -20,6 +22,8 @@ if sys.platform.count("darwin") > 0:
 else:
     from time import clock
     from time import sleep
+
+logger = logging.getLogger(__name__)
 
 
 class CalcThread:
@@ -201,7 +205,7 @@ class CalcThread:
 
     def update(self, **kwargs):
         """Update GUI with the lastest results from the current work unit."""
-        if self.updatefn != None and clock() > self._time_for_update:
+        if self.updatefn is not None and clock() > self._time_for_update:
             self._lock.acquire()
             self._time_for_update = clock() + self._delay
             self._lock.release()
@@ -217,7 +221,7 @@ class CalcThread:
 
     def complete(self, **kwargs):
         """Update the GUI with the completed results from a work unit."""
-        if self.completefn != None:
+        if self.completefn is not None:
             self.completefn(**kwargs)
             sleep(self.yieldtime)
         return
@@ -242,8 +246,7 @@ class CalcThread:
                 return
             except Exception:
                 pass
-        import logging
-        logging.error(traceback.format_exc())
+        logger.error(traceback.format_exc())
         #print 'CalcThread exception',
 
     def _run(self):
@@ -292,7 +295,7 @@ class CalcCommandline:
         Test method
     """
     def __init__(self, n=20000):
-        print thread.get_ident()
+        print(thread.get_ident())
         self.starttime = clock()
         self.done = False
         self.work = CalcDemo(completefn=self.complete,
@@ -304,21 +307,21 @@ class CalcCommandline:
         self.work.queue(n)
         self.work2.queue(n)
         self.work3.queue(n)
-        print "Expect updates from Main every second and from thread every 2.5 seconds"
-        print ""
+        print("Expect updates from Main every second and from thread every 2.5 seconds")
+        print("")
         self.work.ready(.5)
         while not self.done:
             sleep(1)
-            print "Main thread %d at %.2f" % (thread.get_ident(),
-                                              clock() - self.starttime)
+            print("Main thread %d at %.2f" % (thread.get_ident(),
+                                              clock() - self.starttime))
 
     def update(self, i=0):
-        print "Update i=%d from thread %d at %.2f" % (i, thread.get_ident(),
-                                                      clock() - self.starttime)
+        print("Update i=%d from thread %d at %.2f" % (i, thread.get_ident(),
+                                                      clock() - self.starttime))
         self.work.ready(2.5)
 
     def complete(self, total=0.0):
-        print "Complete total=%g from thread %d at %.2f" % (total,
+        print("Complete total=%g from thread %d at %.2f" % (total,
                                                     thread.get_ident(),
-                                                    clock() - self.starttime)
+                                                    clock() - self.starttime))
         self.done = True

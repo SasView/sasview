@@ -1,6 +1,8 @@
 """
     Utilities to manage models
 """
+from __future__ import print_function
+
 import traceback
 import os
 import sys
@@ -19,9 +21,12 @@ from sas.sasgui import get_user_dir
 from sas.sascalc.fit.pluginmodel import Model1DPlugin
 from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 
+logger = logging.getLogger(__name__)
+
 
 PLUGIN_DIR = 'plugin_models'
 PLUGIN_LOG = os.path.join(get_user_dir(), PLUGIN_DIR, "plugins.log")
+PLUGIN_NAME_BASE = '[plug-in] '
 
 def get_model_python_path():
     """
@@ -137,7 +142,7 @@ class ReportProblem:
     def __nonzero__(self):
         type, value, tb = sys.exc_info()
         if type is not None and issubclass(type, py_compile.PyCompileError):
-            print "Problem with", repr(value)
+            print("Problem with", repr(value))
             raise type, value, tb
         return 1
 
@@ -166,12 +171,12 @@ def _findModels(dir):
     # Go through files in plug-in directory
     if not os.path.isdir(dir):
         msg = "SasView couldn't locate Model plugin folder %r." % dir
-        logging.warning(msg)
+        logger.warning(msg)
         return {}
 
     plugin_log("looking for models in: %s" % str(dir))
     #compile_file(dir)  #always recompile the folder plugin
-    logging.info("plugin model dir: %s" % str(dir))
+    logger.info("plugin model dir: %s" % str(dir))
 
     plugins = {}
     for filename in os.listdir(dir):
@@ -180,13 +185,14 @@ def _findModels(dir):
             path = os.path.abspath(os.path.join(dir, filename))
             try:
                 model = load_custom_model(path)
+                model.name = PLUGIN_NAME_BASE + model.name
+                plugins[model.name] = model
             except Exception:
                 msg = traceback.format_exc()
                 msg += "\nwhile accessing model in %r" % path
                 plugin_log(msg)
-                logging.warning("Failed to load plugin %r. See %s for details"
+                logger.warning("Failed to load plugin %r. See %s for details"
                                 % (path, PLUGIN_LOG))
-            plugins[model.name] = model
 
     return plugins
 
@@ -258,7 +264,7 @@ class ModelManagerBase:
         temp = {}
         if self.is_changed():
             return  _findModels(dir)
-        logging.info("plugin model : %s" % str(temp))
+        logger.info("plugin model : %s" % str(temp))
         return temp
 
     def _getModelList(self):
@@ -290,7 +296,7 @@ class ModelManagerBase:
         self.plugins = self.stored_plugins.values()
         for name, plug in self.stored_plugins.iteritems():
             self.model_dictionary[name] = plug
-        
+
         self._get_multifunc_models()
 
         return 0
@@ -322,7 +328,7 @@ class ModelManagerBase:
                     self.stored_plugins[name] = plug
                     self.plugins.append(plug)
                     self.model_dictionary[name] = plug
-            self.model_combobox.set_list("Customized Models", self.plugins)
+            self.model_combobox.set_list("Plugin Models", self.plugins)
             return self.model_combobox.get_list()
         else:
             return {}
@@ -343,7 +349,7 @@ class ModelManagerBase:
             self.plugins.append(plug)
             self.model_dictionary[name] = plug
 
-        self.model_combobox.reset_list("Customized Models", self.plugins)
+        self.model_combobox.reset_list("Plugin Models", self.plugins)
         return self.model_combobox.get_list()
 
     def _on_model(self, evt):
@@ -354,7 +360,7 @@ class ModelManagerBase:
 
         """
         if int(evt.GetId()) in self.form_factor_dict.keys():
-            from sas.sascalc.fit.MultiplicationModel import MultiplicationModel
+            from sasmodels.sasview_model import MultiplicationModel
             self.model_dictionary[MultiplicationModel.__name__] = MultiplicationModel
             model1, model2 = self.form_factor_dict[int(evt.GetId())]
             model = MultiplicationModel(model1, model2)
@@ -386,7 +392,7 @@ class ModelManagerBase:
 #        self.model_combobox.set_list("Shape-Independent",
 #                                     self.shape_indep_list)
         self.model_combobox.set_list("Structure Factors", self.struct_list)
-        self.model_combobox.set_list("Customized Models", self.plugins)
+        self.model_combobox.set_list("Plugin Models", self.plugins)
         self.model_combobox.set_list("P(Q)*S(Q)", self.multiplication_factor)
         self.model_combobox.set_list("multiplication",
                                      self.multiplication_factor)
@@ -411,7 +417,7 @@ class ModelManager(object):
     implement model
     """
     __modelmanager = ModelManagerBase()
-    cat_model_list = [model_name for model_name \
+    cat_model_list = [__modelmanager.model_dictionary[model_name] for model_name \
                       in __modelmanager.model_dictionary.keys() \
                       if model_name not in __modelmanager.stored_plugins.keys()]
 

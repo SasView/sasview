@@ -1,20 +1,29 @@
 """
     Unit tests for data manipulations
 """
+from __future__ import print_function
 
 import unittest
-import numpy, math
-from sas.sascalc.dataloader.loader import  Loader
+import math
+import numpy as np
+from sas.sascalc.dataloader.loader import Loader
+from sas.sascalc.dataloader.readers.IgorReader import Reader as IgorReader
+from sas.sascalc.dataloader.readers.abs_reader import Reader as AbsReader
+from sas.sascalc.dataloader.readers.hfir1d_reader import Reader as HFIRReader
+from sas.sascalc.dataloader.readers.danse_reader import Reader as DANSEReader
+from sas.sascalc.dataloader.readers.cansas_reader import Reader as CANSASReader
+
 from sas.sascalc.dataloader.data_info import Data1D
  
 import os.path
 
+
 class abs_reader(unittest.TestCase):
     
     def setUp(self):
-        from sas.sascalc.dataloader.readers.abs_reader import Reader
-        self.data = Reader().read("jan08002.ABS")
-        
+        reader = AbsReader()
+        self.data = reader.read("jan08002.ABS")
+
     def test_abs_checkdata(self):
         """
             Check the data content to see whether 
@@ -58,12 +67,19 @@ class abs_reader(unittest.TestCase):
         
     def test_checkdata2(self):
         self.assertEqual(self.data.dy[126], 1)
-        
+
+    def test_generic_loader(self):
+        # the generic loader should work as well
+        data = Loader().load("jan08002.ABS")
+        self.assertEqual(data.meta_data['loader'], "IGOR 1D")
+
+
 class hfir_reader(unittest.TestCase):
-    
+
     def setUp(self):
-        self.data = Loader().load("S2-30dq.d1d")
-        
+        reader = HFIRReader()
+        self.data = reader.read("S2-30dq.d1d")
+
     def test_hfir_checkdata(self):
         """
             Check the data content to see whether 
@@ -80,13 +96,21 @@ class hfir_reader(unittest.TestCase):
         self.assertEqual(self.data.y[1], 0.003010)
         self.assertEqual(self.data.dy[1], 0.000315)
         self.assertEqual(self.data.dx[1], 0.008249)
-        
+
+    def test_generic_loader(self):
+        # the generic loader should work as well
+        data = Loader().load("S2-30dq.d1d")
+        self.assertEqual(data.meta_data['loader'], "HFIR 1D")
+
 
 class igor_reader(unittest.TestCase):
     
     def setUp(self):
-        self.data = Loader().load("MAR07232_rest.ASC")
-        
+        # the IgorReader should be able to read this filetype
+        # if it can't, stop here.
+        reader = IgorReader()
+        self.data = reader.read("MAR07232_rest.ASC")
+
     def test_igor_checkdata(self):
         """
             Check the data content to see whether 
@@ -107,20 +131,32 @@ class igor_reader(unittest.TestCase):
         self.assertEqual(self.data.sample.transmission, 0.84357)
         
         self.assertEqual(self.data.detector[0].beam_center_unit, 'mm')
-        center_x = (68.76-1)*5.0
-        center_y = (62.47-1)*5.0
+        center_x = (68.76 - 1)*5.0
+        center_y = (62.47 - 1)*5.0
         self.assertEqual(self.data.detector[0].beam_center.x, center_x)
         self.assertEqual(self.data.detector[0].beam_center.y, center_y)
         
         self.assertEqual(self.data.I_unit, '1/cm')
-        self.assertEqual(self.data.data[0], 0.279783)
-        self.assertEqual(self.data.data[1], 0.28951)
-        self.assertEqual(self.data.data[2], 0.167634)
-        
+        # 3 points should be suffcient to check that the data is in column
+        # major order.
+        np.testing.assert_almost_equal(self.data.data[0:3],
+                                       [0.279783, 0.28951, 0.167634])
+        np.testing.assert_almost_equal(self.data.qx_data[0:3],
+                                       [-0.01849072, -0.01821785, -0.01794498])
+        np.testing.assert_almost_equal(self.data.qy_data[0:3],
+                                       [-0.01677435, -0.01677435, -0.01677435])
+
+    def test_generic_loader(self):
+        # the generic loader should direct the file to IgorReader as well
+        data = Loader().load("MAR07232_rest.ASC")
+        self.assertEqual(data.meta_data['loader'], "IGOR 2D")
+
+
 class danse_reader(unittest.TestCase):
     
     def setUp(self):
-        self.data = Loader().load("MP_New.sans")
+        reader = DANSEReader()
+        self.data = reader.read("MP_New.sans")
 
     def test_checkdata(self):
         """
@@ -154,13 +190,24 @@ class danse_reader(unittest.TestCase):
         self.assertEqual(self.data.err_data[1], 1.77569)
         self.assertEqual(self.data.err_data[2], 2.06313)
 
+    def test_generic_loader(self):
+        # the generic loader should work as well
+        data = Loader().load("MP_New.sans")
+        self.assertEqual(data.meta_data['loader'], "DANSE")
+
  
 class cansas_reader(unittest.TestCase):
     
     def setUp(self):
-        data = Loader().load("cansas1d.xml")
+        reader = CANSASReader()
+        data = reader.read("cansas1d.xml")
         self.data = data[0]
- 
+
+    def test_generic_loader(self):
+        # the generic loader should work as well
+        data = Loader().load("cansas1d.xml")
+        self.assertEqual(data[0].meta_data['loader'], "CanSAS XML 1D")
+
     def test_cansas_checkdata(self):
         self.assertEqual(self.data.filename, "cansas1d.xml")
         self._checkdata()
@@ -173,10 +220,8 @@ class cansas_reader(unittest.TestCase):
             Data1D defaults changed. Otherwise the
             tests won't pass
         """
-        
         self.assertEqual(self.data.run[0], "1234")
-        self.assertEqual(self.data.meta_data['loader'], "CanSAS 1D")
-        self.assertEqual(len(self.data.errors), 0)
+        self.assertEqual(self.data.meta_data['loader'], "CanSAS XML 1D")
         
         # Data
         self.assertEqual(len(self.data.x), 2)
@@ -197,9 +242,9 @@ class cansas_reader(unittest.TestCase):
         self.assertEqual(self.data.sample.ID, "SI600-new-long")
         self.assertEqual(self.data.sample.name, "my sample")
         self.assertEqual(self.data.sample.thickness_unit, 'mm')
-        self.assertEqual(self.data.sample.thickness, 1.03)
+        self.assertAlmostEqual(self.data.sample.thickness, 1.03)
         
-        self.assertEqual(self.data.sample.transmission, 0.327)
+        self.assertAlmostEqual(self.data.sample.transmission, 0.327)
         
         self.assertEqual(self.data.sample.temperature_unit, 'C')
         self.assertEqual(self.data.sample.temperature, 0)
@@ -232,9 +277,9 @@ class cansas_reader(unittest.TestCase):
         self.assertEqual(self.data.source.wavelength, 6)
         
         self.assertEqual(self.data.source.wavelength_max_unit, "nm")
-        self.assertEqual(self.data.source.wavelength_max, 1.0)
+        self.assertAlmostEqual(self.data.source.wavelength_max, 1.0)
         self.assertEqual(self.data.source.wavelength_min_unit, "nm")
-        self.assertEqual(self.data.source.wavelength_min, 0.22)
+        self.assertAlmostEqual(self.data.source.wavelength_min, 0.22)
         self.assertEqual(self.data.source.wavelength_spread_unit, "percent")
         self.assertEqual(self.data.source.wavelength_spread, 14.3)
         
@@ -247,18 +292,18 @@ class cansas_reader(unittest.TestCase):
         for item in self.data.collimation[0].aperture:
             self.assertEqual(item.size_unit,'mm')
             self.assertEqual(item.distance_unit,'mm')
-            
-            if item.size.x==50 \
-                and item.distance==11000.0 \
-                and item.name=='source' \
-                and item.type=='radius':
+
+            if item.size.x == 50 \
+                and item.distance == 11000.0 \
+                and item.name == 'source' \
+                and item.type == 'radius':
                 _found1 = True
-            elif item.size.x==1.0 \
-                and item.name=='sample' \
-                and item.type=='radius':
+            elif item.size.x == 1.0 \
+                and item.name == 'sample' \
+                and item.type == 'radius':
                 _found2 = True
                 
-        if _found1==False or _found2==False:
+        if _found1 == False or _found2 == False:
             raise RuntimeError, "Could not find all data %s %s" % (_found1, _found2) 
             
         # Detector
@@ -293,35 +338,31 @@ class cansas_reader(unittest.TestCase):
             self.assertTrue(item.name in ['NCNR-IGOR', 'spol'])
             self.assertTrue(item.date in ['04-Sep-2007 18:35:02',
                                           '03-SEP-2006 11:42:47'])
+            print(item.term)
             for t in item.term:
-                if t['name']=="ABS:DSTAND" \
-                    and t['unit']=='mm' \
-                    and float(t['value'])==1.0:
+                if (t['name'] == "ABS:DSTAND"
+                    and t['unit'] == 'mm'
+                    and float(t['value']) == 1.0):
                     _found_term2 = True
-                elif t['name']=="radialstep" \
-                    and t['unit']=='mm' \
-                    and float(t['value'])==10.0:
+                elif (t['name'] == "radialstep"
+                      and t['unit'] == 'mm'
+                      and float(t['value']) == 10.0):
                     _found_term1 = True
                     
-        if _found_term1==False or _found_term2==False:
-            raise RuntimeError, "Could not find all process terms %s %s" % (_found_term1, _found_term2) 
-            
-        
-        
+        if _found_term1 == False or _found_term2 == False:
+            raise RuntimeError, "Could not find all process terms %s %s" % (_found_term1, _found_term2)
         
     def test_writer(self):
-        from sas.sascalc.dataloader.readers.cansas_reader import Reader
-        r = Reader()
-        x = numpy.ones(5)
-        y = numpy.ones(5)
-        dy = numpy.ones(5)
-        
+        r = CANSASReader()
+
         filename = "write_test.xml"
         r.write(filename, self.data)
         data = Loader().load(filename)
         self.data = data[0]
         self.assertEqual(self.data.filename, filename)
         self._checkdata()
+        if os.path.isfile(filename):
+            os.remove(filename)
         
     def test_units(self):
         """
@@ -329,7 +370,7 @@ class cansas_reader(unittest.TestCase):
             Note that not all units are available.
         """
         filename = "cansas1d_units.xml"
-        data = Loader().load(filename)
+        data = CANSASReader().read(filename)
         self.data = data[0]
         self.assertEqual(self.data.filename, filename)
         self._checkdata()
@@ -340,25 +381,24 @@ class cansas_reader(unittest.TestCase):
             Note that not all units are available.
         """
         filename = "cansas1d_badunits.xml"
-        data = Loader().load(filename)
+        data = CANSASReader().read(filename)
         self.data = data[0]
         self.assertEqual(self.data.filename, filename)
         # The followed should not have been loaded
-        self.assertEqual(self.data.sample.thickness, 0.00103)
+        self.assertAlmostEqual(self.data.sample.thickness, 0.00103)
         # This one should
-        self.assertEqual(self.data.sample.transmission, 0.327)
+        self.assertAlmostEqual(self.data.sample.transmission, 0.327)
         
-        self.assertEqual(self.data.meta_data['loader'], "CanSAS 1D")
-        print self.data.errors
+        self.assertEqual(self.data.meta_data['loader'], "CanSAS XML 1D")
+        print(self.data.errors)
         self.assertEqual(len(self.data.errors), 1)
-        
-        
+
     def test_slits(self):
         """
             Check slit data
         """
         filename = "cansas1d_slit.xml"
-        data = Loader().load(filename)
+        data = CANSASReader().read(filename)
         self.data = data[0]
         self.assertEqual(self.data.filename, filename)
         self.assertEqual(self.data.run[0], "1234")
@@ -380,8 +420,7 @@ class cansas_reader(unittest.TestCase):
         self.assertEqual(self.data.dy[1], 4)
         self.assertEqual(self.data.run_name['1234'], 'run name')
         self.assertEqual(self.data.title, "Test title")
-        
-            
+
 
 if __name__ == '__main__':
-    unittest.main(testRunner=unittest.TextTestRunner(verbosity=2))
+    unittest.main()

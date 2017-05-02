@@ -23,7 +23,7 @@ import time
 import matplotlib.cm as cm
 import math
 import copy
-import numpy
+import numpy as np
 from sas.sasgui.plottools.PlotPanel import PlotPanel
 from sas.sasgui.plottools.plottables import Graph
 from binder import BindArtist
@@ -99,7 +99,7 @@ class MaskPanel(wx.Dialog):
         kwds["size"] = wx.Size(_STATICBOX_WIDTH * 0.8, PANEL_SIZE)
         wx.Dialog.__init__(self, parent, id=id, *args, **kwds)
 
-        if data != None:
+        if data is not None:
             # Font size
             kwds = []
             self.SetWindowVariant(variant=FONT_VARIANT)
@@ -234,7 +234,7 @@ class MaskPanel(wx.Dialog):
         # get ready for next evt
         event.Skip()
         # from boxMask import BoxMask
-        if event != None:
+        if event is not None:
             self._on_clear_slicer(event)
         self.slicer_z += 1
         self.slicer = slicer(self, self.subplot,
@@ -248,7 +248,7 @@ class MaskPanel(wx.Dialog):
         """
         Add new mask to old mask
         """
-        if not self.slicer == None:
+        if self.slicer is not None:
             data = Data2D()
             data = self.data
             self.slicer_mask = self.slicer.update()
@@ -268,7 +268,7 @@ class MaskPanel(wx.Dialog):
         """
         Erase new mask from old mask
         """
-        if not self.slicer == None:
+        if self.slicer is not None:
             self.slicer_mask = self.slicer.update()
             mask = self.data.mask
             mask[self.slicer_mask == False] = True
@@ -297,7 +297,7 @@ class MaskPanel(wx.Dialog):
                               zorder=self.slicer_z, side=True)
         self.subplot.set_ylim(self.data.ymin, self.data.ymax)
         self.subplot.set_xlim(self.data.xmin, self.data.xmax)
-        mask = numpy.ones(len(self.data.mask), dtype=bool)
+        mask = np.ones(len(self.data.mask), dtype=bool)
         self.data.mask = mask
         # update mask plot
         self._check_display_mask(mask, event)
@@ -306,7 +306,7 @@ class MaskPanel(wx.Dialog):
         """
         Clear the slicer on the plot
         """
-        if not self.slicer == None:
+        if self.slicer is not None:
             self.slicer.clear()
             self.subplot.figure.canvas.draw()
             self.slicer = None
@@ -335,14 +335,14 @@ class MaskPanel(wx.Dialog):
         Respond to changes in masking
         """
         # the case of liitle numbers of True points
-        if len(mask[mask]) < 10 and self.data != None:
+        if len(mask[mask]) < 10 and self.data is not None:
             self.ShowMessage()
             mask = copy.deepcopy(self.mask)
             self.data.mask = mask
         else:
             self.mask = mask
         # make temperary data to plot
-        temp_mask = numpy.zeros(len(mask))
+        temp_mask = np.zeros(len(mask))
         temp_data = copy.deepcopy(self.data)
         # temp_data default is None
         # This method is to distinguish between masked point and data point = 0.
@@ -354,7 +354,7 @@ class MaskPanel(wx.Dialog):
         # TODO: refactor this horrible logic
         temp_data.data[mask == False] = temp_mask[mask == False]
         self.plotpanel.clear()
-        if self.slicer != None:
+        if self.slicer is not None:
             self.slicer.clear()
             self.slicer = None
         # Post slicer None event
@@ -459,7 +459,7 @@ class FloatPanel(wx.Dialog):
         kwds["size"] = wx.Size(PANEL_SIZE * 1.5, PANEL_SIZE * 1.5)
         wx.Dialog.__init__(self, parent, id=id, *args, **kwds)
 
-        if data != None:
+        if data is not None:
             # Font size
             kwds = []
             self.SetWindowVariant(variant=FONT_VARIANT)
@@ -709,7 +709,7 @@ class Maskplotpanel(PlotPanel):
         """
         Status msg
         """
-        if self.parent.parent.parent != None:
+        if self.parent.parent.parent is not None:
             wx.PostEvent(self.parent.parent.parent,
                          StatusEvent(status=msg, type=type))
 

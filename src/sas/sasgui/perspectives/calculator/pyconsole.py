@@ -8,6 +8,8 @@ import numpy as np
 
 import wx
 from wx.lib.dialogs import ScrolledMessageDialog
+from wx.lib import layoutf
+
 import wx.py.editor as editor
 
 if sys.platform.count("win32") > 0:
@@ -62,7 +64,7 @@ def show_model_output(parent, fname):
         parts.extend(["", "Success:", result, ""])
         title, icon = "Info", wx.ICON_INFORMATION
     text = "\n".join(parts)
-    dlg = ScrolledMessageDialog(parent, text, title, size=((550, 250)))
+    dlg = ResizableScrolledMessageDialog(parent, text, title, size=((550, 250)))
     fnt = wx.Font(10, wx.TELETYPE, wx.NORMAL, wx.NORMAL)
     dlg.GetChildren()[0].SetFont(fnt)
     dlg.GetChildren()[0].SetInsertionPoint(0)
@@ -70,33 +72,70 @@ def show_model_output(parent, fname):
     dlg.Destroy()
     return errmsg is None
 
+class ResizableScrolledMessageDialog(wx.Dialog):
+    """
+    Custom version of wx ScrolledMessageDialog, allowing border resize
+    """
+    def __init__(self, parent, msg, caption,
+        pos=wx.DefaultPosition, size=(500,300),
+        style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER ):
+        # Notice, that style can be overrriden in the caller.
+        wx.Dialog.__init__(self, parent, -1, caption, pos, size, style)
+        x, y = pos
+        if x == -1 and y == -1:
+            self.CenterOnScreen(wx.BOTH)
+
+        text = wx.TextCtrl(self, -1, msg, style=wx.TE_MULTILINE | wx.TE_READONLY)
+        ok = wx.Button(self, wx.ID_OK, "OK")
+
+        # Mysterious constraint layouts from 
+        # https://www.wxpython.org/docs/api/wx.lib.layoutf.Layoutf-class.html
+        lc = layoutf.Layoutf('t=t5#1;b=t5#2;l=l5#1;r=r5#1', (self,ok))
+        text.SetConstraints(lc)
+        lc = layoutf.Layoutf('b=b5#1;x%w50#1;w!80;h!25', (self,))
+        ok.SetConstraints(lc)
+
+        self.SetAutoLayout(1)
+        self.Layout()
+
 class PyConsole(editor.EditorNotebookFrame):
     ## Internal nickname for the window, used by the AUI manager
     window_name = "Custom Model Editor"
     ## Name to appear on the window title bar
-    window_caption = "Custom Model Editor"
+    window_caption = "Plugin Model Editor"
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = False
     def __init__(self, parent=None, base=None, manager=None, panel=None,
                     title='Python Shell/Editor', filename=None,
                     size=(PANEL_WIDTH, PANEL_HEIGHT)):
         self.config = None
+
         editor.EditorNotebookFrame.__init__(self, parent=parent,
-                                        title=title, size=size,
-                                        filename=filename)
+                                        title=title, size=size)
         self.parent = parent
         self._manager = manager
         self.base = base
         self.panel = panel
         self._add_menu()
-        if filename != None:
+        if filename is not None:
             dataDir = os.path.dirname(filename)
-        elif self.parent != None:
+        elif self.parent is not None:
             dataDir = self.parent._default_save_location
         else:
              dataDir = None
         self.dataDir = dataDir
         self.Centre()
+
+        # See if there is a corresponding C file
+        if filename is not None:
+            c_filename = os.path.splitext(filename)[0] + ".c"
+            if os.path.isfile(c_filename):
+                self.bufferCreate(c_filename)
+
+            # If not, just open the requested .py, if any.
+            # Needs to be after the C file so the tab focus is correct.
+            if os.path.isfile(filename):
+                    self.bufferCreate(filename)
 
         self.Bind(wx.EVT_MENU, self.OnNewFile, id=wx.ID_NEW)
         self.Bind(wx.EVT_MENU, self.OnOpenFile, id=wx.ID_OPEN)
@@ -202,6 +241,13 @@ class PyConsole(editor.EditorNotebookFrame):
                             wildcard='Python Files (*.py)|*.py')
         if result.path:
             self.bufferCreate(result.path)
+
+        # See if there is a corresponding C file
+        if result.path is not None:
+            c_filename = os.path.splitext(result.path)[0] + ".c"
+            if os.path.isfile(c_filename):
+                self.bufferCreate(c_filename)
+
         cancel = False
         return cancel
 
@@ -255,8 +301,8 @@ class PyConsole(editor.EditorNotebookFrame):
         fname = self.editor.getStatus()[0]
         success = show_model_output(self, fname)
 
-        # Update custom model list in fitpage combobox
-        if success and self._manager != None and self.panel != None:
+        # Update plugin model list in fitpage combobox
+        if success and self._manager is not None and self.panel is not None:
             self._manager.set_edit_menu_helper(self.parent)
             wx.CallAfter(self._manager.update_custom_combo)
 
@@ -290,7 +336,7 @@ class PyConsole(editor.EditorNotebookFrame):
         """
         Close event
         """
-        if self.base != None:
+        if self.base is not None:
             self.base.py_frame = None
         self.Destroy()
 
