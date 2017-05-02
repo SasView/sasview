@@ -1,6 +1,8 @@
 """
     Plot panel.
 """
+from __future__ import print_function
+
 import logging
 import traceback
 import wx
@@ -37,7 +39,7 @@ logger = logging.getLogger(__name__)
 
 def show_tree(obj, d=0):
     """Handy function for displaying a tree of graph objects"""
-    print "%s%s" % ("-"*d, obj.__class__.__name__)
+    print("%s%s" % ("-"*d, obj.__class__.__name__))
     if 'get_children' in dir(obj):
         for a in obj.get_children(): show_tree(a, d + 1)
 
@@ -2013,7 +2015,7 @@ class PlotPanel(wx.Panel):
         try:
             self.toolbar.copy_figure(self.canvas)
         except:
-            print "Error in copy Image"
+            print("Error in copy Image")
 
 
 #---------------------------------------------------------------

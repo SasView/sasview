@@ -2,6 +2,8 @@
 """
 Provide the style for guiframe
 """
+from __future__ import print_function
+
 import wx
 import os
 from sas.sasgui.guiframe import get_data_path
@@ -78,13 +80,13 @@ class GUIFRAME_ICON:
 
 if __name__ == "__main__":
   
-    print GUIFRAME.DEFAULT_STYLE
-    print GUIFRAME.FLOATING_PANEL
-    print GUIFRAME.SINGLE_APPLICATION
+    print(GUIFRAME.DEFAULT_STYLE)
+    print(GUIFRAME.FLOATING_PANEL)
+    print(GUIFRAME.SINGLE_APPLICATION)
     style = GUIFRAME.MULTIPLE_APPLICATIONS
     style &= GUIFRAME.PLOTTING_ON
-    print style == GUIFRAME.PLOTTING_ON
+    print(style == GUIFRAME.PLOTTING_ON)
     style1 = GUIFRAME.MULTIPLE_APPLICATIONS
     style1 &= (~GUIFRAME.MANAGER_ON)
-    print style1 == GUIFRAME.DEFAULT_STYLE
-    print style1
+    print(style1 == GUIFRAME.DEFAULT_STYLE)
+    print(style1)

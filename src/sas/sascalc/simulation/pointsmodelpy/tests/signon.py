@@ -10,24 +10,26 @@
 # 
 #  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 
+from __future__ import print_function
+
 
 if __name__ == "__main__":
 
     import pointsmodelpy
     from pointsmodelpy import pointsmodelpy as pointsmodelpymodule
 
-    print "copyright information:"
-    print "   ", pointsmodelpy.copyright()
-    print "   ", pointsmodelpymodule.copyright()
+    print("copyright information:")
+    print("   ", pointsmodelpy.copyright())
+    print("   ", pointsmodelpymodule.copyright())
 
-    print
-    print "module information:"
-    print "    file:", pointsmodelpymodule.__file__
-    print "    doc:", pointsmodelpymodule.__doc__
-    print "    contents:", dir(pointsmodelpymodule)
+    print()
+    print("module information:")
+    print("    file:", pointsmodelpymodule.__file__)
+    print("    doc:", pointsmodelpymodule.__doc__)
+    print("    contents:", dir(pointsmodelpymodule))
 
-    print
-    print pointsmodelpymodule.hello()
+    print()
+    print(pointsmodelpymodule.hello())
 
 # version
 __id__ = "$Id$"

@@ -76,11 +76,11 @@ def get_app_dir():
     # TODO: gui_manager will have to know about sasview until we
     # clean all these module variables and put them into a config class
     # that can be passed by sasview.py.
-    logger.info(sys.executable)
-    logger.info(str(sys.argv))
+    logger.debug(sys.executable)
+    logger.debug(str(sys.argv))
     from sas import sasview as sasview
     app_path = os.path.dirname(sasview.__file__)
-    logger.info("Using application path: %s", app_path)
+    logger.debug("Using application path: %s", app_path)
     return app_path
 
 
@@ -108,7 +108,7 @@ def _find_local_config(file, path):
     finally:
         if fObj is not None:
             fObj.close()
-    logger.info("GuiManager loaded %s/%s" % (path, file))
+    logger.debug("GuiManager loaded %s/%s" % (path, file))
     return config_module
 
 # Get APP folder
@@ -125,11 +125,11 @@ if config is None:
     if config is None:
         # Didn't find local config, load the default
         import sas.sasgui.guiframe.config as config
-        logger.info("using default local_config")
+        logger.debug("using default local_config")
     else:
-        logger.info("found local_config in %s" % os.getcwd())
+        logger.debug("found local_config in %s" % os.getcwd())
 else:
-    logger.info("found local_config in %s" % PATH_APP)
+    logger.debug("found local_config in %s" % PATH_APP)
 
 from sas.sasgui.guiframe.customdir import SetupCustom
 c_conf_dir = SetupCustom().setup_dir(PATH_APP)
@@ -138,11 +138,11 @@ if custom_config is None:
     custom_config = _find_local_config('custom_config', os.getcwd())
     if custom_config is None:
         msgConfig = "Custom_config file was not imported"
-        logger.info(msgConfig)
+        logger.debug(msgConfig)
     else:
-        logger.info("using custom_config in %s" % os.getcwd())
+        logger.debug("using custom_config in %s" % os.getcwd())
 else:
-    logger.info("using custom_config from %s" % c_conf_dir)
+    logger.debug("using custom_config from %s" % c_conf_dir)
 
 # read some constants from config
 APPLICATION_STATE_EXTENSION = config.APPLICATION_STATE_EXTENSION
@@ -2128,9 +2128,10 @@ class ViewerFrame(PARENT_FRAME):
             for line in config_lines:
                 if "SAS_OPENCL" in line:
                     if sas_opencl:
-                        new_config_lines.append("SAS_OPENCL = \""+sas_opencl+"\"")
+                        new_config_lines.append("SAS_OPENCL = \"" + sas_opencl
+                                                + "\"\n")
                     else:
-                        new_config_lines.append("SAS_OPENCL = None")
+                        new_config_lines.append("SAS_OPENCL = \"None\"\n")
                 else:
                     new_config_lines.append(line)
             config_file.close()
@@ -2155,10 +2156,8 @@ class ViewerFrame(PARENT_FRAME):
         response = c.connect()
         if response is not None:
             try:
-                # 
                 content = response.read().strip()
-                logger.info("Connected to www.sasview.org. Latest version: %s"
-                             % (content))
+                logger.info("Connected to www.sasview.org. Latest version: %s", content)
                 version_info = json.loads(content)
             except:
                 logger.info("Failed to connect to www.sasview.org")

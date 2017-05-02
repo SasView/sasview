@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 import os
 import sys
@@ -23,7 +24,7 @@ run = imp.load_source('sasview_run', run_py)
 run.prepare()
 #print "\n".join(sys.path)
 test_path,test_file = splitpath(abspath(sys.argv[1]))
-print "=== testing:",sys.argv[1]
+print("=== testing:",sys.argv[1])
 #print test_path, test_file
 sys.argv = [sys.argv[0]]
 os.chdir(test_path)

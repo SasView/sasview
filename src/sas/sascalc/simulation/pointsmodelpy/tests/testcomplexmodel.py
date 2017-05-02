@@ -1,6 +1,9 @@
+from __future__ import print_function
+
 from sasModeling.pointsmodelpy import pointsmodelpy
 from sasModeling.iqPy import iqPy
 from sasModeling.geoshapespy import geoshapespy
+
 
 #First testing: a normal case, a lores model holds a sphere
 #and a pdbmodel holds one pdb file. and merged into a complex
@@ -60,9 +63,9 @@ def test_complex2():
 
   iqPy.OutputIQ(iqcomplex,"testcomplex2.iq")
 
-  print "p(r) is saved in testcomplex2.pr"
-  print "I(Q) is saved in testcomplex2.iq"
-  print "pass"
+  print("p(r) is saved in testcomplex2.pr")
+  print("I(Q) is saved in testcomplex2.iq")
+  print("pass")
 
 #testing 3, insert one empty pdbmodel and one loresmodel
 def test_complex3():
@@ -87,9 +90,9 @@ def test_complex3():
 
   iqPy.OutputIQ(iqcomplex,"testcomplex3.iq")
 
-  print "p(r) is saved in testcomplex3.pr"
-  print "I(Q) is saved in testcomplex3.iq"
-  print "pass"
+  print("p(r) is saved in testcomplex3.pr")
+  print("I(Q) is saved in testcomplex3.iq")
+  print("pass")
 
 # Test 2D complex model
 def test_complex4():
@@ -105,8 +108,8 @@ def test_complex4():
     
     pointsmodelpy.get_complexpoints(complex,vpcomplex);
  
-    print pointsmodelpy.get_complex_iq_2D(complex,vpcomplex,0.1,0.1);
-    print pointsmodelpy.get_complex_iq_2D(complex,vpcomplex,0.01,0.1);
+    print(pointsmodelpy.get_complex_iq_2D(complex,vpcomplex,0.1,0.1));
+    print(pointsmodelpy.get_complex_iq_2D(complex,vpcomplex,0.01,0.1));
 
 
 if __name__ == "__main__":

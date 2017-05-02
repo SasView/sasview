@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 """
     Generate two correlated sets of data
         1- A line: y = ax + b
@@ -41,7 +43,7 @@ class Generator:
         
         # Write line data set
         fd = open(filename, 'w')
-        print "Creating ", filename
+        print("Creating ", filename)
         fd.write("#y=A*x+B\n#A=%g\n#B=%g\n" % (self.constant_a, self.constant_b))
         
         for i in range(npts):
