@@ -91,13 +91,19 @@ class FitPanel(nb, PanelBase):
             data = page.get_data()
             # state must be cloned
             state = page.get_state().clone()
-            if data is not None or page.model is not None:
+            # data_list only populated with real data
+            # Fake object in data from page.get_data() if model is selected
+            if len(page.data_list) is not 0 and page.model is not None:
                 new_doc = self._manager.state_reader.write_toXML(data,
                                                                  state,
                                                                  batch_state)
+                # Fit #2 through #n are append to first fit
                 if doc is not None and hasattr(doc, "firstChild"):
-                    child = new_doc.firstChild.firstChild
-                    doc.firstChild.appendChild(child)
+                    # Only append if properly formed new_doc
+                    if new_doc is not None and hasattr(new_doc, "firstChild"):
+                        child = new_doc.firstChild.firstChild
+                        doc.firstChild.appendChild(child)
+                # First fit defines the main document
                 else:
                     doc = new_doc
 
