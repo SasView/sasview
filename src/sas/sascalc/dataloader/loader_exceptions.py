@@ -13,19 +13,19 @@ class NoKnownLoaderException(Exception):
         self.message = e
 
 
-class FileContentsException(Exception):
+class DefaultReaderException(Exception):
     """
-    Exception for files with an associated reader, but with no loadable data.
-    This is useful for catching loader or file format issues.
+    Exception for files with no associated reader. This should be thrown by
+    default readers only to tell Loader to try the next reader.
     """
     def __init__(self, e):
         self.message = e
 
 
-class DefaultReaderException(Exception):
+class FileContentsException(Exception):
     """
-    Exception for files with no associated reader. This should be thrown by
-    default readers only to tell Loader to try the next reader.
+    Exception for files with an associated reader, but with no loadable data.
+    This is useful for catching loader or file format issues.
     """
     def __init__(self, e):
         self.message = e

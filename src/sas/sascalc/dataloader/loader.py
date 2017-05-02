@@ -70,13 +70,18 @@ class Registry(ExtensionRegistry):
         """
         try:
             return super(Registry, self).load(path, format=format)
-        except NoKnownLoaderException as e:
-            pass  # try the ASCII reader
+        except NoKnownLoaderException as nkl_e:
+            pass  # try the ASCII reader4
+        except Exception as reg_e:
+            pass
         try:
             ascii_loader = ascii_reader.Reader()
             return ascii_loader.read(path)
         except DefaultReaderException:
-            pass  # Loader specific error to try the cansas XML reader
+            pass  # Loader specific error to try the ascii reader
+        except FileContentsException:
+            # TODO: handle error
+            pass
         try:
             cansas_loader = cansas_reader.Reader()
             return cansas_loader.read(path)
