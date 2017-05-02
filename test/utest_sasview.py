@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from __future__ import print_function
+
 import os
 import subprocess
 import re
@@ -79,26 +81,26 @@ def run_tests(dirs=None, all=False):
                     
                     if has_failed:
                         failed += 1
-                        print "Result for %s (%s): FAILED" % (module_name, module_dir)
-                        print std_out
+                        print("Result for %s (%s): FAILED" % (module_name, module_dir))
+                        print(std_out)
                     else:
                         passed += 1
-                        print "Result for %s: SUCCESS" % module_name
+                        print("Result for %s: SUCCESS" % module_name)
 
-    print "\n----------------------------------------------"
+    print("\n----------------------------------------------")
     if n_tests == 0:
-        print "No tests."
+        print("No tests.")
     else:
-        print "Results by test modules:"
-        print "    PASSED: %d" % passed
+        print("Results by test modules:")
+        print("    PASSED: %d" % passed)
         ratio = 100.0*failed/(failed+passed)
-        print "    FAILED: %d    (%.0f%%)" % (failed,ratio)
+        print("    FAILED: %d    (%.0f%%)" % (failed,ratio))
 
-        print "Results by tests:"
-        print "    Tests run:    %d" % n_tests
-        print "    Tests failed: %d" % n_failures
-        print "    Test errors:  %d" % n_errors
-    print "----------------------------------------------"
+        print("Results by tests:")
+        print("    Tests run:    %d" % n_tests)
+        print("    Tests failed: %d" % n_failures)
+        print("    Test errors:  %d" % n_errors)
+    print("----------------------------------------------")
     
     return failed
 

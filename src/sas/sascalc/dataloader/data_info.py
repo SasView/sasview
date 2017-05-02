@@ -15,6 +15,7 @@
 #copyright 2008, University of Tennessee
 ######################################################################
 
+from __future__ import print_function
 
 #TODO: Keep track of data manipulation in the 'process' data structure.
 #TODO: This module should be independent of plottables. We should write

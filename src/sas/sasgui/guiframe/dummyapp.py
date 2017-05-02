@@ -2,6 +2,8 @@
 Dummy application.
 Allows the user to set an external data manager
 """
+from __future__ import print_function
+
 import sas.sasgui.guiframe.gui_manager as gui_manager
 
 from sas.sasgui.guiframe.plugin_base import PluginBase
@@ -31,7 +33,7 @@ class TestPlugin(PluginBase):
         # Fill your menu
         plug_menu.Append(id, '&Do something')
         def _on_do_something(event):
-            print "Do something"
+            print("Do something")
         wx.EVT_MENU(self.parent, id, _on_do_something)
     
         # Returns the menu and a name for it.
