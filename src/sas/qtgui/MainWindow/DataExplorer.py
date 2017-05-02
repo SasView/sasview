@@ -432,6 +432,25 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.perspectiveChangedSignal.emit(self.cbFitting.currentText())
         self.chkBatch.setEnabled(self.parent.perspective().allowBatch())
 
+    def displayData(self, data_list):
+        """
+        Forces display of charts for the given filename
+        """
+        # Assure no multiple plots for the same ID
+        plot_to_show = data_list[0]
+        for plot in PlotHelper.currentPlots():
+            if plot == plot_to_show.id:
+                return
+
+        new_plot = Plotter(self)
+        # Now query the model item for available plots
+        filename = plot_to_show.filename
+        model = self.model if plot_to_show.is_data else self.theory_model
+        plots = GuiUtils.plotsFromFilename(filename, model)
+        for plot in plots:
+            new_plot.plot(plot)
+        self.plotAdd(new_plot)
+
     def newPlot(self):
         """
         Create a new matplotlib chart from selected data

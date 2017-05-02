@@ -1,5 +1,6 @@
 import sys
 import unittest
+import time
 
 from PyQt4 import QtGui
 from PyQt4 import QtTest
@@ -20,8 +21,7 @@ from sas.sasgui.guiframe.dataFitting import Data1D
 app = QtGui.QApplication(sys.argv)
 
 class dummy_manager(object):
-    def communicate(self):
-        return Communicate()
+    communicate = Communicate()
 
 class FittingWidgetTest(unittest.TestCase):
     """Test the fitting widget GUI"""
@@ -79,10 +79,9 @@ class FittingWidgetTest(unittest.TestCase):
         # self.assertTrue(widget_with_data.cmdFit.isEnabled())
         self.assertFalse(widget_with_data.acceptsData())
 
-    def notestSelectModel(self):
+    def testSelectModel(self):
         """
         Test if models have been loaded properly
-        :return:
         """
         fittingWindow =  self.widget
 
@@ -279,7 +278,7 @@ class FittingWidgetTest(unittest.TestCase):
         # Tested in default checks
         pass
 
-    def notestCreateTheoryIndex(self):
+    def testCreateTheoryIndex(self):
         """
         Test the data->QIndex conversion
         """
@@ -291,12 +290,13 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.cbCategory.setCurrentIndex(1)
 
         # Create the index
-        self.widget.createTheoryIndex()
+        self.widget.createTheoryIndex(Data1D(x=[1,2], y=[1,2]))
 
-        # Check the signal sent
-        print spy
+        # Make sure the signal has been emitted
+        self.assertEqual(spy.count(), 1)
 
-        # Check the index
+        # Check the argument type
+        self.assertIsInstance(spy.called()[0]['args'][0], QtGui.QStandardItem)
 
     def testCalculateQGridForModel(self):
         """
@@ -304,25 +304,40 @@ class FittingWidgetTest(unittest.TestCase):
         """
         # Mock the thread creation
         threads.deferToThread = MagicMock()
+        # Model for theory
+        self.widget.SASModelToQModel("cylinder")
         # Call the tested method
         self.widget.calculateQGridForModel()
+        time.sleep(1)
         # Test the mock
         self.assertTrue(threads.deferToThread.called)
         self.assertEqual(threads.deferToThread.call_args_list[0][0][0].__name__, "compute")
 
-    def testComplete1D(self):
+    def testCalculateResiduals(self):
         """
-        Check that a new 1D plot is generated
+        Check that the residuals are calculated and plots updated
         """
-        # TODO when chisqr method coded
-        pass
+        test_data = Data1D(x=[1,2], y=[1,2])
 
-    def testComplete2D(self):
-        """
-        Check that a new 2D plot is generated
-        """
-        # TODO when chisqr method coded
-        pass
+        # Model for theory
+        self.widget.SASModelToQModel("cylinder")
+        # Invoke the tested method
+        self.widget.calculateResiduals(test_data)
+        # Check the Chi2 value - should be undetermined
+        self.assertEqual(self.widget.lblChi2Value.text(), '---')
+
+        # Force same data into logic
+        self.widget.logic.data = test_data
+        self.widget.calculateResiduals(test_data)
+        # Now, the difference is 0, as data is the same
+        self.assertEqual(self.widget.lblChi2Value.text(), '0')
+
+        # Change data
+        test_data_2 = Data1D(x=[1,2], y=[2.1,3.49])
+        self.widget.logic.data = test_data_2
+        self.widget.calculateResiduals(test_data)
+        # Now, the difference is non-zero
+        self.assertEqual(float(self.widget.lblChi2Value.text()), 1.715)
 
     def testSetPolyModel(self):
         """
@@ -408,6 +423,79 @@ class FittingWidgetTest(unittest.TestCase):
         # Back to 0
         self.widget.lstParams.indexWidget(func_index).setCurrentIndex(0)
         self.assertEqual(self.widget._model_model.rowCount(), last_row)
+
+    def testPlotTheory(self):
+        """
+        See that theory item can produce a chart
+        """
+        # By default, the compute/plot button is disabled
+        self.assertFalse(self.widget.cmdPlot.isEnabled())
+        self.assertEqual(self.widget.cmdPlot.text(), 'Show Plot')
+
+        # Assign a model
+        self.widget.show()
+        # Change the category index so we have a model available
+        category_index = self.widget.cbCategory.findText("Sphere")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        # Check the enablement/text
+        self.assertTrue(self.widget.cmdPlot.isEnabled())
+        self.assertEqual(self.widget.cmdPlot.text(), 'Calculate')
+
+        # Spying on plot update signal
+        spy = QtSignalSpy(self.widget, self.widget.communicate.plotRequestedSignal)
+
+        # Press Calculate
+        QtTest.QTest.mouseClick(self.widget.cmdPlot, QtCore.Qt.LeftButton)
+
+        # Observe cmdPlot caption change
+        self.assertEqual(self.widget.cmdPlot.text(), 'Show Plot')
+
+        # Make sure the signal has NOT been emitted
+        self.assertEqual(spy.count(), 0)
+
+        # Click again
+        QtTest.QTest.mouseClick(self.widget.cmdPlot, QtCore.Qt.LeftButton)
+
+        # This time, we got the update signal
+        self.assertEqual(spy.count(), 0)
+
+    def testPlotData(self):
+        """
+        See that data item can produce a chart
+        """
+        # By default, the compute/plot button is disabled
+        self.assertFalse(self.widget.cmdPlot.isEnabled())
+        self.assertEqual(self.widget.cmdPlot.text(), 'Show Plot')
+
+        self.widget.show()
+
+        # Set data
+        test_data = Data1D(x=[1,2], y=[1,2])
+
+        # Force same data into logic
+        self.widget.logic.data = test_data
+        self.widget.data_is_loaded = True
+
+        # Change the category index so we have a model available
+        category_index = self.widget.cbCategory.findText("Sphere")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        # Check the enablement/text
+        self.assertTrue(self.widget.cmdPlot.isEnabled())
+        self.assertEqual(self.widget.cmdPlot.text(), 'Show Plot')
+
+        # Spying on plot update signal
+        spy = QtSignalSpy(self.widget, self.widget.communicate.plotRequestedSignal)
+
+        # Press Calculate
+        QtTest.QTest.mouseClick(self.widget.cmdPlot, QtCore.Qt.LeftButton)
+
+        # Observe cmdPlot caption did not change
+        self.assertEqual(self.widget.cmdPlot.text(), 'Show Plot')
+
+        # Make sure the signal has been emitted == new plot
+        self.assertEqual(spy.count(), 1)
 
 
 if __name__ == "__main__":

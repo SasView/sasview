@@ -334,6 +334,7 @@ class GuiManager(object):
         self.communicate.progressBarUpdateSignal.connect(self.updateProgressBar)
         self.communicate.perspectiveChangedSignal.connect(self.perspectiveChanged)
         self.communicate.updateTheoryFromPerspectiveSignal.connect(self.updateTheoryFromPerspective)
+        self.communicate.plotRequestedSignal.connect(self.showPlot)
 
     def addTriggers(self):
         """
@@ -726,5 +727,10 @@ class GuiManager(object):
         """
         self.filesWidget.updateTheoryFromPerspective(index)
 
-
+    def showPlot(self, plot):
+        """
+        Pass the show plot request to the data explorer
+        """
+        if hasattr(self, "filesWidget"):
+            self.filesWidget.displayData(plot)
 

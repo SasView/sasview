@@ -261,6 +261,7 @@ def residualsData1D(reference_data, current_data):
         y = (fn - gn)/en
         residuals.y = -y
     else:
+        # TODO: fix case where applying new data from file on top of existing model data
         y = (fn - gn[index][0]) / en
         residuals.y = y
 

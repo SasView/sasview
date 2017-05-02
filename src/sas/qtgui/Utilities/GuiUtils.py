@@ -228,7 +228,7 @@ class Communicate(QtCore.QObject):
 
     # New plot requested from the GUI manager
     # Old "NewPlotEvent"
-    plotRequestedSignal = QtCore.pyqtSignal(str)
+    plotRequestedSignal = QtCore.pyqtSignal(list)
 
     # Plot update requested from a perspective
     plotUpdateSignal = QtCore.pyqtSignal(list)
@@ -322,6 +322,28 @@ def updateModelItem(item, update_data, name=""):
     # Append the new row to the main item
     item.appendRow(object_item)
 
+def plotsFromFilename(filename, model_item):
+    """
+    Returns the list of plots for the item with text=filename in the model
+    """
+    assert isinstance(model_item, QtGui.QStandardItemModel)
+    assert isinstance(filename, basestring)
+
+    plot_data = []
+    # Iterate over model looking for named items
+    for index in range(model_item.rowCount()):
+        item = model_item.item(index)
+        if str(item.text()) == filename:
+            # TODO: assure item type is correct (either data1/2D or Plotter)
+            plot_data.append(item.child(0).data().toPyObject())
+        # Going 1 level deeper only
+        for index_2 in range(item.rowCount()):
+            item_2 = item.child(index_2)
+            if item_2 and item_2.isCheckable():
+                # TODO: assure item type is correct (either data1/2D or Plotter)
+                plot_data.append(item_2.child(0).data().toPyObject())
+
+    return plot_data
 
 def plotsFromCheckedItems(model_item):
     """

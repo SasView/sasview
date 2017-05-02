@@ -73,6 +73,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.log_points = False
         self.weighting = 0
 
+        # Data for chosen model
+        self.model_data = None
+
         # Which tab is this widget displayed in?
         self.tab_id = id
 
@@ -249,7 +252,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         Set initial control enablement
         """
         self.cmdFit.setEnabled(False)
-        self.cmdPlot.setEnabled(True)
+        self.cmdPlot.setEnabled(False)
         self.options_widget.cmdComputePoints.setVisible(False) # probably redundant
         self.chkPolydispersity.setEnabled(True)
         self.chkPolydispersity.setCheckState(False)
@@ -304,12 +307,17 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.parameters_to_fit = None
         self.has_error_column = False
 
+        # Set enablement on calculate/plot
+        self.cmdPlot.setEnabled(True)
+
         # SasModel -> QModel
         self.SASModelToQModel(model)
 
         if self.data_is_loaded:
+            self.cmdPlot.setText("Show Plot")
             self.calculateQGridForModel()
         else:
+            self.cmdPlot.setText("Calculate")
             # Create default datasets if no data passed
             self.createDefaultDataset()
 
@@ -568,9 +576,27 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Plot the current set of data
         """
+        # Regardless of previous state, this should now be `plot show` functionality only
+        self.cmdPlot.setText("Show Plot")
+        self.recalculatePlotData()
+        self.showPlot()
+
+    def recalculatePlotData(self):
+        """
+        Generate a new dataset for model
+        """
         if not self.data_is_loaded:
             self.createDefaultDataset()
         self.calculateQGridForModel()
+
+    def showPlot(self):
+        """
+        Show the current plot in MPL
+        """
+        # Show the chart if ready
+        data_to_show = self.data if self.data_is_loaded else self.model_data
+        if data_to_show is not None:
+            self.communicate.plotRequestedSignal.emit([data_to_show])
 
     def onOptionsUpdate(self):
         """
@@ -581,7 +607,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # set Q range labels on the main tab
         self.lblMinRangeDef.setText(str(self.q_range_min))
         self.lblMaxRangeDef.setText(str(self.q_range_max))
-        self.onPlot()
+        self.recalculatePlotData()
 
     def setDefaultStructureCombo(self):
         """
@@ -765,7 +791,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         # Force the chart update when actual parameters changed
         if model_column == 1:
-            self.onPlot()
+            self.recalculatePlotData()
 
     def checkboxSelected(self, item):
         # Assure we're dealing with checkboxes
@@ -890,8 +916,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Plot the current 1D data
         """
-        fitted_plot = self.logic.new1DPlot(return_data, self.tab_id)
-        self.calculateResiduals(fitted_plot)
+        fitted_data = self.logic.new1DPlot(return_data, self.tab_id)
+        self.calculateResiduals(fitted_data)
+        self.model_data = fitted_data
 
     def complete2D(self, return_data):
         """
@@ -899,6 +926,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         fitted_data = self.logic.new2DPlot(return_data)
         self.calculateResiduals(fitted_data)
+        self.model_data = fitted_data
 
     def calculateResiduals(self, fitted_data):
         """
@@ -913,14 +941,14 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         chi2_repr = "---" if chi2 is None else GuiUtils.formatNumber(chi2, high=True)
         self.lblChi2Value.setText(chi2_repr)
 
+        self.communicate.plotUpdateSignal.emit([fitted_data])
+
         # Plot residuals if actual data
         if self.data_is_loaded:
             residuals_plot = FittingUtilities.plotResiduals(self.data, fitted_data)
             residuals_plot.id = "Residual " + residuals_plot.id
             self.createNewIndex(residuals_plot)
             self.communicate.plotUpdateSignal.emit([residuals_plot])
-
-        self.communicate.plotUpdateSignal.emit([fitted_data])
 
     def calcException(self, etype, value, tb):
         """
