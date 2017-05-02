@@ -537,7 +537,7 @@ This includes the following:
         very close to zero.
     sin, cos, tan, asin, acos, atan:
         Trigonometry functions and inverses, operating on radians.
-    sinh, cos, tanh, asinh, acosh, atanh:
+    sinh, cosh, tanh, asinh, acosh, atanh:
         Hyperbolic trigonometry functions.
     atan2(y,x):
         Angle from the $x$\ -axis to the point $(x,y)$, which is equal to

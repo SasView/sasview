@@ -1,6 +1,8 @@
 """
 Extension to MPL to support the binding of artists to key/mouse events.
 """
+from __future__ import print_function
+
 import sys
 import logging
 
@@ -62,7 +64,7 @@ class BindArtist(object):
                 canvas.mpl_connect('scroll_event', self._onScroll)
             ]
         except:
-            print "bypassing scroll_event: wrong matplotlib version"
+            print("bypassing scroll_event: wrong matplotlib version")
             self._connections = [
                 canvas.mpl_connect('motion_notify_event', self._onMotion),
                 canvas.mpl_connect('button_press_event', self._onClick),
