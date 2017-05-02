@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import os
 import sys
 import wx
@@ -77,7 +79,7 @@ class ImageView:
             if parent is not None:
                 wx.PostEvent(parent, StatusEvent(status=err_msg, info="error"))
             else:
-                print err_msg
+                print(err_msg)
 
     def choose_data_file(self, location=None):
         """
@@ -300,7 +302,7 @@ class SetDialog(wx.Dialog):
                 wx.PostEvent(self.base, StatusEvent(status=err_msg,
                                                     info="error"))
             else:
-                print err_msg
+                print(err_msg)
         return flag
 
     def _on_z_enter(self, event=None):
@@ -331,7 +333,7 @@ class SetDialog(wx.Dialog):
                 wx.PostEvent(self.base, StatusEvent(status=err_msg,
                                                     info="error"))
             else:
-                print err_msg
+                print(err_msg)
         return flag
 
     def on_set(self, event):
@@ -360,7 +362,7 @@ class SetDialog(wx.Dialog):
                 wx.PostEvent(self.base, StatusEvent(status=err_msg,
                                                     info="error"))
             else:
-                print err_msg
+                print(err_msg)
 
         self.OnClose(event)
 

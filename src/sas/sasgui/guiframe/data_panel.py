@@ -10,6 +10,8 @@
 """
 This module provides Graphic interface for the data_manager module.
 """
+from __future__ import print_function
+
 import wx
 from wx.build import build_options
 
@@ -513,7 +515,7 @@ class DataPanel(ScrolledPanel, PanelBase):
             elif issubclass(data.__class__, Data2D):
                 self.parent.save_data2d(data, default_name)
             else:
-                print "unable to save this type of data"
+                print("unable to save this type of data")
 
     def layout_data_list(self):
         """
@@ -1496,6 +1498,6 @@ if __name__ == "__main__":
         window.load_data_list(list=temp_data_list)
     except:
         # raise
-        print "error", sys.exc_value
+        print("error", sys.exc_value)
 
     app.MainLoop()
