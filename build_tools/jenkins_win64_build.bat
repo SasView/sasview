@@ -14,7 +14,7 @@ echo %WORKSPACE%
 
 :: SET SASVIEW GITHASH ################################################
 cd %WORKSPACE%
-cd sasview\sasview
+cd sasview\src\sas\sasview
 git rev-parse HEAD > tmpFile_githash
 SET /p githash= < tmpFile_githash
 DEL tmpFile_githash
@@ -80,7 +80,7 @@ echo F | xcopy sasview-*.egg sasview.egg /Y
 :: SASVIEW INSTALLER ##################################################
 cd %WORKSPACE%
 cd sasview
-cd sasview
+cd installers
 %PYTHON% setup_exe.py py2exe
 %PYTHON% installer_generator.py
 %INNO% installer.iss
