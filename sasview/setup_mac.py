@@ -10,25 +10,30 @@ NOTES:
                mf.import_hook('pytz.tzinfo', m, ['UTC'])
    12/05/2011: Needs macholib >= 1.4.3 and py2app >= 0.6.4 to create a 64-bit app
 """
-from setuptools import setup
+from __future__ import print_function
+
 import os
 import string
 import sys
-#Extending recursion limit
-sys.setrecursionlimit(10000)
-
-import macholib_patch
 
 from distutils.util import get_platform
 from distutils.filelist import findall
 from distutils.sysconfig import get_python_lib
+
+from setuptools import setup
+
+import macholib_patch
+
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-platform = '%s-%s'%(get_platform(),sys.version[:3])
+platform = '%s-%s'%(get_platform(), sys.version[:3])
 doc_path = os.path.join(root, 'build', 'lib.'+platform, 'doc')
 env = os.path.join(root, 'sasview-install', 'lib', 'python2.7', 'site-packages')
 #sys.path.insert(0, env)
 
-print "BUILDING PATH INSIDE", env
+#Extending recursion limit
+sys.setrecursionlimit(10000)
+
+print("BUILDING PATH INSIDE", env)
 
 from sas.sasview import local_config
 
@@ -59,9 +64,11 @@ RESOURCES_FILES.append(os.path.join(readers.get_data_path(),'defaults.json'))
 sasview_path = os.path.join('..','src','sas','sasview')
 custom_config_file = os.path.join(sasview_path, 'custom_config.py')
 local_config_file = os.path.join(sasview_path, 'local_config.py')
+logging_ini = os.path.join(sasview_path, 'logging.ini')
 DATA_FILES.append(('.', [custom_config_file]))
 DATA_FILES.append(('config', [custom_config_file]))
 DATA_FILES.append(('.', [local_config_file]))
+DATA_FILES.append(('.', [logging_ini]))
 
 # default_categories.json is beside the config files
 category_config = os.path.join(sasview_path, 'default_categories.json')
@@ -110,7 +117,7 @@ for f in findall(opencl_include_dir):
     DATA_FILES.append((os.path.join("includes","pyopencl"), [f]))
 
 # See if the documentation has been built, and if so include it.
-print doc_path
+print(doc_path)
 if os.path.exists(doc_path):
     for dirpath, dirnames, filenames in os.walk(doc_path):
         for filename in filenames:

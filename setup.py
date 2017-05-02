@@ -5,6 +5,7 @@
     Setup for SasView
     TODO: Add checks to see that all the dependencies are on the system
 """
+from __future__ import print_function
 
 import os
 import subprocess
@@ -65,7 +66,7 @@ if os.path.isdir(sas_dir):
     #             os.remove(file_path)
 
 if os.path.exists(SASVIEW_BUILD):
-    print "Removing existing build directory", SASVIEW_BUILD, "for a clean build"
+    print("Removing existing build directory", SASVIEW_BUILD, "for a clean build")
     shutil.rmtree(SASVIEW_BUILD)
 
 # 'sys.maxsize' and 64bit: Not supported for python2.5

@@ -15,39 +15,6 @@ reasons.
 """
 import os
 import logging
-import urllib
-
-import webbrowser
-import wx
-
-from sas.sasgui import get_app_dir
-
-SPHINX_DOC_ENV = "SASVIEW_DOC_PATH"
-WX_SUPPORTS_HTML2 = True
-try:
-    import wx.html2 as html
-except:
-    WX_SUPPORTS_HTML2 = False
-
-
-=======
-"""
-documentation module provides a simple means to add help throughout the
-application. It checks for the existence of html2 package needed to support
-fully html panel which supports css.  The class defined here takes a title for
-the particular help panel, a pointer to the html documentation file of interest
-within the documentation tree along with a 'command' string such as a page
-anchor or a query string etc.  The path to the doc directory is retrieved
-automatically by the class itself.  Thus with these three pieces of information
-the class generates a panel with the appropriate title bar and help file
-formatted according the style sheets called in the html file.  Finally, if an
-old version of Python is running and the html2 package is not available the
-class brings up the default browser and passes the file:/// string to it.  In
-this case however the instruction portion is usually not passed for security
-reasons.
-"""
-import os
-import logging
 import webbrowser
 import urllib
 import sys
