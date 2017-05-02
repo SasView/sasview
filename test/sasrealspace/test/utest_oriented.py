@@ -2,6 +2,7 @@
     Unit tests for specific oriented models
     @copyright: University of Tennessee, for the DANSE project
 """
+from __future__ import print_function
 
 import unittest, math, sys
 
@@ -15,11 +16,11 @@ import unittest, math, sys
 
 try:
     import VolumeCanvas
-    print "Testing local version"
+    print("Testing local version")
 except:
-    print sys.exc_value
+    print(sys.exc_value)
     #testing the version that is working on
-    print "Testing installed version"
+    print("Testing installed version")
     import sas.sascalc.realspace.VolumeCanvas as VolumeCanvas
  
 
@@ -240,7 +241,7 @@ class TestEllipsoid(unittest.TestCase):
         try:
             self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
         except:
-            print "Error", ana_val, sim_val, sim_val/ana_val
+            print("Error", ana_val, sim_val, sim_val/ana_val)
             raise sys.exc_type, sys.exc_value
 
 class TestCoreShell(unittest.TestCase):
@@ -394,7 +395,7 @@ class TestRunMethods(unittest.TestCase):
         try:
             self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
         except:
-            print "Error", ana_val, sim_val, sim_val/ana_val
+            print("Error", ana_val, sim_val, sim_val/ana_val)
             raise sys.exc_type, sys.exc_value
 
     def testRunXY_float(self):
@@ -406,7 +407,7 @@ class TestRunMethods(unittest.TestCase):
         try:
             self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
         except:
-            print "Error", ana_val, sim_val, sim_val/ana_val
+            print("Error", ana_val, sim_val, sim_val/ana_val)
             raise sys.exc_type, sys.exc_value
 
     def testRun_float(self):
@@ -418,7 +419,7 @@ class TestRunMethods(unittest.TestCase):
         try:
             self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
         except:
-            print "Error", ana_val, sim_val, sim_val/ana_val
+            print("Error", ana_val, sim_val, sim_val/ana_val)
             raise sys.exc_type, sys.exc_value
 
     def testRun_list(self):
@@ -430,7 +431,7 @@ class TestRunMethods(unittest.TestCase):
         try:
             self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
         except:
-            print "Error", ana_val, sim_val, sim_val/ana_val
+            print("Error", ana_val, sim_val, sim_val/ana_val)
             raise sys.exc_type, sys.exc_value
 
 class TestParamChange(unittest.TestCase):

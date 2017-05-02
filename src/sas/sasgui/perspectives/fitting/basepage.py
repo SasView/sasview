@@ -1,6 +1,8 @@
 """
 Base Page for fitting
 """
+from __future__ import print_function
+
 import sys
 import os
 import wx
@@ -656,10 +658,10 @@ class BasicPage(ScrolledPanel, PanelBase):
             event.Skip()
         # It seems MAC needs wxCallAfter
         if event.GetId() == GUIFRAME_ID.COPYEX_ID:
-            print "copy excel"
+            print("copy excel")
             wx.CallAfter(self.get_copy_excel)
         elif event.GetId() == GUIFRAME_ID.COPYLAT_ID:
-            print "copy latex"
+            print("copy latex")
             wx.CallAfter(self.get_copy_latex)
         else:
             wx.CallAfter(self.get_copy)
@@ -3367,8 +3369,8 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         except Exception:
             logger.error(traceback.format_exc())
-            print "Error in BasePage._paste_poly_help: %s" % \
-                  sys.exc_info()[1]
+            print("Error in BasePage._paste_poly_help: %s" % \
+                  sys.exc_info()[1])
 
     def _set_disp_cb(self, isarray, item):
         """
@@ -3397,7 +3399,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             Method to be called by sub-classes
             Moveit; This method doesn't belong here
         """
-        print "BasicPage.update_pinhole_smear was called: skipping"
+        print("BasicPage.update_pinhole_smear was called: skipping")
         return
 
     def _read_category_info(self):
@@ -3573,7 +3575,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         wx.EVT_COMBOBOX(self.multifactorbox, wx.ID_ANY, self._on_select_model)
         # check model type to show sizer
         if self.model is not None:
-            print "_set_model_sizer_selection: disabled."
+            print("_set_model_sizer_selection: disabled.")
             # self._set_model_sizer_selection(self.model)
 
         sizer_selection.Add(self.text1)

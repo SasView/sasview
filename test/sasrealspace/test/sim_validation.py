@@ -4,13 +4,15 @@
     @copyright: University of Tennessee, 2007
     @license: This software is provided as part of the DANSE project
 """
+from __future__ import print_function
+
 import math, time, pylab
 
 try:
     import VolumeCanvas
-    print "Testing local version"
+    print("Testing local version")
 except:
-    print "Testing installed version"
+    print("Testing installed version")
     import sas.sascalc.realspace.VolumeCanvas as VolumeCanvas
      
 class Validator:
@@ -249,8 +251,8 @@ def validate_model(validator, q_min, q_max, n_q):
     for q in q_list:
         ana = validator.run_ana(q)
         sim, err = validator.run_sim(q)
-        print "q=%-g  ana=%-g  sim=%-g  err=%-g  diff=%-g (%-g) %s" % (q, ana, sim, err, 
-                        (sim-ana), sim/ana, str(math.fabs(sim-ana)>err))
+        print("q=%-g  ana=%-g  sim=%-g  err=%-g  diff=%-g (%-g) %s" % (q, ana, sim, err, 
+                        (sim-ana), sim/ana, str(math.fabs(sim-ana)>err)))
         output.write("%g  %g  %g  %g\n" % (q, ana, sim, err))
     output.close()
        
@@ -277,10 +279,10 @@ def validate_model_2D(validator, q_min, q_max, phi, n_q):
     for q in q_list:
         ana = validator.run_ana2D(q*math.cos(phi), q*math.sin(phi))
         sim, err = validator.run_sim2D(q*math.cos(phi), q*math.sin(phi))
-        print "q=%-g  ana=%-g  sim=%-g  err=%-g  diff=%-g (%-g) %s" % (q, ana, sim, err, 
-                        (sim-ana), sim/ana, str(math.fabs(sim-ana)>err))
+        print("q=%-g  ana=%-g  sim=%-g  err=%-g  diff=%-g (%-g) %s" % (q, ana, sim, err, 
+                        (sim-ana), sim/ana, str(math.fabs(sim-ana)>err)))
         output.write("%g  %g  %g  %g\n" % (q, ana, sim, err))
-    print "Time elapsed: ", time.time()-t_0
+    print("Time elapsed: ", time.time()-t_0)
     output.close()
        
 def check_density(validator, q, d_min, d_max, n_d): 
@@ -305,9 +307,9 @@ def check_density(validator, q, d_min, d_max, n_d):
     ana = validator.run_ana(q)
     for d in d_list:
         sim, err = validator.run_sim(q, density=d)
-        print "d=%-g  ana=%-g  sim=%-g  err=%-g  diff=%-g (%g) %s" % \
+        print("d=%-g  ana=%-g  sim=%-g  err=%-g  diff=%-g (%g) %s" % \
             (d, ana, sim, err, (sim-ana), (sim-ana)/ana, 
-             str(math.fabs(sim-ana)>err))
+             str(math.fabs(sim-ana)>err)))
         output.write("%g  %g  %g  %g \n" % (d, ana, sim, err))
     output.close()
 
