@@ -1,10 +1,13 @@
 # Setup and find Custom config dir
+from __future__ import print_function
+
 import os.path
 import logging
 import shutil
-import imp
 
-from sas.sasgui import get_custom_config_path
+from sasmodels.custom import load_module_from_path
+
+from sas.sasgui import get_custom_config_path, get_app_dir
 
 logger = logging.getLogger(__name__)
 
@@ -21,36 +24,36 @@ def setup_custom_config():
 
 def _setup_custom_config():
     path = get_custom_config_path()
-    try:
-        if not os.path.isfile(path):
+    if not os.path.isfile(path):
+        try:
             # if the custom config file does not exist, copy the default from
             # the app dir
             shutil.copyfile(os.path.join(get_app_dir(), "custom_config.py"),
                             path)
-        #Adding SAS_OPENCL if it doesn't exist in the config file
-        # - to support backcompability
-        if not "SAS_OPENCL" in open(path).read():
+        except Exception:
+            logger.error("Could not copy default custom config.")
+
+    #Adding SAS_OPENCL if it doesn't exist in the config file
+    # - to support backcompability
+    if not "SAS_OPENCL" in open(path).read():
+        try:
             open(config_file, "a+").write("SAS_OPENCL = \"None\"\n")
-    except Exception:
-        #import traceback; logging.error(traceback.format_exc())
-        logger.error("Could not copy default custom config.")
+        except Exception:
+            logger.error("Could not update custom config with SAS_OPENCL.")
 
     custom_config = _load_config(path)
     return custom_config
 
+
 def _load_config(path):
     if os.path.exists(path):
         try:
-            fObj = None
-            fObj, config_path, descr = imp.find_module('custom_config', [os.path.dirname(path)])
-            custom_config = imp.load_module('custom_config', fObj, config_path, descr)
-            logger.info("GuiManager loaded %s" % config_path)
-            return custom_config
-        except Exception:
-            logger.error("Error loading %s: %s" % (path, sys.exc_value))
-        finally:
-            if fObj is not None:
-                fObj.close()
+            module = load_module_from_path('sas.sasview.custom_config', path)
+            logger.info("GuiManager loaded %s", path)
+            return module
+        except Exception as exc:
+            logger.error("Error loading %s: %s", path, exc)
+
     from sas.sasview import custom_config
-    logging.info("GuiManager custom_config defaults to sas.sasview.custom_config")
+    logger.info("GuiManager custom_config defaults to sas.sasview.custom_config")
     return custom_config

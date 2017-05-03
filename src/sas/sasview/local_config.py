@@ -93,7 +93,7 @@ _danse_url = "http://www.cacr.caltech.edu/projects/danse/release/index.html"
 _inst_url = "http://www.utk.edu"
 _corner_image = os.path.join(icon_path, "angles_flat.png")
 _welcome_image = os.path.join(icon_path, "SVwelcome.png")
-_copyright = "(c) 2009 - 2017, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft and DLS"
+_copyright = "(c) 2009 - 2017, UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft, and DLS"
 marketplace_url = "http://marketplace.sasview.org/"
 
 #edit the list of file state your plugin can read
@@ -146,6 +146,9 @@ UPDATE_TIMEOUT = 2
 
 #OpenCL option
 SAS_OPENCL = None
+
+# Time out for updating sasview
+UPDATE_TIMEOUT = 2
 
 def printEVT(message):
     if __EVT_DEBUG__:

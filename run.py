@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
-
 """
 Run sasview in place.  This allows sasview to use the python
 files in the source tree without having to call setup.py install
@@ -14,6 +13,7 @@ Usage:
 Without arguments run.py runs sasview.  With arguments, run.py will run
 the given module or script.
 """
+from __future__ import print_function
 
 import imp
 import os

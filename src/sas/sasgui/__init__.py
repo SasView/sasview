@@ -46,13 +46,9 @@ APP_FOLDER = find_app_folder()
 
 
 def get_app_dir():
-    if APP_FOLDER is None:
-        raise RuntimeError("Need to initialize sas.sasgui.USER_FOLDER")
     return APP_FOLDER
 
 def get_user_dir():
-    if USER_FOLDER is None:
-        raise RuntimeError("Need to initialize sas.sasgui.USER_FOLDER")
     return USER_FOLDER
 
 def get_custom_config_path():
@@ -73,27 +69,17 @@ def get_local_config():
 def _load_config():
     import os
     import sys
-    import imp
     import logging
+    from sasmodels.custom import load_module_from_path
 
     logger = logging.getLogger(__name__)
     dirname = get_app_dir()
     filename = 'local_config.py'
     path = os.path.join(dirname, filename)
-    if os.path.exists(path):
-        try:
-            fObj = None
-            fObj, config_path, descr = imp.find_module('local_config', [APP_FOLDER])
-            config = imp.load_module('local_config', fObj, config_path, descr)
-            logger.info("GuiManager loaded %s" % config_path)
-            return config
-        except Exception:
-            import traceback; logger.error(traceback.format_exc())
-            logger.error("Error loading %s: %s" % (path, sys.exc_value))
-        finally:
-            if fObj is not None:
-                fObj.close()
-    from sas.sasgui.guiframe import config
-    logger.info("GuiManager config defaults to sas.sasgui.guiframe")
-    return config
-
+    try:
+        module = load_module_from_path('sas.sasgui.local_config', path)
+        logger.info("GuiManager loaded %s", path)
+        return module
+    except Exception as exc:
+        logger.critical("Error loading %s: %s", path, exc)
+        sys.exit()
