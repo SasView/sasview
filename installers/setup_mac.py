@@ -61,7 +61,9 @@ from sas.sascalc.dataloader import readers
 RESOURCES_FILES.append(os.path.join(readers.get_data_path(),'defaults.json'))
 
 # Copy the config files
-sasview_path = os.path.join('..','src','sas','sasview')
+sas_path = os.path.join('..', 'src', 'sas')
+DATA_FILES.append(('.', [os.path.join(sas_path, 'logging.ini')]))
+sasview_path = os.path.join(sas_path,'sasview')
 custom_config_file = os.path.join(sasview_path, 'custom_config.py')
 local_config_file = os.path.join(sasview_path, 'local_config.py')
 logging_ini = os.path.join(sasview_path, 'logging.ini')

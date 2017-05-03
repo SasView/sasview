@@ -221,11 +221,12 @@ if os.path.isfile(reader_config):
     DATA_FILES.append(('.', [reader_config]))
 
 # Copy the config files
-sasview_path = os.path.join('..','src','sas','sasview')
+sas_path = os.path.join('..', 'src', 'sas')
+DATA_FILES.append(('.', [os.path.join(sas_path, 'logging.ini')]))
+sasview_path = os.path.join(sas_path,'sasview')
 config_files = [
     'custom_config.py',
     'local_config.py',
-    'logging.init',
     #'default_categories.json',
     ]
 DATA_FILES.append(('.', [os.path.join(sasview_path, v) for v in config_files]))

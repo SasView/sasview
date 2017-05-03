@@ -145,8 +145,8 @@ if __name__ == "__main__":
     # Need to add absolute path before actual prepare call,
     # so logging can be done during initialization process too
     root = abspath(dirname(__file__))
-    addpath(joinpath(root, 'sasview'))
-    from logger_config import SetupLogger
+    addpath(joinpath(root, 'src'))
+    from sas.logger_config import SetupLogger
     logger = SetupLogger(__name__).config_development()
 
     logger.debug("Starting SASVIEW in debug mode.")

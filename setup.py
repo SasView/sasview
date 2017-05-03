@@ -369,9 +369,9 @@ append_file(file_sources, gen_dir)
 #doc_files = add_doc_files('doc')
 
 # SasView
+package_data['sas'] = ['logging.ini']
 package_data['sas.sasview'] = ['images/*',
                                'media/*',
-                               'logging.ini',
                                'test/*.txt',
                                'test/1d_data/*',
                                'test/2d_data/*',
