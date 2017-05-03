@@ -438,55 +438,46 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         # Assure no multiple plots for the same ID
         plot_to_show = data_list[0]
-        for plot in PlotHelper.currentPlots():
-            if plot == plot_to_show.id:
-                return
+        if plot_to_show.id in PlotHelper.currentPlots():
+            return
 
-        new_plot = Plotter(self)
         # Now query the model item for available plots
         filename = plot_to_show.filename
         model = self.model if plot_to_show.is_data else self.theory_model
         plots = GuiUtils.plotsFromFilename(filename, model)
-        for plot in plots:
-            new_plot.plot(plot)
-        self.plotAdd(new_plot)
+        plots = [(None, plot) for plot in plots]
+        self.plotData(plots)
 
-    def newPlot(self):
-        """
-        Create a new matplotlib chart from selected data
-        """
-        # Check which tab is currently active
-        if self.current_view == self.treeView:
-            plots = GuiUtils.plotsFromCheckedItems(self.model)
-        else:
-            plots = GuiUtils.plotsFromCheckedItems(self.theory_model)
+    def addDataPlot2D(self, plot_set, item):
+        plot2D = Plotter2D(self)
+        plot2D.item = item
+        plot2D.plot(plot_set)
+        self.addPlot(plot2D)
+        #============================================
+        ## Attach silx
+        #from silx.gui import qt
+        #from silx.gui.plot import StackView
+        #sv = StackView()
+        #sv.setColormap("jet", autoscale=True)
+        #sv.setStack(plot_set.data.reshape(1,100,100))
+        ##sv.setLabels(["x: -10 to 10 (200 samples)",
+        ##              "y: -10 to 5 (150 samples)"])
+        #sv.show()
+        #============================================
 
+    def plotData(self, plots):
+        """
+        Takes 1D/2D data and generates a single plot (1D) or multiple plots (2D)
+        """
         # Call show on requested plots
         # All same-type charts in one plot
         new_plot = Plotter(self)
-
-        def addDataPlot2D(plot_set, item):
-            plot2D = Plotter2D(self)
-            plot2D.item = item
-            plot2D.plot(plot_set)
-            self.plotAdd(plot2D)
-            #============================================
-            ## Attach silx
-            #from silx.gui import qt
-            #from silx.gui.plot import StackView
-            #sv = StackView()
-            #sv.setColormap("jet", autoscale=True)
-            #sv.setStack(plot_set.data.reshape(1,100,100))
-            ##sv.setLabels(["x: -10 to 10 (200 samples)",
-            ##              "y: -10 to 5 (150 samples)"])
-            #sv.show()
-            #============================================
 
         for item, plot_set in plots:
             if isinstance(plot_set, Data1D):
                 new_plot.plot(plot_set)
             elif isinstance(plot_set, Data2D):
-                addDataPlot2D(plot_set, item)
+                self.addDataPlot2D(plot_set, item)
             else:
                 msg = "Incorrect data type passed to Plotting"
                 raise AttributeError, msg
@@ -494,9 +485,21 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if plots and \
             hasattr(new_plot, 'data') and \
             isinstance(new_plot.data, Data1D):
-                self.plotAdd(new_plot)
+                self.addPlot(new_plot)
 
-    def plotAdd(self, new_plot):
+    def newPlot(self):
+        """
+        Select checked data and plot it
+        """
+        # Check which tab is currently active
+        if self.current_view == self.treeView:
+            plots = GuiUtils.plotsFromCheckedItems(self.model)
+        else:
+            plots = GuiUtils.plotsFromCheckedItems(self.theory_model)
+
+        self.plotData(plots)
+
+    def addPlot(self, new_plot):
         """
         Helper method for plot bookkeeping
         """

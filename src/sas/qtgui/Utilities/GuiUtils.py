@@ -336,12 +336,12 @@ def plotsFromFilename(filename, model_item):
         if str(item.text()) == filename:
             # TODO: assure item type is correct (either data1/2D or Plotter)
             plot_data.append(item.child(0).data().toPyObject())
-        # Going 1 level deeper only
-        for index_2 in range(item.rowCount()):
-            item_2 = item.child(index_2)
-            if item_2 and item_2.isCheckable():
-                # TODO: assure item type is correct (either data1/2D or Plotter)
-                plot_data.append(item_2.child(0).data().toPyObject())
+            # Going 1 level deeper only
+            for index_2 in range(item.rowCount()):
+                item_2 = item.child(index_2)
+                if item_2 and item_2.isCheckable():
+                    # TODO: assure item type is correct (either data1/2D or Plotter)
+                    plot_data.append(item_2.child(0).data().toPyObject())
 
     return plot_data
 
