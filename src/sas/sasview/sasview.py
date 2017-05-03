@@ -15,18 +15,10 @@ import os
 import os.path
 import sys
 import traceback
-
-from sas.sasview.logger_config import SetupLogger
+import logging
 
 reload(sys)
 sys.setdefaultencoding("iso-8859-1")
-
-logger = SetupLogger(__name__).config_production()
-# Log the start of the session
-logger.info(" --- SasView session started ---")
-# Log the python version
-logger.info("Python: %s" % sys.version)
-
 
 PLUGIN_MODEL_DIR = 'plugin_models'
 APP_NAME = 'SasView'
@@ -38,6 +30,8 @@ class SasView():
     def __init__(self):
         """
         """
+        logger = logging.getLogger(__name__)
+
         from sas.sasgui.guiframe.gui_manager import SasViewApp
         self.gui = SasViewApp(0)
         # Set the application manager for the GUI
@@ -118,22 +112,14 @@ class SasView():
 
 
 def setup_logging():
-    log_file = os.path.join(os.path.expanduser("~"), 'sasview.log')
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s %(levelname)s %(message)s',
-                        filename=log_file,
-                        )
-    logging.captureWarnings(True)
+    from sas.logger_config import SetupLogger
 
-    stderr_logger = logging.getLogger('STDERR')
-    sl = StreamToLogger(stderr_logger, logging.ERROR)
-    sys.stderr = sl
-
+    logger = SetupLogger(__name__).config_production()
     # Log the start of the session
-    logging.info(" --- SasView session started ---")
-
+    logger.info(" --- SasView session started ---")
     # Log the python version
-    logging.info("Python: %s" % sys.version)
+    logger.info("Python: %s" % sys.version)
+    return logger
 
 
 def setup_wx():
@@ -142,6 +128,7 @@ def setup_wx():
     # This variable does not have to be set of course, and through normal usage will
     # probably not be, but this can make things a little easier when upgrading to a
     # new version of wx.
+    logger = logging.getLogger(__name__)
     WX_ENV_VAR = "SASVIEW_WX_VERSION"
     if WX_ENV_VAR in os.environ:
         logger.info("You have set the %s environment variable to %s." % \
@@ -199,6 +186,7 @@ def run_gui():
 
 
 def run_cli():
+    setup_logging()
     setup_mpl()
     if len(sys.argv) == 1:
         # Run sasview as an interactive python interpreter

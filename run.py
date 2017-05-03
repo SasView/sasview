@@ -138,7 +138,24 @@ def prepare():
 
     sys.path.append(build_path)
 
+    set_git_tag()
     # print "\n".join(sys.path)
+
+def set_git_tag():
+    try:
+        import subprocess
+        import os
+        import platform
+        FNULL = open(os.devnull, 'w')
+        if platform.system() == "Windows":
+            args = ['git', 'describe', '--tags']
+        else:
+            args = ['git describe --tags']
+        git_revision = subprocess.check_output(args, stderr=FNULL, shell=True)
+        import sas.sasview
+        sas.sasview.__build__ = str(git_revision).strip()
+    except subprocess.CalledProcessError as cpe:
+        logger.warning("Error while determining build number\n  Using command:\n %s \n Output:\n %s"% (cpe.cmd,cpe.output))
 
 
 if __name__ == "__main__":
