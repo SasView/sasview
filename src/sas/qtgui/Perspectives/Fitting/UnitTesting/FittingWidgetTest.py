@@ -497,6 +497,48 @@ class FittingWidgetTest(unittest.TestCase):
         # Make sure the signal has been emitted == new plot
         self.assertEqual(spy.count(), 1)
 
+    def testOnFit(self):
+        """
+        Test the threaded fitting call
+        """
+        # Set data
+        test_data = Data1D(x=[1,2], y=[1,2])
+
+        # Force same data into logic
+        self.widget.logic.data = test_data
+        self.widget.data_is_loaded = True
+        category_index = self.widget.cbCategory.findText("Sphere")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        self.widget.show()
+
+        # Test no fitting params
+        self.widget.parameters_to_fit = []
+
+        with self.assertRaises(ValueError) as error:
+            self.widget.onFit()
+        self.assertEqual(str(error.exception), 'no fitting parameters')
+
+        # Assing fitting params
+        self.widget.parameters_to_fit = ['scale']
+
+        # Spying on status update signal
+        update_spy = QtSignalSpy(self.widget, self.widget.communicate.statusBarUpdateSignal)
+
+        with threads.deferToThread as MagicMock:
+            self.widget.onFit()
+            # thread called
+            self.assertTrue(threads.deferToThread.called)
+            # thread method is 'compute'
+            self.assertEqual(threads.deferToThread.call_args_list[0][0][0].__name__, 'compute')
+
+            # the fit button changed caption and got disabled
+            self.assertEqual(self.widget.cmdFit.text(), 'Calculating...')
+            self.assertFalse(self.widget.cmdFit.isEnabled())
+
+            # Signal pushed up
+            self.assertEqual(update_spy.count(), 1)
+
 
 if __name__ == "__main__":
     unittest.main()

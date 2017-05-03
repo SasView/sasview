@@ -455,6 +455,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # start the trhrhread
         calc_thread = threads.deferToThread(calc_fit.compute)
         calc_thread.addCallback(self.fitComplete)
+        calc_thread.addErrback(self.fitFailed)
 
         #disable the Fit button
         self.cmdFit.setText('Calculating...')
@@ -465,6 +466,12 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         """
         print "UPDATE FIT"
+        pass
+
+    def fitFailed(self, reason):
+        """
+        """
+        print "FIT FAILED: ", reason
         pass
 
     def fitComplete(self, result):
