@@ -5,7 +5,6 @@ exists in the current directory. Edit local_config.py according to your needs.
 """
 from __future__ import print_function
 
-import local_config
 import os
 import string
 
@@ -57,20 +56,20 @@ def find_extension():
             file_type, ext = string.split(item, "|*", 1)
             if ext.strip() not in ['.*', ''] and ext.strip() not in list_data:
                 list_data.append((ext, 'string', file_type))
-    except:
+    except Exception:
         pass
     try:
         file_type, ext = string.split(local_config.APPLICATION_WLIST, "|*", 1)
         if ext.strip() not in ['.', ''] and ext.strip() not in list_app:
             list_app.append((ext, 'string', file_type))
-    except:
+    except Exception:
         pass
     try:
         for item in local_config.PLUGINS_WLIST:
             file_type, ext = string.split(item, "|*", 1)
             if ext.strip() not in ['.', ''] and ext.strip() not in list_app:
                 list_app.append((ext, 'string', file_type))
-    except:
+    except Exception:
         pass
     return list_data, list_app
 DATA_EXTENSION, APP_EXTENSION = find_extension()
@@ -169,16 +168,15 @@ def write_registry(data_extension=None, app_extension=None):
 
     return msg
 
-def write_language(language=['english'], msfile="compiler:Default.isl"):
+def write_languages(languages=('english',), msfile="compiler:Default.isl"):
     """
     define the language of the application
     """
     msg = ''
-    if language:
+    if languages:
         msg = "\n\n[Languages]\n"
-        for lang in language:
-            msg += """Name: "%s";\tMessagesFile: "%s"\n""" % (str(lang),
-                                                           str(msfile))
+        for lang in languages:
+            msg += """Name: "%s";\tMessagesFile: "%s"\n""" % (str(lang), str(msfile))
     return msg
 
 def write_tasks():
@@ -357,7 +355,7 @@ def generate_installer():
 
     TEMPLATE += write_registry(data_extension=DATA_EXTENSION,
                                 app_extension=APP_EXTENSION)
-    TEMPLATE += write_language()
+    TEMPLATE += write_languages()
     TEMPLATE += write_tasks()
     TEMPLATE += write_file()
     TEMPLATE += write_icon()

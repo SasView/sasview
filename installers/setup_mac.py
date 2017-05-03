@@ -134,32 +134,32 @@ def find_extension():
     Describe the extensions that can be read by the current application
     """
     try:
-        list = []
+        extensions = []
         EXCEPTION_LIST = ['*', '.', '']
         from sas.sascalc.dataloader.loader import Loader
         wild_cards = Loader().get_wildcards()
         for item in wild_cards:
             #['All (*.*)|*.*']
             file_type, ext = string.split(item, "|*.", 1)
-            if ext.strip() not in EXCEPTION_LIST and ext.strip() not in list:
-                list.append(ext)
-    except:
+            if ext.strip() not in EXCEPTION_LIST and ext.strip() not in extensions:
+                extensions.append(ext)
+    except Exception:
         pass
     try:
         file_type, ext = string.split(local_config.APPLICATION_WLIST, "|*.", 1)
-        if ext.strip() not in EXCEPTION_LIST and ext.strip() not in list:
-            list.append(ext)
-    except:
+        if ext.strip() not in EXCEPTION_LIST and ext.strip() not in extensions:
+            extensions.append(ext)
+    except Exception:
         pass
     try:
         for item in local_config.PLUGINS_WLIST:
             file_type, ext = string.split(item, "|*.", 1)
-            if ext.strip() not in EXCEPTION_LIST and ext.strip() not in list:
-                list.append(ext)
-    except:
+            if ext.strip() not in EXCEPTION_LIST and ext.strip() not in extensions:
+                extensions.append(ext)
+    except Exception:
         pass
 
-    return list
+    return extensions
 
 EXTENSIONS_LIST = find_extension()
 
@@ -176,7 +176,7 @@ for item in lib_locs:
     libxml_path_test = '%s/libxml2.2.dylib' % item
     if os.path.isfile(libxml_path_test):
         libxml_path = libxml_path_test
-if libxml_path == None:
+if libxml_path is None:
     raise RuntimeError, "Could not find libxml2 on the system"
 
 #Get version - NB nasty hack. Need to find correct way to give path to installed sasview (AJJ)
