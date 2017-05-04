@@ -8,7 +8,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 
 from FittingWidget import FittingWidget
-from FitPage import FitPage
+#from FitPage import FitPage
 
 class FittingWindow(QtGui.QTabWidget):
     """
