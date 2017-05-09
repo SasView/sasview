@@ -17,6 +17,7 @@ from sas.qtgui.Perspectives.Fitting.FittingWidget import *
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
 from sas.sasgui.guiframe.dataFitting import Data1D
+from sas.sasgui.guiframe.dataFitting import Data2D
 
 app = QtGui.QApplication(sys.argv)
 
@@ -49,7 +50,7 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertTrue(self.widget.acceptsData())
         self.assertFalse(self.widget.data_is_loaded)
 
-    def testSelectCategory(self):
+    def testSelectCategoryDefault(self):
         """
         Test if model categories have been loaded properly
         """
@@ -78,44 +79,6 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertTrue(widget_with_data.data_is_loaded)
         # self.assertTrue(widget_with_data.cmdFit.isEnabled())
         self.assertFalse(widget_with_data.acceptsData())
-
-    def testSelectModel(self):
-        """
-        Test if models have been loaded properly
-        """
-        fittingWindow =  self.widget
-
-        #Test loading from json categories
-        model_list = fittingWindow.master_category_dict["Cylinder"]
-        self.assertTrue(['cylinder', True] in model_list)
-        self.assertTrue(['core_shell_cylinder', True] in model_list)
-        self.assertTrue(['barbell', True] in model_list)
-        self.assertTrue(['core_shell_bicelle', True] in model_list)
-        self.assertTrue(['flexible_cylinder', True] in model_list)
-        self.assertTrue(['flexible_cylinder_elliptical', True] in model_list)
-        self.assertTrue(['pearl_necklace', True] in model_list)
-        self.assertTrue(['capped_cylinder', True] in model_list)
-        self.assertTrue(['elliptical_cylinder', True] in model_list)
-        self.assertTrue(['pringle', True] in model_list)
-        self.assertTrue(['hollow_cylinder', True] in model_list)
-        self.assertTrue(['core_shell_bicelle_elliptical', True] in model_list)
-        self.assertTrue(['stacked_disks', True] in model_list)
-
-        #Test for existence in combobox
-        self.assertNotEqual(fittingWindow.cbModel.findText("cylinder"),-1)
-        self.assertNotEqual(fittingWindow.cbModel.findText("core_shell_cylinder"),-1)
-        self.assertNotEqual(fittingWindow.cbModel.findText("barbell"),-1)
-        self.assertNotEqual(fittingWindow.cbModel.findText("core_shell_bicelle"),-1)
-        self.assertNotEqual(fittingWindow.cbModel.findText("flexible_cylinder"),-1)
-        self.assertNotEqual(fittingWindow.cbModel.findText("flexible_cylinder_elliptical"),-1)
-        self.assertNotEqual(fittingWindow.cbModel.findText("pearl_necklace"),-1)
-        self.assertNotEqual(fittingWindow.cbModel.findText("capped_cylinder"),-1)
-        self.assertNotEqual(fittingWindow.cbModel.findText("elliptical_cylinder"),-1)
-        self.assertNotEqual(fittingWindow.cbModel.findText("pringle"),-1)
-        self.assertNotEqual(fittingWindow.cbModel.findText("hollow_cylinder"),-1)
-        self.assertNotEqual(fittingWindow.cbModel.findText("core_shell_bicelle_elliptical"),-1)
-        self.assertNotEqual(fittingWindow.cbModel.findText("stacked_disks"),-1)
-
 
     def testSelectPolydispersity(self):
         """
@@ -153,7 +116,7 @@ class FittingWidgetTest(unittest.TestCase):
         """
         pass
 
-    def  testSelectCategory(self):
+    def testSelectCategory(self):
         """
         Assure proper behaviour on changing category
         """
@@ -497,12 +460,59 @@ class FittingWidgetTest(unittest.TestCase):
         # Make sure the signal has been emitted == new plot
         self.assertEqual(spy.count(), 1)
 
-    def testOnFit(self):
+    def testOnFit1D(self):
         """
         Test the threaded fitting call
         """
         # Set data
         test_data = Data1D(x=[1,2], y=[1,2])
+
+        # Force same data into logic
+        self.widget.logic.data = test_data
+        self.widget.data_is_loaded = True
+        category_index = self.widget.cbCategory.findText("Sphere")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        self.widget.show()
+
+        # Test no fitting params
+        self.widget.parameters_to_fit = []
+
+        with self.assertRaises(ValueError) as error:
+            self.widget.onFit()
+        self.assertEqual(str(error.exception), 'no fitting parameters')
+
+        # Assing fitting params
+        self.widget.parameters_to_fit = ['scale']
+
+        # Spying on status update signal
+        update_spy = QtSignalSpy(self.widget, self.widget.communicate.statusBarUpdateSignal)
+
+        with threads.deferToThread as MagicMock:
+            self.widget.onFit()
+            # thread called
+            self.assertTrue(threads.deferToThread.called)
+            # thread method is 'compute'
+            self.assertEqual(threads.deferToThread.call_args_list[0][0][0].__name__, 'compute')
+
+            # the fit button changed caption and got disabled
+            self.assertEqual(self.widget.cmdFit.text(), 'Calculating...')
+            self.assertFalse(self.widget.cmdFit.isEnabled())
+
+            # Signal pushed up
+            self.assertEqual(update_spy.count(), 1)
+
+    def testOnFit2D(self):
+        """
+        Test the threaded fitting call
+        """
+        # Set data
+        test_data = Data2D(image=[1.0, 2.0, 3.0],
+                           err_image=[0.01, 0.02, 0.03],
+                           qx_data=[0.1, 0.2, 0.3],
+                           qy_data=[0.1, 0.2, 0.3],
+                           xmin=0.1, xmax=0.3, ymin=0.1, ymax=0.3,
+                           mask=[True, True, True])
 
         # Force same data into logic
         self.widget.logic.data = test_data

@@ -11,6 +11,7 @@ from twisted.internet import threads
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
+from PyQt4 import QtWebKit
 
 from sasmodels import generate
 from sasmodels import modelinfo
@@ -31,6 +32,7 @@ from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from SmearingWidget import SmearingWidget
 from OptionsWidget import OptionsWidget
+from FitPage import FitPage
 
 TAB_MAGNETISM = 4
 TAB_POLY = 3
@@ -72,6 +74,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.npts = 25
         self.log_points = False
         self.weighting = 0
+        self.chi2 = None
 
         # Data for chosen model
         self.model_data = None
@@ -131,6 +134,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             }
         """
         self.lstParams.setStyleSheet(stylesheet)
+        self.lstParams.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.lstParams.customContextMenuRequested.connect(self.showModelDescription)
 
         # Poly model displayed in poly list
         self.lstPoly.setModel(self._poly_model)
@@ -162,9 +167,19 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Initial control state
         self.initializeControls()
 
+        # Display HTML content
+        self.helpView = QtWebKit.QWebView()
+
         self._index = None
         if data is not None:
             self.data = data
+
+    def close(self):
+        """
+        Remember to kill off things on exit
+        """
+        self.helpView.close()
+        del self.helpView
 
     @property
     def data(self):
@@ -196,7 +211,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.label.setText("Data loaded from: ")
         self.lblFilename.setText(self.logic.data.filename)
         self.updateQRange()
-        self.cmdFit.setEnabled(True)
         # Switch off Data2D control
         self.chk2DView.setEnabled(False)
         self.chk2DView.setVisible(False)
@@ -284,6 +298,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Buttons
         self.cmdFit.clicked.connect(self.onFit)
         self.cmdPlot.clicked.connect(self.onPlot)
+        self.cmdHelp.clicked.connect(self.onHelp)
 
         # Respond to change in parameters from the UI
         self._model_model.itemChanged.connect(self.updateParamsFromModel)
@@ -293,6 +308,27 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         # Signals from separate tabs asking for replot
         self.options_widget.plot_signal.connect(self.onOptionsUpdate)
+
+    def showModelDescription(self, position):
+        """
+        Shows a window with model description, when right clicked in the treeview
+        """
+        msg = 'Model description:\n'
+        info = "Info"
+        if self.kernel_module is not None:
+            if str(self.kernel_module.description).rstrip().lstrip() == '':
+                msg += "Sorry, no information is available for this model."
+            else:
+                msg += self.kernel_module.description + '\n'
+        else:
+            msg += "You must select a model to get information on this"
+
+        menu = QtGui.QMenu()
+        label = QtGui.QLabel(msg)
+        action = QtGui.QWidgetAction(self)
+        action.setDefaultWidget(label)
+        menu.addAction(action)
+        menu.exec_(self.lstParams.viewport().mapToGlobal(position))
 
     def onSelectModel(self):
         """
@@ -320,6 +356,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             self.cmdPlot.setText("Calculate")
             # Create default datasets if no data passed
             self.createDefaultDataset()
+
+        #state = self.currentState()
 
     def onSelectStructureFactor(self):
         """
@@ -402,6 +440,15 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         pass # debug anchor
 
+    def onHelp(self):
+        """
+        Show the "Fitting" section of help
+        """
+        tree_location = self.parent.HELP_DIRECTORY_LOCATION +\
+            "/user/sasgui/perspectives/fitting/fitting_help.html"
+        self.helpView.load(QtCore.QUrl(tree_location))
+        self.helpView.show()
+
     def onFit(self):
         """
         Perform fitting on the current data
@@ -437,6 +484,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Parameterize the fitter
         fitter.set_model(model, fit_id, params_to_fit, data=data,
                          constraints=constraints)
+
         fitter.set_data(data=data, id=fit_id, smearer=smearer, qmin=qmin,
                         qmax=qmax)
         fitter.select_problem_for_fit(id=fit_id, value=1)
@@ -500,7 +548,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         msg = "Fitting completed successfully in: %s s.\n" % GuiUtils.formatNumber(elapsed)
         self.communicate.statusBarUpdateSignal.emit(msg)
 
-        fitness = res.fitness
+        self.chi2 = res.fitness
         param_list = res.param_list
         param_values = res.pvec
         param_stderr = res.stderr
@@ -515,7 +563,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.onPlot()
 
         # Read only value - we can get away by just printing it here
-        chi2_repr = GuiUtils.formatNumber(fitness, high=True)
+        chi2_repr = GuiUtils.formatNumber(self.chi2, high=True)
         self.lblChi2Value.setText(chi2_repr)
 
     def iterateOverModel(self, func):
@@ -585,7 +633,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         # Regardless of previous state, this should now be `plot show` functionality only
         self.cmdPlot.setText("Show Plot")
-        self.recalculatePlotData()
         self.showPlot()
 
     def recalculatePlotData(self):
@@ -684,6 +731,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         assert isinstance(model, QtGui.QStandardItemModel)
         checked_list = ['background', '0.001', '-inf', 'inf', '1/cm']
         FittingUtilities.addCheckedListToModel(model, checked_list)
+        last_row = model.rowCount()-1
+        model.item(last_row, 0).setEditable(False)
+        model.item(last_row, 4).setEditable(False)
 
     def addScaleToModel(self, model):
         """
@@ -692,6 +742,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         assert isinstance(model, QtGui.QStandardItemModel)
         checked_list = ['scale', '1.0', '0.0', 'inf', '']
         FittingUtilities.addCheckedListToModel(model, checked_list)
+        last_row = model.rowCount()-1
+        model.item(last_row, 0).setEditable(False)
+        model.item(last_row, 4).setEditable(False)
 
     def addWeightingToData(self, data):
         """
@@ -780,13 +833,19 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         if model_column == 0:
             self.checkboxSelected(item)
+            self.cmdFit.setEnabled(self.parameters_to_fit != [] and self.logic.data_is_loaded)
             return
 
         model_row = item.row()
         name_index = self._model_model.index(model_row, 0)
 
         # Extract changed value. Assumes proper validation by QValidator/Delegate
-        value = float(item.text())
+        # TODO: disable model update for uneditable cells/columns
+        try:
+            value = float(item.text())
+        except ValueError:
+            # Unparsable field
+            return
         parameter_name = str(self._model_model.data(name_index).toPyObject()) # sld, background etc.
         property_name = str(self._model_model.headerData(1, model_column).toPyObject()) # Value, min, max, etc.
 
@@ -943,9 +1002,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         fitted_data.symbol = "Line"
         self.createNewIndex(fitted_data)
         # Calculate difference between return_data and logic.data
-        chi2 = FittingUtilities.calculateChi2(fitted_data, self.logic.data)
+        self.chi2 = FittingUtilities.calculateChi2(fitted_data, self.logic.data)
         # Update the control
-        chi2_repr = "---" if chi2 is None else GuiUtils.formatNumber(chi2, high=True)
+        chi2_repr = "---" if self.chi2 is None else GuiUtils.formatNumber(self.chi2, high=True)
         self.lblChi2Value.setText(chi2_repr)
 
         self.communicate.plotUpdateSignal.emit([fitted_data])

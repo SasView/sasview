@@ -264,6 +264,8 @@ def updateModelItemWithPlot(item, update_data, name=""):
                 # replace data section in item
                 plot_item.child(0).setData(update_data)
                 plot_item.setText(name)
+                # Plot title
+                plot_item.child(1).child(0).setText("Title: %s"%name)
                 # Force redisplay
                 return
 

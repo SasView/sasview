@@ -55,19 +55,26 @@ def addParametersToModel(parameters, is2D):
 
         item1 = QtGui.QStandardItem(item_name)
         item1.setCheckable(True)
+        item1.setEditable(False)
         item_err = QtGui.QStandardItem()
         # check for polydisp params
         if param.polydisperse:
             poly_item = QtGui.QStandardItem("Polydispersity")
+            poly_item.setEditable(False)
             item1_1 = QtGui.QStandardItem("Distribution")
+            item1_1.setEditable(False)
             # Find param in volume_params
             for p in parameters.form_volume_parameters:
                 if p.name != param.name:
                     continue
                 item1_2 = QtGui.QStandardItem(str(p.default))
+                item1_2.setEditable(False)
                 item1_3 = QtGui.QStandardItem(str(p.limits[0]))
+                item1_3.setEditable(False)
                 item1_4 = QtGui.QStandardItem(str(p.limits[1]))
+                item1_4.setEditable(False)
                 item1_5 = QtGui.QStandardItem(p.units)
+                item1_5.setEditable(False)
                 poly_item.appendRow([item1_1, item1_2, item1_3, item1_4, item1_5])
                 break
             # Add the polydisp item as a child
@@ -80,6 +87,7 @@ def addParametersToModel(parameters, is2D):
         item3 = QtGui.QStandardItem(str(param.limits[0]))
         item4 = QtGui.QStandardItem(str(param.limits[1]))
         item5 = QtGui.QStandardItem(param.units)
+        item5.setEditable(False)
         item.append([item1, item2, item3, item4, item5])
     return item
 
@@ -94,14 +102,14 @@ def addSimpleParametersToModel(parameters, is2D):
         item_name = param.name
         item1 = QtGui.QStandardItem(item_name)
         item1.setCheckable(True)
+        item1.setEditable(False)
         # Param values
+        # TODO: add delegate for validation of cells
         item2 = QtGui.QStandardItem(str(param.default))
-        # TODO: the error column.
-        # Either add a proxy model or a custom view delegate
-        item_err = QtGui.QStandardItem()
         item4 = QtGui.QStandardItem(str(param.limits[0]))
         item5 = QtGui.QStandardItem(str(param.limits[1]))
         item6 = QtGui.QStandardItem(param.units)
+        item6.setEditable(False)
         item.append([item1, item2, item4, item5, item6])
     return item
 

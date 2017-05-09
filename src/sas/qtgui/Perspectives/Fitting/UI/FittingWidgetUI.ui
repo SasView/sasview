@@ -157,13 +157,25 @@
              </widget>
             </item>
             <item row="1" column="0">
-             <widget class="QComboBox" name="cbCategory"/>
+             <widget class="QComboBox" name="cbCategory">
+              <property name="toolTip">
+               <string>Select a category</string>
+              </property>
+             </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QComboBox" name="cbModel"/>
+             <widget class="QComboBox" name="cbModel">
+              <property name="toolTip">
+               <string>Select a model</string>
+              </property>
+             </widget>
             </item>
             <item row="1" column="2">
-             <widget class="QComboBox" name="cbStructureFactor"/>
+             <widget class="QComboBox" name="cbStructureFactor">
+              <property name="toolTip">
+               <string>Select a structure factor</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -171,6 +183,9 @@
            <widget class="QTreeView" name="lstParams">
             <property name="styleSheet">
              <string notr="true"/>
+            </property>
+            <property name="editTriggers">
+             <set>QAbstractItemView::CurrentChanged|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
             </property>
             <property name="selectionMode">
              <enum>QAbstractItemView::ExtendedSelection</enum>

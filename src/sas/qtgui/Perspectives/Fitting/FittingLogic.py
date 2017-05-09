@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import Data2D
@@ -71,20 +71,20 @@ class FittingLogic(object):
         ymax = qmax
         ymin = -qmax
 
-        x = numpy.linspace(start=xmin, stop=xmax, num=qstep, endpoint=True)
-        y = numpy.linspace(start=ymin, stop=ymax, num=qstep, endpoint=True)
+        x = np.linspace(start=xmin, stop=xmax, num=qstep, endpoint=True)
+        y = np.linspace(start=ymin, stop=ymax, num=qstep, endpoint=True)
         # Use data info instead
-        new_x = numpy.tile(x, (len(y), 1))
-        new_y = numpy.tile(y, (len(x), 1))
+        new_x = np.tile(x, (len(y), 1))
+        new_y = np.tile(y, (len(x), 1))
         new_y = new_y.swapaxes(0, 1)
 
         # all data required in 1d array
         qx_data = new_x.flatten()
         qy_data = new_y.flatten()
-        q_data = numpy.sqrt(qx_data * qx_data + qy_data * qy_data)
+        q_data = np.sqrt(qx_data * qx_data + qy_data * qy_data)
 
         # set all True (standing for unmasked) as default
-        mask = numpy.ones(len(qx_data), dtype=bool)
+        mask = np.ones(len(qx_data), dtype=bool)
         # calculate the range of qx and qy: this way,
         # it is a little more independent
         # store x and y bin centers in q space
@@ -92,8 +92,8 @@ class FittingLogic(object):
         y_bins = y
 
         self._data.source = Source()
-        self._data.data = numpy.ones(len(mask))
-        self._data.err_data = numpy.ones(len(mask))
+        self._data.data = np.ones(len(mask))
+        self._data.err_data = np.ones(len(mask))
         self._data.qx_data = qx_data
         self._data.qy_data = qy_data
         self._data.q_data = q_data
@@ -119,7 +119,7 @@ class FittingLogic(object):
         # Create the new plot
         new_plot = Data1D(x=x, y=y)
         new_plot.is_data = False
-        new_plot.dy = numpy.zeros(len(y))
+        new_plot.dy = np.zeros(len(y))
         _yaxis, _yunit = data.get_yaxis()
         _xaxis, _xunit = data.get_xaxis()
 
@@ -140,7 +140,7 @@ class FittingLogic(object):
         elapsed, index, fid, qmin, qmax, weight, \
         update_chisqr, source = return_data
 
-        numpy.nan_to_num(image)
+        np.nan_to_num(image)
         new_plot = Data2D(image=image, err_image=data.err_data)
         new_plot.name = model.name + '2d'
         new_plot.title = "Analytical model 2D "
@@ -193,12 +193,12 @@ class FittingLogic(object):
         else:
             qmin = 0
             try:
-                x = max(numpy.fabs(self.data.xmin), numpy.fabs(self.data.xmax))
-                y = max(numpy.fabs(self.data.ymin), numpy.fabs(self.data.ymax))
+                x = max(np.fabs(self.data.xmin), np.fabs(self.data.xmax))
+                y = max(np.fabs(self.data.ymin), np.fabs(self.data.ymax))
             except (ValueError, TypeError):
                 msg = "Unable to find min/max of \n data named %s" % \
                             self.data.filename
                 raise ValueError, msg
-            qmax = numpy.sqrt(x * x + y * y)
+            qmax = np.sqrt(x * x + y * y)
             npts = len(self.data.data)
         return qmin, qmax, npts

@@ -60,14 +60,17 @@ class FittingWindow(QtGui.QTabWidget):
         """
         Overwrite QDialog close method to allow for custom widget close
         """
+        # Invoke fit page events
+        for tab in self.tabs:
+            tab.close()
         if self._allow_close:
             # reset the closability flag
             self.setClosable(value=False)
             event.accept()
         else:
-            event.ignore()
             # Maybe we should just minimize
             self.setWindowState(QtCore.Qt.WindowMinimized)
+            event.ignore()
 
     def addFit(self, data):
         """
