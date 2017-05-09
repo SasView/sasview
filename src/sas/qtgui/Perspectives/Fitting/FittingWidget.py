@@ -605,7 +605,11 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
                 item.setText(error_repr)
             error_column.append(item)
 
+        # block signals temporarily, so we don't end up
+        # updating charts with every single model change on the end of fitting
+        self._model_model.blockSignals(True)
         self.iterateOverModel(updateFittedValues)
+        self._model_model.blockSignals(False)
 
         if self.has_error_column:
             return
