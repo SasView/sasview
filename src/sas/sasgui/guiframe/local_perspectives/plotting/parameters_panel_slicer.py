@@ -192,7 +192,7 @@ class SlicerParameterPanel(wx.Dialog):
             self.append_name = wx.TextCtrl(parent=self, id=wx.NewId(),
                                            name="Append to file name:")
             append_tool_tip = "Files will be saved as <SlicerType><FileName>"
-            append_tool_tip += "<AppendToText>.xml"
+            append_tool_tip += "<AppendToText>.txt"
             self.append_name.SetToolTipString(append_tool_tip)
             self.append_name.SetValue(self.default_value)
             self.append_name.Enable(False)
@@ -416,10 +416,10 @@ class SlicerParameterPanel(wx.Dialog):
                     if base in names:
                         data_dic[item] = plot.plots[item]
 
-        # Save files as XML
+        # Save files as Text
         for item, data1d in data_dic.iteritems():
             base = '.'.join(item.split('.')[:-1])
-            file_name = base + append + ".xml"
+            file_name = base + append + ".txt"
             save_to = evt.path + "\\" + file_name
             writer.write(save_to, data1d)
             f_path_list.append(save_to)
@@ -438,7 +438,8 @@ class SlicerParameterPanel(wx.Dialog):
         :param fit: fit type desired 
         :param file_list: list of loaded file names to send to fit
         """
-        if fit != FIT_OPTIONS[0] and file_list is not None:
+        if fit in FIT_OPTIONS and fit != FIT_OPTIONS[0] and \
+                        file_list is not None:
             # Set perspective to fitting
             int = self.data_panel.perspective_cbox.FindString("Fitting")
             self.data_panel.perspective_cbox.SetSelection(int)
