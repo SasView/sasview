@@ -179,3 +179,18 @@ class SmearingWidget(QtGui.QWidget, Ui_SmearingWidgetUI):
                 d_up = None
 
         return (smearing, accuracy, d_down, d_up)
+
+    def setState(self, smearing, accuracy, d_down, d_up):
+        """
+        Sets new values for the controls
+        """
+        # Update the model -> controls update automatically
+        if smearing is not None:
+            self.model.item(MODEL.index('SMEARING')).setText(smearing)
+        if accuracy is not None:
+            self.model.item(MODEL.index('ACCURACY')).setText(accuracy)
+        if d_down is not None:
+            self.model.item(MODEL.index('PINHOLE_MIN')).setText(d_down)
+        if d_up is not None:
+            self.model.item(MODEL.index('PINHOLE_MAX')).setText(d_up)
+

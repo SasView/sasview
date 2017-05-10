@@ -449,10 +449,15 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.plotData(plots)
 
     def addDataPlot2D(self, plot_set, item):
+        """
+        Create a new 2D plot and add it to the workspace
+        """
         plot2D = Plotter2D(self)
         plot2D.item = item
         plot2D.plot(plot_set)
         self.addPlot(plot2D)
+        #============================================
+        # Experimental hook for silx charts
         #============================================
         ## Attach silx
         #from silx.gui import qt

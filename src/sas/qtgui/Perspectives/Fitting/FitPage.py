@@ -22,8 +22,10 @@ class FitPage(object):
         self.current_factor = ""
 
         self.page_id = 0
-        self.is_data_loaded = False
+        self.data_is_loaded = False
         self.filename = ""
+        self.data = None
+        self.parameters_to_fit = []
         
         # QModels
         self.param_model = None
@@ -43,4 +45,24 @@ class FitPage(object):
         #self.weighting_options = {}
         # Smearing options - tab #3
         self.smearing_options = {}
+
+    def save(self):
+        """
+        Serialize the current state
+        """
+        pass
+
+    def load(self, location):
+        """
+        Retrieve serialized state from specified location
+        """
+        pass
+
+    def saveAsXML(self):
+        """
+        Serialize the current state
+        """
+        # Connect to PageState.to_xml(), which serializes
+        # to the existing XML with file I(Q)
+        pass
 

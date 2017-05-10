@@ -300,7 +300,7 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.logic.data = test_data_2
         self.widget.calculateResiduals(test_data)
         # Now, the difference is non-zero
-        self.assertEqual(float(self.widget.lblChi2Value.text()), 1.715)
+        self.assertEqual(float(self.widget.lblChi2Value.text()), 1.7151)
 
     def testSetPolyModel(self):
         """
@@ -549,6 +549,69 @@ class FittingWidgetTest(unittest.TestCase):
             # Signal pushed up
             self.assertEqual(update_spy.count(), 1)
 
+    def testReadFitPage(self):
+        """
+        Read in the fitpage object and restore state
+        """
+        # Set data
+        test_data = Data1D(x=[1,2], y=[1,2])
+
+        # Force same data into logic
+        self.widget.logic.data = test_data
+        self.widget.data_is_loaded = True
+        category_index = self.widget.cbCategory.findText('Sphere')
+        self.widget.cbCategory.setCurrentIndex(category_index)
+        self.widget.parameters_to_fit = ['scale']
+        # Invoke the tested method
+        fp = self.widget.currentState()
+
+        # Prepare modified fit page
+        fp.current_model = 'onion'
+        fp.is_polydisperse = True
+
+        # Read in modified state
+        self.widget.readFitPage(fp)
+
+        # Check if the widget got updated accordingly
+        self.assertEqual(self.widget.cbModel.currentText(), 'onion')
+        self.assertTrue(self.widget.chkPolydispersity.isChecked())
+
+    def testCurrentState(self):
+        """
+        Set up the fitpage with current state
+        """
+        # Set data
+        test_data = Data1D(x=[1,2], y=[1,2])
+
+        # Force same data into logic
+        self.widget.logic.data = test_data
+        self.widget.data_is_loaded = True
+        category_index = self.widget.cbCategory.findText("Sphere")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+        self.widget.parameters_to_fit = ['scale']
+
+        # Invoke the tested method
+        fp = self.widget.currentState()
+
+        # Test some entries. (Full testing of fp is done in FitPageTest)
+        self.assertIsInstance(fp.data, Data1D)
+        self.assertListEqual(list(fp.data.x), [1,2])
+        self.assertTrue(fp.data_is_loaded)
+        self.assertEqual(fp.current_category, "Sphere")
+        self.assertEqual(fp.current_model, "adsorbed_layer")
+        self.assertListEqual(fp.parameters_to_fit, ['scale'])
+
+    def testPushFitPage(self):
+        """
+        Push current state of fitpage onto stack
+        """
+        pass
+
+    def testPopFitPage(self):
+        """
+        Pop current state of fitpage from stack
+        """
+        pass
 
 if __name__ == "__main__":
     unittest.main()

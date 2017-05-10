@@ -357,7 +357,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             # Create default datasets if no data passed
             self.createDefaultDataset()
 
-        #state = self.currentState()
+        state = self.currentState()
 
     def onSelectStructureFactor(self):
         """
@@ -1147,4 +1147,118 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         FittingUtilities.addShellsToModel(self.model_parameters, self._model_model, index)
         self.current_shell_displayed = index
+
+    def readFitPage(self, fp):
+        """
+        Read in state from a fitpage object and update GUI
+        """
+        assert isinstance(fp, FitPage)
+        # Main tab info
+        self.logic.data.filename = fp.filename
+        self.data_is_loaded = fp.data_is_loaded
+        self.chkPolydispersity.setCheckState(fp.is_polydisperse)
+        self.chkMagnetism.setCheckState(fp.is_magnetic)
+        self.chk2DView.setCheckState(fp.is2D)
+
+        # Update the comboboxes
+        self.cbCategory.setCurrentIndex(self.cbCategory.findText(fp.current_category))
+        self.cbModel.setCurrentIndex(self.cbModel.findText(fp.current_model))
+        if fp.current_factor:
+            self.cbStructureFactor.setCurrentIndex(self.cbStructureFactor.findText(fp.current_factor))
+
+        self.chi2 = fp.chi2
+
+        # Options tab
+        self.q_range_min = fp.fit_options[fp.MIN_RANGE]
+        self.q_range_max = fp.fit_options[fp.MAX_RANGE]
+        self.npts = fp.fit_options[fp.NPTS]
+        #fp.fit_options[fp.NPTS_FIT] = self.npts_fit
+        self.log_points = fp.fit_options[fp.LOG_POINTS]
+        self.weighting = fp.fit_options[fp.WEIGHTING]
+
+        # Models
+        #self._model_model = fp.model_model
+        #self._poly_model = fp.poly_model
+        #self._magnet_model = fp.magnetism_model
+
+        # Resolution tab
+        smearing = fp.smearing_options[fp.SMEARING_OPTION]
+        accuracy = fp.smearing_options[fp.SMEARING_ACCURACY]
+        smearing_min = fp.smearing_options[fp.SMEARING_MIN]
+        smearing_max = fp.smearing_options[fp.SMEARING_MAX]
+        self.smearing_widget.setState(smearing, accuracy, smearing_min, smearing_max)
+
+        # TODO: add polidyspersity and magnetism
+
+    def saveToFitPage(self, fp):
+        """
+        Write current state to the given fitpage
+        """
+        assert isinstance(fp, FitPage)
+
+        # Main tab info
+        fp.filename = self.logic.data.filename
+        fp.data_is_loaded = self.data_is_loaded
+        fp.is_polydisperse = self.chkPolydispersity.isChecked()
+        fp.is_magnetic = self.chkMagnetism.isChecked()
+        fp.is2D = self.chk2DView.isChecked()
+        fp.data = self.data
+
+        # Use current models - they contain all the required parameters
+        fp.model_model = self._model_model
+        fp.poly_model = self._poly_model
+        fp.magnetism_model = self._magnet_model
+
+        if self.cbCategory.currentIndex() != 0:
+            fp.current_category = str(self.cbCategory.currentText())
+            fp.current_model = str(self.cbModel.currentText())
+
+        if self.cbStructureFactor.isEnabled() and self.cbStructureFactor.currentIndex() != 0:
+            fp.current_factor = str(self.cbStructureFactor.currentText())
+        else:
+            fp.current_factor = ''
+
+        fp.chi2 = self.chi2
+        fp.parameters_to_fit = self.parameters_to_fit
+
+        # Options tab
+        fp.fit_options[fp.MIN_RANGE] = self.q_range_min
+        fp.fit_options[fp.MAX_RANGE] = self.q_range_max
+        fp.fit_options[fp.NPTS] = self.npts
+        #fp.fit_options[fp.NPTS_FIT] = self.npts_fit
+        fp.fit_options[fp.LOG_POINTS] = self.log_points
+        fp.fit_options[fp.WEIGHTING] = self.weighting
+
+        # Resolution tab
+        smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
+        fp.smearing_options[fp.SMEARING_OPTION] = smearing
+        fp.smearing_options[fp.SMEARING_ACCURACY] = accuracy
+        fp.smearing_options[fp.SMEARING_MIN] = smearing_min
+        fp.smearing_options[fp.SMEARING_MAX] = smearing_max
+
+        # TODO: add polidyspersity and magnetism
+
+    def currentState(self):
+        """
+        Return fit page with current state
+        """
+        new_page = FitPage()
+        self.saveToFitPage(new_page)
+
+        return new_page
+
+    def pushFitPage(self, new_page):
+        """
+        Add a new fit page object with current state
+        """
+        #page_stack.append(new_page)
+        pass
+
+    def popFitPage(self):
+        """
+        Remove top fit page from stack
+        """
+        #if page_stack:
+        #    page_stack.pop()
+        pass
 
