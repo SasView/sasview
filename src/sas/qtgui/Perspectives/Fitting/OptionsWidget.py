@@ -5,11 +5,10 @@ import numpy as np
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 
-from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import Data2D
 
 # Local UI
-from UI.OptionsWidgetUI import Ui_tabOptions
+from sas.qtgui.Perspectives.Fitting.UI.OptionsWidgetUI import Ui_tabOptions
 
 QMIN_DEFAULT = 0.0005
 QMAX_DEFAULT = 0.5
@@ -49,6 +48,7 @@ class OptionsWidget(QtGui.QWidget, Ui_tabOptions):
 
         # Logic component
         self.logic = logic
+        self.parent = parent
 
         # Weight radio box group
         self.weightingGroup = QtGui.QButtonGroup()
@@ -104,10 +104,10 @@ class OptionsWidget(QtGui.QWidget, Ui_tabOptions):
         self.mapper.setModel(self.model)
         self.mapper.setOrientation(QtCore.Qt.Vertical)
 
-        self.mapper.addMapping(self.txtMinRange,  MODEL.index('MIN_RANGE'))
-        self.mapper.addMapping(self.txtMaxRange,  MODEL.index('MAX_RANGE'))
-        self.mapper.addMapping(self.txtNpts,      MODEL.index('NPTS'))
-        self.mapper.addMapping(self.chkLogData,   MODEL.index('LOG_SPACED'))
+        self.mapper.addMapping(self.txtMinRange, MODEL.index('MIN_RANGE'))
+        self.mapper.addMapping(self.txtMaxRange, MODEL.index('MAX_RANGE'))
+        self.mapper.addMapping(self.txtNpts,     MODEL.index('NPTS'))
+        self.mapper.addMapping(self.chkLogData,  MODEL.index('LOG_SPACED'))
         self.mapper.toFirst()
 
     def toggleLogData(self, isChecked):
@@ -136,11 +136,9 @@ class OptionsWidget(QtGui.QWidget, Ui_tabOptions):
 
     def onModelChange(self, top, bottom):
         """
-        Respond to model change by updating
+        Respond to model change by updating the plot
         """
-        #print "MODEL CHANGED for property: %s. The value is now: %s" % \
-        #    (MODEL[top.row()], str(self.model.item(top.row()).text()))
-
+        # "bottom" is unused
         # update if there's something to update
         if str(self.model.item(top.row()).text()):
             self.plot_signal.emit()
@@ -189,7 +187,7 @@ class OptionsWidget(QtGui.QWidget, Ui_tabOptions):
         """
         q_range_min = float(self.model.item(MODEL.index('MIN_RANGE')).text())
         q_range_max = float(self.model.item(MODEL.index('MAX_RANGE')).text())
-        npts        = int(self.model.item(MODEL.index('NPTS')).text())
-        log_points  = str(self.model.item(MODEL.index('LOG_SPACED')).text()) == 'true'
+        npts = int(self.model.item(MODEL.index('NPTS')).text())
+        log_points = str(self.model.item(MODEL.index('LOG_SPACED')).text()) == 'true'
 
         return (q_range_min, q_range_max, npts, log_points, self.weighting)

@@ -8,7 +8,7 @@ from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import Data2D
 
 # Local UI
-from UI.SmearingWidgetUI import Ui_SmearingWidgetUI
+from sas.qtgui.Perspectives.Fitting.UI.SmearingWidgetUI import Ui_SmearingWidgetUI
 
 class DataWidgetMapper(QtGui.QDataWidgetMapper):
     """
@@ -47,6 +47,7 @@ class SmearingWidget(QtGui.QWidget, Ui_SmearingWidgetUI):
         # Mapper for model update
         self.mapper = None
 
+        self.parent = parent
         # Let only floats in the line edits
         self.txtSmearDown.setValidator(QtGui.QDoubleValidator())
         self.txtSmearUp.setValidator(QtGui.QDoubleValidator())

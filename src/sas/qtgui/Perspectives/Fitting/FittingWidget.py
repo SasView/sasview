@@ -1,13 +1,12 @@
-import sys
 import json
 import os
-import numpy as np
 from collections import defaultdict
 from itertools import izip
 
 import logging
 import traceback
 from twisted.internet import threads
+import numpy as np
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
@@ -27,12 +26,12 @@ from sas.sasgui.perspectives.fitting.model_thread import Calc1D
 from sas.sasgui.perspectives.fitting.model_thread import Calc2D
 from sas.sasgui.perspectives.fitting.utils import get_weight
 
-from UI.FittingWidgetUI import Ui_FittingWidgetUI
+from sas.qtgui.Perspectives.Fitting.UI.FittingWidgetUI import Ui_FittingWidgetUI
 from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
-from SmearingWidget import SmearingWidget
-from OptionsWidget import OptionsWidget
-from FitPage import FitPage
+from sas.qtgui.Perspectives.Fitting.SmearingWidget import SmearingWidget
+from sas.qtgui.Perspectives.Fitting.OptionsWidget import OptionsWidget
+from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
 
 TAB_MAGNETISM = 4
 TAB_POLY = 3
@@ -44,7 +43,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
     """
     Main widget for selecting form and structure factor models
     """
-    def __init__(self, parent=None, data=None, id=1):
+    def __init__(self, parent=None, data=None, tab_id=1):
 
         super(FittingWidget, self).__init__()
 
@@ -80,7 +79,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.model_data = None
 
         # Which tab is this widget displayed in?
-        self.tab_id = id
+        self.tab_id = tab_id
 
         # Which shell is being currently displayed?
         self.current_shell_displayed = 0
@@ -97,17 +96,17 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Options widget
         layout = QtGui.QGridLayout()
         self.options_widget = OptionsWidget(self, self.logic)
-        layout.addWidget(self.options_widget) 
+        layout.addWidget(self.options_widget)
         self.tabOptions.setLayout(layout)
 
         # Smearing widget
         layout = QtGui.QGridLayout()
         self.smearing_widget = SmearingWidget(self)
-        layout.addWidget(self.smearing_widget) 
+        layout.addWidget(self.smearing_widget)
         self.tabResolution.setLayout(layout)
 
         # Define bold font for use in various controls
-        self.boldFont=QtGui.QFont()
+        self.boldFont = QtGui.QFont()
         self.boldFont.setBold(True)
 
         # Set data label
@@ -314,7 +313,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         Shows a window with model description, when right clicked in the treeview
         """
         msg = 'Model description:\n'
-        info = "Info"
         if self.kernel_module is not None:
             if str(self.kernel_module.description).rstrip().lstrip() == '':
                 msg += "Sorry, no information is available for this model."
@@ -357,7 +355,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             # Create default datasets if no data passed
             self.createDefaultDataset()
 
-        state = self.currentState()
+        # TODO: update state stack
+        #state = self.currentState()
 
     def onSelectStructureFactor(self):
         """
@@ -402,7 +401,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self._previous_category_index = self.cbCategory.currentIndex()
         # Retrieve the list of models
         model_list = self.master_category_dict[category]
-        models = []
         # Populate the models combobox
         self.cbModel.addItems(sorted([model for (model, _) in model_list]))
 
@@ -537,7 +535,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         res = res_list[0]
         if res.fitness is None or \
             not np.isfinite(res.fitness) or \
-            np.any(res.pvec == None) or \
+            np.any(res.pvec is None) or \
             not np.all(np.isfinite(res.pvec)):
             msg = "Fitting did not converge!!!"
             self.communicate.statusBarUpdateSignal.emit(msg)
@@ -637,6 +635,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         # Regardless of previous state, this should now be `plot show` functionality only
         self.cmdPlot.setText("Show Plot")
+        if not self.data_is_loaded:
+            self.recalculatePlotData()
         self.showPlot()
 
     def recalculatePlotData(self):
@@ -689,11 +689,11 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             return
         elif self.log_points:
             qmin = -10.0 if self.q_range_min < 1.e-10 else np.log10(self.q_range_min)
-            qmax =  10.0 if self.q_range_max > 1.e10 else np.log10(self.q_range_max)
+            qmax = 10.0 if self.q_range_max > 1.e10 else np.log10(self.q_range_max)
             interval = np.logspace(start=qmin, stop=qmax, num=self.npts, endpoint=True, base=10.0)
         else:
             interval = np.linspace(start=self.q_range_min, stop=self.q_range_max,
-                    num=self.npts, endpoint=True)
+                                   num=self.npts, endpoint=True)
         self.logic.createDefault1dData(interval, self.tab_id)
 
     def readCategoryInfo(self):
@@ -753,7 +753,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
     def addWeightingToData(self, data):
         """
         Adds weighting contribution to fitting data
-        #"""
+        """
         # Send original data for weighting
         weight = get_weight(data=data, is2d=self.is2D, flag=self.weighting)
         update_module = data.err_data if self.is2D else data.dy
@@ -855,6 +855,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         self.kernel_module.params[parameter_name] = value
 
+        # TODO: update min/max based on property_name
         # min/max to be changed in self.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
         # magnetic params in self.kernel_module.details['M0:parameter_name'] = value
         # multishell params in self.kernel_module.details[??] = value
@@ -881,7 +882,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Switch off signaling from the model to avoid recursion
         self._model_model.blockSignals(True)
         # Convert to proper indices and set requested enablement
-        items = [self._model_model.item(row, 0).setCheckState(status) for row in rows]
+        _ = [self._model_model.item(row, 0).setCheckState(status) for row in rows]
         self._model_model.blockSignals(False)
 
         # update the list of parameters to fit
@@ -965,19 +966,19 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             return
         # Awful API to a backend method.
         method = self.methodCalculateForData()(data=self.data,
-                              model=self.kernel_module,
-                              page_id=0,
-                              qmin=self.q_range_min,
-                              qmax=self.q_range_max,
-                              smearer=None,
-                              state=None,
-                              weight=None,
-                              fid=None,
-                              toggle_mode_on=False,
-                              completefn=None,
-                              update_chisqr=True,
-                              exception_handler=self.calcException,
-                              source=None)
+                                               model=self.kernel_module,
+                                               page_id=0,
+                                               qmin=self.q_range_min,
+                                               qmax=self.q_range_max,
+                                               smearer=None,
+                                               state=None,
+                                               weight=None,
+                                               fid=None,
+                                               toggle_mode_on=False,
+                                               completefn=None,
+                                               update_chisqr=True,
+                                               exception_handler=self.calcException,
+                                               source=None)
 
         calc_thread = threads.deferToThread(method.compute)
         calc_thread.addCallback(self.methodCompleteForData())

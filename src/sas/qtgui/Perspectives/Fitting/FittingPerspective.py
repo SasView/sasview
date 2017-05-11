@@ -1,13 +1,11 @@
-import sys
 import numpy
 
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 
-from FittingWidget import FittingWidget
+from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 #from FitPage import FitPage
 
 class FittingWindow(QtGui.QTabWidget):
@@ -30,7 +28,7 @@ class FittingWindow(QtGui.QTabWidget):
         self.currentTab = 0
 
         # The current optimizer
-        self.optimizer = 'DREAM'
+        self.optimizer = 'Levenberg-Marquardt'
 
         # The tabs need to be closeable
         self.setTabsClosable(True)
@@ -76,7 +74,7 @@ class FittingWindow(QtGui.QTabWidget):
         """
         Add a new tab for passed data
         """
-        tab	= FittingWidget(parent=self.parent, data=data, id=self.maxIndex+1)
+        tab	= FittingWidget(parent=self.parent, data=data, tab_id=self.maxIndex+1)
         # Add this tab to the object library so it can be retrieved by scripting/jupyter
         ObjectLibrary.addObject(self.tabName(), tab)
         self.tabs.append(tab)

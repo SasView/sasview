@@ -1,8 +1,9 @@
+from copy import deepcopy
+
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 
 import numpy
-from copy import deepcopy
 
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import Data2D
@@ -56,7 +57,7 @@ def addParametersToModel(parameters, is2D):
         item1 = QtGui.QStandardItem(item_name)
         item1.setCheckable(True)
         item1.setEditable(False)
-        item_err = QtGui.QStandardItem()
+        # item_err = QtGui.QStandardItem()
         # check for polydisp params
         if param.polydisperse:
             poly_item = QtGui.QStandardItem("Polydispersity")
@@ -198,9 +199,9 @@ def calculateChi2(reference_data, current_data):
     #from sas.sasgui.perspectives.fitting.utils import get_weight
     #flag = self.get_weight_flag()
     #weight = get_weight(data=self.data, is2d=self._is_2D(), flag=flag)
-
-    if reference_data == None:
-       return chisqr
+    chisqr = None
+    if reference_data is None:
+        return chisqr
 
     # temporary default values for index and weight
     index = None
@@ -208,9 +209,9 @@ def calculateChi2(reference_data, current_data):
 
     # Get data: data I, theory I, and data dI in order
     if isinstance(reference_data, Data2D):
-        if index == None:
+        if index is None:
             index = numpy.ones(len(current_data.data), dtype=bool)
-        if weight != None:
+        if weight is not None:
             current_data.err_data = weight
         # get rid of zero error points
         index = index & (current_data.err_data != 0)
@@ -220,11 +221,11 @@ def calculateChi2(reference_data, current_data):
         en = current_data.err_data[index]
     else:
         # 1 d theory from model_thread is only in the range of index
-        if index == None:
+        if index is None:
             index = numpy.ones(len(current_data.y), dtype=bool)
-        if weight != None:
+        if weight is not None:
             current_data.dy = weight
-        if current_data.dy == None or current_data.dy == []:
+        if current_data.dy is None or current_data.dy == []:
             dy = numpy.ones(len(current_data.y))
         else:
             ## Set consistently w/AbstractFitengine:
@@ -287,7 +288,7 @@ def residualsData1D(reference_data, current_data):
     residuals.dxl = None
     residuals.dxw = None
     residuals.ytransform = 'y'
-    # For latter scale changes 
+    # For latter scale changes
     residuals.xaxis('\\rm{Q} ', 'A^{-1}')
     residuals.yaxis('\\rm{Residuals} ', 'normalized')
 
@@ -298,7 +299,7 @@ def residualsData2D(reference_data, current_data):
     Calculate the residuals for difference of two Data2D sets
     """
     # temporary default values for index and weight
-    index = None
+    # index = None
     weight = None
 
     # build residuals
@@ -350,7 +351,7 @@ def plotResiduals(reference_data, current_data):
     # group_id specify on which panel to plot this data
     group_id = reference_data.group_id
     residuals.group_id = "res" + str(group_id)
-    
+
     # Symbol
     residuals.symbol = 0
     residuals.hide_error = False

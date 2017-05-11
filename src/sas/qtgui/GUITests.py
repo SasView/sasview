@@ -49,45 +49,45 @@ from Perspectives.Fitting.UnitTesting import FitPageTest
 def suite():
     suites = (
         # Plotting
-        #unittest.makeSuite(PlotHelperTest.PlotHelperTest,             'test'),
-        #unittest.makeSuite(PlotterTest.PlotterTest,                   'test'),
-        #unittest.makeSuite(WindowTitleTest.WindowTitleTest,           'test'),
-        #unittest.makeSuite(PlotterBaseTest.PlotterBaseTest,           'test'),
-        #unittest.makeSuite(Plotter2DTest.Plotter2DTest,               'test'),
-        #unittest.makeSuite(AddTextTest.AddTextTest,                   'test'),
-        #unittest.makeSuite(ScalePropertiesTest.ScalePropertiesTest,   'test'),
-        #unittest.makeSuite(SetGraphRangeTest.SetGraphRangeTest,       'test'),
-        #unittest.makeSuite(LinearFitTest.LinearFitTest,               'test'),
-        #unittest.makeSuite(PlotPropertiesTest.PlotPropertiesTest,     'test'),
-        #unittest.makeSuite(PlotUtilitiesTest.PlotUtilitiesTest,       'test'),
-        #unittest.makeSuite(ColorMapTest.ColorMapTest,                 'test'),
-        #unittest.makeSuite(BoxSumTest.BoxSumTest,                     'test'),
-        #unittest.makeSuite(SlicerModelTest.SlicerModelTest,           'test'),
-        #unittest.makeSuite(SlicerParametersTest.SlicerParametersTest, 'test'),
+        unittest.makeSuite(PlotHelperTest.PlotHelperTest,             'test'),
+        unittest.makeSuite(PlotterTest.PlotterTest,                   'test'),
+        unittest.makeSuite(WindowTitleTest.WindowTitleTest,           'test'),
+        unittest.makeSuite(PlotterBaseTest.PlotterBaseTest,           'test'),
+        unittest.makeSuite(Plotter2DTest.Plotter2DTest,               'test'),
+        unittest.makeSuite(AddTextTest.AddTextTest,                   'test'),
+        unittest.makeSuite(ScalePropertiesTest.ScalePropertiesTest,   'test'),
+        unittest.makeSuite(SetGraphRangeTest.SetGraphRangeTest,       'test'),
+        unittest.makeSuite(LinearFitTest.LinearFitTest,               'test'),
+        unittest.makeSuite(PlotPropertiesTest.PlotPropertiesTest,     'test'),
+        unittest.makeSuite(PlotUtilitiesTest.PlotUtilitiesTest,       'test'),
+        unittest.makeSuite(ColorMapTest.ColorMapTest,                 'test'),
+        unittest.makeSuite(BoxSumTest.BoxSumTest,                     'test'),
+        unittest.makeSuite(SlicerModelTest.SlicerModelTest,           'test'),
+        unittest.makeSuite(SlicerParametersTest.SlicerParametersTest, 'test'),
 
-        ## Main window
-        #unittest.makeSuite(AboutBoxTest.AboutBoxTest,          'test'),
-        #unittest.makeSuite(DataExplorerTest.DataExplorerTest,  'test'),
-        #unittest.makeSuite(WelcomePanelTest.WelcomePanelTest,  'test'),
-        #unittest.makeSuite(DroppableDataLoadWidgetTest.DroppableDataLoadWidgetTest, 'test'),
-        #unittest.makeSuite(GuiManagerTest.GuiManagerTest,      'test'),
-        #unittest.makeSuite(GuiUtilsTest.GuiUtilsTest,          'test'),
-        #unittest.makeSuite(MainWindowTest.MainWindowTest,      'test'),
+        # Main window
+        unittest.makeSuite(AboutBoxTest.AboutBoxTest,          'test'),
+        unittest.makeSuite(DataExplorerTest.DataExplorerTest,  'test'),
+        unittest.makeSuite(WelcomePanelTest.WelcomePanelTest,  'test'),
+        unittest.makeSuite(DroppableDataLoadWidgetTest.DroppableDataLoadWidgetTest, 'test'),
+        unittest.makeSuite(GuiManagerTest.GuiManagerTest,      'test'),
+        unittest.makeSuite(GuiUtilsTest.GuiUtilsTest,          'test'),
+        unittest.makeSuite(MainWindowTest.MainWindowTest,      'test'),
 
-        ## Utilities
-        #unittest.makeSuite(TestUtilsTest.TestUtilsTest,         'test'),
-        #unittest.makeSuite(SasviewLoggerTest.SasviewLoggerTest, 'test'),
+        # Utilities
+        unittest.makeSuite(TestUtilsTest.TestUtilsTest,         'test'),
+        unittest.makeSuite(SasviewLoggerTest.SasviewLoggerTest, 'test'),
 
-        ## Calculators
-        #unittest.makeSuite(KiessigCalculatorTest.KiessigCalculatorTest,                     'test'),
-        #unittest.makeSuite(DensityCalculatorTest.DensityCalculatorTest,                     'test'),
-        #unittest.makeSuite(GenericScatteringCalculatorTest.GenericScatteringCalculatorTest, 'test'),
+        # Calculators
+        unittest.makeSuite(KiessigCalculatorTest.KiessigCalculatorTest,                     'test'),
+        unittest.makeSuite(DensityCalculatorTest.DensityCalculatorTest,                     'test'),
+        unittest.makeSuite(GenericScatteringCalculatorTest.GenericScatteringCalculatorTest, 'test'),
 
-        ## Perspectives
-        #unittest.makeSuite(FittingPerspectiveTest.FittingPerspectiveTest, 'test'),
+        # Perspectives
+        unittest.makeSuite(FittingPerspectiveTest.FittingPerspectiveTest, 'test'),
         unittest.makeSuite(FittingWidgetTest.FittingWidgetTest,           'test'),
-        #unittest.makeSuite(FittingLogicTest.FittingLogicTest,             'test'),
-        #unittest.makeSuite(FittingUtilitiesTest.FittingUtilitiesTest,     'test'),
+        unittest.makeSuite(FittingLogicTest.FittingLogicTest,             'test'),
+        unittest.makeSuite(FittingUtilitiesTest.FittingUtilitiesTest,     'test'),
         unittest.makeSuite(FitPageTest.FitPageTest,                       'test'),
     )
     return unittest.TestSuite(suites)

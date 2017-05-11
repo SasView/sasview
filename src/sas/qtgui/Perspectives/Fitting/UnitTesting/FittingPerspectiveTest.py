@@ -39,7 +39,7 @@ class FittingPerspectiveTest(unittest.TestCase):
         '''Test the GUI in its default state'''
         self.assertIsInstance(self.widget, QtGui.QWidget)
         self.assertIn("Fit panel", self.widget.windowTitle())
-        self.assertEqual(self.widget.optimizer, "DREAM")
+        self.assertEqual(self.widget.optimizer, "Levenberg-Marquardt")
         self.assertEqual(len(self.widget.tabs), 1)
         self.assertEqual(self.widget.maxIndex, 1)
         self.assertEqual(self.widget.tabName(), "FitPage1")
