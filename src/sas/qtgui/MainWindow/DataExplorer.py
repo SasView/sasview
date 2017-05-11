@@ -445,8 +445,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         filename = plot_to_show.filename
         model = self.model if plot_to_show.is_data else self.theory_model
         plots = GuiUtils.plotsFromFilename(filename, model)
-        plots = [(None, plot) for plot in plots]
-        self.plotData(plots)
+        _ = [self.plotData([(None, plot)]) for plot in plots]
 
     def addDataPlot2D(self, plot_set, item):
         """

@@ -1178,9 +1178,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.weighting = fp.fit_options[fp.WEIGHTING]
 
         # Models
-        #self._model_model = fp.model_model
-        #self._poly_model = fp.poly_model
-        #self._magnet_model = fp.magnetism_model
+        self._model_model = fp.model_model
+        self._poly_model = fp.poly_model
+        self._magnet_model = fp.magnetism_model
 
         # Resolution tab
         smearing = fp.smearing_options[fp.SMEARING_OPTION]
