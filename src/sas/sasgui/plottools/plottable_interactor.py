@@ -1,7 +1,10 @@
 """
     This module allows more interaction with the plot
 """
+from __future__ import print_function
+
 from BaseInteractor import _BaseInteractor
+
 
 class PointInteractor(_BaseInteractor):
     """
@@ -155,7 +158,7 @@ class PointInteractor(_BaseInteractor):
             connect('key', h, self.onKey)
 
     def clear(self):
-        print "plottable_interactor.clear()"
+        print("plottable_interactor.clear()")
 
     def _on_click(self, evt):
         """

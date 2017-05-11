@@ -8,6 +8,8 @@
 #See the license text in license.txt
 #copyright 2008, University of Tennessee
 ######################################################################
+from __future__ import print_function
+
 import os
 import numpy as np
 import math
@@ -81,7 +83,7 @@ class Reader:
         output.filename = os.path.basename(filename)
         detector = Detector()
         if len(output.detector) > 0:
-            print str(output.detector[0])
+            print(str(output.detector[0]))
         output.detector.append(detector)
                 
         # Get content
