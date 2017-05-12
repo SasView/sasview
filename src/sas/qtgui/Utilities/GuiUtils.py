@@ -772,3 +772,22 @@ def formatNumber(value, high=False):
     else:
         output = "%-5.3g" % value
     return output.lstrip().rstrip()
+
+def convertUnitToHTML(unit):
+    """
+    Convert ASCII unit display into well rendering HTML
+    """
+    if unit == "1/A":
+        return "&#x212B;<sup>-1</sup>"
+    elif unit == "1/cm":
+        return "cm<sup>-1</sup>"
+    elif unit == "Ang":
+        return "&#x212B;"
+    elif unit == "1e-6/Ang^2":
+        return "10<sup>-6</sup>/&#x212B;<sup>2</sup>"
+    elif unit == "inf":
+        return "&#x221e;"
+    elif unit == "-inf":
+        return "-&#x221e;"
+    else:
+        return unit

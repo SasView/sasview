@@ -32,6 +32,7 @@ from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.SmearingWidget import SmearingWidget
 from sas.qtgui.Perspectives.Fitting.OptionsWidget import OptionsWidget
 from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
+from sas.qtgui.Perspectives.Fitting.ViewDelegate import ModelViewDelegate
 
 TAB_MAGNETISM = 4
 TAB_POLY = 3
@@ -125,6 +126,10 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.lstParams.setModel(self._model_model)
         self.readCategoryInfo()
         self.model_parameters = None
+
+        # Delegates for custom editing and display
+        self.lstParams.setItemDelegate(ModelViewDelegate(self))
+
         self.lstParams.setAlternatingRowColors(True)
         stylesheet = """
             QTreeView{
