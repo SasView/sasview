@@ -369,9 +369,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             self.createDefaultDataset()
 
         # Update state stack
-        if self.undo_supported:
-            state = self.currentState()
-            self.pushFitPage(state)
+        self.updateUndo()
 
     def onSelectStructureFactor(self):
         """
@@ -428,9 +426,14 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         model_row = item.row()
         name_index = self._poly_model.index(model_row, 0)
         # Extract changed value. Assumes proper validation by QValidator/Delegate
-        # Checkbox in column 0
+        # TODO: abstract away hardcoded column numbers
         if model_column == 0:
+            # Is the parameter checked for fitting?
             value = item.checkState()
+            # TODO: add the param to self.params_for_fitting
+        elif model_column == 6:
+            value = item.text()
+            # TODO: Modify Npts/Nsigs based on function choice
         else:
             try:
                 value = float(item.text())
@@ -865,23 +868,23 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             # Unparsable field
             return
         parameter_name = str(self._model_model.data(name_index).toPyObject()) # sld, background etc.
-        property_name = str(self._model_model.headerData(1, model_column).toPyObject()) # Value, min, max, etc.
+        property_index = self._model_model.headerData(1, model_column).toInt()[0]-1 # Value, min, max, etc.
 
+        # Update the parameter value - note: this supports +/-inf as well
         self.kernel_module.params[parameter_name] = value
 
-        # TODO: update min/max based on property_name
         # min/max to be changed in self.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
-        # magnetic params in self.kernel_module.details['M0:parameter_name'] = value
-        # multishell params in self.kernel_module.details[??] = value
+        self.kernel_module.details[parameter_name][property_index] = value
+
+        # TODO: magnetic params in self.kernel_module.details['M0:parameter_name'] = value
+        # TODO: multishell params in self.kernel_module.details[??] = value
 
         # Force the chart update when actual parameters changed
         if model_column == 1:
             self.recalculatePlotData()
 
         # Update state stack
-        if self.undo_supported:
-            state = self.currentState()
-            self.pushFitPage(state)
+        self.updateUndo()
 
     def checkboxSelected(self, item):
         # Assure we're dealing with checkboxes
@@ -942,12 +945,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Update a QStandardModelIndex containing model data
         """
-        if fitted_data.name is None:
-            name = self.nameForFittedData(self.logic.data.filename)
-            fitted_data.title = name
-            fitted_data.name = name
-        else:
-            name = fitted_data.name
+        name = self.nameFromData(fitted_data)
         # Make this a line if no other defined
         if hasattr(fitted_data, 'symbol') and fitted_data.symbol is None:
             fitted_data.symbol = 'Line'
@@ -958,16 +956,23 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Create a QStandardModelIndex containing model data
         """
+        name = self.nameFromData(fitted_data)
+        # Notify the GUI manager so it can create the theory model in DataExplorer
+        new_item = GuiUtils.createModelItemWithPlot(QtCore.QVariant(fitted_data), name=name)
+        self.communicate.updateTheoryFromPerspectiveSignal.emit(new_item)
+
+    def nameFromData(self, fitted_data):
+        """
+        Return name for the dataset. Terribly impure function.
+        """
         if fitted_data.name is None:
-            name = self.nameForFittedData(self.kernel_module.name)
+            name = self.nameForFittedData(self.logic.data.filename)
             fitted_data.title = name
             fitted_data.name = name
             fitted_data.filename = name
         else:
             name = fitted_data.name
-        # Notify the GUI manager so it can create the theory model in DataExplorer
-        new_item = GuiUtils.createModelItemWithPlot(QtCore.QVariant(fitted_data), name=name)
-        self.communicate.updateTheoryFromPerspectiveSignal.emit(new_item)
+        return name
 
     def methodCalculateForData(self):
         '''return the method for data calculation'''
@@ -1256,6 +1261,14 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         fp.smearing_options[fp.SMEARING_MAX] = smearing_max
 
         # TODO: add polidyspersity and magnetism
+
+
+    def updateUndo(self):
+        """
+        Create a new state page and add it to the stack
+        """
+        if self.undo_supported:
+            self.pushFitPage(self.currentState())
 
     def currentState(self):
         """

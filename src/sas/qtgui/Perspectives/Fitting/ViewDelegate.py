@@ -21,14 +21,6 @@ POLY_NPTS=4
 POLY_NSIGS=5
 POLY_FUNCTION=6
 
-class CustomLineEdit(QtGui.QLineEdit):
-    editingFinished = QtCore.pyqtSignal()
-    def __init__(self, parent=None, old_value=None):
-        super(CustomLineEdit, self).__init__(parent)
-        self.setAutoFillBackground(True)
-        self.old_value = old_value
-    def focusOutEvent(self, event):
-        self.editingFinished.emit()
 
 class ModelViewDelegate(QtGui.QStyledItemDelegate):
     """
@@ -80,50 +72,36 @@ class ModelViewDelegate(QtGui.QStyledItemDelegate):
             validator = QtGui.QDoubleValidator()
             editor.setValidator(validator)
             return editor
-        elif index.column() in (PARAM_MIN, PARAM_MAX):
-            # Save current value in case we need to revert
-            #self._old_value = index.data().toFloat()[0]
-            self._old_value = index.data().toString()
-            editor = CustomLineEdit(widget, old_value=self._old_value)
-            editor.editingFinished.connect(self.commitAndCloseEditor)
-            return editor
 
         return super(ModelViewDelegate, self).createEditor(widget, option, index)
 
-    #def setEditorData(self, editor, index):
-    #    if index.column() == MIN:
-    #        #value = index.data().toString()[0]
-    #        value = index.model().data(index, QtCore.Qt.DisplayRole).toString()
-    #        print "VALUE = ", value
-    #        editor.setText('['+value+']')
-    #        return editor
-
-    #    return super(ModelViewDelegate, self).setEditorData(editor, index)
-
-    def commitAndCloseEditor(self):
-            editor = self.sender()
-            content = editor.text()
+    def setModelData(self, editor, model, index):
+        """
+        Overwrite generic model update method for certain columns
+        """
+        if index.column() in (PARAM_MIN, PARAM_MAX):
             try:
-                value_float = float(content)
+                value_float = float(editor.text())
             except ValueError:
-                # TODO: Notify the user
-                # <scary popup>
-                # Do nothing
+                # TODO: present the failure to the user
+                # balloon popup? tooltip? cell background colour flash?
                 return
-            self.commitData.emit(editor)
-            self.closeEditor.emit(editor, QtGui.QAbstractItemDelegate.NoHint)
+        QtGui.QStyledItemDelegate.setModelData(self, editor, model, index)
 
 
 class PolyViewDelegate(QtGui.QStyledItemDelegate):
     """
-    Custom delegate for appearance and behavior control of the polydisperisty view
+    Custom delegate for appearance and behavior control of the polydispersity view
     """
-    def createEditor(self, parent, option, index):
-        # TODO: set it to correct index on creation
+    def createEditor(self, widget, option, index):
+        # Remember the current choice
+        current_text = index.data().toString()
         if index.column() == POLY_FUNCTION:
-            editor = QtGui.QComboBox(parent)
+            editor = QtGui.QComboBox(widget)
             for function in POLYDISPERSE_FUNCTIONS:
                 editor.addItem(function)
+            current_index = editor.findText(current_text)
+            editor.setCurrentIndex(current_index if current_index>-1 else 0)
             return editor
         else:
-            QtGui.QStyledItemDelegate.createEditor(self, parent, option, index)
+            QtGui.QStyledItemDelegate.createEditor(self, widget, option, index)
