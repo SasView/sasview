@@ -33,6 +33,7 @@ from sas.qtgui.Perspectives.Fitting.SmearingWidget import SmearingWidget
 from sas.qtgui.Perspectives.Fitting.OptionsWidget import OptionsWidget
 from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import ModelViewDelegate
+from sas.qtgui.Perspectives.Fitting.ViewDelegate import PolyViewDelegate
 
 TAB_MAGNETISM = 4
 TAB_POLY = 3
@@ -75,6 +76,10 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.log_points = False
         self.weighting = 0
         self.chi2 = None
+
+        # Does the control support UNDO/REDO
+        # temporarily off
+        self.support_undo = False
 
         # Data for chosen model
         self.model_data = None
@@ -145,6 +150,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.lstPoly.setModel(self._poly_model)
         self.setPolyModel()
         self.setTableProperties(self.lstPoly)
+        # Delegates for custom editing and display
+        self.lstPoly.setItemDelegate(PolyViewDelegate(self))
 
         # Magnetism model displayed in magnetism list
         self.lstMagnetic.setModel(self._magnet_model)
@@ -360,8 +367,10 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             # Create default datasets if no data passed
             self.createDefaultDataset()
 
-        # TODO: update state stack
-        #state = self.currentState()
+        # Update state stack
+        if self.support_undo:
+            state = self.currentState()
+            self.pushFitPage(state)
 
     def onSelectStructureFactor(self):
         """
@@ -849,7 +858,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         name_index = self._model_model.index(model_row, 0)
 
         # Extract changed value. Assumes proper validation by QValidator/Delegate
-        # TODO: disable model update for uneditable cells/columns
         try:
             value = float(item.text())
         except ValueError:
@@ -1067,14 +1075,14 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             # Potential multishell params
             checked_list = ["Distribution of "+param.name, str(param.default),
                             str(param.limits[0]), str(param.limits[1]),
-                            "35", "3", ""]
+                            "35", "3", "gaussian"]
             FittingUtilities.addCheckedListToModel(self._poly_model, checked_list)
 
             #TODO: Need to find cleaner way to input functions
-            func = QtGui.QComboBox()
-            func.addItems(['rectangle', 'array', 'lognormal', 'gaussian', 'schulz',])
-            func_index = self.lstPoly.model().index(row, 6)
-            self.lstPoly.setIndexWidget(func_index, func)
+            #func = QtGui.QComboBox()
+            #func.addItems(['rectangle', 'array', 'lognormal', 'gaussian', 'schulz',])
+            #func_index = self.lstPoly.model().index(row, 6)
+            #self.lstPoly.setIndexWidget(func_index, func)
 
         FittingUtilities.addPolyHeadersToModel(self._poly_model)
 
@@ -1178,7 +1186,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.q_range_min = fp.fit_options[fp.MIN_RANGE]
         self.q_range_max = fp.fit_options[fp.MAX_RANGE]
         self.npts = fp.fit_options[fp.NPTS]
-        #fp.fit_options[fp.NPTS_FIT] = self.npts_fit
         self.log_points = fp.fit_options[fp.LOG_POINTS]
         self.weighting = fp.fit_options[fp.WEIGHTING]
 
@@ -1257,14 +1264,14 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Add a new fit page object with current state
         """
-        #page_stack.append(new_page)
+        self.page_stack.append(new_page)
         pass
 
     def popFitPage(self):
         """
         Remove top fit page from stack
         """
-        #if page_stack:
-        #    page_stack.pop()
+        if self.page_stack:
+            self.page_stack.pop()
         pass
 
