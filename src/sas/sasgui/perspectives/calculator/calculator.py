@@ -92,7 +92,7 @@ class Plugin(PluginBase):
         """
         Edit meta data
         """
-        if self.data_edit_frame == None:
+        if self.data_edit_frame is None:
             self.data_edit_frame = DataEditorWindow(parent=self.parent,
                                                     manager=self, data=[],
                                                     title="Data Editor")
@@ -105,7 +105,7 @@ class Plugin(PluginBase):
         """
         Data operation
         """
-        if self.data_operator_frame == None:
+        if self.data_operator_frame is None:
             # Use one frame all the time
             self.data_operator_frame = DataOperatorWindow(parent=self.parent,
                                                 manager=self,
@@ -120,7 +120,7 @@ class Plugin(PluginBase):
         """
         Compute the Kiessig thickness
         """
-        if self.kiessig_frame == None:
+        if self.kiessig_frame is None:
             frame = KiessigWindow(parent=self.parent, manager=self)
             self.put_icon(frame)
             self.kiessig_frame = frame
@@ -132,7 +132,7 @@ class Plugin(PluginBase):
         """
         Compute the scattering length density of molecula
         """
-        if self.sld_frame == None:
+        if self.sld_frame is None:
             frame = SldWindow(parent=self.parent,
                                   base=self.parent, manager=self)
             self.put_icon(frame)
@@ -145,7 +145,7 @@ class Plugin(PluginBase):
         """
         Compute the mass density or molar voulme
         """
-        if self.cal_md_frame == None:
+        if self.cal_md_frame is None:
             frame = DensityWindow(parent=self.parent,
                                   base=self.parent, manager=self)
             self.put_icon(frame)
@@ -158,7 +158,7 @@ class Plugin(PluginBase):
         """
         Compute the slit size a given data
         """
-        if self.cal_slit_frame == None:
+        if self.cal_slit_frame is None:
             frame = SlitLengthCalculatorWindow(parent=self.parent, manager=self)
             self.put_icon(frame)
             self.cal_slit_frame = frame
@@ -170,7 +170,7 @@ class Plugin(PluginBase):
         """
         Estimate the instrumental resolution
         """
-        if self.cal_res_frame == None:
+        if self.cal_res_frame is None:
             frame = ResolutionWindow(parent=self.parent, manager=self)
             self.put_icon(frame)
             self.cal_res_frame = frame
@@ -182,7 +182,7 @@ class Plugin(PluginBase):
         """
         On Generic model menu event
         """
-        if self.gen_frame == None:
+        if self.gen_frame is None:
             frame = SasGenWindow(parent=self.parent, manager=self)
             self.put_icon(frame)
             self.gen_frame = frame
@@ -213,7 +213,7 @@ class Plugin(PluginBase):
 
         :param filename: file name to open in editor
         """
-        if self.py_frame == None:
+        if self.py_frame is None:
             frame = PyConsole(parent=self.parent, base=self,
                               filename=filename)
             self.put_icon(frame)

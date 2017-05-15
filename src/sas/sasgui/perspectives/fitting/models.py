@@ -1,6 +1,8 @@
 """
     Utilities to manage models
 """
+from __future__ import print_function
+
 import traceback
 import os
 import sys
@@ -140,7 +142,7 @@ class ReportProblem:
     def __nonzero__(self):
         type, value, tb = sys.exc_info()
         if type is not None and issubclass(type, py_compile.PyCompileError):
-            print "Problem with", repr(value)
+            print("Problem with", repr(value))
             raise type, value, tb
         return 1
 
