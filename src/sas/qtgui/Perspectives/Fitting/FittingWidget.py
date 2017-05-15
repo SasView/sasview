@@ -79,7 +79,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         # Does the control support UNDO/REDO
         # temporarily off
-        self.support_undo = False
+        self.undo_supported = False
+        self.page_stack = []
 
         # Data for chosen model
         self.model_data = None
@@ -368,7 +369,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             self.createDefaultDataset()
 
         # Update state stack
-        if self.support_undo:
+        if self.undo_supported:
             state = self.currentState()
             self.pushFitPage(state)
 
@@ -876,6 +877,11 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Force the chart update when actual parameters changed
         if model_column == 1:
             self.recalculatePlotData()
+
+        # Update state stack
+        if self.undo_supported:
+            state = self.currentState()
+            self.pushFitPage(state)
 
     def checkboxSelected(self, item):
         # Assure we're dealing with checkboxes

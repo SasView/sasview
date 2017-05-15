@@ -605,12 +605,35 @@ class FittingWidgetTest(unittest.TestCase):
         """
         Push current state of fitpage onto stack
         """
-        pass
+        # Set data
+        test_data = Data1D(x=[1,2], y=[1,2])
+
+        # Force same data into logic
+        self.widget.logic.data = test_data
+        self.widget.data_is_loaded = True
+        category_index = self.widget.cbCategory.findText("Sphere")
+
+        # Asses the initial state of stack
+        self.assertEqual(self.widget.page_stack, [])
+
+        # Set the undo flag
+        self.widget.undo_supported = True
+        self.widget.cbCategory.setCurrentIndex(category_index)
+        self.widget.parameters_to_fit = ['scale']
+
+        # Check that the stack is updated
+        self.assertEqual(len(self.widget.page_stack), 1)
+
+        # Change another parameter
+        self.widget._model_model.item(2, 1).setText("3.0")
+        # Check that the stack is updated
+        self.assertEqual(len(self.widget.page_stack), 2)
 
     def testPopFitPage(self):
         """
         Pop current state of fitpage from stack
         """
+        # TODO: to be added when implementing UNDO/REDO
         pass
 
 if __name__ == "__main__":
