@@ -160,7 +160,7 @@ def compile_file(dir):
     return None
 
 
-def _findModels():
+def _find_models():
     """
     Find custom models
     """
@@ -261,7 +261,7 @@ class ModelManagerBase:
         """
         temp = {}
         if self.is_changed():
-            return  _findModels()
+            return  _find_models()
         logger.info("plugin model : %s" % str(temp))
         return temp
 
@@ -336,7 +336,7 @@ class ModelManagerBase:
         return a dictionary of model
         """
         self.plugins = []
-        new_plugins = _findModels()
+        new_plugins = _find_models()
         for name, plug in  new_plugins.iteritems():
             for stored_name, stored_plug in self.stored_plugins.iteritems():
                 if name == stored_name:
