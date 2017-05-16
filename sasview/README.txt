@@ -3,6 +3,14 @@ Release Notes
 
 1- Features
 ===========
+    - New in Version 4.1.1
+      --------------------
+      This point release is a bug-fix release addressing a few small issues related 
+      to documentation, test data being bundled, reading canSAS1D xml files and saving
+      projects.
+
+      It is recommended that all users upgrade to this version
+
     - New in Version 4.1.0
       ------------------
       This incremental release brings a series of new features and improvements,
