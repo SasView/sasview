@@ -51,113 +51,25 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         # Necessary globals
         self.parent = parent
-        # SasModel is loaded
-        self.model_is_loaded = False
-        # Data[12]D passed and set
-        self.data_is_loaded = False
-        # Current SasModel in view
-        self.kernel_module = None
-        # Current SasModel view dimension
-        self.is2D = False
-        # Current SasModel is multishell
-        self.model_has_shells = False
-        # Utility variable to enable unselectable option in category combobox
-        self._previous_category_index = 0
-        # Utility variable for multishell display
-        self._last_model_row = 0
-        # Dictionary of {model name: model class} for the current category
-        self.models = {}
-        # Parameters to fit
-        self.parameters_to_fit = None
-        # Fit options
-        self.q_range_min = 0.005
-        self.q_range_max = 0.1
-        self.npts = 25
-        self.log_points = False
-        self.weighting = 0
-        self.chi2 = None
-
-        # Does the control support UNDO/REDO
-        # temporarily off
-        self.undo_supported = False
-        self.page_stack = []
-
-        # Data for chosen model
-        self.model_data = None
 
         # Which tab is this widget displayed in?
         self.tab_id = tab_id
 
-        # Which shell is being currently displayed?
-        self.current_shell_displayed = 0
-        self.has_error_column = False
-
         # Main Data[12]D holder
         self.logic = FittingLogic(data=data)
+
+        # Globals
+        self.initializeGlobals()
 
         # Main GUI setup up
         self.setupUi(self)
         self.setWindowTitle("Fitting")
-        self.communicate = self.parent.communicate
 
-        # Options widget
-        layout = QtGui.QGridLayout()
-        self.options_widget = OptionsWidget(self, self.logic)
-        layout.addWidget(self.options_widget)
-        self.tabOptions.setLayout(layout)
+        # Set up tabs widgets
+        self.initializeWidgets()
 
-        # Smearing widget
-        layout = QtGui.QGridLayout()
-        self.smearing_widget = SmearingWidget(self)
-        layout.addWidget(self.smearing_widget)
-        self.tabResolution.setLayout(layout)
-
-        # Define bold font for use in various controls
-        self.boldFont = QtGui.QFont()
-        self.boldFont.setBold(True)
-
-        # Set data label
-        self.label.setFont(self.boldFont)
-        self.label.setText("No data loaded")
-        self.lblFilename.setText("")
-
-        # Set the main models
-        # We can't use a single model here, due to restrictions on flattening
-        # the model tree with subclassed QAbstractProxyModel...
-        self._model_model = QtGui.QStandardItemModel()
-        self._poly_model = QtGui.QStandardItemModel()
-        self._magnet_model = QtGui.QStandardItemModel()
-
-        # Param model displayed in param list
-        self.lstParams.setModel(self._model_model)
-        self.readCategoryInfo()
-        self.model_parameters = None
-
-        # Delegates for custom editing and display
-        self.lstParams.setItemDelegate(ModelViewDelegate(self))
-
-        self.lstParams.setAlternatingRowColors(True)
-        stylesheet = """
-            QTreeView{
-                alternate-background-color: #f6fafb;
-                background: #e8f4fc;
-            }
-        """
-        self.lstParams.setStyleSheet(stylesheet)
-        self.lstParams.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.lstParams.customContextMenuRequested.connect(self.showModelDescription)
-
-        # Poly model displayed in poly list
-        self.lstPoly.setModel(self._poly_model)
-        self.setPolyModel()
-        self.setTableProperties(self.lstPoly)
-        # Delegates for custom editing and display
-        self.lstPoly.setItemDelegate(PolyViewDelegate(self))
-
-        # Magnetism model displayed in magnetism list
-        self.lstMagnetic.setModel(self._magnet_model)
-        self.setMagneticModel()
-        self.setTableProperties(self.lstMagnetic)
+        # Set up models and views
+        self.initializeModels()
 
         # Defaults for the structure factors
         self.setDefaultStructureCombo()
@@ -167,11 +79,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.disableStructureCombo()
 
         # Generate the category list for display
-        category_list = sorted(self.master_category_dict.keys())
-        self.cbCategory.addItem(CATEGORY_DEFAULT)
-        self.cbCategory.addItems(category_list)
-        self.cbCategory.addItem(CATEGORY_STRUCTURE)
-        self.cbCategory.setCurrentIndex(0)
+        self.initializeCategoryCombo()
 
         # Connect signals to controls
         self.initializeSignals()
@@ -214,6 +122,139 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         # Enable/disable UI components
         self.setEnablementOnDataLoad()
+
+    def initializeGlobals(self):
+        """
+        Initialize global variables used in this class
+        """
+        # SasModel is loaded
+        self.model_is_loaded = False
+        # Data[12]D passed and set
+        self.data_is_loaded = False
+        # Current SasModel in view
+        self.kernel_module = None
+        # Current SasModel view dimension
+        self.is2D = False
+        # Current SasModel is multishell
+        self.model_has_shells = False
+        # Utility variable to enable unselectable option in category combobox
+        self._previous_category_index = 0
+        # Utility variable for multishell display
+        self._last_model_row = 0
+        # Dictionary of {model name: model class} for the current category
+        self.models = {}
+        # Parameters to fit
+        self.parameters_to_fit = None
+        # Fit options
+        self.q_range_min = 0.005
+        self.q_range_max = 0.1
+        self.npts = 25
+        self.log_points = False
+        self.weighting = 0
+        self.chi2 = None
+        # Does the control support UNDO/REDO
+        # temporarily off
+        self.undo_supported = False
+        self.page_stack = []
+
+        # Data for chosen model
+        self.model_data = None
+
+        # Which shell is being currently displayed?
+        self.current_shell_displayed = 0
+        self.has_error_column = False
+
+        # signal communicator
+        self.communicate = self.parent.communicate
+
+    def initializeWidgets(self):
+        """
+        Initialize widgets for tabs
+        """
+        # Options widget
+        layout = QtGui.QGridLayout()
+        self.options_widget = OptionsWidget(self, self.logic)
+        layout.addWidget(self.options_widget)
+        self.tabOptions.setLayout(layout)
+
+        # Smearing widget
+        layout = QtGui.QGridLayout()
+        self.smearing_widget = SmearingWidget(self)
+        layout.addWidget(self.smearing_widget)
+        self.tabResolution.setLayout(layout)
+
+        # Define bold font for use in various controls
+        self.boldFont = QtGui.QFont()
+        self.boldFont.setBold(True)
+
+        # Set data label
+        self.label.setFont(self.boldFont)
+        self.label.setText("No data loaded")
+        self.lblFilename.setText("")
+
+    def initializeModels(self):
+        """
+        Set up models and views
+        """
+        # Set the main models
+        # We can't use a single model here, due to restrictions on flattening
+        # the model tree with subclassed QAbstractProxyModel...
+        self._model_model = QtGui.QStandardItemModel()
+        self._poly_model = QtGui.QStandardItemModel()
+        self._magnet_model = QtGui.QStandardItemModel()
+
+        # Param model displayed in param list
+        self.lstParams.setModel(self._model_model)
+        self.readCategoryInfo()
+        self.model_parameters = None
+
+        # Delegates for custom editing and display
+        self.lstParams.setItemDelegate(ModelViewDelegate(self))
+
+        self.lstParams.setAlternatingRowColors(True)
+        stylesheet = """
+            QTreeView::item:hover {
+                background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #e7effd, stop: 1 #cbdaf1);
+                border: 1px solid #bfcde4;
+            }
+
+            QTreeView::item:selected {
+                border: 1px solid #567dbc;
+            }
+
+            QTreeView::item:selected:active{
+                background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6ea1f1, stop: 1 #567dbc);
+            }
+
+            QTreeView::item:selected:!active {
+                background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6b9be8, stop: 1 #577fbf);
+            }
+           """
+        self.lstParams.setStyleSheet(stylesheet)
+        self.lstParams.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.lstParams.customContextMenuRequested.connect(self.showModelDescription)
+
+        # Poly model displayed in poly list
+        self.lstPoly.setModel(self._poly_model)
+        self.setPolyModel()
+        self.setTableProperties(self.lstPoly)
+        # Delegates for custom editing and display
+        self.lstPoly.setItemDelegate(PolyViewDelegate(self))
+
+        # Magnetism model displayed in magnetism list
+        self.lstMagnetic.setModel(self._magnet_model)
+        self.setMagneticModel()
+        self.setTableProperties(self.lstMagnetic)
+
+    def initializeCategoryCombo(self):
+        """
+        Model category combo setup
+        """
+        category_list = sorted(self.master_category_dict.keys())
+        self.cbCategory.addItem(CATEGORY_DEFAULT)
+        self.cbCategory.addItems(category_list)
+        self.cbCategory.addItem(CATEGORY_STRUCTURE)
+        self.cbCategory.setCurrentIndex(0)
 
     def setEnablementOnDataLoad(self):
         """

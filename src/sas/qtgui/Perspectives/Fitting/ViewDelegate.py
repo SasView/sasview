@@ -34,6 +34,7 @@ class ModelViewDelegate(QtGui.QStyledItemDelegate):
             # Units - present in nice HTML
             options = QtGui.QStyleOptionViewItemV4(option)
             self.initStyleOption(options,index)
+
             style = QtGui.QApplication.style() if options.widget is None else options.widget.style()
 
             # Prepare document for inserting into cell
@@ -45,7 +46,7 @@ class ModelViewDelegate(QtGui.QStyledItemDelegate):
 
             # delete the original content
             options.text = ""
-            style.drawControl(QtGui.QStyle.CE_ItemViewItem, options, painter);
+            style.drawControl(QtGui.QStyle.CE_ItemViewItem, options, painter, options.widget);
 
             context = QtGui.QAbstractTextDocumentLayout.PaintContext()
             textRect = style.subElementRect(QtGui.QStyle.SE_ItemViewItemText, options)
@@ -55,7 +56,6 @@ class ModelViewDelegate(QtGui.QStyledItemDelegate):
             painter.setClipRect(textRect.translated(-textRect.topLeft()))
             # Draw the QTextDocument in the cell
             doc.documentLayout().draw(painter, context)
-
             painter.restore()
         else:
             # Just the default paint

@@ -18,6 +18,7 @@ from sas.qtgui.Utilities.SasviewLogger import XStream
 from sas.qtgui.Utilities.IPythonWidget import IPythonWidget
 import sas.qtgui.Utilities.LocalConfig as LocalConfig
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 
 from sas.qtgui.MainWindow.UI.AcknowledgementsUI import Ui_Acknowledgements
 from sas.qtgui.MainWindow.AboutBox import AboutBox
@@ -112,6 +113,7 @@ class GuiManager(object):
         """
         # Add FileDialog widget as docked
         self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
+        ObjectLibrary.addObject('DataExplorer', self.filesWidget)
 
         self.dockedFilesWidget = QtGui.QDockWidget("Data Explorer", self._workspace)
         self.dockedFilesWidget.setWidget(self.filesWidget)
