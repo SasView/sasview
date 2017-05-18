@@ -786,7 +786,6 @@ class Ring(object):
         #,"empty bin(s) due to tight binning..."
         return Data1D(x=phi_values[idx], y=phi_bins[idx], dy=phi_err[idx])
 
-################################################################################
 
 class _Sector(object):
     """
@@ -801,7 +800,12 @@ class _Sector(object):
     starting from the x- axis on the left-hand side
     """
 
-    def __init__(self, r_min, r_max, phi_min=0, phi_max=2 * math.pi, nbins=20, base = None):
+    def __init__(self, r_min, r_max, phi_min=0, phi_max=2 * math.pi, nbins=20,
+                 base=None):
+        '''
+        :param base: must be a valid base for an algorithm, i.e.,
+        a positive number
+        '''
         self.r_min = r_min
         self.r_max = r_max
         self.phi_min = phi_min
@@ -837,7 +841,7 @@ class _Sector(object):
         y = np.zeros(self.nbins)
         y_err = np.zeros(self.nbins)
         x_err = np.zeros(self.nbins)
-        y_counts = np.zeros(self.nbins) # Cycle counts (for the mean)
+        y_counts = np.zeros(self.nbins)  # Cycle counts (for the mean)
 
         # Get the min and max into the region: 0 <= phi < 2Pi
         phi_min = flip_phi(self.phi_min)
@@ -935,10 +939,10 @@ class _Sector(object):
             else:
                 # We take the center of ring area, not radius.
                 # This is more accurate than taking the radial center of ring.
-                #delta_r = (self.r_max - self.r_min) / self.nbins
-                #r_inner = self.r_min + delta_r * i
-                #r_outer = r_inner + delta_r
-                #x[i] = math.sqrt((r_inner * r_inner + r_outer * r_outer) / 2)
+                # delta_r = (self.r_max - self.r_min) / self.nbins
+                # r_inner = self.r_min + delta_r * i
+                # r_outer = r_inner + delta_r
+                # x[i] = math.sqrt((r_inner * r_inner + r_outer * r_outer) / 2)
                 x[i] = x[i] / y_counts[i]
         y_err[y_err == 0] = np.average(y_err)
         idx = (np.isfinite(y) & np.isfinite(y_err))
@@ -951,7 +955,7 @@ class _Sector(object):
             raise ValueError(msg)
         # elif len(y[idx])!= self.nbins:
         #    print "resulted",self.nbins- len(y[idx]),
-        #"empty bin(s) due to tight binning..."
+        # "empty bin(s) due to tight binning..."
         return Data1D(x=x[idx], y=y[idx], dy=y_err[idx], dx=d_x)
 
 
