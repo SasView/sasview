@@ -394,22 +394,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.parameters_to_fit = None
         self.has_error_column = False
 
-        # Set enablement on calculate/plot
-        self.cmdPlot.setEnabled(True)
-
-        # SasModel -> QModel
-        self.SASModelToQModel(model)
-
-        if self.data_is_loaded:
-            self.cmdPlot.setText("Show Plot")
-            self.calculateQGridForModel()
-        else:
-            self.cmdPlot.setText("Calculate")
-            # Create default datasets if no data passed
-            self.createDefaultDataset()
-
-        # Update state stack
-        self.updateUndo()
+        self.respondToModelStructure(model=model, structure_factor=None)
 
     def onSelectStructureFactor(self):
         """
@@ -420,7 +405,23 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         structure = str(self.cbStructureFactor.currentText())
         if category == CATEGORY_STRUCTURE:
             model = None
-        self.SASModelToQModel(model, structure_factor=structure)
+        self.respondToModelStructure(model=model, structure_factor=structure)
+
+    def respondToModelStructure(self, model=None, structure_factor=None):
+        # Set enablement on calculate/plot
+        self.cmdPlot.setEnabled(True)
+
+        # kernel parameters -> model_model
+        self.SASModelToQModel(model, structure_factor)
+
+        if self.data_is_loaded:
+            self.cmdPlot.setText("Show Plot")
+            self.calculateQGridForModel()
+        else:
+            self.cmdPlot.setText("Calculate")
+            # Create default datasets if no data passed
+            self.createDefaultDataset()
+
         # Update state stack
         self.updateUndo()
 
@@ -835,11 +836,50 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Setting model parameters into table based on selected category
         """
-        # TODO - modify for structure factor-only choice
-
         # Crete/overwrite model items
         self._model_model.clear()
 
+        # First, add parameters from the main model
+        if model_name is not None:
+            self.fromModelToQModel(model_name)
+
+        # Then, add structure factor derived parameters
+        if structure_factor is not None and structure_factor != "None":
+            if model_name is None:
+                # Instantiate the current sasmodel for SF-only models
+                self.kernel_module = self.models[structure_factor]()
+            self.fromStructureFactorToQModel(structure_factor)
+        else:
+            # Allow the SF combobox visibility for the given sasmodel
+            self.enableStructureFactorControl(structure_factor)
+
+        # Then, add multishells
+        if model_name is not None:
+            # Multishell models need additional treatment
+            self.addExtraShells()
+
+        # Add polydispersity to the model
+        self.setPolyModel()
+        # Add magnetic parameters to the model
+        self.setMagneticModel()
+
+        # Adjust the table cells width
+        self.lstParams.resizeColumnToContents(0)
+        self.lstParams.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Expanding)
+
+        # Now we claim the model has been loaded
+        self.model_is_loaded = True
+
+        # (Re)-create headers
+        FittingUtilities.addHeadersToModel(self._model_model)
+
+        # Update Q Ranges
+        self.updateQRange()
+
+    def fromModelToQModel(self, model_name):
+        """
+        Setting model parameters into QStandardItemModel based on selected _model_
+        """
         kernel_module = generate.load_kernel_module(model_name)
         self.model_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
 
@@ -857,37 +897,18 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Update the counter used for multishell display
         self._last_model_row = self._model_model.rowCount()
 
-        FittingUtilities.addHeadersToModel(self._model_model)
+    def fromStructureFactorToQModel(self, structure_factor):
+        """
+        Setting model parameters into QStandardItemModel based on selected _structure factor_
+        """
+        structure_module = generate.load_kernel_module(structure_factor)
+        structure_parameters = modelinfo.make_parameter_table(getattr(structure_module, 'parameters', []))
 
-        # Add structure factor
-        if structure_factor is not None and structure_factor != "None":
-            structure_module = generate.load_kernel_module(structure_factor)
-            structure_parameters = modelinfo.make_parameter_table(getattr(structure_module, 'parameters', []))
-            new_rows = FittingUtilities.addSimpleParametersToModel(structure_parameters, self.is2D)
-            for row in new_rows:
-                self._model_model.appendRow(row)
-            # Update the counter used for multishell display
-            self._last_model_row = self._model_model.rowCount()
-        else:
-            self.addStructureFactor()
-
-        # Multishell models need additional treatment
-        self.addExtraShells()
-
-        # Add polydispersity to the model
-        self.setPolyModel()
-        # Add magnetic parameters to the model
-        self.setMagneticModel()
-
-        # Adjust the table cells width
-        self.lstParams.resizeColumnToContents(0)
-        self.lstParams.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Expanding)
-
-        # Now we claim the model has been loaded
-        self.model_is_loaded = True
-
-        # Update Q Ranges
-        self.updateQRange()
+        new_rows = FittingUtilities.addSimpleParametersToModel(structure_parameters, self.is2D)
+        for row in new_rows:
+            self._model_model.appendRow(row)
+        # Update the counter used for multishell display
+        self._last_model_row = self._model_model.rowCount()
 
     def updateParamsFromModel(self, item):
         """
@@ -1158,11 +1179,11 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         FittingUtilities.addHeadersToModel(self._magnet_model)
 
-    def addStructureFactor(self):
+    def enableStructureFactorControl(self, structure_factor):
         """
         Add structure factors to the list of parameters
         """
-        if self.kernel_module.is_form_factor:
+        if self.kernel_module.is_form_factor or structure_factor == 'None':
             self.enableStructureCombo()
         else:
             self.disableStructureCombo()

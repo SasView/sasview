@@ -218,14 +218,23 @@ class FittingWidgetTest(unittest.TestCase):
         # Observe factor reset to None
         self.assertEqual(self.widget.cbStructureFactor.currentText(), STRUCTURE_DEFAULT)
 
+        # Switch category to structure factor
+        structure_index=self.widget.cbCategory.findText(CATEGORY_STRUCTURE)
+        self.widget.cbCategory.setCurrentIndex(structure_index)
+        # Observe the correct enablement
+        self.assertTrue(self.widget.cbStructureFactor.isEnabled())
+        self.assertFalse(self.widget.cbModel.isEnabled())
+        self.assertEqual(self.widget._model_model.rowCount(), 0)
 
-        # TODO once functionality fixed
-        ## Switch category to structure factor
-        #structure_index=self.widget.cbCategory.findText(CATEGORY_STRUCTURE)
-        #self.widget.cbCategory.setCurrentIndex(structure_index)
-        ## Choose the last factor
-        #last_index = self.widget.cbStructureFactor.count()
-        #self.widget.cbStructureFactor.setCurrentIndex(last_index-1)
+        # Choose the last factor
+        last_index = self.widget.cbStructureFactor.count()
+        self.widget.cbStructureFactor.setCurrentIndex(last_index-1)
+        # Do we have all the rows?
+        self.assertEqual(self.widget._model_model.rowCount(), 4)
+
+        # Are the command buttons properly enabled?
+        self.assertTrue(self.widget.cmdPlot.isEnabled())
+        self.assertFalse(self.widget.cmdFit.isEnabled())
 
     def testReadCategoryInfo(self):
         """

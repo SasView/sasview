@@ -131,7 +131,7 @@ def addHeadersToModel(model):
     model.setHeaderData(1, QtCore.Qt.Horizontal, QtCore.QVariant("Value"))
     model.setHeaderData(2, QtCore.Qt.Horizontal, QtCore.QVariant("Min"))
     model.setHeaderData(3, QtCore.Qt.Horizontal, QtCore.QVariant("Max"))
-    model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("[Units]"))
+    model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("Units"))
 
 def addErrorHeadersToModel(model):
     """
@@ -142,7 +142,7 @@ def addErrorHeadersToModel(model):
     model.setHeaderData(2, QtCore.Qt.Horizontal, QtCore.QVariant("Error"))
     model.setHeaderData(3, QtCore.Qt.Horizontal, QtCore.QVariant("Min"))
     model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("Max"))
-    model.setHeaderData(5, QtCore.Qt.Horizontal, QtCore.QVariant("[Units]"))
+    model.setHeaderData(5, QtCore.Qt.Horizontal, QtCore.QVariant("Units"))
 
 def addPolyHeadersToModel(model):
     """
