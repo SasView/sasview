@@ -421,6 +421,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         if category == CATEGORY_STRUCTURE:
             model = None
         self.SASModelToQModel(model, structure_factor=structure)
+        # Update state stack
+        self.updateUndo()
 
     def onSelectCategory(self):
         """
@@ -1324,7 +1326,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         Add a new fit page object with current state
         """
         self.page_stack.append(new_page)
-        pass
 
     def popFitPage(self):
         """
@@ -1332,5 +1333,4 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         if self.page_stack:
             self.page_stack.pop()
-        pass
 

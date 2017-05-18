@@ -5,17 +5,17 @@ class FitPage(object):
     """
     Container for all data related to the current fit page
     """
-    MIN_RANGE=0
-    MAX_RANGE=1
-    NPTS=2
-    NPTS_FIT=3
-    LOG_POINTS=4
-    WEIGHTING=5
-    SMEARING_OPTION=6
-    SMEARING_ACCURACY=7
-    SMEARING_MIN=8
-    SMEARING_MAX=9
-    def __init__(self, parent=None):
+    MIN_RANGE = 0
+    MAX_RANGE = 1
+    NPTS = 2
+    NPTS_FIT = 3
+    LOG_POINTS = 4
+    WEIGHTING = 5
+    SMEARING_OPTION = 6
+    SMEARING_ACCURACY = 7
+    SMEARING_MIN = 8
+    SMEARING_MAX = 9
+    def __init__(self):
         """
         Define the dictionary
         """
@@ -29,7 +29,7 @@ class FitPage(object):
         self.filename = ""
         self.data = None
         self.parameters_to_fit = []
-        
+
         # QModels
         self.param_model = None
         self.poly_model = None
