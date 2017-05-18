@@ -10,10 +10,9 @@ from PyQt4 import QtGui
 from PyQt4 import QtWebKit
 
 from twisted.internet import reactor
-# General SAS imports
 
-from sas.sasgui.guiframe.data_manager import DataManager
-from sas.sasgui.guiframe.proxy import Connection
+# General SAS imports
+from sas.qtgui.Utilities.ConnectionProxy import ConnectionProxy
 from sas.qtgui.Utilities.SasviewLogger import XStream
 from sas.qtgui.Utilities.IPythonWidget import IPythonWidget
 import sas.qtgui.Utilities.LocalConfig as LocalConfig
@@ -23,6 +22,7 @@ import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 from sas.qtgui.MainWindow.UI.AcknowledgementsUI import Ui_Acknowledgements
 from sas.qtgui.MainWindow.AboutBox import AboutBox
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
+from sas.qtgui.MainWindow.DataManager import DataManager
 
 from sas.qtgui.Calculators.SldPanel import SldPanel
 from sas.qtgui.Calculators.DensityPanel import DensityPanel
@@ -277,7 +277,7 @@ class GuiManager(object):
         a call-back method when the current version number has been obtained.
         """
         version_info = {"version": "0.0.0"}
-        c = Connection(LocalConfig.__update_URL__, LocalConfig.UPDATE_TIMEOUT)
+        c = ConnectionProxy(LocalConfig.__update_URL__, LocalConfig.UPDATE_TIMEOUT)
         response = c.connect()
         if response is None:
             return

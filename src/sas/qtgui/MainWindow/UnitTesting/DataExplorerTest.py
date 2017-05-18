@@ -12,9 +12,9 @@ from mpl_toolkits.mplot3d import Axes3D
 import path_prepare
 
 # Local
-from sas.sasgui.guiframe.dataFitting import Data1D
+from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.sascalc.dataloader.loader import Loader
-from sas.sasgui.guiframe.data_manager import DataManager
+from sas.qtgui.MainWindow.DataManager import DataManager
 
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
 from sas.qtgui.MainWindow.GuiManager import GuiManager

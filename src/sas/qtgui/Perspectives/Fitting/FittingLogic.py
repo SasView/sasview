@@ -1,7 +1,8 @@
 import numpy as np
 
-from sas.sasgui.guiframe.dataFitting import Data1D
-from sas.sasgui.guiframe.dataFitting import Data2D
+from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data2D
+
 from sas.sascalc.dataloader.data_info import Detector
 from sas.sascalc.dataloader.data_info import Source
 

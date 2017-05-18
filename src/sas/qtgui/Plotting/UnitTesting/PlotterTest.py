@@ -10,9 +10,9 @@ from mock import patch
 ####### TEMP
 import path_prepare
 #######
-from sas.sasgui.guiframe.dataFitting import Data1D
-from sas.sasgui.guiframe.dataFitting import Data2D
-from UnitTesting.TestUtils import WarningTestNotImplemented
+from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data2D
+from sas.qtgui.UnitTesting.TestUtils import WarningTestNotImplemented
 from sas.qtgui.Plotting.LinearFit import LinearFit
 from sas.qtgui.Plotting.PlotProperties import PlotProperties
 

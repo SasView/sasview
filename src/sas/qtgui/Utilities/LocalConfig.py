@@ -3,9 +3,8 @@
 """
 import time
 import os
-import logging
 
-from sas.sasgui.guiframe.gui_style import GUIFRAME
+#from sas.sasgui.guiframe.gui_style import GUIFRAME
 import sas.sasview
 
 # Version of the application
@@ -103,8 +102,8 @@ DATAPANEL_WIDTH = 235
 DATAPANEL_HEIGHT = 700
 SPLASH_SCREEN_PATH = os.path.join(icon_path, "SVwelcome_mini.png")
 TUTORIAL_PATH = os.path.join(media_path, "Tutorial.pdf")
-DEFAULT_STYLE = GUIFRAME.MULTIPLE_APPLICATIONS|GUIFRAME.MANAGER_ON\
-                    |GUIFRAME.CALCULATOR_ON|GUIFRAME.TOOLBAR_ON
+#DEFAULT_STYLE = GUIFRAME.MULTIPLE_APPLICATIONS|GUIFRAME.MANAGER_ON\
+#                    |GUIFRAME.CALCULATOR_ON|GUIFRAME.TOOLBAR_ON
 SPLASH_SCREEN_WIDTH = 512
 SPLASH_SCREEN_HEIGHT = 366
 SS_MAX_DISPLAY_TIME = 2000

@@ -7,21 +7,22 @@ import time
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 from twisted.internet import threads
+from mpl_toolkits.mplot3d import Axes3D
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
-from sas.sasgui.perspectives.calculator.load_thread import GenReader
+from sas.qtgui.Utilities.GenericReader import GenReader
+
 from sas.sascalc.dataloader.data_info import Detector
 from sas.sascalc.dataloader.data_info import Source
 from sas.sascalc.calculator import sas_gen
 
-from mpl_toolkits.mplot3d import Axes3D
+from sas.qtgui.Plotting.Arrow3D import Arrow3D
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
-from sas.sasgui.guiframe.dataFitting import Data2D
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
-from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.qtgui.Plotting.Plotter import Plotter
-from sas.sasgui.plottools.arrow3d import Arrow3D
+from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data2D
 
 # Local UI
 from UI.GenericScatteringCalculator import Ui_GenericScatteringCalculator

@@ -10,7 +10,7 @@ import sas.qtgui.path_prepare
 # Local
 from sas.qtgui.Utilities.GuiUtils import *
 from sas.qtgui.Perspectives.Fitting.FittingWidget import *
-from sas.sasgui.guiframe.dataFitting import Data1D
+from sas.qtgui.Plotting.PlotterData import Data1D
 
 app = QtGui.QApplication(sys.argv)
 

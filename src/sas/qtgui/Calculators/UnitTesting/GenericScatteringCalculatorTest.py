@@ -18,7 +18,7 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from sas.qtgui.Calculators.GenericScatteringCalculator import GenericScatteringCalculator
 from sas.qtgui.Calculators.GenericScatteringCalculator import Plotter3D
 
-from sas.sasgui.guiframe.data_manager import DataManager
+from sas.qtgui.MainWindow.DataManager import DataManager
 from sas.qtgui.MainWindow.GuiManager import GuiManager
 from sas.qtgui.Utilities.GuiUtils import *
 from sas.sascalc.calculator import sas_gen

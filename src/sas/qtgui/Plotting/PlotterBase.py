@@ -14,12 +14,13 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as Navigatio
 import matplotlib.pyplot as plt
 
 DEFAULT_CMAP = pylab.cm.jet
-from sas.sasgui.plottools.binder import BindArtist
+from sas.qtgui.Plotting.Binder import BindArtist
+from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data2D
 
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.sasgui.guiframe.dataFitting import Data1D, Data2D
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.WindowTitle import WindowTitle
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
 

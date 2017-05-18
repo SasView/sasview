@@ -5,8 +5,8 @@ from PyQt4 import QtCore
 
 import numpy
 
-from sas.sasgui.guiframe.dataFitting import Data1D
-from sas.sasgui.guiframe.dataFitting import Data2D
+from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data2D
 
 def replaceShellName(param_name, value):
     """
@@ -362,3 +362,25 @@ def plotResiduals(reference_data, current_data):
 def binary_encode(i, digits):
     return [i >> d & 1 for d in xrange(digits)]
 
+def getWeight(data, is2d, flag=None):
+    """
+    Received flag and compute error on data.
+    :param flag: flag to transform error of data.
+    """
+    weight = None
+    if is2d:
+        dy_data = data.err_data
+        data = data.data
+    else:
+        dy_data = data.dy
+        data = data.y
+
+    if flag == 0:
+        weight = numpy.ones_like(data)
+    elif flag == 1:
+        weight = dy_data
+    elif flag == 2:
+        weight = numpy.sqrt(numpy.abs(data))
+    elif flag == 3:
+        weight = numpy.abs(data)
+    return weight

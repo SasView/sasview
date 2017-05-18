@@ -3,6 +3,7 @@ Global defaults and various utility functions usable by the general GUI
 """
 
 import os
+import re
 import sys
 import imp
 import warnings
@@ -15,23 +16,16 @@ import logging
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 
-# Translate event handlers
-#from sas.sasgui.guiframe.events import EVT_CATEGORY
-#from sas.sasgui.guiframe.events import EVT_STATUS
-#from sas.sasgui.guiframe.events import EVT_APPEND_BOOKMARK
-#from sas.sasgui.guiframe.events import EVT_PANEL_ON_FOCUS
-#from sas.sasgui.guiframe.events import EVT_NEW_LOAD_DATA
-#from sas.sasgui.guiframe.events import EVT_NEW_COLOR
-#from sas.sasgui.guiframe.events import StatusEvent
-#from sas.sasgui.guiframe.events import NewPlotEvent
-
 from periodictable import formula as Formula
 
-from sas.sasgui.plottools import transform
-from sas.sasgui.plottools.convert_units import convert_unit
-from sas.sasgui.guiframe.dataFitting import Data1D
-from sas.sasgui.guiframe.dataFitting import Data2D
+from sas.qtgui.Plotting import DataTransform
+from sas.qtgui.Plotting.ConvertUnits import convertUnit
+
+from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data2D
+
 from sas.sascalc.dataloader.loader import Loader
+from sas.qtgui.Utilities import CustomDir
 
 
 def get_app_dir():
@@ -108,19 +102,18 @@ config = _find_local_config('local_config', PATH_APP)
 
 if config is None:
     config = _find_local_config('local_config', os.getcwd())
-    if config is None:
-        # Didn't find local config, load the default
-        import sas.sasgui.guiframe.config as config
-        #logging.info("using default local_config")
-    else:
-        pass
-        #logging.info("found local_config in %s", os.getcwd())
+    #if config is None:
+    #    # Didn't find local config, load the default
+    #    import sas.sasgui.guiframe.config as config
+    #    #logging.info("using default local_config")
+    #else:
+    #    pass
+    #    #logging.info("found local_config in %s", os.getcwd())
 else:
     pass
     #logging.info("found local_config in %s", PATH_APP)
 
-from sas.sasgui.guiframe.customdir  import SetupCustom
-c_conf_dir = SetupCustom().setup_dir(PATH_APP)
+c_conf_dir = CustomDir.setup_conf_dir(PATH_APP)
 
 custom_config = _find_local_config('custom_config', c_conf_dir)
 if custom_config is None:
@@ -182,7 +175,7 @@ except AttributeError:
     CLEANUP_PLOT = False
     DEFAULT_OPEN_FOLDER = PATH_APP
 
-DEFAULT_STYLE = config.DEFAULT_STYLE
+#DEFAULT_STYLE = config.DEFAULT_STYLE
 
 PLUGIN_STATE_EXTENSIONS = config.PLUGIN_STATE_EXTENSIONS
 OPEN_SAVE_MENU = config.OPEN_SAVE_PROJECT_MENU
@@ -671,75 +664,74 @@ def xyTransform(data, xLabel="", yLabel=""):
 
     # X
     if xLabel == "x":
-        data.transformX(transform.toX, transform.errToX)
+        data.transformX(DataTransform.toX, DataTransform.errToX)
         xLabel = "%s(%s)" % (xname, xunits)
     if xLabel == "x^(2)":
-        data.transformX(transform.toX2, transform.errToX2)
-        xunits = convert_unit(2, xunits)
+        data.transformX(DataTransform.toX2, DataTransform.errToX2)
+        xunits = convertUnit(2, xunits)
         xLabel = "%s^{2}(%s)" % (xname, xunits)
     if xLabel == "x^(4)":
-        data.transformX(transform.toX4, transform.errToX4)
-        xunits = convert_unit(4, xunits)
+        data.transformX(DataTransform.toX4, DataTransform.errToX4)
+        xunits = convertUnit(4, xunits)
         xLabel = "%s^{4}(%s)" % (xname, xunits)
     if xLabel == "ln(x)":
-        data.transformX(transform.toLogX, transform.errToLogX)
+        data.transformX(DataTransform.toLogX, DataTransform.errToLogX)
         xLabel = "\ln{(%s)}(%s)" % (xname, xunits)
     if xLabel == "log10(x)":
-        data.transformX(transform.toX_pos, transform.errToX_pos)
+        data.transformX(DataTransform.toX_pos, DataTransform.errToX_pos)
         xscale = 'log'
         xLabel = "%s(%s)" % (xname, xunits)
     if xLabel == "log10(x^(4))":
-        data.transformX(transform.toX4, transform.errToX4)
-        xunits = convert_unit(4, xunits)
+        data.transformX(DataTransform.toX4, DataTransform.errToX4)
+        xunits = convertUnit(4, xunits)
         xLabel = "%s^{4}(%s)" % (xname, xunits)
         xscale = 'log'
 
     # Y
     if yLabel == "ln(y)":
-        data.transformY(transform.toLogX, transform.errToLogX)
+        data.transformY(DataTransform.toLogX, DataTransform.errToLogX)
         yLabel = "\ln{(%s)}(%s)" % (yname, yunits)
     if yLabel == "y":
-        data.transformY(transform.toX, transform.errToX)
+        data.transformY(DataTransform.toX, DataTransform.errToX)
         yLabel = "%s(%s)" % (yname, yunits)
     if yLabel == "log10(y)":
-        data.transformY(transform.toX_pos, transform.errToX_pos)
+        data.transformY(DataTransform.toX_pos, DataTransform.errToX_pos)
         yscale = 'log'
         yLabel = "%s(%s)" % (yname, yunits)
     if yLabel == "y^(2)":
-        data.transformY(transform.toX2, transform.errToX2)
-        yunits = convert_unit(2, yunits)
+        data.transformY(DataTransform.toX2, DataTransform.errToX2)
+        yunits = convertUnit(2, yunits)
         yLabel = "%s^{2}(%s)" % (yname, yunits)
     if yLabel == "1/y":
-        data.transformY(transform.toOneOverX, transform.errOneOverX)
-        yunits = convert_unit(-1, yunits)
+        data.transformY(DataTransform.toOneOverX, DataTransform.errOneOverX)
+        yunits = convertUnit(-1, yunits)
         yLabel = "1/%s(%s)" % (yname, yunits)
     if yLabel == "y*x^(2)":
-        data.transformY(transform.toYX2, transform.errToYX2)
-        xunits = convert_unit(2, xunits)
+        data.transformY(DataTransform.toYX2, DataTransform.errToYX2)
+        xunits = convertUnit(2, xunits)
         yLabel = "%s \ \ %s^{2}(%s%s)" % (yname, xname, yunits, xunits)
     if yLabel == "y*x^(4)":
-        data.transformY(transform.toYX4, transform.errToYX4)
-        xunits = convert_unit(4, xunits)
+        data.transformY(DataTransform.toYX4, DataTransform.errToYX4)
+        xunits = convertUnit(4, xunits)
         yLabel = "%s \ \ %s^{4}(%s%s)" % (yname, xname, yunits, xunits)
     if yLabel == "1/sqrt(y)":
-        data.transformY(transform.toOneOverSqrtX,
-                                transform.errOneOverSqrtX)
-        yunits = convert_unit(-0.5, yunits)
+        data.transformY(DataTransform.toOneOverSqrtX, DataTransform.errOneOverSqrtX)
+        yunits = convertUnit(-0.5, yunits)
         yLabel = "1/\sqrt{%s}(%s)" % (yname, yunits)
     if yLabel == "ln(y*x)":
-        data.transformY(transform.toLogXY, transform.errToLogXY)
+        data.transformY(DataTransform.toLogXY, DataTransform.errToLogXY)
         yLabel = "\ln{(%s \ \ %s)}(%s%s)" % (yname, xname, yunits, xunits)
     if yLabel == "ln(y*x^(2))":
-        data.transformY(transform.toLogYX2, transform.errToLogYX2)
-        xunits = convert_unit(2, xunits)
+        data.transformY(DataTransform.toLogYX2, DataTransform.errToLogYX2)
+        xunits = convertUnit(2, xunits)
         yLabel = "\ln (%s \ \ %s^{2})(%s%s)" % (yname, xname, yunits, xunits)
     if yLabel == "ln(y*x^(4))":
-        data.transformY(transform.toLogYX4, transform.errToLogYX4)
-        xunits = convert_unit(4, xunits)
+        data.transformY(DataTransform.toLogYX4, DataTransform.errToLogYX4)
+        xunits = convertUnit(4, xunits)
         yLabel = "\ln (%s \ \ %s^{4})(%s%s)" % (yname, xname, yunits, xunits)
     if yLabel == "log10(y*x^(4))":
-        data.transformY(transform.toYX4, transform.errToYX4)
-        xunits = convert_unit(4, xunits)
+        data.transformY(DataTransform.toYX4, DataTransform.errToYX4)
+        xunits = convertUnit(4, xunits)
         yscale = 'log'
         yLabel = "%s \ \ %s^{4}(%s%s)" % (yname, xname, yunits, xunits)
 
@@ -791,3 +783,15 @@ def convertUnitToHTML(unit):
         return "-&#x221e;"
     else:
         return unit
+
+def parseName(name, expression):
+    """
+    remove "_" in front of a name
+    """
+    if re.match(expression, name) is not None:
+        word = re.split(expression, name, 1)
+        for item in word:           
+            if item.lstrip().rstrip() != '':
+                return item
+    else:
+        return name

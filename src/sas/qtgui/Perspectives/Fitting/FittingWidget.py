@@ -16,17 +16,16 @@ from sasmodels import generate
 from sasmodels import modelinfo
 from sasmodels.sasview_model import load_standard_models
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
-from sas.sasgui.perspectives.fitting.fit_thread import FitThread
 
-from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
-from sas.sasgui.guiframe.dataFitting import Data1D
-from sas.sasgui.guiframe.dataFitting import Data2D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from sas.sasgui.perspectives.fitting.model_thread import Calc1D
-from sas.sasgui.perspectives.fitting.model_thread import Calc2D
-from sas.sasgui.perspectives.fitting.utils import get_weight
+from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
+from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data2D
 
 from sas.qtgui.Perspectives.Fitting.UI.FittingWidgetUI import Ui_FittingWidgetUI
+from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
+from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D
+from sas.qtgui.Perspectives.Fitting.ModelThread import Calc2D
 from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
 from sas.qtgui.Perspectives.Fitting.SmearingWidget import SmearingWidget
@@ -814,7 +813,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         Adds weighting contribution to fitting data
         """
         # Send original data for weighting
-        weight = get_weight(data=data, is2d=self.is2D, flag=self.weighting)
+        weight = FittingUtilities.getWeight(data=data, is2d=self.is2D, flag=self.weighting)
         update_module = data.err_data if self.is2D else data.dy
         update_module = weight
 

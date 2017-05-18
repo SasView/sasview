@@ -11,18 +11,21 @@ from PyQt4.Qt import QMutex
 
 from twisted.internet import threads
 
-# SAS
+# SASCALC
 from sas.sascalc.dataloader.loader import Loader
-from sas.sasgui.guiframe.data_manager import DataManager
-from sas.sasgui.guiframe.dataFitting import Data1D
-from sas.sasgui.guiframe.dataFitting import Data2D
 
+# QTGUI
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
+
+from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
-from sas.qtgui.MainWindow.DroppableDataLoadWidget import DroppableDataLoadWidget
 from sas.qtgui.Plotting.MaskEditor import MaskEditor
+
+from sas.qtgui.MainWindow.DataManager import DataManager
+from sas.qtgui.MainWindow.DroppableDataLoadWidget import DroppableDataLoadWidget
 
 import sas.qtgui.Perspectives as Perspectives
 

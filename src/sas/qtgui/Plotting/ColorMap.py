@@ -10,7 +10,7 @@ from matplotlib import pylab
 import numpy
 
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from sas.sasgui.guiframe.dataFitting import Data2D
+from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.Utilities.GuiUtils import formatNumber
 from rangeSlider import RangeSlider
 

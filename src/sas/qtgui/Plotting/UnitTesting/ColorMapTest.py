@@ -9,7 +9,7 @@ import matplotlib as mpl
 # set up import paths
 import path_prepare
 
-from sas.sasgui.guiframe.dataFitting import Data2D
+from sas.qtgui.Plotting.PlotterData import Data2D
 import sas.qtgui.Plotting.Plotter2D as Plotter2D
 from UnitTesting.TestUtils import WarningTestNotImplemented
 from UnitTesting.TestUtils import QtSignalSpy

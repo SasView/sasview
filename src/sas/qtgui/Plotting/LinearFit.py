@@ -6,12 +6,11 @@ import numpy
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 
-#from sas.sasgui.transform import 
 from sas.qtgui.Utilities.GuiUtils import formatNumber
-from sas.sasgui.plottools import fittings
-from sas.sasgui.plottools import transform
 
-from sas.sasgui.plottools.LineModel import LineModel
+from sas.qtgui.Plotting import Fittings
+from sas.qtgui.Plotting import DataTransform
+from sas.qtgui.Plotting.LineModel import LineModel
 
 # Local UI
 from sas.qtgui.UI import main_resources_rc
@@ -66,9 +65,9 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
         # Display the fittings values
         self.default_A = self.model.getParam('A')
         self.default_B = self.model.getParam('B')
-        self.cstA = fittings.Parameter(self.model, 'A', self.default_A)
-        self.cstB = fittings.Parameter(self.model, 'B', self.default_B)
-        self.transform = transform
+        self.cstA = Fittings.Parameter(self.model, 'A', self.default_A)
+        self.cstB = Fittings.Parameter(self.model, 'B', self.default_B)
+        self.transform = DataTransform
 
         self.setFixedSize(self.minimumSizeHint())
 
@@ -122,8 +121,8 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
         tempx, tempy, tempdy = self.origData()
 
         # Find the fitting parameters
-        self.cstA = fittings.Parameter(self.model, 'A', self.default_A)
-        self.cstB = fittings.Parameter(self.model, 'B', self.default_B)
+        self.cstA = Fittings.Parameter(self.model, 'A', self.default_A)
+        self.cstB = Fittings.Parameter(self.model, 'B', self.default_B)
         tempdy = numpy.asarray(tempdy)
         tempdy[tempdy == 0] = 1
 
@@ -131,7 +130,7 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
             xmin = numpy.log10(xmin)
             xmax = numpy.log10(xmax)
 
-        chisqr, out, cov = fittings.sasfit(self.model,
+        chisqr, out, cov = Fittings.sasfit(self.model,
                                            [self.cstA, self.cstB],
                                            tempx, tempy, tempdy,
                                            xmin, xmax)
@@ -192,11 +191,11 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
             if self.x_is_log:
                 tempy  = [numpy.log10(y[i])
                          for i in range(len(x)) if x[i] >= xmin_check]
-                tempdy = [transform.errToLogX(y[i], 0, dy[i], 0)
+                tempdy = [DataTransform.errToLogX(y[i], 0, dy[i], 0)
                          for i in range(len(x)) if x[i] >= xmin_check]
             else:
                 tempy = map(numpy.log10, y)
-                tempdy = map(lambda t1,t2:transform.errToLogX(t1,0,t2,0),y,dy)
+                tempdy = map(lambda t1,t2:DataTransform.errToLogX(t1,0,t2,0),y,dy)
         else:
             tempy = y
             tempdy = dy

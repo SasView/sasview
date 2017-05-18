@@ -13,7 +13,6 @@ import path_prepare
 
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 from sas.qtgui.Plotting.WindowTitle import WindowTitle
-#import sas.qtgui.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.GuiUtils import *
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 

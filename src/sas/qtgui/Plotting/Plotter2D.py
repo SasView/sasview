@@ -9,21 +9,25 @@ from PyQt4 import QtCore
 DEFAULT_CMAP = pylab.cm.jet
 from mpl_toolkits.mplot3d import Axes3D
 
+from sas.sascalc.dataloader.manipulations import CircularAverage
+
+from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data2D
+
 import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.ColorMap import ColorMap
-from sas.sasgui.guiframe.dataFitting import Data1D
-from sas.sasgui.guiframe.dataFitting import Data2D
-from sas.sascalc.dataloader.manipulations import CircularAverage
-from sas.sasgui.guiframe.local_perspectives.plotting.binder import BindArtist
 from sas.qtgui.Plotting.BoxSum import BoxSum
 from sas.qtgui.Plotting.SlicerParameters import SlicerParameters
-from sas.sasgui.guiframe.local_perspectives.plotting.boxSlicer import BoxInteractorX
-from sas.sasgui.guiframe.local_perspectives.plotting.AnnulusSlicer import AnnulusInteractor
-from sas.sasgui.guiframe.local_perspectives.plotting.SectorSlicer import SectorInteractor
-from sas.sasgui.guiframe.local_perspectives.plotting.boxSum import BoxSumCalculator
-from sas.sasgui.guiframe.local_perspectives.plotting.boxSlicer import BoxInteractorY
+from sas.qtgui.Plotting.Binder import BindArtist
+
+# TODO: move to sas.qtgui namespace
+from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorX
+from sas.qtgui.Plotting.Slicers.BoxSlicer import BoxInteractorY
+from sas.qtgui.Plotting.Slicers.AnnulusSlicer import AnnulusInteractor
+from sas.qtgui.Plotting.Slicers.SectorSlicer import SectorInteractor
+from sas.qtgui.Plotting.Slicers.BoxSum import BoxSumCalculator
 
 # Minimum value of Z for which we will present data.
 MIN_Z = -32

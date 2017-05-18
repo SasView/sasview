@@ -11,8 +11,8 @@ from mpl_toolkits.mplot3d import Axes3D
 ####### TEMP
 import path_prepare
 #######
-from sas.sasgui.guiframe.dataFitting import Data1D
-from sas.sasgui.guiframe.dataFitting import Data2D
+from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data2D
 from UnitTesting.TestUtils import WarningTestNotImplemented
 
 # Tested module

@@ -8,7 +8,7 @@ from mock import MagicMock
 # set up import paths
 import path_prepare
 
-from sas.sasgui.guiframe.dataFitting import Data1D
+from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Plotting.Plotter as Plotter
 
 # Local

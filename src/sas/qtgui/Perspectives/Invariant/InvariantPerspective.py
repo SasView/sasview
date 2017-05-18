@@ -10,7 +10,7 @@ from twisted.internet import reactor
 
 # sas-global
 from sas.sascalc.invariant import invariant
-from sas.sasgui.guiframe.dataFitting import Data1D
+from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # local

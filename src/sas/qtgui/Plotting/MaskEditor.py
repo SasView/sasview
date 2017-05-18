@@ -1,6 +1,6 @@
 from PyQt4 import QtGui
 
-from sas.sasgui.guiframe.dataFitting import Data2D
+from sas.qtgui.Plotting.PlotterData import Data2D
 
 # Local UI
 from sas.qtgui.UI import main_resources_rc

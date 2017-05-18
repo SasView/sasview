@@ -2,8 +2,8 @@ import sys
 import unittest
 from PyQt4 import QtGui
 
-from sas.sasgui.guiframe.dataFitting import Data1D
-from sas.sasgui.guiframe.dataFitting import Data2D
+from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data2D
 
 from UnitTesting.TestUtils import WarningTestNotImplemented
 

@@ -11,9 +11,9 @@ import sas.qtgui.path_prepare
 
 # SV imports
 from sas.sascalc.dataloader.loader import Loader
-from sas.sasgui.guiframe.data_manager import DataManager
-from sas.sasgui.guiframe.dataFitting import Data1D
-from sas.sasgui.guiframe.dataFitting import Data2D
+from sas.qtgui.MainWindow.DataManager import DataManager
+from sas.qtgui.Plotting.PlotterData import Data1D
+from sas.qtgui.Plotting.PlotterData import Data2D
 
 # Tested module
 from sas.qtgui.Utilities.GuiUtils import *

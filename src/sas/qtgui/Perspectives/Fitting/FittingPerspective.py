@@ -6,7 +6,6 @@ from PyQt4 import QtGui
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
-#from FitPage import FitPage
 
 class FittingWindow(QtGui.QTabWidget):
     """

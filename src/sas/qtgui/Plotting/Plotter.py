@@ -6,13 +6,15 @@ import copy
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 
-from sas.sasgui.guiframe.dataFitting import Data1D
+from sas.qtgui.Plotting.PlotterData import Data1D
+
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.AddText import AddText
 from sas.qtgui.Plotting.SetGraphRange import SetGraphRange
 from sas.qtgui.Plotting.LinearFit import LinearFit
 from sas.qtgui.Plotting.PlotProperties import PlotProperties
+
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
 
 class PlotterWidget(PlotterBase):
