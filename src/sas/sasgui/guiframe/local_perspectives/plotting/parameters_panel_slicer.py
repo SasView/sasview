@@ -135,7 +135,7 @@ class SlicerParameterPanel(wx.Dialog):
             # Change slicer within the window
             ix = 0
             iy += 1
-            txt = "Slicer type:"
+            txt = "Slicer type"
             text = wx.StaticText(self, -1, txt, style=wx.ALIGN_LEFT)
             self.bck.Add(text, (iy, ix), (1, 1),
                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
