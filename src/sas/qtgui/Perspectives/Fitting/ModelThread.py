@@ -228,16 +228,6 @@ class Calc1D(CalcThread):
 
         elapsed = time.time() - self.starttime
 
-        #self.complete(x=self.data.x[index], y=output[index],
-        #              page_id=self.page_id,
-        #              state=self.state,
-        #              weight=self.weight,
-        #              fid=self.fid,
-        #              toggle_mode_on=self.toggle_mode_on,
-        #              elapsed=elapsed, index=index, model=self.model,
-        #              data=self.data,
-        #              update_chisqr=self.update_chisqr,
-        #              source=self.source)
         return (self.data.x[index], output[index],
                 self.page_id,
                 self.state,

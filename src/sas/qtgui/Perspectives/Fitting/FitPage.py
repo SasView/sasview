@@ -29,6 +29,7 @@ class FitPage(object):
         self.filename = ""
         self.data = None
         self.parameters_to_fit = []
+        self.kernel_module = None
 
         # QModels
         self.param_model = None

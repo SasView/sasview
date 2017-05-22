@@ -274,14 +274,6 @@ def residualsData1D(reference_data, current_data):
         y = (fn - gn[index][0]) / en
         residuals.y = y
 
-    #try:
-    #    y = (fn - gn)/en
-    #    residuals.y = -y
-    #except ValueError:
-    #    msg = "ResidualPlot Error: different number of data points in theory"
-    #    print msg
-    #    y = (fn - gn[index][0]) / en
-    #    residuals.y = y
     residuals.x = current_data.x[index][0]
     residuals.dy = numpy.ones(len(residuals.y))
     residuals.dx = None
@@ -357,7 +349,6 @@ def plotResiduals(reference_data, current_data):
     residuals.hide_error = False
 
     return residuals
-
 
 def binary_encode(i, digits):
     return [i >> d & 1 for d in xrange(digits)]

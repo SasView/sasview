@@ -818,6 +818,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Send original data for weighting
         weight = FittingUtilities.getWeight(data=data, is2d=self.is2D, flag=self.weighting)
         update_module = data.err_data if self.is2D else data.dy
+        # Overwrite relevant values in data
         update_module = weight
 
     def updateQRange(self):
@@ -872,6 +873,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         # (Re)-create headers
         FittingUtilities.addHeadersToModel(self._model_model)
+        self.lstParams.header().setFont(self.boldFont)
 
         # Update Q Ranges
         self.updateQRange()
@@ -887,8 +889,11 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.kernel_module = self.models[model_name]()
 
         # Explicitly add scale and background with default values
+        temp_undo_state = self.undo_supported
+        self.undo_supported = False
         self.addScaleToModel(self._model_model)
         self.addBackgroundToModel(self._model_model)
+        self.undo_supported = temp_undo_state
 
         # Update the QModel
         new_rows = FittingUtilities.addParametersToModel(self.model_parameters, self.is2D)
@@ -919,6 +924,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         if model_column == 0:
             self.checkboxSelected(item)
             self.cmdFit.setEnabled(self.parameters_to_fit != [] and self.logic.data_is_loaded)
+            # Update state stack
+            self.updateUndo()
             return
 
         model_row = item.row()
@@ -1069,6 +1076,12 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         calc_thread = threads.deferToThread(method.compute)
         calc_thread.addCallback(self.methodCompleteForData())
+        calc_thread.addErrback(self.calculateDataFailed())
+
+    def calculateDataFailed(self):
+        """
+        """
+        print "Calculate Data failed."
 
     def complete1D(self, return_data):
         """
@@ -1092,6 +1105,10 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         # Create a new index for holding data
         fitted_data.symbol = "Line"
+
+        # Modify fitted_data with weighting
+        self.addWeightingToData(fitted_data)
+
         self.createNewIndex(fitted_data)
         # Calculate difference between return_data and logic.data
         self.chi2 = FittingUtilities.calculateChi2(fitted_data, self.logic.data)
@@ -1307,6 +1324,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         fp.chi2 = self.chi2
         fp.parameters_to_fit = self.parameters_to_fit
+        fp.kernel_module = self.kernel_module
 
         # Options tab
         fp.fit_options[fp.MIN_RANGE] = self.q_range_min

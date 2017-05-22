@@ -29,6 +29,7 @@ class FitPageTest(unittest.TestCase):
         self.assertFalse(self.page.data_is_loaded)
         self.assertEqual(self.page.filename, "")
         self.assertIsNone(self.page.data)
+        self.assertIsNone(self.page.kernel_module)
         self.assertEqual(self.page.parameters_to_fit, [])
 
     def testSave(self):
