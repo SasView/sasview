@@ -19,6 +19,8 @@ CONVERT_DICT = {"SectorInteractor": "SectorQ",
                 "AnnulusInteractor": "AnnulusPhi",
                 "BoxInteractorX": "SlabX",
                 "BoxInteractorY": "SlabY"}
+BINNING_OPTIONS = {"Linear" : 0,
+                   "Logarithmic" : 10,}
 
 
 class SlicerParameterPanel(wx.Dialog):
@@ -46,6 +48,7 @@ class SlicerParameterPanel(wx.Dialog):
         self.auto_save = None
         self.path = None
         self.fitting_options = None
+        self.bin_ctl = None
         self.type_list = []
         self.loaded_data = []
         self.always_on = None
@@ -100,9 +103,9 @@ class SlicerParameterPanel(wx.Dialog):
             keys = params.keys()
             keys.sort()
             for item in keys:
-                iy += 1
                 ix = 0
-                if item not in ["count", "errors"]:
+                iy += 1
+                if item not in ["count", "errors", "binning base"]:
                     text = wx.StaticText(self, -1, item, style=wx.ALIGN_LEFT)
                     self.bck.Add(text, (iy, ix), (1, 1),
                                  wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
@@ -116,6 +119,31 @@ class SlicerParameterPanel(wx.Dialog):
                     self.Bind(wx.EVT_TEXT_ENTER, self.on_text_enter)
                     self.parameters.append([item, ctl])
                     self.bck.Add(ctl, (iy, ix), (1, 1),
+                                 wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+                    ix = 3
+                    self.bck.Add((20, 20), (iy, ix), (1, 1),
+                                 wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+                elif item == 'binning base':
+                    text = wx.StaticText(self, -1, item, style=wx.ALIGN_LEFT)
+                    self.bck.Add(text, (iy, ix), (1, 1),
+                                 wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+                    options = BINNING_OPTIONS.keys()
+                    self.bin_ctl = wx.ComboBox(parent=self, choices=options)
+                    hint_msg = "Modify the value of %s to change" % item
+                    hint_msg += " the 2D slicer"
+                    self.bin_ctl.SetToolTipString(hint_msg)
+                    ix = 1
+                    result = ""
+                    value = 0
+                    for name, value in BINNING_OPTIONS.items():
+                        if value == params[item]:
+                            result = name
+                            break
+                    index = self.bin_ctl.FindString(result)
+                    self.bin_ctl.SetSelection(index)
+                    self.parameters.append([item, self.bin_ctl])
+                    self.Bind(wx.EVT_COMBOBOX, self.on_text_enter)
+                    self.bck.Add(self.bin_ctl, (iy, ix), (1, 1),
                                  wx.EXPAND | wx.ADJUST_MINSIZE, 0)
                     ix = 3
                     self.bck.Add((20, 20), (iy, ix), (1, 1),
@@ -250,6 +278,10 @@ class SlicerParameterPanel(wx.Dialog):
         has_error = False
         for item in self.parameters:
             try:
+                if item[0] == "binning base":
+                    title = self.bin_ctl.GetValue()
+                    params["binning base"] = BINNING_OPTIONS.get(title)
+                    continue
                 params[item[0]] = float(item[1].GetValue())
                 item[1].SetBackgroundColour(
                     wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
