@@ -87,7 +87,7 @@ class Plugin(PluginBase):
         """
         On Qmin Qmax vertical line event
         """
-        if event == None:
+        if event is None:
             return
         if event.id in self.plot_panels.keys():
             panel = self.plot_panels[event.id]
@@ -98,7 +98,7 @@ class Plugin(PluginBase):
         panel.on_plot_qrange(event)
 
     def _on_plot_lim(self, event=None):
-        if event == None:
+        if event is None:
             return
         if event.id in self.plot_panels.keys():
             panel = self.plot_panels[event.id]
@@ -133,9 +133,7 @@ class Plugin(PluginBase):
         Clear and Hide all plot panels, and remove them from menu
         """
         for group_id in self.plot_panels.keys():
-            panel = self.plot_panels[group_id]
-            panel.graph.reset()
-            self.hide_panel(group_id)
+            self.clear_panel_by_id(group_id)
         self.plot_panels = {}
 
     def clear_panel_by_id(self, group_id):

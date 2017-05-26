@@ -6,6 +6,8 @@ from matplotlib.backends.backend_wxagg import NavigationToolbar2WxAgg
 from matplotlib.backends.backend_wx import _load_bitmap
 import logging
 
+logger = logging.getLogger(__name__)
+
 # Event binding code changed after version 2.5
 if wx.VERSION_STRING >= '2.5':
     def bind(actor, event, action, **kw):
@@ -34,8 +36,8 @@ class NavigationToolBar(NavigationToolbar2WxAgg):
         NavigationToolbar2WxAgg.__init__(self, canvas)
 
     # CRUFT: mpl 1.1 uses save rather than save_figure
-    #try: save_figure = NavigationToolbar2WxAgg.save
-    #except AttributeError: pass
+    try: save_figure = NavigationToolbar2WxAgg.save
+    except AttributeError: pass
     
     def _init_toolbar(self):
         self._parent = self.canvas.GetParent()
@@ -93,7 +95,7 @@ class NavigationToolBar(NavigationToolbar2WxAgg):
         try:
             self._parent.onToolContextMenu(event=event)
         except:
-            logging.error("Plot toolbar could not show menu")
+            logger.error("Plot toolbar could not show menu")
 
     def context_menu(self, event):
         """
@@ -121,7 +123,7 @@ class NavigationToolBar(NavigationToolbar2WxAgg):
             _printer.Print(self.canvas, PlotPrintout(self.canvas), True)
         except:
             import traceback
-            logging.error(traceback.format_exc())
+            logger.error(traceback.format_exc())
 
     def copy_figure(self, event):
         copy_image_to_clipboard(self.canvas)
@@ -168,5 +170,3 @@ def copy_image_to_clipboard(canvas):
     wx.TheClipboard.Open()
     wx.TheClipboard.SetData(bmp)
     wx.TheClipboard.Close()
-
-

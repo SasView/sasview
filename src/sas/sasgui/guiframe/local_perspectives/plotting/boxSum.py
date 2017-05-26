@@ -361,9 +361,9 @@ class PointInteractor(_BaseInteractor):
         """
         Draw the new roughness on the graph.
         """
-        if center_x != None:
+        if center_x is not None:
             self.x = center_x
-        if center_y != None:
+        if center_y is not None:
             self.y = center_y
         self.center_marker.set(xdata=[self.x], ydata=[self.y])
         self.center.set(xdata=[self.x], ydata=[self.y])

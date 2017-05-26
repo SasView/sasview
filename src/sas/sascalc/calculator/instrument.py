@@ -2,7 +2,7 @@
 This module is a small tool to allow user to
 control instrumental parameters
 """
-import numpy
+import numpy as np
 
 # defaults in cgs unit
 _SAMPLE_A_SIZE = [1.27]
@@ -167,7 +167,7 @@ class Neutron(object):
         # wavelength spectrum
         self.spectrum = self.get_default_spectrum()
         # intensity in counts/sec
-        self.intensity = numpy.interp(self.wavelength,
+        self.intensity = np.interp(self.wavelength,
                                       self.spectrum[0],
                                       self.spectrum[1],
                                       0.0,
@@ -202,7 +202,7 @@ class Neutron(object):
         wavelength is already within the spectrum
         """
         spectrum = self.spectrum
-        intensity = numpy.interp(self.wavelength,
+        intensity = np.interp(self.wavelength,
                                  spectrum[0],
                                  spectrum[1],
                                  0.0,
@@ -243,7 +243,7 @@ class Neutron(object):
             raise
         self.wavelength = wavelength
         validate(wavelength)
-        self.intensity = numpy.interp(self.wavelength,
+        self.intensity = np.interp(self.wavelength,
                                       self.spectrum[0],
                                       self.spectrum[1],
                                       0.0,
@@ -304,7 +304,7 @@ class Neutron(object):
         """
         get default spectrum
         """
-        return numpy.array(_LAMBDA_ARRAY)
+        return np.array(_LAMBDA_ARRAY)
 
     def get_band(self):
         """
@@ -344,7 +344,7 @@ class TOF(Neutron):
         """
         get list of the intensity wrt wavelength_list
         """
-        out = numpy.interp(self.wavelength_list,
+        out = np.interp(self.wavelength_list,
                            self.spectrum[0],
                            self.spectrum[1],
                            0.0,

@@ -29,7 +29,7 @@ from sas.sasgui.plottools.PlotPanel import PlotPanel
 from sas.sasgui.plottools.plottables import Graph, Data1D, Theory1D
 import  sys
 sys.platform = 'win95'
-import numpy
+import numpy as np
 
 
 class TestPlotPanel(PlotPanel):
@@ -80,9 +80,9 @@ class TestPlotPanel(PlotPanel):
 # ---------------------------------------------------------------
 def sample_graph():
     # Construct a simple graph
-    x = numpy.linspace(0,2.0, 50)
-    y = numpy.sin(2*numpy.pi*x*2.8)
-    dy = numpy.sqrt(100*numpy.abs(y))/100
+    x = np.linspace(0,2.0, 50)
+    y = np.sin(2*np.pi*x*2.8)
+    dy = np.sqrt(100*np.abs(y))/100
     
     data = Data1D(x,y,dy=dy)
     data.xaxis('distance', 'm')

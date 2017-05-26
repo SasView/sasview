@@ -1,4 +1,3 @@
-
 import sys
 import time
 from sas.sascalc.data_util.calcthread import CalcThread
@@ -88,8 +87,6 @@ class FitThread(CalcThread):
                           pars=self.pars,
                           elapsed=time.time() - self.starttime)
 
-            return result[0], time.time()-self.starttime
-
         except KeyboardInterrupt, msg:
             # Thread was interrupted, just proceed and re-raise.
             # Real code should not print, but this is an example...
@@ -101,11 +98,7 @@ class FitThread(CalcThread):
             # raise KeyboardInterrupt
             if self.handler is not None:
                 self.handler.stop(msg=msg)
-        except Exception as ex:
-            #print "EXCEPTION: ", ex
+        except:
             import traceback
             if self.handler is not None:
                 self.handler.error(msg=traceback.format_exc())
-
-
-

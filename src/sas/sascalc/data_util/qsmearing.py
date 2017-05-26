@@ -8,13 +8,17 @@
 #See the license text in license.txt
 #copyright 2008, University of Tennessee
 ######################################################################
-import numpy
 import math
 import logging
 import sys
 
+import numpy as np  # type: ignore
+from numpy import pi, exp # type:ignore
+
 from sasmodels.resolution import Slit1D, Pinhole1D
+from sasmodels.sesans import SesansTransform
 from sasmodels.resolution2d import Pinhole2D
+from .nxsunit import Converter
 
 def smear_selection(data, model = None):
     """
@@ -35,18 +39,46 @@ def smear_selection(data, model = None):
     """
     # Sanity check. If we are not dealing with a SAS Data1D
     # object, just return None
+    # This checks for 2D data (does not throw exception because fail is common)
     if  data.__class__.__name__ not in ['Data1D', 'Theory1D']:
-        if data == None:
+        if data is None:
             return None
-        elif data.dqx_data == None or data.dqy_data == None:
+        elif data.dqx_data is None or data.dqy_data is None:
             return None
-        return PySmear2D(data, model)
-
+        return PySmear2D(data)
+    # This checks for 1D data with smearing info in the data itself (again, fail is likely; no exceptions)
     if  not hasattr(data, "dx") and not hasattr(data, "dxl")\
          and not hasattr(data, "dxw"):
         return None
 
     # Look for resolution smearing data
+    # This is the code that checks for SESANS data; it looks for the file loader
+    # TODO: change other sanity checks to check for file loader instead of data structure?
+    _found_sesans = False
+    #if data.dx is not None and data.meta_data['loader']=='SESANS':
+    if data.dx is not None and data.isSesans:
+        #if data.dx[0] > 0.0:
+        if np.size(data.dx[data.dx <= 0]) == 0:
+            _found_sesans = True
+        # if data.dx[0] <= 0.0:
+        if np.size(data.dx[data.dx <= 0]) > 0:
+            raise ValueError('one or more of your dx values are negative, please check the data file!')
+
+    if _found_sesans:
+        # Pre-compute the Hankel matrix (H)
+        SElength = Converter(data._xunit)(data.x, "A")
+
+        theta_max = Converter("radians")(data.sample.zacceptance)[0]
+        q_max = 2 * np.pi / np.max(data.source.wavelength) * np.sin(theta_max)
+        zaccept = Converter("1/A")(q_max, "1/" + data.source.wavelength_unit),
+
+        Rmax = 10000000
+        hankel = SesansTransform(data.x, SElength,
+                                 data.source.wavelength,
+                                 zaccept, Rmax)
+        # Then return the actual transform, as if it were a smearing function
+        return PySmear(hankel, model, offset=0)
+
     _found_resolution = False
     if data.dx is not None and len(data.dx) == len(data.x):
 
@@ -88,10 +120,12 @@ class PySmear(object):
     """
     Wrapper for pure python sasmodels resolution functions.
     """
-    def __init__(self, resolution, model):
+    def __init__(self, resolution, model, offset=None):
         self.model = model
         self.resolution = resolution
-        self.offset = numpy.searchsorted(self.resolution.q_calc, self.resolution.q[0])
+        if offset is None:
+            offset = np.searchsorted(self.resolution.q_calc, self.resolution.q[0])
+        self.offset = offset
 
     def apply(self, iq_in, first_bin=0, last_bin=None):
         """
@@ -106,7 +140,7 @@ class PySmear(object):
         if last_bin is None: last_bin = len(iq_in)
         start, end = first_bin + self.offset, last_bin + self.offset
         q_calc = self.resolution.q_calc
-        iq_calc = numpy.empty_like(q_calc)
+        iq_calc = np.empty_like(q_calc)
         if start > 0:
             iq_calc[:start] = self.model.evalDistribution(q_calc[:start])
         if end+1 < len(q_calc):
@@ -126,8 +160,8 @@ class PySmear(object):
         q[first:last+1].
         """
         q = self.resolution.q
-        first = numpy.searchsorted(q, q_min)
-        last = numpy.searchsorted(q, q_max)
+        first = np.searchsorted(q, q_min)
+        last = np.searchsorted(q, q_max)
         return first, min(last,len(q)-1)
 
 def slit_smear(data, model=None):

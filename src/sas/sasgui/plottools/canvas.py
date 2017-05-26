@@ -10,6 +10,8 @@ from matplotlib.backend_bases import MouseEvent, RendererBase
 from matplotlib.backends.backend_wx import GraphicsContextWx, PrintoutWx
 from matplotlib.backends.backend_wx import RendererWx
 
+logger = logging.getLogger(__name__)
+
 
 def draw_image(self, x, y, im, bbox, clippath=None, clippath_trans=None):
     """
@@ -95,7 +97,7 @@ def OnPrintPage(self, page):
         try:
             dc.DrawBitmap(self.canvas.bitmap, (0, 0))
         except:
-            logging.error(sys.exc_value)
+            logger.error(sys.exc_value)
 
     # restore original figure  resolution
     self.canvas.figure.set_facecolor(bgcolor)
@@ -150,7 +152,7 @@ class FigureCanvas(FigureCanvasWxAgg):
         Render after a delay if no other render requests have been made.
         """
         self.panel.subplot.grid(self.panel.grid_on)
-        if self.panel.legend != None and self.panel.legend_pos_loc:
+        if self.panel.legend is not None and self.panel.legend_pos_loc:
             self.panel.legend._loc = self.panel.legend_pos_loc
         self.idletimer.Restart(5, *args, **kwargs)  # Delay by 5 ms
 
@@ -206,7 +208,7 @@ class FigureCanvas(FigureCanvasWxAgg):
             try:
                 fig.draw(self)
             except ValueError:
-                logging.error(sys.exc_value)
+                logger.error(sys.exc_value)
         else:
             self._isRendered = False
         if self.ndraw <= 1:

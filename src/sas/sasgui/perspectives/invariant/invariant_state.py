@@ -16,6 +16,8 @@ from sas.sasgui.guiframe.utils import format_number
 from sas.sasgui.guiframe.gui_style import GUIFRAME_ID
 from sas.sasgui.guiframe.dataFitting import Data1D
 
+logger = logging.getLogger(__name__)
+
 INVNODE_NAME = 'invariant'
 CANSAS_NS = "cansas1d/1.0"
 
@@ -278,7 +280,7 @@ class InvariantState(object):
 
         # File name
         element = newdoc.createElement("filename")
-        if self.file != None and self.file != '':
+        if self.file is not None and self.file != '':
             element.appendChild(newdoc.createTextNode(str(self.file)))
         else:
             element.appendChild(newdoc.createTextNode(str(file)))
@@ -380,7 +382,7 @@ class InvariantState(object):
                 except:
                     msg = "InvariantSate.fromXML: Could not read"
                     msg += " timestamp\n %s" % sys.exc_value
-                    logging.error(msg)
+                    logger.error(msg)
 
             # Parse bookmarks
             entry_bookmark = get_content('ns:bookmark', node)
@@ -422,7 +424,10 @@ class InvariantState(object):
                 if entry is not None:
                     for item in DEFAULT_STATE:
                         input_field = get_content('ns:%s' % item, entry)
-                        val = str(input_field.text.strip())
+                        if input_field.text is not None:
+                            val = str(input_field.text.strip())
+                        else:
+                            val = ''
                         if input_field is not None:
                             temp_state[item] = val
                             self.state_list[str(ind)] = temp_state
@@ -432,7 +437,10 @@ class InvariantState(object):
             if entry is not None:
                 for item in DEFAULT_STATE:
                     input_field = get_content('ns:%s' % item, entry)
-                    val = str(input_field.text.strip())
+                    if input_field.text is not None:
+                        val = str(input_field.text.strip())
+                    else:
+                        val = ''
                     if input_field is not None:
                         self.set_saved_state(name=item, value=val)
             self.file = file_name
@@ -687,7 +695,7 @@ class Reader(CansasReader):
         except:
             msg = "XML document does not contain invariant"
             msg += " information.\n %s" % sys.exc_value
-            logging.info(msg)
+            logger.info(msg)
         return state
 
     def _read_cansas(self, path):
@@ -725,7 +733,7 @@ class Reader(CansasReader):
 
                     # invstate could be None when .svs file is loaded
                     # in this case, skip appending to output
-                    if invstate != None:
+                    if invstate is not None:
                         sas_entry.meta_data['invstate'] = invstate
                         sas_entry.filename = invstate.file
                         output.append(sas_entry)
@@ -778,9 +786,9 @@ class Reader(CansasReader):
             msg += " instance: %s" % str(datainfo.__class__.__name__)
             raise RuntimeError, msg
         # make sure title and data run is filled up.
-        if datainfo.title == None or datainfo.title == '':
+        if datainfo.title is None or datainfo.title == '':
             datainfo.title = datainfo.name
-        if datainfo.run_name == None or datainfo.run_name == {}:
+        if datainfo.run_name is None or datainfo.run_name == {}:
             datainfo.run = [str(datainfo.name)]
             datainfo.run_name[0] = datainfo.name
         # Create basic XML document

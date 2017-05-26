@@ -117,9 +117,9 @@ class PyConsole(editor.EditorNotebookFrame):
         self.base = base
         self.panel = panel
         self._add_menu()
-        if filename != None:
+        if filename is not None:
             dataDir = os.path.dirname(filename)
-        elif self.parent != None:
+        elif self.parent is not None:
             dataDir = self.parent._default_save_location
         else:
              dataDir = None
@@ -127,7 +127,7 @@ class PyConsole(editor.EditorNotebookFrame):
         self.Centre()
 
         # See if there is a corresponding C file
-        if filename != None:
+        if filename is not None:
             c_filename = os.path.splitext(filename)[0] + ".c"
             if os.path.isfile(c_filename):
                 self.bufferCreate(c_filename)
@@ -243,7 +243,7 @@ class PyConsole(editor.EditorNotebookFrame):
             self.bufferCreate(result.path)
 
         # See if there is a corresponding C file
-        if result.path != None:
+        if result.path is not None:
             c_filename = os.path.splitext(result.path)[0] + ".c"
             if os.path.isfile(c_filename):
                 self.bufferCreate(c_filename)
@@ -301,8 +301,8 @@ class PyConsole(editor.EditorNotebookFrame):
         fname = self.editor.getStatus()[0]
         success = show_model_output(self, fname)
 
-        # Update custom model list in fitpage combobox
-        if success and self._manager != None and self.panel != None:
+        # Update plugin model list in fitpage combobox
+        if success and self._manager is not None and self.panel is not None:
             self._manager.set_edit_menu_helper(self.parent)
             wx.CallAfter(self._manager.update_custom_combo)
 
@@ -336,7 +336,7 @@ class PyConsole(editor.EditorNotebookFrame):
         """
         Close event
         """
-        if self.base != None:
+        if self.base is not None:
             self.base.py_frame = None
         self.Destroy()
 

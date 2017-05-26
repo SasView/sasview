@@ -441,7 +441,6 @@ class SideInteractor(_BaseInteractor):
                  self.theta < 0 and self.theta2 > 0):
                 self.restore()
                 return
-
         self.phi = numpy.fabs(self.theta2 - self.theta)
         if self.phi > numpy.pi:
             self.phi = 2 * numpy.pi - numpy.fabs(self.theta2 - self.theta)

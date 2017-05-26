@@ -1,6 +1,8 @@
 """
     Utilities to manage models
 """
+from __future__ import print_function
+
 import traceback
 import os
 import sys
@@ -18,10 +20,13 @@ from sas.sascalc.fit.pluginmodel import Model1DPlugin
 from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 from sasmodels.sasview_model import load_custom_model, load_standard_models
 
+logger = logging.getLogger(__name__)
+
 
 PLUGIN_DIR = 'plugin_models'
 PLUGIN_LOG = os.path.join(os.path.expanduser("~"), '.sasview', PLUGIN_DIR,
                           "plugins.log")
+PLUGIN_NAME_BASE = '[plug-in] '
 
 def get_model_python_path():
     """
@@ -137,7 +142,7 @@ class ReportProblem:
     def __nonzero__(self):
         type, value, tb = sys.exc_info()
         if type is not None and issubclass(type, py_compile.PyCompileError):
-            print "Problem with", repr(value)
+            print("Problem with", repr(value))
             raise type, value, tb
         return 1
 
@@ -157,38 +162,38 @@ def compile_file(dir):
     return None
 
 
-def _findModels(dir):
+def _find_models():
     """
     Find custom models
     """
     # List of plugin objects
-    dir = find_plugins_dir()
+    directory = find_plugins_dir()
     # Go through files in plug-in directory
-    if not os.path.isdir(dir):
-        msg = "SasView couldn't locate Model plugin folder %r." % dir
-        logging.warning(msg)
+    if not os.path.isdir(directory):
+        msg = "SasView couldn't locate Model plugin folder %r." % directory
+        logger.warning(msg)
         return {}
 
-    plugin_log("looking for models in: %s" % str(dir))
-    #compile_file(dir)  #always recompile the folder plugin
-    logging.info("plugin model dir: %s" % str(dir))
+    plugin_log("looking for models in: %s" % str(directory))
+    # compile_file(directory)  #always recompile the folder plugin
+    logger.info("plugin model dir: %s" % str(directory))
 
     plugins = {}
-    for filename in os.listdir(dir):
+    for filename in os.listdir(directory):
         name, ext = os.path.splitext(filename)
         if ext == '.py' and not name == '__init__':
-            path = os.path.abspath(os.path.join(dir, filename))
+            path = os.path.abspath(os.path.join(directory, filename))
             try:
                 model = load_custom_model(path)
-                model.name = "[plug-in] "+model.name
+                model.name = PLUGIN_NAME_BASE + model.name
                 plugins[model.name] = model
             except Exception:
                 msg = traceback.format_exc()
                 msg += "\nwhile accessing model in %r" % path
                 plugin_log(msg)
-                logging.warning("Failed to load plugin %r. See %s for details"
-                                % (path, PLUGIN_LOG))
-            
+                logger.warning("Failed to load plugin %r. See %s for details"
+                               % (path, PLUGIN_LOG))
+
     return plugins
 
 
@@ -258,8 +263,8 @@ class ModelManagerBase:
         """
         temp = {}
         if self.is_changed():
-            return  _findModels(dir)
-        logging.info("plugin model : %s" % str(temp))
+            return  _find_models()
+        logger.info("plugin model : %s" % str(temp))
         return temp
 
     def _getModelList(self):
@@ -323,7 +328,7 @@ class ModelManagerBase:
                     self.stored_plugins[name] = plug
                     self.plugins.append(plug)
                     self.model_dictionary[name] = plug
-            self.model_combobox.set_list("Customized Models", self.plugins)
+            self.model_combobox.set_list("Plugin Models", self.plugins)
             return self.model_combobox.get_list()
         else:
             return {}
@@ -333,7 +338,7 @@ class ModelManagerBase:
         return a dictionary of model
         """
         self.plugins = []
-        new_plugins = _findModels(dir)
+        new_plugins = _find_models()
         for name, plug in  new_plugins.iteritems():
             for stored_name, stored_plug in self.stored_plugins.iteritems():
                 if name == stored_name:
@@ -344,7 +349,7 @@ class ModelManagerBase:
             self.plugins.append(plug)
             self.model_dictionary[name] = plug
 
-        self.model_combobox.reset_list("Customized Models", self.plugins)
+        self.model_combobox.reset_list("Plugin Models", self.plugins)
         return self.model_combobox.get_list()
 
     def _on_model(self, evt):
@@ -387,7 +392,7 @@ class ModelManagerBase:
 #        self.model_combobox.set_list("Shape-Independent",
 #                                     self.shape_indep_list)
         self.model_combobox.set_list("Structure Factors", self.struct_list)
-        self.model_combobox.set_list("Customized Models", self.plugins)
+        self.model_combobox.set_list("Plugin Models", self.plugins)
         self.model_combobox.set_list("P(Q)*S(Q)", self.multiplication_factor)
         self.model_combobox.set_list("multiplication",
                                      self.multiplication_factor)

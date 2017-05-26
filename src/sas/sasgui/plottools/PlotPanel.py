@@ -1,6 +1,8 @@
 """
     Plot panel.
 """
+from __future__ import print_function
+
 import logging
 import traceback
 import wx
@@ -9,7 +11,7 @@ import wx
 import matplotlib
 matplotlib.interactive(False)
 #Use the WxAgg back end. The Wx one takes too long to render
-#matplotlib.use('WXAgg')
+matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
 from matplotlib.figure import Figure
 import os
@@ -28,14 +30,16 @@ import math
 import pylab
 DEFAULT_CMAP = pylab.cm.jet
 import copy
-import numpy
+import numpy as np
 
 from sas.sasgui.guiframe.events import StatusEvent
 from .toolbar import NavigationToolBar, PlotPrintout, bind
 
+logger = logging.getLogger(__name__)
+
 def show_tree(obj, d=0):
     """Handy function for displaying a tree of graph objects"""
-    print "%s%s" % ("-"*d, obj.__class__.__name__)
+    print("%s%s" % ("-"*d, obj.__class__.__name__))
     if 'get_children' in dir(obj):
         for a in obj.get_children(): show_tree(a, d + 1)
 
@@ -151,11 +155,11 @@ class PlotPanel(wx.Panel):
         self.textList = []
         self.selectedText = None
         #User scale
-        if xtransform != None:
+        if xtransform is not None:
             self.xLabel = xtransform
         else:
             self.xLabel = "log10(x)"
-        if ytransform != None:
+        if ytransform is not None:
             self.yLabel = ytransform
         else:
             self.yLabel = "log10(y)"
@@ -357,7 +361,7 @@ class PlotPanel(wx.Panel):
                     self.selectedText = text
                     return
 
-            if ax != None:
+            if ax is not None:
                 self.xInit, self.yInit = event.xdata, event.ydata
                 try:
                     pos_x = float(event.xdata)  # / size_x
@@ -389,7 +393,7 @@ class PlotPanel(wx.Panel):
         """
         Set legend alpha
         """
-        if self.legend != None:
+        if self.legend is not None:
             self.legend.legendPatch.set_alpha(alpha)
 
     def onPick(self, event):
@@ -415,7 +419,7 @@ class PlotPanel(wx.Panel):
         On legend in motion
         """
         ax = event.inaxes
-        if ax == None:
+        if ax is None:
             return
         # Event occurred inside a plotting area
         lo_x, hi_x = ax.get_xlim()
@@ -458,7 +462,7 @@ class PlotPanel(wx.Panel):
         if self.leftdown and self.selectedText is not None:
             # User has clicked on text and is dragging
             ax = event.inaxes
-            if ax != None:
+            if ax is not None:
                 # Only move text if mouse is within axes
                 self.selectedText.set_position((event.xdata, event.ydata))
                 self._dragHelper(0, 0)
@@ -473,10 +477,10 @@ class PlotPanel(wx.Panel):
         self.mousemotion = True
         if self.leftdown == True and self.mousemotion == True:
             ax = event.inaxes
-            if ax != None:  # the dragging is perform inside the figure
+            if ax is not None:  # the dragging is perform inside the figure
                 self.xFinal, self.yFinal = event.xdata, event.ydata
                 # Check whether this is the first point
-                if self.xInit == None:
+                if self.xInit is None:
                     self.xInit = self.xFinal
                     self.yInit = self.yFinal
 
@@ -573,7 +577,7 @@ class PlotPanel(wx.Panel):
         ax = event.inaxes
         step = event.step
 
-        if ax != None:
+        if ax is not None:
             # Event occurred inside a plotting area
             lo, hi = ax.get_xlim()
             lo, hi = _rescale(lo, hi, step,
@@ -932,7 +936,7 @@ class PlotPanel(wx.Panel):
         """
         # reset postion
         self.position = None
-        if self.graph.selected_plottable != None:
+        if self.graph.selected_plottable is not None:
             self.graph.selected_plottable = None
 
         self.onContextMenu(event)
@@ -956,7 +960,7 @@ class PlotPanel(wx.Panel):
             self.legend = self.subplot.legend(handles2, labels2,
                                               prop=FontProperties(size=10),
                                               loc=self.legendLoc)
-            if self.legend != None:
+            if self.legend is not None:
                 self.legend.set_picker(self.legend_picker)
                 self.legend.set_axes(self.subplot)
                 self.legend.set_zorder(20)
@@ -986,7 +990,7 @@ class PlotPanel(wx.Panel):
         self.legend = self.subplot.legend(handles2, labels2,
                                           prop=FontProperties(size=10),
                                           loc=self.legendLoc)
-        if self.legend != None:
+        if self.legend is not None:
             self.legend.set_picker(self.legend_picker)
             self.legend.set_axes(self.subplot)
             self.legend.set_zorder(20)
@@ -1007,7 +1011,7 @@ class PlotPanel(wx.Panel):
         """
         pos_x = 0
         pos_y = 0
-        if self.position != None:
+        if self.position is not None:
             pos_x, pos_y = self.position
         else:
             pos_x, pos_y = 0.01, 1.00
@@ -1032,7 +1036,7 @@ class PlotPanel(wx.Panel):
                     self.textList.append(new_text)
                     self.subplot.figure.canvas.draw_idle()
             except:
-                if self.parent != None:
+                if self.parent is not None:
                     msg = "Add Text: Error. Check your property values..."
                     wx.PostEvent(self.parent, StatusEvent(status=msg))
                 else:
@@ -1066,7 +1070,7 @@ class PlotPanel(wx.Panel):
         if is_tick:
             self.xaxis_tick = xaxis_font
 
-        if self.data != None:
+        if self.data is not None:
             # 2D
             self.xaxis(self.xaxis_label, self.xaxis_unit, \
                         self.xaxis_font, self.xaxis_color, self.xaxis_tick)
@@ -1113,7 +1117,7 @@ class PlotPanel(wx.Panel):
         if is_tick:
             self.yaxis_tick = yaxis_font
 
-        if self.data != None:
+        if self.data is not None:
             # 2D
             self.yaxis(self.yaxis_label, self.yaxis_unit, \
                         self.yaxis_font, self.yaxis_color, self.yaxis_tick)
@@ -1152,14 +1156,14 @@ class PlotPanel(wx.Panel):
                 is_tick = textdial.getTickLabel()
                 label_temp = textdial.getText()
                 if label_temp.count("\%s" % "\\") > 0:
-                    if self.parent != None:
+                    if self.parent is not None:
                         msg = "Add Label: Error. Can not use double '\\' "
                         msg += "characters..."
                         wx.PostEvent(self.parent, StatusEvent(status=msg))
                 else:
                     label = label_temp
             except:
-                if self.parent != None:
+                if self.parent is not None:
                     msg = "Add Label: Error. Check your property values..."
                     wx.PostEvent(self.parent, StatusEvent(status=msg))
                 else:
@@ -1177,7 +1181,7 @@ class PlotPanel(wx.Panel):
         """
         num_text = len(self.textList)
         if num_text < 1:
-            if self.parent != None:
+            if self.parent is not None:
                 msg = "Remove Text: Nothing to remove.  "
                 wx.PostEvent(self.parent, StatusEvent(status=msg))
             else:
@@ -1187,11 +1191,11 @@ class PlotPanel(wx.Panel):
         try:
             text_remove = txt.get_text()
             txt.remove()
-            if self.parent != None:
+            if self.parent is not None:
                 msg = "Removed Text: '%s'. " % text_remove
                 wx.PostEvent(self.parent, StatusEvent(status=msg))
         except:
-            if self.parent != None:
+            if self.parent is not None:
                 msg = "Remove Text: Error occurred. "
                 wx.PostEvent(self.parent, StatusEvent(status=msg))
             else:
@@ -1247,7 +1251,7 @@ class PlotPanel(wx.Panel):
                 self.legend = ax.legend(handles2, labels2,
                                         prop=FontProperties(size=10),
                                         loc=self.legendLoc)
-                if self.legend != None:
+                if self.legend is not None:
                     self.legend.set_picker(self.legend_picker)
                     self.legend.set_axes(self.subplot)
                     self.legend.set_zorder(20)
@@ -1276,7 +1280,7 @@ class PlotPanel(wx.Panel):
             label = label + " (" + units + ")"
         if font:
             self.subplot.set_xlabel(label, fontproperties=font, color=color)
-            if t_font != None:
+            if t_font is not None:
                 for tick in self.subplot.xaxis.get_major_ticks():
                     tick.label.set_fontproperties(t_font)
                 for line in self.subplot.xaxis.get_ticklines():
@@ -1297,7 +1301,7 @@ class PlotPanel(wx.Panel):
             label = label + " (" + units + ")"
         if font:
             self.subplot.set_ylabel(label, fontproperties=font, color=color)
-            if t_font != None:
+            if t_font is not None:
                 for tick_label in self.subplot.get_yticklabels():
                     tick_label.set_fontproperties(t_font)
                 for line in self.subplot.yaxis.get_ticklines():
@@ -1324,7 +1328,7 @@ class PlotPanel(wx.Panel):
             id = name
         from plottable_interactor import PointInteractor
         p = PointInteractor(self, self.subplot, zorder=zorder, id=id)
-        if p.markersize != None:
+        if p.markersize is not None:
             markersize = p.markersize
         p.points(x, y, dx=dx, dy=dy, color=color, symbol=symbol, zorder=zorder,
                  markersize=markersize, label=label, hide_error=hide_error)
@@ -1360,11 +1364,11 @@ class PlotPanel(wx.Panel):
         """Draw markers with error bars"""
 
         # Convert tuple (lo,hi) to array [(x-lo),(hi-x)]
-        if dx != None and type(dx) == type(()):
+        if dx is not None and type(dx) == type(()):
             dx = nx.vstack((x - dx[0], dx[1] - x)).transpose()
-        if dy != None and type(dy) == type(()):
+        if dy is not None and type(dy) == type(()):
             dy = nx.vstack((y - dy[0], dy[1] - y)).transpose()
-        if dx == None and dy == None:
+        if dx is None and dy is None:
             self.subplot.plot(x, y, color=self._color(color),
                               marker=self._symbol(symbol),
                               markersize=marker_size,
@@ -1400,19 +1404,19 @@ class PlotPanel(wx.Panel):
         zmax_2D_temp = self.zmax_2D
         if self.scale == 'log_{10}':
             self.scale = 'linear'
-            if not self.zmin_2D is None:
+            if self.zmin_2D is not None:
                 zmin_2D_temp = math.pow(10, self.zmin_2D)
-            if not self.zmax_2D is None:
+            if self.zmax_2D is not None:
                 zmax_2D_temp = math.pow(10, self.zmax_2D)
         else:
             self.scale = 'log_{10}'
-            if not self.zmin_2D is None:
+            if self.zmin_2D is not None:
                 # min log value: no log(negative)
                 if self.zmin_2D <= 0:
                     zmin_2D_temp = -32
                 else:
                     zmin_2D_temp = math.log10(self.zmin_2D)
-            if not self.zmax_2D is None:
+            if self.zmax_2D is not None:
                 zmax_2D_temp = math.log10(self.zmax_2D)
 
         self.image(data=self.data, qx_data=self.qx_data,
@@ -1440,7 +1444,7 @@ class PlotPanel(wx.Panel):
         self.zmax_2D = zmax
         c = self._color(color)
         # If we don't have any data, skip.
-        if self.data == None:
+        if self.data is None:
             return
         if self.data.ndim == 1:
             output = self._build_matrix()
@@ -1451,18 +1455,18 @@ class PlotPanel(wx.Panel):
             try:
                 if  self.zmin_2D <= 0  and len(output[output > 0]) > 0:
                     zmin_temp = self.zmin_2D
-                    output[output > 0] = numpy.log10(output[output > 0])
+                    output[output > 0] = np.log10(output[output > 0])
                     #In log scale Negative values are not correct in general
-                    #output[output<=0] = math.log(numpy.min(output[output>0]))
+                    #output[output<=0] = math.log(np.min(output[output>0]))
                 elif self.zmin_2D <= 0:
                     zmin_temp = self.zmin_2D
-                    output[output > 0] = numpy.zeros(len(output))
+                    output[output > 0] = np.zeros(len(output))
                     output[output <= 0] = -32
                 else:
                     zmin_temp = self.zmin_2D
-                    output[output > 0] = numpy.log10(output[output > 0])
+                    output[output > 0] = np.log10(output[output > 0])
                     #In log scale Negative values are not correct in general
-                    #output[output<=0] = math.log(numpy.min(output[output>0]))
+                    #output[output<=0] = math.log(np.min(output[output>0]))
             except:
                 #Too many problems in 2D plot with scale
                 pass
@@ -1491,7 +1495,7 @@ class PlotPanel(wx.Panel):
 
             X = self.x_bins[0:-1]
             Y = self.y_bins[0:-1]
-            X, Y = numpy.meshgrid(X, Y)
+            X, Y = np.meshgrid(X, Y)
 
             try:
                 # mpl >= 1.0.0
@@ -1505,7 +1509,7 @@ class PlotPanel(wx.Panel):
                 try:
                     from mpl_toolkits.mplot3d import Axes3D
                 except:
-                    logging.error("PlotPanel could not import Axes3D")
+                    logger.error("PlotPanel could not import Axes3D")
                 self.subplot.figure.clear()
                 ax = Axes3D(self.subplot.figure)
                 if len(X) > 60:
@@ -1516,7 +1520,7 @@ class PlotPanel(wx.Panel):
                                  linewidth=0, antialiased=False)
             self.subplot.set_axis_off()
 
-        if cbax == None:
+        if cbax is None:
             ax.set_frame_on(False)
             cb = self.subplot.figure.colorbar(im, shrink=0.8, aspect=20)
         else:
@@ -1538,7 +1542,7 @@ class PlotPanel(wx.Panel):
 
         """
         # No qx or qy given in a vector format
-        if self.qx_data == None or self.qy_data == None \
+        if self.qx_data is None or self.qy_data is None \
                 or self.qx_data.ndim != 1 or self.qy_data.ndim != 1:
             # do we need deepcopy here?
             return copy.deepcopy(self.data)
@@ -1554,15 +1558,15 @@ class PlotPanel(wx.Panel):
         # 'cause too many data points (>10000)<=JHC.
         # 1d array to use for weighting the data point averaging
         #when they fall into a same bin.
-        weights_data = numpy.ones([self.data.size])
+        weights_data = np.ones([self.data.size])
         # get histogram of ones w/len(data); this will provide
         #the weights of data on each bins
-        weights, xedges, yedges = numpy.histogram2d(x=self.qy_data,
+        weights, xedges, yedges = np.histogram2d(x=self.qy_data,
                                                     y=self.qx_data,
                                                     bins=[self.y_bins, self.x_bins],
                                                     weights=weights_data)
         # get histogram of data, all points into a bin in a way of summing
-        image, xedges, yedges = numpy.histogram2d(x=self.qy_data,
+        image, xedges, yedges = np.histogram2d(x=self.qy_data,
                                                   y=self.qx_data,
                                                   bins=[self.y_bins, self.x_bins],
                                                   weights=self.data)
@@ -1580,7 +1584,7 @@ class PlotPanel(wx.Panel):
 
         # do while loop until all vacant bins are filled up up
         #to loop = max_loop
-        while not(numpy.isfinite(image[weights == 0])).all():
+        while not(np.isfinite(image[weights == 0])).all():
             if loop >= max_loop:  # this protects never-ending loop
                 break
             image = self._fillup_pixels(image=image, weights=weights)
@@ -1598,7 +1602,7 @@ class PlotPanel(wx.Panel):
         where each one corresponds to  x, or y axis values
         """
         # No qx or qy given in a vector format
-        if self.qx_data == None or self.qy_data == None \
+        if self.qx_data is None or self.qy_data is None \
                 or self.qx_data.ndim != 1 or self.qy_data.ndim != 1:
             # do we need deepcopy here?
             return copy.deepcopy(self.data)
@@ -1629,8 +1633,8 @@ class PlotPanel(wx.Panel):
         ymin = ymin - ystep / 2.0
 
         # store x and y bin centers in q space
-        x_bins = numpy.linspace(xmin, xmax, npix_x)
-        y_bins = numpy.linspace(ymin, ymax, npix_y)
+        x_bins = np.linspace(xmin, xmax, npix_x)
+        y_bins = np.linspace(ymin, ymax, npix_y)
 
         #set x_bins and y_bins
         self.x_bins = x_bins
@@ -1649,52 +1653,52 @@ class PlotPanel(wx.Panel):
 
         """
         # No image matrix given
-        if image == None or numpy.ndim(image) != 2 \
-                or numpy.isfinite(image).all() \
-                or weights == None:
+        if image is None or np.ndim(image) != 2 \
+                or np.isfinite(image).all() \
+                or weights is None:
             return image
         # Get bin size in y and x directions
         len_y = len(image)
         len_x = len(image[1])
-        temp_image = numpy.zeros([len_y, len_x])
-        weit = numpy.zeros([len_y, len_x])
+        temp_image = np.zeros([len_y, len_x])
+        weit = np.zeros([len_y, len_x])
         # do for-loop for all pixels
         for n_y in range(len(image)):
             for n_x in range(len(image[1])):
                 # find only null pixels
-                if weights[n_y][n_x] > 0 or numpy.isfinite(image[n_y][n_x]):
+                if weights[n_y][n_x] > 0 or np.isfinite(image[n_y][n_x]):
                     continue
                 else:
                     # find 4 nearest neighbors
                     # check where or not it is at the corner
-                    if n_y != 0 and numpy.isfinite(image[n_y - 1][n_x]):
+                    if n_y != 0 and np.isfinite(image[n_y - 1][n_x]):
                         temp_image[n_y][n_x] += image[n_y - 1][n_x]
                         weit[n_y][n_x] += 1
-                    if n_x != 0 and numpy.isfinite(image[n_y][n_x - 1]):
+                    if n_x != 0 and np.isfinite(image[n_y][n_x - 1]):
                         temp_image[n_y][n_x] += image[n_y][n_x - 1]
                         weit[n_y][n_x] += 1
-                    if n_y != len_y - 1 and numpy.isfinite(image[n_y + 1][n_x]):
+                    if n_y != len_y - 1 and np.isfinite(image[n_y + 1][n_x]):
                         temp_image[n_y][n_x] += image[n_y + 1][n_x]
                         weit[n_y][n_x] += 1
-                    if n_x != len_x - 1 and numpy.isfinite(image[n_y][n_x + 1]):
+                    if n_x != len_x - 1 and np.isfinite(image[n_y][n_x + 1]):
                         temp_image[n_y][n_x] += image[n_y][n_x + 1]
                         weit[n_y][n_x] += 1
                     # go 4 next nearest neighbors when no non-zero
                     # neighbor exists
-                    if n_y != 0 and n_x != 0 and\
-                         numpy.isfinite(image[n_y - 1][n_x - 1]):
+                    if n_y != 0 and n_x != 0 and \
+                            np.isfinite(image[n_y - 1][n_x - 1]):
                         temp_image[n_y][n_x] += image[n_y - 1][n_x - 1]
                         weit[n_y][n_x] += 1
                     if n_y != len_y - 1 and n_x != 0 and \
-                        numpy.isfinite(image[n_y + 1][n_x - 1]):
+                            np.isfinite(image[n_y + 1][n_x - 1]):
                         temp_image[n_y][n_x] += image[n_y + 1][n_x - 1]
                         weit[n_y][n_x] += 1
                     if n_y != len_y and n_x != len_x - 1 and \
-                        numpy.isfinite(image[n_y - 1][n_x + 1]):
+                            np.isfinite(image[n_y - 1][n_x + 1]):
                         temp_image[n_y][n_x] += image[n_y - 1][n_x + 1]
                         weit[n_y][n_x] += 1
                     if n_y != len_y - 1 and n_x != len_x - 1 and \
-                        numpy.isfinite(image[n_y + 1][n_x + 1]):
+                            np.isfinite(image[n_y + 1][n_x + 1]):
                         temp_image[n_y][n_x] += image[n_y + 1][n_x + 1]
                         weit[n_y][n_x] += 1
 
@@ -1769,14 +1773,14 @@ class PlotPanel(wx.Panel):
             item.setLabel(self.xLabel, self.yLabel)
             # control axis labels from the panel itself
             yname, yunits = item.get_yaxis()
-            if self.yaxis_label != None:
+            if self.yaxis_label is not None:
                 yname = self.yaxis_label
                 yunits = self.yaxis_unit
             else:
                 self.yaxis_label = yname
                 self.yaxis_unit = yunits
             xname, xunits = item.get_xaxis()
-            if self.xaxis_label != None:
+            if self.xaxis_label is not None:
                 xname = self.xaxis_label
                 xunits = self.xaxis_unit
             else:
@@ -1937,7 +1941,7 @@ class PlotPanel(wx.Panel):
     def onChangeCaption(self, event):
         """
         """
-        if self.parent == None:
+        if self.parent is None:
             return
         # get current caption
         old_caption = self.window_caption
@@ -2011,7 +2015,7 @@ class PlotPanel(wx.Panel):
         try:
             self.toolbar.copy_figure(self.canvas)
         except:
-            print "Error in copy Image"
+            print("Error in copy Image")
 
 
 #---------------------------------------------------------------

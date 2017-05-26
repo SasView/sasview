@@ -4,11 +4,11 @@ the easy editor which provides a simple interface with tooltip help to enter
 the parameters of the model and their default value and a panel to input a
 function of y (usually the intensity).  It also provides a drop down of
 standard available math functions.  Finally a full python editor panel for
-complete customizatin is provided.
+complete customization is provided.
 
-:TODO the writiong of the file and name checking (and maybe some other
-funtions?) should be moved to a computational module which could be called
-fropm a python script.  Basically one just needs to pass the name,
+:TODO the writing of the file and name checking (and maybe some other
+functions?) should be moved to a computational module which could be called
+from a python script.  Basically one just needs to pass the name,
 description text and function text (or in the case of the composite editor
 the names of the first and second model and the operator to be used).
 '''
@@ -22,6 +22,8 @@ the names of the first and second model and the operator to be used).
 #
 #copyright 2009, University of Tennessee
 ################################################################################
+from __future__ import print_function
+
 import wx
 import sys
 import os
@@ -31,6 +33,8 @@ import logging
 from wx.py.editwindow import EditWindow
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 from .pyconsole import show_model_output, check_model
+
+logger = logging.getLogger(__name__)
 
 
 if sys.platform.count("win32") > 0:
@@ -60,7 +64,7 @@ def _delete_file(path):
 class TextDialog(wx.Dialog):
     """
     Dialog for easy custom composite models.  Provides a wx.Dialog panel
-    to choose two existing models (including pre-existing custom models which
+    to choose two existing models (including pre-existing Plugin Models which
     may themselves be composite models) as well as an operation on those models
     (add or multiply) the resulting model will add a scale parameter for summed
     models and a background parameter for a multiplied model.
@@ -379,12 +383,12 @@ class TextDialog(wx.Dialog):
             info = 'Info'
             color = 'blue'
         except:
-            msg = "Easy Custom Sum/Multipy: Error occurred..."
+            msg = "Easy Sum/Multipy Plugin: Error occurred..."
             info = 'Error'
             color = 'red'
         self._msg_box.SetLabel(msg)
         self._msg_box.SetForegroundColour(color)
-        if self.parent.parent != None:
+        if self.parent.parent is not None:
             from sas.sasgui.guiframe.events import StatusEvent
             wx.PostEvent(self.parent.parent, StatusEvent(status=msg,
                                                          info=info))
@@ -475,7 +479,7 @@ class TextDialog(wx.Dialog):
         On Select an Operator
         """
         # For Mac
-        if event != None:
+        if event is not None:
             event.Skip()
         item = event.GetEventObject()
         text = item.GetValue()
@@ -500,7 +504,7 @@ class TextDialog(wx.Dialog):
 
         self.factor = factor
         self._operator = operator
-        self.explanation = "  Custom Model = %s %s (model1 %s model2)\n" % \
+        self.explanation = "  Plugin Model = %s %s (model1 %s model2)\n" % \
                            (self.factor, f_oper, self._operator)
         self.explanationctr.SetLabel(self.explanation)
         self.name = name + M_NAME
@@ -616,7 +620,7 @@ class TextDialog(wx.Dialog):
 
 class EditorPanel(wx.ScrolledWindow):
     """
-    Custom model function editor
+    Simple Plugin Model function editor
     """
     def __init__(self, parent, base, path, title, *args, **kwds):
         kwds['name'] = title
@@ -651,7 +655,9 @@ class EditorPanel(wx.ScrolledWindow):
         self._msg_box = None
         self.msg_sizer = None
         self.warning = ""
-        self._description = "New Custom Model"
+        #This does not seem to be used anywhere so commenting out for now
+        #    -- PDB 2/26/17 
+        #self._description = "New Plugin Model"
         self.function_tcl = None
         self.math_combo = None
         self.bt_apply = None
@@ -866,7 +872,7 @@ class EditorPanel(wx.ScrolledWindow):
         self.function_tcl.InsertText(pos, label)
         # Put the cursor at appropriate position
         length = len(label)
-        print length
+        print(length)
         if label[length-1] == ')':
             length -= 1
         f_pos = pos + length
@@ -974,7 +980,7 @@ class EditorPanel(wx.ScrolledWindow):
             msg = "Name exists already."
 
         # Prepare the messagebox
-        if self.base != None and not msg:
+        if self.base is not None and not msg:
             self.base.update_custom_combo()
             # Passed exception in import test as it will fail for sasmodels.sasview_model class
             # Should add similar test for new style?
@@ -982,7 +988,7 @@ class EditorPanel(wx.ScrolledWindow):
             try:
                 exec "from %s import Model" % name
             except:
-                logging.error(sys.exc_value)
+                logger.error(sys.exc_value)
 
         # Prepare the messagebox
         if msg:
@@ -990,14 +996,14 @@ class EditorPanel(wx.ScrolledWindow):
             color = 'red'
         else:
             self._notes = result
-            msg = "Successful! Please look for %s in Customized Models."%name
+            msg = "Successful! Please look for %s in Plugin Models."%name
             msg += "  " + self._notes
             info = 'Info'
             color = 'blue'
         self._msg_box.SetLabel(msg)
         self._msg_box.SetForegroundColour(color)
         # Send msg to the top window
-        if self.base != None:
+        if self.base is not None:
             from sas.sasgui.guiframe.events import StatusEvent
             wx.PostEvent(self.base.parent,
                          StatusEvent(status=msg+check_err, info=info))
@@ -1137,7 +1143,7 @@ class EditorPanel(wx.ScrolledWindow):
 
     def on_help(self, event):
         """
-        Bring up the Custom Model Editor Documentation whenever
+        Bring up the New Plugin Model Editor Documentation whenever
         the HELP button is clicked.
 
         Calls DocumentationWindow with the path of the location within the
@@ -1185,11 +1191,11 @@ class EditorWindow(wx.Frame):
         On close event
         """
         self.Show(False)
-        #if self.parent != None:
+        #if self.parent is not None:
         #    self.parent.new_model_frame = None
         #self.Destroy()
 
-## Templates for custom models
+## Templates for plugin models
 
 CUSTOM_TEMPLATE = """
 from math import *
@@ -1383,7 +1389,7 @@ class Model(Model1DPlugin):
         return name
 
     def _get_upper_name(self, name=None):
-        if name == None:
+        if name is None:
             return ""
         upper_name = ""
         str_name = str(name)

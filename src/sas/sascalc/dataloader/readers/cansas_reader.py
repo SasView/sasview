@@ -19,9 +19,12 @@ import sys
 import datetime
 import inspect
 # For saving individual sections of data
-from sas.sascalc.dataloader.data_info import Data1D, DataInfo, plottable_1D
-from sas.sascalc.dataloader.data_info import Collimation, TransmissionSpectrum, Detector, Process, Aperture
-from sas.sascalc.dataloader.data_info import combine_data_info_with_plottable as combine_data
+from sas.sascalc.dataloader.data_info import Data1D, Data2D, DataInfo, \
+    plottable_1D, plottable_2D
+from sas.sascalc.dataloader.data_info import Collimation, TransmissionSpectrum, \
+    Detector, Process, Aperture
+from sas.sascalc.dataloader.data_info import \
+    combine_data_info_with_plottable as combine_data
 import sas.sascalc.dataloader.readers.xml_reader as xml_reader
 from sas.sascalc.dataloader.readers.xml_reader import XMLreader
 from sas.sascalc.dataloader.readers.cansas_constants import CansasConstants, CurrentLevel
@@ -29,6 +32,8 @@ from sas.sascalc.dataloader.readers.cansas_constants import CansasConstants, Cur
 # The following 2 imports *ARE* used. Do not remove either.
 import xml.dom.minidom
 from xml.dom.minidom import parseString
+
+logger = logging.getLogger(__name__)
 
 PREPROCESS = "xmlpreprocess"
 ENCODING = "encoding"
@@ -55,31 +60,31 @@ class Reader(XMLreader):
     :Dependencies:
         The CanSAS reader requires PyXML 0.8.4 or later.
     """
-    ## CanSAS version - defaults to version 1.0
+    # CanSAS version - defaults to version 1.0
     cansas_version = "1.0"
     base_ns = "{cansas1d/1.0}"
     cansas_defaults = None
     type_name = "canSAS"
     invalid = True
     frm = ""
-    ## Log messages and errors
+    # Log messages and errors
     logging = None
     errors = set()
-    ## Namespace hierarchy for current xml_file object
+    # Namespace hierarchy for current xml_file object
     names = None
     ns_list = None
-    ## Temporary storage location for loading multiple data sets in a single file
+    # Temporary storage location for loading multiple data sets in a single file
     current_datainfo = None
     current_dataset = None
     current_data1d = None
     data = None
-    ## List of data1D objects to be sent back to SasView
+    # List of data1D objects to be sent back to SasView
     output = None
-    ## Wildcards
+    # Wildcards
     type = ["XML files (*.xml)|*.xml", "SasView Save Files (*.svs)|*.svs"]
-    ## List of allowed extensions
+    # List of allowed extensions
     ext = ['.xml', '.XML', '.svs', '.SVS']
-    ## Flag to bypass extension check
+    # Flag to bypass extension check
     allow_all = True
 
     def reset_state(self):
@@ -219,8 +224,15 @@ class Reader(XMLreader):
             if len(node.getchildren()) > 0:
                 self.parent_class = tagname_original
                 if tagname == 'SASdata':
-                    self._initialize_new_data_set()
-                ## Recursion step to access data within the group
+                    self._initialize_new_data_set(node)
+                    if isinstance(self.current_dataset, plottable_2D):
+                        x_bins = attr.get("x_bins", "")
+                        y_bins = attr.get("y_bins", "")
+                        if x_bins is not "" and y_bins is not "":
+                            self.current_dataset.shape = (x_bins, y_bins)
+                        else:
+                            self.current_dataset.shape = ()
+                # Recursion step to access data within the group
                 self._parse_entry(node, True)
                 if tagname == "SASsample":
                     self.current_datainfo.sample.name = name
@@ -233,9 +245,13 @@ class Reader(XMLreader):
                     self.aperture.type = type
                 self.add_intermediate()
             else:
-                data_point, unit = self._get_node_value(node, tagname)
+                if isinstance(self.current_dataset, plottable_2D):
+                    data_point = node.text
+                    unit = attr.get('unit', '')
+                else:
+                    data_point, unit = self._get_node_value(node, tagname)
 
-                ## If this is a dataset, store the data appropriately
+                # If this is a dataset, store the data appropriately
                 if tagname == 'Run':
                     self.current_datainfo.run_name[data_point] = name
                     self.current_datainfo.run.append(data_point)
@@ -244,14 +260,24 @@ class Reader(XMLreader):
                 elif tagname == 'SASnote':
                     self.current_datainfo.notes.append(data_point)
 
-                ## I and Q Data
-                elif tagname == 'I':
-                    self.current_dataset.yaxis("Intensity", unit)
+                # I and Q - 1D data
+                elif tagname == 'I' and isinstance(self.current_dataset, plottable_1D):
+                    unit_list = unit.split("|")
+                    if len(unit_list) > 1:
+                        self.current_dataset.yaxis(unit_list[0].strip(),
+                                                   unit_list[1].strip())
+                    else:
+                        self.current_dataset.yaxis("Intensity", unit)
                     self.current_dataset.y = np.append(self.current_dataset.y, data_point)
-                elif tagname == 'Idev':
+                elif tagname == 'Idev' and isinstance(self.current_dataset, plottable_1D):
                     self.current_dataset.dy = np.append(self.current_dataset.dy, data_point)
                 elif tagname == 'Q':
-                    self.current_dataset.xaxis("Q", unit)
+                    unit_list = unit.split("|")
+                    if len(unit_list) > 1:
+                        self.current_dataset.xaxis(unit_list[0].strip(),
+                                                   unit_list[1].strip())
+                    else:
+                        self.current_dataset.xaxis("Q", unit)
                     self.current_dataset.x = np.append(self.current_dataset.x, data_point)
                 elif tagname == 'Qdev':
                     self.current_dataset.dx = np.append(self.current_dataset.dx, data_point)
@@ -263,8 +289,36 @@ class Reader(XMLreader):
                     pass
                 elif tagname == 'Shadowfactor':
                     pass
+                elif tagname == 'Sesans':
+                    self.current_datainfo.isSesans = bool(data_point)
+                elif tagname == 'yacceptance':
+                    self.current_datainfo.sample.yacceptance = (data_point, unit)
+                elif tagname == 'zacceptance':
+                    self.current_datainfo.sample.zacceptance = (data_point, unit)
 
-                ## Sample Information
+                # I and Qx, Qy - 2D data
+                elif tagname == 'I' and isinstance(self.current_dataset, plottable_2D):
+                    self.current_dataset.yaxis("Intensity", unit)
+                    self.current_dataset.data = np.fromstring(data_point, dtype=float, sep=",")
+                elif tagname == 'Idev' and isinstance(self.current_dataset, plottable_2D):
+                    self.current_dataset.err_data = np.fromstring(data_point, dtype=float, sep=",")
+                elif tagname == 'Qx':
+                    self.current_dataset.xaxis("Qx", unit)
+                    self.current_dataset.qx_data = np.fromstring(data_point, dtype=float, sep=",")
+                elif tagname == 'Qy':
+                    self.current_dataset.yaxis("Qy", unit)
+                    self.current_dataset.qy_data = np.fromstring(data_point, dtype=float, sep=",")
+                elif tagname == 'Qxdev':
+                    self.current_dataset.xaxis("Qxdev", unit)
+                    self.current_dataset.dqx_data = np.fromstring(data_point, dtype=float, sep=",")
+                elif tagname == 'Qydev':
+                    self.current_dataset.yaxis("Qydev", unit)
+                    self.current_dataset.dqy_data = np.fromstring(data_point, dtype=float, sep=",")
+                elif tagname == 'Mask':
+                    inter = [item == "1" for item in data_point.split(",")]
+                    self.current_dataset.mask = np.asarray(inter, dtype=bool)
+
+                # Sample Information
                 elif tagname == 'ID' and self.parent_class == 'SASsample':
                     self.current_datainfo.sample.ID = data_point
                 elif tagname == 'Title' and self.parent_class == 'SASsample':
@@ -298,10 +352,10 @@ class Reader(XMLreader):
                     self.current_datainfo.sample.orientation.z = data_point
                     self.current_datainfo.sample.orientation_unit = unit
 
-                ## Instrumental Information
+                # Instrumental Information
                 elif tagname == 'name' and self.parent_class == 'SASinstrument':
                     self.current_datainfo.instrument = data_point
-                ## Detector Information
+                # Detector Information
                 elif tagname == 'name' and self.parent_class == 'SASdetector':
                     self.detector.name = data_point
                 elif tagname == 'SDD' and self.parent_class == 'SASdetector':
@@ -346,7 +400,7 @@ class Reader(XMLreader):
                 elif tagname == 'yaw' and self.parent_class == 'orientation' and 'SASdetector' in self.names:
                     self.detector.orientation.z = data_point
                     self.detector.orientation_unit = unit
-                ## Collimation and Aperture
+                # Collimation and Aperture
                 elif tagname == 'length' and self.parent_class == 'SAScollimation':
                     self.collimation.length = data_point
                     self.collimation.length_unit = unit
@@ -365,7 +419,7 @@ class Reader(XMLreader):
                     self.aperture.size.z = data_point
                     self.collimation.size_unit = unit
 
-                ## Process Information
+                # Process Information
                 elif tagname == 'name' and self.parent_class == 'SASprocess':
                     self.process.name = data_point
                 elif tagname == 'description' and self.parent_class == 'SASprocess':
@@ -385,7 +439,7 @@ class Reader(XMLreader):
                     dic["unit"] = unit
                     self.process.term.append(dic)
 
-                ## Transmission Spectrum
+                # Transmission Spectrum
                 elif tagname == 'T' and self.parent_class == 'Tdata':
                     self.transspectrum.transmission = np.append(self.transspectrum.transmission, data_point)
                     self.transspectrum.transmission_unit = unit
@@ -396,7 +450,7 @@ class Reader(XMLreader):
                     self.transspectrum.wavelength = np.append(self.transspectrum.wavelength, data_point)
                     self.transspectrum.wavelength_unit = unit
 
-                ## Source Information
+                # Source Information
                 elif tagname == 'wavelength' and (self.parent_class == 'SASsource' or self.parent_class == 'SASData'):
                     self.current_datainfo.source.wavelength = data_point
                     self.current_datainfo.source.wavelength_unit = unit
@@ -423,7 +477,7 @@ class Reader(XMLreader):
                 elif tagname == 'beam_shape' and self.parent_class == 'SASsource':
                     self.current_datainfo.source.beam_shape = data_point
 
-                ## Everything else goes in meta_data
+                # Everything else goes in meta_data
                 else:
                     new_key = self._create_unique_key(self.current_datainfo.meta_data, tagname)
                     self.current_datainfo.meta_data[new_key] = data_point
@@ -437,11 +491,6 @@ class Reader(XMLreader):
             self.frm = ""
             self.add_data_set()
             empty = None
-            if self.output[0].dx is not None:
-                self.output[0].dxl = np.empty(0)
-                self.output[0].dxw = np.empty(0)
-            else:
-                self.output[0].dx = np.empty(0)
             return self.output[0], empty
 
 
@@ -513,18 +562,21 @@ class Reader(XMLreader):
         self.data = []
         self.current_datainfo = DataInfo()
 
-    def _initialize_new_data_set(self, parent_list=None):
+    def _initialize_new_data_set(self, node=None):
         """
         A private class method to generate a new 1D data object.
         Outside methods should call add_data_set() to be sure any existing data is stored properly.
 
-        :param parent_list: List of names of parent elements
+        :param node: XML node to determine if 1D or 2D data
         """
-
-        if parent_list is None:
-            parent_list = []
         x = np.array(0)
         y = np.array(0)
+        for child in node:
+            if child.tag.replace(self.base_ns, "") == "Idata":
+                for i_child in child:
+                    if i_child.tag.replace(self.base_ns, "") == "Qx":
+                        self.current_dataset = plottable_2D()
+                        return
         self.current_dataset = plottable_1D(x, y)
 
     def add_intermediate(self):
@@ -559,40 +611,70 @@ class Reader(XMLreader):
         appropriate information needed for perspectives
         """
 
-        ## Append errors to dataset and reset class errors
+        # Append errors to dataset and reset class errors
         self.current_datainfo.errors = set()
         for error in self.errors:
             self.current_datainfo.errors.add(error)
         self.errors.clear()
 
-        ## Combine all plottables with datainfo and append each to output
-        ## Type cast data arrays to float64 and find min/max as appropriate
+        # Combine all plottables with datainfo and append each to output
+        # Type cast data arrays to float64 and find min/max as appropriate
         for dataset in self.data:
-            if dataset.x is not None:
-                dataset.x = np.delete(dataset.x, [0])
-                dataset.x = dataset.x.astype(np.float64)
-                dataset.xmin = np.min(dataset.x)
-                dataset.xmax = np.max(dataset.x)
-            if dataset.y is not None:
-                dataset.y = np.delete(dataset.y, [0])
-                dataset.y = dataset.y.astype(np.float64)
-                dataset.ymin = np.min(dataset.y)
-                dataset.ymax = np.max(dataset.y)
-            if dataset.dx is not None:
-                dataset.dx = np.delete(dataset.dx, [0])
-                dataset.dx = dataset.dx.astype(np.float64)
-            if dataset.dxl is not None:
-                dataset.dxl = np.delete(dataset.dxl, [0])
-                dataset.dxl = dataset.dxl.astype(np.float64)
-            if dataset.dxw is not None:
-                dataset.dxw = np.delete(dataset.dxw, [0])
-                dataset.dxw = dataset.dxw.astype(np.float64)
-            if dataset.dy is not None:
-                dataset.dy = np.delete(dataset.dy, [0])
-                dataset.dy = dataset.dy.astype(np.float64)
-            np.trim_zeros(dataset.x)
-            np.trim_zeros(dataset.y)
-            np.trim_zeros(dataset.dy)
+            if isinstance(dataset, plottable_1D):
+                if dataset.x is not None:
+                    dataset.x = np.delete(dataset.x, [0])
+                    dataset.x = dataset.x.astype(np.float64)
+                    dataset.xmin = np.min(dataset.x)
+                    dataset.xmax = np.max(dataset.x)
+                if dataset.y is not None:
+                    dataset.y = np.delete(dataset.y, [0])
+                    dataset.y = dataset.y.astype(np.float64)
+                    dataset.ymin = np.min(dataset.y)
+                    dataset.ymax = np.max(dataset.y)
+                if dataset.dx is not None:
+                    dataset.dx = np.delete(dataset.dx, [0])
+                    dataset.dx = dataset.dx.astype(np.float64)
+                if dataset.dxl is not None:
+                    dataset.dxl = np.delete(dataset.dxl, [0])
+                    dataset.dxl = dataset.dxl.astype(np.float64)
+                if dataset.dxw is not None:
+                    dataset.dxw = np.delete(dataset.dxw, [0])
+                    dataset.dxw = dataset.dxw.astype(np.float64)
+                if dataset.dy is not None:
+                    dataset.dy = np.delete(dataset.dy, [0])
+                    dataset.dy = dataset.dy.astype(np.float64)
+                np.trim_zeros(dataset.x)
+                np.trim_zeros(dataset.y)
+                np.trim_zeros(dataset.dy)
+            elif isinstance(dataset, plottable_2D):
+                dataset.data = dataset.data.astype(np.float64)
+                dataset.qx_data = dataset.qx_data.astype(np.float64)
+                dataset.xmin = np.min(dataset.qx_data)
+                dataset.xmax = np.max(dataset.qx_data)
+                dataset.qy_data = dataset.qy_data.astype(np.float64)
+                dataset.ymin = np.min(dataset.qy_data)
+                dataset.ymax = np.max(dataset.qy_data)
+                dataset.q_data = np.sqrt(dataset.qx_data * dataset.qx_data
+                                         + dataset.qy_data * dataset.qy_data)
+                if dataset.err_data is not None:
+                    dataset.err_data = dataset.err_data.astype(np.float64)
+                if dataset.dqx_data is not None:
+                    dataset.dqx_data = dataset.dqx_data.astype(np.float64)
+                if dataset.dqy_data is not None:
+                    dataset.dqy_data = dataset.dqy_data.astype(np.float64)
+                if dataset.mask is not None:
+                    dataset.mask = dataset.mask.astype(dtype=bool)
+
+                if len(dataset.shape) == 2:
+                    n_rows, n_cols = dataset.shape
+                    dataset.y_bins = dataset.qy_data[0::int(n_cols)]
+                    dataset.x_bins = dataset.qx_data[:int(n_cols)]
+                    dataset.data = dataset.data.flatten()
+                else:
+                    dataset.y_bins = []
+                    dataset.x_bins = []
+                    dataset.data = dataset.data.flatten()
+
             final_dataset = combine_data(dataset, self.current_datainfo)
             self.output.append(final_dataset)
 
@@ -692,7 +774,7 @@ class Reader(XMLreader):
                 if local_unit and default_unit and local_unit.lower() != default_unit.lower() \
                         and local_unit.lower() != "none":
                     if HAS_CONVERTER == True:
-                        ## Check local units - bad units raise KeyError
+                        # Check local units - bad units raise KeyError
                         data_conv_q = Converter(local_unit)
                         value_unit = default_unit
                         node_value = data_conv_q(node_value, units=default_unit)
@@ -724,7 +806,7 @@ class Reader(XMLreader):
 
         :param data1d: presumably a Data1D object
         """
-        if self.current_dataset == None:
+        if self.current_dataset is None:
             x_vals = np.empty(0)
             y_vals = np.empty(0)
             dx_vals = np.empty(0)
@@ -739,34 +821,67 @@ class Reader(XMLreader):
         """
         A method to check all resolution data sets are the same size as I and Q
         """
-        dql_exists = False
-        dqw_exists = False
-        dq_exists = False
-        di_exists = False
-        if self.current_dataset.dxl is not None:
-            dql_exists = True
-        if self.current_dataset.dxw is not None:
-            dqw_exists = True
-        if self.current_dataset.dx is not None:
-            dq_exists = True
-        if self.current_dataset.dy is not None:
-            di_exists = True
-        if dqw_exists and not dql_exists:
-            array_size = self.current_dataset.dxw.size - 1
-            self.current_dataset.dxl = np.append(self.current_dataset.dxl, np.zeros([array_size]))
-        elif dql_exists and not dqw_exists:
-            array_size = self.current_dataset.dxl.size - 1
-            self.current_dataset.dxw = np.append(self.current_dataset.dxw, np.zeros([array_size]))
-        elif not dql_exists and not dqw_exists and not dq_exists:
-            array_size = self.current_dataset.x.size - 1
-            self.current_dataset.dx = np.append(self.current_dataset.dx, np.zeros([array_size]))
-        if not di_exists:
-            array_size = self.current_dataset.y.size - 1
-            self.current_dataset.dy = np.append(self.current_dataset.dy, np.zeros([array_size]))
-
+        if isinstance(self.current_dataset, plottable_1D):
+            dql_exists = False
+            dqw_exists = False
+            dq_exists = False
+            di_exists = False
+            if self.current_dataset.dxl is not None:
+                dql_exists = True
+            if self.current_dataset.dxw is not None:
+                dqw_exists = True
+            if self.current_dataset.dx is not None:
+                dq_exists = True
+            if self.current_dataset.dy is not None:
+                di_exists = True
+            if dqw_exists and not dql_exists:
+                array_size = self.current_dataset.dxw.size - 1
+                self.current_dataset.dxl = np.append(self.current_dataset.dxl,
+                                                     np.zeros([array_size]))
+            elif dql_exists and not dqw_exists:
+                array_size = self.current_dataset.dxl.size - 1
+                self.current_dataset.dxw = np.append(self.current_dataset.dxw,
+                                                     np.zeros([array_size]))
+            elif not dql_exists and not dqw_exists and not dq_exists:
+                array_size = self.current_dataset.x.size - 1
+                self.current_dataset.dx = np.append(self.current_dataset.dx,
+                                                    np.zeros([array_size]))
+            if not di_exists:
+                array_size = self.current_dataset.y.size - 1
+                self.current_dataset.dy = np.append(self.current_dataset.dy,
+                                                    np.zeros([array_size]))
+        elif isinstance(self.current_dataset, plottable_2D):
+            dqx_exists = False
+            dqy_exists = False
+            di_exists = False
+            mask_exists = False
+            if self.current_dataset.dqx_data is not None:
+                dqx_exists = True
+            if self.current_dataset.dqy_data is not None:
+                dqy_exists = True
+            if self.current_dataset.err_data is not None:
+                di_exists = True
+            if self.current_dataset.mask is not None:
+                mask_exists = True
+            if not dqy_exists:
+                array_size = self.current_dataset.qy_data.size - 1
+                self.current_dataset.dqy_data = np.append(
+                    self.current_dataset.dqy_data, np.zeros([array_size]))
+            if not dqx_exists:
+                array_size = self.current_dataset.qx_data.size - 1
+                self.current_dataset.dqx_data = np.append(
+                    self.current_dataset.dqx_data, np.zeros([array_size]))
+            if not di_exists:
+                array_size = self.current_dataset.data.size - 1
+                self.current_dataset.err_data = np.append(
+                    self.current_dataset.err_data, np.zeros([array_size]))
+            if not mask_exists:
+                array_size = self.current_dataset.data.size - 1
+                self.current_dataset.mask = np.append(
+                    self.current_dataset.mask,
+                    np.ones([array_size] ,dtype=bool))
 
     ####### All methods below are for writing CanSAS XML files #######
-
 
     def write(self, filename, datainfo):
         """
@@ -779,7 +894,7 @@ class Reader(XMLreader):
         doc, _ = self._to_xml_doc(datainfo)
         # Write the file
         file_ref = open(filename, 'w')
-        if self.encoding == None:
+        if self.encoding is None:
             self.encoding = "UTF-8"
         doc.write(file_ref, encoding=self.encoding,
                   pretty_print=True, xml_declaration=True)
@@ -791,8 +906,9 @@ class Reader(XMLreader):
 
         :param datainfo: Data1D object
         """
-        if not issubclass(datainfo.__class__, Data1D):
-            raise RuntimeError, "The cansas writer expects a Data1D instance"
+        is_2d = False
+        if issubclass(datainfo.__class__, Data2D):
+            is_2d = True
 
         # Get PIs and create root element
         pi_string = self._get_pi_string()
@@ -812,9 +928,13 @@ class Reader(XMLreader):
         # Add Run to SASentry
         self._write_run_names(datainfo, entry_node)
         # Add Data info to SASEntry
-        self._write_data(datainfo, entry_node)
+        if is_2d:
+            self._write_data_2d(datainfo, entry_node)
+        else:
+            self._write_data(datainfo, entry_node)
         # Transmission Spectrum Info
-        self._write_trans_spectrum(datainfo, entry_node)
+        # TODO: fix the writer to linearize all data, including T_spectrum
+        # self._write_trans_spectrum(datainfo, entry_node)
         # Sample info
         self._write_sample_info(datainfo, entry_node)
         # Instrument info
@@ -894,7 +1014,7 @@ class Reader(XMLreader):
         :param datainfo: The Data1D object the information is coming from
         :param entry_node: lxml node ElementTree object to be appended to
         """
-        if datainfo.run == None or datainfo.run == []:
+        if datainfo.run is None or datainfo.run == []:
             datainfo.run.append(RUN_NAME_DEFAULT)
             datainfo.run_name[RUN_NAME_DEFAULT] = RUN_NAME_DEFAULT
         for item in datainfo.run:
@@ -906,7 +1026,7 @@ class Reader(XMLreader):
 
     def _write_data(self, datainfo, entry_node):
         """
-        Writes the I and Q data to the XML file
+        Writes 1D I and Q data to the XML file
 
         :param datainfo: The Data1D object the information is coming from
         :param entry_node: lxml node ElementTree object to be appended to
@@ -918,22 +1038,78 @@ class Reader(XMLreader):
             point = self.create_element("Idata")
             node.append(point)
             self.write_node(point, "Q", datainfo.x[i],
-                            {'unit': datainfo.x_unit})
+                            {'unit': datainfo._xaxis + " | " + datainfo._xunit})
             if len(datainfo.y) >= i:
                 self.write_node(point, "I", datainfo.y[i],
-                                {'unit': datainfo.y_unit})
+                                {'unit': datainfo._yaxis + " | " + datainfo._yunit})
             if datainfo.dy is not None and len(datainfo.dy) > i:
                 self.write_node(point, "Idev", datainfo.dy[i],
-                                {'unit': datainfo.y_unit})
+                                {'unit': datainfo._yaxis + " | " + datainfo._yunit})
             if datainfo.dx is not None and len(datainfo.dx) > i:
                 self.write_node(point, "Qdev", datainfo.dx[i],
-                                {'unit': datainfo.x_unit})
+                                {'unit': datainfo._xaxis + " | " + datainfo._xunit})
             if datainfo.dxw is not None and len(datainfo.dxw) > i:
                 self.write_node(point, "dQw", datainfo.dxw[i],
-                                {'unit': datainfo.x_unit})
+                                {'unit': datainfo._xaxis + " | " + datainfo._xunit})
             if datainfo.dxl is not None and len(datainfo.dxl) > i:
                 self.write_node(point, "dQl", datainfo.dxl[i],
-                                {'unit': datainfo.x_unit})
+                                {'unit': datainfo._xaxis + " | " + datainfo._xunit})
+        if datainfo.isSesans:
+            sesans = self.create_element("Sesans")
+            sesans.text = str(datainfo.isSesans)
+            node.append(sesans)
+            self.write_node(node, "yacceptance", datainfo.sample.yacceptance[0],
+                             {'unit': datainfo.sample.yacceptance[1]})
+            self.write_node(node, "zacceptance", datainfo.sample.zacceptance[0],
+                             {'unit': datainfo.sample.zacceptance[1]})
+
+
+    def _write_data_2d(self, datainfo, entry_node):
+        """
+        Writes 2D data to the XML file
+
+        :param datainfo: The Data2D object the information is coming from
+        :param entry_node: lxml node ElementTree object to be appended to
+        """
+        attr = {}
+        if datainfo.data.shape:
+            attr["x_bins"] = str(len(datainfo.x_bins))
+            attr["y_bins"] = str(len(datainfo.y_bins))
+        node = self.create_element("SASdata", attr)
+        self.append(node, entry_node)
+
+        point = self.create_element("Idata")
+        node.append(point)
+        qx = ','.join([str(datainfo.qx_data[i]) for i in xrange(len(datainfo.qx_data))])
+        qy = ','.join([str(datainfo.qy_data[i]) for i in xrange(len(datainfo.qy_data))])
+        intensity = ','.join([str(datainfo.data[i]) for i in xrange(len(datainfo.data))])
+
+        self.write_node(point, "Qx", qx,
+                        {'unit': datainfo._xunit})
+        self.write_node(point, "Qy", qy,
+                        {'unit': datainfo._yunit})
+        self.write_node(point, "I", intensity,
+                        {'unit': datainfo._zunit})
+        if datainfo.err_data is not None:
+            err = ','.join([str(datainfo.err_data[i]) for i in
+                            xrange(len(datainfo.err_data))])
+            self.write_node(point, "Idev", err,
+                            {'unit': datainfo._zunit})
+        if datainfo.dqy_data is not None:
+            dqy = ','.join([str(datainfo.dqy_data[i]) for i in
+                            xrange(len(datainfo.dqy_data))])
+            self.write_node(point, "Qydev", dqy,
+                            {'unit': datainfo._yunit})
+        if datainfo.dqx_data is not None:
+            dqx = ','.join([str(datainfo.dqx_data[i]) for i in
+                            xrange(len(datainfo.dqx_data))])
+            self.write_node(point, "Qxdev", dqx,
+                            {'unit': datainfo._xunit})
+        if datainfo.mask is not None:
+            mask = ','.join(
+                ["1" if datainfo.mask[i] else "0"
+                 for i in xrange(len(datainfo.mask))])
+            self.write_node(point, "Mask", mask)
 
     def _write_trans_spectrum(self, datainfo, entry_node):
         """
@@ -956,7 +1132,7 @@ class Reader(XMLreader):
                                 {'unit': spectrum.wavelength_unit})
                 self.write_node(point, "T", spectrum.transmission[i],
                                 {'unit': spectrum.transmission_unit})
-                if spectrum.transmission_deviation != None \
+                if spectrum.transmission_deviation is not None \
                 and len(spectrum.transmission_deviation) >= i:
                     self.write_node(point, "Tdev",
                                     spectrum.transmission_deviation[i],
@@ -1036,7 +1212,7 @@ class Reader(XMLreader):
             self.write_attribute(source, "name",
                                  str(datainfo.source.name))
         self.append(source, instr)
-        if datainfo.source.radiation == None or datainfo.source.radiation == '':
+        if datainfo.source.radiation is None or datainfo.source.radiation == '':
             datainfo.source.radiation = "neutron"
         self.write_node(source, "radiation", datainfo.source.radiation)
 
@@ -1077,7 +1253,7 @@ class Reader(XMLreader):
         :param datainfo: The Data1D object the information is coming from
         :param instr: lxml node ElementTree object to be appended to
         """
-        if datainfo.collimation == [] or datainfo.collimation == None:
+        if datainfo.collimation == [] or datainfo.collimation is None:
             coll = Collimation()
             datainfo.collimation.append(coll)
         for item in datainfo.collimation:
@@ -1122,7 +1298,7 @@ class Reader(XMLreader):
         :param datainfo: The Data1D object the information is coming from
         :param inst: lxml instrument node to be appended to
         """
-        if datainfo.detector == None or datainfo.detector == []:
+        if datainfo.detector is None or datainfo.detector == []:
             det = Detector()
             det.name = ""
             datainfo.detector.append(det)
@@ -1287,7 +1463,7 @@ class Reader(XMLreader):
                 toks = variable.split('.')
                 local_unit = None
                 exec "local_unit = storage.%s_unit" % toks[0]
-                if local_unit != None and units.lower() != local_unit.lower():
+                if local_unit is not None and units.lower() != local_unit.lower():
                     if HAS_CONVERTER == True:
                         try:
                             conv = Converter(units)
@@ -1300,7 +1476,7 @@ class Reader(XMLreader):
                                 % (variable, units, local_unit, exc_value)
                             self.errors.add(err_mess)
                             if optional:
-                                logging.info(err_mess)
+                                logger.info(err_mess)
                             else:
                                 raise ValueError, err_mess
                     else:
@@ -1309,7 +1485,7 @@ class Reader(XMLreader):
                         err_mess += " expecting [%s]" % local_unit
                         self.errors.add(err_mess)
                         if optional:
-                            logging.info(err_mess)
+                            logger.info(err_mess)
                         else:
                             raise ValueError, err_mess
                 else:
