@@ -15,6 +15,8 @@ from PyQt4 import QtWebKit
 from sasmodels import generate
 from sasmodels import modelinfo
 from sasmodels.sasview_model import load_standard_models
+from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
+
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -39,6 +41,8 @@ TAB_POLY = 3
 CATEGORY_DEFAULT = "Choose category..."
 CATEGORY_STRUCTURE = "Structure Factor"
 STRUCTURE_DEFAULT = "None"
+
+DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 
 # Mapping between column index and relevant parameter name extension
 POLY_COLUMN_DICT = {
@@ -478,7 +482,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         name_index = self._poly_model.index(model_row, 0)
         parameter_name = str(name_index.data().toString()).lower() # "distribution of sld" etc.
         if "distribution of" in parameter_name:
-            parameter_name = parameter_name[16:]
+            # just the last word
+            parameter_name = parameter_name.rsplit()[-1]
 
         # Extract changed value. Assumes proper validation by QValidator/Delegate
         # TODO: abstract away hardcoded column numbers
@@ -997,7 +1002,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         main_params = self.checkedListFromModel(self._model_model)
         poly_params = self.checkedListFromModel(self._poly_model)
         # Retrieve poly params names
-        poly_params = [param[16:]+'.width' for param in poly_params]
+        poly_params = [param.rsplit()[-1] + '.width' for param in poly_params]
         # TODO : add magnetic params
 
         self.parameters_to_fit = main_params + poly_params
@@ -1206,10 +1211,14 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
                             str(npts), str(nsigs), ""]
             FittingUtilities.addCheckedListToModel(self._poly_model, checked_list)
 
-            #TODO: Need to find cleaner way to input functions
+            # All possible polydisp. functions as strings in combobox
             func = QtGui.QComboBox()
-            func.addItems(['rectangle', 'array', 'lognormal', 'gaussian', 'schulz',])
+            func.addItems([str(name_disp) for name_disp in POLYDISPERSITY_MODELS.iterkeys()])
+            # Default index
+            func.setCurrentIndex(func.findText(DEFAULT_POLYDISP_FUNCTION))
+            # Index in the view
             func_index = self.lstPoly.model().index(row, 6)
+            # Set the combobox in cell
             self.lstPoly.setIndexWidget(func_index, func)
 
         FittingUtilities.addPolyHeadersToModel(self._poly_model)
