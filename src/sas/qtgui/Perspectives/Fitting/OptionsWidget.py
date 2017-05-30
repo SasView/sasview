@@ -83,6 +83,7 @@ class OptionsWidget(QtGui.QWidget, Ui_tabOptions):
         self.txtMaxRange.setText(str(QMAX_DEFAULT))
         self.txtMinRange.setText(str(QMIN_DEFAULT))
         self.txtNpts.setText(str(NPTS_DEFAULT))
+        self.txtNptsFit.setText(str(NPTS_DEFAULT))
         self.model.blockSignals(False)
 
     def initModel(self):
@@ -124,7 +125,7 @@ class OptionsWidget(QtGui.QWidget, Ui_tabOptions):
         """
         Callback for resetting qmin/qmax
         """
-        pass
+        self.updateQRange(QMIN_DEFAULT, QMAX_DEFAULT, NPTS_DEFAULT)
 
     def onWeightingChoice(self, button):
         """

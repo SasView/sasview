@@ -40,6 +40,14 @@ CATEGORY_DEFAULT = "Choose category..."
 CATEGORY_STRUCTURE = "Structure Factor"
 STRUCTURE_DEFAULT = "None"
 
+# Mapping between column index and relevant parameter name extension
+POLY_COLUMN_DICT = {
+    1: 'width',
+    2: 'min',
+    3: 'max',
+    4: 'npts',
+    5: 'nsigmas'}
+
 class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
     """
     Main widget for selecting form and structure factor models
@@ -238,7 +246,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.setPolyModel()
         self.setTableProperties(self.lstPoly)
         # Delegates for custom editing and display
-        self.lstPoly.setItemDelegate(PolyViewDelegate(self))
+        # self.lstPoly.setItemDelegate(PolyViewDelegate(self))
 
         # Magnetism model displayed in magnetism list
         self.lstMagnetic.setModel(self._magnet_model)
@@ -468,12 +476,23 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         model_column = item.column()
         model_row = item.row()
         name_index = self._poly_model.index(model_row, 0)
+        parameter_name = str(name_index.data().toString()).lower() # "distribution of sld" etc.
+        if "distribution of" in parameter_name:
+            parameter_name = parameter_name[16:]
+
         # Extract changed value. Assumes proper validation by QValidator/Delegate
         # TODO: abstract away hardcoded column numbers
         if model_column == 0:
             # Is the parameter checked for fitting?
             value = item.checkState()
             # TODO: add the param to self.params_for_fitting
+            parameter_name = parameter_name+'.width'
+            if value == QtCore.Qt.Checked:
+                self.parameters_to_fit.append(parameter_name)
+            else:
+                if parameter_name in self.parameters_to_fit:
+                    self.parameters_to_fit.remove(parameter_name)
+            return
         elif model_column == 6:
             value = item.text()
             # TODO: Modify Npts/Nsigs based on function choice
@@ -484,14 +503,12 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
                 # Can't be converted properly, bring back the old value and exit
                 return
 
-        parameter_name = str(self._poly_model.data(name_index).toPyObject()) # "distribution of sld" etc.
-        if "Distribution of" in parameter_name:
-            parameter_name = parameter_name[16:]
-        property_name = str(self._poly_model.headerData(model_column, 1).toPyObject()) # Value, min, max, etc.
+        property_name = str(self._poly_model.headerData(model_column, 1).toPyObject()).lower() # Value, min, max, etc.
         # print "%s(%s) => %d" % (parameter_name, property_name, value)
 
         # Update the sasmodel
-        #self.kernel_module.params[parameter_name] = value
+        # PD[ratio] -> width, npts -> npts, nsigs -> nsigmas
+        self.kernel_module.setParam(parameter_name + '.' + POLY_COLUMN_DICT[model_column], value)
 
         # Reload the main model - may not be required if no variable is shown in main view
         #model = str(self.cbModel.currentText())
@@ -520,6 +537,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         qmin = self.q_range_min
         qmax = self.q_range_max
         params_to_fit = self.parameters_to_fit
+
+        print "OPTIMIZING: ", params_to_fit
 
         # Potential weights added directly to data
         self.addWeightingToData(data)
@@ -962,9 +981,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             return
         status = item.checkState()
 
-        def isChecked(row):
-            return self._model_model.item(row, 0).checkState() == QtCore.Qt.Checked
-
         def isCheckable(row):
             return self._model_model.item(row, 0).isCheckable()
 
@@ -978,9 +994,24 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self._model_model.blockSignals(False)
 
         # update the list of parameters to fit
-        self.parameters_to_fit = [str(self._model_model.item(row_index, 0).text())
-                                  for row_index in xrange(self._model_model.rowCount())
-                                  if isChecked(row_index)]
+        main_params = self.checkedListFromModel(self._model_model)
+        poly_params = self.checkedListFromModel(self._poly_model)
+        # Retrieve poly params names
+        poly_params = [param[16:]+'.width' for param in poly_params]
+        # TODO : add magnetic params
+
+        self.parameters_to_fit = main_params + poly_params
+
+    def checkedListFromModel(self, model):
+        """
+        Returns list of checked parameters for given model
+        """
+        def isChecked(row):
+            return model.item(row, 0).checkState() == QtCore.Qt.Checked
+
+        return [str(model.item(row_index, 0).text())
+                for row_index in xrange(model.rowCount())
+                if isChecked(row_index)]
 
     def nameForFittedData(self, name):
         """
@@ -1076,10 +1107,11 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         calc_thread = threads.deferToThread(method.compute)
         calc_thread.addCallback(self.methodCompleteForData())
-        calc_thread.addErrback(self.calculateDataFailed())
+        calc_thread.addErrback(self.calculateDataFailed)
 
     def calculateDataFailed(self):
         """
+        Thread returned error
         """
         print "Calculate Data failed."
 
@@ -1127,8 +1159,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
     def calcException(self, etype, value, tb):
         """
-        Something horrible happened in the deferred.
+        Thread threw an exception.
         """
+        # TODO: remimplement thread cancellation
         logging.error("".join(traceback.format_exception(etype, value, tb)))
 
     def setTableProperties(self, table):
@@ -1163,17 +1196,21 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             if not param.polydisperse:
                 continue
 
+            # Values from the sasmodel
+            width = self.kernel_module.getParam(param.name+'.width')
+            npts = self.kernel_module.getParam(param.name+'.npts')
+            nsigs = self.kernel_module.getParam(param.name+'.nsigmas')
             # Potential multishell params
-            checked_list = ["Distribution of "+param.name, str(param.default),
+            checked_list = ["Distribution of "+param.name, str(width),
                             str(param.limits[0]), str(param.limits[1]),
-                            "35", "3", "gaussian"]
+                            str(npts), str(nsigs), ""]
             FittingUtilities.addCheckedListToModel(self._poly_model, checked_list)
 
             #TODO: Need to find cleaner way to input functions
-            #func = QtGui.QComboBox()
-            #func.addItems(['rectangle', 'array', 'lognormal', 'gaussian', 'schulz',])
-            #func_index = self.lstPoly.model().index(row, 6)
-            #self.lstPoly.setIndexWidget(func_index, func)
+            func = QtGui.QComboBox()
+            func.addItems(['rectangle', 'array', 'lognormal', 'gaussian', 'schulz',])
+            func_index = self.lstPoly.model().index(row, 6)
+            self.lstPoly.setIndexWidget(func_index, func)
 
         FittingUtilities.addPolyHeadersToModel(self._poly_model)
 
