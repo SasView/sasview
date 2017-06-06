@@ -36,7 +36,7 @@ def getMultiplicity(model):
             param_name = iter_params[0].name[:iter_params[0].name.index('[')]
     return (param_name, param_length)
 
-def addParametersToModel(parameters, is2D):
+def addParametersToModel(parameters, kernel_module, is2D):
     """
     Update local ModelModel with sasmodel parameters
     """
@@ -68,13 +68,18 @@ def addParametersToModel(parameters, is2D):
             for p in parameters.form_volume_parameters:
                 if p.name != param.name:
                     continue
-                item1_2 = QtGui.QStandardItem(str(p.default))
+                width = kernel_module.getParam(p.name+'.width')
+                #npts = kernel_module.getParam(p.name+'.npts')
+                #nsigs = kernel_module.getParam(p.name+'.nsigmas')
+                type = kernel_module.getParam(p.name+'.type')
+
+                item1_2 = QtGui.QStandardItem(str(width))
                 item1_2.setEditable(False)
-                item1_3 = QtGui.QStandardItem(str(p.limits[0]))
+                item1_3 = QtGui.QStandardItem()
                 item1_3.setEditable(False)
-                item1_4 = QtGui.QStandardItem(str(p.limits[1]))
+                item1_4 = QtGui.QStandardItem()
                 item1_4.setEditable(False)
-                item1_5 = QtGui.QStandardItem(p.units)
+                item1_5 = QtGui.QStandardItem(type)
                 item1_5.setEditable(False)
                 poly_item.appendRow([item1_1, item1_2, item1_3, item1_4, item1_5])
                 break
@@ -155,6 +160,19 @@ def addPolyHeadersToModel(model):
     model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("Npts"))
     model.setHeaderData(5, QtCore.Qt.Horizontal, QtCore.QVariant("Nsigs"))
     model.setHeaderData(6, QtCore.Qt.Horizontal, QtCore.QVariant("Function"))
+
+def addErrorPolyHeadersToModel(model):
+    """
+    Adds predefined headers to the model
+    """
+    model.setHeaderData(0, QtCore.Qt.Horizontal, QtCore.QVariant("Parameter"))
+    model.setHeaderData(1, QtCore.Qt.Horizontal, QtCore.QVariant("PD[ratio]"))
+    model.setHeaderData(2, QtCore.Qt.Horizontal, QtCore.QVariant("Error"))
+    model.setHeaderData(3, QtCore.Qt.Horizontal, QtCore.QVariant("Min"))
+    model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("Max"))
+    model.setHeaderData(5, QtCore.Qt.Horizontal, QtCore.QVariant("Npts"))
+    model.setHeaderData(6, QtCore.Qt.Horizontal, QtCore.QVariant("Nsigs"))
+    model.setHeaderData(7, QtCore.Qt.Horizontal, QtCore.QVariant("Function"))
 
 def addShellsToModel(parameters, model, index):
     """
