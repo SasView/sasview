@@ -92,6 +92,12 @@ class PolyViewDelegate(QtGui.QStyledItemDelegate):
     POLY_NSIGS=5
     POLY_FUNCTION=6
     POLY_EDITABLE_PARAMS = [POLY_MIN, POLY_MAX, POLY_NPTS, POLY_NSIGS]
+    POLY_COLUMN_DICT = {
+        POLY_PD:    'width',
+        POLY_MIN:   'min',
+        POLY_MAX:   'max',
+        POLY_NPTS:  'npts',
+        POLY_NSIGS: 'nsigmas'}
 
     combo_updated = QtCore.pyqtSignal(str, int)
 

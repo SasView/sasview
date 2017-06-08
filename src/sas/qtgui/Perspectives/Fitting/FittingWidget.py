@@ -44,21 +44,6 @@ STRUCTURE_DEFAULT = "None"
 
 DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 
-# Mapping between column index and relevant parameter name extension
-POLY_COL_NAME = 0
-POLY_COL_WIDTH = 1
-POLY_COL_MIN = 2
-POLY_COL_MAX = 3
-POLY_COL_NPTS = 4
-POLY_COL_NSIGMAS = 5
-POLY_COL_FUNCTION = 6
-POLY_COLUMN_DICT = {
-    POLY_COL_WIDTH:   'width',
-    POLY_COL_MIN:     'min',
-    POLY_COL_MAX:     'max',
-    POLY_COL_NPTS:    'npts',
-    POLY_COL_NSIGMAS: 'nsigmas'}
-
 class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
     """
     Main widget for selecting form and structure factor models
@@ -498,7 +483,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             parameter_name = parameter_name.rsplit()[-1]
 
         # Extract changed value.
-        if model_column == POLY_COL_NAME:
+        if model_column == self.lstPoly.itemDelegate().POLY_PARAMETER:
             # Is the parameter checked for fitting?
             value = item.checkState()
             parameter_name = parameter_name+'.width'
@@ -508,7 +493,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
                 if parameter_name in self.parameters_to_fit:
                     self.parameters_to_fit.remove(parameter_name)
             return
-        elif model_column in [POLY_COL_MIN, POLY_COL_MAX]:
+        elif model_column in [self.lstPoly.itemDelegate().POLY_MIN, self.lstPoly.itemDelegate().POLY_MAX]:
             try:
                 value = float(item.text())
             except ValueError:
@@ -519,25 +504,21 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             # print "%s(%s) => %d" % (parameter_name, property_name, value)
             current_details = self.kernel_module.details[parameter_name]
             current_details[model_column-1] = value
+        elif model_column == self.lstPoly.itemDelegate().POLY_FUNCTION:
+            # name of the function - just pass
+            return
         else:
             try:
                 value = float(item.text())
             except ValueError:
                 # Can't be converted properly, bring back the old value and exit
                 return
-
             property_name = str(self._poly_model.headerData(model_column, 1).toPyObject()).lower() # Value, min, max, etc.
-            # print "%s(%s) => %d" % (parameter_name, property_name, value)
 
             # Update the sasmodel
             # PD[ratio] -> width, npts -> npts, nsigs -> nsigmas
-            self.kernel_module.setParam(parameter_name + '.' + POLY_COLUMN_DICT[model_column], value)
-
-        # Reload the main model - may not be required if no variable is shown in main view
-        #model = str(self.cbModel.currentText())
-        #self.SASModelToQModel(model)
-
-        pass # debug anchor
+            self.kernel_module.setParam(parameter_name + '.' + \
+                                        self.lstPoly.itemDelegate().POLY_COLUMN_DICT[model_column], value)
 
     def onHelp(self):
         """
@@ -696,33 +677,46 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         if not dict:
             return
 
-        def updateFittedValues(row_i):
+        def updateFittedValues(row):
             # Utility function for main model update
             # internal so can use closure for param_dict
-            param_name = str(self._model_model.item(row_i, 0).text())
+            param_name = str(self._model_model.item(row, 0).text())
             if param_name not in param_dict.keys():
                 return
             # modify the param value
             param_repr = GuiUtils.formatNumber(param_dict[param_name][0], high=True)
-            self._model_model.item(row_i, 1).setText(param_repr)
+            self._model_model.item(row, 1).setText(param_repr)
             if self.has_error_column:
                 error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
-                self._model_model.item(row_i, 2).setText(error_repr)
+                self._model_model.item(row, 2).setText(error_repr)
 
-        def createErrorColumn(row_i):
+        def updatePolyValues(row):
+            # Utility function for updateof polydispersity part of the main model
+            param_name = str(self._model_model.item(row, 0).text())+'.width'
+            if param_name not in param_dict.keys():
+                return
+            # modify the param value
+            param_repr = GuiUtils.formatNumber(param_dict[param_name][0], high=True)
+            self._model_model.item(row, 0).child(0).child(0,1).setText(param_repr)
+
+        def createErrorColumn(row):
             # Utility function for error column update
             item = QtGui.QStandardItem()
-            for param_name in param_dict.keys():
-                if str(self._model_model.item(row_i, 0).text()) != param_name:
-                    continue
+            def createItem(param_name):
                 error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
                 item.setText(error_repr)
+            def curr_param():
+                return str(self._model_model.item(row, 0).text())
+
+            [createItem(param_name) for param_name in param_dict.keys() if curr_param() == param_name]
+
             error_column.append(item)
 
         # block signals temporarily, so we don't end up
         # updating charts with every single model change on the end of fitting
         self._model_model.blockSignals(True)
         self.iterateOverModel(updateFittedValues)
+        self.iterateOverModel(updatePolyValues)
         self._model_model.blockSignals(False)
 
         if self.has_error_column:
@@ -768,16 +762,22 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
                 error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
                 self._poly_model.item(row_i, 2).setText(error_repr)
 
+
         def createErrorColumn(row_i):
             # Utility function for error column update
             if row_i >= self._poly_model.rowCount():
                 return
             item = QtGui.QStandardItem()
-            for param_name in param_dict.keys():
-                if str(self._poly_model.item(row_i, 0).text()).rsplit()[-1] + '.width' != param_name:
-                    continue
+
+            def createItem(param_name):
                 error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
                 item.setText(error_repr)
+
+            def poly_param():
+                return str(self._poly_model.item(row_i, 0).text()).rsplit()[-1] + '.width'
+
+            [createItem(param_name) for param_name in param_dict.keys() if poly_param() == param_name]
+
             error_column.append(item)
 
         # block signals temporarily, so we don't end up
@@ -785,8 +785,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self._poly_model.blockSignals(True)
         self.iterateOverModel(updateFittedValues)
         self._poly_model.blockSignals(False)
-
-        #return
 
         if self.has_poly_error_column:
             return
@@ -797,6 +795,12 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.lstPoly.itemDelegate().POLY_NPTS = 5
         self.lstPoly.itemDelegate().POLY_NSIGS = 6
         self.lstPoly.itemDelegate().POLY_FUNCTION = 7
+        self.lstPoly.itemDelegate().POLY_COLUMN_DICT = {
+            2: 'width',
+            3: 'min',
+            4: 'max',
+            5: 'npts',
+            6: 'nsigmas'}
 
         error_column = []
         self.iterateOverModel(createErrorColumn)
@@ -1331,9 +1335,19 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # get npts/nsigs for current selection
         param = self.model_parameters.form_volume_parameters[row_index]
 
+        def updateFunctionCaption(row):
+            # Utility function for update of polydispersity function name in the main model
+            param_name = str(self._model_model.item(row, 0).text())# +'.width'
+            if param_name !=  param.name:
+                return
+            # modify the param value
+            self._model_model.item(row, 0).child(0).child(0,4).setText(combo_string)
+
         if combo_string == 'array':
             try:
                 self.loadPolydispArray()
+                # Update main model for display
+                self.iterateOverModel(updateFunctionCaption)
             except (ValueError, IOError):
                 # Don't do anything if file lookup failed
                 return
@@ -1342,16 +1356,20 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             return
 
         # Enable the row in case it was disabled by Array
-        #[self._poly_model.item(row_index, i).setEnabled(True) for i in xrange(6)]
+        self._poly_model.blockSignals(True)
+        [self._poly_model.item(row_index, i).setEnabled(True) for i in xrange(6)]
+        self._poly_model.blockSignals(False)
 
-        npts_index = self._poly_model.index(row_index, POLY_COL_NPTS)
-        nsigs_index = self._poly_model.index(row_index, POLY_COL_NSIGMAS)
+        npts_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().POLY_NPTS)
+        nsigs_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().POLY_NSIGS)
 
         npts = POLYDISPERSITY_MODELS[str(combo_string)].default['npts']
         nsigs = POLYDISPERSITY_MODELS[str(combo_string)].default['nsigmas']
 
         self._poly_model.setData(npts_index, QtCore.QVariant(npts))
         self._poly_model.setData(nsigs_index, QtCore.QVariant(nsigs))
+
+        self.iterateOverModel(updateFunctionCaption)
 
     def loadPolydispArray(self):
         """
@@ -1364,15 +1382,20 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             return
         values = []
         weights = []
+        def appendData(data_tuple):
+            """
+            Fish out floats from a tuple of strings
+            """
+            try:
+                values.append(float(data_tuple[0]))
+                weights.append(float(data_tuple[1]))
+            except (ValueError, IndexError):
+                # just pass through if line with bad data
+                return
+
         with open(datafile, 'r') as column_file:
             column_data = [line.rstrip().split() for line in column_file.readlines()]
-            for line in column_data:
-                try:
-                    values.append(float(line[0]))
-                    weights.append(float(line[1]))
-                except (ValueError, IndexError):
-                    # just pass through if line with bad data
-                    pass
+            [appendData(line) for line in column_data]
 
         self.disp_model = POLYDISPERSITY_MODELS['array']()
         self.disp_model.set_weights(np.array(values), np.array(weights))
