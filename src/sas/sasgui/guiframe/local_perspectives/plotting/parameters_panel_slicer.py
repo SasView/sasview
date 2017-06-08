@@ -4,10 +4,9 @@ import os
 import wx
 import wx.lib.newevent
 from sas.sascalc.dataloader.readers.cansas_reader import Reader
-from sas.sasgui.guiframe.events import EVT_SLICER_PARS
 from sas.sasgui.guiframe.utils import format_number
-from sas.sasgui.guiframe.events import EVT_SLICER
-from sas.sasgui.guiframe.events import SlicerParameterEvent
+from sas.sasgui.guiframe.events import EVT_SLICER_PARS, EVT_SLICER
+from sas.sasgui.guiframe.events import SlicerParameterEvent, StatusEvent
 from Plotter2D import ModelPanel2D
 apply_params, EVT_APPLY_PARAMS = wx.lib.newevent.NewEvent()
 save_files, EVT_AUTO_SAVE = wx.lib.newevent.NewEvent()
@@ -420,7 +419,7 @@ class SlicerParameterPanel(wx.Dialog):
         # Events triggered after this event pass other events to wx that are
         # necessary before this event is called. If this is the first time
         # reaching this event, send it to the end of the wx event queue
-        if self.iter == 0:
+        if self.iter < 2:
             clone = evt.Clone()
             wx.PostEvent(self, clone)
             self.iter += 1
