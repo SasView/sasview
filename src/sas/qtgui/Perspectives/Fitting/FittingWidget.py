@@ -543,9 +543,23 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Show the "Fitting" section of help
         """
-        tree_location = self.parent.HELP_DIRECTORY_LOCATION +\
-            "/user/sasgui/perspectives/fitting/fitting_help.html"
-        self.helpView.load(QtCore.QUrl(tree_location))
+        tree_location = self.parent.HELP_DIRECTORY_LOCATION + "/user/sasgui/perspectives/fitting/"
+
+        # Actual file will depend on the current tab
+        tab_id = self.tabFitting.currentIndex()
+        helpfile = "fitting.html"
+        if tab_id == 0:
+            helpfile = "fitting_help.html"
+        elif tab_id == 1:
+            helpfile = "residuals_help.html"
+        elif tab_id == 2:
+            helpfile = "sm_help.html"
+        elif tab_id == 3:
+            helpfile = "pd_help.html"
+        elif tab_id == 4:
+            helpfile = "mag_help.html"
+        help_location = tree_location + helpfile
+        self.helpView.load(QtCore.QUrl(help_location))
         self.helpView.show()
 
     def onFit(self):

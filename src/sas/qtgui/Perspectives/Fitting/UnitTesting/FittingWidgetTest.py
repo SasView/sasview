@@ -22,6 +22,7 @@ from sas.qtgui.Plotting.PlotterData import Data2D
 app = QtGui.QApplication(sys.argv)
 
 class dummy_manager(object):
+    HELP_DIRECTORY_LOCATION = "html"
     communicate = Communicate()
 
 class FittingWidgetTest(unittest.TestCase):
@@ -675,6 +676,53 @@ class FittingWidgetTest(unittest.TestCase):
 
             # Signal pushed up
             self.assertEqual(update_spy.count(), 1)
+
+    def testOnHelp(self):
+        """
+        Test various help pages shown in this widget
+        """
+        #Mock the QWebView method
+        QtWebKit.QWebView.show = MagicMock()
+        QtWebKit.QWebView.load = MagicMock()
+
+        # Invoke the action on default tab
+        self.widget.onHelp()
+        # Check if show() got called
+        self.assertTrue(QtWebKit.QWebView.show.called)
+        # Assure the filename is correct
+        self.assertIn("fitting_help.html", QtWebKit.QWebView.load.call_args[0][0].toString())
+
+        # Change the tab to options
+        self.widget.tabFitting.setCurrentIndex(1)
+        self.widget.onHelp()
+        # Check if show() got called
+        self.assertEqual(QtWebKit.QWebView.show.call_count, 2)
+        # Assure the filename is correct
+        self.assertIn("residuals_help.html", QtWebKit.QWebView.load.call_args[0][0].toString())
+
+        # Change the tab to smearing
+        self.widget.tabFitting.setCurrentIndex(2)
+        self.widget.onHelp()
+        # Check if show() got called
+        self.assertEqual(QtWebKit.QWebView.show.call_count, 3)
+        # Assure the filename is correct
+        self.assertIn("sm_help.html", QtWebKit.QWebView.load.call_args[0][0].toString())
+
+        # Change the tab to poly
+        self.widget.tabFitting.setCurrentIndex(3)
+        self.widget.onHelp()
+        # Check if show() got called
+        self.assertEqual(QtWebKit.QWebView.show.call_count, 4)
+        # Assure the filename is correct
+        self.assertIn("pd_help.html", QtWebKit.QWebView.load.call_args[0][0].toString())
+
+        # Change the tab to magnetism
+        self.widget.tabFitting.setCurrentIndex(4)
+        self.widget.onHelp()
+        # Check if show() got called
+        self.assertEqual(QtWebKit.QWebView.show.call_count, 5)
+        # Assure the filename is correct
+        self.assertIn("mag_help.html", QtWebKit.QWebView.load.call_args[0][0].toString())
 
     def testReadFitPage(self):
         """
