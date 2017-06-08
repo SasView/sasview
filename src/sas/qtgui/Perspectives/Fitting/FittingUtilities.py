@@ -69,8 +69,6 @@ def addParametersToModel(parameters, kernel_module, is2D):
                 if p.name != param.name:
                     continue
                 width = kernel_module.getParam(p.name+'.width')
-                #npts = kernel_module.getParam(p.name+'.npts')
-                #nsigs = kernel_module.getParam(p.name+'.nsigmas')
                 type = kernel_module.getParam(p.name+'.type')
 
                 item1_2 = QtGui.QStandardItem(str(width))

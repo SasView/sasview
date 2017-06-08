@@ -9,6 +9,7 @@ from UnitTesting.TestUtils import WarningTestNotImplemented
 
 from sasmodels import generate
 from sasmodels import modelinfo
+from sasmodels.sasview_model import load_standard_models
 
 # Tested module
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
@@ -93,10 +94,17 @@ class FittingUtilitiesTest(unittest.TestCase):
         """
         # Use a single-shell parameter
         model_name = "barbell"
+        models = load_standard_models()
+
         kernel_module = generate.load_kernel_module(model_name)
+        kernel_module_o = None
+        for model in models:
+            if model.name == model_name:
+                kernel_module_o = model()
+        self.assertIsNotNone(kernel_module_o)
         barbell_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
 
-        params = FittingUtilities.addParametersToModel(barbell_parameters, True)
+        params = FittingUtilities.addParametersToModel(barbell_parameters, kernel_module_o, True)
 
         # Test the resulting model
         self.assertEqual(len(params), 7)
@@ -108,9 +116,14 @@ class FittingUtilitiesTest(unittest.TestCase):
         # Use a multi-shell parameter to see that the method includes shell params
         model_name = "core_multi_shell"
         kernel_module = generate.load_kernel_module(model_name)
+        kernel_module_o = None
+        for model in models:
+            if model.name == model_name:
+                kernel_module_o = model()
+        self.assertIsNotNone(kernel_module_o)
         multi_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
 
-        params = FittingUtilities.addParametersToModel(multi_parameters, False)
+        params = FittingUtilities.addParametersToModel(multi_parameters, kernel_module_o, False)
 
         # Test the resulting model
         self.assertEqual(len(params), 3)
@@ -126,9 +139,15 @@ class FittingUtilitiesTest(unittest.TestCase):
         # Use a multi-shell parameter to see that the method doesn't include shells
         model_name = "core_multi_shell"
         kernel_module = generate.load_kernel_module(model_name)
+        models = load_standard_models()
+        kernel_module_o = None
+        for model in models:
+            if model.name == model_name:
+                kernel_module_o = model()
+        self.assertIsNotNone(kernel_module_o)
         multi_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
 
-        params = FittingUtilities.addParametersToModel(multi_parameters, True)
+        params = FittingUtilities.addParametersToModel(multi_parameters, kernel_module_o, True)
 
         # Test the resulting model
         self.assertEqual(len(params), 3)

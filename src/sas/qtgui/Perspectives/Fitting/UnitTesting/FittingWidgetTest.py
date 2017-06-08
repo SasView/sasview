@@ -34,7 +34,7 @@ class FittingWidgetTest(unittest.TestCase):
     def tearDown(self):
         """Destroy the GUI"""
         self.widget.close()
-        self.widget = None
+        del self.widget
 
     def testDefaults(self):
         """Test the GUI in its default state"""
@@ -83,10 +83,10 @@ class FittingWidgetTest(unittest.TestCase):
     def testSelectPolydispersity(self):
         """
         Test if models have been loaded properly
-        :return:
         """
         fittingWindow =  self.widget
 
+        self.assertIsInstance(fittingWindow.lstPoly.itemDelegate(), QtGui.QStyledItemDelegate)
         #Test loading from json categories
         fittingWindow.SASModelToQModel("cylinder")
         pd_index = fittingWindow.lstPoly.model().index(0,0)
@@ -94,10 +94,16 @@ class FittingWidgetTest(unittest.TestCase):
         pd_index = fittingWindow.lstPoly.model().index(1,0)
         self.assertEqual(str(pd_index.data().toString()), "Distribution of length")
 
+        # test the delegate a bit
+        delegate = fittingWindow.lstPoly.itemDelegate()
+        self.assertEqual(len(delegate.POLYDISPERSE_FUNCTIONS), 5)
+        self.assertEqual(delegate.POLY_EDITABLE_PARAMS, [2, 3, 4, 5])
+        self.assertEqual(delegate.POLY_FUNCTION, 6)
+        self.assertIsInstance(delegate.combo_updated, QtCore.pyqtBoundSignal)
+
     def testSelectStructureFactor(self):
         """
         Test if structure factors have been loaded properly
-        :return:
         """
         fittingWindow =  self.widget
 
@@ -339,6 +345,118 @@ class FittingWidgetTest(unittest.TestCase):
             func_index = self.widget._poly_model.index(row, 6)
             #self.assertTrue(isinstance(self.widget.lstPoly.indexWidget(func_index), QtGui.QComboBox))
             self.assertIn('Distribution of', self.widget._poly_model.item(row, 0).text())
+        #self.widget.close()
+
+    def testPolyModelChange(self):
+        """
+        Polydispersity model changed - test all possible scenarios
+        """
+        self.widget.show()
+        # Change the category index so we have a model with polydisp
+        category_index = self.widget.cbCategory.findText("Cylinder")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        # click on a poly parameter checkbox
+        index = self.widget._poly_model.index(0,0)
+        # Set the checbox
+        self.widget._poly_model.item(0,0).setCheckState(2)
+        # Assure the parameter is added
+        self.assertEqual(self.widget.parameters_to_fit, ['radius_bell.width'])
+
+        # Add another parameter
+        self.widget._poly_model.item(2,0).setCheckState(2)
+        # Assure the parameters are added
+        self.assertEqual(self.widget.parameters_to_fit, ['radius_bell.width', 'length.width'])
+
+        # Change the min/max values
+        self.assertEqual(self.widget.kernel_module.details['radius_bell'][1], 0.0)
+        self.widget._poly_model.item(0,2).setText("1.0")
+        self.assertEqual(self.widget.kernel_module.details['radius_bell'][1], 1.0)
+
+        # Change the number of points
+        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.npts'), 35)
+        self.widget._poly_model.item(0,4).setText("22")
+        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.npts'), 22)
+        # try something stupid
+        self.widget._poly_model.item(0,4).setText("butt")
+        # see that this didn't annoy the control at all
+        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.npts'), 22)
+
+        # Change the number of sigmas
+        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.nsigmas'), 3)
+        self.widget._poly_model.item(0,5).setText("222")
+        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.nsigmas'), 222)
+        # try something stupid again
+        self.widget._poly_model.item(0,4).setText("beer")
+        # no efect
+        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.nsigmas'), 222)
+
+    def testOnPolyComboIndexChange(self):
+        """
+        Test the slot method for polydisp. combo box index change
+        """
+        self.widget.show()
+        # Change the category index so we have a model with polydisp
+        category_index = self.widget.cbCategory.findText("Cylinder")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        # call method with default settings
+        self.widget.onPolyComboIndexChange('gaussian', 0)
+        # check values
+        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.npts'), 35)
+        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.nsigmas'), 3)
+        # Change the index
+        self.widget.onPolyComboIndexChange('rectangle', 0)
+        # check values
+        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.npts'), 35)
+        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.nsigmas'), 1.70325)
+        # Change the index
+        self.widget.onPolyComboIndexChange('lognormal', 0)
+        # check values
+        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.npts'), 80)
+        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.nsigmas'), 8)
+        # Change the index
+        self.widget.onPolyComboIndexChange('schulz', 0)
+        # check values
+        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.npts'), 80)
+        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.nsigmas'), 8)
+
+        # mock up file load
+        self.widget.loadPolydispArray = MagicMock()
+        # Change to 'array'
+        self.widget.onPolyComboIndexChange('array', 0)
+        # See the mock fire
+        self.assertTrue(self.widget.loadPolydispArray.called)
+
+    def testLoadPolydispArray(self):
+        """
+        Test opening of the load file dialog for 'array' polydisp. function
+        """
+        filename = os.path.join("UnitTesting", "testdata_noexist.txt")
+        QtGui.QFileDialog.getOpenFileName = MagicMock(return_value=filename)
+        self.widget.show()
+        # Change the category index so we have a model with polydisp
+        category_index = self.widget.cbCategory.findText("Cylinder")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        self.widget.onPolyComboIndexChange('array', 0)
+        # check values - unchanged since the file doesn't exist
+        self.assertTrue(self.widget._poly_model.item(0, 1).isEnabled())
+        with self.assertRaises(AttributeError):
+            self.widget.disp_model()
+
+        # good file
+        filename = os.path.join("UnitTesting", "testdata.txt")
+        QtGui.QFileDialog.getOpenFileName = MagicMock(return_value=filename)
+
+        self.widget.onPolyComboIndexChange('array', 0)
+        # check values - disabled control, present weights
+        self.assertFalse(self.widget._poly_model.item(0, 1).isEnabled())
+        self.assertEqual(self.widget.disp_model.weights[0], 2.83954)
+        self.assertEqual(len(self.widget.disp_model.weights), 19)
+        self.assertEqual(len(self.widget.disp_model.values), 19)
+        self.assertEqual(self.widget.disp_model.values[0], 0.0)
+        self.assertEqual(self.widget.disp_model.values[18], 3.67347)
 
     def testSetMagneticModel(self):
         """

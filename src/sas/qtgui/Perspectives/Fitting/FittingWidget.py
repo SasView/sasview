@@ -497,12 +497,10 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             # just the last word
             parameter_name = parameter_name.rsplit()[-1]
 
-        # Extract changed value. Assumes proper validation by QValidator/Delegate
-        # TODO: abstract away hardcoded column numbers
+        # Extract changed value.
         if model_column == POLY_COL_NAME:
             # Is the parameter checked for fitting?
             value = item.checkState()
-            # TODO: add the param to self.params_for_fitting
             parameter_name = parameter_name+'.width'
             if value == QtCore.Qt.Checked:
                 self.parameters_to_fit.append(parameter_name)
@@ -510,9 +508,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
                 if parameter_name in self.parameters_to_fit:
                     self.parameters_to_fit.remove(parameter_name)
             return
-        elif model_column == POLY_COL_FUNCTION:
-            value = item.text()
-            # TODO: Modify Npts/Nsigs based on function choice
         elif model_column in [POLY_COL_MIN, POLY_COL_MAX]:
             try:
                 value = float(item.text())
@@ -565,8 +560,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         qmin = self.q_range_min
         qmax = self.q_range_max
         params_to_fit = self.parameters_to_fit
-
-        print "OPTIMIZING: ", params_to_fit
 
         # Potential weights added directly to data
         self.addWeightingToData(data)
@@ -779,10 +772,17 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.iterateOverModel(updateFittedValues)
         self._poly_model.blockSignals(False)
 
-        return
+        #return
 
         if self.has_poly_error_column:
             return
+
+        # Duck type delegate variables
+        self.lstPoly.itemDelegate().POLY_MIN = 3
+        self.lstPoly.itemDelegate().POLY_MAX = 4
+        self.lstPoly.itemDelegate().POLY_NPTS = 5
+        self.lstPoly.itemDelegate().POLY_NSIGS = 6
+        self.lstPoly.itemDelegate().POLY_FUNCTION = 7
 
         error_column = []
         self.iterateOverModel(createErrorColumn)
@@ -1289,6 +1289,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Creates a checked row of for a polydisperse parameter
         """
+        # Not suitable for multishell
+        if '[' in param.name:
+            return
         # Values from the sasmodel
         width = self.kernel_module.getParam(param.name+'.width')
         npts = self.kernel_module.getParam(param.name+'.npts')
@@ -1305,7 +1308,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Default index
         func.setCurrentIndex(func.findText(DEFAULT_POLYDISP_FUNCTION))
         # Index in the view
-        func_index = self.lstPoly.model().index(row, 6)
+        #func_index = self.lstPoly.model().index(row, 6)
 
     def onPolyComboIndexChange(self, combo_string, row_index):
         """
@@ -1317,7 +1320,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         if combo_string == 'array':
             try:
                 self.loadPolydispArray()
-            except ValueError:
+            except (ValueError, IOError):
                 # Don't do anything if file lookup failed
                 return
             # disable the row
@@ -1368,7 +1371,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             return
         self._magnet_model.clear()
         [self.addCheckedMagneticListToModel(param, self._magnet_model) for param in \
-            self.model_parameters.call_parameters if param != 'magnetic']
+            self.model_parameters.call_parameters if param.type == 'magnetic']
         FittingUtilities.addHeadersToModel(self._magnet_model)
 
     def addCheckedMagneticListToModel(self, param, model):
