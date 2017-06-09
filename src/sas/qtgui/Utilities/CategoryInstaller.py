@@ -34,13 +34,13 @@ class CategoryInstaller:
         import sas.sascalc.dataloader.readers
         return sas.sascalc.dataloader.readers.get_data_path()
 
-    #@staticmethod
-    #def _get_models_py_dir():
-    #    """
-    #    returns the dir where models.py should be
-    #    """
-    #    import sas.sasgui.perspectives.fitting.models
-    #    return sas.sasgui.perspectives.fitting.models.get_model_python_path()
+    @staticmethod
+    def _get_models_py_dir():
+        """
+        returns the dir where models.py should be
+        """
+        import sas.sasgui.perspectives.fitting.models
+        return sas.sasgui.perspectives.fitting.models.get_model_python_path()
 
     @staticmethod
     def _get_default_cat_file_dir():

@@ -6,6 +6,7 @@ from PyQt4 import QtGui
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
+from sas.qtgui.Perspectives.Fitting import ModelUtilities
 
 class FittingWindow(QtGui.QTabWidget):
     """
@@ -42,6 +43,11 @@ class FittingWindow(QtGui.QTabWidget):
 
         # Perspective window not allowed to close by default
         self._allow_close = False
+
+        self.menu_manager = ModelUtilities.ModelManager()
+        # TODO: reuse these in FittingWidget properly
+        self.model_list_box = self.menu_manager.get_model_list()
+        self.model_dictionary = self.menu_manager.get_model_dictionary()
 
         self.setWindowTitle('Fit panel - Active Fitting Optimizer: %s' % self.optimizer)
 
