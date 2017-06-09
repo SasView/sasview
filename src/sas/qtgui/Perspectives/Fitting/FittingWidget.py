@@ -483,7 +483,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             parameter_name = parameter_name.rsplit()[-1]
 
         # Extract changed value.
-        if model_column == self.lstPoly.itemDelegate().POLY_PARAMETER:
+        if model_column == self.lstPoly.itemDelegate().poly_parameter:
             # Is the parameter checked for fitting?
             value = item.checkState()
             parameter_name = parameter_name+'.width'
@@ -493,7 +493,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
                 if parameter_name in self.parameters_to_fit:
                     self.parameters_to_fit.remove(parameter_name)
             return
-        elif model_column in [self.lstPoly.itemDelegate().POLY_MIN, self.lstPoly.itemDelegate().POLY_MAX]:
+        elif model_column in [self.lstPoly.itemDelegate().poly_min, self.lstPoly.itemDelegate().poly_max]:
             try:
                 value = float(item.text())
             except ValueError:
@@ -504,7 +504,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             # print "%s(%s) => %d" % (parameter_name, property_name, value)
             current_details = self.kernel_module.details[parameter_name]
             current_details[model_column-1] = value
-        elif model_column == self.lstPoly.itemDelegate().POLY_FUNCTION:
+        elif model_column == self.lstPoly.itemDelegate().poly_function:
             # name of the function - just pass
             return
         else:
@@ -518,7 +518,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             # Update the sasmodel
             # PD[ratio] -> width, npts -> npts, nsigs -> nsigmas
             self.kernel_module.setParam(parameter_name + '.' + \
-                                        self.lstPoly.itemDelegate().POLY_COLUMN_DICT[model_column], value)
+                                        self.lstPoly.itemDelegate().columnDict()[model_column], value)
 
     def onHelp(self):
         """
@@ -789,19 +789,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         if self.has_poly_error_column:
             return
 
-        # Duck type delegate variables
-        self.lstPoly.itemDelegate().POLY_MIN = 3
-        self.lstPoly.itemDelegate().POLY_MAX = 4
-        self.lstPoly.itemDelegate().POLY_NPTS = 5
-        self.lstPoly.itemDelegate().POLY_NSIGS = 6
-        self.lstPoly.itemDelegate().POLY_FUNCTION = 7
-        self.lstPoly.itemDelegate().POLY_COLUMN_DICT = {
-            2: 'width',
-            3: 'min',
-            4: 'max',
-            5: 'npts',
-            6: 'nsigmas'}
-
+        self.lstPoly.itemDelegate().addErrorColumn()
         error_column = []
         self.iterateOverModel(createErrorColumn)
 
@@ -1360,8 +1348,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         [self._poly_model.item(row_index, i).setEnabled(True) for i in xrange(6)]
         self._poly_model.blockSignals(False)
 
-        npts_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().POLY_NPTS)
-        nsigs_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().POLY_NSIGS)
+        npts_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_npts)
+        nsigs_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_nsigs)
 
         npts = POLYDISPERSITY_MODELS[str(combo_string)].default['npts']
         nsigs = POLYDISPERSITY_MODELS[str(combo_string)].default['nsigmas']

@@ -81,32 +81,53 @@ class PolyViewDelegate(QtGui.QStyledItemDelegate):
     """
     Custom delegate for appearance and behavior control of the polydispersity view
     """
-    # polydispersity functions
-    POLYDISPERSE_FUNCTIONS=['rectangle', 'array', 'lognormal', 'gaussian', 'schulz']
-    # polydispersity columns
-    POLY_PARAMETER=0
-    POLY_PD=1
-    POLY_MIN=2
-    POLY_MAX=3
-    POLY_NPTS=4
-    POLY_NSIGS=5
-    POLY_FUNCTION=6
-    POLY_EDITABLE_PARAMS = [POLY_MIN, POLY_MAX, POLY_NPTS, POLY_NSIGS]
-    POLY_COLUMN_DICT = {
-        POLY_PD:    'width',
-        POLY_MIN:   'min',
-        POLY_MAX:   'max',
-        POLY_NPTS:  'npts',
-        POLY_NSIGS: 'nsigmas'}
+    POLYDISPERSE_FUNCTIONS = ['rectangle', 'array', 'lognormal', 'gaussian', 'schulz']
 
     combo_updated = QtCore.pyqtSignal(str, int)
+
+    def __init__(self, parent=None):
+        """
+        Overwrite generic constructor to allow for some globals
+        """
+        super(QtGui.QStyledItemDelegate, self).__init__()
+
+        self.poly_parameter = 0
+        self.poly_pd = 1
+        self.poly_min = 2
+        self.poly_max = 3
+        self.poly_npts = 4
+        self.poly_nsigs = 5
+        self.poly_function = 6
+
+    def editableParameters(self):
+        return [self.poly_min, self.poly_max, self.poly_npts, self.poly_nsigs]
+
+    def columnDict(self):
+        return {self.poly_pd:    'width',
+                self.poly_min:   'min',
+                self.poly_max:   'max',
+                self.poly_npts:  'npts',
+                self.poly_nsigs: 'nsigmas'}
+
+    def addErrorColumn(self):
+        """
+        Modify local column pointers
+        Note: the reverse is never required!
+        """
+        self.poly_parameter = 0
+        self.poly_pd = 1
+        self.poly_min = 3
+        self.poly_max = 4
+        self.poly_npts = 5
+        self.poly_nsigs = 6
+        self.poly_function = 7
 
     def createEditor(self, widget, option, index):
         # Remember the current choice
         current_text = index.data().toString()
         if not index.isValid():
             return 0
-        if index.column() == self.POLY_FUNCTION:
+        if index.column() == self.poly_function:
             editor = QtGui.QComboBox(widget)
             for function in self.POLYDISPERSE_FUNCTIONS:
                 editor.addItem(function)
@@ -114,7 +135,7 @@ class PolyViewDelegate(QtGui.QStyledItemDelegate):
             editor.setCurrentIndex(current_index if current_index>-1 else 3)
             editor.currentIndexChanged.connect(lambda: self.combo_updated.emit(str(editor.currentText()), index.row()))
             return editor
-        elif index.column() in self.POLY_EDITABLE_PARAMS:
+        elif index.column() in self.editableParameters():
             editor = QtGui.QLineEdit(widget)
             validator = QtGui.QDoubleValidator()
             editor.setValidator(validator)
@@ -126,7 +147,7 @@ class PolyViewDelegate(QtGui.QStyledItemDelegate):
         """
         Overwrite generic painter for certain columns
         """
-        if index.column() in (self.POLY_MIN, self.POLY_MAX):
+        if index.column() in (self.poly_min, self.poly_max):
             # Units - present in nice HTML
             options = QtGui.QStyleOptionViewItemV4(option)
             self.initStyleOption(options,index)

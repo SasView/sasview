@@ -98,8 +98,8 @@ class FittingWidgetTest(unittest.TestCase):
         # test the delegate a bit
         delegate = fittingWindow.lstPoly.itemDelegate()
         self.assertEqual(len(delegate.POLYDISPERSE_FUNCTIONS), 5)
-        self.assertEqual(delegate.POLY_EDITABLE_PARAMS, [2, 3, 4, 5])
-        self.assertEqual(delegate.POLY_FUNCTION, 6)
+        self.assertEqual(delegate.editableParameters(), [2, 3, 4, 5])
+        self.assertEqual(delegate.poly_function, 6)
         self.assertIsInstance(delegate.combo_updated, QtCore.pyqtBoundSignal)
 
     def testSelectStructureFactor(self):
