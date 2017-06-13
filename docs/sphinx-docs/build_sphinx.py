@@ -65,6 +65,9 @@ SPHINX_SOURCE_MODELS = os.path.join(SPHINX_SOURCE, "user", "models")
 SPHINX_SOURCE_PERSPECTIVES = os.path.join(SPHINX_SOURCE, "user", "sasgui", "perspectives")
 SPHINX_SOURCE_TEST = os.path.join(SPHINX_SOURCE, "test")
 SPHINX_SOURCE_USER = os.path.join(SPHINX_SOURCE, "user")
+KATEX_PARENT = os.path.join(SPHINX_SOURCE, "_static")
+KATEX_PATH = os.path.join(KATEX_PARENT, "katex")
+KATEX_VERSION = "v0.7.1"  # https://github.com/khan/katex/releases
 
 BUMPS_DOCS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..",
                           "bumps", "doc", "guide")
@@ -97,6 +100,7 @@ def clean():
     _remove_dir(SASVIEW_DOCS)
     _remove_dir(SPHINX_BUILD)
     _remove_dir(SPHINX_SOURCE)
+    _remove_dir(KATEX_PATH)
     #_remove_dir(SPHINX_SOURCE_GUIFRAME)
     #_remove_dir(SPHINX_SOURCE_MODELS)
     #_remove_dir(SPHINX_SOURCE_PERSPECTIVES)
@@ -325,6 +329,22 @@ def retrieve_user_docs():
         print("!!!!NO MODEL DOCS WILL BE BUILT!!!!")
 
 
+def fetch_katex(version, destination="_static"):
+    from zipfile import ZipFile
+    import urllib2
+    url = "https://github.com/Khan/KaTeX/releases/download/%s/katex.zip" % version
+    cache_path = "katex_%s.zip" % version
+    if not os.path.exists(cache_path):
+        try:
+            fd_in = urllib2.urlopen(url)
+            with open(cache_path, "wb") as fd_out:
+                fd_out.write(fd_in.read())
+        finally:
+            fd_in.close()
+    with ZipFile(cache_path) as zip:
+        zip.extractall(destination)
+
+
 def retrieve_bumps_docs():
     """
     Copies select files from the bumps documentation into fitting perspective
@@ -380,6 +400,7 @@ def rebuild():
     setup_source_temp()
     retrieve_user_docs()
     retrieve_bumps_docs()
+    fetch_katex(version=KATEX_VERSION, destination=KATEX_PARENT)
     apidoc()
     build()
 

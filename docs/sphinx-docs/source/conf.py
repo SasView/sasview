@@ -34,9 +34,18 @@ print "\n".join(sys.path)
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.todo',
               'sphinx.ext.coverage',
-              'sphinx.ext.mathjax',
+              'mathjax',
               'dollarmath',
               'sphinx.ext.viewcode']
+
+STATIC_PATH = '../../_static/'
+mathjax_path = [
+    STATIC_PATH + 'katex/katex.min.js',
+    STATIC_PATH + 'katex/contrib/auto-render.min.js',
+    STATIC_PATH + 'rendermath.js'
+]
+mathjax_css = STATIC_PATH + 'katex/katex.min.css'
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
