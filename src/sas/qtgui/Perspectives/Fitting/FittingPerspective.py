@@ -3,9 +3,13 @@ import numpy
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 
+from bumps import options
+from bumps import fitters
+
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
+from sas.qtgui.Perspectives.Fitting.FittingOptions import FittingOptions
 from sas.qtgui.Perspectives.Fitting import ModelUtilities
 
 class FittingWindow(QtGui.QTabWidget):
@@ -44,12 +48,29 @@ class FittingWindow(QtGui.QTabWidget):
         # Perspective window not allowed to close by default
         self._allow_close = False
 
+        # Fit options - uniform for all tabs
+        self.fit_options = options.FIT_CONFIG
+        self.fit_options_widget = FittingOptions(self, config=self.fit_options)
+        self.fit_options.selected_id = fitters.LevenbergMarquardtFit.id
+
+        # Listen to GUI Manager signal updating fit options
+        self.fit_options_widget.fit_option_changed.connect(self.onFittingOptionsChange)
+
         self.menu_manager = ModelUtilities.ModelManager()
         # TODO: reuse these in FittingWidget properly
         self.model_list_box = self.menu_manager.get_model_list()
         self.model_dictionary = self.menu_manager.get_model_dictionary()
 
+        #self.setWindowTitle('Fit panel - Active Fitting Optimizer: %s' % self.optimizer)
+        self.updateWindowTitle()
+
+    def updateWindowTitle(self):
+        """
+        Update the window title with the current optimizer name
+        """
+        self.optimizer = self.fit_options.selected_name
         self.setWindowTitle('Fit panel - Active Fitting Optimizer: %s' % self.optimizer)
+
 
     def setClosable(self, value=True):
         """
@@ -136,3 +157,17 @@ class FittingWindow(QtGui.QTabWidget):
                 self.tabs[available_tabs.index(True)].data = data
             else:
                 self.addFit(data)
+
+    def onFittingOptionsChange(self, fit_engine, fit_options):
+        """
+        """
+        fitter = [f.id for f in options.FITTERS if f.name == str(fit_engine)][0]
+
+        # set the optimizer
+        self.fit_options.selected_id = str(fitter)
+        # set the options
+        #
+        # Update the title
+        self.updateWindowTitle()
+
+        pass

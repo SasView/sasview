@@ -611,7 +611,8 @@ class GuiManager(object):
     def actionFit_Options(self):
         """
         """
-        print("actionFit_Options TRIGGERED")
+        if getattr(self._current_perspective, "fit_options_widget"):
+            self._current_perspective.fit_options_widget.show()
         pass
 
     def actionFit_Results(self):
