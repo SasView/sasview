@@ -486,7 +486,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         if model_column == self.lstPoly.itemDelegate().poly_parameter:
             # Is the parameter checked for fitting?
             value = item.checkState()
-            parameter_name = parameter_name+'.width'
+            parameter_name = parameter_name + '.width'
             if value == QtCore.Qt.Checked:
                 self.parameters_to_fit.append(parameter_name)
             else:
@@ -500,8 +500,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
                 # Can't be converted properly, bring back the old value and exit
                 return
 
-            property_name = str(self._poly_model.headerData(model_column, 1).toPyObject()).lower() # Value, min, max, etc.
-            # print "%s(%s) => %d" % (parameter_name, property_name, value)
             current_details = self.kernel_module.details[parameter_name]
             current_details[model_column-1] = value
         elif model_column == self.lstPoly.itemDelegate().poly_function:
@@ -513,7 +511,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             except ValueError:
                 # Can't be converted properly, bring back the old value and exit
                 return
-            property_name = str(self._poly_model.headerData(model_column, 1).toPyObject()).lower() # Value, min, max, etc.
 
             # Update the sasmodel
             # PD[ratio] -> width, npts -> npts, nsigs -> nsigmas
@@ -1293,7 +1290,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
     def setPolyModelParameters(self, row, param):
         """
-        Creates a checked row of for a polydisperse parameter
+        Creates a checked row for a polydisperse parameter
         """
         # Not suitable for multishell
         if '[' in param.name:
@@ -1325,7 +1322,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         def updateFunctionCaption(row):
             # Utility function for update of polydispersity function name in the main model
-            param_name = str(self._model_model.item(row, 0).text())# +'.width'
+            param_name = str(self._model_model.item(row, 0).text())
             if param_name !=  param.name:
                 return
             # modify the param value
@@ -1367,7 +1364,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             self, "Choose a weight file", "", "All files (*.*)")
         if not datafile:
             logging.info("No weight data chosen.")
-            return
+            raise IOError
         values = []
         weights = []
         def appendData(data_tuple):
@@ -1385,6 +1382,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             column_data = [line.rstrip().split() for line in column_file.readlines()]
             [appendData(line) for line in column_data]
 
+        # If everything went well - update the sasmodel values
         self.disp_model = POLYDISPERSITY_MODELS['array']()
         self.disp_model.set_weights(np.array(values), np.array(weights))
 
