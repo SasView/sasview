@@ -1295,12 +1295,15 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Not suitable for multishell
         if '[' in param.name:
             return
-        # Values from the sasmodel
-        width = self.kernel_module.getParam(param.name+'.width')
-        npts = self.kernel_module.getParam(param.name+'.npts')
-        nsigs = self.kernel_module.getParam(param.name+'.nsigmas')
-        # Potential multishell params
-        checked_list = ["Distribution of "+param.name, str(width),
+        # Polydisp. values from the sasmodel
+        width = self.kernel_module.getParam(param.name + '.width')
+        npts = self.kernel_module.getParam(param.name + '.npts')
+        nsigs = self.kernel_module.getParam(param.name + '.nsigmas')
+
+        # Construct a row with polydisp. related variable.
+        # This will get added to the polydisp. model
+        # Note: last argument needs extra space padding for decent display of the control
+        checked_list = ["Distribution of " + param.name, str(width),
                         str(param.limits[0]), str(param.limits[1]),
                         str(npts), str(nsigs), "gaussian      "]
         FittingUtilities.addCheckedListToModel(self._poly_model, checked_list)
@@ -1308,16 +1311,14 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # All possible polydisp. functions as strings in combobox
         func = QtGui.QComboBox()
         func.addItems([str(name_disp) for name_disp in POLYDISPERSITY_MODELS.iterkeys()])
-        # Default index
+        # set the default index
         func.setCurrentIndex(func.findText(DEFAULT_POLYDISP_FUNCTION))
-        # Index in the view
-        #func_index = self.lstPoly.model().index(row, 6)
 
     def onPolyComboIndexChange(self, combo_string, row_index):
         """
         Modify polydisp. defaults on function choice
         """
-        # get npts/nsigs for current selection
+        # Get npts/nsigs for current selection
         param = self.model_parameters.form_volume_parameters[row_index]
 
         def updateFunctionCaption(row):
@@ -1325,7 +1326,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             param_name = str(self._model_model.item(row, 0).text())
             if param_name !=  param.name:
                 return
-            # modify the param value
+            # Modify the param value
             self._model_model.item(row, 0).child(0).child(0,4).setText(combo_string)
 
         if combo_string == 'array':
