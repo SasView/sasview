@@ -158,15 +158,13 @@ class FittingWindow(QtGui.QTabWidget):
             else:
                 self.addFit(data)
 
-    def onFittingOptionsChange(self, fit_engine, fit_options):
+    def onFittingOptionsChange(self, fit_engine):
         """
+        React to the fitting algorithm change by modifying window title
         """
         fitter = [f.id for f in options.FITTERS if f.name == str(fit_engine)][0]
-
         # set the optimizer
         self.fit_options.selected_id = str(fitter)
-        # set the options
-        #
         # Update the title
         self.updateWindowTitle()
 

@@ -8,6 +8,7 @@ from PyQt4 import QtGui
 from PyQt4 import QtCore
 
 from sas.qtgui.UI import main_resources_rc
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 from UI.SlitSizeCalculator import Ui_SlitSizeCalculator
 from sas.sascalc.dataloader.loader import Loader
@@ -44,7 +45,7 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
         documentation tree (after /doc/ ....".
         """
         try:
-            location = self._parent.HELP_DIRECTORY_LOCATION + \
+            location = GuiUtils.HELP_DIRECTORY_LOCATION + \
                 "/user/sasgui/perspectives/calculator/slit_calculator_help.html"
 
             self._parent._helpView.load(QtCore.QUrl(location))

@@ -44,9 +44,6 @@ class GuiManager(object):
     """
     Main SasView window functionality
     """
-    ## TODO: CHANGE FOR SHIPPED PATH IN RELEASE
-    HELP_DIRECTORY_LOCATION = "docs/sphinx-docs/build/html"
-
     def __init__(self, parent=None):
         """
         Initialize the manager as a child of MainWindow.
@@ -98,10 +95,10 @@ class GuiManager(object):
         # Current help file
         self._helpView = QtWebKit.QWebView()
         # Needs URL like path, so no path.join() here
-        self._helpLocation = self.HELP_DIRECTORY_LOCATION + "/index.html"
+        self._helpLocation = GuiUtils.HELP_DIRECTORY_LOCATION + "/index.html"
 
         # Current tutorial location
-        self._tutorialLocation = os.path.abspath(os.path.join(self.HELP_DIRECTORY_LOCATION,
+        self._tutorialLocation = os.path.abspath(os.path.join(GuiUtils.HELP_DIRECTORY_LOCATION,
                                               "_downloads",
                                               "Tutorial.pdf"))
     def addWidgets(self):

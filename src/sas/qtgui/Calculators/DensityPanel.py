@@ -7,6 +7,7 @@ from periodictable import formula as Formula
 
 from sas.qtgui.Utilities.GuiUtils import FormulaValidator
 from sas.qtgui.UI import main_resources_rc
+from sas.qtgui.Utilities.GuiUtils import HELP_DIRECTORY_LOCATION
 
 # Local UI
 from sas.qtgui.Calculators.UI.DensityPanel import Ui_DensityPanel
@@ -147,7 +148,7 @@ class DensityPanel(QtGui.QDialog):
 
     def displayHelp(self):
         try:
-            location = self.manager.HELP_DIRECTORY_LOCATION + \
+            location = HELP_DIRECTORY_LOCATION + \
                 "/user/sasgui/perspectives/calculator/density_calculator_help.html"
 
             self.manager._helpView.load(QtCore.QUrl(location))

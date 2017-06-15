@@ -6,7 +6,8 @@ from periodictable import formula as Formula
 from periodictable.xsf import xray_energy, xray_sld_from_atoms
 from periodictable.nsf import neutron_scattering
 
-from sas.qtgui.Utilities.GuiUtils import FormulaValidator
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+
 from sas.qtgui.UI import main_resources_rc
 
 # Local UI
@@ -124,7 +125,7 @@ class SldPanel(QtGui.QDialog):
         self.ui.setupUi(self)
 
         # set validators
-        self.ui.editMolecularFormula.setValidator(FormulaValidator(self.ui.editMolecularFormula))
+        self.ui.editMolecularFormula.setValidator(GuiUtils.FormulaValidator(self.ui.editMolecularFormula))
 
         rx = QtCore.QRegExp("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
         self.ui.editMassDensity.setValidator(QtGui.QRegExpValidator(rx, self.ui.editMassDensity))
@@ -215,7 +216,7 @@ class SldPanel(QtGui.QDialog):
 
     def displayHelp(self):
         try:
-            location = self.manager.HELP_DIRECTORY_LOCATION + \
+            location = GuiUtils.HELP_DIRECTORY_LOCATION + \
                 "/user/sasgui/perspectives/calculator/sld_calculator_help.html"
             self.manager._helpView.load(QtCore.QUrl(location))
             self.manager._helpView.show()

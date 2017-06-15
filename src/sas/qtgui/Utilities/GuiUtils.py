@@ -94,6 +94,9 @@ def _find_local_config(confg_file, path):
 PATH_APP = get_app_dir()
 DATAPATH = PATH_APP
 
+## TODO: CHANGE FOR SHIPPED PATH IN RELEASE
+HELP_DIRECTORY_LOCATION = "docs/sphinx-docs/build/html"
+
 # GUI always starts from the App folder
 #os.chdir(PATH_APP)
 # Read in the local config, which can either be with the main

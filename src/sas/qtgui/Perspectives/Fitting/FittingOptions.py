@@ -1,13 +1,16 @@
 # global
 import sys
 import os
+import types
+
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 from PyQt4 import QtWebKit
 
 from sas.qtgui.UI import images_rc
 from sas.qtgui.UI import main_resources_rc
-#from bumps.fitters import FITTERS, FIT_AVAILABLE_IDS, FIT_ACTIVE_IDS, FIT_DEFAULT_ID
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+
 from bumps import fitters
 import bumps.options
 
@@ -30,7 +33,7 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
         e.g.
         settings = [('steps', 1000), ('starts', 1), ('radius', 0.15), ('xtol', 1e-6), ('ftol', 1e-8)]
     """
-    fit_option_changed = QtCore.pyqtSignal(str, dict)
+    fit_option_changed = QtCore.pyqtSignal(str)
 
     def __init__(self, parent=None, config=None):
         super(FittingOptions, self).__init__(parent)
@@ -48,6 +51,8 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
 
         # Handle the Apply button click
         self.buttonBox.button(QtGui.QDialogButtonBox.Ok).clicked.connect(self.onApply)
+        # handle the Help button click
+        self.buttonBox.button(QtGui.QDialogButtonBox.Help).clicked.connect(self.onHelp)
 
         # Handle the combo box changes
         self.cbAlgorithm.currentIndexChanged.connect(self.onAlgorithmChange)
@@ -56,10 +61,32 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
         default_name = [n.name for n in fitters.FITTERS if n.id == fitters.FIT_DEFAULT_ID][0]
         default_index = self.cbAlgorithm.findText(default_name)
         self.cbAlgorithm.setCurrentIndex(default_index)
+
+        # Assign appropriate validators
+        self.assignValidators()
+
         self.current_fitter_id = fitters.FIT_DEFAULT_ID
 
-        # Fill in options for all active fitters
-        #[self.updateWidgetFromBumps(fitter_id) for fitter_id in fitters.FIT_ACTIVE_IDS]
+        # Display HTML content
+        self.helpView = QtWebKit.QWebView()
+
+    def assignValidators(self):
+        """
+        Use options.FIT_FIELDS to assert which line edit gets what validator
+        """
+        for option in bumps.options.FIT_FIELDS.iterkeys():
+            (f_name, f_type) = bumps.options.FIT_FIELDS[option]
+            validator = None
+            if type(f_type) == types.FunctionType:
+                validator = QtGui.QIntValidator()
+            elif f_type == types.FloatType:
+                validator = QtGui.QDoubleValidator()
+            else:
+                continue
+            for fitter_id in fitters.FIT_ACTIVE_IDS:
+                line_edit = self.widgetFromOption(str(option), current_fitter=str(fitter_id))
+                if hasattr(line_edit, 'setValidator') and validator is not None:
+                    line_edit.setValidator(validator)
 
     def onAlgorithmChange(self, index):
         """
@@ -74,33 +101,58 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
 
         # Convert the name into widget instance
         widget_to_activate = eval(widget_name)
+        index_for_this_id = self.stackedWidget.indexOf(widget_to_activate)
 
         # Select the requested widget
-        self.stackedWidget.setCurrentIndex(self.stackedWidget.indexOf(widget_to_activate))
+        self.stackedWidget.setCurrentIndex(index_for_this_id)
 
         self.updateWidgetFromBumps(self.current_fitter_id)
 
+        self.assignValidators()
+
     def onApply(self):
         """
-        Update the fitter object in perspective
+        Update the fitter object
         """
-        self.fit_option_changed.emit(self.cbAlgorithm.currentText(), {})
+        # Notify the perspective, so the window title is updated
+        self.fit_option_changed.emit(self.cbAlgorithm.currentText())
 
-        # or just do it locally
-        for option in self.config.values[self.current_fitter_id].iterkeys():
+        def bumpsUpdate(option):
+            """
+            Utility method for bumps state update
+            """
             widget = self.widgetFromOption(option)
-            new_value = ""
-            if isinstance(widget, QtGui.QComboBox):
-                new_value = widget.currentText()
-            else:
-                new_value = float(widget.text())
+            new_value = widget.currentText() if isinstance(widget, QtGui.QComboBox) \
+                else float(widget.text())
             self.config.values[self.current_fitter_id][option] = new_value
 
-    def widgetFromOption(self, option_id):
+        # Update the BUMPS singleton
+        [bumpsUpdate(o) for o in self.config.values[self.current_fitter_id].iterkeys()]
+
+    def onHelp(self):
+        """
+        Show the "Fitting options" section of help
+        """
+        tree_location = GuiUtils.HELP_DIRECTORY_LOCATION + "/user/sasgui/perspectives/fitting/"
+
+        # Actual file anchor will depend on the combo box index
+        # Note that we can be clusmy here, since bad current_fitter_id
+        # will just make the page displayed from the top
+        helpfile = "optimizer.html#fit-" + self.current_fitter_id 
+        help_location = tree_location + helpfile
+        self.helpView.load(QtCore.QUrl(help_location))
+        self.helpView.show()
+
+    def widgetFromOption(self, option_id, current_fitter=None):
         """
         returns widget's element linked to the given option_id
         """
-        return eval('self.' + option_id + '_' + self.current_fitter_id)
+        if current_fitter is None:
+            current_fitter = self.current_fitter_id
+        if option_id not in bumps.options.FIT_FIELDS.keys(): return None
+        option = option_id + '_' + current_fitter
+        if not hasattr(self, option): return None
+        return eval('self.' + option)
 
     def getResults(self):
         """
@@ -126,11 +178,3 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
                 eval(widget_name).setText(str(options[option]))
 
         pass
-
-    def updateBumpsOptions(self, optimizer_id):
-        """
-        Given the ID of the optimizer, gather widget's values
-        and update the bumps options
-        """
-        pass
-

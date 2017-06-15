@@ -137,7 +137,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Show the "Loading data" section of help
         """
-        tree_location = self.parent.HELP_DIRECTORY_LOCATION +\
+        tree_location = GuiUtils.HELP_DIRECTORY_LOCATION +\
             "/user/sasgui/guiframe/data_explorer_help.html"
         self._helpView.load(QtCore.QUrl(tree_location))
         self._helpView.show()

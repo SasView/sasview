@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>503</width>
-    <height>672</height>
+    <width>440</width>
+    <height>538</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,6 +26,12 @@
      <layout class="QGridLayout" name="gridLayout_9">
       <item row="0" column="0">
        <widget class="QComboBox" name="cbAlgorithm">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="sizeAdjustPolicy">
          <enum>QComboBox::AdjustToContents</enum>
         </property>

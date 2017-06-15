@@ -3,6 +3,7 @@ from PyQt4 import QtCore
 
 from sas.qtgui.UI import main_resources_rc
 from UI.KiessigPanel import Ui_KiessigPanel
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # sas-global
 from sas.sascalc.calculator.kiessig_calculator import KiessigThicknessCalculator
@@ -36,7 +37,7 @@ class KiessigPanel(QtGui.QDialog, Ui_KiessigPanel):
         documentation tree (after /doc/ ....".
         """
         try:
-            location = self.manager.HELP_DIRECTORY_LOCATION + \
+            location = GuiUtils.HELP_DIRECTORY_LOCATION + \
                 "/user/sasgui/perspectives/calculator/kiessig_calculator_help.html"
 
             self.manager._helpView.load(QtCore.QUrl(location))

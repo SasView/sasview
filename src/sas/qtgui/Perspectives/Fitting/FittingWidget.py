@@ -521,7 +521,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Show the "Fitting" section of help
         """
-        tree_location = self.parent.HELP_DIRECTORY_LOCATION + "/user/sasgui/perspectives/fitting/"
+        tree_location = GuiUtils.HELP_DIRECTORY_LOCATION + "/user/sasgui/perspectives/fitting/"
 
         # Actual file will depend on the current tab
         tab_id = self.tabFitting.currentIndex()

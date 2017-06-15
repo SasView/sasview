@@ -377,7 +377,7 @@ class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator)
         documentation tree (after /doc/ ....".
         """
         try:
-            location = self.manager.HELP_DIRECTORY_LOCATION + \
+            location = GuiUtils.HELP_DIRECTORY_LOCATION + \
                        "/user/sasgui/perspectives/calculator/sas_calculator_help.html"
             self.manager._helpView.load(QtCore.QUrl(location))
             self.manager._helpView.show()

@@ -367,7 +367,7 @@ class InvariantWindow(QtGui.QDialog, Ui_tabbedInvariantUI):
     def help(self):
         """
         """
-        _TreeLocation = self._manager.HELP_DIRECTORY_LOCATION + \
+        _TreeLocation = GuiUtils.HELP_DIRECTORY_LOCATION + \
             "/user/sasgui/perspectives/invariant/invariant_help.html"
         self._helpView.load(QtCore.QUrl(_TreeLocation))
         self._helpView.show()
