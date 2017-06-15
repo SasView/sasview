@@ -38,7 +38,8 @@ extensions = ['sphinx.ext.autodoc',
               'dollarmath',
               'sphinx.ext.viewcode']
 
-STATIC_PATH = '../../_static/'
+#STATIC_PATH = '../../_static/'
+STATIC_PATH = ''
 mathjax_path = [
     STATIC_PATH + 'katex/katex.min.js',
     STATIC_PATH + 'katex/contrib/auto-render.min.js',
