@@ -17,7 +17,7 @@ One way is obviously to just inspect the graph of the experimental data and to
 see how closely (or not!) the 'theory' calculation matches it. But *SasView*
 also provides two other measures of the quality of a fit:
 
-*  |chi|\  :sup:`2` (or 'Chi2'; pronounced 'chi-squared')
+*  $\chi^2$ (or 'Chi2'; pronounced 'chi-squared')
 *  *Residuals*
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
@@ -31,17 +31,19 @@ data set and an expected dataset (or 'theory').
 *SasView* actually returns this parameter normalized to the number of data points,
 *Npts* such that
 
-  *Chi2/Npts* = { SUM[(*Y_i* - *Y_theory_i*)^2 / (*Y_error_i*)^2] } / *Npts*
+.. math::
 
-This differs slightly from what is sometimes called the 'reduced chi-squared'
+  \chi^2/N_{pts} =  \sum[(Y_i - Y_{theory}_i)^2 / (Y_error_i)^2] / N_{pts}
+
+This differs slightly from what is sometimes called the 'reduced $\chi^2$'
 because it does not take into account the number of fitting parameters (to
-calculate the number of 'degrees of freedom'), but the 'normalized chi-squared'
-and the 'reduced chi-squared' are very close to each other when *Npts* >> number of
-parameters.
+calculate the number of 'degrees of freedom'), but the 'normalized $\chi^2$
+and the 'reduced $\chi^2$ are very close to each other when $N_{pts} \gg
+\text{number of parameters}.
 
-For a good fit, *Chi2/Npts* tends to 0.
+For a good fit, $\chi^2/N_{pts}$ tends to 1.
 
-*Chi2/Npts* is sometimes referred to as the 'goodness-of-fit' parameter.
+$\chi^2/N_{pts}$ is sometimes referred to as the 'goodness-of-fit' parameter.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -52,12 +54,14 @@ A residual is the difference between an observed value and an estimate of that
 value, such as a 'theory' calculation (whereas the difference between an observed
 value and its *true* value is its error).
 
-*SasView* calculates 'normalized residuals', *R_i*, for each data point in the
+*SasView* calculates 'normalized residuals', $R_i$, for each data point in the
 fit:
 
-  *R_i* = (*Y_i* - *Y_theory_i*) / (*Y_err_i*)
+.. math::
 
-For a good fit, *R_i* ~ 0.
+  R_i = (Y_i - Y_theory_i) / (Y_err_i)
+
+For a good fit, $R_i \sim 0$.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 

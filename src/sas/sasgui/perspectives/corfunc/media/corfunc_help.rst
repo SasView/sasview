@@ -70,7 +70,7 @@ Where :math:`Bg` is the background, :math:`K` is the Porod
 constant, and :math:`\sigma` (which must be > 0) describes the width of the electron or neutron scattering length density profile at the interface between the crystalline and amorphous
 regions as shown below.
 
-.. figure:: fig1.gif
+.. figure:: fig1.png
    :align: center
 
    
@@ -138,7 +138,7 @@ morphology, and structural parameters are obtained from it as shown below.
 It should be noted that a small beam size is assumed; ie, no de-smearing is
 performed.
 
-.. figure:: fig2.gif
+.. figure:: fig2.png
    :align: center
 
 The structural parameters obtained are:

@@ -3,15 +3,15 @@
 .. This is a port of the original SasView html help file to ReSTructured text
 .. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
 
-.. |inlineimage004| image:: sm_image004.gif
-.. |inlineimage005| image:: sm_image005.gif
-.. |inlineimage008| image:: sm_image008.gif
-.. |inlineimage009| image:: sm_image009.gif
-.. |inlineimage010| image:: sm_image010.gif
-.. |inlineimage011| image:: sm_image011.gif
-.. |inlineimage012| image:: sm_image012.gif
-.. |inlineimage018| image:: sm_image018.gif
-.. |inlineimage019| image:: sm_image019.gif
+.. |inlineimage004| image:: sm_image004.png
+.. |inlineimage005| image:: sm_image005.png
+.. |inlineimage008| image:: sm_image008.png
+.. |inlineimage009| image:: sm_image009.png
+.. |inlineimage010| image:: sm_image010.png
+.. |inlineimage011| image:: sm_image011.png
+.. |inlineimage012| image:: sm_image012.png
+.. |inlineimage018| image:: sm_image018.png
+.. |inlineimage019| image:: sm_image019.png
 
 
 Fitting
@@ -89,13 +89,13 @@ Category Manager
 To change the model categorizations, either choose *Category Manager* from the
 *View* option on the menubar, or click on the *Modify* button on the *Fit Page*.
 
-.. image:: cat_fig0.bmp
+.. image:: cat_fig0.png
 
 The categorization of all models except the user supplied Plugin Models can be
 reassigned, added to, and removed using *Category Manager*. Models can also be
 hidden from view in the drop-down menus.
 
-.. image:: cat_fig1.bmp
+.. image:: cat_fig1.png
 
 Changing category
 ^^^^^^^^^^^^^^^^^
@@ -104,7 +104,7 @@ To change category, highlight a model in the list by left-clicking on its entry
 and then click the *Modify* button. Use the *Change Category* panel that appears
 to make the required changes.
 
-.. image:: cat_fig2.bmp
+.. image:: cat_fig2.png
 
 To create a category for the selected model, click the *Add* button. In order
 to delete a category, select the category name and click the *Remove Selected*
@@ -178,7 +178,7 @@ New Plugin Model
 Relatively straightforward models can be programmed directly from the SasView
 GUI using the *New Plugin Model Function*.
 
-.. image:: new_model.bmp
+.. image:: new_model.png
 
 When using this feature, be aware that even if your code has errors, including 
 syntax errors, a model file is still generated. When you then correct the errors 
@@ -197,7 +197,7 @@ the :ref:`Advanced_Plugin_Editor` .
 Sum|Multi(p1,p2)
 ^^^^^^^^^^^^^^^^
 
-.. image:: sum_model.bmp
+.. image:: sum_model.png
 
 This option creates a custom Plugin Model of the form::
 
@@ -380,13 +380,13 @@ the corresponding uncertainties on the optimised values.
 *'correlated').*
 
 In the bottom left corner of the *Fit Page* is a box displaying the normalised value
-of the statistical |chi|\  :sup:`2` parameter returned by the optimiser.
+of the statistical $\chi^2$ parameter returned by the optimiser.
 
 Now check the box for another model parameter and click *Fit* again. Repeat this
 process until most or all parameters are checked and have been optimised. As the
 fit of the theory to the experimental data improves the value of 'chi2/Npts' will
 decrease. A good model fit should easily produce values of 'chi2/Npts' that are
-close to zero, and certainly <100. See :ref:`Assessing_Fit_Quality`.
+close to one, and certainly <100. See :ref:`Assessing_Fit_Quality`.
 
 SasView has a number of different optimisers (see the section :ref:`Fitting_Options`).
 The DREAM optimiser is the most sophisticated, but may not necessarily be the best
@@ -508,7 +508,7 @@ Method
 Now *Select All Data* in the *Data Explorer*, check the *Batch Mode* radio button
 at the bottom of that panel and *Send To Fitting*. A *BatchPage* will be created.
 
-.. image:: batch_button_area.bmp
+.. image:: batch_button_area.png
 
 *NB: The Batch Page can also be created by checking the Batch Mode radio button*
 *and selecting New Fit Page under Fitting in the menu bar.*
@@ -530,7 +530,7 @@ a *Data set* in the *Grid Window* and then click the *View Fits* button. The
 data and the model fit will be displayed. If you select mutliple data sets they
 will all appear on one graph.
 
-.. image:: view_button.bmp
+.. image:: view_button.png
 
 *NB: In theory, returning to the BatchPage and changing the name of the I(Q)*
 *data source should also work, but at the moment whilst this does change the*
@@ -566,7 +566,7 @@ It will be displayed automatically when a batch fit completes, but may be
 opened at any time by selecting *Show Grid Window* under *View* in the menu
 bar.
 
-.. image:: restore_batch_window.bmp
+.. image:: restore_batch_window.png
 
 Once a batch fit is completed, all model parameters are displayed but *not*
 their uncertainties. To view the uncertainties, click on a given column then
@@ -582,7 +582,7 @@ allows you to re-order columns.
 All of the above functions are also available by right-clicking on a column
 label.
 
-.. image:: edit_menu.bmp
+.. image:: edit_menu.png
 
 *NB: If there is an existing Grid Window and another batch fit is performed,*
 *an additional 'Table' tab will be added to the Grid Window.*
@@ -595,7 +595,7 @@ batch fit was performed.
 Saved CSV files can be reloaded by choosing *Open* under *File* in the *Grid*
 *Window* menu bar. The loaded parameters will appear in a new table tab.
 
-.. image:: file_menu.bmp
+.. image:: file_menu.png
 
 *NB: Saving the Grid Window does not save any experimental data, residuals*
 *or actual model fits. Consequently if you reload a saved CSV file the*
@@ -613,7 +613,7 @@ When the *Add* button is clicked, *SasView* also automatically completes the
 *X/Y-axis Label* text box with the heading from Row 1 of the selected table,
 but different labels and units can be entered manually.
 
-.. image:: plot_button.bmp
+.. image:: plot_button.png
 
 The *X/Y-axis Selection Range* can be edited manually. The text control box
 recognises the operators +, -, \*, /, or 'pow', and allows the following
