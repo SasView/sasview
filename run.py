@@ -50,6 +50,7 @@ def cd(path):
 
 def import_package(modname, path):
     """Import a package into a particular point in the python namespace"""
+    #logger.debug("Dynamicly importing: %s", path)
     mod = imp.load_source(modname, abspath(joinpath(path, '__init__.py')))
     sys.modules[modname] = mod
     mod.__path__ = [abspath(path)]
