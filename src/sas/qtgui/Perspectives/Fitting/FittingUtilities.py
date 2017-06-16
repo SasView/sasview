@@ -287,8 +287,13 @@ def residualsData1D(reference_data, current_data):
         residuals.y = -y
     else:
         # TODO: fix case where applying new data from file on top of existing model data
-        y = (fn - gn[index][0]) / en
-        residuals.y = y
+        try:
+            y = (fn - gn[index][0]) / en
+            residuals.y = y
+        except ValueError:
+            # value errors may show up every once in a while for malformed columns,
+            # just reuse what's there already
+            pass
 
     residuals.x = current_data.x[index][0]
     residuals.dy = numpy.ones(len(residuals.y))
