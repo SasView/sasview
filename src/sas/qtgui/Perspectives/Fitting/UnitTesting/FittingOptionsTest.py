@@ -61,6 +61,20 @@ class FittingOptionsTest(unittest.TestCase):
         self.assertIsInstance(self.widget.ftol_de.validator(), QtGui.QDoubleValidator)
         self.assertIsInstance(self.widget.xtol_de.validator(), QtGui.QDoubleValidator)
 
+        # bottom value for floats and ints
+        self.assertEqual(self.widget.steps_de.validator().bottom(), 0)
+        self.assertEqual(self.widget.CR_de.validator().bottom(), 0)
+
+        # Behaviour on empty cell
+        self.widget.onAlgorithmChange(3)
+        self.widget.steps_de.setText("")
+        # This should disable the OK button
+        self.assertFalse(self.widget.buttonBox.button(QtGui.QDialogButtonBox.Ok).isEnabled())
+        # Let's put some valid value in lineedit
+        self.widget.steps_de.setText("1")
+        # This should enable the OK button
+        self.assertTrue(self.widget.buttonBox.button(QtGui.QDialogButtonBox.Ok).isEnabled())
+
     def testOnAlgorithmChange(self):
         '''Test the combo box change callback'''
         # Current ID

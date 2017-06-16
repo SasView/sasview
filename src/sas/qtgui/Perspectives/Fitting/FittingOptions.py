@@ -19,6 +19,7 @@ from sas.qtgui.Perspectives.Fitting.UI.FittingOptionsUI import Ui_FittingOptions
 # Set the default optimizer
 fitters.FIT_DEFAULT_ID = 'lm'
 
+
 class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
     """
     Hard-coded version of the fit options dialog available from BUMPS.
@@ -65,7 +66,11 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
         # Assign appropriate validators
         self.assignValidators()
 
+        # Set defaults
         self.current_fitter_id = fitters.FIT_DEFAULT_ID
+
+        # OK has to be initialized to True, after initial validator setup
+        self.buttonBox.button(QtGui.QDialogButtonBox.Ok).setEnabled(True)
 
         # Display HTML content
         self.helpView = QtWebKit.QWebView()
@@ -79,14 +84,31 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
             validator = None
             if type(f_type) == types.FunctionType:
                 validator = QtGui.QIntValidator()
+                validator.setBottom(0)
             elif f_type == types.FloatType:
                 validator = QtGui.QDoubleValidator()
+                validator.setBottom(0)
             else:
                 continue
             for fitter_id in fitters.FIT_ACTIVE_IDS:
                 line_edit = self.widgetFromOption(str(option), current_fitter=str(fitter_id))
                 if hasattr(line_edit, 'setValidator') and validator is not None:
                     line_edit.setValidator(validator)
+                    line_edit.textChanged.connect(self.check_state)
+                    line_edit.textChanged.emit(line_edit.text())
+
+    def check_state(self, *args, **kwargs):
+        sender = self.sender()
+        validator = sender.validator()
+        state = validator.validate(sender.text(), 0)[0]
+        if state == QtGui.QValidator.Acceptable:
+            color = '' # default
+            self.buttonBox.button(QtGui.QDialogButtonBox.Ok).setEnabled(True)
+        else:
+            color = '#fff79a' # yellow
+            self.buttonBox.button(QtGui.QDialogButtonBox.Ok).setEnabled(False)
+
+        sender.setStyleSheet('QLineEdit { background-color: %s }' % color)
 
     def onAlgorithmChange(self, index):
         """

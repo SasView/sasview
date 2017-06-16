@@ -44,6 +44,7 @@ from Perspectives.Fitting.UnitTesting import FittingPerspectiveTest
 from Perspectives.Fitting.UnitTesting import FittingLogicTest
 from Perspectives.Fitting.UnitTesting import FittingUtilitiesTest
 from Perspectives.Fitting.UnitTesting import FitPageTest
+from Perspectives.Fitting.UnitTesting import FittingOptionsTest
 
 
 def suite():
@@ -89,6 +90,7 @@ def suite():
         unittest.makeSuite(FittingLogicTest.FittingLogicTest,             'test'),
         unittest.makeSuite(FittingUtilitiesTest.FittingUtilitiesTest,     'test'),
         unittest.makeSuite(FitPageTest.FitPageTest,                       'test'),
+        unittest.makeSuite(FittingOptionsTest.FittingOptionsTest,         'test'),
     )
     return unittest.TestSuite(suites)
 

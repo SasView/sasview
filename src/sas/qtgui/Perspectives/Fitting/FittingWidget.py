@@ -1362,10 +1362,13 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         Show the load file dialog and loads requested data into state
         """
         datafile = QtGui.QFileDialog.getOpenFileName(
-            self, "Choose a weight file", "", "All files (*.*)")
-        if not datafile:
+            self, "Choose a weight file", "", "All files (*.*)",
+            None, QtGui.QFileDialog.DontUseNativeDialog)
+
+        if datafile is None:
             logging.info("No weight data chosen.")
             raise IOError
+
         values = []
         weights = []
         def appendData(data_tuple):
