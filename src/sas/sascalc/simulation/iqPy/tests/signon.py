@@ -10,23 +10,25 @@
 # 
 #  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 
+from __future__ import print_function
+
 
 if __name__ == "__main__":
 
     import iqPy
     from iqPy import iqPy as iqPymodule
 
-    print "copyright information:"
-    print "   ", iqPy.copyright()
-    print "   ", iqPymodule.copyright()
+    print("copyright information:")
+    print("   ", iqPy.copyright())
+    print("   ", iqPymodule.copyright())
 
-    print
-    print "module information:"
-    print "    file:", iqPymodule.__file__
-    print "    doc:", iqPymodule.__doc__
-    print "    contents:", dir(iqPymodule)
+    print()
+    print("module information:")
+    print("    file:", iqPymodule.__file__)
+    print("    doc:", iqPymodule.__doc__)
+    print("    contents:", dir(iqPymodule))
 
-    print
+    print()
 
 # version
 __id__ = "$Id$"

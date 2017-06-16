@@ -36,6 +36,8 @@ class SectorInteractor(_BaseInteractor):
         self.theta2 = math.pi / 3
         ## Absolute value of the Angle between the middle line and any side line
         self.phi = math.pi / 12
+        # Binning base for log/lin binning
+        self.bin_base = 0
         ## Middle line
         self.main_line = LineInteractor(self, self.base.subplot, color='blue',
                                         zorder=zorder, r=self.qmax,
@@ -143,18 +145,19 @@ class SectorInteractor(_BaseInteractor):
         ## get the data2D to average
         data = self.base.data2D
         # If we have no data, just return
-        if data == None:
+        if data is None:
             return
         ## Averaging
         from sas.sascalc.dataloader.manipulations import SectorQ
         radius = self.qmax
         phimin = -self.left_line.phi + self.main_line.theta
         phimax = self.left_line.phi + self.main_line.theta
-        if nbins == None:
+        bin_base = self.bin_base
+        if nbins is None:
             nbins = 20
         sect = SectorQ(r_min=0.0, r_max=radius,
                        phi_min=phimin + math.pi,
-                       phi_max=phimax + math.pi, nbins=nbins)
+                       phi_max=phimax + math.pi, nbins=nbins, base=bin_base)
 
         sector = sect(self.base.data2D)
         ##Create 1D data resulting from average
@@ -238,6 +241,7 @@ class SectorInteractor(_BaseInteractor):
         params["Phi [deg]"] = self.main_line.theta * 180 / math.pi
         params["Delta_Phi [deg]"] = math.fabs(self.left_line.phi * 180 / math.pi)
         params["nbins"] = self.nbins
+        params["binning base"] = self.bin_base
         return params
 
     def set_params(self, params):
@@ -251,6 +255,7 @@ class SectorInteractor(_BaseInteractor):
         main = params["Phi [deg]"] * math.pi / 180
         phi = math.fabs(params["Delta_Phi [deg]"] * math.pi / 180)
         self.nbins = int(params["nbins"])
+        self.bin_base = params["binning base"]
         self.main_line.theta = main
         ## Reset the slicer parameters
         self.main_line.update()
@@ -361,9 +366,9 @@ class SideInteractor(_BaseInteractor):
         #print "update left or right ", self.has_move
         self.left_moving = left
         theta3 = 0
-        if phi != None:
+        if phi is not None:
             self.phi = phi
-        if delta == None:
+        if delta is None:
             delta = 0
         if  right:
             self.phi = -1 * math.fabs(self.phi)
@@ -373,7 +378,7 @@ class SideInteractor(_BaseInteractor):
         if side:
             self.theta = mline.theta + self.phi
 
-        if mline != None:
+        if mline is not None:
             if delta != 0:
                 self.theta2 = mline + delta
             else:
@@ -537,7 +542,7 @@ class LineInteractor(_BaseInteractor):
         Draw the new roughness on the graph.
         """
 
-        if theta != None:
+        if theta is not None:
             self.theta = theta
         x1 = self.radius * math.cos(self.theta)
         y1 = self.radius * math.sin(self.theta)

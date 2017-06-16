@@ -45,7 +45,8 @@ class cansas_reader_xml(unittest.TestCase):
         self.isis_1_1_doubletrans = "ISIS_1_1_doubletrans.xml"
         self.schema_1_0 = "cansas1d_v1_0.xsd"
         self.schema_1_1 = "cansas1d_v1_1.xsd"
-
+        self.write_1_0_filename = "isis_1_0_write_test.xml"
+        self.write_1_1_filename = "isis_1_1_write_test.xml"
 
     def get_number_of_entries(self, dictionary, name, i):
         if dictionary.get(name) is not None:
@@ -55,14 +56,12 @@ class cansas_reader_xml(unittest.TestCase):
             name = self.get_number_of_entries(dictionary, name, i)
         return name
 
-
     def test_invalid_xml(self):
         """
         Should fail gracefully and send a message to logger.info()
         """
         invalid = StringIO.StringIO('<a><c></b></a>')
-        reader = XMLreader(invalid)
-
+        XMLreader(invalid)
 
     def test_xml_validate(self):
         string = "<xsd:schema xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\n"
@@ -81,7 +80,6 @@ class cansas_reader_xml(unittest.TestCase):
         self.assertTrue(xmlschema.validate(valid))
         self.assertFalse(xmlschema.validate(invalid))
 
-
     def test_real_xml(self):
         reader = XMLreader(self.xml_valid, self.schema_1_0)
         valid = reader.validate_xml()
@@ -89,7 +87,6 @@ class cansas_reader_xml(unittest.TestCase):
             self.assertTrue(valid)
         else:
             self.assertFalse(valid)
-
 
     def _check_data(self, data):
         self.assertTrue(data.title == "TK49 c10_SANS")
@@ -102,22 +99,17 @@ class cansas_reader_xml(unittest.TestCase):
         self.assertTrue(data.detector[0].distance == 575.0)
         self.assertAlmostEqual(data.detector[1].distance, 4145.02)
         self.assertTrue(data.process[0].name == "Mantid generated CanSAS1D XML")
-        self.assertTrue(data.meta_data["xmlpreprocess"] != None)
-
+        self.assertTrue(data.meta_data["xmlpreprocess"] is not None)
 
     def _check_data_1_1(self, data):
         spectrum = data.trans_spectrum[0]
         self.assertTrue(len(spectrum.wavelength) == 138)
 
-
     def test_cansas_xml(self):
-        filename = "isis_1_1_write_test.xml"
         xmlreader = XMLreader(self.isis_1_1, self.schema_1_1)
         valid = xmlreader.validate_xml()
         xmlreader.set_processing_instructions()
         self.assertTrue(valid)
-        fo = open(self.isis_1_1)
-        str = fo.read()
         reader_generic = Loader()
         dataloader = reader_generic.load(self.isis_1_1)
         reader_cansas = Reader()
@@ -127,14 +119,14 @@ class cansas_reader_xml(unittest.TestCase):
             self._check_data_1_1(dataloader[i])
             self._check_data(cansasreader[i])
             self._check_data_1_1(cansasreader[i])
-            reader_generic.save(filename, dataloader[i], None)
-            fo = open(filename)
-            str = fo.read()
+            reader_generic.save(self.write_1_1_filename, dataloader[i], None)
             reader2 = Loader()
-            return_data = reader2.load(filename)
+            self.assertTrue(os.path.isfile(self.write_1_1_filename))
+            return_data = reader2.load(self.write_1_1_filename)
             written_data = return_data[0]
             self._check_data(written_data)
-
+        if os.path.isfile(self.write_1_1_filename):
+            os.remove(self.write_1_1_filename)
 
     def test_double_trans_spectra(self):
         xmlreader = XMLreader(self.isis_1_1_doubletrans, self.schema_1_1)
@@ -143,7 +135,6 @@ class cansas_reader_xml(unittest.TestCase):
         data = reader.load(self.isis_1_1_doubletrans)
         for item in data:
             self._check_data(item)
-
 
     def test_entry_name_recurse(self):
         test_values = [1,2,3,4,5,6]
@@ -154,9 +145,7 @@ class cansas_reader_xml(unittest.TestCase):
             d[new_key] = value
         self.assertTrue(len(d) == 6)
 
-
     def test_load_cansas_file(self):
-        valid = []
         reader1 = XMLreader(self.xml_valid, self.schema_1_0)
         self.assertTrue(reader1.validate_xml())
         reader2 = XMLreader(self.xml_invalid, self.schema_1_0)
@@ -172,7 +161,6 @@ class cansas_reader_xml(unittest.TestCase):
         reader7 = XMLreader(self.isis_1_1, self.schema_1_0)
         self.assertFalse(reader7.validate_xml())
 
-
     def test_invalid_cansas(self):
         list = self.loader.load(self.cansas1d_notitle)
         data = list[0]
@@ -183,12 +171,11 @@ class cansas_reader_xml(unittest.TestCase):
         self.assertTrue(data.detector[0].name == "fictional hybrid")
         self.assertTrue(data.detector[0].distance == 4150)
 
-
     def test_old_cansas_files(self):
         reader1 = XMLreader(self.cansas1d, self.schema_1_0)
         self.assertTrue(reader1.validate_xml())
         file_loader = Loader()
-        file1 = file_loader.load(self.cansas1d)
+        file_loader.load(self.cansas1d)
         reader2 = XMLreader(self.cansas1d_units, self.schema_1_0)
         self.assertTrue(reader2.validate_xml())
         reader3 = XMLreader(self.cansas1d_badunits, self.schema_1_0)
@@ -196,9 +183,7 @@ class cansas_reader_xml(unittest.TestCase):
         reader4 = XMLreader(self.cansas1d_slit, self.schema_1_0)
         self.assertTrue(reader4.validate_xml())
 
-
     def test_save_cansas_v1_0(self):
-        filename = "isis_1_0_write_test.xml"
         xmlreader = XMLreader(self.isis_1_0, self.schema_1_0)
         valid = xmlreader.validate_xml()
         self.assertTrue(valid)
@@ -209,21 +194,23 @@ class cansas_reader_xml(unittest.TestCase):
         for i in range(len(dataloader)):
             self._check_data(dataloader[i])
             self._check_data(cansasreader[i])
-            reader_generic.save(filename, dataloader[i], None)
+            reader_generic.save(self.write_1_0_filename, dataloader[i], None)
             reader2 = Reader()
-            return_data = reader2.read(filename)
+            self.assertTrue(os.path.isfile(self.write_1_0_filename))
+            return_data = reader2.read(self.write_1_0_filename)
             written_data = return_data[0]
-            xmlwrite = XMLreader(filename, self.schema_1_0)
+            XMLreader(self.write_1_0_filename, self.schema_1_0)
             valid = xmlreader.validate_xml()
             self.assertTrue(valid)
             self._check_data(written_data)
-
+        if os.path.isfile(self.write_1_0_filename):
+            os.remove(self.write_1_0_filename)
 
     def test_processing_instructions(self):
         reader = XMLreader(self.isis_1_1, self.schema_1_1)
         valid = reader.validate_xml()
         if valid:
-            ## find the processing instructions and make into a dictionary
+            # find the processing instructions and make into a dictionary
             dic = self.get_processing_instructions(reader)
             self.assertTrue(dic == {'xml-stylesheet': \
                                     'type="text/xsl" href="cansas1d.xsl" '})
@@ -231,10 +218,9 @@ class cansas_reader_xml(unittest.TestCase):
             xml = "<test><a><b><c></c></b></a></test>"
             xmldoc = minidom.parseString(xml)
 
-            ## take the processing instructions and put them back in
+            # take the processing instructions and put them back in
             xmldoc = self.set_processing_instructions(xmldoc, dic)
-            xml_output = xmldoc.toprettyxml()
-
+            xmldoc.toprettyxml()
 
     def set_processing_instructions(self, minidom_object, dic):
         xmlroot = minidom_object.firstChild
@@ -242,7 +228,6 @@ class cansas_reader_xml(unittest.TestCase):
             pi = minidom_object.createProcessingInstruction(item, dic[item])
             minidom_object.insertBefore(pi, xmlroot)
         return minidom_object
-
 
     def get_processing_instructions(self, xml_reader_object):
         dict = {}

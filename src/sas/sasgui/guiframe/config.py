@@ -1,6 +1,8 @@
 """
     Application settings
 """
+from __future__ import print_function
+
 import time
 import os
 from sas.sasgui.guiframe.gui_style import GUIFRAME
@@ -48,7 +50,7 @@ _acknowledgement_citation = \
 '''M. Doucet et al. SasView Version 4.1, Zenodo, 10.5281/zenodo.438138'''
 
 _acknowledgement =  \
-'''This work was originally developed as part of the DANSE project funded by the US NSF under Award DMR-0520547,\n but is currently maintained by a collaboration between UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft, DLS, and the scattering community.\n\n SasView also contains code developed with funding from the EU Horizon 2020 programme under the SINE2020 project (Grant No 654000).\nA list of individual contributors can be found at: https://github.com/orgs/SasView/people
+'''This work was originally developed as part of the DANSE project funded by the US NSF under Award DMR-0520547,\n but is currently maintained by a collaboration between UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft, DLS, and the scattering community.\n\n SasView also contains code developed with funding from the EU Horizon 2020 programme under the SINE2020 project (Grant No 654000).\nA list of individual contributors can be found at: http://www.sasview.org/contact.html
 '''
 
 _homepage = "http://www.sasview.org"
@@ -149,7 +151,7 @@ def printEVT(message):
         """
         :TODO - Need method doc string
         """
-        print "%g:  %s" % (time.clock(), message)
+        print("%g:  %s" % (time.clock(), message))
 
         if __EVT_DEBUG_2_FILE__:
             out = open(__EVT_DEBUG_FILENAME__, 'a')

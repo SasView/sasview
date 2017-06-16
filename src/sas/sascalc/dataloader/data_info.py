@@ -15,6 +15,7 @@
 #copyright 2008, University of Tennessee
 ######################################################################
 
+from __future__ import print_function
 
 #TODO: Keep track of data manipulation in the 'process' data structure.
 #TODO: This module should be independent of plottables. We should write
@@ -805,12 +806,12 @@ class Data1D(plottable_1D, DataInfo):
             # Check that the other data set has errors, otherwise
             # create zero vector
             dy_other = other.dy
-            if other.dy == None or (len(other.dy) != len(other.y)):
+            if other.dy is None or (len(other.dy) != len(other.y)):
                 dy_other = np.zeros(len(other.y))
 
         # Check that we have errors, otherwise create zero vector
         dy = self.dy
-        if self.dy == None or (len(self.dy) != len(self.y)):
+        if self.dy is None or (len(self.dy) != len(self.y)):
             dy = np.zeros(len(self.y))
 
         return dy, dy_other
@@ -821,11 +822,11 @@ class Data1D(plottable_1D, DataInfo):
         # First, check the data compatibility
         dy, dy_other = self._validity_check(other)
         result = self.clone_without_data(len(self.x))
-        if self.dxw == None:
+        if self.dxw is None:
             result.dxw = None
         else:
             result.dxw = np.zeros(len(self.x))
-        if self.dxl == None:
+        if self.dxl is None:
             result.dxl = None
         else:
             result.dxl = np.zeros(len(self.x))
@@ -883,19 +884,19 @@ class Data1D(plottable_1D, DataInfo):
         # First, check the data compatibility
         self._validity_check_union(other)
         result = self.clone_without_data(len(self.x) + len(other.x))
-        if self.dy == None or other.dy is None:
+        if self.dy is None or other.dy is None:
             result.dy = None
         else:
             result.dy = np.zeros(len(self.x) + len(other.x))
-        if self.dx == None or other.dx is None:
+        if self.dx is None or other.dx is None:
             result.dx = None
         else:
             result.dx = np.zeros(len(self.x) + len(other.x))
-        if self.dxw == None or other.dxw is None:
+        if self.dxw is None or other.dxw is None:
             result.dxw = None
         else:
             result.dxw = np.zeros(len(self.x) + len(other.x))
-        if self.dxl == None or other.dxl is None:
+        if self.dxl is None or other.dxl is None:
             result.dxl = None
         else:
             result.dxl = np.zeros(len(self.x) + len(other.x))
@@ -906,7 +907,7 @@ class Data1D(plottable_1D, DataInfo):
         result.x = result.x[ind]
         result.y = np.append(self.y, other.y)
         result.y = result.y[ind]
-        if result.dy != None:
+        if result.dy is not None:
             result.dy = np.append(self.dy, other.dy)
             result.dy = result.dy[ind]
         if result.dx is not None:
@@ -1029,13 +1030,13 @@ class Data2D(plottable_2D, DataInfo):
 
             # Check that the scales match
             err_other = other.err_data
-            if other.err_data == None or \
+            if other.err_data is None or \
                 (len(other.err_data) != len(other.data)):
                 err_other = np.zeros(len(other.data))
 
         # Check that we have errors, otherwise create zero vector
         err = self.err_data
-        if self.err_data == None or \
+        if self.err_data is None or \
             (len(self.err_data) != len(self.data)):
             err = np.zeros(len(other.data))
         return err, err_other
@@ -1050,7 +1051,7 @@ class Data2D(plottable_2D, DataInfo):
         # First, check the data compatibility
         dy, dy_other = self._validity_check(other)
         result = self.clone_without_data(np.size(self.data))
-        if self.dqx_data == None or self.dqy_data == None:
+        if self.dqx_data is None or self.dqy_data is None:
             result.dqx_data = None
             result.dqy_data = None
         else:
@@ -1124,8 +1125,8 @@ class Data2D(plottable_2D, DataInfo):
         result.xmax = self.xmax
         result.ymin = self.ymin
         result.ymax = self.ymax
-        if self.dqx_data == None or self.dqy_data == None or \
-                other.dqx_data == None or other.dqy_data == None:
+        if self.dqx_data is None or self.dqy_data is None or \
+                other.dqx_data is None or other.dqy_data is None:
             result.dqx_data = None
             result.dqy_data = None
         else:

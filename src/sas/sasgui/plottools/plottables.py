@@ -228,11 +228,11 @@ class Graph(object):
         for p in self.plottables:
             if p.hidden == True:
                 continue
-            if not p.x == None:
+            if p.x is not None:
                 for x_i in p.x:
-                    if min_value == None or x_i < min_value:
+                    if min_value is None or x_i < min_value:
                         min_value = x_i
-                    if max_value == None or x_i > max_value:
+                    if max_value is None or x_i > max_value:
                         max_value = x_i
         return min_value, max_value
 
@@ -561,8 +561,8 @@ class Plottable(object):
         """
         Returns True if there is no data stored in the plottable
         """
-        if not self.x == None and len(self.x) == 0 \
-            and not self.y == None and len(self.y) == 0:
+        if (self.x is not None and len(self.x) == 0
+            and self.y is not None and len(self.y) == 0):
             return True
         return False
 
@@ -678,11 +678,11 @@ class View(object):
         """
         # Sanity check
         # Do the transofrmation only when x and y are empty
-        has_err_x = not (dx == None or len(dx) == 0)
-        has_err_y = not (dy == None or len(dy) == 0)
+        has_err_x = not (dx is None or len(dx) == 0)
+        has_err_y = not (dy is None or len(dy) == 0)
 
-        if(x != None) and (y != None):
-            if not dx == None and not len(dx) == 0 and not len(x) == len(dx):
+        if(x is not None) and (y is not None):
+            if dx is not None and not len(dx) == 0 and not len(x) == len(dx):
                 msg = "Plottable.View: Given x and dx are not"
                 msg += " of the same length"
                 raise ValueError, msg
@@ -692,7 +692,7 @@ class View(object):
                 msg += "and x are not of the same length"
                 raise ValueError, msg
 
-            if not dy == None and not len(dy) == 0 and not len(y) == len(dy):
+            if dy is not None and not len(dy) == 0 and not len(y) == len(dy):
                 msg = "Plottable.View: Given y and dy are not of the same "
                 msg += "length: len(y)=%s, len(dy)=%s" % (len(y), len(dy))
                 raise ValueError, msg
@@ -796,9 +796,9 @@ class View(object):
         tempdx = []
         tempy = []
         tempdy = []
-        if self.dx == None:
+        if self.dx is None:
             self.dx = np.zeros(len(self.x))
-        if self.dy == None:
+        if self.dy is None:
             self.dy = np.zeros(len(self.y))
         if self.xLabel == "log10(x)":
             for i in range(len(self.x)):
@@ -826,9 +826,9 @@ class View(object):
         tempdx = []
         tempy = []
         tempdy = []
-        if self.dx == None:
+        if self.dx is None:
             self.dx = np.zeros(len(self.x))
-        if self.dy == None:
+        if self.dy is None:
             self.dy = np.zeros(len(self.y))
         if self.yLabel == "log10(y)":
             for i in range(len(self.x)):
@@ -859,11 +859,11 @@ class View(object):
         tempdx = []
         tempy = []
         tempdy = []
-        if self.dx == None:
+        if self.dx is None:
             self.dx = np.zeros(len(self.x))
-        if self.dy == None:
+        if self.dy is None:
             self.dy = np.zeros(len(self.y))
-        if xmin != None and xmax != None:
+        if xmin is not None and xmax is not None:
             for i in range(len(self.x)):
                 if self.x[i] >= xmin and self.x[i] <= xmax:
                     tempx.append(self.x[i])
@@ -1205,7 +1205,7 @@ class Chisq(Plottable):
     def render(self, plot, **kw):
         """
         """
-        if  self._chisq == None:
+        if  self._chisq is None:
             chisqTxt = r'$\chi^2=$'
         else:
             chisqTxt = r'$\chi^2=%g$' % (float(self._chisq))

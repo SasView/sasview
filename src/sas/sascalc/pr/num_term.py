@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import math
 import numpy as np
 import copy
@@ -66,7 +68,7 @@ class NTermEstimator(object):
         self.err_list = []
         self.alpha_list = []
         for k in range(self.nterm_min, self.nterm_max, 1):
-            if self.isquit_func != None:
+            if self.isquit_func is not None:
                 self.isquit_func()
             best_alpha, message, _ = inver.estimate_alpha(k)
             inver.alpha = best_alpha
@@ -158,7 +160,7 @@ def load(path):
     data_err = np.zeros(0)
     scale = None
     min_err = 0.0
-    if not path == None:
+    if path is not None:
         input_f = open(path, 'r')
         buff = input_f.read()
         lines = buff.split('\n')
@@ -170,7 +172,7 @@ def load(path):
                 if len(toks) > 2:
                     err = float(toks[2])
                 else:
-                    if scale == None:
+                    if scale is None:
                         scale = 0.05 * math.sqrt(test_y)
                         #scale = 0.05/math.sqrt(y)
                         min_err = 0.01 * y
@@ -196,4 +198,4 @@ if __name__ == "__main__":
     invert.err = erro
     # Testing estimator
     est = NTermEstimator(invert)
-    print est.num_terms()
+    print(est.num_terms())

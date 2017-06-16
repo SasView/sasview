@@ -182,12 +182,12 @@ class ModelPanel1D(PlotPanel, PanelBase):
         # It was found that wx >= 2.9.3 sends an event even if no size changed.
         # So manually recode the size (=x_size) and compare here.
         # Massy code to work around:<
-        if self.parent._mgr != None:
+        if self.parent._mgr is not None:
             max_panel = self.parent._mgr.GetPane(self)
             if max_panel.IsMaximized():
                 self.parent._mgr.RestorePane(max_panel)
                 max_panel.Maximize()
-        if self.x_size != None:
+        if self.x_size is not None:
             if self.x_size == self.GetSize():
                 self.resizing = False
                 self.canvas.set_resizing(self.resizing)
@@ -211,11 +211,11 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         On Qmin Qmax vertical line event
         """
-        if event == None:
+        if event is None:
             return
         event.Skip()
         active_ctrl = event.active
-        if active_ctrl == None:
+        if active_ctrl is None:
             return
         if hasattr(event, 'is_corfunc'):
             self.is_corfunc = event.is_corfunc
@@ -230,7 +230,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             if len(ctrl) == 3:
                 colors.append('purple')
                 values.append(min(x_data.max(), float(ctrl[2].GetValue())))
-            if self.ly == None:
+            if self.ly is None:
                 self.ly = []
                 for c, v in zip(colors, values):
                     h = self.subplot.axvline(x=v, color=c, lw=2.5, alpha=0.7)
@@ -240,7 +240,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 # Display x,y in the status bar if possible
                 xval = float(active_ctrl.GetValue())
                 position = self.get_data_xy_vals(xval)
-                if position != None and not self.is_corfunc:
+                if position is not None and not self.is_corfunc:
                     wx.PostEvent(self.parent, StatusEvent(status=position))
             except:
                 logger.error(sys.exc_value)
@@ -335,13 +335,13 @@ class ModelPanel1D(PlotPanel, PanelBase):
         ax = event.inaxes
         if hasattr(event, "action"):
             dclick = event.action == 'dclick'
-            if ax == None or dclick:
+            if ax is None or dclick:
                 # remove the vline
                 self._check_zoom_plot()
                 self.canvas.draw()
                 self.q_ctrl = None
                 return
-        if self.ly != None and event.xdata != None:
+        if self.ly is not None and event.xdata is not None:
             # Selecting a new line if cursor lines are displayed already
             dqmin = math.fabs(event.xdata - self.ly[0].get_xdata())
             dqmax = math.fabs(event.xdata - self.ly[1].get_xdata())
@@ -360,18 +360,18 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         Move the cursor line to write Q range
         """
-        if self.q_ctrl == None:
+        if self.q_ctrl is None:
             return
         # release a q range vline
-        if self.ly != None and not self.leftdown:
+        if self.ly is not None and not self.leftdown:
             for ly in self.ly:
                 ly.set_alpha(0.7)
                 self.canvas.draw()
             return
         ax = event.inaxes
-        if ax == None or not hasattr(event, 'action'):
+        if ax is None or not hasattr(event, 'action'):
             return
-        end_drag = event.action != 'drag' and event.xdata != None
+        end_drag = event.action != 'drag' and event.xdata is not None
         nop = len(self.plots)
         pos_x, _ = float(event.xdata), float(event.ydata)
         try:
@@ -513,7 +513,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self._get_cusor_lines(event)
         ax = event.inaxes
         PlotPanel.onLeftDown(self, event)
-        if ax != None:
+        if ax is not None:
             try:
                 pos_x = float(event.xdata)  # / size_x
                 pos_y = float(event.ydata)  # / size_y
@@ -617,9 +617,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
 
             # add menu of other plugins
             item_list = self.parent.get_current_context_menu(self)
-            if (not item_list == None) and (not len(item_list) == 0):
+            if (item_list is not None) and (len(item_list)):
                 for item, wx_id in zip(item_list, [ids.next() for i in range(len(item_list))]):
-
                     try:
                         plot_menu.Append(wx_id, item[0], name)
                         wx.EVT_MENU(self, wx_id, item[2])
@@ -683,7 +682,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self._slicerpop.AppendSeparator()
 
 
-        if self.position != None:
+        if self.position is not None:
             wx_id = ids.next()
             self._slicerpop.Append(wx_id, '&Add Text')
             wx.EVT_MENU(self, wx_id, self._on_addtext)
@@ -760,7 +759,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         if default_name.count('.') > 0:
             default_name = default_name.split('.')[0]
         default_name += "_out"
-        if self.parent != None:
+        if self.parent is not None:
             self.parent.save_data1d(data, default_name)
 
     def _onDataShow(self, evt):
@@ -778,7 +777,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         if default_name.count('.') > 0:
             default_name = default_name.split('.')[0]
         # default_name += "_out"
-        if self.parent != None:
+        if self.parent is not None:
             self.parent.show_data1d(data, default_name)
 
     def _on_hide(self, event):
@@ -810,7 +809,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         curr_size = self.appearance_selected_plot.markersize
         curr_label = self.appearance_selected_plot.label
 
-        if curr_color == None:
+        if curr_color is None:
             curr_color = self._color_labels['Blue']
             curr_symbol = 13
 

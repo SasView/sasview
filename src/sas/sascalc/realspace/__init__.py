@@ -1,13 +1,13 @@
 """
     Real-Space Modeling for SAS
-""" 
+"""
 ## \mainpage Real-Space Modeling for SAS
 #
 # \section intro_sec Introduction
-# This module provides SAS scattering intensity simulation 
+# This module provides SAS scattering intensity simulation
 # based on real-space modeling.
 #
-# Documentation can be found here: 
+# Documentation can be found here:
 #    http://danse.us/trac/sas/wiki/RealSpaceModeling
 #
 # \section install_sec Installation
@@ -36,7 +36,7 @@
 # \endverbatim
 #
 # \section overview_sec Package Overview
-# 
+#
 # \subsection class Class Diagram:
 # \image html real-space-class-diagram.png
 #
@@ -77,4 +77,3 @@
 #
 # \section help_sec Contact Info
 # Code and Documentation by Jing Zhou as part of the DANSE project.
-

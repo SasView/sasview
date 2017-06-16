@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import inspect
 import wx
 from wx import Timer
@@ -28,7 +30,7 @@ def NewId():
         tag = " via CallLater"
     else:
         tag = ""
-    print "NewId %d from %s(%d):%s%s"%(id, path, line, function, tag)
+    print("NewId %d from %s(%d):%s%s"%(id, path, line, function, tag))
     return id
 
 def _get_caller(distance=0):

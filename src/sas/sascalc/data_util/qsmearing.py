@@ -41,9 +41,9 @@ def smear_selection(data, model = None):
     # object, just return None
     # This checks for 2D data (does not throw exception because fail is common)
     if  data.__class__.__name__ not in ['Data1D', 'Theory1D']:
-        if data == None:
+        if data is None:
             return None
-        elif data.dqx_data == None or data.dqy_data == None:
+        elif data.dqx_data is None or data.dqy_data is None:
             return None
         return PySmear2D(data)
     # This checks for 1D data with smearing info in the data itself (again, fail is likely; no exceptions)
@@ -64,13 +64,18 @@ def smear_selection(data, model = None):
         if np.size(data.dx[data.dx <= 0]) > 0:
             raise ValueError('one or more of your dx values are negative, please check the data file!')
 
-    if _found_sesans == True:
-        #Pre-compute the Hankel matrix (H)
-        qmax, qunits = data.sample.zacceptance
+    if _found_sesans:
+        # Pre-compute the Hankel matrix (H)
         SElength = Converter(data._xunit)(data.x, "A")
-        zaccept = Converter(qunits)(qmax, "1/A"),
+
+        theta_max = Converter("radians")(data.sample.zacceptance)[0]
+        q_max = 2 * np.pi / np.max(data.source.wavelength) * np.sin(theta_max)
+        zaccept = Converter("1/A")(q_max, "1/" + data.source.wavelength_unit),
+
         Rmax = 10000000
-        hankel = SesansTransform(data.x, SElength, zaccept, Rmax)
+        hankel = SesansTransform(data.x, SElength,
+                                 data.source.wavelength,
+                                 zaccept, Rmax)
         # Then return the actual transform, as if it were a smearing function
         return PySmear(hankel, model, offset=0)
 
