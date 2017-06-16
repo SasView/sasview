@@ -373,11 +373,37 @@ def apidoc():
                      "-d", "8", # Max depth of TOC.
                      SASVIEW_BUILD])
 
+def build_pdf():
+    """
+    Runs sphinx-build for pdf.  Reads in all .rst files and spits out the final html.
+    """
+    print("=== Build PDF Docs from ReST Files ===")
+    subprocess.call(["sphinx-build",
+                     "-b", "latex", # Builder name. TODO: accept as arg to setup.py.
+                     "-d", os.path.join(SPHINX_BUILD, "doctrees"),
+                     SPHINX_SOURCE,
+                     os.path.join(SPHINX_BUILD, "latex")])
+
+    LATEXDIR = os.path.join(SPHINX_BUILD, "latex")
+    def pdflatex():
+        subprocess.call(["pdflatex", "Sasview.tex"], cwd=LATEXDIR)
+    pdflatex()
+    pdflatex()
+    pdflatex()
+    subprocess.call(["makeindex", "-s", "python.ist", "Sasview.idx"], cwd=LATEXDIR)
+    pdflatex()
+    pdflatex()
+
+    print("=== Copy PDF to HTML Directory ===")
+    source = os.path.join(LATEXDIR, "Sasview.pdf")
+    target = os.path.join(SASVIEW_DOCS, "Sasview.pdf")
+    shutil.copyfile(source, target)
+
 def build():
     """
     Runs sphinx-build.  Reads in all .rst files and spits out the final html.
     """
-    print("=== Build HTML Docs from Rest Files ===")
+    print("=== Build HTML Docs from ReST Files ===")
     subprocess.call(["sphinx-build",
                      "-b", "html", # Builder name. TODO: accept as arg to setup.py.
                      "-d", os.path.join(SPHINX_BUILD, "doctrees"),
@@ -388,6 +414,10 @@ def build():
     html = os.path.join(SPHINX_BUILD, "html")
     copy_tree(html, SASVIEW_DOCS)
 
+def convert_katex():
+    print("=== Preprocess HTML, converting latex to html ===")
+    subprocess.call(["node", "convertKaTex.js", SASVIEW_DOCS])
+
 def rebuild():
     clean()
     setup_source_temp()
@@ -396,6 +426,8 @@ def rebuild():
     fetch_katex(version=KATEX_VERSION, destination=KATEX_PARENT)
     apidoc()
     build()
+    #build_pdf()
+    #convert_katex()
 
     print("=== Done ===")
 
