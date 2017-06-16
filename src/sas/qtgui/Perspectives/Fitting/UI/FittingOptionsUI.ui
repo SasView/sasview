@@ -67,7 +67,11 @@
               </widget>
              </item>
              <item row="0" column="1">
-              <widget class="QLineEdit" name="samples_dream"/>
+              <widget class="QLineEdit" name="samples_dream">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of points to be drawn from the Markov chain.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
              </item>
              <item row="1" column="0">
               <widget class="QLabel" name="label_2">
@@ -77,7 +81,11 @@
               </widget>
              </item>
              <item row="1" column="1">
-              <widget class="QLineEdit" name="burn_dream"/>
+              <widget class="QLineEdit" name="burn_dream">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The number of iterations to required for the Markov chain to converge to the equilibrium distribution.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
              </item>
              <item row="2" column="0">
               <widget class="QLabel" name="label_3">
@@ -87,7 +95,11 @@
               </widget>
              </item>
              <item row="2" column="1">
-              <widget class="QLineEdit" name="pop_dream"/>
+              <widget class="QLineEdit" name="pop_dream">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The size of the population.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
              </item>
              <item row="3" column="0">
               <widget class="QLabel" name="label_4">
@@ -98,6 +110,9 @@
              </item>
              <item row="3" column="1">
               <widget class="QComboBox" name="init_dream">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Initializer&lt;/span&gt; determines how the population will be initialized. The options are as follows:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;eps&lt;/span&gt; (epsilon ball), in which the entire initial population is chosen at random from within a tiny hypersphere centered about the initial point&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;lhs&lt;/span&gt; (latin hypersquare), which chops the bounds within each dimension in &lt;span style=&quot; font-weight:600;&quot;&gt;k&lt;/span&gt; equal sized chunks where &lt;span style=&quot; font-weight:600;&quot;&gt;k&lt;/span&gt; is the size of the population and makes sure that each parameter has at least one value within each chunk across the population.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;cov&lt;/span&gt; (covariance matrix), in which the uncertainty is estimated using the covariance matrix at the initial point, and points are selected at random from the corresponding gaussian ellipsoid&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;random&lt;/span&gt; (uniform random), in which the points are selected at random within the bounds of the parameters&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <item>
                 <property name="text">
                  <string>eps</string>
@@ -128,7 +143,11 @@
               </widget>
              </item>
              <item row="4" column="1">
-              <widget class="QLineEdit" name="thin_dream"/>
+              <widget class="QLineEdit" name="thin_dream">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The amount of thinning to use when collecting the population.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
              </item>
              <item row="5" column="0">
               <widget class="QLabel" name="label_6">
@@ -138,7 +157,11 @@
               </widget>
              </item>
              <item row="5" column="1">
-              <widget class="QLineEdit" name="steps_dream"/>
+              <widget class="QLineEdit" name="steps_dream">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Determines the number of iterations to use for drawing samples after burn in.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -174,7 +197,11 @@
               </widget>
              </item>
              <item row="0" column="1">
-              <widget class="QLineEdit" name="steps_lm"/>
+              <widget class="QLineEdit" name="steps_lm">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The number of gradient steps to take.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
              </item>
              <item row="1" column="0">
               <widget class="QLabel" name="label_8">
@@ -184,7 +211,11 @@
               </widget>
              </item>
              <item row="1" column="1">
-              <widget class="QLineEdit" name="ftol_lm"/>
+              <widget class="QLineEdit" name="ftol_lm">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Used to determine when the fit has reached the point where no significant improvement is expected.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
              </item>
              <item row="2" column="0">
               <widget class="QLabel" name="label_9">
@@ -194,7 +225,11 @@
               </widget>
              </item>
              <item row="2" column="1">
-              <widget class="QLineEdit" name="xtol_lm"/>
+              <widget class="QLineEdit" name="xtol_lm">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Used to determine when the fit has reached the point where no significant improvement is expected.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -230,7 +265,11 @@
               </widget>
              </item>
              <item row="0" column="1">
-              <widget class="QLineEdit" name="steps_newton"/>
+              <widget class="QLineEdit" name="steps_newton">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The number of gradient steps to take.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
              </item>
              <item row="1" column="0">
               <widget class="QLabel" name="label_13">
@@ -240,7 +279,11 @@
               </widget>
              </item>
              <item row="1" column="1">
-              <widget class="QLineEdit" name="starts_newton"/>
+              <widget class="QLineEdit" name="starts_newton">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Value thattells the optimizer to restart a given number of times. Each time it restarts it uses a random starting point.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
              </item>
              <item row="2" column="0">
               <widget class="QLabel" name="label_11">
@@ -250,7 +293,11 @@
               </widget>
              </item>
              <item row="2" column="1">
-              <widget class="QLineEdit" name="ftol_newton"/>
+              <widget class="QLineEdit" name="ftol_newton">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Used to determine when the fit has reached the point where no significant improvement is expected.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
              </item>
              <item row="3" column="0">
               <widget class="QLabel" name="label_12">
@@ -260,7 +307,11 @@
               </widget>
              </item>
              <item row="3" column="1">
-              <widget class="QLineEdit" name="xtol_newton"/>
+              <widget class="QLineEdit" name="xtol_newton">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Used to determine when the fit has reached the point where no significant improvement is expected.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -296,7 +347,11 @@
               </widget>
              </item>
              <item row="0" column="1">
-              <widget class="QLineEdit" name="steps_de"/>
+              <widget class="QLineEdit" name="steps_de">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The number of iterations.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
              </item>
              <item row="1" column="0">
               <widget class="QLabel" name="label_15">
@@ -316,7 +371,11 @@
               </widget>
              </item>
              <item row="2" column="1">
-              <widget class="QLineEdit" name="CR_de"/>
+              <widget class="QLineEdit" name="CR_de">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The size of the population.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
              </item>
              <item row="3" column="0">
               <widget class="QLabel" name="label_19">
@@ -326,7 +385,11 @@
               </widget>
              </item>
              <item row="3" column="1">
-              <widget class="QLineEdit" name="F_de"/>
+              <widget class="QLineEdit" name="F_de">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Determines how much to scale each difference vector before adding it to the candidate point.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
              </item>
              <item row="4" column="0">
               <widget class="QLabel" name="label_16">
@@ -336,7 +399,11 @@
               </widget>
              </item>
              <item row="4" column="1">
-              <widget class="QLineEdit" name="ftol_de"/>
+              <widget class="QLineEdit" name="ftol_de">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Used to determine when the fit has reached the point where no significant improvement is expected.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
              </item>
              <item row="5" column="0">
               <widget class="QLabel" name="label_17">
@@ -346,7 +413,11 @@
               </widget>
              </item>
              <item row="5" column="1">
-              <widget class="QLineEdit" name="xtol_de"/>
+              <widget class="QLineEdit" name="xtol_de">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Used to determine when the fit has reached the point where no significant improvement is expected.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -382,7 +453,11 @@
               </widget>
              </item>
              <item row="0" column="1">
-              <widget class="QLineEdit" name="steps_amoeba"/>
+              <widget class="QLineEdit" name="steps_amoeba">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The number of simplex update iterations to perform.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
              </item>
              <item row="1" column="0">
               <widget class="QLabel" name="label_21">
@@ -392,7 +467,11 @@
               </widget>
              </item>
              <item row="1" column="1">
-              <widget class="QLineEdit" name="starts_amoeba"/>
+              <widget class="QLineEdit" name="starts_amoeba">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tells the optimizer to restart a given number of times. Each time it restarts it uses a random starting point.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
              </item>
              <item row="2" column="0">
               <widget class="QLabel" name="label_22">
@@ -402,7 +481,11 @@
               </widget>
              </item>
              <item row="2" column="1">
-              <widget class="QLineEdit" name="radius_amoeba"/>
+              <widget class="QLineEdit" name="radius_amoeba">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The initial size of the simplex, as a portion of the bounds defining the parameter space.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
              </item>
              <item row="3" column="0">
               <widget class="QLabel" name="label_24">
@@ -412,7 +495,11 @@
               </widget>
              </item>
              <item row="3" column="1">
-              <widget class="QLineEdit" name="ftol_amoeba"/>
+              <widget class="QLineEdit" name="ftol_amoeba">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Used to determine when the fit has reached the point where no significant improvement is expected. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
              </item>
              <item row="4" column="0">
               <widget class="QLabel" name="label_25">
@@ -422,7 +509,11 @@
               </widget>
              </item>
              <item row="4" column="1">
-              <widget class="QLineEdit" name="xtol_amoeba"/>
+              <widget class="QLineEdit" name="xtol_amoeba">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Used to determine when the fit has reached the point where no significant improvement is expected. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>

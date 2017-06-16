@@ -383,7 +383,7 @@
   </action>
   <action name="actionFit_Options">
    <property name="text">
-    <string>Fit Options</string>
+    <string>Fit Algorithms</string>
    </property>
   </action>
   <action name="actionFit_Results">

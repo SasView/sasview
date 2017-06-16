@@ -45,7 +45,7 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
         # no reason to have this widget resizable
         self.setFixedSize(self.minimumSizeHint())
 
-        self.setWindowTitle("Fitting Options")
+        self.setWindowTitle("Fit Algorithms")
 
         # Fill up the algorithm combo, based on what BUMPS says is available
         self.cbAlgorithm.addItems([n.name for n in fitters.FITTERS if n.id in fitters.FIT_ACTIVE_IDS])

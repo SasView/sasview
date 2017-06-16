@@ -32,7 +32,7 @@ class FittingOptionsTest(unittest.TestCase):
         '''Test the GUI in its default state'''
         self.assertIsInstance(self.widget, QtGui.QDialog)
         # Default title
-        self.assertEqual(self.widget.windowTitle(), "Fitting Options")
+        self.assertEqual(self.widget.windowTitle(), "Fit Algorithms")
 
         # The combo box
         self.assertIsInstance(self.widget.cbAlgorithm, QtGui.QComboBox)
