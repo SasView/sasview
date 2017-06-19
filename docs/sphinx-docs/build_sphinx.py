@@ -323,21 +323,6 @@ def retrieve_user_docs():
         print("no source directory",SASMODELS_SOURCE_MODELS,"was found.")
         print("!!!!NO MODEL DOCS WILL BE BUILT!!!!")
 
-def fetch_katex(version, destination="_static"):
-    from zipfile import ZipFile
-    import urllib2
-    url = "https://github.com/Khan/KaTeX/releases/download/%s/katex.zip" % version
-    cache_path = "katex_%s.zip" % version
-    if not os.path.exists(cache_path):
-        try:
-            fd_in = urllib2.urlopen(url)
-            with open(cache_path, "wb") as fd_out:
-                fd_out.write(fd_in.read())
-        finally:
-            fd_in.close()
-    with ZipFile(cache_path) as zip:
-        zip.extractall(destination)
-
 def retrieve_bumps_docs():
     """
     Copies select files from the bumps documentation into fitting perspective
@@ -414,20 +399,45 @@ def build():
     html = os.path.join(SPHINX_BUILD, "html")
     copy_tree(html, SASVIEW_DOCS)
 
+def fetch_katex(version, destination="_static"):
+    from zipfile import ZipFile
+    import urllib2
+    url = "https://github.com/Khan/KaTeX/releases/download/%s/katex.zip" % version
+    cache_path = "katex_%s.zip" % version
+    if not os.path.exists(cache_path):
+        try:
+            fd_in = urllib2.urlopen(url)
+            with open(cache_path, "wb") as fd_out:
+                fd_out.write(fd_in.read())
+        finally:
+            fd_in.close()
+    with ZipFile(cache_path) as zip:
+        zip.extractall(destination)
+
 def convert_katex():
     print("=== Preprocess HTML, converting latex to html ===")
     subprocess.call(["node", "convertKaTex.js", SASVIEW_DOCS])
+
+def convert_mathjax():
+    print("=== Preprocess HTML, converting latex to html ===")
+    subprocess.call(["node", "convertMathJax.js", SASVIEW_DOCS])
+
+def fetch_mathjax():
+    subprocess.call(["npm", "install", "mathjax-node-page"])
+    # TODO: copy fonts from node_modules/mathjax/fonts/HTML-CSS/Tex into static
 
 def rebuild():
     clean()
     setup_source_temp()
     retrieve_user_docs()
     retrieve_bumps_docs()
-    fetch_katex(version=KATEX_VERSION, destination=KATEX_PARENT)
+    #fetch_katex(version=KATEX_VERSION, destination=KATEX_PARENT)
+    #fetch_mathjax()
     apidoc()
     build()
     #build_pdf()
     #convert_katex()
+    #convert_mathjax()
 
     print("=== Done ===")
 

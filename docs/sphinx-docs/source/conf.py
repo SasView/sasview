@@ -34,10 +34,17 @@ print "\n".join(sys.path)
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.todo',
               'sphinx.ext.coverage',
-              'mathjax',
+              'sphinx.ext.mathjax',
+              #'mathjax',  # replacement mathjax that allows a list of paths
               'dollarmath',
               'sphinx.ext.viewcode']
 
+mathjax_path = (
+    'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?'
+    'config=TeX-MML-AM_CHTML')
+
+# For katex uncomment the following
+"""
 #STATIC_PATH = '../../_static/'
 STATIC_PATH = ''
 mathjax_path = [
@@ -46,6 +53,7 @@ mathjax_path = [
     STATIC_PATH + 'rendermath.js'
 ]
 mathjax_css = STATIC_PATH + 'katex/katex.min.css'
+"""
 
 
 # Add any paths that contain templates here, relative to this directory.
@@ -210,16 +218,17 @@ html_add_permalinks = ""
 
 # -- Options for LaTeX output --------------------------------------------------
 
+# TODO: seems like angstroms is defined twice.
 LATEX_PREAMBLE=r"""
-\renewcommand{\AA}{\text{\r{A}}} % Allow \AA in math mode
 \usepackage[utf8]{inputenc}      % Allow unicode symbols in text
-\usepackage[T1]{fontenc}      % Taking care of underscores
-\catcode`\_=12                % Moving underscore to category 12
-\newcommand{\lt}{<}           %lower than symbol handling
-\newcommand{\gt}{>}           %greater than symbol handling
+\usepackage{underscore}          % Allow underscore outside math mode
+\usepackage[T1]{fontenc}         % Use underscore character from font
+\newcommand{\lt}{<}              % HTML needs \lt rather than <
+\newcommand{\gt}{>}              % HTML needs \gt rather than >
+\renewcommand{\AA}{\text{\r{A}}} % Allow \AA in math mode
+\DeclareUnicodeCharacter {212B} {\AA}                  % Angstrom
 \DeclareUnicodeCharacter {00B7} {\ensuremath{\cdot}}   % cdot
 \DeclareUnicodeCharacter {00B0} {\ensuremath{^\circ}}  % degrees
-\DeclareUnicodeCharacter {212B} {\AA}                  % Angstrom
 """
 latex_elements = {
 # The paper size ('letterpaper' or 'a4paper').

@@ -104,8 +104,10 @@ def setup(app):
     # more information for mathjax secure url is here:
     # http://docs.mathjax.org/en/latest/start.html#secure-access-to-the-cdn
     app.add_config_value('mathjax_path',
-                         'https://cdn.mathjax.org/mathjax/latest/MathJax.js?'
-                         'config=TeX-AMS-MML_HTMLorMML', False)
+                         'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?'
+                         'config=TeX-MML-AM_CHTML',
+                         #'config=TeX-AMS-MML_HTMLorMML',
+                         False)
     app.add_config_value('mathjax_css', None, 'html')
     app.add_config_value('mathjax_use_katex', False, 'html')
     app.add_config_value('mathjax_inline', [r'\(', r'\)'], 'html')
