@@ -61,7 +61,8 @@ function writeFileAsync(path, data) {
 
 const pageConfig = {
     format: ["TeX"],
-    output: 'html',
+    //output: 'html',
+    output: 'svg',
     fontURL: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js/fonts/HTML-CSS',
     MathJax: {
             //config: ["MMLorHTML.js"],
@@ -102,10 +103,14 @@ function mjpageAsync(input, pageConfig, mjnodeConfig) {
     );
 }
 async function updateHtmlAsync(path) {
+  try {
     console.log("====> processing", path);
     const input = await readFileAsync(path);
     const output = await mjpageAsync(input, pageConfig, mjnodeConfig);
     return await writeFileAsync(path, output);
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 async function processTreeAsync(dir) {

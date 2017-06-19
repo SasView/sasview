@@ -96,9 +96,9 @@ class DocumentationWindow(wx.Frame):
             url = "index.html"
             logger.error("Could not find Sphinx documentation at %s \
             -- has it been built?", file_path)
-        elif True:
+        elif False:
             start_documentation_server(docs_path, port=7999)
-            url = "http://localhost:7999/" + path.replace('\\', '/') + url_instruction
+            url = "http://127.0.0.1:7999/" + path.replace('\\', '/') + url_instruction
         else:
             url = "file:///" + urllib.quote(file_path, r'/\:')+ url_instruction
 
