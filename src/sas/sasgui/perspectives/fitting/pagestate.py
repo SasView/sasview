@@ -14,7 +14,6 @@
 import time
 import os
 import sys
-import wx
 import copy
 import logging
 import numpy as np
@@ -518,7 +517,7 @@ class PageState(object):
         """
         rep = "\nState name: %s\n" % self.file
         t = time.localtime(self.timestamp)
-        time_str = time.strftime("%b %d %Y %H;%M;%S ", t)
+        time_str = time.strftime("%b %d %Y %H:%M:%S ", t)
 
         rep += "State created: %s\n" % time_str
         rep += "State form factor combobox selection: %s\n" % \
@@ -595,7 +594,7 @@ class PageState(object):
             rep = self._repr_helper(list=temp_fittable_param, rep=rep)
         return rep
 
-    def set_report_string(self):
+    def _get_report_string(self):
         """
         Get the values (strings) from __str__ for report
         """
@@ -610,21 +609,21 @@ class PageState(object):
         chi2_string = ""
         q_range = ""
         strings = self.__repr__()
+        fixed_parameter = False
         lines = strings.split('\n')
-
         # get all string values from __str__()
         for line in lines:
-            value = ""
-            content = line.split(":")
-            name = content[0]
-            try:
-                value = content[1]
-            except Exception:
-                msg = "Report string expected 'name: value' but got %r" % line
-                logger.error(msg)
-            if name.count("State created"):
-                repo_time = "" + value
-            if name.count("parameter name"):
+            # Skip lines which are not key: value pairs, which includes
+            # blank lines and freeform notes in SASNotes fields.
+            if not ':' in line:
+                #msg = "Report string expected 'name: value' but got %r" % line
+                #logger.error(msg)
+                continue
+
+            name, value = [s.strip() for s in line.split(":", 1)]
+            if name == "State created":
+                repo_time = value
+            elif name == "parameter name":
                 val_name = value.split(".")
                 if len(val_name) > 1:
                     if val_name[1].count("width"):
@@ -633,53 +632,56 @@ class PageState(object):
                         continue
                 else:
                     param_string += value + ','
-            if name == "value":
+            elif name == "value":
                 param_string += value + ','
-            fixed_parameter = False
-            if name == "selected":
-                if value == u' False':
-                    fixed_parameter = True
-            if name == "error value":
+            elif name == "selected":
+                # remember if it is fixed when reporting error value
+                fixed_parameter = (value == u'False')
+            elif name == "error value":
                 if fixed_parameter:
                     param_string += '(fixed),'
                 else:
                     param_string += value + ','
-            if name == "parameter unit":
+            elif name == "parameter unit":
                 param_string += value + ':'
-            if name == "Value of Chisqr ":
+            elif name == "Value of Chisqr":
                 chi2 = ("Chi2/Npts = " + value)
                 chi2_string = CENTRE % chi2
-            if name == "Title":
+            elif name == "Title":
                 if len(value.strip()) == 0:
                     continue
                 title = value + " [" + repo_time + "]"
                 title_name = HEADER % title
-            if name == "data ":
+            elif name == "data":
                 try:
-                    file_value = ("File name:" + content[2])
+                    # parsing "data : File:     filename [mmm dd hh:mm]"
+                    name = value.split(':', 1)[1].strip()
+                    file_value = "File name:" + name
                     file_name = CENTRE % file_value
                     if len(title) == 0:
-                        title = content[2] + " [" + repo_time + "]"
+                        title = name + " [" + repo_time + "]"
                         title_name = HEADER % title
                 except Exception:
                     msg = "While parsing 'data: ...'\n"
                     logger.error(msg + traceback.format_exc())
-            if name == "model name ":
+            elif name == "model name":
                 try:
-                    modelname = "Model name:" + content[1]
-                except:
+                    modelname = "Model name:" + value
+                except Exception:
                     modelname = "Model name:" + " NAN"
                 model_name = CENTRE % modelname
 
-            if name == "Plotting Range":
+            elif name == "Plotting Range":
                 try:
-                    q_range = content[1] + " = " + content[2] \
-                            + " = " + content[3].split(",")[0]
+                    parts = value.split(':')
+                    q_range = parts[0] + " = " + parts[1] \
+                            + " = " + parts[2].split(",")[0]
                     q_name = ("Q Range:    " + q_range)
                     q_range = CENTRE % q_name
                 except Exception:
                     msg = "While parsing 'Plotting Range: ...'\n"
                     logger.error(msg + traceback.format_exc())
+
         paramval = ""
         for lines in param_string.split(":"):
             line = lines.split(",")
@@ -708,8 +710,7 @@ class PageState(object):
                                    "\n" + ELINE + \
                                    "\n" + paramval_string + \
                                    "\n" + ELINE + \
-                                   "\n" + FEET_1 % title + \
-                                   "\n" + FEET_2
+                                   "\n" + FEET_1 % title
 
         return html_string, text_string, title
 
@@ -722,41 +723,21 @@ class PageState(object):
 
         return name
 
-    def report(self, figs=None, canvases=None):
+    def report(self, fig_urls):
         """
         Invoke report dialog panel
 
         : param figs: list of pylab figures [list]
         """
-        from sas.sasgui.perspectives.fitting.report_dialog import ReportDialog
         # get the strings for report
-        html_str, text_str, title = self.set_report_string()
+        html_str, text_str, title = self._get_report_string()
         # Allow 2 figures to append
-        if len(figs) == 1:
-            add_str = FEET_3
-        elif len(figs) == 2:
-            add_str = ELINE
-            add_str += FEET_2 % ("%s")
-            add_str += ELINE
-            add_str += FEET_3
-        elif len(figs) > 2:
-            add_str = ELINE
-            add_str += FEET_2 % ("%s")
-            add_str += ELINE
-            add_str += FEET_2 % ("%s")
-            add_str += ELINE
-            add_str += FEET_3
-        else:
-            add_str = ""
+        image_links = [FEET_2%fig for fig in fig_urls]
 
         # final report html strings
-        report_str = html_str % ("%s") + add_str
+        report_str = html_str + ELINE.join(image_links)
 
-        # make plot image
-        images = self.set_plot_state(figs, canvases)
-        report_list = [report_str, text_str, images]
-        dialog = ReportDialog(report_list, None, wx.ID_ANY, "")
-        dialog.Show()
+        return report_str, text_str
 
     def _to_xml_helper(self, thelist, element, newdoc):
         """
@@ -804,7 +785,7 @@ class PageState(object):
             newdoc = doc
             try:
                 top_element = newdoc.createElement(FITTING_NODE_NAME)
-            except:
+            except Exception:
                 string = etree.tostring(doc, pretty_print=True)
                 newdoc = parseString(string)
                 top_element = newdoc.createElement(FITTING_NODE_NAME)
@@ -813,7 +794,7 @@ class PageState(object):
             else:
                 try:
                     entry_node.appendChild(top_element)
-                except:
+                except Exception:
                     node_name = entry_node.tag
                     node_list = newdoc.getElementsByTagName(node_name)
                     entry_node = node_list.item(0)
@@ -1035,7 +1016,7 @@ class PageState(object):
             if entry is not None and entry.get('epoch'):
                 try:
                     self.timestamp = float(entry.get('epoch'))
-                except:
+                except Exception:
                     msg = "PageState.fromXML: Could not"
                     msg += " read timestamp\n %s" % sys.exc_value
                     logger.error(msg)
@@ -1103,45 +1084,6 @@ class PageState(object):
                                 logger.error(msg + traceback.format_exc())
                         dic[name] = np.array(value_list)
                     setattr(self, varname, dic)
-
-    def set_plot_state(self, figs, canvases):
-        """
-        Build image state that wx.html understand
-        by plotting, putting it into wx.FileSystem image object
-
-        """
-        images = []
-
-        # Reset memory
-        self.imgRAM = None
-        wx.MemoryFSHandler()
-
-        # For no figures in the list, prepare empty plot
-        if figs is None or len(figs) == 0:
-            figs = [None]
-
-        # Loop over the list of figures
-        # use wx.MemoryFSHandler
-        self.imgRAM = wx.MemoryFSHandler()
-        for fig in figs:
-            if fig is not None:
-                ind = figs.index(fig)
-                canvas = canvases[ind]
-
-            # store the image in wx.FileSystem Object
-            wx.FileSystem.AddHandler(wx.MemoryFSHandler())
-
-            # index of the fig
-            ind = figs.index(fig)
-
-            # AddFile, image can be retrieved with 'memory:filename'
-            self.imgRAM.AddFile('img_fit%s.png' % ind,
-                                canvas.bitmap, wx.BITMAP_TYPE_PNG)
-
-            # append figs
-            images.append(fig)
-
-        return images
 
 
 class Reader(CansasReader):
@@ -1409,7 +1351,7 @@ class Reader(CansasReader):
 
         return doc
 
-# Simple html report templet
+# Simple html report template
 HEADER = "<html>\n"
 HEADER += "<head>\n"
 HEADER += "<meta http-equiv=Content-Type content='text/html; "
@@ -1437,15 +1379,13 @@ FEET_1 = \
 <br><font size='4' >Data: "%s"</font><br>
 """
 FEET_2 = \
-"""
-<img src="%s" >
-</img>
+"""<img src="%s" ></img>
 """
 FEET_3 = \
-"""
-</center>
+"""</center>
 </div>
 </body>
 </html>
 """
-ELINE = "<p class=MsoNormal>&nbsp;</p>"
+ELINE = """<p class=MsoNormal>&nbsp;</p>
+"""

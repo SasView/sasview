@@ -37,24 +37,7 @@ class ReportDialog(BaseReportDialog):
 
         # number of images of plot
         self.nimages = len(self.report_list[2])
-
-        if self.report_list[2] is not None:
-            # put image path in the report string
-            if len(self.report_list[2]) == 1:
-                self.report_html = self.report_list[0] % \
-                                    "memory:img_fit0.png"
-            elif len(self.report_list[2]) == 2:
-                self.report_html = self.report_list[0] % \
-                                    ("memory:img_fit0.png",
-                                     "memory:img_fit1.png")
-            # allows up to three images
-            else:
-                self.report_html = self.report_list[0] % \
-                                    ("memory:img_fit0.png",
-                                     "memory:img_fit1.png",
-                                     "memory:img_fit2.png")
-        else:
-            self.report_html = self.report_list[0]
+        self.report_html = self.report_list[0]
         # layout
         self._setup_layout()
 
@@ -104,7 +87,7 @@ class ReportDialog(BaseReportDialog):
                 html = report_frame % (str(pic_fname[0]), str(pic_fname[1]))
             elif self.nimages == 3:
                 html = report_frame % (str(pic_fname[0]), str(pic_fname[1]),
-                                          str(pic_fname[2]))
+                                       str(pic_fname[2]))
 
             # make/open file in case of absence
             f = open(fName, 'w')
@@ -117,11 +100,11 @@ class ReportDialog(BaseReportDialog):
                 try:
                     #Windows
                     os.startfile(str(fName))
-                except:
+                except Exception:
                     try:
                         #Mac
                         os.system("open %s" % fName)
-                    except:
+                    except Exception:
                         #DO not open
                         pass
             #delete image file

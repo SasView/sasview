@@ -5,19 +5,23 @@ from __future__ import print_function
 
 import sys
 import os
-import wx
-import numpy as np
 import time
 import copy
 import math
 import json
 import logging
 import traceback
-
 from collections import defaultdict
+
+import numpy as np
+
+import wx
 from wx.lib.scrolledpanel import ScrolledPanel
 
 from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
+
+from sas.sascalc.dataloader.data_info import Detector
+from sas.sascalc.dataloader.data_info import Source
 
 from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.guiframe.utils import format_number, check_float, IdList, \
@@ -29,11 +33,11 @@ from sas.sasgui.guiframe.dataFitting import Data2D
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import check_data_validity
 from sas.sasgui.guiframe.gui_style import GUIFRAME_ID
-from sas.sascalc.dataloader.data_info import Detector
-from sas.sascalc.dataloader.data_info import Source
-from sas.sasgui.perspectives.fitting.pagestate import PageState
 from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
+
+from sas.sasgui.perspectives.fitting.pagestate import PageState
+from sas.sasgui.perspectives.fitting.report_dialog import ReportDialog
 
 logger = logging.getLogger(__name__)
 
@@ -618,8 +622,52 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         # Get plot image from plotpanel
         images, canvases = self.get_images()
-        # get the report dialog
-        self.state.report(images, canvases)
+        imgRAM, images, refs = self._build_plots_for_report(images, canvases)
+
+        # get the strings for report
+        report_str, text_str = self.state.report(fig_urls=refs)
+
+        # Show the dialog
+        report_list = [report_str, text_str, images]
+        dialog = ReportDialog(report_list, None, wx.ID_ANY, "")
+        dialog.Show()
+
+    def _build_plots_for_report(self, figs, canvases):
+        """
+        Build image state that wx.html understand
+        by plotting, putting it into wx.FileSystem image object
+        """
+        images = []
+        refs = []
+
+        # For no figures in the list, prepare empty plot
+        if figs is None or len(figs) == 0:
+            figs = [None]
+
+        # Loop over the list of figures
+        # use wx.MemoryFSHandler
+        imgRAM = wx.MemoryFSHandler()
+        for fig in figs:
+            if fig is not None:
+                ind = figs.index(fig)
+                canvas = canvases[ind]
+
+            # store the image in wx.FileSystem Object
+            wx.FileSystem.AddHandler(wx.MemoryFSHandler())
+
+            # index of the fig
+            ind = figs.index(fig)
+
+            # AddFile, image can be retrieved with 'memory:filename'
+            name = 'img_fit%s.png' % ind
+            refs.append('memory:' + name)
+            imgRAM.AddFile(name, canvas.bitmap, wx.BITMAP_TYPE_PNG)
+
+            # append figs
+            images.append(fig)
+
+        return imgRAM, images, refs
+
 
     def on_save(self, event):
         """
