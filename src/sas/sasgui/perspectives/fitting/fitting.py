@@ -23,6 +23,9 @@ from copy import deepcopy
 import traceback
 
 from sas.sascalc.dataloader.loader import Loader
+from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
+from sas.sascalc.fit.pagestate import Reader
+
 from sas.sasgui.guiframe.dataFitting import Data2D
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import check_data_validity
@@ -33,7 +36,6 @@ from sas.sasgui.guiframe.events import EVT_SLICER_PARS_UPDATE
 from sas.sasgui.guiframe.gui_style import GUIFRAME_ID
 from sas.sasgui.guiframe.plugin_base import PluginBase
 from sas.sasgui.guiframe.data_processor import BatchCell
-from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 from sas.sasgui.perspectives.fitting.console import ConsoleUpdate
 from sas.sasgui.perspectives.fitting.fitproblem import FitProblemDictionary
 from sas.sasgui.perspectives.fitting.fitpanel import FitPanel
@@ -360,7 +362,7 @@ class Plugin(PluginBase):
         self.edit_model_menu.Append(wx_id, 'New Plugin Model',
                                    'Add a new model function')
         wx.EVT_MENU(owner, wx_id, self.make_new_model)
-        
+
         wx_id = wx.NewId()
         self.edit_model_menu.Append(wx_id, 'Sum|Multi(p1, p2)',
                                     'Sum of two model functions')
@@ -382,7 +384,7 @@ class Plugin(PluginBase):
         self.edit_model_menu.Append(wx_id, 'Load Plugin Models',
           '(Re)Load all models present in user plugin_models folder')
         wx.EVT_MENU(owner, wx_id, self.load_plugin_models)
-                
+
     def set_edit_menu_helper(self, owner=None, menu=None):
         """
         help for setting list of the edit model menu labels
@@ -1733,8 +1735,8 @@ class Plugin(PluginBase):
             @param unsmeared_data: data, rescaled to unsmeared model
             @param unsmeared_error: data error, rescaled to unsmeared model
         """
-            
-        number_finite = np.count_nonzero(np.isfinite(y)) 
+
+        number_finite = np.count_nonzero(np.isfinite(y))
         np.nan_to_num(y)
         new_plot = self.create_theory_1D(x, y, page_id, model, data, state,
                                          data_description=model.name,
@@ -1793,7 +1795,7 @@ class Plugin(PluginBase):
             logger.error("Using the present parameters the model does not return any finite value. ")
             msg = "Computing Error: Model did not return any finite value."
             wx.PostEvent(self.parent, StatusEvent(status = msg, info="error"))
-        else:                 
+        else:
             msg = "Computation  completed!"
             if number_finite != y.size:
                 msg += ' PROBLEM: For some Q values the model returns non finite intensities!'
@@ -1823,7 +1825,7 @@ class Plugin(PluginBase):
         Complete get the result of modelthread and create model 2D
         that can be plot.
         """
-        number_finite = np.count_nonzero(np.isfinite(image)) 
+        number_finite = np.count_nonzero(np.isfinite(image))
         np.nan_to_num(image)
         new_plot = Data2D(image=image, err_image=data.err_data)
         new_plot.name = model.name + '2d'
@@ -1926,7 +1928,7 @@ class Plugin(PluginBase):
                 ## an actual problem.  Seems the fix should also go here
                 ## and may be the cause of other noted instabilities
                 ##
-                ##    -PDB August 12, 2014 
+                ##    -PDB August 12, 2014
                 while self.calc_2D.isrunning():
                     time.sleep(0.1)
             self.calc_2D = Calc2D(model=model,
@@ -1968,7 +1970,7 @@ class Plugin(PluginBase):
             ## If a thread is already started, stop it
             if (self.calc_1D is not None) and self.calc_1D.isrunning():
                 self.calc_1D.stop()
-                ## stop just raises the flag -- the thread is supposed to 
+                ## stop just raises the flag -- the thread is supposed to
                 ## then kill itself but cannot.  Paul Kienzle came up with
                 ## this fix to prevent threads from stepping on each other
                 ## which was causing a simple custom plugin model to crash
@@ -1980,7 +1982,7 @@ class Plugin(PluginBase):
                 ## that the GUI can still respond to user input including
                 ## a request to stop the computation.
                 ## It seems thus that the whole thread approach used here
-                ## May need rethinking  
+                ## May need rethinking
                 ##
                 ##    -PDB August 12, 2014
                 while self.calc_1D.isrunning():
@@ -2145,7 +2147,7 @@ class Plugin(PluginBase):
             residuals.dxl = None
             residuals.dxw = None
             residuals.ytransform = 'y'
-            # For latter scale changes 
+            # For latter scale changes
             residuals.xaxis('\\rm{Q} ', 'A^{-1}')
             residuals.yaxis('\\rm{Residuals} ', 'normalized')
         theory_name = str(theory_data.name.split()[0])

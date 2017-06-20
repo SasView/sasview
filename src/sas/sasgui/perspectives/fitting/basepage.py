@@ -22,6 +22,7 @@ from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
 
 from sas.sascalc.dataloader.data_info import Detector
 from sas.sascalc.dataloader.data_info import Source
+from sas.sascalc.fit.pagestate import PageState
 
 from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.guiframe.utils import format_number, check_float, IdList, \
@@ -36,7 +37,6 @@ from sas.sasgui.guiframe.gui_style import GUIFRAME_ID
 from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
-from sas.sasgui.perspectives.fitting.pagestate import PageState
 from sas.sasgui.perspectives.fitting.report_dialog import ReportDialog
 
 logger = logging.getLogger(__name__)
