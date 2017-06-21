@@ -156,7 +156,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         self.disp_cb_dict = {}
 
-        # self.state = PageState(parent=parent)
+        # self.state = PageState()
         # dictionary containing list of models
         self.model_list_box = {}
 
@@ -203,8 +203,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         # check that the fit range is correct to plot the model again
         self.fitrange = True
         # Create memento to save the current state
-        self.state = PageState(parent=self.parent,
-                               model=self.model, data=self.data)
+        self.state = PageState(model=self.model, data=self.data)
         # flag to determine if state has change
         self.state_change = False
         # save customized array

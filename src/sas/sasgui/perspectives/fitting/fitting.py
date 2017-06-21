@@ -22,9 +22,17 @@ import time
 from copy import deepcopy
 import traceback
 
+import bumps.options
+from bumps.gui.fit_dialog import show_fit_config
+try:
+    from bumps.gui.fit_dialog import EVT_FITTER_CHANGED
+except ImportError:
+    # CRUFT: bumps 0.7.5.8 and below
+    EVT_FITTER_CHANGED = None  # type: wx.PyCommandEvent
+
 from sas.sascalc.dataloader.loader import Loader
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
-from sas.sascalc.fit.pagestate import Reader
+from sas.sascalc.fit.pagestate import Reader, PageState, SimFitPageState
 
 from sas.sasgui.guiframe.dataFitting import Data2D
 from sas.sasgui.guiframe.dataFitting import Data1D
@@ -36,20 +44,21 @@ from sas.sasgui.guiframe.events import EVT_SLICER_PARS_UPDATE
 from sas.sasgui.guiframe.gui_style import GUIFRAME_ID
 from sas.sasgui.guiframe.plugin_base import PluginBase
 from sas.sasgui.guiframe.data_processor import BatchCell
-from sas.sasgui.perspectives.fitting.console import ConsoleUpdate
-from sas.sasgui.perspectives.fitting.fitproblem import FitProblemDictionary
-from sas.sasgui.perspectives.fitting.fitpanel import FitPanel
-from sas.sasgui.perspectives.fitting.resultpanel import ResultPanel, PlotResultEvent
-
-from sas.sasgui.perspectives.fitting.fit_thread import FitThread
-from sas.sasgui.perspectives.fitting.pagestate import Reader
-from sas.sasgui.perspectives.fitting.fitpage import Chi2UpdateEvent
-from sas.sasgui.perspectives.calculator.model_editor import TextDialog
-from sas.sasgui.perspectives.calculator.model_editor import EditorWindow
 from sas.sasgui.guiframe.gui_manager import MDIFrame
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
-from sas.sasgui.perspectives.fitting.gpu_options import GpuOptions
 
+from sas.sasgui.perspectives.calculator.model_editor import TextDialog
+from sas.sasgui.perspectives.calculator.model_editor import EditorWindow
+
+from .fitting_widgets import DataDialog
+from .fit_thread import FitThread
+from .fitpage import Chi2UpdateEvent
+from .console import ConsoleUpdate
+from .fitproblem import FitProblemDictionary
+from .fitpanel import FitPanel
+from .model_thread import Calc1D, Calc2D
+from .resultpanel import ResultPanel, PlotResultEvent
+from .gpu_options import GpuOptions
 from . import models
 
 logger = logging.getLogger(__name__)
@@ -64,13 +73,6 @@ if sys.platform == "win32":
 else:
     ON_MAC = True
 
-import bumps.options
-from bumps.gui.fit_dialog import show_fit_config
-try:
-    from bumps.gui.fit_dialog import EVT_FITTER_CHANGED
-except ImportError:
-    # CRUFT: bumps 0.7.5.8 and below
-    EVT_FITTER_CHANGED = None  # type: wx.PyCommandEvent
 
 class Plugin(PluginBase):
     """
@@ -239,9 +241,10 @@ class Plugin(PluginBase):
         """
         Get the python editor panel
         """
+        from sas.sasgui.perspectives.calculator.pyconsole import PyConsole
+
         event_id = event.GetId()
         label = self.edit_menu.GetLabel(event_id)
-        from sas.sasgui.perspectives.calculator.pyconsole import PyConsole
         filename = os.path.join(models.find_plugins_dir(), label)
         frame = PyConsole(parent=self.parent, manager=self,
                           panel=self.fit_panel,
@@ -283,7 +286,7 @@ class Plugin(PluginBase):
                         wx.PostEvent(self.parent, evt)
                         break
         except Exception:
-            import traceback; traceback.print_exc()
+            traceback.print_exc()
             msg = 'Delete Error: \nCould not delete the file; Check if in use.'
             wx.MessageBox(msg, 'Error')
 
@@ -557,7 +560,6 @@ class Plugin(PluginBase):
             self.add_fit_page(data=data_list)
         else:
             if len(data_list) > MAX_NBR_DATA:
-                from fitting_widgets import DataDialog
                 dlg = DataDialog(data_list=data_list, nb_data=MAX_NBR_DATA)
                 if dlg.ShowModal() == wx.ID_OK:
                     selected_data_list = dlg.get_data()
@@ -602,13 +604,13 @@ class Plugin(PluginBase):
         : param state: PageState object
         : param datainfo: data
         """
-        from pagestate import PageState
-        from simfitpage import SimFitPageState
         if isinstance(state, PageState):
             state = state.clone()
             self.temp_state.append(state)
         elif isinstance(state, SimFitPageState):
-            state.load_from_save_state(self)
+            if self.fit_panel.sim_page is None:
+                self.fit_panel.add_sim_page()
+            self.fit_panel.sim_page.load_from_save_state(state)
         else:
             self.temp_state = []
         # index to start with for a new set_state
@@ -1455,7 +1457,6 @@ class Plugin(PluginBase):
         #fill batch result information
         if "Data" not in batch_outputs.keys():
             batch_outputs["Data"] = []
-        from sas.sasgui.guiframe.data_processor import BatchCell
         cell = BatchCell()
         cell.label = data.name
         cell.value = index
@@ -1564,7 +1565,7 @@ class Plugin(PluginBase):
         except:
             msg = ("Fit completed but the following error occurred: %s"
                    % sys.exc_value)
-            #import traceback; msg = "\n".join((traceback.format_exc(), msg))
+            #msg = "\n".join((traceback.format_exc(), msg))
             evt = StatusEvent(status=msg, info="warning", type="stop")
             wx.PostEvent(self.parent, evt)
 
@@ -1919,7 +1920,6 @@ class Plugin(PluginBase):
         if not enable2D:
             return None
         try:
-            from model_thread import Calc2D
             ## If a thread is already started, stop it
             if (self.calc_2D is not None) and self.calc_2D.isrunning():
                 self.calc_2D.stop()
@@ -1966,7 +1966,6 @@ class Plugin(PluginBase):
         if not enable1D:
             return
         try:
-            from model_thread import Calc1D
             ## If a thread is already started, stop it
             if (self.calc_1D is not None) and self.calc_1D.isrunning():
                 self.calc_1D.stop()

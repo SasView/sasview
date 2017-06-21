@@ -21,10 +21,13 @@ import traceback
 
 import xml.dom.minidom
 from xml.dom.minidom import parseString
+from xml.dom.minidom import getDOMImplementation
 from lxml import etree
 
 from sasmodels import convert
 import sasmodels.weights
+
+from sas.sasview import __version__ as SASVIEW_VERSION
 
 import sas.sascalc.dataloader
 from sas.sascalc.dataloader.readers.cansas_reader import Reader as CansasReader
@@ -140,7 +143,7 @@ class PageState(object):
     """
     Contains information to reconstruct a page of the fitpanel.
     """
-    def __init__(self, parent=None, model=None, data=None):
+    def __init__(self, model=None, data=None):
         """
         Initialize the current state
 
@@ -188,9 +191,6 @@ class PageState(object):
         self.process = []
         # fit page manager
         self.manager = None
-        # Store the parent of this panel parent
-        # For this application fitpanel is the parent
-        self.parent = parent
         # Event_owner is the owner of model event
         self.event_owner = None
         # page name
@@ -285,7 +285,7 @@ class PageState(object):
         if self.model is not None:
             model = self.model.clone()
             model.name = self.model.name
-        obj = PageState(self.parent, model=model)
+        obj = PageState(model=model)
         obj.file = copy.deepcopy(self.file)
         obj.data = copy.deepcopy(self.data)
         if self.data is not None:
@@ -772,8 +772,6 @@ class PageState(object):
                            will append the data [optional]
         :param batch_fit_state: simultaneous fit state
         """
-        from xml.dom.minidom import getDOMImplementation
-
         # Check whether we have to write a standalone XML file
         if doc is None:
             impl = getDOMImplementation()
@@ -801,8 +799,7 @@ class PageState(object):
                     entry_node.appendChild(top_element)
 
         attr = newdoc.createAttribute("version")
-        from sas import sasview
-        attr.nodeValue = sasview.__version__
+        attr.nodeValue = SASVIEW_VERSION
         # attr.nodeValue = '1.0'
         top_element.setAttributeNode(attr)
 
@@ -1085,6 +1082,26 @@ class PageState(object):
                         dic[name] = np.array(value_list)
                     setattr(self, varname, dic)
 
+class SimFitPageState:
+    """
+    State of the simultaneous fit page for saving purposes
+    """
+
+    def __init__(self):
+        # Sim Fit Page Number
+        self.fit_page_no = None
+        # Select all data
+        self.select_all = False
+        # Data sets sent to fit page
+        self.model_list = []
+        # Data sets to be fit
+        self.model_to_fit = []
+        # Number of constraints
+        self.no_constraint = 0
+        # Dictionary of constraints
+        self.constraint_dict = {}
+        # List of constraints
+        self.constraints_list = []
 
 class Reader(CansasReader):
     """
@@ -1167,7 +1184,6 @@ class Reader(CansasReader):
             simfitstate = nodes[0].xpath('ns:simultaneous_fit',
                                          namespaces={'ns': CANSAS_NS})
             if simfitstate:
-                from simfitpage import SimFitPageState
                 sim_fit_state = SimFitPageState()
                 simfitstate_0 = simfitstate[0]
                 all = simfitstate_0.xpath('ns:select_all',
