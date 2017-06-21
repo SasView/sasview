@@ -284,7 +284,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         """
         x = np.linspace(start=self.qmin_x, stop=self.qmax_x,
-                           num=self.npts_x, endpoint=True)
+                        num=self.npts_x, endpoint=True)
         self.data = Data1D(x=x)
         self.data.xaxis('\\rm{Q}', "A^{-1}")
         self.data.yaxis('\\rm{Intensity}', "cm^{-1}")
@@ -310,7 +310,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             qmax = 10.
 
         x = np.logspace(start=qmin, stop=qmax,
-                           num=self.npts_x, endpoint=True, base=10.0)
+                        num=self.npts_x, endpoint=True, base=10.0)
         self.data = Data1D(x=x)
         self.data.xaxis('\\rm{Q}', "A^{-1}")
         self.data.yaxis('\\rm{Intensity}', "cm^{-1}")
@@ -903,7 +903,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         if len(self._disp_obj_dict) > 0:
             for k, v in self._disp_obj_dict.iteritems():
-                self.state._disp_obj_dict[k] = v.type
+                self.state.disp_obj_dict[k] = v.type
 
             self.state.values = copy.deepcopy(self.values)
             self.state.weights = copy.deepcopy(self.weights)
@@ -921,7 +921,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self._copy_parameters_state(self.str_parameters,
                                     self.state.str_parameters)
         self._copy_parameters_state(self.orientation_params,
-                                     self.state.orientation_params)
+                                    self.state.orientation_params)
         self._copy_parameters_state(self.orientation_params_disp,
                                     self.state.orientation_params_disp)
 
@@ -975,11 +975,11 @@ class BasicPage(ScrolledPanel, PanelBase):
                     else:
                         try:
                             self.state.disp_cb_dict[k] = v.GetValue()
-                        except:
+                        except Exception:
                             self.state.disp_cb_dict[k] = None
             if len(self._disp_obj_dict) > 0:
                 for k, v in self._disp_obj_dict.iteritems():
-                    self.state._disp_obj_dict[k] = v.type
+                    self.state.disp_obj_dict[k] = v.type
 
             self.state.values = copy.deepcopy(self.values)
             self.state.weights = copy.deepcopy(self.weights)
@@ -1021,7 +1021,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         try:
             # to support older version
             category_pos = int(state.categorycombobox)
-        except:
+        except Exception:
             category_pos = 0
             for ind_cat in range(self.categorybox.GetCount()):
                 if self.categorycombobox.GetString(ind_cat) == \
@@ -1033,7 +1033,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         try:
             # to support older version
             formfactor_pos = int(state.formfactorcombobox)
-        except:
+        except Exception:
             formfactor_pos = 0
             for ind_form in range(self.formfactorbox.GetCount()):
                 if self.formfactorbox.GetString(ind_form) == \
@@ -1046,7 +1046,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         try:
             # to support older version
             structfactor_pos = int(state.structurecombobox)
-        except:
+        except Exception:
             structfactor_pos = 0
             for ind_struct in range(self.structurebox.GetCount()):
                 if self.structurebox.GetString(ind_struct) == \
@@ -1283,7 +1283,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             self.dI_didata.SetValue(state.dI_didata)
             self.dI_sqrdata.SetValue(state.dI_sqrdata)
             self.dI_idata.SetValue(state.dI_idata)
-        except:
+        except Exception:
             # to support older state file formats
             self.dI_noweight.SetValue(False)
             self.dI_didata.SetValue(True)
@@ -1339,7 +1339,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.values = copy.deepcopy(state.values)
         self.weights = copy.deepcopy(state.weights)
 
-        for key, disp_type in state._disp_obj_dict.iteritems():
+        for key, disp_type in state.disp_obj_dict.iteritems():
             # disp_model = disp
             disp_model = POLYDISPERSITY_MODELS[disp_type]()
             self._disp_obj_dict[key] = disp_model
@@ -1573,7 +1573,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                         # No data in the panel
                         try:
                             self.npts_x = float(self.Npts_total.GetValue())
-                        except:
+                        except Exception:
                             flag = False
                             return flag
                     flag = True
@@ -1614,10 +1614,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         if len(statelist) == 0 or len(listtorestore) == 0:
             return
 
-        for j in range(len(listtorestore)):
+        for item_page in listtorestore:
             for param in statelist:
-                if param[1] == listtorestore[j][1]:
-                    item_page = listtorestore[j]
+                if param[1] == item_page[1]:
                     item_page_info = param
                     if (item_page_info[1] == "theta" or item_page_info[1] ==
                             "phi") and not self._is_2D():
@@ -1663,11 +1662,8 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         listtorestore = copy.deepcopy(statelist)
 
-        for j in range(len(listtorestore)):
-            item_page = listtorestore[j]
-            item_page_info = statelist[j]
+        for item_page, item_page_info in zip(listtorestore, statelist):
             # change the state of the check box for simple parameters
-
             if item_page[0] is not None:
                 item_page[0].SetValue(format_number(item_page_info[0], True))
 
@@ -1920,7 +1916,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                           sys.exc_info()[1]
                     wx.PostEvent(self.parent, StatusEvent(status=msg))
                     return
-            except:
+            except Exception:
                 tcrtl.SetBackgroundColour("pink")
                 msg = "Model Error: wrong value entered: %s" % sys.exc_info()[1]
                 wx.PostEvent(self.parent, StatusEvent(status=msg))
@@ -1977,7 +1973,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                           sys.exc_info()[1]
                     wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                     return
-            except:
+            except Exception:
                 tcrtl.SetBackgroundColour("pink")
                 msg = "Model Error: wrong value entered: %s" % sys.exc_info()[1]
                 wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
@@ -2155,7 +2151,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         for data in self.data_list:
             # q value from qx and qy
             radius = np.sqrt(data.qx_data * data.qx_data +
-                                data.qy_data * data.qy_data)
+                             data.qy_data * data.qy_data)
             # get unmasked index
             index_data = (float(self.qmin.GetValue()) <= radius) & \
                          (radius <= float(self.qmax.GetValue()))
@@ -2384,7 +2380,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         put gaussian dispersity into current model
         """
-        if len(self.param_toFit) > 0:
+        if self.param_toFit:
             for item in self.fittable_param:
                 if item in self.param_toFit:
                     self.param_toFit.remove(item)
@@ -2401,12 +2397,9 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         # from sas.models.dispersion_models import GaussianDispersion
         from sasmodels.weights import GaussianDispersion
-        if len(self.disp_cb_dict) == 0:
-            self.save_current_state()
+        if not self.disp_cb_dict:
             self.sizer4_4.Clear(True)
-            self.Layout()
-            return
-        if (len(self.disp_cb_dict) > 0):
+        else:
             for p in self.disp_cb_dict:
                 # The parameter was un-selected.
                 # Go back to Gaussian model (with 0 pts)
@@ -2479,7 +2472,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 # self._reset_array_disp(param_name)
                 self._disp_obj_dict[name1] = disp_model
                 self.model.set_dispersion(param_name, disp_model)
-                self.state._disp_obj_dict[name1] = disp_model.type
+                self.state.disp_obj_dict[name1] = disp_model.type
 
                 value1 = str(format_number(self.model.getParam(name1), True))
                 value2 = str(format_number(self.model.getParam(name2)))
@@ -2594,7 +2587,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         disp.set_weights(values, weights)
         self._disp_obj_dict[name] = disp
         self.model.set_dispersion(name.split('.')[0], disp)
-        self.state._disp_obj_dict[name] = disp.type
+        self.state.disp_obj_dict[name] = disp.type
         self.values[name] = values
         self.weights[name] = weights
         # Store the object to make it persist outside the
@@ -2952,22 +2945,22 @@ class BasicPage(ScrolledPanel, PanelBase):
 
             # go through the parameters
             strings = self._get_copy_helper(self.parameters,
-                                           self.orientation_params)
+                                            self.orientation_params)
             content += strings
 
             # go through the fittables
             strings = self._get_copy_helper(self.fittable_param,
-                                           self.orientation_params_disp)
+                                            self.orientation_params_disp)
             content += strings
 
             # go through the fixed params
             strings = self._get_copy_helper(self.fixed_param,
-                                           self.orientation_params_disp)
+                                            self.orientation_params_disp)
             content += strings
 
             # go through the str params
             strings = self._get_copy_helper(self.str_parameters,
-                                           self.orientation_params)
+                                            self.orientation_params)
             content += strings
             return content
         else:
@@ -3026,8 +3019,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Get the string copies of the param names and values in the tap
         """
-        content = '\\begin{table}'
-        content += '\\begin{tabular}[h]'
+        content = r'\begin{table}'
+        content += r'\begin{tabular}[h]'
 
         crlf = chr(13) + chr(10)
         tab = chr(9)
@@ -3038,16 +3031,16 @@ class BasicPage(ScrolledPanel, PanelBase):
             content += '{|'
             for param in self.parameters:
                 content += 'l|l|'
-            content += '}\hline'
+            content += r'}\hline'
             content += crlf
 
             for index, param in enumerate(self.parameters):
-                content += param[1].replace('_', '\_')  # parameter name
+                content += param[1].replace('_', r'\_')  # parameter name
                 content += ' & '
-                content += param[1].replace('_', '\_') + "\_err"
+                content += param[1].replace('_', r'\_') + r'\_err'
                 if index < len(self.parameters) - 1:
                     content += ' & '
-            content += '\\\\ \\hline'
+            content += r'\\ \hline'
             content += crlf
 
             # row of values and errors...
@@ -3057,11 +3050,11 @@ class BasicPage(ScrolledPanel, PanelBase):
                 content += param[4].GetValue()  # parameter error
                 if index < len(self.parameters) - 1:
                     content += ' & '
-            content += '\\\\ \\hline'
+            content += r'\\ \hline'
             content += crlf
 
-            content += '\\end{tabular}'
-            content += '\\end{table}'
+            content += r'\end{tabular}'
+            content += r'\end{table}'
             return content
         else:
             return False
@@ -3319,7 +3312,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                                 pd = float(pd)
                                 if name.endswith('.npts'):
                                     pd = int(pd)
-                            except:
+                            except Exception:
                                 # continue
                                 if not pd and pd != '':
                                     continue
@@ -3405,7 +3398,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self._set_disp_cb(False, item=item)
                 self._disp_obj_dict[name] = disp_model
                 self.model.set_dispersion(param_name, disp_model)
-                self.state._disp_obj_dict[name] = disp_model.type
+                self.state.disp_obj_dict[name] = disp_model.type
                 # TODO: It's not an array, why update values and weights?
                 self.model._persistency_dict[param_name] = \
                     [self.values, self.weights]
@@ -3511,9 +3504,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.model_box.Append(str_m)
 
         else:
-            for (model, enabled) in sorted(self.master_category_dict[category],
-                                           key=lambda name: name[0]):
-                if(enabled):
+            for model, enabled in sorted(self.master_category_dict[category],
+                                         key=lambda name: name[0]):
+                if enabled:
                     self.model_box.Append(model)
 
     def _fill_model_sizer(self, sizer):
@@ -3754,12 +3747,12 @@ class ModelTextCtrl(wx.TextCtrl):
             if set_focus_callback is None else set_focus_callback
         self.Bind(wx.EVT_SET_FOCUS, self._on_set_focus)
         self.Bind(wx.EVT_KILL_FOCUS, self._silent_kill_focus
-        if kill_focus_callback is None else kill_focus_callback)
+                  if kill_focus_callback is None else kill_focus_callback)
         self.Bind(wx.EVT_TEXT_ENTER, parent._onparamEnter
-        if text_enter_callback is None else text_enter_callback)
+                  if text_enter_callback is None else text_enter_callback)
         if not ON_MAC:
             self.Bind(wx.EVT_LEFT_UP, self._highlight_text
-            if mouse_up_callback is None else mouse_up_callback)
+                      if mouse_up_callback is None else mouse_up_callback)
 
     def _on_set_focus(self, event):
         """

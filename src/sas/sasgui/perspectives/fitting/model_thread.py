@@ -1,5 +1,5 @@
 """
-    Calculation thread for modeling
+Calculation thread for modeling
 """
 
 import time
@@ -27,7 +27,7 @@ class Calc2D(CalcThread):
                  yieldtime=0.04,
                  worktime=0.04,
                  exception_handler=None,
-                 ):
+                ):
         CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime,
                             exception_handler=exception_handler)
         self.qmin = qmin
@@ -56,25 +56,22 @@ class Calc2D(CalcThread):
             self.qmin = 0
         if self.qmax is None:
             if self.data is not None:
-                newx = math.pow(max(math.fabs(self.data.xmax),
-                                   math.fabs(self.data.xmin)), 2)
-                newy = math.pow(max(math.fabs(self.data.ymax),
-                                   math.fabs(self.data.ymin)), 2)
-                self.qmax = math.sqrt(newx + newy)
+                newx = max(math.fabs(self.data.xmax), math.fabs(self.data.xmin))
+                newy = max(math.fabs(self.data.ymax), math.fabs(self.data.ymin))
+                self.qmax = math.sqrt(newx**2 + newy**2)
 
         if self.data is None:
             msg = "Compute Calc2D receive data = %s.\n" % str(self.data)
             raise ValueError, msg
 
         # Define matrix where data will be plotted
-        radius = np.sqrt((self.data.qx_data * self.data.qx_data) + \
-                    (self.data.qy_data * self.data.qy_data))
+        radius = np.sqrt(self.data.qx_data**2 + self.data.qy_data**2)
 
-        # For theory, qmax is based on 1d qmax 
+        # For theory, qmax is based on 1d qmax
         # so that must be mulitified by sqrt(2) to get actual max for 2d
         index_model = (self.qmin <= radius) & (radius <= self.qmax)
-        index_model = index_model & self.data.mask
-        index_model = index_model & np.isfinite(self.data.data)
+        index_model &= self.data.mask
+        index_model &= np.isfinite(self.data.data)
 
         if self.smearer is not None:
             # Set smearer w/ data, model and index.
@@ -99,20 +96,20 @@ class Calc2D(CalcThread):
         output[index_model] = value
         elapsed = time.time() - self.starttime
         self.complete(image=output,
-                       data=self.data,
-                       page_id=self.page_id,
-                       model=self.model,
-                       state=self.state,
-                       toggle_mode_on=self.toggle_mode_on,
-                       elapsed=elapsed,
-                       index=index_model,
-                       fid=self.fid,
-                       qmin=self.qmin,
-                       qmax=self.qmax,
-                       weight=self.weight,
-                       #qstep=self.qstep,
-                       update_chisqr=self.update_chisqr,
-                       source=self.source)
+                      data=self.data,
+                      page_id=self.page_id,
+                      model=self.model,
+                      state=self.state,
+                      toggle_mode_on=self.toggle_mode_on,
+                      elapsed=elapsed,
+                      index=index_model,
+                      fid=self.fid,
+                      qmin=self.qmin,
+                      qmax=self.qmax,
+                      weight=self.weight,
+                      #qstep=self.qstep,
+                      update_chisqr=self.update_chisqr,
+                      source=self.source)
 
 
 class Calc1D(CalcThread):
@@ -136,7 +133,7 @@ class Calc1D(CalcThread):
                  yieldtime=0.01,
                  worktime=0.01,
                  exception_handler=None,
-                 ):
+                ):
         """
         """
         CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime,
@@ -191,9 +188,9 @@ class Calc1D(CalcThread):
                 unsmeared_error[first_bin:last_bin+1] = self.data.dy[first_bin:last_bin+1]\
                                                         * unsmeared_output[first_bin:last_bin+1]\
                                                         / output[first_bin:last_bin+1]
-                unsmeared_output=unsmeared_output[index]
-                unsmeared_data=unsmeared_data[index]
-                unsmeared_error=unsmeared_error
+                unsmeared_output = unsmeared_output[index]
+                unsmeared_data = unsmeared_data[index]
+                unsmeared_error = unsmeared_error
         else:
             output[index] = self.model.evalDistribution(self.data.x[index])
 

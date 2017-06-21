@@ -28,11 +28,7 @@ class FitThread(CalcThread):
                  yieldtime=0.03,
                  worktime=0.03,
                  reset_flag=False):
-        CalcThread.__init__(self,
-                 completefn,
-                 updatefn,
-                 yieldtime,
-                 worktime)
+        CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime)
         self.handler = handler
         self.fitter = fn
         self.pars = pars
@@ -92,14 +88,14 @@ class FitThread(CalcThread):
             # Thread was interrupted, just proceed and re-raise.
             # Real code should not print, but this is an example...
             #print "keyboard exception"
-            #Stop on exception during fitting. Todo: need to put 
+            #Stop on exception during fitting. Todo: need to put
             #some mssg and reset progress bar.
 
             # Shouldn't this be re-raising? ConsoleUpdate doesn't act on it.
             # raise KeyboardInterrupt
             if self.handler is not None:
                 self.handler.stop(msg=msg)
-        except:
+        except:  # catch-all: show every exception which stops the thread
             import traceback
             if self.handler is not None:
                 self.handler.error(msg=traceback.format_exc())

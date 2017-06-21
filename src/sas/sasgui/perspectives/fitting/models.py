@@ -67,7 +67,7 @@ def _check_plugin(model, name):
         return None
     try:
         new_instance = model()
-    except:
+    except Exception:
         msg = "Plugin %s error in __init__ \n\t: %s %s\n" % (str(name),
                                                              str(sys.exc_type),
                                                              sys.exc_info()[1])
@@ -77,7 +77,7 @@ def _check_plugin(model, name):
     if hasattr(new_instance, "function"):
         try:
             value = new_instance.function()
-        except:
+        except Exception:
             msg = "Plugin %s: error writing function \n\t :%s %s\n " % \
                     (str(name), str(sys.exc_type), sys.exc_info()[1])
             plugin_log(msg)
@@ -101,13 +101,14 @@ def find_plugins_dir():
         os.makedirs(dir)
 
     # Find paths needed
+    # TODO: remove unneeded try/except block
     try:
         # For source
         if os.path.isdir(os.path.dirname(__file__)):
             p_dir = os.path.join(os.path.dirname(__file__), PLUGIN_DIR)
         else:
             raise
-    except:
+    except Exception:
         # Check for data path next to exe/zip file.
         #Look for maximum n_dir up of the current dir to find plugins dir
         n_dir = 12
@@ -157,7 +158,7 @@ def compile_file(dir):
         import compileall
         compileall.compile_dir(dir=dir, ddir=dir, force=0,
                                quiet=report_problem)
-    except:
+    except Exception:
         return sys.exc_info()[1]
     return None
 
@@ -176,7 +177,7 @@ def _find_models():
 
     plugin_log("looking for models in: %s" % str(directory))
     # compile_file(directory)  #always recompile the folder plugin
-    logger.info("plugin model dir: %s" % str(directory))
+    logger.info("plugin model dir: %s", str(directory))
 
     plugins = {}
     for filename in os.listdir(directory):
@@ -191,8 +192,8 @@ def _find_models():
                 msg = traceback.format_exc()
                 msg += "\nwhile accessing model in %r" % path
                 plugin_log(msg)
-                logger.warning("Failed to load plugin %r. See %s for details"
-                               % (path, PLUGIN_LOG))
+                logger.warning("Failed to load plugin %r. See %s for details",
+                               path, PLUGIN_LOG)
 
     return plugins
 
@@ -229,7 +230,7 @@ class ModelList(object):
         return self.mydict
 
 
-class ModelManagerBase:
+class ModelManagerBase(object):
     """
     Base class for the model manager
     """
@@ -264,7 +265,7 @@ class ModelManagerBase:
         temp = {}
         if self.is_changed():
             return  _find_models()
-        logger.info("plugin model : %s" % str(temp))
+        logger.info("plugin model : %s", str(temp))
         return temp
 
     def _getModelList(self):
@@ -296,7 +297,7 @@ class ModelManagerBase:
         self.plugins = self.stored_plugins.values()
         for name, plug in self.stored_plugins.iteritems():
             self.model_dictionary[name] = plug
-        
+
         self._get_multifunc_models()
 
         return 0
