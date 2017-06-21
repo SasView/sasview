@@ -888,7 +888,6 @@ class BasicPage(ScrolledPanel, PanelBase):
             self.state.enable_disp = self.enable_disp.GetValue()
             self.state.disable_disp = self.disable_disp.GetValue()
 
-        self.state.smearer = copy.deepcopy(self.current_smearer)
         if hasattr(self, "enable_smearer"):
             self.state.enable_smearer = \
                                 copy.deepcopy(self.enable_smearer.GetValue())
@@ -953,7 +952,6 @@ class BasicPage(ScrolledPanel, PanelBase):
             self.state.enable_disp = self.enable_disp.GetValue()
             self.state.disable_disp = self.disable_disp.GetValue()
 
-        self.state.smearer = copy.deepcopy(self.current_smearer)
         if hasattr(self, "enable_smearer"):
             self.state.enable_smearer = \
                                 copy.deepcopy(self.enable_smearer.GetValue())

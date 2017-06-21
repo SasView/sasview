@@ -73,8 +73,6 @@ LIST_OF_STATE_ATTRIBUTES = [["qmin", "qmin", "float"],
                             ["enable2D", "enable2D", "bool"],
                             ["cb1", "cb1", "bool"],
                             ["tcChi", "tcChi", "float"],
-                            ["smearer", "smearer", "float"],
-                            ["smear_type", "smear_type", "string"],
                             ["dq_l", "dq_l", "float"],
                             ["dq_r", "dq_r", "float"],
                             ["dx_percent", "dx_percent", "float"],
@@ -209,9 +207,6 @@ class PageState(object):
         self.orientation_params = []
         # orientation parameters for gaussian dispersity
         self.orientation_params_disp = []
-        # smearer info
-        self.smearer = None
-        self.smear_type = None
         self.dq_l = None
         self.dq_r = None
         self.dx_percent = None
@@ -335,7 +330,6 @@ class PageState(object):
         obj.disable_smearer = copy.deepcopy(self.disable_smearer)
         obj.pinhole_smearer = copy.deepcopy(self.pinhole_smearer)
         obj.slit_smearer = copy.deepcopy(self.slit_smearer)
-        obj.smear_type = copy.deepcopy(self.smear_type)
         obj.dI_noweight = copy.deepcopy(self.dI_noweight)
         obj.dI_didata = copy.deepcopy(self.dI_didata)
         obj.dI_sqrdata = copy.deepcopy(self.dI_sqrdata)
@@ -353,7 +347,6 @@ class PageState(object):
         obj.magnetic_on = self.magnetic_on
         obj.npts = copy.deepcopy(self.npts)
         obj.cb1 = copy.deepcopy(self.cb1)
-        obj.smearer = copy.deepcopy(self.smearer)
         obj.version = copy.deepcopy(self.version)
 
         for name, state in self.saved_states.iteritems():
@@ -557,8 +550,6 @@ class PageState(object):
         rep += "2D enable : %s\n" % str(self.enable2D)
         rep += "All parameters checkbox selected: %s\n" % self.cb1
         rep += "Value of Chisqr : %s\n" % str(self.tcChi)
-        rep += "Smear object : %s\n" % self.smearer
-        rep += "Smear type : %s\n" % self.smear_type
         rep += "dq_l  : %s\n" % self.dq_l
         rep += "dq_r  : %s\n" % self.dq_r
         rep += "dx_percent  : %s\n" % str(self.dx_percent)
