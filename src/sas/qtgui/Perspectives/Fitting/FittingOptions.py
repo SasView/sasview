@@ -132,6 +132,9 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
 
         self.assignValidators()
 
+        # OK has to be reinitialized to True
+        self.buttonBox.button(QtGui.QDialogButtonBox.Ok).setEnabled(True)
+
     def onApply(self):
         """
         Update the fitter object
