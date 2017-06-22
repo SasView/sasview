@@ -196,6 +196,13 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.label.setText("No data loaded")
         self.lblFilename.setText("")
 
+        # Magnetic angles explained in one picture
+        self.magneticAnglesWidget = QtGui.QWidget()
+        labl = QtGui.QLabel(self.magneticAnglesWidget)
+        pixmap = QtGui.QPixmap(GuiUtils.IMAGES_DIRECTORY_LOCATION + '/M_angles_pic.bmp')
+        labl.setPixmap(pixmap)
+        self.magneticAnglesWidget.setFixedSize(pixmap.width(), pixmap.height())
+
     def initializeModels(self):
         """
         Set up models and views
@@ -273,7 +280,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Switch off Data2D control
         self.chk2DView.setEnabled(False)
         self.chk2DView.setVisible(False)
-        self.chkMagnetism.setEnabled(True)
+        self.chkMagnetism.setEnabled(self.is2D)
         # Similarly on other tabs
         self.options_widget.setEnablementOnDataLoad()
 
@@ -358,6 +365,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.cmdFit.clicked.connect(self.onFit)
         self.cmdPlot.clicked.connect(self.onPlot)
         self.cmdHelp.clicked.connect(self.onHelp)
+        self.cmdMagneticDisplay.clicked.connect(self.onDisplayMagneticAngles)
 
         # Respond to change in parameters from the UI
         self._model_model.itemChanged.connect(self.updateParamsFromModel)
@@ -539,6 +547,12 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         help_location = tree_location + helpfile
         self.helpView.load(QtCore.QUrl(help_location))
         self.helpView.show()
+
+    def onDisplayMagneticAngles(self):
+        """
+        Display a simple image showing direction of magnetic angles
+        """
+        self.magneticAnglesWidget.show()
 
     def onFit(self):
         """
@@ -1542,6 +1556,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         fp.chi2 = self.chi2
         fp.parameters_to_fit = self.parameters_to_fit
         fp.kernel_module = self.kernel_module
+
+        # Algorithm options
+        # fp.algorithm = self.parent.fit_options.selected_id
 
         # Options tab
         fp.fit_options[fp.MIN_RANGE] = self.q_range_min

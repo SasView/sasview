@@ -45,10 +45,19 @@ class FitPage(object):
 
         # Fit options - tab #2
         self.fit_options = {}
-        # Weight options - tab #2
-        #self.weighting_options = {}
         # Smearing options - tab #3
+        # Should this be just part of self.fit_options?
         self.smearing_options = {}
+
+        # Polydispersity - tab #4
+        #self.poly
+
+        # Magnetism - tab #5
+        #self.magnetism
+
+        # Algorithm
+        self.algorithm = None
+        self.algorithm_options = {}
 
     def save(self):
         """

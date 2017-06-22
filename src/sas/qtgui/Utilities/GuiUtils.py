@@ -96,6 +96,7 @@ DATAPATH = PATH_APP
 
 ## TODO: CHANGE FOR SHIPPED PATH IN RELEASE
 HELP_DIRECTORY_LOCATION = "docs/sphinx-docs/build/html"
+IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION + "/_images"
 
 # GUI always starts from the App folder
 #os.chdir(PATH_APP)
