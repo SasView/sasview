@@ -656,7 +656,7 @@ class EditorPanel(wx.ScrolledWindow):
         self.msg_sizer = None
         self.warning = ""
         #This does not seem to be used anywhere so commenting out for now
-        #    -- PDB 2/26/17 
+        #    -- PDB 2/26/17
         #self._description = "New Plugin Model"
         self.function_tcl = None
         self.math_combo = None
@@ -739,7 +739,7 @@ class EditorPanel(wx.ScrolledWindow):
 
         self.param_sizer.AddMany([(param_txt, 0, wx.LEFT, 10),
                                   (self.param_tcl, 1, wx.EXPAND | wx.ALL, 10)])
-        
+
         # Parameters with polydispersity
         pd_param_txt = wx.StaticText(self, -1, 'Fit Parameters requiring ' + \
                                      'polydispersity (if any): ')
@@ -754,7 +754,7 @@ class EditorPanel(wx.ScrolledWindow):
                                     wx.CLIP_CHILDREN | wx.SUNKEN_BORDER)
         self.pd_param_tcl.setDisplayLineNumbers(True)
         self.pd_param_tcl.SetToolTipString(pd_param_tip)
-        
+
         self.param_sizer.AddMany([(pd_param_txt, 0, wx.LEFT, 10),
                                   (self.pd_param_tcl, 1, wx.EXPAND | wx.ALL, 10)])
 
@@ -1029,20 +1029,20 @@ class EditorPanel(wx.ScrolledWindow):
         has_scipy = func_str.count("scipy.")
         if has_scipy:
             lines.insert(0, 'import scipy')
-        
-        # Think about 2D later        
+
+        # Think about 2D later
         #self.is_2d = func_str.count("#self.ndim = 2")
         #line_2d = ''
         #if self.is_2d:
         #    line_2d = CUSTOM_2D_TEMP.split('\n')
-        
-        # Also think about test later        
+
+        # Also think about test later
         #line_test = TEST_TEMPLATE.split('\n')
         #local_params = ''
         #spaces = '        '#8spaces
         spaces4  = ' '*4
         spaces13 = ' '*13
-        spaces16 = ' '*16     
+        spaces16 = ' '*16
         param_names = []    # to store parameter names
         has_scipy = func_str.count("scipy.")
         if has_scipy:
@@ -1054,11 +1054,11 @@ class EditorPanel(wx.ScrolledWindow):
             # hard-coded in the template as shown below.
             out_f.write(line + '\n')
             if line.count('#name'):
-                out_f.write('name = "%s" \n' % name)               
+                out_f.write('name = "%s" \n' % name)
             elif line.count('#title'):
-                out_f.write('title = "User model for %s"\n' % name)               
+                out_f.write('title = "User model for %s"\n' % name)
             elif line.count('#description'):
-                out_f.write('description = "%s"\n' % desc_str)               
+                out_f.write('description = "%s"\n' % desc_str)
             elif line.count('#parameters'):
                 out_f.write('parameters = [ \n')
                 for param_line in param_str.split('\n'):
@@ -1074,14 +1074,14 @@ class EditorPanel(wx.ScrolledWindow):
                         param_names.append(pname)
                         out_f.write("%s['%s', '', %s, [-numpy.inf, numpy.inf], 'volume', ''],\n" % (spaces16, pname, pvalue))
                 out_f.write('%s]\n' % spaces13)
-            
+
         # No form_volume or ER available in simple model editor
         out_f.write('def form_volume(*arg): \n')
         out_f.write('    return 1.0 \n')
         out_f.write('\n')
         out_f.write('def ER(*arg): \n')
         out_f.write('    return 1.0 \n')
-        
+
         # function to compute
         out_f.write('\n')
         out_f.write('def Iq(x ')
@@ -1090,9 +1090,9 @@ class EditorPanel(wx.ScrolledWindow):
         out_f.write('):\n')
         for func_line in func_str.split('\n'):
             out_f.write('%s%s\n' % (spaces4, func_line))
-        
+
         Iqxy_string = 'return Iq(numpy.sqrt(x**2+y**2) '
-            
+
         out_f.write('\n')
         out_f.write('def Iqxy(x, y ')
         for name in param_names:
@@ -1203,13 +1203,13 @@ import os
 import sys
 import numpy
 
-#name 
+#name
 
 #title
 
 #description
 
-#parameters 
+#parameters
 
 """
 
@@ -1589,16 +1589,8 @@ if __name__ == "__main__":
 """
 
 if __name__ == "__main__":
-#    app = wx.PySimpleApp()
     main_app = wx.App()
     main_frame = TextDialog(id=1, model_list=["SphereModel", "CylinderModel"],
                        plugin_dir='../fitting/plugin_models')
     main_frame.ShowModal()
     main_app.MainLoop()
-
-#if __name__ == "__main__":
-#    from sas.sasgui.perspectives.fitting import models
-#    dir_path = models.find_plugins_dir()
-#    app = wx.App()
-#    window = EditorWindow(parent=None, base=None, path=dir_path, title="Editor")
-#    app.MainLoop()

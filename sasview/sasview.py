@@ -95,6 +95,17 @@ class SasView():
         # modules. We load the fitting module here
         # to ensure a complete Windows executable build.
 
+        # Rebuild .sasview/categories.json.  This triggers a load of sasmodels
+        # and all the plugins.
+        try:
+            from sas.sascalc.fit.models import ModelManager
+            from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
+            model_list = ModelManager().cat_model_list()
+            CategoryInstaller.check_install(model_list=model_list)
+        except Exception:
+            logger.error("%s: could not load SasView models")
+            logger.error(traceback.format_exc())
+
         # Fitting perspective
         try:
             import sas.sasgui.perspectives.fitting as module

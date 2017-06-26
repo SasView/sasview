@@ -18,11 +18,14 @@ import numpy as np
 import wx
 from wx.lib.scrolledpanel import ScrolledPanel
 
+from sasmodels.sasview_model import MultiplicationModel
 from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
+from sasmodels.weights import GaussianDispersion
 
 from sas.sascalc.dataloader.data_info import Detector
 from sas.sascalc.dataloader.data_info import Source
 from sas.sascalc.fit.pagestate import PageState
+from sas.sascalc.fit.models import PLUGIN_NAME_BASE
 
 from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.guiframe.utils import format_number, check_float, IdList, \
@@ -37,7 +40,8 @@ from sas.sasgui.guiframe.gui_style import GUIFRAME_ID
 from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
-from sas.sasgui.perspectives.fitting.report_dialog import ReportDialog
+from .report_dialog import ReportDialog
+from .utils import get_weight
 
 logger = logging.getLogger(__name__)
 
@@ -1213,7 +1217,6 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         self.categorybox.Select(category_pos)
         self._show_combox(None)
-        from models import PLUGIN_NAME_BASE
         if self.categorybox.GetValue() == CUSTOM_MODEL \
                 and PLUGIN_NAME_BASE not in state.formfactorcombobox:
             state.formfactorcombobox = \
@@ -1751,7 +1754,6 @@ class BasicPage(ScrolledPanel, PanelBase):
                 if not self.disable_smearer.GetValue():
                     temp_smear = self.current_smearer
             # compute weight for the current data
-            from sas.sasgui.perspectives.fitting.utils import get_weight
             flag = self.get_weight_flag()
             weight = get_weight(data=self.data, is2d=self._is_2D(), flag=flag)
             toggle_mode_on = self.model_view.IsEnabled()
@@ -1777,7 +1779,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         x, y = self.model.getProfile()
 
         from sas.sasgui.plottools import Data1D as pf_data1d
-        # from sas.sasgui.perspectives.theory.profile_dialog import SLDPanel
         from sas.sasgui.guiframe.local_perspectives.plotting.profile_dialog \
             import SLDPanel
         sld_data = pf_data1d(x, y)
@@ -2073,7 +2074,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         struct_factor = self.structurebox.GetClientData(s_id)
 
         if struct_factor is not None:
-            from sasmodels.sasview_model import MultiplicationModel
             self.model = MultiplicationModel(form_factor(self.multi_factor),
                                              struct_factor())
             # multifunctional form factor
@@ -2395,8 +2395,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.values = {}
         self.weights = {}
 
-        # from sas.models.dispersion_models import GaussianDispersion
-        from sasmodels.weights import GaussianDispersion
         if not self.disp_cb_dict:
             self.sizer4_4.Clear(True)
         else:

@@ -8,13 +8,19 @@ FitPanel class contains fields allowing to fit  models and  data
 import wx
 from wx.aui import AuiNotebook as nb
 
+from sas.sascalc.fit.models import ModelManager
+
 from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.guiframe.events import PanelOnFocusEvent, StatusEvent
 from sas.sasgui.guiframe.dataFitting import check_data_validity
-from sas.sasgui.perspectives.fitting.simfitpage import SimultaneousFitPage
 
-import basepage
-import models
+
+from . import basepage
+from .fitpage import FitPage
+from .simfitpage import SimultaneousFitPage
+from .batchfitpage import BatchFitPage
+from .fitting_widgets import BatchDataDialog
+
 _BOX_WIDTH = 80
 
 
@@ -45,7 +51,7 @@ class FitPanel(nb, PanelBase):
         self.parent = parent
         self.event_owner = None
         # dictionary of miodel {model class name, model class}
-        self.menu_mng = models.ModelManager()
+        self.menu_mng = ModelManager()
         self.model_list_box = self.menu_mng.get_model_list()
         # pageClosedEvent = nb.EVT_FLATNOTEBOOK_PAGE_CLOSING
         self.model_dictionary = self.menu_mng.get_model_dictionary()
@@ -309,7 +315,6 @@ class FitPanel(nb, PanelBase):
         """
         Add the simultaneous fit page
         """
-        from simfitpage import SimultaneousFitPage
         page_finder = self._manager.get_page_finder()
         if caption == "Const & Simul Fit":
             self.sim_page = SimultaneousFitPage(self, page_finder=page_finder,
@@ -337,14 +342,12 @@ class FitPanel(nb, PanelBase):
         add an empty page
         """
         if self.batch_on:
-            from batchfitpage import BatchFitPage
             panel = BatchFitPage(parent=self)
             self.batch_page_index += 1
             caption = "BatchPage" + str(self.batch_page_index)
             panel.set_index_model(self.batch_page_index)
         else:
             # Increment index of fit page
-            from fitpage import FitPage
             panel = FitPage(parent=self)
             self.fit_page_index += 1
             caption = "FitPage" + str(self.fit_page_index)
@@ -442,8 +445,6 @@ class FitPanel(nb, PanelBase):
                     break
         if data_1d_list and data_2d_list:
             # need to warning the user that this batch is a special case
-            from sas.sasgui.perspectives.fitting.fitting_widgets import \
-                BatchDataDialog
             dlg = BatchDataDialog(self)
             if dlg.ShowModal() == wx.ID_OK:
                 data_type = dlg.get_data()

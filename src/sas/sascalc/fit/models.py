@@ -13,12 +13,15 @@ import datetime
 import logging
 import py_compile
 import shutil
+
+from sasmodels.sasview_model import load_custom_model, load_standard_models
+
 # Explicitly import from the pluginmodel module so that py2exe
 # places it in the distribution. The Model1DPlugin class is used
 # as the base class of plug-in models.
-from sas.sascalc.fit.pluginmodel import Model1DPlugin
+from .pluginmodel import Model1DPlugin
+
 from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
-from sasmodels.sasview_model import load_custom_model, load_standard_models
 
 logger = logging.getLogger(__name__)
 
@@ -27,12 +30,6 @@ PLUGIN_DIR = 'plugin_models'
 PLUGIN_LOG = os.path.join(os.path.expanduser("~"), '.sasview', PLUGIN_DIR,
                           "plugins.log")
 PLUGIN_NAME_BASE = '[plug-in] '
-
-def get_model_python_path():
-    """
-    Returns the python path for a model
-    """
-    return os.path.dirname(__file__)
 
 
 def plugin_log(message):
@@ -417,41 +414,47 @@ class ModelManager(object):
     """
     implement model
     """
-    __modelmanager = ModelManagerBase()
-    cat_model_list = [__modelmanager.model_dictionary[model_name] for model_name \
-                      in __modelmanager.model_dictionary.keys() \
-                      if model_name not in __modelmanager.stored_plugins.keys()]
+    base = None  # type: ModelManagerBase()
 
-    CategoryInstaller.check_install(model_list=cat_model_list)
+    def __init__(self):
+        if ModelManager.base is None:
+            self.base = ModelManagerBase()
+
+    def cat_model_list(self):
+        models = self.base.model_dictionary
+        retval = [model for model_name, model in models.items()
+                  if model_name not in self.base.stored_plugins]
+        return retval
+
     def findModels(self):
-        return self.__modelmanager.findModels()
+        return self.base.findModels()
 
     def _getModelList(self):
-        return self.__modelmanager._getModelList()
+        return self.base._getModelList()
 
     def is_changed(self):
-        return self.__modelmanager.is_changed()
+        return self.base.is_changed()
 
     def update(self):
-        return self.__modelmanager.update()
+        return self.base.update()
 
     def plugins_reset(self):
-        return self.__modelmanager.plugins_reset()
+        return self.base.plugins_reset()
 
-    def populate_menu(self, modelmenu, event_owner):
-        return self.__modelmanager.populate_menu(modelmenu, event_owner)
+    #def populate_menu(self, modelmenu, event_owner):
+    #    return self.base.populate_menu(modelmenu, event_owner)
 
     def _on_model(self, evt):
-        return self.__modelmanager._on_model(evt)
+        return self.base._on_model(evt)
 
     def _get_multifunc_models(self):
-        return self.__modelmanager._get_multifunc_models()
+        return self.base._get_multifunc_models()
 
     def get_model_list(self):
-        return self.__modelmanager.get_model_list()
+        return self.base.get_model_list()
 
     def get_model_name_list(self):
-        return self.__modelmanager.get_model_name_list()
+        return self.base.get_model_name_list()
 
     def get_model_dictionary(self):
-        return self.__modelmanager.get_model_dictionary()
+        return self.base.get_model_dictionary()

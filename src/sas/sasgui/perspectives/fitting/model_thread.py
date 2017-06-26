@@ -3,8 +3,10 @@ Calculation thread for modeling
 """
 
 import time
-import numpy as np
 import math
+
+import numpy as np
+
 from sas.sascalc.data_util.calcthread import CalcThread
 from sas.sascalc.fit.MultiplicationModel import MultiplicationModel
 
@@ -239,13 +241,13 @@ Example: ::
 
     class CalcCommandline:
         def __init__(self, n=20000):
-            #print thread.get_ident()
-            from sas.models.CylinderModel import CylinderModel
+            #print(thread.get_ident())
 
-            model = CylinderModel()
+            from sasmodels.sasview_model import _make_standard_model
+            cylinder = _make_standard_model('cylinder')
+            model = cylinder()
 
-
-            print model.runXY([0.01, 0.02])
+            print(model.runXY([0.01, 0.02]))
 
             qmax = 0.01
             qstep = 0.0001
@@ -254,12 +256,11 @@ Example: ::
             x = numpy.arange(-qmax, qmax+qstep*0.01, qstep)
             y = numpy.arange(-qmax, qmax+qstep*0.01, qstep)
 
-
             calc_thread_2D = Calc2D(x, y, None, model.clone(),None,
                                     -qmax, qmax,qstep,
-                                            completefn=self.complete,
-                                            updatefn=self.update ,
-                                            yieldtime=0.0)
+                                    completefn=self.complete,
+                                    updatefn=self.update ,
+                                    yieldtime=0.0)
 
             calc_thread_2D.queue()
             calc_thread_2D.ready(2.5)
@@ -268,10 +269,10 @@ Example: ::
                 time.sleep(1)
 
         def update(self,output):
-            print "update"
+            print("update")
 
         def complete(self, image, data, model, elapsed, qmin, qmax,index, qstep ):
-            print "complete"
+            print("complete")
             self.done = True
 
     if __name__ == "__main__":

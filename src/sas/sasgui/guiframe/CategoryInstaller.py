@@ -18,7 +18,7 @@ USER_FILE = 'categories.json'
 
 logger = logging.getLogger(__name__)
 
-class CategoryInstaller:
+class CategoryInstaller(object):
     """
     Class for making sure all category stuff is installed
 
@@ -33,16 +33,8 @@ class CategoryInstaller:
         """
         returns the dir where installed_models.txt should be
         """
-        import sas.sascalc.dataloader.readers
-        return sas.sascalc.dataloader.readers.get_data_path()
-
-    @staticmethod
-    def _get_models_py_dir():
-        """
-        returns the dir where models.py should be
-        """
-        import sas.sasgui.perspectives.fitting.models
-        return sas.sasgui.perspectives.fitting.models.get_model_python_path()
+        from sas.sascalc.dataloader.readers import get_data_path
+        return get_data_path()
 
     @staticmethod
     def _get_default_cat_file_dir():
@@ -84,7 +76,7 @@ class CategoryInstaller:
         """
         by_model_dict = defaultdict(list)
         model_enabled_dict = defaultdict(bool)
-        
+
         for category in master_category_dict:
             for (model, enabled) in master_category_dict[category]:
                 by_model_dict[model].append(category)
@@ -95,7 +87,7 @@ class CategoryInstaller:
     @staticmethod
     def _regenerate_master_dict(by_model_dict, model_enabled_dict):
         """
-        regenerates master_category_dict from by_model_dict 
+        regenerates master_category_dict from by_model_dict
         and model_enabled_dict
         returns the master category dictionary
         """
@@ -127,7 +119,7 @@ class CategoryInstaller:
         :param model_list: List of model names except those in Plugin Models
                which are user supplied.
         """
-        _model_dict = { model.name: model for model in model_list}
+        _model_dict = {model.name: model for model in model_list}
         _model_list = _model_dict.keys()
 
         serialized_file = None
@@ -149,18 +141,20 @@ class CategoryInstaller:
             for ind in range(len(master_category_dict[cat])):
                 model_name, enabled = master_category_dict[cat][ind]
                 if model_name not in _model_list:
-                    del_name = True 
+                    del_name = True
                     try:
                         by_model_dict.pop(model_name)
                         model_enabled_dict.pop(model_name)
-                    except:
+                    except Exception:
                         logger.error("CategoryInstaller: %s", sys.exc_value)
                 else:
                     add_list.remove(model_name)
         if del_name or (len(add_list) > 0):
             for model in add_list:
-                model_enabled_dict[model]= True
-                if _model_dict[model].category is None or len(str(_model_dict[model].category.capitalize())) == 0:
+                model_enabled_dict[model] = True
+                # TODO: should be:  not _model_dict[model].category
+                if (_model_dict[model].category is None
+                        or len(str(_model_dict[model].category.capitalize())) == 0):
                     by_model_dict[model].append('Uncategorized')
                 else:
                     category = _model_dict[model].category
