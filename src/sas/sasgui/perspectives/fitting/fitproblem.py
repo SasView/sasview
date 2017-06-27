@@ -13,7 +13,8 @@ for a fitProblem i.e relationship between data and model.
 #copyright 2009, University of Tennessee
 ################################################################################
 import copy
-from sas.sascalc.data_util.qsmearing import smear_selection
+
+from sas.sascalc.fit.qsmearing import smear_selection
 
 class FitProblemComponent(object):
     """
@@ -621,8 +622,7 @@ class FitProblem(FitProblemComponent):
         self.original_data = data
         # fit data: used for fit and can be modified for convenience
         self.fit_data = copy.deepcopy(data)
-        self.smearer_computer_value = smear_selection(self.fit_data,
-                                                           self.model)
+        self.smearer_computer_value = smear_selection(self.fit_data, self.model)
         self.smearer_computed = True
         self.result = None
 

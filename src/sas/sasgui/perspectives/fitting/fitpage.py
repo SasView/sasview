@@ -13,6 +13,8 @@ import traceback
 
 from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
 
+from sas.sascalc.fit.qsmearing import smear_selection
+
 from sas.sasgui.guiframe.events import StatusEvent, NewPlotEvent, \
     PlotQrangeEvent
 from sas.sasgui.guiframe.dataFitting import check_data_validity
@@ -22,7 +24,6 @@ from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 from sas.sasgui.perspectives.fitting.basepage import BasicPage as BasicPage
 from sas.sasgui.perspectives.fitting.basepage import PageInfoEvent as \
     PageInfoEvent
-from sas.sascalc.data_util.qsmearing import smear_selection
 from .basepage import ModelTextCtrl
 
 (Chi2UpdateEvent, EVT_CHI2_UPDATE) = wx.lib.newevent.NewEvent()
@@ -288,7 +289,7 @@ class FitPage(BasicPage):
         self.btFitHelp = wx.Button(self, wx.ID_ANY, 'Help')
         self.btFitHelp.SetToolTipString("General fitting help.")
         self.btFitHelp.Bind(wx.EVT_BUTTON, self._onFitHelp)
-        
+
         # Resolution Smearing Help button (for now use same technique as
         # used for dI help to get tiniest possible button that works
         # both on MAC and PC.  Should completely rewrite the fitting sizer
@@ -302,7 +303,7 @@ class FitPage(BasicPage):
                                      style=wx.BU_EXACTFIT, size=size_q)
         self.btSmearHelp.SetToolTipString("Resolution smearing help.")
         self.btSmearHelp.Bind(wx.EVT_BUTTON, self._onSmearHelp)
-        
+
         # textcntrl for custom resolution
         self.smear_pinhole_percent = ModelTextCtrl(self, wx.ID_ANY,
                                                    size=(_BOX_WIDTH - 25, 20),
@@ -563,13 +564,13 @@ class FitPage(BasicPage):
         sizer.Add(self.points_sizer, 0, 0)
         sizer.Add(self.draw_button, 0, 0)
         sizer.Add((-1, 5))
-        
+
         sizer.Add(self.tcChi, 0, 0)
         sizer.Add(self.Npts_fit, 0, 0)
         sizer.Add(self.Npts_total, 0, 0)
         sizer.Add(self.btFit, 0, 0)
         sizer.Add(self.btFitHelp, 0, 0)
-        
+
         boxsizer_range.Add(sizer_chi2)
         boxsizer_range.Add(sizer)
         if is_2d_data:
@@ -2774,7 +2775,7 @@ class FitPage(BasicPage):
             # no numbers
             else:
                 return cmp(a.lower(), b.lower())
-        
+
         # keys obtained now from ordered dict, so commenting alphabetical
         # ordering keys.sort(custom_compare)
 
