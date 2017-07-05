@@ -224,8 +224,6 @@ class PageState(object):
 
         # contains link between a model and selected parameters to fit
         self.param_toFit = []
-        # dictionary of model type and model class
-        self.model_list_box = None
         # save the state of the context menu
         self.saved_states = {}
         # save selection of combobox
@@ -287,7 +285,6 @@ class PageState(object):
             self.data_name = self.data.name
         obj.data_name = self.data_name
         obj.is_data = self.is_data
-        obj.model_list_box = copy.deepcopy(self.model_list_box)
 
         obj.categorycombobox = self.categorycombobox
         obj.formfactorcombobox = self.formfactorcombobox
@@ -966,8 +963,10 @@ class PageState(object):
 
             # Get file name
             entry = get_content('ns:filename', node)
-            if entry is not None:
+            if entry is not None and entry.text:
                 self.file = entry.text.strip()
+            else:
+                self.file = ''
 
             # Get time stamp
             entry = get_content('ns:timestamp', node)

@@ -30,12 +30,15 @@ import os
 import math
 import re
 import logging
+import datetime
+
 from wx.py.editwindow import EditWindow
+
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
+
 from .pyconsole import show_model_output, check_model
 
 logger = logging.getLogger(__name__)
-
 
 if sys.platform.count("win32") > 0:
     FONT_VARIANT = 0
@@ -77,7 +80,7 @@ class TextDialog(wx.Dialog):
     'Plugin Model Operations' under 'Fitting' menu.  This is currently called as
     a Modal Dialog.
 
-    :TODO the build in compiler currently balks at when it tries to import
+    :TODO the built in compiler currently balks at when it tries to import
     a model whose name contains spaces or symbols (such as + ... underscore
     should be fine).  Have fixed so the editor cannot save such a file name
     but if a file is dropped in the plugin directory from outside this class
@@ -335,7 +338,7 @@ class TextDialog(wx.Dialog):
             #Create list of existing model names for comparison
             list_fnames = os.listdir(self.plugin_dir)
             # fake existing regular model name list
-            m_list = [model + ".py" for model in self.model_list]
+            m_list = [model.name + ".py" for model in self.model_list]
             list_fnames.append(m_list)
             if t_fname in list_fnames and title != mname:
                 self.good_name = False
@@ -854,7 +857,7 @@ class EditorPanel(wx.ScrolledWindow):
                 try:
                     exec "float(math.%s)" % item
                     self.math_combo.Append(str(item))
-                except:
+                except Exception:
                     self.math_combo.Append(str(item) + "()")
         self.math_combo.Bind(wx.EVT_COMBOBOX, self._on_math_select)
         self.math_combo.SetSelection(0)
@@ -979,16 +982,9 @@ class EditorPanel(wx.ScrolledWindow):
         else:
             msg = "Name exists already."
 
-        # Prepare the messagebox
+        #
         if self.base is not None and not msg:
             self.base.update_custom_combo()
-            # Passed exception in import test as it will fail for sasmodels.sasview_model class
-            # Should add similar test for new style?
-            Model = None
-            try:
-                exec "from %s import Model" % name
-            except:
-                logger.error(sys.exc_value)
 
         # Prepare the messagebox
         if msg:
@@ -1019,107 +1015,76 @@ class EditorPanel(wx.ScrolledWindow):
         :param pd_param_str: content of params requiring polydispersity; Strings
         :param func_str: content of func; Strings
         """
-        try:
-            out_f = open(fname, 'w')
-        except:
-            raise
-        # Prepare the content of the function
-        lines = CUSTOM_TEMPLATE.split('\n')
+        out_f = open(fname, 'w')
 
-        has_scipy = func_str.count("scipy.")
-        if has_scipy:
-            lines.insert(0, 'import scipy')
+        out_f.write(CUSTOM_TEMPLATE % {
+            'name': name,
+            'title': 'User model for ' + name,
+            'description': desc_str,
+            'date': datetime.datetime.now().strftime('%YYYY-%mm-%dd'),
+        })
 
-        # Think about 2D later
-        #self.is_2d = func_str.count("#self.ndim = 2")
-        #line_2d = ''
-        #if self.is_2d:
-        #    line_2d = CUSTOM_2D_TEMP.split('\n')
-
-        # Also think about test later
-        #line_test = TEST_TEMPLATE.split('\n')
-        #local_params = ''
-        #spaces = '        '#8spaces
-        spaces4  = ' '*4
-        spaces13 = ' '*13
-        spaces16 = ' '*16
+        # Write out parameters
         param_names = []    # to store parameter names
-        has_scipy = func_str.count("scipy.")
-        if has_scipy:
-            lines.insert(0, 'import scipy')
+        pd_params = []
+        out_f.write('parameters = [ \n')
+        out_f.write('#   ["name", "units", default, [lower, upper], "type", "description"],\n')
+        for pname, pvalue in self.get_param_helper(param_str):
+            param_names.append(pname)
+            out_f.write("    ['%s', '', %s, [-inf, inf], '', ''],\n"
+                        % (pname, pvalue))
+        for pname, pvalue in self.get_param_helper(pd_param_str):
+            param_names.append(pname)
+            pd_params.append(pname)
+            out_f.write("    ['%s', '', %s, [-inf, inf], 'volume', ''],\n"
+                        % (pname, pvalue))
+        out_f.write('    ]\n')
 
-        # write function here
-        for line in lines:
-            # The location where to put the strings is
-            # hard-coded in the template as shown below.
-            out_f.write(line + '\n')
-            if line.count('#name'):
-                out_f.write('name = "%s" \n' % name)
-            elif line.count('#title'):
-                out_f.write('title = "User model for %s"\n' % name)
-            elif line.count('#description'):
-                out_f.write('description = "%s"\n' % desc_str)
-            elif line.count('#parameters'):
-                out_f.write('parameters = [ \n')
-                for param_line in param_str.split('\n'):
-                    p_line = param_line.lstrip().rstrip()
-                    if p_line:
-                        pname, pvalue = self.get_param_helper(p_line)
-                        param_names.append(pname)
-                        out_f.write("%s['%s', '', %s, [-numpy.inf, numpy.inf], '', ''],\n" % (spaces16, pname, pvalue))
-                for param_line in pd_param_str.split('\n'):
-                    p_line = param_line.lstrip().rstrip()
-                    if p_line:
-                        pname, pvalue = self.get_param_helper(p_line)
-                        param_names.append(pname)
-                        out_f.write("%s['%s', '', %s, [-numpy.inf, numpy.inf], 'volume', ''],\n" % (spaces16, pname, pvalue))
-                out_f.write('%s]\n' % spaces13)
-
-        # No form_volume or ER available in simple model editor
-        out_f.write('def form_volume(*arg): \n')
-        out_f.write('    return 1.0 \n')
-        out_f.write('\n')
-        out_f.write('def ER(*arg): \n')
-        out_f.write('    return 1.0 \n')
-
-        # function to compute
-        out_f.write('\n')
-        out_f.write('def Iq(x ')
-        for name in param_names:
-            out_f.write(', %s' % name)
-        out_f.write('):\n')
+        # Write out function definition
+        out_f.write('def Iq(%s):\n' % ', '.join(['x'] + param_names))
+        out_f.write('    """Absolute scattering"""\n')
+        if "scipy." in func_str:
+            out_f.write('    import scipy')
+        if "numpy." in func_str:
+            out_f.write('    import numpy')
+        if "np." in func_str:
+            out_f.write('    import numpy as np')
         for func_line in func_str.split('\n'):
             out_f.write('%s%s\n' % (spaces4, func_line))
+        out_f.write('## uncomment the following if Iq works for vector x\n')
+        out_f.write('#Iq.vectorized = True\n')
 
-        Iqxy_string = 'return Iq(numpy.sqrt(x**2+y**2) '
+        # If polydisperse, create place holders for form_volume, ER and VR
+        if pd_params:
+            out_f.write('\n')
+            out_f.write(CUSTOM_TEMPLATE_PD % {'args': ', '.join(pd_params)})
 
+        # Create place holder for Iqxy
         out_f.write('\n')
-        out_f.write('def Iqxy(x, y ')
-        for name in param_names:
-            out_f.write(', %s' % name)
-            Iqxy_string += ', ' + name
-        out_f.write('):\n')
-        Iqxy_string += ')'
-        out_f.write('%s%s\n' % (spaces4, Iqxy_string))
+        out_f.write('#def Iqxy(%s):\n' % ', '.join(["x", "y"] + param_names))
+        out_f.write('#    """Absolute scattering of oriented particles."""\n')
+        out_f.write('#    ...\n')
+        out_f.write('#    return oriented_form(x, y, args)\n')
+        out_f.write('## uncomment the following if Iqxy works for vector x, y\n')
+        out_f.write('#Iqxy.vectorized = True\n')
 
         out_f.close()
 
-    def get_param_helper(self, line):
+    def get_param_helper(self, param_str):
         """
-        Get string in line to define the params dictionary
+        yield a sequence of name, value pairs for the parameters in param_str
 
-        :param line: one line of string got from the param_str
+        Parameters can be defined by one per line by name=value, or multiple
+        on the same line by separating the pairs by semicolon or comma.  The
+        value is optional and defaults to "1.0".
         """
-        items = line.split(";")
-        for item in items:
-            name = item.split("=")[0].lstrip().rstrip()
-            try:
-                value = item.split("=")[1].lstrip().rstrip()
-                float(value)
-            except:
-                value = 1.0 # default
-
-        return name, value
+        for line in param_str.replace(';', ',').split('\n'):
+            for item in line.split(','):
+                parts = item.plit('=')
+                name = parts[0].strip()
+                value = parts[1] if len(parts) > 0 else '1.0'
+                if name:
+                    yield name, value
 
     def set_function_helper(self, line):
         """
@@ -1153,8 +1118,8 @@ class EditorPanel(wx.ScrolledWindow):
         webbrowser does not pass anything past the # to the browser when it is
         running "file:///...."
 
-    :param evt: Triggers on clicking the help button
-    """
+        :param evt: Triggers on clicking the help button
+        """
 
         _TreeLocation = "user/sasgui/perspectives/fitting/fitting_help.html"
         _PageAnchor = "#new-plugin-model"
@@ -1197,76 +1162,60 @@ class EditorWindow(wx.Frame):
 
 ## Templates for plugin models
 
-CUSTOM_TEMPLATE = """
+CUSTOM_TEMPLATE = '''\
+r"""
+Definition
+----------
+
+Calculates %(name)s.
+
+%(description)s
+
+References
+----------
+
+Authorship and Verification
+---------------------------
+
+* **Author:** --- **Date:** %(date)s
+* **Last Modified by:** --- **Date:** %(date)s
+* **Last Reviewed by:** --- **Date:** %(date)s
+"""
+
 from math import *
-import os
-import sys
-import numpy
+from numpy import inf
 
-#name
+name = "%(name)s"
+title = "%(title)s"
+description = """%(description)s"""
 
-#title
+'''
 
-#description
+CUSTOM_TEMPLATE_PD = '''\
+def form_volume(%(args)s):
+    """
+    Volume of the particles used to compute absolute scattering intensity
+    and to weight polydisperse parameter contributions.
+    """
+    return 0.0
 
-#parameters
+def ER(%(args)s):
+    """
+    Effective radius of particles to be used when computing structure factors.
 
-"""
+    Input parameters are vectors ranging over the mesh of polydispersity values.
+    """
+    return 0.0
 
-CUSTOM_2D_TEMP = """
-    def run(self, x=0.0, y=0.0):
-        if x.__class__.__name__ == 'list':
-            x_val = x[0]
-            y_val = y[0]*0.0
-            return self.function(x_val, y_val)
-        elif x.__class__.__name__ == 'tuple':
-            msg = "Tuples are not allowed as input to BaseComponent models"
-            raise ValueError, msg
-        else:
-            return self.function(x, 0.0)
-    def runXY(self, x=0.0, y=0.0):
-        if x.__class__.__name__ == 'list':
-            return self.function(x, y)
-        elif x.__class__.__name__ == 'tuple':
-            msg = "Tuples are not allowed as input to BaseComponent models"
-            raise ValueError, msg
-        else:
-            return self.function(x, y)
-    def evalDistribution(self, qdist):
-        if qdist.__class__.__name__ == 'list':
-            msg = "evalDistribution expects a list of 2 ndarrays"
-            if len(qdist)!=2:
-                raise RuntimeError, msg
-            if qdist[0].__class__.__name__ != 'ndarray':
-                raise RuntimeError, msg
-            if qdist[1].__class__.__name__ != 'ndarray':
-                raise RuntimeError, msg
-            v_model = numpy.vectorize(self.runXY, otypes=[float])
-            iq_array = v_model(qdist[0], qdist[1])
-            return iq_array
-        elif qdist.__class__.__name__ == 'ndarray':
-            v_model = numpy.vectorize(self.runXY, otypes=[float])
-            iq_array = v_model(qdist)
-            return iq_array
-"""
-TEST_TEMPLATE = """
-######################################################################
-## THIS IS FOR TEST. DO NOT MODIFY THE FOLLOWING LINES!!!!!!!!!!!!!!!!
-if __name__ == "__main__":
-    m= Model()
-    out1 = m.runXY(0.0)
-    out2 = m.runXY(0.01)
-    isfine1 = numpy.isfinite(out1)
-    isfine2 = numpy.isfinite(out2)
-    print "Testing the value at Q = 0.0:"
-    print out1, " : finite? ", isfine1
-    print "Testing the value at Q = 0.01:"
-    print out2, " : finite? ", isfine2
-    if isfine1 and isfine2:
-        print "===> Simple Test: Passed!"
-    else:
-        print "===> Simple Test: Failed!"
-"""
+def VR(%(args)s):
+    """
+    Volume ratio of particles to be used when computing structure factors.
+
+    Input parameters are vectors ranging over the mesh of polydispersity values.
+    """
+    return 1.0
+'''
+
 SUM_TEMPLATE = """
 # A sample of an experimental model function for Sum/Multiply(Pmodel1,Pmodel2)
 import os
@@ -1591,6 +1540,6 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     main_app = wx.App()
     main_frame = TextDialog(id=1, model_list=["SphereModel", "CylinderModel"],
-                       plugin_dir='../fitting/plugin_models')
+                            plugin_dir='../fitting/plugin_models')
     main_frame.ShowModal()
     main_app.MainLoop()

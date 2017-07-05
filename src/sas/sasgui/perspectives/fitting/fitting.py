@@ -33,6 +33,7 @@ except ImportError:
 from sas.sascalc.dataloader.loader import Loader
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 from sas.sascalc.fit.pagestate import Reader, PageState, SimFitPageState
+from sas.sascalc.fit import models
 
 from sas.sasgui.guiframe.dataFitting import Data2D
 from sas.sasgui.guiframe.dataFitting import Data1D
@@ -59,7 +60,6 @@ from .fitpanel import FitPanel
 from .model_thread import Calc1D, Calc2D
 from .resultpanel import ResultPanel, PlotResultEvent
 from .gpu_options import GpuOptions
-from . import models
 
 logger = logging.getLogger(__name__)
 
@@ -296,7 +296,7 @@ class Plugin(PluginBase):
         """
         event_id = event.GetId()
         model_manager = models.ModelManager()
-        model_list = model_manager.get_model_name_list()
+        model_list = model_manager.composable_models()
         plug_dir = models.find_plugins_dir()
         textdial = TextDialog(None, self, wx.ID_ANY, 'Easy Sum/Multi(p1, p2) Editor',
                               model_list, plug_dir)
@@ -336,24 +336,30 @@ class Plugin(PluginBase):
             # Update edit menus
             self.set_edit_menu_helper(self.parent, self.edit_custom_model)
             self.set_edit_menu_helper(self.parent, self.delete_custom_model)
-            temp = self.fit_panel.reset_pmodel_list()
-            if temp:
-                # Set the new plugin model list for all fit pages
-                for uid, page in self.fit_panel.opened_pages.iteritems():
-                    if hasattr(page, "formfactorbox"):
-                        page.model_list_box = temp
-                        current_val = page.formfactorbox.GetLabel()
-                        #if page.plugin_rbutton.GetValue():
-                        mod_cat = page.categorybox.GetStringSelection()
-                        if mod_cat == custom_model:
-                            #pos = page.formfactorbox.GetSelection()
-                            page._show_combox_helper()
-                            new_val = page.formfactorbox.GetLabel()
-                            if current_val != new_val and new_val != '':
-                                page.formfactorbox.SetLabel(new_val)
-                            else:
-                                page.formfactorbox.SetLabel(current_val)
-        except:
+            new_pmodel_list = self.fit_panel.reset_pmodel_list()
+            if not new_pmodel_list:
+                return
+            # Set the new plugin model list for all fit pages
+            for uid, page in self.fit_panel.opened_pages.iteritems():
+                if hasattr(page, "formfactorbox"):
+                    page.model_list_box = new_pmodel_list
+                    mod_cat = page.categorybox.GetStringSelection()
+                    if mod_cat == custom_model:
+                        box = page.formfactorbox
+                        model_name = box.GetValue()
+                        model = (box.GetClientData(box.GetCurrentSelection())
+                                 if model_name else None)
+                        page._show_combox_helper()
+                        new_index = box.FindString(model_name)
+                        new_model = (box.GetClientData(new_index)
+                                     if new_index >= 0 else None)
+                        if new_index >= 0:
+                            box.SetStringSelection(model_name)
+                        else:
+                            box.SetStringSelection('')
+                        if model and new_model != model:
+                            page._on_select_model(keep_pars=True)
+        except Exception:
             logger.error("update_custom_combo: %s", sys.exc_value)
 
     def set_edit_menu(self, owner):
@@ -363,7 +369,7 @@ class Plugin(PluginBase):
         wx_id = wx.NewId()
         #new_model_menu = wx.Menu()
         self.edit_model_menu.Append(wx_id, 'New Plugin Model',
-                                   'Add a new model function')
+                                    'Add a new model function')
         wx.EVT_MENU(owner, wx_id, self.make_new_model)
 
         wx_id = wx.NewId()
@@ -645,7 +651,7 @@ class Plugin(PluginBase):
                 data.group_id = state.data.group_id
                 self.parent.add_data(data_list={data.id: data})
                 wx.PostEvent(self.parent, NewPlotEvent(plot=data,
-                                        title=data.title))
+                             title=data.title))
                 #need to be fix later make sure we are sendind guiframe.data
                 #to panel
                 state.data = data
@@ -656,11 +662,11 @@ class Plugin(PluginBase):
                 data.group_id = state.data.group_id
                 self.parent.add_data(data_list={data.id: data})
                 wx.PostEvent(self.parent, NewPlotEvent(plot=data,
-                                        title=data.title))
+                             title=data.title))
                 page = self.add_fit_page([data])
                 caption = page.window_caption
                 self.store_data(uid=page.uid, data_list=page.get_data_list(),
-                        caption=caption)
+                                caption=caption)
                 self.mypanels.append(page)
 
             # get ready for the next set_state
@@ -777,7 +783,7 @@ class Plugin(PluginBase):
 
         """
         if item.find(".") >= 0:
-            param_names = re.split("\.", item)
+            param_names = re.split(r"\.", item)
             model_name = param_names[0]
             ##Assume max len is 3; eg., M0.radius.width
             if len(param_names) == 3:
@@ -880,8 +886,8 @@ class Plugin(PluginBase):
             weight = self.page_finder[uid].get_weight(fid=fid)
 
             self.draw_model(model=model, data=data, page_id=uid, smearer=smear,
-                enable1D=enable1D, enable2D=enable2D,
-                qmin=qmin, qmax=qmax, weight=weight)
+                            enable1D=enable1D, enable2D=enable2D,
+                            qmin=qmin, qmax=qmax, weight=weight)
 
     def draw_model(self, model, page_id, data=None, smearer=None,
                    enable1D=True, enable2D=False,
@@ -924,18 +930,18 @@ class Plugin(PluginBase):
         else:
             ## draw model 2D with no initial data
             self._draw_model2D(model=model,
-                                page_id=page_id,
-                                data=data,
-                                enable2D=enable2D,
-                                smearer=smearer,
-                                qmin=qmin,
-                                qmax=qmax,
-                                fid=fid,
-                                weight=weight,
-                                state=state,
-                                toggle_mode_on=toggle_mode_on,
-                                update_chisqr=update_chisqr,
-                                source=source)
+                               page_id=page_id,
+                               data=data,
+                               enable2D=enable2D,
+                               smearer=smearer,
+                               qmin=qmin,
+                               qmax=qmax,
+                               fid=fid,
+                               weight=weight,
+                               state=state,
+                               toggle_mode_on=toggle_mode_on,
+                               update_chisqr=update_chisqr,
+                               source=source)
 
     def onFit(self, uid):
         """
@@ -944,7 +950,8 @@ class Plugin(PluginBase):
         corresponding panels.
         :param uid: id related to the panel currently calling this fit function.
         """
-        if uid is None: raise RuntimeError("no page to fit") # Should never happen
+        if uid is None:
+            raise RuntimeError("no page to fit") # Should never happen
 
         sim_page_uid = getattr(self.sim_page, 'uid', None)
         batch_page_uid = getattr(self.batch_page, 'uid', None)
@@ -978,8 +985,8 @@ class Plugin(PluginBase):
                     page_info.nbr_residuals_computed = 0
                     page = self.fit_panel.get_page_by_id(page_id)
                     self.set_fit_weight(uid=page.uid,
-                                     flag=page.get_weight_flag(),
-                                     is2d=page._is_2D())
+                                        flag=page.get_weight_flag(),
+                                        is2d=page._is_2D())
                     if not page.param_toFit:
                         msg = "No fitting parameters for %s" % page.window_caption
                         evt = StatusEvent(status=msg, info="error", type="stop")
@@ -1003,9 +1010,9 @@ class Plugin(PluginBase):
                         else:
                             fitter = sim_fitter
                         self._add_problem_to_fit(fitproblem=fitproblem,
-                                             pars=pars,
-                                             fitter=fitter,
-                                             fit_id=fit_id)
+                                                 pars=pars,
+                                                 fitter=fitter,
+                                                 fit_id=fit_id)
                         fit_id += 1
                     list_page_id.append(page_id)
                     page_info.clear_model_param()
@@ -1052,12 +1059,12 @@ class Plugin(PluginBase):
         else:
             ## Perform more than 1 fit at the time
             calc_fit = FitThread(handler=handler,
-                                    fn=fitter_list,
-                                    batch_inputs=batch_inputs,
-                                    batch_outputs=batch_outputs,
-                                    page_id=list_page_id,
-                                    updatefn=handler.update_fit,
-                                    completefn=self._fit_completed)
+                                 fn=fitter_list,
+                                 batch_inputs=batch_inputs,
+                                 batch_outputs=batch_outputs,
+                                 page_id=list_page_id,
+                                 updatefn=handler.update_fit,
+                                 completefn=self._fit_completed)
         #self.fit_thread_list[current_page_id] = calc_fit
         self.fit_thread_list[uid] = calc_fit
         calc_fit.queue()
@@ -1118,7 +1125,7 @@ class Plugin(PluginBase):
                 msg = "Page was already Created"
                 evt = StatusEvent(status=msg, info="warning")
                 wx.PostEvent(self.parent, evt)
-        except:
+        except Exception:
             msg = "Creating Fit page: %s" % sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
 
@@ -1142,19 +1149,19 @@ class Plugin(PluginBase):
                 if theory_data is not None:
                     group_id = str(page.uid) + " Model1D"
                     wx.PostEvent(self.parent,
-                             NewPlotEvent(group_id=group_id,
-                                               action="delete"))
+                                 NewPlotEvent(group_id=group_id,
+                                              action="delete"))
                     self.parent.update_data(prev_data=theory_data,
-                                             new_data=data)
+                                            new_data=data)
             else:
                 if theory_data is not None:
                     group_id = str(page.uid) + " Model2D"
                     data.group_id = theory_data.group_id
                     wx.PostEvent(self.parent,
-                             NewPlotEvent(group_id=group_id,
-                                               action="delete"))
+                                 NewPlotEvent(group_id=group_id,
+                                              action="delete"))
                     self.parent.update_data(prev_data=theory_data,
-                                             new_data=data)
+                                            new_data=data)
         self.store_data(uid=page.uid, data_list=page.get_data_list(),
                         caption=page.window_caption)
         if self.sim_page is not None and not self.batch_on:
@@ -1556,13 +1563,13 @@ class Plugin(PluginBase):
                         wx.CallAfter(cpage._on_fit_complete)
                     except KeyboardInterrupt:
                         fit_msg += "\nSingular point: Fitting stopped."
-                    except:
+                    except Exception:
                         fit_msg += "\nSingular point: Fitting error occurred."
                 if fit_msg:
-                   evt = StatusEvent(status=fit_msg, info="warning", type="stop")
-                   wx.PostEvent(self.parent, evt)
+                    evt = StatusEvent(status=fit_msg, info="warning", type="stop")
+                    wx.PostEvent(self.parent, evt)
 
-        except:
+        except Exception:
             msg = ("Fit completed but the following error occurred: %s"
                    % sys.exc_value)
             #msg = "\n".join((traceback.format_exc(), msg))
@@ -1720,7 +1727,7 @@ class Plugin(PluginBase):
         self.page_finder[page_id].set_theory_data(data=new_plot,
                                                   fid=data.id)
         self.parent.update_theory(data_id=data.id, theory=new_plot,
-                                   state=state)
+                                  state=state)
         return new_plot
 
     def _complete1D(self, x, y, page_id, elapsed, index, model,
@@ -1774,20 +1781,19 @@ class Plugin(PluginBase):
         self.page_finder[page_id].set_fit_tab_caption(caption=caption)
 
         self.page_finder[page_id].set_theory_data(data=new_plot,
-                                                      fid=data.id)
+                                                  fid=data.id)
         if toggle_mode_on:
             wx.PostEvent(self.parent,
                          NewPlotEvent(group_id=str(page_id) + " Model2D",
-                                          action="Hide"))
+                                      action="Hide"))
         else:
             if update_chisqr:
-                wx.PostEvent(current_pg,
-                             Chi2UpdateEvent(output=self._cal_chisqr(
-                                                                data=data,
-                                                                fid=fid,
-                                                                weight=weight,
-                                                                page_id=page_id,
-                                                                index=index)))
+                output = self._cal_chisqr(data=data,
+                                          fid=fid,
+                                          weight=weight,
+                                          page_id=page_id,
+                                          index=index)
+                wx.PostEvent(current_pg, Chi2UpdateEvent(output=output))
             else:
                 self._plot_residuals(page_id=page_id, data=data, fid=fid,
                                      index=index, weight=weight)
@@ -1795,7 +1801,7 @@ class Plugin(PluginBase):
         if not number_finite:
             logger.error("Using the present parameters the model does not return any finite value. ")
             msg = "Computing Error: Model did not return any finite value."
-            wx.PostEvent(self.parent, StatusEvent(status = msg, info="error"))
+            wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
         else:
             msg = "Computation  completed!"
             if number_finite != y.size:
@@ -1820,8 +1826,8 @@ class Plugin(PluginBase):
         wx.PostEvent(self.parent, StatusEvent(msg, type="update"))
 
     def _complete2D(self, image, data, model, page_id, elapsed, index, qmin,
-                qmax, fid=None, weight=None, toggle_mode_on=False, state=None,
-                     update_chisqr=True, source='model', plot_result=True):
+                    qmax, fid=None, weight=None, toggle_mode_on=False, state=None,
+                    update_chisqr=True, source='model', plot_result=True):
         """
         Complete get the result of modelthread and create model 2D
         that can be plot.
@@ -1862,34 +1868,33 @@ class Plugin(PluginBase):
         self.page_finder[page_id].set_theory_data(data=theory_data,
                                                   fid=data.id)
         self.parent.update_theory(data_id=data.id,
-                                       theory=new_plot,
-                                       state=state)
+                                  theory=new_plot,
+                                  state=state)
         current_pg = self.fit_panel.get_page_by_id(page_id)
         title = new_plot.title
         if not source == 'fit' and plot_result:
-            wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
-                                               title=title))
+            wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=title))
         if toggle_mode_on:
             wx.PostEvent(self.parent,
-                             NewPlotEvent(group_id=str(page_id) + " Model1D",
-                                               action="Hide"))
+                         NewPlotEvent(group_id=str(page_id) + " Model1D",
+                                      action="Hide"))
         else:
             # Chisqr in fitpage
             if update_chisqr:
-                wx.PostEvent(current_pg,
-                             Chi2UpdateEvent(output=self._cal_chisqr(data=data,
-                                                                    weight=weight,
-                                                                    fid=fid,
-                                                         page_id=page_id,
-                                                         index=index)))
+                output = self._cal_chisqr(data=data,
+                                          weight=weight,
+                                          fid=fid,
+                                          page_id=page_id,
+                                          index=index)
+                wx.PostEvent(current_pg, Chi2UpdateEvent(output=output))
             else:
                 self._plot_residuals(page_id=page_id, data=data, fid=fid,
-                                      index=index, weight=weight)
+                                     index=index, weight=weight)
 
         if not number_finite:
             logger.error("Using the present parameters the model does not return any finite value. ")
             msg = "Computing Error: Model did not return any finite value."
-            wx.PostEvent(self.parent, StatusEvent(status = msg, info="error"))
+            wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
         else:
             msg = "Computation  completed!"
             if number_finite != image.size:
@@ -1905,7 +1910,7 @@ class Plugin(PluginBase):
                       fid=None,
                       weight=None,
                       toggle_mode_on=False,
-                       update_chisqr=True, source='model'):
+                      update_chisqr=True, source='model'):
         """
         draw model in 2D
 
@@ -1951,11 +1956,9 @@ class Plugin(PluginBase):
 
     def _draw_model1D(self, model, page_id, data,
                       qmin, qmax, smearer=None,
-                state=None,
-                weight=None,
-                fid=None,
-                toggle_mode_on=False, update_chisqr=True, source='model',
-                enable1D=True):
+                      state=None, weight=None, fid=None,
+                      toggle_mode_on=False, update_chisqr=True, source='model',
+                      enable1D=True):
         """
         Draw model 1D from loaded data1D
 

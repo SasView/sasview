@@ -1142,20 +1142,25 @@ class FitPage(BasicPage):
         if self.model is not None:
             self.model.name = "M" + str(self.index_model)
 
-    def _on_select_model(self, event=None):
+    def _on_select_model(self, event=None, keep_pars=False):
         """
         call back for model selection
         """
         self.Show(False)
-        copy_flag = False
-        is_poly_enabled = None
         if event is not None:
-            if (event.GetEventObject() == self.formfactorbox
-                    and self.structurebox.GetLabel() != 'None')\
-                    or event.GetEventObject() == self.structurebox\
-                    or event.GetEventObject() == self.multifactorbox:
-                copy_flag = self.get_copy_params()
-                is_poly_enabled = self.enable_disp.GetValue()
+            control = event.GetEventObject()
+            if ((control == self.formfactorbox
+                 and self.structurebox.GetLabel() != 'None')
+                    or control == self.structurebox
+                    or control == self.multifactorbox):
+                keep_pars = True
+
+        if keep_pars:
+            saved_pars = self.get_copy_params()
+            is_poly_enabled = self.enable_disp.GetValue()
+        else:
+            saved_pars = None
+            is_poly_enabled = None
 
         self._on_select_model_helper()
         self.set_model_param_sizer(self.model)
@@ -1170,7 +1175,7 @@ class FitPage(BasicPage):
         # Note: if we fix this, then remove ID_DISPERSER_HELP from basepage
         try:
             self.set_dispers_sizer()
-        except:
+        except Exception:
             pass
         self.state.enable_disp = self.enable_disp.GetValue()
         self.state.disable_disp = self.disable_disp.GetValue()
@@ -1231,33 +1236,33 @@ class FitPage(BasicPage):
             self.state.model = self.model.clone()
             self.state.model.name = self.model.name
 
+        # when select a model only from guictr/button
+        if is_poly_enabled is not None:
+            self.enable_disp.SetValue(is_poly_enabled)
+            self.disable_disp.SetValue(not is_poly_enabled)
+            self._set_dipers_Param(event=None)
+            self.state.enable_disp = self.enable_disp.GetValue()
+            self.state.disable_disp = self.disable_disp.GetValue()
+
+        # Keep the previous param values
+        if saved_pars:
+            self.get_paste_params(saved_pars)
+
         if event is not None:
+            # update list of plugins if new plugin is available
+            # mod_cat = self.categorybox.GetStringSelection()
+            # if mod_cat == CUSTOM_MODEL:
+            #     temp = self.parent.update_model_list()
+            #     if temp:
+            #         self.model_list_box = temp
+            #         current_val = self.formfactorbox.GetLabel()
+            #         pos = self.formfactorbox.GetSelection()
+            #         self._show_combox_helper()
+            #         self.formfactorbox.SetStringSelection(current_val)
+            #         self.formfactorbox.SetValue(current_val)
             # post state to fit panel
             new_event = PageInfoEvent(page=self)
             wx.PostEvent(self.parent, new_event)
-            # update list of plugins if new plugin is available
-            custom_model = CUSTOM_MODEL
-            mod_cat = self.categorybox.GetStringSelection()
-            if mod_cat == custom_model:
-                temp = self.parent.update_model_list()
-                if temp:
-                    self.model_list_box = temp
-                    current_val = self.formfactorbox.GetLabel()
-                    pos = self.formfactorbox.GetSelection()
-                    self._show_combox_helper()
-                    self.formfactorbox.SetSelection(pos)
-                    self.formfactorbox.SetValue(current_val)
-            # when select a model only from guictr/button
-            if is_poly_enabled is not None:
-                self.enable_disp.SetValue(is_poly_enabled)
-                self.disable_disp.SetValue(not is_poly_enabled)
-                self._set_dipers_Param(event=None)
-                self.state.enable_disp = self.enable_disp.GetValue()
-                self.state.disable_disp = self.disable_disp.GetValue()
-
-            # Keep the previous param values
-            if copy_flag:
-                self.get_paste_params(copy_flag)
             wx.CallAfter(self._onDraw, None)
 
         else:
@@ -1708,6 +1713,7 @@ class FitPage(BasicPage):
         if self.model.__class__ not in self.model_list_box["Multi-Functions"] \
                 and not self.temp_multi_functional:
             return None
+        print("_set_fun_box_list", self.model.name)
         # Get the func name list
         list = self.model.fun_list
         if len(list) == 0:
@@ -1715,8 +1721,8 @@ class FitPage(BasicPage):
         # build function (combo)box
         ind = 0
         while(ind < len(list)):
-            for key, val in list.iteritems():
-                if (val == ind):
+            for key, val in list.items():
+                if val == ind:
                     fun_box.Append(key, val)
                     break
             ind += 1

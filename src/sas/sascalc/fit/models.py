@@ -15,13 +15,12 @@ import py_compile
 import shutil
 
 from sasmodels.sasview_model import load_custom_model, load_standard_models
+from sasmodels.sasview_model import MultiplicationModel
 
 # Explicitly import from the pluginmodel module so that py2exe
 # places it in the distribution. The Model1DPlugin class is used
 # as the base class of plug-in models.
 from .pluginmodel import Model1DPlugin
-
-from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 
 logger = logging.getLogger(__name__)
 
@@ -91,49 +90,47 @@ def find_plugins_dir():
     Find path of the plugins directory.
     The plugin directory is located in the user's home directory.
     """
-    dir = os.path.join(os.path.expanduser("~"), '.sasview', PLUGIN_DIR)
+    path = os.path.join(os.path.expanduser("~"), '.sasview', PLUGIN_DIR)
 
+    # TODO: initializing ~/.sasview/plugin_models doesn't belong in sascalc
     # If the plugin directory doesn't exist, create it
-    if not os.path.isdir(dir):
-        os.makedirs(dir)
-
-    # Find paths needed
-    # TODO: remove unneeded try/except block
-    try:
-        # For source
-        if os.path.isdir(os.path.dirname(__file__)):
-            p_dir = os.path.join(os.path.dirname(__file__), PLUGIN_DIR)
-        else:
-            raise
-    except Exception:
-        # Check for data path next to exe/zip file.
-        #Look for maximum n_dir up of the current dir to find plugins dir
-        n_dir = 12
-        p_dir = None
-        f_dir = os.path.join(os.path.dirname(__file__))
-        for i in range(n_dir):
-            if i > 1:
-                f_dir, _ = os.path.split(f_dir)
-            plugin_path = os.path.join(f_dir, PLUGIN_DIR)
-            if os.path.isdir(plugin_path):
-                p_dir = plugin_path
-                break
-        if not p_dir:
-            raise
-    # Place example user models as needed
-    if os.path.isdir(p_dir):
-        for file in os.listdir(p_dir):
-            file_path = os.path.join(p_dir, file)
-            if os.path.isfile(file_path):
-                if file.split(".")[-1] == 'py' and\
-                    file.split(".")[0] != '__init__':
-                    if not os.path.isfile(os.path.join(dir, file)):
-                        shutil.copy(file_path, dir)
-
-    return dir
+    if not os.path.isdir(path):
+        os.makedirs(path)
+    # TODO: should we be checking for new default models every time?
+    initialize_plugins_dir(path)
+    return path
 
 
-class ReportProblem:
+def initialize_plugins_dir(path):
+    # TODO: There are no default plugins
+    # TODO: Move default plugins beside sample data files
+    # TODO: Should not look for defaults above the root of the sasview install
+
+    # Walk up the tree looking for default plugin_models directory
+    base = os.path.abspath(os.path.dirname(__file__))
+    for _ in range(12):
+        default_plugins_path = os.path.join(base, PLUGIN_DIR)
+        if os.path.isdir(default_plugins_path):
+            break
+        base, _ = os.path.split(base)
+    else:
+        logger.error("default plugins directory not found")
+        return
+
+    # Copy files from default plugins to the .sasview directory
+    # This may include c files, depending on the example.
+    # Note: files are never replaced, even if the default plugins are updated
+    for filename in os.listdir(default_plugins_path):
+        # skip __init__.py and all pyc files
+        if filename == "__init__.py" or filename.endswith('.pyc'):
+            continue
+        source = os.path.join(default_plugins_path, filename)
+        target = os.path.join(path, filename)
+        if os.path.isfile(source) and not os.path.isfile(target):
+            shutil.copy(source, target)
+
+
+class ReportProblem(object):
     """
     Class to check for problems with specific values
     """
@@ -160,30 +157,32 @@ def compile_file(dir):
     return None
 
 
-def _find_models():
+def find_plugin_models():
     """
     Find custom models
     """
     # List of plugin objects
-    directory = find_plugins_dir()
+    plugins_dir = find_plugins_dir()
     # Go through files in plug-in directory
-    if not os.path.isdir(directory):
-        msg = "SasView couldn't locate Model plugin folder %r." % directory
+    if not os.path.isdir(plugins_dir):
+        msg = "SasView couldn't locate Model plugin folder %r." % plugins_dir
         logger.warning(msg)
         return {}
 
-    plugin_log("looking for models in: %s" % str(directory))
-    # compile_file(directory)  #always recompile the folder plugin
-    logger.info("plugin model dir: %s", str(directory))
+    plugin_log("looking for models in: %s" % plugins_dir)
+    # compile_file(plugins_dir)  #always recompile the folder plugin
+    logger.info("plugin model dir: %s", plugins_dir)
 
     plugins = {}
-    for filename in os.listdir(directory):
+    for filename in os.listdir(plugins_dir):
         name, ext = os.path.splitext(filename)
         if ext == '.py' and not name == '__init__':
-            path = os.path.abspath(os.path.join(directory, filename))
+            path = os.path.abspath(os.path.join(plugins_dir, filename))
             try:
                 model = load_custom_model(path)
-                model.name = PLUGIN_NAME_BASE + model.name
+                # TODO: add [plug-in] tag to model name in sasview_model
+                if not model.name.startswith(PLUGIN_NAME_BASE):
+                    model.name = PLUGIN_NAME_BASE + model.name
                 plugins[model.name] = model
             except Exception:
                 msg = traceback.format_exc()
@@ -195,111 +194,33 @@ def _find_models():
     return plugins
 
 
-class ModelList(object):
-    """
-    Contains dictionary of model and their type
-    """
-    def __init__(self):
-        """
-        """
-        self.mydict = {}
-
-    def set_list(self, name, mylist):
-        """
-        :param name: the type of the list
-        :param mylist: the list to add
-
-        """
-        if name not in self.mydict.keys():
-            self.reset_list(name, mylist)
-
-    def reset_list(self, name, mylist):
-        """
-        :param name: the type of the list
-        :param mylist: the list to add
-        """
-        self.mydict[name] = mylist
-
-    def get_list(self):
-        """
-        return all the list stored in a dictionary object
-        """
-        return self.mydict
-
-
 class ModelManagerBase(object):
     """
     Base class for the model manager
     """
-    ## external dict for models
-    model_combobox = ModelList()
-    ## Dictionary of form factor models
-    form_factor_dict = {}
-    ## dictionary of structure factor models
-    struct_factor_dict = {}
-    ##list of structure factors
-    struct_list = []
-    ##list of model allowing multiplication by a structure factor
-    multiplication_factor = []
-    ##list of multifunctional shapes (i.e. that have user defined number of levels
-    multi_func_list = []
-    ## list of added models -- currently python models found in the plugin dir.
-    plugins = []
-    ## Event owner (guiframe)
-    event_owner = None
-    last_time_dir_modified = 0
+    #: mutable dictionary of models, continually updated to reflect the
+    #: current set of plugins
+    model_dictionary = None  # type: Dict[str, Model]
+    #: constant list of standard models
+    standard_models = None  # type: Dict[str, Model]
+    #: list of plugin models reset each time the plugin directory is queried
+    plugin_models = None  # type: Dict[str, Model]
+    #: timestamp on the plugin directory at the last plugin update
+    last_time_dir_modified = 0  # type: int
 
     def __init__(self):
+        # the model dictionary is allocated at the start and updated to
+        # reflect the current list of models.  Be sure to clear it rather
+        # than reassign to it.
         self.model_dictionary = {}
-        self.stored_plugins = {}
-        self._getModelList()
-
-    def findModels(self):
-        """
-        find  plugin model in directory of plugin .recompile all file
-        in the directory if file were modified
-        """
-        temp = {}
-        if self.is_changed():
-            return  _find_models()
-        logger.info("plugin model : %s", str(temp))
-        return temp
-
-    def _getModelList(self):
-        """
-        List of models we want to make available by default
-        for this application
-
-        :return: the next free event ID following the new menu events
-
-        """
-
-        # regular model names only
-        self.model_name_list = []
 
         #Build list automagically from sasmodels package
-        for model in load_standard_models():
-            self.model_dictionary[model.name] = model
-            if model.is_structure_factor:
-                self.struct_list.append(model)
-            if model.is_form_factor:
-                self.multiplication_factor.append(model)
-            if model.is_multiplicity_model:
-                self.multi_func_list.append(model)
-            else:
-                self.model_name_list.append(model.name)
+        self.standard_models = {model.name: model
+                                for model in load_standard_models()}
+        # Look for plugins
+        self.plugins_reset()
 
-        #Looking for plugins
-        self.stored_plugins = self.findModels()
-        self.plugins = self.stored_plugins.values()
-        for name, plug in self.stored_plugins.iteritems():
-            self.model_dictionary[name] = plug
-
-        self._get_multifunc_models()
-
-        return 0
-
-    def is_changed(self):
+    def _is_plugin_dir_changed(self):
         """
         check the last time the plugin dir has changed and return true
         is the directory was modified else return false
@@ -307,76 +228,53 @@ class ModelManagerBase(object):
         is_modified = False
         plugin_dir = find_plugins_dir()
         if os.path.isdir(plugin_dir):
-            temp = os.path.getmtime(plugin_dir)
-            if  self.last_time_dir_modified != temp:
+            mod_time = os.path.getmtime(plugin_dir)
+            if  self.last_time_dir_modified != mod_time:
                 is_modified = True
-                self.last_time_dir_modified = temp
+                self.last_time_dir_modified = mod_time
 
         return is_modified
 
-    def update(self):
+    def composable_models(self):
+        """
+        return list of standard models that can be used in sum/multiply
+        """
+        # TODO: should scan plugin models in addition to standard models
+        # and update model_editor so that it doesn't add plugins to the list
+        return [model.name for model in self.standard_models.values()
+                if not model.is_multiplicity_model]
+
+    def plugins_update(self):
         """
         return a dictionary of model if
         new models were added else return empty dictionary
         """
-        new_plugins = self.findModels()
-        if len(new_plugins) > 0:
-            for name, plug in  new_plugins.iteritems():
-                if name not in self.stored_plugins.keys():
-                    self.stored_plugins[name] = plug
-                    self.plugins.append(plug)
-                    self.model_dictionary[name] = plug
-            self.model_combobox.set_list("Plugin Models", self.plugins)
-            return self.model_combobox.get_list()
-        else:
-            return {}
+        return self.plugins_reset()
+        #if self._is_plugin_dir_changed():
+        #    return self.plugins_reset()
+        #else:
+        #    return {}
 
     def plugins_reset(self):
         """
         return a dictionary of model
         """
-        self.plugins = []
-        new_plugins = _find_models()
-        for name, plug in  new_plugins.iteritems():
-            for stored_name, stored_plug in self.stored_plugins.iteritems():
-                if name == stored_name:
-                    del self.stored_plugins[name]
-                    del self.model_dictionary[name]
-                    break
-            self.stored_plugins[name] = plug
-            self.plugins.append(plug)
-            self.model_dictionary[name] = plug
-
-        self.model_combobox.reset_list("Plugin Models", self.plugins)
-        return self.model_combobox.get_list()
-
-    def _on_model(self, evt):
-        """
-        React to a model menu event
-
-        :param event: wx menu event
-
-        """
-        if int(evt.GetId()) in self.form_factor_dict.keys():
-            from sasmodels.sasview_model import MultiplicationModel
-            self.model_dictionary[MultiplicationModel.__name__] = MultiplicationModel
-            model1, model2 = self.form_factor_dict[int(evt.GetId())]
-            model = MultiplicationModel(model1, model2)
-        else:
-            model = self.struct_factor_dict[str(evt.GetId())]()
-
-
-    def _get_multifunc_models(self):
-        """
-        Get the multifunctional models
-        """
-        items = [item for item in self.plugins if item.is_multiplicity_model]
-        self.multi_func_list = items
+        self.plugin_models = find_plugin_models()
+        self.model_dictionary.clear()
+        self.model_dictionary.update(self.standard_models)
+        self.model_dictionary.update(self.plugin_models)
+        return self.get_model_list()
 
     def get_model_list(self):
         """
-        return dictionary of models for fitpanel use
+        return dictionary of classified models
 
+        *Structure Factors* are the structure factor models
+        *Multi-Functions* are the multiplicity models
+        *Plugin Models* are the plugin models
+
+        Note that a model can be both a plugin and a structure factor or
+        multiplicity model.
         """
         ## Model_list now only contains attribute lists not category list.
         ## Eventually this should be in one master list -- read in category
@@ -386,75 +284,49 @@ class ModelManagerBase(object):
         ##
         ## -PDB   April 26, 2014
 
-#        self.model_combobox.set_list("Shapes", self.shape_list)
-#        self.model_combobox.set_list("Shape-Independent",
-#                                     self.shape_indep_list)
-        self.model_combobox.set_list("Structure Factors", self.struct_list)
-        self.model_combobox.set_list("Plugin Models", self.plugins)
-        self.model_combobox.set_list("P(Q)*S(Q)", self.multiplication_factor)
-        self.model_combobox.set_list("multiplication",
-                                     self.multiplication_factor)
-        self.model_combobox.set_list("Multi-Functions", self.multi_func_list)
-        return self.model_combobox.get_list()
 
-    def get_model_name_list(self):
-        """
-        return regular model name list
-        """
-        return self.model_name_list
+        # Classify models
+        structure_factors = []
+        multiplicity_models = []
+        for model in self.model_dictionary.values():
+            # Old style models don't have is_structure_factor attribute
+            if getattr(model, 'is_structure_factor', False):
+                structure_factors.append(model)
+            if model.is_multiplicity_model:
+                multiplicity_models.append(model)
+        plugin_models = list(self.plugin_models.values())
 
-    def get_model_dictionary(self):
-        """
-        return dictionary linking model names to objects
-        """
-        return self.model_dictionary
+        return {
+            "Structure Factors": structure_factors,
+            "Plugin Models": plugin_models,
+            "Multi-Functions": multiplicity_models,
+        }
 
 
 class ModelManager(object):
     """
-    implement model
+    manage the list of available models
     """
     base = None  # type: ModelManagerBase()
 
     def __init__(self):
         if ModelManager.base is None:
-            self.base = ModelManagerBase()
+            ModelManager.base = ModelManagerBase()
 
     def cat_model_list(self):
-        models = self.base.model_dictionary
-        retval = [model for model_name, model in models.items()
-                  if model_name not in self.base.stored_plugins]
-        return retval
-
-    def findModels(self):
-        return self.base.findModels()
-
-    def _getModelList(self):
-        return self.base._getModelList()
-
-    def is_changed(self):
-        return self.base.is_changed()
+        return list(self.base.standard_models.values())
 
     def update(self):
-        return self.base.update()
+        return self.base.plugins_update()
 
     def plugins_reset(self):
         return self.base.plugins_reset()
 
-    #def populate_menu(self, modelmenu, event_owner):
-    #    return self.base.populate_menu(modelmenu, event_owner)
-
-    def _on_model(self, evt):
-        return self.base._on_model(evt)
-
-    def _get_multifunc_models(self):
-        return self.base._get_multifunc_models()
-
     def get_model_list(self):
         return self.base.get_model_list()
 
-    def get_model_name_list(self):
-        return self.base.get_model_name_list()
+    def composable_models(self):
+        return self.base.composable_models()
 
     def get_model_dictionary(self):
-        return self.base.get_model_dictionary()
+        return self.base.model_dictionary

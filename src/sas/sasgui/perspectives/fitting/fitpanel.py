@@ -113,17 +113,15 @@ class FitPanel(nb, PanelBase):
         """
         """
         temp = self.menu_mng.update()
-        if len(temp):
+        if temp:
             self.model_list_box = temp
         return temp
 
     def reset_pmodel_list(self):
         """
         """
-        temp = self.menu_mng.plugins_reset()
-        if len(temp):
-            self.model_list_box = temp
-        return temp
+        self.model_list_box = self.menu_mng.plugins_reset()
+        return self.model_list_box
 
     def get_page_by_id(self, uid):
         """
@@ -297,11 +295,11 @@ class FitPanel(nb, PanelBase):
         """
         self.model_list_box = dict
 
-    def set_model_dict(self, m_dict):
+    def set_model_dictionary(self, model_dictionary):
         """
         copy a dictionary of model name -> model object
 
-        :param m_dict: dictionary linking model name -> model object
+        :param model_dictionary: dictionary linking model name -> model object
         """
 
     def get_current_page(self):
@@ -355,7 +353,7 @@ class FitPanel(nb, PanelBase):
         panel.batch_on = self.batch_on
         panel._set_save_flag(not panel.batch_on)
         panel.set_model_dictionary(self.model_dictionary)
-        panel.populate_box(model_dict=self.model_list_box)
+        panel.populate_box(model_list_box=self.model_list_box)
         panel.formfactor_combo_init()
         panel.set_manager(self._manager)
         panel.window_caption = caption

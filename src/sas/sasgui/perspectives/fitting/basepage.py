@@ -503,30 +503,28 @@ class BasicPage(ScrolledPanel, PanelBase):
         self._manager = manager
         self.state.manager = manager
 
-    def populate_box(self, model_dict):
+    def populate_box(self, model_list_box):
         """
         Store list of model
 
-        :param model_dict: dictionary containing list of models
-
+        :param model_list_box: dictionary containing categorized models
         """
-        self.model_list_box = model_dict
-        self.state.model_list_box = self.model_list_box
+        self.model_list_box = model_list_box
         self.initialize_combox()
 
-    def set_model_dictionary(self, model_dict):
+    def set_model_dictionary(self, model_dictionary):
         """
         Store a dictionary linking model name -> model object
 
-        :param model_dict: dictionary containing list of models
+        :param model_dictionary: dictionary containing all models
         """
-        self.model_dict = model_dict
+        self.model_dictionary = model_dictionary
 
     def initialize_combox(self):
         """
         put default value in the combo box
         """
-        if self.model_list_box is not None and len(self.model_list_box) > 0:
+        if self.model_list_box:
             self._populate_box(self.structurebox,
                                self.model_list_box["Structure Factors"])
             self.structurebox.Insert("None", 0, None)
@@ -1217,14 +1215,14 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         self.categorybox.Select(category_pos)
         self._show_combox(None)
-        if self.categorybox.GetValue() == CUSTOM_MODEL \
-                and PLUGIN_NAME_BASE not in state.formfactorcombobox:
+        if (self.categorybox.GetValue() == CUSTOM_MODEL
+                and PLUGIN_NAME_BASE not in state.formfactorcombobox):
             state.formfactorcombobox = \
                 PLUGIN_NAME_BASE + state.formfactorcombobox
         formfactor_pos = 0
         for ind_form in range(self.formfactorbox.GetCount()):
-            if self.formfactorbox.GetString(ind_form) == \
-                                                (state.formfactorcombobox):
+            if (self.formfactorbox.GetString(ind_form)
+                    == state.formfactorcombobox):
                 formfactor_pos = int(ind_form)
                 break
 
@@ -1234,8 +1232,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         if state.structurecombobox is not None:
             state.structurecombobox = unicode(state.structurecombobox)
             for ind_struct in range(self.structurebox.GetCount()):
-                if self.structurebox.GetString(ind_struct) == \
-                                                (state.structurecombobox):
+                if (self.structurebox.GetString(ind_struct)
+                        == state.structurecombobox):
                     structfactor_pos = int(ind_struct)
                     break
 
@@ -1839,12 +1837,12 @@ class BasicPage(ScrolledPanel, PanelBase):
         try:
             if mod_cat == CUSTOM_MODEL:
                 for model in self.model_list_box[mod_cat]:
-                    m_list.append(self.model_dict[model.name])
+                    m_list.append(self.model_dictionary[model.name])
             else:
                 cat_dic = self.master_category_dict[mod_cat]
-                for (model, enabled) in cat_dic:
+                for model, enabled in cat_dic:
                     if enabled:
-                        m_list.append(self.model_dict[model])
+                        m_list.append(self.model_dictionary[model])
         except Exception:
             msg = traceback.format_exc()
             wx.PostEvent(self._manager.parent,
@@ -3496,7 +3494,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             return
         self.model_box.Clear()
 
-        if category == 'Plugin Models':
+        if category == CUSTOM_MODEL:
             for model in self.model_list_box[category]:
                 str_m = str(model).split(".")[0]
                 self.model_box.Append(str_m)
