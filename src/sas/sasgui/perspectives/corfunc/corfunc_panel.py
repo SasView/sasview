@@ -54,6 +54,9 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         # The data with no correction for background values
         self._data = data # The data to be analysed (corrected fr background)
         self._extrapolated_data = None # The extrapolated data set
+        # Callable object of class CorfuncCalculator._Interpolator representing
+        # the extrapolated and interpolated data
+        self._extrapolated_fn = None
         self._transformed_data = None # Fourier trans. of the extrapolated data
         self._calculator = CorfuncCalculator()
         self._data_name_box = None # Text box to show name of file
@@ -217,7 +220,8 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._calculator.background = self.background
 
         try:
-            params, self._extrapolated_data = self._calculator.compute_extrapolation()
+            params, self._extrapolated_data, self._extrapolated_fn = \
+                self._calculator.compute_extrapolation()
         except Exception as e:
             msg = "Error extrapolating data:\n"
             msg += str(e)
@@ -240,6 +244,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         if not self._calculator.transform_isrunning():
             self._calculator.compute_transform(self._extrapolated_data,
                 self.transform_type, background=self.background,
+                extrap_fn=self._extrapolated_fn,
                 completefn=self.transform_complete,
                 updatefn=self.transform_update)
 
@@ -275,6 +280,9 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         plot_x = transform1.x[np.where(transform1.x <= 200)]
         plot_y = transform1.y[np.where(transform1.x <= 200)]
         self._manager.show_data(Data1D(plot_x, plot_y), TRANSFORM_LABEL1)
+        plot_x = transform3.x[np.where(transform3.x <= 200)]
+        plot_y = transform3.y[np.where(transform3.x <= 200)]
+        self._manager.show_data(Data1D(plot_x, plot_y), TRANSFORM_LABEL3)
         # Only enable extract params button if a fourier trans. has been done
         if self.transform_type == 'fourier':
             self._extract_btn.Enable()
