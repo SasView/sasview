@@ -24,8 +24,8 @@ class FourierThread(CalcThread):
         if self.isquit():
             return
         try:
-            gamma = dct((iqs-background)*qs**2)
-            gamma = gamma / gamma.max()
+            gamma1 = dct((iqs-background)*qs**2)
+            gamma1 = gamma1 / gamma1.max()
         except:
             self.update(msg="Fourier transform failed.")
             self.complete(transform=None)
@@ -35,9 +35,12 @@ class FourierThread(CalcThread):
         self.update(msg="Fourier transform completed.")
 
         xs = np.pi*np.arange(len(qs),dtype=np.float32)/(q[1]-q[0])/len(qs)
-        transform = Data1D(xs, gamma)
+        transform1 = Data1D(xs, gamma1)
+        transform3 = Data1D()
 
-        self.complete(transform=transform)
+        transforms = (transform1, transform3)
+
+        self.complete(transforms=transforms)
 
 class HilbertThread(CalcThread):
     def __init__(self, raw_data, extrapolated_data, bg, updatefn=None,

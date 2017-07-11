@@ -256,12 +256,12 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         wx.PostEvent(self._manager.parent,
             StatusEvent(status=msg))
 
-    def transform_complete(self, transform=None):
+    def transform_complete(self, transforms=None):
         """
         Called from FourierThread when calculation has completed
         """
         self._transform_btn.SetLabel("Transform")
-        if transform is None:
+        if transforms is None:
             msg = "Error calculating Transform."
             if self.transform_type == 'hilbert':
                 msg = "Not yet implemented"
@@ -269,10 +269,11 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
                 StatusEvent(status=msg, info="Error"))
             self._extract_btn.Disable()
             return
-        self._transformed_data = transform
+        self._transformed_data = transforms
+        (transform1, transform3) = transforms
         import numpy as np
-        plot_x = transform.x[np.where(transform.x <= 200)]
-        plot_y = transform.y[np.where(transform.x <= 200)]
+        plot_x = transform1.x[np.where(transform1.x <= 200)]
+        plot_y = transform1.y[np.where(transform1.x <= 200)]
         self._manager.show_data(Data1D(plot_x, plot_y), TRANSFORM_LABEL1)
         # Only enable extract params button if a fourier trans. has been done
         if self.transform_type == 'fourier':
@@ -285,7 +286,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         Called when "Extract Parameters" is clicked
         """
         try:
-            params = self._calculator.extract_parameters(self._transformed_data)
+            params = self._calculator.extract_parameters(self._transformed_data[0])
         except:
             params = None
         if params is None:
