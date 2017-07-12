@@ -1,7 +1,7 @@
 from sas.sascalc.data_util.calcthread import CalcThread
 from sas.sascalc.dataloader.data_info import Data1D
 from scipy.fftpack import dct
-from scipy.integrate import simps, trapz
+from scipy.integrate import trapz
 import numpy as np
 from time import sleep
 
@@ -33,7 +33,7 @@ class FourierThread(CalcThread):
             gamma1 = gamma1 / gamma1.max()
 
             # gamma3(R) = 1/R int_{0}^{R} gamma1(x) dx
-            # simps uses simpson's rule to calculate the integral
+            # trapz uses the trapezium rule to calculate the integral
             gamma3 = [trapz(gamma1[:n], xs[:n])/xs[n-1] for n in range(1, len(xs+1))]
             gamma3 = np.array(gamma3)
         except Exception as e:
