@@ -88,8 +88,15 @@ class ImageView:
         path = None
         if location is None:
             location = os.getcwd()
-        dlg = wx.FileDialog(self.parent, "Image Viewer: Choose a image file",
-                            location, "", "", style=wx.FD_OPEN | wx.FD_MULTIPLE)
+        wildcard="Bitmap (*.bmp)|*.bmp|"\
+            "GIF (*.gif)|*.gif|"\
+            "JPEG (*.jpg;*.jpeg)|*.jpg;*.jpeg|"\
+            "PNG (*.png)|*.png|"\
+            "TIFF (*.tif;*.tiff)|*.tif;*tiff|"\
+            "All Files (*.*)|*.*|"
+
+        dlg = wx.FileDialog(self.parent, "Image Viewer: Choose an image file",
+                            location, "", wildcard, style=wx.FD_OPEN | wx.FD_MULTIPLE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPaths()
         else:
