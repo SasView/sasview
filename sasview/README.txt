@@ -14,7 +14,7 @@ Release Notes
        - Fixes #918: Test folders not bundled with release
        - Fixes an issue with the live discovery of plugin models
        - Fixes an issue with the NXcanSAS data loader
-       - Updates to documentation
+       - Updated tutorials for SasView 4.x.y
 
       It is recommended that all users upgrade to this version
 
