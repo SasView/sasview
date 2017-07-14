@@ -5,9 +5,16 @@ Release Notes
 ===========
     - New in Version 4.1.1
       --------------------
-      This point release is a bug-fix release addressing a few small issues related 
-      to documentation, test data being bundled, reading canSAS1D xml files and saving
-      projects.
+      This point release is a bug-fix release addressing:
+
+       - Fixes #948: Mathjax CDN is going away
+       - Fixes #938: Cannot read canSAS1D file output by SasView
+       - Fixes #960: Save project throws error if empty fit page
+       - Fixes #929: Problem deleting data in first fit page
+       - Fixes #918: Test folders not bundled with release
+       - Fixes an issue with the live discovery of plugin models
+       - Fixes an issue with the NXcanSAS data loader
+       - Updates to documentation
 
       It is recommended that all users upgrade to this version
 
