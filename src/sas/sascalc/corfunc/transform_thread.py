@@ -34,7 +34,9 @@ class FourierThread(CalcThread):
 
             # gamma3(R) = 1/R int_{0}^{R} gamma1(x) dx
             # trapz uses the trapezium rule to calculate the integral
-            gamma3 = [trapz(gamma1[:n], xs[:n])/xs[n-1] for n in range(1, len(xs+1))]
+            mask = xs <= 200.0 # Only calculate gamma3 up to x=200 (as this is all that's plotted)
+            gamma3 = [trapz(gamma1[:n], xs[:n])/xs[n-1] for n in range(2, len(xs[mask]) + 1)]
+            gamma3.insert(0, 1.0) # Gamma_3(0) is defined as 1
             gamma3 = np.array(gamma3)
         except Exception as e:
             import logging
@@ -49,7 +51,7 @@ class FourierThread(CalcThread):
         self.update(msg="Fourier transform completed.")
 
         transform1 = Data1D(xs, gamma1)
-        transform3 = Data1D(xs, gamma3)
+        transform3 = Data1D(xs[xs <= 200], gamma3)
 
         transforms = (transform1, transform3)
 
