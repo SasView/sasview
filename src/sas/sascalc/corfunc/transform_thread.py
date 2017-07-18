@@ -81,4 +81,4 @@ class HilbertThread(CalcThread):
 
         self.update(msg="Hilbert transform completed.")
 
-        self.complete(transform=None)
+        self.complete(transforms=None)
