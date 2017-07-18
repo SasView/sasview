@@ -190,7 +190,7 @@ class Plugin(PluginBase):
             new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
         elif label == IDF_LABEL:
             new_plot.xaxis("{x}", 'A')
-            new_plot.yaxis("{G}", '')
+            new_plot.yaxis("{g_1}", '')
 
             new_plot.xtransform = 'x'
             new_plot.ytransform = 'y'
