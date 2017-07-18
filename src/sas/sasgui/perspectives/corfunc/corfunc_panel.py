@@ -275,13 +275,14 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
             self._extract_btn.Disable()
             return
         self._transformed_data = transforms
-        (transform1, transform3) = transforms
+        (transform1, transform3, idf) = transforms
         import numpy as np
         plot_x = transform1.x[np.where(transform1.x <= 200)]
         plot_y = transform1.y[np.where(transform1.x <= 200)]
         self._manager.show_data(Data1D(plot_x, plot_y), TRANSFORM_LABEL1)
         # No need to shorten gamma3 as it's only calculated up to x=200
         self._manager.show_data(transform3, TRANSFORM_LABEL3)
+        self._manager.show_data(idf, IDF_LABEL)
         # Only enable extract params button if a fourier trans. has been done
         if self.transform_type == 'fourier':
             self._extract_btn.Enable()
