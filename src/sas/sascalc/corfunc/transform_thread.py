@@ -6,13 +6,12 @@ import numpy as np
 from time import sleep
 
 class FourierThread(CalcThread):
-    def __init__(self, raw_data, extrapolated_data, bg, extrap_fn=None,
-        updatefn=None, completefn=None):
+    def __init__(self, raw_data, extrapolated_data, bg, updatefn=None,
+        completefn=None):
         CalcThread.__init__(self, updatefn=updatefn, completefn=completefn)
         self.data = raw_data
         self.background = bg
         self.extrapolation = extrapolated_data
-        self.extrap_fn = extrap_fn
 
     def check_if_cancelled(self):
         if self.isquit():

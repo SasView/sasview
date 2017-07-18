@@ -130,8 +130,8 @@ class CorfuncCalculator(object):
 
         return params, extrapolation, s2
 
-    def compute_transform(self, extrapolation, trans_type, extrap_fn=None,
-        background=None, completefn=None, updatefn=None):
+    def compute_transform(self, extrapolation, trans_type, background=None,
+        completefn=None, updatefn=None):
         """
         Transform an extrapolated scattering curve into a correlation function.
 
@@ -152,7 +152,7 @@ class CorfuncCalculator(object):
 
         if trans_type == 'fourier':
             self._transform_thread = FourierThread(self._data, extrapolation,
-            background, extrap_fn=extrap_fn, completefn=completefn,
+            background, completefn=completefn,
             updatefn=updatefn)
         elif trans_type == 'hilbert':
             self._transform_thread = HilbertThread(self._data, extrapolation,
