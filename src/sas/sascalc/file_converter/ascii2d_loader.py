@@ -6,6 +6,7 @@ from sas.sascalc.file_converter.nxcansas_writer import NXcanSASWriter
 import numpy as np
 
 # ISIS 2D ASCII File Format
+# http://www.isis.stfc.ac.uk/instruments/loq/software/colette-ascii-file-format-descriptions9808.pdf
 # line: property
 # 0: File header
 # 1: q_x axis label and units
@@ -22,14 +23,25 @@ import numpy as np
 class ASCII2DLoader(object):
 
     def __init__(self, data_path):
+        """
+        :param data_path: The path to the file to load
+        """
         self.data_path = data_path
 
     def load(self):
+        """
+        Load the data from the file into a Data2D object
+
+        :return: A Data2D instance containing data from the file
+        :raises ValueError: Raises a ValueError if the file is incorrectly formatted
+        """
         file_handle = open(self.data_path, 'r')
         file_buffer = file_handle.read()
         all_lines = file_buffer.splitlines()
 
-        def _load_qs(lines, start_line, num_points):
+        # Load num_points line-by-line from lines into a numpy array, starting
+        # on line number start_line
+        def _load_points(lines, start_line, num_points):
             qs = np.zeros(num_points)
             n = start_line
             filled = 0
@@ -40,20 +52,20 @@ class ASCII2DLoader(object):
                 n += 1
             return n, qs
 
-        # Skip nUseRec lines
         current_line = 4
         try:
+            # Skip nUseRec lines
             nUseRec = int(all_lines[current_line].strip()[0])
             current_line += nUseRec + 1
             # Read qx data
             num_qs = int(all_lines[current_line].strip())
             current_line += 1
-            current_line, qx = _load_qs(all_lines, current_line, num_qs)
+            current_line, qx = _load_points(all_lines, current_line, num_qs)
 
             # Read qy data
             num_qs = int(all_lines[current_line].strip())
             current_line += 1
-            current_line, qy = _load_qs(all_lines, current_line, num_qs)
+            current_line, qy = _load_points(all_lines, current_line, num_qs)
         except ValueError as e:
             err_msg = "File incorrectly formatted.\n"
             if str(e).find('broadcast') != -1:
@@ -104,11 +116,12 @@ class ASCII2DLoader(object):
 
         current_line += 1
 
-        current_line, I = _load_qs(all_lines, current_line, width*height)
+        current_line, I = _load_points(all_lines, current_line, width*height)
         dI = np.zeros(width*height)
 
+        # Load error data if it's provided
         if iflag == 3:
-            _, dI = _load_qs(all_lines, current_line, width*height)
+            _, dI = _load_points(all_lines, current_line, width*height)
 
         # Format data for use with Data2D
         qx = list(qx) * height
