@@ -517,7 +517,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         "One dimensional ASCII and BSL/OTOKO files can be converted to CanSAS "
         "(XML) or NXcanSAS (HDF5) formats. Two dimensional datasets can only be"
         " converted to the NXcanSAS format.\n"
-        "Metadata can be optionally added for the CanSAS XML format."
+        "Metadata can also be optionally added to the output file."
         )
 
         instruction_label = wx.StaticText(self, -1, instructions,
