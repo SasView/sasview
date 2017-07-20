@@ -116,12 +116,23 @@ class ASCII2DLoader(object):
 
         current_line += 1
 
-        current_line, I = _load_points(all_lines, current_line, width*height)
-        dI = np.zeros(width*height)
+        try:
+            current_line, I = _load_points(all_lines, current_line, width*height)
+            dI = np.zeros(width*height)
 
-        # Load error data if it's provided
-        if iflag == 3:
-            _, dI = _load_points(all_lines, current_line, width*height)
+            # Load error data if it's provided
+            if iflag == 3:
+                _, dI = _load_points(all_lines, current_line, width*height)
+        except Exception as e:
+            err_msg = "File incorrectly formatted.\n"
+            if str(e).find("list index") != -1:
+                err_msg += ("Incorrect number of data points. Expected {} intensity").format(width*height)
+                if iflag == 3:
+                    err_msg += " and error"
+                err_msg += " points."
+            else:
+                err_msg += str(e)
+            raise ValueError(err_msg)
 
         # Format data for use with Data2D
         qx = list(qx) * height
