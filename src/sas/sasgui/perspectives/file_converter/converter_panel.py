@@ -23,6 +23,7 @@ from sas.sasgui.guiframe.utils import check_float
 from sas.sascalc.file_converter.cansas_writer import CansasWriter
 from sas.sascalc.file_converter.otoko_loader import OTOKOLoader
 from sas.sascalc.file_converter.bsl_loader import BSLLoader
+from sas.sascalc.file_converter.ascii2d_loader import ASCII2DLoader
 from sas.sascalc.file_converter.nxcansas_writer import NXcanSASWriter
 from sas.sascalc.dataloader.data_info import Detector
 from sas.sascalc.dataloader.data_info import Sample
@@ -351,6 +352,14 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             w = NXcanSASWriter()
             w.write(frame_data, output_path)
 
+    def convert_2d_data(self, dataset):
+        metadata = self.get_metadata()
+        for key, value in metadata.iteritems():
+            setattr(dataset[0], key, value)
+
+        w = NXcanSASWriter()
+        w.write(dataset, self.output.GetPath())
+
     def on_convert(self, event):
         """Called when the Convert button is clicked"""
         if not self.validate_inputs():
@@ -366,18 +375,18 @@ class ConverterPanel(ScrolledPanel, PanelBase):
             elif self.data_type == 'otoko':
                 qdata, iqdata = self.extract_otoko_data(self.q_input.GetPath())
                 self.convert_1d_data(qdata, iqdata)
+            elif self.data_type == 'ascii2d':
+                loader = ASCII2DLoader(self.iq_input.GetPath())
+                data = loader.load()
+                dataset = [data] # ASCII 2D only ever contains 1 frame
+                self.convert_2d_data(dataset)
             else: # self.data_type == 'bsl'
                 dataset = self.extract_bsl_data(self.iq_input.GetPath())
                 if dataset is None:
                     # Cancelled by user
                     return
+                self.convert_2d_data(dataset)
 
-                metadata = self.get_metadata()
-                for key, value in metadata.iteritems():
-                    setattr(dataset[0], key, value)
-
-                w = NXcanSASWriter()
-                w.write(dataset, self.output.GetPath())
         except Exception as ex:
             msg = str(ex)
             wx.PostEvent(self.parent.manager.parent,
@@ -398,7 +407,8 @@ class ConverterPanel(ScrolledPanel, PanelBase):
 
     def validate_inputs(self):
         msg = "You must select a"
-        if self.q_input.GetPath() == '' and self.data_type != 'bsl':
+        if self.q_input.GetPath() == '' and self.data_type != 'bsl' \
+            and self.data_type != 'ascii2d':
             msg += " Q Axis input file."
         elif self.iq_input.GetPath() == '':
             msg += "n Intensity input file."
@@ -471,7 +481,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         event.Skip()
         dtype = event.GetEventObject().GetName()
         self.data_type = dtype
-        if dtype == 'bsl':
+        if dtype == 'bsl' or dtype == 'ascii2d':
             self.q_input.SetPath("")
             self.q_input.Disable()
             self.output.SetWildcard("NXcanSAS HDF5 File (*.h5)|*.h5")
@@ -525,17 +535,20 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         input_grid.Add(data_type_label, (y,0), (1,1),
             wx.ALIGN_CENTER_VERTICAL, 5)
         radio_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        ascii_btn = wx.RadioButton(self, -1, "ASCII", name="ascii",
+        ascii_btn = wx.RadioButton(self, -1, "ASCII 1D", name="ascii",
             style=wx.RB_GROUP)
         ascii_btn.Bind(wx.EVT_RADIOBUTTON, self.datatype_changed)
         radio_sizer.Add(ascii_btn)
+        ascii2d_btn = wx.RadioButton(self, -1, "ASCII 2D", name="ascii2d")
+        ascii2d_btn.Bind(wx.EVT_RADIOBUTTON, self.datatype_changed)
+        radio_sizer.Add(ascii2d_btn)
         otoko_btn = wx.RadioButton(self, -1, "BSL 1D", name="otoko")
         otoko_btn.Bind(wx.EVT_RADIOBUTTON, self.datatype_changed)
         radio_sizer.Add(otoko_btn)
-        input_grid.Add(radio_sizer, (y,1), (1,1), wx.ALL, 5)
         bsl_btn = wx.RadioButton(self, -1, "BSL 2D", name="bsl")
         bsl_btn.Bind(wx.EVT_RADIOBUTTON, self.datatype_changed)
         radio_sizer.Add(bsl_btn)
+        input_grid.Add(radio_sizer, (y,1), (1,1), wx.ALL, 5)
         y += 1
 
         q_label = wx.StaticText(self, -1, "Q-Axis Data: ")
@@ -548,7 +561,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         input_grid.Add(self.q_input, (y,1), (1,1), wx.ALL, 5)
         y += 1
 
-        iq_label = wx.StaticText(self, -1, "Intensity-Axis Data: ")
+        iq_label = wx.StaticText(self, -1, "Intensity Data: ")
         input_grid.Add(iq_label, (y,0), (1,1), wx.ALIGN_CENTER_VERTICAL, 5)
 
         self.iq_input = wx.FilePickerCtrl(self, -1,
