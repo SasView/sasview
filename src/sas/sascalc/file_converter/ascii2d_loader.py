@@ -42,23 +42,48 @@ class ASCII2DLoader(object):
 
         # Skip nUseRec lines
         current_line = 4
-        nUseRec = int(all_lines[current_line].strip()[0])
-        current_line += nUseRec + 1
+        try:
+            nUseRec = int(all_lines[current_line].strip()[0])
+            current_line += nUseRec + 1
+            # Read qx data
+            num_qs = int(all_lines[current_line].strip())
+            current_line += 1
+            current_line, qx = _load_qs(all_lines, current_line, num_qs)
 
-        # Read qx data
-        num_qs = int(all_lines[current_line].strip())
-        current_line += 1
-        current_line, qx = _load_qs(all_lines, current_line, num_qs)
-
-        # Read qy data
-        num_qs = int(all_lines[current_line].strip())
-        current_line += 1
-        current_line, qy = _load_qs(all_lines, current_line, num_qs)
+            # Read qy data
+            num_qs = int(all_lines[current_line].strip())
+            current_line += 1
+            current_line, qy = _load_qs(all_lines, current_line, num_qs)
+        except ValueError as e:
+            err_msg = "File incorrectly formatted.\n"
+            if str(e).find('broadcast') != -1:
+                err_msg += "Incorrect number of q data points provided. "
+                err_msg += "Expected {}.".format(num_qs)
+            elif str(e).find('invalid literal') != -1:
+                err_msg += "Expected integer on line {}. Instead got '{}'".format(current_line + 1,
+                    all_lines[current_line])
+            else:
+                err_msg += str(e)
+            raise ValueError(err_msg)
 
         # dimensions: [width, height, scale]
-        dimensions = np.fromstring(all_lines[current_line], dtype=np.float32, sep=' ')
-        width = int(dimensions[0])
-        height = int(dimensions[1])
+        try:
+            dimensions = np.fromstring(all_lines[current_line], dtype=np.float32, sep=' ')
+            if len(dimensions) != 3: raise ValueError()
+            width = int(dimensions[0])
+            height = int(dimensions[1])
+        except ValueError as e:
+            err_msg = "File incorrectly formatted.\n"
+            err_msg += "Expected line {} to be of the form: <num_qx> <num_qy> <scale>.".format(current_line + 1)
+            err_msg += " Instead got '{}'.".format(all_lines[current_line])
+            raise ValueError(err_msg)
+
+        if width > len(qx) or height > len(qy):
+            err_msg = "File incorrectly formatted.\n"
+            err_msg += ("Line {} says to use {}x{} points. "
+                "Only {}x{} provided.").format(current_line + 1, width, height,
+                len(qx), len(qy))
+            raise ValueError(err_msg)
 
         # More qx and/or qy points can be provided than are actually used
         qx = qx[:width]
@@ -68,7 +93,15 @@ class ASCII2DLoader(object):
         # iflag = 1 => Only intensity data (not dealt with here)
         # iflag = 2 => q axis and intensity data
         # iflag = 3 => q axis, intensity and error data
-        iflag = int(all_lines[current_line].strip()[0])
+        try:
+            iflag = int(all_lines[current_line].strip()[0])
+            if iflag <= 0 or iflag > 3: raise ValueError()
+        except:
+            err_msg = "File incorrectly formatted.\n"
+            iflag = all_lines[current_line].strip()[0]
+            err_msg += "Expected iflag on line {} to be 1, 2 or 3. Instead got '{}'.".format(current_line+1, iflag)
+            raise ValueError(err_msg)
+
         current_line += 1
 
         current_line, I = _load_qs(all_lines, current_line, width*height)
