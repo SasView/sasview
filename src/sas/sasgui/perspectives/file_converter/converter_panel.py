@@ -35,13 +35,13 @@ if sys.platform.count("win32") > 0:
     PANEL_TOP = 0
     _STATICBOX_WIDTH = 410
     _BOX_WIDTH = 200
-    PANEL_SIZE = 480
+    PANEL_SIZE = 520
     FONT_VARIANT = 0
 else:
     PANEL_TOP = 60
     _STATICBOX_WIDTH = 430
     _BOX_WIDTH = 200
-    PANEL_SIZE = 500
+    PANEL_SIZE = 540
     FONT_VARIANT = 1
 
 class ConverterPanel(ScrolledPanel, PanelBase):
@@ -509,12 +509,14 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         instructions = (
-        "Select linked single column 1D ASCII files containing the Q-axis and "
-        "Intensity-axis data, or 1D BSL/OTOKO files, or a 2D BSL/OTOKO file, "
-        "then choose where to save the converted file, and click Convert.\n"
-        "1D ASCII and BSL/OTOKO files can be converted to CanSAS (XML) or "
-        "NXcanSAS (HDF5) formats. 2D BSL/OTOKO files can only be converted to "
-        "the NXcanSAS format.\n"
+        "If converting a 1D dataset, select linked single-column ASCII files "
+        "containing the Q-axis and intensity-axis data, or a 1D BSL/OTOKO file."
+        " If converting 2D data, select an ASCII file in the ISIS 2D file "
+        "format, or a 2D BSL/OTOKO file. Choose where to save the converted "
+        "file and click convert.\n"
+        "One dimensional ASCII and BSL/OTOKO files can be converted to CanSAS "
+        "(XML) or NXcanSAS (HDF5) formats. Two dimensional datasets can only be"
+        " converted to the NXcanSAS format.\n"
         "Metadata can be optionally added for the CanSAS XML format."
         )
 
@@ -659,7 +661,7 @@ class ConverterWindow(widget.CHILD_FRAME):
     """Displays ConverterPanel"""
 
     def __init__(self, parent=None, title='File Converter', base=None,
-        manager=None, size=(PANEL_SIZE * 1.05, PANEL_SIZE / 1.1),
+        manager=None, size=(PANEL_SIZE * 0.96, PANEL_SIZE * 0.9),
         *args, **kwargs):
         kwargs['title'] = title
         kwargs['size'] = size
