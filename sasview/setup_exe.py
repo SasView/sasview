@@ -12,6 +12,7 @@
 # Attention should be paid to dynamic imports. Data files can
 # be added to the distribution directory for that purpose.
 # See for example the 'images' directory below.
+from __future__ import print_function
 
 import os
 import sys
@@ -61,8 +62,8 @@ try:
         del sys.argv[path_flag_idx+1]
         sys.argv.remove('--extrapath')
 except:
-    print "Error processing extra python path needed to build SasView\n  %s" % \
-                sys.exc_value
+    print("Error processing extra python path needed to build SasView\n  %s" %
+          sys.exc_value)
 
 
 # Solution taken from here: http://www.py2exe.org/index.cgi/win32com.shell
@@ -82,14 +83,13 @@ try:
     for p in win32com.__path__[1:]:
         modulefinder.AddPackagePath(win32_folder, p)
     for extra in ["win32com.shell", "win32com.adsi", "win32com.axcontrol",
-                    "win32com.axscript", "win32com.bits", "win32com.ifilter",
-                    "win32com.internet", "win32com.mapi", "win32com.propsys",
-                    "win32com.taskscheduler"]:
-        
-            __import__(extra)
-            m = sys.modules[extra]
-            for p in m.__path__[1:]:
-                modulefinder.AddPackagePath(extra, p)
+                  "win32com.axscript", "win32com.bits", "win32com.ifilter",
+                  "win32com.internet", "win32com.mapi", "win32com.propsys",
+                  "win32com.taskscheduler"]:
+        __import__(extra)
+        m = sys.modules[extra]
+        for p in m.__path__[1:]:
+            modulefinder.AddPackagePath(extra, p)
 
 except ImportError:
     # no build path setup, no worries.
@@ -166,7 +166,7 @@ class Target:
         self.company_name = "SasView.org"
         self.copyright = "copyright 2009 - 2016"
         self.name = "SasView"
-        
+
 #
 # Adapted from http://www.py2exe.org/index.cgi/MatPlotLib
 # to use the MatPlotLib.
@@ -239,6 +239,10 @@ if os.path.isfile(f):
     data_files.append(('.', [f]))
     data_files.append(('config', [f]))
 f = 'local_config.py'
+if os.path.isfile(f):
+    data_files.append(('.', [f]))
+
+f = 'logging.ini'
 if os.path.isfile(f):
     data_files.append(('.', [f]))
 
@@ -336,7 +340,7 @@ packages.extend([
     'reportlab.platypus',
     ])
 packages.append('periodictable.core') # not found automatically
-#packages.append('IPython')
+# packages.append('IPython')
 includes = ['site', 'lxml._elementpath', 'lxml.etree']
 
 if tinycc:
@@ -369,7 +373,7 @@ target_wx_client = Target(
     icon_resources = [(1, os.path.join(images_dir, "ball.ico"))],
     other_resources = [(24, 1, manifest)],
     dest_base = "SasView"
-    )
+)
 
 # bundle_option = 2
 bundle_option = 3

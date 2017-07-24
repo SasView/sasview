@@ -1,6 +1,8 @@
 """
     Utilities to manage models
 """
+from __future__ import print_function
+
 import traceback
 import os
 import sys
@@ -18,6 +20,8 @@ from sas.sascalc.fit.pluginmodel import Model1DPlugin
 from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 from sasmodels.sasview_model import load_custom_model, load_standard_models
 from sas.sasgui.perspectives.fitting.fitpage import CUSTOM_MODEL
+
+logger = logging.getLogger(__name__)
 
 
 PLUGIN_DIR = 'plugin_models'
@@ -139,7 +143,7 @@ class ReportProblem:
     def __nonzero__(self):
         type, value, tb = sys.exc_info()
         if type is not None and issubclass(type, py_compile.PyCompileError):
-            print "Problem with", repr(value)
+            print("Problem with", repr(value))
             raise type, value, tb
         return 1
 
@@ -152,34 +156,34 @@ def compile_file(dir):
     """
     try:
         import compileall
-        compileall.compile_dir(dir=dir, ddir=dir, force=1,
+        compileall.compile_dir(dir=dir, ddir=dir, force=0,
                                quiet=report_problem)
     except:
         return sys.exc_info()[1]
     return None
 
 
-def _findModels(dir):
+def _find_models():
     """
     Find custom models
     """
     # List of plugin objects
-    dir = find_plugins_dir()
+    directory = find_plugins_dir()
     # Go through files in plug-in directory
-    if not os.path.isdir(dir):
-        msg = "SasView couldn't locate Model plugin folder %r." % dir
-        logging.warning(msg)
+    if not os.path.isdir(directory):
+        msg = "SasView couldn't locate Model plugin folder %r." % directory
+        logger.warning(msg)
         return {}
 
-    plugin_log("looking for models in: %s" % str(dir))
-    #compile_file(dir)  #always recompile the folder plugin
-    logging.info("plugin model dir: %s" % str(dir))
+    plugin_log("looking for models in: %s" % str(directory))
+    # compile_file(directory)  #always recompile the folder plugin
+    logger.info("plugin model dir: %s" % str(directory))
 
     plugins = {}
-    for filename in os.listdir(dir):
+    for filename in os.listdir(directory):
         name, ext = os.path.splitext(filename)
         if ext == '.py' and not name == '__init__':
-            path = os.path.abspath(os.path.join(dir, filename))
+            path = os.path.abspath(os.path.join(directory, filename))
             try:
                 model = load_custom_model(path)
                 model.name = PLUGIN_NAME_BASE + model.name
@@ -188,9 +192,9 @@ def _findModels(dir):
                 msg = traceback.format_exc()
                 msg += "\nwhile accessing model in %r" % path
                 plugin_log(msg)
-                logging.warning("Failed to load plugin %r. See %s for details"
-                                % (path, PLUGIN_LOG))
-            
+                logger.warning("Failed to load plugin %r. See %s for details"
+                               % (path, PLUGIN_LOG))
+
     return plugins
 
 
@@ -260,10 +264,10 @@ class ModelManagerBase:
         """
         temp = {}
         if self.is_changed():
-            temp =  _findModels(dir)
+            temp =  _findModels()
             self.last_time_dir_modified = time.time()
             return temp
-        logging.info("plugin model : %s" % str(temp))
+        logger.info("plugin model : %s" % str(temp))
         return temp
 
     def _getModelList(self):
@@ -337,7 +341,7 @@ class ModelManagerBase:
         return a dictionary of model
         """
         self.plugins = []
-        new_plugins = _findModels(dir)
+        new_plugins = _find_models()
         for name, plug in  new_plugins.iteritems():
             for stored_name, stored_plug in self.stored_plugins.iteritems():
                 if name == stored_name:

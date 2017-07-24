@@ -36,10 +36,10 @@ Example::
 UncertaintyFormatter() returns a private formatter with its own
 formatter.compact flag.
 """
-from __future__ import division
+from __future__ import division, print_function
 
 import math
-import numpy
+import numpy as np
 __all__ = ['format_uncertainty', 'format_uncertainty_pm',
            'format_uncertainty_compact']
 
@@ -101,15 +101,15 @@ def _format_uncertainty(value, uncertainty, compact):
     Implementation of both the compact and the +/- formats.
     """
     # Handle indefinite value
-    if numpy.isinf(value):
+    if np.isinf(value):
         return "inf" if value > 0 else "-inf"
-    if numpy.isnan(value):
+    if np.isnan(value):
         return "NaN"
 
     # Handle indefinite uncertainty
-    if uncertainty is None or uncertainty <= 0 or numpy.isnan(uncertainty):
+    if uncertainty is None or uncertainty <= 0 or np.isnan(uncertainty):
         return "%g" % value
-    if numpy.isinf(uncertainty):
+    if np.isinf(uncertainty):
         if compact:
             return "%.2g(inf)" % value
         else:
@@ -278,17 +278,17 @@ def test_compact():
     assert value_str(-0.0001,0.764) == "-0.00(76)"
 
     # non-finite values
-    assert value_str(-numpy.inf,None) == "-inf"
-    assert value_str(numpy.inf,None) == "inf"
-    assert value_str(numpy.NaN,None) == "NaN"
+    assert value_str(-np.inf,None) == "-inf"
+    assert value_str(np.inf,None) == "inf"
+    assert value_str(np.NaN,None) == "NaN"
     
     # bad or missing uncertainty
-    assert value_str(-1.23567,numpy.NaN) == "-1.23567"
-    assert value_str(-1.23567,-numpy.inf) == "-1.23567"
+    assert value_str(-1.23567,np.NaN) == "-1.23567"
+    assert value_str(-1.23567,-np.inf) == "-1.23567"
     assert value_str(-1.23567,-0.1) == "-1.23567"
     assert value_str(-1.23567,0) == "-1.23567"
     assert value_str(-1.23567,None) == "-1.23567"
-    assert value_str(-1.23567,numpy.inf) == "-1.2(inf)"
+    assert value_str(-1.23567,np.inf) == "-1.2(inf)"
 
 def test_pm():
     # Oops... renamed function after writing tests
@@ -409,17 +409,17 @@ def test_pm():
     assert value_str(-0.0001,0.764) == "-0.00 +/- 0.76"
 
     # non-finite values
-    assert value_str(-numpy.inf,None) == "-inf"
-    assert value_str(numpy.inf,None) == "inf"
-    assert value_str(numpy.NaN,None) == "NaN"
+    assert value_str(-np.inf,None) == "-inf"
+    assert value_str(np.inf,None) == "inf"
+    assert value_str(np.NaN,None) == "NaN"
     
     # bad or missing uncertainty
-    assert value_str(-1.23567,numpy.NaN) == "-1.23567"
-    assert value_str(-1.23567,-numpy.inf) == "-1.23567"
+    assert value_str(-1.23567,np.NaN) == "-1.23567"
+    assert value_str(-1.23567,-np.inf) == "-1.23567"
     assert value_str(-1.23567,-0.1) == "-1.23567"
     assert value_str(-1.23567,0) == "-1.23567"
     assert value_str(-1.23567,None) == "-1.23567"
-    assert value_str(-1.23567,numpy.inf) == "-1.2 +/- inf"
+    assert value_str(-1.23567,np.inf) == "-1.2 +/- inf"
 
 def test_default():
     # Check that the default is the compact format

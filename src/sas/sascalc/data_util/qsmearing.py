@@ -8,7 +8,6 @@
 #See the license text in license.txt
 #copyright 2008, University of Tennessee
 ######################################################################
-import numpy
 import math
 import logging
 import sys
@@ -42,9 +41,9 @@ def smear_selection(data, model = None):
     # object, just return None
     # This checks for 2D data (does not throw exception because fail is common)
     if  data.__class__.__name__ not in ['Data1D', 'Theory1D']:
-        if data == None:
+        if data is None:
             return None
-        elif data.dqx_data == None or data.dqy_data == None:
+        elif data.dqx_data is None or data.dqy_data is None:
             return None
         return PySmear2D(data)
     # This checks for 1D data with smearing info in the data itself (again, fail is likely; no exceptions)
@@ -59,19 +58,24 @@ def smear_selection(data, model = None):
     #if data.dx is not None and data.meta_data['loader']=='SESANS':
     if data.dx is not None and data.isSesans:
         #if data.dx[0] > 0.0:
-        if numpy.size(data.dx[data.dx <= 0]) == 0:
+        if np.size(data.dx[data.dx <= 0]) == 0:
             _found_sesans = True
         # if data.dx[0] <= 0.0:
-        if numpy.size(data.dx[data.dx <= 0]) > 0:
+        if np.size(data.dx[data.dx <= 0]) > 0:
             raise ValueError('one or more of your dx values are negative, please check the data file!')
 
-    if _found_sesans == True:
-        #Pre-compute the Hankel matrix (H)
-        qmax, qunits = data.sample.zacceptance
+    if _found_sesans:
+        # Pre-compute the Hankel matrix (H)
         SElength = Converter(data._xunit)(data.x, "A")
-        zaccept = Converter(qunits)(qmax, "1/A"),
+
+        theta_max = Converter("radians")(data.sample.zacceptance)[0]
+        q_max = 2 * np.pi / np.max(data.source.wavelength) * np.sin(theta_max)
+        zaccept = Converter("1/A")(q_max, "1/" + data.source.wavelength_unit),
+
         Rmax = 10000000
-        hankel = SesansTransform(data.x, SElength, zaccept, Rmax)
+        hankel = SesansTransform(data.x, SElength,
+                                 data.source.wavelength,
+                                 zaccept, Rmax)
         # Then return the actual transform, as if it were a smearing function
         return PySmear(hankel, model, offset=0)
 
@@ -120,7 +124,7 @@ class PySmear(object):
         self.model = model
         self.resolution = resolution
         if offset is None:
-            offset = numpy.searchsorted(self.resolution.q_calc, self.resolution.q[0])
+            offset = np.searchsorted(self.resolution.q_calc, self.resolution.q[0])
         self.offset = offset
 
     def apply(self, iq_in, first_bin=0, last_bin=None):
@@ -136,7 +140,7 @@ class PySmear(object):
         if last_bin is None: last_bin = len(iq_in)
         start, end = first_bin + self.offset, last_bin + self.offset
         q_calc = self.resolution.q_calc
-        iq_calc = numpy.empty_like(q_calc)
+        iq_calc = np.empty_like(q_calc)
         if start > 0:
             iq_calc[:start] = self.model.evalDistribution(q_calc[:start])
         if end+1 < len(q_calc):
@@ -156,8 +160,8 @@ class PySmear(object):
         q[first:last+1].
         """
         q = self.resolution.q
-        first = numpy.searchsorted(q, q_min)
-        last = numpy.searchsorted(q, q_max)
+        first = np.searchsorted(q, q_min)
+        last = np.searchsorted(q, q_max)
         return first, min(last,len(q)-1)
 
 def slit_smear(data, model=None):

@@ -7,7 +7,7 @@ may return values of the wrong type if some of the arguments are
 integers, so be sure to create them with floating point inputs.
 """
 from __future__ import division  # Get true division
-import numpy
+import numpy as np
 
 
 def div(X, varX, Y, varY):
@@ -58,21 +58,21 @@ def add(X, varX, Y, varY):
 
 def exp(X, varX):
     """Exponentiation with error propagation"""
-    Z = numpy.exp(X)
+    Z = np.exp(X)
     varZ = varX * Z**2
     return Z, varZ
 
 
 def log(X, varX):
     """Logarithm with error propagation"""
-    Z = numpy.log(X)
+    Z = np.log(X)
     varZ = varX / X**2
     return Z, varZ
 
 # Confirm this formula before using it
 # def pow(X,varX, Y,varY):
 #    Z = X**Y
-#    varZ = (Y**2 * varX/X**2 + varY * numpy.log(X)**2) * Z**2
+#    varZ = (Y**2 * varX/X**2 + varY * np.log(X)**2) * Z**2
 #    return Z,varZ
 #
 

@@ -135,7 +135,7 @@ def _build_all_units():
 
     sld = { '10^-6 Angstrom^-2': 1e-6, 'Angstrom^-2': 1 }
     Q = { 'invA': 1, 'invAng': 1, 'invAngstroms': 1, '1/A': 1, 
-          '10^-3 Angstrom^-1': 1e-3, '1/cm': 1e-8,
+          '10^-3 Angstrom^-1': 1e-3, '1/cm': 1e-8, '1/m': 1e-10,
           'nm^-1': 0.1, '1/nm': 0.1, 'n_m^-1': 0.1 }
 
     _caret_optional(sld)
@@ -194,6 +194,7 @@ def _check(expect,get):
 def test():
     _check(1,Converter('n_m^-1')(10,'invA')) # 10 nm^-1 = 1 inv Angstroms
     _check(2,Converter('mm')(2000,'m')) # 2000 mm -> 2 m
+    _check(2.011e10,Converter('1/A')(2.011,"1/m")) # 2.011 1/A -> 2.011 * 10^10 1/m
     _check(0.003,Converter('microseconds')(3,units='ms')) # 3 us -> 0.003 ms
     _check(45,Converter('nanokelvin')(45))  # 45 nK -> 45 nK
     _check(0.5,Converter('seconds')(1800,units='hours')) # 1800 s -> 0.5 hr

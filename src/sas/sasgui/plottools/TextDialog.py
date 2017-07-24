@@ -40,7 +40,7 @@ class TextDialog(wx.Dialog):
         family_box = wx.BoxSizer(wx.HORIZONTAL)
         style_box = wx.BoxSizer(wx.HORIZONTAL)
         # tcA
-        if unit != None:
+        if unit is not None:
             styles = wx.TAB_TRAVERSAL
             height = -1
             unit_text = wx.StaticText(self, -1, 'Unit :')
@@ -129,7 +129,7 @@ class TextDialog(wx.Dialog):
         family_box.Add(wx.StaticText(self, -1, 'Size :', size = (50, -1)),
                        0, wx.TOP, 5)
         family_box.Add(self.font_size, 0, 0)
-        if unit_box != None:
+        if unit_box is not None:
             family_box.Add((_BOX_WIDTH / 2, -1))
             family_box.Add(tick_label_text, 0, 0)
             family_box.Add(self.tick_label_check, 0, 0)
@@ -158,7 +158,7 @@ class TextDialog(wx.Dialog):
         text_box.Add((15, 10))
         text_box.Add(self.text_string)
         vbox.Add(text_box, 0, wx.EXPAND, 15)
-        if unit_box != None:
+        if unit_box is not None:
             unit_box.Add(unit_text, 0, 0)
             unit_box.Add(self.unit_ctrl, 0, 0)
             vbox.Add((5, 5))

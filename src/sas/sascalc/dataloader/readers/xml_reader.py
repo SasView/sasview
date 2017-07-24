@@ -18,6 +18,8 @@ import logging
 from lxml import etree
 from lxml.builder import E
 
+logger = logging.getLogger(__name__)
+
 PARSER = etree.ETCompatXMLParser(remove_comments=True, remove_pis=False)
 
 class XMLreader():
@@ -70,7 +72,7 @@ class XMLreader():
             self.xmldoc = etree.parse(self.xml, parser=PARSER)
             self.xmlroot = self.xmldoc.getroot()
         except etree.XMLSyntaxError as xml_error:
-            logging.info(xml_error)
+            logger.info(xml_error)
         except Exception:
             self.xml = None
             self.xmldoc = None
@@ -87,7 +89,7 @@ class XMLreader():
             self.xmldoc = tag_soup
             self.xmlroot = etree.fromstring(tag_soup)
         except etree.XMLSyntaxError as xml_error:
-            logging.info(xml_error)
+            logger.info(xml_error)
         except Exception:
             self.xml = None
             self.xmldoc = None
@@ -101,7 +103,7 @@ class XMLreader():
             self.schema = schema
             self.schemadoc = etree.parse(self.schema, parser=PARSER)
         except etree.XMLSyntaxError as xml_error:
-            logging.info(xml_error)
+            logger.info(xml_error)
         except Exception:
             self.schema = None
             self.schemadoc = None
@@ -240,7 +242,7 @@ class XMLreader():
 
         :param name: The name of the element to be created
         """
-        if attrib == None:
+        if attrib is None:
             attrib = {}
         return etree.Element(name, attrib, nsmap)
 
@@ -299,7 +301,7 @@ class XMLreader():
         :param attrib: A dictionary of attribute names to attribute values
         """
         text = str(text)
-        if attrib == None:
+        if attrib is None:
             attrib = {}
         elem = E(elementname, attrib, text)
         parent = parent.append(elem)

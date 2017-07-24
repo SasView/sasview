@@ -15,6 +15,7 @@
 #copyright 2008, University of Tennessee
 ######################################################################
 
+from __future__ import print_function
 
 #TODO: Keep track of data manipulation in the 'process' data structure.
 #TODO: This module should be independent of plottables. We should write
@@ -22,7 +23,7 @@
 
 #from sas.guitools.plottables import Data1D as plottable_1D
 from sas.sascalc.data_util.uncertainty import Uncertainty
-import numpy
+import numpy as np
 import math
 
 class plottable_1D(object):
@@ -50,20 +51,20 @@ class plottable_1D(object):
     _yunit = ''
 
     def __init__(self, x, y, dx=None, dy=None, dxl=None, dxw=None, lam=None, dlam=None):
-        self.x = numpy.asarray(x)
-        self.y = numpy.asarray(y)
+        self.x = np.asarray(x)
+        self.y = np.asarray(y)
         if dx is not None:
-            self.dx = numpy.asarray(dx)
+            self.dx = np.asarray(dx)
         if dy is not None:
-            self.dy = numpy.asarray(dy)
+            self.dy = np.asarray(dy)
         if dxl is not None:
-            self.dxl = numpy.asarray(dxl)
+            self.dxl = np.asarray(dxl)
         if dxw is not None:
-            self.dxw = numpy.asarray(dxw)
+            self.dxw = np.asarray(dxw)
         if lam is not None:
-            self.lam = numpy.asarray(lam)
+            self.lam = np.asarray(lam)
         if dlam is not None:
-            self.dlam = numpy.asarray(dlam)
+            self.dlam = np.asarray(dlam)
 
     def xaxis(self, label, unit):
         """
@@ -108,16 +109,16 @@ class plottable_2D(object):
     def __init__(self, data=None, err_data=None, qx_data=None,
                  qy_data=None, q_data=None, mask=None,
                  dqx_data=None, dqy_data=None):
-        self.data = numpy.asarray(data)
-        self.qx_data = numpy.asarray(qx_data)
-        self.qy_data = numpy.asarray(qy_data)
-        self.q_data = numpy.asarray(q_data)
-        self.mask = numpy.asarray(mask)
-        self.err_data = numpy.asarray(err_data)
+        self.data = np.asarray(data)
+        self.qx_data = np.asarray(qx_data)
+        self.qy_data = np.asarray(qy_data)
+        self.q_data = np.asarray(q_data)
+        self.mask = np.asarray(mask)
+        self.err_data = np.asarray(err_data)
         if dqx_data is not None:
-            self.dqx_data = numpy.asarray(dqx_data)
+            self.dqx_data = np.asarray(dqx_data)
         if dqy_data is not None:
-            self.dqy_data = numpy.asarray(dqy_data)
+            self.dqy_data = np.asarray(dqy_data)
 
     def xaxis(self, label, unit):
         """
@@ -352,7 +353,8 @@ class Sample(object):
     ## Details
     details = None
     ## SESANS zacceptance
-    zacceptance = None
+    zacceptance = (0,"")
+    yacceptance = (0,"")
 
     def __init__(self):
         self.position = Vector()
@@ -733,7 +735,7 @@ class Data1D(plottable_1D, DataInfo):
         :return: True is slit smearing info is present, False otherwise
         """
         def _check(v):
-            if (v.__class__ == list or v.__class__ == numpy.ndarray) \
+            if (v.__class__ == list or v.__class__ == np.ndarray) \
                 and len(v) > 0 and min(v) > 0:
                 return True
             return False
@@ -751,12 +753,12 @@ class Data1D(plottable_1D, DataInfo):
         from copy import deepcopy
 
         if clone is None or not issubclass(clone.__class__, Data1D):
-            x = numpy.zeros(length)
-            dx = numpy.zeros(length)
-            y = numpy.zeros(length)
-            dy = numpy.zeros(length)
-            lam = numpy.zeros(length)
-            dlam = numpy.zeros(length)
+            x = np.zeros(length)
+            dx = np.zeros(length)
+            y = np.zeros(length)
+            dy = np.zeros(length)
+            lam = np.zeros(length)
+            dlam = np.zeros(length)
             clone = Data1D(x, y, lam=lam, dx=dx, dy=dy, dlam=dlam)
 
         clone.title = self.title
@@ -804,13 +806,13 @@ class Data1D(plottable_1D, DataInfo):
             # Check that the other data set has errors, otherwise
             # create zero vector
             dy_other = other.dy
-            if other.dy == None or (len(other.dy) != len(other.y)):
-                dy_other = numpy.zeros(len(other.y))
+            if other.dy is None or (len(other.dy) != len(other.y)):
+                dy_other = np.zeros(len(other.y))
 
         # Check that we have errors, otherwise create zero vector
         dy = self.dy
-        if self.dy == None or (len(self.dy) != len(self.y)):
-            dy = numpy.zeros(len(self.y))
+        if self.dy is None or (len(self.dy) != len(self.y)):
+            dy = np.zeros(len(self.y))
 
         return dy, dy_other
 
@@ -820,14 +822,14 @@ class Data1D(plottable_1D, DataInfo):
         # First, check the data compatibility
         dy, dy_other = self._validity_check(other)
         result = self.clone_without_data(len(self.x))
-        if self.dxw == None:
+        if self.dxw is None:
             result.dxw = None
         else:
-            result.dxw = numpy.zeros(len(self.x))
-        if self.dxl == None:
+            result.dxw = np.zeros(len(self.x))
+        if self.dxl is None:
             result.dxl = None
         else:
-            result.dxl = numpy.zeros(len(self.x))
+            result.dxl = np.zeros(len(self.x))
 
         for i in range(len(self.x)):
             result.x[i] = self.x[i]
@@ -882,40 +884,40 @@ class Data1D(plottable_1D, DataInfo):
         # First, check the data compatibility
         self._validity_check_union(other)
         result = self.clone_without_data(len(self.x) + len(other.x))
-        if self.dy == None or other.dy is None:
+        if self.dy is None or other.dy is None:
             result.dy = None
         else:
-            result.dy = numpy.zeros(len(self.x) + len(other.x))
-        if self.dx == None or other.dx is None:
+            result.dy = np.zeros(len(self.x) + len(other.x))
+        if self.dx is None or other.dx is None:
             result.dx = None
         else:
-            result.dx = numpy.zeros(len(self.x) + len(other.x))
-        if self.dxw == None or other.dxw is None:
+            result.dx = np.zeros(len(self.x) + len(other.x))
+        if self.dxw is None or other.dxw is None:
             result.dxw = None
         else:
-            result.dxw = numpy.zeros(len(self.x) + len(other.x))
-        if self.dxl == None or other.dxl is None:
+            result.dxw = np.zeros(len(self.x) + len(other.x))
+        if self.dxl is None or other.dxl is None:
             result.dxl = None
         else:
-            result.dxl = numpy.zeros(len(self.x) + len(other.x))
+            result.dxl = np.zeros(len(self.x) + len(other.x))
 
-        result.x = numpy.append(self.x, other.x)
+        result.x = np.append(self.x, other.x)
         #argsorting
-        ind = numpy.argsort(result.x)
+        ind = np.argsort(result.x)
         result.x = result.x[ind]
-        result.y = numpy.append(self.y, other.y)
+        result.y = np.append(self.y, other.y)
         result.y = result.y[ind]
-        if result.dy != None:
-            result.dy = numpy.append(self.dy, other.dy)
+        if result.dy is not None:
+            result.dy = np.append(self.dy, other.dy)
             result.dy = result.dy[ind]
         if result.dx is not None:
-            result.dx = numpy.append(self.dx, other.dx)
+            result.dx = np.append(self.dx, other.dx)
             result.dx = result.dx[ind]
         if result.dxw is not None:
-            result.dxw = numpy.append(self.dxw, other.dxw)
+            result.dxw = np.append(self.dxw, other.dxw)
             result.dxw = result.dxw[ind]
         if result.dxl is not None:
-            result.dxl = numpy.append(self.dxl, other.dxl)
+            result.dxl = np.append(self.dxl, other.dxl)
             result.dxl = result.dxl[ind]
         return result
 
@@ -969,12 +971,12 @@ class Data2D(plottable_2D, DataInfo):
         from copy import deepcopy
 
         if clone is None or not issubclass(clone.__class__, Data2D):
-            data = numpy.zeros(length)
-            err_data = numpy.zeros(length)
-            qx_data = numpy.zeros(length)
-            qy_data = numpy.zeros(length)
-            q_data = numpy.zeros(length)
-            mask = numpy.zeros(length)
+            data = np.zeros(length)
+            err_data = np.zeros(length)
+            qx_data = np.zeros(length)
+            qy_data = np.zeros(length)
+            q_data = np.zeros(length)
+            mask = np.zeros(length)
             dqx_data = None
             dqy_data = None
             clone = Data2D(data=data, err_data=err_data,
@@ -1028,15 +1030,15 @@ class Data2D(plottable_2D, DataInfo):
 
             # Check that the scales match
             err_other = other.err_data
-            if other.err_data == None or \
+            if other.err_data is None or \
                 (len(other.err_data) != len(other.data)):
-                err_other = numpy.zeros(len(other.data))
+                err_other = np.zeros(len(other.data))
 
         # Check that we have errors, otherwise create zero vector
         err = self.err_data
-        if self.err_data == None or \
+        if self.err_data is None or \
             (len(self.err_data) != len(self.data)):
-            err = numpy.zeros(len(other.data))
+            err = np.zeros(len(other.data))
         return err, err_other
 
     def _perform_operation(self, other, operation):
@@ -1048,17 +1050,17 @@ class Data2D(plottable_2D, DataInfo):
         """
         # First, check the data compatibility
         dy, dy_other = self._validity_check(other)
-        result = self.clone_without_data(numpy.size(self.data))
-        if self.dqx_data == None or self.dqy_data == None:
+        result = self.clone_without_data(np.size(self.data))
+        if self.dqx_data is None or self.dqy_data is None:
             result.dqx_data = None
             result.dqy_data = None
         else:
-            result.dqx_data = numpy.zeros(len(self.data))
-            result.dqy_data = numpy.zeros(len(self.data))
-        for i in range(numpy.size(self.data)):
+            result.dqx_data = np.zeros(len(self.data))
+            result.dqy_data = np.zeros(len(self.data))
+        for i in range(np.size(self.data)):
             result.data[i] = self.data[i]
             if self.err_data is not None and \
-                numpy.size(self.data) == numpy.size(self.err_data):
+                            np.size(self.data) == np.size(self.err_data):
                 result.err_data[i] = self.err_data[i]
             if self.dqx_data is not None:
                 result.dqx_data[i] = self.dqx_data[i]
@@ -1117,33 +1119,33 @@ class Data2D(plottable_2D, DataInfo):
         """
         # First, check the data compatibility
         self._validity_check_union(other)
-        result = self.clone_without_data(numpy.size(self.data) + \
-                                         numpy.size(other.data))
+        result = self.clone_without_data(np.size(self.data) + \
+                                         np.size(other.data))
         result.xmin = self.xmin
         result.xmax = self.xmax
         result.ymin = self.ymin
         result.ymax = self.ymax
-        if self.dqx_data == None or self.dqy_data == None or \
-                other.dqx_data == None or other.dqy_data == None:
+        if self.dqx_data is None or self.dqy_data is None or \
+                other.dqx_data is None or other.dqy_data is None:
             result.dqx_data = None
             result.dqy_data = None
         else:
-            result.dqx_data = numpy.zeros(len(self.data) + \
-                                         numpy.size(other.data))
-            result.dqy_data = numpy.zeros(len(self.data) + \
-                                         numpy.size(other.data))
+            result.dqx_data = np.zeros(len(self.data) + \
+                                       np.size(other.data))
+            result.dqy_data = np.zeros(len(self.data) + \
+                                       np.size(other.data))
 
-        result.data = numpy.append(self.data, other.data)
-        result.qx_data = numpy.append(self.qx_data, other.qx_data)
-        result.qy_data = numpy.append(self.qy_data, other.qy_data)
-        result.q_data = numpy.append(self.q_data, other.q_data)
-        result.mask = numpy.append(self.mask, other.mask)
+        result.data = np.append(self.data, other.data)
+        result.qx_data = np.append(self.qx_data, other.qx_data)
+        result.qy_data = np.append(self.qy_data, other.qy_data)
+        result.q_data = np.append(self.q_data, other.q_data)
+        result.mask = np.append(self.mask, other.mask)
         if result.err_data is not None:
-            result.err_data = numpy.append(self.err_data, other.err_data)
+            result.err_data = np.append(self.err_data, other.err_data)
         if self.dqx_data is not None:
-            result.dqx_data = numpy.append(self.dqx_data, other.dqx_data)
+            result.dqx_data = np.append(self.dqx_data, other.dqx_data)
         if self.dqy_data is not None:
-            result.dqy_data = numpy.append(self.dqy_data, other.dqy_data)
+            result.dqy_data = np.append(self.dqy_data, other.dqy_data)
 
         return result
 

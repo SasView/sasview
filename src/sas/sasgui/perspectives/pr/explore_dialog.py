@@ -18,9 +18,11 @@ their distribution as a function of D_max.
 
 
 import wx
-import numpy
+import numpy as np
 import logging
 import sys
+
+logger = logging.getLogger(__name__)
 
 # Avoid Matplotlib complaining about the lack of legend on the plot
 import warnings
@@ -64,10 +66,10 @@ class OutputPlot(PlotPanel):
         self.npts = DEFAULT_NPTS
 
         step = (self.max - self.min) / (self.npts - 1)
-        self.x = numpy.arange(self.min, self.max + step * 0.01, step)
-        dx = numpy.zeros(len(self.x))
-        y = numpy.ones(len(self.x))
-        dy = numpy.zeros(len(self.x))
+        self.x = np.arange(self.min, self.max + step * 0.01, step)
+        dx = np.zeros(len(self.x))
+        y = np.ones(len(self.x))
+        dy = np.zeros(len(self.x))
 
         # Plot area
         self.plot = Model1D(self.x, y=y, dy=dy)
@@ -266,7 +268,7 @@ class ExploreDialog(wx.Dialog):
         # display the results.
         # Note: by design, the output type should always be part of the
         #       results object.
-        if self.results.outputs.has_key(output_type):
+        if output_type in self.results.outputs:
             self.plotpanel.plot.x = self.results.d_max
             self.plotpanel.plot.y = self.results.outputs[output_type][2]
             self.plotpanel.plot.name = '_nolegend_'
@@ -283,7 +285,7 @@ class ExploreDialog(wx.Dialog):
             msg += "the [%s] output type. This must be indicative of "
             msg += "a change in the " % str(output_type)
             msg += "ExploreDialog code."
-            logging.error(msg)
+            logger.error(msg)
 
     def __do_layout(self):
         """
@@ -417,7 +419,7 @@ class ExploreDialog(wx.Dialog):
                 # This inversion failed, skip this D_max value
                 msg = "ExploreDialog: inversion failed "
                 msg += "for D_max=%s\n%s" % (str(d), sys.exc_value)
-                logging.error(msg)
+                logger.error(msg)
 
         self.results = results
 

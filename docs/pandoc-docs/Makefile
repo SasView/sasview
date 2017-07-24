@@ -1,0 +1,2 @@
+# Makefile for PanDoc documentation
+#
