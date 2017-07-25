@@ -47,6 +47,11 @@ def run():
     splash = SplashScreen()
     splash.show()
 
+    # fix for pyinstaller packages app to avoid ReactorAlreadyInstalledError
+    import sys
+    if 'twisted.internet.reactor' in sys.modules:
+        del sys.modules['twisted.internet.reactor']
+
     # DO NOT move the following import to the top!
     # (unless you know what you're doing)
     import qt4reactor

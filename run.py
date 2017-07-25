@@ -20,7 +20,7 @@ import os
 import sys
 from contextlib import contextmanager
 from os.path import join as joinpath
-from os.path import abspath, dirname
+from os.path import abspath, dirname, realpath
 
 
 def addpath(path):
@@ -63,7 +63,6 @@ def import_dll(modname, build_path):
     ext = sysconfig.get_config_var('SO')
     # build_path comes from context
     path = joinpath(build_path, *modname.split('.')) + ext
-    # print "importing", modname, "from", path
     return imp.load_dynamic(modname, path)
 
 
@@ -76,7 +75,8 @@ def prepare():
 
     # find the directories for the source and build
     from distutils.util import get_platform
-    root = abspath(dirname(__file__))
+    root = abspath(dirname(sys.argv[0]))
+
     platform = '%s-%s' % (get_platform(), sys.version[:3])
     build_path = joinpath(root, 'build', 'lib.' + platform)
 
@@ -143,7 +143,7 @@ def prepare():
 if __name__ == "__main__":
     # Need to add absolute path before actual prepare call,
     # so logging can be done during initialization process too
-    root = abspath(dirname(__file__))
+    root = abspath(dirname(realpath(sys.argv[0])))
     addpath(joinpath(root, 'sasview'))
     from logger_config import SetupLogger
     logger = SetupLogger(__name__).config_development()

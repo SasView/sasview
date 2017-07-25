@@ -50,26 +50,12 @@ datas.append(('local_config.py','.'))
 datas.append(('wxcruft.py','.'))
 datas.append(('welcome_panel.py','.'))
 
+datas.append((os.path.join(PYTHON_LOC,'Lib','SocketServer.py'),'.'))
+
 # TODO
 # NEED BETTER WAY TO DEAL WITH THESE RELATIVE PATHS
 datas.append((os.path.join('..','..','sasmodels','sasmodels'),'sasmodels'))
 datas.append((os.path.join('..','src','sas','sasgui','perspectives','fitting','plugin_models'),'plugin_models'))
-
-# precompile sas models into the sasview build path; doesn't matter too much
-# where it is so long as it is a place that will get cleaned up afterwards.
-import sasmodels.core
-dll_path = 'compiled_models'
-if not (os.path.exists(dll_path)):
-    os.mkdir(dll_path)
-dll_path2 = os.path.join(dll_path, dll_path)
-if not (os.path.exists(dll_path2)):
-    os.mkdir(dll_path2)
-
-compiled_dlls = sasmodels.core.precompile_dlls(dll_path, dtype='double')
-
-# include the compiled models as data; coordinate the target path for the
-# data with installer_generator.py
-datas.append((os.path.join('compiled_models','compiled_models'),'compiled_models'))
 
 # These depend on whether we have MKL or Atlas numpy
 if os.path.exists(os.path.join(LIBLOC, LIBPREFIX + 'mkl_core.' + LIBSUFFIX)):
@@ -113,21 +99,6 @@ binaries = []
 # EXCLUDED FILES ############################################################
 # Spelled out to enable easier editing
 excludes = []
-excludes.append('libzmq')
-excludes.append('IPython')
-excludes.append('PyQt4')
-excludes.append('PySide')
-excludes.append('Qt4')
-excludes.append('Tkinter')
-excludes.append('tk')
-excludes.append('tcl')
-# Seems we cannot build on Linux without bundling sip
-if not platform.system() == 'Linux':
-    excludes.append('sip')
-excludes.append('sympy')
-excludes.append('pytz')
-excludes.append('sklearn')
-excludes.append('zmq')
 
 # Need to explicitly exclude sasmodels here!!
 excludes.append('sasmodels')
@@ -137,7 +108,8 @@ hiddenimports = [
  'periodictable.core',
  'sasmodels.core',
  'pyopencl',
- 'tinycc'
+ 'tinycc',
+ 'SocketServer'
 ]
 
 a = Analysis([SCRIPT_TO_SOURCE],
