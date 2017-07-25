@@ -264,7 +264,7 @@ class ModelManagerBase:
         """
         temp = {}
         if self.is_changed():
-            temp =  _findModels()
+            temp =  _find_models()
             self.last_time_dir_modified = time.time()
             return temp
         logger.info("plugin model : %s" % str(temp))
