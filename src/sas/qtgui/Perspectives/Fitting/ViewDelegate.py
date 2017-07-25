@@ -177,3 +177,81 @@ class PolyViewDelegate(QtGui.QStyledItemDelegate):
         else:
             # Just the default paint
             QtGui.QStyledItemDelegate.paint(self, painter, option, index)
+
+class MagnetismViewDelegate(QtGui.QStyledItemDelegate):
+    """
+    Custom delegate for appearance and behavior control of the magnetism view
+    """
+    def __init__(self, parent=None):
+        """
+        Overwrite generic constructor to allow for some globals
+        """
+        super(QtGui.QStyledItemDelegate, self).__init__()
+
+        self.mag_parameter = 0
+        self.mag_value = 1
+        self.mag_min = 2
+        self.mag_max = 3
+        self.mag_unit = 4
+
+    def editableParameters(self):
+        return [self.mag_min, self.mag_max]
+
+    def addErrorColumn(self):
+        """
+        Modify local column pointers
+        Note: the reverse is never required!
+        """
+        self.mag_parameter = 0
+        self.mag_value = 1
+        self.mag_min = 3
+        self.mag_max = 4
+        self.mag_unit = 5
+
+    def createEditor(self, widget, option, index):
+        # Remember the current choice
+        current_text = index.data().toString()
+        if not index.isValid():
+            return 0
+        if index.column() in self.editableParameters():
+            editor = QtGui.QLineEdit(widget)
+            validator = QtGui.QDoubleValidator()
+            editor.setValidator(validator)
+            return editor
+        else:
+            QtGui.QStyledItemDelegate.createEditor(self, widget, option, index)
+
+    def paint(self, painter, option, index):
+        """
+        Overwrite generic painter for certain columns
+        """
+        if index.column() in (self.mag_min, self.mag_max):
+            # Units - present in nice HTML
+            options = QtGui.QStyleOptionViewItemV4(option)
+            self.initStyleOption(options,index)
+
+            style = QtGui.QApplication.style() if options.widget is None else options.widget.style()
+
+            # Prepare document for inserting into cell
+            doc = QtGui.QTextDocument()
+
+            # Convert the unit description into HTML
+            text_html = GuiUtils.convertUnitToHTML(str(options.text))
+            doc.setHtml(text_html)
+
+            # delete the original content
+            options.text = ""
+            style.drawControl(QtGui.QStyle.CE_ItemViewItem, options, painter, options.widget);
+
+            context = QtGui.QAbstractTextDocumentLayout.PaintContext()
+            textRect = style.subElementRect(QtGui.QStyle.SE_ItemViewItemText, options)
+
+            painter.save()
+            painter.translate(textRect.topLeft())
+            painter.setClipRect(textRect.translated(-textRect.topLeft()))
+            # Draw the QTextDocument in the cell
+            doc.documentLayout().draw(painter, context)
+            painter.restore()
+        else:
+            # Just the default paint
+            QtGui.QStyledItemDelegate.paint(self, painter, option, index)

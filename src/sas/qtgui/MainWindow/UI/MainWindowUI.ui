@@ -323,7 +323,10 @@
   </action>
   <action name="actionCategry_Manager">
    <property name="text">
-    <string>Categry Manager</string>
+    <string>Category Manager</string>
+   </property>
+   <property name="toolTip">
+    <string>Category Manager</string>
    </property>
   </action>
   <action name="actionData_Operation">

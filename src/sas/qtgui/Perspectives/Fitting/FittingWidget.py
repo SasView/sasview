@@ -35,6 +35,7 @@ from sas.qtgui.Perspectives.Fitting.OptionsWidget import OptionsWidget
 from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import ModelViewDelegate
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import PolyViewDelegate
+from sas.qtgui.Perspectives.Fitting.ViewDelegate import MagnetismViewDelegate
 
 TAB_MAGNETISM = 4
 TAB_POLY = 3
@@ -165,8 +166,11 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         # Which shell is being currently displayed?
         self.current_shell_displayed = 0
+
+        # Error column presence in parameter display
         self.has_error_column = False
         self.has_poly_error_column = False
+        self.has_magnet_error_column = False
 
         # signal communicator
         self.communicate = self.parent.communicate
@@ -258,6 +262,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.lstMagnetic.setModel(self._magnet_model)
         self.setMagneticModel()
         self.setTableProperties(self.lstMagnetic)
+        # Delegates for custom editing and display
+        self.lstMagnetic.setItemDelegate(MagnetismViewDelegate(self))
 
     def initializeCategoryCombo(self):
         """
@@ -368,11 +374,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.cmdMagneticDisplay.clicked.connect(self.onDisplayMagneticAngles)
 
         # Respond to change in parameters from the UI
-        self._model_model.itemChanged.connect(self.updateParamsFromModel)
+        self._model_model.itemChanged.connect(self.onMainParamsChange)
         self._poly_model.itemChanged.connect(self.onPolyModelChange)
-
-        # TODO after the poly_model prototype accepted
-        #self._magnet_model.itemChanged.connect(self.onMagneticModelChange)
+        self._magnet_model.itemChanged.connect(self.onMagnetModelChange)
 
         # Signals from separate tabs asking for replot
         self.options_widget.plot_signal.connect(self.onOptionsUpdate)
@@ -500,6 +504,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             else:
                 if parameter_name in self.parameters_to_fit:
                     self.parameters_to_fit.remove(parameter_name)
+            self.cmdFit.setEnabled(self.parameters_to_fit != [] and self.logic.data_is_loaded)
             return
         elif model_column in [self.lstPoly.itemDelegate().poly_min, self.lstPoly.itemDelegate().poly_max]:
             try:
@@ -524,6 +529,49 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             # PD[ratio] -> width, npts -> npts, nsigs -> nsigmas
             self.kernel_module.setParam(parameter_name + '.' + \
                                         self.lstPoly.itemDelegate().columnDict()[model_column], value)
+
+    def onMagnetModelChange(self, item):
+        """
+        Callback method for updating the sasmodel magnetic parameters with the GUI values
+        """
+        model_column = item.column()
+        model_row = item.row()
+        name_index = self._magnet_model.index(model_row, 0)
+        parameter_name = str(self._magnet_model.data(name_index).toPyObject())
+
+        if model_column == 0:
+            value = item.checkState()
+            if value == QtCore.Qt.Checked:
+                self.parameters_to_fit.append(parameter_name)
+            else:
+                if parameter_name in self.parameters_to_fit:
+                    self.parameters_to_fit.remove(parameter_name)
+            self.cmdFit.setEnabled(self.parameters_to_fit != [] and self.logic.data_is_loaded)
+            # Update state stack
+            self.updateUndo()
+            return
+
+        # Extract changed value.
+        try:
+            value = float(item.text())
+        except ValueError:
+            # Unparsable field
+            return
+
+        property_index = self._magnet_model.headerData(1, model_column).toInt()[0]-1 # Value, min, max, etc.
+
+        # Update the parameter value - note: this supports +/-inf as well
+        self.kernel_module.params[parameter_name] = value
+
+        # min/max to be changed in self.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
+        self.kernel_module.details[parameter_name][property_index] = value
+
+        # Force the chart update when actual parameters changed
+        if model_column == 1:
+            self.recalculatePlotData()
+
+        # Update state stack
+        self.updateUndo()
 
     def onHelp(self):
         """
@@ -666,6 +714,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         self.updatePolyModelFromList(param_dict)
 
+        self.updateMagnetModelFromList(param_dict)
+
         # update charts
         self.onPlot()
 
@@ -758,6 +808,13 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         if not dict:
             return
 
+        def iterateOverPolyModel(func):
+            """
+            Take func and throw it inside the poly model row loop
+            """
+            for row_i in xrange(self._poly_model.rowCount()):
+                func(row_i)
+
         def updateFittedValues(row_i):
             # Utility function for main model update
             # internal so can use closure for param_dict
@@ -794,7 +851,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # block signals temporarily, so we don't end up
         # updating charts with every single model change on the end of fitting
         self._poly_model.blockSignals(True)
-        self.iterateOverModel(updateFittedValues)
+        iterateOverPolyModel(updateFittedValues)
         self._poly_model.blockSignals(False)
 
         if self.has_poly_error_column:
@@ -802,7 +859,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         self.lstPoly.itemDelegate().addErrorColumn()
         error_column = []
-        self.iterateOverModel(createErrorColumn)
+        iterateOverPolyModel(createErrorColumn)
 
         # switch off reponse to model change
         self._poly_model.blockSignals(True)
@@ -811,6 +868,68 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         FittingUtilities.addErrorPolyHeadersToModel(self._poly_model)
 
         self.has_poly_error_column = True
+
+    def updateMagnetModelFromList(self, param_dict):
+        """
+        Update the magnetic model with new parameters, create the errors column
+        """
+        assert isinstance(param_dict, dict)
+        if not dict:
+            return
+
+        def iterateOverMagnetModel(func):
+            """
+            Take func and throw it inside the magnet model row loop
+            """
+            for row_i in xrange(self._model_model.rowCount()):
+                func(row_i)
+
+        def updateFittedValues(row):
+            # Utility function for main model update
+            # internal so can use closure for param_dict
+            param_name = str(self._magnet_model.item(row, 0).text())
+            if param_name not in param_dict.keys():
+                return
+            # modify the param value
+            param_repr = GuiUtils.formatNumber(param_dict[param_name][0], high=True)
+            self._magnet_model.item(row, 1).setText(param_repr)
+            if self.has_magnet_error_column:
+                error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
+                self._magnet_model.item(row, 2).setText(error_repr)
+
+        def createErrorColumn(row):
+            # Utility function for error column update
+            item = QtGui.QStandardItem()
+            def createItem(param_name):
+                error_repr = GuiUtils.formatNumber(param_dict[param_name][1], high=True)
+                item.setText(error_repr)
+            def curr_param():
+                return str(self._magnet_model.item(row, 0).text())
+
+            [createItem(param_name) for param_name in param_dict.keys() if curr_param() == param_name]
+
+            error_column.append(item)
+
+        # block signals temporarily, so we don't end up
+        # updating charts with every single model change on the end of fitting
+        self._magnet_model.blockSignals(True)
+        iterateOverMagnetModel(updateFittedValues)
+        self._magnet_model.blockSignals(False)
+
+        if self.has_magnet_error_column:
+            return
+
+        self.lstMagnetic.itemDelegate().addErrorColumn()
+        error_column = []
+        iterateOverMagnetModel(createErrorColumn)
+
+        # switch off reponse to model change
+        self._magnet_model.blockSignals(True)
+        self._magnet_model.insertColumn(2, error_column)
+        self._magnet_model.blockSignals(False)
+        FittingUtilities.addErrorHeadersToModel(self._magnet_model)
+
+        self.has_magnet_error_column = True
 
     def onPlot(self):
         """
@@ -1038,7 +1157,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Update the counter used for multishell display
         self._last_model_row = self._model_model.rowCount()
 
-    def updateParamsFromModel(self, item):
+    def onMainParamsChange(self, item):
         """
         Callback method for updating the sasmodel parameters with the GUI values
         """
@@ -1054,7 +1173,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         model_row = item.row()
         name_index = self._model_model.index(model_row, 0)
 
-        # Extract changed value. Assumes proper validation by QValidator/Delegate
+        # Extract changed value.
         try:
             value = float(item.text())
         except ValueError:
@@ -1100,11 +1219,12 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # update the list of parameters to fit
         main_params = self.checkedListFromModel(self._model_model)
         poly_params = self.checkedListFromModel(self._poly_model)
+        magnet_params = self.checkedListFromModel(self._magnet_model)
+
         # Retrieve poly params names
         poly_params = [param.rsplit()[-1] + '.width' for param in poly_params]
-        # TODO : add magnetic params
 
-        self.parameters_to_fit = main_params + poly_params
+        self.parameters_to_fit = main_params + poly_params + magnet_params
 
     def checkedListFromModel(self, model):
         """
