@@ -40,8 +40,8 @@ class FileReader(object):
 
     def read(self, filepath):
         """
-        Basic file reader 
-        
+        Basic file reader
+
         :param filepath: The full or relative path to a file to be loaded
         """
         if os.path.isfile(filepath):
@@ -54,7 +54,7 @@ class FileReader(object):
                     self.f_open = open(filepath, 'rb')
                     self.get_file_contents()
                     self.sort_one_d_data()
-                except FileContentsException as e:
+                except DataReaderException as e:
                     self.handle_error_message(e.message)
                 except OSError as e:
                     # If the file cannot be opened

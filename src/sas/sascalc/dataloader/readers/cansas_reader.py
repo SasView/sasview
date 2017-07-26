@@ -76,12 +76,8 @@ class Reader(XMLreader):
     names = None
     ns_list = None
     # Temporary storage location for loading multiple data sets in a single file
-    current_datainfo = None
-    current_dataset = None
     current_data1d = None
     data = None
-    # List of data1D objects to be sent back to SasView
-    output = None
     # Wildcards
     type = ["XML files (*.xml)|*.xml", "SasView Save Files (*.svs)|*.svs"]
     # List of allowed extensions
@@ -111,6 +107,15 @@ class Reader(XMLreader):
         self.encoding = None
 
     def read(self, xml_file, schema_path="", invalid=True):
+        if schema_path != "" or invalid != True:
+            # read has been called from self.get_file_contents because xml file doens't conform to schema
+            _, self.extension = os.path.splitext(os.path.basename(xml_file))
+            return self.get_file_contents(xml_file=xml_file, schema_path=schema_path, invalid=invalid)
+
+        # Otherwise, read has been called by the data loader - file_reader_base_class handles this
+        return super(XMLreader, self).read(xml_file)
+
+    def get_file_contents(self, xml_file=None, schema_path="", invalid=True):
         """
         Validate and read in an xml_file file in the canSAS format.
 
@@ -120,70 +125,74 @@ class Reader(XMLreader):
         # For every file loaded, reset everything to a base state
         self.reset_state()
         self.invalid = invalid
-        # Check that the file exists
-        if os.path.isfile(xml_file):
-            basename, extension = os.path.splitext(os.path.basename(xml_file))
-            try:
-                # Get the file location of
-                self.load_file_and_schema(xml_file, schema_path)
+        # We don't use f_open since libxml handles opening/closing files
+        if xml_file is None:
+            xml_file = self.f_open.name
+        if not self.f_open.closed:
+            self.f_open.close()
+        basename, _ = os.path.splitext(os.path.basename(xml_file))
+        try:
+            # Get the file location of
+            self.load_file_and_schema(xml_file, schema_path)
+            self.add_data_set()
+            # Try to load the file, but raise an error if unable to.
+            # Check the file matches the XML schema
+            self.is_cansas(self.extension) # Raises FileContentsException if not CanSAS
+            self.invalid = False
+            # Get each SASentry from XML file and add it to a list.
+            entry_list = self.xmlroot.xpath(
+                    '/ns:SASroot/ns:SASentry',
+                    namespaces={'ns': self.cansas_defaults.get("ns")})
+            self.names.append("SASentry")
+
+            # Get all preprocessing events and encoding
+            self.set_processing_instructions()
+
+            # Parse each <SASentry> item
+            for entry in entry_list:
+                # Create a new DataInfo object for every <SASentry>
+
+                # Set the file name and then parse the entry.
+                self.current_datainfo.filename = basename + self.extension
+                self.current_datainfo.meta_data["loader"] = "CanSAS XML 1D"
+                self.current_datainfo.meta_data[PREPROCESS] = \
+                    self.processing_instructions
+
+                # Parse the XML SASentry
+                self._parse_entry(entry)
+                # Combine datasets with datainfo
                 self.add_data_set()
-                # Try to load the file, but raise an error if unable to.
-                # Check the file matches the XML schema
-                self.is_cansas(extension) # Raises FileContentsException if not CanSAS
-                self.invalid = False
-                # Get each SASentry from XML file and add it to a list.
-                entry_list = self.xmlroot.xpath(
-                        '/ns:SASroot/ns:SASentry',
-                        namespaces={'ns': self.cansas_defaults.get("ns")})
-                self.names.append("SASentry")
-
-                # Get all preprocessing events and encoding
-                self.set_processing_instructions()
-
-                # Parse each <SASentry> item
-                for entry in entry_list:
-                    # Create a new DataInfo object for every <SASentry>
-
-                    # Set the file name and then parse the entry.
-                    self.current_datainfo.filename = basename + extension
-                    self.current_datainfo.meta_data["loader"] = "CanSAS XML 1D"
-                    self.current_datainfo.meta_data[PREPROCESS] = \
-                        self.processing_instructions
-
-                    # Parse the XML SASentry
-                    self._parse_entry(entry)
-                    # Combine datasets with datainfo
-                    self.add_data_set()
-            except FileContentsException as fc_exc:
-                try:
-                    # If the file does not match the schema, raise this error
+        except FileContentsException as fc_exc:
+            try:
+                # Try again with an invalid CanSAS schema, that requires only a data set in each
+                base_name = xml_reader.__file__
+                base_name = base_name.replace("\\", "/")
+                base = base_name.split("/sas/")[0]
+                if self.cansas_version == "1.1":
+                    invalid_schema = INVALID_SCHEMA_PATH_1_1.format(base, self.cansas_defaults.get("schema"))
+                else:
+                    invalid_schema = INVALID_SCHEMA_PATH_1_0.format(base, self.cansas_defaults.get("schema"))
+                self.set_schema(invalid_schema)
+                if self.invalid:
+                    self.output = self.read(xml_file, invalid_schema, False)
+                    # If the file does not match the schema, but can still be read, raise this error
+                    self.load_file_and_schema(xml_file) # Relaod valid schema so we can find errors
                     invalid_xml = self.find_invalid_xml()
-                    invalid_xml = INVALID_XML.format(basename + extension) + invalid_xml
-                    self.errors.add(invalid_xml)
-                    # Try again with an invalid CanSAS schema, that requires only a data set in each
-                    base_name = xml_reader.__file__
-                    base_name = base_name.replace("\\", "/")
-                    base = base_name.split("/sas/")[0]
-                    if self.cansas_version == "1.1":
-                        invalid_schema = INVALID_SCHEMA_PATH_1_1.format(base, self.cansas_defaults.get("schema"))
-                    else:
-                        invalid_schema = INVALID_SCHEMA_PATH_1_0.format(base, self.cansas_defaults.get("schema"))
-                    self.set_schema(invalid_schema)
-                    if self.invalid:
-                        self.output = self.read(xml_file, invalid_schema, False)
-                    else:
-                        raise fc_exc
-                except FileContentsException as fc_exc:
-                    msg = "CanSAS Reader could not load the file {}".format(xml_file)
-                    if not extension in self.ext:
-                        raise DefaultReaderException(msg)
-                    if fc_exc.message is not None:
-                        msg = fc_exc.message
-                    raise FileContentsException(msg)
-                except Exception as e:
-                    raise FileContentsException(e.message)
-        else:
-            self.output.append("Not a valid file path.")
+                    invalid_xml = INVALID_XML.format(basename + self.extension) + invalid_xml
+                    raise DataReaderException(invalid_xml)
+                else:
+                    raise fc_exc
+            except FileContentsException as fc_exc:
+                msg = "CanSAS Reader could not load the file {}".format(xml_file)
+                if not self.extension in self.ext: # If the file has no associated loader
+                    raise DefaultReaderException(msg)
+                if fc_exc.message is not None: # Propagate error messages from earlier
+                    msg = fc_exc.message
+                raise FileContentsException(msg)
+            except DataReaderException as dr_exc: # Handled by file_reader_base_class
+                raise dr_exc
+            except Exception as e: # Convert any other exceptions to FileContentsExceptions
+                raise FileContentsException(e.message)
         # Return a list of parsed entries that dataloader can manage
         return self.output
 
