@@ -71,24 +71,28 @@ class Registry(ExtensionRegistry):
         try:
             return super(Registry, self).load(path, format=format)
         except NoKnownLoaderException as nkl_e:
-            pass  # try the ASCII reader4
-        except Exception as reg_e:
+            pass  # try the ASCII reader
+        except FileContentsException as fc_exc:
+            raise RuntimeError(fc_exc.message)
+        except Exception:
             pass
         try:
             ascii_loader = ascii_reader.Reader()
             return ascii_loader.read(path)
         except DefaultReaderException:
-            pass  # Loader specific error to try the ascii reader
-        except FileContentsException:
+            pass  # Loader specific error to try the cansas XML reader
+        except FileContentsException as e:
             # TODO: handle error
+            raise RuntimeError(e)
             pass
         try:
             cansas_loader = cansas_reader.Reader()
             return cansas_loader.read(path)
         except DefaultReaderException:
             pass  # Loader specific error to try the cansas NeXuS reader
-        except FileContentsException:
+        except FileContentsException as e:
             # TODO: Handle errors properly
+            raise RuntimeError(e)
             pass
         except Exception as csr:
             # TODO: Modify cansas reader to throw DefaultReaderException

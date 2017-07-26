@@ -28,7 +28,8 @@ from sas.sascalc.dataloader.data_info import \
 import sas.sascalc.dataloader.readers.xml_reader as xml_reader
 from sas.sascalc.dataloader.readers.xml_reader import XMLreader
 from sas.sascalc.dataloader.readers.cansas_constants import CansasConstants, CurrentLevel
-from sas.sascalc.dataloader.loader_exceptions import FileContentsException
+from sas.sascalc.dataloader.loader_exceptions import FileContentsException, \
+    DefaultReaderException, DataReaderException
 
 # The following 2 imports *ARE* used. Do not remove either.
 import xml.dom.minidom
@@ -122,40 +123,39 @@ class Reader(XMLreader):
         # Check that the file exists
         if os.path.isfile(xml_file):
             basename, extension = os.path.splitext(os.path.basename(xml_file))
-            # If the file type is not allowed, return nothing
-            if extension in self.ext or self.allow_all:
+            try:
                 # Get the file location of
                 self.load_file_and_schema(xml_file, schema_path)
                 self.add_data_set()
                 # Try to load the file, but raise an error if unable to.
                 # Check the file matches the XML schema
+                self.is_cansas(extension) # Raises FileContentsException if not CanSAS
+                self.invalid = False
+                # Get each SASentry from XML file and add it to a list.
+                entry_list = self.xmlroot.xpath(
+                        '/ns:SASroot/ns:SASentry',
+                        namespaces={'ns': self.cansas_defaults.get("ns")})
+                self.names.append("SASentry")
+
+                # Get all preprocessing events and encoding
+                self.set_processing_instructions()
+
+                # Parse each <SASentry> item
+                for entry in entry_list:
+                    # Create a new DataInfo object for every <SASentry>
+
+                    # Set the file name and then parse the entry.
+                    self.current_datainfo.filename = basename + extension
+                    self.current_datainfo.meta_data["loader"] = "CanSAS XML 1D"
+                    self.current_datainfo.meta_data[PREPROCESS] = \
+                        self.processing_instructions
+
+                    # Parse the XML SASentry
+                    self._parse_entry(entry)
+                    # Combine datasets with datainfo
+                    self.add_data_set()
+            except FileContentsException as fc_exc:
                 try:
-                    self.is_cansas(extension)
-                    self.invalid = False
-                    # Get each SASentry from XML file and add it to a list.
-                    entry_list = self.xmlroot.xpath(
-                            '/ns:SASroot/ns:SASentry',
-                            namespaces={'ns': self.cansas_defaults.get("ns")})
-                    self.names.append("SASentry")
-
-                    # Get all preprocessing events and encoding
-                    self.set_processing_instructions()
-
-                    # Parse each <SASentry> item
-                    for entry in entry_list:
-                        # Create a new DataInfo object for every <SASentry>
-
-                        # Set the file name and then parse the entry.
-                        self.current_datainfo.filename = basename + extension
-                        self.current_datainfo.meta_data["loader"] = "CanSAS XML 1D"
-                        self.current_datainfo.meta_data[PREPROCESS] = \
-                            self.processing_instructions
-
-                        # Parse the XML SASentry
-                        self._parse_entry(entry)
-                        # Combine datasets with datainfo
-                        self.add_data_set()
-                except RuntimeError:
                     # If the file does not match the schema, raise this error
                     invalid_xml = self.find_invalid_xml()
                     invalid_xml = INVALID_XML.format(basename + extension) + invalid_xml
@@ -169,20 +169,19 @@ class Reader(XMLreader):
                     else:
                         invalid_schema = INVALID_SCHEMA_PATH_1_0.format(base, self.cansas_defaults.get("schema"))
                     self.set_schema(invalid_schema)
-                    try:
-                        if self.invalid:
-                            if self.is_cansas():
-                                self.output = self.read(xml_file, invalid_schema, False)
-                            else:
-                                raise RuntimeError
-                        else:
-                            raise RuntimeError
-                    except RuntimeError:
-                        x = np.zeros(1)
-                        y = np.zeros(1)
-                        self.current_data1d = Data1D(x,y)
-                        self.current_data1d.errors = self.errors
-                        return [self.current_data1d]
+                    if self.invalid:
+                        self.output = self.read(xml_file, invalid_schema, False)
+                    else:
+                        raise fc_exc
+                except FileContentsException as fc_exc:
+                    msg = "CanSAS Reader could not load the file {}".format(xml_file)
+                    if not extension in self.ext:
+                        raise DefaultReaderException(msg)
+                    if fc_exc.message is not None:
+                        msg = fc_exc.message
+                    raise FileContentsException(msg)
+                except Exception as e:
+                    raise FileContentsException(e.message)
         else:
             self.output.append("Not a valid file path.")
         # Return a list of parsed entries that dataloader can manage
@@ -524,7 +523,7 @@ class Reader(XMLreader):
                 return True
         if ext == "svs":
             return True
-        raise RuntimeError
+        raise FileContentsException("Not valid CanSAS")
 
     def load_file_and_schema(self, xml_file, schema_path=""):
         """
@@ -542,8 +541,8 @@ class Reader(XMLreader):
         try:
             self.set_xml_file(xml_file)
         except etree.XMLSyntaxError:
-            msg = "Cansas cannot load this file"
-            raise FileContentsException, msg
+            msg = "Cansas cannot load {}.\n Invalid XML syntax.".format(xml_file)
+            raise FileContentsException(msg)
         self.cansas_version = self.xmlroot.get("version", "1.0")
 
         # Generic values for the cansas file based on the version

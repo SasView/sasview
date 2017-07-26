@@ -25,7 +25,7 @@ class ExtensionRegistry(object):
         registry['.tgz'] = untar
         registry['.tar.gz'] = untar
 
-        # Generic extensions to use after trying more specific extensions; 
+        # Generic extensions to use after trying more specific extensions;
         # these will be checked after the more specific extensions fail.
         registry['.gz'] = gunzip
 
@@ -91,11 +91,11 @@ class ExtensionRegistry(object):
     def lookup(self, path):
         """
         Return the loader associated with the file type of path.
-        
+
         :param path: Data file path
         :raises ValueError: When no loaders are found for the file.
         :return: List of available readers for the file extension
-        """        
+        """
         # Find matching extensions
         extlist = [ext for ext in self.extensions() if path.endswith(ext)]
         # Sort matching extensions by decreasing order of length
@@ -134,10 +134,15 @@ class ExtensionRegistry(object):
                 loaders = self.loaders[format]
             except KeyError as e:
                 pass
+        last_exc = None
         for fn in loaders:
             try:
                 return fn(path)
             except Exception as e:
+                last_exc = e
                 pass  # give other loaders a chance to succeed
         # If we get here it is because all loaders failed
+        if last_exc is not None and len(loaders) != 0:
+            # If file has associated loader(s) and they;ve failed
+            raise last_exc
         raise NoKnownLoaderException(e.message)  # raise generic exception

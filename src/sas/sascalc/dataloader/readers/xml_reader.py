@@ -73,6 +73,7 @@ class XMLreader():
             self.xmlroot = self.xmldoc.getroot()
         except etree.XMLSyntaxError as xml_error:
             logger.info(xml_error)
+            raise xml_error
         except Exception:
             self.xml = None
             self.xmldoc = None
@@ -205,7 +206,7 @@ class XMLreader():
         """
         Create a unique key value for any dictionary to prevent overwriting
         Recurses until a unique key value is found.
-        
+
         :param dictionary: A dictionary with any number of entries
         :param name: The index of the item to be added to dictionary
         :param numb: The number to be appended to the name, starts at 0
@@ -221,7 +222,7 @@ class XMLreader():
         """
         Create an element tree for processing from an etree element
 
-        :param root: etree Element(s) 
+        :param root: etree Element(s)
         """
         return etree.ElementTree(root)
 
