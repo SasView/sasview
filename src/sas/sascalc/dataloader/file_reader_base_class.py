@@ -99,7 +99,9 @@ class FileReader(object):
         final_list = []
         for data in self.output:
             if isinstance(data, Data1D):
+                # Sort data by increasing x and remove 1st point
                 ind = np.lexsort((data.y, data.x))
+                ind = ind[1:] # Remove 1st point (Q, I) = (0, 0)
                 data.x = np.asarray([data.x[i] for i in ind])
                 data.y = np.asarray([data.y[i] for i in ind])
                 if data.dx is not None:
@@ -114,6 +116,10 @@ class FileReader(object):
                     data.lam = np.asarray([data.lam[i] for i in ind])
                 if data.dlam is not None:
                     data.dlam = np.asarray([data.dlam[i] for i in ind])
+                data.xmin = np.min(data.x)
+                data.xmax = np.max(data.x)
+                data.ymin = np.min(data.y)
+                data.ymax = np.max(data.y)
             final_list.append(data)
         self.output = final_list
 
