@@ -58,7 +58,7 @@ class FileReader(object):
                         self.sort_one_d_data()
                     elif isinstance(self.output[0], Data2D):
                         self.sort_two_d_data()
-    
+
                 except DataReaderException as e:
                     self.handle_error_message(e.message)
                 except OSError as e:
@@ -106,59 +106,60 @@ class FileReader(object):
             if isinstance(data, Data1D):
                 # Sort data by increasing x and remove 1st point
                 ind = np.lexsort((data.y, data.x))
-                ind = ind[1:] # Remove 1st point (Q, I) = (0, 0)
-                data.x = np.asarray([data.x[i] for i in ind])
-                data.y = np.asarray([data.y[i] for i in ind])
+                data.x = np.asarray([data.x[i] for i in ind]).astype(np.float64)
+                data.y = np.asarray([data.y[i] for i in ind]).astype(np.float64)
                 if data.dx is not None:
-                    data.dx = np.asarray([data.dx[i] for i in ind])
+                    data.dx = np.asarray([data.dx[i] for i in ind]).astype(np.float64)
                 if data.dxl is not None:
-                    data.dxl = np.asarray([data.dxl[i] for i in ind])
+                    data.dxl = np.asarray([data.dxl[i] for i in ind]).astype(np.float64)
                 if data.dxw is not None:
-                    data.dxw = np.asarray([data.dxw[i] for i in ind])
+                    data.dxw = np.asarray([data.dxw[i] for i in ind]).astype(np.float64)
                 if data.dy is not None:
-                    data.dy = np.asarray([data.dy[i] for i in ind])
+                    data.dy = np.asarray([data.dy[i] for i in ind]).astype(np.float64)
                 if data.lam is not None:
-                    data.lam = np.asarray([data.lam[i] for i in ind])
+                    data.lam = np.asarray([data.lam[i] for i in ind]).astype(np.float64)
                 if data.dlam is not None:
-                    data.dlam = np.asarray([data.dlam[i] for i in ind])
+                    data.dlam = np.asarray([data.dlam[i] for i in ind]).astype(np.float64)
                 data.xmin = np.min(data.x)
                 data.xmax = np.max(data.x)
                 data.ymin = np.min(data.y)
                 data.ymax = np.max(data.y)
             final_list.append(data)
         self.output = final_list
+        self.remove_empty_q_values()
 
     def sort_two_d_data(self):
         final_list = []
         for dataset in self.output:
-            dataset.data = dataset.data.astype(np.float64)
-            dataset.qx_data = dataset.qx_data.astype(np.float64)
-            dataset.xmin = np.min(dataset.qx_data)
-            dataset.xmax = np.max(dataset.qx_data)
-            dataset.qy_data = dataset.qy_data.astype(np.float64)
-            dataset.ymin = np.min(dataset.qy_data)
-            dataset.ymax = np.max(dataset.qy_data)
-            dataset.q_data = np.sqrt(dataset.qx_data * dataset.qx_data
-                                     + dataset.qy_data * dataset.qy_data)
-            if dataset.err_data is not None:
-                dataset.err_data = dataset.err_data.astype(np.float64)
-            if dataset.dqx_data is not None:
-                dataset.dqx_data = dataset.dqx_data.astype(np.float64)
-            if dataset.dqy_data is not None:
-                dataset.dqy_data = dataset.dqy_data.astype(np.float64)
-            if dataset.mask is not None:
-                dataset.mask = dataset.mask.astype(dtype=bool)
+            if isinstance(dataset, Data2D):
+                dataset.data = dataset.data.astype(np.float64)
+                dataset.qx_data = dataset.qx_data.astype(np.float64)
+                dataset.xmin = np.min(dataset.qx_data)
+                dataset.xmax = np.max(dataset.qx_data)
+                dataset.qy_data = dataset.qy_data.astype(np.float64)
+                dataset.ymin = np.min(dataset.qy_data)
+                dataset.ymax = np.max(dataset.qy_data)
+                dataset.q_data = np.sqrt(dataset.qx_data * dataset.qx_data
+                                         + dataset.qy_data * dataset.qy_data)
+                if dataset.err_data is not None:
+                    dataset.err_data = dataset.err_data.astype(np.float64)
+                if dataset.dqx_data is not None:
+                    dataset.dqx_data = dataset.dqx_data.astype(np.float64)
+                if dataset.dqy_data is not None:
+                    dataset.dqy_data = dataset.dqy_data.astype(np.float64)
+                if dataset.mask is not None:
+                    dataset.mask = dataset.mask.astype(dtype=bool)
 
-            if len(dataset.shape) == 2:
-                n_rows, n_cols = dataset.shape
-                dataset.y_bins = dataset.qy_data[0::int(n_cols)]
-                dataset.x_bins = dataset.qx_data[:int(n_cols)]
-                dataset.data = dataset.data.flatten()
-            else:
-                dataset.y_bins = []
-                dataset.x_bins = []
-                dataset.data = dataset.data.flatten()
-            final_list.append(dataset)
+                if len(dataset.data.shape) == 2:
+                    n_rows, n_cols = dataset.data.shape
+                    dataset.y_bins = dataset.qy_data[0::int(n_cols)]
+                    dataset.x_bins = dataset.qx_data[:int(n_cols)]
+                    dataset.data = dataset.data.flatten()
+                else:
+                    dataset.y_bins = []
+                    dataset.x_bins = []
+                    dataset.data = dataset.data.flatten()
+                final_list.append(dataset)
         self.output = final_list
 
     def set_all_to_none(self):
