@@ -223,10 +223,11 @@ class Plugin(PluginBase):
 
             except NoKnownLoaderException as e:
                 logging.error(e.message)
+                error_message = "Loading data failed!\n" + e.message
                 self.load_update(output=None, message=e.message, info="warning")
                 self.load_complete(output=None,
-                                   message="Loading data failed!",
-                                   info="warning")
+                                   message=error_message,
+                                   info="error")
             except:
                 logger.error(sys.exc_value)
 
@@ -267,4 +268,5 @@ class Plugin(PluginBase):
         """
         wx.PostEvent(self.parent, StatusEvent(status=message, info=info,
                                               type="stop"))
-        self.parent.add_data(data_list=output)
+        if output is not None:
+            self.parent.add_data(data_list=output)

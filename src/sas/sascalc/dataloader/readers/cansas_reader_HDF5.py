@@ -12,7 +12,7 @@ from sas.sascalc.dataloader.data_info import plottable_1D, plottable_2D,\
     Data1D, Data2D, DataInfo, Process, Aperture, Collimation, \
     TransmissionSpectrum, Detector
 from sas.sascalc.dataloader.data_info import combine_data_info_with_plottable
-from sas.sascalc.dataloader.loader_exceptions import FileContentsException
+from sas.sascalc.dataloader.loader_exceptions import FileContentsException, DefaultReaderException
 from sas.sascalc.dataloader.file_reader_base_class import FileReader
 
 
@@ -77,7 +77,10 @@ class Reader(FileReader):
                 try:
                     self.raw_data = h5py.File(filename, 'r')
                 except Exception as e:
-                    raise FileContentsException, e
+                    if extension not in self.ext:
+                        msg = "CanSAS2.0 HDF5 Reader could not load file {}".format(basename + extension)
+                        raise DefaultReaderException(msg)
+                    raise FileContentsException(e.message)
                 # Read in all child elements of top level SASroot
                 self.read_children(self.raw_data, [])
                 # Add the last data set to the list of outputs

@@ -84,7 +84,6 @@ class Registry(ExtensionRegistry):
         except FileContentsException as e:
             # TODO: handle error
             raise RuntimeError(e)
-            pass
         try:
             cansas_loader = cansas_reader.Reader()
             return cansas_loader.read(path)
@@ -93,23 +92,21 @@ class Registry(ExtensionRegistry):
         except FileContentsException as e:
             # TODO: Handle errors properly
             raise RuntimeError(e)
-            pass
         except Exception as csr:
             # TODO: Modify cansas reader to throw DefaultReaderException
             pass
         try:
             cansas_nexus_loader = cansas_reader_HDF5.Reader()
             return cansas_nexus_loader.read(path)
-        except DefaultReaderException:
-            logging.errors("No default loader can load the data")
+        except DefaultReaderException as e:
+            logging.error("No default loader can load the data")
             # No known reader available. Give up and throw an error
             msg = "\n\tUnknown data format: %s.\n\tThe file is not a " % path
             msg += "known format that can be loaded by SasView.\n"
-            msg += "Traceback:\n%s" % e.message
             raise NoKnownLoaderException, msg
-        except FileContentsException:
+        except FileContentsException as e:
             # TODO: Handle error(s) properly
-            pass
+            raise RuntimeError(e)
 
     def find_plugins(self, dir):
         """

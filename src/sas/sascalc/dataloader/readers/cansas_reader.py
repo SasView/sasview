@@ -107,10 +107,11 @@ class Reader(XMLreader):
             self.f_open.close()
 
         basename, _ = os.path.splitext(os.path.basename(xml_file))
-        # Raises FileContentsException - handled by superclass
-        self.load_file_and_schema(xml_file, schema_path)
-        self.current_datainfo = DataInfo()
+
         try:
+            # Raises FileContentsException
+            self.load_file_and_schema(xml_file, schema_path)
+            self.current_datainfo = DataInfo()
             # Raises FileContentsException if file doesn't meet CanSAS schema
             self.is_cansas(self.extension)
             self.invalid = False # If we reach this point then file must be valid CanSAS
