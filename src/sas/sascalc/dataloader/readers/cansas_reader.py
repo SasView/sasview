@@ -235,7 +235,14 @@ class Reader(XMLreader):
             if len(node.getchildren()) > 0:
                 self.parent_class = tagname_original
                 if tagname == 'SASdata':
-                    self.current_dataset = plottable_1D(np.array(0), np.array(0))
+                    self._initialize_new_data_set(node)
+                    if isinstance(self.current_dataset, plottable_2D):
+                        x_bins = attr.get("x_bins", "")
+                        y_bins = attr.get("y_bins", "")
+                        if x_bins is not "" and y_bins is not "":
+                            self.current_dataset.shape = (x_bins, y_bins)
+                        else:
+                            self.current_dataset.shape = ()
                 # Recurse to access data within the group
                 self._parse_entry(node, recurse=True)
                 if tagname == "SASsample":
@@ -249,7 +256,11 @@ class Reader(XMLreader):
                     self.aperture.type = type
                 self._add_intermediate()
             else:
-                data_point, unit = self._get_node_value(node, tagname)
+                if isinstance(self.current_dataset, plottable_2D):
+                    data_point = node.text
+                    unit = attr.get('unit', '')
+                else:
+                    data_point, unit = self._get_node_value(node, tagname)
 
                 # If this is a dataset, store the data appropriately
                 if tagname == 'Run':
@@ -259,7 +270,9 @@ class Reader(XMLreader):
                     self.current_datainfo.title = data_point
                 elif tagname == 'SASnote':
                     self.current_datainfo.notes.append(data_point)
-                elif tagname == 'I': # I and Q points
+
+                # I and Q points
+                elif tagname == 'I' and isinstance(self.current_dataset, plottable_1D):
                     unit_list = unit.split("|")
                     if len(unit_list) > 1:
                         self.current_dataset.yaxis(unit_list[0].strip(),
@@ -267,7 +280,7 @@ class Reader(XMLreader):
                     else:
                         self.current_dataset.yaxis("Intensity", unit)
                     self.current_dataset.y = np.append(self.current_dataset.y, data_point)
-                elif tagname == 'Idev':
+                elif tagname == 'Idev' and isinstance(self.current_dataset, plottable_1D):
                     self.current_dataset.dy = np.append(self.current_dataset.dy, data_point)
                 elif tagname == 'Q':
                     unit_list = unit.split("|")
@@ -293,6 +306,28 @@ class Reader(XMLreader):
                     self.current_datainfo.sample.yacceptance = (data_point, unit)
                 elif tagname == 'zacceptance':
                     self.current_datainfo.sample.zacceptance = (data_point, unit)
+
+                # I and Qx, Qy - 2D data
+                elif tagname == 'I' and isinstance(self.current_dataset, plottable_2D):
+                    self.current_dataset.yaxis("Intensity", unit)
+                    self.current_dataset.data = np.fromstring(data_point, dtype=float, sep=",")
+                elif tagname == 'Idev' and isinstance(self.current_dataset, plottable_2D):
+                    self.current_dataset.err_data = np.fromstring(data_point, dtype=float, sep=",")
+                elif tagname == 'Qx':
+                    self.current_dataset.xaxis("Qx", unit)
+                    self.current_dataset.qx_data = np.fromstring(data_point, dtype=float, sep=",")
+                elif tagname == 'Qy':
+                    self.current_dataset.yaxis("Qy", unit)
+                    self.current_dataset.qy_data = np.fromstring(data_point, dtype=float, sep=",")
+                elif tagname == 'Qxdev':
+                    self.current_dataset.xaxis("Qxdev", unit)
+                    self.current_dataset.dqx_data = np.fromstring(data_point, dtype=float, sep=",")
+                elif tagname == 'Qydev':
+                    self.current_dataset.yaxis("Qydev", unit)
+                    self.current_dataset.dqy_data = np.fromstring(data_point, dtype=float, sep=",")
+                elif tagname == 'Mask':
+                    inter = [item == "1" for item in data_point.split(",")]
+                    self.current_dataset.mask = np.asarray(inter, dtype=bool)
 
                 # Sample Information
                 elif tagname == 'ID' and self.parent_class == 'SASsample':
@@ -646,6 +681,17 @@ class Reader(XMLreader):
             self.current_dataset.dy = np.append(self.current_dataset.dy,
                                                 np.zeros([array_size]))
 
+    def _initialize_new_data_set(self, node=None):
+        if node is not None:
+            for child in node:
+                if child.tag.replace(self.base_ns, "") == "Idata":
+                    for i_child in child:
+                        if i_child.tag.replace(self.base_ns, "") == "Qx":
+                            self.current_dataset = plottable_2D()
+                            return
+        self.current_dataset = plottable_1D(np.array(0), np.array(0))
+
+    ## Writing Methods
     def write(self, filename, datainfo):
         """
         Write the content of a Data1D as a CanSAS XML file

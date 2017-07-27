@@ -53,7 +53,12 @@ class FileReader(object):
                 try:
                     self.f_open = open(filepath, 'rb')
                     self.get_file_contents()
-                    self.sort_one_d_data()
+
+                    if isinstance(self.output[0], Data1D):
+                        self.sort_one_d_data()
+                    elif isinstance(self.output[0], Data2D):
+                        self.sort_two_d_data()
+    
                 except DataReaderException as e:
                     self.handle_error_message(e.message)
                 except OSError as e:
@@ -121,6 +126,39 @@ class FileReader(object):
                 data.ymin = np.min(data.y)
                 data.ymax = np.max(data.y)
             final_list.append(data)
+        self.output = final_list
+
+    def sort_two_d_data(self):
+        final_list = []
+        for dataset in self.output:
+            dataset.data = dataset.data.astype(np.float64)
+            dataset.qx_data = dataset.qx_data.astype(np.float64)
+            dataset.xmin = np.min(dataset.qx_data)
+            dataset.xmax = np.max(dataset.qx_data)
+            dataset.qy_data = dataset.qy_data.astype(np.float64)
+            dataset.ymin = np.min(dataset.qy_data)
+            dataset.ymax = np.max(dataset.qy_data)
+            dataset.q_data = np.sqrt(dataset.qx_data * dataset.qx_data
+                                     + dataset.qy_data * dataset.qy_data)
+            if dataset.err_data is not None:
+                dataset.err_data = dataset.err_data.astype(np.float64)
+            if dataset.dqx_data is not None:
+                dataset.dqx_data = dataset.dqx_data.astype(np.float64)
+            if dataset.dqy_data is not None:
+                dataset.dqy_data = dataset.dqy_data.astype(np.float64)
+            if dataset.mask is not None:
+                dataset.mask = dataset.mask.astype(dtype=bool)
+
+            if len(dataset.shape) == 2:
+                n_rows, n_cols = dataset.shape
+                dataset.y_bins = dataset.qy_data[0::int(n_cols)]
+                dataset.x_bins = dataset.qx_data[:int(n_cols)]
+                dataset.data = dataset.data.flatten()
+            else:
+                dataset.y_bins = []
+                dataset.x_bins = []
+                dataset.data = dataset.data.flatten()
+            final_list.append(dataset)
         self.output = final_list
 
     def set_all_to_none(self):
