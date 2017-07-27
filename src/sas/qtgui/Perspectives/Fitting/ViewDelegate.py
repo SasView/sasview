@@ -60,6 +60,9 @@ class ModelViewDelegate(QtGui.QStyledItemDelegate):
             validator = QtGui.QDoubleValidator()
             editor.setValidator(validator)
             return editor
+        if index.column() in [self.PARAM_PROPERTY, self.PARAM_UNIT]:
+            # Set some columns uneditable
+            return None
 
         return super(ModelViewDelegate, self).createEditor(widget, option, index)
 
@@ -225,7 +228,7 @@ class MagnetismViewDelegate(QtGui.QStyledItemDelegate):
         """
         Overwrite generic painter for certain columns
         """
-        if index.column() in (self.mag_min, self.mag_max):
+        if index.column() in (self.mag_min, self.mag_max, self.mag_unit):
             # Units - present in nice HTML
             options = QtGui.QStyleOptionViewItemV4(option)
             self.initStyleOption(options,index)

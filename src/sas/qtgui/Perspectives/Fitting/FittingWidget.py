@@ -166,6 +166,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         # Which shell is being currently displayed?
         self.current_shell_displayed = 0
+        # List of all shell-unique parameters
+        self.shell_names = []
 
         # Error column presence in parameter display
         self.has_error_column = False
@@ -1136,6 +1138,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.addBackgroundToModel(self._model_model)
         self.undo_supported = temp_undo_state
 
+        self.shell_names = self.shellNamesList()
+
         # Update the QModel
         new_rows = FittingUtilities.addParametersToModel(self.model_parameters, self.kernel_module, self.is2D)
 
@@ -1418,27 +1422,45 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             return
         self._poly_model.clear()
 
-        [self.setPolyModelParameters(row, param) for row, param in \
+        [self.setPolyModelParameters(param) for _, param in \
             enumerate(self.model_parameters.form_volume_parameters) if param.polydisperse]
         FittingUtilities.addPolyHeadersToModel(self._poly_model)
 
-    def setPolyModelParameters(self, row, param):
+    def setPolyModelParameters(self, param):
         """
-        Creates a checked row for a polydisperse parameter
+        Standard of multishell poly parameter driver
         """
-        # Not suitable for multishell
+        param_name = param.name
+        # see it the parameter is multishell
         if '[' in param.name:
-            return
+            # Skip empty shells
+            if self.current_shell_displayed == 0:
+                return
+            else:
+                # Create as many entries as current shells
+                for ishell in xrange(1, self.current_shell_displayed+1):
+                    # Remove [n] and add the shell numeral
+                    name = param_name[0:param_name.index('[')] + str(ishell)
+                    self.addNameToPolyModel(name)
+        else:
+            # Just create a simple param entry
+            self.addNameToPolyModel(param_name)
+
+    def addNameToPolyModel(self, param_name):
+        """
+        Creates a checked row in the poly model with param_name
+        """
         # Polydisp. values from the sasmodel
-        width = self.kernel_module.getParam(param.name + '.width')
-        npts = self.kernel_module.getParam(param.name + '.npts')
-        nsigs = self.kernel_module.getParam(param.name + '.nsigmas')
+        width = self.kernel_module.getParam(param_name + '.width')
+        npts = self.kernel_module.getParam(param_name + '.npts')
+        nsigs = self.kernel_module.getParam(param_name + '.nsigmas')
+        _, min, max = self.kernel_module.details[param_name]
 
         # Construct a row with polydisp. related variable.
         # This will get added to the polydisp. model
         # Note: last argument needs extra space padding for decent display of the control
-        checked_list = ["Distribution of " + param.name, str(width),
-                        str(param.limits[0]), str(param.limits[1]),
+        checked_list = ["Distribution of " + param_name, str(width),
+                        str(min), str(max),
                         str(npts), str(nsigs), "gaussian      "]
         FittingUtilities.addCheckedListToModel(self._poly_model, checked_list)
 
@@ -1535,10 +1557,34 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             self.model_parameters.call_parameters if param.type == 'magnetic']
         FittingUtilities.addHeadersToModel(self._magnet_model)
 
+    def shellNamesList(self):
+        """
+        Returns list of names of all multi-shell parameters
+        E.g. for sld[n], radius[n], n=1..3 it will return
+        [sld1, sld2, sld3, radius1, radius2, radius3]
+        """
+        multi_names = [p.name[:p.name.index('[')] for p in self.model_parameters.iq_parameters if '[' in p.name]
+        top_index = self.kernel_module.multiplicity_info.number
+        shell_names = []
+        for i in xrange(1, top_index+1):
+            for name in multi_names:
+                shell_names.append(name+str(i))
+        return shell_names
+
     def addCheckedMagneticListToModel(self, param, model):
         """
         Wrapper for model update with a subset of magnetic parameters
         """
+        if param.name[param.name.index(':')+1:] in self.shell_names:
+            # check if two-digit shell number
+            try:
+                shell_index = int(param.name[-2:])
+            except ValueError:
+                shell_index = int(param.name[-1:])
+
+            if shell_index > self.current_shell_displayed:
+                return
+
         checked_list = [param.name,
                         str(param.default),
                         str(param.limits[0]),
@@ -1603,6 +1649,10 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         FittingUtilities.addShellsToModel(self.model_parameters, self._model_model, index)
         self.current_shell_displayed = index
+
+        # Update relevant models
+        self.setPolyModel()
+        self.setMagneticModel()
 
     def readFitPage(self, fp):
         """
