@@ -222,24 +222,24 @@ class Plugin(PluginBase):
                 info="info")
 
             except NoKnownLoaderException as e:
+                exception_occurred = True
                 logging.error(e.message)
+
                 error_message = "Loading data failed!\n" + e.message
                 self.load_update(output=None, message=e.message, info="warning")
-                self.load_complete(output=None,
-                                   message=error_message,
-                                   info="error")
-            except:
-                logger.error(sys.exc_value)
 
-                error_message = "The Data file you selected could not be "
-                error_message += "loaded.\nMake sure the content of your file"
-                error_message += " is properly formatted.\n"
-                error_message += "When contacting the SasView team, mention the"
-                error_message += " following:\n"
-                error_message += "Error: " + str(sys.exc_info()[1])
-                file_errors[basename] = [error_message]
-                self.load_update(output=output, message=error_message,
-                                 info="warning")
+            except Exception as e:
+                import pdb; pdb.set_trace()
+                exception_occurred = True
+                logger.error(e.message)
+
+                file_err = "The Data file you selected could not be "
+                file_err += "loaded.\nMake sure the content of your file"
+                file_err += " is properly formatted.\n"
+                file_err += "When contacting the SasView team, mention the"
+                file_err += " following:\n"
+                file_err += "Error: " + e.message
+                file_errors[basename] = [file_err]
 
         if len(file_errors) > 0:
             error_message = ""
@@ -249,10 +249,15 @@ class Plugin(PluginBase):
                 for message in error_array:
                     error_message += message + "\n"
                 error_message += "\n"
-            self.load_update(output=output, message=error_message, info="error")
+            if not exception_occurred: # Some data loaded but with errors
+                self.load_update(output=output, message=error_message, info="error")
 
-        self.load_complete(output=output, message="Loading data complete!",
-                           info="info")
+        if not exception_occurred: # Everything loaded as expected
+            self.load_complete(output=output, message="Loading data complete!",
+                               info="info")
+        else:
+            self.load_complete(output=None, message=error_message, info="error")
+
 
     def load_update(self, output=None, message="", info="warning"):
         """
