@@ -151,11 +151,11 @@ class Reader(XMLreader):
                     invalid_xml = INVALID_XML.format(basename + self.extension) + invalid_xml
                     raise DataReaderException(invalid_xml) # Handled by base class
                 except FileContentsException as fc_exc:
-                    msg = "CanSAS Reader could not load the file {}".format(xml_file)
                     if not self.extension in self.ext: # If the file has no associated loader
                         raise DefaultReaderException(msg)
+                    msg = "CanSAS Reader could not load the file {}".format(xml_file)
                     if fc_exc.message is not None: # Propagate error messages from earlier
-                        msg += "\n" + fc_exc.message
+                        msg = fc_exc.message
                     raise FileContentsException(msg)
                     pass
             else:
