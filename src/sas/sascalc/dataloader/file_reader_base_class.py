@@ -154,11 +154,7 @@ class FileReader(object):
                     n_rows, n_cols = dataset.data.shape
                     dataset.y_bins = dataset.qy_data[0::int(n_cols)]
                     dataset.x_bins = dataset.qx_data[:int(n_cols)]
-                    dataset.data = dataset.data.flatten()
-                else:
-                    dataset.y_bins = []
-                    dataset.x_bins = []
-                    dataset.data = dataset.data.flatten()
+                dataset.data = dataset.data.flatten()
                 final_list.append(dataset)
         self.output = final_list
 
