@@ -229,7 +229,6 @@ class Plugin(PluginBase):
                 self.load_update(output=None, message=e.message, info="warning")
 
             except Exception as e:
-                import pdb; pdb.set_trace()
                 exception_occurred = True
                 logger.error(e.message)
 
@@ -238,7 +237,7 @@ class Plugin(PluginBase):
                 file_err += " is properly formatted.\n"
                 file_err += "When contacting the SasView team, mention the"
                 file_err += " following:\n"
-                file_err += "Error: " + e.message
+                file_err += e.message
                 file_errors[basename] = [file_err]
 
         if len(file_errors) > 0:

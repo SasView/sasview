@@ -92,10 +92,12 @@ class XMLreader(FileReader):
             self.xmlroot = etree.fromstring(tag_soup)
         except etree.XMLSyntaxError as xml_error:
             logger.info(xml_error)
-        except Exception:
+            raise xml_error
+        except Exception as exc:
             self.xml = None
             self.xmldoc = None
             self.xmlroot = None
+            raise exc
 
     def set_schema(self, schema):
         """
