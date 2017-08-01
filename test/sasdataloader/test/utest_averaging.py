@@ -1,63 +1,71 @@
 
 import math
+import os
 import unittest
+from scipy.stats import binned_statistic_2d
 import numpy as np
+
 import sas.sascalc.dataloader.data_info as data_info
 from sas.sascalc.dataloader.loader import Loader
-from sas.sascalc.dataloader.manipulations import Boxsum, Boxavg, Ring, get_q,\
-    CircularAverage, SectorPhi, SectorQ, reader2D_converter, SlabX, SlabY
+from sas.sascalc.dataloader.manipulations import (Boxavg, Boxsum,
+                                                  CircularAverage, Ring,
+                                                  SectorPhi, SectorQ, SlabX,
+                                                  SlabY, get_q,
+                                                  reader2D_converter)
 
 
 class Averaging(unittest.TestCase):
     """
         Test averaging manipulations on a flat distribution
     """
+
     def setUp(self):
         """
             Create a flat 2D distribution. All averaging results
             should return the predefined height of the distribution (1.0).
         """
-        x_0 = np.ones([100,100])
-        dx_0 = np.ones([100,100])
+        x_0 = np.ones([100, 100])
+        dx_0 = np.ones([100, 100])
 
         self.data = data_info.Data2D(data=x_0, err_data=dx_0)
         detector = data_info.Detector()
         detector.distance = 1000.0  # mm
-        detector.pixel_size.x = 1.0 # mm
-        detector.pixel_size.y = 1.0 # mm
+        detector.pixel_size.x = 1.0  # mm
+        detector.pixel_size.y = 1.0  # mm
 
         # center in pixel position = (len(x_0)-1)/2
-        detector.beam_center.x = (len(x_0)-1)/2 # pixel number
-        detector.beam_center.y = (len(x_0)-1)/2 # pixel number
+        detector.beam_center.x = (len(x_0) - 1) / 2  # pixel number
+        detector.beam_center.y = (len(x_0) - 1) / 2  # pixel number
         self.data.detector.append(detector)
-        
+
         source = data_info.Source()
-        source.wavelength = 10.0 # A
+        source.wavelength = 10.0  # A
         self.data.source = source
 
-        # get_q(dx, dy, det_dist, wavelength) where units are mm, mm, mm, and A
+        # get_q(dx, dy, det_dist, wavelength) where units are mm,mm,mm,and A
+        # respectively.
         self.qmin = get_q(1.0, 1.0, detector.distance, source.wavelength)
         self.qmax = get_q(49.5, 49.5, detector.distance, source.wavelength)
 
         self.qstep = len(x_0)
-        x=  np.linspace(start= -1*self.qmax,
-                               stop= self.qmax,
-                               num= self.qstep,
-                               endpoint=True )  
-        y = np.linspace(start= -1*self.qmax,
-                               stop= self.qmax,
-                               num= self.qstep,
-                               endpoint=True )
-        self.data.x_bins=x
-        self.data.y_bins=y
+        x = np.linspace(start=-1 * self.qmax,
+                        stop=self.qmax,
+                        num=self.qstep,
+                        endpoint=True)
+        y = np.linspace(start=-1 * self.qmax,
+                        stop=self.qmax,
+                        num=self.qstep,
+                        endpoint=True)
+        self.data.x_bins = x
+        self.data.y_bins = y
         self.data = reader2D_converter(self.data)
 
     def test_ring_flat_distribution(self):
         """
             Test ring averaging
         """
-        r = Ring(r_min=2*self.qmin, r_max=5*self.qmin, 
-                 center_x=self.data.detector[0].beam_center.x, 
+        r = Ring(r_min=2 * self.qmin, r_max=5 * self.qmin,
+                 center_x=self.data.detector[0].beam_center.x,
                  center_y=self.data.detector[0].beam_center.y)
         r.nbins_phi = 20
 
@@ -69,8 +77,8 @@ class Averaging(unittest.TestCase):
         """
             Test sector averaging
         """
-        r = SectorPhi(r_min=self.qmin, r_max=3*self.qmin, 
-                      phi_min=0, phi_max=math.pi*2.0)
+        r = SectorPhi(r_min=self.qmin, r_max=3 * self.qmin,
+                      phi_min=0, phi_max=math.pi * 2.0)
         r.nbins_phi = 20
         o = r(self.data)
         for i in range(7):
@@ -80,7 +88,7 @@ class Averaging(unittest.TestCase):
         """
         """
         phi_max = math.pi * 1.5
-        r = SectorPhi(r_min=self.qmin, r_max=3*self.qmin, 
+        r = SectorPhi(r_min=self.qmin, r_max=3 * self.qmin,
                       phi_min=0, phi_max=phi_max)
         self.assertEqual(r.phi_max, phi_max)
         r.nbins_phi = 20
@@ -93,39 +101,44 @@ class Averaging(unittest.TestCase):
 class DataInfoTests(unittest.TestCase):
 
     def setUp(self):
-        self.data = Loader().load('MAR07232_rest.ASC')
+        filepath = os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), 'MAR07232_rest.ASC')
+        self.data = Loader().load(filepath)
 
     def test_ring(self):
         """
             Test ring averaging
         """
-        r = Ring(r_min=.005, r_max=.01, 
-                 center_x=self.data.detector[0].beam_center.x, 
+        r = Ring(r_min=.005, r_max=.01,
+                 center_x=self.data.detector[0].beam_center.x,
                  center_y=self.data.detector[0].beam_center.y,
-                 nbins = 20)
-        # r.nbins_phi = 20
+                 nbins=20)
+        ##r.nbins_phi = 20
 
         o = r(self.data)
-        data_list = Loader().load('ring_testdata.txt')
-        answer = data_list[0]
+        filepath = os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), 'ring_testdata.txt')
+        answer = Loader().load(filepath)
 
         for i in range(r.nbins_phi - 1):
             self.assertAlmostEqual(o.x[i + 1], answer.x[i], 4)
             self.assertAlmostEqual(o.y[i + 1], answer.y[i], 4)
             self.assertAlmostEqual(o.dy[i + 1], answer.dy[i], 4)
 
-    def test_circular_avg(self):
+    def test_circularavg(self):
         """
-            Test circular averaging
-            The test data was not generated by IGOR.
+        Test circular averaging
+        The test data was not generated by IGOR.
         """
-        r = CircularAverage(r_min=.00, r_max=.025, 
-                 bin_width=0.0003)
+        r = CircularAverage(r_min=.00, r_max=.025,
+                            bin_width=0.0003)
         r.nbins_phi = 20
+
         o = r(self.data)
 
-        output = Loader().load('avg_testdata.txt')
-        answer = output[0]
+        filepath = os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), 'avg_testdata.txt')
+        answer = Loader().load(filepath)
         for i in range(r.nbins_phi):
             self.assertAlmostEqual(o.x[i], answer.x[i], 4)
             self.assertAlmostEqual(o.y[i], answer.y[i], 4)
@@ -136,11 +149,12 @@ class DataInfoTests(unittest.TestCase):
             Test circular averaging
             The test data was not generated by IGOR.
         """
+
         r = Boxsum(x_min=.01, x_max=.015, y_min=0.01, y_max=0.015)
         s, ds, npoints = r(self.data)
         self.assertAlmostEqual(s, 34.278990899999997, 4)
         self.assertAlmostEqual(ds, 7.8007981835194293, 4)
-        self.assertAlmostEqual(npoints, 324.0000, 4)        
+        self.assertAlmostEqual(npoints, 324.0000, 4)
 
         r = Boxavg(x_min=.01, x_max=.015, y_min=0.01, y_max=0.015)
         s, ds = r(self.data)
@@ -152,12 +166,15 @@ class DataInfoTests(unittest.TestCase):
             Test slab in X
             The test data was not generated by IGOR.
         """
-        r = SlabX(x_min=-.01, x_max=.01, y_min=-0.0002, y_max=0.0002, bin_width=0.0004)
+
+        r = SlabX(x_min=-.01, x_max=.01, y_min=-0.0002,
+                  y_max=0.0002, bin_width=0.0004)
         r.fold = False
         o = r(self.data)
 
-        output = Loader().load('slabx_testdata.txt')
-        answer = output[0]
+        filepath = os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), 'slabx_testdata.txt')
+        answer = Loader().load(filepath)
         for i in range(len(o.x)):
             self.assertAlmostEqual(o.x[i], answer.x[i], 4)
             self.assertAlmostEqual(o.y[i], answer.y[i], 4)
@@ -168,12 +185,15 @@ class DataInfoTests(unittest.TestCase):
             Test slab in Y
             The test data was not generated by IGOR.
         """
-        r = SlabY(x_min=.005, x_max=.01, y_min=-0.01, y_max=0.01, bin_width=0.0004)
+
+        r = SlabY(x_min=.005, x_max=.01, y_min=-
+                  0.01, y_max=0.01, bin_width=0.0004)
         r.fold = False
         o = r(self.data)
 
-        output = Loader().load('slaby_testdata.txt')
-        answer = output[0]
+        filepath = os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), 'slaby_testdata.txt')
+        answer = Loader().load(filepath)
         for i in range(len(o.x)):
             self.assertAlmostEqual(o.x[i], answer.x[i], 4)
             self.assertAlmostEqual(o.y[i], answer.y[i], 4)
@@ -182,10 +202,11 @@ class DataInfoTests(unittest.TestCase):
     def test_sectorphi_full(self):
         """
             Test sector averaging I(phi)
-            When considering the whole azimuthal range (2pi), 
+            When considering the whole azimuthal range (2pi),
             the answer should be the same as ring averaging.
             The test data was not generated by IGOR.
         """
+
         nbins = 19
         phi_min = math.pi / (nbins + 1)
         phi_max = math.pi * 2 - phi_min
@@ -197,44 +218,80 @@ class DataInfoTests(unittest.TestCase):
                       nbins=nbins)
         o = r(self.data)
 
-        output = Loader().load('ring_testdata.txt')
-        answer = output[0]
+        filepath = os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), 'ring_testdata.txt')
+        answer = Loader().load(filepath)
         for i in range(len(o.x)):
             self.assertAlmostEqual(o.x[i], answer.x[i], 4)
             self.assertAlmostEqual(o.y[i], answer.y[i], 4)
             self.assertAlmostEqual(o.dy[i], answer.dy[i], 4)
-            
+
     def test_sectorphi_quarter(self):
         """
             Test sector averaging I(phi)
             The test data was not generated by IGOR.
         """
-        r = SectorPhi(r_min=.005, r_max=.01, phi_min=0, phi_max=math.pi/2.0)
+
+        r = SectorPhi(r_min=.005, r_max=.01, phi_min=0, phi_max=math.pi / 2.0)
         r.nbins_phi = 20
         o = r(self.data)
 
-        output = Loader().load('sectorphi_testdata.txt')
-        answer = output[0]
+        filepath = os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), 'sectorphi_testdata.txt')
+        answer = Loader().load(filepath)
         for i in range(len(o.x)):
             self.assertAlmostEqual(o.x[i], answer.x[i], 4)
             self.assertAlmostEqual(o.y[i], answer.y[i], 4)
             self.assertAlmostEqual(o.dy[i], answer.dy[i], 4)
-            
+
     def test_sectorq_full(self):
         """
             Test sector averaging I(q)
             The test data was not generated by IGOR.
         """
-        r = SectorQ(r_min=.005, r_max=.01, phi_min=0, phi_max=math.pi/2.0)
+
+        r = SectorQ(r_min=.005, r_max=.01, phi_min=0, phi_max=math.pi / 2.0)
         r.nbins_phi = 20
         o = r(self.data)
 
-        output = Loader().load('sectorq_testdata.txt')
-        answer = output[0]
+        filepath = os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), 'sectorq_testdata.txt')
+        answer = Loader().load(filepath)
         for i in range(len(o.x)):
             self.assertAlmostEqual(o.x[i], answer.x[i], 4)
             self.assertAlmostEqual(o.y[i], answer.y[i], 4)
             self.assertAlmostEqual(o.dy[i], answer.dy[i], 4)
+
+    def test_sectorq_log(self):
+        """
+            Test sector averaging I(q)
+            The test data was not generated by IGOR.
+        """
+
+        r = SectorQ(r_min=.005, r_max=.01, phi_min=0, phi_max=math.pi / 2.0, base=10)
+        r.nbins_phi = 20
+        o = r(self.data)
+
+        expected_binning = np.logspace(np.log10(0.005), np.log10(0.01), 20, base=10)
+        for i in range(len(o.x)):
+            self.assertAlmostEqual(o.x[i], expected_binning[i], 3)
+
+        # TODO: Test for Y values (o.y)
+        # print len(self.data.x_bins)
+        # print len(self.data.y_bins)
+        # print self.data.q_data.shape
+        # data_to_bin = np.array(self.data.q_data)
+        # data_to_bin = data_to_bin.reshape(len(self.data.x_bins), len(self.data.y_bins))
+        # H, xedges, yedges, binnumber = binned_statistic_2d(self.data.x_bins, self.data.y_bins, data_to_bin,
+        #     bins=[[0, math.pi / 2.0], expected_binning], statistic='mean')
+        # xedges_width = (xedges[1] - xedges[0])
+        # xedges_center = xedges[1:] - xedges_width / 2
+
+        # yedges_width = (yedges[1] - yedges[0])
+        # yedges_center = yedges[1:] - yedges_width / 2
+
+        # print H.flatten().shape
+        # print o.y.shape
 
 
 if __name__ == '__main__':

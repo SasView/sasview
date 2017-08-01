@@ -2,6 +2,7 @@
     Unit tests for specific models
     @author: Mathieu Doucet / UTK
 """
+from __future__ import print_function
 
 import unittest, math, time
 
@@ -14,12 +15,12 @@ import unittest, math, time
 
 try:
     import VolumeCanvas
-    print "Testing local version"
+    print("Testing local version")
 except:
     import sys
-    print sys.exc_value
+    print(sys.exc_value)
     #testing the version that is working on
-    print "Testing installed version"
+    print("Testing installed version")
     import sas.sascalc.realspace.VolumeCanvas as VolumeCanvas
      
 class TestRealSpaceModel(unittest.TestCase):

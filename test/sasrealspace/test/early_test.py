@@ -1,3 +1,4 @@
+from __future__ import print_function
 
 import VolumeCanvas
 from sas.models.SphereModel import SphereModel
@@ -29,18 +30,18 @@ def test_1():
         # Time test
         t_0 = time.time()
         value_1 = 1.0e8*canvas.getIq(0.1)
-        print "density = 0.1:  output=%g  time=%g" % (value_1, time.time()-t_0)
+        print("density = 0.1:  output=%g  time=%g" % (value_1, time.time()-t_0))
         
         t_0 = time.time()
         canvas.setParam('lores_density', 1)
         value_1 = 1.0e8*canvas.getIq(0.1)
-        print "density = 1000:  output=%g  time=%g" % (value_1, time.time()-t_0)
+        print("density = 1000:  output=%g  time=%g" % (value_1, time.time()-t_0))
         
         t_0 = time.time()
         canvas.setParam('lores_density', 0.01)
         value_1 = 1.0e8*canvas.getIq(0.1)
-        print "density = 0.00001:  output=%g  time=%g" % (value_1, time.time()-t_0)
-        print
+        print("density = 0.00001:  output=%g  time=%g" % (value_1, time.time()-t_0))
+        print()
     
     
     sphere = SphereModel()
@@ -62,7 +63,7 @@ def test_1():
         ana_1 = sphere.run(q)
         #ana_1 = form_factor(q, radius)
         
-        print "q=%g  sim=%g  ana=%g   ratio=%g" % (q, sim_1, ana_1, sim_1/ana_1)
+        print("q=%g  sim=%g  ana=%g   ratio=%g" % (q, sim_1, ana_1, sim_1/ana_1))
     
 def test_2():
     radius = 15.0
@@ -72,7 +73,7 @@ def test_2():
     outer_radius = radius+thickness
     shell_vol = 4.0/3.0*math.pi*outer_radius*outer_radius*outer_radius - core_vol
     shell_sld = -1.0*core_vol/shell_vol
-    print "Shell SLD", shell_sld
+    print("Shell SLD", shell_sld)
 
     
     density = .1
@@ -125,7 +126,7 @@ def test_2():
         sim_1 = canvas.getIq(q)
         ana_1 = sphere.run(q)
         
-        print "q=%g  sim=%g  ana=%g   ratio=%g" % (q, sim_1, ana_1, sim_1/ana_1)
+        print("q=%g  sim=%g  ana=%g   ratio=%g" % (q, sim_1, ana_1, sim_1/ana_1))
         out.write( "%g  %g  %g\n" % (q, sim_1, ana_1))
 
     out.close()
@@ -167,7 +168,7 @@ def test_4():
         ana_1 = sphere.run(q)
         #ana_1 = form_factor(q, radius)
         
-        print "q=%g  sim=%g  ana=%g   ratio=%g" % (q, sim_1, ana_1, sim_1/ana_1)
+        print("q=%g  sim=%g  ana=%g   ratio=%g" % (q, sim_1, ana_1, sim_1/ana_1))
 
 def test_5():
     from sas.models.SphereModel import SphereModel
@@ -192,7 +193,7 @@ def test_5():
     
     ana = ana.runXY([0.1, 0.1])
     sim = model.getIq2D(0.1, 0.1)
-    print ana, sim, sim/ana, ana/sim
+    print(ana, sim, sim/ana, ana/sim)
 
 def test_6():
     from sas.models.CylinderModel import CylinderModel
@@ -231,7 +232,7 @@ def test_6():
     #model.setParam('%s.orientation' % handle, [1.57,0,0])
     
     
-    print model.npts
+    print(model.npts)
     for i in range(40):
         qmax = 0.5
         anaX = ana.runXY([qmax*i/40.0, 0.0])
@@ -239,11 +240,11 @@ def test_6():
         
         anaY = ana.runXY([0, qmax*i/40.0])
         simY = model.getIq2D(0, qmax*i/40.0)
-        print anaX, simX, simX/anaX, '|', anaY, simY, simY/anaY
+        print(anaX, simX, simX/anaX, '|', anaY, simY, simY/anaY)
     
 def test_7():
     from sas.models.CoreShellModel import CoreShellModel
-    print "Testing core-shell"
+    print("Testing core-shell")
     radius = 15
     thickness = 5
     density = 5
@@ -286,7 +287,7 @@ def test_7():
     for q in qlist:
         ana_val = ana.runXY([q, 0.2])
         sim_val, err = canvas.getIq2DError(q, 0.2)
-        print ana_val, sim_val, sim_val/ana_val, err, (sim_val-ana_val)/err
+        print(ana_val, sim_val, sim_val/ana_val, err, (sim_val-ana_val)/err)
     
     
     

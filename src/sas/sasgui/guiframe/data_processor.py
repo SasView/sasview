@@ -17,6 +17,8 @@ The organization of the classes goes as:
    :align: center
 
 """
+from __future__ import print_function
+
 import os
 import sys
 import copy
@@ -2034,6 +2036,6 @@ if __name__ == "__main__":
         frame = GridFrame(data_outputs=data, data_inputs=data_input)
         frame.Show(True)
     except:
-        print sys.exc_value
+        print(sys.exc_value)
 
     app.MainLoop()

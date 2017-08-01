@@ -5,11 +5,16 @@
 # pylint: disable-msg=C0111
 # Disable "too many methods" complaint 
 # pylint: disable-msg=R0904 
+from __future__ import print_function
 
 
-import unittest, math, numpy
+import os
+import unittest
+import math
+import numpy
 from sas.sascalc.pr.invertor import Invertor
-        
+
+
 class TestFiguresOfMerit(unittest.TestCase):
             
     def setUp(self):
@@ -234,7 +239,7 @@ class TestBasicComponent(unittest.TestCase):
         try:
             self.assertTrue(chi2/51.0<10.0)
         except:
-            print "chi2 =", chi2/51.0
+            print("chi2 =", chi2/51.0)
             raise
         
     def test_lstsq(self):
@@ -262,7 +267,7 @@ class TestBasicComponent(unittest.TestCase):
         try:
             self.assertTrue(self.invertor.chi2/len(x)<200.00)
         except:
-            print "Chi2(I(q)) =", self.invertor.chi2/len(x)
+            print("Chi2(I(q)) =", self.invertor.chi2/len(x))
             raise
         
         # Check the computed P(r) with the theory
@@ -296,7 +301,7 @@ class TestBasicComponent(unittest.TestCase):
         try:
             self.assertTrue(chi2/51.0<50.0)
         except:
-            print "chi2(P(r)) =", chi2/51.0
+            print("chi2(P(r)) =", chi2/51.0)
             raise
         
         # Test the number of peaks
@@ -340,7 +345,7 @@ class TestBasicComponent(unittest.TestCase):
         try:
             self.assertTrue(self.invertor.chi2>0)
         except:
-            print "Chi2 =", self.invertor.chi2
+            print("Chi2 =", self.invertor.chi2)
             raise
                             
     def test_Iq_zero(self):
@@ -364,7 +369,7 @@ class TestBasicComponent(unittest.TestCase):
         try:
             self.assertTrue(self.invertor.chi2>0)
         except:
-            print "Chi2 =", self.invertor.chi2
+            print("Chi2 =", self.invertor.chi2)
             raise
         
     def no_test_time(self):
@@ -415,14 +420,17 @@ class TestBasicComponent(unittest.TestCase):
         out, cov = self.invertor.lstsq(10)
         
         # Save
-        self.invertor.to_file("test_output.txt")
+        f_name = "test_output.txt"
+        self.invertor.to_file(f_name)
     
         # Load
-        self.invertor.from_file("test_output.txt")
+        self.invertor.from_file(f_name)
         self.assertEqual(self.invertor.d_max, 160.0)
         self.assertEqual(self.invertor.alpha, 0.0007)
         self.assertEqual(self.invertor.chi2, 836.797)
         self.assertAlmostEqual(self.invertor.pr(self.invertor.out, 10.0), 903.31577041, 4)
+        if os.path.isfile(f_name):
+            os.remove(f_name)
         
     def test_qmin(self):
         self.invertor.q_min = 1.0

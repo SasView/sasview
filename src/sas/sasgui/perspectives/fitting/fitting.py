@@ -10,6 +10,8 @@
 #
 #copyright 2009, University of Tennessee
 ################################################################################
+from __future__ import print_function
+
 import re
 import sys
 import os
@@ -1252,7 +1254,7 @@ class Plugin(PluginBase):
     def update_fit(self, result=None, msg=""):
         """
         """
-        print "update_fit result", result
+        print("update_fit result", result)
 
     def _batch_fit_complete(self, result, pars, page_id,
                             batch_outputs, batch_inputs, elapsed=None):
@@ -1731,67 +1733,72 @@ class Plugin(PluginBase):
             @param unsmeared_data: data, rescaled to unsmeared model
             @param unsmeared_error: data error, rescaled to unsmeared model
         """
-        try:
-            np.nan_to_num(y)
-            new_plot = self.create_theory_1D(x, y, page_id, model, data, state,
-                                             data_description=model.name,
-                                             data_id=str(page_id) + " " + data.name)
-            if unsmeared_model is not None:
-                self.create_theory_1D(x, unsmeared_model, page_id, model, data, state,
-                                      data_description=model.name + " unsmeared",
-                                      data_id=str(page_id) + " " + data.name + " unsmeared")
+            
+        number_finite = np.count_nonzero(np.isfinite(y)) 
+        np.nan_to_num(y)
+        new_plot = self.create_theory_1D(x, y, page_id, model, data, state,
+                                         data_description=model.name,
+                                         data_id=str(page_id) + " " + data.name)
+        if unsmeared_model is not None:
+            self.create_theory_1D(x, unsmeared_model, page_id, model, data, state,
+                                  data_description=model.name + " unsmeared",
+                                  data_id=str(page_id) + " " + data.name + " unsmeared")
 
-                if unsmeared_data is not None and unsmeared_error is not None:
-                    self.create_theory_1D(x, unsmeared_data, page_id, model, data, state,
-                                          data_description="Data unsmeared",
-                                          data_id="Data  " + data.name + " unsmeared",
-                                          dy=unsmeared_error)
-            # Comment this out until we can get P*S models with correctly populated parameters
-            #if sq_model is not None and pq_model is not None:
-            #    self.create_theory_1D(x, sq_model, page_id, model, data, state,
-            #                          data_description=model.name + " S(q)",
-            #                          data_id=str(page_id) + " " + data.name + " S(q)")
-            #    self.create_theory_1D(x, pq_model, page_id, model, data, state,
-            #                          data_description=model.name + " P(q)",
-            #                          data_id=str(page_id) + " " + data.name + " P(q)")
+            if unsmeared_data is not None and unsmeared_error is not None:
+                self.create_theory_1D(x, unsmeared_data, page_id, model, data, state,
+                                      data_description="Data unsmeared",
+                                      data_id="Data  " + data.name + " unsmeared",
+                                      dy=unsmeared_error)
+        # Comment this out until we can get P*S models with correctly populated parameters
+        #if sq_model is not None and pq_model is not None:
+        #    self.create_theory_1D(x, sq_model, page_id, model, data, state,
+        #                          data_description=model.name + " S(q)",
+        #                          data_id=str(page_id) + " " + data.name + " S(q)")
+        #    self.create_theory_1D(x, pq_model, page_id, model, data, state,
+        #                          data_description=model.name + " P(q)",
+        #                          data_id=str(page_id) + " " + data.name + " P(q)")
 
-            current_pg = self.fit_panel.get_page_by_id(page_id)
-            title = new_plot.title
-            batch_on = self.fit_panel.get_page_by_id(page_id).batch_on
-            if not batch_on:
-                wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
-                                            title=str(title)))
-            elif plot_result:
-                top_data_id = self.fit_panel.get_page_by_id(page_id).data.id
-                if data.id == top_data_id:
-                    wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
-                                            title=str(title)))
-            caption = current_pg.window_caption
-            self.page_finder[page_id].set_fit_tab_caption(caption=caption)
+        current_pg = self.fit_panel.get_page_by_id(page_id)
+        title = new_plot.title
+        batch_on = self.fit_panel.get_page_by_id(page_id).batch_on
+        if not batch_on:
+            wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=str(title)))
+        elif plot_result:
+            top_data_id = self.fit_panel.get_page_by_id(page_id).data.id
+            if data.id == top_data_id:
+                wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=str(title)))
+        caption = current_pg.window_caption
+        self.page_finder[page_id].set_fit_tab_caption(caption=caption)
 
-            self.page_finder[page_id].set_theory_data(data=new_plot,
+        self.page_finder[page_id].set_theory_data(data=new_plot,
                                                       fid=data.id)
-            if toggle_mode_on:
-                wx.PostEvent(self.parent,
-                             NewPlotEvent(group_id=str(page_id) + " Model2D",
+        if toggle_mode_on:
+            wx.PostEvent(self.parent,
+                         NewPlotEvent(group_id=str(page_id) + " Model2D",
                                           action="Hide"))
-            else:
-                if update_chisqr:
-                    wx.PostEvent(current_pg,
-                                 Chi2UpdateEvent(output=self._cal_chisqr(
+        else:
+            if update_chisqr:
+                wx.PostEvent(current_pg,
+                             Chi2UpdateEvent(output=self._cal_chisqr(
                                                                 data=data,
                                                                 fid=fid,
                                                                 weight=weight,
-                                                            page_id=page_id,
-                                                            index=index)))
-                else:
-                    self._plot_residuals(page_id=page_id, data=data, fid=fid,
-                                         index=index, weight=weight)
+                                                                page_id=page_id,
+                                                                index=index)))
+            else:
+                self._plot_residuals(page_id=page_id, data=data, fid=fid,
+                                     index=index, weight=weight)
 
+        if not number_finite:
+            logger.error("Using the present parameters the model does not return any finite value. ")
+            msg = "Computing Error: Model did not return any finite value."
+            wx.PostEvent(self.parent, StatusEvent(status = msg, info="error"))
+        else:                 
             msg = "Computation  completed!"
+            if number_finite != y.size:
+                msg += ' PROBLEM: For some Q values the model returns non finite intensities!'
+                logger.error("For some Q values the model returns non finite intensities.")
             wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
-        except:
-            raise
 
     def _calc_exception(self, etype, value, tb):
         """
@@ -1816,6 +1823,7 @@ class Plugin(PluginBase):
         Complete get the result of modelthread and create model 2D
         that can be plot.
         """
+        number_finite = np.count_nonzero(np.isfinite(image)) 
         np.nan_to_num(image)
         new_plot = Data2D(image=image, err_image=data.err_data)
         new_plot.name = model.name + '2d'
@@ -1874,8 +1882,17 @@ class Plugin(PluginBase):
             else:
                 self._plot_residuals(page_id=page_id, data=data, fid=fid,
                                       index=index, weight=weight)
-        msg = "Computation  completed!"
-        wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
+
+        if not number_finite:
+            logger.error("Using the present parameters the model does not return any finite value. ")
+            msg = "Computing Error: Model did not return any finite value."
+            wx.PostEvent(self.parent, StatusEvent(status = msg, info="error"))
+        else:
+            msg = "Computation  completed!"
+            if number_finite != image.size:
+                msg += ' PROBLEM: For some Qx,Qy values the model returns non finite intensities!'
+                logger.error("For some Qx,Qy values the model returns non finite intensities.")
+            wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
 
     def _draw_model2D(self, model, page_id, qmin,
                       qmax,
@@ -2045,7 +2062,7 @@ class Plugin(PluginBase):
         try:
             res = (fn - gn) / en
         except ValueError:
-            print "Unmatch lengths %s, %s, %s" % (len(fn), len(gn), len(en))
+            print("Unmatch lengths %s, %s, %s" % (len(fn), len(gn), len(en)))
             return
 
         residuals = res[np.isfinite(res)]

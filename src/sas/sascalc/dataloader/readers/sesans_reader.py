@@ -23,17 +23,17 @@ class Reader(FileReader):
     """
     Class to load sesans files (6 columns).
     """
-    ## File type
+    # File type
     type_name = "SESANS"
 
     ## Wildcards
     type = ["SESANS files (*.ses)|*.ses",
             "SESANS files (*..sesans)|*.sesans"]
-    ## List of allowed extensions
+    # List of allowed extensions
     ext = ['.ses', '.SES', '.sesans', '.SESANS']
 
-    ## Flag to bypass extension check
-    allow_all = False
+    # Flag to bypass extension check
+    allow_all = True
 
     def get_file_contents(self):
         self.current_datainfo = DataInfo()
@@ -41,120 +41,132 @@ class Reader(FileReader):
         self.current_datainfo.isSesans = True
         self.output = []
 
-        error_message = ""
-        loaded_correctly = True
+        line = self.f_open.readline()
+        params = {}
+        while not line.startswith("BEGIN_DATA"):
+            terms = line.split()
+            if len(terms) >= 2:
+                params[terms[0]] = " ".join(terms[1:])
+            line = self.f_open.readline()
+        self.params = params
 
-        import pdb; pdb.set_trace()
+        if "FileFormatVersion" not in self.params:
+            raise FileContentsException("SES file missing FileFormatVersion")
+        if float(self.params["FileFormatVersion"]) >= 2.0:
+            raise FileContentsException("SASView only supports SES version 1")
 
-        buff = self.f_open.read()
-        lines = buff.splitlines()
+        if "SpinEchoLength_unit" not in self.params:
+            raise FileContentsException("SpinEchoLength has no units")
+        if "Wavelength_unit" not in self.params:
+            raise FileContentsException("Wavelength has no units")
+        if params["SpinEchoLength_unit"] != params["Wavelength_unit"]:
+            raise FileContentsException("The spin echo data has rudely used "
+                               "different units for the spin echo length "
+                               "and the wavelength.  While sasview could "
+                               "handle this instance, it is a violation "
+                               "of the file format and will not be "
+                               "handled by other software.")
 
-        self.current_datainfo.filename = os.path.basename(self.f_open.name)
+        headers = self.f_open.readline().split()
 
-        paramnames=[]
-        paramvals=[]
-        zvals=[]
-        dzvals=[]
-        lamvals=[]
-        dlamvals=[]
-        Pvals=[]
-        dPvals=[]
+        self._insist_header(headers, "SpinEchoLength")
+        self._insist_header(headers, "Depolarisation")
+        self._insist_header(headers, "Depolarisation_error")
+        self._insist_header(headers, "Wavelength")
 
-        for line in lines:
-            # Initial try for CSV (split on ,)
-            line=line.strip()
-            toks = line.split('\t')
-            if len(toks)==2:
-                paramnames.append(toks[0])
-                paramvals.append(toks[1])
-            elif len(toks)>5:
-                zvals.append(toks[0])
-                dzvals.append(toks[3])
-                lamvals.append(toks[4])
-                dlamvals.append(toks[5])
-                Pvals.append(toks[1])
-                dPvals.append(toks[2])
+            data = np.loadtxt(self.f_open)
+
+            if data.shape[1] != len(headers):
+                raise FileContentsException(
+                    "File has {} headers, but {} columns".format(
+                        len(headers),
+                        data.shape[1]))
+
+            if not data.size:
+                raise FileContentsException("{} is empty".format(path))
+            x = data[:, headers.index("SpinEchoLength")]
+            if "SpinEchoLength_error" in headers:
+                dx = data[:, headers.index("SpinEchoLength_error")]
             else:
-                continue
+                dx = x * 0.05
+            lam = data[:, headers.index("Wavelength")]
+            if "Wavelength_error" in headers:
+                dlam = data[:, headers.index("Wavelength_error")]
+            else:
+                dlam = lam * 0.05
+            y = data[:, headers.index("Depolarisation")]
+            dy = data[:, headers.index("Depolarisation_error")]
 
-        x=[]
-        y=[]
-        lam=[]
-        dx=[]
-        dy=[]
-        dlam=[]
-        lam_header = lamvals[0].split()
-        data_conv_z = None
-        default_z_unit = "A"
-        data_conv_P = None
-        default_p_unit = " " # Adjust unit for axis (L^-3)
-        lam_unit = lam_header[1].replace("[","").replace("]","")
-        if lam_unit == 'AA':
-            lam_unit = 'A'
-        varheader=[zvals[0],dzvals[0],lamvals[0],dlamvals[0],Pvals[0],dPvals[0]]
-        valrange=range(1, len(zvals))
-        try:
-            for i in valrange:
-                x.append(float(zvals[i]))
-                y.append(float(Pvals[i]))
-                lam.append(float(lamvals[i]))
-                dy.append(float(dPvals[i]))
-                dx.append(float(dzvals[i]))
-                dlam.append(float(dlamvals[i]))
-        except ValueError as val_err:
-            err_msg = "Invalid float"
-            err_msg += ":".join(val_err.message.split(":")[1:])
-            raise FileContentsException(err_msg)
+            lam_unit = self._unit_fetch("Wavelength")
+            x, x_unit = self._unit_conversion(x, "A",
+                                              self._unit_fetch(
+                                                  "SpinEchoLength"))
+            dx, dx_unit = self._unit_conversion(
+                dx, lam_unit,
+                self._unit_fetch("SpinEchoLength"))
+            dlam, dlam_unit = self._unit_conversion(
+                dlam, lam_unit,
+                self._unit_fetch("Wavelength"))
+            y_unit = self._unit_fetch("Depolarisation")
 
-        x, y, lam, dy, dx, dlam = [
-            np.asarray(v, 'double')
-           for v in (x, y, lam, dy, dx, dlam)
-        ]
+            self.current_dataset.x = x
+            self.current_dataset.y = y
+            self.current_dataset.lam = lam
+            self.current_dataset.dy = dy
+            self.current_dataset.dx = dx
+            self.current_dataset.dlam = dlam
+            self.current_datainfo.isSesans = True
 
-        self.f_open.close()
+            self.current_datainfo._yunit = y_unit
+            self.current_datainfo._xunit = x_unit
+            self.current_datainfo.source.wavelength_unit = lam_unit
+            self.current_datainfo.source.wavelength = lam
+            self.current_datainfo.filename = os.basename(self.f_open.name)
+            self.current_dataset.xaxis(r"\rm{z}", x_unit)
+            # Adjust label to ln P/(lam^2 t), remove lam column refs
+            self.current_dataset.yaxis(r"\rm{ln(P)/(t \lambda^2)}", y_unit)
+            # Store loading process information
+            self.current_datainfo.meta_data['loader'] = self.type_name
+            self.current_datainfo.sample.name = params["Sample"]
+            self.current_datainfo.sample.ID = params["DataFileTitle"]
+            self.current_datainfo.sample.thickness = self._unit_conversion(
+                float(params["Thickness"]), "cm",
+                self._unit_fetch("Thickness"))[0]
 
-        self.current_dataset.x, self.current_dataset._xunit = self._unit_conversion(x, lam_unit, default_z_unit)
-        self.current_dataset.y = y
-        self.current_dataset._yunit = r'\AA^{-2} cm^{-1}'  # output y_unit added
-        self.current_dataset.dx, _ = self._unit_conversion(dx, lam_unit, default_z_unit)
-        self.current_dataset.dy = dy
-        self.current_dataset.lam, _ = self._unit_conversion(lam, lam_unit, default_z_unit)
-        self.current_dataset.dlam, _ = self._unit_conversion(dlam, lam_unit, default_z_unit)
+            self.current_datainfo.sample.zacceptance = (
+                float(params["Theta_zmax"]),
+                self._unit_fetch("Theta_zmax"))
 
-        self.current_dataset.xaxis(r"\rm{z}", self.current_dataset._xunit)
-        self.current_dataset.yaxis(r"\rm{ln(P)/(t \lambda^2)}", self.current_dataset._yunit)  # Adjust label to ln P/(lam^2 t), remove lam column refs
+            self.current_datainfo.sample.yacceptance = (
+                float(params["Theta_ymax"]),
+                self._unit_fetch("Theta_ymax"))
 
-        # Store loading process information
-        self.current_datainfo.meta_data['loader'] = self.type_name
-        try:
-            self.current_datainfo.sample.thickness = float(paramvals[6])
-        except ValueError as val_err:
-            loaded_correctly = False
-            error_message += "\nInvalid sample thickness '{}'".format(paramvals[6])
+            self.send_to_output()
 
-        self.current_datainfo.sample.name = paramvals[1]
-        self.current_datainfo.sample.ID = paramvals[0]
-        zaccept_unit_split = paramnames[7].split("[")
-        zaccept_unit = zaccept_unit_split[1].replace("]","")
-        if zaccept_unit.strip() == r'\AA^-1' or zaccept_unit.strip() == r'\A^-1':
-            zaccept_unit = "1/A"
-        self.current_datainfo.sample.zacceptance=(float(paramvals[7]),zaccept_unit)
+    @staticmethod
+    def _insist_header(headers, name):
+        if name not in headers:
+            raise FileContentsException(
+                "Missing {} column in spin echo data".format(name))
 
-        self.current_datainfo.vars = varheader
+    @staticmethod
+    def _unit_conversion(value, value_unit, default_unit):
+        """
+        Performs unit conversion on a measurement.
 
-        if len(self.current_dataset.x) < 1:
-            raise FileContentsException("No data points in file.")
-
-        self.send_to_output()
-
-        if not loaded_correctly:
-            raise DataReaderException(error_message)
-
-    def _unit_conversion(self, value, value_unit, default_unit):
-        if has_converter == True and value_unit != default_unit:
-            data_conv_q = Converter(value_unit)
-            value = data_conv_q(value, units=default_unit)
+        :param value: The magnitude of the measurement
+        :param value_unit: a string containing the final desired unit
+        :param default_unit: string with the units of the original measurement
+        :return: The magnitude of the measurement in the new units
+        """
+        # (float, string, string) -> float
+        if has_converter and value_unit != default_unit:
+            data_conv_q = Converter(default_unit)
+            value = data_conv_q(value, units=value_unit)
             new_unit = default_unit
         else:
             new_unit = value_unit
         return value, new_unit
+
+    def _unit_fetch(self, unit):
+        return self.params[unit+"_unit"]

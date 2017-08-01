@@ -61,3 +61,5 @@ class nxcansas_writer(unittest.TestCase):
     def tearDown(self):
         if os.path.isfile(self.write_file_1d):
             os.remove(self.write_file_1d)
+        if os.path.isfile(self.write_file_2d):
+            os.remove(self.write_file_2d)

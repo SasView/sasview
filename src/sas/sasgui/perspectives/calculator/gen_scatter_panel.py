@@ -2,6 +2,7 @@
 Generic Scattering panel.
 This module relies on guiframe manager.
 """
+from __future__ import print_function
 
 import wx
 import sys
@@ -1997,7 +1998,7 @@ class SasGenWindow(widget.CHILD_FRAME):
         try:
             self.panel.set_volume_ctl_val(str(val))
         except:
-            print "self.panel is not initialized yet"
+            print("self.panel is not initialized yet")
 
     def set_omfpanel_default_shap(self, shape):
         """

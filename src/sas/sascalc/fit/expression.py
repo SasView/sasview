@@ -42,6 +42,8 @@ is out of date::
 
 Ideally, this interface will change
 """
+from __future__ import print_function
+
 import math
 import re
 

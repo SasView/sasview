@@ -2128,9 +2128,10 @@ class ViewerFrame(PARENT_FRAME):
             for line in config_lines:
                 if "SAS_OPENCL" in line:
                     if sas_opencl:
-                        new_config_lines.append("SAS_OPENCL = \""+sas_opencl+"\"")
+                        new_config_lines.append("SAS_OPENCL = \"" + sas_opencl
+                                                + "\"\n")
                     else:
-                        new_config_lines.append("SAS_OPENCL = None")
+                        new_config_lines.append("SAS_OPENCL = \"None\"\n")
                 else:
                     new_config_lines.append(line)
             config_file.close()
