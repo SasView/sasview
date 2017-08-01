@@ -65,15 +65,14 @@ class FileReader(object):
                     # Close the file handle if it is open
                     if not self.f_open.closed:
                         self.f_open.close()
+                    if len(self.output) > 0:
+                        # Sort the data that's been loaded
+                        self.sort_one_d_data()
+                        self.sort_two_d_data()
         else:
             msg = "Unable to find file at: {}\n".format(filepath)
             msg += "Please check your file path and try again."
             self.handle_error_message(msg)
-
-        if isinstance(self.output[0], Data1D):
-            self.sort_one_d_data()
-        elif isinstance(self.output[0], Data2D):
-            self.sort_two_d_data()
 
         # Return a list of parsed entries that data_loader can manage
         return self.output
@@ -121,13 +120,13 @@ class FileReader(object):
                     data.lam = np.asarray([data.lam[i] for i in ind]).astype(np.float64)
                 if data.dlam is not None:
                     data.dlam = np.asarray([data.dlam[i] for i in ind]).astype(np.float64)
-                data.xmin = np.min(data.x)
-                data.xmax = np.max(data.x)
-                data.ymin = np.min(data.y)
-                data.ymax = np.max(data.y)
-            final_list.append(data)
-        self.output = final_list
-        self.remove_empty_q_values()
+                if len(data.x > 0):
+                    data.xmin = np.min(data.x)
+                    data.xmax = np.max(data.x)
+                    data.ymin = np.min(data.y)
+                    data.ymax = np.max(data.y)
+        #     final_list.append(data)
+        # self.output = final_list
 
     def sort_two_d_data(self):
         final_list = []
@@ -156,8 +155,8 @@ class FileReader(object):
                     dataset.y_bins = dataset.qy_data[0::int(n_cols)]
                     dataset.x_bins = dataset.qx_data[:int(n_cols)]
                 dataset.data = dataset.data.flatten()
-                final_list.append(dataset)
-        self.output = final_list
+        #         final_list.append(dataset)
+        # self.output = final_list
 
     def set_all_to_none(self):
         """

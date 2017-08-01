@@ -129,7 +129,12 @@ class Reader(XMLreader):
                 self.current_datainfo.meta_data["loader"] = "CanSAS XML 1D"
                 self.current_datainfo.meta_data[PREPROCESS] = self.processing_instructions
                 self._parse_entry(entry)
-                self.send_to_output() # Combune datasets with DataInfo
+                has_error_dx = self.current_dataset.dx is not None
+                has_error_dy = self.current_dataset.dy is not None
+                self.remove_empty_q_values(has_error_dx=has_error_dx,
+                    has_error_dy=has_error_dy)
+                self.send_to_output() # Combine datasets with DataInfo
+                self.current_datainfo = DataInfo() # Reset DataInfo
         except FileContentsException as fc_exc:
             # File doesn't meet schema - try loading with a less strict schema
             base_name = xml_reader.__file__
@@ -214,8 +219,6 @@ class Reader(XMLreader):
         if self.current_dataset is None:
             self.current_dataset = plottable_1D(np.empty(0), np.empty(0),
                 np.empty(0), np.empty(0))
-            self.current_dataset.dxl = np.empty(0)
-            self.current_dataset.dxw = np.empty(0)
         self.base_ns = "{" + CANSAS_NS.get(self.cansas_version).get("ns") + "}"
 
         # Loop through each child in the parent element
@@ -294,8 +297,10 @@ class Reader(XMLreader):
                 elif tagname == 'Qdev':
                     self.current_dataset.dx = np.append(self.current_dataset.dx, data_point)
                 elif tagname == 'dQw':
+                    if self.current_dataset.dqw is None: self.current_dataset.dqw = np.empty(0)
                     self.current_dataset.dxw = np.append(self.current_dataset.dxw, data_point)
                 elif tagname == 'dQl':
+                    if self.current_dataset.dxl is None: self.current_dataset.dxl = np.empty(0)
                     self.current_dataset.dxl = np.append(self.current_dataset.dxl, data_point)
                 elif tagname == 'Qmean':
                     pass

@@ -36,7 +36,7 @@ def read_associations(loader, settings=FILE_ASSOCIATIONS):
     """
     Read the specified settings file to associate
     default readers to file extension.
-    
+
     :param loader: Loader object
     :param settings: path to the json settings file [string]
     """
