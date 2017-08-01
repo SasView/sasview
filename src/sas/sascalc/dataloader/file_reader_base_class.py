@@ -54,11 +54,6 @@ class FileReader(object):
                     self.f_open = open(filepath, 'rb')
                     self.get_file_contents()
 
-                    if isinstance(self.output[0], Data1D):
-                        self.sort_one_d_data()
-                    elif isinstance(self.output[0], Data2D):
-                        self.sort_two_d_data()
-
                 except DataReaderException as e:
                     self.handle_error_message(e.message)
                 except OSError as e:
@@ -74,6 +69,12 @@ class FileReader(object):
             msg = "Unable to find file at: {}\n".format(filepath)
             msg += "Please check your file path and try again."
             self.handle_error_message(msg)
+
+        if isinstance(self.output[0], Data1D):
+            self.sort_one_d_data()
+        elif isinstance(self.output[0], Data2D):
+            self.sort_two_d_data()
+
         # Return a list of parsed entries that data_loader can manage
         return self.output
 
