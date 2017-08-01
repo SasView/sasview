@@ -26,6 +26,8 @@ from sas.qtgui.Plotting.PlotterData import Data2D
 
 from sas.qtgui.Perspectives.Fitting.UI.FittingWidgetUI import Ui_FittingWidgetUI
 from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
+from sas.qtgui.Perspectives.Fitting.ConsoleUpdate import ConsoleUpdate
+
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc2D
 from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
@@ -44,6 +46,8 @@ CATEGORY_STRUCTURE = "Structure Factor"
 STRUCTURE_DEFAULT = "None"
 
 DEFAULT_POLYDISP_FUNCTION = 'gaussian'
+
+USING_TWISTED = True
 
 class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
     """
@@ -635,6 +639,14 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         batch_outputs = {}
         list_page_id = [page_id]
         #---------------------------------
+        if USING_TWISTED:
+            handler = None
+            updater = None
+        else:
+            handler = ConsoleUpdate(parent=self.parent,
+                                    manager=self,
+                                    improvement_delta=0.1)
+            updater = handler.update_fit
 
         # Parameterize the fitter
         fitter.set_model(model, fit_id, params_to_fit, data=data,
@@ -652,16 +664,22 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
                              batch_inputs=batch_inputs,
                              batch_outputs=batch_outputs,
                              page_id=list_page_id,
-                             updatefn=self.updateFit,
-                             completefn=None)
+                             updatefn=updater,
+                             completefn=self.fitComplete)
 
-        # start the trhrhread
-        calc_thread = threads.deferToThread(calc_fit.compute)
-        calc_thread.addCallback(self.fitComplete)
-        calc_thread.addErrback(self.fitFailed)
+        if USING_TWISTED:
+            # start the trhrhread with twisted
+            calc_thread = threads.deferToThread(calc_fit.compute)
+            calc_thread.addCallback(self.fitComplete)
+            calc_thread.addErrback(self.fitFailed)
+        else:
+            # Use the old python threads + Queue
+            calc_fit.queue()
+            calc_fit.ready(2.5)
+
 
         #disable the Fit button
-        self.cmdFit.setText('Calculating...')
+        self.cmdFit.setText('Running...')
         self.communicate.statusBarUpdateSignal.emit('Fitting started...')
         self.cmdFit.setEnabled(False)
 

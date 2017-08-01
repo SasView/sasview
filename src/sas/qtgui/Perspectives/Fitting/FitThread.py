@@ -73,15 +73,11 @@ class FitThread(CalcThread):
                          list_q, list_q, list_handler, list_curr_thread,
                          list_reset_flag)
             result = map(map_apply, inputs)
-
-            self.complete(result=result,
-                          batch_inputs=self.batch_inputs,
-                          batch_outputs=self.batch_outputs,
-                          page_id=self.page_id,
-                          pars=self.pars,
-                          elapsed=time.time() - self.starttime)
-
-            return result[0], time.time()-self.starttime
+            results = (result[0], time.time()-self.starttime)
+            if self.handler:
+                self.completefn(results)
+            else:
+                return (results)
 
         except KeyboardInterrupt, msg:
             # Thread was interrupted, just proceed and re-raise.
@@ -95,6 +91,7 @@ class FitThread(CalcThread):
             if self.handler is not None:
                 self.handler.stop(msg=msg)
         except Exception as ex:
+            # print "ERROR IN FIT THREAD: ", traceback.format_exc()
             if self.handler is not None:
                 self.handler.error(msg=traceback.format_exc())
 
