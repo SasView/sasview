@@ -101,56 +101,6 @@ class hfir_reader(unittest.TestCase):
         data = Loader().load("S2-30dq.d1d")
         self.assertEqual(data.meta_data['loader'], "HFIR 1D")
 
-
-class igor_reader(unittest.TestCase):
-
-    def setUp(self):
-        # the IgorReader should be able to read this filetype
-        # if it can't, stop here.
-        reader = IgorReader()
-        self.data = reader.read("MAR07232_rest.ASC")
-
-    def test_igor_checkdata(self):
-        """
-            Check the data content to see whether
-            it matches the specific file we loaded.
-            Check the units too to see whether the
-            Data1D defaults changed. Otherwise the
-            tests won't pass
-        """
-        self.assertEqual(self.data.filename, "MAR07232_rest.ASC")
-        self.assertEqual(self.data.meta_data['loader'], "IGOR 2D")
-
-        self.assertEqual(self.data.source.wavelength_unit, 'A')
-        self.assertEqual(self.data.source.wavelength, 8.4)
-
-        self.assertEqual(self.data.detector[0].distance_unit, 'mm')
-        self.assertEqual(self.data.detector[0].distance, 13705)
-
-        self.assertEqual(self.data.sample.transmission, 0.84357)
-
-        self.assertEqual(self.data.detector[0].beam_center_unit, 'mm')
-        center_x = (68.76 - 1)*5.0
-        center_y = (62.47 - 1)*5.0
-        self.assertEqual(self.data.detector[0].beam_center.x, center_x)
-        self.assertEqual(self.data.detector[0].beam_center.y, center_y)
-
-        self.assertEqual(self.data.I_unit, '1/cm')
-        # 3 points should be suffcient to check that the data is in column
-        # major order.
-        np.testing.assert_almost_equal(self.data.data[0:3],
-                                       [0.279783, 0.28951, 0.167634])
-        np.testing.assert_almost_equal(self.data.qx_data[0:3],
-                                       [-0.01849072, -0.01821785, -0.01794498])
-        np.testing.assert_almost_equal(self.data.qy_data[0:3],
-                                       [-0.01677435, -0.01677435, -0.01677435])
-
-    def test_generic_loader(self):
-        # the generic loader should direct the file to IgorReader as well
-        data = Loader().load("MAR07232_rest.ASC")
-        self.assertEqual(data.meta_data['loader'], "IGOR 2D")
-
-
 class DanseReaderTests(unittest.TestCase):
 
     def setUp(self):
