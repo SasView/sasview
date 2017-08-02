@@ -135,6 +135,7 @@ class Reader():
                     self.add_data_set(key)
                 elif class_prog.match(u'SASdata'):
                     self._initialize_new_data_set(parent_list)
+                    self._find_data_attributes(value)
                 # Recursion step to access data within the group
                 self.read_children(value, parent_list)
                 self.add_intermediate()
@@ -570,6 +571,25 @@ class Reader():
             y = np.array(0)
             self.current_dataset = plottable_1D(x, y)
         self.current_datainfo.filename = self.raw_data.filename
+
+    def _find_data_attributes(self, value):
+        attrs = value.attrs
+        signal = attrs.get("signal")
+        i_axes = attrs.get("I_axes")
+        q_indices = attrs.get("Q_indices")
+        mask = attrs.get("mask")
+        mask_indices = attrs.get("Mask_indices")
+        keys = value.keys()
+        self.q_name = i_axes[q_indices]
+        self.mask_name = mask[mask_indices]
+        self.i_name = signal
+        if self.q_name in keys:
+            q_vals = value.get(self.q_name)
+            self.q_uncertainties = q_vals.attrs.get("uncertainties")
+            self.q_resolutions = q_vals.attrs.get("resolutions")
+        if self.i_name in keys:
+            i_vals = value.get(self.i_name)
+            self.i_uncertainties = i_vals.attrs.get("uncertainties")
 
     def _find_intermediate(self, parent_list, basename=""):
         """
