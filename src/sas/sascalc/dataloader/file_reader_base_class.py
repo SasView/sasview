@@ -101,7 +101,6 @@ class FileReader(object):
         """
         Sort 1D data along the X axis for consistency
         """
-        final_list = []
         for data in self.output:
             if isinstance(data, Data1D):
                 # Sort data by increasing x and remove 1st point
@@ -125,11 +124,8 @@ class FileReader(object):
                     data.xmax = np.max(data.x)
                     data.ymin = np.min(data.y)
                     data.ymax = np.max(data.y)
-        #     final_list.append(data)
-        # self.output = final_list
 
     def sort_two_d_data(self):
-        final_list = []
         for dataset in self.output:
             if isinstance(dataset, Data2D):
                 dataset.data = dataset.data.astype(np.float64)
@@ -155,8 +151,6 @@ class FileReader(object):
                     dataset.y_bins = dataset.qy_data[0::int(n_cols)]
                     dataset.x_bins = dataset.qx_data[:int(n_cols)]
                 dataset.data = dataset.data.flatten()
-        #         final_list.append(dataset)
-        # self.output = final_list
 
     def set_all_to_none(self):
         """
