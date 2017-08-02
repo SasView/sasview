@@ -27,7 +27,6 @@ FILE_ASSOCIATIONS = {
     ".abs": "abs_reader",
     ".d1d": "hfir1d_reader",
     ".sans": "danse_reader",
-    ".nxs": "nexus_reader",
     ".pdh": "anton_paar_saxs_reader"
 }
 
