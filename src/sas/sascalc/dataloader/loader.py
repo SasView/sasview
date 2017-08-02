@@ -74,7 +74,7 @@ class Registry(ExtensionRegistry):
             pass  # try the ASCII reader
         except FileContentsException as fc_exc:
             # File has an associated reader but it failed
-            raise RuntimeError(fc_exc)
+            raise RuntimeError(fc_exc.message)
         except Exception:
             pass
 
@@ -85,7 +85,7 @@ class Registry(ExtensionRegistry):
         except DefaultReaderException:
             pass  # Loader specific error to try the cansas XML reader
         except FileContentsException as e:
-            raise RuntimeError(e)
+            raise RuntimeError(e.message)
 
         # ASCII reader failed - try CanSAS xML reader
         try:
@@ -94,7 +94,7 @@ class Registry(ExtensionRegistry):
         except DefaultReaderException:
             pass  # Loader specific error to try the NXcanSAS reader
         except FileContentsException as e:
-            raise RuntimeError(e)
+            raise RuntimeError(e.message)
         except Exception as csr:
             pass
 
@@ -109,7 +109,7 @@ class Registry(ExtensionRegistry):
             msg += "known format that can be loaded by SasView.\n"
             raise NoKnownLoaderException(msg)
         except FileContentsException as e:
-            raise RuntimeError(e)
+            raise RuntimeError(e.message)
 
     def find_plugins(self, dir):
         """
