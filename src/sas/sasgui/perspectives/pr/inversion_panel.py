@@ -69,7 +69,11 @@ class InversionControl(ScrolledPanel, PanelBase):
 
         self.rg_ctl = None
         self.iq0_ctl = None
-        self.bck_chk = None
+        self.bck_value = None
+        self.bck_est_ctl = None
+        self.bck_man_ctl = None
+        self.has_bck = True
+        self.bck_input = None
         self.bck_ctl = None
 
         # TextCtrl for fraction of positive P(r)
@@ -325,7 +329,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         state.file = self.plot_data.GetValue()
 
         # Background evaluation checkbox
-        state.estimate_bck = self.bck_chk.IsChecked()
+        state.estimate_bck = self.bck_est_ctl.GetValue()
 
         # Estimates
         state.nterms_estimate = self.nterms_estimate
@@ -371,7 +375,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         self.plot_data.SetValue(str(state.file))
 
         # Background evaluation checkbox
-        self.bck_chk.SetValue(state.estimate_bck)
+        self.bck_man_ctl.SetValue(state.estimate_bck)
 
         # Estimates
         if state.nterms_estimate is not None:
@@ -430,14 +434,41 @@ class InversionControl(ScrolledPanel, PanelBase):
         pars_sizer.Add(self.plot_data, (iy, 1), (1, 1),
                        wx.EXPAND | wx.LEFT | wx.RIGHT | wx.ADJUST_MINSIZE, 15)
 
-        self.bck_chk = wx.CheckBox(self, -1, "Estimate background level")
-        hint_msg = "Check box to let the fit estimate "
-        hint_msg += "the constant background level."
-        self.bck_chk.SetToolTipString(hint_msg)
-        self.bck_chk.Bind(wx.EVT_CHECKBOX, self._on_pars_changed)
+        radio_sizer = wx.GridBagSizer(5, 5)
+
+        self.bck_est_ctl = wx.RadioButton(self, -1, "Estimate background level",
+            name="estimate_bck", style=wx.RB_GROUP)
+        self.bck_man_ctl = wx.RadioButton(self, -1, "Input manual background level",
+            name="manual_bck")
+
+        self.bck_est_ctl.Bind(wx.EVT_RADIOBUTTON, self._on_bck_changed)
+        self.bck_man_ctl.Bind(wx.EVT_RADIOBUTTON, self._on_bck_changed)
+
+        radio_sizer.Add(self.bck_est_ctl, (0,0), (1,1), wx.LEFT | wx.EXPAND)
+        radio_sizer.Add(self.bck_man_ctl, (0,1), (1,1), wx.RIGHT | wx.EXPAND)
+
         iy += 1
-        pars_sizer.Add(self.bck_chk, (iy, 0), (1, 2),
+        pars_sizer.Add(radio_sizer, (iy, 0), (1, 2),
                        wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+
+        background_label = wx.StaticText(self, -1, "Background: ")
+        self.bck_input = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER,
+            size=(60, 20), value="0.0")
+        self.bck_input.Disable()
+        background_units = wx.StaticText(self, -1, "[A^(-1)]", size=(55, 20))
+        iy += 1
+
+        background_sizer = wx.GridBagSizer(5, 5)
+
+        background_sizer.Add(background_label, (0, 0), (1,1),
+            wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 23)
+        background_sizer.Add(self.bck_input, (0, 1), (1,1),
+            wx.LEFT | wx.ADJUST_MINSIZE, 5)
+        background_sizer.Add(background_units, (0, 2), (1,1),
+            wx.LEFT | wx.ADJUST_MINSIZE, 5)
+        pars_sizer.Add(background_sizer, (iy, 0), (1, 2),
+            wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+
         boxsizer1.Add(pars_sizer, 0, wx.EXPAND)
         vbox.Add(boxsizer1, (iy_vb, 0), (1, 1),
                  wx.LEFT | wx.RIGHT | wx.EXPAND | wx.ADJUST_MINSIZE | wx.TOP, 5)
@@ -763,6 +794,13 @@ class InversionControl(ScrolledPanel, PanelBase):
 
         self._on_pars_changed()
 
+    def _on_bck_changed(self, evt=None):
+        self.has_bck = self.bck_est_ctl.GetValue()
+        if self.has_bck:
+            self.bck_input.Disable()
+        else:
+            self.bck_input.Enable()
+
     def _on_pars_changed(self, evt=None):
         """
         Called when an input parameter has changed
@@ -770,7 +808,6 @@ class InversionControl(ScrolledPanel, PanelBase):
         scenes.
         """
         flag, alpha, dmax, nfunc, qmin, qmax, height, width = self._read_pars()
-        has_bck = self.bck_chk.IsChecked()
 
         # If the pars are valid, estimate alpha
         if flag:
@@ -782,7 +819,7 @@ class InversionControl(ScrolledPanel, PanelBase):
                 self._manager.estimate_plot_inversion(alpha=alpha, nfunc=nfunc,
                                                       d_max=dmax,
                                                       q_min=qmin, q_max=qmax,
-                                                      bck=has_bck,
+                                                      bck=self.has_bck,
                                                       height=height,
                                                       width=width)
 
@@ -915,7 +952,6 @@ class InversionControl(ScrolledPanel, PanelBase):
         # Push it to the manager
 
         flag, alpha, dmax, nfunc, qmin, qmax, height, width = self._read_pars()
-        has_bck = self.bck_chk.IsChecked()
 
         if flag:
             dataset = self.plot_data.GetValue()
@@ -927,7 +963,7 @@ class InversionControl(ScrolledPanel, PanelBase):
                 self._manager.setup_plot_inversion(alpha=alpha, nfunc=nfunc,
                                                    d_max=dmax,
                                                    q_min=qmin, q_max=qmax,
-                                                   bck=has_bck,
+                                                   bck=self.has_bck,
                                                    height=height,
                                                    width=width)
         else:
