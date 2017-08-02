@@ -107,6 +107,11 @@ class Reader(FileReader):
                 if candidate_lines >= self.min_data_pts:
                     is_data = True
 
+                if is_data and new_lentoks >= 8:
+                    msg = "This data looks like 2D ASCII data. Use the file "
+                    msg += "converter tool to convert it to NXcanSAS."
+                    raise FileContentsException(msg)
+
                 # To remember the # of columns on the current line
                 # for the next line of data
                 lentoks = new_lentoks
@@ -124,7 +129,7 @@ class Reader(FileReader):
                 has_error_dy = None
                 # Reset # of lines of data candidates
                 candidate_lines = 0
-
+        
         if not is_data:
             self.set_all_to_none()
             if self.extension in self.ext:
