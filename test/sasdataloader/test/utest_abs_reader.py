@@ -6,7 +6,6 @@ from __future__ import print_function
 import unittest
 import numpy as np
 from sas.sascalc.dataloader.loader import Loader
-from sas.sascalc.dataloader.readers.IgorReader import Reader as IgorReader
 from sas.sascalc.dataloader.readers.abs_reader import Reader as AbsReader
 from sas.sascalc.dataloader.readers.hfir1d_reader import Reader as HFIRReader
 from sas.sascalc.dataloader.readers.danse_reader import Reader as DANSEReader
