@@ -73,28 +73,32 @@ class Registry(ExtensionRegistry):
         except NoKnownLoaderException as nkl_e:
             pass  # try the ASCII reader
         except FileContentsException as fc_exc:
-            raise RuntimeError(fc_exc.message)
+            # File has an associated reader but it failed
+            raise RuntimeError(fc_exc)
         except Exception:
             pass
+
+        # File has no associated reader - try the ASCII reader
         try:
             ascii_loader = ascii_reader.Reader()
             return ascii_loader.read(path)
         except DefaultReaderException:
             pass  # Loader specific error to try the cansas XML reader
         except FileContentsException as e:
-            # TODO: handle error
             raise RuntimeError(e)
+
+        # ASCII reader failed - try CanSAS xML reader
         try:
             cansas_loader = cansas_reader.Reader()
             return cansas_loader.read(path)
         except DefaultReaderException:
-            pass  # Loader specific error to try the cansas NeXuS reader
+            pass  # Loader specific error to try the NXcanSAS reader
         except FileContentsException as e:
-            # TODO: Handle errors properly
             raise RuntimeError(e)
         except Exception as csr:
-            # TODO: Modify cansas reader to throw DefaultReaderException
             pass
+
+        # CanSAS XML reader failed - try NXcanSAS reader
         try:
             cansas_nexus_loader = cansas_reader_HDF5.Reader()
             return cansas_nexus_loader.read(path)
@@ -103,9 +107,8 @@ class Registry(ExtensionRegistry):
             # No known reader available. Give up and throw an error
             msg = "\n\tUnknown data format: %s.\n\tThe file is not a " % path
             msg += "known format that can be loaded by SasView.\n"
-            raise NoKnownLoaderException, msg
+            raise NoKnownLoaderException(msg)
         except FileContentsException as e:
-            # TODO: Handle error(s) properly
             raise RuntimeError(e)
 
     def find_plugins(self, dir):
