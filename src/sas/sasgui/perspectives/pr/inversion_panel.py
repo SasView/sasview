@@ -315,7 +315,7 @@ class InversionControl(ScrolledPanel, PanelBase):
 
         # Read the panel's parameters
         flag, alpha, dmax, nfunc, qmin, \
-        qmax, height, width = self._read_pars()
+        qmax, height, width, bck = self._read_pars()
 
         state.nfunc = nfunc
         state.d_max = dmax
@@ -329,7 +329,8 @@ class InversionControl(ScrolledPanel, PanelBase):
         state.file = self.plot_data.GetValue()
 
         # Background evaluation checkbox
-        state.estimate_bck = self.bck_est_ctl.GetValue()
+        state.estimate_bck = self.has_bck
+        state.bck_value = bck
 
         # Estimates
         state.nterms_estimate = self.nterms_estimate
@@ -374,8 +375,14 @@ class InversionControl(ScrolledPanel, PanelBase):
         # Data file
         self.plot_data.SetValue(str(state.file))
 
-        # Background evaluation checkbox
-        self.bck_man_ctl.SetValue(state.estimate_bck)
+        # Background value
+        self.bck_est_ctl.SetValue(state.estimate_bck)
+        self.bck_man_ctl.SetValue(not state.estimate_bck)
+        if not state.estimate_bck:
+            self.bck_input.Enable()
+            self.bck_input.SetValue(str(state.bck_value))
+        self.has_bck = state.estimate_bck
+        self.bck_value = state.bck_value
 
         # Estimates
         if state.nterms_estimate is not None:
@@ -455,6 +462,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         self.bck_input = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER,
             size=(60, 20), value="0.0")
         self.bck_input.Disable()
+        self.bck_input.Bind(wx.EVT_TEXT, self._read_pars)
         background_units = wx.StaticText(self, -1, "[A^(-1)]", size=(55, 20))
         iy += 1
 
@@ -807,7 +815,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         We will estimate the alpha parameter behind the
         scenes.
         """
-        flag, alpha, dmax, nfunc, qmin, qmax, height, width = self._read_pars()
+        flag, alpha, dmax, nfunc, qmin, qmax, height, width, bck = self._read_pars()
 
         # If the pars are valid, estimate alpha
         if flag:
@@ -833,6 +841,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         qmax = 0
         height = 0
         width = 0
+        background = 0
         flag = True
         # Read slit height
         try:
@@ -926,7 +935,21 @@ class InversionControl(ScrolledPanel, PanelBase):
             self.qmax_ctl.SetBackgroundColour("pink")
             self.qmax_ctl.Refresh()
 
-        return flag, alpha, dmax, nfunc, qmin, qmax, height, width
+        # Read background
+        if not self.has_bck:
+            try:
+                bck_str = self.bck_input.GetValue()
+                if len(bck_str.strip()) == 0:
+                    background = 0.0
+                else:
+                    background = float(bck_str)
+                    self.bck_input.SetBackgroundColour(wx.WHITE)
+            except ValueError:
+                background = 0.0
+                self.bck_input.SetBackgroundColour("pink")
+            self.bck_input.Refresh()
+
+        return flag, alpha, dmax, nfunc, qmin, qmax, height, width, background
 
     def _on_explore(self, evt):
         """
@@ -951,7 +974,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         # Get the data from the form
         # Push it to the manager
 
-        flag, alpha, dmax, nfunc, qmin, qmax, height, width = self._read_pars()
+        flag, alpha, dmax, nfunc, qmin, qmax, height, width, bck = self._read_pars()
 
         if flag:
             dataset = self.plot_data.GetValue()
