@@ -7,7 +7,6 @@ import unittest
 import numpy as np
 from sas.sascalc.dataloader.loader import Loader
 from sas.sascalc.dataloader.readers.abs_reader import Reader as AbsReader
-from sas.sascalc.dataloader.readers.hfir1d_reader import Reader as HFIRReader
 from sas.sascalc.dataloader.readers.danse_reader import Reader as DANSEReader
 from sas.sascalc.dataloader.readers.cansas_reader import Reader as CANSASReader
 
@@ -70,35 +69,6 @@ class abs_reader(unittest.TestCase):
         # the generic loader should work as well
         data = Loader().load("jan08002.ABS")
         self.assertEqual(data.meta_data['loader'], "IGOR 1D")
-
-
-class hfir_reader(unittest.TestCase):
-
-    def setUp(self):
-        reader = HFIRReader()
-        self.data = reader.read("S2-30dq.d1d")
-
-    def test_hfir_checkdata(self):
-        """
-            Check the data content to see whether
-            it matches the specific file we loaded.
-        """
-        self.assertEqual(self.data.filename, "S2-30dq.d1d")
-        # THIS FILE FORMAT IS CURRENTLY READ BY THE ASCII READER
-        self.assertEqual(self.data.meta_data['loader'], "HFIR 1D")
-        self.assertEqual(len(self.data.x), 134)
-        self.assertEqual(len(self.data.y), 134)
-        #          Q           I               dI          dQ
-        # Point 1: 0.003014    0.003010        0.000315    0.008249
-        self.assertEqual(self.data.x[1], 0.003014)
-        self.assertEqual(self.data.y[1], 0.003010)
-        self.assertEqual(self.data.dy[1], 0.000315)
-        self.assertEqual(self.data.dx[1], 0.008249)
-
-    def test_generic_loader(self):
-        # the generic loader should work as well
-        data = Loader().load("S2-30dq.d1d")
-        self.assertEqual(data.meta_data['loader'], "HFIR 1D")
 
 class DanseReaderTests(unittest.TestCase):
 
