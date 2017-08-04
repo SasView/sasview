@@ -72,7 +72,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         self.bck_value = None
         self.bck_est_ctl = None
         self.bck_man_ctl = None
-        self.has_bck = True
+        self.est_bck = True
         self.bck_input = None
         self.bck_ctl = None
 
@@ -329,7 +329,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         state.file = self.plot_data.GetValue()
 
         # Background evaluation checkbox
-        state.estimate_bck = self.has_bck
+        state.estimate_bck = self.est_bck
         state.bck_value = bck
 
         # Estimates
@@ -381,7 +381,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         if not state.estimate_bck:
             self.bck_input.Enable()
             self.bck_input.SetValue(str(state.bck_value))
-        self.has_bck = state.estimate_bck
+        self.est_bck = state.estimate_bck
         self.bck_value = state.bck_value
 
         # Estimates
@@ -803,8 +803,8 @@ class InversionControl(ScrolledPanel, PanelBase):
         self._on_pars_changed()
 
     def _on_bck_changed(self, evt=None):
-        self.has_bck = self.bck_est_ctl.GetValue()
-        if self.has_bck:
+        self.est_bck = self.bck_est_ctl.GetValue()
+        if self.est_bck:
             self.bck_input.Disable()
         else:
             self.bck_input.Enable()
@@ -827,7 +827,8 @@ class InversionControl(ScrolledPanel, PanelBase):
                 self._manager.estimate_plot_inversion(alpha=alpha, nfunc=nfunc,
                                                       d_max=dmax,
                                                       q_min=qmin, q_max=qmax,
-                                                      bck=self.has_bck,
+                                                      est_bck=self.est_bck,
+                                                      bck_val=bck,
                                                       height=height,
                                                       width=width)
 
@@ -936,7 +937,7 @@ class InversionControl(ScrolledPanel, PanelBase):
             self.qmax_ctl.Refresh()
 
         # Read background
-        if not self.has_bck:
+        if not self.est_bck:
             try:
                 bck_str = self.bck_input.GetValue()
                 if len(bck_str.strip()) == 0:
@@ -986,7 +987,8 @@ class InversionControl(ScrolledPanel, PanelBase):
                 self._manager.setup_plot_inversion(alpha=alpha, nfunc=nfunc,
                                                    d_max=dmax,
                                                    q_min=qmin, q_max=qmax,
-                                                   bck=self.has_bck,
+                                                   est_bck=self.est_bck,
+                                                   bck_val = bck,
                                                    height=height,
                                                    width=width)
         else:
