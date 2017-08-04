@@ -1,3 +1,24 @@
+def new_load_qt(api_options):
+    from PyQt4 import QtCore, QtGui, QtSvg
+    return QtCore, QtGui, QtSvg, 'pyqt'
+
+def qtconsole_new_load_qt(api_options):
+    from PyQt4 import QtCore, QtGui, QtSvg
+
+    # Alias PyQt-specific functions for PySide compatibility.
+    QtCore.Signal = QtCore.pyqtSignal
+    QtCore.Slot = QtCore.pyqtSlot
+    return QtCore, QtGui, QtSvg, 'pyqt'
+
+# Do some monkey patching to satisfy pyinstaller complaining
+# about pyside/pyqt confusion
+from IPython.external import  qt_loaders
+qt_loaders.load_qt = new_load_qt
+
+from qtconsole import qt_loaders as qtconsole_qt_loaders
+qtconsole_qt_loaders.load_qt = qtconsole_new_load_qt
+
+
 from qtconsole.rich_jupyter_widget import RichJupyterWidget
 from qtconsole.inprocess import QtInProcessKernelManager
 from IPython.lib import guisupport

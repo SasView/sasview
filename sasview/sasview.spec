@@ -50,7 +50,12 @@ datas.append(('local_config.py','.'))
 datas.append(('wxcruft.py','.'))
 datas.append(('welcome_panel.py','.'))
 
+# pyinstaller gets mightily confused by upper/lower case,
+# so some modules need to be copied explicitly to avoid
+# messages like
+# WARNING: Attempted to add Python module twice with different upper/lowercases
 datas.append((os.path.join(PYTHON_LOC,'Lib','SocketServer.py'),'.'))
+datas.append((os.path.join(PYTHON_LOC,'Lib','Queue.py'),'.'))
 
 # TODO
 # NEED BETTER WAY TO DEAL WITH THESE RELATIVE PATHS
