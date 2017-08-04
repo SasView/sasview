@@ -1064,15 +1064,15 @@ class EditorPanel(wx.ScrolledWindow):
                 for param_line in param_str.split('\n'):
                     p_line = param_line.lstrip().rstrip()
                     if p_line:
-                        pname, pvalue = self.get_param_helper(p_line)
+                        pname, pvalue, desc = self.get_param_helper(p_line)
                         param_names.append(pname)
-                        out_f.write("%s['%s', '', %s, [-numpy.inf, numpy.inf], '', ''],\n" % (spaces16, pname, pvalue))
+                        out_f.write("%s['%s', '', %s, [-numpy.inf, numpy.inf], '', '%s'],\n" % (spaces16, pname, pvalue, desc))
                 for param_line in pd_param_str.split('\n'):
                     p_line = param_line.lstrip().rstrip()
                     if p_line:
-                        pname, pvalue = self.get_param_helper(p_line)
+                        pname, pvalue, desc = self.get_param_helper(p_line)
                         param_names.append(pname)
-                        out_f.write("%s['%s', '', %s, [-numpy.inf, numpy.inf], 'volume', ''],\n" % (spaces16, pname, pvalue))
+                        out_f.write("%s['%s', '', %s, [-numpy.inf, numpy.inf], 'volume', '%s'],\n" % (spaces16, pname, pvalue, desc))
                 out_f.write('%s]\n' % spaces13)
 
         # No form_volume or ER available in simple model editor
@@ -1113,16 +1113,19 @@ class EditorPanel(wx.ScrolledWindow):
         items = line.split(";")
         for item in items:
             name = item.split("=")[0].strip()
+            description = ""
             try:
                 value = item.split("=")[1].strip()
                 if value.count("#"):
                     # If line ends in a comment, remove it before parsing float
+                    index = value.index("#")
+                    description = value[(index + 1):].strip()
                     value = value[:value.index("#")].strip()
                 float(value)
             except ValueError:
                 value = 1.0 # default
 
-        return name, value
+        return name, value, description
 
     def set_function_helper(self, line):
         """
