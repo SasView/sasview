@@ -210,8 +210,8 @@ class Calc1D(CalcThread):
         elif hasattr(self.model, "calc_composition_models"):
             results = self.model.calc_composition_models(x)
             if results is not None:
-                sq_values = results[0]
-                pq_values = results[1]
+                sq_values = results[1]
+                pq_values = results[0]
 
 
         elapsed = time.time() - self.starttime
