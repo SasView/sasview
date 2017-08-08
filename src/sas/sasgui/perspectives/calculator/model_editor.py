@@ -642,6 +642,7 @@ class EditorPanel(wx.ScrolledWindow):
         self.name_sizer = None
         self.name_hsizer = None
         self.name_tcl = None
+        self.overwrite_cb = None
         self.desc_sizer = None
         self.desc_tcl = None
         self.param_sizer = None
@@ -688,10 +689,10 @@ class EditorPanel(wx.ScrolledWindow):
         """
         #title name [string]
         name_txt = wx.StaticText(self, -1, 'Function Name : ')
-        overwrite_cb = wx.CheckBox(self, -1, "Overwrite existing plugin model of this name?", (10, 10))
-        overwrite_cb.SetValue(False)
-        overwrite_cb.SetToolTipString("Overwrite it if already exists?")
-        wx.EVT_CHECKBOX(self, overwrite_cb.GetId(), self.on_over_cb)
+        self.overwrite_cb = wx.CheckBox(self, -1, "Overwrite existing plugin model of this name?", (10, 10))
+        self.overwrite_cb.SetValue(False)
+        self.overwrite_cb.SetToolTipString("Overwrite it if already exists?")
+        wx.EVT_CHECKBOX(self, self.overwrite_cb.GetId(), self.on_over_cb)
         self.name_tcl = wx.TextCtrl(self, -1, size=(PANEL_WIDTH * 3 / 5, -1))
         self.name_tcl.Bind(wx.EVT_TEXT_ENTER, self.on_change_name)
         self.name_tcl.SetValue('')
@@ -699,7 +700,7 @@ class EditorPanel(wx.ScrolledWindow):
         hint_name = "Unique Model Function Name."
         self.name_tcl.SetToolTipString(hint_name)
         self.name_hsizer.AddMany([(self.name_tcl, 0, wx.LEFT | wx.TOP, 0),
-                                  (overwrite_cb, 0, wx.LEFT, 20)])
+                                  (self.overwrite_cb, 0, wx.LEFT, 20)])
         self.name_sizer.AddMany([(name_txt, 0, wx.LEFT | wx.TOP, 10),
                                  (self.name_hsizer, 0,
                                   wx.LEFT | wx.TOP | wx.BOTTOM, 10)])
@@ -994,6 +995,8 @@ class EditorPanel(wx.ScrolledWindow):
         if msg:
             info = 'Error'
             color = 'red'
+            self.overwrite_cb.SetValue(True)
+            self.overwrite_name = True
         else:
             self._notes = result
             msg = "Successful! Please look for %s in Plugin Models."%name
