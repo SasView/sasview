@@ -42,7 +42,7 @@ _acknowledgement_preamble_bullet4 =\
 _acknowledgement_publications = \
 '''This work benefited from the use of the SasView application, originally developed under NSF Award DMR-0520547. SasView also contains code developed with funding from the EU Horizon 2020 programme under the SINE2020 project Grant No 654000.'''
 _acknowledgement_citation = \
-'''M. Doucet et al. SasView Version 4.1.1, Zenodo, 10.5281/zenodo.825675'''
+'''M. Doucet et al. SasView Version 4.1.2, Zenodo, 10.5281/zenodo.825675'''
 
 _acknowledgement =  \
 '''This work was originally developed as part of the DANSE project funded by the US NSF under Award DMR-0520547,\n but is currently maintained by a collaboration between UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO and TU Delft and the scattering community.\n\n SasView also contains code developed with funding from the EU Horizon 2020 programme under the SINE2020 project (Grant No 654000).\nA list of individual contributors can be found at: https://github.com/orgs/SasView/people
