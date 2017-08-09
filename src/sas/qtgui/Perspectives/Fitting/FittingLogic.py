@@ -177,15 +177,21 @@ class FittingLogic(object):
 
     def computeDataRange(self):
         """
+        Wrapper for calculating the data range based on local dataset
+        """
+        return self.computeRangeFromData(self.data)
+
+    def computeRangeFromData(self, data):
+        """
         Compute the minimum and the maximum range of the data
         return the npts contains in data
         """
         qmin, qmax, npts = None, None, None
-        if isinstance(self.data, Data1D):
+        if isinstance(data, Data1D):
             try:
-                qmin = min(self.data.x)
-                qmax = max(self.data.x)
-                npts = len(self.data.x)
+                qmin = min(data.x)
+                qmax = max(data.x)
+                npts = len(data.x)
             except (ValueError, TypeError):
                 msg = "Unable to find min/max/length of \n data named %s" % \
                             self.data.filename
@@ -194,12 +200,12 @@ class FittingLogic(object):
         else:
             qmin = 0
             try:
-                x = max(np.fabs(self.data.xmin), np.fabs(self.data.xmax))
-                y = max(np.fabs(self.data.ymin), np.fabs(self.data.ymax))
+                x = max(np.fabs(data.xmin), np.fabs(data.xmax))
+                y = max(np.fabs(data.ymin), np.fabs(data.ymax))
             except (ValueError, TypeError):
                 msg = "Unable to find min/max of \n data named %s" % \
                             self.data.filename
                 raise ValueError, msg
             qmax = np.sqrt(x * x + y * y)
-            npts = len(self.data.data)
+            npts = len(data.data)
         return qmin, qmax, npts

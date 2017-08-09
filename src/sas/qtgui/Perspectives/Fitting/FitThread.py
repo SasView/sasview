@@ -69,11 +69,12 @@ class FitThread(CalcThread):
             list_map_get_attr = [map_getattr]*fitter_size
             list_fit_function = ['fit']*fitter_size
             list_q = [None]*fitter_size
+
             inputs = zip(list_map_get_attr, self.fitter, list_fit_function,
                          list_q, list_q, list_handler, list_curr_thread,
                          list_reset_flag)
             result = map(map_apply, inputs)
-            results = (result[0], time.time()-self.starttime)
+            results = (result, time.time()-self.starttime)
             if self.handler:
                 self.completefn(results)
             else:

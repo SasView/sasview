@@ -47,7 +47,7 @@ STRUCTURE_DEFAULT = "None"
 
 DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 
-USING_TWISTED = True
+USING_TWISTED = False
 
 class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
     """
@@ -64,7 +64,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.tab_id = tab_id
 
         # Main Data[12]D holder
-        self.logic = FittingLogic(data=data)
+        self.logic = FittingLogic()
 
         # Globals
         self.initializeGlobals()
@@ -116,12 +116,20 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
     @data.setter
     def data(self, value):
         """ data setter """
-        assert isinstance(value, QtGui.QStandardItem)
+        if isinstance(value, list):
+            self.is_batch_fitting = True
+        else:
+            value = [value]
+
+        assert isinstance(value[0], QtGui.QStandardItem)
         # _index contains the QIndex with data
-        self._index = value
+        self._index = value[0]
+
+        # Keep reference to all datasets for batch
+        self.all_data = value
 
         # Update logics with data items
-        self.logic.data = GuiUtils.dataFromItem(value)
+        self.logic.data = GuiUtils.dataFromItem(value[0])
 
         # Overwrite data type descriptor
         self.is2D = True if isinstance(self.logic.data, Data2D) else False
@@ -139,6 +147,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.model_is_loaded = False
         # Data[12]D passed and set
         self.data_is_loaded = False
+        # Batch/single fitting
+        self.is_batch_fitting = False
         # Current SasModel in view
         self.kernel_module = None
         # Current SasModel view dimension
@@ -293,6 +303,13 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.chk2DView.setEnabled(False)
         self.chk2DView.setVisible(False)
         self.chkMagnetism.setEnabled(self.is2D)
+        # Combo box or label for file name"
+        if self.is_batch_fitting:
+            self.lblFilename.setVisible(False)
+            for dataitem in self.all_data:
+                filename = GuiUtils.dataFromItem(dataitem).filename
+                self.cbFileNames.addItem(filename)
+            self.cbFileNames.setVisible(True)
         # Similarly on other tabs
         self.options_widget.setEnablementOnDataLoad()
 
@@ -343,6 +360,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Set initial control enablement
         """
+        self.cbFileNames.setVisible(False)
         self.cmdFit.setEnabled(False)
         self.cmdPlot.setEnabled(False)
         self.options_widget.cmdComputePoints.setVisible(False) # probably redundant
@@ -369,6 +387,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.cbStructureFactor.currentIndexChanged.connect(self.onSelectStructureFactor)
         self.cbCategory.currentIndexChanged.connect(self.onSelectCategory)
         self.cbModel.currentIndexChanged.connect(self.onSelectModel)
+        self.cbFileNames.currentIndexChanged.connect(self.onSelectBatchFilename)
         # Checkboxes
         self.chk2DView.toggled.connect(self.toggle2D)
         self.chkPolydispersity.toggled.connect(self.togglePoly)
@@ -422,6 +441,14 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.has_poly_error_column = False
 
         self.respondToModelStructure(model=model, structure_factor=None)
+
+    def onSelectBatchFilename(self, data_index):
+        """
+        Update the logic based on the selected file in batch fitting
+        """
+        self._index = self.all_data[data_index]
+        self.logic.data = GuiUtils.dataFromItem(self.all_data[data_index])
+        self.updateQRange()
 
     def onSelectStructureFactor(self):
         """
@@ -612,7 +639,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Perform fitting on the current data
         """
-        fitter = Fit()
 
         # Data going in
         data = self.logic.data
@@ -649,23 +675,30 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             updater = handler.update_fit
 
         # Parameterize the fitter
-        fitter.set_model(model, fit_id, params_to_fit, data=data,
-                         constraints=constraints)
-
-        fitter.set_data(data=data, id=fit_id, smearer=smearer, qmin=qmin,
-                        qmax=qmax)
-        fitter.select_problem_for_fit(id=fit_id, value=1)
-
-        fitter.fitter_id = page_id
+        fitters = []
+        for fit_index in self.all_data:
+            fitter = Fit()
+            data = GuiUtils.dataFromItem(fit_index)
+            fitter.set_model(model, fit_id, params_to_fit, data=data,
+                             constraints=constraints)
+            qmin, qmax, _ = self.logic.computeRangeFromData(data)
+            fitter.set_data(data=data, id=fit_id, smearer=smearer, qmin=qmin,
+                            qmax=qmax)
+            fitter.select_problem_for_fit(id=fit_id, value=1)
+            fitter.fitter_id = page_id
+            fit_id += 1
+            fitters.append(fitter)
 
         # Create the fitting thread, based on the fitter
+        completefn = self.batchFitComplete if self.is_batch_fitting else self.fitComplete
+
         calc_fit = FitThread(handler=handler,
-                             fn=[fitter],
-                             batch_inputs=batch_inputs,
-                             batch_outputs=batch_outputs,
-                             page_id=list_page_id,
-                             updatefn=updater,
-                             completefn=self.fitComplete)
+                                fn=fitters,
+                                batch_inputs=batch_inputs,
+                                batch_outputs=batch_outputs,
+                                page_id=list_page_id,
+                                updatefn=updater,
+                                completefn=completefn)
 
         if USING_TWISTED:
             # start the trhrhread with twisted
@@ -695,6 +728,18 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         print "FIT FAILED: ", reason
         pass
 
+    def batchFitComplete(self, result):
+        """
+        Receive and display batch fitting results
+        """
+        #re-enable the Fit button
+        self.cmdFit.setText("Fit")
+        self.cmdFit.setEnabled(True)
+
+        print ("BATCH FITTING FINISHED")
+        # Add the Qt version of wx.aui.AuiNotebook and populate it
+        pass
+
     def fitComplete(self, result):
         """
         Receive and display fitting results
@@ -706,7 +751,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         assert result is not None
 
-        res_list = result[0]
+        res_list = result[0][0]
         res = res_list[0]
         if res.fitness is None or \
             not np.isfinite(res.fitness) or \

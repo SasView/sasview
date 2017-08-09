@@ -96,11 +96,12 @@ class FittingWindow(QtGui.QTabWidget):
             self.setWindowState(QtCore.Qt.WindowMinimized)
             event.ignore()
 
-    def addFit(self, data):
+    def addFit(self, data, is_batch=False):
         """
         Add a new tab for passed data
         """
         tab	= FittingWidget(parent=self.parent, data=data, tab_id=self.maxIndex+1)
+        tab.is_batch_fitting = is_batch
         # Add this tab to the object library so it can be retrieved by scripting/jupyter
         ObjectLibrary.addObject(self.tabName(), tab)
         self.tabs.append(tab)
@@ -132,7 +133,7 @@ class FittingWindow(QtGui.QTabWidget):
         """
         return True
 
-    def setData(self, data_item=None):
+    def setData(self, data_item=None, is_batch=False):
         """
         Assign new dataset to the fitting instance
         Obtain a QStandardItem object and dissect it to get Data1D/2D
@@ -148,7 +149,9 @@ class FittingWindow(QtGui.QTabWidget):
             msg = "Incorrect type passed to the Fitting Perspective"
             raise AttributeError, msg
 
-        for data in data_item:
+        items = [data_item] if is_batch else data_item
+
+        for data in items:
             # Find the first unassigned tab.
             # If none, open a new tab.
             available_tabs = list(map(lambda tab: tab.acceptsData(), self.tabs))
@@ -156,7 +159,7 @@ class FittingWindow(QtGui.QTabWidget):
             if numpy.any(available_tabs):
                 self.tabs[available_tabs.index(True)].data = data
             else:
-                self.addFit(data)
+                self.addFit(data, is_batch=is_batch)
 
     def onFittingOptionsChange(self, fit_engine):
         """

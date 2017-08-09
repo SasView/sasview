@@ -538,7 +538,7 @@ class InvariantWindow(QtGui.QDialog, Ui_tabbedInvariantUI):
 
         self.mapper.toFirst()
 
-    def setData(self, data_item):
+    def setData(self, data_item, is_batch=False):
         """
         Obtain a QStandardItem object and dissect it to get Data1D/2D
         Pass it over to the calculator

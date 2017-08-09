@@ -351,7 +351,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             return
 
         # Notify the GuiManager about the send request
-        self._perspective().setData(data_item=selected_items)
+        self._perspective().setData(data_item=selected_items, is_batch=self.chkBatch.isChecked())
 
     def freezeTheory(self, event):
         """
