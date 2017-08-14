@@ -31,8 +31,11 @@ class FittingWindow(QtGui.QTabWidget):
         # Index of the current tab
         self.currentTab = 0
 
-        # The current optimizer
+        # The default optimizer
         self.optimizer = 'Levenberg-Marquardt'
+
+        # Dataset inde -> Fitting tab mapping
+        self.dataToFitTab = {}
 
         # The tabs need to be closeable
         self.setTabsClosable(True)
@@ -44,6 +47,7 @@ class FittingWindow(QtGui.QTabWidget):
 
         # Deal with signals
         self.tabCloseRequested.connect(self.tabCloses)
+        self.communicate.dataDeletedSignal.connect(self.dataDeleted)
 
         # Perspective window not allowed to close by default
         self._allow_close = False
@@ -103,29 +107,86 @@ class FittingWindow(QtGui.QTabWidget):
         tab	= FittingWidget(parent=self.parent, data=data, tab_id=self.maxIndex+1)
         tab.is_batch_fitting = is_batch
         # Add this tab to the object library so it can be retrieved by scripting/jupyter
-        ObjectLibrary.addObject(self.tabName(), tab)
+        tab_name = self.tabName(is_batch=is_batch)
+        ObjectLibrary.addObject(tab_name, tab)
         self.tabs.append(tab)
+        if data:
+            self.updateFitDict(data, tab_name)
         self.maxIndex += 1
-        self.addTab(tab, self.tabName())
+        self.addTab(tab, tab_name)
 
-    def tabName(self):
+    def updateFitDict(self, item_key, tab_name):
+        """
+        Create a list if none exists and append if there's already a list
+        """
+        if item_key in self.dataToFitTab.keys():
+            self.dataToFitTab[item_key].append(tab_name)
+        else:
+            self.dataToFitTab[item_key] = [tab_name]
+
+        #print "CURRENT dict: ", self.dataToFitTab
+
+    def tabName(self, is_batch=False):
         """
         Get the new tab name, based on the number of fitting tabs so far
         """
-        page_name = "FitPage" + str(self.maxIndex)
+        page_name = "BatchPage" if is_batch else "FitPage"
+        page_name = page_name + str(self.maxIndex)
         return page_name
+
+    def resetTab(self, index):
+        """
+        Adds a new tab and removes the last tab
+        as a way of resetting the fit tabs
+        """
+        # If data on tab empty - do nothing
+        if not self.tabs[index].data:
+            return
+        # Add a new, empy tab
+        self.addFit(None)
+        # Remove the previous last tab
+        self.tabCloses(index)
 
     def tabCloses(self, index):
         """
         Update local bookkeeping on tab close
         """
-        assert len(self.tabs) >= index
+        #assert len(self.tabs) >= index
         # don't remove the last tab
         if len(self.tabs) <= 1:
+            self.resetTab(index)
             return
-        ObjectLibrary.deleteObjectByRef(self.tabs[index])
-        del self.tabs[index]
-        self.removeTab(index)
+        try:
+            ObjectLibrary.deleteObjectByRef(self.tabs[index])
+            self.removeTab(index)
+            del self.tabs[index]
+        except IndexError:
+            # The tab might have already been deleted previously
+            pass
+
+    def closeTabByName(self, tab_name):
+        """
+        Given name of the fitting tab - close it
+        """
+        for tab_index in xrange(len(self.tabs)):
+            if self.tabText(tab_index) == tab_name:
+                self.tabCloses(tab_index)
+        pass # debug hook
+
+    def dataDeleted(self, index_list):
+        """
+        Delete fit tabs referencing given data
+        """
+        if not index_list or not self.dataToFitTab:
+            return
+        for index_to_delete in index_list:
+            if index_to_delete in self.dataToFitTab.keys():
+                for tab_name in self.dataToFitTab[index_to_delete]:
+                    # delete tab #index after corresponding data got removed
+                    self.closeTabByName(tab_name)
+                self.dataToFitTab.pop(index_to_delete)
+
+        #print "CURRENT dict: ", self.dataToFitTab
 
     def allowBatch(self):
         """
@@ -157,7 +218,10 @@ class FittingWindow(QtGui.QTabWidget):
             available_tabs = list(map(lambda tab: tab.acceptsData(), self.tabs))
 
             if numpy.any(available_tabs):
-                self.tabs[available_tabs.index(True)].data = data
+                first_good_tab = available_tabs.index(True)
+                self.tabs[first_good_tab].data = data
+                tab_name = str(self.tabText(first_good_tab))
+                self.updateFitDict(data, tab_name)
             else:
                 self.addFit(data, is_batch=is_batch)
 

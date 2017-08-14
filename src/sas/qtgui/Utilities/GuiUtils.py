@@ -245,6 +245,9 @@ class Communicate(QtCore.QObject):
     # Current perspective changed
     perspectiveChangedSignal = QtCore.pyqtSignal(str)
 
+    # File/dataset got deleted
+    dataDeletedSignal = QtCore.pyqtSignal(list)
+
 
 def updateModelItemWithPlot(item, update_data, name=""):
     """

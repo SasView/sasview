@@ -310,6 +310,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
                 filename = GuiUtils.dataFromItem(dataitem).filename
                 self.cbFileNames.addItem(filename)
             self.cbFileNames.setVisible(True)
+            # This panel is not designed to view individual fits, so disable plotting
+            self.cmdPlot.setVisible(False)
         # Similarly on other tabs
         self.options_widget.setEnablementOnDataLoad()
 
