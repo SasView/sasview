@@ -3,6 +3,16 @@ Release Notes
 
 1- Features
 ===========
+    - New in Version 4.1.2
+      --------------------
+      This point release is a bug-fix release addressing:
+
+       - Fixes #984: PDF Reports Generate Empty PDFs
+       - Fixes a path typo
+       - 64 bit and 32 bit Windows executables now available
+
+      It is recommended that all users upgrade to this version
+
     - New in Version 4.1.1
       --------------------
       This point release is a bug-fix release addressing:
@@ -15,8 +25,6 @@ Release Notes
        - Fixes an issue with the live discovery of plugin models
        - Fixes an issue with the NXcanSAS data loader
        - Updated tutorials for SasView 4.x.y
-
-      It is recommended that all users upgrade to this version
 
     - New in Version 4.1.0
       ------------------
