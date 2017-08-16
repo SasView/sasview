@@ -84,7 +84,8 @@ class PolyViewDelegate(QtGui.QStyledItemDelegate):
     """
     Custom delegate for appearance and behavior control of the polydispersity view
     """
-    POLYDISPERSE_FUNCTIONS = ['rectangle', 'array', 'lognormal', 'gaussian', 'schulz']
+    #POLYDISPERSE_FUNCTIONS = ['rectangle', 'array', 'lognormal', 'gaussian', 'schulz']
+    POLYDISPERSE_FUNCTIONS = ['rectangle', 'lognormal', 'gaussian', 'schulz']
 
     combo_updated = QtCore.pyqtSignal(str, int)
 

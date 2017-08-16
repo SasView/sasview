@@ -24,7 +24,7 @@ else:
     LIBLOC = os.path.join(PYTHON_LOC,'Library','bin')
     UPX=True
 
-SCRIPT_TO_SOURCE = 'sasview.py'
+SCRIPT_TO_SOURCE = 'run.py'
 
 # Warning! pyinstaller/py2exe etc. don't have the __file__ attribute
 # WORK_DIR = os.path.dirname(os.path.realpath(__file__))

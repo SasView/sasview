@@ -67,8 +67,8 @@ class FittingPerspectiveTest(unittest.TestCase):
         self.widget.tabCloses(1)
         # The tab should still be there
         self.assertEqual(len(self.widget.tabs), 1)
-        self.assertEqual(self.widget.maxIndex, 2)
-        self.assertEqual(self.widget.tabName(), "FitPage2")
+        self.assertEqual(self.widget.maxIndex, 3)
+        self.assertEqual(self.widget.tabName(), "FitPage3")
 
     def testAllowBatch(self):
         '''Assure the perspective allows multiple datasets'''

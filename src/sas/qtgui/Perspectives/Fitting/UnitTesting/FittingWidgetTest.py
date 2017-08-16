@@ -97,7 +97,7 @@ class FittingWidgetTest(unittest.TestCase):
 
         # test the delegate a bit
         delegate = fittingWindow.lstPoly.itemDelegate()
-        self.assertEqual(len(delegate.POLYDISPERSE_FUNCTIONS), 5)
+        self.assertEqual(len(delegate.POLYDISPERSE_FUNCTIONS), 4)
         self.assertEqual(delegate.editableParameters(), [2, 3, 4, 5])
         self.assertEqual(delegate.poly_function, 6)
         self.assertIsInstance(delegate.combo_updated, QtCore.pyqtBoundSignal)
@@ -594,10 +594,10 @@ class FittingWidgetTest(unittest.TestCase):
         """
         # Set data
         test_data = Data1D(x=[1,2], y=[1,2])
-
+        item = QtGui.QStandardItem()
+        updateModelItem(item, [test_data], "test")
         # Force same data into logic
-        self.widget.logic.data = test_data
-        self.widget.data_is_loaded = True
+        self.widget.data = item
         category_index = self.widget.cbCategory.findText("Sphere")
         self.widget.cbCategory.setCurrentIndex(category_index)
 
@@ -624,7 +624,7 @@ class FittingWidgetTest(unittest.TestCase):
             self.assertEqual(threads.deferToThread.call_args_list[0][0][0].__name__, 'compute')
 
             # the fit button changed caption and got disabled
-            self.assertEqual(self.widget.cmdFit.text(), 'Calculating...')
+            self.assertEqual(self.widget.cmdFit.text(), 'Running...')
             self.assertFalse(self.widget.cmdFit.isEnabled())
 
             # Signal pushed up
@@ -643,8 +643,10 @@ class FittingWidgetTest(unittest.TestCase):
                            mask=[True, True, True])
 
         # Force same data into logic
-        self.widget.logic.data = test_data
-        self.widget.data_is_loaded = True
+        item = QtGui.QStandardItem()
+        updateModelItem(item, [test_data], "test")
+        # Force same data into logic
+        self.widget.data = item
         category_index = self.widget.cbCategory.findText("Sphere")
         self.widget.cbCategory.setCurrentIndex(category_index)
 
@@ -671,7 +673,7 @@ class FittingWidgetTest(unittest.TestCase):
             self.assertEqual(threads.deferToThread.call_args_list[0][0][0].__name__, 'compute')
 
             # the fit button changed caption and got disabled
-            self.assertEqual(self.widget.cmdFit.text(), 'Calculating...')
+            self.assertEqual(self.widget.cmdFit.text(), 'Running...')
             self.assertFalse(self.widget.cmdFit.isEnabled())
 
             # Signal pushed up

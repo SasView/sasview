@@ -47,7 +47,7 @@ STRUCTURE_DEFAULT = "None"
 
 DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 
-USING_TWISTED = False
+USING_TWISTED = True
 
 class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
     """
@@ -174,6 +174,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # temporarily off
         self.undo_supported = False
         self.page_stack = []
+        self.all_data = []
 
         # Data for chosen model
         self.model_data = None

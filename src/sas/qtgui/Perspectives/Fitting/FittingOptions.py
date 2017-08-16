@@ -196,6 +196,8 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
             # Find the widget name of the option
             # e.g. 'samples' for 'dream' is 'self.samples_dream'
             widget_name = 'self.'+option+'_'+fitter_id
+            if option not in bumps.options.FIT_FIELDS:
+                return
             if isinstance(bumps.options.FIT_FIELDS[option][1], bumps.options.ChoiceList):
                 control = eval(widget_name)
                 control.setCurrentIndex(control.findText(str(options[option])))

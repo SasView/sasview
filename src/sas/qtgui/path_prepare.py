@@ -40,8 +40,8 @@ if exe_run():
     addpath('src')
 else:
     root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-    addpath(os.path.join(root, 'src'))
-    addpath('src')
+    #addpath(os.path.join(root, 'src'))
+    #addpath('src')
     # Add the local build directory to PYTHONPATH
     from distutils.util import get_platform
     platform = '%s-%s'%(get_platform(),sys.version[:3])

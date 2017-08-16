@@ -140,7 +140,7 @@ class FittingWindow(QtGui.QTabWidget):
         as a way of resetting the fit tabs
         """
         # If data on tab empty - do nothing
-        if not self.tabs[index].data:
+        if index in self.tabs and not self.tabs[index].data:
             return
         # Add a new, empy tab
         self.addFit(None)
