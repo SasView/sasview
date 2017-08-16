@@ -51,6 +51,37 @@ class FittingPerspectiveTest(unittest.TestCase):
         self.assertEqual(len(self.widget.tabs), 2)
         self.assertEqual(self.widget.tabName(), "FitPage2")
         self.assertEqual(self.widget.maxIndex, 2)
+        # Add an empty batch tab
+        self.widget.addFit(None, is_batch=True)
+        self.assertEqual(len(self.widget.tabs), 3)
+        self.assertEqual(self.widget.tabName(2), "BatchPage3")
+        self.assertEqual(self.widget.maxIndex, 3)
+
+    def testResetTab(self):
+        ''' Remove data from last tab'''
+        self.assertEqual(len(self.widget.tabs), 1)
+        self.assertEqual(self.widget.tabName(), "FitPage1")
+        self.assertEqual(self.widget.maxIndex, 1)
+
+        # Attempt to remove the last tab
+        self.widget.resetTab(0)
+
+        # see that the tab didn't disappear, just changed the name/id
+        self.assertEqual(len(self.widget.tabs), 1)
+        self.assertEqual(self.widget.tabName(), "FitPage2")
+        self.assertEqual(self.widget.maxIndex, 2)
+
+        # Now, add data
+        data = Data1D(x=[1,2], y=[1,2])
+        GuiUtils.dataFromItem = MagicMock(return_value=data)
+        item = QtGui.QStandardItem("test")
+        self.widget.setData([item])
+        # Assert data is on widget
+        self.assertEqual(len(self.widget.tabs[0].all_data), 1)
+        # Reset the tab
+        self.widget.resetTab(0)
+        # See that the tab contains data no more
+        self.assertEqual(len(self.widget.tabs[0].all_data), 0)
 
     def testCloseTab(self):
         '''Delete a tab and test'''
