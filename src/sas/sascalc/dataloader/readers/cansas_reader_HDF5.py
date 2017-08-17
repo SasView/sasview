@@ -96,6 +96,13 @@ class Reader():
         self.errors = set()
         self.logging = []
         self.output = []
+        self.q_name = []
+        self.mask_name = u''
+        self.i_name = u''
+        self.i_node = u''
+        self.q_uncertainties = u''
+        self.q_resolutions = u''
+        self.i_uncertainties = u''
         self.parent_class = u''
         self.detector = Detector()
         self.collimation = Collimation()
@@ -134,8 +141,8 @@ class Reader():
                 if class_prog.match(u'SASentry'):
                     self.add_data_set(key)
                 elif class_prog.match(u'SASdata'):
-                    self._initialize_new_data_set(parent_list)
                     self._find_data_attributes(value)
+                    self._initialize_new_data_set(parent_list)
                 # Recursion step to access data within the group
                 self.read_children(value, parent_list)
                 self.add_intermediate()
@@ -211,30 +218,31 @@ class Reader():
         :param unit: unit attribute
         """
         # FIXME: check attributes of SASdata for Q, dQ, Mask, etc.
-        if key == u'I':
+        if key == self.i_name:
             if isinstance(self.current_dataset, plottable_2D):
                 self.current_dataset.data = data_set
                 self.current_dataset.zaxis("Intensity", unit)
             else:
                 self.current_dataset.y = data_set.flatten()
                 self.current_dataset.yaxis("Intensity", unit)
-        elif key == u'Idev':
+        elif key == self.i_uncertainties:
             if isinstance(self.current_dataset, plottable_2D):
                 self.current_dataset.err_data = data_set.flatten()
             else:
                 self.current_dataset.dy = data_set.flatten()
-        elif key == u'Q':
+        elif key in self.q_name:
             self.current_dataset.xaxis("Q", unit)
             if isinstance(self.current_dataset, plottable_2D):
                 self.current_dataset.q = data_set.flatten()
             else:
                 self.current_dataset.x = data_set.flatten()
-        elif key == u'Qdev':
-            self.current_dataset.dx = data_set.flatten()
-        elif key == u'dQw':
-            self.current_dataset.dxw = data_set.flatten()
-        elif key == u'dQl':
-            self.current_dataset.dxl = data_set.flatten()
+        elif key in self.q_resolutions:
+            if key == u'dQw':
+                self.current_dataset.dxw = data_set.flatten()
+            elif key == u'dQl':
+                self.current_dataset.dxl = data_set.flatten()
+            else:
+                self.current_dataset.dx = data_set.flatten()
         elif key == u'Qy':
             self.current_dataset.yaxis("Q_y", unit)
             self.current_dataset.qy_data = data_set.flatten()
@@ -245,7 +253,7 @@ class Reader():
             self.current_dataset.qx_data = data_set.flatten()
         elif key == u'Qxdev':
             self.current_dataset.dqx_data = data_set.flatten()
-        elif key == u'Mask':
+        elif key == self.mask_name:
             self.current_dataset.mask = data_set.flatten()
         elif key == u'wavelength':
             self.current_datainfo.source.wavelength = data_set[0]
@@ -552,7 +560,6 @@ class Reader():
         self.data2d = []
         self.current_datainfo = DataInfo()
 
-
     def _initialize_new_data_set(self, parent_list=None):
         """
         A private class method to generate a new 1D or 2D data object based on
@@ -573,23 +580,30 @@ class Reader():
         self.current_datainfo.filename = self.raw_data.filename
 
     def _find_data_attributes(self, value):
+        """
+        A class to find the indices for Q, the name of the Qdev and Idev, and
+        the name of the mask.
+        :param value: SASdata/NXdata HDF5 Group
+        """
         attrs = value.attrs
         signal = attrs.get("signal")
-        i_axes = attrs.get("I_axes")
-        q_indices = attrs.get("Q_indices")
-        mask = attrs.get("mask")
-        mask_indices = attrs.get("Mask_indices")
+
+        i_axes = np.array(attrs.get("I_axes").split(","))
+        q_indices = np.array(attrs.get("Q_indices"))
+        self.mask_name = attrs.get("mask")
         keys = value.keys()
-        self.q_name = i_axes[q_indices]
-        self.mask_name = mask[mask_indices]
+        for val in q_indices:
+            self.q_name.append(i_axes[val])
         self.i_name = signal
-        if self.q_name in keys:
-            q_vals = value.get(self.q_name)
-            self.q_uncertainties = q_vals.attrs.get("uncertainties")
-            self.q_resolutions = q_vals.attrs.get("resolutions")
+        self.i_node = value.get(self.i_name)
+        for item in self.q_name:
+            if item in keys:
+                q_vals = value.get(item)
+                self.q_uncertainties = q_vals.attrs.get("uncertainty")
+                self.q_resolutions = q_vals.attrs.get("resolution")
         if self.i_name in keys:
             i_vals = value.get(self.i_name)
-            self.i_uncertainties = i_vals.attrs.get("uncertainties")
+            self.i_uncertainties = i_vals.attrs.get("uncertainty")
 
     def _find_intermediate(self, parent_list, basename=""):
         """
