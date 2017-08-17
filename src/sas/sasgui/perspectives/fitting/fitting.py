@@ -256,9 +256,17 @@ class Plugin(PluginBase):
         label = self.delete_menu.GetLabel(event_id)
         toks = os.path.splitext(label)
         path = os.path.join(models.find_plugins_dir(), toks[0])
+        message = "Are you sure you want to delete the file {}?".format(path)
+        dlg = wx.MessageDialog(self.frame, message, '', wx.YES_NO | wx.ICON_QUESTION)
+        if not dlg.ShowModal() == wx.ID_YES:
+            return
         try:
             for ext in ['.py', '.pyc']:
                 p_path = path + ext
+                if ext == '.pyc' and not os.path.isfile(path + ext):
+                    # If model is invalid, .pyc file may not exist as model has
+                    # never been compiled. Don't try and delete it
+                    continue
                 os.remove(p_path)
             self.update_custom_combo()
             if os.path.isfile(p_path):
