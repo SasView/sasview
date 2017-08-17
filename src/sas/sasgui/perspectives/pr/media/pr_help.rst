@@ -48,8 +48,10 @@ The user must enter
 
 P(r) inversion requires that the background be perfectly subtracted.  This is
 often difficult to do well and thus many data sets will include a background.
-For those cases, the user should check the "estimate background" box and the
-module will do its best to estimate it.
+For those cases, the user should check the "Estimate background level" option
+and the module will do its best to estimate it. If you know the background value
+for your data, select the "Input manual background level" option. Note that
+this value will be treated as having 0 error.
 
 The P(r) module is constantly computing in the background what the optimum
 *number of terms* should be as well as the optimum *regularization constant*.

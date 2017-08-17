@@ -185,7 +185,8 @@ def _find_models():
             path = os.path.abspath(os.path.join(directory, filename))
             try:
                 model = load_custom_model(path)
-                model.name = PLUGIN_NAME_BASE + model.name
+                if not model.name.count(PLUGIN_NAME_BASE):
+                    model.name = PLUGIN_NAME_BASE + model.name
                 plugins[model.name] = model
             except Exception:
                 msg = traceback.format_exc()

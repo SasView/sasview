@@ -19,7 +19,7 @@ void invertor_init(Invertor_params *pars) {
 	pars->d_max = 180;
 	pars->q_min = -1.0;
 	pars->q_max = -1.0;
-	pars->has_bck = 0;
+	pars->est_bck = 0;
 }
 
 
@@ -312,4 +312,3 @@ double rg(double *pars, double d_max, int n_c, int nslice) {
     }
     return sqrt(sum_r2/(2.0*sum));
 }
-
