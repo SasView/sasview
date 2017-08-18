@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>295</width>
-    <height>204</height>
+    <width>345</width>
+    <height>236</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -34,7 +34,20 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="editMolecularFormula"/>
+      <widget class="QLineEdit" name="editMolecularFormula">
+       <property name="minimumSize">
+        <size>
+         <width>61</width>
+         <height>21</height>
+        </size>
+       </property>
+       <property name="baseSize">
+        <size>
+         <width>61</width>
+         <height>21</height>
+        </size>
+       </property>
+      </widget>
      </item>
      <item row="0" column="2">
       <widget class="QLabel" name="label_3">
@@ -52,6 +65,18 @@
      </item>
      <item row="1" column="1">
       <widget class="QLineEdit" name="editMolarMass">
+       <property name="minimumSize">
+        <size>
+         <width>61</width>
+         <height>21</height>
+        </size>
+       </property>
+       <property name="baseSize">
+        <size>
+         <width>61</width>
+         <height>21</height>
+        </size>
+       </property>
        <property name="styleSheet">
         <string notr="true"/>
        </property>
@@ -97,7 +122,20 @@
       </widget>
      </item>
      <item row="3" column="1">
-      <widget class="QLineEdit" name="editMolarVolume"/>
+      <widget class="QLineEdit" name="editMolarVolume">
+       <property name="minimumSize">
+        <size>
+         <width>61</width>
+         <height>21</height>
+        </size>
+       </property>
+       <property name="baseSize">
+        <size>
+         <width>61</width>
+         <height>21</height>
+        </size>
+       </property>
+      </widget>
      </item>
      <item row="3" column="2">
       <widget class="QLabel" name="label_6">
@@ -114,7 +152,20 @@
       </widget>
      </item>
      <item row="4" column="1">
-      <widget class="QLineEdit" name="editMassDensity"/>
+      <widget class="QLineEdit" name="editMassDensity">
+       <property name="minimumSize">
+        <size>
+         <width>61</width>
+         <height>21</height>
+        </size>
+       </property>
+       <property name="baseSize">
+        <size>
+         <width>61</width>
+         <height>21</height>
+        </size>
+       </property>
+      </widget>
      </item>
      <item row="4" column="2">
       <widget class="QLabel" name="label_8">

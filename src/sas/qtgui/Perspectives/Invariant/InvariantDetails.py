@@ -58,6 +58,11 @@ class DetailsDialog(QtGui.QDialog, Ui_Dialog):
 
         self.progressBar.setValue(progress_low_qstar)
         self.progressBar_2.setValue(progress_qstar)           
-        self.progressBar_3.setValue(progress_high_qstar)           
+        self.progressBar_3.setValue(progress_high_qstar)
+
+        new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
+        self.label_3.setStyleSheet(new_font)
+        self.label_4.setStyleSheet(new_font)
+        self.label_.setStyleSheet(new_font)
 
         self.show()

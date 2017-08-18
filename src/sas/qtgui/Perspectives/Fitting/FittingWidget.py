@@ -98,6 +98,11 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Display HTML content
         self.helpView = QtWebKit.QWebView()
 
+        # New font to display angstrom symbol
+        new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
+        self.label_17.setStyleSheet(new_font)
+        self.label_19.setStyleSheet(new_font)
+
         self._index = None
         if data is not None:
             self.data = data
@@ -245,6 +250,11 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         self.lstParams.setAlternatingRowColors(True)
         stylesheet = """
+
+            QTreeView {
+                paint-alternating-row-colors-for-empty-area:0;
+            }
+
             QTreeView::item:hover {
                 background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #e7effd, stop: 1 #cbdaf1);
                 border: 1px solid #bfcde4;
@@ -265,6 +275,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.lstParams.setStyleSheet(stylesheet)
         self.lstParams.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.lstParams.customContextMenuRequested.connect(self.showModelDescription)
+        self.lstParams.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
 
         # Poly model displayed in poly list
         self.lstPoly.setModel(self._poly_model)

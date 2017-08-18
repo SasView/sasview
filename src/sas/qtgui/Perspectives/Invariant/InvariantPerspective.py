@@ -106,6 +106,11 @@ class InvariantWindow(QtGui.QDialog, Ui_tabbedInvariantUI):
         # Set up the mapper
         self.setupMapper()
 
+        new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
+        self.label_2.setStyleSheet(new_font)
+        self.label_24.setStyleSheet(new_font)
+        self.label_27.setStyleSheet(new_font)
+
     def setClosable(self, value=True):
         """
         Allow outsiders close this widget

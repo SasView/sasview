@@ -106,6 +106,19 @@ class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator)
         # TODO the option Ellipsoid has not been implemented
         self.cbShape.currentIndexChanged.connect(self.selectedshapechange)
 
+        # New font to display angstrom symbol
+        new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
+        self.lblUnitSolventSLD.setStyleSheet(new_font)
+        self.lblUnitVolume.setStyleSheet(new_font)
+        self.lbl5.setStyleSheet(new_font)
+        self.lblUnitMx.setStyleSheet(new_font)
+        self.lblUnitMy.setStyleSheet(new_font)
+        self.lblUnitMz.setStyleSheet(new_font)
+        self.lblUnitNucl.setStyleSheet(new_font)
+        self.lblUnitx.setStyleSheet(new_font)
+        self.lblUnity.setStyleSheet(new_font)
+        self.lblUnitz.setStyleSheet(new_font)
+
     def selectedshapechange(self):
         """
         TODO Temporary solution to display information about option 'Ellipsoid'

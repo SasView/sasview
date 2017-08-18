@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>354</width>
+    <width>365</width>
     <height>193</height>
    </rect>
   </property>
@@ -32,12 +32,25 @@
         <item>
          <widget class="QLabel" name="label">
           <property name="text">
-           <string>Kiessing Fringe Width (Delta Q)</string>
+           <string>Kiessig Fringe Width (Delta Q)</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="deltaq_in"/>
+         <widget class="QLineEdit" name="deltaq_in">
+          <property name="minimumSize">
+           <size>
+            <width>77</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>77</width>
+            <height>21</height>
+           </size>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QLabel" name="label_2">
@@ -68,6 +81,18 @@
         </item>
         <item>
          <widget class="QLineEdit" name="lengthscale_out">
+          <property name="minimumSize">
+           <size>
+            <width>77</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>77</width>
+            <height>21</height>
+           </size>
+          </property>
           <property name="readOnly">
            <bool>true</bool>
           </property>

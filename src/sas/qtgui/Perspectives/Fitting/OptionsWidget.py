@@ -86,6 +86,10 @@ class OptionsWidget(QtGui.QWidget, Ui_tabOptions):
         self.txtNptsFit.setText(str(NPTS_DEFAULT))
         self.model.blockSignals(False)
 
+        new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
+        self.label_13.setStyleSheet(new_font)
+        self.label_15.setStyleSheet(new_font)
+
     def initModel(self):
         """
         Initialize the state
