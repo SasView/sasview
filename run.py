@@ -22,7 +22,6 @@ from contextlib import contextmanager
 from os.path import join as joinpath
 from os.path import abspath, dirname
 
-
 def addpath(path):
     """
     Add a directory to the python path environment, and to the PYTHONPATH
@@ -156,19 +155,24 @@ def set_git_tag():
         import sas.sasview
         sas.sasview.__build__ = str(git_revision).strip()
     except subprocess.CalledProcessError as cpe:
-        logger.warning("Error while determining build number\n  Using command:\n %s \n Output:\n %s"% (cpe.cmd,cpe.output))
+        get_logger().warning("Error while determining build number\n  Using command:\n %s \n Output:\n %s"% (cpe.cmd,cpe.output))
 
+_logger = None
+def get_logger():
+    global _logger
+    if _logger is not None:
+        from sas.logger_config import SetupLogger
+        _logger = SetupLogger(__name__).config_development()
+    return _logger
 
 if __name__ == "__main__":
     # Need to add absolute path before actual prepare call,
     # so logging can be done during initialization process too
     root = abspath(dirname(__file__))
     addpath(joinpath(root, 'src'))
-    from sas.logger_config import SetupLogger
-    logger = SetupLogger(__name__).config_development()
 
-    logger.debug("Starting SASVIEW in debug mode.")
+    get_logger().debug("Starting SASVIEW in debug mode.")
     prepare()
     from sas.sasview.sasview import run_gui
     run_gui()
-    logger.debug("Ending SASVIEW in debug mode.")
+    get_logger().debug("Ending SASVIEW in debug mode.")
