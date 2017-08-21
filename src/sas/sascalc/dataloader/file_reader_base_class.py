@@ -83,7 +83,9 @@ class FileReader(object):
         propogate the error up the error chain.
         :param msg: Error message
         """
-        if isinstance(self.current_datainfo, DataInfo):
+        if len(self.output) > 0:
+            self.output[-1].errors.append(msg)
+        elif isinstance(self.current_datainfo, DataInfo):
             self.current_datainfo.errors.append(msg)
         else:
             logger.warning(msg)
@@ -119,7 +121,7 @@ class FileReader(object):
                     data.lam = np.asarray([data.lam[i] for i in ind]).astype(np.float64)
                 if data.dlam is not None:
                     data.dlam = np.asarray([data.dlam[i] for i in ind]).astype(np.float64)
-                if len(data.x > 0):
+                if len(data.x) > 0:
                     data.xmin = np.min(data.x)
                     data.xmax = np.max(data.x)
                     data.ymin = np.min(data.y)

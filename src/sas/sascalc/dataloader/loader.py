@@ -68,24 +68,29 @@ class Registry(ExtensionRegistry):
         Defaults to the ascii (multi-column), cansas XML, and cansas NeXuS
         readers if no reader was registered for the file's extension.
         """
+        # Gets set to a string if the file has an associated reader that fails
+        msg_from_reader = None
         try:
             return super(Registry, self).load(path, format=format)
         except NoKnownLoaderException as nkl_e:
-            pass  # try the ASCII reader
+            pass  # Try the ASCII reader
         except FileContentsException as fc_exc:
-            # File has an associated reader but it failed
-            raise RuntimeError(fc_exc.message)
+            # File has an associated reader but it failed.
+            # Save the error message to display later, but try the 3 default loaders
+            msg_from_reader = fc_exc.message
         except Exception:
             pass
 
-        # File has no associated reader - try the ASCII reader
+        # File has no associated reader, or the associated reader failed.
+        # Try the ASCII reader
         try:
             ascii_loader = ascii_reader.Reader()
             return ascii_loader.read(path)
         except DefaultReaderException:
             pass  # Loader specific error to try the cansas XML reader
         except FileContentsException as e:
-            raise RuntimeError(e.message)
+            if msg_from_reader is None:
+                raise RuntimeError(e.message)
 
         # ASCII reader failed - try CanSAS xML reader
         try:
@@ -94,8 +99,9 @@ class Registry(ExtensionRegistry):
         except DefaultReaderException:
             pass  # Loader specific error to try the NXcanSAS reader
         except FileContentsException as e:
-            raise RuntimeError(e.message)
-        except Exception as csr:
+            if msg_from_reader is None:
+                raise RuntimeError(e.message)
+        except Exception:
             pass
 
         # CanSAS XML reader failed - try NXcanSAS reader
@@ -105,11 +111,17 @@ class Registry(ExtensionRegistry):
         except DefaultReaderException as e:
             logging.error("No default loader can load the data")
             # No known reader available. Give up and throw an error
-            msg = "\n\tUnknown data format: %s.\n\tThe file is not a " % path
-            msg += "known format that can be loaded by SasView.\n"
-            raise NoKnownLoaderException(msg)
+            if msg_from_reader is None:
+                msg = "\nUnknown data format: {}.\nThe file is not a ".format(path)
+                msg += "known format that can be loaded by SasView.\n"
+                raise NoKnownLoaderException(msg)
+            else:
+                # Associated reader and default readers all failed.
+                # Show error message from associated reader
+                raise RuntimeError(msg_from_reader)
         except FileContentsException as e:
-            raise RuntimeError(e.message)
+            err_msg = msg_from_reader if msg_from_reader is not None else e.message
+            raise RuntimeError(err_msg)
 
     def find_plugins(self, dir):
         """

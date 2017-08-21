@@ -156,11 +156,11 @@ class Reader(XMLreader):
                     invalid_xml = INVALID_XML.format(basename + self.extension) + invalid_xml
                     raise DataReaderException(invalid_xml) # Handled by base class
                 except FileContentsException as fc_exc:
-                    if not self.extension in self.ext: # If the file has no associated loader
-                        raise DefaultReaderException(msg)
                     msg = "CanSAS Reader could not load the file {}".format(xml_file)
                     if fc_exc.message is not None: # Propagate error messages from earlier
                         msg = fc_exc.message
+                    if not self.extension in self.ext: # If the file has no associated loader
+                        raise DefaultReaderException(msg)
                     raise FileContentsException(msg)
                     pass
             else:
@@ -178,7 +178,7 @@ class Reader(XMLreader):
         try:
             self.set_xml_file(xml_file)
         except etree.XMLSyntaxError: # File isn't valid XML so can't be loaded
-            msg = "Cansas cannot load {}.\n Invalid XML syntax".format(xml_file)
+            msg = "SasView cannot load {}.\nInvalid XML syntax".format(xml_file)
             raise FileContentsException(msg)
 
         self.cansas_version = self.xmlroot.get("version", "1.0")
@@ -206,6 +206,7 @@ class Reader(XMLreader):
         if ext == "svs":
             return True # Why is this required?
         # If we get to this point then file isn't valid CanSAS
+        logger.warning("File doesn't meet CanSAS schema. Trying to load anyway.")
         raise FileContentsException("The file is not valid CanSAS")
 
     def _parse_entry(self, dom, recurse=False):

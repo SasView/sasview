@@ -223,7 +223,7 @@ class Plugin(PluginBase):
 
             except NoKnownLoaderException as e:
                 exception_occurred = True
-                logging.error(e.message)
+                logger.error(e.message)
 
                 error_message = "Loading data failed!\n" + e.message
                 self.load_update(output=None, message=e.message, info="warning")

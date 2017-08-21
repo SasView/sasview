@@ -81,14 +81,22 @@ class Reader(FileReader):
                         msg = "CanSAS2.0 HDF5 Reader could not load file {}".format(basename + extension)
                         raise DefaultReaderException(msg)
                     raise FileContentsException(e.message)
-                # Read in all child elements of top level SASroot
-                self.read_children(self.raw_data, [])
-                # Add the last data set to the list of outputs
-                self.add_data_set()
-                # Close the data file
-                self.raw_data.close()
-        # Return data set(s)
-        return self.output
+                try:
+                    # Read in all child elements of top level SASroot
+                    self.read_children(self.raw_data, [])
+                    # Add the last data set to the list of outputs
+                    self.add_data_set()
+                except Exception as exc:
+                    raise FileContentsException(exc.message)
+                finally:
+                    # Close the data file
+                    self.raw_data.close()
+
+                for dataset in self.output:
+                    if isinstance(dataset, Data1D):
+                        if dataset.x.size < 5:
+                            self.output = []
+                            raise FileContentsException("Fewer than 5 data points found.")
 
     def reset_class_variables(self):
         """
