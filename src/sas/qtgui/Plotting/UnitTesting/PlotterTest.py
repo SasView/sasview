@@ -1,5 +1,6 @@
 import sys
 import unittest
+import platform
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
@@ -36,6 +37,7 @@ class PlotterTest(unittest.TestCase):
         self.data.title="Test data"
         self.data.name="Test name"
         self.data.id = 1
+        self.isWindows = platform.system=="Windows"
 
     def tearDown(self):
         '''destroy'''
@@ -93,16 +95,6 @@ class PlotterTest(unittest.TestCase):
         # Trigger Copy to Clipboard and make sure the method is called
         self.assertEqual(actions[2].text(), "Copy to Clipboard")
 
-        # Spy on cliboard's dataChanged() signal
-        self.clipboard_called = False
-        def done():
-            self.clipboard_called = True
-        QtCore.QObject.connect(QtGui.qApp.clipboard(), QtCore.SIGNAL("dataChanged()"), done)
-        actions[2].trigger()
-        QtGui.qApp.processEvents()
-        # Make sure clipboard got updated.
-        #self.assertTrue(self.clipboard_called)
-
         # Trigger Toggle Grid and make sure the method is called
         self.assertEqual(actions[4].text(), "Toggle Grid On/Off")
         self.plotter.ax.grid = MagicMock()
@@ -114,6 +106,18 @@ class PlotterTest(unittest.TestCase):
         self.plotter.properties.exec_ = MagicMock(return_value=QtGui.QDialog.Rejected)
         actions[6].trigger()
         self.assertTrue(self.plotter.properties.exec_.called)
+
+        # Spy on cliboard's dataChanged() signal
+        if not self.isWindows:
+            return
+        self.clipboard_called = False
+        def done():
+            self.clipboard_called = True
+        QtCore.QObject.connect(QtGui.qApp.clipboard(), QtCore.SIGNAL("dataChanged()"), done)
+        actions[2].trigger()
+        QtGui.qApp.processEvents()
+        # Make sure clipboard got updated.
+        self.assertTrue(self.clipboard_called)
 
     def testXyTransform(self):
         """ Tests the XY transformation and new chart update """

@@ -1,5 +1,6 @@
 import sys
 import unittest
+import platform
 from mock import patch, MagicMock
 
 from PyQt4 import QtGui
@@ -34,6 +35,7 @@ class PlotterBaseTest(unittest.TestCase):
 
         #PlotterBase.PlotterBase.contextMenuQuickPlot = MagicMock()
         self.plotter = PlotterBase.PlotterBase(None, manager=dummy_manager(), quickplot=True)
+        self.isWindows = platform.system=="Windows"
 
     def tearDown(self):
         '''destroy'''
@@ -146,6 +148,8 @@ class PlotterBaseTest(unittest.TestCase):
         self.assertEqual(actions[2].text(), "Copy to Clipboard")
 
         # Spy on cliboard's dataChanged() signal
+        if not self.isWindows:
+            return
         self.clipboard_called = False
         def done():
             self.clipboard_called = True

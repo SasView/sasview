@@ -1,6 +1,7 @@
 import sys
 import unittest
 import numpy
+import platform
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
@@ -47,6 +48,7 @@ class Plotter2DTest(unittest.TestCase):
 
         self.data.title="Test data"
         self.data.id = 1
+        self.isWindows = platform.system=="Windows"
 
     def tearDown(self):
         '''destroy'''
@@ -155,16 +157,6 @@ class Plotter2DTest(unittest.TestCase):
         # Trigger Copy to Clipboard and make sure the method is called
         self.assertEqual(actions[2].text(), "Copy to Clipboard")
 
-        # Spy on cliboard's dataChanged() signal
-        self.clipboard_called = False
-        def done():
-            self.clipboard_called = True
-        QtCore.QObject.connect(QtGui.qApp.clipboard(), QtCore.SIGNAL("dataChanged()"), done)
-        actions[2].trigger()
-        QtGui.qApp.processEvents()
-        # Make sure clipboard got updated.
-        #self.assertTrue(self.clipboard_called)
-
         # Trigger Toggle Grid and make sure the method is called
         self.assertEqual(actions[4].text(), "Toggle Grid On/Off")
         self.plotter.ax.grid = MagicMock()
@@ -176,6 +168,18 @@ class Plotter2DTest(unittest.TestCase):
         FigureCanvas.draw_idle = MagicMock()
         actions[6].trigger()
         self.assertTrue(FigureCanvas.draw_idle.called)
+
+        # Spy on cliboard's dataChanged() signal
+        if not self.isWindows:
+            return
+        self.clipboard_called = False
+        def done():
+            self.clipboard_called = True
+        QtCore.QObject.connect(QtGui.qApp.clipboard(), QtCore.SIGNAL("dataChanged()"), done)
+        actions[2].trigger()
+        QtGui.qApp.processEvents()
+        # Make sure clipboard got updated.
+        self.assertTrue(self.clipboard_called)
 
     def testShowNoPlot(self):
         """ Test the plot rendering and generation """
