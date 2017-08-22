@@ -1180,10 +1180,14 @@ def combine_data_info_with_plottable(data, datainfo):
                         "plottable2d data object"
         return return_string
 
-    final_dataset.xmax = data.xmax
-    final_dataset.ymax = data.ymax
-    final_dataset.xmin = data.xmin
-    final_dataset.ymin = data.ymin
+    if hasattr(data, "xmax"):
+        final_dataset.xmax = data.xmax
+    if hasattr(data, "ymax"):
+        final_dataset.ymax = data.ymax
+    if hasattr(data, "xmin"):
+        final_dataset.xmin = data.xmin
+    if hasattr(data, "ymin"):
+        final_dataset.ymin = data.ymin
     final_dataset.isSesans = datainfo.isSesans
     final_dataset.title = datainfo.title
     final_dataset.run = datainfo.run
