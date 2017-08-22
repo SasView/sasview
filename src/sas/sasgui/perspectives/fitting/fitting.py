@@ -1741,7 +1741,6 @@ class Plugin(PluginBase):
             @param unsmeared_data: data, rescaled to unsmeared model
             @param unsmeared_error: data error, rescaled to unsmeared model
         """
-
         number_finite = np.count_nonzero(np.isfinite(y))
         np.nan_to_num(y)
         new_plot = self.create_theory_1D(x, y, page_id, model, data, state,
@@ -1758,13 +1757,13 @@ class Plugin(PluginBase):
                                       data_id="Data  " + data.name + " unsmeared",
                                       dy=unsmeared_error)
         # Comment this out until we can get P*S models with correctly populated parameters
-        #if sq_model is not None and pq_model is not None:
-        #    self.create_theory_1D(x, sq_model, page_id, model, data, state,
-        #                          data_description=model.name + " S(q)",
-        #                          data_id=str(page_id) + " " + data.name + " S(q)")
-        #    self.create_theory_1D(x, pq_model, page_id, model, data, state,
-        #                          data_description=model.name + " P(q)",
-        #                          data_id=str(page_id) + " " + data.name + " P(q)")
+        if sq_model is not None and pq_model is not None:
+            self.create_theory_1D(x, sq_model, page_id, model, data, state,
+                                  data_description=model.name + " S(q)",
+                                  data_id=str(page_id) + " " + data.name + " S(q)")
+            self.create_theory_1D(x, pq_model, page_id, model, data, state,
+                                  data_description=model.name + " P(q)",
+                                  data_id=str(page_id) + " " + data.name + " P(q)")
 
         current_pg = self.fit_panel.get_page_by_id(page_id)
         title = new_plot.title
