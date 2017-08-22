@@ -11,7 +11,8 @@ import sas.qtgui.path_prepare
 # Local
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
 
-app = QtGui.QApplication(sys.argv)
+if not QtGui.QApplication.instance():
+    app = QtGui.QApplication(sys.argv)
 
 class SlicerModelTest(unittest.TestCase):
     '''Test the SlicerModel'''

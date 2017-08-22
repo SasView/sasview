@@ -18,7 +18,8 @@ from sas.qtgui.Plotting.PlotterData import Data2D
 # Tested module
 from sas.qtgui.Utilities.GuiUtils import *
 
-app = QtGui.QApplication(sys.argv)
+if not QtGui.QApplication.instance():
+    app = QtGui.QApplication(sys.argv)
 
 class GuiUtilsTest(unittest.TestCase):
     '''Test the GUI Utilities methods'''

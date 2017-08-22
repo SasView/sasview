@@ -23,7 +23,8 @@ from sas.qtgui.MainWindow.GuiManager import Acknowledgements, GuiManager
 from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
-app = QApplication(sys.argv)
+if not QApplication.instance():
+    app = QApplication(sys.argv)
 
 class GuiManagerTest(unittest.TestCase):
     '''Test the Main Window functionality'''

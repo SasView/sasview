@@ -13,7 +13,8 @@ import path_prepare
 from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow
 from sas.qtgui.MainWindow.MainWindow import SplashScreen
 
-app = QtGui.QApplication(sys.argv)
+if not QtGui.QApplication.instance():
+    app = QtGui.QApplication(sys.argv)
 
 class MainWindowTest(unittest.TestCase):
     """Test the Main Window GUI"""

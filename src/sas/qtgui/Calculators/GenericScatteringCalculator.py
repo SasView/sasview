@@ -99,7 +99,9 @@ class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator)
         self.txtNoQBins.textChanged.connect(self.check_value)
 
         # plots - 3D in real space
-        self.trigger_plot_3d.connect(lambda: self.plot3d(has_arrow=False))
+        plot3d = self.plot3d(has_arrow=False)
+        self.trigger_plot_3d.connect(plot3d)
+        #self.trigger_plot_3d.connect(lambda: self.plot3d(has_arrow=False))
 
         self.graph_num = 1  # index for name of graph
 

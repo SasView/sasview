@@ -9,7 +9,8 @@ import path_prepare
 # Local
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
 
-app = QtGui.QApplication(sys.argv)
+if not QtGui.QApplication.instance():
+    app = QtGui.QApplication(sys.argv)
 
 class WelcomePanelTest(unittest.TestCase):
     '''Test the WelcomePanel'''

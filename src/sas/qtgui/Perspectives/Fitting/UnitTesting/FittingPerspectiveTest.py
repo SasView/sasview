@@ -15,7 +15,8 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 
-app = QtGui.QApplication(sys.argv)
+if not QtGui.QApplication.instance():
+    app = QtGui.QApplication(sys.argv)
 
 class FittingPerspectiveTest(unittest.TestCase):
     '''Test the Fitting Perspective'''

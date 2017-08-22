@@ -12,7 +12,8 @@ import sas.qtgui.path_prepare
 from sas.qtgui.Utilities.SasviewLogger import XStream
 from sas.qtgui.Utilities.SasviewLogger import QtHandler
 
-app = QApplication(sys.argv)
+if not QApplication.instance():
+    app = QApplication(sys.argv)
 
 class SasviewLoggerTest(unittest.TestCase):
     def setUp(self):

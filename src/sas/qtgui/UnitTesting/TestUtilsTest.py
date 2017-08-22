@@ -10,7 +10,8 @@ from mock import MagicMock
 from sas.qtgui.Utilities.GuiUtils import Communicate
 from sas.qtgui.UnitTesting.TestUtils import *
 
-app = QApplication(sys.argv)
+if not QApplication.instance():
+    app = QApplication(sys.argv)
 
 class TestUtilsTest(unittest.TestCase):
     '''Test TestUtils'''

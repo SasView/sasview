@@ -23,7 +23,8 @@ from sas.qtgui.MainWindow.GuiManager import GuiManager
 from sas.qtgui.Utilities.GuiUtils import *
 from sas.sascalc.calculator import sas_gen
 
-app = QtGui.QApplication(sys.argv)
+if not QtGui.QApplication.instance():
+    app = QtGui.QApplication(sys.argv)
 
 
 class GenericScatteringCalculatorTest(unittest.TestCase):

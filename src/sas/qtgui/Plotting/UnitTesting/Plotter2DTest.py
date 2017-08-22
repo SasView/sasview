@@ -18,7 +18,8 @@ from UnitTesting.TestUtils import WarningTestNotImplemented
 # Tested module
 import sas.qtgui.Plotting.Plotter2D as Plotter2D
 
-app = QtGui.QApplication(sys.argv)
+if not QtGui.QApplication.instance():
+    app = QtGui.QApplication(sys.argv)
 
 class Plotter2DTest(unittest.TestCase):
     '''Test the Plotter 2D class'''
@@ -158,7 +159,7 @@ class Plotter2DTest(unittest.TestCase):
         self.clipboard_called = False
         def done():
             self.clipboard_called = True
-        QtCore.QObject.connect(app.clipboard(), QtCore.SIGNAL("dataChanged()"), done)
+        QtCore.QObject.connect(QtGui.qApp.clipboard(), QtCore.SIGNAL("dataChanged()"), done)
         actions[2].trigger()
         QtGui.qApp.processEvents()
         # Make sure clipboard got updated.

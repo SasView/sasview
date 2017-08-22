@@ -10,7 +10,8 @@ import path_prepare
 # Local
 from sas.qtgui.Plotting.PlotProperties import PlotProperties
 
-app = QtGui.QApplication(sys.argv)
+if not QtGui.QApplication.instance():
+    app = QtGui.QApplication(sys.argv)
 
 class PlotPropertiesTest(unittest.TestCase):
     '''Test the PlotProperties'''

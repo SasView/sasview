@@ -1,4 +1,9 @@
 import unittest
+import sys
+from PyQt4 import QtGui
+
+# Prepare the general QApplication instance
+app = QtGui.QApplication(sys.argv)
 
 # Main Window
 from MainWindow.UnitTesting import AboutBoxTest
@@ -29,6 +34,8 @@ from Plotting.UnitTesting import SlicerParametersTest
 from Calculators.UnitTesting import KiessigCalculatorTest
 from Calculators.UnitTesting import DensityCalculatorTest
 from Calculators.UnitTesting import GenericScatteringCalculatorTest
+from Calculators.UnitTesting import SLDCalculatorTest
+from Calculators.UnitTesting import SlitSizeCalculatorTest
 
 # Utilities
 from Utilities.UnitTesting import GuiUtilsTest
@@ -45,7 +52,6 @@ from Perspectives.Fitting.UnitTesting import FittingLogicTest
 from Perspectives.Fitting.UnitTesting import FittingUtilitiesTest
 from Perspectives.Fitting.UnitTesting import FitPageTest
 from Perspectives.Fitting.UnitTesting import FittingOptionsTest
-
 
 def suite():
     suites = (
@@ -83,6 +89,8 @@ def suite():
         unittest.makeSuite(KiessigCalculatorTest.KiessigCalculatorTest,                     'test'),
         unittest.makeSuite(DensityCalculatorTest.DensityCalculatorTest,                     'test'),
         unittest.makeSuite(GenericScatteringCalculatorTest.GenericScatteringCalculatorTest, 'test'),
+        unittest.makeSuite(SLDCalculatorTest.SLDCalculatorTest, 'test'),
+        unittest.makeSuite(SlitSizeCalculatorTest.SlitSizeCalculatorTest, 'test'),
 
         # Perspectives
         unittest.makeSuite(FittingPerspectiveTest.FittingPerspectiveTest, 'test'),

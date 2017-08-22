@@ -10,7 +10,8 @@ import path_prepare
 # Local
 from sas.qtgui.Plotting.AddText import AddText
 
-app = QtGui.QApplication(sys.argv)
+if not QtGui.QApplication.instance():
+    app = QtGui.QApplication(sys.argv)
 
 class AddTextTest(unittest.TestCase):
     '''Test the AddText'''

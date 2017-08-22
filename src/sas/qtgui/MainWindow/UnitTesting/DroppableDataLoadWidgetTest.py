@@ -12,7 +12,8 @@ from sas.qtgui.MainWindow.DroppableDataLoadWidget import DroppableDataLoadWidget
 from sas.qtgui.Utilities.GuiUtils import *
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
-app = QApplication(sys.argv)
+if not QApplication.instance():
+    app = QApplication(sys.argv)
 
 class DroppableDataLoadWidgetTest(unittest.TestCase):
     '''Test the DroppableDataLoadWidget GUI'''

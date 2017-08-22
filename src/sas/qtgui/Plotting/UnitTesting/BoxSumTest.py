@@ -11,7 +11,8 @@ import path_prepare
 # Local
 from sas.qtgui.Plotting.BoxSum import BoxSum
 
-app = QtGui.QApplication(sys.argv)
+if not QtGui.QApplication.instance():
+    app = QtGui.QApplication(sys.argv)
 
 class BoxSumTest(unittest.TestCase):
     '''Test the BoxSum'''

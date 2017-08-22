@@ -15,7 +15,8 @@ from UnitTesting.TestUtils import QtSignalSpy
 # Local
 from sas.qtgui.Perspectives.Fitting.FittingOptions import FittingOptions
 
-app = QtGui.QApplication(sys.argv)
+if not QtGui.QApplication.instance():
+    app = QtGui.QApplication(sys.argv)
 
 class FittingOptionsTest(unittest.TestCase):
     '''Test the FittingOptions dialog'''

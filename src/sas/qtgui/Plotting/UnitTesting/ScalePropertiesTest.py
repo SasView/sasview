@@ -9,7 +9,8 @@ import sas.qtgui.path_prepare
 # Local
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 
-app = QtGui.QApplication(sys.argv)
+if not QtGui.QApplication.instance():
+    app = QtGui.QApplication(sys.argv)
 
 class ScalePropertiesTest(unittest.TestCase):
     '''Test the ScaleProperties'''

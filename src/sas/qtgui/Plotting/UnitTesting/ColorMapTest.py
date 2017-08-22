@@ -17,7 +17,8 @@ from UnitTesting.TestUtils import QtSignalSpy
 # Local
 from sas.qtgui.Plotting.ColorMap import ColorMap
 
-app = QtGui.QApplication(sys.argv)
+if not QtGui.QApplication.instance():
+    app = QtGui.QApplication(sys.argv)
 
 class ColorMapTest(unittest.TestCase):
     '''Test the ColorMap'''

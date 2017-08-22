@@ -24,7 +24,8 @@ from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
-app = QApplication(sys.argv)
+if not QApplication.instance():
+    app = QApplication(sys.argv)
 
 class DataExplorerTest(unittest.TestCase):
     '''Test the Data Explorer GUI'''
@@ -440,7 +441,7 @@ class DataExplorerTest(unittest.TestCase):
 
         # Click on the Help button
         QTest.mouseClick(button1, Qt.LeftButton)
-        qApp.processEvents()
+        QtGui.qApp.processEvents()
 
         # Check the browser
         self.assertIn(partial_url, str(self.form._helpView.url()))
@@ -449,7 +450,7 @@ class DataExplorerTest(unittest.TestCase):
 
         # Click on the Help_2 button
         QTest.mouseClick(button2, Qt.LeftButton)
-        qApp.processEvents()
+        QtGui.qApp.processEvents()
         # Check the browser
         self.assertIn(partial_url, str(self.form._helpView.url()))
 

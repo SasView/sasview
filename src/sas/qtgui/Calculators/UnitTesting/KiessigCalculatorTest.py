@@ -10,7 +10,8 @@ import sas.qtgui.path_prepare
 
 from sas.qtgui.Calculators.KiessigPanel import KiessigPanel
 
-app = QtGui.QApplication(sys.argv)
+if not QtGui.QApplication.instance():
+    app = QtGui.QApplication(sys.argv)
 
 
 class KiessigCalculatorTest(unittest.TestCase):

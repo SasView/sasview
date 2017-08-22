@@ -9,7 +9,8 @@ import sas.qtgui.path_prepare
 # Local
 from sas.qtgui.Plotting.SetGraphRange import SetGraphRange
 
-app = QtGui.QApplication(sys.argv)
+if not QtGui.QApplication.instance():
+    app = QtGui.QApplication(sys.argv)
 
 class SetGraphRangeTest(unittest.TestCase):
     '''Test the SetGraphRange'''

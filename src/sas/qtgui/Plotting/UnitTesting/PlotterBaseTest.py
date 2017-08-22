@@ -19,7 +19,8 @@ import sas.qtgui.Plotting.PlotHelper as PlotHelper
 # Tested module
 import sas.qtgui.Plotting.PlotterBase as PlotterBase
 
-app = QtGui.QApplication(sys.argv)
+if not QtGui.QApplication.instance():
+    app = QtGui.QApplication(sys.argv)
 
 class PlotterBaseTest(unittest.TestCase):
     '''Test the Plotter base class'''
@@ -148,7 +149,7 @@ class PlotterBaseTest(unittest.TestCase):
         self.clipboard_called = False
         def done():
             self.clipboard_called = True
-        QtCore.QObject.connect(app.clipboard(), QtCore.SIGNAL("dataChanged()"), done)
+        QtCore.QObject.connect(QtGui.qApp.clipboard(), QtCore.SIGNAL("dataChanged()"), done)
         actions[2].trigger()
         QtGui.qApp.processEvents()
         # Make sure clipboard got updated.

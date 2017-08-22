@@ -17,7 +17,8 @@ from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 # Local
 from sas.qtgui.Plotting.SlicerParameters import SlicerParameters
 
-app = QtGui.QApplication(sys.argv)
+if not QtGui.QApplication.instance():
+    app = QtGui.QApplication(sys.argv)
 
 class SlicerParametersTest(unittest.TestCase):
     '''Test the SlicerParameters dialog'''

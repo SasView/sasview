@@ -18,7 +18,8 @@ from sas.qtgui.Utilities.GuiUtils import FormulaValidator
 
 import sas.qtgui.Utilities.LocalConfig
 
-app = QtGui.QApplication(sys.argv)
+if not QtGui.QApplication.instance():
+    app = QtGui.QApplication(sys.argv)
 
 class ToMolarMassTest(unittest.TestCase):
     """ Test the auxiliary conversion method"""

@@ -14,7 +14,8 @@ import sas.qtgui.Plotting.Plotter as Plotter
 # Local
 from sas.qtgui.Plotting.LinearFit import LinearFit
 
-app = QtGui.QApplication(sys.argv)
+if not QtGui.QApplication.instance():
+    app = QtGui.QApplication(sys.argv)
 
 class LinearFitTest(unittest.TestCase):
     '''Test the LinearFit'''

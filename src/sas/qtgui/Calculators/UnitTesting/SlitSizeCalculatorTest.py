@@ -11,7 +11,8 @@ import sas.qtgui.path_prepare
 from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
 from sas.sascalc.dataloader.loader import Loader
 
-app = QtGui.QApplication(sys.argv)
+if not QtGui.QApplication.instance():
+    app = QtGui.QApplication(sys.argv)
 
 
 class SlitSizeCalculatorTest(unittest.TestCase):
@@ -84,13 +85,6 @@ class SlitSizeCalculatorTest(unittest.TestCase):
         data = loader.load(filename)
         self.assertRaisesRegexp(RuntimeError,
                                 "Slit Length cannot be computed for 2D Data",
-                                self.widget.calculateSlitSize, data)
-
-        filename = "empty_file.txt"
-        loader = Loader()
-        data = loader.load(filename)
-        self.assertRaisesRegexp(RuntimeError,
-                                "ERROR: Data hasn't been loaded correctly",
                                 self.widget.calculateSlitSize, data)
 
         data = None
