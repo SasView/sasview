@@ -12,9 +12,11 @@ from sas.sascalc.dataloader.data_info import plottable_1D, plottable_2D,\
     Data1D, Data2D, DataInfo, Process, Aperture, Collimation, \
     TransmissionSpectrum, Detector
 from sas.sascalc.dataloader.data_info import combine_data_info_with_plottable
+from sas.sascalc.dataloader.loader_exceptions import FileContentsException, DefaultReaderException
+from sas.sascalc.dataloader.file_reader_base_class import FileReader
 
 
-class Reader():
+class Reader(FileReader):
     """
     A class for reading in CanSAS v2.0 data files. The existing iteration opens
     Mantid generated HDF5 formatted files with file extension .h5/.H5. Any
@@ -39,10 +41,6 @@ class Reader():
     errors = None
     # Raw file contents to be processed
     raw_data = None
-    # Data info currently being read in
-    current_datainfo = None
-    # SASdata set currently being read in
-    current_dataset = None
     # List of plottable1D objects that should be linked to the current_datainfo
     data1d = None
     # List of plottable2D objects that should be linked to the current_datainfo
@@ -55,10 +53,8 @@ class Reader():
     ext = ['.h5', '.H5']
     # Flag to bypass extension check
     allow_all = True
-    # List of files to return
-    output = None
 
-    def read(self, filename):
+    def get_file_contents(self):
         """
         This is the general read method that all SasView data_loaders must have.
 
@@ -67,6 +63,10 @@ class Reader():
         """
         # Reinitialize when loading a new data file to reset all class variables
         self.reset_class_variables()
+
+        filename = self.f_open.name
+        self.f_open.close() # IO handled by h5py
+
         # Check that the file exists
         if os.path.isfile(filename):
             basename = os.path.basename(filename)
@@ -74,15 +74,29 @@ class Reader():
             # If the file type is not allowed, return empty list
             if extension in self.ext or self.allow_all:
                 # Load the data file
-                self.raw_data = h5py.File(filename, 'r')
-                # Read in all child elements of top level SASroot
-                self.read_children(self.raw_data, [])
-                # Add the last data set to the list of outputs
-                self.add_data_set()
-                # Close the data file
-                self.raw_data.close()
-        # Return data set(s)
-        return self.output
+                try:
+                    self.raw_data = h5py.File(filename, 'r')
+                except Exception as e:
+                    if extension not in self.ext:
+                        msg = "CanSAS2.0 HDF5 Reader could not load file {}".format(basename + extension)
+                        raise DefaultReaderException(msg)
+                    raise FileContentsException(e.message)
+                try:
+                    # Read in all child elements of top level SASroot
+                    self.read_children(self.raw_data, [])
+                    # Add the last data set to the list of outputs
+                    self.add_data_set()
+                except Exception as exc:
+                    raise FileContentsException(exc.message)
+                finally:
+                    # Close the data file
+                    self.raw_data.close()
+
+                for dataset in self.output:
+                    if isinstance(dataset, Data1D):
+                        if dataset.x.size < 5:
+                            self.output = []
+                            raise FileContentsException("Fewer than 5 data points found.")
 
     def reset_class_variables(self):
         """
@@ -426,7 +440,6 @@ class Reader():
         all data1D and data2D objects and then combines the data and info into
         Data1D and Data2D objects
         """
-
         # Type cast data arrays to float64
         if len(self.current_datainfo.trans_spectrum) > 0:
             spectrum_list = []
@@ -450,22 +463,6 @@ class Reader():
         # Combine all plottables with datainfo and append each to output
         # Type cast data arrays to float64 and find min/max as appropriate
         for dataset in self.data2d:
-            dataset.data = dataset.data.astype(np.float64)
-            dataset.err_data = dataset.err_data.astype(np.float64)
-            if dataset.qx_data is not None:
-                dataset.xmin = np.min(dataset.qx_data)
-                dataset.xmax = np.max(dataset.qx_data)
-                dataset.qx_data = dataset.qx_data.astype(np.float64)
-            if dataset.dqx_data is not None:
-                dataset.dqx_data = dataset.dqx_data.astype(np.float64)
-            if dataset.qy_data is not None:
-                dataset.ymin = np.min(dataset.qy_data)
-                dataset.ymax = np.max(dataset.qy_data)
-                dataset.qy_data = dataset.qy_data.astype(np.float64)
-            if dataset.dqy_data is not None:
-                dataset.dqy_data = dataset.dqy_data.astype(np.float64)
-            if dataset.q_data is not None:
-                dataset.q_data = dataset.q_data.astype(np.float64)
             zeros = np.ones(dataset.data.size, dtype=bool)
             try:
                 for i in range(0, dataset.mask.size - 1):
@@ -488,31 +485,12 @@ class Reader():
                 dataset.y_bins = dataset.qy_data[0::n_cols]
                 dataset.x_bins = dataset.qx_data[:n_cols]
                 dataset.data = dataset.data.flatten()
-
-            final_dataset = combine_data_info_with_plottable(
-                dataset, self.current_datainfo)
-            self.output.append(final_dataset)
+            self.current_dataset = dataset
+            self.send_to_output()
 
         for dataset in self.data1d:
-            if dataset.x is not None:
-                dataset.x = dataset.x.astype(np.float64)
-                dataset.xmin = np.min(dataset.x)
-                dataset.xmax = np.max(dataset.x)
-            if dataset.y is not None:
-                dataset.y = dataset.y.astype(np.float64)
-                dataset.ymin = np.min(dataset.y)
-                dataset.ymax = np.max(dataset.y)
-            if dataset.dx is not None:
-                dataset.dx = dataset.dx.astype(np.float64)
-            if dataset.dxl is not None:
-                dataset.dxl = dataset.dxl.astype(np.float64)
-            if dataset.dxw is not None:
-                dataset.dxw = dataset.dxw.astype(np.float64)
-            if dataset.dy is not None:
-                dataset.dy = dataset.dy.astype(np.float64)
-            final_dataset = combine_data_info_with_plottable(
-                dataset, self.current_datainfo)
-            self.output.append(final_dataset)
+            self.current_dataset = dataset
+            self.send_to_output()
 
     def add_data_set(self, key=""):
         """
