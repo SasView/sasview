@@ -1705,40 +1705,26 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         :param chisqr: update chisqr value [bool]
         """
-        # Get the time
-        current_time = time.time()
-
-        # When loading we slam a number of fits through here
-        # let's filter these out to start with
-        if current_time > (self.last_time_fit_submitted + 0.1):
-            # Submitting the rest
-            self.threaded_draw_queue.put([update_chisqr, source])
-        else:
-            pass
-
-        self.last_time_fit_submitted = current_time
+        print (dir(update_chisqr))
+        print (dir(source))
+        self.threaded_draw_queue.put([copy.copy(update_chisqr), copy.copy(source)])
 
     def _threaded_draw_worker(self, threaded_draw_queue):
         while True:
-            # Check to see is a manager is running and a calc is running
-            if ((self._manager.calc_1D is not None
-                 and self._manager.calc_1D.isrunning()) or
-                (self._manager.calc_2D is not None
-                 and self._manager.calc_2D.isrunning())):
-                # If a manager is running a calculation
-                # then trim the queue
-                if self.threaded_draw_queue.qsize() > 1:
-                    for loopIter in range(threaded_draw_queue.qsize() - 1):
-                        dump = self.threaded_draw_queue.get()
-                        self.threaded_draw_queue.task_done()
-            else:
-                # Otherwise, just run
-                input_variables = threaded_draw_queue.get()
-                self._draw_model_after(input_variables[0], input_variables[1])
-                event = StatusEvent(status="Computation is in progress...",
-                                    type="progress")
-                wx.PostEvent(self._manager.parent, event)
-                threaded_draw_queue.task_done()
+            # sit and wait for the next task
+            next_task = threaded_draw_queue.get()
+
+            # sleep for 1/10th second in case some other tasks accumulate
+            time.sleep(0.1)
+
+            # skip all intermediate tasks
+            while self.threaded_draw_queue.qsize() > 0:
+                self.threaded_draw_queue.task_done()
+                next_task = self.threaded_draw_queue.get()
+
+            # and finally, do the task
+            self._draw_model_after(*next_task)
+            threaded_draw_queue.task_done()
 
     def _draw_model_after(self, update_chisqr=True, source='model'):
         """
