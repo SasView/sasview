@@ -1705,8 +1705,6 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         :param chisqr: update chisqr value [bool]
         """
-        print (dir(update_chisqr))
-        print (dir(source))
         self.threaded_draw_queue.put([copy.copy(update_chisqr), copy.copy(source)])
 
     def _threaded_draw_worker(self, threaded_draw_queue):
