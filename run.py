@@ -160,7 +160,7 @@ def set_git_tag():
 _logger = None
 def get_logger():
     global _logger
-    if _logger is not None:
+    if _logger is None:
         from sas.logger_config import SetupLogger
         _logger = SetupLogger(__name__).config_development()
     return _logger
