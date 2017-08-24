@@ -245,8 +245,9 @@ class Graph(object):
                 selected_plottable = p
                 selected_color = self.plottables[p]
                 break
-        if  selected_plottable is not None and selected_color is not None:
+        if selected_plottable is not None and selected_color is not None:
             del self.plottables[selected_plottable]
+            plottable.custom_color = selected_color
             self.plottables[plottable] = selected_color
 
     def delete(self, plottable):
