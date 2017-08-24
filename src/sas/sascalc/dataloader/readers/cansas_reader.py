@@ -298,7 +298,7 @@ class Reader(XMLreader):
                 elif tagname == 'Qdev':
                     self.current_dataset.dx = np.append(self.current_dataset.dx, data_point)
                 elif tagname == 'dQw':
-                    if self.current_dataset.dqw is None: self.current_dataset.dqw = np.empty(0)
+                    if self.current_dataset.dxw is None: self.current_dataset.dxw = np.empty(0)
                     self.current_dataset.dxw = np.append(self.current_dataset.dxw, data_point)
                 elif tagname == 'dQl':
                     if self.current_dataset.dxl is None: self.current_dataset.dxl = np.empty(0)

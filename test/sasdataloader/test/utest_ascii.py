@@ -31,8 +31,8 @@ class ABSReaderTests(unittest.TestCase):
         self.assertEqual(len(self.f1.x), 10)
         self.assertEqual(self.f1.x[0],0.002618)
         self.assertEqual(self.f1.x[9],0.0497)
-        self.assertEqual(self.f1.x_unit, '1/A')
-        self.assertEqual(self.f1.y_unit, '1/cm')
+        self.assertTrue(self.f1.x_unit == '1/A' or self.f1.x_unit == 'A^{-1}')
+        self.assertTrue(self.f1.y_unit == '1/cm' or self.f1.y_unit == 'cm^{-1}')
         
         self.assertEqual(self.f1.meta_data['loader'],"ASCII")
 
