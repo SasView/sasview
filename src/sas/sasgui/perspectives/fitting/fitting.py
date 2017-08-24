@@ -1761,11 +1761,11 @@ class Plugin(PluginBase):
             # plot_ids[data_id] = [group_id1, group_id2, ...]
             plot_ids = {}
             for plot_panel in self.parent.plot_panels.values():
-                for plot in plot_panel.plots.keys():
-                    if plot in plot_ids.keys():
-                        plot_ids[plot].append(plot_panel.group_id)
+                for data_id in plot_panel.plots.keys():
+                    if data_id in plot_ids.keys():
+                        plot_ids[data_id].append(plot_panel.group_id)
                     else:
-                        plot_ids[plot] = [plot_panel.group_id]
+                        plot_ids[data_id] = [plot_panel.group_id]
             # Create/Update the theories
             sq_id = str(page_id) + " " + data.name + " S(q)"
             sq_plot = self.create_theory_1D(x, sq_model, page_id, model, data, state,
@@ -1778,16 +1778,28 @@ class Plugin(PluginBase):
             # Update the P(Q) and S(Q) plots if they exist
             if sq_id in plot_ids.keys():
                 # If the S(Q) theory has been plotted, update its plots
+                sq_plot.list_group_id = plot_ids[sq_id]
                 for group_id in plot_ids[sq_id]:
-                    sq_plot.group_id = group_id
-                    wx.PostEvent(self.parent, NewPlotEvent(plot=sq_plot,
-                        title=str(sq_plot.title)))
+                    # Only create a copy of the data object if more than one plot of it exists
+                    if len(plot_ids[sq_id]) > 1:
+                        to_plot = deepcopy(sq_plot)
+                    else:
+                        to_plot = sq_plot
+                    to_plot.group_id = group_id
+                    wx.PostEvent(self.parent, NewPlotEvent(plot=to_plot,
+                        title=str(to_plot.title), group_id=to_plot.group_id))
             if pq_id in plot_ids.keys():
                 # If the P(Q) theory has been plotted, update its plots
+                pq_plot.list_group_id = plot_ids[pq_id]
                 for group_id in plot_ids[pq_id]:
-                    pq_plot.group_id = group_id
-                    wx.PostEvent(self.parent, NewPlotEvent(plot=pq_plot,
-                        title=str(pq_plot.title)))
+                    # Only create a copy of the data object if more than one plot of it exists
+                    if len(plot_ids[pq_id]) > 1:
+                        to_plot = deepcopy(pq_plot)
+                    else:
+                        to_plot = pq_plot
+                    to_plot.group_id = group_id
+                    wx.PostEvent(self.parent, NewPlotEvent(plot=to_plot,
+                        title=str(to_plot.title), group_id=to_plot.group_id))
 
         current_pg = self.fit_panel.get_page_by_id(page_id)
         title = new_plot.title
