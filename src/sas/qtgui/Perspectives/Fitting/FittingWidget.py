@@ -285,6 +285,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.lstPoly.setItemDelegate(PolyViewDelegate(self))
         # Polydispersity function combo response
         self.lstPoly.itemDelegate().combo_updated.connect(self.onPolyComboIndexChange)
+        self.lstPoly.itemDelegate().filename_updated.connect(self.onPolyFilenameChange)
 
         # Magnetism model displayed in magnetism list
         self.lstMagnetic.setModel(self._magnet_model)
@@ -564,6 +565,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             current_details[model_column-1] = value
         elif model_column == self.lstPoly.itemDelegate().poly_function:
             # name of the function - just pass
+            return
+        elif model_column == self.lstPoly.itemDelegate().poly_filename:
+            # filename for array - just pass
             return
         else:
             try:
@@ -1487,9 +1491,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         header.setResizeMode(QtGui.QHeaderView.ResizeToContents)
 
         header.ResizeMode(QtGui.QHeaderView.Interactive)
-        # Resize column 0 and 6 to content
+        # Resize column 0 and 7 to content
         header.setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
-        header.setResizeMode(6, QtGui.QHeaderView.ResizeToContents)
+        header.setResizeMode(7, QtGui.QHeaderView.ResizeToContents)
 
     def setPolyModel(self):
         """
@@ -1499,11 +1503,11 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             return
         self._poly_model.clear()
 
-        [self.setPolyModelParameters(param) for _, param in \
+        [self.setPolyModelParameters(i, param) for i, param in \
             enumerate(self.model_parameters.form_volume_parameters) if param.polydisperse]
         FittingUtilities.addPolyHeadersToModel(self._poly_model)
 
-    def setPolyModelParameters(self, param):
+    def setPolyModelParameters(self, i, param):
         """
         Standard of multishell poly parameter driver
         """
@@ -1518,12 +1522,12 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
                 for ishell in xrange(1, self.current_shell_displayed+1):
                     # Remove [n] and add the shell numeral
                     name = param_name[0:param_name.index('[')] + str(ishell)
-                    self.addNameToPolyModel(name)
+                    self.addNameToPolyModel(i, name)
         else:
             # Just create a simple param entry
-            self.addNameToPolyModel(param_name)
+            self.addNameToPolyModel(i, param_name)
 
-    def addNameToPolyModel(self, param_name):
+    def addNameToPolyModel(self, i, param_name):
         """
         Creates a checked row in the poly model with param_name
         """
@@ -1538,14 +1542,32 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Note: last argument needs extra space padding for decent display of the control
         checked_list = ["Distribution of " + param_name, str(width),
                         str(min), str(max),
-                        str(npts), str(nsigs), "gaussian      "]
+                        str(npts), str(nsigs), "gaussian      ",'']
         FittingUtilities.addCheckedListToModel(self._poly_model, checked_list)
 
         # All possible polydisp. functions as strings in combobox
         func = QtGui.QComboBox()
         func.addItems([str(name_disp) for name_disp in POLYDISPERSITY_MODELS.iterkeys()])
-        # set the default index
+        # Set the default index
         func.setCurrentIndex(func.findText(DEFAULT_POLYDISP_FUNCTION))
+        ind = self._poly_model.index(i,self.lstPoly.itemDelegate().poly_function)
+        self.lstPoly.setIndexWidget(ind, func)
+        func.currentIndexChanged.connect(lambda: self.onPolyComboIndexChange(str(func.currentText()), i))
+
+    def onPolyFilenameChange(self, row_index):
+        """
+        Respond to filename_updated signal from the delegate
+        """
+        # For the given row, invoke the "array" combo handler
+        array_caption = 'array'
+        self.onPolyComboIndexChange(array_caption, row_index)
+        # Get the combo box reference
+        ind = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_function)
+        widget = self.lstPoly.indexWidget(ind)
+        # Update the combo box so it displays "array"
+        widget.blockSignals(True)
+        widget.setCurrentIndex(self.lstPoly.itemDelegate().POLYDISPERSE_FUNCTIONS.index(array_caption))
+        widget.blockSignals(False)
 
     def onPolyComboIndexChange(self, combo_string, row_index):
         """
@@ -1553,6 +1575,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         # Get npts/nsigs for current selection
         param = self.model_parameters.form_volume_parameters[row_index]
+        file_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_function)
+        combo_box = self.lstPoly.indexWidget(file_index)
+        orig_index = combo_box.currentIndex()
 
         def updateFunctionCaption(row):
             # Utility function for update of polydispersity function name in the main model
@@ -1564,19 +1589,25 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         if combo_string == 'array':
             try:
-                self.loadPolydispArray()
+                self.loadPolydispArray(row_index)
                 # Update main model for display
                 self.iterateOverModel(updateFunctionCaption)
-            except (ValueError, IOError):
-                # Don't do anything if file lookup failed
+                # disable the row
+                lo = self.lstPoly.itemDelegate().poly_pd
+                hi = self.lstPoly.itemDelegate().poly_function
+                [self._poly_model.item(row_index, i).setEnabled(False) for i in xrange(lo, hi)]
                 return
-            # disable the row
-            [self._poly_model.item(row_index, i).setEnabled(False) for i in xrange(6)]
-            return
+            except IOError:
+                combo_box.setCurrentIndex(orig_index)
+                # Pass for cancel/bad read
+                pass
 
         # Enable the row in case it was disabled by Array
         self._poly_model.blockSignals(True)
-        [self._poly_model.item(row_index, i).setEnabled(True) for i in xrange(6)]
+        max_range = self.lstPoly.itemDelegate().poly_filename
+        [self._poly_model.item(row_index, i).setEnabled(True) for i in xrange(7)]
+        file_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_filename)
+        self._poly_model.setData(file_index, QtCore.QVariant(""))
         self._poly_model.blockSignals(False)
 
         npts_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_npts)
@@ -1590,7 +1621,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         self.iterateOverModel(updateFunctionCaption)
 
-    def loadPolydispArray(self):
+    def loadPolydispArray(self, row_index):
         """
         Show the load file dialog and loads requested data into state
         """
@@ -1598,7 +1629,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             self, "Choose a weight file", "", "All files (*.*)",
             None, QtGui.QFileDialog.DontUseNativeDialog)
 
-        if datafile is None:
+        if datafile is None or str(datafile)=='':
             logging.info("No weight data chosen.")
             raise IOError
 
@@ -1622,6 +1653,10 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # If everything went well - update the sasmodel values
         self.disp_model = POLYDISPERSITY_MODELS['array']()
         self.disp_model.set_weights(np.array(values), np.array(weights))
+        # + update the cell with filename
+        fname = os.path.basename(str(datafile))
+        fname_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_filename)
+        self._poly_model.setData(fname_index, QtCore.QVariant(fname))
 
     def setMagneticModel(self):
         """

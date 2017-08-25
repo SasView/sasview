@@ -84,10 +84,11 @@ class PolyViewDelegate(QtGui.QStyledItemDelegate):
     """
     Custom delegate for appearance and behavior control of the polydispersity view
     """
-    #POLYDISPERSE_FUNCTIONS = ['rectangle', 'array', 'lognormal', 'gaussian', 'schulz']
-    POLYDISPERSE_FUNCTIONS = ['rectangle', 'lognormal', 'gaussian', 'schulz']
+    POLYDISPERSE_FUNCTIONS = ['rectangle', 'array', 'lognormal', 'gaussian', 'schulz']
+    #POLYDISPERSE_FUNCTIONS = ['rectangle', 'lognormal', 'gaussian', 'schulz']
 
     combo_updated = QtCore.pyqtSignal(str, int)
+    filename_updated = QtCore.pyqtSignal(int)
 
     def __init__(self, parent=None):
         """
@@ -102,6 +103,7 @@ class PolyViewDelegate(QtGui.QStyledItemDelegate):
         self.poly_npts = 4
         self.poly_nsigs = 5
         self.poly_function = 6
+        self.poly_filename = 7
 
     def editableParameters(self):
         return [self.poly_min, self.poly_max, self.poly_npts, self.poly_nsigs]
@@ -125,25 +127,21 @@ class PolyViewDelegate(QtGui.QStyledItemDelegate):
         self.poly_npts = 5
         self.poly_nsigs = 6
         self.poly_function = 7
+        self.poly_filename = 8
 
     def createEditor(self, widget, option, index):
         # Remember the current choice
-        current_text = index.data().toString()
         if not index.isValid():
             return 0
-        if index.column() == self.poly_function:
-            editor = QtGui.QComboBox(widget)
-            for function in self.POLYDISPERSE_FUNCTIONS:
-                editor.addItem(function)
-            current_index = editor.findText(current_text)
-            editor.setCurrentIndex(current_index if current_index>-1 else 3)
-            editor.currentIndexChanged.connect(lambda: self.combo_updated.emit(str(editor.currentText()), index.row()))
-            return editor
+        elif index.column() == self.poly_filename:
+            # Notify the widget that we want to change the filename
+            self.filename_updated.emit(index.row())
+            return None
         elif index.column() in self.editableParameters():
-            editor = QtGui.QLineEdit(widget)
+            self.editor = QtGui.QLineEdit(widget)
             validator = QtGui.QDoubleValidator()
-            editor.setValidator(validator)
-            return editor
+            self.editor.setValidator(validator)
+            return self.editor
         else:
             QtGui.QStyledItemDelegate.createEditor(self, widget, option, index)
 

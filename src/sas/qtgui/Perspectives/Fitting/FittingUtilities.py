@@ -158,6 +158,7 @@ def addPolyHeadersToModel(model):
     model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("Npts"))
     model.setHeaderData(5, QtCore.Qt.Horizontal, QtCore.QVariant("Nsigs"))
     model.setHeaderData(6, QtCore.Qt.Horizontal, QtCore.QVariant("Function"))
+    model.setHeaderData(7, QtCore.Qt.Horizontal, QtCore.QVariant("Filename"))
 
 def addErrorPolyHeadersToModel(model):
     """
@@ -171,6 +172,7 @@ def addErrorPolyHeadersToModel(model):
     model.setHeaderData(5, QtCore.Qt.Horizontal, QtCore.QVariant("Npts"))
     model.setHeaderData(6, QtCore.Qt.Horizontal, QtCore.QVariant("Nsigs"))
     model.setHeaderData(7, QtCore.Qt.Horizontal, QtCore.QVariant("Function"))
+    model.setHeaderData(8, QtCore.Qt.Horizontal, QtCore.QVariant("Filename"))
 
 def addShellsToModel(parameters, model, index):
     """
