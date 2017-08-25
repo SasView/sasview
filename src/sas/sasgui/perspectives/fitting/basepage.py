@@ -2949,9 +2949,18 @@ class BasicPage(ScrolledPanel, PanelBase):
         # Do it if params exist
         if self.parameters:
 
+            disp_params = []
+            for param in self.disp_list:
+                p1, p2 = param.split('.')
+                if p1 not in disp_params:
+                    disp_params.append(p1)
+
             for param in self.parameters:
                 content += param[1]  # parameter name
                 content += tab
+                if param[1] in disp_params:
+                    content += param[1] + ".width"
+                    content += tab
                 content += param[1] + "_err"
                 content += tab
 
@@ -2961,6 +2970,9 @@ class BasicPage(ScrolledPanel, PanelBase):
             for param in self.parameters:
                 content += param[2].GetValue()  # value
                 content += tab
+                if param[1] in disp_params:
+                    content += str(self.model.getParam(param[1] + '.width'))
+                    content += tab
                 content += param[4].GetValue()  # error
                 content += tab
 
@@ -2989,9 +3001,14 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         # Do it if params exist
         if self.parameters:
+            disp_params = []
+            for param in self.disp_list:
+                p1, p2 = param.split('.')
+                if p1 not in disp_params:
+                    disp_params.append(p1)
 
             content += '{|'
-            for param in self.parameters:
+            for param in (self.parameters + disp_params):
                 content += 'l|l|'
             content += '}\hline'
             content += crlf
@@ -2999,6 +3016,9 @@ class BasicPage(ScrolledPanel, PanelBase):
             for index, param in enumerate(self.parameters):
                 content += param[1].replace('_', '\_')  # parameter name
                 content += ' & '
+                if param[1] in disp_params:
+                    content += param[1].replace('_', '\_') + ".width"
+                    content += ' & '
                 content += param[1].replace('_', '\_') + "\_err"
                 if index < len(self.parameters) - 1:
                     content += ' & '
@@ -3009,6 +3029,9 @@ class BasicPage(ScrolledPanel, PanelBase):
             for index, param in enumerate(self.parameters):
                 content += param[2].GetValue()  # parameter value
                 content += ' & '
+                if param[1] in disp_params:
+                    content += str(self.model.getParam(param[1] + '.width'))
+                    content += ' & '
                 content += param[4].GetValue()  # parameter error
                 if index < len(self.parameters) - 1:
                     content += ' & '
