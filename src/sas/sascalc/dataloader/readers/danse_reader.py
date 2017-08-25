@@ -188,7 +188,8 @@ class Reader(FileReader):
         # Reshape data
         x_vals = np.tile(x_vals, (size_y, 1)).flatten()
         y_vals = np.tile(y_vals, (size_x, 1)).T.flatten()
-        if self.current_dataset.err_data == np.all(np.array(None)) or np.any(self.current_dataset.err_data <= 0):
+        if np.all(self.current_dataset.err_data == None) \
+                or np.any(self.current_dataset.err_data <= 0):
             new_err_data = np.sqrt(np.abs(self.current_dataset.data))
         else:
             new_err_data = self.current_dataset.err_data.flatten()
