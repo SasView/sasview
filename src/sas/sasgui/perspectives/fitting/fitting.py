@@ -1325,7 +1325,7 @@ class Plugin(PluginBase):
                     data = data.sas_data
 
                 is_data2d = issubclass(data.__class__, Data2D)
-                #check consistency of arrays
+                # Check consistency of arrays
                 if not is_data2d:
                     if len(res.theory) == len(res.index[res.index]) and \
                         len(res.index) == len(data.y):
@@ -1336,10 +1336,11 @@ class Plugin(PluginBase):
                     new_theory[res.index] = res.theory
                     new_theory[res.index == False] = np.nan
                     correct_result = True
-                #get all fittable parameters of the current model
+                # Get all fittable parameters of the current model
                 param_list = model.getParamList()
                 for param in model.getDispParamList():
                     if '.' in param and param in param_list:
+                        # Ensure polydispersity results are displayed
                         p1, p2 = param.split('.')
                         if not model.is_fittable(p1) and not (p2 == 'width' and param in res.param_list)\
                             and param in param_list:
@@ -1365,11 +1366,11 @@ class Plugin(PluginBase):
                     cell.value = res.fitness
                     batch_outputs["Chi2"].append(ERROR)
                     for param in param_list:
-                        # save value of  fixed parameters
+                        # Save value of  fixed parameters
                         if param not in res.param_list:
                             batch_outputs[str(param)].append(ERROR)
                         else:
-                            #save only fitted values
+                            # Save only fitted values
                             batch_outputs[param].append(ERROR)
                             batch_inputs["error on %s" % str(param)].append(ERROR)
                 else:
