@@ -1339,7 +1339,12 @@ class Plugin(PluginBase):
                 #get all fittable parameters of the current model
                 param_list = model.getParamList()
                 for param in model.getDispParamList():
-                    if not model.is_fittable(param) and \
+                    if '.' in param and param in param_list:
+                        p1, p2 = param.split('.')
+                        if not model.is_fittable(p1) and not (p2 == 'width' and param in res.param_list)\
+                            and param in param_list:
+                            param_list.remove(param)
+                    elif not model.is_fittable(param) and \
                         param in param_list:
                         param_list.remove(param)
                 if not correct_result or res.fitness is None or \
