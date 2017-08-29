@@ -54,6 +54,7 @@ class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator)
         self.default_shape = str(self.cbShape.currentText())
         self.is_avg = False
         self.data_to_plot = None
+        self.graph_num = 1  # index for name of graph
 
         # combox box
         self.cbOptionsCalc.setVisible(False)
@@ -99,11 +100,7 @@ class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator)
         self.txtNoQBins.textChanged.connect(self.check_value)
 
         # plots - 3D in real space
-        plot3d = self.plot3d(has_arrow=False)
-        self.trigger_plot_3d.connect(plot3d)
-        #self.trigger_plot_3d.connect(lambda: self.plot3d(has_arrow=False))
-
-        self.graph_num = 1  # index for name of graph
+        self.trigger_plot_3d.connect(lambda: self.plot3d(has_arrow=False))
 
         # TODO the option Ellipsoid has not been implemented
         self.cbShape.currentIndexChanged.connect(self.selectedshapechange)
@@ -692,8 +689,10 @@ class Plotter3DWidget(PlotterBase):
         """
         Plot 3D self._data
         """
+        if not data:
+            return
         self.data = data
-        assert(self._data)
+        #assert(self._data)
         # Prepare and show the plot
         self.showPlot(data=self.data, has_arrow=has_arrow)
 
