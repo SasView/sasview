@@ -344,9 +344,8 @@ if tinycc:
     packages.append('tinycc')
 
 # Exclude packages that are not needed but are often found on build systems
-excludes = ['Tkinter', 'PyQt4', '_tkagg', 'sip', 'pytz', 'sympy']
-
-
+excludes = [
+    'Tkinter', 'PyQt4', '_tkagg', 'sip', 'pytz', 'sympy',
     # Various matplotlib backends we are not using
     'libgdk_pixbuf-2.0-0.dll', 'libgobject-2.0-0.dll', 'libgdk-win32-2.0-0.dll',
     'tcl84.dll', 'tk84.dll', 'QtGui4.dll', 'QtCore4.dll',
