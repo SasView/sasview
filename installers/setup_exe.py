@@ -61,7 +61,7 @@ try:
         sys.path.insert(0, extra_path)
         del sys.argv[path_flag_idx+1]
         sys.argv.remove('--extrapath')
-except:
+except Exception:
     print("Error processing extra python path needed to build SasView\n  %s" %
           sys.exc_value)
 
@@ -223,7 +223,7 @@ if os.path.isfile(reader_config):
 # Copy the config files
 sas_path = os.path.join('..', 'src', 'sas')
 DATA_FILES.append(('.', [os.path.join(sas_path, 'logging.ini')]))
-sasview_path = os.path.join(sas_path,'sasview')
+sasview_path = os.path.join(sas_path, 'sasview')
 config_files = [
     'custom_config.py',
     'local_config.py',
@@ -259,25 +259,25 @@ for f in findall(media_dir):
 
 # Copying the sample data user data
 for f in findall(test_1d_dir):
-    DATA_FILES.append((os.path.join("test","1d_data"), [f]))
+    DATA_FILES.append((os.path.join("test", "1d_data"), [f]))
 
 # Copying the sample data user data
 for f in findall(test_2d_dir):
-    DATA_FILES.append((os.path.join("test","2d_data"), [f]))
+    DATA_FILES.append((os.path.join("test", "2d_data"), [f]))
 
 # Copying the sample data user data
 for f in findall(test_save_dir):
-    DATA_FILES.append((os.path.join("test","save_states"), [f]))
+    DATA_FILES.append((os.path.join("test", "save_states"), [f]))
 
 # Copying the sample data user data
 for f in findall(test_upcoming_dir):
-    DATA_FILES.append((os.path.join("test","upcoming_formats"), [f]))
+    DATA_FILES.append((os.path.join("test", "upcoming_formats"), [f]))
 
 # Copying opencl include files
 site_loc = get_python_lib()
 opencl_include_dir = os.path.join(site_loc, "pyopencl", "cl")
 for f in findall(opencl_include_dir):
-    DATA_FILES.append((os.path.join("includes","pyopencl"), [f]))
+    DATA_FILES.append((os.path.join("includes", "pyopencl"), [f]))
 
 # Numerical libraries
 python_root = os.path.dirname(os.path.abspath(sys.executable))
@@ -318,7 +318,7 @@ if msvcrtdll_data_files is not None:
 #
 packages = [
     'matplotlib', 'scipy', 'encodings', 'comtypes', 'h5py',
-    'win32com', 'xhtml2pdf', 'bumps','sasmodels', 'sas',
+    'win32com', 'xhtml2pdf', 'bumps', 'sasmodels', 'sas',
     ]
 packages.extend([
     'reportlab',
@@ -335,7 +335,7 @@ packages.extend([
 packages.append('periodictable.core') # not found automatically
 
 # For an interactive interpreter, SasViewCom
-packages.extend(['IPython','pyreadline','pyreadline.unicode_helper'])
+packages.extend(['IPython', 'pyreadline', 'pyreadline.unicode_helper'])
 
 # individual models
 includes = ['site', 'lxml._elementpath', 'lxml.etree']
@@ -364,19 +364,19 @@ excludes = [
     ]
 
 target_wx_client = Target(
-    description = 'SasView',
-    script = 'sasview_gui.py',
-    icon_resources = [(1, local_config.SetupIconFile_win)],
-    other_resources = [(24, 1, manifest)],
-    dest_base = "SasView"
+    description='SasView',
+    script='sasview_gui.py',
+    icon_resources=[(1, local_config.SetupIconFile_win)],
+    other_resources=[(24, 1, manifest)],
+    dest_base="SasView"
 )
 
 target_console_client = Target(
-    description = 'SasView console',
-    script = 'sasview_console.py',
-    icon_resources = [(1, local_config.SetupIconFile_win)],
-    other_resources = [(24, 1, manifest)],
-    dest_base = "SasViewCom"
+    description='SasView console',
+    script='sasview_console.py',
+    icon_resources=[(1, local_config.SetupIconFile_win)],
+    other_resources=[(24, 1, manifest)],
+    dest_base="SasViewCom"
 )
 
 bundle_option = 3 if is_64bits else 2

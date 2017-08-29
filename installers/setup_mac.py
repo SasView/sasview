@@ -6,7 +6,8 @@ Usage:
 
 
 NOTES:
-   12/01/2011: When seeing an error related to pytz.zoneinfo not being found, change the following line in py2app/recipes/matplotlib.py
+   12/01/2011: When seeing an error related to pytz.zoneinfo not being found,
+               change the following line in py2app/recipes/matplotlib.py
                mf.import_hook('pytz.tzinfo', m, ['UTC'])
    12/05/2011: Needs macholib >= 1.4.3 and py2app >= 0.6.4 to create a 64-bit app
 """
@@ -58,12 +59,12 @@ DATA_FILES += guiframe.data_files()
 
 #CANSAxml reader data files
 from sas.sascalc.dataloader import readers
-RESOURCES_FILES.append(os.path.join(readers.get_data_path(),'defaults.json'))
+RESOURCES_FILES.append(os.path.join(readers.get_data_path(), 'defaults.json'))
 
 # Copy the config files
 sas_path = os.path.join('..', 'src', 'sas')
 DATA_FILES.append(('.', [os.path.join(sas_path, 'logging.ini')]))
-sasview_path = os.path.join(sas_path,'sasview')
+sasview_path = os.path.join(sas_path, 'sasview')
 custom_config_file = os.path.join(sasview_path, 'custom_config.py')
 local_config_file = os.path.join(sasview_path, 'local_config.py')
 logging_ini = os.path.join(sasview_path, 'logging.ini')
@@ -98,25 +99,25 @@ for f in findall(media_dir):
 
 # Copying the sample data user data
 for f in findall(test_1d_dir):
-    DATA_FILES.append((os.path.join("test","1d_data"), [f]))
+    DATA_FILES.append((os.path.join("test", "1d_data"), [f]))
 
 # Copying the sample data user data
 for f in findall(test_2d_dir):
-    DATA_FILES.append((os.path.join("test","2d_data"), [f]))
+    DATA_FILES.append((os.path.join("test", "2d_data"), [f]))
 
 # Copying the sample data user data
 for f in findall(test_save_dir):
-    DATA_FILES.append((os.path.join("test","save_states"), [f]))
+    DATA_FILES.append((os.path.join("test", "save_states"), [f]))
 
 # Copying the sample data user data
 for f in findall(test_upcoming_dir):
-    DATA_FILES.append((os.path.join("test","upcoming_formats"), [f]))
+    DATA_FILES.append((os.path.join("test", "upcoming_formats"), [f]))
 
 # Copying opencl include files
 site_loc = get_python_lib()
 opencl_include_dir = os.path.join(site_loc, "pyopencl", "cl")
 for f in findall(opencl_include_dir):
-    DATA_FILES.append((os.path.join("includes","pyopencl"), [f]))
+    DATA_FILES.append((os.path.join("includes", "pyopencl"), [f]))
 
 # See if the documentation has been built, and if so include it.
 print(doc_path)
@@ -166,8 +167,8 @@ EXTENSIONS_LIST = find_extension()
 
 plist = dict(CFBundleDocumentTypes=[dict(CFBundleTypeExtensions=EXTENSIONS_LIST,
                                          CFBundleTypeIconFile=ICON,
-                                   CFBundleTypeName="sasview file",
-                                   CFBundleTypeRole="Shell" )],)
+                                         CFBundleTypeName="sasview file",
+                                         CFBundleTypeRole="Shell")],)
 
 # Locate libxml2 library
 lib_locs = ['/usr/local/lib', '/usr/lib']
