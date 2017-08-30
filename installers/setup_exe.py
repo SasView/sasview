@@ -16,8 +16,8 @@ from __future__ import print_function
 
 import os
 import sys
-import warnings
 from glob import glob
+import warnings
 import shutil
 
 from distutils.util import get_platform
@@ -28,9 +28,10 @@ import py2exe
 
 #from idlelib.PyShell import warning_stream
 
-# put the build directory at the front of the path
 if os.path.abspath(os.path.dirname(__file__)) != os.path.abspath(os.getcwd()):
-    raise RuntimeError("Must run setup_exe from the sasview directory")
+    raise RuntimeError("Must run setup_exe from the installers directory")
+
+# put the build directory at the front of the path
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 platform = '%s-%s'%(get_platform(), sys.version[:3])
 doc_path = os.path.join(root, 'build', 'lib.'+platform, 'doc')
@@ -152,11 +153,7 @@ if is_64bits:
     msvcrtdll = glob(r"C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*.*")
 else:
     msvcrtdll = glob(r"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*.*")
-if msvcrtdll:
-    msvcrtdll_data_files = ("Microsoft.VC90.CRT", msvcrtdll)
-else:
-    msvcrtdll_data_files = None
-
+msvcrtdll_data_files = ("Microsoft.VC90.CRT", msvcrtdll) if msvcrtdll else None
 
 class Target:
     def __init__(self, **kw):
@@ -171,31 +168,24 @@ class Target:
 # Adapted from http://www.py2exe.org/index.cgi/MatPlotLib
 # to use the MatPlotLib.
 #
-path = os.getcwd()
-
 matplotlibdatadir = matplotlib.get_data_path()
 matplotlibdata = findall(matplotlibdatadir)
 
-DATA_FILES = []
+data_files = []
 
 if tinycc:
-    DATA_FILES += tinycc.data_files()
+    data_files += tinycc.data_files()
 
-# Copying SLD data
+# Include data for supporting packages
 import periodictable
-DATA_FILES += periodictable.data_files()
+data_files += periodictable.data_files()
 
-from sas.sasgui.perspectives import fitting
-DATA_FILES += fitting.data_files()
+for f in matplotlibdata:
+    dirname = os.path.join('mpl-data', f[len(matplotlibdatadir)+1:])
+    data_files.append((os.path.split(dirname)[0], [f]))
 
-from sas.sasgui.perspectives import calculator
-DATA_FILES += calculator.data_files()
-
-from sas.sasgui.perspectives import invariant
-DATA_FILES += invariant.data_files()
-
-from sas.sasgui import guiframe
-DATA_FILES += guiframe.data_files()
+import sasmodels
+data_files += sasmodels.data_files()
 
 # precompile sas models into the sasview build path; doesn't matter too much
 # where it is so long as it is a place that will get cleaned up afterwards.
@@ -205,72 +195,69 @@ compiled_dlls = sasmodels.core.precompile_dlls(dll_path, dtype='double')
 
 # include the compiled models as data; coordinate the target path for the
 # data with installer_generator.py
-DATA_FILES.append(('compiled_models', compiled_dlls))
+data_files.append(('compiled_models', compiled_dlls))
 
-import sasmodels
-DATA_FILES += sasmodels.data_files()
+# Data files for the different perspectives
+from sas.sasgui.perspectives import fitting
+data_files += fitting.data_files()
 
-for f in matplotlibdata:
-    dirname = os.path.join('mpl-data', f[len(matplotlibdatadir)+1:])
-    DATA_FILES.append((os.path.split(dirname)[0], [f]))
+from sas.sasgui.perspectives import calculator
+data_files += calculator.data_files()
 
-# Copy the settings file for the sas.dataloader file extension associations
-from sas.sascalc.dataloader import readers
-reader_config = os.path.join(readers.get_data_path(), 'defaults.json')
-if os.path.isfile(reader_config):
-    DATA_FILES.append(('.', [reader_config]))
+from sas.sasgui.perspectives import invariant
+data_files += invariant.data_files()
+
+from sas.sasgui import guiframe
+data_files += guiframe.data_files()
 
 # Copy the config files
+sasview_path = os.path.join('..', 'src', 'sas', 'sasview')
+data_files.append(('.', [os.path.join(sasview_path, 'custom_config.py')]))
+data_files.append(('config', [os.path.join(sasview_path, 'custom_config.py')]))
+data_files.append(('.', [os.path.join(sasview_path, 'local_config.py')]))
+
+# Copy the logging config
 sas_path = os.path.join('..', 'src', 'sas')
-DATA_FILES.append(('.', [os.path.join(sas_path, 'logging.ini')]))
-sasview_path = os.path.join(sas_path, 'sasview')
-config_files = [
-    'custom_config.py',
-    'local_config.py',
-    ]
-DATA_FILES.append(('.', [os.path.join(sasview_path, v) for v in config_files]))
-DATA_FILES.append(('config', [os.path.join(sasview_path, 'custom_config.py')]))
+data_files.append(('.', [os.path.join(sas_path, 'logging.ini')]))
 
 if os.path.isfile("BUILD_NUMBER"):
-    DATA_FILES.append(('.', ["BUILD_NUMBER"]))
-
-images_dir = local_config.icon_path
-media_dir = local_config.media_path
-test_dir = local_config.test_path
-test_1d_dir = os.path.join(test_dir, "1d_data")
-test_2d_dir = os.path.join(test_dir, "2d_data")
-test_save_dir = os.path.join(test_dir, "save_states")
-test_upcoming_dir = os.path.join(test_dir, "upcoming_formats")
+    data_files.append(('.', ["BUILD_NUMBER"]))
 
 # Copying the images directory to the distribution directory.
+images_dir = local_config.icon_path
 for f in findall(images_dir):
-    DATA_FILES.append(("images", [f]))
+    data_files.append(("images", [f]))
 
 # Copying the HTML help docs
+media_dir = local_config.media_path
 for f in findall(media_dir):
-    DATA_FILES.append(("media", [f]))
+    data_files.append(("media", [f]))
 
 # Copying the sample data user data
-for f in findall(test_1d_dir):
-    DATA_FILES.append((os.path.join("test", "1d_data"), [f]))
+test_dir = local_config.test_path
+for f in findall(os.path.join(test_dir, "1d_data")):
+    data_files.append((os.path.join("test", "1d_data"), [f]))
+for f in findall(os.path.join(test_dir, "2d_data")):
+    data_files.append((os.path.join("test", "2d_data"), [f]))
+for f in findall(os.path.join(test_dir, "save_states")):
+    data_files.append((os.path.join("test", "save_states"), [f]))
+for f in findall(os.path.join(test_dir, "upcoming_formats")):
+    data_files.append((os.path.join("test", "upcoming_formats"), [f]))
 
-# Copying the sample data user data
-for f in findall(test_2d_dir):
-    DATA_FILES.append((os.path.join("test", "2d_data"), [f]))
-
-# Copying the sample data user data
-for f in findall(test_save_dir):
-    DATA_FILES.append((os.path.join("test", "save_states"), [f]))
-
-# Copying the sample data user data
-for f in findall(test_upcoming_dir):
-    DATA_FILES.append((os.path.join("test", "upcoming_formats"), [f]))
+# See if the documentation has been built, and if so include it.
+if os.path.exists(doc_path):
+    for dirpath, dirnames, filenames in os.walk(doc_path):
+        for filename in filenames:
+            sub_dir = os.path.join("doc", os.path.relpath(dirpath, doc_path))
+            data_files.append((sub_dir, [os.path.join(dirpath, filename)]))
+else:
+    raise Exception("You must first build the documentation before creating an installer.")
 
 # Copying opencl include files
 site_loc = get_python_lib()
 opencl_include_dir = os.path.join(site_loc, "pyopencl", "cl")
 for f in findall(opencl_include_dir):
-    DATA_FILES.append((os.path.join("includes", "pyopencl"), [f]))
+    data_files.append((os.path.join("includes", "pyopencl"), [f]))
 
 # Numerical libraries
 python_root = os.path.dirname(os.path.abspath(sys.executable))
@@ -287,22 +274,13 @@ mkl_path = os.path.join(python_root, 'Library', 'bin')
 mkl_dlls = dll_check(mkl_path, ['mkl_core', 'mkl_def', 'libiomp5md'])
 
 if atlas_dlls:
-    DATA_FILES.append(('.', atlas_dlls))
+    data_files.append(('.', atlas_dlls))
 elif mkl_dlls:
-    DATA_FILES.append(('.', mkl_dlls))
-
-# See if the documentation has been built, and if so include it.
-if os.path.exists(doc_path):
-    for dirpath, dirnames, filenames in os.walk(doc_path):
-        for filename in filenames:
-            sub_dir = os.path.join("doc", os.path.relpath(dirpath, doc_path))
-            DATA_FILES.append((sub_dir, [os.path.join(dirpath, filename)]))
-else:
-    raise Exception("You must first build the documentation before creating an installer.")
+    data_files.append(('.', mkl_dlls))
 
 if msvcrtdll_data_files is not None:
     # install the MSVC 9 runtime dll's into the application folder
-    DATA_FILES.append(msvcrtdll_data_files)
+    data_files.append(msvcrtdll_data_files)
 
 # NOTE:
 #  need an empty __init__.py in site-packages/numpy/distutils/tests and site-packages/mpl_toolkits
@@ -327,7 +305,7 @@ packages.extend([
     ])
 packages.append('periodictable.core') # not found automatically
 
-# For an interactive interpreter, SasViewCom
+# For the interactive interpreter SasViewCom make sure ipython is available
 packages.extend(['IPython', 'pyreadline', 'pyreadline.unicode_helper'])
 
 # individual models
@@ -337,8 +315,9 @@ if tinycc:
     packages.append('tinycc')
 
 # Exclude packages that are not needed but are often found on build systems
-excludes = [
-    'Tkinter', 'PyQt4', '_tkagg', 'sip', 'pytz', 'sympy',
+excludes = ['Tkinter', 'PyQt4', '_tkagg', 'sip', 'pytz', 'sympy']
+
+dll_excludes = [
     # Various matplotlib backends we are not using
     'libgdk_pixbuf-2.0-0.dll', 'libgobject-2.0-0.dll', 'libgdk-win32-2.0-0.dll',
     'tcl84.dll', 'tk84.dll', 'QtGui4.dll', 'QtCore4.dll',
@@ -392,5 +371,5 @@ setup(
             "bundle_files": bundle_option,
             },
     },
-    data_files=DATA_FILES,
+    data_files=data_files,
 )
