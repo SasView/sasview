@@ -227,16 +227,9 @@ sasview_path = os.path.join(sas_path, 'sasview')
 config_files = [
     'custom_config.py',
     'local_config.py',
-    #'default_categories.json',
     ]
 DATA_FILES.append(('.', [os.path.join(sasview_path, v) for v in config_files]))
 DATA_FILES.append(('config', [os.path.join(sasview_path, 'custom_config.py')]))
-
-# default_categories.json is beside the config files
-category_config = os.path.join(os.path.dirname(local_config_file),
-                               'default_categories.json')
-if os.path.isfile(category_config):
-    DATA_FILES.append(('.', [category_config]))
 
 if os.path.isfile("BUILD_NUMBER"):
     DATA_FILES.append(('.', ["BUILD_NUMBER"]))

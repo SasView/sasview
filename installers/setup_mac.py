@@ -73,11 +73,6 @@ DATA_FILES.append(('config', [custom_config_file]))
 DATA_FILES.append(('.', [local_config_file]))
 DATA_FILES.append(('.', [logging_ini]))
 
-# default_categories.json is beside the config files
-category_config = os.path.join(sasview_path, 'default_categories.json')
-if os.path.isfile(category_config):
-    DATA_FILES.append(('.', [category_config]))
-
 if os.path.isfile("BUILD_NUMBER"):
     DATA_FILES.append(('.', ["BUILD_NUMBER"]))
 
