@@ -380,7 +380,8 @@ package_data['sas.sasview'] = ['images/*',
                                'test/media/*',
                                'test/other_files/*',
                                'test/save_states/*',
-                               'test/sesans_data/*'
+                               'test/sesans_data/*',
+                               'test/upcoming_formats/*',
                                ]
 packages.append("sas.sasview")
 
