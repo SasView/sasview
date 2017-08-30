@@ -1746,60 +1746,36 @@ class Plugin(PluginBase):
         new_plot = self.create_theory_1D(x, y, page_id, model, data, state,
                                          data_description=model.name,
                                          data_id=str(page_id) + " " + data.name)
+        plots_to_update = [] # List of plottables that have changed since last calculation
+        # Create the new theories
         if unsmeared_model is not None:
-            self.create_theory_1D(x, unsmeared_model, page_id, model, data, state,
+            unsmeared_model_plot = self.create_theory_1D(x, unsmeared_model, 
+                                  page_id, model, data, state,
                                   data_description=model.name + " unsmeared",
                                   data_id=str(page_id) + " " + data.name + " unsmeared")
+            plots_to_update.append(unsmeared_model_plot)
 
             if unsmeared_data is not None and unsmeared_error is not None:
-                self.create_theory_1D(x, unsmeared_data, page_id, model, data, state,
+                unsmeared_data_plot = self.create_theory_1D(x, unsmeared_data, 
+                                      page_id, model, data, state,
                                       data_description="Data unsmeared",
                                       data_id="Data  " + data.name + " unsmeared",
                                       dy=unsmeared_error)
+                plots_to_update.append(unsmeared_data_plot)
         if sq_model is not None and pq_model is not None:
-            # Store which data sets are plotted in which windows
-            # plot_ids[data_id] = [group_id1, group_id2, ...]
-            plot_ids = {}
-            for plot_panel in self.parent.plot_panels.values():
-                for data_id in plot_panel.plots.keys():
-                    if data_id in plot_ids:
-                        plot_ids[data_id].append(plot_panel.group_id)
-                    else:
-                        plot_ids[data_id] = [plot_panel.group_id]
-            # Create/Update the theories
             sq_id = str(page_id) + " " + data.name + " S(q)"
             sq_plot = self.create_theory_1D(x, sq_model, page_id, model, data, state,
                                   data_description=model.name + " S(q)",
                                   data_id=sq_id)
+            plots_to_update.append(sq_plot)
             pq_id = str(page_id) + " " + data.name + " P(q)"
             pq_plot = self.create_theory_1D(x, pq_model, page_id, model, data, state,
                                   data_description=model.name + " P(q)",
                                   data_id=pq_id)
-            # Update the P(Q) and S(Q) plots if they exist
-            if sq_id in plot_ids:
-                # If the S(Q) theory has been plotted, update its plots
-                sq_plot.list_group_id = plot_ids[sq_id]
-                for group_id in plot_ids[sq_id]:
-                    # Only create a copy of the data object if more than one plot of it exists
-                    if len(plot_ids[sq_id]) > 1:
-                        to_plot = deepcopy(sq_plot)
-                    else:
-                        to_plot = sq_plot
-                    to_plot.group_id = group_id
-                    wx.PostEvent(self.parent, NewPlotEvent(plot=to_plot,
-                        title=str(to_plot.title), group_id=to_plot.group_id))
-            if pq_id in plot_ids:
-                # If the P(Q) theory has been plotted, update its plots
-                pq_plot.list_group_id = plot_ids[pq_id]
-                for group_id in plot_ids[pq_id]:
-                    # Only create a copy of the data object if more than one plot of it exists
-                    if len(plot_ids[pq_id]) > 1:
-                        to_plot = deepcopy(pq_plot)
-                    else:
-                        to_plot = pq_plot
-                    to_plot.group_id = group_id
-                    wx.PostEvent(self.parent, NewPlotEvent(plot=to_plot,
-                        title=str(to_plot.title), group_id=to_plot.group_id))
+            plots_to_update.append(pq_plot)
+        # Update the P(Q), S(Q) and unsmeared theory plots if they exist
+        wx.PostEvent(self.parent, NewPlotEvent(plots=plots_to_update, 
+                                              action='update'))
 
         current_pg = self.fit_panel.get_page_by_id(page_id)
         title = new_plot.title
