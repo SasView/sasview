@@ -1762,7 +1762,7 @@ class Plugin(PluginBase):
             plot_ids = {}
             for plot_panel in self.parent.plot_panels.values():
                 for data_id in plot_panel.plots.keys():
-                    if data_id in plot_ids.keys():
+                    if data_id in plot_ids:
                         plot_ids[data_id].append(plot_panel.group_id)
                     else:
                         plot_ids[data_id] = [plot_panel.group_id]
@@ -1776,7 +1776,7 @@ class Plugin(PluginBase):
                                   data_description=model.name + " P(q)",
                                   data_id=pq_id)
             # Update the P(Q) and S(Q) plots if they exist
-            if sq_id in plot_ids.keys():
+            if sq_id in plot_ids:
                 # If the S(Q) theory has been plotted, update its plots
                 sq_plot.list_group_id = plot_ids[sq_id]
                 for group_id in plot_ids[sq_id]:
@@ -1788,7 +1788,7 @@ class Plugin(PluginBase):
                     to_plot.group_id = group_id
                     wx.PostEvent(self.parent, NewPlotEvent(plot=to_plot,
                         title=str(to_plot.title), group_id=to_plot.group_id))
-            if pq_id in plot_ids.keys():
+            if pq_id in plot_ids:
                 # If the P(Q) theory has been plotted, update its plots
                 pq_plot.list_group_id = plot_ids[pq_id]
                 for group_id in plot_ids[pq_id]:
