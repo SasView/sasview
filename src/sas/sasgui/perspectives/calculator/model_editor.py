@@ -495,7 +495,7 @@ class TextDialog(wx.Dialog):
 
         if operator == '*':
             name = 'Multi'
-            factor = 'BackGround'
+            factor = 'background'
             f_oper = '+'
         else:
             name = 'Sum'
@@ -534,13 +534,13 @@ class TextDialog(wx.Dialog):
         description = self.desc_tcl.GetValue().lstrip().rstrip()
         if description == '':
             description = name1 + self._operator + name2
-        text = self._operator_choice.GetValue()
-        if text.count('+') > 0:
+        operator_text = self._operator_choice.GetValue()
+        if '+' in operator_text:
             factor = 'scale_factor'
             f_oper = '*'
             default_val = '1.0'
         else:
-            factor = 'BackGround'
+            factor = 'background'
             f_oper = '+'
             default_val = '0.0'
         path = self.fname
@@ -548,61 +548,12 @@ class TextDialog(wx.Dialog):
             out_f = open(path, 'w')
         except:
             raise
-        lines = SUM_TEMPLATE.split('\n')
-        for line in lines:
-            try:
-                if line.count("scale_factor"):
-                    line = line.replace('scale_factor', factor)
-                    #print "scale_factor", line
-                if line.count("= %s"):
-                    out_f.write(line % (default_val) + "\n")
-                elif line.count("import Model as P1"):
-                    if self.is_p1_custom:
-                        line = line.replace('#', '')
-                        out_f.write(line % name1 + "\n")
-                    else:
-                        out_f.write(line + "\n")
-                elif line.count("import %s as P1"):
-                    if not self.is_p1_custom:
-                        line = line.replace('#', '')
-                        out_f.write(line % (name1) + "\n")
-                    else:
-                        out_f.write(line + "\n")
-                elif line.count("import Model as P2"):
-                    if self.is_p2_custom:
-                        line = line.replace('#', '')
-                        out_f.write(line % name2 + "\n")
-                    else:
-                        out_f.write(line + "\n")
-                elif line.count("import %s as P2"):
-                    if not self.is_p2_custom:
-                        line = line.replace('#', '')
-                        out_f.write(line % (name2) + "\n")
-                    else:
-                        out_f.write(line + "\n")
-                elif line.count("P1 = find_model"):
-                    out_f.write(line % (name1) + "\n")
-                elif line.count("P2 = find_model"):
-                    out_f.write(line % (name2) + "\n")
-
-                elif line.count("self.description = '%s'"):
-                    out_f.write(line % description + "\n")
-                #elif line.count("run") and line.count("%s"):
-                #    out_f.write(line % self._operator + "\n")
-                #elif line.count("evalDistribution") and line.count("%s"):
-                #    out_f.write(line % self._operator + "\n")
-                elif line.count("return") and line.count("%s") == 2:
-                    #print "line return", line
-                    out_f.write(line % (f_oper, self._operator) + "\n")
-                elif line.count("out2")and line.count("%s"):
-                    out_f.write(line % self._operator + "\n")
-                else:
-                    out_f.write(line + "\n")
-            except:
-                raise
+        output = SUM_TEMPLATE.format(model1=name1, model2=name2, 
+            scale_factor_default=default_val, factor_operator=f_oper,
+            operator=self._operator, description=description)
+        output = output.replace("scale_factor", factor)
+        out_f.write(output + "\n")
         out_f.close()
-        #else:
-        #    msg = "Name exists already."
 
     def compile_file(self, path):
         """
@@ -1293,12 +1244,12 @@ class Model(Model1DPlugin):
     is_multiplicity_model = False
     def __init__(self, multiplicity=1):
         Model1DPlugin.__init__(self, name='')
-        P1 = find_model('%s')
-        P2 = find_model('%s')
+        P1 = find_model('{model1}')
+        P2 = find_model('{model2}')
         p_model1 = P1()
         p_model2 = P2()
         ## Setting  model name model description
-        self.description = '%s'
+        self.description = '{description}'
         if self.name.rstrip().lstrip() == '':
             self.name = self._get_name(p_model1.name, p_model2.name)
         if self.description.rstrip().lstrip() == '':
@@ -1310,7 +1261,7 @@ class Model(Model1DPlugin):
         self.params = collections.OrderedDict()
 
         ## Parameter details [units, min, max]
-        self.details = {}
+        self.details = {{}}
         ## Magnetic Panrameters
         self.magnetic_params = []
         # non-fittable parameters
@@ -1327,7 +1278,7 @@ class Model(Model1DPlugin):
         ## Define parameters
         self._set_params()
         ## New parameter:scaling_factor
-        self.params['scale_factor'] = %s
+        self.params['scale_factor'] = {scale_factor_default}
 
         ## Parameter details [units, min, max]
         self._set_details()
@@ -1537,20 +1488,20 @@ class Model(Model1DPlugin):
 
     def run(self, x = 0.0):
         self._set_scale_factor()
-        return self.params['scale_factor'] %s \
-(self.p_model1.run(x) %s self.p_model2.run(x))
+        return self.params['scale_factor'] {factor_operator} \
+(self.p_model1.run(x) {operator} self.p_model2.run(x))
 
     def runXY(self, x = 0.0):
         self._set_scale_factor()
-        return self.params['scale_factor'] %s \
-(self.p_model1.runXY(x) %s self.p_model2.runXY(x))
+        return self.params['scale_factor'] {factor_operator} \
+(self.p_model1.runXY(x) {operator} self.p_model2.runXY(x))
 
     ## Now (May27,10) directly uses the model eval function
     ## instead of the for-loop in Base Component.
     def evalDistribution(self, x = []):
         self._set_scale_factor()
-        return self.params['scale_factor'] %s \
-(self.p_model1.evalDistribution(x) %s \
+        return self.params['scale_factor'] {factor_operator} \
+(self.p_model1.evalDistribution(x) {operator} \
 self.p_model2.evalDistribution(x))
 
     def set_dispersion(self, parameter, dispersion):
@@ -1588,7 +1539,7 @@ if __name__ == "__main__":
     #m2.p_model1.setParam("length", 1000)
     #m2.p_model2.setParam("scale", 100)
     #m2.p_model2.setParam("rg", 100)
-    out2 = m2.p_model1.runXY(0.01) %s m2.p_model2.runXY(0.01)\n
+    out2 = m2.p_model1.runXY(0.01) {operator} m2.p_model2.runXY(0.01)\n
     print "My name is %s."% m1.name
     print out1, " = ", out2
     if out1 == out2:
