@@ -65,7 +65,7 @@ from sas.sasgui import guiframe
 data_files += guiframe.data_files()
 
 # Copy the config files
-sasview_path = os.path.join(sas_path, 'sasview')
+sasview_path = os.path.join('..', 'src', 'sas', 'sasview')
 data_files.append(('.', [os.path.join(sasview_path, 'custom_config.py')]))
 data_files.append(('config', [os.path.join(sasview_path, 'custom_config.py')]))
 data_files.append(('.', [os.path.join(sasview_path, 'local_config.py')]))
