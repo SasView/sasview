@@ -1,6 +1,6 @@
 set PYTHON=python.exe
 set EASY_INSTALL=easy_install.exe
-set PYLINT= pylint.exe
+set PYLINT=pylint.exe
 set INNO="C:\util\inno\ISCC.exe"
 set GIT_SED=C:\"Program Files"\Git\bin\sed.exe
 set SAS_COMPILER=tinycc

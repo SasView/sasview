@@ -5,8 +5,6 @@ import logging.config
 import os
 import os.path
 
-import pkg_resources
-
 
 '''
 Module that manages the global logging
@@ -70,8 +68,11 @@ class SetupLogger(object):
         # To avoid the exception in OSx
         # NotImplementedError: resource_filename() only supported for .egg, not .zip
         try:
+            import pkg_resources
             places_to_look_for_conf_file.append(
                 pkg_resources.resource_filename(__name__, filename))
+        except ImportError:
+            pass
         except NotImplementedError:
             pass
 

@@ -37,7 +37,7 @@ import matplotlib
 try:
     import pkg_resources
     pkg_resources.require("matplotlib>=" + plot_version)
-except:
+except ImportError:
     from distutils.version import LooseVersion as Version
     if Version(matplotlib.__version__) < Version(plot_version):
         msg = "Matplotlib version must be %s or newer" % (plot_version, )
