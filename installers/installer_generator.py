@@ -13,7 +13,7 @@ root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(root, 'sasview-install', 'Lib', 'site-packages'))
 from sas.sasview import local_config
 
-REG_PROGRAM = """{app}\MYPROG.EXE"" ""%1"""
+#REG_PROGRAM = """{app}\MYPROG.EXE"" ""%1"""
 APPLICATION = str(local_config.__appname__ )+ '.exe'
 AppName = str(local_config.__appname__ )
 AppVerName = str(local_config.__appname__ )+'-'+ str(local_config.__version__)
@@ -29,7 +29,7 @@ DefaultDirName = os.path.join("{pf}" , AppName+Dev)
 DefaultGroupName = os.path.join(local_config.DefaultGroupName, AppVerName)
 
 OutputBaseFilename = local_config.OutputBaseFilename
-SetupIconFile = "images\\ball.ico"
+SetupIconFile = os.path.join(root, 'src', 'sas', 'sasview', 'images', 'ball.ico')
 LicenseFile = 'license.txt'
 DisableProgramGroupPage = 'yes'
 Compression = 'lzma'
