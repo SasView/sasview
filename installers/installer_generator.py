@@ -6,6 +6,7 @@ exists in the current directory. Edit local_config.py according to your needs.
 from __future__ import print_function
 
 import os
+import sys
 import string
 
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
