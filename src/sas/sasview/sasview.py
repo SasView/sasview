@@ -49,7 +49,7 @@ class SasView():
             fitting_plug = module.Plugin()
             self.gui.add_perspective(fitting_plug)
         except Exception:
-            logger.error("%s: could not find Fitting plug-in module"% APP_NAME)
+            logger.error("%s: could not find Fitting plug-in module", APP_NAME)
             logger.error(traceback.format_exc())
 
         # P(r) perspective
@@ -57,8 +57,8 @@ class SasView():
             import sas.sasgui.perspectives.pr as module
             pr_plug = module.Plugin()
             self.gui.add_perspective(pr_plug)
-        except:
-            logger.error("%s: could not find P(r) plug-in module"% APP_NAME)
+        except Exception:
+            logger.error("%s: could not find P(r) plug-in module", APP_NAME)
             logger.error(traceback.format_exc())
 
         # Invariant perspective
@@ -66,9 +66,9 @@ class SasView():
             import sas.sasgui.perspectives.invariant as module
             invariant_plug = module.Plugin()
             self.gui.add_perspective(invariant_plug)
-        except Exception as e :
-            logger.error("%s: could not find Invariant plug-in module"% \
-                          APP_NAME)
+        except Exception:
+            logger.error("%s: could not find Invariant plug-in module",
+                         APP_NAME)
             logger.error(traceback.format_exc())
 
         # Corfunc perspective
@@ -76,7 +76,7 @@ class SasView():
             import sas.sasgui.perspectives.corfunc as module
             corfunc_plug = module.Plugin()
             self.gui.add_perspective(corfunc_plug)
-        except:
+        except Exception:
             logger.error("Unable to load corfunc module")
 
         # Calculator perspective
@@ -84,9 +84,9 @@ class SasView():
             import sas.sasgui.perspectives.calculator as module
             calculator_plug = module.Plugin()
             self.gui.add_perspective(calculator_plug)
-        except:
-            logger.error("%s: could not find Calculator plug-in module"% \
-                                                        APP_NAME)
+        except Exception:
+            logger.error("%s: could not find Calculator plug-in module",
+                         APP_NAME)
             logger.error(traceback.format_exc())
 
         # File converter tool
@@ -94,9 +94,9 @@ class SasView():
             import sas.sasgui.perspectives.file_converter as module
             converter_plug = module.Plugin()
             self.gui.add_perspective(converter_plug)
-        except:
-            logger.error("%s: could not find File Converter plug-in module"% \
-                                                        APP_NAME)
+        except Exception:
+            logger.error("%s: could not find File Converter plug-in module",
+                         APP_NAME)
             logger.error(traceback.format_exc())
 
         # Add welcome page
@@ -131,22 +131,25 @@ def setup_wx():
     logger = logging.getLogger(__name__)
     WX_ENV_VAR = "SASVIEW_WX_VERSION"
     if WX_ENV_VAR in os.environ:
-        logger.info("You have set the %s environment variable to %s." % \
-                     (WX_ENV_VAR, os.environ[WX_ENV_VAR]))
+        logger.info("You have set the %s environment variable to %s.",
+                    WX_ENV_VAR, os.environ[WX_ENV_VAR])
         import wxversion
         if wxversion.checkInstalled(os.environ[WX_ENV_VAR]):
-            logger.info("Version %s of wxPython is installed, so using that version." % os.environ[WX_ENV_VAR])
+            logger.info("Version %s of wxPython is installed, so using that version.",
+                        os.environ[WX_ENV_VAR])
             wxversion.select(os.environ[WX_ENV_VAR])
         else:
-            logger.error("Version %s of wxPython is not installed, so using default version." % os.environ[WX_ENV_VAR])
+            logger.error("Version %s of wxPython is not installed, so using default version.",
+                         os.environ[WX_ENV_VAR])
     else:
-        logger.info("You have not set the %s environment variable, so using default version of wxPython." % WX_ENV_VAR)
+        logger.info("You have not set the %s environment variable, so using default version of wxPython.",
+                    WX_ENV_VAR)
 
     import wx
 
     try:
-        logger.info("Wx version: %s" % wx.__version__)
-    except:
+        logger.info("Wx version: %s", wx.__version__)
+    except AttributeError:
         logger.error("Wx version: error reading version")
 
     from . import wxcruft
@@ -196,7 +199,7 @@ def run_cli():
             sys.exit(start_ipython())
         except ImportError:
             import code
-            code.interact()
+            code.interact(local={'exit': sys.exit})
     else:
         # Run sasview as a python script interpreter
         ## Run sasview as an interactive python interpreter
