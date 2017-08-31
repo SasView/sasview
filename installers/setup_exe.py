@@ -149,12 +149,6 @@ manifest = """
     </assembly>
     """%{'arch': arch}
 
-if is_64bits:
-    msvcrtdll = glob(r"C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*.*")
-else:
-    msvcrtdll = glob(r"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*.*")
-msvcrtdll_data_files = ("Microsoft.VC90.CRT", msvcrtdll) if msvcrtdll else None
-
 class Target:
     def __init__(self, **kw):
         self.__dict__.update(kw)
@@ -278,9 +272,13 @@ if atlas_dlls:
 elif mkl_dlls:
     data_files.append(('.', mkl_dlls))
 
-if msvcrtdll_data_files is not None:
+if is_64bits:
+    msvcrtdll = glob(r"C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*.*")
+else:
+    msvcrtdll = glob(r"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*.*")
+if msvcrtdll:
     # install the MSVC 9 runtime dll's into the application folder
-    data_files.append(msvcrtdll_data_files)
+    data_files.append(("Microsoft.VC90.CRT", msvcrtdll))
 
 # NOTE:
 #  need an empty __init__.py in site-packages/numpy/distutils/tests and site-packages/mpl_toolkits
@@ -351,7 +349,8 @@ target_console_client = Target(
     dest_base="SasViewCom"
 )
 
-bundle_option = 3 if is_64bits else 2
+#bundle_option = 3 if is_64bits else 2
+bundle_option = 3
 generate_installer()
 #initialize category stuff
 #from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller

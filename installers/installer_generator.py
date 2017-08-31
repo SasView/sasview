@@ -29,7 +29,7 @@ DefaultDirName = os.path.join("{pf}" , AppName+Dev)
 DefaultGroupName = os.path.join(local_config.DefaultGroupName, AppVerName)
 
 OutputBaseFilename = local_config.OutputBaseFilename
-SetupIconFile = os.path.join(root, 'src', 'sas', 'sasview', 'images', 'ball.ico')
+SetupIconFile = local_config.SetupIconFile_win
 LicenseFile = 'license.txt'
 DisableProgramGroupPage = 'yes'
 Compression = 'lzma'
