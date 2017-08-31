@@ -306,7 +306,7 @@ packages.extend([
 packages.append('periodictable.core') # not found automatically
 
 # For the interactive interpreter SasViewCom make sure ipython is available
-packages.extend(['IPython', 'pyreadline', 'pyreadline.unicode_helper'])
+#packages.extend(['IPython', 'pyreadline', 'pyreadline.unicode_helper'])
 
 # individual models
 includes = ['site', 'lxml._elementpath', 'lxml.etree']
