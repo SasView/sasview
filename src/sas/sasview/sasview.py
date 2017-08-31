@@ -190,9 +190,13 @@ def run_cli():
     setup_mpl()
     if len(sys.argv) == 1:
         # Run sasview as an interactive python interpreter
-        sys.argv = ["ipython", "--pylab"]
-        from IPython import start_ipython
-        sys.exit(start_ipython())
+        try:
+            from IPython import start_ipython
+            sys.argv = ["ipython", "--pylab"]
+            sys.exit(start_ipython())
+        except ImportError:
+            import code
+            code.interact()
     else:
         # Run sasview as a python script interpreter
         ## Run sasview as an interactive python interpreter
