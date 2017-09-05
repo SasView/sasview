@@ -221,8 +221,6 @@ html_add_permalinks = ""
 # TODO: seems like angstroms is defined twice.
 LATEX_PREAMBLE=r"""
 \usepackage[utf8]{inputenc}      % Allow unicode symbols in text
-\usepackage{underscore}          % Allow underscore outside math mode
-\usepackage[T1]{fontenc}         % Use underscore character from font
 \newcommand{\lt}{<}              % HTML needs \lt rather than <
 \newcommand{\gt}{>}              % HTML needs \gt rather than >
 \renewcommand{\AA}{\text{\r{A}}} % Allow \AA in math mode
