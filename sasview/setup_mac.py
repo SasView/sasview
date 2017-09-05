@@ -50,7 +50,7 @@ import sas.sasgui.guiframe as guiframe
 DATA_FILES += guiframe.data_files()
 
 #CANSAxml reader data files
-RESOURCES_FILES.append(os.path.join(sas.sascalc.dataloader.readers.get_data_path(),'defaults.json'))
+RESOURCES_FILES.append(os.path.join(sas.sascalc.dataloader.readers.get_data_path()))
 
 DATA_FILES.append('logging.ini')
 
