@@ -98,7 +98,7 @@ class FittingWidgetTest(unittest.TestCase):
 
         # test the delegate a bit
         delegate = fittingWindow.lstPoly.itemDelegate()
-        self.assertEqual(len(delegate.POLYDISPERSE_FUNCTIONS), 4)
+        self.assertEqual(len(delegate.POLYDISPERSE_FUNCTIONS), 5)
         self.assertEqual(delegate.editableParameters(), [2, 3, 4, 5])
         self.assertEqual(delegate.poly_function, 6)
         self.assertIsInstance(delegate.combo_updated, QtCore.pyqtBoundSignal)
@@ -336,16 +336,16 @@ class FittingWidgetTest(unittest.TestCase):
 
         # Check the poly model
         self.assertEqual(self.widget._poly_model.rowCount(), 4)
-        self.assertEqual(self.widget._poly_model.columnCount(), 7)
+        self.assertEqual(self.widget._poly_model.columnCount(), 8)
 
         # Test the header
-        self.assertEqual(self.widget.lstPoly.horizontalHeader().count(), 7)
+        self.assertEqual(self.widget.lstPoly.horizontalHeader().count(), 8)
         self.assertFalse(self.widget.lstPoly.horizontalHeader().stretchLastSection())
 
         # Test presence of comboboxes in last column
         for row in xrange(self.widget._poly_model.rowCount()):
             func_index = self.widget._poly_model.index(row, 6)
-            #self.assertTrue(isinstance(self.widget.lstPoly.indexWidget(func_index), QtGui.QComboBox))
+            self.assertTrue(isinstance(self.widget.lstPoly.indexWidget(func_index), QtGui.QComboBox))
             self.assertIn('Distribution of', self.widget._poly_model.item(row, 0).text())
         #self.widget.close()
 

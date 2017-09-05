@@ -39,6 +39,7 @@ from sas.qtgui.Perspectives.Fitting.ViewDelegate import ModelViewDelegate
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import PolyViewDelegate
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import MagnetismViewDelegate
 
+
 TAB_MAGNETISM = 4
 TAB_POLY = 3
 CATEGORY_DEFAULT = "Choose category..."
@@ -180,6 +181,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.undo_supported = False
         self.page_stack = []
         self.all_data = []
+        # Polydisp widget table default index for function combobox
+        self.orig_poly_index = 3
 
         # Data for chosen model
         self.model_data = None
@@ -1560,14 +1563,18 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         # For the given row, invoke the "array" combo handler
         array_caption = 'array'
-        self.onPolyComboIndexChange(array_caption, row_index)
+
         # Get the combo box reference
         ind = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_function)
         widget = self.lstPoly.indexWidget(ind)
+
         # Update the combo box so it displays "array"
         widget.blockSignals(True)
         widget.setCurrentIndex(self.lstPoly.itemDelegate().POLYDISPERSE_FUNCTIONS.index(array_caption))
         widget.blockSignals(False)
+
+        # Invoke the file reader
+        self.onPolyComboIndexChange(array_caption, row_index)
 
     def onPolyComboIndexChange(self, combo_string, row_index):
         """
@@ -1577,7 +1584,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         param = self.model_parameters.form_volume_parameters[row_index]
         file_index = self._poly_model.index(row_index, self.lstPoly.itemDelegate().poly_function)
         combo_box = self.lstPoly.indexWidget(file_index)
-        orig_index = combo_box.currentIndex()
 
         def updateFunctionCaption(row):
             # Utility function for update of polydispersity function name in the main model
@@ -1598,7 +1604,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
                 [self._poly_model.item(row_index, i).setEnabled(False) for i in xrange(lo, hi)]
                 return
             except IOError:
-                combo_box.setCurrentIndex(orig_index)
+                combo_box.setCurrentIndex(self.orig_poly_index)
                 # Pass for cancel/bad read
                 pass
 
@@ -1620,6 +1626,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self._poly_model.setData(nsigs_index, QtCore.QVariant(nsigs))
 
         self.iterateOverModel(updateFunctionCaption)
+        self.orig_poly_index = combo_box.currentIndex()
 
     def loadPolydispArray(self, row_index):
         """
