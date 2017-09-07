@@ -30,7 +30,8 @@ DEFAULT_STRINGS = {'GUIFRAME_WIDTH':-1,
                    'WELCOME_PANEL_SHOW':False,
                    'CLEANUP_PLOT':False,
                    'DEFAULT_PERSPECTIVE':'Fitting',
-                   'DEFAULT_OPEN_FOLDER': None}
+                   'DEFAULT_OPEN_FOLDER': None,
+                   'SAS_OPENCL': None}
 try:
     CURRENT_STRINGS = {'GUIFRAME_WIDTH':CURRENT.GUIFRAME_WIDTH,
                        'GUIFRAME_HEIGHT':CURRENT.GUIFRAME_HEIGHT,
@@ -44,7 +45,8 @@ try:
                        'WELCOME_PANEL_SHOW':CURRENT.WELCOME_PANEL_SHOW,
                        'CLEANUP_PLOT':CURRENT.CLEANUP_PLOT,
                        'DEFAULT_PERSPECTIVE':CURRENT.DEFAULT_PERSPECTIVE,
-                       'DEFAULT_OPEN_FOLDER':CURRENT.DEFAULT_OPEN_FOLDER}
+                       'DEFAULT_OPEN_FOLDER':CURRENT.DEFAULT_OPEN_FOLDER,
+                       'SAS_OPENCL': None}
 except:
     CURRENT_STRINGS = DEFAULT_STRINGS
 FONT_VARIANT = 0
@@ -126,9 +128,9 @@ class StartupConfiguration(wx.Dialog):
                 #p_panel = self.parent._mgr.GetPane(panel.window_name)
                 width, _ = panel.frame.GetSizeTuple()
                 if panel.frame.IsShown():
-                    if p_size == None or width > p_size:
+                    if p_size is None or width > p_size:
                         p_size = width
-            if p_size == None:
+            if p_size is None:
                 p_size = CURRENT_STRINGS['PLOPANEL_WIDTH']
             self.current_string['PLOPANEL_WIDTH'] = p_size
             
@@ -142,7 +144,7 @@ class StartupConfiguration(wx.Dialog):
                 self.current_string['CONTROL_HEIGHT'] = -1
                 
             data_pw, _ = self.parent.panels["data_panel"].frame.GetSizeTuple()
-            if data_pw == None:
+            if data_pw is None:
                 data_pw = CURRENT_STRINGS['DATAPANEL_WIDTH']
             self.current_string['DATAPANEL_WIDTH'] = data_pw
             
@@ -205,7 +207,7 @@ class StartupConfiguration(wx.Dialog):
         out_f.write("#Application appearance custom configuration\n" )
         for key, item in strings.iteritems():
             if (key == 'DEFAULT_PERSPECTIVE') or \
-                (key == 'DEFAULT_OPEN_FOLDER' and item != None):
+                (key == 'DEFAULT_OPEN_FOLDER' and item is not None):
                 out_f.write("%s = \"%s\"\n" % (key,str(item)))
             else:
                 out_f.write("%s = %s\n" % (key,str(item)))

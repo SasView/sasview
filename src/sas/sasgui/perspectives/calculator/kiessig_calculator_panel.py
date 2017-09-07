@@ -189,7 +189,7 @@ class KiessigThicknessCalculatorPanel(wx.Panel, PanelBase):
         Execute the computation of thickness
         """
         # skip for another event
-        if event != None:
+        if event is not None:
             event.Skip()
         dq = self.dq_name_tcl.GetValue()
         self.kiessig.set_deltaq(dq)
@@ -236,7 +236,7 @@ class KiessigWindow(widget.CHILD_FRAME):
         """
         Close event
         """
-        if self.manager != None:
+        if self.manager is not None:
             self.manager.kiessig_frame = None
         self.Destroy()
 

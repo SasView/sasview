@@ -7,6 +7,8 @@ import logging
 import sys
 import wx.html as html
 
+logger = logging.getLogger(__name__)
+
 ISPDF = False
 if sys.platform == "win32":
     _STATICBOX_WIDTH = 450
@@ -134,6 +136,6 @@ class BaseReportDialog(wx.Dialog):
             self.Update()
             return pisaStatus.err
         except:
-            logging.error("Error creating pdf: %s" % sys.exc_value)
+            logger.error("Error creating pdf: %s" % sys.exc_value)
         return False
 

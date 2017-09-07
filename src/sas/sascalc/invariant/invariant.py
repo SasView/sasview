@@ -16,7 +16,7 @@ This module implements invariant and its related computations.
 
 """
 import math
-import numpy
+import numpy as np
 
 from sas.sascalc.dataloader.data_info import Data1D as LoaderData1D
 
@@ -49,7 +49,7 @@ class Transform(object):
             assert len(data.x) == len(data.dy)
             dy = data.dy
         else:
-            dy = numpy.ones(len(data.y))
+            dy = np.ones(len(data.y))
 
         # Transform the data
         data_points = zip(data.x, data.y, dy)
@@ -62,9 +62,9 @@ class Transform(object):
         x_out, y_out, dy_out = zip(*output_points)
 
         # Create Data1D object
-        x_out = numpy.asarray(x_out)
-        y_out = numpy.asarray(y_out)
-        dy_out = numpy.asarray(dy_out)
+        x_out = np.asarray(x_out)
+        y_out = np.asarray(y_out)
+        dy_out = np.asarray(dy_out)
         linear_data = LoaderData1D(x=x_out, y=y_out, dy=dy_out)
 
         return linear_data
@@ -157,12 +157,12 @@ class Guinier(Transform):
 
         :param x: array of q-values
         """
-        p1 = numpy.array([self.dscale * math.exp(-((self.radius * q) ** 2 / 3)) \
+        p1 = np.array([self.dscale * math.exp(-((self.radius * q) ** 2 / 3)) \
                           for q in x])
-        p2 = numpy.array([self.scale * math.exp(-((self.radius * q) ** 2 / 3))\
+        p2 = np.array([self.scale * math.exp(-((self.radius * q) ** 2 / 3))\
                      * (-(q ** 2 / 3)) * 2 * self.radius * self.dradius for q in x])
         diq2 = p1 * p1 + p2 * p2
-        return numpy.array([math.sqrt(err) for err in diq2])
+        return np.array([math.sqrt(err) for err in diq2])
 
     def _guinier(self, x):
         """
@@ -181,7 +181,7 @@ class Guinier(Transform):
         if self.radius <= 0:
             msg = "Rg expected positive value, but got %s" % self.radius
             raise ValueError(msg)
-        value = numpy.array([math.exp(-((self.radius * i) ** 2 / 3)) for i in x])
+        value = np.array([math.exp(-((self.radius * i) ** 2 / 3)) for i in x])
         return self.scale * value
 
 class PowerLaw(Transform):
@@ -231,11 +231,11 @@ class PowerLaw(Transform):
         Returns the error on I(q) for the given array of q-values
         :param x: array of q-values
         """
-        p1 = numpy.array([self.dscale * math.pow(q, -self.power) for q in x])
-        p2 = numpy.array([self.scale * self.power * math.pow(q, -self.power - 1)\
+        p1 = np.array([self.dscale * math.pow(q, -self.power) for q in x])
+        p2 = np.array([self.scale * self.power * math.pow(q, -self.power - 1)\
                            * self.dpower for q in x])
         diq2 = p1 * p1 + p2 * p2
-        return numpy.array([math.sqrt(err) for err in diq2])
+        return np.array([math.sqrt(err) for err in diq2])
 
     def _power_law(self, x):
         """
@@ -258,7 +258,7 @@ class PowerLaw(Transform):
             msg = "scale expected positive value, but got %s" % self.scale
             raise ValueError(msg)
 
-        value = numpy.array([math.pow(i, -self.power) for i in x])
+        value = np.array([math.pow(i, -self.power) for i in x])
         return self.scale * value
 
 class Extrapolator(object):
@@ -303,15 +303,15 @@ class Extrapolator(object):
         # Identify the bin range for the fit
         idx = (self.data.x >= qmin) & (self.data.x <= qmax)
 
-        fx = numpy.zeros(len(self.data.x))
+        fx = np.zeros(len(self.data.x))
 
         # Uncertainty
-        if type(self.data.dy) == numpy.ndarray and \
+        if type(self.data.dy) == np.ndarray and \
             len(self.data.dy) == len(self.data.x) and \
-            numpy.all(self.data.dy > 0):
+                np.all(self.data.dy > 0):
             sigma = self.data.dy
         else:
-            sigma = numpy.ones(len(self.data.x))
+            sigma = np.ones(len(self.data.x))
 
         # Compute theory data f(x)
         fx[idx] = self.data.y[idx]
@@ -328,28 +328,28 @@ class Extrapolator(object):
                                            dy=sigma[idx])
 
         ##power is given only for function = power_law
-        if power != None:
+        if power is not None:
             sigma2 = linearized_data.dy * linearized_data.dy
             a = -(power)
-            b = (numpy.sum(linearized_data.y / sigma2) \
-                 - a * numpy.sum(linearized_data.x / sigma2)) / numpy.sum(1.0 / sigma2)
+            b = (np.sum(linearized_data.y / sigma2) \
+                 - a * np.sum(linearized_data.x / sigma2)) / np.sum(1.0 / sigma2)
 
 
             deltas = linearized_data.x * a + \
-                    numpy.ones(len(linearized_data.x)) * b - linearized_data.y
-            residuals = numpy.sum(deltas * deltas / sigma2)
+                     np.ones(len(linearized_data.x)) * b - linearized_data.y
+            residuals = np.sum(deltas * deltas / sigma2)
 
-            err = math.fabs(residuals) / numpy.sum(1.0 / sigma2)
+            err = math.fabs(residuals) / np.sum(1.0 / sigma2)
             return [a, b], [0, math.sqrt(err)]
         else:
-            A = numpy.vstack([linearized_data.x / linearized_data.dy, 1.0 / linearized_data.dy]).T
-            (p, residuals, _, _) = numpy.linalg.lstsq(A, linearized_data.y / linearized_data.dy)
+            A = np.vstack([linearized_data.x / linearized_data.dy, 1.0 / linearized_data.dy]).T
+            (p, residuals, _, _) = np.linalg.lstsq(A, linearized_data.y / linearized_data.dy)
 
             # Get the covariance matrix, defined as inv_cov = a_transposed * a
-            err = numpy.zeros(2)
+            err = np.zeros(2)
             try:
-                inv_cov = numpy.dot(A.transpose(), A)
-                cov = numpy.linalg.pinv(inv_cov)
+                inv_cov = np.dot(A.transpose(), A)
+                cov = np.linalg.pinv(inv_cov)
                 err_matrix = math.fabs(residuals) * cov
                 err = [math.sqrt(err_matrix[0][0]), math.sqrt(err_matrix[1][1])]
             except:
@@ -388,7 +388,7 @@ class InvariantCalculator(object):
         # The data should be private
         self._data = self._get_data(data)
         # get the dxl if the data is smeared: This is done only once on init.
-        if self._data.dxl != None and self._data.dxl.all() > 0:
+        if self._data.dxl is not None and self._data.dxl.all() > 0:
             # assumes constant dxl
             self._smeared = self._data.dxl[0]
 
@@ -433,7 +433,7 @@ class InvariantCalculator(object):
         # Verify that the errors are set correctly
         if new_data.dy is None or len(new_data.x) != len(new_data.dy) or \
             (min(new_data.dy) == 0 and max(new_data.dy) == 0):
-            new_data.dy = numpy.ones(len(new_data.x))
+            new_data.dy = np.ones(len(new_data.x))
         return  new_data
 
     def _fit(self, model, qmin=Q_MINIMUM, qmax=Q_MAXIMUM, power=None):
@@ -570,7 +570,7 @@ class InvariantCalculator(object):
         :return: extrapolate data create from data
         """
         #create new Data1D to compute the invariant
-        q = numpy.linspace(start=q_start,
+        q = np.linspace(start=q_start,
                            stop=q_end,
                            num=npts,
                            endpoint=True)
@@ -578,8 +578,8 @@ class InvariantCalculator(object):
         diq = model.evaluate_model_errors(q)
 
         result_data = LoaderData1D(x=q, y=iq, dy=diq)
-        if self._smeared != None:
-            result_data.dxl = self._smeared * numpy.ones(len(q))
+        if self._smeared is not None:
+            result_data.dxl = self._smeared * np.ones(len(q))
         return result_data
 
     def get_data(self):
@@ -690,7 +690,7 @@ class InvariantCalculator(object):
         q_end = self._data.x[max(0, npts_in - 1)]
 
         if q_start >= q_end:
-            return numpy.zeros(0), numpy.zeros(0)
+            return np.zeros(0), np.zeros(0)
 
         return self._get_extrapolated_data(\
                                     model=self._low_extrapolation_function,
@@ -718,7 +718,7 @@ class InvariantCalculator(object):
         q_start = self._data.x[min(_npts, _npts - npts_in)]
 
         if q_start >= q_end:
-            return numpy.zeros(0), numpy.zeros(0)
+            return np.zeros(0), np.zeros(0)
 
         return self._get_extrapolated_data(\
                                 model=self._high_extrapolation_function,

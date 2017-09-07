@@ -21,6 +21,8 @@ from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sascalc.dataloader.readers.cansas_reader import Reader as CansasReader
 from sas.sascalc.dataloader.readers.cansas_reader import get_content
 
+logger = logging.getLogger(__name__)
+
 PRNODE_NAME = 'pr_inversion'
 CANSAS_NS = "cansas1d/1.0"
 
@@ -33,7 +35,8 @@ in_list = [["nterms", "nfunc"],
            ["slit_height", "height"],
            ["qmin", "qmin"],
            ["qmax", "qmax"],
-           ["estimate_bck", "estimate_bck"]]
+           ["estimate_bck", "estimate_bck"],
+           ["bck_value", "bck_value"]]
 
 ## List of P(r) inversion outputs
 out_list = [["elapsed", "elapsed"],
@@ -59,6 +62,7 @@ class InversionState(object):
         self.file = None
         self.estimate_bck = False
         self.timestamp = time.time()
+        self.bck_value = 0.0
 
         # Inversion parameters
         self.nfunc = None
@@ -106,6 +110,7 @@ class InversionState(object):
         state = "File:         %s\n" % self.file
         state += "Timestamp:    %s\n" % self.timestamp
         state += "Estimate bck: %s\n" % str(self.estimate_bck)
+        state += "Bck Value:    %s\n" % str(self.bck_value)
         state += "No. terms:    %s\n" % str(self.nfunc)
         state += "D_max:        %s\n" % str(self.d_max)
         state += "Alpha:        %s\n" % str(self.alpha)
@@ -249,7 +254,7 @@ class InversionState(object):
                 except:
                     msg = "InversionState.fromXML: Could not read "
                     msg += "timestamp\n %s" % sys.exc_value
-                    logging.error(msg)
+                    logger.error(msg)
 
             # Parse inversion inputs
             entry = get_content('ns:inputs', node)
@@ -293,8 +298,8 @@ class InversionState(object):
                         try:
                             self.coefficients.append(float(c))
                         except:
-                            # Bad data, skip. We will count the number of 
-                            # coefficients at the very end and deal with 
+                            # Bad data, skip. We will count the number of
+                            # coefficients at the very end and deal with
                             # inconsistencies then.
                             pass
                     # Sanity check
@@ -305,7 +310,7 @@ class InversionState(object):
                         err_msg += "number of coefficients: "
                         err_msg += "%d %d" % (len(self.coefficients),
                                               self.nfunc)
-                        logging.error(err_msg)
+                        logger.error(err_msg)
                         self.coefficients = None
 
                 # Look for covariance matrix
@@ -326,8 +331,8 @@ class InversionState(object):
                             try:
                                 cov_row.append(float(c))
                             except:
-                                # Bad data, skip. We will count the number of 
-                                # coefficients at the very end and deal with 
+                                # Bad data, skip. We will count the number of
+                                # coefficients at the very end and deal with
                                 # inconsistencies then.
                                 pass
                         # Sanity check: check the number of entries in the row
@@ -342,7 +347,7 @@ class InversionState(object):
                         err_msg += "inconsistant dimensions of the "
                         err_msg += " covariance matrix: "
                         err_msg += "%d %d" % (len(self.covariance), self.nfunc)
-                        logging.error(err_msg)
+                        logger.error(err_msg)
                         self.covariance = None
 
 class Reader(CansasReader):
@@ -429,7 +434,7 @@ class Reader(CansasReader):
         except:
             msg = "XML document does not contain P(r) "
             msg += "information.\n %s" % sys.exc_value
-            logging.info(msg)
+            logger.info(msg)
 
         return state
 
@@ -458,8 +463,8 @@ class Reader(CansasReader):
 
                 tree = etree.parse(path, parser=etree.ETCompatXMLParser())
                 # Check the format version number
-                # Specifying the namespace will take care of the file 
-                #format version 
+                # Specifying the namespace will take care of the file
+                #format version
                 root = tree.getroot()
 
                 entry_list = root.xpath('/ns:SASroot/ns:SASentry',
@@ -470,7 +475,7 @@ class Reader(CansasReader):
                     prstate = self._parse_prstate(entry)
                     #prstate could be None when .svs file is loaded
                     #in this case, skip appending to output
-                    if prstate != None:
+                    if prstate is not None:
                         sas_entry.meta_data['prstate'] = prstate
                         sas_entry.filename = prstate.file
                         output.append(sas_entry)

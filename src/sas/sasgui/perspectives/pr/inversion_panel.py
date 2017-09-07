@@ -17,6 +17,8 @@ from pr_widgets import DataFileTextCtrl
 from pr_widgets import OutputTextCtrl
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
+logger = logging.getLogger(__name__)
+
 if sys.platform.count("win32") > 0:
     FONT_VARIANT = 0
 else:
@@ -67,7 +69,11 @@ class InversionControl(ScrolledPanel, PanelBase):
 
         self.rg_ctl = None
         self.iq0_ctl = None
-        self.bck_chk = None
+        self.bck_value = None
+        self.bck_est_ctl = None
+        self.bck_man_ctl = None
+        self.est_bck = True
+        self.bck_input = None
         self.bck_ctl = None
 
         # TextCtrl for fraction of positive P(r)
@@ -268,7 +274,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         """
         # Ask the user the location of the file to write to.
         path = None
-        if self.parent != None:
+        if self.parent is not None:
             self._default_save_location = self.parent._default_save_location
         dlg = wx.FileDialog(self, "Choose a file",
                             self._default_save_location,
@@ -276,7 +282,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             self._default_save_location = os.path.dirname(path)
-            if self.parent != None:
+            if self.parent is not None:
                 self.parent._default_save_location = self._default_save_location
         else:
             return None
@@ -309,7 +315,7 @@ class InversionControl(ScrolledPanel, PanelBase):
 
         # Read the panel's parameters
         flag, alpha, dmax, nfunc, qmin, \
-        qmax, height, width = self._read_pars()
+        qmax, height, width, bck = self._read_pars()
 
         state.nfunc = nfunc
         state.d_max = dmax
@@ -323,7 +329,8 @@ class InversionControl(ScrolledPanel, PanelBase):
         state.file = self.plot_data.GetValue()
 
         # Background evaluation checkbox
-        state.estimate_bck = self.bck_chk.IsChecked()
+        state.estimate_bck = self.est_bck
+        state.bck_value = bck
 
         # Estimates
         state.nterms_estimate = self.nterms_estimate
@@ -368,8 +375,14 @@ class InversionControl(ScrolledPanel, PanelBase):
         # Data file
         self.plot_data.SetValue(str(state.file))
 
-        # Background evaluation checkbox
-        self.bck_chk.SetValue(state.estimate_bck)
+        # Background value
+        self.bck_est_ctl.SetValue(state.estimate_bck)
+        self.bck_man_ctl.SetValue(not state.estimate_bck)
+        if not state.estimate_bck:
+            self.bck_input.Enable()
+            self.bck_input.SetValue(str(state.bck_value))
+        self.est_bck = state.estimate_bck
+        self.bck_value = state.bck_value
 
         # Estimates
         if state.nterms_estimate is not None:
@@ -428,14 +441,42 @@ class InversionControl(ScrolledPanel, PanelBase):
         pars_sizer.Add(self.plot_data, (iy, 1), (1, 1),
                        wx.EXPAND | wx.LEFT | wx.RIGHT | wx.ADJUST_MINSIZE, 15)
 
-        self.bck_chk = wx.CheckBox(self, -1, "Estimate background level")
-        hint_msg = "Check box to let the fit estimate "
-        hint_msg += "the constant background level."
-        self.bck_chk.SetToolTipString(hint_msg)
-        self.bck_chk.Bind(wx.EVT_CHECKBOX, self._on_pars_changed)
+        radio_sizer = wx.GridBagSizer(5, 5)
+
+        self.bck_est_ctl = wx.RadioButton(self, -1, "Estimate background level",
+            name="estimate_bck", style=wx.RB_GROUP)
+        self.bck_man_ctl = wx.RadioButton(self, -1, "Input manual background level",
+            name="manual_bck")
+
+        self.bck_est_ctl.Bind(wx.EVT_RADIOBUTTON, self._on_bck_changed)
+        self.bck_man_ctl.Bind(wx.EVT_RADIOBUTTON, self._on_bck_changed)
+
+        radio_sizer.Add(self.bck_est_ctl, (0,0), (1,1), wx.LEFT | wx.EXPAND)
+        radio_sizer.Add(self.bck_man_ctl, (0,1), (1,1), wx.RIGHT | wx.EXPAND)
+
         iy += 1
-        pars_sizer.Add(self.bck_chk, (iy, 0), (1, 2),
+        pars_sizer.Add(radio_sizer, (iy, 0), (1, 2),
                        wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+
+        background_label = wx.StaticText(self, -1, "Background: ")
+        self.bck_input = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER,
+            size=(60, 20), value="0.0")
+        self.bck_input.Disable()
+        self.bck_input.Bind(wx.EVT_TEXT, self._read_pars)
+        background_units = wx.StaticText(self, -1, "[A^(-1)]", size=(55, 20))
+        iy += 1
+
+        background_sizer = wx.GridBagSizer(5, 5)
+
+        background_sizer.Add(background_label, (0, 0), (1,1),
+            wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 23)
+        background_sizer.Add(self.bck_input, (0, 1), (1,1),
+            wx.LEFT | wx.ADJUST_MINSIZE, 5)
+        background_sizer.Add(background_units, (0, 2), (1,1),
+            wx.LEFT | wx.ADJUST_MINSIZE, 5)
+        pars_sizer.Add(background_sizer, (iy, 0), (1, 2),
+            wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+
         boxsizer1.Add(pars_sizer, 0, wx.EXPAND)
         vbox.Add(boxsizer1, (iy_vb, 0), (1, 1),
                  wx.LEFT | wx.RIGHT | wx.EXPAND | wx.ADJUST_MINSIZE | wx.TOP, 5)
@@ -709,10 +750,10 @@ class InversionControl(ScrolledPanel, PanelBase):
             float(alpha)
             self.alpha_ctl.SetValue(alpha)
         except ValueError:
-            logging.error("InversionControl._on_accept_alpha got a value that was not a number: %s" % alpha )
+            logger.error("InversionControl._on_accept_alpha got a value that was not a number: %s" % alpha )
         except:
             # No estimate or bad estimate, either do nothing
-            logging.error("InversionControl._on_accept_alpha: %s" % sys.exc_value)
+            logger.error("InversionControl._on_accept_alpha: %s" % sys.exc_value)
 
     def _on_accept_nterms(self, evt):
         """
@@ -725,10 +766,10 @@ class InversionControl(ScrolledPanel, PanelBase):
             float(nterms)
             self.nfunc_ctl.SetValue(nterms)
         except ValueError:
-            logging.error("InversionControl._on_accept_nterms got a value that was not a number: %s" % nterms )
+            logger.error("InversionControl._on_accept_nterms got a value that was not a number: %s" % nterms )
         except:
             # No estimate or bad estimate, either do nothing
-            logging.error("InversionControl._on_accept_nterms: %s" % sys.exc_value)
+            logger.error("InversionControl._on_accept_nterms: %s" % sys.exc_value)
 
     def clear_panel(self):
         """
@@ -761,14 +802,20 @@ class InversionControl(ScrolledPanel, PanelBase):
 
         self._on_pars_changed()
 
+    def _on_bck_changed(self, evt=None):
+        self.est_bck = self.bck_est_ctl.GetValue()
+        if self.est_bck:
+            self.bck_input.Disable()
+        else:
+            self.bck_input.Enable()
+
     def _on_pars_changed(self, evt=None):
         """
         Called when an input parameter has changed
         We will estimate the alpha parameter behind the
         scenes.
         """
-        flag, alpha, dmax, nfunc, qmin, qmax, height, width = self._read_pars()
-        has_bck = self.bck_chk.IsChecked()
+        flag, alpha, dmax, nfunc, qmin, qmax, height, width, bck = self._read_pars()
 
         # If the pars are valid, estimate alpha
         if flag:
@@ -780,7 +827,8 @@ class InversionControl(ScrolledPanel, PanelBase):
                 self._manager.estimate_plot_inversion(alpha=alpha, nfunc=nfunc,
                                                       d_max=dmax,
                                                       q_min=qmin, q_max=qmax,
-                                                      bck=has_bck,
+                                                      est_bck=self.est_bck,
+                                                      bck_val=bck,
                                                       height=height,
                                                       width=width)
 
@@ -794,6 +842,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         qmax = 0
         height = 0
         width = 0
+        background = 0
         flag = True
         # Read slit height
         try:
@@ -887,7 +936,21 @@ class InversionControl(ScrolledPanel, PanelBase):
             self.qmax_ctl.SetBackgroundColour("pink")
             self.qmax_ctl.Refresh()
 
-        return flag, alpha, dmax, nfunc, qmin, qmax, height, width
+        # Read background
+        if not self.est_bck:
+            try:
+                bck_str = self.bck_input.GetValue()
+                if len(bck_str.strip()) == 0:
+                    background = 0.0
+                else:
+                    background = float(bck_str)
+                    self.bck_input.SetBackgroundColour(wx.WHITE)
+            except ValueError:
+                background = 0.0
+                self.bck_input.SetBackgroundColour("pink")
+            self.bck_input.Refresh()
+
+        return flag, alpha, dmax, nfunc, qmin, qmax, height, width, background
 
     def _on_explore(self, evt):
         """
@@ -912,12 +975,11 @@ class InversionControl(ScrolledPanel, PanelBase):
         # Get the data from the form
         # Push it to the manager
 
-        flag, alpha, dmax, nfunc, qmin, qmax, height, width = self._read_pars()
-        has_bck = self.bck_chk.IsChecked()
+        flag, alpha, dmax, nfunc, qmin, qmax, height, width, bck = self._read_pars()
 
         if flag:
             dataset = self.plot_data.GetValue()
-            if dataset == None or len(dataset.strip()) == 0:
+            if dataset is None or len(dataset.strip()) == 0:
                 message = "No data to invert. Select a data set before"
                 message += " proceeding with P(r) inversion."
                 wx.PostEvent(self._manager.parent, StatusEvent(status=message))
@@ -925,7 +987,8 @@ class InversionControl(ScrolledPanel, PanelBase):
                 self._manager.setup_plot_inversion(alpha=alpha, nfunc=nfunc,
                                                    d_max=dmax,
                                                    q_min=qmin, q_max=qmax,
-                                                   bck=has_bck,
+                                                   est_bck=self.est_bck,
+                                                   bck_val = bck,
                                                    height=height,
                                                    width=width)
         else:
@@ -937,7 +1000,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         """
         Choose a new input file for I(q)
         """
-        if not self._manager is None:
+        if self._manager is not None:
             self.plot_data.SetValue(str(data.name))
             try:
                 self._manager.show_data(data=data, reset=True)
@@ -946,7 +1009,7 @@ class InversionControl(ScrolledPanel, PanelBase):
                 self._set_analysis(True)
             except:
                 msg = "InversionControl._change_file: %s" % sys.exc_value
-                logging.error(msg)
+                logger.error(msg)
 
     def on_help(self, event):
         """

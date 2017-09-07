@@ -2,6 +2,7 @@
     Unit tests for DataLoader module 
 """
 
+import os
 import unittest
 from sas.sascalc.dataloader.loader import  Loader, Registry
 class testLoader(unittest.TestCase):
@@ -31,7 +32,7 @@ class testRegistry(unittest.TestCase):
         """
         output = self.L.load('test_data.test')
         self.assertEqual(output.x[0], 1234.)
-        self.assertTrue(self.L.loaders.has_key('.test'))
+        self.assertTrue('.test' in self.L.loaders)
         
 class testZip(unittest.TestCase):
     
@@ -40,9 +41,12 @@ class testZip(unittest.TestCase):
         
         # Create module
         import zipfile
-        z = zipfile.PyZipFile("plugins.zip", 'w')
+        f_name = "plugins.zip"
+        z = zipfile.PyZipFile(f_name, 'w')
         z.writepy("../plugins", "")
         z.close()
+        if os.path.isfile(f_name):
+            os.remove(f_name)
         
     def testplugin_checksetup(self):
         """ 
@@ -60,7 +64,7 @@ class testZip(unittest.TestCase):
         self.L.find_plugins('.')
         output = self.L.load('test_data.test')
         self.assertEqual(output.x[0], 1234.)
-        self.assertTrue(self.L.loaders.has_key('.test'))
+        self.assertTrue('.test' in self.L.loaders)
         
         
 if __name__ == '__main__':

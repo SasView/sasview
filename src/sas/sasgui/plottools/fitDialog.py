@@ -1,7 +1,7 @@
 import wx
 from plottables import Theory1D
 import math
-import numpy
+import numpy as np
 import fittings
 import transform
 import sys
@@ -94,23 +94,23 @@ class LinearFit(wx.Dialog):
         self.cstB = fittings.Parameter(self.model, 'B', self.default_B)
 
         # Set default value of parameter in the dialog panel
-        if self.Avalue == None:
+        if self.Avalue is None:
             self.tcA.SetValue(format_number(self.default_A))
         else:
             self.tcA.SetLabel(format_number(self.Avalue))
-        if self.Bvalue == None:
+        if self.Bvalue is None:
             self.tcB.SetValue(format_number(self.default_B))
         else:
             self.tcB.SetLabel(format_number(self.Bvalue))
-        if self.ErrAvalue == None:
+        if self.ErrAvalue is None:
             self.tcErrA.SetLabel(format_number(0.0))
         else:
             self.tcErrA.SetLabel(format_number(self.ErrAvalue))
-        if self.ErrBvalue == None:
+        if self.ErrBvalue is None:
             self.tcErrB.SetLabel(format_number(0.0))
         else:
             self.tcErrB.SetLabel(format_number(self.ErrBvalue))
-        if self.Chivalue == None:
+        if self.Chivalue is None:
             self.tcChi.SetLabel(format_number(0.0))
         else:
             self.tcChi.SetLabel(format_number(self.Chivalue))
@@ -481,7 +481,7 @@ class LinearFit(wx.Dialog):
                 self.cstB = fittings.Parameter(self.model, 'B', self.default_B)
 
                 if self.xLabel.lower() == "log10(x)":
-                    tempdy = numpy.asarray(tempdy)
+                    tempdy = np.asarray(tempdy)
                     tempdy[tempdy == 0] = 1
                     chisqr, out, cov = fittings.sasfit(self.model,
                                                        [self.cstA, self.cstB],
@@ -490,7 +490,7 @@ class LinearFit(wx.Dialog):
                                                        math.log10(xmin),
                                                        math.log10(xmax))
                 else:
-                    tempdy = numpy.asarray(tempdy)
+                    tempdy = np.asarray(tempdy)
                     tempdy[tempdy == 0] = 1
                     chisqr, out, cov = fittings.sasfit(self.model,
                                                        [self.cstA, self.cstB],
@@ -501,13 +501,13 @@ class LinearFit(wx.Dialog):
                     chisqr = chisqr / len(tempx)
 
                 # Check that cov and out are iterable before displaying them
-                if cov == None:
+                if cov is None:
                     errA = 0.0
                     errB = 0.0
                 else:
                     errA = math.sqrt(cov[0][0])
                     errB = math.sqrt(cov[1][1])
-                if out == None:
+                if out is None:
                     cstA = 0.0
                     cstB = 0.0
                 else:
@@ -571,28 +571,28 @@ class LinearFit(wx.Dialog):
         self.tcChi.SetValue(format_number(Chi))
         if self.rg_on:
             if self.Rg_tctr.IsShown():
-                rg = numpy.sqrt(-3 * float(cstA))
+                rg = np.sqrt(-3 * float(cstA))
                 value = format_number(rg)
                 self.Rg_tctr.SetValue(value)
                 if self.I0_tctr.IsShown():
-                    val = numpy.exp(cstB)
+                    val = np.exp(cstB)
                     self.I0_tctr.SetValue(format_number(val))
             if self.Rgerr_tctr.IsShown():
-                if rg != None and rg != 0:
+                if rg is not None and rg != 0:
                     value = format_number(3 * float(errA) / (2 * rg))
                 else:
                     value = ''
                 self.Rgerr_tctr.SetValue(value)
                 if self.I0err_tctr.IsShown():
-                    val = numpy.abs(numpy.exp(cstB) * errB)
+                    val = np.abs(np.exp(cstB) * errB)
                     self.I0err_tctr.SetValue(format_number(val))
             if self.Diameter_tctr.IsShown():
-                rg = numpy.sqrt(-2 * float(cstA))
-                _diam = 4 * numpy.sqrt(-float(cstA))
+                rg = np.sqrt(-2 * float(cstA))
+                _diam = 4 * np.sqrt(-float(cstA))
                 value = format_number(_diam)
                 self.Diameter_tctr.SetValue(value)
             if self.Diametererr_tctr.IsShown():
-                if rg != None and rg != 0:
+                if rg is not None and rg != 0:
                     value = format_number(8 * float(errA) / _diam)
                 else:
                     value = ''

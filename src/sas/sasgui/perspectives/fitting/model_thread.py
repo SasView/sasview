@@ -3,7 +3,7 @@
 """
 
 import time
-import numpy
+import numpy as np
 import math
 from sas.sascalc.data_util.calcthread import CalcThread
 from sas.sascalc.fit.MultiplicationModel import MultiplicationModel
@@ -52,10 +52,10 @@ class Calc2D(CalcThread):
         """
         self.starttime = time.time()
         # Determine appropriate q range
-        if self.qmin == None:
+        if self.qmin is None:
             self.qmin = 0
-        if self.qmax == None:
-            if self.data != None:
+        if self.qmax is None:
+            if self.data is not None:
                 newx = math.pow(max(math.fabs(self.data.xmax),
                                    math.fabs(self.data.xmin)), 2)
                 newy = math.pow(max(math.fabs(self.data.ymax),
@@ -67,31 +67,30 @@ class Calc2D(CalcThread):
             raise ValueError, msg
 
         # Define matrix where data will be plotted
-        radius = numpy.sqrt((self.data.qx_data * self.data.qx_data) + \
+        radius = np.sqrt((self.data.qx_data * self.data.qx_data) + \
                     (self.data.qy_data * self.data.qy_data))
 
         # For theory, qmax is based on 1d qmax 
         # so that must be mulitified by sqrt(2) to get actual max for 2d
         index_model = (self.qmin <= radius) & (radius <= self.qmax)
         index_model = index_model & self.data.mask
-        index_model = index_model & numpy.isfinite(self.data.data)
+        index_model = index_model & np.isfinite(self.data.data)
 
         if self.smearer is not None:
             # Set smearer w/ data, model and index.
             fn = self.smearer
             fn.set_model(self.model)
             fn.set_index(index_model)
-            # Get necessary data from self.data and set the data for smearing
-            fn.get_data()
             # Calculate smeared Intensity
             #(by Gaussian averaging): DataLoader/smearing2d/Smearer2D()
             value = fn.get_value()
         else:
             # calculation w/o smearing
-            value = self.model.evalDistribution(\
-                [self.data.qx_data[index_model],
-                 self.data.qy_data[index_model]])
-        output = numpy.zeros(len(self.data.qx_data))
+            value = self.model.evalDistribution([
+                self.data.qx_data[index_model],
+                self.data.qy_data[index_model]
+            ])
+        output = np.zeros(len(self.data.qx_data))
         # output default is None
         # This method is to distinguish between masked
         #point(nan) and data point = 0.
@@ -163,7 +162,7 @@ class Calc1D(CalcThread):
         Compute model 1d value given qmin , qmax , x value
         """
         self.starttime = time.time()
-        output = numpy.zeros((len(self.data.x)))
+        output = np.zeros((len(self.data.x)))
         index = (self.qmin <= self.data.x) & (self.data.x <= self.qmax)
 
         # If we use a smearer, also return the unsmeared model
@@ -175,16 +174,17 @@ class Calc1D(CalcThread):
             first_bin, last_bin = self.smearer.get_bin_range(self.qmin,
                                                              self.qmax)
             mask = self.data.x[first_bin:last_bin+1]
-            unsmeared_output = numpy.zeros((len(self.data.x)))
+            unsmeared_output = np.zeros((len(self.data.x)))
             unsmeared_output[first_bin:last_bin+1] = self.model.evalDistribution(mask)
+            self.smearer.model = self.model
             output = self.smearer(unsmeared_output, first_bin, last_bin)
 
             # Rescale data to unsmeared model
             # Check that the arrays are compatible. If we only have a model but no data,
             # the length of data.y will be zero.
-            if isinstance(self.data.y, numpy.ndarray) and output.shape == self.data.y.shape:
-                unsmeared_data = numpy.zeros((len(self.data.x)))
-                unsmeared_error = numpy.zeros((len(self.data.x)))
+            if isinstance(self.data.y, np.ndarray) and output.shape == self.data.y.shape:
+                unsmeared_data = np.zeros((len(self.data.x)))
+                unsmeared_error = np.zeros((len(self.data.x)))
                 unsmeared_data[first_bin:last_bin+1] = self.data.y[first_bin:last_bin+1]\
                                                         * unsmeared_output[first_bin:last_bin+1]\
                                                         / output[first_bin:last_bin+1]
@@ -197,13 +197,21 @@ class Calc1D(CalcThread):
         else:
             output[index] = self.model.evalDistribution(self.data.x[index])
 
-        sq_model = None
-        pq_model = None
+        sq_values = None
+        pq_values = None
+        s_model = None
+        p_model = None
         if isinstance(self.model, MultiplicationModel):
-            sq_model = numpy.zeros((len(self.data.x)))
-            pq_model = numpy.zeros((len(self.data.x)))
-            sq_model[index] = self.model.s_model.evalDistribution(self.data.x[index])
-            pq_model[index] = self.model.p_model.evalDistribution(self.data.x[index])
+            s_model = self.model.s_model
+            p_model = self.model.p_model
+        elif hasattr(self.model, "get_composition_models"):
+            p_model, s_model = self.model.get_composition_models()
+
+        if p_model is not None and s_model is not None:
+            sq_values = np.zeros((len(self.data.x)))
+            pq_values = np.zeros((len(self.data.x)))
+            sq_values[index] = s_model.evalDistribution(self.data.x[index])
+            pq_values[index] = p_model.evalDistribution(self.data.x[index])
 
         elapsed = time.time() - self.starttime
 
@@ -220,8 +228,8 @@ class Calc1D(CalcThread):
                       unsmeared_model=unsmeared_output,
                       unsmeared_data=unsmeared_data,
                       unsmeared_error=unsmeared_error,
-                      pq_model=pq_model,
-                      sq_model=sq_model)
+                      pq_model=pq_values,
+                      sq_model=sq_values)
 
     def results(self):
         """

@@ -10,6 +10,8 @@ NOTES:
                mf.import_hook('pytz.tzinfo', m, ['UTC'])
    12/05/2011: Needs macholib >= 1.4.3 and py2app >= 0.6.4 to create a 64-bit app
 """
+from __future__ import print_function
+
 from setuptools import setup
 import periodictable.xsf
 import sas.sascalc.dataloader.readers
@@ -27,7 +29,7 @@ root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 platform = '%s-%s'%(get_platform(),sys.version[:3])
 build_path = os.path.join(root, 'build','lib.'+platform)
 sys.path.insert(0, build_path)
-print "BUILDING PATH INSIDE", build_path
+print("BUILDING PATH INSIDE", build_path)
 ICON = local_config.SetupIconFile_mac
 EXTENSIONS_LIST = []
 DATA_FILES = []
@@ -48,7 +50,9 @@ import sas.sasgui.guiframe as guiframe
 DATA_FILES += guiframe.data_files()
 
 #CANSAxml reader data files
-RESOURCES_FILES.append(os.path.join(sas.sascalc.dataloader.readers.get_data_path(),'defaults.json'))
+RESOURCES_FILES.append(os.path.join(sas.sascalc.dataloader.readers.get_data_path()))
+
+DATA_FILES.append('logging.ini')
 
 # Locate libxml2 library
 lib_locs = ['/usr/local/lib', '/usr/lib']
@@ -57,7 +61,7 @@ for item in lib_locs:
     libxml_path_test = '%s/libxml2.2.dylib' % item
     if os.path.isfile(libxml_path_test):
         libxml_path = libxml_path_test
-if libxml_path == None:
+if libxml_path is None:
     raise RuntimeError, "Could not find libxml2 on the system"
 
 APP = ['sasview.py']
@@ -67,7 +71,7 @@ if os.path.isfile("BUILD_NUMBER"):
 
 # See if the documentation has been built, and if so include it.
 doc_path = os.path.join(build_path, "doc")
-print doc_path
+print(doc_path)
 if os.path.exists(doc_path):
     for dirpath, dirnames, filenames in os.walk(doc_path):
         for filename in filenames:

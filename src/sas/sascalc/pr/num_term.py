@@ -1,9 +1,13 @@
+from __future__ import print_function
+
 import math
-import numpy
+import numpy as np
 import copy
 import sys
 import logging
 from sas.sascalc.pr.invertor import Invertor
+
+logger = logging.getLogger(__name__)
 
 class NTermEstimator(object):
     """
@@ -64,7 +68,7 @@ class NTermEstimator(object):
         self.err_list = []
         self.alpha_list = []
         for k in range(self.nterm_min, self.nterm_max, 1):
-            if self.isquit_func != None:
+            if self.isquit_func is not None:
                 self.isquit_func()
             best_alpha, message, _ = inver.estimate_alpha(k)
             inver.alpha = best_alpha
@@ -151,12 +155,12 @@ class NTermEstimator(object):
 #For testing
 def load(path):
     # Read the data from the data file
-    data_x = numpy.zeros(0)
-    data_y = numpy.zeros(0)
-    data_err = numpy.zeros(0)
+    data_x = np.zeros(0)
+    data_y = np.zeros(0)
+    data_err = np.zeros(0)
     scale = None
     min_err = 0.0
-    if not path == None:
+    if path is not None:
         input_f = open(path, 'r')
         buff = input_f.read()
         lines = buff.split('\n')
@@ -168,18 +172,18 @@ def load(path):
                 if len(toks) > 2:
                     err = float(toks[2])
                 else:
-                    if scale == None:
+                    if scale is None:
                         scale = 0.05 * math.sqrt(test_y)
                         #scale = 0.05/math.sqrt(y)
                         min_err = 0.01 * y
                     err = scale * math.sqrt(test_y) + min_err
                     #err = 0
 
-                data_x = numpy.append(data_x, test_x)
-                data_y = numpy.append(data_y, test_y)
-                data_err = numpy.append(data_err, err)
+                data_x = np.append(data_x, test_x)
+                data_y = np.append(data_y, test_y)
+                data_err = np.append(data_err, err)
             except:
-                logging.error(sys.exc_value)
+                logger.error(sys.exc_value)
 
     return data_x, data_y, data_err
 
@@ -194,4 +198,4 @@ if __name__ == "__main__":
     invert.err = erro
     # Testing estimator
     est = NTermEstimator(invert)
-    print est.num_terms()
+    print(est.num_terms())

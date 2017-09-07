@@ -36,10 +36,9 @@ def check_model(path):
     qx, qy =  np.array([0.01, 0.01]), np.array([0.1, 0.1])
     Iqxy = model.evalDistribution([qx, qy])
 
-    result = """
-    Iq(%s) = %s
-    Iqxy(%s, %s) = %s
-    """%(q, Iq, qx, qy, Iqxy)
+    # check the model's unit tests run
+    from sasmodels.model_test import run_one
+    result = run_one(path)
 
     return result
 
@@ -88,7 +87,7 @@ class ResizableScrolledMessageDialog(wx.Dialog):
         text = wx.TextCtrl(self, -1, msg, style=wx.TE_MULTILINE | wx.TE_READONLY)
         ok = wx.Button(self, wx.ID_OK, "OK")
 
-        # Mysterious constraint layouts from 
+        # Mysterious constraint layouts from
         # https://www.wxpython.org/docs/api/wx.lib.layoutf.Layoutf-class.html
         lc = layoutf.Layoutf('t=t5#1;b=t5#2;l=l5#1;r=r5#1', (self,ok))
         text.SetConstraints(lc)
@@ -117,9 +116,9 @@ class PyConsole(editor.EditorNotebookFrame):
         self.base = base
         self.panel = panel
         self._add_menu()
-        if filename != None:
+        if filename is not None:
             dataDir = os.path.dirname(filename)
-        elif self.parent != None:
+        elif self.parent is not None:
             dataDir = self.parent._default_save_location
         else:
              dataDir = None
@@ -127,7 +126,7 @@ class PyConsole(editor.EditorNotebookFrame):
         self.Centre()
 
         # See if there is a corresponding C file
-        if filename != None:
+        if filename is not None:
             c_filename = os.path.splitext(filename)[0] + ".c"
             if os.path.isfile(c_filename):
                 self.bufferCreate(c_filename)
@@ -243,7 +242,7 @@ class PyConsole(editor.EditorNotebookFrame):
             self.bufferCreate(result.path)
 
         # See if there is a corresponding C file
-        if result.path != None:
+        if result.path is not None:
             c_filename = os.path.splitext(result.path)[0] + ".c"
             if os.path.isfile(c_filename):
                 self.bufferCreate(c_filename)
@@ -301,8 +300,8 @@ class PyConsole(editor.EditorNotebookFrame):
         fname = self.editor.getStatus()[0]
         success = show_model_output(self, fname)
 
-        # Update custom model list in fitpage combobox
-        if success and self._manager != None and self.panel != None:
+        # Update plugin model list in fitpage combobox
+        if success and self._manager is not None and self.panel is not None:
             self._manager.set_edit_menu_helper(self.parent)
             wx.CallAfter(self._manager.update_custom_combo)
 
@@ -336,7 +335,7 @@ class PyConsole(editor.EditorNotebookFrame):
         """
         Close event
         """
-        if self.base != None:
+        if self.base is not None:
             self.base.py_frame = None
         self.Destroy()
 

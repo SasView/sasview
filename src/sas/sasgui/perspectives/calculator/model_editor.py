@@ -4,11 +4,11 @@ the easy editor which provides a simple interface with tooltip help to enter
 the parameters of the model and their default value and a panel to input a
 function of y (usually the intensity).  It also provides a drop down of
 standard available math functions.  Finally a full python editor panel for
-complete customizatin is provided.
+complete customization is provided.
 
-:TODO the writiong of the file and name checking (and maybe some other
-funtions?) should be moved to a computational module which could be called
-fropm a python script.  Basically one just needs to pass the name,
+:TODO the writing of the file and name checking (and maybe some other
+functions?) should be moved to a computational module which could be called
+from a python script.  Basically one just needs to pass the name,
 description text and function text (or in the case of the composite editor
 the names of the first and second model and the operator to be used).
 '''
@@ -22,6 +22,8 @@ the names of the first and second model and the operator to be used).
 #
 #copyright 2009, University of Tennessee
 ################################################################################
+from __future__ import print_function
+
 import wx
 import sys
 import os
@@ -31,6 +33,8 @@ import logging
 from wx.py.editwindow import EditWindow
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 from .pyconsole import show_model_output, check_model
+
+logger = logging.getLogger(__name__)
 
 
 if sys.platform.count("win32") > 0:
@@ -60,7 +64,7 @@ def _delete_file(path):
 class TextDialog(wx.Dialog):
     """
     Dialog for easy custom composite models.  Provides a wx.Dialog panel
-    to choose two existing models (including pre-existing custom models which
+    to choose two existing models (including pre-existing Plugin Models which
     may themselves be composite models) as well as an operation on those models
     (add or multiply) the resulting model will add a scale parameter for summed
     models and a background parameter for a multiplied model.
@@ -379,12 +383,12 @@ class TextDialog(wx.Dialog):
             info = 'Info'
             color = 'blue'
         except:
-            msg = "Easy Custom Sum/Multipy: Error occurred..."
+            msg = "Easy Sum/Multipy Plugin: Error occurred..."
             info = 'Error'
             color = 'red'
         self._msg_box.SetLabel(msg)
         self._msg_box.SetForegroundColour(color)
-        if self.parent.parent != None:
+        if self.parent.parent is not None:
             from sas.sasgui.guiframe.events import StatusEvent
             wx.PostEvent(self.parent.parent, StatusEvent(status=msg,
                                                          info=info))
@@ -475,7 +479,7 @@ class TextDialog(wx.Dialog):
         On Select an Operator
         """
         # For Mac
-        if event != None:
+        if event is not None:
             event.Skip()
         item = event.GetEventObject()
         text = item.GetValue()
@@ -500,7 +504,7 @@ class TextDialog(wx.Dialog):
 
         self.factor = factor
         self._operator = operator
-        self.explanation = "  Custom Model = %s %s (model1 %s model2)\n" % \
+        self.explanation = "  Plugin Model = %s %s (model1 %s model2)\n" % \
                            (self.factor, f_oper, self._operator)
         self.explanationctr.SetLabel(self.explanation)
         self.name = name + M_NAME
@@ -616,7 +620,7 @@ class TextDialog(wx.Dialog):
 
 class EditorPanel(wx.ScrolledWindow):
     """
-    Custom model function editor
+    Simple Plugin Model function editor
     """
     def __init__(self, parent, base, path, title, *args, **kwds):
         kwds['name'] = title
@@ -638,6 +642,7 @@ class EditorPanel(wx.ScrolledWindow):
         self.name_sizer = None
         self.name_hsizer = None
         self.name_tcl = None
+        self.overwrite_cb = None
         self.desc_sizer = None
         self.desc_tcl = None
         self.param_sizer = None
@@ -651,7 +656,9 @@ class EditorPanel(wx.ScrolledWindow):
         self._msg_box = None
         self.msg_sizer = None
         self.warning = ""
-        self._description = "New Custom Model"
+        #This does not seem to be used anywhere so commenting out for now
+        #    -- PDB 2/26/17
+        #self._description = "New Plugin Model"
         self.function_tcl = None
         self.math_combo = None
         self.bt_apply = None
@@ -682,10 +689,10 @@ class EditorPanel(wx.ScrolledWindow):
         """
         #title name [string]
         name_txt = wx.StaticText(self, -1, 'Function Name : ')
-        overwrite_cb = wx.CheckBox(self, -1, "Overwrite existing plugin model of this name?", (10, 10))
-        overwrite_cb.SetValue(False)
-        overwrite_cb.SetToolTipString("Overwrite it if already exists?")
-        wx.EVT_CHECKBOX(self, overwrite_cb.GetId(), self.on_over_cb)
+        self.overwrite_cb = wx.CheckBox(self, -1, "Overwrite existing plugin model of this name?", (10, 10))
+        self.overwrite_cb.SetValue(False)
+        self.overwrite_cb.SetToolTipString("Overwrite it if already exists?")
+        wx.EVT_CHECKBOX(self, self.overwrite_cb.GetId(), self.on_over_cb)
         self.name_tcl = wx.TextCtrl(self, -1, size=(PANEL_WIDTH * 3 / 5, -1))
         self.name_tcl.Bind(wx.EVT_TEXT_ENTER, self.on_change_name)
         self.name_tcl.SetValue('')
@@ -693,7 +700,7 @@ class EditorPanel(wx.ScrolledWindow):
         hint_name = "Unique Model Function Name."
         self.name_tcl.SetToolTipString(hint_name)
         self.name_hsizer.AddMany([(self.name_tcl, 0, wx.LEFT | wx.TOP, 0),
-                                  (overwrite_cb, 0, wx.LEFT, 20)])
+                                  (self.overwrite_cb, 0, wx.LEFT, 20)])
         self.name_sizer.AddMany([(name_txt, 0, wx.LEFT | wx.TOP, 10),
                                  (self.name_hsizer, 0,
                                   wx.LEFT | wx.TOP | wx.BOTTOM, 10)])
@@ -733,7 +740,7 @@ class EditorPanel(wx.ScrolledWindow):
 
         self.param_sizer.AddMany([(param_txt, 0, wx.LEFT, 10),
                                   (self.param_tcl, 1, wx.EXPAND | wx.ALL, 10)])
-        
+
         # Parameters with polydispersity
         pd_param_txt = wx.StaticText(self, -1, 'Fit Parameters requiring ' + \
                                      'polydispersity (if any): ')
@@ -748,7 +755,7 @@ class EditorPanel(wx.ScrolledWindow):
                                     wx.CLIP_CHILDREN | wx.SUNKEN_BORDER)
         self.pd_param_tcl.setDisplayLineNumbers(True)
         self.pd_param_tcl.SetToolTipString(pd_param_tip)
-        
+
         self.param_sizer.AddMany([(pd_param_txt, 0, wx.LEFT, 10),
                                   (self.pd_param_tcl, 1, wx.EXPAND | wx.ALL, 10)])
 
@@ -866,7 +873,7 @@ class EditorPanel(wx.ScrolledWindow):
         self.function_tcl.InsertText(pos, label)
         # Put the cursor at appropriate position
         length = len(label)
-        print length
+        print(length)
         if label[length-1] == ')':
             length -= 1
         f_pos = pos + length
@@ -974,7 +981,7 @@ class EditorPanel(wx.ScrolledWindow):
             msg = "Name exists already."
 
         # Prepare the messagebox
-        if self.base != None and not msg:
+        if self.base is not None and not msg:
             self.base.update_custom_combo()
             # Passed exception in import test as it will fail for sasmodels.sasview_model class
             # Should add similar test for new style?
@@ -982,22 +989,24 @@ class EditorPanel(wx.ScrolledWindow):
             try:
                 exec "from %s import Model" % name
             except:
-                logging.error(sys.exc_value)
+                logger.error(sys.exc_value)
 
         # Prepare the messagebox
         if msg:
             info = 'Error'
             color = 'red'
+            self.overwrite_cb.SetValue(True)
+            self.overwrite_name = True
         else:
             self._notes = result
-            msg = "Successful! Please look for %s in Customized Models."%name
+            msg = "Successful! Please look for %s in Plugin Models."%name
             msg += "  " + self._notes
             info = 'Info'
             color = 'blue'
         self._msg_box.SetLabel(msg)
         self._msg_box.SetForegroundColour(color)
         # Send msg to the top window
-        if self.base != None:
+        if self.base is not None:
             from sas.sasgui.guiframe.events import StatusEvent
             wx.PostEvent(self.base.parent,
                          StatusEvent(status=msg+check_err, info=info))
@@ -1023,20 +1032,20 @@ class EditorPanel(wx.ScrolledWindow):
         has_scipy = func_str.count("scipy.")
         if has_scipy:
             lines.insert(0, 'import scipy')
-        
-        # Think about 2D later        
+
+        # Think about 2D later
         #self.is_2d = func_str.count("#self.ndim = 2")
         #line_2d = ''
         #if self.is_2d:
         #    line_2d = CUSTOM_2D_TEMP.split('\n')
-        
-        # Also think about test later        
+
+        # Also think about test later
         #line_test = TEST_TEMPLATE.split('\n')
         #local_params = ''
         #spaces = '        '#8spaces
         spaces4  = ' '*4
         spaces13 = ' '*13
-        spaces16 = ' '*16     
+        spaces16 = ' '*16
         param_names = []    # to store parameter names
         has_scipy = func_str.count("scipy.")
         if has_scipy:
@@ -1048,34 +1057,34 @@ class EditorPanel(wx.ScrolledWindow):
             # hard-coded in the template as shown below.
             out_f.write(line + '\n')
             if line.count('#name'):
-                out_f.write('name = "%s" \n' % name)               
+                out_f.write('name = "%s" \n' % name)
             elif line.count('#title'):
-                out_f.write('title = "User model for %s"\n' % name)               
+                out_f.write('title = "User model for %s"\n' % name)
             elif line.count('#description'):
-                out_f.write('description = "%s"\n' % desc_str)               
+                out_f.write('description = "%s"\n' % desc_str)
             elif line.count('#parameters'):
                 out_f.write('parameters = [ \n')
                 for param_line in param_str.split('\n'):
                     p_line = param_line.lstrip().rstrip()
                     if p_line:
-                        pname, pvalue = self.get_param_helper(p_line)
+                        pname, pvalue, desc = self.get_param_helper(p_line)
                         param_names.append(pname)
-                        out_f.write("%s['%s', '', %s, [-numpy.inf, numpy.inf], '', ''],\n" % (spaces16, pname, pvalue))
+                        out_f.write("%s['%s', '', %s, [-numpy.inf, numpy.inf], '', '%s'],\n" % (spaces16, pname, pvalue, desc))
                 for param_line in pd_param_str.split('\n'):
                     p_line = param_line.lstrip().rstrip()
                     if p_line:
-                        pname, pvalue = self.get_param_helper(p_line)
+                        pname, pvalue, desc = self.get_param_helper(p_line)
                         param_names.append(pname)
-                        out_f.write("%s['%s', '', %s, [-numpy.inf, numpy.inf], 'volume', ''],\n" % (spaces16, pname, pvalue))
+                        out_f.write("%s['%s', '', %s, [-numpy.inf, numpy.inf], 'volume', '%s'],\n" % (spaces16, pname, pvalue, desc))
                 out_f.write('%s]\n' % spaces13)
-            
+
         # No form_volume or ER available in simple model editor
         out_f.write('def form_volume(*arg): \n')
         out_f.write('    return 1.0 \n')
         out_f.write('\n')
         out_f.write('def ER(*arg): \n')
         out_f.write('    return 1.0 \n')
-        
+
         # function to compute
         out_f.write('\n')
         out_f.write('def Iq(x ')
@@ -1084,9 +1093,9 @@ class EditorPanel(wx.ScrolledWindow):
         out_f.write('):\n')
         for func_line in func_str.split('\n'):
             out_f.write('%s%s\n' % (spaces4, func_line))
-        
+
         Iqxy_string = 'return Iq(numpy.sqrt(x**2+y**2) '
-            
+
         out_f.write('\n')
         out_f.write('def Iqxy(x, y ')
         for name in param_names:
@@ -1106,14 +1115,20 @@ class EditorPanel(wx.ScrolledWindow):
         """
         items = line.split(";")
         for item in items:
-            name = item.split("=")[0].lstrip().rstrip()
+            name = item.split("=")[0].strip()
+            description = ""
             try:
-                value = item.split("=")[1].lstrip().rstrip()
+                value = item.split("=")[1].strip()
+                if value.count("#"):
+                    # If line ends in a comment, remove it before parsing float
+                    index = value.index("#")
+                    description = value[(index + 1):].strip()
+                    value = value[:value.index("#")].strip()
                 float(value)
-            except:
+            except ValueError:
                 value = 1.0 # default
 
-        return name, value
+        return name, value, description
 
     def set_function_helper(self, line):
         """
@@ -1137,7 +1152,7 @@ class EditorPanel(wx.ScrolledWindow):
 
     def on_help(self, event):
         """
-        Bring up the Custom Model Editor Documentation whenever
+        Bring up the New Plugin Model Editor Documentation whenever
         the HELP button is clicked.
 
         Calls DocumentationWindow with the path of the location within the
@@ -1185,11 +1200,11 @@ class EditorWindow(wx.Frame):
         On close event
         """
         self.Show(False)
-        #if self.parent != None:
+        #if self.parent is not None:
         #    self.parent.new_model_frame = None
         #self.Destroy()
 
-## Templates for custom models
+## Templates for plugin models
 
 CUSTOM_TEMPLATE = """
 from math import *
@@ -1197,13 +1212,13 @@ import os
 import sys
 import numpy
 
-#name 
+#name
 
 #title
 
 #description
 
-#parameters 
+#parameters
 
 """
 
@@ -1383,7 +1398,7 @@ class Model(Model1DPlugin):
         return name
 
     def _get_upper_name(self, name=None):
-        if name == None:
+        if name is None:
             return ""
         upper_name = ""
         str_name = str(name)

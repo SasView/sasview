@@ -10,12 +10,14 @@
 #
 #copyright 2009, University of Tennessee
 ################################################################################
+from __future__ import print_function
+
 import re
 import sys
 import os
 import wx
 import logging
-import numpy
+import numpy as np
 import time
 from copy import deepcopy
 import traceback
@@ -44,8 +46,11 @@ from sas.sasgui.perspectives.calculator.model_editor import TextDialog
 from sas.sasgui.perspectives.calculator.model_editor import EditorWindow
 from sas.sasgui.guiframe.gui_manager import MDIFrame
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
+from sas.sasgui.perspectives.fitting.gpu_options import GpuOptions
 
 from . import models
+
+logger = logging.getLogger(__name__)
 
 MAX_NBR_DATA = 4
 
@@ -117,7 +122,7 @@ class Plugin(PluginBase):
         # take care of saving  data, model and page associated with each other
         self.page_finder = {}
         # Log startup
-        logging.info("Fitting plug-in started")
+        logger.info("Fitting plug-in started")
         self.batch_capable = self.get_batch_capable()
 
     def get_batch_capable(self):
@@ -192,6 +197,10 @@ class Plugin(PluginBase):
         self.bumps_options_menu = self.menu1.FindItemById(self.id_bumps_options)
         self.bumps_options_menu.Enable(True)
 
+        self.id_gpu_options_panel = wx.NewId()
+        self.menu1.Append(self.id_gpu_options_panel, "OpenCL Options", "Choose OpenCL driver or turn it off")
+        wx.EVT_MENU(owner, self.id_gpu_options_panel, self.on_gpu_options)
+
         self.id_result_panel = wx.NewId()
         self.menu1.Append(self.id_result_panel, "Fit Results", "Show fit results panel")
         wx.EVT_MENU(owner, self.id_result_panel, self.on_fit_results)
@@ -219,9 +228,8 @@ class Plugin(PluginBase):
             raise
 
         self.id_edit = wx.NewId()
-        editmodel_help = "Edit customized model sample file"
         self.menu1.AppendMenu(self.id_edit, "Plugin Model Operations",
-                              self.edit_model_menu, editmodel_help)
+                              self.edit_model_menu)
         #create  menubar items
         return [(self.menu1, self.sub_menu)]
 
@@ -248,14 +256,22 @@ class Plugin(PluginBase):
         label = self.delete_menu.GetLabel(event_id)
         toks = os.path.splitext(label)
         path = os.path.join(models.find_plugins_dir(), toks[0])
+        message = "Are you sure you want to delete the file {}?".format(path)
+        dlg = wx.MessageDialog(self.frame, message, '', wx.YES_NO | wx.ICON_QUESTION)
+        if not dlg.ShowModal() == wx.ID_YES:
+            return
         try:
             for ext in ['.py', '.pyc']:
                 p_path = path + ext
+                if ext == '.pyc' and not os.path.isfile(path + ext):
+                    # If model is invalid, .pyc file may not exist as model has
+                    # never been compiled. Don't try and delete it
+                    continue
                 os.remove(p_path)
             self.update_custom_combo()
             if os.path.isfile(p_path):
-                msg = "Sorry! Could not be able to delete the default "
-                msg += "custom model... \n"
+                msg = "Sorry! unable to delete the default "
+                msg += "plugin model... \n"
                 msg += "Please manually remove the files (.py, .pyc) "
                 msg += "in the 'plugin_models' folder \n"
                 msg += "inside of the SasView application, "
@@ -268,7 +284,7 @@ class Plugin(PluginBase):
                 for item in self.edit_menu.GetMenuItems():
                     if item.GetLabel() == label:
                         self.edit_menu.DeleteItem(item)
-                        msg = "The custom model, %s, has been deleted." % label
+                        msg = "The plugin model, %s, has been deleted." % label
                         evt = StatusEvent(status=msg, type='stop', info='info')
                         wx.PostEvent(self.parent, evt)
                         break
@@ -295,7 +311,7 @@ class Plugin(PluginBase):
         """
         Make new model
         """
-        if self.new_model_frame != None:
+        if self.new_model_frame is not None:
             self.new_model_frame.Show(False)
             self.new_model_frame.Show(True)
         else:
@@ -325,7 +341,7 @@ class Plugin(PluginBase):
             self.set_edit_menu_helper(self.parent, self.delete_custom_model)
             temp = self.fit_panel.reset_pmodel_list()
             if temp:
-                # Set the new custom model list for all fit pages
+                # Set the new plugin model list for all fit pages
                 for uid, page in self.fit_panel.opened_pages.iteritems():
                     if hasattr(page, "formfactorbox"):
                         page.model_list_box = temp
@@ -341,7 +357,7 @@ class Plugin(PluginBase):
                             else:
                                 page.formfactorbox.SetLabel(current_val)
         except:
-            logging.error("update_custom_combo: %s", sys.exc_value)
+            logger.error("update_custom_combo: %s", sys.exc_value)
 
     def set_edit_menu(self, owner):
         """
@@ -352,7 +368,7 @@ class Plugin(PluginBase):
         self.edit_model_menu.Append(wx_id, 'New Plugin Model',
                                    'Add a new model function')
         wx.EVT_MENU(owner, wx_id, self.make_new_model)
-        
+
         wx_id = wx.NewId()
         self.edit_model_menu.Append(wx_id, 'Sum|Multi(p1, p2)',
                                     'Sum of two model functions')
@@ -374,12 +390,12 @@ class Plugin(PluginBase):
         self.edit_model_menu.Append(wx_id, 'Load Plugin Models',
           '(Re)Load all models present in user plugin_models folder')
         wx.EVT_MENU(owner, wx_id, self.load_plugin_models)
-                
+
     def set_edit_menu_helper(self, owner=None, menu=None):
         """
         help for setting list of the edit model menu labels
         """
-        if menu == None:
+        if menu is None:
             menu = self.edit_custom_model
         list_fnames = os.listdir(models.find_plugins_dir())
         list_fnames.sort()
@@ -434,7 +450,7 @@ class Plugin(PluginBase):
             msg = "%s already opened\n" % str(page.window_caption)
             wx.PostEvent(self.parent, StatusEvent(status=msg))
 
-        if page != None:
+        if page is not None:
             return set_focus_page(page)
         if caption == "Const & Simul Fit":
             self.sim_page = self.fit_panel.add_sim_page(caption=caption)
@@ -581,7 +597,7 @@ class Plugin(PluginBase):
             except Exception:
                 msg = "Fitting: cannot deal with the theory received"
                 evt = StatusEvent(status=msg, info="error")
-                logging.error("set_theory " + msg + "\n" + str(sys.exc_value))
+                logger.error("set_theory " + msg + "\n" + str(sys.exc_value))
                 wx.PostEvent(self.parent, evt)
 
     def set_state(self, state=None, datainfo=None, format=None):
@@ -627,7 +643,7 @@ class Plugin(PluginBase):
             # Load fitting state
             state = self.temp_state[self.state_index]
             #panel state should have model selection to set_state
-            if state.formfactorcombobox != None:
+            if state.formfactorcombobox is not None:
                 #set state
                 data = self.parent.create_gui_data(state.data)
                 data.group_id = state.data.group_id
@@ -801,6 +817,13 @@ class Plugin(PluginBase):
         self.result_frame.Show()
         self.result_frame.Raise()
 
+    def on_gpu_options(self, event=None):
+        """
+        Make the Fit Results panel visible.
+        """
+        dialog = GpuOptions(None, wx.ID_ANY, "")
+        dialog.Show()
+
     def stop_fit(self, uid):
         """
         Stop the fit
@@ -863,14 +886,6 @@ class Plugin(PluginBase):
             self.draw_model(model=model, data=data, page_id=uid, smearer=smear,
                 enable1D=enable1D, enable2D=enable2D,
                 qmin=qmin, qmax=qmax, weight=weight)
-            self._mac_sleep(0.2)
-
-    def _mac_sleep(self, sec=0.2):
-        """
-        Give sleep to MAC
-        """
-        if ON_MAC:
-            time.sleep(sec)
 
     def draw_model(self, model, page_id, data=None, smearer=None,
                    enable1D=True, enable2D=False,
@@ -1010,7 +1025,7 @@ class Plugin(PluginBase):
                 wx.PostEvent(self.parent, evt)
                 return False
         ## If a thread is already started, stop it
-        #if self.calc_fit!= None and self.calc_fit.isrunning():
+        #if self.calc_fitis not None and self.calc_fit.isrunning():
         #    self.calc_fit.stop()
         msg = "Fitting is in progress..."
         wx.PostEvent(self.parent, StatusEvent(status=msg, type="progress"))
@@ -1019,7 +1034,6 @@ class Plugin(PluginBase):
         handler = ConsoleUpdate(parent=self.parent,
                                 manager=self,
                                 improvement_delta=0.1)
-        self._mac_sleep(0.2)
 
         # batch fit
         batch_inputs = {}
@@ -1101,7 +1115,7 @@ class Plugin(PluginBase):
         try:
             page = self.fit_panel.add_empty_page()
             # add data associated to the page created
-            if page != None:
+            if page is not None:
                 evt = StatusEvent(status="Page Created", info="info")
                 wx.PostEvent(self.parent, evt)
             else:
@@ -1120,7 +1134,7 @@ class Plugin(PluginBase):
         """
         page = self.fit_panel.set_data(data)
         # page could be None when loading state files
-        if page == None:
+        if page is None:
             return page
         #append Data1D to the panel containing its theory
         #if theory already plotted
@@ -1188,7 +1202,7 @@ class Plugin(PluginBase):
         unschedule or schedule all fitproblem to be fit
         """
         # case that uid is not specified
-        if uid == None:
+        if uid is None:
             for page_id in self.page_finder.keys():
                 self.page_finder[page_id].schedule_tofit(value)
         # when uid is given
@@ -1211,7 +1225,7 @@ class Plugin(PluginBase):
         if len(param) > 0:
             for item in param:
                 ## check if constraint
-                if item[0] != None and item[1] != None:
+                if item[0] is not None and item[1] is not None:
                     listOfConstraint.append((item[0], item[1]))
         new_model = model
         fitter.set_model(new_model, fit_id, pars, data=data,
@@ -1226,7 +1240,7 @@ class Plugin(PluginBase):
         added to self.page_finder
         """
         panel = self.plot_panel
-        if panel == None:
+        if panel is None:
             raise ValueError, "Fitting:_onSelect: NonType panel"
         Plugin.on_perspective(self, event=event)
         self.select_data(panel)
@@ -1248,7 +1262,7 @@ class Plugin(PluginBase):
     def update_fit(self, result=None, msg=""):
         """
         """
-        print "update_fit result", result
+        print("update_fit result", result)
 
     def _batch_fit_complete(self, result, pars, page_id,
                             batch_outputs, batch_inputs, elapsed=None):
@@ -1259,7 +1273,6 @@ class Plugin(PluginBase):
         :param page_id: list of page ids which called fit function
         :param elapsed: time spent at the fitting level
         """
-        self._mac_sleep(0.2)
         uid = page_id[0]
         if uid in self.fit_thread_list.keys():
             del self.fit_thread_list[uid]
@@ -1321,7 +1334,7 @@ class Plugin(PluginBase):
                     copy_data = deepcopy(data)
                     new_theory = copy_data.data
                     new_theory[res.index] = res.theory
-                    new_theory[res.index == False] = numpy.nan
+                    new_theory[res.index == False] = np.nan
                     correct_result = True
                 #get all fittable parameters of the current model
                 param_list = model.getParamList()
@@ -1330,9 +1343,9 @@ class Plugin(PluginBase):
                         param in param_list:
                         param_list.remove(param)
                 if not correct_result or res.fitness is None or \
-                    not numpy.isfinite(res.fitness) or \
-                    numpy.any(res.pvec == None) or not \
-                    numpy.all(numpy.isfinite(res.pvec)):
+                    not np.isfinite(res.fitness) or \
+                        np.any(res.pvec is None) or not \
+                        np.all(np.isfinite(res.pvec)):
                     data_name = str(None)
                     if data is not None:
                         data_name = str(data.name)
@@ -1341,7 +1354,7 @@ class Plugin(PluginBase):
                         model_name = str(model.name)
                     msg += "Data %s and Model %s did not fit.\n" % (data_name,
                                                                     model_name)
-                    ERROR = numpy.NAN
+                    ERROR = np.NAN
                     cell = BatchCell()
                     cell.label = res.fitness
                     cell.value = res.fitness
@@ -1355,9 +1368,9 @@ class Plugin(PluginBase):
                             batch_outputs[param].append(ERROR)
                             batch_inputs["error on %s" % str(param)].append(ERROR)
                 else:
-                    # TODO: Why sometimes res.pvec comes with numpy.float64?
+                    # TODO: Why sometimes res.pvec comes with np.float64?
                     # probably from scipy lmfit
-                    if res.pvec.__class__ == numpy.float64:
+                    if res.pvec.__class__ == np.float64:
                         res.pvec = [res.pvec]
 
                     cell = BatchCell()
@@ -1453,7 +1466,7 @@ class Plugin(PluginBase):
         cell.label = data.name
         cell.value = index
 
-        if theory_data != None:
+        if theory_data is not None:
             #Suucessful fit
             theory_data.id = wx.NewId()
             theory_data.name = model.name + "[%s]" % str(data.name)
@@ -1509,7 +1522,6 @@ class Plugin(PluginBase):
         if page_id is None:
             page_id = []
         ## fit more than 1 model at the same time
-        self._mac_sleep(0.2)
         try:
             index = 0
             # Update potential simfit page(s)
@@ -1522,18 +1534,18 @@ class Plugin(PluginBase):
                 res = result[index]
                 fit_msg = res.mesg
                 if res.fitness is None or \
-                    not numpy.isfinite(res.fitness) or \
-                    numpy.any(res.pvec == None) or \
-                    not numpy.all(numpy.isfinite(res.pvec)):
+                    not np.isfinite(res.fitness) or \
+                        np.any(res.pvec is None) or \
+                    not np.all(np.isfinite(res.pvec)):
                     fit_msg += "\nFitting did not converge!!!"
                     wx.CallAfter(self._update_fit_button, page_id)
                 else:
                     #set the panel when fit result are float not list
-                    if res.pvec.__class__ == numpy.float64:
+                    if res.pvec.__class__ == np.float64:
                         pvec = [res.pvec]
                     else:
                         pvec = res.pvec
-                    if res.stderr.__class__ == numpy.float64:
+                    if res.stderr.__class__ == np.float64:
                         stderr = [res.stderr]
                     else:
                         stderr = res.stderr
@@ -1541,7 +1553,7 @@ class Plugin(PluginBase):
                     # Make sure we got all results
                     #(CallAfter is important to MAC)
                     try:
-                        #if res != None:
+                        #if res is not None:
                         wx.CallAfter(cpage.onsetValues, res.fitness,
                                      res.param_list,
                                      pvec, stderr)
@@ -1584,7 +1596,7 @@ class Plugin(PluginBase):
         Set batch_reset_flag
         """
         event.Skip()
-        if self.menu1 == None:
+        if self.menu1 is None:
             return
         menu_item = self.menu1.FindItemById(self.id_reset_flag)
         flag = menu_item.IsChecked()
@@ -1643,7 +1655,7 @@ class Plugin(PluginBase):
         qmax = evt.qmax
         caption = evt.caption
         enable_smearer = evt.enable_smearer
-        if model == None:
+        if model is None:
             return
         if uid not in self.page_finder.keys():
             return
@@ -1681,7 +1693,7 @@ class Plugin(PluginBase):
         new_plot = Data1D(x=x, y=y)
         if dy is None:
             new_plot.is_data = False
-            new_plot.dy = numpy.zeros(len(y))
+            new_plot.dy = np.zeros(len(y))
             # If this is a theory curve, pick the proper symbol to make it a curve
             new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
         else:
@@ -1695,7 +1707,7 @@ class Plugin(PluginBase):
         _xaxis, _xunit = data.get_xaxis()
         new_plot.title = data.name
         new_plot.group_id = data.group_id
-        if new_plot.group_id == None:
+        if new_plot.group_id is None:
             new_plot.group_id = data.group_id
         new_plot.id = data_id
         # Find if this theory was already plotted and replace that plot given
@@ -1729,74 +1741,78 @@ class Plugin(PluginBase):
             @param unsmeared_data: data, rescaled to unsmeared model
             @param unsmeared_error: data error, rescaled to unsmeared model
         """
-        try:
-            numpy.nan_to_num(y)
-            new_plot = self.create_theory_1D(x, y, page_id, model, data, state,
-                                             data_description=model.name,
-                                             data_id=str(page_id) + " " + data.name)
-            if unsmeared_model is not None:
-                self.create_theory_1D(x, unsmeared_model, page_id, model, data, state,
-                                      data_description=model.name + " unsmeared",
-                                      data_id=str(page_id) + " " + data.name + " unsmeared")
 
-                if unsmeared_data is not None and unsmeared_error is not None:
-                    self.create_theory_1D(x, unsmeared_data, page_id, model, data, state,
-                                          data_description="Data unsmeared",
-                                          data_id="Data  " + data.name + " unsmeared",
-                                          dy=unsmeared_error)
-                
-            if sq_model is not None and pq_model is not None:
-                self.create_theory_1D(x, sq_model, page_id, model, data, state,
-                                      data_description=model.name + " S(q)",
-                                      data_id=str(page_id) + " " + data.name + " S(q)")
-                self.create_theory_1D(x, pq_model, page_id, model, data, state,
-                                      data_description=model.name + " P(q)",
-                                      data_id=str(page_id) + " " + data.name + " P(q)")
+        number_finite = np.count_nonzero(np.isfinite(y))
+        np.nan_to_num(y)
+        new_plot = self.create_theory_1D(x, y, page_id, model, data, state,
+                                         data_description=model.name,
+                                         data_id=str(page_id) + " " + data.name)
+        if unsmeared_model is not None:
+            self.create_theory_1D(x, unsmeared_model, page_id, model, data, state,
+                                  data_description=model.name + " unsmeared",
+                                  data_id=str(page_id) + " " + data.name + " unsmeared")
 
+            if unsmeared_data is not None and unsmeared_error is not None:
+                self.create_theory_1D(x, unsmeared_data, page_id, model, data, state,
+                                      data_description="Data unsmeared",
+                                      data_id="Data  " + data.name + " unsmeared",
+                                      dy=unsmeared_error)
+        # Comment this out until we can get P*S models with correctly populated parameters
+        #if sq_model is not None and pq_model is not None:
+        #    self.create_theory_1D(x, sq_model, page_id, model, data, state,
+        #                          data_description=model.name + " S(q)",
+        #                          data_id=str(page_id) + " " + data.name + " S(q)")
+        #    self.create_theory_1D(x, pq_model, page_id, model, data, state,
+        #                          data_description=model.name + " P(q)",
+        #                          data_id=str(page_id) + " " + data.name + " P(q)")
 
-            current_pg = self.fit_panel.get_page_by_id(page_id)
-            title = new_plot.title
-            batch_on = self.fit_panel.get_page_by_id(page_id).batch_on
-            if not batch_on:
-                wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
-                                            title=str(title)))
-            elif plot_result:
-                top_data_id = self.fit_panel.get_page_by_id(page_id).data.id
-                if data.id == top_data_id:
-                    wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
-                                            title=str(title)))
-            caption = current_pg.window_caption
-            self.page_finder[page_id].set_fit_tab_caption(caption=caption)
+        current_pg = self.fit_panel.get_page_by_id(page_id)
+        title = new_plot.title
+        batch_on = self.fit_panel.get_page_by_id(page_id).batch_on
+        if not batch_on:
+            wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=str(title)))
+        elif plot_result:
+            top_data_id = self.fit_panel.get_page_by_id(page_id).data.id
+            if data.id == top_data_id:
+                wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=str(title)))
+        caption = current_pg.window_caption
+        self.page_finder[page_id].set_fit_tab_caption(caption=caption)
 
-            self.page_finder[page_id].set_theory_data(data=new_plot,
+        self.page_finder[page_id].set_theory_data(data=new_plot,
                                                       fid=data.id)
-            if toggle_mode_on:
-                wx.PostEvent(self.parent,
-                             NewPlotEvent(group_id=str(page_id) + " Model2D",
+        if toggle_mode_on:
+            wx.PostEvent(self.parent,
+                         NewPlotEvent(group_id=str(page_id) + " Model2D",
                                           action="Hide"))
-            else:
-                if update_chisqr:
-                    wx.PostEvent(current_pg,
-                                 Chi2UpdateEvent(output=self._cal_chisqr(
+        else:
+            if update_chisqr:
+                wx.PostEvent(current_pg,
+                             Chi2UpdateEvent(output=self._cal_chisqr(
                                                                 data=data,
                                                                 fid=fid,
                                                                 weight=weight,
-                                                            page_id=page_id,
-                                                            index=index)))
-                else:
-                    self._plot_residuals(page_id=page_id, data=data, fid=fid,
-                                         index=index, weight=weight)
+                                                                page_id=page_id,
+                                                                index=index)))
+            else:
+                self._plot_residuals(page_id=page_id, data=data, fid=fid,
+                                     index=index, weight=weight)
 
+        if not number_finite:
+            logger.error("Using the present parameters the model does not return any finite value. ")
+            msg = "Computing Error: Model did not return any finite value."
+            wx.PostEvent(self.parent, StatusEvent(status = msg, info="error"))
+        else:
             msg = "Computation  completed!"
+            if number_finite != y.size:
+                msg += ' PROBLEM: For some Q values the model returns non finite intensities!'
+                logger.error("For some Q values the model returns non finite intensities.")
             wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
-        except:
-            raise
 
     def _calc_exception(self, etype, value, tb):
         """
         Handle exception from calculator by posting it as an error.
         """
-        logging.error("".join(traceback.format_exception(etype, value, tb)))
+        logger.error("".join(traceback.format_exception(etype, value, tb)))
         msg = traceback.format_exception(etype, value, tb, limit=1)
         evt = StatusEvent(status="".join(msg), type="stop", info="error")
         wx.PostEvent(self.parent, evt)
@@ -1815,7 +1831,8 @@ class Plugin(PluginBase):
         Complete get the result of modelthread and create model 2D
         that can be plot.
         """
-        numpy.nan_to_num(image)
+        number_finite = np.count_nonzero(np.isfinite(image))
+        np.nan_to_num(image)
         new_plot = Data2D(image=image, err_image=data.err_data)
         new_plot.name = model.name + '2d'
         new_plot.title = "Analytical model 2D "
@@ -1873,8 +1890,17 @@ class Plugin(PluginBase):
             else:
                 self._plot_residuals(page_id=page_id, data=data, fid=fid,
                                       index=index, weight=weight)
-        msg = "Computation  completed!"
-        wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
+
+        if not number_finite:
+            logger.error("Using the present parameters the model does not return any finite value. ")
+            msg = "Computing Error: Model did not return any finite value."
+            wx.PostEvent(self.parent, StatusEvent(status = msg, info="error"))
+        else:
+            msg = "Computation  completed!"
+            if number_finite != image.size:
+                msg += ' PROBLEM: For some Qx,Qy values the model returns non finite intensities!'
+                logger.error("For some Qx,Qy values the model returns non finite intensities.")
+            wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
 
     def _draw_model2D(self, model, page_id, qmin,
                       qmax,
@@ -1908,7 +1934,7 @@ class Plugin(PluginBase):
                 ## an actual problem.  Seems the fix should also go here
                 ## and may be the cause of other noted instabilities
                 ##
-                ##    -PDB August 12, 2014 
+                ##    -PDB August 12, 2014
                 while self.calc_2D.isrunning():
                     time.sleep(0.1)
             self.calc_2D = Calc2D(model=model,
@@ -1950,10 +1976,11 @@ class Plugin(PluginBase):
             ## If a thread is already started, stop it
             if (self.calc_1D is not None) and self.calc_1D.isrunning():
                 self.calc_1D.stop()
-                ## stop just raises the flag -- the thread is supposed to 
+                ## stop just raises the flag -- the thread is supposed to
                 ## then kill itself but cannot.  Paul Kienzle came up with
                 ## this fix to prevent threads from stepping on each other
-                ## which was causing a simple custom model to crash Sasview.
+                ## which was causing a simple custom plugin model to crash
+                ##Sasview.
                 ## We still don't know why the fit sometimes lauched a second
                 ## thread -- something which should also be investigated.
                 ## The thread approach was implemented in order to be able
@@ -1961,9 +1988,9 @@ class Plugin(PluginBase):
                 ## that the GUI can still respond to user input including
                 ## a request to stop the computation.
                 ## It seems thus that the whole thread approach used here
-                ## May need rethinking  
+                ## May need rethinking
                 ##
-                ##    -PDB August 12, 2014                  
+                ##    -PDB August 12, 2014
                 while self.calc_1D.isrunning():
                     time.sleep(0.1)
             self.calc_1D = Calc1D(data=data,
@@ -1999,33 +2026,33 @@ class Plugin(PluginBase):
         # default chisqr
         chisqr = None
         #to compute chisq make sure data has valid data
-        # return None if data == None
-        if not check_data_validity(data_copy) or data_copy == None:
+        # return None if data is None
+        if not check_data_validity(data_copy) or data_copy is None:
             return chisqr
 
         # Get data: data I, theory I, and data dI in order
         if data_copy.__class__.__name__ == "Data2D":
-            if index == None:
-                index = numpy.ones(len(data_copy.data), dtype=bool)
-            if weight != None:
+            if index is None:
+                index = np.ones(len(data_copy.data), dtype=bool)
+            if weight is not None:
                 data_copy.err_data = weight
             # get rid of zero error points
             index = index & (data_copy.err_data != 0)
-            index = index & (numpy.isfinite(data_copy.data))
+            index = index & (np.isfinite(data_copy.data))
             fn = data_copy.data[index]
             theory_data = self.page_finder[page_id].get_theory_data(fid=data_copy.id)
-            if theory_data == None:
+            if theory_data is None:
                 return chisqr
             gn = theory_data.data[index]
             en = data_copy.err_data[index]
         else:
             # 1 d theory from model_thread is only in the range of index
-            if index == None:
-                index = numpy.ones(len(data_copy.y), dtype=bool)
-            if weight != None:
+            if index is None:
+                index = np.ones(len(data_copy.y), dtype=bool)
+            if weight is not None:
                 data_copy.dy = weight
-            if data_copy.dy == None or data_copy.dy == []:
-                dy = numpy.ones(len(data_copy.y))
+            if data_copy.dy is None or data_copy.dy == []:
+                dy = np.ones(len(data_copy.y))
             else:
                 ## Set consistently w/AbstractFitengine:
                 # But this should be corrected later.
@@ -2034,7 +2061,7 @@ class Plugin(PluginBase):
             fn = data_copy.y[index]
 
             theory_data = self.page_finder[page_id].get_theory_data(fid=data_copy.id)
-            if theory_data == None:
+            if theory_data is None:
                 return chisqr
             gn = theory_data.y
             en = dy[index]
@@ -2043,12 +2070,12 @@ class Plugin(PluginBase):
         try:
             res = (fn - gn) / en
         except ValueError:
-            print "Unmatch lengths %s, %s, %s" % (len(fn), len(gn), len(en))
+            print("Unmatch lengths %s, %s, %s" % (len(fn), len(gn), len(en)))
             return
 
-        residuals = res[numpy.isfinite(res)]
+        residuals = res[np.isfinite(res)]
         # get chisqr only w/finite
-        chisqr = numpy.average(residuals * residuals)
+        chisqr = np.average(residuals * residuals)
 
         self._plot_residuals(page_id=page_id, data=data_copy,
                              fid=fid,
@@ -2077,7 +2104,7 @@ class Plugin(PluginBase):
             fn = data_copy.data
             theory_data = self.page_finder[page_id].get_theory_data(fid=data_copy.id)
             gn = theory_data.data
-            if weight == None:
+            if weight is None:
                 en = data_copy.err_data
             else:
                 en = weight
@@ -2085,7 +2112,7 @@ class Plugin(PluginBase):
             residuals.qx_data = data_copy.qx_data
             residuals.qy_data = data_copy.qy_data
             residuals.q_data = data_copy.q_data
-            residuals.err_data = numpy.ones(len(residuals.data))
+            residuals.err_data = np.ones(len(residuals.data))
             residuals.xmin = min(residuals.qx_data)
             residuals.xmax = max(residuals.qx_data)
             residuals.ymin = min(residuals.qy_data)
@@ -2098,11 +2125,11 @@ class Plugin(PluginBase):
                 return
         else:
             # 1 d theory from model_thread is only in the range of index
-            if data_copy.dy == None or data_copy.dy == []:
-                dy = numpy.ones(len(data_copy.y))
+            if data_copy.dy is None or data_copy.dy == []:
+                dy = np.ones(len(data_copy.y))
             else:
-                if weight == None:
-                    dy = numpy.ones(len(data_copy.y))
+                if weight is None:
+                    dy = np.ones(len(data_copy.y))
                 ## Set consitently w/AbstractFitengine:
                 ## But this should be corrected later.
                 else:
@@ -2121,12 +2148,12 @@ class Plugin(PluginBase):
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
                 residuals.y = (fn - gn[index]) / en
             residuals.x = data_copy.x[index]
-            residuals.dy = numpy.ones(len(residuals.y))
+            residuals.dy = np.ones(len(residuals.y))
             residuals.dx = None
             residuals.dxl = None
             residuals.dxw = None
             residuals.ytransform = 'y'
-            # For latter scale changes 
+            # For latter scale changes
             residuals.xaxis('\\rm{Q} ', 'A^{-1}')
             residuals.yaxis('\\rm{Residuals} ', 'normalized')
         theory_name = str(theory_data.name.split()[0])
@@ -2139,7 +2166,7 @@ class Plugin(PluginBase):
         new_plot.id = "res" + str(data_copy.id) + str(theory_name)
         ##group_id specify on which panel to plot this data
         group_id = self.page_finder[page_id].get_graph_id()
-        if group_id == None:
+        if group_id is None:
             group_id = data.group_id
         new_plot.group_id = "res" + str(group_id)
         #new_plot.is_data = True

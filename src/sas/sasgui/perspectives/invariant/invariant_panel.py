@@ -24,6 +24,8 @@ from sas.sasgui.perspectives.invariant.invariant_state import InvariantState as 
 from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
+logger = logging.getLogger(__name__)
+
 # The minimum q-value to be used when extrapolating
 Q_MINIMUM = 1e-5
 # The maximum q-value to be used when extrapolating
@@ -237,9 +239,9 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         set state when loading it from a .inv/.svs file
         """
 
-        if state == None and data == None:
+        if state is None and data is None:
             self.state = IState()
-        elif state == None or data == None:
+        elif state is None or data is None:
             return
         else:
             new_state = copy.deepcopy(state)
@@ -459,7 +461,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             try:
                 self._manager.plot_theory(name="Low-Q extrapolation")
             except:
-                logging.error(sys.exc_value)
+                logger.error(sys.exc_value)
 
     def get_high_qstar(self, inv, high_q=False):
         """
@@ -493,7 +495,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             try:
                 self._manager.plot_theory(name="High-Q extrapolation")
             except:
-                logging.error(sys.exc_value)
+                logger.error(sys.exc_value)
 
     def get_qstar(self, inv):
         """
@@ -601,12 +603,12 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         compute invariant
         """
-        if self._data == None:
+        if self._data is None:
             msg = "\n\nData must be loaded first in order"
             msg += " to perform a compution..."
             wx.PostEvent(self.parent, StatusEvent(status=msg))
         # set a state for this computation for saving
-        elif event != None:
+        elif event is not None:
             self._set_compute_state(state='compute')
             self._set_bookmark_flag(True)
             msg = "\n\nStarting a new invariant computation..."
@@ -715,7 +717,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         #enable the button_ok for more details
         self._set_preview_flag(True)
 
-        if event != None:
+        if event is not None:
             self._set_preview_flag(True)
             self._set_save_flag(True)
             wx.PostEvent(self.parent,
@@ -789,7 +791,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
 
         : param state_num: the given state number
         """
-        if state_num == None:
+        if state_num is None:
             return
 
         backup_state_list = copy.deepcopy(self.state.state_list)
@@ -844,7 +846,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                 value = str(value)
             attr.SetValue(value)
         except:
-            logging.error("Invariant state: %s", sys.exc_value)
+            logger.error("Invariant state: %s", sys.exc_value)
 
     def get_bookmark_by_num(self, num=None):
         """
@@ -861,7 +863,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         try:
             _, _, current_state, comp_state = self.state.bookmark_list[int(num)]
         except:
-            logging.error(sys.exc_value)
+            logger.error(sys.exc_value)
             raise ValueError, "No such bookmark exists"
 
         # set the parameters
@@ -921,7 +923,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
 
         :param event: rb/cb event
         """
-        if event == None:
+        if event is None:
             return
         obj = event.GetEventObject()
         name = str(obj.GetName())
@@ -931,7 +933,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                    ['fit_enable_high', 'fix_enable_high']]
 
         try:
-            if value == None or value.lstrip().rstrip() == '':
+            if value is None or value.lstrip().rstrip() == '':
                 value = 'None'
             setattr(self.state, name, str(value))
             self.state.saved_state[name] = str(value)
@@ -956,7 +958,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             self.state.state_list[str(self.state.state_num)] = \
                     self.state.clone_state()
         except:
-            logging.error(sys.exc_value)
+            logger.error(sys.exc_value)
 
         self._set_undo_flag(True)
         self._set_redo_flag(False)
@@ -1000,7 +1002,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             try:
                 del self.state.state_list[str(i)]
             except:
-                logging.error(sys.exc_value)
+                logger.error(sys.exc_value)
         # Enable the undo button if it was not
         self._set_undo_flag(True)
         self._set_redo_flag(False)
@@ -1010,7 +1012,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         Reset the state_list just before data was loading:
         Used in 'set_current_data()'
         """
-        #if data == None: return
+        #if data is None: return
         #temp_state = self.state.clone_state()
         #copy.deepcopy(self.state.saved_state)
         # Clear the list
@@ -1019,7 +1021,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         # Set defaults
         self.state.saved_state['state_num'] = 0
         self.state.saved_state['compute_num'] = 0
-        if self._data != None:
+        if self._data is not None:
             self.state.saved_state['file'] = str(self._data.name)
         else:
             self.state.saved_state['file'] = 'None'
@@ -1046,7 +1048,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         :param event: txtctr event ; assumes not None
 
         """
-        if self._data == None:
+        if self._data is None:
             return
         # check if this event is from do/undo button
         if self.state.saved_state['is_time_machine'] or self.new_state:
@@ -1065,11 +1067,11 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             try:
                 del self.state.state_list[str(i)]
             except:
-                logging.error(sys.exc_value)
+                logger.error(sys.exc_value)
 
         # try to add new state of the text changes in the state_list
         try:
-            if value.strip() == None:
+            if value.strip() is None:
                 value = ''
             setattr(self.state, name, str(value))
             self.state.saved_state[name] = str(value)
@@ -1080,7 +1082,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             self.state.state_num = self.state.saved_state['state_num']
             self.state.state_list[str(self.state.state_num)] = self.state.clone_state()
         except:
-            logging.error(sys.exc_value)
+            logger.error(sys.exc_value)
 
         self._set_undo_flag(True)
         self._set_redo_flag(False)
@@ -1102,7 +1104,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             self.state.saved_state[name] = str(value)
             self.state.state_list[str(self.state.state_num)] = self.state.clone_state()
         except:
-            logging.error(sys.exc_value)
+            logger.error(sys.exc_value)
 
     def _get_input_list(self):
         """
@@ -1137,9 +1139,9 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         Save the panel state in memory and add the list on
         the popup menu on bookmark context menu event
         """
-        if self._data == None:
+        if self._data is None:
             return
-        if event == None:
+        if event is None:
             return
         self.bookmark_num += 1
         # date and time of the event
@@ -1203,7 +1205,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
 
         : event: popUpMenu event
         """
-        if event == None:
+        if event is None:
             return
         # get the object
         menu = event.GetEventObject()
@@ -1241,9 +1243,9 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         # Ask the user the location of the file to write to.
         path = None
-        if self.parent != None:
+        if self.parent is not None:
             self._default_save_location = self.parent.get_save_location()
-        if self._default_save_location == None:
+        if self._default_save_location is None:
             self._default_save_location = os.getcwd()
         dlg = wx.FileDialog(self, "Choose a file",
                             self._default_save_location, \
@@ -1251,7 +1253,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             self._default_save_location = os.path.dirname(path)
-            if self.parent != None:
+            if self.parent is not None:
                 self.parent._default_save_location = \
                     self._default_save_location
         else:
@@ -1390,7 +1392,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         Enable and disable the power value editing
         """
-        if event != None:
+        if event is not None:
             self._set_bookmark_flag(True)
             self._set_preview_flag(False)
 
@@ -1408,7 +1410,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         Disable or enable some button if the user enable low q extrapolation
         """
-        if event != None:
+        if event is not None:
             self._set_bookmark_flag(True)
             self._set_preview_flag(False)
 
@@ -1435,7 +1437,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         Enable editing power law section at low q range
         """
-        if event != None:
+        if event is not None:
             self._set_bookmark_flag(True)
             self._set_preview_flag(False)
         if self.guinier.GetValue():
@@ -1534,7 +1536,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         Enable and disable the power value editing
         """
-        if event != None:
+        if event is not None:
             self._set_bookmark_flag(True)
 
             self._set_preview_flag(False)
@@ -1551,7 +1553,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         Disable or enable some button if the user enable high q extrapolation
         """
-        if event != None:
+        if event is not None:
             self._set_bookmark_flag(True)
             self._set_preview_flag(False)
         if self.enable_high_cbox.GetValue():

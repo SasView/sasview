@@ -12,10 +12,12 @@
 import math
 import logging
 import os
-import numpy
+import numpy as np
 from sas.sascalc.dataloader.data_info import Data2D
 from sas.sascalc.dataloader.manipulations import reader2D_converter
-    
+
+logger = logging.getLogger(__name__)
+
 class Reader:
     """
     Example data manipulation
@@ -55,9 +57,9 @@ class Reader:
         data = im.getdata()
 
         # Initiazed the output data object
-        output.data = numpy.zeros([im.size[0], im.size[1]])
-        output.err_data = numpy.zeros([im.size[0], im.size[1]])
-        output.mask = numpy.ones([im.size[0], im.size[1]], dtype=bool)
+        output.data = np.zeros([im.size[0], im.size[1]])
+        output.err_data = np.zeros([im.size[0], im.size[1]])
+        output.mask = np.ones([im.size[0], im.size[1]], dtype=bool)
         
         # Initialize
         x_vals = []
@@ -75,7 +77,7 @@ class Reader:
             try:
                 value = float(val)
             except:
-                logging.error("tiff_reader: had to skip a non-float point")
+                logger.error("tiff_reader: had to skip a non-float point")
                 continue
             
             # Get bin number
@@ -93,8 +95,8 @@ class Reader:
         output.ybins = im.size[1]
         output.x_bins = x_vals
         output.y_bins = y_vals
-        output.qx_data = numpy.array(x_vals)
-        output.qy_data = numpy.array(y_vals)
+        output.qx_data = np.array(x_vals)
+        output.qy_data = np.array(y_vals)
         output.xmin = 0
         output.xmax = im.size[0] - 1
         output.ymin = 0

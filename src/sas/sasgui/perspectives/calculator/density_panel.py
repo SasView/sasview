@@ -238,7 +238,7 @@ class DensityPanel(ScrolledPanel, PanelBase):
         On selection of input combobox,
         update units and output combobox
         """
-        if event == None:
+        if event is None:
             return
         event.Skip()
 
@@ -256,7 +256,7 @@ class DensityPanel(ScrolledPanel, PanelBase):
         On selection of output combobox,
         update units and input combobox
         """
-        if event == None:
+        if event is None:
             return
         event.Skip()
 
@@ -437,7 +437,7 @@ class DensityWindow(widget.CHILD_FRAME):
         """
         On close event
         """
-        if self.manager != None:
+        if self.manager is not None:
             self.manager.cal_md_frame = None
         self.Destroy()
 

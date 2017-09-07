@@ -1,17 +1,3 @@
-"""
-    CanSAS data reader - new recursive cansas_version.
-"""
-############################################################################
-#This software was developed by the University of Tennessee as part of the
-#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation.
-#If you use DANSE applications to do scientific research that leads to
-#publication, we ask that you acknowledge the use of the software with the
-#following sentence:
-#This work benefited from DANSE software developed under NSF award DMR-0520547.
-#copyright 2008,2009 University of Tennessee
-#############################################################################
-
 import logging
 import numpy as np
 import os
@@ -19,16 +5,25 @@ import sys
 import datetime
 import inspect
 # For saving individual sections of data
-from sas.sascalc.dataloader.data_info import Data1D, DataInfo, plottable_1D
-from sas.sascalc.dataloader.data_info import Collimation, TransmissionSpectrum, Detector, Process, Aperture
-from sas.sascalc.dataloader.data_info import combine_data_info_with_plottable as combine_data
+from sas.sascalc.dataloader.data_info import Data1D, Data2D, DataInfo, \
+    plottable_1D, plottable_2D
+from sas.sascalc.dataloader.data_info import Collimation, TransmissionSpectrum, \
+    Detector, Process, Aperture
+from sas.sascalc.dataloader.data_info import \
+    combine_data_info_with_plottable as combine_data
 import sas.sascalc.dataloader.readers.xml_reader as xml_reader
 from sas.sascalc.dataloader.readers.xml_reader import XMLreader
 from sas.sascalc.dataloader.readers.cansas_constants import CansasConstants, CurrentLevel
+from sas.sascalc.dataloader.loader_exceptions import FileContentsException, \
+    DefaultReaderException, DataReaderException
 
 # The following 2 imports *ARE* used. Do not remove either.
 import xml.dom.minidom
 from xml.dom.minidom import parseString
+
+from lxml import etree
+
+logger = logging.getLogger(__name__)
 
 PREPROCESS = "xmlpreprocess"
 ENCODING = "encoding"
@@ -49,37 +44,26 @@ CANSAS_NS = CONSTANTS.names
 ALLOW_ALL = True
 
 class Reader(XMLreader):
-    """
-    Class to load cansas 1D XML files
-
-    :Dependencies:
-        The CanSAS reader requires PyXML 0.8.4 or later.
-    """
-    ## CanSAS version - defaults to version 1.0
     cansas_version = "1.0"
     base_ns = "{cansas1d/1.0}"
     cansas_defaults = None
     type_name = "canSAS"
     invalid = True
     frm = ""
-    ## Log messages and errors
+    # Log messages and errors
     logging = None
     errors = set()
-    ## Namespace hierarchy for current xml_file object
+    # Namespace hierarchy for current xml_file object
     names = None
     ns_list = None
-    ## Temporary storage location for loading multiple data sets in a single file
-    current_datainfo = None
-    current_dataset = None
+    # Temporary storage location for loading multiple data sets in a single file
     current_data1d = None
     data = None
-    ## List of data1D objects to be sent back to SasView
-    output = None
-    ## Wildcards
+    # Wildcards
     type = ["XML files (*.xml)|*.xml", "SasView Save Files (*.svs)|*.svs"]
-    ## List of allowed extensions
+    # List of allowed extensions
     ext = ['.xml', '.XML', '.svs', '.SVS']
-    ## Flag to bypass extension check
+    # Flag to bypass extension check
     allow_all = True
 
     def reset_state(self):
@@ -104,103 +88,141 @@ class Reader(XMLreader):
         self.encoding = None
 
     def read(self, xml_file, schema_path="", invalid=True):
-        """
-        Validate and read in an xml_file file in the canSAS format.
+        if schema_path != "" or invalid != True:
+            # read has been called from self.get_file_contents because xml file doens't conform to schema
+            _, self.extension = os.path.splitext(os.path.basename(xml_file))
+            return self.get_file_contents(xml_file=xml_file, schema_path=schema_path, invalid=invalid)
 
-        :param xml_file: A canSAS file path in proper XML format
-        :param schema_path: A file path to an XML schema to validate the xml_file against
-        """
-        # For every file loaded, reset everything to a base state
+        # Otherwise, read has been called by the data loader - file_reader_base_class handles this
+        return super(XMLreader, self).read(xml_file)
+
+    def get_file_contents(self, xml_file=None, schema_path="", invalid=True):
+        # Reset everything since we're loading a new file
         self.reset_state()
         self.invalid = invalid
-        # Check that the file exists
-        if os.path.isfile(xml_file):
-            basename, extension = os.path.splitext(os.path.basename(xml_file))
-            # If the file type is not allowed, return nothing
-            if extension in self.ext or self.allow_all:
-                # Get the file location of
-                self.load_file_and_schema(xml_file, schema_path)
-                self.add_data_set()
-                # Try to load the file, but raise an error if unable to.
-                # Check the file matches the XML schema
+        if xml_file is None:
+            xml_file = self.f_open.name
+        # We don't sure f_open since lxml handles opnening/closing files
+        if not self.f_open.closed:
+            self.f_open.close()
+
+        basename, _ = os.path.splitext(os.path.basename(xml_file))
+
+        try:
+            # Raises FileContentsException
+            self.load_file_and_schema(xml_file, schema_path)
+            self.current_datainfo = DataInfo()
+            # Raises FileContentsException if file doesn't meet CanSAS schema
+            self.is_cansas(self.extension)
+            self.invalid = False # If we reach this point then file must be valid CanSAS
+
+            # Parse each SASentry
+            entry_list = self.xmlroot.xpath('/ns:SASroot/ns:SASentry', namespaces={
+                'ns': self.cansas_defaults.get("ns")
+            })
+            # Look for a SASentry
+            self.names.append("SASentry")
+            self.set_processing_instructions()
+
+            for entry in entry_list:
+                self.current_datainfo.filename = basename + self.extension
+                self.current_datainfo.meta_data["loader"] = "CanSAS XML 1D"
+                self.current_datainfo.meta_data[PREPROCESS] = self.processing_instructions
+                self._parse_entry(entry)
+                has_error_dx = self.current_dataset.dx is not None
+                has_error_dy = self.current_dataset.dy is not None
+                self.remove_empty_q_values(has_error_dx=has_error_dx,
+                    has_error_dy=has_error_dy)
+                self.send_to_output() # Combine datasets with DataInfo
+                self.current_datainfo = DataInfo() # Reset DataInfo
+        except FileContentsException as fc_exc:
+            # File doesn't meet schema - try loading with a less strict schema
+            base_name = xml_reader.__file__
+            base_name = base_name.replace("\\", "/")
+            base = base_name.split("/sas/")[0]
+            if self.cansas_version == "1.1":
+                invalid_schema = INVALID_SCHEMA_PATH_1_1.format(base, self.cansas_defaults.get("schema"))
+            else:
+                invalid_schema = INVALID_SCHEMA_PATH_1_0.format(base, self.cansas_defaults.get("schema"))
+            self.set_schema(invalid_schema)
+            if self.invalid:
                 try:
-                    self.is_cansas(extension)
-                    self.invalid = False
-                    # Get each SASentry from XML file and add it to a list.
-                    entry_list = self.xmlroot.xpath(
-                            '/ns:SASroot/ns:SASentry',
-                            namespaces={'ns': self.cansas_defaults.get("ns")})
-                    self.names.append("SASentry")
+                    # Load data with less strict schema
+                    self.read(xml_file, invalid_schema, False)
 
-                    # Get all preprocessing events and encoding
-                    self.set_processing_instructions()
-
-                    # Parse each <SASentry> item
-                    for entry in entry_list:
-                        # Create a new DataInfo object for every <SASentry>
-
-                        # Set the file name and then parse the entry.
-                        self.current_datainfo.filename = basename + extension
-                        self.current_datainfo.meta_data["loader"] = "CanSAS XML 1D"
-                        self.current_datainfo.meta_data[PREPROCESS] = \
-                            self.processing_instructions
-
-                        # Parse the XML SASentry
-                        self._parse_entry(entry)
-                        # Combine datasets with datainfo
-                        self.add_data_set()
-                except RuntimeError:
-                    # If the file does not match the schema, raise this error
+                    # File can still be read but doesn't match schema, so raise exception
+                    self.load_file_and_schema(xml_file) # Reload strict schema so we can find where error are in file
                     invalid_xml = self.find_invalid_xml()
-                    invalid_xml = INVALID_XML.format(basename + extension) + invalid_xml
-                    self.errors.add(invalid_xml)
-                    # Try again with an invalid CanSAS schema, that requires only a data set in each
-                    base_name = xml_reader.__file__
-                    base_name = base_name.replace("\\", "/")
-                    base = base_name.split("/sas/")[0]
-                    if self.cansas_version == "1.1":
-                        invalid_schema = INVALID_SCHEMA_PATH_1_1.format(base, self.cansas_defaults.get("schema"))
-                    else:
-                        invalid_schema = INVALID_SCHEMA_PATH_1_0.format(base, self.cansas_defaults.get("schema"))
-                    self.set_schema(invalid_schema)
-                    try:
-                        if self.invalid:
-                            if self.is_cansas():
-                                self.output = self.read(xml_file, invalid_schema, False)
-                            else:
-                                raise RuntimeError
-                        else:
-                            raise RuntimeError
-                    except RuntimeError:
-                        x = np.zeros(1)
-                        y = np.zeros(1)
-                        self.current_data1d = Data1D(x,y)
-                        self.current_data1d.errors = self.errors
-                        return [self.current_data1d]
-        else:
-            self.output.append("Not a valid file path.")
-        # Return a list of parsed entries that dataloader can manage
-        return self.output
+                    invalid_xml = INVALID_XML.format(basename + self.extension) + invalid_xml
+                    raise DataReaderException(invalid_xml) # Handled by base class
+                except FileContentsException as fc_exc:
+                    msg = "CanSAS Reader could not load the file {}".format(xml_file)
+                    if fc_exc.message is not None: # Propagate error messages from earlier
+                        msg = fc_exc.message
+                    if not self.extension in self.ext: # If the file has no associated loader
+                        raise DefaultReaderException(msg)
+                    raise FileContentsException(msg)
+                    pass
+            else:
+                raise fc_exc
+        except Exception as e: # Convert all other exceptions to FileContentsExceptions
+            raise FileContentsException(e.message)
+
+
+    def load_file_and_schema(self, xml_file, schema_path=""):
+        base_name = xml_reader.__file__
+        base_name = base_name.replace("\\", "/")
+        base = base_name.split("/sas/")[0]
+
+        # Try and parse the XML file
+        try:
+            self.set_xml_file(xml_file)
+        except etree.XMLSyntaxError: # File isn't valid XML so can't be loaded
+            msg = "SasView cannot load {}.\nInvalid XML syntax".format(xml_file)
+            raise FileContentsException(msg)
+
+        self.cansas_version = self.xmlroot.get("version", "1.0")
+        self.cansas_defaults = CANSAS_NS.get(self.cansas_version, "1.0")
+
+        if schema_path == "":
+            schema_path = "{}/sas/sascalc/dataloader/readers/schema/{}".format(
+                base, self.cansas_defaults.get("schema").replace("\\", "/")
+            )
+        self.set_schema(schema_path)
+
+    def is_cansas(self, ext="xml"):
+        """
+        Checks to see if the XML file is a CanSAS file
+
+        :param ext: The file extension of the data file
+        :raises FileContentsException: Raised if XML file isn't valid CanSAS
+        """
+        if self.validate_xml(): # Check file is valid XML
+            name = "{http://www.w3.org/2001/XMLSchema-instance}schemaLocation"
+            value = self.xmlroot.get(name)
+            # Check schema CanSAS version matches file CanSAS version
+            if CANSAS_NS.get(self.cansas_version).get("ns") == value.rsplit(" ")[0]:
+                return True
+        if ext == "svs":
+            return True # Why is this required?
+        # If we get to this point then file isn't valid CanSAS
+        logger.warning("File doesn't meet CanSAS schema. Trying to load anyway.")
+        raise FileContentsException("The file is not valid CanSAS")
 
     def _parse_entry(self, dom, recurse=False):
-        """
-        Parse a SASEntry - new recursive method for parsing the dom of
-            the CanSAS data format. This will allow multiple data files
-            and extra nodes to be read in simultaneously.
-
-        :param dom: dom object with a namespace base of names
-        """
-
         if not self._is_call_local() and not recurse:
             self.reset_state()
-            self.add_data_set()
+            self.data = []
+            self.current_datainfo = DataInfo()
             self.names.append("SASentry")
             self.parent_class = "SASentry"
-        self._check_for_empty_data()
-        self.base_ns = "{0}{1}{2}".format("{", \
-                            CANSAS_NS.get(self.cansas_version).get("ns"), "}")
+        # Create an empty dataset if no data has been passed to the reader
+        if self.current_dataset is None:
+            self.current_dataset = plottable_1D(np.empty(0), np.empty(0),
+                np.empty(0), np.empty(0))
+        self.base_ns = "{" + CANSAS_NS.get(self.cansas_version).get("ns") + "}"
 
-        # Go through each child in the parent element
+        # Loop through each child in the parent element
         for node in dom:
             attr = node.attrib
             name = attr.get("name", "")
@@ -211,7 +233,6 @@ class Reader(XMLreader):
             # Skip this iteration when loading in save state information
             if tagname == "fitting_plug_in" or tagname == "pr_inversion" or tagname == "invariant":
                 continue
-
             # Get where to store content
             self.names.append(tagname_original)
             self.ns_list = CONSTANTS.iterate_namespace(self.names)
@@ -219,9 +240,16 @@ class Reader(XMLreader):
             if len(node.getchildren()) > 0:
                 self.parent_class = tagname_original
                 if tagname == 'SASdata':
-                    self._initialize_new_data_set()
-                ## Recursion step to access data within the group
-                self._parse_entry(node, True)
+                    self._initialize_new_data_set(node)
+                    if isinstance(self.current_dataset, plottable_2D):
+                        x_bins = attr.get("x_bins", "")
+                        y_bins = attr.get("y_bins", "")
+                        if x_bins is not "" and y_bins is not "":
+                            self.current_dataset.shape = (x_bins, y_bins)
+                        else:
+                            self.current_dataset.shape = ()
+                # Recurse to access data within the group
+                self._parse_entry(node, recurse=True)
                 if tagname == "SASsample":
                     self.current_datainfo.sample.name = name
                 elif tagname == "beam_size":
@@ -231,11 +259,15 @@ class Reader(XMLreader):
                 elif tagname == "aperture":
                     self.aperture.name = name
                     self.aperture.type = type
-                self.add_intermediate()
+                self._add_intermediate()
             else:
-                data_point, unit = self._get_node_value(node, tagname)
+                if isinstance(self.current_dataset, plottable_2D):
+                    data_point = node.text
+                    unit = attr.get('unit', '')
+                else:
+                    data_point, unit = self._get_node_value(node, tagname)
 
-                ## If this is a dataset, store the data appropriately
+                # If this is a dataset, store the data appropriately
                 if tagname == 'Run':
                     self.current_datainfo.run_name[data_point] = name
                     self.current_datainfo.run.append(data_point)
@@ -244,27 +276,67 @@ class Reader(XMLreader):
                 elif tagname == 'SASnote':
                     self.current_datainfo.notes.append(data_point)
 
-                ## I and Q Data
-                elif tagname == 'I':
-                    self.current_dataset.yaxis("Intensity", unit)
+                # I and Q points
+                elif tagname == 'I' and isinstance(self.current_dataset, plottable_1D):
+                    unit_list = unit.split("|")
+                    if len(unit_list) > 1:
+                        self.current_dataset.yaxis(unit_list[0].strip(),
+                                                   unit_list[1].strip())
+                    else:
+                        self.current_dataset.yaxis("Intensity", unit)
                     self.current_dataset.y = np.append(self.current_dataset.y, data_point)
-                elif tagname == 'Idev':
+                elif tagname == 'Idev' and isinstance(self.current_dataset, plottable_1D):
                     self.current_dataset.dy = np.append(self.current_dataset.dy, data_point)
                 elif tagname == 'Q':
-                    self.current_dataset.xaxis("Q", unit)
+                    unit_list = unit.split("|")
+                    if len(unit_list) > 1:
+                        self.current_dataset.xaxis(unit_list[0].strip(),
+                                                   unit_list[1].strip())
+                    else:
+                        self.current_dataset.xaxis("Q", unit)
                     self.current_dataset.x = np.append(self.current_dataset.x, data_point)
                 elif tagname == 'Qdev':
                     self.current_dataset.dx = np.append(self.current_dataset.dx, data_point)
                 elif tagname == 'dQw':
+                    if self.current_dataset.dqw is None: self.current_dataset.dqw = np.empty(0)
                     self.current_dataset.dxw = np.append(self.current_dataset.dxw, data_point)
                 elif tagname == 'dQl':
+                    if self.current_dataset.dxl is None: self.current_dataset.dxl = np.empty(0)
                     self.current_dataset.dxl = np.append(self.current_dataset.dxl, data_point)
                 elif tagname == 'Qmean':
                     pass
                 elif tagname == 'Shadowfactor':
                     pass
+                elif tagname == 'Sesans':
+                    self.current_datainfo.isSesans = bool(data_point)
+                elif tagname == 'yacceptance':
+                    self.current_datainfo.sample.yacceptance = (data_point, unit)
+                elif tagname == 'zacceptance':
+                    self.current_datainfo.sample.zacceptance = (data_point, unit)
 
-                ## Sample Information
+                # I and Qx, Qy - 2D data
+                elif tagname == 'I' and isinstance(self.current_dataset, plottable_2D):
+                    self.current_dataset.yaxis("Intensity", unit)
+                    self.current_dataset.data = np.fromstring(data_point, dtype=float, sep=",")
+                elif tagname == 'Idev' and isinstance(self.current_dataset, plottable_2D):
+                    self.current_dataset.err_data = np.fromstring(data_point, dtype=float, sep=",")
+                elif tagname == 'Qx':
+                    self.current_dataset.xaxis("Qx", unit)
+                    self.current_dataset.qx_data = np.fromstring(data_point, dtype=float, sep=",")
+                elif tagname == 'Qy':
+                    self.current_dataset.yaxis("Qy", unit)
+                    self.current_dataset.qy_data = np.fromstring(data_point, dtype=float, sep=",")
+                elif tagname == 'Qxdev':
+                    self.current_dataset.xaxis("Qxdev", unit)
+                    self.current_dataset.dqx_data = np.fromstring(data_point, dtype=float, sep=",")
+                elif tagname == 'Qydev':
+                    self.current_dataset.yaxis("Qydev", unit)
+                    self.current_dataset.dqy_data = np.fromstring(data_point, dtype=float, sep=",")
+                elif tagname == 'Mask':
+                    inter = [item == "1" for item in data_point.split(",")]
+                    self.current_dataset.mask = np.asarray(inter, dtype=bool)
+
+                # Sample Information
                 elif tagname == 'ID' and self.parent_class == 'SASsample':
                     self.current_datainfo.sample.ID = data_point
                 elif tagname == 'Title' and self.parent_class == 'SASsample':
@@ -298,10 +370,11 @@ class Reader(XMLreader):
                     self.current_datainfo.sample.orientation.z = data_point
                     self.current_datainfo.sample.orientation_unit = unit
 
-                ## Instrumental Information
+                # Instrumental Information
                 elif tagname == 'name' and self.parent_class == 'SASinstrument':
                     self.current_datainfo.instrument = data_point
-                ## Detector Information
+
+                # Detector Information
                 elif tagname == 'name' and self.parent_class == 'SASdetector':
                     self.detector.name = data_point
                 elif tagname == 'SDD' and self.parent_class == 'SASdetector':
@@ -346,7 +419,8 @@ class Reader(XMLreader):
                 elif tagname == 'yaw' and self.parent_class == 'orientation' and 'SASdetector' in self.names:
                     self.detector.orientation.z = data_point
                     self.detector.orientation_unit = unit
-                ## Collimation and Aperture
+
+                # Collimation and Aperture
                 elif tagname == 'length' and self.parent_class == 'SAScollimation':
                     self.collimation.length = data_point
                     self.collimation.length_unit = unit
@@ -365,7 +439,7 @@ class Reader(XMLreader):
                     self.aperture.size.z = data_point
                     self.collimation.size_unit = unit
 
-                ## Process Information
+                # Process Information
                 elif tagname == 'name' and self.parent_class == 'SASprocess':
                     self.process.name = data_point
                 elif tagname == 'description' and self.parent_class == 'SASprocess':
@@ -379,13 +453,10 @@ class Reader(XMLreader):
                     self.process.notes.append(data_point)
                 elif tagname == 'term' and self.parent_class == 'SASprocess':
                     unit = attr.get("unit", "")
-                    dic = {}
-                    dic["name"] = name
-                    dic["value"] = data_point
-                    dic["unit"] = unit
+                    dic = { "name": name, "value": data_point, "unit": unit }
                     self.process.term.append(dic)
 
-                ## Transmission Spectrum
+                # Transmission Spectrum
                 elif tagname == 'T' and self.parent_class == 'Tdata':
                     self.transspectrum.transmission = np.append(self.transspectrum.transmission, data_point)
                     self.transspectrum.transmission_unit = unit
@@ -396,7 +467,7 @@ class Reader(XMLreader):
                     self.transspectrum.wavelength = np.append(self.transspectrum.wavelength, data_point)
                     self.transspectrum.wavelength_unit = unit
 
-                ## Source Information
+                # Source Information
                 elif tagname == 'wavelength' and (self.parent_class == 'SASsource' or self.parent_class == 'SASData'):
                     self.current_datainfo.source.wavelength = data_point
                     self.current_datainfo.source.wavelength_unit = unit
@@ -423,7 +494,7 @@ class Reader(XMLreader):
                 elif tagname == 'beam_shape' and self.parent_class == 'SASsource':
                     self.current_datainfo.source.beam_shape = data_point
 
-                ## Everything else goes in meta_data
+                # Everything else goes in meta_data
                 else:
                     new_key = self._create_unique_key(self.current_datainfo.meta_data, tagname)
                     self.current_datainfo.meta_data[new_key] = data_point
@@ -435,20 +506,15 @@ class Reader(XMLreader):
             self.parent_class = self.names[length]
         if not self._is_call_local() and not recurse:
             self.frm = ""
-            self.add_data_set()
+            self.current_datainfo.errors = set()
+            for error in self.errors:
+                self.current_datainfo.errors.add(error)
+            self.errors.clear()
+            self.send_to_output()
             empty = None
-            if self.output[0].dx is not None:
-                self.output[0].dxl = np.empty(0)
-                self.output[0].dxw = np.empty(0)
-            else:
-                self.output[0].dx = np.empty(0)
             return self.output[0], empty
 
-
     def _is_call_local(self):
-        """
-
-        """
         if self.frm == "":
             inter = inspect.stack()
             self.frm = inter[2]
@@ -460,80 +526,10 @@ class Reader(XMLreader):
             return False
         return True
 
-    def is_cansas(self, ext="xml"):
-        """
-        Checks to see if the xml file is a CanSAS file
-
-        :param ext: The file extension of the data file
-        """
-        if self.validate_xml():
-            name = "{http://www.w3.org/2001/XMLSchema-instance}schemaLocation"
-            value = self.xmlroot.get(name)
-            if CANSAS_NS.get(self.cansas_version).get("ns") == \
-                    value.rsplit(" ")[0]:
-                return True
-        if ext == "svs":
-            return True
-        raise RuntimeError
-
-    def load_file_and_schema(self, xml_file, schema_path=""):
-        """
-        Loads the file and associates a schema, if a schema is passed in or if one already exists
-
-        :param xml_file: The xml file path sent to Reader.read
-        :param schema_path: The path to a schema associated with the xml_file, or find one based on the file
-        """
-        base_name = xml_reader.__file__
-        base_name = base_name.replace("\\", "/")
-        base = base_name.split("/sas/")[0]
-
-        # Load in xml file and get the cansas version from the header
-        self.set_xml_file(xml_file)
-        self.cansas_version = self.xmlroot.get("version", "1.0")
-
-        # Generic values for the cansas file based on the version
-        self.cansas_defaults = CANSAS_NS.get(self.cansas_version, "1.0")
-        if schema_path == "":
-            schema_path = "{0}/sas/sascalc/dataloader/readers/schema/{1}".format \
-                (base, self.cansas_defaults.get("schema")).replace("\\", "/")
-
-        # Link a schema to the XML file.
-        self.set_schema(schema_path)
-
-    def add_data_set(self):
-        """
-        Adds the current_dataset to the list of outputs after preforming final processing on the data and then calls a
-        private method to generate a new data set.
-
-        :param key: NeXus group name for current tree level
-        """
-
-        if self.current_datainfo and self.current_dataset:
-            self._final_cleanup()
-        self.data = []
-        self.current_datainfo = DataInfo()
-
-    def _initialize_new_data_set(self, parent_list=None):
-        """
-        A private class method to generate a new 1D data object.
-        Outside methods should call add_data_set() to be sure any existing data is stored properly.
-
-        :param parent_list: List of names of parent elements
-        """
-
-        if parent_list is None:
-            parent_list = []
-        x = np.array(0)
-        y = np.array(0)
-        self.current_dataset = plottable_1D(x, y)
-
-    def add_intermediate(self):
+    def _add_intermediate(self):
         """
         This method stores any intermediate objects within the final data set after fully reading the set.
-
-        :param parent: The NXclass name for the h5py Group object that just finished being processed
         """
-
         if self.parent_class == 'SASprocess':
             self.current_datainfo.process.append(self.process)
             self.process = Process()
@@ -552,65 +548,6 @@ class Reader(XMLreader):
         elif self.parent_class == 'SASdata':
             self._check_for_empty_resolution()
             self.data.append(self.current_dataset)
-
-    def _final_cleanup(self):
-        """
-        Final cleanup of the Data1D object to be sure it has all the
-        appropriate information needed for perspectives
-        """
-
-        ## Append errors to dataset and reset class errors
-        self.current_datainfo.errors = set()
-        for error in self.errors:
-            self.current_datainfo.errors.add(error)
-        self.errors.clear()
-
-        ## Combine all plottables with datainfo and append each to output
-        ## Type cast data arrays to float64 and find min/max as appropriate
-        for dataset in self.data:
-            if dataset.x is not None:
-                dataset.x = np.delete(dataset.x, [0])
-                dataset.x = dataset.x.astype(np.float64)
-                dataset.xmin = np.min(dataset.x)
-                dataset.xmax = np.max(dataset.x)
-            if dataset.y is not None:
-                dataset.y = np.delete(dataset.y, [0])
-                dataset.y = dataset.y.astype(np.float64)
-                dataset.ymin = np.min(dataset.y)
-                dataset.ymax = np.max(dataset.y)
-            if dataset.dx is not None:
-                dataset.dx = np.delete(dataset.dx, [0])
-                dataset.dx = dataset.dx.astype(np.float64)
-            if dataset.dxl is not None:
-                dataset.dxl = np.delete(dataset.dxl, [0])
-                dataset.dxl = dataset.dxl.astype(np.float64)
-            if dataset.dxw is not None:
-                dataset.dxw = np.delete(dataset.dxw, [0])
-                dataset.dxw = dataset.dxw.astype(np.float64)
-            if dataset.dy is not None:
-                dataset.dy = np.delete(dataset.dy, [0])
-                dataset.dy = dataset.dy.astype(np.float64)
-            np.trim_zeros(dataset.x)
-            np.trim_zeros(dataset.y)
-            np.trim_zeros(dataset.dy)
-            final_dataset = combine_data(dataset, self.current_datainfo)
-            self.output.append(final_dataset)
-
-    def _create_unique_key(self, dictionary, name, numb=0):
-        """
-        Create a unique key value for any dictionary to prevent overwriting
-        Recurse until a unique key value is found.
-
-        :param dictionary: A dictionary with any number of entries
-        :param name: The index of the item to be added to dictionary
-        :param numb: The number to be appended to the name, starts at 0
-        """
-        if dictionary.get(name) is not None:
-            numb += 1
-            name = name.split("_")[0]
-            name += "_{0}".format(numb)
-            name = self._create_unique_key(dictionary, name, numb)
-        return name
 
     def _get_node_value(self, node, tagname):
         """
@@ -692,7 +629,7 @@ class Reader(XMLreader):
                 if local_unit and default_unit and local_unit.lower() != default_unit.lower() \
                         and local_unit.lower() != "none":
                     if HAS_CONVERTER == True:
-                        ## Check local units - bad units raise KeyError
+                        # Check local units - bad units raise KeyError
                         data_conv_q = Converter(local_unit)
                         value_unit = default_unit
                         node_value = data_conv_q(node_value, units=default_unit)
@@ -718,26 +655,9 @@ class Reader(XMLreader):
             self.errors.add(err_msg)
         return node_value, value_unit
 
-    def _check_for_empty_data(self):
-        """
-        Creates an empty data set if no data is passed to the reader
-
-        :param data1d: presumably a Data1D object
-        """
-        if self.current_dataset == None:
-            x_vals = np.empty(0)
-            y_vals = np.empty(0)
-            dx_vals = np.empty(0)
-            dy_vals = np.empty(0)
-            dxl = np.empty(0)
-            dxw = np.empty(0)
-            self.current_dataset = plottable_1D(x_vals, y_vals, dx_vals, dy_vals)
-            self.current_dataset.dxl = dxl
-            self.current_dataset.dxw = dxw
-
     def _check_for_empty_resolution(self):
         """
-        A method to check all resolution data sets are the same size as I and Q
+        a method to check all resolution data sets are the same size as I and q
         """
         dql_exists = False
         dqw_exists = False
@@ -753,21 +673,32 @@ class Reader(XMLreader):
             di_exists = True
         if dqw_exists and not dql_exists:
             array_size = self.current_dataset.dxw.size - 1
-            self.current_dataset.dxl = np.append(self.current_dataset.dxl, np.zeros([array_size]))
+            self.current_dataset.dxl = np.append(self.current_dataset.dxl,
+                                                 np.zeros([array_size]))
         elif dql_exists and not dqw_exists:
             array_size = self.current_dataset.dxl.size - 1
-            self.current_dataset.dxw = np.append(self.current_dataset.dxw, np.zeros([array_size]))
+            self.current_dataset.dxw = np.append(self.current_dataset.dxw,
+                                                 np.zeros([array_size]))
         elif not dql_exists and not dqw_exists and not dq_exists:
             array_size = self.current_dataset.x.size - 1
-            self.current_dataset.dx = np.append(self.current_dataset.dx, np.zeros([array_size]))
+            self.current_dataset.dx = np.append(self.current_dataset.dx,
+                                                np.zeros([array_size]))
         if not di_exists:
             array_size = self.current_dataset.y.size - 1
-            self.current_dataset.dy = np.append(self.current_dataset.dy, np.zeros([array_size]))
+            self.current_dataset.dy = np.append(self.current_dataset.dy,
+                                                np.zeros([array_size]))
 
+    def _initialize_new_data_set(self, node=None):
+        if node is not None:
+            for child in node:
+                if child.tag.replace(self.base_ns, "") == "Idata":
+                    for i_child in child:
+                        if i_child.tag.replace(self.base_ns, "") == "Qx":
+                            self.current_dataset = plottable_2D()
+                            return
+        self.current_dataset = plottable_1D(np.array(0), np.array(0))
 
-    ####### All methods below are for writing CanSAS XML files #######
-
-
+    ## Writing Methods
     def write(self, filename, datainfo):
         """
         Write the content of a Data1D as a CanSAS XML file
@@ -779,7 +710,7 @@ class Reader(XMLreader):
         doc, _ = self._to_xml_doc(datainfo)
         # Write the file
         file_ref = open(filename, 'w')
-        if self.encoding == None:
+        if self.encoding is None:
             self.encoding = "UTF-8"
         doc.write(file_ref, encoding=self.encoding,
                   pretty_print=True, xml_declaration=True)
@@ -791,8 +722,9 @@ class Reader(XMLreader):
 
         :param datainfo: Data1D object
         """
-        if not issubclass(datainfo.__class__, Data1D):
-            raise RuntimeError, "The cansas writer expects a Data1D instance"
+        is_2d = False
+        if issubclass(datainfo.__class__, Data2D):
+            is_2d = True
 
         # Get PIs and create root element
         pi_string = self._get_pi_string()
@@ -812,9 +744,13 @@ class Reader(XMLreader):
         # Add Run to SASentry
         self._write_run_names(datainfo, entry_node)
         # Add Data info to SASEntry
-        self._write_data(datainfo, entry_node)
+        if is_2d:
+            self._write_data_2d(datainfo, entry_node)
+        else:
+            self._write_data(datainfo, entry_node)
         # Transmission Spectrum Info
-        self._write_trans_spectrum(datainfo, entry_node)
+        # TODO: fix the writer to linearize all data, including T_spectrum
+        # self._write_trans_spectrum(datainfo, entry_node)
         # Sample info
         self._write_sample_info(datainfo, entry_node)
         # Instrument info
@@ -894,7 +830,7 @@ class Reader(XMLreader):
         :param datainfo: The Data1D object the information is coming from
         :param entry_node: lxml node ElementTree object to be appended to
         """
-        if datainfo.run == None or datainfo.run == []:
+        if datainfo.run is None or datainfo.run == []:
             datainfo.run.append(RUN_NAME_DEFAULT)
             datainfo.run_name[RUN_NAME_DEFAULT] = RUN_NAME_DEFAULT
         for item in datainfo.run:
@@ -906,7 +842,7 @@ class Reader(XMLreader):
 
     def _write_data(self, datainfo, entry_node):
         """
-        Writes the I and Q data to the XML file
+        Writes 1D I and Q data to the XML file
 
         :param datainfo: The Data1D object the information is coming from
         :param entry_node: lxml node ElementTree object to be appended to
@@ -918,22 +854,78 @@ class Reader(XMLreader):
             point = self.create_element("Idata")
             node.append(point)
             self.write_node(point, "Q", datainfo.x[i],
-                            {'unit': datainfo.x_unit})
+                            {'unit': datainfo._xaxis + " | " + datainfo._xunit})
             if len(datainfo.y) >= i:
                 self.write_node(point, "I", datainfo.y[i],
-                                {'unit': datainfo.y_unit})
+                                {'unit': datainfo._yaxis + " | " + datainfo._yunit})
             if datainfo.dy is not None and len(datainfo.dy) > i:
                 self.write_node(point, "Idev", datainfo.dy[i],
-                                {'unit': datainfo.y_unit})
+                                {'unit': datainfo._yaxis + " | " + datainfo._yunit})
             if datainfo.dx is not None and len(datainfo.dx) > i:
                 self.write_node(point, "Qdev", datainfo.dx[i],
-                                {'unit': datainfo.x_unit})
+                                {'unit': datainfo._xaxis + " | " + datainfo._xunit})
             if datainfo.dxw is not None and len(datainfo.dxw) > i:
                 self.write_node(point, "dQw", datainfo.dxw[i],
-                                {'unit': datainfo.x_unit})
+                                {'unit': datainfo._xaxis + " | " + datainfo._xunit})
             if datainfo.dxl is not None and len(datainfo.dxl) > i:
                 self.write_node(point, "dQl", datainfo.dxl[i],
-                                {'unit': datainfo.x_unit})
+                                {'unit': datainfo._xaxis + " | " + datainfo._xunit})
+        if datainfo.isSesans:
+            sesans = self.create_element("Sesans")
+            sesans.text = str(datainfo.isSesans)
+            node.append(sesans)
+            self.write_node(node, "yacceptance", datainfo.sample.yacceptance[0],
+                             {'unit': datainfo.sample.yacceptance[1]})
+            self.write_node(node, "zacceptance", datainfo.sample.zacceptance[0],
+                             {'unit': datainfo.sample.zacceptance[1]})
+
+
+    def _write_data_2d(self, datainfo, entry_node):
+        """
+        Writes 2D data to the XML file
+
+        :param datainfo: The Data2D object the information is coming from
+        :param entry_node: lxml node ElementTree object to be appended to
+        """
+        attr = {}
+        if datainfo.data.shape:
+            attr["x_bins"] = str(len(datainfo.x_bins))
+            attr["y_bins"] = str(len(datainfo.y_bins))
+        node = self.create_element("SASdata", attr)
+        self.append(node, entry_node)
+
+        point = self.create_element("Idata")
+        node.append(point)
+        qx = ','.join([str(datainfo.qx_data[i]) for i in xrange(len(datainfo.qx_data))])
+        qy = ','.join([str(datainfo.qy_data[i]) for i in xrange(len(datainfo.qy_data))])
+        intensity = ','.join([str(datainfo.data[i]) for i in xrange(len(datainfo.data))])
+
+        self.write_node(point, "Qx", qx,
+                        {'unit': datainfo._xunit})
+        self.write_node(point, "Qy", qy,
+                        {'unit': datainfo._yunit})
+        self.write_node(point, "I", intensity,
+                        {'unit': datainfo._zunit})
+        if datainfo.err_data is not None:
+            err = ','.join([str(datainfo.err_data[i]) for i in
+                            xrange(len(datainfo.err_data))])
+            self.write_node(point, "Idev", err,
+                            {'unit': datainfo._zunit})
+        if datainfo.dqy_data is not None:
+            dqy = ','.join([str(datainfo.dqy_data[i]) for i in
+                            xrange(len(datainfo.dqy_data))])
+            self.write_node(point, "Qydev", dqy,
+                            {'unit': datainfo._yunit})
+        if datainfo.dqx_data is not None:
+            dqx = ','.join([str(datainfo.dqx_data[i]) for i in
+                            xrange(len(datainfo.dqx_data))])
+            self.write_node(point, "Qxdev", dqx,
+                            {'unit': datainfo._xunit})
+        if datainfo.mask is not None:
+            mask = ','.join(
+                ["1" if datainfo.mask[i] else "0"
+                 for i in xrange(len(datainfo.mask))])
+            self.write_node(point, "Mask", mask)
 
     def _write_trans_spectrum(self, datainfo, entry_node):
         """
@@ -956,7 +948,7 @@ class Reader(XMLreader):
                                 {'unit': spectrum.wavelength_unit})
                 self.write_node(point, "T", spectrum.transmission[i],
                                 {'unit': spectrum.transmission_unit})
-                if spectrum.transmission_deviation != None \
+                if spectrum.transmission_deviation is not None \
                 and len(spectrum.transmission_deviation) >= i:
                     self.write_node(point, "Tdev",
                                     spectrum.transmission_deviation[i],
@@ -1036,7 +1028,7 @@ class Reader(XMLreader):
             self.write_attribute(source, "name",
                                  str(datainfo.source.name))
         self.append(source, instr)
-        if datainfo.source.radiation == None or datainfo.source.radiation == '':
+        if datainfo.source.radiation is None or datainfo.source.radiation == '':
             datainfo.source.radiation = "neutron"
         self.write_node(source, "radiation", datainfo.source.radiation)
 
@@ -1077,7 +1069,7 @@ class Reader(XMLreader):
         :param datainfo: The Data1D object the information is coming from
         :param instr: lxml node ElementTree object to be appended to
         """
-        if datainfo.collimation == [] or datainfo.collimation == None:
+        if datainfo.collimation == [] or datainfo.collimation is None:
             coll = Collimation()
             datainfo.collimation.append(coll)
         for item in datainfo.collimation:
@@ -1122,7 +1114,7 @@ class Reader(XMLreader):
         :param datainfo: The Data1D object the information is coming from
         :param inst: lxml instrument node to be appended to
         """
-        if datainfo.detector == None or datainfo.detector == []:
+        if datainfo.detector is None or datainfo.detector == []:
             det = Detector()
             det.name = ""
             datainfo.detector.append(det)
@@ -1287,7 +1279,7 @@ class Reader(XMLreader):
                 toks = variable.split('.')
                 local_unit = None
                 exec "local_unit = storage.%s_unit" % toks[0]
-                if local_unit != None and units.lower() != local_unit.lower():
+                if local_unit is not None and units.lower() != local_unit.lower():
                     if HAS_CONVERTER == True:
                         try:
                             conv = Converter(units)
@@ -1300,7 +1292,7 @@ class Reader(XMLreader):
                                 % (variable, units, local_unit, exc_value)
                             self.errors.add(err_mess)
                             if optional:
-                                logging.info(err_mess)
+                                logger.info(err_mess)
                             else:
                                 raise ValueError, err_mess
                     else:
@@ -1309,7 +1301,7 @@ class Reader(XMLreader):
                         err_mess += " expecting [%s]" % local_unit
                         self.errors.add(err_mess)
                         if optional:
-                            logging.info(err_mess)
+                            logger.info(err_mess)
                         else:
                             raise ValueError, err_mess
                 else:
@@ -1336,7 +1328,6 @@ class Reader(XMLreader):
         entry = get_content(location, node)
         if entry is not None and entry.text is not None:
             exec "storage.%s = entry.text.strip()" % variable
-
 
 # DO NOT REMOVE Called by outside packages:
 #    sas.sasgui.perspectives.invariant.invariant_state

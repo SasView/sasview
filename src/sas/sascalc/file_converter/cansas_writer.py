@@ -16,7 +16,7 @@ class CansasWriter(CansasReader):
         doc, _ = self._to_xml_doc(frame_data, sasentry_attrs)
         # Write the file
         file_ref = open(filename, 'w')
-        if self.encoding == None:
+        if self.encoding is None:
             self.encoding = "UTF-8"
         doc.write(file_ref, encoding=self.encoding,
                   pretty_print=True, xml_declaration=True)
@@ -95,15 +95,15 @@ class CansasWriter(CansasReader):
             if len(datainfo.y) >= i:
                 self.write_node(point, "I", datainfo.y[i],
                                 {'unit': datainfo.y_unit})
-            if datainfo.dy != None and len(datainfo.dy) > i:
+            if datainfo.dy is not None and len(datainfo.dy) > i:
                 self.write_node(point, "Idev", datainfo.dy[i],
                                 {'unit': datainfo.y_unit})
-            if datainfo.dx != None and len(datainfo.dx) > i:
+            if datainfo.dx is not None and len(datainfo.dx) > i:
                 self.write_node(point, "Qdev", datainfo.dx[i],
                                 {'unit': datainfo.x_unit})
-            if datainfo.dxw != None and len(datainfo.dxw) > i:
+            if datainfo.dxw is not None and len(datainfo.dxw) > i:
                 self.write_node(point, "dQw", datainfo.dxw[i],
                                 {'unit': datainfo.x_unit})
-            if datainfo.dxl != None and len(datainfo.dxl) > i:
+            if datainfo.dxl is not None and len(datainfo.dxl) > i:
                 self.write_node(point, "dQl", datainfo.dxl[i],
                                 {'unit': datainfo.x_unit})

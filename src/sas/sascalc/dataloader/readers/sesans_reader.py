@@ -1,13 +1,15 @@
 """
     SESANS reader (based on ASCII reader)
-    
+
     Reader for .ses or .sesans file format
-    
-    Jurrian Bakker 
+
+    Jurrian Bakker
 """
-import numpy
+import numpy as np
 import os
-from sas.sascalc.dataloader.data_info import SESANSData1D
+from sas.sascalc.dataloader.file_reader_base_class import FileReader
+from sas.sascalc.dataloader.data_info import plottable_1D, DataInfo
+from sas.sascalc.dataloader.loader_exceptions import FileContentsException, DataReaderException
 
 # Check whether we have a converter available
 has_converter = True
@@ -17,181 +19,154 @@ except:
     has_converter = False
 _ZERO = 1e-16
 
-class Reader:
+class Reader(FileReader):
     """
     Class to load sesans files (6 columns).
     """
-    ## File type
+    # File type
     type_name = "SESANS"
-    
+
     ## Wildcards
     type = ["SESANS files (*.ses)|*.ses",
             "SESANS files (*..sesans)|*.sesans"]
-    ## List of allowed extensions
+    # List of allowed extensions
     ext = ['.ses', '.SES', '.sesans', '.SESANS']
-    
-    ## Flag to bypass extension check
+
+    # Flag to bypass extension check
     allow_all = True
-    
-    def read(self, path):
-        
-#        print "reader triggered"
-        
-        """
-        Load data file
-        
-        :param path: file path
-        
-        :return: SESANSData1D object, or None
-        
-        :raise RuntimeError: when the file can't be opened
-        :raise ValueError: when the length of the data vectors are inconsistent
-        """
-        if os.path.isfile(path):
-            basename = os.path.basename(path)
-            _, extension = os.path.splitext(basename)
-            if self.allow_all or extension.lower() in self.ext:
-                try:
-                    # Read in binary mode since GRASP frequently has no-ascii
-                    # characters that brakes the open operation
-                    input_f = open(path,'rb')
-                except:
-                    raise  RuntimeError, "sesans_reader: cannot open %s" % path
-                buff = input_f.read()
-#                print buff
-                lines = buff.splitlines()
-#                print lines
-                #Jae could not find python universal line spliter:
-                #keep the below for now
-                # some ascii data has \r line separator,
-                # try it when the data is on only one long line
-#                if len(lines) < 2 :
-#                    lines = buff.split('\r')
-                 
-                x  = numpy.zeros(0)
-                y  = numpy.zeros(0)
-                dy = numpy.zeros(0)
-                lam  = numpy.zeros(0)
-                dlam = numpy.zeros(0)
-                dx = numpy.zeros(0)
-                
-               #temp. space to sort data
-                tx  = numpy.zeros(0)
-                ty  = numpy.zeros(0)
-                tdy = numpy.zeros(0)
-                tlam  = numpy.zeros(0)
-                tdlam = numpy.zeros(0)
-                tdx = numpy.zeros(0)
-#                print "all good"
-                output = SESANSData1D(x=x, y=y, lam=lam, dy=dy, dx=dx, dlam=dlam)
-#                print output                
-                self.filename = output.filename = basename
 
-#                #Initialize counters for data lines and header lines.
-#                is_data = False  # Has more than 5 lines
-#                # More than "5" lines of data is considered as actual
-#                # data unless that is the only data
-#                mum_data_lines = 5
-#                # To count # of current data candidate lines
-#                i = -1
-#                # To count total # of previous data candidate lines
-#                i1 = -1
-#                # To count # of header lines
-#                j = -1
-#                # Helps to count # of header lines
-#                j1 = -1
-#                #minimum required number of columns of data; ( <= 4).
-#                lentoks = 2
-                paramnames=[]
-                paramvals=[]
-                zvals=[]
-                dzvals=[]
-                lamvals=[]
-                dlamvals=[]
-                Pvals=[]
-                dPvals=[]
-#                print x
-#                print zvals
-                for line in lines:
-                    # Initial try for CSV (split on ,)
-                    line=line.strip()
-                    toks = line.split('\t')
-                    if len(toks)==2:
-                        paramnames.append(toks[0])
-                        paramvals.append(toks[1])
-                    if len(toks)>5:
-                        zvals.append(toks[0])
-                        dzvals.append(toks[1])
-                        lamvals.append(toks[2])
-                        dlamvals.append(toks[3])
-                        Pvals.append(toks[4])
-                        dPvals.append(toks[5])
-                    else:
-                        continue
+    def get_file_contents(self):
+        self.current_datainfo = DataInfo()
+        self.current_dataset = plottable_1D(np.array([]), np.array([]))
+        self.current_datainfo.isSesans = True
+        self.output = []
 
-                x=[]
-                y=[]
-                lam=[]
-                dx=[]
-                dy=[]
-                dlam=[]
-                lam_header = lamvals[0].split()
-                data_conv_z = None
-                default_z_unit = "A"
-                data_conv_P = None
-                default_p_unit = " "
-                lam_unit = lam_header[1].replace("[","").replace("]","")
-                varheader=[zvals[0],dzvals[0],lamvals[0],dlamvals[0],Pvals[0],dPvals[0]]
-                valrange=range(1, len(zvals))
-                for i in valrange:
-                    x.append(float(zvals[i]))
-                    y.append(float(Pvals[i]))
-                    lam.append(float(lamvals[i]))
-                    dy.append(float(dPvals[i]))
-                    dx.append(float(dzvals[i]))
-                    dlam.append(float(dlamvals[i]))
+        line = self.f_open.readline()
+        params = {}
+        while not line.startswith("BEGIN_DATA"):
+            terms = line.split()
+            if len(terms) >= 2:
+                params[terms[0]] = " ".join(terms[1:])
+            line = self.f_open.readline()
+        self.params = params
 
-                x,y,lam,dy,dx,dlam = [
-                   numpy.asarray(v, 'double')
-                   for v in (x,y,lam,dy,dx,dlam)
-                ]
+        if "FileFormatVersion" not in self.params:
+            raise FileContentsException("SES file missing FileFormatVersion")
+        if float(self.params["FileFormatVersion"]) >= 2.0:
+            raise FileContentsException("SASView only supports SES version 1")
 
-                input_f.close()
+        if "SpinEchoLength_unit" not in self.params:
+            raise FileContentsException("SpinEchoLength has no units")
+        if "Wavelength_unit" not in self.params:
+            raise FileContentsException("Wavelength has no units")
+        if params["SpinEchoLength_unit"] != params["Wavelength_unit"]:
+            raise FileContentsException("The spin echo data has rudely used "
+                               "different units for the spin echo length "
+                               "and the wavelength.  While sasview could "
+                               "handle this instance, it is a violation "
+                               "of the file format and will not be "
+                               "handled by other software.")
 
-                output.x, output.x_unit = self._unit_conversion(x, lam_unit, default_z_unit)
-                output.y = y
-                output.dx, output.dx_unit = self._unit_conversion(dx, lam_unit, default_z_unit)
-                output.dy = dy
-                output.lam, output.lam_unit = self._unit_conversion(lam, lam_unit, default_z_unit)
-                output.dlam, output.dlam_unit = self._unit_conversion(dlam, lam_unit, default_z_unit)
+        headers = self.f_open.readline().split()
 
-                output.xaxis("\rm{z}", output.x_unit)
-                output.yaxis("\\rm{P/P0}", output.y_unit)
-                # Store loading process information
-                output.meta_data['loader'] = self.type_name
-                output.sample.thickness = float(paramvals[6])
-                output.sample.name = paramvals[1]
-                output.sample.ID = paramvals[0]
-                zaccept_unit_split = paramnames[7].split("[")
-                zaccept_unit = zaccept_unit_split[1].replace("]","")
-                if zaccept_unit.strip() == '\AA^-1':
-                    zaccept_unit = "1/A"
-                output.sample.zacceptance=(float(paramvals[7]),zaccept_unit)
-                output.vars=varheader
+        self._insist_header(headers, "SpinEchoLength")
+        self._insist_header(headers, "Depolarisation")
+        self._insist_header(headers, "Depolarisation_error")
+        self._insist_header(headers, "Wavelength")
 
-                if len(output.x) < 1:
-                    raise RuntimeError, "%s is empty" % path
-                return output
+        data = np.loadtxt(self.f_open)
 
+        if data.shape[1] != len(headers):
+            raise FileContentsException(
+                "File has {} headers, but {} columns".format(
+                    len(headers),
+                    data.shape[1]))
+
+        if not data.size:
+            raise FileContentsException("{} is empty".format(path))
+        x = data[:, headers.index("SpinEchoLength")]
+        if "SpinEchoLength_error" in headers:
+            dx = data[:, headers.index("SpinEchoLength_error")]
         else:
-            raise RuntimeError, "%s is not a file" % path
-        return None
+            dx = x * 0.05
+        lam = data[:, headers.index("Wavelength")]
+        if "Wavelength_error" in headers:
+            dlam = data[:, headers.index("Wavelength_error")]
+        else:
+            dlam = lam * 0.05
+        y = data[:, headers.index("Depolarisation")]
+        dy = data[:, headers.index("Depolarisation_error")]
 
-    def _unit_conversion(self, value, value_unit, default_unit):
-        if has_converter == True and value_unit != default_unit:
-            data_conv_q = Converter(value_unit)
-            value = data_conv_q(value, units=default_unit)
+        lam_unit = self._unit_fetch("Wavelength")
+        x, x_unit = self._unit_conversion(x, "A",
+                                          self._unit_fetch(
+                                              "SpinEchoLength"))
+        dx, dx_unit = self._unit_conversion(
+            dx, lam_unit,
+            self._unit_fetch("SpinEchoLength"))
+        dlam, dlam_unit = self._unit_conversion(
+            dlam, lam_unit,
+            self._unit_fetch("Wavelength"))
+        y_unit = self._unit_fetch("Depolarisation")
+
+        self.current_dataset.x = x
+        self.current_dataset.y = y
+        self.current_dataset.lam = lam
+        self.current_dataset.dy = dy
+        self.current_dataset.dx = dx
+        self.current_dataset.dlam = dlam
+        self.current_datainfo.isSesans = True
+
+        self.current_datainfo._yunit = y_unit
+        self.current_datainfo._xunit = x_unit
+        self.current_datainfo.source.wavelength_unit = lam_unit
+        self.current_datainfo.source.wavelength = lam
+        self.current_datainfo.filename = os.path.basename(self.f_open.name)
+        self.current_dataset.xaxis(r"\rm{z}", x_unit)
+        # Adjust label to ln P/(lam^2 t), remove lam column refs
+        self.current_dataset.yaxis(r"\rm{ln(P)/(t \lambda^2)}", y_unit)
+        # Store loading process information
+        self.current_datainfo.meta_data['loader'] = self.type_name
+        self.current_datainfo.sample.name = params["Sample"]
+        self.current_datainfo.sample.ID = params["DataFileTitle"]
+        self.current_datainfo.sample.thickness = self._unit_conversion(
+            float(params["Thickness"]), "cm",
+            self._unit_fetch("Thickness"))[0]
+
+        self.current_datainfo.sample.zacceptance = (
+            float(params["Theta_zmax"]),
+            self._unit_fetch("Theta_zmax"))
+
+        self.current_datainfo.sample.yacceptance = (
+            float(params["Theta_ymax"]),
+            self._unit_fetch("Theta_ymax"))
+
+        self.send_to_output()
+
+    @staticmethod
+    def _insist_header(headers, name):
+        if name not in headers:
+            raise FileContentsException(
+                "Missing {} column in spin echo data".format(name))
+
+    @staticmethod
+    def _unit_conversion(value, value_unit, default_unit):
+        """
+        Performs unit conversion on a measurement.
+
+        :param value: The magnitude of the measurement
+        :param value_unit: a string containing the final desired unit
+        :param default_unit: string with the units of the original measurement
+        :return: The magnitude of the measurement in the new units
+        """
+        # (float, string, string) -> float
+        if has_converter and value_unit != default_unit:
+            data_conv_q = Converter(default_unit)
+            value = data_conv_q(value, units=value_unit)
             new_unit = default_unit
         else:
             new_unit = value_unit
         return value, new_unit
+
+    def _unit_fetch(self, unit):
+        return self.params[unit+"_unit"]

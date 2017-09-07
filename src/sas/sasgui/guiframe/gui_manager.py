@@ -47,8 +47,9 @@ from sas.sascalc.dataloader.loader import Loader
 from sas.sasgui.guiframe.proxy import Connection
 from matplotlib import _pylab_helpers
 
-warnings.simplefilter("ignore")
+logger = logging.getLogger(__name__)
 
+warnings.simplefilter("ignore")
 
 def get_app_dir():
     """
@@ -63,23 +64,23 @@ def get_app_dir():
         app_path = os.path.dirname(app_path)
     if os.path.isfile(os.path.join(app_path, "custom_config.py")):
         app_path = os.path.abspath(app_path)
-        logging.info("Using application path: %s", app_path)
+        logger.info("Using application path: %s", app_path)
         return app_path
 
     # Next, try the current working directory
     if os.path.isfile(os.path.join(os.getcwd(), "custom_config.py")):
-        logging.info("Using application path: %s", os.getcwd())
+        logger.info("Using application path: %s", os.getcwd())
         return os.path.abspath(os.getcwd())
 
     # Finally, try the directory of the sasview module
     # TODO: gui_manager will have to know about sasview until we
     # clean all these module variables and put them into a config class
     # that can be passed by sasview.py.
-    logging.info(sys.executable)
-    logging.info(str(sys.argv))
+    logger.debug(sys.executable)
+    logger.debug(str(sys.argv))
     from sas import sasview as sasview
     app_path = os.path.dirname(sasview.__file__)
-    logging.info("Using application path: %s", app_path)
+    logger.debug("Using application path: %s", app_path)
     return app_path
 
 
@@ -103,11 +104,11 @@ def _find_local_config(file, path):
         fObj, path_config, descr = imp.find_module(file, [path])
         config_module = imp.load_module(file, fObj, path_config, descr)
     except:
-        logging.error("Error loading %s/%s: %s" % (path, file, sys.exc_value))
+        logger.error("Error loading %s/%s: %s" % (path, file, sys.exc_value))
     finally:
         if fObj is not None:
             fObj.close()
-    logging.info("GuiManager loaded %s/%s" % (path, file))
+    logger.debug("GuiManager loaded %s/%s" % (path, file))
     return config_module
 
 # Get APP folder
@@ -124,11 +125,11 @@ if config is None:
     if config is None:
         # Didn't find local config, load the default
         import sas.sasgui.guiframe.config as config
-        logging.info("using default local_config")
+        logger.debug("using default local_config")
     else:
-        logging.info("found local_config in %s" % os.getcwd())
+        logger.debug("found local_config in %s" % os.getcwd())
 else:
-    logging.info("found local_config in %s" % PATH_APP)
+    logger.debug("found local_config in %s" % PATH_APP)
 
 from sas.sasgui.guiframe.customdir import SetupCustom
 c_conf_dir = SetupCustom().setup_dir(PATH_APP)
@@ -137,11 +138,11 @@ if custom_config is None:
     custom_config = _find_local_config('custom_config', os.getcwd())
     if custom_config is None:
         msgConfig = "Custom_config file was not imported"
-        logging.info(msgConfig)
+        logger.debug(msgConfig)
     else:
-        logging.info("using custom_config in %s" % os.getcwd())
+        logger.debug("using custom_config in %s" % os.getcwd())
 else:
-    logging.info("using custom_config from %s" % c_conf_dir)
+    logger.debug("using custom_config from %s" % c_conf_dir)
 
 # read some constants from config
 APPLICATION_STATE_EXTENSION = config.APPLICATION_STATE_EXTENSION
@@ -151,6 +152,7 @@ WELCOME_PANEL_ON = config.WELCOME_PANEL_ON
 SPLASH_SCREEN_WIDTH = config.SPLASH_SCREEN_WIDTH
 SPLASH_SCREEN_HEIGHT = config.SPLASH_SCREEN_HEIGHT
 SS_MAX_DISPLAY_TIME = config.SS_MAX_DISPLAY_TIME
+SAS_OPENCL = config.SAS_OPENCL
 if not WELCOME_PANEL_ON:
     WELCOME_PANEL_SHOW = False
 else:
@@ -175,6 +177,7 @@ try:
         DEFAULT_OPEN_FOLDER = os.path.abspath(open_folder)
     else:
         DEFAULT_OPEN_FOLDER = PATH_APP
+    SAS_OPENCL = custom_config.SAS_OPENCL
 except:
     DATALOADER_SHOW = True
     TOOLBAR_SHOW = True
@@ -189,7 +192,7 @@ except:
     DEFAULT_PERSPECTIVE = None
     CLEANUP_PLOT = False
     DEFAULT_OPEN_FOLDER = PATH_APP
-
+    SAS_OPENCL = None
 DEFAULT_STYLE = config.DEFAULT_STYLE
 
 PLUGIN_STATE_EXTENSIONS = config.PLUGIN_STATE_EXTENSIONS
@@ -224,6 +227,9 @@ if sys.platform.count("win32") < 1:
         PARENT_FRAME = wx.Frame
         CHILD_FRAME = wx.Frame
 
+#Initiliaze enviromental variable with custom setting but only if variable not set
+if SAS_OPENCL and not "SAS_OPENCL" in os.environ:
+    os.environ["SAS_OPENCL"] = SAS_OPENCL
 
 class ViewerFrame(PARENT_FRAME):
     """
@@ -368,7 +374,7 @@ class ViewerFrame(PARENT_FRAME):
                     icon = self.GetIcon()
                     frame.SetIcon(icon)
                 except:
-                    logging.error("ViewerFrame.put_icon: could not set icon")
+                    logger.error("ViewerFrame.put_icon: could not set icon")
 
     def get_client_size(self):
         """
@@ -797,7 +803,7 @@ class ViewerFrame(PARENT_FRAME):
             msg = "%s Cannot load file %s\n" % (str(APPLICATION_NAME),
                                                 str(self._input_file))
             msg += str(sys.exc_value) + '\n'
-            logging.error(msg)
+            logger.error(msg)
         if self._data_panel is not None and len(self.plugins) > 0:
             self._data_panel.fill_cbox_analysis(self.plugins)
         self.post_init()
@@ -863,12 +869,12 @@ class ViewerFrame(PARENT_FRAME):
             item.set_batch_selection(self.batch_on)
             if plugin.__class__ == item.__class__:
                 msg = "Plugin %s already loaded" % plugin.sub_menu
-                logging.info(msg)
+                logger.info(msg)
                 is_loaded = True
         if not is_loaded:
             self.plugins.append(plugin)
             msg = "Plugin %s appended" % plugin.sub_menu
-            logging.info(msg)
+            logger.info(msg)
 
     def _get_local_plugins(self):
         """
@@ -888,7 +894,7 @@ class ViewerFrame(PARENT_FRAME):
             except:
                 msg = "ViewerFrame._get_local_plugins:"
                 msg += "cannot import dataloader plugin.\n %s" % sys.exc_value
-                logging.error(msg)
+                logger.error(msg)
         if style2 == GUIFRAME.PLOTTING_ON:
             try:
                 from sas.sasgui.guiframe.local_perspectives.plotting \
@@ -898,7 +904,7 @@ class ViewerFrame(PARENT_FRAME):
             except:
                 msg = "ViewerFrame._get_local_plugins:"
                 msg += "cannot import plotting plugin.\n %s" % sys.exc_value
-                logging.error(msg)
+                logger.error(msg)
 
         return plugins
 
@@ -943,21 +949,21 @@ class ViewerFrame(PARENT_FRAME):
                             try:
                                 plugins.append(module.Plugin())
                                 msg = "Found plug-in: %s" % module.PLUGIN_ID
-                                logging.info(msg)
+                                logger.info(msg)
                             except:
                                 msg = "Error accessing PluginPanel"
                                 msg += " in %s\n  %s" % (name, sys.exc_value)
                                 config.printEVT(msg)
                     except:
                         msg = "ViewerFrame._find_plugins: %s" % sys.exc_value
-                        logging.error(msg)
+                        logger.error(msg)
                     finally:
                         if file is not None:
                             file.close()
         except:
             # Should raise and catch at a higher level and
             # display error on status bar
-            logging.error(sys.exc_value)
+            logger.error(sys.exc_value)
 
         return plugins
 
@@ -1379,7 +1385,7 @@ class ViewerFrame(PARENT_FRAME):
             wx.EVT_MENU(self, wx_id, self._onAcknowledge)
 
         if config._do_aboutbox:
-            logging.info("Doing help menu")
+            logger.info("Doing help menu")
             wx_id = wx.NewId()
             self._help_menu.Append(wx_id, '&About', 'Software information')
             wx.EVT_MENU(self, wx_id, self._onAbout)
@@ -1740,7 +1746,7 @@ class ViewerFrame(PARENT_FRAME):
             if ID in self.panels.keys():
                 del self.panels[ID]
         else:
-            logging.error("delete_panel: No such plot id as %s" % ID)
+            logger.error("delete_panel: No such plot id as %s" % ID)
 
     def create_gui_data(self, data, path=None):
         """
@@ -1757,7 +1763,7 @@ class ViewerFrame(PARENT_FRAME):
             log_msg = "File Loader cannot "
             log_msg += "load: %s\n" % str(basename)
             log_msg += "Try Data opening...."
-            logging.error(log_msg)
+            logger.error(log_msg)
             return
 
         # reading a state file
@@ -1837,13 +1843,13 @@ class ViewerFrame(PARENT_FRAME):
             log_msg = "Data Loader cannot "
             log_msg += "load: %s\n" % str(path)
             log_msg += "Try File opening ...."
-            logging.error(log_msg)
+            logger.error(log_msg)
             return
         log_msg = ''
         output = {}
         error_message = ""
         try:
-            logging.info("Loading Data...:\n" + str(path) + "\n")
+            logger.info("Loading Data...:\n" + str(path) + "\n")
             temp = self.loader.load(path)
             if temp.__class__.__name__ == "list":
                 for item in temp:
@@ -1858,7 +1864,7 @@ class ViewerFrame(PARENT_FRAME):
             error_message = "Error while loading"
             error_message += " Data from cmd:\n %s\n" % str(path)
             error_message += str(sys.exc_value) + "\n"
-            logging.error(error_message)
+            logger.error(error_message)
 
     def load_folder(self, path):
         """
@@ -1879,7 +1885,7 @@ class ViewerFrame(PARENT_FRAME):
             error_message = "Error while loading"
             error_message += " Data folder from cmd:\n %s\n" % str(path)
             error_message += str(sys.exc_value) + "\n"
-            logging.error(error_message)
+            logger.error(error_message)
 
     def _on_open_state_application(self, event):
         """
@@ -1949,7 +1955,6 @@ class ViewerFrame(PARENT_FRAME):
                 for key, value in theory_dict.iteritems():
                     item, _, _ = value
                     item.Check(True)
-            self._data_panel.on_remove(None, False)
 
             wx.PostEvent(self, StatusEvent(status="Loading Project file..."))
             dlg = wx.FileDialog(self, "Choose a file",
@@ -1962,6 +1967,7 @@ class ViewerFrame(PARENT_FRAME):
                 dlg.Destroy()
                 # Reset to a base state
                 self._on_reset_state()
+                self._data_panel.on_remove(None, False)
                 # Load the project file
                 self.load_state(path=path, is_project=True)
 
@@ -1989,8 +1995,9 @@ class ViewerFrame(PARENT_FRAME):
                 self.cpanel_on_focus.on_save(event)
                 wx.PostEvent(self,
                              StatusEvent(status="Completed saving."))
-            except:
+            except Exception:
                 msg = "Error occurred while saving: "
+                msg += traceback.format_exc()
                 msg += "To save, the application panel should have a data set.."
                 wx.PostEvent(self, StatusEvent(status=msg))
 
@@ -2037,10 +2044,11 @@ class ViewerFrame(PARENT_FRAME):
                 msg += "should have a data set "
                 msg += "and model selected. "
                 msg += "No project was saved to %s" % (str(path))
-                logging.warning(msg)
+                logger.warning(msg)
                 wx.PostEvent(self, StatusEvent(status=msg, info="error"))
-        except:
+        except Exception:
             msg = "Error occurred while saving: "
+            msg += traceback.format_exc()
             msg += "To save, at least one application panel "
             msg += "should have a data set.."
             wx.PostEvent(self, StatusEvent(status=msg, info="error"))
@@ -2101,9 +2109,40 @@ class ViewerFrame(PARENT_FRAME):
         """
         Quit the application
         """
-        logging.info(" --- SasView session was closed --- \n")
+        #IF SAS_OPENCL is set, settings are stored in the custom config file
+        self._write_opencl_config_file()
+        logger.info(" --- SasView session was closed --- \n")
         wx.Exit()
         sys.exit()
+
+    def _write_opencl_config_file(self):
+        """
+        Writes OpenCL settings to custom config file, so they can be remmbered
+        from session to session
+        """
+        if custom_config is not None:
+            sas_opencl = os.environ.get("SAS_OPENCL")
+            new_config_lines = []
+            config_file = open(custom_config.__file__)
+            config_lines = config_file.readlines()
+            for line in config_lines:
+                if "SAS_OPENCL" in line:
+                    if sas_opencl:
+                        new_config_lines.append("SAS_OPENCL = \"" + sas_opencl
+                                                + "\"\n")
+                    else:
+                        new_config_lines.append("SAS_OPENCL = \"None\"\n")
+                else:
+                    new_config_lines.append(line)
+            config_file.close()
+
+            #If custom_config is None, settings will not be remmbered
+            new_config_file = open(custom_config.__file__,"w")
+            new_config_file.writelines(new_config_lines)
+            new_config_file.close()
+        else:
+            logger.info("Failed to save OPENCL settings in custom config file")
+
 
     def _check_update(self, event=None):
         """
@@ -2117,13 +2156,11 @@ class ViewerFrame(PARENT_FRAME):
         response = c.connect()
         if response is not None:
             try:
-                # 
                 content = response.read().strip()
-                logging.info("Connected to www.sasview.org. Latest version: %s"
-                             % (content))
+                logger.info("Connected to www.sasview.org. Latest version: %s", content)
                 version_info = json.loads(content)
             except:
-                logging.info("Failed to connect to www.sasview.org")
+                logger.info("Failed to connect to www.sasview.org")
         self._process_version(version_info, standalone=event is None)
 
     def _process_version(self, version_info, standalone=True):
@@ -2163,7 +2200,7 @@ class ViewerFrame(PARENT_FRAME):
         except:
             msg = "guiframe: could not get latest application"
             msg += " version number\n  %s" % sys.exc_value
-            logging.error(msg)
+            logger.error(msg)
             if not standalone:
                 msg = "Could not connect to the application server."
                 msg += " Please try again later."
@@ -2210,15 +2247,15 @@ class ViewerFrame(PARENT_FRAME):
                     self.put_icon(dialog)
                     dialog.Show(True)
                 except:
-                    logging.error("Error in _onTutorial: %s" % sys.exc_value)
+                    logger.error("Error in _onTutorial: %s" % sys.exc_value)
                     try:
                         # Try an alternate method
-                        logging.error(
+                        logger.error(
                             "Could not open the tutorial pdf, trying xhtml2pdf")
                         from xhtml2pdf import pisa
                         pisa.startViewer(path)
                     except:
-                        logging.error(
+                        logger.error(
                             "Could not open the tutorial pdf with xhtml2pdf")
                         msg = "This feature requires 'PDF Viewer'\n"
                         wx.MessageBox(msg, 'Error')
@@ -2229,12 +2266,12 @@ class ViewerFrame(PARENT_FRAME):
                 except:
                     try:
                         # Try an alternate method
-                        logging.error(
+                        logger.error(
                             "Could not open the tutorial pdf, trying xhtml2pdf")
                         from xhtml2pdf import pisa
                         pisa.startViewer(path)
                     except:
-                        logging.error(
+                        logger.error(
                             "Could not open the tutorial pdf with xhtml2pdf")
                         msg = "This feature requires the Preview application\n"
                         wx.MessageBox(msg, 'Error')
@@ -2373,7 +2410,7 @@ class ViewerFrame(PARENT_FRAME):
 
         else:
             msg = "Guiframe does not have a current perspective"
-            logging.info(msg)
+            logger.info(msg)
 
     def set_theory(self, state_id, theory_id=None):
         """
@@ -2384,11 +2421,11 @@ class ViewerFrame(PARENT_FRAME):
                 self._current_perspective.set_theory(list_theory.values())
             except:
                 msg = "Guiframe set_theory: \n" + str(sys.exc_value)
-                logging.info(msg)
+                logger.info(msg)
                 wx.PostEvent(self, StatusEvent(status=msg, info="error"))
         else:
             msg = "Guiframe does not have a current perspective"
-            logging.info(msg)
+            logger.info(msg)
 
     def plot_data(self, state_id, data_id=None,
                   theory_id=None, append=False):
@@ -2455,7 +2492,6 @@ class ViewerFrame(PARENT_FRAME):
                 wx.PostEvent(self, NewPlotEvent(id=new_plot.id,
                                                 group_id=group_id,
                                                 action='remove'))
-                # remove res plot: Todo: improve
                 wx.CallAfter(self._remove_res_plot, new_plot.id)
         self._data_manager.delete_data(data_id=data_id,
                                        theory_id=theory_id)
@@ -2471,7 +2507,7 @@ class ViewerFrame(PARENT_FRAME):
                                             group_id=("res" + str(id)),
                                             action='remove'))
         except:
-            logging.error(sys.exc_value)
+            logger.error(sys.exc_value)
 
     def save_data1d(self, data, fname):
         """
@@ -3269,7 +3305,7 @@ class SasViewApp(wx.App):
         except:
             msg = "%s Could not load " % str(APPLICATION_NAME)
             msg += "input file from command line.\n"
-            logging.error(msg)
+            logger.error(msg)
         # Display a splash screen on top of the frame.
         try:
             if os.path.isfile(SPLASH_SCREEN_PATH):
@@ -3283,7 +3319,7 @@ class SasViewApp(wx.App):
                 self.s_screen.Close()
             msg = "Cannot display splash screen\n"
             msg += str(sys.exc_value)
-            logging.error(msg)
+            logger.error(msg)
             self.frame.Show()
 
         self.SetTopWindow(self.frame)
@@ -3338,7 +3374,7 @@ class SasViewApp(wx.App):
                         if os.path.isfile(file_path):
                             os.remove(file_path)
                 except:
-                    logging.error("gui_manager.clean_plugin_models:\n  %s"
+                    logger.error("gui_manager.clean_plugin_models:\n  %s"
                                   % sys.exc_value)
 
     def set_manager(self, manager):

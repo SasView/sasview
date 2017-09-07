@@ -26,6 +26,8 @@ from sas.sascalc.dataloader.loader import Loader
 from sas.sasgui.perspectives.invariant.invariant_panel import InvariantPanel
 from sas.sasgui.guiframe.plugin_base import PluginBase
 
+logger = logging.getLogger(__name__)
+
 class Plugin(PluginBase):
     """
     This class defines the interface for invariant Plugin class
@@ -45,7 +47,7 @@ class Plugin(PluginBase):
         self.__data = None
 
         # Log startup
-        logging.info("Invariant plug-in started")
+        logger.info("Invariant plug-in started")
 
     def get_data(self):
         """
@@ -279,7 +281,7 @@ class Plugin(PluginBase):
             self.on_set_state_helper(None)
 
         except:
-            logging.error("invariant.set_state: %s" % sys.exc_value)
+            logger.error("invariant.set_state: %s" % sys.exc_value)
 
     def on_set_state_helper(self, event=None):
         """
@@ -328,7 +330,7 @@ class Plugin(PluginBase):
         new_plot.id = str(self.__data.id) + name
         new_plot.title = self.__data.title
         # Save theory_data in a state
-        if data != None:
+        if data is not None:
             name_head = name.split('-')
             if name_head[0] == 'Low':
                 self.invariant_panel.state.theory_lowQ = copy.deepcopy(new_plot)
@@ -350,7 +352,7 @@ class Plugin(PluginBase):
         new_plot.title = self.__data.title
 
         # Save data in a state: but seems to never happen
-        if new_plot != None:
+        if new_plot is not None:
             self.invariant_panel.state.data = copy.deepcopy(new_plot)
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                                                title=new_plot.title))
