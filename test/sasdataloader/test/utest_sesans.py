@@ -64,13 +64,6 @@ class sesans_reader(unittest.TestCase):
             self.loader,
             "sesans_examples/no_spin_echo_unit.ses")
 
-    def test_sesans_no_version(self):
-        """
-            Confirm that sesans files with no file format version raise an appropriate error
-        """
-        # Warning message sent to logger for files not found.
-        pass
-
     def test_sesans_future_version(self):
         """
             Confirm that sesans files that, according to semantic version, are from a future, backwards-incompatible version of the SES file format throw an exception.
