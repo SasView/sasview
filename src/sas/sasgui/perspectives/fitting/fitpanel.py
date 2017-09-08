@@ -406,7 +406,6 @@ class FitPanel(nb, PanelBase):
                     pos = self.GetPageIndex(self.sim_page)
                     self.SetSelection(pos)
                     self.on_close_page(event=None)
-                    temp = self.GetSelection()
                     self.DeletePage(pos)
                     self.sim_page = None
                     self.batch_on = False

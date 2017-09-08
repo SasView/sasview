@@ -125,7 +125,7 @@ class Reader():
                 class_prog = re.compile(value.name)
 
             if isinstance(value, h5py.Group):
-                parent_class = class_name
+                # Set parent class before recursion
                 self.parent_class = class_name
                 parent_list.append(key)
                 # If a new sasentry, store the current data sets and create
@@ -136,7 +136,8 @@ class Reader():
                     self._initialize_new_data_set(parent_list)
                 # Recursion step to access data within the group
                 self.read_children(value, parent_list)
-                self.parent_class = parent_class
+                # Reset parent class when returning from recursive method
+                self.parent_class = class_name
                 self.add_intermediate()
                 parent_list.remove(key)
 
