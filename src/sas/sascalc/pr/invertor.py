@@ -120,7 +120,7 @@ class Invertor(Cinvertor):
         (self.__dict__, self.alpha, self.d_max,
          self.q_min, self.q_max,
          self.x, self.y,
-         self.err, self.has_bck,
+         self.err, self.est_bck,
          self.slit_height, self.slit_width) = state
 
     def __reduce_ex__(self, proto):
@@ -132,7 +132,7 @@ class Invertor(Cinvertor):
                  self.alpha, self.d_max,
                  self.q_min, self.q_max,
                  self.x, self.y,
-                 self.err, self.has_bck,
+                 self.err, self.est_bck,
                  self.slit_height, self.slit_width,
                 )
         return (Invertor, tuple(), state, None, None)
@@ -174,13 +174,13 @@ class Invertor(Cinvertor):
             return self.set_slit_height(value)
         elif name == 'slit_width':
             return self.set_slit_width(value)
-        elif name == 'has_bck':
+        elif name == 'est_bck':
             if value == True:
-                return self.set_has_bck(1)
+                return self.set_est_bck(1)
             elif value == False:
-                return self.set_has_bck(0)
+                return self.set_est_bck(0)
             else:
-                raise ValueError, "Invertor: has_bck can only be True or False"
+                raise ValueError, "Invertor: est_bck can only be True or False"
 
         return Cinvertor.__setattr__(self, name, value)
 
@@ -219,8 +219,8 @@ class Invertor(Cinvertor):
             return self.get_slit_height()
         elif name == 'slit_width':
             return self.get_slit_width()
-        elif name == 'has_bck':
-            value = self.get_has_bck()
+        elif name == 'est_bck':
+            value = self.get_est_bck()
             if value == 1:
                 return True
             else:
@@ -247,7 +247,8 @@ class Invertor(Cinvertor):
         invertor.x = self.x
         invertor.y = self.y
         invertor.err = self.err
-        invertor.has_bck = self.has_bck
+        invertor.est_bck = self.est_bck
+        invertor.background = self.background
         invertor.slit_height = self.slit_height
         invertor.slit_width = self.slit_width
 
@@ -289,8 +290,13 @@ class Invertor(Cinvertor):
         :return: c_out, c_cov - the coefficients with covariance matrix
         """
         # Reset the background value before proceeding
-        self.background = 0.0
-        return self.lstsq(nfunc, nr=nr)
+        # self.background = 0.0
+        if not self.est_bck:
+            self.y -= self.background
+        out, cov = self.lstsq(nfunc, nr=nr)
+        if not self.est_bck:
+            self.y += self.background
+        return out, cov
 
     def iq(self, out, q):
         """
@@ -453,7 +459,7 @@ class Invertor(Cinvertor):
             nq = 0
 
         # If we need to fit the background, add a term
-        if self.has_bck == True:
+        if self.est_bck == True:
             nfunc_0 = nfunc
             nfunc += 1
 
@@ -499,8 +505,7 @@ class Invertor(Cinvertor):
             logger.error(sys.exc_value)
 
         # Keep a copy of the last output
-        if self.has_bck == False:
-            self.background = 0
+        if self.est_bck == False:
             self.out = c
             self.cov = err
         else:
@@ -652,7 +657,7 @@ class Invertor(Cinvertor):
         file.write("#slit_height=%g\n" % self.slit_height)
         file.write("#slit_width=%g\n" % self.slit_width)
         file.write("#background=%g\n" % self.background)
-        if self.has_bck == True:
+        if self.est_bck == True:
             file.write("#has_bck=1\n")
         else:
             file.write("#has_bck=0\n")
@@ -733,9 +738,9 @@ class Invertor(Cinvertor):
                     elif line.startswith('#has_bck='):
                         toks = line.split('=')
                         if int(toks[1]) == 1:
-                            self.has_bck = True
+                            self.est_bck = True
                         else:
-                            self.has_bck = False
+                            self.est_bck = False
 
                     # Now read in the parameters
                     elif line.startswith('#C_'):

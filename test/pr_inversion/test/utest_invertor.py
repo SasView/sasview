@@ -67,17 +67,17 @@ class TestBasicComponent(unittest.TestCase):
         for i in range(self.ntest):
             self.x_in[i] = 1.0*(i+1)
 
-    def test_has_bck_flag(self):
+    def test_est_bck_flag(self):
         """
-            Tests the has_bck flag operations
+            Tests the est_bck flag operations
         """
-        self.assertEqual(self.invertor.has_bck, False)
-        self.invertor.has_bck=True
-        self.assertEqual(self.invertor.has_bck, True)
+        self.assertEqual(self.invertor.est_bck, False)
+        self.invertor.est_bck=True
+        self.assertEqual(self.invertor.est_bck, True)
         def doit_float():
-            self.invertor.has_bck  = 2.0
+            self.invertor.est_bck  = 2.0
         def doit_str():
-            self.invertor.has_bck  = 'a'
+            self.invertor.est_bck  = 'a'
 
         self.assertRaises(ValueError, doit_float)
         self.assertRaises(ValueError, doit_str)

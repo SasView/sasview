@@ -24,7 +24,7 @@ class Plugin(PluginBase):
         """
         Returns a set of menu entries
         """
-        help_txt = "Convert single column ASCII data to CanSAS format"
+        help_txt = "Convert ASCII or BSL/OTOKO data to CanSAS or NXcanSAS formats"
         return [("File Converter", help_txt, self.on_file_converter)]
 
     def on_file_converter(self, event):
