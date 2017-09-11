@@ -438,8 +438,8 @@ def rebuild():
     #fetch_mathjax()
     apidoc()
     build()
-    if find_executable('latex'):
-        build_pdf()
+    #if find_executable('latex'):
+    build_pdf()
     #convert_katex()
     #convert_mathjax()
 
