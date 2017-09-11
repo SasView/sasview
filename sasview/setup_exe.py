@@ -231,7 +231,7 @@ for f in matplotlibdata:
 
 # Copy the settings file for the sas.dataloader file extension associations
 import sas.sascalc.dataloader.readers
-f = os.path.join(sas.sascalc.dataloader.readers.get_data_path(), 'defaults.json')
+f = os.path.join(sas.sascalc.dataloader.readers.get_data_path())
 if os.path.isfile(f):
     data_files.append(('.', [f]))
 f = 'custom_config.py'
@@ -245,10 +245,6 @@ if os.path.isfile(f):
 f = 'logging.ini'
 if os.path.isfile(f):
     data_files.append(('.', [f]))
-
-#f = 'default_categories.json'
-#if os.path.isfile(f):
-#    data_files.append(('.', [f]))
 
 # numerical libraries
 def dll_check(dll_path, dlls):

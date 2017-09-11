@@ -19,6 +19,7 @@ import logging
 import warnings
 
 from lxml import etree
+from lxml.etree import XMLSyntaxError
 from xml.dom import minidom
 
 logger = logging.getLogger(__name__)
@@ -61,7 +62,7 @@ class cansas_reader_xml(unittest.TestCase):
         Should fail gracefully and send a message to logger.info()
         """
         invalid = StringIO.StringIO('<a><c></b></a>')
-        XMLreader(invalid)
+        self.assertRaises(XMLSyntaxError, lambda: XMLreader(invalid))
 
     def test_xml_validate(self):
         string = "<xsd:schema xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\n"
@@ -301,8 +302,8 @@ class cansas_reader_hdf5(unittest.TestCase):
         self.assertTrue(data._xunit == "A^{-1}")
         self.assertTrue(data._yunit == "cm^{-1}")
         self.assertTrue(data.y.size == 100)
-        self.assertAlmostEqual(data.y[9], 0.952749011516985)
-        self.assertAlmostEqual(data.x[9], 0.3834415188257777)
+        self.assertAlmostEqual(data.y[40], 0.952749011516985)
+        self.assertAlmostEqual(data.x[40], 0.3834415188257777)
         self.assertAlmostEqual(len(data.meta_data), 0)
 
 
