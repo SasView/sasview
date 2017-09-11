@@ -483,6 +483,8 @@ bottom of that *FitPage* to recalculate. Also see :ref:`Assessing_Fit_Quality`.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
+.. _Batch_Fit_Mode:
+
 Batch Fit Mode
 --------------
 
@@ -641,30 +643,45 @@ types of expression :
 Combined Batch Fit Mode
 -----------------------
 
-Batch mode does not allow for multiple models.  In other words in batch mode
-all the data sets must be fit with single model and set of parameter.  At times
-there may be a shape change occuring in the series that requires changing the
-model part way through the series.  In this case set up two batch fit pages
-following the instructions in :ref:`Batch Fit Mode`.  However *be careful!* each
-time a batch fit panel runs fit it will overwrite the table of values.
+The purpose of the Combined Batch Fit is to allow running two or more batch
+fits in sequence without overwriting the output table of results.  This may be
+of interest for example if one is fitting a series of data sets where there is
+a shape change occurring in the series that requires changing the model part
+way through the series; for example a sphere to rod transition.  Indeed the
+regular batch mode does not allow for multiple models and requires all the
+files in the series to be fit with single model and set of parameters.  While
+it is of course possible to just run part of the series as a batch fit using
+model one followed by running another batch fit on the rest of the series with
+model two (and/or model three etc), doing so will overwrite the table of
+outputs from the previous batch fit(s).  This may not be desirable if one is
+interested in comparing the parameters: for example the sphere radius of set
+one and the cylinder radius of set 2.
 
-However there may be occassion when one wants to run these two (or more) batch
-fits and then plot one of the common parameters (e.g. radius of shere and
-eventually cylinder).  In this case the Combined Batch Fit can be used.
-Similarly to the Simultaneous Fit page a new page will appear.  In this case,
-instead of a check box for each fitpage model there will be a check box for each
-batchpage.  Clicking the Fit button will run each batch fit *in sequence*. 
+Method
+^^^^^^
+
+In order to use the *Combined Batch Fit*, first load all the data needed as
+described in :ref:`Loading_data`. Next start up two or more *BatchPage* fits
+following the instructions in :ref:`Batch_Fit_Mode` but **DO NOT PRESS FIT**.
+At this point the *Combine Batch Fit* menu item under the *Fitting menu* should
+be active (if there is one or no *BatchPage* the menu item will be greyed out
+and inactive).  Clicking on *Combine Batch Fit* will bring up a new panel,
+similar to the *Const & Simult Fit* panel. In this case there will be a
+checkbox for each *BatchPage* instead of each *FitPage* that should be included
+in the fit.  Once all are selected, click the Fit button on
+the *BatchPage* to run each batch fit in *sequence*
 
 .. image:: combine_batch_page.png
 
-The batch table will then pop up at the end as before with the following
-caveats:
+The batch table will then pop up at the end as for the case of the simple Batch
+Fitting with the following caveats:
 
 .. note::
    The order matters.  The parameters in the table will be taken from the model
-   used in the first batch page of the list.  Any parameters from the
-   second and on batch pages that have the same name as a parameter in the first
-   will show up allowing for plotting of that parameter across the models.
+   used in the first *BatchPage* of the list.  Any parameters from the
+   second and later *BatchPage* s that have the same name as a parameter in the
+   first will show up allowing for plotting of that parameter across the
+   models. The other parameters will not be available in the grid.
 .. note::
    a corralary of the above is that currently models created as a sum|multiply
    model will not work as desired because the generated model parameters have a
@@ -673,22 +690,20 @@ caveats:
    
 .. image:: combine_batch_grid.png
 
-In this case the series is a time series.  Unfortunately the time is not listed
-in the file but the file name contains the information.  A column can be added
-manually, in this case called time.  Clicking on the top of a column will select
-it. Clicking next on the Add button next to the x or y row will add the cell
-information to use in a plot.  The axis labels will be automatically populated
-from the top row information.  Units can be specified as well using text and a
-subset of in line Latex.  Once this is set up, in this case using the peak
-position from the two different models for the y axis and time on the x axis,
-one clicks the Plot button.  
+In the example shown above the data is a time series with a shifting peak.
+The first part of the series was fitted using the *broad_peak* model, while
+the rest of the data were fit using the *gaussian_peak* model. Unfortunately the
+time is not listed in the file but the file name contains the information. As
+described in :ref:`Grid_Window`, a column can be added manually, in this case
+called time, and the peak position plotted against time. 
 
 .. image:: combine_batch_plot.png
 
-Note the discontinuity in the peak position.  This
-is due to the fact that the Guassian fit is actually pretty bad and is not
-actually finding the peak.
+Note the discontinuity in the peak position.  This is due to the fact that the
+Guassian fit is in fact a pretty bad model of the data and is not actually
+finding the peak.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Paul Butler, 06April2017
+.. note::  This help document was last changed by Paul Butler, 10 September
+   2017
