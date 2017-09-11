@@ -655,7 +655,7 @@ model one followed by running another batch fit on the rest of the series with
 model two (and/or model three etc), doing so will overwrite the table of
 outputs from the previous batch fit(s).  This may not be desirable if one is
 interested in comparing the parameters: for example the sphere radius of set
-one and the cylinder radius of set 2.
+one and the cylinder radius of set two.
 
 Method
 ^^^^^^
@@ -699,8 +699,8 @@ called time, and the peak position plotted against time.
 
 .. image:: combine_batch_plot.png
 
-Note the discontinuity in the peak position.  This is due to the fact that the
-Guassian fit is in fact a pretty bad model of the data and is not actually
+Note the discontinuity in the peak position.  This reflects the fact that the
+Gaussian fit is a rather poor model for the data and is not actually
 finding the peak.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
