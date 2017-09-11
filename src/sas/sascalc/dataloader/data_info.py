@@ -1160,11 +1160,13 @@ def combine_data_info_with_plottable(data, datainfo):
 
     final_dataset = None
     if isinstance(data, plottable_1D):
-        final_dataset = Data1D(data.x, data.y)
+        final_dataset = Data1D(data.x, data.y, isSesans=datainfo.isSesans)
         final_dataset.dx = data.dx
         final_dataset.dy = data.dy
         final_dataset.dxl = data.dxl
         final_dataset.dxw = data.dxw
+        final_dataset.x_unit = data._xunit
+        final_dataset.y_unit = data._yunit
         final_dataset.xaxis(data._xaxis, data._xunit)
         final_dataset.yaxis(data._yaxis, data._yunit)
     elif isinstance(data, plottable_2D):
