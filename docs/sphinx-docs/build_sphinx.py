@@ -17,6 +17,8 @@ import imp
 from glob import glob
 from distutils.dir_util import copy_tree
 from distutils.util import get_platform
+from distutils.spawn import find_executable
+
 from shutil import copy
 from os import listdir
 
@@ -370,6 +372,7 @@ def build_pdf():
                      os.path.join(SPHINX_BUILD, "latex")])
 
     LATEXDIR = os.path.join(SPHINX_BUILD, "latex")
+    #TODO: Does it need to be done so many time?
     def pdflatex():
         subprocess.call(["pdflatex", "Sasview.tex"], cwd=LATEXDIR)
     pdflatex()
@@ -435,7 +438,8 @@ def rebuild():
     #fetch_mathjax()
     apidoc()
     build()
-    #build_pdf()
+    if find_executable('latex'):
+        build_pdf()
     #convert_katex()
     #convert_mathjax()
 

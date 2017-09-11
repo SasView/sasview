@@ -63,9 +63,9 @@ $PYTHON setup.py clean
 $PYTHON setup.py build docs bdist_egg
 
 # CREATE PDF FROM LATEX
-cd $WORKSPACE
-cd sasview/docs/sphinx-docs/build/latex
-pdflatex SasView.tex
+#cd $WORKSPACE
+#cd sasview/docs/sphinx-docs/build/latex
+#pdflatex SasView.tex
 
 # INSTALL SASVIEW
 cd $WORKSPACE
