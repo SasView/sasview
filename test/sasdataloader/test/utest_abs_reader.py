@@ -19,7 +19,8 @@ class abs_reader(unittest.TestCase):
 
     def setUp(self):
         reader = AbsReader()
-        self.data = reader.read("jan08002.ABS")
+        data = reader.read("jan08002.ABS")
+        self.data= data[0]
 
     def test_abs_checkdata(self):
         """
@@ -46,7 +47,7 @@ class abs_reader(unittest.TestCase):
         self.assertEqual(self.data.detector[0].beam_center.x, center_x)
         self.assertEqual(self.data.detector[0].beam_center.y, center_y)
 
-        self.assertEqual(self.data.y_unit, '1/cm')
+        self.assertEqual(self.data.y_unit, 'cm^{-1}')
         self.assertEqual(self.data.x[0], 0.002618)
         self.assertEqual(self.data.x[1], 0.007854)
         self.assertEqual(self.data.x[2], 0.01309)
@@ -68,13 +69,14 @@ class abs_reader(unittest.TestCase):
     def test_generic_loader(self):
         # the generic loader should work as well
         data = Loader().load("jan08002.ABS")
-        self.assertEqual(data.meta_data['loader'], "IGOR 1D")
+        self.assertEqual(data[0].meta_data['loader'], "IGOR 1D")
 
 class DanseReaderTests(unittest.TestCase):
 
     def setUp(self):
         reader = DANSEReader()
-        self.data = reader.read("MP_New.sans")
+        data = reader.read("MP_New.sans")
+        self.data = data[0]
 
     def test_checkdata(self):
         """
@@ -111,7 +113,7 @@ class DanseReaderTests(unittest.TestCase):
     def test_generic_loader(self):
         # the generic loader should work as well
         data = Loader().load("MP_New.sans")
-        self.assertEqual(data.meta_data['loader'], "DANSE")
+        self.assertEqual(data[0].meta_data['loader'], "DANSE")
 
 
 class cansas_reader(unittest.TestCase):
@@ -143,8 +145,8 @@ class cansas_reader(unittest.TestCase):
 
         # Data
         self.assertEqual(len(self.data.x), 2)
-        self.assertEqual(self.data.x_unit, '1/A')
-        self.assertEqual(self.data.y_unit, '1/cm')
+        self.assertEqual(self.data.x_unit, 'A^{-1}')
+        self.assertEqual(self.data.y_unit, 'cm^{-1}')
         self.assertAlmostEqual(self.data.x[0], 0.02, 6)
         self.assertAlmostEqual(self.data.y[0], 1000, 6)
         self.assertAlmostEqual(self.data.dx[0], 0.01, 6)
@@ -256,7 +258,6 @@ class cansas_reader(unittest.TestCase):
             self.assertTrue(item.name in ['NCNR-IGOR', 'spol'])
             self.assertTrue(item.date in ['04-Sep-2007 18:35:02',
                                           '03-SEP-2006 11:42:47'])
-            print(item.term)
             for t in item.term:
                 if (t['name'] == "ABS:DSTAND"
                     and t['unit'] == 'mm'
@@ -308,8 +309,7 @@ class cansas_reader(unittest.TestCase):
         self.assertAlmostEqual(self.data.sample.transmission, 0.327)
 
         self.assertEqual(self.data.meta_data['loader'], "CanSAS XML 1D")
-        print(self.data.errors)
-        self.assertEqual(len(self.data.errors), 1)
+        self.assertEqual(len(self.data.errors), 0)
 
     def test_slits(self):
         """
@@ -323,8 +323,8 @@ class cansas_reader(unittest.TestCase):
 
         # Data
         self.assertEqual(len(self.data.x), 2)
-        self.assertEqual(self.data.x_unit, '1/A')
-        self.assertEqual(self.data.y_unit, '1/cm')
+        self.assertEqual(self.data.x_unit, 'A^{-1}')
+        self.assertEqual(self.data.y_unit, 'cm^{-1}')
         self.assertEqual(self.data.x[0], 0.02)
         self.assertEqual(self.data.y[0], 1000)
         self.assertEqual(self.data.dxl[0], 0.005)
@@ -332,7 +332,7 @@ class cansas_reader(unittest.TestCase):
         self.assertEqual(self.data.dy[0], 3)
         self.assertEqual(self.data.x[1], 0.03)
         self.assertAlmostEquals(self.data.y[1], 1001.0)
-        self.assertEqual(self.data.dx, None)
+        self.assertEqual(self.data.dx[0], 0.0)
         self.assertEqual(self.data.dxl[1], 0.005)
         self.assertEqual(self.data.dxw[1], 0.001)
         self.assertEqual(self.data.dy[1], 4)

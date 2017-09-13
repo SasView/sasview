@@ -1747,30 +1747,41 @@ class Plugin(PluginBase):
             @param unsmeared_data: data, rescaled to unsmeared model
             @param unsmeared_error: data error, rescaled to unsmeared model
         """
-
         number_finite = np.count_nonzero(np.isfinite(y))
         np.nan_to_num(y)
         new_plot = self.create_theory_1D(x, y, page_id, model, data, state,
                                          data_description=model.name,
                                          data_id=str(page_id) + " " + data.name)
+        plots_to_update = [] # List of plottables that have changed since last calculation
+        # Create the new theories
         if unsmeared_model is not None:
-            self.create_theory_1D(x, unsmeared_model, page_id, model, data, state,
+            unsmeared_model_plot = self.create_theory_1D(x, unsmeared_model, 
+                                  page_id, model, data, state,
                                   data_description=model.name + " unsmeared",
                                   data_id=str(page_id) + " " + data.name + " unsmeared")
+            plots_to_update.append(unsmeared_model_plot)
 
             if unsmeared_data is not None and unsmeared_error is not None:
-                self.create_theory_1D(x, unsmeared_data, page_id, model, data, state,
+                unsmeared_data_plot = self.create_theory_1D(x, unsmeared_data, 
+                                      page_id, model, data, state,
                                       data_description="Data unsmeared",
                                       data_id="Data  " + data.name + " unsmeared",
                                       dy=unsmeared_error)
-        # Comment this out until we can get P*S models with correctly populated parameters
-        #if sq_model is not None and pq_model is not None:
-        #    self.create_theory_1D(x, sq_model, page_id, model, data, state,
-        #                          data_description=model.name + " S(q)",
-        #                          data_id=str(page_id) + " " + data.name + " S(q)")
-        #    self.create_theory_1D(x, pq_model, page_id, model, data, state,
-        #                          data_description=model.name + " P(q)",
-        #                          data_id=str(page_id) + " " + data.name + " P(q)")
+                plots_to_update.append(unsmeared_data_plot)
+        if sq_model is not None and pq_model is not None:
+            sq_id = str(page_id) + " " + data.name + " S(q)"
+            sq_plot = self.create_theory_1D(x, sq_model, page_id, model, data, state,
+                                  data_description=model.name + " S(q)",
+                                  data_id=sq_id)
+            plots_to_update.append(sq_plot)
+            pq_id = str(page_id) + " " + data.name + " P(q)"
+            pq_plot = self.create_theory_1D(x, pq_model, page_id, model, data, state,
+                                  data_description=model.name + " P(q)",
+                                  data_id=pq_id)
+            plots_to_update.append(pq_plot)
+        # Update the P(Q), S(Q) and unsmeared theory plots if they exist
+        wx.PostEvent(self.parent, NewPlotEvent(plots=plots_to_update, 
+                                              action='update'))
 
         current_pg = self.fit_panel.get_page_by_id(page_id)
         title = new_plot.title
