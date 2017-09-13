@@ -2,12 +2,9 @@ from PyQt4 import QtGui
 from PyQt4 import QtCore
 import functools
 import copy
-
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
-
 from sas.qtgui.Plotting.PlotterData import Data1D
-
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.AddText import AddText
 from sas.qtgui.Plotting.SetGraphRange import SetGraphRange
@@ -389,7 +386,7 @@ class PlotterWidget(PlotterBase):
         """
         Deletes the selected plot from the chart
         """
-        if id not in self.plot_dict:
+        if id not in self.plot_dict.keys():
             return
 
         selected_plot = self.plot_dict[id]

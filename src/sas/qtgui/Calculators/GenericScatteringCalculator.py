@@ -7,20 +7,16 @@ import time
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 from twisted.internet import threads
-from mpl_toolkits.mplot3d import Axes3D
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-
 from sas.qtgui.Utilities.GenericReader import GenReader
-
 from sas.sascalc.dataloader.data_info import Detector
 from sas.sascalc.dataloader.data_info import Source
 from sas.sascalc.calculator import sas_gen
-
-from sas.qtgui.Plotting.Arrow3D import Arrow3D
 from sas.qtgui.Plotting.PlotterBase import PlotterBase
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
 from sas.qtgui.Plotting.Plotter import Plotter
+
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
 
@@ -703,6 +699,8 @@ class Plotter3DWidget(PlotterBase):
         # If we don't have any data, skip.
         if data is None:
             return
+        # This import takes forever - place it here so the main UI starts faster
+        from mpl_toolkits.mplot3d import Axes3D
         color_dic = {'H': 'blue', 'D': 'purple', 'N': 'orange',
                      'O': 'red', 'C': 'green', 'P': 'cyan', 'Other': 'k'}
         marker = ','
@@ -780,6 +778,8 @@ class Plotter3DWidget(PlotterBase):
         # V. Draws magnetic vectors
         if has_arrow and len(pos_x) > 0:
             def _draw_arrow(input=None, update=None):
+                # import moved here for performance reasons
+                from sas.qtgui.Plotting.Arrow3D import Arrow3D
                 """
                 draw magnetic vectors w/arrow
                 """

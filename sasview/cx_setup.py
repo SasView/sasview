@@ -71,6 +71,7 @@ data_files.append("media/")
 data_files.append("images/")
 data_files.append("test/")
 data_files.append("plugin_models/")
+data_files.append("compiled_models/")
 
 def append_data(tups):
     # Convert py2exe tuple into cx_freeze tuple

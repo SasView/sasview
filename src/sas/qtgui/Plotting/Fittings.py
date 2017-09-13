@@ -13,9 +13,6 @@ collimation of SANS but may be good for SAXS.  It is completely wrong for
 slit smeared data. 
 
 """
-from scipy import optimize
-
-
 class Parameter(object):
     """
     Class to handle model parameters - sets the parameters and their
@@ -83,8 +80,10 @@ def sasfit(model, pars, x, y, err_y, qmin=None, qmax=None):
         for item in res:
             sum += item * item
         return sum
-
+    # This import takes a long time, which is why it's here not in the top of file
+    from scipy.optimize import leastsq
     p = [param() for param in pars]
+    #out, cov_x, info, mesg, success = optimize.leastsq(f, p, full_output=1)
     out, cov_x, info, mesg, success = optimize.leastsq(f, p, full_output=1)
     # Calculate chi squared
     if len(pars) > 1:

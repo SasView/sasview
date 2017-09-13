@@ -1,27 +1,22 @@
+from PyQt4 import QtCore, QtGui, QtSvg
+
 def new_load_qt(api_options):
-    from PyQt4 import QtCore, QtGui, QtSvg
     return QtCore, QtGui, QtSvg, 'pyqt'
 
 def qtconsole_new_load_qt(api_options):
-    from PyQt4 import QtCore, QtGui, QtSvg
-
     # Alias PyQt-specific functions for PySide compatibility.
     QtCore.Signal = QtCore.pyqtSignal
     QtCore.Slot = QtCore.pyqtSlot
     return QtCore, QtGui, QtSvg, 'pyqt'
 
+from IPython.external import  qt_loaders
+from qtconsole import qt_loaders as qtconsole_qt_loaders
 # Do some monkey patching to satisfy pyinstaller complaining
 # about pyside/pyqt confusion
-from IPython.external import  qt_loaders
 qt_loaders.load_qt = new_load_qt
-
-from qtconsole import qt_loaders as qtconsole_qt_loaders
 qtconsole_qt_loaders.load_qt = qtconsole_new_load_qt
 
-
 from qtconsole.rich_jupyter_widget import RichJupyterWidget
-from qtconsole.inprocess import QtInProcessKernelManager
-from IPython.lib import guisupport
 
 MODULES_TO_IMPORT = [
     ('sas', 'sas'),
@@ -31,9 +26,11 @@ MODULES_TO_IMPORT = [
 class IPythonWidget(RichJupyterWidget):
     def __init__(self, parent=None, **kwargs):
         super(self.__class__, self).__init__(parent)
+        from qtconsole.inprocess import QtInProcessKernelManager
+        from IPython.lib import guisupport
         app = guisupport.get_app_qt4()
 
-       # Create an in-process kernel
+        # Create an in-process kernel
         kernel_manager = QtInProcessKernelManager()
         kernel_manager.start_kernel()
         kernel = kernel_manager.kernel

@@ -10,18 +10,18 @@ from PyQt4 import QtGui
 from PyQt4 import QtWebKit
 
 from twisted.internet import reactor
-
 # General SAS imports
 from sas.qtgui.Utilities.ConnectionProxy import ConnectionProxy
 from sas.qtgui.Utilities.SasviewLogger import XStream
-from sas.qtgui.Utilities.IPythonWidget import IPythonWidget
+
 import sas.qtgui.Utilities.LocalConfig as LocalConfig
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 
+import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 from sas.qtgui.MainWindow.UI.AcknowledgementsUI import Ui_Acknowledgements
 from sas.qtgui.MainWindow.AboutBox import AboutBox
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
+
 from sas.qtgui.MainWindow.DataManager import DataManager
 
 from sas.qtgui.Calculators.SldPanel import SldPanel
@@ -95,6 +95,7 @@ class GuiManager(object):
         # Current help file
         self._helpView = QtWebKit.QWebView()
         # Needs URL like path, so no path.join() here
+        GuiUtils._init()
         self._helpLocation = GuiUtils.HELP_DIRECTORY_LOCATION + "/index.html"
 
         # Current tutorial location
@@ -567,6 +568,8 @@ class GuiManager(object):
         """
         Display the Jupyter console as a docked widget.
         """
+        # Import moved here for startup performance reasons
+        from sas.qtgui.Utilities.IPythonWidget import IPythonWidget
         terminal = IPythonWidget()
 
         # Add the console window as another docked widget

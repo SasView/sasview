@@ -17,16 +17,19 @@ from PyQt4 import QtCore
 from PyQt4 import QtGui
 
 from periodictable import formula as Formula
-
 from sas.qtgui.Plotting import DataTransform
 from sas.qtgui.Plotting.ConvertUnits import convertUnit
-
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
-
 from sas.sascalc.dataloader.loader import Loader
 from sas.qtgui.Utilities import CustomDir
 
+## TODO: CHANGE FOR SHIPPED PATH IN RELEASE
+if os.path.splitext(sys.argv[0])[1].lower() != ".py":
+        HELP_DIRECTORY_LOCATION = "doc"
+else:
+        HELP_DIRECTORY_LOCATION = "docs/sphinx-docs/build/html"
+IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION + "/_images"
 
 def get_app_dir():
     """
@@ -90,118 +93,95 @@ def _find_local_config(confg_file, path):
     #logging.info("GuiManager loaded %s/%s" % (path, confg_file))
     return config_module
 
-# Get APP folder
-PATH_APP = get_app_dir()
-DATAPATH = PATH_APP
+def _init():
+    # Get APP folder
+    PATH_APP = get_app_dir()
+    DATAPATH = PATH_APP
 
-## TODO: CHANGE FOR SHIPPED PATH IN RELEASE
-if os.path.splitext(sys.argv[0])[1].lower() != ".py":
-     HELP_DIRECTORY_LOCATION = "doc"
-else:
-     HELP_DIRECTORY_LOCATION = "docs/sphinx-docs/build/html"
-IMAGES_DIRECTORY_LOCATION = HELP_DIRECTORY_LOCATION + "/_images"
+    # Read in the local config, which can either be with the main
+    # application or in the installation directory
+    config = _find_local_config('local_config', PATH_APP)
 
-# GUI always starts from the App folder
-#os.chdir(PATH_APP)
-# Read in the local config, which can either be with the main
-# application or in the installation directory
-config = _find_local_config('local_config', PATH_APP)
-
-if config is None:
-    config = _find_local_config('local_config', os.getcwd())
-    #if config is None:
-    #    # Didn't find local config, load the default
-    #    import sas.sasgui.guiframe.config as config
-    #    #logging.info("using default local_config")
-    #else:
-    #    pass
-    #    #logging.info("found local_config in %s", os.getcwd())
-else:
-    pass
-    #logging.info("found local_config in %s", PATH_APP)
-
-c_conf_dir = CustomDir.setup_conf_dir(PATH_APP)
-
-custom_config = _find_local_config('custom_config', c_conf_dir)
-if custom_config is None:
-    custom_config = _find_local_config('custom_config', os.getcwd())
-    if custom_config is None:
-        msgConfig = "Custom_config file was not imported"
-        #logging.info(msgConfig)
+    if config is None:
+        config = _find_local_config('local_config', os.getcwd())
     else:
         pass
-        #logging.info("using custom_config in %s", os.getcwd())
-else:
-    pass
-    #logging.info("using custom_config from %s", c_conf_dir)
 
-#read some constants from config
-APPLICATION_STATE_EXTENSION = config.APPLICATION_STATE_EXTENSION
-APPLICATION_NAME = config.__appname__
-SPLASH_SCREEN_PATH = config.SPLASH_SCREEN_PATH
-WELCOME_PANEL_ON = config.WELCOME_PANEL_ON
-SPLASH_SCREEN_WIDTH = config.SPLASH_SCREEN_WIDTH
-SPLASH_SCREEN_HEIGHT = config.SPLASH_SCREEN_HEIGHT
-SS_MAX_DISPLAY_TIME = config.SS_MAX_DISPLAY_TIME
-if not WELCOME_PANEL_ON:
-    WELCOME_PANEL_SHOW = False
-else:
-    WELCOME_PANEL_SHOW = True
-try:
-    DATALOADER_SHOW = custom_config.DATALOADER_SHOW
-    TOOLBAR_SHOW = custom_config.TOOLBAR_SHOW
-    FIXED_PANEL = custom_config.FIXED_PANEL
-    if WELCOME_PANEL_ON:
-        WELCOME_PANEL_SHOW = custom_config.WELCOME_PANEL_SHOW
-    PLOPANEL_WIDTH = custom_config.PLOPANEL_WIDTH
-    DATAPANEL_WIDTH = custom_config.DATAPANEL_WIDTH
-    GUIFRAME_WIDTH = custom_config.GUIFRAME_WIDTH
-    GUIFRAME_HEIGHT = custom_config.GUIFRAME_HEIGHT
-    CONTROL_WIDTH = custom_config.CONTROL_WIDTH
-    CONTROL_HEIGHT = custom_config.CONTROL_HEIGHT
-    DEFAULT_PERSPECTIVE = custom_config.DEFAULT_PERSPECTIVE
-    CLEANUP_PLOT = custom_config.CLEANUP_PLOT
-    # custom open_path
-    open_folder = custom_config.DEFAULT_OPEN_FOLDER
-    if open_folder != None and os.path.isdir(open_folder):
-        DEFAULT_OPEN_FOLDER = os.path.abspath(open_folder)
+    c_conf_dir = CustomDir.setup_conf_dir(PATH_APP)
+
+    custom_config = _find_local_config('custom_config', c_conf_dir)
+    if custom_config is None:
+        custom_config = _find_local_config('custom_config', os.getcwd())
+        if custom_config is None:
+            msgConfig = "Custom_config file was not imported"
+
+    #read some constants from config
+    APPLICATION_STATE_EXTENSION = config.APPLICATION_STATE_EXTENSION
+    APPLICATION_NAME = config.__appname__
+    SPLASH_SCREEN_PATH = config.SPLASH_SCREEN_PATH
+    WELCOME_PANEL_ON = config.WELCOME_PANEL_ON
+    SPLASH_SCREEN_WIDTH = config.SPLASH_SCREEN_WIDTH
+    SPLASH_SCREEN_HEIGHT = config.SPLASH_SCREEN_HEIGHT
+    SS_MAX_DISPLAY_TIME = config.SS_MAX_DISPLAY_TIME
+    if not WELCOME_PANEL_ON:
+        WELCOME_PANEL_SHOW = False
     else:
+        WELCOME_PANEL_SHOW = True
+    try:
+        DATALOADER_SHOW = custom_config.DATALOADER_SHOW
+        TOOLBAR_SHOW = custom_config.TOOLBAR_SHOW
+        FIXED_PANEL = custom_config.FIXED_PANEL
+        if WELCOME_PANEL_ON:
+            WELCOME_PANEL_SHOW = custom_config.WELCOME_PANEL_SHOW
+        PLOPANEL_WIDTH = custom_config.PLOPANEL_WIDTH
+        DATAPANEL_WIDTH = custom_config.DATAPANEL_WIDTH
+        GUIFRAME_WIDTH = custom_config.GUIFRAME_WIDTH
+        GUIFRAME_HEIGHT = custom_config.GUIFRAME_HEIGHT
+        CONTROL_WIDTH = custom_config.CONTROL_WIDTH
+        CONTROL_HEIGHT = custom_config.CONTROL_HEIGHT
+        DEFAULT_PERSPECTIVE = custom_config.DEFAULT_PERSPECTIVE
+        CLEANUP_PLOT = custom_config.CLEANUP_PLOT
+        # custom open_path
+        open_folder = custom_config.DEFAULT_OPEN_FOLDER
+        if open_folder != None and os.path.isdir(open_folder):
+            DEFAULT_OPEN_FOLDER = os.path.abspath(open_folder)
+        else:
+            DEFAULT_OPEN_FOLDER = PATH_APP
+    except AttributeError:
+        DATALOADER_SHOW = True
+        TOOLBAR_SHOW = True
+        FIXED_PANEL = True
+        WELCOME_PANEL_SHOW = False
+        PLOPANEL_WIDTH = config.PLOPANEL_WIDTH
+        DATAPANEL_WIDTH = config.DATAPANEL_WIDTH
+        GUIFRAME_WIDTH = config.GUIFRAME_WIDTH
+        GUIFRAME_HEIGHT = config.GUIFRAME_HEIGHT
+        CONTROL_WIDTH = -1
+        CONTROL_HEIGHT = -1
+        DEFAULT_PERSPECTIVE = None
+        CLEANUP_PLOT = False
         DEFAULT_OPEN_FOLDER = PATH_APP
-except AttributeError:
-    DATALOADER_SHOW = True
-    TOOLBAR_SHOW = True
-    FIXED_PANEL = True
-    WELCOME_PANEL_SHOW = False
-    PLOPANEL_WIDTH = config.PLOPANEL_WIDTH
-    DATAPANEL_WIDTH = config.DATAPANEL_WIDTH
-    GUIFRAME_WIDTH = config.GUIFRAME_WIDTH
-    GUIFRAME_HEIGHT = config.GUIFRAME_HEIGHT
-    CONTROL_WIDTH = -1
-    CONTROL_HEIGHT = -1
-    DEFAULT_PERSPECTIVE = None
-    CLEANUP_PLOT = False
-    DEFAULT_OPEN_FOLDER = PATH_APP
 
-#DEFAULT_STYLE = config.DEFAULT_STYLE
+    #DEFAULT_STYLE = config.DEFAULT_STYLE
 
-PLUGIN_STATE_EXTENSIONS = config.PLUGIN_STATE_EXTENSIONS
-OPEN_SAVE_MENU = config.OPEN_SAVE_PROJECT_MENU
-VIEW_MENU = config.VIEW_MENU
-EDIT_MENU = config.EDIT_MENU
-extension_list = []
-if APPLICATION_STATE_EXTENSION is not None:
-    extension_list.append(APPLICATION_STATE_EXTENSION)
-EXTENSIONS = PLUGIN_STATE_EXTENSIONS + extension_list
-try:
-    PLUGINS_WLIST = '|'.join(config.PLUGINS_WLIST)
-except AttributeError:
-    PLUGINS_WLIST = ''
-APPLICATION_WLIST = config.APPLICATION_WLIST
-IS_WIN = True
-IS_LINUX = False
-CLOSE_SHOW = True
-TIME_FACTOR = 2
-NOT_SO_GRAPH_LIST = ["BoxSum"]
+    PLUGIN_STATE_EXTENSIONS = config.PLUGIN_STATE_EXTENSIONS
+    OPEN_SAVE_MENU = config.OPEN_SAVE_PROJECT_MENU
+    VIEW_MENU = config.VIEW_MENU
+    EDIT_MENU = config.EDIT_MENU
+    extension_list = []
+    if APPLICATION_STATE_EXTENSION is not None:
+        extension_list.append(APPLICATION_STATE_EXTENSION)
+    EXTENSIONS = PLUGIN_STATE_EXTENSIONS + extension_list
+    try:
+        PLUGINS_WLIST = '|'.join(config.PLUGINS_WLIST)
+    except AttributeError:
+        PLUGINS_WLIST = ''
+    APPLICATION_WLIST = config.APPLICATION_WLIST
+    IS_WIN = True
+    IS_LINUX = False
+    CLOSE_SHOW = True
+    TIME_FACTOR = 2
+    NOT_SO_GRAPH_LIST = ["BoxSum"]
 
 class Communicate(QtCore.QObject):
     """
