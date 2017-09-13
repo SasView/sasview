@@ -95,7 +95,6 @@ class GuiManager(object):
         # Current help file
         self._helpView = QtWebKit.QWebView()
         # Needs URL like path, so no path.join() here
-        GuiUtils._init()
         self._helpLocation = GuiUtils.HELP_DIRECTORY_LOCATION + "/index.html"
 
         # Current tutorial location
