@@ -1155,8 +1155,15 @@ class FitPage(BasicPage):
                     or event.GetEventObject() == self.multifactorbox:
                 copy_flag = self.get_copy_params()
                 is_poly_enabled = self.enable_disp.GetValue()
-
-        self._on_select_model_helper()
+        try:
+            self._on_select_model_helper()
+        except Exception as e:
+            evt = StatusEvent(status=e.message, info="error")
+            wx.PostEvent(self._manager.parent, evt)
+            # Set S(Q) to None
+            self.structurebox.SetSelection(0)
+            self._on_select_model()
+            return
         self.set_model_param_sizer(self.model)
         if self.model is None:
             self._set_bookmark_flag(False)
