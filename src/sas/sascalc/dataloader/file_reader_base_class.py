@@ -114,12 +114,18 @@ class FileReader(object):
                 data.x = np.asarray([data.x[i] for i in ind]).astype(np.float64)
                 data.y = np.asarray([data.y[i] for i in ind]).astype(np.float64)
                 if data.dx is not None:
+                    if len(data.dx) == 0:
+                        data.dx = None
+                        continue
                     data.dx = np.asarray([data.dx[i] for i in ind]).astype(np.float64)
                 if data.dxl is not None:
                     data.dxl = np.asarray([data.dxl[i] for i in ind]).astype(np.float64)
                 if data.dxw is not None:
                     data.dxw = np.asarray([data.dxw[i] for i in ind]).astype(np.float64)
                 if data.dy is not None:
+                    if len(data.dy) == 0:
+                        data.dy = None
+                        continue
                     data.dy = np.asarray([data.dy[i] for i in ind]).astype(np.float64)
                 if data.lam is not None:
                     data.lam = np.asarray([data.lam[i] for i in ind]).astype(np.float64)
@@ -203,7 +209,9 @@ class FileReader(object):
         # Initialize data sets with arrays the maximum possible size
         x = np.zeros(no_lines)
         y = np.zeros(no_lines)
-        self.current_dataset = plottable_1D(x, y)
+        dx = np.zeros(no_lines)
+        dy = np.zeros(no_lines)
+        self.current_dataset = plottable_1D(x, y, dx, dy)
 
     @staticmethod
     def splitline(line):
