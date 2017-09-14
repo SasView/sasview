@@ -277,10 +277,10 @@ class ModelManagerBase:
 
         """
 
-        # regular model names only
+        # Regular model names only
         self.model_name_list = []
 
-        #Build list automagically from sasmodels package
+        # Build list automagically from sasmodels package
         for model in load_standard_models():
             self.model_dictionary[model.name] = model
             if model.is_structure_factor:
@@ -292,11 +292,18 @@ class ModelManagerBase:
             else:
                 self.model_name_list.append(model.name)
 
-        #Looking for plugins
+        # Looking for plugins
         self.stored_plugins = self.findModels()
         self.plugins = self.stored_plugins.values()
         for name, plug in self.stored_plugins.iteritems():
             self.model_dictionary[name] = plug
+            if plug.is_structure_factor:
+                self.struct_list.append(plug)
+                self.plugins.remove(plug)
+            elif plug.is_form_factor:
+                self.multiplication_factor.append(plug)
+            if plug.is_multiplicity_model:
+                self.multi_func_list.append(plug)
 
         self._get_multifunc_models()
 
@@ -340,17 +347,38 @@ class ModelManagerBase:
         """
         self.plugins = []
         new_plugins = _find_models()
+        stored_names = self.stored_plugins.keys()
+        structure_names = [model.name for model in self.struct_list]
+        form_names = [model.name for model in self.multiplication_factor]
         for name, plug in  new_plugins.iteritems():
-            for stored_name, stored_plug in self.stored_plugins.iteritems():
-                if name == stored_name:
-                    del self.stored_plugins[name]
-                    del self.model_dictionary[name]
-                    break
+            if name in stored_names:
+                # Delete references to the olf model
+                del self.stored_plugins[name]
+                del self.model_dictionary[name]
+            if plug.is_structure_factor:
+                if name in structure_names:
+                    # Delete the old model from self.struct list
+                    i = structure_names.index(name)
+                    del self.struct_list[i]
+                # Add the new model to self.struct_list
+                self.struct_list.append(plug)
+            elif plug.is_form_factor:
+                if name in form_names:
+                    # Delete the old model from self.multiplication_factor
+                    i = form_names.index(name)
+                    del self.multiplication_factor[i]
+                # Add the new model to self.multiplication_factor
+                self.multiplication_factor.append(plug)
+
+            # Add references to the updated model
             self.stored_plugins[name] = plug
-            self.plugins.append(plug)
+            if not plug.is_structure_factor:
+                # Don't show S(Q) models in the 'Plugin Models' dropdown
+                self.plugins.append(plug)
             self.model_dictionary[name] = plug
 
         self.model_combobox.reset_list("Plugin Models", self.plugins)
+        # TODO: Also update structure factor box (if it exists)
         return self.model_combobox.get_list()
 
     def _on_model(self, evt):
