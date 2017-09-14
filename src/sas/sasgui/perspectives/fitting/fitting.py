@@ -357,9 +357,18 @@ class Plugin(PluginBase):
                             else:
                                 page.formfactorbox.SetLabel(current_val)
                         if hasattr(page, 'structurebox'):
+                            selected_name = page.structurebox.GetStringSelection()
+
                             page.structurebox.Clear()
                             page._populate_box(page.structurebox,
                                 page.model_list_box["Structure Factors"])
+                            page.structurebox.Insert("None", 0, None)
+
+                            index = page.structurebox.FindString(selected_name)
+                            if index == -1:
+                                index = 0
+                            page.structurebox.SetSelection(index)
+                            page._on_select_model()
         except:
             logger.error("update_custom_combo: %s", sys.exc_value)
 
