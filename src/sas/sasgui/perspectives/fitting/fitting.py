@@ -360,9 +360,7 @@ class Plugin(PluginBase):
                             selected_name = page.structurebox.GetStringSelection()
 
                             page.structurebox.Clear()
-                            page._populate_box(page.structurebox,
-                                page.model_list_box["Structure Factors"])
-                            page.structurebox.Insert("None", 0, None)
+                            page.initialize_combox()
 
                             index = page.structurebox.FindString(selected_name)
                             if index == -1:
