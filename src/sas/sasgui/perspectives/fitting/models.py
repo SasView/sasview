@@ -13,6 +13,7 @@ import datetime
 import logging
 import py_compile
 import shutil
+from copy import copy
 # Explicitly import from the pluginmodel module so that py2exe
 # places it in the distribution. The Model1DPlugin class is used
 # as the base class of plug-in models.
@@ -346,15 +347,24 @@ class ModelManagerBase:
         return a dictionary of model
         """
         self.plugins = []
-        new_plugins = _find_models()
-        stored_names = self.stored_plugins.keys()
+        self.stored_plugins = _find_models()
         structure_names = [model.name for model in self.struct_list]
         form_names = [model.name for model in self.multiplication_factor]
-        for name, plug in  new_plugins.iteritems():
-            if name in stored_names:
-                # Delete references to the olf model
-                del self.stored_plugins[name]
-                del self.model_dictionary[name]
+
+        # Remove all plugin structure factors and form factors
+        for name in copy(structure_names):
+            if '[plug-in]' in name:
+                i = structure_names.index(name)
+                del self.struct_list[i]
+                structure_names.remove(name)
+        for name in copy(form_names):
+            if '[plug-in]' in name:
+                i = form_names.index(name)
+                del self.multiplication_factor[i]
+                form_names.remove(name)
+
+        # Add new plugin structure factors and form factors
+        for name, plug in self.stored_plugins.iteritems():
             if plug.is_structure_factor:
                 if name in structure_names:
                     # Delete the old model from self.struct list
@@ -378,7 +388,9 @@ class ModelManagerBase:
             self.model_dictionary[name] = plug
 
         self.model_combobox.reset_list("Plugin Models", self.plugins)
-        # TODO: Also update structure factor box (if it exists)
+        self.model_combobox.reset_list("Structure Factors", self.struct_list)
+        self.model_combobox.reset_list("P(Q)*S(Q)", self.multiplication_factor)
+
         return self.model_combobox.get_list()
 
     def _on_model(self, evt):

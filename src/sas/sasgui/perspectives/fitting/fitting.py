@@ -356,6 +356,10 @@ class Plugin(PluginBase):
                                 page.formfactorbox.SetLabel(new_val)
                             else:
                                 page.formfactorbox.SetLabel(current_val)
+                        if hasattr(page, 'structurebox'):
+                            page.structurebox.Clear()
+                            page._populate_box(page.structurebox,
+                                page.model_list_box["Structure Factors"])
         except:
             logger.error("update_custom_combo: %s", sys.exc_value)
 
