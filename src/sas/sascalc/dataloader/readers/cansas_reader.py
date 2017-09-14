@@ -129,12 +129,7 @@ class Reader(XMLreader):
                 self.current_datainfo.meta_data["loader"] = "CanSAS XML 1D"
                 self.current_datainfo.meta_data[PREPROCESS] = self.processing_instructions
                 self._parse_entry(entry)
-                has_error_dx = self.current_dataset.dx is not None
-                has_error_dy = self.current_dataset.dy is not None
-                self.remove_empty_q_values(has_error_dx=has_error_dx,
-                    has_error_dy=has_error_dy)
-                self.send_to_output() # Combine datasets with DataInfo
-                self.current_datainfo = DataInfo() # Reset DataInfo
+                self.data_cleanup()
         except FileContentsException as fc_exc:
             # File doesn't meet schema - try loading with a less strict schema
             base_name = xml_reader.__file__
@@ -506,10 +501,24 @@ class Reader(XMLreader):
             self.current_datainfo.errors = set()
             for error in self.errors:
                 self.current_datainfo.errors.add(error)
-            self.errors.clear()
-            self.send_to_output()
+            self.data_cleanup()
+            self.sort_one_d_data()
+            self.sort_two_d_data()
+            self.reset_data_list()
             empty = None
             return self.output[0], empty
+
+    def data_cleanup(self):
+        """
+        Clean up the data sets and refresh everything
+        :return: None
+        """
+        has_error_dx = self.current_dataset.dx is not None
+        has_error_dy = self.current_dataset.dy is not None
+        self.remove_empty_q_values(has_error_dx=has_error_dx,
+                                   has_error_dy=has_error_dy)
+        self.send_to_output()  # Combine datasets with DataInfo
+        self.current_datainfo = DataInfo()  # Reset DataInfo
 
     def _is_call_local(self):
         if self.frm == "":

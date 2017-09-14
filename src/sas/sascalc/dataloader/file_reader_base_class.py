@@ -203,9 +203,7 @@ class FileReader(object):
         # Initialize data sets with arrays the maximum possible size
         x = np.zeros(no_lines)
         y = np.zeros(no_lines)
-        dy = np.zeros(no_lines)
-        dx = np.zeros(no_lines)
-        self.current_dataset = plottable_1D(x, y, dx, dy)
+        self.current_dataset = plottable_1D(x, y)
 
     @staticmethod
     def splitline(line):
