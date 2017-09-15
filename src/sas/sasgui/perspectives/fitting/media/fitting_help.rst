@@ -213,6 +213,7 @@ the parameter list::
      parameters = [ 
                      ['radius_effective', '', 1, [-numpy.inf, numpy.inf], 'volume', ''],
                      ['volfraction', '', 1, [-numpy.inf, numpy.inf], '', ''],
+                     [...],
 
 and to the declarations of the functions Iq and Iqxy:::
 
@@ -241,7 +242,8 @@ description (to appear under the *Details* button on the *FitPage*). Then select
 two existing models, as p1 and p2, and the required operator, '+' or '*' between
 them. Finally, click the *Apply* button to generate and test the model and then click *Close*.
 
-Any changes to a plugin model generated in this way only become effective *after* it is re-selected from the plugin models drop-down menu on the FitPage. If the model is not listed you can force a 
+Any changes to a plugin model generated in this way only become effective *after* it is re-selected 
+from the plugin models drop-down menu on the FitPage. If the model is not listed you can force a 
 recompilation of the plugins by selecting *Fitting* > *Plugin Model Operations* > *Load Plugin Models*.
 
 **SasView version 4.2** introduced a much simplified and more extensible structure for plugin models 
@@ -252,7 +254,7 @@ with a power law model now looks like this::
      from sasmodels.sasview_model import make_model_from_info
      
      model_info = load_model_info('sphere+power_law')
-     model_info.name = 'My Plugin Model'
+     model_info.name = 'MyPluginModel'
      model_info.description = 'sphere + power_law'
      Model = make_model_from_info(model_info)
 
@@ -260,12 +262,22 @@ To change the models or operators contributing to this plugin it is only necessa
 in the brackets after *load_model_info*, though it would also be a good idea to update the model name 
 and description too!!!
 
-The model specification string can handle multiple models and combinations of operators (+ - * /) which 
+The model specification string can handle multiple models and combinations of operators (+ - * \\) which 
 are processed according to normal conventions. Thus 'model1+model2*model3' would be valid and would 
 multiply model2 by model3 before adding model1. In this example, parameters in the *FitPage* would be 
-prefixed A_\ (for model2), B_\ (for model3) and C_\ (for model1). Whilst this might appear a little 
-confusing, unless you were creating a plugin model from multiple instances of the same model the parameter assignments ought to be obvious when you load the plugin.
+prefixed A (for model2), B (for model3) and C (for model1). Whilst this might appear a little 
+confusing, unless you were creating a plugin model from multiple instances of the same model the parameter 
+assignments ought to be obvious when you load the plugin.
 
+If you need to include another plugin model in the model specification string, just prefix the name of 
+that model with *custom*. For instance::
+
+     sphere+custom.MyPluginModel
+
+To create a P(Q)*\S(Q) model use the @ symbol instead of * like this::
+
+     sphere@hardsphere
+     
 This streamlined approach to building complex plugin models from existing library models, or models 
 available on the *Model Marketplace*, also permits the creation of P(Q)*\S(Q) plugin models, something 
 that was not possible in earlier versions of SasView. 
