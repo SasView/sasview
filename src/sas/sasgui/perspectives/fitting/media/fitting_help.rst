@@ -213,8 +213,6 @@ the parameter list::
      parameters = [ 
                      ['radius_effective', '', 1, [-numpy.inf, numpy.inf], 'volume', ''],
                      ['volfraction', '', 1, [-numpy.inf, numpy.inf], '', ''],
-					 .
-					 .
 
 and to the declarations of the functions Iq and Iqxy:::
 
@@ -265,11 +263,11 @@ and description too!!!
 The model specification string can handle multiple models and combinations of operators (+ - * /) which 
 are processed according to normal conventions. Thus 'model1+model2*model3' would be valid and would 
 multiply model2 by model3 before adding model1. In this example, parameters in the *FitPage* would be 
-prefixed A_ (for model2), B_ (for model3) and C_ (for model1). Whilst this might appear a little 
+prefixed A_\ (for model2), B_\ (for model3) and C_\ (for model1). Whilst this might appear a little 
 confusing, unless you were creating a plugin model from multiple instances of the same model the parameter assignments ought to be obvious when you load the plugin.
 
 This streamlined approach to building complex plugin models from existing library models, or models 
-available on the *Model Marketplace*, also permits the creation of P(Q)S(Q) plugin models, something 
+available on the *Model Marketplace*, also permits the creation of P(Q)*\S(Q) plugin models, something 
 that was not possible in earlier versions of SasView. 
 
 .. _Advanced_Plugin_Editor:
