@@ -211,8 +211,8 @@ If the plugin is a structure factor it is *also* necessary to add two variables 
 the parameter list::
 
      parameters = [ 
-                     ['radius_effective', '', 1, [-numpy.inf, numpy.inf], 'volume', ''],
-                     ['volfraction', '', 1, [-numpy.inf, numpy.inf], '', ''],
+                     ['radius_effective', '', 1, [0.0, numpy.inf], 'volume', ''],
+                     ['volfraction', '', 1, [0.0, 1.0], '', ''],
                      [...],
 
 and to the declarations of the functions Iq and Iqxy:::
@@ -262,7 +262,7 @@ To change the models or operators contributing to this plugin it is only necessa
 in the brackets after *load_model_info*, though it would also be a good idea to update the model name 
 and description too!!!
 
-The model specification string can handle multiple models and combinations of operators (+ - * \\) which 
+The model specification string can handle multiple models and combinations of operators (+ or *) which 
 are processed according to normal conventions. Thus 'model1+model2*model3' would be valid and would 
 multiply model2 by model3 before adding model1. In this example, parameters in the *FitPage* would be 
 prefixed A (for model2), B (for model3) and C (for model1). Whilst this might appear a little 
