@@ -190,17 +190,22 @@ class FileReader(object):
         self.current_datainfo = None
         self.output = []
 
-    def remove_empty_q_values(self, has_error_dx=False, has_error_dy=False):
+    def remove_empty_q_values(self, has_error_dx=False, has_error_dy=False,
+                              has_error_dxl=False, has_error_dxw=False):
         """
         Remove any point where Q == 0
         """
         x = self.current_dataset.x
         self.current_dataset.x = self.current_dataset.x[x != 0]
         self.current_dataset.y = self.current_dataset.y[x != 0]
-        self.current_dataset.dy = self.current_dataset.dy[x != 0] if \
-            has_error_dy else np.zeros(len(self.current_dataset.y))
-        self.current_dataset.dx = self.current_dataset.dx[x != 0] if \
-            has_error_dx else np.zeros(len(self.current_dataset.x))
+        if has_error_dy:
+            self.current_dataset.dy = self.current_dataset.dy[x != 0]
+        if has_error_dx:
+            self.current_dataset.dx = self.current_dataset.dx[x != 0]
+        if has_error_dxl:
+            self.current_dataset.dxl = self.current_dataset.dxl[x != 0]
+        if has_error_dxw:
+            self.current_dataset.dxw = self.current_dataset.dxw[x != 0]
 
     def reset_data_list(self, no_lines=0):
         """

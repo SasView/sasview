@@ -510,8 +510,12 @@ class Reader(XMLreader):
         :return: None
         """
         has_error_dx = self.current_dataset.dx is not None
+        has_error_dxl = self.current_dataset.dxl is not None
+        has_error_dxw = self.current_dataset.dxw is not None
         has_error_dy = self.current_dataset.dy is not None
         self.remove_empty_q_values(has_error_dx=has_error_dx,
+                                   has_error_dxl=has_error_dxl,
+                                   has_error_dxw=has_error_dxw,
                                    has_error_dy=has_error_dy)
         self.send_to_output()  # Combine datasets with DataInfo
         self.current_datainfo = DataInfo()  # Reset DataInfo
@@ -677,19 +681,17 @@ class Reader(XMLreader):
         if self.current_dataset.dy is not None:
             di_exists = True
         if dqw_exists and not dql_exists:
-            array_size = self.current_dataset.dxw.size - 1
-            self.current_dataset.dxl = np.append(self.current_dataset.dxl,
-                                                 np.zeros([array_size]))
+            array_size = self.current_dataset.dxw.size
+            self.current_dataset.dxl = np.zeros(array_size)
         elif dql_exists and not dqw_exists:
-            array_size = self.current_dataset.dxl.size - 1
-            self.current_dataset.dxw = np.append(self.current_dataset.dxw,
-                                                 np.zeros([array_size]))
+            array_size = self.current_dataset.dxl.size
+            self.current_dataset.dxw = np.zeros(array_size)
         elif not dql_exists and not dqw_exists and not dq_exists:
-            array_size = self.current_dataset.x.size - 1
+            array_size = self.current_dataset.x.size
             self.current_dataset.dx = np.append(self.current_dataset.dx,
                                                 np.zeros([array_size]))
         if not di_exists:
-            array_size = self.current_dataset.y.size - 1
+            array_size = self.current_dataset.y.size
             self.current_dataset.dy = np.append(self.current_dataset.dy,
                                                 np.zeros([array_size]))
 
