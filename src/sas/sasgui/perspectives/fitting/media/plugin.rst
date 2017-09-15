@@ -18,6 +18,8 @@ There are essentially three ways to generate new fitting models for SasView:
 * By writing a model from scratch outside of SasView (only recommended for
   code monkeys!)
 
+Also see :ref:`Adding_your_own_models`.
+
 Overview
 ^^^^^^^^
 
