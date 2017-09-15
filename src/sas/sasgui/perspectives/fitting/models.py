@@ -298,12 +298,15 @@ class ModelManagerBase:
         self.plugins = self.stored_plugins.values()
         for name, plug in self.stored_plugins.iteritems():
             self.model_dictionary[name] = plug
-            if plug.is_structure_factor:
+            # TODO: Remove 'hasattr' statements when old style plugin models
+            # are no longer supported. All sasmodels models will have
+            # the required attributes.
+            if hasattr(plug, 'is_structure_factor') and plug.is_structure_factor:
                 self.struct_list.append(plug)
                 self.plugins.remove(plug)
-            elif plug.is_form_factor:
+            elif hasattr(plug, 'is_form_factor') and plug.is_form_factor:
                 self.multiplication_factor.append(plug)
-            if plug.is_multiplicity_model:
+            if hasattr(plug, 'is_multiplicity_model') and plug.is_multiplicity_model:
                 self.multi_func_list.append(plug)
 
         self._get_multifunc_models()
