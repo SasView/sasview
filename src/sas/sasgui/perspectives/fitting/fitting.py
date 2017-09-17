@@ -256,9 +256,17 @@ class Plugin(PluginBase):
         label = self.delete_menu.GetLabel(event_id)
         toks = os.path.splitext(label)
         path = os.path.join(models.find_plugins_dir(), toks[0])
+        message = "Are you sure you want to delete the file {}?".format(path)
+        dlg = wx.MessageDialog(self.frame, message, '', wx.YES_NO | wx.ICON_QUESTION)
+        if not dlg.ShowModal() == wx.ID_YES:
+            return
         try:
             for ext in ['.py', '.pyc']:
                 p_path = path + ext
+                if ext == '.pyc' and not os.path.isfile(path + ext):
+                    # If model is invalid, .pyc file may not exist as model has
+                    # never been compiled. Don't try and delete it
+                    continue
                 os.remove(p_path)
             self.update_custom_combo()
             if os.path.isfile(p_path):
@@ -360,7 +368,7 @@ class Plugin(PluginBase):
         self.edit_model_menu.Append(wx_id, 'New Plugin Model',
                                    'Add a new model function')
         wx.EVT_MENU(owner, wx_id, self.make_new_model)
-        
+
         wx_id = wx.NewId()
         self.edit_model_menu.Append(wx_id, 'Sum|Multi(p1, p2)',
                                     'Sum of two model functions')
@@ -382,7 +390,7 @@ class Plugin(PluginBase):
         self.edit_model_menu.Append(wx_id, 'Load Plugin Models',
           '(Re)Load all models present in user plugin_models folder')
         wx.EVT_MENU(owner, wx_id, self.load_plugin_models)
-                
+
     def set_edit_menu_helper(self, owner=None, menu=None):
         """
         help for setting list of the edit model menu labels
@@ -1733,30 +1741,41 @@ class Plugin(PluginBase):
             @param unsmeared_data: data, rescaled to unsmeared model
             @param unsmeared_error: data error, rescaled to unsmeared model
         """
-            
-        number_finite = np.count_nonzero(np.isfinite(y)) 
+        number_finite = np.count_nonzero(np.isfinite(y))
         np.nan_to_num(y)
         new_plot = self.create_theory_1D(x, y, page_id, model, data, state,
                                          data_description=model.name,
                                          data_id=str(page_id) + " " + data.name)
+        plots_to_update = [] # List of plottables that have changed since last calculation
+        # Create the new theories
         if unsmeared_model is not None:
-            self.create_theory_1D(x, unsmeared_model, page_id, model, data, state,
+            unsmeared_model_plot = self.create_theory_1D(x, unsmeared_model, 
+                                  page_id, model, data, state,
                                   data_description=model.name + " unsmeared",
                                   data_id=str(page_id) + " " + data.name + " unsmeared")
+            plots_to_update.append(unsmeared_model_plot)
 
             if unsmeared_data is not None and unsmeared_error is not None:
-                self.create_theory_1D(x, unsmeared_data, page_id, model, data, state,
+                unsmeared_data_plot = self.create_theory_1D(x, unsmeared_data, 
+                                      page_id, model, data, state,
                                       data_description="Data unsmeared",
                                       data_id="Data  " + data.name + " unsmeared",
                                       dy=unsmeared_error)
-        # Comment this out until we can get P*S models with correctly populated parameters
-        #if sq_model is not None and pq_model is not None:
-        #    self.create_theory_1D(x, sq_model, page_id, model, data, state,
-        #                          data_description=model.name + " S(q)",
-        #                          data_id=str(page_id) + " " + data.name + " S(q)")
-        #    self.create_theory_1D(x, pq_model, page_id, model, data, state,
-        #                          data_description=model.name + " P(q)",
-        #                          data_id=str(page_id) + " " + data.name + " P(q)")
+                plots_to_update.append(unsmeared_data_plot)
+        if sq_model is not None and pq_model is not None:
+            sq_id = str(page_id) + " " + data.name + " S(q)"
+            sq_plot = self.create_theory_1D(x, sq_model, page_id, model, data, state,
+                                  data_description=model.name + " S(q)",
+                                  data_id=sq_id)
+            plots_to_update.append(sq_plot)
+            pq_id = str(page_id) + " " + data.name + " P(q)"
+            pq_plot = self.create_theory_1D(x, pq_model, page_id, model, data, state,
+                                  data_description=model.name + " P(q)",
+                                  data_id=pq_id)
+            plots_to_update.append(pq_plot)
+        # Update the P(Q), S(Q) and unsmeared theory plots if they exist
+        wx.PostEvent(self.parent, NewPlotEvent(plots=plots_to_update, 
+                                              action='update'))
 
         current_pg = self.fit_panel.get_page_by_id(page_id)
         title = new_plot.title
@@ -1793,7 +1812,7 @@ class Plugin(PluginBase):
             logger.error("Using the present parameters the model does not return any finite value. ")
             msg = "Computing Error: Model did not return any finite value."
             wx.PostEvent(self.parent, StatusEvent(status = msg, info="error"))
-        else:                 
+        else:
             msg = "Computation  completed!"
             if number_finite != y.size:
                 msg += ' PROBLEM: For some Q values the model returns non finite intensities!'
@@ -1823,7 +1842,7 @@ class Plugin(PluginBase):
         Complete get the result of modelthread and create model 2D
         that can be plot.
         """
-        number_finite = np.count_nonzero(np.isfinite(image)) 
+        number_finite = np.count_nonzero(np.isfinite(image))
         np.nan_to_num(image)
         new_plot = Data2D(image=image, err_image=data.err_data)
         new_plot.name = model.name + '2d'
@@ -1926,7 +1945,7 @@ class Plugin(PluginBase):
                 ## an actual problem.  Seems the fix should also go here
                 ## and may be the cause of other noted instabilities
                 ##
-                ##    -PDB August 12, 2014 
+                ##    -PDB August 12, 2014
                 while self.calc_2D.isrunning():
                     time.sleep(0.1)
             self.calc_2D = Calc2D(model=model,
@@ -1968,7 +1987,7 @@ class Plugin(PluginBase):
             ## If a thread is already started, stop it
             if (self.calc_1D is not None) and self.calc_1D.isrunning():
                 self.calc_1D.stop()
-                ## stop just raises the flag -- the thread is supposed to 
+                ## stop just raises the flag -- the thread is supposed to
                 ## then kill itself but cannot.  Paul Kienzle came up with
                 ## this fix to prevent threads from stepping on each other
                 ## which was causing a simple custom plugin model to crash
@@ -1980,7 +1999,7 @@ class Plugin(PluginBase):
                 ## that the GUI can still respond to user input including
                 ## a request to stop the computation.
                 ## It seems thus that the whole thread approach used here
-                ## May need rethinking  
+                ## May need rethinking
                 ##
                 ##    -PDB August 12, 2014
                 while self.calc_1D.isrunning():
@@ -2145,7 +2164,7 @@ class Plugin(PluginBase):
             residuals.dxl = None
             residuals.dxw = None
             residuals.ytransform = 'y'
-            # For latter scale changes 
+            # For latter scale changes
             residuals.xaxis('\\rm{Q} ', 'A^{-1}')
             residuals.yaxis('\\rm{Residuals} ', 'normalized')
         theory_name = str(theory_data.name.split()[0])
