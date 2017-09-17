@@ -26,7 +26,7 @@ typedef struct {
     /// Maximum q to include in inversion
     double q_max;
     /// Flag for whether or not to evalute a constant background while inverting
-    int has_bck;
+    int est_bck;
     /// Slit height in units of q [A-1]
     double slit_height;
     /// Slit width in units of q [A-1]

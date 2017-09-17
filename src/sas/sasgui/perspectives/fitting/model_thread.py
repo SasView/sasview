@@ -70,7 +70,7 @@ class Calc2D(CalcThread):
         radius = np.sqrt((self.data.qx_data * self.data.qx_data) + \
                     (self.data.qy_data * self.data.qy_data))
 
-        # For theory, qmax is based on 1d qmax 
+        # For theory, qmax is based on 1d qmax
         # so that must be mulitified by sqrt(2) to get actual max for 2d
         index_model = (self.qmin <= radius) & (radius <= self.qmax)
         index_model = index_model & self.data.mask
@@ -90,11 +90,12 @@ class Calc2D(CalcThread):
                 self.data.qx_data[index_model],
                 self.data.qy_data[index_model]
             ])
-        output = np.zeros(len(self.data.qx_data))
+        # Initialize output to NaN so masked elements do not get plotted.
+        output = np.empty_like(self.data.qx_data)
         # output default is None
         # This method is to distinguish between masked
         #point(nan) and data point = 0.
-        output = output / output
+        output[:] = np.NaN
         # set value for self.mask==True, else still None to Plottools
         output[index_model] = value
         elapsed = time.time() - self.starttime
@@ -197,25 +198,24 @@ class Calc1D(CalcThread):
         else:
             output[index] = self.model.evalDistribution(self.data.x[index])
 
+        x=self.data.x[index]
+        y=output[index]
         sq_values = None
         pq_values = None
-        s_model = None
-        p_model = None
         if isinstance(self.model, MultiplicationModel):
             s_model = self.model.s_model
             p_model = self.model.p_model
-        elif hasattr(self.model, "get_composition_models"):
-            p_model, s_model = self.model.get_composition_models()
+            sq_values = s_model.evalDistribution(x)
+            pq_values = p_model.evalDistribution(x)
+        elif hasattr(self.model, "calc_composition_models"):
+            results = self.model.calc_composition_models(x)
+            if results is not None:
+                pq_values, sq_values = results
 
-        if p_model is not None and s_model is not None:
-            sq_values = np.zeros((len(self.data.x)))
-            pq_values = np.zeros((len(self.data.x)))
-            sq_values[index] = s_model.evalDistribution(self.data.x[index])
-            pq_values[index] = p_model.evalDistribution(self.data.x[index])
 
         elapsed = time.time() - self.starttime
 
-        self.complete(x=self.data.x[index], y=output[index],
+        self.complete(x=x, y=y,
                       page_id=self.page_id,
                       state=self.state,
                       weight=self.weight,
