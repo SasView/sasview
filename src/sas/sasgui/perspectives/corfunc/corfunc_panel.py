@@ -54,6 +54,9 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         # The data with no correction for background values
         self._data = data # The data to be analysed (corrected fr background)
         self._extrapolated_data = None # The extrapolated data set
+        # Callable object of class CorfuncCalculator._Interpolator representing
+        # the extrapolated and interpolated data
+        self._extrapolated_fn = None
         self._transformed_data = None # Fourier trans. of the extrapolated data
         self._calculator = CorfuncCalculator()
         self._data_name_box = None # Text box to show name of file
@@ -217,7 +220,8 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         self._calculator.background = self.background
 
         try:
-            params, self._extrapolated_data = self._calculator.compute_extrapolation()
+            params, self._extrapolated_data, self._extrapolated_fn = \
+                self._calculator.compute_extrapolation()
         except Exception as e:
             msg = "Error extrapolating data:\n"
             msg += str(e)
@@ -256,12 +260,12 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         wx.PostEvent(self._manager.parent,
             StatusEvent(status=msg))
 
-    def transform_complete(self, transform=None):
+    def transform_complete(self, transforms=None):
         """
         Called from FourierThread when calculation has completed
         """
         self._transform_btn.SetLabel("Transform")
-        if transform is None:
+        if transforms is None:
             msg = "Error calculating Transform."
             if self.transform_type == 'hilbert':
                 msg = "Not yet implemented"
@@ -269,11 +273,19 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
                 StatusEvent(status=msg, info="Error"))
             self._extract_btn.Disable()
             return
-        self._transformed_data = transform
-        import numpy as np
-        plot_x = transform.x[np.where(transform.x <= 200)]
-        plot_y = transform.y[np.where(transform.x <= 200)]
+
+        self._transformed_data = transforms
+        (transform1, transform3, idf) = transforms
+        plot_x = transform1.x[transform1.x <= 200]
+        plot_y = transform1.y[transform1.x <= 200]
         self._manager.show_data(Data1D(plot_x, plot_y), TRANSFORM_LABEL1)
+        # No need to shorten gamma3 as it's only calculated up to x=200
+        self._manager.show_data(transform3, TRANSFORM_LABEL3)
+
+        plot_x = idf.x[idf.x <= 200]
+        plot_y = idf.y[idf.x <= 200]
+        self._manager.show_data(Data1D(plot_x, plot_y), IDF_LABEL)
+
         # Only enable extract params button if a fourier trans. has been done
         if self.transform_type == 'fourier':
             self._extract_btn.Enable()
@@ -285,7 +297,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         Called when "Extract Parameters" is clicked
         """
         try:
-            params = self._calculator.extract_parameters(self._transformed_data)
+            params = self._calculator.extract_parameters(self._transformed_data[0])
         except:
             params = None
         if params is None:
