@@ -18,7 +18,7 @@ class TestCalculator(unittest.TestCase):
         self.extrapolation = None
 
     def extrapolate(self):
-        params, extrapolation = self.calculator.compute_extrapolation()
+        params, extrapolation, s2 = self.calculator.compute_extrapolation()
 
         # Check the extrapolation parameters
         self.assertAlmostEqual(params['A'], 4.19, places=2)
@@ -56,11 +56,12 @@ class TestCalculator(unittest.TestCase):
             if not self.calculator.transform_isrunning():
                 break
 
-    def transform_callback(self, transform):
-        self.assertIsNotNone(transform)
-        self.assertAlmostEqual(transform.y[0], 1)
-        self.assertAlmostEqual(transform.y[-1], 0, 5)
-        self.transformation = transform
+    def transform_callback(self, transforms):
+        transform1, transform3, idf = transforms
+        self.assertIsNotNone(transform1)
+        self.assertAlmostEqual(transform1.y[0], 1)
+        self.assertAlmostEqual(transform1.y[-1], 0, 5)
+        self.transformation = transform1
 
     def extract_params(self):
         params = self.calculator.extract_parameters(self.transformation)
@@ -76,6 +77,7 @@ class TestCalculator(unittest.TestCase):
             try:
                 test()
             except Exception as e:
+                raise
                 self.fail("{} failed ({}: {})".format(test, type(e), e))
 
 
