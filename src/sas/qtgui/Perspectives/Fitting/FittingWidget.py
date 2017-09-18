@@ -1274,7 +1274,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.kernel_module.params[parameter_name] = value
 
         # min/max to be changed in self.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
-        self.kernel_module.details[parameter_name][property_index] = value
+        if model_column > 1:
+            self.kernel_module.details[parameter_name][property_index] = value
 
         # TODO: magnetic params in self.kernel_module.details['M0:parameter_name'] = value
         # TODO: multishell params in self.kernel_module.details[??] = value

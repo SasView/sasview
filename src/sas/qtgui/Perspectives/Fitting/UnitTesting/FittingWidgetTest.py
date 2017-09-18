@@ -814,5 +814,34 @@ class FittingWidgetTest(unittest.TestCase):
         # TODO: to be added when implementing UNDO/REDO
         pass
 
+    def testOnMainPageChange(self):
+        """
+        Test update  values of modified parameters in models
+        """
+        # select model: cylinder / cylinder
+        category_index = self.widget.cbCategory.findText("Cylinder")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        model_index = self.widget.cbModel.findText("cylinder")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        # modify the initial value of length (different from default)
+        # print self.widget.kernel_module.details['length']
+
+        new_value = "333.0"
+        self.widget._model_model.item(5, 1).setText(new_value)
+
+        # name of modified parameter
+        name_modified_param = str(self.widget._model_model.item(5, 0).text())
+
+        # check that the value has been modified in kernel_module
+        self.assertEqual(new_value,
+                         str(self.widget.kernel_module.params[name_modified_param]))
+
+        # check that range of variation for this parameter has NOT been changed
+        print self.widget.kernel_module.details[name_modified_param]
+        self.assertNotIn(new_value, self.widget.kernel_module.details[name_modified_param] )
+
+
 if __name__ == "__main__":
     unittest.main()
