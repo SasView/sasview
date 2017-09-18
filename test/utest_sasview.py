@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from __future__ import print_function
+
 import os
 import subprocess
 import re
@@ -41,13 +43,13 @@ def run_tests(dirs=None, all=False):
     n_tests = 0
     n_errors = 0
     n_failures = 0
-    
+
     for d in (dirs if dirs else os.listdir(test_root)):
-        
+
         # Check for modules to be skipped
         if d in SKIPPED_DIRS:
             continue
-        
+
 
         # Go through modules looking for unit tests
         module_dir = os.path.join(test_root, d, "test")
@@ -61,45 +63,44 @@ def run_tests(dirs=None, all=False):
                     std_out, std_err = proc.communicate()
                     #print std_out
                     #sys.exit()
-                    has_failed = True
                     m = re.search("Ran ([0-9]+) test", std_out)
                     if m is not None:
-                        has_failed = False
                         n_tests += int(m.group(1))
+                        has_tests = True
+                    else:
+                        has_tests = False
 
-                    m = re.search("FAILED \(errors=([0-9]+)\)", std_out)
+                    has_failed = "FAILED (" in std_out
+                    m = re.search("FAILED \(.*errors=([0-9]+)", std_out)
                     if m is not None:
-                        has_failed = True
                         n_errors += int(m.group(1))
-                    
-                    m = re.search("FAILED \(failures=([0-9]+)\)", std_out)
+                    m = re.search("FAILED \(.*failures=([0-9]+)", std_out)
                     if m is not None:
-                        has_failed = True
                         n_failures += int(m.group(1))
-                    
-                    if has_failed:
+
+                    if has_failed or not has_tests:
                         failed += 1
-                        print "Result for %s (%s): FAILED" % (module_name, module_dir)
-                        print std_out
+                        print("Result for %s (%s): FAILED" % (module_name, module_dir))
+                        print(std_out)
                     else:
                         passed += 1
-                        print "Result for %s: SUCCESS" % module_name
+                        print("Result for %s: SUCCESS" % module_name)
 
-    print "\n----------------------------------------------"
+    print("\n----------------------------------------------")
     if n_tests == 0:
-        print "No tests."
+        print("No tests.")
     else:
-        print "Results by test modules:"
-        print "    PASSED: %d" % passed
+        print("Results by test modules:")
+        print("    PASSED: %d" % passed)
         ratio = 100.0*failed/(failed+passed)
-        print "    FAILED: %d    (%.0f%%)" % (failed,ratio)
+        print("    FAILED: %d    (%.0f%%)" % (failed,ratio))
 
-        print "Results by tests:"
-        print "    Tests run:    %d" % n_tests
-        print "    Tests failed: %d" % n_failures
-        print "    Test errors:  %d" % n_errors
-    print "----------------------------------------------"
-    
+        print("Results by tests:")
+        print("    Tests run:    %d" % n_tests)
+        print("    Tests failed: %d" % n_failures)
+        print("    Test errors:  %d" % n_errors)
+    print("----------------------------------------------")
+
     return failed
 
 if __name__ == '__main__':
@@ -107,4 +108,4 @@ if __name__ == '__main__':
     dirs = sys.argv[1:] if not all else sys.argv[2:]
     if run_tests(dirs=dirs, all=all)>0:
         sys.exit(1)
-    
+

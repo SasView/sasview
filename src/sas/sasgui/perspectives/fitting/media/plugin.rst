@@ -18,6 +18,9 @@ There are essentially three ways to generate new fitting models for SasView:
 * By writing a model from scratch outside of SasView (only recommended for
   code monkeys!)
 
+**What follows below is quite technical. If you just want a helping hand to get 
+started creating your own models see** :ref:`Adding_your_own_models`.
+
 Overview
 ^^^^^^^^
 
@@ -537,7 +540,7 @@ This includes the following:
         very close to zero.
     sin, cos, tan, asin, acos, atan:
         Trigonometry functions and inverses, operating on radians.
-    sinh, cos, tanh, asinh, acosh, atanh:
+    sinh, cosh, tanh, asinh, acosh, atanh:
         Hyperbolic trigonometry functions.
     atan2(y,x):
         Angle from the $x$\ -axis to the point $(x,y)$, which is equal to

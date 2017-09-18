@@ -64,19 +64,23 @@ def smear_selection(data, model = None):
         if np.size(data.dx[data.dx <= 0]) > 0:
             raise ValueError('one or more of your dx values are negative, please check the data file!')
 
-    if _found_sesans == True:
-        #Pre-compute the Hankel matrix (H)
-        qmax, qunits = data.sample.zacceptance
+    if _found_sesans:
+        # Pre-compute the Hankel matrix (H)
         SElength = Converter(data._xunit)(data.x, "A")
-        zaccept = Converter(qunits)(qmax, "1/A"),
+
+        theta_max = Converter("radians")(data.sample.zacceptance)[0]
+        q_max = 2 * np.pi / np.max(data.source.wavelength) * np.sin(theta_max)
+        zaccept = Converter("1/A")(q_max, "1/" + data.source.wavelength_unit),
+
         Rmax = 10000000
-        # data must have the isoriented flag here!
         # Then return the actual transform, as if it were a smearing function
+        # data must have the isoriented flag here!
         if getattr(data, 'isoriented', False):
             costransform = OrientedSesansTransform(data.x, SElength, zaccept, Rmax)
             return PySmear(costransform, model, offset=0)
         else:
-            hankel = SesansTransform(data.x, SElength, zaccept, Rmax)
+            hankel = SesansTransform(data.x, SElength,
+                                     data.source.wavelength, zaccept, Rmax)
             return PySmear(hankel, model, offset=0)
 
     _found_resolution = False

@@ -15,6 +15,7 @@
 #copyright 2008, University of Tennessee
 ######################################################################
 
+from __future__ import print_function
 
 #TODO: Keep track of data manipulation in the 'process' data structure.
 #TODO: This module should be independent of plottables. We should write
@@ -1159,11 +1160,13 @@ def combine_data_info_with_plottable(data, datainfo):
 
     final_dataset = None
     if isinstance(data, plottable_1D):
-        final_dataset = Data1D(data.x, data.y)
+        final_dataset = Data1D(data.x, data.y, isSesans=datainfo.isSesans)
         final_dataset.dx = data.dx
         final_dataset.dy = data.dy
         final_dataset.dxl = data.dxl
         final_dataset.dxw = data.dxw
+        final_dataset.x_unit = data._xunit
+        final_dataset.y_unit = data._yunit
         final_dataset.xaxis(data._xaxis, data._xunit)
         final_dataset.yaxis(data._yaxis, data._yunit)
     elif isinstance(data, plottable_2D):
@@ -1179,10 +1182,14 @@ def combine_data_info_with_plottable(data, datainfo):
                         "plottable2d data object"
         return return_string
 
-    final_dataset.xmax = data.xmax
-    final_dataset.ymax = data.ymax
-    final_dataset.xmin = data.xmin
-    final_dataset.ymin = data.ymin
+    if hasattr(data, "xmax"):
+        final_dataset.xmax = data.xmax
+    if hasattr(data, "ymax"):
+        final_dataset.ymax = data.ymax
+    if hasattr(data, "xmin"):
+        final_dataset.xmin = data.xmin
+    if hasattr(data, "ymin"):
+        final_dataset.ymin = data.ymin
     final_dataset.isSesans = datainfo.isSesans
     final_dataset.title = datainfo.title
     final_dataset.run = datainfo.run
