@@ -1,7 +1,7 @@
 from sas.sascalc.data_util.calcthread import CalcThread
 from sas.sascalc.dataloader.data_info import Data1D
 from scipy.fftpack import dct
-from scipy.integrate import trapz
+from scipy.integrate import trapz, cumtrapz
 import numpy as np
 from time import sleep
 
@@ -45,9 +45,10 @@ class FourierThread(CalcThread):
             # gamma3(R) = 1/R int_{0}^{R} gamma1(x) dx
             # trapz uses the trapezium rule to calculate the integral
             mask = xs <= 200.0 # Only calculate gamma3 up to x=200 (as this is all that's plotted)
-            gamma3 = [trapz(gamma1[:n], xs[:n])/xs[n-1] for n in range(2, len(xs[mask]) + 1)]
-            gamma3.insert(0, 1.0) # Gamma_3(0) is defined as 1
-            gamma3 = np.array(gamma3)
+            from scipy.integrate import cumtrapz
+            n = len(xs[mask]) + 1
+            gamma3 = cumtrapz(gamma1[:n], xs[:n])
+            gamma3 = np.hstack((1.0, gamma3)) # Gamma_3(0) is defined as 1
 
             if self.check_if_cancelled(): return
 
