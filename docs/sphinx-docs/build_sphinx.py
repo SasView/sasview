@@ -374,17 +374,17 @@ def build_pdf():
     LATEXDIR = os.path.join(SPHINX_BUILD, "latex")
     #TODO: Does it need to be done so many time?
     def pdflatex():
-        subprocess.call(["pdflatex", "Sasview.tex"], cwd=LATEXDIR)
+        subprocess.call(["pdflatex", "SasView.tex"], cwd=LATEXDIR)
     pdflatex()
     pdflatex()
     pdflatex()
-    subprocess.call(["makeindex", "-s", "python.ist", "Sasview.idx"], cwd=LATEXDIR)
+    subprocess.call(["makeindex", "-s", "python.ist", "SasView.idx"], cwd=LATEXDIR)
     pdflatex()
     pdflatex()
 
     print("=== Copy PDF to HTML Directory ===")
-    source = os.path.join(LATEXDIR, "Sasview.pdf")
-    target = os.path.join(SASVIEW_DOCS, "Sasview.pdf")
+    source = os.path.join(LATEXDIR, "SasView.pdf")
+    target = os.path.join(SASVIEW_DOCS, "SasView.pdf")
     shutil.copyfile(source, target)
 
 def build():
@@ -438,8 +438,8 @@ def rebuild():
     #fetch_mathjax()
     apidoc()
     build()
-    #if find_executable('latex'):
-    build_pdf()
+    if find_executable('latex'):
+        build_pdf()
     #convert_katex()
     #convert_mathjax()
 
