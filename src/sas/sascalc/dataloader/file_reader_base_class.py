@@ -5,6 +5,7 @@ class
 """
 
 import os
+import re
 import logging
 import numpy as np
 from abc import abstractmethod
@@ -105,6 +106,9 @@ class FileReader(object):
         """
         for data in self.output:
             if isinstance(data, Data1D):
+                # Normalize the units for
+                data.x_unit = self.format_unit(data.x_unit)
+                data.y_unit = self.format_unit(data.y_unit)
                 # Sort data by increasing x and remove 1st point
                 ind = np.lexsort((data.y, data.x))
                 data.x = np.asarray([data.x[i] for i in ind]).astype(np.float64)
@@ -130,6 +134,9 @@ class FileReader(object):
     def sort_two_d_data(self):
         for dataset in self.output:
             if isinstance(dataset, Data2D):
+                # Normalize the units for
+                dataset.x_unit = self.format_unit(dataset.Q_unit)
+                dataset.y_unit = self.format_unit(dataset.I_unit)
                 dataset.data = dataset.data.astype(np.float64)
                 dataset.qx_data = dataset.qx_data.astype(np.float64)
                 dataset.xmin = np.min(dataset.qx_data)
@@ -153,6 +160,21 @@ class FileReader(object):
                     dataset.y_bins = dataset.qy_data[0::int(n_cols)]
                     dataset.x_bins = dataset.qx_data[:int(n_cols)]
                 dataset.data = dataset.data.flatten()
+
+    def format_unit(self, unit=None):
+        """
+        Format units a common way
+        :param unit:
+        :return:
+        """
+        if unit:
+            split = unit.split("/")
+            if len(split) == 1:
+                return unit
+            elif split[0] == '1':
+                return "{0}^".format(split[1]) + "{-1}"
+            else:
+                return "{0}*{1}^".format(split[0], split[1]) + "{-1}"
 
     def set_all_to_none(self):
         """
