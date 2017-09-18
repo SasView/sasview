@@ -47,7 +47,7 @@ class abs_reader(unittest.TestCase):
         self.assertEqual(self.data.detector[0].beam_center.x, center_x)
         self.assertEqual(self.data.detector[0].beam_center.y, center_y)
 
-        self.assertEqual(self.data.y_unit, '1/cm')
+        self.assertEqual(self.data.y_unit, 'cm^{-1}')
         self.assertEqual(self.data.x[0], 0.002618)
         self.assertEqual(self.data.x[1], 0.007854)
         self.assertEqual(self.data.x[2], 0.01309)
@@ -145,8 +145,8 @@ class cansas_reader(unittest.TestCase):
 
         # Data
         self.assertEqual(len(self.data.x), 2)
-        self.assertEqual(self.data.x_unit, '1/A')
-        self.assertEqual(self.data.y_unit, '1/cm')
+        self.assertEqual(self.data.x_unit, 'A^{-1}')
+        self.assertEqual(self.data.y_unit, 'cm^{-1}')
         self.assertAlmostEqual(self.data.x[0], 0.02, 6)
         self.assertAlmostEqual(self.data.y[0], 1000, 6)
         self.assertAlmostEqual(self.data.dx[0], 0.01, 6)
@@ -323,8 +323,8 @@ class cansas_reader(unittest.TestCase):
 
         # Data
         self.assertEqual(len(self.data.x), 2)
-        self.assertEqual(self.data.x_unit, '1/A')
-        self.assertEqual(self.data.y_unit, '1/cm')
+        self.assertEqual(self.data.x_unit, 'A^{-1}')
+        self.assertEqual(self.data.y_unit, 'cm^{-1}')
         self.assertEqual(self.data.x[0], 0.02)
         self.assertEqual(self.data.y[0], 1000)
         self.assertEqual(self.data.dxl[0], 0.005)
