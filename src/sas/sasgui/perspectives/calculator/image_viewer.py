@@ -58,6 +58,12 @@ class ImageView:
             basename = os.path.basename(file_path)
             _, extension = os.path.splitext(basename)
             try:
+                # Note that matplotlib only reads png natively.
+                # Any other formats (tiff, jpeg, etc) are passed
+                # to PIL which seems to have a problem in version
+                # 1.1.7 that causes a close error which shows up in 
+                # the log file.  This does not seem to have any adverse
+                # effects.  PDB   --- September 17, 2017.
                 img = mpimg.imread(file_path)
                 is_png = extension.lower() == '.png'
                 plot_frame = ImageFrame(parent, -1, basename, img)

@@ -33,12 +33,12 @@ Using the tool
 2) Select a file and then click *Open*. If the loading is successful the image 
    will be displayed.
 
-.. image:: load_image.bmp
+.. image:: load_image.png
 
 3) To save, print, or copy the image, or to apply a grid overlay, right-click 
    anywhere in the plot.
 
-.. image:: pic_plot.bmp
+.. image:: pic_plot.png
 
 4. If the image is taken from a 2D detector, SasView can attempt to convert 
    the colour/grey scale into pseudo-intensity 2D data using 
@@ -50,7 +50,7 @@ Using the tool
 5. In the *Convert to Data* dialog, set the parameters relevant to the data and 
    then click the OK.
 
-.. image:: pic_convert.bmp
+.. image:: pic_convert.png
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
