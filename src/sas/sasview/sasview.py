@@ -26,9 +26,6 @@ APP_NAME = 'SasView'
 # Set SAS_MODELPATH so sasmodels can find our custom models
 os.environ['SAS_MODELPATH'] = os.path.join(sasdir, PLUGIN_MODEL_DIR)
 
-from matplotlib import backend_bases
-backend_bases.FigureCanvasBase.filetypes.pop('pgf', None)
-
 class SasView():
     """
     Main class for running the SasView application
@@ -178,9 +175,9 @@ def setup_mpl():
     # path as we can
     os.environ['MPLBACKEND'] = 'WXAgg'
 
-
     from matplotlib import backend_bases
     backend_bases.FigureCanvasBase.filetypes.pop('pgf', None)
+
 
 def run_gui():
     """
