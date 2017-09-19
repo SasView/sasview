@@ -140,7 +140,7 @@ class CorfuncCalculator(object):
             calculated value will be used)
         :param extrap_fn: A callable function representing the extraoplated data
         :param completefn: The function to call when the transform calculation
-            is complete`
+            is complete
         :param updatefn: The function to call to update the GUI with the status
             of the transform calculation
         :return: The transformed data
