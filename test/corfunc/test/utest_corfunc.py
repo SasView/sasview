@@ -26,6 +26,7 @@ class TestCalculator(unittest.TestCase):
             upperq=(0.15, 0.24))
         self.calculator.background = 0.3
         self.extrapolation = None
+        self.transformation = None
         self.results = [np.loadtxt(filename+"_out.txt").T[2]
                         for filename in ("gamma1", "gamma3", "idf")]
 
