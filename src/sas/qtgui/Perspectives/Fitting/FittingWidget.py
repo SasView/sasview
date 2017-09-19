@@ -1273,8 +1273,11 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Update the parameter value - note: this supports +/-inf as well
         self.kernel_module.params[parameter_name] = value
 
-        # min/max to be changed in self.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
-        if model_column > 1:
+        # Update the parameter value - note: this supports +/-inf as well
+        if model_column == 0:
+            self.kernel_module.setParam(parameter_name, value)
+        else:
+            # min/max to be changed in self.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
             self.kernel_module.details[parameter_name][property_index] = value
 
         # TODO: magnetic params in self.kernel_module.details['M0:parameter_name'] = value
