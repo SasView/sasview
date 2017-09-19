@@ -28,6 +28,10 @@ except ImportError:
 
 from .gui_manager import get_app_dir
 
+# Don't use wx html renderer on windows.
+if os.name == 'nt':
+    WX_SUPPORTS_HTML2 = False
+
 logger = logging.getLogger(__name__)
 
 SPHINX_DOC_ENV = "SASVIEW_DOC_PATH"
