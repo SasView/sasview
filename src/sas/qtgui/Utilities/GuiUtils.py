@@ -555,6 +555,8 @@ def saveData1D(data):
     """
     default_name = os.path.basename(data.filename)
     default_name, extension = os.path.splitext(default_name)
+    if not extension:
+        extension = ".txt"
     default_name += "_out" + extension
 
     wildcard = "Text files (*.txt);;"\
