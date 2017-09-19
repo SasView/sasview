@@ -16,6 +16,7 @@ class TestCalculator(unittest.TestCase):
         self.calculator = CorfuncCalculator(data=self.data, lowerq=0.013,
             upperq=(0.15, 0.24))
         self.extrapolation = None
+        self.transformation = None
 
     def extrapolate(self):
         params, extrapolation = self.calculator.compute_extrapolation()

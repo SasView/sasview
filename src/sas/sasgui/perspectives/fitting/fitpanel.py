@@ -500,10 +500,15 @@ class FitPanel(nb, PanelBase):
 
             if data is None:
                 return None
+        focused_page = self.GetPage(self.GetSelection())
         for page in self.opened_pages.values():
             # check if the selected data existing in the fitpanel
             pos = self.GetPageIndex(page)
             if not check_data_validity(page.get_data()) and not page.batch_on:
+                if page.model is not None and page != focused_page:
+                    # Page has an active theory and is in background - don't
+                    # send data here.
+                    continue
                 # make sure data get placed in 1D empty tab if data is 1D
                 # else data get place on 2D tab empty tab
                 enable2D = page.get_view_mode()
