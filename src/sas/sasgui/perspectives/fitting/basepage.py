@@ -1840,7 +1840,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         for models in list:
             if models.name != "NoStructure":
                 mlist.append((models.name, models))
-
         # Sort the models
         mlist_sorted = sorted(mlist)
         for item in mlist_sorted:

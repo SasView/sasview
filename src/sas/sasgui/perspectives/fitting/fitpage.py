@@ -1155,8 +1155,15 @@ class FitPage(BasicPage):
                     or event.GetEventObject() == self.multifactorbox:
                 copy_flag = self.get_copy_params()
                 is_poly_enabled = self.enable_disp.GetValue()
-
-        self._on_select_model_helper()
+        try:
+            self._on_select_model_helper()
+        except Exception as e:
+            evt = StatusEvent(status=e.message, info="error")
+            wx.PostEvent(self._manager.parent, evt)
+            # Set S(Q) to None
+            self.structurebox.SetSelection(0)
+            self._on_select_model()
+            return
         self.set_model_param_sizer(self.model)
         if self.model is None:
             self._set_bookmark_flag(False)
@@ -1235,10 +1242,14 @@ class FitPage(BasicPage):
             new_event = PageInfoEvent(page=self)
             wx.PostEvent(self.parent, new_event)
             # update list of plugins if new plugin is available
-            custom_model = CUSTOM_MODEL
             mod_cat = self.categorybox.GetStringSelection()
-            if mod_cat == custom_model:
+            if mod_cat == CUSTOM_MODEL:
+                temp_id = self.model.id
                 temp = self.parent.update_model_list()
+                for v in self.parent.model_dictionary.values():
+                    if v.id == temp_id:
+                        self.model = v()
+                        break
                 if temp:
                     self.model_list_box = temp
                     current_val = self.formfactorbox.GetLabel()

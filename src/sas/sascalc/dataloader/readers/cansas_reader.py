@@ -129,12 +129,7 @@ class Reader(XMLreader):
                 self.current_datainfo.meta_data["loader"] = "CanSAS XML 1D"
                 self.current_datainfo.meta_data[PREPROCESS] = self.processing_instructions
                 self._parse_entry(entry)
-                has_error_dx = self.current_dataset.dx is not None
-                has_error_dy = self.current_dataset.dy is not None
-                self.remove_empty_q_values(has_error_dx=has_error_dx,
-                    has_error_dy=has_error_dy)
-                self.send_to_output() # Combine datasets with DataInfo
-                self.current_datainfo = DataInfo() # Reset DataInfo
+                self.data_cleanup()
         except FileContentsException as fc_exc:
             # File doesn't meet schema - try loading with a less strict schema
             base_name = xml_reader.__file__
@@ -153,8 +148,9 @@ class Reader(XMLreader):
                     # File can still be read but doesn't match schema, so raise exception
                     self.load_file_and_schema(xml_file) # Reload strict schema so we can find where error are in file
                     invalid_xml = self.find_invalid_xml()
-                    invalid_xml = INVALID_XML.format(basename + self.extension) + invalid_xml
-                    raise DataReaderException(invalid_xml) # Handled by base class
+                    if invalid_xml != "":
+                        invalid_xml = INVALID_XML.format(basename + self.extension) + invalid_xml
+                        raise DataReaderException(invalid_xml) # Handled by base class
                 except FileContentsException as fc_exc:
                     msg = "CanSAS Reader could not load the file {}".format(xml_file)
                     if fc_exc.message is not None: # Propagate error messages from earlier
@@ -278,32 +274,18 @@ class Reader(XMLreader):
 
                 # I and Q points
                 elif tagname == 'I' and isinstance(self.current_dataset, plottable_1D):
-                    unit_list = unit.split("|")
-                    if len(unit_list) > 1:
-                        self.current_dataset.yaxis(unit_list[0].strip(),
-                                                   unit_list[1].strip())
-                    else:
-                        self.current_dataset.yaxis("Intensity", unit)
+                    self.current_dataset.yaxis("Intensity", unit)
                     self.current_dataset.y = np.append(self.current_dataset.y, data_point)
                 elif tagname == 'Idev' and isinstance(self.current_dataset, plottable_1D):
                     self.current_dataset.dy = np.append(self.current_dataset.dy, data_point)
                 elif tagname == 'Q':
-                    unit_list = unit.split("|")
-                    if len(unit_list) > 1:
-                        self.current_dataset.xaxis(unit_list[0].strip(),
-                                                   unit_list[1].strip())
-                    else:
-                        self.current_dataset.xaxis("Q", unit)
+                    self.current_dataset.xaxis("Q", unit)
                     self.current_dataset.x = np.append(self.current_dataset.x, data_point)
                 elif tagname == 'Qdev':
                     self.current_dataset.dx = np.append(self.current_dataset.dx, data_point)
                 elif tagname == 'dQw':
-                    if self.current_dataset.dxw is None:
-                        self.current_dataset.dxw = np.empty(0)
-                    self.current_dataset.dxw = np.append(self.current_dataset.dxw, data_point)
+                   self.current_dataset.dxw = np.append(self.current_dataset.dxw, data_point)
                 elif tagname == 'dQl':
-                    if self.current_dataset.dxl is None:
-                        self.current_dataset.dxl = np.empty(0)
                     self.current_dataset.dxl = np.append(self.current_dataset.dxl, data_point)
                 elif tagname == 'Qmean':
                     pass
@@ -311,6 +293,10 @@ class Reader(XMLreader):
                     pass
                 elif tagname == 'Sesans':
                     self.current_datainfo.isSesans = bool(data_point)
+                    self.current_dataset.xaxis(attr.get('x_axis'),
+                                                attr.get('x_unit'))
+                    self.current_dataset.yaxis(attr.get('y_axis'),
+                                                attr.get('y_unit'))
                 elif tagname == 'yacceptance':
                     self.current_datainfo.sample.yacceptance = (data_point, unit)
                 elif tagname == 'zacceptance':
@@ -511,10 +497,28 @@ class Reader(XMLreader):
             self.current_datainfo.errors = set()
             for error in self.errors:
                 self.current_datainfo.errors.add(error)
-            self.errors.clear()
-            self.send_to_output()
+            self.data_cleanup()
+            self.sort_one_d_data()
+            self.sort_two_d_data()
+            self.reset_data_list()
             empty = None
             return self.output[0], empty
+
+    def data_cleanup(self):
+        """
+        Clean up the data sets and refresh everything
+        :return: None
+        """
+        has_error_dx = self.current_dataset.dx is not None
+        has_error_dxl = self.current_dataset.dxl is not None
+        has_error_dxw = self.current_dataset.dxw is not None
+        has_error_dy = self.current_dataset.dy is not None
+        self.remove_empty_q_values(has_error_dx=has_error_dx,
+                                   has_error_dxl=has_error_dxl,
+                                   has_error_dxw=has_error_dxw,
+                                   has_error_dy=has_error_dy)
+        self.send_to_output()  # Combine datasets with DataInfo
+        self.current_datainfo = DataInfo()  # Reset DataInfo
 
     def _is_call_local(self):
         if self.frm == "":
@@ -641,10 +645,13 @@ class Reader(XMLreader):
                 else:
                     value_unit = local_unit
             except KeyError:
-                err_msg = "CanSAS reader: unexpected "
-                err_msg += "\"{0}\" unit [{1}]; "
-                err_msg = err_msg.format(tagname, local_unit)
-                err_msg += "expecting [{0}]".format(default_unit)
+                # Do not throw an error for loading Sesans data in cansas xml
+                # This is a temporary fix.
+                if local_unit != "A" and local_unit != 'pol':
+                    err_msg = "CanSAS reader: unexpected "
+                    err_msg += "\"{0}\" unit [{1}]; "
+                    err_msg = err_msg.format(tagname, local_unit)
+                    err_msg += "expecting [{0}]".format(default_unit)
                 value_unit = local_unit
             except:
                 err_msg = "CanSAS reader: unknown error converting "
@@ -674,19 +681,17 @@ class Reader(XMLreader):
         if self.current_dataset.dy is not None:
             di_exists = True
         if dqw_exists and not dql_exists:
-            array_size = self.current_dataset.dxw.size - 1
-            self.current_dataset.dxl = np.append(self.current_dataset.dxl,
-                                                 np.zeros([array_size]))
+            array_size = self.current_dataset.dxw.size
+            self.current_dataset.dxl = np.zeros(array_size)
         elif dql_exists and not dqw_exists:
-            array_size = self.current_dataset.dxl.size - 1
-            self.current_dataset.dxw = np.append(self.current_dataset.dxw,
-                                                 np.zeros([array_size]))
+            array_size = self.current_dataset.dxl.size
+            self.current_dataset.dxw = np.zeros(array_size)
         elif not dql_exists and not dqw_exists and not dq_exists:
-            array_size = self.current_dataset.x.size - 1
+            array_size = self.current_dataset.x.size
             self.current_dataset.dx = np.append(self.current_dataset.dx,
                                                 np.zeros([array_size]))
         if not di_exists:
-            array_size = self.current_dataset.y.size - 1
+            array_size = self.current_dataset.y.size
             self.current_dataset.dy = np.append(self.current_dataset.dy,
                                                 np.zeros([array_size]))
 
@@ -856,29 +861,33 @@ class Reader(XMLreader):
             point = self.create_element("Idata")
             node.append(point)
             self.write_node(point, "Q", datainfo.x[i],
-                            {'unit': datainfo._xaxis + " | " + datainfo._xunit})
+                            {'unit': datainfo.x_unit})
             if len(datainfo.y) >= i:
                 self.write_node(point, "I", datainfo.y[i],
-                                {'unit': datainfo._yaxis + " | " + datainfo._yunit})
+                                {'unit': datainfo.y_unit})
             if datainfo.dy is not None and len(datainfo.dy) > i:
                 self.write_node(point, "Idev", datainfo.dy[i],
-                                {'unit': datainfo._yaxis + " | " + datainfo._yunit})
+                                {'unit': datainfo.y_unit})
             if datainfo.dx is not None and len(datainfo.dx) > i:
                 self.write_node(point, "Qdev", datainfo.dx[i],
-                                {'unit': datainfo._xaxis + " | " + datainfo._xunit})
+                                {'unit': datainfo.x_unit})
             if datainfo.dxw is not None and len(datainfo.dxw) > i:
                 self.write_node(point, "dQw", datainfo.dxw[i],
-                                {'unit': datainfo._xaxis + " | " + datainfo._xunit})
+                                {'unit': datainfo.x_unit})
             if datainfo.dxl is not None and len(datainfo.dxl) > i:
                 self.write_node(point, "dQl", datainfo.dxl[i],
-                                {'unit': datainfo._xaxis + " | " + datainfo._xunit})
+                                {'unit': datainfo.x_unit})
         if datainfo.isSesans:
-            sesans = self.create_element("Sesans")
+            sesans_attrib = {'x_axis': datainfo._xaxis,
+                             'y_axis': datainfo._yaxis,
+                             'x_unit': datainfo.x_unit,
+                             'y_unit': datainfo.y_unit}
+            sesans = self.create_element("Sesans", attrib=sesans_attrib)
             sesans.text = str(datainfo.isSesans)
-            node.append(sesans)
-            self.write_node(node, "yacceptance", datainfo.sample.yacceptance[0],
+            entry_node.append(sesans)
+            self.write_node(entry_node, "yacceptance", datainfo.sample.yacceptance[0],
                              {'unit': datainfo.sample.yacceptance[1]})
-            self.write_node(node, "zacceptance", datainfo.sample.zacceptance[0],
+            self.write_node(entry_node, "zacceptance", datainfo.sample.zacceptance[0],
                              {'unit': datainfo.sample.zacceptance[1]})
 
 

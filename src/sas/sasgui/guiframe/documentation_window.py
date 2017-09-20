@@ -98,15 +98,15 @@ class DocumentationWindow(wx.Frame):
             url = path
         elif not os.path.exists(file_path):
             url = "index.html"
-            logger.error("Could not find Sphinx documentation at %s \
-            -- has it been built?", file_path)
+            logger.error("Could not find Sphinx documentation at %s -- has it been built?",
+                         file_path)
         elif False:
             start_documentation_server(docs_path, port=7999)
             url = "http://127.0.0.1:7999/" + path.replace('\\', '/') + url_instruction
         else:
             url = "file:///" + urllib.quote(file_path, r'/\:')+ url_instruction
 
-        logger.info("showing url " + url)
+        #logger.info("showing url " + url)
         if WX_SUPPORTS_HTML2:
             # Complete HTML/CSS support!
             self.view = html.WebView.New(self)
