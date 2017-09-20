@@ -288,7 +288,7 @@ class FitPage(BasicPage):
         self.btFitHelp = wx.Button(self, wx.ID_ANY, 'Help')
         self.btFitHelp.SetToolTipString("General fitting help.")
         self.btFitHelp.Bind(wx.EVT_BUTTON, self._onFitHelp)
-        
+
         # Resolution Smearing Help button (for now use same technique as
         # used for dI help to get tiniest possible button that works
         # both on MAC and PC.  Should completely rewrite the fitting sizer
@@ -302,7 +302,7 @@ class FitPage(BasicPage):
                                      style=wx.BU_EXACTFIT, size=size_q)
         self.btSmearHelp.SetToolTipString("Resolution smearing help.")
         self.btSmearHelp.Bind(wx.EVT_BUTTON, self._onSmearHelp)
-        
+
         # textcntrl for custom resolution
         self.smear_pinhole_percent = ModelTextCtrl(self, wx.ID_ANY,
                                                    size=(_BOX_WIDTH - 25, 20),
@@ -563,13 +563,13 @@ class FitPage(BasicPage):
         sizer.Add(self.points_sizer, 0, 0)
         sizer.Add(self.draw_button, 0, 0)
         sizer.Add((-1, 5))
-        
+
         sizer.Add(self.tcChi, 0, 0)
         sizer.Add(self.Npts_fit, 0, 0)
         sizer.Add(self.Npts_total, 0, 0)
         sizer.Add(self.btFit, 0, 0)
         sizer.Add(self.btFitHelp, 0, 0)
-        
+
         boxsizer_range.Add(sizer_chi2)
         boxsizer_range.Add(sizer)
         if is_2d_data:
@@ -1155,8 +1155,15 @@ class FitPage(BasicPage):
                     or event.GetEventObject() == self.multifactorbox:
                 copy_flag = self.get_copy_params()
                 is_poly_enabled = self.enable_disp.GetValue()
-
-        self._on_select_model_helper()
+        try:
+            self._on_select_model_helper()
+        except Exception as e:
+            evt = StatusEvent(status=e.message, info="error")
+            wx.PostEvent(self._manager.parent, evt)
+            # Set S(Q) to None
+            self.structurebox.SetSelection(0)
+            self._on_select_model()
+            return
         self.set_model_param_sizer(self.model)
         if self.model is None:
             self._set_bookmark_flag(False)
@@ -2184,6 +2191,9 @@ class FitPage(BasicPage):
         # save current state
         self.save_current_state()
 
+        if not self.is_mac:
+            self.Layout()
+            self.Refresh()
         # plot model ( when drawing, do not update chisqr value again)
         self._draw_model(update_chisqr=False, source='fit')
 
@@ -2778,7 +2788,7 @@ class FitPage(BasicPage):
             # no numbers
             else:
                 return cmp(a.lower(), b.lower())
-        
+
         # keys obtained now from ordered dict, so commenting alphabetical
         # ordering keys.sort(custom_compare)
 

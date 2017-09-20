@@ -61,7 +61,7 @@ def run_tests(dirs=None, all=False):
                     code = '"%s" %s %s'%(sys.executable, run_one_py, file_path)
                     proc = subprocess.Popen(code, shell=True, stdout=subprocess.PIPE, stderr = subprocess.STDOUT)
                     std_out, std_err = proc.communicate()
-                    #print std_out
+                    #print(">>>>>> standard out", file_path, "\n", std_out, "\n>>>>>>>>> end stdout", file_path)
                     #sys.exit()
                     m = re.search("Ran ([0-9]+) test", std_out)
                     if m is not None:
@@ -81,7 +81,7 @@ def run_tests(dirs=None, all=False):
                     if has_failed or not has_tests:
                         failed += 1
                         print("Result for %s (%s): FAILED" % (module_name, module_dir))
-                        print(std_out)
+                        #print(std_out)
                     else:
                         passed += 1
                         print("Result for %s: SUCCESS" % module_name)
