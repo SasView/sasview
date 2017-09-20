@@ -870,6 +870,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             return
 
         error_column = []
+        self.lstParams.itemDelegate().addErrorColumn()
         self.iterateOverModel(createErrorColumn)
 
         # switch off reponse to model change
@@ -1268,17 +1269,24 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             # Unparsable field
             return
         parameter_name = str(self._model_model.data(name_index).toPyObject()) # sld, background etc.
-        property_index = self._model_model.headerData(1, model_column).toInt()[0]-1 # Value, min, max, etc.
 
         # Update the parameter value - note: this supports +/-inf as well
         self.kernel_module.params[parameter_name] = value
 
         # Update the parameter value - note: this supports +/-inf as well
-        if model_column == 0:
+        param_column = self.lstParams.itemDelegate().param_value
+        min_column = self.lstParams.itemDelegate().param_min
+        max_column = self.lstParams.itemDelegate().param_max
+        if model_column == param_column:
             self.kernel_module.setParam(parameter_name, value)
-        else:
+        elif model_column == min_column:
             # min/max to be changed in self.kernel_module.details[parameter_name] = ['Ang', 0.0, inf]
-            self.kernel_module.details[parameter_name][property_index] = value
+            self.kernel_module.details[parameter_name][1] = value
+        elif model_column == max_column:
+            self.kernel_module.details[parameter_name][2] = value
+        else:
+            # don't update the chart
+            return
 
         # TODO: magnetic params in self.kernel_module.details['M0:parameter_name'] = value
         # TODO: multishell params in self.kernel_module.details[??] = value

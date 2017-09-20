@@ -7,18 +7,40 @@ class ModelViewDelegate(QtGui.QStyledItemDelegate):
     """
     Custom delegate for appearance and behavior control of the model view
     """
-    # Main parameter table view columns
-    PARAM_PROPERTY=0
-    PARAM_VALUE=1
-    PARAM_MIN=2
-    PARAM_MAX=3
-    PARAM_UNIT=4
+    def __init__(self, parent=None):
+        """
+        Overwrite generic constructor to allow for some globals
+        """
+        super(QtGui.QStyledItemDelegate, self).__init__()
+
+        # Main parameter table view columns
+        self.param_error=-1
+        self.param_property=0
+        self.param_value=1
+        self.param_min=2
+        self.param_max=2
+        self.param_unit=2
+
+    def editableParameters(self):
+        return [self.param_value, self.param_min, self.param_max]
+
+    def addErrorColumn(self):
+        """
+        Modify local column pointers
+        Note: the reverse is never required!
+        """
+        self.param_property=0
+        self.param_value=1
+        self.param_error=2
+        self.param_min=3
+        self.param_max=4
+        self.param_unit=5
 
     def paint(self, painter, option, index):
         """
         Overwrite generic painter for certain columns
         """
-        if index.column() in (self.PARAM_UNIT, self.PARAM_MIN, self.PARAM_MAX):
+        if index.column() in self.editableParameters():
             # Units - present in nice HTML
             options = QtGui.QStyleOptionViewItemV4(option)
             self.initStyleOption(options,index)
@@ -55,12 +77,12 @@ class ModelViewDelegate(QtGui.QStyledItemDelegate):
         """
         if not index.isValid():
             return 0
-        if index.column() == self.PARAM_VALUE: #only in the value column
+        if index.column() == self.param_value: #only in the value column
             editor = QtGui.QLineEdit(widget)
             validator = QtGui.QDoubleValidator()
             editor.setValidator(validator)
             return editor
-        if index.column() in [self.PARAM_PROPERTY, self.PARAM_UNIT]:
+        if index.column() in [self.param_property, self.param_error]:
             # Set some columns uneditable
             return None
 
@@ -70,7 +92,7 @@ class ModelViewDelegate(QtGui.QStyledItemDelegate):
         """
         Overwrite generic model update method for certain columns
         """
-        if index.column() in (self.PARAM_MIN, self.PARAM_MAX):
+        if index.column() in (self.param_min, self.param_max):
             try:
                 value_float = float(editor.text())
             except ValueError:
@@ -85,7 +107,6 @@ class PolyViewDelegate(QtGui.QStyledItemDelegate):
     Custom delegate for appearance and behavior control of the polydispersity view
     """
     POLYDISPERSE_FUNCTIONS = ['rectangle', 'array', 'lognormal', 'gaussian', 'schulz']
-    #POLYDISPERSE_FUNCTIONS = ['rectangle', 'lognormal', 'gaussian', 'schulz']
 
     combo_updated = QtCore.pyqtSignal(str, int)
     filename_updated = QtCore.pyqtSignal(int)
