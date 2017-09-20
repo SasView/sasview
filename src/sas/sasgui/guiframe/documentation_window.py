@@ -74,11 +74,15 @@ class DocumentationWindow(wx.Frame):
         if not os.path.exists(file_path):
             logger.error("Could not find Sphinx documentation at %s \
             -- has it been built?", file_path)
-        elif WX_SUPPORTS_HTML2:
-            # Complete HTML/CSS support!
-            self.view = html.WebView.New(self)
-            self.view.LoadURL(url)
-            self.Show()
+        #Commenting following 5 lines, so default browser is forced
+        #This is due to CDN mathjax discontinuation of service, intenal help
+        #browser should be back with qt version
+        #Note added by Wojtek Potrzebowski, July 4th 2017
+        # elif WX_SUPPORTS_HTML2:
+        #     # Complete HTML/CSS support!
+        #     self.view = html.WebView.New(self)
+        #     self.view.LoadURL(url)
+        #     self.Show()
         else:
             logger.error("No html2 support, popping up a web browser")
             #For cases that do not build against current version dependency
