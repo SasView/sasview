@@ -2787,7 +2787,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
     def _on_mag_angle_help(self, event):
         """
-        Bring up Magnetic Angle definition bmp image whenever the ? button
+        Bring up Magnetic Angle definition.png image whenever the ? button
         is clicked. Calls DocumentationWindow with the path of the location
         within the documentation tree (after /doc/ ....". When using old
         versions of Wx (i.e. before 2.9 and therefore not part of release
@@ -2801,13 +2801,13 @@ class BasicPage(ScrolledPanel, PanelBase):
         :param evt: Triggers on clicking ? in Magnetic Angles? box
         """
 
-        _TreeLocation = "_images/M_angles_pic.bmp"
+        _TreeLocation = "_images/M_angles_pic.png"
         _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation, "",
                                           "Magnetic Angle Defintions")
 
     def _on_mag_help(self, event):
         """
-        Bring up Magnetic Angle definition bmp image whenever the ? button
+        Bring up Magnetic Angle definition.png image whenever the ? button
         is clicked. Calls DocumentationWindow with the path of the location
         within the documentation tree (after /doc/ ....". When using old
         versions of Wx (i.e. before 2.9 and therefore not part of release
