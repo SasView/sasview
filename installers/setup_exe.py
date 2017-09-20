@@ -24,12 +24,19 @@ from distutils.util import get_platform
 from distutils.core import setup
 from distutils.filelist import findall
 from distutils.sysconfig import get_python_lib
-import py2exe
 
 #from idlelib.PyShell import warning_stream
 
+# Need the installer dir on the python path to find helper modules
+installer_dir = os.path.abspath(os.path.dirname(__file__))
+if installer_dir != os.path.abspath(os.getcwd()):
+    raise RuntimeError("Must run setup_exe from the installers directory")
+sys.path.append(installer_dir)
+
+# Need the installer dir on the python path to find helper modules
 if os.path.abspath(os.path.dirname(__file__)) != os.path.abspath(os.getcwd()):
     raise RuntimeError("Must run setup_exe from the installers directory")
+sys.path.append(installer_dir)
 
 # put the build directory at the front of the path
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -158,13 +165,6 @@ class Target:
         self.copyright = "copyright 2009 - 2016"
         self.name = "SasView"
 
-#
-# Adapted from http://www.py2exe.org/index.cgi/MatPlotLib
-# to use the MatPlotLib.
-#
-matplotlibdatadir = matplotlib.get_data_path()
-matplotlibdata = findall(matplotlibdatadir)
-
 data_files = []
 
 if tinycc:
@@ -174,9 +174,15 @@ if tinycc:
 import periodictable
 data_files += periodictable.data_files()
 
-for f in matplotlibdata:
-    dirname = os.path.join('mpl-data', f[len(matplotlibdatadir)+1:])
-    data_files.append((os.path.split(dirname)[0], [f]))
+#
+# Adapted from http://www.py2exe.org/index.cgi/MatPlotLib
+# to use the MatPlotLib.
+#
+mpl_dir = matplotlib.get_data_path()
+for dirpath, dirnames, filenames in os.walk(mpl_dir):
+    target_dir = os.path.join("mpl-data", os.path.relpath(dirpath, mpl_dir))
+    source_files = [os.path.join(dirpath, f) for f in filenames]
+    data_files.append((target_dir, source_files))
 
 import sasmodels
 data_files += sasmodels.data_files()
@@ -218,40 +224,31 @@ if os.path.isfile("BUILD_NUMBER"):
     data_files.append(('.', ["BUILD_NUMBER"]))
 
 # Copying the images directory to the distribution directory.
-images_dir = local_config.icon_path
-for f in findall(images_dir):
-    data_files.append(("images", [f]))
+data_files.append(("images", findall(local_config.icon_path)))
 
 # Copying the HTML help docs
-media_dir = local_config.media_path
-for f in findall(media_dir):
-    data_files.append(("media", [f]))
+data_files.append(("media", findall(local_config.media_path)))
 
 # Copying the sample data user data
 test_dir = local_config.test_path
-for f in findall(os.path.join(test_dir, "1d_data")):
-    data_files.append((os.path.join("test", "1d_data"), [f]))
-for f in findall(os.path.join(test_dir, "2d_data")):
-    data_files.append((os.path.join("test", "2d_data"), [f]))
-for f in findall(os.path.join(test_dir, "save_states")):
-    data_files.append((os.path.join("test", "save_states"), [f]))
-for f in findall(os.path.join(test_dir, "upcoming_formats")):
-    data_files.append((os.path.join("test", "upcoming_formats"), [f]))
+for dirpath, dirnames, filenames in os.walk(test_dir):
+    target_dir = os.path.join("test", os.path.relpath(dirpath, test_dir))
+    source_files = [os.path.join(dirpath, f) for f in filenames]
+    data_files.append((target_dir, source_files))
 
 # See if the documentation has been built, and if so include it.
 if os.path.exists(doc_path):
     for dirpath, dirnames, filenames in os.walk(doc_path):
-        for filename in filenames:
-            sub_dir = os.path.join("doc", os.path.relpath(dirpath, doc_path))
-            data_files.append((sub_dir, [os.path.join(dirpath, filename)]))
+        target_dir = os.path.join("doc", os.path.relpath(dirpath, doc_path))
+        source_files = [os.path.join(dirpath, f) for f in filenames]
+        data_files.append((target_dir, source_files))
 else:
     raise Exception("You must first build the documentation before creating an installer.")
 
 # Copying opencl include files
-site_loc = get_python_lib()
-opencl_include_dir = os.path.join(site_loc, "pyopencl", "cl")
-for f in findall(opencl_include_dir):
-    data_files.append((os.path.join("includes", "pyopencl"), [f]))
+opencl_source = os.path.join(get_python_lib(), "pyopencl", "cl")
+opencl_target = os.path.join("includes", "pyopencl")
+data_files.append((opencl_target, findall(opencl_source)))
 
 # Numerical libraries
 python_root = os.path.dirname(os.path.abspath(sys.executable))
@@ -356,6 +353,9 @@ generate_installer()
 #from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 #CategoryInstaller.check_install(s)
 
+#import pprint; pprint.pprint(data_files); sys.exit()
+
+import py2exe
 setup(
     windows=[target_wx_client],
     console=[target_console_client],
