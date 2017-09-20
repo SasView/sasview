@@ -12,7 +12,7 @@ def get_data_path(media):
 
     # Check for data path next to exe/zip file.
     # If we are inside a py2exe zip file, we need to go up
-    # to get to the directory containing 
+    # to get to the directory containing
     # the media for this module
     path = os.path.dirname(__file__)
     #Look for maximum n_dir up of the current dir to find media
@@ -25,24 +25,20 @@ def get_data_path(media):
             if os.path.isdir(module_media_path):
                 return module_media_path
             return media_path
-   
+
     raise RuntimeError('Could not find models media files')
 
 def data_files():
     """
     Return the data files associated with media.
-    
+
     The format is a list of (directory, [files...]) pairs which can be
     used directly in setup(...,data_files=...) for setup.py.
 
     """
     data_files = []
-    path = os.path.dirname(__file__)
-    p_path = os.path.join(path, 'plugin_models')
-    for f in findall(p_path):
-        data_files.append(('plugin_models', [f]))
-    # path = get_data_path(media="media")
-    for f in findall(path):
-        data_files.append(('media/fitting_media', [f]))
-    
+    # plugin_models = os.path.join(os.path.dirname(__file__), "plugin_models")
+    # data_files.append('plugin_models', findall(plugin_models)))
+    data_files.append(('media/fitting_media', findall(get_data_path("media"))))
+
     return data_files
