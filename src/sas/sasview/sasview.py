@@ -20,13 +20,10 @@ import logging
 reload(sys)
 sys.setdefaultencoding("iso-8859-1")
 
-PLUGIN_MODEL_DIR = 'plugin_models'
 APP_NAME = 'SasView'
+PLUGIN_MODEL_DIR = 'plugin_models'
 
-# Set SAS_MODELPATH so sasmodels can find our custom models
-os.environ['SAS_MODELPATH'] = os.path.join(sasdir, PLUGIN_MODEL_DIR)
-
-class SasView():
+class SasView(object):
     """
     Main class for running the SasView application
     """
@@ -162,7 +159,7 @@ def setup_wx():
     #uses of matplotlib
 
 
-def setup_mpl():
+def setup_mpl(backend='WXAgg'):
     import sas.sasgui
     # Always use private .matplotlib setup to avoid conflicts with other
     mplconfigdir = os.path.join(sas.sasgui.get_user_dir(), '.matplotlib')
@@ -173,11 +170,23 @@ def setup_mpl():
     # mpl.use().  Note: Don't import matplotlib here since the script that
     # we are running may not actually need it; also, putting as little on the
     # path as we can
-    os.environ['MPLBACKEND'] = 'WXAgg'
+    os.environ['MPLBACKEND'] = backend
 
+    # TODO: ... so much for not importing matplotlib unless we need it...
     from matplotlib import backend_bases
     backend_bases.FigureCanvasBase.filetypes.pop('pgf', None)
 
+def setup_sasmodels():
+    """
+    Prepare sasmodels for running within sasview.
+    """
+    import sas.sasgui
+    # Set SAS_MODELPATH so sasmodels can find our custom models
+    plugin_dir = os.path.join(sas.sasgui.get_user_dir(), PLUGIN_MODEL_DIR)
+    os.environ['SAS_MODELPATH'] = plugin_dir
+    # TODO: SAS_OPENCL flag belongs in setup_sasmodels
+    # this will require restructuring of the config management so that it
+    # can occur outside of sasgui.
 
 def run_gui():
     """
@@ -186,14 +195,18 @@ def run_gui():
     from multiprocessing import freeze_support
     freeze_support()
     setup_logging()
-    setup_wx()
     setup_mpl()
+    setup_sasmodels()
+    setup_wx()
     SasView()
 
 
 def run_cli():
+    from multiprocessing import freeze_support
+    freeze_support()
     setup_logging()
-    setup_mpl()
+    setup_mpl(backend='Agg')
+    setup_sasmodels()
     if len(sys.argv) == 1:
         # Run sasview as an interactive python interpreter
         try:
