@@ -102,6 +102,11 @@ def prepare():
     except:
         addpath(joinpath(root, '..', 'bumps'))
 
+    try:
+        import tinycc
+    except:
+        addpath(joinpath(root, '../tinycc/build/lib'))
+
     # select wx version
     #addpath(os.path.join(root, '..','wxPython-src-3.0.0.0','wxPython'))
 
@@ -173,6 +178,9 @@ if __name__ == "__main__":
 
     get_logger().debug("Starting SASVIEW in debug mode.")
     prepare()
-    from sas.sasview.sasview import run_gui
-    run_gui()
+    from sas.sasview.sasview import run_cli, run_gui
+    if len(sys.argv) == 1:
+        run_gui()
+    else:
+        run_cli()
     get_logger().debug("Ending SASVIEW in debug mode.")
