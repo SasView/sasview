@@ -58,7 +58,6 @@ class CorfuncState(object):
         # Raw Data
         self.q = None
         self.iq = None
-        # TODO: Add extrapolated data and transformed data (when implemented)
 
     def __str__(self):
         """
