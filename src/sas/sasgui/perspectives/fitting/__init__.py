@@ -37,8 +37,9 @@ def data_files():
 
     """
     data_files = []
-    # plugin_models = os.path.join(os.path.dirname(__file__), "plugin_models")
-    # data_files.append('plugin_models', findall(plugin_models)))
+    # Note: windows installer requires the plugin_models directory
+    plugin_models = os.path.join(os.path.dirname(__file__), "plugin_models")
+    data_files.append(('plugin_models', findall(plugin_models)))
     data_files.append(('media/fitting_media', findall(get_data_path("media"))))
 
     return data_files
