@@ -3,6 +3,29 @@ Release Notes
 
 1- Features
 ===========
+    - New in Version 4.1.2
+      --------------------
+      This point release is a bug-fix release addressing:
+
+       - Fixes #984: PDF Reports Generate Empty PDFs
+       - Fixes a path typo
+       - 64 bit and 32 bit Windows executables now available
+
+      It is recommended that all users upgrade to this version
+
+    - New in Version 4.1.1
+      --------------------
+      This point release is a bug-fix release addressing:
+
+       - Fixes #948: Mathjax CDN is going away
+       - Fixes #938: Cannot read canSAS1D file output by SasView
+       - Fixes #960: Save project throws error if empty fit page
+       - Fixes #929: Problem deleting data in first fit page
+       - Fixes #918: Test folders not bundled with release
+       - Fixes an issue with the live discovery of plugin models
+       - Fixes an issue with the NXcanSAS data loader
+       - Updated tutorials for SasView 4.x.y
+
     - New in Version 4.1.0
       ------------------
       This incremental release brings a series of new features and improvements,

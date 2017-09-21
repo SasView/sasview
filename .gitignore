@@ -37,6 +37,7 @@ default_categories.json
 /docs/sphinx-docs/source/user/models
 /docs/sphinx-docs/source/user/perspectives
 /docs/sphinx-docs/source/user/sasgui
+/docs/sphinx-docs/katex*.zip
 
 # test outputs
 /test/pr_inversion/test/test_output.txt

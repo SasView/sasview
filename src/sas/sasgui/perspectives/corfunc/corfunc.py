@@ -188,6 +188,15 @@ class Plugin(PluginBase):
             group_id = GROUP_ID_TRANSFORM
             # Show the transformation as a curve instead of points
             new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
+        elif label == IDF_LABEL:
+            new_plot.xaxis("{x}", 'A')
+            new_plot.yaxis("{g_1}", '')
+            # Linear scale
+            new_plot.xtransform = 'x'
+            new_plot.ytransform = 'y'
+            group_id = GROUP_ID_IDF
+            # Show IDF as a curve instead of points
+            new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
         new_plot.id = label
         new_plot.name = label
         new_plot.group_id = group_id
