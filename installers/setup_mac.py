@@ -35,7 +35,6 @@ platform = '%s-%s'%(get_platform(), sys.version[:3])
 doc_path = os.path.join(root, 'build', 'lib.'+platform, 'doc')
 build_path = os.path.join(root, 'sasview-install', 'lib', 'python2.7', 'site-packages')
 #sys.path.insert(0, build_path)
-print("build path", build_path)
 
 #Extending recursion limit
 sys.setrecursionlimit(10000)
@@ -178,7 +177,6 @@ OPTIONS = {'argv_emulation': True,
                        ],
            'iconfile': ICON,
            'frameworks': [libxml_path],
-           'resources': [],
            'plist': plist,
            'excludes' : EXCLUDES,
           }
