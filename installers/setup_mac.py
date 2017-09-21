@@ -40,6 +40,9 @@ print("build path", build_path)
 #Extending recursion limit
 sys.setrecursionlimit(10000)
 
+if len(sys.argv) == 1:
+    sys.argv.append('py2app')
+
 import macholib_patch
 
 from sas.sasview import local_config
