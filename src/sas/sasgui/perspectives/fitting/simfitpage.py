@@ -1,6 +1,20 @@
 """
-    Simultaneous fit page
+    Simultaneous or Batch fit page
 """
+# Note that this is used for both Simultaneous/Constrained fit AND for 
+# combined batch fit.  This is done through setting of the batch_on parameter.
+# There are the a half dozen or so places where an if statement is used as in 
+# if not batch_on:
+#     xxxx
+# else:
+#     xxxx
+# This is just wrong but dont have time to fix this go. Proper approach would be
+# to strip all parts of the code that depend on batch_on and create the top
+# level class from which a contrained/simultaneous fit page and a combined 
+# batch page inherit.
+#
+#            04/09/2017   --PDB
+
 import sys
 from collections import namedtuple
 
@@ -399,7 +413,10 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
 
         # General Help button
         self.btHelp = wx.Button(self, wx.ID_HELP, 'HELP')
-        self.btHelp.SetToolTipString("Simultaneous/Constrained Fitting help.")
+        if self.batch_on:
+            self.btHelp.SetToolTipString("Combined Batch Fitting help.")
+        else:
+            self.btHelp.SetToolTipString("Simultaneous/Constrained Fitting help.")
         self.btHelp.Bind(wx.EVT_BUTTON, self._on_help)
 
         # hint text on button line
@@ -526,10 +543,16 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
     :param event: Triggers on clicking the help button
     """
         _TreeLocation = "user/sasgui/perspectives/fitting/fitting_help.html"
-        _PageAnchor = "#simultaneous-fit-mode"
-        _doc_viewer = DocumentationWindow(self, self.ID_DOC, _TreeLocation,
+        if not self.batch_on:
+            _PageAnchor = "#simultaneous-fit-mode"
+            _doc_viewer = DocumentationWindow(self, self.ID_DOC, _TreeLocation,
                                           _PageAnchor,
                                           "Simultaneous/Constrained Fitting Help")
+        else:
+            _PageAnchor = "#combined-batch-fit-mode"
+            _doc_viewer = DocumentationWindow(self, self.ID_DOC, _TreeLocation,
+                                          _PageAnchor,
+                                          "Combined Batch Fit Help")
 
     def set_manager(self, manager):
         """

@@ -33,7 +33,15 @@ class CorfuncCalculator(object):
             self._lasty = []
 
         def __call__(self, x):
-            if self._lastx == [] or x.tolist() != self._lastx.tolist():
+            # If input is a single number, evaluate the function at that number
+            # and return a single number
+            if type(x) == float or type(x) == int:
+                return self._smoothed_function(np.array([x]))[0]
+            # If input is a list, and is different to the last input, evaluate
+            # the function at each point. If the input is the same as last time
+            # the function was called, return the result that was calculated
+            # last time instead of explicity evaluating the function again.
+            elif self._lastx == [] or x.tolist() != self._lastx.tolist():
                 self._lasty = self._smoothed_function(x)
                 self._lastx = x
             return self._lasty
@@ -120,7 +128,7 @@ class CorfuncCalculator(object):
 
         extrapolation = Data1D(qs, iqs)
 
-        return params, extrapolation
+        return params, extrapolation, s2
 
     def compute_transform(self, extrapolation, trans_type, background=None,
         completefn=None, updatefn=None):
@@ -130,8 +138,9 @@ class CorfuncCalculator(object):
         :param extrapolation: The extrapolated data
         :param background: The background value (if not provided, previously
             calculated value will be used)
+        :param extrap_fn: A callable function representing the extraoplated data
         :param completefn: The function to call when the transform calculation
-            is complete`
+            is complete
         :param updatefn: The function to call to update the GUI with the status
             of the transform calculation
         :return: The transformed data
@@ -143,7 +152,8 @@ class CorfuncCalculator(object):
 
         if trans_type == 'fourier':
             self._transform_thread = FourierThread(self._data, extrapolation,
-            background, completefn=completefn, updatefn=updatefn)
+            background, completefn=completefn,
+            updatefn=updatefn)
         elif trans_type == 'hilbert':
             self._transform_thread = HilbertThread(self._data, extrapolation,
             background, completefn=completefn, updatefn=updatefn)

@@ -609,7 +609,7 @@ class InvariantCalculator(object):
         """
         # Data boundaries for fitting
         qmin = self._data.x[0]
-        qmax = self._data.x[self._low_extrapolation_npts - 1]
+        qmax = self._data.x[int(self._low_extrapolation_npts - 1)]
 
         # Extrapolate the low-Q data
         p, _ = self._fit(model=self._low_extrapolation_function,
@@ -648,8 +648,8 @@ class InvariantCalculator(object):
         """
         # Data boundaries for fitting
         x_len = len(self._data.x) - 1
-        qmin = self._data.x[x_len - (self._high_extrapolation_npts - 1)]
-        qmax = self._data.x[x_len]
+        qmin = self._data.x[int(x_len - (self._high_extrapolation_npts - 1))]
+        qmax = self._data.x[int(x_len)]
 
         # fit the data with a model to get the appropriate parameters
         p, _ = self._fit(model=self._high_extrapolation_function,
@@ -687,7 +687,7 @@ class InvariantCalculator(object):
 
         if npts_in is None:
             npts_in = self._low_extrapolation_npts
-        q_end = self._data.x[max(0, npts_in - 1)]
+        q_end = self._data.x[max(0, int(npts_in - 1))]
 
         if q_start >= q_end:
             return np.zeros(0), np.zeros(0)
@@ -713,9 +713,9 @@ class InvariantCalculator(object):
         """
         # Get extrapolation range
         if npts_in is None:
-            npts_in = self._high_extrapolation_npts
+            npts_in = int(self._high_extrapolation_npts)
         _npts = len(self._data.x)
-        q_start = self._data.x[min(_npts, _npts - npts_in)]
+        q_start = self._data.x[min(_npts, int(_npts - npts_in))]
 
         if q_start >= q_end:
             return np.zeros(0), np.zeros(0)
