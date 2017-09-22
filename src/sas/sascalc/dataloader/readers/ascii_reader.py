@@ -44,7 +44,7 @@ class Reader(FileReader):
         Get the contents of the file
         """
 
-        buff = self.f_open.read()
+        buff = self.readall()
         filepath = self.f_open.name
         lines = buff.splitlines()
         self.output = []
