@@ -13,9 +13,11 @@ import datetime
 import logging
 import py_compile
 import shutil
+#?? from copy import copy
 
 from sasmodels.sasview_model import load_custom_model, load_standard_models
 from sasmodels.sasview_model import MultiplicationModel
+#?? from sas.sasgui.perspectives.fitting.fitpage import CUSTOM_MODEL
 
 # Explicitly import from the pluginmodel module so that py2exe
 # places it in the distribution. The Model1DPlugin class is used
@@ -287,17 +289,21 @@ class ModelManagerBase(object):
 
         # Classify models
         structure_factors = []
+        form_factors = []
         multiplicity_models = []
         for model in self.model_dictionary.values():
             # Old style models don't have is_structure_factor attribute
             if getattr(model, 'is_structure_factor', False):
                 structure_factors.append(model)
+            if getattr(model, 'is_form_factor', False):
+                form_factors.append(model)
             if model.is_multiplicity_model:
                 multiplicity_models.append(model)
         plugin_models = list(self.plugin_models.values())
 
         return {
             "Structure Factors": structure_factors,
+            "Form Factors": form_factors,
             "Plugin Models": plugin_models,
             "Multi-Functions": multiplicity_models,
         }

@@ -1162,7 +1162,15 @@ class FitPage(BasicPage):
             saved_pars = None
             is_poly_enabled = None
 
-        self._on_select_model_helper()
+        try:
+            self._on_select_model_helper()
+        except Exception as e:
+            evt = StatusEvent(status=e.message, info="error")
+            wx.PostEvent(self._manager.parent, evt)
+            # Set S(Q) to None
+            self.structurebox.SetSelection(0)
+            self._on_select_model()
+            return
         self.set_model_param_sizer(self.model)
         if self.model is None:
             self._set_bookmark_flag(False)
@@ -1253,6 +1261,10 @@ class FitPage(BasicPage):
             # mod_cat = self.categorybox.GetStringSelection()
             # if mod_cat == CUSTOM_MODEL:
             #     temp = self.parent.update_model_list()
+            #     for v in self.parent.model_dictionary.values():
+            #         if v.id == self.model.id:
+            #             self.model = v()
+            #             break
             #     if temp:
             #         self.model_list_box = temp
             #         current_val = self.formfactorbox.GetLabel()
@@ -2187,6 +2199,9 @@ class FitPage(BasicPage):
         # save current state
         self.save_current_state()
 
+        if not self.is_mac:
+            self.Layout()
+            self.Refresh()
         # plot model ( when drawing, do not update chisqr value again)
         self._draw_model(update_chisqr=False, source='fit')
 

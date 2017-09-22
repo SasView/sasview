@@ -74,6 +74,9 @@ from welcome_panel import WelcomePanel
 PLUGIN_MODEL_DIR = 'plugin_models'
 APP_NAME = 'SasView'
 
+# Set SAS_MODELPATH so sasmodels can find our custom models
+os.environ['SAS_MODELPATH'] = os.path.join(sasdir, PLUGIN_MODEL_DIR)
+
 from matplotlib import backend_bases
 backend_bases.FigureCanvasBase.filetypes.pop('pgf', None)
 

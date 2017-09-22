@@ -1880,7 +1880,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         for models in list:
             if models.name != "NoStructure":
                 mlist.append((models.name, models))
-
         # Sort the models
         mlist_sorted = sorted(mlist)
         for item in mlist_sorted:
@@ -2822,7 +2821,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
     def _on_mag_angle_help(self, event):
         """
-        Bring up Magnetic Angle definition bmp image whenever the ? button
+        Bring up Magnetic Angle definition.png image whenever the ? button
         is clicked. Calls DocumentationWindow with the path of the location
         within the documentation tree (after /doc/ ....". When using old
         versions of Wx (i.e. before 2.9 and therefore not part of release
@@ -2836,13 +2835,13 @@ class BasicPage(ScrolledPanel, PanelBase):
         :param evt: Triggers on clicking ? in Magnetic Angles? box
         """
 
-        _TreeLocation = "_images/M_angles_pic.bmp"
+        _TreeLocation = "_images/M_angles_pic.png"
         _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation, "",
                                           "Magnetic Angle Defintions")
 
     def _on_mag_help(self, event):
         """
-        Bring up Magnetic Angle definition bmp image whenever the ? button
+        Bring up Magnetic Angle definition.png image whenever the ? button
         is clicked. Calls DocumentationWindow with the path of the location
         within the documentation tree (after /doc/ ....". When using old
         versions of Wx (i.e. before 2.9 and therefore not part of release
@@ -2962,6 +2961,41 @@ class BasicPage(ScrolledPanel, PanelBase):
         else:
             return False
 
+
+    def _get_copy_params_details(self):
+        """
+        Combines polydisperse parameters with self.parameters so that they can
+        be written to the clipboard (for Excel or LaTeX). Also returns a list of
+        the names of parameters that have been fitted
+
+        :returns: all_params - A list of all parameters, in the format of
+        self.parameters
+        :returns: fitted_par_names - A list of the names of parameters that have
+        been fitted
+        """
+        # Names of params that are being fitted
+        fitted_par_names = [param[1] for param in self.param_toFit]
+        # Names of params with associated polydispersity
+        disp_params = [param[1].split('.')[0] for param in self.fittable_param]
+
+        # Create array of all parameters
+        all_params = copy.copy(self.parameters)
+        for param in self.parameters:
+            if param[1] in disp_params:
+                # Polydisperse params aren't in self.parameters, so need adding
+                # to all_params
+                name = param[1] + ".width"
+                index = all_params.index(param) + 1
+                to_insert = []
+                if name in fitted_par_names:
+                    # Param is fitted, so already has a param list in self.param_toFit
+                    to_insert = self.param_toFit[fitted_par_names.index(name)]
+                else:
+                    # Param isn't fitted, so mockup a param list
+                    to_insert = [None, name, self.model.getParam(name), None, None]
+                all_params.insert(index, to_insert)
+        return all_params, fitted_par_names
+
     def get_copy_excel(self):
         """
         Get copy params to clipboard
@@ -2975,32 +3009,45 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Get the string copies of the param names and values in the tap
         """
-        content = ''
+        if not self.parameters:
+            # Do nothing if parameters doesn't exist
+            return False
 
+        content = ''
         crlf = chr(13) + chr(10)
         tab = chr(9)
 
-        # Do it if params exist
-        if self.parameters:
+        all_params, fitted_param_names = self._get_copy_params_details()
 
-            for param in self.parameters:
-                content += param[1]  # parameter name
-                content += tab
-                content += param[1] + "_err"
-                content += tab
-
-            content += crlf
-
-            # row of values and errors...
-            for param in self.parameters:
-                content += param[2].GetValue()  # value
-                content += tab
-                content += param[4].GetValue()  # error
+        # Construct row of parameter names
+        for param in all_params:
+            name = param[1] # Parameter name
+            content += name
+            content += tab
+            if name in fitted_param_names:
+                # Only print errors for fitted parameters
+                content += name + "_err"
                 content += tab
 
-            return content
-        else:
-            return False
+        content += crlf
+
+        # Construct row of parameter values and errors
+        for param in all_params:
+            value = param[2]
+            if hasattr(value, 'GetValue'):
+                # param[2] is a text box
+                value = value.GetValue()
+            else:
+                # param[2] is a float (from our self._get_copy_params_details)
+                value = str(value)
+            content += value
+            content += tab
+            if param[1] in fitted_param_names:
+                # Only print errors for fitted parameters
+                content += param[4].GetValue()
+                content += tab
+
+        return content
 
     def get_copy_latex(self):
         """
@@ -3015,45 +3062,61 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Get the string copies of the param names and values in the tap
         """
+        if not self.parameters:
+            # Do nothing if self.parameters doesn't exist
+            return False
+
         content = r'\begin{table}'
         content += r'\begin{tabular}[h]'
 
         crlf = chr(13) + chr(10)
         tab = chr(9)
 
-        # Do it if params exist
-        if self.parameters:
+        all_params, fitted_param_names = self._get_copy_params_details()
 
-            content += '{|'
-            for param in self.parameters:
-                content += 'l|l|'
-            content += r'}\hline'
-            content += crlf
+        content += '{|'
+        for param in all_params:
+            content += 'l|l|'
+        content += r'}\hline'
+        content += crlf
 
-            for index, param in enumerate(self.parameters):
-                content += param[1].replace('_', r'\_')  # parameter name
+        # Construct row of parameter names
+        for index, param in enumerate(all_params):
+            name = param[1] # Parameter name
+            content += name.replace('_', r'\_')  # Escape underscores
+            if name in fitted_param_names:
+                # Only print errors for fitted parameters
                 content += ' & '
-                content += param[1].replace('_', r'\_') + r'\_err'
-                if index < len(self.parameters) - 1:
-                    content += ' & '
-            content += r'\\ \hline'
-            content += crlf
-
-            # row of values and errors...
-            for index, param in enumerate(self.parameters):
-                content += param[2].GetValue()  # parameter value
+                content += name.replace('_', r'\_') + r"\_err"
+            if index < len(all_params) - 1:
                 content += ' & '
-                content += param[4].GetValue()  # parameter error
-                if index < len(self.parameters) - 1:
-                    content += ' & '
-            content += r'\\ \hline'
-            content += crlf
 
-            content += r'\end{tabular}'
-            content += r'\end{table}'
-            return content
-        else:
-            return False
+        content += r'\\ \hline'
+        content += crlf
+
+        # Construct row of values and errors
+        for index, param in enumerate(all_params):
+            value = param[2]
+            if hasattr(value, "GetValue"):
+                # value is a text box
+                value = value.GetValue()
+            else:
+                # value is a float (from self._get_copy_params_details)
+                value = str(value)
+            content += value
+            if param[1] in fitted_param_names:
+                # Only print errors for fitted params
+                content += ' & '
+                content += param[4].GetValue()
+            if index < len(all_params) - 1:
+                content += ' & '
+
+        content += r'\\ \hline'
+        content += crlf
+        content += r'\end{tabular}'
+        content += r'\end{table}'
+
+        return content
 
     def set_clipboard(self, content=None):
         """

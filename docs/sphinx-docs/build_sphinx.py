@@ -17,6 +17,8 @@ import imp
 from glob import glob
 from distutils.dir_util import copy_tree
 from distutils.util import get_platform
+from distutils.spawn import find_executable
+
 from shutil import copy
 from os import listdir
 
@@ -37,12 +39,12 @@ SASVIEW_TOC_SOURCE = os.path.join(CURRENT_SCRIPT_DIR, "source")
 # We are currently here:
 #/sasview-local-trunk/docs/sphinx-docs/build_sphinx.py
 SASMODELS_SOURCE_PROLOG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc")
-SASMODELS_SOURCE_GPU = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "ref", "gpu")
-SASMODELS_SOURCE_SESANS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "ref", "sesans")
-SASMODELS_SOURCE_SESANSIMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "ref", "sesans", "sesans_img")
-SASMODELS_SOURCE_MAGNETISM = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "ref", "magnetism")
-SASMODELS_SOURCE_MAGIMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "ref", "magnetism", "mag_img")
-SASMODELS_SOURCE_REF_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "ref", "models")
+SASMODELS_SOURCE_GPU = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "guide", "gpu")
+SASMODELS_SOURCE_SESANS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "guide", "sesans")
+SASMODELS_SOURCE_SESANSIMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "guide", "sesans", "sesans_img")
+SASMODELS_SOURCE_MAGNETISM = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "guide", "magnetism")
+SASMODELS_SOURCE_MAGIMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "guide", "magnetism", "mag_img")
+SASMODELS_SOURCE_REF_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "guide", "models")
 SASMODELS_SOURCE_MODELS = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "model")
 SASMODELS_SOURCE_IMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "model", "img")
 SASMODELS_SOURCE_AUTOIMG = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "..", "sasmodels", "doc", "_build", "html","_images")
@@ -323,7 +325,6 @@ def retrieve_user_docs():
         print("no source directory",SASMODELS_SOURCE_MODELS,"was found.")
         print("!!!!NO MODEL DOCS WILL BE BUILT!!!!")
 
-
 def retrieve_bumps_docs():
     """
     Copies select files from the bumps documentation into fitting perspective
@@ -359,11 +360,38 @@ def apidoc():
                      "-d", "8", # Max depth of TOC.
                      SASVIEW_BUILD])
 
+def build_pdf():
+    """
+    Runs sphinx-build for pdf.  Reads in all .rst files and spits out the final html.
+    """
+    print("=== Build PDF Docs from ReST Files ===")
+    subprocess.call(["sphinx-build",
+                     "-b", "latex", # Builder name. TODO: accept as arg to setup.py.
+                     "-d", os.path.join(SPHINX_BUILD, "doctrees"),
+                     SPHINX_SOURCE,
+                     os.path.join(SPHINX_BUILD, "latex")])
+
+    LATEXDIR = os.path.join(SPHINX_BUILD, "latex")
+    #TODO: Does it need to be done so many time?
+    def pdflatex():
+        subprocess.call(["pdflatex", "SasView.tex"], cwd=LATEXDIR)
+    pdflatex()
+    pdflatex()
+    pdflatex()
+    subprocess.call(["makeindex", "-s", "python.ist", "SasView.idx"], cwd=LATEXDIR)
+    pdflatex()
+    pdflatex()
+
+    print("=== Copy PDF to HTML Directory ===")
+    source = os.path.join(LATEXDIR, "SasView.pdf")
+    target = os.path.join(SASVIEW_DOCS, "SasView.pdf")
+    shutil.copyfile(source, target)
+
 def build():
     """
     Runs sphinx-build.  Reads in all .rst files and spits out the final html.
     """
-    print("=== Build HTML Docs from Rest Files ===")
+    print("=== Build HTML Docs from ReST Files ===")
     subprocess.call(["sphinx-build",
                      "-b", "html", # Builder name. TODO: accept as arg to setup.py.
                      "-d", os.path.join(SPHINX_BUILD, "doctrees"),
@@ -374,13 +402,46 @@ def build():
     html = os.path.join(SPHINX_BUILD, "html")
     copy_tree(html, SASVIEW_DOCS)
 
+def fetch_katex(version, destination="_static"):
+    from zipfile import ZipFile
+    import urllib2
+    url = "https://github.com/Khan/KaTeX/releases/download/%s/katex.zip" % version
+    cache_path = "katex_%s.zip" % version
+    if not os.path.exists(cache_path):
+        try:
+            fd_in = urllib2.urlopen(url)
+            with open(cache_path, "wb") as fd_out:
+                fd_out.write(fd_in.read())
+        finally:
+            fd_in.close()
+    with ZipFile(cache_path) as zip:
+        zip.extractall(destination)
+
+def convert_katex():
+    print("=== Preprocess HTML, converting latex to html ===")
+    subprocess.call(["node", "convertKaTex.js", SASVIEW_DOCS])
+
+def convert_mathjax():
+    print("=== Preprocess HTML, converting latex to html ===")
+    subprocess.call(["node", "convertMathJax.js", SASVIEW_DOCS])
+
+def fetch_mathjax():
+    subprocess.call(["npm", "install", "mathjax-node-page"])
+    # TODO: copy fonts from node_modules/mathjax/fonts/HTML-CSS/Tex into static
+
 def rebuild():
     clean()
     setup_source_temp()
     retrieve_user_docs()
     retrieve_bumps_docs()
+    #fetch_katex(version=KATEX_VERSION, destination=KATEX_PARENT)
+    #fetch_mathjax()
     apidoc()
     build()
+    if find_executable('latex'):
+        build_pdf()
+    #convert_katex()
+    #convert_mathjax()
 
     print("=== Done ===")
 

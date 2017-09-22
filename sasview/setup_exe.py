@@ -178,8 +178,12 @@ images_dir = os.path.join(path, "images")
 test_dir = os.path.join(path, "test")
 test_1d_dir = os.path.join(path, "test\\1d_data")
 test_2d_dir = os.path.join(path, "test\\2d_data")
+test_sesans_dir = os.path.join(path, "test\\sesans_data")
+test_convertible_dir = os.path.join(path, "test\\convertible_files")
 test_save_dir = os.path.join(path, "test\\save_states")
-test_upcoming_dir = os.path.join(path, "test\\upcoming_formats")
+test_coord_dir = os.path.join(path, "test\\coordinate_data")
+test_image_dir = os.path.join(path, "test\\image_data")
+test_other_dir = os.path.join(path, "test\\other_files")
 
 matplotlibdatadir = matplotlib.get_data_path()
 matplotlibdata = findall(matplotlibdatadir)
@@ -227,7 +231,7 @@ for f in matplotlibdata:
 
 # Copy the settings file for the sas.dataloader file extension associations
 import sas.sascalc.dataloader.readers
-f = os.path.join(sas.sascalc.dataloader.readers.get_data_path(), 'defaults.json')
+f = os.path.join(sas.sascalc.dataloader.readers.get_data_path())
 if os.path.isfile(f):
     data_files.append(('.', [f]))
 f = 'custom_config.py'
@@ -241,10 +245,6 @@ if os.path.isfile(f):
 f = 'logging.ini'
 if os.path.isfile(f):
     data_files.append(('.', [f]))
-
-#f = 'default_categories.json'
-#if os.path.isfile(f):
-#    data_files.append(('.', [f]))
 
 # numerical libraries
 def dll_check(dll_path, dlls):
@@ -272,33 +272,29 @@ if os.path.isfile("BUILD_NUMBER"):
 
 # Copying the images directory to the distribution directory.
 for f in findall(images_dir):
-    if not ".svn" in f:
-        data_files.append(("images", [f]))
+    data_files.append(("images", [f]))
 
 # Copying the HTML help docs
 for f in findall(media_dir):
-    if not ".svn" in f:
-        data_files.append(("media", [f]))
+    data_files.append(("media", [f]))
 
 # Copying the sample data user data
 for f in findall(test_1d_dir):
-    if not ".svn" in f:
-        data_files.append(("test\\1d_data", [f]))
-
-# Copying the sample data user data
+    data_files.append(("test\\1d_data", [f]))
 for f in findall(test_2d_dir):
-    if not ".svn" in f:
-        data_files.append(("test\\2d_data", [f]))
-
-# Copying the sample data user data
+    data_files.append(("test\\2d_data", [f]))
 for f in findall(test_save_dir):
-    if not ".svn" in f:
-        data_files.append(("test\\save_states", [f]))
-
-# Copying the sample data user data
-for f in findall(test_upcoming_dir):
-    if not ".svn" in f:
-        data_files.append(("test\\upcoming_formats", [f]))
+    data_files.append(("test\\save_states", [f]))
+for f in findall(test_sesans_dir):
+    data_files.append(("test\\sesans_data", [f]))
+for f in findall(test_convertible_dir):
+    data_files.append(("test\\convertible_files", [f]))
+for f in findall(test_coord_dir):
+    data_files.append(("test\\coordinate_data", [f]))
+for f in findall(test_image_dir):
+    data_files.append(("test\\image_data", [f]))
+for f in findall(test_other_dir):
+    data_files.append(("test\\other_files", [f]))
 
 # Copying opencl include files
 for f in findall(opencl_include_dir):

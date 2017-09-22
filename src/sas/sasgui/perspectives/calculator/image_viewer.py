@@ -58,6 +58,12 @@ class ImageView:
             basename = os.path.basename(file_path)
             _, extension = os.path.splitext(basename)
             try:
+                # Note that matplotlib only reads png natively.
+                # Any other formats (tiff, jpeg, etc) are passed
+                # to PIL which seems to have a problem in version
+                # 1.1.7 that causes a close error which shows up in 
+                # the log file.  This does not seem to have any adverse
+                # effects.  PDB   --- September 17, 2017.
                 img = mpimg.imread(file_path)
                 is_png = extension.lower() == '.png'
                 plot_frame = ImageFrame(parent, -1, basename, img)
@@ -88,8 +94,18 @@ class ImageView:
         path = None
         if location is None:
             location = os.getcwd()
-        dlg = wx.FileDialog(self.parent, "Image Viewer: Choose a image file",
-                            location, "", "", style=wx.FD_OPEN | wx.FD_MULTIPLE)
+        wildcard="Images (*.bmp;*.gif;*jpeg,*jpg;*.png;*tif;*.tiff)|*bmp;\
+            *.gif; *.jpg; *.jpeg;*png;*.png;*.tif;*.tiff|"\
+            "Bitmap (*.bmp)|*.bmp|"\
+            "GIF (*.gif)|*.gif|"\
+            "JPEG (*.jpg;*.jpeg)|*.jpg;*.jpeg|"\
+            "PNG (*.png)|*.png|"\
+            "TIFF (*.tif;*.tiff)|*.tif;*tiff|"\
+            "All Files (*.*)|*.*|"
+
+        dlg = wx.FileDialog(self.parent, "Image Viewer: Choose an image file",
+                            location, "", wildcard, style=wx.FD_OPEN
+                            | wx.FD_MULTIPLE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPaths()
         else:

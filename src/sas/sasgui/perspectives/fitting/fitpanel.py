@@ -97,13 +97,19 @@ class FitPanel(nb, PanelBase):
             data = page.get_data()
             # state must be cloned
             state = page.get_state().clone()
-            if data is not None or page.model is not None:
+            # data_list only populated with real data
+            # Fake object in data from page.get_data() if model is selected
+            if len(page.data_list) is not 0 and page.model is not None:
                 new_doc = self._manager.state_reader.write_toXML(data,
                                                                  state,
                                                                  batch_state)
+                # Fit #2 through #n are append to first fit
                 if doc is not None and hasattr(doc, "firstChild"):
-                    child = new_doc.firstChild.firstChild
-                    doc.firstChild.appendChild(child)
+                    # Only append if properly formed new_doc
+                    if new_doc is not None and hasattr(new_doc, "firstChild"):
+                        child = new_doc.firstChild.firstChild
+                        doc.firstChild.appendChild(child)
+                # First fit defines the main document
                 else:
                     doc = new_doc
 
@@ -395,17 +401,13 @@ class FitPanel(nb, PanelBase):
                 pos = self.GetPageIndex(page)
                 temp_data = page.get_data()
                 if temp_data is not None and temp_data.id in data:
-                    self.SetSelection(pos)
-                    self.on_close_page(event=None)
-                    temp = self.GetSelection()
-                    self.DeletePage(temp)
+                    self.close_page_with_data(temp_data)
             if self.sim_page is not None:
                 if len(self.sim_page.model_list) == 0:
                     pos = self.GetPageIndex(self.sim_page)
                     self.SetSelection(pos)
                     self.on_close_page(event=None)
-                    temp = self.GetSelection()
-                    self.DeletePage(temp)
+                    self.DeletePage(pos)
                     self.sim_page = None
                     self.batch_on = False
             if self.GetPageCount() == 0:
@@ -499,10 +501,15 @@ class FitPanel(nb, PanelBase):
 
             if data is None:
                 return None
+        focused_page = self.GetPage(self.GetSelection())
         for page in self.opened_pages.values():
             # check if the selected data existing in the fitpanel
             pos = self.GetPageIndex(page)
             if not check_data_validity(page.get_data()) and not page.batch_on:
+                if page.model is not None and page != focused_page:
+                    # Page has an active theory and is in background - don't
+                    # send data here.
+                    continue
                 # make sure data get placed in 1D empty tab if data is 1D
                 # else data get place on 2D tab empty tab
                 enable2D = page.get_view_mode()

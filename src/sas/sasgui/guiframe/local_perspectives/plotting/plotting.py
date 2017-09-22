@@ -13,6 +13,7 @@
 
 import wx
 import sys
+from copy import deepcopy
 from sas.sasgui.guiframe.events import EVT_NEW_PLOT
 from sas.sasgui.guiframe.events import EVT_PLOT_QRANGE
 from sas.sasgui.guiframe.events import EVT_PLOT_LIM
@@ -274,8 +275,21 @@ class Plugin(PluginBase):
             if action_string == 'check':
                 action_check = True
             else:
+                if action_string == 'update':
+                    # Update all existing plots of data with this ID
+                    for data in event.plots:
+                        for panel in self.plot_panels.values():
+                            if data.id in panel.plots.keys():
+                                plot_exists = True
+                                # Pass each panel it's own copy of the data
+                                # that's being updated, otherwise things like
+                                # colour and line thickness are unintentionally
+                                # synced across panels
+                                self.update_panel(deepcopy(data), panel)
+                    return
+                    
                 group_id = event.group_id
-                if group_id in self.plot_panels.keys():
+                if group_id in self.plot_panels:
                     #remove data from panel
                     if action_string == 'remove':
                         return self.remove_plot(group_id, event.id)

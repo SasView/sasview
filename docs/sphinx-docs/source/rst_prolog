@@ -1,46 +1,5 @@
 .. Set up some substitutions to make life easier...
-.. Remove |biggamma|, etc. when they are no longer needed.
 
-
-.. |alpha| unicode:: U+03B1
-.. |beta| unicode:: U+03B2
-.. |gamma| unicode:: U+03B3
-.. |delta| unicode:: U+03B4
-.. |epsilon| unicode:: U+03B5
-.. |zeta| unicode:: U+03B6
-.. |eta| unicode:: U+03B7
-.. |theta| unicode:: U+03B8
-.. |iota| unicode:: U+03B9
-.. |kappa| unicode:: U+03BA
-.. |lambda| unicode:: U+03BB
-.. |mu| unicode:: U+03BC
-.. |nu| unicode:: U+03BD
-.. |xi| unicode:: U+03BE
-.. |omicron| unicode:: U+03BF
-.. |pi| unicode:: U+03C0
-.. |rho| unicode:: U+03C1
-.. |sigma| unicode:: U+03C3
-.. |tau| unicode:: U+03C4
-.. |upsilon| unicode:: U+03C5
-.. |phi| unicode:: U+03C6
-.. |chi| unicode:: U+03C7
-.. |psi| unicode:: U+03C8
-.. |omega| unicode:: U+03C9
-
-
-.. |biggamma| unicode:: U+0393
-.. |bigdelta| unicode:: U+0394
-.. |bigzeta| unicode:: U+039E
-.. |bigpsi| unicode:: U+03A8
-.. |bigphi| unicode:: U+03A6
-.. |bigsigma| unicode:: U+03A3
-.. |Gamma| unicode:: U+0393
-.. |Delta| unicode:: U+0394
-.. |Zeta| unicode:: U+039E
-.. |Psi| unicode:: U+03A8
-
-
-.. |drho| replace:: |Delta|\ |rho|
 .. |Ang| unicode:: U+212B
 .. |Ang^-1| replace:: |Ang|\ :sup:`-1`
 .. |Ang^2| replace:: |Ang|\ :sup:`2`
@@ -56,14 +15,6 @@
 .. |1e15cm^3| replace:: 10\ :sup:`15`\ cm\ :sup:`3`
 .. |cm^-3| replace:: cm\ :sup:`-3`
 .. |sr^-1| replace:: sr\ :sup:`-1`
-.. |P0| replace:: P\ :sub:`0`\
-.. |A2| replace:: A\ :sub:`2`\
-
-
-.. |equiv| unicode:: U+2261
-.. |noteql| unicode:: U+2260
-.. |TM| unicode:: U+2122
-
 
 .. |cdot| unicode:: U+00B7
 .. |deg| unicode:: U+00B0
