@@ -79,6 +79,28 @@ class FileReader(object):
         # Return a list of parsed entries that data_loader can manage
         return self.output
 
+    def nextline(self):
+        """
+        Returns the next line in the file as a string.
+        """
+        #return self.f_open.readline()
+        return self.f_open.readline().decode()
+
+    def nextlines(self):
+        """
+        Returns the next line in the file as a string.
+        """
+        for line in self.f_open:
+            #yield line
+            yield line.decode()
+
+    def readall(self):
+        """
+        Returns the entire file as a string.
+        """
+        #return self.f_open.read()
+        return self.f_open.read().decode()
+
     def handle_error_message(self, msg):
         """
         Generic error handler to add an error to the current datainfo to
