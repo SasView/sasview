@@ -3,10 +3,13 @@
 """
 import os
 import sys
-from io import StringIO
 import unittest
 import logging
 import warnings
+if sys.version_info[0] >= 3:
+    from io import StringIO
+else:
+    from StringIO import StringIO
 
 from lxml import etree
 from lxml.etree import XMLSyntaxError

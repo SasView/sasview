@@ -8,15 +8,12 @@ import re
 import os
 import sys
 
-from sas.sascalc.dataloader.data_info import plottable_1D, plottable_2D,\
+from ..data_info import plottable_1D, plottable_2D,\
     Data1D, Data2D, DataInfo, Process, Aperture, Collimation, \
     TransmissionSpectrum, Detector
-from sas.sascalc.dataloader.data_info import combine_data_info_with_plottable
-from sas.sascalc.dataloader.loader_exceptions import FileContentsException, DefaultReaderException
-from sas.sascalc.dataloader.file_reader_base_class import FileReader
-
-def decode(s):
-    return s.decode() if isinstance(s, bytes) else s
+from ..data_info import combine_data_info_with_plottable
+from ..loader_exceptions import FileContentsException, DefaultReaderException
+from ..file_reader_base_class import FileReader, decode
 
 def h5attr(node, key, default=None):
     return decode(node.attrs.get(key, default))
@@ -134,8 +131,8 @@ class Reader(FileReader):
         for key in data.keys():
             # Get all information for the current key
             value = data.get(key)
-            classname = h5attr(value, u'canSAS_class')
-            if classname is None:
+            class_name = h5attr(value, u'canSAS_class')
+            if class_name is None:
                 class_name = h5attr(value, u'NX_class')
             if class_name is not None:
                 class_prog = re.compile(class_name)
@@ -239,7 +236,7 @@ class Reader(FileReader):
                             run_name = h5attr(value, 'name')
                             run_dict = {data_point: run_name}
                             self.current_datainfo.run_name = run_dict
-                        except:
+                        except Exception:
                             pass
                     elif key == u'title':
                         self.current_datainfo.title = data_point

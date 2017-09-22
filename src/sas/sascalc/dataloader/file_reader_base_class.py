@@ -5,6 +5,7 @@ class
 """
 
 import os
+import sys
 import re
 import logging
 from abc import abstractmethod
@@ -17,6 +18,12 @@ from .data_info import Data1D, Data2D, DataInfo, plottable_1D, plottable_2D,\
 
 logger = logging.getLogger(__name__)
 
+if sys.version_info[0] < 3:
+    def decode(s):
+        return s
+else:
+    def decode(s):
+        return s.decode() if isinstance(s, bytes) else s
 
 class FileReader(object):
     # List of Data1D and Data2D objects to be sent back to data_loader
@@ -84,7 +91,7 @@ class FileReader(object):
         Returns the next line in the file as a string.
         """
         #return self.f_open.readline()
-        return self.f_open.readline().decode()
+        return decode(self.f_open.readline())
 
     def nextlines(self):
         """
@@ -92,14 +99,14 @@ class FileReader(object):
         """
         for line in self.f_open:
             #yield line
-            yield line.decode()
+            yield decode(line)
 
     def readall(self):
         """
         Returns the entire file as a string.
         """
         #return self.f_open.read()
-        return self.f_open.read().decode()
+        return decode(self.f_open.read())
 
     def handle_error_message(self, msg):
         """

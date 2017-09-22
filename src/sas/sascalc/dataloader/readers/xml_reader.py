@@ -19,7 +19,7 @@ import logging
 from lxml import etree
 from lxml.builder import E
 
-from sas.sascalc.dataloader.file_reader_base_class import FileReader
+from ..file_reader_base_class import FileReader, decode
 
 logger = logging.getLogger(__name__)
 
@@ -152,8 +152,8 @@ class XMLreader(FileReader):
         """
         Converts an etree element into a string
         """
-        return etree.tostring(elem, pretty_print=pretty_print,
-                              encoding=encoding).decode()
+        return decode(etree.tostring(elem, pretty_print=pretty_print,
+                                     encoding=encoding))
 
     def break_processing_instructions(self, string, dic):
         """
