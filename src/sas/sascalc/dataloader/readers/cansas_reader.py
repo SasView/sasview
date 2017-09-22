@@ -629,12 +629,13 @@ class Reader(XMLreader):
                     save_in = "process"
                 else:
                     save_in = "current_datainfo"
-                exec("default_unit = self.{0}.{1}".format(save_in, unitname))
+                default_unit = getattrchain(self, '.'.join((save_in, unitname)))
                 if (local_unit and default_unit
                         and local_unit.lower() != default_unit.lower()
                         and local_unit.lower() != "none"):
                     if HAS_CONVERTER:
                         # Check local units - bad units raise KeyError
+                        #print("loading", tagname, node_value, local_unit, default_unit)
                         data_conv_q = Converter(local_unit)
                         value_unit = default_unit
                         node_value = data_conv_q(node_value, units=default_unit)
@@ -715,7 +716,7 @@ class Reader(XMLreader):
         # Create XML document
         doc, _ = self._to_xml_doc(datainfo)
         # Write the file
-        file_ref = open(filename, 'w')
+        file_ref = open(filename, 'wb')
         if self.encoding is None:
             self.encoding = "UTF-8"
         doc.write(file_ref, encoding=self.encoding,
@@ -1282,13 +1283,13 @@ class Reader(XMLreader):
             units = entry.get('unit')
             if units is not None:
                 toks = variable.split('.')
-                exec("local_unit = storage.%s_unit" % toks[0])
+                # TODO: why split() when accessing unit, but not when setting value?
+                local_unit = getattr(storage, toks[0]+"_unit")
                 if local_unit is not None and units.lower() != local_unit.lower():
                     if HAS_CONVERTER == True:
                         try:
                             conv = Converter(units)
-                            exec("storage.%s = %g" %
--                                (variable, conv(value, units=local_unit)))
+                            setattrchain(storage, variable, conv(value, units=local_unit))
                         except Exception:
                             _, exc_value, _ = sys.exc_info()
                             err_mess = "CanSAS reader: could not convert"
@@ -1309,9 +1310,9 @@ class Reader(XMLreader):
                         else:
                             raise ValueError(err_mess)
                 else:
-                    exec("storage.%s = value" % variable)
+                    setattrchain(storage, variable, value)
             else:
-                exec("storage.%s = value" % variable)
+                setattrchain(storage, variable, value)
 
     # DO NOT REMOVE - used in saving and loading panel states.
     def _store_content(self, location, node, variable, storage):
@@ -1374,3 +1375,21 @@ def write_node(doc, parent, name, value, attr=None):
         parent.appendChild(node)
         return True
     return False
+
+def getattrchain(obj, chain, default=None):
+    """Like getattr, but the attr may contain multiple parts separated by '.'"""
+    for part in chain.split('.'):
+        if hasattr(obj, part):
+            obj = getattr(obj, part, None)
+        else:
+            return default
+    return obj
+
+def setattrchain(obj, chain, value):
+    """Like setattr, but the attr may contain multiple parts separated by '.'"""
+    parts = list(chain.split('.'))
+    for part in parts[-1]:
+        obj = getattr(obj, part, None)
+        if obj is None:
+            raise ValueError("missing parent object "+part)
+    setattr(obj, value)
