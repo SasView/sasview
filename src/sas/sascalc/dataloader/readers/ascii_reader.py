@@ -129,7 +129,7 @@ class Reader(FileReader):
                 has_error_dy = None
                 # Reset # of lines of data candidates
                 candidate_lines = 0
-        
+
         if not is_data:
             self.set_all_to_none()
             if self.extension in self.ext:

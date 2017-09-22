@@ -5,18 +5,21 @@
 #
 from __future__ import print_function
 
-import thread
 import traceback
 import sys
 import logging
+try:
+    import _thread as thread
+except ImportError: # CRUFT: python 2 support
+    import thread
 
 if sys.platform.count("darwin") > 0:
     import time
     stime = time.time()
-    
+
     def clock():
         return time.time() - stime
-    
+
     def sleep(t):
         return time.sleep(t)
 else:
@@ -34,7 +37,7 @@ class CalcThread:
     If you specialize the __init__ method be sure to call
     CalcThread.__init__, passing it the keyword arguments for
     yieldtime, worktime, update and complete.
-    
+
     When defining the compute() method you need to include code which
     allows the GUI to run.  They are as follows: ::
 
@@ -210,7 +213,7 @@ class CalcThread:
             self._time_for_update = clock() + self._delay
             self._lock.release()
             self._time_for_update += 1e6  # No more updates
-            
+
             self.updatefn(**kwargs)
             sleep(self.yieldtime)
             if self._interrupting:

@@ -7,11 +7,12 @@ class
 import os
 import re
 import logging
-import numpy as np
 from abc import abstractmethod
-from loader_exceptions import NoKnownLoaderException, FileContentsException,\
+
+import numpy as np
+from .loader_exceptions import NoKnownLoaderException, FileContentsException,\
     DataReaderException, DefaultReaderException
-from data_info import Data1D, Data2D, DataInfo, plottable_1D, plottable_2D,\
+from .data_info import Data1D, Data2D, DataInfo, plottable_1D, plottable_2D,\
     combine_data_info_with_plottable
 
 logger = logging.getLogger(__name__)

@@ -5,11 +5,13 @@
 
     Jurrian Bakker
 """
-import numpy as np
 import os
-from sas.sascalc.dataloader.file_reader_base_class import FileReader
-from sas.sascalc.dataloader.data_info import plottable_1D, DataInfo
-from sas.sascalc.dataloader.loader_exceptions import FileContentsException, DataReaderException
+
+import numpy as np
+
+from ..file_reader_base_class import FileReader
+from ..data_info import plottable_1D, DataInfo
+from ..loader_exceptions import FileContentsException, DataReaderException
 
 # Check whether we have a converter available
 has_converter = True

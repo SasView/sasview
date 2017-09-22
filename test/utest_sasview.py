@@ -61,6 +61,7 @@ def run_tests(dirs=None, all=False):
                     code = '"%s" %s %s'%(sys.executable, run_one_py, file_path)
                     proc = subprocess.Popen(code, shell=True, stdout=subprocess.PIPE, stderr = subprocess.STDOUT)
                     std_out, std_err = proc.communicate()
+                    std_out, std_err = std_out.decode(), (std_err.decode() if std_err else None)
                     #print(">>>>>> standard out", file_path, "\n", std_out, "\n>>>>>>>>> end stdout", file_path)
                     #sys.exit()
                     m = re.search("Ran ([0-9]+) test", std_out)
@@ -108,4 +109,3 @@ if __name__ == '__main__':
     dirs = sys.argv[1:] if not all else sys.argv[2:]
     if run_tests(dirs=dirs, all=all)>0:
         sys.exit(1)
-

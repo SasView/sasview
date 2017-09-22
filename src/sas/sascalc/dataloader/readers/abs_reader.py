@@ -30,11 +30,11 @@ class Reader(FileReader):
     type = ["IGOR 1D files (*.abs)|*.abs"]
     # List of allowed extensions
     ext = ['.abs']
-    
+
     def get_file_contents(self):
-        """ 
+        """
         Get the contents of the file
-        
+
         :raise RuntimeError: when the file can't be opened
         :raise ValueError: when the length of the data vectors are inconsistent
         """

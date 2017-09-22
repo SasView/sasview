@@ -33,7 +33,7 @@ def mag2sld(mag, v_unit=None):
     elif v_unit == "mT":
         factor = MFACTOR_MT
     else:
-        raise ValueError, "Invalid valueunit"
+        raise ValueError("Invalid valueunit")
     sld_m = factor * mag
     return sld_m
 
@@ -99,7 +99,7 @@ class GenSAS(BaseComponent):
         :Param volume: pixel volume [float]
         """
         if self.data_vol is None:
-            raise
+            raise TypeError("data_vol is missing")
         self.data_vol = volume
 
     def set_is_avg(self, is_avg=False):
@@ -173,14 +173,14 @@ class GenSAS(BaseComponent):
         if x.__class__.__name__ == 'list':
             if len(x[1]) > 0:
                 msg = "Not a 1D."
-                raise ValueError, msg
+                raise ValueError(msg)
             i_out = np.zeros_like(x[0])
             # 1D I is found at y =0 in the 2D pattern
             out = self._gen(x[0], [], i_out)
             return out
         else:
             msg = "Q must be given as list of qx's and qy's"
-            raise ValueError, msg
+            raise ValueError(msg)
 
     def runXY(self, x=0.0):
         """
@@ -195,7 +195,7 @@ class GenSAS(BaseComponent):
             return out
         else:
             msg = "Q must be given as list of qx's and qy's"
-            raise ValueError, msg
+            raise ValueError(msg)
 
     def evalDistribution(self, qdist):
         """
@@ -213,7 +213,7 @@ class GenSAS(BaseComponent):
         else:
             mesg = "evalDistribution is expecting an ndarray of "
             mesg += "a list [qx,qy] where qx,qy are arrays."
-            raise RuntimeError, mesg
+            raise RuntimeError(mesg)
 
 class OMF2SLD(object):
     """
@@ -312,19 +312,9 @@ class OMF2SLD(object):
         Check if the data lengths are consistent
         :Params length: data length
         """
-        msg = "Error: Inconsistent data length."
-        if len(self.pos_x) != length:
-            raise ValueError, msg
-        if len(self.pos_y) != length:
-            raise ValueError, msg
-        if len(self.pos_z) != length:
-            raise ValueError, msg
-        if len(self.mx) != length:
-            raise ValueError, msg
-        if len(self.my) != length:
-            raise ValueError, msg
-        if len(self.mz) != length:
-            raise ValueError, msg
+        parts = (self.pos_x, self.pos_y, self.pos_z, self.mx, self.my, self.mz)
+        if any(len(v) != length for v in parts):
+            raise ValueError("Error: Inconsistent data length.")
 
     def remove_null_points(self, remove=False, recenter=False):
         """
@@ -414,7 +404,7 @@ class OMFReader(object):
                     if meshunit.count("m") < 1:
                         msg = "Error: \n"
                         msg += "We accept only m as meshunit"
-                        raise ValueError, msg
+                        raise ValueError(msg)
                 if s_line[0].lower().count("xbase") > 0:
                     xbase = s_line[1].lstrip()
                 if s_line[0].lower().count("ybase") > 0:
@@ -484,7 +474,7 @@ class OMFReader(object):
         except:
             msg = "%s is not supported: \n" % path
             msg += "We accept only Text format OMF file."
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
 
 class PDBReader(object):
     """
@@ -604,7 +594,7 @@ class PDBReader(object):
             output.sld_unit = '1/A^(2)'
             return output
         except:
-            raise RuntimeError, "%s is not a sld file" % path
+            raise RuntimeError("%s is not a sld file" % path)
 
     def write(self, path, data):
         """
@@ -696,7 +686,7 @@ class SLDReader(object):
                 output.set_pixel_volumes(vol_pix)
             return output
         except:
-            raise RuntimeError, "%s is not a sld file" % path
+            raise RuntimeError("%s is not a sld file" % path)
 
     def write(self, path, data):
         """
@@ -705,9 +695,9 @@ class SLDReader(object):
         :Param data: MagSLD data object
         """
         if path is None:
-            raise ValueError, "Missing the file path."
+            raise ValueError("Missing the file path.")
         if data is None:
-            raise ValueError, "Missing the data to save."
+            raise ValueError("Missing the data to save.")
         x_val = data.pos_x
         y_val = data.pos_y
         z_val = data.pos_z

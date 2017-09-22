@@ -312,16 +312,16 @@ class PageState(object):
         obj.tcChi = self.tcChi
 
         if len(self.disp_obj_dict) > 0:
-            for k, v in self.disp_obj_dict.iteritems():
+            for k, v in self.disp_obj_dict.items():
                 obj.disp_obj_dict[k] = v
         if len(self.disp_cb_dict) > 0:
-            for k, v in self.disp_cb_dict.iteritems():
+            for k, v in self.disp_cb_dict.items():
                 obj.disp_cb_dict[k] = v
         if len(self.values) > 0:
-            for k, v in self.values.iteritems():
+            for k, v in self.values.items():
                 obj.values[k] = v
         if len(self.weights) > 0:
-            for k, v in self.weights.iteritems():
+            for k, v in self.weights.items():
                 obj.weights[k] = v
         obj.enable_smearer = copy.deepcopy(self.enable_smearer)
         obj.disable_smearer = copy.deepcopy(self.disable_smearer)
@@ -346,7 +346,7 @@ class PageState(object):
         obj.cb1 = copy.deepcopy(self.cb1)
         obj.version = copy.deepcopy(self.version)
 
-        for name, state in self.saved_states.iteritems():
+        for name, state in self.saved_states.items():
             copy_name = copy.deepcopy(name)
             copy_state = state.clone()
             obj.saved_states[copy_name] = copy_state
@@ -429,7 +429,7 @@ class PageState(object):
         :return: None
         """
         p_map = []
-        for name, info in params.iteritems():
+        for name, info in params.items():
             if ".fittable" in name or ".std" in name or ".upper" in name or \
                             ".lower" in name or ".units" in name:
                 pass
@@ -474,7 +474,7 @@ class PageState(object):
                 self.str_parameters, True)
             formfactor, str_params = convert.convert_model(
                 self.formfactorcombobox, str_pars, False, self.version)
-            for key, value in str_params.iteritems():
+            for key, value in str_params.items():
                 params[key] = value
 
         if self.formfactorcombobox == 'SphericalSLDModel':
@@ -834,7 +834,7 @@ class PageState(object):
         for item in LIST_OF_MODEL_ATTRIBUTES:
             element = newdoc.createElement(item[0])
             value_list = getattr(self, item[1])
-            for key, value in value_list.iteritems():
+            for key, value in value_list.items():
                 sub_element = newdoc.createElement(key)
                 sub_element.setAttribute('name', str(key))
                 for val in value:
@@ -847,7 +847,7 @@ class PageState(object):
         for tagname, varname, tagtype in DISPERSION_LIST:
             element = newdoc.createElement(tagname)
             value_list = getattr(self, varname)
-            for key, value in value_list.iteritems():
+            for key, value in value_list.items():
                 sub_element = newdoc.createElement(key)
                 sub_element.setAttribute('name', str(key))
                 sub_element.setAttribute('value', str(value))
@@ -949,7 +949,7 @@ class PageState(object):
         if file is not None:
             msg = "PageState no longer supports non-CanSAS"
             msg += " format for fitting files"
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
 
         if node.get('version'):
             # Get the version for model conversion purposes
@@ -1240,7 +1240,7 @@ class Reader(CansasReader):
 
             else:
                 self.call_back(format=ext)
-                raise RuntimeError, "%s is not a file" % path
+                raise RuntimeError("%s is not a file" % path)
 
             # Return output consistent with the loader's api
             if len(output) == 0:

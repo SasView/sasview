@@ -250,7 +250,7 @@ class FitData1D(Data1D):
         if np.size(self.dy) != np.size(fx):
             msg = "FitData1D: invalid error array "
             msg += "%d <> %d" % (np.shape(self.dy), np.size(fx))
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
         return (self.y[self.idx] - fx[self.idx]) / self.dy[self.idx], fx[self.idx]
 
     def residuals_deriv(self, model, pars=[]):

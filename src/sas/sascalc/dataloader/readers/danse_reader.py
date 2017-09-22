@@ -13,12 +13,14 @@
 #############################################################################
 import math
 import os
-import numpy as np
 import logging
-from sas.sascalc.dataloader.data_info import plottable_2D, DataInfo, Detector
-from sas.sascalc.dataloader.manipulations import reader2D_converter
-from sas.sascalc.dataloader.file_reader_base_class import FileReader
-from sas.sascalc.dataloader.loader_exceptions import FileContentsException, DataReaderException
+
+import numpy as np
+
+from ..data_info import plottable_2D, DataInfo, Detector
+from ..manipulations import reader2D_converter
+from ..file_reader_base_class import FileReader
+from ..loader_exceptions import FileContentsException, DataReaderException
 
 logger = logging.getLogger(__name__)
 

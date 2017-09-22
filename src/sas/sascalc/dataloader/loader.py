@@ -25,14 +25,16 @@ import sys
 import logging
 import time
 from zipfile import ZipFile
+
 from sas.sascalc.data_util.registry import ExtensionRegistry
+
 # Default readers are defined in the readers sub-module
-import readers
-from loader_exceptions import NoKnownLoaderException, FileContentsException,\
+from . import readers
+from .loader_exceptions import NoKnownLoaderException, FileContentsException,\
     DefaultReaderException
-from readers import ascii_reader
-from readers import cansas_reader
-from readers import cansas_reader_HDF5
+from .readers import ascii_reader
+from .readers import cansas_reader
+from .readers import cansas_reader_HDF5
 
 logger = logging.getLogger(__name__)
 
@@ -340,7 +342,7 @@ class Registry(ExtensionRegistry):
             writers = L
         # Raise an error if there are no matching extensions
         if len(writers) == 0:
-            raise ValueError, "Unknown file type for " + path
+            raise ValueError("Unknown file type for " + path)
         # All done
         return writers
 
@@ -359,7 +361,7 @@ class Registry(ExtensionRegistry):
         for fn in writers:
             try:
                 return fn(path, data)
-            except:
+            except Exception:
                 pass  # give other loaders a chance to succeed
         # If we get here it is because all loaders failed
         raise  # reraises last exception

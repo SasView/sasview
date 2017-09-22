@@ -1,5 +1,5 @@
 # Method to associate extensions to default readers
-from associations import read_associations
+from .associations import read_associations
 
 
 # Method to return the location of the XML settings file

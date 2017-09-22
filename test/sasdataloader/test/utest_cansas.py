@@ -1,26 +1,23 @@
 """
     Unit tests for the new recursive cansas reader
 """
-import sas.sascalc.dataloader.readers.cansas_reader as cansas
-from sas.sascalc.dataloader.loader import Loader
-from sas.sascalc.dataloader.data_info import Data1D, Data2D
-from sas.sascalc.dataloader.readers.xml_reader import XMLreader
-from sas.sascalc.dataloader.readers.cansas_reader import Reader
-from sas.sascalc.dataloader.readers.cansas_constants import CansasConstants
-
 import os
 import sys
-import urllib2
 import StringIO
-import pylint as pylint
 import unittest
-import numpy as np
 import logging
 import warnings
 
 from lxml import etree
 from lxml.etree import XMLSyntaxError
 from xml.dom import minidom
+
+import sas.sascalc.dataloader.readers.cansas_reader as cansas
+from sas.sascalc.dataloader.loader import Loader
+from sas.sascalc.dataloader.data_info import Data1D, Data2D
+from sas.sascalc.dataloader.readers.xml_reader import XMLreader
+from sas.sascalc.dataloader.readers.cansas_reader import Reader
+from sas.sascalc.dataloader.readers.cansas_constants import CansasConstants
 
 logger = logging.getLogger(__name__)
 
@@ -308,4 +305,4 @@ class cansas_reader_hdf5(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()    
+    unittest.main()
