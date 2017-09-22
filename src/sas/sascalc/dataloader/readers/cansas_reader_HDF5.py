@@ -15,6 +15,11 @@ from sas.sascalc.dataloader.data_info import combine_data_info_with_plottable
 from sas.sascalc.dataloader.loader_exceptions import FileContentsException, DefaultReaderException
 from sas.sascalc.dataloader.file_reader_base_class import FileReader
 
+def decode(s):
+    return s.decode() if isinstance(s, bytes) else s
+
+def h5attr(node, key, default=None):
+    return decode(node.attrs.get(key, default))
 
 class Reader(FileReader):
     """
@@ -129,10 +134,9 @@ class Reader(FileReader):
         for key in data.keys():
             # Get all information for the current key
             value = data.get(key)
-            if value.attrs.get(u'canSAS_class') is not None:
-                class_name = value.attrs.get(u'canSAS_class')
-            else:
-                class_name = value.attrs.get(u'NX_class')
+            classname = h5attr(value, u'canSAS_class')
+            if classname is None:
+                class_name = h5attr(value, u'NX_class')
             if class_name is not None:
                 class_prog = re.compile(class_name)
             else:
@@ -224,13 +228,15 @@ class Reader(FileReader):
                     continue
 
                 for data_point in data_set:
+                    if data_point.dtype.char == 'S':
+                        data_point = decode(bytes(data_point))
                     # Top Level Meta Data
                     if key == u'definition':
                         self.current_datainfo.meta_data['reader'] = data_point
                     elif key == u'run':
                         self.current_datainfo.run.append(data_point)
                         try:
-                            run_name = value.attrs['name']
+                            run_name = h5attr(value, 'name')
                             run_dict = {data_point: run_name}
                             self.current_datainfo.run_name = run_dict
                         except:
@@ -575,9 +581,9 @@ class Reader(FileReader):
         :param value: attribute dictionary for a particular value set
         :return: unit for the value passed to the method
         """
-        unit = value.attrs.get(u'units')
+        unit = h5attr(value, u'units')
         if unit is None:
-            unit = value.attrs.get(u'unit')
+            unit = h5attr(value, u'unit')
         # Convert the unit formats
         if unit == "1/A":
             unit = "A^{-1}"
