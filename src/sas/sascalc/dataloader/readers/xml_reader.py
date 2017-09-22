@@ -153,7 +153,7 @@ class XMLreader(FileReader):
         Converts an etree element into a string
         """
         return etree.tostring(elem, pretty_print=pretty_print,
-                              encoding=encoding)
+                              encoding=encoding).decode()
 
     def break_processing_instructions(self, string, dic):
         """
