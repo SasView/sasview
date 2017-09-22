@@ -3,7 +3,7 @@
 """
 import os
 import sys
-import StringIO
+from io import StringIO
 import unittest
 import logging
 import warnings
@@ -58,7 +58,7 @@ class cansas_reader_xml(unittest.TestCase):
         """
         Should fail gracefully and send a message to logger.info()
         """
-        invalid = StringIO.StringIO('<a><c></b></a>')
+        invalid = StringIO('<a><c></b></a>')
         self.assertRaises(XMLSyntaxError, lambda: XMLreader(invalid))
 
     def test_xml_validate(self):
@@ -70,11 +70,11 @@ class cansas_reader_xml(unittest.TestCase):
         string += "\t\t</xsd:sequence>\n"
         string += "\t</xsd:complexType>\n"
         string += "</xsd:schema>"
-        f = StringIO.StringIO(string)
+        f = StringIO(string)
         xmlschema_doc = etree.parse(f)
         xmlschema = etree.XMLSchema(xmlschema_doc)
-        valid = etree.parse(StringIO.StringIO('<a><b></b></a>'))
-        invalid = etree.parse(StringIO.StringIO('<a><c></c></a>'))
+        valid = etree.parse(StringIO('<a><b></b></a>'))
+        invalid = etree.parse(StringIO('<a><c></c></a>'))
         self.assertTrue(xmlschema.validate(valid))
         self.assertFalse(xmlschema.validate(invalid))
 
@@ -210,8 +210,8 @@ class cansas_reader_xml(unittest.TestCase):
         if valid:
             # find the processing instructions and make into a dictionary
             dic = self.get_processing_instructions(reader)
-            self.assertTrue(dic == {'xml-stylesheet': \
-                                    'type="text/xsl" href="cansas1d.xsl" '})
+            self.assertEqual(dic, {'xml-stylesheet':
+                                   'type="text/xsl" href="cansas1d.xsl" '})
 
             xml = "<test><a><b><c></c></b></a></test>"
             xmldoc = minidom.parseString(xml)
