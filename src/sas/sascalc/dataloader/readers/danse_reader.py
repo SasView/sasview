@@ -79,7 +79,7 @@ class Reader(FileReader):
         read_on = True
         data_start_line = 1
         while read_on:
-            line = self.f_open.readline()
+            line = self.nextline()
             data_start_line += 1
             if line.find("DATA:") >= 0:
                 read_on = False
@@ -113,7 +113,7 @@ class Reader(FileReader):
             msg = "danse_reader can't read this file {}".format(self.f_open.name)
             raise FileContentsException(msg)
 
-        for line_num, data_str in enumerate(self.f_open.readlines()):
+        for line_num, data_str in enumerate(self.nextlines()):
             toks = data_str.split()
             try:
                 val = float(toks[0])
