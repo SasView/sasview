@@ -71,7 +71,7 @@ class Reader(FileReader):
 
     def get_file_contents(self):
         # Read file
-        buf = self.f_open.read()
+        buf = self.readall()
         self.f_open.close()
         # Instantiate data object
         self.current_dataset = plottable_2D()
