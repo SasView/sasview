@@ -159,6 +159,11 @@ if __name__ == "__main__":
 
     logger.debug("Starting SASVIEW in debug mode.")
     prepare()
-    from sas.sasview.sasview import run
-    run()
+    if len(sys.argv) == 2 and sys.argv[1] == "-i":
+        sys.argv = ["ipython", "--pylab"]
+        from IPython import start_ipython
+        start_ipython()
+    else:
+        from sas.sasview.sasview import run
+        run()
     logger.debug("Ending SASVIEW in debug mode.")
