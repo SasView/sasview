@@ -100,7 +100,7 @@ class ExtensionRegistry(object):
         # Find matching extensions
         extlist = [ext for ext in self.extensions() if path.endswith(ext)]
         # Sort matching extensions by decreasing order of length
-        extlist.sort(lambda a,b: len(a)<len(b))
+        extlist.sort(key=len)
         # Combine loaders for matching extensions into one big list
         loaders = []
         for L in [self.loaders[ext] for ext in extlist]:

@@ -74,6 +74,7 @@ class Registry(ExtensionRegistry):
         msg_from_reader = None
         try:
             return super(Registry, self).load(path, format=format)
+        #except Exception: raise  # for debugging, don't use fallback loader
         except NoKnownLoaderException as nkl_e:
             pass  # Try the ASCII reader
         except FileContentsException as fc_exc:
@@ -328,7 +329,7 @@ class Registry(ExtensionRegistry):
         # Find matching extensions
         extlist = [ext for ext in self.extensions() if path.endswith(ext)]
         # Sort matching extensions by decreasing order of length
-        extlist.sort(lambda a, b: len(a) < len(b))
+        extlist.sort(key=len)
         # Combine loaders for matching extensions into one big list
         writers = []
         for L in [self.writers[ext] for ext in extlist]:
