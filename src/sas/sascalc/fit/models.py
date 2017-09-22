@@ -94,17 +94,19 @@ def find_plugins_dir():
     """
     path = os.path.join(os.path.expanduser("~"), '.sasview', PLUGIN_DIR)
 
-    # TODO: initializing ~/.sasview/plugin_models doesn't belong in sascalc
+    # TODO: trigger initialization of plugins dir from installer or startup
     # If the plugin directory doesn't exist, create it
     if not os.path.isdir(path):
         os.makedirs(path)
     # TODO: should we be checking for new default models every time?
-    initialize_plugins_dir(path)
+    # TODO: restore support for default plugins
+    #initialize_plugins_dir(path)
     return path
 
 
 def initialize_plugins_dir(path):
     # TODO: There are no default plugins
+    # TODO: Default plugins directory is in sasgui, but models.py is in sascalc
     # TODO: Move default plugins beside sample data files
     # TODO: Should not look for defaults above the root of the sasview install
 

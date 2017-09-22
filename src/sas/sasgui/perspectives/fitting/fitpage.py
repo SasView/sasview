@@ -1725,7 +1725,6 @@ class FitPage(BasicPage):
         if self.model.__class__ not in self.model_list_box["Multi-Functions"] \
                 and not self.temp_multi_functional:
             return None
-        print("_set_fun_box_list", self.model.name)
         # Get the func name list
         list = self.model.fun_list
         if len(list) == 0:

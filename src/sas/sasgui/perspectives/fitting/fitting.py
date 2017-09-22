@@ -50,6 +50,7 @@ from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
 from sas.sasgui.perspectives.calculator.model_editor import TextDialog
 from sas.sasgui.perspectives.calculator.model_editor import EditorWindow
+from sas.sasgui.perspectives.calculator.pyconsole import PyConsole
 
 from .fitting_widgets import DataDialog
 from .fit_thread import FitThread
@@ -241,8 +242,6 @@ class Plugin(PluginBase):
         """
         Get the python editor panel
         """
-        from sas.sasgui.perspectives.calculator.pyconsole import PyConsole
-
         event_id = event.GetId()
         label = self.edit_menu.GetLabel(event_id)
         filename = os.path.join(models.find_plugins_dir(), label)
@@ -367,7 +366,7 @@ class Plugin(PluginBase):
                             box.SetStringSelection('')
                         if model and new_model != model:
                             page._on_select_model(keep_pars=True)
-                    if hasattr(page, 'structurebox'):
+                    if hasattr(page, "structurebox"):
                         selected_name = page.structurebox.GetStringSelection()
 
                         page.structurebox.Clear()
@@ -1768,10 +1767,6 @@ class Plugin(PluginBase):
             @param unsmeared_data: data, rescaled to unsmeared model
             @param unsmeared_error: data error, rescaled to unsmeared model
         """
-<<<<<<< HEAD
-
-=======
->>>>>>> master
         number_finite = np.count_nonzero(np.isfinite(y))
         np.nan_to_num(y)
         new_plot = self.create_theory_1D(x, y, page_id, model, data, state,
