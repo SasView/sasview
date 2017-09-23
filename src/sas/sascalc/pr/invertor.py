@@ -471,8 +471,8 @@ class Invertor(Cinvertor):
         t_0 = time.time()
         try:
             self._get_matrix(nfunc, nq, a, b)
-        except:
-            raise RuntimeError("Invertor: could not invert I(Q)\n  %s" % sys.exc_value)
+        except Exception as exc:
+            raise RuntimeError("Invertor: could not invert I(Q)\n  %s" % str(exc))
 
         # Perform the inversion (least square fit)
         c, chi2, _, _ = lstsq(a, b)

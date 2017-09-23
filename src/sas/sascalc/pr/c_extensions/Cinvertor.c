@@ -51,7 +51,7 @@ Cinvertor_dealloc(Cinvertor* self)
 {
     invertor_dealloc(&(self->params));
 
-    self->ob_type->tp_free((PyObject*)self);
+    Py_TYPE(self)->tp_free((PyObject*)self);
 
 }
 
@@ -1053,8 +1053,9 @@ static PyMethodDef Cinvertor_methods[] = {
 };
 
 static PyTypeObject CinvertorType = {
-    PyObject_HEAD_INIT(NULL)
-    0,                         /*ob_size*/
+    //PyObject_HEAD_INIT(NULL)
+    //0,                         /*ob_size*/
+    PyVarObject_HEAD_INIT(NULL, 0)
     "Cinvertor",             /*tp_name*/
     sizeof(Cinvertor),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
@@ -1118,16 +1119,52 @@ void addCinvertor(PyObject *module) {
 }
 
 
-#ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
-#define PyMODINIT_FUNC void
+#define MODULE_DOC "C extension module for inversion to P(r)."
+#define MODULE_NAME "pr_inversion"
+#define MODULE_INIT2 initpr_inversion
+#define MODULE_INIT3 PyInit_pr_inversion
+#define MODULE_METHODS module_methods
+
+/* ==== boilerplate python 2/3 interface bootstrap ==== */
+
+
+#if defined(WIN32) && !defined(__MINGW32__)
+    #define DLL_EXPORT __declspec(dllexport)
+#else
+    #define DLL_EXPORT
 #endif
-PyMODINIT_FUNC
-initpr_inversion(void)
-{
-    PyObject* m;
 
-    m = Py_InitModule3("pr_inversion", module_methods,
-                       "C extension module for inversion to P(r).");
+#if PY_MAJOR_VERSION >= 3
 
-    addCinvertor(m);
-}
+  DLL_EXPORT PyMODINIT_FUNC MODULE_INIT3(void)
+  {
+    static struct PyModuleDef moduledef = {
+      PyModuleDef_HEAD_INIT,
+      MODULE_NAME,         /* m_name */
+      MODULE_DOC,          /* m_doc */
+      -1,                  /* m_size */
+      MODULE_METHODS,      /* m_methods */
+      NULL,                /* m_reload */
+      NULL,                /* m_traverse */
+      NULL,                /* m_clear */
+      NULL,                /* m_free */
+    };
+	PyObject* m = PyModule_Create(&moduledef);
+	addCinvertor(m);
+	return m;
+  }
+
+#else /* !PY_MAJOR_VERSION >= 3 */
+
+  DLL_EXPORT PyMODINIT_FUNC MODULE_INIT2(void)
+  {
+    PyObject* m = Py_InitModule4(MODULE_NAME,
+		 MODULE_METHODS,
+		 MODULE_DOC,
+		 0,
+		 PYTHON_API_VERSION
+		 );
+	addCinvertor(m);
+  }
+
+#endif /* !PY_MAJOR_VERSION >= 3 */
