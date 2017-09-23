@@ -157,7 +157,7 @@ static PyMethodDef module_methods[] = {
 #define MODULE_DOC "Sld2i C Library"
 #define MODULE_NAME "sld2i"
 #define MODULE_INIT2 initsld2i
-#define MODULE_INIT3 PyInit_reflmodule
+#define MODULE_INIT3 PyInit_sld2i
 #define MODULE_METHODS module_methods
 
 /* ==== boilerplate python 2/3 interface bootstrap ==== */
