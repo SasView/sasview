@@ -24,7 +24,7 @@ HAS_MPL_WX = True
 try:
     import matplotlib
     import wx
-except:
+except ImportError:
     HAS_MPL_WX = False
 
 SKIPPED_DIRS = ["sasrealspace", "calculatorview"]
@@ -35,7 +35,7 @@ if not HAS_MPL_WX:
 #if os.name == 'nt':
 #    COMMAND_SEP = '&'
 
-def run_tests(dirs=None, all=False):
+def run_tests(dirs=None, run_all=False):
     test_root = os.path.abspath(os.path.dirname(__file__))
     run_one_py = os.path.join(test_root, 'run_one.py')
     passed = 0
@@ -81,7 +81,9 @@ def run_tests(dirs=None, all=False):
 
                     if has_failed or not has_tests:
                         failed += 1
-                        print("Result for %s (%s): FAILED" % (module_name, module_dir))
+                        modpath = os.path.join(module_dir, module_name+".py")
+                        print("Result for %s: FAILED    %s"
+                              % (module_name, os.path.relpath(modpath, os.getcwd())))
                         #print(std_out)
                     else:
                         passed += 1
@@ -105,7 +107,7 @@ def run_tests(dirs=None, all=False):
     return failed
 
 if __name__ == '__main__':
-    all = (len(sys.argv) > 1 and sys.argv[1] == '-all')
-    dirs = sys.argv[1:] if not all else sys.argv[2:]
-    if run_tests(dirs=dirs, all=all)>0:
+    run_all = (len(sys.argv) > 1 and sys.argv[1] == '-all')
+    dirs = sys.argv[1:] if not run_all else sys.argv[2:]
+    if run_tests(dirs=dirs, run_all=run_all)>0:
         sys.exit(1)
