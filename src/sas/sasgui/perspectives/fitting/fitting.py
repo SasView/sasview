@@ -356,6 +356,17 @@ class Plugin(PluginBase):
                                 page.formfactorbox.SetLabel(new_val)
                             else:
                                 page.formfactorbox.SetLabel(current_val)
+                        if hasattr(page, 'structurebox'):
+                            selected_name = page.structurebox.GetStringSelection()
+
+                            page.structurebox.Clear()
+                            page.initialize_combox()
+
+                            index = page.structurebox.FindString(selected_name)
+                            if index == -1:
+                                index = 0
+                            page.structurebox.SetSelection(index)
+                            page._on_select_model()
         except:
             logger.error("update_custom_combo: %s", sys.exc_value)
 
@@ -1325,7 +1336,7 @@ class Plugin(PluginBase):
                     data = data.sas_data
 
                 is_data2d = issubclass(data.__class__, Data2D)
-                #check consistency of arrays
+                # Check consistency of arrays
                 if not is_data2d:
                     if len(res.theory) == len(res.index[res.index]) and \
                         len(res.index) == len(data.y):
@@ -1336,10 +1347,16 @@ class Plugin(PluginBase):
                     new_theory[res.index] = res.theory
                     new_theory[res.index == False] = np.nan
                     correct_result = True
-                #get all fittable parameters of the current model
+                # Get all fittable parameters of the current model
                 param_list = model.getParamList()
                 for param in model.getDispParamList():
-                    if not model.is_fittable(param) and \
+                    if '.' in param and param in param_list:
+                        # Ensure polydispersity results are displayed
+                        p1, p2 = param.split('.')
+                        if not model.is_fittable(p1) and not (p2 == 'width' and param in res.param_list)\
+                            and param in param_list:
+                            param_list.remove(param)
+                    elif not model.is_fittable(param) and \
                         param in param_list:
                         param_list.remove(param)
                 if not correct_result or res.fitness is None or \
@@ -1360,11 +1377,11 @@ class Plugin(PluginBase):
                     cell.value = res.fitness
                     batch_outputs["Chi2"].append(ERROR)
                     for param in param_list:
-                        # save value of  fixed parameters
+                        # Save value of  fixed parameters
                         if param not in res.param_list:
                             batch_outputs[str(param)].append(ERROR)
                         else:
-                            #save only fitted values
+                            # Save only fitted values
                             batch_outputs[param].append(ERROR)
                             batch_inputs["error on %s" % str(param)].append(ERROR)
                 else:
