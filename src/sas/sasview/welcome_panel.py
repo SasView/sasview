@@ -6,9 +6,13 @@ import wx.aui
 import wx.lib.hyperlink
 import os.path
 import os, sys
-import local_config as config
+
 from wx.lib.scrolledpanel import ScrolledPanel
+
+from sas.sasgui import get_local_config
 from sas.sasgui.guiframe.panel_base import PanelBase
+config = get_local_config()
+
 #Font size width
 if sys.platform.count("win32") > 0:
     FONT_VARIANT = 0

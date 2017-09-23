@@ -26,7 +26,7 @@ try:
 except ImportError:
     WX_SUPPORTS_HTML2 = False
 
-from .gui_manager import get_app_dir
+from sas.sasgui import get_app_dir
 
 # Don't use wx html renderer on windows.
 if os.name == 'nt':

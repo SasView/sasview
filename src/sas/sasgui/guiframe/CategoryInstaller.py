@@ -14,6 +14,8 @@ import json
 import logging
 from collections import defaultdict, OrderedDict
 
+from sas.sasgui import get_user_dir
+
 USER_FILE = 'categories.json'
 
 logger = logging.getLogger(__name__)
@@ -24,9 +26,6 @@ class CategoryInstaller(object):
 
     Note - class is entirely static!
     """
-
-    def __init__(self):
-        """ initialization """
 
     @staticmethod
     def _get_installed_model_dir():
@@ -103,7 +102,7 @@ class CategoryInstaller(object):
         """
         returns the user data file, eg .sasview/categories.json.json
         """
-        return os.path.join(CategoryInstaller._get_home_dir(), USER_FILE)
+        return os.path.join(get_user_dir(), USER_FILE)
 
     @staticmethod
     def get_default_file():

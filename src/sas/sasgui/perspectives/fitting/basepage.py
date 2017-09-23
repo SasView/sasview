@@ -11,6 +11,8 @@ import math
 import json
 import logging
 import traceback
+from Queue import Queue
+from threading import Thread
 from collections import defaultdict
 
 import numpy as np
@@ -246,6 +248,17 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         # layout
         self.set_layout()
+
+        # Setting up a thread for the fitting
+        self.threaded_draw_queue = Queue()
+
+        self.draw_worker_thread = Thread(target = self._threaded_draw_worker,
+                                         args = (self.threaded_draw_queue,))
+        self.draw_worker_thread.setDaemon(True)
+        self.draw_worker_thread.start()
+
+        # And a home for the thread submission times
+        self.last_time_fit_submitted = 0.00
 
     def set_index_model(self, index):
         """
@@ -1734,7 +1747,24 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         :param chisqr: update chisqr value [bool]
         """
-        wx.CallAfter(self._draw_model_after, update_chisqr, source)
+        self.threaded_draw_queue.put([copy.copy(update_chisqr), copy.copy(source)])
+
+    def _threaded_draw_worker(self, threaded_draw_queue):
+        while True:
+            # sit and wait for the next task
+            next_task = threaded_draw_queue.get()
+
+            # sleep for 1/10th second in case some other tasks accumulate
+            time.sleep(0.1)
+
+            # skip all intermediate tasks
+            while self.threaded_draw_queue.qsize() > 0:
+                self.threaded_draw_queue.task_done()
+                next_task = self.threaded_draw_queue.get()
+
+            # and finally, do the task
+            self._draw_model_after(*next_task)
+            threaded_draw_queue.task_done()
 
     def _draw_model_after(self, update_chisqr=True, source='model'):
         """
@@ -1756,6 +1786,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             weight = get_weight(data=self.data, is2d=self._is_2D(), flag=flag)
             toggle_mode_on = self.model_view.IsEnabled()
             is_2d = self._is_2D()
+
             self._manager.draw_model(self.model,
                                      data=self.data,
                                      smearer=temp_smear,
