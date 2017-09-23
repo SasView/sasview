@@ -16,6 +16,7 @@ from lxml.etree import XMLSyntaxError
 from xml.dom import minidom
 
 import sas.sascalc.dataloader.readers.cansas_reader as cansas
+from sas.sascalc.dataloader.file_reader_base_class import decode
 from sas.sascalc.dataloader.loader import Loader
 from sas.sascalc.dataloader.data_info import Data1D, Data2D
 from sas.sascalc.dataloader.readers.xml_reader import XMLreader
@@ -237,7 +238,7 @@ class cansas_reader_xml(unittest.TestCase):
         while pi is not None:
             attr = {}
             pi_name = ""
-            pi_string = etree.tostring(pi)
+            pi_string = decode(etree.tostring(pi))
             if isinstance(pi_string, str):
                 pi_string = pi_string.replace("<?", "").replace("?>", "")
                 split = pi_string.split(" ", 1)
