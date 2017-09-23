@@ -1,68 +1,59 @@
 # Setup and find Custom config dir
+from __future__ import print_function
+
 import os.path
+import logging
 import shutil
 
-CONF_DIR = 'config' 
-APPLICATION_NAME = 'sasview'
+from sasmodels.custom import load_module_from_path
 
-def _find_usersasview_dir():
-    """
-    Find and return user/.sasview dir
-    """
-    return os.path.join(os.path.expanduser("~"), ("." + APPLICATION_NAME))
+from sas.sasgui import get_custom_config_path, get_app_dir
 
-def _find_customconf_dir():
-    """
-    Find path of the config directory.
-    The plugin directory is located in the user's home directory.
-    """
-    u_dir = _find_usersasview_dir()
-    return os.path.join(u_dir, CONF_DIR)
+logger = logging.getLogger(__name__)
 
-def _setup_conf_dir(path):
+_config_cache = None
+def setup_custom_config():
     """
     Setup the custom config dir and cat file
     """
-    conf_dir = _find_customconf_dir()
-    # If the plugin directory doesn't exist, create it
-    if not os.path.isdir(conf_dir):
-        os.makedirs(conf_dir)
-    config_file = os.path.join(conf_dir, "custom_config.py")
-
-    # Place example user models as needed
-    try:
-        if not os.path.isfile(config_file):
-            shutil.copyfile(os.path.join(path, "custom_config.py"), config_file)
-
-        #Adding SAS_OPENCL if it doesn't exist in the config file
-        # - to support backcompability
-        if not "SAS_OPENCL" in open(config_file).read():
-            open(config_file,"a+").write("SAS_OPENCL = \"None\"\n")
-    except:
-        # Check for data path next to exe/zip file.
-        #Look for maximum n_dir up of the current dir to find plugins dir
-        n_dir = 12
-        is_dir = False
-        f_dir = path
-        for i in range(n_dir):
-            if i > 1:
-                f_dir, _ = os.path.split(f_dir)
-            temp_path = os.path.join(f_dir, "custom_config.py")
-            if os.path.isfile(temp_path):
-                shutil.copyfile(temp_path, config_file)
-                is_dir = True
-                break
-        if not is_dir:
-            raise
-    return conf_dir
+    global _config_cache
+    if not _config_cache:
+        _config_cache = _setup_custom_config()
+    return _config_cache
 
 
-class SetupCustom(object):
-    """
-    implement custom config dir
-    """
-    def find_dir(self):
-        return _find_customconf_dir()
-    
-    def setup_dir(self, path):
-        return _setup_conf_dir(path)
+def _setup_custom_config():
+    path = get_custom_config_path()
+    if not os.path.isfile(path):
+        try:
+            # if the custom config file does not exist, copy the default from
+            # the app dir
+            shutil.copyfile(os.path.join(get_app_dir(), "custom_config.py"),
+                            path)
+        except Exception:
+            logger.error("Could not copy default custom config.")
+
+    #Adding SAS_OPENCL if it doesn't exist in the config file
+    # - to support backcompability
+    if not "SAS_OPENCL" in open(path).read():
+        try:
+            open(config_file, "a+").write("SAS_OPENCL = \"None\"\n")
+        except Exception:
+            logger.error("Could not update custom config with SAS_OPENCL.")
+
+    custom_config = _load_config(path)
+    return custom_config
+
+
+def _load_config(path):
+    if os.path.exists(path):
+        try:
+            module = load_module_from_path('sas.sasview.custom_config', path)
+            logger.info("GuiManager loaded %s", path)
+            return module
+        except Exception as exc:
+            logger.error("Error loading %s: %s", path, exc)
+
+    from sas.sasview import custom_config
+    logger.info("GuiManager custom_config defaults to sas.sasview.custom_config")
+    return custom_config

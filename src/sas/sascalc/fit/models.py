@@ -3,21 +3,18 @@
 """
 from __future__ import print_function
 
-import traceback
 import os
 import sys
-import os.path
-# Time is needed by the log method
 import time
 import datetime
 import logging
+import traceback
 import py_compile
 import shutil
-#?? from copy import copy
 
 from sasmodels.sasview_model import load_custom_model, load_standard_models
-from sasmodels.sasview_model import MultiplicationModel
-#?? from sas.sasgui.perspectives.fitting.fitpage import CUSTOM_MODEL
+
+from sas.sasgui import get_user_dir
 
 # Explicitly import from the pluginmodel module so that py2exe
 # places it in the distribution. The Model1DPlugin class is used
@@ -28,8 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 PLUGIN_DIR = 'plugin_models'
-PLUGIN_LOG = os.path.join(os.path.expanduser("~"), '.sasview', PLUGIN_DIR,
-                          "plugins.log")
+PLUGIN_LOG = os.path.join(get_user_dir(), PLUGIN_DIR, "plugins.log")
 PLUGIN_NAME_BASE = '[plug-in] '
 
 

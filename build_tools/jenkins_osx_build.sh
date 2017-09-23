@@ -16,7 +16,7 @@ cd $WORKSPACE
 
 # SET SASVIEW GITHASH
 cd $WORKSPACE
-cd sasview/sasview
+cd sasview/src/sas/sasview
 githash=$( git rev-parse HEAD )
 sed -i.bak s/GIT_COMMIT/$githash/g __init__.py
 
@@ -87,6 +87,6 @@ $PYLINT --rcfile "build_tools/pylint.rc" -f parseable sasview-install/sasview*.e
 
 # BUILD APP
 cd $WORKSPACE
-cd sasview/sasview
+cd sasview/installers
 $PYTHON setup_mac.py py2app
 

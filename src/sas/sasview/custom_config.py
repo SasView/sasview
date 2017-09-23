@@ -1,12 +1,12 @@
 """
-    Application appearance custom configuration
+Application appearance custom configuration
 """
 DATAPANEL_WIDTH = -1
 CLEANUP_PLOT = False
 FIXED_PANEL = True
 PLOPANEL_WIDTH = -1
 DATALOADER_SHOW = True
-GUIFRAME_HEIGHT = -1 
+GUIFRAME_HEIGHT = -1
 GUIFRAME_WIDTH = -1
 CONTROL_WIDTH = -1
 CONTROL_HEIGHT = -1

@@ -5,6 +5,7 @@
     Setup for SasView
     TODO: Add checks to see that all the dependencies are on the system
 """
+from __future__ import print_function
 
 import os
 import subprocess
@@ -17,9 +18,13 @@ import numpy as np
 from setuptools import Extension, setup
 
 # Manage version number ######################################
-import sasview
-
-VERSION = sasview.__version__
+with open(os.path.join("src", "sas", "sasview", "__init__.py")) as fid:
+    for line in fid:
+        if line.startswith('__version__'):
+            VERSION = line.split('"')[1]
+            break
+    else:
+        raise ValueError("Could not find version in src/sas/sasview/__init__.py")
 ##############################################################
 
 package_dir = {}
@@ -41,6 +46,7 @@ ext_modules = []
 CURRENT_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SASVIEW_BUILD = os.path.join(CURRENT_SCRIPT_DIR, "build")
 
+# TODO: build step should not be messing with existing installation!!
 sas_dir = os.path.join(os.path.expanduser("~"), '.sasview')
 if os.path.isdir(sas_dir):
     f_path = os.path.join(sas_dir, "sasview.log")
@@ -58,18 +64,15 @@ if os.path.isdir(sas_dir):
     #         if f in plugin_model_list:
     #             file_path =  os.path.join(f_path, f)
     #             os.remove(file_path)
-    if os.path.exists(SASVIEW_BUILD):
-        print("Removing existing build directory",
-              SASVIEW_BUILD, "for a clean build")
-        shutil.rmtree(SASVIEW_BUILD)
+
+if os.path.exists(SASVIEW_BUILD):
+    print("Removing existing build directory", SASVIEW_BUILD, "for a clean build")
+    shutil.rmtree(SASVIEW_BUILD)
 
 # 'sys.maxsize' and 64bit: Not supported for python2.5
-is_64bits = False
-if sys.version_info >= (2, 6):
-    is_64bits = sys.maxsize > 2**32
+is_64bits = sys.maxsize > 2**32
 
 enable_openmp = False
-
 if sys.platform == 'darwin':
     if not is_64bits:
         # Disable OpenMP
@@ -365,10 +368,9 @@ append_file(file_sources, gen_dir)
 #doc_files = add_doc_files('doc')
 
 # SasView
-package_dir["sas.sasview"] = "sasview"
+package_data['sas'] = ['logging.ini']
 package_data['sas.sasview'] = ['images/*',
                                'media/*',
-                               'logging.ini',
                                'test/*.txt',
                                'test/1d_data/*',
                                'test/2d_data/*',
@@ -378,7 +380,8 @@ package_data['sas.sasview'] = ['images/*',
                                'test/media/*',
                                'test/other_files/*',
                                'test/save_states/*',
-                               'test/sesans_data/*'
+                               'test/sesans_data/*',
+                               'test/upcoming_formats/*',
                                ]
 packages.append("sas.sasview")
 
