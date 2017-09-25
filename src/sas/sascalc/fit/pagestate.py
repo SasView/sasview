@@ -1225,15 +1225,15 @@ class Reader(CansasReader):
                     entry_list = root.xpath('ns:SASentry',
                                             namespaces=CANSAS_NS)
                     for entry in entry_list:
-                        try:
-                            sas_entry, _ = self._parse_save_state_entry(entry)
-                        except:
-                            raise
                         fitstate = self._parse_state(entry)
-
                         # state could be None when .svs file is loaded
                         # in this case, skip appending to output
                         if fitstate is not None:
+                            try:
+                                sas_entry, _ = self._parse_save_state_entry(
+                                    entry)
+                            except:
+                                raise
                             sas_entry.meta_data['fitstate'] = fitstate
                             sas_entry.filename = fitstate.file
                             output.append(sas_entry)

@@ -2048,6 +2048,8 @@ class FitPage(BasicPage):
             self.select_param()
             # Save state_fit
             self.save_current_state_fit()
+            self.onSmear(None)
+            self._onDraw(None)
         except:
             self._show_combox_helper()
             msg = "Error: This model state has missing or outdated "
