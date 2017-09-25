@@ -166,6 +166,11 @@ class FileReader(object):
                     dataset.y_bins = dataset.qy_data[0::int(n_cols)]
                     dataset.x_bins = dataset.qx_data[:int(n_cols)]
                 dataset.data = dataset.data.flatten()
+                if len(dataset.data) > 0:
+                    dataset.xmin = np.min(dataset.qx_data)
+                    dataset.xmax = np.max(dataset.qx_data)
+                    dataset.ymin = np.min(dataset.qy_data)
+                    dataset.ymax = np.max(dataset.qx_data)
 
     def format_unit(self, unit=None):
         """
@@ -248,11 +253,13 @@ class FileReader(object):
             has_error_dqy = self.current_dataset.dqy_data is not None
             has_error_dy = self.current_dataset.err_data is not None
             has_mask = self.current_dataset.mask is not None
-            has_q_data = self.current_dataset.q_data is not None
             x = self.current_dataset.qx_data
             self.current_dataset.data = self.current_dataset.data[x != 0]
             self.current_dataset.qx_data = self.current_dataset.qx_data[x != 0]
             self.current_dataset.qy_data = self.current_dataset.qy_data[x != 0]
+            self.current_dataset.q_data = np.sqrt(
+                np.square(self.current_dataset.qx_data) + np.square(
+                    self.current_dataset.qy_data))
             if has_error_dy:
                 self.current_dataset.err_data = self.current_dataset.err_data[x != 0]
             if has_error_dqx:
@@ -261,8 +268,6 @@ class FileReader(object):
                 self.current_dataset.dqy_data = self.current_dataset.dqy_data[x != 0]
             if has_mask:
                 self.current_dataset.mask = self.current_dataset.mask[x != 0]
-            if has_q_data:
-                self.current_dataset.q_data = self.current_dataset.q_data[x != 0]
 
     def reset_data_list(self, no_lines=0):
         """
