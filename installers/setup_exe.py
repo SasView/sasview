@@ -45,7 +45,6 @@ doc_path = os.path.join(root, 'build', 'lib.'+platform, 'doc')
 build_path = os.path.join(root, 'sasview-install', 'Lib', 'site-packages')
 sys.path.insert(0, build_path)
 
-from sas.sasview import local_config
 from installer_generator import generate_installer
 
 import matplotlib
@@ -73,6 +72,8 @@ except Exception:
     print("Error processing extra python path needed to build SasView\n  %s" %
           sys.exc_value)
 
+from sas import get_local_config
+local_config = get_local_config()
 
 # Solution taken from here: http://www.py2exe.org/index.cgi/win32com.shell
 # ModuleFinder can't handle runtime changes to __path__, but win32com uses them

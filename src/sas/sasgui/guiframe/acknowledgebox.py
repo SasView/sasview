@@ -12,7 +12,7 @@ import wx.richtext
 import wx.lib.hyperlink
 from wx.lib.expando import ExpandoTextCtrl
 
-from sas.sasgui import get_local_config
+from sas import get_local_config
 config = get_local_config()
 
 class DialogAcknowledge(wx.Dialog):

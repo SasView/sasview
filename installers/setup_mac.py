@@ -44,7 +44,8 @@ if len(sys.argv) == 1:
 
 import macholib_patch
 
-from sas.sasview import local_config
+from sas import get_local_config
+local_config = get_local_config()
 
 ICON = local_config.SetupIconFile_mac
 data_files = []

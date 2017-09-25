@@ -12,7 +12,7 @@ import copy
 
 import wx
 
-from sas.sasgui import get_custom_config_path
+from sas import make_custom_config_path
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.gui_style import GUIFRAME
 from sas.sasgui.guiframe import gui_manager as CURRENT
@@ -193,7 +193,7 @@ class StartupConfiguration(wx.Dialog):
         """
         Write custom configuration
         """
-        path = get_custom_config_path()
+        path = make_custom_config_path()
         with open(path, 'w') as out_f:
             out_f.write("#Application appearance custom configuration\n")
             for key, item in self.return_string.iteritems():
