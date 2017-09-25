@@ -33,7 +33,6 @@ INVALID_SCHEMA_PATH_1_1 = "{0}/sas/sascalc/dataloader/readers/schema/cansas1d_in
 INVALID_SCHEMA_PATH_1_0 = "{0}/sas/sascalc/dataloader/readers/schema/cansas1d_invalid_v1_0.xsd"
 INVALID_XML = "\n\nThe loaded xml file, {0} does not fully meet the CanSAS v1.x specification. SasView loaded " + \
               "as much of the data as possible.\n\n"
-HAS_CONVERTER = True
 
 CONSTANTS = CansasConstants()
 CANSAS_FORMAT = CONSTANTS.format
@@ -159,7 +158,6 @@ class Reader(XMLreader):
             else:
                 raise fc_exc
         except Exception as e: # Convert all other exceptions to FileContentsExceptions
-            raise
             raise FileContentsException(str(e))
 
 
@@ -633,15 +631,11 @@ class Reader(XMLreader):
                 if (local_unit and default_unit
                         and local_unit.lower() != default_unit.lower()
                         and local_unit.lower() != "none"):
-                    if HAS_CONVERTER:
-                        # Check local units - bad units raise KeyError
-                        #print("loading", tagname, node_value, local_unit, default_unit)
-                        data_conv_q = Converter(local_unit)
-                        value_unit = default_unit
-                        node_value = data_conv_q(node_value, units=default_unit)
-                    else:
-                        value_unit = local_unit
-                        err_msg = "Unit converter is not available.\n"
+                    # Check local units - bad units raise KeyError
+                    #print("loading", tagname, node_value, local_unit, default_unit)
+                    data_conv_q = Converter(local_unit)
+                    value_unit = default_unit
+                    node_value = data_conv_q(node_value, units=default_unit)
                 else:
                     value_unit = local_unit
             except KeyError:
@@ -1286,24 +1280,14 @@ class Reader(XMLreader):
                 # TODO: why split() when accessing unit, but not when setting value?
                 local_unit = getattr(storage, toks[0]+"_unit")
                 if local_unit is not None and units.lower() != local_unit.lower():
-                    if HAS_CONVERTER == True:
-                        try:
-                            conv = Converter(units)
-                            setattrchain(storage, variable, conv(value, units=local_unit))
-                        except Exception:
-                            _, exc_value, _ = sys.exc_info()
-                            err_mess = "CanSAS reader: could not convert"
-                            err_mess += " %s unit [%s]; expecting [%s]\n  %s" \
-                                % (variable, units, local_unit, exc_value)
-                            self.errors.add(err_mess)
-                            if optional:
-                                logger.info(err_mess)
-                            else:
-                                raise ValueError(err_mess)
-                    else:
-                        err_mess = "CanSAS reader: unrecognized %s unit [%s];"\
-                        % (variable, units)
-                        err_mess += " expecting [%s]" % local_unit
+                    try:
+                        conv = Converter(units)
+                        setattrchain(storage, variable, conv(value, units=local_unit))
+                    except Exception:
+                        _, exc_value, _ = sys.exc_info()
+                        err_mess = "CanSAS reader: could not convert"
+                        err_mess += " %s unit [%s]; expecting [%s]\n  %s" \
+                            % (variable, units, local_unit, exc_value)
                         self.errors.add(err_mess)
                         if optional:
                             logger.info(err_mess)
@@ -1332,7 +1316,7 @@ class Reader(XMLreader):
         """
         entry = get_content(location, node)
         if entry is not None and entry.text is not None:
-            exec("storage.%s = entry.text.strip()" % variable)
+            setattrchain(storage, variable, entry.text.strip())
 
 # DO NOT REMOVE Called by outside packages:
 #    sas.sasgui.perspectives.invariant.invariant_state
