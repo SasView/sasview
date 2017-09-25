@@ -1,0 +1,22 @@
+# -*- coding: utf-8 -*-
+
+def main():
+    startApplication("sasview")
+    activateItem(waitForObjectItem(":MainWindow.menubar_QMenuBar", "Window"))
+    activateItem(waitForObjectItem(":MainWindow.menuWindow_QMenu", "Cascade"))
+    activateItem(waitForObjectItem(":MainWindow.menubar_QMenuBar", "Window"))
+    activateItem(waitForObjectItem(":MainWindow.menuWindow_QMenu", "Tile"))
+    test.compare(waitForObjectExists(":qt_workspacechild.Fit panel - Active Fitting Optimizer: Levenberg-Marquardt_QWorkspaceTitleBar").x, 0)
+    test.compare(waitForObjectExists(":qt_workspacechild.Fit panel - Active Fitting Optimizer: Levenberg-Marquardt_QWorkspaceTitleBar").y, 0)
+    test.compare(str(waitForObjectExists(":qt_workspacechild.Fit panel - Active Fitting Optimizer: Levenberg-Marquardt_QWorkspaceTitleBar").windowTitle), "Fit panel - Active Fitting Optimizer: Levenberg-Marquardt")
+    test.compare(str(waitForObjectExists(":MainWindow.qt_workspacechild_QWorkspaceChild_3").windowTitle), "Welcome")
+    test.compare(waitForObjectExists(":MainWindow.qt_workspacechild_QWorkspaceChild_3").y, 0)
+    test.compare(waitForObjectExists(":MainWindow.qt_workspacechild_QWorkspaceChild_3").x, 747)
+    test.compare(waitForObjectExists(":MainWindow.qt_workspacechild_QWorkspaceChild").y, 0)
+    test.compare(str(waitForObjectExists(":MainWindow.qt_workspacechild_QWorkspaceChild").windowTitle), "Fit panel - Active Fitting Optimizer: Levenberg-Marquardt")
+    test.compare(waitForObjectExists(":MainWindow.qt_workspacechild_QWorkspaceChild").x, 0)
+    activateItem(waitForObjectItem(":MainWindow.menubar_QMenuBar", "Window"))
+    activateItem(waitForObjectItem(":MainWindow.menuWindow_QMenu", "Arrange Icons"))
+    activateItem(waitForObjectItem(":MainWindow.menubar_QMenuBar", "Window"))
+    activateItem(waitForObjectItem(":MainWindow.menuWindow_QMenu", "Next"))
+    mouseClick(waitForObject(":MainWindow_MainSasViewWindow"), 292, -9, 0, Qt.LeftButton)

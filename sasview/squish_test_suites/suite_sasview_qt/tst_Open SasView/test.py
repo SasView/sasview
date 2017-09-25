@@ -1,0 +1,20 @@
+# -*- coding: utf-8 -*-
+
+def main():
+    startApplication("sasview")
+    test.compare(waitForObjectExists(":_QSplashScreen").enabled, True)
+    test.compare(waitForObjectExists(":_QSplashScreen").enabled, True)
+    test.compare(waitForObjectExists(":MainWindow.Data Explorer_QDockWidget").enabled, True)
+    test.compare(waitForObjectExists(":MainWindow.Data Explorer_QDockWidget").visible, True)
+    test.compare(str(waitForObjectExists(":MainWindow.Data Explorer_QDockWidget").windowTitle), "Data Explorer")
+    test.compare(waitForObjectExists(":MainWindow.LogDockWidget_QDockWidget").floating, False)
+    test.compare(waitForObjectExists(":MainWindow.LogDockWidget_QDockWidget").visible, True)
+    test.compare(str(waitForObjectExists(":MainWindow.LogDockWidget_QDockWidget").windowTitle), "Log Explorer")
+    test.compare(waitForObjectExists(":MainWindow.LogDockWidget_QDockWidget").enabled, True)
+    test.compare(waitForObjectExists(":qt_tabwidget_stackedwidget.FittingWidgetUI_FittingWidget_2").enabled, True)
+    test.compare(str(waitForObjectExists(":qt_tabwidget_stackedwidget.FittingWidgetUI_FittingWidget_2").windowTitle), "Fitting")
+    test.compare(str(waitForObjectExists(":FittingWidgetUI.label_QLabel").text), "No data loaded")
+    test.compare(waitForObjectExists(":FittingWidgetUI.tabFitting_QTabWidget").enabled, True)
+    test.compare(str(waitForObjectExists(":FittingWidgetUI.cmdPlot_QPushButton").text), "Show Plot")
+    setWindowState(waitForObject(":MainWindow_MainSasViewWindow"), WindowState.Normal)
+    setWindowState(waitForObject(":MainWindow_MainSasViewWindow"), WindowState.Maximize)
