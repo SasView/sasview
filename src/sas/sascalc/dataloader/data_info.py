@@ -1175,8 +1175,10 @@ def combine_data_info_with_plottable(data, datainfo):
         final_dataset.xaxis(data._xaxis, data._xunit)
         final_dataset.yaxis(data._yaxis, data._yunit)
         final_dataset.zaxis(data._zaxis, data._zunit)
-        final_dataset.x_bins = data.x_bins
-        final_dataset.y_bins = data.y_bins
+        if len(data.data.shape) == 2:
+            n_rows, n_cols = data.data.shape
+            final_dataset.y_bins = data.qy_data[0::int(n_cols)]
+            final_dataset.x_bins = data.qx_data[:int(n_cols)]
     else:
         return_string = "Should Never Happen: _combine_data_info_with_plottable input is not a plottable1d or " + \
                         "plottable2d data object"
