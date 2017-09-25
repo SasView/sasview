@@ -14,7 +14,7 @@ import json
 import logging
 from collections import defaultdict, OrderedDict
 
-from sas.sasgui import get_user_dir
+from sas import get_user_dir
 
 USER_FILE = 'categories.json'
 

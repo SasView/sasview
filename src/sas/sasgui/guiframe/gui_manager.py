@@ -27,7 +27,7 @@ import json
 
 from matplotlib import _pylab_helpers
 
-from sas.sasgui import get_local_config, get_app_dir, get_user_dir
+from sas import get_local_config, get_custom_config, get_app_dir, get_user_dir
 from sas.sasgui.guiframe.events import EVT_CATEGORY
 from sas.sasgui.guiframe.events import EVT_STATUS
 from sas.sasgui.guiframe.events import EVT_APPEND_BOOKMARK
@@ -46,13 +46,12 @@ from sas.sasgui.guiframe.events import EVT_NEW_BATCH
 from sas.sasgui.guiframe.CategoryManager import CategoryManager
 from sas.sascalc.dataloader.loader import Loader
 from sas.sasgui.guiframe.proxy import Connection
-from sas.sasgui.guiframe.customdir import setup_custom_config
 
 logger = logging.getLogger(__name__)
 warnings.simplefilter("ignore")
 
 config = get_local_config()
-custom_config = setup_custom_config()
+custom_config = get_custom_config()
 
 # read some constants from config
 APPLICATION_STATE_EXTENSION = config.APPLICATION_STATE_EXTENSION
@@ -62,7 +61,6 @@ WELCOME_PANEL_ON = config.WELCOME_PANEL_ON
 SPLASH_SCREEN_WIDTH = config.SPLASH_SCREEN_WIDTH
 SPLASH_SCREEN_HEIGHT = config.SPLASH_SCREEN_HEIGHT
 SS_MAX_DISPLAY_TIME = config.SS_MAX_DISPLAY_TIME
-SAS_OPENCL = config.SAS_OPENCL
 if not WELCOME_PANEL_ON:
     WELCOME_PANEL_SHOW = False
 else:
@@ -137,10 +135,6 @@ if sys.platform.count("win32") < 1:
         IS_LINUX = True
         PARENT_FRAME = wx.Frame
         CHILD_FRAME = wx.Frame
-
-#Initiliaze enviromental variable with custom setting but only if variable not set
-if SAS_OPENCL and not "SAS_OPENCL" in os.environ:
-    os.environ["SAS_OPENCL"] = SAS_OPENCL
 
 class ViewerFrame(PARENT_FRAME):
     """

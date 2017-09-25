@@ -9,7 +9,7 @@ import os, sys
 
 from wx.lib.scrolledpanel import ScrolledPanel
 
-from sas.sasgui import get_local_config
+from sas import get_local_config
 from sas.sasgui.guiframe.panel_base import PanelBase
 config = get_local_config()
 

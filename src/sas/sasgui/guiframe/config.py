@@ -144,9 +144,6 @@ DEFAULT_PERSPECTIVE = 'None'
 # Time out for updating sasview
 UPDATE_TIMEOUT = 2
 
-#OpenCL option
-SAS_OPENCL = None
-
 # Time out for updating sasview
 UPDATE_TIMEOUT = 2
 

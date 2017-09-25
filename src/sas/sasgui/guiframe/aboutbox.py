@@ -24,7 +24,7 @@ import random
 import os.path
 import os
 
-from sas.sasgui import get_local_config
+from sas import get_local_config
 config = get_local_config()
 
 def launchBrowser(url):

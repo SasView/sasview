@@ -9,10 +9,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+from sas import get_local_config
+
 from sas.sascalc.dataloader.loader import Loader
 from sas.sascalc.dataloader.loader_exceptions import NoKnownLoaderException
 
-from sas.sasgui import get_local_config
 from sas.sasgui.guiframe.plugin_base import PluginBase
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.gui_style import GUIFRAME

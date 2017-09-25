@@ -20,6 +20,8 @@ import logging
 reload(sys)
 sys.setdefaultencoding("iso-8859-1")
 
+import sas
+
 APP_NAME = 'SasView'
 PLUGIN_MODEL_DIR = 'plugin_models'
 
@@ -170,10 +172,9 @@ def setup_wx():
     #uses of matplotlib
 
 
-def setup_mpl(backend='WXAgg'):
-    import sas.sasgui
+def setup_mpl(backend=None):
     # Always use private .matplotlib setup to avoid conflicts with other
-    mplconfigdir = os.path.join(sas.sasgui.get_user_dir(), '.matplotlib')
+    mplconfigdir = os.path.join(sas.get_user_dir(), '.matplotlib')
     if not os.path.exists(mplconfigdir):
         os.mkdir(mplconfigdir)
     os.environ['MPLCONFIGDIR'] = mplconfigdir
@@ -191,13 +192,13 @@ def setup_sasmodels():
     """
     Prepare sasmodels for running within sasview.
     """
-    import sas.sasgui
     # Set SAS_MODELPATH so sasmodels can find our custom models
-    plugin_dir = os.path.join(sas.sasgui.get_user_dir(), PLUGIN_MODEL_DIR)
+    plugin_dir = os.path.join(sas.get_user_dir(), PLUGIN_MODEL_DIR)
     os.environ['SAS_MODELPATH'] = plugin_dir
-    # TODO: SAS_OPENCL flag belongs in setup_sasmodels
-    # this will require restructuring of the config management so that it
-    # can occur outside of sasgui.
+    #Initiliaze enviromental variable with custom setting but only if variable not set
+    SAS_OPENCL = sas.get_custom_config().SAS_OPENCL
+    if SAS_OPENCL and "SAS_OPENCL" not in os.environ:
+        os.environ["SAS_OPENCL"] = SAS_OPENCL
 
 def run_gui():
     """
@@ -206,7 +207,7 @@ def run_gui():
     from multiprocessing import freeze_support
     freeze_support()
     setup_logging()
-    setup_mpl()
+    setup_mpl(backend='WXAgg')
     setup_sasmodels()
     setup_wx()
     SasView()
@@ -216,7 +217,10 @@ def run_cli():
     from multiprocessing import freeze_support
     freeze_support()
     setup_logging()
-    setup_mpl(backend='Agg')
+    # Use default matplotlib backend on mac/linux, but wx on windows.
+    # The problem on mac is that the wx backend requires pythonw.  On windows
+    # we are sure to wx since it is the shipped with the app.
+    setup_mpl(backend='WXAgg' if os.name == 'nt' else None)
     setup_sasmodels()
     if len(sys.argv) == 1:
         # Run sasview as an interactive python interpreter
