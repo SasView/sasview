@@ -182,7 +182,8 @@ def setup_mpl(backend=None):
     # mpl.use().  Note: Don't import matplotlib here since the script that
     # we are running may not actually need it; also, putting as little on the
     # path as we can
-    os.environ['MPLBACKEND'] = backend
+    if backend:
+        os.environ['MPLBACKEND'] = backend
 
     # TODO: ... so much for not importing matplotlib unless we need it...
     from matplotlib import backend_bases

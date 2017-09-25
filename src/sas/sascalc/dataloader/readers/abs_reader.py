@@ -103,7 +103,13 @@ class Reader(FileReader):
 
                 # Sample thickness in mm
                 try:
-                    value = float(line_toks[5])
+                    # ABS writer adds 'C' with no space to the end of the
+                    # thickness column.  Remove it if it is there before
+                    # converting the thickness.
+                    if line_toks[5][:-1] not in '012345679.':
+                        value = float(line_toks[5][:-1])
+                    else:
+                        value = float(line_toks[5])
                     if self.current_datainfo.sample.thickness_unit != 'cm':
                         conv = Converter('cm')
                         self.current_datainfo.sample.thickness = conv(value,
@@ -195,7 +201,7 @@ class Reader(FileReader):
             if line.count("The 6 columns") > 0:
                 is_data_started = True
 
-        self.remove_empty_q_values(True, True)
+        self.remove_empty_q_values()
 
         # Sanity check
         if not len(self.current_dataset.y) == len(self.current_dataset.dy):
