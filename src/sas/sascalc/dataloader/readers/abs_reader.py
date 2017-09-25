@@ -108,7 +108,7 @@ class Reader(FileReader):
 
                 # Sample thickness in mm
                 try:
-                    value = float(line_toks[5])
+                    value = float(line_toks[5][:-1])
                     if self.has_converter and \
                             self.current_datainfo.sample.thickness_unit != 'cm':
                         conv = Converter('cm')
