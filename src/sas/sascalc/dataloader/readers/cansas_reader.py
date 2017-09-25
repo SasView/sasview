@@ -591,7 +591,14 @@ class Reader(XMLreader):
             node_value = float(node_value)
         if 'unit' in attr and attr.get('unit') is not None:
             try:
-                local_unit = attr['unit']
+                unit = attr['unit']
+                unit_list = unit.split("|")
+                if len(unit_list) > 1:
+                    self.current_dataset.xaxis(unit_list[0].strip(),
+                                               unit_list[1].strip())
+                    local_unit = unit_list[1]
+                else:
+                    local_unit = unit
                 unitname = self.ns_list.current_level.get("unit", "")
                 if "SASdetector" in self.names:
                     save_in = "detector"
