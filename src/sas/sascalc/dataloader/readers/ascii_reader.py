@@ -155,7 +155,7 @@ class Reader(FileReader):
             self.set_all_to_none()
             raise FileContentsException(msg)
 
-        self.remove_empty_q_values(has_error_dx, has_error_dy)
+        self.remove_empty_q_values()
         self.current_dataset.xaxis("\\rm{Q}", 'A^{-1}')
         self.current_dataset.yaxis("\\rm{Intensity}", "cm^{-1}")
 

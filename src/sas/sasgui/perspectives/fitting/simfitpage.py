@@ -1072,7 +1072,8 @@ class SimFitPageState:
         :return: None
         """
 
-        model_map = {}
+        init_map = {}
+        final_map = {}
         if fit.fit_panel.sim_page is None:
             fit.fit_panel.add_sim_page()
         sim_page = fit.fit_panel.sim_page
@@ -1086,8 +1087,9 @@ class SimFitPageState:
                 saved_model['name'] = save_id
                 save_id = self._format_id(save_id)
                 if save_id == model_id:
-                    model_map[saved_model.pop('fit_page_source')] = \
-                        model[3].name
+                    inter_id = str(i) + str(i) + str(i) + str(i) + str(i)
+                    init_map[saved_model.pop('fit_page_source')] = inter_id
+                    final_map[inter_id] = model[3].name
                     check = bool(saved_model.pop('checked'))
                     sim_page.model_list[i][0].SetValue(check)
                     break
@@ -1105,9 +1107,12 @@ class SimFitPageState:
                 constraint_value = item.pop('constraint')
                 param = item.pop('param_cbox')
                 equality = item.pop('egal_txt')
-                for key, value in model_map.iteritems():
-                    model_cbox.replace(key, value)
-                    constraint_value.replace(key, value)
+                for key, value in init_map.items():
+                    model_cbox = model_cbox.replace(key, value)
+                    constraint_value = constraint_value.replace(key, value)
+                for key, value in final_map.items():
+                    model_cbox = model_cbox.replace(key, value)
+                    constraint_value = constraint_value.replace(key, value)
 
                 sim_page.constraints_list[index][0].SetValue(model_cbox)
                 sim_page._on_select_model(None)
