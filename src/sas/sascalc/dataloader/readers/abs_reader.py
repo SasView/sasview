@@ -201,7 +201,7 @@ class Reader(FileReader):
             if line.count("The 6 columns") > 0:
                 is_data_started = True
 
-        self.remove_empty_q_values(True, True)
+        self.remove_empty_q_values()
 
         # Sanity check
         if not len(self.current_dataset.y) == len(self.current_dataset.dy):
