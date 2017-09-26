@@ -106,7 +106,7 @@ class Reader(FileReader):
                     # ABS writer adds 'C' with no space to the end of the
                     # thickness column.  Remove it if it is there before
                     # converting the thickness.
-                    if line_toks[5][:-1] not in '012345679.':
+                    if line_toks[5][-1] not in '012345679.':
                         value = float(line_toks[5][:-1])
                     else:
                         value = float(line_toks[5])

@@ -144,9 +144,6 @@ DEFAULT_PERSPECTIVE = 'None'
 # Time out for updating sasview
 UPDATE_TIMEOUT = 2
 
-# Time out for updating sasview
-UPDATE_TIMEOUT = 2
-
 def printEVT(message):
     if __EVT_DEBUG__:
         """
