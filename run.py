@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Run sasview in place.  This allows sasview to use the python
 files in the source tree without having to call setup.py install

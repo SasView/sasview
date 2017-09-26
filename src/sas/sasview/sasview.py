@@ -17,8 +17,14 @@ import sys
 import traceback
 import logging
 
-reload(sys)
-sys.setdefaultencoding("iso-8859-1")
+try:
+    reload(sys)
+    sys.setdefaultencoding("iso-8859-1")
+except NameError:
+    # On python 3 sys.setdefaultencoding does nothing, so pass.
+    # We know we are in python 3 at this point since reload is no longer in
+    # builtins, but instead has been moved to importlib, hence the NameError.
+    pass
 
 import sas
 
@@ -232,6 +238,8 @@ def run_cli():
         except ImportError:
             import code
             code.interact(local={'exit': sys.exit})
+    elif sys.argv[1] == '-c':
+        exec(sys.argv[2])
     else:
         thing_to_run = sys.argv[1]
         sys.argv = sys.argv[1:]
