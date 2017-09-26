@@ -560,7 +560,7 @@ class PDBReader(object):
                             vol = 1.0e+24 * atom.mass / atom.density / NA
                             vol_pix = np.append(vol_pix, vol)
                         except Exception:
-                            print("Error: set the sld of %s to zero"% atom_name)
+                            logger.error("Error: set the sld of %s to zero"% atom_name)
                             sld_n = np.append(sld_n, 0.0)
                         sld_mx = np.append(sld_mx, 0)
                         sld_my = np.append(sld_my, 0)
