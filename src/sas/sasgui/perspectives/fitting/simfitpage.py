@@ -173,10 +173,6 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                 saved_model['name'] = save_id
                 save_id = self._format_id(save_id)
                 if save_id == model_id:
-                    model_map[saved_model.pop('fit_page_source')] = \
-                        model[3].name
-                    check = bool(saved_model.pop('checked'))
-                    self.model_list[i][0].SetValue(check)
                     inter_id = str(i)*5
                     init_map[saved_model.pop('fit_page_source')] = inter_id
                     final_map[inter_id] = model[3].name
