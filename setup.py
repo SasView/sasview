@@ -65,7 +65,12 @@ if os.path.isdir(sas_dir):
     #             file_path =  os.path.join(f_path, f)
     #             os.remove(file_path)
 
-if os.path.exists(SASVIEW_BUILD):
+
+# Optionally clean before build.
+dont_clean = 'update' in sys.argv
+if dont_clean:
+    sys.argv.remove('update')
+elif os.path.exists(SASVIEW_BUILD):
     print("Removing existing build directory", SASVIEW_BUILD, "for a clean build")
     shutil.rmtree(SASVIEW_BUILD)
 
