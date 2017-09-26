@@ -20,6 +20,7 @@ from copy import copy
 from sas.sascalc.fit.pluginmodel import Model1DPlugin
 from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 from sasmodels.sasview_model import load_custom_model, load_standard_models
+from sas.sasgui.perspectives.fitting.fitpage import CUSTOM_MODEL
 
 logger = logging.getLogger(__name__)
 
@@ -265,7 +266,9 @@ class ModelManagerBase:
         """
         temp = {}
         if self.is_changed():
-            return  _find_models()
+            temp =  _find_models()
+            self.last_time_dir_modified = time.time()
+            return temp
         logger.info("plugin model : %s" % str(temp))
         return temp
 
@@ -322,7 +325,7 @@ class ModelManagerBase:
         plugin_dir = find_plugins_dir()
         if os.path.isdir(plugin_dir):
             temp = os.path.getmtime(plugin_dir)
-            if  self.last_time_dir_modified != temp:
+            if  self.last_time_dir_modified < temp:
                 is_modified = True
                 self.last_time_dir_modified = temp
 
@@ -333,14 +336,14 @@ class ModelManagerBase:
         return a dictionary of model if
         new models were added else return empty dictionary
         """
+        self.plugins = []
         new_plugins = self.findModels()
-        if len(new_plugins) > 0:
-            for name, plug in  new_plugins.iteritems():
-                if name not in self.stored_plugins.keys():
-                    self.stored_plugins[name] = plug
-                    self.plugins.append(plug)
-                    self.model_dictionary[name] = plug
-            self.model_combobox.set_list("Plugin Models", self.plugins)
+        if new_plugins:
+            for name, plug in  new_plugins.items():
+                self.stored_plugins[name] = plug
+                self.plugins.append(plug)
+                self.model_dictionary[name] = plug
+            self.model_combobox.set_list(CUSTOM_MODEL, self.plugins)
             return self.model_combobox.get_list()
         else:
             return {}

@@ -616,6 +616,8 @@ class PageState(object):
         for line in lines:
             value = ""
             content = line.split(":")
+            if line == '' or len(content) == 1:
+                continue
             name = content[0]
             try:
                 value = content[1]

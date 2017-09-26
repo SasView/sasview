@@ -137,7 +137,8 @@ hiddenimports = [
  'periodictable.core',
  'sasmodels.core',
  'pyopencl',
- 'tinycc'
+ 'tinycc',
+ 'xhtml2pdf'
 ]
 
 a = Analysis([SCRIPT_TO_SOURCE],
