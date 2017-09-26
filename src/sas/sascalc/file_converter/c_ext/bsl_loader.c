@@ -278,22 +278,17 @@ static PyTypeObject CLoaderType = {
     CLoader_new,                 /* tp_new */
 };
 
-static PyMethodDef module_methods[] = {
-    {NULL}
-};
-
 /**
  * Function used to add the model class to a module
  * @param module: module to add the class to
  */
-void addCLoader(PyObject *module) {
+void addCLoader(PyObject *module)
+{
     if (PyType_Ready(&CLoaderType) < 0)
         return;
-
     Py_INCREF(&CLoaderType);
-    PyModule_AddObject(module, "bsl_loader", (PyObject *)&CLoaderType);
+    PyModule_AddObject(module, "CLoader", (PyObject *)&CLoaderType);
 }
-
 
 #define MODULE_DOC "C module for loading bsl."
 #define MODULE_NAME "bsl_loader"
@@ -312,6 +307,10 @@ void addCLoader(PyObject *module) {
 
 #if PY_MAJOR_VERSION >= 3
 
+  static PyMethodDef module_methods[] = {
+      {NULL}
+  };
+
   DLL_EXPORT PyMODINIT_FUNC MODULE_INIT3(void)
   {
     static struct PyModuleDef moduledef = {
@@ -325,22 +324,19 @@ void addCLoader(PyObject *module) {
       NULL,                /* m_clear */
       NULL,                /* m_free */
     };
-	PyObject* m = PyModule_Create(&moduledef);
-	addCLoader(m);
-	return m;
+    PyObject* m = PyModule_Create(&moduledef);
+    import_array();
+    addCLoader(m);
+    return m;
   }
 
 #else /* !PY_MAJOR_VERSION >= 3 */
 
   DLL_EXPORT PyMODINIT_FUNC MODULE_INIT2(void)
   {
-    PyObject* m = Py_InitModule4(MODULE_NAME,
-		 MODULE_METHODS,
-		 MODULE_DOC,
-		 0,
-		 PYTHON_API_VERSION
-		 );
-	addCLoader(m);
+    PyObject* m = Py_InitModule(MODULE_NAME, NULL);
+    import_array();
+    addCLoader(m);
   }
 
 #endif /* !PY_MAJOR_VERSION >= 3 */
