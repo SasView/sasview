@@ -14,20 +14,22 @@ import logging
 import py_compile
 import shutil
 from copy import copy
+
+from sasmodels.sasview_model import load_custom_model, load_standard_models
+
 # Explicitly import from the pluginmodel module so that py2exe
 # places it in the distribution. The Model1DPlugin class is used
 # as the base class of plug-in models.
+from sas.sasgui import get_user_dir
 from sas.sascalc.fit.pluginmodel import Model1DPlugin
 from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
-from sasmodels.sasview_model import load_custom_model, load_standard_models
 from sas.sasgui.perspectives.fitting.fitpage import CUSTOM_MODEL
 
 logger = logging.getLogger(__name__)
 
 
 PLUGIN_DIR = 'plugin_models'
-PLUGIN_LOG = os.path.join(os.path.expanduser("~"), '.sasview', PLUGIN_DIR,
-                          "plugins.log")
+PLUGIN_LOG = os.path.join(get_user_dir(), PLUGIN_DIR, "plugins.log")
 PLUGIN_NAME_BASE = '[plug-in] '
 
 def get_model_python_path():

@@ -14,65 +14,18 @@ import json
 import logging
 from collections import defaultdict, OrderedDict
 
+from sas.sasgui import get_user_dir
+
 USER_FILE = 'categories.json'
 
 logger = logging.getLogger(__name__)
 
-class CategoryInstaller:
+class CategoryInstaller(object):
     """
     Class for making sure all category stuff is installed
 
     Note - class is entirely static!
     """
-
-    def __init__(self):
-        """ initialization """
-
-    @staticmethod
-    def _get_installed_model_dir():
-        """
-        returns the dir where installed_models.txt should be
-        """
-        import sas.sascalc.dataloader.readers
-        return sas.sascalc.dataloader.readers.get_data_path()
-
-    @staticmethod
-    def _get_models_py_dir():
-        """
-        returns the dir where models.py should be
-        """
-        import sas.sasgui.perspectives.fitting.models
-        return sas.sasgui.perspectives.fitting.models.get_model_python_path()
-
-    @staticmethod
-    def _get_default_cat_file_dir():
-        """
-        returns the dir where default_cat.j should be
-        """
-        # The default categories file is usually found with the code, except
-        # when deploying using py2app (it will be in Contents/Resources), or
-        # py2exe (it will be in the exec dir).
-        import sas.sasview
-        cat_file = "default_categories.json"
-
-        possible_cat_file_paths = [
-            os.path.join(os.path.split(sas.sasview.__file__)[0], cat_file),           # Source
-            os.path.join(os.path.dirname(sys.executable), '..', 'Resources', cat_file), # Mac
-            os.path.join(os.path.dirname(sys.executable), cat_file)                     # Windows
-        ]
-
-        for path in possible_cat_file_paths:
-            if os.path.isfile(path):
-                return os.path.dirname(path)
-
-        raise RuntimeError('CategoryInstaller: Could not find folder containing default categories')
-
-    @staticmethod
-    def _get_home_dir():
-        """
-        returns the users sasview config dir
-        """
-        return os.path.join(os.path.expanduser("~"), ".sasview")
 
     @staticmethod
     def _regenerate_model_dict(master_category_dict):
@@ -84,7 +37,7 @@ class CategoryInstaller:
         """
         by_model_dict = defaultdict(list)
         model_enabled_dict = defaultdict(bool)
-        
+
         for category in master_category_dict:
             for (model, enabled) in master_category_dict[category]:
                 by_model_dict[model].append(category)
@@ -95,7 +48,7 @@ class CategoryInstaller:
     @staticmethod
     def _regenerate_master_dict(by_model_dict, model_enabled_dict):
         """
-        regenerates master_category_dict from by_model_dict 
+        regenerates master_category_dict from by_model_dict
         and model_enabled_dict
         returns the master category dictionary
         """
@@ -111,7 +64,7 @@ class CategoryInstaller:
         """
         returns the user data file, eg .sasview/categories.json.json
         """
-        return os.path.join(CategoryInstaller._get_home_dir(), USER_FILE)
+        return os.path.join(get_user_dir(), USER_FILE)
 
     @staticmethod
     def get_default_file():
@@ -149,7 +102,7 @@ class CategoryInstaller:
             for ind in range(len(master_category_dict[cat])):
                 model_name, enabled = master_category_dict[cat][ind]
                 if model_name not in _model_list:
-                    del_name = True 
+                    del_name = True
                     try:
                         by_model_dict.pop(model_name)
                         model_enabled_dict.pop(model_name)
