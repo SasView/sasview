@@ -29,6 +29,8 @@ from sas.qtgui.Calculators.DensityPanel import DensityPanel
 from sas.qtgui.Calculators.KiessigPanel import KiessigPanel
 from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
 from sas.qtgui.Calculators.GenericScatteringCalculator import GenericScatteringCalculator
+from sas.qtgui.Calculators.ResolutionCalculatorPanel import ResolutionCalculatorPanel
+
 
 # Perspectives
 import sas.qtgui.Perspectives as Perspectives
@@ -135,10 +137,10 @@ class GuiManager(object):
         # Add calculators - floating for usability
         self.SLDCalculator = SldPanel(self)
         self.DVCalculator = DensityPanel(self)
-        #self.KIESSIGCalculator = DensityPanel(self)#KiessigPanel(self)
         self.KIESSIGCalculator = KiessigPanel(self)
         self.SlitSizeCalculator = SlitSizeCalculator(self)
         self.GENSASCalculator = GenericScatteringCalculator(self)
+        self.ResolutionCalculator = ResolutionCalculatorPanel(self)
 
     def statusBarSetup(self):
         """
@@ -555,8 +557,7 @@ class GuiManager(object):
     def actionSAS_Resolution_Estimator(self):
         """
         """
-        print("actionSAS_Resolution_Estimator TRIGGERED")
-        pass
+        self.ResolutionCalculator.show()
 
     def actionGeneric_Scattering_Calculator(self):
         """

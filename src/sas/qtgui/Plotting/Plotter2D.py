@@ -428,7 +428,7 @@ class Plotter2DWidget(PlotterBase):
                 zmax_temp = self.vmax
 
             im = self.ax.imshow(output, interpolation='nearest',
-                                origin='lower',
+                                # origin='lower',
                                 vmin=zmin_temp, vmax=zmax_temp,
                                 cmap=self.cmap,
                                 extent=(self.xmin, self.xmax,
@@ -493,7 +493,7 @@ class Plotter2DWidget(PlotterBase):
     def replacePlot(self, id, new_plot):
         """
         Replace data in current chart.
-        This effectlvely refreshes the chart with changes to one of its plots
+        This effectively refreshes the chart with changes to one of its plots
         """
         self.plot(data=new_plot)
 
