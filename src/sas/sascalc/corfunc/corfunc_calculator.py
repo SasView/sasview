@@ -123,6 +123,7 @@ class CorfuncCalculator(object):
         iq = self._data.y
 
         params, s2 = self._fit_data(q, iq)
+        # Extrapolate to 100*Qmax in experimental data
         qs = np.arange(0, q[-1]*100, (q[1]-q[0]))
         iqs = s2(qs)
 
