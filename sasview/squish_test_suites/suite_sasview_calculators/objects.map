@@ -1,0 +1,86 @@
+:DensityPanel.Close_QPushButton	{text='Close' type='QPushButton' unnamed='1' visible='1' window=':DensityPanel_DensityPanel'}
+:DensityPanel.Reset_QPushButton	{text='Reset' type='QPushButton' unnamed='1' visible='1' window=':DensityPanel_DensityPanel'}
+:DensityPanel.editMassDensity_QLineEdit	{name='editMassDensity' type='QLineEdit' visible='1' window=':DensityPanel_DensityPanel'}
+:DensityPanel.editMolarMass_QLineEdit	{name='editMolarMass' type='QLineEdit' visible='1' window=':DensityPanel_DensityPanel'}
+:DensityPanel.editMolarVolume_QLineEdit	{name='editMolarVolume' type='QLineEdit' visible='1' window=':DensityPanel_DensityPanel'}
+:DensityPanel.editMolecularFormula_QLineEdit	{name='editMolecularFormula' type='QLineEdit' visible='1' window=':DensityPanel_DensityPanel'}
+:DensityPanel_DensityPanel	{name='DensityPanel' type='DensityPanel' visible='1'}
+:GenericScatteringCalculator.cmdClose_QPushButton	{name='cmdClose' type='QPushButton' visible='1' window=':GenericScatteringCalculator_GenericScatteringCalculator'}
+:GenericScatteringCalculator.cmdCompute_QPushButton	{name='cmdCompute' type='QPushButton' visible='1' window=':GenericScatteringCalculator_GenericScatteringCalculator'}
+:GenericScatteringCalculator.cmdHelp_QPushButton	{name='cmdHelp' type='QPushButton' visible='1' window=':GenericScatteringCalculator_GenericScatteringCalculator'}
+:GenericScatteringCalculator.cmdReset_QPushButton	{name='cmdReset' type='QPushButton' visible='1' window=':GenericScatteringCalculator_GenericScatteringCalculator'}
+:GenericScatteringCalculator.groupBox_Datafile_QGroupBox	{name='groupBox_Datafile' type='QGroupBox' visible='1' window=':GenericScatteringCalculator_GenericScatteringCalculator'}
+:GenericScatteringCalculator.groupBox_InputParam_QGroupBox	{name='groupBox_InputParam' type='QGroupBox' visible='1' window=':GenericScatteringCalculator_GenericScatteringCalculator'}
+:GenericScatteringCalculator.groupBox_Qrange_QGroupBox	{name='groupBox_Qrange' type='QGroupBox' visible='1' window=':GenericScatteringCalculator_GenericScatteringCalculator'}
+:GenericScatteringCalculator.groupBox_SLDPixelInfo_QGroupBox	{name='groupBox_SLDPixelInfo' type='QGroupBox' visible='1' window=':GenericScatteringCalculator_GenericScatteringCalculator'}
+:GenericScatteringCalculator_GenericScatteringCalculator	{name='GenericScatteringCalculator' type='GenericScatteringCalculator' visible='1'}
+:KiessigPanel.computeButton_QPushButton	{name='computeButton' type='QPushButton' visible='1' window=':KiessigPanel_KiessigPanel'}
+:KiessigPanel.groupBox_2_QGroupBox	{name='groupBox_2' type='QGroupBox' visible='1' window=':KiessigPanel_KiessigPanel'}
+:KiessigPanel.groupBox_QGroupBox	{name='groupBox' type='QGroupBox' visible='1' window=':KiessigPanel_KiessigPanel'}
+:KiessigPanel_KiessigPanel	{name='KiessigPanel' type='KiessigPanel' visible='1'}
+:MainWindow.Welcome to SasView_QLabel	{text='Welcome to SasView' type='QLabel' unnamed='1' visible='1' window=':MainWindow_MainSasViewWindow'}
+:MainWindow.menuTool_QMenu	{name='menuTool' type='QMenu' visible='1' window=':MainWindow_MainSasViewWindow'}
+:MainWindow.menubar_QMenuBar	{name='menubar' type='QMenuBar' visible='1' window=':MainWindow_MainSasViewWindow'}
+:MainWindow_MainSasViewWindow	{name='MainWindow' type='MainSasViewWindow' visible='1'}
+:QFileDialog.Cancel_QPushButton	{text='Cancel' type='QPushButton' unnamed='1' visible='1' window=':QFileDialog_QFileDialog'}
+:QFileDialog.fileNameLabel_QLabel	{name='fileNameLabel' type='QLabel' visible='1' window=':QFileDialog_QFileDialog'}
+:QFileDialog.fileTypeCombo_QComboBox	{name='fileTypeCombo' type='QComboBox' visible='1' window=':QFileDialog_QFileDialog'}
+:QFileDialog.splitter_QSplitter	{name='splitter' type='QSplitter' visible='1' window=':QFileDialog_QFileDialog'}
+:QFileDialog.toParentButton_QToolButton	{name='toParentButton' type='QToolButton' visible='1' window=':QFileDialog_QFileDialog'}
+:QFileDialog_QFileDialog	{name='QFileDialog' type='QFileDialog' visible='1'}
+:SldPanel.Close_QPushButton	{text='Close' type='QPushButton' unnamed='1' visible='1' window=':SldPanel_SldPanel'}
+:SldPanel.Reset_QPushButton	{text='Reset' type='QPushButton' unnamed='1' visible='1' window=':SldPanel_SldPanel'}
+:SldPanel.groupBoxInput_QGroupBox	{name='groupBoxInput' type='QGroupBox' visible='1' window=':SldPanel_SldPanel'}
+:SldPanel.groupBoxOutput_QGroupBox	{name='groupBoxOutput' type='QGroupBox' visible='1' window=':SldPanel_SldPanel'}
+:SldPanel_SldPanel	{name='SldPanel' type='SldPanel' visible='1'}
+:SlitSizeCalculator.browseButton_QPushButton	{name='browseButton' type='QPushButton' visible='1' window=':SlitSizeCalculator_SlitSizeCalculator'}
+:SlitSizeCalculator.closeButton_QPushButton	{name='closeButton' type='QPushButton' visible='1' window=':SlitSizeCalculator_SlitSizeCalculator'}
+:SlitSizeCalculator.groupBox_2_QGroupBox	{name='groupBox_2' type='QGroupBox' visible='1' window=':SlitSizeCalculator_SlitSizeCalculator'}
+:SlitSizeCalculator.groupBox_QGroupBox	{name='groupBox' type='QGroupBox' visible='1' window=':SlitSizeCalculator_SlitSizeCalculator'}
+:SlitSizeCalculator_SlitSizeCalculator	{name='SlitSizeCalculator' type='SlitSizeCalculator' visible='1'}
+:_Plotter2D	{type='Plotter2D' unnamed='1' visible='1'}
+:fileNameEdit_QLineEdit	{buddy=':QFileDialog.fileNameLabel_QLabel' name='fileNameEdit' type='QLineEdit' visible='1'}
+:frame.stackedWidget_QStackedWidget	{container=':splitter.frame_QFrame' name='stackedWidget' type='QStackedWidget' visible='1'}
+:groupBox.data_file_QLineEdit	{container=':SlitSizeCalculator.groupBox_QGroupBox' name='data_file' type='QLineEdit' visible='1'}
+:groupBox.deltaq_in_QLineEdit	{container=':KiessigPanel.groupBox_QGroupBox' name='deltaq_in' type='QLineEdit' visible='1'}
+:groupBoxInput.editMassDensity_QLineEdit	{container=':SldPanel.groupBoxInput_QGroupBox' name='editMassDensity' type='QLineEdit' visible='1'}
+:groupBoxInput.editMolecularFormula_QLineEdit	{container=':SldPanel.groupBoxInput_QGroupBox' name='editMolecularFormula' type='QLineEdit' visible='1'}
+:groupBoxInput.editWavelength_QLineEdit	{container=':SldPanel.groupBoxInput_QGroupBox' name='editWavelength' type='QLineEdit' visible='1'}
+:groupBoxOutput.editCuKaSldReal_QLineEdit	{container=':SldPanel.groupBoxOutput_QGroupBox' name='editCuKaSldReal' type='QLineEdit' visible='1'}
+:groupBoxOutput.editMoKaSldReal_QLineEdit	{container=':SldPanel.groupBoxOutput_QGroupBox' name='editMoKaSldReal' type='QLineEdit' visible='1'}
+:groupBoxOutput.editNeutronAbsXs_QLineEdit	{container=':SldPanel.groupBoxOutput_QGroupBox' name='editNeutronAbsXs' type='QLineEdit' visible='1'}
+:groupBoxOutput.editNeutronIncXs_QLineEdit	{container=':SldPanel.groupBoxOutput_QGroupBox' name='editNeutronIncXs' type='QLineEdit' visible='1'}
+:groupBoxOutput.editNeutronLength_QLineEdit	{container=':SldPanel.groupBoxOutput_QGroupBox' name='editNeutronLength' type='QLineEdit' visible='1'}
+:groupBoxOutput.editNeutronSldReal_QLineEdit	{container=':SldPanel.groupBoxOutput_QGroupBox' name='editNeutronSldReal' type='QLineEdit' visible='1'}
+:groupBox_2.lengthscale_out_QLineEdit	{container=':KiessigPanel.groupBox_2_QGroupBox' name='lengthscale_out' type='QLineEdit' visible='1'}
+:groupBox_2.slit_length_out_QLineEdit	{container=':SlitSizeCalculator.groupBox_2_QGroupBox' name='slit_length_out' type='QLineEdit' visible='1'}
+:groupBox_5.txtMx_QLineEdit	{container=':groupBox_SLDPixelInfo.groupBox_5_QGroupBox' name='txtMx' type='QLineEdit' visible='1'}
+:groupBox_5.txtMy_QLineEdit	{container=':groupBox_SLDPixelInfo.groupBox_5_QGroupBox' name='txtMy' type='QLineEdit' visible='1'}
+:groupBox_5.txtMz_QLineEdit	{container=':groupBox_SLDPixelInfo.groupBox_5_QGroupBox' name='txtMz' type='QLineEdit' visible='1'}
+:groupBox_5.txtNucl_QLineEdit	{container=':groupBox_SLDPixelInfo.groupBox_5_QGroupBox' name='txtNucl' type='QLineEdit' visible='1'}
+:groupBox_6.txtXnodes_QLineEdit	{container=':groupBox_SLDPixelInfo.groupBox_6_QGroupBox' name='txtXnodes' type='QLineEdit' visible='1'}
+:groupBox_6.txtYnodes_QLineEdit	{container=':groupBox_SLDPixelInfo.groupBox_6_QGroupBox' name='txtYnodes' type='QLineEdit' visible='1'}
+:groupBox_6.txtZnodes_QLineEdit	{container=':groupBox_SLDPixelInfo.groupBox_6_QGroupBox' name='txtZnodes' type='QLineEdit' visible='1'}
+:groupBox_Datafile.cbShape_QComboBox	{container=':GenericScatteringCalculator.groupBox_Datafile_QGroupBox' name='cbShape' type='QComboBox' visible='1'}
+:groupBox_Datafile.cmdDraw_QPushButton	{container=':GenericScatteringCalculator.groupBox_Datafile_QGroupBox' name='cmdDraw' type='QPushButton' visible='1'}
+:groupBox_Datafile.cmdLoad_QPushButton	{container=':GenericScatteringCalculator.groupBox_Datafile_QGroupBox' name='cmdLoad' type='QPushButton' visible='1'}
+:groupBox_Datafile.txtData_QLineEdit	{container=':GenericScatteringCalculator.groupBox_Datafile_QGroupBox' name='txtData' type='QLineEdit' visible='1'}
+:groupBox_InputParam.txtBackground_QLineEdit	{container=':GenericScatteringCalculator.groupBox_InputParam_QGroupBox' name='txtBackground' type='QLineEdit' visible='1'}
+:groupBox_InputParam.txtScale_QLineEdit	{container=':GenericScatteringCalculator.groupBox_InputParam_QGroupBox' name='txtScale' type='QLineEdit' visible='1'}
+:groupBox_InputParam.txtSolventSLD_QLineEdit	{container=':GenericScatteringCalculator.groupBox_InputParam_QGroupBox' name='txtSolventSLD' type='QLineEdit' visible='1'}
+:groupBox_InputParam.txtTotalVolume_QLineEdit	{container=':GenericScatteringCalculator.groupBox_InputParam_QGroupBox' name='txtTotalVolume' type='QLineEdit' visible='1'}
+:groupBox_InputParam.txtUpFracIn_QLineEdit	{container=':GenericScatteringCalculator.groupBox_InputParam_QGroupBox' name='txtUpFracIn' type='QLineEdit' visible='1'}
+:groupBox_InputParam.txtUpFracOut_QLineEdit	{container=':GenericScatteringCalculator.groupBox_InputParam_QGroupBox' name='txtUpFracOut' type='QLineEdit' visible='1'}
+:groupBox_InputParam.txtUpTheta_QLineEdit	{container=':GenericScatteringCalculator.groupBox_InputParam_QGroupBox' name='txtUpTheta' type='QLineEdit' visible='1'}
+:groupBox_Qrange.txtNoQBins_QLineEdit	{container=':GenericScatteringCalculator.groupBox_Qrange_QGroupBox' name='txtNoQBins' type='QLineEdit' visible='1'}
+:groupBox_SLDPixelInfo.cmdDrawpoints_QPushButton	{container=':GenericScatteringCalculator.groupBox_SLDPixelInfo_QGroupBox' name='cmdDrawpoints' type='QPushButton' visible='1'}
+:groupBox_SLDPixelInfo.cmdSave_QPushButton	{container=':GenericScatteringCalculator.groupBox_SLDPixelInfo_QGroupBox' name='cmdSave' type='QPushButton' visible='1'}
+:groupBox_SLDPixelInfo.groupBox_5_QGroupBox	{container=':GenericScatteringCalculator.groupBox_SLDPixelInfo_QGroupBox' name='groupBox_5' type='QGroupBox' visible='1'}
+:groupBox_SLDPixelInfo.groupBox_6_QGroupBox	{container=':GenericScatteringCalculator.groupBox_SLDPixelInfo_QGroupBox' name='groupBox_6' type='QGroupBox' visible='1'}
+:groupBox_SLDPixelInfo.groupBox_Stepsize_QGroupBox	{container=':GenericScatteringCalculator.groupBox_SLDPixelInfo_QGroupBox' name='groupBox_Stepsize' type='QGroupBox' visible='1'}
+:groupBox_SLDPixelInfo.txtNoPixels_QLineEdit	{container=':GenericScatteringCalculator.groupBox_SLDPixelInfo_QGroupBox' name='txtNoPixels' type='QLineEdit' visible='1'}
+:groupBox_Stepsize.txtXstepsize_QLineEdit	{container=':groupBox_SLDPixelInfo.groupBox_Stepsize_QGroupBox' name='txtXstepsize' type='QLineEdit' visible='1'}
+:groupBox_Stepsize.txtYstepsize_QLineEdit	{container=':groupBox_SLDPixelInfo.groupBox_Stepsize_QGroupBox' name='txtYstepsize' type='QLineEdit' visible='1'}
+:groupBox_Stepsize.txtZstepsize_QLineEdit	{container=':groupBox_SLDPixelInfo.groupBox_Stepsize_QGroupBox' name='txtZstepsize' type='QLineEdit' visible='1'}
+:splitter.frame_QFrame	{container=':QFileDialog.splitter_QSplitter' name='frame' type='QFrame' visible='1'}
+:stackedWidget.listView_QListView	{container=':frame.stackedWidget_QStackedWidget' name='listView' type='QListView' visible='1'}

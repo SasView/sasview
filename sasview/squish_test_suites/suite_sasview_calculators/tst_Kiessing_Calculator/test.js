@@ -1,0 +1,30 @@
+function main() {
+    startApplication("sasview");
+    activateItem(waitForObjectItem(":MainWindow.menubar_QMenuBar", "Tool"));
+    activateItem(waitForObjectItem(":MainWindow.menuTool_QMenu", "Kiessig Thickness Calculator"));
+    test.compare(waitForObjectExists(":KiessigPanel_KiessigPanel").windowTitle, "Kiessig Thickness Calculator");
+    test.compare(waitForObjectExists(":KiessigPanel_KiessigPanel").visible, true);
+    test.compare(waitForObjectExists(":groupBox.deltaq_in_QLineEdit").text, "0.05");
+    test.compare(waitForObjectExists(":groupBox.deltaq_in_QLineEdit").readOnly, false);
+    test.compare(waitForObjectExists(":groupBox_2.lengthscale_out_QLineEdit").text, "");
+    test.compare(waitForObjectExists(":groupBox_2.lengthscale_out_QLineEdit").readOnly, true);
+    type(waitForObject(":groupBox.deltaq_in_QLineEdit"), "<Backspace>");
+    type(waitForObject(":groupBox.deltaq_in_QLineEdit"), "<Backspace>");
+    type(waitForObject(":groupBox.deltaq_in_QLineEdit"), "1");
+    type(waitForObject(":groupBox.deltaq_in_QLineEdit"), "<Tab>");
+    clickButton(waitForObject(":KiessigPanel.computeButton_QPushButton"));
+    test.compare(waitForObjectExists(":groupBox_2.lengthscale_out_QLineEdit").text, "62.832");
+    test.compare(waitForObjectExists(":groupBox_2.lengthscale_out_QLineEdit").readOnly, true);
+    mouseDrag(waitForObject(":groupBox.deltaq_in_QLineEdit"), 34, 7, -67, 5, 1, Qt.LeftButton);
+    type(waitForObject(":groupBox.deltaq_in_QLineEdit"), "rrrr");
+    clickButton(waitForObject(":KiessigPanel.computeButton_QPushButton"));
+    test.compare(waitForObjectExists(":groupBox_2.lengthscale_out_QLineEdit").text, "");
+    test.compare(waitForObjectExists(":groupBox_2.lengthscale_out_QLineEdit").readOnly, true);
+    mouseDrag(waitForObject(":groupBox.deltaq_in_QLineEdit"), 35, 6, -94, 10, 1, Qt.LeftButton);
+    type(waitForObject(":groupBox.deltaq_in_QLineEdit"), "0");
+    clickButton(waitForObject(":KiessigPanel.computeButton_QPushButton"));
+    mouseDrag(waitForObject(":groupBox.deltaq_in_QLineEdit"), 20, 13, -33, -1, 1, Qt.LeftButton);
+    type(waitForObject(":groupBox.deltaq_in_QLineEdit"), "<Backspace>");
+    mouseClick(waitForObject(":groupBox_2.lengthscale_out_QLineEdit"), 44, 8, 0, Qt.LeftButton);
+    sendEvent("QCloseEvent", waitForObject(":KiessigPanel_KiessigPanel"));
+}
