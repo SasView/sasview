@@ -16,7 +16,6 @@ import matplotlib.patches as patches
 import numpy
 import sys
 import logging
-import math
 import os
 import re
 
@@ -31,9 +30,6 @@ _SOURCE_MASS = {'Alpha': 6.64465620E-24,
 
 BG_WHITE = "background-color: rgb(255, 255, 255);"
 BG_RED = "background-color: rgb(244, 170, 164);"
-
-_INTENSITY = 368428
-_LAMBDA_ARRAY = [[0, 1e+16], [_INTENSITY, _INTENSITY]]
 
 
 class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
@@ -84,8 +80,6 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
 
         # dQ 2d image
         self.image = None
-        # results of sigmas
-        self.sigma_strings = ' '
         # Source selection dic
         self.source_mass = _SOURCE_MASS
         # detector coordinate of estimation of sigmas
@@ -236,7 +230,7 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
             if q_input is None:
                 text_edit.setStyleSheet(QtCore.QString(BG_RED))
                 self.cmdCompute.setEnabled(False)
-                logging.info('Qx and Qy are lists of comma-separated numbers.')
+                logging.info('Qx and Qy should contain one or more comma-separated numbers.')
             else:
                 text_edit.setStyleSheet(QtCore.QString(BG_WHITE))
                 self.cmdCompute.setEnabled(True)
@@ -255,7 +249,7 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
                     text_edit.setStyleSheet(QtCore.QString(BG_RED))
                     self.cmdCompute.setEnabled(False)
                     logging.info(
-                        'Qx and Qy have the same number of elements.')
+                        'Qx and Qy should have the same number of elements.')
 
                 else:
                     text_edit.setStyleSheet(QtCore.QString(BG_WHITE))
@@ -409,7 +403,6 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
         self.txtSigma_lamd.setText('3.168e-05')
 
         self.image = None
-        self.sigma_strings = ' '
         self.source_mass = _SOURCE_MASS
         self.det_coordinate = 'cartesian'
         self.num_wave = 10
@@ -495,13 +488,12 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
             ymin = min(self.qy)
             ymax = max(self.qy)
             if not self._validate_q_input(self.qx, self.qy):
-                raise
+                raise ValueError("Invalid Q input")
         except:
             msg = "An error occurred during the resolution computation."
             msg += "Please check your inputs..."
             logging.warning(msg)
             return
-            # raise ValueError, "Invalid Q Input..."
 
         # Validate the q inputs
         q_input = self._validate_q_input(self.qx, self.qy)
@@ -522,25 +514,23 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
 
         # Compute and get the image plot
         try:
-            self.sigma_strings = '\nResolution: Computation is finished. \n'
-            cal_res = threads.deferToThread(self.complete,
-                                            map(self._map_func,
-                                                self.qx,
-                                                self.qy,
-                                                qx_min,
-                                                qx_max,
-                                                qy_min, qy_max)[0],
-                                            self.image)
+            cal_res = threads.deferToThread(self.map_wrapper,
+                                            self.calc_func,
+                                            self.qx,
+                                            self.qy,
+                                            qx_min,
+                                            qx_max,
+                                            qy_min, qy_max)
 
-            cal_res.addCallback(self.new2DPlot)
+            cal_res.addCallback(self.complete)
 
-            logging.info("Computation is in progress...")
+            # logging.info("Computation is in progress...")
             self.cmdCompute.setText('Wait...')
             self.cmdCompute.setEnabled(False)
         except:
             raise
 
-    def complete(self, image, elapsed=None):
+    def complete(self, image):
         """
         Complete computation
         """
@@ -558,103 +548,92 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
         self.txtSigma_lamd.setText(str(sigma_lamd))
         self.txt1DSigma.setText(str(sigma_1d))
 
-        msg = self.sigma_strings
-        logging.info(msg + '\n stop')
         self.cmdCompute.setText('Compute')
         self.cmdCompute.setEnabled(True)
+
+        self.new2DPlot()
+
         return
 
-    def _map_func(self, qx, qy, qx_min, qx_max, qy_min, qy_max):
+    def map_wrapper(self, func, qx, qy, qx_min, qx_max, qy_min, qy_max):
         """
         Prepare the Mapping for the computation
         : params qx, qy, qx_min, qx_max, qy_min, qy_max:
         : return: image (numpy array)
         """
+        image = map(func, qx, qy,
+                    qx_min, qx_max,
+                    qy_min, qy_max)[0]
+        return image
+
+    def calc_func(self, qx, qy, qx_min, qx_max, qy_min, qy_max):
+        """
+        Perform the calculation for a given set of Q values.
+        : return: image (numpy array)
+        """
         try:
             qx_value = float(qx)
             qy_value = float(qy)
-        except:
-            raise
+        except :
+            raise ValueError
+
         # calculate 2D resolution distribution image
         image = self.resolution.compute_and_plot(qx_value, qy_value,
                                                  qx_min, qx_max, qy_min,
                                                  qy_max,
                                                  self.det_coordinate)
-        # record sigmas
-        self.sigma_strings += " At Qx = %s, Qy = %s; \n" % (qx_value, qy_value)
-        self._sigma_strings()
-        logging.info(self.sigma_strings)
-
         return image
 
     # #################################
     # Legacy validators
     # #################################
-    def _sigma_strings(self):
-        """
-        Recode sigmas as strings
-        """
-        sigma_r = self.formatNumber(self.resolution.sigma_1)
-        sigma_phi = self.formatNumber(self.resolution.sigma_2)
-        sigma_lamd = self.formatNumber(self.resolution.sigma_lamd)
-        sigma_1d = self.formatNumber(self.resolution.sigma_1d)
-        # Set output values
-        self.sigma_strings += "   sigma_x = %s\n" % sigma_r
-        self.sigma_strings += "   sigma_y = %s\n" % sigma_phi
-        self.sigma_strings += "   sigma_lamd = %s\n" % sigma_lamd
-        self.sigma_strings += "   sigma_1D = %s\n" % sigma_1d
-
-    def _string2list(self, string):
+    def _string2list(self, input_string):
         """
         Change NNN, NNN to list,ie. [NNN, NNN] where NNN is a number
         """
-        new_string = []
+        new_numbers_list = []
         # check the number of floats
         try:
-            strg = float(string)
-            new_string.append(strg)
+            strg = float(input_string)
+            new_numbers_list.append(strg)
         except:
-            string_split = string.split(',')
+            string_split = input_string.split(',')
             if len(string_split) == 2:
                 str_1 = string_split[0]
                 str_2 = string_split[1]
-                new_string.append(float(str_1))
-                new_string.append(float(str_2))
+                new_numbers_list.append(float(str_1))
+                new_numbers_list.append(float(str_2))
             elif len(string_split) == 1:
                 str_1 = string_split[0]
-                new_string.append(float(str_1))
+                new_numbers_list.append(float(str_1))
             else:
-                msg = "The numbers must be one or two (separated by ',')..."
+                msg = "The numbers must be one or two (separated by ',')"
                 logging.info(msg)
                 raise RuntimeError, msg
 
-        return new_string
+        return new_numbers_list
 
-    def _string2inputlist(self, string):
+    def _string2inputlist(self, input_string):
         """
         Change NNN, NNN,... to list,ie. [NNN, NNN,...] where NNN is a number
-        : return new_string: string like list
+        : return new_list: string like list
         """
-        new_string = []
-        string_split = string.split(',')
-        length = len(string_split)
-        for ind in range(length):
-            try:
-                value = float(string_split[ind])
-                new_string.append(value)
-            except:
-                logging.error(sys.exc_value)
+        new_list = []
+        string_split = input_string.split(',')
+        try:
+            new_list = [float(t) for t in string_split]
+        except:
+            logging.error(sys.exc_value)
+        return new_list
 
-        return new_string
-
-    def _str2longlist(self, string):
+    def _str2longlist(self, input_string):
         """
-        Change NNN, NNN,... to list, NNN - NNN ; NNN to list, or float to list
-        : return new_string: string like list
-        """
+          Change NNN, NNN,... to list, NNN - NNN ; NNN to list, or float to list
+          : return new_string: string like list
+          """
         try:
             # is float
-            out = [float(string)]
+            out = [float(input_string)]
             return out
         except:
             if self.cbWaveColor.currentText() == 'Monochromatic':
@@ -662,12 +641,12 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
             else:
                 try:
                     # has a '-'
-                    if string.count('-') > 0:
-                        value = string.split('-')
+                    if input_string.count('-') > 0:
+                        value = input_string.split('-')
                         if value[1].count(';') > 0:
                             # has a ';'
                             last_list = value[1].split(';')
-                            num = math.ceil(float(last_list[1]))
+                            num = numpy.ceil(float(last_list[1]))
                             max_value = float(last_list[0])
                             self.num_wave = num
                         else:
@@ -676,12 +655,12 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
                             max_value = float(value[1])
                         min_value = float(value[0])
                         # make a list
-                        bin_size = math.fabs(max_value - min_value) / (num - 1)
+                        bin_size = numpy.fabs(max_value - min_value) / (num - 1)
                         out = [min_value + bin_size * bnum for bnum in
                                range(num)]
                         return out
-                    if string.count(',') > 0:
-                        out = self._string2inputlist(string)
+                    if input_string.count(',') > 0:
+                        out = self._string2inputlist(input_string)
                         return out
                 except:
                     logging.error(sys.exc_value)
@@ -738,12 +717,13 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
         """
         self.plotter = Plotter2DWidget(self, quickplot=True)
         self.plotter.scale = 'linear'
+        self.plotter.cmap = None
         layout = QtGui.QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         self.graphicsView.setLayout(layout)
         layout.addWidget(self.plotter)
 
-    def new2DPlot(self, res_cal):
+    def new2DPlot(self):
         """
         Create a new 2D data instance based on computing results
         """

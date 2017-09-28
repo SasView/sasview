@@ -50,8 +50,8 @@ class ResolutionCalculatorPanelTest(unittest.TestCase):
         self.assertIsInstance(self.widget, QtGui.QDialog)
         self.assertEqual(self.widget.windowTitle(), "Q Resolution Estimator")
         # size
-        self.assertEqual(self.widget.size().height(), 667)
-        self.assertEqual(self.widget.size().width(), 1310)
+        self.assertEqual(self.widget.size().height(), 561)
+        self.assertEqual(self.widget.size().width(), 1034)
 
         # visibility
         self.assertFalse(self.widget.lblSpectrum.isVisible())
@@ -268,7 +268,7 @@ class ResolutionCalculatorPanelTest(unittest.TestCase):
 
         # thread called
         self.assertTrue(threads.deferToThread.called)
-        self.assertEqual(threads.deferToThread.call_args_list[0][0][0].__name__, 'complete')
+        self.assertEqual(threads.deferToThread.call_args_list[0][0][0].__name__, 'map_wrapper')
 
         # the Compute button changed caption and got disabled
         self.assertEqual(self.widget.cmdCompute.text(), 'Wait...')

@@ -9,14 +9,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1310</width>
-    <height>667</height>
+    <width>1034</width>
+    <height>561</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>1310</width>
-    <height>667</height>
+    <width>800</width>
+    <height>550</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -28,82 +28,511 @@
   <property name="windowTitle">
    <string>Q Resolution Estimator</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_8">
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>:/res/ball.ico</normaloff>:/res/ball.ico</iconset>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_6">
+   <item row="0" column="1" rowspan="5">
+    <widget class="Line" name="line_4">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2" rowspan="3">
+    <widget class="QGraphicsView" name="graphicsView">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>430</width>
+       <height>430</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Q Location of the Estimation</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_9">
+      <property name="margin">
+       <number>6</number>
+      </property>
+      <item row="0" column="0">
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_21">
+          <property name="minimumSize">
+           <size>
+            <width>21</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Qx:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="txtQx">
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Type the Qx value.</string>
+          </property>
+          <property name="text">
+           <string>0.0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="lblUnitQx">
+          <property name="minimumSize">
+           <size>
+            <width>18</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_22">
+          <property name="minimumSize">
+           <size>
+            <width>21</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Qy:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="txtQy">
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Type the Qy value.</string>
+          </property>
+          <property name="text">
+           <string>0.0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLabel" name="lblUnitQy">
+          <property name="minimumSize">
+           <size>
+            <width>18</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="2" column="0" rowspan="2">
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>Standard Deviation of the Resolution Distribution</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4">
+      <property name="margin">
+       <number>6</number>
+      </property>
+      <item row="0" column="0">
+       <layout class="QGridLayout" name="gridLayout_2">
+        <property name="bottomMargin">
+         <number>5</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label">
+          <property name="minimumSize">
+           <size>
+            <width>76</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Sigma_x:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="txtSigma_x">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>75</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>The x component of the geometric resolution, excluding sigma_lamda.</string>
+          </property>
+          <property name="text">
+           <string>0.0008288</string>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="lblUnitSigmax">
+          <property name="minimumSize">
+           <size>
+            <width>16</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>78</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="0" column="4">
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>Sigma_y:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="5">
+         <widget class="QLineEdit" name="txtSigma_y">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>75</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>The y component of the geometric resolution, excluding sigma_lamda.</string>
+          </property>
+          <property name="text">
+           <string>0.0008288</string>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="6">
+         <widget class="QLabel" name="lblUnitSigmay">
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_2">
+          <property name="minimumSize">
+           <size>
+            <width>76</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Sigma_lamd:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLabel" name="lblUnitSigmalamd">
+          <property name="minimumSize">
+           <size>
+            <width>16</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="4">
+         <widget class="QLabel" name="label_6">
+          <property name="minimumSize">
+           <size>
+            <width>70</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>(1D) Sigma:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="5">
+         <widget class="QLineEdit" name="txt1DSigma">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>75</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Resolution in 1-dimension (for 1D data).</string>
+          </property>
+          <property name="text">
+           <string>0.0008289</string>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="6">
+         <widget class="QLabel" name="lblUnit1DSigma">
+          <property name="minimumSize">
+           <size>
+            <width>16</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="txtSigma_lamd">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>75</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>The wavelength contribution in the radial direction. Note: The phi component is always zero.</string>
+          </property>
+          <property name="text">
+           <string>3.168e-05</string>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="3" column="2">
+    <spacer name="horizontalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="4" column="0">
+    <layout class="QGridLayout" name="gridLayout_3">
+     <item row="0" column="1">
+      <widget class="QPushButton" name="cmdReset">
+       <property name="minimumSize">
+        <size>
+         <width>75</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Reset to default SAS instrumental parameter</string>
+       </property>
+       <property name="text">
+        <string>Reset</string>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QPushButton" name="cmdCompute">
+       <property name="toolTip">
+        <string>Compute the resolution of Q from SAS instrumental parameter</string>
+       </property>
+       <property name="text">
+        <string>Compute</string>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="3">
+      <widget class="QPushButton" name="cmdClose">
+       <property name="minimumSize">
+        <size>
+         <width>75</width>
+         <height>23</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Close this window</string>
+       </property>
+       <property name="text">
+        <string>Close</string>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="4">
+      <widget class="QPushButton" name="cmdHelp">
+       <property name="minimumSize">
+        <size>
+         <width>75</width>
+         <height>23</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Help on using the Resolution Calculator</string>
+       </property>
+       <property name="text">
+        <string>Help</string>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
    <item row="0" column="0">
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
       <string>Instrumental Parameters</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_7">
-      <item row="0" column="0">
+     <layout class="QFormLayout" name="formLayout">
+      <property name="fieldGrowthPolicy">
+       <enum>QFormLayout::FieldsStayAtSizeHint</enum>
+      </property>
+      <property name="margin">
+       <number>6</number>
+      </property>
+      <item row="0" column="0" colspan="2">
        <layout class="QGridLayout" name="gridLayout_5">
-        <item row="8" column="3">
-         <widget class="QLineEdit" name="txtDetectorSize">
-          <property name="minimumSize">
-           <size>
-            <width>100</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="baseSize">
-           <size>
-            <width>100</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Number of Pixels on Detector.</string>
-          </property>
-          <property name="text">
-           <string>128, 128</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="3">
-         <widget class="QLineEdit" name="txtSampleApertureSize">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>100</width>
-            <height>23</height>
-           </size>
-          </property>
-          <property name="baseSize">
-           <size>
-            <width>100</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="focusPolicy">
-           <enum>Qt::StrongFocus</enum>
-          </property>
-          <property name="toolTip">
-           <string>Sample Aperture Size.</string>
-          </property>
-          <property name="text">
-           <string>1.27</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="2">
-         <widget class="QComboBox" name="cbWaveColor">
-          <item>
-           <property name="text">
-            <string>Monochromatic</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>TOF</string>
-           </property>
-          </item>
-         </widget>
-        </item>
+        <property name="leftMargin">
+         <number>1</number>
+        </property>
+        <property name="topMargin">
+         <number>1</number>
+        </property>
+        <property name="rightMargin">
+         <number>1</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
+        <property name="verticalSpacing">
+         <number>-1</number>
+        </property>
         <item row="0" column="0">
          <widget class="QLabel" name="label_26">
           <property name="text">
@@ -111,213 +540,14 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="3">
-         <widget class="QLineEdit" name="txtWavelength">
-          <property name="minimumSize">
-           <size>
-            <width>100</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="baseSize">
-           <size>
-            <width>100</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="focusPolicy">
-           <enum>Qt::StrongFocus</enum>
-          </property>
-          <property name="toolTip">
-           <string>Wavelength of the Neutrons.</string>
-          </property>
-          <property name="text">
-           <string>6.0</string>
-          </property>
-          <property name="echoMode">
-           <enum>QLineEdit::Normal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="3">
-         <widget class="QLineEdit" name="txtSourceApertureSize">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>100</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="baseSize">
-           <size>
-            <width>100</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="focusPolicy">
-           <enum>Qt::StrongFocus</enum>
-          </property>
-          <property name="toolTip">
-           <string>Source Aperture Size.</string>
-          </property>
-          <property name="text">
-           <string>3.81</string>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="0">
-         <widget class="QLabel" name="label_33">
-          <property name="text">
-           <string>Sample Offset:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0" colspan="2">
-         <widget class="QLabel" name="label_30">
-          <property name="text">
-           <string>Sample Aperture Size:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="3">
-         <widget class="QLineEdit" name="txtSample2DetectorDistance">
-          <property name="minimumSize">
-           <size>
-            <width>100</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="baseSize">
-           <size>
-            <width>100</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Sample Aperture to Detector Distance.</string>
-          </property>
-          <property name="text">
-           <string>1000</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_27">
-          <property name="text">
-           <string>Wavelength:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0" colspan="2">
-         <widget class="QLabel" name="label_29">
-          <property name="text">
-           <string>Source Aperture Size:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="3">
-         <widget class="QLineEdit" name="txtSampleOffset">
-          <property name="minimumSize">
-           <size>
-            <width>100</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="baseSize">
-           <size>
-            <width>100</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Sample Offset.</string>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="3">
-         <widget class="QLineEdit" name="txtDetectorPixSize">
-          <property name="minimumSize">
-           <size>
-            <width>100</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="baseSize">
-           <size>
-            <width>100</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Detector Pixel Size.</string>
-          </property>
-          <property name="text">
-           <string>0.5, 0.5</string>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="0" colspan="2">
-         <widget class="QLabel" name="label_35">
-          <property name="text">
-           <string>Detector Pixel Size:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="3">
-         <widget class="QLineEdit" name="txtSource2SampleDistance">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>100</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="baseSize">
-           <size>
-            <width>100</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="focusPolicy">
-           <enum>Qt::StrongFocus</enum>
-          </property>
-          <property name="toolTip">
-           <string>Source to Sample Aperture Distance.</string>
-          </property>
-          <property name="text">
-           <string>1627</string>
-          </property>
-         </widget>
-        </item>
-        <item row="8" column="0" colspan="2">
-         <widget class="QLabel" name="label_34">
-          <property name="text">
-           <string>Number of Pixels on Detector:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0" colspan="2">
-         <widget class="QLabel" name="label_28">
-          <property name="text">
-           <string>Wavelength Spread:</string>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="1">
          <widget class="QComboBox" name="cbSource">
+          <property name="minimumSize">
+           <size>
+            <width>80</width>
+            <height>26</height>
+           </size>
+          </property>
           <property name="toolTip">
            <string>Source Selection: Affect on the gravitational contribution.</string>
           </property>
@@ -356,134 +586,37 @@
           </item>
          </widget>
         </item>
-        <item row="5" column="0" colspan="3">
-         <widget class="QLabel" name="label_31">
-          <property name="text">
-           <string>Source to Sample Aperture Distance:</string>
+        <item row="0" column="2">
+         <widget class="QComboBox" name="cbWaveColor">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
-         </widget>
-        </item>
-        <item row="2" column="3">
-         <widget class="QLineEdit" name="txtWavelengthSpread">
           <property name="minimumSize">
            <size>
-            <width>100</width>
-            <height>20</height>
+            <width>127</width>
+            <height>26</height>
            </size>
-          </property>
-          <property name="baseSize">
-           <size>
-            <width>100</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="focusPolicy">
-           <enum>Qt::StrongFocus</enum>
-          </property>
-          <property name="toolTip">
-           <string>Wavelength Spread of Neutrons.</string>
-          </property>
-          <property name="text">
-           <string>0.125</string>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="0" colspan="3">
-         <widget class="QLabel" name="label_32">
-          <property name="text">
-           <string>Sample Aperture to Detector Distance:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="4" rowspan="10">
-         <layout class="QGridLayout" name="gridLayout_6">
-          <item row="1" column="0">
-           <widget class="QLabel" name="lblUnitWavelength">
-            <property name="text">
-             <string>Å</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="lblUnitWavelengthSpread">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_39">
-            <property name="text">
-             <string>cm</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_40">
-            <property name="text">
-             <string>cm</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="label_41">
-            <property name="text">
-             <string>cm</string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="0">
-           <widget class="QLabel" name="label_42">
-            <property name="text">
-             <string>cm</string>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="0">
-           <widget class="QLabel" name="label_43">
-            <property name="text">
-             <string>cm</string>
-            </property>
-           </widget>
-          </item>
-          <item row="8" column="0">
-           <widget class="QLabel" name="label_44">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="9" column="0">
-           <widget class="QLabel" name="label_45">
-            <property name="text">
-             <string>cm</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_36">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item row="1" column="2">
-         <widget class="QComboBox" name="cbCustomSpectrum">
-          <property name="toolTip">
-           <string>Wavelength Spectrum: Intensity vs. wavelength.</string>
           </property>
           <item>
            <property name="text">
-            <string>Flat</string>
+            <string>Monochromatic</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Add New</string>
+            <string>TOF</string>
            </property>
           </item>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_27">
+          <property name="text">
+           <string>Wavelength:</string>
+          </property>
          </widget>
         </item>
         <item row="1" column="1">
@@ -505,313 +638,425 @@
           </property>
          </widget>
         </item>
-       </layout>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="0" column="1" rowspan="7">
-    <widget class="Line" name="line_4">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="2" rowspan="3">
-    <widget class="QGraphicsView" name="graphicsView">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QGroupBox" name="groupBox_2">
-     <property name="title">
-      <string>Q Location of the Estimation</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_9">
-      <item row="0" column="0">
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_21">
-          <property name="text">
-           <string>Qx:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLineEdit" name="txtQx">
-          <property name="minimumSize">
-           <size>
-            <width>100</width>
-            <height>21</height>
-           </size>
-          </property>
-          <property name="baseSize">
-           <size>
-            <width>100</width>
-            <height>21</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Type the Qx value.</string>
-          </property>
-          <property name="text">
-           <string>0.0</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="2">
-         <widget class="QLabel" name="lblUnitQx">
-          <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_22">
-          <property name="text">
-           <string>Qy:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QLineEdit" name="txtQy">
-          <property name="minimumSize">
-           <size>
-            <width>100</width>
-            <height>21</height>
-           </size>
-          </property>
-          <property name="baseSize">
-           <size>
-            <width>100</width>
-            <height>21</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Type the Qy value.</string>
-          </property>
-          <property name="text">
-           <string>0.0</string>
-          </property>
-         </widget>
-        </item>
         <item row="1" column="2">
-         <widget class="QLabel" name="lblUnitQy">
-          <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="Line" name="line_2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="0">
-    <widget class="QGroupBox" name="groupBox_3">
-     <property name="title">
-      <string>Standard Deviation of the Resolution Distribtion</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_4">
-      <item row="0" column="0">
-       <layout class="QGridLayout" name="gridLayout_2">
-        <item row="0" column="0">
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>Sigma_x:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLineEdit" name="txtSigma_x">
-          <property name="enabled">
-           <bool>true</bool>
+         <widget class="QComboBox" name="cbCustomSpectrum">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
           <property name="minimumSize">
            <size>
-            <width>100</width>
-            <height>21</height>
-           </size>
-          </property>
-          <property name="baseSize">
-           <size>
-            <width>100</width>
-            <height>21</height>
+            <width>130</width>
+            <height>26</height>
            </size>
           </property>
           <property name="toolTip">
-           <string>The x component of the geometric resolution, excluding sigma_lamda.</string>
+           <string>Wavelength Spectrum: Intensity vs. wavelength.</string>
           </property>
-          <property name="text">
-           <string>0.0008288</string>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
+          <item>
+           <property name="text">
+            <string>Flat</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Add New</string>
+           </property>
+          </item>
          </widget>
         </item>
-        <item row="0" column="2">
-         <widget class="QLabel" name="lblUnitSigmax">
-          <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <item row="1" column="3">
+         <widget class="QLineEdit" name="txtWavelength">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
-         </widget>
-        </item>
-        <item row="0" column="3">
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
+          <property name="minimumSize">
            <size>
-            <width>78</width>
+            <width>75</width>
             <height>20</height>
            </size>
           </property>
-         </spacer>
-        </item>
-        <item row="0" column="4">
-         <widget class="QLabel" name="label_5">
-          <property name="text">
-           <string>Sigma_y:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="5">
-         <widget class="QLineEdit" name="txtSigma_y">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>100</width>
-            <height>21</height>
-           </size>
-          </property>
           <property name="baseSize">
            <size>
             <width>100</width>
-            <height>21</height>
+            <height>20</height>
            </size>
           </property>
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
+          </property>
           <property name="toolTip">
-           <string>The y component of the geometric resolution, excluding sigma_lamda.</string>
+           <string>Wavelength of the Neutrons.</string>
           </property>
           <property name="text">
-           <string>0.0008288</string>
+           <string>6.0</string>
           </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="6">
-         <widget class="QLabel" name="lblUnitSigmay">
-          <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Sigma_lamd:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="2">
-         <widget class="QLabel" name="lblUnitSigmalamd">
-          <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <property name="echoMode">
+           <enum>QLineEdit::Normal</enum>
           </property>
          </widget>
         </item>
         <item row="1" column="4">
-         <widget class="QLabel" name="label_6">
+         <widget class="QLabel" name="lblUnitWavelength">
+          <property name="minimumSize">
+           <size>
+            <width>18</width>
+            <height>21</height>
+           </size>
+          </property>
           <property name="text">
-           <string>(1D) Sigma:</string>
+           <string>Å</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="5">
-         <widget class="QLineEdit" name="txt1DSigma">
-          <property name="enabled">
-           <bool>true</bool>
+        <item row="2" column="0" colspan="2">
+         <widget class="QLabel" name="label_28">
+          <property name="text">
+           <string>Wavelength Spread:</string>
           </property>
+         </widget>
+        </item>
+        <item row="2" column="3">
+         <widget class="QLineEdit" name="txtWavelengthSpread">
           <property name="minimumSize">
            <size>
-            <width>100</width>
-            <height>21</height>
+            <width>75</width>
+            <height>20</height>
            </size>
           </property>
           <property name="baseSize">
            <size>
             <width>100</width>
-            <height>21</height>
+            <height>20</height>
            </size>
           </property>
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
+          </property>
           <property name="toolTip">
-           <string>Resolution in 1-dimension (for 1D data).</string>
+           <string>Wavelength Spread of Neutrons.</string>
           </property>
           <property name="text">
-           <string>0.0008289</string>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
+           <string>0.125</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="6">
-         <widget class="QLabel" name="lblUnit1DSigma">
+        <item row="3" column="0" colspan="2">
+         <widget class="QLabel" name="label_29">
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Å&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>Source Aperture Size:</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QLineEdit" name="txtSigma_lamd">
-          <property name="enabled">
-           <bool>true</bool>
+        <item row="3" column="3">
+         <widget class="QLineEdit" name="txtSourceApertureSize">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
           <property name="minimumSize">
            <size>
-            <width>100</width>
-            <height>21</height>
+            <width>75</width>
+            <height>20</height>
            </size>
           </property>
           <property name="baseSize">
            <size>
             <width>100</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
+          </property>
+          <property name="toolTip">
+           <string>Source Aperture Size.</string>
+          </property>
+          <property name="text">
+           <string>3.81</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="4">
+         <widget class="QLabel" name="label_39">
+          <property name="minimumSize">
+           <size>
+            <width>18</width>
             <height>21</height>
            </size>
           </property>
+          <property name="text">
+           <string>cm</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0" colspan="2">
+         <widget class="QLabel" name="label_30">
+          <property name="text">
+           <string>Sample Aperture Size:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="3">
+         <widget class="QLineEdit" name="txtSampleApertureSize">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>75</width>
+            <height>23</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
+          </property>
           <property name="toolTip">
-           <string>The wavelength contribution in the radial direction. Note: The phi component is always zero.</string>
+           <string>Sample Aperture Size.</string>
           </property>
           <property name="text">
-           <string>3.168e-05</string>
+           <string>1.27</string>
           </property>
-          <property name="readOnly">
-           <bool>true</bool>
+         </widget>
+        </item>
+        <item row="4" column="4">
+         <widget class="QLabel" name="label_40">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>18</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>cm</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0" colspan="3">
+         <widget class="QLabel" name="label_31">
+          <property name="text">
+           <string>Source to Sample Aperture Distance:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="3">
+         <widget class="QLineEdit" name="txtSource2SampleDistance">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>75</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
+          </property>
+          <property name="toolTip">
+           <string>Source to Sample Aperture Distance.</string>
+          </property>
+          <property name="text">
+           <string>1627</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="4">
+         <widget class="QLabel" name="label_41">
+          <property name="minimumSize">
+           <size>
+            <width>18</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>cm</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0" colspan="3">
+         <widget class="QLabel" name="label_32">
+          <property name="text">
+           <string>Sample Aperture to Detector Distance:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="3">
+         <widget class="QLineEdit" name="txtSample2DetectorDistance">
+          <property name="minimumSize">
+           <size>
+            <width>75</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Sample Aperture to Detector Distance.</string>
+          </property>
+          <property name="text">
+           <string>1000</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="4">
+         <widget class="QLabel" name="label_42">
+          <property name="minimumSize">
+           <size>
+            <width>18</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>cm</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="0">
+         <widget class="QLabel" name="label_33">
+          <property name="text">
+           <string>Sample Offset:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="3">
+         <widget class="QLineEdit" name="txtSampleOffset">
+          <property name="minimumSize">
+           <size>
+            <width>75</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Sample Offset.</string>
+          </property>
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="4">
+         <widget class="QLabel" name="label_43">
+          <property name="minimumSize">
+           <size>
+            <width>18</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>cm</string>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="0" colspan="2">
+         <widget class="QLabel" name="label_34">
+          <property name="text">
+           <string>Number of Pixels on Detector:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="3">
+         <widget class="QLineEdit" name="txtDetectorSize">
+          <property name="minimumSize">
+           <size>
+            <width>75</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Number of Pixels on Detector.</string>
+          </property>
+          <property name="text">
+           <string>128, 128</string>
+          </property>
+         </widget>
+        </item>
+        <item row="9" column="0" colspan="2">
+         <widget class="QLabel" name="label_35">
+          <property name="text">
+           <string>Detector Pixel Size:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="9" column="3">
+         <widget class="QLineEdit" name="txtDetectorPixSize">
+          <property name="minimumSize">
+           <size>
+            <width>75</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Detector Pixel Size.</string>
+          </property>
+          <property name="text">
+           <string>0.5, 0.5</string>
+          </property>
+         </widget>
+        </item>
+        <item row="9" column="4">
+         <widget class="QLabel" name="label_45">
+          <property name="minimumSize">
+           <size>
+            <width>18</width>
+            <height>21</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>cm</string>
           </property>
          </widget>
         </item>
@@ -820,89 +1065,10 @@
      </layout>
     </widget>
    </item>
-   <item row="5" column="0">
-    <widget class="Line" name="line_3">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="0">
-    <layout class="QGridLayout" name="gridLayout_3">
-     <item row="0" column="0">
-      <widget class="QPushButton" name="cmdReset">
-       <property name="toolTip">
-        <string>Reset to default SAS instrumental parameter</string>
-       </property>
-       <property name="text">
-        <string>Reset</string>
-       </property>
-       <property name="autoDefault">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QPushButton" name="cmdCompute">
-       <property name="toolTip">
-        <string>Compute the resolution of Q from SAS instrumental parameter</string>
-       </property>
-       <property name="text">
-        <string>Compute</string>
-       </property>
-       <property name="autoDefault">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QPushButton" name="cmdClose">
-       <property name="toolTip">
-        <string>Close this window</string>
-       </property>
-       <property name="text">
-        <string>Close</string>
-       </property>
-       <property name="autoDefault">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="3">
-      <widget class="QPushButton" name="cmdHelp">
-       <property name="toolTip">
-        <string>Help on using the Resolution Calculator</string>
-       </property>
-       <property name="text">
-        <string>Help</string>
-       </property>
-       <property name="autoDefault">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="5" column="2">
-    <spacer name="horizontalSpacer_2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
   </layout>
   <zorder>groupBox</zorder>
   <zorder>groupBox_2</zorder>
-  <zorder>line</zorder>
-  <zorder>line_2</zorder>
   <zorder>groupBox_3</zorder>
-  <zorder>line_3</zorder>
   <zorder>graphicsView</zorder>
   <zorder>line_4</zorder>
   <zorder>horizontalSpacer_2</zorder>
@@ -923,14 +1089,14 @@
   <tabstop>txtQx</tabstop>
   <tabstop>txtQy</tabstop>
   <tabstop>cmdCompute</tabstop>
-  <tabstop>cmdClose</tabstop>
   <tabstop>cmdHelp</tabstop>
   <tabstop>cmdReset</tabstop>
-  <tabstop>txtSigma_x</tabstop>
+  <tabstop>cmdClose</tabstop>
   <tabstop>txtSigma_lamd</tabstop>
   <tabstop>txtSigma_y</tabstop>
   <tabstop>txt1DSigma</tabstop>
   <tabstop>graphicsView</tabstop>
+  <tabstop>txtSigma_x</tabstop>
  </tabstops>
  <resources/>
  <connections/>
