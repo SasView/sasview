@@ -225,8 +225,11 @@ class Reader(FileReader):
                     continue
 
                 for data_point in data_set:
-                    if data_point.dtype.char == 'S':
-                        data_point = decode(bytes(data_point))
+                    if isinstance(data_point, np.ndarray):
+                        if data_point.dtype.char == 'S':
+                            data_point = decode(bytes(data_point))
+                    else:
+                        data_point = decode(data_point)
                     # Top Level Meta Data
                     if key == u'definition':
                         self.current_datainfo.meta_data['reader'] = data_point
