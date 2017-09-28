@@ -588,10 +588,10 @@ class Reader(XMLreader):
         if 'unit' in attr and attr.get('unit') is not None:
             try:
                 unit = attr['unit']
+                # Split the units to retain backwards compatibility with
+                # projects, analyses, and saved data from v4.1.0
                 unit_list = unit.split("|")
                 if len(unit_list) > 1:
-                    self.current_dataset.xaxis(unit_list[0].strip(),
-                                               unit_list[1].strip())
                     local_unit = unit_list[1]
                 else:
                     local_unit = unit
@@ -1236,7 +1236,6 @@ class Reader(XMLreader):
             units = entry.get('unit')
             if units is not None:
                 toks = variable.split('.')
-                # TODO: why split() when accessing unit, but not when setting value?
                 local_unit = getattr(storage, toks[0]+"_unit")
                 if local_unit is not None and units.lower() != local_unit.lower():
                     try:
