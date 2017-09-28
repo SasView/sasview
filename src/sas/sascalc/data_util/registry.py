@@ -120,8 +120,9 @@ class ExtensionRegistry(object):
         """
         Call the loader for the file type of path.
 
-        :raise ValueError: if no loader is available.
-        :raise KeyError: if format is not available.
+        :raises ValueError: if no loader is available.
+        :raises KeyError: if format is not available.
+
         May raise a loader-defined exception if loader fails.
         """
         loaders = []

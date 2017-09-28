@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Provide Line function (y= Ax + B). Until July 10, 2016 this function provided
-(y= A + Bx).  This however was contrary to all the other code using it which 
+(y= A + Bx).  This however was contrary to all the other code using it which
 assumed (y= mx+b) or in this nomenclature (y=Ax + B). This lead to some
 contortions in the code and worse incorrect calculations until now for at least
 some of the functions.  This seemed the easiest to fix particularly since this
@@ -66,15 +66,16 @@ class LineModel(object):
         """
         Evaluate the model
 
-        :note: This is the function called by fitDialog to calculate the
-        the y(xmin) and y(xmax), but the only difference between this and
-        runXY is when the if statement is true. I however cannot see what that
-        function is for.  It needs to be documented here or removed.
-        PDB 7/10/16 
-
         :param x: simple value
 
         :return: (Line value)
+
+        .. note::
+            This is the function called by fitDialog to calculate the
+            the y(xmin) and y(xmax), but the only difference between this and
+            runXY is when the if statement is true. I however cannot see what
+            that function is for.  It needs to be documented here or removed.
+            PDB 7/10/16
         """
         if x.__class__.__name__ == 'list':
             return self._line(x[0] * math.cos(x[1])) * \
@@ -88,16 +89,16 @@ class LineModel(object):
     def runXY(self, x=0.0):
         """
         Evaluate the model.
-        
-        :note: This is to be what is called by fitDialog for the actual fit
-        but the only difference between this and run is when the if 
-        statement is true. I however cannot see what that function
-        is for.  It needs to be documented here or removed. PDB 7/10/16 
 
         :param x: simple value
 
         :return: Line value
 
+        .. note::
+            This is to be what is called by fitDialog for the actual fit
+            the only difference between this and run is when the if
+            statement is true. I however cannot see what that function
+            is for.  It needs to be documented here or removed. PDB 7/10/16
         """
         if x.__class__.__name__ == 'list':
             return self._line(x[0]) * self._line(x[1])

@@ -394,8 +394,10 @@ class SlicerParameterPanel(wx.Dialog):
     def apply_params_list_and_process(self, evt=None):
         """
         Event based parameter setting.
+
         :param evt: Event triggered to apply parameters to a list of plots
-                    evt should have attrs plot_list and params
+           evt should have attrs plot_list and params
+
         """
         if evt is None:
             return
@@ -466,7 +468,7 @@ class SlicerParameterPanel(wx.Dialog):
     def send_to_fitting(self, fit=FIT_OPTIONS[0], file_list=None):
         """
         Send a list of data to the fitting perspective
-        :param fit: fit type desired 
+        :param fit: fit type desired
         :param file_list: list of loaded file names to send to fit
         """
         if fit in FIT_OPTIONS and fit != FIT_OPTIONS[0] and \

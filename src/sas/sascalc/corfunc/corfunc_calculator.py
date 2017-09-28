@@ -176,8 +176,8 @@ class CorfuncCalculator(object):
     def extract_parameters(self, transformed_data):
         """
         Extract the interesting measurements from a correlation function
-        :param transformed_data: Fourier transformation of the
-            extrapolated data
+
+        :param transformed_data: Fourier transformation of the extrapolated data
         """
         # Calculate indexes of maxima and minima
         x = transformed_data.x
