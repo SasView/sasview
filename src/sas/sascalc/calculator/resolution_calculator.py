@@ -92,6 +92,7 @@ class ResolutionCalculator(object):
         : qx_value: x component of q
         : qy_value: y component of q
         """
+
         # make sure to update all the variables need.
         # except lambda, dlambda, and intensity
         self.get_all_instrument_params()
@@ -151,9 +152,6 @@ class ResolutionCalculator(object):
             out = self.get_image(qx_value, qy_value, sig1_list[ind],
                                  sig2_list[ind], sigr_list[ind],
                                  qx_min, qx_max, qy_min, qy_max, coord)
-            # this is the case of q being outside the detector
-            #if numpy.all(out==0.0):
-            #    continue
             image = out
             # set variance as sigmas
             sigma_1 += sig1_list[ind] * sig1_list[ind] * self.intensity
@@ -185,13 +183,14 @@ class ResolutionCalculator(object):
             sigma_r = 0
             sigma_2 = 0
             sigma1d = 0
+
         if len(self.image) > 0:
             self.image += image_out
         else:
             self.image = image_out
 
         # plot image
-        return self.plot_image(self.image)
+        return self.image  # self.plot_image(self.image)
 
     def setup_tof(self, wavelength, wavelength_spread):
         """
@@ -213,7 +212,7 @@ class ResolutionCalculator(object):
     def compute(self, wavelength, wavelength_spread, qx_value, qy_value,
                 coord='cartesian', tof=False):
         """
-        Compute the Q resoltuion in || and + direction of 2D
+        Compute the Q resolution in || and + direction of 2D
         : qx_value: x component of q
         : qy_value: y component of q
         """

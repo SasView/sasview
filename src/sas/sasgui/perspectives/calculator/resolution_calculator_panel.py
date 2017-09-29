@@ -933,7 +933,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
 
     def _sigma_strings(self):
         """
-        Recode sigmas as strins
+        Recode sigmas as strings
         """
         sigma_r = self.format_number(self.resolution.sigma_1)
         sigma_phi = self.format_number(self.resolution.sigma_2)
@@ -1207,7 +1207,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         source_hint += " the gravitational contribution.\n"
         source_hint += "Mass of %s: m = %s [g]" % \
                             (selection, str(self.resolution.get_neutron_mass()))
-        #source_tip.SetTip(source_hint)
+        # source_tip.SetTip(source_hint)
         self.mass_txt.ToolTip.SetTip(source_hint)
 
     def _on_source_color(self, event=None):
