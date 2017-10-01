@@ -127,6 +127,8 @@ class PlotterBase(QtGui.QWidget):
     def title(self, title=""):
         """ title setter """
         self._title = title
+        # Set the object name to satisfy the Squish object picker
+        self.canvas.setObjectName(title)
 
     @property
     def xLabel(self, xlabel=""):
@@ -270,8 +272,10 @@ class PlotterBase(QtGui.QWidget):
         """
         # Please remove me from your database.
         PlotHelper.deletePlot(PlotHelper.idOfPlot(self))
+
         # Notify the listeners
         self.manager.communicator.activeGraphsSignal.emit(PlotHelper.currentPlots())
+
         event.accept()
 
     def onImageSave(self):

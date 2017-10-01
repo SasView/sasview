@@ -89,7 +89,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.currentChanged.connect(self.onTabSwitch)
         self.communicator = self.parent.communicator()
         self.communicator.fileReadSignal.connect(self.loadFromURL)
-        self.communicator.activeGraphsSignal.connect(self.updateGraphCombo)
+        self.communicator.activeGraphsSignal.connect(self.updateGraphCount)
         self.communicator.activeGraphName.connect(self.updatePlotName)
         self.communicator.plotUpdateSignal.connect(self.updatePlot)
         self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
@@ -416,15 +416,28 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cbgraph.setCurrentIndex(ind)
         self.cbgraph.setItemText(ind, current_name)
 
+    def updateGraphCount(self, graph_list):
+        """
+        Modify the graph name combo and potentially remove
+        deleted graphs
+        """
+        self.updateGraphCombo(graph_list)
+
+        if not self.active_plots:
+            return
+        new_plots = [PlotHelper.plotById(plot) for plot in graph_list]
+        active_plots_copy = self.active_plots.keys()
+        for plot in active_plots_copy:
+            if self.active_plots[plot] in new_plots:
+                continue
+            self.active_plots.pop(plot)
+
     def updateGraphCombo(self, graph_list):
         """
         Modify Graph combo box on graph add/delete
         """
         orig_text = self.cbgraph.currentText()
         self.cbgraph.clear()
-        #graph_titles= [str(graph) for graph in graph_list]
-
-        #self.cbgraph.insertItems(0, graph_titles)
         self.cbgraph.insertItems(0, graph_list)
         ind = self.cbgraph.findText(orig_text)
         if ind > 0:
@@ -453,7 +466,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         for plot in plots:
             plot_id = plot.id
             if plot_id in self.active_plots.keys():
-                self.active_plots[plot_id].replacePlot(plot_id, plot_to_show)
+                self.active_plots[plot_id].replacePlot(plot_id, plot)
             else:
                 self.plotData([(None, plot)])
 
@@ -485,10 +498,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         # Call show on requested plots
         # All same-type charts in one plot
-        new_plot = Plotter(self)
+        #if isinstance(plot_set, Data1D):
+        #    new_plot = Plotter(self)
 
         for item, plot_set in plots:
             if isinstance(plot_set, Data1D):
+                if not 'new_plot' in locals():
+                    new_plot = Plotter(self)
                 new_plot.plot(plot_set)
             elif isinstance(plot_set, Data2D):
                 self.addDataPlot2D(plot_set, item)
@@ -496,7 +512,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 msg = "Incorrect data type passed to Plotting"
                 raise AttributeError, msg
 
-        if plots and \
+        if 'new_plot' in locals() and \
             hasattr(new_plot, 'data') and \
             isinstance(new_plot.data, Data1D):
                 self.addPlot(new_plot)
@@ -520,6 +536,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Update the global plot counter
         title = str(PlotHelper.idOfPlot(new_plot))
         new_plot.setWindowTitle(title)
+
+        # Set the object name to satisfy the Squish object picker
+        new_plot.setObjectName(title)
 
         # Add the plot to the workspace
         self.parent.workspace().addWindow(new_plot)
