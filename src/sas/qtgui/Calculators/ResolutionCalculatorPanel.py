@@ -598,14 +598,8 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
             new_numbers_list.append(strg)
         except:
             string_split = input_string.split(',')
-            if len(string_split) == 2:
-                str_1 = string_split[0]
-                str_2 = string_split[1]
-                new_numbers_list.append(float(str_1))
-                new_numbers_list.append(float(str_2))
-            elif len(string_split) == 1:
-                str_1 = string_split[0]
-                new_numbers_list.append(float(str_1))
+            if len(string_split) == 1 or len(string_split) == 2:
+                new_numbers_list = [float(item) for item in string_split]
             else:
                 msg = "The numbers must be one or two (separated by ',')"
                 logging.info(msg)
@@ -733,6 +727,9 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
         dy_size = (qy_max - qy_min) / (1000 - 1)
         x_val = numpy.arange(qx_min, qx_max, dx_size)
         y_val = numpy.arange(qy_max, qy_min, -dy_size)
+
+        if len(self.plotter.ax.patches):
+            self.plotter.ax.patches[0].remove()
 
         self.drawLines()
 
