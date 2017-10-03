@@ -50,8 +50,8 @@ class ResolutionCalculatorPanelTest(unittest.TestCase):
         self.assertIsInstance(self.widget, QtGui.QDialog)
         self.assertEqual(self.widget.windowTitle(), "Q Resolution Estimator")
         # size
-        self.assertEqual(self.widget.size().height(), 561)
-        self.assertEqual(self.widget.size().width(), 1034)
+        self.assertEqual(self.widget.size().height(), 540)
+        self.assertEqual(self.widget.size().width(), 876)
 
         # visibility
         self.assertFalse(self.widget.lblSpectrum.isVisible())
