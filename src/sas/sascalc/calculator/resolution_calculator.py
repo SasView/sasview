@@ -815,6 +815,8 @@ class ResolutionCalculator(object):
         """
         if len(distance) < 1 or len(distance) > 2:
             raise RuntimeError, "The length of the size must be one or two."
+        if len(distance) == 1:
+            distance.append(0)
         self.sample.set_distance(distance)
 
     def set_sample2detector_distance(self, distance):
@@ -825,6 +827,8 @@ class ResolutionCalculator(object):
         """
         if len(distance) < 1 or len(distance) > 2:
             raise RuntimeError, "The length of the size must be one or two."
+        if len(distance) == 1:
+            distance.append(0)
         self.detector.set_distance(distance)
 
     def get_all_instrument_params(self):
