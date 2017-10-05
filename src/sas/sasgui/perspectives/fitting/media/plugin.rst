@@ -18,6 +18,9 @@ There are essentially three ways to generate new fitting models for SasView:
 * By writing a model from scratch outside of SasView (only recommended for
   code monkeys!)
 
+**What follows below is quite technical. If you just want a helping hand to get 
+started creating your own models see** :ref:`Adding_your_own_models`.
+
 Overview
 ^^^^^^^^
 
@@ -45,7 +48,7 @@ the application bundle as
 */Applications/SasView 4.0.app/Contents/Resources/sasmodels-data/models*.
 
 Other models are available for download from our
-`Model Marketplace <http://marketplace.sasview.org/>`_. You can contribute your own models to the 
+`Model Marketplace <http://marketplace.sasview.org/>`_. You can contribute your own models to the
 Marketplace aswell.
 
 Create New Model Files
@@ -79,7 +82,7 @@ The model interface definition is in the .py file.  This file contains:
     - without spaces (use underscores to separate words instead)
     - without any capitalization or CamelCase
     - without incorporating the word "model"
-    - examples: *barbell* **not** *BarBell*; *broad_peak* **not** *BroadPeak*; 
+    - examples: *barbell* **not** *BarBell*; *broad_peak* **not** *BroadPeak*;
       *barbell* **not** *BarBellModel*
 
 - a **model title**:
@@ -99,7 +102,7 @@ The model interface definition is in the .py file.  This file contains:
    - this is ReStructuredText enclosed between the r""" and """ delimiters
      at the top of the *.py* file
    - what you write here is abstracted into the SasView help documentation
-   - this is what other users will refer to when they want to know what your model does; 
+   - this is what other users will refer to when they want to know what your model does;
      so please be helpful!
 
 - a **definition** of the model:
@@ -124,7 +127,7 @@ The model interface definition is in the .py file.  This file contains:
    - the *.py* file should also contain a comment identifying *who*
      converted/created the model file
 
-Models that do not conform to these requirements will *never* be incorporated 
+Models that do not conform to these requirements will *never* be incorporated
 into the built-in library.
 
 More complete documentation for the sasmodels package can be found at
@@ -305,9 +308,9 @@ Next comes the parameter table.  For example::
 **parameters = [["name", "units", default, [min,max], "type", "tooltip"],...]**
 defines the parameters that form the model.
 
-**Note: The order of the parameters in the definition will be the order of the 
-parameters in the user interface and the order of the parameters in Iq(), 
-Iqxy() and form_volume(). And** *scale* **and** *background* **parameters are 
+**Note: The order of the parameters in the definition will be the order of the
+parameters in the user interface and the order of the parameters in Iq(),
+Iqxy() and form_volume(). And** *scale* **and** *background* **parameters are
 implicit to all models, so they do not need to be included in the parameter table.**
 
 - **"name"** is the name of the parameter shown on the FitPage.
@@ -488,7 +491,7 @@ This expands into the equivalent C code::
 *Iqxy* is similar to *Iq*, except it uses parameters *qx, qy* instead of *q*,
 and it includes orientation parameters.
 
-*form_volume* defines the volume of the shape. As in python models, it 
+*form_volume* defines the volume of the shape. As in python models, it
 includes only the volume parameters.
 
 *Iqxy* will default to *Iq(sqrt(qx**2 + qy**2), par1, ...)* and
@@ -622,7 +625,7 @@ file in the order given, otherwise these functions will not be available.
         (`link to code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/polevl.c>`_)
 
     sas_gamma(x):
-        Gamma function $\text{sas_gamma}(x) = \Gamma(x)$.
+        Gamma function sas_gamma\ $(x) = \Gamma(x)$.
 
         The standard math function, tgamma(x) is unstable for $x < 1$
         on some platforms.
@@ -632,9 +635,9 @@ file in the order given, otherwise these functions will not be available.
 
     sas_erf(x), sas_erfc(x):
         Error function
-        $\text{sas_erf}(x) = \frac{2}{\sqrt\pi}\int_0^x e^{-t^2}\,dt$
+        sas_erf\ $(x) = \frac{2}{\sqrt\pi}\int_0^x e^{-t^2}\,dt$
         and complementary error function
-        $\text{sas_erfc}(x) = \frac{2}{\sqrt\pi}\int_x^{\infty} e^{-t^2}\,dt$.
+        sas_erfc $(x) = \frac{2}{\sqrt\pi}\int_x^{\infty} e^{-t^2}\,dt$.
 
         The standard math functions erf(x) and erfc(x) are slower and broken
         on some platforms.
@@ -643,7 +646,7 @@ file in the order given, otherwise these functions will not be available.
         (`link to error functions' code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/sas_erf.c>`_)
 
     sas_J0(x):
-        Bessel function of the first kind $\text{sas_J0}(x)=J_0(x)$ where
+        Bessel function of the first kind sas_J0\ $(x)=J_0(x)$ where
         $J_0(x) = \frac{1}{\pi}\int_0^\pi \cos(x\sin(\tau))\,d\tau$.
 
         The standard math function j0(x) is not available on all platforms.
@@ -652,7 +655,7 @@ file in the order given, otherwise these functions will not be available.
         (`link to Bessel function's code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/sas_J0.c>`_)
 
     sas_J1(x):
-        Bessel function of the first kind  $\text{sas_J1}(x)=J_1(x)$ where
+        Bessel function of the first kind  sas_J1\ $(x)=J_1(x)$ where
         $J_1(x) = \frac{1}{\pi}\int_0^\pi \cos(\tau - x\sin(\tau))\,d\tau$.
 
         The standard math function j1(x) is not available on all platforms.
@@ -662,7 +665,7 @@ file in the order given, otherwise these functions will not be available.
 
     sas_JN(n, x):
         Bessel function of the first kind and integer order $n$:
-        $\text{sas_JN}(n, x)=J_n(x)$ where
+        sas_JN\ $(n, x)=J_n(x)$ where
         $J_n(x) = \frac{1}{\pi}\int_0^\pi \cos(n\tau - x\sin(\tau))\,d\tau$.
         If $n$ = 0 or 1, it uses sas_J0(x) or sas_J1(x), respectively.
 
@@ -672,7 +675,7 @@ file in the order given, otherwise these functions will not be available.
         (`link to Bessel function's code <https://github.com/SasView/sasmodels/tree/master/sasmodels/models/lib/sas_JN.c>`_)
 
     sas_Si(x):
-        Sine integral $\text{Si}(x) = \int_0^x \tfrac{\sin t}{t}\,dt$.
+        Sine integral Si\ $(x) = \int_0^x \tfrac{\sin t}{t}\,dt$.
 
         This function uses Taylor series for small and large arguments:
 
@@ -697,7 +700,7 @@ file in the order given, otherwise these functions will not be available.
 
     sas_3j1x_x(x):
         Spherical Bessel form
-        $\text{sph_j1c}(x) = 3 j_1(x)/x = 3 (\sin(x) - x \cos(x))/x^3$,
+        sph_j1c\ $(x) = 3 j_1(x)/x = 3 (\sin(x) - x \cos(x))/x^3$,
         with a limiting value of 1 at $x=0$, where $j_1(x)$ is the spherical
         Bessel function of the first kind and first order.
 
@@ -708,7 +711,7 @@ file in the order given, otherwise these functions will not be available.
 
 
     sas_2J1x_x(x):
-        Bessel form $\text{sas_J1c}(x) = 2 J_1(x)/x$, with a limiting value
+        Bessel form sas_J1c\ $(x) = 2 J_1(x)/x$, with a limiting value
         of 1 at $x=0$, where $J_1(x)$ is the Bessel function of first kind
         and first order.
 
@@ -831,7 +834,7 @@ the structure factor.  The *VR* function returns the volume of
 the whole sphere and the volume of the shell. Like *ER*, there is
 one return value for each point in the mesh grid.
 
-*NOTE: we may be removing or modifying this feature soon. As of the 
+*NOTE: we may be removing or modifying this feature soon. As of the
 time of writing, core-shell sphere returns (1., 1.) for VR, giving a volume
 ratio of 1.0.*
 
@@ -877,11 +880,11 @@ Test Your New Model
 Minimal Testing
 ...............
 
-Either open the :ref:`Python_shell` (*Tools* > *Python Shell/Editor*) or the :ref:`Advanced_Plugin_Editor` (*Fitting* > *Plugin Model Operations* > *Advanced 
-Plugin Editor*), load your model, and then select *Run > Check Model* from the 
+Either open the :ref:`Python_shell` (*Tools* > *Python Shell/Editor*) or the :ref:`Advanced_Plugin_Editor` (*Fitting* > *Plugin Model Operations* > *Advanced
+Plugin Editor*), load your model, and then select *Run > Check Model* from the
 menu bar.
 
-An *Info* box will appear with the results of the compilation and a check that 
+An *Info* box will appear with the results of the compilation and a check that
 the model runs.
 
 Recommended Testing
@@ -946,7 +949,7 @@ test with::
 Clean Lint - (Developer Version Only)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**NB: For now we are not providing pylint with the installer version of SasView; 
+**NB: For now we are not providing pylint with the installer version of SasView;
 so unless you have a SasView build environment available, you can ignore this section!**
 
 Run the lint check with::

@@ -25,6 +25,30 @@
 				<Qmean unit="1/A"><!-- Qmean is optional --></Qmean>
 				<Shadowfactor><!-- Shadowfactor is optional --></Shadowfactor>
 			</Idata>
+      <Idata>
+				<Q unit="1/A">0.04</Q>
+				<I unit="1/cm">1002</I>
+				<Idev unit="1/cm">4</Idev>
+				<Qdev unit="1/A">0.02</Qdev>
+				<Qmean unit="1/A"><!-- Qmean is optional --></Qmean>
+				<Shadowfactor><!-- Shadowfactor is optional --></Shadowfactor>
+			</Idata>
+      <Idata>
+				<Q unit="1/A">0.05</Q>
+				<I unit="1/cm">1003</I>
+				<Idev unit="1/cm">4</Idev>
+				<Qdev unit="1/A">0.02</Qdev>
+				<Qmean unit="1/A"><!-- Qmean is optional --></Qmean>
+				<Shadowfactor><!-- Shadowfactor is optional --></Shadowfactor>
+			</Idata>
+      <Idata>
+				<Q unit="1/A">0.06</Q>
+				<I unit="1/cm">1004</I>
+				<Idev unit="1/cm">4</Idev>
+				<Qdev unit="1/A">0.02</Qdev>
+				<Qmean unit="1/A"><!-- Qmean is optional --></Qmean>
+				<Shadowfactor><!-- Shadowfactor is optional --></Shadowfactor>
+			</Idata>
 		</SASdata>
 		<SASsample name='my sample'>
 			<ID>SI600-new-long</ID>
@@ -46,7 +70,7 @@
 			<details>
 				Some text here
 			</details>
-			
+
 		</SASsample>
 		<SASinstrument>
 			<name>canSAS instrument</name>

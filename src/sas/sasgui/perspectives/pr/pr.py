@@ -67,7 +67,8 @@ class Plugin(PluginBase):
         self.max_length = self.DEFAULT_DMAX
         self.q_min = None
         self.q_max = None
-        self.has_bck = False
+        self.est_bck = False
+        self.bck_val = 0
         self.slit_height = 0
         self.slit_width = 0
         ## Remember last plottable processed
@@ -827,6 +828,7 @@ class Plugin(PluginBase):
         self.control_panel.rg = pr.rg(out)
         self.control_panel.iq0 = pr.iq0(out)
         self.control_panel.bck = pr.background
+        self.control_panel.bck_input.SetValue("{:.2g}".format(pr.background))
 
         # Show I(q) fit
         self.show_iq(out, self.pr)
@@ -906,7 +908,7 @@ class Plugin(PluginBase):
             raise RuntimeError, msg
 
     def setup_plot_inversion(self, alpha, nfunc, d_max, q_min=None, q_max=None,
-                             bck=False, height=0, width=0):
+                             est_bck=False, bck_val=0, height=0, width=0):
         """
             Set up inversion from plotted data
         """
@@ -915,7 +917,8 @@ class Plugin(PluginBase):
         self.max_length = d_max
         self.q_min = q_min
         self.q_max = q_max
-        self.has_bck = bck
+        self.est_bck = est_bck
+        self.bck_val = bck_val
         self.slit_height = height
         self.slit_width = width
 
@@ -929,7 +932,7 @@ class Plugin(PluginBase):
 
     def estimate_plot_inversion(self, alpha, nfunc, d_max,
                                 q_min=None, q_max=None,
-                                bck=False, height=0, width=0):
+                                est_bck=False, bck_val=0, height=0, width=0):
         """
             Estimate parameters from plotted data
         """
@@ -938,7 +941,8 @@ class Plugin(PluginBase):
         self.max_length = d_max
         self.q_min = q_min
         self.q_max = q_max
-        self.has_bck = bck
+        self.est_bck = est_bck
+        self.bck_val = bck_val
         self.slit_height = height
         self.slit_width = width
 
@@ -972,9 +976,10 @@ class Plugin(PluginBase):
         pr.q_max = self.q_max
         pr.x = self.current_plottable.x
         pr.y = self.current_plottable.y
-        pr.has_bck = self.has_bck
+        pr.est_bck = self.est_bck
         pr.slit_height = self.slit_height
         pr.slit_width = self.slit_width
+        pr.background = self.bck_val
 
         # Keep track of the plot window title to ensure that
         # we can overlay the plots
@@ -1018,7 +1023,7 @@ class Plugin(PluginBase):
         self.max_length = d_max
         self.q_min = q_min
         self.q_max = q_max
-        self.has_bck = bck
+        self.est_bck = bck
         self.slit_height = height
         self.slit_width = width
 
@@ -1041,7 +1046,7 @@ class Plugin(PluginBase):
         self.max_length = d_max
         self.q_min = q_min
         self.q_max = q_max
-        self.has_bck = bck
+        self.est_bck = bck
         self.slit_height = height
         self.slit_width = width
 
@@ -1114,7 +1119,7 @@ class Plugin(PluginBase):
             pr.x = x
             pr.y = y
             pr.err = err
-            pr.has_bck = self.has_bck
+            pr.est_bck = self.est_bck
             pr.slit_height = self.slit_height
             pr.slit_width = self.slit_width
             return pr

@@ -27,7 +27,7 @@ DEFAULT_STATE = {
 
 # List of output parameters, used by __str__
 output_list = [
-    ['max', "Long Period (A): "],
+    ['max', "Long Period / 2 (A): "],
     ['Lc', "Average Hard Block Thickness (A): "],
     ['dtr', "Average Interface Thickness (A): "],
     ['d0', "Average Core Thickness: "],
@@ -58,7 +58,6 @@ class CorfuncState(object):
         # Raw Data
         self.q = None
         self.iq = None
-        # TODO: Add extrapolated data and transformed data (when implemented)
 
     def __str__(self):
         """
