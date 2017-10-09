@@ -130,11 +130,12 @@ def addHeadersToModel(model):
     """
     Adds predefined headers to the model
     """
-    model.setHeaderData(0, QtCore.Qt.Horizontal, QtCore.QVariant("Parameter"))
-    model.setHeaderData(1, QtCore.Qt.Horizontal, QtCore.QVariant("Value"))
-    model.setHeaderData(2, QtCore.Qt.Horizontal, QtCore.QVariant("Min"))
-    model.setHeaderData(3, QtCore.Qt.Horizontal, QtCore.QVariant("Max"))
-    model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("Units"))
+    model.parameter_headers = ['Parameter', 'Value', 'Min', 'Max', 'Units']
+    #model.setHeaderData(0, QtCore.Qt.Horizontal, QtCore.QVariant("Parameter"))
+    #model.setHeaderData(1, QtCore.Qt.Horizontal, QtCore.QVariant("Value"))
+    #model.setHeaderData(2, QtCore.Qt.Horizontal, QtCore.QVariant("Min"))
+    #model.setHeaderData(3, QtCore.Qt.Horizontal, QtCore.QVariant("Max"))
+    #model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("Units"))
 
 def addErrorHeadersToModel(model):
     """

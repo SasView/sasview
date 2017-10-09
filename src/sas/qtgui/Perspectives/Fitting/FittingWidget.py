@@ -55,14 +55,21 @@ class ToolTippedItemModel(QtGui.QStandardItemModel):
     def __init__(self, parent = None):
         QtGui.QStandardItemModel.__init__(self,parent)
 
+        super(ToolTippedItemModel, self).__init__()
+        self.parent = parent
+        self.parameter_headers = None
+
     # optional method for Model class
     def headerData(self, section, orientation, role):
 
         if role == QtCore.Qt.ToolTipRole:
             if orientation == QtCore.Qt.Horizontal:
-                return QtCore.QString("Horizontal Header %s Tooltip" % str(section))
-            else:
-                return QtCore.QString("Vertical Header %s Tooltip" % str(section))
+                return QtCore.QString("Horizontal Header Tooltip for %s" % str(self.parameter_headers[section]))
+
+        if role == QtCore.Qt.DisplayRole:
+            if orientation == QtCore.Qt.Horizontal:
+                return QtCore.QString(self.parameter_headers[section])
+
 
 class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
     """
