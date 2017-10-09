@@ -50,6 +50,20 @@ DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 
 USING_TWISTED = True
 
+class ToolTippedItemModel(QtGui.QStandardItemModel):
+
+    def __init__(self, parent = None):
+        QtGui.QStandardItemModel.__init__(self,parent)
+
+    # optional method for Model class
+    def headerData(self, section, orientation, role):
+
+        if role == QtCore.Qt.ToolTipRole:
+            if orientation == QtCore.Qt.Horizontal:
+                return QtCore.QString("Horizontal Header %s Tooltip" % str(section))
+            else:
+                return QtCore.QString("Vertical Header %s Tooltip" % str(section))
+
 class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
     """
     Main widget for selecting form and structure factor models
@@ -239,9 +253,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Set the main models
         # We can't use a single model here, due to restrictions on flattening
         # the model tree with subclassed QAbstractProxyModel...
-        self._model_model = QtGui.QStandardItemModel()
-        self._poly_model = QtGui.QStandardItemModel()
-        self._magnet_model = QtGui.QStandardItemModel()
+        self._model_model = ToolTippedItemModel()
+        self._poly_model = ToolTippedItemModel()
+        self._magnet_model = ToolTippedItemModel()
 
         # Param model displayed in param list
         self.lstParams.setModel(self._model_model)
