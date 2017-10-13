@@ -63,6 +63,6 @@ class DetailsDialog(QtGui.QDialog, Ui_Dialog):
         new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
         self.label_3.setStyleSheet(new_font)
         self.label_4.setStyleSheet(new_font)
-        self.label_.setStyleSheet(new_font)
+        self.label_7.setStyleSheet(new_font)
 
         self.show()
