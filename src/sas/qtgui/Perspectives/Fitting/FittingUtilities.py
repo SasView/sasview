@@ -130,13 +130,17 @@ def addHeadersToModel(model):
     """
     Adds predefined headers to the model
     """
-    model.parameter_headers = ['Parameter', 'Value', 'Min', 'Max', 'Units']
-    #model.setHeaderData(0, QtCore.Qt.Horizontal, QtCore.QVariant("Parameter"))
-    #model.setHeaderData(1, QtCore.Qt.Horizontal, QtCore.QVariant("Value"))
-    #model.setHeaderData(2, QtCore.Qt.Horizontal, QtCore.QVariant("Min"))
-    #model.setHeaderData(3, QtCore.Qt.Horizontal, QtCore.QVariant("Max"))
-    #model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("Units"))
+    model.setHeaderData(0, QtCore.Qt.Horizontal, QtCore.QVariant("Parameter"))
+    model.setHeaderData(1, QtCore.Qt.Horizontal, QtCore.QVariant("Value"))
+    model.setHeaderData(2, QtCore.Qt.Horizontal, QtCore.QVariant("Min"))
+    model.setHeaderData(3, QtCore.Qt.Horizontal, QtCore.QVariant("Max"))
+    model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("Units"))
 
+    model.header_tooltips = ['Select parameter for fitting',
+                             'Enter parameter value',
+                             'Enter minimum value for parameter',
+                             'Enter maximum value for parameter',
+                             'Unit of the parameter']
 def addErrorHeadersToModel(model):
     """
     Adds predefined headers to the model
@@ -147,6 +151,13 @@ def addErrorHeadersToModel(model):
     model.setHeaderData(3, QtCore.Qt.Horizontal, QtCore.QVariant("Min"))
     model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("Max"))
     model.setHeaderData(5, QtCore.Qt.Horizontal, QtCore.QVariant("Units"))
+
+    model.header_tooltips = ['Select parameter for fitting',
+                             'Enter parameter value',
+                             'Error value for fitted parameter',
+                             'Enter minimum value for parameter',
+                             'Enter maximum value for parameter',
+                             'Unit of the parameter']
 
 def addPolyHeadersToModel(model):
     """
@@ -161,6 +172,16 @@ def addPolyHeadersToModel(model):
     model.setHeaderData(6, QtCore.Qt.Horizontal, QtCore.QVariant("Function"))
     model.setHeaderData(7, QtCore.Qt.Horizontal, QtCore.QVariant("Filename"))
 
+    model.header_tooltips = ['Select parameter for fitting',
+                             'Enter polydispersity ratio (STD/mean). '
+                             'STD: standard deviation from the mean value',
+                             'Enter minimum value for parameter',
+                             'Enter maximum value for parameter',
+                             'Enter number of points for parameter',
+                             'Enter number of sigmas parameter',
+                             'Select distribution function',
+                             'Select filename with user-definable distribution']
+
 def addErrorPolyHeadersToModel(model):
     """
     Adds predefined headers to the model
@@ -174,6 +195,17 @@ def addErrorPolyHeadersToModel(model):
     model.setHeaderData(6, QtCore.Qt.Horizontal, QtCore.QVariant("Nsigs"))
     model.setHeaderData(7, QtCore.Qt.Horizontal, QtCore.QVariant("Function"))
     model.setHeaderData(8, QtCore.Qt.Horizontal, QtCore.QVariant("Filename"))
+
+    model.header_tooltips = ['Select parameter for fitting',
+                             'Enter polydispersity ratio (STD/mean). '
+                             'STD: standard deviation from the mean value',
+                             'Error value for fitted parameter',
+                             'Enter minimum value for parameter',
+                             'Enter maximum value for parameter',
+                             'Enter number of points for parameter',
+                             'Enter number of sigmas parameter',
+                             'Select distribution function',
+                             'Select filename with user-definable distribution']
 
 def addShellsToModel(parameters, model, index):
     """
