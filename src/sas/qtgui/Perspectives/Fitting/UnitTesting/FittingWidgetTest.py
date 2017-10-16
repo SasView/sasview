@@ -342,6 +342,23 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertEqual(self.widget.lstPoly.horizontalHeader().count(), 8)
         self.assertFalse(self.widget.lstPoly.horizontalHeader().stretchLastSection())
 
+        # Test tooltips
+        self.assertEqual(len(self.widget._poly_model.header_tooltips), 8)
+
+        header_tooltips = ['Select parameter for fitting',
+                             'Enter polydispersity ratio (STD/mean). '
+                             'STD: standard deviation from the mean value',
+                             'Enter minimum value for parameter',
+                             'Enter maximum value for parameter',
+                             'Enter number of points for parameter',
+                             'Enter number of sigmas parameter',
+                             'Select distribution function',
+                             'Select filename with user-definable distribution']
+        for column, tooltip in enumerate(header_tooltips):
+             self.assertEqual(self.widget._poly_model.headerData( column,
+                QtCore.Qt.Horizontal, QtCore.Qt.ToolTipRole),
+                         header_tooltips[column])
+
         # Test presence of comboboxes in last column
         for row in xrange(self.widget._poly_model.rowCount()):
             func_index = self.widget._poly_model.index(row, 6)
@@ -476,6 +493,19 @@ class FittingWidgetTest(unittest.TestCase):
         # Test the header
         self.assertEqual(self.widget.lstMagnetic.horizontalHeader().count(), 5)
         self.assertFalse(self.widget.lstMagnetic.horizontalHeader().stretchLastSection())
+
+        #Test tooltips
+        self.assertEqual(len(self.widget._magnet_model.header_tooltips), 5)
+
+        header_tooltips = ['Select parameter for fitting',
+                             'Enter parameter value',
+                             'Enter minimum value for parameter',
+                             'Enter maximum value for parameter',
+                             'Unit of the parameter']
+        for column, tooltip in enumerate(header_tooltips):
+             self.assertEqual(self.widget._magnet_model.headerData(column,
+                QtCore.Qt.Horizontal, QtCore.Qt.ToolTipRole),
+                         header_tooltips[column])
 
         # Test rows
         for row in xrange(self.widget._magnet_model.rowCount()):
@@ -833,6 +863,25 @@ class FittingWidgetTest(unittest.TestCase):
 
         # name of modified parameter
         name_modified_param = str(self.widget._model_model.item(5, 0).text())
+
+         # Check the model
+        self.assertEqual(self.widget._model_model.rowCount(), 6)
+        self.assertEqual(self.widget._model_model.columnCount(), 5)
+
+        # Test the header
+        #self.assertEqual(self.widget.lstParams.horizontalHeader().count(), 5)
+        #self.assertFalse(self.widget.lstParams.horizontalHeader().stretchLastSection())
+
+        self.assertEqual(len(self.widget._model_model.header_tooltips), 5)
+        header_tooltips = ['Select parameter for fitting',
+                             'Enter parameter value',
+                             'Enter minimum value for parameter',
+                             'Enter maximum value for parameter',
+                             'Unit of the parameter']
+        for column, tooltip in enumerate(header_tooltips):
+             self.assertEqual(self.widget._model_model.headerData(column,
+                QtCore.Qt.Horizontal, QtCore.Qt.ToolTipRole),
+                         header_tooltips[column])
 
         # check that the value has been modified in kernel_module
         self.assertEqual(new_value,
