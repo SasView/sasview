@@ -1,0 +1,21 @@
+:Data Explorer.buttonBox_QDialogButtonBox	{container=':MainWindow.Data Explorer_QDockWidget' name='buttonBox' type='QDialogButtonBox' visible='1'}
+:Data Explorer.qt_tabwidget_stackedwidget_QStackedWidget	{container=':MainWindow.Data Explorer_QDockWidget' name='qt_tabwidget_stackedwidget' type='QStackedWidget' visible='1'}
+:Data Explorer.splitter_QSplitter	{container=':MainWindow.Data Explorer_QDockWidget' name='splitter' type='QSplitter' visible='1'}
+:LogDockWidget.qt_dockwidget_floatbutton_QDockWidgetTitleButton	{container=':MainWindow.LogDockWidget_QDockWidget' name='qt_dockwidget_floatbutton' type='QDockWidgetTitleButton' visible='1'}
+:LogDockWidget.qt_dockwidget_floatbutton_QTextBrowser	{aboveWidget=':LogDockWidget.qt_dockwidget_floatbutton_QDockWidgetTitleButton' container=':MainWindow.LogDockWidget_QDockWidget' type='QTextBrowser' unnamed='1' visible='1'}
+:MainWindow.Data Explorer_QDockWidget	{type='QDockWidget' unnamed='1' visible='1' window=':MainWindow_MainSasViewWindow' windowTitle='Data Explorer'}
+:MainWindow.LogDockWidget_QDockWidget	{name='LogDockWidget' type='QDockWidget' visible='1' window=':MainWindow_MainSasViewWindow'}
+:MainWindow.menubar_QMenuBar	{name='menubar' type='QMenuBar' visible='1' window=':MainWindow_MainSasViewWindow'}
+:MainWindow_MainSasViewWindow	{name='MainWindow' type='MainSasViewWindow' visible='1'}
+:_QSplashScreen	{type='QSplashScreen' unnamed='1' visible='0'}
+:buttonBox.Open_QPushButton	{container=':Data Explorer.buttonBox_QDialogButtonBox' text='Open' type='QPushButton' unnamed='1' visible='1'}
+:dataTab.groupBox_QGroupBox	{container=':qt_tabwidget_stackedwidget.dataTab_QWidget' name='groupBox' type='QGroupBox' visible='1'}
+:frame.stackedWidget_QStackedWidget	{container=':splitter.frame_QFrame' name='stackedWidget' type='QStackedWidget' visible='1'}
+:groupBox.cbSelect_QComboBox	{container=':dataTab.groupBox_QGroupBox' name='cbSelect' type='QComboBox' visible='1'}
+:groupBox.cmdLoad_QPushButton	{container=':dataTab.groupBox_QGroupBox' name='cmdLoad' type='QPushButton' visible='1'}
+:groupBox.treeView_QTreeView	{container=':dataTab.groupBox_QGroupBox' name='treeView' type='QTreeView' visible='1'}
+:qt_tabwidget_stackedwidget.dataTab_QWidget	{container=':Data Explorer.qt_tabwidget_stackedwidget_QStackedWidget' name='dataTab' type='QWidget' visible='1'}
+:splitter.frame_QFrame	{container=':Data Explorer.splitter_QSplitter' name='frame' type='QFrame' visible='1'}
+:stackedWidget.listView_QListView	{container=':frame.stackedWidget_QStackedWidget' name='listView' type='QListView' visible='1'}
+:treeView.cyl_400_20.txt_QModelIndex	{column='0' container=':groupBox.treeView_QTreeView' text='cyl_400_20.txt' type='QModelIndex'}
+:treeView.cyl_400_40.txt_QModelIndex	{column='0' container=':groupBox.treeView_QTreeView' text='cyl_400_40.txt' type='QModelIndex'}
