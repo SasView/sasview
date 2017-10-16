@@ -55,7 +55,7 @@ class ToolTippedItemModel(QtGui.QStandardItemModel):
     Subclass from QStandardItemModel to allow displaying tooltips in
     QTableView model.
     """
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         QtGui.QStandardItemModel.__init__(self,parent)
 
     def headerData(self, section, orientation, role):

@@ -11,23 +11,23 @@ from sas.qtgui.Plotting.PlotterData import Data2D
 model_header_captions = ['Parameter', 'Value', 'Min', 'Max', 'Units']
 
 model_header_tooltips = ['Select parameter for fitting',
-                        'Enter parameter value',
-                        'Enter minimum value for parameter',
-                        'Enter maximum value for parameter',
-                        'Unit of the parameter']
+                         'Enter parameter value',
+                         'Enter minimum value for parameter',
+                         'Enter maximum value for parameter',
+                         'Unit of the parameter']
 
 poly_header_captions = ['Parameter', 'PD[ratio]', 'Min', 'Max', 'Npts', 'Nsigs',
-                         'Function', 'Filename']
+                        'Function', 'Filename']
 
 poly_header_tooltips = ['Select parameter for fitting',
-                             'Enter polydispersity ratio (STD/mean). '
-                             'STD: standard deviation from the mean value',
-                             'Enter minimum value for parameter',
-                             'Enter maximum value for parameter',
-                             'Enter number of points for parameter',
-                             'Enter number of sigmas parameter',
-                             'Select distribution function',
-                             'Select filename with user-definable distribution']
+                        'Enter polydispersity ratio (STD/mean). '
+                        'STD: standard deviation from the mean value',
+                        'Enter minimum value for parameter',
+                        'Enter maximum value for parameter',
+                        'Enter number of points for parameter',
+                        'Enter number of sigmas parameter',
+                        'Select distribution function',
+                        'Select filename with user-definable distribution']
 
 error_tooltip = 'Error value for fitted parameter'
 header_error_caption = 'Error'
