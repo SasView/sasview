@@ -30,7 +30,7 @@ from sas.qtgui.Calculators.KiessigPanel import KiessigPanel
 from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
 from sas.qtgui.Calculators.GenericScatteringCalculator import GenericScatteringCalculator
 from sas.qtgui.Calculators.ResolutionCalculatorPanel import ResolutionCalculatorPanel
-
+from sas.qtgui.Calculators.DataOperationUtilityPanel import DataOperationUtilityPanel
 
 # Perspectives
 import sas.qtgui.Perspectives as Perspectives
@@ -46,6 +46,7 @@ class GuiManager(object):
     """
     Main SasView window functionality
     """
+
     def __init__(self, parent=None):
         """
         Initialize the manager as a child of MainWindow.
@@ -141,6 +142,7 @@ class GuiManager(object):
         self.SlitSizeCalculator = SlitSizeCalculator(self)
         self.GENSASCalculator = GenericScatteringCalculator(self)
         self.ResolutionCalculator = ResolutionCalculatorPanel(self)
+        self.DataOperation = DataOperationUtilityPanel(self)
 
     def statusBarSetup(self):
         """
@@ -336,6 +338,7 @@ class GuiManager(object):
         self.communicate.perspectiveChangedSignal.connect(self.perspectiveChanged)
         self.communicate.updateTheoryFromPerspectiveSignal.connect(self.updateTheoryFromPerspective)
         self.communicate.plotRequestedSignal.connect(self.showPlot)
+        self.communicate.updateModelFromDataOperationPanelSignal.connect(self.updateModelFromDataOperationPanel)
 
     def addTriggers(self):
         """
@@ -530,8 +533,9 @@ class GuiManager(object):
     def actionData_Operation(self):
         """
         """
-        print("actionData_Operation TRIGGERED")
-        pass
+        self.communicate.sendDataToPanel.emit(self._data_manager.get_all_data())
+
+        self.DataOperation.show()
 
     def actionSLD_Calculator(self):
         """
@@ -730,10 +734,22 @@ class GuiManager(object):
         """
         self.filesWidget.updateTheoryFromPerspective(index)
 
+    def updateModelFromDataOperationPanel(self, new_item, new_datalist_item):
+        """
+        :param new_item: item to be added to list of loaded files
+        :param new_datalist_item:
+        """
+        if not isinstance(new_item, QtGui.QStandardItem) or \
+                not isinstance(new_datalist_item, dict):
+            msg = "Wrong data type returned from calculations."
+            raise AttributeError, msg
+
+        self.filesWidget.model.appendRow(new_item)
+        self._data_manager.add_data(new_datalist_item)
+
     def showPlot(self, plot):
         """
         Pass the show plot request to the data explorer
         """
         if hasattr(self, "filesWidget"):
             self.filesWidget.displayData(plot)
-

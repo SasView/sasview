@@ -92,6 +92,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.activeGraphsSignal.connect(self.updateGraphCount)
         self.communicator.activeGraphName.connect(self.updatePlotName)
         self.communicator.plotUpdateSignal.connect(self.updatePlot)
+
         self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
 
@@ -868,6 +869,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.txt_widget.setWindowFlags(QtCore.Qt.Window)
         self.txt_widget.setWindowIcon(QtGui.QIcon(":/res/ball.ico"))
         self.txt_widget.setWindowTitle("Data Info: %s" % data.filename)
+        self.txt_widget.clear()
         self.txt_widget.insertPlainText(text_to_show)
 
         self.txt_widget.show()
@@ -1010,7 +1012,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # New row in the model
         self.model.appendRow(checkbox_item)
-
 
     def updateModelFromPerspective(self, model_item):
         """

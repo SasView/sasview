@@ -229,6 +229,11 @@ class Communicate(QtCore.QObject):
     # File/dataset got deleted
     dataDeletedSignal = QtCore.pyqtSignal(list)
 
+    # Send data to Data Operation Utility panel
+    sendDataToPanel = QtCore.pyqtSignal(dict)
+
+    # Send result of Data Operation Utility panel to Data Explorer
+    updateModelFromDataOperationPanelSignal = QtCore.pyqtSignal(QtGui.QStandardItem, dict)
 
 def updateModelItemWithPlot(item, update_data, name=""):
     """
@@ -429,24 +434,24 @@ def retrieveData1d(data):
     text += 'Data Min Max:\n'
     text += 'X_min = %s:  X_max = %s\n' % (xmin, max(data.x))
     text += 'Y_min = %s:  Y_max = %s\n' % (ymin, max(data.y))
-    if data.dy != None:
+    if data.dy is not None:
         text += 'dY_min = %s:  dY_max = %s\n' % (min(data.dy), max(data.dy))
     text += '\nData Points:\n'
     x_st = "X"
     for index in range(len(data.x)):
-        if data.dy != None and len(data.dy) > index:
+        if data.dy is not None and len(data.dy) > index:
             dy_val = data.dy[index]
         else:
             dy_val = 0.0
-        if data.dx != None and len(data.dx) > index:
+        if data.dx is not None and len(data.dx) > index:
             dx_val = data.dx[index]
         else:
             dx_val = 0.0
-        if data.dxl != None and len(data.dxl) > index:
+        if data.dxl is not None and len(data.dxl) > index:
             if index == 0:
                 x_st = "Xl"
             dx_val = data.dxl[index]
-        elif data.dxw != None and len(data.dxw) > index:
+        elif data.dxw is not None and len(data.dxw) > index:
             if index == 0:
                 x_st = "Xw"
             dx_val = data.dxw[index]
@@ -485,11 +490,11 @@ def retrieveData2d(data):
         x_val = data.qx_data[index]
         y_val = data.qy_data[index]
         i_val = data.data[index]
-        if data.err_data != None:
+        if data.err_data is not None:
             di_val = data.err_data[index]
-        if data.dqx_data != None:
+        if data.dqx_data is not None:
             dx_val = data.dqx_data[index]
-        if data.dqy_data != None:
+        if data.dqy_data is not None:
             dy_val = data.dqy_data[index]
 
         text += "%s \t%s \t%s \t%s \t%s \t%s \t%s\n" % (index,

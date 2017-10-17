@@ -86,7 +86,7 @@ class Plotter2DWidget(PlotterBase):
         ''' setter for this plot's QStandardItem '''
         self._item = item
 
-    def plot(self, data=None, marker=None):
+    def plot(self, data=None, marker=None, show_colorbar=True):
         """
         Plot 2D self._data
         marker - unused
@@ -108,7 +108,7 @@ class Plotter2DWidget(PlotterBase):
                       xmax=self.xmax,
                       ymin=self.ymin, ymax=self.ymax,
                       cmap=self.cmap, zmin=zmin_2D_temp,
-                      zmax=zmax_2D_temp)
+                      zmax=zmax_2D_temp, show_colorbar=show_colorbar)
 
     def calculateDepth(self):
         """
@@ -378,7 +378,7 @@ class Plotter2DWidget(PlotterBase):
         self.plot()
 
     def showPlot(self, data, qx_data, qy_data, xmin, xmax, ymin, ymax,
-                 zmin, zmax, label='data2D', cmap=DEFAULT_CMAP):
+                 zmin, zmax, label='data2D', cmap=DEFAULT_CMAP, show_colorbar=True):
         """
         Render and show the current data
         """
@@ -455,6 +455,9 @@ class Plotter2DWidget(PlotterBase):
 
             self.vmin = cb.vmin
             self.vmax = cb.vmax
+
+            if show_colorbar is False:
+                cb.remove()
 
         else:
             # clear the previous 2D from memory
