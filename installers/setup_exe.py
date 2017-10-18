@@ -205,22 +205,12 @@ data_files += fitting.data_files()
 from sas.sasgui.perspectives import calculator
 data_files += calculator.data_files()
 
-<<<<<<< Updated upstream:installers/setup_exe.py
 from sas.sasgui.perspectives import invariant
 data_files += invariant.data_files()
-=======
-python_root = os.path.dirname(os.path.abspath(sys.executable))
-
-# Check for ATLAS
-dll_path = os.path.join(python_root, 'lib', 'site-packages', 'numpy', 'core')
-dlls = ['numpy-atlas']
-atlas_dlls = dll_check(dll_path, dlls)
->>>>>>> Stashed changes:sasview/setup_exe.py
 
 from sas.sasgui import guiframe
 data_files += guiframe.data_files()
 
-<<<<<<< Updated upstream:installers/setup_exe.py
 # Copy the config files
 sasview_path = os.path.join('..', 'src', 'sas', 'sasview')
 data_files.append(('.', [os.path.join(sasview_path, 'custom_config.py')]))
@@ -230,12 +220,6 @@ data_files.append(('.', [os.path.join(sasview_path, 'local_config.py')]))
 # Copy the logging config
 sas_path = os.path.join('..', 'src', 'sas')
 data_files.append(('.', [os.path.join(sas_path, 'logging.ini')]))
-=======
-if mkl_dlls:
-    data_files.append(('.', atlas_dlls))
-elif atlas_dlls:
-    data_files.append(('.', mkl_dlls))
->>>>>>> Stashed changes:sasview/setup_exe.py
 
 if os.path.isfile("BUILD_NUMBER"):
     data_files.append(('.', ["BUILD_NUMBER"]))
