@@ -266,9 +266,9 @@ mkl_path = os.path.join(python_root, 'Library', 'bin')
 mkl_dlls = dll_check(mkl_path, ['mkl_core', 'mkl_def', 'libiomp5md'])
 
 if mkl_dlls:
-    data_files.append(('.', atlas_dlls))
-elif atlas_dlls:
     data_files.append(('.', mkl_dlls))
+elif atlas_dlls:
+    data_files.append(('.', atlas_dlls))
 
 if is_64bits:
     msvcrtdll = glob(r"C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*.*")
