@@ -280,14 +280,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         ind = -1
         # Use 'while' so the row count is forced at every iteration
         deleted_indices = []
-        # deleted_names = []
+        deleted_names = []
         while ind < self.model.rowCount():
             ind += 1
             item = self.model.item(ind)
 
             if item and item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
                 # Delete these rows from the model
-                # deleted_names.append(self.model.item(ind).text())
+                deleted_names.append(str(self.model.item(ind).text()))
                 deleted_indices.append(item)
 
                 self.model.removeRow(ind)
@@ -298,8 +298,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.dataDeletedSignal.emit(deleted_indices)
 
         # update stored_data
-        # self.manager.delete_by_name(deleted_names)
-
+        self.manager.update_stored_data(deleted_names)
 
     def deleteTheory(self, event):
         """

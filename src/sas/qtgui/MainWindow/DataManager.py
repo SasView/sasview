@@ -294,6 +294,14 @@ class DataManager(object):
                 if data_state.data.name == selected_name:
                     del self.stored_data[id]
 
+    def update_stored_data(self, name_list=None):
+        """ update stored data after deleting files in Data Explorer """
+        for selected_name in name_list:
+            for idx in self.stored_data.keys():
+                if str(selected_name) in str(idx):
+                    print selected_name, idx
+                    del self.stored_data[idx]
+
     def get_data_state(self, data_id):
         """
         Send list of selected data

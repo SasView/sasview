@@ -121,7 +121,13 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
     def onClose(self):
         """ Close dialog """
         self.onReset()
+
+        self.cbData1.clear()
+        self.cbData1.addItems(['No Data Available'])
+        self.cbData2.clear()
+        self.cbData2.addItems(['No Data Available'])
         self.close()
+
 
     def onCompute(self):
         """ perform calculation """
