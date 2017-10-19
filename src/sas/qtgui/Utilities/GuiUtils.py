@@ -143,7 +143,7 @@ try:
     CLEANUP_PLOT = custom_config.CLEANUP_PLOT
     # custom open_path
     open_folder = custom_config.DEFAULT_OPEN_FOLDER
-    if open_folder != None and os.path.isdir(open_folder):
+    if open_folder is not None and os.path.isdir(open_folder):
         DEFAULT_OPEN_FOLDER = os.path.abspath(open_folder)
     else:
         DEFAULT_OPEN_FOLDER = PATH_APP
@@ -230,7 +230,7 @@ class Communicate(QtCore.QObject):
     dataDeletedSignal = QtCore.pyqtSignal(list)
 
     # Send data to Data Operation Utility panel
-    sendDataToPanel = QtCore.pyqtSignal(dict)
+    sendDataToPanelSignal = QtCore.pyqtSignal(dict)
 
     # Send result of Data Operation Utility panel to Data Explorer
     updateModelFromDataOperationPanelSignal = QtCore.pyqtSignal(QtGui.QStandardItem, dict)
@@ -527,7 +527,7 @@ def onTXTSave(data, path):
             except:
                 has_errors = False
         if has_errors:
-            if data.dx != None and data.dx != []:
+            if data.dx is not None and data.dx != []:
                 out.write("<X>   <Y>   <dY>   <dX>\n")
             else:
                 out.write("<X>   <Y>   <dY>\n")
@@ -536,7 +536,7 @@ def onTXTSave(data, path):
 
         for i in range(len(data.x)):
             if has_errors:
-                if data.dx != None and data.dx != []:
+                if data.dx is not None and data.dx != []:
                     if  data.dx[i] != None:
                         out.write("%g  %g  %g  %g\n" % (data.x[i],
                                                         data.y[i],

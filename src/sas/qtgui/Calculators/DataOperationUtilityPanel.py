@@ -1,3 +1,8 @@
+import time
+import logging
+import re
+import copy
+
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 
@@ -5,16 +10,13 @@ from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Plotter import PlotterWidget
 from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.Plotting.Plotter2D import Plotter2DWidget
-
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from UI.DataOperationUtilityUI import Ui_DataOperationUtility
 
-import time
-import logging
-import re
+from UI.DataOperationUtilityUI import Ui_DataOperationUtility
 
 BG_WHITE = "background-color: rgb(255, 255, 255);"
 BG_RED = "background-color: rgb(244, 170, 164);"
+
 
 class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
     def __init__(self, parent=None):
@@ -32,7 +34,7 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
         self.output = None
 
         # To update content of comboboxes with files loaded in DataExplorer
-        self.communicator.sendDataToPanel.connect(self.updateCombobox)
+        self.communicator.sendDataToPanelSignal.connect(self.updateCombobox)
 
         # change index of comboboxes
         self.cbData1.currentIndexChanged.connect(self.onSelectData1)
@@ -44,7 +46,7 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
         self.txtOutputData.textChanged.connect(self.onCheckOutputName)
 
         # push buttons
-        self.cmdClose.clicked.connect(self.onClose)  # accept)
+        self.cmdClose.clicked.connect(self.onClose)
         self.cmdHelp.clicked.connect(self.onHelp)
         self.cmdCompute.clicked.connect(self.onCompute)
         self.cmdReset.clicked.connect(self.onReset)
@@ -54,11 +56,11 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
         # validator for coefficient
         self.txtNumber.setValidator(QtGui.QDoubleValidator())
 
-        # Add "?" to initial graphs (when they are still empty)
         self.layoutOutput = QtGui.QHBoxLayout()
         self.layoutData1 = QtGui.QHBoxLayout()
         self.layoutData2 = QtGui.QHBoxLayout()
 
+        # Create default layout for initial graphs (when they are still empty)
         self.newPlot(self.graphOutput, self.layoutOutput)
         self.newPlot(self.graphData1, self.layoutData1)
         self.newPlot(self.graphData2, self.layoutData2)
@@ -82,16 +84,16 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
 
             list_datafiles = []
 
-            for id in filenames.keys():
-                if filenames[id].get_data().title != '':
+            for key_id in filenames.keys():
+                if filenames[key_id].get_data().title:
                     # filenames with titles
-                    new_title = filenames[id].get_data().title
+                    new_title = filenames[key_id].get_data().title
                     list_datafiles.append(new_title)
                     self.list_data_items.append(new_title)
 
                 else:
                     # filenames without titles by removing time.time()
-                    new_title = re.sub('\d{10}\.\d{2}', '', str(id))
+                    new_title = re.sub('\d{10}\.\d{2}', '', str(key_id))
                     self.list_data_items.append(new_title)
                     list_datafiles.append(new_title)
 
@@ -160,7 +162,7 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
             updateModelFromDataOperationPanelSignal.emit(new_item, new_datalist_item)
 
     def onSelectOperator(self):
-        """ Change GUI when operator changed"""
+        """ Change GUI when operator changed """
         self.lblOperatorApplied.setText(self.cbOperator.currentText())
         self.newPlot(self.graphOutput, self.layoutOutput)
 
@@ -182,6 +184,8 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
         self.output = None
         self.data1 = None
         self.data2 = None
+        self.filenames = None
+        self.list_data_items = []
 
         self.data1OK = False
         self.data2OK = False
@@ -203,20 +207,22 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
             self.data1 = None
             self.data1OK = False
             self.cmdCompute.setEnabled(False)
-            # logging.info('Choose a file for Data1')
+            self.onCheckChosenData()
             return
 
         else:
             # Enable Compute button only if Data2 is defined
             self.cmdCompute.setEnabled(self.data2OK)
             self.data1OK = True
+            self.onCheckChosenData()
             # get Data1
-            id1 = self._findId(choice_data1)
-            self.data1 = self._extractData(id1)
+            key_id1 = self._findId(choice_data1)
+            self.data1 = self._extractData(key_id1)
             # plot Data1
             self.updatePlot(self.graphData1, self.layoutData1, self.data1)
             # plot default for output graph
             self.newPlot(self.graphOutput, self.layoutOutput)
+
 
     def onSelectData2(self):
         """ Plot for selection of Data2 """
@@ -227,7 +233,7 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
             self.newPlot(self.graphData2, self.layoutData2)
             self.txtNumber.setEnabled(False)
             self.data2OK = False
-            # logging.info('Choose a file or a number for Data2')
+            self.onCheckChosenData()
             return
 
         elif choice_data2 == 'Number':
@@ -241,17 +247,19 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
             self.updatePlot(self.graphData2, self.layoutData2, self.data2)
             # plot default for output graph
             self.newPlot(self.graphOutput, self.layoutOutput)
+            self.onCheckChosenData()
 
         else:
             self.cmdCompute.setEnabled(self.data1OK)
             self.data2OK = True
             self.txtNumber.setEnabled(False)
-            id2 = self._findId(choice_data2)
-            self.data2 = self._extractData(id2)
+            key_id2 = self._findId(choice_data2)
+            self.data2 = self._extractData(key_id2)
             # plot Data2
             self.updatePlot(self.graphData2, self.layoutData2, self.data2)
             # plot default for output graph
             self.newPlot(self.graphOutput, self.layoutOutput)
+            self.onCheckChosenData()
 
     def onInputCoefficient(self):
         """ Check input of number when a coefficient is required
@@ -322,12 +330,12 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
 
         if name_to_check is None or name_to_check == '':
             self.txtOutputData.setStyleSheet(QtCore.QString(BG_RED))
-            logging.info('no output name')
+            logging.info('No output name')
             return False
 
         elif name_to_check in self.list_data_items:
             self.txtOutputData.setStyleSheet(QtCore.QString(BG_RED))
-            logging.info('The Output Data Name already exists')
+            logging.info('The Output data name already exists')
             return False
 
         else:
@@ -341,48 +349,27 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
         """ find id of name in list of filenames """
         isinstance(name, basestring)
 
-        for id in self.filenames.keys():
+        for key_id in self.filenames.keys():
             # data with title
-            if self.filenames[id].get_data().title:
-                input = self.filenames[id].get_data().title
+            if self.filenames[key_id].get_data().title:
+                input = self.filenames[key_id].get_data().title
             # data without title
             else:
-                input = str(id)
+                input = str(key_id)
             if name in input:
-                return id
+                return key_id
 
-    def _extractData(self, id):
+    def _extractData(self, key_id):
         """ Extract data from file with id contained in list of filenames """
-        data_complete = self.filenames[id].get_data()
+        data_complete = self.filenames[key_id].get_data()
         dimension = data_complete.__class__.__name__
 
-        if dimension == 'Data1D':
-            data_set = Data1D(x=data_complete.x,
-                              y=data_complete.y,
-                              dx=data_complete.dx,
-                              dy=data_complete.dy)
-
-        elif dimension == 'Data2D':
-            data_set = Data2D(image=data_complete.data,
-                              err_image=data_complete.err_data,
-                              mask=data_complete.mask,
-                              qx_data=data_complete.qx_data,
-                              qy_data=data_complete.qy_data,
-                              dqx_data=data_complete.dqx_data,
-                              dqy_data=data_complete.dqy_data,
-                              q_data=data_complete.q_data,
-                              xmin=data_complete.xmin,
-                              xmax=data_complete.xmax,
-                              ymin=data_complete.ymin,
-                              ymax=data_complete.ymax,
-                              zmin=data_complete.zmin,
-                              zmax=data_complete.zmax)
+        if dimension in ('Data1D', 'Data2D'):
+            return copy.deepcopy(data_complete)
 
         else:
             logging.info('Error with data format')
             return
-
-        return data_set
 
     # ########
     # PLOTS
@@ -398,15 +385,7 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
             layout.removeItem(item)
 
         layout.setContentsMargins(0, 0, 0, 0)
-
-        # define default content: '?'
-        scene = QtGui.QGraphicsScene()
-        scene.addText("?")
-
-        subgraph = QtGui.QGraphicsView()
-        subgraph.setScene(scene)
-
-        layout.addWidget(subgraph)
+        layout.addWidget(self.prepareSubgraphWithData("?"))
 
         graph.setLayout(layout)
 
@@ -455,19 +434,24 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
             plotter.ax.tick_params(axis='x', labelsize=8)
             plotter.ax.tick_params(axis='y', labelsize=8)
 
-            plotter.plot(hide_error=True, marker='.', show_legend=False)
+            plotter.plot(hide_error=True, marker='.')
+            # plotter.legend = None
 
             plotter.show()
 
         elif float(data) and self.cbData2.currentText() == 'Number':
             # display value of coefficient (to be applied to Data1)
             # in graphData2
-            scene = QtGui.QGraphicsScene()
-            scene.addText(str(data))
-
-            subgraph = QtGui.QGraphicsView()
-            subgraph.setScene(scene)
-
-            layout.addWidget(subgraph)
+            layout.addWidget(self.prepareSubgraphWithData(data))
 
             graph.setLayout(layout)
+
+    def prepareSubgraphWithData(self, data):
+        """ Create graphics view containing scene with string """
+        scene = QtGui.QGraphicsScene()
+        scene.addText(str(data))
+
+        subgraph = QtGui.QGraphicsView()
+        subgraph.setScene(scene)
+
+        return subgraph

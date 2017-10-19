@@ -68,7 +68,7 @@ class GuiUtilsTest(unittest.TestCase):
             'plotRequestedSignal',
             'progressBarUpdateSignal',
             'activeGraphName',
-            'sendDataToPanel',
+            'sendDataToPanelSignal',
             'updateModelFromDataOperationPanelSignal'
         ]
 

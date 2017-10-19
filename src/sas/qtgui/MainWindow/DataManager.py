@@ -274,7 +274,6 @@ class DataManager(object):
             if id in self.stored_data:
                 del self.stored_data[id]
 
-
     def get_by_name(self, name_list=None):
         """
         return a list of data given a list of data names

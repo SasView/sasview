@@ -533,7 +533,7 @@ class GuiManager(object):
     def actionData_Operation(self):
         """
         """
-        self.communicate.sendDataToPanel.emit(self._data_manager.get_all_data())
+        self.communicate.sendDataToPanelSignal.emit(self._data_manager.get_all_data())
 
         self.DataOperation.show()
 
