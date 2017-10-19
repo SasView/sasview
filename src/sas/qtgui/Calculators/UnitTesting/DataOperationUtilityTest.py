@@ -134,7 +134,6 @@ class DataOperationUtilityTest(unittest.TestCase):
         QTest.mouseClick(closeButton, Qt.LeftButton)
 
 
-    # @patch('DataOperationUtilityPanel.')
     def testOnCompute(self):
         """ Test onCompute function """
 
@@ -162,8 +161,6 @@ class DataOperationUtilityTest(unittest.TestCase):
         self.widget.onPrepareOutputData = MagicMock()
 
         self.assertTrue(self.widget.onPrepareOutputData.called_once())
-
-        # GuiManager.updateModelFromDataOperationPanel
 
     def testOnSelectData1(self):
         """ Test ComboBox for Data1 """
@@ -282,6 +279,11 @@ class DataOperationUtilityTest(unittest.TestCase):
 
     def testCheckChosenData(self):
         """ Test check of data compatibility """
+        # set the 2 following to True since we want to check
+        # the compatibility of dimensions
+        self.widget.data1OK = True
+        self.widget.data2OK = True
+
         # Case 1: incompatible dimensions
         self.widget.data1 = Data1D(x=[1.0, 2.0, 3.0], y=[11.0, 12.0, 13.0],
                                    dx=[0.1, 0.2, 0.3], dy=[0.1, 0.2, 0.3])

@@ -125,30 +125,28 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
 
     def onCompute(self):
         """ perform calculation """
-        # check compatibility of datasets before calculation
-        if self.onCheckChosenData():
-            # set operator to be applied
-            operator = self.cbOperator.currentText()
-            # calculate and send data to DataExplorer
-            output = None
-            try:
-                data1 = self.data1
-                data2 = self.data2
-                exec "output = data1 %s data2" % operator
-            except:
-                raise
+        # set operator to be applied
+        operator = self.cbOperator.currentText()
+        # calculate and send data to DataExplorer
+        output = None
+        try:
+            data1 = self.data1
+            data2 = self.data2
+            exec "output = data1 %s data2" % operator
+        except:
+            raise
 
-            self.output = output
+        self.output = output
 
-            # if outputname was unused, write output result to it
-            # and display plot
-            if self.onCheckOutputName():
-                # add outputname to self.filenames
-                self.list_data_items.append(str(self.txtOutputData.text()))
-                # send result to DataExplorer
-                self.onPrepareOutputData()
-                # plot result
-                self.updatePlot(self.graphOutput, self.layoutOutput, self.output)
+        # if outputname was unused, write output result to it
+        # and display plot
+        if self.onCheckOutputName():
+            # add outputname to self.filenames
+            self.list_data_items.append(str(self.txtOutputData.text()))
+            # send result to DataExplorer
+            self.onPrepareOutputData()
+            # plot result
+            self.updatePlot(self.graphOutput, self.layoutOutput, self.output)
 
     def onPrepareOutputData(self):
         """ Prepare datasets to be added to DataExplorer and DataManager """
@@ -206,15 +204,11 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
             self.newPlot(self.graphData1, self.layoutData1)
             self.data1 = None
             self.data1OK = False
-            self.cmdCompute.setEnabled(False)
-            self.onCheckChosenData()
+            self.cmdCompute.setEnabled(False) # self.onCheckChosenData())
             return
 
         else:
-            # Enable Compute button only if Data2 is defined
-            self.cmdCompute.setEnabled(self.data2OK)
             self.data1OK = True
-            self.onCheckChosenData()
             # get Data1
             key_id1 = self._findId(choice_data1)
             self.data1 = self._extractData(key_id1)
@@ -222,7 +216,8 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
             self.updatePlot(self.graphData1, self.layoutData1, self.data1)
             # plot default for output graph
             self.newPlot(self.graphOutput, self.layoutOutput)
-
+            # Enable Compute button only if Data2 is defined and data compatible
+            self.cmdCompute.setEnabled(self.onCheckChosenData())
 
     def onSelectData2(self):
         """ Plot for selection of Data2 """
@@ -234,6 +229,7 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
             self.txtNumber.setEnabled(False)
             self.data2OK = False
             self.onCheckChosenData()
+            self.cmdCompute.setEnabled(False)
             return
 
         elif choice_data2 == 'Number':
@@ -241,8 +237,8 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
             self.txtNumber.setEnabled(True)
             self.data2 = float(self.txtNumber.text())
 
-            # Enable Compute button only if Data1 is defined
-            self.cmdCompute.setEnabled(self.data1OK)
+            # Enable Compute button only if Data1 defined and compatible data
+            self.cmdCompute.setEnabled(self.onCheckChosenData())
             # Display value of coefficient in graphData2
             self.updatePlot(self.graphData2, self.layoutData2, self.data2)
             # plot default for output graph
@@ -250,16 +246,16 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
             self.onCheckChosenData()
 
         else:
-            self.cmdCompute.setEnabled(self.data1OK)
-            self.data2OK = True
             self.txtNumber.setEnabled(False)
+            self.data2OK = True
             key_id2 = self._findId(choice_data2)
             self.data2 = self._extractData(key_id2)
+            self.cmdCompute.setEnabled(self.onCheckChosenData())
+
             # plot Data2
             self.updatePlot(self.graphData2, self.layoutData2, self.data2)
             # plot default for output graph
             self.newPlot(self.graphOutput, self.layoutOutput)
-            self.onCheckChosenData()
 
     def onInputCoefficient(self):
         """ Check input of number when a coefficient is required
@@ -284,44 +280,48 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
                 self.updatePlot(self.graphData2, self.layoutData2, self.data2)
 
     def onCheckChosenData(self):
-        """ Before running compute, check that data1 and 2 are compatible """
+        """ check that data1 and data2 are compatible """
 
-        if self.cbData2.currentText() == 'Number':
-            self.cbData1.setStyleSheet(QtCore.QString(BG_WHITE))
-            self.cbData2.setStyleSheet(QtCore.QString(BG_WHITE))
-            return True
-
-        elif self.data1.__class__.__name__ != self.data2.__class__.__name__:
-            self.cbData1.setStyleSheet(QtCore.QString(BG_RED))
-            self.cbData2.setStyleSheet(QtCore.QString(BG_RED))
-            logging.info('Cannot compute data of different dimensions')
+        if not all([self.data1OK, self.data2OK]):
             return False
-
-        elif self.data1.__class__.__name__ == 'Data1D'\
-                and (len(self.data2.x) != len(self.data1.x) or
-                         not all(i == j for i, j in zip(self.data1.x, self.data2.x))):
-            logging.info('Cannot compute 1D data of different lengths')
-            self.cbData1.setStyleSheet(QtCore.QString(BG_RED))
-            self.cbData2.setStyleSheet(QtCore.QString(BG_RED))
-            return False
-
-        elif self.data1.__class__.__name__ == 'Data2D' \
-                and (len(self.data2.qx_data) != len(self.data1.qx_data) \
-                or len(self.data2.qy_data) != len(self.data1.qy_data)
-                or not all(i == j for i, j in
-                                 zip(self.data1.qx_data, self.data2.qx_data))
-                or not all(i == j for i, j in
-                            zip(self.data1.qy_data, self.data2.qy_data))
-                     ):
-            self.cbData1.setStyleSheet(QtCore.QString(BG_RED))
-            self.cbData2.setStyleSheet(QtCore.QString(BG_RED))
-            logging.info('Cannot compute 2D data of different lengths')
-            return False
-
         else:
-            self.cbData1.setStyleSheet(QtCore.QString(BG_WHITE))
-            self.cbData2.setStyleSheet(QtCore.QString(BG_WHITE))
-            return True
+            if self.cbData2.currentText() == 'Number':
+                self.cbData1.setStyleSheet(QtCore.QString(BG_WHITE))
+                self.cbData2.setStyleSheet(QtCore.QString(BG_WHITE))
+                return True
+
+            elif self.data1.__class__.__name__ != self.data2.__class__.__name__:
+                self.cbData1.setStyleSheet(QtCore.QString(BG_RED))
+                self.cbData2.setStyleSheet(QtCore.QString(BG_RED))
+                print self.data1.__class__.__name__ != self.data2.__class__.__name__
+                logging.info('Cannot compute data of different dimensions')
+                return False
+
+            elif self.data1.__class__.__name__ == 'Data1D'\
+                    and (len(self.data2.x) != len(self.data1.x) or
+                             not all(i == j for i, j in zip(self.data1.x, self.data2.x))):
+                logging.info('Cannot compute 1D data of different lengths')
+                self.cbData1.setStyleSheet(QtCore.QString(BG_RED))
+                self.cbData2.setStyleSheet(QtCore.QString(BG_RED))
+                return False
+
+            elif self.data1.__class__.__name__ == 'Data2D' \
+                    and (len(self.data2.qx_data) != len(self.data1.qx_data) \
+                    or len(self.data2.qy_data) != len(self.data1.qy_data)
+                    or not all(i == j for i, j in
+                                     zip(self.data1.qx_data, self.data2.qx_data))
+                    or not all(i == j for i, j in
+                                zip(self.data1.qy_data, self.data2.qy_data))
+                         ):
+                self.cbData1.setStyleSheet(QtCore.QString(BG_RED))
+                self.cbData2.setStyleSheet(QtCore.QString(BG_RED))
+                logging.info('Cannot compute 2D data of different lengths')
+                return False
+
+            else:
+                self.cbData1.setStyleSheet(QtCore.QString(BG_WHITE))
+                self.cbData2.setStyleSheet(QtCore.QString(BG_WHITE))
+                return True
 
     def onCheckOutputName(self):
         """ Check that name of output does not already exist """
