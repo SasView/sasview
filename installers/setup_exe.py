@@ -267,7 +267,7 @@ mkl_dlls = dll_check(mkl_path, ['mkl_core', 'mkl_def', 'libiomp5md'])
 
 if mkl_dlls:
     data_files.append(('.', mkl_dlls))
-elif atlas_dlls or is_64bit:
+elif atlas_dlls or is_64bits:
     data_files.append(('.', atlas_dlls))
 
 if is_64bits:
