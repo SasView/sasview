@@ -92,6 +92,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.activeGraphsSignal.connect(self.updateGraphCount)
         self.communicator.activeGraphName.connect(self.updatePlotName)
         self.communicator.plotUpdateSignal.connect(self.updatePlot)
+
         self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
 
@@ -279,18 +280,25 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         ind = -1
         # Use 'while' so the row count is forced at every iteration
         deleted_indices = []
+        deleted_names = []
         while ind < self.model.rowCount():
             ind += 1
             item = self.model.item(ind)
+
             if item and item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
                 # Delete these rows from the model
+                deleted_names.append(str(self.model.item(ind).text()))
                 deleted_indices.append(item)
+
                 self.model.removeRow(ind)
                 # Decrement index since we just deleted it
                 ind -= 1
 
         # Let others know we deleted data
         self.communicator.dataDeletedSignal.emit(deleted_indices)
+
+        # update stored_data
+        self.manager.update_stored_data(deleted_names)
 
     def deleteTheory(self, event):
         """
@@ -868,6 +876,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.txt_widget.setWindowFlags(QtCore.Qt.Window)
         self.txt_widget.setWindowIcon(QtGui.QIcon(":/res/ball.ico"))
         self.txt_widget.setWindowTitle("Data Info: %s" % data.filename)
+        self.txt_widget.clear()
         self.txt_widget.insertPlainText(text_to_show)
 
         self.txt_widget.show()
@@ -1010,7 +1019,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # New row in the model
         self.model.appendRow(checkbox_item)
-
 
     def updateModelFromPerspective(self, model_item):
         """

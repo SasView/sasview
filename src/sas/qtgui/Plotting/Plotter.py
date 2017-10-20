@@ -144,6 +144,7 @@ class PlotterWidget(PlotterBase):
         self.plot_dict[self._data.id] = self.data
 
         # Now add the legend with some customizations.
+
         self.legend = ax.legend(loc='upper right', shadow=True)
         if self.legend:
             self.legend.set_picker(True)

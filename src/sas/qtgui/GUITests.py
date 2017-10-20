@@ -37,6 +37,7 @@ from Calculators.UnitTesting import GenericScatteringCalculatorTest
 from Calculators.UnitTesting import SLDCalculatorTest
 from Calculators.UnitTesting import SlitSizeCalculatorTest
 from Calculators.UnitTesting import ResolutionCalculatorPanelTest
+from Calculators.UnitTesting import DataOperationUtilityTest
 
 # Utilities
 from Utilities.UnitTesting import GuiUtilsTest
@@ -93,6 +94,7 @@ def suite():
         unittest.makeSuite(SLDCalculatorTest.SLDCalculatorTest, 'test'),
         unittest.makeSuite(SlitSizeCalculatorTest.SlitSizeCalculatorTest, 'test'),
         unittest.makeSuite(ResolutionCalculatorPanelTest.ResolutionCalculatorPanelTest, 'test'),
+        unittest.makeSuite(DataOperationUtilityTest.DataOperationUtilityTest, 'test'),
 
         # Perspectives
         unittest.makeSuite(FittingPerspectiveTest.FittingPerspectiveTest, 'test'),

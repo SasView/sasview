@@ -68,6 +68,8 @@ class GuiUtilsTest(unittest.TestCase):
             'plotRequestedSignal',
             'progressBarUpdateSignal',
             'activeGraphName',
+            'sendDataToPanelSignal',
+            'updateModelFromDataOperationPanelSignal'
         ]
 
         # Assure all signals are defined.
@@ -410,6 +412,7 @@ class GuiUtilsTest(unittest.TestCase):
         xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x", yLabel="log10(y*x^(4))")
         self.assertEqual(yLabel, " \\ \\ ^{4}(()^{4})")
         self.assertEqual(yscale, "log")
+
 
 class FormulaValidatorTest(unittest.TestCase):
     """ Test the formula validator """
