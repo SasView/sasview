@@ -271,13 +271,13 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
 
             if input_to_check is None or input_to_check is '':
                 msg = 'DataOperation: Number requires a float number'
-                logging.info(msg)
+                logging.warning(msg)
                 self.txtNumber.setStyleSheet(QtCore.QString(BG_RED))
 
             elif float(self.txtNumber.text()) == 0.:
                 # should be check that 0 is not chosen
                 msg = 'DataOperation: Number requires a non zero number'
-                logging.info(msg)
+                logging.warning(msg)
                 self.txtNumber.setStyleSheet(QtCore.QString(BG_RED))
 
             else:
@@ -300,13 +300,13 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
                 self.cbData1.setStyleSheet(QtCore.QString(BG_RED))
                 self.cbData2.setStyleSheet(QtCore.QString(BG_RED))
                 print self.data1.__class__.__name__ != self.data2.__class__.__name__
-                logging.info('Cannot compute data of different dimensions')
+                logging.warning('Cannot compute data of different dimensions')
                 return False
 
             elif self.data1.__class__.__name__ == 'Data1D'\
                     and (len(self.data2.x) != len(self.data1.x) or
                              not all(i == j for i, j in zip(self.data1.x, self.data2.x))):
-                logging.info('Cannot compute 1D data of different lengths')
+                logging.warning('Cannot compute 1D data of different lengths')
                 self.cbData1.setStyleSheet(QtCore.QString(BG_RED))
                 self.cbData2.setStyleSheet(QtCore.QString(BG_RED))
                 return False
@@ -321,7 +321,7 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
                          ):
                 self.cbData1.setStyleSheet(QtCore.QString(BG_RED))
                 self.cbData2.setStyleSheet(QtCore.QString(BG_RED))
-                logging.info('Cannot compute 2D data of different lengths')
+                logging.warning('Cannot compute 2D data of different lengths')
                 return False
 
             else:
@@ -336,12 +336,12 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
 
         if name_to_check is None or name_to_check == '':
             self.txtOutputData.setStyleSheet(QtCore.QString(BG_RED))
-            logging.info('No output name')
+            logging.warning('No output name')
             return False
 
         elif name_to_check in self.list_data_items:
             self.txtOutputData.setStyleSheet(QtCore.QString(BG_RED))
-            logging.info('The Output data name already exists')
+            logging.warning('The Output data name already exists')
             return False
 
         else:
@@ -374,7 +374,7 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
             return copy.deepcopy(data_complete)
 
         else:
-            logging.info('Error with data format')
+            logging.warning('Error with data format')
             return
 
     # ########
