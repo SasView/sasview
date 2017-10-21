@@ -10,12 +10,13 @@
 ######################################################################
 
 import logging
+
 import numpy as np
-from sas.sascalc.dataloader.file_reader_base_class import FileReader
-from sas.sascalc.dataloader.data_info import DataInfo, plottable_1D, Data1D,\
-    Detector
-from sas.sascalc.dataloader.loader_exceptions import FileContentsException,\
-    DefaultReaderException
+
+from sas.sascalc.data_util.nxsunit import Converter
+from ..file_reader_base_class import FileReader
+from ..data_info import DataInfo, plottable_1D, Data1D, Detector
+from ..loader_exceptions import FileContentsException, DefaultReaderException
 
 logger = logging.getLogger(__name__)
 
@@ -30,22 +31,17 @@ class Reader(FileReader):
     type = ["IGOR 1D files (*.abs)|*.abs"]
     # List of allowed extensions
     ext = ['.abs']
-    
+
     def get_file_contents(self):
-        """ 
+        """
         Get the contents of the file
-        
+
         :raise RuntimeError: when the file can't be opened
         :raise ValueError: when the length of the data vectors are inconsistent
         """
-        buff = self.f_open.read()
+        buff = self.readall()
         filepath = self.f_open.name
         lines = buff.splitlines()
-        self.has_converter = True
-        try:
-            from sas.sascalc.data_util.nxsunit import Converter
-        except:
-            self.has_converter = False
         self.output = []
         self.current_datainfo = DataInfo()
         self.current_datainfo.filename = filepath
@@ -74,8 +70,7 @@ class Reader(FileReader):
                 # Wavelength in Angstrom
                 try:
                     value = float(line_toks[1])
-                    if self.has_converter and \
-                            self.current_datainfo.source.wavelength_unit != 'A':
+                    if self.current_datainfo.source.wavelength_unit != 'A':
                         conv = Converter('A')
                         self.current_datainfo.source.wavelength = conv(value,
                             units=self.current_datainfo.source.wavelength_unit)
@@ -88,13 +83,13 @@ class Reader(FileReader):
                 # Detector distance in meters
                 try:
                     value = float(line_toks[3])
-                    if self.has_converter and detector.distance_unit != 'm':
+                    if detector.distance_unit != 'm':
                         conv = Converter('m')
                         detector.distance = conv(value,
                                         units=detector.distance_unit)
                     else:
                         detector.distance = value
-                except:
+                except Exception:
                     msg = "ABSReader cannot read SDD from %s" % filepath
                     self.current_datainfo.errors.append(msg)
 
@@ -108,9 +103,14 @@ class Reader(FileReader):
 
                 # Sample thickness in mm
                 try:
-                    value = float(line_toks[5])
-                    if self.has_converter and \
-                            self.current_datainfo.sample.thickness_unit != 'cm':
+                    # ABS writer adds 'C' with no space to the end of the
+                    # thickness column.  Remove it if it is there before
+                    # converting the thickness.
+                    if line_toks[5][-1] not in '012345679.':
+                        value = float(line_toks[5][:-1])
+                    else:
+                        value = float(line_toks[5])
+                    if self.current_datainfo.sample.thickness_unit != 'cm':
                         conv = Converter('cm')
                         self.current_datainfo.sample.thickness = conv(value,
                             units=self.current_datainfo.sample.thickness_unit)
@@ -133,7 +133,7 @@ class Reader(FileReader):
                 center_y = float(line_toks[1])
 
                 # Bin size
-                if self.has_converter and detector.pixel_size_unit != 'mm':
+                if detector.pixel_size_unit != 'mm':
                     conv = Converter('mm')
                     detector.pixel_size.x = conv(5.08,
                                         units=detector.pixel_size_unit)
@@ -145,12 +145,12 @@ class Reader(FileReader):
 
                 # Store beam center in distance units
                 # Det 640 x 640 mm
-                if self.has_converter and detector.beam_center_unit != 'mm':
+                if detector.beam_center_unit != 'mm':
                     conv = Converter('mm')
                     detector.beam_center.x = conv(center_x * 5.08,
                                      units=detector.beam_center_unit)
                     detector.beam_center.y = conv(center_y * 5.08,
-                                    units=detector.beam_center_unit)
+                                     units=detector.beam_center_unit)
                 else:
                     detector.beam_center.x = center_x * 5.08
                     detector.beam_center.y = center_y * 5.08
@@ -201,7 +201,7 @@ class Reader(FileReader):
             if line.count("The 6 columns") > 0:
                 is_data_started = True
 
-        self.remove_empty_q_values(True, True)
+        self.remove_empty_q_values()
 
         # Sanity check
         if not len(self.current_dataset.y) == len(self.current_dataset.dy):

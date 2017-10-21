@@ -2,12 +2,12 @@
 
 #
 # The setup to create a Windows executable.
-# Inno Setup can then be used with the installer.iss file 
-# in the top source directory to create an installer. 
+# Inno Setup can then be used with the installer.iss file
+# in the top source directory to create an installer.
 #
 # Setuptools clashes with py2exe 0.6.8 (and probably later too).
 # For that reason, most of the code needs to have direct imports
-# that are not going through pkg_resources. 
+# that are not going through pkg_resources.
 #
 # Attention should be paid to dynamic imports. Data files can
 # be added to the distribution directory for that purpose.
@@ -16,28 +16,35 @@ from __future__ import print_function
 
 import os
 import sys
-import warnings
 from glob import glob
+import warnings
 import shutil
 
 from distutils.util import get_platform
 from distutils.core import setup
 from distutils.filelist import findall
 from distutils.sysconfig import get_python_lib
-import py2exe
 
 #from idlelib.PyShell import warning_stream
 
-# put the build directory at the front of the path
+# Need the installer dir on the python path to find helper modules
+installer_dir = os.path.abspath(os.path.dirname(__file__))
+if installer_dir != os.path.abspath(os.getcwd()):
+    raise RuntimeError("Must run setup_exe from the installers directory")
+sys.path.append(installer_dir)
+
+# Need the installer dir on the python path to find helper modules
 if os.path.abspath(os.path.dirname(__file__)) != os.path.abspath(os.getcwd()):
-    raise RuntimeError("Must run setup_exe from the sasview directory")
+    raise RuntimeError("Must run setup_exe from the installers directory")
+sys.path.append(installer_dir)
+
+# put the build directory at the front of the path
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 platform = '%s-%s'%(get_platform(), sys.version[:3])
-build_path = os.path.join(root, 'build', 'lib.'+platform)
-#build_path = os.path.join(root, 'sasview-install', 'Lib', 'site-packages')
+doc_path = os.path.join(root, 'build', 'lib.'+platform, 'doc')
+build_path = os.path.join(root, 'sasview-install', 'Lib', 'site-packages')
 sys.path.insert(0, build_path)
 
-import local_config
 from installer_generator import generate_installer
 
 import matplotlib
@@ -61,10 +68,12 @@ try:
         sys.path.insert(0, extra_path)
         del sys.argv[path_flag_idx+1]
         sys.argv.remove('--extrapath')
-except:
+except Exception:
     print("Error processing extra python path needed to build SasView\n  %s" %
           sys.exc_value)
 
+from sas import get_local_config
+local_config = get_local_config()
 
 # Solution taken from here: http://www.py2exe.org/index.cgi/win32com.shell
 # ModuleFinder can't handle runtime changes to __path__, but win32com uses them
@@ -148,16 +157,6 @@ manifest = """
     </assembly>
     """%{'arch': arch}
 
-if is_64bits:
-    msvcrtdll = glob(r"C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*.*")
-else:
-    msvcrtdll = glob(r"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*.*")
-if msvcrtdll:
-    msvcrtdll_data_files = ("Microsoft.VC90.CRT", msvcrtdll)
-else:
-    msvcrtdll_data_files = None
-
-
 class Target:
     def __init__(self, **kw):
         self.__dict__.update(kw)
@@ -167,50 +166,27 @@ class Target:
         self.copyright = "copyright 2009 - 2016"
         self.name = "SasView"
 
-#
-# Adapted from http://www.py2exe.org/index.cgi/MatPlotLib
-# to use the MatPlotLib.
-#
-path = os.getcwd()
-
-media_dir = os.path.join(path, "media")
-images_dir = os.path.join(path, "images")
-test_dir = os.path.join(path, "test")
-test_1d_dir = os.path.join(path, "test\\1d_data")
-test_2d_dir = os.path.join(path, "test\\2d_data")
-test_sesans_dir = os.path.join(path, "test\\sesans_data")
-test_convertible_dir = os.path.join(path, "test\\convertible_files")
-test_save_dir = os.path.join(path, "test\\save_states")
-test_coord_dir = os.path.join(path, "test\\coordinate_data")
-test_image_dir = os.path.join(path, "test\\image_data")
-test_other_dir = os.path.join(path, "test\\other_files")
-
-matplotlibdatadir = matplotlib.get_data_path()
-matplotlibdata = findall(matplotlibdatadir)
-
-site_loc = get_python_lib()
-opencl_include_dir = os.path.join(site_loc, "pyopencl", "cl")
-
 data_files = []
 
 if tinycc:
     data_files += tinycc.data_files()
 
-# Copying SLD data
+# Include data for supporting packages
 import periodictable
 data_files += periodictable.data_files()
 
-import sas.sasgui.perspectives.fitting as fitting
-data_files += fitting.data_files()
+#
+# Adapted from http://www.py2exe.org/index.cgi/MatPlotLib
+# to use the MatPlotLib.
+#
+mpl_dir = matplotlib.get_data_path()
+for dirpath, dirnames, filenames in os.walk(mpl_dir):
+    target_dir = os.path.join("mpl-data", os.path.relpath(dirpath, mpl_dir))
+    source_files = [os.path.join(dirpath, f) for f in filenames]
+    data_files.append((target_dir, source_files))
 
-import sas.sasgui.perspectives.calculator as calculator
-data_files += calculator.data_files()
-
-import sas.sasgui.perspectives.invariant as invariant
-data_files += invariant.data_files()
-
-import sas.sasgui.guiframe as guiframe
-data_files += guiframe.data_files()
+import sasmodels
+data_files += sasmodels.data_files()
 
 # precompile sas models into the sasview build path; doesn't matter too much
 # where it is so long as it is a place that will get cleaned up afterwards.
@@ -222,97 +198,85 @@ compiled_dlls = sasmodels.core.precompile_dlls(dll_path, dtype='double')
 # data with installer_generator.py
 data_files.append(('compiled_models', compiled_dlls))
 
-import sasmodels
-data_files += sasmodels.data_files()
+# Data files for the different perspectives
+from sas.sasgui.perspectives import fitting
+data_files += fitting.data_files()
 
-for f in matplotlibdata:
-    dirname = os.path.join('mpl-data', f[len(matplotlibdatadir)+1:])
-    data_files.append((os.path.split(dirname)[0], [f]))
+from sas.sasgui.perspectives import calculator
+data_files += calculator.data_files()
 
-# Copy the settings file for the sas.dataloader file extension associations
-import sas.sascalc.dataloader.readers
-f = os.path.join(sas.sascalc.dataloader.readers.get_data_path())
-if os.path.isfile(f):
-    data_files.append(('.', [f]))
-f = 'custom_config.py'
-if os.path.isfile(f):
-    data_files.append(('.', [f]))
-    data_files.append(('config', [f]))
-f = 'local_config.py'
-if os.path.isfile(f):
-    data_files.append(('.', [f]))
+from sas.sasgui.perspectives import invariant
+data_files += invariant.data_files()
 
-f = 'logging.ini'
-if os.path.isfile(f):
-    data_files.append(('.', [f]))
+from sas.sasgui import guiframe
+data_files += guiframe.data_files()
 
-# numerical libraries
-def dll_check(dll_path, dlls):
-    dll_includes = [os.path.join(dll_path, dll+'.dll') for dll in dlls]
-    return [dll for dll in dll_includes if os.path.exists(dll)]
+# Copy the config files
+sasview_path = os.path.join('..', 'src', 'sas', 'sasview')
+data_files.append(('.', [os.path.join(sasview_path, 'custom_config.py')]))
+data_files.append(('config', [os.path.join(sasview_path, 'custom_config.py')]))
+data_files.append(('.', [os.path.join(sasview_path, 'local_config.py')]))
 
-python_root = os.path.dirname(os.path.abspath(sys.executable))
-# Check for ATLAS
-dll_path = os.path.join(python_root, 'lib', 'site-packages', 'numpy', 'core')
-dlls = ['numpy-atlas']
-atlas_dlls = dll_check(dll_path, dlls)
-
-# Check for MKL
-dll_path = os.path.join(python_root, 'Library', 'bin')
-dlls = ['mkl_core', 'mkl_def', 'libiomp5md']
-mkl_dlls = dll_check(dll_path, dlls)
-
-if atlas_dlls:
-    data_files.append(('.', atlas_dlls))
-elif mkl_dlls:
-    data_files.append(('.', mkl_dlls))
+# Copy the logging config
+sas_path = os.path.join('..', 'src', 'sas')
+data_files.append(('.', [os.path.join(sas_path, 'logging.ini')]))
 
 if os.path.isfile("BUILD_NUMBER"):
     data_files.append(('.', ["BUILD_NUMBER"]))
 
 # Copying the images directory to the distribution directory.
-for f in findall(images_dir):
-    data_files.append(("images", [f]))
+data_files.append(("images", findall(local_config.icon_path)))
 
 # Copying the HTML help docs
-for f in findall(media_dir):
-    data_files.append(("media", [f]))
+data_files.append(("media", findall(local_config.media_path)))
 
 # Copying the sample data user data
-for f in findall(test_1d_dir):
-    data_files.append(("test\\1d_data", [f]))
-for f in findall(test_2d_dir):
-    data_files.append(("test\\2d_data", [f]))
-for f in findall(test_save_dir):
-    data_files.append(("test\\save_states", [f]))
-for f in findall(test_sesans_dir):
-    data_files.append(("test\\sesans_data", [f]))
-for f in findall(test_convertible_dir):
-    data_files.append(("test\\convertible_files", [f]))
-for f in findall(test_coord_dir):
-    data_files.append(("test\\coordinate_data", [f]))
-for f in findall(test_image_dir):
-    data_files.append(("test\\image_data", [f]))
-for f in findall(test_other_dir):
-    data_files.append(("test\\other_files", [f]))
-
-# Copying opencl include files
-for f in findall(opencl_include_dir):
-    data_files.append(("includes\\pyopencl",[f]))
+test_dir = local_config.test_path
+for dirpath, dirnames, filenames in os.walk(test_dir):
+    target_dir = os.path.join("test", os.path.relpath(dirpath, test_dir))
+    source_files = [os.path.join(dirpath, f) for f in filenames]
+    data_files.append((target_dir, source_files))
 
 # See if the documentation has been built, and if so include it.
-doc_path = os.path.join(build_path, "doc")
 if os.path.exists(doc_path):
     for dirpath, dirnames, filenames in os.walk(doc_path):
-        for filename in filenames:
-            sub_dir = os.path.join("doc", os.path.relpath(dirpath, doc_path))
-            data_files.append((sub_dir, [os.path.join(dirpath, filename)]))
+        target_dir = os.path.join("doc", os.path.relpath(dirpath, doc_path))
+        source_files = [os.path.join(dirpath, f) for f in filenames]
+        data_files.append((target_dir, source_files))
 else:
     raise Exception("You must first build the documentation before creating an installer.")
 
-if msvcrtdll_data_files is not None:
+# Copying opencl include files
+opencl_source = os.path.join(get_python_lib(), "pyopencl", "cl")
+opencl_target = os.path.join("includes", "pyopencl")
+data_files.append((opencl_target, findall(opencl_source)))
+
+# Numerical libraries
+python_root = os.path.dirname(os.path.abspath(sys.executable))
+def dll_check(dll_path, dlls):
+    dll_includes = [os.path.join(dll_path, dll+'.dll') for dll in dlls]
+    return [dll for dll in dll_includes if os.path.exists(dll)]
+
+# Check for ATLAS
+numpy_path = os.path.join(python_root, 'lib', 'site-packages', 'numpy', 'core')
+atlas_dlls = dll_check(numpy_path, ['numpy-atlas'])
+
+# Check for MKL
+mkl_path = os.path.join(python_root, 'Library', 'bin')
+mkl_dlls = dll_check(mkl_path, ['mkl_core', 'mkl_def', 'libiomp5md'])
+
+if mkl_dlls:
+    data_files.append(('.', mkl_dlls))
+if atlas_dlls:
+    data_files.append(('.', atlas_dlls))
+
+if is_64bits:
+    msvcrtdll = glob(r"C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*.*")
+else:
+    msvcrtdll = glob(r"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*.*")
+if msvcrtdll:
     # install the MSVC 9 runtime dll's into the application folder
-    data_files.append(msvcrtdll_data_files)
+    data_files.append(("Microsoft.VC90.CRT", msvcrtdll))
 
 # NOTE:
 #  need an empty __init__.py in site-packages/numpy/distutils/tests and site-packages/mpl_toolkits
@@ -321,7 +285,7 @@ if msvcrtdll_data_files is not None:
 #
 packages = [
     'matplotlib', 'scipy', 'encodings', 'comtypes', 'h5py',
-    'win32com', 'xhtml2pdf', 'bumps','sasmodels', 'sas',
+    'win32com', 'xhtml2pdf', 'bumps', 'sasmodels', 'sas',
     ]
 packages.extend([
     'reportlab',
@@ -336,7 +300,11 @@ packages.extend([
     'reportlab.platypus',
     ])
 packages.append('periodictable.core') # not found automatically
-# packages.append('IPython')
+
+# For the interactive interpreter SasViewCom make sure ipython is available
+#packages.extend(['IPython', 'pyreadline', 'pyreadline.unicode_helper'])
+
+# individual models
 includes = ['site', 'lxml._elementpath', 'lxml.etree']
 
 if tinycc:
@@ -345,12 +313,12 @@ if tinycc:
 # Exclude packages that are not needed but are often found on build systems
 excludes = ['Tkinter', 'PyQt4', '_tkagg', 'sip', 'pytz', 'sympy']
 
-
 dll_excludes = [
     # Various matplotlib backends we are not using
     'libgdk_pixbuf-2.0-0.dll', 'libgobject-2.0-0.dll', 'libgdk-win32-2.0-0.dll',
     'tcl84.dll', 'tk84.dll', 'QtGui4.dll', 'QtCore4.dll',
     # numpy 1.8 openmp bindings (still seems to use all the cores without them)
+    # ... but we seem to need them when building from anaconda, so don't exclude ...
     #'libiomp5md.dll', 'libifcoremd.dll', 'libmmd.dll', 'svml_dispmd.dll','libifportMD.dll',
     'numpy-atlas.dll',
     # microsoft C runtime (not allowed to ship with the app; need to ship vcredist
@@ -364,25 +332,34 @@ dll_excludes = [
     ]
 
 target_wx_client = Target(
-    description = 'SasView',
-    script = 'sasview.py',
-    icon_resources = [(1, os.path.join(images_dir, "ball.ico"))],
-    other_resources = [(24, 1, manifest)],
-    dest_base = "SasView"
+    description='SasView',
+    script='sasview_gui.py',
+    icon_resources=[(1, local_config.SetupIconFile_win)],
+    other_resources=[(24, 1, manifest)],
+    dest_base="SasView"
 )
 
-# bundle_option = 2
+target_console_client = Target(
+    description='SasView console',
+    script='sasview_console.py',
+    icon_resources=[(1, local_config.SetupIconFile_win)],
+    other_resources=[(24, 1, manifest)],
+    dest_base="SasViewCom"
+)
+
+#bundle_option = 3 if is_64bits else 2
 bundle_option = 3
-if is_64bits:
-    bundle_option = 3
 generate_installer()
 #initialize category stuff
 #from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 #CategoryInstaller.check_install(s)
 
+#import pprint; pprint.pprint(data_files); sys.exit()
+
+import py2exe
 setup(
     windows=[target_wx_client],
-    console=[],
+    console=[target_console_client],
     options={
         'py2exe': {
             'dll_excludes': dll_excludes,

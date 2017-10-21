@@ -4,7 +4,7 @@
 #####################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation. 
+#project funded by the US National Science Foundation.
 #See the license text in license.txt
 #copyright 2008, University of Tennessee
 ######################################################################
@@ -18,7 +18,8 @@ from numpy import pi, exp # type:ignore
 from sasmodels.resolution import Slit1D, Pinhole1D
 from sasmodels.sesans import SesansTransform
 from sasmodels.resolution2d import Pinhole2D
-from .nxsunit import Converter
+
+from sas.sascalc.data_util.nxsunit import Converter
 
 def smear_selection(data, model = None):
     """

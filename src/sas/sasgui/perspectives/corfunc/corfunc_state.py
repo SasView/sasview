@@ -288,10 +288,10 @@ class Reader(CansasReader):
             entry_list = root.xpath('/ns:SASroot/ns:SASentry',
                 namespaces={'ns': CANSAS_NS})
             for entry in entry_list:
-                sas_entry, _ = self._parse_entry(entry)
                 corstate = self._parse_state(entry)
 
                 if corstate is not None:
+                    sas_entry, _ = self._parse_entry(entry)
                     sas_entry.meta_data['corstate'] = corstate
                     sas_entry.filename = corstate.file
                     output.append(sas_entry)

@@ -44,7 +44,7 @@ class Reader(FileReader):
         Get the contents of the file
         """
 
-        buff = self.f_open.read()
+        buff = self.readall()
         filepath = self.f_open.name
         lines = buff.splitlines()
         self.output = []
@@ -129,7 +129,7 @@ class Reader(FileReader):
                 has_error_dy = None
                 # Reset # of lines of data candidates
                 candidate_lines = 0
-        
+
         if not is_data:
             self.set_all_to_none()
             if self.extension in self.ext:
@@ -155,7 +155,7 @@ class Reader(FileReader):
             self.set_all_to_none()
             raise FileContentsException(msg)
 
-        self.remove_empty_q_values(has_error_dx, has_error_dy)
+        self.remove_empty_q_values()
         self.current_dataset.xaxis("\\rm{Q}", 'A^{-1}')
         self.current_dataset.yaxis("\\rm{Intensity}", "cm^{-1}")
 

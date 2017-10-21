@@ -58,7 +58,7 @@ def _symbols(expr,symtab):
     used in the expression.  Symbols are only returned once even if they
     occur multiple times.  The return value is a set with the elements in
     no particular order.
-    
+
     This is the first step in computing a dependency graph.
     """
     matches = [m.group(0) for m in _symbol_pattern.finditer(expr)]
@@ -80,14 +80,14 @@ def _substitute(expr,mapping):
         pieces += [expr[offset:start],text]
         offset = end
     pieces.append(expr[offset:])
-    
+
     # Join the pieces and return them
     return "".join(pieces)
 
 def _find_dependencies(symtab, exprs):
     """
     Returns a list of pair-wise dependencies from the parameter expressions.
-    
+
     For example, if p3 = p1+p2, then find_dependencies([p1,p2,p3]) will
     return [(p3,p1),(p3,p2)].  For base expressions without dependencies,
     such as p4 = 2*pi, this should return [(p4, None)]
@@ -109,7 +109,7 @@ def _symbols_or_none(expr,symtab):
 def _parameter_mapping(pairs):
     """
     Find the parameter substitution we need so that expressions can
-    be evaluated without having to traverse a chain of 
+    be evaluated without having to traverse a chain of
     model.layer.parameter.value
     """
     left,right = zip(*pairs)
@@ -121,7 +121,7 @@ def _parameter_mapping(pairs):
                     if p is not None)
     return definition, substitution
 
-def no_constraints(): 
+def no_constraints():
     """
     This parameter set has no constraints between the parameters.
     """
@@ -162,12 +162,12 @@ def compile_constraints(symtab, exprs, context={}):
     evaluations.  Unauthenticated users should not be running this code.
 
     Parameter names are assumed to contain only _.a-zA-Z0-9#[]
-    
+
     Both names are provided for inverse functions, e.g., acos and arccos.
 
     Should try running the function to identify syntax errors before
     running it in a fit.
-    
+
     Use help(fn) to see the code generated for the returned function fn.
     dis.dis(fn) will show the corresponding python vm instructions.
     """
@@ -238,7 +238,7 @@ def order_dependencies(pairs):
         independent = right - left
         if independent == emptyset:
             cycleset = ", ".join(str(s) for s in left)
-            raise ValueError,"Cyclic dependencies amongst %s"%cycleset
+            raise ValueError("Cyclic dependencies amongst %s"%cycleset)
 
         # The possibly resolvable items are those that depend on the independents
         dependent = set([a for a,b in pairs if b in independent])
@@ -266,10 +266,10 @@ def _check(msg,pairs):
     if set(n) != items or len(n) != len(items):
         n.sort()
         items = list(items); items.sort()
-        raise Exception,"%s expect %s to contain %s for %s"%(msg,n,items,pairs)
+        raise ValueError("%s expect %s to contain %s for %s"%(msg,n,items,pairs))
     for lo,hi in pairs:
         if lo in n and hi in n and n.index(lo) >= n.index(hi):
-            raise Exception,"%s expect %s before %s in %s for %s"%(msg,lo,hi,n,pairs)
+            raise ValueError("%s expect %s before %s in %s for %s"%(msg,lo,hi,n,pairs))
 
 def test_deps():
     import numpy as np
@@ -287,9 +287,12 @@ def test_deps():
 
     # Cycle test
     pairs = [(1,4),(4,3),(4,5),(5,1)]
-    try: n = order_dependencies(pairs)
-    except ValueError: pass
-    else: raise Exception,"test3 expect ValueError exception for %s"%(pairs,)
+    try:
+        n = order_dependencies(pairs)
+    except ValueError:
+        pass
+    else:
+        raise Exception("test3 expect ValueError exception for %s"%(pairs,))
 
     # large test for gross speed check
     A = np.random.randint(4000,size=(1000,2))
@@ -307,10 +310,10 @@ def test_deps():
 def test_expr():
     import inspect, dis
     import math
-    
+
     symtab = {'a.b.x':1, 'a.c':2, 'a.b':3, 'b.x':4}
     expr = 'a.b.x + sin(4*pi*a.c) + a.b.x/a.b'
-    
+
     # Check symbol lookup
     assert _symbols(expr, symtab) == set([1,2,3])
 
@@ -356,7 +359,7 @@ def test_expr():
     fn()
     expected = 2*math.pi*math.sin(5/.1875) + 6
     assert p2.value == expected,"Value was %s, not %s"%(p2.value,expected)
-    
+
     # Check empty dependency set doesn't crash
     fn = compile_constraints(*world(p1,p3))
     fn()
@@ -380,10 +383,10 @@ def test_expr():
     fn = compile_constraints(*world(p1,p2,p3,p5),context=dict(tbl=tbl))
     fn()
     assert p5.value == 2.07,"Value for %s was %s"%(p5.expression,p5.value)
-    
+
 
     # Verify that we capture invalid expressions
-    for expr in ['G4.cage', 'M0.cage', 'M1.G1 + *2', 
+    for expr in ['G4.cage', 'M0.cage', 'M1.G1 + *2',
                  'piddle',
                  '5; import sys; print "p0wned"',
                  '__import__("sys").argv']:

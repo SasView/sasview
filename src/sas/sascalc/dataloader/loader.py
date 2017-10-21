@@ -25,14 +25,16 @@ import sys
 import logging
 import time
 from zipfile import ZipFile
+
 from sas.sascalc.data_util.registry import ExtensionRegistry
+
 # Default readers are defined in the readers sub-module
-import readers
-from loader_exceptions import NoKnownLoaderException, FileContentsException,\
+from . import readers
+from .loader_exceptions import NoKnownLoaderException, FileContentsException,\
     DefaultReaderException
-from readers import ascii_reader
-from readers import cansas_reader
-from readers import cansas_reader_HDF5
+from .readers import ascii_reader
+from .readers import cansas_reader
+from .readers import cansas_reader_HDF5
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +74,7 @@ class Registry(ExtensionRegistry):
         msg_from_reader = None
         try:
             return super(Registry, self).load(path, format=format)
+        #except Exception: raise  # for debugging, don't use fallback loader
         except NoKnownLoaderException as nkl_e:
             pass  # Try the ASCII reader
         except FileContentsException as fc_exc:
@@ -326,7 +329,7 @@ class Registry(ExtensionRegistry):
         # Find matching extensions
         extlist = [ext for ext in self.extensions() if path.endswith(ext)]
         # Sort matching extensions by decreasing order of length
-        extlist.sort(lambda a, b: len(a) < len(b))
+        extlist.sort(key=len)
         # Combine loaders for matching extensions into one big list
         writers = []
         for L in [self.writers[ext] for ext in extlist]:
@@ -340,7 +343,7 @@ class Registry(ExtensionRegistry):
             writers = L
         # Raise an error if there are no matching extensions
         if len(writers) == 0:
-            raise ValueError, "Unknown file type for " + path
+            raise ValueError("Unknown file type for " + path)
         # All done
         return writers
 
@@ -359,7 +362,7 @@ class Registry(ExtensionRegistry):
         for fn in writers:
             try:
                 return fn(path, data)
-            except:
+            except Exception:
                 pass  # give other loaders a chance to succeed
         # If we get here it is because all loaders failed
         raise  # reraises last exception

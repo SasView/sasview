@@ -1,5 +1,5 @@
 """
-    Class that holds a fit page state
+Class that holds a fit page state
 """
 # TODO: Refactor code so we don't need to use getattr/setattr
 ################################################################################
@@ -14,7 +14,6 @@
 import time
 import os
 import sys
-import wx
 import copy
 import logging
 import numpy as np
@@ -22,10 +21,13 @@ import traceback
 
 import xml.dom.minidom
 from xml.dom.minidom import parseString
+from xml.dom.minidom import getDOMImplementation
 from lxml import etree
 
 from sasmodels import convert
 import sasmodels.weights
+
+from sas.sasview import __version__ as SASVIEW_VERSION
 
 import sas.sascalc.dataloader
 from sas.sascalc.dataloader.readers.cansas_reader import Reader as CansasReader
@@ -37,7 +39,7 @@ logger = logging.getLogger(__name__)
 
 # Information to read/write state as xml
 FITTING_NODE_NAME = 'fitting_plug_in'
-CANSAS_NS = "cansas1d/1.0"
+CANSAS_NS = {"ns": "cansas1d/1.0"}
 
 CUSTOM_MODEL = 'Plugin Models'
 CUSTOM_MODEL_OLD = 'Customized Models'
@@ -71,8 +73,6 @@ LIST_OF_STATE_ATTRIBUTES = [["qmin", "qmin", "float"],
                             ["enable2D", "enable2D", "bool"],
                             ["cb1", "cb1", "bool"],
                             ["tcChi", "tcChi", "float"],
-                            ["smearer", "smearer", "float"],
-                            ["smear_type", "smear_type", "string"],
                             ["dq_l", "dq_l", "float"],
                             ["dq_r", "dq_r", "float"],
                             ["dx_percent", "dx_percent", "float"],
@@ -82,7 +82,7 @@ LIST_OF_STATE_ATTRIBUTES = [["qmin", "qmin", "float"],
 LIST_OF_MODEL_ATTRIBUTES = [["values", "values"],
                             ["weights", "weights"]]
 
-DISPERSION_LIST = [["disp_obj_dict", "_disp_obj_dict", "string"]]
+DISPERSION_LIST = [["disp_obj_dict", "disp_obj_dict", "string"]]
 
 LIST_OF_STATE_PARAMETERS = [["parameters", "parameters"],
                             ["str_parameters", "str_parameters"],
@@ -141,7 +141,7 @@ class PageState(object):
     """
     Contains information to reconstruct a page of the fitpanel.
     """
-    def __init__(self, parent=None, model=None, data=None):
+    def __init__(self, model=None, data=None):
         """
         Initialize the current state
 
@@ -153,7 +153,7 @@ class PageState(object):
         # Time of state creation
         self.timestamp = time.time()
         # Data member to store the dispersion object created
-        self._disp_obj_dict = {}
+        self.disp_obj_dict = {}
         # ------------------------
         # Data used for fitting
         self.data = data
@@ -189,9 +189,6 @@ class PageState(object):
         self.process = []
         # fit page manager
         self.manager = None
-        # Store the parent of this panel parent
-        # For this application fitpanel is the parent
-        self.parent = parent
         # Event_owner is the owner of model event
         self.event_owner = None
         # page name
@@ -210,9 +207,6 @@ class PageState(object):
         self.orientation_params = []
         # orientation parameters for gaussian dispersity
         self.orientation_params_disp = []
-        # smearer info
-        self.smearer = None
-        self.smear_type = None
         self.dq_l = None
         self.dq_r = None
         self.dx_percent = None
@@ -230,8 +224,6 @@ class PageState(object):
 
         # contains link between a model and selected parameters to fit
         self.param_toFit = []
-        # dictionary of model type and model class
-        self.model_list_box = None
         # save the state of the context menu
         self.saved_states = {}
         # save selection of combobox
@@ -276,7 +268,7 @@ class PageState(object):
         self.cb1 = False
         # store value of chisqr
         self.tcChi = None
-        self.version = (1,0,0)
+        self.version = (1, 0, 0)
 
     def clone(self):
         """
@@ -286,14 +278,13 @@ class PageState(object):
         if self.model is not None:
             model = self.model.clone()
             model.name = self.model.name
-        obj = PageState(self.parent, model=model)
+        obj = PageState(model=model)
         obj.file = copy.deepcopy(self.file)
         obj.data = copy.deepcopy(self.data)
         if self.data is not None:
             self.data_name = self.data.name
         obj.data_name = self.data_name
         obj.is_data = self.is_data
-        obj.model_list_box = copy.deepcopy(self.model_list_box)
 
         obj.categorycombobox = self.categorycombobox
         obj.formfactorcombobox = self.formfactorcombobox
@@ -320,23 +311,22 @@ class PageState(object):
         obj.disable_disp = copy.deepcopy(self.disable_disp)
         obj.tcChi = self.tcChi
 
-        if len(self._disp_obj_dict) > 0:
-            for k, v in self._disp_obj_dict.iteritems():
-                obj._disp_obj_dict[k] = v
+        if len(self.disp_obj_dict) > 0:
+            for k, v in self.disp_obj_dict.items():
+                obj.disp_obj_dict[k] = v
         if len(self.disp_cb_dict) > 0:
-            for k, v in self.disp_cb_dict.iteritems():
+            for k, v in self.disp_cb_dict.items():
                 obj.disp_cb_dict[k] = v
         if len(self.values) > 0:
-            for k, v in self.values.iteritems():
+            for k, v in self.values.items():
                 obj.values[k] = v
         if len(self.weights) > 0:
-            for k, v in self.weights.iteritems():
+            for k, v in self.weights.items():
                 obj.weights[k] = v
         obj.enable_smearer = copy.deepcopy(self.enable_smearer)
         obj.disable_smearer = copy.deepcopy(self.disable_smearer)
         obj.pinhole_smearer = copy.deepcopy(self.pinhole_smearer)
         obj.slit_smearer = copy.deepcopy(self.slit_smearer)
-        obj.smear_type = copy.deepcopy(self.smear_type)
         obj.dI_noweight = copy.deepcopy(self.dI_noweight)
         obj.dI_didata = copy.deepcopy(self.dI_didata)
         obj.dI_sqrdata = copy.deepcopy(self.dI_sqrdata)
@@ -354,10 +344,9 @@ class PageState(object):
         obj.magnetic_on = self.magnetic_on
         obj.npts = copy.deepcopy(self.npts)
         obj.cb1 = copy.deepcopy(self.cb1)
-        obj.smearer = copy.deepcopy(self.smearer)
         obj.version = copy.deepcopy(self.version)
 
-        for name, state in self.saved_states.iteritems():
+        for name, state in self.saved_states.items():
             copy_name = copy.deepcopy(name)
             copy_state = state.clone()
             obj.saved_states[copy_name] = copy_state
@@ -440,7 +429,7 @@ class PageState(object):
         :return: None
         """
         p_map = []
-        for name, info in params.iteritems():
+        for name, info in params.items():
             if ".fittable" in name or ".std" in name or ".upper" in name or \
                             ".lower" in name or ".units" in name:
                 pass
@@ -485,7 +474,7 @@ class PageState(object):
                 self.str_parameters, True)
             formfactor, str_params = convert.convert_model(
                 self.formfactorcombobox, str_pars, False, self.version)
-            for key, value in str_params.iteritems():
+            for key, value in str_params.items():
                 params[key] = value
 
         if self.formfactorcombobox == 'SphericalSLDModel':
@@ -518,7 +507,7 @@ class PageState(object):
         """
         rep = "\nState name: %s\n" % self.file
         t = time.localtime(self.timestamp)
-        time_str = time.strftime("%b %d %Y %H;%M;%S ", t)
+        time_str = time.strftime("%b %d %Y %H:%M:%S ", t)
 
         rep += "State created: %s\n" % time_str
         rep += "State form factor combobox selection: %s\n" % \
@@ -558,8 +547,6 @@ class PageState(object):
         rep += "2D enable : %s\n" % str(self.enable2D)
         rep += "All parameters checkbox selected: %s\n" % self.cb1
         rep += "Value of Chisqr : %s\n" % str(self.tcChi)
-        rep += "Smear object : %s\n" % self.smearer
-        rep += "Smear type : %s\n" % self.smear_type
         rep += "dq_l  : %s\n" % self.dq_l
         rep += "dq_r  : %s\n" % self.dq_r
         rep += "dx_percent  : %s\n" % str(self.dx_percent)
@@ -595,7 +582,7 @@ class PageState(object):
             rep = self._repr_helper(list=temp_fittable_param, rep=rep)
         return rep
 
-    def set_report_string(self):
+    def _get_report_string(self):
         """
         Get the values (strings) from __str__ for report
         """
@@ -610,23 +597,21 @@ class PageState(object):
         chi2_string = ""
         q_range = ""
         strings = self.__repr__()
+        fixed_parameter = False
         lines = strings.split('\n')
-
         # get all string values from __str__()
         for line in lines:
-            value = ""
-            content = line.split(":")
-            if line == '' or len(content) == 1:
+            # Skip lines which are not key: value pairs, which includes
+            # blank lines and freeform notes in SASNotes fields.
+            if not ':' in line:
+                #msg = "Report string expected 'name: value' but got %r" % line
+                #logger.error(msg)
                 continue
-            name = content[0]
-            try:
-                value = content[1]
-            except Exception:
-                msg = "Report string expected 'name: value' but got %r" % line
-                logger.error(msg)
-            if name.count("State created"):
-                repo_time = "" + value
-            if name.count("parameter name"):
+
+            name, value = [s.strip() for s in line.split(":", 1)]
+            if name == "State created":
+                repo_time = value
+            elif name == "parameter name":
                 val_name = value.split(".")
                 if len(val_name) > 1:
                     if val_name[1].count("width"):
@@ -635,53 +620,56 @@ class PageState(object):
                         continue
                 else:
                     param_string += value + ','
-            if name == "value":
+            elif name == "value":
                 param_string += value + ','
-            fixed_parameter = False
-            if name == "selected":
-                if value == u' False':
-                    fixed_parameter = True
-            if name == "error value":
+            elif name == "selected":
+                # remember if it is fixed when reporting error value
+                fixed_parameter = (value == u'False')
+            elif name == "error value":
                 if fixed_parameter:
                     param_string += '(fixed),'
                 else:
                     param_string += value + ','
-            if name == "parameter unit":
+            elif name == "parameter unit":
                 param_string += value + ':'
-            if name == "Value of Chisqr ":
+            elif name == "Value of Chisqr":
                 chi2 = ("Chi2/Npts = " + value)
                 chi2_string = CENTRE % chi2
-            if name == "Title":
+            elif name == "Title":
                 if len(value.strip()) == 0:
                     continue
                 title = value + " [" + repo_time + "]"
                 title_name = HEADER % title
-            if name == "data ":
+            elif name == "data":
                 try:
-                    file_value = ("File name:" + content[2])
+                    # parsing "data : File:     filename [mmm dd hh:mm]"
+                    name = value.split(':', 1)[1].strip()
+                    file_value = "File name:" + name
                     file_name = CENTRE % file_value
                     if len(title) == 0:
-                        title = content[2] + " [" + repo_time + "]"
+                        title = name + " [" + repo_time + "]"
                         title_name = HEADER % title
                 except Exception:
                     msg = "While parsing 'data: ...'\n"
                     logger.error(msg + traceback.format_exc())
-            if name == "model name ":
+            elif name == "model name":
                 try:
-                    modelname = "Model name:" + content[1]
-                except:
+                    modelname = "Model name:" + value
+                except Exception:
                     modelname = "Model name:" + " NAN"
                 model_name = CENTRE % modelname
 
-            if name == "Plotting Range":
+            elif name == "Plotting Range":
                 try:
-                    q_range = content[1] + " = " + content[2] \
-                            + " = " + content[3].split(",")[0]
+                    parts = value.split(':')
+                    q_range = parts[0] + " = " + parts[1] \
+                            + " = " + parts[2].split(",")[0]
                     q_name = ("Q Range:    " + q_range)
                     q_range = CENTRE % q_name
                 except Exception:
                     msg = "While parsing 'Plotting Range: ...'\n"
                     logger.error(msg + traceback.format_exc())
+
         paramval = ""
         for lines in param_string.split(":"):
             line = lines.split(",")
@@ -710,8 +698,7 @@ class PageState(object):
                                    "\n" + ELINE + \
                                    "\n" + paramval_string + \
                                    "\n" + ELINE + \
-                                   "\n" + FEET_1 % title + \
-                                   "\n" + FEET_2
+                                   "\n" + FEET_1 % title
 
         return html_string, text_string, title
 
@@ -724,41 +711,21 @@ class PageState(object):
 
         return name
 
-    def report(self, figs=None, canvases=None):
+    def report(self, fig_urls):
         """
         Invoke report dialog panel
 
         : param figs: list of pylab figures [list]
         """
-        from sas.sasgui.perspectives.fitting.report_dialog import ReportDialog
         # get the strings for report
-        html_str, text_str, title = self.set_report_string()
+        html_str, text_str, title = self._get_report_string()
         # Allow 2 figures to append
-        if len(figs) == 1:
-            add_str = FEET_3
-        elif len(figs) == 2:
-            add_str = ELINE
-            add_str += FEET_2 % ("%s")
-            add_str += ELINE
-            add_str += FEET_3
-        elif len(figs) > 2:
-            add_str = ELINE
-            add_str += FEET_2 % ("%s")
-            add_str += ELINE
-            add_str += FEET_2 % ("%s")
-            add_str += ELINE
-            add_str += FEET_3
-        else:
-            add_str = ""
+        image_links = [FEET_2%fig for fig in fig_urls]
 
         # final report html strings
-        report_str = html_str % ("%s") + add_str
+        report_str = html_str + ELINE.join(image_links)
 
-        # make plot image
-        images = self.set_plot_state(figs, canvases)
-        report_list = [report_str, text_str, images]
-        dialog = ReportDialog(report_list, None, wx.ID_ANY, "")
-        dialog.Show()
+        return report_str, text_str
 
     def _to_xml_helper(self, thelist, element, newdoc):
         """
@@ -793,8 +760,6 @@ class PageState(object):
                            will append the data [optional]
         :param batch_fit_state: simultaneous fit state
         """
-        from xml.dom.minidom import getDOMImplementation
-
         # Check whether we have to write a standalone XML file
         if doc is None:
             impl = getDOMImplementation()
@@ -806,7 +771,7 @@ class PageState(object):
             newdoc = doc
             try:
                 top_element = newdoc.createElement(FITTING_NODE_NAME)
-            except:
+            except Exception:
                 string = etree.tostring(doc, pretty_print=True)
                 newdoc = parseString(string)
                 top_element = newdoc.createElement(FITTING_NODE_NAME)
@@ -815,15 +780,14 @@ class PageState(object):
             else:
                 try:
                     entry_node.appendChild(top_element)
-                except:
+                except Exception:
                     node_name = entry_node.tag
                     node_list = newdoc.getElementsByTagName(node_name)
                     entry_node = node_list.item(0)
                     entry_node.appendChild(top_element)
 
         attr = newdoc.createAttribute("version")
-        from sas import sasview
-        attr.nodeValue = sasview.__version__
+        attr.nodeValue = SASVIEW_VERSION
         # attr.nodeValue = '1.0'
         top_element.setAttributeNode(attr)
 
@@ -870,7 +834,7 @@ class PageState(object):
         for item in LIST_OF_MODEL_ATTRIBUTES:
             element = newdoc.createElement(item[0])
             value_list = getattr(self, item[1])
-            for key, value in value_list.iteritems():
+            for key, value in value_list.items():
                 sub_element = newdoc.createElement(key)
                 sub_element.setAttribute('name', str(key))
                 for val in value:
@@ -879,11 +843,11 @@ class PageState(object):
                 element.appendChild(sub_element)
             inputs.appendChild(element)
 
-        # Create doc for the dictionary of self._disp_obj_dic
+        # Create doc for the dictionary of self.disp_obj_dic
         for tagname, varname, tagtype in DISPERSION_LIST:
             element = newdoc.createElement(tagname)
             value_list = getattr(self, varname)
-            for key, value in value_list.iteritems():
+            for key, value in value_list.items():
                 sub_element = newdoc.createElement(key)
                 sub_element.setAttribute('name', str(key))
                 sub_element.setAttribute('value', str(value))
@@ -960,46 +924,16 @@ class PageState(object):
         Helper function to write state to xml
         """
         for item in node:
-            try:
-                name = item.get('name')
-            except:
-                name = None
-            try:
-                value = item.get('value')
-            except:
-                value = None
-            try:
-                selected_to_fit = (item.get('selected_to_fit') == "True")
-            except:
-                selected_to_fit = None
-            try:
-                error_displayed = (item.get('error_displayed') == "True")
-            except:
-                error_displayed = None
-            try:
-                error_value = item.get('error_value')
-            except:
-                error_value = None
-            try:
-                minimum_displayed = (item.get('minimum_displayed') == "True")
-            except:
-                minimum_displayed = None
-            try:
-                minimum_value = item.get('minimum_value')
-            except:
-                minimum_value = None
-            try:
-                maximum_displayed = (item.get('maximum_displayed') == "True")
-            except:
-                maximum_displayed = None
-            try:
-                maximum_value = item.get('maximum_value')
-            except:
-                maximum_value = None
-            try:
-                unit = item.get('unit')
-            except:
-                unit = None
+            name = item.get('name')
+            value = item.get('value')
+            selected_to_fit = (item.get('selected_to_fit') == "True")
+            error_displayed = (item.get('error_displayed') == "True")
+            error_value = item.get('error_value')
+            minimum_displayed = (item.get('minimum_displayed') == "True")
+            minimum_value = item.get('minimum_value')
+            maximum_displayed = (item.get('maximum_displayed') == "True")
+            maximum_value = item.get('maximum_value')
+            unit = item.get('unit')
             list.append([selected_to_fit, name, value, "+/-",
                          [error_displayed, error_value],
                          [minimum_displayed, minimum_value],
@@ -1015,7 +949,7 @@ class PageState(object):
         if file is not None:
             msg = "PageState no longer supports non-CanSAS"
             msg += " format for fitting files"
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
 
         if node.get('version'):
             # Get the version for model conversion purposes
@@ -1029,15 +963,17 @@ class PageState(object):
 
             # Get file name
             entry = get_content('ns:filename', node)
-            if entry is not None:
+            if entry is not None and entry.text:
                 self.file = entry.text.strip()
+            else:
+                self.file = ''
 
             # Get time stamp
             entry = get_content('ns:timestamp', node)
             if entry is not None and entry.get('epoch'):
                 try:
                     self.timestamp = float(entry.get('epoch'))
-                except:
+                except Exception:
                     msg = "PageState.fromXML: Could not"
                     msg += " read timestamp\n %s" % sys.exc_value
                     logger.error(msg)
@@ -1065,8 +1001,8 @@ class PageState(object):
                     self._from_xml_helper(node=node,
                                           list=getattr(self, item[1]))
 
-                # Recover _disp_obj_dict from xml file
-                self._disp_obj_dict = {}
+                # Recover disp_obj_dict from xml file
+                self.disp_obj_dict = {}
                 for tagname, varname, tagtype in DISPERSION_LIST:
                     node = get_content("ns:%s" % tagname, entry)
                     for attr in node:
@@ -1080,10 +1016,10 @@ class PageState(object):
                                 value = cls.type
                             except Exception:
                                 base = "unable to load distribution %r for %s"
-                                logger.error(base % (value, parameter))
+                                logger.error(base, value, parameter)
                                 continue
-                        _disp_obj_dict = getattr(self, varname)
-                        _disp_obj_dict[parameter] = value
+                        disp_obj_dict = getattr(self, varname)
+                        disp_obj_dict[parameter] = value
 
                 # get self.values and self.weights dic. if exists
                 for tagname, varname in LIST_OF_MODEL_ATTRIBUTES:
@@ -1106,45 +1042,40 @@ class PageState(object):
                         dic[name] = np.array(value_list)
                     setattr(self, varname, dic)
 
-    def set_plot_state(self, figs, canvases):
-        """
-        Build image state that wx.html understand
-        by plotting, putting it into wx.FileSystem image object
+class SimFitPageState(object):
+    """
+    State of the simultaneous fit page for saving purposes
+    """
 
-        """
-        images = []
+    def __init__(self):
+        # Sim Fit Page Number
+        self.fit_page_no = None
+        # Select all data
+        self.select_all = False
+        # Data sets sent to fit page
+        self.model_list = []
+        # Data sets to be fit
+        self.model_to_fit = []
+        # Number of constraints
+        self.no_constraint = 0
+        # Dictionary of constraints
+        self.constraint_dict = {}
+        # List of constraints
+        self.constraints_list = []
 
-        # Reset memory
-        self.imgRAM = None
-        wx.MemoryFSHandler()
-
-        # For no figures in the list, prepare empty plot
-        if figs is None or len(figs) == 0:
-            figs = [None]
-
-        # Loop over the list of figures
-        # use wx.MemoryFSHandler
-        self.imgRAM = wx.MemoryFSHandler()
-        for fig in figs:
-            if fig is not None:
-                ind = figs.index(fig)
-                canvas = canvases[ind]
-
-            # store the image in wx.FileSystem Object
-            wx.FileSystem.AddHandler(wx.MemoryFSHandler())
-
-            # index of the fig
-            ind = figs.index(fig)
-
-            # AddFile, image can be retrieved with 'memory:filename'
-            self.imgRAM.AddFile('img_fit%s.png' % ind,
-                                canvas.bitmap, wx.BITMAP_TYPE_PNG)
-
-            # append figs
-            images.append(fig)
-
-        return images
-
+    def __repr__(self):
+        # TODO: should use __str__, not __repr__ (similarly for PageState)
+        # TODO: could use a nicer representation
+        repr = """\
+fit page number : %(fit_page_no)s
+select all : %(select_all)s
+model_list : %(model_list)s
+model to fit : %(model_to_fit)s
+number of construsts : %(no_constraint)s
+constraint dict : %(constraint_dict)s
+constraints list : %(constraints_list)s
+"""%self.__dict__
+        return repr
 
 class Reader(CansasReader):
     """
@@ -1203,15 +1134,15 @@ class Reader(CansasReader):
         # Locate the P(r) node
         try:
             nodes = entry.xpath('ns:%s' % FITTING_NODE_NAME,
-                                namespaces={'ns': CANSAS_NS})
+                                namespaces=CANSAS_NS)
             if nodes:
                 # Create an empty state
                 state = PageState()
                 state.from_xml(node=nodes[0])
 
-        except:
+        except Exception:
             logger.info("XML document does not contain fitting information.\n"
-                         + traceback.format_exc())
+                        + traceback.format_exc())
 
         return state
 
@@ -1222,32 +1153,30 @@ class Reader(CansasReader):
         :return: XML object for a simultaneous fit or None
         """
         nodes = entry.xpath('ns:%s' % FITTING_NODE_NAME,
-                            namespaces={'ns': CANSAS_NS})
+                            namespaces=CANSAS_NS)
         if nodes:
             simfitstate = nodes[0].xpath('ns:simultaneous_fit',
-                                         namespaces={'ns': CANSAS_NS})
+                                         namespaces=CANSAS_NS)
             if simfitstate:
-                from simfitpage import SimFitPageState
                 sim_fit_state = SimFitPageState()
                 simfitstate_0 = simfitstate[0]
                 all = simfitstate_0.xpath('ns:select_all',
-                                          namespaces={'ns': CANSAS_NS})
+                                          namespaces=CANSAS_NS)
                 atts = all[0].attrib
                 checked = atts.get('checked')
                 sim_fit_state.select_all = bool(checked)
                 model_list = simfitstate_0.xpath('ns:model_list',
-                                                 namespaces={'ns': CANSAS_NS})
+                                                 namespaces=CANSAS_NS)
                 model_list_items = model_list[0].xpath('ns:model_list_item',
-                                                       namespaces={'ns':
-                                                                    CANSAS_NS})
+                                                       namespaces=CANSAS_NS)
                 for model in model_list_items:
                     attrs = model.attrib
                     sim_fit_state.model_list.append(attrs)
 
                 constraints = simfitstate_0.xpath('ns:constraints',
-                                                namespaces={'ns': CANSAS_NS})
+                                                  namespaces=CANSAS_NS)
                 constraint_list = constraints[0].xpath('ns:constraint',
-                                               namespaces={'ns': CANSAS_NS})
+                                                       namespaces=CANSAS_NS)
                 for constraint in constraint_list:
                     attrs = constraint.attrib
                     sim_fit_state.constraints_list.append(attrs)
@@ -1265,7 +1194,7 @@ class Reader(CansasReader):
         :return: Data1D/Data2D object
 
         """
-        node = dom.xpath('ns:data_class', namespaces={'ns': CANSAS_NS})
+        node = dom.xpath('ns:data_class', namespaces=CANSAS_NS)
         return_value, _ = self._parse_entry(dom)
         return return_value, _
 
@@ -1294,33 +1223,33 @@ class Reader(CansasReader):
                     # format version
                     root = tree.getroot()
                     entry_list = root.xpath('ns:SASentry',
-                                            namespaces={'ns': CANSAS_NS})
+                                            namespaces=CANSAS_NS)
                     for entry in entry_list:
-                        try:
-                            sas_entry, _ = self._parse_save_state_entry(entry)
-                        except:
-                            raise
                         fitstate = self._parse_state(entry)
-
                         # state could be None when .svs file is loaded
                         # in this case, skip appending to output
                         if fitstate is not None:
+                            try:
+                                sas_entry, _ = self._parse_save_state_entry(
+                                    entry)
+                            except:
+                                raise
                             sas_entry.meta_data['fitstate'] = fitstate
                             sas_entry.filename = fitstate.file
                             output.append(sas_entry)
 
             else:
                 self.call_back(format=ext)
-                raise RuntimeError, "%s is not a file" % path
+                raise RuntimeError("%s is not a file" % path)
 
             # Return output consistent with the loader's api
             if len(output) == 0:
                 self.call_back(state=None, datainfo=None, format=ext)
                 return None
             else:
-                for ind in range(len(output)):
+                for data in output:
                     # Call back to post the new state
-                    state = output[ind].meta_data['fitstate']
+                    state = data.meta_data['fitstate']
                     t = time.localtime(state.timestamp)
                     time_str = time.strftime("%b %d %H:%M", t)
                     # Check that no time stamp is already appended
@@ -1331,27 +1260,26 @@ class Reader(CansasReader):
                     state.file = original_fname + ' [' + time_str + ']'
 
                     if state is not None and state.is_data is not None:
-                        output[ind].is_data = state.is_data
+                        data.is_data = state.is_data
 
-                    output[ind].filename = state.file
-                    state.data = output[ind]
-                    state.data.name = output[ind].filename  # state.data_name
+                    data.filename = state.file
+                    state.data = data
+                    state.data.name = data.filename  # state.data_name
                     state.data.id = state.data_id
                     if state.is_data is not None:
                         state.data.is_data = state.is_data
-                    if output[ind].run_name is not None\
-                         and len(output[ind].run_name) != 0:
-                        if isinstance(output[ind].run_name, dict):
-                            name = output[ind].run_name.keys()[0]
+                    if data.run_name is not None and len(data.run_name) != 0:
+                        if isinstance(data.run_name, dict):
+                            # Note: key order in dict is not guaranteed, so sort
+                            name = data.run_name.keys()[0]
                         else:
-                            name = output[ind].run_name
+                            name = data.run_name
                     else:
                         name = original_fname
                     state.data.group_id = name
                     state.version = fitstate.version
                     # store state in fitting
-                    self.call_back(state=state,
-                                   datainfo=output[ind], format=ext)
+                    self.call_back(state=state, datainfo=data, format=ext)
                     self.state = state
                 simfitstate = self._parse_simfit_state(entry)
                 if simfitstate is not None:
@@ -1411,7 +1339,7 @@ class Reader(CansasReader):
 
         return doc
 
-# Simple html report templet
+# Simple html report template
 HEADER = "<html>\n"
 HEADER += "<head>\n"
 HEADER += "<meta http-equiv=Content-Type content='text/html; "
@@ -1439,15 +1367,13 @@ FEET_1 = \
 <br><font size='4' >Data: "%s"</font><br>
 """
 FEET_2 = \
-"""
-<img src="%s" >
-</img>
+"""<img src="%s" ></img>
 """
 FEET_3 = \
-"""
-</center>
+"""</center>
 </div>
 </body>
 </html>
 """
-ELINE = "<p class=MsoNormal>&nbsp;</p>"
+ELINE = """<p class=MsoNormal>&nbsp;</p>
+"""
