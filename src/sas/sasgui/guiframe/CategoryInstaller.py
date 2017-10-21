@@ -111,12 +111,13 @@ class CategoryInstaller(object):
     @staticmethod
     def check_install(homedir = None, model_list=None):
         """
-        the main method of this class
-        makes sure categories.json exists and if not
-        compile it and install
+        Makes sure categories.json exists and if not compile it and install.
+
+        This is the main method of this class.
+
         :param homefile: Override the default home directory
-        :param model_list: List of model names except those in Plugin Models
-               which are user supplied.
+        :param model_list: List of model names except those in
+            Plugin Models which are user supplied.
         """
         _model_dict = {model.name: model for model in model_list}
         _model_list = _model_dict.keys()
