@@ -18,11 +18,11 @@ class ModelViewDelegate(QtGui.QStyledItemDelegate):
         self.param_property=0
         self.param_value=1
         self.param_min=2
-        self.param_max=2
-        self.param_unit=2
+        self.param_max=3
+        self.param_unit=4
 
-    def editableParameters(self):
-        return [self.param_value, self.param_min, self.param_max]
+    def fancyColumns(self):
+        return [self.param_value, self.param_min, self.param_max, self.param_unit]
 
     def addErrorColumn(self):
         """
@@ -40,7 +40,7 @@ class ModelViewDelegate(QtGui.QStyledItemDelegate):
         """
         Overwrite generic painter for certain columns
         """
-        if index.column() in self.editableParameters():
+        if index.column() in self.fancyColumns():
             # Units - present in nice HTML
             options = QtGui.QStyleOptionViewItemV4(option)
             self.initStyleOption(options,index)
