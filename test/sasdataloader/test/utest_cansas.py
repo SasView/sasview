@@ -1,26 +1,27 @@
 """
     Unit tests for the new recursive cansas reader
 """
+import os
+import sys
+import unittest
+import logging
+import warnings
+if sys.version_info[0] >= 3:
+    from io import StringIO
+else:
+    from StringIO import StringIO
+
+from lxml import etree
+from lxml.etree import XMLSyntaxError
+from xml.dom import minidom
+
 import sas.sascalc.dataloader.readers.cansas_reader as cansas
+from sas.sascalc.dataloader.file_reader_base_class import decode
 from sas.sascalc.dataloader.loader import Loader
 from sas.sascalc.dataloader.data_info import Data1D, Data2D
 from sas.sascalc.dataloader.readers.xml_reader import XMLreader
 from sas.sascalc.dataloader.readers.cansas_reader import Reader
 from sas.sascalc.dataloader.readers.cansas_constants import CansasConstants
-
-import os
-import sys
-import urllib2
-import StringIO
-import pylint as pylint
-import unittest
-import numpy as np
-import logging
-import warnings
-
-from lxml import etree
-from lxml.etree import XMLSyntaxError
-from xml.dom import minidom
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +62,7 @@ class cansas_reader_xml(unittest.TestCase):
         """
         Should fail gracefully and send a message to logger.info()
         """
-        invalid = StringIO.StringIO('<a><c></b></a>')
+        invalid = StringIO('<a><c></b></a>')
         self.assertRaises(XMLSyntaxError, lambda: XMLreader(invalid))
 
     def test_xml_validate(self):
@@ -73,11 +74,11 @@ class cansas_reader_xml(unittest.TestCase):
         string += "\t\t</xsd:sequence>\n"
         string += "\t</xsd:complexType>\n"
         string += "</xsd:schema>"
-        f = StringIO.StringIO(string)
+        f = StringIO(string)
         xmlschema_doc = etree.parse(f)
         xmlschema = etree.XMLSchema(xmlschema_doc)
-        valid = etree.parse(StringIO.StringIO('<a><b></b></a>'))
-        invalid = etree.parse(StringIO.StringIO('<a><c></c></a>'))
+        valid = etree.parse(StringIO('<a><b></b></a>'))
+        invalid = etree.parse(StringIO('<a><c></c></a>'))
         self.assertTrue(xmlschema.validate(valid))
         self.assertFalse(xmlschema.validate(invalid))
 
@@ -213,8 +214,8 @@ class cansas_reader_xml(unittest.TestCase):
         if valid:
             # find the processing instructions and make into a dictionary
             dic = self.get_processing_instructions(reader)
-            self.assertTrue(dic == {'xml-stylesheet': \
-                                    'type="text/xsl" href="cansas1d.xsl" '})
+            self.assertEqual(dic, {'xml-stylesheet':
+                                   'type="text/xsl" href="cansas1d.xsl" '})
 
             xml = "<test><a><b><c></c></b></a></test>"
             xmldoc = minidom.parseString(xml)
@@ -237,7 +238,7 @@ class cansas_reader_xml(unittest.TestCase):
         while pi is not None:
             attr = {}
             pi_name = ""
-            pi_string = etree.tostring(pi)
+            pi_string = decode(etree.tostring(pi))
             if isinstance(pi_string, str):
                 pi_string = pi_string.replace("<?", "").replace("?>", "")
                 split = pi_string.split(" ", 1)
@@ -308,4 +309,4 @@ class cansas_reader_hdf5(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()    
+    unittest.main()

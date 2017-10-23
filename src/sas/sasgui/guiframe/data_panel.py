@@ -32,7 +32,9 @@ from sas.sascalc.dataloader.loader import Loader
 #    import FloatPanel as QucikPlotDialog
 from sas.sasgui.guiframe.local_perspectives.plotting.SimplePlot \
     import PlotFrame as QucikPlotDialog
-import sas.sasgui.guiframe.config as config
+from sas import get_local_config
+
+config = get_local_config()
 
 # Check version
 toks = str(wx.__version__).split('.')

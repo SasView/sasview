@@ -62,7 +62,7 @@ class Reader(XMLreader):
 
         ## Reinitialize the class when loading a new data file to reset all class variables
         self.reset_state()
-        buff = self.f_open.read()
+        buff = self.readall()
         self.raw_data = buff.splitlines()
         self.read_data()
 

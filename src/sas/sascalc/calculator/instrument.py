@@ -221,9 +221,8 @@ class Neutron(object):
         :param band: array of [min, max]
         """
         # check if the wavelength is in range
-        if min(band) < self.min or\
-                max(band) > self.max:
-            raise
+        if min(band) < self.min or max(band) > self.max:
+            raise ValueError("band out of range")
         self.band = band
 
     def set_intensity(self, intensity=368428):
@@ -238,9 +237,8 @@ class Neutron(object):
         Sets the wavelength
         """
         # check if the wavelength is in range
-        if wavelength < min(self.band) or\
-                wavelength > max(self.band):
-            raise
+        if wavelength < min(self.band) or wavelength > max(self.band):
+            raise ValueError("wavelength out of range")
         self.wavelength = wavelength
         validate(wavelength)
         self.intensity = np.interp(self.wavelength,
@@ -323,7 +321,7 @@ class Neutron(object):
             plt.legend(['Spectrum'], loc='best')
             plt.show()
         except:
-            raise RuntimeError, "Can't import matplotlib required to plot..."
+            raise RuntimeError("Can't import matplotlib required to plot...")
 
 
 class TOF(Neutron):

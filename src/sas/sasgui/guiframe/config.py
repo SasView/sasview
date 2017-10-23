@@ -1,14 +1,14 @@
 """
-    Application settings
+Application settings
 """
 from __future__ import print_function
 
 import time
 import os
-from sas.sasgui.guiframe.gui_style import GUIFRAME
-import sas.sasview
 import logging
 
+from sas.sasgui.guiframe.gui_style import GUIFRAME
+import sas.sasview
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +74,7 @@ _ess_logo = os.path.join(icon_path, "ess_logo.png")
 _ill_logo = os.path.join(icon_path, "ill_logo.png")
 _ansto_logo = os.path.join(icon_path, "ansto_logo.png")
 _tudelft_logo = os.path.join(icon_path, "tudelft_logo.png")
+_dls_logo = os.path.join(icon_path, "dls_logo.png")
 _nsf_logo = os.path.join(icon_path, "nsf_logo.png")
 _danse_logo = os.path.join(icon_path, "danse_logo.png")
 _inst_logo = os.path.join(icon_path, "utlogo.png")
@@ -142,9 +143,6 @@ DEFAULT_PERSPECTIVE = 'None'
 
 # Time out for updating sasview
 UPDATE_TIMEOUT = 2
-
-#OpenCL option
-SAS_OPENCL = None
 
 def printEVT(message):
     if __EVT_DEBUG__:

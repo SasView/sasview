@@ -5,17 +5,25 @@ class
 """
 
 import os
+import sys
 import re
 import logging
-import numpy as np
 from abc import abstractmethod
-from loader_exceptions import NoKnownLoaderException, FileContentsException,\
+
+import numpy as np
+from .loader_exceptions import NoKnownLoaderException, FileContentsException,\
     DataReaderException, DefaultReaderException
-from data_info import Data1D, Data2D, DataInfo, plottable_1D, plottable_2D,\
+from .data_info import Data1D, Data2D, DataInfo, plottable_1D, plottable_2D,\
     combine_data_info_with_plottable
 
 logger = logging.getLogger(__name__)
 
+if sys.version_info[0] < 3:
+    def decode(s):
+        return s
+else:
+    def decode(s):
+        return s.decode() if isinstance(s, bytes) else s
 
 class FileReader(object):
     # List of Data1D and Data2D objects to be sent back to data_loader
@@ -77,6 +85,28 @@ class FileReader(object):
 
         # Return a list of parsed entries that data_loader can manage
         return self.output
+
+    def nextline(self):
+        """
+        Returns the next line in the file as a string.
+        """
+        #return self.f_open.readline()
+        return decode(self.f_open.readline())
+
+    def nextlines(self):
+        """
+        Returns the next line in the file as a string.
+        """
+        for line in self.f_open:
+            #yield line
+            yield decode(line)
+
+    def readall(self):
+        """
+        Returns the entire file as a string.
+        """
+        #return self.f_open.read()
+        return decode(self.f_open.read())
 
     def handle_error_message(self, msg):
         """
@@ -166,6 +196,11 @@ class FileReader(object):
                     dataset.y_bins = dataset.qy_data[0::int(n_cols)]
                     dataset.x_bins = dataset.qx_data[:int(n_cols)]
                 dataset.data = dataset.data.flatten()
+                if len(dataset.data) > 0:
+                    dataset.xmin = np.min(dataset.qx_data)
+                    dataset.xmax = np.max(dataset.qx_data)
+                    dataset.ymin = np.min(dataset.qy_data)
+                    dataset.ymax = np.max(dataset.qx_data)
 
     def format_unit(self, unit=None):
         """
@@ -190,22 +225,79 @@ class FileReader(object):
         self.current_datainfo = None
         self.output = []
 
-    def remove_empty_q_values(self, has_error_dx=False, has_error_dy=False,
-                              has_error_dxl=False, has_error_dxw=False):
+    def data_cleanup(self):
+        """
+        Clean up the data sets and refresh everything
+        :return: None
+        """
+        self.remove_empty_q_values()
+        self.send_to_output()  # Combine datasets with DataInfo
+        self.current_datainfo = DataInfo()  # Reset DataInfo
+
+    def remove_empty_q_values(self):
         """
         Remove any point where Q == 0
         """
-        x = self.current_dataset.x
-        self.current_dataset.x = self.current_dataset.x[x != 0]
-        self.current_dataset.y = self.current_dataset.y[x != 0]
-        if has_error_dy:
-            self.current_dataset.dy = self.current_dataset.dy[x != 0]
-        if has_error_dx:
-            self.current_dataset.dx = self.current_dataset.dx[x != 0]
-        if has_error_dxl:
-            self.current_dataset.dxl = self.current_dataset.dxl[x != 0]
-        if has_error_dxw:
-            self.current_dataset.dxw = self.current_dataset.dxw[x != 0]
+        if isinstance(self.current_dataset, plottable_1D):
+            # Booleans for resolutions
+            has_error_dx = self.current_dataset.dx is not None
+            has_error_dxl = self.current_dataset.dxl is not None
+            has_error_dxw = self.current_dataset.dxw is not None
+            has_error_dy = self.current_dataset.dy is not None
+            # Create arrays of zeros for non-existent resolutions
+            if has_error_dxw and not has_error_dxl:
+                array_size = self.current_dataset.dxw.size - 1
+                self.current_dataset.dxl = np.append(self.current_dataset.dxl,
+                                                    np.zeros([array_size]))
+                has_error_dxl = True
+            elif has_error_dxl and not has_error_dxw:
+                array_size = self.current_dataset.dxl.size - 1
+                self.current_dataset.dxw = np.append(self.current_dataset.dxw,
+                                                    np.zeros([array_size]))
+                has_error_dxw = True
+            elif not has_error_dxl and not has_error_dxw and not has_error_dx:
+                array_size = self.current_dataset.x.size - 1
+                self.current_dataset.dx = np.append(self.current_dataset.dx,
+                                                    np.zeros([array_size]))
+                has_error_dx = True
+            if not has_error_dy:
+                array_size = self.current_dataset.y.size - 1
+                self.current_dataset.dy = np.append(self.current_dataset.dy,
+                                                    np.zeros([array_size]))
+                has_error_dy = True
+
+            # Remove points where q = 0
+            x = self.current_dataset.x
+            self.current_dataset.x = self.current_dataset.x[x != 0]
+            self.current_dataset.y = self.current_dataset.y[x != 0]
+            if has_error_dy:
+                self.current_dataset.dy = self.current_dataset.dy[x != 0]
+            if has_error_dx:
+                self.current_dataset.dx = self.current_dataset.dx[x != 0]
+            if has_error_dxl:
+                self.current_dataset.dxl = self.current_dataset.dxl[x != 0]
+            if has_error_dxw:
+                self.current_dataset.dxw = self.current_dataset.dxw[x != 0]
+        elif isinstance(self.current_dataset, plottable_2D):
+            has_error_dqx = self.current_dataset.dqx_data is not None
+            has_error_dqy = self.current_dataset.dqy_data is not None
+            has_error_dy = self.current_dataset.err_data is not None
+            has_mask = self.current_dataset.mask is not None
+            x = self.current_dataset.qx_data
+            self.current_dataset.data = self.current_dataset.data[x != 0]
+            self.current_dataset.qx_data = self.current_dataset.qx_data[x != 0]
+            self.current_dataset.qy_data = self.current_dataset.qy_data[x != 0]
+            self.current_dataset.q_data = np.sqrt(
+                np.square(self.current_dataset.qx_data) + np.square(
+                    self.current_dataset.qy_data))
+            if has_error_dy:
+                self.current_dataset.err_data = self.current_dataset.err_data[x != 0]
+            if has_error_dqx:
+                self.current_dataset.dqx_data = self.current_dataset.dqx_data[x != 0]
+            if has_error_dqy:
+                self.current_dataset.dqy_data = self.current_dataset.dqy_data[x != 0]
+            if has_mask:
+                self.current_dataset.mask = self.current_dataset.mask[x != 0]
 
     def reset_data_list(self, no_lines=0):
         """

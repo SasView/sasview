@@ -92,11 +92,12 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         <SasData> elements, or to multiple CanSAS files, each with one
         <SasData> element.
 
-        :param frame_data: If single_file is true, an array of Data1D objects.
-        If single_file is false, a dictionary of the form frame_number: Data1D.
+        :param frame_data: If single_file is true, an array of Data1D
+            objects. If single_file is false, a dictionary of the
+            form *{frame_number: Data1D}*.
         :param filepath: Where to save the CanSAS file
-        :param single_file: If true, array is saved as a single file, if false,
-        each item in the array is saved to it's own file
+        :param single_file: If true, array is saved as a single file,
+            if false, each item in the array is saved to it's own file
         """
         writer = CansasWriter()
         entry_attrs = None
@@ -191,8 +192,7 @@ class ConverterPanel(ScrolledPanel, PanelBase):
         :param filename: The header file to extract the data from
         :return x_data: A 1D array containing all the x coordinates of the data
         :return y_data: A 1D array containing all the y coordinates of the data
-        :return frame_data: A dictionary of the form frame_number: data, where
-        data is a 2D numpy array containing the intensity data
+        :return frame_data: A dictionary of the form *{frame_number: data}*, where data is a 2D numpy array containing the intensity data
         """
         loader = BSLLoader(filename)
         frames = [0]

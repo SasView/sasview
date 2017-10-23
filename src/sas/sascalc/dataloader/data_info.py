@@ -715,7 +715,7 @@ class Data1D(plottable_1D, DataInfo):
                 self.x_unit = '1/A'
                 self.y_unit = '1/cm'
         except: # the data is not recognized/supported, and the user is notified
-            raise(TypeError, 'data not recognized, check documentation for supported 1D data formats')
+            raise TypeError('data not recognized, check documentation for supported 1D data formats')
 
     def __str__(self):
         """
@@ -795,13 +795,13 @@ class Data1D(plottable_1D, DataInfo):
             if len(self.x) != len(other.x) or \
                 len(self.y) != len(other.y):
                 msg = "Unable to perform operation: data length are not equal"
-                raise ValueError, msg
+                raise ValueError(msg)
             # Here we could also extrapolate between data points
             TOLERANCE = 0.01
             for i in range(len(self.x)):
                 if math.fabs((self.x[i] - other.x[i])/self.x[i]) > TOLERANCE:
                     msg = "Incompatible data sets: x-values do not match"
-                    raise ValueError, msg
+                    raise ValueError(msg)
 
             # Check that the other data set has errors, otherwise
             # create zero vector
@@ -875,7 +875,7 @@ class Data1D(plottable_1D, DataInfo):
         """
         if not isinstance(other, Data1D):
             msg = "Unable to perform operation: different types of data set"
-            raise ValueError, msg
+            raise ValueError(msg)
         return True
 
     def _perform_union(self, other):
@@ -947,7 +947,7 @@ class Data2D(plottable_2D, DataInfo):
         self.x_bins = []
 
         if len(self.detector) > 0:
-            raise RuntimeError, "Data2D: Detector bank already filled at init"
+            raise RuntimeError("Data2D: Detector bank already filled at init")
 
     def __str__(self):
         _str = "%s\n" % DataInfo.__str__(self)
@@ -1019,14 +1019,14 @@ class Data2D(plottable_2D, DataInfo):
                 len(self.qx_data) != len(other.qx_data) or \
                 len(self.qy_data) != len(other.qy_data):
                 msg = "Unable to perform operation: data length are not equal"
-                raise ValueError, msg
+                raise ValueError(msg)
             for ind in range(len(self.data)):
                 if math.fabs((self.qx_data[ind] - other.qx_data[ind])/self.qx_data[ind]) > TOLERANCE:
                     msg = "Incompatible data sets: qx-values do not match: %s %s" % (self.qx_data[ind], other.qx_data[ind])
-                    raise ValueError, msg
+                    raise ValueError(msg)
                 if math.fabs((self.qy_data[ind] - other.qy_data[ind])/self.qy_data[ind]) > TOLERANCE:
                     msg = "Incompatible data sets: qy-values do not match: %s %s" % (self.qy_data[ind], other.qy_data[ind])
-                    raise ValueError, msg
+                    raise ValueError(msg)
 
             # Check that the scales match
             err_other = other.err_data
@@ -1107,7 +1107,7 @@ class Data2D(plottable_2D, DataInfo):
         """
         if not isinstance(other, Data2D):
             msg = "Unable to perform operation: different types of data set"
-            raise ValueError, msg
+            raise ValueError(msg)
         return True
 
     def _perform_union(self, other):
@@ -1175,8 +1175,10 @@ def combine_data_info_with_plottable(data, datainfo):
         final_dataset.xaxis(data._xaxis, data._xunit)
         final_dataset.yaxis(data._yaxis, data._yunit)
         final_dataset.zaxis(data._zaxis, data._zunit)
-        final_dataset.x_bins = data.x_bins
-        final_dataset.y_bins = data.y_bins
+        if len(data.data.shape) == 2:
+            n_rows, n_cols = data.data.shape
+            final_dataset.y_bins = data.qy_data[0::int(n_cols)]
+            final_dataset.x_bins = data.qx_data[:int(n_cols)]
     else:
         return_string = "Should Never Happen: _combine_data_info_with_plottable input is not a plottable1d or " + \
                         "plottable2d data object"

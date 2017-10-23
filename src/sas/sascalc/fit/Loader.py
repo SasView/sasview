@@ -17,22 +17,22 @@ class Load:
         self.dx = dx
         self.dy = dy
         self.filename = None
-        
+
     def set_filename(self, path=None):
         """
-        Store path into a variable.If the user doesn't give 
+        Store path into a variable.If the user doesn't give
         a path as a parameter a pop-up
         window appears to select the file.
-        
+
         :param path: the path given by the user
-        
+
         """
         self.filename = path
-       
+
     def get_filename(self):
         """ return the file's path"""
         return self.filename
-    
+
     def set_values(self):
         """ Store the values loaded from file in local variables"""
         if self.filename is not None:
@@ -41,7 +41,7 @@ class Load:
             lines = buff.split('\n')
             self.x = []
             self.y = []
-            self.dx = [] 
+            self.dx = []
             self.dy = []
             for line in lines:
                 try:
@@ -49,7 +49,7 @@ class Load:
                     x = float(toks[0])
                     y = float(toks[1])
                     dy = float(toks[2])
-                    
+
                     self.x.append(x)
                     self.y.append(y)
                     self.dy.append(dy)
@@ -58,15 +58,15 @@ class Load:
                     print("READ ERROR", line)
             # Sanity check
             if not len(self.x) == len(self.dx):
-                raise ValueError, "x and dx have different length"
+                raise ValueError("x and dx have different length")
             if not len(self.y) == len(self.dy):
-                raise ValueError, "y and dy have different length"
-            
-            
+                raise ValueError("y and dy have different length")
+
+
     def get_values(self):
         """ Return x, y, dx, dy"""
         return self.x, self.y, self.dx, self.dy
-    
+
     def load_data(self, data):
         """ Return plottable"""
         #load data
@@ -76,13 +76,12 @@ class Load:
         data.dy = self.dy
         #Load its View class
         #plottable.reset_view()
-       
-    
-if __name__ == "__main__": 
+
+
+if __name__ == "__main__":
     load = Load()
     load.set_filename("testdata_line.txt")
-    print(load.get_filename()) 
+    print(load.get_filename())
     load.set_values()
     print(load.get_values())
-    
-            
+

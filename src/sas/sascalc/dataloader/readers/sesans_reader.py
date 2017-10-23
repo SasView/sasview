@@ -5,11 +5,13 @@
 
     Jurrian Bakker
 """
-import numpy as np
 import os
-from sas.sascalc.dataloader.file_reader_base_class import FileReader
-from sas.sascalc.dataloader.data_info import plottable_1D, DataInfo
-from sas.sascalc.dataloader.loader_exceptions import FileContentsException, DataReaderException
+
+import numpy as np
+
+from ..file_reader_base_class import FileReader
+from ..data_info import plottable_1D, DataInfo
+from ..loader_exceptions import FileContentsException, DataReaderException
 
 # Check whether we have a converter available
 has_converter = True
@@ -41,13 +43,13 @@ class Reader(FileReader):
         self.current_datainfo.isSesans = True
         self.output = []
 
-        line = self.f_open.readline()
+        line = self.nextline()
         params = {}
         while not line.startswith("BEGIN_DATA"):
             terms = line.split()
             if len(terms) >= 2:
                 params[terms[0]] = " ".join(terms[1:])
-            line = self.f_open.readline()
+            line = self.nextline()
         self.params = params
 
         if "FileFormatVersion" not in self.params:
@@ -67,7 +69,7 @@ class Reader(FileReader):
                                "of the file format and will not be "
                                "handled by other software.")
 
-        headers = self.f_open.readline().split()
+        headers = self.nextline().split()
 
         self._insist_header(headers, "SpinEchoLength")
         self._insist_header(headers, "Depolarisation")

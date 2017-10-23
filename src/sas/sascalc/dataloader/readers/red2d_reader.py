@@ -9,18 +9,16 @@
 #copyright 2008, University of Tennessee
 ######################################################################
 import os
-import numpy as np
 import math
-from sas.sascalc.dataloader.data_info import plottable_2D, DataInfo, Detector
-from sas.sascalc.dataloader.file_reader_base_class import FileReader
-from sas.sascalc.dataloader.loader_exceptions import FileContentsException
+import time
 
-# Look for unit converter
-has_converter = True
-try:
-    from sas.sascalc.data_util.nxsunit import Converter
-except:
-    has_converter = False
+import numpy as np
+
+from sas.sascalc.data_util.nxsunit import Converter
+
+from ..data_info import plottable_2D, DataInfo, Detector
+from ..file_reader_base_class import FileReader
+from ..loader_exceptions import FileContentsException
 
 
 def check_point(x_point):
@@ -30,7 +28,7 @@ def check_point(x_point):
     # set zero for non_floats
     try:
         return float(x_point)
-    except:
+    except Exception:
         return 0
 
 
@@ -50,7 +48,6 @@ class Reader(FileReader):
         :param filename: file name to write
         :param data: data2D
         """
-        import time
         # Write the file
         try:
             fd = open(filename, 'w')
@@ -71,7 +68,7 @@ class Reader(FileReader):
 
     def get_file_contents(self):
         # Read file
-        buf = self.f_open.read()
+        buf = self.readall()
         self.f_open.close()
         # Instantiate data object
         self.current_dataset = plottable_2D()
@@ -118,33 +115,27 @@ class Reader(FileReader):
                 # Wavelength in Angstrom
                 try:
                     wavelength = float(line_toks[1])
-                    # Units
-                    if has_converter == True and \
-                    self.current_datainfo.source.wavelength_unit != 'A':
+                    # Wavelength is stored in angstroms; convert if necessary
+                    if self.current_datainfo.source.wavelength_unit != 'A':
                         conv = Converter('A')
                         wavelength = conv(wavelength,
                                           units=self.current_datainfo.source.wavelength_unit)
-                except:
-                    #Not required
-                    pass
-                # Distance in mm
+                except Exception:
+                    pass  # Not required
                 try:
                     distance = float(line_toks[3])
-                    # Units
-                    if has_converter == True and self.current_datainfo.detector[0].distance_unit != 'm':
+                    # Distance is stored in meters; convert if necessary
+                    if self.current_datainfo.detector[0].distance_unit != 'm':
                         conv = Converter('m')
                         distance = conv(distance,
                             units=self.current_datainfo.detector[0].distance_unit)
-                except:
-                    #Not required
-                    pass
+                except Exception:
+                    pass  # Not required
 
-                # Distance in meters
                 try:
                     transmission = float(line_toks[4])
-                except:
-                    #Not required
-                    pass
+                except Exception:
+                    pass  # Not required
 
             if line.count("LAMBDA") > 0:
                 is_info = True
@@ -169,7 +160,7 @@ class Reader(FileReader):
                 continue
 
             ## Read and get data.
-            if data_started == True:
+            if data_started:
                 line_toks = line.split()
                 if len(line_toks) == 0:
                     #empty line
@@ -177,6 +168,7 @@ class Reader(FileReader):
                 # the number of columns must be stayed same
                 col_num = len(line_toks)
                 break
+
         # Make numpy array to remove header lines using index
         lines_array = np.array(lines)
 
@@ -202,7 +194,7 @@ class Reader(FileReader):
 
         # Change it(string) into float
         #data_list = map(float,data_list)
-        data_list1 = map(check_point, data_list)
+        data_list1 = list(map(check_point, data_list))
 
         # numpy array form
         data_array = np.array(data_list1)
@@ -210,7 +202,7 @@ class Reader(FileReader):
         #otherwise raise an error.
         try:
             data_point = data_array.reshape(row_num, col_num).transpose()
-        except:
+        except Exception:
             msg = "red2d_reader can't read this file: Incorrect number of data points provided."
             raise FileContentsException(msg)
         ## Get the all data: Let's HARDcoding; Todo find better way
@@ -324,9 +316,9 @@ class Reader(FileReader):
                     self.current_dataset.dqy_data = dqy_data
 
         # Units of axes
-        self.current_dataset.xaxis("\\rm{Q_{x}}", 'A^{-1}')
-        self.current_dataset.yaxis("\\rm{Q_{y}}", 'A^{-1}')
-        self.current_dataset.zaxis("\\rm{Intensity}", "cm^{-1}")
+        self.current_dataset.xaxis(r"\rm{Q_{x}}", 'A^{-1}')
+        self.current_dataset.yaxis(r"\rm{Q_{y}}", 'A^{-1}')
+        self.current_dataset.zaxis(r"\rm{Intensity}", "cm^{-1}")
 
         # Store loading process information
         self.current_datainfo.meta_data['loader'] = self.type_name

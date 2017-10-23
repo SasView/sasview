@@ -13,12 +13,14 @@
 #############################################################################
 import math
 import os
-import numpy as np
 import logging
-from sas.sascalc.dataloader.data_info import plottable_2D, DataInfo, Detector
-from sas.sascalc.dataloader.manipulations import reader2D_converter
-from sas.sascalc.dataloader.file_reader_base_class import FileReader
-from sas.sascalc.dataloader.loader_exceptions import FileContentsException, DataReaderException
+
+import numpy as np
+
+from ..data_info import plottable_2D, DataInfo, Detector
+from ..manipulations import reader2D_converter
+from ..file_reader_base_class import FileReader
+from ..loader_exceptions import FileContentsException, DataReaderException
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +79,7 @@ class Reader(FileReader):
         read_on = True
         data_start_line = 1
         while read_on:
-            line = self.f_open.readline()
+            line = self.nextline()
             data_start_line += 1
             if line.find("DATA:") >= 0:
                 read_on = False
@@ -111,7 +113,7 @@ class Reader(FileReader):
             msg = "danse_reader can't read this file {}".format(self.f_open.name)
             raise FileContentsException(msg)
 
-        for line_num, data_str in enumerate(self.f_open.readlines()):
+        for line_num, data_str in enumerate(self.nextlines()):
             toks = data_str.split()
             try:
                 val = float(toks[0])

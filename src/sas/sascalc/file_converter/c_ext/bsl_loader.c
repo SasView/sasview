@@ -1,5 +1,5 @@
 #include <Python.h>
-//#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/arrayobject.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,7 +43,7 @@ static PyObject *CLoader_init(CLoader *self, PyObject *args, PyObject *kwds) {
 
 static void CLoader_dealloc(CLoader *self) {
     free(self->params.filename);
-    self->ob_type->tp_free((PyObject *)self);
+    Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
 static PyObject *to_string(CLoader *self, PyObject *params) {
@@ -236,8 +236,9 @@ static PyMemberDef CLoader_members[] = {
 };
 
 static PyTypeObject CLoaderType = {
-    PyObject_HEAD_INIT(NULL)
-    0,                         /*ob_size*/
+    //PyObject_HEAD_INIT(NULL)
+    //0,                         /*ob_size*/
+    PyVarObject_HEAD_INIT(NULL, 0)
     "CLoader",             /*tp_name*/
     sizeof(CLoader),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
@@ -277,16 +278,65 @@ static PyTypeObject CLoaderType = {
     CLoader_new,                 /* tp_new */
 };
 
-PyMODINIT_FUNC
-initbsl_loader(void)
+/**
+ * Function used to add the model class to a module
+ * @param module: module to add the class to
+ */
+void addCLoader(PyObject *module)
 {
-    PyObject *module;
-    module = Py_InitModule("bsl_loader", NULL);
-    import_array();
-
     if (PyType_Ready(&CLoaderType) < 0)
         return;
-
     Py_INCREF(&CLoaderType);
     PyModule_AddObject(module, "CLoader", (PyObject *)&CLoaderType);
 }
+
+#define MODULE_DOC "C module for loading bsl."
+#define MODULE_NAME "bsl_loader"
+#define MODULE_INIT2 initbsl_loader
+#define MODULE_INIT3 PyInit_bsl_loader
+#define MODULE_METHODS module_methods
+
+/* ==== boilerplate python 2/3 interface bootstrap ==== */
+
+
+#if defined(WIN32) && !defined(__MINGW32__)
+    #define DLL_EXPORT __declspec(dllexport)
+#else
+    #define DLL_EXPORT
+#endif
+
+#if PY_MAJOR_VERSION >= 3
+
+  static PyMethodDef module_methods[] = {
+      {NULL}
+  };
+
+  DLL_EXPORT PyMODINIT_FUNC MODULE_INIT3(void)
+  {
+    static struct PyModuleDef moduledef = {
+      PyModuleDef_HEAD_INIT,
+      MODULE_NAME,         /* m_name */
+      MODULE_DOC,          /* m_doc */
+      -1,                  /* m_size */
+      MODULE_METHODS,      /* m_methods */
+      NULL,                /* m_reload */
+      NULL,                /* m_traverse */
+      NULL,                /* m_clear */
+      NULL,                /* m_free */
+    };
+    PyObject* m = PyModule_Create(&moduledef);
+    import_array();
+    addCLoader(m);
+    return m;
+  }
+
+#else /* !PY_MAJOR_VERSION >= 3 */
+
+  DLL_EXPORT PyMODINIT_FUNC MODULE_INIT2(void)
+  {
+    PyObject* m = Py_InitModule(MODULE_NAME, NULL);
+    import_array();
+    addCLoader(m);
+  }
+
+#endif /* !PY_MAJOR_VERSION >= 3 */

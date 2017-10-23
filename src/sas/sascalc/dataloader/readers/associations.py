@@ -39,18 +39,18 @@ def read_associations(loader, settings=FILE_ASSOCIATIONS):
     :param settings: path to the json settings file [string]
     """
     # For each FileType entry, get the associated reader and extension
-    for ext, reader in settings.iteritems():
+    for ext, reader in settings.items():
         if reader is not None and ext is not None:
             # Associate the extension with a particular reader
             # TODO: Modify the Register code to be case-insensitive
             # FIXME: Remove exec statements
             # and remove the extra line below.
             try:
-                exec "import %s" % reader
-                exec "loader.associate_file_type('%s', %s)" % (ext.lower(),
-                                                                reader)
-                exec "loader.associate_file_type('%s', %s)" % (ext.upper(),
-                                                                reader)
+                exec("from . import %s" % reader)
+                exec("loader.associate_file_type('%s', %s)"
+                     % (ext.lower(), reader))
+                exec("loader.associate_file_type('%s', %s)"
+                     % (ext.upper(), reader))
             except:
                 msg = "read_associations: skipping association"
                 msg += " for %s\n  %s" % (ext.lower(), sys.exc_value)
