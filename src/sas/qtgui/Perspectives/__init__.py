@@ -3,8 +3,10 @@
 
 from Fitting.FittingPerspective import FittingWindow
 from Invariant.InvariantPerspective import InvariantWindow
+from Corfunc.CorfuncPerspective import CorfuncWindow
 
 PERSPECTIVES = {
     FittingWindow.name: FittingWindow,
     InvariantWindow.name: InvariantWindow,
+    CorfuncWindow.name: CorfuncWindow,
 }

@@ -66,3 +66,4 @@ test*log
 # Editor files
 .vscode/
 
+/src/sas/qtgui/Perspectives/Corfunc/UI/CorfuncPanel.py
