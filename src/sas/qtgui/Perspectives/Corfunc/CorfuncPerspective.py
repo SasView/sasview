@@ -10,6 +10,7 @@ from twisted.internet import reactor
 # sas-global
 from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 
 # local
 from UI.CorfuncPanel import Ui_CorfuncDialog
@@ -31,6 +32,7 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
 
         self.model = QtGui.QStandardItemModel(self)
         self.communicate = GuiUtils.Communicate()
+        self._calculator = CorfuncCalculator()
 
         # Connect buttons to slots.
         # Needs to be done early so default values propagate properly.
@@ -47,8 +49,12 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         self.extrapolateBtn.clicked.connect(self.action)
         self.transformBtn.clicked.connect(self.action)
 
+        self.calculateBgBtn.clicked.connect(self.calculateBackground)
+
         self.hilbertBtn.clicked.connect(self.action)
         self.fourierBtn.clicked.connect(self.action)
+
+        self.model.itemChanged.connect(self.modelChanged)
 
     def setupModel(self):
         self.model.setItem(W.W_QMIN,
@@ -62,6 +68,26 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         self.model.setItem(W.W_TRANSFORM,
                            QtGui.QStandardItem("Fourier"))
 
+    def modelChanged(self, item):
+        if item.row() == W.W_QMIN:
+            value = float(self.model.item(W.W_QMIN).text())
+            self.qMin.setValue(value)
+            self._calculator.lowerq = value
+        elif item.row() == W.W_QMAX:
+            value = float(self.model.item(W.W_QMAX).text())
+            self.qMax1.setValue(value)
+            self._calculator.upperq = (value, self._calculator.upperq[1])
+        elif item.row() == W.W_QCUTOFF:
+            value = float(self.model.item(W.W_QCUTOFF).text())
+            self.qMax2.setValue(value)
+            self._calculator.upperq = (self._calculator.upperq[0], value)
+        elif item.row() == W.W_BACKGROUND:
+            value = float(self.model.item(W.W_BACKGROUND).text())
+            self.bg.setValue(float(value))
+        else:
+            print("{} Changed".format(item))
+
+
     def setupMapper(self):
         self.mapper = QtGui.QDataWidgetMapper(self)
         self.mapper.setOrientation(QtCore.Qt.Vertical)
@@ -74,6 +100,10 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
 
         self.mapper.toFirst()
 
+    def calculateBackground(self):
+        bg = self._calculator.compute_background()
+        print(bg)
+        self.model.setItem(W.W_BACKGROUND, QtGui.QStandardItem(str(bg)))
 
     def action(self):
         print("Called an action!")
@@ -101,6 +131,9 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
 
         self._model_item = data_item[0]
         data = GuiUtils.dataFromItem(self._model_item)
+        self._calculator.lowerq = 1e-3
+        self._calculator.upperq = (2e-1, 3e-1)
+        self._calculator.set_data(data)
 
         # self.model.item(WIDGETS.W_FILENAME).setData(QtCoreQVariant(self._model_item.text()))
 
