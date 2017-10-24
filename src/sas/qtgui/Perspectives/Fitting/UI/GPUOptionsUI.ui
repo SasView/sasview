@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QPushButton" name="pushButton">
+  <widget class="QPushButton" name="testButton">
    <property name="geometry">
     <rect>
      <x>220</x>
@@ -26,20 +26,7 @@
     <string>Test</string>
    </property>
   </widget>
-  <widget class="QDialogButtonBox" name="TestButton">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>140</y>
-     <width>193</width>
-     <height>28</height>
-    </rect>
-   </property>
-   <property name="standardButtons">
-    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButton_2">
+  <widget class="QPushButton" name="helpButton">
    <property name="geometry">
     <rect>
      <x>320</x>
@@ -49,10 +36,13 @@
     </rect>
    </property>
    <property name="text">
-    <string>Reset</string>
+    <string>Help</string>
+   </property>
+   <property name="autoDefault">
+    <bool>true</bool>
    </property>
   </widget>
-  <widget class="QGroupBox" name="openCLButtonGroup">
+  <widget class="QGroupBox" name="openCLCheckBoxGroup">
    <property name="geometry">
     <rect>
      <x>20</x>
@@ -65,7 +55,66 @@
     <string>Available OpenCL Options</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="resetButton">
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>140</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Reset</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="okButton">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>140</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>OK</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>okButton</sender>
+   <signal>clicked()</signal>
+   <receiver>GPUOptions</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>66</x>
+     <y>153</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>219</x>
+     <y>88</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>resetButton</sender>
+   <signal>clicked()</signal>
+   <receiver>GPUOptions</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>166</x>
+     <y>153</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>219</x>
+     <y>88</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

@@ -623,7 +623,6 @@ class GuiManager(object):
     def actionGPU_Options(self):
         """
         """
-        print("actionGPU_Options TRIGGERED")
         if getattr(self._current_perspective, "gpu_options_widget"):
             self._current_perspective.gpu_options_widget.show()
         pass
