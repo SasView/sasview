@@ -24,8 +24,8 @@ from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
-#if not QApplication.instance():
-app = QApplication(sys.argv)
+if not QApplication.instance():
+    app = QApplication(sys.argv)
 
 class DataExplorerTest(unittest.TestCase):
     '''Test the Data Explorer GUI'''

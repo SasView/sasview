@@ -1037,8 +1037,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         # Regardless of previous state, this should now be `plot show` functionality only
         self.cmdPlot.setText("Show Plot")
-        if not self.data_is_loaded:
-            self.recalculatePlotData()
+        # Force data recalculation so existing charts are updated
+        self.recalculatePlotData()
         self.showPlot()
 
     def recalculatePlotData(self):

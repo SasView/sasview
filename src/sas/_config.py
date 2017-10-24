@@ -64,10 +64,10 @@ def load_local_config(app_dir):
     path = os.path.join(app_dir, filename)
     try:
         module = load_module_from_path('sas.local_config', path)
-        logger.info("GuiManager loaded %s", path)
+        #logger.info("GuiManager loaded %s", path)
         return module
     except Exception as exc:
-        logger.critical("Error loading %s: %s", path, exc)
+        #logger.critical("Error loading %s: %s", path, exc)
         sys.exit()
 
 def make_custom_config_path(user_dir):

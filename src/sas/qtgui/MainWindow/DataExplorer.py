@@ -462,21 +462,32 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Forces display of charts for the given filename
         """
-        # Assure no multiple plots for the same ID
         plot_to_show = data_list[0]
-        if plot_to_show.id in PlotHelper.currentPlots():
-            return
 
-        # Now query the model item for available plots
+        # passed plot is used ONLY to figure out its title,
+        # so all the charts related by it can be pulled from 
+        # the data explorer indices.
         filename = plot_to_show.filename
         model = self.model if plot_to_show.is_data else self.theory_model
+
+        # Now query the model item for available plots
         plots = GuiUtils.plotsFromFilename(filename, model)
+        item = GuiUtils.itemFromFilename(filename, model)
+
+        new_plots = []
         for plot in plots:
             plot_id = plot.id
             if plot_id in self.active_plots.keys():
                 self.active_plots[plot_id].replacePlot(plot_id, plot)
             else:
-                self.plotData([(None, plot)])
+                # 'sophisticated' test to generate standalone plot for residuals
+                if 'esiduals' in plot.title:
+                    self.plotData([(item, plot)])
+                else:
+                    new_plots.append((item, plot))
+
+        if new_plots:
+            self.plotData(new_plots)
 
     def addDataPlot2D(self, plot_set, item):
         """
@@ -486,6 +497,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         plot2D.item = item
         plot2D.plot(plot_set)
         self.addPlot(plot2D)
+        self.active_plots[plot2D.data.id] = plot2D
         #============================================
         # Experimental hook for silx charts
         #============================================
@@ -506,14 +518,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         # Call show on requested plots
         # All same-type charts in one plot
-        #if isinstance(plot_set, Data1D):
-        #    new_plot = Plotter(self)
-
         for item, plot_set in plots:
             if isinstance(plot_set, Data1D):
                 if not 'new_plot' in locals():
                     new_plot = Plotter(self)
                 new_plot.plot(plot_set)
+                # active_plots may contain multiple charts
+                self.active_plots[plot_set.id] = new_plot
             elif isinstance(plot_set, Data2D):
                 self.addDataPlot2D(plot_set, item)
             else:
@@ -555,7 +566,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         new_plot.show()
 
         # Update the active chart list
-        self.active_plots[new_plot.data.id] = new_plot
+        #self.active_plots[new_plot.data.id] = new_plot
 
     def appendPlot(self):
         """

@@ -313,6 +313,18 @@ def updateModelItem(item, update_data, name=""):
     # Append the new row to the main item
     item.appendRow(object_item)
 
+def itemFromFilename(filename, model_item):
+    """
+    Returns the model item text=filename in the model
+    """
+    assert isinstance(model_item, QtGui.QStandardItemModel)
+    assert isinstance(filename, basestring)
+
+    # Iterate over model looking for named items
+    item = list(filter(lambda i: str(i.text()) == filename,
+                  [model_item.item(index) for index in range(model_item.rowCount())]))
+    return item[0] if len(item)>0 else None
+
 def plotsFromFilename(filename, model_item):
     """
     Returns the list of plots for the item with text=filename in the model
