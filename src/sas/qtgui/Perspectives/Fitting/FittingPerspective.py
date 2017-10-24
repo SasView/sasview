@@ -62,7 +62,7 @@ class FittingWindow(QtGui.QTabWidget):
         self.fit_options_widget.fit_option_changed.connect(self.onFittingOptionsChange)
 
         # GPU Options
-        self.gpu_options_widget = GPUOptions()
+        self.gpu_options_widget = GPUOptions(self)
 
         self.menu_manager = ModelUtilities.ModelManager()
         # TODO: reuse these in FittingWidget properly

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>440</width>
-    <height>163</height>
+    <height>178</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>220</x>
-     <y>110</y>
+     <y>140</y>
      <width>93</width>
      <height>28</height>
     </rect>
@@ -30,7 +30,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>110</y>
+     <y>140</y>
      <width>193</width>
      <height>28</height>
     </rect>
@@ -43,7 +43,7 @@
    <property name="geometry">
     <rect>
      <x>320</x>
-     <y>110</y>
+     <y>140</y>
      <width>93</width>
      <height>28</height>
     </rect>
@@ -52,27 +52,18 @@
     <string>Reset</string>
    </property>
   </widget>
-  <widget class="QWidget" name="gridLayoutWidget">
+  <widget class="QGroupBox" name="openCLButtonGroup">
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>10</y>
+     <y>20</y>
      <width>391</width>
-     <height>91</height>
+     <height>111</height>
     </rect>
    </property>
-   <layout class="QGridLayout" name="OpenCLDialogOptionsSection">
-    <item row="0" column="0">
-     <widget class="QRadioButton" name="AvailableOpenCLOptions">
-      <property name="text">
-       <string>None</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-   </layout>
+   <property name="title">
+    <string>Available OpenCL Options</string>
+   </property>
   </widget>
  </widget>
  <resources/>
