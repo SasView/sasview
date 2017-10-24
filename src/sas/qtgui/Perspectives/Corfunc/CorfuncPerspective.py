@@ -89,7 +89,6 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
     name = "Corfunc" # For displaying in the combo box
     #def __init__(self, manager=None, parent=None):
     def __init__(self, parent=None):
-        #super(InvariantWindow, self).__init__(parent)
         super(CorfuncWindow, self).__init__()
         self.setupUi(self)
 
@@ -101,7 +100,7 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
 
         self._canvas = MyMplCanvas(self)
         self._realplot = MyMplCanvas(self)
-        self.verticalLayout_7.insertWidget(0,self._canvas)
+        self.verticalLayout_7.insertWidget(0, self._canvas)
         self.verticalLayout_7.insertWidget(1, self._realplot)
 
         # Connect buttons to slots.
@@ -136,39 +135,46 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
                            QtGui.QStandardItem("0"))
         self.model.setItem(W.W_TRANSFORM,
                            QtGui.QStandardItem("Fourier"))
+        self.model.setItem(W.W_GUINIERA,
+                           QtGui.QStandardItem("0.0"))
+        self.model.setItem(W.W_GUINIERB,
+                           QtGui.QStandardItem("0.0"))
+        self.model.setItem(W.W_PORODK,
+                           QtGui.QStandardItem("0.0"))
+        self.model.setItem(W.W_PORODSIGMA,
+                           QtGui.QStandardItem("0.0"))
 
     def modelChanged(self, item):
         if item.row() == W.W_QMIN:
             value = float(self.model.item(W.W_QMIN).text())
-            self.qMin.setValue(value)
             self._calculator.lowerq = value
             self._canvas.qmin = value
         elif item.row() == W.W_QMAX:
             value = float(self.model.item(W.W_QMAX).text())
-            self.qMax1.setValue(value)
             self._calculator.upperq = (value, self._calculator.upperq[1])
             self._canvas.qmax1 = value
         elif item.row() == W.W_QCUTOFF:
             value = float(self.model.item(W.W_QCUTOFF).text())
-            self.qMax2.setValue(value)
             self._calculator.upperq = (self._calculator.upperq[0], value)
             self._canvas.qmax2 = value
         elif item.row() == W.W_BACKGROUND:
             value = float(self.model.item(W.W_BACKGROUND).text())
-            self.bg.setValue(value)
             self._calculator.background = value
         else:
             print("{} Changed".format(item))
 
+        self.mapper.toFirst()
         self._canvas.drawQSpace()
 
 
     def extrapolate(self):
         params, extrapolation = self._calculator.compute_extrapolation()
-        self.guinierA.setValue(params['A'])
-        self.guinierB.setValue(params['B'])
-        self.porodK.setValue(params['K'])
-        self.porodSigma.setValue(params['sigma'])
+
+        self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem(str(params['A'])))
+        self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem(str(params['B'])))
+        self.model.setItem(W.W_PORODK, QtGui.QStandardItem(str(params['K'])))
+        self.model.setItem(W.W_PORODSIGMA, QtGui.QStandardItem(str(params['sigma'])))
+
         self._canvas.extrap = extrapolation
         self._canvas.drawQSpace()
 
@@ -208,12 +214,17 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         self.mapper.addMapping(self.qMax2, W.W_QCUTOFF)
         self.mapper.addMapping(self.bg, W.W_BACKGROUND)
 
+        self.mapper.addMapping(self.guinierA, W.W_GUINIERA)
+        self.mapper.addMapping(self.guinierB, W.W_GUINIERB)
+        self.mapper.addMapping(self.porodK, W.W_PORODK)
+        self.mapper.addMapping(self.porodSigma, W.W_PORODSIGMA)
+
         self.mapper.toFirst()
 
     def calculateBackground(self):
         bg = self._calculator.compute_background()
-        print(bg)
-        self.model.setItem(W.W_BACKGROUND, QtGui.QStandardItem(str(bg)))
+        temp = QtGui.QStandardItem(str(bg))
+        self.model.setItem(W.W_BACKGROUND, temp)
 
     def action(self):
         print("Called an action!")

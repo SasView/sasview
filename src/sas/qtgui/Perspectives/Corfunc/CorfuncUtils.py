@@ -7,4 +7,8 @@ WIDGETS = enum( 'W_QMIN',
                 'W_QCUTOFF',
                 'W_BACKGROUND',
                 'W_TRANSFORM',
+                'W_GUINIERA',
+                'W_GUINIERB',
+                'W_PORODK',
+                'W_PORODSIGMA',
                 )
