@@ -628,7 +628,7 @@ class FittingWidgetTest(unittest.TestCase):
         item = QtGui.QStandardItem()
         updateModelItem(item, [test_data], "test")
         # Force same data into logic
-        self.widget.data = item
+        self.widget.logic.data = item
         category_index = self.widget.cbCategory.findText("Sphere")
         self.widget.cbCategory.setCurrentIndex(category_index)
 
@@ -677,7 +677,7 @@ class FittingWidgetTest(unittest.TestCase):
         item = QtGui.QStandardItem()
         updateModelItem(item, [test_data], "test")
         # Force same data into logic
-        self.widget.data = item
+        self.widget.logic.data = item
         category_index = self.widget.cbCategory.findText("Sphere")
         self.widget.cbCategory.setCurrentIndex(category_index)
 
