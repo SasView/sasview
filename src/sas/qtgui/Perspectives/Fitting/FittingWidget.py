@@ -332,7 +332,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.chk2DView.setEnabled(False)
         self.chk2DView.setVisible(False)
         self.chkMagnetism.setEnabled(self.is2D)
-        self.chkMagnetism.setVisible(self.is2D)
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.is2D)
         # Combo box or label for file name"
         if self.is_batch_fitting:
