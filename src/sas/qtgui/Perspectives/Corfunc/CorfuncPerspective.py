@@ -46,7 +46,7 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
 
     def setupSlots(self):
         self.extractBtn.clicked.connect(self.action)
-        self.extrapolateBtn.clicked.connect(self.action)
+        self.extrapolateBtn.clicked.connect(self.extrapolate)
         self.transformBtn.clicked.connect(self.action)
 
         self.calculateBgBtn.clicked.connect(self.calculateBackground)
@@ -83,9 +83,20 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
             self._calculator.upperq = (self._calculator.upperq[0], value)
         elif item.row() == W.W_BACKGROUND:
             value = float(self.model.item(W.W_BACKGROUND).text())
-            self.bg.setValue(float(value))
+            self.bg.setValue(value)
+            self._calculator.background = value
         else:
             print("{} Changed".format(item))
+
+
+    def extrapolate(self):
+        params, extrapolation = self._calculator.compute_extrapolation()
+        self.guinierA.setValue(params['A'])
+        self.guinierB.setValue(params['B'])
+        self.porodK.setValue(params['K'])
+        self.porodSigma.setValue(params['sigma'])
+        print(params)
+
 
 
     def setupMapper(self):

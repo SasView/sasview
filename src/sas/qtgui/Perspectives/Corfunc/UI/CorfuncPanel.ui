@@ -132,9 +132,9 @@
   <widget class="QWidget" name="horizontalLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>350</x>
-     <y>350</y>
-     <width>334</width>
+     <x>270</x>
+     <y>320</y>
+     <width>453</width>
      <height>81</height>
     </rect>
    </property>
@@ -155,6 +155,9 @@
           <property name="readOnly">
            <bool>true</bool>
           </property>
+          <property name="decimals">
+           <number>7</number>
+          </property>
          </widget>
         </item>
         <item row="0" column="1">
@@ -168,6 +171,15 @@
          <widget class="QDoubleSpinBox" name="guinierB">
           <property name="readOnly">
            <bool>true</bool>
+          </property>
+          <property name="decimals">
+           <number>7</number>
+          </property>
+          <property name="minimum">
+           <double>-1000000.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>1000000.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -198,6 +210,9 @@
           <property name="readOnly">
            <bool>true</bool>
           </property>
+          <property name="decimals">
+           <number>7</number>
+          </property>
          </widget>
         </item>
         <item row="0" column="1">
@@ -211,6 +226,9 @@
          <widget class="QDoubleSpinBox" name="porodSigma">
           <property name="readOnly">
            <bool>true</bool>
+          </property>
+          <property name="decimals">
+           <number>7</number>
           </property>
          </widget>
         </item>
