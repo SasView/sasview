@@ -150,25 +150,25 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
     def modelChanged(self, item):
         if item.row() == W.W_QMIN:
             value = float(self.model.item(W.W_QMIN).text())
-            self._calculator.lowerq = value
             self._canvas.qmin = value
-        elif item.row() == W.W_QMAX:
-            value = float(self.model.item(W.W_QMAX).text())
-            self._calculator.upperq = (value, self._calculator.upperq[1])
-            self._canvas.qmax1 = value
-        elif item.row() == W.W_QCUTOFF:
-            value = float(self.model.item(W.W_QCUTOFF).text())
-            self._calculator.upperq = (self._calculator.upperq[0], value)
-            self._canvas.qmax2 = value
-        elif item.row() == W.W_BACKGROUND:
-            value = float(self.model.item(W.W_BACKGROUND).text())
-            self._calculator.background = value
+        elif item.row() == W.W_QMAX or item.row() == W.W_QCUTOFF:
+            a = float(self.model.item(W.W_QMAX).text())
+            b = float(self.model.item(W.W_QCUTOFF).text())
+            self._canvas.qmax1 = a
+            self._canvas.qmax2 = b
         else:
             print("{} Changed".format(item))
 
+        self._update_calculator()
         self.mapper.toFirst()
         self._canvas.drawQSpace()
 
+    def _update_calculator(self):
+        self._calculator.lowerq = float(self.model.item(W.W_QMIN).text())
+        qmax1 = float(self.model.item(W.W_QMAX).text())
+        qmax2 = float(self.model.item(W.W_QCUTOFF).text())
+        self._calculator.upperq = (qmax1, qmax2)
+        self._calculator.background = float(self.model.item(W.W_BACKGROUND).text())
 
     def extrapolate(self):
         params, extrapolation = self._calculator.compute_extrapolation()
@@ -189,7 +189,7 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
             method = "hilbert"
 
         extrap = self._canvas.extrap
-        bg = self._calculator.background
+        bg = float(self.model.item(W.W_BACKGROUND).text())
         def updatefn(*args, **kwargs):
             pass
 
