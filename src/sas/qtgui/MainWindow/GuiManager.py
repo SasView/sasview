@@ -383,6 +383,7 @@ class GuiManager(object):
         self._workspace.actionConstrained_Fit.triggered.connect(self.actionConstrained_Fit)
         self._workspace.actionCombine_Batch_Fit.triggered.connect(self.actionCombine_Batch_Fit)
         self._workspace.actionFit_Options.triggered.connect(self.actionFit_Options)
+        self._workspace.actionGPU_Options.triggered.connect(self.actionGPU_Options)
         self._workspace.actionFit_Results.triggered.connect(self.actionFit_Results)
         self._workspace.actionChain_Fitting.triggered.connect(self.actionChain_Fitting)
         self._workspace.actionEdit_Custom_Model.triggered.connect(self.actionEdit_Custom_Model)
@@ -617,6 +618,14 @@ class GuiManager(object):
         """
         if getattr(self._current_perspective, "fit_options_widget"):
             self._current_perspective.fit_options_widget.show()
+        pass
+
+    def actionGPU_Options(self):
+        """
+        """
+        print("actionGPU_Options TRIGGERED")
+        if getattr(self._current_perspective, "gpu_options_widget"):
+            self._current_perspective.gpu_options_widget.show()
         pass
 
     def actionFit_Results(self):
