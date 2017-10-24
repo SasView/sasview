@@ -1,6 +1,5 @@
 # global
 import sys
-import os
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 from PyQt4 import QtWebKit
@@ -9,14 +8,13 @@ from twisted.internet import threads
 from twisted.internet import reactor
 
 # sas-global
-from sas.sascalc.invariant import invariant
 from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # local
 from UI.CorfuncPanel import Ui_CorfuncDialog
 # from InvariantDetails import DetailsDialog
-# from InvariantUtils import WIDGETS
+from CorfuncUtils import WIDGETS as W
 
 
 class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
@@ -31,7 +29,56 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
 
         self.setWindowTitle("Corfunc Perspective")
 
+        self.model = QtGui.QStandardItemModel(self)
         self.communicate = GuiUtils.Communicate()
+
+        # Connect buttons to slots.
+        # Needs to be done early so default values propagate properly.
+        self.setupSlots()
+
+        # Set up the model.
+        self.setupModel()
+
+        # Set up the mapper
+        self.setupMapper()
+
+    def setupSlots(self):
+        self.extractBtn.clicked.connect(self.action)
+        self.extrapolateBtn.clicked.connect(self.action)
+        self.transformBtn.clicked.connect(self.action)
+
+        self.hilbertBtn.clicked.connect(self.action)
+        self.fourierBtn.clicked.connect(self.action)
+
+    def setupModel(self):
+        self.model.setItem(W.W_QMIN,
+                           QtGui.QStandardItem("0"))
+        self.model.setItem(W.W_QMAX,
+                           QtGui.QStandardItem("0"))
+        self.model.setItem(W.W_QCUTOFF,
+                           QtGui.QStandardItem("0"))
+        self.model.setItem(W.W_BACKGROUND,
+                           QtGui.QStandardItem("0"))
+        self.model.setItem(W.W_TRANSFORM,
+                           QtGui.QStandardItem("Fourier"))
+
+    def setupMapper(self):
+        self.mapper = QtGui.QDataWidgetMapper(self)
+        self.mapper.setOrientation(QtCore.Qt.Vertical)
+        self.mapper.setModel(self.model)
+
+        self.mapper.addMapping(self.qMin, W.W_QMIN)
+        self.mapper.addMapping(self.qMax1, W.W_QMAX)
+        self.mapper.addMapping(self.qMax2, W.W_QCUTOFF)
+        self.mapper.addMapping(self.bg, W.W_BACKGROUND)
+
+        self.mapper.toFirst()
+
+
+    def action(self):
+        print("Called an action!")
+        print(self.model)
+        print(self.mapper)
 
     def allowBatch(self):
         """
