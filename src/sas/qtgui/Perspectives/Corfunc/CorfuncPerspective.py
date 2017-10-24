@@ -123,11 +123,11 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
 
     def setupModel(self):
         self.model.setItem(W.W_QMIN,
-                           QtGui.QStandardItem("0"))
+                           QtGui.QStandardItem("0.01"))
         self.model.setItem(W.W_QMAX,
-                           QtGui.QStandardItem("0"))
+                           QtGui.QStandardItem("0.20"))
         self.model.setItem(W.W_QCUTOFF,
-                           QtGui.QStandardItem("0"))
+                           QtGui.QStandardItem("0.22"))
         self.model.setItem(W.W_BACKGROUND,
                            QtGui.QStandardItem("0"))
         self.model.setItem(W.W_TRANSFORM,
@@ -257,8 +257,6 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
 
         self._model_item = data_item[0]
         data = GuiUtils.dataFromItem(self._model_item)
-        self._calculator.lowerq = 1e-3
-        self._calculator.upperq = (2e-1, 3e-1)
         self._calculator.set_data(data)
 
         self._canvas.data = data
