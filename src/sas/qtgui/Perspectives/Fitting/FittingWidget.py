@@ -12,6 +12,7 @@ from PyQt4 import QtGui
 from PyQt4 import QtCore
 from PyQt4 import QtWebKit
 
+from sasmodels import product
 from sasmodels import generate
 from sasmodels import modelinfo
 from sasmodels.sasview_model import load_standard_models
@@ -51,12 +52,21 @@ DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 USING_TWISTED = True
 
 class ToolTippedItemModel(QtGui.QStandardItemModel):
-
-    def __init__(self, parent = None):
+    """
+    Subclass from QStandardItemModel to allow displaying tooltips in
+    QTableView model.
+    """
+    def __init__(self, parent=None):
         QtGui.QStandardItemModel.__init__(self,parent)
 
     def headerData(self, section, orientation, role):
-
+        """
+        Displays tooltip for each column's header
+        :param section:
+        :param orientation:
+        :param role:
+        :return:
+        """
         if role == QtCore.Qt.ToolTipRole:
             if orientation == QtCore.Qt.Horizontal:
                 return QtCore.QString(str(self.header_tooltips[section]))
@@ -1038,8 +1048,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         # Regardless of previous state, this should now be `plot show` functionality only
         self.cmdPlot.setText("Show Plot")
-        if not self.data_is_loaded:
-            self.recalculatePlotData()
+        # Force data recalculation so existing charts are updated
+        self.recalculatePlotData()
         self.showPlot()
 
     def recalculatePlotData(self):
@@ -1253,6 +1263,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         structure_module = generate.load_kernel_module(structure_factor)
         structure_parameters = modelinfo.make_parameter_table(getattr(structure_module, 'parameters', []))
+        structure_kernel = self.models[structure_factor]()
+
+        self.kernel_module._model_info = product.make_product_info(self.kernel_module._model_info, structure_kernel._model_info)
 
         new_rows = FittingUtilities.addSimpleParametersToModel(structure_parameters, self.is2D)
         for row in new_rows:
