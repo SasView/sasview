@@ -17,6 +17,38 @@ from UI.CorfuncPanel import Ui_CorfuncDialog
 # from InvariantDetails import DetailsDialog
 from CorfuncUtils import WIDGETS as W
 
+from matplotlib.backends import qt_compat
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+
+
+class MyMplCanvas(FigureCanvas):
+    """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
+    def __init__(self, parent=None, width=5, height=4, dpi=100):
+        self.fig = Figure(figsize=(width, height), dpi=dpi)
+        self.axes = self.fig.add_subplot(111)
+        # # We want the axes cleared every time plot() is called
+        # self.axes.hold(False)
+        self.axes.set_xscale("log")
+        self.axes.set_yscale("log")
+
+        # self.compute_initial_figure()
+
+        FigureCanvas.__init__(self, self.fig)
+        # self.reparent(parent, QPoint(0, 0))
+
+        # FigureCanvas.setSizePolicy(self,
+        #                            QSizePolicy.Expanding,
+        #                            QSizePolicy.Expanding)
+        # FigureCanvas.updateGeometry(self)
+
+    def sizeHint(self):
+        w, h = self.get_width_height()
+        return QSize(w, h)
+
+    def minimumSizeHint(self):
+        return QSize(10, 10)
+
 
 class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
     # The controller which is responsible for managing signal slots connections
@@ -33,6 +65,9 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         self.model = QtGui.QStandardItemModel(self)
         self.communicate = GuiUtils.Communicate()
         self._calculator = CorfuncCalculator()
+
+        self._canvas = MyMplCanvas(self)
+        self.verticalLayout_7.addWidget(self._canvas)
 
         # Connect buttons to slots.
         # Needs to be done early so default values propagate properly.
@@ -145,6 +180,8 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         self._calculator.lowerq = 1e-3
         self._calculator.upperq = (2e-1, 3e-1)
         self._calculator.set_data(data)
+
+        self._canvas.axes.plot(data.x, data.y)
 
         # self.model.item(WIDGETS.W_FILENAME).setData(QtCoreQVariant(self._model_item.text()))
 
