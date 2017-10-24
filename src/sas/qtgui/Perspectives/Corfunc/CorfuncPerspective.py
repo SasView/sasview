@@ -27,12 +27,6 @@ class MyMplCanvas(FigureCanvas):
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = self.fig.add_subplot(111)
-        # # We want the axes cleared every time plot() is called
-        # self.axes.hold(False)
-        self.axes.set_xscale("log")
-        self.axes.set_yscale("log")
-
-        # self.compute_initial_figure()
 
         FigureCanvas.__init__(self, self.fig)
         # self.reparent(parent, QPoint(0, 0))
@@ -42,12 +36,41 @@ class MyMplCanvas(FigureCanvas):
         #                            QSizePolicy.Expanding)
         # FigureCanvas.updateGeometry(self)
 
-    def sizeHint(self):
-        w, h = self.get_width_height()
-        return QSize(w, h)
+        self.data = None
+        self.qmin = None
+        self.qmax1 = None
+        self.qmax2 = None
+        self.extrap = None
 
-    def minimumSizeHint(self):
-        return QSize(10, 10)
+    def drawQSpace(self):
+        self.fig.clf()
+
+        self.axes = self.fig.add_subplot(111)
+        self.axes.set_xscale("log")
+        self.axes.set_yscale("log")
+
+        if self.data:
+            self.axes.plot(self.data.x, self.data.y)
+        if self.qmin:
+            self.axes.axvline(self.qmin)
+        if self.qmax1:
+            self.axes.axvline(self.qmax1)
+        if self.qmax2:
+            self.axes.axvline(self.qmax2)
+        if self.extrap:
+            print(self.extrap)
+            self.axes.plot(self.extrap.x, self.extrap.y)
+
+        self.draw()
+
+
+
+    # def sizeHint(self):
+    #     w, h = self.get_width_height()
+    #     return QSize(w, h)
+
+    # def minimumSizeHint(self):
+    #     return QSize(10, 10)
 
 
 class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
@@ -67,7 +90,7 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         self._calculator = CorfuncCalculator()
 
         self._canvas = MyMplCanvas(self)
-        self.verticalLayout_7.addWidget(self._canvas)
+        self.verticalLayout_7.insertWidget(0,self._canvas)
 
         # Connect buttons to slots.
         # Needs to be done early so default values propagate properly.
@@ -108,20 +131,25 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
             value = float(self.model.item(W.W_QMIN).text())
             self.qMin.setValue(value)
             self._calculator.lowerq = value
+            self._canvas.qmin = value
         elif item.row() == W.W_QMAX:
             value = float(self.model.item(W.W_QMAX).text())
             self.qMax1.setValue(value)
             self._calculator.upperq = (value, self._calculator.upperq[1])
+            self._canvas.qmax1 = value
         elif item.row() == W.W_QCUTOFF:
             value = float(self.model.item(W.W_QCUTOFF).text())
             self.qMax2.setValue(value)
             self._calculator.upperq = (self._calculator.upperq[0], value)
+            self._canvas.qmax2 = value
         elif item.row() == W.W_BACKGROUND:
             value = float(self.model.item(W.W_BACKGROUND).text())
             self.bg.setValue(value)
             self._calculator.background = value
         else:
             print("{} Changed".format(item))
+
+        self._canvas.drawQSpace()
 
 
     def extrapolate(self):
@@ -131,6 +159,8 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         self.porodK.setValue(params['K'])
         self.porodSigma.setValue(params['sigma'])
         print(params)
+        self._canvas.extrap = extrapolation
+        self._canvas.drawQSpace()
 
 
 
@@ -181,7 +211,8 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         self._calculator.upperq = (2e-1, 3e-1)
         self._calculator.set_data(data)
 
-        self._canvas.axes.plot(data.x, data.y)
+        self._canvas.data = data
+        self._canvas.drawQSpace()
 
         # self.model.item(WIDGETS.W_FILENAME).setData(QtCoreQVariant(self._model_item.text()))
 
