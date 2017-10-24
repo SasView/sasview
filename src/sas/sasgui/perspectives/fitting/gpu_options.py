@@ -317,7 +317,7 @@ class GpuOptions(wx.Dialog):
         """
         Provide help on opencl options.
         """
-        TreeLocation = "user/gpu_computations.html"
+        TreeLocation = "user/sasgui/perspectives/fitting/gpu_setup.html"
         anchor = "#device-selection"
         DocumentationWindow(self, -1,
                             TreeLocation, anchor, "OpenCL Options Help")

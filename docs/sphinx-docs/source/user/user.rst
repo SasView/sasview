@@ -6,12 +6,12 @@ SasView User Documentation
 .. toctree::
    :maxdepth: 1
 
-   Model Documentation <index>
-   
+   Model Documentation <sasgui/perspectives/fitting/models/index>
+
    Menu Bar <menu_bar>
 
    Fitting & Other Analyses <analysis>
-   
+
    Tools & Utilities <tools>
-         
+
    Working with SasView <working>

@@ -15,23 +15,48 @@ reasons.
 """
 import os
 import logging
-import wx
 import webbrowser
 import urllib
 import sys
 
+import wx
+try:
+    import wx.html2 as html
+    WX_SUPPORTS_HTML2 = True
+except ImportError:
+    WX_SUPPORTS_HTML2 = False
+
+from sas import get_app_dir
+
+# Don't use wx html renderer on windows.
+if os.name == 'nt':
+    WX_SUPPORTS_HTML2 = False
+
 logger = logging.getLogger(__name__)
 
 SPHINX_DOC_ENV = "SASVIEW_DOC_PATH"
-WX_SUPPORTS_HTML2 = True
-try:
-    import wx.html2 as html
-except:
-    WX_SUPPORTS_HTML2 = False
 
+THREAD_STARTED = False
+def start_documentation_server(doc_root, port):
+    import thread
+    global THREAD_STARTED
+    if not THREAD_STARTED:
+        thread.start_new_thread(_documentation_server, (doc_root, port))
+        THREAD_STARTED = True
 
-from gui_manager import get_app_dir
+def _documentation_server(doc_root, port):
+    from SimpleHTTPServer import SimpleHTTPRequestHandler
+    from SocketServer import TCPServer
 
+    os.chdir(doc_root)
+    httpd = TCPServer(("127.0.0.1", port), SimpleHTTPRequestHandler, bind_and_activate=False)
+    httpd.allow_reuse_address = True
+    try:
+        httpd.server_bind()
+        httpd.server_activate()
+        httpd.serve_forever()
+    finally:
+        httpd.server_close()
 
 class DocumentationWindow(wx.Frame):
     """
@@ -69,15 +94,24 @@ class DocumentationWindow(wx.Frame):
         #and /// for PC.
         #Note added June 21, 2015     PDB
         file_path = os.path.join(docs_path, path)
-        url = "file:///" + urllib.quote(file_path, r'/\:')+ url_instruction
+        if path.startswith('http'):
+            url = path
+        elif not os.path.exists(file_path):
+            url = "index.html"
+            logger.error("Could not find Sphinx documentation at %s -- has it been built?",
+                         file_path)
+        elif False:
+            start_documentation_server(docs_path, port=7999)
+            url = "http://127.0.0.1:7999/" + path.replace('\\', '/') + url_instruction
+        else:
+            url = "file:///" + urllib.quote(file_path, r'/\:')+ url_instruction
 
-        if not os.path.exists(file_path):
-            logger.error("Could not find Sphinx documentation at %s \
-            -- has it been built?", file_path)
-        elif WX_SUPPORTS_HTML2:
+        #logger.info("showing url " + url)
+        if WX_SUPPORTS_HTML2:
             # Complete HTML/CSS support!
             self.view = html.WebView.New(self)
             self.view.LoadURL(url)
+            self.Bind(html.EVT_WEBVIEW_ERROR, self.OnError, self.view)
             self.Show()
         else:
             logger.error("No html2 support, popping up a web browser")
@@ -87,12 +121,16 @@ class DocumentationWindow(wx.Frame):
             #does not deal with issue of math in docs of course.
             webbrowser.open_new_tab(url)
 
+    def OnError(self, evt):
+        logger.error("%d: %s", evt.GetInt(), evt.GetString())
+
 def main():
     """
     main loop function if running alone for testing.
     """
+    url = "index.html" if len(sys.argv) <= 1 else sys.argv[1]
     app = wx.App()
-    DocumentationWindow(None, -1, "index.html", "", "Documentation",)
+    DocumentationWindow(None, -1, url, "", "Documentation",)
     app.MainLoop()
 
 if __name__ == '__main__':

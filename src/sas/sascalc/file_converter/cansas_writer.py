@@ -31,7 +31,7 @@ class CansasWriter(CansasReader):
         """
         valid_class = all([issubclass(data.__class__, Data1D) for data in frame_data])
         if not valid_class:
-            raise RuntimeError, ("The cansas writer expects an array of "
+            raise RuntimeError("The cansas writer expects an array of "
                 "Data1D instances")
 
         # Get PIs and create root element

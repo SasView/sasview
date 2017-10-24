@@ -30,12 +30,15 @@ import os
 import math
 import re
 import logging
+import datetime
+
 from wx.py.editwindow import EditWindow
+
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
+
 from .pyconsole import show_model_output, check_model
 
 logger = logging.getLogger(__name__)
-
 
 if sys.platform.count("win32") > 0:
     FONT_VARIANT = 0
@@ -77,7 +80,7 @@ class TextDialog(wx.Dialog):
     'Plugin Model Operations' under 'Fitting' menu.  This is currently called as
     a Modal Dialog.
 
-    :TODO the build in compiler currently balks at when it tries to import
+    :TODO the built in compiler currently balks at when it tries to import
     a model whose name contains spaces or symbols (such as + ... underscore
     should be fine).  Have fixed so the editor cannot save such a file name
     but if a file is dropped in the plugin directory from outside this class
@@ -105,7 +108,6 @@ class TextDialog(wx.Dialog):
         self.model1_string = "sphere"
         self.model2_string = "cylinder"
         self.name = 'Sum' + M_NAME
-        self.factor = 'scale_factor'
         self._notes = ''
         self._operator = '+'
         self._operator_choice = None
@@ -132,7 +134,7 @@ class TextDialog(wx.Dialog):
         self.model1_name = str(self.model1.GetValue())
         self.model2_name = str(self.model2.GetValue())
         self.good_name = True
-        self.fill_oprator_combox()
+        self.fill_operator_combox()
 
     def _layout_name(self):
         """
@@ -335,7 +337,7 @@ class TextDialog(wx.Dialog):
             #Create list of existing model names for comparison
             list_fnames = os.listdir(self.plugin_dir)
             # fake existing regular model name list
-            m_list = [model + ".py" for model in self.model_list]
+            m_list = [model.name + ".py" for model in self.model_list]
             list_fnames.append(m_list)
             if t_fname in list_fnames and title != mname:
                 self.good_name = False
@@ -490,27 +492,22 @@ class TextDialog(wx.Dialog):
         Choose the equation to use depending on whether we now have
         a sum or multiply model then create the appropriate string
         """
-
         name = ''
-
         if operator == '*':
             name = 'Multi'
-            factor = 'BackGround'
-            f_oper = '+'
+            factor = 'background'
         else:
             name = 'Sum'
             factor = 'scale_factor'
-            f_oper = '*'
 
-        self.factor = factor
         self._operator = operator
-        self.explanation = "  Plugin Model = %s %s (model1 %s model2)\n" % \
-                           (self.factor, f_oper, self._operator)
+        self.explanation = ("  Plugin_model = scale_factor * (model_1 {} "
+            "model_2) + background").format(operator)
         self.explanationctr.SetLabel(self.explanation)
         self.name = name + M_NAME
 
 
-    def fill_oprator_combox(self):
+    def fill_operator_combox(self):
         """
         fill the current combobox with the operator
         """
@@ -526,83 +523,22 @@ class TextDialog(wx.Dialog):
         """
         return [self.model1_name, self.model2_name]
 
-    def write_string(self, fname, name1, name2):
+    def write_string(self, fname, model1_name, model2_name):
         """
         Write and Save file
         """
         self.fname = fname
         description = self.desc_tcl.GetValue().lstrip().rstrip()
-        if description == '':
-            description = name1 + self._operator + name2
-        text = self._operator_choice.GetValue()
-        if text.count('+') > 0:
-            factor = 'scale_factor'
-            f_oper = '*'
-            default_val = '1.0'
-        else:
-            factor = 'BackGround'
-            f_oper = '+'
-            default_val = '0.0'
-        path = self.fname
-        try:
-            out_f = open(path, 'w')
-        except:
-            raise
-        lines = SUM_TEMPLATE.split('\n')
-        for line in lines:
-            try:
-                if line.count("scale_factor"):
-                    line = line.replace('scale_factor', factor)
-                    #print "scale_factor", line
-                if line.count("= %s"):
-                    out_f.write(line % (default_val) + "\n")
-                elif line.count("import Model as P1"):
-                    if self.is_p1_custom:
-                        line = line.replace('#', '')
-                        out_f.write(line % name1 + "\n")
-                    else:
-                        out_f.write(line + "\n")
-                elif line.count("import %s as P1"):
-                    if not self.is_p1_custom:
-                        line = line.replace('#', '')
-                        out_f.write(line % (name1) + "\n")
-                    else:
-                        out_f.write(line + "\n")
-                elif line.count("import Model as P2"):
-                    if self.is_p2_custom:
-                        line = line.replace('#', '')
-                        out_f.write(line % name2 + "\n")
-                    else:
-                        out_f.write(line + "\n")
-                elif line.count("import %s as P2"):
-                    if not self.is_p2_custom:
-                        line = line.replace('#', '')
-                        out_f.write(line % (name2) + "\n")
-                    else:
-                        out_f.write(line + "\n")
-                elif line.count("P1 = find_model"):
-                    out_f.write(line % (name1) + "\n")
-                elif line.count("P2 = find_model"):
-                    out_f.write(line % (name2) + "\n")
-
-                elif line.count("self.description = '%s'"):
-                    out_f.write(line % description + "\n")
-                #elif line.count("run") and line.count("%s"):
-                #    out_f.write(line % self._operator + "\n")
-                #elif line.count("evalDistribution") and line.count("%s"):
-                #    out_f.write(line % self._operator + "\n")
-                elif line.count("return") and line.count("%s") == 2:
-                    #print "line return", line
-                    out_f.write(line % (f_oper, self._operator) + "\n")
-                elif line.count("out2")and line.count("%s"):
-                    out_f.write(line % self._operator + "\n")
-                else:
-                    out_f.write(line + "\n")
-            except:
-                raise
-        out_f.close()
-        #else:
-        #    msg = "Name exists already."
+        desc_line = ''
+        if description.strip() != '':
+            # Sasmodels generates a description for us. If the user provides
+            # their own description, add a line to overwrite the sasmodels one
+            desc_line = "\nmodel_info.description = '{}'".format(description)
+        name = os.path.splitext(os.path.basename(self.fname))[0]
+        output = SUM_TEMPLATE.format(name=name, model1=model1_name,
+            model2=model2_name, operator=self._operator, desc_line=desc_line)
+        with open(self.fname, 'w') as out_f:
+            out_f.write(output)
 
     def compile_file(self, path):
         """
@@ -642,6 +578,7 @@ class EditorPanel(wx.ScrolledWindow):
         self.name_sizer = None
         self.name_hsizer = None
         self.name_tcl = None
+        self.overwrite_cb = None
         self.desc_sizer = None
         self.desc_tcl = None
         self.param_sizer = None
@@ -656,7 +593,7 @@ class EditorPanel(wx.ScrolledWindow):
         self.msg_sizer = None
         self.warning = ""
         #This does not seem to be used anywhere so commenting out for now
-        #    -- PDB 2/26/17 
+        #    -- PDB 2/26/17
         #self._description = "New Plugin Model"
         self.function_tcl = None
         self.math_combo = None
@@ -688,10 +625,10 @@ class EditorPanel(wx.ScrolledWindow):
         """
         #title name [string]
         name_txt = wx.StaticText(self, -1, 'Function Name : ')
-        overwrite_cb = wx.CheckBox(self, -1, "Overwrite existing plugin model of this name?", (10, 10))
-        overwrite_cb.SetValue(False)
-        overwrite_cb.SetToolTipString("Overwrite it if already exists?")
-        wx.EVT_CHECKBOX(self, overwrite_cb.GetId(), self.on_over_cb)
+        self.overwrite_cb = wx.CheckBox(self, -1, "Overwrite existing plugin model of this name?", (10, 10))
+        self.overwrite_cb.SetValue(False)
+        self.overwrite_cb.SetToolTipString("Overwrite it if already exists?")
+        wx.EVT_CHECKBOX(self, self.overwrite_cb.GetId(), self.on_over_cb)
         self.name_tcl = wx.TextCtrl(self, -1, size=(PANEL_WIDTH * 3 / 5, -1))
         self.name_tcl.Bind(wx.EVT_TEXT_ENTER, self.on_change_name)
         self.name_tcl.SetValue('')
@@ -699,7 +636,7 @@ class EditorPanel(wx.ScrolledWindow):
         hint_name = "Unique Model Function Name."
         self.name_tcl.SetToolTipString(hint_name)
         self.name_hsizer.AddMany([(self.name_tcl, 0, wx.LEFT | wx.TOP, 0),
-                                  (overwrite_cb, 0, wx.LEFT, 20)])
+                                  (self.overwrite_cb, 0, wx.LEFT, 20)])
         self.name_sizer.AddMany([(name_txt, 0, wx.LEFT | wx.TOP, 10),
                                  (self.name_hsizer, 0,
                                   wx.LEFT | wx.TOP | wx.BOTTOM, 10)])
@@ -739,7 +676,7 @@ class EditorPanel(wx.ScrolledWindow):
 
         self.param_sizer.AddMany([(param_txt, 0, wx.LEFT, 10),
                                   (self.param_tcl, 1, wx.EXPAND | wx.ALL, 10)])
-        
+
         # Parameters with polydispersity
         pd_param_txt = wx.StaticText(self, -1, 'Fit Parameters requiring ' + \
                                      'polydispersity (if any): ')
@@ -754,7 +691,7 @@ class EditorPanel(wx.ScrolledWindow):
                                     wx.CLIP_CHILDREN | wx.SUNKEN_BORDER)
         self.pd_param_tcl.setDisplayLineNumbers(True)
         self.pd_param_tcl.SetToolTipString(pd_param_tip)
-        
+
         self.param_sizer.AddMany([(pd_param_txt, 0, wx.LEFT, 10),
                                   (self.pd_param_tcl, 1, wx.EXPAND | wx.ALL, 10)])
 
@@ -854,7 +791,7 @@ class EditorPanel(wx.ScrolledWindow):
                 try:
                     exec "float(math.%s)" % item
                     self.math_combo.Append(str(item))
-                except:
+                except Exception:
                     self.math_combo.Append(str(item) + "()")
         self.math_combo.Bind(wx.EVT_COMBOBOX, self._on_math_select)
         self.math_combo.SetSelection(0)
@@ -979,21 +916,16 @@ class EditorPanel(wx.ScrolledWindow):
         else:
             msg = "Name exists already."
 
-        # Prepare the messagebox
+        #
         if self.base is not None and not msg:
             self.base.update_custom_combo()
-            # Passed exception in import test as it will fail for sasmodels.sasview_model class
-            # Should add similar test for new style?
-            Model = None
-            try:
-                exec "from %s import Model" % name
-            except:
-                logger.error(sys.exc_value)
 
         # Prepare the messagebox
         if msg:
             info = 'Error'
             color = 'red'
+            self.overwrite_cb.SetValue(True)
+            self.overwrite_name = True
         else:
             self._notes = result
             msg = "Successful! Please look for %s in Plugin Models."%name
@@ -1019,107 +951,75 @@ class EditorPanel(wx.ScrolledWindow):
         :param pd_param_str: content of params requiring polydispersity; Strings
         :param func_str: content of func; Strings
         """
-        try:
-            out_f = open(fname, 'w')
-        except:
-            raise
-        # Prepare the content of the function
-        lines = CUSTOM_TEMPLATE.split('\n')
+        out_f = open(fname, 'w')
 
-        has_scipy = func_str.count("scipy.")
-        if has_scipy:
-            lines.insert(0, 'import scipy')
-        
-        # Think about 2D later        
-        #self.is_2d = func_str.count("#self.ndim = 2")
-        #line_2d = ''
-        #if self.is_2d:
-        #    line_2d = CUSTOM_2D_TEMP.split('\n')
-        
-        # Also think about test later        
-        #line_test = TEST_TEMPLATE.split('\n')
-        #local_params = ''
-        #spaces = '        '#8spaces
-        spaces4  = ' '*4
-        spaces13 = ' '*13
-        spaces16 = ' '*16     
+        out_f.write(CUSTOM_TEMPLATE % {
+            'name': name,
+            'title': 'User model for ' + name,
+            'description': desc_str,
+            'date': datetime.datetime.now().strftime('%YYYY-%mm-%dd'),
+        })
+
+        # Write out parameters
         param_names = []    # to store parameter names
-        has_scipy = func_str.count("scipy.")
-        if has_scipy:
-            lines.insert(0, 'import scipy')
+        pd_params = []
+        out_f.write('parameters = [ \n')
+        out_f.write('#   ["name", "units", default, [lower, upper], "type", "description"],\n')
+        for pname, pvalue, desc in self.get_param_helper(param_str):
+            param_names.append(pname)
+            out_f.write("    ['%s', '', %s, [-inf, inf], '', '%s'],\n"
+                        % (pname, pvalue, desc))
+        for pname, pvalue, desc in self.get_param_helper(pd_param_str):
+            param_names.append(pname)
+            pd_params.append(pname)
+            out_f.write("    ['%s', '', %s, [-inf, inf], 'volume', '%s'],\n"
+                        % (pname, pvalue, desc))
+        out_f.write('    ]\n')
 
-        # write function here
-        for line in lines:
-            # The location where to put the strings is
-            # hard-coded in the template as shown below.
-            out_f.write(line + '\n')
-            if line.count('#name'):
-                out_f.write('name = "%s" \n' % name)               
-            elif line.count('#title'):
-                out_f.write('title = "User model for %s"\n' % name)               
-            elif line.count('#description'):
-                out_f.write('description = "%s"\n' % desc_str)               
-            elif line.count('#parameters'):
-                out_f.write('parameters = [ \n')
-                for param_line in param_str.split('\n'):
-                    p_line = param_line.lstrip().rstrip()
-                    if p_line:
-                        pname, pvalue = self.get_param_helper(p_line)
-                        param_names.append(pname)
-                        out_f.write("%s['%s', '', %s, [-numpy.inf, numpy.inf], '', ''],\n" % (spaces16, pname, pvalue))
-                for param_line in pd_param_str.split('\n'):
-                    p_line = param_line.lstrip().rstrip()
-                    if p_line:
-                        pname, pvalue = self.get_param_helper(p_line)
-                        param_names.append(pname)
-                        out_f.write("%s['%s', '', %s, [-numpy.inf, numpy.inf], 'volume', ''],\n" % (spaces16, pname, pvalue))
-                out_f.write('%s]\n' % spaces13)
-            
-        # No form_volume or ER available in simple model editor
-        out_f.write('def form_volume(*arg): \n')
-        out_f.write('    return 1.0 \n')
-        out_f.write('\n')
-        out_f.write('def ER(*arg): \n')
-        out_f.write('    return 1.0 \n')
-        
-        # function to compute
-        out_f.write('\n')
-        out_f.write('def Iq(x ')
-        for name in param_names:
-            out_f.write(', %s' % name)
-        out_f.write('):\n')
+        # Write out function definition
+        out_f.write('def Iq(%s):\n' % ', '.join(['x'] + param_names))
+        out_f.write('    """Absolute scattering"""\n')
+        if "scipy." in func_str:
+            out_f.write('    import scipy')
+        if "numpy." in func_str:
+            out_f.write('    import numpy')
+        if "np." in func_str:
+            out_f.write('    import numpy as np')
         for func_line in func_str.split('\n'):
             out_f.write('%s%s\n' % (spaces4, func_line))
-        
-        Iqxy_string = 'return Iq(numpy.sqrt(x**2+y**2) '
-            
+        out_f.write('## uncomment the following if Iq works for vector x\n')
+        out_f.write('#Iq.vectorized = True\n')
+
+        # If polydisperse, create place holders for form_volume, ER and VR
+        if pd_params:
+            out_f.write('\n')
+            out_f.write(CUSTOM_TEMPLATE_PD % {'args': ', '.join(pd_params)})
+
+        # Create place holder for Iqxy
         out_f.write('\n')
-        out_f.write('def Iqxy(x, y ')
-        for name in param_names:
-            out_f.write(', %s' % name)
-            Iqxy_string += ', ' + name
-        out_f.write('):\n')
-        Iqxy_string += ')'
-        out_f.write('%s%s\n' % (spaces4, Iqxy_string))
+        out_f.write('#def Iqxy(%s):\n' % ', '.join(["x", "y"] + param_names))
+        out_f.write('#    """Absolute scattering of oriented particles."""\n')
+        out_f.write('#    ...\n')
+        out_f.write('#    return oriented_form(x, y, args)\n')
+        out_f.write('## uncomment the following if Iqxy works for vector x, y\n')
+        out_f.write('#Iqxy.vectorized = True\n')
 
         out_f.close()
 
-    def get_param_helper(self, line):
+    def get_param_helper(self, param_str):
         """
-        Get string in line to define the params dictionary
+        yield a sequence of name, value pairs for the parameters in param_str
 
-        :param line: one line of string got from the param_str
+        Parameters can be defined by one per line by name=value, or multiple
+        on the same line by separating the pairs by semicolon or comma.  The
+        value is optional and defaults to "1.0".
         """
-        items = line.split(";")
-        for item in items:
-            name = item.split("=")[0].lstrip().rstrip()
-            try:
-                value = item.split("=")[1].lstrip().rstrip()
-                float(value)
-            except:
-                value = 1.0 # default
-
-        return name, value
+        for line in param_str.replace(';', ',').split('\n'):
+            for item in line.split(','):
+                defn, desc = item.split('#', 1) if '#' in item else (item, '')
+                name, value = defn.split('=', 1) if '=' in defn else (defn, '1.0')
+                if name:
+                    yield [v.strip() for v in (name, value, desc)]
 
     def set_function_helper(self, line):
         """
@@ -1153,8 +1053,8 @@ class EditorPanel(wx.ScrolledWindow):
         webbrowser does not pass anything past the # to the browser when it is
         running "file:///...."
 
-    :param evt: Triggers on clicking the help button
-    """
+        :param evt: Triggers on clicking the help button
+        """
 
         _TreeLocation = "user/sasgui/perspectives/fitting/fitting_help.html"
         _PageAnchor = "#new-plugin-model"
@@ -1197,408 +1097,71 @@ class EditorWindow(wx.Frame):
 
 ## Templates for plugin models
 
-CUSTOM_TEMPLATE = """
+CUSTOM_TEMPLATE = '''\
+r"""
+Definition
+----------
+
+Calculates %(name)s.
+
+%(description)s
+
+References
+----------
+
+Authorship and Verification
+---------------------------
+
+* **Author:** --- **Date:** %(date)s
+* **Last Modified by:** --- **Date:** %(date)s
+* **Last Reviewed by:** --- **Date:** %(date)s
+"""
+
 from math import *
-import os
-import sys
-import numpy
+from numpy import inf
 
-#name 
+name = "%(name)s"
+title = "%(title)s"
+description = """%(description)s"""
 
-#title
+'''
 
-#description
+CUSTOM_TEMPLATE_PD = '''\
+def form_volume(%(args)s):
+    """
+    Volume of the particles used to compute absolute scattering intensity
+    and to weight polydisperse parameter contributions.
+    """
+    return 0.0
 
-#parameters 
+def ER(%(args)s):
+    """
+    Effective radius of particles to be used when computing structure factors.
 
-"""
+    Input parameters are vectors ranging over the mesh of polydispersity values.
+    """
+    return 0.0
 
-CUSTOM_2D_TEMP = """
-    def run(self, x=0.0, y=0.0):
-        if x.__class__.__name__ == 'list':
-            x_val = x[0]
-            y_val = y[0]*0.0
-            return self.function(x_val, y_val)
-        elif x.__class__.__name__ == 'tuple':
-            msg = "Tuples are not allowed as input to BaseComponent models"
-            raise ValueError, msg
-        else:
-            return self.function(x, 0.0)
-    def runXY(self, x=0.0, y=0.0):
-        if x.__class__.__name__ == 'list':
-            return self.function(x, y)
-        elif x.__class__.__name__ == 'tuple':
-            msg = "Tuples are not allowed as input to BaseComponent models"
-            raise ValueError, msg
-        else:
-            return self.function(x, y)
-    def evalDistribution(self, qdist):
-        if qdist.__class__.__name__ == 'list':
-            msg = "evalDistribution expects a list of 2 ndarrays"
-            if len(qdist)!=2:
-                raise RuntimeError, msg
-            if qdist[0].__class__.__name__ != 'ndarray':
-                raise RuntimeError, msg
-            if qdist[1].__class__.__name__ != 'ndarray':
-                raise RuntimeError, msg
-            v_model = numpy.vectorize(self.runXY, otypes=[float])
-            iq_array = v_model(qdist[0], qdist[1])
-            return iq_array
-        elif qdist.__class__.__name__ == 'ndarray':
-            v_model = numpy.vectorize(self.runXY, otypes=[float])
-            iq_array = v_model(qdist)
-            return iq_array
-"""
-TEST_TEMPLATE = """
-######################################################################
-## THIS IS FOR TEST. DO NOT MODIFY THE FOLLOWING LINES!!!!!!!!!!!!!!!!
-if __name__ == "__main__":
-    m= Model()
-    out1 = m.runXY(0.0)
-    out2 = m.runXY(0.01)
-    isfine1 = numpy.isfinite(out1)
-    isfine2 = numpy.isfinite(out2)
-    print "Testing the value at Q = 0.0:"
-    print out1, " : finite? ", isfine1
-    print "Testing the value at Q = 0.01:"
-    print out2, " : finite? ", isfine2
-    if isfine1 and isfine2:
-        print "===> Simple Test: Passed!"
-    else:
-        print "===> Simple Test: Failed!"
-"""
+def VR(%(args)s):
+    """
+    Volume ratio of particles to be used when computing structure factors.
+
+    Input parameters are vectors ranging over the mesh of polydispersity values.
+    """
+    return 1.0
+'''
+
 SUM_TEMPLATE = """
-# A sample of an experimental model function for Sum/Multiply(Pmodel1,Pmodel2)
-import os
-import sys
-import copy
-import collections
+from sasmodels.core import load_model_info
+from sasmodels.sasview_model import make_model_from_info
 
-import numpy
-
-from sas.sascalc.fit.pluginmodel import Model1DPlugin
-from sasmodels.sasview_model import find_model
-
-class Model(Model1DPlugin):
-    name = os.path.splitext(os.path.basename(__file__))[0]
-    is_multiplicity_model = False
-    def __init__(self, multiplicity=1):
-        Model1DPlugin.__init__(self, name='')
-        P1 = find_model('%s')
-        P2 = find_model('%s')
-        p_model1 = P1()
-        p_model2 = P2()
-        ## Setting  model name model description
-        self.description = '%s'
-        if self.name.rstrip().lstrip() == '':
-            self.name = self._get_name(p_model1.name, p_model2.name)
-        if self.description.rstrip().lstrip() == '':
-            self.description = p_model1.name
-            self.description += p_model2.name
-            self.fill_description(p_model1, p_model2)
-
-        ## Define parameters
-        self.params = collections.OrderedDict()
-
-        ## Parameter details [units, min, max]
-        self.details = {}
-        ## Magnetic Panrameters
-        self.magnetic_params = []
-        # non-fittable parameters
-        self.non_fittable = p_model1.non_fittable
-        self.non_fittable += p_model2.non_fittable
-
-        ##models
-        self.p_model1= p_model1
-        self.p_model2= p_model2
-
-
-        ## dispersion
-        self._set_dispersion()
-        ## Define parameters
-        self._set_params()
-        ## New parameter:scaling_factor
-        self.params['scale_factor'] = %s
-
-        ## Parameter details [units, min, max]
-        self._set_details()
-        self.details['scale_factor'] = ['', 0.0, numpy.inf]
-
-
-        #list of parameter that can be fitted
-        self._set_fixed_params()
-
-        ## parameters with orientation
-        self.orientation_params = []
-        for item in self.p_model1.orientation_params:
-            new_item = "p1_" + item
-            if not new_item in self.orientation_params:
-                self.orientation_params.append(new_item)
-
-        for item in self.p_model2.orientation_params:
-            new_item = "p2_" + item
-            if not new_item in self.orientation_params:
-                self.orientation_params.append(new_item)
-        ## magnetic params
-        self.magnetic_params = []
-        for item in self.p_model1.magnetic_params:
-            new_item = "p1_" + item
-            if not new_item in self.magnetic_params:
-                self.magnetic_params.append(new_item)
-
-        for item in self.p_model2.magnetic_params:
-            new_item = "p2_" + item
-            if not new_item in self.magnetic_params:
-                self.magnetic_params.append(new_item)
-        # get multiplicity if model provide it, else 1.
-        try:
-            multiplicity1 = p_model1.multiplicity
-            try:
-                multiplicity2 = p_model2.multiplicity
-            except:
-                multiplicity2 = 1
-        except:
-            multiplicity1 = 1
-            multiplicity2 = 1
-        ## functional multiplicity of the model
-        self.multiplicity1 = multiplicity1
-        self.multiplicity2 = multiplicity2
-        self.multiplicity_info = []
-
-    def _clone(self, obj):
-        import copy
-        obj.params     = copy.deepcopy(self.params)
-        obj.description     = copy.deepcopy(self.description)
-        obj.details    = copy.deepcopy(self.details)
-        obj.dispersion = copy.deepcopy(self.dispersion)
-        obj.p_model1  = self.p_model1.clone()
-        obj.p_model2  = self.p_model2.clone()
-        #obj = copy.deepcopy(self)
-        return obj
-
-    def _get_name(self, name1, name2):
-        p1_name = self._get_upper_name(name1)
-        if not p1_name:
-            p1_name = name1
-        name = p1_name
-        name += "_and_"
-        p2_name = self._get_upper_name(name2)
-        if not p2_name:
-            p2_name = name2
-        name += p2_name
-        return name
-
-    def _get_upper_name(self, name=None):
-        if name is None:
-            return ""
-        upper_name = ""
-        str_name = str(name)
-        for index in range(len(str_name)):
-            if str_name[index].isupper():
-                upper_name += str_name[index]
-        return upper_name
-
-    def _set_dispersion(self):
-        self.dispersion = collections.OrderedDict()
-        ##set dispersion only from p_model
-        for name , value in self.p_model1.dispersion.iteritems():
-            #if name.lower() not in self.p_model1.orientation_params:
-            new_name = "p1_" + name
-            self.dispersion[new_name]= value
-        for name , value in self.p_model2.dispersion.iteritems():
-            #if name.lower() not in self.p_model2.orientation_params:
-            new_name = "p2_" + name
-            self.dispersion[new_name]= value
-
-    def function(self, x=0.0):
-        return 0
-
-    def getProfile(self):
-        try:
-            x,y = self.p_model1.getProfile()
-        except:
-            x = None
-            y = None
-
-        return x, y
-
-    def _set_params(self):
-        for name , value in self.p_model1.params.iteritems():
-            # No 2D-supported
-            #if name not in self.p_model1.orientation_params:
-            new_name = "p1_" + name
-            self.params[new_name]= value
-
-        for name , value in self.p_model2.params.iteritems():
-            # No 2D-supported
-            #if name not in self.p_model2.orientation_params:
-            new_name = "p2_" + name
-            self.params[new_name]= value
-
-        # Set "scale" as initializing
-        self._set_scale_factor()
-
-
-    def _set_details(self):
-        for name ,detail in self.p_model1.details.iteritems():
-            new_name = "p1_" + name
-            #if new_name not in self.orientation_params:
-            self.details[new_name]= detail
-
-        for name ,detail in self.p_model2.details.iteritems():
-            new_name = "p2_" + name
-            #if new_name not in self.orientation_params:
-            self.details[new_name]= detail
-
-    def _set_scale_factor(self):
-        pass
-
-
-    def setParam(self, name, value):
-        # set param to this (p1, p2) model
-        self._setParamHelper(name, value)
-
-        ## setParam to p model
-        model_pre = ''
-        new_name = ''
-        name_split = name.split('_', 1)
-        if len(name_split) == 2:
-            model_pre = name.split('_', 1)[0]
-            new_name = name.split('_', 1)[1]
-        if model_pre == "p1":
-            if new_name in self.p_model1.getParamList():
-                self.p_model1.setParam(new_name, value)
-        elif model_pre == "p2":
-             if new_name in self.p_model2.getParamList():
-                self.p_model2.setParam(new_name, value)
-        elif name == 'scale_factor':
-            self.params['scale_factor'] = value
-        else:
-            raise ValueError, "Model does not contain parameter %s" % name
-
-    def getParam(self, name):
-        # Look for dispersion parameters
-        toks = name.split('.')
-        if len(toks)==2:
-            for item in self.dispersion.keys():
-                # 2D not supported
-                if item.lower()==toks[0].lower():
-                    for par in self.dispersion[item]:
-                        if par.lower() == toks[1].lower():
-                            return self.dispersion[item][par]
-        else:
-            # Look for standard parameter
-            for item in self.params.keys():
-                if item.lower()==name.lower():
-                    return self.params[item]
-        return
-        #raise ValueError, "Model does not contain parameter %s" % name
-
-    def _setParamHelper(self, name, value):
-        # Look for dispersion parameters
-        toks = name.split('.')
-        if len(toks)== 2:
-            for item in self.dispersion.keys():
-                if item.lower()== toks[0].lower():
-                    for par in self.dispersion[item]:
-                        if par.lower() == toks[1].lower():
-                            self.dispersion[item][par] = value
-                            return
-        else:
-            # Look for standard parameter
-            for item in self.params.keys():
-                if item.lower()== name.lower():
-                    self.params[item] = value
-                    return
-
-        raise ValueError, "Model does not contain parameter %s" % name
-
-
-    def _set_fixed_params(self):
-        self.fixed = []
-        for item in self.p_model1.fixed:
-            new_item = "p1" + item
-            self.fixed.append(new_item)
-        for item in self.p_model2.fixed:
-            new_item = "p2" + item
-            self.fixed.append(new_item)
-
-        self.fixed.sort()
-
-
-    def run(self, x = 0.0):
-        self._set_scale_factor()
-        return self.params['scale_factor'] %s \
-(self.p_model1.run(x) %s self.p_model2.run(x))
-
-    def runXY(self, x = 0.0):
-        self._set_scale_factor()
-        return self.params['scale_factor'] %s \
-(self.p_model1.runXY(x) %s self.p_model2.runXY(x))
-
-    ## Now (May27,10) directly uses the model eval function
-    ## instead of the for-loop in Base Component.
-    def evalDistribution(self, x = []):
-        self._set_scale_factor()
-        return self.params['scale_factor'] %s \
-(self.p_model1.evalDistribution(x) %s \
-self.p_model2.evalDistribution(x))
-
-    def set_dispersion(self, parameter, dispersion):
-        value= None
-        new_pre = parameter.split("_", 1)[0]
-        new_parameter = parameter.split("_", 1)[1]
-        try:
-            if new_pre == 'p1' and \
-new_parameter in self.p_model1.dispersion.keys():
-                value= self.p_model1.set_dispersion(new_parameter, dispersion)
-            if new_pre == 'p2' and \
-new_parameter in self.p_model2.dispersion.keys():
-                value= self.p_model2.set_dispersion(new_parameter, dispersion)
-            self._set_dispersion()
-            return value
-        except:
-            raise
-
-    def fill_description(self, p_model1, p_model2):
-        description = ""
-        description += "This model gives the summation or multiplication of"
-        description += "%s and %s. "% ( p_model1.name, p_model2.name )
-        self.description += description
-
-if __name__ == "__main__":
-    m1= Model()
-    #m1.setParam("p1_scale", 25)
-    #m1.setParam("p1_length", 1000)
-    #m1.setParam("p2_scale", 100)
-    #m1.setParam("p2_rg", 100)
-    out1 = m1.runXY(0.01)
-
-    m2= Model()
-    #m2.p_model1.setParam("scale", 25)
-    #m2.p_model1.setParam("length", 1000)
-    #m2.p_model2.setParam("scale", 100)
-    #m2.p_model2.setParam("rg", 100)
-    out2 = m2.p_model1.runXY(0.01) %s m2.p_model2.runXY(0.01)\n
-    print "My name is %s."% m1.name
-    print out1, " = ", out2
-    if out1 == out2:
-        print "===> Simple Test: Passed!"
-    else:
-        print "===> Simple Test: Failed!"
+model_info = load_model_info('{model1}{operator}{model2}')
+model_info.name = '{name}'{desc_line}
+Model = make_model_from_info(model_info)
 """
-
 if __name__ == "__main__":
-#    app = wx.PySimpleApp()
     main_app = wx.App()
     main_frame = TextDialog(id=1, model_list=["SphereModel", "CylinderModel"],
-                       plugin_dir='../fitting/plugin_models')
+                            plugin_dir='../fitting/plugin_models')
     main_frame.ShowModal()
     main_app.MainLoop()
-
-#if __name__ == "__main__":
-#    from sas.sasgui.perspectives.fitting import models
-#    dir_path = models.find_plugins_dir()
-#    app = wx.App()
-#    window = EditorWindow(parent=None, base=None, path=dir_path, title="Editor")
-#    app.MainLoop()

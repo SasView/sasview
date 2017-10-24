@@ -28,7 +28,7 @@ export PYTHONPATH=$PYTHONPATH:$WORKSPACE/utils
 "$EASY_INSTALL" -d "$WORKSPACE/utils" lxml
 "$EASY_INSTALL" -d "$WORKSPACE/utils" pyparsing==1.5.5
 "$EASY_INSTALL" -d "$WORKSPACE/utils" bumps==0.7.5.9
-"$EASY_INSTALL" -d "$WORKSPACE/utils" periodictable==1.3.0
+"$EASY_INSTALL" -d "$WORKSPACE/utils" periodictable==1.5.0
 python deps.py
 
 #  Set up working directories
@@ -43,7 +43,7 @@ rm -rf build
 
 # Build SasView ###########################################################
 export PYTHONPATH=$PYTHONPATH:$WORKSPACE/$SASVIEW_INSTALL:$WORKSPACE/utils
-python setup.py bdist_egg 
+python setup.py bdist_egg
 
 
 # Run tests ###############################################################

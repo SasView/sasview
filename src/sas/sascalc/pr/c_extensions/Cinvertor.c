@@ -51,7 +51,7 @@ Cinvertor_dealloc(Cinvertor* self)
 {
     invertor_dealloc(&(self->params));
 
-    self->ob_type->tp_free((PyObject*)self);
+    Py_TYPE(self)->tp_free((PyObject*)self);
 
 }
 
@@ -293,28 +293,28 @@ static PyObject * is_valid(Cinvertor *self, PyObject *args) {
 	}
 }
 
-const char set_has_bck_doc[] =
+const char set_est_bck_doc[] =
 	"Sets background flag\n";
 
 /**
  * Sets the maximum distance
  */
-static PyObject * set_has_bck(Cinvertor *self, PyObject *args) {
-	int has_bck;
+static PyObject * set_est_bck(Cinvertor *self, PyObject *args) {
+	int est_bck;
 
-	if (!PyArg_ParseTuple(args, "i", &has_bck)) return NULL;
-	self->params.has_bck = has_bck;
-	return Py_BuildValue("i", self->params.has_bck);
+	if (!PyArg_ParseTuple(args, "i", &est_bck)) return NULL;
+	self->params.est_bck = est_bck;
+	return Py_BuildValue("i", self->params.est_bck);
 }
 
-const char get_has_bck_doc[] =
+const char get_est_bck_doc[] =
 	"Gets background flag\n";
 
 /**
  * Gets the maximum distance
  */
-static PyObject * get_has_bck(Cinvertor *self, PyObject *args) {
-	return Py_BuildValue("i", self->params.has_bck);
+static PyObject * get_est_bck(Cinvertor *self, PyObject *args) {
+	return Py_BuildValue("i", self->params.est_bck);
 }
 
 const char set_dmax_doc[] =
@@ -881,7 +881,7 @@ static PyObject * get_matrix(Cinvertor *self, PyObject *args) {
 
 	sqrt_alpha = sqrt(self->params.alpha);
 	pi = acos(-1.0);
-	offset = (self->params.has_bck==1) ? 0 : 1;
+	offset = (self->params.est_bck==1) ? 0 : 1;
 
     for (j=0; j<nfunc; j++) {
         for (i=0; i<self->params.npoints; i++) {
@@ -891,7 +891,7 @@ static PyObject * get_matrix(Cinvertor *self, PyObject *args) {
               return NULL;
             }
             if (accept_q(self, self->params.x[i])){
-                if (self->params.has_bck==1 && j==0) {
+                if (self->params.est_bck==1 && j==0) {
                     a[i*nfunc+j] = 1.0/self->params.err[i];
                 } else {
                 	if (self->params.slit_width>0 || self->params.slit_height>0) {
@@ -905,7 +905,7 @@ static PyObject * get_matrix(Cinvertor *self, PyObject *args) {
             }
         }
         for (i_r=0; i_r<nr; i_r++){
-            if (self->params.has_bck==1 && j==0) {
+            if (self->params.est_bck==1 && j==0) {
                 a[(i_r+self->params.npoints)*nfunc+j] = 0.0;
             } else {
 	            r = self->params.d_max/nr*i_r;
@@ -1028,8 +1028,8 @@ static PyMethodDef Cinvertor_methods[] = {
 		   {"get_slit_width", (PyCFunction)get_slit_width, METH_VARARGS, get_slit_width_doc},
 		   {"set_slit_height", (PyCFunction)set_slit_height, METH_VARARGS, set_slit_height_doc},
 		   {"get_slit_height", (PyCFunction)get_slit_height, METH_VARARGS, get_slit_height_doc},
-		   {"set_has_bck", (PyCFunction)set_has_bck, METH_VARARGS, set_has_bck_doc},
-		   {"get_has_bck", (PyCFunction)get_has_bck, METH_VARARGS, get_has_bck_doc},
+		   {"set_est_bck", (PyCFunction)set_est_bck, METH_VARARGS, set_est_bck_doc},
+		   {"get_est_bck", (PyCFunction)get_est_bck, METH_VARARGS, get_est_bck_doc},
 		   {"get_nx", (PyCFunction)get_nx, METH_VARARGS, get_nx_doc},
 		   {"get_ny", (PyCFunction)get_ny, METH_VARARGS, get_ny_doc},
 		   {"get_nerr", (PyCFunction)get_nerr, METH_VARARGS, get_nerr_doc},
@@ -1053,8 +1053,9 @@ static PyMethodDef Cinvertor_methods[] = {
 };
 
 static PyTypeObject CinvertorType = {
-    PyObject_HEAD_INIT(NULL)
-    0,                         /*ob_size*/
+    //PyObject_HEAD_INIT(NULL)
+    //0,                         /*ob_size*/
+    PyVarObject_HEAD_INIT(NULL, 0)
     "Cinvertor",             /*tp_name*/
     sizeof(Cinvertor),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
@@ -1118,16 +1119,52 @@ void addCinvertor(PyObject *module) {
 }
 
 
-#ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
-#define PyMODINIT_FUNC void
+#define MODULE_DOC "C extension module for inversion to P(r)."
+#define MODULE_NAME "pr_inversion"
+#define MODULE_INIT2 initpr_inversion
+#define MODULE_INIT3 PyInit_pr_inversion
+#define MODULE_METHODS module_methods
+
+/* ==== boilerplate python 2/3 interface bootstrap ==== */
+
+
+#if defined(WIN32) && !defined(__MINGW32__)
+    #define DLL_EXPORT __declspec(dllexport)
+#else
+    #define DLL_EXPORT
 #endif
-PyMODINIT_FUNC
-initpr_inversion(void)
-{
-    PyObject* m;
 
-    m = Py_InitModule3("pr_inversion", module_methods,
-                       "C extension module for inversion to P(r).");
+#if PY_MAJOR_VERSION >= 3
 
-    addCinvertor(m);
-}
+  DLL_EXPORT PyMODINIT_FUNC MODULE_INIT3(void)
+  {
+    static struct PyModuleDef moduledef = {
+      PyModuleDef_HEAD_INIT,
+      MODULE_NAME,         /* m_name */
+      MODULE_DOC,          /* m_doc */
+      -1,                  /* m_size */
+      MODULE_METHODS,      /* m_methods */
+      NULL,                /* m_reload */
+      NULL,                /* m_traverse */
+      NULL,                /* m_clear */
+      NULL,                /* m_free */
+    };
+	PyObject* m = PyModule_Create(&moduledef);
+	addCinvertor(m);
+	return m;
+  }
+
+#else /* !PY_MAJOR_VERSION >= 3 */
+
+  DLL_EXPORT PyMODINIT_FUNC MODULE_INIT2(void)
+  {
+    PyObject* m = Py_InitModule4(MODULE_NAME,
+		 MODULE_METHODS,
+		 MODULE_DOC,
+		 0,
+		 PYTHON_API_VERSION
+		 );
+	addCinvertor(m);
+  }
+
+#endif /* !PY_MAJOR_VERSION >= 3 */

@@ -97,7 +97,7 @@ class SLDCalculatorTest(unittest.TestCase):
         QTest.qWait(100)
 
         # Assure the output fields are set
-        self.assertEqual(self.widget.ui.editNeutronIncXs.text(), '5.37')
+        self.assertEqual(self.widget.ui.editNeutronIncXs.text(), '5.62')
 
         # Change mass density
         self.widget.ui.editWavelength.clear()
@@ -127,7 +127,7 @@ class SLDCalculatorTest(unittest.TestCase):
         QTest.qWait(100)
 
         # Assure the mass density field is set
-        self.assertEqual(self.widget.ui.editNeutronIncXs.text(), '40.6')
+        self.assertEqual(self.widget.ui.editNeutronIncXs.text(), '43.4')
 
         # Reset the widget
         self.widget.modelReset()

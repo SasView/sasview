@@ -1,6 +1,6 @@
 """
     File handler to support different file extensions.
-    Uses reflectometry's registry utility.
+    Uses reflectometer registry utility.
 
     The default readers are found in the 'readers' sub-module
     and registered by default at initialization time.
@@ -13,11 +13,11 @@
     look for new readers/writers.
 """
 #####################################################################
-#This software was developed by the University of Tennessee as part of the
-#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation.
-#See the license text in license.txt
-#copyright 2008, University of Tennessee
+# This software was developed by the University of Tennessee as part of the
+# Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+# project funded by the US National Science Foundation.
+# See the license text in license.txt
+# copyright 2008, University of Tennessee
 ######################################################################
 
 import os
@@ -25,30 +25,35 @@ import sys
 import logging
 import time
 from zipfile import ZipFile
+
 from sas.sascalc.data_util.registry import ExtensionRegistry
+
 # Default readers are defined in the readers sub-module
-import readers
-from readers import ascii_reader
-from readers import cansas_reader
+from . import readers
+from .loader_exceptions import NoKnownLoaderException, FileContentsException,\
+    DefaultReaderException
+from .readers import ascii_reader
+from .readers import cansas_reader
+from .readers import cansas_reader_HDF5
 
 logger = logging.getLogger(__name__)
+
 
 class Registry(ExtensionRegistry):
     """
     Registry class for file format extensions.
     Readers and writers are supported.
     """
-
     def __init__(self):
         super(Registry, self).__init__()
 
-        ## Writers
+        # Writers
         self.writers = {}
 
-        ## List of wildcards
+        # List of wildcards
         self.wildcards = ['All (*.*)|*.*']
 
-        ## Creation time, for testing
+        # Creation time, for testing
         self._created = time.time()
 
         # Register default readers
@@ -62,20 +67,64 @@ class Registry(ExtensionRegistry):
         :param format: explicit extension, to force the use
             of a particular reader
 
-        Defaults to the ascii (multi-column) reader
-        if no reader was registered for the file's
-        extension.
+        Defaults to the ascii (multi-column), cansas XML, and cansas NeXuS
+        readers if no reader was registered for the file's extension.
         """
+        # Gets set to a string if the file has an associated reader that fails
+        msg_from_reader = None
         try:
             return super(Registry, self).load(path, format=format)
-        except:
-            try:
-                # No reader was found. Default to the ascii reader.
-                ascii_loader = ascii_reader.Reader()
-                return ascii_loader.read(path)
-            except:
-                cansas_loader = cansas_reader.Reader()
-                return cansas_loader.read(path)
+        #except Exception: raise  # for debugging, don't use fallback loader
+        except NoKnownLoaderException as nkl_e:
+            pass  # Try the ASCII reader
+        except FileContentsException as fc_exc:
+            # File has an associated reader but it failed.
+            # Save the error message to display later, but try the 3 default loaders
+            msg_from_reader = fc_exc.message
+        except Exception:
+            pass
+
+        # File has no associated reader, or the associated reader failed.
+        # Try the ASCII reader
+        try:
+            ascii_loader = ascii_reader.Reader()
+            return ascii_loader.read(path)
+        except DefaultReaderException:
+            pass  # Loader specific error to try the cansas XML reader
+        except FileContentsException as e:
+            if msg_from_reader is None:
+                raise RuntimeError(e.message)
+
+        # ASCII reader failed - try CanSAS xML reader
+        try:
+            cansas_loader = cansas_reader.Reader()
+            return cansas_loader.read(path)
+        except DefaultReaderException:
+            pass  # Loader specific error to try the NXcanSAS reader
+        except FileContentsException as e:
+            if msg_from_reader is None:
+                raise RuntimeError(e.message)
+        except Exception:
+            pass
+
+        # CanSAS XML reader failed - try NXcanSAS reader
+        try:
+            cansas_nexus_loader = cansas_reader_HDF5.Reader()
+            return cansas_nexus_loader.read(path)
+        except DefaultReaderException as e:
+            logging.error("No default loader can load the data")
+            # No known reader available. Give up and throw an error
+            if msg_from_reader is None:
+                msg = "\nUnknown data format: {}.\nThe file is not a ".format(path)
+                msg += "known format that can be loaded by SasView.\n"
+                raise NoKnownLoaderException(msg)
+            else:
+                # Associated reader and default readers all failed.
+                # Show error message from associated reader
+                raise RuntimeError(msg_from_reader)
+        except FileContentsException as e:
+            err_msg = msg_from_reader if msg_from_reader is not None else e.message
+            raise RuntimeError(err_msg)
 
     def find_plugins(self, dir):
         """
@@ -280,7 +329,7 @@ class Registry(ExtensionRegistry):
         # Find matching extensions
         extlist = [ext for ext in self.extensions() if path.endswith(ext)]
         # Sort matching extensions by decreasing order of length
-        extlist.sort(lambda a, b: len(a) < len(b))
+        extlist.sort(key=len)
         # Combine loaders for matching extensions into one big list
         writers = []
         for L in [self.writers[ext] for ext in extlist]:
@@ -294,7 +343,7 @@ class Registry(ExtensionRegistry):
             writers = L
         # Raise an error if there are no matching extensions
         if len(writers) == 0:
-            raise ValueError, "Unknown file type for " + path
+            raise ValueError("Unknown file type for " + path)
         # All done
         return writers
 
@@ -313,7 +362,7 @@ class Registry(ExtensionRegistry):
         for fn in writers:
             try:
                 return fn(path, data)
-            except:
+            except Exception:
                 pass  # give other loaders a chance to succeed
         # If we get here it is because all loaders failed
         raise  # reraises last exception

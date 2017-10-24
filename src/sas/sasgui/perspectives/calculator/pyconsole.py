@@ -36,10 +36,9 @@ def check_model(path):
     qx, qy =  np.array([0.01, 0.01]), np.array([0.1, 0.1])
     Iqxy = model.evalDistribution([qx, qy])
 
-    result = """
-    Iq(%s) = %s
-    Iqxy(%s, %s) = %s
-    """%(q, Iq, qx, qy, Iqxy)
+    # check the model's unit tests run
+    from sasmodels.model_test import run_one
+    result = run_one(path)
 
     return result
 
@@ -88,7 +87,7 @@ class ResizableScrolledMessageDialog(wx.Dialog):
         text = wx.TextCtrl(self, -1, msg, style=wx.TE_MULTILINE | wx.TE_READONLY)
         ok = wx.Button(self, wx.ID_OK, "OK")
 
-        # Mysterious constraint layouts from 
+        # Mysterious constraint layouts from
         # https://www.wxpython.org/docs/api/wx.lib.layoutf.Layoutf-class.html
         lc = layoutf.Layoutf('t=t5#1;b=t5#2;l=l5#1;r=r5#1', (self,ok))
         text.SetConstraints(lc)
