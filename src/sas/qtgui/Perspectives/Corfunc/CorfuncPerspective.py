@@ -119,9 +119,6 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
 
         self.calculateBgBtn.clicked.connect(self.calculateBackground)
 
-        self.hilbertBtn.clicked.connect(self.action)
-        self.fourierBtn.clicked.connect(self.action)
-
         self.model.itemChanged.connect(self.modelChanged)
 
     def setupModel(self):
@@ -143,6 +140,12 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
                            QtGui.QStandardItem("0.0"))
         self.model.setItem(W.W_PORODSIGMA,
                            QtGui.QStandardItem("0.0"))
+        self.model.setItem(W.W_CORETHICK, QtGui.QStandardItem(str(0)))
+        self.model.setItem(W.W_INTTHICK, QtGui.QStandardItem(str(0)))
+        self.model.setItem(W.W_HARDBLOCK, QtGui.QStandardItem(str(0)))
+        self.model.setItem(W.W_CRYSTAL, QtGui.QStandardItem(str(0)))
+        self.model.setItem(W.W_POLY, QtGui.QStandardItem(str(0)))
+        self.model.setItem(W.W_PERIOD, QtGui.QStandardItem(str(0)))
 
     def modelChanged(self, item):
         if item.row() == W.W_QMIN:
@@ -194,12 +197,12 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
             self._realplot.data = transform
             self._realplot.drawRealSpace()
             params = self._calculator.extract_parameters(transform)
-            self.avgCoreThick.setValue(params["d0"])
-            self.avgHardBlock.setValue(params["Lc"])
-            self.avgIntThick.setValue(params["dtr"])
-            self.localCrystal.setValue(params["fill"])
-            self.polydisp.setValue(params["A"])
-            self.longPeriod.setValue(params["max"])
+            self.model.setItem(W.W_CORETHICK, QtGui.QStandardItem(str(params['d0'])))
+            self.model.setItem(W.W_INTTHICK, QtGui.QStandardItem(str(params['dtr'])))
+            self.model.setItem(W.W_HARDBLOCK, QtGui.QStandardItem(str(params['Lc'])))
+            self.model.setItem(W.W_CRYSTAL, QtGui.QStandardItem(str(params['fill'])))
+            self.model.setItem(W.W_POLY, QtGui.QStandardItem(str(params['A'])))
+            self.model.setItem(W.W_PERIOD, QtGui.QStandardItem(str(params['max'])))
 
         self._calculator.compute_transform(extrap, method, bg, completefn, updatefn)
 
@@ -219,17 +222,19 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         self.mapper.addMapping(self.porodK, W.W_PORODK)
         self.mapper.addMapping(self.porodSigma, W.W_PORODSIGMA)
 
+        self.mapper.addMapping(self.avgCoreThick, W.W_CORETHICK)
+        self.mapper.addMapping(self.avgIntThick, W.W_INTTHICK)
+        self.mapper.addMapping(self.avgHardBlock, W.W_HARDBLOCK)
+        self.mapper.addMapping(self.polydisp, W.W_POLY)
+        self.mapper.addMapping(self.longPeriod, W.W_PERIOD)
+        self.mapper.addMapping(self.localCrystal, W.W_CRYSTAL)
+
         self.mapper.toFirst()
 
     def calculateBackground(self):
         bg = self._calculator.compute_background()
         temp = QtGui.QStandardItem(str(bg))
         self.model.setItem(W.W_BACKGROUND, temp)
-
-    def action(self):
-        print("Called an action!")
-        print(self.model)
-        print(self.mapper)
 
     def allowBatch(self):
         """
