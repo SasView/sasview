@@ -4,7 +4,7 @@
 ############################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation. 
+#project funded by the US National Science Foundation.
 #If you use DANSE applications to do scientific research that leads to
 #publication, we ask that you acknowledge the use of the software with the
 #following sentence:
@@ -13,11 +13,14 @@
 #############################################################################
 import math
 import os
-import sys
-import numpy as np
 import logging
-from sas.sascalc.dataloader.data_info import Data2D, Detector
-from sas.sascalc.dataloader.manipulations import reader2D_converter
+
+import numpy as np
+
+from ..data_info import plottable_2D, DataInfo, Detector
+from ..manipulations import reader2D_converter
+from ..file_reader_base_class import FileReader
+from ..loader_exceptions import FileContentsException, DataReaderException
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +32,7 @@ except:
     has_converter = False
 
 
-class Reader:
+class Reader(FileReader):
     """
     Example data manipulation
     """
@@ -39,73 +42,53 @@ class Reader:
     type = ["DANSE files (*.sans)|*.sans"]
     ## Extension
     ext  = ['.sans', '.SANS']
-        
-    def read(self, filename=None):
-        """
-        Open and read the data in a file
-        @param file: path of the file
-        """
-        
-        read_it = False
-        for item in self.ext:
-            if filename.lower().find(item) >= 0:
-                read_it = True
-                
-        if read_it:
+
+    def get_file_contents(self):
+        self.current_datainfo = DataInfo()
+        self.current_dataset = plottable_2D()
+        self.output = []
+
+        loaded_correctly = True
+        error_message = ""
+
+        # defaults
+        # wavelength in Angstrom
+        wavelength = 10.0
+        # Distance in meter
+        distance   = 11.0
+        # Pixel number of center in x
+        center_x   = 65
+        # Pixel number of center in y
+        center_y   = 65
+        # Pixel size [mm]
+        pixel      = 5.0
+        # Size in x, in pixels
+        size_x     = 128
+        # Size in y, in pixels
+        size_y     = 128
+        # Format version
+        fversion   = 1.0
+
+        self.current_datainfo.filename = os.path.basename(self.f_open.name)
+        detector = Detector()
+        self.current_datainfo.detector.append(detector)
+
+        self.current_dataset.data = np.zeros([size_x, size_y])
+        self.current_dataset.err_data = np.zeros([size_x, size_y])
+
+        read_on = True
+        data_start_line = 1
+        while read_on:
+            line = self.nextline()
+            data_start_line += 1
+            if line.find("DATA:") >= 0:
+                read_on = False
+                break
+            toks = line.split(':')
             try:
-                datafile = open(filename, 'r')
-            except:
-                raise  RuntimeError,"danse_reader cannot open %s" % (filename)
-        
-            # defaults
-            # wavelength in Angstrom
-            wavelength = 10.0
-            # Distance in meter
-            distance   = 11.0
-            # Pixel number of center in x
-            center_x   = 65
-            # Pixel number of center in y
-            center_y   = 65
-            # Pixel size [mm]
-            pixel      = 5.0
-            # Size in x, in pixels
-            size_x     = 128
-            # Size in y, in pixels
-            size_y     = 128
-            # Format version
-            fversion   = 1.0
-            
-            output = Data2D()
-            output.filename = os.path.basename(filename)
-            detector = Detector()
-            output.detector.append(detector)
-            
-            output.data = np.zeros([size_x,size_y])
-            output.err_data = np.zeros([size_x, size_y])
-            
-            data_conv_q = None
-            data_conv_i = None
-            
-            if has_converter == True and output.Q_unit != '1/A':
-                data_conv_q = Converter('1/A')
-                # Test it
-                data_conv_q(1.0, output.Q_unit)
-                
-            if has_converter == True and output.I_unit != '1/cm':
-                data_conv_i = Converter('1/cm')
-                # Test it
-                data_conv_i(1.0, output.I_unit)
-        
-            read_on = True
-            while read_on:
-                line = datafile.readline()
-                if line.find("DATA:") >= 0:
-                    read_on = False
-                    break
-                toks = line.split(':')
                 if toks[0] == "FORMATVERSION":
                     fversion = float(toks[1])
-                if toks[0] == "WAVELENGTH":
+                elif toks[0] == "WAVELENGTH":
                     wavelength = float(toks[1])
                 elif toks[0] == "DISTANCE":
                     distance = float(toks[1])
@@ -119,164 +102,110 @@ class Reader:
                     size_x = int(toks[1])
                 elif toks[0] == "SIZE_Y":
                     size_y = int(toks[1])
-            
-            # Read the data
-            data = []
-            error = []
-            if fversion == 1.0:
-                data_str = datafile.readline()
-                data = data_str.split(' ')
-            else:
-                read_on = True
-                while read_on:
-                    data_str = datafile.readline()
-                    if len(data_str) == 0:
-                        read_on = False
-                    else:
-                        toks = data_str.split()
-                        try:
-                            val = float(toks[0])
-                            err = float(toks[1])
-                            if data_conv_i is not None:
-                                val = data_conv_i(val, units=output._yunit)
-                                err = data_conv_i(err, units=output._yunit)
-                            data.append(val)
-                            error.append(err)
-                        except:
-                            logger.info("Skipping line:%s,%s" %(data_str,
-                                                                sys.exc_value))
-            
-            # Initialize
-            x_vals = []
-            y_vals = []
-            ymin = None
-            ymax = None
-            xmin = None
-            xmax = None
-            
-            # Qx and Qy vectors
-            theta = pixel / distance / 100.0
-            stepq = 4.0 * math.pi / wavelength * math.sin(theta / 2.0)
-            for i_x in range(size_x):
-                theta = (i_x - center_x + 1) * pixel / distance / 100.0
-                qx = 4.0 * math.pi / wavelength * math.sin(theta / 2.0)
-                
-                if has_converter == True and output.Q_unit != '1/A':
-                    qx = data_conv_q(qx, units=output.Q_unit)
-                
-                x_vals.append(qx)
-                if xmin is None or qx < xmin:
-                    xmin = qx
-                if xmax is None or qx > xmax:
-                    xmax = qx
-            
-            ymin = None
-            ymax = None
-            for i_y in range(size_y):
-                theta = (i_y - center_y + 1) * pixel / distance / 100.0
-                qy = 4.0 * math.pi / wavelength * math.sin(theta/2.0)
-                
-                if has_converter == True and output.Q_unit != '1/A':
-                    qy = data_conv_q(qy, units=output.Q_unit)
-                
-                y_vals.append(qy)
-                if ymin is None or qy < ymin:
-                    ymin = qy
-                if ymax is None or qy > ymax:
-                    ymax = qy
-            
-            # Store the data in the 2D array
-            i_x = 0
-            i_y = -1
-            
-            for i_pt in range(len(data)):
-                try:
-                    value = float(data[i_pt])
-                except:
-                    # For version 1.0, the data were still
-                    # stored as strings at this point.
-                    msg = "Skipping entry (v1.0):%s,%s" % (str(data[i_pt]),
-                                                           sys.exc_value)
-                    logger.info(msg)
-                
-                # Get bin number
-                if math.fmod(i_pt, size_x) == 0:
-                    i_x = 0
-                    i_y += 1
-                else:
-                    i_x += 1
-                    
-                output.data[i_y][i_x] = value
-                if fversion>1.0:
-                    output.err_data[i_y][i_x] = error[i_pt]
-                
-            # Store all data
-            # Store wavelength
-            if has_converter == True and output.source.wavelength_unit != 'A':
-                conv = Converter('A')
-                wavelength = conv(wavelength,
-                                  units=output.source.wavelength_unit)
-            output.source.wavelength = wavelength
-                
-            # Store distance
-            if has_converter == True and detector.distance_unit != 'm':
-                conv = Converter('m')
-                distance = conv(distance, units=detector.distance_unit)
-            detector.distance = distance
-            
-            # Store pixel size
-            if has_converter == True and detector.pixel_size_unit != 'mm':
-                conv = Converter('mm')
-                pixel = conv(pixel, units=detector.pixel_size_unit)
-            detector.pixel_size.x = pixel
-            detector.pixel_size.y = pixel
+            except ValueError as e:
+                error_message += "Unable to parse {}. Default value used.\n".format(toks[0])
+                loaded_correctly = False
 
-            # Store beam center in distance units
-            detector.beam_center.x = center_x * pixel
-            detector.beam_center.y = center_y * pixel
-            
-            # Store limits of the image (2D array)
-            xmin = xmin - stepq / 2.0
-            xmax = xmax + stepq / 2.0
-            ymin = ymin - stepq /2.0
-            ymax = ymax + stepq / 2.0
-            
-            if has_converter == True and output.Q_unit != '1/A':
-                xmin = data_conv_q(xmin, units=output.Q_unit)
-                xmax = data_conv_q(xmax, units=output.Q_unit)
-                ymin = data_conv_q(ymin, units=output.Q_unit)
-                ymax = data_conv_q(ymax, units=output.Q_unit)
-            output.xmin = xmin
-            output.xmax = xmax
-            output.ymin = ymin
-            output.ymax = ymax
-            
-            # Store x and y axis bin centers
-            output.x_bins = x_vals
-            output.y_bins = y_vals
-           
-            # Units
-            if data_conv_q is not None:
-                output.xaxis("\\rm{Q_{x}}", output.Q_unit)
-                output.yaxis("\\rm{Q_{y}}", output.Q_unit)
-            else:
-                output.xaxis("\\rm{Q_{x}}", 'A^{-1}')
-                output.yaxis("\\rm{Q_{y}}", 'A^{-1}')
-                
-            if data_conv_i is not None:
-                output.zaxis("\\rm{Intensity}", output.I_unit)
-            else:
-                output.zaxis("\\rm{Intensity}", "cm^{-1}")
-           
-            if not fversion >= 1.0:
-                msg = "Danse_reader can't read this file %s" % filename
-                raise ValueError, msg
-            else:
-                logger.info("Danse_reader Reading %s \n" % filename)
-            
-            # Store loading process information
-            output.meta_data['loader'] = self.type_name
-            output = reader2D_converter(output)
-            return output
-        
-        return None
+        # Read the data
+        data = []
+        error = []
+        if not fversion >= 1.0:
+            msg = "danse_reader can't read this file {}".format(self.f_open.name)
+            raise FileContentsException(msg)
+
+        for line_num, data_str in enumerate(self.nextlines()):
+            toks = data_str.split()
+            try:
+                val = float(toks[0])
+                err = float(toks[1])
+                data.append(val)
+                error.append(err)
+            except ValueError as exc:
+                msg = "Unable to parse line {}: {}".format(line_num + data_start_line, data_str.strip())
+                raise FileContentsException(msg)
+
+        num_pts = size_x * size_y
+        if len(data) < num_pts:
+            msg = "Not enough data points provided. Expected {} but got {}".format(
+                size_x * size_y, len(data))
+            raise FileContentsException(msg)
+        elif len(data) > num_pts:
+            error_message += ("Too many data points provided. Expected {0} but"
+                " got {1}. Only the first {0} will be used.\n").format(num_pts, len(data))
+            loaded_correctly = False
+            data = data[:num_pts]
+            error = error[:num_pts]
+
+        # Qx and Qy vectors
+        theta = pixel / distance / 100.0
+        i_x = np.arange(size_x)
+        theta = (i_x - center_x + 1) * pixel / distance / 100.0
+        x_vals = 4.0 * np.pi / wavelength * np.sin(theta / 2.0)
+        xmin = x_vals.min()
+        xmax = x_vals.max()
+
+        i_y = np.arange(size_y)
+        theta = (i_y - center_y + 1) * pixel / distance / 100.0
+        y_vals = 4.0 * np.pi / wavelength * np.sin(theta / 2.0)
+        ymin = y_vals.min()
+        ymax = y_vals.max()
+
+        self.current_dataset.data = np.array(data, dtype=np.float64).reshape((size_y, size_x))
+        if fversion > 1.0:
+            self.current_dataset.err_data = np.array(error, dtype=np.float64).reshape((size_y, size_x))
+
+        # Store all data
+        # Store wavelength
+        if has_converter == True and self.current_datainfo.source.wavelength_unit != 'A':
+            conv = Converter('A')
+            wavelength = conv(wavelength,
+                              units=self.current_datainfo.source.wavelength_unit)
+        self.current_datainfo.source.wavelength = wavelength
+
+        # Store distance
+        if has_converter == True and detector.distance_unit != 'm':
+            conv = Converter('m')
+            distance = conv(distance, units=detector.distance_unit)
+        detector.distance = distance
+
+        # Store pixel size
+        if has_converter == True and detector.pixel_size_unit != 'mm':
+            conv = Converter('mm')
+            pixel = conv(pixel, units=detector.pixel_size_unit)
+        detector.pixel_size.x = pixel
+        detector.pixel_size.y = pixel
+
+        # Store beam center in distance units
+        detector.beam_center.x = center_x * pixel
+        detector.beam_center.y = center_y * pixel
+
+
+        self.current_dataset.xaxis("\\rm{Q_{x}}", 'A^{-1}')
+        self.current_dataset.yaxis("\\rm{Q_{y}}", 'A^{-1}')
+        self.current_dataset.zaxis("\\rm{Intensity}", "cm^{-1}")
+
+        self.current_dataset.x_bins = x_vals
+        self.current_dataset.y_bins = y_vals
+
+        # Reshape data
+        x_vals = np.tile(x_vals, (size_y, 1)).flatten()
+        y_vals = np.tile(y_vals, (size_x, 1)).T.flatten()
+        if (np.all(self.current_dataset.err_data == None)
+                or np.any(self.current_dataset.err_data <= 0)):
+            new_err_data = np.sqrt(np.abs(self.current_dataset.data))
+        else:
+            new_err_data = self.current_dataset.err_data.flatten()
+
+        self.current_dataset.err_data = new_err_data
+        self.current_dataset.qx_data = x_vals
+        self.current_dataset.qy_data = y_vals
+        self.current_dataset.q_data = np.sqrt(x_vals**2 + y_vals**2)
+        self.current_dataset.mask = np.ones(len(x_vals), dtype=bool)
+
+        # Store loading process information
+        self.current_datainfo.meta_data['loader'] = self.type_name
+
+        self.send_to_output()
+
+        if not loaded_correctly:
+            raise DataReaderException(error_message)

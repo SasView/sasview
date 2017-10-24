@@ -17,7 +17,7 @@ One way is obviously to just inspect the graph of the experimental data and to
 see how closely (or not!) the 'theory' calculation matches it. But *SasView*
 also provides two other measures of the quality of a fit:
 
-*  |chi|\  :sup:`2` (or 'Chi2'; pronounced 'chi-squared')
+*  $\chi^2$ (or 'Chi2'; pronounced 'chi-squared')
 *  *Residuals*
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
@@ -25,23 +25,33 @@ also provides two other measures of the quality of a fit:
 Chi2
 ^^^^
 
-Chi2 is a statistical parameter that quantifies the differences between an observed
-data set and an expected dataset (or 'theory').
+$\chi^2$ is a statistical parameter that quantifies the differences between
+an observed data set and an expected dataset (or 'theory').
 
-*SasView* actually returns this parameter normalized to the number of data points,
-*Npts* such that
+When showing the a model with the data, *SasView* displays this parameter
+normalized to the number of data points, $N_\mathrm{pts}$ such that
 
-  *Chi2/Npts* = { SUM[(*Y_i* - *Y_theory_i*)^2 / (*Y_error_i*)^2] } / *Npts*
+.. math::
 
-This differs slightly from what is sometimes called the 'reduced chi-squared'
-because it does not take into account the number of fitting parameters (to
-calculate the number of 'degrees of freedom'), but the 'normalized chi-squared'
-and the 'reduced chi-squared' are very close to each other when *Npts* >> number of
-parameters.
+  \chi^2_N
+  =  \sum[(Y_i - \mathrm{theory}_i)^2 / \mathrm{error}_i^2] / N_\mathrm{pts}
 
-For a good fit, *Chi2/Npts* tends to 0.
+When performing a fit, *SasView* instead displays the reduced $\chi^2_R$,
+which takes into account the number of fitting parameters $N_\mathrm{par}$
+(to calculate the number of 'degrees of freedom'). This is computed as
 
-*Chi2/Npts* is sometimes referred to as the 'goodness-of-fit' parameter.
+.. math::
+
+  \chi^2_R
+  =  \sum[(Y_i - \mathrm{theory}_i)^2 / \mathrm{error}_i^2]
+  / [N_\mathrm{pts} - N_\mathrm{par}]
+
+The normalized $\chi^2_N$ and the reduced $\chi^2_R$ are very close to each
+other when $N_\mathrm{pts} \gg N_\mathrm{par}$.
+
+For a good fit, $\chi^2_R$ tends to 1.
+
+$\chi^2_R$ is sometimes referred to as the 'goodness-of-fit' parameter.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -49,16 +59,33 @@ Residuals
 ^^^^^^^^^
 
 A residual is the difference between an observed value and an estimate of that
-value, such as a 'theory' calculation (whereas the difference between an observed
-value and its *true* value is its error).
+value, such as a 'theory' calculation (whereas the difference between an
+observed value and its *true* value is its error).
 
-*SasView* calculates 'normalized residuals', *R_i*, for each data point in the
+*SasView* calculates 'normalized residuals', $R_i$, for each data point in the
 fit:
 
-  *R_i* = (*Y_i* - *Y_theory_i*) / (*Y_err_i*)
+.. math::
 
-For a good fit, *R_i* ~ 0.
+  R_i = (Y_i - \mathrm{theory}_i) / \mathrm{error}_i
+
+Think of each normalized residual as the number of standard deviations
+between the measured value and the theory.  For a good fit, 68% of $R_i$
+will be within one standard deviation, which will show up in the Residuals
+plot as $R_i$ values between $-1$ and $+1$.  Almost all the values should
+be between $-3$ and $+3$.
+
+Residuals values larger than $\pm 3$ indicate that the model
+is not fit correctly, the wrong model was chosen (e.g., because there is
+more than one phase in your system), or there are problems in
+the data reduction.  Since the goodness of fit is calculated from the
+sum-squared residuals, these extreme values will drive the choice of fit
+parameters.  Any uncertainties calculated for the fitting parameters will
+be meaningless.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Steve King, 08Jun2015
+*Document History*
+
+| 2015-06-08 Steve King
+| 2017-09-28 Paul Kienzle

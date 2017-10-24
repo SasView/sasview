@@ -14,7 +14,7 @@ try:
     FIT_CONFIG.selected_id = fitters.LevenbergMarquardtFit.id
     def get_fitter():
         return FIT_CONFIG.selected_fitter, FIT_CONFIG.selected_values
-except:
+except ImportError:
     # CRUFT: Bumps changed its handling of fit options around 0.7.5.6
     # Default bumps to use the Levenberg-Marquardt optimizer
     fitters.FIT_DEFAULT = 'lm'
@@ -55,7 +55,7 @@ class Progress(object):
         step = "%d of %d"%(history.step[0], max_step)
         header = "=== Steps: %s  chisq: %s  ETA: %s\n"%(step, chisq, time)
         parameters = ["%15s: %-10.3g%s"%(k,v,("\n" if i%3==2 else " | "))
-                      for i,(k,v) in enumerate(zip(pars,history.point[0]))]
+                      for i, (k, v) in enumerate(zip(pars, history.point[0]))]
         self.msg = "".join([header]+parameters)
 
     def __str__(self):
@@ -76,7 +76,7 @@ class BumpsMonitor(object):
         if self.handler is None: return
         self.handler.set_result(Progress(history, self.max_step, self.pars, self.dof))
         self.handler.progress(history.step[0], self.max_step)
-        if len(history.step)>1 and history.step[1] > history.step[0]:
+        if len(history.step) > 1 and history.step[1] > history.step[0]:
             self.handler.improvement()
         self.handler.update_fit()
 
@@ -96,11 +96,11 @@ class ConvergenceMonitor(object):
         best = history.value[0]
         try:
             p = history.population_values[0]
-            n,p = len(p), np.sort(p)
-            QI,Qmid, = int(0.2*n),int(0.5*n)
-            self.convergence.append((best, p[0],p[QI],p[Qmid],p[-1-QI],p[-1]))
-        except:
-            self.convergence.append((best, best,best,best,best,best))
+            n, p = len(p), np.sort(p)
+            QI, Qmid = int(0.2*n), int(0.5*n)
+            self.convergence.append((best, p[0], p[QI], p[Qmid], p[-1-QI], p[-1]))
+        except Exception:
+            self.convergence.append((best, best, best, best, best, best))
 
 
 # Note: currently using bumps parameters for each parameter object so that
@@ -130,26 +130,30 @@ class SasFitness(object):
         self.update()
 
     def _reset_pars(self, names, values):
-        for k,v in zip(names, values):
+        for k, v in zip(names, values):
             self._pars[k].value = v
 
     def _define_pars(self):
         self._pars = {}
         for k in self.model.getParamList():
-            name = ".".join((self.name,k))
+            name = ".".join((self.name, k))
             value = self.model.getParam(k)
-            bounds = self.model.details.get(k,["",None,None])[1:3]
+            bounds = self.model.details.get(k, ["", None, None])[1:3]
             self._pars[k] = parameter.Parameter(value=value, bounds=bounds,
                                                 fixed=True, name=name)
         #print parameter.summarize(self._pars.values())
 
     def _init_pars(self, kw):
-        for k,v in kw.items():
+        for k, v in kw.items():
             # dispersion parameters initialized with _field instead of .field
-            if k.endswith('_width'): k = k[:-6]+'.width'
-            elif k.endswith('_npts'): k = k[:-5]+'.npts'
-            elif k.endswith('_nsigmas'): k = k[:-7]+'.nsigmas'
-            elif k.endswith('_type'): k = k[:-5]+'.type'
+            if k.endswith('_width'):
+                k = k[:-6]+'.width'
+            elif k.endswith('_npts'):
+                k = k[:-5]+'.npts'
+            elif k.endswith('_nsigmas'):
+                k = k[:-7]+'.nsigmas'
+            elif k.endswith('_type'):
+                k = k[:-5]+'.type'
             if k not in self._pars:
                 formatted_pars = ", ".join(sorted(self._pars.keys()))
                 raise KeyError("invalid parameter %r for %s--use one of: %s"
@@ -158,10 +162,10 @@ class SasFitness(object):
                 self.model.setParam(k, v)
             elif isinstance(v, parameter.BaseParameter):
                 self._pars[k] = v
-            elif isinstance(v, (tuple,list)):
+            elif isinstance(v, (tuple, list)):
                 low, high = v
                 self._pars[k].value = (low+high)/2
-                self._pars[k].range(low,high)
+                self._pars[k].range(low, high)
             else:
                 self._pars[k].value = v
 
@@ -169,7 +173,7 @@ class SasFitness(object):
         """
         Flag a set of parameters as fitted parameters.
         """
-        for k,p in self._pars.items():
+        for k, p in self._pars.items():
             p.fixed = (k not in param_list or k in self.constraints)
         self.fitted_par_names = [k for k in param_list if k not in self.constraints]
         self.computed_par_names = [k for k in param_list if k in self.constraints]
@@ -181,9 +185,9 @@ class SasFitness(object):
         return self._pars
 
     def update(self):
-        for k,v in self._pars.items():
+        for k, v in self._pars.items():
             #print "updating",k,v,v.value
-            self.model.setParam(k,v.value)
+            self.model.setParam(k, v.value)
         self._dirty = True
 
     def _recalculate(self):
@@ -222,7 +226,7 @@ class ParameterExpressions(object):
         if exprs:
             symtab = dict((".".join((M.name, k)), p)
                           for M in self.models
-                          for k,p in M.parameters().items())
+                          for k, p in M.parameters().items())
             self.update = compile_constraints(symtab, exprs)
         else:
             self.update = lambda: 0
@@ -299,11 +303,11 @@ class BumpsFit(FitEngine):
                     R.stderr = np.hstack((result['stderr'][fitted_index],
                                           np.NaN*np.ones(len(fitness.computed_pars))))
                 R.pvec = np.hstack((result['value'][fitted_index],
-                                      [p.value for p in fitness.computed_pars]))
+                                    [p.value for p in fitness.computed_pars]))
                 R.fitness = np.sum(R.residuals**2)/(fitness.numpoints() - len(fitted_index))
             else:
                 R.stderr = np.NaN*np.ones(len(param_list))
-                R.pvec = np.asarray( [p.value for p in fitness.fitted_pars+fitness.computed_pars])
+                R.pvec = np.asarray([p.value for p in fitness.fitted_pars+fitness.computed_pars])
                 R.fitness = np.NaN
             R.convergence = result['convergence']
             if result['uncertainty'] is not None:
@@ -330,7 +334,7 @@ def run_bumps(problem, handler, curr_thread):
     fitclass, options = get_fitter()
     steps = options.get('steps', 0)
     if steps == 0:
-        pop = options.get('pop',0)*len(problem._parameters)
+        pop = options.get('pop', 0)*len(problem._parameters)
         samples = options.get('samples', 0)
         steps = (samples+pop-1)/pop if pop != 0 else samples
     max_step = steps + options.get('burn', 0)
@@ -342,7 +346,7 @@ def run_bumps(problem, handler, curr_thread):
         ]
     fitdriver = fitters.FitDriver(fitclass, problem=problem,
                                   abort_test=abort_test, **options)
-    omp_threads = int(os.environ.get('OMP_NUM_THREADS','0'))
+    omp_threads = int(os.environ.get('OMP_NUM_THREADS', '0'))
     mapper = MPMapper if omp_threads == 1 else SerialMapper
     fitdriver.mapper = mapper.start_mapper(problem, None)
     #import time; T0 = time.time()
@@ -358,7 +362,7 @@ def run_bumps(problem, handler, curr_thread):
 
     convergence_list = options['monitors'][-1].convergence
     convergence = (2*np.asarray(convergence_list)/problem.dof
-                   if convergence_list else np.empty((0,1),'d'))
+                   if convergence_list else np.empty((0, 1), 'd'))
 
     success = best is not None
     try:
@@ -375,4 +379,3 @@ def run_bumps(problem, handler, curr_thread):
         'uncertainty': getattr(fitdriver.fitter, 'state', None),
         'errors': '\n'.join(errors),
         }
-

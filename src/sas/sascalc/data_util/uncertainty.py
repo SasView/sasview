@@ -1,12 +1,12 @@
 r"""
 Uncertainty propagation class for arithmetic, log and exp.
 
-Based on scalars or numpy vectors, this class allows you to store and 
+Based on scalars or numpy vectors, this class allows you to store and
 manipulate values+uncertainties, with propagation of gaussian error for
 addition, subtraction, multiplication, division, power, exp and log.
 
 Storage properties are determined by the numbers used to set the value
-and uncertainty.  Be sure to use floating point uncertainty vectors 
+and uncertainty.  Be sure to use floating point uncertainty vectors
 for inplace operations since numpy does not do automatic type conversion.
 Normal operations can use mixed integer and floating point.  In place
 operations such as *a \*= b* create at most one extra copy for each operation.
@@ -17,8 +17,9 @@ for huge arrays.
 from __future__ import division
 
 import numpy as np
-import err1d
-from formatnum import format_uncertainty
+
+from .import err1d
+from .formatnum import format_uncertainty
 
 __all__ = ['Uncertainty']
 
@@ -27,7 +28,7 @@ __all__ = ['Uncertainty']
 class Uncertainty(object):
     # Make standard deviation available
     def _getdx(self): return np.sqrt(self.variance)
-    def _setdx(self,dx): 
+    def _setdx(self,dx):
         # Direct operation
         #    variance = dx**2
         # Indirect operation to avoid temporaries
@@ -37,12 +38,12 @@ class Uncertainty(object):
 
     # Constructor
     def __init__(self, x, variance=None):
-        self.x, self.variance = x, variance    
- 
+        self.x, self.variance = x, variance
+
     # Numpy array slicing operations
-    def __len__(self): 
+    def __len__(self):
         return len(self.x)
-    def __getitem__(self,key): 
+    def __getitem__(self,key):
         return Uncertainty(self.x[key],self.variance[key])
     def __setitem__(self,key,value):
         self.x[key] = value.x
@@ -136,7 +137,7 @@ class Uncertainty(object):
     def __rdiv__(self, other): return self.__rtruediv__(other)
     def __idiv__(self, other): return self.__itruediv__(other)
 
-        
+
     # Unary ops
     def __neg__(self):
         return Uncertainty(-self.x,self.variance)
@@ -150,7 +151,7 @@ class Uncertainty(object):
         if np.isscalar(self.x):
             return format_uncertainty(self.x,np.sqrt(self.variance))
         else:
-            return [format_uncertainty(v,dv) 
+            return [format_uncertainty(v,dv)
                     for v,dv in zip(self.x,np.sqrt(self.variance))]
     def __repr__(self):
         return "Uncertainty(%s,%s)"%(str(self.x),str(self.variance))
@@ -218,7 +219,7 @@ def test():
     assert z.x == 5*4 and z.variance == 3*4**2
     z = a/4
     assert z.x == 5./4 and z.variance == 3./4**2
-    
+
     # Reverse scalar operations
     z = 4+a
     assert z.x == 4+5 and z.variance == 3
@@ -228,7 +229,7 @@ def test():
     assert z.x == 4*5 and z.variance == 3*4**2
     z = 4/a
     assert z.x == 4./5 and abs(z.variance - 3./5**4 * 4**2) < 1e-15
-    
+
     # Power operations
     z = a**2
     assert z.x == 5**2 and z.variance == 4*3*5**2
@@ -249,7 +250,7 @@ def test():
     z = a/b
     assert z.x == 5./4 and abs(z.variance - (3./5**2 + 2./4**2)*(5./4)**2) < 1e-15
 
-    # ===== Inplace operations =====    
+    # ===== Inplace operations =====
     # Scalar operations
     y = a+0; y += 4
     z = a+4
@@ -307,7 +308,7 @@ def test():
     z = A/B
     assert (z.x == 5./4).all()
     assert (abs(z.variance - (3./5**2 + 2./4**2)*(5./4)**2) < 1e-15).all()
-    
+
     # printing; note that sqrt(3) ~ 1.7
     assert str(Uncertainty(5,3)) == "5.0(17)"
     assert str(Uncertainty(15,3)) == "15.0(17)"

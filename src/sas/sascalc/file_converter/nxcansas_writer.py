@@ -165,7 +165,7 @@ class NXcanSASWriter(Cansas2Reader):
             'wavelength_min':'wavelength_min',
             'wavelength_max': 'wavelength_max',
             'wavelength_spread': 'incident_wavelength_spread' }
-        for sasname, nxname in wavelength_keys.iteritems():
+        for sasname, nxname in wavelength_keys.items():
             value = getattr(data_info.source, sasname)
             units = getattr(data_info.source, sasname + '_unit')
             if value is not None:

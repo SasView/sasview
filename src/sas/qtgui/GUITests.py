@@ -75,12 +75,12 @@ def suite():
         unittest.makeSuite(SlicerParametersTest.SlicerParametersTest, 'test'),
 
         # Main window
-        unittest.makeSuite(AboutBoxTest.AboutBoxTest,          'test'),
         unittest.makeSuite(DataExplorerTest.DataExplorerTest,  'test'),
-        unittest.makeSuite(WelcomePanelTest.WelcomePanelTest,  'test'),
-        unittest.makeSuite(DroppableDataLoadWidgetTest.DroppableDataLoadWidgetTest, 'test'),
         unittest.makeSuite(GuiManagerTest.GuiManagerTest,      'test'),
         unittest.makeSuite(GuiUtilsTest.GuiUtilsTest,          'test'),
+        unittest.makeSuite(AboutBoxTest.AboutBoxTest,          'test'),
+        unittest.makeSuite(WelcomePanelTest.WelcomePanelTest,  'test'),
+        unittest.makeSuite(DroppableDataLoadWidgetTest.DroppableDataLoadWidgetTest, 'test'),
         unittest.makeSuite(MainWindowTest.MainWindowTest,      'test'),
 
         # Utilities

@@ -3,17 +3,17 @@ This object is a small tool to allow user to quickly
 determine the variance in q  from the
 instrumental parameters.
 """
-from instrument import Sample
-from instrument import Detector
-from instrument import TOF as Neutron
-from instrument import Aperture
-# import math stuffs
-from math import pi
-from math import sqrt
-import math
-import numpy as np
 import sys
+from math import pi, sqrt
+import math
 import logging
+
+import numpy as np
+
+from .instrument import Sample
+from .instrument import Detector
+from .instrument import TOF as Neutron
+from .instrument import Aperture
 
 logger = logging.getLogger(__name__)
 
@@ -92,7 +92,6 @@ class ResolutionCalculator(object):
         : qx_value: x component of q
         : qy_value: y component of q
         """
-
         # make sure to update all the variables need.
         # except lambda, dlambda, and intensity
         self.get_all_instrument_params()
@@ -152,6 +151,9 @@ class ResolutionCalculator(object):
             out = self.get_image(qx_value, qy_value, sig1_list[ind],
                                  sig2_list[ind], sigr_list[ind],
                                  qx_min, qx_max, qy_min, qy_max, coord)
+            # this is the case of q being outside the detector
+            #if numpy.all(out==0.0):
+            #    continue
             image = out
             # set variance as sigmas
             sigma_1 += sig1_list[ind] * sig1_list[ind] * self.intensity
@@ -183,14 +185,13 @@ class ResolutionCalculator(object):
             sigma_r = 0
             sigma_2 = 0
             sigma1d = 0
-
         if len(self.image) > 0:
             self.image += image_out
         else:
             self.image = image_out
 
         # plot image
-        return self.image  # self.plot_image(self.image)
+        return self.plot_image(self.image)
 
     def setup_tof(self, wavelength, wavelength_spread):
         """
@@ -206,13 +207,13 @@ class ResolutionCalculator(object):
 
         if wavelength == 0:
             msg = "Can't compute the resolution: the wavelength is zero..."
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
         return self.intensity
 
     def compute(self, wavelength, wavelength_spread, qx_value, qy_value,
                 coord='cartesian', tof=False):
         """
-        Compute the Q resolution in || and + direction of 2D
+        Compute the Q resoltuion in || and + direction of 2D
         : qx_value: x component of q
         : qy_value: y component of q
         """
@@ -377,16 +378,16 @@ class ResolutionCalculator(object):
         # Check whether the q value is within the detector range
         if qx_min < self.qx_min:
             self.qx_min = qx_min
-            #raise ValueError, msg
+            #raise ValueError(msg)
         if qx_max > self.qx_max:
             self.qx_max = qx_max
-            #raise ValueError, msg
+            #raise ValueError(msg)
         if qy_min < self.qy_min:
             self.qy_min = qy_min
-            #raise ValueError, msg
+            #raise ValueError(msg)
         if qy_max > self.qy_max:
             self.qy_max = qy_max
-            #raise ValueError, msg
+            #raise ValueError(msg)
         if not full_cal:
             return None
 
@@ -501,7 +502,7 @@ class ResolutionCalculator(object):
             y_comp = size[1] * phi_y
         # otherwise
         else:
-            raise ValueError, " Improper input..."
+            raise ValueError(" Improper input...")
         # get them squared
         sigma = x_comp * x_comp
         sigma += y_comp * y_comp
@@ -704,7 +705,7 @@ class ResolutionCalculator(object):
             self.wave.set_wave_list([wavelength])
             #self.set_wavelength(wavelength)
         else:
-            raise
+            raise TypeError("invalid wavlength---should be list or float")
 
     def set_wave_spread(self, wavelength_spread):
         """
@@ -715,7 +716,7 @@ class ResolutionCalculator(object):
         elif wavelength_spread.__class__.__name__ == 'float':
             self.wave.set_wave_spread_list([wavelength_spread])
         else:
-            raise
+            raise TypeError("invalid wavelength spread---should be list or float")
 
     def set_wavelength(self, wavelength):
         """
@@ -764,7 +765,7 @@ class ResolutionCalculator(object):
         : param size: [dia_value] or [x_value, y_value]
         """
         if len(size) < 1 or len(size) > 2:
-            raise RuntimeError, "The length of the size must be one or two."
+            raise RuntimeError("The length of the size must be one or two.")
         self.aperture.set_source_size(size)
 
     def set_neutron_mass(self, mass):
@@ -781,7 +782,7 @@ class ResolutionCalculator(object):
         : param size: [dia_value] or [xheight_value, yheight_value]
         """
         if len(size) < 1 or len(size) > 2:
-            raise RuntimeError, "The length of the size must be one or two."
+            raise RuntimeError("The length of the size must be one or two.")
         self.aperture.set_sample_size(size)
 
     def set_detector_pix_size(self, size):
@@ -804,7 +805,7 @@ class ResolutionCalculator(object):
         : param distance: [distance, x_offset]
         """
         if len(distance) < 1 or len(distance) > 2:
-            raise RuntimeError, "The length of the size must be one or two."
+            raise RuntimeError("The length of the size must be one or two.")
         self.aperture.set_sample_distance(distance)
 
     def set_sample2sample_distance(self, distance):
@@ -814,9 +815,7 @@ class ResolutionCalculator(object):
         : param distance: [distance, x_offset]
         """
         if len(distance) < 1 or len(distance) > 2:
-            raise RuntimeError, "The length of the size must be one or two."
-        if len(distance) == 1:
-            distance.append(0)
+            raise RuntimeError("The length of the size must be one or two.")
         self.sample.set_distance(distance)
 
     def set_sample2detector_distance(self, distance):
@@ -826,9 +825,7 @@ class ResolutionCalculator(object):
         : param distance: [distance, x_offset]
         """
         if len(distance) < 1 or len(distance) > 2:
-            raise RuntimeError, "The length of the size must be one or two."
-        if len(distance) == 1:
-            distance.append(0)
+            raise RuntimeError("The length of the size must be one or two.")
         self.detector.set_distance(distance)
 
     def get_all_instrument_params(self):
@@ -1000,7 +997,7 @@ class ResolutionCalculator(object):
             pix_x_size = detector_pix_size[0]
             pix_y_size = detector_pix_size[1]
         else:
-            raise ValueError, " Input value format error..."
+            raise ValueError(" Input value format error...")
         # Sample to detector distance = sample slit to detector
         # minus sample offset
         sample2detector_distance = self.sample2detector_distance[0] - \

@@ -33,7 +33,15 @@ class CorfuncCalculator(object):
             self._lasty = []
 
         def __call__(self, x):
-            if self._lastx == [] or x.tolist() != self._lastx.tolist():
+            # If input is a single number, evaluate the function at that number
+            # and return a single number
+            if type(x) == float or type(x) == int:
+                return self._smoothed_function(np.array([x]))[0]
+            # If input is a list, and is different to the last input, evaluate
+            # the function at each point. If the input is the same as last time
+            # the function was called, return the result that was calculated
+            # last time instead of explicity evaluating the function again.
+            elif self._lastx == [] or x.tolist() != self._lastx.tolist():
                 self._lasty = self._smoothed_function(x)
                 self._lastx = x
             return self._lasty
@@ -79,7 +87,7 @@ class CorfuncCalculator(object):
             return
         # Only process data of the class Data1D
         if not issubclass(data.__class__, Data1D):
-            raise ValueError, "Data must be of the type DataLoader.Data1D"
+            raise ValueError("Data must be of the type DataLoader.Data1D")
 
         # Prepare the data
         new_data = Data1D(x=data.x, y=data.y)
@@ -115,12 +123,13 @@ class CorfuncCalculator(object):
         iq = self._data.y
 
         params, s2 = self._fit_data(q, iq)
+        # Extrapolate to 100*Qmax in experimental data
         qs = np.arange(0, q[-1]*100, (q[1]-q[0]))
         iqs = s2(qs)
 
         extrapolation = Data1D(qs, iqs)
 
-        return params, extrapolation
+        return params, extrapolation, s2
 
     def compute_transform(self, extrapolation, trans_type, background=None,
         completefn=None, updatefn=None):
@@ -130,8 +139,9 @@ class CorfuncCalculator(object):
         :param extrapolation: The extrapolated data
         :param background: The background value (if not provided, previously
             calculated value will be used)
+        :param extrap_fn: A callable function representing the extraoplated data
         :param completefn: The function to call when the transform calculation
-            is complete`
+            is complete
         :param updatefn: The function to call to update the GUI with the status
             of the transform calculation
         :return: The transformed data
@@ -143,14 +153,15 @@ class CorfuncCalculator(object):
 
         if trans_type == 'fourier':
             self._transform_thread = FourierThread(self._data, extrapolation,
-            background, completefn=completefn, updatefn=updatefn)
+            background, completefn=completefn,
+            updatefn=updatefn)
         elif trans_type == 'hilbert':
             self._transform_thread = HilbertThread(self._data, extrapolation,
             background, completefn=completefn, updatefn=updatefn)
         else:
             err = ("Incorrect transform type supplied, must be 'fourier'",
                 " or 'hilbert'")
-            raise ValueError, err
+            raise ValueError(err)
 
         self._transform_thread.queue()
 
@@ -165,8 +176,8 @@ class CorfuncCalculator(object):
     def extract_parameters(self, transformed_data):
         """
         Extract the interesting measurements from a correlation function
-        :param transformed_data: Fourier transformation of the
-            extrapolated data
+
+        :param transformed_data: Fourier transformation of the extrapolated data
         """
         # Calculate indexes of maxima and minima
         x = transformed_data.x

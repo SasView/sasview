@@ -8,8 +8,8 @@ Plotting Data/Models
 ====================
 
 SasView generates three different types of graph window: one that displays *1D data*
-(ie, I(Q) vs Q), one that displays *1D residuals* (ie, the difference between the
-experimental data and the theory at the same Q values), and *2D color maps*.
+(i.e., $I(Q)$ vs $Q$), one that displays *1D residuals* (ie, the difference between the
+experimental data and the theory at the same $Q$ values), and *2D color maps*.
 
 Graph window options
 --------------------
@@ -41,7 +41,7 @@ minimised window.
 To delete a plot, click the *Close* (x) icon in the top-right corner of the
 plot window.
 
-.. note:: 
+.. note::
     *If a residuals graph (when fitting data) is hidden, it will not show up
     after computation.*
 
@@ -137,7 +137,7 @@ and selecting *Modify Graph Appearance* (for axis labels, grid overlay and
 legend position) or *Add Text* to add textual annotations, selecting font, color,
 style and size. *Remove Text* will remove the last annotation added. To change
 the legend. *Window Title* allows a custom title to be entered instead of Graph
-x. 
+x.
 
 Changing scales
 ^^^^^^^^^^^^^^^
@@ -225,7 +225,7 @@ formats (see :ref:`Formats`).
 Making a linear fit
 ^^^^^^^^^^^^^^^^^^^
 
-Linear fit performs a simple ( y(x)=ax+b ) linear fit within the plot window.
+Linear fit performs a simple $y(x)=ax+b$ linear fit within the plot window.
 
 In the *Dataset Menu* (see Invoking_the_dataset_menu_), select *Linear Fit*. A
 fitting dialog will appear. Set some initial parameters and data limits and
@@ -233,7 +233,7 @@ click *Fit*. The fitted parameter values are displayed and the resulting line
 calculated from them is added to the plot.
 
 This option is most useful for performing simple Guinier, XS Guinier, and
-Porod type analyses, for example, to estimate Rg, a rod diameter, or incoherent
+Porod type analyses, for example, to estimate $R_g$, a rod diameter, or incoherent
 background level, respectively.
 
 The following figure shows an example of a Guinier analysis using this option
@@ -318,7 +318,7 @@ To remove a 'slicer', bring back the *Dataset menu* and select *Clear Slicer*.
 Unmasked circular average
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This operation will perform an average in constant Q-rings around the (x,y)
+This operation will perform an average in constant $Q$ rings around the (x,y)
 pixel location of the beam center.
 
 Masked circular average
@@ -330,18 +330,18 @@ masked region is excluded.
 Sector average [Q View]
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-This operation averages in constant Q-arcs.
+This operation averages in constant $Q$ arcs.
 
-The width of the sector is specified in degrees (+/- |delta|\|phi|\) each side
-of the central angle (|phi|\).
+The width of the sector is specified in degrees ($\pm\delta|\phi|$) each side
+of the central angle $\phi$.
 
-Annular average [|phi| View]
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Annular average [:math:`\phi`]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This operation performs an average between two Q-values centered on (0,0),
+This operation performs an average between two $Q$ values centered on (0,0),
 and averaged over a specified number of pixels.
 
-The data is returned as a function of angle (|phi|\) in degrees with zero
+The data is returned as a function of angle $\phi$ in degrees with zero
 degrees at the 3 O'clock position.
 
 Box sum
@@ -355,21 +355,21 @@ the rectangular slicer and the coordinates of the center of the rectangle.
 Box Averaging in Qx
 ^^^^^^^^^^^^^^^^^^^
 
-This operation computes an average I(Qx) for the region of interest.
+This operation computes an average $I(Q_x)$ for the region of interest.
 
 When editing the slicer parameters, the user can control the length and the
 width the rectangular slicer. The averaged output is calculated from constant
-bins with rectangular shape. The resultant Q values are nominal values, that
+bins with rectangular shape. The resultant $Q$ values are nominal values, that
 is, the central value of each bin on the x-axis.
 
 Box Averaging in Qy
 ^^^^^^^^^^^^^^^^^^^
 
-This operation computes an average I(Qy) for the region of interest.
+This operation computes an average $I(Q_y)$ for the region of interest.
 
 When editing the slicer parameters, the user can control the length and the
 width the rectangular slicer. The averaged output is calculated from constant
-bins with rectangular shape. The resultant Q values are nominal values, that
+bins with rectangular shape. The resultant $Q$ values are nominal values, that
 is, the central value of each bin on the x-axis.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ

@@ -8,13 +8,19 @@ FitPanel class contains fields allowing to fit  models and  data
 import wx
 from wx.aui import AuiNotebook as nb
 
+from sas.sascalc.fit.models import ModelManager
+
 from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.guiframe.events import PanelOnFocusEvent, StatusEvent
 from sas.sasgui.guiframe.dataFitting import check_data_validity
-from sas.sasgui.perspectives.fitting.simfitpage import SimultaneousFitPage
 
-import basepage
-import models
+
+from . import basepage
+from .fitpage import FitPage
+from .simfitpage import SimultaneousFitPage
+from .batchfitpage import BatchFitPage
+from .fitting_widgets import BatchDataDialog
+
 _BOX_WIDTH = 80
 
 
@@ -45,7 +51,7 @@ class FitPanel(nb, PanelBase):
         self.parent = parent
         self.event_owner = None
         # dictionary of miodel {model class name, model class}
-        self.menu_mng = models.ModelManager()
+        self.menu_mng = ModelManager()
         self.model_list_box = self.menu_mng.get_model_list()
         # pageClosedEvent = nb.EVT_FLATNOTEBOOK_PAGE_CLOSING
         self.model_dictionary = self.menu_mng.get_model_dictionary()
@@ -91,13 +97,19 @@ class FitPanel(nb, PanelBase):
             data = page.get_data()
             # state must be cloned
             state = page.get_state().clone()
-            if data is not None or page.model is not None:
+            # data_list only populated with real data
+            # Fake object in data from page.get_data() if model is selected
+            if len(page.data_list) is not 0 and page.model is not None:
                 new_doc = self._manager.state_reader.write_toXML(data,
                                                                  state,
                                                                  batch_state)
+                # Fit #2 through #n are append to first fit
                 if doc is not None and hasattr(doc, "firstChild"):
-                    child = new_doc.firstChild.firstChild
-                    doc.firstChild.appendChild(child)
+                    # Only append if properly formed new_doc
+                    if new_doc is not None and hasattr(new_doc, "firstChild"):
+                        child = new_doc.firstChild.firstChild
+                        doc.firstChild.appendChild(child)
+                # First fit defines the main document
                 else:
                     doc = new_doc
 
@@ -107,17 +119,15 @@ class FitPanel(nb, PanelBase):
         """
         """
         temp = self.menu_mng.update()
-        if len(temp):
+        if temp:
             self.model_list_box = temp
         return temp
 
     def reset_pmodel_list(self):
         """
         """
-        temp = self.menu_mng.plugins_reset()
-        if len(temp):
-            self.model_list_box = temp
-        return temp
+        self.model_list_box = self.menu_mng.plugins_reset()
+        return self.model_list_box
 
     def get_page_by_id(self, uid):
         """
@@ -291,11 +301,11 @@ class FitPanel(nb, PanelBase):
         """
         self.model_list_box = dict
 
-    def set_model_dict(self, m_dict):
+    def set_model_dictionary(self, model_dictionary):
         """
         copy a dictionary of model name -> model object
 
-        :param m_dict: dictionary linking model name -> model object
+        :param model_dictionary: dictionary linking model name -> model object
         """
 
     def get_current_page(self):
@@ -309,7 +319,6 @@ class FitPanel(nb, PanelBase):
         """
         Add the simultaneous fit page
         """
-        from simfitpage import SimultaneousFitPage
         page_finder = self._manager.get_page_finder()
         if caption == "Const & Simul Fit":
             self.sim_page = SimultaneousFitPage(self, page_finder=page_finder,
@@ -337,14 +346,12 @@ class FitPanel(nb, PanelBase):
         add an empty page
         """
         if self.batch_on:
-            from batchfitpage import BatchFitPage
             panel = BatchFitPage(parent=self)
             self.batch_page_index += 1
             caption = "BatchPage" + str(self.batch_page_index)
             panel.set_index_model(self.batch_page_index)
         else:
             # Increment index of fit page
-            from fitpage import FitPage
             panel = FitPage(parent=self)
             self.fit_page_index += 1
             caption = "FitPage" + str(self.fit_page_index)
@@ -352,7 +359,7 @@ class FitPanel(nb, PanelBase):
         panel.batch_on = self.batch_on
         panel._set_save_flag(not panel.batch_on)
         panel.set_model_dictionary(self.model_dictionary)
-        panel.populate_box(model_dict=self.model_list_box)
+        panel.populate_box(model_list_box=self.model_list_box)
         panel.formfactor_combo_init()
         panel.set_manager(self._manager)
         panel.window_caption = caption
@@ -394,17 +401,13 @@ class FitPanel(nb, PanelBase):
                 pos = self.GetPageIndex(page)
                 temp_data = page.get_data()
                 if temp_data is not None and temp_data.id in data:
-                    self.SetSelection(pos)
-                    self.on_close_page(event=None)
-                    temp = self.GetSelection()
-                    self.DeletePage(temp)
+                    self.close_page_with_data(temp_data)
             if self.sim_page is not None:
                 if len(self.sim_page.model_list) == 0:
                     pos = self.GetPageIndex(self.sim_page)
                     self.SetSelection(pos)
                     self.on_close_page(event=None)
-                    temp = self.GetSelection()
-                    self.DeletePage(temp)
+                    self.DeletePage(pos)
                     self.sim_page = None
                     self.batch_on = False
             if self.GetPageCount() == 0:
@@ -442,8 +445,6 @@ class FitPanel(nb, PanelBase):
                     break
         if data_1d_list and data_2d_list:
             # need to warning the user that this batch is a special case
-            from sas.sasgui.perspectives.fitting.fitting_widgets import \
-                BatchDataDialog
             dlg = BatchDataDialog(self)
             if dlg.ShowModal() == wx.ID_OK:
                 data_type = dlg.get_data()
@@ -500,10 +501,15 @@ class FitPanel(nb, PanelBase):
 
             if data is None:
                 return None
+        focused_page = self.GetPage(self.GetSelection())
         for page in self.opened_pages.values():
             # check if the selected data existing in the fitpanel
             pos = self.GetPageIndex(page)
             if not check_data_validity(page.get_data()) and not page.batch_on:
+                if page.model is not None and page != focused_page:
+                    # Page has an active theory and is in background - don't
+                    # send data here.
+                    continue
                 # make sure data get placed in 1D empty tab if data is 1D
                 # else data get place on 2D tab empty tab
                 enable2D = page.get_view_mode()

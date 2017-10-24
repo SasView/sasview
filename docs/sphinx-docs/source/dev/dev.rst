@@ -9,7 +9,9 @@ Contents
 .. toctree::
    :maxdepth: 1
 
-   SasView API <api/modules>
+   SasView API <sasview-api/modules>
+   sasmodels overview <sasmodels-dev/index>
+   sasmodels API <sasmodels-api/modules>
 
 Indices and Search
 ------------------

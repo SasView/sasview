@@ -37,24 +37,7 @@ class ReportDialog(BaseReportDialog):
 
         # number of images of plot
         self.nimages = len(self.report_list[2])
-
-        if self.report_list[2] is not None:
-            # put image path in the report string
-            if len(self.report_list[2]) == 1:
-                self.report_html = self.report_list[0] % \
-                                    "memory:img_fit0.png"
-            elif len(self.report_list[2]) == 2:
-                self.report_html = self.report_list[0] % \
-                                    ("memory:img_fit0.png",
-                                     "memory:img_fit1.png")
-            # allows up to three images
-            else:
-                self.report_html = self.report_list[0] % \
-                                    ("memory:img_fit0.png",
-                                     "memory:img_fit1.png",
-                                     "memory:img_fit2.png")
-        else:
-            self.report_html = self.report_list[0]
+        self.report_html = self.report_list[0]
         # layout
         self._setup_layout()
 
@@ -73,101 +56,59 @@ class ReportDialog(BaseReportDialog):
             return
 
         fName = dlg.GetPath()
+        basename = os.path.splitext(fName)[0]
         ext_num = dlg.GetFilterIndex()
+        dlg.Destroy()
+
+        if ext_num == 0 and self.index_offset == 0:  # has pdf
+            ext = ".pdf"
+        elif ext_num == 1 - self.index_offset:
+            ext = ".html"
+        elif ext_num == 2 - self.index_offset:
+            ext = ".txt"
+        else:
+            logger.warn("unknown export format in report dialog")
+            return
+        filename = basename + ext
+
+        # save figures
+        pictures = []
+        for num in range(self.nimages):
+            pic_name = basename + '_img%s.png' % num
+            # save the image for use with pdf writer
+            self.report_list[2][num].savefig(pic_name)
+            pictures.append(pic_name)
+
+        # translate png references int html from in-memory name to on-disk name
+        html = self.report_html.replace("memory:img_fit", basename+'_img')
 
         #set file extensions
         img_ext = []
-        pic_fname = []
-        #PDF
-        if ext_num == (0 + 2 * self.index_offset):
-            # TODO: Sort this case out
-            ext = '.pdf'
-
-            fName = os.path.splitext(fName)[0] + ext
-            dlg.Destroy()
-            #pic (png) file path/name
-            for num in range(self.nimages):
-                im_ext = '_img%s.png' % num
-                #img_ext.append(im_ext)
-                pic_name = os.path.splitext(fName)[0] + im_ext
-                pic_fname.append(pic_name)
-                # save the image for use with pdf writer
-                self.report_list[2][num].savefig(pic_name)
-
-            #put the image path in html string
-            report_frame = self.report_list[0]
-            #put image name strings into the html file
-            #Note:The str for pic_fname shouldn't be removed.
-            if self.nimages == 1:
-                html = report_frame % str(pic_fname[0])
-            elif self.nimages == 2:
-                html = report_frame % (str(pic_fname[0]), str(pic_fname[1]))
-            elif self.nimages == 3:
-                html = report_frame % (str(pic_fname[0]), str(pic_fname[1]),
-                                          str(pic_fname[2]))
-
-            # make/open file in case of absence
-            f = open(fName, 'w')
-            f.close()
+        if ext == ".pdf":
             # write pdf as a pdf file
-            pdf = self.HTML2PDF(data=html, filename=fName)
+            pdf = self.HTML2PDF(data=html, filename=filename)
 
-            #open pdf
+            # delete images used to create the pdf
+            for pic_name in pictures:
+                os.remove(pic_name)
+
+            #open pdf viewer
             if pdf:
                 try:
-                    #Windows
-                    os.startfile(str(fName))
-                except:
-                    try:
-                        #Mac
+                    if os.name == 'nt':  # Windows
+                        os.startfile(fName)
+                    elif sys.platform == "darwin":  # Mac
                         os.system("open %s" % fName)
-                    except:
-                        #DO not open
-                        pass
-            #delete image file
-            for num in range(self.nimages):
-                os.remove(pic_fname[num])
-            return
-        #HTML + png(graph)
-        elif ext_num == (1 - self.index_offset):
-            ext = '.html'
-            for num in range(self.nimages):
-                img_ext.append('_img4html%s.png' % num)
-            report_frame = self.report_list[0]
-        #TEXT + pdf(graph)
-        elif ext_num == (2 - self.index_offset):
-            ext = '.txt'
-            # changing the image extension actually changes the image
-            # format on saving
-            for num in range(self.nimages):
-                img_ext.append('_img4txt%s.pdf' % num)
-            report = self.report_list[1]
-        else:
-            return
+                except Exception as exc:
+                    # cannot open pdf
+                    logging.error(str(exc))
 
-        #file name
-        fName = os.path.splitext(fName)[0] + ext
-        dlg.Destroy()
+        elif ext == ".html":
+            with open(filename, 'w') as f:
+                f.write(html)
 
-        #pic (png) file path/name
-        for num in range(self.nimages):
-            pic_name = os.path.splitext(fName)[0] + img_ext[num]
-            pic_fname.append(pic_name)
-        #put the image path in html string
-        if ext_num == (1 - self.index_offset):
-            if self.nimages == 1:
-                report = report_frame % os.path.basename(pic_fname[0])
-            elif self.nimages == 2:
-                report = report_frame % (os.path.basename(pic_fname[0]),
-                                         os.path.basename(pic_fname[1]))
-            elif self.nimages == 3:
-                report = report_frame % (os.path.basename(pic_fname[0]),
-                                         os.path.basename(pic_fname[1]),
-                                         os.path.basename(pic_fname[2]))
-        f = open(fName, 'w')
-        f.write(report)
-        f.close()
+        elif ext == ".txt":
+            with open(filename, 'w') as f:
+                f.write(self.report_list[1])
+
         self.Update()
-        #save png file using pic_fname
-        for num in range(self.nimages):
-            self.report_list[2][num].savefig(pic_fname[num])

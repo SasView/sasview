@@ -62,7 +62,7 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
         if not path_str:
             return
         loader = Loader()
-        data = loader.load(path_str)
+        data = loader.load(path_str)[0]
 
         self.data_file.setText(os.path.basename(path_str))
         self.calculateSlitSize(data)
@@ -103,7 +103,6 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
         """
         Computes slit lenght from given 1D data
         """
-
         if data is None:
             self.clearResults()
             msg = "ERROR: Data hasn't been loaded correctly"

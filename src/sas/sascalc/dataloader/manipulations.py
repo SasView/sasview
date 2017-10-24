@@ -25,7 +25,7 @@ import numpy as np
 import sys
 
 #from data_info import plottable_2D
-from data_info import Data1D
+from .data_info import Data1D
 
 
 def get_q(dx, dy, det_dist, wavelength):
@@ -198,18 +198,18 @@ def get_dq_data(data2D):
     '''
     z_max = max(data2D.q_data)
     z_min = min(data2D.q_data)
-    x_max = data2D.dqx_data[data2D.q_data[z_max]]
-    x_min = data2D.dqx_data[data2D.q_data[z_min]]
-    y_max = data2D.dqy_data[data2D.q_data[z_max]]
-    y_min = data2D.dqy_data[data2D.q_data[z_min]]
+    dqx_at_z_max = data2D.dqx_data[np.argmax(data2D.q_data)]
+    dqx_at_z_min = data2D.dqx_data[np.argmin(data2D.q_data)]
+    dqy_at_z_max = data2D.dqy_data[np.argmax(data2D.q_data)]
+    dqy_at_z_min = data2D.dqy_data[np.argmin(data2D.q_data)]
     # Find qdx at q = 0
-    dq_overlap_x = (x_min * z_max - x_max * z_min) / (z_max - z_min)
+    dq_overlap_x = (dqx_at_z_min * z_max - dqx_at_z_max * z_min) / (z_max - z_min)
     # when extrapolation goes wrong
     if dq_overlap_x > min(data2D.dqx_data):
         dq_overlap_x = min(data2D.dqx_data)
     dq_overlap_x *= dq_overlap_x
     # Find qdx at q = 0
-    dq_overlap_y = (y_min * z_max - y_max * z_min) / (z_max - z_min)
+    dq_overlap_y = (dqy_at_z_min * z_max - dqy_at_z_max * z_min) / (z_max - z_min)
     # when extrapolation goes wrong
     if dq_overlap_y > min(data2D.dqy_data):
         dq_overlap_y = min(data2D.dqy_data)
@@ -219,7 +219,7 @@ def get_dq_data(data2D):
     dq_overlap = np.sqrt((dq_overlap_x + dq_overlap_y) / 2.0)
     # Final protection of dq
     if dq_overlap < 0:
-        dq_overlap = y_min
+        dq_overlap = dqy_at_z_min
     dqx_data = data2D.dqx_data[np.isfinite(data2D.data)]
     dqy_data = data2D.dqy_data[np.isfinite(
         data2D.data)] - dq_overlap

@@ -15,14 +15,17 @@
 #############################################################################
 
 import logging
+
 from lxml import etree
 from lxml.builder import E
+
+from ..file_reader_base_class import FileReader, decode
 
 logger = logging.getLogger(__name__)
 
 PARSER = etree.ETCompatXMLParser(remove_comments=True, remove_pis=False)
 
-class XMLreader():
+class XMLreader(FileReader):
     """
     Generic XML read and write class. Mostly helper functions.
     Makes reading/writing XML a bit easier than calling lxml libraries directly.
@@ -73,6 +76,7 @@ class XMLreader():
             self.xmlroot = self.xmldoc.getroot()
         except etree.XMLSyntaxError as xml_error:
             logger.info(xml_error)
+            raise xml_error
         except Exception:
             self.xml = None
             self.xmldoc = None
@@ -90,10 +94,12 @@ class XMLreader():
             self.xmlroot = etree.fromstring(tag_soup)
         except etree.XMLSyntaxError as xml_error:
             logger.info(xml_error)
-        except Exception:
+            raise xml_error
+        except Exception as exc:
             self.xml = None
             self.xmldoc = None
             self.xmlroot = None
+            raise exc
 
     def set_schema(self, schema):
         """
@@ -129,6 +135,9 @@ class XMLreader():
         try:
             first_error = schema.assertValid(self.xmldoc)
         except etree.DocumentInvalid as err:
+            # Suppress errors for <'any'> elements
+            if "##other" in str(err):
+                return first_error
             first_error = str(err)
         return first_error
 
@@ -143,8 +152,8 @@ class XMLreader():
         """
         Converts an etree element into a string
         """
-        return etree.tostring(elem, pretty_print=pretty_print, \
-                              encoding=encoding)
+        return decode(etree.tostring(elem, pretty_print=pretty_print,
+                                     encoding=encoding))
 
     def break_processing_instructions(self, string, dic):
         """
@@ -205,7 +214,7 @@ class XMLreader():
         """
         Create a unique key value for any dictionary to prevent overwriting
         Recurses until a unique key value is found.
-        
+
         :param dictionary: A dictionary with any number of entries
         :param name: The index of the item to be added to dictionary
         :param numb: The number to be appended to the name, starts at 0
@@ -221,7 +230,7 @@ class XMLreader():
         """
         Create an element tree for processing from an etree element
 
-        :param root: etree Element(s) 
+        :param root: etree Element(s)
         """
         return etree.ElementTree(root)
 

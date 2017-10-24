@@ -28,7 +28,7 @@ Using the tool
 
 4) Click the 'Calculate' button to perform the calculation.
 
-.. image:: density_tutor.gif
+.. image:: density_tutor.png
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 

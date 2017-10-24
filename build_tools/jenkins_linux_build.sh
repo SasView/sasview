@@ -13,7 +13,7 @@ cd $WORKSPACE
 
 # SET SASVIEW GITHASH
 cd $WORKSPACE
-cd sasview/sasview
+cd sasview/src/sas/sasview
 githash=$( git rev-parse HEAD )
 sed -i.bak s/GIT_COMMIT/$githash/g __init__.py
 
@@ -62,6 +62,10 @@ cd sasview
 $PYTHON setup.py clean
 $PYTHON setup.py build docs bdist_egg
 
+# CREATE PDF FROM LATEX
+#cd $WORKSPACE
+#cd sasview/docs/sphinx-docs/build/latex
+#pdflatex SasView.tex
 
 # INSTALL SASVIEW
 cd $WORKSPACE
@@ -80,5 +84,3 @@ $PYTHON utest_sasview.py
 #cd $WORKSPACE
 #cd sasview
 #$PYLINT --rcfile "build_tools/pylint.rc" -f parseable sasview-install/sasview*.egg/sas sasview | tee  test/sasview.txt
-
-

@@ -393,7 +393,9 @@ class Plotter2DWidget(PlotterBase):
         # If we don't have any data, skip.
         if data is None:
             return
-        if data.ndim == 1:
+        if data.ndim == 0:
+            return
+        elif data.ndim == 1:
             output = PlotUtilities.build_matrix(data, self.qx_data, self.qy_data)
         else:
             output = copy.deepcopy(data)

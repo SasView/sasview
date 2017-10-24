@@ -727,13 +727,11 @@ class Reader(CansasReader):
                                         namespaces={'ns': CANSAS_NS})
 
                 for entry in entry_list:
-
-                    sas_entry, _ = self._parse_entry(entry)
                     invstate = self._parse_state(entry)
-
                     # invstate could be None when .svs file is loaded
                     # in this case, skip appending to output
                     if invstate is not None:
+                        sas_entry, _ = self._parse_entry(entry)
                         sas_entry.meta_data['invstate'] = invstate
                         sas_entry.filename = invstate.file
                         output.append(sas_entry)

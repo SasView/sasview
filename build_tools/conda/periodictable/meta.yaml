@@ -1,11 +1,11 @@
 package:
   name: periodictable
-  version: !!str 1.4.1
+  version: !!str 1.5.0
 
 source:
-  fn: periodictable-1.4.1.tar.gz
-  url: https://pypi.python.org/packages/source/p/periodictable/periodictable-1.4.1.tar.gz
-  md5: 7246b63cc0b6b1be6e86b6616f9e866e
+  fn: periodictable-1.5.0.tar.gz
+  url: https://pypi.python.org/packages/source/p/periodictable/periodictable-1.5.0.tar.gz
+  md5: f7e0d8199b0fe829868d24a0a734398e
 #  patches:
    # List any patch files here
    # - fix.patch

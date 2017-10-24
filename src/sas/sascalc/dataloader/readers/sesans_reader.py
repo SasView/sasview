@@ -5,9 +5,13 @@
 
     Jurrian Bakker
 """
-import numpy as np
 import os
-from sas.sascalc.dataloader.data_info import Data1D
+
+import numpy as np
+
+from ..file_reader_base_class import FileReader
+from ..data_info import plottable_1D, DataInfo
+from ..loader_exceptions import FileContentsException, DataReaderException
 
 # Check whether we have a converter available
 has_converter = True
@@ -17,15 +21,14 @@ except:
     has_converter = False
 _ZERO = 1e-16
 
-
-class Reader:
+class Reader(FileReader):
     """
     Class to load sesans files (6 columns).
     """
     # File type
     type_name = "SESANS"
 
-    # Wildcards
+    ## Wildcards
     type = ["SESANS files (*.ses)|*.ses",
             "SESANS files (*..sesans)|*.sesans"]
     # List of allowed extensions
@@ -34,126 +37,118 @@ class Reader:
     # Flag to bypass extension check
     allow_all = True
 
-    def read(self, path):
-        """
-        Load data file
+    def get_file_contents(self):
+        self.current_datainfo = DataInfo()
+        self.current_dataset = plottable_1D(np.array([]), np.array([]))
+        self.current_datainfo.isSesans = True
+        self.output = []
 
-        :param path: file path
+        line = self.nextline()
+        params = {}
+        while not line.startswith("BEGIN_DATA"):
+            terms = line.split()
+            if len(terms) >= 2:
+                params[terms[0]] = " ".join(terms[1:])
+            line = self.nextline()
+        self.params = params
 
-        :return: SESANSData1D object, or None
+        if "FileFormatVersion" not in self.params:
+            raise FileContentsException("SES file missing FileFormatVersion")
+        if float(self.params["FileFormatVersion"]) >= 2.0:
+            raise FileContentsException("SASView only supports SES version 1")
 
-        :raise RuntimeError: when the file can't be opened
-        :raise ValueError: when the length of the data vectors are inconsistent
-        """
-        if os.path.isfile(path):
-            basename = os.path.basename(path)
-            _, extension = os.path.splitext(basename)
-            if not (self.allow_all or extension.lower() in self.ext):
-                raise RuntimeError(
-                    "{} has an unrecognized file extension".format(path))
+        if "SpinEchoLength_unit" not in self.params:
+            raise FileContentsException("SpinEchoLength has no units")
+        if "Wavelength_unit" not in self.params:
+            raise FileContentsException("Wavelength has no units")
+        if params["SpinEchoLength_unit"] != params["Wavelength_unit"]:
+            raise FileContentsException("The spin echo data has rudely used "
+                               "different units for the spin echo length "
+                               "and the wavelength.  While sasview could "
+                               "handle this instance, it is a violation "
+                               "of the file format and will not be "
+                               "handled by other software.")
+
+        headers = self.nextline().split()
+
+        self._insist_header(headers, "SpinEchoLength")
+        self._insist_header(headers, "Depolarisation")
+        self._insist_header(headers, "Depolarisation_error")
+        self._insist_header(headers, "Wavelength")
+
+        data = np.loadtxt(self.f_open)
+
+        if data.shape[1] != len(headers):
+            raise FileContentsException(
+                "File has {} headers, but {} columns".format(
+                    len(headers),
+                    data.shape[1]))
+
+        if not data.size:
+            raise FileContentsException("{} is empty".format(path))
+        x = data[:, headers.index("SpinEchoLength")]
+        if "SpinEchoLength_error" in headers:
+            dx = data[:, headers.index("SpinEchoLength_error")]
         else:
-            raise RuntimeError("{} is not a file".format(path))
-        with open(path, 'r') as input_f:
-            line = input_f.readline()
-            params = {}
-            while not line.startswith("BEGIN_DATA"):
-                terms = line.split()
-                if len(terms) >= 2:
-                    params[terms[0]] = " ".join(terms[1:])
-                line = input_f.readline()
-            self.params = params
+            dx = x * 0.05
+        lam = data[:, headers.index("Wavelength")]
+        if "Wavelength_error" in headers:
+            dlam = data[:, headers.index("Wavelength_error")]
+        else:
+            dlam = lam * 0.05
+        y = data[:, headers.index("Depolarisation")]
+        dy = data[:, headers.index("Depolarisation_error")]
 
-            if "FileFormatVersion" not in self.params:
-                raise RuntimeError("SES file missing FileFormatVersion")
-            if float(self.params["FileFormatVersion"]) >= 2.0:
-                raise RuntimeError("SASView only supports SES version 1")
+        lam_unit = self._unit_fetch("Wavelength")
+        x, x_unit = self._unit_conversion(x, "A",
+                                          self._unit_fetch(
+                                              "SpinEchoLength"))
+        dx, dx_unit = self._unit_conversion(
+            dx, lam_unit,
+            self._unit_fetch("SpinEchoLength"))
+        dlam, dlam_unit = self._unit_conversion(
+            dlam, lam_unit,
+            self._unit_fetch("Wavelength"))
+        y_unit = self._unit_fetch("Depolarisation")
 
-            if "SpinEchoLength_unit" not in self.params:
-                raise RuntimeError("SpinEchoLength has no units")
-            if "Wavelength_unit" not in self.params:
-                raise RuntimeError("Wavelength has no units")
-            if params["SpinEchoLength_unit"] != params["Wavelength_unit"]:
-                raise RuntimeError("The spin echo data has rudely used "
-                                   "different units for the spin echo length "
-                                   "and the wavelength.  While sasview could "
-                                   "handle this instance, it is a violation "
-                                   "of the file format and will not be "
-                                   "handled by other software.")
+        self.current_dataset.x = x
+        self.current_dataset.y = y
+        self.current_dataset.lam = lam
+        self.current_dataset.dy = dy
+        self.current_dataset.dx = dx
+        self.current_dataset.dlam = dlam
+        self.current_datainfo.isSesans = True
 
-            headers = input_f.readline().split()
+        self.current_datainfo._yunit = y_unit
+        self.current_datainfo._xunit = x_unit
+        self.current_datainfo.source.wavelength_unit = lam_unit
+        self.current_datainfo.source.wavelength = lam
+        self.current_datainfo.filename = os.path.basename(self.f_open.name)
+        self.current_dataset.xaxis(r"\rm{z}", x_unit)
+        # Adjust label to ln P/(lam^2 t), remove lam column refs
+        self.current_dataset.yaxis(r"\rm{ln(P)/(t \lambda^2)}", y_unit)
+        # Store loading process information
+        self.current_datainfo.meta_data['loader'] = self.type_name
+        self.current_datainfo.sample.name = params["Sample"]
+        self.current_datainfo.sample.ID = params["DataFileTitle"]
+        self.current_datainfo.sample.thickness = self._unit_conversion(
+            float(params["Thickness"]), "cm",
+            self._unit_fetch("Thickness"))[0]
 
-            self._insist_header(headers, "SpinEchoLength")
-            self._insist_header(headers, "Depolarisation")
-            self._insist_header(headers, "Depolarisation_error")
-            self._insist_header(headers, "Wavelength")
+        self.current_datainfo.sample.zacceptance = (
+            float(params["Theta_zmax"]),
+            self._unit_fetch("Theta_zmax"))
 
-            data = np.loadtxt(input_f)
+        self.current_datainfo.sample.yacceptance = (
+            float(params["Theta_ymax"]),
+            self._unit_fetch("Theta_ymax"))
 
-            if data.shape[1] != len(headers):
-                raise RuntimeError(
-                    "File has {} headers, but {} columns".format(
-                        len(headers),
-                        data.shape[1]))
-
-            if not data.size:
-                raise RuntimeError("{} is empty".format(path))
-            x = data[:, headers.index("SpinEchoLength")]
-            if "SpinEchoLength_error" in headers:
-                dx = data[:, headers.index("SpinEchoLength_error")]
-            else:
-                dx = x * 0.05
-            lam = data[:, headers.index("Wavelength")]
-            if "Wavelength_error" in headers:
-                dlam = data[:, headers.index("Wavelength_error")]
-            else:
-                dlam = lam * 0.05
-            y = data[:, headers.index("Depolarisation")]
-            dy = data[:, headers.index("Depolarisation_error")]
-
-            lam_unit = self._unit_fetch("Wavelength")
-            x, x_unit = self._unit_conversion(x, "A",
-                                              self._unit_fetch(
-                                                  "SpinEchoLength"))
-            dx, dx_unit = self._unit_conversion(
-                dx, lam_unit,
-                self._unit_fetch("SpinEchoLength"))
-            dlam, dlam_unit = self._unit_conversion(
-                dlam, lam_unit,
-                self._unit_fetch("Wavelength"))
-            y_unit = self._unit_fetch("Depolarisation")
-
-            output = Data1D(x=x, y=y, lam=lam, dy=dy, dx=dx, dlam=dlam,
-                            isSesans=True)
-
-            output.y_unit = y_unit
-            output.x_unit = x_unit
-            output.source.wavelength_unit = lam_unit
-            output.source.wavelength = lam
-            self.filename = output.filename = basename
-            output.xaxis(r"\rm{z}", x_unit)
-            # Adjust label to ln P/(lam^2 t), remove lam column refs
-            output.yaxis(r"\rm{ln(P)/(t \lambda^2)}", y_unit)
-            # Store loading process information
-            output.meta_data['loader'] = self.type_name
-            output.sample.name = params["Sample"]
-            output.sample.ID = params["DataFileTitle"]
-            output.sample.thickness = self._unit_conversion(
-                float(params["Thickness"]), "cm",
-                self._unit_fetch("Thickness"))[0]
-
-            output.sample.zacceptance = (
-                float(params["Theta_zmax"]),
-                self._unit_fetch("Theta_zmax"))
-
-            output.sample.yacceptance = (
-                float(params["Theta_ymax"]),
-                self._unit_fetch("Theta_ymax"))
-            return output
+        self.send_to_output()
 
     @staticmethod
     def _insist_header(headers, name):
         if name not in headers:
-            raise RuntimeError(
+            raise FileContentsException(
                 "Missing {} column in spin echo data".format(name))
 
     @staticmethod

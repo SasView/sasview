@@ -85,7 +85,7 @@ class DataManager(object):
         data.clone_without_data(clone=new_plot)
         #creating a name for data
         title = ""
-        file_name = os.path.basename(path) if path is not None else data.filename
+        file_name = os.path.basename(path) if path is not None else os.path.basename(data.filename)
         if file_name:
             name = file_name
         elif data.run:
@@ -99,7 +99,10 @@ class DataManager(object):
         if title.strip() == "":
             title = file_name
 
-        if new_plot.filename.strip() == "":
+        stripped_filename = new_plot.filename.strip()
+        if not stripped_filename:
+            new_plot.filename = file_name
+        if stripped_filename != os.path.basename(stripped_filename):
             new_plot.filename = file_name
 
         new_plot.name = name
