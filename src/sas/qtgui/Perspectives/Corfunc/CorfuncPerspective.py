@@ -58,11 +58,21 @@ class MyMplCanvas(FigureCanvas):
         if self.qmax2:
             self.axes.axvline(self.qmax2)
         if self.extrap:
-            print(self.extrap)
             self.axes.plot(self.extrap.x, self.extrap.y)
 
         self.draw()
 
+    def drawRealSpace(self):
+        self.fig.clf()
+
+        self.axes = self.fig.add_subplot(111)
+        self.axes.set_xscale("linear")
+        self.axes.set_yscale("linear")
+
+        if self.data:
+            self.axes.plot(self.data.x, self.data.y)
+
+        self.draw()
 
 
     # def sizeHint(self):
@@ -90,7 +100,9 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         self._calculator = CorfuncCalculator()
 
         self._canvas = MyMplCanvas(self)
+        self._realplot = MyMplCanvas(self)
         self.verticalLayout_7.insertWidget(0,self._canvas)
+        self.verticalLayout_7.insertWidget(1, self._realplot)
 
         # Connect buttons to slots.
         # Needs to be done early so default values propagate properly.
@@ -105,7 +117,7 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
     def setupSlots(self):
         self.extractBtn.clicked.connect(self.action)
         self.extrapolateBtn.clicked.connect(self.extrapolate)
-        self.transformBtn.clicked.connect(self.action)
+        self.transformBtn.clicked.connect(self.transform)
 
         self.calculateBgBtn.clicked.connect(self.calculateBackground)
 
@@ -158,10 +170,26 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         self.guinierB.setValue(params['B'])
         self.porodK.setValue(params['K'])
         self.porodSigma.setValue(params['sigma'])
-        print(params)
         self._canvas.extrap = extrapolation
         self._canvas.drawQSpace()
 
+
+    def transform(self):
+        if self.fourierBtn.isChecked():
+            method = "fourier"
+        elif self.hilbertBtn.isChecked():
+            method = "hilbert"
+
+        extrap = self._canvas.extrap
+        bg = self._calculator.background
+        def updatefn(*args, **kwargs):
+            pass
+
+        def completefn(transform):
+            self._realplot.data = transform
+            self._realplot.drawRealSpace()
+
+        self._calculator.compute_transform(extrap, method, bg, completefn, updatefn)
 
 
     def setupMapper(self):
