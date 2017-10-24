@@ -3,7 +3,7 @@ import os
 import sys
 import sasmodels
 
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui, QtCore, QtWebKit
 from sas.qtgui.Perspectives.Fitting.UI.GPUOptionsUI import Ui_GPUOptions
 
 try:
@@ -92,18 +92,25 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
         """
         Run the model tests when the test button is clicked
         """
+        # TODO: Do something
         pass
 
     def helpButtonClicked(self):
         """
         Open the help menu when the help button is clicked
         """
-        pass
+        tree_location = "user/sasgui/perspectives/fitting/gpu_setup.html"
+        anchor = "#device-selection"
+        self.helpView = QtWebKit.QWebView()
+        help_location = tree_location + anchor
+        self.helpView.load(QtCore.QUrl(help_location))
+        self.helpView.show()
 
     def reject(self):
         """
         Close the window without modifying SAS_OPENCL
         """
+        # FIXME: Reset option to original value
         self.close()
         self.open()
 
