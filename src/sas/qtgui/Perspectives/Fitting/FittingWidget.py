@@ -12,6 +12,7 @@ from PyQt4 import QtGui
 from PyQt4 import QtCore
 from PyQt4 import QtWebKit
 
+from sasmodels import product
 from sasmodels import generate
 from sasmodels import modelinfo
 from sasmodels.sasview_model import load_standard_models
@@ -1261,6 +1262,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         structure_module = generate.load_kernel_module(structure_factor)
         structure_parameters = modelinfo.make_parameter_table(getattr(structure_module, 'parameters', []))
+        structure_kernel = self.models[structure_factor]()
+
+        self.kernel_module._model_info = product.make_product_info(self.kernel_module._model_info, structure_kernel._model_info)
 
         new_rows = FittingUtilities.addSimpleParametersToModel(structure_parameters, self.is2D)
         for row in new_rows:
