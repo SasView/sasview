@@ -27,7 +27,6 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
     """
 
     clicked = False
-    checkBoxes = None
     sas_open_cl = None
 
     def __init__(self, parent=None):
@@ -45,7 +44,6 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
         cl_tuple = _get_clinfo()
         i = 0
         self.sas_open_cl = os.environ.get("SAS_OPENCL", "")
-        self.checkBoxes = []
         for title, descr in cl_tuple:
             checkBox = QtGui.QCheckBox(self.openCLCheckBoxGroup)
             checkBox.setGeometry(20, 20 + i, 351, 30)
@@ -54,7 +52,6 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
             if (descr == self.sas_open_cl) or (title == "None" and not self.clicked):
                 checkBox.click()
                 self.clicked = True
-            self.checkBoxes.append(checkBox)
             # Expand group and shift items down as more are added
             self.openCLCheckBoxGroup.resize(391, 60 + i)
             self.okButton.setGeometry(QtCore.QRect(20, 90 + i, 93, 28))
@@ -70,20 +67,24 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
         """
         self.testButton.clicked.connect(lambda: self.testButtonClicked())
         self.helpButton.clicked.connect(lambda: self.helpButtonClicked())
-        self.openCLCheckBoxGroup.clicked.connect(lambda: self.checked())
+        for item in self.openCLCheckBoxGroup.findChildren(QtGui.QCheckBox):
+            item.clicked.connect(lambda: self.checked())
 
     def checked(self):
         """
         Action triggered when box is selected
         """
-        selected_box = None
-        for box in self.checkBoxes:
-            if box.isChecked() and box.getText() != self.sas_open_cl:
-                selected_box = box
-            else:
+        checked = None
+        for box in self.openCLCheckBoxGroup.findChildren(QtGui.QCheckBox):
+            if box.isChecked() and (str(box.text()) == self.sas_open_cl or (
+                            str(box.text()) == "No OpenCL" and self.sas_open_cl == "")):
                 box.setChecked(False)
-        if selected_box.getText():
-            self.sas_open_cl = self.option_button[selected_box.title]
+            elif not box.isChecked():
+                pass
+            else:
+                checked = box
+        if hasattr(checked, "text"):
+            self.sas_open_cl = str(checked.text())
         else:
             self.sas_open_cl = None
 
@@ -104,7 +105,6 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
         Close the window without modifying SAS_OPENCL
         """
         self.close()
-        self.parent.gpu_options_widget = GPUOptions(self)
         self.open()
 
     def accept(self):
@@ -129,6 +129,7 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
         """
         Overwrite QDialog close method to allow for custom widget close
         """
+        self.parent.gpu_options_widget = reload(GPUOptions(self))
         self.reject()
 
 
