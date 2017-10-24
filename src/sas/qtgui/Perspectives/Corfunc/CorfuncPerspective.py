@@ -24,7 +24,8 @@ from matplotlib.figure import Figure
 
 class MyMplCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
+    def __init__(self, model, parent=None, width=5, height=4, dpi=100):
+        self.model = model
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = self.fig.add_subplot(111)
 
@@ -37,26 +38,29 @@ class MyMplCanvas(FigureCanvas):
         # FigureCanvas.updateGeometry(self)
 
         self.data = None
-        self.qmin = None
-        self.qmax1 = None
-        self.qmax2 = None
         self.extrap = None
 
     def drawQSpace(self):
         self.fig.clf()
 
+        self.qmin = None
+        self.qmax1 = None
+        self.qmax2 = None
+
         self.axes = self.fig.add_subplot(111)
         self.axes.set_xscale("log")
         self.axes.set_yscale("log")
 
+        qmin = float(self.model.item(W.W_QMIN).text())
+        qmax1 = float(self.model.item(W.W_QMAX).text())
+        qmax2 = float(self.model.item(W.W_QCUTOFF).text())
+
         if self.data:
             self.axes.plot(self.data.x, self.data.y)
-        if self.qmin:
-            self.axes.axvline(self.qmin)
-        if self.qmax1:
-            self.axes.axvline(self.qmax1)
-        if self.qmax2:
-            self.axes.axvline(self.qmax2)
+            self.axes.axvline(qmin)
+            self.axes.axvline(qmax1)
+            self.axes.axvline(qmax2)
+            self.axes.set_xlim(min(self.data.x), max(self.data.x)*1.5-0.5*min(self.data.x))
         if self.extrap:
             self.axes.plot(self.extrap.x, self.extrap.y)
 
@@ -71,6 +75,7 @@ class MyMplCanvas(FigureCanvas):
 
         if self.data:
             self.axes.plot(self.data.x, self.data.y)
+            self.axes.set_xlim(min(self.data.x), max(self.data.x)/4)
 
         self.draw()
 
@@ -98,8 +103,8 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         self.communicate = GuiUtils.Communicate()
         self._calculator = CorfuncCalculator()
 
-        self._canvas = MyMplCanvas(self)
-        self._realplot = MyMplCanvas(self)
+        self._canvas = MyMplCanvas(self.model, self)
+        self._realplot = MyMplCanvas(self.model, self)
         self.verticalLayout_7.insertWidget(0, self._canvas)
         self.verticalLayout_7.insertWidget(1, self._realplot)
 
@@ -159,7 +164,6 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         else:
             print("{} Changed".format(item))
 
-        self._update_calculator()
         self.mapper.toFirst()
         self._canvas.drawQSpace()
 
@@ -171,6 +175,7 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         self._calculator.background = float(self.model.item(W.W_BACKGROUND).text())
 
     def extrapolate(self):
+        self._update_calculator()
         params, extrapolation = self._calculator.compute_extrapolation()
 
         self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem(str(params['A'])))
@@ -204,6 +209,7 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
             self.model.setItem(W.W_POLY, QtGui.QStandardItem(str(params['A'])))
             self.model.setItem(W.W_PERIOD, QtGui.QStandardItem(str(params['max'])))
 
+        self._update_calculator()
         self._calculator.compute_transform(extrap, method, bg, completefn, updatefn)
 
 
@@ -232,6 +238,7 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         self.mapper.toFirst()
 
     def calculateBackground(self):
+        self._update_calculator()
         bg = self._calculator.compute_background()
         temp = QtGui.QStandardItem(str(bg))
         self.model.setItem(W.W_BACKGROUND, temp)
