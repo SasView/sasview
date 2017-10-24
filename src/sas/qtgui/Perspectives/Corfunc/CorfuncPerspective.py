@@ -115,7 +115,6 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         self.setupMapper()
 
     def setupSlots(self):
-        self.extractBtn.clicked.connect(self.action)
         self.extrapolateBtn.clicked.connect(self.extrapolate)
         self.transformBtn.clicked.connect(self.transform)
 
@@ -188,6 +187,13 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         def completefn(transform):
             self._realplot.data = transform
             self._realplot.drawRealSpace()
+            params = self._calculator.extract_parameters(transform)
+            self.avgCoreThick.setValue(params["d0"])
+            self.avgHardBlock.setValue(params["Lc"])
+            self.avgIntThick.setValue(params["dtr"])
+            self.localCrystal.setValue(params["fill"])
+            self.polydisp.setValue(params["A"])
+            self.longPeriod.setValue(params["max"])
 
         self._calculator.compute_transform(extrap, method, bg, completefn, updatefn)
 
