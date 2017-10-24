@@ -51,12 +51,21 @@ DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 USING_TWISTED = True
 
 class ToolTippedItemModel(QtGui.QStandardItemModel):
-
-    def __init__(self, parent = None):
+    """
+    Subclass from QStandardItemModel to allow displaying tooltips in
+    QTableView model.
+    """
+    def __init__(self, parent=None):
         QtGui.QStandardItemModel.__init__(self,parent)
 
     def headerData(self, section, orientation, role):
-
+        """
+        Displays tooltip for each column's header
+        :param section:
+        :param orientation:
+        :param role:
+        :return:
+        """
         if role == QtCore.Qt.ToolTipRole:
             if orientation == QtCore.Qt.Horizontal:
                 return QtCore.QString(str(self.header_tooltips[section]))
