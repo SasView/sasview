@@ -355,6 +355,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Similarly on other tabs
         self.options_widget.setEnablementOnDataLoad()
 
+        # Reload the model
+	self.onSelectModel()
+
         # Smearing tab
         self.smearing_widget.updateSmearing(self.data)
 
