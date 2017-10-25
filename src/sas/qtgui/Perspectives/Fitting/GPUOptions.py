@@ -44,6 +44,8 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
         cl_tuple = _get_clinfo()
         i = 0
         self.sas_open_cl = os.environ.get("SAS_OPENCL", "")
+        self.setWindowFlags(self.windowFlags() | QtCore.Qt.CustomizeWindowHint)
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowCloseButtonHint)
         for title, descr in cl_tuple:
             checkBox = QtGui.QCheckBox(self.openCLCheckBoxGroup)
             checkBox.setGeometry(20, 20 + i, 351, 30)
@@ -110,9 +112,8 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
         """
         Close the window without modifying SAS_OPENCL
         """
-        # FIXME: Reset option to original value
-        self.close()
-        self.open()
+        self.closeEvent(None)
+        self.parent.gpu_options_widget.open()
 
     def accept(self):
         """
@@ -130,14 +131,14 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
             sasmodels.kernelcl.ENV = None
 
         reload(sasmodels.core)
-        super(GPUOptions, self).accept()
+        super(GPUOptions, self).reject()
 
     def closeEvent(self, event):
         """
         Overwrite QDialog close method to allow for custom widget close
         """
-        self.parent.gpu_options_widget = reload(GPUOptions(self))
-        self.reject()
+        self.close()
+        self.parent.gpu_options_widget = GPUOptions(self)
 
 
 def _get_clinfo():
