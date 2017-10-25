@@ -124,9 +124,12 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
     def setup_slots(self):
         """Connect the buttons to their appropriate slots."""
         self.extrapolateBtn.clicked.connect(self.extrapolate)
+        self.extrapolateBtn.setEnabled(False)
         self.transformBtn.clicked.connect(self.transform)
+        self.transformBtn.setEnabled(False)
 
         self.calculateBgBtn.clicked.connect(self.calculate_background)
+        self.calculateBgBtn.setEnabled(False)
 
         self.model.itemChanged.connect(self.model_changed)
 
@@ -185,6 +188,7 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
 
         self._canvas.extrap = extrapolation
         self._canvas.draw_q_space()
+        self.transformBtn.setEnabled(True)
 
     def transform(self):
         """Calculate the real space version of the extrapolation."""
@@ -276,6 +280,8 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         model_item = data_item[0]
         data = GuiUtils.dataFromItem(model_item)
         self._calculator.set_data(data)
+        self.calculateBgBtn.setEnabled(True)
+        self.extrapolateBtn.setEnabled(True)
 
         self._canvas.data = data
         self._canvas.draw_q_space()
