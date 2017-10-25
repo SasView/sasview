@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>OpenCL Test Results</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../../../UI/res/ball.ico</normaloff>../../../UI/res/ball.ico</iconset>
+  </property>
   <widget class="QDialogButtonBox" name="okButton">
    <property name="geometry">
     <rect>

@@ -47,28 +47,17 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
         """
         # Get list of openCL options and add to GUI
         cl_tuple = _get_clinfo()
-        i = 0
         self.sas_open_cl = os.environ.get("SAS_OPENCL", "")
         for title, descr in cl_tuple:
-            # Create an list item for each openCL option
-            check_box = QtGui.QCheckBox(self.openCLCheckBoxGroup)
-            check_box.setGeometry(20, 20 + i, 351, 30)
+            # Create an item for each openCL option
+            check_box = QtGui.QCheckBox()
             check_box.setObjectName(_fromUtf8(descr))
             check_box.setText(_translate("GPUOptions", descr, None))
+            self.optionsLayout.addWidget(check_box)
             if (descr == self.sas_open_cl) or (
                             title == "None" and not self.clicked):
                 check_box.click()
                 self.clicked = True
-
-            # Expand group and shift items down as more are added
-            self.openCLCheckBoxGroup.resize(391, 60 + i)
-            self.warningMessage.setGeometry(QtCore.QRect(20, 90 + i, 391, 37))
-            self.okButton.setGeometry(QtCore.QRect(20, 127 + i, 93, 28))
-            self.resetButton.setGeometry(QtCore.QRect(120, 127 + i, 93, 28))
-            self.testButton.setGeometry(QtCore.QRect(220, 127 + i, 93, 28))
-            self.helpButton.setGeometry(QtCore.QRect(320, 127 + i, 93, 28))
-            self.resize(440, 167 + i)
-            i += 30
 
     def createLinks(self):
         """
