@@ -66,7 +66,7 @@ class MyMplCanvas(FigureCanvas):
 
         self.draw()
 
-    def drawRealSpace(self):
+    def draw_real_space(self):
         self.fig.clf()
 
         self.axes = self.fig.add_subplot(111)
@@ -74,8 +74,11 @@ class MyMplCanvas(FigureCanvas):
         self.axes.set_yscale("linear")
 
         if self.data:
-            self.axes.plot(self.data.x, self.data.y)
-            self.axes.set_xlim(min(self.data.x), max(self.data.x)/4)
+            self.axes.plot(self.data.x, self.data.y, label="1D Correlation")
+            self.axes.plot(self.data3.x, self.data3.y, label="3D Correlation")
+            self.axes.plot(self.data_idf.x, self.data_idf.y, label="Interface Distribution Function")
+            self.axes.set_xlim(min(self.data.x), max(self.data.x) / 4)
+            self.axes.legend()
 
         self.draw()
 
@@ -187,16 +190,25 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         def updatefn(*args, **kwargs):
             pass
 
-        def completefn(transform):
-            self._realplot.data = transform
-            self._realplot.drawRealSpace()
-            params = self._calculator.extract_parameters(transform)
-            self.model.setItem(W.W_CORETHICK, QtGui.QStandardItem(str(params['d0'])))
-            self.model.setItem(W.W_INTTHICK, QtGui.QStandardItem(str(params['dtr'])))
-            self.model.setItem(W.W_HARDBLOCK, QtGui.QStandardItem(str(params['Lc'])))
-            self.model.setItem(W.W_CRYSTAL, QtGui.QStandardItem(str(params['fill'])))
-            self.model.setItem(W.W_POLY, QtGui.QStandardItem(str(params['A'])))
-            self.model.setItem(W.W_PERIOD, QtGui.QStandardItem(str(params['max'])))
+        def completefn(transforms):
+            (trans1, trans3, idf) = transforms
+            self._realplot.data = trans1
+            self._realplot.data3 = trans3
+            self._realplot.data_idf = idf
+            self._realplot.draw_real_space()
+            params = self._calculator.extract_parameters(trans1)
+            self.model.setItem(W.W_CORETHICK,
+                               QtGui.QStandardItem(str(params['d0'])))
+            self.model.setItem(W.W_INTTHICK,
+                               QtGui.QStandardItem(str(params['dtr'])))
+            self.model.setItem(W.W_HARDBLOCK,
+                               QtGui.QStandardItem(str(params['Lc'])))
+            self.model.setItem(W.W_CRYSTAL,
+                               QtGui.QStandardItem(str(params['fill'])))
+            self.model.setItem(W.W_POLY,
+                               QtGui.QStandardItem(str(params['A'])))
+            self.model.setItem(W.W_PERIOD,
+                               QtGui.QStandardItem(str(params['max'])))
 
         self._update_calculator()
         self._calculator.compute_transform(extrap, method, bg, completefn, updatefn)
