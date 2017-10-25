@@ -153,17 +153,6 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         self.model.setItem(W.W_PERIOD, QtGui.QStandardItem(str(0)))
 
     def modelChanged(self, item):
-        if item.row() == W.W_QMIN:
-            value = float(self.model.item(W.W_QMIN).text())
-            self._canvas.qmin = value
-        elif item.row() == W.W_QMAX or item.row() == W.W_QCUTOFF:
-            a = float(self.model.item(W.W_QMAX).text())
-            b = float(self.model.item(W.W_QCUTOFF).text())
-            self._canvas.qmax1 = a
-            self._canvas.qmax2 = b
-        else:
-            print("{} Changed".format(item))
-
         self.mapper.toFirst()
         self._canvas.drawQSpace()
 
