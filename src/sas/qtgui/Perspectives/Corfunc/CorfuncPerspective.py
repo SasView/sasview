@@ -1,14 +1,8 @@
 # global
-import sys
 from PyQt4 import QtCore
 from PyQt4 import QtGui
-from PyQt4 import QtWebKit
-
-from twisted.internet import threads
-from twisted.internet import reactor
 
 # sas-global
-from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 
@@ -17,35 +11,25 @@ from UI.CorfuncPanel import Ui_CorfuncDialog
 # from InvariantDetails import DetailsDialog
 from CorfuncUtils import WIDGETS as W
 
-from matplotlib.backends import qt_compat
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg \
+    as FigureCanvas
 from matplotlib.figure import Figure
 
 
 class MyMplCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
-    def __init__(self, model, parent=None, width=5, height=4, dpi=100):
+    def __init__(self, model, width=5, height=4, dpi=100):
         self.model = model
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = self.fig.add_subplot(111)
 
         FigureCanvas.__init__(self, self.fig)
-        # self.reparent(parent, QPoint(0, 0))
-
-        # FigureCanvas.setSizePolicy(self,
-        #                            QSizePolicy.Expanding,
-        #                            QSizePolicy.Expanding)
-        # FigureCanvas.updateGeometry(self)
 
         self.data = None
         self.extrap = None
 
-    def drawQSpace(self):
+    def draw_q_space(self):
         self.fig.clf()
-
-        self.qmin = None
-        self.qmax1 = None
-        self.qmax2 = None
 
         self.axes = self.fig.add_subplot(111)
         self.axes.set_xscale("log")
@@ -60,7 +44,8 @@ class MyMplCanvas(FigureCanvas):
             self.axes.axvline(qmin)
             self.axes.axvline(qmax1)
             self.axes.axvline(qmax2)
-            self.axes.set_xlim(min(self.data.x), max(self.data.x)*1.5-0.5*min(self.data.x))
+            self.axes.set_xlim(min(self.data.x), max(self.data.x) * 1.5 -
+                               0.5 * min(self.data.x))
         if self.extrap:
             self.axes.plot(self.extrap.x, self.extrap.y)
 
@@ -76,26 +61,19 @@ class MyMplCanvas(FigureCanvas):
         if self.data:
             self.axes.plot(self.data.x, self.data.y, label="1D Correlation")
             self.axes.plot(self.data3.x, self.data3.y, label="3D Correlation")
-            self.axes.plot(self.data_idf.x, self.data_idf.y, label="Interface Distribution Function")
+            self.axes.plot(self.data_idf.x, self.data_idf.y,
+                           label="Interface Distribution Function")
             self.axes.set_xlim(min(self.data.x), max(self.data.x) / 4)
             self.axes.legend()
 
         self.draw()
 
 
-    # def sizeHint(self):
-    #     w, h = self.get_width_height()
-    #     return QSize(w, h)
-
-    # def minimumSizeHint(self):
-    #     return QSize(10, 10)
-
-
 class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
-    name = "Corfunc" # For displaying in the combo box
-    #def __init__(self, manager=None, parent=None):
+    name = "Corfunc"  # For displaying in the combo box
+
     def __init__(self, parent=None):
         super(CorfuncWindow, self).__init__()
         self.setupUi(self)
@@ -106,22 +84,22 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         self.communicate = GuiUtils.Communicate()
         self._calculator = CorfuncCalculator()
 
-        self._canvas = MyMplCanvas(self.model, self)
-        self._realplot = MyMplCanvas(self.model, self)
+        self._canvas = MyMplCanvas(self.model)
+        self._realplot = MyMplCanvas(self.model)
         self.verticalLayout_7.insertWidget(0, self._canvas)
         self.verticalLayout_7.insertWidget(1, self._realplot)
 
         # Connect buttons to slots.
         # Needs to be done early so default values propagate properly.
-        self.setupSlots()
+        self.setup_slots()
 
         # Set up the model.
-        self.setupModel()
+        self.setup_model()
 
         # Set up the mapper
-        self.setupMapper()
+        self.setup_mapper()
 
-    def setupSlots(self):
+    def setup_slots(self):
         self.extrapolateBtn.clicked.connect(self.extrapolate)
         self.transformBtn.clicked.connect(self.transform)
 
@@ -129,7 +107,7 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
 
         self.model.itemChanged.connect(self.modelChanged)
 
-    def setupModel(self):
+    def setup_model(self):
         self.model.setItem(W.W_QMIN,
                            QtGui.QStandardItem("0.01"))
         self.model.setItem(W.W_QMAX,
@@ -157,27 +135,28 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
 
     def modelChanged(self, item):
         self.mapper.toFirst()
-        self._canvas.drawQSpace()
+        self._canvas.draw_q_space()
 
     def _update_calculator(self):
         self._calculator.lowerq = float(self.model.item(W.W_QMIN).text())
         qmax1 = float(self.model.item(W.W_QMAX).text())
         qmax2 = float(self.model.item(W.W_QCUTOFF).text())
         self._calculator.upperq = (qmax1, qmax2)
-        self._calculator.background = float(self.model.item(W.W_BACKGROUND).text())
+        self._calculator.background = \
+            float(self.model.item(W.W_BACKGROUND).text())
 
     def extrapolate(self):
         self._update_calculator()
-        params, extrapolation = self._calculator.compute_extrapolation()
+        params, extrapolation, _ = self._calculator.compute_extrapolation()
 
         self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem(str(params['A'])))
         self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem(str(params['B'])))
         self.model.setItem(W.W_PORODK, QtGui.QStandardItem(str(params['K'])))
-        self.model.setItem(W.W_PORODSIGMA, QtGui.QStandardItem(str(params['sigma'])))
+        self.model.setItem(W.W_PORODSIGMA,
+                           QtGui.QStandardItem(str(params['sigma'])))
 
         self._canvas.extrap = extrapolation
-        self._canvas.drawQSpace()
-
+        self._canvas.draw_q_space()
 
     def transform(self):
         if self.fourierBtn.isChecked():
@@ -187,6 +166,7 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
 
         extrap = self._canvas.extrap
         bg = float(self.model.item(W.W_BACKGROUND).text())
+
         def updatefn(*args, **kwargs):
             pass
 
@@ -211,10 +191,10 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
                                QtGui.QStandardItem(str(params['max'])))
 
         self._update_calculator()
-        self._calculator.compute_transform(extrap, method, bg, completefn, updatefn)
+        self._calculator.compute_transform(extrap, method, bg,
+                                           completefn, updatefn)
 
-
-    def setupMapper(self):
+    def setup_mapper(self):
         self.mapper = QtGui.QDataWidgetMapper(self)
         self.mapper.setOrientation(QtCore.Qt.Vertical)
         self.mapper.setModel(self.model)
@@ -268,7 +248,7 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         self._calculator.set_data(data)
 
         self._canvas.data = data
-        self._canvas.drawQSpace()
+        self._canvas.draw_q_space()
 
         # self.model.item(WIDGETS.W_FILENAME).setData(QtCoreQVariant(self._model_item.text()))
 
@@ -279,18 +259,3 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         assert isinstance(value, bool)
 
         self._allow_close = value
-
-
-if __name__ == "__main__":
-    app = QtGui.QApplication([])
-    import qt4reactor
-    # qt4reactor.install()
-    # DO NOT move the following import to the top!
-    # (unless you know what you're doing)
-    from twisted.internet import reactor
-    dlg = CorfuncWindow(reactor)
-    print(dlg)
-    dlg.show()
-    # print(reactor)
-    # reactor.run()
-    sys.exit(app.exec_())
