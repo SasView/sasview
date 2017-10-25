@@ -188,10 +188,7 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
 
     def transform(self):
         """Calculate the real space version of the extrapolation."""
-        if self.fourierBtn.isChecked():
-            method = "fourier"
-        elif self.hilbertBtn.isChecked():
-            method = "hilbert"
+        method = str(self.model.item(W.W_TRANSFORM).text()).lower()
 
         extrap = self._canvas.extrap
         background = float(self.model.item(W.W_BACKGROUND).text())
@@ -232,6 +229,7 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         self.mapper.addMapping(self.qMax1, W.W_QMAX)
         self.mapper.addMapping(self.qMax2, W.W_QCUTOFF)
         self.mapper.addMapping(self.bg, W.W_BACKGROUND)
+        self.mapper.addMapping(self.transformCombo, W.W_TRANSFORM)
 
         self.mapper.addMapping(self.guinierA, W.W_GUINIERA)
         self.mapper.addMapping(self.guinierB, W.W_GUINIERB)
