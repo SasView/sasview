@@ -1,3 +1,6 @@
+"""
+This module provides the intelligence behind the gui interface for Corfunc.
+"""
 # pylint: disable=E1101
 
 # global
@@ -5,8 +8,10 @@ from PyQt4 import QtCore
 from PyQt4 import QtGui
 
 # sas-global
+# pylint: disable=import-error, no-name-in-module
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
+# pylint: enable=import-error, no-name-in-module
 
 # local
 from UI.CorfuncPanel import Ui_CorfuncDialog
@@ -52,8 +57,8 @@ class MyMplCanvas(FigureCanvas):
             self.axes.axvline(qmin)
             self.axes.axvline(qmax1)
             self.axes.axvline(qmax2)
-            self.axes.set_xlim(min(self.data.x), max(self.data.x) * 1.5 -
-                               0.5 * min(self.data.x))
+            self.axes.set_xlim(min(self.data.x) / 2,
+                               max(self.data.x) * 1.5 - 0.5 * min(self.data.x))
         if self.extrap:
             self.axes.plot(self.extrap.x, self.extrap.y)
 
@@ -73,11 +78,12 @@ class MyMplCanvas(FigureCanvas):
         self.axes.set_yscale("linear")
 
         if self.data:
-            self.axes.plot(self.data.x, self.data.y, label="1D Correlation")
-            self.axes.plot(self.data3.x, self.data3.y, label="3D Correlation")
-            self.axes.plot(self.data_idf.x, self.data_idf.y,
+            data1, data3, data_idf = self.data
+            self.axes.plot(data1.x, data1.y, label="1D Correlation")
+            self.axes.plot(data3.x, data3.y, label="3D Correlation")
+            self.axes.plot(data_idf.x, data_idf.y,
                            label="Interface Distribution Function")
-            self.axes.set_xlim(min(self.data.x), max(self.data.x) / 4)
+            self.axes.set_xlim(min(data1.x), max(data1.x) / 4)
             self.axes.legend()
 
         self.draw()
@@ -87,6 +93,7 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
     """Displays the correlation function analysis of sas data."""
     name = "Corfunc"  # For displaying in the combo box
 
+# pylint: disable=unused-argument
     def __init__(self, parent=None):
         super(CorfuncWindow, self).__init__()
         self.setupUi(self)
@@ -195,12 +202,9 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
 
         def completefn(transforms):
             """Extract the values from the transforms and plot"""
-            (trans1, trans3, idf) = transforms
-            self._realplot.data = trans1
-            self._realplot.data3 = trans3
-            self._realplot.data_idf = idf
+            self._realplot.data = transforms
             self._realplot.draw_real_space()
-            params = self._calculator.extract_parameters(trans1)
+            params = self._calculator.extract_parameters(transforms[0])
             self.model.setItem(W.W_CORETHICK,
                                QtGui.QStandardItem(str(params['d0'])))
             self.model.setItem(W.W_INTTHICK,
@@ -250,7 +254,9 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         temp = QtGui.QStandardItem(str(background))
         self.model.setItem(W.W_BACKGROUND, temp)
 
-    def allowBatch(self):
+    # pylint: disable=invalid-name
+    @staticmethod
+    def allowBatch():
         """
         We cannot perform corfunc analysis in batch at this time.
         """
@@ -285,3 +291,4 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         assert isinstance(value, bool)
 
         self._allow_close = value
+    # pylint: enable=invalid-name
