@@ -94,7 +94,7 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
         else:
             self.sas_open_cl = None
 
-    def set_open_cl(self):
+    def set_sas_open_cl(self):
         """
         Set openCL value when tests run or OK button clicked
         """
@@ -117,7 +117,7 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
         Run sasmodels check from here and report results from
         """
 
-        no_opencl_msg = self.set_open_cl()
+        no_opencl_msg = self.set_sas_open_cl()
 
         # Only import when tests are run
         from sasmodels.model_test import model_tests
@@ -196,15 +196,15 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
         """
         Close the window after modifying the SAS_OPENCL value
         """
-        self.set_open_cl()
-        super(GPUOptions, self).reject()
+        self.set_sas_open_cl()
+        self.closeEvent(None)
 
     def closeEvent(self, event):
         """
         Overwrite QDialog close method to allow for custom widget close
         """
         self.close()
-        self.parent.gpu_options_widget = GPUOptions(self)
+        self.parent.gpu_options_widget = GPUOptions(self.parent)
 
 
 class GPUTestResults(QtGui.QDialog, Ui_GPUTestResults):
