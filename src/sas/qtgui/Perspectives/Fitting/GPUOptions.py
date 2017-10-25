@@ -58,6 +58,9 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
                             title == "None" and not self.clicked):
                 check_box.click()
                 self.clicked = True
+        self.openCLCheckBoxGroup.setMinimumWidth(
+            self.optionsLayout.sizeHint().width())
+        self.setMinimumWidth(self.verticalLayout.sizeHint().width())
 
     def createLinks(self):
         """

@@ -32,7 +32,7 @@
      <height>241</height>
     </rect>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout" stretch="5,1,1">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="5,1,0">
     <property name="sizeConstraint">
      <enum>QLayout::SetMinimumSize</enum>
     </property>
@@ -105,19 +105,19 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="testButton">
+        <property name="text">
+         <string>Test</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="helpButton">
         <property name="text">
          <string>Help</string>
         </property>
         <property name="autoDefault">
          <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="testButton">
-        <property name="text">
-         <string>Test</string>
         </property>
        </widget>
       </item>
