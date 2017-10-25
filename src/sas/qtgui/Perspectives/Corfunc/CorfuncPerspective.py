@@ -1,3 +1,5 @@
+# pylint: disable=E1101
+
 # global
 from PyQt4 import QtCore
 from PyQt4 import QtGui
@@ -29,6 +31,12 @@ class MyMplCanvas(FigureCanvas):
         self.extrap = None
 
     def draw_q_space(self):
+        """Draw the Q space data in the plot window
+
+        This draws the q space data in self.data, as well
+        as the bounds set by self.qmin, self.qmax1, and self.qmax2.
+        It will also plot the extrpolation in self.extrap, if it exists."""
+
         self.fig.clf()
 
         self.axes = self.fig.add_subplot(111)
@@ -52,6 +60,12 @@ class MyMplCanvas(FigureCanvas):
         self.draw()
 
     def draw_real_space(self):
+        """
+        This function draws the real space data onto the plot
+
+        The 1d correlation function in self.data, the 3d correlation function
+        in self.data3, and the interface distribution function in self.data_idf
+        are all draw in on the plot in linear cooredinates."""
         self.fig.clf()
 
         self.axes = self.fig.add_subplot(111)
@@ -70,8 +84,7 @@ class MyMplCanvas(FigureCanvas):
 
 
 class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
-    # The controller which is responsible for managing signal slots connections
-    # for the gui and providing an interface to the data model.
+    """Displays the correlation function analysis of sas data."""
     name = "Corfunc"  # For displaying in the combo box
 
     def __init__(self, parent=None):
@@ -80,9 +93,11 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
 
         self.setWindowTitle("Corfunc Perspective")
 
+        self.mapper = None
         self.model = QtGui.QStandardItemModel(self)
         self.communicate = GuiUtils.Communicate()
         self._calculator = CorfuncCalculator()
+        self._allow_close = True
 
         self._canvas = MyMplCanvas(self.model)
         self._realplot = MyMplCanvas(self.model)
@@ -100,14 +115,16 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         self.setup_mapper()
 
     def setup_slots(self):
+        """Connect the buttons to their appropriate slots."""
         self.extrapolateBtn.clicked.connect(self.extrapolate)
         self.transformBtn.clicked.connect(self.transform)
 
-        self.calculateBgBtn.clicked.connect(self.calculateBackground)
+        self.calculateBgBtn.clicked.connect(self.calculate_background)
 
-        self.model.itemChanged.connect(self.modelChanged)
+        self.model.itemChanged.connect(self.model_changed)
 
     def setup_model(self):
+        """Populate the model with default data."""
         self.model.setItem(W.W_QMIN,
                            QtGui.QStandardItem("0.01"))
         self.model.setItem(W.W_QMAX,
@@ -133,7 +150,10 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         self.model.setItem(W.W_POLY, QtGui.QStandardItem(str(0)))
         self.model.setItem(W.W_PERIOD, QtGui.QStandardItem(str(0)))
 
-    def modelChanged(self, item):
+    def model_changed(self, _):
+        """Actions to perform when the data is updated"""
+        if not self.mapper:
+            return
         self.mapper.toFirst()
         self._canvas.draw_q_space()
 
@@ -146,6 +166,7 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
             float(self.model.item(W.W_BACKGROUND).text())
 
     def extrapolate(self):
+        """Extend the experiemntal data with guinier and porod curves."""
         self._update_calculator()
         params, extrapolation, _ = self._calculator.compute_extrapolation()
 
@@ -159,18 +180,21 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         self._canvas.draw_q_space()
 
     def transform(self):
+        """Calculate the real space version of the extrapolation."""
         if self.fourierBtn.isChecked():
             method = "fourier"
         elif self.hilbertBtn.isChecked():
             method = "hilbert"
 
         extrap = self._canvas.extrap
-        bg = float(self.model.item(W.W_BACKGROUND).text())
+        background = float(self.model.item(W.W_BACKGROUND).text())
 
-        def updatefn(*args, **kwargs):
-            pass
+        def updatefn(msg):
+            """Report progress of transformation."""
+            self.communicate.statusBarUpdateSignal.emit(msg)
 
         def completefn(transforms):
+            """Extract the values from the transforms and plot"""
             (trans1, trans3, idf) = transforms
             self._realplot.data = trans1
             self._realplot.data3 = trans3
@@ -191,10 +215,11 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
                                QtGui.QStandardItem(str(params['max'])))
 
         self._update_calculator()
-        self._calculator.compute_transform(extrap, method, bg,
+        self._calculator.compute_transform(extrap, method, background,
                                            completefn, updatefn)
 
     def setup_mapper(self):
+        """Creating mapping between model and gui elements."""
         self.mapper = QtGui.QDataWidgetMapper(self)
         self.mapper.setOrientation(QtCore.Qt.Vertical)
         self.mapper.setModel(self.model)
@@ -218,10 +243,11 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
 
         self.mapper.toFirst()
 
-    def calculateBackground(self):
+    def calculate_background(self):
+        """Find a good estimate of the background value."""
         self._update_calculator()
-        bg = self._calculator.compute_background()
-        temp = QtGui.QStandardItem(str(bg))
+        background = self._calculator.compute_background()
+        temp = QtGui.QStandardItem(str(background))
         self.model.setItem(W.W_BACKGROUND, temp)
 
     def allowBatch(self):
@@ -243,8 +269,8 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
             msg = "Incorrect type passed to the Corfunc Perspective"
             raise AttributeError(msg)
 
-        self._model_item = data_item[0]
-        data = GuiUtils.dataFromItem(self._model_item)
+        model_item = data_item[0]
+        data = GuiUtils.dataFromItem(model_item)
         self._calculator.set_data(data)
 
         self._canvas.data = data
