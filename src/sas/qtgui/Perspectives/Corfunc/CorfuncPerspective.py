@@ -93,6 +93,8 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
     """Displays the correlation function analysis of sas data."""
     name = "Corfunc"  # For displaying in the combo box
 
+    trigger = QtCore.pyqtSignal(QtCore.QVariant)
+
 # pylint: disable=unused-argument
     def __init__(self, parent=None):
         super(CorfuncWindow, self).__init__()
@@ -132,6 +134,8 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         self.calculateBgBtn.setEnabled(False)
 
         self.model.itemChanged.connect(self.model_changed)
+
+        self.trigger.connect(self.finish_transform)
 
     def setup_model(self):
         """Populate the model with default data."""
@@ -203,25 +207,31 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
 
         def completefn(transforms):
             """Extract the values from the transforms and plot"""
-            self._realplot.data = transforms
-            self._realplot.draw_real_space()
-            params = self._calculator.extract_parameters(transforms[0])
-            self.model.setItem(W.W_CORETHICK,
-                               QtGui.QStandardItem(str(params['d0'])))
-            self.model.setItem(W.W_INTTHICK,
-                               QtGui.QStandardItem(str(params['dtr'])))
-            self.model.setItem(W.W_HARDBLOCK,
-                               QtGui.QStandardItem(str(params['Lc'])))
-            self.model.setItem(W.W_CRYSTAL,
-                               QtGui.QStandardItem(str(params['fill'])))
-            self.model.setItem(W.W_POLY,
-                               QtGui.QStandardItem(str(params['A'])))
-            self.model.setItem(W.W_PERIOD,
-                               QtGui.QStandardItem(str(params['max'])))
+            self.trigger.emit(transforms)
 
         self._update_calculator()
         self._calculator.compute_transform(extrap, method, background,
                                            completefn, updatefn)
+
+
+    def finish_transform(self, transforms):
+        transforms = transforms.toPyObject()
+        print(transforms)
+        params = self._calculator.extract_parameters(transforms[0])
+        self.model.setItem(W.W_CORETHICK,
+                           QtGui.QStandardItem(str(params['d0'])))
+        self.model.setItem(W.W_INTTHICK,
+                           QtGui.QStandardItem(str(params['dtr'])))
+        self.model.setItem(W.W_HARDBLOCK,
+                           QtGui.QStandardItem(str(params['Lc'])))
+        self.model.setItem(W.W_CRYSTAL,
+                           QtGui.QStandardItem(str(params['fill'])))
+        self.model.setItem(W.W_POLY,
+                           QtGui.QStandardItem(str(params['A'])))
+        self.model.setItem(W.W_PERIOD,
+                           QtGui.QStandardItem(str(params['max'])))
+        self._realplot.data = transforms
+        self._realplot.draw_real_space()
 
     def setup_mapper(self):
         """Creating mapping between model and gui elements."""
