@@ -5,6 +5,7 @@ import sasmodels
 import json
 import platform
 
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from PyQt4 import QtGui, QtCore, QtWebKit
 from sas.qtgui.Perspectives.Fitting.UI.GPUOptionsUI import Ui_GPUOptions
 from sas.qtgui.Perspectives.Fitting.UI.GPUTestResultsUI import Ui_GPUTestResults
@@ -37,6 +38,7 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
         self.parent = parent
         self.setupUi(self)
         self.addOpenCLOptions()
+        self.setFixedSize(self.size())
         self.createLinks()
 
     def addOpenCLOptions(self):
@@ -60,7 +62,7 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
 
             # Expand group and shift items down as more are added
             self.openCLCheckBoxGroup.resize(391, 60 + i)
-            self.label.setGeometry(QtCore.QRect(20, 90 + i, 391, 37))
+            self.warningMessage.setGeometry(QtCore.QRect(20, 90 + i, 391, 37))
             self.okButton.setGeometry(QtCore.QRect(20, 127 + i, 93, 28))
             self.resetButton.setGeometry(QtCore.QRect(120, 127 + i, 93, 28))
             self.testButton.setGeometry(QtCore.QRect(220, 127 + i, 93, 28))
@@ -72,10 +74,10 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
         """
         Link user interactions to function calls
         """
-        self.testButton.clicked.connect(lambda: self.testButtonClicked())
-        self.helpButton.clicked.connect(lambda: self.helpButtonClicked())
+        self.testButton.clicked.connect(self.testButtonClicked)
+        self.helpButton.clicked.connect(self.helpButtonClicked)
         for item in self.openCLCheckBoxGroup.findChildren(QtGui.QCheckBox):
-            item.clicked.connect(lambda: self.checked())
+            item.clicked.connect(self.checked)
 
     def checked(self):
         """
@@ -150,8 +152,6 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
             'failing tests': failures,
         }
 
-        msg_info = 'OpenCL tests results'
-
         msg = str(tests_completed) + ' tests completed.\n'
         if len(failures) > 0:
             msg += str(len(failures)) + ' tests failed.\n'
@@ -171,16 +171,16 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
         else:
             msg += "\nOpenCL driver: "
             msg += json.dumps(info['opencl']) + "\n"
-        GPUTestResults(self, msg, msg_info)
+        GPUTestResults(self, msg)
 
     def helpButtonClicked(self):
         """
         Open the help menu when the help button is clicked
         """
-        tree_location = "user/sasgui/perspectives/fitting/gpu_setup.html"
-        anchor = "#device-selection"
+        help_location = GuiUtils.HELP_DIRECTORY_LOCATION
+        help_location += "/user/sasgui/perspectives/fitting/gpu_setup.html"
+        help_location += "#device-selection"
         self.helpView = QtWebKit.QWebView()
-        help_location = tree_location + anchor
         self.helpView.load(QtCore.QUrl(help_location))
         self.helpView.show()
 
@@ -210,10 +210,11 @@ class GPUTestResults(QtGui.QDialog, Ui_GPUTestResults):
     """
     OpenCL Dialog to modify the OpenCL options
     """
-    def __init__(self, parent, msg, title):
+    def __init__(self, parent, msg):
         super(GPUTestResults, self).__init__(parent)
         self.setupUi(self)
         self.resultsText.setText(_translate("GPUTestResults", msg, None))
+        self.setFixedSize(self.size())
         self.open()
 
 
@@ -222,26 +223,26 @@ def _get_clinfo():
     Read in information about available OpenCL infrastructure
     """
     clinfo = []
-    platforms = []
+    cl_platforms = []
     try:
         import pyopencl as cl
-        platforms = cl.get_platforms()
+        cl_platforms = cl.get_platforms()
     except ImportError:
         print("pyopencl import failed. Using only CPU computations")
 
     p_index = 0
-    for platform in platforms:
+    for cl_platform in cl_platforms:
         d_index = 0
-        devices = platform.get_devices()
-        for device in devices:
-            if len(devices) > 1 and len(platforms) > 1:
+        cl_platforms = cl_platform.get_devices()
+        for cl_platform in cl_platforms:
+            if len(cl_platforms) > 1 and len(cl_platforms) > 1:
                 combined_index = ":".join([str(p_index), str(d_index)])
-            elif len(platforms) > 1:
+            elif len(cl_platforms) > 1:
                 combined_index = str(p_index)
             else:
                 combined_index = str(d_index)
-            clinfo.append((combined_index, ":".join([platform.name,
-                                                     device.name])))
+            clinfo.append((combined_index, ":".join([cl_platform.name,
+                                                     cl_platform.name])))
             d_index += 1
         p_index += 1
 

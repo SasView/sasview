@@ -622,8 +622,9 @@ class GuiManager(object):
 
     def actionGPU_Options(self):
         """
+        Load the OpenCL selection dialog if the fitting perspective is active
         """
-        if getattr(self._current_perspective, "gpu_options_widget"):
+        if hasattr(self._current_perspective, "gpu_options_widget"):
             self._current_perspective.gpu_options_widget.show()
         pass
 

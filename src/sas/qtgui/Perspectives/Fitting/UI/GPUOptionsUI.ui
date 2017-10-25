@@ -6,12 +6,18 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>440</width>
-    <height>211</height>
+    <width>438</width>
+    <height>206</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>OpenCL Options</string>
   </property>
   <widget class="QPushButton" name="testButton">
    <property name="geometry">
@@ -81,7 +87,7 @@
     <string>OK</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label">
+  <widget class="QLabel" name="warningMessage">
    <property name="geometry">
     <rect>
      <x>20</x>
@@ -113,7 +119,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>66</x>
-     <y>153</y>
+     <y>183</y>
     </hint>
     <hint type="destinationlabel">
      <x>219</x>
@@ -128,8 +134,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>166</x>
-     <y>153</y>
+     <x>266</x>
+     <y>183</y>
     </hint>
     <hint type="destinationlabel">
      <x>219</x>

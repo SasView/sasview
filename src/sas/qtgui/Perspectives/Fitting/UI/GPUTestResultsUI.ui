@@ -11,9 +11,9 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>OpenCL Test Results</string>
   </property>
-  <widget class="QDialogButtonBox" name="buttonBox">
+  <widget class="QDialogButtonBox" name="okButton">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -32,7 +32,7 @@
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QLabel" name="label">
+  <widget class="QLabel" name="falingTestsNoOpenCL">
    <property name="geometry">
     <rect>
      <x>20</x>
@@ -48,7 +48,7 @@
     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="label_2">
+  <widget class="QLabel" name="howToReportIssues">
    <property name="geometry">
     <rect>
      <x>20</x>
@@ -75,6 +75,12 @@
      <width>401</width>
      <height>321</height>
     </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
    </property>
    <property name="title">
     <string>OpenCL test results</string>
@@ -115,7 +121,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>okButton</sender>
    <signal>accepted()</signal>
    <receiver>GPUTestResults</receiver>
    <slot>accept()</slot>
@@ -131,7 +137,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>okButton</sender>
    <signal>rejected()</signal>
    <receiver>GPUTestResults</receiver>
    <slot>reject()</slot>
