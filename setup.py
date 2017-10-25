@@ -368,6 +368,12 @@ package_dir["sas.qtgui.Perspectives"] = os.path.join(
     "src", "sas", "qtgui", "Perspectives")
 packages.append("sas.qtgui.Perspectives")
 
+package_dir["sas.qtgui.Perspectives.Corfunc"] = os.path.join(
+    "src", "sas", "qtgui", "Perspectives", "Corfunc")
+package_dir["sas.qtgui.Perspectives.Corfunc.UI"] = os.path.join(
+    "src", "sas", "qtgui", "Perspectives", "Corfunc", "UI")
+packages.extend(["sas.qtgui.Perspectives.Corfunc", "sas.qtgui.Perspectives.Corfunc.UI"])
+
 package_dir["sas.qtgui.Perspectives.Invariant"] = os.path.join(
     "src", "sas", "qtgui", "Perspectives", "Invariant")
 package_dir["sas.qtgui.Perspectives.Invariant.UI"] = os.path.join(
