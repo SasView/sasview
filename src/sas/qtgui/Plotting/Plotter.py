@@ -55,6 +55,9 @@ class PlotterWidget(PlotterBase):
         self._data = value
         self.xLabel = "%s(%s)"%(value._xaxis, value._xunit)
         self.yLabel = "%s(%s)"%(value._yaxis, value._yunit)
+        if value.isSesans:
+            self.xscale = 'linear'
+            self.yscale = 'linear'
         self.title(title=value.name)
 
     def plot(self, data=None, color=None, marker=None, hide_error=False):
