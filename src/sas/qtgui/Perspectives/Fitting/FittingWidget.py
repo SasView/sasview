@@ -643,7 +643,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
             # Unparsable field
             return
 
-        # p_i = self._magnet_model.headerData(0,1,2,3,4,5,6,7,8,9,10)
         property_index = self._magnet_model.headerData(0, 1, model_column).toInt()[0]-1 # Value, min, max, etc.
 
         # Update the parameter value - note: this supports +/-inf as well
