@@ -26,7 +26,7 @@ except AttributeError:
 
 class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
     """
-    OpenCL Dialog to modify the OpenCL options
+    OpenCL Dialog to select the desired OpenCL driver
     """
 
     clicked = False
@@ -47,16 +47,17 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
         cl_tuple = _get_clinfo()
         i = 0
         self.sas_open_cl = os.environ.get("SAS_OPENCL", "")
-        self.setWindowFlags(self.windowFlags() | QtCore.Qt.CustomizeWindowHint)
-        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowCloseButtonHint)
         for title, descr in cl_tuple:
-            checkBox = QtGui.QCheckBox(self.openCLCheckBoxGroup)
-            checkBox.setGeometry(20, 20 + i, 351, 30)
-            checkBox.setObjectName(_fromUtf8(descr))
-            checkBox.setText(_translate("GPUOptions", descr, None))
-            if (descr == self.sas_open_cl) or (title == "None" and not self.clicked):
-                checkBox.click()
+            # Create an list item for each openCL option
+            check_box = QtGui.QCheckBox(self.openCLCheckBoxGroup)
+            check_box.setGeometry(20, 20 + i, 351, 30)
+            check_box.setObjectName(_fromUtf8(descr))
+            check_box.setText(_translate("GPUOptions", descr, None))
+            if (descr == self.sas_open_cl) or (
+                            title == "None" and not self.clicked):
+                check_box.click()
                 self.clicked = True
+
             # Expand group and shift items down as more are added
             self.openCLCheckBoxGroup.resize(391, 60 + i)
             self.label.setGeometry(QtCore.QRect(20, 90 + i, 391, 37))
@@ -69,7 +70,7 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
 
     def createLinks(self):
         """
-        Link actions to function calls
+        Link user interactions to function calls
         """
         self.testButton.clicked.connect(lambda: self.testButtonClicked())
         self.helpButton.clicked.connect(lambda: self.helpButtonClicked())
@@ -78,16 +79,14 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
 
     def checked(self):
         """
-        Action triggered when box is selected
+        Only allow a single check box to be selected. Uncheck others.
         """
         checked = None
         for box in self.openCLCheckBoxGroup.findChildren(QtGui.QCheckBox):
             if box.isChecked() and (str(box.text()) == self.sas_open_cl or (
-                            str(box.text()) == "No OpenCL" and self.sas_open_cl == "")):
+                    str(box.text()) == "No OpenCL" and self.sas_open_cl == "")):
                 box.setChecked(False)
-            elif not box.isChecked():
-                pass
-            else:
+            elif box.isChecked():
                 checked = box
         if hasattr(checked, "text"):
             self.sas_open_cl = str(checked.text())
@@ -96,7 +95,7 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
 
     def set_sas_open_cl(self):
         """
-        Set openCL value when tests run or OK button clicked
+        Set SAS_OPENCL value when tests run or OK button clicked
         """
         no_opencl_msg = False
         if self.sas_open_cl:
@@ -220,8 +219,7 @@ class GPUTestResults(QtGui.QDialog, Ui_GPUTestResults):
 
 def _get_clinfo():
     """
-    Reading in information about available OpenCL infrastructure
-    :return:
+    Read in information about available OpenCL infrastructure
     """
     clinfo = []
     platforms = []
@@ -242,7 +240,8 @@ def _get_clinfo():
                 combined_index = str(p_index)
             else:
                 combined_index = str(d_index)
-            clinfo.append((combined_index, ":".join([platform.name, device.name])))
+            clinfo.append((combined_index, ":".join([platform.name,
+                                                     device.name])))
             d_index += 1
         p_index += 1
 
