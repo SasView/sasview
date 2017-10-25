@@ -109,7 +109,7 @@ def load_custom_config(path):
     if os.path.exists(path):
         try:
             module = load_module_from_path('sas.custom_config', path)
-            logger.info("GuiManager loaded %s", path)
+            #logger.info("GuiManager loaded %s", path)
             return module
         except Exception as exc:
             logger.error("Error loading %s: %s", path, exc)

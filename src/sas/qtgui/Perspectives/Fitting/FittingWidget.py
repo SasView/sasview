@@ -145,6 +145,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
     @data.setter
     def data(self, value):
         """ data setter """
+        # Value is either a list of indices for batch fitting or a simple index
+        # for standard fitting. Assure we have a list, regardless.
         if isinstance(value, list):
             self.is_batch_fitting = True
         else:
@@ -158,11 +160,13 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.all_data = value
 
         # Update logics with data items
+        # Logics.data contains only a single Data1D/Data2D object
         self.logic.data = GuiUtils.dataFromItem(value[0])
 
         # Overwrite data type descriptor
         self.is2D = True if isinstance(self.logic.data, Data2D) else False
 
+        # Let others know we're full of data now
         self.data_is_loaded = True
 
         # Enable/disable UI components
@@ -356,7 +360,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.options_widget.setEnablementOnDataLoad()
 
         # Reload the model
-	self.onSelectModel()
+        self.onSelectModel()
 
         # Smearing tab
         self.smearing_widget.updateSmearing(self.data)

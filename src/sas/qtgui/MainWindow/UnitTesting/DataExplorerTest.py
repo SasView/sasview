@@ -36,7 +36,7 @@ class DataExplorerTest(unittest.TestCase):
                 return Communicate()
             def allowBatch(self):
                 return False
-            def setData(self, data_item=None):
+            def setData(self, data_item=None, is_batch=False):
                 return None
             def title(self):
                 return "Dummy Perspective"
@@ -169,7 +169,7 @@ class DataExplorerTest(unittest.TestCase):
         QtGui.QMessageBox.question = MagicMock(return_value=QtGui.QMessageBox.No)
 
         # Populate the model
-        filename = ["cyl_400_20.txt", "P123_D2O_10_percent.dat", "cyl_400_20.txt"]
+        filename = ["cyl_400_20.txt", "cyl_400_20.txt", "cyl_400_20.txt"]
         self.form.readData(filename)
 
         # Assure the model contains three items

@@ -99,7 +99,7 @@ class FittingWidgetTest(unittest.TestCase):
         # test the delegate a bit
         delegate = fittingWindow.lstPoly.itemDelegate()
         self.assertEqual(len(delegate.POLYDISPERSE_FUNCTIONS), 5)
-        self.assertEqual(delegate.editableParameters(), [1, 2, 3, 4, 5])
+        self.assertEqual(delegate.editableParameters(), [2, 3, 4, 5])
         self.assertEqual(delegate.poly_function, 6)
         self.assertIsInstance(delegate.combo_updated, QtCore.pyqtBoundSignal)
 
@@ -628,7 +628,7 @@ class FittingWidgetTest(unittest.TestCase):
         item = QtGui.QStandardItem()
         updateModelItem(item, [test_data], "test")
         # Force same data into logic
-        self.widget.logic.data = item
+        self.widget.data = item
         category_index = self.widget.cbCategory.findText("Sphere")
         self.widget.cbCategory.setCurrentIndex(category_index)
 
@@ -677,7 +677,7 @@ class FittingWidgetTest(unittest.TestCase):
         item = QtGui.QStandardItem()
         updateModelItem(item, [test_data], "test")
         # Force same data into logic
-        self.widget.logic.data = item
+        self.widget.data = item
         category_index = self.widget.cbCategory.findText("Sphere")
         self.widget.cbCategory.setCurrentIndex(category_index)
 
