@@ -296,3 +296,15 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
 
         self._allow_close = value
     # pylint: enable=invalid-name
+
+
+if __name__ == "__main__":
+    APPLICATION = QtGui.QApplication([])
+    import qt4reactor
+    qt4reactor.install()
+    # DO NOT move the following import to the top!
+    # (unless you know what you're doing)
+    from twisted.internet import reactor
+    DIALOG = CorfuncWindow(reactor)
+    DIALOG.show()
+    reactor.run()
