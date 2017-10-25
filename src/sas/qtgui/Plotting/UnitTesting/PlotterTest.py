@@ -77,11 +77,11 @@ class PlotterTest(unittest.TestCase):
     def testPlotWithSesans(self):
         """ Ensure that Sesans data is plotted in linear cooredinates"""
         data = Data1D(x=[1.0, 2.0, 3.0],
-                           y=[10.0, 11.0, 12.0],
-                           dx=[0.1, 0.2, 0.3],
-                           dy=[0.1, 0.2, 0.3])
-        data.title="Sesans data"
-        data.name="Test Sesans"
+                      y=[10.0, 11.0, 12.0],
+                      dx=[0.1, 0.2, 0.3],
+                      dy=[0.1, 0.2, 0.3])
+        data.title = "Sesans data"
+        data.name = "Test Sesans"
         data.isSesans = True
         data.id = 2
 
