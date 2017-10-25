@@ -24,8 +24,8 @@ from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
-#if not QApplication.instance():
-app = QApplication(sys.argv)
+if not QApplication.instance():
+    app = QApplication(sys.argv)
 
 class DataExplorerTest(unittest.TestCase):
     '''Test the Data Explorer GUI'''
@@ -36,7 +36,7 @@ class DataExplorerTest(unittest.TestCase):
                 return Communicate()
             def allowBatch(self):
                 return False
-            def setData(self, data_item=None):
+            def setData(self, data_item=None, is_batch=False):
                 return None
             def title(self):
                 return "Dummy Perspective"
@@ -169,12 +169,8 @@ class DataExplorerTest(unittest.TestCase):
         QtGui.QMessageBox.question = MagicMock(return_value=QtGui.QMessageBox.No)
 
         # Populate the model
-        #filename = ["cyl_400_20.txt", "P123_D2O_10_percent.dat", "cyl_400_20.txt"]
-        filename = ["cyl_400_20.txt", "cyl_400_20.txt", "P123_D2O_10_percent.dat"]
+        filename = ["cyl_400_20.txt", "cyl_400_20.txt", "cyl_400_20.txt"]
         self.form.readData(filename)
-
-        self.form.show()
-        app.exec_()
 
         # Assure the model contains three items
         self.assertEqual(self.form.model.rowCount(), 3)

@@ -8,6 +8,30 @@ import numpy
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
 
+model_header_captions = ['Parameter', 'Value', 'Min', 'Max', 'Units']
+
+model_header_tooltips = ['Select parameter for fitting',
+                         'Enter parameter value',
+                         'Enter minimum value for parameter',
+                         'Enter maximum value for parameter',
+                         'Unit of the parameter']
+
+poly_header_captions = ['Parameter', 'PD[ratio]', 'Min', 'Max', 'Npts', 'Nsigs',
+                        'Function', 'Filename']
+
+poly_header_tooltips = ['Select parameter for fitting',
+                        'Enter polydispersity ratio (STD/mean). '
+                        'STD: standard deviation from the mean value',
+                        'Enter minimum value for parameter',
+                        'Enter maximum value for parameter',
+                        'Enter number of points for parameter',
+                        'Enter number of sigmas parameter',
+                        'Select distribution function',
+                        'Select filename with user-definable distribution']
+
+error_tooltip = 'Error value for fitted parameter'
+header_error_caption = 'Error'
+
 def replaceShellName(param_name, value):
     """
     Updates parameter name from <param_name>[n_shell] to <param_name>value
@@ -130,82 +154,46 @@ def addHeadersToModel(model):
     """
     Adds predefined headers to the model
     """
-    model.setHeaderData(0, QtCore.Qt.Horizontal, QtCore.QVariant("Parameter"))
-    model.setHeaderData(1, QtCore.Qt.Horizontal, QtCore.QVariant("Value"))
-    model.setHeaderData(2, QtCore.Qt.Horizontal, QtCore.QVariant("Min"))
-    model.setHeaderData(3, QtCore.Qt.Horizontal, QtCore.QVariant("Max"))
-    model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("Units"))
+    for i, item in enumerate(model_header_captions):
+        model.setHeaderData(i, QtCore.Qt.Horizontal, QtCore.QVariant(item))
 
-    model.header_tooltips = ['Select parameter for fitting',
-                             'Enter parameter value',
-                             'Enter minimum value for parameter',
-                             'Enter maximum value for parameter',
-                             'Unit of the parameter']
+    model.header_tooltips = model_header_tooltips
+
 def addErrorHeadersToModel(model):
     """
     Adds predefined headers to the model
     """
-    model.setHeaderData(0, QtCore.Qt.Horizontal, QtCore.QVariant("Parameter"))
-    model.setHeaderData(1, QtCore.Qt.Horizontal, QtCore.QVariant("Value"))
-    model.setHeaderData(2, QtCore.Qt.Horizontal, QtCore.QVariant("Error"))
-    model.setHeaderData(3, QtCore.Qt.Horizontal, QtCore.QVariant("Min"))
-    model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("Max"))
-    model.setHeaderData(5, QtCore.Qt.Horizontal, QtCore.QVariant("Units"))
+    model_header_error_captions = model_header_captions
+    model_header_error_captions.insert(2, header_error_caption)
+    for i, item in enumerate(model_header_error_captions):
+        model.setHeaderData(i, QtCore.Qt.Horizontal, QtCore.QVariant(item))
 
-    model.header_tooltips = ['Select parameter for fitting',
-                             'Enter parameter value',
-                             'Error value for fitted parameter',
-                             'Enter minimum value for parameter',
-                             'Enter maximum value for parameter',
-                             'Unit of the parameter']
+    model_header_error_tooltips = model_header_tooltips
+    model_header_error_tooltips.insert(2, error_tooltip)
+    model.header_tooltips = model_header_error_tooltips
 
 def addPolyHeadersToModel(model):
     """
     Adds predefined headers to the model
     """
-    model.setHeaderData(0, QtCore.Qt.Horizontal, QtCore.QVariant("Parameter"))
-    model.setHeaderData(1, QtCore.Qt.Horizontal, QtCore.QVariant("PD[ratio]"))
-    model.setHeaderData(2, QtCore.Qt.Horizontal, QtCore.QVariant("Min"))
-    model.setHeaderData(3, QtCore.Qt.Horizontal, QtCore.QVariant("Max"))
-    model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("Npts"))
-    model.setHeaderData(5, QtCore.Qt.Horizontal, QtCore.QVariant("Nsigs"))
-    model.setHeaderData(6, QtCore.Qt.Horizontal, QtCore.QVariant("Function"))
-    model.setHeaderData(7, QtCore.Qt.Horizontal, QtCore.QVariant("Filename"))
+    for i, item in enumerate(poly_header_captions):
+        model.setHeaderData(i, QtCore.Qt.Horizontal, QtCore.QVariant(item))
 
-    model.header_tooltips = ['Select parameter for fitting',
-                             'Enter polydispersity ratio (STD/mean). '
-                             'STD: standard deviation from the mean value',
-                             'Enter minimum value for parameter',
-                             'Enter maximum value for parameter',
-                             'Enter number of points for parameter',
-                             'Enter number of sigmas parameter',
-                             'Select distribution function',
-                             'Select filename with user-definable distribution']
+    model.header_tooltips = poly_header_tooltips
+
 
 def addErrorPolyHeadersToModel(model):
     """
     Adds predefined headers to the model
     """
-    model.setHeaderData(0, QtCore.Qt.Horizontal, QtCore.QVariant("Parameter"))
-    model.setHeaderData(1, QtCore.Qt.Horizontal, QtCore.QVariant("PD[ratio]"))
-    model.setHeaderData(2, QtCore.Qt.Horizontal, QtCore.QVariant("Error"))
-    model.setHeaderData(3, QtCore.Qt.Horizontal, QtCore.QVariant("Min"))
-    model.setHeaderData(4, QtCore.Qt.Horizontal, QtCore.QVariant("Max"))
-    model.setHeaderData(5, QtCore.Qt.Horizontal, QtCore.QVariant("Npts"))
-    model.setHeaderData(6, QtCore.Qt.Horizontal, QtCore.QVariant("Nsigs"))
-    model.setHeaderData(7, QtCore.Qt.Horizontal, QtCore.QVariant("Function"))
-    model.setHeaderData(8, QtCore.Qt.Horizontal, QtCore.QVariant("Filename"))
+    poly_header_error_captions = poly_header_captions
+    poly_header_error_captions.insert(2, header_error_caption)
+    for i, item in enumerate(poly_header_error_captions):
+        model.setHeaderData(i, QtCore.Qt.Horizontal, QtCore.QVariant(item))
 
-    model.header_tooltips = ['Select parameter for fitting',
-                             'Enter polydispersity ratio (STD/mean). '
-                             'STD: standard deviation from the mean value',
-                             'Error value for fitted parameter',
-                             'Enter minimum value for parameter',
-                             'Enter maximum value for parameter',
-                             'Enter number of points for parameter',
-                             'Enter number of sigmas parameter',
-                             'Select distribution function',
-                             'Select filename with user-definable distribution']
+    poly_header_error_tooltips = poly_header_tooltips
+    poly_header_error_tooltips.insert(2, error_tooltip)
+    model.header_tooltips = poly_header_error_tooltips
 
 def addShellsToModel(parameters, model, index):
     """
