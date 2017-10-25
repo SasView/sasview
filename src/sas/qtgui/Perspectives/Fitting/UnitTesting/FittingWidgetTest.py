@@ -19,8 +19,8 @@ from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
 
-if not QtGui.QApplication.instance():
-    app = QtGui.QApplication(sys.argv)
+#if not QtGui.QApplication.instance():
+app = QtGui.QApplication(sys.argv)
 
 class dummy_manager(object):
     HELP_DIRECTORY_LOCATION = "html"
@@ -783,6 +783,65 @@ class FittingWidgetTest(unittest.TestCase):
         # Check if the widget got updated accordingly
         self.assertEqual(self.widget.cbModel.currentText(), 'onion')
         self.assertTrue(self.widget.chkPolydispersity.isChecked())
+        #Check if polidispersity tab is available
+        self.assertTrue(self.widget.tabFitting.isTabEnabled(3))
+
+        #Check if magnetism box and tab are disabled when 1D data is loaded
+        self.assertFalse(self.widget.chkMagnetism.isEnabled())
+        self.assertFalse(self.widget.tabFitting.isTabEnabled(4))
+
+    def testReadFitPage2D(self):
+        """
+        Read in the fitpage object and restore state
+        """
+        # Set data
+
+        test_data = Data2D(image=[1.0, 2.0, 3.0],
+                           err_image=[0.01, 0.02, 0.03],
+                           qx_data=[0.1, 0.2, 0.3],
+                           qy_data=[0.1, 0.2, 0.3],
+                           xmin=0.1, xmax=0.3, ymin=0.1, ymax=0.3,
+                           mask=[True, True, True])
+
+        # Force same data into logic
+        self.widget.logic.data = test_data
+        self.widget.data_is_loaded = True
+
+        #item = QtGui.QStandardItem()
+        #updateModelItem(item, [test_data], "test")
+        # Force same data into logic
+        #self.widget.logic.data = item
+        #self.widget.data_is_loaded = True
+
+        category_index = self.widget.cbCategory.findText("Cylinder")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        # Test no fitting params
+        self.widget.parameters_to_fit = ['scale']
+
+        # Invoke the tested method
+        fp = self.widget.currentState()
+
+        # Prepare modified fit page
+        fp.current_model = 'cylinder'
+        fp.is_polydisperse = True
+        fp.is_magnetic = True
+        fp.is2D = True
+
+        # Read in modified state
+        self.widget.readFitPage(fp)
+
+        # Check if the widget got updated accordingly
+        self.assertEqual(self.widget.cbModel.currentText(), 'cylinder')
+        self.assertTrue(self.widget.chkPolydispersity.isChecked())
+        self.assertTrue(self.widget.chkPolydispersity.isEnabled())
+        #Check if polidispersity tab is available
+        self.assertTrue(self.widget.tabFitting.isTabEnabled(3))
+
+        #Check if magnetism box and tab are disabled when 1D data is loaded
+        self.assertTrue(self.widget.chkMagnetism.isChecked())
+        self.assertTrue(self.widget.chkMagnetism.isEnabled())
+        self.assertTrue(self.widget.tabFitting.isTabEnabled(4))
 
     def testCurrentState(self):
         """
