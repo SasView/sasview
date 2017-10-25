@@ -2,9 +2,12 @@
 import os
 import sys
 import sasmodels
+import json
+import platform
 
 from PyQt4 import QtGui, QtCore, QtWebKit
 from sas.qtgui.Perspectives.Fitting.UI.GPUOptionsUI import Ui_GPUOptions
+from sas.qtgui.Perspectives.Fitting.UI.GPUTestResultsUI import Ui_GPUTestResults
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -56,11 +59,12 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
                 self.clicked = True
             # Expand group and shift items down as more are added
             self.openCLCheckBoxGroup.resize(391, 60 + i)
-            self.okButton.setGeometry(QtCore.QRect(20, 90 + i, 93, 28))
-            self.resetButton.setGeometry(QtCore.QRect(120, 90 + i, 93, 28))
-            self.testButton.setGeometry(QtCore.QRect(220, 90 + i, 93, 28))
-            self.helpButton.setGeometry(QtCore.QRect(320, 90 + i, 93, 28))
-            self.resize(440, 130 + i)
+            self.label.setGeometry(QtCore.QRect(20, 90 + i, 391, 37))
+            self.okButton.setGeometry(QtCore.QRect(20, 127 + i, 93, 28))
+            self.resetButton.setGeometry(QtCore.QRect(120, 127 + i, 93, 28))
+            self.testButton.setGeometry(QtCore.QRect(220, 127 + i, 93, 28))
+            self.helpButton.setGeometry(QtCore.QRect(320, 127 + i, 93, 28))
+            self.resize(440, 167 + i)
             i += 30
 
     def createLinks(self):
@@ -90,12 +94,85 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
         else:
             self.sas_open_cl = None
 
+    def set_open_cl(self):
+        """
+        Set openCL value when tests run or OK button clicked
+        """
+        no_opencl_msg = False
+        if self.sas_open_cl:
+            os.environ["SAS_OPENCL"] = self.sas_open_cl
+            if self.sas_open_cl.lower() == "none":
+                no_opencl_msg = True
+        else:
+            if "SAS_OPENCL" in os.environ:
+                del os.environ["SAS_OPENCL"]
+        # Sasmodels kernelcl doesn't exist when initiated with None
+        if 'sasmodels.kernelcl' in sys.modules:
+            sasmodels.kernelcl.ENV = None
+        reload(sasmodels.core)
+        return no_opencl_msg
+
     def testButtonClicked(self):
         """
-        Run the model tests when the test button is clicked
+        Run sasmodels check from here and report results from
         """
-        # TODO: Do something
-        pass
+
+        no_opencl_msg = self.set_open_cl()
+
+        # Only import when tests are run
+        from sasmodels.model_test import model_tests
+
+        try:
+            from sasmodels.kernelcl import environment
+            env = environment()
+            clinfo = [(ctx.devices[0].platform.vendor,
+                       ctx.devices[0].platform.version,
+                       ctx.devices[0].vendor,
+                       ctx.devices[0].name,
+                       ctx.devices[0].version)
+                      for ctx in env.context]
+        except ImportError:
+            clinfo = None
+
+        failures = []
+        tests_completed = 0
+        for test in model_tests():
+            try:
+                test()
+            except Exception:
+                failures.append(test.description)
+
+            tests_completed += 1
+
+        info = {
+            'version': sasmodels.__version__,
+            'platform': platform.uname(),
+            'opencl': clinfo,
+            'failing tests': failures,
+        }
+
+        msg_info = 'OpenCL tests results'
+
+        msg = str(tests_completed) + ' tests completed.\n'
+        if len(failures) > 0:
+            msg += str(len(failures)) + ' tests failed.\n'
+            msg += 'Failing tests: '
+            msg += json.dumps(info['failing tests'])
+            msg += "\n"
+        else:
+            msg += "All tests passed!\n"
+
+        msg += "\nPlatform Details:\n\n"
+        msg += "Sasmodels version: "
+        msg += info['version'] + "\n"
+        msg += "\nPlatform used: "
+        msg += json.dumps(info['platform']) + "\n"
+        if no_opencl_msg:
+            msg += "\nOpenCL driver: None"
+        else:
+            msg += "\nOpenCL driver: "
+            msg += json.dumps(info['opencl']) + "\n"
+        GPUTestResults(self, msg, msg_info)
 
     def helpButtonClicked(self):
         """
@@ -119,18 +196,7 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
         """
         Close the window after modifying the SAS_OPENCL value
         """
-        # If statement added to handle Reset
-        if self.sas_open_cl:
-            os.environ["SAS_OPENCL"] = self.sas_open_cl
-        else:
-            if "SAS_OPENCL" in os.environ:
-                del os.environ["SAS_OPENCL"]
-
-        # Sasmodels kernelcl doesn't exist when initiated with None
-        if 'sasmodels.kernelcl' in sys.modules:
-            sasmodels.kernelcl.ENV = None
-
-        reload(sasmodels.core)
+        self.set_open_cl()
         super(GPUOptions, self).reject()
 
     def closeEvent(self, event):
@@ -139,6 +205,17 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
         """
         self.close()
         self.parent.gpu_options_widget = GPUOptions(self)
+
+
+class GPUTestResults(QtGui.QDialog, Ui_GPUTestResults):
+    """
+    OpenCL Dialog to modify the OpenCL options
+    """
+    def __init__(self, parent, msg, title):
+        super(GPUTestResults, self).__init__(parent)
+        self.setupUi(self)
+        self.resultsText.setText(_translate("GPUTestResults", msg, None))
+        self.open()
 
 
 def _get_clinfo():

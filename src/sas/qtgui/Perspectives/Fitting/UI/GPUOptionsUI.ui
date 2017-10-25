@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>440</width>
-    <height>178</height>
+    <height>211</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,8 +16,8 @@
   <widget class="QPushButton" name="testButton">
    <property name="geometry">
     <rect>
-     <x>220</x>
-     <y>140</y>
+     <x>120</x>
+     <y>170</y>
      <width>93</width>
      <height>28</height>
     </rect>
@@ -30,7 +30,7 @@
    <property name="geometry">
     <rect>
      <x>320</x>
-     <y>140</y>
+     <y>170</y>
      <width>93</width>
      <height>28</height>
     </rect>
@@ -58,8 +58,8 @@
   <widget class="QPushButton" name="resetButton">
    <property name="geometry">
     <rect>
-     <x>120</x>
-     <y>140</y>
+     <x>220</x>
+     <y>170</y>
      <width>93</width>
      <height>28</height>
     </rect>
@@ -72,13 +72,34 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>140</y>
+     <y>170</y>
      <width>93</width>
      <height>28</height>
     </rect>
    </property>
    <property name="text">
     <string>OK</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>132</y>
+     <width>391</width>
+     <height>37</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>WARNING: Running tests can take a few minutes!</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
    </property>
   </widget>
  </widget>
