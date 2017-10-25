@@ -5,19 +5,29 @@ from __future__ import print_function
 
 import sys
 import os
-import wx
-import numpy as np
 import time
 import copy
 import math
 import json
 import logging
 import traceback
-
+from Queue import Queue
+from threading import Thread
 from collections import defaultdict
+
+import numpy as np
+
+import wx
 from wx.lib.scrolledpanel import ScrolledPanel
 
+from sasmodels.sasview_model import MultiplicationModel
 from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
+from sasmodels.weights import GaussianDispersion
+
+from sas.sascalc.dataloader.data_info import Detector
+from sas.sascalc.dataloader.data_info import Source
+from sas.sascalc.fit.pagestate import PageState
+from sas.sascalc.fit.models import PLUGIN_NAME_BASE
 
 from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.guiframe.utils import format_number, check_float, IdList, \
@@ -29,11 +39,11 @@ from sas.sasgui.guiframe.dataFitting import Data2D
 from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import check_data_validity
 from sas.sasgui.guiframe.gui_style import GUIFRAME_ID
-from sas.sascalc.dataloader.data_info import Detector
-from sas.sascalc.dataloader.data_info import Source
-from sas.sasgui.perspectives.fitting.pagestate import PageState
 from sas.sasgui.guiframe.CategoryInstaller import CategoryInstaller
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
+
+from .report_dialog import ReportDialog
+from .utils import get_weight
 
 logger = logging.getLogger(__name__)
 
@@ -152,7 +162,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         self.disp_cb_dict = {}
 
-        # self.state = PageState(parent=parent)
+        # self.state = PageState()
         # dictionary containing list of models
         self.model_list_box = {}
 
@@ -199,8 +209,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         # check that the fit range is correct to plot the model again
         self.fitrange = True
         # Create memento to save the current state
-        self.state = PageState(parent=self.parent,
-                               model=self.model, data=self.data)
+        self.state = PageState(model=self.model, data=self.data)
         # flag to determine if state has change
         self.state_change = False
         # save customized array
@@ -240,6 +249,17 @@ class BasicPage(ScrolledPanel, PanelBase):
         # layout
         self.set_layout()
 
+        # Setting up a thread for the fitting
+        self.threaded_draw_queue = Queue()
+
+        self.draw_worker_thread = Thread(target = self._threaded_draw_worker,
+                                         args = (self.threaded_draw_queue,))
+        self.draw_worker_thread.setDaemon(True)
+        self.draw_worker_thread.start()
+
+        # And a home for the thread submission times
+        self.last_time_fit_submitted = 0.00
+
     def set_index_model(self, index):
         """
         Index related to this page
@@ -253,7 +273,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         if not hasattr(self, "model_view"):
             return
-        toggle_mode_on = self.model_view.IsEnabled()
+        toggle_mode_on = self.model_view.IsEnabled() or self.data is None
         if toggle_mode_on:
             if self.enable2D and not check_data_validity(self.data):
                 self._create_default_2d_data()
@@ -281,7 +301,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         """
         x = np.linspace(start=self.qmin_x, stop=self.qmax_x,
-                           num=self.npts_x, endpoint=True)
+                        num=self.npts_x, endpoint=True)
         self.data = Data1D(x=x)
         self.data.xaxis('\\rm{Q}', "A^{-1}")
         self.data.yaxis('\\rm{Intensity}', "cm^{-1}")
@@ -307,7 +327,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             qmax = 10.
 
         x = np.logspace(start=qmin, stop=qmax,
-                           num=self.npts_x, endpoint=True, base=10.0)
+                        num=self.npts_x, endpoint=True, base=10.0)
         self.data = Data1D(x=x)
         self.data.xaxis('\\rm{Q}', "A^{-1}")
         self.data.yaxis('\\rm{Intensity}', "cm^{-1}")
@@ -496,30 +516,28 @@ class BasicPage(ScrolledPanel, PanelBase):
         self._manager = manager
         self.state.manager = manager
 
-    def populate_box(self, model_dict):
+    def populate_box(self, model_list_box):
         """
         Store list of model
 
-        :param model_dict: dictionary containing list of models
-
+        :param model_list_box: dictionary containing categorized models
         """
-        self.model_list_box = model_dict
-        self.state.model_list_box = self.model_list_box
+        self.model_list_box = model_list_box
         self.initialize_combox()
 
-    def set_model_dictionary(self, model_dict):
+    def set_model_dictionary(self, model_dictionary):
         """
         Store a dictionary linking model name -> model object
 
-        :param model_dict: dictionary containing list of models
+        :param model_dictionary: dictionary containing all models
         """
-        self.model_dict = model_dict
+        self.model_dictionary = model_dictionary
 
     def initialize_combox(self):
         """
         put default value in the combo box
         """
-        if self.model_list_box is not None and len(self.model_list_box) > 0:
+        if self.model_list_box:
             self._populate_box(self.structurebox,
                                self.model_list_box["Structure Factors"])
             self.structurebox.Insert("None", 0, None)
@@ -618,8 +636,52 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         # Get plot image from plotpanel
         images, canvases = self.get_images()
-        # get the report dialog
-        self.state.report(images, canvases)
+        imgRAM, images, refs = self._build_plots_for_report(images, canvases)
+
+        # get the strings for report
+        report_str, text_str = self.state.report(fig_urls=refs)
+
+        # Show the dialog
+        report_list = [report_str, text_str, images]
+        dialog = ReportDialog(report_list, None, wx.ID_ANY, "")
+        dialog.Show()
+
+    def _build_plots_for_report(self, figs, canvases):
+        """
+        Build image state that wx.html understand
+        by plotting, putting it into wx.FileSystem image object
+        """
+        images = []
+        refs = []
+
+        # For no figures in the list, prepare empty plot
+        if figs is None or len(figs) == 0:
+            figs = [None]
+
+        # Loop over the list of figures
+        # use wx.MemoryFSHandler
+        imgRAM = wx.MemoryFSHandler()
+        for fig in figs:
+            if fig is not None:
+                ind = figs.index(fig)
+                canvas = canvases[ind]
+
+            # store the image in wx.FileSystem Object
+            wx.FileSystem.AddHandler(wx.MemoryFSHandler())
+
+            # index of the fig
+            ind = figs.index(fig)
+
+            # AddFile, image can be retrieved with 'memory:filename'
+            name = 'img_fit%s.png' % ind
+            refs.append('memory:' + name)
+            imgRAM.AddFile(name, canvas.bitmap, wx.BITMAP_TYPE_PNG)
+
+            # append figs
+            images.append(fig)
+
+        return imgRAM, images, refs
+
 
     def on_save(self, event):
         """
@@ -841,7 +903,6 @@ class BasicPage(ScrolledPanel, PanelBase):
             self.state.enable_disp = self.enable_disp.GetValue()
             self.state.disable_disp = self.disable_disp.GetValue()
 
-        self.state.smearer = copy.deepcopy(self.current_smearer)
         if hasattr(self, "enable_smearer"):
             self.state.enable_smearer = \
                                 copy.deepcopy(self.enable_smearer.GetValue())
@@ -857,7 +918,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         if len(self._disp_obj_dict) > 0:
             for k, v in self._disp_obj_dict.iteritems():
-                self.state._disp_obj_dict[k] = v.type
+                self.state.disp_obj_dict[k] = v.type
 
             self.state.values = copy.deepcopy(self.values)
             self.state.weights = copy.deepcopy(self.weights)
@@ -875,7 +936,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self._copy_parameters_state(self.str_parameters,
                                     self.state.str_parameters)
         self._copy_parameters_state(self.orientation_params,
-                                     self.state.orientation_params)
+                                    self.state.orientation_params)
         self._copy_parameters_state(self.orientation_params_disp,
                                     self.state.orientation_params_disp)
 
@@ -906,7 +967,6 @@ class BasicPage(ScrolledPanel, PanelBase):
             self.state.enable_disp = self.enable_disp.GetValue()
             self.state.disable_disp = self.disable_disp.GetValue()
 
-        self.state.smearer = copy.deepcopy(self.current_smearer)
         if hasattr(self, "enable_smearer"):
             self.state.enable_smearer = \
                                 copy.deepcopy(self.enable_smearer.GetValue())
@@ -930,11 +990,11 @@ class BasicPage(ScrolledPanel, PanelBase):
                     else:
                         try:
                             self.state.disp_cb_dict[k] = v.GetValue()
-                        except:
+                        except Exception:
                             self.state.disp_cb_dict[k] = None
             if len(self._disp_obj_dict) > 0:
                 for k, v in self._disp_obj_dict.iteritems():
-                    self.state._disp_obj_dict[k] = v.type
+                    self.state.disp_obj_dict[k] = v.type
 
             self.state.values = copy.deepcopy(self.values)
             self.state.weights = copy.deepcopy(self.weights)
@@ -976,7 +1036,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         try:
             # to support older version
             category_pos = int(state.categorycombobox)
-        except:
+        except Exception:
             category_pos = 0
             for ind_cat in range(self.categorybox.GetCount()):
                 if self.categorycombobox.GetString(ind_cat) == \
@@ -988,7 +1048,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         try:
             # to support older version
             formfactor_pos = int(state.formfactorcombobox)
-        except:
+        except Exception:
             formfactor_pos = 0
             for ind_form in range(self.formfactorbox.GetCount()):
                 if self.formfactorbox.GetString(ind_form) == \
@@ -1001,7 +1061,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         try:
             # to support older version
             structfactor_pos = int(state.structurecombobox)
-        except:
+        except Exception:
             structfactor_pos = 0
             for ind_struct in range(self.structurebox.GetCount()):
                 if self.structurebox.GetString(ind_struct) == \
@@ -1168,15 +1228,14 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         self.categorybox.Select(category_pos)
         self._show_combox(None)
-        from models import PLUGIN_NAME_BASE
-        if self.categorybox.GetValue() == CUSTOM_MODEL \
-                and PLUGIN_NAME_BASE not in state.formfactorcombobox:
+        if (self.categorybox.GetValue() == CUSTOM_MODEL
+                and PLUGIN_NAME_BASE not in state.formfactorcombobox):
             state.formfactorcombobox = \
                 PLUGIN_NAME_BASE + state.formfactorcombobox
         formfactor_pos = 0
         for ind_form in range(self.formfactorbox.GetCount()):
-            if self.formfactorbox.GetString(ind_form) == \
-                                                (state.formfactorcombobox):
+            if (self.formfactorbox.GetString(ind_form)
+                    == state.formfactorcombobox):
                 formfactor_pos = int(ind_form)
                 break
 
@@ -1186,8 +1245,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         if state.structurecombobox is not None:
             state.structurecombobox = unicode(state.structurecombobox)
             for ind_struct in range(self.structurebox.GetCount()):
-                if self.structurebox.GetString(ind_struct) == \
-                                                (state.structurecombobox):
+                if (self.structurebox.GetString(ind_struct)
+                        == state.structurecombobox):
                     structfactor_pos = int(ind_struct)
                     break
 
@@ -1238,7 +1297,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             self.dI_didata.SetValue(state.dI_didata)
             self.dI_sqrdata.SetValue(state.dI_sqrdata)
             self.dI_idata.SetValue(state.dI_idata)
-        except:
+        except Exception:
             # to support older state file formats
             self.dI_noweight.SetValue(False)
             self.dI_didata.SetValue(True)
@@ -1294,7 +1353,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.values = copy.deepcopy(state.values)
         self.weights = copy.deepcopy(state.weights)
 
-        for key, disp_type in state._disp_obj_dict.iteritems():
+        for key, disp_type in state.disp_obj_dict.iteritems():
             # disp_model = disp
             disp_model = POLYDISPERSITY_MODELS[disp_type]()
             self._disp_obj_dict[key] = disp_model
@@ -1527,7 +1586,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                         # No data in the panel
                         try:
                             self.npts_x = float(self.Npts_total.GetValue())
-                        except:
+                        except Exception:
                             flag = False
                             return flag
                     flag = True
@@ -1568,10 +1627,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         if len(statelist) == 0 or len(listtorestore) == 0:
             return
 
-        for j in range(len(listtorestore)):
+        for item_page in listtorestore:
             for param in statelist:
-                if param[1] == listtorestore[j][1]:
-                    item_page = listtorestore[j]
+                if param[1] == item_page[1]:
                     item_page_info = param
                     if (item_page_info[1] == "theta" or item_page_info[1] ==
                             "phi") and not self._is_2D():
@@ -1617,11 +1675,8 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         listtorestore = copy.deepcopy(statelist)
 
-        for j in range(len(listtorestore)):
-            item_page = listtorestore[j]
-            item_page_info = statelist[j]
+        for item_page, item_page_info in zip(listtorestore, statelist):
             # change the state of the check box for simple parameters
-
             if item_page[0] is not None:
                 item_page[0].SetValue(format_number(item_page_info[0], True))
 
@@ -1691,7 +1746,24 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         :param chisqr: update chisqr value [bool]
         """
-        wx.CallAfter(self._draw_model_after, update_chisqr, source)
+        self.threaded_draw_queue.put([copy.copy(update_chisqr), copy.copy(source)])
+
+    def _threaded_draw_worker(self, threaded_draw_queue):
+        while True:
+            # sit and wait for the next task
+            next_task = threaded_draw_queue.get()
+
+            # sleep for 1/10th second in case some other tasks accumulate
+            time.sleep(0.1)
+
+            # skip all intermediate tasks
+            while self.threaded_draw_queue.qsize() > 0:
+                self.threaded_draw_queue.task_done()
+                next_task = self.threaded_draw_queue.get()
+
+            # and finally, do the task
+            self._draw_model_after(*next_task)
+            threaded_draw_queue.task_done()
 
     def _draw_model_after(self, update_chisqr=True, source='model'):
         """
@@ -1709,11 +1781,11 @@ class BasicPage(ScrolledPanel, PanelBase):
                 if not self.disable_smearer.GetValue():
                     temp_smear = self.current_smearer
             # compute weight for the current data
-            from sas.sasgui.perspectives.fitting.utils import get_weight
             flag = self.get_weight_flag()
             weight = get_weight(data=self.data, is2d=self._is_2D(), flag=flag)
             toggle_mode_on = self.model_view.IsEnabled()
             is_2d = self._is_2D()
+
             self._manager.draw_model(self.model,
                                      data=self.data,
                                      smearer=temp_smear,
@@ -1735,7 +1807,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         x, y = self.model.getProfile()
 
         from sas.sasgui.plottools import Data1D as pf_data1d
-        # from sas.sasgui.perspectives.theory.profile_dialog import SLDPanel
         from sas.sasgui.guiframe.local_perspectives.plotting.profile_dialog \
             import SLDPanel
         sld_data = pf_data1d(x, y)
@@ -1796,12 +1867,12 @@ class BasicPage(ScrolledPanel, PanelBase):
         try:
             if mod_cat == CUSTOM_MODEL:
                 for model in self.model_list_box[mod_cat]:
-                    m_list.append(self.model_dict[model.name])
+                    m_list.append(self.model_dictionary[model.name])
             else:
                 cat_dic = self.master_category_dict[mod_cat]
-                for (model, enabled) in cat_dic:
+                for model, enabled in cat_dic:
                     if enabled:
-                        m_list.append(self.model_dict[model])
+                        m_list.append(self.model_dictionary[model])
         except Exception:
             msg = traceback.format_exc()
             wx.PostEvent(self._manager.parent,
@@ -1839,7 +1910,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         for models in list:
             if models.name != "NoStructure":
                 mlist.append((models.name, models))
-
         # Sort the models
         mlist_sorted = sorted(mlist)
         for item in mlist_sorted:
@@ -1874,7 +1944,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                           sys.exc_info()[1]
                     wx.PostEvent(self.parent, StatusEvent(status=msg))
                     return
-            except:
+            except Exception:
                 tcrtl.SetBackgroundColour("pink")
                 msg = "Model Error: wrong value entered: %s" % sys.exc_info()[1]
                 wx.PostEvent(self.parent, StatusEvent(status=msg))
@@ -1931,7 +2001,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                           sys.exc_info()[1]
                     wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                     return
-            except:
+            except Exception:
                 tcrtl.SetBackgroundColour("pink")
                 msg = "Model Error: wrong value entered: %s" % sys.exc_info()[1]
                 wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
@@ -2031,7 +2101,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         struct_factor = self.structurebox.GetClientData(s_id)
 
         if struct_factor is not None:
-            from sasmodels.sasview_model import MultiplicationModel
             self.model = MultiplicationModel(form_factor(self.multi_factor),
                                              struct_factor())
             # multifunctional form factor
@@ -2110,7 +2179,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         for data in self.data_list:
             # q value from qx and qy
             radius = np.sqrt(data.qx_data * data.qx_data +
-                                data.qy_data * data.qy_data)
+                             data.qy_data * data.qy_data)
             # get unmasked index
             index_data = (float(self.qmin.GetValue()) <= radius) & \
                          (radius <= float(self.qmax.GetValue()))
@@ -2339,7 +2408,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         put gaussian dispersity into current model
         """
-        if len(self.param_toFit) > 0:
+        if self.param_toFit:
             for item in self.fittable_param:
                 if item in self.param_toFit:
                     self.param_toFit.remove(item)
@@ -2354,14 +2423,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.values = {}
         self.weights = {}
 
-        # from sas.models.dispersion_models import GaussianDispersion
-        from sasmodels.weights import GaussianDispersion
-        if len(self.disp_cb_dict) == 0:
-            self.save_current_state()
+        if not self.disp_cb_dict:
             self.sizer4_4.Clear(True)
-            self.Layout()
-            return
-        if (len(self.disp_cb_dict) > 0):
+        else:
             for p in self.disp_cb_dict:
                 # The parameter was un-selected.
                 # Go back to Gaussian model (with 0 pts)
@@ -2434,7 +2498,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 # self._reset_array_disp(param_name)
                 self._disp_obj_dict[name1] = disp_model
                 self.model.set_dispersion(param_name, disp_model)
-                self.state._disp_obj_dict[name1] = disp_model.type
+                self.state.disp_obj_dict[name1] = disp_model.type
 
                 value1 = str(format_number(self.model.getParam(name1), True))
                 value2 = str(format_number(self.model.getParam(name2)))
@@ -2549,7 +2613,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         disp.set_weights(values, weights)
         self._disp_obj_dict[name] = disp
         self.model.set_dispersion(name.split('.')[0], disp)
-        self.state._disp_obj_dict[name] = disp.type
+        self.state.disp_obj_dict[name] = disp.type
         self.values[name] = values
         self.weights[name] = weights
         # Store the object to make it persist outside the
@@ -2751,7 +2815,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation,
                                               "", name + " Help")
         else:
-            _TreeLocation = 'user/index.html'
+            _TreeLocation = 'user/sasgui/perspectives/fitting/models/index.html'
             _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation,
                                               "", "General Model Help")
 
@@ -2788,7 +2852,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
     def _on_mag_angle_help(self, event):
         """
-        Bring up Magnetic Angle definition bmp image whenever the ? button
+        Bring up Magnetic Angle definition.png image whenever the ? button
         is clicked. Calls DocumentationWindow with the path of the location
         within the documentation tree (after /doc/ ....". When using old
         versions of Wx (i.e. before 2.9 and therefore not part of release
@@ -2802,13 +2866,13 @@ class BasicPage(ScrolledPanel, PanelBase):
         :param evt: Triggers on clicking ? in Magnetic Angles? box
         """
 
-        _TreeLocation = "_images/M_angles_pic.bmp"
+        _TreeLocation = "_images/M_angles_pic.png"
         _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation, "",
                                           "Magnetic Angle Defintions")
 
     def _on_mag_help(self, event):
         """
-        Bring up Magnetic Angle definition bmp image whenever the ? button
+        Bring up Magnetic Angle definition.png image whenever the ? button
         is clicked. Calls DocumentationWindow with the path of the location
         within the documentation tree (after /doc/ ....". When using old
         versions of Wx (i.e. before 2.9 and therefore not part of release
@@ -2822,7 +2886,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         :param evt: Triggers on clicking ? in Magnetic Angles? box
         """
 
-        _TreeLocation = "user/magnetism.html"
+        _TreeLocation = "user/sasgui/perspectives/fitting/magnetism/magnetism.html"
         _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation, "",
                                           "Polarized Beam/Magnetc Help")
 
@@ -2868,7 +2932,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         :param event: Triggers on clicking ? in polydispersity box
         """
 
-        _TreeLocation = "user/sasgui/perspectives/fitting/pd_help.html"
+        _TreeLocation = "user/sasgui/perspectives/fitting/pd/polydispersity.html"
         _PageAnchor = ""
         _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation,
                                           _PageAnchor, "Polydispersity Help")
@@ -2907,26 +2971,61 @@ class BasicPage(ScrolledPanel, PanelBase):
 
             # go through the parameters
             strings = self._get_copy_helper(self.parameters,
-                                           self.orientation_params)
+                                            self.orientation_params)
             content += strings
 
             # go through the fittables
             strings = self._get_copy_helper(self.fittable_param,
-                                           self.orientation_params_disp)
+                                            self.orientation_params_disp)
             content += strings
 
             # go through the fixed params
             strings = self._get_copy_helper(self.fixed_param,
-                                           self.orientation_params_disp)
+                                            self.orientation_params_disp)
             content += strings
 
             # go through the str params
             strings = self._get_copy_helper(self.str_parameters,
-                                           self.orientation_params)
+                                            self.orientation_params)
             content += strings
             return content
         else:
             return False
+
+
+    def _get_copy_params_details(self):
+        """
+        Combines polydisperse parameters with self.parameters so that they can
+        be written to the clipboard (for Excel or LaTeX). Also returns a list of
+        the names of parameters that have been fitted
+
+        :returns: all_params - A list of all parameters, in the format of
+        self.parameters
+        :returns: fitted_par_names - A list of the names of parameters that have
+        been fitted
+        """
+        # Names of params that are being fitted
+        fitted_par_names = [param[1] for param in self.param_toFit]
+        # Names of params with associated polydispersity
+        disp_params = [param[1].split('.')[0] for param in self.fittable_param]
+
+        # Create array of all parameters
+        all_params = copy.copy(self.parameters)
+        for param in self.parameters:
+            if param[1] in disp_params:
+                # Polydisperse params aren't in self.parameters, so need adding
+                # to all_params
+                name = param[1] + ".width"
+                index = all_params.index(param) + 1
+                to_insert = []
+                if name in fitted_par_names:
+                    # Param is fitted, so already has a param list in self.param_toFit
+                    to_insert = self.param_toFit[fitted_par_names.index(name)]
+                else:
+                    # Param isn't fitted, so mockup a param list
+                    to_insert = [None, name, self.model.getParam(name), None, None]
+                all_params.insert(index, to_insert)
+        return all_params, fitted_par_names
 
     def get_copy_excel(self):
         """
@@ -2941,32 +3040,45 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Get the string copies of the param names and values in the tap
         """
-        content = ''
+        if not self.parameters:
+            # Do nothing if parameters doesn't exist
+            return False
 
+        content = ''
         crlf = chr(13) + chr(10)
         tab = chr(9)
 
-        # Do it if params exist
-        if self.parameters:
+        all_params, fitted_param_names = self._get_copy_params_details()
 
-            for param in self.parameters:
-                content += param[1]  # parameter name
-                content += tab
-                content += param[1] + "_err"
-                content += tab
-
-            content += crlf
-
-            # row of values and errors...
-            for param in self.parameters:
-                content += param[2].GetValue()  # value
-                content += tab
-                content += param[4].GetValue()  # error
+        # Construct row of parameter names
+        for param in all_params:
+            name = param[1] # Parameter name
+            content += name
+            content += tab
+            if name in fitted_param_names:
+                # Only print errors for fitted parameters
+                content += name + "_err"
                 content += tab
 
-            return content
-        else:
-            return False
+        content += crlf
+
+        # Construct row of parameter values and errors
+        for param in all_params:
+            value = param[2]
+            if hasattr(value, 'GetValue'):
+                # param[2] is a text box
+                value = value.GetValue()
+            else:
+                # param[2] is a float (from our self._get_copy_params_details)
+                value = str(value)
+            content += value
+            content += tab
+            if param[1] in fitted_param_names:
+                # Only print errors for fitted parameters
+                content += param[4].GetValue()
+                content += tab
+
+        return content
 
     def get_copy_latex(self):
         """
@@ -2981,45 +3093,61 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Get the string copies of the param names and values in the tap
         """
-        content = '\\begin{table}'
-        content += '\\begin{tabular}[h]'
+        if not self.parameters:
+            # Do nothing if self.parameters doesn't exist
+            return False
+
+        content = r'\begin{table}'
+        content += r'\begin{tabular}[h]'
 
         crlf = chr(13) + chr(10)
         tab = chr(9)
 
-        # Do it if params exist
-        if self.parameters:
+        all_params, fitted_param_names = self._get_copy_params_details()
 
-            content += '{|'
-            for param in self.parameters:
-                content += 'l|l|'
-            content += '}\hline'
-            content += crlf
+        content += '{|'
+        for param in all_params:
+            content += 'l|l|'
+        content += r'}\hline'
+        content += crlf
 
-            for index, param in enumerate(self.parameters):
-                content += param[1].replace('_', '\_')  # parameter name
+        # Construct row of parameter names
+        for index, param in enumerate(all_params):
+            name = param[1] # Parameter name
+            content += name.replace('_', r'\_')  # Escape underscores
+            if name in fitted_param_names:
+                # Only print errors for fitted parameters
                 content += ' & '
-                content += param[1].replace('_', '\_') + "\_err"
-                if index < len(self.parameters) - 1:
-                    content += ' & '
-            content += '\\\\ \\hline'
-            content += crlf
-
-            # row of values and errors...
-            for index, param in enumerate(self.parameters):
-                content += param[2].GetValue()  # parameter value
+                content += name.replace('_', r'\_') + r"\_err"
+            if index < len(all_params) - 1:
                 content += ' & '
-                content += param[4].GetValue()  # parameter error
-                if index < len(self.parameters) - 1:
-                    content += ' & '
-            content += '\\\\ \\hline'
-            content += crlf
 
-            content += '\\end{tabular}'
-            content += '\\end{table}'
-            return content
-        else:
-            return False
+        content += r'\\ \hline'
+        content += crlf
+
+        # Construct row of values and errors
+        for index, param in enumerate(all_params):
+            value = param[2]
+            if hasattr(value, "GetValue"):
+                # value is a text box
+                value = value.GetValue()
+            else:
+                # value is a float (from self._get_copy_params_details)
+                value = str(value)
+            content += value
+            if param[1] in fitted_param_names:
+                # Only print errors for fitted params
+                content += ' & '
+                content += param[4].GetValue()
+            if index < len(all_params) - 1:
+                content += ' & '
+
+        content += r'\\ \hline'
+        content += crlf
+        content += r'\end{tabular}'
+        content += r'\end{table}'
+
+        return content
 
     def set_clipboard(self, content=None):
         """
@@ -3274,7 +3402,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                                 pd = float(pd)
                                 if name.endswith('.npts'):
                                     pd = int(pd)
-                            except:
+                            except Exception:
                                 # continue
                                 if not pd and pd != '':
                                     continue
@@ -3360,7 +3488,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self._set_disp_cb(False, item=item)
                 self._disp_obj_dict[name] = disp_model
                 self.model.set_dispersion(param_name, disp_model)
-                self.state._disp_obj_dict[name] = disp_model.type
+                self.state.disp_obj_dict[name] = disp_model.type
                 # TODO: It's not an array, why update values and weights?
                 self.model._persistency_dict[param_name] = \
                     [self.values, self.weights]
@@ -3460,15 +3588,15 @@ class BasicPage(ScrolledPanel, PanelBase):
             return
         self.model_box.Clear()
 
-        if category == 'Plugin Models':
+        if category == CUSTOM_MODEL:
             for model in self.model_list_box[category]:
                 str_m = str(model).split(".")[0]
                 self.model_box.Append(str_m)
 
         else:
-            for (model, enabled) in sorted(self.master_category_dict[category],
-                                           key=lambda name: name[0]):
-                if(enabled):
+            for model, enabled in sorted(self.master_category_dict[category],
+                                         key=lambda name: name[0]):
+                if enabled:
                     self.model_box.Append(model)
 
     def _fill_model_sizer(self, sizer):
@@ -3709,12 +3837,12 @@ class ModelTextCtrl(wx.TextCtrl):
             if set_focus_callback is None else set_focus_callback
         self.Bind(wx.EVT_SET_FOCUS, self._on_set_focus)
         self.Bind(wx.EVT_KILL_FOCUS, self._silent_kill_focus
-        if kill_focus_callback is None else kill_focus_callback)
+                  if kill_focus_callback is None else kill_focus_callback)
         self.Bind(wx.EVT_TEXT_ENTER, parent._onparamEnter
-        if text_enter_callback is None else text_enter_callback)
+                  if text_enter_callback is None else text_enter_callback)
         if not ON_MAC:
             self.Bind(wx.EVT_LEFT_UP, self._highlight_text
-            if mouse_up_callback is None else mouse_up_callback)
+                      if mouse_up_callback is None else mouse_up_callback)
 
     def _on_set_focus(self, event):
         """

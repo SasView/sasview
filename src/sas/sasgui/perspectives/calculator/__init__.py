@@ -17,7 +17,7 @@ def get_data_path(media):
     # directory.
     path = os.path.dirname(__file__)
     #Look for maximum n_dir up of the current dir to find media
-   
+
     #for i in range(n_dir):
     i = 0
     while(i < N_DIR):
@@ -29,19 +29,17 @@ def get_data_path(media):
                  return module_media_path
              return media_path
         i += 1
-   
+
     raise RuntimeError('Could not find calculator media files')
 
 def data_files():
     """
     Return the data files associated with media calculator.
-    
+
     The format is a list of (directory, [files...]) pairs which can be
     used directly in setup(...,data_files=...) for setup.py.
 
     """
     data_files = []
-    path = get_data_path(media="media")
-    for f in findall(path):
-        data_files.append(('media/calculator_media', [f]))
+    data_files.append(('media/calculator_media', findall(get_data_path("media"))))
     return data_files

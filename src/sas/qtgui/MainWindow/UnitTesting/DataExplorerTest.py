@@ -149,7 +149,7 @@ class DataExplorerTest(unittest.TestCase):
             self.form.communicator.progressBarUpdateSignal)
 
         # Populate the model
-        filename = ["cyl_400_20.txt", "Dec07031.ASC", "cyl_400_20.txt"]
+        filename = ["cyl_400_20.txt", "P123_D2O_10_percent.dat", "cyl_400_20.txt"]
         self.form.readData(filename)
 
         # 0, 0, 33, 66, -1 -> 5 signals reaching progressBar
@@ -169,8 +169,12 @@ class DataExplorerTest(unittest.TestCase):
         QtGui.QMessageBox.question = MagicMock(return_value=QtGui.QMessageBox.No)
 
         # Populate the model
-        filename = ["cyl_400_20.txt", "Dec07031.ASC", "cyl_400_20.txt"]
+        #filename = ["cyl_400_20.txt", "P123_D2O_10_percent.dat", "cyl_400_20.txt"]
+        filename = ["cyl_400_20.txt", "cyl_400_20.txt", "P123_D2O_10_percent.dat"]
         self.form.readData(filename)
+
+        self.form.show()
+        app.exec_()
 
         # Assure the model contains three items
         self.assertEqual(self.form.model.rowCount(), 3)
@@ -318,7 +322,7 @@ class DataExplorerTest(unittest.TestCase):
         Tests the functionality of the Selection Option combobox
         """
         # Populate the model with 1d and 2d data
-        filename = ["cyl_400_20.txt", "Dec07031.ASC"]
+        filename = ["cyl_400_20.txt", "P123_D2O_10_percent.dat"]
         self.form.readData(filename)
 
         # Unselect all data
@@ -468,9 +472,9 @@ class DataExplorerTest(unittest.TestCase):
         w_list = self.form.getWlist()
 
         defaults = 'All (*.*);;canSAS files (*.xml);;SESANS files' +\
-            ' (*.ses);;ASCII files (*.txt);;IGOR 2D files (*.asc);;' +\
+            ' (*.ses);;ASCII files (*.txt);;' +\
             'IGOR/DAT 2D Q_map files (*.dat);;IGOR 1D files (*.abs);;'+\
-            'HFIR 1D files (*.d1d);;DANSE files (*.sans);;NXS files (*.nxs)'
+            'DANSE files (*.sans)'
         default_list = defaults.split(';;')
 
         for def_format in default_list:
@@ -524,7 +528,7 @@ class DataExplorerTest(unittest.TestCase):
         # get Data1D
         p_file="cyl_400_20.txt"
         output_object = loader.load(p_file)
-        new_data = [manager.create_gui_data(output_object, p_file)]
+        new_data = [manager.create_gui_data(output_object[0], p_file)]
 
         # Mask retrieval of the data
         self.form.plotsFromCheckedItems = MagicMock(return_value=new_data)
@@ -555,9 +559,9 @@ class DataExplorerTest(unittest.TestCase):
         self.assertFalse(self.form.cmdAppend.isEnabled())
 
         # get Data2D
-        p_file="Dec07031.ASC"
+        p_file="P123_D2O_10_percent.dat"
         output_object = loader.load(p_file)
-        new_data = [manager.create_gui_data(output_object, p_file)]
+        new_data = [manager.create_gui_data(output_object[0], p_file)]
 
         # Mask retrieval of the data
         self.form.plotsFromCheckedItems = MagicMock(return_value=new_data)
@@ -593,7 +597,7 @@ class DataExplorerTest(unittest.TestCase):
         p_file="cyl_400_20.txt"
         output_object = loader.load(p_file)
         output_item = QtGui.QStandardItem()
-        new_data = [(output_item, manager.create_gui_data(output_object, p_file))]
+        new_data = [(output_item, manager.create_gui_data(output_object[0], p_file))]
 
         # Mask plotting
         self.form.parent.workspace = MagicMock()
@@ -736,7 +740,7 @@ class DataExplorerTest(unittest.TestCase):
         QFileDialog.getSaveFileName.assert_called_once()
 
         # get Data2D
-        p_file=["Dec07031.ASC"]
+        p_file=["P123_D2O_10_percent.dat"]
         # Read in the file
         output, message = self.form.readData(p_file)
         self.form.loadComplete((output, message))
@@ -753,7 +757,7 @@ class DataExplorerTest(unittest.TestCase):
         self.form.saveDataAs()
         QFileDialog.getSaveFileName.assert_called_with(
                                 caption="Save As",
-                                directory='Dec07031_out.dat',
+                                directory='P123_D2O_10_percent_out.dat',
                                 filter='IGOR/DAT 2D file in Q_map (*.dat)',
                                 parent=None)
         QFileDialog.getSaveFileName.assert_called_once()
@@ -781,7 +785,7 @@ class DataExplorerTest(unittest.TestCase):
         Slow(er) 3D data plot generation.
         """
         # get Data1D
-        p_file=["Dec07031.ASC"]
+        p_file=["P123_D2O_10_percent.dat"]
         # Read in the file
         output, message = self.form.readData(p_file)
         self.form.loadComplete((output, message))

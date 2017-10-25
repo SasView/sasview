@@ -9,7 +9,7 @@ export PYTHONPATH=$PYTHONPATH:$WORKSPACE/sasview/utils
 export PYTHONPATH=$PYTHONPATH:$WORKSPACE/sasview/sasview-install
 
 # SET SASVIEW GITHASH
-cd $WORKSPACE/sasview/sasview
+cd $WORKSPACE/sasview/src/sas/sasview
 githash=$( git rev-parse HEAD )
 sed -i.bak s/GIT_COMMIT/$githash/g __init__.py
 

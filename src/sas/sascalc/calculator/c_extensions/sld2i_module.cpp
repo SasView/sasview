@@ -5,6 +5,14 @@
 #include <stdio.h>
 #include <sld2i.hh>
 
+#if PY_MAJOR_VERSION < 3
+typedef void (*PyCapsule_Destructor)(PyObject *);
+typedef void (*PyCObject_Destructor)(void *);
+#define PyCapsule_New(pointer, name, destructor) (PyCObject_FromVoidPtr(pointer, (PyCObject_Destructor)destructor))
+#define PyCapsule_GetPointer(capsule, name) (PyCObject_AsVoidPtr(capsule))
+#endif
+
+
 // Utilities
 #define INVECTOR(obj,buf,len)										\
     do { \
@@ -24,8 +32,9 @@
 /**
  * Delete a GenI object
  */
-void del_sld2i(void *ptr){
-	GenI* sld2i = static_cast<GenI *>(ptr);
+void
+del_sld2i(PyObject *obj){
+	GenI* sld2i = static_cast<GenI *>(PyCapsule_GetPointer(obj, "GenI"));
 	delete sld2i;
 	return;
 }
@@ -70,7 +79,7 @@ PyObject * new_GenI(PyObject *, PyObject *args) {
 	OUTVECTOR(mz_val_obj, mz_val, n_x);
 	OUTVECTOR(vol_pix_obj, vol_pix, n_x);
 	GenI* sld2i = new GenI(n_pix,x_val,y_val,z_val,sldn_val,mx_val,my_val,mz_val,vol_pix,inspin,outspin,stheta);
-	return PyCObject_FromVoidPtr(sld2i, del_sld2i);
+	return PyCapsule_New(sld2i, "GenI", del_sld2i);
 }
 
 /**
@@ -96,7 +105,7 @@ PyObject * genicom_inputXY(PyObject *, PyObject *args) {
 	//if(n_in!=n_out) return Py_BuildValue("i",-1);
 
 	// Set the array pointers
-	void *temp = PyCObject_AsVoidPtr(gen_obj);
+	void *temp = PyCapsule_GetPointer(gen_obj, "GenI");
 	GenI* s = static_cast<GenI *>(temp);
 
 	s->genicomXY(npoints, qx, qy, I_out);
@@ -124,7 +133,7 @@ PyObject * genicom_input(PyObject *, PyObject *args) {
 	//if(n_in!=n_out) return Py_BuildValue("i",-1);
 
 	// Set the array pointers
-	void *temp = PyCObject_AsVoidPtr(gen_obj);
+	void *temp = PyCapsule_GetPointer(gen_obj, "GenI");
 	GenI* s = static_cast<GenI *>(temp);
 
 	s->genicom(npoints, q, I_out);
@@ -145,12 +154,49 @@ static PyMethodDef module_methods[] = {
     {NULL}
 };
 
+#define MODULE_DOC "Sld2i C Library"
+#define MODULE_NAME "sld2i"
+#define MODULE_INIT2 initsld2i
+#define MODULE_INIT3 PyInit_sld2i
+#define MODULE_METHODS module_methods
 
-#ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
-#define PyMODINIT_FUNC void
+/* ==== boilerplate python 2/3 interface bootstrap ==== */
+
+
+#if defined(WIN32) && !defined(__MINGW32__)
+    #define DLL_EXPORT __declspec(dllexport)
+#else
+    #define DLL_EXPORT
 #endif
-PyMODINIT_FUNC
-initsld2i(void)
-{
-    Py_InitModule3("sld2i", module_methods, "Sld2i module");
-}
+
+#if PY_MAJOR_VERSION >= 3
+
+  DLL_EXPORT PyMODINIT_FUNC MODULE_INIT3(void)
+  {
+    static struct PyModuleDef moduledef = {
+      PyModuleDef_HEAD_INIT,
+      MODULE_NAME,         /* m_name */
+      MODULE_DOC,          /* m_doc */
+      -1,                  /* m_size */
+      MODULE_METHODS,      /* m_methods */
+      NULL,                /* m_reload */
+      NULL,                /* m_traverse */
+      NULL,                /* m_clear */
+      NULL,                /* m_free */
+    };
+    return PyModule_Create(&moduledef);
+  }
+
+#else /* !PY_MAJOR_VERSION >= 3 */
+
+  DLL_EXPORT PyMODINIT_FUNC MODULE_INIT2(void)
+  {
+    Py_InitModule4(MODULE_NAME,
+		 MODULE_METHODS,
+		 MODULE_DOC,
+		 0,
+		 PYTHON_API_VERSION
+		 );
+  }
+
+#endif /* !PY_MAJOR_VERSION >= 3 */

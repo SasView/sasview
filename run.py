@@ -118,7 +118,8 @@ def prepare():
     # Import the sasview package from root/sasview as sas.sasview.  It would
     # be better to just store the package in src/sas/sasview.
     import sas
-    sas.sasview = import_package('sas.sasview', joinpath(root, 'sasview'))
+    #sas.sasview = import_package('sas.sasview', joinpath(root, 'sasview'))
+    sas.sasview = import_package('sas.sasview', joinpath(root, 'src','sas','sasview'))
 
     # Compiled modules need to be pulled from the build directory.
     # Some packages are not where they are needed, so load them explicitly.
@@ -144,7 +145,7 @@ if __name__ == "__main__":
     # Need to add absolute path before actual prepare call,
     # so logging can be done during initialization process too
     root = abspath(dirname(realpath(sys.argv[0])))
-    addpath(joinpath(root, 'sasview'))
+    addpath(joinpath(root, 'src','sas'))
     from logger_config import SetupLogger
     logger = SetupLogger(__name__).config_development()
 

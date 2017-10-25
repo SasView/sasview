@@ -70,7 +70,7 @@ class SlitSizeCalculatorTest(unittest.TestCase):
 
         filename = "beam_profile.DAT"
         loader = Loader()
-        data = loader.load(filename)
+        data = loader.load(filename)[0]
 
         self.widget.calculateSlitSize(data)
         # The value "5.5858" was obtained by manual calculation.
@@ -80,9 +80,9 @@ class SlitSizeCalculatorTest(unittest.TestCase):
     def testWrongInput(self):
         """ Test on wrong input data """
 
-        filename = "Dec07031.ASC"
+        filename = "P123_D2O_10_percent.dat"
         loader = Loader()
-        data = loader.load(filename)
+        data = loader.load(filename)[0]
         self.assertRaisesRegexp(RuntimeError,
                                 "Slit Length cannot be computed for 2D Data",
                                 self.widget.calculateSlitSize, data)

@@ -127,7 +127,7 @@ class PolyViewDelegate(QtGui.QStyledItemDelegate):
         self.poly_filename = 7
 
     def editableParameters(self):
-        return [self.poly_min, self.poly_max, self.poly_npts, self.poly_nsigs]
+        return [self.poly_pd, self.poly_min, self.poly_max, self.poly_npts, self.poly_nsigs]
 
     def columnDict(self):
         return {self.poly_pd:    'width',

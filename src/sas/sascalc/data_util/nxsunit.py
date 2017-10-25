@@ -12,7 +12,7 @@ need now.  It does not support the complete dimensional analysis provided
 by the package udunits on which NeXus is based, or even the units used
 in the NeXus definition files.
 
-Unlike other units packages, this package does not carry the units along with 
+Unlike other units packages, this package does not carry the units along with
 the value but merely provides a conversion function for transforming values.
 
 Usage example::
@@ -67,7 +67,7 @@ def _build_metric_units(unit,abbr):
 
     Ack! Allows, e.g., Coulomb and coulomb even though Coulomb is not
     a unit because some NeXus files store it that way!
-    
+
     Returns a dictionary of names and scales.
     """
     prefix = dict(peta=1e15,tera=1e12,giga=1e9,mega=1e6,kilo=1e3,
@@ -77,12 +77,12 @@ def _build_metric_units(unit,abbr):
                         d=1e-1,c=1e-2,m=1e-3,u=1e-6,
                         n=1e-9,p=1e-12,f=1e-15)
     map = {abbr:1}
-    map.update([(P+abbr,scale) for (P,scale) in short_prefix.iteritems()])
+    map.update([(P+abbr,scale) for (P,scale) in short_prefix.items()])
     for name in [unit,unit.capitalize()]:
         map.update({name:1,name+'s':1})
-        map.update([(P+name,scale) for (P,scale) in prefix.iteritems()])
-        map.update([(P+'*'+name,scale) for (P,scale) in prefix.iteritems()])
-        map.update([(P+name+'s',scale) for (P,scale) in prefix.iteritems()])
+        map.update([(P+name,scale) for (P,scale) in prefix.items()])
+        map.update([(P+'*'+name,scale) for (P,scale) in prefix.items()])
+        map.update([(P+name+'s',scale) for (P,scale) in prefix.items()])
     return map
 
 def _build_plural_units(**kw):
@@ -90,8 +90,8 @@ def _build_plural_units(**kw):
     Construct names for the given units.  Builds singular and plural form.
     """
     map = {}
-    map.update([(name,scale) for name,scale in kw.iteritems()])
-    map.update([(name+'s',scale) for name,scale in kw.iteritems()])
+    map.update([(name,scale) for name,scale in kw.items()])
+    map.update([(name+'s',scale) for name,scale in kw.items()])
     return map
 
 def _caret_optional(s):
@@ -100,8 +100,8 @@ def _caret_optional(s):
 
     * WARNING * this will incorrect transform 10^3 to 103.
     """
-    s.update((k.replace('^',''),v) 
-             for k,v in s.items()
+    s.update((k.replace('^',''),v)
+             for k, v in list(s.items())
              if '^' in k)
 
 def _build_all_units():
@@ -129,12 +129,12 @@ def _build_all_units():
     temperature.update(_build_metric_units('Kelvin','K'))
     temperature.update(_build_metric_units('Celcius', 'C'))
     temperature.update(_build_metric_units('celcius', 'C'))
-    
+
     charge = _build_metric_units('coulomb','C')
     charge.update({'microAmp*hour':0.0036})
 
     sld = { '10^-6 Angstrom^-2': 1e-6, 'Angstrom^-2': 1 }
-    Q = { 'invA': 1, 'invAng': 1, 'invAngstroms': 1, '1/A': 1, 
+    Q = { 'invA': 1, 'invAng': 1, 'invAngstroms': 1, '1/A': 1,
           '10^-3 Angstrom^-1': 1e-3, '1/cm': 1e-8, '1/m': 1e-10,
           'nm^-1': 0.1, '1/nm': 0.1, 'n_m^-1': 0.1 }
 
@@ -188,7 +188,8 @@ class Converter(object):
             raise KeyError("%s not in %s"%(units,possible_units))
 
 def _check(expect,get):
-    if expect != get: raise ValueError, "Expected %s but got %s"%(expect,get)
+    if expect != get:
+        raise ValueError("Expected %s but got %s"%(expect, get))
      #print expect,"==",get
 
 def test():
@@ -201,9 +202,12 @@ def test():
     _check(123,Converter('a.u.')(123,units='mm')) # arbitrary units always returns the same value
     _check(123,Converter('a.u.')(123,units='s')) # arbitrary units always returns the same value
     _check(123,Converter('a.u.')(123,units='')) # arbitrary units always returns the same value
-    try: Converter('help')
-    except KeyError: pass
-    else: raise Exception("unknown unit did not raise an error")
+    try:
+        Converter('help')
+    except KeyError:
+        pass
+    else:
+        raise Exception("unknown unit did not raise an error")
 
     # TODO: more tests
 
