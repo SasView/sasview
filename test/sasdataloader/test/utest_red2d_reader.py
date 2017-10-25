@@ -13,13 +13,15 @@ class abs_reader(unittest.TestCase):
 
     def setUp(self):
         self.loader = Loader()
+        self.data_list = self.loader.load("exp18_14_igor_2dqxqy.dat")
 
     def test_checkdata(self):
         """
             Test .DAT file loaded as IGOR/DAT 2D Q_map
         """
-        f = self.loader.load("exp18_14_igor_2dqxqy.dat")[0]
+        f = self.data_list[0]
         # The length of the data is 10
+        self.assertEqual(len(self.data_list), 1)
         self.assertEqual(len(f.qx_data),  36864)
         self.assertEqual(f.qx_data[0],-0.03573497)
         self.assertEqual(f.qx_data[36863],0.2908819)
