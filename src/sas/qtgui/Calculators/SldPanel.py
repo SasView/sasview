@@ -13,11 +13,7 @@ from sas.qtgui.UI import main_resources_rc
 # Local UI
 from sas.qtgui.Calculators.UI.SldPanel import Ui_SldPanel
 
-def enum(*sequential, **named):
-    enums = dict(zip(sequential, range(len(sequential))), **named)
-    return type('Enum', (), enums)
-
-MODEL = enum(
+MODEL = GuiUtils.enum(
     'MOLECULAR_FORMULA',
     'MASS_DENSITY',
     'WAVELENGTH',

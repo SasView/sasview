@@ -805,3 +805,8 @@ def parseName(name, expression):
                 return item
     else:
         return name
+
+def enum(*sequential, **named):
+    """Create an enumeration object from a list of strings"""
+    enums = dict(zip(sequential, range(len(sequential))), **named)
+    return type('Enum', (), enums)

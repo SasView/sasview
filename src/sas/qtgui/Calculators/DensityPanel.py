@@ -7,14 +7,10 @@ from periodictable import formula as Formula
 
 from sas.qtgui.Utilities.GuiUtils import FormulaValidator
 from sas.qtgui.UI import main_resources_rc
-from sas.qtgui.Utilities.GuiUtils import HELP_DIRECTORY_LOCATION
+from sas.qtgui.Utilities.GuiUtils import HELP_DIRECTORY_LOCATION, enum
 
 # Local UI
 from sas.qtgui.Calculators.UI.DensityPanel import Ui_DensityPanel
-
-def enum(*sequential, **named):
-    enums = dict(zip(sequential, range(len(sequential))), **named)
-    return type('Enum', (), enums)
 
 MODEL = enum(
     'MOLECULAR_FORMULA',
