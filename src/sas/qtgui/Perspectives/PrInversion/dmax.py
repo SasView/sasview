@@ -179,10 +179,8 @@ if __name__ == "__main__":
     pr_state.alpha = 0.0007
     pr_state.x = data.x
     pr_state.y = data.y
-    pr_state.err = 0.15*data.y
+    pr_state.err = 0.15*np.sqrt(data.y[0])*np.sqrt(data.y)
     pr_state.nfunc = 15
-
-    print(data.x, data.y, 0.15*np.sqrt(data.y))
 
     DLG = DmaxWindow(pr_state, 15, reactor)
     DLG.show()
