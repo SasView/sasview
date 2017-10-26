@@ -20,6 +20,7 @@ from CorfuncUtils import WIDGETS as W
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg \
     as FigureCanvas
 from matplotlib.figure import Figure
+from numpy.linalg.linalg import LinAlgError
 
 
 class MyMplCanvas(FigureCanvas):
@@ -181,17 +182,26 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
     def extrapolate(self):
         """Extend the experiemntal data with guinier and porod curves."""
         self._update_calculator()
-        params, extrapolation, _ = self._calculator.compute_extrapolation()
+        try:
+            params, extrapolation, _ = self._calculator.compute_extrapolation()
+            self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem(str(params['A'])))
+            self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem(str(params['B'])))
+            self.model.setItem(W.W_PORODK, QtGui.QStandardItem(str(params['K'])))
+            self.model.setItem(W.W_PORODSIGMA,
+                               QtGui.QStandardItem(str(params['sigma'])))
 
-        self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem(str(params['A'])))
-        self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem(str(params['B'])))
-        self.model.setItem(W.W_PORODK, QtGui.QStandardItem(str(params['K'])))
-        self.model.setItem(W.W_PORODSIGMA,
-                           QtGui.QStandardItem(str(params['sigma'])))
+            self._canvas.extrap = extrapolation
+            self._canvas.draw_q_space()
+            self.transformBtn.setEnabled(True)
+        except (LinAlgError, ValueError):
+            message = "These is not enough data in the fitting range. "\
+                      "Try decreasing the upper Q, increasing the "\
+                      "cutoff Q, or increasing the lower Q."
+            QtGui.QMessageBox.warning(self, "Calculation Error",
+                                      message)
+            self._canvas.extrap = None
+            self._canvas.draw_q_space()
 
-        self._canvas.extrap = extrapolation
-        self._canvas.draw_q_space()
-        self.transformBtn.setEnabled(True)
 
     def transform(self):
         """Calculate the real space version of the extrapolation."""
@@ -259,9 +269,16 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
     def calculate_background(self):
         """Find a good estimate of the background value."""
         self._update_calculator()
-        background = self._calculator.compute_background()
-        temp = QtGui.QStandardItem(str(background))
-        self.model.setItem(W.W_BACKGROUND, temp)
+        try:
+            background = self._calculator.compute_background()
+            temp = QtGui.QStandardItem(str(background))
+            self.model.setItem(W.W_BACKGROUND, temp)
+        except (LinAlgError, ValueError):
+            message = "These is not enough data in the fitting range. "\
+                      "Try decreasing the upper Q or increasing the cutoff Q"
+            QtGui.QMessageBox.warning(self, "Calculation Error",
+                                      message)
+
 
     # pylint: disable=invalid-name
     @staticmethod
