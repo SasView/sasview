@@ -286,9 +286,6 @@
            </item>
            <item row="1" column="2">
             <widget class="QLineEdit" name="bg">
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
             </widget>
            </item>
            <item row="2" column="0">
