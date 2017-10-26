@@ -179,13 +179,21 @@ class GuiManager(object):
         """
         Respond to change of the perspective signal
         """
+
+        # Save users from themselves...
+        if isinstance(self._current_perspective, Perspectives.PERSPECTIVES[str(perspective_name)]):
+            self.setupPerspectiveMenubarOptions(self._current_perspective)
+            return
+
         # Close the previous perspective
+        self.clearPerspectiveMenubarOptions(self._current_perspective)
         if self._current_perspective:
             self._current_perspective.setClosable()
             self._current_perspective.close()
         # Default perspective
         self._current_perspective = Perspectives.PERSPECTIVES[str(perspective_name)](parent=self)
 
+        self.setupPerspectiveMenubarOptions(self._current_perspective)
         self._workspace.workspace.addWindow(self._current_perspective)
         # Resize to the workspace height
         workspace_height = self._workspace.workspace.sizeHint().height()
@@ -649,21 +657,25 @@ class GuiManager(object):
     #============ ANALYSIS =================
     def actionFitting(self):
         """
+        Change to the Fitting perspective
         """
-        print("actionFitting TRIGGERED")
-        pass
+        self.perspectiveChanged("Fitting")
 
     def actionInversion(self):
         """
+        Change to the Inversion perspective
         """
+        # For now we'll just update the analysis menu status but when the inversion is implemented delete from here
+        self.checkAnalysisOption(self._workspace.actionInversion)
         print("actionInversion TRIGGERED")
-        pass
+        # to here and uncomment the following line
+        # self.perspectiveChanged("Inversion")
 
     def actionInvariant(self):
         """
+        Change to the Invariant perspective
         """
-        print("actionInvariant TRIGGERED")
-        pass
+        self.perspectiveChanged("Invariant")
 
     #============ WINDOW =================
     def actionCascade(self):
@@ -762,3 +774,47 @@ class GuiManager(object):
         """
         if hasattr(self, "filesWidget"):
             self.filesWidget.displayData(plot)
+
+    def uncheckAllMenuItems(self, menuObject):
+        """
+        Uncheck all options in a given menu
+        """
+        menuObjects = menuObject.actions()
+
+        for menuItem in menuObjects:
+            menuItem.setChecked(False)
+
+    def checkAnalysisOption(self, analysisMenuOption):
+        """
+        Unchecks all the items in the analysis menu and checks the item passed
+        """
+        self.uncheckAllMenuItems(self._workspace.menuAnalysis)
+        analysisMenuOption.setChecked(True)
+
+    def clearPerspectiveMenubarOptions(self, perspective):
+        """
+        When closing a perspective, clears the menu bar
+        """
+        for menuItem in self._workspace.menuAnalysis.actions():
+            menuItem.setChecked(False)
+
+        if isinstance(self._current_perspective, Perspectives.PERSPECTIVES["Fitting"]):
+            self._workspace.menubar.removeAction(self._workspace.menuFitting.menuAction())
+
+    def setupPerspectiveMenubarOptions(self, perspective):
+        """
+        When setting a perspective, sets up the menu bar
+        """
+        if isinstance(perspective, Perspectives.PERSPECTIVES["Fitting"]):
+            self.checkAnalysisOption(self._workspace.actionFitting)
+            # Put the fitting menu back in
+            # This is a bit involved but it is needed to preserve the menu ordering
+            self._workspace.menubar.removeAction(self._workspace.menuWindow.menuAction())
+            self._workspace.menubar.removeAction(self._workspace.menuHelp.menuAction())
+            self._workspace.menubar.addAction(self._workspace.menuFitting.menuAction())
+            self._workspace.menubar.addAction(self._workspace.menuWindow.menuAction())
+            self._workspace.menubar.addAction(self._workspace.menuHelp.menuAction())
+        elif isinstance(perspective, Perspectives.PERSPECTIVES["Invariant"]):
+            self.checkAnalysisOption(self._workspace.actionInvariant)
+        # elif isinstance(perspective, Perspectives.PERSPECTIVES["Inversion"]):
+        #     self.checkAnalysisOption(self._workspace.actionInversion)
