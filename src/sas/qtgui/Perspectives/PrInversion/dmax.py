@@ -137,9 +137,7 @@ class DmaxWindow(QtGui.QDialog, Ui_DmaxExplorer):
         self.pr_state.d_max = original
 
         plotter = unicode(self.model.item(W.VARIABLE).text())
-        if plotter == u"1-σ positive fraction":
-            ys = pos_err
-        elif plotter == u"χ²/dof":
+        if plotter == u"χ²/dof":
             ys = chi2
         elif plotter == u"I(Q=0)":
             ys = iq0
@@ -151,6 +149,8 @@ class DmaxWindow(QtGui.QDialog, Ui_DmaxExplorer):
             ys = bck
         elif plotter == u"Positive Fraction":
             ys = pos
+        else:
+            ys = pos_err
 
         self.plot.plot(data=Data1D(xs, ys), marker="-")
 
