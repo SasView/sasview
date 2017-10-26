@@ -55,6 +55,7 @@ class DmaxWindow(QtGui.QDialog, Ui_DmaxExplorer):
         self.communicator = GuiUtils.Communicate()
 
         self.plot = PlotterWidget(self, self)
+        self.hasPlot = None
         self.verticalLayout.insertWidget(0, self.plot)
 
         # Let's choose the Standard Item Model.
@@ -152,7 +153,11 @@ class DmaxWindow(QtGui.QDialog, Ui_DmaxExplorer):
         else:
             ys = pos_err
 
-        self.plot.plot(data=Data1D(xs, ys), marker="-")
+        data = Data1D(xs, ys)
+        if self.hasPlot:
+            self.plot.removePlot(None)
+        self.hasPlot = True
+        self.plot.plot(data=data, marker="-")
 
 
 if __name__ == "__main__":
