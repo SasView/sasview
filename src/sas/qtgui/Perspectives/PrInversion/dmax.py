@@ -9,6 +9,8 @@ their distribution as a function of D_max.
 # global
 import sys
 import os
+import logging
+import numpy as np
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 from PyQt4 import QtWebKit
@@ -24,6 +26,8 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from UI.dmax import Ui_DmaxExplorer
 # from InvariantDetails import DetailsDialog
 # from InvariantUtils import WIDGETS
+
+logger = logging.getLogger(__name__)
 
 def enum(*sequential, **named):
     enums = dict(zip(sequential, range(len(sequential))), **named)
@@ -55,6 +59,7 @@ class DmaxWindow(QtGui.QDialog, Ui_DmaxExplorer):
 
         # Let's choose the Standard Item Model.
         self.model = QtGui.QStandardItemModel(self)
+        self.mapper = None
 
         # # Connect buttons to slots.
         # # Needs to be done early so default values propagate properly.
@@ -93,7 +98,35 @@ class DmaxWindow(QtGui.QDialog, Ui_DmaxExplorer):
         self.mapper.toFirst()
 
     def modelChanged(self, item):
-        pass
+        if not self.mapper:
+            return
+
+        iq0 = []
+        rg = []
+        pos = []
+        pos_err = []
+        osc = []
+        xs = np.linspace(float(self.model.item(W.DMIN).text()),
+                         float(self.model.item(W.DMAX).text()),
+                         float(self.model.item(W.NPTS).text()))
+
+        for x in xs:
+            self.pr_state.d_max = x
+            try:
+                out, cov = self.pr_state.invert(self.nfunc)
+
+                iq0.append(self.pr_state.iq0(out))
+                rg.append(self.pr_state.rg(out))
+                pos.append(self.pr_state.get_positive(out))
+                pos_err.append(self.pr_state.get_pos_err(out, cov))
+                osc.append(self.pr_state.oscillations(out))
+            except:
+                # This inversion failed, skip this D_max value
+                msg = "ExploreDialog: inversion failed "
+                msg += "for D_max=%s\n%s" % (str(x), sys.exc_value)
+                print(msg)
+                # logger.error(msg)
+        self.plot.plot(data=Data1D(xs, rg), marker="-")
 
 
 if __name__ == "__main__":
