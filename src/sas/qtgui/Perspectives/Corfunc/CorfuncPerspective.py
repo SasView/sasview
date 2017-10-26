@@ -93,7 +93,7 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
     """Displays the correlation function analysis of sas data."""
     name = "Corfunc"  # For displaying in the combo box
 
-    trigger = QtCore.pyqtSignal(QtCore.QVariant)
+    trigger = QtCore.pyqtSignal(tuple)
 
 # pylint: disable=unused-argument
     def __init__(self, parent=None):
@@ -215,8 +215,6 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
 
 
     def finish_transform(self, transforms):
-        transforms = transforms.toPyObject()
-        print(transforms)
         params = self._calculator.extract_parameters(transforms[0])
         self.model.setItem(W.W_CORETHICK,
                            QtGui.QStandardItem(str(params['d0'])))
