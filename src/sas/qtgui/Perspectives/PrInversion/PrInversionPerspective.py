@@ -1,4 +1,3 @@
-import logging
 import numpy as np
 
 from PyQt4 import QtGui, QtCore, QtWebKit
@@ -12,6 +11,7 @@ from UI.TabbedPrInversionUI import Ui_PrInversion
 
 class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
     """
+    The main window for the P(r) Inversion perspective.
     """
 
     name = "PrInversion"
@@ -25,6 +25,9 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         self._manager = parent
         self._model_item = QtGui.QStandardItem()
         self._helpView = QtWebKit.QWebView()
+
+        if not isinstance(data, list):
+            data = [data]
         self._data = data
 
         # The tabs need to be closeable
@@ -32,28 +35,28 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
 
         # Set initial values
         self._data_index = 0
-        self._path = [""]
-        self._background = [0.0]
-        self._qmin = [0.0]
-        self._qmax = [1.0]
-        self._slit_height = [0.0]
-        self._slit_width = [0.0]
-        self._terms = [10]
-        self._regularization = [0.0001]
-        self._max_distance = [140]
-        self._bgd_input = [False]
-        self._terms_button = [False]
-        self._reg_button = [False]
-        self._terms_label = [""]
-        self._reg_label = [""]
+        self._path = ""
+        self._background = 0.0
+        self._qmin = 0.0
+        self._qmax = 1.0
+        self._slit_height = 0.0
+        self._slit_width = 0.0
+        self._terms = 10
+        self._regularization = 0.0001
+        self._max_distance = 140
+        self._bgd_input = False
+        self._terms_button = False
+        self._reg_button = False
+        self._terms_label = ""
+        self._reg_label = ""
         # Set results
-        self._rg = [0.0]
-        self._i_0 = [0.0]
-        self._comp_time = [0.0]
-        self._chi_dof = [0.0]
-        self._oscillations = [0.0]
-        self._pos_fraction = [0.0]
-        self._sigma_pos_fraction = [0.0]
+        self._rg = 0.0
+        self._i_0 = 0.0
+        self._comp_time = 0.0
+        self._chi_dof = 0.0
+        self._oscillations = 0.0
+        self._pos_fraction = 0.0
+        self._sigma_pos_fraction = 0.0
 
         # Let's choose the Standard Item Model.
         self.model = QtGui.QStandardItemModel(self)
@@ -65,7 +68,6 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         self.setupLinks()
 
         self.communicate = GuiUtils.Communicate()
-        logging.debug("P(r) Inversion Perspective loaded")
 
     ######################################################################
     # Base Perspective Class Definitions
@@ -163,40 +165,40 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         """
         Update boxes with latest values
         """
-        item = QtGui.QStandardItem(self._path[self._data_index])
+        item = QtGui.QStandardItem(self._path)
         self.model.setItem(WIDGETS.W_FILENAME, item)
-        item = QtGui.QStandardItem(self._background[self._data_index])
+        item = QtGui.QStandardItem(self._background)
         self.model.setItem(WIDGETS.W_BACKGROUND, item)
-        self.checkBgdClicked(self._bgd_input[self._data_index])
-        item = QtGui.QStandardItem(self._qmin[self._data_index])
+        self.checkBgdClicked(self._bgd_input)
+        item = QtGui.QStandardItem(self._qmin)
         self.model.setItem(WIDGETS.W_QMIN, item)
-        item = QtGui.QStandardItem(self._qmax[self._data_index])
+        item = QtGui.QStandardItem(self._qmax)
         self.model.setItem(WIDGETS.W_QMAX, item)
-        item = QtGui.QStandardItem(self._slit_width[self._data_index])
+        item = QtGui.QStandardItem(self._slit_width)
         self.model.setItem(WIDGETS.W_SLIT_WIDTH, item)
-        item = QtGui.QStandardItem(self._slit_height[self._data_index])
+        item = QtGui.QStandardItem(self._slit_height)
         self.model.setItem(WIDGETS.W_SLIT_HEIGHT, item)
-        item = QtGui.QStandardItem(self._terms[self._data_index])
+        item = QtGui.QStandardItem(self._terms)
         self.model.setItem(WIDGETS.W_NO_TERMS, item)
-        item = QtGui.QStandardItem(self._regularization[self._data_index])
+        item = QtGui.QStandardItem(self._regularization)
         self.model.setItem(WIDGETS.W_REGULARIZATION, item)
-        item = QtGui.QStandardItem(self._max_distance[self._data_index])
+        item = QtGui.QStandardItem(self._max_distance)
         self.model.setItem(WIDGETS.W_MAX_DIST, item)
-        item = QtGui.QStandardItem(self._rg[self._data_index])
+        item = QtGui.QStandardItem(self._rg)
         self.model.setItem(WIDGETS.W_RG, item)
-        item = QtGui.QStandardItem(self._i_0[self._data_index])
+        item = QtGui.QStandardItem(self._i_0)
         self.model.setItem(WIDGETS.W_I_ZERO, item)
-        item = QtGui.QStandardItem(self._background[self._data_index])
+        item = QtGui.QStandardItem(self._background)
         self.model.setItem(WIDGETS.W_BACKGROUND, item)
-        item = QtGui.QStandardItem(self._comp_time[self._data_index])
+        item = QtGui.QStandardItem(self._comp_time)
         self.model.setItem(WIDGETS.W_COMP_TIME, item)
-        item = QtGui.QStandardItem(self._chi_dof[self._data_index])
+        item = QtGui.QStandardItem(self._chi_dof)
         self.model.setItem(WIDGETS.W_CHI_SQUARED, item)
-        item = QtGui.QStandardItem(self._oscillations[self._data_index])
+        item = QtGui.QStandardItem(self._oscillations)
         self.model.setItem(WIDGETS.W_OSCILLATION, item)
-        item = QtGui.QStandardItem(self._pos_fraction[self._data_index])
+        item = QtGui.QStandardItem(self._pos_fraction)
         self.model.setItem(WIDGETS.W_POS_FRACTION, item)
-        item = QtGui.QStandardItem(self._sigma_pos_fraction[self._data_index])
+        item = QtGui.QStandardItem(self._sigma_pos_fraction)
         self.model.setItem(WIDGETS.W_SIGMA_POS_FRACTION, item)
         self.enableButtons()
 
@@ -204,7 +206,7 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         """
         Disable buttons when no data present, else enable them
         """
-        if self._path[self._data_index] == "" and len(self._path) == 1:
+        if self._path == "" and len(self._data) == 1:
             self.calculateButton.setEnabled(False)
             self.explorerButton.setEnabled(False)
             self.statusButton.setEnabled(False)
@@ -219,11 +221,11 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         """
         self.populateDataComboBox()
         self.dataList.setCurrentIndex(self._data_index)
-        self.setupModel()
+        self._get_data_from_data_set()
 
     def populateDataComboBox(self):
         string_list = QtCore.QStringList()
-        for item in self._data:
+        for item in self._path:
             qt_item = QtCore.QString.fromUtf8(item)
             string_list.append(qt_item)
         self.dataList.addItems(string_list)
@@ -234,12 +236,17 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         :param data_list: List of data sent from the data manager
         """
         assert data_list is not None
-
         for data in data_list:
-            # TODO: populate class variable lists with data from data_list
-            pass
+            # TODO: Get get object via GuiUtils
+            self._data.append(None)
         self.reDraw()
 
+    def _get_data_from_data_set(self):
+        data = self._data[self._data_index]
+        # TODO: Get all items from data
+        # self._qmin = data.qmin
+        # self._qmax = data.qmax
+        self.setupModel()
 
     ######################################################################
     # GUI Actions
@@ -273,11 +280,11 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         if boolean or self.manualBgd.isChecked():
             self.manualBgd.setChecked(True)
             self.toggleBgd(self.manualBgd)
-            self._bgd_input[self._data_index] = True
+            self._bgd_input = True
         else:
             self.estimateBgd.setChecked(True)
             self.toggleBgd(self.estimateBgd)
-            self._bgd_input[self._data_index] = False
+            self._bgd_input = False
 
     def toggleBgd(self, item=None):
         """
