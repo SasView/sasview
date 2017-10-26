@@ -316,6 +316,13 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         assert isinstance(value, bool)
 
         self._allow_close = value
+
+    def title(self):
+        """
+        Window title function used by certain error messages.
+        Check DataExplorer.py, line 355
+        """
+        return "Corfunc Perspective"
     # pylint: enable=invalid-name
 
 
