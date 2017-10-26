@@ -158,6 +158,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if available_perspectives:
             self.cbFitting.clear()
             self.cbFitting.addItems(available_perspectives)
+            for idx, p in enumerate(available_perspectives):
+                if p=="Fitting":
+                    self.cbFitting.setCurrentIndex(idx)
         self.cbFitting.currentIndexChanged.connect(self.updatePerspectiveCombo)
         # Set the index so we see the default (Fitting)
         self.updatePerspectiveCombo(0)
