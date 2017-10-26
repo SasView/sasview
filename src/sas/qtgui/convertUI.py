@@ -7,7 +7,7 @@ def pyrrc(in_file, out_file):
     os.system(execute)
 
 def pyuic(in_file, out_file):
-    """ Run the pyuic4 script"""
+    """ Run the pyuic5 script"""
     execute = 'pyuic4 -o %s %s' % (out_file, in_file)
     os.system(execute)
 

@@ -138,7 +138,7 @@ def printEVT(message):
     Post a debug message to console/file
     """
     if __EVT_DEBUG__:
-        print "%g:  %s" % (time.clock(), message)
+        print("%g:  %s" % (time.clock(), message))
 
         if __EVT_DEBUG_2_FILE__:
             out = open(__EVT_DEBUG_FILENAME__, 'a')

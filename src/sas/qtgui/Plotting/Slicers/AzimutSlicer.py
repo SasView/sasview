@@ -4,7 +4,7 @@
 # TODO: NEED MAJOR REFACTOR
 #
 import math
-from BaseInteractor import BaseInteractor
+from .BaseInteractor import BaseInteractor
 
 class SectorInteractor(BaseInteractor):
     """
@@ -25,7 +25,7 @@ class SectorInteractor(BaseInteractor):
         theta2 = -2 * math.pi / 3
 
         # Inner circle
-        from Arc import ArcInteractor
+        from .Arc import ArcInteractor
         self.inner_circle = ArcInteractor(self, self.base.subplot,
                                           zorder=zorder,
                                           r=self.qmax / 2.0,

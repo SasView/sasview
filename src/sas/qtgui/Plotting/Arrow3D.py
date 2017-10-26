@@ -58,7 +58,7 @@ class Arrow3D(FancyArrowPatch):
         if self.leftdown:
             return
         xs3d, ys3d, zs3d = self._verts3d
-        for i in xrange(len(xs3d)):
+        for i in range(len(xs3d)):
             xs, ys, _ = proj3d.proj_transform(xs3d[i], ys3d[i], zs3d[i], renderer.M)
             self.set_positions((xs[0], ys[0]), (xs[1], ys[1]))
             self.set_color(self.colors[i])

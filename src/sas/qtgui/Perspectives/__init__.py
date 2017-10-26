@@ -1,8 +1,8 @@
 # Available perspectives.
 # When adding a new perspective, this dictionary needs to be updated
 
-from Fitting.FittingPerspective import FittingWindow
-from Invariant.InvariantPerspective import InvariantWindow
+from .Fitting.FittingPerspective import FittingWindow
+from .Invariant.InvariantPerspective import InvariantWindow
 
 PERSPECTIVES = {
     FittingWindow.name: FittingWindow,

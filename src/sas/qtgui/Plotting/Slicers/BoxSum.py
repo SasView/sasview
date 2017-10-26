@@ -7,7 +7,7 @@ from PyQt4 import QtGui
 from PyQt4 import QtCore
 from sas.qtgui.Utilities.GuiUtils import formatNumber
 
-from BaseInteractor import BaseInteractor
+from .BaseInteractor import BaseInteractor
 from sas.sascalc.dataloader.manipulations import Boxavg
 from sas.sascalc.dataloader.manipulations import Boxsum
 

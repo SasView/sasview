@@ -21,7 +21,7 @@ from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
 
 # Local UI
-from UI.GenericScatteringCalculator import Ui_GenericScatteringCalculator
+from .UI.GenericScatteringCalculator import Ui_GenericScatteringCalculator
 
 _Q1D_MIN = 0.001
 
@@ -118,7 +118,7 @@ class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator)
         """
         TODO Temporary solution to display information about option 'Ellipsoid'
         """
-        print "The option Ellipsoid has not been implemented yet."
+        print("The option Ellipsoid has not been implemented yet.")
         self.communicator.statusBarUpdateSignal.emit(
             "The option Ellipsoid has not been implemented yet.")
 
@@ -164,7 +164,7 @@ class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator)
                                         updatefn=self.load_update)
                 self.reader.queue()
         except (RuntimeError, IOError):
-            log_msg = "Generic SAS Calculator: %s" % sys.exc_value
+            log_msg = "Generic SAS Calculator: %s" % sys.exc_info()[1]
             logging.info(log_msg)
             raise
         return
@@ -555,7 +555,7 @@ class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator)
             # Add deferred callback for call return
             d.addCallback(self.plot_1_2d)
         except:
-            log_msg = "{}. stop".format(sys.exc_value)
+            log_msg = "{}. stop".format(sys.exc_info()[1])
             logging.info(log_msg)
         return
 
@@ -643,7 +643,7 @@ class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator)
             plot1D.show()
             self.graph_num += 1
             # TODO
-            print 'TRANSFER OF DATA TO MAIN PANEL TO BE IMPLEMENTED'
+            print('TRANSFER OF DATA TO MAIN PANEL TO BE IMPLEMENTED')
             return plot1D
         else:
             numpy.nan_to_num(self.data_to_plot)
@@ -661,7 +661,7 @@ class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator)
             plot2D.show()
             self.graph_num += 1
             # TODO
-            print 'TRANSFER OF DATA TO MAIN PANEL TO BE IMPLEMENTED'
+            print('TRANSFER OF DATA TO MAIN PANEL TO BE IMPLEMENTED')
             return plot2D
 
 
@@ -743,7 +743,7 @@ class Plotter3DWidget(PlotterBase):
             pix_symbol = data.pix_symbol[is_nonzero]
         # II. Plot selective points in color
         other_color = numpy.ones(len(pix_symbol), dtype='bool')
-        for key in color_dic.keys():
+        for key in list(color_dic.keys()):
             chosen_color = pix_symbol == key
             if numpy.any(chosen_color):
                 other_color = other_color & (chosen_color!=True)
@@ -757,7 +757,7 @@ class Plotter3DWidget(PlotterBase):
             if data.pix_type == 'atom':
                 # Get atom names not in the list
                 a_names = [symb for symb in pix_symbol \
-                           if symb not in color_dic.keys()]
+                           if symb not in list(color_dic.keys())]
                 a_name = a_names[0]
                 for name in a_names:
                     new_name = ", " + name

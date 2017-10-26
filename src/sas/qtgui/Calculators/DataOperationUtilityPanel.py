@@ -12,7 +12,7 @@ from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.Plotting.Plotter2D import Plotter2DWidget
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
-from UI.DataOperationUtilityUI import Ui_DataOperationUtility
+from .UI.DataOperationUtilityUI import Ui_DataOperationUtility
 
 BG_WHITE = "background-color: rgb(255, 255, 255);"
 BG_RED = "background-color: rgb(244, 170, 164);"
@@ -75,7 +75,7 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
          a number to apply to data1 """
         self.filenames = filenames
 
-        if filenames.keys():
+        if list(filenames.keys()):
             # clear contents of comboboxes
             self.cbData1.clear()
             self.cbData1.addItems(['Select Data'])
@@ -84,7 +84,7 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
 
             list_datafiles = []
 
-            for key_id in filenames.keys():
+            for key_id in list(filenames.keys()):
                 if filenames[key_id].get_data().title:
                     # filenames with titles
                     new_title = filenames[key_id].get_data().title
@@ -138,7 +138,7 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
         try:
             data1 = self.data1
             data2 = self.data2
-            exec "output = data1 %s data2" % operator
+            exec("output = data1 %s data2" % operator)
         except:
             raise
 
@@ -299,7 +299,7 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
             elif self.data1.__class__.__name__ != self.data2.__class__.__name__:
                 self.cbData1.setStyleSheet(QtCore.QString(BG_RED))
                 self.cbData2.setStyleSheet(QtCore.QString(BG_RED))
-                print self.data1.__class__.__name__ != self.data2.__class__.__name__
+                print(self.data1.__class__.__name__ != self.data2.__class__.__name__)
                 logging.warning('Cannot compute data of different dimensions')
                 return False
 
@@ -353,9 +353,9 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
     # ########
     def _findId(self, name):
         """ find id of name in list of filenames """
-        isinstance(name, basestring)
+        isinstance(name, str)
 
-        for key_id in self.filenames.keys():
+        for key_id in list(self.filenames.keys()):
             # data with title
             if self.filenames[key_id].get_data().title:
                 input = self.filenames[key_id].get_data().title

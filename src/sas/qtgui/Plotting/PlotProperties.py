@@ -25,7 +25,7 @@ class PlotProperties(QtGui.QDialog, Ui_PlotPropertiesUI):
         self.custom_color = False if isinstance(self._color, int) else True
 
         # Fill out the color combobox
-        self.cbColor.addItems(COLORS.keys()[:-1])
+        self.cbColor.addItems(list(COLORS.keys())[:-1])
         # data1d.custom_color can now be a simple integer,
         # specifying COLORS dict index or a string containing
         # the hex RGB value, e.g. #00FF00
@@ -33,11 +33,11 @@ class PlotProperties(QtGui.QDialog, Ui_PlotPropertiesUI):
             self.cbColor.setCurrentIndex(self._color)
         else:
             # Need the Custom entry here. "Custom" is always last.
-            self.cbColor.addItems([COLORS.keys()[-1]])
-            self.cbColor.setCurrentIndex(COLORS.keys().index("Custom"))
+            self.cbColor.addItems([list(COLORS.keys())[-1]])
+            self.cbColor.setCurrentIndex(list(COLORS.keys()).index("Custom"))
 
         # Fill out the marker combobox
-        self.cbShape.addItems(SHAPES.keys())
+        self.cbShape.addItems(list(SHAPES.keys()))
         try:
             self.cbShape.setCurrentIndex(self._marker)
         except TypeError:
@@ -82,7 +82,7 @@ class PlotProperties(QtGui.QDialog, Ui_PlotPropertiesUI):
             self.cbColor.blockSignals(True)
             # Add Custom to the color combo box
             self.cbColor.addItems(["Custom"])
-            self.cbColor.setCurrentIndex(COLORS.keys().index("Custom"))
+            self.cbColor.setCurrentIndex(list(COLORS.keys()).index("Custom"))
             # unblock currentIndexChanged
             self.cbColor.blockSignals(False)
             # Save the color as #RRGGBB

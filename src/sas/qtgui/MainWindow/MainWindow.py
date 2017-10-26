@@ -4,7 +4,7 @@ from PyQt4 import QtGui
 
 # Local UI
 from sas.qtgui.UI import main_resources_rc
-from UI.MainWindowUI import Ui_MainWindow
+from .UI.MainWindowUI import Ui_MainWindow
 
 # Initialize logging
 import sas.qtgui.Utilities.SasviewLogger
@@ -20,7 +20,7 @@ class MainSasViewWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.setCentralWidget(self.workspace)
 
         # Create the gui manager
-        from GuiManager import GuiManager
+        from .GuiManager import GuiManager
         self.guiManager = GuiManager(self)
 
     def closeEvent(self, event):

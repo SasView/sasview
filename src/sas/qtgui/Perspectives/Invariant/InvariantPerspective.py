@@ -14,9 +14,9 @@ from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # local
-from UI.TabbedInvariantUI import Ui_tabbedInvariantUI
-from InvariantDetails import DetailsDialog
-from InvariantUtils import WIDGETS
+from .UI.TabbedInvariantUI import Ui_tabbedInvariantUI
+from .InvariantDetails import DetailsDialog
+from .InvariantUtils import WIDGETS
 
 # The minimum q-value to be used when extrapolating
 Q_MINIMUM = 1e-5
@@ -550,11 +550,11 @@ class InvariantWindow(QtGui.QDialog, Ui_tabbedInvariantUI):
         """
         if not isinstance(data_item, list):
             msg = "Incorrect type passed to the Invariant Perspective"
-            raise AttributeError, msg
+            raise AttributeError(msg)
 
         if not isinstance(data_item[0], QtGui.QStandardItem):
             msg = "Incorrect type passed to the Invariant Perspective"
-            raise AttributeError, msg
+            raise AttributeError(msg)
 
         self._model_item = data_item[0]
 
@@ -630,7 +630,7 @@ class InvariantWindow(QtGui.QDialog, Ui_tabbedInvariantUI):
                     self._path = "unique path"
                     self.calculateInvariant()
                 except:
-                    msg = "Invariant Set_data: " + str(sys.exc_value)
+                    msg = "Invariant Set_data: " + str(sys.exc_info()[1])
                     #wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
         else:
             msg = "invariant cannot be computed for data of "

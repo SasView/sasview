@@ -78,7 +78,7 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
         """
         Overwrite default fit range label to correspond to actual unit
         """
-        assert(isinstance(label, basestring))
+        assert(isinstance(label, str))
         self.lblRange.setText(label)
 
     def range(self):
@@ -194,8 +194,8 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
                 tempdy = [DataTransform.errToLogX(y[i], 0, dy[i], 0)
                          for i in range(len(x)) if x[i] >= xmin_check]
             else:
-                tempy = map(numpy.log10, y)
-                tempdy = map(lambda t1,t2:DataTransform.errToLogX(t1,0,t2,0),y,dy)
+                tempy = list(map(numpy.log10, y))
+                tempdy = list(map(lambda t1,t2:DataTransform.errToLogX(t1,0,t2,0),y,dy))
         else:
             tempy = y
             tempdy = dy

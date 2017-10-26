@@ -13,7 +13,7 @@ from sas.qtgui.Utilities.GuiUtils import HELP_DIRECTORY_LOCATION
 from sas.qtgui.Calculators.UI.DensityPanel import Ui_DensityPanel
 
 def enum(*sequential, **named):
-    enums = dict(zip(sequential, range(len(sequential))), **named)
+    enums = dict(list(zip(sequential, list(range(len(sequential))))), **named)
     return type('Enum', (), enums)
 
 MODEL = enum(
@@ -94,7 +94,7 @@ class DensityPanel(QtGui.QDialog):
         self.mapper.toFirst()
 
     def dataChanged(self, top, bottom):
-        for index in xrange(top.row(), bottom.row() + 1):
+        for index in range(top.row(), bottom.row() + 1):
             if index == MODEL.MOLECULAR_FORMULA:
                 molarMass = toMolarMass(self.model.item(MODEL.MOLECULAR_FORMULA).text())
                 self.model.item(MODEL.MOLAR_MASS).setText(molarMass)

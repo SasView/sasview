@@ -79,13 +79,13 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
         """
         Use options.FIT_FIELDS to assert which line edit gets what validator
         """
-        for option in bumps.options.FIT_FIELDS.iterkeys():
+        for option in bumps.options.FIT_FIELDS.keys():
             (f_name, f_type) = bumps.options.FIT_FIELDS[option]
             validator = None
             if type(f_type) == types.FunctionType:
                 validator = QtGui.QIntValidator()
                 validator.setBottom(0)
-            elif f_type == types.FloatType:
+            elif f_type == float:
                 validator = QtGui.QDoubleValidator()
                 validator.setBottom(0)
             else:
@@ -152,7 +152,7 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
             self.config.values[self.current_fitter_id][option] = new_value
 
         # Update the BUMPS singleton
-        [bumpsUpdate(o) for o in self.config.values[self.current_fitter_id].iterkeys()]
+        [bumpsUpdate(o) for o in self.config.values[self.current_fitter_id].keys()]
 
     def onHelp(self):
         """
@@ -174,7 +174,7 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
         """
         if current_fitter is None:
             current_fitter = self.current_fitter_id
-        if option_id not in bumps.options.FIT_FIELDS.keys(): return None
+        if option_id not in list(bumps.options.FIT_FIELDS.keys()): return None
         option = option_id + '_' + current_fitter
         if not hasattr(self, option): return None
         return eval('self.' + option)
@@ -192,7 +192,7 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
         and update the widget
         """
         options = self.config.values[fitter_id]
-        for option in options.iterkeys():
+        for option in options.keys():
             # Find the widget name of the option
             # e.g. 'samples' for 'dream' is 'self.samples_dream'
             widget_name = 'self.'+option+'_'+fitter_id
