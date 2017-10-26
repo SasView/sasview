@@ -43,12 +43,9 @@
          <item>
           <layout class="QFormLayout" name="formLayout_2">
            <item row="0" column="0">
-            <widget class="QDoubleSpinBox" name="guinierA">
+            <widget class="QLineEdit" name="guinierA">
              <property name="readOnly">
               <bool>true</bool>
-             </property>
-             <property name="decimals">
-              <number>7</number>
              </property>
             </widget>
            </item>
@@ -60,18 +57,9 @@
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QDoubleSpinBox" name="guinierB">
+            <widget class="QLineEdit" name="guinierB">
              <property name="readOnly">
               <bool>true</bool>
-             </property>
-             <property name="decimals">
-              <number>7</number>
-             </property>
-             <property name="minimum">
-              <double>-1000000.000000000000000</double>
-             </property>
-             <property name="maximum">
-              <double>1000000.000000000000000</double>
              </property>
             </widget>
            </item>
@@ -98,12 +86,9 @@
          <item>
           <layout class="QFormLayout" name="formLayout_3">
            <item row="0" column="0">
-            <widget class="QDoubleSpinBox" name="porodK">
+            <widget class="QLineEdit" name="porodK">
              <property name="readOnly">
               <bool>true</bool>
-             </property>
-             <property name="decimals">
-              <number>7</number>
              </property>
             </widget>
            </item>
@@ -115,12 +100,9 @@
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QDoubleSpinBox" name="porodSigma">
+            <widget class="QLineEdit" name="porodSigma">
              <property name="readOnly">
               <bool>true</bool>
-             </property>
-             <property name="decimals">
-              <number>7</number>
              </property>
             </widget>
            </item>
@@ -167,7 +149,7 @@
         </widget>
        </item>
        <item row="0" column="2">
-        <widget class="QDoubleSpinBox" name="avgIntThick"/>
+        <widget class="QLineEdit" name="avgIntThick"/>
        </item>
        <item row="0" column="3">
         <widget class="QLabel" name="label_15">
@@ -177,7 +159,7 @@
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QDoubleSpinBox" name="avgHardBlock"/>
+        <widget class="QLineEdit" name="avgHardBlock"/>
        </item>
        <item row="1" column="1">
         <widget class="QLabel" name="label_16">
@@ -187,7 +169,7 @@
         </widget>
        </item>
        <item row="1" column="2">
-        <widget class="QDoubleSpinBox" name="avgCoreThick"/>
+        <widget class="QLineEdit" name="avgCoreThick"/>
        </item>
        <item row="1" column="3">
         <widget class="QLabel" name="label_17">
@@ -197,7 +179,7 @@
         </widget>
        </item>
        <item row="2" column="0">
-        <widget class="QDoubleSpinBox" name="polydisp"/>
+        <widget class="QLineEdit" name="polydisp"/>
        </item>
        <item row="2" column="1">
         <widget class="QLabel" name="label_18">
@@ -207,7 +189,7 @@
         </widget>
        </item>
        <item row="2" column="2">
-        <widget class="QDoubleSpinBox" name="localCrystal"/>
+        <widget class="QLineEdit" name="localCrystal"/>
        </item>
        <item row="2" column="3">
         <widget class="QLabel" name="label_19">
@@ -217,7 +199,7 @@
         </widget>
        </item>
        <item row="0" column="0">
-        <widget class="QDoubleSpinBox" name="longPeriod"/>
+        <widget class="QLineEdit" name="longPeriod"/>
        </item>
       </layout>
      </item>
@@ -252,15 +234,9 @@
             </widget>
            </item>
            <item row="0" column="0">
-            <widget class="QDoubleSpinBox" name="qMin">
+            <widget class="QLineEdit" name="qMin">
              <property name="toolTip">
               <string>Values with q &lt; qmin will be used for Guinier back extrapolation</string>
-             </property>
-             <property name="decimals">
-              <number>4</number>
-             </property>
-             <property name="singleStep">
-              <double>0.001000000000000</double>
              </property>
             </widget>
            </item>
@@ -272,15 +248,9 @@
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QDoubleSpinBox" name="qMax1">
+            <widget class="QLineEdit" name="qMax1">
              <property name="toolTip">
               <string>Values with Uppder &lt; q &lt; Cutoff will be used for Porod forward extrapolation</string>
-             </property>
-             <property name="decimals">
-              <number>4</number>
-             </property>
-             <property name="singleStep">
-              <double>0.001000000000000</double>
              </property>
             </widget>
            </item>
@@ -315,25 +285,16 @@
             </widget>
            </item>
            <item row="1" column="2">
-            <widget class="QDoubleSpinBox" name="bg">
+            <widget class="QLineEdit" name="bg">
              <property name="readOnly">
               <bool>true</bool>
-             </property>
-             <property name="decimals">
-              <number>4</number>
              </property>
             </widget>
            </item>
            <item row="2" column="0">
-            <widget class="QDoubleSpinBox" name="qMax2">
+            <widget class="QLineEdit" name="qMax2">
              <property name="toolTip">
               <string>Values with Uppder &lt; q &lt; Cutoff will be used for Porod forward extrapolation</string>
-             </property>
-             <property name="decimals">
-              <number>4</number>
-             </property>
-             <property name="singleStep">
-              <double>0.001000000000000</double>
              </property>
             </widget>
            </item>
