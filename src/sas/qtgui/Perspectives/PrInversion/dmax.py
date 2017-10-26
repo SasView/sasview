@@ -110,6 +110,7 @@ class DmaxWindow(QtGui.QDialog, Ui_DmaxExplorer):
                          float(self.model.item(W.DMAX).text()),
                          float(self.model.item(W.NPTS).text()))
 
+        original = self.pr_state.d_max
         for x in xs:
             self.pr_state.d_max = x
             try:
@@ -126,6 +127,8 @@ class DmaxWindow(QtGui.QDialog, Ui_DmaxExplorer):
                 msg += "for D_max=%s\n%s" % (str(x), sys.exc_value)
                 print(msg)
                 # logger.error(msg)
+        self.pr_state.d_max = original
+
         self.plot.plot(data=Data1D(xs, rg), marker="-")
 
 
@@ -137,7 +140,14 @@ if __name__ == "__main__":
     # (unless you know what you're doing)
     from twisted.internet import reactor
     from sas.sascalc.pr.invertor import Invertor
+    from sas.sascalc.dataloader.loader import Loader
+
+    data = Loader().load("../../../../../test/pr_inversion/test/sphere_80.txt")[0]
     pr_state = Invertor()
+    pr_state.x = data.x
+    pr_state.y = data.y
+    pr_state.err = data.dy+1e-3
+
     DLG = DmaxWindow(pr_state, 10, reactor)
     DLG.show()
     reactor.run()
