@@ -84,6 +84,8 @@ class DmaxWindow(QtGui.QDialog, Ui_DmaxExplorer):
         self.model.setItem(W.DMAX,
                            QtGui.QStandardItem(
                                str(1.1*self.pr_state.d_max)))
+        self.model.setItem(W.VARIABLE,
+                           QtGui.QStandardItem( "χ²/dof"))
 
     def setupMapper(self):
         self.mapper = QtGui.QDataWidgetMapper(self)
@@ -134,7 +136,23 @@ class DmaxWindow(QtGui.QDialog, Ui_DmaxExplorer):
                 # logger.error(msg)
         self.pr_state.d_max = original
 
-        self.plot.plot(data=Data1D(xs, rg), marker="-")
+        plotter = unicode(self.model.item(W.VARIABLE).text())
+        if plotter == u"1-σ positive fraction":
+            ys = pos_err
+        elif plotter == u"χ²/dof":
+            ys = chi2
+        elif plotter == u"I(Q=0)":
+            ys = iq0
+        elif plotter == u"Rg":
+            ys = rg
+        elif plotter == u"Oscillation parameter":
+            ys = osc
+        elif plotter == u"Background":
+            ys = bck
+        elif plotter == u"Positive Fraction":
+            ys = pos
+
+        self.plot.plot(data=Data1D(xs, ys), marker="-")
 
 
 if __name__ == "__main__":
