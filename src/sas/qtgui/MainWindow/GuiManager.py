@@ -647,13 +647,12 @@ class GuiManager(object):
     def actionInversion(self):
         """
         """
-        print("actionInversion TRIGGERED")
+        self._current_perspective = self.perspectiveChanged("PrInversion")
         pass
 
     def actionInvariant(self):
         """
         """
-        self._current_perspective = self.perspectiveChanged("PrInversion")
         print("actionInvariant TRIGGERED")
         pass
 

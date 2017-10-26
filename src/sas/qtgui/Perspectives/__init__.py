@@ -8,5 +8,5 @@ from PrInversion.PrInversionPerspective import PrInversionWindow
 PERSPECTIVES = {
     FittingWindow.name: FittingWindow,
     InvariantWindow.name: InvariantWindow,
-    PrInversionWindow.name: PrInversionWindow,
+    PrInversionWindow.name: PrInversionWindow
 }
