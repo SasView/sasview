@@ -272,7 +272,7 @@ def getValidColor(color):
     if isinstance(color, int):
         # Check if it's within the range
         if 0 <= color <=6:
-            color = COLORS.values()[color]
+            color = list(COLORS.values())[color]
     # Check if it's an RGB string
     elif isinstance(color, str):
         # Assure the correctnes of the string

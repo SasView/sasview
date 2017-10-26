@@ -198,7 +198,7 @@ class GuiManager(object):
         # Resize to the workspace height
         workspace_height = self._workspace.workspace.sizeHint().height()
         perspective_size = self._current_perspective.sizeHint()
-        if workspace_height < perspective_size.height:
+        if workspace_height < perspective_size.height():
             perspective_width = perspective_size.width()
             self._current_perspective.resize(perspective_width, workspace_height-10)
         self._current_perspective.show()
@@ -209,7 +209,7 @@ class GuiManager(object):
         """
         assert isinstance(data, list)
         if self._current_perspective is not None:
-            self._current_perspective.setData(data.values())
+            self._current_perspective.setData(list(data.values()))
         else:
             msg = "No perspective is currently active."
             logging.info(msg)
@@ -253,7 +253,7 @@ class GuiManager(object):
         Sends data to current perspective
         """
         if self._current_perspective is not None:
-            self._current_perspective.setData(data.values())
+            self._current_perspective.setData(list(data.values()))
         else:
             msg = "Guiframe does not have a current perspective"
             logging.info(msg)
@@ -296,7 +296,7 @@ class GuiManager(object):
                             % (content))
             version_info = json.loads(content)
             self.processVersion(version_info)
-        except ValueError, ex:
+        except ValueError as ex:
             logging.info("Failed to connect to www.sasview.org:", ex)
 
     def processVersion(self, version_info):
@@ -328,7 +328,7 @@ class GuiManager(object):
                 self.communicate.statusBarUpdateSignal.emit(msg)
         except:
             msg = "guiframe: could not get latest application"
-            msg += " version number\n  %s" % sys.exc_value
+            msg += " version number\n  %s" % sys.exc_info()[1]
             logging.error(msg)
             msg = "Could not connect to the application server."
             msg += " Please try again later."
@@ -763,7 +763,7 @@ class GuiManager(object):
         if not isinstance(new_item, QtGui.QStandardItem) or \
                 not isinstance(new_datalist_item, dict):
             msg = "Wrong data type returned from calculations."
-            raise AttributeError, msg
+            raise AttributeError(msg)
 
         self.filesWidget.model.appendRow(new_item)
         self._data_manager.add_data(new_datalist_item)

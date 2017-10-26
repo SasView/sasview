@@ -14,7 +14,7 @@ from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Calculators.UI.SldPanel import Ui_SldPanel
 
 def enum(*sequential, **named):
-    enums = dict(zip(sequential, range(len(sequential))), **named)
+    enums = dict(list(zip(sequential, list(range(len(sequential))))), **named)
     return type('Enum', (), enums)
 
 MODEL = enum(
@@ -59,7 +59,7 @@ def sldAlgorithm(molecular_formula, mass_density, wavelength):
     def calculate_sld(formula):
         if len(formula.atoms) != 1:
             raise NotImplementedError()
-        energy = xray_energy(formula.atoms.keys()[0].K_alpha)
+        energy = xray_energy(list(formula.atoms.keys())[0].K_alpha)
         return xray_sld_from_atoms(
             sld_formula.atoms,
             density=mass_density,
@@ -141,7 +141,7 @@ class SldPanel(QtGui.QDialog):
         self.model.setItem(MODEL.MASS_DENSITY     , QtGui.QStandardItem())
         self.model.setItem(MODEL.WAVELENGTH       , QtGui.QStandardItem())
 
-        for key in self._getOutputs().keys():
+        for key in list(self._getOutputs().keys()):
             self.model.setItem(key, QtGui.QStandardItem())
 
         QtCore.QObject.connect(
@@ -160,14 +160,14 @@ class SldPanel(QtGui.QDialog):
         self.mapper.addMapping(self.ui.editMassDensity     , MODEL.MASS_DENSITY)
         self.mapper.addMapping(self.ui.editWavelength      , MODEL.WAVELENGTH)
 
-        for key, edit in self._getOutputs().iteritems():
+        for key, edit in self._getOutputs().items():
             self.mapper.addMapping(edit, key)
 
         self.mapper.toFirst()
 
     def dataChanged(self, top, bottom):
         update = False
-        for index in xrange(top.row(), bottom.row() + 1):
+        for index in range(top.row(), bottom.row() + 1):
             if (index == MODEL.MOLECULAR_FORMULA) or (index == MODEL.MASS_DENSITY) or (index == MODEL.WAVELENGTH):
                 update = True
 
@@ -201,7 +201,7 @@ class SldPanel(QtGui.QDialog):
                 except Exception as e:
                     pass
 
-            for key in self._getOutputs().keys():
+            for key in list(self._getOutputs().keys()):
                 self.model.item(key).setText("")
 
     def modelReset(self):

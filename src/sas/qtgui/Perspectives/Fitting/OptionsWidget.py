@@ -95,7 +95,7 @@ class OptionsWidget(QtGui.QWidget, Ui_tabOptions):
         Initialize the state
         """
         self.model = QtGui.QStandardItemModel()
-        for model_item in xrange(len(MODEL)):
+        for model_item in range(len(MODEL)):
             self.model.setItem(model_item, QtGui.QStandardItem())
         # Attach slot
         self.model.dataChanged.connect(self.onModelChange)

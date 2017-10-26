@@ -4,8 +4,8 @@ from PyQt4 import QtCore
 from PyQt4 import QtGui
 
 # local
-from UI.InvariantDetailsUI import Ui_Dialog
-from InvariantUtils import WIDGETS
+from .UI.InvariantDetailsUI import Ui_Dialog
+from .InvariantUtils import WIDGETS
 
 class DetailsDialog(QtGui.QDialog, Ui_Dialog):
     """

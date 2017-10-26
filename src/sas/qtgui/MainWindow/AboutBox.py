@@ -7,7 +7,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.UI import images_rc
 from sas.qtgui.UI import main_resources_rc
 
-from UI.AboutUI import Ui_AboutUI
+from .UI.AboutUI import Ui_AboutUI
 
 class AboutBox(QtGui.QDialog, Ui_AboutUI):
     def __init__(self, parent=None):

@@ -3,7 +3,7 @@
 """
 import math
 
-from BaseInteractor import BaseInteractor
+from .BaseInteractor import BaseInteractor
 
 class ArcInteractor(BaseInteractor):
     """

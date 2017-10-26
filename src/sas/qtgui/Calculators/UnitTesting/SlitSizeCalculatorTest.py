@@ -83,12 +83,12 @@ class SlitSizeCalculatorTest(unittest.TestCase):
         filename = "P123_D2O_10_percent.dat"
         loader = Loader()
         data = loader.load(filename)[0]
-        self.assertRaisesRegexp(RuntimeError,
+        self.assertRaisesRegex(RuntimeError,
                                 "Slit Length cannot be computed for 2D Data",
                                 self.widget.calculateSlitSize, data)
 
         data = None
-        self.assertRaisesRegexp(RuntimeError,
+        self.assertRaisesRegex(RuntimeError,
                                 "ERROR: Data hasn't been loaded correctly",
                                 self.widget.calculateSlitSize, data)
 

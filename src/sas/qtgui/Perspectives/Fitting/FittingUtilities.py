@@ -43,7 +43,7 @@ def getIterParams(model):
     """
     Returns a list of all multi-shell parameters in 'model'
     """
-    return list(filter(lambda par: "[" in par.name, model.iq_parameters))
+    return list([par for par in model.iq_parameters if "[" in par.name])
 
 def getMultiplicity(model):
     """
@@ -155,7 +155,8 @@ def addHeadersToModel(model):
     Adds predefined headers to the model
     """
     for i, item in enumerate(model_header_captions):
-        model.setHeaderData(i, QtCore.Qt.Horizontal, QtCore.QVariant(item))
+        #model.setHeaderData(i, QtCore.Qt.Horizontal, QtCore.QVariant(item))
+        model.setHeaderData(i, QtCore.Qt.Horizontal, item)
 
     model.header_tooltips = model_header_tooltips
 
@@ -166,7 +167,7 @@ def addErrorHeadersToModel(model):
     model_header_error_captions = model_header_captions
     model_header_error_captions.insert(2, header_error_caption)
     for i, item in enumerate(model_header_error_captions):
-        model.setHeaderData(i, QtCore.Qt.Horizontal, QtCore.QVariant(item))
+        model.setHeaderData(i, QtCore.Qt.Horizontal, item)
 
     model_header_error_tooltips = model_header_tooltips
     model_header_error_tooltips.insert(2, error_tooltip)
@@ -177,7 +178,7 @@ def addPolyHeadersToModel(model):
     Adds predefined headers to the model
     """
     for i, item in enumerate(poly_header_captions):
-        model.setHeaderData(i, QtCore.Qt.Horizontal, QtCore.QVariant(item))
+        model.setHeaderData(i, QtCore.Qt.Horizontal, item)
 
     model.header_tooltips = poly_header_tooltips
 
@@ -189,7 +190,7 @@ def addErrorPolyHeadersToModel(model):
     poly_header_error_captions = poly_header_captions
     poly_header_error_captions.insert(2, header_error_caption)
     for i, item in enumerate(poly_header_error_captions):
-        model.setHeaderData(i, QtCore.Qt.Horizontal, QtCore.QVariant(item))
+        model.setHeaderData(i, QtCore.Qt.Horizontal, item)
 
     poly_header_error_tooltips = poly_header_tooltips
     poly_header_error_tooltips.insert(2, error_tooltip)
@@ -201,7 +202,7 @@ def addShellsToModel(parameters, model, index):
     """
     multishell_parameters = getIterParams(parameters)
 
-    for i in xrange(index):
+    for i in range(index):
         for par in multishell_parameters:
             # Create the name: <param>[<i>], e.g. "sld1" for parameter "sld[n]"
             param_name = replaceShellName(par.name, i+1)
@@ -395,7 +396,7 @@ def plotResiduals(reference_data, current_data):
     return residuals
 
 def binary_encode(i, digits):
-    return [i >> d & 1 for d in xrange(digits)]
+    return [i >> d & 1 for d in range(digits)]
 
 def getWeight(data, is2d, flag=None):
     """

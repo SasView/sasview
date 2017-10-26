@@ -154,7 +154,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Populate the Perspective combobox and define callbacks
         """
-        available_perspectives = sorted([p for p in Perspectives.PERSPECTIVES.keys()])
+        available_perspectives = sorted([p for p in list(Perspectives.PERSPECTIVES.keys())])
         if available_perspectives:
             self.cbFitting.clear()
             self.cbFitting.addItems(available_perspectives)
@@ -239,7 +239,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.model.clear()
 
         self.manager.assign(manager)
-        for id, item in self.manager.get_all_data().iteritems():
+        for id, item in self.manager.get_all_data().items():
             self.updateModel(item.data, item.path)
 
         self.model.reset()
@@ -344,7 +344,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Figure out which rows are checked
         selected_items = [self.model.item(index)
-                          for index in xrange(self.model.rowCount())
+                          for index in range(self.model.rowCount())
                           if isItemReady(index)]
 
         if len(selected_items) < 1:
@@ -399,7 +399,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             freeze_msg = "%i theories copied from the Theory tab as data sets" % theories_copied
         else:
             freeze_msg = "Unexpected number of theories copied: %i" % theories_copied
-            raise AttributeError, freeze_msg
+            raise AttributeError(freeze_msg)
         self.communicator.statusBarUpdateSignal.emit(freeze_msg)
         # Actively switch tabs
         self.setCurrentIndex(1)
@@ -410,7 +410,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         new_item = item.clone()
         # clone doesn't do deepcopy :(
-        for child_index in xrange(item.rowCount()):
+        for child_index in range(item.rowCount()):
             child_item = self.recursivelyCloneItem(item.child(child_index))
             new_item.setChild(child_index, child_item)
         return new_item
@@ -434,7 +434,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if not self.active_plots:
             return
         new_plots = [PlotHelper.plotById(plot) for plot in graph_list]
-        active_plots_copy = self.active_plots.keys()
+        active_plots_copy = list(self.active_plots.keys())
         for plot in active_plots_copy:
             if self.active_plots[plot] in new_plots:
                 continue
@@ -477,7 +477,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         new_plots = []
         for plot in plots:
             plot_id = plot.id
-            if plot_id in self.active_plots.keys():
+            if plot_id in list(self.active_plots.keys()):
                 self.active_plots[plot_id].replacePlot(plot_id, plot)
             else:
                 # 'sophisticated' test to generate standalone plot for residuals
@@ -529,7 +529,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 self.addDataPlot2D(plot_set, item)
             else:
                 msg = "Incorrect data type passed to Plotting"
-                raise AttributeError, msg
+                raise AttributeError(msg)
 
         if 'new_plot' in locals() and \
             hasattr(new_plot, 'data') and \
@@ -596,7 +596,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         assert type(data).__name__ in ['Data1D', 'Data2D']
 
         id = data.id
-        if data.id in self.active_plots.keys():
+        if data.id in list(self.active_plots.keys()):
             self.active_plots[id].replacePlot(id, data)
 
     def chooseFiles(self):
@@ -609,12 +609,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Location is automatically saved - no need to keep track of the last dir
         # But only with Qt built-in dialog (non-platform native)
         paths = QtGui.QFileDialog.getOpenFileNames(self, "Choose a file", "",
-                wlist, None, QtGui.QFileDialog.DontUseNativeDialog)
+                wlist, QtGui.QFileDialog.DontUseNativeDialog)
         if paths is None:
             return
 
-        if isinstance(paths, QtCore.QStringList):
-            paths = [str(f) for f in paths]
+        #if isinstance(paths, QtCore.QStringList):
+        #    paths = [str(f) for f in paths]
 
         if not isinstance(paths, list):
             paths = [paths]
@@ -686,7 +686,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                         data_error = True
 
             except Exception as ex:
-                logging.error(sys.exc_value)
+                logging.error(sys.exc_info()[1])
 
                 any_error = True
             if any_error or error_message != "":
@@ -746,7 +746,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         if not isinstance(index, int):
             msg = "Incorrect type passed to DataExplorer.selectData()"
-            raise AttributeError, msg
+            raise AttributeError(msg)
 
         # Respond appropriately
         if index == 0:
@@ -772,7 +772,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     is1D = isinstance(GuiUtils.dataFromItem(item), Data1D)
                 except AttributeError:
                     msg = "Bad structure of the data model."
-                    raise RuntimeError, msg
+                    raise RuntimeError(msg)
 
                 if is1D:
                     item.setCheckState(QtCore.Qt.Checked)
@@ -786,7 +786,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     is1D = isinstance(GuiUtils.dataFromItem(item), Data1D)
                 except AttributeError:
                     msg = "Bad structure of the data model."
-                    raise RuntimeError, msg
+                    raise RuntimeError(msg)
 
                 if item.isCheckable() and item.checkState() == QtCore.Qt.Checked and is1D:
                     item.setCheckState(QtCore.Qt.Unchecked)
@@ -800,7 +800,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     is2D = isinstance(GuiUtils.dataFromItem(item), Data2D)
                 except AttributeError:
                     msg = "Bad structure of the data model."
-                    raise RuntimeError, msg
+                    raise RuntimeError(msg)
 
                 if is2D:
                     item.setCheckState(QtCore.Qt.Checked)
@@ -814,7 +814,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     is2D = isinstance(GuiUtils.dataFromItem(item), Data2D)
                 except AttributeError:
                     msg = "Bad structure of the data model."
-                    raise RuntimeError, msg
+                    raise RuntimeError(msg)
 
                 if item.isCheckable() and item.checkState() == QtCore.Qt.Checked and is2D:
                     item.setCheckState(QtCore.Qt.Unchecked)
@@ -822,7 +822,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         else:
             msg = "Incorrect value in the Selection Option"
             # Change this to a proper logging action
-            raise Exception, msg
+            raise Exception(msg)
 
     def contextMenu(self):
         """
@@ -1015,7 +1015,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Add the actual Data1D/Data2D object
         object_item = QtGui.QStandardItem()
-        object_item.setData(QtCore.QVariant(data))
+        object_item.setData(data)
 
         checkbox_item.setChild(0, object_item)
 
@@ -1039,7 +1039,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Assert the correct type
         if not isinstance(model_item, QtGui.QStandardItem):
             msg = "Wrong data type returned from calculations."
-            raise AttributeError, msg
+            raise AttributeError(msg)
 
         # TODO: Assert other properties
 
@@ -1056,14 +1056,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Assert the correct type
         if not isinstance(model_item, QtGui.QStandardItem):
             msg = "Wrong data type returned from calculations."
-            raise AttributeError, msg
+            raise AttributeError(msg)
 
         # Check if there are any other items for this tab
         # If so, delete them
         # TODO: fix this to resemble GuiUtils.updateModelItemWithPlot
         # 
         current_tab_name = model_item.text()[:2]
-        for current_index in xrange(self.theory_model.rowCount()):
+        for current_index in range(self.theory_model.rowCount()):
             if current_tab_name in self.theory_model.item(current_index).text():
                 self.theory_model.removeRow(current_index)
                 break

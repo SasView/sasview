@@ -8,7 +8,7 @@ import sys
 import imp
 import warnings
 import webbrowser
-import urlparse
+import urllib.parse
 
 warnings.simplefilter("ignore")
 import logging
@@ -85,7 +85,7 @@ def _find_local_config(confg_file, path):
         pass
         #logging.error("Error loading %s/%s: %s" % (path, confg_file, sys.exc_value))
     except ValueError:
-        print "Value error"
+        print("Value error")
         pass
     finally:
         if fObj is not None:
@@ -241,14 +241,15 @@ def updateModelItemWithPlot(item, update_data, name=""):
     Adds QVariant 'update_data' to that row.
     """
     assert isinstance(item, QtGui.QStandardItem)
-    assert isinstance(update_data, QtCore.QVariant)
-    py_update_data = update_data.toPyObject()
+    #assert isinstance(update_data, QtCore.QVariant)
+    #py_update_data = update_data.toPyObject()
+    py_update_data = update_data
 
     # Check if data with the same ID is already present
     for index in range(item.rowCount()):
         plot_item = item.child(index)
         if plot_item.isCheckable():
-            plot_data = plot_item.child(0).data().toPyObject()
+            plot_data = plot_item.child(0).data() #.toPyObject()
             if plot_data.id is not None and plot_data.id == py_update_data.id:
                 # replace data section in item
                 plot_item.child(0).setData(update_data)
@@ -269,8 +270,9 @@ def createModelItemWithPlot(update_data, name=""):
     Creates a checkboxed QStandardItem named "name"
     Adds QVariant 'update_data' to that row.
     """
-    assert isinstance(update_data, QtCore.QVariant)
-    py_update_data = update_data.toPyObject()
+    #assert isinstance(update_data, QtCore.QVariant)
+    #py_update_data = update_data.toPyObject()
+    py_update_data = update_data
 
     checkbox_item = QtGui.QStandardItem()
     checkbox_item.setCheckable(True)
@@ -308,7 +310,8 @@ def updateModelItem(item, update_data, name=""):
     # Add the actual Data1D/Data2D object
     object_item = QtGui.QStandardItem()
     object_item.setText(name)
-    object_item.setData(QtCore.QVariant(update_data))
+    #object_item.setData(QtCore.QVariant(update_data))
+    object_item.setData(update_data)
 
     # Append the new row to the main item
     item.appendRow(object_item)
@@ -318,11 +321,10 @@ def itemFromFilename(filename, model_item):
     Returns the model item text=filename in the model
     """
     assert isinstance(model_item, QtGui.QStandardItemModel)
-    assert isinstance(filename, basestring)
+    assert isinstance(filename, str)
 
     # Iterate over model looking for named items
-    item = list(filter(lambda i: str(i.text()) == filename,
-                  [model_item.item(index) for index in range(model_item.rowCount())]))
+    item = list([i for i in [model_item.item(index) for index in range(model_item.rowCount())] if str(i.text()) == filename])
     return item[0] if len(item)>0 else None
 
 def plotsFromFilename(filename, model_item):
@@ -330,7 +332,7 @@ def plotsFromFilename(filename, model_item):
     Returns the list of plots for the item with text=filename in the model
     """
     assert isinstance(model_item, QtGui.QStandardItemModel)
-    assert isinstance(filename, basestring)
+    assert isinstance(filename, str)
 
     plot_data = []
     # Iterate over model looking for named items
@@ -338,13 +340,13 @@ def plotsFromFilename(filename, model_item):
         item = model_item.item(index)
         if str(item.text()) == filename:
             # TODO: assure item type is correct (either data1/2D or Plotter)
-            plot_data.append(item.child(0).data().toPyObject())
+            plot_data.append(item.child(0).data()) #.toPyObject())
             # Going 1 level deeper only
             for index_2 in range(item.rowCount()):
                 item_2 = item.child(index_2)
                 if item_2 and item_2.isCheckable():
                     # TODO: assure item type is correct (either data1/2D or Plotter)
-                    plot_data.append(item_2.child(0).data().toPyObject())
+                    plot_data.append(item_2.child(0).data()) #.toPyObject())
 
     return plot_data
 
@@ -360,13 +362,13 @@ def plotsFromCheckedItems(model_item):
         item = model_item.item(index)
         if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
             # TODO: assure item type is correct (either data1/2D or Plotter)
-            plot_data.append((item, item.child(0).data().toPyObject()))
+            plot_data.append((item, item.child(0).data())) #.toPyObject()))
         # Going 1 level deeper only
         for index_2 in range(item.rowCount()):
             item_2 = item.child(index_2)
             if item_2 and item_2.isCheckable() and item_2.checkState() == QtCore.Qt.Checked:
                 # TODO: assure item type is correct (either data1/2D or Plotter)
-                plot_data.append((item_2, item_2.child(0).data().toPyObject()))
+                plot_data.append((item_2, item_2.child(0).data())) #.toPyObject()))
 
     return plot_data
 
@@ -418,12 +420,12 @@ def openLink(url):
     Open a URL in an external browser.
     Check the URL first, though.
     """
-    parsed_url = urlparse.urlparse(url)
+    parsed_url = urllib.parse.urlparse(url)
     if parsed_url.scheme:
         webbrowser.open(url)
     else:
         msg = "Attempt at opening an invalid URL"
-        raise AttributeError, msg
+        raise AttributeError(msg)
 
 def retrieveData1d(data):
     """
@@ -432,7 +434,7 @@ def retrieveData1d(data):
     """
     if not isinstance(data, Data1D):
         msg = "Incorrect type passed to retrieveData1d"
-        raise AttributeError, msg
+        raise AttributeError(msg)
     try:
         xmin = min(data.x)
         ymin = min(data.y)
@@ -440,7 +442,7 @@ def retrieveData1d(data):
         msg = "Unable to find min/max of \n data named %s" % \
                     data.filename
         #logging.error(msg)
-        raise ValueError, msg
+        raise ValueError(msg)
 
     text = data.__str__()
     text += 'Data Min Max:\n'
@@ -484,7 +486,7 @@ def retrieveData2d(data):
     """
     if not isinstance(data, Data2D):
         msg = "Incorrect type passed to retrieveData2d"
-        raise AttributeError, msg
+        raise AttributeError(msg)
 
     text = data.__str__()
     text += 'Data Min Max:\n'
@@ -498,7 +500,7 @@ def retrieveData2d(data):
     dx_val = 0.0
     dy_val = 0.0
     len_data = len(data.qx_data)
-    for index in xrange(0, len_data):
+    for index in range(0, len_data):
         x_val = data.qx_data[index]
         y_val = data.qy_data[index]
         i_val = data.data[index]
@@ -755,7 +757,7 @@ def dataFromItem(item):
     Retrieve Data1D/2D component from QStandardItem.
     The assumption - data stored in SasView standard, in child 0
     """
-    return item.child(0).data().toPyObject()
+    return item.child(0).data() #.toPyObject()
 
 def formatNumber(value, high=False):
     """

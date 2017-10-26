@@ -89,7 +89,7 @@ class PlotterWidget(PlotterBase):
             try:
                 marker = PlotUtilities.SHAPES[marker]
             except KeyError:
-                marker = PlotUtilities.SHAPES.values()[marker]
+                marker = list(PlotUtilities.SHAPES.values())[marker]
 
         assert marker is not None
         # Plot name
@@ -205,7 +205,7 @@ class PlotterWidget(PlotterBase):
         """
         Adds operations on all plotted sets of data to the context menu
         """
-        for id in self.plot_dict.keys():
+        for id in list(self.plot_dict.keys()):
             plot = self.plot_dict[id]
 
             name = plot.name if plot.name else plot.title
@@ -390,7 +390,7 @@ class PlotterWidget(PlotterBase):
         """
         Deletes the selected plot from the chart
         """
-        if id not in self.plot_dict.keys():
+        if id not in list(self.plot_dict.keys()):
             return
 
         selected_plot = self.plot_dict[id]
@@ -481,7 +481,7 @@ class PlotterWidget(PlotterBase):
         Transforms x and y in View and set the scale
         """
         # Transform all the plots on the chart
-        for id in self.plot_dict.keys():
+        for id in list(self.plot_dict.keys()):
             current_plot = self.plot_dict[id]
             if current_plot.id == "fit":
                 self.removePlot(id)

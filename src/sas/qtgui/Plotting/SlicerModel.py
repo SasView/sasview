@@ -18,7 +18,7 @@ class SlicerModel(object):
         parameters = self.getParams()
         self._model.removeRows( 0, self._model.rowCount() )
         # Crete/overwrite model items
-        for parameter in parameters.keys():
+        for parameter in list(parameters.keys()):
             item1 = QtGui.QStandardItem(parameter)
             item2 = QtGui.QStandardItem(GuiUtils.formatNumber(parameters[parameter]))
             self._model.appendRow([item1, item2])

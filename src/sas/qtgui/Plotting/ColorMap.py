@@ -12,7 +12,7 @@ import numpy
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.Utilities.GuiUtils import formatNumber
-from rangeSlider import RangeSlider
+from .rangeSlider import RangeSlider
 
 DEFAULT_MAP = 'jet'
 

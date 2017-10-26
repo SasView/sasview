@@ -1,7 +1,7 @@
 """
     Utilities to manage models
 """
-from __future__ import print_function
+
 
 import traceback
 import os
@@ -67,7 +67,7 @@ def _check_plugin(model, name):
         new_instance = model()
     except:
         msg = "Plugin %s error in __init__ \n\t: %s %s\n" % (str(name),
-                                                             str(sys.exc_type),
+                                                             str(sys.exc_info()[0]),
                                                              sys.exc_info()[1])
         plugin_log(msg)
         return None
@@ -77,7 +77,7 @@ def _check_plugin(model, name):
             value = new_instance.function()
         except:
             msg = "Plugin %s: error writing function \n\t :%s %s\n " % \
-                    (str(name), str(sys.exc_type), sys.exc_info()[1])
+                    (str(name), str(sys.exc_info()[0]), sys.exc_info()[1])
             plugin_log(msg)
             return None
     else:
@@ -137,11 +137,11 @@ class ReportProblem:
     """
     Class to check for problems with specific values
     """
-    def __nonzero__(self):
+    def __bool__(self):
         type, value, tb = sys.exc_info()
         if type is not None and issubclass(type, py_compile.PyCompileError):
             print("Problem with", repr(value))
-            raise type, value, tb
+            raise type(value).with_traceback(tb)
         return 1
 
 report_problem = ReportProblem()
@@ -210,7 +210,7 @@ class ModelList(object):
         :param mylist: the list to add
 
         """
-        if name not in self.mydict.keys():
+        if name not in list(self.mydict.keys()):
             self.reset_list(name, mylist)
 
     def reset_list(self, name, mylist):
@@ -291,8 +291,8 @@ class ModelManagerBase:
 
         #Looking for plugins
         self.stored_plugins = self.findModels()
-        self.plugins = self.stored_plugins.values()
-        for name, plug in self.stored_plugins.iteritems():
+        self.plugins = list(self.stored_plugins.values())
+        for name, plug in self.stored_plugins.items():
             self.model_dictionary[name] = plug
         
         self._get_multifunc_models()
@@ -321,8 +321,8 @@ class ModelManagerBase:
         """
         new_plugins = self.findModels()
         if len(new_plugins) > 0:
-            for name, plug in  new_plugins.iteritems():
-                if name not in self.stored_plugins.keys():
+            for name, plug in  new_plugins.items():
+                if name not in list(self.stored_plugins.keys()):
                     self.stored_plugins[name] = plug
                     self.plugins.append(plug)
                     self.model_dictionary[name] = plug
@@ -337,8 +337,8 @@ class ModelManagerBase:
         """
         self.plugins = []
         new_plugins = _find_models()
-        for name, plug in  new_plugins.iteritems():
-            for stored_name, stored_plug in self.stored_plugins.iteritems():
+        for name, plug in  new_plugins.items():
+            for stored_name, stored_plug in self.stored_plugins.items():
                 if name == stored_name:
                     del self.stored_plugins[name]
                     del self.model_dictionary[name]
@@ -357,7 +357,7 @@ class ModelManagerBase:
         :param event: wx menu event
 
         """
-        if int(evt.GetId()) in self.form_factor_dict.keys():
+        if int(evt.GetId()) in list(self.form_factor_dict.keys()):
             from sasmodels.sasview_model import MultiplicationModel
             self.model_dictionary[MultiplicationModel.__name__] = MultiplicationModel
             model1, model2 = self.form_factor_dict[int(evt.GetId())]
@@ -416,8 +416,8 @@ class ModelManager(object):
     """
     __modelmanager = ModelManagerBase()
     cat_model_list = [__modelmanager.model_dictionary[model_name] for model_name \
-                      in __modelmanager.model_dictionary.keys() \
-                      if model_name not in __modelmanager.stored_plugins.keys()]
+                      in list(__modelmanager.model_dictionary.keys()) \
+                      if model_name not in list(__modelmanager.stored_plugins.keys())]
 
     CategoryInstaller.check_install(model_list=cat_model_list)
     def findModels(self):

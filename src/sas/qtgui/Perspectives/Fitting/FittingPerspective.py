@@ -11,7 +11,7 @@ import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.FittingOptions import FittingOptions
 from sas.qtgui.Perspectives.Fitting.GPUOptions import GPUOptions
-from sas.qtgui.Perspectives.Fitting import ModelUtilities
+#from sas.qtgui.Perspectives.Fitting import ModelUtilities
 
 class FittingWindow(QtGui.QTabWidget):
     """
@@ -63,11 +63,6 @@ class FittingWindow(QtGui.QTabWidget):
 
         # GPU Options
         self.gpu_options_widget = GPUOptions(self)
-
-        self.menu_manager = ModelUtilities.ModelManager()
-        # TODO: reuse these in FittingWidget properly
-        self.model_list_box = self.menu_manager.get_model_list()
-        self.model_dictionary = self.menu_manager.get_model_dictionary()
 
         #self.setWindowTitle('Fit panel - Active Fitting Optimizer: %s' % self.optimizer)
         self.updateWindowTitle()
@@ -123,10 +118,11 @@ class FittingWindow(QtGui.QTabWidget):
         """
         Create a list if none exists and append if there's already a list
         """
-        if item_key in self.dataToFitTab.keys():
-            self.dataToFitTab[item_key].append(tab_name)
+        item_key_str = str(item_key)
+        if item_key_str in list(self.dataToFitTab.keys()):
+            self.dataToFitTab[item_key_str].append(tab_name)
         else:
-            self.dataToFitTab[item_key] = [tab_name]
+            self.dataToFitTab[item_key_str] = [tab_name]
 
         #print "CURRENT dict: ", self.dataToFitTab
 
@@ -172,7 +168,7 @@ class FittingWindow(QtGui.QTabWidget):
         """
         Given name of the fitting tab - close it
         """
-        for tab_index in xrange(len(self.tabs)):
+        for tab_index in range(len(self.tabs)):
             if self.tabText(tab_index) == tab_name:
                 self.tabCloses(tab_index)
         pass # debug hook
@@ -184,11 +180,12 @@ class FittingWindow(QtGui.QTabWidget):
         if not index_list or not self.dataToFitTab:
             return
         for index_to_delete in index_list:
-            if index_to_delete in self.dataToFitTab.keys():
-                for tab_name in self.dataToFitTab[index_to_delete]:
+            index_to_delete_str = str(index_to_delete)
+            if index_to_delete_str in list(self.dataToFitTab.keys()):
+                for tab_name in self.dataToFitTab[index_to_delete_str]:
                     # delete tab #index after corresponding data got removed
                     self.closeTabByName(tab_name)
-                self.dataToFitTab.pop(index_to_delete)
+                self.dataToFitTab.pop(index_to_delete_str)
 
         #print "CURRENT dict: ", self.dataToFitTab
 
@@ -208,18 +205,18 @@ class FittingWindow(QtGui.QTabWidget):
 
         if not isinstance(data_item, list):
             msg = "Incorrect type passed to the Fitting Perspective"
-            raise AttributeError, msg
+            raise AttributeError(msg)
 
         if not isinstance(data_item[0], QtGui.QStandardItem):
             msg = "Incorrect type passed to the Fitting Perspective"
-            raise AttributeError, msg
+            raise AttributeError(msg)
 
         items = [data_item] if is_batch else data_item
 
         for data in items:
             # Find the first unassigned tab.
             # If none, open a new tab.
-            available_tabs = list(map(lambda tab: tab.acceptsData(), self.tabs))
+            available_tabs = list([tab.acceptsData() for tab in self.tabs])
 
             if numpy.any(available_tabs):
                 first_good_tab = available_tabs.index(True)

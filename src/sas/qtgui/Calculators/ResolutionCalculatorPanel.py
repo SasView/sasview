@@ -19,7 +19,7 @@ import logging
 import os
 import re
 
-from UI.ResolutionCalculatorPanelUI import Ui_ResolutionCalculatorPanel
+from .UI.ResolutionCalculatorPanelUI import Ui_ResolutionCalculatorPanel
 
 _SOURCE_MASS = {'Alpha': 6.64465620E-24,
                 'Deuteron': 3.34358320E-24,
@@ -317,7 +317,7 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
             datafile = QtGui.QFileDialog.getOpenFileName(
                 self, "Choose a spectral distribution file", "",
                 "All files (*.*)",
-                None, QtGui.QFileDialog.DontUseNativeDialog)
+                QtGui.QFileDialog.DontUseNativeDialog)
 
             if datafile is None or str(datafile) == '':
                 logging.info("No spectral distribution data chosen.")
@@ -327,7 +327,7 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
 
             try:
                 basename = os.path.basename(datafile)
-                if basename not in self.spectrum_dic.keys():
+                if basename not in list(self.spectrum_dic.keys()):
                     self.cbCustomSpectrum.addItem(basename)
 
                 input_f = open(datafile, 'r')
@@ -603,7 +603,7 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
             else:
                 msg = "The numbers must be one or two (separated by ',')"
                 logging.info(msg)
-                raise RuntimeError, msg
+                raise RuntimeError(msg)
 
         return new_numbers_list
 
@@ -617,7 +617,7 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
         try:
             new_list = [float(t) for t in string_split]
         except:
-            logging.error(sys.exc_value)
+            logging.error(sys.exc_info()[1])
         return new_list
 
     def _str2longlist(self, input_string):
@@ -657,7 +657,7 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
                         out = self._string2inputlist(input_string)
                         return out
                 except:
-                    logging.error(sys.exc_value)
+                    logging.error(sys.exc_info()[1])
 
     def _validate_q_input(self, qx, qy):
         """
