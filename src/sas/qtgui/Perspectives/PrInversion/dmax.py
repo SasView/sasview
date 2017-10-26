@@ -135,7 +135,10 @@ class DmaxWindow(QtGui.QDialog, Ui_DmaxExplorer):
                 msg += "for D_max=%s\n%s" % (str(x), sys.exc_value)
                 print(msg)
                 # logger.error(msg)
+
+        #Return the invertor to its original state
         self.pr_state.d_max = original
+        self.pr_state.invert(self.nfunc)
 
         plotter = unicode(self.model.item(W.VARIABLE).text())
         if plotter == u"χ²/dof":
@@ -172,10 +175,12 @@ if __name__ == "__main__":
 
     data = Loader().load("../../../../../test/pr_inversion/test/sphere_80.txt")[0]
     pr_state = Invertor()
+    pr_state.d_max = 160.0
+    pr_state.alpha = 0.0007
     pr_state.x = data.x
     pr_state.y = data.y
-    pr_state.err = data.dy+1e-3
+    pr_state.err = 0.15*np.sqrt(data.y)
 
-    DLG = DmaxWindow(pr_state, 10, reactor)
+    DLG = DmaxWindow(pr_state, 15, reactor)
     DLG.show()
     reactor.run()
