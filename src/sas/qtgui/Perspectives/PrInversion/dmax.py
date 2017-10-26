@@ -106,6 +106,9 @@ class DmaxWindow(QtGui.QDialog, Ui_DmaxExplorer):
         pos = []
         pos_err = []
         osc = []
+        bck = []
+        chi2 = []
+
         xs = np.linspace(float(self.model.item(W.DMIN).text()),
                          float(self.model.item(W.DMAX).text()),
                          float(self.model.item(W.NPTS).text()))
@@ -121,6 +124,8 @@ class DmaxWindow(QtGui.QDialog, Ui_DmaxExplorer):
                 pos.append(self.pr_state.get_positive(out))
                 pos_err.append(self.pr_state.get_pos_err(out, cov))
                 osc.append(self.pr_state.oscillations(out))
+                bck.append(self.pr_state.background)
+                chi2.append(self.pr_state.chi2)
             except:
                 # This inversion failed, skip this D_max value
                 msg = "ExploreDialog: inversion failed "
