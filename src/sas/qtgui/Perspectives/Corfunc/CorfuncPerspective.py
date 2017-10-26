@@ -15,7 +15,6 @@ from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 
 # local
 from UI.CorfuncPanel import Ui_CorfuncDialog
-# from InvariantDetails import DetailsDialog
 from CorfuncUtils import WIDGETS as W
 
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg \
