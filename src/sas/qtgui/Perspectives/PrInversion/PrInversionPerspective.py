@@ -1,4 +1,5 @@
 import logging
+import numpy as np
 
 from PyQt4 import QtGui, QtCore, QtWebKit
 
@@ -30,26 +31,29 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         self._allow_close = False
 
         # Set initial values
-        self._path = ""
-        self._background = 0.0
-        self._qmin = 0.0
-        self._qmax = 1.0
-        self._slit_height = 0.0
-        self._slit_width = 0.0
-        self._terms = 10
-        self._regularization = 0.0001
-        self._max_distance = 140
-        self._bgd_input = False
-        self._terms_button = False
-        self._reg_button = False
+        self._data_index = 0
+        self._path = [""]
+        self._background = [0.0]
+        self._qmin = [0.0]
+        self._qmax = [1.0]
+        self._slit_height = [0.0]
+        self._slit_width = [0.0]
+        self._terms = [10]
+        self._regularization = [0.0001]
+        self._max_distance = [140]
+        self._bgd_input = [False]
+        self._terms_button = [False]
+        self._reg_button = [False]
+        self._terms_label = [""]
+        self._reg_label = [""]
         # Set results
-        self._rg = 0.0
-        self._i_0 = 0.0
-        self._comp_time = 0.0
-        self._chi_dof = 0.0
-        self._oscillations = 0.0
-        self._pos_fraction = 0.0
-        self._sigma_pos_fraction = 0.0
+        self._rg = [0.0]
+        self._i_0 = [0.0]
+        self._comp_time = [0.0]
+        self._chi_dof = [0.0]
+        self._oscillations = [0.0]
+        self._pos_fraction = [0.0]
+        self._sigma_pos_fraction = [0.0]
 
         # Let's choose the Standard Item Model.
         self.model = QtGui.QStandardItemModel(self)
@@ -63,8 +67,11 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         self.communicate = GuiUtils.Communicate()
         logging.debug("P(r) Inversion Perspective loaded")
 
+    ######################################################################
+    # Base Perspective Class Definitions
+
     def allowBatch(self):
-        return False
+        return True
 
     def setClosable(self, value=True):
         """
@@ -86,7 +93,11 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
             # Maybe we should just minimize
             self.setWindowState(QtCore.Qt.WindowMinimized)
 
+    ######################################################################
+    # Initialization routines
+
     def setupLinks(self):
+        self.dataList.currentIndexChanged.connect(self.displayChange)
         self.calculateButton.clicked.connect(self.calculatePrInversion)
         self.statusButton.clicked.connect(self.status)
         self.helpButton.clicked.connect(self.help)
@@ -102,7 +113,7 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         self.mapper.setModel(self.model)
 
         # Filename
-        self.mapper.addMapping(self.dataFileName, WIDGETS.W_FILENAME)
+        self.mapper.addMapping(self.dataList, WIDGETS.W_FILENAME)
         # Background
         self.mapper.addMapping(self.backgroundInput, WIDGETS.W_BACKGROUND)
         self.mapper.addMapping(self.estimateBgd, WIDGETS.W_ESTIMATE)
@@ -117,12 +128,15 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         self.mapper.addMapping(self.slitHeightInput, WIDGETS.W_SLIT_HEIGHT)
 
         # Parameter Items
-        self.mapper.addMapping(self.regularizationConstantInput, WIDGETS.W_REGULARIZATION)
-        self.mapper.addMapping(self.regConstantSuggestionButton, WIDGETS.W_REGULARIZATION_SUGGEST)
+        self.mapper.addMapping(self.regularizationConstantInput,
+                               WIDGETS.W_REGULARIZATION)
+        self.mapper.addMapping(self.regConstantSuggestionButton,
+                               WIDGETS.W_REGULARIZATION_SUGGEST)
         self.mapper.addMapping(self.explorerButton, WIDGETS.W_EXPLORE)
         self.mapper.addMapping(self.maxDistanceInput, WIDGETS.W_MAX_DIST)
         self.mapper.addMapping(self.noOfTermsInput, WIDGETS.W_NO_TERMS)
-        self.mapper.addMapping(self.noOfTermsSuggestionButton, WIDGETS.W_NO_TERMS_SUGGEST)
+        self.mapper.addMapping(self.noOfTermsSuggestionButton,
+                               WIDGETS.W_NO_TERMS_SUGGEST)
 
         # Output
         self.mapper.addMapping(self.rgValue, WIDGETS.W_RG)
@@ -132,7 +146,8 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         self.mapper.addMapping(self.chiDofValue, WIDGETS.W_CHI_SQUARED)
         self.mapper.addMapping(self.oscillationValue, WIDGETS.W_OSCILLATION)
         self.mapper.addMapping(self.posFractionValue, WIDGETS.W_POS_FRACTION)
-        self.mapper.addMapping(self.sigmaPosFractionValue, WIDGETS.W_SIGMA_POS_FRACTION)
+        self.mapper.addMapping(self.sigmaPosFractionValue,
+                               WIDGETS.W_SIGMA_POS_FRACTION)
 
         # Main Buttons
         self.mapper.addMapping(self.calculateButton, WIDGETS.W_CALCULATE)
@@ -141,60 +156,173 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
 
         self.mapper.toFirst()
 
+    ######################################################################
+    # Methods for updating GUI
+
     def setupModel(self):
         """
         Update boxes with latest values
         """
-        item = QtGui.QStandardItem(self._path)
+        item = QtGui.QStandardItem(self._path[self._data_index])
         self.model.setItem(WIDGETS.W_FILENAME, item)
-        item = QtGui.QStandardItem(self._background)
+        item = QtGui.QStandardItem(self._background[self._data_index])
         self.model.setItem(WIDGETS.W_BACKGROUND, item)
-        self.estimateBgd.click()
-        self.backgroundInput.setEnabled(self._bgd_input)
-        item = QtGui.QStandardItem(self._qmin)
+        self.checkBgdClicked(self._bgd_input[self._data_index])
+        item = QtGui.QStandardItem(self._qmin[self._data_index])
         self.model.setItem(WIDGETS.W_QMIN, item)
-        item = QtGui.QStandardItem(self._qmax)
+        item = QtGui.QStandardItem(self._qmax[self._data_index])
         self.model.setItem(WIDGETS.W_QMAX, item)
-        item = QtGui.QStandardItem(self._slit_width)
+        item = QtGui.QStandardItem(self._slit_width[self._data_index])
         self.model.setItem(WIDGETS.W_SLIT_WIDTH, item)
-        item = QtGui.QStandardItem(self._slit_height)
+        item = QtGui.QStandardItem(self._slit_height[self._data_index])
         self.model.setItem(WIDGETS.W_SLIT_HEIGHT, item)
-        item = QtGui.QStandardItem(self._terms)
+        item = QtGui.QStandardItem(self._terms[self._data_index])
         self.model.setItem(WIDGETS.W_NO_TERMS, item)
-        item = QtGui.QStandardItem(self._regularization)
+        item = QtGui.QStandardItem(self._regularization[self._data_index])
         self.model.setItem(WIDGETS.W_REGULARIZATION, item)
-        item = QtGui.QStandardItem(self._max_distance)
+        item = QtGui.QStandardItem(self._max_distance[self._data_index])
         self.model.setItem(WIDGETS.W_MAX_DIST, item)
-        item = QtGui.QStandardItem(self._rg)
+        item = QtGui.QStandardItem(self._rg[self._data_index])
         self.model.setItem(WIDGETS.W_RG, item)
-        item = QtGui.QStandardItem(self._i_0)
+        item = QtGui.QStandardItem(self._i_0[self._data_index])
         self.model.setItem(WIDGETS.W_I_ZERO, item)
-        item = QtGui.QStandardItem(self._background)
+        item = QtGui.QStandardItem(self._background[self._data_index])
         self.model.setItem(WIDGETS.W_BACKGROUND, item)
-        item = QtGui.QStandardItem(self._comp_time)
+        item = QtGui.QStandardItem(self._comp_time[self._data_index])
         self.model.setItem(WIDGETS.W_COMP_TIME, item)
-        item = QtGui.QStandardItem(self._chi_dof)
+        item = QtGui.QStandardItem(self._chi_dof[self._data_index])
         self.model.setItem(WIDGETS.W_CHI_SQUARED, item)
-        item = QtGui.QStandardItem(self._oscillations)
+        item = QtGui.QStandardItem(self._oscillations[self._data_index])
         self.model.setItem(WIDGETS.W_OSCILLATION, item)
-        item = QtGui.QStandardItem(self._pos_fraction)
+        item = QtGui.QStandardItem(self._pos_fraction[self._data_index])
         self.model.setItem(WIDGETS.W_POS_FRACTION, item)
-        item = QtGui.QStandardItem(self._sigma_pos_fraction)
+        item = QtGui.QStandardItem(self._sigma_pos_fraction[self._data_index])
         self.model.setItem(WIDGETS.W_SIGMA_POS_FRACTION, item)
+        self.enableButtons()
 
+    def enableButtons(self):
+        """
+        Disable buttons when no data present, else enable them
+        """
+        if self._path[self._data_index] == "" and len(self._path) == 1:
+            self.calculateButton.setEnabled(False)
+            self.explorerButton.setEnabled(False)
+            self.statusButton.setEnabled(False)
+        else:
+            self.statusButton.setEnabled(True)
+            self.explorerButton.setEnabled(True)
+            self.calculateButton.setEnabled(True)
+
+    def reDraw(self):
+        """
+        Redraws the window with any and all necessary updates.
+        """
+        self.populateDataComboBox()
+        self.dataList.setCurrentIndex(self._data_index)
+        self.setupModel()
+
+    def populateDataComboBox(self):
+        string_list = QtCore.QStringList()
+        for item in self._data:
+            qt_item = QtCore.QString.fromUtf8(item)
+            string_list.append(qt_item)
+        self.dataList.addItems(string_list)
+
+    def _addPr(self, data_list):
+        """
+        Add a new data set to the P(r) window and updates as needed.
+        :param data_list: List of data sent from the data manager
+        """
+        assert data_list is not None
+
+        for data in data_list:
+            # TODO: populate class variable lists with data from data_list
+            pass
+        self.reDraw()
+
+
+    ######################################################################
     # GUI Actions
+
     def calculatePrInversion(self):
+        """
+        Calculate the P(r) for every data set in the data list
+        """
         pass
 
     def status(self):
+        """
+        Show the status of the calculations
+        """
         pass
 
     def help(self):
-        pass
+        """
+        Open the P(r) Inversion help browser
+        """
+        tree_location = (GuiUtils.HELP_DIRECTORY_LOCATION +
+                         "user/sasgui/perspectives/pr/pr_help.html")
 
-    def toggleBgd(self, item):
-        pass
+        # Actual file anchor will depend on the combo box index
+        # Note that we can be clusmy here, since bad current_fitter_id
+        # will just make the page displayed from the top
+        self._helpView.load(QtCore.QUrl(tree_location))
+        self._helpView.show()
+
+    def checkBgdClicked(self, boolean=None):
+        if boolean or self.manualBgd.isChecked():
+            self.manualBgd.setChecked(True)
+            self.toggleBgd(self.manualBgd)
+            self._bgd_input[self._data_index] = True
+        else:
+            self.estimateBgd.setChecked(True)
+            self.toggleBgd(self.estimateBgd)
+            self._bgd_input[self._data_index] = False
+
+    def toggleBgd(self, item=None):
+        """
+        Toggle the background between manual and estimated
+        :param item: gui item that was triggered
+        """
+        if not item:
+            self.checkBgdClicked()
+        elif isinstance(item, QtGui.QRadioButton):
+            if item is self.estimateBgd:
+                self.backgroundInput.setEnabled(False)
+            else:
+                self.backgroundInput.setEnabled(True)
 
     def openExplorerWindow(self):
+        """
+        Open the Explorer window to see correlations between params and results
+        """
         # TODO: This depends on SVCC-45
         pass
+
+    def displayChange(self):
+        """
+        Display the values of the data set selected from the data combo box
+        """
+        self._data_index = self.dataList.currentIndex()
+        self.setupModel()
+
+    ######################################################################
+    # Response Actions
+
+    def setData(self, data_item=None, is_batch=False):
+        """
+        Assign new data set or sets to the P(r) perspective
+        Obtain a QStandardItem object and dissect it to get Data1D/2D
+        Pass it over to the calculator
+        """
+        assert data_item is not None
+
+        if not isinstance(data_item, list):
+            msg = "Incorrect type passed to the P(r) Perspective"
+            raise AttributeError, msg
+
+        if not isinstance(data_item[0], QtGui.QStandardItem):
+            msg = "Incorrect type passed to the P(r) Perspective"
+            raise AttributeError, msg
+
+        self._addPr(data_item)

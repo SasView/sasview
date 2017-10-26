@@ -178,7 +178,7 @@
            </layout>
           </item>
           <item row="0" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,3">
             <item>
              <widget class="QLabel" name="label">
               <property name="text">
@@ -187,17 +187,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="dataFileName">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-              <property name="frame">
-               <bool>false</bool>
-              </property>
-              <property name="readOnly">
-               <bool>false</bool>
-              </property>
-             </widget>
+             <widget class="QComboBox" name="dataList"/>
             </item>
            </layout>
           </item>
