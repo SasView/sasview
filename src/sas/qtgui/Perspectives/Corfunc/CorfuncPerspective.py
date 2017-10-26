@@ -290,10 +290,24 @@ class CorfuncWindow(QtGui.QDialog, Ui_CorfuncDialog):
         self.calculateBgBtn.setEnabled(True)
         self.extrapolateBtn.setEnabled(True)
 
-        self._canvas.data = data
-        self._canvas.draw_q_space()
+        self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem(""))
+        self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem(""))
+        self.model.setItem(W.W_PORODK, QtGui.QStandardItem(""))
+        self.model.setItem(W.W_PORODSIGMA, QtGui.QStandardItem(""))
+        self.model.setItem(W.W_CORETHICK, QtGui.QStandardItem(""))
+        self.model.setItem(W.W_INTTHICK, QtGui.QStandardItem(""))
+        self.model.setItem(W.W_HARDBLOCK, QtGui.QStandardItem(""))
+        self.model.setItem(W.W_CRYSTAL, QtGui.QStandardItem(""))
+        self.model.setItem(W.W_POLY, QtGui.QStandardItem(""))
+        self.model.setItem(W.W_PERIOD, QtGui.QStandardItem(""))
 
-        # self.model.item(WIDGETS.W_FILENAME).setData(QtCoreQVariant(self._model_item.text()))
+        self._canvas.data = data
+        self._canvas.extrap = None
+        self._canvas.draw_q_space()
+        self.transformBtn.setEnabled(False)
+
+        self._realplot.data = None
+        self._realplot.draw_real_space()
 
     def setClosable(self, value=True):
         """
