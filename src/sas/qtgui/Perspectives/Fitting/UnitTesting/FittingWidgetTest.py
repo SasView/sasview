@@ -99,8 +99,41 @@ class FittingWidgetTest(unittest.TestCase):
         # test the delegate a bit
         delegate = fittingWindow.lstPoly.itemDelegate()
         self.assertEqual(len(delegate.POLYDISPERSE_FUNCTIONS), 5)
-        self.assertEqual(delegate.editableParameters(), [2, 3, 4, 5])
+        self.assertEqual(delegate.editableParameters(), [1, 2, 3, 4, 5])
         self.assertEqual(delegate.poly_function, 6)
+        self.assertIsInstance(delegate.combo_updated, QtCore.pyqtBoundSignal)
+
+    def testSelectMagnetism(self):
+        """
+        Test if models have been loaded properly
+        """
+        fittingWindow =  self.widget
+
+        self.assertIsInstance(fittingWindow.lstMagnetic.itemDelegate(), QtGui.QStyledItemDelegate)
+        #Test loading from json categories
+        fittingWindow.SASModelToQModel("cylinder")
+        mag_index = fittingWindow.lstMagnetic.model().index(0,0)
+        self.assertEqual(str(mag_index.data().toString()), "up:frac_i")
+        mag_index = fittingWindow.lstMagnetic.model().index(1,0)
+        self.assertEqual(str(mag_index.data().toString()), "up:frac_f")
+        mag_index = fittingWindow.lstMagnetic.model().index(2,0)
+        self.assertEqual(str(mag_index.data().toString()), "up:angle")
+        mag_index = fittingWindow.lstMagnetic.model().index(3,0)
+        self.assertEqual(str(mag_index.data().toString()), "M0:sld")
+        mag_index = fittingWindow.lstMagnetic.model().index(4,0)
+        self.assertEqual(str(mag_index.data().toString()), "mtheta:sld")
+        mag_index = fittingWindow.lstMagnetic.model().index(5,0)
+        self.assertEqual(str(mag_index.data().toString()), "mphi:sld")
+        mag_index = fittingWindow.lstMagnetic.model().index(6,0)
+        self.assertEqual(str(mag_index.data().toString()), "M0:sld_solvent")
+        mag_index = fittingWindow.lstMagnetic.model().index(7,0)
+        self.assertEqual(str(mag_index.data().toString()), "mtheta:sld_solvent")
+        mag_index = fittingWindow.lstMagnetic.model().index(8,0)
+        self.assertEqual(str(mag_index.data().toString()), "mphi:sld_solvent")
+
+        # test the delegate a bit
+        delegate = fittingWindow.lstMagnetic.itemDelegate()
+        self.assertEqual(delegate.editableParameters(), [1, 2, 3])
         self.assertIsInstance(delegate.combo_updated, QtCore.pyqtBoundSignal)
 
     def testSelectStructureFactor(self):

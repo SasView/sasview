@@ -218,7 +218,7 @@ class MagnetismViewDelegate(QtGui.QStyledItemDelegate):
         self.mag_unit = 4
 
     def editableParameters(self):
-        return [self.mag_min, self.mag_max]
+        return [self.mag_value, self.mag_min, self.mag_max]
 
     def addErrorColumn(self):
         """
