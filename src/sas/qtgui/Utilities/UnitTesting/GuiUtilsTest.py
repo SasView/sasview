@@ -101,7 +101,7 @@ class GuiUtilsTest(unittest.TestCase):
         """
         test_item = QtGui.QStandardItem()
         test_list = ['aa','11']
-        update_data = QtCore.QVariant(test_list)
+        update_data = test_list
         name = "Black Sabbath"
 
         # update the item
@@ -132,14 +132,14 @@ class GuiUtilsTest(unittest.TestCase):
         checkbox_item.setCheckable(True)
         checkbox_item.setCheckState(QtCore.Qt.Checked)
         test_item0 = QtGui.QStandardItem()
-        test_item0.setData(QtCore.QVariant(test_list0))
+        test_item0.setData(test_list0)
 
         # Checked item 1
         test_item1 = QtGui.QStandardItem(True)
         test_item1.setCheckable(True)
         test_item1.setCheckState(QtCore.Qt.Checked)
         object_item = QtGui.QStandardItem()
-        object_item.setData(QtCore.QVariant(test_list1))
+        object_item.setData(test_list1)
         test_item1.setChild(0, object_item)
 
         checkbox_item.setChild(0, test_item0)
@@ -150,7 +150,7 @@ class GuiUtilsTest(unittest.TestCase):
         test_item2.setCheckable(True)
         test_item2.setCheckState(QtCore.Qt.Unchecked)
         object_item = QtGui.QStandardItem()
-        object_item.setData(QtCore.QVariant(test_list2))
+        object_item.setData(test_list2)
         test_item2.setChild(0, object_item)
         checkbox_item.appendRow(test_item2)
 

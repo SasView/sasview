@@ -226,11 +226,11 @@ class Graph(object):
         for p in self.plottables:
             if p.hidden == True:
                 continue
-            if not p.x == None:
+            if not p.x is None:
                 for x_i in p.x:
-                    if min_value == None or x_i < min_value:
+                    if min_value is None or x_i < min_value:
                         min_value = x_i
-                    if max_value == None or x_i > max_value:
+                    if max_value is None or x_i > max_value:
                         max_value = x_i
         return min_value, max_value
 
@@ -559,8 +559,8 @@ class Plottable(object):
         """
         Returns True if there is no data stored in the plottable
         """
-        if not self.x == None and len(self.x) == 0 \
-            and not self.y == None and len(self.y) == 0:
+        if not self.x is None and len(self.x) == 0 \
+            and not self.y is None and len(self.y) == 0:
             return True
         return False
 
@@ -794,9 +794,9 @@ class View(object):
         tempdx = []
         tempy = []
         tempdy = []
-        if self.dx == None:
+        if self.dx is None:
             self.dx = numpy.zeros(len(self.x))
-        if self.dy == None:
+        if self.dy is None:
             self.dy = numpy.zeros(len(self.y))
         if self.xLabel == "log10(x)":
             for i in range(len(self.x)):
@@ -824,9 +824,9 @@ class View(object):
         tempdx = []
         tempy = []
         tempdy = []
-        if self.dx == None:
+        if self.dx is None:
             self.dx = numpy.zeros(len(self.x))
-        if self.dy == None:
+        if self.dy is None:
             self.dy = numpy.zeros(len(self.y))
         if self.yLabel == "log10(y)":
             for i in range(len(self.x)):
@@ -857,11 +857,11 @@ class View(object):
         tempdx = []
         tempy = []
         tempdy = []
-        if self.dx == None:
+        if self.dx is None:
             self.dx = numpy.zeros(len(self.x))
-        if self.dy == None:
+        if self.dy is None:
             self.dy = numpy.zeros(len(self.y))
-        if xmin != None and xmax != None:
+        if xmin is not None and xmax is not None:
             for i in range(len(self.x)):
                 if self.x[i] >= xmin and self.x[i] <= xmax:
                     tempx.append(self.x[i])
@@ -1201,7 +1201,7 @@ class Chisq(Plottable):
     def render(self, plot, **kw):
         """
         """
-        if  self._chisq == None:
+        if  self._chisq is None:
             chisqTxt = r'$\chi^2=$'
         else:
             chisqTxt = r'$\chi^2=%g$' % (float(self._chisq))

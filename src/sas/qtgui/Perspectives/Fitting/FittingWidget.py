@@ -994,6 +994,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         assert isinstance(param_dict, dict)
         if not dict:
             return
+        if self._model_model.rowCount() == 0:
+            return
 
         def iterateOverMagnetModel(func):
             """
@@ -1005,6 +1007,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         def updateFittedValues(row):
             # Utility function for main model update
             # internal so can use closure for param_dict
+            if self._magnet_model.item(row, 0) is None:
+                return
             param_name = str(self._magnet_model.item(row, 0).text())
             if param_name not in list(param_dict.keys()):
                 return

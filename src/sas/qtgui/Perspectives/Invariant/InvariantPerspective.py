@@ -296,12 +296,9 @@ class InvariantWindow(QtGui.QDialog, Ui_tabbedInvariantUI):
             extrapolated_data.title = title
 
             # Add the plot to the model item
-            # variant_item = QtCore.QVariant(self._plotter)
-            variant_item = QtCore.QVariant(extrapolated_data)
-
             # This needs to run in the main thread
             reactor.callFromThread(GuiUtils.updateModelItemWithPlot,
-                    self._model_item, variant_item, title)
+                    self._model_item, extrapolated_data, title)
 
         if self._high_extrapolate:
             # for presentation in InvariantDetails
@@ -321,11 +318,9 @@ class InvariantWindow(QtGui.QDialog, Ui_tabbedInvariantUI):
             high_out_data.title = title
 
             # Add the plot to the model item
-            # variant_item = QtCore.QVariant(self._plotter)
-            variant_item = QtCore.QVariant(high_out_data)
             # This needs to run in the main thread
             reactor.callFromThread(GuiUtils.updateModelItemWithPlot,
-                    self._model_item, variant_item, title)
+                    self._model_item, high_out_data, title)
 
         item = QtGui.QStandardItem(str(float('%.5g'% volume_fraction)))
         self.model.setItem(WIDGETS.W_VOLUME_FRACTION, item)
@@ -560,7 +555,7 @@ class InvariantWindow(QtGui.QDialog, Ui_tabbedInvariantUI):
 
         # Extract data on 1st child - this is the Data1D/2D component
         data = GuiUtils.dataFromItem(self._model_item)
-        self.model.item(WIDGETS.W_FILENAME).setData(QtCore.QVariant(self._model_item.text()))
+        self.model.item(WIDGETS.W_FILENAME).setData(self._model_item.text())
 
         ##### DEBUG ####
         # set data in the debug tree view window

@@ -157,7 +157,7 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
     def onPrepareOutputData(self):
         """ Prepare datasets to be added to DataExplorer and DataManager """
         new_item = GuiUtils.createModelItemWithPlot(
-            QtCore.QVariant(self.output),
+            self.output,
             name=self.txtOutputData.text())
 
         new_datalist_item = {str(self.txtOutputData.text()) + str(time.time()):

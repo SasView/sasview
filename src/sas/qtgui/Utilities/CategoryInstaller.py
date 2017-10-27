@@ -128,7 +128,7 @@ class CategoryInstaller:
         _model_list = list(_model_dict.keys())
 
         serialized_file = None
-        if homedir == None:
+        if homedir is None:
             serialized_file = CategoryInstaller.get_user_file()
         else:
             serialized_file = os.path.join(homedir, USER_FILE)
