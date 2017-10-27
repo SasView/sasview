@@ -189,8 +189,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         new_plot.group_id = "2daverage" + self.base.data.name
         new_plot.id = (self.averager.__name__) + self.base.data.name
         new_plot.is_data = True
-        variant_plot = QtCore.QVariant(new_plot)
-        GuiUtils.updateModelItemWithPlot(self._item, variant_plot, new_plot.id)
+        GuiUtils.updateModelItemWithPlot(self._item, new_plot, new_plot.id)
 
         if self.update_model:
             self.setModelFromParams()

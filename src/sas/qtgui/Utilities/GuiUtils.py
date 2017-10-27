@@ -238,11 +238,9 @@ class Communicate(QtCore.QObject):
 def updateModelItemWithPlot(item, update_data, name=""):
     """
     Adds a checkboxed row named "name" to QStandardItem
-    Adds QVariant 'update_data' to that row.
+    Adds 'update_data' to that row.
     """
     assert isinstance(item, QtGui.QStandardItem)
-    #assert isinstance(update_data, QtCore.QVariant)
-    #py_update_data = update_data.toPyObject()
     py_update_data = update_data
 
     # Check if data with the same ID is already present
@@ -268,7 +266,7 @@ def updateModelItemWithPlot(item, update_data, name=""):
 def createModelItemWithPlot(update_data, name=""):
     """
     Creates a checkboxed QStandardItem named "name"
-    Adds QVariant 'update_data' to that row.
+    Adds 'update_data' to that row.
     """
     #assert isinstance(update_data, QtCore.QVariant)
     #py_update_data = update_data.toPyObject()
@@ -531,7 +529,7 @@ def onTXTSave(data, path):
     """
     with open(path,'w') as out:
         has_errors = True
-        if data.dy == None or data.dy == []:
+        if data.dy is None or data.dy == []:
             has_errors = False
         # Sanity check
         if has_errors:
@@ -551,7 +549,7 @@ def onTXTSave(data, path):
         for i in range(len(data.x)):
             if has_errors:
                 if data.dx is not None and data.dx != []:
-                    if  data.dx[i] != None:
+                    if  data.dx[i] is not None:
                         out.write("%g  %g  %g  %g\n" % (data.x[i],
                                                         data.y[i],
                                                         data.dy[i],

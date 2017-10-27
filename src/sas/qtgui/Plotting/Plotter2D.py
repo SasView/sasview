@@ -280,8 +280,7 @@ class Plotter2DWidget(PlotterBase):
         new_plot.group_id = "2daverage" + self.data.name
         new_plot.id = "Circ avg " + self.data.name
         new_plot.is_data = True
-        variant_plot = QtCore.QVariant(new_plot)
-        GuiUtils.updateModelItemWithPlot(self._item, variant_plot, new_plot.id)
+        GuiUtils.updateModelItemWithPlot(self._item, new_plot, new_plot.id)
         self.manager.communicator.plotUpdateSignal.emit([new_plot])
 
     def setSlicer(self, slicer):

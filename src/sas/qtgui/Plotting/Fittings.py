@@ -21,7 +21,7 @@ class Parameter(object):
     def __init__(self, model, name, value=None):
         self.model = model
         self.name = name
-        if not value == None:
+        if value is not None:
             self.model.setParam(self.name, value)
 
     def set(self, value):

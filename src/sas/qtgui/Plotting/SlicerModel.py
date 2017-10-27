@@ -22,8 +22,8 @@ class SlicerModel(object):
             item1 = QtGui.QStandardItem(parameter)
             item2 = QtGui.QStandardItem(GuiUtils.formatNumber(parameters[parameter]))
             self._model.appendRow([item1, item2])
-        self._model.setHeaderData(0, QtCore.Qt.Horizontal, QtCore.QVariant("Parameter"))
-        self._model.setHeaderData(1, QtCore.Qt.Horizontal, QtCore.QVariant("Value"))
+        self._model.setHeaderData(0, QtCore.Qt.Horizontal, "Parameter")
+        self._model.setHeaderData(1, QtCore.Qt.Horizontal, "Value")
 
     def setParamsFromModel(self, item):
         """

@@ -613,7 +613,7 @@ class PlotterWidget(PlotterBase):
         On legend in motion
         """
         ax = event.inaxes
-        if ax == None:
+        if ax is None:
             return
         # Event occurred inside a plotting area
         lo_x, hi_x = ax.get_xlim()
@@ -648,7 +648,7 @@ class PlotterWidget(PlotterBase):
         ax = event.inaxes
         step = event.step
 
-        if ax != None:
+        if ax is not None:
             # Event occurred inside a plotting area
             lo, hi = ax.get_xlim()
             lo, hi = PlotUtilities.rescale(lo, hi, step,

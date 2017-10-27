@@ -53,7 +53,7 @@ class QtSignalSpy(QObject):
         self._signal = [args, kwargs]
 
     def signal(self, index=None):
-        if index == None:
+        if index is None:
             return self._signal
         else:
             return self._signal[index]

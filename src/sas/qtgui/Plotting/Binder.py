@@ -232,7 +232,8 @@ class BindArtist(object):
         registered artists.  All others are invisible to the mouse.
         """
         # TODO: sort by zorder of axes then by zorder within axes
-        self._artists.sort(cmp=lambda x, y: cmp(y.zorder, x.zorder))
+        #self._artists.sort(cmp=lambda x, y: cmp(y.zorder, x.zorder))
+        #self._artists.sort(cmp=lambda x, y: y.zorder.__gt__(x.zorder))
         found = Selection()
         for artist in self._artists:
             # TODO: should contains() return false if invisible?

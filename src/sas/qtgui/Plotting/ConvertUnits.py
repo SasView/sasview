@@ -3,29 +3,28 @@
     This is a cleaned up version of unitConverter.py
 """
 import re
-import string
 
 def convertUnit(power, unit):
     """
         Convert units to strings that can be displayed
     """
     if power != 0:
-        if string.find(unit, "^") != -1:  # if the unit contains a powerer ^
+        if unit.find("^") != -1:  # if the unit contains a powerer ^
             toks = re.split("\^", unit)
-            if string.find(toks[0], "/") != -1 or \
-                string.find(toks[0], "-") != -1:
+            if toks[0].find("/") != -1 or \
+                toks[0].find("-") != -1:
                 if power == 1:
                     unit = unit
                 else:
                     unit = "(" + unit + ")" + "^{" + str(power) + "}"
             else:
-                if string.find(toks[1], "{") != -1:  # if found a {
+                if toks[1].find("{") != -1:  # if found a {
                     find_power_toks = re.split("{", toks[1])
-                    if string.find(find_power_toks[1], "}") != -1:  # found }
+                    if find_power_toks[1].find("}") != -1:  # found }
                         unit_toks = re.split("}", find_power_toks[1])
-                        if string.find(unit_toks[0], ".") != -1:
+                        if unit_toks[0].find(".") != -1:
                             powerer = float(unit_toks[0]) * power
-                        elif string.find(unit_toks[0], "/") != -1:
+                        elif unit_toks[0].find("/") != -1:
                             power_toks = re.split("/", unit_toks[0])
                             powerer = power * int(power_toks[0])\
                                             / int(power_toks[1])

@@ -155,7 +155,6 @@ def addHeadersToModel(model):
     Adds predefined headers to the model
     """
     for i, item in enumerate(model_header_captions):
-        #model.setHeaderData(i, QtCore.Qt.Horizontal, QtCore.QVariant(item))
         model.setHeaderData(i, QtCore.Qt.Horizontal, item)
 
     model.header_tooltips = model_header_tooltips

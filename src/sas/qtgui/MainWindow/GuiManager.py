@@ -307,7 +307,7 @@ class GuiManager(object):
                 msg += " Please try again later."
                 self.communicate.statusBarUpdateSignal.emit(msg)
 
-            elif cmp(version, LocalConfig.__version__) > 0:
+            elif version.__gt__(LocalConfig.__version__):
                 msg = "Version %s is available! " % str(version)
                 if "download_url" in version_info:
                     webbrowser.open(version_info["download_url"])
