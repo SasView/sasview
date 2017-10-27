@@ -1,5 +1,6 @@
 import sys
 import logging
+import pylab
 import numpy as np
 
 from PyQt4 import QtGui, QtCore, QtWebKit
@@ -13,8 +14,14 @@ import UI.TabbedPrInversionUI
 from UI.TabbedPrInversionUI import Ui_PrInversion
 
 # pr inversion calculation elements
+from sas.sascalc.dataloader.data_info import Data1D
 from sas.sascalc.pr.invertor import Invertor
 
+def is_float(value):
+    try:
+        return float(value)
+    except ValueError:
+        return 0.0
 
 class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
     """
@@ -40,6 +47,13 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
 
         # is there data
         self._has_data = False
+        self._data = Data1D()
+
+        # p(r) calculator
+        self._calculator = Invertor()
+        self._last_calculator = None
+        self.calc_thread = None
+        self.estimation_thread = None
 
         # Current data object in view
         self._data_index = 0
@@ -48,13 +62,7 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         if not isinstance(data, list):
             data = [data]
         for datum in data:
-            self._data_list.append({datum : None})
-
-        # p(r) calculator
-        self._calculator = Invertor()
-        self._last_calculator = None
-        self.calc_thread = None
-        self.estimation_thread = None
+            self._data_list.append({datum: self._calculator.clone()})
 
         self.model = QtGui.QStandardItemModel(self)
         self.mapper = QtGui.QDataWidgetMapper(self)
@@ -233,13 +241,33 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
     ######################################################################
     # GUI Interaction Events
 
+    def update_calculator(self):
+        """Update all p(r) params. Take all GUI values as an override"""
+        self._calculator.set_x(self._data.x)
+        self._calculator.set_y(self._data.y)
+        self._calculator.set_err(self._data.dy)
+        self._calculator.set_qmin(is_float(UI.TabbedPrInversionUI._fromUtf8(
+            self.minQInput.text())))
+        self._calculator.set_qmax(is_float(UI.TabbedPrInversionUI._fromUtf8(
+            self.maxQInput.text())))
+        self._calculator.set_alpha(is_float(UI.TabbedPrInversionUI._fromUtf8(
+            self.regularizationConstantInput.text())))
+        self._calculator.set_dmax(is_float(UI.TabbedPrInversionUI._fromUtf8(
+            self.maxDistanceInput.text())))
+        self._calculator.set_est_bck(int(is_float(
+            UI.TabbedPrInversionUI._fromUtf8(self.backgroundInput.text()))))
+        self._calculator.set_slit_height(is_float(
+            UI.TabbedPrInversionUI._fromUtf8(self.slitHeightInput.text())))
+        self._calculator.set_slit_width(is_float(
+            UI.TabbedPrInversionUI._fromUtf8(self.slitWidthInput.text())))
+
     def _calculation(self):
         """
         Calculate the P(r) for every data set in the data list
         """
-        # TODO: Set all invertor values before calculation
-        self._calculator.__setattr__("qmin", UI.TabbedPrInversionUI._fromUtf8(
-            self.minQInput.text()))
+        # Pull in any GUI changes before running the calculations
+        self.update_calculator()
+        # Run
         self.startThread()
 
     def model_changed(self):
@@ -313,20 +341,22 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
             data_object = GuiUtils.dataFromItem(data)
             self._data_list.append({data_object: None})
             self._has_data = True
+            self._data = data_object
             self.enableButtons()
             self.populateDataComboBox(data_object.filename)
-            self.model.setItem(WIDGETS.W_QMIN,
-                               QtGui.QStandardItem(str(data_object.x.min())))
-            self.model.setItem(WIDGETS.W_QMAX,
-                               QtGui.QStandardItem(str(data_object.x.max())))
+            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem(
+                "{:.4g}".format(data_object.x.min())))
+            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem(
+                "{:.4g}".format(data_object.x.max())))
 
             # Estimate initial values from data
+            self.update_calculator()
             self.performEstimate()
 
             # TODO: Plot data on load
 
-            # TODO: Only load in the 1st data until batch mode is working
-            # TODO: Thus, the break
+            # TODO: Only load the 1st data until batch mode is working
+            # TODO: thus, the break
             break
 
     ######################################################################
@@ -410,7 +440,7 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
                            QtGui.QStandardItem(str(elapsed)))
         self.regConstantSuggestionButton.setText(QtCore.QString(str(alpha)))
         self.regConstantSuggestionButton.setEnabled(True)
-        if message is not None:
+        if message:
             logging.info(message)
         self.performEstimateNT()
 
@@ -425,13 +455,15 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
 
         """
         # Save useful info
-        self.noOfTermsSuggestionButton.setText(QtCore.QString(str(nterms)))
+        self.noOfTermsSuggestionButton.setText(QtCore.QString(
+            "{:n}".format(nterms)))
         self.noOfTermsSuggestionButton.setEnabled(True)
-        self.regConstantSuggestionButton.setText(QtCore.QString(str(alpha)))
+        self.regConstantSuggestionButton.setText(QtCore.QString(
+            "{:.3g}".format(alpha)))
         self.regConstantSuggestionButton.setEnabled(True)
         self.model.setItem(WIDGETS.W_COMP_TIME,
                            QtGui.QStandardItem(str(elapsed)))
-        if message is not None:
+        if message:
             logging.info(message)
             pass
 
@@ -458,15 +490,16 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
 
         # Show result on control panel
 
+        # TODO: Connect self._calculator to GUI
         self.model.setItem(WIDGETS.W_RG, QtGui.QStandardItem(str(pr.rg(out))))
         self.model.setItem(WIDGETS.W_I_ZERO,
                            QtGui.QStandardItem(str(pr.iq0(out))))
         self.model.setItem(WIDGETS.W_BACKGROUND_INPUT,
-                           QtGui.QStandardItem("{:.2g}".format(pr.background)))
+                           QtGui.QStandardItem("{:.3f}".format(pr.background)))
         self.model.setItem(WIDGETS.W_BACKGROUND_OUTPUT,
                            QtGui.QStandardItem(str(pr.background)))
         self.model.setItem(WIDGETS.W_CHI_SQUARED,
-                           QtGui.QStandardItem(str(pr.chi2)))
+                           QtGui.QStandardItem(str(pr.chi2[0])))
         self.model.setItem(WIDGETS.W_COMP_TIME,
                            QtGui.QStandardItem(str(elapsed)))
         self.model.setItem(WIDGETS.W_OSCILLATION,
@@ -475,6 +508,9 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
                            QtGui.QStandardItem(str(pr.get_positive(out))))
         self.model.setItem(WIDGETS.W_SIGMA_POS_FRACTION,
                            QtGui.QStandardItem(str(pr.get_pos_err(out, cov))))
+
+        # Display results tab
+        self.PrTabWidget.setCurrentIndex(1)
 
         # TODO: Show plots
         # Show I(q) fit
