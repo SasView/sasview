@@ -74,7 +74,7 @@
     <addaction name="separator"/>
     <addaction name="actionStartup_Settings"/>
     <addaction name="separator"/>
-    <addaction name="actionCategry_Manager"/>
+    <addaction name="actionCategory_Manager"/>
    </widget>
    <widget class="QMenu" name="menuTool">
     <property name="title">
@@ -323,7 +323,7 @@
     <string>Startup Settings</string>
    </property>
   </action>
-  <action name="actionCategry_Manager">
+  <action name="actionCategory_Manager">
    <property name="text">
     <string>Category Manager</string>
    </property>

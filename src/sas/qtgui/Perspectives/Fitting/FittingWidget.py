@@ -372,7 +372,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         category_list = sorted(self.master_category_dict.keys())
         self.cbCategory.addItem(CATEGORY_DEFAULT)
         self.cbCategory.addItems(category_list)
-        self.cbCategory.addItem(CATEGORY_STRUCTURE)
+        if CATEGORY_STRUCTURE not in category_list:
+            self.cbCategory.addItem(CATEGORY_STRUCTURE)
         self.cbCategory.setCurrentIndex(0)
 
     def setEnablementOnDataLoad(self):
@@ -522,6 +523,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.smearing_widget.smearingChangedSignal.connect(self.onSmearingOptionsUpdate)
         self.communicate.copyFitParamsSignal.connect(self.onParameterCopy)
         self.communicate.pasteFitParamsSignal.connect(self.onParameterPaste)
+
+        # Communicator signal
+        self.communicate.updateModelCategoriesSignal.connect(self.onCategoriesChanged)
 
     def modelName(self):
         """
@@ -2246,6 +2250,34 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         residuals_plot = FittingUtilities.plotResiduals(self.data, fitted_data)
         residuals_plot.id = "Residual " + residuals_plot.id
         self.createNewIndex(residuals_plot)
+
+    def onCategoriesChanged(self):
+            """
+            Reload the category/model comboboxes
+            """
+            # Store the current combo indices
+            current_cat = self.cbCategory.currentText()
+            current_model = self.cbModel.currentText()
+
+            # reread the category file and repopulate the combo
+            self.cbCategory.blockSignals(True)
+            self.cbCategory.clear()
+            self.readCategoryInfo()
+            self.initializeCategoryCombo()
+
+            # Scroll back to the original index in Categories
+            new_index = self.cbCategory.findText(current_cat)
+            if new_index != -1:
+                self.cbCategory.setCurrentIndex(new_index)
+            self.cbCategory.blockSignals(False)
+            # ...and in the Models
+            self.cbModel.blockSignals(True)
+            new_index = self.cbModel.findText(current_model)
+            if new_index != -1:
+                self.cbModel.setCurrentIndex(new_index)
+            self.cbModel.blockSignals(False)
+
+            return
 
     def calcException(self, etype, value, tb):
         """

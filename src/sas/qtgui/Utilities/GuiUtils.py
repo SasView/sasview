@@ -259,6 +259,8 @@ class Communicate(QtCore.QObject):
 
     # Fitting parameter paste from clipboard
     pasteFitParamsSignal = QtCore.pyqtSignal()
+    # Notify about new categories/models from category manager
+    updateModelCategoriesSignal = QtCore.pyqtSignal()
 
 def updateModelItemWithPlot(item, update_data, name=""):
     """
