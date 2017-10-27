@@ -4,8 +4,8 @@ import unittest
 from PyQt4.QtGui import *
 from PyQt4.QtTest import QTest
 from PyQt4.QtCore import *
-from mock import MagicMock
-from mock import patch
+from unittest.mock import MagicMock
+from unittest.mock import patch
 from mpl_toolkits.mplot3d import Axes3D
 
 # set up import paths
@@ -156,7 +156,7 @@ class DataExplorerTest(unittest.TestCase):
         self.assertEqual(spy_progress_bar_update.count(), 5)
 
         expected_list = [0, 0, 33, 66, -1]
-        spied_list = [spy_progress_bar_update.called()[i]['args'][0] for i in xrange(5)]
+        spied_list = [spy_progress_bar_update.called()[i]['args'][0] for i in range(5)]
         self.assertEqual(expected_list, spied_list)
         
     def testDeleteButton(self):
@@ -323,6 +323,9 @@ class DataExplorerTest(unittest.TestCase):
 
         # Unselect all data
         self.form.cbSelect.setCurrentIndex(1)
+
+        self.form.show()
+        app.exec_()
 
         # Test the current selection
         item1D = self.form.model.item(0)
@@ -502,7 +505,7 @@ class DataExplorerTest(unittest.TestCase):
         # Assure returned dictionary has correct data
         # We don't know the data ID, so need to iterate over dict
         data_dict = spy_data_received.called()[0]['args'][0]
-        for data_key, data_value in data_dict.iteritems():
+        for data_key, data_value in data_dict.items():
             self.assertIsInstance(data_value, Data1D)
 
         # Assure add_data on data_manager was called (last call)

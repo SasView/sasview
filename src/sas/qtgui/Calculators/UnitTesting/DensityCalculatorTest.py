@@ -5,7 +5,7 @@ import webbrowser
 from PyQt4 import QtGui
 from PyQt4.QtTest import QTest
 from PyQt4 import QtCore
-from mock import MagicMock
+from unittest.mock import MagicMock
 
 ####### TEMP
 import sas.qtgui.path_prepare

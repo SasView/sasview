@@ -272,16 +272,16 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
             if input_to_check is None or input_to_check is '':
                 msg = 'DataOperation: Number requires a float number'
                 logging.warning(msg)
-                self.txtNumber.setStyleSheet(QtCore.QString(BG_RED))
+                self.txtNumber.setStyleSheet(BG_RED)
 
             elif float(self.txtNumber.text()) == 0.:
                 # should be check that 0 is not chosen
                 msg = 'DataOperation: Number requires a non zero number'
                 logging.warning(msg)
-                self.txtNumber.setStyleSheet(QtCore.QString(BG_RED))
+                self.txtNumber.setStyleSheet(BG_RED)
 
             else:
-                self.txtNumber.setStyleSheet(QtCore.QString(BG_WHITE))
+                self.txtNumber.setStyleSheet(BG_WHITE)
                 self.data2 = float(self.txtNumber.text())
                 self.updatePlot(self.graphData2, self.layoutData2, self.data2)
 
@@ -292,13 +292,13 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
             return False
         else:
             if self.cbData2.currentText() == 'Number':
-                self.cbData1.setStyleSheet(QtCore.QString(BG_WHITE))
-                self.cbData2.setStyleSheet(QtCore.QString(BG_WHITE))
+                self.cbData1.setStyleSheet(BG_WHITE)
+                self.cbData2.setStyleSheet(BG_WHITE)
                 return True
 
             elif self.data1.__class__.__name__ != self.data2.__class__.__name__:
-                self.cbData1.setStyleSheet(QtCore.QString(BG_RED))
-                self.cbData2.setStyleSheet(QtCore.QString(BG_RED))
+                self.cbData1.setStyleSheet(BG_RED)
+                self.cbData2.setStyleSheet(BG_RED)
                 print(self.data1.__class__.__name__ != self.data2.__class__.__name__)
                 logging.warning('Cannot compute data of different dimensions')
                 return False
@@ -307,8 +307,8 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
                     and (len(self.data2.x) != len(self.data1.x) or
                              not all(i == j for i, j in zip(self.data1.x, self.data2.x))):
                 logging.warning('Cannot compute 1D data of different lengths')
-                self.cbData1.setStyleSheet(QtCore.QString(BG_RED))
-                self.cbData2.setStyleSheet(QtCore.QString(BG_RED))
+                self.cbData1.setStyleSheet(BG_RED)
+                self.cbData2.setStyleSheet(BG_RED)
                 return False
 
             elif self.data1.__class__.__name__ == 'Data2D' \
@@ -319,33 +319,33 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
                     or not all(i == j for i, j in
                                 zip(self.data1.qy_data, self.data2.qy_data))
                          ):
-                self.cbData1.setStyleSheet(QtCore.QString(BG_RED))
-                self.cbData2.setStyleSheet(QtCore.QString(BG_RED))
+                self.cbData1.setStyleSheet(BG_RED)
+                self.cbData2.setStyleSheet(BG_RED)
                 logging.warning('Cannot compute 2D data of different lengths')
                 return False
 
             else:
-                self.cbData1.setStyleSheet(QtCore.QString(BG_WHITE))
-                self.cbData2.setStyleSheet(QtCore.QString(BG_WHITE))
+                self.cbData1.setStyleSheet(BG_WHITE)
+                self.cbData2.setStyleSheet(BG_WHITE)
                 return True
 
     def onCheckOutputName(self):
         """ Check that name of output does not already exist """
         name_to_check = str(self.txtOutputData.text())
-        self.txtOutputData.setStyleSheet(QtCore.QString(BG_WHITE))
+        self.txtOutputData.setStyleSheet(BG_WHITE)
 
         if name_to_check is None or name_to_check == '':
-            self.txtOutputData.setStyleSheet(QtCore.QString(BG_RED))
+            self.txtOutputData.setStyleSheet(BG_RED)
             logging.warning('No output name')
             return False
 
         elif name_to_check in self.list_data_items:
-            self.txtOutputData.setStyleSheet(QtCore.QString(BG_RED))
+            self.txtOutputData.setStyleSheet(BG_RED)
             logging.warning('The Output data name already exists')
             return False
 
         else:
-            self.txtOutputData.setStyleSheet(QtCore.QString(BG_WHITE))
+            self.txtOutputData.setStyleSheet(BG_WHITE)
             return True
 
     # ########

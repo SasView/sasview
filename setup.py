@@ -450,9 +450,7 @@ package_data['sas.sasview'] = ['images/*',
 packages.append("sas.sasview")
 
 required = [
-    'bumps>=0.7.5.9', 'periodictable>=1.5.0', 'pyparsing<2.0.0',
-
-    # 'lxml>=2.2.2',
+    'bumps>=0.7.5.9', 'periodictable>=1.5.0',
     'lxml', 'h5py',
 
     # The following dependecies won't install automatically, so assume them

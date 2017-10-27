@@ -179,12 +179,18 @@ class InvariantWindow(QtGui.QDialog, Ui_tabbedInvariantUI):
             d = threads.deferToThread(self.calculateThread, extrapolation)
             # Add deferred callback for call return
             d.addCallback(self.plotResult)
+            d.addErrback(self.plotFailed)
         except Exception as ex:
             # Set the button back to available
             self.pushButton.setEnabled(True)
             self.pushButton.setText("Calculate")
             self.pushButton.setStyleSheet(self.style)
 
+    def plotFailed(self, reason):
+        """
+        """
+        print("plotFailed FAILED: ", reason)
+        pass
 
     def plotResult(self, model):
         """

@@ -1,7 +1,7 @@
 import sys
 import unittest
 import platform
-from mock import patch, MagicMock
+from unittest.mock import MagicMock
 
 from PyQt4 import QtGui
 import matplotlib.pyplot as plt

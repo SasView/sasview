@@ -5,8 +5,8 @@ import platform
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from mock import MagicMock
-from mock import patch
+from unittest.mock import MagicMock
+from unittest.mock import patch
 
 ####### TEMP
 import path_prepare
@@ -256,7 +256,7 @@ class PlotterTest(unittest.TestCase):
         QtGui.QDialog.exec_ = MagicMock(return_value=QtGui.QDialog.Accepted)
 
         # Just this one plot
-        self.assertEqual(len(self.plotter.plot_dict.keys()), 1)
+        self.assertEqual(len(list(self.plotter.plot_dict.keys())), 1)
         self.plotter.onLinearFit(1)
 
         # Check that exec_ got called
@@ -280,19 +280,19 @@ class PlotterTest(unittest.TestCase):
         #self.assertTrue(self.plotter.isVisible())
 
         # Assure we have two sets
-        self.assertEqual(len(self.plotter.plot_dict.keys()), 2)
+        self.assertEqual(len(list(self.plotter.plot_dict.keys())), 2)
 
         # Delete one set
         self.plotter.onRemovePlot(2)
         # Assure we have two sets
-        self.assertEqual(len(self.plotter.plot_dict.keys()), 1)
+        self.assertEqual(len(list(self.plotter.plot_dict.keys())), 1)
 
         self.plotter.manager = MagicMock()
 
         # Delete the remaining set
         self.plotter.onRemovePlot(1)
         # Assure we have no plots
-        self.assertEqual(len(self.plotter.plot_dict.keys()), 0)
+        self.assertEqual(len(list(self.plotter.plot_dict.keys())), 0)
         # Assure the plotter window is closed
         self.assertFalse(self.plotter.isVisible())
 

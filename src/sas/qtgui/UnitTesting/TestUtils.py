@@ -9,11 +9,11 @@ def WarningTestNotImplemented(method_name=None):
     Test name retrieved from stack trace.
     """
     if method_name is not None:
-        print("\nWARNING: %s needs implementing!"%method_name)
+        print(("\nWARNING: %s needs implementing!"%method_name))
     else:
         (frame, filename, line_number,
             function_name, lines, index) = inspect.getouterframes(inspect.currentframe())[1]
-        print("\nWARNING: %s needs implementing!"%function_name)
+        print(("\nWARNING: %s needs implementing!"%function_name))
 
 class QtSignalSpy(QObject):
     """
@@ -38,7 +38,7 @@ class QtSignalSpy(QObject):
                 widget.signal.connect(slot)
         except AttributeError:
             msg = "Wrong construction of QtSignalSpy instance"
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
 
     def slot(self, *args, **kwargs):
         """

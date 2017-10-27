@@ -5,7 +5,7 @@ import time
 from PyQt4 import QtGui
 from PyQt4 import QtTest
 from PyQt4 import QtCore
-from mock import MagicMock
+from unittest.mock import MagicMock
 from twisted.internet import threads
 
 # set up import paths
@@ -59,7 +59,7 @@ class FittingWidgetTest(unittest.TestCase):
         fittingWindow =  self.widget
 
         #Test loading from json categories
-        category_list = fittingWindow.master_category_dict.keys()
+        category_list = list(fittingWindow.master_category_dict.keys())
 
         for category in category_list:
             self.assertNotEqual(fittingWindow.cbCategory.findText(category),-1)
@@ -92,9 +92,9 @@ class FittingWidgetTest(unittest.TestCase):
         #Test loading from json categories
         fittingWindow.SASModelToQModel("cylinder")
         pd_index = fittingWindow.lstPoly.model().index(0,0)
-        self.assertEqual(str(pd_index.data().toString()), "Distribution of radius")
+        self.assertEqual(str(pd_index.data()), "Distribution of radius")
         pd_index = fittingWindow.lstPoly.model().index(1,0)
-        self.assertEqual(str(pd_index.data().toString()), "Distribution of length")
+        self.assertEqual(str(pd_index.data()), "Distribution of length")
 
         # test the delegate a bit
         delegate = fittingWindow.lstPoly.itemDelegate()
@@ -393,7 +393,7 @@ class FittingWidgetTest(unittest.TestCase):
                          header_tooltips[column])
 
         # Test presence of comboboxes in last column
-        for row in xrange(self.widget._poly_model.rowCount()):
+        for row in range(self.widget._poly_model.rowCount()):
             func_index = self.widget._poly_model.index(row, 6)
             self.assertTrue(isinstance(self.widget.lstPoly.indexWidget(func_index), QtGui.QComboBox))
             self.assertIn('Distribution of', self.widget._poly_model.item(row, 0).text())
@@ -541,7 +541,7 @@ class FittingWidgetTest(unittest.TestCase):
                          header_tooltips[column])
 
         # Test rows
-        for row in xrange(self.widget._magnet_model.rowCount()):
+        for row in range(self.widget._magnet_model.rowCount()):
             func_index = self.widget._magnet_model.index(row, 0)
             self.assertIn(':', self.widget._magnet_model.item(row, 0).text())
 
@@ -980,7 +980,7 @@ class FittingWidgetTest(unittest.TestCase):
                          str(self.widget.kernel_module.params[name_modified_param]))
 
         # check that range of variation for this parameter has NOT been changed
-        print self.widget.kernel_module.details[name_modified_param]
+        print(self.widget.kernel_module.details[name_modified_param])
         self.assertNotIn(new_value, self.widget.kernel_module.details[name_modified_param] )
 
 

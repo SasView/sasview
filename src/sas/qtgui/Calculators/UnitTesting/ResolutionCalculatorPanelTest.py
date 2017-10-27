@@ -7,8 +7,7 @@ from PyQt4 import QtGui
 from PyQt4 import QtCore
 from PyQt4.QtTest import QTest
 from PyQt4.QtCore import Qt
-from mock import MagicMock
-from mock import patch
+from unittest.mock import MagicMock
 
 from twisted.internet import threads
 

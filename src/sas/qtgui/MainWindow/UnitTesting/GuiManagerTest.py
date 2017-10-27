@@ -8,7 +8,7 @@ from PyQt4.QtGui import *
 from PyQt4.QtTest import QTest
 from PyQt4.QtCore import *
 from PyQt4.QtWebKit import *
-from mock import MagicMock
+from unittest.mock import MagicMock
 
 # set up import paths
 import path_prepare
@@ -73,7 +73,7 @@ class GuiManagerTest(unittest.TestCase):
         # Now, send some message to stdout.
         # We are in the MainWindow scope, so simple 'print' will work
         message = "from stdout"
-        print message
+        print(message)
         self.assertIn(message, self.manager.logDockWidget.widget().toPlainText())
 
         # Send some message to stderr
@@ -161,7 +161,7 @@ class GuiManagerTest(unittest.TestCase):
         Tests the version checker logic
         """
         # 1. version = 0.0.0
-        version_info = {u'version' : u'0.0.0'}
+        version_info = {'version' : '0.0.0'}
         spy_status_update = QtSignalSpy(self.manager, self.manager.communicate.statusBarUpdateSignal)
 
         self.manager.processVersion(version_info)
@@ -171,7 +171,7 @@ class GuiManagerTest(unittest.TestCase):
         self.assertIn(message, str(spy_status_update.signal(index=0)))
 
         # 2. version < LocalConfig.__version__
-        version_info = {u'version' : u'0.0.1'}
+        version_info = {'version' : '0.0.1'}
         spy_status_update = QtSignalSpy(self.manager, self.manager.communicate.statusBarUpdateSignal)
 
         self.manager.processVersion(version_info)
@@ -181,7 +181,7 @@ class GuiManagerTest(unittest.TestCase):
         self.assertIn(message, str(spy_status_update.signal(index=0)))
 
         # 3. version > LocalConfig.__version__
-        version_info = {u'version' : u'999.0.0'}
+        version_info = {'version' : '999.0.0'}
         spy_status_update = QtSignalSpy(self.manager, self.manager.communicate.statusBarUpdateSignal)
         webbrowser.open = MagicMock()
 

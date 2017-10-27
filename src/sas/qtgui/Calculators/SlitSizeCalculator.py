@@ -81,9 +81,6 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
         if path is None:
             return
 
-        if isinstance(path, QtCore.QString):
-            path = str(path)
-
         return path
 
     def onClose(self):

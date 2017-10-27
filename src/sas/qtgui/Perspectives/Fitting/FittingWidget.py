@@ -571,7 +571,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         model_column = item.column()
         model_row = item.row()
         name_index = self._poly_model.index(model_row, 0)
-        parameter_name = str(name_index.data().toString()).lower() # "distribution of sld" etc.
+        parameter_name = str(name_index.data()).lower() # "distribution of sld" etc.
         if "distribution of" in parameter_name:
             # just the last word
             parameter_name = parameter_name.rsplit()[-1]

@@ -3,7 +3,7 @@ import unittest
 import numpy
 
 from PyQt4 import QtGui
-from mock import MagicMock
+from unittest.mock import MagicMock
 
 # set up import paths
 import path_prepare
@@ -58,7 +58,7 @@ class LinearFitTest(unittest.TestCase):
         self.widget.fit(None)
         return_values = self.widget.parent.emit.call_args[0][1]
         # Compare
-        self.assertItemsEqual(return_values[0], [1.0, 3.0])
+        self.assertCountEqual(return_values[0], [1.0, 3.0])
         self.assertAlmostEqual(return_values[1][0], 10.004054329, 6)
         self.assertAlmostEqual(return_values[1][1], 12.030439848, 6)
 
@@ -67,7 +67,7 @@ class LinearFitTest(unittest.TestCase):
         self.widget.fit(None)
         return_values = self.widget.parent.emit.call_args[0][1]
         # Compare
-        self.assertItemsEqual(return_values[0], [1.0, 3.0])
+        self.assertCountEqual(return_values[0], [1.0, 3.0])
         self.assertAlmostEqual(return_values[1][0], 9.987732937, 6)
         self.assertAlmostEqual(return_values[1][1], 11.84365082, 6)
 
@@ -80,7 +80,7 @@ class LinearFitTest(unittest.TestCase):
         orig_dy = [0.01, 0.018181818181818184, 0.024999999999999998]
         x, y, dy = self.widget.origData()
 
-        self.assertItemsEqual(x, orig_x)
+        self.assertCountEqual(x, orig_x)
         self.assertEqual(y[0], orig_y[0])
         self.assertAlmostEqual(y[1], orig_y[1], 8)
         self.assertAlmostEqual(y[2], orig_y[2], 8)
@@ -97,9 +97,9 @@ class LinearFitTest(unittest.TestCase):
         orig_dy = [0.1, 0.2, 0.3]
         x, y, dy = self.widget.origData()
 
-        self.assertItemsEqual(x, orig_x)
-        self.assertItemsEqual(y, orig_y)
-        self.assertItemsEqual(dy, orig_dy)
+        self.assertCountEqual(x, orig_x)
+        self.assertCountEqual(y, orig_y)
+        self.assertCountEqual(dy, orig_dy)
 
         # x, log(y)
         self.widget.x_is_log = False
@@ -110,7 +110,7 @@ class LinearFitTest(unittest.TestCase):
         orig_dy = [0.01, 0.018181818181818184, 0.024999999999999998]
         x, y, dy = self.widget.origData()
 
-        self.assertItemsEqual(x, orig_x)
+        self.assertCountEqual(x, orig_x)
         self.assertEqual(y[0], orig_y[0])
         self.assertAlmostEqual(y[1], orig_y[1], 8)
         self.assertAlmostEqual(y[2], orig_y[2], 8)
