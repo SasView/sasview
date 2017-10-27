@@ -774,6 +774,7 @@ class Data1D(plottable_1D, DataInfo):
         clone.trans_spectrum = deepcopy(self.trans_spectrum)
         clone.meta_data = deepcopy(self.meta_data)
         clone.errors = deepcopy(self.errors)
+        clone.isSesans = self.isSesans
 
         return clone
 

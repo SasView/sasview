@@ -53,6 +53,7 @@ class Data1D(PlottableData1D, LoadData1D):
         self.xaxis(data1d._xaxis, data1d._xunit)
         self.yaxis(data1d._yaxis, data1d._yunit)
         self.title = data1d.title
+        self.isSesans = data1d.isSesans
         
     def __str__(self):
         """
