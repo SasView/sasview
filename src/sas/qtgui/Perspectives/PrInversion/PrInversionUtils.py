@@ -3,7 +3,7 @@ def enum(*sequential, **named):
     return type('Enum', (), enums)
 
 WIDGETS = enum( 'W_FILENAME',               #0
-                'W_BACKGROUND',             #1
+                'W_BACKGROUND_INPUT',             #1
                 'W_ESTIMATE',               #2
                 'W_MANUAL_INPUT',           #3
                 'W_QMIN',                   #4
@@ -19,7 +19,7 @@ WIDGETS = enum( 'W_FILENAME',               #0
                 # results
                 'W_RG',
                 'W_I_ZERO',
-                'W_BACKGROUND',
+                'W_BACKGROUND_OUTPUT',
                 'W_COMP_TIME',
                 'W_CHI_SQUARED',
                 'W_OSCILLATION',
