@@ -234,24 +234,19 @@ class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator)
     def check_value(self):
         """Check range of text edits for QMax and Number of Qbins """
         text_edit = self.sender()
-        text_edit.setStyleSheet(
-            QtCore.QString.fromUtf8('background-color: rgb(255, 255, 255);'))
+        text_edit.setStyleSheet('background-color: rgb(255, 255, 255);')
         if text_edit.text():
             value = float(str(text_edit.text()))
             if text_edit == self.txtQxMax:
                 if value <= 0 or value > 1000:
-                    text_edit.setStyleSheet(QtCore.QString.fromUtf8(
-                        'background-color: rgb(255, 182, 193);'))
+                    text_edit.setStyleSheet('background-color: rgb(255, 182, 193);')
                 else:
-                    text_edit.setStyleSheet(QtCore.QString.fromUtf8(
-                        'background-color: rgb(255, 255, 255);'))
+                    text_edit.setStyleSheet('background-color: rgb(255, 255, 255);')
             elif text_edit == self.txtNoQBins:
                 if value < 2 or value > 1000:
-                    self.txtNoQBins.setStyleSheet(QtCore.QString.fromUtf8(
-                        'background-color: rgb(255, 182, 193);'))
+                    self.txtNoQBins.setStyleSheet('background-color: rgb(255, 182, 193);')
                 else:
-                    self.txtNoQBins.setStyleSheet(QtCore.QString.fromUtf8(
-                        'background-color: rgb(255, 255, 255);'))
+                    self.txtNoQBins.setStyleSheet('background-color: rgb(255, 255, 255);')
 
     def update_gui(self):
         """ Update the interface with values from loaded data """
@@ -554,6 +549,7 @@ class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator)
             d = threads.deferToThread(self.complete, inputs, self._update)
             # Add deferred callback for call return
             d.addCallback(self.plot_1_2d)
+            d.addErrback(self.calculateFailed)
         except:
             log_msg = "{}. stop".format(sys.exc_info()[1])
             logging.info(log_msg)
@@ -563,6 +559,12 @@ class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator)
         """
         Copied from previous version
         """
+        pass
+
+    def calculateFailed(self, reason):
+        """
+        """
+        print("Calculate Failed with:\n", reason)
         pass
 
     def complete(self, input, update=None):

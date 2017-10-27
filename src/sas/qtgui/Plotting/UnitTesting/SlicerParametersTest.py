@@ -1,13 +1,11 @@
 import sys
 import unittest
-from mock import MagicMock
+from unittest.mock import MagicMock
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 from PyQt4 import QtTest
 from PyQt4 import QtWebKit
-
-from mock import MagicMock
 
 # set up import paths
 import sas.qtgui.path_prepare

@@ -2,7 +2,7 @@ import sys
 import unittest
 
 import numpy
-from mock import MagicMock
+from unittest.mock import MagicMock
 
 # set up import paths
 import sas.qtgui.path_prepare

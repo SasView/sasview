@@ -5,7 +5,7 @@ from bumps import options
 from PyQt4 import QtGui
 from PyQt4 import QtWebKit
 
-from mock import MagicMock
+from unittest.mock import MagicMock
 
 # set up import paths
 import path_prepare

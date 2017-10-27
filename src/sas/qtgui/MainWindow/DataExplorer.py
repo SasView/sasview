@@ -174,6 +174,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         load_thread = threads.deferToThread(self.readData, url)
         load_thread.addCallback(self.loadComplete)
+        load_thread.addErrback(self.loadFailed)
 
     def loadFile(self, event=None):
         """
@@ -220,6 +221,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if filename:
             load_thread = threads.deferToThread(self.readProject, filename)
             load_thread.addCallback(self.readProjectComplete)
+            load_thread.addErrback(self.readProjectFailed)
+
+    def readProjectFailed(self, reason):
+        """
+        """
+        print("readProjectFailed FAILED: ", reason)
+        pass
 
     def readProject(self, filename):
         self.communicator.statusBarUpdateSignal.emit("Loading Project... %s" % os.path.basename(filename))
@@ -613,9 +621,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if paths is None:
             return
 
-        #if isinstance(paths, QtCore.QStringList):
-        #    paths = [str(f) for f in paths]
-
         if not isinstance(paths, list):
             paths = [paths]
 
@@ -990,6 +995,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.statusBarUpdateSignal.emit(message)
         self.communicator.fileDataReceivedSignal.emit(output_data)
         self.manager.add_data(data_list=output_data)
+
+    def loadErrback(self, reason):
+        print("File Load Failed with:\n", reason)
+        pass
 
     def updateModel(self, data, p_file):
         """

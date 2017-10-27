@@ -6,7 +6,7 @@ import platform
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from mock import MagicMock
+from unittest.mock import MagicMock
 from mpl_toolkits.mplot3d import Axes3D
 
 ####### TEMP

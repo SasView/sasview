@@ -4,7 +4,7 @@ import unittest
 from PyQt4.QtGui import *
 from PyQt4.QtTest import QTest
 from PyQt4.QtCore import *
-from mock import MagicMock
+from unittest.mock import MagicMock
 
 # Local
 from sas.qtgui.Utilities.GuiUtils import Communicate

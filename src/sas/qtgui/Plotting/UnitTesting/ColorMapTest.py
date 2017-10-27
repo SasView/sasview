@@ -3,7 +3,7 @@ import unittest
 import numpy
 
 from PyQt4 import QtGui
-from mock import MagicMock
+from unittest.mock import MagicMock
 import matplotlib as mpl
 
 # set up import paths
