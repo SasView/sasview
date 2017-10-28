@@ -84,7 +84,18 @@ class FileReader(object):
             self.handle_error_message(msg)
 
         # Return a list of parsed entries that data_loader can manage
-        return self.output
+        final_data = self.output
+        self.reset_state()
+        return final_data
+
+    def reset_state(self):
+        """
+        Resets the class state to a base case when loading a new data file so previous
+        data files do not appear a second time
+        """
+        self.current_datainfo = None
+        self.current_dataset = None
+        self.output = []
 
     def nextline(self):
         """
