@@ -251,13 +251,14 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
             self.calculateButton.setEnabled(False)
             self.explorerButton.setEnabled(False)
 
-    def populateDataComboBox(self, filename):
+    def populateDataComboBox(self, filename, data_ref):
         """
         Append a new file name to the data combobox
         :param data: Data1D object
         """
         qt_item = QtCore.QString.fromUtf8(filename)
-        self.dataList.addItem(qt_item)
+        ref = QtCore.QVariant(data_ref)
+        self.dataList.addItem(qt_item, ref)
 
     def acceptNoTerms(self):
         """Send estimated no of terms to input"""
@@ -270,9 +271,8 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
             self.regConstantSuggestionButton.text()))
 
     def displayChange(self):
-        data_name = str(self.dataList.currentText())
-        # TODO: Find data ref based on file name
-        # TODO: Find way to link standardmodelitem with combobox entry
+        variant_ref = self.currentWidget()
+        self.setCurrentData(variant_ref.toPyObject()[0])
 
     ######################################################################
     # GUI Interaction Events
@@ -355,29 +355,35 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
             msg = "Incorrect type passed to the P(r) Perspective"
             raise AttributeError, msg
 
-        if not isinstance(data_item[0], QtGui.QStandardItem):
+        for data in data_item:
+            self.setCurrentData(data)
+
+    def setCurrentData(self, data_ref):
+        """Set an individual data set to the current data"""
+
+        if not isinstance(data_ref, QtGui.QStandardItem):
             msg = "Incorrect type passed to the P(r) Perspective"
             raise AttributeError, msg
 
-        for data in data_item:
-            # Data references
-            self._data = data
-            self._data_set = GuiUtils.dataFromItem(data)
-            self.populateDataComboBox(self._data_set.filename)
-            self._data_list[self._data] = self._calculator
+        # Data references
+        self._data = data_ref
+        self._data_set = GuiUtils.dataFromItem(data_ref)
+        ref = QtCore.QVariant(self._data)
+        self.populateDataComboBox(self._data_set.filename, ref)
+        self._data_list[self._data] = self._calculator
 
-            # Estimate initial values from data
-            self.performEstimate()
-            self.logic = InversionLogic(self._data_set)
+        # Estimate initial values from data
+        self.performEstimate()
+        self.logic = InversionLogic(self._data_set)
 
-            # Estimate q range
-            qmin, qmax = self.logic.computeDataRange()
-            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem(
-                "{:.4g}".format(qmin)))
-            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem(
-                "{:.4g}".format(qmax)))
+        # Estimate q range
+        qmin, qmax = self.logic.computeDataRange()
+        self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem(
+            "{:.4g}".format(qmin)))
+        self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem(
+            "{:.4g}".format(qmax)))
 
-            self.enableButtons()
+        self.enableButtons()
 
     ######################################################################
     # Thread Creators
