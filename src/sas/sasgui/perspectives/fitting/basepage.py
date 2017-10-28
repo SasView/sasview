@@ -3414,8 +3414,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                             item[2].Enable(True)
                         if item[2].__class__.__name__ == "ComboBox":
                             if value[0] in self.model.fun_list:
-                                fun_val = self.model.fun_list[value[0]]
-                                self.model.setParam(name, fun_val)
+                                self.model.setParam(name, 0)
                                 # save state
                         try:
                             item[5].SetValue(str(value[-3]))

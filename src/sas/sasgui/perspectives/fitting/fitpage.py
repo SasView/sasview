@@ -1732,10 +1732,7 @@ class FitPage(BasicPage):
         # build function (combo)box
         ind = 0
         while(ind < len(list)):
-            for key, val in list.items():
-                if val == ind:
-                    fun_box.Append(key, val)
-                    break
+            fun_box.Append(list[ind])        
             ind += 1
 
     def _on_select_accuracy(self, event):
@@ -1764,7 +1761,7 @@ class FitPage(BasicPage):
         name = fun_box.Name
         value = fun_box.GetValue()
         if value in self.model.fun_list:
-            fun_val = self.model.fun_list[value]
+            fun_val = fun_box.GetSelection()
 
         self.model.setParam(name, fun_val)
         # save state
