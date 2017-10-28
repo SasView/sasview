@@ -63,11 +63,12 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         # Current data object in view
         self._data_index = 0
         # list mapping data to p(r) calculation
-        self._data_list = []
+        self._data_list = {}
         if not isinstance(data, list):
-            data = [data]
-        for datum in data:
-            self._data_list.append({datum: self._calculator.clone()})
+            data_list = [data]
+        if data is not None:
+            for datum in data_list:
+                self._data_list[datum] = self._calculator.clone()
 
         # plots
         self.pr_plot = None
@@ -89,7 +90,7 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         return self.communicate
 
     def allowBatch(self):
-        return False
+        return True
 
     def setClosable(self, value=True):
         """
@@ -117,10 +118,7 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
     def setupLinks(self):
         """Connect the use controls to their appropriate methods"""
         self.enableButtons()
-        # TODO: enable the drop down box once batch is working
-        self.dataList.setEnabled(False)
-        # TODO: enable displayChange once batch is working
-        # self.dataList.currentIndexChanged.connect(self.displayChange)
+        self.dataList.currentIndexChanged.connect(self.displayChange)
         self.calculateButton.clicked.connect(self._calculation)
         self.helpButton.clicked.connect(self.help)
         self.estimateBgd.toggled.connect(self.toggleBgd)
@@ -271,6 +269,11 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         self.model.setItem(WIDGETS.W_REGULARIZATION, QtGui.QStandardItem(
             self.regConstantSuggestionButton.text()))
 
+    def displayChange(self):
+        data_name = str(self.dataList.currentText())
+        # TODO: Find data ref based on file name
+        # TODO: Find way to link standardmodelitem with combobox entry
+
     ######################################################################
     # GUI Interaction Events
 
@@ -284,10 +287,13 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         """
         Calculate the P(r) for every data set in the data list
         """
-        # Set data before running the calculations
-        self.update_calculator()
-        # Run
-        self.startThread()
+        for data_ref, pr in self._data_list.items():
+            self._data_set = GuiUtils.dataFromItem(data_ref)
+            self._calculator = pr
+            # Set data before running the calculations
+            self.update_calculator()
+            # Run
+            self.startThread()
 
     def model_changed(self):
         """Update the values when user makes changes"""
@@ -354,25 +360,24 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
             raise AttributeError, msg
 
         for data in data_item:
+            # Data references
             self._data = data
             self._data_set = GuiUtils.dataFromItem(data)
             self.populateDataComboBox(self._data_set.filename)
+            self._data_list[self._data] = self._calculator
 
             # Estimate initial values from data
             self.performEstimate()
             self.logic = InversionLogic(self._data_set)
 
+            # Estimate q range
             qmin, qmax = self.logic.computeDataRange()
-
             self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem(
                 "{:.4g}".format(qmin)))
             self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem(
                 "{:.4g}".format(qmax)))
 
             self.enableButtons()
-
-            # TODO: Only load 1st data until batch mode working. Thus, break
-            break
 
     ######################################################################
     # Thread Creators
@@ -526,7 +531,7 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         # Save Pr invertor
         self._calculator = pr
         # Append data to data list
-        self._data_list.append({self._data: pr})
+        self._data_list[self._data] = self._calculator.clone()
 
         if self.pr_plot is None:
             self.pr_plot = self.logic.newPRPlot(out, self._calculator, cov)
