@@ -4,14 +4,16 @@ import pylab
 import numpy as np
 
 from PyQt4 import QtGui, QtCore, QtWebKit
+from twisted.internet import reactor
 
 # sas-global
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
-# pr inversion gui elements
-from PrInversionUtils import WIDGETS
+# pr inversion GUI elements
+from InversionUtils import WIDGETS
 import UI.TabbedPrInversionUI
 from UI.TabbedPrInversionUI import Ui_PrInversion
+from InversionLogic import InversionLogic
 
 # pr inversion calculation elements
 from sas.sascalc.dataloader.data_info import Data1D
@@ -23,15 +25,15 @@ def is_float(value):
     except ValueError:
         return 0.0
 
-class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
+class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
     """
     The main window for the P(r) Inversion perspective.
     """
 
-    name = "PrInversion"
+    name = "Inversion"
 
     def __init__(self, parent=None, data=None):
-        super(PrInversionWindow, self).__init__()
+        super(InversionWindow, self).__init__()
         self.setupUi(self)
 
         self.setWindowTitle("P(r) Inversion Perspective")
@@ -42,12 +44,15 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
 
         self.communicate = GuiUtils.Communicate()
 
+        self.logic = InversionLogic()
+
         # The window should not close
         self._allow_close = False
 
-        # is there data
-        self._has_data = False
-        self._data = Data1D()
+        # current QStandardItem showing on the panel
+        self._data = None
+        # current Data1D as referenced by self._data
+        self._data_set = None
 
         # p(r) calculator
         self._calculator = Invertor()
@@ -64,6 +69,10 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         for datum in data:
             self._data_list.append({datum: self._calculator.clone()})
 
+        # plots
+        self.pr_plot = None
+        self.data_plot = None
+
         self.model = QtGui.QStandardItemModel(self)
         self.mapper = QtGui.QDataWidgetMapper(self)
         # Link user interactions with methods
@@ -75,6 +84,9 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
 
     ######################################################################
     # Base Perspective Class Definitions
+
+    def communicator(self):
+        return self.communicate
 
     def allowBatch(self):
         return False
@@ -213,7 +225,7 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         """
         Enable buttons when data is present, else disable them
         """
-        if self._has_data:
+        if self.logic.data_is_loaded:
             self.explorerButton.setEnabled(True)
             self.calculateButton.setEnabled(True)
         else:
@@ -243,9 +255,9 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
 
     def update_calculator(self):
         """Update all p(r) params. Take all GUI values as an override"""
-        self._calculator.set_x(self._data.x)
-        self._calculator.set_y(self._data.y)
-        self._calculator.set_err(self._data.dy)
+        self._calculator.set_x(self._data_set.x)
+        self._calculator.set_y(self._data_set.y)
+        self._calculator.set_err(self._data_set.dy)
         self._calculator.set_qmin(is_float(UI.TabbedPrInversionUI._fromUtf8(
             self.minQInput.text())))
         self._calculator.set_qmax(is_float(UI.TabbedPrInversionUI._fromUtf8(
@@ -274,8 +286,8 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         """Update the values when user makes changes"""
         if not self.mapper:
             return
+        # TODO: Update plots
         self.mapper.toFirst()
-        # TODO: Update plots, etc.
 
     def help(self):
         """
@@ -338,25 +350,35 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
             raise AttributeError, msg
 
         for data in data_item:
-            data_object = GuiUtils.dataFromItem(data)
-            self._data_list.append({data_object: None})
-            self._has_data = True
-            self._data = data_object
+            self._data = data
+            self._data_set = GuiUtils.dataFromItem(data)
             self.enableButtons()
-            self.populateDataComboBox(data_object.filename)
-            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem(
-                "{:.4g}".format(data_object.x.min())))
-            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem(
-                "{:.4g}".format(data_object.x.max())))
+            self.populateDataComboBox(self._data_set.filename)
 
             # Estimate initial values from data
-            self.update_calculator()
             self.performEstimate()
+            self.logic.data(self._calculator)
 
-            # TODO: Plot data on load
+            self._manager.createGuiData(None)
 
-            # TODO: Only load the 1st data until batch mode is working
-            # TODO: thus, the break
+            # TODO: Finish plotting
+            if self.pr_plot is None:
+                self.pr_plot = None
+                #self.pr_plot = self.logic.new1DPlot(self._calculator)
+            if self.data_plot is None:
+                self.data_plot = None
+
+            qmin, qmax, _ = self.logic.computeDataRange()
+            title = self._data.filename
+
+            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem(
+                "{:.4g}".format(qmin)))
+            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem(
+                "{:.4g}".format(qmax)))
+            #reactor.callFromThread(GuiUtils.updateModelItemWithPlot,
+            #                       self._model_item, self._communicator, title)
+
+            # TODO: Only load 1st data until batch mode working. Thus, break
             break
 
     ######################################################################
@@ -366,7 +388,7 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         """
             Start a calculation thread
         """
-        from PrThread import CalcPr
+        from Thread import CalcPr
 
         # If a thread is already started, stop it
         if self.calc_thread is not None and self.calc_thread.isrunning():
@@ -384,7 +406,7 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         """
             Perform parameter estimation
         """
-        from PrThread import EstimateNT
+        from Thread import EstimateNT
 
         # If a thread is already started, stop it
         if (self.estimation_thread is not None and
@@ -408,7 +430,9 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         """
             Perform parameter estimation
         """
-        from PrThread import EstimatePr
+        from Thread import EstimatePr
+
+        self._calculation()
 
         # If a thread is already started, stop it
         if (self.estimation_thread is not None and
@@ -463,9 +487,9 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         self.regConstantSuggestionButton.setEnabled(True)
         self.model.setItem(WIDGETS.W_COMP_TIME,
                            QtGui.QStandardItem(str(elapsed)))
+        self.PrTabWidget.setCurrentIndex(0)
         if message:
             logging.info(message)
-            pass
 
     def _completed(self, out, cov, pr, elapsed):
         """
@@ -480,9 +504,6 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         # Save useful info
         # Keep a copy of the last result
         self._last_calculator = pr.clone()
-
-        # TODO: Append to data dictionary
-        # self._data_list.append({s})
 
         # Save Pr invertor
         self._calculator = pr
@@ -511,8 +532,10 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
 
         # Display results tab
         self.PrTabWidget.setCurrentIndex(1)
+        self._data_list.append({self._data: pr})
 
-        # TODO: Show plots
+        # TODO: Show plots - Really, this should be linked to the inputs, etc,
+        # TODO: so it should happen automagically
         # Show I(q) fit
         # self.show_iq(out, self._calculator)
         # Show P(r) fit
@@ -523,34 +546,3 @@ class PrInversionWindow(QtGui.QTabWidget, Ui_PrInversion):
             Call-back method for calculation errors
         """
         logging.warning(error)
-
-    def show_data(self, path=None, data=None, reset=False):
-        """
-        Show data read from a file
-
-        :param path: file path
-        :param reset: if True all other plottables will be cleared
-
-        """
-        if data is not None:
-            try:
-                pr = self._create_file_pr(data)
-            except:
-                status = "Problem reading data: %s" % sys.exc_value
-                raise RuntimeError, status
-
-            # If the file contains nothing, just return
-            if pr is None:
-                raise RuntimeError, "Loaded data is invalid"
-
-            self._calculator = pr
-
-        # Make a plot of I(q) data
-        if self._calculator.err is None:
-            logging.log(self._calculator.err)
-        else:
-            # TODO: Do something
-            pass
-        # Get Q range
-        #self.control_panel.q_min = min(self._calculator.x)
-        #self.control_panel.q_max = max(self._calculator.x)
