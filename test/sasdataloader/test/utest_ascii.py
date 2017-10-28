@@ -28,6 +28,11 @@ class ABSReaderTests(unittest.TestCase):
             Test .ABS file loaded as ascii
         """
         # The length of the data is 10
+        self.assertEqual(len(self.f1_list), 1)
+        self.assertEqual(len(self.f2_list), 1)
+        self.assertEqual(len(self.f3_list), 1)
+        self.assertEqual(len(self.f4_list), 1)
+        self.assertEqual(len(self.f5_list), 1)
         self.assertEqual(len(self.f1.x), 10)
         self.assertEqual(self.f1.x[0],0.002618)
         self.assertEqual(self.f1.x[9],0.0497)

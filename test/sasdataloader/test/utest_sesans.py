@@ -21,6 +21,7 @@ class sesans_reader(unittest.TestCase):
         file = Loader().load("sesans_examples/sphere2micron.ses")
         f = file[0]
         # self.assertEqual(f, 5)
+        self.assertEqual(len(file), 1)
         self.assertEqual(len(f.x), 40)
         self.assertEqual(f.x[0], 391.56)
         self.assertEqual(f.x[-1], 46099)
@@ -38,6 +39,7 @@ class sesans_reader(unittest.TestCase):
         """
         file = self.loader("sesans_examples/sphere_isis.ses")
         f = file[0]
+        self.assertEqual(len(file), 1)
         self.assertEqual(len(f.x), 57)
         self.assertEqual(f.x[-1], 19303.4)
         self.assertEqual(f.source.wavelength[-1], 13.893668)

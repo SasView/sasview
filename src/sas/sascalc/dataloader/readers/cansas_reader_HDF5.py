@@ -64,7 +64,7 @@ class Reader(FileReader):
         :return: List of Data1D/2D objects and/or a list of errors.
         """
         # Reinitialize when loading a new data file to reset all class variables
-        self.reset_class_variables()
+        self.reset_state()
 
         filename = self.f_open.name
         self.f_open.close() # IO handled by h5py
@@ -100,18 +100,16 @@ class Reader(FileReader):
                             self.output = []
                             raise FileContentsException("Fewer than 5 data points found.")
 
-    def reset_class_variables(self):
+    def reset_state(self):
         """
         Create the reader object and define initial states for class variables
         """
-        self.current_datainfo = None
-        self.current_dataset = None
+        super(Reader, self).reset_state()
         self.data1d = []
         self.data2d = []
         self.raw_data = None
         self.errors = set()
         self.logging = []
-        self.output = []
         self.parent_class = u''
         self.detector = Detector()
         self.collimation = Collimation()

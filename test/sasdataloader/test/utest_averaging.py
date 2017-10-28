@@ -103,7 +103,8 @@ class DataInfoTests(unittest.TestCase):
     def setUp(self):
         filepath = os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'MAR07232_rest.h5')
-        self.data = Loader().load(filepath)[0]
+        self.data_list = Loader().load(filepath)
+        self.data = self.data_list[0]
 
     def test_ring(self):
         """
@@ -118,8 +119,10 @@ class DataInfoTests(unittest.TestCase):
         o = r(self.data)
         filepath = os.path.join(os.path.dirname(
             os.path.realpath(__file__)), 'ring_testdata.txt')
-        answer = Loader().load(filepath)[0]
+        answer_list = Loader().load(filepath)
+        answer = answer_list[0]
 
+        self.assertEqual(len(answer_list), 1)
         for i in range(r.nbins_phi - 1):
             self.assertAlmostEqual(o.x[i + 1], answer.x[i], 4)
             self.assertAlmostEqual(o.y[i + 1], answer.y[i], 4)
