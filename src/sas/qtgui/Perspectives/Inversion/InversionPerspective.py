@@ -11,8 +11,8 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # pr inversion GUI elements
 from InversionUtils import WIDGETS
-import UI.TabbedPrInversionUI
-from UI.TabbedPrInversionUI import Ui_PrInversion
+import UI.TabbedInversionUI
+from UI.TabbedInversionUI import Ui_PrInversion
 from InversionLogic import InversionLogic
 
 # pr inversion calculation elements
@@ -117,7 +117,6 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
     def setupLinks(self):
         """Connect the use controls to their appropriate methods"""
         self.enableButtons()
-        self.checkBgdClicked(False)
         # TODO: enable the drop down box once batch is working
         self.dataList.setEnabled(False)
         # TODO: enable displayChange once batch is working
@@ -129,7 +128,29 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         self.regConstantSuggestionButton.clicked.connect(self.acceptAlpha)
         self.noOfTermsSuggestionButton.clicked.connect(self.acceptNoTerms)
         self.explorerButton.clicked.connect(self.openExplorerWindow)
+        self.backgroundInput.textChanged.connect(
+            lambda: self._calculator.set_est_bck(int(is_float(
+                str(self.backgroundInput.text())))))
+        self.minQInput.textChanged.connect(
+            lambda: self._calculator.set_qmin(is_float(
+                str(self.minQInput.text()))))
+        self.regularizationConstantInput.textChanged.connect(
+            lambda: self._calculator.set_alpha(is_float(
+                str(self.regularizationConstantInput.text()))))
+        self.maxDistanceInput.textChanged.connect(
+            lambda: self._calculator.set_dmax(is_float(
+                str(self.maxDistanceInput.text()))))
+        self.maxQInput.textChanged.connect(
+            lambda: self._calculator.set_qmax(is_float(
+                str(self.maxQInput.text()))))
+        self.slitHeightInput.textChanged.connect(
+            lambda: self._calculator.set_slit_height(is_float(
+                str(self.slitHeightInput.text()))))
+        self.slitWidthInput.textChanged.connect(
+            lambda: self._calculator.set_slit_width(is_float(
+                str(self.slitHeightInput.text()))))
         self.model.itemChanged.connect(self.model_changed)
+        self.estimateBgd.setChecked(True)
 
     def setupMapper(self):
         # Set up the mapper.
@@ -254,30 +275,16 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
     # GUI Interaction Events
 
     def update_calculator(self):
-        """Update all p(r) params. Take all GUI values as an override"""
+        """Update all p(r) params"""
         self._calculator.set_x(self._data_set.x)
         self._calculator.set_y(self._data_set.y)
         self._calculator.set_err(self._data_set.dy)
-        self._calculator.set_qmin(is_float(UI.TabbedPrInversionUI._fromUtf8(
-            self.minQInput.text())))
-        self._calculator.set_qmax(is_float(UI.TabbedPrInversionUI._fromUtf8(
-            self.maxQInput.text())))
-        self._calculator.set_alpha(is_float(UI.TabbedPrInversionUI._fromUtf8(
-            self.regularizationConstantInput.text())))
-        self._calculator.set_dmax(is_float(UI.TabbedPrInversionUI._fromUtf8(
-            self.maxDistanceInput.text())))
-        self._calculator.set_est_bck(int(is_float(
-            UI.TabbedPrInversionUI._fromUtf8(self.backgroundInput.text()))))
-        self._calculator.set_slit_height(is_float(
-            UI.TabbedPrInversionUI._fromUtf8(self.slitHeightInput.text())))
-        self._calculator.set_slit_width(is_float(
-            UI.TabbedPrInversionUI._fromUtf8(self.slitWidthInput.text())))
 
     def _calculation(self):
         """
         Calculate the P(r) for every data set in the data list
         """
-        # Pull in any GUI changes before running the calculations
+        # Set data before running the calculations
         self.update_calculator()
         # Run
         self.startThread()
@@ -286,7 +293,14 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         """Update the values when user makes changes"""
         if not self.mapper:
             return
-        # TODO: Update plots
+        if self.pr_plot is not None:
+            title = self.pr_plot.name
+            GuiUtils.updateModelItemWithPlot(
+                self._data, QtCore.QVariant(self.pr_plot), title)
+        if self.data_plot is not None:
+            title = self.data_plot.name
+            GuiUtils.updateModelItemWithPlot(
+                self._data, QtCore.QVariant(self.data_plot), title)
         self.mapper.toFirst()
 
     def help(self):
@@ -302,26 +316,16 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         self._helpView.load(QtCore.QUrl(tree_location))
         self._helpView.show()
 
-    def checkBgdClicked(self, boolean=None):
-        if boolean or self.manualBgd.isChecked():
-            self.manualBgd.setChecked(True)
-            self.toggleBgd(self.manualBgd)
-        else:
-            self.estimateBgd.setChecked(True)
-            self.toggleBgd(self.estimateBgd)
-
-    def toggleBgd(self, item=None):
+    def toggleBgd(self):
         """
         Toggle the background between manual and estimated
         :param item: gui item that was triggered
         """
-        if not item:
-            self.checkBgdClicked()
-        elif isinstance(item, QtGui.QRadioButton):
-            if item is self.estimateBgd:
-                self.backgroundInput.setEnabled(False)
-            else:
-                self.backgroundInput.setEnabled(True)
+        sender = self.sender()
+        if sender is self.estimateBgd:
+            self.backgroundInput.setEnabled(False)
+        else:
+            self.backgroundInput.setEnabled(True)
 
     def openExplorerWindow(self):
         """
@@ -352,31 +356,20 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         for data in data_item:
             self._data = data
             self._data_set = GuiUtils.dataFromItem(data)
-            self.enableButtons()
             self.populateDataComboBox(self._data_set.filename)
 
             # Estimate initial values from data
             self.performEstimate()
-            self.logic.data(self._calculator)
+            self.logic = InversionLogic(self._data_set)
 
-            self._manager.createGuiData(None)
-
-            # TODO: Finish plotting
-            if self.pr_plot is None:
-                self.pr_plot = None
-                #self.pr_plot = self.logic.new1DPlot(self._calculator)
-            if self.data_plot is None:
-                self.data_plot = None
-
-            qmin, qmax, _ = self.logic.computeDataRange()
-            title = self._data.filename
+            qmin, qmax = self.logic.computeDataRange()
 
             self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem(
                 "{:.4g}".format(qmin)))
             self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem(
                 "{:.4g}".format(qmax)))
-            #reactor.callFromThread(GuiUtils.updateModelItemWithPlot,
-            #                       self._model_item, self._communicator, title)
+
+            self.enableButtons()
 
             # TODO: Only load 1st data until batch mode working. Thus, break
             break
@@ -394,7 +387,7 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         if self.calc_thread is not None and self.calc_thread.isrunning():
             self.calc_thread.stop()
         pr = self._calculator.clone()
-        nfunc = int(UI.TabbedPrInversionUI._fromUtf8(
+        nfunc = int(UI.TabbedInversionUI._fromUtf8(
             self.noOfTermsInput.text()))
         self.calc_thread = CalcPr(pr, nfunc,
                                   error_func=self._threadError,
@@ -417,7 +410,7 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         # It slows down the application and it doesn't change the estimates
         pr.slit_height = 0.0
         pr.slit_width = 0.0
-        nfunc = int(UI.TabbedPrInversionUI._fromUtf8(
+        nfunc = int(UI.TabbedInversionUI._fromUtf8(
             self.noOfTermsInput.text()))
         self.estimation_thread = EstimateNT(pr, nfunc,
                                             error_func=self._threadError,
@@ -439,7 +432,7 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
                 self.estimation_thread.isrunning()):
             self.estimation_thread.stop()
         pr = self._calculator.clone()
-        nfunc = int(UI.TabbedPrInversionUI._fromUtf8(
+        nfunc = int(UI.TabbedInversionUI._fromUtf8(
             self.noOfTermsInput.text()))
         self.estimation_thread = EstimatePr(pr, nfunc,
                                             error_func=self._threadError,
@@ -502,12 +495,10 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
 
         """
         # Save useful info
-        # Keep a copy of the last result
-        self._last_calculator = pr.clone()
-
-        # Save Pr invertor
-        self._calculator = pr
         cov = np.ascontiguousarray(cov)
+        pr.cov = cov
+        pr.out = out
+        pr.elapsed = elapsed
 
         # Show result on control panel
 
@@ -532,14 +523,15 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
 
         # Display results tab
         self.PrTabWidget.setCurrentIndex(1)
+        # Save Pr invertor
+        self._calculator = pr
+        # Append data to data list
         self._data_list.append({self._data: pr})
 
-        # TODO: Show plots - Really, this should be linked to the inputs, etc,
-        # TODO: so it should happen automagically
-        # Show I(q) fit
-        # self.show_iq(out, self._calculator)
-        # Show P(r) fit
-        # self.show_pr(out, self._calculator, cov)
+        if self.pr_plot is None:
+            self.pr_plot = self.logic.newPRPlot(out, self._calculator, cov)
+        if self.data_plot is None:
+            self.data_plot = self.logic.new1DPlot(out, self._calculator)
 
     def _threadError(self, error):
         """
