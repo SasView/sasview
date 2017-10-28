@@ -119,7 +119,7 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         """Connect the use controls to their appropriate methods"""
         self.enableButtons()
         self.dataList.currentIndexChanged.connect(self.displayChange)
-        self.calculateButton.clicked.connect(self._calculation)
+        self.calculateButton.clicked.connect(self.startThread)
         self.helpButton.clicked.connect(self.help)
         self.estimateBgd.toggled.connect(self.toggleBgd)
         self.manualBgd.toggled.connect(self.toggleBgd)
@@ -271,8 +271,8 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
             self.regConstantSuggestionButton.text()))
 
     def displayChange(self):
-        variant_ref = self.currentWidget()
-        self.setCurrentData(variant_ref.toPyObject()[0])
+        variant_ref = self.dataList.itemData(self.dataList.currentIndex())
+        self.setCurrentData(variant_ref.toPyObject())
 
     ######################################################################
     # GUI Interaction Events
@@ -282,18 +282,6 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         self._calculator.set_x(self._data_set.x)
         self._calculator.set_y(self._data_set.y)
         self._calculator.set_err(self._data_set.dy)
-
-    def _calculation(self):
-        """
-        Calculate the P(r) for every data set in the data list
-        """
-        for data_ref, pr in self._data_list.items():
-            self._data_set = GuiUtils.dataFromItem(data_ref)
-            self._calculator = pr
-            # Set data before running the calculations
-            self.update_calculator()
-            # Run
-            self.startThread()
 
     def model_changed(self):
         """Update the values when user makes changes"""
@@ -357,6 +345,8 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
 
         for data in data_item:
             self.setCurrentData(data)
+            ref_var = QtCore.QVariant(data)
+            self.populateDataComboBox(self._data_set.filename, ref_var)
 
     def setCurrentData(self, data_ref):
         """Set an individual data set to the current data"""
@@ -368,8 +358,6 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         # Data references
         self._data = data_ref
         self._data_set = GuiUtils.dataFromItem(data_ref)
-        ref = QtCore.QVariant(self._data)
-        self.populateDataComboBox(self._data_set.filename, ref)
         self._data_list[self._data] = self._calculator
 
         # Estimate initial values from data
@@ -394,17 +382,23 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         """
         from Thread import CalcPr
 
-        # If a thread is already started, stop it
-        if self.calc_thread is not None and self.calc_thread.isrunning():
-            self.calc_thread.stop()
-        pr = self._calculator.clone()
-        nfunc = int(UI.TabbedInversionUI._fromUtf8(
-            self.noOfTermsInput.text()))
-        self.calc_thread = CalcPr(pr, nfunc,
-                                  error_func=self._threadError,
-                                  completefn=self._completed, updatefn=None)
-        self.calc_thread.queue()
-        self.calc_thread.ready(2.5)
+        for data_ref, pr in self._data_list.items():
+            self._data_set = GuiUtils.dataFromItem(data_ref)
+            self._calculator = pr
+            # Set data before running the calculations
+            self.update_calculator()
+
+            # If a thread is already started, stop it
+            if self.calc_thread is not None and self.calc_thread.isrunning():
+                self.calc_thread.stop()
+            pr = self._calculator.clone()
+            nfunc = int(UI.TabbedInversionUI._fromUtf8(
+                self.noOfTermsInput.text()))
+            self.calc_thread = CalcPr(pr, nfunc,
+                                      error_func=self._threadError,
+                                      completefn=self._completed, updatefn=None)
+            self.calc_thread.queue()
+            self.calc_thread.ready(2.5)
 
     def performEstimateNT(self):
         """
@@ -436,7 +430,7 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         """
         from Thread import EstimatePr
 
-        self._calculation()
+        self.startThread()
 
         # If a thread is already started, stop it
         if (self.estimation_thread is not None and
