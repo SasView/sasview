@@ -26,6 +26,7 @@ WIDGETS = enum( 'W_FILENAME',               #0
                 'W_POS_FRACTION',
                 'W_SIGMA_POS_FRACTION',
                 # bottom buttons
-                'W_CALCULATE',
+                'W_CALCULATE_ALL',
+                'W_CALCULATE_VISIBLE',
                 'W_HELP'
 )

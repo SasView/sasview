@@ -82,6 +82,8 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         self.setupModel()
         # Set up the Widget Map
         self.setupMapper()
+        # Set base window state
+        self.setupWindow()
 
     ######################################################################
     # Base Perspective Class Definitions
@@ -117,9 +119,9 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
 
     def setupLinks(self):
         """Connect the use controls to their appropriate methods"""
-        self.enableButtons()
         self.dataList.currentIndexChanged.connect(self.displayChange)
-        self.calculateButton.clicked.connect(self.startThread)
+        self.calculateAllButton.clicked.connect(self.startThreadAll)
+        self.calculateThisButton.clicked.connect(self.startThread)
         self.helpButton.clicked.connect(self.help)
         self.estimateBgd.toggled.connect(self.toggleBgd)
         self.manualBgd.toggled.connect(self.toggleBgd)
@@ -148,7 +150,6 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
             lambda: self._calculator.set_slit_width(is_float(
                 str(self.slitHeightInput.text()))))
         self.model.itemChanged.connect(self.model_changed)
-        self.estimateBgd.setChecked(True)
 
     def setupMapper(self):
         # Set up the mapper.
@@ -193,7 +194,9 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
                                WIDGETS.W_SIGMA_POS_FRACTION)
 
         # Main Buttons
-        self.mapper.addMapping(self.calculateButton, WIDGETS.W_CALCULATE)
+        self.mapper.addMapping(self.calculateAllButton, WIDGETS.W_CALCULATE_ALL)
+        self.mapper.addMapping(self.calculateThisButton,
+                               WIDGETS.W_CALCULATE_VISIBLE)
         self.mapper.addMapping(self.helpButton, WIDGETS.W_HELP)
 
         self.mapper.toFirst()
@@ -237,6 +240,12 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         item = QtGui.QStandardItem("")
         self.model.setItem(WIDGETS.W_SIGMA_POS_FRACTION, item)
 
+    def setupWindow(self):
+        """Initialize base window state on init"""
+        self.setTabPosition(0)
+        self.enableButtons()
+        self.estimateBgd.setChecked(True)
+
     ######################################################################
     # Methods for updating GUI
 
@@ -244,12 +253,9 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         """
         Enable buttons when data is present, else disable them
         """
-        if self.logic.data_is_loaded:
-            self.explorerButton.setEnabled(True)
-            self.calculateButton.setEnabled(True)
-        else:
-            self.calculateButton.setEnabled(False)
-            self.explorerButton.setEnabled(False)
+        self.explorerButton.setEnabled(self.logic.data_is_loaded)
+        self.calculateAllButton.setEnabled(self.logic.data_is_loaded)
+        self.calculateThisButton.setEnabled(self.logic.data_is_loaded)
 
     def populateDataComboBox(self, filename, data_ref):
         """
@@ -286,6 +292,12 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
     def model_changed(self):
         """Update the values when user makes changes"""
         if not self.mapper:
+            msg = "Unable to update P{r}. The connection between the main GUI "
+            msg += "and P(r) was severed. Attempting to restart P(r)."
+            logging.warning(msg)
+            self.setClosable(True)
+            self.close()
+            InversionWindow.__init__(self.parent(), self._data_list.keys())
             return
         if self.pr_plot is not None:
             title = self.pr_plot.name
@@ -313,7 +325,6 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
     def toggleBgd(self):
         """
         Toggle the background between manual and estimated
-        :param item: gui item that was triggered
         """
         sender = self.sender()
         if sender is self.estimateBgd:
@@ -325,7 +336,7 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         """
         Open the Explorer window to see correlations between params and results
         """
-        # TODO: This depends on SVCC-45
+        # TODO: Look at PR from AW - Is there anything else I need to do?
         pass
 
     ######################################################################
@@ -333,8 +344,8 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
 
     def setData(self, data_item=None, is_batch=False):
         """
-        Assign new data set or sets to the P(r) perspective
-        Obtain a QStandardItem object and dissect it to get Data1D/2D
+        Assign new data set(s) to the P(r) perspective
+        Obtain a QStandardItem object and parse it to get Data1D/2D
         Pass it over to the calculator
         """
         assert data_item is not None
@@ -349,7 +360,7 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
             self.populateDataComboBox(self._data_set.filename, ref_var)
 
     def setCurrentData(self, data_ref):
-        """Set an individual data set to the current data"""
+        """Set the selected data set to be the current data"""
 
         if not isinstance(data_ref, QtGui.QStandardItem):
             msg = "Incorrect type passed to the P(r) Perspective"
@@ -376,29 +387,34 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
     ######################################################################
     # Thread Creators
 
+    # TODO: Move to individual class(?)
+
+    def startThreadAll(self):
+        for data_ref, pr in self._data_list.items():
+            self._data_set = GuiUtils.dataFromItem(data_ref)
+            self._calculator = pr
+            self.startThread()
+
     def startThread(self):
         """
             Start a calculation thread
         """
         from Thread import CalcPr
 
-        for data_ref, pr in self._data_list.items():
-            self._data_set = GuiUtils.dataFromItem(data_ref)
-            self._calculator = pr
-            # Set data before running the calculations
-            self.update_calculator()
+        # Set data before running the calculations
+        self.update_calculator()
 
-            # If a thread is already started, stop it
-            if self.calc_thread is not None and self.calc_thread.isrunning():
-                self.calc_thread.stop()
-            pr = self._calculator.clone()
-            nfunc = int(UI.TabbedInversionUI._fromUtf8(
-                self.noOfTermsInput.text()))
-            self.calc_thread = CalcPr(pr, nfunc,
-                                      error_func=self._threadError,
-                                      completefn=self._completed, updatefn=None)
-            self.calc_thread.queue()
-            self.calc_thread.ready(2.5)
+        # If a thread is already started, stop it
+        if self.calc_thread is not None and self.calc_thread.isrunning():
+            self.calc_thread.stop()
+        pr = self._calculator.clone()
+        nfunc = int(UI.TabbedInversionUI._fromUtf8(
+            self.noOfTermsInput.text()))
+        self.calc_thread = CalcPr(pr, nfunc,
+                                  error_func=self._threadError,
+                                  completefn=self._completed, updatefn=None)
+        self.calc_thread.queue()
+        self.calc_thread.ready(2.5)
 
     def performEstimateNT(self):
         """
@@ -532,6 +548,10 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         self._calculator = pr
         # Append data to data list
         self._data_list[self._data] = self._calculator.clone()
+
+        # FIXME: Update plots if exist
+        # TODO: Keep plot references so they can be updated.
+        # TODO: On data change, update current reference to this->plot
 
         if self.pr_plot is None:
             self.pr_plot = self.logic.newPRPlot(out, self._calculator, cov)
