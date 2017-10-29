@@ -132,5 +132,3 @@ dependencies:
   - wxpython-common==3.0.0.0
   - xhtml2pdf==0.0.6
   - zope.interface==4.4.2
-prefix: /home/sasview/miniconda2/envs/sasview
-

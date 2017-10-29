@@ -117,5 +117,3 @@ dependencies:
   - win-unicode-console==0.5
   - xhtml2pdf==0.0.6
   - zope.interface==4.4.2
-prefix: C:\Users\sasview\Miniconda2\envs\sasview18_ver3
-

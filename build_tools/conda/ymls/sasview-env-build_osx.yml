@@ -86,5 +86,3 @@ dependencies:
   - wxpython-common==3.0.0.0
   - xhtml2pdf==0.0.6
   - xmlrunner==1.7.7
-prefix: /Users/sasview/miniconda2/envs/sasview
-
