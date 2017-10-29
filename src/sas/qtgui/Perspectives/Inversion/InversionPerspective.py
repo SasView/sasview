@@ -20,11 +20,20 @@ from sas.sascalc.dataloader.data_info import Data1D
 from sas.sascalc.pr.invertor import Invertor
 
 def is_float(value):
+    """Converts text input values to floats. Empty strings throw ValueError"""
     try:
         return float(value)
     except ValueError:
         return 0.0
 
+
+# TODO: Remove data
+# TODO: Modify plot references, don't just send new
+# TODO: Explorer button - link to PR from AW
+# TODO: Update help with batch capabilities
+# TODO: Window should not be fixed size
+# TODO: Easy way to scroll through results - no tabs in window(?) - 'spreadsheet'
+# TODO: Method to export results in some meaningful way
 class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
     """
     The main window for the P(r) Inversion perspective.
@@ -70,9 +79,12 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
             for datum in data_list:
                 self._data_list[datum] = self._calculator.clone()
 
-        # plots
+        # plots for current data
         self.pr_plot = None
         self.data_plot = None
+        # plot references for all data in perspective
+        self.pr_plot_list = {}
+        self.data_plot_list = {}
 
         self.model = QtGui.QStandardItemModel(self)
         self.mapper = QtGui.QDataWidgetMapper(self)
@@ -298,7 +310,8 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
             self.setClosable(True)
             self.close()
             InversionWindow.__init__(self.parent(), self._data_list.keys())
-            return
+            exit(0)
+        # TODO: Only send plot first time - otherwise, update in complete
         if self.pr_plot is not None:
             title = self.pr_plot.name
             GuiUtils.updateModelItemWithPlot(
@@ -355,12 +368,30 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
             raise AttributeError, msg
 
         for data in data_item:
-            self.setCurrentData(data)
+            # Create initial internal mappings
+            self._data_list[data] = self._calculator.clone()
+            self._data_set = GuiUtils.dataFromItem(data)
+            self.data_plot_list[data] = self.data_plot
+            self.pr_plot_list[data] = self.pr_plot
             ref_var = QtCore.QVariant(data)
             self.populateDataComboBox(self._data_set.filename, ref_var)
+            self.setCurrentData(data)
+
+            # Estimate initial values from data
+            self.performEstimate()
+            self.logic = InversionLogic(self._data_set)
+
+            # Estimate q range
+            qmin, qmax = self.logic.computeDataRange()
+            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem(
+                "{:.4g}".format(qmin)))
+            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem(
+                "{:.4g}".format(qmax)))
+
+        self.enableButtons()
 
     def setCurrentData(self, data_ref):
-        """Set the selected data set to be the current data"""
+        """Get the current data and display as necessary"""
 
         if not isinstance(data_ref, QtGui.QStandardItem):
             msg = "Incorrect type passed to the P(r) Perspective"
@@ -369,20 +400,9 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         # Data references
         self._data = data_ref
         self._data_set = GuiUtils.dataFromItem(data_ref)
-        self._data_list[self._data] = self._calculator
-
-        # Estimate initial values from data
-        self.performEstimate()
-        self.logic = InversionLogic(self._data_set)
-
-        # Estimate q range
-        qmin, qmax = self.logic.computeDataRange()
-        self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem(
-            "{:.4g}".format(qmin)))
-        self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem(
-            "{:.4g}".format(qmax)))
-
-        self.enableButtons()
+        self._calculator = self._data_list[data_ref]
+        self.pr_plot = self.pr_plot_list[data_ref]
+        self.data_plot = self.data_plot_list[data_ref]
 
     ######################################################################
     # Thread Creators
@@ -523,7 +543,7 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
 
         # Show result on control panel
 
-        # TODO: Connect self._calculator to GUI
+        # TODO: Connect self._calculator to GUI - two-to-one connection possible?
         self.model.setItem(WIDGETS.W_RG, QtGui.QStandardItem(str(pr.rg(out))))
         self.model.setItem(WIDGETS.W_I_ZERO,
                            QtGui.QStandardItem(str(pr.iq0(out))))
@@ -549,14 +569,21 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         # Append data to data list
         self._data_list[self._data] = self._calculator.clone()
 
-        # FIXME: Update plots if exist
-        # TODO: Keep plot references so they can be updated.
-        # TODO: On data change, update current reference to this->plot
-
+        # Create new P(r) and fit plots
         if self.pr_plot is None:
             self.pr_plot = self.logic.newPRPlot(out, self._calculator, cov)
+            self.pr_plot_list[self._data] = self.pr_plot
+        else:
+            # FIXME: this should update the existing plot, not create a new one
+            self.pr_plot = self.logic.newPRPlot(out, self._calculator, cov)
+            self.pr_plot_list[self._data] = self.pr_plot
         if self.data_plot is None:
             self.data_plot = self.logic.new1DPlot(out, self._calculator)
+            self.data_plot_list[self._data] = self.data_plot
+        else:
+            # FIXME: this should update the existing plot, not create a new one
+            self.data_plot = self.logic.new1DPlot(out, self._calculator)
+            self.data_plot_list[self._data] = self.data_plot
 
     def _threadError(self, error):
         """
