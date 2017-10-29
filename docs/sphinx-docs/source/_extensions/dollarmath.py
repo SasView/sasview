@@ -10,7 +10,7 @@ semicolon).
 """
 
 import re
-_dollar = re.compile(r"(?:^|(?<=\s))[$]([^\n]*?)(?<![\\])[$](?:$|(?=\s|[.,;:?\\()]))")
+_dollar = re.compile(r"(?:^|(?<=\s|[-(]))[$]([^\n]*?)(?<![\\])[$](?:$|(?=\s|[-.,;:?\\)]))")
 _notdollar = re.compile(r"\\[$]")
 
 def replace_dollar(content):
