@@ -36,7 +36,7 @@ class SlicerParametersTest(unittest.TestCase):
     def testDefaults(self):
         '''Test the GUI in its default state'''
         #self.widget.mapper
-        self.assertIsInstance(self.widget.proxy, QtGui.QIdentityProxyModel)
+        self.assertIsInstance(self.widget.proxy, QtCore.QIdentityProxyModel)
         self.assertIsInstance(self.widget.lstParams.itemDelegate(), QtGui.QStyledItemDelegate)
         self.assertTrue(self.widget.lstParams.model().columnReadOnly(0))
         self.assertFalse(self.widget.lstParams.model().columnReadOnly(1))

@@ -4,8 +4,9 @@ Slit Size Calculator Panel
 import os
 import sys
 
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 from sas.qtgui.UI import main_resources_rc
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -15,7 +16,7 @@ from sas.sascalc.dataloader.loader import Loader
 from sas.sascalc.calculator.slit_length_calculator import SlitlengthCalculator
 
 
-class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
+class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
     """
     Provides the slit length calculator GUI.
     """
@@ -74,9 +75,10 @@ class SlitSizeCalculator(QtGui.QDialog, Ui_SlitSizeCalculator):
 
         # Location is automatically saved - no need to keep track of the last dir
         # But only with Qt built-in dialog (non-platform native)
-        path = QtGui.QFileDialog.getOpenFileName(self, "Choose a file", "",
+        path = QtWidgets.QFileDialog.getOpenFileName(self, "Choose a file", "",
                                                  "SAXSess 1D data (*.txt *.TXT *.dat *.DAT)",
-                                                 QtGui.QFileDialog.DontUseNativeDialog)
+                                                 None,
+                                                 QtWidgets.QFileDialog.DontUseNativeDialog)
 
         if path is None:
             return

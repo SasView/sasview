@@ -3,10 +3,17 @@ import numpy
 import pylab
 import functools
 
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 DEFAULT_CMAP = pylab.cm.jet
+
+#import sys
+#print("SYS.PATH = ", sys.path)
+import matplotlib as mpl
+mpl.use("Qt5Agg")
+
 from mpl_toolkits.mplot3d import Axes3D
 
 from sas.sascalc.dataloader.manipulations import CircularAverage
@@ -364,7 +371,7 @@ class Plotter2DWidget(PlotterBase):
 
         color_map_dialog.apply_signal.connect(self.onApplyMap)
 
-        if color_map_dialog.exec_() == QtGui.QDialog.Accepted:
+        if color_map_dialog.exec_() == QtWidgets.QDialog.Accepted:
             self.onApplyMap(color_map_dialog.norm(), color_map_dialog.cmap())
 
     def onApplyMap(self, v_values, cmap):
@@ -502,12 +509,12 @@ class Plotter2DWidget(PlotterBase):
         self.plot(data=new_plot)
 
 
-class Plotter2D(QtGui.QDialog, Plotter2DWidget):
+class Plotter2D(QtWidgets.QDialog, Plotter2DWidget):
     """
     Plotter widget implementation
     """
     def __init__(self, parent=None, quickplot=False, dimension=2):
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
         Plotter2DWidget.__init__(self, manager=parent, quickplot=quickplot, dimension=dimension)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/res/ball.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)

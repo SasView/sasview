@@ -1,14 +1,15 @@
 """
 Allows users to modify the box slicer parameters.
 """
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 # Local UI
 from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.BoxSumUI import Ui_BoxSumUI
 
-class BoxSum(QtGui.QDialog, Ui_BoxSumUI):
+class BoxSum(QtWidgets.QDialog, Ui_BoxSumUI):
     apply_signal = QtCore.pyqtSignal(tuple, str)
     def __init__(self, parent=None, model=None):
         super(BoxSum, self).__init__()

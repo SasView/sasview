@@ -13,8 +13,9 @@ import urllib.parse
 warnings.simplefilter("ignore")
 import logging
 
-from PyQt4 import QtCore
-from PyQt4 import QtGui
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 from periodictable import formula as Formula
 from sas.qtgui.Plotting import DataTransform
@@ -308,7 +309,6 @@ def updateModelItem(item, update_data, name=""):
     # Add the actual Data1D/Data2D object
     object_item = QtGui.QStandardItem()
     object_item.setText(name)
-    #object_item.setData(QtCore.QVariant(update_data))
     object_item.setData(update_data)
 
     # Append the new row to the main item
@@ -585,7 +585,7 @@ def saveData1D(data):
         'parent'    : None,
     }
     # Query user for filename.
-    filename = QtGui.QFileDialog.getSaveFileName(**kwargs)
+    filename = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
 
     # User cancelled.
     if not filename:
@@ -617,7 +617,7 @@ def saveData2D(data):
         'parent'    : None,
     }
     # Query user for filename.
-    filename = QtGui.QFileDialog.getSaveFileName(**kwargs)
+    filename = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
 
     # User cancelled.
     if not filename:

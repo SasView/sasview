@@ -3,8 +3,8 @@ Boxsum Class: determine 2 rectangular area to compute
 the sum of pixel of a Data.
 """
 import numpy
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtGui
+
 from sas.qtgui.Utilities.GuiUtils import formatNumber
 
 from .BaseInteractor import BaseInteractor

@@ -1,6 +1,4 @@
 import numpy
-from PyQt4 import QtGui
-from PyQt4 import QtCore
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from .BaseInteractor import BaseInteractor

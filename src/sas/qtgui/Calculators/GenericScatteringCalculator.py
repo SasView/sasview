@@ -4,8 +4,10 @@ import numpy
 import logging
 import time
 
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
+
 from twisted.internet import threads
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -26,7 +28,7 @@ from .UI.GenericScatteringCalculator import Ui_GenericScatteringCalculator
 _Q1D_MIN = 0.001
 
 
-class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator):
+class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalculator):
 
     trigger_plot_3d = QtCore.pyqtSignal()
 
@@ -128,7 +130,7 @@ class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator)
         Only extensions .SLD, .PDB, .OMF, .sld, .pdb, .omf
         """
         try:
-            self.datafile = QtGui.QFileDialog.getOpenFileName(
+            self.datafile = QtWidgets.QFileDialog.getOpenFileName(
                 self, "Choose a file", "", "All Gen files (*.OMF *.omf) ;;"
                                           "SLD files (*.SLD *.sld);;PDB files (*.pdb *.PDB);; "
                                           "OMF files (*.OMF *.omf);; "
@@ -606,9 +608,9 @@ class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator)
             'parent': self,
             'directory': default_name,
             'filter': 'SLD file (*.sld)',
-            'options': QtGui.QFileDialog.DontUseNativeDialog}
+            'options': QtWidgets.QFileDialog.DontUseNativeDialog}
         # Query user for filename.
-        filename = str(QtGui.QFileDialog.getSaveFileName(**kwargs))
+        filename = str(QtWidgets.QFileDialog.getSaveFileName(**kwargs))
         if filename:
             try:
                 if os.path.splitext(filename)[1].lower() == '.sld':
@@ -829,10 +831,10 @@ class Plotter3DWidget(PlotterBase):
         self.figure.canvas.draw()
 
 
-class Plotter3D(QtGui.QDialog, Plotter3DWidget):
+class Plotter3D(QtWidgets.QDialog, Plotter3DWidget):
     def __init__(self, parent=None, graph_title=''):
         self.graph_title = graph_title
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
         Plotter3DWidget.__init__(self, manager=parent)
         self.setWindowTitle(self.graph_title)
 

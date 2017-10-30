@@ -1,9 +1,10 @@
 import unittest
 import sys
-from PyQt4 import QtGui
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 # Prepare the general QApplication instance
-app = QtGui.QApplication(sys.argv)
+app = QtWidgets.QApplication(sys.argv)
 
 # Main Window
 from MainWindow.UnitTesting import AboutBoxTest

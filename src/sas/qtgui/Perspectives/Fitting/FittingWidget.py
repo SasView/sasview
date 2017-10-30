@@ -8,9 +8,10 @@ import traceback
 from twisted.internet import threads
 import numpy as np
 
-from PyQt4 import QtGui
-from PyQt4 import QtCore
-from PyQt4 import QtWebKit
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
+from PyQt5 import QtWebKitWidgets
 
 from sasmodels import product
 from sasmodels import generate
@@ -73,7 +74,7 @@ class ToolTippedItemModel(QtGui.QStandardItemModel):
 
         return QtGui.QStandardItemModel.headerData(self, section, orientation, role)
 
-class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
+class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     """
     Main widget for selecting form and structure factor models
     """
@@ -120,7 +121,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.initializeControls()
 
         # Display HTML content
-        self.helpView = QtWebKit.QWebView()
+        self.helpView = QtWebKitWidgets.QWebView()
 
         # New font to display angstrom symbol
         new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
@@ -232,13 +233,13 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         Initialize widgets for tabs
         """
         # Options widget
-        layout = QtGui.QGridLayout()
+        layout = QtWidgets.QGridLayout()
         self.options_widget = OptionsWidget(self, self.logic)
         layout.addWidget(self.options_widget)
         self.tabOptions.setLayout(layout)
 
         # Smearing widget
-        layout = QtGui.QGridLayout()
+        layout = QtWidgets.QGridLayout()
         self.smearing_widget = SmearingWidget(self)
         layout.addWidget(self.smearing_widget)
         self.tabResolution.setLayout(layout)
@@ -253,8 +254,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.lblFilename.setText("")
 
         # Magnetic angles explained in one picture
-        self.magneticAnglesWidget = QtGui.QWidget()
-        labl = QtGui.QLabel(self.magneticAnglesWidget)
+        self.magneticAnglesWidget = QtWidgets.QWidget()
+        labl = QtWidgets.QLabel(self.magneticAnglesWidget)
         pixmap = QtGui.QPixmap(GuiUtils.IMAGES_DIRECTORY_LOCATION + '/M_angles_pic.bmp')
         labl.setPixmap(pixmap)
         self.magneticAnglesWidget.setFixedSize(pixmap.width(), pixmap.height())
@@ -273,6 +274,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Param model displayed in param list
         self.lstParams.setModel(self._model_model)
         self.readCategoryInfo()
+
         self.model_parameters = None
 
         # Delegates for custom editing and display
@@ -306,7 +308,6 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.lstParams.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.lstParams.customContextMenuRequested.connect(self.showModelDescription)
         self.lstParams.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
-
         # Poly model displayed in poly list
         self.lstPoly.setModel(self._poly_model)
         self.setPolyModel()
@@ -465,8 +466,8 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         else:
             msg += "You must select a model to get information on this"
 
-        menu = QtGui.QMenu()
-        label = QtGui.QLabel(msg)
+        menu = QtWidgets.QMenu()
+        label = QtWidgets.QLabel(msg)
         action = QtGui.QWidgetAction(self)
         action.setDefaultWidget(label)
         menu.addAction(action)
@@ -914,7 +915,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         self.lstParams.resizeColumnToContents(0)
         self.lstParams.resizeColumnToContents(4)
         self.lstParams.resizeColumnToContents(5)
-        self.lstParams.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Expanding)
+        self.lstParams.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
 
         self.has_error_column = True
 
@@ -1229,7 +1230,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
 
         # Adjust the table cells width
         self.lstParams.resizeColumnToContents(0)
-        self.lstParams.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Expanding)
+        self.lstParams.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
 
         # Now we claim the model has been loaded
         self.model_is_loaded = True
@@ -1535,18 +1536,19 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # Table properties
         table.verticalHeader().setVisible(False)
         table.setAlternatingRowColors(True)
-        table.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Expanding)
-        table.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        table.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
+        table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         table.resizeColumnsToContents()
 
         # Header
         header = table.horizontalHeader()
-        header.setResizeMode(QtGui.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+        header.ResizeMode(QtWidgets.QHeaderView.Interactive)
 
-        header.ResizeMode(QtGui.QHeaderView.Interactive)
+        # Qt5: the following 2 lines crash - figure out why!
         # Resize column 0 and 7 to content
-        header.setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
-        header.setResizeMode(7, QtGui.QHeaderView.ResizeToContents)
+        #header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
+        #header.setSectionResizeMode(7, QtWidgets.QHeaderView.ResizeToContents)
 
     def setPolyModel(self):
         """
@@ -1599,7 +1601,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         FittingUtilities.addCheckedListToModel(self._poly_model, checked_list)
 
         # All possible polydisp. functions as strings in combobox
-        func = QtGui.QComboBox()
+        func = QtWidgets.QComboBox()
         func.addItems([str(name_disp) for name_disp in POLYDISPERSITY_MODELS.keys()])
         # Set the default index
         func.setCurrentIndex(func.findText(DEFAULT_POLYDISP_FUNCTION))
@@ -1682,9 +1684,9 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         """
         Show the load file dialog and loads requested data into state
         """
-        datafile = QtGui.QFileDialog.getOpenFileName(
-            self, "Choose a weight file", "", "All files (*.*)",
-            QtGui.QFileDialog.DontUseNativeDialog)
+        datafile = QtWidgets.QFileDialog.getOpenFileName(
+            self, "Choose a weight file", "", "All files (*.*)", None,
+            QtWidgets.QFileDialog.DontUseNativeDialog)
 
         if datafile is None or str(datafile)=='':
             logging.info("No weight data chosen.")
@@ -1783,7 +1785,7 @@ class FittingWidget(QtGui.QWidget, Ui_FittingWidgetUI):
         # cell 1: variable name
         item1 = QtGui.QStandardItem(param_name)
 
-        func = QtGui.QComboBox()
+        func = QtWidgets.QComboBox()
         # Available range of shells displayed in the combobox
         func.addItems([str(i) for i in range(param_length+1)])
 

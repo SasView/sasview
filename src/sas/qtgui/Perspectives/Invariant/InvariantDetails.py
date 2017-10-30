@@ -1,13 +1,14 @@
 import sys
 import os
-from PyQt4 import QtCore
-from PyQt4 import QtGui
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 # local
 from .UI.InvariantDetailsUI import Ui_Dialog
 from .InvariantUtils import WIDGETS
 
-class DetailsDialog(QtGui.QDialog, Ui_Dialog):
+class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
     """
     """
     def __init__(self, parent):

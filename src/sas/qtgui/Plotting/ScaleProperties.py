@@ -1,4 +1,6 @@
-from PyQt4 import QtGui
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 import sas.sasview
 from sas.qtgui.UI import main_resources_rc
@@ -19,7 +21,7 @@ view_to_xy = {
     view_values[4]: [2, 5], # Porod
     view_values[5]: [0, 4], # Kratky
 }
-class ScaleProperties(QtGui.QDialog, Ui_scalePropertiesUI):
+class ScaleProperties(QtWidgets.QDialog, Ui_scalePropertiesUI):
     def __init__(self, parent=None, init_scale_x='x', init_scale_y='y'):
         super(ScaleProperties, self).__init__(parent)
         self.setupUi(self)

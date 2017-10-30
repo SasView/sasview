@@ -3,8 +3,9 @@ Adds a linear fit plot to the chart
 """
 import re
 import numpy
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 from sas.qtgui.Utilities.GuiUtils import formatNumber
 
@@ -16,7 +17,7 @@ from sas.qtgui.Plotting.LineModel import LineModel
 from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.LinearFitUI import Ui_LinearFitUI
 
-class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
+class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
     def __init__(self, parent=None,
                  data=None,
                  max_range=(0.0, 0.0),

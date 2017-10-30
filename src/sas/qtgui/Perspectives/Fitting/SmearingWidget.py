@@ -1,8 +1,9 @@
 """
 Widget/logic for smearing data.
 """
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
@@ -10,7 +11,7 @@ from sas.qtgui.Plotting.PlotterData import Data2D
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.SmearingWidgetUI import Ui_SmearingWidgetUI
 
-class DataWidgetMapper(QtGui.QDataWidgetMapper):
+class DataWidgetMapper(QtWidgets.QDataWidgetMapper):
     """
     Custom version of the standard QDataWidgetMapper allowing for proper
     response to index change in comboboxes
@@ -21,7 +22,7 @@ class DataWidgetMapper(QtGui.QDataWidgetMapper):
         else:
             super(DataWidgetMapper, self).addMapping(widget, section, propertyName)
 
-        if isinstance(widget, QtGui.QComboBox):
+        if isinstance(widget, QtWidgets.QComboBox):
             delegate = self.itemDelegate()
             widget.currentIndexChanged.connect(lambda: delegate.commitData.emit(widget))
 
@@ -34,7 +35,7 @@ MODEL = [
     'PINHOLE_MAX',
     'ACCURACY']
 
-class SmearingWidget(QtGui.QWidget, Ui_SmearingWidgetUI):
+class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
     def __init__(self, parent=None):
         super(SmearingWidget, self).__init__()
 
@@ -82,7 +83,9 @@ class SmearingWidget(QtGui.QWidget, Ui_SmearingWidgetUI):
         self.mapper.addMapping(self.txtSmearDown, MODEL.index('PINHOLE_MAX'))
         self.mapper.addMapping(self.cbSmearing,   MODEL.index('SMEARING'))
         self.mapper.addMapping(self.cbAccuracy,   MODEL.index('ACCURACY'))
-        self.mapper.toFirst()
+
+        # FIXME DOESNT WORK WITH QT5
+        #self.mapper.toFirst()
 
     def updateSmearing(self, data=None):
         """

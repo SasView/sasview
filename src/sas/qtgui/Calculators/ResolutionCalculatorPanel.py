@@ -3,8 +3,9 @@ This object is a small tool to allow user to quickly
 determine the variance in q  from the
 instrumental parameters.
 """
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 from twisted.internet import threads
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -32,7 +33,7 @@ BG_WHITE = "background-color: rgb(255, 255, 255);"
 BG_RED = "background-color: rgb(244, 170, 164);"
 
 
-class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
+class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel):
     """
     compute resolution in 2D
     """
@@ -314,10 +315,10 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
     def onSelectCustomSpectrum(self):
         """ On Spectrum Combobox event"""
         if self.cbCustomSpectrum.currentText() == 'Add New':
-            datafile = QtGui.QFileDialog.getOpenFileName(
+            datafile = QtWidgets.QFileDialog.getOpenFileName(
                 self, "Choose a spectral distribution file", "",
                 "All files (*.*)",
-                QtGui.QFileDialog.DontUseNativeDialog)
+                QtWidgets.QFileDialog.DontUseNativeDialog)
 
             if datafile is None or str(datafile) == '':
                 logging.info("No spectral distribution data chosen.")
@@ -720,7 +721,7 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
         self.plotter = Plotter2DWidget(self, quickplot=True)
         self.plotter.scale = 'linear'
         self.plotter.cmap = None
-        layout = QtGui.QHBoxLayout()
+        layout = QtWidgets.QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         self.graphicsView.setLayout(layout)
         layout.addWidget(self.plotter)

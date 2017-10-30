@@ -1,6 +1,8 @@
 # global
 import logging
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 from periodictable import formula as Formula
 from periodictable.xsf import xray_energy, xray_sld_from_atoms
@@ -96,7 +98,7 @@ def sldAlgorithm(molecular_formula, mass_density, wavelength):
         neutron_inc_xs, neutron_abs_xs, neutron_length)
 
 
-class SldPanel(QtGui.QDialog):
+class SldPanel(QtWidgets.QDialog):
 
     def __init__(self, parent=None):
         super(SldPanel, self).__init__()
@@ -132,8 +134,8 @@ class SldPanel(QtGui.QDialog):
         self.ui.editWavelength.setValidator(QtGui.QRegExpValidator(rx, self.ui.editWavelength))
 
         # signals
-        self.ui.buttonBox.button(QtGui.QDialogButtonBox.Reset).clicked.connect(self.modelReset)
-        self.ui.buttonBox.button(QtGui.QDialogButtonBox.Help).clicked.connect(self.displayHelp)
+        self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Reset).clicked.connect(self.modelReset)
+        self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Help).clicked.connect(self.displayHelp)
 
     def setupModel(self):
         self.model = QtGui.QStandardItemModel(self)
@@ -144,18 +146,18 @@ class SldPanel(QtGui.QDialog):
         for key in list(self._getOutputs().keys()):
             self.model.setItem(key, QtGui.QStandardItem())
 
-        QtCore.QObject.connect(
-            self.model,
-            QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"),
-            self.dataChanged)
+        self.model.dataChanged.connect(self.dataChanged)
+        #QtCore.QObject.connect(
+        #    self.model,
+        #    QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"),
+        #    self.dataChanged)
 
         self.modelReset()
 
     def setupMapper(self):
-        self.mapper = QtGui.QDataWidgetMapper(self)
+        self.mapper = QtWidgets.QDataWidgetMapper(self)
         self.mapper.setModel(self.model)
         self.mapper.setOrientation(QtCore.Qt.Vertical)
-
         self.mapper.addMapping(self.ui.editMolecularFormula, MODEL.MOLECULAR_FORMULA)
         self.mapper.addMapping(self.ui.editMassDensity     , MODEL.MASS_DENSITY)
         self.mapper.addMapping(self.ui.editWavelength      , MODEL.WAVELENGTH)
@@ -163,7 +165,8 @@ class SldPanel(QtGui.QDialog):
         for key, edit in self._getOutputs().items():
             self.mapper.addMapping(edit, key)
 
-        self.mapper.toFirst()
+        # FIXME DOESNT WORK WITH QT5
+        #self.mapper.toFirst()
 
     def dataChanged(self, top, bottom):
         update = False

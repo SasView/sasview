@@ -1,5 +1,6 @@
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 from sas.qtgui.UI import main_resources_rc
 from .UI.KiessigPanel import Ui_KiessigPanel
@@ -9,7 +10,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.sascalc.calculator.kiessig_calculator import KiessigThicknessCalculator
 
 
-class KiessigPanel(QtGui.QDialog, Ui_KiessigPanel):
+class KiessigPanel(QtWidgets.QDialog, Ui_KiessigPanel):
     def __init__(self, parent=None):
         super(KiessigPanel, self).__init__()
         self.setupUi(self)

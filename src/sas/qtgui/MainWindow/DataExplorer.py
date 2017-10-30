@@ -4,10 +4,10 @@ import os
 import time
 import logging
 
-from PyQt4 import QtCore
-from PyQt4 import QtGui
-from PyQt4 import QtWebKit
-from PyQt4.Qt import QMutex
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
+from PyQt5 import QtWebKitWidgets
 
 from twisted.internet import threads
 
@@ -47,10 +47,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.parent = guimanager
         self.loader = Loader()
         self.manager = manager if manager is not None else DataManager()
-        self.txt_widget = QtGui.QTextEdit(None)
+        self.txt_widget = QtWidgets.QTextEdit(None)
 
         # Be careful with twisted threads.
-        self.mutex = QMutex()
+        self.mutex = QtCore.QMutex()
 
         # Active plots
         self.active_plots = {}
@@ -68,7 +68,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cmdHelp_2.clicked.connect(self.displayHelp)
 
         # Display HTML content
-        self._helpView = QtWebKit.QWebView()
+        self._helpView = QtWebKitWidgets.QWebView()
 
         # Fill in the perspectives combo
         self.initPerspectives()
@@ -97,7 +97,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
 
         # Proxy model for showing a subset of Data1D/Data2D content
-        self.data_proxy = QtGui.QSortFilterProxyModel(self)
+        self.data_proxy = QtCore.QSortFilterProxyModel(self)
         self.data_proxy.setSourceModel(self.model)
 
         # Don't show "empty" rows with data objects
@@ -107,7 +107,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.treeView.setModel(self.data_proxy)
 
         # Proxy model for showing a subset of Theory content
-        self.theory_proxy = QtGui.QSortFilterProxyModel(self)
+        self.theory_proxy = QtCore.QSortFilterProxyModel(self)
         self.theory_proxy.setSourceModel(self.theory_model)
 
         # Don't show "empty" rows with data objects
@@ -181,6 +181,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Called when the "Load" button pressed.
         Opens the Qt "Open File..." dialog
         """
+        print("A")
         path_str = self.chooseFiles()
         if not path_str:
             return
@@ -191,8 +192,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Called when the "File/Load Folder" menu item chosen.
         Opens the Qt "Open Folder..." dialog
         """
-        folder = QtGui.QFileDialog.getExistingDirectory(self, "Choose a directory", "",
-              QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontUseNativeDialog)
+        folder = QtWidgets.QFileDialog.getExistingDirectory(self, "Choose a directory", "", None,
+              QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontUseNativeDialog)
         if folder is None:
             return
 
@@ -215,13 +216,19 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             'parent'    : self,
             'caption'   : 'Open Project',
             'filter'    : 'Project (*.json);;All files (*.*)',
-            'options'   : QtGui.QFileDialog.DontUseNativeDialog
+            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
         }
-        filename = str(QtGui.QFileDialog.getOpenFileName(**kwargs))
+        filename = str(QtWidgets.QFileDialog.getOpenFileName(**kwargs))
         if filename:
             load_thread = threads.deferToThread(self.readProject, filename)
             load_thread.addCallback(self.readProjectComplete)
             load_thread.addErrback(self.readProjectFailed)
+
+    def loadFailed(self, reason):
+        """
+        """
+        print("file load FAILED: ", reason)
+        pass
 
     def readProjectFailed(self, reason):
         """
@@ -247,10 +254,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.model.clear()
 
         self.manager.assign(manager)
+        self.model.beginResetModel()
         for id, item in self.manager.get_all_data().items():
             self.updateModel(item.data, item.path)
 
-        self.model.reset()
+        self.model.endResetModel()
 
     def saveProject(self):
         """
@@ -260,9 +268,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             'parent'    : self,
             'caption'   : 'Save Project',
             'filter'    : 'Project (*.json)',
-            'options'   : QtGui.QFileDialog.DontUseNativeDialog
+            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
         }
-        filename = str(QtGui.QFileDialog.getSaveFileName(**kwargs))
+        filename = str(QtWidgets.QFileDialog.getSaveFileName(**kwargs))
         if filename:
             self.communicator.statusBarUpdateSignal.emit("Saving Project... %s\n" % os.path.basename(filename))
             with open(filename, 'w') as outfile:
@@ -616,8 +624,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Location is automatically saved - no need to keep track of the last dir
         # But only with Qt built-in dialog (non-platform native)
-        paths = QtGui.QFileDialog.getOpenFileNames(self, "Choose a file", "",
-                wlist, QtGui.QFileDialog.DontUseNativeDialog)
+        paths = QtWidgets.QFileDialog.getOpenFileNames(self, "Choose a file", "",
+                wlist, None, QtWidgets.QFileDialog.DontUseNativeDialog)
         if paths is None:
             return
 
@@ -834,7 +842,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Define actions and layout of the right click context menu
         """
         # Create a custom menu based on actions defined in the UI file
-        self.context_menu = QtGui.QMenu(self)
+        self.context_menu = QtWidgets.QMenu(self)
         self.context_menu.addAction(self.actionDataInfo)
         self.context_menu.addAction(self.actionSaveAs)
         self.context_menu.addAction(self.actionQuickPlot)
@@ -1070,7 +1078,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Check if there are any other items for this tab
         # If so, delete them
         # TODO: fix this to resemble GuiUtils.updateModelItemWithPlot
-        # 
+        #
+        self.model.beginResetModel()
         current_tab_name = model_item.text()[:2]
         for current_index in range(self.theory_model.rowCount()):
             if current_tab_name in self.theory_model.item(current_index).text():
@@ -1078,7 +1087,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 break
 
         # Reset the view
-        self.model.reset()
+        self.model.endResetModel()
 
         # Reset the view
         self.theory_model.appendRow(model_item)
