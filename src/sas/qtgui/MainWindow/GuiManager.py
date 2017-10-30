@@ -5,9 +5,10 @@ import logging
 import json
 import webbrowser
 
-from PyQt4 import QtCore
-from PyQt4 import QtGui
-from PyQt4 import QtWebKit
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import Qt
+from PyQt5.QtWebKitWidgets import QWebView
 
 from twisted.internet import reactor
 # General SAS imports
@@ -37,9 +38,9 @@ import sas.qtgui.Perspectives as Perspectives
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
 
-class Acknowledgements(QtGui.QDialog, Ui_Acknowledgements):
+class Acknowledgements(QDialog, Ui_Acknowledgements):
     def __init__(self, parent=None):
-        QtGui.QDialog.__init__(self, parent)
+        QDialog.__init__(self, parent)
         self.setupUi(self)
 
 class GuiManager(object):
@@ -76,7 +77,6 @@ class GuiManager(object):
 
         # Invoke the initial perspective
         self.perspectiveChanged("Fitting")
-
         self.addWidgets()
 
         # Fork off logging messages to the Log Window
@@ -93,10 +93,10 @@ class GuiManager(object):
 
         # Show the Welcome panel
         self.welcomePanel = WelcomePanel()
-        self._workspace.workspace.addWindow(self.welcomePanel)
+        self._workspace.workspace.addSubWindow(self.welcomePanel)
 
         # Current help file
-        self._helpView = QtWebKit.QWebView()
+        self._helpView = QWebView()
         # Needs URL like path, so no path.join() here
         self._helpLocation = GuiUtils.HELP_DIRECTORY_LOCATION + "/index.html"
 
@@ -115,21 +115,23 @@ class GuiManager(object):
         self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
         ObjectLibrary.addObject('DataExplorer', self.filesWidget)
 
-        self.dockedFilesWidget = QtGui.QDockWidget("Data Explorer", self._workspace)
+        self.dockedFilesWidget = QDockWidget("Data Explorer", self._workspace)
+        self.dockedFilesWidget.setFloating(True)
         self.dockedFilesWidget.setWidget(self.filesWidget)
 
         # Disable maximize/minimize and close buttons
-        self.dockedFilesWidget.setFeatures(QtGui.QDockWidget.NoDockWidgetFeatures)
-        self._workspace.addDockWidget(QtCore.Qt.LeftDockWidgetArea,
-                                      self.dockedFilesWidget)
+        self.dockedFilesWidget.setFeatures(QDockWidget.NoDockWidgetFeatures)
+        self.dockedFilesWidget.setFeatures(Qt.LeftDockWidgetArea)
+
+        self._workspace.workspace.addDockWidget(Qt.LeftDockWidgetArea, self.dockedFilesWidget)
 
         # Add the console window as another docked widget
-        self.logDockWidget = QtGui.QDockWidget("Log Explorer", self._workspace)
+        self.logDockWidget = QDockWidget("Log Explorer", self._workspace)
         self.logDockWidget.setObjectName("LogDockWidget")
-        self.listWidget = QtGui.QTextBrowser()
+
+        self.listWidget = QTextBrowser()
         self.logDockWidget.setWidget(self.listWidget)
-        self._workspace.addDockWidget(QtCore.Qt.BottomDockWidgetArea,
-                                      self.logDockWidget)
+        self._workspace.workspace.addDockWidget(Qt.BottomDockWidgetAre, self.logDockWidget) 
 
         # Add other, minor widgets
         self.ackWidget = Acknowledgements()
@@ -151,10 +153,10 @@ class GuiManager(object):
 
         Progress bar invisible until explicitly shown
         """
-        self.progress = QtGui.QProgressBar()
+        self.progress = QProgressBar()
         self._workspace.statusbar.setSizeGripEnabled(False)
 
-        self.statusLabel = QtGui.QLabel()
+        self.statusLabel = QLabel()
         self.statusLabel.setText("Welcome to SasView")
         self._workspace.statusbar.addPermanentWidget(self.statusLabel, 1)
         self._workspace.statusbar.addPermanentWidget(self.progress, stretch=0)
@@ -186,7 +188,8 @@ class GuiManager(object):
         # Default perspective
         self._current_perspective = Perspectives.PERSPECTIVES[str(perspective_name)](parent=self)
 
-        self._workspace.workspace.addWindow(self._current_perspective)
+        self._workspace.workspace.addSubWindow(self._current_perspective)
+
         # Resize to the workspace height
         workspace_height = self._workspace.workspace.sizeHint().height()
         perspective_size = self._current_perspective.sizeHint()
@@ -256,15 +259,15 @@ class GuiManager(object):
         """
         # Display confirmation messagebox
         quit_msg = "Are you sure you want to exit the application?"
-        reply = QtGui.QMessageBox.question(
+        reply = QMessageBox.question(
             self._parent,
             'Information',
             quit_msg,
-            QtGui.QMessageBox.Yes,
-            QtGui.QMessageBox.No)
+            QMessageBox.Yes,
+            QMessageBox.No)
 
         # Exit if yes
-        if reply == QtGui.QMessageBox.Yes:
+        if reply == QMessageBox.Yes:
             reactor.callFromThread(reactor.stop)
             return True
 
@@ -577,11 +580,10 @@ class GuiManager(object):
         terminal = IPythonWidget()
 
         # Add the console window as another docked widget
-        self.ipDockWidget = QtGui.QDockWidget("IPython", self._workspace)
+        self.ipDockWidget = QDockWidget("IPython", self._workspace)
         self.ipDockWidget.setObjectName("IPythonDockWidget")
         self.ipDockWidget.setWidget(terminal)
-        self._workspace.addDockWidget(QtCore.Qt.RightDockWidgetArea,
-                                      self.ipDockWidget)
+        self._workspace.workspace.addSubWindow(self.ipDockWidget, Qt.RightDockWidgetArea)
 
     def actionImage_Viewer(self):
         """
@@ -694,7 +696,7 @@ class GuiManager(object):
 
         TODO: use QNetworkAccessManager to assure _helpLocation is valid
         """
-        self._helpView.load(QtCore.QUrl(self._helpLocation))
+        self._helpView.load(QUrl(self._helpLocation))
         self._helpView.show()
 
     def actionTutorial(self):
@@ -739,7 +741,7 @@ class GuiManager(object):
         :param new_item: item to be added to list of loaded files
         :param new_datalist_item:
         """
-        if not isinstance(new_item, QtGui.QStandardItem) or \
+        if not isinstance(new_item, QStandardItem) or \
                 not isinstance(new_datalist_item, dict):
             msg = "Wrong data type returned from calculations."
             raise AttributeError(msg)

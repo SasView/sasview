@@ -1,5 +1,7 @@
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
+
 import functools
 import copy
 import matplotlib.pyplot as plt
@@ -18,6 +20,7 @@ class PlotterWidget(PlotterBase):
     """
     1D Plot widget for use with a QDialog
     """
+    updatePlot = QtCore.pyqtSignal(tuple)
     def __init__(self, parent=None, manager=None, quickplot=False):
         super(PlotterWidget, self).__init__(parent, manager=manager, quickplot=quickplot)
 
@@ -40,10 +43,9 @@ class PlotterWidget(PlotterBase):
 
         # Add a slot for receiving update signal from LinearFit
         # NEW style signals
-        #self.updatePlot = QtCore.pyqtSignal(tuple)
-        # self.updatePlot.connect(self.onFitDisplay)
+        self.updatePlot.connect(self.onFitDisplay)
         # OLD style signals
-        QtCore.QObject.connect(self, QtCore.SIGNAL('updatePlot'), self.onFitDisplay)
+        # QtCore.QObject.connect(self, QtCore.SIGNAL('updatePlot'), self.onFitDisplay)
 
     @property
     def data(self):
@@ -268,7 +270,7 @@ class PlotterWidget(PlotterBase):
         """
         Show a dialog allowing axes rescaling
         """
-        if self.properties.exec_() == QtGui.QDialog.Accepted:
+        if self.properties.exec_() == QtWidgets.QDialog.Accepted:
             self.xLogLabel, self.yLogLabel = self.properties.getValues()
             self.xyTransform(self.xLogLabel, self.yLogLabel)
 
@@ -276,7 +278,7 @@ class PlotterWidget(PlotterBase):
         """
         Show a dialog allowing adding custom text to the chart
         """
-        if self.addText.exec_() == QtGui.QDialog.Accepted:
+        if self.addText.exec_() == QtWidgets.QDialog.Accepted:
             # Retrieve the new text, its font and color
             extra_text = self.addText.text()
             extra_font = self.addText.font()
@@ -328,7 +330,7 @@ class PlotterWidget(PlotterBase):
         Show a dialog allowing setting the chart ranges
         """
         # min and max of data
-        if self.setRange.exec_() == QtGui.QDialog.Accepted:
+        if self.setRange.exec_() == QtWidgets.QDialog.Accepted:
             x_range = self.setRange.xrange()
             y_range = self.setRange.yrange()
             if x_range is not None and y_range is not None:
@@ -362,7 +364,7 @@ class PlotterWidget(PlotterBase):
                     fit_range=fitrange,
                     xlabel=self.xLogLabel,
                     ylabel=self.yLogLabel)
-        if fit_dialog.exec_() == QtGui.QDialog.Accepted:
+        if fit_dialog.exec_() == QtWidgets.QDialog.Accepted:
             return
 
     def replacePlot(self, id, new_plot):
@@ -439,7 +441,7 @@ class PlotterWidget(PlotterBase):
                                 marker=marker,
                                 marker_size=marker_size,
                                 legend=legend)
-        if plotPropertiesWidget.exec_() == QtGui.QDialog.Accepted:
+        if plotPropertiesWidget.exec_() == QtWidgets.QDialog.Accepted:
             # Update Data1d
             selected_plot.markersize = plotPropertiesWidget.markersize()
             selected_plot.custom_color = plotPropertiesWidget.color()
@@ -696,10 +698,10 @@ class PlotterWidget(PlotterBase):
         self.canvas.draw_idle()
 
 
-class Plotter(QtGui.QDialog, PlotterWidget):
+class Plotter(QtWidgets.QDialog, PlotterWidget):
     def __init__(self, parent=None, quickplot=False):
 
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
         PlotterWidget.__init__(self, parent=self, manager=parent, quickplot=quickplot)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/res/ball.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)

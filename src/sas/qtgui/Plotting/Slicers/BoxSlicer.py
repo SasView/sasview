@@ -1,6 +1,4 @@
 import numpy
-from PyQt4 import QtGui
-from PyQt4 import QtCore
 
 from .BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.PlotterData import Data1D

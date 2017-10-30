@@ -1,7 +1,8 @@
 import numpy
 
-from PyQt4 import QtCore
-from PyQt4 import QtGui
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 from bumps import options
 from bumps import fitters
@@ -12,11 +13,12 @@ from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.FittingOptions import FittingOptions
 #from sas.qtgui.Perspectives.Fitting import ModelUtilities
 
-class FittingWindow(QtGui.QTabWidget):
+class FittingWindow(QtWidgets.QTabWidget):
     """
     """
     name = "Fitting" # For displaying in the combo box in DataExplorer
     def __init__(self, parent=None, data=None):
+
         super(FittingWindow, self).__init__()
 
         self.parent = parent

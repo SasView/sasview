@@ -1,15 +1,17 @@
 import pylab
 import numpy
 
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 # TODO: Replace the qt4agg calls below with qt5 equivalent.
 # Requires some code modifications.
 # https://www.boxcontrol.net/embedding-matplotlib-plot-on-pyqt5-gui.html
 #
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
+# matplotlib.use("Qt5Agg")
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 import matplotlib.pyplot as plt
 
@@ -24,7 +26,7 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
 
-class PlotterBase(QtGui.QWidget):
+class PlotterBase(QtWidgets.QWidget):
     def __init__(self, parent=None, manager=None, quickplot=False):
         super(PlotterBase, self).__init__(parent)
 
@@ -42,11 +44,12 @@ class PlotterBase(QtGui.QWidget):
         self.toolbar = NavigationToolbar(self.canvas, self)
 
         # Simple window for data display
-        self.txt_widget = QtGui.QTextEdit(None)
+        self.txt_widget = QtWidgets.QTextEdit(None)
 
         # Set the layout and place the canvas widget in it.
-        layout = QtGui.QVBoxLayout()
-        layout.setMargin(0)
+        layout = QtWidgets.QVBoxLayout()
+        # FIXME setMargin -> setContentsMargins in qt5 with 4 args
+        #layout.setContentsMargins(0)
         layout.addWidget(self.canvas)
 
         # 1D plotter defaults
@@ -104,7 +107,7 @@ class PlotterBase(QtGui.QWidget):
         self.canvas.mpl_connect('pick_event', self.onMplPick)
         self.canvas.mpl_connect('scroll_event', self.onMplWheel)
 
-        self.contextMenu = QtGui.QMenu(self)
+        self.contextMenu = QtWidgets.QMenu(self)
 
         if not quickplot:
             # Add the toolbar
@@ -295,14 +298,14 @@ class PlotterBase(QtGui.QWidget):
         dialog = QtGui.QPrintDialog(printer)
         dialog.setModal(True)
         dialog.setWindowTitle("Print")
-        if dialog.exec_() != QtGui.QDialog.Accepted:
+        if dialog.exec_() != QtWidgets.QDialog.Accepted:
             return
 
         painter = QtGui.QPainter(printer)
         # Grab the widget screenshot
         pmap = QtGui.QPixmap.grabWidget(self)
         # Create a label with pixmap drawn
-        printLabel = QtGui.QLabel()
+        printLabel = QtWidgets.QLabel()
         printLabel.setPixmap(pmap)
 
         # Print the label
@@ -332,7 +335,7 @@ class PlotterBase(QtGui.QWidget):
         current_title = self.windowTitle()
         titleWidget = WindowTitle(self, new_title=current_title)
         result = titleWidget.exec_()
-        if result != QtGui.QDialog.Accepted:
+        if result != QtWidgets.QDialog.Accepted:
             return
 
         title = titleWidget.title()

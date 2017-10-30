@@ -3,9 +3,10 @@ import sys
 import os
 import types
 
-from PyQt4 import QtCore
-from PyQt4 import QtGui
-from PyQt4 import QtWebKit
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
+from PyQt5 import QtWebKitWidgets
 
 from sas.qtgui.UI import images_rc
 from sas.qtgui.UI import main_resources_rc
@@ -20,7 +21,7 @@ from sas.qtgui.Perspectives.Fitting.UI.FittingOptionsUI import Ui_FittingOptions
 fitters.FIT_DEFAULT_ID = 'lm'
 
 
-class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
+class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
     """
     Hard-coded version of the fit options dialog available from BUMPS.
     This should be make more "dynamic".
@@ -51,9 +52,9 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
         self.cbAlgorithm.addItems([n.name for n in fitters.FITTERS if n.id in fitters.FIT_ACTIVE_IDS])
 
         # Handle the Apply button click
-        self.buttonBox.button(QtGui.QDialogButtonBox.Ok).clicked.connect(self.onApply)
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).clicked.connect(self.onApply)
         # handle the Help button click
-        self.buttonBox.button(QtGui.QDialogButtonBox.Help).clicked.connect(self.onHelp)
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Help).clicked.connect(self.onHelp)
 
         # Handle the combo box changes
         self.cbAlgorithm.currentIndexChanged.connect(self.onAlgorithmChange)
@@ -70,10 +71,10 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
         self.current_fitter_id = fitters.FIT_DEFAULT_ID
 
         # OK has to be initialized to True, after initial validator setup
-        self.buttonBox.button(QtGui.QDialogButtonBox.Ok).setEnabled(True)
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(True)
 
         # Display HTML content
-        self.helpView = QtWebKit.QWebView()
+        self.helpView = QtWebKitWidgets.QWebView()
 
     def assignValidators(self):
         """
@@ -103,10 +104,10 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
         state = validator.validate(sender.text(), 0)[0]
         if state == QtGui.QValidator.Acceptable:
             color = '' # default
-            self.buttonBox.button(QtGui.QDialogButtonBox.Ok).setEnabled(True)
+            self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(True)
         else:
             color = '#fff79a' # yellow
-            self.buttonBox.button(QtGui.QDialogButtonBox.Ok).setEnabled(False)
+            self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(False)
 
         sender.setStyleSheet('QLineEdit { background-color: %s }' % color)
 
@@ -133,7 +134,7 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
         self.assignValidators()
 
         # OK has to be reinitialized to True
-        self.buttonBox.button(QtGui.QDialogButtonBox.Ok).setEnabled(True)
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(True)
 
     def onApply(self):
         """
@@ -147,7 +148,7 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
             Utility method for bumps state update
             """
             widget = self.widgetFromOption(option)
-            new_value = widget.currentText() if isinstance(widget, QtGui.QComboBox) \
+            new_value = widget.currentText() if isinstance(widget, QtWidgets.QComboBox) \
                 else float(widget.text())
             self.config.values[self.current_fitter_id][option] = new_value
 

@@ -1,10 +1,12 @@
-from PyQt4 import QtGui
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 import sas.sasview
 
 from sas.qtgui.Plotting.UI.AddTextUI import Ui_AddText
 
-class AddText(QtGui.QDialog, Ui_AddText):
+class AddText(QtWidgets.QDialog, Ui_AddText):
     """ Simple GUI for a single line text query """
     def __init__(self, parent=None):
         super(AddText, self).__init__(parent)

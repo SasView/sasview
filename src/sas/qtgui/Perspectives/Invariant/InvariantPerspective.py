@@ -1,9 +1,10 @@
 # global
 import sys
 import os
-from PyQt4 import QtCore
-from PyQt4 import QtGui
-from PyQt4 import QtWebKit
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
+from PyQt5 import QtWebKitWidgets
 
 from twisted.internet import threads
 from twisted.internet import reactor
@@ -34,7 +35,7 @@ class MyModel(object):
         item = QtGui.QStandardItem(str(item))
         self._model.appendRow(item)
 
-class InvariantWindow(QtGui.QDialog, Ui_tabbedInvariantUI):
+class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
     name = "Invariant" # For displaying in the combo box
@@ -60,7 +61,7 @@ class InvariantWindow(QtGui.QDialog, Ui_tabbedInvariantUI):
         self._reactor = reactor
         self._model_item = QtGui.QStandardItem()
 
-        self._helpView = QtWebKit.QWebView()
+        self._helpView = QtWebKitWidgets.QWebView()
         self.detailsDialog = DetailsDialog(self)
 
         self._low_extrapolate = False
@@ -501,7 +502,7 @@ class InvariantWindow(QtGui.QDialog, Ui_tabbedInvariantUI):
 
     def setupMapper(self):
         # Set up the mapper.
-        self.mapper = QtGui.QDataWidgetMapper(self)
+        self.mapper = QtWidgets.QDataWidgetMapper(self)
         self.mapper.setOrientation(QtCore.Qt.Vertical)
         self.mapper.setModel(self.model)
 
@@ -542,7 +543,8 @@ class InvariantWindow(QtGui.QDialog, Ui_tabbedInvariantUI):
         self.mapper.addMapping(self.lineEdit_19, WIDGETS.W_INVARIANT)
         self.mapper.addMapping(self.lineEdit_18, WIDGETS.W_INVARIANT_ERR)
 
-        self.mapper.toFirst()
+        # FIXME DOESNT WORK WITH QT5
+        #self.mapper.toFirst()
 
     def setData(self, data_item, is_batch=False):
         """
@@ -643,14 +645,3 @@ class InvariantWindow(QtGui.QDialog, Ui_tabbedInvariantUI):
         Tell the caller that we don't accept multiple data instances
         """
         return False
-
-if __name__ == "__main__":
-    app = QtGui.QApplication([])
-    import qt4reactor
-    qt4reactor.install()
-    # DO NOT move the following import to the top!
-    # (unless you know what you're doing)
-    from twisted.internet import reactor
-    dlg = InvariantWindow(reactor)
-    dlg.show()
-    reactor.run()

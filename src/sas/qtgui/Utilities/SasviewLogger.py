@@ -2,13 +2,13 @@ import os
 import sys
 import logging
 
-from PyQt4 import QtCore
+from PyQt5.QtCore import *
 
 
-class XStream(QtCore.QObject):
+class XStream(QObject):
     _stdout = None
     _stderr = None
-    messageWritten = QtCore.pyqtSignal(str)
+    messageWritten = pyqtSignal(str)
 
     def flush(self):
         pass

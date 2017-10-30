@@ -3,8 +3,9 @@ import logging
 import re
 import copy
 
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Plotter import PlotterWidget
@@ -18,7 +19,7 @@ BG_WHITE = "background-color: rgb(255, 255, 255);"
 BG_RED = "background-color: rgb(244, 170, 164);"
 
 
-class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
+class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
     def __init__(self, parent=None):
         super(DataOperationUtilityPanel, self).__init__()
         self.setupUi(self)
@@ -56,9 +57,9 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
         # validator for coefficient
         self.txtNumber.setValidator(QtGui.QDoubleValidator())
 
-        self.layoutOutput = QtGui.QHBoxLayout()
-        self.layoutData1 = QtGui.QHBoxLayout()
-        self.layoutData2 = QtGui.QHBoxLayout()
+        self.layoutOutput = QtWidgets.QHBoxLayout()
+        self.layoutData1 = QtWidgets.QHBoxLayout()
+        self.layoutData2 = QtWidgets.QHBoxLayout()
 
         # Create default layout for initial graphs (when they are still empty)
         self.newPlot(self.graphOutput, self.layoutOutput)
@@ -382,8 +383,8 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
     # ########
     def newPlot(self, graph, layout):
         """ Create template for graphs with default '?' layout"""
-        assert isinstance(graph, QtGui.QGraphicsView)
-        assert isinstance(layout, QtGui.QHBoxLayout)
+        assert isinstance(graph, QtWidgets.QGraphicsView)
+        assert isinstance(layout, QtWidgets.QHBoxLayout)
 
         # clear layout
         if layout.count() > 0:
@@ -398,8 +399,8 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
     def updatePlot(self, graph, layout, data):
         """ plot data in graph after clearing its layout """
 
-        assert isinstance(graph, QtGui.QGraphicsView)
-        assert isinstance(layout, QtGui.QHBoxLayout)
+        assert isinstance(graph, QtWidgets.QGraphicsView)
+        assert isinstance(layout, QtWidgets.QHBoxLayout)
 
         # clear layout
         if layout.count() > 0:
@@ -454,10 +455,10 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
 
     def prepareSubgraphWithData(self, data):
         """ Create graphics view containing scene with string """
-        scene = QtGui.QGraphicsScene()
+        scene = QtWidgets.QGraphicsScene()
         scene.addText(str(data))
 
-        subgraph = QtGui.QGraphicsView()
+        subgraph = QtWidgets.QGraphicsView()
         subgraph.setScene(scene)
 
         return subgraph

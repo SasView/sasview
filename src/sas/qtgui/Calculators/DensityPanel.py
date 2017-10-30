@@ -1,7 +1,9 @@
 # global
 import logging
 import functools
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 from periodictable import formula as Formula
 
@@ -38,7 +40,7 @@ def toMolarMass(formula):
         return ""
 
 
-class DensityPanel(QtGui.QDialog):
+class DensityPanel(QtWidgets.QDialog):
 
     def __init__(self, parent=None):
         super(DensityPanel, self).__init__()
@@ -67,8 +69,8 @@ class DensityPanel(QtGui.QDialog):
         self.ui.editMolarVolume.textEdited.connect(functools.partial(self.setMode, MODES.VOLUME_TO_DENSITY))
         self.ui.editMassDensity.textEdited.connect(functools.partial(self.setMode, MODES.DENSITY_TO_VOLUME))
 
-        self.ui.buttonBox.button(QtGui.QDialogButtonBox.Reset).clicked.connect(self.modelReset)
-        self.ui.buttonBox.button(QtGui.QDialogButtonBox.Help).clicked.connect(self.displayHelp)
+        self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Reset).clicked.connect(self.modelReset)
+        self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Help).clicked.connect(self.displayHelp)
 
     def setupModel(self):
         self.model = QtGui.QStandardItemModel(self)
@@ -82,7 +84,7 @@ class DensityPanel(QtGui.QDialog):
         self.modelReset()
 
     def setupMapper(self):
-        self.mapper = QtGui.QDataWidgetMapper(self)
+        self.mapper = QtWidgets.QDataWidgetMapper(self)
         self.mapper.setModel(self.model)
         self.mapper.setOrientation(QtCore.Qt.Vertical)
 
@@ -91,7 +93,8 @@ class DensityPanel(QtGui.QDialog):
         self.mapper.addMapping(self.ui.editMolarVolume     , MODEL.MOLAR_VOLUME)
         self.mapper.addMapping(self.ui.editMassDensity     , MODEL.MASS_DENSITY)
 
-        self.mapper.toFirst()
+        # FIXME DOESNT WORK WITH QT5
+        #self.mapper.toFirst()
 
     def dataChanged(self, top, bottom):
         for index in range(top.row(), bottom.row() + 1):

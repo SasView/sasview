@@ -1,4 +1,8 @@
-from PyQt4 import QtCore, QtGui, QtSvg
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
+
+##from PyQt4 import QtSvg
 
 def new_load_qt(api_options):
     return QtCore, QtGui, QtSvg, 'pyqt'
