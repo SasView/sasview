@@ -349,8 +349,10 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         """
         Open the Explorer window to see correlations between params and results
         """
-        # TODO: Look at PR from AW - Is there anything else I need to do?
-        pass
+        # TODO: Link Invertor() and DmaxWindow so window updates when recalculated
+        from dmax import DmaxWindow
+        self.dmaxWindow = DmaxWindow(self._calculator, self.getNFunc(), self)
+        self.dmaxWindow.show()
 
     ######################################################################
     # Response Actions
@@ -390,6 +392,10 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
 
         self.enableButtons()
 
+    def getNFunc(self):
+        """Get the n_func value from the GUI object"""
+        return int(UI.TabbedInversionUI._fromUtf8(self.noOfTermsInput.text()))
+
     def setCurrentData(self, data_ref):
         """Get the current data and display as necessary"""
 
@@ -428,8 +434,7 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         if self.calc_thread is not None and self.calc_thread.isrunning():
             self.calc_thread.stop()
         pr = self._calculator.clone()
-        nfunc = int(UI.TabbedInversionUI._fromUtf8(
-            self.noOfTermsInput.text()))
+        nfunc = self.getNFunc()
         self.calc_thread = CalcPr(pr, nfunc,
                                   error_func=self._threadError,
                                   completefn=self._completed, updatefn=None)
@@ -451,8 +456,7 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         # It slows down the application and it doesn't change the estimates
         pr.slit_height = 0.0
         pr.slit_width = 0.0
-        nfunc = int(UI.TabbedInversionUI._fromUtf8(
-            self.noOfTermsInput.text()))
+        nfunc = self.getNFunc()
         self.estimation_thread = EstimateNT(pr, nfunc,
                                             error_func=self._threadError,
                                             completefn=self._estimateNTCompleted,
@@ -473,8 +477,7 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
                 self.estimation_thread.isrunning()):
             self.estimation_thread.stop()
         pr = self._calculator.clone()
-        nfunc = int(UI.TabbedInversionUI._fromUtf8(
-            self.noOfTermsInput.text()))
+        nfunc = self.getNFunc()
         self.estimation_thread = EstimatePr(pr, nfunc,
                                             error_func=self._threadError,
                                             completefn=self._estimateCompleted,
