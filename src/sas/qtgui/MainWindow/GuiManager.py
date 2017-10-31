@@ -76,7 +76,7 @@ class GuiManager(object):
         self._current_perspective = None
 
         # Invoke the initial perspective
-        self.perspectiveChanged("Fitting")
+        #self.perspectiveChanged("Fitting")
         self.addWidgets()
 
         # Fork off logging messages to the Log Window
@@ -90,7 +90,6 @@ class GuiManager(object):
 
         # Set up the status bar
         self.statusBarSetup()
-
         # Show the Welcome panel
         self.welcomePanel = WelcomePanel()
         self._workspace.workspace.addSubWindow(self.welcomePanel)
@@ -116,14 +115,14 @@ class GuiManager(object):
         ObjectLibrary.addObject('DataExplorer', self.filesWidget)
 
         self.dockedFilesWidget = QDockWidget("Data Explorer", self._workspace)
-        self.dockedFilesWidget.setFloating(True)
+        self.dockedFilesWidget.setFloating(False)
         self.dockedFilesWidget.setWidget(self.filesWidget)
 
         # Disable maximize/minimize and close buttons
         self.dockedFilesWidget.setFeatures(QDockWidget.NoDockWidgetFeatures)
-        self.dockedFilesWidget.setFeatures(Qt.LeftDockWidgetArea)
 
-        self._workspace.workspace.addDockWidget(Qt.LeftDockWidgetArea, self.dockedFilesWidget)
+        #self._workspace.workspace.addDockWidget(Qt.LeftDockWidgetArea, self.dockedFilesWidget)
+        self._workspace.addDockWidget(Qt.LeftDockWidgetArea, self.dockedFilesWidget)
 
         # Add the console window as another docked widget
         self.logDockWidget = QDockWidget("Log Explorer", self._workspace)
@@ -131,7 +130,7 @@ class GuiManager(object):
 
         self.listWidget = QTextBrowser()
         self.logDockWidget.setWidget(self.listWidget)
-        self._workspace.workspace.addDockWidget(Qt.BottomDockWidgetAre, self.logDockWidget) 
+        self._workspace.addDockWidget(Qt.BottomDockWidgetArea, self.logDockWidget)
 
         # Add other, minor widgets
         self.ackWidget = Acknowledgements()
@@ -191,11 +190,12 @@ class GuiManager(object):
         self._workspace.workspace.addSubWindow(self._current_perspective)
 
         # Resize to the workspace height
-        workspace_height = self._workspace.workspace.sizeHint().height()
-        perspective_size = self._current_perspective.sizeHint()
-        if workspace_height < perspective_size.height():
-            perspective_width = perspective_size.width()
-            self._current_perspective.resize(perspective_width, workspace_height-10)
+        #workspace_height = self._workspace.workspace.sizeHint().height()
+        #perspective_size = self._current_perspective.sizeHint()
+        #if workspace_height < perspective_size.height():
+        #    perspective_width = perspective_size.width()
+        #    self._current_perspective.resize(perspective_width, workspace_height-10)
+
         self._current_perspective.show()
 
     def updatePerspective(self, data):

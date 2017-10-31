@@ -181,7 +181,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Called when the "Load" button pressed.
         Opens the Qt "Open File..." dialog
         """
-        print("A")
         path_str = self.chooseFiles()
         if not path_str:
             return
@@ -192,7 +191,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Called when the "File/Load Folder" menu item chosen.
         Opens the Qt "Open Folder..." dialog
         """
-        folder = QtWidgets.QFileDialog.getExistingDirectory(self, "Choose a directory", "", None,
+        folder = QtWidgets.QFileDialog.getExistingDirectory(self, "Choose a directory", "",
               QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontUseNativeDialog)
         if folder is None:
             return
@@ -397,6 +396,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 continue
             if outer_item.isCheckable() and \
                    outer_item.checkState() == QtCore.Qt.Checked:
+                self.model.beginResetModel()
                 theories_copied += 1
                 new_item = self.recursivelyCloneItem(outer_item)
                 # Append a "unique" descriptor to the name
@@ -404,7 +404,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 new_name = new_item.text() + '_@' + time_bit
                 new_item.setText(new_name)
                 self.model.appendRow(new_item)
-            self.model.reset()
+                self.model.endResetModel()
+            #self.model.reset()
 
         freeze_msg = ""
         if theories_copied == 0:
@@ -576,7 +577,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         new_plot.setObjectName(title)
 
         # Add the plot to the workspace
-        self.parent.workspace().addWindow(new_plot)
+        self.parent.workspace().addSubWindow(new_plot)
 
         # Show the plot
         new_plot.show()
@@ -625,7 +626,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Location is automatically saved - no need to keep track of the last dir
         # But only with Qt built-in dialog (non-platform native)
         paths = QtWidgets.QFileDialog.getOpenFileNames(self, "Choose a file", "",
-                wlist, None, QtWidgets.QFileDialog.DontUseNativeDialog)
+                wlist, None, QtWidgets.QFileDialog.DontUseNativeDialog)[0]
+        # [0] is new in Qt5 as getOpenFileNames() returns now a tuple!
         if paths is None:
             return
 
@@ -685,8 +687,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     # Model update should be protected
                     self.mutex.lock()
                     self.updateModel(new_data, p_file)
-                    self.model.reset()
-                    QtGui.qApp.processEvents()
+                    #self.model.reset()
+                    QtWidgets.QApplication.processEvents()
                     self.mutex.unlock()
 
                     if hasattr(item, 'errors'):
@@ -906,7 +908,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.txt_widget.show()
         # Move the slider all the way up, if present
         vertical_scroll_bar = self.txt_widget.verticalScrollBar()
-        vertical_scroll_bar.triggerAction(QtGui.QScrollBar.SliderToMinimum)
+        vertical_scroll_bar.triggerAction(QtWidgets.QScrollBar.SliderToMinimum)
 
     def saveDataAs(self):
         """
@@ -994,7 +996,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         assert isinstance(output, tuple)
 
         # Reset the model so the view gets updated.
-        self.model.reset()
+        #self.model.reset()
         self.communicator.progressBarUpdateSignal.emit(-1)
 
         output_data = output[0]
@@ -1004,7 +1006,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.fileDataReceivedSignal.emit(output_data)
         self.manager.add_data(data_list=output_data)
 
-    def loadErrback(self, reason):
+    def loadFailed(self, reason):
         print("File Load Failed with:\n", reason)
         pass
 
@@ -1046,7 +1048,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         checkbox_item.setChild(2, QtGui.QStandardItem("THEORIES"))
 
         # New row in the model
+        self.model.beginResetModel()
         self.model.appendRow(checkbox_item)
+        self.model.endResetModel()
 
     def updateModelFromPerspective(self, model_item):
         """
@@ -1061,7 +1065,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # TODO: Assert other properties
 
         # Reset the view
-        self.model.reset()
+        ##self.model.reset()
         # Pass acting as a debugger anchor
         pass
 
@@ -1097,7 +1101,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
 
 if __name__ == "__main__":
-    app = QtGui.QApplication([])
+    app = QtWidgets.QApplication([])
     dlg = DataExplorerWindow()
     dlg.show()
     sys.exit(app.exec_())
