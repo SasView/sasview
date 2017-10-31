@@ -316,7 +316,7 @@ class PlotterBase(QtWidgets.QWidget):
         """
         Copy MPL widget area to buffer
         """
-        bmp = QtGui.QApplication.clipboard()
+        bmp = QtWidgets.QApplication.clipboard()
         pixmap = QtGui.QPixmap.grabWidget(self.canvas)
         bmp.setPixmap(pixmap)
 
@@ -373,7 +373,7 @@ class PlotterBase(QtWidgets.QWidget):
         self.txt_widget.show()
         # Move the slider all the way up, if present
         vertical_scroll_bar = self.txt_widget.verticalScrollBar()
-        vertical_scroll_bar.triggerAction(QtGui.QScrollBar.SliderToMinimum)
+        vertical_scroll_bar.triggerAction(QtWidgets.QScrollBar.SliderToMinimum)
 
     def onSavePoints(self, plot_data):
         """

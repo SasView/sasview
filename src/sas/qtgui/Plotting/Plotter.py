@@ -20,7 +20,6 @@ class PlotterWidget(PlotterBase):
     """
     1D Plot widget for use with a QDialog
     """
-    updatePlot = QtCore.pyqtSignal(tuple)
     def __init__(self, parent=None, manager=None, quickplot=False):
         super(PlotterWidget, self).__init__(parent, manager=manager, quickplot=quickplot)
 
@@ -40,12 +39,6 @@ class PlotterWidget(PlotterBase):
         self.fit_result = Data1D(x=[], y=[], dy=None)
         self.fit_result.symbol = 13
         self.fit_result.name = "Fit"
-
-        # Add a slot for receiving update signal from LinearFit
-        # NEW style signals
-        self.updatePlot.connect(self.onFitDisplay)
-        # OLD style signals
-        # QtCore.QObject.connect(self, QtCore.SIGNAL('updatePlot'), self.onFitDisplay)
 
     @property
     def data(self):
@@ -367,6 +360,7 @@ class PlotterWidget(PlotterBase):
                     fit_range=fitrange,
                     xlabel=self.xLogLabel,
                     ylabel=self.yLogLabel)
+        fit_dialog.updatePlot.connect(self.onFitDisplay)
         if fit_dialog.exec_() == QtWidgets.QDialog.Accepted:
             return
 

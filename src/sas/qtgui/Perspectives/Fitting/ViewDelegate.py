@@ -47,7 +47,7 @@ class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
             options = QtWidgets.QStyleOptionViewItem(option)
             self.initStyleOption(options,index)
 
-            style = QtGui.QApplication.style() if options.widget is None else options.widget.style()
+            style = QtWidgets.QApplication.style() if options.widget is None else options.widget.style()
 
             # Prepare document for inserting into cell
             doc = QtGui.QTextDocument()
@@ -177,7 +177,7 @@ class PolyViewDelegate(QtWidgets.QStyledItemDelegate):
             options = QtWidgets.QStyleOptionViewItem(option)
             self.initStyleOption(options,index)
 
-            style = QtGui.QApplication.style() if options.widget is None else options.widget.style()
+            style = QtWidgets.QApplication.style() if options.widget is None else options.widget.style()
 
             # Prepare document for inserting into cell
             doc = QtGui.QTextDocument()
@@ -255,7 +255,7 @@ class MagnetismViewDelegate(QtWidgets.QStyledItemDelegate):
             options = QtWidgets.QStyleOptionViewItem(option)
             self.initStyleOption(options,index)
 
-            style = QtGui.QApplication.style() if options.widget is None else options.widget.style()
+            style = QtWidgets.QApplication.style() if options.widget is None else options.widget.style()
 
             # Prepare document for inserting into cell
             doc = QtGui.QTextDocument()

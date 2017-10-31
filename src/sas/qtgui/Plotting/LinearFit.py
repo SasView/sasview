@@ -18,6 +18,7 @@ from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.LinearFitUI import Ui_LinearFitUI
 
 class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
+    updatePlot = QtCore.pyqtSignal(tuple)
     def __init__(self, parent=None,
                  data=None,
                  max_range=(0.0, 0.0),
@@ -177,8 +178,7 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.txtBerr.setText(formatNumber(self.ErrBvalue))
         self.txtChi2.setText(formatNumber(self.Chivalue))
 
-        #self.parent.updatePlot.emit((tempx, tempy))
-        self.parent.emit(QtCore.SIGNAL('updatePlot'), (tempx, tempy))
+        self.updatePlot.emit((tempx, tempy))
 
     def origData(self):
         # Store the transformed values of view x, y and dy before the fit

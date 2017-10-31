@@ -88,7 +88,7 @@ class RangeSlider(QtWidgets.QSlider):
         # based on http://qt.gitorious.org/qt/qt/blobs/master/src/gui/widgets/qslider.cpp
 
         painter = QtGui.QPainter(self)
-        style = QtGui.QApplication.style() 
+        style = QtWidgets.QApplication.style()
 
         for i, value in enumerate([self._low, self._high]):
             opt = QtWidgets.QStyleOptionSlider()
@@ -172,7 +172,7 @@ class RangeSlider(QtWidgets.QSlider):
     def mousePressEvent(self, event):
         event.accept()
         
-        style = QtGui.QApplication.style()
+        style = QtWidgets.QApplication.style()
         button = event.button()
         
         # In a normal slider control, when the user clicks on a point in the 
@@ -263,9 +263,6 @@ class RangeSlider(QtWidgets.QSlider):
                 new_pos = self._low
             self.setHighValue( new_pos )
 
-        if self.hasTracking():
-            self.emit(QtCore.SIGNAL('sliderMoved(int)'), new_pos)
-
             
     def __pick(self, pt):
         if self.orientation() == QtCore.Qt.Horizontal:
@@ -277,7 +274,7 @@ class RangeSlider(QtWidgets.QSlider):
     def __pixelPosToRangeValue(self, pos):
         opt = QtWidgets.QStyleOptionSlider()
         self.initStyleOption(opt)
-        style = QtGui.QApplication.style()
+        style = QtWidgets.QApplication.style()
         
         gr = style.subControlRect(style.CC_Slider, opt, style.SC_SliderGroove, self)
         sr = style.subControlRect(style.CC_Slider, opt, style.SC_SliderHandle, self)
