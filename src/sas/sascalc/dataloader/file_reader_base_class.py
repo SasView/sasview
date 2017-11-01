@@ -26,12 +26,6 @@ else:
         return s.decode() if isinstance(s, bytes) else s
 
 class FileReader(object):
-    # List of Data1D and Data2D objects to be sent back to data_loader
-    output = []
-    # Current plottable_(1D/2D) object being loaded in
-    current_dataset = None
-    # Current DataInfo object being loaded in
-    current_datainfo = None
     # String to describe the type of data this reader can load
     type_name = "ASCII"
     # Wildcards to display
@@ -42,10 +36,18 @@ class FileReader(object):
     allow_all = False
     # Able to import the unit converter
     has_converter = True
-    # Open file handle
-    f_open = None
     # Default value of zero
     _ZERO = 1e-16
+
+    def __init__(self):
+        # List of Data1D and Data2D objects to be sent back to data_loader
+        self.output = []
+        # Current plottable_(1D/2D) object being loaded in
+        self.current_dataset = None
+        # Current DataInfo object being loaded in
+        self.current_datainfo = None
+        # Open file handle
+        self.f_open = None
 
     def read(self, filepath):
         """
