@@ -2,7 +2,6 @@ from sas.sascalc.file_converter.nxcansas_writer import NXcanSASWriter
 from sas.sascalc.dataloader.loader import Loader
 
 import os
-import pylint
 import unittest
 import warnings
 
