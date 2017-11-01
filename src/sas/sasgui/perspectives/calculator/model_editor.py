@@ -331,13 +331,13 @@ class TextDialog(wx.Dialog):
             self.good_name = False
             msg = ("%s is not a valid Python name. Only alphanumeric \n" \
                    "and underscore allowed" % self.name)
-
+        
         #Now check if the name already exists
         if not self.overwrite_name and self.good_name:
             #Create list of existing model names for comparison
             list_fnames = os.listdir(self.plugin_dir)
             # fake existing regular model name list
-            m_list = [model.name + ".py" for model in self.model_list]
+            m_list = [model + ".py" for model in self.model_list]
             list_fnames.append(m_list)
             if t_fname in list_fnames and title != mname:
                 self.good_name = False
