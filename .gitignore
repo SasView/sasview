@@ -28,6 +28,7 @@ sasview.egg-info
 .mplconfig
 default_categories.json
 /setup.cfg
+**/UI/*.py
 
 # doc build
 /docs/sphinx-docs/build
