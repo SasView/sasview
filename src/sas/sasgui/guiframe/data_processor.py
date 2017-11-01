@@ -13,7 +13,7 @@ The organization of the classes goes as:
 
 .. note:: Path to image is: /sasview/src/sas/sasgui/guiframe/media/BatchGridClassLayout.png
 
-.. image:: ../../user/sasgui/guiframe/BatchGridClassLayout.png
+.. image:: ../../../../../src/sas/sasgui/guiframe/media/BatchGridClassLayout.png
    :align: center
 
 """
