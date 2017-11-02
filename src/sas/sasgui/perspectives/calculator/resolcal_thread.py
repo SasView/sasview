@@ -43,7 +43,7 @@ class CalcRes(CalcThread):
 
     def compute(self):
         """
-        excuting computation
+        executing computation
         """
         self.image = map(self.func, self.qx, self.qy,
                         self.qx_min, self.qx_max,

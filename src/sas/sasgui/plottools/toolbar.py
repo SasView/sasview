@@ -144,7 +144,7 @@ class PlotPrintout(wx.Printout):
 
     def OnPrintPage(self, page):
         """
-        Most rudimentry OnPrintPage overide.  instatiates a dc object, gets
+        Most rudimentry OnPrintPage override.  instatiates a dc object, gets
         its size, gets the size of the figure object, scales it to the dc
         canvas size keeping the aspect ratio intact, then prints as bitmap
         """

@@ -63,7 +63,7 @@ class BatchDataDialog(wx.Dialog):
         iy += 1
         selection_sizer.Add(self.data_2d_selected, (iy, ix),
                            (1, 1), wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
-        #contruction the sizer contaning button
+        #contruction the sizer containing button
         button_sizer.Add((20, 20), 1, wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         button_sizer.Add(button_cancel, 0,
                          wx.LEFT | wx.RIGHT | wx.ADJUST_MINSIZE, 10)

@@ -202,7 +202,7 @@ def setup_sasmodels():
     # Set SAS_MODELPATH so sasmodels can find our custom models
     plugin_dir = os.path.join(sas.get_user_dir(), PLUGIN_MODEL_DIR)
     os.environ['SAS_MODELPATH'] = plugin_dir
-    #Initiliaze enviromental variable with custom setting but only if variable not set
+    #Initialize environment variable with custom setting but only if variable not set
     SAS_OPENCL = sas.get_custom_config().SAS_OPENCL
     if SAS_OPENCL and "SAS_OPENCL" not in os.environ:
         os.environ["SAS_OPENCL"] = SAS_OPENCL

@@ -77,9 +77,9 @@ class Model:
 
     def get_params(self, fitparams):
         """
-        return a list of value of paramter to fit
+        return a list of value of parameter to fit
 
-        :param fitparams: list of paramaters name to fit
+        :param fitparams: list of parameters name to fit
 
         """
         return [self.model.getParam(k) for k in fitparams]
