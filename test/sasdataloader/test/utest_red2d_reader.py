@@ -9,11 +9,16 @@ from sas.sascalc.dataloader.loader import  Loader
 
 import os.path
 
+
+def find(filename):
+    return os.path.join(os.path.dirname(__file__), filename)
+
+
 class abs_reader(unittest.TestCase):
 
     def setUp(self):
         self.loader = Loader()
-        self.data_list = self.loader.load("exp18_14_igor_2dqxqy.dat")
+        self.data_list = self.loader.load(find("exp18_14_igor_2dqxqy.dat"))
 
     def test_checkdata(self):
         """

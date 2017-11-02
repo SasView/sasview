@@ -1,6 +1,8 @@
 """
     Unit tests for the ascii (n-column) reader
 """
+
+import os.path
 import warnings
 warnings.simplefilter("ignore")
 
@@ -8,19 +10,23 @@ import unittest
 from sas.sascalc.dataloader.loader import Loader
 
 
+def find(filename):
+    return os.path.join(os.path.dirname(__file__), filename)
+
+
 class ABSReaderTests(unittest.TestCase):
     
     def setUp(self):
         self.loader = Loader()
-        self.f1_list = self.loader.load("ascii_test_1.txt")
+        self.f1_list = self.loader.load(find("ascii_test_1.txt"))
         self.f1 = self.f1_list[0]
-        self.f2_list = self.loader.load("ascii_test_2.txt")
+        self.f2_list = self.loader.load(find("ascii_test_2.txt"))
         self.f2 = self.f2_list[0]
-        self.f3_list = self.loader.load("ascii_test_3.txt")
+        self.f3_list = self.loader.load(find("ascii_test_3.txt"))
         self.f3 = self.f3_list[0]
-        self.f4_list = self.loader.load("ascii_test_4.abs")
+        self.f4_list = self.loader.load(find("ascii_test_4.abs"))
         self.f4 = self.f4_list[0]
-        self.f5_list = self.loader.load("ascii_test_5.txt")
+        self.f5_list = self.loader.load(find("ascii_test_5.txt"))
         self.f5 = self.f5_list[0]
 
     def test_checkdata(self):
@@ -98,7 +104,7 @@ class ABSReaderTests(unittest.TestCase):
         # Test .ABS file loaded as ascii
         f = None
         try:
-            f = self.loader.load("ascii_test_6.txt")
+            f = self.loader.load(find("ascii_test_6.txt"))
         # The length of the data is 5
         except:
             self.assertEqual(f, None)

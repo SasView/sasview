@@ -3,6 +3,7 @@ Unit Tests for CorfuncCalculator class
 """
 from __future__ import division, print_function
 
+import os.path
 import unittest
 import time
 
@@ -10,6 +11,10 @@ import numpy as np
 
 from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 from sas.sascalc.dataloader.data_info import Data1D
+
+
+def find(filename):
+    return os.path.join(os.path.dirname(__file__), filename)
 
 
 class TestCalculator(unittest.TestCase):
@@ -30,7 +35,7 @@ class TestCalculator(unittest.TestCase):
         self.calculator.background = 0.3
         self.extrapolation = None
         self.transformation = None
-        self.results = [np.loadtxt(filename+"_out.txt").T[2]
+        self.results = [np.loadtxt(find(filename+"_out.txt")).T[2]
                         for filename in ("gamma1", "gamma3", "idf")]
 
     def extrapolate(self):
@@ -109,7 +114,7 @@ class TestCalculator(unittest.TestCase):
 
 
 def load_data(filename="98929.txt"):
-    data = np.loadtxt(filename, dtype=np.float64)
+    data = np.loadtxt(find(filename), dtype=np.float64)
     q = data[:,0]
     iq = data[:,1]
     return Data1D(x=q, y=iq)
