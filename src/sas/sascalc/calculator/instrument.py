@@ -313,7 +313,7 @@ class Neutron(object):
     def plot_spectrum(self):
         """
         To plot the wavelength spactrum
-        : requirment: matplotlib.pyplot
+        : requirement: matplotlib.pyplot
         """
         try:
             import matplotlib.pyplot as plt
