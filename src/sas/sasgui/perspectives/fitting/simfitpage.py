@@ -975,7 +975,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
 
         param_cbox = self.constraints_list[-1].param_cbox
         param_cbox.Clear()
-        # insert only fittable paramaters
+        # insert only fittable parameters
         for param in param_list:
             param_cbox.Append(str(param), model)
         param_cbox.Show(True)

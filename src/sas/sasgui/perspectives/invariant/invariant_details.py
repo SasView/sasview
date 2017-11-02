@@ -421,7 +421,7 @@ class InvariantDetailsPanel(wx.Dialog):
             scale = float(percentage)
         except:
             scale = RECTANGLE_SCALE
-            self.warning_msg += "Recieve an invalid scale for %s\n"
+            self.warning_msg += "Receive an invalid scale for %s\n"
             self.warning_msg += "check this value : %s\n" % str(percentage)
         return  scale
 

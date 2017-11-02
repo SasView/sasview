@@ -87,7 +87,7 @@ class GpuOptions(wx.Dialog):
         boxsizer = wx.BoxSizer(orient=wx.VERTICAL)
         self.option_button = {}
         self.buttons = []
-        #Check if SAS_OPENCL is already set as enviromental variable
+        #Check if SAS_OPENCL is already set as environment variable
         self.sas_opencl = os.environ.get("SAS_OPENCL", "")
 
         for clopt in clinfo:

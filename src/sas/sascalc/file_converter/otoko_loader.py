@@ -35,7 +35,7 @@ class OTOKOLoader(object):
         of one or more binary files where the actual data is stored.
 
         Given the paths of two header files, this function will load each axis in
-        turn.  If loading is successfull then an instance of the OTOKOData class
+        turn.  If loading is successful then an instance of the OTOKOData class
         will be returned, else an exception will be raised.
 
         For more information on the OTOKO file format, please see:

@@ -81,7 +81,7 @@ class PluginBase(object):
 
     def can_load_data(self):
         """
-        if return True, then call handler to laod data
+        if return True, then call handler to load data
         """
         return False
 

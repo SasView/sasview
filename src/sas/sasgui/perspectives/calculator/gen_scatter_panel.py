@@ -112,7 +112,7 @@ class CalcGen(CalcThread):
 
     def compute(self):
         """
-        excuting computation
+        executing computation
         """
         #elapsed = time.time() - self.starttime
         self.starttime = time.time()
