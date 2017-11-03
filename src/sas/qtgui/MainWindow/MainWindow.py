@@ -68,7 +68,7 @@ def run():
 
     # Show the main SV window
     mainwindow = MainSasViewWindow()
-    mainwindow.showMaximized()
+    mainwindow.show()
 
     # no more splash screen
     splash.finish(mainwindow)

@@ -60,7 +60,7 @@ class ToolTippedItemModel(QtGui.QStandardItemModel):
     def __init__(self, parent=None):
         QtGui.QStandardItemModel.__init__(self,parent)
 
-    def headerData(self, section, orientation, role):
+    def headerData(self, section, orientation, role=QtCore.Qt.DisplayRole):
         """
         Displays tooltip for each column's header
         :param section:
@@ -591,7 +591,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
         elif model_column in [self.lstPoly.itemDelegate().poly_min, self.lstPoly.itemDelegate().poly_max]:
             try:
-                value = float(item.text())
+                value = GuiUtils.toDouble(item.text())
             except ValueError:
                 # Can't be converted properly, bring back the old value and exit
                 return
@@ -606,7 +606,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
         else:
             try:
-                value = float(item.text())
+                value = GuiUtils.toDouble(item.text())
             except ValueError:
                 # Can't be converted properly, bring back the old value and exit
                 return
@@ -623,7 +623,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         model_column = item.column()
         model_row = item.row()
         name_index = self._magnet_model.index(model_row, 0)
-        parameter_name = str(self._magnet_model.data(name_index).toPyObject())
+        parameter_name = str(self._magnet_model.data(name_index))
 
         if model_column == 0:
             value = item.checkState()
@@ -639,12 +639,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Extract changed value.
         try:
-            value = float(item.text())
+            value = GuiUtils.toDouble(item.text())
         except ValueError:
             # Unparsable field
             return
 
-        property_index = self._magnet_model.headerData(0, 1, model_column).toInt()[0]-1 # Value, min, max, etc.
+        property_index = self._magnet_model.headerData(1, model_column)-1 # Value, min, max, etc.
 
         # Update the parameter value - note: this supports +/-inf as well
         self.kernel_module.params[parameter_name] = value
@@ -1303,11 +1303,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Extract changed value.
         try:
-            value = float(item.text())
+            value = GuiUtils.toDouble(item.text())
         except ValueError:
             # Unparsable field
             return
-        parameter_name = str(self._model_model.data(name_index)) #.toPyObject()) # sld, background etc.
+
+        parameter_name = str(self._model_model.data(name_index)) # sld, background etc.
 
         # Update the parameter value - note: this supports +/-inf as well
         self.kernel_module.params[parameter_name] = value
@@ -1686,9 +1687,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         datafile = QtWidgets.QFileDialog.getOpenFileName(
             self, "Choose a weight file", "", "All files (*.*)", None,
-            QtWidgets.QFileDialog.DontUseNativeDialog)
+            QtWidgets.QFileDialog.DontUseNativeDialog)[0]
 
-        if datafile is None or str(datafile)=='':
+        if not datafile:
             logging.info("No weight data chosen.")
             raise IOError
 

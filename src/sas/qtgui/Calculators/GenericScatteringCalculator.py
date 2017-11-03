@@ -134,7 +134,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
                 self, "Choose a file", "", "All Gen files (*.OMF *.omf) ;;"
                                           "SLD files (*.SLD *.sld);;PDB files (*.pdb *.PDB);; "
                                           "OMF files (*.OMF *.omf);; "
-                                          "All files (*.*)")
+                                          "All files (*.*)")[0]
             if self.datafile:
                 self.default_shape = str(self.cbShape.currentText())
                 self.file_name = os.path.basename(str(self.datafile))

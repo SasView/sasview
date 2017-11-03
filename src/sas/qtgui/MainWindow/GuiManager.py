@@ -7,7 +7,7 @@ import webbrowser
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QLocale
 from PyQt5.QtWebKitWidgets import QWebView
 
 from twisted.internet import reactor
@@ -197,11 +197,11 @@ class GuiManager(object):
         self._workspace.workspace.addSubWindow(self._current_perspective)
 
         # Resize to the workspace height
-        #workspace_height = self._workspace.workspace.sizeHint().height()
-        #perspective_size = self._current_perspective.sizeHint()
+        workspace_height = self._workspace.workspace.sizeHint().height()
+        perspective_size = self._current_perspective.sizeHint()
         #if workspace_height < perspective_size.height():
-        #    perspective_width = perspective_size.width()
-        #    self._current_perspective.resize(perspective_width, workspace_height-10)
+        perspective_width = perspective_size.width()
+        self._current_perspective.resize(perspective_width, workspace_height-10)
 
         self._current_perspective.show()
 
@@ -591,7 +591,7 @@ class GuiManager(object):
         self.ipDockWidget = QDockWidget("IPython", self._workspace)
         self.ipDockWidget.setObjectName("IPythonDockWidget")
         self.ipDockWidget.setWidget(terminal)
-        self._workspace.workspace.addSubWindow(self.ipDockWidget, Qt.RightDockWidgetArea)
+        self._workspace.addDockWidget(Qt.RightDockWidgetArea, self.ipDockWidget)
 
     def actionImage_Viewer(self):
         """

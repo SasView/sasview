@@ -316,9 +316,9 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
         """ On Spectrum Combobox event"""
         if self.cbCustomSpectrum.currentText() == 'Add New':
             datafile = QtWidgets.QFileDialog.getOpenFileName(
-                self, "Choose a spectral distribution file", "",
-                "All files (*.*)",
-                QtWidgets.QFileDialog.DontUseNativeDialog)
+                self, "Choose a spectral distribution file","",
+                "All files (*.*)", None,
+                QtWidgets.QFileDialog.DontUseNativeDialog)[0]
 
             if datafile is None or str(datafile) == '':
                 logging.info("No spectral distribution data chosen.")
@@ -567,12 +567,10 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
         : params qx, qy, qx_min, qx_max, qy_min, qy_max:
         : return: image (numpy array)
         """
-        # This fails in py3 with
-        # [Failure instance: Traceback: <class 'TypeError'>: 'map' object is not subscriptable
-        # INVESTIGATE
-        image = map(func, qx, qy,
+        image = list(map(func, qx, qy,
                     qx_min, qx_max,
-                    qy_min, qy_max)[0]
+                    qy_min, qy_max))[0]
+
         return image
 
     def calc_func(self, qx, qy, qx_min, qx_max, qy_min, qy_max):
@@ -750,6 +748,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
 
         self.plotter.plot()
         self.plotter.show()
+        self.plotter.update()
 
     def drawLines(self):
         """

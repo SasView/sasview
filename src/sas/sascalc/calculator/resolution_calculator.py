@@ -1006,8 +1006,8 @@ class ResolutionCalculator(object):
         detector_offset = 0
         try:
             detector_offset = self.sample2detector_distance[1]
-        except:
-            logger.error(sys.exc_value)
+        except Exception as ex:
+            logger.error(ex)
 
         # detector size in [no of pix_x,no of pix_y]
         detector_pix_nums_x = self.detector_size[0]
@@ -1056,9 +1056,9 @@ class ResolutionCalculator(object):
 
         # qx_value and qy_value values in array
         qx_value = qx_value.repeat(detector_pix_nums_y)
-        qx_value = qx_value.reshape(detector_pix_nums_x, detector_pix_nums_y)
+        qx_value = qx_value.reshape(int(detector_pix_nums_x), int(detector_pix_nums_y))
         qy_value = qy_value.repeat(detector_pix_nums_x)
-        qy_value = qy_value.reshape(detector_pix_nums_y, detector_pix_nums_x)
+        qy_value = qy_value.reshape(int(detector_pix_nums_y), int(detector_pix_nums_x))
         qy_value = qy_value.transpose()
 
         # p min and max values among the center of pixels

@@ -54,8 +54,13 @@ class KiessigPanel(QtWidgets.QDialog, Ui_KiessigPanel):
         try:
             self.thickness.set_deltaq(dq=float(self.deltaq_in.text()))
             kiessing_result = self.thickness.compute_thickness()
-            float_as_str = "{:.3f}".format(kiessing_result)
-            self.lengthscale_out.setText(float_as_str)
+            if kiessing_result:
+                float_as_str = "{:.3f}".format(kiessing_result)
+                self.lengthscale_out.setText(float_as_str)
+            else:
+                # error or division by zero
+                self.lengthscale_out.setText("")
+
         except (ArithmeticError, ValueError):
             self.lengthscale_out.setText("")
 

@@ -122,7 +122,7 @@ class Plotter2DWidget(PlotterBase):
         Re-calculate the plot depth parameters depending on the scale
         """
         # Toggle the scale
-        zmin_temp = self.zmin
+        zmin_temp = self.zmin if self.zmin else MIN_Z
         zmax_temp = self.zmax
         # self.scale predefined in the baseclass
         if self.scale == 'log_{10}':
