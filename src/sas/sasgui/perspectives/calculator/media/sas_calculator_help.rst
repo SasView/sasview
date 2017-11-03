@@ -86,7 +86,7 @@ scattering from the sample are then
 
 .. image:: gen_mag_pic.png
 
-Now let us assume that the angles of the $Q$ vector and the spin-axis ($x'$)
+Now let us assume that the angles of the $\vec Q$ vector and the spin-axis ($x'$)
 to the $x$-axis are $\phi$ and $\theta_\text{up}$ respectively (see above). Then,
 depending upon the polarization (spin) state of neutrons, the scattering
 length densities, including the nuclear scattering length density ($\beta_N$)
