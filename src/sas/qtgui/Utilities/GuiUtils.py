@@ -248,7 +248,7 @@ def updateModelItemWithPlot(item, update_data, name=""):
     for index in range(item.rowCount()):
         plot_item = item.child(index)
         if plot_item.isCheckable():
-            plot_data = plot_item.child(0).data() #.toPyObject()
+            plot_data = plot_item.child(0).data()
             if plot_data.id is not None and plot_data.id == py_update_data.id:
                 # replace data section in item
                 plot_item.child(0).setData(update_data)
@@ -269,8 +269,6 @@ def createModelItemWithPlot(update_data, name=""):
     Creates a checkboxed QStandardItem named "name"
     Adds 'update_data' to that row.
     """
-    #assert isinstance(update_data, QtCore.QVariant)
-    #py_update_data = update_data.toPyObject()
     py_update_data = update_data
 
     checkbox_item = QtGui.QStandardItem()
@@ -338,13 +336,13 @@ def plotsFromFilename(filename, model_item):
         item = model_item.item(index)
         if str(item.text()) == filename:
             # TODO: assure item type is correct (either data1/2D or Plotter)
-            plot_data.append(item.child(0).data()) #.toPyObject())
+            plot_data.append(item.child(0).data())
             # Going 1 level deeper only
             for index_2 in range(item.rowCount()):
                 item_2 = item.child(index_2)
                 if item_2 and item_2.isCheckable():
                     # TODO: assure item type is correct (either data1/2D or Plotter)
-                    plot_data.append(item_2.child(0).data()) #.toPyObject())
+                    plot_data.append(item_2.child(0).data())
 
     return plot_data
 
@@ -360,13 +358,13 @@ def plotsFromCheckedItems(model_item):
         item = model_item.item(index)
         if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
             # TODO: assure item type is correct (either data1/2D or Plotter)
-            plot_data.append((item, item.child(0).data())) #.toPyObject()))
+            plot_data.append((item, item.child(0).data()))
         # Going 1 level deeper only
         for index_2 in range(item.rowCount()):
             item_2 = item.child(index_2)
             if item_2 and item_2.isCheckable() and item_2.checkState() == QtCore.Qt.Checked:
                 # TODO: assure item type is correct (either data1/2D or Plotter)
-                plot_data.append((item_2, item_2.child(0).data())) #.toPyObject()))
+                plot_data.append((item_2, item_2.child(0).data()))
 
     return plot_data
 
@@ -634,14 +632,18 @@ class FormulaValidator(QtGui.QValidator):
         super(FormulaValidator, self).__init__(parent)
   
     def validate(self, input, pos):
-        try:
-            Formula(str(input))
-            self._setStyleSheet("")
-            return QtGui.QValidator.Acceptable, pos
 
-        except Exception as e:
-            self._setStyleSheet("background-color:pink;")
-            return QtGui.QValidator.Intermediate, pos
+        self._setStyleSheet("")
+        return QtGui.QValidator.Acceptable, pos
+
+        #try:
+        #    Formula(str(input))
+        #    self._setStyleSheet("")
+        #    return QtGui.QValidator.Acceptable, pos
+
+        #except Exception as e:
+        #    self._setStyleSheet("background-color:pink;")
+        #    return QtGui.QValidator.Intermediate, pos
 
     def _setStyleSheet(self, value):
         try:
@@ -755,7 +757,7 @@ def dataFromItem(item):
     Retrieve Data1D/2D component from QStandardItem.
     The assumption - data stored in SasView standard, in child 0
     """
-    return item.child(0).data() #.toPyObject()
+    return item.child(0).data()
 
 def formatNumber(value, high=False):
     """
@@ -805,3 +807,20 @@ def parseName(name, expression):
                 return item
     else:
         return name
+
+def toDouble(value_string):
+    """
+    toFloat conversion which cares deeply about user's locale
+    """
+    # Holy shit this escalated quickly in Qt5.
+    # No more float() cast on general locales.
+    value = QtCore.QLocale().toFloat(value_string)
+    if value[1]:
+        return value[0]
+
+    # Try generic locale
+    value = QtCore.QLocale(QtCore.QLocale('en_US')).toFloat(value_string)
+    if value[1]:
+        return value[0]
+    else:
+        raise ValueError

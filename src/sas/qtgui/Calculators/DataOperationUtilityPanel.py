@@ -139,9 +139,10 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         try:
             data1 = self.data1
             data2 = self.data2
-            exec("output = data1 %s data2" % operator)
-        except:
-            raise
+            output = eval("data1 %s data2" % operator)
+        except Exception as ex:
+            logging.error(ex)
+            return
 
         self.output = output
 

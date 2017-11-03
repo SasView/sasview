@@ -5,7 +5,7 @@ the sum of pixel of a Data.
 import numpy
 from PyQt5 import QtGui
 
-from sas.qtgui.Utilities.GuiUtils import formatNumber
+from sas.qtgui.Utilities.GuiUtils import formatNumber, toDouble
 
 from .BaseInteractor import BaseInteractor
 from sas.sascalc.dataloader.manipulations import Boxavg
@@ -136,10 +136,10 @@ class BoxSumCalculator(BaseInteractor):
         Cast model content onto params dict
         """
         params = {}
-        params["Height"] = float(self.model().item(0, 0).text())
-        params["Width"] = float(self.model().item(0, 1).text())
-        params["center_x"] = float(self.model().item(0, 2).text())
-        params["center_y"] = float(self.model().item(0, 3).text())
+        params["Height"] = toDouble(self.model().item(0, 0).text())
+        params["Width"] = toDouble(self.model().item(0, 1).text())
+        params["center_x"] = toDouble(self.model().item(0, 2).text())
+        params["center_y"] = toDouble(self.model().item(0, 3).text())
         self.update_model = False
         self.setParams(params)
         self.setReadOnlyParametersFromModel()

@@ -159,7 +159,7 @@ class PlotterWidget(PlotterBase):
             x_range=self.ax.get_xlim(), y_range=self.ax.get_ylim())
 
         # refresh canvas
-        self.canvas.draw()
+        self.canvas.draw_idle()
 
     def createContextMenu(self):
         """

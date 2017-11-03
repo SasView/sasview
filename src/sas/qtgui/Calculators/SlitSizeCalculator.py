@@ -3,6 +3,7 @@ Slit Size Calculator Panel
 """
 import os
 import sys
+import logging
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -63,7 +64,12 @@ class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
         if not path_str:
             return
         loader = Loader()
-        data = loader.load(path_str)[0]
+        try:
+            data = loader.load(path_str)[0]
+        # Can return multiple exceptions - gather them all under one umbrella and complain
+        except Exception as ex:
+            logging.error(ex)
+            return
 
         self.data_file.setText(os.path.basename(path_str))
         self.calculateSlitSize(data)
@@ -78,11 +84,7 @@ class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
         path = QtWidgets.QFileDialog.getOpenFileName(self, "Choose a file", "",
                                                  "SAXSess 1D data (*.txt *.TXT *.dat *.DAT)",
                                                  None,
-                                                 QtWidgets.QFileDialog.DontUseNativeDialog)
-
-        if path is None:
-            return
-
+                                                 QtWidgets.QFileDialog.DontUseNativeDialog)[0]
         return path
 
     def onClose(self):
@@ -105,12 +107,14 @@ class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
         if data is None:
             self.clearResults()
             msg = "ERROR: Data hasn't been loaded correctly"
-            raise RuntimeError(msg)
+            logging.error(msg)
+            return
 
         if data.__class__.__name__ == 'Data2D':
             self.clearResults()
             msg = "Slit Length cannot be computed for 2D Data"
-            raise RuntimeError(msg)
+            logging.error(msg)
+            return
 
         #compute the slit size
         try:
@@ -118,14 +122,16 @@ class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
             ydata = data.y
             if xdata == [] or xdata is None or ydata == [] or ydata is None:
                 msg = "The current data is empty please check x and y"
-                raise ValueError(msg)
+                logging.error(msg)
+                return
             slit_length_calculator = SlitlengthCalculator()
             slit_length_calculator.set_data(x=xdata, y=ydata)
             slit_length = slit_length_calculator.calculate_slit_length()
         except:
             self.clearResults()
             msg = "Slit Size Calculator: %s" % (sys.exc_info()[1])
-            raise RuntimeError(msg)
+            logging.error(msg)
+            return
 
         slit_length_str = "{:.5f}".format(slit_length)
         self.slit_length_out.setText(slit_length_str)

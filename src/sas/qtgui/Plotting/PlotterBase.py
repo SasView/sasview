@@ -34,6 +34,9 @@ class PlotterBase(QtWidgets.QWidget):
         self.manager = manager
         self.quickplot = quickplot
 
+        #plt.style.use('ggplot')
+        plt.style.use('seaborn-darkgrid')
+
         # a figure instance to plot on
         self.figure = plt.figure()
 

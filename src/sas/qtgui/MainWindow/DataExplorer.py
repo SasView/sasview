@@ -217,7 +217,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             'filter'    : 'Project (*.json);;All files (*.*)',
             'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
         }
-        filename = str(QtWidgets.QFileDialog.getOpenFileName(**kwargs))
+        filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
         if filename:
             load_thread = threads.deferToThread(self.readProject, filename)
             load_thread.addCallback(self.readProjectComplete)
@@ -581,6 +581,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Show the plot
         new_plot.show()
+        new_plot.canvas.draw()
 
         # Update the active chart list
         #self.active_plots[new_plot.data.id] = new_plot
@@ -627,8 +628,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # But only with Qt built-in dialog (non-platform native)
         paths = QtWidgets.QFileDialog.getOpenFileNames(self, "Choose a file", "",
                 wlist, None, QtWidgets.QFileDialog.DontUseNativeDialog)[0]
-        # [0] is new in Qt5 as getOpenFileNames() returns now a tuple!
-        if paths is None:
+        if not paths:
             return
 
         if not isinstance(paths, list):

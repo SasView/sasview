@@ -127,7 +127,8 @@ class SldPanel(QtWidgets.QDialog):
         self.ui.setupUi(self)
 
         # set validators
-        self.ui.editMolecularFormula.setValidator(GuiUtils.FormulaValidator(self.ui.editMolecularFormula))
+        # TODO: GuiUtils.FormulaValidator() crashes with Qt5 - fix
+        #self.ui.editMolecularFormula.setValidator(GuiUtils.FormulaValidator(self.ui.editMolecularFormula))
 
         rx = QtCore.QRegExp("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
         self.ui.editMassDensity.setValidator(QtGui.QRegExpValidator(rx, self.ui.editMassDensity))
@@ -147,10 +148,6 @@ class SldPanel(QtWidgets.QDialog):
             self.model.setItem(key, QtGui.QStandardItem())
 
         self.model.dataChanged.connect(self.dataChanged)
-        #QtCore.QObject.connect(
-        #    self.model,
-        #    QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"),
-        #    self.dataChanged)
 
         self.modelReset()
 
@@ -165,8 +162,7 @@ class SldPanel(QtWidgets.QDialog):
         for key, edit in self._getOutputs().items():
             self.mapper.addMapping(edit, key)
 
-        # FIXME DOESNT WORK WITH QT5
-        #self.mapper.toFirst()
+        self.mapper.toFirst()
 
     def dataChanged(self, top, bottom):
         update = False
@@ -215,7 +211,7 @@ class SldPanel(QtWidgets.QDialog):
             self.model.item(MODEL.WAVELENGTH       ).setText("6")
         finally:
             pass
-            #self.model.endResetModel()
+        #self.model.endResetModel()
 
     def displayHelp(self):
         try:

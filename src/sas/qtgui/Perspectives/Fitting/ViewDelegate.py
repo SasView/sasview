@@ -4,6 +4,12 @@ from PyQt5 import QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
+class CommaLessValidator(QtGui.QDoubleValidator):
+    """
+    Custom double validator which doesn't allow for commas to be used as decimal point
+    """
+    pass
+
 class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
     """
     Custom delegate for appearance and behavior control of the model view
@@ -43,7 +49,6 @@ class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
         """
         if index.column() in self.fancyColumns():
             # Units - present in nice HTML
-            #options = QtWidgets.QStyleOptionViewItemV4(option)
             options = QtWidgets.QStyleOptionViewItem(option)
             self.initStyleOption(options,index)
 
@@ -235,7 +240,7 @@ class MagnetismViewDelegate(QtWidgets.QStyledItemDelegate):
 
     def createEditor(self, widget, option, index):
         # Remember the current choice
-        current_text = index.data().toString()
+        current_text = index.data()
         if not index.isValid():
             return 0
         if index.column() in self.editableParameters():

@@ -59,7 +59,7 @@ class DensityPanel(QtWidgets.QDialog):
         self.setFixedSize(self.minimumSizeHint())
 
         # set validators
-        self.ui.editMolecularFormula.setValidator(FormulaValidator(self.ui.editMolecularFormula))
+        #self.ui.editMolecularFormula.setValidator(FormulaValidator(self.ui.editMolecularFormula))
 
         rx = QtCore.QRegExp("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
         self.ui.editMolarVolume.setValidator(QtGui.QRegExpValidator(rx, self.ui.editMolarVolume))
@@ -93,8 +93,7 @@ class DensityPanel(QtWidgets.QDialog):
         self.mapper.addMapping(self.ui.editMolarVolume     , MODEL.MOLAR_VOLUME)
         self.mapper.addMapping(self.ui.editMassDensity     , MODEL.MASS_DENSITY)
 
-        # FIXME DOESNT WORK WITH QT5
-        #self.mapper.toFirst()
+        self.mapper.toFirst()
 
     def dataChanged(self, top, bottom):
         for index in range(top.row(), bottom.row() + 1):
@@ -139,7 +138,6 @@ class DensityPanel(QtWidgets.QDialog):
             self.model.item(MODEL.MOLAR_VOLUME).setText("")
 
     def modelReset(self):
-        #self.model.beginResetModel()
         try:
             self.setMode(None)
             self.model.item(MODEL.MOLECULAR_FORMULA).setText("H2O")
@@ -147,7 +145,6 @@ class DensityPanel(QtWidgets.QDialog):
             self.model.item(MODEL.MASS_DENSITY     ).setText("")
         finally:
             pass
-            #self.model.endResetModel()
 
     def displayHelp(self):
         try:
