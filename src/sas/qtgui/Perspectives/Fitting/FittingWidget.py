@@ -12,6 +12,10 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5 import QtWebKitWidgets
+# Officially QtWebEngineWidgets are the way to display HTML in Qt5,
+# but this module isn't ported to PyQt5 yet...
+# let's wait. In the meantime no Help.
+#from PyQt5 import QtWebEngineWidgets
 
 from sasmodels import product
 from sasmodels import generate
@@ -50,7 +54,8 @@ STRUCTURE_DEFAULT = "None"
 
 DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 
-USING_TWISTED = True
+#USING_TWISTED = True
+USING_TWISTED = False
 
 class ToolTippedItemModel(QtGui.QStandardItemModel):
     """
@@ -468,7 +473,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         menu = QtWidgets.QMenu()
         label = QtWidgets.QLabel(msg)
-        action = QtGui.QWidgetAction(self)
+        action = QtWidgets.QWidgetAction(self)
         action.setDefaultWidget(label)
         menu.addAction(action)
         menu.exec_(self.lstParams.viewport().mapToGlobal(position))
@@ -477,7 +482,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Respond to select Model from list event
         """
-        model = str(self.cbModel.currentText())
+        model = self.cbModel.currentText()
 
         # empty combobox forced to be read
         if not model:
@@ -533,7 +538,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Select Category from list
         """
-        category = str(self.cbCategory.currentText())
+        category = self.cbCategory.currentText()
         # Check if the user chose "Choose category entry"
         if category == CATEGORY_DEFAULT:
             # if the previous category was not the default, keep it.
@@ -679,6 +684,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         elif tab_id == 4:
             helpfile = "mag_help.html"
         help_location = tree_location + helpfile
+
+        content = QtCore.QUrl(help_location)
         self.helpView.load(QtCore.QUrl(help_location))
         self.helpView.show()
 
@@ -732,8 +739,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for fit_index in self.all_data:
             fitter = Fit()
             data = GuiUtils.dataFromItem(fit_index)
-            fitter.set_model(model, fit_id, params_to_fit, data=data,
+            try:
+                fitter.set_model(model, fit_id, params_to_fit, data=data,
                              constraints=constraints)
+            except ValueError as ex:
+                logging.error("Setting model parameters failed with: %s" % ex)
+                return
+
             qmin, qmax, _ = self.logic.computeRangeFromData(data)
             fitter.set_data(data=data, id=fit_id, smearer=smearer, qmin=qmin,
                             qmax=qmax)
@@ -1521,7 +1533,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         residuals_plot = FittingUtilities.plotResiduals(self.data, fitted_data)
         residuals_plot.id = "Residual " + residuals_plot.id
         self.createNewIndex(residuals_plot)
-        self.communicate.plotUpdateSignal.emit([residuals_plot])
+        #self.communicate.plotUpdateSignal.emit([residuals_plot])
 
     def calcException(self, etype, value, tb):
         """

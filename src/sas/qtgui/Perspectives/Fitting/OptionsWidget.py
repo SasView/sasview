@@ -7,6 +7,7 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
 from sas.qtgui.Plotting.PlotterData import Data2D
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.OptionsWidgetUI import Ui_tabOptions
@@ -65,8 +66,8 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.weightingGroup.addButton(self.rbWeighting4)
 
         # Let only floats in the range edits
-        self.txtMinRange.setValidator(QtGui.QDoubleValidator())
-        self.txtMaxRange.setValidator(QtGui.QDoubleValidator())
+        self.txtMinRange.setValidator(GuiUtils.DoubleValidator())
+        self.txtMaxRange.setValidator(GuiUtils.DoubleValidator())
         # Let only ints in the number of points edit
         self.txtNpts.setValidator(QtGui.QIntValidator())
 

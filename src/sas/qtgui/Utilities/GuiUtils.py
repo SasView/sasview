@@ -583,13 +583,12 @@ def saveData1D(data):
         'parent'    : None,
     }
     # Query user for filename.
-    filename = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+    filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+    filename = filename_tuple[0]
 
     # User cancelled.
     if not filename:
         return
-
-    filename = str(filename)
 
     #Instantiate a loader
     loader = Loader()
@@ -615,12 +614,13 @@ def saveData2D(data):
         'parent'    : None,
     }
     # Query user for filename.
-    filename = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+    filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+    filename = filename_tuple[0]
 
     # User cancelled.
     if not filename:
         return
-    filename = str(filename)
+
     #Instantiate a loader
     loader = Loader()
 
@@ -824,3 +824,23 @@ def toDouble(value_string):
         return value[0]
     else:
         raise ValueError
+
+class DoubleValidator(QtGui.QDoubleValidator):
+    """
+    Allow only dots as decimal separator
+    """
+    def validate(self, input, pos):
+        """
+        Return invalid for commas
+        """
+        if (',' in input):
+            return (QtGui.QValidator.Invalid, input, pos)
+        return super(DoubleValidator, self).validate(input, pos)
+
+    def fixup(self, input):
+        """
+        Correct (remove) potential preexisting content
+        """
+        QtGui.QDoubleValidator.fixup(input)
+        input = input.replace(",", "")
+

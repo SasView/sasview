@@ -87,7 +87,7 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
                 validator = QtGui.QIntValidator()
                 validator.setBottom(0)
             elif f_type == float:
-                validator = QtGui.QDoubleValidator()
+                validator = GuiUtils.DoubleValidator()
                 validator.setBottom(0)
             else:
                 continue

@@ -269,8 +269,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             'filter'    : 'Project (*.json)',
             'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
         }
-        filename = str(QtWidgets.QFileDialog.getSaveFileName(**kwargs))
+        name_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+        filename = name_tuple[0]
         if filename:
+            _, extension = os.path.splitext(filename)
+            if not extension:
+                filename = '.'.join((filename, 'json'))
             self.communicator.statusBarUpdateSignal.emit("Saving Project... %s\n" % os.path.basename(filename))
             with open(filename, 'w') as outfile:
                 self.manager.save_to_writable(outfile)
@@ -1083,15 +1087,16 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # If so, delete them
         # TODO: fix this to resemble GuiUtils.updateModelItemWithPlot
         #
-        self.model.beginResetModel()
-        current_tab_name = model_item.text()[:2]
-        for current_index in range(self.theory_model.rowCount()):
-            if current_tab_name in self.theory_model.item(current_index).text():
-                self.theory_model.removeRow(current_index)
-                break
+        ##self.model.beginResetModel()
+        ##current_tab_name = model_item.text()[:2]
+        ##for current_index in range(self.theory_model.rowCount()):
+            #if current_tab_name in self.theory_model.item(current_index).text():
+            #    return
+        ##        self.theory_model.removeRow(current_index)
+        ##        break
 
-        # Reset the view
-        self.model.endResetModel()
+        ### Reset the view
+        ##self.model.endResetModel()
 
         # Reset the view
         self.theory_model.appendRow(model_item)

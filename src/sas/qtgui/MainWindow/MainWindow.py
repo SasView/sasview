@@ -60,7 +60,7 @@ def run():
     # DO NOT move the following import to the top!
     # (unless you know what you're doing)
     import qt5reactor
-    # Using the Qt4 reactor wrapper from https://github.com/ghtdak/qtreactor
+    # Using the Qt5 reactor wrapper from https://github.com/ghtdak/qtreactor
     qt5reactor.install()
 
     # DO NOT move the following import to the top!

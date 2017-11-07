@@ -2,6 +2,7 @@ import copy
 import numpy
 import pylab
 import functools
+import logging
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -125,11 +126,13 @@ class Plotter2DWidget(PlotterBase):
         zmin_temp = self.zmin if self.zmin else MIN_Z
         zmax_temp = self.zmax
         # self.scale predefined in the baseclass
+        # in numpy > 1.12 power(int, -int) raises ValueException
+        # "Integers to negative integer powers are not allowed."
         if self.scale == 'log_{10}':
             if self.zmin is not None:
-                zmin_temp = numpy.power(10, self.zmin)
+                zmin_temp = numpy.power(10.0, self.zmin)
             if self.zmax is not None:
-                zmax_temp = numpy.power(10, self.zmax)
+                zmax_temp = numpy.power(10.0, self.zmax)
         else:
             if self.zmin is not None:
                 # min log value: no log(negative)
@@ -288,6 +291,7 @@ class Plotter2DWidget(PlotterBase):
         new_plot.id = "Circ avg " + self.data.name
         new_plot.is_data = True
         GuiUtils.updateModelItemWithPlot(self._item, new_plot, new_plot.id)
+
         self.manager.communicator.plotUpdateSignal.emit([new_plot])
 
     def setSlicer(self, slicer):

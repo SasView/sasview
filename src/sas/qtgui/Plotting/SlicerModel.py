@@ -1,4 +1,5 @@
 from PyQt5 import QtGui
+from PyQt5 import QtCore
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 

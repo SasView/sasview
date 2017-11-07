@@ -610,14 +610,14 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             'filter': 'SLD file (*.sld)',
             'options': QtWidgets.QFileDialog.DontUseNativeDialog}
         # Query user for filename.
-        filename = str(QtWidgets.QFileDialog.getSaveFileName(**kwargs))
+        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+        filename = name_tuple[0]
         if filename:
             try:
-                if os.path.splitext(filename)[1].lower() == '.sld':
-                    sas_gen.SLDReader().write(filename, self.sld_data)
-                else:
-                    sas_gen.SLDReader().write('.'.join((filename, 'sld')),
-                                              self.sld_data)
+                _, extension = os.path.splitext(filename)
+                if not extension:
+                    filename = '.'.join((filename, 'sld'))
+                sas_gen.SLDReader().write(filename, self.sld_data)
             except:
                 raise
 

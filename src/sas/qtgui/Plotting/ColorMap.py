@@ -12,7 +12,7 @@ import numpy
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from sas.qtgui.Plotting.PlotterData import Data2D
-from sas.qtgui.Utilities.GuiUtils import formatNumber
+from sas.qtgui.Utilities.GuiUtils import formatNumber, DoubleValidator
 from .rangeSlider import RangeSlider
 
 DEFAULT_MAP = 'jet'
@@ -50,10 +50,10 @@ class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
         self.initColorMap()
 
         # Initialize validators on amplitude textboxes
-        validator_min = QtGui.QDoubleValidator(self.txtMinAmplitude)
+        validator_min = DoubleValidator(self.txtMinAmplitude)
         validator_min.setNotation(0)
         self.txtMinAmplitude.setValidator(validator_min)
-        validator_max = QtGui.QDoubleValidator(self.txtMaxAmplitude)
+        validator_max = DoubleValidator(self.txtMaxAmplitude)
         validator_max.setNotation(0)
         self.txtMaxAmplitude.setValidator(validator_max)
 
