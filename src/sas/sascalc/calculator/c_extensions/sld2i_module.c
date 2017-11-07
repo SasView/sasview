@@ -3,7 +3,7 @@
  */
 #include <Python.h>
 #include <stdio.h>
-#include <sld2i.hh>
+#include <sld2i.h>
 
 #if PY_MAJOR_VERSION < 3
 typedef void (*PyCapsule_Destructor)(PyObject *);
@@ -34,15 +34,14 @@ typedef void (*PyCObject_Destructor)(void *);
  */
 void
 del_sld2i(PyObject *obj){
-	GenI* sld2i = static_cast<GenI *>(PyCapsule_GetPointer(obj, "GenI"));
-	delete sld2i;
-	return;
+	GenI* sld2i = (GenI *)(PyCapsule_GetPointer(obj, "GenI"));
+	PyMem_Free((void *)sld2i);
 }
 
 /**
  * Create a GenI as a python object by supplying arrays
  */
-PyObject * new_GenI(PyObject *, PyObject *args) {
+PyObject * new_GenI(PyObject *self, PyObject *args) {
 	PyObject *x_val_obj;
 	PyObject *y_val_obj;
 	PyObject *z_val_obj;
@@ -78,14 +77,17 @@ PyObject * new_GenI(PyObject *, PyObject *args) {
 	OUTVECTOR(my_val_obj, my_val, n_x);
 	OUTVECTOR(mz_val_obj, mz_val, n_x);
 	OUTVECTOR(vol_pix_obj, vol_pix, n_x);
-	GenI* sld2i = new GenI(n_pix,x_val,y_val,z_val,sldn_val,mx_val,my_val,mz_val,vol_pix,inspin,outspin,stheta);
+	GenI* sld2i =  PyMem_Malloc(sizeof(GenI));
+	if (sld2i != NULL) {
+		initGenI(sld2i, n_pix,x_val,y_val,z_val,sldn_val,mx_val,my_val,mz_val,vol_pix,inspin,outspin,stheta);
+	}
 	return PyCapsule_New(sld2i, "GenI", del_sld2i);
 }
 
 /**
  * GenI the given input (2D) according to a given object
  */
-PyObject * genicom_inputXY(PyObject *, PyObject *args) {
+PyObject * genicom_inputXY(PyObject *self, PyObject *args) {
 	int npoints;
 	PyObject *qx_obj;
 	double *qx;
@@ -105,10 +107,9 @@ PyObject * genicom_inputXY(PyObject *, PyObject *args) {
 	//if(n_in!=n_out) return Py_BuildValue("i",-1);
 
 	// Set the array pointers
-	void *temp = PyCapsule_GetPointer(gen_obj, "GenI");
-	GenI* s = static_cast<GenI *>(temp);
+	GenI* sld2i = (GenI *)PyCapsule_GetPointer(gen_obj, "GenI");
 
-	s->genicomXY(npoints, qx, qy, I_out);
+	genicomXY(sld2i, npoints, qx, qy, I_out);
 	//return PyCObject_FromVoidPtr(s, del_genicom);
 	return Py_BuildValue("i",1);
 }
@@ -116,7 +117,7 @@ PyObject * genicom_inputXY(PyObject *, PyObject *args) {
 /**
  * GenI the given 1D input according to a given object
  */
-PyObject * genicom_input(PyObject *, PyObject *args) {
+PyObject * genicom_input(PyObject *self, PyObject *args) {
 	int npoints;
 	PyObject *q_obj;
 	double *q;
@@ -133,10 +134,9 @@ PyObject * genicom_input(PyObject *, PyObject *args) {
 	//if(n_in!=n_out) return Py_BuildValue("i",-1);
 
 	// Set the array pointers
-	void *temp = PyCapsule_GetPointer(gen_obj, "GenI");
-	GenI* s = static_cast<GenI *>(temp);
+	GenI *sld2i = (GenI *)PyCapsule_GetPointer(gen_obj, "GenI");
 
-	s->genicom(npoints, q, I_out);
+	genicom(sld2i, npoints, q, I_out);
 	//return PyCObject_FromVoidPtr(s, del_genicom);
 	return Py_BuildValue("i",1);
 }

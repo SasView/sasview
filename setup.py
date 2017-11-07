@@ -241,8 +241,8 @@ package_dir["sas.sascalc.calculator"] = os.path.join(
 packages.extend(["sas.sascalc.calculator", "sas.sascalc.calculator.core"])
 ext_modules.append(Extension("sas.sascalc.calculator.core.sld2i",
                              sources=[
-                                 os.path.join(gen_dir, "sld2i_module.cpp"),
-                                 os.path.join(gen_dir, "sld2i.cpp"),
+                                 os.path.join(gen_dir, "sld2i_module.c"),
+                                 os.path.join(gen_dir, "sld2i.c"),
                                  os.path.join(gen_dir, "libfunc.c"),
                                  os.path.join(gen_dir, "librefl.c"),
                              ],
