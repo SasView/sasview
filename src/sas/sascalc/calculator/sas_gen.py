@@ -1056,8 +1056,8 @@ def test_load():
         raise ValueError("file(s) not found: %r, %r"%(tfpath, ofpath))
     reader = SLDReader()
     oreader = OMFReader()
-    output = decode(reader.read(tfpath))
-    ooutput = decode(oreader.read(ofpath))
+    output = reader.read(tfpath)
+    ooutput = oreader.read(ofpath)
     foutput = OMF2SLD()
     foutput.set_data(ooutput)
 
@@ -1086,6 +1086,17 @@ def test_load():
     colors = np.column_stack((color_x, color_y, color_z))
     plt.show()
 
+def test_save():
+    ofpath = _get_data_path("coordinate_data", "A_Raw_Example-1.omf")
+    if not os.path.isfile(ofpath):
+        raise ValueError("file(s) not found: %r"%(ofpath,))
+    oreader = OMFReader()
+    omfdata = oreader.read(ofpath)
+    omf2sld = OMF2SLD()
+    omf2sld.set_data(omfdata)
+    writer = SLDReader()
+    writer.write("out.txt", omf2sld.output)
+
 def test():
     """
         Test code
@@ -1094,18 +1105,15 @@ def test():
     if not os.path.isfile(ofpath):
         raise ValueError("file(s) not found: %r"%(ofpath,))
     oreader = OMFReader()
-    ooutput = decode(oreader.read(ofpath))
-    foutput = OMF2SLD()
-    foutput.set_data(ooutput)
-    writer = SLDReader()
-    writer.write("out.txt", foutput.output)
+    omfdata = oreader.read(ofpath)
+    omf2sld = OMF2SLD()
+    omf2sld.set_data(omfdata)
     model = GenSAS()
-    model.set_sld_data(foutput.output)
-    x = np.arange(1000)/10000. + 1e-5
-    y = np.arange(1000)/10000. + 1e-5
-    i = np.zeros(1000)
-    model.runXY([x, y, i])
+    model.set_sld_data(omf2sld.output)
+    x = np.linspace(0, 0.1, 11)[1:]
+    model.runXY([x, x])
 
 if __name__ == "__main__":
     #test_load()
+    #test_save()
     test()
