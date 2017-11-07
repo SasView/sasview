@@ -105,9 +105,9 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
         self.txtQy.editingFinished.connect(self.checkQx_y)
 
         # double validator
-        self.txtSource2SampleDistance.setValidator(QtGui.QDoubleValidator())
-        self.txtSample2DetectorDistance.setValidator(QtGui.QDoubleValidator())
-        self.txtSampleOffset.setValidator(QtGui.QDoubleValidator())
+        self.txtSource2SampleDistance.setValidator(GuiUtils.DoubleValidator())
+        self.txtSample2DetectorDistance.setValidator(GuiUtils.DoubleValidator())
+        self.txtSampleOffset.setValidator(GuiUtils.DoubleValidator())
 
         # call compute to calculate with default values
         self.createTemplate2DPlot()

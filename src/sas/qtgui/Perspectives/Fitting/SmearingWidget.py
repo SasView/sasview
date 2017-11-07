@@ -7,6 +7,7 @@ from PyQt5 import QtWidgets
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.SmearingWidgetUI import Ui_SmearingWidgetUI
@@ -50,8 +51,8 @@ class SmearingWidget(QtWidgets.QWidget, Ui_SmearingWidgetUI):
 
         self.parent = parent
         # Let only floats in the line edits
-        self.txtSmearDown.setValidator(QtGui.QDoubleValidator())
-        self.txtSmearUp.setValidator(QtGui.QDoubleValidator())
+        self.txtSmearDown.setValidator(GuiUtils.DoubleValidator())
+        self.txtSmearUp.setValidator(GuiUtils.DoubleValidator())
 
         # Attach slots
         self.cbSmearing.currentIndexChanged.connect(self.onIndexChange)

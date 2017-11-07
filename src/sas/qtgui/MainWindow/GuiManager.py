@@ -7,7 +7,7 @@ import webbrowser
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from PyQt5.QtCore import Qt, QLocale
+from PyQt5.QtCore import Qt, QLocale, QUrl
 from PyQt5.QtWebKitWidgets import QWebView
 
 from twisted.internet import reactor
@@ -54,6 +54,9 @@ class GuiManager(object):
         """
         self._workspace = parent
         self._parent = parent
+
+        # Decide on a locale
+        QLocale.setDefault(QLocale('en_US'))
 
         # Add signal callbacks
         self.addCallbacks()

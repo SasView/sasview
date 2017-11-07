@@ -8,6 +8,8 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5 import QtWebKitWidgets
 
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+
 # Local UI
 from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.SlicerParametersUI import Ui_SlicerParametersUI
@@ -125,9 +127,9 @@ class PositiveDoubleEditor(QtWidgets.QLineEdit):
             # Initialize the editor object
             super(PositiveDoubleEditor, self).__init__(parent)
             self.setAutoFillBackground(True)
-            validator = QtGui.QDoubleValidator()
+            validator = GuiUtils.DoubleValidator()
             # Don't use the scientific notation, cause 'e'.
-            validator.setNotation(QtGui.QDoubleValidator.StandardNotation)
+            validator.setNotation(GuiUtils.DoubleValidator.StandardNotation)
 
             self.setValidator(validator)
 

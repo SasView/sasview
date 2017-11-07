@@ -4,12 +4,6 @@ from PyQt5 import QtWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
-class CommaLessValidator(QtGui.QDoubleValidator):
-    """
-    Custom double validator which doesn't allow for commas to be used as decimal point
-    """
-    pass
-
 class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
     """
     Custom delegate for appearance and behavior control of the model view
@@ -86,7 +80,7 @@ class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
             return 0
         if index.column() == self.param_value: #only in the value column
             editor = QtWidgets.QLineEdit(widget)
-            validator = QtGui.QDoubleValidator()
+            validator = GuiUtils.DoubleValidator()
             editor.setValidator(validator)
             return editor
         if index.column() in [self.param_property, self.param_error]:
@@ -167,7 +161,7 @@ class PolyViewDelegate(QtWidgets.QStyledItemDelegate):
             return None
         elif index.column() in self.editableParameters():
             self.editor = QtWidgets.QLineEdit(widget)
-            validator = QtGui.QDoubleValidator()
+            validator = GuiUtils.DoubleValidator()
             self.editor.setValidator(validator)
             return self.editor
         else:
@@ -245,7 +239,7 @@ class MagnetismViewDelegate(QtWidgets.QStyledItemDelegate):
             return 0
         if index.column() in self.editableParameters():
             editor = QtWidgets.QLineEdit(widget)
-            validator = QtGui.QDoubleValidator()
+            validator = GuiUtils.DoubleValidator()
             editor.setValidator(validator)
             return editor
         else:

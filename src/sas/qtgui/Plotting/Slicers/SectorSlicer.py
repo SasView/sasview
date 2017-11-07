@@ -2,6 +2,7 @@
     Sector interactor
 """
 import numpy
+import logging
 
 from .BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.PlotterData import Data1D
@@ -166,6 +167,7 @@ class SectorInteractor(BaseInteractor, SlicerModel):
         new_plot.id = "SectorQ" + self.base.data.name
         new_plot.is_data = True
         GuiUtils.updateModelItemWithPlot(self._item, new_plot, new_plot.id)
+
         self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
 
         if self.update_model:

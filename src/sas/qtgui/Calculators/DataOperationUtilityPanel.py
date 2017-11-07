@@ -55,7 +55,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         self.cmdCompute.setEnabled(False)
 
         # validator for coefficient
-        self.txtNumber.setValidator(QtGui.QDoubleValidator())
+        self.txtNumber.setValidator(GuiUtils.DoubleValidator())
 
         self.layoutOutput = QtWidgets.QHBoxLayout()
         self.layoutData1 = QtWidgets.QHBoxLayout()

@@ -7,7 +7,7 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
-from sas.qtgui.Utilities.GuiUtils import formatNumber
+from sas.qtgui.Utilities.GuiUtils import formatNumber, DoubleValidator
 
 from sas.qtgui.Plotting import Fittings
 from sas.qtgui.Plotting import DataTransform
@@ -42,8 +42,8 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         self.x_is_log = self.xLabel == "log10(x)"
         self.y_is_log = self.yLabel == "log10(y)"
 
-        self.txtFitRangeMin.setValidator(QtGui.QDoubleValidator())
-        self.txtFitRangeMax.setValidator(QtGui.QDoubleValidator())
+        self.txtFitRangeMin.setValidator(DoubleValidator())
+        self.txtFitRangeMax.setValidator(DoubleValidator())
 
         # Default values in the line edits
         self.txtA.setText("1")
@@ -157,12 +157,12 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         # load tempy with the minimum transformation
         y_model = self.model.run(xmin)
         tempx.append(xminView)
-        tempy.append(numpy.power(10, y_model) if self.y_is_log else y_model)
+        tempy.append(numpy.power(10.0, y_model) if self.y_is_log else y_model)
 
         # load tempy with the maximum transformation
         y_model = self.model.run(xmax)
         tempx.append(xmaxView)
-        tempy.append(numpy.power(10, y_model) if self.y_is_log else y_model)
+        tempy.append(numpy.power(10.0, y_model) if self.y_is_log else y_model)
 
         # Set the fit parameter display when  FitDialog is opened again
         self.Avalue = cstA
@@ -246,11 +246,11 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         elif self.xLabel == "x^(4)":
             return numpy.sqrt(numpy.sqrt(x))
         elif self.xLabel == "log10(x)":
-            return numpy.power(10, x)
+            return numpy.power(10.0, x)
         elif self.xLabel == "ln(x)":
             return numpy.exp(x)
         elif self.xLabel == "log10(x^(4))":
-            return numpy.sqrt(numpy.sqrt(numpy.power(10, x)))
+            return numpy.sqrt(numpy.sqrt(numpy.power(10.0, x)))
         return x
 
 

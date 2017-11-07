@@ -5,6 +5,8 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+
 # Local UI
 from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.BoxSumUI import Ui_BoxSumUI
@@ -16,10 +18,10 @@ class BoxSum(QtWidgets.QDialog, Ui_BoxSumUI):
         self.setupUi(self)
         assert isinstance(model, QtGui.QStandardItemModel)
 
-        self.txtBoxHeight.setValidator(QtGui.QDoubleValidator())
-        self.txtBoxWidth.setValidator(QtGui.QDoubleValidator())
-        self.txtCenterX.setValidator(QtGui.QDoubleValidator())
-        self.txtCenterY.setValidator(QtGui.QDoubleValidator())
+        self.txtBoxHeight.setValidator(GuiUtils.DoubleValidator())
+        self.txtBoxWidth.setValidator(GuiUtils.DoubleValidator())
+        self.txtCenterX.setValidator(GuiUtils.DoubleValidator())
+        self.txtCenterY.setValidator(GuiUtils.DoubleValidator())
 
         self.model = model
         self.mapper = QtWidgets.QDataWidgetMapper()
