@@ -29,9 +29,7 @@ def is_float(value):
 
 # TODO: Remove data
 # TODO: Modify plot references, don't just send new
-# TODO: Explorer button - link to PR from AW
 # TODO: Update help with batch capabilities
-# TODO: Window should not be fixed size
 # TODO: Easy way to scroll through results - no tabs in window(?) - 'spreadsheet'
 # TODO: Method to export results in some meaningful way
 class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
@@ -134,6 +132,7 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         self.dataList.currentIndexChanged.connect(self.displayChange)
         self.calculateAllButton.clicked.connect(self.startThreadAll)
         self.calculateThisButton.clicked.connect(self.startThread)
+        self.removeButton.clicked.connect(self.removeData)
         self.helpButton.clicked.connect(self.help)
         self.estimateBgd.toggled.connect(self.toggleBgd)
         self.manualBgd.toggled.connect(self.toggleBgd)
@@ -206,6 +205,7 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
                                WIDGETS.W_SIGMA_POS_FRACTION)
 
         # Main Buttons
+        self.mapper.addMapping(self.removeButton, WIDGETS.W_REMOVE)
         self.mapper.addMapping(self.calculateAllButton, WIDGETS.W_CALCULATE_ALL)
         self.mapper.addMapping(self.calculateThisButton,
                                WIDGETS.W_CALCULATE_VISIBLE)
@@ -265,6 +265,7 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         """
         Enable buttons when data is present, else disable them
         """
+        self.removeButton.setEnabled(self.logic.data_is_loaded)
         self.explorerButton.setEnabled(self.logic.data_is_loaded)
         self.calculateAllButton.setEnabled(self.logic.data_is_loaded)
         self.calculateThisButton.setEnabled(self.logic.data_is_loaded)
@@ -272,7 +273,8 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
     def populateDataComboBox(self, filename, data_ref):
         """
         Append a new file name to the data combobox
-        :param data: Data1D object
+        :param filename: data filename
+        :param data_ref: QStandardItem reference for data set to be added
         """
         qt_item = QtCore.QString.fromUtf8(filename)
         ref = QtCore.QVariant(data_ref)
@@ -291,6 +293,14 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
     def displayChange(self):
         variant_ref = self.dataList.itemData(self.dataList.currentIndex())
         self.setCurrentData(variant_ref.toPyObject())
+
+    def removeData(self):
+        """Remove the existing data reference from the P(r) Persepective"""
+        self._data_list.pop(self._data)
+        self.pr_plot_list.pop(self._data)
+        self.data_plot_list.pop(self._data)
+        self.dataList.removeItem(self.dataList.currentIndex())
+        self.dataList.setCurrentIndex(0)
 
     ######################################################################
     # GUI Interaction Events
@@ -551,7 +561,7 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         self.model.setItem(WIDGETS.W_I_ZERO,
                            QtGui.QStandardItem(str(pr.iq0(out))))
         self.model.setItem(WIDGETS.W_BACKGROUND_INPUT,
-                           QtGui.QStandardItem("{:.3f}".format(pr.background)))
+                           QtGui.QStandardItem("{:.3f}".format(pr.est_bck)))
         self.model.setItem(WIDGETS.W_BACKGROUND_OUTPUT,
                            QtGui.QStandardItem(str(pr.background)))
         self.model.setItem(WIDGETS.W_CHI_SQUARED,
