@@ -180,7 +180,7 @@ class GuiManager(object):
         Respond to change of the perspective signal
         """
         # Close the previous perspective
-        if self._current_perspective:
+        if self._current_perspective is not None:
             self._current_perspective.setClosable()
             self._current_perspective.close()
         # Default perspective
@@ -647,7 +647,7 @@ class GuiManager(object):
     def actionInversion(self):
         """
         """
-        self._current_perspective = self.perspectiveChanged("PrInversion")
+        self.perspectiveChanged("Inversion")
         pass
 
     def actionInvariant(self):
