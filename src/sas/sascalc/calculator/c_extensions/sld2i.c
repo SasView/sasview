@@ -24,10 +24,11 @@ Computes the (magnetic) scattering form sld (n and m) profile
  * @param out_spin: ratio of up spin in Iout
  * @param s_theta: angle (from x-axis) of the up spin in degree
  */
-void initGenI(GenI* this, int npix, double* x, double* y, double* z, double* sldn,
+void initGenI(GenI* this, int is_avg, int npix, double* x, double* y, double* z, double* sldn,
 			double* mx, double* my, double* mz, double* voli,
 			double in_spin, double out_spin,
 			double s_theta) {
+	this->is_avg = is_avg;
 	this->n_pix = npix;
 	this->x_val = x;
 	this->y_val = y;
@@ -72,6 +73,7 @@ void genicomXY(GenI* this, int npoints, double *qx, double *qy, double *I_out){
 
 	// Loop over q-values and multiply apply matrix
 
+	//printf("npoints: %d, npix: %d\n", npoints, this->n_pix);
 	for(int i=0; i<npoints; i++){
 		//I_out[i] = 0.0;
 		sumj_uu = cassign(0.0, 0.0);
@@ -149,20 +151,18 @@ void genicom(GenI* this, int npoints, double *q, double *I_out){
 	//npoints is given negative for angular averaging
 	// Assumes that q doesn't have qz component and sld_n is all real
 	//double Pi = 4.0*atan(1.0);
-	int is_sym = this->n_pix < 0;
 	double qr = 0.0;
 	double sumj;
 	double sld_j = 0.0;
 	double count = 0.0;
-	int n_pix = is_sym ? -this->n_pix : this->n_pix;
 	//Assume that pixel volumes are given in vol_pix in A^3 unit
 	// Loop over q-values and multiply apply matrix
 	for(int i=0; i<npoints; i++){
 		sumj =0.0;
-		for(int j=0; j<n_pix; j++){
+		for(int j=0; j<this->n_pix; j++){
 			//Isotropic: Assumes all slds are real (no magnetic)
 			//Also assumes there is no polarization: No dependency on spin
-			if (is_sym == 1){
+			if (this->is_avg == 1){
 				// approximation for a spherical symmetric particle
 				qr = sqrt(this->x_val[j]*this->x_val[j]+this->y_val[j]*this->y_val[j]+this->z_val[j]*this->z_val[j])*q[i];
 				if (qr > 0.0){
@@ -176,7 +176,7 @@ void genicom(GenI* this, int npoints, double *q, double *I_out){
 			else{
 				//full calculation
 				//pragma omp parallel for
-				for(int k=0; k<n_pix; k++){
+				for(int k=0; k<this->n_pix; k++){
 					sld_j =  this->sldn_val[j] * this->sldn_val[k] * this->vol_pix[j] * this->vol_pix[k];
 					qr = (this->x_val[j]-this->x_val[k])*(this->x_val[j]-this->x_val[k])+
 						      (this->y_val[j]-this->y_val[k])*(this->y_val[j]-this->y_val[k])+
@@ -195,7 +195,7 @@ void genicom(GenI* this, int npoints, double *q, double *I_out){
 			}
 		}
 		I_out[i] = sumj;
-		if (is_sym == 1){
+		if (this->is_avg == 1) {
 			I_out[i] *= sumj;
 		}
 		I_out[i] *= (1.0E+8 / count); //in cm (unit) / number; //to be multiplied by vol_pix

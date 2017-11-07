@@ -34,7 +34,11 @@ typedef void (*PyCObject_Destructor)(void *);
  */
 void
 del_sld2i(PyObject *obj){
+#if PY_MAJOR_VERSION < 3
+	GenI* sld2i = (GenI *)obj;
+#else
 	GenI* sld2i = (GenI *)(PyCapsule_GetPointer(obj, "GenI"));
+#endif
 	PyMem_Free((void *)sld2i);
 }
 
@@ -50,12 +54,8 @@ PyObject * new_GenI(PyObject *self, PyObject *args) {
 	PyObject *my_val_obj;
 	PyObject *mz_val_obj;
 	PyObject *vol_pix_obj;
-	Py_ssize_t n_x;
-	//PyObject rlimit_obj;
-	//PyObject npoints_obj;
-	//PyObject nrbins_obj;
-	//PyObject nphibins_obj;
-	int n_pix;
+	Py_ssize_t n_x, n_y, n_z, n_sld, n_mx, n_my, n_mz, n_vol_pix;
+	int is_avg;
 	double* x_val;
 	double* y_val;
 	double* z_val;
@@ -68,48 +68,48 @@ PyObject * new_GenI(PyObject *self, PyObject *args) {
 	double outspin;
 	double stheta;
 
-	if (!PyArg_ParseTuple(args, "iOOOOOOOOddd", &n_pix, &x_val_obj, &y_val_obj, &z_val_obj, &sldn_val_obj, &mx_val_obj, &my_val_obj, &mz_val_obj, &vol_pix_obj, &inspin, &outspin, &stheta)) return NULL;
-	OUTVECTOR(x_val_obj, x_val, n_x);
-	OUTVECTOR(y_val_obj, y_val, n_x);
-	OUTVECTOR(z_val_obj, z_val, n_x);
-	OUTVECTOR(sldn_val_obj, sldn_val, n_x);
-	OUTVECTOR(mx_val_obj, mx_val, n_x);
-	OUTVECTOR(my_val_obj, my_val, n_x);
-	OUTVECTOR(mz_val_obj, mz_val, n_x);
-	OUTVECTOR(vol_pix_obj, vol_pix, n_x);
-	GenI* sld2i =  PyMem_Malloc(sizeof(GenI));
+	if (!PyArg_ParseTuple(args, "iOOOOOOOOddd", &is_avg, &x_val_obj, &y_val_obj, &z_val_obj, &sldn_val_obj, &mx_val_obj, &my_val_obj, &mz_val_obj, &vol_pix_obj, &inspin, &outspin, &stheta)) return NULL;
+	INVECTOR(x_val_obj, x_val, n_x);
+	INVECTOR(y_val_obj, y_val, n_y);
+	INVECTOR(z_val_obj, z_val, n_z);
+	INVECTOR(sldn_val_obj, sldn_val, n_sld);
+	INVECTOR(mx_val_obj, mx_val, n_mx);
+	INVECTOR(my_val_obj, my_val, n_my);
+	INVECTOR(mz_val_obj, mz_val, n_mz);
+	INVECTOR(vol_pix_obj, vol_pix, n_vol_pix);
+	GenI* sld2i = PyMem_Malloc(sizeof(GenI));
+	//printf("sldi:%p\n", sld2i);
 	if (sld2i != NULL) {
-		initGenI(sld2i, n_pix,x_val,y_val,z_val,sldn_val,mx_val,my_val,mz_val,vol_pix,inspin,outspin,stheta);
+		initGenI(sld2i,is_avg,n_x,x_val,y_val,z_val,sldn_val,mx_val,my_val,mz_val,vol_pix,inspin,outspin,stheta);
 	}
-	return PyCapsule_New(sld2i, "GenI", del_sld2i);
+	PyObject *obj = PyCapsule_New(sld2i, "GenI", del_sld2i);
+	//printf("constructed %p\n", obj);
+	return obj;
 }
 
 /**
  * GenI the given input (2D) according to a given object
  */
 PyObject * genicom_inputXY(PyObject *self, PyObject *args) {
-	int npoints;
-	PyObject *qx_obj;
-	double *qx;
-	PyObject *qy_obj;
-	double *qy;
-	PyObject *I_out_obj;
-	Py_ssize_t n_out;
-	double *I_out;
 	PyObject *gen_obj;
+	PyObject *qx_obj;
+	PyObject *qy_obj;
+	PyObject *I_out_obj;
+	Py_ssize_t n_qx, n_qy, n_out;
+	double *qx;
+	double *qy;
+	double *I_out;
 
-	if (!PyArg_ParseTuple(args, "OiOOO",  &gen_obj, &npoints, &qx_obj, &qy_obj, &I_out_obj)) return NULL;
-	OUTVECTOR(qx_obj, qx, n_out);
-	OUTVECTOR(qy_obj, qy, n_out);
+	if (!PyArg_ParseTuple(args, "OOOO",  &gen_obj, &qx_obj, &qy_obj, &I_out_obj)) return NULL;
+	GenI* sld2i = (GenI *)PyCapsule_GetPointer(gen_obj, "GenI");
+	INVECTOR(qx_obj, qx, n_qx);
+	INVECTOR(qy_obj, qy, n_qy);
 	OUTVECTOR(I_out_obj, I_out, n_out);
 
 	// Sanity check
-	//if(n_in!=n_out) return Py_BuildValue("i",-1);
+	//if(n_q!=n_out) return Py_BuildValue("i",-1);
 
-	// Set the array pointers
-	GenI* sld2i = (GenI *)PyCapsule_GetPointer(gen_obj, "GenI");
-
-	genicomXY(sld2i, npoints, qx, qy, I_out);
+	genicomXY(sld2i, n_qx, qx, qy, I_out);
 	//return PyCObject_FromVoidPtr(s, del_genicom);
 	return Py_BuildValue("i",1);
 }
@@ -118,26 +118,22 @@ PyObject * genicom_inputXY(PyObject *self, PyObject *args) {
  * GenI the given 1D input according to a given object
  */
 PyObject * genicom_input(PyObject *self, PyObject *args) {
-	int npoints;
-	PyObject *q_obj;
-	double *q;
-	PyObject *I_out_obj;
-	Py_ssize_t n_out;
-	double *I_out;
 	PyObject *gen_obj;
+	PyObject *q_obj;
+	PyObject *I_out_obj;
+	Py_ssize_t n_q, n_out;
+	double *q;
+	double *I_out;
 
-	if (!PyArg_ParseTuple(args, "OiOO",  &gen_obj, &npoints, &q_obj, &I_out_obj)) return NULL;
-	OUTVECTOR(q_obj, q, n_out);
+	if (!PyArg_ParseTuple(args, "OOO",  &gen_obj, &q_obj, &I_out_obj)) return NULL;
+	GenI *sld2i = (GenI *)PyCapsule_GetPointer(gen_obj, "GenI");
+	INVECTOR(q_obj, q, n_q);
 	OUTVECTOR(I_out_obj, I_out, n_out);
 
 	// Sanity check
-	//if(n_in!=n_out) return Py_BuildValue("i",-1);
+	//if (n_q!=n_out) return Py_BuildValue("i",-1);
 
-	// Set the array pointers
-	GenI *sld2i = (GenI *)PyCapsule_GetPointer(gen_obj, "GenI");
-
-	genicom(sld2i, npoints, q, I_out);
-	//return PyCObject_FromVoidPtr(s, del_genicom);
+	genicom(sld2i, n_q, q, I_out);
 	return Py_BuildValue("i",1);
 }
 

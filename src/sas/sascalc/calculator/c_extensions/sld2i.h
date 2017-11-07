@@ -9,6 +9,7 @@ Computes the (magnetic) scattering form sld (n and m) profile
  */
 typedef struct {
 	// vectors
+	int is_avg;
 	int n_pix;
 	double* x_val;
 	double* y_val;
@@ -25,8 +26,8 @@ typedef struct {
 } GenI;
 
 // Constructor
-void initGenI(GenI*, int npix, double* x, double* y, double* z, double* sldn,
-		double* mx, double* my, double* mz, double* voli,
+void initGenI(GenI*, int is_avg, int npix, double* x, double* y, double* z,
+		double* sldn, double* mx, double* my, double* mz, double* voli,
 		double in_spin, double out_spin,
 		double s_theta);
 // compute function
