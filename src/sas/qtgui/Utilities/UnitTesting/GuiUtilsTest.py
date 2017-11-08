@@ -2,8 +2,8 @@ import sys
 import unittest
 import webbrowser
 
-from PyQt4 import QtCore
-from PyQt4 import QtGui
+from PyQt5 import QtCore
+from PyQt5 import QtGui, QtWidgets
 from unittest.mock import MagicMock
 
 # set up import paths
@@ -18,8 +18,8 @@ from sas.qtgui.Plotting.PlotterData import Data2D
 # Tested module
 from sas.qtgui.Utilities.GuiUtils import *
 
-if not QtGui.QApplication.instance():
-    app = QtGui.QApplication(sys.argv)
+if not QtWidgets.QApplication.instance():
+    app = QtWidgets.QApplication(sys.argv)
 
 class GuiUtilsTest(unittest.TestCase):
     '''Test the GUI Utilities methods'''
@@ -89,11 +89,11 @@ class GuiUtilsTest(unittest.TestCase):
 
         # Make sure test_item got all data added
         self.assertEqual(test_item.child(0).text(), name)
-        list_from_item = test_item.child(0).data().toList()
+        list_from_item = test_item.child(0).data()
         self.assertIsInstance(list_from_item, list)
-        self.assertEqual(list_from_item[0].toPyObject(), test_list[0])
-        self.assertEqual(list_from_item[1].toPyObject(), test_list[1])
-        self.assertEqual(list_from_item[2].toPyObject(), test_list[2])
+        self.assertEqual(list_from_item[0], test_list[0])
+        self.assertEqual(list_from_item[1], test_list[1])
+        self.assertEqual(list_from_item[2], test_list[2])
 
     def testupdateModelItemWithPlot(self):
         """
@@ -110,7 +110,7 @@ class GuiUtilsTest(unittest.TestCase):
         # Make sure test_item got all data added
         self.assertEqual(test_item.child(0).text(), name)
         self.assertTrue(test_item.child(0).isCheckable())
-        list_from_item = test_item.child(0).child(0).data().toPyObject()
+        list_from_item = test_item.child(0).child(0).data()
         self.assertIsInstance(list_from_item, list)
         self.assertEqual(str(list_from_item[0]), test_list[0])
         self.assertEqual(str(list_from_item[1]), test_list[1])
@@ -304,7 +304,7 @@ class GuiUtilsTest(unittest.TestCase):
 
         # Test the .txt format
         file_name = "test123_out.txt"
-        QtGui.QFileDialog.getSaveFileName = MagicMock(return_value=file_name)
+        QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
         data.filename = "test123.txt"
         saveData1D(data)
         self.assertTrue(os.path.isfile(file_name))
@@ -312,7 +312,7 @@ class GuiUtilsTest(unittest.TestCase):
 
         # Test the .xml format
         file_name = "test123_out.xml"
-        QtGui.QFileDialog.getSaveFileName = MagicMock(return_value=file_name)
+        QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
         data.filename = "test123.xml"
         saveData1D(data)
         self.assertTrue(os.path.isfile(file_name))
@@ -320,7 +320,7 @@ class GuiUtilsTest(unittest.TestCase):
 
         # Test the wrong format
         file_name = "test123_out.mp3"
-        QtGui.QFileDialog.getSaveFileName = MagicMock(return_value=file_name)
+        QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
         data.filename = "test123.mp3"
         saveData1D(data)
         self.assertFalse(os.path.isfile(file_name))
@@ -336,7 +336,7 @@ class GuiUtilsTest(unittest.TestCase):
 
         # Test the .txt format
         file_name = "test123_out.dat"
-        QtGui.QFileDialog.getSaveFileName = MagicMock(return_value=file_name)
+        QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
         data.filename = "test123.dat"
         saveData2D(data)
         self.assertTrue(os.path.isfile(file_name))
@@ -344,7 +344,7 @@ class GuiUtilsTest(unittest.TestCase):
 
         # Test the wrong format
         file_name = "test123_out.mp3"
-        QtGui.QFileDialog.getSaveFileName = MagicMock(return_value=file_name)
+        QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
         data.filename = "test123.mp3"
         saveData2D(data)
         self.assertFalse(os.path.isfile(file_name))

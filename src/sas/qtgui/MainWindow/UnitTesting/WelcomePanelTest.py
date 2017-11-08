@@ -1,7 +1,7 @@
 import sys
 import unittest
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 # set up import paths
 import path_prepare
@@ -9,8 +9,8 @@ import path_prepare
 # Local
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
 
-if not QtGui.QApplication.instance():
-    app = QtGui.QApplication(sys.argv)
+if not QtWidgets.QApplication.instance():
+    app = QtWidgets.QApplication(sys.argv)
 
 class WelcomePanelTest(unittest.TestCase):
     '''Test the WelcomePanel'''
@@ -26,13 +26,13 @@ class WelcomePanelTest(unittest.TestCase):
 
     def testDefaults(self):
         '''Test the GUI in its default state'''
-        self.assertIsInstance(self.widget, QtGui.QDialog)
+        self.assertIsInstance(self.widget, QtWidgets.QDialog)
         self.assertEqual(self.widget.windowTitle(), "Welcome")
         
     def testVersion(self):
         '''Test the version string'''
         version = self.widget.lblVersion
-        self.assertIsInstance(version, QtGui.QLabel)
+        self.assertIsInstance(version, QtWidgets.QLabel)
 
         self.assertIn("SasView", version.text())
         self.assertIn("Build:", version.text())

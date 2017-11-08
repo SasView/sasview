@@ -14,14 +14,11 @@ from MainWindow.UnitTesting import DroppableDataLoadWidgetTest
 from MainWindow.UnitTesting import GuiManagerTest
 from MainWindow.UnitTesting import MainWindowTest
 
-# Plotting
+## Plotting
 from Plotting.UnitTesting import AddTextTest
 from Plotting.UnitTesting import PlotHelperTest
-from Plotting.UnitTesting import PlotterBaseTest
-from Plotting.UnitTesting import PlotterTest
-from Plotting.UnitTesting import Plotter2DTest
-from Plotting.UnitTesting import ScalePropertiesTest
 from Plotting.UnitTesting import WindowTitleTest
+from Plotting.UnitTesting import ScalePropertiesTest
 from Plotting.UnitTesting import SetGraphRangeTest
 from Plotting.UnitTesting import LinearFitTest
 from Plotting.UnitTesting import PlotPropertiesTest
@@ -30,6 +27,9 @@ from Plotting.UnitTesting import ColorMapTest
 from Plotting.UnitTesting import BoxSumTest
 from Plotting.UnitTesting import SlicerModelTest
 from Plotting.UnitTesting import SlicerParametersTest
+from Plotting.UnitTesting import PlotterBaseTest
+from Plotting.UnitTesting import PlotterTest
+from Plotting.UnitTesting import Plotter2DTest
 
 # Calculators
 from Calculators.UnitTesting import KiessigCalculatorTest
@@ -48,7 +48,7 @@ from Utilities.UnitTesting import SasviewLoggerTest
 from UnitTesting import TestUtilsTest
 
 # Perspectives
-import path_prepare
+#import path_prepare
 from Perspectives.Fitting.UnitTesting import FittingWidgetTest
 from Perspectives.Fitting.UnitTesting import FittingPerspectiveTest
 from Perspectives.Fitting.UnitTesting import FittingLogicTest
@@ -59,12 +59,10 @@ from Perspectives.Fitting.UnitTesting import FittingOptionsTest
 def suite():
     suites = (
         # Plotting
-        unittest.makeSuite(PlotHelperTest.PlotHelperTest,             'test'),
-        unittest.makeSuite(PlotterTest.PlotterTest,                   'test'),
-        unittest.makeSuite(WindowTitleTest.WindowTitleTest,           'test'),
-        unittest.makeSuite(PlotterBaseTest.PlotterBaseTest,           'test'),
         unittest.makeSuite(Plotter2DTest.Plotter2DTest,               'test'),
+        unittest.makeSuite(PlotHelperTest.PlotHelperTest,             'test'),
         unittest.makeSuite(AddTextTest.AddTextTest,                   'test'),
+        unittest.makeSuite(WindowTitleTest.WindowTitleTest,           'test'),
         unittest.makeSuite(ScalePropertiesTest.ScalePropertiesTest,   'test'),
         unittest.makeSuite(SetGraphRangeTest.SetGraphRangeTest,       'test'),
         unittest.makeSuite(LinearFitTest.LinearFitTest,               'test'),
@@ -74,15 +72,18 @@ def suite():
         unittest.makeSuite(BoxSumTest.BoxSumTest,                     'test'),
         unittest.makeSuite(SlicerModelTest.SlicerModelTest,           'test'),
         unittest.makeSuite(SlicerParametersTest.SlicerParametersTest, 'test'),
+        unittest.makeSuite(PlotterBaseTest.PlotterBaseTest,           'test'),
+        unittest.makeSuite(PlotterTest.PlotterTest,                   'test'),
 
         # Main window
         unittest.makeSuite(DataExplorerTest.DataExplorerTest,  'test'),
-        unittest.makeSuite(GuiManagerTest.GuiManagerTest,      'test'),
+
         unittest.makeSuite(GuiUtilsTest.GuiUtilsTest,          'test'),
-        unittest.makeSuite(AboutBoxTest.AboutBoxTest,          'test'),
-        unittest.makeSuite(WelcomePanelTest.WelcomePanelTest,  'test'),
         unittest.makeSuite(DroppableDataLoadWidgetTest.DroppableDataLoadWidgetTest, 'test'),
         unittest.makeSuite(MainWindowTest.MainWindowTest,      'test'),
+        unittest.makeSuite(GuiManagerTest.GuiManagerTest,      'test'),
+        unittest.makeSuite(AboutBoxTest.AboutBoxTest,          'test'),
+        unittest.makeSuite(WelcomePanelTest.WelcomePanelTest,  'test'),
 
         # Utilities
         unittest.makeSuite(TestUtilsTest.TestUtilsTest,         'test'),

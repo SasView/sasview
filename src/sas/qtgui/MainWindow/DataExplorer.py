@@ -286,13 +286,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Assure this is indeed wanted
         delete_msg = "This operation will delete the checked data sets and all the dependents." +\
                      "\nDo you want to continue?"
-        reply = QtGui.QMessageBox.question(self,
+        reply = QtWidgets.QMessageBox.question(self,
                                            'Warning',
                                            delete_msg,
-                                           QtGui.QMessageBox.Yes,
-                                           QtGui.QMessageBox.No)
+                                           QtWidgets.QMessageBox.Yes,
+                                           QtWidgets.QMessageBox.No)
 
-        if reply == QtGui.QMessageBox.No:
+        if reply == QtWidgets.QMessageBox.No:
             return
 
         # Figure out which rows are checked
@@ -326,13 +326,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Assure this is indeed wanted
         delete_msg = "This operation will delete the checked data sets and all the dependents." +\
                      "\nDo you want to continue?"
-        reply = QtGui.QMessageBox.question(self,
+        reply = QtWidgets.QMessageBox.question(self,
                                            'Warning',
                                            delete_msg,
-                                           QtGui.QMessageBox.Yes,
-                                           QtGui.QMessageBox.No)
+                                           QtWidgets.QMessageBox.Yes,
+                                           QtWidgets.QMessageBox.No)
 
-        if reply == QtGui.QMessageBox.No:
+        if reply == QtWidgets.QMessageBox.No:
             return
 
         # Figure out which rows are checked
@@ -372,10 +372,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Which perspective has been selected?
         if len(selected_items) > 1 and not self._perspective().allowBatch():
             msg = self._perspective().title() + " does not allow multiple data."
-            msgbox = QtGui.QMessageBox()
-            msgbox.setIcon(QtGui.QMessageBox.Critical)
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setIcon(QtWidgets.QMessageBox.Critical)
             msgbox.setText(msg)
-            msgbox.setStandardButtons(QtGui.QMessageBox.Ok)
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
             retval = msgbox.exec_()
             return
 

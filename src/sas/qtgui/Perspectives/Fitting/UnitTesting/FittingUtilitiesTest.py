@@ -1,6 +1,6 @@
 import sys
 import unittest
-from PyQt4 import QtGui
+from PyQt5 import QtGui
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D

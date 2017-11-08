@@ -1,17 +1,18 @@
 import sys
 import unittest
-from PyQt4 import QtGui
-from PyQt4.QtTest import QTest
-from PyQt4.QtCore import Qt
+from PyQt5 import QtGui, QtWidgets
+from PyQt5.QtTest import QTest
+from PyQt5.QtCore import Qt
 
 # TEMP
-import sas.qtgui.path_prepare
+#import sas.qtgui.path_prepare
+import path_prepare
 
 
 from sas.qtgui.Calculators.KiessigPanel import KiessigPanel
 
-if not QtGui.QApplication.instance():
-    app = QtGui.QApplication(sys.argv)
+if not QtWidgets.QApplication.instance():
+    app = QtWidgets.QApplication(sys.argv)
 
 
 class KiessigCalculatorTest(unittest.TestCase):
@@ -27,9 +28,9 @@ class KiessigCalculatorTest(unittest.TestCase):
 
     def testDefaults(self):
         """Test the GUI in its default state"""
-        self.assertIsInstance(self.widget, QtGui.QWidget)
+        self.assertIsInstance(self.widget, QtWidgets.QWidget)
         self.assertEqual(self.widget.windowTitle(), "Kiessig Thickness Calculator")
-        self.assertEqual(self.widget.sizePolicy().Policy(), QtGui.QSizePolicy.Fixed)
+        self.assertEqual(self.widget.sizePolicy().Policy(), QtWidgets.QSizePolicy.Fixed)
 
     def testHelp(self):
         """ Assure help file is shown """

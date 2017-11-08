@@ -12,9 +12,6 @@ from sas.qtgui.Utilities.GuiUtils import *
 from sas.qtgui.Perspectives.Fitting.FittingWidget import *
 from sas.qtgui.Plotting.PlotterData import Data1D
 
-if not QtGui.QApplication.instance():
-    app = QtGui.QApplication(sys.argv)
-
 
 class FittingLogicTest(unittest.TestCase):
     """Test the fitting logic class"""

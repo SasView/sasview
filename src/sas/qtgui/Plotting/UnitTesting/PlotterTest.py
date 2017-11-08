@@ -2,9 +2,9 @@ import sys
 import unittest
 import platform
 
-from PyQt4 import QtGui
-from PyQt4 import QtCore
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from PyQt5 import QtGui, QtWidgets, QtPrintSupport
+from PyQt5 import QtCore
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
@@ -20,8 +20,8 @@ from sas.qtgui.Plotting.PlotProperties import PlotProperties
 # Tested module
 import sas.qtgui.Plotting.Plotter as Plotter
 
-if not QtGui.QApplication.instance():
-    app = QtGui.QApplication(sys.argv)
+if not QtWidgets.QApplication.instance():
+    app = QtWidgets.QApplication(sys.argv)
 
 
 class PlotterTest(unittest.TestCase):
@@ -56,23 +56,26 @@ class PlotterTest(unittest.TestCase):
         """ Look at the plotting with error bars"""
         self.plotter.data = self.data
         self.plotter.show()
-        FigureCanvas.draw = MagicMock()
+        FigureCanvas.draw_idle = MagicMock()
 
         self.plotter.plot(hide_error=False)
 
         self.assertEqual(self.plotter.ax.get_xscale(), 'log')
-        self.assertTrue(FigureCanvas.draw.called)
+        self.assertTrue(FigureCanvas.draw_idle.called)
+
+        self.plotter.figure.clf()
 
     def testPlotWithoutErrors(self):
         """ Look at the plotting without error bars"""
         self.plotter.data = self.data
         self.plotter.show()
-        FigureCanvas.draw = MagicMock()
+        FigureCanvas.draw_idle = MagicMock()
 
         self.plotter.plot(hide_error=True)
 
         self.assertEqual(self.plotter.ax.get_yscale(), 'log')
-        self.assertTrue(FigureCanvas.draw.called)
+        self.assertTrue(FigureCanvas.draw_idle.called)
+        self.plotter.figure.clf()
 
     def testCreateContextMenuQuick(self):
         """ Test the right click menu """
@@ -88,9 +91,9 @@ class PlotterTest(unittest.TestCase):
 
         # Trigger Print Image and make sure the method is called
         self.assertEqual(actions[1].text(), "Print Image")
-        QtGui.QPrintDialog.exec_ = MagicMock(return_value=QtGui.QDialog.Rejected)
+        QtPrintSupport.QPrintDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Rejected)
         actions[1].trigger()
-        self.assertTrue(QtGui.QPrintDialog.exec_.called)
+        self.assertTrue(QtPrintSupport.QPrintDialog.exec_.called)
 
         # Trigger Copy to Clipboard and make sure the method is called
         self.assertEqual(actions[2].text(), "Copy to Clipboard")
@@ -103,7 +106,7 @@ class PlotterTest(unittest.TestCase):
 
         # Trigger Change Scale and make sure the method is called
         self.assertEqual(actions[6].text(), "Change Scale")
-        self.plotter.properties.exec_ = MagicMock(return_value=QtGui.QDialog.Rejected)
+        self.plotter.properties.exec_ = MagicMock(return_value=QtWidgets.QDialog.Rejected)
         actions[6].trigger()
         self.assertTrue(self.plotter.properties.exec_.called)
 
@@ -113,9 +116,9 @@ class PlotterTest(unittest.TestCase):
         self.clipboard_called = False
         def done():
             self.clipboard_called = True
-        QtCore.QObject.connect(QtGui.qApp.clipboard(), QtCore.SIGNAL("dataChanged()"), done)
+        QtCore.QObject.connect(QtWidgets.qApp.clipboard(), QtCore.SIGNAL("dataChanged()"), done)
         actions[2].trigger()
-        QtGui.qApp.processEvents()
+        QtWidgets.qApp.processEvents()
         # Make sure clipboard got updated.
         self.assertTrue(self.clipboard_called)
 
@@ -135,6 +138,7 @@ class PlotterTest(unittest.TestCase):
         # See that just one plot is present
         self.assertEqual(len(self.plotter.plot_dict), 1)
         self.assertEqual(len(self.plotter.ax.collections), 1)
+        self.plotter.figure.clf()
 
     def testAddText(self):
         """ Checks the functionality of adding text to graph """
@@ -152,7 +156,7 @@ class PlotterTest(unittest.TestCase):
         self.plotter.addText.font = MagicMock(return_value = test_font)
         self.plotter.addText.color = MagicMock(return_value = test_color)
         # Return OK from the dialog
-        self.plotter.addText.exec_ = MagicMock(return_value = QtGui.QDialog.Accepted)
+        self.plotter.addText.exec_ = MagicMock(return_value = QtWidgets.QDialog.Accepted)
         # Add text to graph
         self.plotter.onAddText()
         self.plotter.show()
@@ -162,6 +166,7 @@ class PlotterTest(unittest.TestCase):
         self.assertEqual(self.plotter.textList[0].get_color(), test_color)
         self.assertEqual(self.plotter.textList[0].get_fontproperties().get_family()[0], 'Arial')
         self.assertEqual(self.plotter.textList[0].get_fontproperties().get_size(), 16)
+        self.plotter.figure.clf()
 
     def testOnRemoveText(self):
         """ Cheks if annotations can be removed from the graph """
@@ -171,7 +176,7 @@ class PlotterTest(unittest.TestCase):
         test_text = "Safety instructions"
         self.plotter.addText.textEdit.setText(test_text)
         # Return OK from the dialog
-        self.plotter.addText.exec_ = MagicMock(return_value = QtGui.QDialog.Accepted)
+        self.plotter.addText.exec_ = MagicMock(return_value = QtWidgets.QDialog.Accepted)
         # Add text to graph
         self.plotter.onAddText()
         self.plotter.show()
@@ -187,6 +192,7 @@ class PlotterTest(unittest.TestCase):
         # Attempt removal on empty and check
         self.plotter.onRemoveText()
         self.assertEqual(self.plotter.textList, [])
+        self.plotter.figure.clf()
 
     def testOnSetGraphRange(self):
         """ Cheks if the graph can be resized for range """
@@ -194,7 +200,7 @@ class PlotterTest(unittest.TestCase):
         new_y = (10,11)
         self.plotter.plot(self.data)
         self.plotter.show()
-        self.plotter.setRange.exec_ = MagicMock(return_value = QtGui.QDialog.Accepted)
+        self.plotter.setRange.exec_ = MagicMock(return_value = QtWidgets.QDialog.Accepted)
         self.plotter.setRange.xrange = MagicMock(return_value = new_x)
         self.plotter.setRange.yrange = MagicMock(return_value = new_y)
 
@@ -203,6 +209,7 @@ class PlotterTest(unittest.TestCase):
         # See that ranges changed accordingly
         self.assertEqual(self.plotter.ax.get_xlim(), new_x)
         self.assertEqual(self.plotter.ax.get_ylim(), new_y)
+        self.plotter.figure.clf()
 
     def testOnResetGraphRange(self):
         """ Cheks if the graph can be reset after resizing for range """
@@ -214,7 +221,7 @@ class PlotterTest(unittest.TestCase):
         self.plotter.show()
 
         # mock setRange methods
-        self.plotter.setRange.exec_ = MagicMock(return_value = QtGui.QDialog.Accepted)
+        self.plotter.setRange.exec_ = MagicMock(return_value = QtWidgets.QDialog.Accepted)
         self.plotter.setRange.xrange = MagicMock(return_value = new_x)
         self.plotter.setRange.yrange = MagicMock(return_value = new_y)
 
@@ -227,19 +234,21 @@ class PlotterTest(unittest.TestCase):
         # See that ranges are changed
         self.assertNotEqual(self.plotter.ax.get_xlim(), new_x)
         self.assertNotEqual(self.plotter.ax.get_ylim(), new_y)
+        self.plotter.figure.clf()
 
     def testOnLinearFit(self):
         """ Checks the response to LinearFit call """
         self.plotter.plot(self.data)
         self.plotter.show()
-        QtGui.QDialog.exec_ = MagicMock(return_value=QtGui.QDialog.Accepted)
+        QtWidgets.QDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Accepted)
 
         # Just this one plot
         self.assertEqual(len(list(self.plotter.plot_dict.keys())), 1)
         self.plotter.onLinearFit(1)
 
         # Check that exec_ got called
-        self.assertTrue(QtGui.QDialog.exec_.called)
+        self.assertTrue(QtWidgets.QDialog.exec_.called)
+        self.plotter.figure.clf()
 
     def testOnRemovePlot(self):
         """ Assure plots get removed when requested """
@@ -274,7 +283,7 @@ class PlotterTest(unittest.TestCase):
         self.assertEqual(len(list(self.plotter.plot_dict.keys())), 0)
         # Assure the plotter window is closed
         self.assertFalse(self.plotter.isVisible())
-
+        self.plotter.figure.clf()
 
     def testRemovePlot(self):
         """ Test plot removal """
@@ -305,6 +314,7 @@ class PlotterTest(unittest.TestCase):
         self.assertEqual(yl, "$YAXIS(cake)$")
         # The hide_error flag should also remain
         self.assertTrue(self.plotter.plot_dict[2].hide_error)
+        self.plotter.figure.clf()
 
     def testOnToggleHideError(self):
         """ Test the error bar toggle on plots """
@@ -335,6 +345,7 @@ class PlotterTest(unittest.TestCase):
         self.assertEqual(yl, "$YAXIS(cake)$")
         # The hide_error flag should toggle
         self.assertEqual(self.plotter.plot_dict[2].hide_error, not error_status)
+        self.plotter.figure.clf()
 
     def testOnFitDisplay(self):
         """ Test the fit line display on the chart """
@@ -351,6 +362,7 @@ class PlotterTest(unittest.TestCase):
         # Look at arguments passed to .plot()
         self.plotter.plot.assert_called_with(data=self.plotter.fit_result,
                                              hide_error=True, marker='-')
+        self.plotter.figure.clf()
 
     def testReplacePlot(self):
         """ Test the plot refresh functionality """
@@ -388,6 +400,7 @@ class PlotterTest(unittest.TestCase):
         self.assertEqual(yl, "$YAXIS(cake)$")
         # The hide_error flag should be as set
         self.assertEqual(self.plotter.plot_dict[2].hide_error, error_status)
+        self.plotter.figure.clf()
 
     def notestOnModifyPlot(self):
         """ Test the functionality for changing plot properties """
@@ -407,10 +420,11 @@ class PlotterTest(unittest.TestCase):
 
         with patch('sas.qtgui.Plotting.PlotProperties.PlotProperties') as mock:
             instance = mock.return_value
-            QtGui.QDialog.exec_ = MagicMock(return_value=QtGui.QDialog.Accepted)
+            QtWidgets.QDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Accepted)
             instance.symbol.return_value = 7
 
             self.plotter.onModifyPlot(2)
+        self.plotter.figure.clf()
 
 
 if __name__ == "__main__":

@@ -1,9 +1,10 @@
 import sys
 import unittest
 
-from PyQt4.QtGui import *
-from PyQt4.QtTest import QTest
-from PyQt4.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtTest import QTest
+from PyQt5.QtCore import *
 from unittest.mock import MagicMock
 from unittest.mock import patch
 from mpl_toolkits.mplot3d import Axes3D
@@ -35,8 +36,8 @@ class DataExplorerTest(unittest.TestCase):
             def communicator(self):
                 return Communicate()
             def allowBatch(self):
-                return False
-            def setData(self, data_item=None):
+                return True
+            def setData(self, data_item=None, is_batch=False):
                 return None
             def title(self):
                 return "Dummy Perspective"
@@ -113,28 +114,28 @@ class DataExplorerTest(unittest.TestCase):
         spy_file_read = QtSignalSpy(self.form, self.form.communicator.fileReadSignal)
 
         # Return no files.
-        QtGui.QFileDialog.getOpenFileNames = MagicMock(return_value=None)
+        QFileDialog.getOpenFileNames = MagicMock(return_value=('',''))
 
         # Click on the Load button
         QTest.mouseClick(loadButton, Qt.LeftButton)
 
         # Test the getOpenFileName() dialog called once
-        self.assertTrue(QtGui.QFileDialog.getOpenFileNames.called)
-        QtGui.QFileDialog.getOpenFileNames.assert_called_once()
+        self.assertTrue(QFileDialog.getOpenFileNames.called)
+        QFileDialog.getOpenFileNames.assert_called_once()
 
         # Make sure the signal has not been emitted
         self.assertEqual(spy_file_read.count(), 0)
 
         # Now, return a single file
-        QtGui.QFileDialog.getOpenFileNames = MagicMock(return_value=filename)
+        QFileDialog.getOpenFileNames = MagicMock(return_value=(filename,''))
 
         # Click on the Load button
         QTest.mouseClick(loadButton, Qt.LeftButton)
-        QtGui.qApp.processEvents()
+        qApp.processEvents()
 
         # Test the getOpenFileName() dialog called once
-        self.assertTrue(QtGui.QFileDialog.getOpenFileNames.called)
-        QtGui.QFileDialog.getOpenFileNames.assert_called_once()
+        self.assertTrue(QFileDialog.getOpenFileNames.called)
+        QFileDialog.getOpenFileNames.assert_called_once()
 
         # Expected one spy instance
         #self.assertEqual(spy_file_read.count(), 1)
@@ -166,7 +167,7 @@ class DataExplorerTest(unittest.TestCase):
         deleteButton = self.form.cmdDeleteData
 
         # Mock the confirmation dialog with return=No
-        QtGui.QMessageBox.question = MagicMock(return_value=QtGui.QMessageBox.No)
+        QMessageBox.question = MagicMock(return_value=QMessageBox.No)
 
         # Populate the model
         #filename = ["cyl_400_20.txt", "P123_D2O_10_percent.dat", "cyl_400_20.txt"]
@@ -180,27 +181,27 @@ class DataExplorerTest(unittest.TestCase):
         item1 = self.form.model.item(0)
         item2 = self.form.model.item(1)
         item3 = self.form.model.item(2)
-        self.assertTrue(item1.checkState() == QtCore.Qt.Checked)
-        self.assertTrue(item2.checkState() == QtCore.Qt.Checked)
-        self.assertTrue(item3.checkState() == QtCore.Qt.Checked)
+        self.assertTrue(item1.checkState() == Qt.Checked)
+        self.assertTrue(item2.checkState() == Qt.Checked)
+        self.assertTrue(item3.checkState() == Qt.Checked)
 
         # Click on the delete  button
         QTest.mouseClick(deleteButton, Qt.LeftButton)
 
         # Test the warning dialog called once
-        self.assertTrue(QtGui.QMessageBox.question.called)
+        self.assertTrue(QMessageBox.question.called)
 
         # Assure the model still contains the items
         self.assertEqual(self.form.model.rowCount(), 3)
 
         # Now, mock the confirmation dialog with return=Yes
-        QtGui.QMessageBox.question = MagicMock(return_value=QtGui.QMessageBox.Yes)
+        QMessageBox.question = MagicMock(return_value=QMessageBox.Yes)
 
         # Click on the delete  button
         QTest.mouseClick(deleteButton, Qt.LeftButton)
 
         # Test the warning dialog called once
-        self.assertTrue(QtGui.QMessageBox.question.called)
+        self.assertTrue(QMessageBox.question.called)
 
         # Assure the model contains no items
         self.assertEqual(self.form.model.rowCount(), 0)
@@ -215,17 +216,17 @@ class DataExplorerTest(unittest.TestCase):
         deleteButton = self.form.cmdDeleteTheory
 
         # Mock the confirmation dialog with return=No
-        QtGui.QMessageBox.question = MagicMock(return_value=QtGui.QMessageBox.No)
+        QMessageBox.question = MagicMock(return_value=QMessageBox.No)
 
         # Populate the model
-        item1 = QtGui.QStandardItem(True)
+        item1 = QStandardItem(True)
         item1.setCheckable(True)
-        item1.setCheckState(QtCore.Qt.Checked)
+        item1.setCheckState(Qt.Checked)
         item1.setText("item 1")
         self.form.theory_model.appendRow(item1)
-        item2 = QtGui.QStandardItem(True)
+        item2 = QStandardItem(True)
         item2.setCheckable(True)
-        item2.setCheckState(QtCore.Qt.Unchecked)
+        item2.setCheckState(Qt.Unchecked)
         item2.setText("item 2")
         self.form.theory_model.appendRow(item2)
 
@@ -233,32 +234,32 @@ class DataExplorerTest(unittest.TestCase):
         self.assertEqual(self.form.theory_model.rowCount(), 2)
 
         # Assure the checkboxes are on
-        self.assertTrue(item1.checkState() == QtCore.Qt.Checked)
-        self.assertTrue(item2.checkState() == QtCore.Qt.Unchecked)
+        self.assertTrue(item1.checkState() == Qt.Checked)
+        self.assertTrue(item2.checkState() == Qt.Unchecked)
 
         # Click on the delete  button
         QTest.mouseClick(deleteButton, Qt.LeftButton)
 
         # Test the warning dialog called once
-        self.assertTrue(QtGui.QMessageBox.question.called)
+        self.assertTrue(QMessageBox.question.called)
 
         # Assure the model still contains the items
         self.assertEqual(self.form.theory_model.rowCount(), 2)
 
         # Now, mock the confirmation dialog with return=Yes
-        QtGui.QMessageBox.question = MagicMock(return_value=QtGui.QMessageBox.Yes)
+        QMessageBox.question = MagicMock(return_value=QMessageBox.Yes)
 
         # Click on the delete  button
         QTest.mouseClick(deleteButton, Qt.LeftButton)
 
         # Test the warning dialog called once
-        self.assertTrue(QtGui.QMessageBox.question.called)
+        self.assertTrue(QMessageBox.question.called)
 
         # Assure the model contains 1 item
         self.assertEqual(self.form.theory_model.rowCount(), 1)
 
         # Set the remaining item to checked
-        self.form.theory_model.item(0).setCheckState(QtCore.Qt.Checked)
+        self.form.theory_model.item(0).setCheckState(Qt.Checked)
 
         # Click on the delete button again
         QTest.mouseClick(deleteButton, Qt.LeftButton)
@@ -306,13 +307,13 @@ class DataExplorerTest(unittest.TestCase):
         self.form.readData(filename)
 
         # Mock the warning message
-        QtGui.QMessageBox = MagicMock()
+        QMessageBox = MagicMock()
 
         # Click on the button
         QTest.mouseClick(self.form.cmdSendTo, Qt.LeftButton)
 
         # Assure the message box popped up
-        QtGui.QMessageBox.assert_called_once()
+        QMessageBox.assert_called_once()
 
     def testDataSelection(self):
         """
@@ -325,49 +326,46 @@ class DataExplorerTest(unittest.TestCase):
         # Unselect all data
         self.form.cbSelect.setCurrentIndex(1)
 
-        self.form.show()
-        app.exec_()
-
         # Test the current selection
         item1D = self.form.model.item(0)
         item2D = self.form.model.item(1)
-        self.assertTrue(item1D.checkState() == QtCore.Qt.Unchecked)
-        self.assertTrue(item2D.checkState() == QtCore.Qt.Unchecked)        
+        self.assertTrue(item1D.checkState() == Qt.Unchecked)
+        self.assertTrue(item2D.checkState() == Qt.Unchecked)        
 
         # Select all data
         self.form.cbSelect.setCurrentIndex(0)
 
         # Test the current selection
-        self.assertTrue(item1D.checkState() == QtCore.Qt.Checked)
-        self.assertTrue(item2D.checkState() == QtCore.Qt.Checked)        
+        self.assertTrue(item1D.checkState() == Qt.Checked)
+        self.assertTrue(item2D.checkState() == Qt.Checked)        
 
         # select 1d data
         self.form.cbSelect.setCurrentIndex(2)
 
         # Test the current selection
-        self.assertTrue(item1D.checkState() == QtCore.Qt.Checked)
-        self.assertTrue(item2D.checkState() == QtCore.Qt.Unchecked)        
+        self.assertTrue(item1D.checkState() == Qt.Checked)
+        self.assertTrue(item2D.checkState() == Qt.Unchecked)        
 
         # unselect 1d data
         self.form.cbSelect.setCurrentIndex(3)
 
         # Test the current selection
-        self.assertTrue(item1D.checkState() == QtCore.Qt.Unchecked)
-        self.assertTrue(item2D.checkState() == QtCore.Qt.Unchecked)        
+        self.assertTrue(item1D.checkState() == Qt.Unchecked)
+        self.assertTrue(item2D.checkState() == Qt.Unchecked)        
 
         # select 2d data
         self.form.cbSelect.setCurrentIndex(4)
 
         # Test the current selection
-        self.assertTrue(item1D.checkState() == QtCore.Qt.Unchecked)
-        self.assertTrue(item2D.checkState() == QtCore.Qt.Checked)        
+        self.assertTrue(item1D.checkState() == Qt.Unchecked)
+        self.assertTrue(item2D.checkState() == Qt.Checked)        
 
         # unselect 2d data
         self.form.cbSelect.setCurrentIndex(5)
 
         # Test the current selection
-        self.assertTrue(item1D.checkState() == QtCore.Qt.Unchecked)
-        self.assertTrue(item2D.checkState() == QtCore.Qt.Unchecked)        
+        self.assertTrue(item1D.checkState() == Qt.Unchecked)
+        self.assertTrue(item2D.checkState() == Qt.Unchecked)        
 
         # choose impossible index and assure the code raises
         #with self.assertRaises(Exception):
@@ -385,12 +383,12 @@ class DataExplorerTest(unittest.TestCase):
         Test the rescursive QAbstractItem/QStandardItem clone
         """
         # Create an item with several branches
-        item1 = QtGui.QStandardItem()
-        item2 = QtGui.QStandardItem()
-        item3 = QtGui.QStandardItem()
-        item4 = QtGui.QStandardItem()
-        item5 = QtGui.QStandardItem()
-        item6 = QtGui.QStandardItem()
+        item1 = QStandardItem()
+        item2 = QStandardItem()
+        item3 = QStandardItem()
+        item4 = QStandardItem()
+        item5 = QStandardItem()
+        item6 = QStandardItem()
 
         item4.appendRow(item5)
         item2.appendRow(item4)
@@ -432,7 +430,7 @@ class DataExplorerTest(unittest.TestCase):
 
         # The 0th item header should be the name of the file
         model_item = self.form.model.index(0,0)
-        model_name = str(self.form.model.data(model_item).toString())
+        model_name = self.form.model.data(model_item)
         self.assertEqual(model_name, filename[0])
 
     def skip_testDisplayHelp(self): # Skip due to help path change
@@ -445,7 +443,7 @@ class DataExplorerTest(unittest.TestCase):
 
         # Click on the Help button
         QTest.mouseClick(button1, Qt.LeftButton)
-        QtGui.qApp.processEvents()
+        qApp.processEvents()
 
         # Check the browser
         self.assertIn(partial_url, str(self.form._helpView.url()))
@@ -454,7 +452,7 @@ class DataExplorerTest(unittest.TestCase):
 
         # Click on the Help_2 button
         QTest.mouseClick(button2, Qt.LeftButton)
-        QtGui.qApp.processEvents()
+        qApp.processEvents()
         # Check the browser
         self.assertIn(partial_url, str(self.form._helpView.url()))
 
@@ -596,7 +594,7 @@ class DataExplorerTest(unittest.TestCase):
         # get Data1D
         p_file="cyl_400_20.txt"
         output_object = loader.load(p_file)
-        output_item = QtGui.QStandardItem()
+        output_item = QStandardItem()
         new_data = [(output_item, manager.create_gui_data(output_object[0], p_file))]
 
         # Mask plotting
@@ -644,7 +642,7 @@ class DataExplorerTest(unittest.TestCase):
         """
         Assure the model update is correct
         """
-        good_item = QtGui.QStandardItem()
+        good_item = QStandardItem()
         bad_item = "I'm so bad"
 
         self.form.model.reset = MagicMock()
@@ -669,7 +667,7 @@ class DataExplorerTest(unittest.TestCase):
         self.form.loadComplete((output, message))
 
         # Pick up the treeview index corresponding to that file
-        index = self.form.treeView.indexAt(QtCore.QPoint(5,5))
+        index = self.form.treeView.indexAt(QPoint(5,5))
         self.form.show()
 
         # Find out the center pointof the treeView row
