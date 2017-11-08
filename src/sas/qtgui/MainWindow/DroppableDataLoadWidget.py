@@ -57,7 +57,7 @@ class DroppableDataLoadWidget(QtWidgets.QTabWidget, Ui_DataLoadWidget):
         if self.dragIsOK(event):
             filenames=[]
             for url in event.mimeData().urls():
-                filenames.append(str(url.toLocalFile()))
+                filenames.append(url.toLocalFile())
             self.communicator.fileReadSignal.emit(filenames)
             event.accept()
         else:

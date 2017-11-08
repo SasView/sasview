@@ -611,7 +611,7 @@ class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalcula
             'options': QtWidgets.QFileDialog.DontUseNativeDialog}
         # Query user for filename.
         filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
-        filename = name_tuple[0]
+        filename = filename_tuple[0]
         if filename:
             try:
                 _, extension = os.path.splitext(filename)

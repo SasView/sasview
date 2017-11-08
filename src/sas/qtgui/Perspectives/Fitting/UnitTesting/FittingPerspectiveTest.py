@@ -2,9 +2,10 @@ import sys
 import unittest
 import webbrowser
 
-from PyQt4 import QtGui
-from PyQt4 import QtTest
-from PyQt4 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
+from PyQt5 import QtTest
+from PyQt5 import QtCore
 from unittest.mock import MagicMock
 
 # set up import paths
@@ -15,8 +16,8 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 
-if not QtGui.QApplication.instance():
-    app = QtGui.QApplication(sys.argv)
+if not QtWidgets.QApplication.instance():
+    app = QtWidgets.QApplication(sys.argv)
 
 class FittingPerspectiveTest(unittest.TestCase):
     '''Test the Fitting Perspective'''
@@ -37,7 +38,7 @@ class FittingPerspectiveTest(unittest.TestCase):
 
     def testDefaults(self):
         '''Test the GUI in its default state'''
-        self.assertIsInstance(self.widget, QtGui.QWidget)
+        self.assertIsInstance(self.widget, QtWidgets.QWidget)
         self.assertIn("Fit panel", self.widget.windowTitle())
         self.assertEqual(self.widget.optimizer, "Levenberg-Marquardt")
         self.assertEqual(len(self.widget.tabs), 1)

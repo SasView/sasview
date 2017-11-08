@@ -527,7 +527,7 @@ def onTXTSave(data, path):
     """
     with open(path,'w') as out:
         has_errors = True
-        if data.dy is None or data.dy == []:
+        if data.dy is None or not data.dy:
             has_errors = False
         # Sanity check
         if has_errors:
@@ -537,7 +537,7 @@ def onTXTSave(data, path):
             except:
                 has_errors = False
         if has_errors:
-            if data.dx is not None and data.dx != []:
+            if data.dx is not None and data.dx:
                 out.write("<X>   <Y>   <dY>   <dX>\n")
             else:
                 out.write("<X>   <Y>   <dY>\n")
@@ -546,7 +546,7 @@ def onTXTSave(data, path):
 
         for i in range(len(data.x)):
             if has_errors:
-                if data.dx is not None and data.dx != []:
+                if data.dx is not None and data.dx:
                     if  data.dx[i] is not None:
                         out.write("%g  %g  %g  %g\n" % (data.x[i],
                                                         data.y[i],

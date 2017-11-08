@@ -77,7 +77,7 @@ class PlotProperties(QtWidgets.QDialog, Ui_PlotPropertiesUI):
         Pop up the standard Qt color change dialog
         """
         # Pick up the chosen color
-        proposed_color = QtGui.QColorDialog.getColor(parent=self)
+        proposed_color = QtWidgets.QColorDialog.getColor(parent=self)
         # Update the text control
         if proposed_color.isValid():
             # Block currentIndexChanged

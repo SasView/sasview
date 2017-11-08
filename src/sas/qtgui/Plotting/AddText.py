@@ -30,7 +30,7 @@ class AddText(QtWidgets.QDialog, Ui_AddText):
         """
         Pop up the standard Qt Font change dialog
         """
-        self._font, ok = QtGui.QFontDialog.getFont(parent=self)
+        self._font, ok = QtWidgets.QFontDialog.getFont(parent=self)
         if ok:
             self.textEdit.setFont(self._font)
 
@@ -39,7 +39,7 @@ class AddText(QtWidgets.QDialog, Ui_AddText):
         Pop up the standard Qt color change dialog
         """
         # Pick up the chosen color
-        self._color = QtGui.QColorDialog.getColor(parent=self)
+        self._color = QtWidgets.QColorDialog.getColor(parent=self)
         # Update the text control
         palette = QtGui.QPalette()
         palette.setColor(QtGui.QPalette.Text, self._color)

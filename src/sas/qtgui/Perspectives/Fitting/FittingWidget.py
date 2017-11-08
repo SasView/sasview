@@ -54,8 +54,8 @@ STRUCTURE_DEFAULT = "None"
 
 DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 
-#USING_TWISTED = True
-USING_TWISTED = False
+USING_TWISTED = True
+#USING_TWISTED = False
 
 class ToolTippedItemModel(QtGui.QStandardItemModel):
     """
@@ -137,12 +137,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if data is not None:
             self.data = data
 
-    def close(self):
-        """
-        Remember to kill off things on exit
-        """
-        self.helpView.close()
-        del self.helpView
+    #def close(self):
+    #    """
+    #    Remember to kill off things on exit
+    #    """
+    #    self.helpView.close()
+    #    del self.helpView
 
     @property
     def data(self):

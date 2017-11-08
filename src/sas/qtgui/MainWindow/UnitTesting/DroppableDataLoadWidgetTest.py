@@ -1,9 +1,9 @@
 import sys
 import unittest
 
-from PyQt4.QtGui import QApplication
-from PyQt4.QtTest import QTest
-from PyQt4 import QtCore
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtTest import QTest
+from PyQt5 import QtCore
 
 # set up import paths
 import path_prepare
@@ -61,13 +61,13 @@ class DroppableDataLoadWidgetTest(unittest.TestCase):
         spy_file_read = QtSignalSpy(self.form, self.form.communicator.fileReadSignal)
 
         drop_event = QtGui.QDropEvent(QtCore.QPoint(0,0),
-                                           QtCore.Qt.CopyAction,
-                                           self.mime_data,
-                                           QtCore.Qt.LeftButton,
-                                           QtCore.Qt.NoModifier)
+                                    QtCore.Qt.CopyAction,
+                                    self.mime_data,
+                                    QtCore.Qt.LeftButton,
+                                    QtCore.Qt.NoModifier)
 
         self.form.dropEvent(drop_event)
-        QtGui.qApp.processEvents()
+        QApplication.processEvents()
         self.assertEqual(spy_file_read.count(), 1)
         self.assertIn(self.testfile, str(spy_file_read.signal(index=0)))
 

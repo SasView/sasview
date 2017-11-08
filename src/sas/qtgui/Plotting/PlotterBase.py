@@ -3,7 +3,7 @@ import numpy
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtPrintSupport
 
 # TODO: Replace the qt4agg calls below with qt5 equivalent.
 # Requires some code modifications.
@@ -295,10 +295,10 @@ class PlotterBase(QtWidgets.QWidget):
         Display printer dialog and print the MPL widget area
         """
         # Define the printer
-        printer = QtGui.QPrinter()
+        printer = QtPrintSupport.QPrinter()
 
         # Display the print dialog
-        dialog = QtGui.QPrintDialog(printer)
+        dialog = QtPrintSupport.QPrintDialog(printer)
         dialog.setModal(True)
         dialog.setWindowTitle("Print")
         if dialog.exec_() != QtWidgets.QDialog.Accepted:

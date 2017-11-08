@@ -1,7 +1,7 @@
 import sys
 import unittest
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 # set up import paths
 import sas.qtgui.path_prepare
@@ -9,8 +9,8 @@ import sas.qtgui.path_prepare
 # Local
 from sas.qtgui.Plotting.ScaleProperties import ScaleProperties
 
-if not QtGui.QApplication.instance():
-    app = QtGui.QApplication(sys.argv)
+if not QtWidgets.QApplication.instance():
+    app = QtWidgets.QApplication(sys.argv)
 
 class ScalePropertiesTest(unittest.TestCase):
     '''Test the ScaleProperties'''
@@ -26,7 +26,7 @@ class ScalePropertiesTest(unittest.TestCase):
 
     def testDefaults(self):
         '''Test the GUI in its default state'''
-        self.assertIsInstance(self.widget, QtGui.QDialog)
+        self.assertIsInstance(self.widget, QtWidgets.QDialog)
         self.assertEqual(self.widget.windowTitle(), "Scale Properties")
         self.assertEqual(self.widget.cbX.count(), 6)
         self.assertEqual(self.widget.cbY.count(), 12)

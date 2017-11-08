@@ -1,7 +1,7 @@
 import sys
 import unittest
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 # set up import paths
 import sas.qtgui.path_prepare
@@ -9,8 +9,8 @@ import sas.qtgui.path_prepare
 # Local
 from sas.qtgui.Plotting.WindowTitle import WindowTitle
 
-if not QtGui.QApplication.instance():
-    app = QtGui.QApplication(sys.argv)
+if not QtWidgets.QApplication.instance():
+    app = QtWidgets.QApplication(sys.argv)
 
 class WindowTitleTest(unittest.TestCase):
     '''Test the WindowTitle'''
@@ -26,19 +26,19 @@ class WindowTitleTest(unittest.TestCase):
     def testDefaults(self):
         '''Test the GUI in its default state'''
         self.widget.show()
-        self.assertIsInstance(self.widget, QtGui.QDialog)
+        self.assertIsInstance(self.widget, QtWidgets.QDialog)
         self.assertEqual(self.widget.windowTitle(), "Modify Window Title")
         
     def testTitle(self):
         '''Modify the title'''
         self.widget.show()
-        QtGui.qApp.processEvents()
+        QtWidgets.qApp.processEvents()
         # make sure we have the pre-set title
         self.assertEqual(self.widget.txtTitle.text(), "some title")
         # Clear the control and set it to something else
         self.widget.txtTitle.clear()
         self.widget.txtTitle.setText("5 elephants")
-        QtGui.qApp.processEvents()
+        QtWidgets.qApp.processEvents()
         # Retrieve value
         new_title = self.widget.title()
         # Check
