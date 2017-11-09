@@ -90,7 +90,7 @@ class PlotterBaseTest(unittest.TestCase):
         self.plotter.onImageSave()
         self.assertTrue(self.plotter.toolbar.save_figure.called)
 
-    def notestOnImagePrint(self):
+    def testOnImagePrint(self):
         ''' test the workspace print '''
         QtGui.QPainter.end = MagicMock()
         QtWidgets.QLabel.render = MagicMock()
@@ -107,7 +107,7 @@ class PlotterBaseTest(unittest.TestCase):
         self.assertTrue(QtGui.QPainter.end.called)
         self.assertTrue(QtWidgets.QLabel.render.called)
 
-    def notestOnClipboardCopy(self):
+    def testOnClipboardCopy(self):
         ''' test the workspace screen copy '''
         QtGui.QClipboard.setPixmap = MagicMock()
         self.plotter.onClipboardCopy()
