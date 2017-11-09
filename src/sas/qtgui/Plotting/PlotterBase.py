@@ -306,7 +306,8 @@ class PlotterBase(QtWidgets.QWidget):
 
         painter = QtGui.QPainter(printer)
         # Grab the widget screenshot
-        pmap = QtGui.QPixmap.grabWidget(self)
+        pmap = QtGui.QPixmap(self.size())
+        self.render(pmap)
         # Create a label with pixmap drawn
         printLabel = QtWidgets.QLabel()
         printLabel.setPixmap(pmap)
@@ -320,7 +321,8 @@ class PlotterBase(QtWidgets.QWidget):
         Copy MPL widget area to buffer
         """
         bmp = QtWidgets.QApplication.clipboard()
-        pixmap = QtGui.QPixmap.grabWidget(self.canvas)
+        pixmap = QtGui.QPixmap(self.canvas.size())
+        self.canvas.render(pixmap)
         bmp.setPixmap(pixmap)
 
     def onGridToggle(self):
