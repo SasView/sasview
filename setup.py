@@ -17,6 +17,18 @@ from distutils.core import Command
 import numpy as np
 from setuptools import Extension, setup
 
+if os.name == 'nt':
+    try:
+        import tinycc
+    except ImportError:
+        os.path.insert(os.path.insert(0, '..', 'tinycc'))
+        import tinycc
+    use_tinycc = True
+    sys.argv.append('--compiler=mingw32')
+    print(tinycc.TCC)
+else:
+    use_tinycc = False
+
 # Manage version number ######################################
 with open(os.path.join("src", "sas", "sasview", "__init__.py")) as fid:
     for line in fid:
@@ -132,11 +144,35 @@ class DisableOpenMPCommand(Command):
         pass
 
 
+_ = """
+C:\Users\pkienzle\AppData\Local\Continuum\Anaconda2\lib\site-packages\tinycc\tcc.exe -DMS_WIN64 -shared -s build\temp.win-amd64-2.7\Release\src\sas\sascalc\calculator\c_extensions\sld2i_module.o build\temp.win-amd64-2.7\Release\src\sas\sascalc\calculator\c_extensions\sld2i.o build\temp.win-amd64-2.7\Release\src\sas\sascalc\calculator\c_extensions\libfunc.o build\temp.win-amd64-2.7\Release\src\sas\sascalc\calculator\c_extensions\librefl.o build\temp.win-amd64-2.7\Release\src\sas\sascalc\calculator\c_extensions\sld2i.def -LC:\Users\pkienzle\AppData\Local\Continuum\Anaconda2\libs -LC:\Users\pkienzle\AppData\Local\Continuum\Anaconda2\PCbuild\amd64 -LC:\Users\pkienzle\AppData\Local\Continuum\Anaconda2\PC\VS9.0\amd64 -lpython27 -lmsvcr90 -o build\lib.win-amd64-2.7\sas\sascalc\calculator\core\sld2i.pyd
+"""
+
 class build_ext_subclass(build_ext):
     def build_extensions(self):
+        if use_tinycc:
+            # Note: no -O option because not an optimizer
+            self.compiler.set_executables(
+                #archiver = ['ar', '-cr'],
+                compiler=[tinycc.TCC, '-DMS_WIN64', '-D__TINYCC__', '-Wall'],
+                #compiler_cxx=['g__', '-DMS_WIN64', '-Wall'],  # tinycc is not a C++ compiler
+                compiler_so=[tinycc.TCC, '-DMS_WIN64', '-D__TINYCC__', '-Wall'],  # and '-c'??
+                #dll_libraries=['msvcr90'],
+                linker_exe=[tinycc.TCC, '-DMS_WIN64'],
+                linker_so=[tinycc.TCC, '-DMS_WIN64', '-shared'],
+                #linker_dll=tinycc.TCC,
+            )
+            sysroot = os.path.dirname(os.path.realpath(sys.executable))
+            self.compiler.include_dirs = [os.path.join(sysroot, 'include')]
+            self.compiler.library_dirs = [sysroot]
         # Get 64-bitness
         c = self.compiler.compiler_type
         print("Compiling with %s (64bit=%s)" % (c, str(is_64bits)))
+        #print("=== compiler attributes ===")
+        #print("\n".join("%s: %s"%(k, v) for k, v in sorted(self.compiler.__dict__.items())))
+        #print("=== build_ext attributes ===")
+        #print("\n".join("%s: %s"%(k, v) for k, v in self.__dict__.items()))
+        #sys.exit(1)
 
         # OpenMP build options
         if enable_openmp:
