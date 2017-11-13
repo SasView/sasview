@@ -312,6 +312,25 @@ def updateModelItem(item, update_data, name=""):
     # Append the new row to the main item
     item.appendRow(object_item)
 
+def updateModelItemStatus(model_item, filename="", name="", status=2):
+    """
+    Update status of checkbox related to high- and low-Q extrapolation
+    choice in Invariant Panel
+    """
+    assert isinstance(model_item, QtGui.QStandardItemModel)
+
+    # Iterate over model looking for items with checkboxes
+    for index in range(model_item.rowCount()):
+        item = model_item.item(index)
+        if item.text() == filename and item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
+            # Going 1 level deeper only
+            for index_2 in range(item.rowCount()):
+                item_2 = item.child(index_2)
+                if item_2 and item_2.isCheckable() and item_2.text() == name:
+                    item_2.setCheckState(status)
+
+    return
+
 def itemFromFilename(filename, model_item):
     """
     Returns the model item text=filename in the model

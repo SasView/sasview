@@ -306,6 +306,7 @@ class PlotterWidget(PlotterBase):
                 # Update the list of annotations
                 self.textList.append(new_text)
                 self.canvas.draw_idle()
+                pass
 
     def onRemoveText(self):
         """

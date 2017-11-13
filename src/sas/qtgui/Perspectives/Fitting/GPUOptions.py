@@ -4,6 +4,7 @@ import sys
 import sasmodels
 import json
 import platform
+import webbrowser
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from PyQt5 import QtGui, QtCore, QtWebKit, QtWidgets
@@ -170,9 +171,8 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         help_location = GuiUtils.HELP_DIRECTORY_LOCATION
         help_location += "/user/sasgui/perspectives/fitting/gpu_setup.html"
         help_location += "#device-selection"
-        self.helpView = QtWebKit.QWebView()
-        self.helpView.load(QtCore.QUrl(help_location))
-        self.helpView.show()
+        # Test the system browser solution
+        webbrowser.open('file://' + os.path.realpath(help_location))
 
     def reject(self):
         """
