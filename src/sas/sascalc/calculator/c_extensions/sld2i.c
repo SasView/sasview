@@ -80,10 +80,11 @@ void genicomXY(GenI* this, int npoints, double *qx, double *qy, double *I_out){
 		sumj_ud = cassign(0.0, 0.0);
 		sumj_du = cassign(0.0, 0.0);
 		sumj_dd = cassign(0.0, 0.0);
-		//printf ("%d ", i);
+		//printf("i: %d\n", i);
 		//q = sqrt(qx[i]*qx[i] + qy[i]*qy[i]); // + qz[i]*qz[i]);
 
 		for(j=0; j<this->n_pix; j++){
+			//printf("j: %d\n", j);
 			if (this->sldn_val[j]!=0.0
 				||this->mx_val[j]!=0.0
 				||this->my_val[j]!=0.0
@@ -140,7 +141,7 @@ void genicomXY(GenI* this, int npoints, double *qx, double *qy, double *I_out){
 
 		I_out[i] *= (1.0E+8 / count); //in cm (unit) / number; //to be multiplied by vol_pix
 	}
-	//printf ("count = %d %g %g %g %g\n", count, sldn_val[0],mx_val[0], my_val[0], mz_val[0]);
+	//printf("count = %d %g %g %g %g\n", count, this->sldn_val[0],this->mx_val[0], this->my_val[0], this->mz_val[0]);
 }
 /**
  * Compute 1D isotropic
@@ -202,5 +203,5 @@ void genicom(GenI* this, int npoints, double *q, double *I_out){
 		}
 		I_out[i] *= (1.0E+8 / count); //in cm (unit) / number; //to be multiplied by vol_pix
 	}
-	//printf ("count = %d %g %g %g %g\n", count, sldn_val[0],mx_val[0], my_val[0], mz_val[0]);
+	//printf("count = %d %g %g %g %g\n", count, sldn_val[0],mx_val[0], my_val[0], mz_val[0]);
 }

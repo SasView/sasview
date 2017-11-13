@@ -6,7 +6,7 @@
 #include "librefl.h"
 #include <stdio.h>
 #include <stdlib.h>
-#if defined(_MSC_VER)
+#if defined _MSC_VER  || defined __TINYCC__
 #define NEED_ERF
 #endif
 
@@ -20,7 +20,16 @@ reference - Haruhiko Okumura: C-gengo niyoru saishin algorithm jiten
             sha, Tokyo, 1991) p.227 [in Japanese]                 */
 
 
-#ifdef _WIN32
+#ifdef __TINYCC__
+# ifdef isnan
+#   undef isnan
+# endif
+# ifdef isfinite
+#   undef isfinite
+# endif
+# define isnan(x) (x != x)
+# define isfinite(x) (x != INFINITY && x != -INFINITY)
+#elif defined _WIN32
 # include <float.h>
 # if !defined __MINGW32__ || defined __NO_ISOCEXT
 #  ifndef isnan
@@ -29,8 +38,8 @@ reference - Haruhiko Okumura: C-gengo niyoru saishin algorithm jiten
 #  ifndef isinf
 #   define isinf(x) (!_finite(x) && !_isnan(x))
 #  endif
-#  ifndef finite
-#   define finite(x) _finite(x)
+#  ifndef isfinite
+#   define isfinite(x) _finite(x)
 #  endif
 # endif
 #endif
@@ -83,7 +92,7 @@ static double q_gamma(double a, double x, double loggamma_a)
 
 double erf(double x)
 {
-    if (!finite(x)) {
+    if (!isfinite(x)) {
         if (isnan(x)) return x;      /* erf(NaN)   = NaN   */
         return (x>0 ? 1.0 : -1.0);   /* erf(+-inf) = +-1.0 */
     }
@@ -93,7 +102,7 @@ double erf(double x)
 
 double erfc(double x)
 {
-    if (!finite(x)) {
+    if (!isfinite(x)) {
         if (isnan(x)) return x;      /* erfc(NaN)   = NaN      */
         return (x>0 ? 0.0 : 2.0);    /* erfc(+-inf) = 0.0, 2.0 */
     }

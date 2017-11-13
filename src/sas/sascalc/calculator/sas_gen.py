@@ -142,7 +142,9 @@ class GenSAS(BaseComponent):
         if len(qy):
             qx, qy = _vec(qx), _vec(qy)
             I_out = np.empty_like(qx)
+            #print("npoints", qx.shape, "npixels", pos_x.shape)
             mod.genicomXY(model, qx, qy, I_out)
+            #print("I_out after", I_out)
         else:
             qx = _vec(qx)
             I_out = np.empty_like(qx)
@@ -1111,9 +1113,10 @@ def test():
     model = GenSAS()
     model.set_sld_data(omf2sld.output)
     x = np.linspace(0, 0.1, 11)[1:]
-    model.runXY([x, x])
+    return model.runXY([x, x])
 
 if __name__ == "__main__":
     #test_load()
     #test_save()
+    #print(test())
     test()
