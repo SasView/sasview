@@ -3,7 +3,7 @@
  */
 #include <Python.h>
 #include <stdio.h>
-#include <sld2i.h>
+#include "sld2i.h"
 
 #if PY_MAJOR_VERSION < 3
 typedef void (*PyCapsule_Destructor)(PyObject *);
@@ -67,6 +67,8 @@ PyObject * new_GenI(PyObject *self, PyObject *args) {
 	double inspin;
 	double outspin;
 	double stheta;
+	PyObject *obj;
+	GenI* sld2i;
 
 	if (!PyArg_ParseTuple(args, "iOOOOOOOOddd", &is_avg, &x_val_obj, &y_val_obj, &z_val_obj, &sldn_val_obj, &mx_val_obj, &my_val_obj, &mz_val_obj, &vol_pix_obj, &inspin, &outspin, &stheta)) return NULL;
 	INVECTOR(x_val_obj, x_val, n_x);
@@ -77,12 +79,12 @@ PyObject * new_GenI(PyObject *self, PyObject *args) {
 	INVECTOR(my_val_obj, my_val, n_my);
 	INVECTOR(mz_val_obj, mz_val, n_mz);
 	INVECTOR(vol_pix_obj, vol_pix, n_vol_pix);
-	GenI* sld2i = PyMem_Malloc(sizeof(GenI));
+	sld2i = PyMem_Malloc(sizeof(GenI));
 	//printf("sldi:%p\n", sld2i);
 	if (sld2i != NULL) {
-		initGenI(sld2i,is_avg,n_x,x_val,y_val,z_val,sldn_val,mx_val,my_val,mz_val,vol_pix,inspin,outspin,stheta);
+		initGenI(sld2i,is_avg,(int)n_x,x_val,y_val,z_val,sldn_val,mx_val,my_val,mz_val,vol_pix,inspin,outspin,stheta);
 	}
-	PyObject *obj = PyCapsule_New(sld2i, "GenI", del_sld2i);
+	obj = PyCapsule_New(sld2i, "GenI", del_sld2i);
 	//printf("constructed %p\n", obj);
 	return obj;
 }
@@ -99,9 +101,10 @@ PyObject * genicom_inputXY(PyObject *self, PyObject *args) {
 	double *qx;
 	double *qy;
 	double *I_out;
+	GenI* sld2i;
 
 	if (!PyArg_ParseTuple(args, "OOOO",  &gen_obj, &qx_obj, &qy_obj, &I_out_obj)) return NULL;
-	GenI* sld2i = (GenI *)PyCapsule_GetPointer(gen_obj, "GenI");
+	sld2i = (GenI *)PyCapsule_GetPointer(gen_obj, "GenI");
 	INVECTOR(qx_obj, qx, n_qx);
 	INVECTOR(qy_obj, qy, n_qy);
 	OUTVECTOR(I_out_obj, I_out, n_out);
@@ -109,7 +112,7 @@ PyObject * genicom_inputXY(PyObject *self, PyObject *args) {
 	// Sanity check
 	//if(n_q!=n_out) return Py_BuildValue("i",-1);
 
-	genicomXY(sld2i, n_qx, qx, qy, I_out);
+	genicomXY(sld2i, (int)n_qx, qx, qy, I_out);
 	//return PyCObject_FromVoidPtr(s, del_genicom);
 	return Py_BuildValue("i",1);
 }
@@ -124,16 +127,17 @@ PyObject * genicom_input(PyObject *self, PyObject *args) {
 	Py_ssize_t n_q, n_out;
 	double *q;
 	double *I_out;
+	GenI *sld2i;
 
 	if (!PyArg_ParseTuple(args, "OOO",  &gen_obj, &q_obj, &I_out_obj)) return NULL;
-	GenI *sld2i = (GenI *)PyCapsule_GetPointer(gen_obj, "GenI");
+	sld2i = (GenI *)PyCapsule_GetPointer(gen_obj, "GenI");
 	INVECTOR(q_obj, q, n_q);
 	OUTVECTOR(I_out_obj, I_out, n_out);
 
 	// Sanity check
 	//if (n_q!=n_out) return Py_BuildValue("i",-1);
 
-	genicom(sld2i, n_q, q, I_out);
+	genicom(sld2i, (int)n_q, q, I_out);
 	return Py_BuildValue("i",1);
 }
 

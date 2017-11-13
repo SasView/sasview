@@ -64,7 +64,7 @@ void genicomXY(GenI* this, int npoints, double *qx, double *qy, double *I_out){
 	complex temp_fi;
 
 	double count = 0.0;
-	//check if this computation is for averaging
+	int i, j;
 
 	//Assume that pixel volumes are given in vol_pix in A^3 unit
 	//int x_size = 0; //in Ang
@@ -74,7 +74,7 @@ void genicomXY(GenI* this, int npoints, double *qx, double *qy, double *I_out){
 	// Loop over q-values and multiply apply matrix
 
 	//printf("npoints: %d, npix: %d\n", npoints, this->n_pix);
-	for(int i=0; i<npoints; i++){
+	for(i=0; i<npoints; i++){
 		//I_out[i] = 0.0;
 		sumj_uu = cassign(0.0, 0.0);
 		sumj_ud = cassign(0.0, 0.0);
@@ -83,7 +83,7 @@ void genicomXY(GenI* this, int npoints, double *qx, double *qy, double *I_out){
 		//printf ("%d ", i);
 		//q = sqrt(qx[i]*qx[i] + qy[i]*qy[i]); // + qz[i]*qz[i]);
 
-		for(int j=0; j<this->n_pix; j++){
+		for(j=0; j<this->n_pix; j++){
 			if (this->sldn_val[j]!=0.0
 				||this->mx_val[j]!=0.0
 				||this->my_val[j]!=0.0
@@ -155,11 +155,13 @@ void genicom(GenI* this, int npoints, double *q, double *I_out){
 	double sumj;
 	double sld_j = 0.0;
 	double count = 0.0;
+	int i, j, k;
+
 	//Assume that pixel volumes are given in vol_pix in A^3 unit
 	// Loop over q-values and multiply apply matrix
-	for(int i=0; i<npoints; i++){
+	for(i=0; i<npoints; i++){
 		sumj =0.0;
-		for(int j=0; j<this->n_pix; j++){
+		for(j=0; j<this->n_pix; j++){
 			//Isotropic: Assumes all slds are real (no magnetic)
 			//Also assumes there is no polarization: No dependency on spin
 			if (this->is_avg == 1){
@@ -176,7 +178,7 @@ void genicom(GenI* this, int npoints, double *q, double *I_out){
 			else{
 				//full calculation
 				//pragma omp parallel for
-				for(int k=0; k<this->n_pix; k++){
+				for(k=0; k<this->n_pix; k++){
 					sld_j =  this->sldn_val[j] * this->sldn_val[k] * this->vol_pix[j] * this->vol_pix[k];
 					qr = (this->x_val[j]-this->x_val[k])*(this->x_val[j]-this->x_val[k])+
 						      (this->y_val[j]-this->y_val[k])*(this->y_val[j]-this->y_val[k])+
