@@ -132,13 +132,19 @@ class GenSAS(BaseComponent):
             pos_x, pos_y, pos_z = transform_center(pos_x, pos_y, pos_z)
         sldn = copy.deepcopy(self.data_sldn)
         sldn -= self.params['solvent_SLD']
-        model = mod.new_GenI((1 if self.is_avg else 0),
-                             pos_x, pos_y, pos_z,
-                             sldn, self.data_mx, self.data_my,
-                             self.data_mz, self.data_vol,
-                             self.params['Up_frac_in'],
-                             self.params['Up_frac_out'],
-                             self.params['Up_theta'])
+        # **** WARNING **** new_GenI holds pointers to numpy vectors
+        # be sure that they are contiguous double precision arrays and make 
+        # sure the GC doesn't eat them before genicom is called.
+        # TODO: rewrite so that the parameters are passed directly to genicom
+        args = (
+            (1 if self.is_avg else 0),
+            pos_x, pos_y, pos_z,
+            sldn, self.data_mx, self.data_my,
+            self.data_mz, self.data_vol,
+            self.params['Up_frac_in'],
+            self.params['Up_frac_out'],
+            self.params['Up_theta'])
+        model = mod.new_GenI(*args)
         if len(qy):
             qx, qy = _vec(qx), _vec(qy)
             I_out = np.empty_like(qx)
