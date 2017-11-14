@@ -80,6 +80,11 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
         self.txtQData.setText(str(self.qstar_total))
         self.txtQDataErr.setText(self._model.item(WIDGETS.W_INVARIANT_ERR).text())
 
+        # Reset progress counters
+        self.progress_low_qstar = 0.0
+        self.progress_high_qstar = 0.0
+        self.progress_qstar = 100.0
+
         # Low-Q
         if self._model.item(WIDGETS.W_ENABLE_LOWQ).text() == "true":
             self.qlow = float(self._model.item(WIDGETS.D_LOW_QSTAR).text())
@@ -146,8 +151,12 @@ class DetailsDialog(QtWidgets.QDialog, Ui_Dialog):
         msg = ''
         if self.progress_qstar == 'error':
             msg += 'Error occurred when computing invariant from data.\n '
-        if self.progress_qstar > 100:
-            msg += "Invariant Q contribution is greater than 100% .\n"
+        try:
+            if float(self.progress_qstar) > 100:
+                msg += "Invariant Q contribution is greater than 100% .\n"
+        except ValueError:
+            # Text message, skip msg update
+            pass
 
         if self.progress_low_qstar == 'error':
             try:

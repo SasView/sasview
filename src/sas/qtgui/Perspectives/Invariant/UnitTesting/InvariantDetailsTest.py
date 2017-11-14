@@ -7,8 +7,8 @@ from PyQt5 import QtGui, QtWidgets
 from PyQt5 import QtCore
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
-from mock import MagicMock
-from mock import patch
+from unittest.mock import MagicMock
+from unittest.mock import patch
 
 from twisted.internet import threads
 
@@ -137,7 +137,7 @@ class InvariantDetailsTest(unittest.TestCase):
 
         self.widget.qstar_total = 10
         self.widget.progress_qstar = 'error'
-        self.assertEqual(self.widget.checkValues(), "Error occurred when computing invariant from data.\n Invariant Q contribution is greater than 100% .\n")
+        self.assertIn("Error occurred when computing invariant from data.", self.widget.checkValues())
 
         self.widget.progress_qstar = 0
 

@@ -7,9 +7,9 @@ from PyQt5 import QtGui, QtWidgets
 from PyQt5 import QtCore
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
-from mock import MagicMock
-from mock import patch
-from mock import create_autospec
+from unittest.mock import MagicMock
+from unittest.mock import patch
+from unittest.mock import create_autospec
 
 from twisted.internet import threads
 
@@ -22,8 +22,8 @@ from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
-if not QtWidgets.QApplication.instance():
-    app = QtWidgets.QApplication(sys.argv)
+#if not QtWidgets.QApplication.instance():
+app = QtWidgets.QApplication(sys.argv)
 
 BG_COLOR_ERR = 'background-color: rgb(244, 170, 164);'
 
@@ -141,15 +141,15 @@ class InvariantPerspectiveTest(unittest.TestCase):
         self.assertEqual(self.widget.txtPowerLowQ.toolTip(), "Exponent to apply to the Power_law function." )
 
         # Validators
-        self.assertIsInstance(self.widget.txtNptsLowQ.validator(), QtGui.QRegExpValidator)
-        self.assertIsInstance(self.widget.txtNptsHighQ.validator(), QtGui.QRegExpValidator)
-        self.assertIsInstance(self.widget.txtPowerLowQ.validator(), QtGui.QRegExpValidator)
-        self.assertIsInstance(self.widget.txtPowerHighQ.validator(), QtGui.QRegExpValidator)
+        self.assertIsInstance(self.widget.txtNptsLowQ.validator(), QtGui.QIntValidator)
+        self.assertIsInstance(self.widget.txtNptsHighQ.validator(), QtGui.QIntValidator)
+        self.assertIsInstance(self.widget.txtPowerLowQ.validator(), GuiUtils.DoubleValidator)
+        self.assertIsInstance(self.widget.txtPowerHighQ.validator(), GuiUtils.DoubleValidator)
 
-        self.assertIsInstance(self.widget.txtBackgd.validator(), QtGui.QDoubleValidator)
-        self.assertIsInstance(self.widget.txtContrast.validator(), QtGui.QDoubleValidator)
-        self.assertIsInstance(self.widget.txtScale.validator(), QtGui.QDoubleValidator)
-        self.assertIsInstance(self.widget.txtPorodCst.validator(), QtGui.QDoubleValidator)
+        self.assertIsInstance(self.widget.txtBackgd.validator(), GuiUtils.DoubleValidator)
+        self.assertIsInstance(self.widget.txtContrast.validator(), GuiUtils.DoubleValidator)
+        self.assertIsInstance(self.widget.txtScale.validator(), GuiUtils.DoubleValidator)
+        self.assertIsInstance(self.widget.txtPorodCst.validator(), GuiUtils.DoubleValidator)
 
         # Test autoexclusivity of radiobuttons
         # Low Q
@@ -201,7 +201,7 @@ class InvariantPerspectiveTest(unittest.TestCase):
         # self.assertEqual(self.widget._data.y[0], 3)
         # self.assertEqual(self.widget._data.y[1], 4)
 
-    def testHelp(self):
+    def notestHelp(self):
         """ Assure help file is shown """
         # this should not rise
         self.widget.onHelp()

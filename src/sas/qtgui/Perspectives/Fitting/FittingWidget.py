@@ -137,13 +137,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if data is not None:
             self.data = data
 
-    #def close(self):
-    #    """
-    #    Remember to kill off things on exit
-    #    """
-    #    self.helpView.close()
-    #    del self.helpView
-
     @property
     def data(self):
         return self.logic.data

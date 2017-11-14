@@ -48,13 +48,17 @@ from Utilities.UnitTesting import SasviewLoggerTest
 from UnitTesting import TestUtilsTest
 
 # Perspectives
-#import path_prepare
+#  Fitting
 from Perspectives.Fitting.UnitTesting import FittingWidgetTest
 from Perspectives.Fitting.UnitTesting import FittingPerspectiveTest
 from Perspectives.Fitting.UnitTesting import FittingLogicTest
 from Perspectives.Fitting.UnitTesting import FittingUtilitiesTest
 from Perspectives.Fitting.UnitTesting import FitPageTest
 from Perspectives.Fitting.UnitTesting import FittingOptionsTest
+#  Invariant
+from Perspectives.Invariant.UnitTesting import InvariantPerspectiveTest
+from Perspectives.Invariant.UnitTesting import InvariantDetailsTest
+
 
 def suite():
     suites = (
@@ -99,12 +103,16 @@ def suite():
         unittest.makeSuite(DataOperationUtilityTest.DataOperationUtilityTest, 'test'),
 
         # Perspectives
+        #  Fitting
         unittest.makeSuite(FittingPerspectiveTest.FittingPerspectiveTest, 'test'),
         unittest.makeSuite(FittingWidgetTest.FittingWidgetTest,           'test'),
         unittest.makeSuite(FittingLogicTest.FittingLogicTest,             'test'),
         unittest.makeSuite(FittingUtilitiesTest.FittingUtilitiesTest,     'test'),
         unittest.makeSuite(FitPageTest.FitPageTest,                       'test'),
         unittest.makeSuite(FittingOptionsTest.FittingOptionsTest,         'test'),
+        #  Invariant
+        unittest.makeSuite(InvariantPerspectiveTest.InvariantPerspectiveTest,  'test'),
+        unittest.makeSuite(InvariantDetailsTest.InvariantDetailsTest,     'test'),
      )
     return unittest.TestSuite(suites)
 

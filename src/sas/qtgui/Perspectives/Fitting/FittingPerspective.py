@@ -90,11 +90,11 @@ class FittingWindow(QtWidgets.QTabWidget):
         Overwrite QDialog close method to allow for custom widget close
         """
         # Invoke fit page events
-        for tab in self.tabs:
-            tab.close()
         if self._allow_close:
             # reset the closability flag
             self.setClosable(value=False)
+            # Tell the MdiArea to close the container
+            self.parentWidget().close()
             event.accept()
         else:
             # Maybe we should just minimize

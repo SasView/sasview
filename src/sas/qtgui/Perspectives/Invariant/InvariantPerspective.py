@@ -124,22 +124,20 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         # Set up the mapper
         self.setupMapper()
 
+        # Default enablement
+        self.cmdCalculate.setEnabled(False)
+
         # validator: double
-        self.txtBackgd.setValidator(QtGui.QDoubleValidator())
-        self.txtContrast.setValidator(QtGui.QDoubleValidator())
-        self.txtScale.setValidator(QtGui.QDoubleValidator())
-        self.txtPorodCst.setValidator(QtGui.QDoubleValidator())
+        self.txtBackgd.setValidator(GuiUtils.DoubleValidator())
+        self.txtContrast.setValidator(GuiUtils.DoubleValidator())
+        self.txtScale.setValidator(GuiUtils.DoubleValidator())
+        self.txtPorodCst.setValidator(GuiUtils.DoubleValidator())
 
         # validator: integer number
-        valid_regex_int = QtCore.QRegExp('^[+]?(\d+[.][0]*)$')
-        self.txtNptsLowQ.setValidator(QtGui.QRegExpValidator(valid_regex_int,
-                                                             self.txtNptsLowQ))
-        self.txtNptsHighQ.setValidator(QtGui.QRegExpValidator(valid_regex_int,
-                                                             self.txtNptsHighQ))
-        self.txtPowerLowQ.setValidator(QtGui.QRegExpValidator(valid_regex_int,
-                                                             self.txtPowerLowQ))
-        self.txtPowerHighQ.setValidator(QtGui.QRegExpValidator(valid_regex_int,
-                                                             self.txtPowerHighQ))
+        self.txtNptsLowQ.setValidator(QtGui.QIntValidator())
+        self.txtNptsHighQ.setValidator(QtGui.QIntValidator())
+        self.txtPowerLowQ.setValidator(GuiUtils.DoubleValidator())
+        self.txtPowerHighQ.setValidator(GuiUtils.DoubleValidator())
 
     def enabling(self):
         """ """
@@ -158,6 +156,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         if self._allow_close:
             # reset the closability flag
             self.setClosable(value=False)
+            # Tell the MdiArea to close the container
+            self.parentWidget().close()
             event.accept()
         else:
             event.ignore()
@@ -226,7 +226,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.cmdStatus.setEnabled(True)
 
         self.model = model
-        self.mapper.toFirst()
         self._data = GuiUtils.dataFromItem(self._model_item)
 
         # Send the modified model item to DE for keeping in the model
@@ -330,7 +329,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             surface = None
 
         if (calculation_failed):
-            self.mapper.toFirst()
             logging.warning('Calculation failed: {}'.format(msg))
             return self.model
         else:
@@ -414,8 +412,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
             self.model.setItem(WIDGETS.D_HIGH_QSTAR, item)
             item = QtGui.QStandardItem(str(float('%.3g'% qstar_high_err)))
             self.model.setItem(WIDGETS.D_HIGH_QSTAR_ERR, item)
-
-            self.mapper.toFirst()
 
             return self.model
 
@@ -503,13 +499,20 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         Validators of number of points for extrapolation.
         Error if it is larger than the distribution length
         """
+        try:
+            int_value = int(self.sender().text())
+        except ValueError:
+            self.sender().setStyleSheet(BG_RED)
+            self.cmdCalculate.setEnabled(False)
+            return
+
         if self._data:
-            if len(self._data.x) < int(self.sender().text()):
-                self.sender().setStyleSheet(QtCore.QString(BG_RED))
+            if len(self._data.x) < int_value:
+                self.sender().setStyleSheet(BG_RED)
                 logging.warning('The number of points must be smaller than {}'.format(len(self._data.x)))
                 self.cmdCalculate.setEnabled(False)
             else:
-                self.sender().setStyleSheet(QtCore.QString(BG_WHITE))
+                self.sender().setStyleSheet(BG_WHITE)
                 self.cmdCalculate.setEnabled(True)
         else:
             # logging.info('no data is loaded')
@@ -564,12 +567,14 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         index_elt = possible_senders.index(self.sender().objectName())
 
         self.model.setItem(related_widgets[index_elt], item)
-
-        related_internal_values[index_elt] = float(self.sender().text())
-
-        # print possible_senders[index_elt], related_internal_values[index_elt]
-
-        self.mapper.toFirst()
+        try:
+            related_internal_values[index_elt] = float(self.sender().text())
+            self.sender().setStyleSheet(BG_WHITE)
+            self.cmdCalculate.setEnabled(True)
+        except ValueError:
+            # empty field, just skip
+            self.sender().setStyleSheet(BG_RED)
+            self.cmdCalculate.setEnabled(False)
 
     def lowGuinierAndPowerToggle(self, toggle):
         """
@@ -760,7 +765,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         # Extract data on 1st child - this is the Data1D/2D component
         data = GuiUtils.dataFromItem(self._model_item)
-        self.model.item(WIDGETS.W_FILENAME).setData(QtCore.QVariant(self._model_item.text()))
+        self.model.item(WIDGETS.W_FILENAME).setData(self._model_item.text())
         # update GUI and model with info from loaded data
         self.updateGuiFromFile(data=data)
 
