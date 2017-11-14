@@ -144,10 +144,6 @@ class DisableOpenMPCommand(Command):
         pass
 
 
-_ = """
-C:\Users\pkienzle\AppData\Local\Continuum\Anaconda2\lib\site-packages\tinycc\tcc.exe -DMS_WIN64 -shared -s build\temp.win-amd64-2.7\Release\src\sas\sascalc\calculator\c_extensions\sld2i_module.o build\temp.win-amd64-2.7\Release\src\sas\sascalc\calculator\c_extensions\sld2i.o build\temp.win-amd64-2.7\Release\src\sas\sascalc\calculator\c_extensions\libfunc.o build\temp.win-amd64-2.7\Release\src\sas\sascalc\calculator\c_extensions\librefl.o build\temp.win-amd64-2.7\Release\src\sas\sascalc\calculator\c_extensions\sld2i.def -LC:\Users\pkienzle\AppData\Local\Continuum\Anaconda2\libs -LC:\Users\pkienzle\AppData\Local\Continuum\Anaconda2\PCbuild\amd64 -LC:\Users\pkienzle\AppData\Local\Continuum\Anaconda2\PC\VS9.0\amd64 -lpython27 -lmsvcr90 -o build\lib.win-amd64-2.7\sas\sascalc\calculator\core\sld2i.pyd
-"""
-
 class build_ext_subclass(build_ext):
     def build_extensions(self):
         if use_tinycc:
