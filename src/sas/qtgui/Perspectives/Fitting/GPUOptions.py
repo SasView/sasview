@@ -219,6 +219,8 @@ def _get_clinfo():
         cl_platforms = cl.get_platforms()
     except ImportError:
         print("pyopencl import failed. Using only CPU computations")
+    except cl.LogicError as e:
+        print(e.value)
 
     p_index = 0
     for cl_platform in cl_platforms:
