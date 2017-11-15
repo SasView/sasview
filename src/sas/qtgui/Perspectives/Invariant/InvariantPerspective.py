@@ -80,7 +80,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self._high_power_value = DEFAULT_POWER_LOW
 
         # no reason to have this widget resizable
-        self.setFixedSize(self.minimumSizeHint())
+        self.resize(self.minimumSizeHint())
+        #self.setFixedSize(self.sizeHint())
 
         self.communicate = self._manager.communicator()
 

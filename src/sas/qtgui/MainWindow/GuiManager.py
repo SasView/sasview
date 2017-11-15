@@ -191,14 +191,15 @@ class GuiManager(object):
         # Default perspective
         self._current_perspective = Perspectives.PERSPECTIVES[str(perspective_name)](parent=self)
 
-        self._workspace.workspace.addSubWindow(self._current_perspective)
+        subwindow = self._workspace.workspace.addSubWindow(self._current_perspective)
 
         # Resize to the workspace height
         workspace_height = self._workspace.workspace.sizeHint().height()
         perspective_size = self._current_perspective.sizeHint()
-        #if workspace_height < perspective_size.height():
         perspective_width = perspective_size.width()
         self._current_perspective.resize(perspective_width, workspace_height-10)
+        # Resize the mdi area to match the widget within
+        subwindow.resize(subwindow.minimumSizeHint())
 
         self._current_perspective.show()
 
