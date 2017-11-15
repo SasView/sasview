@@ -15,9 +15,7 @@ from sas.qtgui.UI import main_resources_rc
 # Local UI
 from sas.qtgui.Calculators.UI.SldPanel import Ui_SldPanel
 
-def enum(*sequential, **named):
-    enums = dict(list(zip(sequential, list(range(len(sequential))))), **named)
-    return type('Enum', (), enums)
+from sas.qtgui.Utilities.GuiUtils import enum
 
 MODEL = enum(
     'MOLECULAR_FORMULA',

@@ -36,7 +36,7 @@ from sas.qtgui.Calculators.DataOperationUtilityPanel import DataOperationUtility
 # Perspectives
 import sas.qtgui.Perspectives as Perspectives
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
-from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
+from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow, DEFAULT_PERSPECTIVE
 
 class Acknowledgements(QDialog, Ui_Acknowledgements):
     def __init__(self, parent=None):
@@ -68,18 +68,10 @@ class GuiManager(object):
         # Create action triggers
         self.addTriggers()
 
-        # Populate menus with dynamic data
-        #
-        # Analysis/Perspectives - potentially
-        # Window/current windows
-        #
-        # Widgets
-        #
-        # Current displayed perspective
+        # Currently displayed perspective
         self._current_perspective = None
 
-        # Invoke the initial perspective
-        #self.perspectiveChanged("Fitting")
+        # Populate the main window with stuff
         self.addWidgets()
 
         # Fork off logging messages to the Log Window
@@ -673,9 +665,8 @@ class GuiManager(object):
         """
         # For now we'll just update the analysis menu status but when the inversion is implemented delete from here
         self.checkAnalysisOption(self._workspace.actionInversion)
-        print("actionInversion TRIGGERED")
         # to here and uncomment the following line
-        # self.perspectiveChanged("Inversion")
+        self.perspectiveChanged("Inversion")
 
     def actionInvariant(self):
         """

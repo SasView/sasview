@@ -1,6 +1,4 @@
-def enum(*sequential, **named):
-    enums = dict(list(zip(sequential, list(range(len(sequential))))), **named)
-    return type('Enum', (), enums)
+from sas.qtgui.Utilities.GuiUtils import enum
 
 WIDGETS = enum( 'W_FILENAME',
                 'W_QMIN',

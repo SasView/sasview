@@ -14,9 +14,7 @@ from sas.qtgui.Utilities.GuiUtils import HELP_DIRECTORY_LOCATION
 # Local UI
 from sas.qtgui.Calculators.UI.DensityPanel import Ui_DensityPanel
 
-def enum(*sequential, **named):
-    enums = dict(list(zip(sequential, list(range(len(sequential))))), **named)
-    return type('Enum', (), enums)
+from sas.qtgui.Utilities.GuiUtils import enum
 
 MODEL = enum(
     'MOLECULAR_FORMULA',

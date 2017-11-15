@@ -30,7 +30,8 @@ def is_float(value):
 # TODO: Update help with batch capabilities
 # TODO: Easy way to scroll through results - no tabs in window(?) - 'spreadsheet'
 # TODO: Method to export results in some meaningful way
-class InversionWindow(QtWidgets.QTabWidget, Ui_PrInversion):
+#class InversionWindow(QtWidgets.QTabWidget, Ui_PrInversion):
+class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     """
     The main window for the P(r) Inversion perspective.
     """
@@ -116,6 +117,8 @@ class InversionWindow(QtWidgets.QTabWidget, Ui_PrInversion):
         if self._allow_close:
             # reset the closability flag
             self.setClosable(value=False)
+            # Tell the MdiArea to close the container
+            self.parentWidget().close()
             event.accept()
         else:
             event.ignore()
@@ -252,7 +255,7 @@ class InversionWindow(QtWidgets.QTabWidget, Ui_PrInversion):
 
     def setupWindow(self):
         """Initialize base window state on init"""
-        self.setTabPosition(0)
+        #self.setTabPosition(0)
         self.enableButtons()
         self.estimateBgd.setChecked(True)
 
@@ -379,7 +382,10 @@ class InversionWindow(QtWidgets.QTabWidget, Ui_PrInversion):
 
         for data in data_item:
             # Create initial internal mappings
-            self._data_list[data] = self._calculator.clone()
+            # TODO: in PyQt5 QStandardItem no longer can be used as dict key
+            # Possibly the easiest solution is to subclass QStandardItem
+            # and reimplement __hash__() method so it can be hashed.
+            self._data_list[data] = self._calculator.clone() #<- this crashes
             self._data_set = GuiUtils.dataFromItem(data)
             self.data_plot_list[data] = self.data_plot
             self.pr_plot_list[data] = self.pr_plot

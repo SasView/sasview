@@ -29,6 +29,8 @@ from sas.qtgui.MainWindow.DroppableDataLoadWidget import DroppableDataLoadWidget
 
 import sas.qtgui.Perspectives as Perspectives
 
+DEFAULT_PERSPECTIVE = "Fitting"
+
 class DataExplorerWindow(DroppableDataLoadWidget):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
@@ -160,7 +162,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             self.cbFitting.addItems(available_perspectives)
         self.cbFitting.currentIndexChanged.connect(self.updatePerspectiveCombo)
         # Set the index so we see the default (Fitting)
-        self.updatePerspectiveCombo(0)
+        self.cbFitting.setCurrentIndex(self.cbFitting.findText(DEFAULT_PERSPECTIVE))
 
     def _perspective(self):
         """

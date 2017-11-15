@@ -863,3 +863,7 @@ class DoubleValidator(QtGui.QDoubleValidator):
         QtGui.QDoubleValidator.fixup(input)
         input = input.replace(",", "")
 
+def enum(*sequential, **named):
+    """Create an enumeration object from a list of strings"""
+    enums = dict(zip(sequential, range(len(sequential))), **named)
+    return type('Enum', (), enums)
