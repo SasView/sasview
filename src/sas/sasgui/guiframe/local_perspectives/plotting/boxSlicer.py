@@ -135,7 +135,7 @@ class BoxInteractor(_BaseInteractor, SlicerModel):
         if self.averager is None:
             if new_slab is None:
                 msg = "post data:cannot average , averager is empty"
-                raise ValueError, msg
+                raise (ValueError, msg)
             self.averager = new_slab
         if self.direction == "X":
             if self.fold:
@@ -151,7 +151,7 @@ class BoxInteractor(_BaseInteractor, SlicerModel):
             bin_width = (y_max + y_low) / self.nbins
         else:
             msg = "post data:no Box Average direction was supplied"
-            raise ValueError, msg
+            raise (ValueError, msg)
         # # Average data2D given Qx or Qy
         box = self.averager(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
                             bin_width=bin_width)

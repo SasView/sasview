@@ -16,8 +16,8 @@ from sas.sasgui.guiframe.panel_base import PanelBase
 
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sascalc.calculator.slit_length_calculator import SlitlengthCalculator
-from calculator_widgets import OutputTextCtrl
-from calculator_widgets import InterActiveOutputTextCtrl
+from .calculator_widgets import OutputTextCtrl
+from .calculator_widgets import InterActiveOutputTextCtrl
 from sas.sasgui.perspectives.calculator import calculator_widgets as widget
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
@@ -209,7 +209,7 @@ class SlitLengthCalculatorPanel(wx.Panel, PanelBase):
         self._default_save_location = path
         try:
             #Load data
-            from load_thread import DataReader
+            from .load_thread import DataReader
             ## If a thread is already started, stop it
             if self.reader is not None and self.reader.isrunning():
                 self.reader.stop()
@@ -225,7 +225,7 @@ class SlitLengthCalculatorPanel(wx.Panel, PanelBase):
         except:
             if self.parent.parent is None:
                 return
-            msg = "Slit Length Calculator: %s" % (sys.exc_value)
+            msg = "Slit Length Calculator: %s" % (sys.exc_info()[1])
             wx.PostEvent(self.parent.parent,
                           StatusEvent(status=msg, type='stop'))
             return
@@ -261,14 +261,14 @@ class SlitLengthCalculatorPanel(wx.Panel, PanelBase):
             y = data.y
             if x == [] or  x is None or y == [] or y is None:
                 msg = "The current data is empty please check x and y"
-                raise ValueError, msg
+                raise ValueError(msg)
             slit_length_calculator = SlitlengthCalculator()
             slit_length_calculator.set_data(x=x, y=y)
             slit_length = slit_length_calculator.calculate_slit_length()
         except:
             if self.parent.parent is None:
                 return
-            msg = "Slit Size Calculator: %s" % (sys.exc_value)
+            msg = "Slit Size Calculator: %s" % (sys.exc_info()[1])
             wx.PostEvent(self.parent.parent,
                           StatusEvent(status=msg, type='stop'))
             return

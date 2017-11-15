@@ -11,10 +11,10 @@ import logging
 from wx.lib.scrolledpanel import ScrolledPanel
 from sas.sasgui.guiframe.events import StatusEvent
 from sas.sasgui.guiframe.panel_base import PanelBase
-from inversion_state import InversionState
-from pr_widgets import PrTextCtrl
-from pr_widgets import DataFileTextCtrl
-from pr_widgets import OutputTextCtrl
+from .inversion_state import InversionState
+from .pr_widgets import PrTextCtrl
+from .pr_widgets import DataFileTextCtrl
+from .pr_widgets import OutputTextCtrl
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 
 logger = logging.getLogger(__name__)
@@ -753,7 +753,7 @@ class InversionControl(ScrolledPanel, PanelBase):
             logger.error("InversionControl._on_accept_alpha got a value that was not a number: %s" % alpha )
         except:
             # No estimate or bad estimate, either do nothing
-            logger.error("InversionControl._on_accept_alpha: %s" % sys.exc_value)
+            logger.error("InversionControl._on_accept_alpha: %s" % sys.exc_info()[1])
 
     def _on_accept_nterms(self, evt):
         """
@@ -769,7 +769,7 @@ class InversionControl(ScrolledPanel, PanelBase):
             logger.error("InversionControl._on_accept_nterms got a value that was not a number: %s" % nterms )
         except:
             # No estimate or bad estimate, either do nothing
-            logger.error("InversionControl._on_accept_nterms: %s" % sys.exc_value)
+            logger.error("InversionControl._on_accept_nterms: %s" % sys.exc_info()[1])
 
     def clear_panel(self):
         """
@@ -900,7 +900,7 @@ class InversionControl(ScrolledPanel, PanelBase):
                 message = "Number of function terms should be smaller "
                 message += "than the number of points"
                 wx.PostEvent(self._manager.parent, StatusEvent(status=message))
-                raise ValueError, message
+                raise ValueError(message)
             self.nfunc_ctl.SetBackgroundColour(wx.WHITE)
             self.nfunc_ctl.Refresh()
         except:
@@ -956,7 +956,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         """
         Invoke the d_max exploration dialog
         """
-        from explore_dialog import ExploreDialog
+        from .explore_dialog import ExploreDialog
         if self._manager._last_pr is not None:
             pr = self._manager._create_plot_pr()
             dialog = ExploreDialog(pr, 10, None, -1, "")
@@ -1008,7 +1008,7 @@ class InversionControl(ScrolledPanel, PanelBase):
                 self._on_invert(None)
                 self._set_analysis(True)
             except:
-                msg = "InversionControl._change_file: %s" % sys.exc_value
+                msg = "InversionControl._change_file: %s" % sys.exc_info()[1]
                 logger.error(msg)
 
     def on_help(self, event):

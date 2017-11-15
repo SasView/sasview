@@ -5,7 +5,7 @@ import sys
 from copy import deepcopy
 from sas.sascalc.dataloader.loader import Loader
 from sas.sascalc.dataloader.data_info import Aperture, Collimation
-from aperture_editor import ApertureDialog
+from .aperture_editor import ApertureDialog
 
 from sas.sasgui.guiframe.utils import check_float
 _BOX_WIDTH = 60

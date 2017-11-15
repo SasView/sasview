@@ -380,6 +380,12 @@ package_dir["sas.qtgui.Perspectives.Fitting.UI"] = os.path.join(
     "src", "sas", "qtgui", "Perspectives", "Fitting", "UI")
 packages.extend(["sas.qtgui.Perspectives.Fitting", "sas.qtgui.Perspectives.Fitting.UI"])
 
+package_dir["sas.qtgui.Perspectives.Inversion"] = os.path.join(
+    "src", "sas", "qtgui", "Perspectives", "Inversion")
+package_dir["sas.qtgui.Perspectives.Inversion.UI"] = os.path.join(
+    "src", "sas", "qtgui", "Perspectives", "Inversion", "UI")
+packages.extend(["sas.qtgui.Perspectives.Inversion", "sas.qtgui.Perspectives.Inversion.UI"])
+
 ## Plotting
 package_dir["sas.qtgui.Plotting"] = os.path.join(
     "src", "sas", "qtgui", "Plotting")

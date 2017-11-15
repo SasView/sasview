@@ -97,7 +97,7 @@ def OnPrintPage(self, page):
         try:
             dc.DrawBitmap(self.canvas.bitmap, (0, 0))
         except:
-            logger.error(sys.exc_value)
+            logger.error(sys.exc_info()[1])
 
     # restore original figure  resolution
     self.canvas.figure.set_facecolor(bgcolor)
@@ -208,7 +208,7 @@ class FigureCanvas(FigureCanvasWxAgg):
             try:
                 fig.draw(self)
             except ValueError:
-                logger.error(sys.exc_value)
+                logger.error(sys.exc_info()[1])
         else:
             self._isRendered = False
         if self.ndraw <= 1:

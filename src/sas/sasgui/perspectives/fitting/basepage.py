@@ -1,7 +1,7 @@
 """
 Base Page for fitting
 """
-from __future__ import print_function
+
 
 import sys
 import os
@@ -11,7 +11,7 @@ import math
 import json
 import logging
 import traceback
-from Queue import Queue
+from queue import Queue
 from threading import Thread
 from collections import defaultdict
 
@@ -222,7 +222,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         # Create context menu for page
         self.popUpMenu = wx.Menu()
 
-        wx_id = self._ids.next()
+        wx_id = next(self._ids)
         self._keep = wx.MenuItem(self.popUpMenu, wx_id, "Add bookmark",
                                  " Keep the panel status to recall it later")
         self.popUpMenu.AppendItem(self._keep)
@@ -622,7 +622,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self._on_select_model_helper()
         if self.model is not None:
             self.m_name = self.model.name
-        if name in self.saved_states.keys():
+        if name in list(self.saved_states.keys()):
             previous_state = self.saved_states[name]
             # reset state of checkbox,textcrtl  and  regular parameters value
 
@@ -917,7 +917,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.state.slit_smearer = copy.deepcopy(self.slit_smearer.GetValue())
 
         if len(self._disp_obj_dict) > 0:
-            for k, v in self._disp_obj_dict.iteritems():
+            for k, v in self._disp_obj_dict.items():
                 self.state.disp_obj_dict[k] = v.type
 
             self.state.values = copy.deepcopy(self.values)
@@ -984,7 +984,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             self.state.disp_box = self.disp_box.GetCurrentSelection()
 
             if len(self.disp_cb_dict) > 0:
-                for k, v in self.disp_cb_dict.iteritems():
+                for k, v in self.disp_cb_dict.items():
                     if v is None:
                         self.state.disp_cb_dict[k] = v
                     else:
@@ -993,7 +993,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                         except Exception:
                             self.state.disp_cb_dict[k] = None
             if len(self._disp_obj_dict) > 0:
-                for k, v in self._disp_obj_dict.iteritems():
+                for k, v in self._disp_obj_dict.items():
                     self.state.disp_obj_dict[k] = v.type
 
             self.state.values = copy.deepcopy(self.values)
@@ -1095,7 +1095,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
             if name == "ArrayDispersion":
 
-                for item in self.disp_cb_dict.keys():
+                for item in list(self.disp_cb_dict.keys()):
 
                     if hasattr(self.disp_cb_dict[item], "SetValue"):
                         self.disp_cb_dict[item].SetValue(
@@ -1166,7 +1166,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         Iterate through the categories to find the structurefactor
         :return: combo_box_position
         """
-        for key, value in self.master_category_dict.iteritems():
+        for key, value in self.master_category_dict.items():
             formfactor = state.formfactorcombobox.split(":")
             if isinstance(formfactor, list):
                 formfactor = formfactor[0]
@@ -1218,7 +1218,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self._show_combox_helper()
         # select the current model
         state._convert_to_sasmodels()
-        state.categorycombobox = unicode(state.categorycombobox)
+        state.categorycombobox = str(state.categorycombobox)
         if state.categorycombobox in self.categorybox.Items:
             category_pos = self.categorybox.Items.index(
                 state.categorycombobox)
@@ -1243,7 +1243,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         structfactor_pos = 0
         if state.structurecombobox is not None:
-            state.structurecombobox = unicode(state.structurecombobox)
+            state.structurecombobox = str(state.structurecombobox)
             for ind_struct in range(self.structurebox.GetCount()):
                 if (self.structurebox.GetString(ind_struct)
                         == state.structurecombobox):
@@ -1353,7 +1353,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.values = copy.deepcopy(state.values)
         self.weights = copy.deepcopy(state.weights)
 
-        for key, disp_type in state.disp_obj_dict.iteritems():
+        for key, disp_type in state.disp_obj_dict.items():
             # disp_model = disp
             disp_model = POLYDISPERSITY_MODELS[disp_type]()
             self._disp_obj_dict[key] = disp_model
@@ -1414,10 +1414,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         reset the context menu
         """
         ids = iter(self._id_pool)  # Reusing ids for context menu
-        for name, _ in self.state.saved_states.iteritems():
+        for name, _ in self.state.saved_states.items():
             self.number_saved_state += 1
             # Add item in the context menu
-            wx_id = ids.next()
+            wx_id = next(ids)
             msg = 'Save model and state %g' % self.number_saved_state
             self.popUpMenu.Append(wx_id, name, msg)
             wx.EVT_MENU(self, wx_id, self.onResetModel)
@@ -2313,7 +2313,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                     value = high
                     value_ctrl.SetValue(format_number(value))
 
-                if name not in self.model.details.keys():
+                if name not in list(self.model.details.keys()):
                     self.model.details[name] = ["", None, None]
                 old_low, old_high = self.model.details[name][1:3]
                 if old_low != low or old_high != high:
@@ -2674,10 +2674,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         # Find the selection
         if disp_func is not None:
             try:
-                return POLYDISPERSITY_MODELS.values().index(disp_func.__class__)
+                return list(POLYDISPERSITY_MODELS.values()).index(disp_func.__class__)
             except ValueError:
                 pass  # Fall through to default class
-        return POLYDISPERSITY_MODELS.keys().index('gaussian')
+        return list(POLYDISPERSITY_MODELS.keys()).index('gaussian')
 
     def on_reset_clicked(self, event):
         """
@@ -2769,7 +2769,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         # call gui_manager
         gui_manager = self._manager.parent
         # loops through the panels [dic]
-        for _, item2 in gui_manager.plot_panels.iteritems():
+        for _, item2 in gui_manager.plot_panels.items():
             data_title = self.data.group_id
             # try to get all plots belonging to this control panel
             try:
@@ -3339,7 +3339,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             # 2D
             if self.data.__class__.__name__ == "Data2D":
                 name = item[1]
-                if name in content.keys():
+                if name in list(content.keys()):
                     values = content[name]
                     check = values[0]
                     pd = values[1]
@@ -3388,7 +3388,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 # for 1D all parameters except orientation
                 if not item[1] in orient_param:
                     name = item[1]
-                    if name in content.keys():
+                    if name in list(content.keys()):
                         check = content[name][0]
                         # Avoid changing combox content
                         value = content[name][1:]
@@ -3614,17 +3614,17 @@ class BasicPage(ScrolledPanel, PanelBase):
         boxsizer1 = wx.StaticBoxSizer(self.mbox_description, wx.VERTICAL)
         sizer_cat = wx.BoxSizer(wx.HORIZONTAL)
         self.mbox_description.SetForegroundColour(wx.RED)
-        wx_id = self._ids.next()
+        wx_id = next(self._ids)
         self.model_func = wx.Button(self, wx_id, 'Help', size=(80, 23))
         self.model_func.Bind(wx.EVT_BUTTON, self.on_function_help_clicked,
                              id=wx_id)
         self.model_func.SetToolTipString("Full Model Function Help")
-        wx_id = self._ids.next()
+        wx_id = next(self._ids)
         self.model_help = wx.Button(self, wx_id, 'Description', size=(80, 23))
         self.model_help.Bind(wx.EVT_BUTTON, self.on_model_help_clicked,
                              id=wx_id)
         self.model_help.SetToolTipString("Short Model Function Description")
-        wx_id = self._ids.next()
+        wx_id = next(self._ids)
         self.model_view = wx.Button(self, wx_id, "Show 2D", size=(80, 23))
         self.model_view.Bind(wx.EVT_BUTTON, self._onModel2D, id=wx_id)
         hint = "toggle view of model from 1D to 2D  or 2D to 1D"

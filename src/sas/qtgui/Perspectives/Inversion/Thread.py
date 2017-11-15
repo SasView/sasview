@@ -1,17 +1,7 @@
-
-################################################################################
-#This software was developed by the University of Tennessee as part of the
-#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation.
-#
-#See the license text in license.txt
-#
-#copyright 2009, University of Tennessee
-################################################################################
-
 import sys
 import time
 from sas.sascalc.data_util.calcthread import CalcThread
+
 
 class CalcPr(CalcThread):
     """
@@ -44,6 +34,7 @@ class CalcPr(CalcThread):
             if self.error_func is not None:
                 self.error_func("CalcPr.compute: %s" % sys.exc_info()[1])
 
+
 class EstimatePr(CalcThread):
     """
     Estimate P(r)
@@ -72,6 +63,7 @@ class EstimatePr(CalcThread):
             if self.error_func is not None:
                 self.error_func("EstimatePr.compute: %s" % sys.exc_info()[1])
 
+
 class EstimateNT(CalcThread):
     """
     """
@@ -84,7 +76,6 @@ class EstimateNT(CalcThread):
         self.starttime = 0
         self._time_for_sleep = 0
         self._sleep_delay = 1.0
-
 
     def isquit(self):
         """

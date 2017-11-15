@@ -64,7 +64,7 @@ class Calc2D(CalcThread):
 
         if self.data is None:
             msg = "Compute Calc2D receive data = %s.\n" % str(self.data)
-            raise ValueError, msg
+            raise ValueError(msg)
 
         # Define matrix where data will be plotted
         radius = np.sqrt((self.data.qx_data * self.data.qx_data) + \

@@ -231,7 +231,7 @@ class SectorInteractor(_BaseInteractor, SlicerModel):
         if numpy.fabs(self.left_line.phi) != numpy.fabs(self.right_line.phi):
             msg = "Phi left and phi right are different"
             msg += " %f, %f" % (self.left_line.phi, self.right_line.phi)
-            raise ValueError, msg
+            raise (ValueError, msg)
         params["Phi [deg]"] = self.main_line.theta * 180 / numpy.pi
         params["Delta_Phi [deg]"] = numpy.fabs(self.left_line.phi * 180 / numpy.pi)
         params["nbins"] = self.nbins

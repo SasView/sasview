@@ -1,9 +1,9 @@
 """
     This module allows more interaction with the plot
 """
-from __future__ import print_function
 
-from BaseInteractor import _BaseInteractor
+
+from .BaseInteractor import _BaseInteractor
 
 
 class PointInteractor(_BaseInteractor):

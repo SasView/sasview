@@ -186,8 +186,8 @@ class BindArtist(object):
         """
         # Check that the trigger is valid
         if trigger not in self._actions:
-            raise ValueError, "%s invalid --- valid triggers are %s" \
-                % (trigger, ", ".join(self.events))
+            raise (ValueError, "%s invalid --- valid triggers are %s" \
+                % (trigger, ", ".join(self.events)))
         # Register the trigger callback
         self._actions[trigger][artist] = action
         # print "==> added",artist,[artist],"to",trigger,":",
@@ -202,7 +202,7 @@ class BindArtist(object):
         to figure, and to 'all' if the event is not processed.
         """
         if action not in self.events:
-            raise ValueError, "Trigger expects " + ", ".join(self.events)
+            raise (ValueError, "Trigger expects " + ", ".join(self.events))
         # Tag the event with modifiers
         for mod in ('alt', 'control', 'shift', 'meta'):
             setattr(ev, mod, getattr(self, mod))
