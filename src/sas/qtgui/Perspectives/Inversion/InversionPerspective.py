@@ -27,10 +27,8 @@ def is_float(value):
         return 0.0
 
 
-# TODO: Remove data
 # TODO: Modify plot references, don't just send new
 # TODO: Update help with batch capabilities
-# TODO: Easy way to scroll through results - no tabs in window(?) - 'spreadsheet'
 # TODO: Method to export results in some meaningful way
 class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
     """
@@ -52,6 +50,8 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         self.communicate = GuiUtils.Communicate()
 
         self.logic = InversionLogic()
+
+        self.dmaxWindow = None
 
         # The window should not close
         self._allow_close = False
@@ -299,6 +299,8 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         self._data_list.pop(self._data)
         self.pr_plot_list.pop(self._data)
         self.data_plot_list.pop(self._data)
+        if self.dmaxWindow is not None:
+            self.dmaxWindow = None
         self.dataList.removeItem(self.dataList.currentIndex())
         self.dataList.setCurrentIndex(0)
 
@@ -330,6 +332,10 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
             title = self.data_plot.name
             GuiUtils.updateModelItemWithPlot(
                 self._data, QtCore.QVariant(self.data_plot), title)
+        if self.dmaxWindow is not None:
+            self.dmaxWindow.pr_state = self._calculator
+            self.dmaxWindow.nfunc = self.getNFunc()
+
         self.mapper.toFirst()
 
     def help(self):
@@ -359,7 +365,6 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         """
         Open the Explorer window to see correlations between params and results
         """
-        # TODO: Link Invertor() and DmaxWindow so window updates when recalculated
         from dmax import DmaxWindow
         self.dmaxWindow = DmaxWindow(self._calculator, self.getNFunc(), self)
         self.dmaxWindow.show()
@@ -422,8 +427,6 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
 
     ######################################################################
     # Thread Creators
-
-    # TODO: Move to individual class(?)
 
     def startThreadAll(self):
         for data_ref, pr in self._data_list.items():
@@ -534,7 +537,6 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         self.regConstantSuggestionButton.setEnabled(True)
         self.model.setItem(WIDGETS.W_COMP_TIME,
                            QtGui.QStandardItem(str(elapsed)))
-        self.PrTabWidget.setCurrentIndex(0)
         if message:
             logging.info(message)
 
@@ -556,14 +558,13 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
 
         # Show result on control panel
 
-        # TODO: Connect self._calculator to GUI - two-to-one connection possible?
         self.model.setItem(WIDGETS.W_RG, QtGui.QStandardItem(str(pr.rg(out))))
         self.model.setItem(WIDGETS.W_I_ZERO,
                            QtGui.QStandardItem(str(pr.iq0(out))))
         self.model.setItem(WIDGETS.W_BACKGROUND_INPUT,
                            QtGui.QStandardItem("{:.3f}".format(pr.est_bck)))
-        self.model.setItem(WIDGETS.W_BACKGROUND_OUTPUT,
-                           QtGui.QStandardItem(str(pr.background)))
+        self.model.setItem(WIDGETS.W_BACKGROUND_OUTPUT, QtGui.QStandardItem(
+            str("{:.3g}".format(pr.background))))
         self.model.setItem(WIDGETS.W_CHI_SQUARED,
                            QtGui.QStandardItem(str(pr.chi2[0])))
         self.model.setItem(WIDGETS.W_COMP_TIME,
@@ -575,8 +576,6 @@ class InversionWindow(QtGui.QTabWidget, Ui_PrInversion):
         self.model.setItem(WIDGETS.W_SIGMA_POS_FRACTION,
                            QtGui.QStandardItem(str(pr.get_pos_err(out, cov))))
 
-        # Display results tab
-        self.PrTabWidget.setCurrentIndex(1)
         # Save Pr invertor
         self._calculator = pr
         # Append data to data list

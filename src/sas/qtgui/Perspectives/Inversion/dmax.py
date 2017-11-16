@@ -75,6 +75,8 @@ class DmaxWindow(QtGui.QDialog, Ui_DmaxExplorer):
     def setupSlots(self):
         self.closeButton.clicked.connect(self.close)
 
+        self.dependentVariable.currentIndexChanged.connect(self.dVChanged)
+
         self.model.itemChanged.connect(self.modelChanged)
 
     def setupModel(self):
@@ -100,7 +102,10 @@ class DmaxWindow(QtGui.QDialog, Ui_DmaxExplorer):
 
         self.mapper.toFirst()
 
-    def modelChanged(self, item):
+    def dVChanged(self):
+        self.modelChanged()
+
+    def modelChanged(self):
         if not self.mapper:
             return
 
