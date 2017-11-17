@@ -107,7 +107,7 @@ dependencies:
   - ipython-genutils==0.2.0
   - jupyter-client==5.1.0
   - jupyter-core==4.3.0
-  - periodictable==1.4.1
+  - periodictable==1.5.0
   - pisa==3.0.33
   - prompt-toolkit==1.0.15
   - pypdf2==1.26.0
