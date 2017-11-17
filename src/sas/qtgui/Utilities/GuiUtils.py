@@ -264,6 +264,20 @@ def updateModelItemWithPlot(item, update_data, name=""):
     # Append the new row to the main item
     item.appendRow(checkbox_item)
 
+class HashableStandardItem(QtGui.QStandardItem):
+    """
+    Subclassed standard item with reimplemented __hash__
+    to allow for use as an index.
+    """
+    def __init__(self, parent=None):
+        super(QtGui.QStandardItem, self).__init__()
+
+    def __hash__(self):
+        ''' just a random hash value '''
+        #return hash(self.__init__)
+        return 0
+
+
 def createModelItemWithPlot(update_data, name=""):
     """
     Creates a checkboxed QStandardItem named "name"
@@ -271,7 +285,7 @@ def createModelItemWithPlot(update_data, name=""):
     """
     py_update_data = update_data
 
-    checkbox_item = QtGui.QStandardItem()
+    checkbox_item = HashableStandardItem()
     checkbox_item.setCheckable(True)
     checkbox_item.setCheckState(QtCore.Qt.Checked)
     checkbox_item.setText(name)

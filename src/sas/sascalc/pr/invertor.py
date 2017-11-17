@@ -539,7 +539,7 @@ class Invertor(Cinvertor):
         :return: number of terms, alpha, message
 
         """
-        from num_term import NTermEstimator
+        from sas.sascalc.pr.num_term import NTermEstimator
         estimator = NTermEstimator(self.clone())
         try:
             return estimator.num_terms(isquit_func)

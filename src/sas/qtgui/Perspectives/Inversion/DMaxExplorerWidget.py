@@ -23,9 +23,7 @@ from sas.qtgui.Plotting.Plotter import PlotterWidget
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # local
-from .UI.dmax import Ui_DmaxExplorer
-# from InvariantDetails import DetailsDialog
-# from InvariantUtils import WIDGETS
+from .UI.DMaxExplorer import Ui_DmaxExplorer
 
 logger = logging.getLogger(__name__)
 
@@ -77,14 +75,9 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
 
     def setupModel(self):
         self.model.setItem(W.NPTS, QtGui.QStandardItem(str(self.nfunc)))
-        self.model.setItem(W.DMIN,
-                           QtGui.QStandardItem(
-                               str(0.9*self.pr_state.d_max)))
-        self.model.setItem(W.DMAX,
-                           QtGui.QStandardItem(
-                               str(1.1*self.pr_state.d_max)))
-        self.model.setItem(W.VARIABLE,
-                           QtGui.QStandardItem( "χ²/dof"))
+        self.model.setItem(W.DMIN, QtGui.QStandardItem(str(0.9*self.pr_state.d_max)))
+        self.model.setItem(W.DMAX, QtGui.QStandardItem(str(1.1*self.pr_state.d_max)))
+        self.model.setItem(W.VARIABLE, QtGui.QStandardItem( "χ²/dof"))
 
     def setupMapper(self):
         self.mapper = QtWidgets.QDataWidgetMapper(self)
@@ -132,11 +125,17 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
                 msg = "ExploreDialog: inversion failed "
                 msg += "for D_max=%s\n%s" % (str(x), sys.exc_info()[1])
                 print(msg)
-                # logger.error(msg)
+                logger.error(msg)
 
         #Return the invertor to its original state
         self.pr_state.d_max = original
-        self.pr_state.invert(self.nfunc)
+        try:
+            self.pr_state.invert(self.nfunc)
+        except RuntimeError as ex:
+            msg = "ExploreDialog: inversion failed "
+            msg += "for D_max=%s\n%s" % (str(x), sys.exc_info()[1])
+            print(msg)
+            logger.error(msg)
 
         plotter = str(self.model.item(W.VARIABLE).text())
         if plotter == "χ²/dof":

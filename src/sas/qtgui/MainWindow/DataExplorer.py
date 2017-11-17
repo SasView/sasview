@@ -1033,13 +1033,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         #     |-------> THEORIES
 
         # Top-level item: checkbox with label
-        checkbox_item = QtGui.QStandardItem(True)
+        checkbox_item = GuiUtils.HashableStandardItem()
         checkbox_item.setCheckable(True)
         checkbox_item.setCheckState(QtCore.Qt.Checked)
         checkbox_item.setText(os.path.basename(p_file))
 
         # Add the actual Data1D/Data2D object
-        object_item = QtGui.QStandardItem()
+        object_item = GuiUtils.HashableStandardItem()
         object_item.setData(data)
 
         checkbox_item.setChild(0, object_item)

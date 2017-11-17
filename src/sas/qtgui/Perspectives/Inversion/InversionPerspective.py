@@ -131,8 +131,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     def setupLinks(self):
         """Connect the use controls to their appropriate methods"""
         self.dataList.currentIndexChanged.connect(self.displayChange)
-        self.calculateAllButton.clicked.connect(self.startThreadAll)
-        self.calculateThisButton.clicked.connect(self.startThread)
+        #self.calculateAllButton.clicked.connect(self.startThreadAll)
+        #self.calculateThisButton.clicked.connect(self.startThread)
         self.removeButton.clicked.connect(self.removeData)
         self.helpButton.clicked.connect(self.help)
         self.estimateBgd.toggled.connect(self.toggleBgd)
@@ -207,9 +207,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
         # Main Buttons
         self.mapper.addMapping(self.removeButton, WIDGETS.W_REMOVE)
-        self.mapper.addMapping(self.calculateAllButton, WIDGETS.W_CALCULATE_ALL)
-        self.mapper.addMapping(self.calculateThisButton,
-                               WIDGETS.W_CALCULATE_VISIBLE)
+        #self.mapper.addMapping(self.calculateAllButton, WIDGETS.W_CALCULATE_ALL)
+        #self.mapper.addMapping(self.calculateThisButton,
+        #                       WIDGETS.W_CALCULATE_VISIBLE)
         self.mapper.addMapping(self.helpButton, WIDGETS.W_HELP)
 
         self.mapper.toFirst()
@@ -268,8 +268,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         """
         self.removeButton.setEnabled(self.logic.data_is_loaded)
         self.explorerButton.setEnabled(self.logic.data_is_loaded)
-        self.calculateAllButton.setEnabled(self.logic.data_is_loaded)
-        self.calculateThisButton.setEnabled(self.logic.data_is_loaded)
+        #self.calculateAllButton.setEnabled(self.logic.data_is_loaded)
+        #self.calculateThisButton.setEnabled(self.logic.data_is_loaded)
 
     def populateDataComboBox(self, filename, data_ref):
         """
@@ -277,9 +277,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         :param filename: data filename
         :param data_ref: QStandardItem reference for data set to be added
         """
-        qt_item = QtCore.QString.fromUtf8(filename)
-        ref = QtCore.QVariant(data_ref)
-        self.dataList.addItem(qt_item, ref)
+        self.dataList.addItem(filename, data_ref)
 
     def acceptNoTerms(self):
         """Send estimated no of terms to input"""
@@ -293,7 +291,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
     def displayChange(self):
         variant_ref = self.dataList.itemData(self.dataList.currentIndex())
-        self.setCurrentData(variant_ref.toPyObject())
+        self.setCurrentData(variant_ref)
 
     def removeData(self):
         """Remove the existing data reference from the P(r) Persepective"""
@@ -325,12 +323,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         # TODO: Only send plot first time - otherwise, update in complete
         if self.pr_plot is not None:
             title = self.pr_plot.name
-            GuiUtils.updateModelItemWithPlot(
-                self._data, QtCore.QVariant(self.pr_plot), title)
+            GuiUtils.updateModelItemWithPlot(self._data, self.pr_plot, title)
         if self.data_plot is not None:
             title = self.data_plot.name
-            GuiUtils.updateModelItemWithPlot(
-                self._data, QtCore.QVariant(self.data_plot), title)
+            GuiUtils.updateModelItemWithPlot(self._data, self.data_plot, title)
         self.mapper.toFirst()
 
     def help(self):
@@ -382,15 +378,11 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
         for data in data_item:
             # Create initial internal mappings
-            # TODO: in PyQt5 QStandardItem no longer can be used as dict key
-            # Possibly the easiest solution is to subclass QStandardItem
-            # and reimplement __hash__() method so it can be hashed.
-            self._data_list[data] = self._calculator.clone() #<- this crashes
+            self._data_list[data] = self._calculator.clone()
             self._data_set = GuiUtils.dataFromItem(data)
             self.data_plot_list[data] = self.data_plot
             self.pr_plot_list[data] = self.pr_plot
-            ref_var = QtCore.QVariant(data)
-            self.populateDataComboBox(self._data_set.filename, ref_var)
+            self.populateDataComboBox(self._data_set.filename, data)
             self.setCurrentData(data)
 
             # Estimate initial values from data
@@ -399,19 +391,20 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
             # Estimate q range
             qmin, qmax = self.logic.computeDataRange()
-            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem(
-                "{:.4g}".format(qmin)))
-            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem(
-                "{:.4g}".format(qmax)))
+            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("{:.4g}".format(qmin)))
+            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("{:.4g}".format(qmax)))
 
         self.enableButtons()
 
     def getNFunc(self):
         """Get the n_func value from the GUI object"""
-        return int(UI.TabbedInversionUI._fromUtf8(self.noOfTermsInput.text()))
+        return int(self.noOfTermsInput.text())
 
     def setCurrentData(self, data_ref):
         """Get the current data and display as necessary"""
+
+        if data_ref is None:
+            return
 
         if not isinstance(data_ref, QtGui.QStandardItem):
             msg = "Incorrect type passed to the P(r) Perspective"
@@ -423,6 +416,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self._calculator = self._data_list[data_ref]
         self.pr_plot = self.pr_plot_list[data_ref]
         self.data_plot = self.data_plot_list[data_ref]
+        # Rerun the calculations for the current set
+        self.startThread()
+        self.model_changed()
 
     ######################################################################
     # Thread Creators
@@ -511,9 +507,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         :param elapsed: computation time
         """
         # Save useful info
-        self.model.setItem(WIDGETS.W_COMP_TIME,
-                           QtGui.QStandardItem(str(elapsed)))
-        self.regConstantSuggestionButton.setText(QtCore.QString(str(alpha)))
+        self.model.setItem(WIDGETS.W_COMP_TIME, QtGui.QStandardItem(str(elapsed)))
+        self.regConstantSuggestionButton.setText("{:-3.2g}".format(alpha))
         self.regConstantSuggestionButton.setEnabled(True)
         if message:
             logging.info(message)
@@ -530,15 +525,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
         """
         # Save useful info
-        self.noOfTermsSuggestionButton.setText(QtCore.QString(
-            "{:n}".format(nterms)))
+        self.noOfTermsSuggestionButton.setText("{:n}".format(nterms))
         self.noOfTermsSuggestionButton.setEnabled(True)
-        self.regConstantSuggestionButton.setText(QtCore.QString(
-            "{:.3g}".format(alpha)))
+        self.regConstantSuggestionButton.setText("{:.3g}".format(alpha))
         self.regConstantSuggestionButton.setEnabled(True)
-        self.model.setItem(WIDGETS.W_COMP_TIME,
-                           QtGui.QStandardItem(str(elapsed)))
-        self.PrTabWidget.setCurrentIndex(0)
+        self.model.setItem(WIDGETS.W_COMP_TIME, QtGui.QStandardItem(str(elapsed)))
+        #self.PrTabWidget.setCurrentIndex(0)
         if message:
             logging.info(message)
 
@@ -562,25 +554,19 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
         # TODO: Connect self._calculator to GUI - two-to-one connection possible?
         self.model.setItem(WIDGETS.W_RG, QtGui.QStandardItem(str(pr.rg(out))))
-        self.model.setItem(WIDGETS.W_I_ZERO,
-                           QtGui.QStandardItem(str(pr.iq0(out))))
+        self.model.setItem(WIDGETS.W_I_ZERO, QtGui.QStandardItem(str(pr.iq0(out))))
         self.model.setItem(WIDGETS.W_BACKGROUND_INPUT,
                            QtGui.QStandardItem("{:.3f}".format(pr.est_bck)))
-        self.model.setItem(WIDGETS.W_BACKGROUND_OUTPUT,
-                           QtGui.QStandardItem(str(pr.background)))
-        self.model.setItem(WIDGETS.W_CHI_SQUARED,
-                           QtGui.QStandardItem(str(pr.chi2[0])))
-        self.model.setItem(WIDGETS.W_COMP_TIME,
-                           QtGui.QStandardItem(str(elapsed)))
-        self.model.setItem(WIDGETS.W_OSCILLATION,
-                           QtGui.QStandardItem(str(pr.oscillations(out))))
-        self.model.setItem(WIDGETS.W_POS_FRACTION,
-                           QtGui.QStandardItem(str(pr.get_positive(out))))
+        self.model.setItem(WIDGETS.W_BACKGROUND_OUTPUT, QtGui.QStandardItem(str(pr.background)))
+        self.model.setItem(WIDGETS.W_CHI_SQUARED, QtGui.QStandardItem(str(pr.chi2[0])))
+        self.model.setItem(WIDGETS.W_COMP_TIME, QtGui.QStandardItem(str(elapsed)))
+        self.model.setItem(WIDGETS.W_OSCILLATION, QtGui.QStandardItem(str(pr.oscillations(out))))
+        self.model.setItem(WIDGETS.W_POS_FRACTION, QtGui.QStandardItem(str(pr.get_positive(out))))
         self.model.setItem(WIDGETS.W_SIGMA_POS_FRACTION,
                            QtGui.QStandardItem(str(pr.get_pos_err(out, cov))))
 
         # Display results tab
-        self.PrTabWidget.setCurrentIndex(1)
+        #self.PrTabWidget.setCurrentIndex(1)
         # Save Pr invertor
         self._calculator = pr
         # Append data to data list
