@@ -270,12 +270,18 @@ class HashableStandardItem(QtGui.QStandardItem):
     to allow for use as an index.
     """
     def __init__(self, parent=None):
-        super(QtGui.QStandardItem, self).__init__()
+        super(HashableStandardItem, self).__init__()
 
     def __hash__(self):
         ''' just a random hash value '''
         #return hash(self.__init__)
         return 0
+
+    def clone(self):
+        ''' Assure __hash__ is cloned as well'''
+        clone = super(HashableStandardItem, self).clone()
+        clone.__hash__ = self.__hash__
+        return clone
 
 
 def createModelItemWithPlot(update_data, name=""):
@@ -560,7 +566,7 @@ def onTXTSave(data, path):
     """
     with open(path,'w') as out:
         has_errors = True
-        if data.dy is None or not data.dy:
+        if data.dy is None or not data.dy.any():
             has_errors = False
         # Sanity check
         if has_errors:
@@ -570,7 +576,7 @@ def onTXTSave(data, path):
             except:
                 has_errors = False
         if has_errors:
-            if data.dx is not None and data.dx:
+            if data.dx is not None and data.dx.any():
                 out.write("<X>   <Y>   <dY>   <dX>\n")
             else:
                 out.write("<X>   <Y>   <dY>\n")
@@ -579,7 +585,7 @@ def onTXTSave(data, path):
 
         for i in range(len(data.x)):
             if has_errors:
-                if data.dx is not None and data.dx:
+                if data.dx is not None and data.dx.any():
                     if  data.dx[i] is not None:
                         out.write("%g  %g  %g  %g\n" % (data.x[i],
                                                         data.y[i],
@@ -856,7 +862,7 @@ def toDouble(value_string):
     if value[1]:
         return value[0]
     else:
-        raise ValueError
+        raise TypeError
 
 class DoubleValidator(QtGui.QDoubleValidator):
     """
@@ -866,7 +872,7 @@ class DoubleValidator(QtGui.QDoubleValidator):
         """
         Return invalid for commas
         """
-        if (',' in input):
+        if input is not None and ',' in input:
             return (QtGui.QValidator.Invalid, input, pos)
         return super(DoubleValidator, self).validate(input, pos)
 
@@ -874,7 +880,7 @@ class DoubleValidator(QtGui.QDoubleValidator):
         """
         Correct (remove) potential preexisting content
         """
-        QtGui.QDoubleValidator.fixup(input)
+        super(DoubleValidator, self).fixup(input)
         input = input.replace(",", "")
 
 def enum(*sequential, **named):

@@ -125,8 +125,12 @@ class DataManager(object):
         """
         rename data
         """
-        ## name of the data allow to differentiate data when plotted
-        name = GuiUtils.parseName(name=name, expression="_")
+        # name of the data allow to differentiate data when plotted
+        try:
+            name = GuiUtils.parseName(name=name, expression="_")
+        except TypeError:
+            # bad name sent to rename
+            return None
 
         max_char = name.find("[")
         if max_char < 0:

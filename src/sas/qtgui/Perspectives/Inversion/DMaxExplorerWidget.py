@@ -44,7 +44,7 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         super(DmaxWindow, self).__init__()
         self.setupUi(self)
 
-        self.setWindowTitle("Dₘₐₓ Explorer")
+        self.setWindowTitle("Dₐₓ Explorer")
 
         self.pr_state = pr_state
         self.nfunc = nfunc

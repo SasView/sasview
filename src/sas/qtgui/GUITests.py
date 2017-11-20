@@ -81,8 +81,6 @@ def suite():
 
         # Main window
         unittest.makeSuite(DataExplorerTest.DataExplorerTest,  'test'),
-
-        unittest.makeSuite(GuiUtilsTest.GuiUtilsTest,          'test'),
         unittest.makeSuite(DroppableDataLoadWidgetTest.DroppableDataLoadWidgetTest, 'test'),
         unittest.makeSuite(MainWindowTest.MainWindowTest,      'test'),
         unittest.makeSuite(GuiManagerTest.GuiManagerTest,      'test'),
@@ -90,8 +88,11 @@ def suite():
         unittest.makeSuite(WelcomePanelTest.WelcomePanelTest,  'test'),
 
         # Utilities
-        unittest.makeSuite(TestUtilsTest.TestUtilsTest,         'test'),
-        unittest.makeSuite(SasviewLoggerTest.SasviewLoggerTest, 'test'),
+        unittest.makeSuite(TestUtilsTest.TestUtilsTest,           'test'),
+        unittest.makeSuite(SasviewLoggerTest.SasviewLoggerTest,   'test'),
+        unittest.makeSuite(GuiUtilsTest.GuiUtilsTest,             'test'),
+        unittest.makeSuite(GuiUtilsTest.DoubleValidatorTest,      'test'),
+        unittest.makeSuite(GuiUtilsTest.HashableStandardItemTest, 'test'),
 
         # Calculators
         unittest.makeSuite(KiessigCalculatorTest.KiessigCalculatorTest,                     'test'),

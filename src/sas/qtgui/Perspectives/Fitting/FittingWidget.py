@@ -590,7 +590,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         elif model_column in [self.lstPoly.itemDelegate().poly_min, self.lstPoly.itemDelegate().poly_max]:
             try:
                 value = GuiUtils.toDouble(item.text())
-            except ValueError:
+            except TypeError:
                 # Can't be converted properly, bring back the old value and exit
                 return
 
@@ -605,7 +605,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             try:
                 value = GuiUtils.toDouble(item.text())
-            except ValueError:
+            except TypeError:
                 # Can't be converted properly, bring back the old value and exit
                 return
 
@@ -638,7 +638,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Extract changed value.
         try:
             value = GuiUtils.toDouble(item.text())
-        except ValueError:
+        except TypeError:
             # Unparsable field
             return
 
@@ -1309,7 +1309,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Extract changed value.
         try:
             value = GuiUtils.toDouble(item.text())
-        except ValueError:
+        except TypeError:
             # Unparsable field
             return
 

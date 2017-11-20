@@ -413,6 +413,90 @@ class GuiUtilsTest(unittest.TestCase):
         self.assertEqual(yLabel, " \\ \\ ^{4}(()^{4})")
         self.assertEqual(yscale, "log")
 
+    def testParseName(self):
+        '''test parse out a string from the beinning of a string'''
+        # good input
+        value = "_test"
+        self.assertEqual(parseName(value, '_'), 'test')
+        value = "____test____"
+        self.assertEqual(parseName(value, '_'), '___test____')
+        self.assertEqual(parseName(value, '___'), '_test____')
+        self.assertEqual(parseName(value, 'test'), '____test____')
+        # bad input
+        with self.assertRaises(TypeError):
+            parseName(value, None)
+        with self.assertRaises(TypeError):
+            parseName(None, '_')
+        value = []
+        with self.assertRaises(TypeError):
+            parseName(value, '_')
+        value = 1.44
+        with self.assertRaises(TypeError):
+            parseName(value, 'p')
+        value = 100
+        with self.assertRaises(TypeError):
+            parseName(value, 'p')
+
+    def testToDouble(self):
+        '''test homemade string-> double converter'''
+        #good values
+        value = "1"
+        self.assertEqual(toDouble(value), 1.0)
+        value = "1.2"
+        # has to be AlmostEqual due to numerical rounding
+        self.assertAlmostEqual(toDouble(value), 1.2, 6)
+        value = "2,1"
+        self.assertAlmostEqual(toDouble(value), 2.1, 6)
+
+        # bad values
+        value = None
+        with self.assertRaises(TypeError):
+            toDouble(value)
+        value = "MyDouble"
+        with self.assertRaises(TypeError):
+            toDouble(value)
+        value = [1,2.2]
+        with self.assertRaises(TypeError):
+            toDouble(value)
+
+
+class DoubleValidatorTest(unittest.TestCase):
+    """ Test the validator for floats """
+    def setUp(self):
+        '''Create the validator'''
+        self.validator = DoubleValidator()
+
+    def tearDown(self):
+        '''Destroy the validator'''
+        self.validator = None
+
+    def testValidateGood(self):
+        """Test a valid float """
+        QtCore.QLocale.setDefault(QtCore.QLocale('en_US'))
+        float_good = "170"
+        self.assertEqual(self.validator.validate(float_good, 1)[0], QtGui.QValidator.Acceptable)
+        float_good = "170.11"
+        ## investigate: a double returns Invalid here!
+        ##self.assertEqual(self.validator.validate(float_good, 1)[0], QtGui.QValidator.Acceptable)
+        float_good = "17e2"
+        self.assertEqual(self.validator.validate(float_good, 1)[0], QtGui.QValidator.Acceptable)
+
+    def testValidateBad(self):
+        """Test a bad float """
+        float_bad = None
+        self.assertEqual(self.validator.validate(float_bad, 1)[0], QtGui.QValidator.Intermediate)
+        float_bad = [1]
+        with self.assertRaises(TypeError):
+           self.validator.validate(float_bad, 1)
+        float_bad = "1,3"
+        self.assertEqual(self.validator.validate(float_bad, 1)[0], QtGui.QValidator.Invalid)
+
+    def notestFixup(self):
+        """Fixup of a float"""
+        float_to_fixup = "1,3"
+        self.validator.fixup(float_to_fixup)
+        self.assertEqual(float_to_fixup, "13")
+
 
 class FormulaValidatorTest(unittest.TestCase):
     """ Test the formula validator """
@@ -433,7 +517,7 @@ class FormulaValidatorTest(unittest.TestCase):
         self.assertEqual(self.validator.validate(formula_good, 1)[0], QtGui.QValidator.Acceptable)
 
     def testValidateBad(self):
-        """Test a valid Formula """
+        """Test an invalid Formula """
         formula_bad = "H24 %%%O12C4C6N2Pu"
         self.assertRaises(self.validator.validate(formula_bad, 1)[0])
         self.assertEqual(self.validator.validate(formula_bad, 1)[0], QtGui.QValidator.Intermediate)
@@ -441,6 +525,30 @@ class FormulaValidatorTest(unittest.TestCase):
         formula_bad = [1]
         self.assertEqual(self.validator.validate(formula_bad, 1)[0], QtGui.QValidator.Intermediate)
 
+class HashableStandardItemTest(unittest.TestCase):
+    """ Test the reimplementation of QStandardItem """
+    def setUp(self):
+        '''Create the validator'''
+        self.item = HashableStandardItem()
+
+    def tearDown(self):
+        '''Destroy the validator'''
+        self.item = None
+
+    def testHash(self):
+        '''assure the item returns hash'''
+        self.assertEqual(self.item.__hash__(), 0)
+
+    def testIndexing(self):
+        '''test that we can use HashableSI as an index'''
+        dictionary = {}
+        dictionary[self.item] = "wow!"
+        self.assertEqual(dictionary[self.item], "wow!")
+
+    def testClone(self):
+        '''let's see if we can clone the item'''
+        item_clone = self.item.clone()
+        self.assertEqual(item_clone.__hash__(), 0)
 
 if __name__ == "__main__":
     unittest.main()
