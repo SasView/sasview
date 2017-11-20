@@ -89,7 +89,7 @@ def smear_selection(data, model = None):
             #print "_found_resolution",_found_resolution
             #print "data1D.dx[0]",data1D.dx[0],data1D.dxl[0]
     # If we found resolution smearing data, return a QSmearer
-    if _found_resolution == True:
+    if _found_resolution:
          return pinhole_smear(data, model)
 
     # Look for slit smearing data
@@ -112,7 +112,7 @@ def smear_selection(data, model = None):
                 _found_resolution = False
                 break
     # If we found slit smearing data, return a slit smearer
-    if _found_slit == True:
+    if _found_slit:
         return slit_smear(data, model)
     return None
 

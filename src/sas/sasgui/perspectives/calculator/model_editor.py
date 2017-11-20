@@ -331,7 +331,7 @@ class TextDialog(wx.Dialog):
             self.good_name = False
             msg = ("%s is not a valid Python name. Only alphanumeric \n" \
                    "and underscore allowed" % self.name)
-        
+
         #Now check if the name already exists
         if not self.overwrite_name and self.good_name:
             #Create list of existing model names for comparison
@@ -343,7 +343,7 @@ class TextDialog(wx.Dialog):
                 self.good_name = False
                 msg = "Name exists already."
 
-        if self.good_name == False:
+        if not self.good_name:
             self.name_tcl.SetBackgroundColour('pink')
             info = 'Error'
             wx.MessageBox(msg, info)

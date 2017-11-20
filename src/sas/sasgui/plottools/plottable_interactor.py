@@ -165,7 +165,7 @@ class PointInteractor(_BaseInteractor):
         Called when a mouse button is clicked
         from within the boundaries of an artist.
         """
-        if self._context_menu == True:
+        if self._context_menu:
             self._context_menu = False
             evt.artist = self.marker
             self._on_leave(evt)
@@ -215,7 +215,7 @@ class PointInteractor(_BaseInteractor):
         of an artist.
         """
         if not evt.artist.__class__.__name__ == "AxesSubplot":
-            if self._context_menu == False:
+            if not self._context_menu:
                 self.base.plottable_selected(None)
                 try:
                     evt.artist.set_color(self.color)
