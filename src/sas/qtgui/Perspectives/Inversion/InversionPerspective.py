@@ -37,6 +37,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     """
 
     name = "Inversion"
+    estimateSignal = QtCore.pyqtSignal(tuple)
+    estimateNTSignal = QtCore.pyqtSignal(tuple)
+    calculateSignal = QtCore.pyqtSignal(tuple)
 
     def __init__(self, parent=None, data=None):
         super(InversionWindow, self).__init__()
@@ -75,6 +78,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         if data is not None:
             for datum in data_list:
                 self._data_list[datum] = self._calculator.clone()
+
+        # dict of models for quick update after calculation
+        # {item:model}
+        self._models = {}
 
         # plots for current data
         self.pr_plot = None
@@ -131,8 +138,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     def setupLinks(self):
         """Connect the use controls to their appropriate methods"""
         self.dataList.currentIndexChanged.connect(self.displayChange)
-        #self.calculateAllButton.clicked.connect(self.startThreadAll)
-        #self.calculateThisButton.clicked.connect(self.startThread)
+        self.calculateAllButton.clicked.connect(self.startThreadAll)
+        self.calculateThisButton.clicked.connect(self.startThread)
         self.removeButton.clicked.connect(self.removeData)
         self.helpButton.clicked.connect(self.help)
         self.estimateBgd.toggled.connect(self.toggleBgd)
@@ -140,28 +147,33 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.regConstantSuggestionButton.clicked.connect(self.acceptAlpha)
         self.noOfTermsSuggestionButton.clicked.connect(self.acceptNoTerms)
         self.explorerButton.clicked.connect(self.openExplorerWindow)
-        self.backgroundInput.textChanged.connect(
+
+        self.backgroundInput.editingFinished.connect(
             lambda: self._calculator.set_est_bck(int(is_float(
-                str(self.backgroundInput.text())))))
-        self.minQInput.textChanged.connect(
+                self.backgroundInput.text()))))
+        self.minQInput.editingFinished.connect(
             lambda: self._calculator.set_qmin(is_float(
-                str(self.minQInput.text()))))
-        self.regularizationConstantInput.textChanged.connect(
+                self.minQInput.text())))
+        self.regularizationConstantInput.editingFinished.connect(
             lambda: self._calculator.set_alpha(is_float(
-                str(self.regularizationConstantInput.text()))))
-        self.maxDistanceInput.textChanged.connect(
+                self.regularizationConstantInput.text())))
+        self.maxDistanceInput.editingFinished.connect(
             lambda: self._calculator.set_dmax(is_float(
-                str(self.maxDistanceInput.text()))))
-        self.maxQInput.textChanged.connect(
+                self.maxDistanceInput.text())))
+        self.maxQInput.editingFinished.connect(
             lambda: self._calculator.set_qmax(is_float(
-                str(self.maxQInput.text()))))
-        self.slitHeightInput.textChanged.connect(
+                self.maxQInput.text())))
+        self.slitHeightInput.editingFinished.connect(
             lambda: self._calculator.set_slit_height(is_float(
-                str(self.slitHeightInput.text()))))
-        self.slitWidthInput.textChanged.connect(
+                self.slitHeightInput.text())))
+        self.slitWidthInput.editingFinished.connect(
             lambda: self._calculator.set_slit_width(is_float(
-                str(self.slitHeightInput.text()))))
+                self.slitHeightInput.text())))
+
         self.model.itemChanged.connect(self.model_changed)
+        self.estimateNTSignal.connect(self._estimateNTUpdate)
+        self.estimateSignal.connect(self._estimateUpdate)
+        self.calculateSignal.connect(self._calculateUpdate)
 
     def setupMapper(self):
         # Set up the mapper.
@@ -207,9 +219,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
         # Main Buttons
         self.mapper.addMapping(self.removeButton, WIDGETS.W_REMOVE)
-        #self.mapper.addMapping(self.calculateAllButton, WIDGETS.W_CALCULATE_ALL)
-        #self.mapper.addMapping(self.calculateThisButton,
-        #                       WIDGETS.W_CALCULATE_VISIBLE)
+        self.mapper.addMapping(self.calculateAllButton, WIDGETS.W_CALCULATE_ALL)
+        self.mapper.addMapping(self.calculateThisButton,
+                               WIDGETS.W_CALCULATE_VISIBLE)
         self.mapper.addMapping(self.helpButton, WIDGETS.W_HELP)
 
         self.mapper.toFirst()
@@ -268,8 +280,6 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         """
         self.removeButton.setEnabled(self.logic.data_is_loaded)
         self.explorerButton.setEnabled(self.logic.data_is_loaded)
-        #self.calculateAllButton.setEnabled(self.logic.data_is_loaded)
-        #self.calculateThisButton.setEnabled(self.logic.data_is_loaded)
 
     def populateDataComboBox(self, filename, data_ref):
         """
@@ -290,8 +300,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             self.regConstantSuggestionButton.text()))
 
     def displayChange(self):
-        variant_ref = self.dataList.itemData(self.dataList.currentIndex())
-        self.setCurrentData(variant_ref)
+        ref_item = self.dataList.itemData(self.dataList.currentIndex())
+        self._model_item = ref_item
+        self.setCurrentData(ref_item)
+        self.setCurrentModel(ref_item)
 
     def removeData(self):
         """Remove the existing data reference from the P(r) Persepective"""
@@ -303,6 +315,11 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
     ######################################################################
     # GUI Interaction Events
+
+    def setCurrentModel(self, ref_item):
+        '''update the current model with stored values'''
+        if ref_item in self._models:
+            self.model = self._models[ref_item]
 
     def update_calculator(self):
         """Update all p(r) params"""
@@ -393,6 +410,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             qmin, qmax = self.logic.computeDataRange()
             self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("{:.4g}".format(qmin)))
             self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("{:.4g}".format(qmax)))
+            self._models[data] = self.model
+            self.model_item = data
 
         self.enableButtons()
 
@@ -416,9 +435,6 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self._calculator = self._data_list[data_ref]
         self.pr_plot = self.pr_plot_list[data_ref]
         self.data_plot = self.data_plot_list[data_ref]
-        # Rerun the calculations for the current set
-        self.startThread()
-        self.model_changed()
 
     ######################################################################
     # Thread Creators
@@ -447,13 +463,14 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         nfunc = self.getNFunc()
         self.calc_thread = CalcPr(pr, nfunc,
                                   error_func=self._threadError,
-                                  completefn=self._completed, updatefn=None)
+                                  completefn=self._calculateCompleted,
+                                  updatefn=None)
         self.calc_thread.queue()
         self.calc_thread.ready(2.5)
 
     def performEstimateNT(self):
         """
-            Perform parameter estimation
+        Perform parameter estimation
         """
         from .Thread import EstimateNT
 
@@ -467,6 +484,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         pr.slit_height = 0.0
         pr.slit_width = 0.0
         nfunc = self.getNFunc()
+
         self.estimation_thread = EstimateNT(pr, nfunc,
                                             error_func=self._threadError,
                                             completefn=self._estimateNTCompleted,
@@ -499,6 +517,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     # Thread Complete
 
     def _estimateCompleted(self, alpha, message, elapsed):
+        ''' Send a signal to the main thread for model update'''
+        self.estimateSignal.emit((alpha, message, elapsed))
+
+    def _estimateUpdate(self, output_tuple):
         """
         Parameter estimation completed,
         display the results to the user
@@ -506,6 +528,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         :param alpha: estimated best alpha
         :param elapsed: computation time
         """
+        alpha, message, elapsed = output_tuple
         # Save useful info
         self.model.setItem(WIDGETS.W_COMP_TIME, QtGui.QStandardItem(str(elapsed)))
         self.regConstantSuggestionButton.setText("{:-3.2g}".format(alpha))
@@ -515,6 +538,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.performEstimateNT()
 
     def _estimateNTCompleted(self, nterms, alpha, message, elapsed):
+        ''' Send a signal to the main thread for model update'''
+        self.estimateNTSignal.emit((nterms, alpha, message, elapsed))
+
+    def _estimateNTUpdate(self, output_tuple):
         """
         Parameter estimation completed,
         display the results to the user
@@ -522,19 +549,22 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         :param alpha: estimated best alpha
         :param nterms: estimated number of terms
         :param elapsed: computation time
-
         """
+        nterms, alpha, message, elapsed = output_tuple
         # Save useful info
         self.noOfTermsSuggestionButton.setText("{:n}".format(nterms))
         self.noOfTermsSuggestionButton.setEnabled(True)
         self.regConstantSuggestionButton.setText("{:.3g}".format(alpha))
         self.regConstantSuggestionButton.setEnabled(True)
         self.model.setItem(WIDGETS.W_COMP_TIME, QtGui.QStandardItem(str(elapsed)))
-        #self.PrTabWidget.setCurrentIndex(0)
         if message:
             logging.info(message)
 
-    def _completed(self, out, cov, pr, elapsed):
+    def _calculateCompleted(self, out, cov, pr, elapsed):
+        ''' Send a signal to the main thread for model update'''
+        self.calculateSignal.emit((out, cov, pr, elapsed))
+
+    def _calculateUpdate(self, output_tuple):
         """
         Method called with the results when the inversion is done
 
@@ -542,8 +572,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         :param cov: covariance matrix
         :param pr: Invertor instance
         :param elapsed: time spent computing
-
         """
+        out, cov, pr, elapsed = output_tuple
         # Save useful info
         cov = np.ascontiguousarray(cov)
         pr.cov = cov
@@ -571,6 +601,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self._calculator = pr
         # Append data to data list
         self._data_list[self._data] = self._calculator.clone()
+
+        # Update model dict
+        self._models[self.model_item] = self.model
 
         # Create new P(r) and fit plots
         if self.pr_plot is None:
