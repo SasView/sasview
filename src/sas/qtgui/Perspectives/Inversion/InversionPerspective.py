@@ -595,8 +595,6 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.model.setItem(WIDGETS.W_SIGMA_POS_FRACTION,
                            QtGui.QStandardItem(str(pr.get_pos_err(out, cov))))
 
-        # Display results tab
-        #self.PrTabWidget.setCurrentIndex(1)
         # Save Pr invertor
         self._calculator = pr
         # Append data to data list
