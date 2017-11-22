@@ -25,8 +25,8 @@ from sas.qtgui.Plotting.Plotter import Plotter
 from sas.qtgui.Plotting.Plotter2D import Plotter2D
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 
-if not QApplication.instance():
-    app = QApplication(sys.argv)
+#if not QApplication.instance():
+app = QApplication(sys.argv)
 
 class DataExplorerTest(unittest.TestCase):
     '''Test the Data Explorer GUI'''
@@ -683,8 +683,6 @@ class DataExplorerTest(unittest.TestCase):
         # Instead, send the signal directly
         self.form.treeView.customContextMenuRequested.emit(rect)
 
-        # app.exec_() # debug
-
         # See that the menu has been shown
         self.form.context_menu.exec_.assert_called_once()
 
@@ -803,6 +801,63 @@ class DataExplorerTest(unittest.TestCase):
         TODO: add content once plotting finalized
         """
         pass
+
+    def notestDeleteItem(self):
+        """
+        Delete selected item from data explorer
+        """
+
+        # Mock the confirmation dialog with return=No
+        QMessageBox.question = MagicMock(return_value=QMessageBox.No)
+
+        # Populate the model
+        filename = ["cyl_400_20.txt", "cyl_400_20.txt", "cyl_400_20.txt"]
+        self.form.readData(filename)
+
+        # Assure the model contains three items
+        self.assertEqual(self.form.model.rowCount(), 3)
+
+        # Add an item to first file item
+        item1 = QtGui.QStandardItem("test")
+        item1.setCheckable(True)
+        self.form.model.item(0).appendRow(item1)
+
+        # Check the new item is in
+
+        self.assertTrue(self.form.model.item(0).hasChildren())
+
+        #select_item = self.form.model.item(0).child(3)
+        select_item = self.form.model.item(0)
+        select_index = self.form.model.indexFromItem(select_item)
+
+        # Open up items
+        self.form.current_view.expandAll()
+
+        # Select the newly created item
+        self.form.current_view.selectionModel().select(select_index, QtCore.QItemSelectionModel.Rows)
+
+        # Attempt at deleting
+        self.form.deleteItem()
+
+        # Test the warning dialog called once
+        self.assertTrue(QMessageBox.question.called)
+
+        # Assure the model still contains the items
+        self.assertEqual(self.form.model.rowCount(), 3)
+
+        # Now, mock the confirmation dialog with return=Yes
+        QMessageBox.question = MagicMock(return_value=QMessageBox.Yes)
+
+        # Select the newly created item
+        self.form.current_view.selectionModel().select(select_index, QtCore.QItemSelectionModel.Rows)
+        # delete it. now for good
+        self.form.deleteItem()
+
+        # Test the warning dialog called once
+        self.assertTrue(QMessageBox.question.called)
+
+        # Assure the model contains no items
+        self.assertEqual(self.form.model.rowCount(), 3)
 
 
 if __name__ == "__main__":

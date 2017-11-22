@@ -857,6 +857,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.context_menu.addSeparator()
         self.context_menu.addAction(self.actionQuick3DPlot)
         self.context_menu.addAction(self.actionEditMask)
+        self.context_menu.addSeparator()
+        self.context_menu.addAction(self.actionDelete)
+
 
         # Define the callbacks
         self.actionDataInfo.triggered.connect(self.showDataInfo)
@@ -864,6 +867,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.actionQuickPlot.triggered.connect(self.quickDataPlot)
         self.actionQuick3DPlot.triggered.connect(self.quickData3DPlot)
         self.actionEditMask.triggered.connect(self.showEditDataMask)
+        self.actionDelete.triggered.connect(self.deleteItem)
 
     def onCustomContextMenu(self, position):
         """
@@ -994,6 +998,39 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         mask_editor = MaskEditor(self, data)
         # Modal dialog here.
         mask_editor.exec_()
+
+    def deleteItem(self):
+        """
+        Delete the current item
+        """
+        # Assure this is indeed wanted
+        delete_msg = "This operation will delete the selected data sets." +\
+                     "\nDo you want to continue?"
+        reply = QtWidgets.QMessageBox.question(self,
+                                           'Warning',
+                                           delete_msg,
+                                           QtWidgets.QMessageBox.Yes,
+                                           QtWidgets.QMessageBox.No)
+
+        if reply == QtWidgets.QMessageBox.No:
+            return
+
+        indices = self.current_view.selectedIndexes()
+        proxy = self.current_view.model()
+        model = proxy.sourceModel()
+
+        for index in indices:
+            row_index = proxy.mapToSource(index)
+            item_to_delete = model.itemFromIndex(row_index)
+            if item_to_delete.isCheckable():
+                row = row_index.row()
+                if item_to_delete.parent():
+                    # We have a child item - delete from it
+                    item_to_delete.parent().removeRow(row)
+                else:
+                    # delete directly from model
+                    model.removeRow(row)
+        pass
 
     def loadComplete(self, output):
         """
