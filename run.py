@@ -114,13 +114,8 @@ def prepare():
     # PAK: with "update" we can always build since it is fast
     if True or not os.path.exists(build_path):
         import subprocess
-        build_cmd = [sys.executable, "setup.py", "build", "update"]
-        if os.name == 'nt':
-            build_cmd.append('--compiler=tinycc')
-        # need shell=True on windows to keep console box from popping up
-        shell = (os.name == 'nt')
         with cd(root):
-            subprocess.call(build_cmd, shell=shell)
+            subprocess.call((sys.executable, "setup.py", "build", "update"), shell=False)
 
     # Put the source trees on the path
     addpath(joinpath(root, 'src'))
