@@ -111,11 +111,10 @@ def prepare():
     #addpath(os.path.join(root, '..','wxPython-src-3.0.0.0','wxPython'))
 
     # Build project if the build directory does not already exist.
-    # PAK: with "update" we can always build since it is fast
-    if True or not os.path.exists(build_path):
+    if not os.path.exists(build_path):
         import subprocess
         with cd(root):
-            subprocess.call((sys.executable, "setup.py", "build", "update"), shell=False)
+            subprocess.call((sys.executable, "setup.py", "build"), shell=False)
 
     # Put the source trees on the path
     addpath(joinpath(root, 'src'))
