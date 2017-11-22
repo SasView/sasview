@@ -17,17 +17,10 @@ from distutils.core import Command
 import numpy as np
 from setuptools import Extension, setup
 
-if os.name == 'nt':
-    try:
-        import tinycc
-    except ImportError:
-        os.path.insert(os.path.insert(0, '..', 'tinycc'))
-        import tinycc
-    use_tinycc = True
-    sys.argv.append('--compiler=mingw32')
-    print(tinycc.TCC)
-else:
-    use_tinycc = False
+try:
+    import tinycc.distutils
+except ImportError:
+    pass
 
 # Manage version number ######################################
 with open(os.path.join("src", "sas", "sasview", "__init__.py")) as fid:
@@ -146,21 +139,6 @@ class DisableOpenMPCommand(Command):
 
 class build_ext_subclass(build_ext):
     def build_extensions(self):
-        if use_tinycc:
-            # Note: no -O option because not an optimizer
-            self.compiler.set_executables(
-                #archiver = ['ar', '-cr'],
-                compiler=[tinycc.TCC, '-DMS_WIN64', '-D__TINYCC__', '-Wall'],
-                #compiler_cxx=['g__', '-DMS_WIN64', '-Wall'],  # tinycc is not a C++ compiler
-                compiler_so=[tinycc.TCC, '-DMS_WIN64', '-D__TINYCC__', '-Wall'],  # and '-c'??
-                #dll_libraries=['msvcr90'],
-                linker_exe=[tinycc.TCC, '-DMS_WIN64'],
-                linker_so=[tinycc.TCC, '-DMS_WIN64', '-shared'],
-                #linker_dll=tinycc.TCC,
-            )
-            sysroot = os.path.dirname(os.path.realpath(sys.executable))
-            self.compiler.include_dirs = [os.path.join(sysroot, 'include')]
-            self.compiler.library_dirs = [sysroot]
         # Get 64-bitness
         c = self.compiler.compiler_type
         print("Compiling with %s (64bit=%s)" % (c, str(is_64bits)))
