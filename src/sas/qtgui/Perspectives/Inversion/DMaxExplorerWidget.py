@@ -98,13 +98,6 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
 
         self.mapper.toFirst()
 
-    def variableChanged(self, index):
-        """
-        Respond to combobox update
-        """
-        # Just fire the model change signal, mate
-        pass
-
     def modelChanged(self, item):
         if not self.mapper:
             return
