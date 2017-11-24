@@ -107,7 +107,7 @@ where
 .. math::
 
     M_{\perp x'} &= M_{0q_x}\cos\theta_\text{up} + M_{0q_y}\sin\theta_\text{up} \\
-    M_{\perp y'} &= M_{0q_y}\cos\theta_\text{up} + M_{0q_x}\sin\theta_\text{up} \\
+    M_{\perp y'} &= M_{0q_y}\cos\theta_\text{up} - M_{0q_x}\sin\theta_\text{up} \\
     M_{\perp z'} &= M_{0z} \\
     M_{0q_x} &= (M_{0x}\cos\phi - M_{0y}\sin\phi)\cos\phi \\
     M_{0q_y} &= (M_{0y}\sin\phi - M_{0y}\cos\phi)\sin\phi
