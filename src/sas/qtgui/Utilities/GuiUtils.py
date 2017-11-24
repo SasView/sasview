@@ -242,19 +242,19 @@ def updateModelItemWithPlot(item, update_data, name=""):
     Adds 'update_data' to that row.
     """
     assert isinstance(item, QtGui.QStandardItem)
-    py_update_data = update_data
 
     # Check if data with the same ID is already present
     for index in range(item.rowCount()):
         plot_item = item.child(index)
         if plot_item.isCheckable():
             plot_data = plot_item.child(0).data()
-            if plot_data.id is not None and plot_data.id == py_update_data.id:
+            if plot_data.id is not None and plot_data.id == update_data.id:
                 # replace data section in item
                 plot_item.child(0).setData(update_data)
                 plot_item.setText(name)
-                # Plot title
-                plot_item.child(1).child(0).setText("Title: %s"%name)
+                # Plot title if any
+                if plot_item.child(1).hasChildren():
+                    plot_item.child(1).child(0).setText("Title: %s"%name)
                 # Force redisplay
                 return
 
@@ -882,6 +882,7 @@ class DoubleValidator(QtGui.QDoubleValidator):
         """
         super(DoubleValidator, self).fixup(input)
         input = input.replace(",", "")
+
 
 def enum(*sequential, **named):
     """Create an enumeration object from a list of strings"""

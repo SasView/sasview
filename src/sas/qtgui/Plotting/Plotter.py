@@ -48,9 +48,16 @@ class PlotterWidget(PlotterBase):
     def data(self, value):
         """ data setter """
         self._data = value
-        self.xLabel = "%s(%s)"%(value._xaxis, value._xunit)
-        self.yLabel = "%s(%s)"%(value._yaxis, value._yunit)
-        if value.isSesans:
+        if value._xunit:
+            self.xLabel = "%s(%s)"%(value._xaxis, value._xunit)
+        else:
+            self.xLabel = "%s"%(value._xaxis)
+        if value._yunit:
+            self.yLabel = "%s(%s)"%(value._yaxis, value._yunit)
+        else:
+            self.yLabel = "%s"%(value._yaxis)
+
+        if value.scale == 'linear' or value.isSesans:
             self.xscale = 'linear'
             self.yscale = 'linear'
         self.title(title=value.name)
@@ -82,9 +89,9 @@ class PlotterWidget(PlotterBase):
             marker = self.data.symbol
             # Try name first
             try:
-                marker = PlotUtilities.SHAPES[marker]
+                marker = dict(PlotUtilities.SHAPES)[marker]
             except KeyError:
-                marker = list(PlotUtilities.SHAPES.values())[marker]
+                list(PlotUtilities.SHAPES.values())[marker]
 
         assert marker is not None
         # Plot name

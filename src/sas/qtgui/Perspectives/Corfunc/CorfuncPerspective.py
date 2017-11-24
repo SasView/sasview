@@ -42,6 +42,7 @@ class MyMplCanvas(FigureCanvas):
         as the bounds set by self.qmin, self.qmax1, and self.qmax2.
         It will also plot the extrpolation in self.extrap, if it exists."""
 
+        # TODO: add interactivity to axvlines so qlimits are immediately updated!
         self.fig.clf()
 
         self.axes = self.fig.add_subplot(111)
@@ -102,16 +103,18 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
         self.setWindowTitle("Corfunc Perspective")
 
+        self.parent = parent
         self.mapper = None
         self.model = QtGui.QStandardItemModel(self)
         self.communicate = GuiUtils.Communicate()
         self._calculator = CorfuncCalculator()
         self._allow_close = True
+        self._model_item = None
+        self.txtLowerQMin.setText("0.0")
+        self.txtLowerQMin.setEnabled(False)
 
         self._canvas = MyMplCanvas(self.model)
-        self._realplot = MyMplCanvas(self.model)
-        self.verticalLayout_7.insertWidget(0, self._canvas)
-        self.verticalLayout_7.insertWidget(1, self._realplot)
+        self.mainVerticalLayout.insertWidget(0, self._canvas)
 
         # Connect buttons to slots.
         # Needs to be done early so default values propagate properly.
@@ -125,13 +128,13 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
     def setup_slots(self):
         """Connect the buttons to their appropriate slots."""
-        self.extrapolateBtn.clicked.connect(self.extrapolate)
-        self.extrapolateBtn.setEnabled(False)
-        self.transformBtn.clicked.connect(self.transform)
-        self.transformBtn.setEnabled(False)
+        self.cmdExtrapolate.clicked.connect(self.extrapolate)
+        self.cmdExtrapolate.setEnabled(False)
+        self.cmdTransform.clicked.connect(self.transform)
+        self.cmdTransform.setEnabled(False)
 
-        self.calculateBgBtn.clicked.connect(self.calculate_background)
-        self.calculateBgBtn.setEnabled(False)
+        self.cmdCalculateBg.clicked.connect(self.calculate_background)
+        self.cmdCalculateBg.setEnabled(False)
 
         self.model.itemChanged.connect(self.model_changed)
 
@@ -147,8 +150,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
                            QtGui.QStandardItem("0.22"))
         self.model.setItem(W.W_BACKGROUND,
                            QtGui.QStandardItem("0"))
-        self.model.setItem(W.W_TRANSFORM,
-                           QtGui.QStandardItem("Fourier"))
+        #self.model.setItem(W.W_TRANSFORM,
+        #                   QtGui.QStandardItem("Fourier"))
         self.model.setItem(W.W_GUINIERA,
                            QtGui.QStandardItem("0.0"))
         self.model.setItem(W.W_GUINIERB,
@@ -184,15 +187,15 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self._update_calculator()
         try:
             params, extrapolation, _ = self._calculator.compute_extrapolation()
-            self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem(str(params['A'])))
-            self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem(str(params['B'])))
-            self.model.setItem(W.W_PORODK, QtGui.QStandardItem(str(params['K'])))
+            self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem("{:.3g}".format(params['A'])))
+            self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem("{:.3g}".format(params['B'])))
+            self.model.setItem(W.W_PORODK, QtGui.QStandardItem("{:.3g}".format(params['K'])))
             self.model.setItem(W.W_PORODSIGMA,
-                               QtGui.QStandardItem(str(params['sigma'])))
+                               QtGui.QStandardItem("{:.4g}".format(params['sigma'])))
 
             self._canvas.extrap = extrapolation
             self._canvas.draw_q_space()
-            self.transformBtn.setEnabled(True)
+            self.cmdTransform.setEnabled(True)
         except (LinAlgError, ValueError):
             message = "These is not enough data in the fitting range. "\
                       "Try decreasing the upper Q, increasing the "\
@@ -205,7 +208,9 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
     def transform(self):
         """Calculate the real space version of the extrapolation."""
-        method = str(self.model.item(W.W_TRANSFORM).text()).lower()
+        #method = self.model.item(W.W_TRANSFORM).text().lower()
+
+        method = "fourier"
 
         extrap = self._canvas.extrap
         background = float(self.model.item(W.W_BACKGROUND).text())
@@ -225,20 +230,39 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
     def finish_transform(self, transforms):
         params = self._calculator.extract_parameters(transforms[0])
-        self.model.setItem(W.W_CORETHICK,
-                           QtGui.QStandardItem(str(params['d0'])))
-        self.model.setItem(W.W_INTTHICK,
-                           QtGui.QStandardItem(str(params['dtr'])))
-        self.model.setItem(W.W_HARDBLOCK,
-                           QtGui.QStandardItem(str(params['Lc'])))
-        self.model.setItem(W.W_CRYSTAL,
-                           QtGui.QStandardItem(str(params['fill'])))
-        self.model.setItem(W.W_POLY,
-                           QtGui.QStandardItem(str(params['A'])))
-        self.model.setItem(W.W_PERIOD,
-                           QtGui.QStandardItem(str(params['max'])))
-        self._realplot.data = transforms
-        self._realplot.draw_real_space()
+        self.model.setItem(W.W_CORETHICK, QtGui.QStandardItem("{:.3g}".format(params['d0'])))
+        self.model.setItem(W.W_INTTHICK, QtGui.QStandardItem("{:.3g}".format(params['dtr'])))
+        self.model.setItem(W.W_HARDBLOCK, QtGui.QStandardItem("{:.3g}".format(params['Lc'])))
+        self.model.setItem(W.W_CRYSTAL, QtGui.QStandardItem("{:.3g}".format(params['fill'])))
+        self.model.setItem(W.W_POLY, QtGui.QStandardItem("{:.3g}".format(params['A'])))
+        self.model.setItem(W.W_PERIOD, QtGui.QStandardItem("{:.3g}".format(params['max'])))
+        #self._realplot.data = transforms
+
+        self.update_real_space_plot(transforms)
+
+        #self._realplot.draw_real_space()
+
+    def update_real_space_plot(self, datas):
+        """take the datas tuple and create a plot in DE"""
+
+        assert isinstance(datas, tuple)
+        plot_id = id(self)
+        titles = ['1D Correlation', '3D Correlation', 'Interface Distribution Function']
+        for i, plot in enumerate(datas):
+            plot_to_add = self.parent.createGuiData(plot)
+            # set plot properties
+            title = plot_to_add.title
+            plot_to_add.scale = 'linear'
+            plot_to_add.symbol = 'Line'
+            plot_to_add._xaxis = "x"
+            plot_to_add._xunit = "A"
+            plot_to_add._yaxis = "\Gamma"
+            if i < len(titles):
+                title = titles[i]
+                plot_to_add.name = titles[i]
+            GuiUtils.updateModelItemWithPlot(self._model_item, plot_to_add, title)
+            #self.axes.set_xlim(min(data1.x), max(data1.x) / 4)
+        pass
 
     def setup_mapper(self):
         """Creating mapping between model and gui elements."""
@@ -246,23 +270,23 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self.mapper.setOrientation(QtCore.Qt.Vertical)
         self.mapper.setModel(self.model)
 
-        self.mapper.addMapping(self.qMin, W.W_QMIN)
-        self.mapper.addMapping(self.qMax1, W.W_QMAX)
-        self.mapper.addMapping(self.qMax2, W.W_QCUTOFF)
-        self.mapper.addMapping(self.bg, W.W_BACKGROUND)
-        self.mapper.addMapping(self.transformCombo, W.W_TRANSFORM)
+        self.mapper.addMapping(self.txtLowerQMax, W.W_QMIN)
+        self.mapper.addMapping(self.txtUpperQMin, W.W_QMAX)
+        self.mapper.addMapping(self.txtUpperQMax, W.W_QCUTOFF)
+        self.mapper.addMapping(self.txtBackground, W.W_BACKGROUND)
+        #self.mapper.addMapping(self.transformCombo, W.W_TRANSFORM)
 
-        self.mapper.addMapping(self.guinierA, W.W_GUINIERA)
-        self.mapper.addMapping(self.guinierB, W.W_GUINIERB)
-        self.mapper.addMapping(self.porodK, W.W_PORODK)
-        self.mapper.addMapping(self.porodSigma, W.W_PORODSIGMA)
+        self.mapper.addMapping(self.txtGuinierA, W.W_GUINIERA)
+        self.mapper.addMapping(self.txtGuinierB, W.W_GUINIERB)
+        self.mapper.addMapping(self.txtPorodK, W.W_PORODK)
+        self.mapper.addMapping(self.txtPorodSigma, W.W_PORODSIGMA)
 
-        self.mapper.addMapping(self.avgCoreThick, W.W_CORETHICK)
-        self.mapper.addMapping(self.avgIntThick, W.W_INTTHICK)
-        self.mapper.addMapping(self.avgHardBlock, W.W_HARDBLOCK)
-        self.mapper.addMapping(self.polydisp, W.W_POLY)
-        self.mapper.addMapping(self.longPeriod, W.W_PERIOD)
-        self.mapper.addMapping(self.localCrystal, W.W_CRYSTAL)
+        self.mapper.addMapping(self.txtAvgCoreThick, W.W_CORETHICK)
+        self.mapper.addMapping(self.txtAvgIntThick, W.W_INTTHICK)
+        self.mapper.addMapping(self.txtAvgHardBlock, W.W_HARDBLOCK)
+        self.mapper.addMapping(self.txtPolydisp, W.W_POLY)
+        self.mapper.addMapping(self.txtLongPeriod, W.W_PERIOD)
+        self.mapper.addMapping(self.txtLocalCrystal, W.W_CRYSTAL)
 
         self.mapper.toFirst()
 
@@ -271,7 +295,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self._update_calculator()
         try:
             background = self._calculator.compute_background()
-            temp = QtGui.QStandardItem(str(background))
+            temp = QtGui.QStandardItem("{:.4g}".format(background))
             self.model.setItem(W.W_BACKGROUND, temp)
         except (LinAlgError, ValueError):
             message = "These is not enough data in the fitting range. "\
@@ -303,9 +327,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
         model_item = data_item[0]
         data = GuiUtils.dataFromItem(model_item)
+        self._model_item = model_item
         self._calculator.set_data(data)
-        self.calculateBgBtn.setEnabled(True)
-        self.extrapolateBtn.setEnabled(True)
+        self.cmdCalculateBg.setEnabled(True)
+        self.cmdExtrapolate.setEnabled(True)
 
         self.model.setItem(W.W_GUINIERA, QtGui.QStandardItem(""))
         self.model.setItem(W.W_GUINIERB, QtGui.QStandardItem(""))
@@ -321,10 +346,10 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
         self._canvas.data = data
         self._canvas.extrap = None
         self._canvas.draw_q_space()
-        self.transformBtn.setEnabled(False)
+        self.cmdTransform.setEnabled(False)
 
-        self._realplot.data = None
-        self._realplot.draw_real_space()
+        #self._realplot.data = None
+        #self._realplot.draw_real_space()
 
     def setClosable(self, value=True):
         """

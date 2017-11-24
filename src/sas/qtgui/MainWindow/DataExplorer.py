@@ -1022,7 +1022,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         for index in indices:
             row_index = proxy.mapToSource(index)
             item_to_delete = model.itemFromIndex(row_index)
-            if item_to_delete.isCheckable():
+            if item_to_delete and item_to_delete.isCheckable():
                 row = row_index.row()
                 if item_to_delete.parent():
                     # We have a child item - delete from it
