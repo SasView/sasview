@@ -15,8 +15,6 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
-from twisted.internet import threads
-
 # sas-global
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Plotter import PlotterWidget
@@ -29,10 +27,10 @@ logger = logging.getLogger(__name__)
 
 from sas.qtgui.Utilities.GuiUtils import enum
 
-W = enum( 'NPTS',           #0
-          'DMIN',               #1
-          'DMAX',               #2
-          'VARIABLE',         #3
+W = enum( 'NPTS',      #0
+          'DMIN',      #1
+          'DMAX',      #2
+          'VARIABLE',  #3
 )
 
 class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
@@ -58,6 +56,9 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         self.model = QtGui.QStandardItemModel(self)
         self.mapper = None
 
+        # Add validators on line edits
+        self.setupValidators()
+
         # # Connect buttons to slots.
         # # Needs to be done early so default values propagate properly.
         self.setupSlots()
@@ -68,15 +69,21 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         # # Set up the mapper
         self.setupMapper()
 
+    def setupValidators(self):
+        """Add validators on relevant line edits"""
+        self.Npts.setValidator(QtGui.QIntValidator())
+        self.minDist.setValidator(GuiUtils.DoubleValidator())
+        self.maxDist.setValidator(GuiUtils.DoubleValidator())
+
     def setupSlots(self):
         self.closeButton.clicked.connect(self.close)
-
         self.model.itemChanged.connect(self.modelChanged)
+        self.dependentVariable.currentIndexChanged.connect(lambda:self.modelChanged(None))
 
     def setupModel(self):
         self.model.setItem(W.NPTS, QtGui.QStandardItem(str(self.nfunc)))
-        self.model.setItem(W.DMIN, QtGui.QStandardItem(str(0.9*self.pr_state.d_max)))
-        self.model.setItem(W.DMAX, QtGui.QStandardItem(str(1.1*self.pr_state.d_max)))
+        self.model.setItem(W.DMIN, QtGui.QStandardItem("{:.1f}".format(0.9*self.pr_state.d_max)))
+        self.model.setItem(W.DMAX, QtGui.QStandardItem("{:.1f}".format(1.1*self.pr_state.d_max)))
         self.model.setItem(W.VARIABLE, QtGui.QStandardItem( "χ²/dof"))
 
     def setupMapper(self):
@@ -90,6 +97,13 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         self.mapper.addMapping(self.dependentVariable, W.VARIABLE)
 
         self.mapper.toFirst()
+
+    def variableChanged(self, index):
+        """
+        Respond to combobox update
+        """
+        # Just fire the model change signal, mate
+        pass
 
     def modelChanged(self, item):
         if not self.mapper:
@@ -120,10 +134,10 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
                 osc.append(self.pr_state.oscillations(out))
                 bck.append(self.pr_state.background)
                 chi2.append(self.pr_state.chi2)
-            except:
+            except Exception as ex:
                 # This inversion failed, skip this D_max value
                 msg = "ExploreDialog: inversion failed "
-                msg += "for D_max=%s\n%s" % (str(x), sys.exc_info()[1])
+                msg += "for D_max=%s\n%s" % (str(x), ex)
                 print(msg)
                 logger.error(msg)
 
@@ -133,28 +147,50 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
             self.pr_state.invert(self.nfunc)
         except RuntimeError as ex:
             msg = "ExploreDialog: inversion failed "
-            msg += "for D_max=%s\n%s" % (str(x), sys.exc_info()[1])
+            msg += "for D_max=%s\n%s" % (str(x), ex)
             print(msg)
             logger.error(msg)
 
-        plotter = str(self.model.item(W.VARIABLE).text())
+        plotter = self.model.item(W.VARIABLE).text()
+        y_label = y_unit = ""
+        x_label = "D_{max}"
+        x_unit = "A"
         if plotter == "χ²/dof":
             ys = chi2
+            y_label = "\chi^2/dof"
+            y_unit = "a.u."
         elif plotter == "I(Q=0)":
             ys = iq0
+            y_label = "I(q=0)"
+            y_unit = "\AA^{-1}"
         elif plotter == "Rg":
             ys = rg
+            y_label = "R_g"
+            y_unit = "\AA"
         elif plotter == "Oscillation parameter":
             ys = osc
+            y_label = "Osc"
+            y_unit = "a.u."
         elif plotter == "Background":
             ys = bck
+            y_label = "Bckg"
+            y_unit = "\AA^{-1}"
         elif plotter == "Positive Fraction":
             ys = pos
+            y_label = "P^+"
+            y_unit = "a.u."
         else:
             ys = pos_err
+            y_label = "P^{+}_{1\sigma}"
+            y_unit = "a.u."
 
         data = Data1D(xs, ys)
         if self.hasPlot:
             self.plot.removePlot(None)
         self.hasPlot = True
+        data.title = plotter
+        data._xaxis= x_label
+        data._xunit = x_unit
+        data._yaxis = y_label
+        data._yunit = y_unit
         self.plot.plot(data=data, marker="-")

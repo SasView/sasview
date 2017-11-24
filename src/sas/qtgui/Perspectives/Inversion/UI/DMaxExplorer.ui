@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>609</width>
-    <height>524</height>
+    <width>394</width>
+    <height>426</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2">
+  <layout class="QGridLayout" name="gridLayout_3">
    <item row="0" column="0">
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
@@ -24,95 +24,133 @@
        <property name="sizeHint" stdset="0">
         <size>
          <width>20</width>
-         <height>40</height>
+         <height>305</height>
         </size>
        </property>
       </spacer>
      </item>
      <item>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="1" column="2">
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>Max Distance [Å]</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="3">
-        <widget class="QLineEdit" name="maxDist"/>
-       </item>
-       <item row="0" column="2">
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>Npts</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="3">
-        <widget class="QLineEdit" name="Npts"/>
-       </item>
        <item row="0" column="0">
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>Dependent Variable:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLineEdit" name="minDist"/>
-       </item>
-       <item row="0" column="1">
-        <widget class="QComboBox" name="dependentVariable">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
-          <property name="text">
-           <string>1-σ positive fraction</string>
-          </property>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Dependent Variable:</string>
+           </property>
+          </widget>
          </item>
          <item>
-          <property name="text">
-           <string>χ²/dof</string>
-          </property>
+          <widget class="QComboBox" name="dependentVariable">
+           <item>
+            <property name="text">
+             <string>1-σ positive fraction</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>χ²/dof</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>I(Q=0)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Rg</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Oscillation parameter</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Background</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Positive Fraction</string>
+            </property>
+           </item>
+          </widget>
          </item>
          <item>
-          <property name="text">
-           <string>I(Q=0)</string>
-          </property>
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
-         <item>
-          <property name="text">
-           <string>Rg</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Oscillation parameter</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Background</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Positive Fraction</string>
-          </property>
-         </item>
-        </widget>
+        </layout>
        </item>
        <item row="1" column="0">
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>Min Distance [Å]</string>
-         </property>
-        </widget>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Npts</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="Npts"/>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Min Distance [Å]</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="minDist"/>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>Max Distance [Å]</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="maxDist"/>
+         </item>
+        </layout>
        </item>
-       <item row="2" column="0" colspan="4">
-        <widget class="QPushButton" name="closeButton">
-         <property name="text">
-          <string>Close</string>
-         </property>
-        </widget>
+       <item row="2" column="0">
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="closeButton">
+           <property name="text">
+            <string>Close</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </item>

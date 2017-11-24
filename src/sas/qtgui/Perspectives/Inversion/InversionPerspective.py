@@ -25,12 +25,9 @@ def is_float(value):
         return 0.0
 
 
-# TODO: Remove data
 # TODO: Modify plot references, don't just send new
 # TODO: Update help with batch capabilities
-# TODO: Easy way to scroll through results - no tabs in window(?) - 'spreadsheet'
 # TODO: Method to export results in some meaningful way
-#class InversionWindow(QtWidgets.QTabWidget, Ui_PrInversion):
 class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     """
     The main window for the P(r) Inversion perspective.
@@ -54,6 +51,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.communicate = GuiUtils.Communicate()
 
         self.logic = InversionLogic()
+
+        # Reference to Dmax window
+        self.dmaxWindow = None
 
         # The window should not close
         self._allow_close = False
@@ -83,6 +83,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         # {item:model}
         self._models = {}
 
+        self.calculateAllButton.setEnabled(False)
+        self.calculateThisButton.setEnabled(False)
+
         # plots for current data
         self.pr_plot = None
         self.data_plot = None
@@ -92,6 +95,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
         self.model = QtGui.QStandardItemModel(self)
         self.mapper = QtWidgets.QDataWidgetMapper(self)
+
+        # Add validators
+        self.setupValidators()
         # Link user interactions with methods
         self.setupLinks()
         # Set values
@@ -149,26 +155,19 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.explorerButton.clicked.connect(self.openExplorerWindow)
 
         self.backgroundInput.editingFinished.connect(
-            lambda: self._calculator.set_est_bck(int(is_float(
-                self.backgroundInput.text()))))
+            lambda: self._calculator.set_est_bck(int(is_float(self.backgroundInput.text()))))
         self.minQInput.editingFinished.connect(
-            lambda: self._calculator.set_qmin(is_float(
-                self.minQInput.text())))
+            lambda: self._calculator.set_qmin(is_float(self.minQInput.text())))
         self.regularizationConstantInput.editingFinished.connect(
-            lambda: self._calculator.set_alpha(is_float(
-                self.regularizationConstantInput.text())))
+            lambda: self._calculator.set_alpha(is_float(self.regularizationConstantInput.text())))
         self.maxDistanceInput.editingFinished.connect(
-            lambda: self._calculator.set_dmax(is_float(
-                self.maxDistanceInput.text())))
+            lambda: self._calculator.set_dmax(is_float(self.maxDistanceInput.text())))
         self.maxQInput.editingFinished.connect(
-            lambda: self._calculator.set_qmax(is_float(
-                self.maxQInput.text())))
+            lambda: self._calculator.set_qmax(is_float(self.maxQInput.text())))
         self.slitHeightInput.editingFinished.connect(
-            lambda: self._calculator.set_slit_height(is_float(
-                self.slitHeightInput.text())))
+            lambda: self._calculator.set_slit_height(is_float(self.slitHeightInput.text())))
         self.slitWidthInput.editingFinished.connect(
-            lambda: self._calculator.set_slit_width(is_float(
-                self.slitHeightInput.text())))
+            lambda: self._calculator.set_slit_width(is_float(self.slitHeightInput.text())))
 
         self.model.itemChanged.connect(self.model_changed)
         self.estimateNTSignal.connect(self._estimateNTUpdate)
@@ -196,15 +195,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.mapper.addMapping(self.slitHeightInput, WIDGETS.W_SLIT_HEIGHT)
 
         # Parameter Items
-        self.mapper.addMapping(self.regularizationConstantInput,
-                               WIDGETS.W_REGULARIZATION)
-        self.mapper.addMapping(self.regConstantSuggestionButton,
-                               WIDGETS.W_REGULARIZATION_SUGGEST)
+        self.mapper.addMapping(self.regularizationConstantInput, WIDGETS.W_REGULARIZATION)
+        self.mapper.addMapping(self.regConstantSuggestionButton, WIDGETS.W_REGULARIZATION_SUGGEST)
         self.mapper.addMapping(self.explorerButton, WIDGETS.W_EXPLORE)
         self.mapper.addMapping(self.maxDistanceInput, WIDGETS.W_MAX_DIST)
         self.mapper.addMapping(self.noOfTermsInput, WIDGETS.W_NO_TERMS)
-        self.mapper.addMapping(self.noOfTermsSuggestionButton,
-                               WIDGETS.W_NO_TERMS_SUGGEST)
+        self.mapper.addMapping(self.noOfTermsSuggestionButton, WIDGETS.W_NO_TERMS_SUGGEST)
 
         # Output
         self.mapper.addMapping(self.rgValue, WIDGETS.W_RG)
@@ -214,14 +210,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.mapper.addMapping(self.chiDofValue, WIDGETS.W_CHI_SQUARED)
         self.mapper.addMapping(self.oscillationValue, WIDGETS.W_OSCILLATION)
         self.mapper.addMapping(self.posFractionValue, WIDGETS.W_POS_FRACTION)
-        self.mapper.addMapping(self.sigmaPosFractionValue,
-                               WIDGETS.W_SIGMA_POS_FRACTION)
+        self.mapper.addMapping(self.sigmaPosFractionValue, WIDGETS.W_SIGMA_POS_FRACTION)
 
         # Main Buttons
         self.mapper.addMapping(self.removeButton, WIDGETS.W_REMOVE)
         self.mapper.addMapping(self.calculateAllButton, WIDGETS.W_CALCULATE_ALL)
-        self.mapper.addMapping(self.calculateThisButton,
-                               WIDGETS.W_CALCULATE_VISIBLE)
+        self.mapper.addMapping(self.calculateThisButton, WIDGETS.W_CALCULATE_VISIBLE)
         self.mapper.addMapping(self.helpButton, WIDGETS.W_HELP)
 
         self.mapper.toFirst()
@@ -267,9 +261,18 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
     def setupWindow(self):
         """Initialize base window state on init"""
-        #self.setTabPosition(0)
         self.enableButtons()
         self.estimateBgd.setChecked(True)
+
+    def setupValidators(self):
+        """Apply validators to editable line edits"""
+        self.noOfTermsInput.setValidator(QtGui.QIntValidator())
+        self.regularizationConstantInput.setValidator(GuiUtils.DoubleValidator())
+        self.maxDistanceInput.setValidator(GuiUtils.DoubleValidator())
+        self.minQInput.setValidator(GuiUtils.DoubleValidator())
+        self.maxQInput.setValidator(GuiUtils.DoubleValidator())
+        self.slitHeightInput.setValidator(GuiUtils.DoubleValidator())
+        self.slitWidthInput.setValidator(GuiUtils.DoubleValidator())
 
     ######################################################################
     # Methods for updating GUI
@@ -278,6 +281,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         """
         Enable buttons when data is present, else disable them
         """
+        self.calculateAllButton.setEnabled(self.logic.data_is_loaded)
+        self.calculateThisButton.setEnabled(self.logic.data_is_loaded)
         self.removeButton.setEnabled(self.logic.data_is_loaded)
         self.explorerButton.setEnabled(self.logic.data_is_loaded)
 
@@ -310,8 +315,18 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self._data_list.pop(self._data)
         self.pr_plot_list.pop(self._data)
         self.data_plot_list.pop(self._data)
+        if self.dmaxWindow is not None:
+            self.dmaxWindow = None
         self.dataList.removeItem(self.dataList.currentIndex())
         self.dataList.setCurrentIndex(0)
+        # Last file removed
+        if not self._data_list:
+            self._data = None
+            self.pr_plot = None
+            self._data_set = None
+            self.calculateThisButton.setEnabled(False)
+            self.calculateAllButton.setEnabled(False)
+            self.explorerButton.setEnabled(False)
 
     ######################################################################
     # GUI Interaction Events
@@ -344,6 +359,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         if self.data_plot is not None:
             title = self.data_plot.name
             GuiUtils.updateModelItemWithPlot(self._data, self.data_plot, title)
+        if self.dmaxWindow is not None:
+             self.dmaxWindow.pr_state = self._calculator
+             self.dmaxWindow.nfunc = self.getNFunc()
+
         self.mapper.toFirst()
 
     def help(self):
@@ -373,7 +392,6 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         """
         Open the Explorer window to see correlations between params and results
         """
-        # TODO: Link Invertor() and DmaxWindow so window updates when recalculated
         from .DMaxExplorerWidget import DmaxWindow
         self.dmaxWindow = DmaxWindow(self._calculator, self.getNFunc(), self)
         self.dmaxWindow.show()
@@ -394,6 +412,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             raise AttributeError
 
         for data in data_item:
+            if data in self._data_list.keys():
+                # Don't add data if it's already in
+                return
             # Create initial internal mappings
             self._data_list[data] = self._calculator.clone()
             self._data_set = GuiUtils.dataFromItem(data)
@@ -438,9 +459,6 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
     ######################################################################
     # Thread Creators
-
-    # TODO: Move to individual class(?)
-
     def startThreadAll(self):
         for data_ref, pr in list(self._data_list.items()):
             self._data_set = GuiUtils.dataFromItem(data_ref)
@@ -530,7 +548,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         """
         alpha, message, elapsed = output_tuple
         # Save useful info
-        self.model.setItem(WIDGETS.W_COMP_TIME, QtGui.QStandardItem(str(elapsed)))
+        self.model.setItem(WIDGETS.W_COMP_TIME, QtGui.QStandardItem("{:.4g}".format(elapsed)))
         self.regConstantSuggestionButton.setText("{:-3.2g}".format(alpha))
         self.regConstantSuggestionButton.setEnabled(True)
         if message:
@@ -581,19 +599,17 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         pr.elapsed = elapsed
 
         # Show result on control panel
-
-        # TODO: Connect self._calculator to GUI - two-to-one connection possible?
-        self.model.setItem(WIDGETS.W_RG, QtGui.QStandardItem(str(pr.rg(out))))
-        self.model.setItem(WIDGETS.W_I_ZERO, QtGui.QStandardItem(str(pr.iq0(out))))
+        self.model.setItem(WIDGETS.W_RG, QtGui.QStandardItem("{:.3g}".format(pr.rg(out))))
+        self.model.setItem(WIDGETS.W_I_ZERO, QtGui.QStandardItem("{:.3g}".format(pr.iq0(out))))
         self.model.setItem(WIDGETS.W_BACKGROUND_INPUT,
                            QtGui.QStandardItem("{:.3f}".format(pr.est_bck)))
-        self.model.setItem(WIDGETS.W_BACKGROUND_OUTPUT, QtGui.QStandardItem(str(pr.background)))
-        self.model.setItem(WIDGETS.W_CHI_SQUARED, QtGui.QStandardItem(str(pr.chi2[0])))
-        self.model.setItem(WIDGETS.W_COMP_TIME, QtGui.QStandardItem(str(elapsed)))
-        self.model.setItem(WIDGETS.W_OSCILLATION, QtGui.QStandardItem(str(pr.oscillations(out))))
-        self.model.setItem(WIDGETS.W_POS_FRACTION, QtGui.QStandardItem(str(pr.get_positive(out))))
+        self.model.setItem(WIDGETS.W_BACKGROUND_OUTPUT, QtGui.QStandardItem("{:.3g}".format(pr.background)))
+        self.model.setItem(WIDGETS.W_CHI_SQUARED, QtGui.QStandardItem("{:.3g}".format(pr.chi2[0])))
+        self.model.setItem(WIDGETS.W_COMP_TIME, QtGui.QStandardItem("{:.2g}".format(elapsed)))
+        self.model.setItem(WIDGETS.W_OSCILLATION, QtGui.QStandardItem("{:.3g}".format(pr.oscillations(out))))
+        self.model.setItem(WIDGETS.W_POS_FRACTION, QtGui.QStandardItem("{:.3g}".format(pr.get_positive(out))))
         self.model.setItem(WIDGETS.W_SIGMA_POS_FRACTION,
-                           QtGui.QStandardItem(str(pr.get_pos_err(out, cov))))
+                           QtGui.QStandardItem("{:.3g}".format(pr.get_pos_err(out, cov))))
 
         # Save Pr invertor
         self._calculator = pr

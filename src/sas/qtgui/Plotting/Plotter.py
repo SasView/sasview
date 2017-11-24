@@ -91,7 +91,7 @@ class PlotterWidget(PlotterBase):
             try:
                 marker = dict(PlotUtilities.SHAPES)[marker]
             except KeyError:
-                list(PlotUtilities.SHAPES.values())[marker]
+                marker = list(PlotUtilities.SHAPES.values())[marker]
 
         assert marker is not None
         # Plot name

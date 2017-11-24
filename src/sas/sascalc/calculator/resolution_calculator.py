@@ -1093,8 +1093,8 @@ class ResolutionCalculator(object):
             output.data = inten
             output.qx_data = qx_value
             output.qy_data = qy_value
-        except:
-            logger.error(sys.exc_value)
+        except Exception as ex:
+            logger.error(ex)
 
         return output
 
