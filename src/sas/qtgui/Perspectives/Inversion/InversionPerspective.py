@@ -574,7 +574,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.noOfTermsSuggestionButton.setEnabled(True)
         self.regConstantSuggestionButton.setText("{:.3g}".format(alpha))
         self.regConstantSuggestionButton.setEnabled(True)
-        self.model.setItem(WIDGETS.W_COMP_TIME, QtGui.QStandardItem(str(elapsed)))
+        self.model.setItem(WIDGETS.W_COMP_TIME, QtGui.QStandardItem("{:.2g}".format(elapsed)))
         if message:
             logging.info(message)
 
