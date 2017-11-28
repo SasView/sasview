@@ -17,6 +17,8 @@ Fitting Documentation
    Smearing Functions <resolution>
 
    Polarisation/Magnetic Scattering <magnetism/magnetism>
+   
+   Oriented Particles <orientation/orientation>
 
    Information on the SasView Optimisers <optimizer>
 
