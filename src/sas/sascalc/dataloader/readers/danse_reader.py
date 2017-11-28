@@ -156,20 +156,20 @@ class Reader(FileReader):
 
         # Store all data
         # Store wavelength
-        if has_converter == True and self.current_datainfo.source.wavelength_unit != 'A':
+        if has_converter and self.current_datainfo.source.wavelength_unit != 'A':
             conv = Converter('A')
             wavelength = conv(wavelength,
                               units=self.current_datainfo.source.wavelength_unit)
         self.current_datainfo.source.wavelength = wavelength
 
         # Store distance
-        if has_converter == True and detector.distance_unit != 'm':
+        if has_converter and detector.distance_unit != 'm':
             conv = Converter('m')
             distance = conv(distance, units=detector.distance_unit)
         detector.distance = distance
 
         # Store pixel size
-        if has_converter == True and detector.pixel_size_unit != 'mm':
+        if has_converter and detector.pixel_size_unit != 'mm':
             conv = Converter('mm')
             pixel = conv(pixel, units=detector.pixel_size_unit)
         detector.pixel_size.x = pixel

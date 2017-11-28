@@ -221,10 +221,7 @@ class Invertor(Cinvertor):
             return self.get_slit_width()
         elif name == 'est_bck':
             value = self.get_est_bck()
-            if value == 1:
-                return True
-            else:
-                return False
+            return value == 1
         elif name in self.__dict__:
             return self.__dict__[name]
         return None
@@ -459,7 +456,7 @@ class Invertor(Cinvertor):
             nq = 0
 
         # If we need to fit the background, add a term
-        if self.est_bck == True:
+        if self.est_bck:
             nfunc_0 = nfunc
             nfunc += 1
 
@@ -505,7 +502,7 @@ class Invertor(Cinvertor):
             logger.error(sys.exc_value)
 
         # Keep a copy of the last output
-        if self.est_bck == False:
+        if not self.est_bck:
             self.out = c
             self.cov = err
         else:
@@ -657,7 +654,7 @@ class Invertor(Cinvertor):
         file.write("#slit_height=%g\n" % self.slit_height)
         file.write("#slit_width=%g\n" % self.slit_width)
         file.write("#background=%g\n" % self.background)
-        if self.est_bck == True:
+        if self.est_bck:
             file.write("#has_bck=1\n")
         else:
             file.write("#has_bck=0\n")
@@ -737,10 +734,7 @@ class Invertor(Cinvertor):
                         self.background = float(toks[1])
                     elif line.startswith('#has_bck='):
                         toks = line.split('=')
-                        if int(toks[1]) == 1:
-                            self.est_bck = True
-                        else:
-                            self.est_bck = False
+                        self.est_bck = int(toks[1]) == 1
 
                     # Now read in the parameters
                     elif line.startswith('#C_'):

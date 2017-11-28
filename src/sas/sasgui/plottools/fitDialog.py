@@ -43,7 +43,7 @@ class LinearFit(wx.Dialog):
         Displays fitting parameters. This class handles the linearized
         fitting and derives and displays specialized output parameters based
         on the scale choice of the plot calling it.
-        
+
         :note1: The fitting is currently a bit convoluted as besides using
         plottools.transform.py to handle all the conversions, it uses
         LineModel to define a linear model and calculate a number of
@@ -54,7 +54,7 @@ class LinearFit(wx.Dialog):
         a linear solver such as scipy.stats.linregress or bumps.wsolve directly.
         This would considerably simplify the code and remove the need I think
         for LineModel.py and possibly fittins.py altogether.   -PDB 7/10/16
-        
+
         :note2: The linearized fits do not take resolution into account. This
         means that for poor resolution such as slit smearing the answers will
         be completely wrong --- Rg would be OK but I0 would be orders of
@@ -141,7 +141,7 @@ class LinearFit(wx.Dialog):
 
         """
 
-        # set up sizers first. 
+        # set up sizers first.
         # vbox is the panel sizer and is a vertical sizer
         # The first element of the panel is sizer which is a gridbagsizer
         # and contains most of the text fields
@@ -150,7 +150,7 @@ class LinearFit(wx.Dialog):
         vbox = wx.BoxSizer(wx.VERTICAL)
         sizer = wx.GridBagSizer(5, 5)
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
-        
+
         #size of string boxes in pixels
         _BOX_WIDTH = 100
         _BOX_HEIGHT = 20
@@ -394,9 +394,9 @@ class LinearFit(wx.Dialog):
                          wx.LEFT | wx.RIGHT | wx.ADJUST_MINSIZE, 10)
         sizer_button.Add(self.btClose, 0,
                          wx.LEFT | wx.RIGHT | wx.ADJUST_MINSIZE, 10)
-        
+
         vbox.Add(sizer)
-        self.static_line_1 = wx.StaticLine(self, -1)        
+        self.static_line_1 = wx.StaticLine(self, -1)
         vbox.Add(self.static_line_1, 0, wx.EXPAND, 0)
         vbox.Add(sizer_button, 0, wx.EXPAND | wx.BOTTOM | wx.TOP, 10)
 
@@ -438,7 +438,7 @@ class LinearFit(wx.Dialog):
         # Check if View contains a x array .we online fit when x exits
         # makes transformation for y as a line to fit
         if self.x != []:
-            if self.checkFitValues(self.xminFit) == True:
+            if self.checkFitValues(self.xminFit):
                 # Check if the field of Fit Dialog contain values
                 # and use the x max and min of the user
                 if not self._checkVal(self.xminFit, self.xmaxFit):

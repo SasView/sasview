@@ -406,10 +406,10 @@ class Plugin(PluginBase):
 
             y[i] = value
 
-        if self._normalize_output == True:
+        if self._normalize_output:
             y = y / total
             dy = dy / total
-        elif self._scale_output_unity == True:
+        elif self._scale_output_unity:
             y = y / pmax
             dy = dy / pmax
 
@@ -543,7 +543,7 @@ class Plugin(PluginBase):
             buff = input_f.read()
             lines = buff.split('\n')
             for line in lines:
-                if data_started == True:
+                if data_started:
                     try:
                         toks = line.split()
                         x = float(toks[0])
