@@ -11,13 +11,13 @@ import numpy as np
 
 from ..file_reader_base_class import FileReader
 from ..data_info import plottable_1D, DataInfo
-from ..loader_exceptions import FileContentsException, DataReaderException
+from ..loader_exceptions import FileContentsException
 
 # Check whether we have a converter available
 has_converter = True
 try:
     from sas.sascalc.data_util.nxsunit import Converter
-except:
+except ImportError:
     has_converter = False
 _ZERO = 1e-16
 
@@ -45,7 +45,7 @@ class Reader(FileReader):
 
         line = self.nextline()
         params = {}
-        while not line.startswith("BEGIN_DATA"):
+        while line and not line.startswith("BEGIN_DATA"):
             terms = line.split()
             if len(terms) >= 2:
                 params[terms[0]] = " ".join(terms[1:])
@@ -62,12 +62,13 @@ class Reader(FileReader):
         if "Wavelength_unit" not in self.params:
             raise FileContentsException("Wavelength has no units")
         if params["SpinEchoLength_unit"] != params["Wavelength_unit"]:
-            raise FileContentsException("The spin echo data has rudely used "
-                               "different units for the spin echo length "
-                               "and the wavelength.  While sasview could "
-                               "handle this instance, it is a violation "
-                               "of the file format and will not be "
-                               "handled by other software.")
+            raise FileContentsException(
+                "The spin echo data has rudely used "
+                "different units for the spin echo length "
+                "and the wavelength.  While sasview could "
+                "handle this instance, it is a violation "
+                "of the file format and will not be "
+                "handled by other software.")
 
         headers = self.nextline().split()
 
@@ -85,7 +86,7 @@ class Reader(FileReader):
                     data.shape[1]))
 
         if not data.size:
-            raise FileContentsException("{} is empty".format(path))
+            raise FileContentsException("{} is empty".format(self.filepath))
         x = data[:, headers.index("SpinEchoLength")]
         if "SpinEchoLength_error" in headers:
             dx = data[:, headers.index("SpinEchoLength_error")]

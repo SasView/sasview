@@ -53,6 +53,7 @@ class FileReader(object):
 
         :param filepath: The full or relative path to a file to be loaded
         """
+        self.filepath = filepath
         if os.path.isfile(filepath):
             basename, extension = os.path.splitext(os.path.basename(filepath))
             self.extension = extension.lower()
