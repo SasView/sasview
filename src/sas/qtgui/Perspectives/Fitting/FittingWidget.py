@@ -177,6 +177,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.data_is_loaded = False
         # Batch/single fitting
         self.is_batch_fitting = False
+        self.is_chain_fitting = False
         # Current SasModel in view
         self.kernel_module = None
         # Current SasModel view dimension
@@ -300,7 +301,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
            """
         self.lstParams.setStyleSheet(stylesheet)
         self.lstParams.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.lstParams.customContextMenuRequested.connect(self.showModelDescription)
+        self.lstParams.customContextMenuRequested.connect(self.showModelContextMenu)
         self.lstParams.setAttribute(QtCore.Qt.WA_MacShowFocusRect, False)
         # Poly model displayed in poly list
         self.lstPoly.setModel(self._poly_model)
@@ -349,6 +350,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 filename = GuiUtils.dataFromItem(dataitem).filename
                 self.cbFileNames.addItem(filename)
             self.cbFileNames.setVisible(True)
+            self.chkChainFit.setEnabled(True)
+            self.chkChainFit.setVisible(True)
             # This panel is not designed to view individual fits, so disable plotting
             self.cmdPlot.setVisible(False)
         # Similarly on other tabs
@@ -389,6 +392,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """ Enable/disable the magnetism tab """
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, isChecked)
 
+    def toggleChainFit(self, isChecked):
+        """ Enable/disable chain fitting """
+        self.is_chain_fitting = isChecked
+
     def toggle2D(self, isChecked):
         """ Enable/disable the controls dependent on 1D/2D data instance """
         self.chkMagnetism.setEnabled(isChecked)
@@ -411,6 +418,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.chk2DView.setCheckState(False)
         self.chkMagnetism.setEnabled(False)
         self.chkMagnetism.setCheckState(False)
+        self.chkChainFit.setEnabled(False)
+        self.chkChainFit.setVisible(False)
         # Tabs
         self.tabFitting.setTabEnabled(TAB_POLY, False)
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, False)
@@ -433,6 +442,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.chk2DView.toggled.connect(self.toggle2D)
         self.chkPolydispersity.toggled.connect(self.togglePoly)
         self.chkMagnetism.toggled.connect(self.toggleMagnetism)
+        self.chkChainFit.toggled.connect(self.toggleChainFit)
         # Buttons
         self.cmdFit.clicked.connect(self.onFit)
         self.cmdPlot.clicked.connect(self.onPlot)
@@ -447,9 +457,110 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Signals from separate tabs asking for replot
         self.options_widget.plot_signal.connect(self.onOptionsUpdate)
 
-    def showModelDescription(self, position):
+    def showModelContextMenu(self, position):
+
+        rows = len([s.row() for s in self.lstParams.selectionModel().selectedRows()])
+        menu = self.showModelDescription() if not rows else self.modelContextMenu(rows)
+        try:
+            menu.exec_(self.lstParams.viewport().mapToGlobal(position))
+        except AttributeError as ex:
+            logging.error("Error generating context menu: %s" % ex)
+        return
+
+    def modelContextMenu(self, rows):
+        menu = QtWidgets.QMenu()
+
+        # Select for fitting
+        self.actionSelect = QtWidgets.QAction(self)
+        self.actionSelect.setObjectName("actionSelect")
+        self.actionSelect.setText(QtCore.QCoreApplication.translate("self", "Select parameter for fitting"))
+        # Unselect from fitting
+        self.actionDeselect = QtWidgets.QAction(self)
+        self.actionDeselect.setObjectName("actionDeselect")
+        self.actionDeselect.setText(QtCore.QCoreApplication.translate("self", "De-select parameter from fitting"))
+
+        self.actionConstrain = QtWidgets.QAction(self)
+        self.actionConstrain.setObjectName("actionConstrain")
+        self.actionConstrain.setText(QtCore.QCoreApplication.translate("self", "Constrain parameter to current value"))
+
+        self.actionMultiConstrain = QtWidgets.QAction(self)
+        self.actionMultiConstrain.setObjectName("actionMultiConstrain")
+        self.actionMultiConstrain.setText(QtCore.QCoreApplication.translate("self", "Constrain selected parameters to their current values"))
+
+        self.actionMutualMultiConstrain = QtWidgets.QAction(self)
+        self.actionMutualMultiConstrain.setObjectName("actionMutualMultiConstrain")
+        self.actionMutualMultiConstrain.setText(QtCore.QCoreApplication.translate("self", "Mutual constrain of selected parameters..."))
+
+        #action.setDefaultWidget(label)
+        menu.addAction(self.actionSelect)
+        menu.addAction(self.actionDeselect)
+        menu.addSeparator()
+
+        if rows == 1:
+            menu.addAction(self.actionConstrain)
+        elif rows == 2:
+            menu.addAction(self.actionMultiConstrain)
+            menu.addAction(self.actionMutualMultiConstrain)
+        elif rows > 2:
+            menu.addAction(self.actionMultiConstrain)
+
+        # Define the callbacks
+        self.actionConstrain.triggered.connect(self.addConstraint)
+        self.actionMutualMultiConstrain.triggered.connect(self.showMultiConstrain)
+        self.actionSelect.triggered.connect(self.selectParameters)
+        self.actionDeselect.triggered.connect(self.deselectParameters)
+        return menu
+
+    def showMultiConstrain(self):
         """
-        Shows a window with model description, when right clicked in the treeview
+        Show the constraint widget and receive the expression
+        """
+        from sas.qtgui.Perspectives.Fitting.MultiConstraint import MultiConstraint
+        params_list = [s.data() for s in self.lstParams.selectionModel().selectedRows()]
+        mc_widget = MultiConstraint(self, params=params_list)
+        mc_widget.exec_()
+        constraint = mc_widget.txtConstraint.text()
+        # Pass the constraint to the parser
+        self.communicate.statusBarUpdateSignal.emit('Constraints added')
+        pass
+
+    def addConstraint(self):
+        """
+        Adds a constraint on a single parameter.
+        """
+        self.communicate.statusBarUpdateSignal.emit('Constraint added')
+        pass
+
+    def selectParameters(self):
+        """
+        Selected parameters are chosen for fitting
+        """
+        status = QtCore.Qt.Checked
+        self.setParameterSelection(status)
+
+    def deselectParameters(self):
+        """
+        Selected parameters are removed for fitting
+        """
+        status = QtCore.Qt.Unchecked
+        self.setParameterSelection(status)
+
+    def selectedParameters(self):
+        """ Returns list of selected (highlighted) parameters """
+        return [s.row() for s in self.lstParams.selectionModel().selectedRows() if self.isCheckable(s.row())]
+
+    def setParameterSelection(self, status=QtCore.Qt.Unchecked):
+        """
+        Selected parameters are chosen for fitting
+        """
+        # Convert to proper indices and set requested enablement
+        for row in self.selectedParameters():
+            self._model_model.item(row, 0).setCheckState(status)
+        pass
+
+    def showModelDescription(self):
+        """
+        Creates a window with model description, when right clicked in the treeview
         """
         msg = 'Model description:\n'
         if self.kernel_module is not None:
@@ -465,7 +576,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         action = QtWidgets.QWidgetAction(self)
         action.setDefaultWidget(label)
         menu.addAction(action)
-        menu.exec_(self.lstParams.viewport().mapToGlobal(position))
+        return menu
 
     def onSelectModel(self):
         """
@@ -1343,22 +1454,21 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Update state stack
         self.updateUndo()
 
+    def isCheckable(self, row):
+        return self._model_model.item(row, 0).isCheckable()
+
     def checkboxSelected(self, item):
         # Assure we're dealing with checkboxes
         if not item.isCheckable():
             return
         status = item.checkState()
 
-        def isCheckable(row):
-            return self._model_model.item(row, 0).isCheckable()
-
         # If multiple rows selected - toggle all of them, filtering uncheckable
-        rows = [s.row() for s in self.lstParams.selectionModel().selectedRows() if isCheckable(s.row())]
-
         # Switch off signaling from the model to avoid recursion
         self._model_model.blockSignals(True)
         # Convert to proper indices and set requested enablement
-        [self._model_model.item(row, 0).setCheckState(status) for row in rows]
+        self.setParameterSelection(status)
+        #[self._model_model.item(row, 0).setCheckState(status) for row in self.selectedParameters()]
         self._model_model.blockSignals(False)
 
         # update the list of parameters to fit
