@@ -57,11 +57,11 @@ def get_app_dir():
     # TODO: gui_manager will have to know about sasview until we
     # clean all these module variables and put them into a config class
     # that can be passed by sasview.py.
-    #logging.info(sys.executable)
-    #logging.info(str(sys.argv))
+    # logging.info(sys.executable)
+    # logging.info(str(sys.argv))
     from sas import sasview as sasview
     app_path = os.path.dirname(sasview.__file__)
-    #logging.info("Using application path: %s", app_path)
+    # logging.info("Using application path: %s", app_path)
     return app_path
 
 def get_user_directory():
@@ -248,7 +248,9 @@ def updateModelItemWithPlot(item, update_data, name=""):
         plot_item = item.child(index)
         if plot_item.isCheckable():
             plot_data = plot_item.child(0).data()
-            if plot_data.id is not None and plot_data.id == update_data.id:
+            if plot_data.id is not None and \
+                   (plot_data.name == update_data.name or plot_data.id == update_data.id):
+            # if plot_data.id is not None and plot_data.id == update_data.id:
                 # replace data section in item
                 plot_item.child(0).setData(update_data)
                 plot_item.setText(name)
@@ -342,7 +344,8 @@ def updateModelItemStatus(model_item, filename="", name="", status=2):
     # Iterate over model looking for items with checkboxes
     for index in range(model_item.rowCount()):
         item = model_item.item(index)
-        if item.text() == filename and item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
+        if item.text() == filename and item.isCheckable() \
+                and item.checkState() == QtCore.Qt.Checked:
             # Going 1 level deeper only
             for index_2 in range(item.rowCount()):
                 item_2 = item.child(index_2)
@@ -359,7 +362,9 @@ def itemFromFilename(filename, model_item):
     assert isinstance(filename, str)
 
     # Iterate over model looking for named items
-    item = list([i for i in [model_item.item(index) for index in range(model_item.rowCount())] if str(i.text()) == filename])
+    item = list([i for i in [model_item.item(index)
+                             for index in range(model_item.rowCount())]
+                 if str(i.text()) == filename])
     return item[0] if len(item)>0 else None
 
 def plotsFromFilename(filename, model_item):
@@ -395,15 +400,17 @@ def plotsFromCheckedItems(model_item):
     # Iterate over model looking for items with checkboxes
     for index in range(model_item.rowCount()):
         item = model_item.item(index)
-        if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
-            # TODO: assure item type is correct (either data1/2D or Plotter)
-            plot_data.append((item, item.child(0).data()))
+
         # Going 1 level deeper only
         for index_2 in range(item.rowCount()):
             item_2 = item.child(index_2)
             if item_2 and item_2.isCheckable() and item_2.checkState() == QtCore.Qt.Checked:
                 # TODO: assure item type is correct (either data1/2D or Plotter)
                 plot_data.append((item_2, item_2.child(0).data()))
+
+        if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
+            # TODO: assure item type is correct (either data1/2D or Plotter)
+            plot_data.append((item, item.child(0).data()))
 
     return plot_data
 

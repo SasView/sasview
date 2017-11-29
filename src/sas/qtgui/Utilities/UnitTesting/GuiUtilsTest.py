@@ -99,21 +99,53 @@ class GuiUtilsTest(unittest.TestCase):
         """
         Test the QModelItem checkbox update method
         """
-        test_item = QtGui.QStandardItem()
-        test_list = ['aa','11']
-        update_data = test_list
-        name = "Black Sabbath"
+        # test_item = QtGui.QStandardItem()
+        # test_list = ['aa','11']
+        # update_data = test_list
+        # name = "Black Sabbath"
 
+        # # update the item
+        # updateModelItemWithPlot(test_item, update_data, name)
+
+        test_item = QtGui.QStandardItem()
+        update_data = Data1D(x=[1.0, 2.0, 3.0], y=[10.0, 11.0, 12.0])
+        name = "Black Sabbath"
+        update_data.id = '[0]data0'
+        update_data.name = 'data0'
         # update the item
         updateModelItemWithPlot(test_item, update_data, name)
-        
+
         # Make sure test_item got all data added
         self.assertEqual(test_item.child(0).text(), name)
         self.assertTrue(test_item.child(0).isCheckable())
-        list_from_item = test_item.child(0).child(0).data()
-        self.assertIsInstance(list_from_item, list)
-        self.assertEqual(str(list_from_item[0]), test_list[0])
-        self.assertEqual(str(list_from_item[1]), test_list[1])
+        data_from_item = test_item.child(0).child(0).data()
+        self.assertIsInstance(data_from_item, Data1D)
+        self.assertSequenceEqual(list(data_from_item.x), [1.0, 2.0, 3.0])
+        self.assertSequenceEqual(list(data_from_item.y), [10.0, 11.0, 12.0])
+        self.assertEqual(test_item.rowCount(), 1)
+
+        # add another dataset (different from the first one)
+        update_data1 = Data1D(x=[1.1, 2.1, 3.1], y=[10.1, 11.1, 12.1])
+        update_data1.id = '[0]data1'
+        update_data1.name = 'data1'
+        name1 = "Black Sabbath1"
+        # update the item and check number of rows
+        updateModelItemWithPlot(test_item, update_data1, name1)
+
+        self.assertEqual(test_item.rowCount(), 2)
+
+        # add another dataset (with the same name as the first one)
+        # check that number of rows was not changed but data have been updated
+        update_data2 = Data1D(x=[4.0, 5.0, 6.0], y=[13.0, 14.0, 15.0])
+        update_data2.id = '[1]data0'
+        update_data2.name = 'data0'
+        name2 = "Black Sabbath2"
+        updateModelItemWithPlot(test_item, update_data2, name2)
+        self.assertEqual(test_item.rowCount(), 2)
+
+        data_from_item = test_item.child(0).child(0).data()
+        self.assertSequenceEqual(list(data_from_item.x), [4.0, 5.0, 6.0])
+        self.assertSequenceEqual(list(data_from_item.y), [13.0, 14.0, 15.0])
 
 
     def testPlotsFromCheckedItems(self):
@@ -161,9 +193,9 @@ class GuiUtilsTest(unittest.TestCase):
 
         # Make sure only the checked data is present
         # FRIDAY IN
-        self.assertIn(test_list0, plot_list[0])
+        self.assertIn(test_list0, plot_list[1])
         # SATURDAY IN
-        self.assertIn(test_list1, plot_list[1])
+        self.assertIn(test_list1, plot_list[0])
         # MONDAY NOT IN
         self.assertNotIn(test_list2, plot_list[0])
         self.assertNotIn(test_list2, plot_list[1])
