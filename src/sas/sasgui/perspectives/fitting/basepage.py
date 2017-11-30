@@ -1642,7 +1642,13 @@ class BasicPage(ScrolledPanel, PanelBase):
                         item_page[2].SetValue(item_page_info[2])
                         if item_page[2].__class__.__name__ == "ComboBox":
                             if item_page_info[2] in self.model.fun_list:
-                                fun_val = self.model.fun_list[item_page_info[2]]
+                                # to fix: fun_list is not a dictionary, but a tuple
+                                # so the following line (commented) will fail
+                                # fun_val = self.model.fun_list[item_page_info[2]]
+                                # I guess the following should work, but 
+                                # could not test as I don't know when this
+                                # part is used by SasView.
+                                fun_val = self.model.fun_list.index(item_page_info[2])
                                 self.model.setParam(item_page_info[1], fun_val)
                     if item_page[3] is not None:
                         # show or hide text +/-
@@ -1686,7 +1692,12 @@ class BasicPage(ScrolledPanel, PanelBase):
                 value = item_page_info[2]
                 selection = value
                 if value in self.model.fun_list:
-                    selection = self.model.fun_list[value]
+                    # to fix: fun_list is not a dictionary, so 
+                    # I commented the following original line 
+                    #selection = self.model.fun_list[value]
+                    # and replaced by this.
+                    # I think this should work, but could not test it.
+                    selection = self.model.fun_list.index(value)
                 item_page[2].SetValue(selection)
                 self.model.setParam(param_name, selection)
 
@@ -3364,7 +3375,13 @@ class BasicPage(ScrolledPanel, PanelBase):
                         item[2].Enable(True)
                     if item[2].__class__.__name__ == "ComboBox":
                         if content[name][1] in self.model.fun_list:
-                            fun_val = self.model.fun_list[content[name][1]]
+                            # to fix: fun_list is not a dictionary, but a tuple
+                            # so the following line (commented) will fail
+                            # fun_val = self.model.fun_list[content[name][1]]
+                            # I guess the following should work, but 
+                            # could not test as I don't know when this
+                            # part is used by SasView.
+                            fun_val = self.model.fun_list.index(content[name][1])
                             self.model.setParam(name, fun_val)
                     try:
                         item[5].SetValue(str(values[-3]))
@@ -3414,7 +3431,11 @@ class BasicPage(ScrolledPanel, PanelBase):
                             item[2].Enable(True)
                         if item[2].__class__.__name__ == "ComboBox":
                             if value[0] in self.model.fun_list:
-                                self.model.setParam(name, 0)
+                                # Fixed: fun_list not a dictionary!
+                                # Arrives here when spherical_sld model is
+                                # selected and number of shells modified.
+                                fun_val = self.model.fun_list.index(value[0])
+                                self.model.setParam(name, fun_val)
                                 # save state
                         try:
                             item[5].SetValue(str(value[-3]))
