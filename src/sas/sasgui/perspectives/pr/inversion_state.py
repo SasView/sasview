@@ -388,7 +388,7 @@ class Reader(CansasReader):
         :return: None
 
         """
-        if self.cansas == True:
+        if self.cansas:
             return self._read_cansas(path)
         else:
             return self._read_standalone(path)
@@ -504,7 +504,7 @@ class Reader(CansasReader):
 
         """
         # Sanity check
-        if self.cansas == True:
+        if self.cansas:
             doc = self.write_toXML(datainfo, prstate)
             # Write the XML document
             fd = open(filename, 'w')

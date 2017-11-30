@@ -757,7 +757,7 @@ class GridPage(sheet.CSheet):
         THIS METHOD IS NOT CURRENTLY USED.  It is designed to provide a
         cell pop up context by right clicking on a cell and gives the
         option to cut, paste, and clear. This will probably be removed in
-        future versions and is being superceded by more traditional cut and
+        future versions and is being superseded by more traditional cut and
         paste options.
         """
 
@@ -799,7 +799,7 @@ class GridPage(sheet.CSheet):
 
         THIS METHOD IS NOT CURRENTLY USED.  it is part of right click cell
         context menu which is being removed. This will probably be removed in
-        future versions and is being superceded by more traditional cut and
+        future versions and is being superseded by more traditional cut and
         paste options
         """
 
@@ -811,7 +811,7 @@ class GridPage(sheet.CSheet):
 
         THIS METHOD IS NOT CURRENTLY USED.  it is part of right click cell
         context menu which is being removed. This will probably be removed in
-        future versions and is being superceded by more traditional cut and
+        future versions and is being superseded by more traditional cut and
         paste options
         """
 
@@ -827,7 +827,7 @@ class GridPage(sheet.CSheet):
 
         THIS METHOD IS NOT CURRENTLY USED.  it is part of right click cell
         context menu which is being removed. This will probably be removed in
-        future versions and is being superceded by more traditional cut and
+        future versions and is being superseded by more traditional cut and
         paste options
         """
 
@@ -1232,7 +1232,7 @@ class GridPanel(SPanel):
     def on_view(self, event):
         """
         Get object represented by the given cells and plot them.  Basically
-        plot the colum in y vs the column in x.
+        plot the column in y vs the column in x.
         """
 
         pos = self.notebook.GetSelection()
@@ -1960,7 +1960,7 @@ class BatchOutputFrame(wx.Frame):
         iy += 1
         selection_sizer.Add(self.save_to_file, (iy, ix),
                             (1, 1), wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
-        #contruction the sizer contaning button
+        #contruction the sizer containing button
         button_sizer.Add((20, 20), 1, wx.EXPAND | wx.ADJUST_MINSIZE, 0)
 
         button_sizer.Add(button_close, 0,

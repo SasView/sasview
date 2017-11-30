@@ -122,7 +122,7 @@ class FileReader(object):
     def handle_error_message(self, msg):
         """
         Generic error handler to add an error to the current datainfo to
-        propogate the error up the error chain.
+        propagate the error up the error chain.
         :param msg: Error message
         """
         if len(self.output) > 0:
@@ -324,7 +324,7 @@ class FileReader(object):
     @staticmethod
     def splitline(line):
         """
-        Splits a line into pieces based on common delimeters
+        Splits a line into pieces based on common delimiters
         :param line: A single line of text
         :return: list of values
         """

@@ -1,6 +1,6 @@
 """
 Inferface containing information to store data, model, range of data, etc...
-and retreive this information. This is an inferface
+and retrieve this information. This is an inferface
 for a fitProblem i.e relationship between data and model.
 """
 ################################################################################
@@ -55,7 +55,7 @@ class FitProblem(object):
     def enable_smearing(self, flag=False):
         """
         :param flag: bool.When flag is 1 get the computer smear value. When
-            flag is 0 ingore smear value.
+            flag is 0 ignore smear value.
         """
         self.smearer_enable = flag
 
@@ -304,7 +304,7 @@ class FitProblemDictionary(dict):
     def enable_smearing(self, flag=False, fid=None):
         """
         :param flag: bool.When flag is 1 get the computer smear value. When
-            flag is 0 ingore smear value.
+            flag is 0 ignore smear value.
         """
         self._smear_on = flag
         if fid is None:

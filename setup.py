@@ -427,7 +427,7 @@ setup(
     zip_safe=False,
     entry_points={
         'console_scripts': [
-            "sasview = sas.sasview.sasview:run",
+            "sasview = sas.sasview.sasview:run_gui",
         ]
     },
     cmdclass={'build_ext': build_ext_subclass,

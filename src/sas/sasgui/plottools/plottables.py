@@ -226,7 +226,7 @@ class Graph(object):
         min_value = None
         max_value = None
         for p in self.plottables:
-            if p.hidden == True:
+            if p.hidden:
                 continue
             if p.x is not None:
                 for x_i in p.x:
@@ -1061,7 +1061,7 @@ class Data1D(Plottable):
         """
         Renders the plottable on the graph
         """
-        if self.interactive == True:
+        if self.interactive:
             kw['symbol'] = self.symbol
             kw['id'] = self.id
             kw['hide_error'] = self.hide_error

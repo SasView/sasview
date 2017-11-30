@@ -762,7 +762,7 @@ class Plugin(PluginBase):
         Schedule the specified fitproblem or get the fit problem related to
         the current page and set value.
         :param value: integer 0 or 1
-        :param uid: the id related to a page contaning fitting information
+        :param uid: the id related to a page containing fitting information
         """
         if uid in self.page_finder.keys():
             self.page_finder[uid].schedule_tofit(value)
@@ -777,10 +777,10 @@ class Plugin(PluginBase):
         """
         Used by simfitpage.py to reset a parameter given the string constrainst.
 
-        :param modelname: the name ot the model for with the parameter
+        :param modelname: the name of the model for with the parameter
                             has to reset
         :param value: can be a string in this case.
-        :param names: the paramter name
+        :param names: the parameter name
         """
         sim_page_id = self.sim_page.uid
         for uid, value in self.page_finder.iteritems():
@@ -796,7 +796,7 @@ class Plugin(PluginBase):
         receive a word containing dot and split it. used to split parameterset
         name into model name and parameter name example: ::
 
-            paramaterset (item) = M1.A
+            parameterset (item) = M1.A
             Will return model_name = M1 , parameter name = A
 
         """
@@ -1116,7 +1116,7 @@ class Plugin(PluginBase):
 
     def store_data(self, uid, data_list=None, caption=None):
         """
-        Recieve a list of data and store them ans well as a caption of
+        Receive a list of data and store them ans well as a caption of
         the fit page where they come from.
         :param uid: if related to a fit page
         :param data_list: list of data to fit
@@ -1195,7 +1195,7 @@ class Plugin(PluginBase):
         event.panel_name. this method update slicer panel
         for a given interactor.
 
-        :param event: contains type of slicer , paramaters for updating
+        :param event: contains type of slicer , parameters for updating
             the panel and panel_name to find the slicer 's panel concerned.
         """
         event.panel_name
