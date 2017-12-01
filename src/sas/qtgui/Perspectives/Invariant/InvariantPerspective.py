@@ -62,7 +62,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self._reactor = reactor
         self._model_item = QtGui.QStandardItem()
 
-        #self._helpView = QtWebKit.QWebView()
+        self._helpView = QtWebKit.QWebView()
         self.detailsDialog = DetailsDialog(self)
         self.detailsDialog.cmdOK.clicked.connect(self.enabling)
 
@@ -81,7 +81,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         # no reason to have this widget resizable
         self.resize(self.minimumSizeHint())
-        #self.setFixedSize(self.sizeHint())
 
         self.communicate = self._manager.communicator()
 
@@ -231,7 +230,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
         # Send the modified model item to DE for keeping in the model
         # Currently -unused
-        #self.communicate.updateModelFromPerspectiveSignal.emit(self._model_item)
+        # self.communicate.updateModelFromPerspectiveSignal.emit(self._model_item)
 
         plot_data = GuiUtils.plotsFromCheckedItems(self._manager.filesWidget.model)
 
@@ -364,7 +363,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
             if self._high_extrapolate:
                 # for presentation in InvariantDetails
-                qmax_plot = Q_MAXIMUM_PLOT * max(temp_data.x) # self._data.x)
+                qmax_plot = Q_MAXIMUM_PLOT * max(temp_data.x)
 
                 if qmax_plot > Q_MAXIMUM:
                     qmax_plot = Q_MAXIMUM
