@@ -58,6 +58,8 @@ from Perspectives.Fitting.UnitTesting import FittingOptionsTest
 #  Invariant
 from Perspectives.Invariant.UnitTesting import InvariantPerspectiveTest
 from Perspectives.Invariant.UnitTesting import InvariantDetailsTest
+#  Inversion
+from Perspectives.Inversion.UnitTesting import InversionPerspectiveTest
 
 
 def suite():
@@ -114,6 +116,8 @@ def suite():
         #  Invariant
         unittest.makeSuite(InvariantPerspectiveTest.InvariantPerspectiveTest,  'test'),
         unittest.makeSuite(InvariantDetailsTest.InvariantDetailsTest,     'test'),
+        #  Inversion
+        unittest.makeSuite(InversionPerspectiveTest.InversionTest,  'test'),
      )
     return unittest.TestSuite(suites)
 

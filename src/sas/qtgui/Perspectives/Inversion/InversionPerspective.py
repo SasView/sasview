@@ -24,6 +24,10 @@ def is_float(value):
     except ValueError:
         return 0.0
 
+NUMBER_OF_TERMS = 10
+REGULARIZATION = 0.0001
+BACKGROUND_INPUT = 0.0
+MAX_DIST = 140.0
 
 # TODO: Modify plot references, don't just send new
 # TODO: Update help with batch capabilities
@@ -226,7 +230,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         """
         item = QtGui.QStandardItem("")
         self.model.setItem(WIDGETS.W_FILENAME, item)
-        item = QtGui.QStandardItem('0.0')
+        item = QtGui.QStandardItem(str(BACKGROUND_INPUT))
         self.model.setItem(WIDGETS.W_BACKGROUND_INPUT, item)
         item = QtGui.QStandardItem("")
         self.model.setItem(WIDGETS.W_QMIN, item)
@@ -236,11 +240,11 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.model.setItem(WIDGETS.W_SLIT_WIDTH, item)
         item = QtGui.QStandardItem("")
         self.model.setItem(WIDGETS.W_SLIT_HEIGHT, item)
-        item = QtGui.QStandardItem("10")
+        item = QtGui.QStandardItem(str(NUMBER_OF_TERMS))
         self.model.setItem(WIDGETS.W_NO_TERMS, item)
-        item = QtGui.QStandardItem("0.0001")
+        item = QtGui.QStandardItem(str(REGULARIZATION))
         self.model.setItem(WIDGETS.W_REGULARIZATION, item)
-        item = QtGui.QStandardItem("140.0")
+        item = QtGui.QStandardItem(str(MAX_DIST))
         self.model.setItem(WIDGETS.W_MAX_DIST, item)
         item = QtGui.QStandardItem("")
         self.model.setItem(WIDGETS.W_RG, item)
@@ -438,7 +442,13 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
     def getNFunc(self):
         """Get the n_func value from the GUI object"""
-        return int(self.noOfTermsInput.text())
+        try:
+            nfunc = int(self.noOfTermsInput.text())
+        except ValueError:
+            logging.error("Incorrect number of terms specified: %s" %self.noOfTermsInput.text())
+            self.noOfTermsInput.setText(str(NUMBER_OF_TERMS))
+            nfunc = NUMBER_OF_TERMS
+        return nfunc
 
     def setCurrentData(self, data_ref):
         """Get the current data and display as necessary"""

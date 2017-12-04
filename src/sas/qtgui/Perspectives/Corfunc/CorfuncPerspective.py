@@ -367,7 +367,8 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
             # reset the closability flag
             self.setClosable(value=False)
             # Tell the MdiArea to close the container
-            self.parentWidget().close()
+            if self.parent:
+                self.parentWidget().close()
             event.accept()
         else:
             event.ignore()

@@ -62,7 +62,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self._reactor = reactor
         self._model_item = QtGui.QStandardItem()
 
-        self._helpView = QtWebKit.QWebView()
+        #self._helpView = QtWebKit.QWebView()
         self.detailsDialog = DetailsDialog(self)
         self.detailsDialog.cmdOK.clicked.connect(self.enabling)
 
