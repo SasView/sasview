@@ -30,25 +30,30 @@ warnings.simplefilter("ignore")
 CANSAS_FORMAT = CansasConstants.CANSAS_FORMAT
 CANSAS_NS = CansasConstants.CANSAS_NS
 
+
+def find(filename):
+    return os.path.join(os.path.dirname(__file__), filename)
+
+
 class cansas_reader_xml(unittest.TestCase):
 
     def setUp(self):
         self.loader = Loader()
-        self.xml_valid = "cansas_test_modified.xml"
-        self.xml_invalid = "cansas_test.xml"
-        self.cansas1d_badunits = "cansas1d_badunits.xml"
-        self.cansas1d = "cansas1d.xml"
-        self.cansas1d_slit = "cansas1d_slit.xml"
-        self.cansas1d_units = "cansas1d_units.xml"
-        self.cansas1d_notitle = "cansas1d_notitle.xml"
-        self.isis_1_0 = "ISIS_1_0.xml"
-        self.isis_1_1 = "ISIS_1_1.xml"
-        self.isis_1_1_notrans = "ISIS_1_1_notrans.xml"
-        self.isis_1_1_doubletrans = "ISIS_1_1_doubletrans.xml"
-        self.schema_1_0 = "cansas1d_v1_0.xsd"
-        self.schema_1_1 = "cansas1d_v1_1.xsd"
-        self.write_1_0_filename = "isis_1_0_write_test.xml"
-        self.write_1_1_filename = "isis_1_1_write_test.xml"
+        self.xml_valid = find("cansas_test_modified.xml")
+        self.xml_invalid = find("cansas_test.xml")
+        self.cansas1d_badunits = find("cansas1d_badunits.xml")
+        self.cansas1d = find("cansas1d.xml")
+        self.cansas1d_slit = find("cansas1d_slit.xml")
+        self.cansas1d_units = find("cansas1d_units.xml")
+        self.cansas1d_notitle = find("cansas1d_notitle.xml")
+        self.isis_1_0 = find("ISIS_1_0.xml")
+        self.isis_1_1 = find("ISIS_1_1.xml")
+        self.isis_1_1_notrans = find("ISIS_1_1_notrans.xml")
+        self.isis_1_1_doubletrans = find("ISIS_1_1_doubletrans.xml")
+        self.schema_1_0 = find("cansas1d_v1_0.xsd")
+        self.schema_1_1 = find("cansas1d_v1_1.xsd")
+        self.write_1_0_filename = find("isis_1_0_write_test.xml")
+        self.write_1_1_filename = find("isis_1_1_write_test.xml")
 
     def get_number_of_entries(self, dictionary, name, i):
         if dictionary.get(name) is not None:
@@ -253,10 +258,10 @@ class cansas_reader_hdf5(unittest.TestCase):
 
     def setUp(self):
         self.loader = Loader()
-        self.datafile_basic = "simpleexamplefile.h5"
-        self.datafile_multiplesasentry = "cansas_1Dand2D_samedatafile.h5"
-        self.datafile_multiplesasdata = "cansas_1Dand2D_samesasentry.h5"
-        self.datafile_multiplesasdata_multiplesasentry = "cansas_1Dand2D_multiplesasentry_multiplesasdata.h5"
+        self.datafile_basic = find("simpleexamplefile.h5")
+        self.datafile_multiplesasentry = find("cansas_1Dand2D_samedatafile.h5")
+        self.datafile_multiplesasdata = find("cansas_1Dand2D_samesasentry.h5")
+        self.datafile_multiplesasdata_multiplesasentry = find("cansas_1Dand2D_multiplesasentry_multiplesasdata.h5")
 
     def test_real_data(self):
         self.data = self.loader.load(self.datafile_basic)

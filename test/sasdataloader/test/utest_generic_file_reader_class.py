@@ -13,12 +13,16 @@ from sas.sascalc.dataloader.file_reader_base_class import FileReader
 logger = logging.getLogger(__name__)
 
 
+def find(filename):
+    return os.path.join(os.path.dirname(__file__), filename)
+
+
 class GenericFileReaderTests(unittest.TestCase):
 
     def setUp(self):
         self.reader = TestFileReader()
-        self.bad_file = "ACB123.txt"
-        self.good_file = "123ABC.txt"
+        self.bad_file = find("ACB123.txt")
+        self.good_file = find("123ABC.txt")
 
     def test_bad_file_path(self):
         output = self.reader.read(self.bad_file)
