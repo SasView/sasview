@@ -46,6 +46,8 @@ class FileReader(object):
         self.current_dataset = None
         # Current DataInfo object being loaded in
         self.current_datainfo = None
+        # File path sent to reader
+        self.filepath = None
         # Open file handle
         self.f_open = None
 
@@ -98,6 +100,7 @@ class FileReader(object):
         """
         self.current_datainfo = None
         self.current_dataset = None
+        self.filepath = None
         self.output = []
 
     def nextline(self):
