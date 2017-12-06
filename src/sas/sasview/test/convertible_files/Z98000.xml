@@ -1,0 +1,583 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SASroot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="cansas1d/1.0" version="1.0" xsi:schemaLocation="cansas1d/1.0 http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd">
+  <SASentry>
+    <Title></Title>
+    <Run></Run>
+    <SASdata>
+      <Idata>
+        <Q unit="1/A">0.00700000021607</Q>
+        <I unit="1/cm">21.0877494812</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.00899999961257</Q>
+        <I unit="1/cm">6.9149928093</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0109999999404</Q>
+        <I unit="1/cm">3.29820299149</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0130000002682</Q>
+        <I unit="1/cm">1.95223999023</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0149999996647</Q>
+        <I unit="1/cm">1.37454605103</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0170000009239</Q>
+        <I unit="1/cm">0.986351907253</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0189999993891</Q>
+        <I unit="1/cm">0.856290578842</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0209999997169</Q>
+        <I unit="1/cm">0.79960078001</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0230000000447</Q>
+        <I unit="1/cm">0.73988121748</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0250000003725</Q>
+        <I unit="1/cm">0.70280957222</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0270000007004</Q>
+        <I unit="1/cm">0.665353894234</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0289999991655</Q>
+        <I unit="1/cm">0.667375028133</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0309999994934</Q>
+        <I unit="1/cm">0.662829220295</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0329999998212</Q>
+        <I unit="1/cm">0.689519286156</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.035000000149</Q>
+        <I unit="1/cm">0.697279512882</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0370000004768</Q>
+        <I unit="1/cm">0.713435471058</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0390000008047</Q>
+        <I unit="1/cm">0.701587080956</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0410000011325</Q>
+        <I unit="1/cm">0.749152183533</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0430000014603</Q>
+        <I unit="1/cm">0.758012771606</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0450000017881</Q>
+        <I unit="1/cm">0.783602774143</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0469999983907</Q>
+        <I unit="1/cm">0.841286420822</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0489999987185</Q>
+        <I unit="1/cm">0.884350776672</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0509999990463</Q>
+        <I unit="1/cm">0.926352083683</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0529999993742</Q>
+        <I unit="1/cm">0.974015712738</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.054999999702</Q>
+        <I unit="1/cm">1.02490401268</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0570000000298</Q>
+        <I unit="1/cm">1.06476104259</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0590000003576</Q>
+        <I unit="1/cm">1.08852303028</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0610000006855</Q>
+        <I unit="1/cm">1.11291205883</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0630000010133</Q>
+        <I unit="1/cm">1.15584397316</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0649999976158</Q>
+        <I unit="1/cm">1.16356503963</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0670000016689</Q>
+        <I unit="1/cm">1.16666996479</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0689999982715</Q>
+        <I unit="1/cm">1.15272796154</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0710000023246</Q>
+        <I unit="1/cm">1.15064799786</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0729999989271</Q>
+        <I unit="1/cm">1.13290500641</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0750000029802</Q>
+        <I unit="1/cm">1.11188900471</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0769999995828</Q>
+        <I unit="1/cm">1.07086598873</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0790000036359</Q>
+        <I unit="1/cm">1.04297494888</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0810000002384</Q>
+        <I unit="1/cm">1.02898001671</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.082999996841</Q>
+        <I unit="1/cm">0.979080200195</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0850000008941</Q>
+        <I unit="1/cm">0.927485704422</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0869999974966</Q>
+        <I unit="1/cm">0.877090275288</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0890000015497</Q>
+        <I unit="1/cm">0.837758421898</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0909999981523</Q>
+        <I unit="1/cm">0.800018072128</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0930000022054</Q>
+        <I unit="1/cm">0.767646312714</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0949999988079</Q>
+        <I unit="1/cm">0.723915994167</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.097000002861</Q>
+        <I unit="1/cm">0.67986792326</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.0989999994636</Q>
+        <I unit="1/cm">0.644961714745</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.101000003517</Q>
+        <I unit="1/cm">0.618148684502</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.103000000119</Q>
+        <I unit="1/cm">0.587383925915</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.104999996722</Q>
+        <I unit="1/cm">0.56969088316</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.107000000775</Q>
+        <I unit="1/cm">0.550951302052</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.108999997377</Q>
+        <I unit="1/cm">0.54040068388</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.111000001431</Q>
+        <I unit="1/cm">0.523307979107</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.112999998033</Q>
+        <I unit="1/cm">0.498805910349</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.115000002086</Q>
+        <I unit="1/cm">0.484060287476</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.116999998689</Q>
+        <I unit="1/cm">0.469231009483</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.119000002742</Q>
+        <I unit="1/cm">0.454095512629</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.120999999344</Q>
+        <I unit="1/cm">0.444210112095</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.123000003397</Q>
+        <I unit="1/cm">0.437322497368</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.125</Q>
+        <I unit="1/cm">0.431536197662</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.127000004053</Q>
+        <I unit="1/cm">0.426572710276</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.128999993205</Q>
+        <I unit="1/cm">0.425902992487</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.130999997258</Q>
+        <I unit="1/cm">0.416256785393</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.133000001311</Q>
+        <I unit="1/cm">0.41275331378</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.135000005364</Q>
+        <I unit="1/cm">0.410560309887</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.136999994516</Q>
+        <I unit="1/cm">0.404949605465</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.138999998569</Q>
+        <I unit="1/cm">0.403335213661</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.141000002623</Q>
+        <I unit="1/cm">0.40135088563</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.143000006676</Q>
+        <I unit="1/cm">0.40077239275</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.144999995828</Q>
+        <I unit="1/cm">0.394572585821</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.146999999881</Q>
+        <I unit="1/cm">0.385773509741</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.149000003934</Q>
+        <I unit="1/cm">0.379192501307</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.150999993086</Q>
+        <I unit="1/cm">0.379544496536</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.152999997139</Q>
+        <I unit="1/cm">0.373678892851</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.155000001192</Q>
+        <I unit="1/cm">0.370625406504</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.157000005245</Q>
+        <I unit="1/cm">0.368275612593</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.158999994397</Q>
+        <I unit="1/cm">0.371669888496</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.16099999845</Q>
+        <I unit="1/cm">0.368764400482</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.163000002503</Q>
+        <I unit="1/cm">0.369146198034</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.165000006557</Q>
+        <I unit="1/cm">0.365978509188</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.166999995708</Q>
+        <I unit="1/cm">0.358884811401</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.168999999762</Q>
+        <I unit="1/cm">0.355919510126</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.171000003815</Q>
+        <I unit="1/cm">0.357609987259</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.172999992967</Q>
+        <I unit="1/cm">0.356993794441</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.17499999702</Q>
+        <I unit="1/cm">0.356719911098</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.177000001073</Q>
+        <I unit="1/cm">0.351224392653</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.179000005126</Q>
+        <I unit="1/cm">0.355494886637</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.180999994278</Q>
+        <I unit="1/cm">0.358554303646</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.182999998331</Q>
+        <I unit="1/cm">0.350813299417</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.185000002384</Q>
+        <I unit="1/cm">0.347702711821</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.187000006437</Q>
+        <I unit="1/cm">0.342840611935</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.188999995589</Q>
+        <I unit="1/cm">0.346473008394</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.190999999642</Q>
+        <I unit="1/cm">0.34877538681</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.193000003695</Q>
+        <I unit="1/cm">0.34089460969</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.194999992847</Q>
+        <I unit="1/cm">0.343621701002</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.196999996901</Q>
+        <I unit="1/cm">0.337706804276</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.199000000954</Q>
+        <I unit="1/cm">0.341378808022</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.201000005007</Q>
+        <I unit="1/cm">0.339097201824</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.202999994159</Q>
+        <I unit="1/cm">0.338257014751</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.204999998212</Q>
+        <I unit="1/cm">0.337063491344</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.207000002265</Q>
+        <I unit="1/cm">0.33335390687</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.209000006318</Q>
+        <I unit="1/cm">0.327607989311</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.21099999547</Q>
+        <I unit="1/cm">0.326870590448</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.212999999523</Q>
+        <I unit="1/cm">0.322661489248</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.215000003576</Q>
+        <I unit="1/cm">0.323224306107</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.216999992728</Q>
+        <I unit="1/cm">0.326994895935</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.218999996781</Q>
+        <I unit="1/cm">0.330487310886</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.221000000834</Q>
+        <I unit="1/cm">0.333228886127</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.223000004888</Q>
+        <I unit="1/cm">0.33349108696</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.22499999404</Q>
+        <I unit="1/cm">0.328233093023</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.226999998093</Q>
+        <I unit="1/cm">0.325591206551</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.229000002146</Q>
+        <I unit="1/cm">0.319118887186</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.231000006199</Q>
+        <I unit="1/cm">0.311261802912</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.232999995351</Q>
+        <I unit="1/cm">0.312078088522</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.234999999404</Q>
+        <I unit="1/cm">0.301698714495</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.237000003457</Q>
+        <I unit="1/cm">0.311744302511</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.238999992609</Q>
+        <I unit="1/cm">0.322577595711</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.240999996662</Q>
+        <I unit="1/cm">0.323940396309</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.243000000715</Q>
+        <I unit="1/cm">0.344702214003</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.245000004768</Q>
+        <I unit="1/cm">0.348640114069</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.24699999392</Q>
+        <I unit="1/cm">0.350162893534</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.248999997973</Q>
+        <I unit="1/cm">0.355486005545</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.250999987125</Q>
+        <I unit="1/cm">0.349838793278</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.252999991179</Q>
+        <I unit="1/cm">0.347436606884</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.254999995232</Q>
+        <I unit="1/cm">0.346845299006</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.256999999285</Q>
+        <I unit="1/cm">0.318100512028</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.259000003338</Q>
+        <I unit="1/cm">0.309689611197</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.261000007391</Q>
+        <I unit="1/cm">0.2904047966</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.263000011444</Q>
+        <I unit="1/cm">0.280272006989</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.264999985695</Q>
+        <I unit="1/cm">0.289936304092</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.266999989748</Q>
+        <I unit="1/cm">0.308597505093</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.268999993801</Q>
+        <I unit="1/cm">0.304085701704</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.270999997854</Q>
+        <I unit="1/cm">0.335575789213</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.273000001907</Q>
+        <I unit="1/cm">0.316729396582</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.27500000596</Q>
+        <I unit="1/cm">0.318863213062</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.277000010014</Q>
+        <I unit="1/cm">0.293644398451</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.279000014067</Q>
+        <I unit="1/cm">0.311365485191</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.280999988317</Q>
+        <I unit="1/cm">0.221318095922</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.282999992371</Q>
+        <I unit="1/cm">0.165873795748</I>
+      </Idata>
+      <Idata>
+        <Q unit="1/A">0.284999996424</Q>
+        <I unit="1/cm">0.161938592792</I>
+      </Idata>
+    </SASdata>
+    <SASsample name="">
+      <ID></ID>
+    </SASsample>
+    <SASinstrument>
+      <name></name>
+      <SASsource>
+        <radiation>neutron</radiation>
+      </SASsource>
+      <SAScollimation/>
+      <SASdetector>
+        <name></name>
+      </SASdetector>
+    </SASinstrument>
+    <SASnote/>
+  </SASentry>
+</SASroot>

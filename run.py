@@ -111,10 +111,16 @@ def prepare():
     #addpath(os.path.join(root, '..','wxPython-src-3.0.0.0','wxPython'))
 
     # Build project if the build directory does not already exist.
-    if not os.path.exists(build_path):
+    # PAK: with "update" we can always build since it is fast
+    if True or not os.path.exists(build_path):
         import subprocess
+        build_cmd = [sys.executable, "setup.py", "build", "update"]
+        if os.name == 'nt':
+            build_cmd.append('--compiler=tinycc')
+        # need shell=True on windows to keep console box from popping up
+        shell = (os.name == 'nt')
         with cd(root):
-            subprocess.call((sys.executable, "setup.py", "build"), shell=False)
+            subprocess.call(build_cmd, shell=shell)
 
     # Put the source trees on the path
     addpath(joinpath(root, 'src'))

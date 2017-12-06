@@ -17,6 +17,11 @@ from distutils.core import Command
 import numpy as np
 from setuptools import Extension, setup
 
+try:
+    import tinycc.distutils
+except ImportError:
+    pass
+
 # Manage version number ######################################
 with open(os.path.join("src", "sas", "sasview", "__init__.py")) as fid:
     for line in fid:
@@ -137,6 +142,11 @@ class build_ext_subclass(build_ext):
         # Get 64-bitness
         c = self.compiler.compiler_type
         print("Compiling with %s (64bit=%s)" % (c, str(is_64bits)))
+        #print("=== compiler attributes ===")
+        #print("\n".join("%s: %s"%(k, v) for k, v in sorted(self.compiler.__dict__.items())))
+        #print("=== build_ext attributes ===")
+        #print("\n".join("%s: %s"%(k, v) for k, v in self.__dict__.items()))
+        #sys.exit(1)
 
         # OpenMP build options
         if enable_openmp:
@@ -241,8 +251,8 @@ package_dir["sas.sascalc.calculator"] = os.path.join(
 packages.extend(["sas.sascalc.calculator", "sas.sascalc.calculator.core"])
 ext_modules.append(Extension("sas.sascalc.calculator.core.sld2i",
                              sources=[
-                                 os.path.join(gen_dir, "sld2i_module.cpp"),
-                                 os.path.join(gen_dir, "sld2i.cpp"),
+                                 os.path.join(gen_dir, "sld2i_module.c"),
+                                 os.path.join(gen_dir, "sld2i.c"),
                                  os.path.join(gen_dir, "libfunc.c"),
                                  os.path.join(gen_dir, "librefl.c"),
                              ],
