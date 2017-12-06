@@ -25,7 +25,10 @@ smaller than $V$.
 Assuming that all the pixel sizes are the same, the elastic scattering
 intensity from the particle is
 
-.. image:: gen_i.png
+.. math::
+
+    I(\vec Q) = \frac{1}{V}\left|
+        \sum_j^N v_j \beta_j \exp(i\vec Q \cdot \vec r_j)\right|^2
 
 Equation 1.
 
@@ -45,7 +48,7 @@ density * Avogadro number) for the atomic structures).
 $V$ can be corrected by users. This correction is useful especially for an
 atomic structure (such as taken from a PDB file) to get the right normalization.
 
-*NOTE! $\beta_j$ displayed in the GUI may be incorrect but this will not
+*NOTE!* $\beta_j$ *displayed in the GUI may be incorrect but this will not
 affect the scattering computation if the correction of the total volume V is made.*
 
 The scattering length density (SLD) of each pixel, where the SLD is uniform, is
@@ -55,15 +58,18 @@ of the neutrons as follows.
 Magnetic Scattering
 ^^^^^^^^^^^^^^^^^^^
 
-For magnetic scattering, only the magnetization component, $M_\perp$,
-perpendicular to the scattering vector $Q$ contributes to the magnetic
+For magnetic scattering, only the magnetization component, $\mathbf{M}_\perp$,
+perpendicular to the scattering vector $\vec Q$ contributes to the magnetic
 scattering length.
 
 .. image:: mag_vector.png
 
 The magnetic scattering length density is then
 
-.. image:: dm_eq.png
+.. math::
+
+    \beta_M = \frac{\gamma r_0}{2 \mu_B}\sigma \cdot \mathbf{M}_\perp
+        = D_M\sigma \cdot \mathbf{M}_\perp
 
 where the gyromagnetic ratio is $\gamma = -1.913$, $\mu_B$ is the Bohr
 magneton, $r_0$ is the classical radius of electron, and $\sigma$ is the
@@ -80,34 +86,35 @@ scattering from the sample are then
 
 .. image:: gen_mag_pic.png
 
-Now let us assume that the angles of the *Q* vector and the spin-axis (x')
-to the x-axis are $\phi$ and $\theta_\text{up}$ respectively (see above). Then,
+Now let us assume that the angles of the $\vec Q$ vector and the spin-axis ($x'$)
+to the $x$-axis are $\phi$ and $\theta_\text{up}$ respectively (see above). Then,
 depending upon the polarization (spin) state of neutrons, the scattering
 length densities, including the nuclear scattering length density ($\beta_N$)
 are given as
 
 *  for non-spin-flips
 
-   .. image:: sld1.png
+.. math::
+    \beta_{\pm\pm} = \beta_N \mp D_M M_{\perp x'}
 
 *  for spin-flips
 
-   .. image:: sld2.png
+.. math::
+    \beta_{\pm\mp} = - D_M(M_{\perp y'} \pm i M_{\perp z'})
 
 where
 
-.. image:: mxp.png
+.. math::
 
-.. image:: myp.png
+    M_{\perp x'} &= M_{0q_x}\cos\theta_\text{up} + M_{0q_y}\sin\theta_\text{up} \\
+    M_{\perp y'} &= M_{0q_y}\cos\theta_\text{up} - M_{0q_x}\sin\theta_\text{up} \\
+    M_{\perp z'} &= M_{0z} \\
+    M_{0q_x} &= (M_{0x}\cos\phi - M_{0y}\sin\phi)\cos\phi \\
+    M_{0q_y} &= (M_{0y}\sin\phi - M_{0y}\cos\phi)\sin\phi
 
-.. image:: mzp.png
-
-.. image:: mqx.png
-
-.. image:: mqy.png
-
-Here the $M0_x$, $M0_y$ and $M0_z$ are the $x$, $y$ and $z$
-components of the magnetisation vector in the laboratory $xyz$ frame.
+Here the $M_{0x}$, $M_{0y}$ and $M_{0z}$ are
+the $x$, $y$ and $z$ components of the magnetisation vector in the
+laboratory $x$-$y$-$z$ frame.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -147,7 +154,10 @@ The calculation for fixed orientation uses Equation 1 above resulting in a 2D
 output, whereas the scattering calculation averaged over all the orientations
 uses the Debye equation below providing a 1D output
 
-.. image:: gen_debye_eq.png
+.. math::
+
+    I(|\vec Q|) = \frac{1}{V}\sum_j^N v_j\beta_j \sum_k^N v_k \beta_k
+        \frac{\sin(|\vec Q||\vec r_j - \vec r_k|)}{|\vec Q||\vec r_j - \vec r_k|}
 
 where $v_j \beta_j \equiv b_j$ is the scattering
 length of the $j^\text{th}$ atom. The calculation output is passed to the *Data Explorer*

@@ -706,7 +706,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self.set_message()
 
         # reset power_out to default to get ready for another '_on_text'
-        if self.is_power_out == True:
+        if self.is_power_out:
             self.state.container = copy.deepcopy(self.inv_container)
             self.state.timestamp = self._get_time_stamp()
             msg = self.state.__str__()

@@ -26,12 +26,6 @@ else:
         return s.decode() if isinstance(s, bytes) else s
 
 class FileReader(object):
-    # List of Data1D and Data2D objects to be sent back to data_loader
-    output = []
-    # Current plottable_(1D/2D) object being loaded in
-    current_dataset = None
-    # Current DataInfo object being loaded in
-    current_datainfo = None
     # String to describe the type of data this reader can load
     type_name = "ASCII"
     # Wildcards to display
@@ -42,10 +36,20 @@ class FileReader(object):
     allow_all = False
     # Able to import the unit converter
     has_converter = True
-    # Open file handle
-    f_open = None
     # Default value of zero
     _ZERO = 1e-16
+
+    def __init__(self):
+        # List of Data1D and Data2D objects to be sent back to data_loader
+        self.output = []
+        # Current plottable_(1D/2D) object being loaded in
+        self.current_dataset = None
+        # Current DataInfo object being loaded in
+        self.current_datainfo = None
+        # File path sent to reader
+        self.filepath = None
+        # Open file handle
+        self.f_open = None
 
     def read(self, filepath):
         """
@@ -53,6 +57,7 @@ class FileReader(object):
 
         :param filepath: The full or relative path to a file to be loaded
         """
+        self.filepath = filepath
         if os.path.isfile(filepath):
             basename, extension = os.path.splitext(os.path.basename(filepath))
             self.extension = extension.lower()
@@ -95,6 +100,7 @@ class FileReader(object):
         """
         self.current_datainfo = None
         self.current_dataset = None
+        self.filepath = None
         self.output = []
 
     def nextline(self):
@@ -122,7 +128,7 @@ class FileReader(object):
     def handle_error_message(self, msg):
         """
         Generic error handler to add an error to the current datainfo to
-        propogate the error up the error chain.
+        propagate the error up the error chain.
         :param msg: Error message
         """
         if len(self.output) > 0:
@@ -324,7 +330,7 @@ class FileReader(object):
     @staticmethod
     def splitline(line):
         """
-        Splits a line into pieces based on common delimeters
+        Splits a line into pieces based on common delimiters
         :param line: A single line of text
         :return: list of values
         """

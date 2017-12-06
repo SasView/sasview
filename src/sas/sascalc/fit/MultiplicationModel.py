@@ -67,7 +67,7 @@ class MultiplicationModel(BaseComponent):
         # get multiplicity if model provide it, else 1.
         try:
             multiplicity = p_model.multiplicity
-        except:
+        except AttributeError:
             multiplicity = 1
         ## functional multiplicity of the model
         self.multiplicity = multiplicity
@@ -75,13 +75,13 @@ class MultiplicationModel(BaseComponent):
         # non-fittable parameters
         self.non_fittable = p_model.non_fittable
         self.multiplicity_info = []
-        self.fun_list = {}
+        self.fun_list = []
         if self.non_fittable > 1:
             try:
                 self.multiplicity_info = p_model.multiplicity_info
                 self.fun_list = p_model.fun_list
                 self.is_multiplicity_model = True
-            except:
+            except AttributeError:
                 pass
         else:
             self.is_multiplicity_model = False

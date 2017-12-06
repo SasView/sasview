@@ -1725,18 +1725,8 @@ class FitPage(BasicPage):
         if self.model.__class__ not in self.model_list_box["Multi-Functions"] \
                 and not self.temp_multi_functional:
             return None
-        # Get the func name list
-        list = self.model.fun_list
-        if len(list) == 0:
-            return None
-        # build function (combo)box
-        ind = 0
-        while(ind < len(list)):
-            for key, val in list.items():
-                if val == ind:
-                    fun_box.Append(key, val)
-                    break
-            ind += 1
+        for index, choice in enumerate(self.model.fun_list):
+            fun_box.Append(choice, index)
 
     def _on_select_accuracy(self, event):
         """
@@ -1764,7 +1754,7 @@ class FitPage(BasicPage):
         name = fun_box.Name
         value = fun_box.GetValue()
         if value in self.model.fun_list:
-            fun_val = self.model.fun_list[value]
+            fun_val = self.model.fun_list.index(value)
 
         self.model.setParam(name, fun_val)
         # save state

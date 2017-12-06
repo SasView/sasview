@@ -337,13 +337,13 @@ class TextDialog(wx.Dialog):
             #Create list of existing model names for comparison
             list_fnames = os.listdir(self.plugin_dir)
             # fake existing regular model name list
-            m_list = [model.name + ".py" for model in self.model_list]
+            m_list = [model + ".py" for model in self.model_list]
             list_fnames.append(m_list)
             if t_fname in list_fnames and title != mname:
                 self.good_name = False
                 msg = "Name exists already."
 
-        if self.good_name == False:
+        if not self.good_name:
             self.name_tcl.SetBackgroundColour('pink')
             info = 'Error'
             wx.MessageBox(msg, info)

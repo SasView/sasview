@@ -92,7 +92,7 @@ class OutputPlot(PlotPanel):
         Default context menu for the plot panel
 
         :TODO: Would be nice to add printing and log/linear scales.
-            The current verison of plottools no longer plays well with
+            The current version of plottools no longer plays well with
             plots outside of guiframe. Guiframe team needs to fix this.
         """
         # Slicer plot popup menu

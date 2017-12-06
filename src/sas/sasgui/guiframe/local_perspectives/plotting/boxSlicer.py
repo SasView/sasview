@@ -215,7 +215,7 @@ class BoxInteractor(_BaseInteractor):
         corresponding to the new average
         """
         self.base.thaw_axes()
-        # Post paramters
+        # Post parameters
         event = SlicerParameterEvent()
         event.type = self.__class__.__name__
         event.params = self.get_params()

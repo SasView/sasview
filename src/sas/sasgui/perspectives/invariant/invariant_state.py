@@ -654,7 +654,7 @@ class Reader(CansasReader):
         : param path: file path
         : return: None
         """
-        if self.cansas == True:
+        if self.cansas:
             return self._read_cansas(path)
         else:
             return self._read_standalone(path)
@@ -762,7 +762,7 @@ class Reader(CansasReader):
         : param invstate: InvariantState object
         """
         # Sanity check
-        if self.cansas == True:
+        if self.cansas:
             doc = self.write_toXML(datainfo, invstate)
             # Write the XML document
             fd = open(filename, 'w')

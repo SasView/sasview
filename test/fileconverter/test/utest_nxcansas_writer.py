@@ -2,21 +2,26 @@ from sas.sascalc.file_converter.nxcansas_writer import NXcanSASWriter
 from sas.sascalc.dataloader.loader import Loader
 
 import os
-import pylint
+import os.path
 import unittest
 import warnings
 
 warnings.simplefilter("ignore")
+
+
+def find(filename):
+    return os.path.join(os.path.dirname(__file__), filename)
+
 
 class nxcansas_writer(unittest.TestCase):
 
     def setUp(self):
         self.loader = Loader()
         self.writer = NXcanSASWriter()
-        self.read_file_1d = "cansas1d.xml"
-        self.write_file_1d = "export1d.h5"
-        self.read_file_2d = "exp18_14_igor_2dqxqy.dat"
-        self.write_file_2d = "export2d.h5"
+        self.read_file_1d = find("cansas1d.xml")
+        self.write_file_1d = find("export1d.h5")
+        self.read_file_2d = find("exp18_14_igor_2dqxqy.dat")
+        self.write_file_2d = find("export2d.h5")
 
         self.data_1d = self.loader.load(self.read_file_1d)[0]
 

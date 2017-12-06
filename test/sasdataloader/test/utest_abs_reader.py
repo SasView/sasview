@@ -15,11 +15,15 @@ from sas.sascalc.dataloader.data_info import Data1D
 import os.path
 
 
+def find(filename):
+    return os.path.join(os.path.dirname(__file__), filename)
+
+
 class abs_reader(unittest.TestCase):
 
     def setUp(self):
         reader = AbsReader()
-        self.data_list = reader.read("jan08002.ABS")
+        self.data_list = reader.read(find("jan08002.ABS"))
         self.data = self.data_list[0]
 
     def test_abs_checkdata(self):
@@ -30,7 +34,7 @@ class abs_reader(unittest.TestCase):
             Data1D defaults changed. Otherwise the
             tests won't pass
         """
-        self.assertEqual(self.data.filename, "jan08002.ABS")
+        self.assertEqual(os.path.basename(self.data.filename), "jan08002.ABS")
         self.assertEqual(self.data.meta_data['loader'], "IGOR 1D")
 
         self.assertEqual(self.data.source.wavelength_unit, 'A')
@@ -68,14 +72,14 @@ class abs_reader(unittest.TestCase):
 
     def test_generic_loader(self):
         # the generic loader should work as well
-        data = Loader().load("jan08002.ABS")
+        data = Loader().load(find("jan08002.ABS"))
         self.assertEqual(data[0].meta_data['loader'], "IGOR 1D")
 
 class DanseReaderTests(unittest.TestCase):
 
     def setUp(self):
         reader = DANSEReader()
-        self.data_list = reader.read("MP_New.sans")
+        self.data_list = reader.read(find("MP_New.sans"))
         self.data = self.data_list[0]
 
     def test_checkdata(self):
@@ -87,7 +91,7 @@ class DanseReaderTests(unittest.TestCase):
             tests won't pass
         """
         self.assertEqual(len(self.data_list), 1)
-        self.assertEqual(self.data.filename, "MP_New.sans")
+        self.assertEqual(os.path.basename(self.data.filename), "MP_New.sans")
         self.assertEqual(self.data.meta_data['loader'], "DANSE")
 
         self.assertEqual(self.data.source.wavelength_unit, 'A')
@@ -113,7 +117,7 @@ class DanseReaderTests(unittest.TestCase):
 
     def test_generic_loader(self):
         # the generic loader should work as well
-        data = Loader().load("MP_New.sans")
+        data = Loader().load(find("MP_New.sans"))
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0].meta_data['loader'], "DANSE")
 
@@ -122,17 +126,17 @@ class cansas_reader(unittest.TestCase):
 
     def setUp(self):
         reader = CANSASReader()
-        self.data_list = reader.read("cansas1d.xml")
+        self.data_list = reader.read(find("cansas1d.xml"))
         self.data = self.data_list[0]
 
     def test_generic_loader(self):
         # the generic loader should work as well
-        data = Loader().load("cansas1d.xml")
+        data = Loader().load(find("cansas1d.xml"))
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0].meta_data['loader'], "CanSAS XML 1D")
 
     def test_cansas_checkdata(self):
-        self.assertEqual(self.data.filename, "cansas1d.xml")
+        self.assertEqual(os.path.basename(self.data.filename), "cansas1d.xml")
         self._checkdata()
 
     def _checkdata(self):
@@ -281,8 +285,8 @@ class cansas_reader(unittest.TestCase):
         r = CANSASReader()
 
         filename = "write_test.xml"
-        r.write(filename, self.data)
-        data = Loader().load(filename)
+        r.write(find(filename), self.data)
+        data = Loader().load(find(filename))
         self.data = data[0]
         self.assertEqual(len(data), 1)
         self.assertEqual(self.data.filename, filename)
@@ -296,7 +300,7 @@ class cansas_reader(unittest.TestCase):
             Note that not all units are available.
         """
         filename = "cansas1d_units.xml"
-        data = CANSASReader().read(filename)
+        data = CANSASReader().read(find(filename))
         self.data = data[0]
         self.assertEqual(len(data), 1)
         self.assertEqual(self.data.filename, filename)
@@ -308,7 +312,7 @@ class cansas_reader(unittest.TestCase):
             Note that not all units are available.
         """
         filename = "cansas1d_badunits.xml"
-        data = CANSASReader().read(filename)
+        data = CANSASReader().read(find(filename))
         self.data = data[0]
         self.assertEqual(len(data), 1)
         self.assertEqual(self.data.filename, filename)
@@ -325,7 +329,7 @@ class cansas_reader(unittest.TestCase):
             Check slit data
         """
         filename = "cansas1d_slit.xml"
-        data = CANSASReader().read(filename)
+        data = CANSASReader().read(find(filename))
         self.data = data[0]
         self.assertEqual(len(data), 1)
         self.assertEqual(len(self.data_list), 1)
