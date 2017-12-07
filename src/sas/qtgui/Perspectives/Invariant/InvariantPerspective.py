@@ -226,6 +226,7 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self.cmdStatus.setEnabled(True)
 
         self.model = model
+        self.mapper.toFirst()
         self._data = GuiUtils.dataFromItem(self._model_item)
 
         # Send the modified model item to DE for keeping in the model

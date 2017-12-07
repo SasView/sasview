@@ -141,7 +141,7 @@
                <item>
                 <widget class="QLineEdit" name="txtTotalQMin">
                  <property name="enabled">
-                  <bool>false</bool>
+                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
@@ -155,7 +155,7 @@
                <item>
                 <widget class="QLineEdit" name="txtTotalQMax">
                  <property name="enabled">
-                  <bool>false</bool>
+                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
@@ -190,7 +190,7 @@
           <item row="0" column="1">
            <widget class="QLineEdit" name="txtVolFract">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="autoFillBackground">
              <bool>true</bool>
@@ -219,7 +219,7 @@
           <item row="0" column="3">
            <widget class="QLineEdit" name="txtVolFractErr">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="frame">
              <bool>true</bool>
@@ -242,7 +242,7 @@
           <item row="1" column="1">
            <widget class="QLineEdit" name="txtSpecSurf">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="frame">
              <bool>true</bool>
@@ -265,7 +265,7 @@
           <item row="1" column="3">
            <widget class="QLineEdit" name="txtSpecSurfErr">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="frame">
              <bool>true</bool>
@@ -302,7 +302,7 @@
           <item row="3" column="1">
            <widget class="QLineEdit" name="txtInvariantTot">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="toolTip">
              <string>Total invariant [Q*], including extrapolated regions.</string>
@@ -328,7 +328,7 @@
           <item row="3" column="3">
            <widget class="QLineEdit" name="txtInvariantTotErr">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="frame">
              <bool>true</bool>
@@ -461,10 +461,13 @@
             <item>
              <widget class="QLineEdit" name="txtExtrapolQMin">
               <property name="enabled">
-               <bool>false</bool>
+               <bool>true</bool>
               </property>
               <property name="toolTip">
                <string>The minimum extrapolated q value.</string>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -478,7 +481,10 @@
             <item>
              <widget class="QLineEdit" name="txtExtrapolQMax">
               <property name="enabled">
-               <bool>false</bool>
+               <bool>true</bool>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
