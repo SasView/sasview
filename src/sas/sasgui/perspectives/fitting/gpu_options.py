@@ -167,7 +167,13 @@ class GpuOptions(wx.Dialog):
             import pyopencl as cl
             platforms = cl.get_platforms()
         except ImportError:
-            warnings.warn("pyopencl import failed. Using only CPU computations")
+            warnings.warn("Unable to import the pyopencl package.  It may not \
+            have been installed.  If you wish to use OpenCL, try running pip \
+            install --user pyopencl")
+        except cl.LogicError as e:
+            warnings.warn("Unable to fetch the OpenCL platforms.  This likely \
+            means that the opencl drivers for your system are not installed.")
+            warnings.warn(e)
 
         p_index = 0
         for platform in platforms:
