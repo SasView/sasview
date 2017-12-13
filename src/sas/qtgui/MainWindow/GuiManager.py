@@ -85,9 +85,6 @@ class GuiManager(object):
 
         # Set up the status bar
         self.statusBarSetup()
-        # Show the Welcome panel
-        self.welcomePanel = WelcomePanel()
-        self._workspace.workspace.addSubWindow(self.welcomePanel)
 
         # Current help file
         self._helpView = QWebView()
@@ -98,6 +95,7 @@ class GuiManager(object):
         self._tutorialLocation = os.path.abspath(os.path.join(GuiUtils.HELP_DIRECTORY_LOCATION,
                                               "_downloads",
                                               "Tutorial.pdf"))
+
     def addWidgets(self):
         """
         Populate the main window with widgets
@@ -130,6 +128,7 @@ class GuiManager(object):
         # Add other, minor widgets
         self.ackWidget = Acknowledgements()
         self.aboutWidget = AboutBox()
+        self.welcomePanel = WelcomePanel()
 
         # Add calculators - floating for usability
         self.SLDCalculator = SldPanel(self)
@@ -333,6 +332,11 @@ class GuiManager(object):
             msg = "Could not connect to the application server."
             msg += " Please try again later."
             self.communicate.statusBarUpdateSignal.emit(msg)
+
+    def showWelcomeMessage(self):
+        """ Show the Welcome panel """
+        self._workspace.workspace.addSubWindow(self.welcomePanel)
+        self.welcomePanel.show()
 
     def addCallbacks(self):
         """

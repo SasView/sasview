@@ -18,7 +18,7 @@ import path_prepare
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
 from sas.qtgui.MainWindow.AboutBox import AboutBox
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
-#from sas.qtgui.Utilities.IPythonWidget import IPythonWidget
+from sas.qtgui.Utilities.IPythonWidget import IPythonWidget
 
 from sas.qtgui.MainWindow.GuiManager import Acknowledgements, GuiManager
 from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow

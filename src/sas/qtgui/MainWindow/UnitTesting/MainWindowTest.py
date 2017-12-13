@@ -14,6 +14,7 @@ import path_prepare
 from sas.qtgui.MainWindow.MainWindow import MainSasViewWindow
 from sas.qtgui.MainWindow.MainWindow import SplashScreen
 from sas.qtgui.MainWindow.GuiManager import GuiManager
+from sas.qtgui.Perspectives.Fitting import FittingPerspective
 
 if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)
@@ -38,6 +39,24 @@ class MainWindowTest(unittest.TestCase):
         """ Test the splash screen """
         splash = SplashScreen()
         self.assertIsInstance(splash, QtWidgets.QSplashScreen)
+
+    def testWidgets(self):
+        """ Test enablement/disablement of widgets """
+        # Open the main window
+        tmp_main = MainSasViewWindow(None)
+        tmp_main.showMaximized()
+        # See that only one subwindow is up
+        self.assertEqual(len(tmp_main.workspace.subWindowList()), 1)
+        # and that the subwindow is the fitting perspective
+        self.assertIsInstance(tmp_main.workspace.subWindowList()[0].widget(),
+                              FittingPerspective.FittingWindow)
+        # Show the message widget
+        tmp_main.guiManager.showWelcomeMessage()
+        # Assure it is visible and a part of the MdiArea
+        self.assertTrue(tmp_main.guiManager.welcomePanel.isVisible())
+        self.assertEqual(len(tmp_main.workspace.subWindowList()), 2)
+
+        tmp_main.close()
 
     def testExit(self):
         """

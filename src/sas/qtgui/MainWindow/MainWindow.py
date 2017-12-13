@@ -1,8 +1,10 @@
 # UNLESS EXEPTIONALLY REQUIRED TRY TO AVOID IMPORTING ANY MODULES HERE
 # ESPECIALLY ANYTHING IN SAS, SASMODELS NAMESPACE
-#from PyQt4 import QtGui
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
+from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QMdiArea
+from PyQt5.QtWidgets import QSplashScreen
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtGui import QPixmap
 
 # Local UI
 from sas.qtgui.UI import main_resources_rc
@@ -70,10 +72,13 @@ def run():
 
     # Show the main SV window
     mainwindow = MainSasViewWindow()
-    mainwindow.show()
+    mainwindow.showMaximized()
 
     # no more splash screen
     splash.finish(mainwindow)
+
+    # Time for the welcome window
+    mainwindow.guiManager.showWelcomeMessage()
 
     # No need to .exec_ - the reactor takes care of it.
     reactor.run()
