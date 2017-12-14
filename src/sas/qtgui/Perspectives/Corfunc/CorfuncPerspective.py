@@ -4,6 +4,11 @@ This module provides the intelligence behind the gui interface for Corfunc.
 # pylint: disable=E1101
 
 # global
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg \
+    as FigureCanvas
+from matplotlib.figure import Figure
+from numpy.linalg.linalg import LinAlgError
+
 from PyQt5 import QtCore
 from PyQt5 import QtGui, QtWidgets
 
@@ -16,11 +21,6 @@ from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 # local
 from .UI.CorfuncPanel import Ui_CorfuncDialog
 from .CorfuncUtils import WIDGETS as W
-
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg \
-    as FigureCanvas
-from matplotlib.figure import Figure
-from numpy.linalg.linalg import LinAlgError
 
 
 class MyMplCanvas(FigureCanvas):
@@ -135,6 +135,7 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
         self.cmdCalculateBg.clicked.connect(self.calculate_background)
         self.cmdCalculateBg.setEnabled(False)
+        self.cmdHelp.clicked.connect(self.showHelp)
 
         self.model.itemChanged.connect(self.model_changed)
 
@@ -305,6 +306,14 @@ class CorfuncWindow(QtWidgets.QDialog, Ui_CorfuncDialog):
 
 
     # pylint: disable=invalid-name
+    def showHelp(self):
+        """
+        Opens a webpage with help on the perspective
+        """
+        """ Display help when clicking on Help button """
+        treeLocation = "/user/sasgui/perspectives/corfunc/corfunc_help.html"
+        self.parent.showHelp(treeLocation)
+
     @staticmethod
     def allowBatch():
         """

@@ -212,12 +212,7 @@ class SldPanel(QtWidgets.QDialog):
         #self.model.endResetModel()
 
     def displayHelp(self):
-        try:
-            location = GuiUtils.HELP_DIRECTORY_LOCATION + \
-                "/user/sasgui/perspectives/calculator/sld_calculator_help.html"
-            self.manager._helpView.load(QtCore.QUrl(location))
-            self.manager._helpView.show()
-        except AttributeError:
-            # No manager defined - testing and standalone runs
-            pass
+        location = "/user/sasgui/perspectives/calculator/sld_calculator_help.html"
+        self.manager.showHelp(location)
+
 

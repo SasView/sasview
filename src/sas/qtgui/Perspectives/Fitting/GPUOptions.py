@@ -7,7 +7,7 @@ import platform
 import webbrowser
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from PyQt5 import QtGui, QtCore, QtWebKit, QtWidgets
+from PyQt5 import QtGui, QtCore, QtWidgets
 from sas.qtgui.Perspectives.Fitting.UI.GPUOptionsUI import Ui_GPUOptions
 from sas.qtgui.Perspectives.Fitting.UI.GPUTestResultsUI import Ui_GPUTestResults
 
@@ -171,7 +171,7 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         help_location = GuiUtils.HELP_DIRECTORY_LOCATION
         help_location += "/user/sasgui/perspectives/fitting/gpu_setup.html"
         help_location += "#device-selection"
-        # Test the system browser solution
+        # Display the page in default browser
         webbrowser.open('file://' + os.path.realpath(help_location))
 
     def reject(self):

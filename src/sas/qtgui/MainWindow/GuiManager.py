@@ -86,8 +86,6 @@ class GuiManager(object):
         # Set up the status bar
         self.statusBarSetup()
 
-        # Current help file
-        self._helpView = QWebView()
         # Needs URL like path, so no path.join() here
         self._helpLocation = GuiUtils.HELP_DIRECTORY_LOCATION + "/index.html"
 
@@ -163,6 +161,16 @@ class GuiManager(object):
         Callback for fileDataReceivedSignal
         """
         pass
+
+    def showHelp(self, url):
+        """
+        Open a local url in the default browser
+        """
+        location = GuiUtils.HELP_DIRECTORY_LOCATION + url
+        try:
+            webbrowser.open('file://' + os.path.realpath(location))
+        except webbrowser.Error as ex:
+            logging.warning("Cannot display help. %s" % ex)
 
     def workspace(self):
         """
@@ -717,8 +725,7 @@ class GuiManager(object):
 
         TODO: use QNetworkAccessManager to assure _helpLocation is valid
         """
-        self._helpView.load(QUrl(self._helpLocation))
-        self._helpView.show()
+        self.showHelp(self._helpLocation)
 
     def actionTutorial(self):
         """

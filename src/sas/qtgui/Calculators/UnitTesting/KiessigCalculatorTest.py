@@ -4,10 +4,8 @@ from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
 
-# TEMP
-#import sas.qtgui.path_prepare
 import path_prepare
-
+from unittest.mock import MagicMock
 
 from sas.qtgui.Calculators.KiessigPanel import KiessigPanel
 
@@ -34,9 +32,12 @@ class KiessigCalculatorTest(unittest.TestCase):
 
     def testHelp(self):
         """ Assure help file is shown """
-
-        # this should not rise
+        self.widget.manager = QtWidgets.QWidget()
+        self.widget.manager.showHelp = MagicMock()
         self.widget.onHelp()
+        self.assertTrue(self.widget.manager.showHelp.called_once())
+        args = self.widget.manager.showHelp.call_args
+        self.assertIn('kiessig_calculator_help.html', args[0][0])
 
     def testComplexEntryNumbers(self):
         """ User entered compound calculations and subsequent reset"""

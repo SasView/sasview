@@ -12,7 +12,6 @@ import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.FittingOptions import FittingOptions
 from sas.qtgui.Perspectives.Fitting.GPUOptions import GPUOptions
-#from sas.qtgui.Perspectives.Fitting import ModelUtilities
 
 class FittingWindow(QtWidgets.QTabWidget):
     """

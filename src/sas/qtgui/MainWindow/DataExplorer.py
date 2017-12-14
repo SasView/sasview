@@ -7,7 +7,6 @@ import logging
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
-from PyQt5 import QtWebKitWidgets
 
 from twisted.internet import threads
 
@@ -68,9 +67,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cmdAppend.clicked.connect(self.appendPlot)
         self.cmdHelp.clicked.connect(self.displayHelp)
         self.cmdHelp_2.clicked.connect(self.displayHelp)
-
-        # Display HTML content
-        self._helpView = QtWebKitWidgets.QWebView()
 
         # Fill in the perspectives combo
         self.initPerspectives()
@@ -140,10 +136,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Show the "Loading data" section of help
         """
-        tree_location = GuiUtils.HELP_DIRECTORY_LOCATION +\
-            "/user/sasgui/guiframe/data_explorer_help.html"
-        self._helpView.load(QtCore.QUrl(tree_location))
-        self._helpView.show()
+        tree_location = "/user/sasgui/guiframe/data_explorer_help.html"
+        self.parent.showHelp(tree_location)
 
     def enableGraphCombo(self, combo_text):
         """

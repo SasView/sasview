@@ -145,12 +145,7 @@ class DensityPanel(QtWidgets.QDialog):
             pass
 
     def displayHelp(self):
-        try:
-            location = HELP_DIRECTORY_LOCATION + \
-                "/user/sasgui/perspectives/calculator/density_calculator_help.html"
+        location =  "/user/sasgui/perspectives/calculator/density_calculator_help.html"
+        self.manager.showHelp(location)
 
-            self.manager._helpView.load(QtCore.QUrl(location))
-            self.manager._helpView.show()
-        except AttributeError:
-            # No manager defined - testing and standalone runs
-            pass
+

@@ -7,15 +7,11 @@ import logging
 import traceback
 from twisted.internet import threads
 import numpy as np
+import webbrowser
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
-from PyQt5 import QtWebKitWidgets
-# Officially QtWebEngineWidgets are the way to display HTML in Qt5,
-# but this module isn't ported to PyQt5 yet...
-# let's wait. In the meantime no Help.
-#from PyQt5 import QtWebEngineWidgets
 
 from sasmodels import product
 from sasmodels import generate
@@ -126,7 +122,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.initializeControls()
 
         # Display HTML content
-        self.helpView = QtWebKitWidgets.QWebView()
+        #self.setupHelp()
 
         # New font to display angstrom symbol
         new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
@@ -661,7 +657,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Show the "Fitting" section of help
         """
-        tree_location = GuiUtils.HELP_DIRECTORY_LOCATION + "/user/sasgui/perspectives/fitting/"
+        tree_location = "/user/sasgui/perspectives/fitting/"
 
         # Actual file will depend on the current tab
         tab_id = self.tabFitting.currentIndex()
@@ -671,16 +667,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         elif tab_id == 1:
             helpfile = "residuals_help.html"
         elif tab_id == 2:
-            helpfile = "sm_help.html"
+            helpfile = "resolution.html"
         elif tab_id == 3:
-            helpfile = "pd_help.html"
+            helpfile = "pd/polydispersity.html"
         elif tab_id == 4:
-            helpfile = "mag_help.html"
+            helpfile = "magnetism/magnetism.html"
         help_location = tree_location + helpfile
 
-        content = QtCore.QUrl(help_location)
-        self.helpView.load(QtCore.QUrl(help_location))
-        self.helpView.show()
+        self.showHelp(help_location)
+
+    def showHelp(self, url):
+        """
+        Calls parent's method for opening an HTML page
+        """
+        self.parent.showHelp(url)
 
     def onDisplayMagneticAngles(self):
         """

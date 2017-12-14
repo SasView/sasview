@@ -50,8 +50,6 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
         self._manager = parent
         self._model_item = QtGui.QStandardItem()
-        #self._helpView = QtWebKit.QWebView()
-
         self.communicate = GuiUtils.Communicate()
 
         self.logic = InversionLogic()
@@ -373,14 +371,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         """
         Open the P(r) Inversion help browser
         """
-        tree_location = (GuiUtils.HELP_DIRECTORY_LOCATION +
-                         "user/sasgui/perspectives/pr/pr_help.html")
+        tree_location = "/user/sasgui/perspectives/pr/pr_help.html"
 
         # Actual file anchor will depend on the combo box index
         # Note that we can be clusmy here, since bad current_fitter_id
         # will just make the page displayed from the top
-        #self._helpView.load(QtCore.QUrl(tree_location))
-        #self._helpView.show()
+        self._manager.showHelp(tree_location)
 
     def toggleBgd(self):
         """

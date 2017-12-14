@@ -7,7 +7,6 @@ import webbrowser
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui, QtWidgets
-from PyQt5 import QtWebKit
 
 from twisted.internet import threads
 from twisted.internet import reactor
@@ -62,7 +61,6 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
         self._reactor = reactor
         self._model_item = QtGui.QStandardItem()
 
-        #self._helpView = QtWebKit.QWebView()
         self.detailsDialog = DetailsDialog(self)
         self.detailsDialog.cmdOK.clicked.connect(self.enabling)
 
@@ -430,9 +428,8 @@ class InvariantWindow(QtWidgets.QDialog, Ui_tabbedInvariantUI):
 
     def onHelp(self):
         """ Display help when clicking on Help button """
-        treeLocation = GuiUtils.HELP_DIRECTORY_LOCATION + \
-            "/user/sasgui/perspectives/invariant/invariant_help.html"
-        webbrowser.open('file://' + treeLocation)
+        treeLocation = "/user/sasgui/perspectives/invariant/invariant_help.html"
+        self.parent.showHelp(treeLocation)
 
     def setupSlots(self):
         """ """

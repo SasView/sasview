@@ -6,7 +6,6 @@ import functools
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
-from PyQt5 import QtWebKitWidgets
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
@@ -86,11 +85,8 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """
         Display generic data averaging help
         """
-        location = "docs/sphinx-docs/build/html" + \
-            "/user/sasgui/guiframe/graph_help.html#d-data-averaging"
-        self.helpView = QtWebKitWidgets.QWebView()
-        self.helpView.load(QtCore.QUrl(location))
-        self.helpView.show()
+        location = "/user/sasgui/guiframe/graph_help.html#d-data-averaging"
+        self.parent.showHelp(location)
 
 
 class ProxyModel(QtCore.QIdentityProxyModel):

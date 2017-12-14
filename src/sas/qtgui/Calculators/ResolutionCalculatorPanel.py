@@ -365,15 +365,8 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
         Calls Documentation Window with the path of the location within the
         documentation tree (after /doc/ ....".
         """
-        try:
-            location = GuiUtils.HELP_DIRECTORY_LOCATION + \
-                       "/user/sasgui/perspectives/calculator/resolution_calculator_help.html"
-            self.manager._helpView.load(QtCore.QUrl(location))
-            self.manager._helpView.show()
-
-        except AttributeError:
-            # No manager defined - testing and standalone runs
-            pass
+        location = "/user/sasgui/perspectives/calculator/resolution_calculator_help.html"
+        self.manager.showHelp(location)
 
     def onReset(self):
         # by default Spectrum label and cbCustomSpectrum are not visible

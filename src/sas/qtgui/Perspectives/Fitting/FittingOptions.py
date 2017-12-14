@@ -2,11 +2,11 @@
 import sys
 import os
 import types
+import webbrowser
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
-from PyQt5 import QtWebKitWidgets
 
 from sas.qtgui.UI import images_rc
 from sas.qtgui.UI import main_resources_rc
@@ -72,9 +72,6 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
 
         # OK has to be initialized to True, after initial validator setup
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(True)
-
-        # Display HTML content
-        self.helpView = QtWebKitWidgets.QWebView()
 
     def assignValidators(self):
         """
@@ -159,15 +156,15 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         """
         Show the "Fitting options" section of help
         """
-        tree_location = GuiUtils.HELP_DIRECTORY_LOCATION + "/user/sasgui/perspectives/fitting/"
+        tree_location = GuiUtils.HELP_DIRECTORY_LOCATION
+        tree_location += "/user/sasgui/perspectives/fitting/"
 
         # Actual file anchor will depend on the combo box index
         # Note that we can be clusmy here, since bad current_fitter_id
         # will just make the page displayed from the top
         helpfile = "optimizer.html#fit-" + self.current_fitter_id 
         help_location = tree_location + helpfile
-        self.helpView.load(QtCore.QUrl(help_location))
-        self.helpView.show()
+        webbrowser.open('file://' + os.path.realpath(help_location))
 
     def widgetFromOption(self, option_id, current_fitter=None):
         """

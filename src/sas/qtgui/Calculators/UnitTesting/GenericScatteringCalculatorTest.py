@@ -103,7 +103,11 @@ class GenericScatteringCalculatorTest(unittest.TestCase):
 
     def testHelpButton(self):
         """ Assure help file is shown """
+        self.widget.manager.showHelp = MagicMock()
         self.widget.onHelp()
+        self.assertTrue(self.widget.manager.showHelp.called_once())
+        args = self.widget.manager.showHelp.call_args
+        self.assertIn('sas_calculator_help.html', args[0][0])
 
     def testValidator(self):
         """ Test the inputs when validators had been defined """

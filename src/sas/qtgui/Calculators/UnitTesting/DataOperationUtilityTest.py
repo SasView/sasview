@@ -3,6 +3,8 @@ import time
 import numpy
 import logging
 import unittest
+import webbrowser
+
 from PyQt5 import QtGui, QtWidgets
 from PyQt5 import QtCore
 from PyQt5.QtTest import QTest
@@ -118,8 +120,11 @@ class DataOperationUtilityTest(unittest.TestCase):
 
     def testHelp(self):
         """ Assure help file is shown """
-        # this should not rise
+        self.widget.manager.showHelp = MagicMock()
         self.widget.onHelp()
+        self.assertTrue(self.widget.manager.showHelp.called_once())
+        args = self.widget.manager.showHelp.call_args
+        self.assertIn('data_operator_help.html', args[0][0])
 
     def testOnReset(self):
         """ Test onReset function """

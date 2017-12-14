@@ -36,9 +36,12 @@ class SlitSizeCalculatorTest(unittest.TestCase):
 
     def testHelp(self):
         """ Assure help file is shown """
-
-        # this should not rise
+        self.widget._parent = QtWidgets.QWidget()
+        self.widget._parent.showHelp = MagicMock()
         self.widget.onHelp()
+        self.assertTrue(self.widget._parent.showHelp.called_once())
+        args = self.widget._parent.showHelp.call_args
+        self.assertIn('slit_calculator_help.html', args[0][0])
 
     def testBrowseButton(self):
         browseButton = self.widget.browseButton

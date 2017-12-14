@@ -141,9 +141,12 @@ class SLDCalculatorTest(unittest.TestCase):
 
     def testHelp(self):
         """ Assure help file is shown """
-
-        # this should not rise
+        self.widget.manager = QtWidgets.QWidget()
+        self.widget.manager.showHelp = MagicMock()
         self.widget.displayHelp()
+        self.assertTrue(self.widget.manager.showHelp.called_once())
+        args = self.widget.manager.showHelp.call_args
+        self.assertIn('sld_calculator_help.html', args[0][0])
 
 if __name__ == "__main__":
     unittest.main()
