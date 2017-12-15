@@ -7,12 +7,14 @@ Created on Nov 29, 2016
 @author: wpotrzebowski
 '''
 
+import logging
 import os
 import sys
-import warnings
 import wx
 import sasmodels
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -167,13 +169,14 @@ class GpuOptions(wx.Dialog):
             import pyopencl as cl
             platforms = cl.get_platforms()
         except ImportError:
-            warnings.warn("Unable to import the pyopencl package.  It may not \
-            have been installed.  If you wish to use OpenCL, try running pip \
-            install --user pyopencl")
-        except cl.LogicError as e:
-            warnings.warn("Unable to fetch the OpenCL platforms.  This likely \
-            means that the opencl drivers for your system are not installed.")
-            warnings.warn(e)
+            logger.warn("Unable to import the pyopencl package.  It may not "
+                        "have been installed.  If you wish to use OpenCL, try "
+                        "running pip install --user pyopencl")
+        except cl.LogicError as err:
+            logger.warn("Unable to fetch the OpenCL platforms.  This likely "
+                        "means that the opencl drivers for your system are "
+                        "not installed.")
+            logger.warn(err)
 
         p_index = 0
         for platform in platforms:
