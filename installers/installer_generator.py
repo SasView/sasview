@@ -24,6 +24,7 @@ AppPublisher = local_config._copyright
 AppPublisherURL = local_config._homepage
 AppSupportURL = local_config._homepage
 AppUpdatesURL = local_config._homepage
+ArchitecturesInstallIn64BitMode = 'x64'
 ChangesEnvironment = 'true'
 DefaultDirName = os.path.join("{pf}" , AppName+Dev)
 DefaultGroupName = os.path.join(local_config.DefaultGroupName, AppVerName)
@@ -342,6 +343,7 @@ def generate_installer():
     TEMPLATE += "AppPublisherURL=%s\n" % str(AppPublisherURL)
     TEMPLATE += "AppSupportURL=%s\n" % str(AppSupportURL)
     TEMPLATE += "AppUpdatesURL=%s \n" % str(AppUpdatesURL)
+    TEMPLATE += "ArchitecturesInstallIn64BitMode=%s \n" % str(ArchitecturesInstallIn64BitMode)
     TEMPLATE += "ChangesEnvironment=%s \n" % str(ChangesEnvironment)
     TEMPLATE += "DefaultDirName=%s\n" % str(DefaultDirName)
     TEMPLATE += "DefaultGroupName=%s\n" % str(DefaultGroupName)
