@@ -45,7 +45,6 @@ class Reader(FileReader):
         self.output = []
         self.current_datainfo = DataInfo()
         self.current_datainfo.filename = filepath
-        self.reset_data_list(len(lines))
         detector = Detector()
         data_line = 0
         self.reset_data_list(len(lines))
@@ -187,7 +186,15 @@ class Reader(FileReader):
                     self.current_dataset.x[data_line] = _x
                     self.current_dataset.y[data_line] = _y
                     self.current_dataset.dy[data_line] = _dy
-                    self.current_dataset.dx[data_line] = _dx
+                    if _dx > 0:
+                        self.current_dataset.dx[data_line] = _dx
+                    else:
+                        if data_line == 0:
+                            self.current_dataset.dx = None
+                            self.current_dataset.dxl = np.zeros(len(lines))
+                            self.current_dataset.dxw = np.zeros(len(lines))
+                        self.current_dataset.dxl[data_line] = abs(_dx)
+                        self.current_dataset.dxw[data_line] = 0
                     data_line += 1
 
                 except ValueError:
@@ -196,9 +203,12 @@ class Reader(FileReader):
                     # skip it.
                     pass
 
+            # SANS Data:
             # The 6 columns are | Q (1/A) | I(Q) (1/cm) | std. dev.
             # I(Q) (1/cm) | sigmaQ | meanQ | ShadowFactor|
-            if line.count("The 6 columns") > 0:
+            # USANS Data:
+            # EMP LEVEL: <value> ; BKG LEVEL: <value>
+            if line.count("The 6 columns") > 0 or line.count("EMP LEVEL"):
                 is_data_started = True
 
         self.remove_empty_q_values()
