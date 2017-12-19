@@ -28,9 +28,9 @@ class Reader(FileReader):
     # File type
     type_name = "IGOR 1D"
     # Wildcards
-    type = ["IGOR 1D files (*.abs)|*.abs"]
+    type = ["IGOR 1D files (*.abs)|*.abs", "IGOR 1D USANS files (*.cor)|*.cor"]
     # List of allowed extensions
-    ext = ['.abs']
+    ext = ['.abs', '.cor']
 
     def get_file_contents(self):
         """
