@@ -208,7 +208,7 @@ class Reader(FileReader):
             # I(Q) (1/cm) | sigmaQ | meanQ | ShadowFactor|
             # USANS Data:
             # EMP LEVEL: <value> ; BKG LEVEL: <value>
-            if line.count("The 6 columns") > 0 or line.count("EMP LEVEL"):
+            if line.startswith("The 6 columns") or line.startswith("EMP LEVEL"):
                 is_data_started = True
 
         self.remove_empty_q_values()
