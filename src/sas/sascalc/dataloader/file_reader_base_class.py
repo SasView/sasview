@@ -6,7 +6,7 @@ class
 
 import os
 import sys
-import re
+import math
 import logging
 from abc import abstractmethod
 
@@ -101,6 +101,7 @@ class FileReader(object):
         self.current_datainfo = None
         self.current_dataset = None
         self.filepath = None
+        self.ind = None
         self.output = []
 
     def nextline(self):
@@ -157,32 +158,40 @@ class FileReader(object):
                 data.x_unit = self.format_unit(data.x_unit)
                 data.y_unit = self.format_unit(data.y_unit)
                 # Sort data by increasing x and remove 1st point
-                ind = np.lexsort((data.y, data.x))
-                data.x = np.asarray([data.x[i] for i in ind]).astype(np.float64)
-                data.y = np.asarray([data.y[i] for i in ind]).astype(np.float64)
+                self.ind = np.lexsort((data.y, data.x))
+                data.x = self.sort_1d_array(data.x)
+                data.y = self.sort_1d_array(data.y)
                 if data.dx is not None:
                     if len(data.dx) == 0:
                         data.dx = None
                         continue
-                    data.dx = np.asarray([data.dx[i] for i in ind]).astype(np.float64)
+                    data.dx = self.sort_1d_array(data.dx)
                 if data.dxl is not None:
-                    data.dxl = np.asarray([data.dxl[i] for i in ind]).astype(np.float64)
+                    data.dxl = self.sort_1d_array(data.dxl)
                 if data.dxw is not None:
-                    data.dxw = np.asarray([data.dxw[i] for i in ind]).astype(np.float64)
+                    data.dxw = self.sort_1d_array(data.dxw)
                 if data.dy is not None:
                     if len(data.dy) == 0:
                         data.dy = None
                         continue
-                    data.dy = np.asarray([data.dy[i] for i in ind]).astype(np.float64)
+                    data.dy = self.sort_1d_array(data.dy)
                 if data.lam is not None:
-                    data.lam = np.asarray([data.lam[i] for i in ind]).astype(np.float64)
+                    data.lam = self.sort_1d_array(data.lam)
                 if data.dlam is not None:
-                    data.dlam = np.asarray([data.dlam[i] for i in ind]).astype(np.float64)
+                    data.dlam = self.sort_1d_array(data.dlam)
                 if len(data.x) > 0:
                     data.xmin = np.min(data.x)
                     data.xmax = np.max(data.x)
                     data.ymin = np.min(data.y)
                     data.ymax = np.max(data.y)
+
+    def sort_1d_array(self, array=[]):
+        if array.any():
+            for i in self.ind:
+                if math.isnan(array[i]):
+                    array[i] = 0
+            array = np.asarray([array[i] for i in self.ind]).astype(np.float64)
+        return array
 
     def sort_two_d_data(self):
         for dataset in self.output:
