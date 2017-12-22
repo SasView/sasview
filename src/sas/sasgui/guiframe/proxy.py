@@ -16,7 +16,7 @@ HTTP Proxy parser and Connection
 
 connect() function:
     - auto detects proxy in windows, osx
-    - in ux systems, the http_proxy enviroment variable must be set
+    - in ux systems, the http_proxy environment variable must be set
     - if it fails, try to find the proxy.pac address.
       - parses the file, and looks up for all possible proxies
 '''

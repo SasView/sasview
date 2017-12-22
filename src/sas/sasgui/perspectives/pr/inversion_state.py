@@ -35,7 +35,8 @@ in_list = [["nterms", "nfunc"],
            ["slit_height", "height"],
            ["qmin", "qmin"],
            ["qmax", "qmax"],
-           ["estimate_bck", "estimate_bck"]]
+           ["estimate_bck", "estimate_bck"],
+           ["bck_value", "bck_value"]]
 
 ## List of P(r) inversion outputs
 out_list = [["elapsed", "elapsed"],
@@ -61,6 +62,7 @@ class InversionState(object):
         self.file = None
         self.estimate_bck = False
         self.timestamp = time.time()
+        self.bck_value = 0.0
 
         # Inversion parameters
         self.nfunc = None
@@ -108,6 +110,7 @@ class InversionState(object):
         state = "File:         %s\n" % self.file
         state += "Timestamp:    %s\n" % self.timestamp
         state += "Estimate bck: %s\n" % str(self.estimate_bck)
+        state += "Bck Value:    %s\n" % str(self.bck_value)
         state += "No. terms:    %s\n" % str(self.nfunc)
         state += "D_max:        %s\n" % str(self.d_max)
         state += "Alpha:        %s\n" % str(self.alpha)
@@ -295,8 +298,8 @@ class InversionState(object):
                         try:
                             self.coefficients.append(float(c))
                         except:
-                            # Bad data, skip. We will count the number of 
-                            # coefficients at the very end and deal with 
+                            # Bad data, skip. We will count the number of
+                            # coefficients at the very end and deal with
                             # inconsistencies then.
                             pass
                     # Sanity check
@@ -328,8 +331,8 @@ class InversionState(object):
                             try:
                                 cov_row.append(float(c))
                             except:
-                                # Bad data, skip. We will count the number of 
-                                # coefficients at the very end and deal with 
+                                # Bad data, skip. We will count the number of
+                                # coefficients at the very end and deal with
                                 # inconsistencies then.
                                 pass
                         # Sanity check: check the number of entries in the row
@@ -385,7 +388,7 @@ class Reader(CansasReader):
         :return: None
 
         """
-        if self.cansas == True:
+        if self.cansas:
             return self._read_cansas(path)
         else:
             return self._read_standalone(path)
@@ -460,19 +463,19 @@ class Reader(CansasReader):
 
                 tree = etree.parse(path, parser=etree.ETCompatXMLParser())
                 # Check the format version number
-                # Specifying the namespace will take care of the file 
-                #format version 
+                # Specifying the namespace will take care of the file
+                #format version
                 root = tree.getroot()
 
                 entry_list = root.xpath('/ns:SASroot/ns:SASentry',
                                         namespaces={'ns': CANSAS_NS})
 
                 for entry in entry_list:
-                    sas_entry, _ = self._parse_entry(entry)
                     prstate = self._parse_prstate(entry)
                     #prstate could be None when .svs file is loaded
                     #in this case, skip appending to output
                     if prstate is not None:
+                        sas_entry, _ = self._parse_entry(entry)
                         sas_entry.meta_data['prstate'] = prstate
                         sas_entry.filename = prstate.file
                         output.append(sas_entry)
@@ -501,7 +504,7 @@ class Reader(CansasReader):
 
         """
         # Sanity check
-        if self.cansas == True:
+        if self.cansas:
             doc = self.write_toXML(datainfo, prstate)
             # Write the XML document
             fd = open(filename, 'w')

@@ -226,7 +226,7 @@ class Graph(object):
         min_value = None
         max_value = None
         for p in self.plottables:
-            if p.hidden == True:
+            if p.hidden:
                 continue
             if p.x is not None:
                 for x_i in p.x:
@@ -238,15 +238,18 @@ class Graph(object):
 
     def replace(self, plottable):
         """Replace an existing plottable from the graph"""
-        selected_color = None
+        # If the user has set a custom color, ensure the new plot is the same color
+        selected_color = plottable.custom_color
         selected_plottable = None
         for p in self.plottables.keys():
             if plottable.id == p.id:
                 selected_plottable = p
-                selected_color = self.plottables[p]
+                if selected_color is None:
+                    selected_color = self.plottables[p]
                 break
-        if  selected_plottable is not None and selected_color is not None:
+        if selected_plottable is not None and selected_color is not None:
             del self.plottables[selected_plottable]
+            plottable.custom_color = selected_color
             self.plottables[plottable] = selected_color
 
     def delete(self, plottable):
@@ -1058,7 +1061,7 @@ class Data1D(Plottable):
         """
         Renders the plottable on the graph
         """
-        if self.interactive == True:
+        if self.interactive:
             kw['symbol'] = self.symbol
             kw['id'] = self.id
             kw['hide_error'] = self.hide_error

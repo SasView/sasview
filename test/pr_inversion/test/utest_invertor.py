@@ -9,10 +9,15 @@ from __future__ import print_function
 
 
 import os
+import os.path
 import unittest
 import math
 import numpy
 from sas.sascalc.pr.invertor import Invertor
+
+
+def find(filename):
+    return os.path.join(os.path.dirname(__file__), filename)
 
 
 class TestFiguresOfMerit(unittest.TestCase):
@@ -27,7 +32,7 @@ class TestFiguresOfMerit(unittest.TestCase):
         for i in range(self.ntest):
             self.x_in[i] = 1.0*(i+1)
        
-        x, y, err = load("sphere_80.txt")
+        x, y, err = load(find("sphere_80.txt"))
 
         # Choose the right d_max...
         self.invertor.d_max = 160.0
@@ -67,17 +72,17 @@ class TestBasicComponent(unittest.TestCase):
         for i in range(self.ntest):
             self.x_in[i] = 1.0*(i+1)
 
-    def test_has_bck_flag(self):
+    def test_est_bck_flag(self):
         """
-            Tests the has_bck flag operations
+            Tests the est_bck flag operations
         """
-        self.assertEqual(self.invertor.has_bck, False)
-        self.invertor.has_bck=True
-        self.assertEqual(self.invertor.has_bck, True)
+        self.assertEqual(self.invertor.est_bck, False)
+        self.invertor.est_bck=True
+        self.assertEqual(self.invertor.est_bck, True)
         def doit_float():
-            self.invertor.has_bck  = 2.0
+            self.invertor.est_bck  = 2.0
         def doit_str():
-            self.invertor.has_bck  = 'a'
+            self.invertor.est_bck  = 'a'
 
         self.assertRaises(ValueError, doit_float)
         self.assertRaises(ValueError, doit_str)
@@ -191,7 +196,7 @@ class TestBasicComponent(unittest.TestCase):
         """
             Test an inversion for which we know the answer
         """
-        x, y, err = load("sphere_80.txt")
+        x, y, err = load(find("sphere_80.txt"))
 
         # Choose the right d_max...
         self.invertor.d_max = 160.0
@@ -246,7 +251,7 @@ class TestBasicComponent(unittest.TestCase):
         """
             Test an inversion for which we know the answer
         """
-        x, y, err = load("sphere_80.txt")
+        x, y, err = load(find("sphere_80.txt"))
 
         # Choose the right d_max...
         self.invertor.d_max = 160.0
@@ -311,7 +316,7 @@ class TestBasicComponent(unittest.TestCase):
         """
             Test error condition where a point has q=0
         """
-        x, y, err = load("sphere_80.txt")
+        x, y, err = load(find("sphere_80.txt"))
         x[0] = 0.0
         
         # Choose the right d_max...
@@ -328,7 +333,7 @@ class TestBasicComponent(unittest.TestCase):
         """
             Test error condition where a point has q<0
         """
-        x, y, err = load("sphere_80.txt")
+        x, y, err = load(find("sphere_80.txt"))
         x[0] = -0.2
         
         # Choose the right d_max...
@@ -352,7 +357,7 @@ class TestBasicComponent(unittest.TestCase):
         """
             Test error condition where a point has q<0
         """
-        x, y, err = load("sphere_80.txt")
+        x, y, err = load(find("sphere_80.txt"))
         y[0] = 0.0
         
         # Choose the right d_max...
@@ -373,7 +378,7 @@ class TestBasicComponent(unittest.TestCase):
             raise
         
     def no_test_time(self):
-        x, y, err = load("sphere_80.txt")
+        x, y, err = load(find("sphere_80.txt"))
 
         # Choose the right d_max...
         self.invertor.d_max = 160.0
@@ -405,7 +410,7 @@ class TestBasicComponent(unittest.TestCase):
             self.assertEqual(self.x_in[i], clone.x[i])
         
     def test_save(self):
-        x, y, err = load("sphere_80.txt")
+        x, y, err = load(find("sphere_80.txt"))
 
         # Choose the right d_max...
         self.invertor.d_max = 160.0
@@ -463,7 +468,7 @@ class TestErrorConditions(unittest.TestCase):
         """
             Test an inversion for which we know the answer
         """
-        x, y, err = load("data_error_1.txt")
+        x, y, err = load(find("data_error_1.txt"))
 
         # Choose the right d_max...
         self.invertor.d_max = 160.0
@@ -481,7 +486,7 @@ class TestErrorConditions(unittest.TestCase):
         """
             Have zero as an error should raise an exception
         """
-        x, y, err = load("data_error_2.txt")
+        x, y, err = load(find("data_error_2.txt"))
 
         # Set data
         self.invertor.x   = x
@@ -494,7 +499,7 @@ class TestErrorConditions(unittest.TestCase):
         """
             Test an inversion for which we know the answer
         """
-        x, y, err = load("data_error_1.txt")
+        x, y, err = load(find("data_error_1.txt"))
 
         # Set data
         self.invertor.x   = x
@@ -510,7 +515,7 @@ class TestErrorConditions(unittest.TestCase):
             One of the q-values is zero.
             An exception should be raised.
         """
-        x, y, err = load("data_error_3.txt")
+        x, y, err = load(find("data_error_3.txt"))
 
         # Set data
         self.assertRaises(ValueError, self.invertor.__setattr__, 'x', x)
@@ -520,7 +525,7 @@ class TestErrorConditions(unittest.TestCase):
             One of the I(q) points has a value of zero
             Should not complain or crash.
         """
-        x, y, err = load("data_error_4.txt")
+        x, y, err = load(find("data_error_4.txt"))
 
         # Set data
         self.invertor.x   = x
@@ -534,7 +539,7 @@ class TestErrorConditions(unittest.TestCase):
             One q value is negative.
             Makes not sense, but should not complain or crash.
         """
-        x, y, err = load("data_error_5.txt")
+        x, y, err = load(find("data_error_5.txt"))
 
         # Set data
         self.invertor.x   = x
@@ -548,7 +553,7 @@ class TestErrorConditions(unittest.TestCase):
             One I(q) value is negative.
             Makes not sense, but should not complain or crash.
         """
-        x, y, err = load("data_error_6.txt")
+        x, y, err = load(find("data_error_6.txt"))
 
         # Set data
         self.invertor.x   = x

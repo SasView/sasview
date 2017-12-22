@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 #!/usr/bin/env python
-
+# -*- coding: utf-8 -*-
 """
 Run sasview in place.  This allows sasview to use the python
 files in the source tree without having to call setup.py install
@@ -14,6 +13,7 @@ Usage:
 Without arguments run.py runs sasview.  With arguments, run.py will run
 the given module or script.
 """
+from __future__ import print_function
 
 import imp
 import os
@@ -21,7 +21,6 @@ import sys
 from contextlib import contextmanager
 from os.path import join as joinpath
 from os.path import abspath, dirname
-
 
 def addpath(path):
     """
@@ -103,25 +102,31 @@ def prepare():
     except:
         addpath(joinpath(root, '..', 'bumps'))
 
+    try:
+        import tinycc
+    except:
+        addpath(joinpath(root, '../tinycc/build/lib'))
+
     # select wx version
     #addpath(os.path.join(root, '..','wxPython-src-3.0.0.0','wxPython'))
 
     # Build project if the build directory does not already exist.
-    if not os.path.exists(build_path):
+    # PAK: with "update" we can always build since it is fast
+    if True or not os.path.exists(build_path):
         import subprocess
+        build_cmd = [sys.executable, "setup.py", "build", "update"]
+        if os.name == 'nt':
+            build_cmd.append('--compiler=tinycc')
+        # need shell=True on windows to keep console box from popping up
+        shell = (os.name == 'nt')
         with cd(root):
-            subprocess.call((sys.executable, "setup.py", "build"), shell=False)
+            subprocess.call(build_cmd, shell=shell)
 
     # Put the source trees on the path
     addpath(joinpath(root, 'src'))
 
     # sasmodels on the path
     addpath(joinpath(root, '../sasmodels/'))
-
-    # Import the sasview package from root/sasview as sas.sasview.  It would
-    # be better to just store the package in src/sas/sasview.
-    import sas
-    sas.sasview = import_package('sas.sasview', joinpath(root, 'sasview'))
 
     # The sas.models package Compiled Model files should be pulled in from the build directory even though
     # the source is stored in src/sas/models.
@@ -138,27 +143,50 @@ def prepare():
     sas.sascalc.file_converter.core = import_package('sas.sascalc.file_converter.core',
                                                      joinpath(build_path, 'sas', 'sascalc', 'file_converter', 'core'))
 
-    # Compiled modules need to be pulled from the build directory.
-    # Some packages are not where they are needed, so load them explicitly.
     import sas.sascalc.calculator
     sas.sascalc.calculator.core = import_package('sas.sascalc.calculator.core',
                                                  joinpath(build_path, 'sas', 'sascalc', 'calculator', 'core'))
 
     sys.path.append(build_path)
 
+    set_git_tag()
     # print "\n".join(sys.path)
 
+def set_git_tag():
+    try:
+        import subprocess
+        import os
+        import platform
+        FNULL = open(os.devnull, 'w')
+        if platform.system() == "Windows":
+            args = ['git', 'describe', '--tags']
+        else:
+            args = ['git describe --tags']
+        git_revision = subprocess.check_output(args, stderr=FNULL, shell=True)
+        import sas.sasview
+        sas.sasview.__build__ = str(git_revision).strip()
+    except subprocess.CalledProcessError as cpe:
+        get_logger().warning("Error while determining build number\n  Using command:\n %s \n Output:\n %s"% (cpe.cmd,cpe.output))
+
+_logger = None
+def get_logger():
+    global _logger
+    if _logger is None:
+        from sas.logger_config import SetupLogger
+        _logger = SetupLogger(__name__).config_development()
+    return _logger
 
 if __name__ == "__main__":
     # Need to add absolute path before actual prepare call,
     # so logging can be done during initialization process too
     root = abspath(dirname(__file__))
-    addpath(joinpath(root, 'sasview'))
-    from logger_config import SetupLogger
-    logger = SetupLogger(__name__).config_development()
+    addpath(joinpath(root, 'src'))
 
-    logger.debug("Starting SASVIEW in debug mode.")
+    get_logger().debug("Starting SASVIEW in debug mode.")
     prepare()
-    from sas.sasview.sasview import run
-    run()
-    logger.debug("Ending SASVIEW in debug mode.")
+    from sas.sasview.sasview import run_cli, run_gui
+    if len(sys.argv) == 1:
+        run_gui()
+    else:
+        run_cli()
+    get_logger().debug("Ending SASVIEW in debug mode.")

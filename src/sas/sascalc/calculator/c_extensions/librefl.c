@@ -6,7 +6,7 @@
 #include "librefl.h"
 #include <stdio.h>
 #include <stdlib.h>
-#if defined(_MSC_VER)
+#if defined _MSC_VER  || defined __TINYCC__
 #define NEED_ERF
 #endif
 
@@ -20,7 +20,16 @@ reference - Haruhiko Okumura: C-gengo niyoru saishin algorithm jiten
             sha, Tokyo, 1991) p.227 [in Japanese]                 */
 
 
-#ifdef _WIN32
+#ifdef __TINYCC__
+# ifdef isnan
+#   undef isnan
+# endif
+# ifdef isfinite
+#   undef isfinite
+# endif
+# define isnan(x) (x != x)
+# define isfinite(x) (x != INFINITY && x != -INFINITY)
+#elif defined _WIN32
 # include <float.h>
 # if !defined __MINGW32__ || defined __NO_ISOCEXT
 #  ifndef isnan
@@ -29,8 +38,8 @@ reference - Haruhiko Okumura: C-gengo niyoru saishin algorithm jiten
 #  ifndef isinf
 #   define isinf(x) (!_finite(x) && !_isnan(x))
 #  endif
-#  ifndef finite
-#   define finite(x) _finite(x)
+#  ifndef isfinite
+#   define isfinite(x) _finite(x)
 #  endif
 # endif
 #endif
@@ -83,7 +92,7 @@ static double q_gamma(double a, double x, double loggamma_a)
 
 double erf(double x)
 {
-    if (!finite(x)) {
+    if (!isfinite(x)) {
         if (isnan(x)) return x;      /* erf(NaN)   = NaN   */
         return (x>0 ? 1.0 : -1.0);   /* erf(+-inf) = +-1.0 */
     }
@@ -93,7 +102,7 @@ double erf(double x)
 
 double erfc(double x)
 {
-    if (!finite(x)) {
+    if (!isfinite(x)) {
         if (isnan(x)) return x;      /* erfc(NaN)   = NaN      */
         return (x>0 ? 0.0 : 2.0);    /* erfc(+-inf) = 0.0, 2.0 */
     }
@@ -102,80 +111,56 @@ double erfc(double x)
 }
 #endif // NEED_ERF
 
-complex cassign(real, imag)
-	double real, imag;
+void cassign(Cplx *x, double real, double imag)
 {
-	complex x;
-	x.re = real;
-	x.im = imag;
-	return x;
+	x->re = real;
+	x->im = imag;
 }
 
 
-complex cplx_add(x,y)
-	complex x,y;
+void cplx_add(Cplx *z, Cplx x, Cplx y)
 {
-	complex z;
-	z.re = x.re + y.re;
-	z.im = x.im + y.im;
-	return z;
+	z->re = x.re + y.re;
+	z->im = x.im + y.im;
 }
 
-complex rcmult(x,y)
-	double x;
-    complex y;
+void rcmult(Cplx *z, double x, Cplx y)
 {
-	complex z;
-	z.re = x*y.re;
-	z.im = x*y.im;
-	return z;
+	z->re = x*y.re;
+	z->im = x*y.im;
 }
 
-complex cplx_sub(x,y)
-	complex x,y;
+void cplx_sub(Cplx *z, Cplx x, Cplx y)
 {
-	complex z;
-	z.re = x.re - y.re;
-	z.im = x.im - y.im;
-	return z;
+	z->re = x.re - y.re;
+	z->im = x.im - y.im;
 }
 
 
-complex cplx_mult(x,y)
-	complex x,y;
+void cplx_mult(Cplx *z, Cplx x, Cplx y)
 {
-	complex z;
-	z.re = x.re*y.re - x.im*y.im;
-	z.im = x.re*y.im + x.im*y.re;
-	return z;
+	z->re = x.re*y.re - x.im*y.im;
+	z->im = x.re*y.im + x.im*y.re;
 }
 
-complex cplx_div(x,y)
-	complex x,y;
+void cplx_div(Cplx *z, Cplx x, Cplx y)
 {
-	complex z;
-	z.re = (x.re*y.re + x.im*y.im)/(y.re*y.re + y.im*y.im);
-	z.im = (x.im*y.re - x.re*y.im)/(y.re*y.re + y.im*y.im);
-	return z;
+	z->re = (x.re*y.re + x.im*y.im)/(y.re*y.re + y.im*y.im);
+	z->im = (x.im*y.re - x.re*y.im)/(y.re*y.re + y.im*y.im);
 }
 
-complex cplx_exp(b)
-	complex b;
+void cplx_exp(Cplx *z, Cplx b)
 {
-	complex z;
 	double br,bi;
 	br=b.re;
 	bi=b.im;
-	z.re = exp(br)*cos(bi);
-	z.im = exp(br)*sin(bi);
-	return z;
+	z->re = exp(br)*cos(bi);
+	z->im = exp(br)*sin(bi);
 }
 
 
-complex cplx_sqrt(z)    //see Schaum`s Math Handbook p. 22, 6.6 and 6.10
-	complex z;
+void cplx_sqrt(Cplx *c, Cplx z)    //see Schaum`s Math Handbook p. 22, 6.6 and 6.10
 {
-	complex c;
 	double zr,zi,x,y,r,w;
 
 	zr=z.re;
@@ -183,49 +168,41 @@ complex cplx_sqrt(z)    //see Schaum`s Math Handbook p. 22, 6.6 and 6.10
 
 	if (zr==0.0 && zi==0.0)
 	{
-    c.re=0.0;
-	c.im=0.0;
-    return c;
-	}
-	else
-	{
+		c->re=0.0;
+		c->im=0.0;
+	} else {
 		x=fabs(zr);
 		y=fabs(zi);
 		if (x>y)
 		{
 			r=y/x;
 			w=sqrt(x)*sqrt(0.5*(1.0+sqrt(1.0+r*r)));
-		}
-		else
-		{
+		} else {
 			r=x/y;
 			w=sqrt(y)*sqrt(0.5*(r+sqrt(1.0+r*r)));
 		}
 		if (zr >=0.0)
 		{
-			c.re=w;
-			c.im=zi/(2.0*w);
+			c->re=w;
+			c->im=zi/(2.0*w);
+		} else {
+			c->im=(zi >= 0) ? w : -w;
+			c->re=zi/(2.0*c->im);
 		}
-		else
-		{
-			c.im=(zi >= 0) ? w : -w;
-			c.re=zi/(2.0*c.im);
-		}
-		return c;
 	}
 }
 
-complex cplx_cos(b)
-	complex b;
+void cplx_cos(Cplx *z, Cplx b)
 {
-	complex zero,two,z,i,bi,negbi;
-	zero = cassign(0.0,0.0);
-	two = cassign(2.0,0.0);
-	i = cassign(0.0,1.0);
-	bi = cplx_mult(b,i);
-	negbi = cplx_sub(zero,bi);
-	z = cplx_div(cplx_add(cplx_exp(bi),cplx_exp(negbi)),two);
-	return z;
+	// cos(b) = (e^bi + e^-bi)/2
+	//        = (e^b.im e^-i bi.re) + e^-b.im e^i b.re)/2
+	//        = (e^b.im cos(-b.re) + e^b.im sin(-b.re) i)/2 + (e^-b.im cos(b.re) + e^-b.im sin(b.re) i)/2
+	//        = e^b.im cos(b.re)/2 - e^b.im sin(b.re)/2 i + 1/e^b.im cos(b.re)/2 + 1/e^b.im sin(b.re)/2 i
+	//        = (e^b.im + 1/e^b.im)/2 cos(b.re) + (-e^b.im + 1/e^b.im)/2 sin(b.re) i
+	//        = cosh(b.im) cos(b.re) - sinh(b.im) sin(b.re) i
+	double exp_b_im = exp(b.im);
+	z->re = 0.5*(+exp_b_im + 1.0/exp_b_im) * cos(b.re);
+	z->im = -0.5*(exp_b_im - 1.0/exp_b_im) * sin(b.re);
 }
 
 // normalized and modified erf

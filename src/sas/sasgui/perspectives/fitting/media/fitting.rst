@@ -12,19 +12,24 @@ Fitting Documentation
 
    Assessing Fit Quality <residuals_help>
 
-   Polydispersity Distributions <pd_help>
+   Polydispersity Distributions <pd/polydispersity>
 
-   Smearing Functions <sm_help>
+   Smearing Functions <resolution>
 
-   Polarisation/Magnetic Scattering <mag_help>
+   Polarisation/Magnetic Scattering <magnetism/magnetism>
+   
+   Oriented Particles <orientation/orientation>
 
-   Information on the SasView Optimisers <optimizer.rst>
-      
-   Converting SANS to SESANS for Fitting <../../../sans_to_sesans>
-   
-   Fitting SESANS Data <../../../sesans_fitting.rst>
-   
-   Writing a Plugin Model <plugin.rst>
-      
-   Computations with a GPU <../../../gpu_computations>
-   
+   Information on the SasView Optimisers <optimizer>
+
+   Converting SANS to SESANS for Fitting <sesans/sans_to_sesans>
+
+   Fitting SESANS Data <sesans/sesans_fitting>
+
+   Writing a Plugin Model <plugin>
+
+   Computations with a GPU <gpu_setup>
+
+   Scripting interface to sasmodels <scripting>
+
+   References <refs>

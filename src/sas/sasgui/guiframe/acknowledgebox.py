@@ -11,24 +11,9 @@ import wx
 import wx.richtext
 import wx.lib.hyperlink
 from wx.lib.expando import ExpandoTextCtrl
-import random
-import os.path
-import os
-try:
-    # Try to find a local config
-    import imp
-    path = os.getcwd()
-    if(os.path.isfile("%s/%s.py" % (path, 'local_config'))) or \
-      (os.path.isfile("%s/%s.pyc" % (path, 'local_config'))):
-        fObj, path, descr = imp.find_module('local_config', [path])
-        config = imp.load_module('local_config', fObj, path, descr)
-    else:
-        # Try simply importing local_config
-        import local_config as config
-except:
-    # Didn't find local config, load the default
-    import config
 
+from sas import get_local_config
+config = get_local_config()
 
 class DialogAcknowledge(wx.Dialog):
     """

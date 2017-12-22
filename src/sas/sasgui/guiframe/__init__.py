@@ -13,7 +13,7 @@ def get_data_path(media):
 
     # Check for data path next to exe/zip file.
     # If we are inside a py2exe zip file, we need to go up
-    # to get to the directory containing 
+    # to get to the directory containing
     # the media for this module
     path = os.path.dirname(__file__)
     #Look for maximum n_dir up of the current dir to find media
@@ -26,7 +26,7 @@ def get_data_path(media):
             if os.path.isdir(module_media_path):
                 return module_media_path
             return media_path
-   
+
     raise RuntimeError('Could not find guiframe images files')
 
 def get_media_path(media):
@@ -39,7 +39,7 @@ def get_media_path(media):
 
     # Check for data path next to exe/zip file.
     # If we are inside a py2exe zip file, we need to go up
-    # to get to the directory containing 
+    # to get to the directory containing
     # the media for this module
     path = os.path.dirname(__file__)
     #Look for maximum n_dir up of the current dir to find media
@@ -57,17 +57,13 @@ def get_media_path(media):
 def data_files():
     """
     Return the data files associated with guiframe images .
-    
+
     The format is a list of (directory, [files...]) pairs which can be
     used directly in setup(...,data_files=...) for setup.py.
 
     """
     data_files = []
-    path = get_data_path(media="images")
-    for f in findall(path):
-        data_files.append(('images/icons', [f]))
-    path = get_media_path(media="media")
-    for f in findall(path):
-        data_files.append(('media/guiframe_media', [f]))
+    data_files.append(('images/icons', findall(get_data_path("images"))))
+    data_files.append(('media/guiframe_media', findall(get_data_path("media"))))
 
     return data_files

@@ -23,29 +23,18 @@ import wx.lib.hyperlink
 import random
 import os.path
 import os
-try:
-    # Try to find a local config
-    import imp
-    path = os.getcwd()
-    if(os.path.isfile("%s/%s.py" % (path, 'local_config'))) or \
-      (os.path.isfile("%s/%s.pyc" % (path, 'local_config'))):
-        fObj, path, descr = imp.find_module('local_config', [path])
-        config = imp.load_module('local_config', fObj, path, descr)  
-    else:
-        # Try simply importing local_config
-        import local_config as config
-except:
-    # Didn't find local config, load the default 
-    import config
+
+from sas import get_local_config
+config = get_local_config()
 
 def launchBrowser(url):
     """
     Launches browser and opens specified url
-    
+
     In some cases may require BROWSER environment variable to be set up.
-    
+
     :param url: URL to open
-    
+
     """
     import webbrowser
     webbrowser.open(url)
@@ -54,24 +43,24 @@ def launchBrowser(url):
 class DialogAbout(wx.Dialog):
     """
     "About" Dialog
-    
+
     Shows product name, current version, authors, and link to the product page.
     Current version is taken from version.py
-    
+
     """
-    
+
     def __init__(self, *args, **kwds):
 
         # begin wxGlade: DialogAbout.__init__
         kwds["style"] = wx.DEFAULT_DIALOG_STYLE
         wx.Dialog.__init__(self, *args, **kwds)
-        
+
         file_dir = os.path.dirname(__file__)
-        
+
         # Mac doesn't display images with transparent background so well,
         # keep it for Windows
         image = file_dir + "/images/angles_flat.png"
-        
+
         if os.path.isfile(config._corner_image):
             image = config._corner_image
 
@@ -79,7 +68,7 @@ class DialogAbout(wx.Dialog):
             self.bitmap_logo = wx.StaticBitmap(self, -1, wx.Bitmap(image))
         else:
             self.bitmap_logo = wx.StaticBitmap(self, -1, wx.Bitmap(image))
-        
+
         self.label_title = wx.StaticText(self, -1, config.__appname__)
         self.label_version = wx.StaticText(self, -1, "")
         self.label_build = wx.StaticText(self, -1, "Build:")
@@ -111,20 +100,20 @@ class DialogAbout(wx.Dialog):
         #                                         wx.NullBitmap)
         #self.bitmap_button_danse = wx.BitmapButton(self, -1, wx.NullBitmap)
         self.bitmap_button_msu = wx.BitmapButton(self, -1, wx.NullBitmap)
-        
+
         self.bitmap_button_isis = wx.BitmapButton(self, -1, wx.NullBitmap)
         self.bitmap_button_ess = wx.BitmapButton(self, -1, wx.NullBitmap)
         self.bitmap_button_ill = wx.BitmapButton(self, -1, wx.NullBitmap)
         self.bitmap_button_ansto = wx.BitmapButton(self, -1, wx.NullBitmap)
         self.bitmap_button_tudelft = wx.BitmapButton(self, -1, wx.NullBitmap)
         self.bitmap_button_dls = wx.BitmapButton(self, -1, wx.NullBitmap)
-        
+
         self.static_line_3 = wx.StaticLine(self, -1)
         self.button_OK = wx.Button(self, wx.ID_OK, "OK")
 
         self.__set_properties()
         self.__do_layout()
-        
+
         self.Bind(wx.EVT_BUTTON, self.onNistLogo, self.bitmap_button_nist)
         self.Bind(wx.EVT_BUTTON, self.onUmdLogo, self.bitmap_button_umd)
         #self.Bind(wx.EVT_BUTTON, self.onSnsLogo, self.bitmap_button_sns)
@@ -144,7 +133,7 @@ class DialogAbout(wx.Dialog):
         # randomly shuffle authors' names
         random.shuffle(config._authors)
         strLabel = ", ".join(config._authors)
-        
+
         # display version and svn revison numbers
         verwords = config.__version__.split('.')
         version = '.'.join(verwords[:-1])
@@ -156,37 +145,37 @@ class DialogAbout(wx.Dialog):
         self.label_author.SetLabel(strLabel)
         self.label_version.SetLabel(config.__version__)#(version)
         self.label_svnrevision.SetLabel(build_num)
-        
+
         # set bitmaps for logo buttons
         image = file_dir + "/images/nist_logo.png"
         if os.path.isfile(config._nist_logo):
             image = config._nist_logo
-        logo = wx.Bitmap(image)        
+        logo = wx.Bitmap(image)
         self.bitmap_button_nist.SetBitmapLabel(logo)
-        
+
         image = file_dir + "/images/umd_logo.png"
         if os.path.isfile(config._umd_logo):
             image = config._umd_logo
-        logo = wx.Bitmap(image)        
+        logo = wx.Bitmap(image)
         self.bitmap_button_umd.SetBitmapLabel(logo)
 
         image = file_dir + "/images/ornl_logo.png"
         if os.path.isfile(config._ornl_logo):
             image = config._ornl_logo
-        logo = wx.Bitmap(image)        
+        logo = wx.Bitmap(image)
         self.bitmap_button_ornl.SetBitmapLabel(logo)
 
         """
         image = file_dir + "/images/sns_logo.png"
         if os.path.isfile(config._sns_logo):
             image = config._sns_logo
-        logo = wx.Bitmap(image)        
+        logo = wx.Bitmap(image)
         self.bitmap_button_sns.SetBitmapLabel(logo)
-        
+
         image = file_dir + "/images/nsf_logo.png"
         if os.path.isfile(config._nsf_logo):
             image = config._nsf_logo
-        logo = wx.Bitmap(image)        
+        logo = wx.Bitmap(image)
         self.bitmap_button_nsf.SetBitmapLabel(logo)
 
         image = file_dir + "/images/danse_logo.png"
@@ -195,16 +184,16 @@ class DialogAbout(wx.Dialog):
         logo = wx.Bitmap(image)
         self.bitmap_button_danse.SetBitmapLabel(logo)
         """
-        image = file_dir + "/images/utlogo.gif"
+        image = file_dir + "/images/utlogo.png"
         if os.path.isfile(config._inst_logo):
             image = config._inst_logo
         logo = wx.Bitmap(image)
         self.bitmap_button_msu.SetBitmapLabel(logo)
-        
+
         image = file_dir + "/images/isis_logo.png"
         if os.path.isfile(config._isis_logo):
             image = config._isis_logo
-        logo = wx.Bitmap(image)        
+        logo = wx.Bitmap(image)
         self.bitmap_button_isis.SetBitmapLabel(logo)
 
         image = file_dir + "/images/ess_logo.png"
@@ -212,38 +201,38 @@ class DialogAbout(wx.Dialog):
             image = config._ess_logo
         logo = wx.Bitmap(image)
         self.bitmap_button_ess.SetBitmapLabel(logo)
-        
+
         image = file_dir + "/images/ill_logo.png"
         if os.path.isfile(config._ill_logo):
             image = config._ill_logo
         logo = wx.Bitmap(image)
         self.bitmap_button_ill.SetBitmapLabel(logo)
-        
+
         image = file_dir + "/images/ansto_logo.png"
         if os.path.isfile(config._ansto_logo):
             image = config._ansto_logo
         logo = wx.Bitmap(image)
         self.bitmap_button_ansto.SetBitmapLabel(logo)
-        
+
         image = file_dir + "/images/tudelft_logo.png"
         if os.path.isfile(config._tudelft_logo):
             image = config._tudelft_logo
         logo = wx.Bitmap(image)
         self.bitmap_button_tudelft.SetBitmapLabel(logo)
-        
+
         image = file_dir + "/images/dls_logo.png"
         if os.path.isfile(config._dls_logo):
             image = config._dls_logo
         logo = wx.Bitmap(image)
         self.bitmap_button_dls.SetBitmapLabel(logo)
-                
+
         # resize dialog window to fit version number nicely
         if wx.VERSION >= (2, 7, 2, 0):
             size = [self.GetEffectiveMinSize()[0], self.GetSize()[1]]
         else:
             size = [self.GetBestFittingSize()[0], self.GetSize()[1]]
         self.Fit()
-        
+
     def __set_properties(self):
         """
         """
@@ -309,38 +298,38 @@ class DialogAbout(wx.Dialog):
                        wx.LEFT|wx.TOP|wx.BOTTOM|wx.ADJUST_MINSIZE, 7)
         sizer_main.Add(self.static_line_2, 0, wx.EXPAND, 0)
 
-        sizer_logos.Add(self.bitmap_button_msu, 0, 
+        sizer_logos.Add(self.bitmap_button_msu, 0,
                         wx.LEFT|wx.ADJUST_MINSIZE, 2)
         #sizer_logos.Add(self.bitmap_button_danse, 0,
         #                wx.LEFT|wx.ADJUST_MINSIZE, 2)
-        #sizer_logos.Add(self.bitmap_button_nsf, 0, 
+        #sizer_logos.Add(self.bitmap_button_nsf, 0,
         #                wx.LEFT|wx.ADJUST_MINSIZE, 2)
-        sizer_logos.Add(self.bitmap_button_umd, 0, 
+        sizer_logos.Add(self.bitmap_button_umd, 0,
                         wx.LEFT|wx.ADJUST_MINSIZE, 2)
-        sizer_logos.Add(self.bitmap_button_nist, 0, 
+        sizer_logos.Add(self.bitmap_button_nist, 0,
                         wx.LEFT|wx.ADJUST_MINSIZE, 2)
-        #sizer_logos.Add(self.bitmap_button_sns, 0, 
+        #sizer_logos.Add(self.bitmap_button_sns, 0,
         #                wx.LEFT|wx.ADJUST_MINSIZE, 2)
-        sizer_logos.Add(self.bitmap_button_ornl, 0, 
+        sizer_logos.Add(self.bitmap_button_ornl, 0,
                         wx.LEFT|wx.ADJUST_MINSIZE, 2)
-        sizer_logos.Add(self.bitmap_button_isis, 0, 
+        sizer_logos.Add(self.bitmap_button_isis, 0,
                         wx.LEFT|wx.ADJUST_MINSIZE, 2)
-        sizer_logos.Add(self.bitmap_button_ess, 0, 
+        sizer_logos.Add(self.bitmap_button_ess, 0,
                         wx.LEFT|wx.ADJUST_MINSIZE, 2)
-        sizer_logos.Add(self.bitmap_button_ill, 0, 
+        sizer_logos.Add(self.bitmap_button_ill, 0,
                         wx.LEFT|wx.ADJUST_MINSIZE, 2)
-        sizer_logos.Add(self.bitmap_button_ansto, 0, 
+        sizer_logos.Add(self.bitmap_button_ansto, 0,
                         wx.LEFT|wx.ADJUST_MINSIZE, 2)
-        sizer_logos.Add(self.bitmap_button_tudelft, 0, 
+        sizer_logos.Add(self.bitmap_button_tudelft, 0,
                         wx.LEFT|wx.ADJUST_MINSIZE, 2)
-        sizer_logos.Add(self.bitmap_button_dls, 0, 
+        sizer_logos.Add(self.bitmap_button_dls, 0,
                         wx.LEFT|wx.ADJUST_MINSIZE, 2)
-                
+
         sizer_logos.Add((10, 50), 0, wx.ADJUST_MINSIZE, 0)
         sizer_main.Add(sizer_logos, 0, wx.EXPAND, 0)
         sizer_main.Add(self.static_line_3, 0, wx.EXPAND, 0)
         sizer_button.Add((20, 40), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        sizer_button.Add(self.button_OK, 0, 
+        sizer_button.Add(self.button_OK, 0,
                          wx.RIGHT|wx.ADJUST_MINSIZE|wx.CENTER, 10)
         sizer_main.Add(sizer_button, 0, wx.EXPAND, 0)
         self.SetAutoLayout(True)
@@ -349,35 +338,35 @@ class DialogAbout(wx.Dialog):
         self.Centre()
         # end wxGlade
 
-    def onNistLogo(self, event): 
+    def onNistLogo(self, event):
         """
         """
         # wxGlade: DialogAbout.<event_handler>
         launchBrowser(config._nist_url)
         event.Skip()
-        
-    def onUmdLogo(self, event): 
+
+    def onUmdLogo(self, event):
         """
         """
         # wxGlade: DialogAbout.<event_handler>
         launchBrowser(config._umd_url)
         event.Skip()
-        
-    def onOrnlLogo(self, event): 
+
+    def onOrnlLogo(self, event):
         """
         """
         # wxGlade: DialogAbout.<event_handler>
         launchBrowser(config._ornl_url)
         event.Skip()
-        
-    def onSnsLogo(self, event): 
+
+    def onSnsLogo(self, event):
         """
         """
         # wxGlade: DialogAbout.<event_handler>
         launchBrowser(config._sns_url)
         event.Skip()
-                
-    def onNsfLogo(self, event): 
+
+    def onNsfLogo(self, event):
         """
         """
         # wxGlade: DialogAbout.<event_handler>
@@ -393,12 +382,12 @@ class DialogAbout(wx.Dialog):
 
     def onUTLogo(self, event):
         """
-        """ 
+        """
         # wxGlade: DialogAbout.<event_handler>
         launchBrowser(config._inst_url)
         event.Skip()
 
-    def onIsisLogo(self, event): 
+    def onIsisLogo(self, event):
         """
         """
         # wxGlade: DialogAbout.<event_handler>
@@ -414,28 +403,28 @@ class DialogAbout(wx.Dialog):
 
     def onIllLogo(self, event):
         """
-        """ 
+        """
         # wxGlade: DialogAbout.<event_handler>
         launchBrowser(config._ill_url)
         event.Skip()
 
     def onAnstoLogo(self, event):
         """
-        """ 
+        """
         # wxGlade: DialogAbout.<event_handler>
         launchBrowser(config._ansto_url)
         event.Skip()
 
     def onTudelftLogo(self, event):
         """
-        """ 
+        """
         # wxGlade: DialogAbout.<event_handler>
         launchBrowser(config._tudelft_url)
         event.Skip()
 
     def onDlsLogo(self, event):
         """
-        """ 
+        """
         # wxGlade: DialogAbout.<event_handler>
         launchBrowser(config._dls_url)
         event.Skip()
@@ -461,5 +450,5 @@ class MyApp(wx.App):
 if __name__ == "__main__":
     app = MyApp(0)
     app.MainLoop()
-    
-##### end of testing code #####################################################    
+
+##### end of testing code #####################################################

@@ -1,6 +1,20 @@
 """
-    Simultaneous fit page
+    Simultaneous or Batch fit page
 """
+# Note that this is used for both Simultaneous/Constrained fit AND for
+# combined batch fit.  This is done through setting of the batch_on parameter.
+# There are the a half dozen or so places where an if statement is used as in
+# if not batch_on:
+#     xxxx
+# else:
+#     xxxx
+# This is just wrong but dont have time to fix this go. Proper approach would be
+# to strip all parts of the code that depend on batch_on and create the top
+# level class from which a contrained/simultaneous fit page and a combined
+# batch page inherit.
+#
+#            04/09/2017   --PDB
+
 import sys
 from collections import namedtuple
 
@@ -8,6 +22,7 @@ import wx
 import wx.lib.newevent
 from wx.lib.scrolledpanel import ScrolledPanel
 
+from sas.sascalc.fit.pagestate import SimFitPageState
 from sas.sasgui.guiframe.events import StatusEvent, PanelOnFocusEvent
 from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sasgui.guiframe.utils import IdList
@@ -45,7 +60,6 @@ def get_fittableParam(model):
         fittable_param.append(item)
 
     return fittable_param
-
 
 class SimultaneousFitPage(ScrolledPanel, PanelBase):
     """
@@ -142,10 +156,71 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         """
         return self.state
 
+    def load_from_save_state(self, sim_state):
+        """
+        Load in a simultaneous/constrained fit from a save state
+        :param fit: Fitpanel object
+        :return: None
+        """
+        init_map = {}
+        final_map = {}
+        # Process each model and associate old M# with new M#
+        i = 0
+        for model in self.model_list:
+            model_id = self._format_id(model[1].keys()[0])
+            for saved_model in sim_state.model_list:
+                save_id = saved_model.pop('name')
+                saved_model['name'] = save_id
+                save_id = self._format_id(save_id)
+                if save_id == model_id:
+                    inter_id = str(i)*5
+                    init_map[saved_model.pop('fit_page_source')] = inter_id
+                    final_map[inter_id] = model[3].name
+                    check = bool(saved_model.pop('checked'))
+                    self.model_list[i][0].SetValue(check)
+                    break
+            i += 1
+
+        self.check_model_name(None)
+
+        if len(sim_state.constraints_list) > 0:
+            self.hide_constraint.SetValue(False)
+            self.show_constraint.SetValue(True)
+            self._display_constraint(None)
+
+        for index, item in enumerate(sim_state.constraints_list):
+            model_cbox = item.pop('model_cbox')
+            if model_cbox != "":
+                constraint_value = item.pop('constraint')
+                param = item.pop('param_cbox')
+                equality = item.pop('egal_txt')
+                for key, value in init_map.items():
+                    model_cbox = model_cbox.replace(key, value)
+                    constraint_value = constraint_value.replace(key, value)
+                for key, value in final_map.items():
+                    model_cbox = model_cbox.replace(key, value)
+                    constraint_value = constraint_value.replace(key, value)
+
+                self.constraints_list[index][0].SetValue(model_cbox)
+                self._on_select_model(None)
+                self.constraints_list[index][1].SetValue(param)
+                self.constraints_list[index][2].SetLabel(equality)
+                self.constraints_list[index][3].SetValue(constraint_value)
+                self._on_add_constraint(None)
+                self._manager.sim_page = self
+
+    def _format_id(self, original_id):
+        original_id = original_id.rstrip('1234567890.')
+        new_id_list = original_id.split()
+        new_id = ' '.join(new_id_list)
+        return new_id
+
+
+
     def draw_page(self):
         """
         Construct the Simultaneous/Constrained fit page. fills the first
-        region (sizer1) with the list of available fit page pairs of data 
+        region (sizer1) with the list of available fit page pairs of data
         and models.  Then fills sizer2 with the checkbox for adding
         constraints, and finally fills sizer3 with the fit button and
         instructions.
@@ -399,7 +474,10 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
 
         # General Help button
         self.btHelp = wx.Button(self, wx.ID_HELP, 'HELP')
-        self.btHelp.SetToolTipString("Simultaneous/Constrained Fitting help.")
+        if self.batch_on:
+            self.btHelp.SetToolTipString("Combined Batch Fitting help.")
+        else:
+            self.btHelp.SetToolTipString("Simultaneous/Constrained Fitting help.")
         self.btHelp.Bind(wx.EVT_BUTTON, self._on_help)
 
         # hint text on button line
@@ -526,10 +604,16 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
     :param event: Triggers on clicking the help button
     """
         _TreeLocation = "user/sasgui/perspectives/fitting/fitting_help.html"
-        _PageAnchor = "#simultaneous-fit-mode"
-        _doc_viewer = DocumentationWindow(self, self.ID_DOC, _TreeLocation,
+        if not self.batch_on:
+            _PageAnchor = "#simultaneous-fit-mode"
+            _doc_viewer = DocumentationWindow(self, self.ID_DOC, _TreeLocation,
                                           _PageAnchor,
                                           "Simultaneous/Constrained Fitting Help")
+        else:
+            _PageAnchor = "#combined-batch-fit-mode"
+            _doc_viewer = DocumentationWindow(self, self.ID_DOC, _TreeLocation,
+                                          _PageAnchor,
+                                          "Combined Batch Fit Help")
 
     def set_manager(self, manager):
         """
@@ -891,7 +975,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
 
         param_cbox = self.constraints_list[-1].param_cbox
         param_cbox.Clear()
-        # insert only fittable paramaters
+        # insert only fittable parameters
         for param in param_list:
             param_cbox.Append(str(param), model)
         param_cbox.Show(True)
@@ -1019,83 +1103,3 @@ def setComboBoxItems(cbox, items):
     for k, (name, value) in enumerate(items):
         cbox.Append(name, value)
     cbox.SetStringSelection(selected)
-
-
-class SimFitPageState:
-    """
-    State of the simultaneous fit page for saving purposes
-    """
-
-    def __init__(self):
-        # Sim Fit Page Number
-        self.fit_page_no = None
-        # Select all data
-        self.select_all = False
-        # Data sets sent to fit page
-        self.model_list = []
-        # Data sets to be fit
-        self.model_to_fit = []
-        # Number of constraints
-        self.no_constraint = 0
-        # Dictionary of constraints
-        self.constraint_dict = {}
-        # List of constraints
-        self.constraints_list = []
-
-    def load_from_save_state(self, fit):
-        """
-        Load in a simultaneous/constrained fit from a save state
-        :param fit: Fitpanel object
-        :return: None
-        """
-
-        model_map = {}
-        if fit.fit_panel.sim_page is None:
-            fit.fit_panel.add_sim_page()
-        sim_page = fit.fit_panel.sim_page
-
-        # Process each model and associate old M# with new M#
-        i = 0
-        for model in sim_page.model_list:
-            model_id = self._format_id(model[1].keys()[0])
-            for saved_model in self.model_list:
-                save_id = saved_model.pop('name')
-                saved_model['name'] = save_id
-                save_id = self._format_id(save_id)
-                if save_id == model_id:
-                    model_map[saved_model.pop('fit_page_source')] = \
-                        model[3].name
-                    check = bool(saved_model.pop('checked'))
-                    sim_page.model_list[i][0].SetValue(check)
-                    break
-            i += 1
-        sim_page.check_model_name(None)
-
-        if len(self.constraints_list) > 0:
-            sim_page.hide_constraint.SetValue(False)
-            sim_page.show_constraint.SetValue(True)
-            sim_page._display_constraint(None)
-
-        for index, item in enumerate(self.constraints_list):
-            model_cbox = item.pop('model_cbox')
-            if model_cbox != "":
-                constraint_value = item.pop('constraint')
-                param = item.pop('param_cbox')
-                equality = item.pop('egal_txt')
-                for key, value in model_map.iteritems():
-                    model_cbox.replace(key, value)
-                    constraint_value.replace(key, value)
-
-                sim_page.constraints_list[index][0].SetValue(model_cbox)
-                sim_page._on_select_model(None)
-                sim_page.constraints_list[index][1].SetValue(param)
-                sim_page.constraints_list[index][2].SetLabel(equality)
-                sim_page.constraints_list[index][3].SetValue(constraint_value)
-                sim_page._on_add_constraint(None)
-                sim_page._manager.sim_page = sim_page
-
-    def _format_id(self, original_id):
-        original_id = original_id.rstrip('1234567890.')
-        new_id_list = original_id.split()
-        new_id = ' '.join(new_id_list)
-        return new_id

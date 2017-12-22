@@ -26,7 +26,7 @@ common_required_package_list = {
     'lxml': {'version': '2.3', 'import_name': 'lxml.etree', 'test': 'LXML_VERSION'},
     'PIL': {'version': '1.1.7', 'import_name': 'Image', 'test': 'VERSION'},
     'pylint': {'version': None, 'import_name': 'pylint', 'test': None},
-    'periodictable': {'version': '1.3.0', 'import_name': 'periodictable', 'test': '__version__'},
+    'periodictable': {'version': '1.5.0', 'import_name': 'periodictable', 'test': '__version__'},
     'bumps': {'version': '0.7.5.9', 'import_name': 'bumps', 'test': '__version__'},
     'numpy': {'version': '1.7.1', 'import_name': 'numpy', 'test': '__version__'},
     'scipy': {'version': '0.18.0', 'import_name': 'scipy', 'test': '__version__'},

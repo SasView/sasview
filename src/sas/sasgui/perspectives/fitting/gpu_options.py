@@ -7,12 +7,14 @@ Created on Nov 29, 2016
 @author: wpotrzebowski
 '''
 
+import logging
 import os
 import sys
-import warnings
 import wx
 import sasmodels
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -87,7 +89,7 @@ class GpuOptions(wx.Dialog):
         boxsizer = wx.BoxSizer(orient=wx.VERTICAL)
         self.option_button = {}
         self.buttons = []
-        #Check if SAS_OPENCL is already set as enviromental variable
+        #Check if SAS_OPENCL is already set as environment variable
         self.sas_opencl = os.environ.get("SAS_OPENCL", "")
 
         for clopt in clinfo:
@@ -167,7 +169,14 @@ class GpuOptions(wx.Dialog):
             import pyopencl as cl
             platforms = cl.get_platforms()
         except ImportError:
-            warnings.warn("pyopencl import failed. Using only CPU computations")
+            logger.warn("Unable to import the pyopencl package.  It may not "
+                        "have been installed.  If you wish to use OpenCL, try "
+                        "running pip install --user pyopencl")
+        except cl.LogicError as err:
+            logger.warn("Unable to fetch the OpenCL platforms.  This likely "
+                        "means that the opencl drivers for your system are "
+                        "not installed.")
+            logger.warn(err)
 
         p_index = 0
         for platform in platforms:
@@ -317,7 +326,7 @@ class GpuOptions(wx.Dialog):
         """
         Provide help on opencl options.
         """
-        TreeLocation = "user/gpu_computations.html"
+        TreeLocation = "user/sasgui/perspectives/fitting/gpu_setup.html"
         anchor = "#device-selection"
         DocumentationWindow(self, -1,
                             TreeLocation, anchor, "OpenCL Options Help")

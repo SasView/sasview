@@ -365,7 +365,7 @@ class BindArtist(object):
         # TODO: Do we really want keyboard focus separate from mouse focus?
         # TODO: Do we need an explicit focus command for keyboard?
         # TODO: Can we tab between items?
-        # TODO: How do unhandled events get propogated to axes, figure and
+        # TODO: How do unhandled events get propagated to axes, figure and
         # TODO: finally to application?  Do we need to implement a full tags
         # TODO: architecture a la Tk?
         # TODO: Do modifiers cause a grab?  Does the artist see the modifiers?

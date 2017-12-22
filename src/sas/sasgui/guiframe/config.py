@@ -1,14 +1,14 @@
 """
-    Application settings
+Application settings
 """
 from __future__ import print_function
 
 import time
 import os
-from sas.sasgui.guiframe.gui_style import GUIFRAME
-import sas.sasview
 import logging
 
+from sas.sasgui.guiframe.gui_style import GUIFRAME
+import sas.sasview
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ _acknowledgement_preamble_bullet4 =\
 _acknowledgement_publications = \
 '''This work benefited from the use of the SasView application, originally developed under NSF Award DMR-0520547. SasView also contains code developed with funding from the EU Horizon 2020 programme under the SINE2020 project Grant No 654000.'''
 _acknowledgement_citation = \
-'''M. Doucet et al. SasView Version 4.1, Zenodo, 10.5281/zenodo.438138'''
+'''M. Doucet et al. SasView Version 4.1.2, Zenodo, 10.5281/zenodo.825675'''
 
 _acknowledgement =  \
 '''This work was originally developed as part of the DANSE project funded by the US NSF under Award DMR-0520547,\n but is currently maintained by a collaboration between UTK, UMD, NIST, ORNL, ISIS, ESS, ILL, ANSTO, TU Delft, DLS, and the scattering community.\n\n SasView also contains code developed with funding from the EU Horizon 2020 programme under the SINE2020 project (Grant No 654000).\nA list of individual contributors can be found at: http://www.sasview.org/contact.html
@@ -74,9 +74,10 @@ _ess_logo = os.path.join(icon_path, "ess_logo.png")
 _ill_logo = os.path.join(icon_path, "ill_logo.png")
 _ansto_logo = os.path.join(icon_path, "ansto_logo.png")
 _tudelft_logo = os.path.join(icon_path, "tudelft_logo.png")
+_dls_logo = os.path.join(icon_path, "dls_logo.png")
 _nsf_logo = os.path.join(icon_path, "nsf_logo.png")
 _danse_logo = os.path.join(icon_path, "danse_logo.png")
-_inst_logo = os.path.join(icon_path, "utlogo.gif")
+_inst_logo = os.path.join(icon_path, "utlogo.png")
 _nist_url = "http://www.nist.gov/"
 _umd_url = "http://www.umd.edu/"
 _sns_url = "http://neutrons.ornl.gov/"
@@ -142,9 +143,6 @@ DEFAULT_PERSPECTIVE = 'None'
 
 # Time out for updating sasview
 UPDATE_TIMEOUT = 2
-
-#OpenCL option
-SAS_OPENCL = None
 
 def printEVT(message):
     if __EVT_DEBUG__:

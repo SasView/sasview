@@ -2,16 +2,22 @@
     Unit tests for DistExplorer class
 """
 
+import os.path
 import unittest, math, numpy
 from utest_invertor import load
 from sas.sascalc.pr.invertor import Invertor
 from sas.sascalc.pr.distance_explorer import DistExplorer
-        
+
+
+def find(filename):
+    return os.path.join(os.path.dirname(__file__), filename)
+
+
 class TestExplorer(unittest.TestCase):
             
     def setUp(self):
         self.invertor = Invertor()
-        x, y, err = load('sphere_80.txt')
+        x, y, err = load(find('sphere_80.txt'))
         
         # Choose the right d_max...
         self.invertor.d_max = 160.0

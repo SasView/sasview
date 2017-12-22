@@ -475,7 +475,7 @@ class PlotPanel(wx.Panel):
             #Disable dragging without the toolbar to allow zooming with toolbar
             return
         self.mousemotion = True
-        if self.leftdown == True and self.mousemotion == True:
+        if self.leftdown and self.mousemotion:
             ax = event.inaxes
             if ax is not None:  # the dragging is perform inside the figure
                 self.xFinal, self.yFinal = event.xdata, event.ydata

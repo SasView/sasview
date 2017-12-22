@@ -204,7 +204,7 @@ class ViewerFrame(wx.Frame):
             #Instantiate a loader 
             L=Loader()
             
-            #Recieves data 
+            #Receives data
             try:
                 output=L.load(path)
             except:

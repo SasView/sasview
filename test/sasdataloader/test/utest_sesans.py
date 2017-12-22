@@ -2,9 +2,17 @@
     Unit tests for the SESANS .ses reader
 """
 
+import os.path
 import unittest
+from sas.sascalc.dataloader.loader_exceptions import FileContentsException,\
+    DefaultReaderException
 from sas.sascalc.dataloader.readers.sesans_reader import Reader
 from sas.sascalc.dataloader.loader import  Loader
+
+
+def find(filename):
+    return os.path.join(os.path.dirname(__file__), filename)
+
 
 class sesans_reader(unittest.TestCase):
 
@@ -16,8 +24,10 @@ class sesans_reader(unittest.TestCase):
         """
             Test .SES in the full loader to make sure that the file type is correctly accepted
         """
-        f = Loader().load("sesans_examples/sphere2micron.ses")
+        file = Loader().load(find("sesans_examples/sphere2micron.ses"))
+        f = file[0]
         # self.assertEqual(f, 5)
+        self.assertEqual(len(file), 1)
         self.assertEqual(len(f.x), 40)
         self.assertEqual(f.x[0], 391.56)
         self.assertEqual(f.x[-1], 46099)
@@ -33,7 +43,9 @@ class sesans_reader(unittest.TestCase):
         """
             Test .SES loading on a TOF dataset
         """
-        f = self.loader("sesans_examples/sphere_isis.ses")
+        file = self.loader(find("sesans_examples/sphere_isis.ses"))
+        f = file[0]
+        self.assertEqual(len(file), 1)
         self.assertEqual(len(f.x), 57)
         self.assertEqual(f.x[-1], 19303.4)
         self.assertEqual(f.source.wavelength[-1], 13.893668)
@@ -47,54 +59,45 @@ class sesans_reader(unittest.TestCase):
             Confirm that sesans files with no actual data won't load.
         """
         self.assertRaises(
-            RuntimeError,
+            FileContentsException,
             self.loader,
-            "sesans_examples/sesans_no_data.ses")
+            find("sesans_examples/sesans_no_data.ses"))
 
     def test_sesans_no_spin_echo_unit(self):
         """
             Confirm that sesans files with no units from the spin echo length raise an appropriate error
         """
         self.assertRaises(
-            RuntimeError,
+            FileContentsException,
             self.loader,
-            "sesans_examples/no_spin_echo_unit.ses")
-
-    def test_sesans_no_version(self):
-        """
-            Confirm that sesans files with no file format version raise an appropriate error
-        """
-        self.assertRaises(
-            RuntimeError,
-            self.loader,
-            "sesans_examples/no_version.ses")
+            find("sesans_examples/no_spin_echo_unit.ses"))
 
     def test_sesans_future_version(self):
         """
             Confirm that sesans files that, according to semantic version, are from a future, backwards-incompatible version of the SES file format throw an exception.
         """
         self.assertRaises(
-            RuntimeError,
+            FileContentsException,
             self.loader,
-            "sesans_examples/next_gen.ses")
+            find("sesans_examples/next_gen.ses"))
 
     def test_sesans_mandatory_headers(self):
         """
             Confirm that sesans files throw an exception if one of the mandator headers is missing.
         """
         self.assertRaises(
-            RuntimeError,
+            FileContentsException,
             self.loader,
-            "sesans_examples/no_wavelength.ses")
+            find("sesans_examples/no_wavelength.ses"))
 
     def test_sesans_columns_match_headers(self):
         """
             Confirm that sesans files throw an exception if one of the mandator headers is missing.
         """
         self.assertRaises(
-            RuntimeError,
+            FileContentsException,
             self.loader,
-            "sesans_examples/too_many_headers.ses")
+            find("sesans_examples/too_many_headers.ses"))
 
 if __name__ == "__main__":
     unittest.main()

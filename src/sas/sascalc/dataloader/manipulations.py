@@ -25,7 +25,7 @@ import numpy as np
 import sys
 
 #from data_info import plottable_2D
-from data_info import Data1D
+from .data_info import Data1D
 
 
 def get_q(dx, dy, det_dist, wavelength):

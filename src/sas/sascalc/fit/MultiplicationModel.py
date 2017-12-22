@@ -67,7 +67,7 @@ class MultiplicationModel(BaseComponent):
         # get multiplicity if model provide it, else 1.
         try:
             multiplicity = p_model.multiplicity
-        except:
+        except AttributeError:
             multiplicity = 1
         ## functional multiplicity of the model
         self.multiplicity = multiplicity
@@ -75,13 +75,13 @@ class MultiplicationModel(BaseComponent):
         # non-fittable parameters
         self.non_fittable = p_model.non_fittable
         self.multiplicity_info = []
-        self.fun_list = {}
+        self.fun_list = []
         if self.non_fittable > 1:
             try:
                 self.multiplicity_info = p_model.multiplicity_info
                 self.fun_list = p_model.fun_list
                 self.is_multiplicity_model = True
-            except:
+            except AttributeError:
                 pass
         else:
             self.is_multiplicity_model = False
@@ -108,7 +108,7 @@ class MultiplicationModel(BaseComponent):
         applied to s_model
         """
         ##set dispersion only from p_model
-        for name , value in self.p_model.dispersion.iteritems():
+        for name , value in self.p_model.dispersion.items():
             self.dispersion[name] = value
 
     def getProfile(self):
@@ -134,11 +134,11 @@ class MultiplicationModel(BaseComponent):
         these model parameters
         """
 
-        for name , value in self.p_model.params.iteritems():
+        for name , value in self.p_model.params.items():
             if not name in self.params.keys() and name not in self.excluded_params:
                 self.params[name] = value
 
-        for name , value in self.s_model.params.iteritems():
+        for name , value in self.s_model.params.items():
             #Remove the radius_effective from the (P*S) model parameters.
             if not name in self.params.keys() and name not in self.excluded_params:
                 self.params[name] = value
@@ -154,11 +154,11 @@ class MultiplicationModel(BaseComponent):
         Concatenate details of the two models to create
         this model's details
         """
-        for name, detail in self.p_model.details.iteritems():
+        for name, detail in self.p_model.details.items():
             if name not in self.excluded_params:
                 self.details[name] = detail
 
-        for name , detail in self.s_model.details.iteritems():
+        for name , detail in self.s_model.details.items():
             if not name in self.details.keys() or name not in self.exluded_params:
                 self.details[name] = detail
 
@@ -244,7 +244,7 @@ class MultiplicationModel(BaseComponent):
                     self.params[item] = value
                     return
 
-        raise ValueError, "Model does not contain parameter %s" % name
+        raise ValueError("Model does not contain parameter %s" % name)
 
 
     def _set_fixed_params(self):

@@ -14,10 +14,14 @@ from sas.sasgui.guiframe.dataFitting import Data1D
 from sas.sasgui.guiframe.dataFitting import Data2D
 
 
+def find(filename):
+    return os.path.join(os.path.dirname(__file__), filename)
+
+
 class DataInfoTests(unittest.TestCase):
 
     def setUp(self):
-        data = Loader().load("cansas1d.xml")
+        data = Loader().load(find("cansas1d.xml"))
         self.data = data[0]
 
     def test_clone1D(self):
@@ -34,7 +38,7 @@ class DataInfoTests(unittest.TestCase):
 class Theory1DTests(unittest.TestCase):
 
     def setUp(self):
-        data = Loader().load("cansas1d.xml")
+        data = Loader().load(find("cansas1d.xml"))
         self.data = data[0]
 
     def test_clone_theory1D(self):

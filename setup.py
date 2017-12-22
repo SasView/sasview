@@ -5,6 +5,7 @@
     Setup for SasView
     TODO: Add checks to see that all the dependencies are on the system
 """
+from __future__ import print_function
 
 import os
 import subprocess
@@ -16,10 +17,19 @@ from distutils.core import Command
 import numpy as np
 from setuptools import Extension, setup
 
-# Manage version number ######################################
-import sasview
+try:
+    import tinycc.distutils
+except ImportError:
+    pass
 
-VERSION = sasview.__version__
+# Manage version number ######################################
+with open(os.path.join("src", "sas", "sasview", "__init__.py")) as fid:
+    for line in fid:
+        if line.startswith('__version__'):
+            VERSION = line.split('"')[1]
+            break
+    else:
+        raise ValueError("Could not find version in src/sas/sasview/__init__.py")
 ##############################################################
 
 package_dir = {}
@@ -41,6 +51,7 @@ ext_modules = []
 CURRENT_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SASVIEW_BUILD = os.path.join(CURRENT_SCRIPT_DIR, "build")
 
+# TODO: build step should not be messing with existing installation!!
 sas_dir = os.path.join(os.path.expanduser("~"), '.sasview')
 if os.path.isdir(sas_dir):
     f_path = os.path.join(sas_dir, "sasview.log")
@@ -58,18 +69,20 @@ if os.path.isdir(sas_dir):
     #         if f in plugin_model_list:
     #             file_path =  os.path.join(f_path, f)
     #             os.remove(file_path)
-    if os.path.exists(SASVIEW_BUILD):
-        print("Removing existing build directory",
-              SASVIEW_BUILD, "for a clean build")
-        shutil.rmtree(SASVIEW_BUILD)
+
+
+# Optionally clean before build.
+dont_clean = 'update' in sys.argv
+if dont_clean:
+    sys.argv.remove('update')
+elif os.path.exists(SASVIEW_BUILD):
+    print("Removing existing build directory", SASVIEW_BUILD, "for a clean build")
+    shutil.rmtree(SASVIEW_BUILD)
 
 # 'sys.maxsize' and 64bit: Not supported for python2.5
-is_64bits = False
-if sys.version_info >= (2, 6):
-    is_64bits = sys.maxsize > 2**32
+is_64bits = sys.maxsize > 2**32
 
 enable_openmp = False
-
 if sys.platform == 'darwin':
     if not is_64bits:
         # Disable OpenMP
@@ -129,6 +142,11 @@ class build_ext_subclass(build_ext):
         # Get 64-bitness
         c = self.compiler.compiler_type
         print("Compiling with %s (64bit=%s)" % (c, str(is_64bits)))
+        #print("=== compiler attributes ===")
+        #print("\n".join("%s: %s"%(k, v) for k, v in sorted(self.compiler.__dict__.items())))
+        #print("=== build_ext attributes ===")
+        #print("\n".join("%s: %s"%(k, v) for k, v in self.__dict__.items()))
+        #sys.exit(1)
 
         # OpenMP build options
         if enable_openmp:
@@ -220,8 +238,7 @@ for d in os.listdir(os.path.join(guiframe_path, "local_perspectives")):
 # sas.sascalc.dataloader
 package_dir["sas.sascalc.dataloader"] = os.path.join(
     "src", "sas", "sascalc", "dataloader")
-package_data["sas.sascalc.dataloader.readers"] = [
-    'defaults.json', 'schema/*.xsd']
+package_data["sas.sascalc.dataloader.readers"] = ['schema/*.xsd']
 packages.extend(["sas.sascalc.dataloader", "sas.sascalc.dataloader.readers",
                  "sas.sascalc.dataloader.readers.schema"])
 
@@ -234,8 +251,8 @@ package_dir["sas.sascalc.calculator"] = os.path.join(
 packages.extend(["sas.sascalc.calculator", "sas.sascalc.calculator.core"])
 ext_modules.append(Extension("sas.sascalc.calculator.core.sld2i",
                              sources=[
-                                 os.path.join(gen_dir, "sld2i_module.cpp"),
-                                 os.path.join(gen_dir, "sld2i.cpp"),
+                                 os.path.join(gen_dir, "sld2i_module.c"),
+                                 os.path.join(gen_dir, "sld2i.c"),
                                  os.path.join(gen_dir, "libfunc.c"),
                                  os.path.join(gen_dir, "librefl.c"),
                              ],
@@ -366,10 +383,9 @@ append_file(file_sources, gen_dir)
 #doc_files = add_doc_files('doc')
 
 # SasView
-package_dir["sas.sasview"] = "sasview"
+package_data['sas'] = ['logging.ini']
 package_data['sas.sasview'] = ['images/*',
                                'media/*',
-                               'logging.ini',
                                'test/*.txt',
                                'test/1d_data/*',
                                'test/2d_data/*',
@@ -379,12 +395,13 @@ package_data['sas.sasview'] = ['images/*',
                                'test/media/*',
                                'test/other_files/*',
                                'test/save_states/*',
-                               'test/sesans_data/*'
+                               'test/sesans_data/*',
+                               'test/upcoming_formats/*',
                                ]
 packages.append("sas.sasview")
 
 required = [
-    'bumps>=0.7.5.9', 'periodictable>=1.3.1', 'pyparsing<2.0.0',
+    'bumps>=0.7.5.9', 'periodictable>=1.5.0', 'pyparsing<2.0.0',
 
     # 'lxml>=2.2.2',
     'lxml', 'h5py',
@@ -420,7 +437,7 @@ setup(
     zip_safe=False,
     entry_points={
         'console_scripts': [
-            "sasview = sas.sasview.sasview:run",
+            "sasview = sas.sasview.sasview:run_gui",
         ]
     },
     cmdclass={'build_ext': build_ext_subclass,

@@ -654,7 +654,7 @@ class Reader(CansasReader):
         : param path: file path
         : return: None
         """
-        if self.cansas == True:
+        if self.cansas:
             return self._read_cansas(path)
         else:
             return self._read_standalone(path)
@@ -727,13 +727,11 @@ class Reader(CansasReader):
                                         namespaces={'ns': CANSAS_NS})
 
                 for entry in entry_list:
-
-                    sas_entry, _ = self._parse_entry(entry)
                     invstate = self._parse_state(entry)
-
                     # invstate could be None when .svs file is loaded
                     # in this case, skip appending to output
                     if invstate is not None:
+                        sas_entry, _ = self._parse_entry(entry)
                         sas_entry.meta_data['invstate'] = invstate
                         sas_entry.filename = invstate.file
                         output.append(sas_entry)
@@ -764,7 +762,7 @@ class Reader(CansasReader):
         : param invstate: InvariantState object
         """
         # Sanity check
-        if self.cansas == True:
+        if self.cansas:
             doc = self.write_toXML(datainfo, invstate)
             # Write the XML document
             fd = open(filename, 'w')

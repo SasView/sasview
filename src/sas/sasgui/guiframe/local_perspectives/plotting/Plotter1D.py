@@ -826,7 +826,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         on_Modify Plot Property_close
         """
-        if self.appD.okay_clicked == True:
+        if self.appD.okay_clicked:
             info = self.appD.get_current_values()
             self.appearance_selected_plot.custom_color = \
                         self._color_labels[info[1].encode('ascii', 'ignore')]
