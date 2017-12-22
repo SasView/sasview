@@ -4,6 +4,7 @@
 
 import os.path
 import warnings
+import math
 warnings.simplefilter("ignore")
 
 import unittest
@@ -108,6 +109,17 @@ class ABSReaderTests(unittest.TestCase):
         # The length of the data is 5
         except:
             self.assertEqual(f, None)
+
+    def test_nan_values(self):
+        """
+        Test loading an ascii data file with nan values saved in x, y, or dy.
+        """
+        f = self.loader.load(find("test_data_nan_values.dat"))[0]
+        for i in range(0, len(f.x) - 1):
+            self.assertFalse(math.isnan(f.x[i]))
+            self.assertFalse(math.isnan(f.y[i]))
+            self.assertFalse(math.isnan(f.dy[i]))
+
 
 if __name__ == '__main__':
     unittest.main()
