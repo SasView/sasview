@@ -79,6 +79,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     """
     Main widget for selecting form and structure factor models
     """
+    constraintAddedSignal = QtCore.pyqtSignal(list)
     def __init__(self, parent=None, data=None, tab_id=1):
 
         super(FittingWidget, self).__init__()
@@ -451,6 +452,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Respond to change in parameters from the UI
         self._model_model.itemChanged.connect(self.onMainParamsChange)
+        self.constraintAddedSignal.connect(self.modifyViewOnConstraint)
         self._poly_model.itemChanged.connect(self.onPolyModelChange)
         self._magnet_model.itemChanged.connect(self.onMagnetModelChange)
 
@@ -505,29 +507,64 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             menu.addAction(self.actionMultiConstrain)
 
         # Define the callbacks
-        self.actionConstrain.triggered.connect(self.addConstraint)
-        self.actionMutualMultiConstrain.triggered.connect(self.showMultiConstrain)
+        self.actionConstrain.triggered.connect(self.addSimpleConstraint)
+        self.actionMutualMultiConstrain.triggered.connect(self.showMultiConstraint)
         self.actionSelect.triggered.connect(self.selectParameters)
         self.actionDeselect.triggered.connect(self.deselectParameters)
         return menu
 
-    def showMultiConstrain(self):
+    def showMultiConstraint(self):
         """
         Show the constraint widget and receive the expression
         """
         from sas.qtgui.Perspectives.Fitting.MultiConstraint import MultiConstraint
-        params_list = [s.data() for s in self.lstParams.selectionModel().selectedRows()]
+        from .Constraints import Constraint
+        selected_rows = self.lstParams.selectionModel().selectedRows()
+
+        params_list = [s.data() for s in selected_rows]
         mc_widget = MultiConstraint(self, params=params_list)
         mc_widget.exec_()
-        constraint = mc_widget.txtConstraint.text()
+        constraint = Constraint()
+        c_text = mc_widget.txtConstraint.text()
         # Pass the constraint to the parser
+
         self.communicate.statusBarUpdateSignal.emit('Constraints added')
+        # Change the colour of the row
         pass
 
-    def addConstraint(self):
+    def modifyViewOnConstraint(self, row):
+        """
+        Add visual cues that the parameter is constrained
+        """
+        value = self._model_model.item(row, 1).text()
+        # Set min/max to the value constrained
+        self._model_model.item(row,2).setText(value)
+        self._model_model.item(row,3).setText(value)
+        font = QtGui.QFont()
+        font.setItalic(True)
+        brush = QtGui.QBrush(QtGui.QColor('blue'))
+        self._model_model.blockSignals(True)
+        # Modify font and foreground of affected rows
+        for column in range(0, self._model_model.columnCount()):
+            self._model_model.item(row, column).setForeground(brush)
+            self._model_model.item(row, column).setFont(font)
+            self._model_model.item(row, column).setEditable(False)
+        self._model_model.blockSignals(False)
+
+    def addSimpleConstraint(self):
         """
         Adds a constraint on a single parameter.
         """
+        from .Constraints import Constraint
+        for row in self.selectedParameters():
+            param = self._model_model.item(row, 0).text()
+            value = self._model_model.item(row, 1).text()
+            constraint = Constraint(param=param, value=value)
+            item = QtGui.QStandardItem()
+            item.setData(constraint)
+            self._model_model.item(row, 1).setChild(0, item)
+            #self.constraintAddedSignal.emit([row])
+            self.modifyViewOnConstraint(row)
         self.communicate.statusBarUpdateSignal.emit('Constraint added')
         pass
 
