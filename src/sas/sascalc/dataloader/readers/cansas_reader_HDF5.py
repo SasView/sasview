@@ -37,16 +37,6 @@ class Reader(FileReader):
 
     # CanSAS version
     cansas_version = 2.0
-    # Logged warnings or messages
-    logging = None
-    # List of errors for the current data set
-    errors = None
-    # Raw file contents to be processed
-    raw_data = None
-    # List of plottable1D objects that should be linked to the current_datainfo
-    data1d = None
-    # List of plottable2D objects that should be linked to the current_datainfo
-    data2d = None
     # Data type name
     type_name = "CanSAS 2.0"
     # Wildcards
@@ -110,7 +100,6 @@ class Reader(FileReader):
         self.raw_data = None
         self.errors = set()
         self.logging = []
-        self.output = []
         self.q_name = []
         self.mask_name = u''
         self.i_name = u''
