@@ -1,0 +1,88 @@
+name: sasview
+channels:
+- conda-forge
+- anaconda
+- defaults
+dependencies:
+- cffi=1.6.0=py27_0
+- decorator=4.0.9=py27_0
+- freetype=2.5.5=2
+- jpeg=8d=2
+- lcms=1.19=0
+- libtiff=4.0.6=2
+- libxslt=1.1.28=2
+- lxml=3.6.1=py27_0
+- matplotlib=1.5.1=np111py27_0
+- pil=1.1.7=py27_2
+- pillow=2.7.0=py27_1
+- pyparsing=2.1.4=py27_0
+- pytest=2.9.1=py27_0
+- python.app=1.2=py27_4
+- qt=4.8.7=4
+- reportlab=3.0=py27_0
+- sphinx=1.2.1=py27_0
+- wxpython=3.0=py27_0
+- astroid=1.5.3=py27_0
+- backports.functools_lru_cache=1.4=py27_0
+- blas=1.1=openblas
+- ca-certificates=2017.7.27.1=0
+- certifi=2017.7.27.1=py27_0
+- configparser=3.5.0=py27_0
+- cycler=0.10.0=py27_0
+- docutils=0.14=py27_0
+- enum34=1.1.6=py27_1
+- h5py=2.7.1=py27_1
+- hdf5=1.8.18=1
+- html5lib=0.999=py27_0
+- icu=58.1=1
+- isort=4.2.15=py27_0
+- jbig=2.1=0
+- jinja2=2.9.6=py27_0
+- lazy-object-proxy=1.3.1=py27_0
+- libgfortran=3.0.0=0
+- libiconv=1.14=4
+- libpng=1.6.28=1
+- libxml2=2.9.5=0
+- markupsafe=1.0=py27_0
+- mccabe=0.6.1=py27_0
+- ncurses=5.9=10
+- numpy=1.11.1=py27_blas_openblas_202
+- openblas=0.2.18=6
+- openssl=1.0.2l=0
+- pip=9.0.1=py27_0
+- py=1.4.31=py27_0
+- pycparser=2.18=py27_0
+- pylint=1.7.1=py27_0
+- pyqt=4.11.4=py27_2
+- python=2.7.13=1
+- python-dateutil=2.6.1=py27_0
+- pytz=2017.2=py27_0
+- readline=6.2=0
+- scipy=0.18.0=np111py27_blas_openblas_202
+- setuptools=36.3.0=py27_0
+- singledispatch=3.4.0.3=py27_0
+- sip=4.18=py27_1
+- six=1.10.0=py27_0
+- sqlite=3.13.0=1
+- tk=8.5.19=2
+- webencodings=0.5=py27_0
+- wheel=0.29.0=py27_0
+- wrapt=1.10.11=py27_0
+- xz=5.2.3=0
+- zlib=1.2.8=3
+- pip:
+  - altgraph==0.14
+  - appdirs==1.4.3
+  - backports.functools-lru-cache==1.4
+  - bumps==0.7.5.9
+  - macholib==1.8
+  - modulegraph==0.15
+  - periodictable==1.5.0
+  - py2app==0.14
+  - pyopencl==2016.1
+  - pypdf2==1.26.0
+  - pytools==2017.4
+  - unittest-xml-reporting==1.10.0
+  - wxpython-common==3.0.0.0
+  - xhtml2pdf==0.0.6
+  - xmlrunner==1.7.7
