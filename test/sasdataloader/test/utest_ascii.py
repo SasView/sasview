@@ -114,11 +114,19 @@ class ABSReaderTests(unittest.TestCase):
         """
         Test loading an ascii data file with nan values saved in x, y, or dy.
         """
-        f = self.loader.load(find("test_data_nan_values.dat"))[0]
-        for i in range(0, len(f.x) - 1):
-            self.assertFalse(math.isnan(f.x[i]))
-            self.assertFalse(math.isnan(f.y[i]))
-            self.assertFalse(math.isnan(f.dy[i]))
+        f_1d = self.loader.load(find("nans_in_1d_data.dat"))[0]
+        f_2d = self.loader.load(find("nans_in_2d_data.DAT"))[0]
+        for i in range(0, len(f_1d.x) - 1):
+            self.assertFalse(math.isnan(f_1d.x[i]))
+            self.assertFalse(math.isnan(f_1d.y[i]))
+            self.assertFalse(math.isnan(f_1d.dy[i]))
+        f_2d.data = f_2d.data.flatten()
+        f_2d.qx_data = f_2d.qx_data.flatten()
+        f_2d.qy_data = f_2d.qy_data.flatten()
+        for i in range(0, len(f_2d.data) - 1):
+            self.assertFalse(math.isnan(f_2d.data[i]))
+            self.assertFalse(math.isnan(f_2d.qx_data[i]))
+            self.assertFalse(math.isnan(f_2d.qy_data[i]))
 
 
 if __name__ == '__main__':
