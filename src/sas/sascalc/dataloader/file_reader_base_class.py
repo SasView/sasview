@@ -25,6 +25,13 @@ else:
     def decode(s):
         return s.decode() if isinstance(s, bytes) else s
 
+# Data 1D fields for iterative purposes
+FIELDS_1D = ('x', 'y', 'dx', 'dy', 'dxl', 'dxw')
+# Data 2D fields for iterative purposes
+FIELDS_2D = ('data', 'qx_data', 'qy_data', 'q_data', 'err_data',
+                 'dqx_data', 'dqy_data')
+
+
 class FileReader(object):
     # String to describe the type of data this reader can load
     type_name = "ASCII"
@@ -205,47 +212,22 @@ class FileReader(object):
         :return: data with mask=0 for any value of nan in data .x, .y, .dx, .dy
         """
         if isinstance(data, Data1D):
-            mask = np.ones(data.x.shape)
-            data_list = [data.x, data.y, data.dx, data.dy, data.dxl, data.dxw]
+            fields = FIELDS_1D
         elif isinstance(data, Data2D):
-            mask = np.ones(data.data.shape)
-            data_list = [data.data, data.qx_data, data.qy_data, data.q_data,
-                         data.err_data, data.dqx_data, data.dqy_data, data.mask]
+            fields = FIELDS_2D
         else:
-            mask = np.ones(0)
-            data_list = []
-        for array in data_list:
+            return data
+        good = np.isfinite(getattr(data, fields[0]))
+        for name in fields[1:]:
+            array = getattr(data, name)
             if array is not None:
                 # Set mask[i] to 0 when data.<param> is nan
-                mask[np.isnan(array)] = 0
-        # Data indices to mask/remove from the data
-        nans = np.where(mask == 0)[0]
-        if len(nans) > 0:
-            if isinstance(data, Data1D):
-                data.x = np.delete(data.x, nans)
-                data.y = np.delete(data.y, nans)
-                if data.dx is not None:
-                    data.dx = np.delete(data.dx, nans)
-                if data.dxl is not None:
-                    data.dxl = np.delete(data.dxl, nans)
-                if data.dxw is not None:
-                    data.dxw = np.delete(data.dxw, nans)
-                if data.dy is not None:
-                    data.dy = np.delete(data.dy, nans)
-            elif isinstance(data, Data2D):
-                data.data = np.delete(data.data, nans)
-                data.qx_data = np.delete(data.qx_data, nans)
-                data.qy_data = np.delete(data.qy_data, nans)
-                if data.q_data is not None:
-                    data.q_data = np.delete(data.q_data, nans)
-                if data.err_data is not None:
-                    data.err_data = np.delete(data.err_data, nans)
-                if data.dqx_data is not None:
-                    data.dqx_data = np.delete(data.dqx_data, nans)
-                if data.dqy_data is not None:
-                    data.dqy_data = np.delete(data.dqy_data, nans)
-                if data.mask is not None:
-                    data.mask = np.delete(data.mask, nans)
+                good &= np.isfinite(array)
+        if not np.all(good):
+            for name in fields:
+                array = getattr(data, name)
+                if array is not None:
+                    setattr(data, name, array[good])
         return data
 
     def sort_two_d_data(self):
