@@ -158,40 +158,72 @@ class FileReader(object):
                 data.x_unit = self.format_unit(data.x_unit)
                 data.y_unit = self.format_unit(data.y_unit)
                 # Sort data by increasing x and remove 1st point
-                self.ind = np.lexsort((data.y, data.x))
-                data.x = self.sort_1d_array(data.x)
-                data.y = self.sort_1d_array(data.y)
+                ind = np.lexsort((data.y, data.x))
+                data.x = self._reorder_1d_array(data.x, ind)
+                data.y = self._reorder_1d_array(data.y, ind)
                 if data.dx is not None:
                     if len(data.dx) == 0:
                         data.dx = None
                         continue
-                    data.dx = self.sort_1d_array(data.dx)
+                    data.dx = self._reorder_1d_array(data.dx, ind)
                 if data.dxl is not None:
-                    data.dxl = self.sort_1d_array(data.dxl)
+                    data.dxl = self._reorder_1d_array(data.dxl, ind)
                 if data.dxw is not None:
-                    data.dxw = self.sort_1d_array(data.dxw)
+                    data.dxw = self._reorder_1d_array(data.dxw, ind)
                 if data.dy is not None:
                     if len(data.dy) == 0:
                         data.dy = None
                         continue
-                    data.dy = self.sort_1d_array(data.dy)
+                    data.dy = self._reorder_1d_array(data.dy, ind)
                 if data.lam is not None:
-                    data.lam = self.sort_1d_array(data.lam)
+                    data.lam = self._reorder_1d_array(data.lam, ind)
                 if data.dlam is not None:
-                    data.dlam = self.sort_1d_array(data.dlam)
+                    data.dlam = self._reorder_1d_array(data.dlam, ind)
+                data = self._remove_nans_in_1d_data(data)
                 if len(data.x) > 0:
                     data.xmin = np.min(data.x)
                     data.xmax = np.max(data.x)
                     data.ymin = np.min(data.y)
                     data.ymax = np.max(data.y)
 
-    def sort_1d_array(self, array=[]):
-        if array.any():
-            for i in self.ind:
-                if math.isnan(array[i]):
-                    array[i] = 0
-            array = np.asarray([array[i] for i in self.ind]).astype(np.float64)
-        return array
+    @staticmethod
+    def _reorder_1d_array(array, ind):
+        """
+        Reorders a 1D array based on the indices passed as ind
+        :param array: Array to be reordered
+        :param ind: Indices used to reorder array
+        :return: reordered array
+        """
+        array = np.asarray(array, dtype=np.float64)
+        return array[ind]
+
+    @staticmethod
+    def _remove_nans_in_1d_data(data):
+        """
+        Remove data points where nan is loaded
+        :param data: 1D data set
+        :return: data with mask=0 for any value of nan in data .x, .y, .dx, .dy
+        """
+        mask = np.ones(len(data.x))
+        data_list = [data.x, data.y, data.dx, data.dy, data.dxl, data.dxw]
+        for array in data_list:
+            if array is not None:
+                # Set mask[i] to 0 when data.<param> is nan
+                mask[np.isnan(array)] = 0
+        # Data indices to mask/remove from the data
+        nans = np.where(mask == 0)[0]
+        if len(nans) > 0:
+            data.x = np.delete(data.x, nans)
+            data.y = np.delete(data.y, nans)
+            if data.dx is not None:
+                data.dx = np.delete(data.dx, nans)
+            if data.dxl is not None:
+                data.dxl = np.delete(data.dxl, nans)
+            if data.dxw is not None:
+                data.dxw = np.delete(data.dxw, nans)
+            if data.dy is not None:
+                data.dy = np.delete(data.dy, nans)
+        return data
 
     def sort_two_d_data(self):
         for dataset in self.output:
