@@ -29,7 +29,7 @@ else:
 FIELDS_1D = ('x', 'y', 'dx', 'dy', 'dxl', 'dxw')
 # Data 2D fields for iterative purposes
 FIELDS_2D = ('data', 'qx_data', 'qy_data', 'q_data', 'err_data',
-                 'dqx_data', 'dqy_data')
+                 'dqx_data', 'dqy_data', 'mask')
 
 
 class FileReader(object):
