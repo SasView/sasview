@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>335</width>
+    <width>369</width>
     <height>143</height>
    </rect>
   </property>
@@ -157,5 +157,22 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>cmdOK</sender>
+   <signal>clicked()</signal>
+   <receiver>MultiConstraintUI</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>321</x>
+     <y>121</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>184</x>
+     <y>71</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
