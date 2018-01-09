@@ -208,8 +208,8 @@ class FileReader(object):
     def _remove_nans_in_data(data):
         """
         Remove data points where nan is loaded
-        :param data: 1D data set
-        :return: data with mask=0 for any value of nan in data .x, .y, .dx, .dy
+        :param data: 1D or 2D data object
+        :return: data with nan points removed
         """
         if isinstance(data, Data1D):
             fields = FIELDS_1D
@@ -217,11 +217,12 @@ class FileReader(object):
             fields = FIELDS_2D
         else:
             return data
+        # Make array of good points - all others will be removed
         good = np.isfinite(getattr(data, fields[0]))
         for name in fields[1:]:
             array = getattr(data, name)
             if array is not None:
-                # Set mask[i] to 0 when data.<param> is nan
+                # Update good points only if not already changed
                 good &= np.isfinite(array)
         if not np.all(good):
             for name in fields:
