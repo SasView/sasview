@@ -35,7 +35,13 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         """
         switch M1 <-> M2
         """
+        # Switch parameters
         self.params[1], self.params[0] = self.params[0], self.params[1]
+        # Try to swap parameter names in the line edit
+        current_text = self.txtConstraint.text()
+        new_text = current_text.replace(self.params[0], self.params[1])
+        self.txtConstraint.setText(new_text)
+        # Update labels and tooltips
         self.setupLabels()
         self.setupTooltip()
 
@@ -87,12 +93,11 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
 
         # 2. ensure the text contains parameter name
         parameter_string_start = constraint_text.find(param_str)
-        has_parameter_name = (parameter_string_start > -1)
-        if not has_parameter_name:
+        if parameter_string_start < 0:
             return False
         parameter_string_end = parameter_string_start + len(param_str)
 
-        # 3. parameter name should be a separate word, but can have "()[]*+-/" around
+        # 3. parameter name should be a separate word, but can have "()[]*+-/ " around
         valid_neighbours = "()[]*+-/ "
         has_only_parameter = False
         start_loc = parameter_string_start -1

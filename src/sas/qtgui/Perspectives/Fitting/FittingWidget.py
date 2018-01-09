@@ -44,6 +44,8 @@ from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import ModelViewDelegate
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import PolyViewDelegate
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import MagnetismViewDelegate
+from sas.qtgui.Perspectives.Fitting.Constraints import Constraint
+from sas.qtgui.Perspectives.Fitting.MultiConstraint import MultiConstraint
 
 
 TAB_MAGNETISM = 4
@@ -83,7 +85,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     """
     Main widget for selecting form and structure factor models
     """
-    constraintAddedSignal = QtCore.pyqtSignal(list)
+    #constraintAddedSignal = QtCore.pyqtSignal(list)
     def __init__(self, parent=None, data=None, tab_id=1):
 
         super(FittingWidget, self).__init__()
@@ -456,7 +458,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Respond to change in parameters from the UI
         self._model_model.itemChanged.connect(self.onMainParamsChange)
-        self.constraintAddedSignal.connect(self.modifyViewOnConstraint)
+        #self.constraintAddedSignal.connect(self.modifyViewOnConstraint)
         self._poly_model.itemChanged.connect(self.onPolyModelChange)
         self._magnet_model.itemChanged.connect(self.onMagnetModelChange)
 
@@ -465,7 +467,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def showModelContextMenu(self, position):
 
-        rows = len([s.row() for s in self.lstParams.selectionModel().selectedRows()])
+        #rows = len([s.row() for s in self.lstParams.selectionModel().selectedRows()])
+        rows = [s.row() for s in self.lstParams.selectionModel().selectedRows()]
         menu = self.showModelDescription() if not rows else self.modelContextMenu(rows)
         try:
             menu.exec_(self.lstParams.viewport().mapToGlobal(position))
@@ -474,20 +477,30 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         return
 
     def modelContextMenu(self, rows):
+        """
+        Create context menu for the given model
+        """
         menu = QtWidgets.QMenu()
-
+        num_rows = len(rows)
         # Select for fitting
+        param_string = "parameter " if num_rows==1 else "parameters "
+        to_string = "to its current value" if num_rows==1 else "to their current values"
+
         self.actionSelect = QtWidgets.QAction(self)
         self.actionSelect.setObjectName("actionSelect")
-        self.actionSelect.setText(QtCore.QCoreApplication.translate("self", "Select parameter for fitting"))
+        self.actionSelect.setText(QtCore.QCoreApplication.translate("self", "Select "+param_string+" for fitting"))
         # Unselect from fitting
         self.actionDeselect = QtWidgets.QAction(self)
         self.actionDeselect.setObjectName("actionDeselect")
-        self.actionDeselect.setText(QtCore.QCoreApplication.translate("self", "De-select parameter from fitting"))
+        self.actionDeselect.setText(QtCore.QCoreApplication.translate("self", "De-select "+param_string+" from fitting"))
 
         self.actionConstrain = QtWidgets.QAction(self)
         self.actionConstrain.setObjectName("actionConstrain")
-        self.actionConstrain.setText(QtCore.QCoreApplication.translate("self", "Constrain parameter to current value"))
+        self.actionConstrain.setText(QtCore.QCoreApplication.translate("self", "Constrain "+param_string + to_string))
+
+        self.actionRemoveConstraint = QtWidgets.QAction(self)
+        self.actionRemoveConstraint.setObjectName("actionRemoveConstrain")
+        self.actionRemoveConstraint.setText(QtCore.QCoreApplication.translate("self", "Remove constraint"))
 
         self.actionMultiConstrain = QtWidgets.QAction(self)
         self.actionMultiConstrain.setObjectName("actionMultiConstrain")
@@ -497,21 +510,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.actionMutualMultiConstrain.setObjectName("actionMutualMultiConstrain")
         self.actionMutualMultiConstrain.setText(QtCore.QCoreApplication.translate("self", "Mutual constrain of selected parameters..."))
 
-        #action.setDefaultWidget(label)
         menu.addAction(self.actionSelect)
         menu.addAction(self.actionDeselect)
         menu.addSeparator()
 
-        if rows == 1:
+        if self.rowHasConstraint(rows[0]):
+            menu.addAction(self.actionRemoveConstraint)
+        else:
             menu.addAction(self.actionConstrain)
-        elif rows == 2:
-            menu.addAction(self.actionMultiConstrain)
+        if num_rows == 2:
             menu.addAction(self.actionMutualMultiConstrain)
-        elif rows > 2:
-            menu.addAction(self.actionMultiConstrain)
 
         # Define the callbacks
         self.actionConstrain.triggered.connect(self.addSimpleConstraint)
+        self.actionRemoveConstraint.triggered.connect(self.deleteConstraint)
         self.actionMutualMultiConstrain.triggered.connect(self.showMultiConstraint)
         self.actionSelect.triggered.connect(self.selectParameters)
         self.actionDeselect.triggered.connect(self.deselectParameters)
@@ -521,56 +533,121 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Show the constraint widget and receive the expression
         """
-        from sas.qtgui.Perspectives.Fitting.MultiConstraint import MultiConstraint
-        from .Constraints import Constraint
         selected_rows = self.lstParams.selectionModel().selectedRows()
+        assert(len(selected_rows), 2)
 
         params_list = [s.data() for s in selected_rows]
+        # Create and display the widget for param1 and param2
         mc_widget = MultiConstraint(self, params=params_list)
-        mc_widget.exec_()
+        if mc_widget.exec_() != QtWidgets.QDialog.Accepted:
+            return
+
         constraint = Constraint()
         c_text = mc_widget.txtConstraint.text()
-        # Pass the constraint to the parser
 
-        self.communicate.statusBarUpdateSignal.emit('Constraints added')
-        # Change the colour of the row
-        pass
+        # widget.params[0] is the parameter we're constraining
+        constraint.param = mc_widget.params[0]
+        constraint.func = c_text
 
-    def modifyViewOnConstraint(self, row):
-        """
-        Add visual cues that the parameter is constrained
-        """
-        value = self._model_model.item(row, 1).text()
-        # Set min/max to the value constrained
-        self._model_model.item(row,2).setText(value)
-        self._model_model.item(row,3).setText(value)
+        # Create a new item and add the Constraint object as a child
+        item = QtGui.QStandardItem()
+        item.setData(constraint)
+        # Which row is the constrained parameter in?
+
+        row = self.rowFromName(constraint.param)
+        self._model_model.item(row, 1).setChild(0, item)
+        #self.constraintAddedSignal.emit([row])
+        # Show visual hints for the constraint
         font = QtGui.QFont()
         font.setItalic(True)
         brush = QtGui.QBrush(QtGui.QColor('blue'))
+        self.modifyViewOnRow(row, font=font, brush=brush)
+
+        # Pass the constraint to the parser
+        self.communicate.statusBarUpdateSignal.emit('Constraints added')
+
+    def rowFromName(self, name):
+        """
+        given parameter name get the row number in self._model_model
+        """
+        for row in range(self._model_model.rowCount()):
+            row_name = self._model_model.item(row).text()
+            if row_name == name:
+                return row
+        return None
+
+    def modifyViewOnRow(self, row, font=None, brush=None):
+        """
+        Chage how the given row of the main model is shown
+        """
+        fields_enabled = False
+        if font is None:
+            font = QtGui.QFont()
+            fields_enabled = True
+        if brush is None:
+            brush = QtGui.QBrush()
+            fields_enabled = True
         self._model_model.blockSignals(True)
         # Modify font and foreground of affected rows
         for column in range(0, self._model_model.columnCount()):
             self._model_model.item(row, column).setForeground(brush)
             self._model_model.item(row, column).setFont(font)
-            self._model_model.item(row, column).setEditable(False)
+            self._model_model.item(row, column).setEditable(fields_enabled)
         self._model_model.blockSignals(False)
 
     def addSimpleConstraint(self):
         """
         Adds a constraint on a single parameter.
         """
-        from .Constraints import Constraint
         for row in self.selectedParameters():
             param = self._model_model.item(row, 0).text()
             value = self._model_model.item(row, 1).text()
-            constraint = Constraint(param=param, value=value)
+            min = self._model_model.item(row, 2).text()
+            max = self._model_model.item(row, 3).text()
+            # Create a Constraint object
+            constraint = Constraint(param=param, value=value, min=min, max=max)
+            # Create a new item and add the Constraint object as a child
             item = QtGui.QStandardItem()
             item.setData(constraint)
             self._model_model.item(row, 1).setChild(0, item)
+            # Set min/max to the value constrained
+            self._model_model.item(row,2).setText(value)
+            self._model_model.item(row,3).setText(value)
             #self.constraintAddedSignal.emit([row])
-            self.modifyViewOnConstraint(row)
+            # Show visual hints for the constraint
+            font = QtGui.QFont()
+            font.setItalic(True)
+            brush = QtGui.QBrush(QtGui.QColor('blue'))
+            self.modifyViewOnRow(row, font=font, brush=brush)
         self.communicate.statusBarUpdateSignal.emit('Constraint added')
         pass
+
+    def deleteConstraint(self):
+        """
+        Delete constraints from selected parameters.
+        """
+        for row in self.selectedParameters():
+            # Get the Constraint object from of the model item
+            item = self._model_model.item(row, 1)
+            constraint = item.child(0).data()
+            # Retrieve old values and put them on the model
+            if constraint.min is not None:
+                self._model_model.item(row, 2).setText(constraint.min)
+            if constraint.max is not None:
+                self._model_model.item(row, 3).setText(constraint.max)
+            # Remove constraint item
+            item.removeRow(0)
+            #self.constraintAddedSignal.emit([row])
+            self.modifyViewOnRow(row)
+        self.communicate.statusBarUpdateSignal.emit('Constraint removed')
+        pass
+
+    def rowHasConstraint(self, row):
+        """
+        Finds out if row of the main model has a constraint child
+        """
+        item = self._model_model.item(row,1)
+        return True if (item.hasChildren() and isinstance(item.child(0).data(), Constraint)) else False
 
     def selectParameters(self):
         """
@@ -963,7 +1040,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             not np.isfinite(res.fitness) or \
             np.any(res.pvec is None) or \
             not np.all(np.isfinite(res.pvec)):
-            msg = "Fitting did not converge!!!"
+            msg = "Fitting did not converge!"
             self.communicate.statusBarUpdateSignal.emit(msg)
             logging.error(msg)
             return
