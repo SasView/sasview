@@ -1,11 +1,13 @@
 """
 Widget for parameter constraints.
 """
+import os
 from numpy import *
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
+import webbrowser
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
@@ -127,11 +129,9 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         Display related help section
         """
         try:
-            location = GuiUtils.HELP_DIRECTORY_LOCATION + \
+            help_location = GuiUtils.HELP_DIRECTORY_LOCATION + \
             "/user/sasgui/perspectives/fitting/fitting_help.html#simultaneous-fits-with-constraints"
-
-            self.manager._helpView.load(QtCore.QUrl(location))
-            self.manager._helpView.show()
+            webbrowser.open('file://' + os.path.realpath(help_location))
         except AttributeError:
             # No manager defined - testing and standalone runs
             pass
