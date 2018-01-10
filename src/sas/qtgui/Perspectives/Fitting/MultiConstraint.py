@@ -28,6 +28,7 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         self.txtConstraint.setText(self.params[1])
 
         self.cmdOK.clicked.connect(self.accept)
+        self.cmdHelp.clicked.connect(self.onHelp)
         self.cmdRevert.clicked.connect(self.revert)
         self.txtConstraint.editingFinished.connect(self.validateFormula)
 
@@ -121,5 +122,18 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
 
         return True
 
+    def onHelp(self):
+        """
+        Display related help section
+        """
+        try:
+            location = GuiUtils.HELP_DIRECTORY_LOCATION + \
+            "/user/sasgui/perspectives/fitting/fitting_help.html#simultaneous-fits-with-constraints"
+
+            self.manager._helpView.load(QtCore.QUrl(location))
+            self.manager._helpView.show()
+        except AttributeError:
+            # No manager defined - testing and standalone runs
+            pass
 
 
