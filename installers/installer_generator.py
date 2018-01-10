@@ -9,6 +9,8 @@ import os
 import sys
 import string
 
+is_64bit = sys.maxsize > 2**32
+
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(root, 'sasview-install', 'Lib', 'site-packages'))
 from sas.sasview import local_config
@@ -343,7 +345,8 @@ def generate_installer():
     TEMPLATE += "AppPublisherURL=%s\n" % str(AppPublisherURL)
     TEMPLATE += "AppSupportURL=%s\n" % str(AppSupportURL)
     TEMPLATE += "AppUpdatesURL=%s \n" % str(AppUpdatesURL)
-    TEMPLATE += "ArchitecturesInstallIn64BitMode=%s \n" % str(ArchitecturesInstallIn64BitMode)
+    if is_64bit:
+        TEMPLATE += "ArchitecturesInstallIn64BitMode=%s \n" % str(ArchitecturesInstallIn64BitMode)
     TEMPLATE += "ChangesEnvironment=%s \n" % str(ChangesEnvironment)
     TEMPLATE += "DefaultDirName=%s\n" % str(DefaultDirName)
     TEMPLATE += "DefaultGroupName=%s\n" % str(DefaultGroupName)
