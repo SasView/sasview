@@ -59,7 +59,6 @@ from Perspectives.Fitting.UnitTesting import MultiConstraintTest
 
 #  Invariant
 from Perspectives.Invariant.UnitTesting import InvariantPerspectiveTest
-from Perspectives.Invariant.UnitTesting import InvariantDetailsTest
 
 def suite():
     suites = (
