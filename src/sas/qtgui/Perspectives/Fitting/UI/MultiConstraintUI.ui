@@ -3,7 +3,7 @@
  <class>MultiConstraintUI</class>
  <widget class="QDialog" name="MultiConstraintUI">
   <property name="windowModality">
-   <enum>Qt::WindowModal</enum>
+   <enum>Qt::ApplicationModal</enum>
   </property>
   <property name="geometry">
    <rect>
@@ -152,6 +152,20 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QPushButton" name="cmdCancel">
+       <property name="text">
+        <string>Cancel</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cmdHelp">
+       <property name="text">
+        <string>Help</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
   </layout>
@@ -166,6 +180,22 @@
    <hints>
     <hint type="sourcelabel">
      <x>321</x>
+     <y>121</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>184</x>
+     <y>71</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cmdCancel</sender>
+   <signal>clicked()</signal>
+   <receiver>MultiConstraintUI</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>187</x>
      <y>121</y>
     </hint>
     <hint type="destinationlabel">
