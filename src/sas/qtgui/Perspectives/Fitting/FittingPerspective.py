@@ -10,6 +10,7 @@ from bumps import fitters
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
+from sas.qtgui.Perspectives.Fitting.ConstraintWidget import ConstraintWidget
 from sas.qtgui.Perspectives.Fitting.FittingOptions import FittingOptions
 from sas.qtgui.Perspectives.Fitting.GPUOptions import GPUOptions
 
@@ -29,6 +30,7 @@ class FittingWindow(QtWidgets.QTabWidget):
 
         # Max index for adding new, non-clashing tab names
         self.maxIndex = 0
+        self.maxCSIndex = 0
 
         # Index of the current tab
         self.currentTab = 0
@@ -107,12 +109,24 @@ class FittingWindow(QtWidgets.QTabWidget):
         tab	= FittingWidget(parent=self.parent, data=data, tab_id=self.maxIndex+1)
         tab.is_batch_fitting = is_batch
         # Add this tab to the object library so it can be retrieved by scripting/jupyter
-        tab_name = self.tabName(is_batch=is_batch)
+        tab_name = self.getTabName(is_batch=is_batch)
         ObjectLibrary.addObject(tab_name, tab)
         self.tabs.append(tab)
         if data:
             self.updateFitDict(data, tab_name)
         self.maxIndex += 1
+        self.addTab(tab, tab_name)
+
+    def addConstraintTab(self):
+        """
+        Add a new C&S fitting tab
+        """
+        tab	= ConstraintWidget(parent=self.parent)
+        # Add this tab to the object library so it can be retrieved by scripting/jupyter
+        tab_name = self.getCSTabName() # TODO update the tab name scheme
+        ObjectLibrary.addObject(tab_name, tab)
+        self.tabs.append(tab)
+        self.maxCSIndex += 1
         self.addTab(tab, tab_name)
 
     def updateFitDict(self, item_key, tab_name):
@@ -125,14 +139,20 @@ class FittingWindow(QtWidgets.QTabWidget):
         else:
             self.dataToFitTab[item_key_str] = [tab_name]
 
-        #print "CURRENT dict: ", self.dataToFitTab
-
-    def tabName(self, is_batch=False):
+    def getTabName(self, is_batch=False):
         """
         Get the new tab name, based on the number of fitting tabs so far
         """
         page_name = "BatchPage" if is_batch else "FitPage"
         page_name = page_name + str(self.maxIndex)
+        return page_name
+
+    def getCSTabName(self):
+        """
+        Get the new tab name, based on the number of fitting tabs so far
+        """
+        page_name = "Const. & Simul. Fit"
+        page_name = page_name + str(self.maxCSIndex)
         return page_name
 
     def resetTab(self, index):

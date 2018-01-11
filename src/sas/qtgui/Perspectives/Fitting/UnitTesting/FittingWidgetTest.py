@@ -111,32 +111,31 @@ class FittingWidgetTest(unittest.TestCase):
         """
         fittingWindow =  self.widget
 
-        self.assertIsInstance(fittingWindow.lstMagnetic.itemDelegate(), QtGui.QStyledItemDelegate)
+        self.assertIsInstance(fittingWindow.lstMagnetic.itemDelegate(), QtWidgets.QStyledItemDelegate)
         #Test loading from json categories
         fittingWindow.SASModelToQModel("cylinder")
         mag_index = fittingWindow.lstMagnetic.model().index(0,0)
-        self.assertEqual(str(mag_index.data().toString()), "up:frac_i")
+        self.assertEqual(mag_index.data(), "up:frac_i")
         mag_index = fittingWindow.lstMagnetic.model().index(1,0)
-        self.assertEqual(str(mag_index.data().toString()), "up:frac_f")
+        self.assertEqual(mag_index.data(), "up:frac_f")
         mag_index = fittingWindow.lstMagnetic.model().index(2,0)
-        self.assertEqual(str(mag_index.data().toString()), "up:angle")
+        self.assertEqual(mag_index.data(), "up:angle")
         mag_index = fittingWindow.lstMagnetic.model().index(3,0)
-        self.assertEqual(str(mag_index.data().toString()), "M0:sld")
+        self.assertEqual(mag_index.data(), "M0:sld")
         mag_index = fittingWindow.lstMagnetic.model().index(4,0)
-        self.assertEqual(str(mag_index.data().toString()), "mtheta:sld")
+        self.assertEqual(mag_index.data(), "mtheta:sld")
         mag_index = fittingWindow.lstMagnetic.model().index(5,0)
-        self.assertEqual(str(mag_index.data().toString()), "mphi:sld")
+        self.assertEqual(mag_index.data(), "mphi:sld")
         mag_index = fittingWindow.lstMagnetic.model().index(6,0)
-        self.assertEqual(str(mag_index.data().toString()), "M0:sld_solvent")
+        self.assertEqual(mag_index.data(), "M0:sld_solvent")
         mag_index = fittingWindow.lstMagnetic.model().index(7,0)
-        self.assertEqual(str(mag_index.data().toString()), "mtheta:sld_solvent")
+        self.assertEqual(mag_index.data(), "mtheta:sld_solvent")
         mag_index = fittingWindow.lstMagnetic.model().index(8,0)
-        self.assertEqual(str(mag_index.data().toString()), "mphi:sld_solvent")
+        self.assertEqual(mag_index.data(), "mphi:sld_solvent")
 
         # test the delegate a bit
         delegate = fittingWindow.lstMagnetic.itemDelegate()
         self.assertEqual(delegate.editableParameters(), [1, 2, 3])
-        self.assertIsInstance(delegate.combo_updated, QtCore.pyqtBoundSignal)
 
     def testSelectStructureFactor(self):
         """

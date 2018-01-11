@@ -551,7 +551,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Show the constraint widget and receive the expression
         """
         selected_rows = self.lstParams.selectionModel().selectedRows()
-        assert(len(selected_rows), 2)
+        assert(len(selected_rows)==2)
 
         params_list = [s.data() for s in selected_rows]
         # Create and display the widget for param1 and param2
