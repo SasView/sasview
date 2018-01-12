@@ -129,7 +129,7 @@ The following algorithm is applied:
 
 .. math::
     \Gamma(x_k) = 2 \sum_{n=0}^{N-1} x_n \cos{\left[ \frac{\pi}{N}
-    \left(n + \frac{1}{2} \right) k \right] } \text{ for } k = 0, 1, \ldots,
+    \left(n + \frac{1}{2} \right) k \right] } \mathrm{ for } k = 0, 1, \ldots,
     N-1, N
 
 The 3D correlation function is calculated as:
@@ -187,8 +187,8 @@ The structural parameters extracted are:
 *   Long Period :math:`= L_p`
 *   Average Hard Block Thickness :math:`= L_c`
 *   Average Core Thickness :math:`= D_0`
-*   Average Interface Thickness :math:`\text{} = D_{tr}`
-*   Polydispersity :math:`= \Gamma_{\text{min}}/\Gamma_{\text{max}}`
+*   Average Interface Thickness :math:`\mathrm{} = D_{tr}`
+*   Polydispersity :math:`= \Gamma_{\mathrm{min}}/\Gamma_{\mathrm{max}}`
 *   Local Crystallinity :math:`= L_c/L_p`
 
 Volume Fraction Profile
@@ -202,7 +202,7 @@ structural parameters are obtainable by other means:
 *   Anchor Separation :math:`= D`
 *   Bound Fraction :math:`= <p>`
 *   Second Moment :math:`= \sigma`
-*   Maximum Extent :math:`= \delta_{\text{h}}`
+*   Maximum Extent :math:`= \delta_{\mathrm{h}}`
 *   Adsorbed Amount :math:`= \Gamma`
 
 .. figure:: profile1.png

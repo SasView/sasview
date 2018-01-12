@@ -223,7 +223,7 @@ LATEX_PREAMBLE=r"""
 \usepackage[utf8]{inputenc}      % Allow unicode symbols in text
 \newcommand{\lt}{<}              % HTML needs \lt rather than <
 \newcommand{\gt}{>}              % HTML needs \gt rather than >
-\renewcommand{\AA}{\text{\r{A}}} % Allow \AA in math mode
+\renewcommand{\AA}{\mathrm{\r{A}}} % Allow \AA in math mode
 \DeclareUnicodeCharacter {212B} {\AA}                  % Angstrom
 \DeclareUnicodeCharacter {00B7} {\ensuremath{\cdot}}   % cdot
 \DeclareUnicodeCharacter {00B0} {\ensuremath{^\circ}}  % degrees
