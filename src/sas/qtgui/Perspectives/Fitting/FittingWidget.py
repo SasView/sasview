@@ -81,7 +81,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     """
     Main widget for selecting form and structure factor models
     """
-    #constraintAddedSignal = QtCore.pyqtSignal(list)
+    constraintAddedSignal = QtCore.pyqtSignal(list)
+    newModelSignal = QtCore.pyqtSignal()
     def __init__(self, parent=None, data=None, tab_id=1):
 
         super(FittingWidget, self).__init__()
@@ -573,7 +574,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Which row is the constrained parameter in?
         row = self.rowFromName(constraint.param)
         self._model_model.item(row, 1).setChild(0, item)
-        #self.constraintAddedSignal.emit([row])
+        self.constraintAddedSignal.emit([row])
 
         # Show visual hints for the constraint
         font = QtGui.QFont()
@@ -625,7 +626,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             min = self._model_model.item(row, min_col).text()
             max = self._model_model.item(row, max_col).text()
             # Create a Constraint object
-            constraint = Constraint(param=param, value=value, min=min, max=max)
+            constraint = Constraint(param=param, value=value, min=min, max=max, func=value)
             # Create a new item and add the Constraint object as a child
             item = QtGui.QStandardItem()
             item.setData(constraint)
@@ -633,7 +634,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # Set min/max to the value constrained
             self._model_model.item(row, min_col).setText(value)
             self._model_model.item(row, max_col).setText(value)
-            #self.constraintAddedSignal.emit([row])
+            self.constraintAddedSignal.emit([row])
             # Show visual hints for the constraint
             font = QtGui.QFont()
             font.setItalic(True)
@@ -646,9 +647,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Delete constraints from selected parameters.
         """
+        self.deleteConstraintOnParameter(param=None)
+
+    def deleteConstraintOnParameter(self, param=None):
+        """
+        Delete the constraint on model parameter 'param'
+        """
         min_col = self.lstParams.itemDelegate().param_min
         max_col = self.lstParams.itemDelegate().param_max
-        for row in self.selectedParameters():
+        for row in range(self._model_model.rowCount()):
             # Get the Constraint object from of the model item
             item = self._model_model.item(row, 1)
             if not item.hasChildren():
@@ -658,6 +665,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 continue
             if not isinstance(constraint, Constraint):
                 continue
+            if param and constraint.param != param:
+                continue
+            # Now we got the right row. Delete the constraint and clean up
             # Retrieve old values and put them on the model
             if constraint.min is not None:
                 self._model_model.item(row, min_col).setText(constraint.min)
@@ -665,10 +675,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 self._model_model.item(row, max_col).setText(constraint.max)
             # Remove constraint item
             item.removeRow(0)
-            #self.constraintAddedSignal.emit([row])
+            self.constraintAddedSignal.emit([row])
             self.modifyViewOnRow(row)
+            break
+
         self.communicate.statusBarUpdateSignal.emit('Constraint removed')
         pass
+
 
     def getConstraintForRow(self, row):
         """
@@ -686,7 +699,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Finds out if row of the main model has a constraint child
         """
         item = self._model_model.item(row,1)
-        return True if (item.hasChildren() and isinstance(item.child(0).data(), Constraint)) else False
+        if item.hasChildren():
+            c = item.child(0).data()
+            if isinstance(c, Constraint) and c.func:
+                return True
+        return False
+        #return True if (item.hasChildren() and isinstance(item.child(0).data(), Constraint)) else False
 
     def selectParameters(self):
         """
@@ -725,8 +743,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         model_name = self.modelName()
         self.kernel_module.name = model_name
         param_number = self._model_model.rowCount()
+        def preamble(s):
+            func = self._model_model.item(s, 1).child(0).data().func
+            value = self._model_model.item(s, 1).child(0).data().value
+            if func == value:
+                return ""
+            return model_name + "."
         params = [(self._model_model.item(s, 0).text(),
-                    model_name+"."+self._model_model.item(s, 1).child(0).data().func)
+                    preamble(s) +self._model_model.item(s, 1).child(0).data().func)
                     for s in range(param_number) if self.rowHasConstraint(s)]
         return params
 
@@ -805,6 +829,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Update state stack
         self.updateUndo()
+
+        # Let others know
+        self.newModelSignal.emit()
 
     def onSelectCategory(self):
         """
@@ -1522,6 +1549,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Now we claim the model has been loaded
         self.model_is_loaded = True
+        # Change the model name to a monicker
+        self.kernel_module.name = self.modelName()
 
         # (Re)-create headers
         FittingUtilities.addHeadersToModel(self._model_model)

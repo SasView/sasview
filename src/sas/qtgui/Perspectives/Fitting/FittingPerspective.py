@@ -17,6 +17,7 @@ from sas.qtgui.Perspectives.Fitting.GPUOptions import GPUOptions
 class FittingWindow(QtWidgets.QTabWidget):
     """
     """
+    tabsModifiedSignal = QtCore.pyqtSignal()
     name = "Fitting" # For displaying in the combo box in DataExplorer
     def __init__(self, parent=None, data=None):
 
@@ -116,12 +117,13 @@ class FittingWindow(QtWidgets.QTabWidget):
             self.updateFitDict(data, tab_name)
         self.maxIndex += 1
         self.addTab(tab, tab_name)
+        self.tabsModifiedSignal.emit()
 
     def addConstraintTab(self):
         """
         Add a new C&S fitting tab
         """
-        tab	= ConstraintWidget(parent=self.parent)
+        tab	= ConstraintWidget(parent=self)
         # Add this tab to the object library so it can be retrieved by scripting/jupyter
         tab_name = self.getCSTabName() # TODO update the tab name scheme
         ObjectLibrary.addObject(tab_name, tab)
@@ -181,6 +183,7 @@ class FittingWindow(QtWidgets.QTabWidget):
             ObjectLibrary.deleteObjectByRef(self.tabs[index])
             self.removeTab(index)
             del self.tabs[index]
+            self.tabsModifiedSignal.emit()
         except IndexError:
             # The tab might have already been deleted previously
             pass
