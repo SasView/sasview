@@ -565,6 +565,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # widget.params[0] is the parameter we're constraining
         constraint.param = mc_widget.params[0]
+        # Function should have the model name preamble
+        #model_name = self.kernel_module.name
+        #constraint.func = model_name + ":" + c_text
         constraint.func = c_text
 
         # Create a new item and add the Constraint object as a child
@@ -740,8 +743,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         ('constrained parameter', 'function to constrain')
         e.g. [('sld','5*sld_solvent')]
         """
-        model_name = self.modelName()
-        self.kernel_module.name = model_name
+        model_name = self.kernel_module.name
         param_number = self._model_model.rowCount()
         def preamble(s):
             func = self._model_model.item(s, 1).child(0).data().func
@@ -811,6 +813,21 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if category == CATEGORY_STRUCTURE:
             model = None
         self.respondToModelStructure(model=model, structure_factor=structure)
+
+    def replaceConstraintName(self, old_name, new_name=""):
+        """
+        Replace names of models in defined constraints
+        """
+        param_number = self._model_model.rowCount()
+        # loop over parameters
+        for row in range(param_number):
+            if self.rowHasConstraint(row):
+                func = self._model_model.item(row, 1).child(0).data().func
+                if old_name in func:
+                    new_func = func.replace(old_name, new_name)
+                    self._model_model.item(row, 1).child(0).data().func = new_func
+
+        pass
 
     def respondToModelStructure(self, model=None, structure_factor=None):
         # Set enablement on calculate/plot

@@ -20,6 +20,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.setupUi(self)
         self.currentType = "FitPage"
 
+        # Remember previous content of modified cell
+        self.current_cell = ""
+
         # Set up the widgets
         self.initializeWidgets()
 
@@ -37,8 +40,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Set up various widget states
         """
-        labels = ['FitPage', 'Model', 'Data', 'Mnemonics']
+        labels = ['FitPage', 'Model', 'Data', 'Mnemonic']
         # tab widget - headers
+        self.editable_tab_columns = [labels.index('Mnemonic')]
         self.tblTabList.setColumnCount(len(labels))
         self.tblTabList.setHorizontalHeaderLabels(labels)
         self.tblTabList.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
@@ -60,11 +64,19 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Set up signals/slots for this widget
         """
+        # simple widgets
         self.btnSingle.toggled.connect(self.onFitTypeChange)
         self.btnBatch.toggled.connect(self.onFitTypeChange)
         self.cbCases.currentIndexChanged.connect(self.onSpecialCaseChange)
         self.cmdFit.clicked.connect(self.onFit)
         self.cmdHelp.clicked.connect(self.onHelp)
+
+        # QTableWidgets
+        self.tblTabList.cellChanged.connect(self.onMonikerEdit)
+        self.tblTabList.cellDoubleClicked.connect(self.onTabCellEntered)
+        self.tblConstraints.cellChanged.connect(self.onConstraintChange)
+
+        # External signals
         self.parent.tabsModifiedSignal.connect(self.initializeFitList)
 
     def updateSignalsFromTab(self, tab=None):
@@ -99,6 +111,60 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         Display the help page
         """
         pass
+
+    def onMonikerEdit(self, row, column):
+        """
+        Modify the model moniker
+        """
+        if column not in self.editable_tab_columns:
+            return
+        item = self.tblTabList.item(row, column)
+        new_moniker = item.data(0)
+
+        # The new name should be validated on the fly, with QValidator
+        # but let's just assure it post-factum
+        is_good_moniker = self.validateMoniker(new_moniker)
+        is_good_moniker = True
+        if not is_good_moniker:
+            item.setBackground(QtCore.Qt.red)
+            self.cmdFit.setEnabled(False)
+        else:
+            self.tblTabList.blockSignals(True)
+            item.setBackground(QtCore.Qt.white)
+            self.tblTabList.blockSignals(False)
+            self.cmdFit.setEnabled(True)
+            if not self.current_cell:
+                return
+            # Remember the value
+            if self.current_cell not in self.available_tabs:
+                return
+            temp_tab = self.available_tabs[self.current_cell]
+            # Remove the key from the dictionaries
+            self.available_tabs.pop(self.current_cell, None)
+            # Change the model name
+            model = temp_tab.kernel_module
+            model.name = new_moniker
+            # Replace constraint name
+            temp_tab.replaceConstraintName(self.current_cell, new_moniker)
+            # Reinitialize the display
+            self.initializeFitList()
+        pass
+
+    def onConstraintChange(self, row, column):
+        """
+        Modify the constraint in-place.
+        Tricky.
+        """
+        pass
+
+    def onTabCellEntered(self, row, column):
+        """
+        Remember the original tab list cell data.
+        Needed for reverting back on bad validation
+        """
+        if column != 3:
+            return
+        self.current_cell = self.tblTabList.item(row, column).data(0)
 
     def isTabImportable(self, tab):
         """
@@ -150,7 +216,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Define the callbacks
         #self.actionConstrain.triggered.connect(self.addSimpleConstraint)
         #self.actionRemoveConstraint.triggered.connect(self.deleteConstraint)
-        #self.actionMutualMultiConstrain.triggered.connect(self.showMultiConstraint)
+        self.actionMutualMultiConstrain.triggered.connect(self.showMultiConstraint)
         self.actionSelect.triggered.connect(self.selectModels)
         self.actionDeselect.triggered.connect(self.deselectModels)
         try:
@@ -245,6 +311,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Delete all selected constraints.
         """
+        # Removing rows from the table we're iterating over,
+        # so prepare a list of data first
         constraints_to_delete = []
         for row in self.selectedParameters(self.tblConstraints):
             constraints_to_delete.append(self.tblConstraints.item(row, 0).data(0))
@@ -255,6 +323,14 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             tab.deleteConstraintOnParameter(param)
         # Constraints removed - refresh the table widget
         self.initializeFitList()
+
+    def uneditableItem(self, data=""):
+        """
+        Returns an uneditable Table Widget Item
+        """
+        item = QtWidgets.QTableWidgetItem(data)
+        item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
+        return item
 
     def updateFitLine(self, tab):
         """
@@ -271,17 +347,23 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.available_tabs[moniker] = ObjectLibrary.getObject(tab)
 
         # Update the model table widget
-        item = QtWidgets.QTableWidgetItem(tab_name)
-        item.setCheckState(QtCore.Qt.Checked)
+        #item = QtWidgets.QTableWidgetItem(tab_name)
+        #item.setCheckState(QtCore.Qt.Checked)
+        #item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
         pos = self.tblTabList.rowCount()
         self.tblTabList.insertRow(pos)
+        item = self.uneditableItem(tab_name)
+        item.setFlags(item.flags() ^ QtCore.Qt.ItemIsUserCheckable)
+        item.setCheckState(QtCore.Qt.Checked)
         self.tblTabList.setItem(pos, 0, item)
-        self.tblTabList.setItem(pos, 1, QtWidgets.QTableWidgetItem(model_name))
-        self.tblTabList.setItem(pos, 2, QtWidgets.QTableWidgetItem(model_filename))
-        self.tblTabList.setItem(pos, 3, QtWidgets.QTableWidgetItem(moniker))
-
-        #self.available_tabs[pos] = (model, model_data)
-        #self.available_tabs[moniker] = tab
+        self.tblTabList.setItem(pos, 1, self.uneditableItem(model_name))
+        self.tblTabList.setItem(pos, 2, self.uneditableItem(model_filename))
+        # Moniker is editable, so no option change
+        item = QtWidgets.QTableWidgetItem(moniker)
+        # Disable signals so we don't get infinite call recursion
+        self.tblTabList.blockSignals(True)
+        self.tblTabList.setItem(pos, 3, item)
+        self.tblTabList.blockSignals(False)
 
         # Check if any constraints present in tab
         constraints = ObjectLibrary.getObject(tab).getConstraintsForModel()
@@ -331,3 +413,24 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             self.updateSignalsFromTab(tab)
             # We have at least 1 fit page, allow fitting
             self.cmdFit.setEnabled(True)
+
+    def validateMoniker(self, new_moniker=None):
+        """
+        Check new_moniker for correctness.
+        It must be non-empty.
+        It must not be the same as other monikers.
+        """
+        if not new_moniker:
+            return False
+
+        for existing_moniker in self.available_tabs:
+            if existing_moniker == new_moniker and existing_moniker != self.current_cell:
+                return False
+
+        return True
+
+    def showMultiConstraint(self):
+        """
+        Invoke the complex constraint editor
+        """
+        pass
