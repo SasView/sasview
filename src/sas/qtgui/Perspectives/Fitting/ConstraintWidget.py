@@ -8,6 +8,7 @@ import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 
 from sas.qtgui.Perspectives.Fitting.UI.ConstraintWidgetUI import Ui_ConstraintWidgetUI
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
+from sas.qtgui.Perspectives.Fitting.ComplexConstraint import ComplexConstraint
 
 class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
     """
@@ -433,4 +434,15 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Invoke the complex constraint editor
         """
+        selected_rows = self.selectedParameters(self.tblTabList)
+        assert(len(selected_rows)==2)
+
+        tab_list = [ObjectLibrary.getObject(self.tblTabList.item(s, 0).data(0)) for s in selected_rows]
+        # Create and display the widget for param1 and param2
+        cc_widget = ComplexConstraint(self, tabs=tab_list)
+        if cc_widget.exec_() != QtWidgets.QDialog.Accepted:
+            return
+
+        #constraint = Constraint()
+        #c_text = cc_widget.txtConstraint.text()
         pass

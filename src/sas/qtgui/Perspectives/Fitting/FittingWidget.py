@@ -566,8 +566,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # widget.params[0] is the parameter we're constraining
         constraint.param = mc_widget.params[0]
         # Function should have the model name preamble
-        #model_name = self.kernel_module.name
-        #constraint.func = model_name + ":" + c_text
         constraint.func = c_text
 
         # Create a new item and add the Constraint object as a child
@@ -575,7 +573,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         item.setData(constraint)
 
         # Which row is the constrained parameter in?
-        row = self.rowFromName(constraint.param)
+        row = self.getRowFromName(constraint.param)
         self._model_model.item(row, 1).setChild(0, item)
         self.constraintAddedSignal.emit([row])
 
@@ -588,7 +586,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Notify the user
         self.communicate.statusBarUpdateSignal.emit('Constraints added')
 
-    def rowFromName(self, name):
+    def getRowFromName(self, name):
         """
         Given parameter name get the row number in self._model_model
         """
@@ -597,6 +595,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if row_name == name:
                 return row
         return None
+
+    def getParamNames(self):
+        """
+        Return list of all parameters for the current model
+        """
+        #params = []
+        #for row in range(self._model_model.rowCount()):
+        #    params.append(self._model_model.item(row).text())
+        #return params
+        return [self._model_model.item(row).text() for row in range(self._model_model.rowCount())]
 
     def modifyViewOnRow(self, row, font=None, brush=None):
         """
