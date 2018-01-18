@@ -14,6 +14,7 @@ ALLOWED_OPERATORS = ['=','<','>','>=','<=']
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.ComplexConstraintUI import Ui_ComplexConstraintUI
+from sas.qtgui.Perspectives.Fitting.Constraints import Constraint
 
 class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
     def __init__(self, parent=None, tabs=None):
@@ -51,7 +52,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         self.cmdOK.clicked.connect(self.accept)
         self.cmdHelp.clicked.connect(self.onHelp)
         self.cmdRevert.clicked.connect(self.onRevert)
-        #self.txtConstraint.editingFinished.connect(self.validateFormula)
+        self.txtConstraint.editingFinished.connect(self.validateFormula)
 
         self.cbParam1.currentIndexChanged.connect(self.onParamIndexChange)
         self.cbParam2.currentIndexChanged.connect(self.onParamIndexChange)
@@ -94,7 +95,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         if source == "cbParam1":
             self.txtParam.setText(self.tab_names[0] + ":" + self.cbParam1.currentText())
         else:
-            self.txtConstraint.setText(self.cbParam2.currentText())
+            self.txtConstraint.setText(self.tab_names[1] + "." + self.cbParam2.currentText())
         pass
 
     def onOperatorChange(self, index):
@@ -147,8 +148,18 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         if not constraint_text or not isinstance(constraint_text, str):
             return False
 
-        param_str = str(self.params[1])
+        # M1.scale  --> model_str='M1', constraint_text='scale'
+        param_str = self.cbParam2.currentText()
         constraint_text = constraint_text.strip()
+        model_str = constraint_text[:constraint_text.index('.')]
+        #constraint_text = constraint_text[constraint_text.index('.')+1:]
+
+        # 0. Has to contain the model name
+        if model_str != self.txtName2.text():
+            return False
+
+        # Remove model name from constraint text
+        constraint_text = constraint_text.replace(model_str+".",'')
 
         # 1. just the parameter
         if param_str == constraint_text:
@@ -160,18 +171,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
             return False
         parameter_string_end = parameter_string_start + len(param_str)
 
-        # 3. parameter name should be a separate word, but can have "()[]*+-/ " around
-        valid_neighbours = "()[]*+-/ "
-        has_only_parameter = False
-        start_loc = parameter_string_start -1
-        end_loc = parameter_string_end
-        if not any([constraint_text[start_loc] == char for char in valid_neighbours]):
-            return False
-        if end_loc < len(constraint_text):
-            if not any([constraint_text[end_loc] == char for char in valid_neighbours]):
-                return False
-
-        # 4. replace parameter name with "1" and try to evaluate the expression
+        # 3. replace parameter name with "1" and try to evaluate the expression
         try:
             expression_to_evaluate = constraint_text.replace(param_str, "1.0")
             eval(expression_to_evaluate)
@@ -183,6 +183,12 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
             return False
 
         return True
+
+    def constraint(self):
+        """
+        Return the generated constraint as tuple (model1, param1, operator, constraint)
+        """
+        return (self.txtName1.text(), self.cbParam1.currentText(), self.cbOperator.currentText(), self.txtConstraint.text())
 
     def onHelp(self):
         """

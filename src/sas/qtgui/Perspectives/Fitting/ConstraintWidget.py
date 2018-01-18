@@ -9,6 +9,7 @@ import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 from sas.qtgui.Perspectives.Fitting.UI.ConstraintWidgetUI import Ui_ConstraintWidgetUI
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.ComplexConstraint import ComplexConstraint
+from sas.qtgui.Perspectives.Fitting.Constraints import Constraint
 
 class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
     """
@@ -430,6 +431,18 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         return True
 
+    def getObjectByName(self, name):
+        for object_name in ObjectLibrary.listObjects():
+            object = ObjectLibrary.getObject(object_name)
+            if isinstance(object, FittingWidget):
+                try:
+                    if object.kernel_module.name == name:
+                        return object
+                except AttributeError:
+                    # Disregard atribute errors - empty fit widgets
+                    continue
+        return None
+
     def showMultiConstraint(self):
         """
         Invoke the complex constraint editor
@@ -443,6 +456,19 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         if cc_widget.exec_() != QtWidgets.QDialog.Accepted:
             return
 
-        #constraint = Constraint()
-        #c_text = cc_widget.txtConstraint.text()
+        constraint = Constraint()
+        model1, param1, operator, constraint_text = cc_widget.constraint()
+
+        constraint.func = constraint_text
+        # constraint.param = param1
+        # Find the right tab
+        constrained_tab = self.getObjectByName(model1)
+        if constrained_tab is None:
+            return
+
+        # Find the constrained parameter row
+        constrained_row = constrained_tab.getRowFromName(param1)
+
+        # Update the tab
+        constrained_tab.addConstraintToRow(constraint, constrained_row)
         pass

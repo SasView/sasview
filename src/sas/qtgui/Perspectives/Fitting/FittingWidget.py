@@ -600,10 +600,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Return list of all parameters for the current model
         """
-        #params = []
-        #for row in range(self._model_model.rowCount()):
-        #    params.append(self._model_model.item(row).text())
-        #return params
         return [self._model_model.item(row).text() for row in range(self._model_model.rowCount())]
 
     def modifyViewOnRow(self, row, font=None, brush=None):
@@ -624,6 +620,26 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self._model_model.item(row, column).setFont(font)
             self._model_model.item(row, column).setEditable(fields_enabled)
         self._model_model.blockSignals(False)
+
+    def addConstraintToRow(self, constraint=None, row=0):
+        """
+        Adds the constraint object to requested row
+        """
+        # Create a new item and add the Constraint object as a child
+        assert(isinstance(constraint, Constraint))
+        assert(0<=row<=self._model_model.rowCount())
+
+        item = QtGui.QStandardItem()
+        item.setData(constraint)
+        self._model_model.item(row, 1).setChild(0, item)
+        # Set min/max to the value constrained
+        self.constraintAddedSignal.emit([row])
+        # Show visual hints for the constraint
+        font = QtGui.QFont()
+        font.setItalic(True)
+        brush = QtGui.QBrush(QtGui.QColor('blue'))
+        self.modifyViewOnRow(row, font=font, brush=brush)
+        self.communicate.statusBarUpdateSignal.emit('Constraint added')
 
     def addSimpleConstraint(self):
         """
@@ -758,9 +774,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             value = self._model_model.item(s, 1).child(0).data().value
             if func == value:
                 return ""
+
             return model_name + "."
         params = [(self._model_model.item(s, 0).text(),
-                    preamble(s) +self._model_model.item(s, 1).child(0).data().func)
+                    #preamble(s) +self._model_model.item(s, 1).child(0).data().func)
+                    self._model_model.item(s, 1).child(0).data().func)
                     for s in range(param_number) if self.rowHasConstraint(s)]
         return params
 
