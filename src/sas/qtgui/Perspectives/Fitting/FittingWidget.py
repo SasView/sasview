@@ -782,6 +782,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                     for s in range(param_number) if self.rowHasConstraint(s)]
         return params
 
+    def getConstraintObjectsForModel(self):
+        """
+        Returns Constraint objects present on the whole model
+        """
+        param_number = self._model_model.rowCount()
+        constraints = [self._model_model.item(s, 1).child(0).data()
+                       for s in range(param_number) if self.rowHasConstraint(s)]
+
+        return constraints
+
     def showModelDescription(self):
         """
         Creates a window with model description, when right clicked in the treeview

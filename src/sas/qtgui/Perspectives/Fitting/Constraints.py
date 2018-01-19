@@ -6,7 +6,7 @@ class Constraint(object):
         self._value = value
         self._param = param
         self._func = func
-        self.active = False
+        self.active = True
         self._min = min
         self._max = max
 
@@ -52,18 +52,3 @@ class Constraint(object):
 
     def delete(self, constraint=None):
         pass
-
-
-class ConstrainedParameters(object):
-    """
-    Representation of two constrained parameters
-    """
-    def __init__(self, parent=None):
-        pass
-
-    def add(self, constraint=None):
-        pass
-
-    def delete(self, constraint=None):
-        pass
-

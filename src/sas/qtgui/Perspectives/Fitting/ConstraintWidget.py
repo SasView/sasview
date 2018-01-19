@@ -25,6 +25,10 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Remember previous content of modified cell
         self.current_cell = ""
 
+        # Tabs used in simultaneous fitting
+        # tab_name : True/False
+        self.tabs_for_fitting = {}
+
         # Set up the widgets
         self.initializeWidgets()
 
@@ -74,12 +78,13 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.cmdHelp.clicked.connect(self.onHelp)
 
         # QTableWidgets
-        self.tblTabList.cellChanged.connect(self.onMonikerEdit)
+        self.tblTabList.cellChanged.connect(self.onTabCellEdit)
         self.tblTabList.cellDoubleClicked.connect(self.onTabCellEntered)
         self.tblConstraints.cellChanged.connect(self.onConstraintChange)
 
         # External signals
-        self.parent.tabsModifiedSignal.connect(self.initializeFitList)
+        #self.parent.tabsModifiedSignal.connect(self.initializeFitList)
+        self.parent.tabsModifiedSignal.connect(self.onModifiedTabs)
 
     def updateSignalsFromTab(self, tab=None):
         """
@@ -94,7 +99,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         Respond to the fit type change
         single fit/batch fit
         """
-        pass
+        source = self.sender().objectName()
+        self.currentType = "BatchPage" if source == "btnBatch" else "FitPage"
+        self.initializeFitList()
 
     def onSpecialCaseChange(self, index):
         """
@@ -114,13 +121,20 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         pass
 
-    def onMonikerEdit(self, row, column):
+    def onTabCellEdit(self, row, column):
         """
-        Modify the model moniker
+        Respond to check/uncheck and to modify the model moniker actions
         """
+        item = self.tblTabList.item(row, column)
+        if column == 0:
+            # Update the tabs for fitting list
+            tab_name = item.text()
+            self.tabs_for_fitting[tab_name] = (item.checkState() == QtCore.Qt.Checked)
+            # Enable fitting only when there are models to fit
+            self.cmdFit.setEnabled(any(self.tabs_for_fitting.values()))
+
         if column not in self.editable_tab_columns:
             return
-        item = self.tblTabList.item(row, column)
         new_moniker = item.data(0)
 
         # The new name should be validated on the fly, with QValidator
@@ -130,34 +144,36 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         if not is_good_moniker:
             item.setBackground(QtCore.Qt.red)
             self.cmdFit.setEnabled(False)
-        else:
-            self.tblTabList.blockSignals(True)
-            item.setBackground(QtCore.Qt.white)
-            self.tblTabList.blockSignals(False)
-            self.cmdFit.setEnabled(True)
-            if not self.current_cell:
-                return
-            # Remember the value
-            if self.current_cell not in self.available_tabs:
-                return
-            temp_tab = self.available_tabs[self.current_cell]
-            # Remove the key from the dictionaries
-            self.available_tabs.pop(self.current_cell, None)
-            # Change the model name
-            model = temp_tab.kernel_module
-            model.name = new_moniker
-            # Replace constraint name
-            temp_tab.replaceConstraintName(self.current_cell, new_moniker)
-            # Reinitialize the display
-            self.initializeFitList()
-        pass
+            return
+        self.tblTabList.blockSignals(True)
+        item.setBackground(QtCore.Qt.white)
+        self.tblTabList.blockSignals(False)
+        self.cmdFit.setEnabled(True)
+        if not self.current_cell:
+            return
+        # Remember the value
+        if self.current_cell not in self.available_tabs:
+            return
+        temp_tab = self.available_tabs[self.current_cell]
+        # Remove the key from the dictionaries
+        self.available_tabs.pop(self.current_cell, None)
+        # Change the model name
+        model = temp_tab.kernel_module
+        model.name = new_moniker
+        # Replace constraint name
+        temp_tab.replaceConstraintName(self.current_cell, new_moniker)
+        # Reinitialize the display
+        self.initializeFitList()
 
     def onConstraintChange(self, row, column):
         """
         Modify the constraint in-place.
-        Tricky.
         """
-        pass
+        item = self.tblConstraints.item(row, column)
+        if column == 0:
+            # Update the tabs for fitting list
+            constraint = self.available_constraints[row]
+            constraint.active = (item.checkState() == QtCore.Qt.Checked)
 
     def onTabCellEntered(self, row, column):
         """
@@ -167,6 +183,25 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         if column != 3:
             return
         self.current_cell = self.tblTabList.item(row, column).data(0)
+
+    def onModifiedTabs(self):
+        """
+        Respond to tabs being deleted by deleting involved constraints
+
+        This should probably be done in FittingWidget as it is the owner of
+        all the fitting data, but I want to keep the FW oblivious about
+        dependence on other FW tabs, so enforcing the constraint deletion here.
+        """
+        # Get the list of all constraints from querying the table
+        #constraints = getConstraintsForModel()
+
+        # Get the current list of tabs
+        #tabs = ObjectLibrary.listObjects()
+
+        # Check if any of the constraint dependencies got deleted
+        # Check the list of constraints
+        self.initializeFitList()
+        pass
 
     def isTabImportable(self, tab):
         """
@@ -338,25 +373,29 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Update a single line of the table widget with tab info
         """
-        model = ObjectLibrary.getObject(tab).kernel_module
+        fit_page = ObjectLibrary.getObject(tab)
+        model = fit_page.kernel_module
         if model is None:
             return
         tab_name = tab
         model_name = model.id
         moniker = model.name
-        model_data = ObjectLibrary.getObject(tab).data
+        model_data = fit_page.data
         model_filename = model_data.filename
-        self.available_tabs[moniker] = ObjectLibrary.getObject(tab)
+        self.available_tabs[moniker] = fit_page
 
         # Update the model table widget
-        #item = QtWidgets.QTableWidgetItem(tab_name)
-        #item.setCheckState(QtCore.Qt.Checked)
-        #item.setFlags( QtCore.Qt.ItemIsSelectable |  QtCore.Qt.ItemIsEnabled )
         pos = self.tblTabList.rowCount()
         self.tblTabList.insertRow(pos)
         item = self.uneditableItem(tab_name)
         item.setFlags(item.flags() ^ QtCore.Qt.ItemIsUserCheckable)
-        item.setCheckState(QtCore.Qt.Checked)
+        if tab_name in self.tabs_for_fitting:
+            state = QtCore.Qt.Checked if self.tabs_for_fitting[tab_name] else QtCore.Qt.Unchecked
+            item.setCheckState(state)
+        else:
+            item.setCheckState(QtCore.Qt.Checked)
+            self.tabs_for_fitting[tab_name] = True
+
         self.tblTabList.setItem(pos, 0, item)
         self.tblTabList.setItem(pos, 1, self.uneditableItem(model_name))
         self.tblTabList.setItem(pos, 2, self.uneditableItem(model_filename))
@@ -368,21 +407,23 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.tblTabList.blockSignals(False)
 
         # Check if any constraints present in tab
-        constraints = ObjectLibrary.getObject(tab).getConstraintsForModel()
+        constraint_names = fit_page.getConstraintsForModel()
+        constraints = fit_page.getConstraintObjectsForModel()
         if not constraints: 
             return
         self.tblConstraints.setEnabled(True)
-        for constraint in constraints:
+        for constraint, constraint_name in zip(constraints, constraint_names):
             # Create the text for widget item
-            label = moniker + ":"+ constraint[0] + " = " + constraint[1]
+            label = moniker + ":"+ constraint_name[0] + " = " + constraint_name[1]
+            pos = self.tblConstraints.rowCount()
+            self.available_constraints[pos] = constraint
 
             # Show the text in the constraint table
-            item = QtWidgets.QTableWidgetItem(label)
+            item = self.uneditableItem(label)
+            item.setFlags(item.flags() ^ QtCore.Qt.ItemIsUserCheckable)
             item.setCheckState(QtCore.Qt.Checked)
-            pos = self.tblConstraints.rowCount()
             self.tblConstraints.insertRow(pos)
             self.tblConstraints.setItem(pos, 0, item)
-            self.available_constraints[pos] = constraints
 
     def initializeFitList(self):
         """
@@ -460,7 +501,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         model1, param1, operator, constraint_text = cc_widget.constraint()
 
         constraint.func = constraint_text
-        # constraint.param = param1
+        constraint.param = param1
         # Find the right tab
         constrained_tab = self.getObjectByName(model1)
         if constrained_tab is None:

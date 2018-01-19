@@ -151,14 +151,13 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         # M1.scale  --> model_str='M1', constraint_text='scale'
         param_str = self.cbParam2.currentText()
         constraint_text = constraint_text.strip()
-        model_str = constraint_text[:constraint_text.index('.')]
-        #constraint_text = constraint_text[constraint_text.index('.')+1:]
+        model_str = self.txtName2.text()
 
         # 0. Has to contain the model name
         if model_str != self.txtName2.text():
             return False
 
-        # Remove model name from constraint text
+        # Remove model name from constraint
         constraint_text = constraint_text.replace(model_str+".",'')
 
         # 1. just the parameter
