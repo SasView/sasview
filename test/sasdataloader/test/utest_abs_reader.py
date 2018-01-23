@@ -75,6 +75,17 @@ class abs_reader(unittest.TestCase):
         data = Loader().load(find("jan08002.ABS"))
         self.assertEqual(data[0].meta_data['loader'], "IGOR 1D")
 
+    def test_usans_negative_dxl(self):
+        data_abs = Loader().load(find("sam14_cor.ABS"))
+        data_cor = Loader().load(find("sam14_cor.cor"))
+        for i in range(0, len(data_abs) - 1):
+            self.assertEquals(data_abs.x[i], data_cor.x[i])
+            self.assertEquals(data_abs.y[i], data_cor.y[i])
+            self.assertEquals(data_abs.dxl[i], data_cor.dxl[i])
+            self.assertEquals(data_abs.dxw[i], data_cor.dxw[i])
+            self.assertTrue(data_abs.dxl > 0)
+
+
 class DanseReaderTests(unittest.TestCase):
 
     def setUp(self):

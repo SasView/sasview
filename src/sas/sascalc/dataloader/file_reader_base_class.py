@@ -6,7 +6,7 @@ class
 
 import os
 import sys
-import re
+import math
 import logging
 from abc import abstractmethod
 
@@ -24,6 +24,13 @@ if sys.version_info[0] < 3:
 else:
     def decode(s):
         return s.decode() if isinstance(s, bytes) else s
+
+# Data 1D fields for iterative purposes
+FIELDS_1D = ('x', 'y', 'dx', 'dy', 'dxl', 'dxw')
+# Data 2D fields for iterative purposes
+FIELDS_2D = ('data', 'qx_data', 'qy_data', 'q_data', 'err_data',
+                 'dqx_data', 'dqy_data', 'mask')
+
 
 class FileReader(object):
     # String to describe the type of data this reader can load
@@ -101,6 +108,7 @@ class FileReader(object):
         self.current_datainfo = None
         self.current_dataset = None
         self.filepath = None
+        self.ind = None
         self.output = []
 
     def nextline(self):
@@ -158,31 +166,70 @@ class FileReader(object):
                 data.y_unit = self.format_unit(data.y_unit)
                 # Sort data by increasing x and remove 1st point
                 ind = np.lexsort((data.y, data.x))
-                data.x = np.asarray([data.x[i] for i in ind]).astype(np.float64)
-                data.y = np.asarray([data.y[i] for i in ind]).astype(np.float64)
+                data.x = self._reorder_1d_array(data.x, ind)
+                data.y = self._reorder_1d_array(data.y, ind)
                 if data.dx is not None:
                     if len(data.dx) == 0:
                         data.dx = None
                         continue
-                    data.dx = np.asarray([data.dx[i] for i in ind]).astype(np.float64)
+                    data.dx = self._reorder_1d_array(data.dx, ind)
                 if data.dxl is not None:
-                    data.dxl = np.asarray([data.dxl[i] for i in ind]).astype(np.float64)
+                    data.dxl = self._reorder_1d_array(data.dxl, ind)
                 if data.dxw is not None:
-                    data.dxw = np.asarray([data.dxw[i] for i in ind]).astype(np.float64)
+                    data.dxw = self._reorder_1d_array(data.dxw, ind)
                 if data.dy is not None:
                     if len(data.dy) == 0:
                         data.dy = None
                         continue
-                    data.dy = np.asarray([data.dy[i] for i in ind]).astype(np.float64)
+                    data.dy = self._reorder_1d_array(data.dy, ind)
                 if data.lam is not None:
-                    data.lam = np.asarray([data.lam[i] for i in ind]).astype(np.float64)
+                    data.lam = self._reorder_1d_array(data.lam, ind)
                 if data.dlam is not None:
-                    data.dlam = np.asarray([data.dlam[i] for i in ind]).astype(np.float64)
+                    data.dlam = self._reorder_1d_array(data.dlam, ind)
+                data = self._remove_nans_in_data(data)
                 if len(data.x) > 0:
                     data.xmin = np.min(data.x)
                     data.xmax = np.max(data.x)
                     data.ymin = np.min(data.y)
                     data.ymax = np.max(data.y)
+
+    @staticmethod
+    def _reorder_1d_array(array, ind):
+        """
+        Reorders a 1D array based on the indices passed as ind
+        :param array: Array to be reordered
+        :param ind: Indices used to reorder array
+        :return: reordered array
+        """
+        array = np.asarray(array, dtype=np.float64)
+        return array[ind]
+
+    @staticmethod
+    def _remove_nans_in_data(data):
+        """
+        Remove data points where nan is loaded
+        :param data: 1D or 2D data object
+        :return: data with nan points removed
+        """
+        if isinstance(data, Data1D):
+            fields = FIELDS_1D
+        elif isinstance(data, Data2D):
+            fields = FIELDS_2D
+        else:
+            return data
+        # Make array of good points - all others will be removed
+        good = np.isfinite(getattr(data, fields[0]))
+        for name in fields[1:]:
+            array = getattr(data, name)
+            if array is not None:
+                # Update good points only if not already changed
+                good &= np.isfinite(array)
+        if not np.all(good):
+            for name in fields:
+                array = getattr(data, name)
+                if array is not None:
+                    setattr(data, name, array[good])
+        return data
 
     def sort_two_d_data(self):
         for dataset in self.output:
@@ -213,6 +260,7 @@ class FileReader(object):
                     dataset.y_bins = dataset.qy_data[0::int(n_cols)]
                     dataset.x_bins = dataset.qx_data[:int(n_cols)]
                 dataset.data = dataset.data.flatten()
+                dataset = self._remove_nans_in_data(dataset)
                 if len(dataset.data) > 0:
                     dataset.xmin = np.min(dataset.qx_data)
                     dataset.xmax = np.max(dataset.qx_data)

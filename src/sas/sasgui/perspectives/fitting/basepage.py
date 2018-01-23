@@ -2811,7 +2811,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         if self.model is not None:
             name = self.formfactorbox.GetValue()
-            _TreeLocation = 'user/models/' + name.lower()+'.html'
+            _TreeLocation = 'user/models/%s.html' % name
             _doc_viewer = DocumentationWindow(self, wx.ID_ANY, _TreeLocation,
                                               "", name + " Help")
         else:
