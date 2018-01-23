@@ -226,7 +226,6 @@ class Reader(FileReader):
         :param key: canSAS_class attribute
         :param unit: unit attribute
         """
-        # FIXME: check attributes of SASdata for Q, dQ, Mask, etc.
         if key == self.i_name:
             if isinstance(self.current_dataset, plottable_2D):
                 self.current_dataset.data = data_set
@@ -551,6 +550,13 @@ class Reader(FileReader):
             y = np.array(0)
             self.current_dataset = plottable_1D(x, y)
         self.current_datainfo.filename = self.raw_data.filename
+        self.mask_name = ""
+        self.i_name = ""
+        self.i_node = ""
+        self.q_name = []
+        self.q_uncertainties = ""
+        self.q_resolutions = ""
+        self.i_uncertainties = ""
 
     def _find_data_attributes(self, value):
         """
@@ -560,11 +566,10 @@ class Reader(FileReader):
         """
         attrs = value.attrs
         signal = attrs.get("signal")
-
-        i_axes = np.array(attrs.get("I_axes").split(","))
-        q_indices = np.array(attrs.get("Q_indices"))
-        self.mask_name = attrs.get("mask")
+        i_axes = np.array(str(attrs.get("I_axes")).split(","))
+        q_indices = np.int_(attrs.get("Q_indices").split(","))
         keys = value.keys()
+        self.mask_name = attrs.get("mask")
         for val in q_indices:
             self.q_name.append(i_axes[val])
         self.i_name = signal
