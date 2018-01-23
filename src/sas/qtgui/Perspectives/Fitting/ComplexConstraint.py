@@ -65,10 +65,13 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         self.txtName1.setText(self.tab_names[0])
         self.txtName2.setText(self.tab_names[1])
 
+        # Show only parameters not already constrained
         self.cbParam1.clear()
-        self.cbParam1.addItems(self.params[0])
+        items = [param for i,param in enumerate(self.params[0]) if not self.tabs[0].rowHasConstraint(i)]
+        self.cbParam1.addItems(items)
         self.cbParam2.clear()
-        self.cbParam2.addItems(self.params[1])
+        items = [param for i,param in enumerate(self.params[1]) if not self.tabs[1].rowHasConstraint(i)]
+        self.cbParam2.addItems(items)
 
         self.txtParam.setText(self.tab_names[0] + ":" + self.cbParam1.currentText())
 
@@ -111,6 +114,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         # Switch parameters
         self.params[1], self.params[0] = self.params[0], self.params[1]
         self.tab_names[1], self.tab_names[0] = self.tab_names[0], self.tab_names[1]
+        self.tabs[1], self.tabs[0] = self.tabs[0], self.tabs[1]
         # Try to swap parameter names in the line edit
         current_text = self.txtConstraint.text()
         new_text = current_text.replace(self.cbParam1.currentText(), self.cbParam2.currentText())

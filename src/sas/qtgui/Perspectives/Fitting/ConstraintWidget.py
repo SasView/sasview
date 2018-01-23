@@ -140,7 +140,6 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # The new name should be validated on the fly, with QValidator
         # but let's just assure it post-factum
         is_good_moniker = self.validateMoniker(new_moniker)
-        is_good_moniker = True
         if not is_good_moniker:
             item.setBackground(QtCore.Qt.red)
             self.cmdFit.setEnabled(False)
@@ -162,6 +161,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         model.name = new_moniker
         # Replace constraint name
         temp_tab.replaceConstraintName(self.current_cell, new_moniker)
+        # Replace constraint name in the remaining tabs
+        for tab in self.available_tabs.values():
+            tab.replaceConstraintName(self.current_cell, new_moniker)
         # Reinitialize the display
         self.initializeFitList()
 
