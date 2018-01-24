@@ -57,7 +57,7 @@ Using the tool
    Note that the effect from the beam block/stop is ignored, so in the small $Q$
    region near the beam block/stop
 
-   [i.e., $Q < (2 \pi \cdot \mathrm{beam block diameter}) / (\mathrm{sample-to-detector distance} \cdot \lambda_\mathrm{min})$]
+   [i.e., $Q < (2 \pi \cdot \mathrm{w}) / (\mathrm{min} \cdot \lambda_\mathrm{min})$, where $w$ is the beam block diameter and $min$ is the sample-to-detector distance]
 
    the variance is slightly under estimated.
 

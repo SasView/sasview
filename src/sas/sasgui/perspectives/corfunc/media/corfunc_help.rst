@@ -129,7 +129,7 @@ The following algorithm is applied:
 
 .. math::
     \Gamma(x_k) = 2 \sum_{n=0}^{N-1} x_n \cos{\left[ \frac{\pi}{N}
-    \left(n + \frac{1}{2} \right) k \right] } \mathrm{ for } k = 0, 1, \ldots,
+    \left(n + \frac{1}{2} \right) k \right] } \text{ for } k = 0, 1, \ldots,
     N-1, N
 
 The 3D correlation function is calculated as:
