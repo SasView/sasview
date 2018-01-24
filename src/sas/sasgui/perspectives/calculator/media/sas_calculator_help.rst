@@ -33,7 +33,7 @@ intensity from the particle is
 Equation 1.
 
 where $\beta_j$ and $r_j$ are the scattering length density and
-the position of the $j^\mathrm{th}$ pixel respectively.
+the position of the $j^\text{th}$ pixel respectively.
 
 The total volume $V$
 
@@ -41,8 +41,8 @@ The total volume $V$
 
     V = \sum_j^N v_j
 
-for $\beta_j \ne 0$ where $v_j$ is the volume of the $j^\mathrm{th}$
-pixel (or the $j^\mathrm{th}$ natural atomic volume (= atomic mass / (natural molar
+for $\beta_j \ne 0$ where $v_j$ is the volume of the $j^\text{th}$
+pixel (or the $j^\text{th}$ natural atomic volume (= atomic mass / (natural molar
 density * Avogadro number) for the atomic structures).
 
 $V$ can be corrected by users. This correction is useful especially for an
@@ -160,7 +160,7 @@ uses the Debye equation below providing a 1D output
         \frac{\sin(|\vec Q||\vec r_j - \vec r_k|)}{|\vec Q||\vec r_j - \vec r_k|}
 
 where $v_j \beta_j \equiv b_j$ is the scattering
-length of the $j^\mathrm{th}$ atom. The calculation output is passed to the *Data Explorer*
+length of the $j^\text{th}$ atom. The calculation output is passed to the *Data Explorer*
 for further use.
 
 .. image:: pdb_combo.jpg
