@@ -141,7 +141,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # but let's just assure it post-factum
         is_good_moniker = self.validateMoniker(new_moniker)
         if not is_good_moniker:
+            self.tblTabList.blockSignals(True)
             item.setBackground(QtCore.Qt.red)
+            self.tblTabList.blockSignals(False)
             self.cmdFit.setEnabled(False)
             return
         self.tblTabList.blockSignals(True)
