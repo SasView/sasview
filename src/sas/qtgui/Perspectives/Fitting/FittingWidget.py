@@ -211,6 +211,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Polydisp widget table default index for function combobox
         self.orig_poly_index = 3
 
+        # Page id for fitting
+        # To keep with previous SasView values, use 200 as the start offset
+        self.page_id = 200 + self.tab_id
+
         # Data for chosen model
         self.model_data = None
 
@@ -731,7 +735,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             if isinstance(c, Constraint) and c.func:
                 return True
         return False
-        #return True if (item.hasChildren() and isinstance(item.child(0).data(), Constraint)) else False
+
+    def rowHasActiveConstraint(self, row):
+        """
+        Finds out if row of the main model has an active constraint child
+        """
+        item = self._model_model.item(row,1)
+        if item.hasChildren():
+            c = item.child(0).data()
+            if isinstance(c, Constraint) and c.func and c.active:
+                return True
+        return False
 
     def selectParameters(self):
         """
@@ -779,7 +793,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         params = [(self._model_model.item(s, 0).text(),
                     #preamble(s) +self._model_model.item(s, 1).child(0).data().func)
                     self._model_model.item(s, 1).child(0).data().func)
-                    for s in range(param_number) if self.rowHasConstraint(s)]
+                    for s in range(param_number) if self.rowHasActiveConstraint(s)]
         return params
 
     def getConstraintObjectsForModel(self):
@@ -1055,31 +1069,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Perform fitting on the current data
         """
-
-        # Data going in
-        data = self.logic.data
-        model = self.kernel_module
-        qmin = self.q_range_min
-        qmax = self.q_range_max
-        params_to_fit = self.parameters_to_fit
-
-        # Potential weights added directly to data
-        self.addWeightingToData(data)
-
-        # Potential smearing added
-        # Remember that smearing_min/max can be None ->
-        # deal with it until Python gets discriminated unions
-        smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
-
-        # These should be updating somehow?
+        # initialize fitter constants
         fit_id = 0
-        constraints = self.getConstraintsForModel()
-        smearer = None
-        page_id = [210]
         handler = None
         batch_inputs = {}
         batch_outputs = {}
-        list_page_id = [page_id]
         #---------------------------------
         if USING_TWISTED:
             handler = None
@@ -1090,36 +1084,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                                     improvement_delta=0.1)
             updater = handler.update_fit
 
-        # Parameterize the fitter
-        fitters = []
-        for fit_index in self.all_data:
-            fitter = Fit()
-            data = GuiUtils.dataFromItem(fit_index)
-            try:
-                fitter.set_model(model, fit_id, params_to_fit, data=data,
-                             constraints=constraints)
-            except ValueError as ex:
-                logging.error("Setting model parameters failed with: %s" % ex)
-                return
-
-            qmin, qmax, _ = self.logic.computeRangeFromData(data)
-            fitter.set_data(data=data, id=fit_id, smearer=smearer, qmin=qmin,
-                            qmax=qmax)
-            fitter.select_problem_for_fit(id=fit_id, value=1)
-            fitter.fitter_id = page_id
-            fit_id += 1
-            fitters.append(fitter)
+        # Prepare the fitter object
+        fitters, _ = self.prepareFitters()
 
         # Create the fitting thread, based on the fitter
         completefn = self.batchFitComplete if self.is_batch_fitting else self.fitComplete
 
         calc_fit = FitThread(handler=handler,
-                                fn=fitters,
-                                batch_inputs=batch_inputs,
-                                batch_outputs=batch_outputs,
-                                page_id=list_page_id,
-                                updatefn=updater,
-                                completefn=completefn)
+                            fn=fitters,
+                            batch_inputs=batch_inputs,
+                            batch_outputs=batch_outputs,
+                            page_id=[[self.page_id]],
+                            updatefn=updater,
+                            completefn=completefn)
 
         if USING_TWISTED:
             # start the trhrhread with twisted
@@ -1208,6 +1185,57 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Read only value - we can get away by just printing it here
         chi2_repr = GuiUtils.formatNumber(self.chi2, high=True)
         self.lblChi2Value.setText(chi2_repr)
+
+    def prepareFitters(self, fitter=None, fit_id=0):
+        """
+        Prepare the Fitter object for use in fitting
+        """
+        # fitter = None -> single/batch fitting
+        # fitter = Fit() -> simultaneous fitting
+
+        # Data going in
+        data = self.logic.data
+        model = self.kernel_module
+        qmin = self.q_range_min
+        qmax = self.q_range_max
+        params_to_fit = self.parameters_to_fit
+
+        # Potential weights added directly to data
+        self.addWeightingToData(data)
+
+        # Potential smearing added
+        # Remember that smearing_min/max can be None ->
+        # deal with it until Python gets discriminated unions
+        smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
+
+        constraints = self.getConstraintsForModel()
+        smearer = None
+        handler = None
+        batch_inputs = {}
+        batch_outputs = {}
+
+        fitters = []
+        for fit_index in self.all_data:
+            fitter_single = Fit() if fitter is None else fitter
+            data = GuiUtils.dataFromItem(fit_index)
+            try:
+                fitter_single.set_model(model, fit_id, params_to_fit, data=data,
+                             constraints=constraints)
+            except ValueError as ex:
+                logging.error("Setting model parameters failed with: %s" % ex)
+                return
+
+            qmin, qmax, _ = self.logic.computeRangeFromData(data)
+            fitter_single.set_data(data=data, id=fit_id, smearer=smearer, qmin=qmin,
+                            qmax=qmax)
+            fitter_single.select_problem_for_fit(id=fit_id, value=1)
+            if fitter is None:
+                # Assign id to the new fitter only
+                fitter_single.fitter_id = [self.page_id]
+            fit_id += 1
+            fitters.append(fitter_single)
+
+        return fitters, fit_id
 
     def iterateOverModel(self, func):
         """

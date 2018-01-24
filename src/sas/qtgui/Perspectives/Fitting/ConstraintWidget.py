@@ -1,13 +1,18 @@
 import os
 import sys
 
+from twisted.internet import threads
+
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from PyQt5 import QtGui, QtCore, QtWidgets
 
-import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
+from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 
+import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 from sas.qtgui.Perspectives.Fitting.UI.ConstraintWidgetUI import Ui_ConstraintWidgetUI
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
+from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
+from sas.qtgui.Perspectives.Fitting.ConsoleUpdate import ConsoleUpdate
 from sas.qtgui.Perspectives.Fitting.ComplexConstraint import ComplexConstraint
 from sas.qtgui.Perspectives.Fitting.Constraints import Constraint
 
@@ -16,11 +21,15 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
     Constraints Dialog to select the desired parameter/model constraints.
     """
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, tab_id=1):
         super(ConstraintWidget, self).__init__()
         self.parent = parent
         self.setupUi(self)
         self.currentType = "FitPage"
+        self.tab_id = tab_id
+        # Page id for fitting
+        # To keep with previous SasView values, use 300 as the start offset
+        self.page_id = 300 + self.tab_id
 
         # Remember previous content of modified cell
         self.current_cell = ""
@@ -113,7 +122,62 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Perform the constrained/simultaneous fit
         """
-        pass
+        # Find out all tabs to fit
+        tabs_to_fit = [tab for tab in self.tabs_for_fitting if self.tabs_for_fitting[tab]]
+
+        # Single fitter for the simultaneous run
+        sim_fitter = Fit()
+        sim_fitter.fitter_id = self.page_id
+
+        # prepare fitting problems for each tab
+        #
+        page_ids = []
+        fitter_id = 0
+        sim_fitter=[sim_fitter]
+        for tab in tabs_to_fit:
+            tab_object = ObjectLibrary.getObject(tab)
+            sim_fitter, fitter_id = tab_object.prepareFitters(fitter=sim_fitter[0], fit_id=fitter_id)
+            page_ids.append([tab_object.page_id])
+
+        # Create the fitting thread, based on the fitter
+        completefn = self.onBatchFitComplete if self.currentType=='BatchPage' else self.onFitComplete
+
+        #if USING_TWISTED:
+        handler = None
+        updater = None
+        #else:
+        #    handler = ConsoleUpdate(parent=self.parent,
+        #                            manager=self,
+        #                            improvement_delta=0.1)
+        #    updater = handler.update_fit
+
+        batch_inputs = {}
+        batch_outputs = {}
+
+        # new fit thread object
+        calc_fit = FitThread(handler=handler,
+                             fn=sim_fitter,
+                             batch_inputs=batch_inputs,
+                             batch_outputs=batch_outputs,
+                             page_id=page_ids,
+                             updatefn=updater,
+                             completefn=completefn)
+
+        #if USING_TWISTED:
+        # start the trhrhread with twisted
+        calc_thread = threads.deferToThread(calc_fit.compute)
+        calc_thread.addCallback(self.onFitComplete)
+        calc_thread.addErrback(self.onFitFailed)
+        #else:
+        #    # Use the old python threads + Queue
+        #    calc_fit.queue()
+        #    calc_fit.ready(2.5)
+
+
+        #disable the Fit button
+        self.cmdFit.setText('Running...')
+        self.parent.communicate.statusBarUpdateSignal.emit('Fitting started...')
+        self.cmdFit.setEnabled(False)
 
     def onHelp(self):
         """
@@ -171,7 +235,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
     def onConstraintChange(self, row, column):
         """
-        Modify the constraint in-place.
+        Modify the constraint's "active" instance variable.
         """
         item = self.tblConstraints.item(row, column)
         if column == 0:
@@ -207,6 +271,24 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.initializeFitList()
         pass
 
+    def onFitComplete(self, result):
+        """
+        Respond to the successful fit complete signal
+        """
+        pass
+
+    def onBatchFitComplete(self, result):
+        """
+        Respond to the successful batch fit complete signal
+        """
+        pass
+
+    def onFitFailed(self, reason):
+        """
+        """
+        print("FIT FAILED: ", reason)
+        pass
+ 
     def isTabImportable(self, tab):
         """
         Determines if the tab can be imported and included in the widget

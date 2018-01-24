@@ -123,7 +123,7 @@ class FittingWindow(QtWidgets.QTabWidget):
         """
         Add a new C&S fitting tab
         """
-        tab	= ConstraintWidget(parent=self)
+        tab	= ConstraintWidget(parent=self, tab_id=self.maxCSIndex)
         # Add this tab to the object library so it can be retrieved by scripting/jupyter
         tab_name = self.getCSTabName() # TODO update the tab name scheme
         ObjectLibrary.addObject(tab_name, tab)
