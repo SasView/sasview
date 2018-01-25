@@ -1085,7 +1085,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             updater = handler.update_fit
 
         # Prepare the fitter object
-        fitters, _ = self.prepareFitters()
+        try:
+            fitters, _ = self.prepareFitters()
+        except ValueError as ex:
+            # This should not happen! GUI explicitly forbids this situation
+            self.communicate.statusBarUpdateSignal.emit('Fitting attempt without parameters.')
+            return
 
         # Create the fitting thread, based on the fitter
         completefn = self.batchFitComplete if self.is_batch_fitting else self.fitComplete
@@ -1199,6 +1204,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         qmin = self.q_range_min
         qmax = self.q_range_max
         params_to_fit = self.parameters_to_fit
+        if (not params_to_fit):
+            raise ValueError('Fitting requires at least one parameter to optimize.')
 
         # Potential weights added directly to data
         self.addWeightingToData(data)

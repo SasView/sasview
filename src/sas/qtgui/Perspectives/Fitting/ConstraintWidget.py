@@ -92,7 +92,6 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.tblConstraints.cellChanged.connect(self.onConstraintChange)
 
         # External signals
-        #self.parent.tabsModifiedSignal.connect(self.initializeFitList)
         self.parent.tabsModifiedSignal.connect(self.onModifiedTabs)
 
     def updateSignalsFromTab(self, tab=None):
@@ -134,10 +133,25 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         page_ids = []
         fitter_id = 0
         sim_fitter=[sim_fitter]
-        for tab in tabs_to_fit:
-            tab_object = ObjectLibrary.getObject(tab)
-            sim_fitter, fitter_id = tab_object.prepareFitters(fitter=sim_fitter[0], fit_id=fitter_id)
-            page_ids.append([tab_object.page_id])
+        # Prepare the fitter object
+        try:
+            for tab in tabs_to_fit:
+                tab_object = ObjectLibrary.getObject(tab)
+                if tab_object is None:
+                    # No such tab!
+                    return
+                sim_fitter, fitter_id = tab_object.prepareFitters(fitter=sim_fitter[0], fit_id=fitter_id)
+                page_ids.append([tab_object.page_id])
+        except ValueError as ex:
+            # No parameters selected in one of the tabs
+            no_params_msg = "Fitting can not be performed.\n" +\
+                            "Not all tabs chosen for fitting have parameters selected for fitting."
+            reply = QtWidgets.QMessageBox.question(self,
+                                               'Warning',
+                                               no_params_msg,
+                                               QtWidgets.QMessageBox.Ok)
+
+            return
 
         # Create the fitting thread, based on the fitter
         completefn = self.onBatchFitComplete if self.currentType=='BatchPage' else self.onFitComplete
@@ -181,9 +195,15 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
     def onHelp(self):
         """
-        Display the help page
+        Show the "Fitting" section of help
         """
-        pass
+        tree_location = "/user/sasgui/perspectives/fitting/"
+
+        helpfile = "fitting_help.html#simultaneous-fit-mode"
+        help_location = tree_location + helpfile
+
+        # OMG, really? Crawling up the object hierarchy...
+        self.parent.parent.showHelp(help_location)
 
     def onTabCellEdit(self, row, column):
         """
@@ -275,7 +295,24 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Respond to the successful fit complete signal
         """
-        pass
+        # get the elapsed time
+        elapsed = result[1]
+
+        # result list
+        results = result[0][0]
+
+        # Find out all tabs to fit
+        tabs_to_fit = [tab for tab in self.tabs_for_fitting if self.tabs_for_fitting[tab]]
+
+        # update all involved tabs
+        for i, tab in enumerate(tabs_to_fit):
+            tab_object = ObjectLibrary.getObject(tab)
+            if tab_object is None:
+                # No such tab. removed while job was running
+                return
+            # Make sure result and target objects are the same (same model moniker)
+            if tab_object.kernel_module.name == results[i].model.name:
+                tab_object.fitComplete(([[results[i]]], elapsed))
 
     def onBatchFitComplete(self, result):
         """
