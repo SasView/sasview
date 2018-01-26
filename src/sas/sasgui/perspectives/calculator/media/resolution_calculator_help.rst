@@ -28,7 +28,7 @@ Using the tool
 3) Change the default values of the instrumental parameters as required. Be
    careful to note that distances are specified in cm!
 
-4) Enter values for the source wavelength(s), $\lambda$, and its spread (= $\text{FWHM}/\lambda$).
+4) Enter values for the source wavelength(s), $\lambda$, and its spread (= $\mathrm{FWHM}/\lambda$).
 
    For monochromatic sources, the inputs are just one value. For TOF sources,
    the minimum and maximum values should be separated by a '-' to specify a
@@ -57,7 +57,7 @@ Using the tool
    Note that the effect from the beam block/stop is ignored, so in the small $Q$
    region near the beam block/stop
 
-   [i.e., $Q < (2 \pi \cdot \text{beam block diameter}) / (\text{sample-to-detector distance} \cdot \lambda_\text{min})$]
+   [i.e., $Q < (2 \pi \cdot w) / (d_s \cdot \lambda_\mathrm{min})$, where $w$ is the beam block diameter, $d_s$ is the sample-to-detector distance, and $\lambda_\mathrm{min}$ is the minimum wavelength.]
 
    the variance is slightly under estimated.
 

@@ -187,8 +187,8 @@ The structural parameters extracted are:
 *   Long Period :math:`= L_p`
 *   Average Hard Block Thickness :math:`= L_c`
 *   Average Core Thickness :math:`= D_0`
-*   Average Interface Thickness :math:`\text{} = D_{tr}`
-*   Polydispersity :math:`= \Gamma_{\text{min}}/\Gamma_{\text{max}}`
+*   Average Interface Thickness :math:`= D_{tr}`
+*   Polydispersity :math:`= \Gamma_{\mathrm{min}}/\Gamma_{\mathrm{max}}`
 *   Local Crystallinity :math:`= L_c/L_p`
 
 Volume Fraction Profile
@@ -202,7 +202,7 @@ structural parameters are obtainable by other means:
 *   Anchor Separation :math:`= D`
 *   Bound Fraction :math:`= <p>`
 *   Second Moment :math:`= \sigma`
-*   Maximum Extent :math:`= \delta_{\text{h}}`
+*   Maximum Extent :math:`= \delta_{\mathrm{h}}`
 *   Adsorbed Amount :math:`= \Gamma`
 
 .. figure:: profile1.png
