@@ -879,13 +879,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         pass
 
-    def respondToModelStructure(self, model=None, structure_factor=None):
-        # Set enablement on calculate/plot
-        self.cmdPlot.setEnabled(True)
-
-        # kernel parameters -> model_model
-        self.SASModelToQModel(model, structure_factor)
-
+    def updateData(self):
+        """
+        Helper function for recalculation of data used in plotting
+        """
+        # Update the chart
         if self.data_is_loaded:
             self.cmdPlot.setText("Show Plot")
             self.calculateQGridForModel()
@@ -893,6 +891,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.cmdPlot.setText("Calculate")
             # Create default datasets if no data passed
             self.createDefaultDataset()
+
+    def respondToModelStructure(self, model=None, structure_factor=None):
+        # Set enablement on calculate/plot
+        self.cmdPlot.setEnabled(True)
+
+        # kernel parameters -> model_model
+        self.SASModelToQModel(model, structure_factor)
+
+        # Update plot
+        self.updateData()
 
         # Update state stack
         self.updateUndo()
@@ -972,9 +980,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         elif model_column == self.lstPoly.itemDelegate().poly_function:
             # name of the function - just pass
             return
-        elif model_column == self.lstPoly.itemDelegate().poly_filename:
-            # filename for array - just pass
-            return
         else:
             try:
                 value = GuiUtils.toDouble(item.text())
@@ -986,6 +991,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # PD[ratio] -> width, npts -> npts, nsigs -> nsigmas
             self.kernel_module.setParam(parameter_name + '.' + \
                                         self.lstPoly.itemDelegate().columnDict()[model_column], value)
+
+            # Update plot
+            self.updateData()
 
     def onMagnetModelChange(self, item):
         """
