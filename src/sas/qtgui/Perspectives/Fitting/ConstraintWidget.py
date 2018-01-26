@@ -180,7 +180,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         #if USING_TWISTED:
         # start the trhrhread with twisted
         calc_thread = threads.deferToThread(calc_fit.compute)
-        calc_thread.addCallback(self.onFitComplete)
+        calc_thread.addCallback(completefn)
         calc_thread.addErrback(self.onFitFailed)
         #else:
         #    # Use the old python threads + Queue
@@ -295,6 +295,10 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Respond to the successful fit complete signal
         """
+        #re-enable the Fit button
+        self.cmdFit.setText("Fit")
+        self.cmdFit.setEnabled(True)
+
         # get the elapsed time
         elapsed = result[1]
 
@@ -314,16 +318,38 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             if tab_object.kernel_module.name == results[i].model.name:
                 tab_object.fitComplete(([[results[i]]], elapsed))
 
+        msg = "Fitting completed successfully in: %s s.\n" % GuiUtils.formatNumber(elapsed)
+        self.parent.communicate.statusBarUpdateSignal.emit(msg)
+
     def onBatchFitComplete(self, result):
         """
         Respond to the successful batch fit complete signal
         """
+        #re-enable the Fit button
+        self.cmdFit.setText("Fit")
+        self.cmdFit.setEnabled(True)
+
+        # get the elapsed time
+        elapsed = result[1]
+
+        # ADD THE BATCH FIT VIEW HERE
+        #
+
+        msg = "Fitting completed successfully in: %s s.\n" % GuiUtils.formatNumber(elapsed)
+        self.parent.communicate.statusBarUpdateSignal.emit(msg)
+
         pass
 
     def onFitFailed(self, reason):
         """
+        Respond to fitting failure.
         """
-        print("FIT FAILED: ", reason)
+        #re-enable the Fit button
+        self.cmdFit.setText("Fit")
+        self.cmdFit.setEnabled(True)
+
+        msg = "Fitting failed: %s s.\n" % reason
+        self.parent.communicate.statusBarUpdateSignal.emit(msg)
         pass
  
     def isTabImportable(self, tab):

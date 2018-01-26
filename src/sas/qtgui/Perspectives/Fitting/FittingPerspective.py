@@ -235,12 +235,16 @@ class FittingWindow(QtWidgets.QTabWidget):
             msg = "Incorrect type passed to the Fitting Perspective"
             raise AttributeError(msg)
 
-        items = [data_item] if is_batch else data_item
+        if is_batch:
+            # Just create a new fit tab. No empty batchFit tabs
+            self.addFit(data_item, is_batch=is_batch)
+            return
 
+        items = [data_item] if is_batch else data_item
         for data in items:
             # Find the first unassigned tab.
             # If none, open a new tab.
-            available_tabs = list([tab.acceptsData() for tab in self.tabs])
+            available_tabs = [tab.acceptsData() for tab in self.tabs]
 
             if numpy.any(available_tabs):
                 first_good_tab = available_tabs.index(True)
