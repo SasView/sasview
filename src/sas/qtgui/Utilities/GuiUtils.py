@@ -324,7 +324,7 @@ def updateModelItem(item, update_data, name=""):
     Adds a simple named child to QStandardItem
     """
     assert isinstance(item, QtGui.QStandardItem)
-    assert isinstance(update_data, list)
+    #assert isinstance(update_data, list)
 
     # Add the actual Data1D/Data2D object
     object_item = QtGui.QStandardItem()

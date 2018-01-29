@@ -501,6 +501,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         menu = QtWidgets.QMenu()
         num_rows = len(rows)
+        if num_rows < 1:
+            return menu
         # Select for fitting
         param_string = "parameter " if num_rows==1 else "parameters "
         to_string = "to its current value" if num_rows==1 else "to their current values"

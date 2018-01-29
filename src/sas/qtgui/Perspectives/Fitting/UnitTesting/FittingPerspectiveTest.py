@@ -19,6 +19,7 @@ from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)
 
+
 class FittingPerspectiveTest(unittest.TestCase):
     '''Test the Fitting Perspective'''
     def setUp(self):
@@ -145,6 +146,30 @@ class FittingPerspectiveTest(unittest.TestCase):
         # Check for 4 tabs
         self.assertEqual(len(self.widget.tabs), 4)
 
+    def testSetBatchData(self):
+        ''' Assure that setting batch data is correct'''
+
+        # Mock the datafromitem() call from FittingWidget
+        data1 = Data1D(x=[1,2], y=[1,2])
+        data2 = Data1D(x=[1,2], y=[1,2])
+        data_batch = [data1, data2]
+        GuiUtils.dataFromItem = MagicMock(return_value=data1)
+
+        item = QtGui.QStandardItem("test")
+        self.widget.setData([item, item], is_batch=True)
+
+        # First tab should not accept data
+        self.assertEqual(len(self.widget.tabs), 2)
+
+        # Add another set of data
+        self.widget.setData([item, item], is_batch=True)
+
+        # Now we should have two batch tabs
+        self.assertEqual(len(self.widget.tabs), 3)
+
+        # Check the names of the new tabs
+        self.assertEqual(self.widget.tabText(1), "BatchPage1")
+        self.assertEqual(self.widget.tabText(2), "BatchPage2")
 
 if __name__ == "__main__":
     unittest.main()

@@ -211,8 +211,6 @@ class FittingWindow(QtWidgets.QTabWidget):
                     self.closeTabByName(tab_name)
                 self.dataToFitTab.pop(index_to_delete_str)
 
-        #print "CURRENT dict: ", self.dataToFitTab
-
     def allowBatch(self):
         """
         Tell the caller that we accept multiple data instances

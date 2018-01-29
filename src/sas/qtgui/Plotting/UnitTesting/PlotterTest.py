@@ -49,8 +49,8 @@ class PlotterTest(unittest.TestCase):
 
         self.assertEqual(self.plotter.data, self.data)
         self.assertEqual(self.plotter._title, self.data.name)
-        self.assertEqual(self.plotter.xLabel, "$()$")
-        self.assertEqual(self.plotter.yLabel, "$()$")
+        self.assertEqual(self.plotter.xLabel, "")
+        self.assertEqual(self.plotter.yLabel, "")
 
     def testPlotWithErrors(self):
         """ Look at the plotting with error bars"""
@@ -90,13 +90,13 @@ class PlotterTest(unittest.TestCase):
 
         self.plotter.data = data
         self.plotter.show()
-        FigureCanvas.draw = MagicMock()
+        FigureCanvas.draw_idle = MagicMock()
 
         self.plotter.plot(hide_error=True)
 
         self.assertEqual(self.plotter.ax.get_xscale(), 'linear')
         self.assertEqual(self.plotter.ax.get_yscale(), 'linear')
-        self.assertTrue(FigureCanvas.draw.called)
+        self.assertTrue(FigureCanvas.draw_idle.called)
 
     def testCreateContextMenuQuick(self):
         """ Test the right click menu """
@@ -199,6 +199,8 @@ class PlotterTest(unittest.TestCase):
         # Return OK from the dialog
         self.plotter.addText.exec_ = MagicMock(return_value = QtWidgets.QDialog.Accepted)
         # Add text to graph
+        self.plotter.x_click = 1.0
+        self.plotter.y_click = 5.0
         self.plotter.onAddText()
         self.plotter.show()
         # Check if the text was added properly
@@ -393,8 +395,8 @@ class PlotterTest(unittest.TestCase):
         # See the default labels
         xl = self.plotter.ax.xaxis.label.get_text()
         yl = self.plotter.ax.yaxis.label.get_text()
-        self.assertEqual(xl, "$()$")
-        self.assertEqual(yl, "$()$")
+        self.assertEqual(xl, "")
+        self.assertEqual(yl, "")
 
         # Prepare new data
         data2 = Data1D(x=[1.0, 2.0, 3.0],
