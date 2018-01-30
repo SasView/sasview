@@ -1,6 +1,7 @@
 import sys
 import unittest
 import numpy as np
+import webbrowser
 
 from unittest.mock import MagicMock
 
@@ -97,3 +98,15 @@ class MultiConstraintTest(unittest.TestCase):
         self.assertTrue(self.widget.validateConstraint("log10(p2) - sqrt(p2) + p2"))
         # log10(    p2    ) +  p2
         self.assertTrue(self.widget.validateConstraint("log10(    p2    ) +  p2  "))
+
+    def testOnHelp(self):
+        """
+        Test the default help renderer
+        """
+        webbrowser.open = MagicMock()
+
+        # invoke the tested method
+        self.widget.onHelp()
+
+        # see that webbrowser open was attempted
+        webbrowser.open.assert_called_once()

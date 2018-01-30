@@ -21,7 +21,6 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         super(ComplexConstraint, self).__init__()
 
         self.setupUi(self)
-        #self.setFixedSize(self.minimumSizeHint())
         self.setModal(True)
 
         # Useful globals
@@ -33,7 +32,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         self.setupData()
         self.setupWidgets()
         self.setupSignals()
-        #self.setupTooltip()
+        self.setupTooltip()
 
         self.setFixedSize(self.minimumSizeHint())
 
@@ -85,8 +84,10 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         Tooltip for txtConstraint
         """
-        tooltip = "E.g.\n%s = 2.0 * (%s)\n" %(self.params[0], self.params[1])
-        tooltip += "%s = sqrt(%s) + 5"%(self.params[0], self.params[1])
+        p1 = self.tab_names[0] + ":" + self.cbParam1.currentText()
+        p2 = self.tab_names[1]+"."+self.cbParam2.currentText()
+        tooltip = "E.g.\n%s = 2.0 * (%s)\n" %(p1, p2)
+        tooltip += "%s = sqrt(%s) + 5"%(p1, p2)
         self.txtConstraint.setToolTip(tooltip)
 
     def onParamIndexChange(self, index):
@@ -129,7 +130,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         self.cbParam1.setCurrentIndex(index2)
         self.cbParam2.setCurrentIndex(index1)
         self.cbOperator.setCurrentIndex(indexOp)
-        #self.setupTooltip()
+        self.setupTooltip()
 
     def validateFormula(self):
         """

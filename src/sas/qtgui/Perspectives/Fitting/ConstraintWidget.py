@@ -356,6 +356,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Determines if the tab can be imported and included in the widget
         """
+        if not isinstance(tab, str): return False
         if not self.currentType in tab: return False
         object = ObjectLibrary.getObject(tab)
         if not isinstance(object, FittingWidget): return False
@@ -395,13 +396,10 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         menu.addAction(self.actionDeselect)
         menu.addSeparator()
 
-        #menu.addAction(self.actionRemoveConstraint)
         if num_rows >= 2:
             menu.addAction(self.actionMutualMultiConstrain)
 
         # Define the callbacks
-        #self.actionConstrain.triggered.connect(self.addSimpleConstraint)
-        #self.actionRemoveConstraint.triggered.connect(self.deleteConstraint)
         self.actionMutualMultiConstrain.triggered.connect(self.showMultiConstraint)
         self.actionSelect.triggered.connect(self.selectModels)
         self.actionDeselect.triggered.connect(self.deselectModels)
@@ -442,9 +440,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         menu.addAction(self.actionRemoveConstraint)
 
         # Define the callbacks
-        #self.actionConstrain.triggered.connect(self.addSimpleConstraint)
         self.actionRemoveConstraint.triggered.connect(self.deleteConstraint)
-        #self.actionMutualMultiConstrain.triggered.connect(self.showMultiConstraint)
         self.actionSelect.triggered.connect(self.selectConstraints)
         self.actionDeselect.triggered.connect(self.deselectConstraints)
         try:

@@ -56,6 +56,7 @@ from Perspectives.Fitting.UnitTesting import FittingUtilitiesTest
 from Perspectives.Fitting.UnitTesting import FitPageTest
 from Perspectives.Fitting.UnitTesting import FittingOptionsTest
 from Perspectives.Fitting.UnitTesting import MultiConstraintTest
+from Perspectives.Fitting.UnitTesting import ComplexConstraintTest
 from Perspectives.Fitting.UnitTesting import ConstraintWidgetTest
 
 #  Invariant
@@ -117,6 +118,7 @@ def suite():
         unittest.makeSuite(FittingOptionsTest.FittingOptionsTest,         'test'),
         unittest.makeSuite(MultiConstraintTest.MultiConstraintTest,       'test'),
         unittest.makeSuite(ConstraintWidgetTest.ConstraintWidgetTest,     'test'),
+        unittest.makeSuite(ComplexConstraintTest.ComplexConstraintTest,   'test'),
 
         #  Invariant
         unittest.makeSuite(InvariantPerspectiveTest.InvariantPerspectiveTest,  'test'),
