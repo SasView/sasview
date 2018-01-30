@@ -2,12 +2,13 @@
 Widget for parameter constraints.
 """
 import os
+import webbrowser
+
+# numpy methods required for the validator! Don't remove.
+# pylint: disable=unused-import,unused-wildcard-import,redefined-builtin
 from numpy import *
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
 from PyQt5 import QtWidgets
-import webbrowser
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
@@ -15,13 +16,21 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Perspectives.Fitting.UI.MultiConstraintUI import Ui_MultiConstraintUI
 
 class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
+    """
+    Logic class for interacting with MultiConstrainedUI view
+    """
     def __init__(self, parent=None, params=None):
+        """
+        parent: ConstraintWidget object
+        params: tuple of strings describing model parameters
+        """
         super(MultiConstraint, self).__init__()
 
         self.setupUi(self)
         self.setFixedSize(self.minimumSizeHint())
         self.setModal(True)
         self.params = params
+        self.parent = parent
 
         self.setupLabels()
         self.setupTooltip()
@@ -36,7 +45,7 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
 
     def revert(self):
         """
-        switch M1 <-> M2
+        Swap parameters in the view
         """
         # Switch parameters
         self.params[1], self.params[0] = self.params[0], self.params[1]
@@ -102,13 +111,12 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
 
         # 3. parameter name should be a separate word, but can have "()[]*+-/ " around
         valid_neighbours = "()[]*+-/ "
-        has_only_parameter = False
         start_loc = parameter_string_start -1
         end_loc = parameter_string_end
-        if not any([constraint_text[start_loc] == char for char in valid_neighbours]):
+        if not any([constraint_text[start_loc] == ch for ch in valid_neighbours]):
             return False
         if end_loc < len(constraint_text):
-            if not any([constraint_text[end_loc] == char for char in valid_neighbours]):
+            if not any([constraint_text[end_loc] == ch for ch in valid_neighbours]):
                 return False
 
         # 4. replace parameter name with "1" and try to evaluate the expression
