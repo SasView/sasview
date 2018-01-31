@@ -2678,7 +2678,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                        disp_func.type)
             except ValueError:
                 pass  # Fall through to default class
-        return POLYDISPERSITY_MODELS.keys().index('gaussian'), 'gaussian'
+        return (list(POLYDISPERSITY_MODELS).index('gaussian'), 'gaussian')
 
     def on_reset_clicked(self, event):
         """
