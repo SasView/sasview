@@ -2674,8 +2674,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         # Find the selection
         if disp_func is not None:
             try:
-                index = POLYDISPERSITY_MODELS.values().index(disp_func.__class__)
-                return index, POLYDISPERSITY_MODELS.keys()[index]
+                return (list(POLYDISPERSITY_MODELS).index(disp_func.type),
+                       disp_func.type)
             except ValueError:
                 pass  # Fall through to default class
         return POLYDISPERSITY_MODELS.keys().index('gaussian'), 'gaussian'
