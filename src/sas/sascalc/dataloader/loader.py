@@ -53,6 +53,9 @@ class Registry(ExtensionRegistry):
         # List of wildcards
         self.wildcards = ['All (*.*)|*.*']
 
+        # Deprecated extensions
+        self.deprecated_extensions = ['.asc', '.ASC', '.nxs', '.NXS']
+
         # Creation time, for testing
         self._created = time.time()
 
@@ -72,6 +75,12 @@ class Registry(ExtensionRegistry):
         """
         # Gets set to a string if the file has an associated reader that fails
         msg_from_reader = None
+        extlist = [ext for ext in self.deprecated_extensions if path.endswith(ext)]
+        if extlist:
+            msg = ("\rThe file you are attempting to load, {}, is no "
+                   "longer loadable into SasView. Please use data in Q space."
+                   .format(path))
+            raise RuntimeError(msg)
         try:
             return super(Registry, self).load(path, format=format)
         #except Exception: raise  # for debugging, don't use fallback loader
