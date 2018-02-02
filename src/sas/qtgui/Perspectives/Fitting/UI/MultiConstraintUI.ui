@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>369</width>
-    <height>143</height>
+    <width>426</width>
+    <height>162</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -84,7 +84,7 @@
      <item>
       <widget class="QPushButton" name="cmdRevert">
        <property name="text">
-        <string>Revert</string>
+        <string>Swap</string>
        </property>
       </widget>
      </item>
@@ -149,6 +149,9 @@
       <widget class="QPushButton" name="cmdOK">
        <property name="text">
         <string>OK</string>
+       </property>
+       <property name="default">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

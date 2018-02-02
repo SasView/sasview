@@ -4,6 +4,8 @@ import sys
 from twisted.internet import threads
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+import sas.qtgui.Utilities.LocalConfig as LocalConfig
+
 from PyQt5 import QtGui, QtCore, QtWidgets
 
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
@@ -14,22 +16,21 @@ from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.FitThread import FitThread
 from sas.qtgui.Perspectives.Fitting.ConsoleUpdate import ConsoleUpdate
 from sas.qtgui.Perspectives.Fitting.ComplexConstraint import ComplexConstraint
-from sas.qtgui.Perspectives.Fitting.Constraints import Constraint
+from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 
 class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
     """
     Constraints Dialog to select the desired parameter/model constraints.
     """
 
-    def __init__(self, parent=None, tab_id=1):
+    def __init__(self, parent=None):
         super(ConstraintWidget, self).__init__()
         self.parent = parent
         self.setupUi(self)
         self.currentType = "FitPage"
-        self.tab_id = tab_id
         # Page id for fitting
         # To keep with previous SasView values, use 300 as the start offset
-        self.page_id = 300 + self.tab_id
+        self.page_id = 301
 
         # Remember previous content of modified cell
         self.current_cell = ""
@@ -117,16 +118,25 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         pass
 
+    def getTabsForFit(self):
+        """
+        Returns list of tab names selected for fitting
+        """
+        return [tab for tab in self.tabs_for_fitting if self.tabs_for_fitting[tab]]
+
     def onFit(self):
         """
         Perform the constrained/simultaneous fit
         """
         # Find out all tabs to fit
-        tabs_to_fit = [tab for tab in self.tabs_for_fitting if self.tabs_for_fitting[tab]]
+        tabs_to_fit = self.getTabsForFit()
 
         # Single fitter for the simultaneous run
         sim_fitter = Fit()
         sim_fitter.fitter_id = self.page_id
+
+        # Notify the parent about fitting started
+        self.parent.fittingStartedSignal.emit(tabs_to_fit)
 
         # prepare fitting problems for each tab
         #
@@ -156,14 +166,14 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Create the fitting thread, based on the fitter
         completefn = self.onBatchFitComplete if self.currentType=='BatchPage' else self.onFitComplete
 
-        #if USING_TWISTED:
-        handler = None
-        updater = None
-        #else:
-        #    handler = ConsoleUpdate(parent=self.parent,
-        #                            manager=self,
-        #                            improvement_delta=0.1)
-        #    updater = handler.update_fit
+        if LocalConfig.USING_TWISTED:
+            handler = None
+            updater = None
+        else:
+            handler = ConsoleUpdate(parent=self.parent,
+                                    manager=self,
+                                    improvement_delta=0.1)
+            updater = handler.update_fit
 
         batch_inputs = {}
         batch_outputs = {}
@@ -177,15 +187,15 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                              updatefn=updater,
                              completefn=completefn)
 
-        #if USING_TWISTED:
-        # start the trhrhread with twisted
-        calc_thread = threads.deferToThread(calc_fit.compute)
-        calc_thread.addCallback(completefn)
-        calc_thread.addErrback(self.onFitFailed)
-        #else:
-        #    # Use the old python threads + Queue
-        #    calc_fit.queue()
-        #    calc_fit.ready(2.5)
+        if LocalConfig.USING_TWISTED:
+            # start the trhrhread with twisted
+            calc_thread = threads.deferToThread(calc_fit.compute)
+            calc_thread.addCallback(completefn)
+            calc_thread.addErrback(self.onFitFailed)
+        else:
+            # Use the old python threads + Queue
+            calc_fit.queue()
+            calc_fit.ready(2.5)
 
 
         #disable the Fit button
@@ -299,6 +309,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.cmdFit.setText("Fit")
         self.cmdFit.setEnabled(True)
 
+        # Notify the parent about completed fitting
+        self.parent.fittingStoppedSignal.emit(self.getTabsForFit())
+
         # get the elapsed time
         elapsed = result[1]
 
@@ -329,6 +342,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.cmdFit.setText("Fit")
         self.cmdFit.setEnabled(True)
 
+        # Notify the parent about completed fitting
+        self.parent.fittingStoppedSignal.emit(self.getTabsForFit())
+
         # get the elapsed time
         elapsed = result[1]
 
@@ -347,6 +363,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         #re-enable the Fit button
         self.cmdFit.setText("Fit")
         self.cmdFit.setEnabled(True)
+
+        # Notify the parent about completed fitting
+        self.parent.fittingStoppedSignal.emit(self.getTabsForFit())
 
         msg = "Fitting failed: %s s.\n" % reason
         self.parent.communicate.statusBarUpdateSignal.emit(msg)

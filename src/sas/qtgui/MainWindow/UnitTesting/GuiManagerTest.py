@@ -271,21 +271,18 @@ class GuiManagerTest(unittest.TestCase):
 
     #### HELP ####
     # test when PyQt5 works with html
-    def notestActionDocumentation(self):
+    def testActionDocumentation(self):
         """
         Menu Help/Documentation
         """
-        #Mock the QWebView method
-        QWebView.show = MagicMock()
-
-        # Assure the filename is correct
-        self.assertIn("index.html", self.manager._helpLocation)
+        webbrowser.open = MagicMock()
 
         # Invoke the action
         self.manager.actionDocumentation()
 
-        # Check if show() got called
-        self.assertTrue(QWebView.show.called)
+        # see that webbrowser open was attempted
+        webbrowser.open.assert_called_once()
+
 
     def skip_testActionTutorial(self):
         """

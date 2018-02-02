@@ -43,6 +43,9 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         self.cmdRevert.clicked.connect(self.revert)
         self.txtConstraint.editingFinished.connect(self.validateFormula)
 
+        # Default focus is on OK
+        self.cmdOK.setFocus()
+
     def revert(self):
         """
         Swap parameters in the view

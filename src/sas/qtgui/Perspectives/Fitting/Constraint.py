@@ -1,6 +1,8 @@
 class Constraint(object):
     """
     Internal representation of a single parameter constraint
+    Currently just a data structure, might get expaned with more functionality,
+    hence made into a class.
     """
     def __init__(self, parent=None, param=None, value=0.0, min=None, max=None, func=None):
         self._value = value
@@ -50,5 +52,3 @@ class Constraint(object):
     def max(self, val):
         self._max = val
 
-    def delete(self, constraint=None):
-        pass

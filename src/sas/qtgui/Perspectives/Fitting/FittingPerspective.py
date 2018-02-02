@@ -18,6 +18,9 @@ class FittingWindow(QtWidgets.QTabWidget):
     """
     """
     tabsModifiedSignal = QtCore.pyqtSignal()
+    fittingStartedSignal = QtCore.pyqtSignal(list)
+    fittingStoppedSignal = QtCore.pyqtSignal(list)
+
     name = "Fitting" # For displaying in the combo box in DataExplorer
     def __init__(self, parent=None, data=None):
 
@@ -31,7 +34,6 @@ class FittingWindow(QtWidgets.QTabWidget):
 
         # Max index for adding new, non-clashing tab names
         self.maxIndex = 0
-        self.maxCSIndex = 0
 
         # Index of the current tab
         self.currentTab = 0
@@ -39,11 +41,14 @@ class FittingWindow(QtWidgets.QTabWidget):
         # The default optimizer
         self.optimizer = 'Levenberg-Marquardt'
 
-        # Dataset inde -> Fitting tab mapping
+        # Dataset index -> Fitting tab mapping
         self.dataToFitTab = {}
 
         # The tabs need to be closeable
         self.setTabsClosable(True)
+
+        # The tabs need to be movabe
+        self.setMovable(True)
 
         self.communicate = self.parent.communicator()
 
@@ -53,6 +58,8 @@ class FittingWindow(QtWidgets.QTabWidget):
         # Deal with signals
         self.tabCloseRequested.connect(self.tabCloses)
         self.communicate.dataDeletedSignal.connect(self.dataDeleted)
+        self.fittingStartedSignal.connect(self.onFittingStarted)
+        self.fittingStoppedSignal.connect(self.onFittingStopped)
 
         # Perspective window not allowed to close by default
         self._allow_close = False
@@ -68,7 +75,6 @@ class FittingWindow(QtWidgets.QTabWidget):
         # GPU Options
         self.gpu_options_widget = GPUOptions(self)
 
-        #self.setWindowTitle('Fit panel - Active Fitting Optimizer: %s' % self.optimizer)
         self.updateWindowTitle()
 
     def updateWindowTitle(self):
@@ -81,7 +87,7 @@ class FittingWindow(QtWidgets.QTabWidget):
 
     def setClosable(self, value=True):
         """
-        Allow outsiders close this widget
+        Allow outsiders to close this widget
         """
         assert isinstance(value, bool)
 
@@ -123,12 +129,16 @@ class FittingWindow(QtWidgets.QTabWidget):
         """
         Add a new C&S fitting tab
         """
-        tab	= ConstraintWidget(parent=self, tab_id=self.maxCSIndex)
+        tabs = [isinstance(tab, ConstraintWidget) for tab in self.tabs]
+        if any(tabs):
+            # We already have a C&S tab: show it
+            self.setCurrentIndex(tabs.index(True))
+            return
+        tab	= ConstraintWidget(parent=self)
         # Add this tab to the object library so it can be retrieved by scripting/jupyter
         tab_name = self.getCSTabName() # TODO update the tab name scheme
         ObjectLibrary.addObject(tab_name, tab)
         self.tabs.append(tab)
-        self.maxCSIndex += 1
         self.addTab(tab, tab_name)
 
     def updateFitDict(self, item_key, tab_name):
@@ -154,7 +164,6 @@ class FittingWindow(QtWidgets.QTabWidget):
         Get the new tab name, based on the number of fitting tabs so far
         """
         page_name = "Const. & Simul. Fit"
-        page_name = page_name + str(self.maxCSIndex)
         return page_name
 
     def resetTab(self, index):
@@ -261,5 +270,37 @@ class FittingWindow(QtWidgets.QTabWidget):
         self.fit_options.selected_id = str(fitter)
         # Update the title
         self.updateWindowTitle()
+
+    def onFittingStarted(self, tabs_for_fitting=None):
+        """
+        Notify tabs listed in tabs_for_fitting
+        that the fitting thread started
+        """
+        assert(isinstance(tabs_for_fitting, list))
+        assert(len(tabs_for_fitting)>0)
+
+        for tab_object in self.tabs:
+            if not isinstance(tab_object, FittingWidget):
+                continue
+            page_name = "Page%s"%tab_object.tab_id
+            if any([page_name in tab for tab in tabs_for_fitting]):
+                tab_object.setFittingStarted()
+
+        pass
+
+    def onFittingStopped(self, tabs_for_fitting=None):
+        """
+        Notify tabs listed in tabs_for_fitting
+        that the fitting thread stopped
+        """
+        assert(isinstance(tabs_for_fitting, list))
+        assert(len(tabs_for_fitting)>0)
+
+        for tab_object in self.tabs:
+            if not isinstance(tab_object, FittingWidget):
+                continue
+            page_name = "Page%s"%tab_object.tab_id
+            if any([page_name in tab for tab in tabs_for_fitting]):
+                tab_object.setFittingStopped()
 
         pass

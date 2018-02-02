@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>359</width>
-    <height>166</height>
+    <width>406</width>
+    <height>167</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -91,7 +91,7 @@
         <item>
          <widget class="QPushButton" name="cmdRevert">
           <property name="text">
-           <string>Revert</string>
+           <string>Swap</string>
           </property>
          </widget>
         </item>
@@ -163,6 +163,9 @@
       <widget class="QPushButton" name="cmdOK">
        <property name="text">
         <string>OK</string>
+       </property>
+       <property name="default">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

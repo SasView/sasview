@@ -1,5 +1,6 @@
 import sys
 import unittest
+import webbrowser
 from bumps import options
 
 from PyQt5 import QtGui, QtWidgets
@@ -113,34 +114,32 @@ class FittingOptionsTest(unittest.TestCase):
         self.assertEqual(options.FIT_CONFIG.values['dream']['init'], 'cov')
 
     # test disabled until pyQt5 works well
-    def notestOnHelp(self):
+    def testOnHelp(self):
         ''' Test help display'''
-        #Mock the QWebView method
-        QtWebKit.QWebView.show = MagicMock()
-        QtWebKit.QWebView.load = MagicMock()
+        webbrowser.open = MagicMock()
 
         # Invoke the action on default tab
         self.widget.onHelp()
         # Check if show() got called
-        self.assertTrue(QtWebKit.QWebView.show.called)
+        self.assertTrue(webbrowser.open.called)
         # Assure the filename is correct
-        self.assertIn("optimizer.html", QtWebKit.QWebView.load.call_args[0][0].toString())
+        self.assertIn("optimizer.html", webbrowser.open.call_args[0][0])
 
         # Change the combo index
         self.widget.cbAlgorithm.setCurrentIndex(2)
         self.widget.onHelp()
         # Check if show() got called
-        self.assertEqual(QtWebKit.QWebView.show.call_count, 2)
+        self.assertEqual(webbrowser.open.call_count, 2)
         # Assure the filename is correct
-        self.assertIn("fit-dream", QtWebKit.QWebView.load.call_args[0][0].toString())
+        self.assertIn("fit-dream", webbrowser.open.call_args[0][0])
 
         # Change the index again
         self.widget.cbAlgorithm.setCurrentIndex(4)
         self.widget.onHelp()
         # Check if show() got called
-        self.assertEqual(QtWebKit.QWebView.show.call_count, 3)
+        self.assertEqual(webbrowser.open.call_count, 3)
         # Assure the filename is correct
-        self.assertIn("fit-lm", QtWebKit.QWebView.load.call_args[0][0].toString())
+        self.assertIn("fit-lm", webbrowser.open.call_args[0][0])
 
     def testWidgetFromOptions(self):
         '''Test the helper function'''

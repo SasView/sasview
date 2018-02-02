@@ -14,7 +14,7 @@ ALLOWED_OPERATORS = ['=','<','>','>=','<=']
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.ComplexConstraintUI import Ui_ComplexConstraintUI
-from sas.qtgui.Perspectives.Fitting.Constraints import Constraint
+from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 
 class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
     def __init__(self, parent=None, tabs=None):
@@ -35,6 +35,9 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         self.setupTooltip()
 
         self.setFixedSize(self.minimumSizeHint())
+
+        # Default focus is on OK
+        self.cmdOK.setFocus()
 
     def setupData(self):
         """

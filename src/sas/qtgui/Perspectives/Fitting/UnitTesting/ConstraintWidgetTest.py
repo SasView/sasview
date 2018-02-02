@@ -14,7 +14,7 @@ import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 
 # Local
 from sas.qtgui.Perspectives.Fitting.ConstraintWidget import ConstraintWidget
-from sas.qtgui.Perspectives.Fitting.Constraints import Constraint
+from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 
 if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)

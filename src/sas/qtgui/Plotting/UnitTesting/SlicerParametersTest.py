@@ -1,5 +1,6 @@
 import sys
 import unittest
+import webbrowser
 from unittest.mock import MagicMock
 
 from PyQt5 import QtGui, QtWidgets
@@ -71,18 +72,17 @@ class SlicerParametersTest(unittest.TestCase):
         ''' Assure clicking on help returns QtWeb view on requested page'''
         self.widget.show()
 
-        #Mock the QWebView method
-        QtWebKit.QWebView.show = MagicMock()
-        QtWebKit.QWebView.load = MagicMock()
+        #Mock the webbrowser.open method
+        webbrowser.open = MagicMock()
 
         # Invoke the action
         self.widget.onHelp()
 
         # Check if show() got called
-        self.assertTrue(QtWebKit.QWebView.show.called)
+        self.assertTrue(webbrowser.open.called)
 
         # Assure the filename is correct
-        self.assertIn("graph_help.html", QtWebKit.QWebView.load.call_args[0][0].toString())
+        self.assertIn("graph_help.html", webbrowser.open.call_args[0][0])
         
     def testSetModel(self):
         ''' Test if resetting the model works'''

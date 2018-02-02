@@ -22,6 +22,8 @@ from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
+import sas.qtgui.Utilities.LocalConfig as LocalConfig
+
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
@@ -40,7 +42,7 @@ from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import ModelViewDelegate
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import PolyViewDelegate
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import MagnetismViewDelegate
-from sas.qtgui.Perspectives.Fitting.Constraints import Constraint
+from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.MultiConstraint import MultiConstraint
 
 
@@ -52,8 +54,6 @@ STRUCTURE_DEFAULT = "None"
 
 DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 
-USING_TWISTED = True
-#USING_TWISTED = False
 
 class ToolTippedItemModel(QtGui.QStandardItemModel):
     """
@@ -1085,7 +1085,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         batch_inputs = {}
         batch_outputs = {}
         #---------------------------------
-        if USING_TWISTED:
+        if LocalConfig.USING_TWISTED:
             handler = None
             updater = None
         else:
@@ -1113,21 +1113,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                             updatefn=updater,
                             completefn=completefn)
 
-        if USING_TWISTED:
+        if LocalConfig.USING_TWISTED:
             # start the trhrhread with twisted
             calc_thread = threads.deferToThread(calc_fit.compute)
-            calc_thread.addCallback(self.fitComplete)
+            calc_thread.addCallback(completefn)
             calc_thread.addErrback(self.fitFailed)
         else:
             # Use the old python threads + Queue
             calc_fit.queue()
             calc_fit.ready(2.5)
 
-
-        #disable the Fit button
-        self.cmdFit.setText('Running...')
         self.communicate.statusBarUpdateSignal.emit('Fitting started...')
-        self.cmdFit.setEnabled(False)
+        # Disable some elements
+        self.setFittingStarted()
 
     def updateFit(self):
         """
@@ -1146,8 +1144,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Receive and display batch fitting results
         """
         #re-enable the Fit button
-        self.cmdFit.setText("Fit")
-        self.cmdFit.setEnabled(True)
+        self.setFittingStopped()
 
         print ("BATCH FITTING FINISHED")
         # Add the Qt version of wx.aui.AuiNotebook and populate it
@@ -1159,8 +1156,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         "result" is a tuple of actual result list and the fit time in seconds
         """
         #re-enable the Fit button
-        self.cmdFit.setText("Fit")
-        self.cmdFit.setEnabled(True)
+        self.setFittingStopped()
 
         assert result is not None
 
@@ -2230,6 +2226,22 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Update relevant models
         self.setPolyModel()
         self.setMagneticModel()
+
+    def setFittingStarted(self):
+        """
+        Set item enablement on fitting start
+        """
+        #disable the Fit button
+        self.cmdFit.setText('Running...')
+        self.cmdFit.setEnabled(False)
+
+    def setFittingStopped(self):
+        """
+        Set item enablement on fitting stop
+        """
+        #enable the Fit button
+        self.cmdFit.setText("Fit")
+        self.cmdFit.setEnabled(True)
 
     def readFitPage(self, fp):
         """

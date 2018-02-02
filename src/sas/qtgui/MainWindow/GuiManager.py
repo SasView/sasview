@@ -8,7 +8,6 @@ import webbrowser
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt, QLocale, QUrl
-from PyQt5.QtWebKitWidgets import QWebView
 
 from twisted.internet import reactor
 # General SAS imports
