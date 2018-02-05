@@ -17,9 +17,8 @@ from sas.qtgui.Utilities.GuiUtils import Communicate
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
 from sas.qtgui.Perspectives.Fitting.ComplexConstraint import ComplexConstraint
 
-#if not QtWidgets.QApplication.instance():
-#    app = QtWidgets.QApplication(sys.argv)
-app = QtWidgets.QApplication(sys.argv)
+if not QtWidgets.QApplication.instance():
+    app = QtWidgets.QApplication(sys.argv)
 
 class dummy_manager(object):
     HELP_DIRECTORY_LOCATION = "html"

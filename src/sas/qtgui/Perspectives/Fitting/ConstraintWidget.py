@@ -93,7 +93,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.tblConstraints.cellChanged.connect(self.onConstraintChange)
 
         # External signals
-        self.parent.tabsModifiedSignal.connect(self.onModifiedTabs)
+        self.parent.tabsModifiedSignal.connect(self.initializeFitList)
 
     def updateSignalsFromTab(self, tab=None):
         """
@@ -281,25 +281,6 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         if column != 3:
             return
         self.current_cell = self.tblTabList.item(row, column).data(0)
-
-    def onModifiedTabs(self):
-        """
-        Respond to tabs being deleted by deleting involved constraints
-
-        This should probably be done in FittingWidget as it is the owner of
-        all the fitting data, but I want to keep the FW oblivious about
-        dependence on other FW tabs, so enforcing the constraint deletion here.
-        """
-        # Get the list of all constraints from querying the table
-        #constraints = getConstraintsForModel()
-
-        # Get the current list of tabs
-        #tabs = ObjectLibrary.listObjects()
-
-        # Check if any of the constraint dependencies got deleted
-        # Check the list of constraints
-        self.initializeFitList()
-        pass
 
     def onFitComplete(self, result):
         """
@@ -676,4 +657,3 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # Update the tab
         constrained_tab.addConstraintToRow(constraint, constrained_row)
-        pass

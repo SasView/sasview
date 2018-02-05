@@ -6,30 +6,38 @@ from unittest.mock import MagicMock
 
 from PyQt5 import QtGui, QtCore, QtWidgets
 from PyQt5 import QtWebKit
+from PyQt5.QtTest import QTest
 
 # set up import paths
 import path_prepare
 
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
+from sas.qtgui.Plotting.PlotterData import Data1D
 
 # Local
 from sas.qtgui.Perspectives.Fitting.ConstraintWidget import ConstraintWidget
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
+from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 
 if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)
+#app = QtWidgets.QApplication(sys.argv)
 
 class ConstraintWidgetTest(unittest.TestCase):
     '''Test the ConstraintWidget dialog'''
     def setUp(self):
         '''Create ConstraintWidget dialog'''
-        class dummy_perspective(QtWidgets.QTabWidget):
-            tabsModifiedSignal = QtCore.pyqtSignal()
-            def __init__(self):
-                super(dummy_perspective, self).__init__()
-                pass
+        class dummy_manager(object):
+            def communicator(self):
+                return GuiUtils.Communicate()
+            def communicate(self):
+                return GuiUtils.Communicate()
 
-        self.widget = ConstraintWidget(parent=dummy_perspective())
+        '''Create the perspective'''
+        self.perspective = FittingWindow(dummy_manager())
+
+        self.widget = ConstraintWidget(parent=self.perspective)
 
         # Example constraint object
         self.constraint1 = Constraint(parent=None, param="test", value="7.0", min="0.0", max="inf", func="M1:sld")
@@ -51,14 +59,33 @@ class ConstraintWidgetTest(unittest.TestCase):
         # TableWidgets
         self.assertEqual(self.widget.tblTabList.columnCount(), 4)
         self.assertEqual(self.widget.tblConstraints.columnCount(), 1)
+        # Data accept 
+        self.assertFalse(self.widget.acceptsData())
+        # By default, the constraint table is disabled
+        self.assertFalse(self.widget.tblConstraints.isEnabled())
 
-    def testLabels(self):
-        ''' various labels on the widget '''
-        # params related setup
-        pass
+    def testOnFitTypeChange(self):
+        ''' test the single/batch fit switch '''
+        self.widget.initializeFitList = MagicMock()
+        # Assure current type is Single
+        self.assertEqual(self.widget.currentType, "FitPage")
+        # click on "batch"
+        QTest.mouseClick(self.widget.btnBatch, QtCore.Qt.LeftButton)
+        app.processEvents()
+        # See what the current type is now
+        self.assertEqual(self.widget.currentType, "BatchPage")
+        # See if the list is getting initialized
+        self.assertTrue(self.widget.initializeFitList.called)
+        # Go back to single fit
+        QTest.mouseClick(self.widget.btnSingle, QtCore.Qt.LeftButton)
+        app.processEvents()
+        # See what the current type is now
+        self.assertEqual(self.widget.currentType, "FitPage")
 
-    def testTooltip(self):
-        ''' test the tooltip'''
+    def testGetTabsForFit(self):
+        ''' Test the fitting tab list '''
+        self.assertEqual(self.widget.getTabsForFit(),[])
+        # Add some tabs
         pass
 
     def testIsTabImportable(self):
@@ -68,11 +95,16 @@ class ConstraintWidgetTest(unittest.TestCase):
         ObjectLibrary.getObject = MagicMock(return_value=test_tab)
 
         self.assertFalse(self.widget.isTabImportable(None))
-        self.assertTrue(self.widget.isTabImportable("FitTab333333"))
-        self.assertFalse(self.widget.isTabImportable("BatchTab"))
+        self.assertFalse(self.widget.isTabImportable("BatchTab1"))
         self.assertFalse(self.widget.isTabImportable("BatchTab"))
 
-        pass
+    def testOnTabCellEdit(self):
+        ''' test what happens on monicker edit '''
+        # Mock the datafromitem() call from FittingWidget
+        data = Data1D(x=[1,2], y=[1,2])
+        GuiUtils.dataFromItem = MagicMock(return_value=data)
+        item = QtGui.QStandardItem("test")
+        self.perspective.addFit([item])
 
     def testUpdateFitLine(self):
         ''' See if the fit table row can be updated '''
