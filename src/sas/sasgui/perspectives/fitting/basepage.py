@@ -1366,12 +1366,12 @@ class BasicPage(ScrolledPanel, PanelBase):
                     [state.values, state.weights]
             except Exception:
                 logger.error(traceback.format_exc())
-            selection = self._find_polyfunc_selection(disp_model)
+            index, selection = self._find_polyfunc_selection(disp_model)
             for list in self.fittable_param:
                 if list[1] == key and list[7] is not None:
-                    list[7].SetSelection(selection)
+                    list[7].SetSelection(index)
                     # For the array disp_model, set the values and weights
-                    if selection == 1:
+                    if selection == 'array':
                         disp_model.set_weights(self.values[key],
                                                self.weights[key])
                         try:
@@ -1384,7 +1384,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                         except Exception:
                             logger.error(traceback.format_exc())
             # For array, disable all fixed params
-            if selection == 1:
+            if selection == 'array':
                 for item in self.fixed_param:
                     if item[1].split(".")[0] == key.split(".")[0]:
                         # try it and pass it for the orientation for 1D
@@ -2667,17 +2667,18 @@ class BasicPage(ScrolledPanel, PanelBase):
 
     def _find_polyfunc_selection(self, disp_func=None):
         """
-        FInd Comboox selection from disp_func
+        Find Combobox selection from disp_func
 
         :param disp_function: dispersion distr. function
         """
         # Find the selection
         if disp_func is not None:
             try:
-                return POLYDISPERSITY_MODELS.values().index(disp_func.__class__)
+                return (list(POLYDISPERSITY_MODELS).index(disp_func.type),
+                       disp_func.type)
             except ValueError:
                 pass  # Fall through to default class
-        return POLYDISPERSITY_MODELS.keys().index('gaussian')
+        return (list(POLYDISPERSITY_MODELS).index('gaussian'), 'gaussian')
 
     def on_reset_clicked(self, event):
         """
