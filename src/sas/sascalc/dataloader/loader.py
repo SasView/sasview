@@ -54,7 +54,7 @@ class Registry(ExtensionRegistry):
         self.wildcards = ['All (*.*)|*.*']
 
         # Deprecated extensions
-        self.deprecated_extensions = ['.asc', '.ASC', '.nxs', '.NXS']
+        self.deprecated_extensions = ['.asc', '.nxs']
 
         # Creation time, for testing
         self._created = time.time()
@@ -75,10 +75,14 @@ class Registry(ExtensionRegistry):
         """
         # Gets set to a string if the file has an associated reader that fails
         msg_from_reader = None
-        extlist = [ext for ext in self.deprecated_extensions if path.endswith(ext)]
+        extlist = [ext for ext in self.deprecated_extensions if
+                   path.lower().endswith(ext)]
         if extlist:
-            msg = ("\rThe file you are attempting to load, {}, is no "
-                   "longer loadable into SasView. Please use data in Q space."
+            msg = ("\rThe file you are attempting to load, {}, is no longer "
+                   "loadable by SasView. The file extension suggests the data "
+                   "set is in pixel space. SasView will no longer reduce raw da"
+                   "ta sets. Please provide fully reduced data in Q space. No a"
+                   "ttempt to load the data has been made."
                    .format(path))
             raise RuntimeError(msg)
         try:
