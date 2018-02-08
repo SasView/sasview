@@ -23,6 +23,7 @@ from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Utilities.LocalConfig as LocalConfig
+from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
@@ -35,6 +36,7 @@ from sas.qtgui.Perspectives.Fitting.ModelThread import Calc1D
 from sas.qtgui.Perspectives.Fitting.ModelThread import Calc2D
 from sas.qtgui.Perspectives.Fitting.FittingLogic import FittingLogic
 from sas.qtgui.Perspectives.Fitting import FittingUtilities
+from sas.qtgui.Perspectives.Fitting import ModelUtilities
 from sas.qtgui.Perspectives.Fitting.SmearingWidget import SmearingWidget
 from sas.qtgui.Perspectives.Fitting.OptionsWidget import OptionsWidget
 from sas.qtgui.Perspectives.Fitting.FitPage import FitPage
@@ -49,6 +51,7 @@ TAB_MAGNETISM = 4
 TAB_POLY = 3
 CATEGORY_DEFAULT = "Choose category..."
 CATEGORY_STRUCTURE = "Structure Factor"
+CATEGORY_CUSTOM = "Plugin Models"
 STRUCTURE_DEFAULT = "None"
 
 DEFAULT_POLYDISP_FUNCTION = 'gaussian'
@@ -82,6 +85,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     """
     constraintAddedSignal = QtCore.pyqtSignal(list)
     newModelSignal = QtCore.pyqtSignal()
+    fittingFinishedSignal = QtCore.pyqtSignal(tuple)
+    batchFittingFinishedSignal = QtCore.pyqtSignal(tuple)
+
     def __init__(self, parent=None, data=None, tab_id=1):
 
         super(FittingWidget, self).__init__()
@@ -210,6 +216,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.undo_supported = False
         self.page_stack = []
         self.all_data = []
+        # custom plugin models
+        # {model.name:model}
+        self.custom_models = self.customModels()
         # Polydisp widget table default index for function combobox
         self.orig_poly_index = 3
 
@@ -414,6 +423,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.kernel_module:
             self.onSelectModel()
 
+    def customModels(self):
+        """ Reads in file names in the custom plugin directory """
+        return ModelUtilities._find_models()
+
     def initializeControls(self):
         """
         Set initial control enablement
@@ -464,9 +477,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         #self.constraintAddedSignal.connect(self.modifyViewOnConstraint)
         self._poly_model.itemChanged.connect(self.onPolyModelChange)
         self._magnet_model.itemChanged.connect(self.onMagnetModelChange)
+        self.lstParams.selectionModel().selectionChanged.connect(self.onSelectionChanged)
+
+        # Local signals
+        self.batchFittingFinishedSignal.connect(self.batchFitComplete)
+        self.fittingFinishedSignal.connect(self.fitComplete)
 
         # Signals from separate tabs asking for replot
         self.options_widget.plot_signal.connect(self.onOptionsUpdate)
+
+        # Signals from other widgets
+        self.communicate.customModelDirectoryChanged.connect(self.onCustomModelChange)
 
     def modelName(self):
         """
@@ -575,9 +596,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # widget.params[0] is the parameter we're constraining
         constraint.param = mc_widget.params[0]
-        # Function should have the model name preamble
+        # parameter should have the model name preamble
         model_name = self.kernel_module.name
-        constraint.func = model_name + "." + c_text
+        # param_used is the parameter we're using in constraining function
+        param_used = mc_widget.params[1]
+        # Replace param_used with model_name.param_used
+        updated_param_used = model_name + "." + param_used
+        new_func = c_text.replace(param_used, updated_param_used)
+        constraint.func = new_func
         # Which row is the constrained parameter in?
         row = self.getRowFromName(constraint.param)
 
@@ -676,7 +702,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Delete constraints from selected parameters.
         """
-        self.deleteConstraintOnParameter(param=None)
+        params =  [s.data() for s in self.lstParams.selectionModel().selectedRows()
+                   if self.isCheckable(s.row())]
+        for param in params:
+            self.deleteConstraintOnParameter(param=param)
 
     def deleteConstraintOnParameter(self, param=None):
         """
@@ -685,11 +714,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         min_col = self.lstParams.itemDelegate().param_min
         max_col = self.lstParams.itemDelegate().param_max
         for row in range(self._model_model.rowCount()):
+            if not self.rowHasConstraint(row):
+                continue
             # Get the Constraint object from of the model item
             item = self._model_model.item(row, 1)
-            if not item.hasChildren():
-                continue
-            constraint = item.child(0).data()
+            constraint = self.getConstraintForRow(row)
             if constraint is None:
                 continue
             if not isinstance(constraint, Constraint):
@@ -815,6 +844,43 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         return constraints
 
+    def getConstraintsForFitting(self):
+        """
+        Return a list of constraints in format ready for use in fiting
+        """
+        # Get constraints
+        constraints = self.getComplexConstraintsForModel()
+        # See if there are any constraints across models
+        multi_constraints = [cons for cons in constraints if self.isConstraintMultimodel(cons[1])]
+
+        if multi_constraints:
+            # Let users choose what to do
+            msg = "The current fit contains constraints relying on other fit pages.\n"
+            msg += "Parameters with those constraints are:\n" +\
+                '\n'.join([cons[0] for cons in multi_constraints])
+            msg += "\n\nWould you like to remove these constraints or cancel fitting?"
+            msgbox = QtWidgets.QMessageBox(self)
+            msgbox.setIcon(QtWidgets.QMessageBox.Warning)
+            msgbox.setText(msg)
+            msgbox.setWindowTitle("Existing Constraints")
+            # custom buttons
+            button_remove = QtWidgets.QPushButton("Remove")
+            msgbox.addButton(button_remove, QtWidgets.QMessageBox.YesRole)
+            button_cancel = QtWidgets.QPushButton("Cancel")
+            msgbox.addButton(button_cancel, QtWidgets.QMessageBox.RejectRole)
+            retval = msgbox.exec_()
+            if retval == QtWidgets.QMessageBox.RejectRole:
+                # cancel fit
+                raise ValueError("Fitting cancelled")
+            else:
+                # remove constraint
+                for cons in multi_constraints:
+                    self.deleteConstraintOnParameter(param=cons[0])
+                # re-read the constraints
+                constraints = self.getComplexConstraintsForModel()
+
+        return constraints
+
     def showModelDescription(self):
         """
         Creates a window with model description, when right clicked in the treeview
@@ -873,6 +939,44 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             model = None
         self.respondToModelStructure(model=model, structure_factor=structure)
 
+    def onCustomModelChange(self):
+        """
+        Reload the custom model combobox
+        """
+        self.custom_models = self.customModels()
+        self.readCustomCategoryInfo()
+        # See if we need to update the combo in-place
+        if self.cbCategory.currentText() != CATEGORY_CUSTOM: return
+
+        current_text = self.cbModel.currentText()
+        self.cbModel.blockSignals(True)
+        self.cbModel.clear()
+        self.cbModel.blockSignals(False)
+        self.enableModelCombo()
+        self.disableStructureCombo()
+        # Retrieve the list of models
+        model_list = self.master_category_dict[CATEGORY_CUSTOM]
+        # Populate the models combobox
+        self.cbModel.addItems(sorted([model for (model, _) in model_list]))
+        new_index = self.cbModel.findText(current_text)
+        if new_index != -1:
+            self.cbModel.setCurrentIndex(self.cbModel.findText(current_text))
+
+    def onSelectionChanged(self):
+        """
+        React to parameter selection
+        """
+        rows = self.lstParams.selectionModel().selectedRows()
+        # Clean previous messages
+        self.communicate.statusBarUpdateSignal.emit("")
+        if len(rows) == 1:
+            # Show constraint, if present
+            row = rows[0].row()
+            if self.rowHasConstraint(row):
+                func = self.getConstraintForRow(row).func
+                if func is not None:
+                    self.communicate.statusBarUpdateSignal.emit("Active constrain: "+func)
+
     def replaceConstraintName(self, old_name, new_name=""):
         """
         Replace names of models in defined constraints
@@ -885,6 +989,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 if old_name in func:
                     new_func = func.replace(old_name, new_name)
                     self._model_model.item(row, 1).child(0).data().func = new_func
+
+    def isConstraintMultimodel(self, constraint):
+        """
+        Check if the constraint function text contains current model name
+        """
+        current_model_name = self.kernel_module.name
+        if current_model_name in constraint:
+            return False
+        else:
+            return True
 
     def updateData(self):
         """
@@ -936,7 +1050,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.enableStructureCombo()
             self._model_model.clear()
             return
-
+            
         # Safely clear and enable the model combo
         self.cbModel.blockSignals(True)
         self.cbModel.clear()
@@ -1104,11 +1218,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             fitters, _ = self.prepareFitters()
         except ValueError as ex:
             # This should not happen! GUI explicitly forbids this situation
-            self.communicate.statusBarUpdateSignal.emit('Fitting attempt without parameters.')
+            self.communicate.statusBarUpdateSignal.emit(str(ex))
             return
 
         # Create the fitting thread, based on the fitter
-        completefn = self.batchFitComplete if self.is_batch_fitting else self.fitComplete
+        completefn = self.batchFittingCompleted if self.is_batch_fitting else self.fittingCompleted
 
         calc_fit = FitThread(handler=handler,
                             fn=fitters,
@@ -1145,12 +1259,27 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         print("FIT FAILED: ", reason)
         pass
 
+    def batchFittingCompleted(self, result):
+        """
+        Send the finish message from calculate threads to main thread
+        """
+        self.batchFittingFinishedSignal.emit(result)
+
     def batchFitComplete(self, result):
         """
         Receive and display batch fitting results
         """
         #re-enable the Fit button
         self.setFittingStopped()
+        # Show the grid panel
+        self.grid_window = BatchOutputPanel(parent=self, output_data=result[0])
+        self.grid_window.show()
+
+    def fittingCompleted(self, result):
+        """
+        Send the finish message from calculate threads to main thread
+        """
+        self.fittingFinishedSignal.emit(result)
 
     def fitComplete(self, result):
         """
@@ -1161,7 +1290,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.setFittingStopped()
 
         if result is None:
-            msg = "Fitting failed after: %s s.\n" % GuiUtils.formatNumber(elapsed)
+            msg = "Fitting failed."
             self.communicate.statusBarUpdateSignal.emit(msg)
             return
 
@@ -1227,7 +1356,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # deal with it until Python gets discriminated unions
         smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
 
-        constraints = self.getComplexConstraintsForModel()
+        constraints = self.getConstraintsForFitting()
+
         smearer = None
         handler = None
         batch_inputs = {}
@@ -1241,8 +1371,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 fitter_single.set_model(model, fit_id, params_to_fit, data=data,
                              constraints=constraints)
             except ValueError as ex:
-                logging.error("Setting model parameters failed with: %s" % ex)
-                return
+                raise ValueError("Setting model parameters failed with: %s" % ex)
 
             qmin, qmax, _ = self.logic.computeRangeFromData(data)
             fitter_single.set_data(data=data, id=fit_id, smearer=smearer, qmin=qmin,
@@ -1408,7 +1537,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         assert isinstance(param_dict, dict)
         if not dict:
             return
-        if self._model_model.rowCount() == 0:
+        if self._magnet_model.rowCount() == 0:
             return
 
         def iterateOverMagnetModel(func):
@@ -1554,6 +1683,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for model in models:
             self.models[model.name] = model
 
+        self.readCustomCategoryInfo()
+
+    def readCustomCategoryInfo(self):
+        """
+        Reads the custom model category
+        """
+        #Looking for plugins
+        self.plugins = list(self.custom_models.values())
+        plugin_list = []
+        for name, plug in self.custom_models.items():
+            self.models[name] = plug
+            plugin_list.append([name, True])
+        self.master_category_dict[CATEGORY_CUSTOM] = plugin_list
+
     def regenerateModelDict(self):
         """
         Regenerates self.by_model_dict which has each model name as the
@@ -1661,7 +1804,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Setting model parameters into QStandardItemModel based on selected _model_
         """
-        kernel_module = generate.load_kernel_module(model_name)
+        name = model_name
+        if self.cbCategory.currentText() == CATEGORY_CUSTOM:
+            # custom kernel load requires full path
+            name = os.path.join(ModelUtilities.find_plugins_dir(), model_name+".py")
+        kernel_module = generate.load_kernel_module(name)
         self.model_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
 
         # Instantiate the current sasmodel

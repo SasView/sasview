@@ -18,6 +18,8 @@ import sas.qtgui.Utilities.LocalConfig as LocalConfig
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
+from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
+from sas.qtgui.Utilities.PluginManager import PluginManager
 from sas.qtgui.MainWindow.UI.AcknowledgementsUI import Ui_Acknowledgements
 from sas.qtgui.MainWindow.AboutBox import AboutBox
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
@@ -357,6 +359,7 @@ class GuiManager(object):
         self.communicate.perspectiveChangedSignal.connect(self.perspectiveChanged)
         self.communicate.updateTheoryFromPerspectiveSignal.connect(self.updateTheoryFromPerspective)
         self.communicate.plotRequestedSignal.connect(self.showPlot)
+        self.communicate.plotFromFilenameSignal.connect(self.showPlotFromFilename)
         self.communicate.updateModelFromDataOperationPanelSignal.connect(self.updateModelFromDataOperationPanel)
 
     def addTriggers(self):
@@ -405,7 +408,9 @@ class GuiManager(object):
         self._workspace.actionGPU_Options.triggered.connect(self.actionGPU_Options)
         self._workspace.actionFit_Results.triggered.connect(self.actionFit_Results)
         self._workspace.actionChain_Fitting.triggered.connect(self.actionChain_Fitting)
+        self._workspace.actionAdd_Custom_Model.triggered.connect(self.actionAdd_Custom_Model)
         self._workspace.actionEdit_Custom_Model.triggered.connect(self.actionEdit_Custom_Model)
+        self._workspace.actionManage_Custom_Models.triggered.connect(self.actionManage_Custom_Models)
         # Window
         self._workspace.actionCascade.triggered.connect(self.actionCascade)
         self._workspace.actionTile.triggered.connect(self.actionTile)
@@ -661,11 +666,23 @@ class GuiManager(object):
         print("actionChain_Fitting TRIGGERED")
         pass
 
+    def actionAdd_Custom_Model(self):
+        """
+        """
+        self.model_editor = TabbedModelEditor(self)
+        self.model_editor.show()
+
     def actionEdit_Custom_Model(self):
         """
         """
-        print("actionEdit_Custom_Model TRIGGERED")
-        pass
+        self.model_editor = TabbedModelEditor(self, edit_only=True)
+        self.model_editor.show()
+
+    def actionManage_Custom_Models(self):
+        """
+        """
+        self.model_manager = PluginManager(self)
+        self.model_manager.show()
 
     #============ ANALYSIS =================
     def actionFitting(self):
@@ -778,6 +795,13 @@ class GuiManager(object):
 
         self.filesWidget.model.appendRow(new_item)
         self._data_manager.add_data(new_datalist_item)
+
+    def showPlotFromFilename(self, filename):
+        """
+        Pass the show plot request to the data explorer
+        """
+        if hasattr(self, "filesWidget"):
+            self.filesWidget.displayFile(filename=filename, is_data=True)
 
     def showPlot(self, plot):
         """

@@ -475,18 +475,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.perspectiveChangedSignal.emit(self.cbFitting.currentText())
         self.chkBatch.setEnabled(self.parent.perspective().allowBatch())
 
-    def displayData(self, data_list):
+    def displayFile(self, filename=None, is_data=True):
         """
         Forces display of charts for the given filename
         """
-        plot_to_show = data_list[0]
-
-        # passed plot is used ONLY to figure out its title,
-        # so all the charts related by it can be pulled from 
-        # the data explorer indices.
-        filename = plot_to_show.filename
-        model = self.model if plot_to_show.is_data else self.theory_model
-
+        model = self.model if is_data else self.theory_model
         # Now query the model item for available plots
         plots = GuiUtils.plotsFromFilename(filename, model)
         item = GuiUtils.itemFromFilename(filename, model)
@@ -505,6 +498,17 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         if new_plots:
             self.plotData(new_plots)
+
+    def displayData(self, data_list):
+        """
+        Forces display of charts for the given data set
+        """
+        plot_to_show = data_list[0]
+        # passed plot is used ONLY to figure out its title,
+        # so all the charts related by it can be pulled from 
+        # the data explorer indices.
+        filename = plot_to_show.filename
+        self.displayFile(filename=filename, is_data=plot_to_show.is_data)
 
     def addDataPlot2D(self, plot_set, item):
         """

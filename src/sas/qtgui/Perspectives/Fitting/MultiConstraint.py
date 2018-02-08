@@ -113,14 +113,14 @@ class MultiConstraint(QtWidgets.QDialog, Ui_MultiConstraintUI):
         parameter_string_end = parameter_string_start + len(param_str)
 
         # 3. parameter name should be a separate word, but can have "()[]*+-/ " around
-        valid_neighbours = "()[]*+-/ "
-        start_loc = parameter_string_start -1
-        end_loc = parameter_string_end
-        if not any([constraint_text[start_loc] == ch for ch in valid_neighbours]):
-            return False
-        if end_loc < len(constraint_text):
-            if not any([constraint_text[end_loc] == ch for ch in valid_neighbours]):
-                return False
+        #valid_neighbours = "()[]*+-/ "
+        #start_loc = parameter_string_start -1
+        #end_loc = parameter_string_end
+        #if not any([constraint_text[start_loc] == ch for ch in valid_neighbours]):
+        #    return False
+        #if end_loc < len(constraint_text):
+        #    if not any([constraint_text[end_loc] == ch for ch in valid_neighbours]):
+        #        return False
 
         # 4. replace parameter name with "1" and try to evaluate the expression
         try:

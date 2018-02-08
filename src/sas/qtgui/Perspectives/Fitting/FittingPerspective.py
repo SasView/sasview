@@ -7,6 +7,7 @@ from PyQt5 import QtWidgets
 from bumps import options
 from bumps import fitters
 
+import sas.qtgui.Utilities.LocalConfig as LocalConfig
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
@@ -115,6 +116,7 @@ class FittingWindow(QtWidgets.QTabWidget):
         """
         tab	= FittingWidget(parent=self.parent, data=data, tab_id=self.maxIndex+1)
         tab.is_batch_fitting = is_batch
+
         # Add this tab to the object library so it can be retrieved by scripting/jupyter
         tab_name = self.getTabName(is_batch=is_batch)
         ObjectLibrary.addObject(tab_name, tab)
@@ -122,7 +124,13 @@ class FittingWindow(QtWidgets.QTabWidget):
         if data:
             self.updateFitDict(data, tab_name)
         self.maxIndex += 1
-        self.addTab(tab, tab_name)
+        icon = QtGui.QIcon()
+        if is_batch:
+            icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
+        self.addTab(tab, icon, tab_name)
+        # Show the new tab
+        self.setCurrentIndex(self.maxIndex-1)
+        # Notify listeners
         self.tabsModifiedSignal.emit()
 
     def addConstraintTab(self):
@@ -139,7 +147,12 @@ class FittingWindow(QtWidgets.QTabWidget):
         tab_name = self.getCSTabName() # TODO update the tab name scheme
         ObjectLibrary.addObject(tab_name, tab)
         self.tabs.append(tab)
-        self.addTab(tab, tab_name)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/link.svg"))
+        self.addTab(tab, icon, tab_name)
+
+        # This will be the last tab, so set the index accordingly
+        self.setCurrentIndex(self.count()-1)
 
     def updateFitDict(self, item_key, tab_name):
         """

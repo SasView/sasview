@@ -110,7 +110,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         tab_object = ObjectLibrary.getObject(tab)
 
         # Disconnect all local slots
-        tab_object.disconnect()
+        #tab_object.disconnect()
 
         # Reconnect tab signals to local slots
         tab_object.constraintAddedSignal.connect(self.initializeFitList)
@@ -177,9 +177,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             no_params_msg = "Fitting can not be performed.\n" +\
                             "Not all tabs chosen for fitting have parameters selected for fitting."
             QtWidgets.QMessageBox.warning(self,
-                                           'Warning',
-                                            no_params_msg,
-                                            QtWidgets.QMessageBox.Ok)
+                                          'Warning',
+                                           no_params_msg,
+                                           QtWidgets.QMessageBox.Ok)
 
             return
 
@@ -673,7 +673,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         model1, param1, operator, constraint_text = cc_widget.constraint()
 
         constraint.func = constraint_text
+        # param1 is the parameter we're constraining
         constraint.param = param1
+
         # Find the right tab
         constrained_tab = self.getObjectByName(model1)
         if constrained_tab is None:

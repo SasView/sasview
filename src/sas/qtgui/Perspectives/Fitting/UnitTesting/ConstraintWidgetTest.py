@@ -21,7 +21,6 @@ from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 
 if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)
-#app = QtWidgets.QApplication(sys.argv)
 
 class ConstraintWidgetTest(unittest.TestCase):
     '''Test the ConstraintWidget dialog'''
@@ -70,14 +69,14 @@ class ConstraintWidgetTest(unittest.TestCase):
         self.assertEqual(self.widget.currentType, "FitPage")
         # click on "batch"
         QTest.mouseClick(self.widget.btnBatch, QtCore.Qt.LeftButton)
-        app.processEvents()
+        QtWidgets.QApplication.processEvents()
         # See what the current type is now
         self.assertEqual(self.widget.currentType, "BatchPage")
         # See if the list is getting initialized
         self.assertTrue(self.widget.initializeFitList.called)
         # Go back to single fit
         QTest.mouseClick(self.widget.btnSingle, QtCore.Qt.LeftButton)
-        app.processEvents()
+        QtWidgets.QApplication.processEvents()
         # See what the current type is now
         self.assertEqual(self.widget.currentType, "FitPage")
 

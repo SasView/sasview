@@ -178,12 +178,13 @@ def _find_models():
 
     plugins = {}
     for filename in os.listdir(directory):
+
         name, ext = os.path.splitext(filename)
         if ext == '.py' and not name == '__init__':
             path = os.path.abspath(os.path.join(directory, filename))
             try:
                 model = load_custom_model(path)
-                model.name = PLUGIN_NAME_BASE + model.name
+                #model.name = PLUGIN_NAME_BASE + model.name
                 plugins[model.name] = model
             except Exception:
                 msg = traceback.format_exc()
@@ -414,12 +415,14 @@ class ModelManager(object):
     """
     implement model
     """
-    __modelmanager = ModelManagerBase()
-    cat_model_list = [__modelmanager.model_dictionary[model_name] for model_name \
-                      in list(__modelmanager.model_dictionary.keys()) \
-                      if model_name not in list(__modelmanager.stored_plugins.keys())]
+    def __init__(self):
+        self.__modelmanager = ModelManagerBase()
+        self.cat_model_list = [self.__modelmanager.model_dictionary[model_name] for model_name \
+                          in list(self.__modelmanager.model_dictionary.keys()) \
+                          if model_name not in list(self.__modelmanager.stored_plugins.keys())]
 
-    CategoryInstaller.check_install(model_list=cat_model_list)
+        CategoryInstaller.check_install(model_list=self.cat_model_list)
+
     def findModels(self):
         return self.__modelmanager.findModels()
 

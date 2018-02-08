@@ -140,6 +140,10 @@ DISABLE_LOGGING = logging.DEBUG
 
 # Time out for updating sasview
 UPDATE_TIMEOUT = 2
+
+# Logging levels to disable, if any
+DISABLE_LOGGING = logging.DEBUG
+
 def printEVT(message):
     """
     Post a debug message to console/file
