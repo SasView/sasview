@@ -293,6 +293,12 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # Notify the parent about completed fitting
         self.parent.fittingStoppedSignal.emit(self.getTabsForFit())
 
+        # Assure the fitting succeeded
+        if result is None or not result:
+            msg = "Fitting failed. Please ensure correctness of chosen constraints."
+            self.parent.communicate.statusBarUpdateSignal.emit(msg)
+            return
+
         # get the elapsed time
         elapsed = result[1]
 
@@ -552,7 +558,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.tblTabList.blockSignals(False)
 
         # Check if any constraints present in tab
-        constraint_names = fit_page.getConstraintsForModel()
+        constraint_names = fit_page.getComplexConstraintsForModel()
         constraints = fit_page.getConstraintObjectsForModel()
         if not constraints: 
             return

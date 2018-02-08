@@ -23,7 +23,7 @@ from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Utilities.LocalConfig as LocalConfig
-
+from sas.qtgui.Utilities.GridPanel import  BatchOutputPanel
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
@@ -656,17 +656,22 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for row in self.selectedParameters():
             param = self._model_model.item(row, 0).text()
             value = self._model_model.item(row, 1).text()
-            min = self._model_model.item(row, min_col).text()
-            max = self._model_model.item(row, max_col).text()
+            min_t = self._model_model.item(row, min_col).text()
+            max_t = self._model_model.item(row, max_col).text()
             # Create a Constraint object
-            constraint = Constraint(param=param, value=value, min=min, max=max, func=value)
+            constraint = Constraint(param=param, value=value, min=min_t, max=max_t)
             # Create a new item and add the Constraint object as a child
             item = QtGui.QStandardItem()
             item.setData(constraint)
             self._model_model.item(row, 1).setChild(0, item)
+            # Assumed correctness from the validator
+            value = float(value)
+            # BUMPS calculates log(max-min) without any checks, so let's assign minor range
+            min_v = value - (value/10000.0)
+            max_v = value + (value/10000.0)
             # Set min/max to the value constrained
-            self._model_model.item(row, min_col).setText(value)
-            self._model_model.item(row, max_col).setText(value)
+            self._model_model.item(row, min_col).setText(str(min_v))
+            self._model_model.item(row, max_col).setText(str(max_v))
             self.constraintAddedSignal.emit([row])
             # Show visual hints for the constraint
             font = QtGui.QFont()
@@ -734,13 +739,24 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         item = self._model_model.item(row,1)
         if item.hasChildren():
             c = item.child(0).data()
-            if isinstance(c, Constraint) and c.func:
+            if isinstance(c, Constraint):
                 return True
         return False
 
     def rowHasActiveConstraint(self, row):
         """
         Finds out if row of the main model has an active constraint child
+        """
+        item = self._model_model.item(row,1)
+        if item.hasChildren():
+            c = item.child(0).data()
+            if isinstance(c, Constraint) and c.active:
+                return True
+        return False
+
+    def rowHasActiveComplexConstraint(self, row):
+        """
+        Finds out if row of the main model has an active, nontrivial constraint child
         """
         item = self._model_model.item(row,1)
         if item.hasChildren():
@@ -785,17 +801,23 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         model_name = self.kernel_module.name
         param_number = self._model_model.rowCount()
-        def preamble(s):
-            func = self._model_model.item(s, 1).child(0).data().func
-            value = self._model_model.item(s, 1).child(0).data().value
-            if func == value:
-                return ""
-
-            return model_name + "."
         params = [(self._model_model.item(s, 0).text(),
-                    #preamble(s) +self._model_model.item(s, 1).child(0).data().func)
                     self._model_model.item(s, 1).child(0).data().func)
                     for s in range(param_number) if self.rowHasActiveConstraint(s)]
+        return params
+
+    def getComplexConstraintsForModel(self):
+        """
+        Return a list of tuples. Each tuple contains constraints mapped as
+        ('constrained parameter', 'function to constrain')
+        e.g. [('sld','5*sld_solvent')].
+        Only for constraints with defined VALUE
+        """
+        model_name = self.kernel_module.name
+        param_number = self._model_model.rowCount()
+        params = [(self._model_model.item(s, 0).text(),
+                    self._model_model.item(s, 1).child(0).data().func)
+                    for s in range(param_number) if self.rowHasActiveComplexConstraint(s)]
         return params
 
     def getConstraintObjectsForModel(self):
@@ -1146,9 +1168,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         #re-enable the Fit button
         self.setFittingStopped()
 
-        print ("BATCH FITTING FINISHED")
-        # Add the Qt version of wx.aui.AuiNotebook and populate it
-        pass
+        # Show the grid panel
+        grid_window = BatchOutputPanel(parent=self, output_data=result[0])
+        grid_window.show()
 
     def fitComplete(self, result):
         """
@@ -1221,7 +1243,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # deal with it until Python gets discriminated unions
         smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
 
-        constraints = self.getConstraintsForModel()
+        constraints = self.getComplexConstraintsForModel()
         smearer = None
         handler = None
         batch_inputs = {}
