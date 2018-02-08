@@ -8,7 +8,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import *
-from PyQt5.QtWebKit import *
 from unittest.mock import MagicMock
 
 # set up import paths

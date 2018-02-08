@@ -4,7 +4,6 @@ import webbrowser
 from bumps import options
 
 from PyQt5 import QtGui, QtWidgets
-from PyQt5 import QtWebKit
 
 from unittest.mock import MagicMock
 

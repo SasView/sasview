@@ -6,7 +6,6 @@ import webbrowser
 from unittest.mock import MagicMock
 
 from PyQt5 import QtGui, QtWidgets
-from PyQt5 import QtWebKit
 
 # set up import paths
 import path_prepare

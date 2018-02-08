@@ -2,6 +2,9 @@
 Widget for multi-model constraints.
 """
 import os
+
+# numpy methods required for the validator! Don't remove.
+# pylint: disable=unused-import,unused-wildcard-import,redefined-builtin
 from numpy import *
 
 from PyQt5 import QtCore
@@ -14,7 +17,6 @@ ALLOWED_OPERATORS = ['=','<','>','>=','<=']
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.ComplexConstraintUI import Ui_ComplexConstraintUI
-from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 
 class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
     def __init__(self, parent=None, tabs=None):
@@ -45,7 +47,6 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         self.tab_names = [tab.kernel_module.name for tab in self.tabs]
         self.params = [tab.getParamNames() for tab in self.tabs]
-        pass
 
     def setupSignals(self):
         """
@@ -103,7 +104,6 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
             self.txtParam.setText(self.tab_names[0] + ":" + self.cbParam1.currentText())
         else:
             self.txtConstraint.setText(self.tab_names[1] + "." + self.cbParam2.currentText())
-        pass
 
     def onOperatorChange(self, index):
         """
@@ -139,7 +139,6 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         Add visual cues when formula is incorrect
         """
-        formula_is_valid = False
         formula_is_valid = self.validateConstraint(self.txtConstraint.text())
         if not formula_is_valid:
             self.cmdOK.setEnabled(False)
@@ -176,7 +175,6 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         parameter_string_start = constraint_text.find(param_str)
         if parameter_string_start < 0:
             return False
-        parameter_string_end = parameter_string_start + len(param_str)
 
         # 3. replace parameter name with "1" and try to evaluate the expression
         try:

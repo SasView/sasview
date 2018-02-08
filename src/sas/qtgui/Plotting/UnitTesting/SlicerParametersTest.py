@@ -6,7 +6,6 @@ from unittest.mock import MagicMock
 from PyQt5 import QtGui, QtWidgets
 from PyQt5 import QtCore
 from PyQt5 import QtTest
-from PyQt5 import QtWebKit
 
 # set up import paths
 import sas.qtgui.path_prepare
