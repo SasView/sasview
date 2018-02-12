@@ -1,5 +1,6 @@
 import os
 import sys
+import logging
 
 from twisted.internet import threads
 
@@ -99,9 +100,16 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         Intercept update signals from fitting tabs
         """
-        if tab is not None:
-            ObjectLibrary.getObject(tab).constraintAddedSignal.connect(self.initializeFitList)
-            ObjectLibrary.getObject(tab).newModelSignal.connect(self.initializeFitList)
+        if tab is None:
+            return
+        tab_object = ObjectLibrary.getObject(tab)
+
+        # Disconnect all local slots
+        tab_object.disconnect()
+
+        # Reconnect tab signals to local slots
+        tab_object.constraintAddedSignal.connect(self.initializeFitList)
+        tab_object.newModelSignal.connect(self.initializeFitList)
 
     def onFitTypeChange(self, checked):
         """
@@ -547,13 +555,13 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             item.setCheckState(QtCore.Qt.Checked)
             self.tabs_for_fitting[tab_name] = True
 
+        # Disable signals so we don't get infinite call recursion
+        self.tblTabList.blockSignals(True)
         self.tblTabList.setItem(pos, 0, item)
         self.tblTabList.setItem(pos, 1, self.uneditableItem(model_name))
         self.tblTabList.setItem(pos, 2, self.uneditableItem(model_filename))
         # Moniker is editable, so no option change
         item = QtWidgets.QTableWidgetItem(moniker)
-        # Disable signals so we don't get infinite call recursion
-        self.tblTabList.blockSignals(True)
         self.tblTabList.setItem(pos, 3, item)
         self.tblTabList.blockSignals(False)
 
@@ -563,6 +571,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         if not constraints: 
             return
         self.tblConstraints.setEnabled(True)
+        self.tblConstraints.blockSignals(True)
         for constraint, constraint_name in zip(constraints, constraint_names):
             # Create the text for widget item
             label = moniker + ":"+ constraint_name[0] + " = " + constraint_name[1]
@@ -575,6 +584,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             item.setCheckState(QtCore.Qt.Checked)
             self.tblConstraints.insertRow(pos)
             self.tblConstraints.setItem(pos, 0, item)
+        self.tblConstraints.blockSignals(False)
 
     def initializeFitList(self):
         """
@@ -624,6 +634,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         return True
 
     def getObjectByName(self, name):
+        """
+        Given name of the fit, returns associated fit object
+        """
         for object_name in ObjectLibrary.listObjects():
             object = ObjectLibrary.getObject(object_name)
             if isinstance(object, FittingWidget):
