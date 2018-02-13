@@ -85,6 +85,7 @@ class Plugin(PluginBase):
                         resolution_help, self.on_calculate_resoltuion),
                 ("Generic Scattering Calculator",
                         gensas_help, self.on_gen_model),
+                ("Orientation Viewer", "Show 3-D view of oriented shape", self.on_show_orientation),
                 ("Python Shell/Editor", pyconsole_help, self.on_python_console),
                 ("Image Viewer", imageviewer_help, self.on_image_viewer), ]
 
@@ -189,6 +190,13 @@ class Plugin(PluginBase):
         else:
             self.gen_frame.Show(False)
         self.gen_frame.Show(True)
+
+    def on_show_orientation(self, event):
+        """
+        Make sasmodels orientation & jitter viewer available
+        """
+        from sasmodels.jitter import run
+        run()
 
     def on_image_viewer(self, event):
         """
