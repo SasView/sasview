@@ -39,7 +39,7 @@ For a description of the CanSAS/SASXML format see:
 http://www.cansas.org/formats/canSAS1d/1.1/doc/
 
 For a description of the ISIS 1D format see:
-https://www.isis.stfc.ac.uk/Pages/1d-loq-fish-rkh-ascii-format-example.pdf
+https://www.isis.stfc.ac.uk/Pages/colette-ascii-file-format-descriptions.pdf
 
 For a description of the NXcanSAS format see:
 http://cansas-org.github.io/NXcanSAS/classes/contributed_definitions/NXcanSAS.html
