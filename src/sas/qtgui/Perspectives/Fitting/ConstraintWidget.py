@@ -1,5 +1,3 @@
-import os
-import sys
 import logging
 
 from twisted.internet import threads
@@ -140,8 +138,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         tabs_to_fit = self.getTabsForFit()
 
         # Single fitter for the simultaneous run
-        sim_fitter = Fit()
-        sim_fitter.fitter_id = self.page_id
+        fitter = Fit()
+        fitter.fitter_id = self.page_id
 
         # Notify the parent about fitting started
         self.parent.fittingStartedSignal.emit(tabs_to_fit)
@@ -150,7 +148,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         #
         page_ids = []
         fitter_id = 0
-        sim_fitter=[sim_fitter]
+        sim_fitter_list=[fitter]
         # Prepare the fitter object
         try:
             for tab in tabs_to_fit:
@@ -158,16 +156,16 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 if tab_object is None:
                     # No such tab!
                     return
-                sim_fitter, fitter_id = tab_object.prepareFitters(fitter=sim_fitter[0], fit_id=fitter_id)
+                sim_fitter_list, fitter_id = tab_object.prepareFitters(fitter=sim_fitter_list[0], fit_id=fitter_id)
                 page_ids.append([tab_object.page_id])
-        except ValueError as ex:
+        except ValueError:
             # No parameters selected in one of the tabs
             no_params_msg = "Fitting can not be performed.\n" +\
                             "Not all tabs chosen for fitting have parameters selected for fitting."
-            reply = QtWidgets.QMessageBox.question(self,
-                                               'Warning',
-                                               no_params_msg,
-                                               QtWidgets.QMessageBox.Ok)
+            QtWidgets.QMessageBox.question(self,
+                                           'Warning',
+                                            no_params_msg,
+                                            QtWidgets.QMessageBox.Ok)
 
             return
 
@@ -188,7 +186,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         # new fit thread object
         calc_fit = FitThread(handler=handler,
-                             fn=sim_fitter,
+                             fn=sim_fitter_list,
                              batch_inputs=batch_inputs,
                              batch_outputs=batch_outputs,
                              page_id=page_ids,
@@ -388,7 +386,6 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             return
         # Select for fitting
         param_string = "Fit Page " if num_rows==1 else "Fit Pages "
-        to_string = "to its current value" if num_rows==1 else "to their current values"
 
         self.actionSelect = QtWidgets.QAction(self)
         self.actionSelect.setObjectName("actionSelect")
@@ -434,7 +431,6 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             return
         # Select for fitting
         param_string = "constraint " if num_rows==1 else "constraints "
-        to_string = "to its current value" if num_rows==1 else "to their current values"
 
         self.actionSelect = QtWidgets.QAction(self)
         self.actionSelect.setObjectName("actionSelect")
