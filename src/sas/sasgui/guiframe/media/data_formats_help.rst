@@ -27,9 +27,14 @@ Numbers can be separated by spaces or commas.
 SasView recognises the following file extensions which are not case-sensitive:
 
 *  .TXT
-*  .ASC
 *  .DAT
 *  .XML (in canSAS format v1.0 and 1.1)
+*  .H5  (as NeXus NXcanSAS only)
+*  .NXS (as NeXus NXcanSAS only)
+
+.. note::
+    From SasView version 4.2 onwards files written in the NIST .ASC format are no longer read. This is because that 
+    format normally represents *raw* and not reduced data.
 
 If using CSV output from, for example, a spreadsheet, ensure that it is not using commas as delimiters for thousands.
 
@@ -57,9 +62,16 @@ http://www.diamond.ac.uk/Beamlines/Soft-Condensed-Matter/small-angle/SAXS-Softwa
 2D SAS Formats
 --------------
 
-SasView will read ASCII ('text') files in the NIST 2D format (with the extensions .ASC or .DAT) or files in the NeXus NXcanSAS (HDF5) format (with the extension .H5). File extensions are not case-sensitive. Both of these formats are written by the `Mantid Framework <http://www.mantidproject.org/>`_.
+SasView will read ASCII ('text') files in the NIST 2D format (with the extension .DAT) or files in the NeXus NXcanSAS (HDF5) format (with the extension .H5 or .NXS). File extensions are not case-sensitive. Both of these formats are written by the `Mantid Framework <http://www.mantidproject.org/>`_.
 
 Most of the header lines in the NIST 2D format can actually be removed except the last line, and only the first three columns (*Qx, Qy,* and *I(Qx,Qy)*) are actually required.
+
+.. note::
+    From SasView version 4.2 onwards files written in the NIST .ASC format are no longer read. This is because that 
+    format normally represents *raw* and not reduced data.
+
+.. note::
+    SasView does not read the standard NeXus format, only the NXcanSAS subset. 
 
 The SasView :ref:`File_Converter_Tool` available in SasView 4.1 onwards can be used to convert data sets in the 2D BSL/OTOKO format into the NeXus NXcanSAS (HDF5) format.
 
