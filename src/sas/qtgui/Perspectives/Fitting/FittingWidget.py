@@ -23,7 +23,6 @@ from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Utilities.LocalConfig as LocalConfig
-from sas.qtgui.Utilities.GridPanel import  BatchOutputPanel
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
@@ -1167,10 +1166,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         #re-enable the Fit button
         self.setFittingStopped()
-
-        # Show the grid panel
-        grid_window = BatchOutputPanel(parent=self, output_data=result[0])
-        grid_window.show()
 
     def fitComplete(self, result):
         """

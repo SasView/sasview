@@ -347,8 +347,6 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         msg = "Fitting completed successfully in: %s s.\n" % GuiUtils.formatNumber(elapsed)
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
 
-        pass
-
     def onFitFailed(self, reason):
         """
         Respond to fitting failure.
@@ -362,7 +360,6 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
 
         msg = "Fitting failed: %s s.\n" % reason
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
-        pass
  
     def isTabImportable(self, tab):
         """
