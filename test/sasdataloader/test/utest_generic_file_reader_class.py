@@ -8,6 +8,7 @@ import logging
 import numpy as np
 
 from sas.sascalc.dataloader.data_info import DataInfo, plottable_1D
+from sas.sascalc.dataloader.loader import Loader
 from sas.sascalc.dataloader.file_reader_base_class import FileReader
 
 logger = logging.getLogger(__name__)
@@ -23,6 +24,8 @@ class GenericFileReaderTests(unittest.TestCase):
         self.reader = TestFileReader()
         self.bad_file = find("ACB123.txt")
         self.good_file = find("123ABC.txt")
+        self.generic_reader = Loader()
+        self.deprecated_file_type = find("FEB18012.ASC")
 
     def test_bad_file_path(self):
         output = self.reader.read(self.bad_file)
@@ -35,6 +38,14 @@ class GenericFileReaderTests(unittest.TestCase):
         output = self.reader.read(self.good_file)
         self.assertEqual(len(output), 1)
         self.assertEqual(output[0].meta_data["blah"], '123ABC exists!')
+
+    def test_old_file_types(self):
+        f = self.generic_reader.load(self.deprecated_file_type)
+        last_f = f[0]
+        if hasattr(last_f, "errors"):
+            self.assertEquals(len(last_f.errors), 1)
+        else:
+            self.fail("Errors did not propogate to the file properly.")
 
     def tearDown(self):
         if os.path.isfile(self.bad_file):
