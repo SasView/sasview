@@ -557,6 +557,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Show the constraint widget and receive the expression
         """
         selected_rows = self.lstParams.selectionModel().selectedRows()
+        # There have to be only two rows selected. The caller takes care of that
+        # but let's check the correctness.
         assert(len(selected_rows)==2)
 
         params_list = [s.data() for s in selected_rows]
@@ -572,24 +574,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         constraint.param = mc_widget.params[0]
         # Function should have the model name preamble
         constraint.func = c_text
-
-        # Create a new item and add the Constraint object as a child
-        item = QtGui.QStandardItem()
-        item.setData(constraint)
-
         # Which row is the constrained parameter in?
         row = self.getRowFromName(constraint.param)
-        self._model_model.item(row, 1).setChild(0, item)
-        self.constraintAddedSignal.emit([row])
 
-        # Show visual hints for the constraint
-        font = QtGui.QFont()
-        font.setItalic(True)
-        brush = QtGui.QBrush(QtGui.QColor('blue'))
-        self.modifyViewOnRow(row, font=font, brush=brush)
-
-        # Notify the user
-        self.communicate.statusBarUpdateSignal.emit('Constraints added')
+        # Create a new item and add the Constraint object as a child
+        self.addConstraintToRow(constraint=constraint, row=row)
 
     def getRowFromName(self, name):
         """
@@ -678,7 +667,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             brush = QtGui.QBrush(QtGui.QColor('blue'))
             self.modifyViewOnRow(row, font=font, brush=brush)
         self.communicate.statusBarUpdateSignal.emit('Constraint added')
-        pass
 
     def deleteConstraint(self):
         """
@@ -717,8 +705,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             break
 
         self.communicate.statusBarUpdateSignal.emit('Constraint removed')
-        pass
-
 
     def getConstraintForRow(self, row):
         """
@@ -790,7 +776,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Convert to proper indices and set requested enablement
         for row in self.selectedParameters():
             self._model_model.item(row, 0).setCheckState(status)
-        pass # debugger hook
 
     def getConstraintsForModel(self):
         """
@@ -798,7 +783,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         ('constrained parameter', 'function to constrain')
         e.g. [('sld','5*sld_solvent')]
         """
-        model_name = self.kernel_module.name
         param_number = self._model_model.rowCount()
         params = [(self._model_model.item(s, 0).text(),
                     self._model_model.item(s, 1).child(0).data().func)
@@ -812,7 +796,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         e.g. [('sld','5*sld_solvent')].
         Only for constraints with defined VALUE
         """
-        model_name = self.kernel_module.name
         param_number = self._model_model.rowCount()
         params = [(self._model_model.item(s, 0).text(),
                     self._model_model.item(s, 1).child(0).data().func)
@@ -899,8 +882,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 if old_name in func:
                     new_func = func.replace(old_name, new_name)
                     self._model_model.item(row, 1).child(0).data().func = new_func
-
-        pass
 
     def updateData(self):
         """
