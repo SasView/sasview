@@ -30,6 +30,11 @@ FIELDS_1D = ('x', 'y', 'dx', 'dy', 'dxl', 'dxw')
 # Data 2D fields for iterative purposes
 FIELDS_2D = ('data', 'qx_data', 'qy_data', 'q_data', 'err_data',
                  'dqx_data', 'dqy_data', 'mask')
+DEPRECATION_MESSAGE = ("\rThe extension of this file suggests the data set migh"
+                       "t not be fully reduced. Support for the reader associat"
+                       "ed with this file type has been removed. An attempt to "
+                       "load the file was made, but SasView cannot guarantee th"
+                       "e accuracy of the data.")
 
 
 class FileReader(object):
@@ -39,6 +44,8 @@ class FileReader(object):
     type = ["Text files (*.txt|*.TXT)"]
     # List of allowed extensions
     ext = ['.txt']
+    # Deprecated extensions
+    deprecated_extensions = ['.asc', '.nxs']
     # Bypass extension check and try to load anyway
     allow_all = False
     # Able to import the unit converter
@@ -87,6 +94,9 @@ class FileReader(object):
                     if not self.f_open.closed:
                         self.f_open.close()
                     if len(self.output) > 0:
+                        if any(filepath.lower().endswith(ext) for ext in
+                               self.deprecated_extensions):
+                            self.handle_error_message(DEPRECATION_MESSAGE)
                         # Sort the data that's been loaded
                         self.sort_one_d_data()
                         self.sort_two_d_data()
