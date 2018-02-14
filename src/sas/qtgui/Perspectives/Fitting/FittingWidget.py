@@ -573,7 +573,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # widget.params[0] is the parameter we're constraining
         constraint.param = mc_widget.params[0]
         # Function should have the model name preamble
-        constraint.func = c_text
+        model_name = self.kernel_module.name
+        constraint.func = model_name + "." + c_text
         # Which row is the constrained parameter in?
         row = self.getRowFromName(constraint.param)
 
@@ -702,7 +703,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             item.removeRow(0)
             self.constraintAddedSignal.emit([row])
             self.modifyViewOnRow(row)
-            break
 
         self.communicate.statusBarUpdateSignal.emit('Constraint removed')
 
@@ -793,7 +793,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Return a list of tuples. Each tuple contains constraints mapped as
         ('constrained parameter', 'function to constrain')
-        e.g. [('sld','5*sld_solvent')].
+        e.g. [('sld','5*M2.sld_solvent')].
         Only for constraints with defined VALUE
         """
         param_number = self._model_model.rowCount()
@@ -1156,7 +1156,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         #re-enable the Fit button
         self.setFittingStopped()
 
-        assert result is not None
+        #assert result is not None
+        if assert in None:
+            msg = "Fitting failed after: %s s.\n" % GuiUtils.formatNumber(elapsed)
+            self.communicate.statusBarUpdateSignal.emit(msg)
+            return
 
         res_list = result[0][0]
         res = res_list[0]
