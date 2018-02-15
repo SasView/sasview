@@ -93,10 +93,10 @@ class FileReader(object):
                     # Close the file handle if it is open
                     if not self.f_open.closed:
                         self.f_open.close()
+                    if any(filepath.lower().endswith(ext) for ext in
+                           self.deprecated_extensions):
+                        self.handle_error_message(DEPRECATION_MESSAGE)
                     if len(self.output) > 0:
-                        if any(filepath.lower().endswith(ext) for ext in
-                               self.deprecated_extensions):
-                            self.handle_error_message(DEPRECATION_MESSAGE)
                         # Sort the data that's been loaded
                         self.sort_one_d_data()
                         self.sort_two_d_data()
@@ -155,6 +155,7 @@ class FileReader(object):
             self.current_datainfo.errors.append(msg)
         else:
             logger.warning(msg)
+            raise NoKnownLoaderException(msg)
 
     def send_to_output(self):
         """
