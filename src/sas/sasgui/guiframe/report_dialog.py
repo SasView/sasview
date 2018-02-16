@@ -126,10 +126,11 @@ class BaseReportDialog(wx.Dialog):
         """
         try:
             from xhtml2pdf import pisa
+            data = "<html><body><p>To PDF or not to PDF</p></body></html>"
             # open output file for writing (truncated binary)
             resultFile = open(filename, "w+b")
             # convert HTML to PDF
-            pisaStatus = pisa.CreatePDF(data, dest=resultFile, encoding='utf-8', show_error_as_pdf=True)
+            pisaStatus = pisa.CreatePDF(data, dest=resultFile)
             # close output file
             resultFile.close()
             self.Update()
