@@ -129,7 +129,7 @@ class BaseReportDialog(wx.Dialog):
             # open output file for writing (truncated binary)
             resultFile = open(filename, "w+b")
             # convert HTML to PDF
-            pisaStatus = pisa.CreatePDF(data, dest=resultFile, encoding='utf-8')
+            pisaStatus = pisa.CreatePDF(data, dest=resultFile, encoding='utf-8', show_error_as_pdf=True)
             # close output file
             resultFile.close()
             self.Update()
