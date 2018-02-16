@@ -124,16 +124,16 @@ class BaseReportDialog(wx.Dialog):
         : data: html string
         : filename: name of file to be saved
         """
-        #try:
-        from xhtml2pdf import pisa
-        # open output file for writing (truncated binary)
-        resultFile = open(filename, "w+b")
-        # convert HTML to PDF
-        pisaStatus = pisa.CreatePDF(data, dest=resultFile, encoding='utf-8')
-        # close output file
-        resultFile.close()
-        self.Update()
-        return pisaStatus.err
-        #except Exception:
-        #    logger.error("Error creating pdf: %s" % sys.exc_value)
-        #return False
+        try:
+            from xhtml2pdf import pisa
+            # open output file for writing (truncated binary)
+            resultFile = open(filename, "w+b")
+            # convert HTML to PDF
+            pisaStatus = pisa.CreatePDF(data, dest=resultFile, encoding='utf-8')
+            # close output file
+            resultFile.close()
+            self.Update()
+            return pisaStatus.err
+        except Exception:
+            logger.error("Error creating pdf: %s" % sys.exc_value)
+        return False
