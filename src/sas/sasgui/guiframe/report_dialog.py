@@ -21,7 +21,7 @@ else:
     _STATICBOX_WIDTH = 480
     PANEL_WIDTH = 530
     PANEL_HEIGHT = 700
-    FONT_VARIANT = 1
+    FONT_VARIANT = 0
     ISPDF = True
 
 class BaseReportDialog(wx.Dialog):
@@ -126,7 +126,6 @@ class BaseReportDialog(wx.Dialog):
         """
         try:
             from xhtml2pdf import pisa
-            data = "<html><body><p>To PDF or not to PDF</p></body></html>"
             # open output file for writing (truncated binary)
             resultFile = open(filename, "w+b")
             # convert HTML to PDF
