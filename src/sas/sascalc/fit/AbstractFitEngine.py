@@ -299,7 +299,7 @@ class FitData2D(Data2D):
         if qmax is None:
             self.qmax = math.sqrt(x_max * x_max + y_max * y_max)
         ## new error image for fitting purpose
-        if self.err_data is None or self.err_data == []:
+        if self.err_data is None or not self.err_data:
             self.res_err_data = np.ones(len(self.data))
         else:
             self.res_err_data = copy.deepcopy(self.err_data)

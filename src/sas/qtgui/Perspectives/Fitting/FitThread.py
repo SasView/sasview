@@ -94,7 +94,10 @@ class FitThread(CalcThread):
         except Exception as ex:
             # print "ERROR IN FIT THREAD: ", traceback.format_exc()
             if self.handler is not None:
-                self.handler.error(msg=traceback.format_exc())
+                self.handler.error(msg=str(ex))
+                self.completefn(None)
+            else:
+                return(None)
 
 
 

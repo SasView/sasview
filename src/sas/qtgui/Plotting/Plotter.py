@@ -281,39 +281,41 @@ class PlotterWidget(PlotterBase):
         """
         Show a dialog allowing adding custom text to the chart
         """
-        if self.addText.exec_() == QtWidgets.QDialog.Accepted:
-            # Retrieve the new text, its font and color
-            extra_text = self.addText.text()
-            extra_font = self.addText.font()
-            extra_color = self.addText.color()
+        if self.addText.exec_() != QtWidgets.QDialog.Accepted:
+            return
 
-            # Place the text on the screen at (0,0)
-            pos_x = self.x_click
-            pos_y = self.y_click
+        # Retrieve the new text, its font and color
+        extra_text = self.addText.text()
+        extra_font = self.addText.font()
+        extra_color = self.addText.color()
 
-            # Map QFont onto MPL font
-            mpl_font = FontProperties()
-            mpl_font.set_size(int(extra_font.pointSize()))
-            mpl_font.set_family(str(extra_font.family()))
-            mpl_font.set_weight(int(extra_font.weight()))
-            # MPL style names
-            styles = ['normal', 'italic', 'oblique']
-            # QFont::Style maps directly onto the above
-            try:
-                mpl_font.set_style(styles[extra_font.style()])
-            except:
-                pass
+        # Place the text on the screen at the click location
+        pos_x = self.x_click
+        pos_y = self.y_click
 
-            if len(extra_text) > 0:
-                new_text = self.ax.text(str(pos_x),
-                                        str(pos_y),
-                                        extra_text,
-                                        color=extra_color,
-                                        fontproperties=mpl_font)
-                # Update the list of annotations
-                self.textList.append(new_text)
-                self.canvas.draw_idle()
-                pass
+        # Map QFont onto MPL font
+        mpl_font = FontProperties()
+        mpl_font.set_size(int(extra_font.pointSize()))
+        mpl_font.set_family(str(extra_font.family()))
+        mpl_font.set_weight(int(extra_font.weight()))
+        # MPL style names
+        styles = ['normal', 'italic', 'oblique']
+        # QFont::Style maps directly onto the above
+        try:
+            mpl_font.set_style(styles[extra_font.style()])
+        except:
+            pass
+
+        if len(extra_text) > 0:
+            new_text = self.ax.text(pos_x,
+                                    pos_y,
+                                    extra_text,
+                                    color=extra_color,
+                                    fontproperties=mpl_font)
+
+            # Update the list of annotations
+            self.textList.append(new_text)
+            self.canvas.draw()
 
     def onRemoveText(self):
         """
@@ -324,7 +326,11 @@ class PlotterWidget(PlotterBase):
             return
         txt = self.textList[num_text - 1]
         text_remove = txt.get_text()
-        txt.remove()
+        try:
+            txt.remove()
+        except ValueError:
+            # Text got already deleted somehow
+            pass
         self.textList.remove(txt)
 
         self.canvas.draw_idle()

@@ -55,12 +55,15 @@ from Perspectives.Fitting.UnitTesting import FittingLogicTest
 from Perspectives.Fitting.UnitTesting import FittingUtilitiesTest
 from Perspectives.Fitting.UnitTesting import FitPageTest
 from Perspectives.Fitting.UnitTesting import FittingOptionsTest
+from Perspectives.Fitting.UnitTesting import MultiConstraintTest
+from Perspectives.Fitting.UnitTesting import ComplexConstraintTest
+from Perspectives.Fitting.UnitTesting import ConstraintWidgetTest
+
 #  Invariant
 from Perspectives.Invariant.UnitTesting import InvariantPerspectiveTest
-from Perspectives.Invariant.UnitTesting import InvariantDetailsTest
+
 #  Inversion
 from Perspectives.Inversion.UnitTesting import InversionPerspectiveTest
-
 
 def suite():
     suites = (
@@ -113,12 +116,15 @@ def suite():
         unittest.makeSuite(FittingUtilitiesTest.FittingUtilitiesTest,     'test'),
         unittest.makeSuite(FitPageTest.FitPageTest,                       'test'),
         unittest.makeSuite(FittingOptionsTest.FittingOptionsTest,         'test'),
+        unittest.makeSuite(MultiConstraintTest.MultiConstraintTest,       'test'),
+        unittest.makeSuite(ConstraintWidgetTest.ConstraintWidgetTest,     'test'),
+        unittest.makeSuite(ComplexConstraintTest.ComplexConstraintTest,   'test'),
+
         #  Invariant
         unittest.makeSuite(InvariantPerspectiveTest.InvariantPerspectiveTest,  'test'),
-        unittest.makeSuite(InvariantDetailsTest.InvariantDetailsTest,     'test'),
         #  Inversion
         unittest.makeSuite(InversionPerspectiveTest.InversionTest,  'test'),
-     )
+        )
     return unittest.TestSuite(suites)
 
 if __name__ == "__main__":

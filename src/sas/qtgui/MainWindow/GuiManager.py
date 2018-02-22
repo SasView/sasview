@@ -8,7 +8,6 @@ import webbrowser
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt, QLocale, QUrl
-from PyQt5.QtWebKitWidgets import QWebView
 
 from twisted.internet import reactor
 # General SAS imports
@@ -184,9 +183,9 @@ class GuiManager(object):
         """
 
         # Save users from themselves...
-        if isinstance(self._current_perspective, Perspectives.PERSPECTIVES[str(perspective_name)]):
-            self.setupPerspectiveMenubarOptions(self._current_perspective)
-            return
+        #if isinstance(self._current_perspective, Perspectives.PERSPECTIVES[str(perspective_name)]):
+        self.setupPerspectiveMenubarOptions(self._current_perspective)
+        #    return
 
         # Close the previous perspective
         self.clearPerspectiveMenubarOptions(self._current_perspective)
@@ -622,9 +621,12 @@ class GuiManager(object):
 
     def actionConstrained_Fit(self):
         """
+        Add a new Constrained and Simult. Fit page in the fitting perspective.
         """
-        print("actionConstrained_Fit TRIGGERED")
-        pass
+        per = self.perspective()
+        if not isinstance(per, FittingWindow):
+            return
+        per.addConstraintTab()
 
     def actionCombine_Batch_Fit(self):
         """

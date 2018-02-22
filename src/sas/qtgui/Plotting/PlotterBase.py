@@ -5,11 +5,6 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets, QtPrintSupport
 
-# TODO: Replace the qt4agg calls below with qt5 equivalent.
-# Requires some code modifications.
-# https://www.boxcontrol.net/embedding-matplotlib-plot-on-pyqt5-gui.html
-#
-# matplotlib.use("Qt5Agg")
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
@@ -35,7 +30,7 @@ class PlotterBase(QtWidgets.QWidget):
         self.quickplot = quickplot
 
         #plt.style.use('ggplot')
-        plt.style.use('seaborn-darkgrid')
+        #plt.style.use('seaborn-darkgrid')
 
         # a figure instance to plot on
         self.figure = plt.figure()
@@ -175,6 +170,7 @@ class PlotterBase(QtWidgets.QWidget):
     @xscale.setter
     def xscale(self, scale='linear'):
         """ X-axis scale setter """
+        self.ax.cla()
         self.ax.set_xscale(scale)
         self._xscale = scale
 

@@ -131,6 +131,9 @@ TOOLBAR_SHOW = True
 # set a default perspective
 DEFAULT_PERSPECTIVE = 'None'
 
+# Default threading model
+USING_TWISTED = False
+
 # Time out for updating sasview
 UPDATE_TIMEOUT = 2
 def printEVT(message):
