@@ -21,7 +21,7 @@ else:
     _STATICBOX_WIDTH = 480
     PANEL_WIDTH = 530
     PANEL_HEIGHT = 700
-    FONT_VARIANT = 0
+    FONT_VARIANT = 1
     ISPDF = True
 
 class BaseReportDialog(wx.Dialog):
@@ -124,16 +124,17 @@ class BaseReportDialog(wx.Dialog):
         : data: html string
         : filename: name of file to be saved
         """
-        try:
-            from xhtml2pdf import pisa
-            # open output file for writing (truncated binary)
-            resultFile = open(filename, "w+b")
-            # convert HTML to PDF
-            pisaStatus = pisa.CreatePDF(data, dest=resultFile)
-            # close output file
-            resultFile.close()
-            self.Update()
-            return pisaStatus.err
-        except Exception:
-            logger.error("Error creating pdf: %s" % sys.exc_value)
+        #try:
+        from xhtml2pdf import pisa
+        # open output file for writing (truncated binary)
+        resultFile = open(filename, "w+b")
+        # convert HTML to PDF
+        pisaStatus = pisa.CreatePDF(data, dest=resultFile)
+        # close output file
+        resultFile.close()
+        self.Update()
+        #    return pisaStatus.err
+        #except Exception:
+        #    logger.error("Error creating pdf: %s" % sys.exc_value)
+        logger.error("Error creating pdf: %s" % pisaStatus.err)
         return False
