@@ -130,16 +130,16 @@ class BaseReportDialog(wx.Dialog):
         resultFile = open(filename, "w+b")
         # convert HTML to PDF
         data = '<html><head><meta http-equiv=Content-Type content=\'text/html; charset=windows-1252\'><meta name=Generator ></head><body lang=EN-US>' \
-               '<div class=WordSection1><p class=MsoNormal><b><span ><center><font size=\'4\' >cyl_400_40.txt [Feb 26 2018 12:04:42]</font></center></span></center></b></p><p class=MsoNormal>&nbsp;</p>' \
-               '<p class=MsoNormal><center><font size=\'4\' > File name:/Volumes/SasView-4.2.0-MacOSX/SasView 4.2.0.app/Contents/Resources/test/1d_data/cyl_400_40.txt</font></center></p>' \
-               '<p class=MsoNormal><center><font size=\'4\' > Model name:cylinder </font></center></p>' \
-               '<p class=MsoNormal><center><font size=\'4\' > Q Range:    min =  0.00925926, max =  0.5 </font></center></p>' \
-               '<p class=MsoNormal><center><font size=\'4\' > Chi2/Npts = 21178 </font></center></p><p class=MsoNormal>&nbsp;</p>' \
-               '<p class=MsoNormal><center><font size=\'4\' > scale = 1 +- (fixed)</font></center></p><p class=MsoNormal><center><font size=\'4\' > background = 0.001 +- (fixed) 1/cm </font>' \
-               '</center></p><p class=MsoNormal><center><font size=\'4\' > sld = 4 +- (fixed) 1e-6/Ang^2</font></center></p><p class=MsoNormal><center><font size=\'4\' > sld_solvent = 1 +- (fixed) 1e-6/Ang^2' \
-               '</font></center></p><p class=MsoNormal><center><font size=\'4\' > radius = 20 +- (fixed) Ang </font></center></p><p class=MsoNormal><center><font size=\'4\' > length = 400 +- (fixed) Ang</font></center></p>' \
-               '<p class=MsoNormal>&nbsp;</p><p class=MsoNormal>&nbsp;</p><br><p class=MsoNormal><b><span ><center> <font size=\'4\' > Graph</font></span></center></b></p>' \
-               '<p class=MsoNormal>&nbsp;</p><center><br><font size=\'4\' >Model Computation</font><br><font size=\'4\' >Data: "cyl_400_40.txt [Feb 26 2018 12:04:42]"</font><br>' \
+               '<div class=WordSection1><p class=MsoNormal><b><span ><center><font size=4 >cyl_400_40.txt [Feb 26 2018 12:04:42]</font></center></span></center></b></p><p class=MsoNormal>&nbsp;</p>' \
+               '<p class=MsoNormal><center><font size=4 > File name:/Volumes/SasView-4.2.0-MacOSX/SasView 4.2.0.app/Contents/Resources/test/1d_data/cyl_400_40.txt</font></center></p>' \
+               '<p class=MsoNormal><center><font size=4 > Model name:cylinder </font></center></p>' \
+               '<p class=MsoNormal><center><font size=4 > Q Range:    min =  0.00925926, max =  0.5 </font></center></p>' \
+               '<p class=MsoNormal><center><font size=4 > Chi2/Npts = 21178 </font></center></p><p class=MsoNormal>&nbsp;</p>' \
+               '<p class=MsoNormal><center><font size=4 > scale = 1 +- (fixed)</font></center></p><p class=MsoNormal><center><font size=4 > background = 0.001 +- (fixed) 1/cm </font>' \
+               '</center></p><p class=MsoNormal><center><font size=4 > sld = 4 +- (fixed) 1e-6/Ang^2</font></center></p><p class=MsoNormal><center><font size=4 > sld_solvent = 1 +- (fixed) 1e-6/Ang^2' \
+               '</font></center></p><p class=MsoNormal><center><font size=4 > radius = 20 +- (fixed) Ang </font></center></p><p class=MsoNormal><center><font size=4 > length = 400 +- (fixed) Ang</font></center></p>' \
+               '<p class=MsoNormal>&nbsp;</p><p class=MsoNormal>&nbsp;</p><br><p class=MsoNormal><b><span ><center> <font size=4> Graph</font></span></center></b></p>' \
+               '<p class=MsoNormal>&nbsp;</p><center><br><font size=4 >Model Computation</font><br><font size=4 >Data: "cyl_400_40.txt [Feb 26 2018 12:04:42]"</font><br>' \
                '<img src="/Users/wojciechpotrzebowski/Desktop/sasview_reporting2_img0.png" ></img><p class=MsoNormal>&nbsp;</p><img src="/Users/wojciechpotrzebowski/Desktop/sasview_reporting2_img1.png" ></img>'
         pisaStatus = pisa.CreatePDF(data, dest=resultFile)
         # close output file
