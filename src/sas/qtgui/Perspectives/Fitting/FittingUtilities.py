@@ -1,4 +1,4 @@
-from copy import deepcopy
+import copy
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -158,20 +158,20 @@ def addHeadersToModel(model):
     for i, item in enumerate(model_header_captions):
         model.setHeaderData(i, QtCore.Qt.Horizontal, item)
 
-    model.header_tooltips = model_header_tooltips
+    model.header_tooltips = copy.copy(model_header_tooltips)
 
 def addErrorHeadersToModel(model):
     """
     Adds predefined headers to the model
     """
-    model_header_error_captions = model_header_captions
+    model_header_error_captions = copy.copy(model_header_captions)
     model_header_error_captions.insert(2, header_error_caption)
     for i, item in enumerate(model_header_error_captions):
         model.setHeaderData(i, QtCore.Qt.Horizontal, item)
 
-    model_header_error_tooltips = model_header_tooltips
+    model_header_error_tooltips = copy.copy(model_header_tooltips)
     model_header_error_tooltips.insert(2, error_tooltip)
-    model.header_tooltips = model_header_error_tooltips
+    model.header_tooltips = copy.copy(model_header_error_tooltips)
 
 def addPolyHeadersToModel(model):
     """
@@ -180,21 +180,21 @@ def addPolyHeadersToModel(model):
     for i, item in enumerate(poly_header_captions):
         model.setHeaderData(i, QtCore.Qt.Horizontal, item)
 
-    model.header_tooltips = poly_header_tooltips
+    model.header_tooltips = copy.copy(poly_header_tooltips)
 
 
 def addErrorPolyHeadersToModel(model):
     """
     Adds predefined headers to the model
     """
-    poly_header_error_captions = poly_header_captions
+    poly_header_error_captions = copy.copy(poly_header_captions)
     poly_header_error_captions.insert(2, header_error_caption)
     for i, item in enumerate(poly_header_error_captions):
         model.setHeaderData(i, QtCore.Qt.Horizontal, item)
 
-    poly_header_error_tooltips = poly_header_tooltips
+    poly_header_error_tooltips = copy.copy(poly_header_tooltips)
     poly_header_error_tooltips.insert(2, error_tooltip)
-    model.header_tooltips = poly_header_error_tooltips
+    model.header_tooltips = copy.copy(poly_header_error_tooltips)
 
 def addShellsToModel(parameters, model, index):
     """
@@ -270,7 +270,7 @@ def calculateChi2(reference_data, current_data):
         else:
             ## Set consistently w/AbstractFitengine:
             # But this should be corrected later.
-            dy = deepcopy(current_data.dy)
+            dy = copy.deepcopy(current_data.dy)
             dy[dy == 0] = 1
         fn = current_data.y[index]
         gn = reference_data.y
@@ -368,7 +368,7 @@ def plotResiduals(reference_data, current_data):
     """
     Create Data1D/Data2D with residuals, ready for plotting
     """
-    data_copy = deepcopy(current_data)
+    data_copy = copy.deepcopy(current_data)
     # Get data: data I, theory I, and data dI in order
     method_name = current_data.__class__.__name__
     residuals_dict = {"Data1D": residualsData1D,

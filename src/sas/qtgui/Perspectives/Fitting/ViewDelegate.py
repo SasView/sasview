@@ -83,7 +83,7 @@ class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
             validator = GuiUtils.DoubleValidator()
             editor.setValidator(validator)
             return editor
-        if index.column() in [self.param_property, self.param_error]:
+        if index.column() in [self.param_property, self.param_error, self.param_unit]:
             # Set some columns uneditable
             return None
 

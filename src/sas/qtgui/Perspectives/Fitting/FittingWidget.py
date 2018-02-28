@@ -1319,9 +1319,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.iterateOverModel(createErrorColumn)
 
         # switch off reponse to model change
-        self._model_model.blockSignals(True)
         self._model_model.insertColumn(2, error_column)
-        self._model_model.blockSignals(False)
         FittingUtilities.addErrorHeadersToModel(self._model_model)
         # Adjust the table cells width.
         # TODO: find a way to dynamically adjust column width while resized expanding
