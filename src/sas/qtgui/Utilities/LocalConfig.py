@@ -3,6 +3,7 @@
 """
 import time
 import os
+import logging
 
 #from sas.sasgui.guiframe.gui_style import GUIFRAME
 import sas.sasview
@@ -133,6 +134,9 @@ DEFAULT_PERSPECTIVE = 'None'
 
 # Default threading model
 USING_TWISTED = False
+
+# Logging levels to disable, if any
+DISABLE_LOGGING = logging.DEBUG
 
 # Time out for updating sasview
 UPDATE_TIMEOUT = 2

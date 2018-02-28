@@ -98,6 +98,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Globals
         self.initializeGlobals()
 
+        # Set up desired logging level
+        logging.disable(LocalConfig.DISABLE_LOGGING)
+
         # Main GUI setup up
         self.setupUi(self)
         self.setWindowTitle("Fitting")
@@ -1156,8 +1159,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         #re-enable the Fit button
         self.setFittingStopped()
 
-        #assert result is not None
-        if assert in None:
+        if result is None:
             msg = "Fitting failed after: %s s.\n" % GuiUtils.formatNumber(elapsed)
             self.communicate.statusBarUpdateSignal.emit(msg)
             return
