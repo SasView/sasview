@@ -31,6 +31,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # To keep with previous SasView values, use 300 as the start offset
         self.page_id = 301
 
+        # Are we chain fitting?
+        self.is_chain_fitting = False
+
         # Remember previous content of modified cell
         self.current_cell = ""
 
@@ -65,6 +68,9 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.tblTabList.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.tblTabList.customContextMenuRequested.connect(self.showModelContextMenu)
 
+        # Single Fit is the default, so disable chainfit
+        self.chkChain.setVisible(False)
+
         # disabled constraint 
         labels = ['Constraint']
         self.tblConstraints.setColumnCount(len(labels))
@@ -85,6 +91,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         self.cbCases.currentIndexChanged.connect(self.onSpecialCaseChange)
         self.cmdFit.clicked.connect(self.onFit)
         self.cmdHelp.clicked.connect(self.onHelp)
+        self.chkChain.toggled.connect(self.onChainFit)
 
         # QTableWidgets
         self.tblTabList.cellChanged.connect(self.onTabCellEdit)
@@ -116,6 +123,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         """
         source = self.sender().objectName()
         self.currentType = "BatchPage" if source == "btnBatch" else "FitPage"
+        self.chkChain.setVisible(source=="btnBatch")
         self.initializeFitList()
 
     def onSpecialCaseChange(self, index):
@@ -129,6 +137,12 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         Returns list of tab names selected for fitting
         """
         return [tab for tab in self.tabs_for_fitting if self.tabs_for_fitting[tab]]
+
+    def onChainFit(self, is_checked):
+        """
+        Respond to selecting the Chain Fit checkbox
+        """
+        self.is_chain_fitting = is_checked
 
     def onFit(self):
         """
@@ -191,7 +205,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                              batch_outputs=batch_outputs,
                              page_id=page_ids,
                              updatefn=updater,
-                             completefn=completefn)
+                             completefn=completefn,
+                             reset_flag=self.is_chain_fitting)
 
         if LocalConfig.USING_TWISTED:
             # start the trhrhread with twisted
@@ -369,7 +384,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         if not self.currentType in tab: return False
         object = ObjectLibrary.getObject(tab)
         if not isinstance(object, FittingWidget): return False
-        if object.data is None: return False
+        if not object.data_is_loaded : return False
         return True
 
     def showModelContextMenu(self, position):

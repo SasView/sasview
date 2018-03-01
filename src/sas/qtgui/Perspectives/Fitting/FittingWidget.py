@@ -1116,7 +1116,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                             batch_outputs=batch_outputs,
                             page_id=[[self.page_id]],
                             updatefn=updater,
-                            completefn=completefn)
+                            completefn=completefn,
+                            reset_flag=self.is_chain_fitting)
 
         if LocalConfig.USING_TWISTED:
             # start the trhrhread with twisted
