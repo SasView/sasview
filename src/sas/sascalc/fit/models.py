@@ -97,6 +97,7 @@ def find_plugins_dir():
     # TODO: should we be checking for new default models every time?
     # TODO: restore support for default plugins
     #initialize_plugins_dir(path)
+    os.environ['PLUGIN_MODEL_DIR'] = path
     return path
 
 
