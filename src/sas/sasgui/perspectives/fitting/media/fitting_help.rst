@@ -425,27 +425,30 @@ window, and a second graph window will appear displaying the residuals (the
 difference between the experimental data and the theory) at the same X-data values.
 See :ref:`Assessing_Fit_Quality`.
 
-The objective of model-fitting is to find a *physically-plausible* model, and set
-of model parameters, that generate a theory that reproduces the experimental data
-and gives residual values as close to zero as possible.
+The objective of model-fitting is to find a *physically-plausible* model, and
+set of model parameters, that generate a theory that reproduces the experimental
+data and minimizes the values of the residuals.
 
 Change the default values of the model parameters by hand until the theory line
-starts to represent the experimental data. Then uncheck the tick boxes alongside
-all parameters *except* the 'background' and the 'scale'. Click the *Fit* button.
-SasView will optimise the values of the 'background' and 'scale' and also display
-the corresponding uncertainties on the optimised values.
+starts to represent the experimental data. Then check the tick boxes alongside
+the 'background' and the 'scale' parameters. Click the *Fit* button. SasView
+will optimise the values of the 'background' and 'scale' and also display the
+corresponding uncertainties on the optimised values.
 
-*NB: If no uncertainty is shown it generally means that the model is not very*
-*dependent on the corresponding parameter (or that one or more parameters are*
-*'correlated').*
+.. note::
+   If a parameter uncertainty is unrealistically large, or if it displays as
+   NaN either the model is a poor representation of the data, the parameter in
+   question is either highly correlated with one or more other fitted parameters
+   or at least that the model is relatively insensitive to the value of that
+   particular parameter.
 
-In the bottom left corner of the *Fit Page* is a box displaying the normalised value
-of the statistical $\chi^2$ parameter returned by the optimiser.
+In the bottom left corner of the *Fit Page* is a box displaying the normalised
+value of the statistical $\chi^2$ parameter returned by the optimiser.
 
 Now check the box for another model parameter and click *Fit* again. Repeat this
 process until most or all parameters are checked and have been optimised. As the
-fit of the theory to the experimental data improves the value of 'chi2/Npts' will
-decrease. A good model fit should easily produce values of 'chi2/Npts' that are
+fit of the theory to the experimental data improves, the value of 'Reduced Chi2'
+will decrease. A good model fit should produce values of Reduced Chi2 close
 close to one, and certainly <100. See :ref:`Assessing_Fit_Quality`.
 
 SasView has a number of different optimisers (see the section :ref:`Fitting_Options`).
@@ -511,9 +514,11 @@ Simultaneous Fits without Constraints
 The results of the model-fitting will be returned to each of the individual
 *FitPage*'s.
 
-Note that the chi2/Npts value returned is the SUM of the chi2/Npts of each fit. To
-see the chi2/Npts value for a specific *FitPage*, click the *Compute* button at the
-bottom of that *FitPage* to recalculate. Also see :ref:`Assessing_Fit_Quality`.
+Note that the Reduced Chi2 value returned is the SUM of the Reduced Chi2 of
+each fit. To see the Reduced Chi2 value for a specific *FitPage*, click the 
+*Compute* button at the bottom of that *FitPage* to recalculate. Note that in
+doing so the degrees of freedome will be set to Npts.
+See :ref:`Assessing_Fit_Quality`.
 
 Simultaneous Fits with Constraints
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -537,10 +542,12 @@ Many constraints can be entered for a single fit.
 The results of the model-fitting will be returned to each of the individual
 *FitPage*'s.
 
-Note that the chi2/Npts value returned is the SUM of the chi2/Npts of each fit. To
-see the chi2/Npts value for a specific *FitPage*, click the *Compute* button at the
-bottom of that *FitPage* to recalculate. Also see :ref:`Assessing_Fit_Quality`.
-
+Note that the Reduced Chi2 value returned is the SUM of the Reduced Chi2 of
+each fit. To see the Reduced Chi2 value for a specific *FitPage*, click the 
+*Compute* button at the bottom of that *FitPage* to recalculate. Note that in
+doing so the degrees of freedome will be set to Npts.
+See :ref:`Assessing_Fit_Quality`.  Moreover in the case of constraints the
+degrees of freedom are less than one might think do to those constraints.
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 .. _Batch_Fit_Mode:
