@@ -176,7 +176,7 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
             # No parameters selected in one of the tabs
             no_params_msg = "Fitting can not be performed.\n" +\
                             "Not all tabs chosen for fitting have parameters selected for fitting."
-            QtWidgets.QMessageBox.question(self,
+            QtWidgets.QMessageBox.warning(self,
                                            'Warning',
                                             no_params_msg,
                                             QtWidgets.QMessageBox.Ok)

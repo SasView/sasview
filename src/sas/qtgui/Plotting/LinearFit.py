@@ -12,6 +12,7 @@ from sas.qtgui.Utilities.GuiUtils import formatNumber, DoubleValidator
 from sas.qtgui.Plotting import Fittings
 from sas.qtgui.Plotting import DataTransform
 from sas.qtgui.Plotting.LineModel import LineModel
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # Local UI
 from sas.qtgui.UI import main_resources_rc
@@ -55,8 +56,11 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
         # Initial ranges
         self.txtRangeMin.setText(str(max_range[0]))
         self.txtRangeMax.setText(str(max_range[1]))
-        self.txtFitRangeMin.setText(str(fit_range[0]))
-        self.txtFitRangeMax.setText(str(fit_range[1]))
+        # Assure nice display of ranges
+        fr_min = GuiUtils.formatNumber(fit_range[0])
+        fr_max = GuiUtils.formatNumber(fit_range[1])
+        self.txtFitRangeMin.setText(str(fr_min))
+        self.txtFitRangeMax.setText(str(fr_max))
 
         # cast xLabel into html
         label = re.sub(r'\^\((.)\)(.*)', r'<span style=" vertical-align:super;">\1</span>\2',
@@ -112,9 +116,6 @@ class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
 
         # Set the qmin and qmax in the panel that matches the
         # transformed min and max
-        #value_xmin = X_VAL_DICT[self.xLabel].floatTransform(xmin)
-        #value_xmax = X_VAL_DICT[self.xLabel].floatTransform(xmax)
-
         value_xmin = self.floatInvTransform(xmin)
         value_xmax = self.floatInvTransform(xmax)
         self.txtRangeMin.setText(formatNumber(value_xmin))

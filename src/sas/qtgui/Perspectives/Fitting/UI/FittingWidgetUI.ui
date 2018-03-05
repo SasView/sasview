@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>448</width>
-    <height>526</height>
+    <width>568</width>
+    <height>605</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -449,8 +449,8 @@ angles</string>
        </property>
        <property name="minimumSize">
         <size>
-         <width>75</width>
-         <height>23</height>
+         <width>93</width>
+         <height>28</height>
         </size>
        </property>
        <property name="text">
@@ -468,8 +468,8 @@ angles</string>
        </property>
        <property name="minimumSize">
         <size>
-         <width>75</width>
-         <height>23</height>
+         <width>93</width>
+         <height>28</height>
         </size>
        </property>
        <property name="text">
@@ -487,8 +487,8 @@ angles</string>
        </property>
        <property name="minimumSize">
         <size>
-         <width>75</width>
-         <height>23</height>
+         <width>93</width>
+         <height>28</height>
         </size>
        </property>
        <property name="text">

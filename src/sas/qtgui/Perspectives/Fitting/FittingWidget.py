@@ -1173,6 +1173,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             not np.all(np.isfinite(res.pvec)):
             msg = "Fitting did not converge!"
             self.communicate.statusBarUpdateSignal.emit(msg)
+            msg += res.mesg
             logging.error(msg)
             return
 
