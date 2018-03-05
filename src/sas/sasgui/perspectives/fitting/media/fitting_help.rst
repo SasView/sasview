@@ -431,25 +431,25 @@ data and minimizes the values of the residuals.
 
 Change the default values of the model parameters by hand until the theory line
 starts to represent the experimental data. Then check the tick boxes alongside
-the 'background' and the 'scale' parameters. Click the *Fit* button. SasView
+the 'background' and 'scale' parameters. Click the *Fit* button. SasView
 will optimise the values of the 'background' and 'scale' and also display the
 corresponding uncertainties on the optimised values.
 
 .. note::
-   If a parameter uncertainty is unrealistically large, or if it displays as
-   NaN either the model is a poor representation of the data, the parameter in
-   question is either highly correlated with one or more other fitted parameters
-   or at least that the model is relatively insensitive to the value of that
-   particular parameter.
+   If the uncertainty on a fitted parameter is unrealistically large, or if it
+   displays as NaN, the model is most likely a poor representation of the data,
+   the parameter in question is highly correlated with one or more of the other
+   fitted parameters, or the model is relatively insensitive to the value of
+   that particular parameter.
 
 In the bottom left corner of the *Fit Page* is a box displaying the normalised
 value of the statistical $\chi^2$ parameter returned by the optimiser.
 
 Now check the box for another model parameter and click *Fit* again. Repeat this
-process until most or all parameters are checked and have been optimised. As the
-fit of the theory to the experimental data improves, the value of 'Reduced Chi2'
-will decrease. A good model fit should produce values of Reduced Chi2 close
-close to one, and certainly <100. See :ref:`Assessing_Fit_Quality`.
+process until all relevant parameters are checked and have been optimised. As
+the fit of the theory to the experimental data improves, the value of 'Reduced
+Chi2' will decrease. A good model fit should produce values of Reduced Chi2
+close to one, and certainly << 100. See :ref:`Assessing_Fit_Quality`.
 
 SasView has a number of different optimisers (see the section :ref:`Fitting_Options`).
 The DREAM optimiser is the most sophisticated, but may not necessarily be the best
@@ -464,9 +464,13 @@ Simultaneous Fit Mode
 *NB: Before proceeding, ensure that the Single Mode radio button at the bottom of*
 *the Data Explorer is checked (see the section* :ref:`Loading_data` *).*
 
-This mode is an extension of the :ref:`Single_Fit_Mode` that fits two or more data
-sets *to the same model* simultaneously. If necessary it is possible to constrain
-fit parameters between data sets (eg, to fix a background level, or radius, etc).
+This mode is an extension of the :ref:`Single_Fit_Mode` that allows for some
+relatively extensive constraints between fitted parameters in a single *FitPage*
+or between several *FitPage*'s (eg, to constrain all fitted parameters to be the
+same in a contrast series of *FitPages* except for the solvent sld parameter,
+contrain the length to be twice that of the radius in a single *FitPage*,
+fix the radius of the sphere in one *FitPage* to be the same as the radius of
+the cylinder in a second *FitPage*, etc).
 
 If the data to be fit are in multiple files, load each file, then select each file
 in the *Data Explorer*, and *Send To Fitting*. If multiple data sets are in one file,
@@ -503,28 +507,11 @@ them in the first place!).
 To tie parameters between the data sets with constraints, check the 'yes' radio button
 next to *Add Constraint?* in the *Fit Constraints* box.
 
+To constrain all identically named parameters to fit *simultaneously* to the
+same value across all the *Fitpages* use the *Easy Setup* drop-down buttons in
+the *Const & Simul Fit* page.
+
 *NB: You can only constrain parameters that are set to refine.*
-
-When ready, click the *Fit* button on the *Const & Simul Fit* page, NOT the *Fit*
-button on the individual *FitPage*'s.
-
-Simultaneous Fits without Constraints
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The results of the model-fitting will be returned to each of the individual
-*FitPage*'s.
-
-Note that the Reduced Chi2 value returned is the SUM of the Reduced Chi2 of
-each fit. To see the Reduced Chi2 value for a specific *FitPage*, click the 
-*Compute* button at the bottom of that *FitPage* to recalculate. Note that in
-doing so the degrees of freedome will be set to Npts.
-See :ref:`Assessing_Fit_Quality`.
-
-Simultaneous Fits with Constraints
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Use the *Easy Setup* drop-down buttons in the *Const & Simul Fit* page to set
-up constraints between *FitPage*'s.
 
 Constraints will generally be of the form
 
@@ -539,15 +526,19 @@ A 'free-form' constraint box is also provided.
 
 Many constraints can be entered for a single fit.
 
+When ready, click the *Fit* button on the *Const & Simul Fit* page, NOT the *Fit*
+button on the individual *FitPage*'s.
+
 The results of the model-fitting will be returned to each of the individual
 *FitPage*'s.
 
 Note that the Reduced Chi2 value returned is the SUM of the Reduced Chi2 of
 each fit. To see the Reduced Chi2 value for a specific *FitPage*, click the 
 *Compute* button at the bottom of that *FitPage* to recalculate. Note that in
-doing so the degrees of freedome will be set to Npts.
+doing so the degrees of freedom will be set to Npts.
 See :ref:`Assessing_Fit_Quality`.  Moreover in the case of constraints the
-degrees of freedom are less than one might think do to those constraints.
+degrees of freedom are less than one might think due to those constraints.
+
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 .. _Batch_Fit_Mode:
@@ -772,5 +763,8 @@ finding the peak.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Paul Butler, 10 September
-   2017
+.*Document History*
+
+| 2017-09-10 Paul Butler
+| 2017-09-15 Steve King
+| 2018-03-05 Paul Butler

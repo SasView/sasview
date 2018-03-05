@@ -33,14 +33,14 @@ an observed data set and an expected dataset (or 'theory') calculated as
   \chi^2
   =  \sum[(Y_i - \mathrm{theory}_i)^2 / \mathrm{error}_i^2]
 
-Fitting typically minimizes the value of $\chi^2$.  However, for assessing the
-quality of the model and its "fit" this parameter is not terribly helpful on its
-own.  Thus *SasView* instead displays a normalized version of this parameter,
-using the traditional reduced $\chi^2_R$.  This is the $\chi^2$ divided by the
-degrees of freedom (or DOF). The DOF is simply the number of data points being
-considered reduced by the number of free (i.e. fitted) parameters. Note that
-model parameters that are kept fixed do *not* contribute to the DOF (they are
-not"free". This reduced value is then given as
+Fitting typically minimizes the value of $\chi^2$.  For assessing the quality of
+the model and its "fit" however, *SasView* displays the traditional reduced
+$\chi^2_R$ which normalizes this parameter by dividing it by the number of
+degrees of freedom (or DOF). The DOF is the number of data points being
+considered, $N_\mathrm{pts}$, reduced by the number of free (i.e. fitted)
+parameters, $N_\mathrm{par}$. Note that model parameters that are kept fixed do
+*not* contribute to the DOF (they are not "free"). This reduced value is then
+given as
 
 .. math::
 
@@ -48,12 +48,11 @@ not"free". This reduced value is then given as
   =  \sum[(Y_i - \mathrm{theory}_i)^2 / \mathrm{error}_i^2]
   / [N_\mathrm{pts} - N_\mathrm{par}]
 
-where $N_\mathrm{par}$ is the number of *fitted* parameters. Note that this
-means the displayed value will vary depending on the number of parameters used
-in the fit.  In particular, when doing a calculation without a fit (e.g.
-manually changing a parameter) the DOF will now equal $N_\mathrm{pts}$ and the
-$\chi^2_R$ will be the smallest possible for that combination of model, data
-set and set of parameter values.
+Note that this means the displayed value will vary depending on the number of
+parameters used in the fit. In particular, when doing a calculation without a
+fit (e.g. manually changing a parameter) the DOF will now equal $N_\mathrm{pts}$
+and the $\chi^2_R$ will be the smallest possible for that combination of model,
+data set, and set of parameter values.
 
 When $N_\mathrm{pts} \gg N_\mathrm{par}$ as it should for proper fitting, the
 value of the reduced $\chi^2_R$ will not change very much.
@@ -98,3 +97,4 @@ be meaningless.
 
 | 2015-06-08 Steve King
 | 2017-09-28 Paul Kienzle
+| 2018-03-04 Paul Butler
