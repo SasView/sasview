@@ -59,7 +59,7 @@ class sas_gen_test(unittest.TestCase):
         """
         Test that the calculator calculates.
         """
-        f = self.omfloader.read("A_Raw_Example-1.omf")
+        f = self.omfloader.read(find("A_Raw_Example-1.omf"))
         omf2sld = sas_gen.OMF2SLD()
         omf2sld.set_data(f)
         model = sas_gen.GenSAS()
