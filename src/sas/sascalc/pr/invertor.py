@@ -480,7 +480,7 @@ class Invertor(Cinvertor):
         try:
             float(chi2)
         except:
-            chi2 = -1.0
+            chi2 = [-1.0]
         self.chi2 = chi2
 
         inv_cov = np.zeros([nfunc, nfunc])
@@ -499,10 +499,10 @@ class Invertor(Cinvertor):
         try:
             cov = np.linalg.pinv(inv_cov)
             err = math.fabs(chi2 / float(npts - nfunc)) * cov
-        except:
+        except Exception as ex:
             # We were not able to estimate the errors
             # Return an empty error matrix
-            logger.error(sys.exc_value)
+            logger.error(ex)
 
         # Keep a copy of the last output
         if self.est_bck == False:
@@ -539,15 +539,15 @@ class Invertor(Cinvertor):
         :return: number of terms, alpha, message
 
         """
-        from num_term import NTermEstimator
+        from sas.sascalc.pr.num_term import NTermEstimator
         estimator = NTermEstimator(self.clone())
         try:
             return estimator.num_terms(isquit_func)
-        except:
+        except Exception as ex:
             # If we fail, estimate alpha and return the default
             # number of terms
             best_alpha, _, _ = self.estimate_alpha(self.nfunc)
-            logger.warning("Invertor.estimate_numterms: %s" % sys.exc_value)
+            logger.warning("Invertor.estimate_numterms: %s" % ex)
             return self.nfunc, best_alpha, "Could not estimate number of terms"
 
     def estimate_alpha(self, nfunc):
@@ -633,8 +633,8 @@ class Invertor(Cinvertor):
 
                 return best_alpha, message, elapsed
 
-        except:
-            message = "Invertor.estimate_alpha: %s" % sys.exc_value
+        except Exception as ex:
+            message = "Invertor.estimate_alpha: %s" % ex
             return 0, message, elapsed
 
     def to_file(self, path, npts=100):
@@ -753,8 +753,8 @@ class Invertor(Cinvertor):
 
                         self.cov[i][i] = float(toks2[1])
 
-            except:
-                msg = "Invertor.from_file: corrupted file\n%s" % sys.exc_value
+            except Exception as ex:
+                msg = "Invertor.from_file: corrupted file\n%s" % ex
                 raise RuntimeError(msg)
         else:
             msg = "Invertor.from_file: '%s' is not a file" % str(path)

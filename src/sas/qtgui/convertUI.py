@@ -3,12 +3,12 @@ import os
 
 def pyrrc(in_file, out_file):
     """ Run the pyrcc4 script"""
-    execute = 'pyrcc4 -py3 %s -o %s' % (in_file, out_file)
+    execute = 'pyrcc5 %s -o %s' % (in_file, out_file)
     os.system(execute)
 
 def pyuic(in_file, out_file):
-    """ Run the pyuic4 script"""
-    execute = 'pyuic4 -o %s %s' % (out_file, in_file)
+    """ Run the pyuic5 script"""
+    execute = 'pyuic5 -o %s %s' % (out_file, in_file)
     os.system(execute)
 
 # look for .ui files

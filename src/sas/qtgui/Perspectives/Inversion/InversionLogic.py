@@ -72,7 +72,7 @@ class InversionLogic(object):
                 err[i] = math.sqrt(math.fabs(value))
             except:
                 err[i] = 1.0
-                print("Error getting error", value, x[i])
+                print(("Error getting error", value, x[i]))
 
         new_plot = Data1D(x, y)
         new_plot.name = IQ_FIT_LABEL
@@ -98,7 +98,7 @@ class InversionLogic(object):
                     err[i] = math.sqrt(math.fabs(value))
                 except:
                     err[i] = 1.0
-                    print("Error getting error", value, x[i])
+                    print(("Error getting error", value, x[i]))
 
             new_plot = Data1D(x, y)
             new_plot.name = IQ_SMEARED_LABEL
@@ -142,7 +142,7 @@ class InversionLogic(object):
                 err[i] = math.sqrt(math.fabs(value))
             except:
                 err[i] = 1.0
-                print("Error getting error", value, x[i])
+                print(("Error getting error", value, x[i]))
 
         plot.x = x
         plot.y = y
@@ -159,7 +159,7 @@ class InversionLogic(object):
                     err[i] = math.sqrt(math.fabs(value))
                 except:
                     err[i] = 1.0
-                    print("Error getting error", value, x[i])
+                    print(("Error getting error", value, x[i]))
 
             plot.x = x
             plot.y = y
@@ -271,7 +271,7 @@ class InversionLogic(object):
             except (ValueError, TypeError):
                 msg = "Unable to find min/max/length of \n data named %s" % \
                             self.data.filename
-                raise ValueError, msg
+                raise ValueError(msg)
 
         else:
             qmin = 0
@@ -281,6 +281,6 @@ class InversionLogic(object):
             except (ValueError, TypeError):
                 msg = "Unable to find min/max of \n data named %s" % \
                             self.data.filename
-                raise ValueError, msg
+                raise ValueError(msg)
             qmax = np.sqrt(x * x + y * y)
         return qmin, qmax

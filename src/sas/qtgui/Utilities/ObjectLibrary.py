@@ -8,7 +8,7 @@ def addObject(obj_name, obj):
     this._objects[obj_name] = obj
 
 def deleteObjectByRef(obj):
-    for name, object in this._objects.iteritems():
+    for name, object in this._objects.items():
         if object == obj:
             del this._objects[name]
             break
@@ -21,7 +21,7 @@ def getObject(obj_name):
     return this._objects[obj_name] if obj_name in this._objects else None
 
 def listObjects():
-    return this._objects.keys()
+    return list(this._objects.keys())
 
 
 

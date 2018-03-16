@@ -1,7 +1,9 @@
 # global
 import logging
 import functools
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 from periodictable import formula as Formula
 
@@ -12,9 +14,7 @@ from sas.qtgui.Utilities.GuiUtils import HELP_DIRECTORY_LOCATION
 # Local UI
 from sas.qtgui.Calculators.UI.DensityPanel import Ui_DensityPanel
 
-def enum(*sequential, **named):
-    enums = dict(zip(sequential, range(len(sequential))), **named)
-    return type('Enum', (), enums)
+from sas.qtgui.Utilities.GuiUtils import enum
 
 MODEL = enum(
     'MOLECULAR_FORMULA',
@@ -38,7 +38,7 @@ def toMolarMass(formula):
         return ""
 
 
-class DensityPanel(QtGui.QDialog):
+class DensityPanel(QtWidgets.QDialog):
 
     def __init__(self, parent=None):
         super(DensityPanel, self).__init__()
@@ -57,7 +57,7 @@ class DensityPanel(QtGui.QDialog):
         self.setFixedSize(self.minimumSizeHint())
 
         # set validators
-        self.ui.editMolecularFormula.setValidator(FormulaValidator(self.ui.editMolecularFormula))
+        #self.ui.editMolecularFormula.setValidator(FormulaValidator(self.ui.editMolecularFormula))
 
         rx = QtCore.QRegExp("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
         self.ui.editMolarVolume.setValidator(QtGui.QRegExpValidator(rx, self.ui.editMolarVolume))
@@ -67,8 +67,8 @@ class DensityPanel(QtGui.QDialog):
         self.ui.editMolarVolume.textEdited.connect(functools.partial(self.setMode, MODES.VOLUME_TO_DENSITY))
         self.ui.editMassDensity.textEdited.connect(functools.partial(self.setMode, MODES.DENSITY_TO_VOLUME))
 
-        self.ui.buttonBox.button(QtGui.QDialogButtonBox.Reset).clicked.connect(self.modelReset)
-        self.ui.buttonBox.button(QtGui.QDialogButtonBox.Help).clicked.connect(self.displayHelp)
+        self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Reset).clicked.connect(self.modelReset)
+        self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Help).clicked.connect(self.displayHelp)
 
     def setupModel(self):
         self.model = QtGui.QStandardItemModel(self)
@@ -82,7 +82,7 @@ class DensityPanel(QtGui.QDialog):
         self.modelReset()
 
     def setupMapper(self):
-        self.mapper = QtGui.QDataWidgetMapper(self)
+        self.mapper = QtWidgets.QDataWidgetMapper(self)
         self.mapper.setModel(self.model)
         self.mapper.setOrientation(QtCore.Qt.Vertical)
 
@@ -94,7 +94,7 @@ class DensityPanel(QtGui.QDialog):
         self.mapper.toFirst()
 
     def dataChanged(self, top, bottom):
-        for index in xrange(top.row(), bottom.row() + 1):
+        for index in range(top.row(), bottom.row() + 1):
             if index == MODEL.MOLECULAR_FORMULA:
                 molarMass = toMolarMass(self.model.item(MODEL.MOLECULAR_FORMULA).text())
                 self.model.item(MODEL.MOLAR_MASS).setText(molarMass)
@@ -136,7 +136,6 @@ class DensityPanel(QtGui.QDialog):
             self.model.item(MODEL.MOLAR_VOLUME).setText("")
 
     def modelReset(self):
-        #self.model.beginResetModel()
         try:
             self.setMode(None)
             self.model.item(MODEL.MOLECULAR_FORMULA).setText("H2O")
@@ -144,15 +143,9 @@ class DensityPanel(QtGui.QDialog):
             self.model.item(MODEL.MASS_DENSITY     ).setText("")
         finally:
             pass
-            #self.model.endResetModel()
 
     def displayHelp(self):
-        try:
-            location = HELP_DIRECTORY_LOCATION + \
-                "/user/sasgui/perspectives/calculator/density_calculator_help.html"
+        location =  "/user/sasgui/perspectives/calculator/density_calculator_help.html"
+        self.manager.showHelp(location)
 
-            self.manager._helpView.load(QtCore.QUrl(location))
-            self.manager._helpView.show()
-        except AttributeError:
-            # No manager defined - testing and standalone runs
-            pass
+

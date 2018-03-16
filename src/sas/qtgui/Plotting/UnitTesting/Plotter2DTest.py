@@ -3,10 +3,10 @@ import unittest
 import numpy
 import platform
 
-from PyQt4 import QtGui
-from PyQt4 import QtCore
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from mock import MagicMock
+from PyQt5 import QtGui, QtWidgets, QtPrintSupport
+from PyQt5 import QtCore
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from unittest.mock import MagicMock
 from mpl_toolkits.mplot3d import Axes3D
 
 ####### TEMP
@@ -19,8 +19,8 @@ from UnitTesting.TestUtils import WarningTestNotImplemented
 # Tested module
 import sas.qtgui.Plotting.Plotter2D as Plotter2D
 
-if not QtGui.QApplication.instance():
-    app = QtGui.QApplication(sys.argv)
+if not QtWidgets.QApplication.instance():
+    app = QtWidgets.QApplication(sys.argv)
 
 class Plotter2DTest(unittest.TestCase):
     '''Test the Plotter 2D class'''
@@ -52,6 +52,7 @@ class Plotter2DTest(unittest.TestCase):
 
     def tearDown(self):
         '''destroy'''
+        self.plotter.figure.clf()
         self.plotter = None
 
     def testDataProperty(self):
@@ -72,6 +73,7 @@ class Plotter2DTest(unittest.TestCase):
         self.plotter.plot()
 
         self.assertTrue(FigureCanvas.draw_idle.called)
+        self.plotter.figure.clf()
 
     def testCalculateDepth(self):
         ''' Test the depth calculator '''
@@ -93,17 +95,18 @@ class Plotter2DTest(unittest.TestCase):
         self.plotter.plot()
         self.plotter.show()
 
-        QtGui.QDialog.exec_ = MagicMock(return_value=QtGui.QDialog.Accepted)
+        QtWidgets.QDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Accepted)
 
         # Just this one plot
         self.plotter.onColorMap()
 
         # Check that exec_ got called
-        self.assertTrue(QtGui.QDialog.exec_.called)
+        self.assertTrue(QtWidgets.QDialog.exec_.called)
 
         self.assertEqual(self.plotter.cmap, "jet")
         self.assertAlmostEqual(self.plotter.vmin, 0.1, 6)
         self.assertAlmostEqual(self.plotter.vmax, 1e+20, 6)
+        self.plotter.figure.clf()
 
     def testOnToggleScale(self):
         """ Respond to the event by replotting """
@@ -114,6 +117,7 @@ class Plotter2DTest(unittest.TestCase):
         self.plotter.onToggleScale(None)
 
         self.assertTrue(FigureCanvas.draw_idle.called)
+        self.plotter.figure.clf()
 
     def testOnBoxSum(self):
         """ Test the box sum display and functionality """
@@ -134,6 +138,7 @@ class Plotter2DTest(unittest.TestCase):
         self.assertIsInstance(self.plotter.slicer.model(), QtGui.QStandardItemModel)
         self.assertTrue(self.plotter.boxwidget.isVisible())
         self.assertIsInstance(self.plotter.boxwidget.model, QtGui.QStandardItemModel)
+        self.plotter.figure.clf()
 
     def testContextMenuQuickPlot(self):
         """ Test the right click menu """
@@ -150,9 +155,9 @@ class Plotter2DTest(unittest.TestCase):
 
         # Trigger Print Image and make sure the method is called
         self.assertEqual(actions[1].text(), "Print Image")
-        QtGui.QPrintDialog.exec_ = MagicMock(return_value=QtGui.QDialog.Rejected)
+        QtPrintSupport.QPrintDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Rejected)
         actions[1].trigger()
-        self.assertTrue(QtGui.QPrintDialog.exec_.called)
+        self.assertTrue(QtPrintSupport.QPrintDialog.exec_.called)
 
         # Trigger Copy to Clipboard and make sure the method is called
         self.assertEqual(actions[2].text(), "Copy to Clipboard")
@@ -175,11 +180,12 @@ class Plotter2DTest(unittest.TestCase):
         self.clipboard_called = False
         def done():
             self.clipboard_called = True
-        QtCore.QObject.connect(QtGui.qApp.clipboard(), QtCore.SIGNAL("dataChanged()"), done)
+        QtCore.QObject.connect(QtWidgets.qApp.clipboard(), QtCore.SIGNAL("dataChanged()"), done)
         actions[2].trigger()
-        QtGui.qApp.processEvents()
+        QtWidgets.qApp.processEvents()
         # Make sure clipboard got updated.
         self.assertTrue(self.clipboard_called)
+        self.plotter.figure.clf()
 
     def testShowNoPlot(self):
         """ Test the plot rendering and generation """
@@ -199,6 +205,7 @@ class Plotter2DTest(unittest.TestCase):
 
         self.assertFalse(FigureCanvas.draw_idle.called)
         self.assertFalse(FigureCanvas.draw.called)
+        self.plotter.figure.clf()
 
     def testShow3DPlot(self):
         """ Test the 3Dplot rendering and generation """
@@ -219,6 +226,7 @@ class Plotter2DTest(unittest.TestCase):
                               zmax=None)
         self.assertTrue(Axes3D.plot_surface.called)
         self.assertTrue(FigureCanvas.draw.called)
+        self.plotter.figure.clf()
 
     def testShow2DPlot(self):
         """ Test the 2Dplot rendering and generation """
@@ -237,6 +245,7 @@ class Plotter2DTest(unittest.TestCase):
                               cmap=None, zmin=None,
                               zmax=None)
         self.assertTrue(FigureCanvas.draw_idle.called)
+        self.plotter.figure.clf()
 
 
 if __name__ == "__main__":

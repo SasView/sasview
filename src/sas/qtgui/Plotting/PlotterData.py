@@ -53,6 +53,7 @@ class Data1D(PlottableData1D, LoadData1D):
         self.xaxis(data1d._xaxis, data1d._xunit)
         self.yaxis(data1d._yaxis, data1d._yunit)
         self.title = data1d.title
+        self.isSesans = data1d.isSesans
         
     def __str__(self):
         """
@@ -70,11 +71,11 @@ class Data1D(PlottableData1D, LoadData1D):
         result = Data1D(x=[], y=[], dx=None, dy=None)
         result.clone_without_data(length=len(self.x), clone=self)
         result.copy_from_datainfo(data1d=self)
-        if self.dxw == None:
+        if self.dxw is None:
             result.dxw = None
         else:
             result.dxw = numpy.zeros(len(self.x))
-        if self.dxl == None:
+        if self.dxl is None:
             result.dxl = None
         else:
             result.dxl = numpy.zeros(len(self.x))
@@ -117,19 +118,19 @@ class Data1D(PlottableData1D, LoadData1D):
         result = Data1D(x=[], y=[], dx=None, dy=None)
         tot_length = len(self.x) + len(other.x)
         result = self.clone_without_data(length=tot_length, clone=result)
-        if self.dy == None or other.dy is None:
+        if self.dy is None or other.dy is None:
             result.dy = None
         else:
             result.dy = numpy.zeros(tot_length)
-        if self.dx == None or other.dx is None:
+        if self.dx is None or other.dx is None:
             result.dx = None
         else:
             result.dx = numpy.zeros(tot_length)
-        if self.dxw == None or other.dxw is None:
+        if self.dxw is None or other.dxw is None:
             result.dxw = None
         else:
             result.dxw = numpy.zeros(tot_length)
-        if self.dxl == None or other.dxl is None:
+        if self.dxl is None or other.dxl is None:
             result.dxl = None
         else:
             result.dxl = numpy.zeros(tot_length)
@@ -140,7 +141,7 @@ class Data1D(PlottableData1D, LoadData1D):
         result.x = result.x[ind]
         result.y = numpy.append(self.y, other.y)
         result.y = result.y[ind]
-        if result.dy != None:
+        if result.dy is not None:
             result.dy = numpy.append(self.dy, other.dy)
             result.dy = result.dy[ind]
         if result.dx is not None:
@@ -237,7 +238,7 @@ class Data2D(PlottableData2D, LoadData2D):
         result.xmax = self.xmax
         result.ymin = self.ymin
         result.ymax = self.ymax
-        if self.dqx_data == None or self.dqy_data == None:
+        if self.dqx_data is None or self.dqy_data is None:
             result.dqx_data = None
             result.dqy_data = None
         else:
@@ -300,8 +301,8 @@ class Data2D(PlottableData2D, LoadData2D):
         result.xmax = self.xmax
         result.ymin = self.ymin
         result.ymax = self.ymax
-        if self.dqx_data == None or self.dqy_data == None or \
-                other.dqx_data == None or other.dqy_data == None :
+        if self.dqx_data is None or self.dqy_data is None or \
+                other.dqx_data is None or other.dqy_data is None :
             result.dqx_data = None
             result.dqy_data = None
         else:

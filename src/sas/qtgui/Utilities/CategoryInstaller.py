@@ -102,7 +102,7 @@ class CategoryInstaller:
             for category in by_model_dict[model]:
                 master_category_dict[category].append(\
                     (model, model_enabled_dict[model]))
-        return OrderedDict(sorted(master_category_dict.items(), key=lambda t: t[0]))
+        return OrderedDict(sorted(list(master_category_dict.items()), key=lambda t: t[0]))
 
     @staticmethod
     def get_user_file():
@@ -125,10 +125,10 @@ class CategoryInstaller:
         :param model_list: List of model names except customized models
         """
         _model_dict = { model.name: model for model in model_list}
-        _model_list = _model_dict.keys()
+        _model_list = list(_model_dict.keys())
 
         serialized_file = None
-        if homedir == None:
+        if homedir is None:
             serialized_file = CategoryInstaller.get_user_file()
         else:
             serialized_file = os.path.join(homedir, USER_FILE)
@@ -142,7 +142,7 @@ class CategoryInstaller:
                 CategoryInstaller._regenerate_model_dict(master_category_dict)
         add_list = _model_list
         del_name = False
-        for cat in master_category_dict.keys():
+        for cat in list(master_category_dict.keys()):
             for ind in range(len(master_category_dict[cat])):
                 model_name, enabled = master_category_dict[cat][ind]
                 if model_name not in _model_list:
@@ -151,7 +151,7 @@ class CategoryInstaller:
                         by_model_dict.pop(model_name)
                         model_enabled_dict.pop(model_name)
                     except:
-                        logging.error("CategoryInstaller: %s", sys.exc_value)
+                        logging.error("CategoryInstaller: %s", sys.exc_info()[1])
                 else:
                     add_list.remove(model_name)
         if del_name or (len(add_list) > 0):

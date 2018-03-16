@@ -1,27 +1,36 @@
 # UNLESS EXEPTIONALLY REQUIRED TRY TO AVOID IMPORTING ANY MODULES HERE
 # ESPECIALLY ANYTHING IN SAS, SASMODELS NAMESPACE
-from PyQt4 import QtGui
+from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QMdiArea
+from PyQt5.QtWidgets import QSplashScreen
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtGui import QPixmap
 
 # Local UI
 from sas.qtgui.UI import main_resources_rc
-from UI.MainWindowUI import Ui_MainWindow
+from .UI.MainWindowUI import Ui_MainWindow
 
 # Initialize logging
 import sas.qtgui.Utilities.SasviewLogger
 
-class MainSasViewWindow(QtGui.QMainWindow, Ui_MainWindow):
+class MainSasViewWindow(QMainWindow, Ui_MainWindow):
     # Main window of the application
     def __init__(self, parent=None):
         super(MainSasViewWindow, self).__init__(parent)
         self.setupUi(self)
 
         # define workspace for dialogs.
-        self.workspace = QtGui.QWorkspace(self)
+        self.workspace = QMdiArea(self)
         self.setCentralWidget(self.workspace)
 
         # Create the gui manager
-        from GuiManager import GuiManager
-        self.guiManager = GuiManager(self)
+        from .GuiManager import GuiManager
+        try:
+            self.guiManager = GuiManager(self)
+        except Exception as ex:
+            import logging
+            logging.error("Application failed with: ", ex)
+            print("Application failed with: ", ex)
 
     def closeEvent(self, event):
         if self.guiManager.quitApplication():
@@ -36,12 +45,12 @@ def SplashScreen():
     The screen will disappear as soon as the event loop starts.
     """
     # TODO: standardize path to images
-    pixmap = QtGui.QPixmap("src/sas/qtgui/images/SVwelcome_mini.png")
-    splashScreen = QtGui.QSplashScreen(pixmap)
+    pixmap = QPixmap("src/sas/qtgui/images/SVwelcome_mini.png")
+    splashScreen = QSplashScreen(pixmap)
     return splashScreen
 
 def run():
-    app = QtGui.QApplication([])
+    app = QApplication([])
 
     # Main must have reference to the splash screen, so making it explicit
     splash = SplashScreen()
@@ -54,9 +63,9 @@ def run():
 
     # DO NOT move the following import to the top!
     # (unless you know what you're doing)
-    import qt4reactor
-    # Using the Qt4 reactor wrapper from https://github.com/ghtdak/qtreactor
-    qt4reactor.install()
+    import qt5reactor
+    # Using the Qt5 reactor wrapper from https://github.com/ghtdak/qtreactor
+    qt5reactor.install()
 
     # DO NOT move the following import to the top!
     from twisted.internet import reactor
@@ -67,6 +76,9 @@ def run():
 
     # no more splash screen
     splash.finish(mainwindow)
+
+    # Time for the welcome window
+    mainwindow.guiManager.showWelcomeMessage()
 
     # No need to .exec_ - the reactor takes care of it.
     reactor.run()

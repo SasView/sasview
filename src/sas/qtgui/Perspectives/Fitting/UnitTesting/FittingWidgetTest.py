@@ -1,11 +1,13 @@
 import sys
 import unittest
 import time
+import logging
 
-from PyQt4 import QtGui
-from PyQt4 import QtTest
-from PyQt4 import QtCore
-from mock import MagicMock
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
+from PyQt5 import QtTest
+from PyQt5 import QtCore
+from unittest.mock import MagicMock
 from twisted.internet import threads
 
 # set up import paths
@@ -14,13 +16,15 @@ import sas.qtgui.path_prepare
 # Local
 from sas.qtgui.Utilities.GuiUtils import *
 from sas.qtgui.Perspectives.Fitting.FittingWidget import *
+from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
+
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
 
-#if not QtGui.QApplication.instance():
-app = QtGui.QApplication(sys.argv)
+if not QtWidgets.QApplication.instance():
+    app = QtWidgets.QApplication(sys.argv)
 
 class dummy_manager(object):
     HELP_DIRECTORY_LOCATION = "html"
@@ -40,9 +44,9 @@ class FittingWidgetTest(unittest.TestCase):
 
     def testDefaults(self):
         """Test the GUI in its default state"""
-        self.assertIsInstance(self.widget, QtGui.QWidget)
+        self.assertIsInstance(self.widget, QtWidgets.QWidget)
         self.assertEqual(self.widget.windowTitle(), "Fitting")
-        self.assertEqual(self.widget.sizePolicy().Policy(), QtGui.QSizePolicy.Fixed)
+        self.assertEqual(self.widget.sizePolicy().Policy(), QtWidgets.QSizePolicy.Fixed)
         self.assertIsInstance(self.widget.lstParams.model(), QtGui.QStandardItemModel)
         self.assertIsInstance(self.widget.lstPoly.model(), QtGui.QStandardItemModel)
         self.assertIsInstance(self.widget.lstMagnetic.model(), QtGui.QStandardItemModel)
@@ -59,7 +63,7 @@ class FittingWidgetTest(unittest.TestCase):
         fittingWindow =  self.widget
 
         #Test loading from json categories
-        category_list = fittingWindow.master_category_dict.keys()
+        category_list = list(fittingWindow.master_category_dict.keys())
 
         for category in category_list:
             self.assertNotEqual(fittingWindow.cbCategory.findText(category),-1)
@@ -88,13 +92,13 @@ class FittingWidgetTest(unittest.TestCase):
         """
         fittingWindow =  self.widget
 
-        self.assertIsInstance(fittingWindow.lstPoly.itemDelegate(), QtGui.QStyledItemDelegate)
+        self.assertIsInstance(fittingWindow.lstPoly.itemDelegate(), QtWidgets.QStyledItemDelegate)
         #Test loading from json categories
         fittingWindow.SASModelToQModel("cylinder")
         pd_index = fittingWindow.lstPoly.model().index(0,0)
-        self.assertEqual(str(pd_index.data().toString()), "Distribution of radius")
+        self.assertEqual(str(pd_index.data()), "Distribution of radius")
         pd_index = fittingWindow.lstPoly.model().index(1,0)
-        self.assertEqual(str(pd_index.data().toString()), "Distribution of length")
+        self.assertEqual(str(pd_index.data()), "Distribution of length")
 
         # test the delegate a bit
         delegate = fittingWindow.lstPoly.itemDelegate()
@@ -109,32 +113,31 @@ class FittingWidgetTest(unittest.TestCase):
         """
         fittingWindow =  self.widget
 
-        self.assertIsInstance(fittingWindow.lstMagnetic.itemDelegate(), QtGui.QStyledItemDelegate)
+        self.assertIsInstance(fittingWindow.lstMagnetic.itemDelegate(), QtWidgets.QStyledItemDelegate)
         #Test loading from json categories
         fittingWindow.SASModelToQModel("cylinder")
         mag_index = fittingWindow.lstMagnetic.model().index(0,0)
-        self.assertEqual(str(mag_index.data().toString()), "up:frac_i")
+        self.assertEqual(mag_index.data(), "up:frac_i")
         mag_index = fittingWindow.lstMagnetic.model().index(1,0)
-        self.assertEqual(str(mag_index.data().toString()), "up:frac_f")
+        self.assertEqual(mag_index.data(), "up:frac_f")
         mag_index = fittingWindow.lstMagnetic.model().index(2,0)
-        self.assertEqual(str(mag_index.data().toString()), "up:angle")
+        self.assertEqual(mag_index.data(), "up:angle")
         mag_index = fittingWindow.lstMagnetic.model().index(3,0)
-        self.assertEqual(str(mag_index.data().toString()), "M0:sld")
+        self.assertEqual(mag_index.data(), "M0:sld")
         mag_index = fittingWindow.lstMagnetic.model().index(4,0)
-        self.assertEqual(str(mag_index.data().toString()), "mtheta:sld")
+        self.assertEqual(mag_index.data(), "mtheta:sld")
         mag_index = fittingWindow.lstMagnetic.model().index(5,0)
-        self.assertEqual(str(mag_index.data().toString()), "mphi:sld")
+        self.assertEqual(mag_index.data(), "mphi:sld")
         mag_index = fittingWindow.lstMagnetic.model().index(6,0)
-        self.assertEqual(str(mag_index.data().toString()), "M0:sld_solvent")
+        self.assertEqual(mag_index.data(), "M0:sld_solvent")
         mag_index = fittingWindow.lstMagnetic.model().index(7,0)
-        self.assertEqual(str(mag_index.data().toString()), "mtheta:sld_solvent")
+        self.assertEqual(mag_index.data(), "mtheta:sld_solvent")
         mag_index = fittingWindow.lstMagnetic.model().index(8,0)
-        self.assertEqual(str(mag_index.data().toString()), "mphi:sld_solvent")
+        self.assertEqual(mag_index.data(), "mphi:sld_solvent")
 
         # test the delegate a bit
         delegate = fittingWindow.lstMagnetic.itemDelegate()
         self.assertEqual(delegate.editableParameters(), [1, 2, 3])
-        self.assertIsInstance(delegate.combo_updated, QtCore.pyqtBoundSignal)
 
     def testSelectStructureFactor(self):
         """
@@ -393,9 +396,9 @@ class FittingWidgetTest(unittest.TestCase):
                          header_tooltips[column])
 
         # Test presence of comboboxes in last column
-        for row in xrange(self.widget._poly_model.rowCount()):
+        for row in range(self.widget._poly_model.rowCount()):
             func_index = self.widget._poly_model.index(row, 6)
-            self.assertTrue(isinstance(self.widget.lstPoly.indexWidget(func_index), QtGui.QComboBox))
+            self.assertTrue(isinstance(self.widget.lstPoly.indexWidget(func_index), QtWidgets.QComboBox))
             self.assertIn('Distribution of', self.widget._poly_model.item(row, 0).text())
         #self.widget.close()
 
@@ -461,7 +464,7 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.onPolyComboIndexChange('rectangle', 0)
         # check values
         self.assertEqual(self.widget.kernel_module.getParam('radius_bell.npts'), 35)
-        self.assertEqual(self.widget.kernel_module.getParam('radius_bell.nsigmas'), 1.70325)
+        self.assertAlmostEqual(self.widget.kernel_module.getParam('radius_bell.nsigmas'), 1.70325, 5)
         # Change the index
         self.widget.onPolyComboIndexChange('lognormal', 0)
         # check values
@@ -485,7 +488,7 @@ class FittingWidgetTest(unittest.TestCase):
         Test opening of the load file dialog for 'array' polydisp. function
         """
         filename = os.path.join("UnitTesting", "testdata_noexist.txt")
-        QtGui.QFileDialog.getOpenFileName = MagicMock(return_value=filename)
+        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=(filename,''))
         self.widget.show()
         # Change the category index so we have a model with polydisp
         category_index = self.widget.cbCategory.findText("Cylinder")
@@ -499,7 +502,7 @@ class FittingWidgetTest(unittest.TestCase):
 
         # good file
         filename = os.path.join("UnitTesting", "testdata.txt")
-        QtGui.QFileDialog.getOpenFileName = MagicMock(return_value=filename)
+        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=(filename,''))
 
         self.widget.onPolyComboIndexChange('array', 0)
         # check values - disabled control, present weights
@@ -541,7 +544,7 @@ class FittingWidgetTest(unittest.TestCase):
                          header_tooltips[column])
 
         # Test rows
-        for row in xrange(self.widget._magnet_model.rowCount()):
+        for row in range(self.widget._magnet_model.rowCount()):
             func_index = self.widget._magnet_model.index(row, 0)
             self.assertIn(':', self.widget._magnet_model.item(row, 0).text())
 
@@ -566,7 +569,7 @@ class FittingWidgetTest(unittest.TestCase):
         # Assure we have the combobox available
         last_row = self.widget._last_model_row
         func_index = self.widget._model_model.index(last_row-1, 1)
-        self.assertIsInstance(self.widget.lstParams.indexWidget(func_index), QtGui.QComboBox)
+        self.assertIsInstance(self.widget.lstParams.indexWidget(func_index), QtWidgets.QComboBox)
 
         # Change the combo box index
         self.widget.lstParams.indexWidget(func_index).setCurrentIndex(3)
@@ -652,14 +655,14 @@ class FittingWidgetTest(unittest.TestCase):
         # Make sure the signal has been emitted == new plot
         self.assertEqual(spy.count(), 1)
 
-    def testOnFit1D(self):
+    def testOnEmptyFit(self):
         """
-        Test the threaded fitting call
+        Test a 1D/2D fit with no parameters
         """
         # Set data
         test_data = Data1D(x=[1,2], y=[1,2])
         item = QtGui.QStandardItem()
-        updateModelItem(item, [test_data], "test")
+        updateModelItem(item, test_data, "test")
         # Force same data into logic
         self.widget.data = item
         category_index = self.widget.cbCategory.findText("Sphere")
@@ -670,9 +673,54 @@ class FittingWidgetTest(unittest.TestCase):
         # Test no fitting params
         self.widget.parameters_to_fit = []
 
-        with self.assertRaises(ValueError) as error:
-            self.widget.onFit()
-        self.assertEqual(str(error.exception), 'no fitting parameters')
+        logging.error = MagicMock()
+
+        self.widget.onFit()
+        self.assertTrue(logging.error.called_with('no fitting parameters'))
+        self.widget.close()
+
+        test_data = Data2D(image=[1.0, 2.0, 3.0],
+                           err_image=[0.01, 0.02, 0.03],
+                           qx_data=[0.1, 0.2, 0.3],
+                           qy_data=[0.1, 0.2, 0.3],
+                           xmin=0.1, xmax=0.3, ymin=0.1, ymax=0.3,
+                           mask=[True, True, True])
+
+        # Force same data into logic
+        item = QtGui.QStandardItem()
+        updateModelItem(item, test_data, "test")
+        # Force same data into logic
+        self.widget.data = item
+        category_index = self.widget.cbCategory.findText("Sphere")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        self.widget.show()
+
+        # Test no fitting params
+        self.widget.parameters_to_fit = []
+
+        logging.error = MagicMock()
+
+        self.widget.onFit()
+        self.assertTrue(logging.error.called_once())
+        self.assertTrue(logging.error.called_with('no fitting parameters'))
+        self.widget.close()
+
+
+    def testOnFit1D(self):
+        """
+        Test the threaded fitting call
+        """
+        # Set data
+        test_data = Data1D(x=[1,2], y=[1,2])
+        item = QtGui.QStandardItem()
+        updateModelItem(item, test_data, "test")
+        # Force same data into logic
+        self.widget.data = item
+        category_index = self.widget.cbCategory.findText("Sphere")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        self.widget.show()
 
         # Assing fitting params
         self.widget.parameters_to_fit = ['scale']
@@ -694,6 +742,8 @@ class FittingWidgetTest(unittest.TestCase):
             # Signal pushed up
             self.assertEqual(update_spy.count(), 1)
 
+        self.widget.close()
+
     def testOnFit2D(self):
         """
         Test the threaded fitting call
@@ -708,20 +758,13 @@ class FittingWidgetTest(unittest.TestCase):
 
         # Force same data into logic
         item = QtGui.QStandardItem()
-        updateModelItem(item, [test_data], "test")
+        updateModelItem(item, test_data, "test")
         # Force same data into logic
         self.widget.data = item
         category_index = self.widget.cbCategory.findText("Sphere")
         self.widget.cbCategory.setCurrentIndex(category_index)
 
         self.widget.show()
-
-        # Test no fitting params
-        self.widget.parameters_to_fit = []
-
-        with self.assertRaises(ValueError) as error:
-            self.widget.onFit()
-        self.assertEqual(str(error.exception), 'no fitting parameters')
 
         # Assing fitting params
         self.widget.parameters_to_fit = ['scale']
@@ -747,48 +790,48 @@ class FittingWidgetTest(unittest.TestCase):
         """
         Test various help pages shown in this widget
         """
-        #Mock the QWebView method
-        QtWebKit.QWebView.show = MagicMock()
-        QtWebKit.QWebView.load = MagicMock()
+        #Mock the webbrowser.open method
+        self.widget.parent.showHelp = MagicMock()
+        #webbrowser.open = MagicMock()
 
         # Invoke the action on default tab
         self.widget.onHelp()
         # Check if show() got called
-        self.assertTrue(QtWebKit.QWebView.show.called)
+        self.assertTrue(self.widget.parent.showHelp.called)
         # Assure the filename is correct
-        self.assertIn("fitting_help.html", QtWebKit.QWebView.load.call_args[0][0].toString())
+        self.assertIn("fitting_help.html", self.widget.parent.showHelp.call_args[0][0])
 
         # Change the tab to options
         self.widget.tabFitting.setCurrentIndex(1)
         self.widget.onHelp()
         # Check if show() got called
-        self.assertEqual(QtWebKit.QWebView.show.call_count, 2)
+        self.assertEqual(self.widget.parent.showHelp.call_count, 2)
         # Assure the filename is correct
-        self.assertIn("residuals_help.html", QtWebKit.QWebView.load.call_args[0][0].toString())
+        self.assertIn("residuals_help.html", self.widget.parent.showHelp.call_args[0][0])
 
         # Change the tab to smearing
         self.widget.tabFitting.setCurrentIndex(2)
         self.widget.onHelp()
         # Check if show() got called
-        self.assertEqual(QtWebKit.QWebView.show.call_count, 3)
+        self.assertEqual(self.widget.parent.showHelp.call_count, 3)
         # Assure the filename is correct
-        self.assertIn("sm_help.html", QtWebKit.QWebView.load.call_args[0][0].toString())
+        self.assertIn("resolution.html", self.widget.parent.showHelp.call_args[0][0])
 
         # Change the tab to poly
         self.widget.tabFitting.setCurrentIndex(3)
         self.widget.onHelp()
         # Check if show() got called
-        self.assertEqual(QtWebKit.QWebView.show.call_count, 4)
+        self.assertEqual(self.widget.parent.showHelp.call_count, 4)
         # Assure the filename is correct
-        self.assertIn("pd_help.html", QtWebKit.QWebView.load.call_args[0][0].toString())
+        self.assertIn("polydispersity.html", self.widget.parent.showHelp.call_args[0][0])
 
         # Change the tab to magnetism
         self.widget.tabFitting.setCurrentIndex(4)
         self.widget.onHelp()
         # Check if show() got called
-        self.assertEqual(QtWebKit.QWebView.show.call_count, 5)
+        self.assertEqual(self.widget.parent.showHelp.call_count, 5)
         # Assure the filename is correct
-        self.assertIn("mag_help.html", QtWebKit.QWebView.load.call_args[0][0].toString())
+        self.assertIn("magnetism.html", self.widget.parent.showHelp.call_args[0][0])
 
     def testReadFitPage(self):
         """
@@ -980,8 +1023,420 @@ class FittingWidgetTest(unittest.TestCase):
                          str(self.widget.kernel_module.params[name_modified_param]))
 
         # check that range of variation for this parameter has NOT been changed
-        print self.widget.kernel_module.details[name_modified_param]
         self.assertNotIn(new_value, self.widget.kernel_module.details[name_modified_param] )
+
+    def testModelContextMenu(self):
+        """
+        Test the right click context menu in the parameter table
+        """
+        # select model: cylinder / cylinder
+        category_index = self.widget.cbCategory.findText("Cylinder")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        model_index = self.widget.cbModel.findText("cylinder")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        # no rows selected
+        menu = self.widget.modelContextMenu([])
+        self.assertEqual(len(menu.actions()), 0)
+
+        # 1 row selected
+        menu = self.widget.modelContextMenu([1])
+        self.assertEqual(len(menu.actions()), 4)
+
+        # 2 rows selected
+        menu = self.widget.modelContextMenu([1,3])
+        self.assertEqual(len(menu.actions()), 5)
+
+        # 3 rows selected
+        menu = self.widget.modelContextMenu([1,2,3])
+        self.assertEqual(len(menu.actions()), 4)
+
+        # over 9000
+        with self.assertRaises(AttributeError):
+            menu = self.widget.modelContextMenu([i for i in range(9001)])
+        self.assertEqual(len(menu.actions()), 4)
+
+    def testShowModelContextMenu(self):
+        # select model: cylinder / cylinder
+        category_index = self.widget.cbCategory.findText("Cylinder")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        model_index = self.widget.cbModel.findText("cylinder")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        # No selection
+        logging.error = MagicMock()
+        self.widget.showModelDescription = MagicMock()
+        # Show the menu
+        self.widget.showModelContextMenu(QtCore.QPoint(10,20))
+
+        # Assure the description menu is shown
+        self.assertTrue(self.widget.showModelDescription.called)
+        self.assertFalse(logging.error.called)
+
+        # "select" two rows
+        index1 = self.widget.lstParams.model().index(1, 0, QtCore.QModelIndex())
+        index2 = self.widget.lstParams.model().index(2, 0, QtCore.QModelIndex())
+        selection_model = self.widget.lstParams.selectionModel()
+        selection_model.select(index1, selection_model.Select | selection_model.Rows)
+        selection_model.select(index2, selection_model.Select | selection_model.Rows)
+
+        QtWidgets.QMenu.exec_ = MagicMock()
+        logging.error = MagicMock()
+        # Show the menu
+        self.widget.showModelContextMenu(QtCore.QPoint(10,20))
+
+        # Assure the menu is shown
+        self.assertFalse(logging.error.called)
+        self.assertTrue(QtWidgets.QMenu.exec_.called)
+
+    def testShowMultiConstraint(self):
+        """
+        Test the widget update on new multi constraint
+        """
+        # select model: cylinder / cylinder
+        category_index = self.widget.cbCategory.findText("Cylinder")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        model_index = self.widget.cbModel.findText("cylinder")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        # nothing selected
+        with self.assertRaises(AssertionError):
+            self.widget.showMultiConstraint()
+
+        # one row selected
+        index = self.widget.lstParams.model().index(1, 0, QtCore.QModelIndex())
+        selection_model = self.widget.lstParams.selectionModel()
+        selection_model.select(index, selection_model.Select | selection_model.Rows)
+        with self.assertRaises(AssertionError):
+            # should also throw
+            self.widget.showMultiConstraint()
+
+        # two rows selected
+        index1 = self.widget.lstParams.model().index(1, 0, QtCore.QModelIndex())
+        index2 = self.widget.lstParams.model().index(2, 0, QtCore.QModelIndex())
+        selection_model = self.widget.lstParams.selectionModel()
+        selection_model.select(index1, selection_model.Select | selection_model.Rows)
+        selection_model.select(index2, selection_model.Select | selection_model.Rows)
+
+        # return non-OK from dialog
+        QtWidgets.QDialog.exec_ = MagicMock()
+        self.widget.showMultiConstraint()
+        # Check the dialog called
+        self.assertTrue(QtWidgets.QDialog.exec_.called)
+
+        # return OK from dialog
+        QtWidgets.QDialog.exec_ = MagicMock(return_value=QtWidgets.QDialog.Accepted)
+        spy = QtSignalSpy(self.widget, self.widget.constraintAddedSignal)
+
+        self.widget.showMultiConstraint()
+
+        # Make sure the signal has been emitted
+        self.assertEqual(spy.count(), 1)
+
+        # Check the argument value - should be row '1'
+        self.assertEqual(spy.called()[0]['args'][0], [1])
+
+    def testGetRowFromName(self):
+        """
+        Helper function for parameter table
+        """
+        # select model: cylinder / cylinder
+        category_index = self.widget.cbCategory.findText("Cylinder")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        model_index = self.widget.cbModel.findText("cylinder")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        # several random parameters
+        self.assertEqual(self.widget.getRowFromName('scale'), 0)
+        self.assertEqual(self.widget.getRowFromName('length'), 5)
+
+    def testGetParamNames(self):
+        """
+        Helper function for parameter table
+        """
+        # select model: cylinder / cylinder
+        category_index = self.widget.cbCategory.findText("Cylinder")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        model_index = self.widget.cbModel.findText("cylinder")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        cylinder_params = ['scale','background','sld','sld_solvent','radius','length']
+        # assure all parameters are returned
+        self.assertEqual(self.widget.getParamNames(), cylinder_params)
+
+        # Switch to another model
+        model_index = self.widget.cbModel.findText("pringle")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        # make sure the parameters are different than before
+        self.assertFalse(self.widget.getParamNames() == cylinder_params)
+
+    def testAddConstraintToRow(self):
+        """
+        Test the constraint row add operation
+        """
+        # select model: cylinder / cylinder
+        category_index = self.widget.cbCategory.findText("Cylinder")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        model_index = self.widget.cbModel.findText("cylinder")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        # Create a constraint object
+        const = Constraint(parent=None, value=7.0)
+        row = 2
+
+        spy = QtSignalSpy(self.widget, self.widget.constraintAddedSignal)
+
+        # call the method tested
+        self.widget.addConstraintToRow(constraint=const, row=row)
+
+        # Make sure the signal has been emitted
+        self.assertEqual(spy.count(), 1)
+
+        # Check the argument value - should be row 'row'
+        self.assertEqual(spy.called()[0]['args'][0], [row])
+
+        # Assure the row has the constraint
+        self.assertEqual(self.widget.getConstraintForRow(row), const)
+        # but not complex constraint!
+        self.assertFalse(self.widget.rowHasConstraint(row))
+
+        # assign complex constraint now
+        const = Constraint(parent=None, param='radius', func='5*sld')
+        row = 4
+        # call the method tested
+        self.widget.addConstraintToRow(constraint=const, row=row)
+
+        # Make sure the signal has been emitted
+        self.assertEqual(spy.count(), 2)
+
+        # Check the argument value - should be row 'row'
+        self.assertEqual(spy.called()[1]['args'][0], [row])
+
+        # Assure the row has the constraint
+        self.assertEqual(self.widget.getConstraintForRow(row), const)
+        # and it is a complex constraint
+        self.assertTrue(self.widget.rowHasConstraint(row))
+
+    def testAddSimpleConstraint(self):
+        """
+        Test the constraint add operation
+        """
+        # select model: cylinder / cylinder
+        category_index = self.widget.cbCategory.findText("Cylinder")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        model_index = self.widget.cbModel.findText("cylinder")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        # select two rows
+        row1 = 1
+        row2 = 4
+        index1 = self.widget.lstParams.model().index(row1, 0, QtCore.QModelIndex())
+        index2 = self.widget.lstParams.model().index(row2, 0, QtCore.QModelIndex())
+        selection_model = self.widget.lstParams.selectionModel()
+        selection_model.select(index1, selection_model.Select | selection_model.Rows)
+        selection_model.select(index2, selection_model.Select | selection_model.Rows)
+
+        # define the signal spy
+        spy = QtSignalSpy(self.widget, self.widget.constraintAddedSignal)
+
+        # call the method tested
+        self.widget.addSimpleConstraint()
+
+        # Make sure the signal has been emitted
+        self.assertEqual(spy.count(), 2)
+
+        # Check the argument value
+        self.assertEqual(spy.called()[0]['args'][0], [row1])
+        self.assertEqual(spy.called()[1]['args'][0], [row2])
+
+        # Other properties
+        self.assertEqual(self.widget.getConstraintsForModel(), [('background', '0.001'), ('radius', '20')])
+
+    def testDeleteConstraintOnParameter(self):
+        """
+        Test the constraint deletion in model/view
+        """
+        # select model: cylinder / cylinder
+        category_index = self.widget.cbCategory.findText("Cylinder")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        model_index = self.widget.cbModel.findText("cylinder")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        # select two rows
+        row1 = 1
+        row2 = 4
+        index1 = self.widget.lstParams.model().index(row1, 0, QtCore.QModelIndex())
+        index2 = self.widget.lstParams.model().index(row2, 0, QtCore.QModelIndex())
+        selection_model = self.widget.lstParams.selectionModel()
+        selection_model.select(index1, selection_model.Select | selection_model.Rows)
+        selection_model.select(index2, selection_model.Select | selection_model.Rows)
+
+        # add constraints
+        self.widget.addSimpleConstraint()
+
+        # deselect the model
+        selection_model.clear()
+
+        # select a single row
+        selection_model.select(index1, selection_model.Select | selection_model.Rows)
+
+        # delete one of the constraints
+        self.widget.deleteConstraintOnParameter(param='background')
+
+        # see that the other constraint is still present
+        self.assertEqual(self.widget.getConstraintsForModel(), [('radius', '20')])
+
+        # kill the other constraint
+        self.widget.deleteConstraint()
+
+        # see that the other constraint is still present
+        self.assertEqual(self.widget.getConstraintsForModel(), [])
+
+    def testGetConstraintForRow(self):
+        """
+        Helper function for parameter table
+        """
+        # tested extensively elsewhere
+        pass
+
+    def testRowHasConstraint(self):
+        """
+        Helper function for parameter table
+        """
+        # select model: cylinder / cylinder
+        category_index = self.widget.cbCategory.findText("Cylinder")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        model_index = self.widget.cbModel.findText("cylinder")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        # select two rows
+        row1 = 1
+        row2 = 4
+        index1 = self.widget.lstParams.model().index(row1, 0, QtCore.QModelIndex())
+        index2 = self.widget.lstParams.model().index(row2, 0, QtCore.QModelIndex())
+        selection_model = self.widget.lstParams.selectionModel()
+        selection_model.select(index1, selection_model.Select | selection_model.Rows)
+        selection_model.select(index2, selection_model.Select | selection_model.Rows)
+
+        # add constraints
+        self.widget.addSimpleConstraint()
+
+        con_list = [False, True, False, False, True, False]
+        new_list = []
+        for row in range(self.widget._model_model.rowCount()):
+            new_list.append(self.widget.rowHasConstraint(row))
+
+        self.assertEqual(new_list, con_list)
+
+    def testRowHasActiveConstraint(self):
+        """
+        Helper function for parameter table
+        """
+        # select model: cylinder / cylinder
+        category_index = self.widget.cbCategory.findText("Cylinder")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        model_index = self.widget.cbModel.findText("cylinder")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        # select two rows
+        row1 = 1
+        row2 = 4
+        index1 = self.widget.lstParams.model().index(row1, 0, QtCore.QModelIndex())
+        index2 = self.widget.lstParams.model().index(row2, 0, QtCore.QModelIndex())
+        selection_model = self.widget.lstParams.selectionModel()
+        selection_model.select(index1, selection_model.Select | selection_model.Rows)
+        selection_model.select(index2, selection_model.Select | selection_model.Rows)
+
+        # add constraints
+        self.widget.addSimpleConstraint()
+
+        # deactivate the first constraint
+        constraint_objects = self.widget.getConstraintObjectsForModel()
+        constraint_objects[0].active = False
+
+        con_list = [False, False, False, False, True, False]
+        new_list = []
+        for row in range(self.widget._model_model.rowCount()):
+            new_list.append(self.widget.rowHasActiveConstraint(row))
+
+        self.assertEqual(new_list, con_list)
+
+    def testGetConstraintsForModel(self):
+        """
+        Test the constraint getter for constraint texts
+        """
+        # select model: cylinder / cylinder
+        category_index = self.widget.cbCategory.findText("Cylinder")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        model_index = self.widget.cbModel.findText("cylinder")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        # no constraints
+        self.assertEqual(self.widget.getConstraintsForModel(),[])
+
+        # select two rows
+        row1 = 1
+        row2 = 4
+        index1 = self.widget.lstParams.model().index(row1, 0, QtCore.QModelIndex())
+        index2 = self.widget.lstParams.model().index(row2, 0, QtCore.QModelIndex())
+        selection_model = self.widget.lstParams.selectionModel()
+        selection_model.select(index1, selection_model.Select | selection_model.Rows)
+        selection_model.select(index2, selection_model.Select | selection_model.Rows)
+
+        # add constraints
+        self.widget.addSimpleConstraint()
+
+        # simple constraints
+        self.assertEqual(self.widget.getConstraintsForModel(), [('background', '0.001'), ('radius', '20')])
+        objects = self.widget.getConstraintObjectsForModel()
+        self.assertEqual(len(objects), 2)
+        self.assertEqual(objects[1].value, '20')
+        self.assertEqual(objects[0].param, 'background')
+
+
+        # add complex constraint
+        const = Constraint(parent=None, param='scale', func='5*sld')
+        row = 0
+        self.widget.addConstraintToRow(constraint=const, row=row)
+        self.assertEqual(self.widget.getConstraintsForModel(),[('scale', '5*sld'), ('background', '0.001'), ('radius', '20')])
+        objects = self.widget.getConstraintObjectsForModel()
+        self.assertEqual(len(objects), 3)
+        self.assertEqual(objects[0].func, '5*sld')
+
+    def testReplaceConstraintName(self):
+        """
+        Test the replacement of constraint moniker
+        """
+        # select model: cylinder / cylinder
+        category_index = self.widget.cbCategory.findText("Cylinder")
+        self.widget.cbCategory.setCurrentIndex(category_index)
+
+        model_index = self.widget.cbModel.findText("cylinder")
+        self.widget.cbModel.setCurrentIndex(model_index)
+
+        old_name = 'M5'
+        new_name = 'poopy'
+        # add complex constraint
+        const = Constraint(parent=None, param='scale', func='%s.5*sld'%old_name)
+        row = 0
+        self.widget.addConstraintToRow(constraint=const, row=row)
+
+        # Replace 'm5' with 'poopy'
+        self.widget.replaceConstraintName(old_name, new_name)
+
+        self.assertEqual(self.widget.getConstraintsForModel(),[('scale', 'poopy.5*sld')])
 
 
 if __name__ == "__main__":

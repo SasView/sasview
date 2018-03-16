@@ -4,8 +4,10 @@ import numpy
 import logging
 import time
 
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
+
 from twisted.internet import threads
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -21,12 +23,12 @@ from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
 
 # Local UI
-from UI.GenericScatteringCalculator import Ui_GenericScatteringCalculator
+from .UI.GenericScatteringCalculator import Ui_GenericScatteringCalculator
 
 _Q1D_MIN = 0.001
 
 
-class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator):
+class GenericScatteringCalculator(QtWidgets.QDialog, Ui_GenericScatteringCalculator):
 
     trigger_plot_3d = QtCore.pyqtSignal()
 
@@ -118,7 +120,7 @@ class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator)
         """
         TODO Temporary solution to display information about option 'Ellipsoid'
         """
-        print "The option Ellipsoid has not been implemented yet."
+        print("The option Ellipsoid has not been implemented yet.")
         self.communicator.statusBarUpdateSignal.emit(
             "The option Ellipsoid has not been implemented yet.")
 
@@ -128,11 +130,11 @@ class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator)
         Only extensions .SLD, .PDB, .OMF, .sld, .pdb, .omf
         """
         try:
-            self.datafile = QtGui.QFileDialog.getOpenFileName(
+            self.datafile = QtWidgets.QFileDialog.getOpenFileName(
                 self, "Choose a file", "", "All Gen files (*.OMF *.omf) ;;"
                                           "SLD files (*.SLD *.sld);;PDB files (*.pdb *.PDB);; "
                                           "OMF files (*.OMF *.omf);; "
-                                          "All files (*.*)")
+                                          "All files (*.*)")[0]
             if self.datafile:
                 self.default_shape = str(self.cbShape.currentText())
                 self.file_name = os.path.basename(str(self.datafile))
@@ -164,7 +166,7 @@ class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator)
                                         updatefn=self.load_update)
                 self.reader.queue()
         except (RuntimeError, IOError):
-            log_msg = "Generic SAS Calculator: %s" % sys.exc_value
+            log_msg = "Generic SAS Calculator: %s" % sys.exc_info()[1]
             logging.info(log_msg)
             raise
         return
@@ -234,24 +236,19 @@ class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator)
     def check_value(self):
         """Check range of text edits for QMax and Number of Qbins """
         text_edit = self.sender()
-        text_edit.setStyleSheet(
-            QtCore.QString.fromUtf8('background-color: rgb(255, 255, 255);'))
+        text_edit.setStyleSheet('background-color: rgb(255, 255, 255);')
         if text_edit.text():
             value = float(str(text_edit.text()))
             if text_edit == self.txtQxMax:
                 if value <= 0 or value > 1000:
-                    text_edit.setStyleSheet(QtCore.QString.fromUtf8(
-                        'background-color: rgb(255, 182, 193);'))
+                    text_edit.setStyleSheet('background-color: rgb(255, 182, 193);')
                 else:
-                    text_edit.setStyleSheet(QtCore.QString.fromUtf8(
-                        'background-color: rgb(255, 255, 255);'))
+                    text_edit.setStyleSheet('background-color: rgb(255, 255, 255);')
             elif text_edit == self.txtNoQBins:
                 if value < 2 or value > 1000:
-                    self.txtNoQBins.setStyleSheet(QtCore.QString.fromUtf8(
-                        'background-color: rgb(255, 182, 193);'))
+                    self.txtNoQBins.setStyleSheet('background-color: rgb(255, 182, 193);')
                 else:
-                    self.txtNoQBins.setStyleSheet(QtCore.QString.fromUtf8(
-                        'background-color: rgb(255, 255, 255);'))
+                    self.txtNoQBins.setStyleSheet('background-color: rgb(255, 255, 255);')
 
     def update_gui(self):
         """ Update the interface with values from loaded data """
@@ -384,14 +381,8 @@ class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator)
         Calls Documentation Window with the path of the location within the
         documentation tree (after /doc/ ....".
         """
-        try:
-            location = GuiUtils.HELP_DIRECTORY_LOCATION + \
-                       "/user/sasgui/perspectives/calculator/sas_calculator_help.html"
-            self.manager._helpView.load(QtCore.QUrl(location))
-            self.manager._helpView.show()
-        except AttributeError:
-            # No manager defined - testing and standalone runs
-            pass
+        location = "/user/sasgui/perspectives/calculator/sas_calculator_help.html"
+        self.manager.showHelp(location)
 
     def onReset(self):
         """ Reset the inputs of textEdit to default values """
@@ -554,8 +545,9 @@ class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator)
             d = threads.deferToThread(self.complete, inputs, self._update)
             # Add deferred callback for call return
             d.addCallback(self.plot_1_2d)
+            d.addErrback(self.calculateFailed)
         except:
-            log_msg = "{}. stop".format(sys.exc_value)
+            log_msg = "{}. stop".format(sys.exc_info()[1])
             logging.info(log_msg)
         return
 
@@ -563,6 +555,12 @@ class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator)
         """
         Copied from previous version
         """
+        pass
+
+    def calculateFailed(self, reason):
+        """
+        """
+        print("Calculate Failed with:\n", reason)
         pass
 
     def complete(self, input, update=None):
@@ -604,16 +602,16 @@ class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator)
             'parent': self,
             'directory': default_name,
             'filter': 'SLD file (*.sld)',
-            'options': QtGui.QFileDialog.DontUseNativeDialog}
+            'options': QtWidgets.QFileDialog.DontUseNativeDialog}
         # Query user for filename.
-        filename = str(QtGui.QFileDialog.getSaveFileName(**kwargs))
+        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+        filename = filename_tuple[0]
         if filename:
             try:
-                if os.path.splitext(filename)[1].lower() == '.sld':
-                    sas_gen.SLDReader().write(filename, self.sld_data)
-                else:
-                    sas_gen.SLDReader().write('.'.join((filename, 'sld')),
-                                              self.sld_data)
+                _, extension = os.path.splitext(filename)
+                if not extension:
+                    filename = '.'.join((filename, 'sld'))
+                sas_gen.SLDReader().write(filename, self.sld_data)
             except:
                 raise
 
@@ -643,7 +641,7 @@ class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator)
             plot1D.show()
             self.graph_num += 1
             # TODO
-            print 'TRANSFER OF DATA TO MAIN PANEL TO BE IMPLEMENTED'
+            print('TRANSFER OF DATA TO MAIN PANEL TO BE IMPLEMENTED')
             return plot1D
         else:
             numpy.nan_to_num(self.data_to_plot)
@@ -661,7 +659,7 @@ class GenericScatteringCalculator(QtGui.QDialog, Ui_GenericScatteringCalculator)
             plot2D.show()
             self.graph_num += 1
             # TODO
-            print 'TRANSFER OF DATA TO MAIN PANEL TO BE IMPLEMENTED'
+            print('TRANSFER OF DATA TO MAIN PANEL TO BE IMPLEMENTED')
             return plot2D
 
 
@@ -743,7 +741,7 @@ class Plotter3DWidget(PlotterBase):
             pix_symbol = data.pix_symbol[is_nonzero]
         # II. Plot selective points in color
         other_color = numpy.ones(len(pix_symbol), dtype='bool')
-        for key in color_dic.keys():
+        for key in list(color_dic.keys()):
             chosen_color = pix_symbol == key
             if numpy.any(chosen_color):
                 other_color = other_color & (chosen_color!=True)
@@ -757,7 +755,7 @@ class Plotter3DWidget(PlotterBase):
             if data.pix_type == 'atom':
                 # Get atom names not in the list
                 a_names = [symb for symb in pix_symbol \
-                           if symb not in color_dic.keys()]
+                           if symb not in list(color_dic.keys())]
                 a_name = a_names[0]
                 for name in a_names:
                     new_name = ", " + name
@@ -827,10 +825,10 @@ class Plotter3DWidget(PlotterBase):
         self.figure.canvas.draw()
 
 
-class Plotter3D(QtGui.QDialog, Plotter3DWidget):
+class Plotter3D(QtWidgets.QDialog, Plotter3DWidget):
     def __init__(self, parent=None, graph_title=''):
         self.graph_title = graph_title
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
         Plotter3DWidget.__init__(self, manager=parent)
         self.setWindowTitle(self.graph_title)
 

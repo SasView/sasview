@@ -1,5 +1,7 @@
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
+
 import functools
 import copy
 import matplotlib.pyplot as plt
@@ -38,13 +40,6 @@ class PlotterWidget(PlotterBase):
         self.fit_result.symbol = 13
         self.fit_result.name = "Fit"
 
-        # Add a slot for receiving update signal from LinearFit
-        # NEW style signals
-        #self.updatePlot = QtCore.pyqtSignal(tuple)
-        # self.updatePlot.connect(self.onFitDisplay)
-        # OLD style signals
-        QtCore.QObject.connect(self, QtCore.SIGNAL('updatePlot'), self.onFitDisplay)
-
     @property
     def data(self):
         return self._data
@@ -53,8 +48,18 @@ class PlotterWidget(PlotterBase):
     def data(self, value):
         """ data setter """
         self._data = value
-        self.xLabel = "%s(%s)"%(value._xaxis, value._xunit)
-        self.yLabel = "%s(%s)"%(value._yaxis, value._yunit)
+        if value._xunit:
+            self.xLabel = "%s(%s)"%(value._xaxis, value._xunit)
+        else:
+            self.xLabel = "%s"%(value._xaxis)
+        if value._yunit:
+            self.yLabel = "%s(%s)"%(value._yaxis, value._yunit)
+        else:
+            self.yLabel = "%s"%(value._yaxis)
+
+        if value.scale == 'linear' or value.isSesans:
+            self.xscale = 'linear'
+            self.yscale = 'linear'
         self.title(title=value.name)
 
     def plot(self, data=None, color=None, marker=None, hide_error=False):
@@ -84,9 +89,9 @@ class PlotterWidget(PlotterBase):
             marker = self.data.symbol
             # Try name first
             try:
-                marker = PlotUtilities.SHAPES[marker]
+                marker = dict(PlotUtilities.SHAPES)[marker]
             except KeyError:
-                marker = PlotUtilities.SHAPES.values()[marker]
+                marker = list(PlotUtilities.SHAPES.values())[marker]
 
         assert marker is not None
         # Plot name
@@ -164,7 +169,7 @@ class PlotterWidget(PlotterBase):
             x_range=self.ax.get_xlim(), y_range=self.ax.get_ylim())
 
         # refresh canvas
-        self.canvas.draw()
+        self.canvas.draw_idle()
 
     def createContextMenu(self):
         """
@@ -202,7 +207,7 @@ class PlotterWidget(PlotterBase):
         """
         Adds operations on all plotted sets of data to the context menu
         """
-        for id in self.plot_dict.keys():
+        for id in list(self.plot_dict.keys()):
             plot = self.plot_dict[id]
 
             name = plot.name if plot.name else plot.title
@@ -268,7 +273,7 @@ class PlotterWidget(PlotterBase):
         """
         Show a dialog allowing axes rescaling
         """
-        if self.properties.exec_() == QtGui.QDialog.Accepted:
+        if self.properties.exec_() == QtWidgets.QDialog.Accepted:
             self.xLogLabel, self.yLogLabel = self.properties.getValues()
             self.xyTransform(self.xLogLabel, self.yLogLabel)
 
@@ -276,38 +281,41 @@ class PlotterWidget(PlotterBase):
         """
         Show a dialog allowing adding custom text to the chart
         """
-        if self.addText.exec_() == QtGui.QDialog.Accepted:
-            # Retrieve the new text, its font and color
-            extra_text = self.addText.text()
-            extra_font = self.addText.font()
-            extra_color = self.addText.color()
+        if self.addText.exec_() != QtWidgets.QDialog.Accepted:
+            return
 
-            # Place the text on the screen at (0,0)
-            pos_x = self.x_click
-            pos_y = self.y_click
+        # Retrieve the new text, its font and color
+        extra_text = self.addText.text()
+        extra_font = self.addText.font()
+        extra_color = self.addText.color()
 
-            # Map QFont onto MPL font
-            mpl_font = FontProperties()
-            mpl_font.set_size(int(extra_font.pointSize()))
-            mpl_font.set_family(str(extra_font.family()))
-            mpl_font.set_weight(int(extra_font.weight()))
-            # MPL style names
-            styles = ['normal', 'italic', 'oblique']
-            # QFont::Style maps directly onto the above
-            try:
-                mpl_font.set_style(styles[extra_font.style()])
-            except:
-                pass
+        # Place the text on the screen at the click location
+        pos_x = self.x_click
+        pos_y = self.y_click
 
-            if len(extra_text) > 0:
-                new_text = self.ax.text(str(pos_x),
-                                        str(pos_y),
-                                        extra_text,
-                                        color=extra_color,
-                                        fontproperties=mpl_font)
-                # Update the list of annotations
-                self.textList.append(new_text)
-                self.canvas.draw_idle()
+        # Map QFont onto MPL font
+        mpl_font = FontProperties()
+        mpl_font.set_size(int(extra_font.pointSize()))
+        mpl_font.set_family(str(extra_font.family()))
+        mpl_font.set_weight(int(extra_font.weight()))
+        # MPL style names
+        styles = ['normal', 'italic', 'oblique']
+        # QFont::Style maps directly onto the above
+        try:
+            mpl_font.set_style(styles[extra_font.style()])
+        except:
+            pass
+
+        if len(extra_text) > 0:
+            new_text = self.ax.text(pos_x,
+                                    pos_y,
+                                    extra_text,
+                                    color=extra_color,
+                                    fontproperties=mpl_font)
+
+            # Update the list of annotations
+            self.textList.append(new_text)
+            self.canvas.draw()
 
     def onRemoveText(self):
         """
@@ -318,7 +326,11 @@ class PlotterWidget(PlotterBase):
             return
         txt = self.textList[num_text - 1]
         text_remove = txt.get_text()
-        txt.remove()
+        try:
+            txt.remove()
+        except ValueError:
+            # Text got already deleted somehow
+            pass
         self.textList.remove(txt)
 
         self.canvas.draw_idle()
@@ -328,7 +340,7 @@ class PlotterWidget(PlotterBase):
         Show a dialog allowing setting the chart ranges
         """
         # min and max of data
-        if self.setRange.exec_() == QtGui.QDialog.Accepted:
+        if self.setRange.exec_() == QtWidgets.QDialog.Accepted:
             x_range = self.setRange.xrange()
             y_range = self.setRange.yrange()
             if x_range is not None and y_range is not None:
@@ -362,7 +374,8 @@ class PlotterWidget(PlotterBase):
                     fit_range=fitrange,
                     xlabel=self.xLogLabel,
                     ylabel=self.yLogLabel)
-        if fit_dialog.exec_() == QtGui.QDialog.Accepted:
+        fit_dialog.updatePlot.connect(self.onFitDisplay)
+        if fit_dialog.exec_() == QtWidgets.QDialog.Accepted:
             return
 
     def replacePlot(self, id, new_plot):
@@ -387,7 +400,7 @@ class PlotterWidget(PlotterBase):
         """
         Deletes the selected plot from the chart
         """
-        if id not in self.plot_dict.keys():
+        if id not in list(self.plot_dict.keys()):
             return
 
         selected_plot = self.plot_dict[id]
@@ -439,7 +452,7 @@ class PlotterWidget(PlotterBase):
                                 marker=marker,
                                 marker_size=marker_size,
                                 legend=legend)
-        if plotPropertiesWidget.exec_() == QtGui.QDialog.Accepted:
+        if plotPropertiesWidget.exec_() == QtWidgets.QDialog.Accepted:
             # Update Data1d
             selected_plot.markersize = plotPropertiesWidget.markersize()
             selected_plot.custom_color = plotPropertiesWidget.color()
@@ -478,7 +491,7 @@ class PlotterWidget(PlotterBase):
         Transforms x and y in View and set the scale
         """
         # Transform all the plots on the chart
-        for id in self.plot_dict.keys():
+        for id in list(self.plot_dict.keys()):
             current_plot = self.plot_dict[id]
             if current_plot.id == "fit":
                 self.removePlot(id)
@@ -613,7 +626,7 @@ class PlotterWidget(PlotterBase):
         On legend in motion
         """
         ax = event.inaxes
-        if ax == None:
+        if ax is None:
             return
         # Event occurred inside a plotting area
         lo_x, hi_x = ax.get_xlim()
@@ -648,7 +661,7 @@ class PlotterWidget(PlotterBase):
         ax = event.inaxes
         step = event.step
 
-        if ax != None:
+        if ax is not None:
             # Event occurred inside a plotting area
             lo, hi = ax.get_xlim()
             lo, hi = PlotUtilities.rescale(lo, hi, step,
@@ -696,10 +709,10 @@ class PlotterWidget(PlotterBase):
         self.canvas.draw_idle()
 
 
-class Plotter(QtGui.QDialog, PlotterWidget):
+class Plotter(QtWidgets.QDialog, PlotterWidget):
     def __init__(self, parent=None, quickplot=False):
 
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
         PlotterWidget.__init__(self, parent=self, manager=parent, quickplot=quickplot)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/res/ball.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)

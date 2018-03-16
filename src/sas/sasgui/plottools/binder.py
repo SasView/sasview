@@ -1,7 +1,7 @@
 """
 Extension to MPL to support the binding of artists to key/mouse events.
 """
-from __future__ import print_function
+
 
 import sys
 import logging
@@ -27,7 +27,7 @@ class Selection(object):
     def __ne__(self, other):
         return self.artist is not other.artist
 
-    def __nonzero__(self):
+    def __bool__(self):
         return self.artist is not None
 
 
@@ -124,7 +124,7 @@ class BindArtist(object):
         try:
             for cid in self._connections: self.canvas.mpl_disconnect(cid)
         except:
-            logger.error("Error disconnection canvas: %s" % sys.exc_value)
+            logger.error("Error disconnection canvas: %s" % sys.exc_info()[1])
         self._connections = []
 
     def __del__(self):
@@ -188,8 +188,8 @@ class BindArtist(object):
         """
         # Check that the trigger is valid
         if trigger not in self._actions:
-            raise ValueError, "%s invalid --- valid triggers are %s"\
-                 % (trigger, ", ".join(self.events))
+            raise ValueError("%s invalid --- valid triggers are %s"\
+                 % (trigger, ", ".join(self.events)))
 
         # Register the trigger callback
         self._actions[trigger][artist] = action
@@ -204,7 +204,7 @@ class BindArtist(object):
         to figure, and to 'all' if the event is not processed.
         """
         if action not in self.events:
-            raise ValueError, "Trigger expects " + ", ".join(self.events)
+            raise ValueError("Trigger expects " + ", ".join(self.events))
 
         # Tag the event with modifiers
         for mod in ('alt', 'control', 'shift', 'meta'):

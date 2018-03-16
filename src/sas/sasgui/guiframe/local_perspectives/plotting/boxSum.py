@@ -109,14 +109,10 @@ class BoxSumCalculator(_BaseInteractor):
         """
         parameters = self.getParams()
         # Crete/overwrite model items
-        self._model.setData(self._model.index(0, 0),
-                    QtCore.QVariant(formatNumber(parameters['Height'])))
-        self._model.setData(self._model.index(0, 1),
-                    QtCore.QVariant(formatNumber(parameters['Width'])))
-        self._model.setData(self._model.index(0, 2),
-                    QtCore.QVariant(formatNumber(parameters['center_x'])))
-        self._model.setData(self._model.index(0, 3),
-                    QtCore.QVariant(formatNumber(parameters['center_y'])))
+        self._model.setData(self._model.index(0, 0), formatNumber(parameters['Height']))
+        self._model.setData(self._model.index(0, 1), formatNumber(parameters['Width']))
+        self._model.setData(self._model.index(0, 2), formatNumber(parameters['center_x']))
+        self._model.setData(self._model.index(0, 3), formatNumber(parameters['center_y']))
 
         self.setReadOnlyParametersFromModel()
 
@@ -129,16 +125,11 @@ class BoxSumCalculator(_BaseInteractor):
         Cast model content onto "read-only" subset of parameters
         """
         parameters = self.getParams()
-        self._model.setData(self._model.index(0, 4),
-                    QtCore.QVariant(formatNumber(parameters['avg'])))
-        self._model.setData(self._model.index(0, 5),
-                    QtCore.QVariant(formatNumber(parameters['avg_error'])))
-        self._model.setData(self._model.index(0, 6),
-                    QtCore.QVariant(formatNumber(parameters['sum'])))
-        self._model.setData(self._model.index(0, 7),
-                    QtCore.QVariant(formatNumber(parameters['sum_error'])))
-        self._model.setData(self._model.index(0, 8),
-                    QtCore.QVariant(formatNumber(parameters['num_points'])))
+        self._model.setData(self._model.index(0, 4), formatNumber(parameters['avg']))
+        self._model.setData(self._model.index(0, 5), formatNumber(parameters['avg_error']))
+        self._model.setData(self._model.index(0, 6), formatNumber(parameters['sum']))
+        self._model.setData(self._model.index(0, 7), formatNumber(parameters['sum_error']))
+        self._model.setData(self._model.index(0, 8), formatNumber(parameters['num_points']))
 
     def setParamsFromModel(self):
         """

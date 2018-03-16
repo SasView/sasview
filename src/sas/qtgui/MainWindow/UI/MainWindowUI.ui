@@ -102,6 +102,7 @@
     <addaction name="actionCombine_Batch_Fit"/>
     <addaction name="separator"/>
     <addaction name="actionFit_Options"/>
+    <addaction name="actionGPU_Options"/>
     <addaction name="actionFit_Results"/>
     <addaction name="separator"/>
     <addaction name="actionChain_Fitting"/>
@@ -496,6 +497,11 @@
   <action name="actionKeissig_Calculator">
    <property name="text">
     <string>Kiessig Thickness Calculator</string>
+   </property>
+  </action>
+  <action name="actionGPU_Options">
+   <property name="text">
+    <string>GPU Options</string>
    </property>
   </action>
  </widget>

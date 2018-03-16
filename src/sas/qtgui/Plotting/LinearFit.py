@@ -3,20 +3,23 @@ Adds a linear fit plot to the chart
 """
 import re
 import numpy
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
-from sas.qtgui.Utilities.GuiUtils import formatNumber
+from sas.qtgui.Utilities.GuiUtils import formatNumber, DoubleValidator
 
 from sas.qtgui.Plotting import Fittings
 from sas.qtgui.Plotting import DataTransform
 from sas.qtgui.Plotting.LineModel import LineModel
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # Local UI
 from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.LinearFitUI import Ui_LinearFitUI
 
-class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
+class LinearFit(QtWidgets.QDialog, Ui_LinearFitUI):
+    updatePlot = QtCore.pyqtSignal(tuple)
     def __init__(self, parent=None,
                  data=None,
                  max_range=(0.0, 0.0),
@@ -40,8 +43,8 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
         self.x_is_log = self.xLabel == "log10(x)"
         self.y_is_log = self.yLabel == "log10(y)"
 
-        self.txtFitRangeMin.setValidator(QtGui.QDoubleValidator())
-        self.txtFitRangeMax.setValidator(QtGui.QDoubleValidator())
+        self.txtFitRangeMin.setValidator(DoubleValidator())
+        self.txtFitRangeMax.setValidator(DoubleValidator())
 
         # Default values in the line edits
         self.txtA.setText("1")
@@ -53,8 +56,11 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
         # Initial ranges
         self.txtRangeMin.setText(str(max_range[0]))
         self.txtRangeMax.setText(str(max_range[1]))
-        self.txtFitRangeMin.setText(str(fit_range[0]))
-        self.txtFitRangeMax.setText(str(fit_range[1]))
+        # Assure nice display of ranges
+        fr_min = GuiUtils.formatNumber(fit_range[0])
+        fr_max = GuiUtils.formatNumber(fit_range[1])
+        self.txtFitRangeMin.setText(str(fr_min))
+        self.txtFitRangeMax.setText(str(fr_max))
 
         # cast xLabel into html
         label = re.sub(r'\^\((.)\)(.*)', r'<span style=" vertical-align:super;">\1</span>\2',
@@ -78,7 +84,7 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
         """
         Overwrite default fit range label to correspond to actual unit
         """
-        assert(isinstance(label, basestring))
+        assert(isinstance(label, str))
         self.lblRange.setText(label)
 
     def range(self):
@@ -110,9 +116,6 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
 
         # Set the qmin and qmax in the panel that matches the
         # transformed min and max
-        #value_xmin = X_VAL_DICT[self.xLabel].floatTransform(xmin)
-        #value_xmax = X_VAL_DICT[self.xLabel].floatTransform(xmax)
-
         value_xmin = self.floatInvTransform(xmin)
         value_xmax = self.floatInvTransform(xmax)
         self.txtRangeMin.setText(formatNumber(value_xmin))
@@ -155,12 +158,12 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
         # load tempy with the minimum transformation
         y_model = self.model.run(xmin)
         tempx.append(xminView)
-        tempy.append(numpy.power(10, y_model) if self.y_is_log else y_model)
+        tempy.append(numpy.power(10.0, y_model) if self.y_is_log else y_model)
 
         # load tempy with the maximum transformation
         y_model = self.model.run(xmax)
         tempx.append(xmaxView)
-        tempy.append(numpy.power(10, y_model) if self.y_is_log else y_model)
+        tempy.append(numpy.power(10.0, y_model) if self.y_is_log else y_model)
 
         # Set the fit parameter display when  FitDialog is opened again
         self.Avalue = cstA
@@ -176,8 +179,7 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
         self.txtBerr.setText(formatNumber(self.ErrBvalue))
         self.txtChi2.setText(formatNumber(self.Chivalue))
 
-        #self.parent.updatePlot.emit((tempx, tempy))
-        self.parent.emit(QtCore.SIGNAL('updatePlot'), (tempx, tempy))
+        self.updatePlot.emit((tempx, tempy))
 
     def origData(self):
         # Store the transformed values of view x, y and dy before the fit
@@ -194,8 +196,8 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
                 tempdy = [DataTransform.errToLogX(y[i], 0, dy[i], 0)
                          for i in range(len(x)) if x[i] >= xmin_check]
             else:
-                tempy = map(numpy.log10, y)
-                tempdy = map(lambda t1,t2:DataTransform.errToLogX(t1,0,t2,0),y,dy)
+                tempy = list(map(numpy.log10, y))
+                tempdy = list(map(lambda t1,t2:DataTransform.errToLogX(t1,0,t2,0),y,dy))
         else:
             tempy = y
             tempdy = dy
@@ -245,11 +247,11 @@ class LinearFit(QtGui.QDialog, Ui_LinearFitUI):
         elif self.xLabel == "x^(4)":
             return numpy.sqrt(numpy.sqrt(x))
         elif self.xLabel == "log10(x)":
-            return numpy.power(10, x)
+            return numpy.power(10.0, x)
         elif self.xLabel == "ln(x)":
             return numpy.exp(x)
         elif self.xLabel == "log10(x^(4))":
-            return numpy.sqrt(numpy.sqrt(numpy.power(10, x)))
+            return numpy.sqrt(numpy.sqrt(numpy.power(10.0, x)))
         return x
 
 

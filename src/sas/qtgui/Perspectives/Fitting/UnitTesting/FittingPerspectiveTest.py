@@ -2,10 +2,11 @@ import sys
 import unittest
 import webbrowser
 
-from PyQt4 import QtGui
-from PyQt4 import QtTest
-from PyQt4 import QtCore
-from mock import MagicMock
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
+from PyQt5 import QtTest
+from PyQt5 import QtCore
+from unittest.mock import MagicMock
 
 # set up import paths
 import sas.qtgui.path_prepare
@@ -15,8 +16,9 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 
-if not QtGui.QApplication.instance():
-    app = QtGui.QApplication(sys.argv)
+if not QtWidgets.QApplication.instance():
+    app = QtWidgets.QApplication(sys.argv)
+
 
 class FittingPerspectiveTest(unittest.TestCase):
     '''Test the Fitting Perspective'''
@@ -37,12 +39,13 @@ class FittingPerspectiveTest(unittest.TestCase):
 
     def testDefaults(self):
         '''Test the GUI in its default state'''
-        self.assertIsInstance(self.widget, QtGui.QWidget)
+        self.assertIsInstance(self.widget, QtWidgets.QWidget)
         self.assertIn("Fit panel", self.widget.windowTitle())
         self.assertEqual(self.widget.optimizer, "Levenberg-Marquardt")
         self.assertEqual(len(self.widget.tabs), 1)
         self.assertEqual(self.widget.maxIndex, 1)
-        self.assertEqual(self.widget.tabName(), "FitPage1")
+        self.assertEqual(self.widget.maxCSIndex, 0)
+        self.assertEqual(self.widget.getTabName(), "FitPage1")
 
     def testAddTab(self):
         '''Add a tab and test it'''
@@ -50,18 +53,25 @@ class FittingPerspectiveTest(unittest.TestCase):
         # Add an empty tab
         self.widget.addFit(None)
         self.assertEqual(len(self.widget.tabs), 2)
-        self.assertEqual(self.widget.tabName(), "FitPage2")
+        self.assertEqual(self.widget.getTabName(), "FitPage2")
         self.assertEqual(self.widget.maxIndex, 2)
         # Add an empty batch tab
         self.widget.addFit(None, is_batch=True)
         self.assertEqual(len(self.widget.tabs), 3)
-        self.assertEqual(self.widget.tabName(2), "BatchPage3")
+        self.assertEqual(self.widget.getTabName(2), "BatchPage3")
         self.assertEqual(self.widget.maxIndex, 3)
+
+    def testAddCSTab(self):
+        ''' Add a constraint/simult tab'''
+        self.widget.addConstraintTab()
+        self.assertEqual(len(self.widget.tabs), 2)
+        self.assertEqual(self.widget.getCSTabName(), "Const. & Simul. Fit1")
+        self.assertEqual(self.widget.maxCSIndex, 1)
 
     def testResetTab(self):
         ''' Remove data from last tab'''
         self.assertEqual(len(self.widget.tabs), 1)
-        self.assertEqual(self.widget.tabName(), "FitPage1")
+        self.assertEqual(self.widget.getTabName(), "FitPage1")
         self.assertEqual(self.widget.maxIndex, 1)
 
         # Attempt to remove the last tab
@@ -69,7 +79,7 @@ class FittingPerspectiveTest(unittest.TestCase):
 
         # see that the tab didn't disappear, just changed the name/id
         self.assertEqual(len(self.widget.tabs), 1)
-        self.assertEqual(self.widget.tabName(), "FitPage2")
+        self.assertEqual(self.widget.getTabName(), "FitPage2")
         self.assertEqual(self.widget.maxIndex, 2)
 
         # Now, add data
@@ -93,14 +103,14 @@ class FittingPerspectiveTest(unittest.TestCase):
         self.widget.tabCloses(1)
         self.assertEqual(len(self.widget.tabs), 1)
         self.assertEqual(self.widget.maxIndex, 2)
-        self.assertEqual(self.widget.tabName(), "FitPage2")
+        self.assertEqual(self.widget.getTabName(), "FitPage2")
 
         # Attemtp to remove the last tab
         self.widget.tabCloses(1)
         # The tab should still be there
         self.assertEqual(len(self.widget.tabs), 1)
         self.assertEqual(self.widget.maxIndex, 3)
-        self.assertEqual(self.widget.tabName(), "FitPage3")
+        self.assertEqual(self.widget.getTabName(), "FitPage3")
 
     def testAllowBatch(self):
         '''Assure the perspective allows multiple datasets'''
@@ -136,6 +146,30 @@ class FittingPerspectiveTest(unittest.TestCase):
         # Check for 4 tabs
         self.assertEqual(len(self.widget.tabs), 4)
 
+    def testSetBatchData(self):
+        ''' Assure that setting batch data is correct'''
+
+        # Mock the datafromitem() call from FittingWidget
+        data1 = Data1D(x=[1,2], y=[1,2])
+        data2 = Data1D(x=[1,2], y=[1,2])
+        data_batch = [data1, data2]
+        GuiUtils.dataFromItem = MagicMock(return_value=data1)
+
+        item = QtGui.QStandardItem("test")
+        self.widget.setData([item, item], is_batch=True)
+
+        # First tab should not accept data
+        self.assertEqual(len(self.widget.tabs), 2)
+
+        # Add another set of data
+        self.widget.setData([item, item], is_batch=True)
+
+        # Now we should have two batch tabs
+        self.assertEqual(len(self.widget.tabs), 3)
+
+        # Check the names of the new tabs
+        self.assertEqual(self.widget.tabText(1), "BatchPage1")
+        self.assertEqual(self.widget.tabText(2), "BatchPage2")
 
 if __name__ == "__main__":
     unittest.main()

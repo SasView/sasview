@@ -1,15 +1,16 @@
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 from sas.qtgui.UI import main_resources_rc
-from UI.KiessigPanel import Ui_KiessigPanel
+from .UI.KiessigPanel import Ui_KiessigPanel
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # sas-global
 from sas.sascalc.calculator.kiessig_calculator import KiessigThicknessCalculator
 
 
-class KiessigPanel(QtGui.QDialog, Ui_KiessigPanel):
+class KiessigPanel(QtWidgets.QDialog, Ui_KiessigPanel):
     def __init__(self, parent=None):
         super(KiessigPanel, self).__init__()
         self.setupUi(self)
@@ -36,15 +37,8 @@ class KiessigPanel(QtGui.QDialog, Ui_KiessigPanel):
         Calls DocumentationWindow with the path of the location within the
         documentation tree (after /doc/ ....".
         """
-        try:
-            location = GuiUtils.HELP_DIRECTORY_LOCATION + \
-                "/user/sasgui/perspectives/calculator/kiessig_calculator_help.html"
-
-            self.manager._helpView.load(QtCore.QUrl(location))
-            self.manager._helpView.show()
-        except AttributeError:
-            # No manager defined - testing and standalone runs
-            pass
+        location = "/user/sasgui/perspectives/calculator/kiessig_calculator_help.html"
+        self.manager.showHelp(location)
 
     def onCompute(self):
         """
@@ -53,8 +47,13 @@ class KiessigPanel(QtGui.QDialog, Ui_KiessigPanel):
         try:
             self.thickness.set_deltaq(dq=float(self.deltaq_in.text()))
             kiessing_result = self.thickness.compute_thickness()
-            float_as_str = "{:.3f}".format(kiessing_result)
-            self.lengthscale_out.setText(float_as_str)
+            if kiessing_result:
+                float_as_str = "{:.3f}".format(kiessing_result)
+                self.lengthscale_out.setText(float_as_str)
+            else:
+                # error or division by zero
+                self.lengthscale_out.setText("")
+
         except (ArithmeticError, ValueError):
             self.lengthscale_out.setText("")
 

@@ -1,6 +1,4 @@
-def enum(*sequential, **named):
-    enums = dict(zip(sequential, range(len(sequential))), **named)
-    return type('Enum', (), enums)
+from sas.qtgui.Utilities.GuiUtils import enum
 
 WIDGETS = enum( 'W_FILENAME',               #0
                 'W_BACKGROUND_INPUT',             #1

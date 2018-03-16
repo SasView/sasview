@@ -22,7 +22,7 @@ the names of the first and second model and the operator to be used).
 #
 #copyright 2009, University of Tennessee
 ################################################################################
-from __future__ import print_function
+
 
 import wx
 import sys
@@ -789,7 +789,7 @@ class EditorPanel(wx.ScrolledWindow):
         for item in dir(math):
             if item.count("_") < 1:
                 try:
-                    exec "float(math.%s)" % item
+                    exec("float(math.%s)" % item)
                     self.math_combo.Append(str(item))
                 except Exception:
                     self.math_combo.Append(str(item) + "()")

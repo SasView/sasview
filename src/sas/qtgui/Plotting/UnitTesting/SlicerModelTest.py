@@ -1,9 +1,9 @@
 import sys
 import unittest
-from mock import MagicMock
+from unittest.mock import MagicMock
 
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtCore
 
 # set up import paths
 import sas.qtgui.path_prepare
@@ -11,8 +11,8 @@ import sas.qtgui.path_prepare
 # Local
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
 
-if not QtGui.QApplication.instance():
-    app = QtGui.QApplication(sys.argv)
+if not QtWidgets.QApplication.instance():
+    app = QtWidgets.QApplication(sys.argv)
 
 class SlicerModelTest(unittest.TestCase):
     '''Test the SlicerModel'''

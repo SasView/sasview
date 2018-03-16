@@ -2,8 +2,9 @@ import sys
 import unittest
 import logging
 
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
 
 # set up import paths
 import sas.qtgui.path_prepare

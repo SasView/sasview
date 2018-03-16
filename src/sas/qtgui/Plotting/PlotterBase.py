@@ -1,15 +1,12 @@
 import pylab
 import numpy
 
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets, QtPrintSupport
 
-# TODO: Replace the qt4agg calls below with qt5 equivalent.
-# Requires some code modifications.
-# https://www.boxcontrol.net/embedding-matplotlib-plot-on-pyqt5-gui.html
-#
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 import matplotlib.pyplot as plt
 
@@ -24,13 +21,16 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Plotting.PlotHelper as PlotHelper
 import sas.qtgui.Plotting.PlotUtilities as PlotUtilities
 
-class PlotterBase(QtGui.QWidget):
+class PlotterBase(QtWidgets.QWidget):
     def __init__(self, parent=None, manager=None, quickplot=False):
         super(PlotterBase, self).__init__(parent)
 
         # Required for the communicator
         self.manager = manager
         self.quickplot = quickplot
+
+        #plt.style.use('ggplot')
+        #plt.style.use('seaborn-darkgrid')
 
         # a figure instance to plot on
         self.figure = plt.figure()
@@ -42,11 +42,12 @@ class PlotterBase(QtGui.QWidget):
         self.toolbar = NavigationToolbar(self.canvas, self)
 
         # Simple window for data display
-        self.txt_widget = QtGui.QTextEdit(None)
+        self.txt_widget = QtWidgets.QTextEdit(None)
 
         # Set the layout and place the canvas widget in it.
-        layout = QtGui.QVBoxLayout()
-        layout.setMargin(0)
+        layout = QtWidgets.QVBoxLayout()
+        # FIXME setMargin -> setContentsMargins in qt5 with 4 args
+        #layout.setContentsMargins(0)
         layout.addWidget(self.canvas)
 
         # 1D plotter defaults
@@ -104,7 +105,7 @@ class PlotterBase(QtGui.QWidget):
         self.canvas.mpl_connect('pick_event', self.onMplPick)
         self.canvas.mpl_connect('scroll_event', self.onMplWheel)
 
-        self.contextMenu = QtGui.QMenu(self)
+        self.contextMenu = QtWidgets.QMenu(self)
 
         if not quickplot:
             # Add the toolbar
@@ -138,7 +139,7 @@ class PlotterBase(QtGui.QWidget):
     @xLabel.setter
     def xLabel(self, xlabel=""):
         """ x-label setter """
-        self.x_label = r'$%s$'% xlabel
+        self.x_label = r'$%s$'% xlabel if xlabel else ""
 
     @property
     def yLabel(self, ylabel=""):
@@ -148,7 +149,7 @@ class PlotterBase(QtGui.QWidget):
     @yLabel.setter
     def yLabel(self, ylabel=""):
         """ y-label setter """
-        self.y_label = r'$%s$'% ylabel
+        self.y_label = r'$%s$'% ylabel if ylabel else ""
 
     @property
     def yscale(self):
@@ -169,6 +170,7 @@ class PlotterBase(QtGui.QWidget):
     @xscale.setter
     def xscale(self, scale='linear'):
         """ X-axis scale setter """
+        self.ax.cla()
         self.ax.set_xscale(scale)
         self._xscale = scale
 
@@ -289,20 +291,21 @@ class PlotterBase(QtGui.QWidget):
         Display printer dialog and print the MPL widget area
         """
         # Define the printer
-        printer = QtGui.QPrinter()
+        printer = QtPrintSupport.QPrinter()
 
         # Display the print dialog
-        dialog = QtGui.QPrintDialog(printer)
+        dialog = QtPrintSupport.QPrintDialog(printer)
         dialog.setModal(True)
         dialog.setWindowTitle("Print")
-        if dialog.exec_() != QtGui.QDialog.Accepted:
+        if dialog.exec_() != QtWidgets.QDialog.Accepted:
             return
 
         painter = QtGui.QPainter(printer)
         # Grab the widget screenshot
-        pmap = QtGui.QPixmap.grabWidget(self)
+        pmap = QtGui.QPixmap(self.size())
+        self.render(pmap)
         # Create a label with pixmap drawn
-        printLabel = QtGui.QLabel()
+        printLabel = QtWidgets.QLabel()
         printLabel.setPixmap(pmap)
 
         # Print the label
@@ -313,8 +316,9 @@ class PlotterBase(QtGui.QWidget):
         """
         Copy MPL widget area to buffer
         """
-        bmp = QtGui.QApplication.clipboard()
-        pixmap = QtGui.QPixmap.grabWidget(self.canvas)
+        bmp = QtWidgets.QApplication.clipboard()
+        pixmap = QtGui.QPixmap(self.canvas.size())
+        self.canvas.render(pixmap)
         bmp.setPixmap(pixmap)
 
     def onGridToggle(self):
@@ -332,7 +336,7 @@ class PlotterBase(QtGui.QWidget):
         current_title = self.windowTitle()
         titleWidget = WindowTitle(self, new_title=current_title)
         result = titleWidget.exec_()
-        if result != QtGui.QDialog.Accepted:
+        if result != QtWidgets.QDialog.Accepted:
             return
 
         title = titleWidget.title()
@@ -370,7 +374,7 @@ class PlotterBase(QtGui.QWidget):
         self.txt_widget.show()
         # Move the slider all the way up, if present
         vertical_scroll_bar = self.txt_widget.verticalScrollBar()
-        vertical_scroll_bar.triggerAction(QtGui.QScrollBar.SliderToMinimum)
+        vertical_scroll_bar.triggerAction(QtWidgets.QScrollBar.SliderToMinimum)
 
     def onSavePoints(self, plot_data):
         """

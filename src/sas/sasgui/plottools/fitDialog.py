@@ -1,9 +1,9 @@
 import wx
-from plottables import Theory1D
+from .plottables import Theory1D
 import math
 import numpy as np
-import fittings
-import transform
+from . import fittings
+from . import transform
 import sys
 
 # Linear fit panel size
@@ -85,7 +85,7 @@ class LinearFit(wx.Dialog):
         # Now set up the dialog interface
         self.layout()
         # Receives the type of model for the fitting
-        from LineModel import LineModel
+        from .LineModel import LineModel
         self.model = LineModel()
         # Display the fittings values
         self.default_A = self.model.getParam('A')
@@ -670,7 +670,7 @@ class LinearFit(wx.Dialog):
             if x > 0:
                 return x
             else:
-                raise ValueError, "cannot compute log of a negative number"
+                raise ValueError("cannot compute log of a negative number")
 
     def floatInvTransform(self, x):
         """
@@ -733,7 +733,7 @@ class LinearFit(wx.Dialog):
             float(xmax)
         except:
             msg = "LinearFit.set_fit_region: fit range must be floats"
-            raise ValueError, msg
+            raise ValueError(msg)
         self.xminFit.SetValue(format_number(xmin))
         self.xmaxFit.SetValue(format_number(xmax))
 

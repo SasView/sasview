@@ -908,20 +908,20 @@ class Notebook(nb, PanelBase):
                 if c != col:
                     msg = "Edit axis doesn't understand this selection.\n"
                     msg += "Please select only one column"
-                    raise ValueError, msg
+                    raise (ValueError, msg)
             for (_, cell_col) in grid.selected_cells:
                 if cell_col != col:
                     msg = "Cannot use cells from different columns for "
                     msg += "this operation.\n"
                     msg += "Please select elements of the same col.\n"
-                    raise ValueError, msg
+                    raise (ValueError, msg)
 
             # Finally check the highlighted cell if any cells missing
             self.get_highlighted_row(True)
         else:
             msg = "No item selected.\n"
             msg += "Please select only one column or one cell"
-            raise ValueError, msg
+            raise (ValueError, msg)
         return grid.selected_cells
 
     def get_highlighted_row(self, is_number=True):
@@ -1325,7 +1325,7 @@ class GridPanel(SPanel):
         try:
             if sentence.strip() == "":
                 msg = "Select column values for x axis"
-                raise ValueError, msg
+                raise (ValueError, msg)
         except:
             msg = "X axis value error."
             wx.PostEvent(self.parent.parent, StatusEvent(status=msg, info="error"))
@@ -1344,7 +1344,7 @@ class GridPanel(SPanel):
         try:
             if sentence.strip() == "":
                 msg = "select value for y axis"
-                raise ValueError, msg
+                raise (ValueError, msg)
         except:
             msg = "Y axis value error."
             wx.PostEvent(self.parent.parent, StatusEvent(status=msg, info="error"))
@@ -1630,7 +1630,7 @@ class GridFrame(wx.Frame):
         wx.EVT_MENU(self, self.save_menu.GetId(), self.on_save_page)
 
         # We need to grab a WxMenu handle here, otherwise the next one to grab
-        # the handle will be treated as the Edit Menu handle when checking in
+        # the handle will be treated as the Edi)t Menu handle when checking in
         # on_menu_open event handler and thus raise an exception when it hits an 
         # unitialized object.  Alternative is to comment out that whole section
         # in on_menu_open, but that would make it more difficult to undo the

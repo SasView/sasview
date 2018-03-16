@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 
 import wx
 import sys
@@ -34,7 +34,7 @@ class DetectorDialog(wx.Dialog):
             self._do_layout()
             self.set_values()
         except:
-            print("error", sys.exc_value)
+            print("error", sys.exc_info()[1])
 
     def _define_structure(self):
         """

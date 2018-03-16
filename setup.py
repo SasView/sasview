@@ -52,9 +52,9 @@ if os.path.isdir(sas_dir):
     f_path = os.path.join(sas_dir, "sasview.log")
     if os.path.isfile(f_path):
         os.remove(f_path)
-    f_path = os.path.join(sas_dir, "categories.json")
-    if os.path.isfile(f_path):
-        os.remove(f_path)
+    #f_path = os.path.join(sas_dir, "categories.json")
+    #if os.path.isfile(f_path):
+    #    os.remove(f_path)
     f_path = os.path.join(sas_dir, 'config', "custom_config.py")
     if os.path.isfile(f_path):
         os.remove(f_path)
@@ -380,6 +380,18 @@ package_dir["sas.qtgui.Perspectives.Fitting.UI"] = os.path.join(
     "src", "sas", "qtgui", "Perspectives", "Fitting", "UI")
 packages.extend(["sas.qtgui.Perspectives.Fitting", "sas.qtgui.Perspectives.Fitting.UI"])
 
+package_dir["sas.qtgui.Perspectives.Inversion"] = os.path.join(
+    "src", "sas", "qtgui", "Perspectives", "Inversion")
+package_dir["sas.qtgui.Perspectives.Inversion.UI"] = os.path.join(
+    "src", "sas", "qtgui", "Perspectives", "Inversion", "UI")
+packages.extend(["sas.qtgui.Perspectives.Inversion", "sas.qtgui.Perspectives.Inversion.UI"])
+
+package_dir["sas.qtgui.Perspectives.Corfunc"] = os.path.join(
+    "src", "sas", "qtgui", "Perspectives", "Corfunc")
+package_dir["sas.qtgui.Perspectives.Corfunc.UI"] = os.path.join(
+    "src", "sas", "qtgui", "Perspectives", "Corfunc", "UI")
+packages.extend(["sas.qtgui.Perspectives.Corfunc", "sas.qtgui.Perspectives.Corfunc.UI"])
+
 ## Plotting
 package_dir["sas.qtgui.Plotting"] = os.path.join(
     "src", "sas", "qtgui", "Plotting")
@@ -450,9 +462,7 @@ package_data['sas.sasview'] = ['images/*',
 packages.append("sas.sasview")
 
 required = [
-    'bumps>=0.7.5.9', 'periodictable>=1.5.0', 'pyparsing<2.0.0',
-
-    # 'lxml>=2.2.2',
+    'bumps>=0.7.5.9', 'periodictable>=1.5.0',
     'lxml', 'h5py',
 
     # The following dependecies won't install automatically, so assume them

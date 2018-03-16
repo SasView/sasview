@@ -2,10 +2,11 @@
 import sys
 import os
 import types
+import webbrowser
 
-from PyQt4 import QtCore
-from PyQt4 import QtGui
-from PyQt4 import QtWebKit
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 from sas.qtgui.UI import images_rc
 from sas.qtgui.UI import main_resources_rc
@@ -20,7 +21,7 @@ from sas.qtgui.Perspectives.Fitting.UI.FittingOptionsUI import Ui_FittingOptions
 fitters.FIT_DEFAULT_ID = 'lm'
 
 
-class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
+class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
     """
     Hard-coded version of the fit options dialog available from BUMPS.
     This should be make more "dynamic".
@@ -51,9 +52,9 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
         self.cbAlgorithm.addItems([n.name for n in fitters.FITTERS if n.id in fitters.FIT_ACTIVE_IDS])
 
         # Handle the Apply button click
-        self.buttonBox.button(QtGui.QDialogButtonBox.Ok).clicked.connect(self.onApply)
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).clicked.connect(self.onApply)
         # handle the Help button click
-        self.buttonBox.button(QtGui.QDialogButtonBox.Help).clicked.connect(self.onHelp)
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Help).clicked.connect(self.onHelp)
 
         # Handle the combo box changes
         self.cbAlgorithm.currentIndexChanged.connect(self.onAlgorithmChange)
@@ -70,23 +71,20 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
         self.current_fitter_id = fitters.FIT_DEFAULT_ID
 
         # OK has to be initialized to True, after initial validator setup
-        self.buttonBox.button(QtGui.QDialogButtonBox.Ok).setEnabled(True)
-
-        # Display HTML content
-        self.helpView = QtWebKit.QWebView()
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(True)
 
     def assignValidators(self):
         """
         Use options.FIT_FIELDS to assert which line edit gets what validator
         """
-        for option in bumps.options.FIT_FIELDS.iterkeys():
+        for option in bumps.options.FIT_FIELDS.keys():
             (f_name, f_type) = bumps.options.FIT_FIELDS[option]
             validator = None
             if type(f_type) == types.FunctionType:
                 validator = QtGui.QIntValidator()
                 validator.setBottom(0)
-            elif f_type == types.FloatType:
-                validator = QtGui.QDoubleValidator()
+            elif f_type == float:
+                validator = GuiUtils.DoubleValidator()
                 validator.setBottom(0)
             else:
                 continue
@@ -103,10 +101,10 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
         state = validator.validate(sender.text(), 0)[0]
         if state == QtGui.QValidator.Acceptable:
             color = '' # default
-            self.buttonBox.button(QtGui.QDialogButtonBox.Ok).setEnabled(True)
+            self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(True)
         else:
             color = '#fff79a' # yellow
-            self.buttonBox.button(QtGui.QDialogButtonBox.Ok).setEnabled(False)
+            self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(False)
 
         sender.setStyleSheet('QLineEdit { background-color: %s }' % color)
 
@@ -133,7 +131,7 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
         self.assignValidators()
 
         # OK has to be reinitialized to True
-        self.buttonBox.button(QtGui.QDialogButtonBox.Ok).setEnabled(True)
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(True)
 
     def onApply(self):
         """
@@ -147,26 +145,26 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
             Utility method for bumps state update
             """
             widget = self.widgetFromOption(option)
-            new_value = widget.currentText() if isinstance(widget, QtGui.QComboBox) \
+            new_value = widget.currentText() if isinstance(widget, QtWidgets.QComboBox) \
                 else float(widget.text())
             self.config.values[self.current_fitter_id][option] = new_value
 
         # Update the BUMPS singleton
-        [bumpsUpdate(o) for o in self.config.values[self.current_fitter_id].iterkeys()]
+        [bumpsUpdate(o) for o in self.config.values[self.current_fitter_id].keys()]
 
     def onHelp(self):
         """
         Show the "Fitting options" section of help
         """
-        tree_location = GuiUtils.HELP_DIRECTORY_LOCATION + "/user/sasgui/perspectives/fitting/"
+        tree_location = GuiUtils.HELP_DIRECTORY_LOCATION
+        tree_location += "/user/sasgui/perspectives/fitting/"
 
         # Actual file anchor will depend on the combo box index
         # Note that we can be clusmy here, since bad current_fitter_id
         # will just make the page displayed from the top
         helpfile = "optimizer.html#fit-" + self.current_fitter_id 
         help_location = tree_location + helpfile
-        self.helpView.load(QtCore.QUrl(help_location))
-        self.helpView.show()
+        webbrowser.open('file://' + os.path.realpath(help_location))
 
     def widgetFromOption(self, option_id, current_fitter=None):
         """
@@ -174,7 +172,7 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
         """
         if current_fitter is None:
             current_fitter = self.current_fitter_id
-        if option_id not in bumps.options.FIT_FIELDS.keys(): return None
+        if option_id not in list(bumps.options.FIT_FIELDS.keys()): return None
         option = option_id + '_' + current_fitter
         if not hasattr(self, option): return None
         return eval('self.' + option)
@@ -192,7 +190,7 @@ class FittingOptions(QtGui.QDialog, Ui_FittingOptions):
         and update the widget
         """
         options = self.config.values[fitter_id]
-        for option in options.iterkeys():
+        for option in options.keys():
             # Find the widget name of the option
             # e.g. 'samples' for 'dream' is 'self.samples_dream'
             widget_name = 'self.'+option+'_'+fitter_id

@@ -2,8 +2,10 @@ import sys
 import unittest
 import numpy
 
-from PyQt4 import QtGui
-from mock import MagicMock
+from PyQt5 import QtGui, QtWidgets
+from unittest.mock import MagicMock
+
+from UnitTesting.TestUtils import QtSignalSpy
 
 # set up import paths
 import path_prepare
@@ -14,8 +16,8 @@ import sas.qtgui.Plotting.Plotter as Plotter
 # Local
 from sas.qtgui.Plotting.LinearFit import LinearFit
 
-if not QtGui.QApplication.instance():
-    app = QtGui.QApplication(sys.argv)
+if not QtWidgets.QApplication.instance():
+    app = QtWidgets.QApplication(sys.argv)
 
 class LinearFitTest(unittest.TestCase):
     '''Test the LinearFit'''
@@ -35,7 +37,7 @@ class LinearFitTest(unittest.TestCase):
 
     def testDefaults(self):
         '''Test the GUI in its default state'''
-        self.assertIsInstance(self.widget, QtGui.QDialog)
+        self.assertIsInstance(self.widget, QtWidgets.QDialog)
         self.assertEqual(self.widget.windowTitle(), "Linear Fit")
         self.assertEqual(self.widget.txtA.text(), "1")
         self.assertEqual(self.widget.txtB.text(), "1")
@@ -47,7 +49,9 @@ class LinearFitTest(unittest.TestCase):
     def testFit(self):
         '''Test the fitting wrapper '''
         # Catch the update signal
-        self.widget.parent.emit = MagicMock()
+        #self.widget.updatePlot.emit = MagicMock()
+        #self.widget.updatePlot.emit = MagicMock()
+        spy_update = QtSignalSpy(self.widget, self.widget.updatePlot)
 
         # Set some initial values
         self.widget.txtRangeMin.setText("1.0")
@@ -56,18 +60,23 @@ class LinearFitTest(unittest.TestCase):
         self.widget.txtFitRangeMax.setText("3.0")
         # Run the fitting
         self.widget.fit(None)
-        return_values = self.widget.parent.emit.call_args[0][1]
+
+        # Expected one spy instance
+        self.assertEqual(spy_update.count(), 1)
+
+        return_values = spy_update.called()[0]['args'][0]
         # Compare
-        self.assertItemsEqual(return_values[0], [1.0, 3.0])
+        self.assertCountEqual(return_values[0], [1.0, 3.0])
         self.assertAlmostEqual(return_values[1][0], 10.004054329, 6)
         self.assertAlmostEqual(return_values[1][1], 12.030439848, 6)
 
         # Set the log scale
         self.widget.x_is_log = True
         self.widget.fit(None)
-        return_values = self.widget.parent.emit.call_args[0][1]
+        self.assertEqual(spy_update.count(), 2)
+        return_values = spy_update.called()[1]['args'][0]
         # Compare
-        self.assertItemsEqual(return_values[0], [1.0, 3.0])
+        self.assertCountEqual(return_values[0], [1.0, 3.0])
         self.assertAlmostEqual(return_values[1][0], 9.987732937, 6)
         self.assertAlmostEqual(return_values[1][1], 11.84365082, 6)
 
@@ -80,7 +89,7 @@ class LinearFitTest(unittest.TestCase):
         orig_dy = [0.01, 0.018181818181818184, 0.024999999999999998]
         x, y, dy = self.widget.origData()
 
-        self.assertItemsEqual(x, orig_x)
+        self.assertCountEqual(x, orig_x)
         self.assertEqual(y[0], orig_y[0])
         self.assertAlmostEqual(y[1], orig_y[1], 8)
         self.assertAlmostEqual(y[2], orig_y[2], 8)
@@ -97,9 +106,9 @@ class LinearFitTest(unittest.TestCase):
         orig_dy = [0.1, 0.2, 0.3]
         x, y, dy = self.widget.origData()
 
-        self.assertItemsEqual(x, orig_x)
-        self.assertItemsEqual(y, orig_y)
-        self.assertItemsEqual(dy, orig_dy)
+        self.assertCountEqual(x, orig_x)
+        self.assertCountEqual(y, orig_y)
+        self.assertCountEqual(dy, orig_dy)
 
         # x, log(y)
         self.widget.x_is_log = False
@@ -110,7 +119,7 @@ class LinearFitTest(unittest.TestCase):
         orig_dy = [0.01, 0.018181818181818184, 0.024999999999999998]
         x, y, dy = self.widget.origData()
 
-        self.assertItemsEqual(x, orig_x)
+        self.assertCountEqual(x, orig_x)
         self.assertEqual(y[0], orig_y[0])
         self.assertAlmostEqual(y[1], orig_y[1], 8)
         self.assertAlmostEqual(y[2], orig_y[2], 8)

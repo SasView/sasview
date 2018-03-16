@@ -52,10 +52,10 @@ class Calc2D(CalcThread):
         """
         self.starttime = time.time()
         # Determine appropriate q range
-        if self.qmin == None:
+        if self.qmin is None:
             self.qmin = 0
-        if self.qmax == None:
-            if self.data != None:
+        if self.qmax is None:
+            if self.data is not None:
                 newx = math.pow(max(math.fabs(self.data.xmax),
                                    math.fabs(self.data.xmin)), 2)
                 newy = math.pow(max(math.fabs(self.data.ymax),
@@ -64,7 +64,7 @@ class Calc2D(CalcThread):
 
         if self.data is None:
             msg = "Compute Calc2D receive data = %s.\n" % str(self.data)
-            raise ValueError, msg
+            raise ValueError(msg)
 
         # Define matrix where data will be plotted
         radius = numpy.sqrt((self.data.qx_data * self.data.qx_data) + \

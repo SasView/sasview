@@ -147,7 +147,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         # Sort source name because wx2.9 on Mac does not support CB_SORT
         # Custom sorting
         source_list = []
-        for key, _ in self.source_mass.iteritems():
+        for key, _ in self.source_mass.items():
             name_source = str(key)
             source_list.append(name_source)
         source_list.sort()
@@ -1081,7 +1081,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
             else:
                 msg = "The numbers must be one or two (separated by ',')..."
                 self._status_info(msg, 'stop')
-                raise RuntimeError, msg
+                raise RuntimeError(msg)
 
         return new_string
 
@@ -1099,7 +1099,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                 value = float(string_split[ind])
                 new_string.append(value)
             except:
-                logger.error(sys.exc_value)
+                logger.error(sys.exc_info()[1])
 
         return new_string
 
@@ -1141,7 +1141,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                         out = self._string2inputlist(string)
                         return out
                 except:
-                    logger.error(sys.exc_value)
+                    logger.error(sys.exc_info()[1])
 
     def _on_xy_coordinate(self, event=None):
         """
@@ -1268,7 +1268,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                 return
             try:
                 basename = os.path.basename(path)
-                if basename not in self.spectrum_dic.keys():
+                if basename not in list(self.spectrum_dic.keys()):
                     self.spectrum_cb.Append(basename)
                 self.spectrum_dic[basename] = self._read_file(path)
                 self.spectrum_cb.SetValue(basename)
@@ -1319,7 +1319,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                     intensity.append(intens)
                 except:
                     # Skip non-data lines
-                    logger.error(sys.exc_value)
+                    logger.error(sys.exc_info()[1])
 
             return [wavelength, intensity]
         except:

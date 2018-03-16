@@ -3,29 +3,28 @@
     This is a cleaned up version of unitConverter.py
 """
 import re
-import string
 
 def convertUnit(power, unit):
     """
         Convert units to strings that can be displayed
     """
     if power != 0:
-        if string.find(unit, "^") != -1:  # if the unit contains a powerer ^
+        if unit.find("^") != -1:  # if the unit contains a powerer ^
             toks = re.split("\^", unit)
-            if string.find(toks[0], "/") != -1 or \
-                string.find(toks[0], "-") != -1:
+            if toks[0].find("/") != -1 or \
+                toks[0].find("-") != -1:
                 if power == 1:
                     unit = unit
                 else:
                     unit = "(" + unit + ")" + "^{" + str(power) + "}"
             else:
-                if string.find(toks[1], "{") != -1:  # if found a {
+                if toks[1].find("{") != -1:  # if found a {
                     find_power_toks = re.split("{", toks[1])
-                    if string.find(find_power_toks[1], "}") != -1:  # found }
+                    if find_power_toks[1].find("}") != -1:  # found }
                         unit_toks = re.split("}", find_power_toks[1])
-                        if string.find(unit_toks[0], ".") != -1:
+                        if unit_toks[0].find(".") != -1:
                             powerer = float(unit_toks[0]) * power
-                        elif string.find(unit_toks[0], "/") != -1:
+                        elif unit_toks[0].find("/") != -1:
                             power_toks = re.split("/", unit_toks[0])
                             powerer = power * int(power_toks[0])\
                                             / int(power_toks[1])
@@ -41,12 +40,12 @@ def convertUnit(power, unit):
                         else:
                             unit = toks[0] + "^{" + str(powerer) + "}"
                 else:
-                    raise ValueError, "missing } in unit expression"
+                    raise ValueError("missing } in unit expression")
         else:  # no powerer
             if  power != 1:
                 unit = "(" + unit + ")" + "^{" + str(power) + "}"
     else:
-        raise ValueError, "empty unit ,enter a powerer different from zero"
+        raise ValueError("empty unit ,enter a powerer different from zero")
     return unit
 
 
@@ -67,14 +66,14 @@ if __name__ == "__main__":
     unit7 = "m/s^{2}"  #         1/x                 (m/s^{2})^{-1}
     unit8 = "m/s^{4}"  #         x^2               (m/s^{4})^{2}
 
-    print "this unit1 %s ,its powerer %s , and value %s" % (unit1, 1, convert_unit(1, unit1))
-    print "this unit2 %s ,its powerer %s , and value %s" % (unit2, 1, convert_unit(1, unit2))
-    print "this unit3 %s ,its powerer %s , and value %s" % (unit3, 2, convert_unit(2, unit3))
-    print "this unit4 %s ,its powerer %s , and value %s" % (unit4, -1, convert_unit(-1, unit4))
-    print "this unit5 %s ,its powerer %s , and value %s" % (unit5, 2, convert_unit(2, unit5))
-    print "this unit6 %s ,its powerer %s , and value %s" % (unit6, 2, convert_unit(2, unit6))
-    print "this unit7 %s ,its powerer %s , and value %s" % (unit7, -1, convert_unit(-1, unit7))
-    print "this unit8 %s ,its powerer %s , and value %s" % (unit8, 2, convert_unit(2, unit8))
-    print "this unit9 %s ,its powerer %s , and value %s" % (unit9, 2, convert_unit(2, unit9))
+    print("this unit1 %s ,its powerer %s , and value %s" % (unit1, 1, convert_unit(1, unit1)))
+    print("this unit2 %s ,its powerer %s , and value %s" % (unit2, 1, convert_unit(1, unit2)))
+    print("this unit3 %s ,its powerer %s , and value %s" % (unit3, 2, convert_unit(2, unit3)))
+    print("this unit4 %s ,its powerer %s , and value %s" % (unit4, -1, convert_unit(-1, unit4)))
+    print("this unit5 %s ,its powerer %s , and value %s" % (unit5, 2, convert_unit(2, unit5)))
+    print("this unit6 %s ,its powerer %s , and value %s" % (unit6, 2, convert_unit(2, unit6)))
+    print("this unit7 %s ,its powerer %s , and value %s" % (unit7, -1, convert_unit(-1, unit7)))
+    print("this unit8 %s ,its powerer %s , and value %s" % (unit8, 2, convert_unit(2, unit8)))
+    print("this unit9 %s ,its powerer %s , and value %s" % (unit9, 2, convert_unit(2, unit9)))
 
 

@@ -1,6 +1,8 @@
 # global
 import logging
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 from periodictable import formula as Formula
 from periodictable.xsf import xray_energy, xray_sld_from_atoms
@@ -13,9 +15,7 @@ from sas.qtgui.UI import main_resources_rc
 # Local UI
 from sas.qtgui.Calculators.UI.SldPanel import Ui_SldPanel
 
-def enum(*sequential, **named):
-    enums = dict(zip(sequential, range(len(sequential))), **named)
-    return type('Enum', (), enums)
+from sas.qtgui.Utilities.GuiUtils import enum
 
 MODEL = enum(
     'MOLECULAR_FORMULA',
@@ -59,7 +59,7 @@ def sldAlgorithm(molecular_formula, mass_density, wavelength):
     def calculate_sld(formula):
         if len(formula.atoms) != 1:
             raise NotImplementedError()
-        energy = xray_energy(formula.atoms.keys()[0].K_alpha)
+        energy = xray_energy(list(formula.atoms.keys())[0].K_alpha)
         return xray_sld_from_atoms(
             sld_formula.atoms,
             density=mass_density,
@@ -96,7 +96,7 @@ def sldAlgorithm(molecular_formula, mass_density, wavelength):
         neutron_inc_xs, neutron_abs_xs, neutron_length)
 
 
-class SldPanel(QtGui.QDialog):
+class SldPanel(QtWidgets.QDialog):
 
     def __init__(self, parent=None):
         super(SldPanel, self).__init__()
@@ -125,15 +125,16 @@ class SldPanel(QtGui.QDialog):
         self.ui.setupUi(self)
 
         # set validators
-        self.ui.editMolecularFormula.setValidator(GuiUtils.FormulaValidator(self.ui.editMolecularFormula))
+        # TODO: GuiUtils.FormulaValidator() crashes with Qt5 - fix
+        #self.ui.editMolecularFormula.setValidator(GuiUtils.FormulaValidator(self.ui.editMolecularFormula))
 
         rx = QtCore.QRegExp("[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?")
         self.ui.editMassDensity.setValidator(QtGui.QRegExpValidator(rx, self.ui.editMassDensity))
         self.ui.editWavelength.setValidator(QtGui.QRegExpValidator(rx, self.ui.editWavelength))
 
         # signals
-        self.ui.buttonBox.button(QtGui.QDialogButtonBox.Reset).clicked.connect(self.modelReset)
-        self.ui.buttonBox.button(QtGui.QDialogButtonBox.Help).clicked.connect(self.displayHelp)
+        self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Reset).clicked.connect(self.modelReset)
+        self.ui.buttonBox.button(QtWidgets.QDialogButtonBox.Help).clicked.connect(self.displayHelp)
 
     def setupModel(self):
         self.model = QtGui.QStandardItemModel(self)
@@ -141,33 +142,29 @@ class SldPanel(QtGui.QDialog):
         self.model.setItem(MODEL.MASS_DENSITY     , QtGui.QStandardItem())
         self.model.setItem(MODEL.WAVELENGTH       , QtGui.QStandardItem())
 
-        for key in self._getOutputs().keys():
+        for key in list(self._getOutputs().keys()):
             self.model.setItem(key, QtGui.QStandardItem())
 
-        QtCore.QObject.connect(
-            self.model,
-            QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"),
-            self.dataChanged)
+        self.model.dataChanged.connect(self.dataChanged)
 
         self.modelReset()
 
     def setupMapper(self):
-        self.mapper = QtGui.QDataWidgetMapper(self)
+        self.mapper = QtWidgets.QDataWidgetMapper(self)
         self.mapper.setModel(self.model)
         self.mapper.setOrientation(QtCore.Qt.Vertical)
-
         self.mapper.addMapping(self.ui.editMolecularFormula, MODEL.MOLECULAR_FORMULA)
         self.mapper.addMapping(self.ui.editMassDensity     , MODEL.MASS_DENSITY)
         self.mapper.addMapping(self.ui.editWavelength      , MODEL.WAVELENGTH)
 
-        for key, edit in self._getOutputs().iteritems():
+        for key, edit in self._getOutputs().items():
             self.mapper.addMapping(edit, key)
 
         self.mapper.toFirst()
 
     def dataChanged(self, top, bottom):
         update = False
-        for index in xrange(top.row(), bottom.row() + 1):
+        for index in range(top.row(), bottom.row() + 1):
             if (index == MODEL.MOLECULAR_FORMULA) or (index == MODEL.MASS_DENSITY) or (index == MODEL.WAVELENGTH):
                 update = True
 
@@ -201,7 +198,7 @@ class SldPanel(QtGui.QDialog):
                 except Exception as e:
                     pass
 
-            for key in self._getOutputs().keys():
+            for key in list(self._getOutputs().keys()):
                 self.model.item(key).setText("")
 
     def modelReset(self):
@@ -212,15 +209,10 @@ class SldPanel(QtGui.QDialog):
             self.model.item(MODEL.WAVELENGTH       ).setText("6")
         finally:
             pass
-            #self.model.endResetModel()
+        #self.model.endResetModel()
 
     def displayHelp(self):
-        try:
-            location = GuiUtils.HELP_DIRECTORY_LOCATION + \
-                "/user/sasgui/perspectives/calculator/sld_calculator_help.html"
-            self.manager._helpView.load(QtCore.QUrl(location))
-            self.manager._helpView.show()
-        except AttributeError:
-            # No manager defined - testing and standalone runs
-            pass
+        location = "/user/sasgui/perspectives/calculator/sld_calculator_help.html"
+        self.manager.showHelp(location)
+
 

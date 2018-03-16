@@ -36,7 +36,7 @@ class DataState(object):
             _str += "Data ID : %s \n" % str(self.data.id)
         _str += "Theories available: %s \n" % len(self.theory_list)
         if self.theory_list:
-            for id, item in self.theory_list.iteritems():
+            for id, item in self.theory_list.items():
                 theory_data, theory_state = item
                 _str += "Theory name : %s \n" % str(theory_data.name)
                 _str += "Theory ID : %s \n" % str(id)
@@ -52,7 +52,7 @@ class DataState(object):
         obj.path = self.path 
         obj.message = self.message
         obj.id = self.id
-        for id, item in self.theory_list.iteritems():
+        for id, item in self.theory_list.items():
             theory_data, theory_state = item
             state = None
             if theory_state is not None:
@@ -94,7 +94,7 @@ class DataState(object):
         """
         """
         self.theory_list[theory_data.id] = [theory_data, theory_state]
-        data, state = self.theory_list.values()[0]
+        data, state = list(self.theory_list.values())[0]
        
     def get_theory(self):
         return self.theory_list

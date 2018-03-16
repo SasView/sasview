@@ -132,7 +132,7 @@ class Plugin(PluginBase):
         if not issubclass(data.__class__, Data1D):
             name = data.__class__.__name__
             msg = "Invariant use only Data1D got: [%s] " % str(name)
-            raise ValueError, msg
+            raise ValueError(msg)
         self.compute_helper(data=data)
 
     def set_data(self, data_list=None):
@@ -168,7 +168,7 @@ class Plugin(PluginBase):
                 msg += "Invariant panel does not allow multiple data!\n"
                 msg += "Please select one.\n"
                 if len(data_list) > 1:
-                    from invariant_widgets import DataDialog
+                    from .invariant_widgets import DataDialog
                     dlg = DataDialog(data_list=data_1d_list, text=msg)
                     if dlg.ShowModal() == wx.ID_OK:
                         data = dlg.get_data()
@@ -190,7 +190,7 @@ class Plugin(PluginBase):
                 try:
                     self.compute_helper(data)
                 except:
-                    msg = "Invariant Set_data: " + str(sys.exc_value)
+                    msg = "Invariant Set_data: " + str(sys.exc_info()[1])
                     wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
         else:
             msg = "invariant cannot be computed for data of "
@@ -239,7 +239,7 @@ class Plugin(PluginBase):
         else:
             msg = "invariant.save_file: the data being saved is"
             msg += " not a sas.sascalc.dataloader.data_info.Data1D object"
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
 
     def set_state(self, state=None, datainfo=None):
         """
@@ -257,7 +257,7 @@ class Plugin(PluginBase):
             if data is None:
                 msg = "invariant.set_state: datainfo parameter cannot"
                 msg += " be None in standalone mode"
-                raise RuntimeError, msg
+                raise RuntimeError(msg)
             # Make sure the user sees the invariant panel after loading
             # self.parent.set_perspective(self.perspective)
             self.on_perspective(event=None)
@@ -281,7 +281,7 @@ class Plugin(PluginBase):
             self.on_set_state_helper(None)
 
         except:
-            logger.error("invariant.set_state: %s" % sys.exc_value)
+            logger.error("invariant.set_state: %s" % sys.exc_info()[1])
 
     def on_set_state_helper(self, event=None):
         """
@@ -319,7 +319,7 @@ class Plugin(PluginBase):
             new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
         else:
             msg = "Scale can not be zero."
-            raise ValueError, msg
+            raise ValueError(msg)
         if len(new_plot.x) == 0:
             return
 

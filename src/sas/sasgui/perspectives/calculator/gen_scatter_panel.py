@@ -2,7 +2,7 @@
 Generic Scattering panel.
 This module relies on guiframe manager.
 """
-from __future__ import print_function
+
 
 import wx
 import sys
@@ -227,7 +227,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         unit_title = wx.StaticText(self, -1, 'Unit')
         sizer.Add(unit_title, (iy, ix), (1, 1), \
                             wx.EXPAND | wx.ADJUST_MINSIZE, 0)
-        key_list = params.keys()
+        key_list = list(params.keys())
         key_list.sort()
         for param in key_list:
             iy += 1
@@ -559,7 +559,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             self.ext = None
             if self.parent.parent is None:
                 return
-            msg = "Generic SAS Calculator: %s" % (sys.exc_value)
+            msg = "Generic SAS Calculator: %s" % (sys.exc_info()[1])
             wx.PostEvent(self.parent.parent,
                           StatusEvent(status=msg, type='stop'))
             self.SetFocus()
@@ -760,7 +760,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             pix_symbol = output.pix_symbol[is_nonzero]
         # II. Plot selective points in color
         other_color = np.ones(len(pix_symbol), dtype='bool')
-        for key in color_dic.keys():
+        for key in list(color_dic.keys()):
             chosen_color = pix_symbol == key
             if np.any(chosen_color):
                 other_color = other_color & (chosen_color != True)
@@ -774,7 +774,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             if output.pix_type == 'atom':
                 # Get atom names not in the list
                 a_names = [symb  for symb in pix_symbol \
-                           if symb not in color_dic.keys()]
+                           if symb not in list(color_dic.keys())]
                 a_name = a_names[0]
                 for name in a_names:
                     new_name = ", " + name
@@ -898,7 +898,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             cal_out.queue()
 
         except:
-            msg = "%s." % sys.exc_value
+            msg = "%s." % sys.exc_info()[1]
             status_type = 'stop'
             self._status_info(msg, status_type)
             wx.PostEvent(self.parent.parent,
@@ -1284,7 +1284,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
                         return self.sld_data
             else:
                sld_sets[list[0]] = None
-        for key in sld_sets.keys():
+        for key in list(sld_sets.keys()):
             key_low = key.lower()
             if key_low.count('mx') > 0:
                 if sld_sets[key] is None:
@@ -1335,7 +1335,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
                     sets[lst[0]] = None
                     return
 
-            for key in sets.keys():
+            for key in list(sets.keys()):
                 setattr(omfdata, key, sets[key])
 
             omf2sld = sas_gen.OMF2SLD()
@@ -1344,7 +1344,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
             self.sld_data.is_data = False
             self.sld_data.filename = "Default SLD Profile"
         except:
-            msg = "OMF Panel: %s" % sys.exc_value
+            msg = "OMF Panel: %s" % sys.exc_info()[1]
             infor = 'Error'
             #logger.error(msg)
             if self.parent.parent is not None:
@@ -1374,13 +1374,13 @@ class OmfPanel(ScrolledPanel, PanelBase):
         nodes_list = self._get_nodes_key_list(omfdata)
         step_list = self._get_step_key_list(omfdata)
         for ctr_list in self.nodes:
-            for key in nodes_list.keys():
+            for key in list(nodes_list.keys()):
                 if ctr_list[0] == key:
                     ctr_list[1].SetValue(format_number(nodes_list[key], True))
                     ctr_list[1].Enable(not omfdata.is_data)
                     break
         for ctr_list in self.stepsize:
-            for key in step_list.keys():
+            for key in list(step_list.keys()):
                 if ctr_list[0] == key:
                     ctr_list[1].SetValue(format_number(step_list[key], True))
                     ctr_list[1].Enable(not omfdata.is_data)
@@ -1441,7 +1441,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
             raise
         sld_key_list = self._get_slds_key_list(omfdata)
         # Dic is not sorted
-        key_list = [key for key in sld_key_list.keys()]
+        key_list = [key for key in list(sld_key_list.keys())]
         # Sort here
         key_list.sort()
         is_data = self.sld_data.is_data
@@ -1484,7 +1484,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         sizer = wx.GridBagSizer(2, 3)
         ix = 0
         iy = -1
-        for key, value in key_list.iteritems():
+        for key, value in key_list.items():
             iy += 1
             ix = 0
             name = wx.StaticText(self, -1, key)
@@ -1520,7 +1520,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         ix = 0
         iy = -1
         #key_list.sort()
-        for key, value in key_list.iteritems():
+        for key, value in key_list.items():
             iy += 1
             ix = 0
             name = wx.StaticText(self, -1, key)
@@ -1640,7 +1640,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         self.sld_data = sld_data
         sld_list = self._get_slds_key_list(sld_data)
         for ctr_list in self.slds:
-            for key in sld_list.keys():
+            for key in list(sld_list.keys()):
                 if ctr_list[0] == key:
                     min_val = np.min(sld_list[key])
                     max_val = np.max(sld_list[key])

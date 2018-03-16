@@ -1,8 +1,8 @@
 import sys
 import unittest
-from mock import MagicMock
+from unittest.mock import MagicMock
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 # set up import paths
 import path_prepare
@@ -10,8 +10,8 @@ import path_prepare
 # Local
 from sas.qtgui.Plotting.PlotProperties import PlotProperties
 
-if not QtGui.QApplication.instance():
-    app = QtGui.QApplication(sys.argv)
+if not QtWidgets.QApplication.instance():
+    app = QtWidgets.QApplication(sys.argv)
 
 class PlotPropertiesTest(unittest.TestCase):
     '''Test the PlotProperties'''
@@ -31,7 +31,7 @@ class PlotPropertiesTest(unittest.TestCase):
 
     def testDefaults(self):
         '''Test the GUI in its default state'''
-        self.assertIsInstance(self.widget, QtGui.QDialog)
+        self.assertIsInstance(self.widget, QtWidgets.QDialog)
         self.assertEqual(self.widget.windowTitle(), "Modify Plot Properties")
 
         # Check the combo boxes
@@ -55,7 +55,7 @@ class PlotPropertiesTest(unittest.TestCase):
     def testOnColorChange(self):
         '''Test the response to color change event'''
         # Accept the new color
-        QtGui.QColorDialog.getColor = MagicMock(return_value=QtGui.QColor(255, 0, 255))
+        QtWidgets.QColorDialog.getColor = MagicMock(return_value=QtGui.QColor(255, 0, 255))
 
         self.widget.onColorChange()
 
@@ -71,7 +71,7 @@ class PlotPropertiesTest(unittest.TestCase):
 
         # Cancel the dialog now
         bad_color = QtGui.QColor() # constructs an invalid color
-        QtGui.QColorDialog.getColor = MagicMock(return_value=bad_color)
+        QtWidgets.QColorDialog.getColor = MagicMock(return_value=bad_color)
         self.widget.onColorChange()
 
         self.assertEqual(self.widget.color(), 1)

@@ -2,11 +2,19 @@ import copy
 import numpy
 import pylab
 import functools
+import logging
 
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 DEFAULT_CMAP = pylab.cm.jet
+
+#import sys
+#print("SYS.PATH = ", sys.path)
+import matplotlib as mpl
+mpl.use("Qt5Agg")
+
 from mpl_toolkits.mplot3d import Axes3D
 
 from sas.sascalc.dataloader.manipulations import CircularAverage
@@ -115,14 +123,16 @@ class Plotter2DWidget(PlotterBase):
         Re-calculate the plot depth parameters depending on the scale
         """
         # Toggle the scale
-        zmin_temp = self.zmin
+        zmin_temp = self.zmin if self.zmin else MIN_Z
         zmax_temp = self.zmax
         # self.scale predefined in the baseclass
+        # in numpy > 1.12 power(int, -int) raises ValueException
+        # "Integers to negative integer powers are not allowed."
         if self.scale == 'log_{10}':
             if self.zmin is not None:
-                zmin_temp = numpy.power(10, self.zmin)
+                zmin_temp = numpy.power(10.0, self.zmin)
             if self.zmax is not None:
-                zmax_temp = numpy.power(10, self.zmax)
+                zmax_temp = numpy.power(10.0, self.zmax)
         else:
             if self.zmin is not None:
                 # min log value: no log(negative)
@@ -235,7 +245,7 @@ class Plotter2DWidget(PlotterBase):
                                               validate_method=self.slicer.validate)
         self.slicer_widget.close_signal.connect(slicer_closed)
         # Add the plot to the workspace
-        self.manager.parent.workspace().addWindow(self.slicer_widget)
+        self.manager.parent.workspace().addSubWindow(self.slicer_widget)
 
         self.slicer_widget.show()
 
@@ -280,8 +290,8 @@ class Plotter2DWidget(PlotterBase):
         new_plot.group_id = "2daverage" + self.data.name
         new_plot.id = "Circ avg " + self.data.name
         new_plot.is_data = True
-        variant_plot = QtCore.QVariant(new_plot)
-        GuiUtils.updateModelItemWithPlot(self._item, variant_plot, new_plot.id)
+        GuiUtils.updateModelItemWithPlot(self._item, new_plot, new_plot.id)
+
         self.manager.communicator.plotUpdateSignal.emit([new_plot])
 
     def setSlicer(self, slicer):
@@ -337,7 +347,7 @@ class Plotter2DWidget(PlotterBase):
         # Pass the BoxSumCalculator model to the BoxSum widget
         self.boxwidget = BoxSum(self, model=self.box_sum_model)
         # Add the plot to the workspace
-        self.manager.parent.workspace().addWindow(self.boxwidget)
+        self.manager.parent.workspace().addSubWindow(self.boxwidget)
         self.boxwidget.show()
 
     def onBoxAveragingX(self):
@@ -365,7 +375,7 @@ class Plotter2DWidget(PlotterBase):
 
         color_map_dialog.apply_signal.connect(self.onApplyMap)
 
-        if color_map_dialog.exec_() == QtGui.QDialog.Accepted:
+        if color_map_dialog.exec_() == QtWidgets.QDialog.Accepted:
             self.onApplyMap(color_map_dialog.norm(), color_map_dialog.cmap())
 
     def onApplyMap(self, v_values, cmap):
@@ -503,12 +513,12 @@ class Plotter2DWidget(PlotterBase):
         self.plot(data=new_plot)
 
 
-class Plotter2D(QtGui.QDialog, Plotter2DWidget):
+class Plotter2D(QtWidgets.QDialog, Plotter2DWidget):
     """
     Plotter widget implementation
     """
     def __init__(self, parent=None, quickplot=False, dimension=2):
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
         Plotter2DWidget.__init__(self, manager=parent, quickplot=quickplot, dimension=dimension)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/res/ball.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)

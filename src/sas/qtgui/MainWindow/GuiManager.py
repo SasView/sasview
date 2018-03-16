@@ -5,9 +5,9 @@ import logging
 import json
 import webbrowser
 
-from PyQt4 import QtCore
-from PyQt4 import QtGui
-from PyQt4 import QtWebKit
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import Qt, QLocale, QUrl
 
 from twisted.internet import reactor
 # General SAS imports
@@ -35,11 +35,11 @@ from sas.qtgui.Calculators.DataOperationUtilityPanel import DataOperationUtility
 # Perspectives
 import sas.qtgui.Perspectives as Perspectives
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
-from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
+from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow, DEFAULT_PERSPECTIVE
 
-class Acknowledgements(QtGui.QDialog, Ui_Acknowledgements):
+class Acknowledgements(QDialog, Ui_Acknowledgements):
     def __init__(self, parent=None):
-        QtGui.QDialog.__init__(self, parent)
+        QDialog.__init__(self, parent)
         self.setupUi(self)
 
 class GuiManager(object):
@@ -54,6 +54,9 @@ class GuiManager(object):
         self._workspace = parent
         self._parent = parent
 
+        # Decide on a locale
+        QLocale.setDefault(QLocale('en_US'))
+
         # Add signal callbacks
         self.addCallbacks()
 
@@ -64,19 +67,10 @@ class GuiManager(object):
         # Create action triggers
         self.addTriggers()
 
-        # Populate menus with dynamic data
-        #
-        # Analysis/Perspectives - potentially
-        # Window/current windows
-        #
-        # Widgets
-        #
-        # Current displayed perspective
+        # Currently displayed perspective
         self._current_perspective = None
 
-        # Invoke the initial perspective
-        self.perspectiveChanged("Fitting")
-
+        # Populate the main window with stuff
         self.addWidgets()
 
         # Fork off logging messages to the Log Window
@@ -91,12 +85,6 @@ class GuiManager(object):
         # Set up the status bar
         self.statusBarSetup()
 
-        # Show the Welcome panel
-        self.welcomePanel = WelcomePanel()
-        self._workspace.workspace.addWindow(self.welcomePanel)
-
-        # Current help file
-        self._helpView = QtWebKit.QWebView()
         # Needs URL like path, so no path.join() here
         self._helpLocation = GuiUtils.HELP_DIRECTORY_LOCATION + "/index.html"
 
@@ -104,6 +92,7 @@ class GuiManager(object):
         self._tutorialLocation = os.path.abspath(os.path.join(GuiUtils.HELP_DIRECTORY_LOCATION,
                                               "_downloads",
                                               "Tutorial.pdf"))
+
     def addWidgets(self):
         """
         Populate the main window with widgets
@@ -115,25 +104,28 @@ class GuiManager(object):
         self.filesWidget = DataExplorerWindow(self._parent, self, manager=self._data_manager)
         ObjectLibrary.addObject('DataExplorer', self.filesWidget)
 
-        self.dockedFilesWidget = QtGui.QDockWidget("Data Explorer", self._workspace)
+        self.dockedFilesWidget = QDockWidget("Data Explorer", self._workspace)
+        self.dockedFilesWidget.setFloating(False)
         self.dockedFilesWidget.setWidget(self.filesWidget)
 
         # Disable maximize/minimize and close buttons
-        self.dockedFilesWidget.setFeatures(QtGui.QDockWidget.NoDockWidgetFeatures)
-        self._workspace.addDockWidget(QtCore.Qt.LeftDockWidgetArea,
-                                      self.dockedFilesWidget)
+        self.dockedFilesWidget.setFeatures(QDockWidget.NoDockWidgetFeatures)
+
+        #self._workspace.workspace.addDockWidget(Qt.LeftDockWidgetArea, self.dockedFilesWidget)
+        self._workspace.addDockWidget(Qt.LeftDockWidgetArea, self.dockedFilesWidget)
 
         # Add the console window as another docked widget
-        self.logDockWidget = QtGui.QDockWidget("Log Explorer", self._workspace)
+        self.logDockWidget = QDockWidget("Log Explorer", self._workspace)
         self.logDockWidget.setObjectName("LogDockWidget")
-        self.listWidget = QtGui.QTextBrowser()
+
+        self.listWidget = QTextBrowser()
         self.logDockWidget.setWidget(self.listWidget)
-        self._workspace.addDockWidget(QtCore.Qt.BottomDockWidgetArea,
-                                      self.logDockWidget)
+        self._workspace.addDockWidget(Qt.BottomDockWidgetArea, self.logDockWidget)
 
         # Add other, minor widgets
         self.ackWidget = Acknowledgements()
         self.aboutWidget = AboutBox()
+        self.welcomePanel = WelcomePanel()
 
         # Add calculators - floating for usability
         self.SLDCalculator = SldPanel(self)
@@ -151,10 +143,10 @@ class GuiManager(object):
 
         Progress bar invisible until explicitly shown
         """
-        self.progress = QtGui.QProgressBar()
+        self.progress = QProgressBar()
         self._workspace.statusbar.setSizeGripEnabled(False)
 
-        self.statusLabel = QtGui.QLabel()
+        self.statusLabel = QLabel()
         self.statusLabel.setText("Welcome to SasView")
         self._workspace.statusbar.addPermanentWidget(self.statusLabel, 1)
         self._workspace.statusbar.addPermanentWidget(self.progress, stretch=0)
@@ -169,6 +161,16 @@ class GuiManager(object):
         """
         pass
 
+    def showHelp(self, url):
+        """
+        Open a local url in the default browser
+        """
+        location = GuiUtils.HELP_DIRECTORY_LOCATION + url
+        try:
+            webbrowser.open('file://' + os.path.realpath(location))
+        except webbrowser.Error as ex:
+            logging.warning("Cannot display help. %s" % ex)
+
     def workspace(self):
         """
         Accessor for the main window workspace
@@ -179,20 +181,32 @@ class GuiManager(object):
         """
         Respond to change of the perspective signal
         """
+
+        # Save users from themselves...
+        #if isinstance(self._current_perspective, Perspectives.PERSPECTIVES[str(perspective_name)]):
+        self.setupPerspectiveMenubarOptions(self._current_perspective)
+        #    return
+
         # Close the previous perspective
-        if self._current_perspective is not None:
+        self.clearPerspectiveMenubarOptions(self._current_perspective)
+        if self._current_perspective:
             self._current_perspective.setClosable()
+            #self._workspace.workspace.removeSubWindow(self._current_perspective)
             self._current_perspective.close()
+            self._workspace.workspace.removeSubWindow(self._current_perspective)
         # Default perspective
         self._current_perspective = Perspectives.PERSPECTIVES[str(perspective_name)](parent=self)
 
-        self._workspace.workspace.addWindow(self._current_perspective)
+        subwindow = self._workspace.workspace.addSubWindow(self._current_perspective)
+
         # Resize to the workspace height
         workspace_height = self._workspace.workspace.sizeHint().height()
         perspective_size = self._current_perspective.sizeHint()
-        if workspace_height < perspective_size.height:
-            perspective_width = perspective_size.width()
-            self._current_perspective.resize(perspective_width, workspace_height-10)
+        perspective_width = perspective_size.width()
+        self._current_perspective.resize(perspective_width, workspace_height-10)
+        # Resize the mdi area to match the widget within
+        subwindow.resize(subwindow.minimumSizeHint())
+
         self._current_perspective.show()
 
     def updatePerspective(self, data):
@@ -201,7 +215,7 @@ class GuiManager(object):
         """
         assert isinstance(data, list)
         if self._current_perspective is not None:
-            self._current_perspective.setData(data.values())
+            self._current_perspective.setData(list(data.values()))
         else:
             msg = "No perspective is currently active."
             logging.info(msg)
@@ -245,7 +259,7 @@ class GuiManager(object):
         Sends data to current perspective
         """
         if self._current_perspective is not None:
-            self._current_perspective.setData(data.values())
+            self._current_perspective.setData(list(data.values()))
         else:
             msg = "Guiframe does not have a current perspective"
             logging.info(msg)
@@ -256,15 +270,15 @@ class GuiManager(object):
         """
         # Display confirmation messagebox
         quit_msg = "Are you sure you want to exit the application?"
-        reply = QtGui.QMessageBox.question(
+        reply = QMessageBox.question(
             self._parent,
             'Information',
             quit_msg,
-            QtGui.QMessageBox.Yes,
-            QtGui.QMessageBox.No)
+            QMessageBox.Yes,
+            QMessageBox.No)
 
         # Exit if yes
-        if reply == QtGui.QMessageBox.Yes:
+        if reply == QMessageBox.Yes:
             reactor.callFromThread(reactor.stop)
             return True
 
@@ -288,7 +302,7 @@ class GuiManager(object):
                             % (content))
             version_info = json.loads(content)
             self.processVersion(version_info)
-        except ValueError, ex:
+        except ValueError as ex:
             logging.info("Failed to connect to www.sasview.org:", ex)
 
     def processVersion(self, version_info):
@@ -307,7 +321,7 @@ class GuiManager(object):
                 msg += " Please try again later."
                 self.communicate.statusBarUpdateSignal.emit(msg)
 
-            elif cmp(version, LocalConfig.__version__) > 0:
+            elif version.__gt__(LocalConfig.__version__):
                 msg = "Version %s is available! " % str(version)
                 if "download_url" in version_info:
                     webbrowser.open(version_info["download_url"])
@@ -320,11 +334,16 @@ class GuiManager(object):
                 self.communicate.statusBarUpdateSignal.emit(msg)
         except:
             msg = "guiframe: could not get latest application"
-            msg += " version number\n  %s" % sys.exc_value
+            msg += " version number\n  %s" % sys.exc_info()[1]
             logging.error(msg)
             msg = "Could not connect to the application server."
             msg += " Please try again later."
             self.communicate.statusBarUpdateSignal.emit(msg)
+
+    def showWelcomeMessage(self):
+        """ Show the Welcome panel """
+        self._workspace.workspace.addSubWindow(self.welcomePanel)
+        self.welcomePanel.show()
 
     def addCallbacks(self):
         """
@@ -383,6 +402,7 @@ class GuiManager(object):
         self._workspace.actionConstrained_Fit.triggered.connect(self.actionConstrained_Fit)
         self._workspace.actionCombine_Batch_Fit.triggered.connect(self.actionCombine_Batch_Fit)
         self._workspace.actionFit_Options.triggered.connect(self.actionFit_Options)
+        self._workspace.actionGPU_Options.triggered.connect(self.actionGPU_Options)
         self._workspace.actionFit_Results.triggered.connect(self.actionFit_Results)
         self._workspace.actionChain_Fitting.triggered.connect(self.actionChain_Fitting)
         self._workspace.actionEdit_Custom_Model.triggered.connect(self.actionEdit_Custom_Model)
@@ -577,11 +597,10 @@ class GuiManager(object):
         terminal = IPythonWidget()
 
         # Add the console window as another docked widget
-        self.ipDockWidget = QtGui.QDockWidget("IPython", self._workspace)
+        self.ipDockWidget = QDockWidget("IPython", self._workspace)
         self.ipDockWidget.setObjectName("IPythonDockWidget")
         self.ipDockWidget.setWidget(terminal)
-        self._workspace.addDockWidget(QtCore.Qt.RightDockWidgetArea,
-                                      self.ipDockWidget)
+        self._workspace.addDockWidget(Qt.RightDockWidgetArea, self.ipDockWidget)
 
     def actionImage_Viewer(self):
         """
@@ -602,9 +621,12 @@ class GuiManager(object):
 
     def actionConstrained_Fit(self):
         """
+        Add a new Constrained and Simult. Fit page in the fitting perspective.
         """
-        print("actionConstrained_Fit TRIGGERED")
-        pass
+        per = self.perspective()
+        if not isinstance(per, FittingWindow):
+            return
+        per.addConstraintTab()
 
     def actionCombine_Batch_Fit(self):
         """
@@ -617,6 +639,14 @@ class GuiManager(object):
         """
         if getattr(self._current_perspective, "fit_options_widget"):
             self._current_perspective.fit_options_widget.show()
+        pass
+
+    def actionGPU_Options(self):
+        """
+        Load the OpenCL selection dialog if the fitting perspective is active
+        """
+        if hasattr(self._current_perspective, "gpu_options_widget"):
+            self._current_perspective.gpu_options_widget.show()
         pass
 
     def actionFit_Results(self):
@@ -640,21 +670,24 @@ class GuiManager(object):
     #============ ANALYSIS =================
     def actionFitting(self):
         """
+        Change to the Fitting perspective
         """
-        print("actionFitting TRIGGERED")
-        pass
+        self.perspectiveChanged("Fitting")
 
     def actionInversion(self):
         """
+        Change to the Inversion perspective
         """
+        # For now we'll just update the analysis menu status but when the inversion is implemented delete from here
+        self.checkAnalysisOption(self._workspace.actionInversion)
+        # to here and uncomment the following line
         self.perspectiveChanged("Inversion")
-        pass
 
     def actionInvariant(self):
         """
+        Change to the Invariant perspective
         """
-        print("actionInvariant TRIGGERED")
-        pass
+        self.perspectiveChanged("Invariant")
 
     #============ WINDOW =================
     def actionCascade(self):
@@ -694,8 +727,7 @@ class GuiManager(object):
 
         TODO: use QNetworkAccessManager to assure _helpLocation is valid
         """
-        self._helpView.load(QtCore.QUrl(self._helpLocation))
-        self._helpView.show()
+        self.showHelp(self._helpLocation)
 
     def actionTutorial(self):
         """
@@ -739,10 +771,10 @@ class GuiManager(object):
         :param new_item: item to be added to list of loaded files
         :param new_datalist_item:
         """
-        if not isinstance(new_item, QtGui.QStandardItem) or \
+        if not isinstance(new_item, QStandardItem) or \
                 not isinstance(new_datalist_item, dict):
             msg = "Wrong data type returned from calculations."
-            raise AttributeError, msg
+            raise AttributeError(msg)
 
         self.filesWidget.model.appendRow(new_item)
         self._data_manager.add_data(new_datalist_item)
@@ -753,3 +785,47 @@ class GuiManager(object):
         """
         if hasattr(self, "filesWidget"):
             self.filesWidget.displayData(plot)
+
+    def uncheckAllMenuItems(self, menuObject):
+        """
+        Uncheck all options in a given menu
+        """
+        menuObjects = menuObject.actions()
+
+        for menuItem in menuObjects:
+            menuItem.setChecked(False)
+
+    def checkAnalysisOption(self, analysisMenuOption):
+        """
+        Unchecks all the items in the analysis menu and checks the item passed
+        """
+        self.uncheckAllMenuItems(self._workspace.menuAnalysis)
+        analysisMenuOption.setChecked(True)
+
+    def clearPerspectiveMenubarOptions(self, perspective):
+        """
+        When closing a perspective, clears the menu bar
+        """
+        for menuItem in self._workspace.menuAnalysis.actions():
+            menuItem.setChecked(False)
+
+        if isinstance(self._current_perspective, Perspectives.PERSPECTIVES["Fitting"]):
+            self._workspace.menubar.removeAction(self._workspace.menuFitting.menuAction())
+
+    def setupPerspectiveMenubarOptions(self, perspective):
+        """
+        When setting a perspective, sets up the menu bar
+        """
+        if isinstance(perspective, Perspectives.PERSPECTIVES["Fitting"]):
+            self.checkAnalysisOption(self._workspace.actionFitting)
+            # Put the fitting menu back in
+            # This is a bit involved but it is needed to preserve the menu ordering
+            self._workspace.menubar.removeAction(self._workspace.menuWindow.menuAction())
+            self._workspace.menubar.removeAction(self._workspace.menuHelp.menuAction())
+            self._workspace.menubar.addAction(self._workspace.menuFitting.menuAction())
+            self._workspace.menubar.addAction(self._workspace.menuWindow.menuAction())
+            self._workspace.menubar.addAction(self._workspace.menuHelp.menuAction())
+        elif isinstance(perspective, Perspectives.PERSPECTIVES["Invariant"]):
+            self.checkAnalysisOption(self._workspace.actionInvariant)
+        # elif isinstance(perspective, Perspectives.PERSPECTIVES["Inversion"]):
+        #     self.checkAnalysisOption(self._workspace.actionInversion)

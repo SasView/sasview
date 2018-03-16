@@ -22,9 +22,11 @@ the code is based on RangeSlider by phil
  ***************************************************************************/
 """
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
-class RangeSlider(QtGui.QSlider):
+class RangeSlider(QtWidgets.QSlider):
     """ A slider for ranges.
     
         This class provides a dual-slider for ranges, where there is a defined
@@ -45,8 +47,8 @@ class RangeSlider(QtGui.QSlider):
         self._low = self.minimum()
         self._high = self.maximum()
         
-        self.pressed_control = QtGui.QStyle.SC_None
-        self.hover_control = QtGui.QStyle.SC_None
+        self.pressed_control = QtWidgets.QStyle.SC_None
+        self.hover_control = QtWidgets.QStyle.SC_None
         self.click_offset = 0
         
         # -1 for the low, 1 for the high, 0 for both
@@ -86,10 +88,10 @@ class RangeSlider(QtGui.QSlider):
         # based on http://qt.gitorious.org/qt/qt/blobs/master/src/gui/widgets/qslider.cpp
 
         painter = QtGui.QPainter(self)
-        style = QtGui.QApplication.style() 
+        style = QtWidgets.QApplication.style()
 
         for i, value in enumerate([self._low, self._high]):
-            opt = QtGui.QStyleOptionSlider()
+            opt = QtWidgets.QStyleOptionSlider()
             self.initStyleOption(opt)
 
             gr = style.subControlRect(style.CC_Slider, opt, style.SC_SliderGroove, self)
@@ -106,7 +108,7 @@ class RangeSlider(QtGui.QSlider):
                 slider_min = gr.y()
                 slider_max = gr.bottom() - handle_length + 1
 
-            opt.subControls = QtGui.QStyle.SC_SliderGroove | QtGui.QStyle.SC_SliderHandle
+            opt.subControls = QtWidgets.QStyle.SC_SliderGroove | QtWidgets.QStyle.SC_SliderHandle
 
             # draw the first slider with inverted appearance, then the second 
             # slider drawn on top of the existing ones
@@ -130,7 +132,7 @@ class RangeSlider(QtGui.QSlider):
             else:
                 # do not highlight the second part when has focus to avoid 
                 # drawing of partially overlapped semi-transparent backgrounds
-                opt.state &= ~QtGui.QStyle.State_HasFocus
+                opt.state &= ~QtWidgets.QStyle.State_HasFocus
 
                 opt.sliderValue = 0
                 opt.sliderPosition = self.minimum()
@@ -156,21 +158,21 @@ class RangeSlider(QtGui.QSlider):
                     opt.rect.setHeight(slider_min + slider_length - pos - 2)
 
             if self.tickPosition() != self.NoTicks:
-                opt.subControls |= QtGui.QStyle.SC_SliderTickmarks
+                opt.subControls |= QtWidgets.QStyle.SC_SliderTickmarks
 
             if self.pressed_control:
                 opt.activeSubControls = self.pressed_control
-                opt.state |= QtGui.QStyle.State_Sunken
+                opt.state |= QtWidgets.QStyle.State_Sunken
             else:
                 opt.activeSubControls = self.hover_control
 
-            style.drawComplexControl(QtGui.QStyle.CC_Slider, opt, painter, self)
+            style.drawComplexControl(QtWidgets.QStyle.CC_Slider, opt, painter, self)
             
         
     def mousePressEvent(self, event):
         event.accept()
         
-        style = QtGui.QApplication.style()
+        style = QtWidgets.QApplication.style()
         button = event.button()
         
         # In a normal slider control, when the user clicks on a point in the 
@@ -180,7 +182,7 @@ class RangeSlider(QtGui.QSlider):
         # slider parts
                 
         if button:
-            opt = QtGui.QStyleOptionSlider()
+            opt = QtWidgets.QStyleOptionSlider()
             self.initStyleOption(opt)
 
             self.active_slider = 0
@@ -205,7 +207,7 @@ class RangeSlider(QtGui.QSlider):
                     break
 
             if self.active_slider == 0:
-                self.pressed_control = QtGui.QStyle.SC_SliderHandle
+                self.pressed_control = QtWidgets.QStyle.SC_SliderHandle
                 self.click_offset = self.__pixelPosToRangeValue(self.__pick(event.pos()))
                 self.triggerAction(self.SliderMove)
                 self.setRepeatAction(self.SliderNoAction)
@@ -214,21 +216,21 @@ class RangeSlider(QtGui.QSlider):
             event.ignore()
 
     def mouseReleaseEvent(self, event):
-        if self.pressed_control != QtGui.QStyle.SC_SliderHandle:
+        if self.pressed_control != QtWidgets.QStyle.SC_SliderHandle:
             event.ignore()
             return
 
         self.setSliderDown(False)
-        return QtGui.QSlider.mouseReleaseEvent(self, event)
+        return QtWidgets.QSlider.mouseReleaseEvent(self, event)
                                 
     def mouseMoveEvent(self, event):
-        if self.pressed_control != QtGui.QStyle.SC_SliderHandle:
+        if self.pressed_control != QtWidgets.QStyle.SC_SliderHandle:
             event.ignore()
             return
         
         event.accept()
         new_pos = self.__pixelPosToRangeValue(self.__pick(event.pos()))
-        opt = QtGui.QStyleOptionSlider()
+        opt = QtWidgets.QStyleOptionSlider()
         self.initStyleOption(opt)
 
         old_click_offset = self.click_offset
@@ -261,9 +263,6 @@ class RangeSlider(QtGui.QSlider):
                 new_pos = self._low
             self.setHighValue( new_pos )
 
-        if self.hasTracking():
-            self.emit(QtCore.SIGNAL('sliderMoved(int)'), new_pos)
-
             
     def __pick(self, pt):
         if self.orientation() == QtCore.Qt.Horizontal:
@@ -273,9 +272,9 @@ class RangeSlider(QtGui.QSlider):
            
            
     def __pixelPosToRangeValue(self, pos):
-        opt = QtGui.QStyleOptionSlider()
+        opt = QtWidgets.QStyleOptionSlider()
         self.initStyleOption(opt)
-        style = QtGui.QApplication.style()
+        style = QtWidgets.QApplication.style()
         
         gr = style.subControlRect(style.CC_Slider, opt, style.SC_SliderGroove, self)
         sr = style.subControlRect(style.CC_Slider, opt, style.SC_SliderHandle, self)

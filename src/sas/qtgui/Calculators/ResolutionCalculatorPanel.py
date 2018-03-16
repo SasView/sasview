@@ -3,8 +3,9 @@ This object is a small tool to allow user to quickly
 determine the variance in q  from the
 instrumental parameters.
 """
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 from twisted.internet import threads
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -19,7 +20,7 @@ import logging
 import os
 import re
 
-from UI.ResolutionCalculatorPanelUI import Ui_ResolutionCalculatorPanel
+from .UI.ResolutionCalculatorPanelUI import Ui_ResolutionCalculatorPanel
 
 _SOURCE_MASS = {'Alpha': 6.64465620E-24,
                 'Deuteron': 3.34358320E-24,
@@ -32,7 +33,7 @@ BG_WHITE = "background-color: rgb(255, 255, 255);"
 BG_RED = "background-color: rgb(244, 170, 164);"
 
 
-class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
+class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel):
     """
     compute resolution in 2D
     """
@@ -104,13 +105,13 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
         self.txtQy.editingFinished.connect(self.checkQx_y)
 
         # double validator
-        self.txtSource2SampleDistance.setValidator(QtGui.QDoubleValidator())
-        self.txtSample2DetectorDistance.setValidator(QtGui.QDoubleValidator())
-        self.txtSampleOffset.setValidator(QtGui.QDoubleValidator())
+        self.txtSource2SampleDistance.setValidator(GuiUtils.DoubleValidator())
+        self.txtSample2DetectorDistance.setValidator(GuiUtils.DoubleValidator())
+        self.txtSampleOffset.setValidator(GuiUtils.DoubleValidator())
 
         # call compute to calculate with default values
         self.createTemplate2DPlot()
-        self.onCompute()
+        #self.onCompute()
 
     # #################################
     # Validators: red background in line edits when wrong input
@@ -122,23 +123,23 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
          if TOF, wavelength = min - max else only one number """
         text_edit = self.txtWavelength  # self.sender()
         if text_edit.isModified():
-            text_edit.setStyleSheet(QtCore.QString(BG_WHITE))
+            text_edit.setStyleSheet(BG_WHITE)
             input_string = str(text_edit.text())
             if self.cbWaveColor.currentText() != 'TOF':
                 input_wavelength = re.match('\d+\.?\d*', input_string)
                 if input_wavelength is None:
-                    text_edit.setStyleSheet(QtCore.QString(BG_RED))
+                    text_edit.setStyleSheet(BG_RED)
                     self.cmdCompute.setEnabled(False)
                     logging.info('Wavelength has to be a number.')
                 else:
-                    text_edit.setStyleSheet(QtCore.QString(BG_WHITE))
+                    text_edit.setStyleSheet(BG_WHITE)
                     self.cmdCompute.setEnabled(True)
             else:
                 interval_wavelength = re.match('^\d+\.?\d*\s*-\s*\d+\.?\d*$',
                                                input_string)
 
                 if interval_wavelength is None:
-                    text_edit.setStyleSheet(QtCore.QString(BG_RED))
+                    text_edit.setStyleSheet(BG_RED)
                     self.cmdCompute.setEnabled(False)
                     logging.info("Wavelength's input has to be an interval: "
                                  "min - max.")
@@ -148,12 +149,12 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
                         re.findall('\d+\.?\d*', interval_wavelength.group())
 
                     if float(wavelength_min) >= float(wavelength_max):
-                        text_edit.setStyleSheet(QtCore.QString(BG_RED))
+                        text_edit.setStyleSheet(BG_RED)
                         self.cmdCompute.setEnabled(False)
                         logging.info("Wavelength: min must be smaller than max.")
 
                     else:
-                        text_edit.setStyleSheet(QtCore.QString(BG_WHITE))
+                        text_edit.setStyleSheet(BG_WHITE)
                         self.cmdCompute.setEnabled(True)
 
     def checkWavelengthSpread(self):
@@ -162,14 +163,14 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
         text_edit = self.sender()
 
         if text_edit.isModified():
-            text_edit.setStyleSheet(QtCore.QString(BG_WHITE))
+            text_edit.setStyleSheet(BG_WHITE)
             if self.cbWaveColor.currentText() != 'TOF':
                 pattern = '^\d+\.?\d*(|;\s*\d+)$'
                 input_string = str(text_edit.text())
                 wavelength_spread_input = re.match(pattern, input_string)
 
                 if wavelength_spread_input is None:
-                    text_edit.setStyleSheet(QtCore.QString(BG_RED))
+                    text_edit.setStyleSheet(BG_RED)
                     self.cmdCompute.setEnabled(False)
                     logging.info('Wavelength spread has to be specified: '
                                  'single value or value; integer number of bins.')
@@ -177,7 +178,7 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
                 else:
                     split_input = wavelength_spread_input.group().split(';')
                     self.num_wave = split_input[1] if len(split_input) > 1 else 10
-                    text_edit.setStyleSheet(QtCore.QString(BG_WHITE))
+                    text_edit.setStyleSheet(BG_WHITE)
                     self.cmdCompute.setEnabled(True)
             else:
                 pattern = '^\d+\.?\d*\s*-\s*\d+\.?\d*(|;\s*\d+)$'
@@ -185,7 +186,7 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
                 wavelength_spread_input = re.match(pattern, input_string)
 
                 if wavelength_spread_input is None:
-                    text_edit.setStyleSheet(QtCore.QString(BG_RED))
+                    text_edit.setStyleSheet(BG_RED)
                     self.cmdCompute.setEnabled(False)
                     logging.info("Wavelength spread has to be specified: "
                                  "doublet separated by '-' with optional "
@@ -196,7 +197,7 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
                     split_input = wavelength_spread_input.group().split(';')
                     self.num_wave = split_input[1] if len(
                         split_input) > 1 else 10
-                    text_edit.setStyleSheet(QtCore.QString(BG_WHITE))
+                    text_edit.setStyleSheet(BG_WHITE)
                     self.cmdCompute.setEnabled(True)
 
     def checkPixels(self):
@@ -204,19 +205,19 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
         text_edit = self.sender()
 
         if text_edit.isModified():
-            text_edit.setStyleSheet(QtCore.QString(BG_WHITE))
+            text_edit.setStyleSheet(BG_WHITE)
             pattern = '^\d+\.?\d*,\s*\d+\.?\d*$'
             input_string = str(text_edit.text())
             pixels_input = re.match(pattern, input_string)
 
             if pixels_input is None:
-                text_edit.setStyleSheet(QtCore.QString(BG_RED))
+                text_edit.setStyleSheet(BG_RED)
                 self.cmdCompute.setEnabled(False)
                 logging.info('The input for the detector should contain 2 '
                              'values separated by a comma.')
 
             else:
-                text_edit.setStyleSheet(QtCore.QString(BG_WHITE))
+                text_edit.setStyleSheet(BG_WHITE)
                 self.cmdCompute.setEnabled(True)
 
     def checkQx_y(self):
@@ -228,11 +229,11 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
             input_string = str(text_edit.text())
             q_input = re.match(pattern, input_string)
             if q_input is None:
-                text_edit.setStyleSheet(QtCore.QString(BG_RED))
+                text_edit.setStyleSheet(BG_RED)
                 self.cmdCompute.setEnabled(False)
                 logging.info('Qx and Qy should contain one or more comma-separated numbers.')
             else:
-                text_edit.setStyleSheet(QtCore.QString(BG_WHITE))
+                text_edit.setStyleSheet(BG_WHITE)
                 self.cmdCompute.setEnabled(True)
                 qx = str(self.txtQx.text()).split(',')
                 qy = str(self.txtQy.text()).split(',')
@@ -246,13 +247,13 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
                     self.txtQy.setText(fill_qy)
 
                 elif len(qx) != len(qy):
-                    text_edit.setStyleSheet(QtCore.QString(BG_RED))
+                    text_edit.setStyleSheet(BG_RED)
                     self.cmdCompute.setEnabled(False)
                     logging.info(
                         'Qx and Qy should have the same number of elements.')
 
                 else:
-                    text_edit.setStyleSheet(QtCore.QString(BG_WHITE))
+                    text_edit.setStyleSheet(BG_WHITE)
                     self.cmdCompute.setEnabled(True)
 
     def checkAperture(self):
@@ -260,20 +261,20 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
         text_edit = self.sender()
 
         if text_edit.isModified():
-            text_edit.setStyleSheet(QtCore.QString(BG_WHITE))
+            text_edit.setStyleSheet(BG_WHITE)
             input_string = str(text_edit.text())
             pattern = '^\d+\.?\d*(|,\s*\d+)$'
             aperture_input = re.match(pattern, input_string)
 
             if aperture_input is None:
-                text_edit.setStyleSheet(QtCore.QString(BG_RED))
+                text_edit.setStyleSheet(BG_RED)
                 self.cmdCompute.setEnabled(False)
                 logging.info('A circular aperture is defined by a single '
                              'value (diameter). A rectangular aperture is '
                              'defined by 2 values separated by a comma.')
 
             else:
-                text_edit.setStyleSheet(QtCore.QString(BG_WHITE))
+                text_edit.setStyleSheet(BG_WHITE)
                 self.cmdCompute.setEnabled(True)
 
     # #################################
@@ -314,10 +315,10 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
     def onSelectCustomSpectrum(self):
         """ On Spectrum Combobox event"""
         if self.cbCustomSpectrum.currentText() == 'Add New':
-            datafile = QtGui.QFileDialog.getOpenFileName(
-                self, "Choose a spectral distribution file", "",
-                "All files (*.*)",
-                None, QtGui.QFileDialog.DontUseNativeDialog)
+            datafile = QtWidgets.QFileDialog.getOpenFileName(
+                self, "Choose a spectral distribution file","",
+                "All files (*.*)", None,
+                QtWidgets.QFileDialog.DontUseNativeDialog)[0]
 
             if datafile is None or str(datafile) == '':
                 logging.info("No spectral distribution data chosen.")
@@ -327,7 +328,7 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
 
             try:
                 basename = os.path.basename(datafile)
-                if basename not in self.spectrum_dic.keys():
+                if basename not in list(self.spectrum_dic.keys()):
                     self.cbCustomSpectrum.addItem(basename)
 
                 input_f = open(datafile, 'r')
@@ -364,15 +365,8 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
         Calls Documentation Window with the path of the location within the
         documentation tree (after /doc/ ....".
         """
-        try:
-            location = GuiUtils.HELP_DIRECTORY_LOCATION + \
-                       "/user/sasgui/perspectives/calculator/resolution_calculator_help.html"
-            self.manager._helpView.load(QtCore.QUrl(location))
-            self.manager._helpView.show()
-
-        except AttributeError:
-            # No manager defined - testing and standalone runs
-            pass
+        location = "/user/sasgui/perspectives/calculator/resolution_calculator_help.html"
+        self.manager.showHelp(location)
 
     def onReset(self):
         # by default Spectrum label and cbCustomSpectrum are not visible
@@ -523,12 +517,17 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
                                             qy_min, qy_max)
 
             cal_res.addCallback(self.complete)
+            cal_res.addErrback(self.calculateFailed)
 
             # logging.info("Computation is in progress...")
             self.cmdCompute.setText('Wait...')
             self.cmdCompute.setEnabled(False)
         except:
             raise
+
+    def calculateFailed(self, reason):
+        print("calculateFailed Failed with:\n", reason)
+        pass
 
     def complete(self, image):
         """
@@ -561,9 +560,10 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
         : params qx, qy, qx_min, qx_max, qy_min, qy_max:
         : return: image (numpy array)
         """
-        image = map(func, qx, qy,
+        image = list(map(func, qx, qy,
                     qx_min, qx_max,
-                    qy_min, qy_max)[0]
+                    qy_min, qy_max))[0]
+
         return image
 
     def calc_func(self, qx, qy, qx_min, qx_max, qy_min, qy_max):
@@ -603,7 +603,7 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
             else:
                 msg = "The numbers must be one or two (separated by ',')"
                 logging.info(msg)
-                raise RuntimeError, msg
+                raise RuntimeError(msg)
 
         return new_numbers_list
 
@@ -617,7 +617,7 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
         try:
             new_list = [float(t) for t in string_split]
         except:
-            logging.error(sys.exc_value)
+            logging.error(sys.exc_info()[1])
         return new_list
 
     def _str2longlist(self, input_string):
@@ -657,7 +657,7 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
                         out = self._string2inputlist(input_string)
                         return out
                 except:
-                    logging.error(sys.exc_value)
+                    logging.error(sys.exc_info()[1])
 
     def _validate_q_input(self, qx, qy):
         """
@@ -712,7 +712,7 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
         self.plotter = Plotter2DWidget(self, quickplot=True)
         self.plotter.scale = 'linear'
         self.plotter.cmap = None
-        layout = QtGui.QHBoxLayout()
+        layout = QtWidgets.QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         self.graphicsView.setLayout(layout)
         layout.addWidget(self.plotter)
@@ -741,6 +741,7 @@ class ResolutionCalculatorPanel(QtGui.QDialog, Ui_ResolutionCalculatorPanel):
 
         self.plotter.plot()
         self.plotter.show()
+        self.plotter.update()
 
     def drawLines(self):
         """

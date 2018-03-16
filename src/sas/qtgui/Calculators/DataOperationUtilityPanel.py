@@ -3,8 +3,9 @@ import logging
 import re
 import copy
 
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.Plotter import PlotterWidget
@@ -12,13 +13,13 @@ from sas.qtgui.Plotting.PlotterData import Data2D
 from sas.qtgui.Plotting.Plotter2D import Plotter2DWidget
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
-from UI.DataOperationUtilityUI import Ui_DataOperationUtility
+from .UI.DataOperationUtilityUI import Ui_DataOperationUtility
 
 BG_WHITE = "background-color: rgb(255, 255, 255);"
 BG_RED = "background-color: rgb(244, 170, 164);"
 
 
-class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
+class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
     def __init__(self, parent=None):
         super(DataOperationUtilityPanel, self).__init__()
         self.setupUi(self)
@@ -54,11 +55,11 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
         self.cmdCompute.setEnabled(False)
 
         # validator for coefficient
-        self.txtNumber.setValidator(QtGui.QDoubleValidator())
+        self.txtNumber.setValidator(GuiUtils.DoubleValidator())
 
-        self.layoutOutput = QtGui.QHBoxLayout()
-        self.layoutData1 = QtGui.QHBoxLayout()
-        self.layoutData2 = QtGui.QHBoxLayout()
+        self.layoutOutput = QtWidgets.QHBoxLayout()
+        self.layoutData1 = QtWidgets.QHBoxLayout()
+        self.layoutData2 = QtWidgets.QHBoxLayout()
 
         # Create default layout for initial graphs (when they are still empty)
         self.newPlot(self.graphOutput, self.layoutOutput)
@@ -75,7 +76,7 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
          a number to apply to data1 """
         self.filenames = filenames
 
-        if filenames.keys():
+        if list(filenames.keys()):
             # clear contents of comboboxes
             self.cbData1.clear()
             self.cbData1.addItems(['Select Data'])
@@ -84,7 +85,7 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
 
             list_datafiles = []
 
-            for key_id in filenames.keys():
+            for key_id in list(filenames.keys()):
                 if filenames[key_id].get_data().title:
                     # filenames with titles
                     new_title = filenames[key_id].get_data().title
@@ -108,15 +109,8 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
         Calls Documentation Window with the path of the location within the
         documentation tree (after /doc/ ....".
         """
-        try:
-            location = GuiUtils.HELP_DIRECTORY_LOCATION + \
-                       "/user/sasgui/perspectives/calculator/data_operator_help.html"
-            self.manager._helpView.load(QtCore.QUrl(location))
-            self.manager._helpView.show()
-
-        except AttributeError:
-            # No manager defined - testing and standalone runs
-            pass
+        location = "/user/sasgui/perspectives/calculator/data_operator_help.html"
+        self.manager.showHelp(location)
 
     def onClose(self):
         """ Close dialog """
@@ -138,9 +132,10 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
         try:
             data1 = self.data1
             data2 = self.data2
-            exec "output = data1 %s data2" % operator
-        except:
-            raise
+            output = eval("data1 %s data2" % operator)
+        except Exception as ex:
+            logging.error(ex)
+            return
 
         self.output = output
 
@@ -157,7 +152,7 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
     def onPrepareOutputData(self):
         """ Prepare datasets to be added to DataExplorer and DataManager """
         new_item = GuiUtils.createModelItemWithPlot(
-            QtCore.QVariant(self.output),
+            self.output,
             name=self.txtOutputData.text())
 
         new_datalist_item = {str(self.txtOutputData.text()) + str(time.time()):
@@ -272,16 +267,16 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
             if input_to_check is None or input_to_check is '':
                 msg = 'DataOperation: Number requires a float number'
                 logging.warning(msg)
-                self.txtNumber.setStyleSheet(QtCore.QString(BG_RED))
+                self.txtNumber.setStyleSheet(BG_RED)
 
             elif float(self.txtNumber.text()) == 0.:
                 # should be check that 0 is not chosen
                 msg = 'DataOperation: Number requires a non zero number'
                 logging.warning(msg)
-                self.txtNumber.setStyleSheet(QtCore.QString(BG_RED))
+                self.txtNumber.setStyleSheet(BG_RED)
 
             else:
-                self.txtNumber.setStyleSheet(QtCore.QString(BG_WHITE))
+                self.txtNumber.setStyleSheet(BG_WHITE)
                 self.data2 = float(self.txtNumber.text())
                 self.updatePlot(self.graphData2, self.layoutData2, self.data2)
 
@@ -292,14 +287,14 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
             return False
         else:
             if self.cbData2.currentText() == 'Number':
-                self.cbData1.setStyleSheet(QtCore.QString(BG_WHITE))
-                self.cbData2.setStyleSheet(QtCore.QString(BG_WHITE))
+                self.cbData1.setStyleSheet(BG_WHITE)
+                self.cbData2.setStyleSheet(BG_WHITE)
                 return True
 
             elif self.data1.__class__.__name__ != self.data2.__class__.__name__:
-                self.cbData1.setStyleSheet(QtCore.QString(BG_RED))
-                self.cbData2.setStyleSheet(QtCore.QString(BG_RED))
-                print self.data1.__class__.__name__ != self.data2.__class__.__name__
+                self.cbData1.setStyleSheet(BG_RED)
+                self.cbData2.setStyleSheet(BG_RED)
+                print(self.data1.__class__.__name__ != self.data2.__class__.__name__)
                 logging.warning('Cannot compute data of different dimensions')
                 return False
 
@@ -307,8 +302,8 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
                     and (len(self.data2.x) != len(self.data1.x) or
                              not all(i == j for i, j in zip(self.data1.x, self.data2.x))):
                 logging.warning('Cannot compute 1D data of different lengths')
-                self.cbData1.setStyleSheet(QtCore.QString(BG_RED))
-                self.cbData2.setStyleSheet(QtCore.QString(BG_RED))
+                self.cbData1.setStyleSheet(BG_RED)
+                self.cbData2.setStyleSheet(BG_RED)
                 return False
 
             elif self.data1.__class__.__name__ == 'Data2D' \
@@ -319,33 +314,33 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
                     or not all(i == j for i, j in
                                 zip(self.data1.qy_data, self.data2.qy_data))
                          ):
-                self.cbData1.setStyleSheet(QtCore.QString(BG_RED))
-                self.cbData2.setStyleSheet(QtCore.QString(BG_RED))
+                self.cbData1.setStyleSheet(BG_RED)
+                self.cbData2.setStyleSheet(BG_RED)
                 logging.warning('Cannot compute 2D data of different lengths')
                 return False
 
             else:
-                self.cbData1.setStyleSheet(QtCore.QString(BG_WHITE))
-                self.cbData2.setStyleSheet(QtCore.QString(BG_WHITE))
+                self.cbData1.setStyleSheet(BG_WHITE)
+                self.cbData2.setStyleSheet(BG_WHITE)
                 return True
 
     def onCheckOutputName(self):
         """ Check that name of output does not already exist """
         name_to_check = str(self.txtOutputData.text())
-        self.txtOutputData.setStyleSheet(QtCore.QString(BG_WHITE))
+        self.txtOutputData.setStyleSheet(BG_WHITE)
 
         if name_to_check is None or name_to_check == '':
-            self.txtOutputData.setStyleSheet(QtCore.QString(BG_RED))
+            self.txtOutputData.setStyleSheet(BG_RED)
             logging.warning('No output name')
             return False
 
         elif name_to_check in self.list_data_items:
-            self.txtOutputData.setStyleSheet(QtCore.QString(BG_RED))
+            self.txtOutputData.setStyleSheet(BG_RED)
             logging.warning('The Output data name already exists')
             return False
 
         else:
-            self.txtOutputData.setStyleSheet(QtCore.QString(BG_WHITE))
+            self.txtOutputData.setStyleSheet(BG_WHITE)
             return True
 
     # ########
@@ -353,9 +348,9 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
     # ########
     def _findId(self, name):
         """ find id of name in list of filenames """
-        isinstance(name, basestring)
+        isinstance(name, str)
 
-        for key_id in self.filenames.keys():
+        for key_id in list(self.filenames.keys()):
             # data with title
             if self.filenames[key_id].get_data().title:
                 input = self.filenames[key_id].get_data().title
@@ -382,8 +377,8 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
     # ########
     def newPlot(self, graph, layout):
         """ Create template for graphs with default '?' layout"""
-        assert isinstance(graph, QtGui.QGraphicsView)
-        assert isinstance(layout, QtGui.QHBoxLayout)
+        assert isinstance(graph, QtWidgets.QGraphicsView)
+        assert isinstance(layout, QtWidgets.QHBoxLayout)
 
         # clear layout
         if layout.count() > 0:
@@ -398,8 +393,8 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
     def updatePlot(self, graph, layout, data):
         """ plot data in graph after clearing its layout """
 
-        assert isinstance(graph, QtGui.QGraphicsView)
-        assert isinstance(layout, QtGui.QHBoxLayout)
+        assert isinstance(graph, QtWidgets.QGraphicsView)
+        assert isinstance(layout, QtWidgets.QHBoxLayout)
 
         # clear layout
         if layout.count() > 0:
@@ -454,10 +449,10 @@ class DataOperationUtilityPanel(QtGui.QDialog, Ui_DataOperationUtility):
 
     def prepareSubgraphWithData(self, data):
         """ Create graphics view containing scene with string """
-        scene = QtGui.QGraphicsScene()
+        scene = QtWidgets.QGraphicsScene()
         scene.addText(str(data))
 
-        subgraph = QtGui.QGraphicsView()
+        subgraph = QtWidgets.QGraphicsView()
         subgraph.setScene(scene)
 
         return subgraph

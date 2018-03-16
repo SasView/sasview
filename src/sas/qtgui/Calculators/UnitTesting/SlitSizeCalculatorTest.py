@@ -1,9 +1,11 @@
 import sys
 import unittest
-from PyQt4 import QtGui
-from PyQt4.QtTest import QTest
-from PyQt4.QtCore import Qt
-from mock import MagicMock
+import logging
+
+from PyQt5 import QtGui, QtWidgets
+from PyQt5.QtTest import QTest
+from PyQt5.QtCore import Qt
+from unittest.mock import MagicMock
 
 # set up import paths
 import sas.qtgui.path_prepare
@@ -11,8 +13,8 @@ import sas.qtgui.path_prepare
 from sas.qtgui.Calculators.SlitSizeCalculator import SlitSizeCalculator
 from sas.sascalc.dataloader.loader import Loader
 
-if not QtGui.QApplication.instance():
-    app = QtGui.QApplication(sys.argv)
+if not QtWidgets.QApplication.instance():
+    app = QtWidgets.QApplication(sys.argv)
 
 
 class SlitSizeCalculatorTest(unittest.TestCase):
@@ -28,15 +30,18 @@ class SlitSizeCalculatorTest(unittest.TestCase):
 
     def testDefaults(self):
         """Test the GUI in its default state"""
-        self.assertIsInstance(self.widget, QtGui.QWidget)
+        self.assertIsInstance(self.widget, QtWidgets.QWidget)
         self.assertEqual(self.widget.windowTitle(), "Slit Size Calculator")
-        self.assertEqual(self.widget.sizePolicy().Policy(), QtGui.QSizePolicy.Fixed)
+        self.assertEqual(self.widget.sizePolicy().Policy(), QtWidgets.QSizePolicy.Fixed)
 
     def testHelp(self):
         """ Assure help file is shown """
-
-        # this should not rise
+        self.widget._parent = QtWidgets.QWidget()
+        self.widget._parent.showHelp = MagicMock()
         self.widget.onHelp()
+        self.assertTrue(self.widget._parent.showHelp.called_once())
+        args = self.widget._parent.showHelp.call_args
+        self.assertIn('slit_calculator_help.html', args[0][0])
 
     def testBrowseButton(self):
         browseButton = self.widget.browseButton
@@ -44,25 +49,25 @@ class SlitSizeCalculatorTest(unittest.TestCase):
         filename = "beam_profile.DAT"
 
         # Return no files.
-        QtGui.QFileDialog.getOpenFileName = MagicMock(return_value=None)
+        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=('',''))
 
         # Click on the Browse button
         QTest.mouseClick(browseButton, Qt.LeftButton)
 
         # Test the getOpenFileName() dialog called once
-        self.assertTrue(QtGui.QFileDialog.getOpenFileName.called)
-        QtGui.QFileDialog.getOpenFileName.assert_called_once()
+        self.assertTrue(QtWidgets.QFileDialog.getOpenFileName.called)
+        QtWidgets.QFileDialog.getOpenFileName.assert_called_once()
 
         # Now, return a single file
-        QtGui.QFileDialog.getOpenFileName = MagicMock(return_value=filename)
+        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=(filename,''))
 
         # Click on the Load button
         QTest.mouseClick(browseButton, Qt.LeftButton)
-        QtGui.qApp.processEvents()
+        QtWidgets.qApp.processEvents()
 
         # Test the getOpenFileName() dialog called once
-        self.assertTrue(QtGui.QFileDialog.getOpenFileName.called)
-        QtGui.QFileDialog.getOpenFileName.assert_called_once()
+        self.assertTrue(QtWidgets.QFileDialog.getOpenFileName.called)
+        QtWidgets.QFileDialog.getOpenFileName.assert_called_once()
 
 
     def notestCalculateSlitSize(self):
@@ -80,17 +85,19 @@ class SlitSizeCalculatorTest(unittest.TestCase):
     def testWrongInput(self):
         """ Test on wrong input data """
 
-        filename = "P123_D2O_10_percent.dat"
+        filename = "Dec07031.ASC"
         loader = Loader()
         data = loader.load(filename)[0]
-        self.assertRaisesRegexp(RuntimeError,
-                                "Slit Length cannot be computed for 2D Data",
-                                self.widget.calculateSlitSize, data)
+
+        logging.error = MagicMock()
+
+        self.widget.calculateSlitSize(data)
+
+        self.assertTrue(logging.error.called_once())
 
         data = None
-        self.assertRaisesRegexp(RuntimeError,
-                                "ERROR: Data hasn't been loaded correctly",
-                                self.widget.calculateSlitSize, data)
+        self.widget.calculateSlitSize(data)
+        self.assertTrue(logging.error.call_count == 2)
 
 
 if __name__ == "__main__":

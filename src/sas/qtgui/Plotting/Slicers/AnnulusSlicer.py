@@ -1,9 +1,7 @@
 import numpy
-from PyQt4 import QtGui
-from PyQt4 import QtCore
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from BaseInteractor import BaseInteractor
+from .BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Utilities.GuiUtils import formatNumber
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
@@ -144,8 +142,7 @@ class AnnulusInteractor(BaseInteractor, SlicerModel):
         new_plot.is_data = True
         new_plot.xtransform = "x"
         new_plot.ytransform = "y"
-        variant_plot = QtCore.QVariant(new_plot)
-        GuiUtils.updateModelItemWithPlot(self._item, variant_plot, new_plot.id)
+        GuiUtils.updateModelItemWithPlot(self._item, new_plot, new_plot.id)
         self.base.manager.communicator.plotUpdateSignal.emit([new_plot])
 
         if self.update_model:

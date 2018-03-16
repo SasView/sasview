@@ -2,7 +2,7 @@ import sys
 import unittest
 
 import numpy
-from mock import MagicMock
+from unittest.mock import MagicMock
 
 # set up import paths
 import sas.qtgui.path_prepare
@@ -11,9 +11,6 @@ import sas.qtgui.path_prepare
 from sas.qtgui.Utilities.GuiUtils import *
 from sas.qtgui.Perspectives.Fitting.FittingWidget import *
 from sas.qtgui.Plotting.PlotterData import Data1D
-
-if not QtGui.QApplication.instance():
-    app = QtGui.QApplication(sys.argv)
 
 
 class FittingLogicTest(unittest.TestCase):

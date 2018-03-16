@@ -8,13 +8,14 @@ import sys
 import imp
 import warnings
 import webbrowser
-import urlparse
+import urllib.parse
 
 warnings.simplefilter("ignore")
 import logging
 
-from PyQt4 import QtCore
-from PyQt4 import QtGui
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 from periodictable import formula as Formula
 from sas.qtgui.Plotting import DataTransform
@@ -56,11 +57,11 @@ def get_app_dir():
     # TODO: gui_manager will have to know about sasview until we
     # clean all these module variables and put them into a config class
     # that can be passed by sasview.py.
-    #logging.info(sys.executable)
-    #logging.info(str(sys.argv))
+    # logging.info(sys.executable)
+    # logging.info(str(sys.argv))
     from sas import sasview as sasview
     app_path = os.path.dirname(sasview.__file__)
-    #logging.info("Using application path: %s", app_path)
+    # logging.info("Using application path: %s", app_path)
     return app_path
 
 def get_user_directory():
@@ -85,7 +86,7 @@ def _find_local_config(confg_file, path):
         pass
         #logging.error("Error loading %s/%s: %s" % (path, confg_file, sys.exc_value))
     except ValueError:
-        print "Value error"
+        print("Value error")
         pass
     finally:
         if fObj is not None:
@@ -238,23 +239,24 @@ class Communicate(QtCore.QObject):
 def updateModelItemWithPlot(item, update_data, name=""):
     """
     Adds a checkboxed row named "name" to QStandardItem
-    Adds QVariant 'update_data' to that row.
+    Adds 'update_data' to that row.
     """
     assert isinstance(item, QtGui.QStandardItem)
-    assert isinstance(update_data, QtCore.QVariant)
-    py_update_data = update_data.toPyObject()
 
     # Check if data with the same ID is already present
     for index in range(item.rowCount()):
         plot_item = item.child(index)
         if plot_item.isCheckable():
-            plot_data = plot_item.child(0).data().toPyObject()
-            if plot_data.id is not None and plot_data.id == py_update_data.id:
+            plot_data = plot_item.child(0).data()
+            if plot_data.id is not None and \
+                   (plot_data.name == update_data.name or plot_data.id == update_data.id):
+            # if plot_data.id is not None and plot_data.id == update_data.id:
                 # replace data section in item
                 plot_item.child(0).setData(update_data)
                 plot_item.setText(name)
-                # Plot title
-                plot_item.child(1).child(0).setText("Title: %s"%name)
+                # Plot title if any
+                if plot_item.child(1).hasChildren():
+                    plot_item.child(1).child(0).setText("Title: %s"%name)
                 # Force redisplay
                 return
 
@@ -264,15 +266,34 @@ def updateModelItemWithPlot(item, update_data, name=""):
     # Append the new row to the main item
     item.appendRow(checkbox_item)
 
+class HashableStandardItem(QtGui.QStandardItem):
+    """
+    Subclassed standard item with reimplemented __hash__
+    to allow for use as an index.
+    """
+    def __init__(self, parent=None):
+        super(HashableStandardItem, self).__init__()
+
+    def __hash__(self):
+        ''' just a random hash value '''
+        #return hash(self.__init__)
+        return 0
+
+    def clone(self):
+        ''' Assure __hash__ is cloned as well'''
+        clone = super(HashableStandardItem, self).clone()
+        clone.__hash__ = self.__hash__
+        return clone
+
+
 def createModelItemWithPlot(update_data, name=""):
     """
     Creates a checkboxed QStandardItem named "name"
-    Adds QVariant 'update_data' to that row.
+    Adds 'update_data' to that row.
     """
-    assert isinstance(update_data, QtCore.QVariant)
-    py_update_data = update_data.toPyObject()
+    py_update_data = update_data
 
-    checkbox_item = QtGui.QStandardItem()
+    checkbox_item = HashableStandardItem()
     checkbox_item.setCheckable(True)
     checkbox_item.setCheckState(QtCore.Qt.Checked)
     checkbox_item.setText(name)
@@ -303,26 +324,47 @@ def updateModelItem(item, update_data, name=""):
     Adds a simple named child to QStandardItem
     """
     assert isinstance(item, QtGui.QStandardItem)
-    assert isinstance(update_data, list)
+    #assert isinstance(update_data, list)
 
     # Add the actual Data1D/Data2D object
     object_item = QtGui.QStandardItem()
     object_item.setText(name)
-    object_item.setData(QtCore.QVariant(update_data))
+    object_item.setData(update_data)
 
     # Append the new row to the main item
     item.appendRow(object_item)
+
+def updateModelItemStatus(model_item, filename="", name="", status=2):
+    """
+    Update status of checkbox related to high- and low-Q extrapolation
+    choice in Invariant Panel
+    """
+    assert isinstance(model_item, QtGui.QStandardItemModel)
+
+    # Iterate over model looking for items with checkboxes
+    for index in range(model_item.rowCount()):
+        item = model_item.item(index)
+        if item.text() == filename and item.isCheckable() \
+                and item.checkState() == QtCore.Qt.Checked:
+            # Going 1 level deeper only
+            for index_2 in range(item.rowCount()):
+                item_2 = item.child(index_2)
+                if item_2 and item_2.isCheckable() and item_2.text() == name:
+                    item_2.setCheckState(status)
+
+    return
 
 def itemFromFilename(filename, model_item):
     """
     Returns the model item text=filename in the model
     """
     assert isinstance(model_item, QtGui.QStandardItemModel)
-    assert isinstance(filename, basestring)
+    assert isinstance(filename, str)
 
     # Iterate over model looking for named items
-    item = list(filter(lambda i: str(i.text()) == filename,
-                  [model_item.item(index) for index in range(model_item.rowCount())]))
+    item = list([i for i in [model_item.item(index)
+                             for index in range(model_item.rowCount())]
+                 if str(i.text()) == filename])
     return item[0] if len(item)>0 else None
 
 def plotsFromFilename(filename, model_item):
@@ -330,7 +372,7 @@ def plotsFromFilename(filename, model_item):
     Returns the list of plots for the item with text=filename in the model
     """
     assert isinstance(model_item, QtGui.QStandardItemModel)
-    assert isinstance(filename, basestring)
+    assert isinstance(filename, str)
 
     plot_data = []
     # Iterate over model looking for named items
@@ -338,13 +380,13 @@ def plotsFromFilename(filename, model_item):
         item = model_item.item(index)
         if str(item.text()) == filename:
             # TODO: assure item type is correct (either data1/2D or Plotter)
-            plot_data.append(item.child(0).data().toPyObject())
+            plot_data.append(item.child(0).data())
             # Going 1 level deeper only
             for index_2 in range(item.rowCount()):
                 item_2 = item.child(index_2)
                 if item_2 and item_2.isCheckable():
                     # TODO: assure item type is correct (either data1/2D or Plotter)
-                    plot_data.append(item_2.child(0).data().toPyObject())
+                    plot_data.append(item_2.child(0).data())
 
     return plot_data
 
@@ -358,15 +400,17 @@ def plotsFromCheckedItems(model_item):
     # Iterate over model looking for items with checkboxes
     for index in range(model_item.rowCount()):
         item = model_item.item(index)
-        if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
-            # TODO: assure item type is correct (either data1/2D or Plotter)
-            plot_data.append((item, item.child(0).data().toPyObject()))
+
         # Going 1 level deeper only
         for index_2 in range(item.rowCount()):
             item_2 = item.child(index_2)
             if item_2 and item_2.isCheckable() and item_2.checkState() == QtCore.Qt.Checked:
                 # TODO: assure item type is correct (either data1/2D or Plotter)
-                plot_data.append((item_2, item_2.child(0).data().toPyObject()))
+                plot_data.append((item_2, item_2.child(0).data()))
+
+        if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
+            # TODO: assure item type is correct (either data1/2D or Plotter)
+            plot_data.append((item, item.child(0).data()))
 
     return plot_data
 
@@ -418,12 +462,12 @@ def openLink(url):
     Open a URL in an external browser.
     Check the URL first, though.
     """
-    parsed_url = urlparse.urlparse(url)
+    parsed_url = urllib.parse.urlparse(url)
     if parsed_url.scheme:
         webbrowser.open(url)
     else:
         msg = "Attempt at opening an invalid URL"
-        raise AttributeError, msg
+        raise AttributeError(msg)
 
 def retrieveData1d(data):
     """
@@ -432,7 +476,7 @@ def retrieveData1d(data):
     """
     if not isinstance(data, Data1D):
         msg = "Incorrect type passed to retrieveData1d"
-        raise AttributeError, msg
+        raise AttributeError(msg)
     try:
         xmin = min(data.x)
         ymin = min(data.y)
@@ -440,7 +484,7 @@ def retrieveData1d(data):
         msg = "Unable to find min/max of \n data named %s" % \
                     data.filename
         #logging.error(msg)
-        raise ValueError, msg
+        raise ValueError(msg)
 
     text = data.__str__()
     text += 'Data Min Max:\n'
@@ -484,7 +528,7 @@ def retrieveData2d(data):
     """
     if not isinstance(data, Data2D):
         msg = "Incorrect type passed to retrieveData2d"
-        raise AttributeError, msg
+        raise AttributeError(msg)
 
     text = data.__str__()
     text += 'Data Min Max:\n'
@@ -498,7 +542,7 @@ def retrieveData2d(data):
     dx_val = 0.0
     dy_val = 0.0
     len_data = len(data.qx_data)
-    for index in xrange(0, len_data):
+    for index in range(0, len_data):
         x_val = data.qx_data[index]
         y_val = data.qy_data[index]
         i_val = data.data[index]
@@ -529,7 +573,7 @@ def onTXTSave(data, path):
     """
     with open(path,'w') as out:
         has_errors = True
-        if data.dy == None or data.dy == []:
+        if data.dy is None or not data.dy.any():
             has_errors = False
         # Sanity check
         if has_errors:
@@ -539,7 +583,7 @@ def onTXTSave(data, path):
             except:
                 has_errors = False
         if has_errors:
-            if data.dx is not None and data.dx != []:
+            if data.dx is not None and data.dx.any():
                 out.write("<X>   <Y>   <dY>   <dX>\n")
             else:
                 out.write("<X>   <Y>   <dY>\n")
@@ -548,8 +592,8 @@ def onTXTSave(data, path):
 
         for i in range(len(data.x)):
             if has_errors:
-                if data.dx is not None and data.dx != []:
-                    if  data.dx[i] != None:
+                if data.dx is not None and data.dx.any():
+                    if  data.dx[i] is not None:
                         out.write("%g  %g  %g  %g\n" % (data.x[i],
                                                         data.y[i],
                                                         data.dy[i],
@@ -585,13 +629,12 @@ def saveData1D(data):
         'parent'    : None,
     }
     # Query user for filename.
-    filename = QtGui.QFileDialog.getSaveFileName(**kwargs)
+    filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+    filename = filename_tuple[0]
 
     # User cancelled.
     if not filename:
         return
-
-    filename = str(filename)
 
     #Instantiate a loader
     loader = Loader()
@@ -617,12 +660,13 @@ def saveData2D(data):
         'parent'    : None,
     }
     # Query user for filename.
-    filename = QtGui.QFileDialog.getSaveFileName(**kwargs)
+    filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+    filename = filename_tuple[0]
 
     # User cancelled.
     if not filename:
         return
-    filename = str(filename)
+
     #Instantiate a loader
     loader = Loader()
 
@@ -634,14 +678,18 @@ class FormulaValidator(QtGui.QValidator):
         super(FormulaValidator, self).__init__(parent)
   
     def validate(self, input, pos):
-        try:
-            Formula(str(input))
-            self._setStyleSheet("")
-            return QtGui.QValidator.Acceptable, pos
 
-        except Exception as e:
-            self._setStyleSheet("background-color:pink;")
-            return QtGui.QValidator.Intermediate, pos
+        self._setStyleSheet("")
+        return QtGui.QValidator.Acceptable, pos
+
+        #try:
+        #    Formula(str(input))
+        #    self._setStyleSheet("")
+        #    return QtGui.QValidator.Acceptable, pos
+
+        #except Exception as e:
+        #    self._setStyleSheet("background-color:pink;")
+        #    return QtGui.QValidator.Intermediate, pos
 
     def _setStyleSheet(self, value):
         try:
@@ -755,7 +803,7 @@ def dataFromItem(item):
     Retrieve Data1D/2D component from QStandardItem.
     The assumption - data stored in SasView standard, in child 0
     """
-    return item.child(0).data().toPyObject()
+    return item.child(0).data()
 
 def formatNumber(value, high=False):
     """
@@ -805,3 +853,45 @@ def parseName(name, expression):
                 return item
     else:
         return name
+
+def toDouble(value_string):
+    """
+    toFloat conversion which cares deeply about user's locale
+    """
+    # Holy shit this escalated quickly in Qt5.
+    # No more float() cast on general locales.
+    value = QtCore.QLocale().toFloat(value_string)
+    if value[1]:
+        return value[0]
+
+    # Try generic locale
+    value = QtCore.QLocale(QtCore.QLocale('en_US')).toFloat(value_string)
+    if value[1]:
+        return value[0]
+    else:
+        raise TypeError
+
+class DoubleValidator(QtGui.QDoubleValidator):
+    """
+    Allow only dots as decimal separator
+    """
+    def validate(self, input, pos):
+        """
+        Return invalid for commas
+        """
+        if input is not None and ',' in input:
+            return (QtGui.QValidator.Invalid, input, pos)
+        return super(DoubleValidator, self).validate(input, pos)
+
+    def fixup(self, input):
+        """
+        Correct (remove) potential preexisting content
+        """
+        super(DoubleValidator, self).fixup(input)
+        input = input.replace(",", "")
+
+
+def enum(*sequential, **named):
+    """Create an enumeration object from a list of strings"""
+    enums = dict(zip(sequential, range(len(sequential))), **named)
+    return type('Enum', (), enums)

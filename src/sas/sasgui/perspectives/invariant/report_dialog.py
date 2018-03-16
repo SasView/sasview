@@ -93,7 +93,7 @@ class ReportDialog(BaseReportDialog):
                         os.system("open %s" % fName)
                     except:
                         # DO not open
-                        logger.error("Could not open file: %s" % sys.exc_value)
+                        logger.error("Could not open file: %s" % sys.exc_info()[1])
             # delete image file
             os.remove(pic_fname)
             return

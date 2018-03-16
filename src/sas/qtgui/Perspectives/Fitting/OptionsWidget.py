@@ -2,10 +2,12 @@
 Widget/logic for smearing data.
 """
 import numpy as np
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 from sas.qtgui.Plotting.PlotterData import Data2D
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # Local UI
 from sas.qtgui.Perspectives.Fitting.UI.OptionsWidgetUI import Ui_tabOptions
@@ -20,7 +22,7 @@ MODEL = [
     'NPTS',
     'LOG_SPACED']
 
-class DataWidgetMapper(QtGui.QDataWidgetMapper):
+class DataWidgetMapper(QtWidgets.QDataWidgetMapper):
     """
     Custom version of the standard QDataWidgetMapper allowing for proper
     response to index change in comboboxes
@@ -31,15 +33,15 @@ class DataWidgetMapper(QtGui.QDataWidgetMapper):
         else:
             super(DataWidgetMapper, self).addMapping(widget, section, propertyName)
 
-        if isinstance(widget, QtGui.QComboBox):
+        if isinstance(widget, QtWidgets.QComboBox):
             delegate = self.itemDelegate()
             widget.currentIndexChanged.connect(lambda: delegate.commitData.emit(widget))
 
-        elif isinstance(widget, QtGui.QCheckBox):
+        elif isinstance(widget, QtWidgets.QCheckBox):
             delegate = self.itemDelegate()
             widget.stateChanged.connect(lambda: delegate.commitData.emit(widget))
 
-class OptionsWidget(QtGui.QWidget, Ui_tabOptions):
+class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
     plot_signal = QtCore.pyqtSignal()
     def __init__(self, parent=None, logic=None):
         super(OptionsWidget, self).__init__()
@@ -51,7 +53,7 @@ class OptionsWidget(QtGui.QWidget, Ui_tabOptions):
         self.parent = parent
 
         # Weight radio box group
-        self.weightingGroup = QtGui.QButtonGroup()
+        self.weightingGroup = QtWidgets.QButtonGroup()
         self.weighting = 0
 
         # Group boxes
@@ -64,8 +66,8 @@ class OptionsWidget(QtGui.QWidget, Ui_tabOptions):
         self.weightingGroup.addButton(self.rbWeighting4)
 
         # Let only floats in the range edits
-        self.txtMinRange.setValidator(QtGui.QDoubleValidator())
-        self.txtMaxRange.setValidator(QtGui.QDoubleValidator())
+        self.txtMinRange.setValidator(GuiUtils.DoubleValidator())
+        self.txtMaxRange.setValidator(GuiUtils.DoubleValidator())
         # Let only ints in the number of points edit
         self.txtNpts.setValidator(QtGui.QIntValidator())
 
@@ -95,7 +97,7 @@ class OptionsWidget(QtGui.QWidget, Ui_tabOptions):
         Initialize the state
         """
         self.model = QtGui.QStandardItemModel()
-        for model_item in xrange(len(MODEL)):
+        for model_item in range(len(MODEL)):
             self.model.setItem(model_item, QtGui.QStandardItem())
         # Attach slot
         self.model.dataChanged.connect(self.onModelChange)
@@ -113,7 +115,8 @@ class OptionsWidget(QtGui.QWidget, Ui_tabOptions):
         self.mapper.addMapping(self.txtMaxRange, MODEL.index('MAX_RANGE'))
         self.mapper.addMapping(self.txtNpts,     MODEL.index('NPTS'))
         self.mapper.addMapping(self.chkLogData,  MODEL.index('LOG_SPACED'))
-        self.mapper.toFirst()
+        # FIXME DOESNT WORK WITH QT5
+        #self.mapper.toFirst()
 
     def toggleLogData(self, isChecked):
         """ Toggles between log and linear data sets """

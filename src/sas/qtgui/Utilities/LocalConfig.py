@@ -3,6 +3,7 @@
 """
 import time
 import os
+import logging
 
 #from sas.sasgui.guiframe.gui_style import GUIFRAME
 import sas.sasview
@@ -131,6 +132,12 @@ TOOLBAR_SHOW = True
 # set a default perspective
 DEFAULT_PERSPECTIVE = 'None'
 
+# Default threading model
+USING_TWISTED = False
+
+# Logging levels to disable, if any
+DISABLE_LOGGING = logging.DEBUG
+
 # Time out for updating sasview
 UPDATE_TIMEOUT = 2
 def printEVT(message):
@@ -138,7 +145,7 @@ def printEVT(message):
     Post a debug message to console/file
     """
     if __EVT_DEBUG__:
-        print "%g:  %s" % (time.clock(), message)
+        print("%g:  %s" % (time.clock(), message))
 
         if __EVT_DEBUG_2_FILE__:
             out = open(__EVT_DEBUG_FILENAME__, 'a')

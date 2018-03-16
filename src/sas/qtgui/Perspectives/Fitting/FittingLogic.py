@@ -195,7 +195,7 @@ class FittingLogic(object):
             except (ValueError, TypeError):
                 msg = "Unable to find min/max/length of \n data named %s" % \
                             self.data.filename
-                raise ValueError, msg
+                raise ValueError(msg)
 
         else:
             qmin = 0
@@ -205,7 +205,7 @@ class FittingLogic(object):
             except (ValueError, TypeError):
                 msg = "Unable to find min/max of \n data named %s" % \
                             self.data.filename
-                raise ValueError, msg
+                raise ValueError(msg)
             qmax = np.sqrt(x * x + y * y)
             npts = len(data.data)
         return qmin, qmax, npts

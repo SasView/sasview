@@ -1,7 +1,8 @@
 import numpy
 
-from PyQt4 import QtCore
-from PyQt4 import QtGui
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 from bumps import options
 from bumps import fitters
@@ -9,14 +10,20 @@ from bumps import fitters
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
 
 from sas.qtgui.Perspectives.Fitting.FittingWidget import FittingWidget
+from sas.qtgui.Perspectives.Fitting.ConstraintWidget import ConstraintWidget
 from sas.qtgui.Perspectives.Fitting.FittingOptions import FittingOptions
-from sas.qtgui.Perspectives.Fitting import ModelUtilities
+from sas.qtgui.Perspectives.Fitting.GPUOptions import GPUOptions
 
-class FittingWindow(QtGui.QTabWidget):
+class FittingWindow(QtWidgets.QTabWidget):
     """
     """
+    tabsModifiedSignal = QtCore.pyqtSignal()
+    fittingStartedSignal = QtCore.pyqtSignal(list)
+    fittingStoppedSignal = QtCore.pyqtSignal(list)
+
     name = "Fitting" # For displaying in the combo box in DataExplorer
     def __init__(self, parent=None, data=None):
+
         super(FittingWindow, self).__init__()
 
         self.parent = parent
@@ -34,11 +41,14 @@ class FittingWindow(QtGui.QTabWidget):
         # The default optimizer
         self.optimizer = 'Levenberg-Marquardt'
 
-        # Dataset inde -> Fitting tab mapping
+        # Dataset index -> Fitting tab mapping
         self.dataToFitTab = {}
 
         # The tabs need to be closeable
         self.setTabsClosable(True)
+
+        # The tabs need to be movabe
+        self.setMovable(True)
 
         self.communicate = self.parent.communicator()
 
@@ -48,6 +58,8 @@ class FittingWindow(QtGui.QTabWidget):
         # Deal with signals
         self.tabCloseRequested.connect(self.tabCloses)
         self.communicate.dataDeletedSignal.connect(self.dataDeleted)
+        self.fittingStartedSignal.connect(self.onFittingStarted)
+        self.fittingStoppedSignal.connect(self.onFittingStopped)
 
         # Perspective window not allowed to close by default
         self._allow_close = False
@@ -60,12 +72,9 @@ class FittingWindow(QtGui.QTabWidget):
         # Listen to GUI Manager signal updating fit options
         self.fit_options_widget.fit_option_changed.connect(self.onFittingOptionsChange)
 
-        self.menu_manager = ModelUtilities.ModelManager()
-        # TODO: reuse these in FittingWidget properly
-        self.model_list_box = self.menu_manager.get_model_list()
-        self.model_dictionary = self.menu_manager.get_model_dictionary()
+        # GPU Options
+        self.gpu_options_widget = GPUOptions(self)
 
-        #self.setWindowTitle('Fit panel - Active Fitting Optimizer: %s' % self.optimizer)
         self.updateWindowTitle()
 
     def updateWindowTitle(self):
@@ -78,7 +87,7 @@ class FittingWindow(QtGui.QTabWidget):
 
     def setClosable(self, value=True):
         """
-        Allow outsiders close this widget
+        Allow outsiders to close this widget
         """
         assert isinstance(value, bool)
 
@@ -89,11 +98,11 @@ class FittingWindow(QtGui.QTabWidget):
         Overwrite QDialog close method to allow for custom widget close
         """
         # Invoke fit page events
-        for tab in self.tabs:
-            tab.close()
         if self._allow_close:
             # reset the closability flag
             self.setClosable(value=False)
+            # Tell the MdiArea to close the container
+            self.parentWidget().close()
             event.accept()
         else:
             # Maybe we should just minimize
@@ -107,31 +116,54 @@ class FittingWindow(QtGui.QTabWidget):
         tab	= FittingWidget(parent=self.parent, data=data, tab_id=self.maxIndex+1)
         tab.is_batch_fitting = is_batch
         # Add this tab to the object library so it can be retrieved by scripting/jupyter
-        tab_name = self.tabName(is_batch=is_batch)
+        tab_name = self.getTabName(is_batch=is_batch)
         ObjectLibrary.addObject(tab_name, tab)
         self.tabs.append(tab)
         if data:
             self.updateFitDict(data, tab_name)
         self.maxIndex += 1
         self.addTab(tab, tab_name)
+        self.tabsModifiedSignal.emit()
+
+    def addConstraintTab(self):
+        """
+        Add a new C&S fitting tab
+        """
+        tabs = [isinstance(tab, ConstraintWidget) for tab in self.tabs]
+        if any(tabs):
+            # We already have a C&S tab: show it
+            self.setCurrentIndex(tabs.index(True))
+            return
+        tab	= ConstraintWidget(parent=self)
+        # Add this tab to the object library so it can be retrieved by scripting/jupyter
+        tab_name = self.getCSTabName() # TODO update the tab name scheme
+        ObjectLibrary.addObject(tab_name, tab)
+        self.tabs.append(tab)
+        self.addTab(tab, tab_name)
 
     def updateFitDict(self, item_key, tab_name):
         """
         Create a list if none exists and append if there's already a list
         """
-        if item_key in self.dataToFitTab.keys():
-            self.dataToFitTab[item_key].append(tab_name)
+        item_key_str = str(item_key)
+        if item_key_str in list(self.dataToFitTab.keys()):
+            self.dataToFitTab[item_key_str].append(tab_name)
         else:
-            self.dataToFitTab[item_key] = [tab_name]
+            self.dataToFitTab[item_key_str] = [tab_name]
 
-        #print "CURRENT dict: ", self.dataToFitTab
-
-    def tabName(self, is_batch=False):
+    def getTabName(self, is_batch=False):
         """
         Get the new tab name, based on the number of fitting tabs so far
         """
         page_name = "BatchPage" if is_batch else "FitPage"
         page_name = page_name + str(self.maxIndex)
+        return page_name
+
+    def getCSTabName(self):
+        """
+        Get the new tab name, based on the number of fitting tabs so far
+        """
+        page_name = "Const. & Simul. Fit"
         return page_name
 
     def resetTab(self, index):
@@ -160,6 +192,7 @@ class FittingWindow(QtGui.QTabWidget):
             ObjectLibrary.deleteObjectByRef(self.tabs[index])
             self.removeTab(index)
             del self.tabs[index]
+            self.tabsModifiedSignal.emit()
         except IndexError:
             # The tab might have already been deleted previously
             pass
@@ -168,7 +201,7 @@ class FittingWindow(QtGui.QTabWidget):
         """
         Given name of the fitting tab - close it
         """
-        for tab_index in xrange(len(self.tabs)):
+        for tab_index in range(len(self.tabs)):
             if self.tabText(tab_index) == tab_name:
                 self.tabCloses(tab_index)
         pass # debug hook
@@ -180,13 +213,12 @@ class FittingWindow(QtGui.QTabWidget):
         if not index_list or not self.dataToFitTab:
             return
         for index_to_delete in index_list:
-            if index_to_delete in self.dataToFitTab.keys():
-                for tab_name in self.dataToFitTab[index_to_delete]:
+            index_to_delete_str = str(index_to_delete)
+            if index_to_delete_str in list(self.dataToFitTab.keys()):
+                for tab_name in self.dataToFitTab[index_to_delete_str]:
                     # delete tab #index after corresponding data got removed
                     self.closeTabByName(tab_name)
-                self.dataToFitTab.pop(index_to_delete)
-
-        #print "CURRENT dict: ", self.dataToFitTab
+                self.dataToFitTab.pop(index_to_delete_str)
 
     def allowBatch(self):
         """
@@ -204,18 +236,22 @@ class FittingWindow(QtGui.QTabWidget):
 
         if not isinstance(data_item, list):
             msg = "Incorrect type passed to the Fitting Perspective"
-            raise AttributeError, msg
+            raise AttributeError(msg)
 
         if not isinstance(data_item[0], QtGui.QStandardItem):
             msg = "Incorrect type passed to the Fitting Perspective"
-            raise AttributeError, msg
+            raise AttributeError(msg)
+
+        if is_batch:
+            # Just create a new fit tab. No empty batchFit tabs
+            self.addFit(data_item, is_batch=is_batch)
+            return
 
         items = [data_item] if is_batch else data_item
-
         for data in items:
             # Find the first unassigned tab.
             # If none, open a new tab.
-            available_tabs = list(map(lambda tab: tab.acceptsData(), self.tabs))
+            available_tabs = [tab.acceptsData() for tab in self.tabs]
 
             if numpy.any(available_tabs):
                 first_good_tab = available_tabs.index(True)
@@ -234,5 +270,37 @@ class FittingWindow(QtGui.QTabWidget):
         self.fit_options.selected_id = str(fitter)
         # Update the title
         self.updateWindowTitle()
+
+    def onFittingStarted(self, tabs_for_fitting=None):
+        """
+        Notify tabs listed in tabs_for_fitting
+        that the fitting thread started
+        """
+        assert(isinstance(tabs_for_fitting, list))
+        assert(len(tabs_for_fitting)>0)
+
+        for tab_object in self.tabs:
+            if not isinstance(tab_object, FittingWidget):
+                continue
+            page_name = "Page%s"%tab_object.tab_id
+            if any([page_name in tab for tab in tabs_for_fitting]):
+                tab_object.setFittingStarted()
+
+        pass
+
+    def onFittingStopped(self, tabs_for_fitting=None):
+        """
+        Notify tabs listed in tabs_for_fitting
+        that the fitting thread stopped
+        """
+        assert(isinstance(tabs_for_fitting, list))
+        assert(len(tabs_for_fitting)>0)
+
+        for tab_object in self.tabs:
+            if not isinstance(tab_object, FittingWidget):
+                continue
+            page_name = "Page%s"%tab_object.tab_id
+            if any([page_name in tab for tab in tabs_for_fitting]):
+                tab_object.setFittingStopped()
 
         pass

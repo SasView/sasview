@@ -32,7 +32,7 @@ class CalcPr(CalcThread):
             pass
         except:
             if self.error_func is not None:
-                self.error_func("CalcPr.compute: %s" % sys.exc_value)
+                self.error_func("CalcPr.compute: %s" % sys.exc_info()[1])
 
 
 class EstimatePr(CalcThread):
@@ -61,7 +61,7 @@ class EstimatePr(CalcThread):
             pass
         except:
             if self.error_func is not None:
-                self.error_func("EstimatePr.compute: %s" % sys.exc_value)
+                self.error_func("EstimatePr.compute: %s" % sys.exc_info()[1])
 
 
 class EstimateNT(CalcThread):
@@ -101,4 +101,4 @@ class EstimateNT(CalcThread):
             pass
         except:
             if self.error_func is not None:
-                self.error_func("EstimatePr2.compute: %s" % sys.exc_value)
+                self.error_func("EstimatePr2.compute: %s" % sys.exc_info()[1])
