@@ -442,8 +442,9 @@ corresponding uncertainties on the optimised values.
    fitted parameters, or the model is relatively insensitive to the value of
    that particular parameter.
 
-In the bottom left corner of the *Fit Page* is a box displaying the normalised
-value of the statistical $\chi^2$ parameter returned by the optimiser.
+In the bottom left corner of the *Fit Page* is a box displaying a normalised
+value of the statistical $\chi^2$ parameter (the reduced $\chi^2$,
+See :ref:`Assessing_Fit_Quality`) returned by the optimiser.
 
 Now check the box for another model parameter and click *Fit* again. Repeat this
 process until all relevant parameters are checked and have been optimised. As
@@ -468,7 +469,7 @@ This mode is an extension of the :ref:`Single_Fit_Mode` that allows for some
 relatively extensive constraints between fitted parameters in a single *FitPage*
 or between several *FitPage*'s (eg, to constrain all fitted parameters to be the
 same in a contrast series of *FitPages* except for the solvent sld parameter,
-contrain the length to be twice that of the radius in a single *FitPage*,
+constrain the length to be twice that of the radius in a single *FitPage*,
 fix the radius of the sphere in one *FitPage* to be the same as the radius of
 the cylinder in a second *FitPage*, etc).
 
