@@ -390,6 +390,7 @@ class TextDialog(wx.Dialog):
             color = 'red'
         self._msg_box.SetLabel(msg)
         self._msg_box.SetForegroundColour(color)
+        self._set_model_list()
         if self.parent.parent is not None:
             from sas.sasgui.guiframe.events import StatusEvent
             wx.PostEvent(self.parent.parent, StatusEvent(status=msg,
@@ -431,6 +432,8 @@ class TextDialog(wx.Dialog):
 
         if len(main_list) > 1:
             main_list.sort()
+        self.model1.Clear()
+        self.model2.Clear()
         for idx in range(len(main_list)):
             self.model1.Append(str(main_list[idx]), idx)
             self.model2.Append(str(main_list[idx]), idx)
