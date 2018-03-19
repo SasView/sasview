@@ -364,7 +364,7 @@ class FitPage(BasicPage):
 
         # StaticText for chi2, N(for fitting), Npts + Log/linear spacing
         self.tcChi = BGTextCtrl(self, wx.ID_ANY, "-", size=(75, 20), style=0)
-        self.tcChi.SetToolTipString("Chi2/Npts(Fit)")
+        self.tcChi.SetToolTipString("Chi2/DOF (DOF=Npts-Npar fitted)")
         self.Npts_fit = BGTextCtrl(self, wx.ID_ANY, "-", size=(75, 20), style=0)
         self.Npts_fit.SetToolTipString(
             " Npts : number of points selected for fitting")
@@ -390,7 +390,7 @@ class FitPage(BasicPage):
         self.points_sizer.Add(wx.StaticText(self, wx.ID_ANY, 'Npts    '))
         self.points_sizer.Add(self.pointsbox)
 
-        box_description_1 = wx.StaticText(self, wx.ID_ANY, '   Chi2/Npts')
+        box_description_1 = wx.StaticText(self, wx.ID_ANY, 'Reduced Chi2')
         box_description_2 = wx.StaticText(self, wx.ID_ANY, 'Npts(Fit)')
 
         # StaticText for smear
