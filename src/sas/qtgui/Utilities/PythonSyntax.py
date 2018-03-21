@@ -1,5 +1,3 @@
-import sys
-
 from PyQt5.QtCore import QRegExp
 from PyQt5.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter
 
@@ -174,8 +172,6 @@ class PythonHighlighter (QSyntaxHighlighter):
             return False
 
 if __name__ == '__main__':
-    import sys
-
     from PyQt5 import QtWidgets
 
     app = QtWidgets.QApplication([])

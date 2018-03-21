@@ -1,11 +1,7 @@
 # global
-import sys
 import os
-import logging 
 from shutil import copyfile
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
 from sas.sascalc.fit import models

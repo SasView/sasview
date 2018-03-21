@@ -1,14 +1,10 @@
 # global
 import sys
 import os
-import types
 import datetime
 import numpy as np
-import webbrowser
 import logging
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
 from sas.sascalc.fit import models
@@ -16,7 +12,6 @@ from sas.sascalc.fit import models
 from sas.qtgui.Utilities.UI.TabbedModelEditor import Ui_TabbedModelEditor
 from sas.qtgui.Utilities.PluginDefinition import PluginDefinition
 from sas.qtgui.Utilities.ModelEditor import ModelEditor
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
     """
@@ -313,7 +308,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         """
         return self.tabWidget.currentWidget().getModel()
 
-    def writeFile(self, fname, model_str=""):
+    @classmethod
+    def writeFile(cls, fname, model_str=""):
         """
         Write model content to file "fname"
         """
@@ -341,13 +337,15 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         pd_params = []
         model_text += 'parameters = [ \n'
         model_text += '#   ["name", "units", default, [lower, upper], "type", "description"],\n'
-        for pname, pvalue, desc in self.getParamHelper(param_str):
-            param_names.append(pname)
-            model_text += "    ['%s', '', %s, [-inf, inf], '', '%s'],\n" % (pname, pvalue, desc)
-        for pname, pvalue, desc in self.getParamHelper(pd_param_str):
-            param_names.append(pname)
-            pd_params.append(pname)
-            model_text += "    ['%s', '', %s, [-inf, inf], 'volume', '%s'],\n" % (pname, pvalue, desc)
+        if param_str:
+            for pname, pvalue, desc in self.getParamHelper(param_str):
+                param_names.append(pname)
+                model_text += "    ['%s', '', %s, [-inf, inf], '', '%s'],\n" % (pname, pvalue, desc)
+        if pd_param_str:
+            for pname, pvalue, desc in self.getParamHelper(pd_param_str):
+                param_names.append(pname)
+                pd_params.append(pname)
+                model_text += "    ['%s', '', %s, [-inf, inf], 'volume', '%s'],\n" % (pname, pvalue, desc)
         model_text += '    ]\n'
 
         # Write out function definition
@@ -380,7 +378,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         return model_text
 
-    def checkModel(self, path):
+    @classmethod
+    def checkModel(cls, path):
         """
         Check that the model save in file 'path' can run.
         """
@@ -389,9 +388,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         Model = load_custom_model(path)
         model = Model()
         q =  np.array([0.01, 0.1])
-        Iq = model.evalDistribution(q)
+        _ = model.evalDistribution(q)
         qx, qy =  np.array([0.01, 0.01]), np.array([0.1, 0.1])
-        Iqxy = model.evalDistribution([qx, qy])
+        _ = model.evalDistribution([qx, qy])
 
         # check the model's unit tests run
         from sasmodels.model_test import run_one
@@ -399,7 +398,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         return result
 
-    def getParamHelper(self, param_str):
+    @classmethod
+    def getParamHelper(cls, param_str):
         """
         yield a sequence of name, value pairs for the parameters in param_str
 
@@ -413,8 +413,9 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
                 name, value = defn.split('=', 1) if '=' in defn else (defn, '1.0')
                 if name:
                     yield [v.strip() for v in (name, value, desc)]
-        
-    def strFromParamDict(self, param_dict):
+
+    @classmethod
+    def strFromParamDict(cls, param_dict):
         """
         Creates string from parameter dictionary
         {0: ('variable','value'),
@@ -422,7 +423,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
          ...}
         """
         param_str = ""
-        for row, params in param_dict.items():
+        for _, params in param_dict.items():
             if not params[0]: continue
             value = 1
             if params[1]:
@@ -499,9 +500,8 @@ Model = make_model_from_info(model_info)
 """
 
 if __name__ == '__main__':
-    import sys
     app = QtWidgets.QApplication(sys.argv)
     sheet = TabbedModelEditor()
     sheet.show()
-    sys.exit(app.exec_())
+    app.exec_()
     

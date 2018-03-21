@@ -423,7 +423,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if self.kernel_module:
             self.onSelectModel()
 
-    def customModels(self):
+    @classmethod
+    def customModels(cls):
         """ Reads in file names in the custom plugin directory """
         return ModelUtilities._find_models()
 
@@ -1050,7 +1051,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.enableStructureCombo()
             self._model_model.clear()
             return
-            
+
         # Safely clear and enable the model combo
         self.cbModel.blockSignals(True)
         self.cbModel.clear()
@@ -1356,7 +1357,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # deal with it until Python gets discriminated unions
         smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
 
-        constraints = self.getConstraintsForFitting()
+        # Get the constraints.
+        constraints = self.getComplexConstraintsForModel()
+        if fitter is None:
+            # For single fits - check for inter-model constraints
+            constraints = self.getConstraintsForFitting()
 
         smearer = None
         handler = None

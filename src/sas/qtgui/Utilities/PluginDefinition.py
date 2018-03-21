@@ -1,8 +1,3 @@
-# global
-import sys
-import os
-import logging 
-
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
@@ -68,7 +63,7 @@ return y
 
         txt_validator = QtGui.QRegExpValidator(rx)
         self.txtName.setValidator(txt_validator)
-        self.highlight = PythonHighlighter(self.txtFunction.document())        
+        self.highlight = PythonHighlighter(self.txtFunction.document())
 
     def initializeModel(self):
         """

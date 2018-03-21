@@ -170,7 +170,8 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
                 if tab_object is None:
                     # No such tab!
                     return
-                sim_fitter_list, fitter_id = tab_object.prepareFitters(fitter=sim_fitter_list[0], fit_id=fitter_id)
+                sim_fitter_list, fitter_id = \
+                    tab_object.prepareFitters(fitter=sim_fitter_list[0], fit_id=fitter_id)
                 page_ids.append([tab_object.page_id])
         except ValueError:
             # No parameters selected in one of the tabs

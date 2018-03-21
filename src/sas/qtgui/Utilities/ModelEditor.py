@@ -1,14 +1,6 @@
-# global
-import sys
-import os
-import types
-import webbrowser
-
 from PyQt5 import QtCore
-from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
-import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.PythonSyntax import PythonHighlighter
 
 from sas.qtgui.Utilities.UI.ModelEditor import Ui_ModelEditor
@@ -48,7 +40,6 @@ class ModelEditor(QtWidgets.QDialog, Ui_ModelEditor):
         # We have edited the model - notify the parent.
         if self.txtEditor.toPlainText() != "":
             self.modelModified.emit()
-        pass
 
     def getModel(self):
         """
