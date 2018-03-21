@@ -472,7 +472,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Notify the gui manager about the new perspective chosen.
         """
-        self.communicator.perspectiveChangedSignal.emit(self.cbFitting.currentText())
+        self.communicator.perspectiveChangedSignal.emit(self.cbFitting.itemText(index))
         self.chkBatch.setEnabled(self.parent.perspective().allowBatch())
 
     def displayFile(self, filename=None, is_data=True):
@@ -1028,6 +1028,16 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 else:
                     # delete directly from model
                     model.removeRow(row)
+        pass
+
+    def onAnalysisUpdate(self, new_perspective=""):
+        """
+        Update the perspective combo index based on passed string
+        """
+        assert new_perspective in Perspectives.PERSPECTIVES.keys()
+        self.cbFitting.blockSignals(True)
+        self.cbFitting.setCurrentIndex(self.cbFitting.findText(new_perspective))
+        self.cbFitting.blockSignals(False)
         pass
 
     def loadComplete(self, output):

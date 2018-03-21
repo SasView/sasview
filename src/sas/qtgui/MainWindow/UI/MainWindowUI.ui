@@ -127,9 +127,10 @@
     <property name="title">
      <string>Analysis</string>
     </property>
+    <addaction name="actionCorfunc"/>
     <addaction name="actionFitting"/>
-    <addaction name="actionInversion"/>
     <addaction name="actionInvariant"/>
+    <addaction name="actionInversion"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -514,6 +515,14 @@
   <action name="actionManage_Custom_Models">
    <property name="text">
     <string>Manage Custom Models</string>
+   </property>
+  </action>
+  <action name="actionCorfunc">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Correlation Function</string>
    </property>
   </action>
  </widget>

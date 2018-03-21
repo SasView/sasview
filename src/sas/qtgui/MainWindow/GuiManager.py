@@ -48,7 +48,6 @@ class GuiManager(object):
     """
     Main SasView window functionality
     """
-
     def __init__(self, parent=None):
         """
         Initialize the manager as a child of MainWindow.
@@ -183,12 +182,6 @@ class GuiManager(object):
         """
         Respond to change of the perspective signal
         """
-
-        # Save users from themselves...
-        #if isinstance(self._current_perspective, Perspectives.PERSPECTIVES[str(perspective_name)]):
-        self.setupPerspectiveMenubarOptions(self._current_perspective)
-        #    return
-
         # Close the previous perspective
         self.clearPerspectiveMenubarOptions(self._current_perspective)
         if self._current_perspective:
@@ -198,6 +191,8 @@ class GuiManager(object):
             self._workspace.workspace.removeSubWindow(self._current_perspective)
         # Default perspective
         self._current_perspective = Perspectives.PERSPECTIVES[str(perspective_name)](parent=self)
+
+        self.setupPerspectiveMenubarOptions(self._current_perspective)
 
         subwindow = self._workspace.workspace.addSubWindow(self._current_perspective)
 
@@ -421,6 +416,7 @@ class GuiManager(object):
         self._workspace.actionFitting.triggered.connect(self.actionFitting)
         self._workspace.actionInversion.triggered.connect(self.actionInversion)
         self._workspace.actionInvariant.triggered.connect(self.actionInvariant)
+        self._workspace.actionCorfunc.triggered.connect(self.actionCorfunc)
         # Help
         self._workspace.actionDocumentation.triggered.connect(self.actionDocumentation)
         self._workspace.actionTutorial.triggered.connect(self.actionTutorial)
@@ -690,21 +686,29 @@ class GuiManager(object):
         Change to the Fitting perspective
         """
         self.perspectiveChanged("Fitting")
+        # Notify other widgets
+        self.filesWidget.onAnalysisUpdate("Fitting")
 
     def actionInversion(self):
         """
         Change to the Inversion perspective
         """
-        # For now we'll just update the analysis menu status but when the inversion is implemented delete from here
-        self.checkAnalysisOption(self._workspace.actionInversion)
-        # to here and uncomment the following line
         self.perspectiveChanged("Inversion")
+        self.filesWidget.onAnalysisUpdate("Inversion")
 
     def actionInvariant(self):
         """
         Change to the Invariant perspective
         """
         self.perspectiveChanged("Invariant")
+        self.filesWidget.onAnalysisUpdate("Invariant")
+
+    def actionCorfunc(self):
+        """
+        Change to the Corfunc perspective
+        """
+        self.perspectiveChanged("Corfunc")
+        self.filesWidget.onAnalysisUpdate("Corfunc")
 
     #============ WINDOW =================
     def actionCascade(self):
@@ -851,5 +855,7 @@ class GuiManager(object):
             self._workspace.menubar.addAction(self._workspace.menuHelp.menuAction())
         elif isinstance(perspective, Perspectives.PERSPECTIVES["Invariant"]):
             self.checkAnalysisOption(self._workspace.actionInvariant)
-        # elif isinstance(perspective, Perspectives.PERSPECTIVES["Inversion"]):
-        #     self.checkAnalysisOption(self._workspace.actionInversion)
+        elif isinstance(perspective, Perspectives.PERSPECTIVES["Inversion"]):
+            self.checkAnalysisOption(self._workspace.actionInversion)
+        elif isinstance(perspective, Perspectives.PERSPECTIVES["Corfunc"]):
+            self.checkAnalysisOption(self._workspace.actionCorfunc)
