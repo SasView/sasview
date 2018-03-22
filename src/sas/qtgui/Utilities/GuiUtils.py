@@ -244,6 +244,10 @@ class Communicate(QtCore.QObject):
     # Notify about a new custom plugin being written/deleted/modified
     customModelDirectoryChanged = QtCore.pyqtSignal()
 
+    # Notify the gui manager about new data to be added to the grid view
+    sendDataToGridSignal = QtCore.pyqtSignal(list)
+
+
 def updateModelItemWithPlot(item, update_data, name=""):
     """
     Adds a checkboxed row named "name" to QStandardItem
@@ -332,7 +336,6 @@ def updateModelItem(item, update_data, name=""):
     Adds a simple named child to QStandardItem
     """
     assert isinstance(item, QtGui.QStandardItem)
-    #assert isinstance(update_data, list)
 
     # Add the actual Data1D/Data2D object
     object_item = QtGui.QStandardItem()
@@ -464,6 +467,13 @@ def infoFromData(data):
     info_item.appendRow(process_item)
 
     return info_item
+
+def dataFromItem(item):
+    """
+    Retrieve Data1D/2D component from QStandardItem.
+    The assumption - data stored in SasView standard, in child 0
+    """
+    return item.child(0).data()
 
 def openLink(url):
     """
@@ -811,13 +821,6 @@ def xyTransform(data, xLabel="", yLabel=""):
     data.transformView()
 
     return (xLabel, yLabel, xscale, yscale)
-
-def dataFromItem(item):
-    """
-    Retrieve Data1D/2D component from QStandardItem.
-    The assumption - data stored in SasView standard, in child 0
-    """
-    return item.child(0).data()
 
 def formatNumber(value, high=False):
     """

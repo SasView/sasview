@@ -133,7 +133,7 @@ TOOLBAR_SHOW = True
 DEFAULT_PERSPECTIVE = 'None'
 
 # Default threading model
-USING_TWISTED = False
+USING_TWISTED = True
 
 # Logging levels to disable, if any
 DISABLE_LOGGING = logging.DEBUG

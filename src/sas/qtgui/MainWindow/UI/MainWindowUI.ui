@@ -105,8 +105,6 @@
     <addaction name="actionGPU_Options"/>
     <addaction name="actionFit_Results"/>
     <addaction name="separator"/>
-    <addaction name="actionChain_Fitting"/>
-    <addaction name="separator"/>
     <addaction name="actionAdd_Custom_Model"/>
     <addaction name="actionEdit_Custom_Model"/>
     <addaction name="actionManage_Custom_Models"/>

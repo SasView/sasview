@@ -475,6 +475,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.perspectiveChangedSignal.emit(self.cbFitting.itemText(index))
         self.chkBatch.setEnabled(self.parent.perspective().allowBatch())
 
+    def itemFromFilename(self, filename):
+        """
+        Retrieves model item corresponding to the given filename
+        """
+        item = GuiUtils.itemFromFilename(filename, self.model)
+        return item
+
     def displayFile(self, filename=None, is_data=True):
         """
         Forces display of charts for the given filename

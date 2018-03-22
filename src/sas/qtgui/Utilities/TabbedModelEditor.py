@@ -34,6 +34,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.window_title = self.windowTitle()
         self.edit_only = edit_only
         self.is_modified = False
+        self.label = None
 
         self.addWidgets()
 
@@ -239,7 +240,8 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         # Run the model test in sasmodels
         try:
-            _ = GuiUtils.checkModel(full_path)
+            model_results = self.checkModel(full_path)
+            logging.info(model_results)
         except Exception as ex:
             msg = "Error building model: "+ str(ex)
             logging.error(msg)

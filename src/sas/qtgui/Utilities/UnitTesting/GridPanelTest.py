@@ -69,7 +69,7 @@ class BatchOutputPanelTest(unittest.TestCase):
         '''Test the GUI in its default state'''
         self.assertIsInstance(self.widget, QtWidgets.QMainWindow)
         # Default title
-        self.assertEqual(self.widget.windowTitle(), "Grid Panel")
+        self.assertEqual(self.widget.windowTitle(), "Batch Fitting Results")
 
         # non-modal window
         self.assertFalse(self.widget.isModal())

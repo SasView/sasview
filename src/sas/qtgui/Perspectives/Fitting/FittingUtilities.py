@@ -420,3 +420,19 @@ def getWeight(data, is2d, flag=None):
     elif flag == 3:
         weight = numpy.abs(data)
     return weight
+
+def updateKernelWithResults(kernel, results):
+    """
+    Takes model kernel and applies results dict to its parameters,
+    returning the modified (deep) copy of the kernel.
+    """
+    assert(isinstance(results, dict))
+    local_kernel = copy.deepcopy(kernel)
+
+    for parameter in results.keys():
+        # Update the parameter value - note: this supports +/-inf as well
+        local_kernel.setParam(parameter, results[parameter][0])
+
+    return local_kernel
+
+

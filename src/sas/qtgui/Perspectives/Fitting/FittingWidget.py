@@ -2,7 +2,7 @@ import json
 import os
 from collections import defaultdict
 
-
+import copy
 import logging
 import traceback
 from twisted.internet import threads
@@ -23,7 +23,6 @@ from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Utilities.LocalConfig as LocalConfig
-from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
@@ -87,6 +86,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     newModelSignal = QtCore.pyqtSignal()
     fittingFinishedSignal = QtCore.pyqtSignal(tuple)
     batchFittingFinishedSignal = QtCore.pyqtSignal(tuple)
+    Calc1DFinishedSignal = QtCore.pyqtSignal(tuple)
+    Calc2DFinishedSignal = QtCore.pyqtSignal(tuple)
 
     def __init__(self, parent=None, data=None, tab_id=1):
 
@@ -98,14 +99,17 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Which tab is this widget displayed in?
         self.tab_id = tab_id
 
-        # Main Data[12]D holder
-        self.logic = FittingLogic()
-
         # Globals
         self.initializeGlobals()
 
         # Set up desired logging level
         logging.disable(LocalConfig.DISABLE_LOGGING)
+
+        # data index for the batch set
+        self.data_index = 0
+        # Main Data[12]D holders
+        # Logics.data contains a single Data1D/Data2D object
+        self._logic = [FittingLogic()]
 
         # Main GUI setup up
         self.setupUi(self)
@@ -133,17 +137,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Initial control state
         self.initializeControls()
 
-        # Display HTML content
-        #self.setupHelp()
+        if data is not None:
+            self.data = data
 
         # New font to display angstrom symbol
         new_font = 'font-family: -apple-system, "Helvetica Neue", "Ubuntu";'
         self.label_17.setStyleSheet(new_font)
         self.label_19.setStyleSheet(new_font)
 
-        self._index = None
-        if data is not None:
-            self.data = data
+    @property
+    def logic(self):
+        # make sure the logic contains at least one element
+        assert(self._logic)
+        # logic connected to the currently shown data
+        return self._logic[self.data_index]
 
     @property
     def data(self):
@@ -160,15 +167,16 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             value = [value]
 
         assert isinstance(value[0], QtGui.QStandardItem)
-        # _index contains the QIndex with data
-        self._index = value[0]
 
         # Keep reference to all datasets for batch
         self.all_data = value
 
-        # Update logics with data items
+        # Create logics with data items
+        self._logic=[]
         # Logics.data contains only a single Data1D/Data2D object
-        self.logic.data = GuiUtils.dataFromItem(value[0])
+        for data_item in value:
+            self._logic.append(FittingLogic())
+            self._logic[-1].data = GuiUtils.dataFromItem(data_item)
 
         # Overwrite data type descriptor
         self.is2D = True if isinstance(self.logic.data, Data2D) else False
@@ -225,6 +233,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.custom_models = self.customModels()
         # Polydisp widget table default index for function combobox
         self.orig_poly_index = 3
+        # copy of current kernel model
+        self.kernel_module_copy = None
 
         # Page id for fitting
         # To keep with previous SasView values, use 200 as the start offset
@@ -487,6 +497,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Local signals
         self.batchFittingFinishedSignal.connect(self.batchFitComplete)
         self.fittingFinishedSignal.connect(self.fitComplete)
+        self.Calc1DFinishedSignal.connect(self.complete1D)
+        self.Calc2DFinishedSignal.connect(self.complete2D)
 
         # Signals from separate tabs asking for replot
         self.options_widget.plot_signal.connect(self.onOptionsUpdate)
@@ -929,8 +941,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Update the logic based on the selected file in batch fitting
         """
-        self._index = self.all_data[data_index]
-        self.logic.data = GuiUtils.dataFromItem(self.all_data[data_index])
+        self.data_index = data_index
         self.updateQRange()
 
     def onSelectStructureFactor(self):
@@ -1230,6 +1241,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             self.communicate.statusBarUpdateSignal.emit(str(ex))
             return
 
+        # keep local copy of kernel parameters, as they will change during the update
+        self.kernel_module_copy = copy.deepcopy(self.kernel_module)
+
         # Create the fitting thread, based on the fitter
         completefn = self.batchFittingCompleted if self.is_batch_fitting else self.fittingCompleted
 
@@ -1296,9 +1310,62 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         #re-enable the Fit button
         self.setFittingStopped()
+
+        if result is None:
+            msg = "Fitting failed."
+            self.communicate.statusBarUpdateSignal.emit(msg)
+            return
+
         # Show the grid panel
-        self.grid_window = BatchOutputPanel(parent=self, output_data=result[0])
-        self.grid_window.show()
+        self.communicate.sendDataToGridSignal.emit(result[0])
+
+        elapsed = result[1]
+        msg = "Fitting completed successfully in: %s s.\n" % GuiUtils.formatNumber(elapsed)
+        self.communicate.statusBarUpdateSignal.emit(msg)
+
+        # Run over the list of results and update the items
+        for res_index, res_list in enumerate(result[0]):
+            # results
+            res = res_list[0]
+            param_dict = self.paramDictFromResults(res)
+
+            # create local kernel_module
+            kernel_module = FittingUtilities.updateKernelWithResults(self.kernel_module, param_dict)
+            # pull out current data
+            data = self._logic[res_index].data
+
+            # Switch indexes
+            self.onSelectBatchFilename(res_index)
+
+            method = self.complete1D if isinstance(self.data, Data1D) else self.complete2D
+            self.calculateQGridForModelExt(data=data, model=kernel_module, completefn=method, use_threads=False)
+
+        # Restore original kernel_module, so subsequent fits on the same model don't pick up the new params
+        if self.kernel_module is not None:
+            self.kernel_module = copy.deepcopy(self.kernel_module_copy)
+
+    def paramDictFromResults(self, results):
+        """
+        Given the fit results structure, pull out optimized parameters and return them as nicely
+        formatted dict
+        """
+        if results.fitness is None or \
+            not np.isfinite(results.fitness) or \
+            np.any(results.pvec is None) or \
+            not np.all(np.isfinite(results.pvec)):
+            msg = "Fitting did not converge!"
+            self.communicate.statusBarUpdateSignal.emit(msg)
+            msg += results.mesg
+            logging.error(msg)
+            return
+
+        param_list = results.param_list # ['radius', 'radius.width']
+        param_values = results.pvec     # array([ 0.36221662,  0.0146783 ])
+        param_stderr = results.stderr   # array([ 1.71293015,  1.71294233])
+        params_and_errors = list(zip(param_values, param_stderr))
+        param_dict = dict(zip(param_list, params_and_errors))
+
+        return param_dict
 
     def fittingCompleted(self, result):
         """
@@ -1321,15 +1388,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         res_list = result[0][0]
         res = res_list[0]
-        if res.fitness is None or \
-            not np.isfinite(res.fitness) or \
-            np.any(res.pvec is None) or \
-            not np.all(np.isfinite(res.pvec)):
-            msg = "Fitting did not converge!"
-            self.communicate.statusBarUpdateSignal.emit(msg)
-            msg += res.mesg
-            logging.error(msg)
-            return
+        self.chi2 = res.fitness
+        param_dict = self.paramDictFromResults(res)
 
         elapsed = result[1]
         if self.calc_fit._interrupting:
@@ -1338,13 +1398,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         else:
             msg = "Fitting completed successfully in: %s s." % GuiUtils.formatNumber(elapsed)
         self.communicate.statusBarUpdateSignal.emit(msg)
-
-        self.chi2 = res.fitness
-        param_list = res.param_list # ['radius', 'radius.width']
-        param_values = res.pvec     # array([ 0.36221662,  0.0146783 ])
-        param_stderr = res.stderr   # array([ 1.71293015,  1.71294233])
-        params_and_errors = list(zip(param_values, param_stderr))
-        param_dict = dict(zip(param_list, params_and_errors))
 
         # Dictionary of fitted parameter: value, error
         # e.g. param_dic = {"sld":(1.703, 0.0034), "length":(33.455, -0.0983)}
@@ -2000,7 +2053,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if hasattr(fitted_data, 'symbol') and fitted_data.symbol is None:
             fitted_data.symbol = 'Line'
         # Notify the GUI manager so it can update the main model in DataExplorer
-        GuiUtils.updateModelItemWithPlot(self._index, fitted_data, name)
+        GuiUtils.updateModelItemWithPlot(self.all_data[self.data_index], fitted_data, name)
 
     def createTheoryIndex(self, fitted_data):
         """
@@ -2030,17 +2083,22 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def methodCompleteForData(self):
         '''return the method for result parsin on calc complete '''
-        return self.complete1D if isinstance(self.data, Data1D) else self.complete2D
+        return self.completed1D if isinstance(self.data, Data1D) else self.completed2D
 
-    def calculateQGridForModel(self):
+    def calculateQGridForModelExt(self, data=None, model=None, completefn=None, use_threads=True):
         """
-        Prepare the fitting data object, based on current ModelModel
+        Wrapper for Calc1D/2D calls
         """
-        if self.kernel_module is None:
-            return
+        if data is None:
+            data = self.data
+        if model is None:
+            model = self.kernel_module
+        if completefn is None:
+            completefn = self.methodCompleteForData()
+
         # Awful API to a backend method.
-        method = self.methodCalculateForData()(data=self.data,
-                                               model=self.kernel_module,
+        calc_thread = self.methodCalculateForData()(data=data,
+                                               model=model,
                                                page_id=0,
                                                qmin=self.q_range_min,
                                                qmax=self.q_range_max,
@@ -2049,20 +2107,43 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                                                weight=None,
                                                fid=None,
                                                toggle_mode_on=False,
-                                               completefn=None,
+                                               completefn=completefn,
                                                update_chisqr=True,
                                                exception_handler=self.calcException,
                                                source=None)
+        if use_threads:
+            if LocalConfig.USING_TWISTED:
+                # start the thread with twisted
+                thread = threads.deferToThread(calc_thread.compute)
+                thread.addCallback(completefn)
+                thread.addErrback(self.calculateDataFailed)
+            else:
+                # Use the old python threads + Queue
+                calc_thread.queue()
+                calc_thread.ready(2.5)
+        else:
+            results = calc_thread.compute()
+            completefn(results)
 
-        calc_thread = threads.deferToThread(method.compute)
-        calc_thread.addCallback(self.methodCompleteForData())
-        calc_thread.addErrback(self.calculateDataFailed)
+    def calculateQGridForModel(self):
+        """
+        Prepare the fitting data object, based on current ModelModel
+        """
+        if self.kernel_module is None:
+            return
+        self.calculateQGridForModelExt()
 
     def calculateDataFailed(self, reason):
         """
         Thread returned error
         """
         print("Calculate Data failed with ", reason)
+
+    def completed1D(self, return_data):
+        self.Calc1DFinishedSignal.emit(return_data)
+
+    def completed2D(self, return_data):
+        self.Calc2DFinishedSignal.emit(return_data)
 
     def complete1D(self, return_data):
         """
@@ -2106,7 +2187,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         residuals_plot = FittingUtilities.plotResiduals(self.data, fitted_data)
         residuals_plot.id = "Residual " + residuals_plot.id
         self.createNewIndex(residuals_plot)
-        #self.communicate.plotUpdateSignal.emit([residuals_plot])
 
     def calcException(self, etype, value, tb):
         """

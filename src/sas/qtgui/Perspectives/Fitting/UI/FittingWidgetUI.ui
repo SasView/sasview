@@ -215,7 +215,7 @@
              <bool>true</bool>
             </property>
             <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Switch on magnetic scattering parameters.&lt;/p&gt;&lt;p&gt;This option is available only for 2D models.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Switch on Chain Fitting (parameter reuse) for batch datasets.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
              <string>Chain fit</string>

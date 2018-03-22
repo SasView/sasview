@@ -172,10 +172,6 @@ def _find_models():
         logging.warning(msg)
         return {}
 
-    plugin_log("looking for models in: %s" % str(directory))
-    # compile_file(directory)  #always recompile the folder plugin
-    logging.info("plugin model dir: %s" % str(directory))
-
     plugins = {}
     for filename in os.listdir(directory):
 

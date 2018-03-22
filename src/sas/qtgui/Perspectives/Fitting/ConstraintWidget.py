@@ -357,8 +357,13 @@ class ConstraintWidget(QtWidgets.QWidget, Ui_ConstraintWidgetUI):
         # get the elapsed time
         elapsed = result[1]
 
-        # ADD THE BATCH FIT VIEW HERE
-        #
+        if result is None:
+            msg = "Fitting failed."
+            self.parent.communicate.statusBarUpdateSignal.emit(msg)
+            return
+
+        # Show the grid panel
+        self.parent.communicate.sendDataToGridSignal.emit(result[0])
 
         msg = "Fitting completed successfully in: %s s.\n" % GuiUtils.formatNumber(elapsed)
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
