@@ -29,11 +29,9 @@ REGULARIZATION = 0.0001
 BACKGROUND_INPUT = 0.0
 MAX_DIST = 140.0
 DICT_KEYS = ["Calculator", "PrPlot", "DataPlot", "DMaxWindow",
-             "Logic", "NFunc", "Estimates"]
-ESTIMATE_KEYS = ["nFunc", "??????", "Background"]
+             "Logic", "NFunc", "NFuncEst", "BackgroundEst"]
 
 
-# TODO: Modify plot references, don't just send new
 # TODO: Update help with batch capabilities
 # TODO: Method to export results in some meaningful way
 class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
@@ -69,32 +67,26 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.dmaxWindow = None
         # p(r) calculator for self._data
         self._calculator = Invertor()
-        # Combo box index for self._data
-        self._data_index = 0
         # plots of self._data
         self.pr_plot = None
         self.data_plot = None
+        # suggested nTerms
+        self.nTermsSuggested = NUMBER_OF_TERMS
 
         # Calculation threads used by all data items
         self.calc_thread = None
         self.estimation_thread = None
 
         # Mapping for all data items
-        # TODO: {QStandardItem -> {params: [], plot: Plot, dmax: dMax,
-        # TODO: calculator: Invertor(), estimates: {}, data: Data1D, ...}
         # list mapping data to all parameters
         self._data_list = {}
         if not isinstance(data, list):
             data_list = [data]
         if data is not None:
             for datum in data_list:
-                self._data_list[datum] = {DICT_KEYS[0]: self._calculator.clone(),
-                                          DICT_KEYS[4]: self.logic,
-                                          DICT_KEYS[5]: NUMBER_OF_TERMS,
-                                          DICT_KEYS[6]: {}}
+                self.updateDataList(datum)
 
-        self.calculateAllButton.setEnabled(False)
-        self.calculateThisButton.setEnabled(False)
+        self.enableButtons()
 
         self.model = QtGui.QStandardItemModel(self)
         self.mapper = QtWidgets.QDataWidgetMapper(self)
@@ -310,7 +302,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     def displayChange(self):
         """Switch to another item in the data list"""
         ref_item = self.dataList.itemData(self.dataList.currentIndex())
-        self.updateDataList(self._data)
+        self.updateDataList(ref_item)
         self.setCurrentData(ref_item)
 
     ######################################################################
@@ -396,28 +388,29 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             self._data_set = GuiUtils.dataFromItem(data)
             self.logic = InversionLogic(self._data_set)
             self.populateDataComboBox(self._data_set.filename, data)
-            self.setCurrentData(data)
-
-            # Estimate initial values from data
-            self.performEstimate()
-
             # Estimate q range
             qmin, qmax = self.logic.computeDataRange()
-            self.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("{:.4g}".format(qmin)))
-            self.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("{:.4g}".format(qmax)))
-            self._data_list[data] = {DICT_KEYS[0]: self._calculator.clone(),
-                                     DICT_KEYS[1]: self.data_plot,
-                                     DICT_KEYS[2]: self.pr_plot,
-                                     DICT_KEYS[4]: self.logic}
+            self._calculator.set_qmin(qmin)
+            self._calculator.set_qmax(qmax)
+            self.updateDataList(data)
+            self.setCurrentData(data)
+            # Estimate initial values from data
+            self.performEstimate()
         self.enableButtons()
 
     def updateDataList(self, dataRef):
         """Save the current data state of the window into self._data_list"""
+        if dataRef is None:
+            return
         self._data_list[dataRef] = {
-        DICT_KEYS[0]: self._calculator,
-        DICT_KEYS[1]: self.pr_plot,
-        DICT_KEYS[2]: self.data_plot,
-        DICT_KEYS[3]: self.dmaxWindow
+            DICT_KEYS[0]: self._calculator,
+            DICT_KEYS[1]: self.pr_plot,
+            DICT_KEYS[2]: self.data_plot,
+            DICT_KEYS[3]: self.dmaxWindow,
+            DICT_KEYS[4]: self.logic,
+            DICT_KEYS[5]: self.getNFunc(),
+            DICT_KEYS[6]: self.nTermsSuggested,
+            DICT_KEYS[7]: self.backgroundInput.text()
         }
 
     def getNFunc(self):
@@ -432,11 +425,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
     def setCurrentData(self, data_ref):
         """Get the data by reference and display as necessary"""
-        if data_ref is None:
-            return
         if not isinstance(data_ref, QtGui.QStandardItem):
             msg = "Incorrect type passed to the P(r) Perspective"
-            raise AttributeError
+            raise AttributeError(msg)
         # Data references
         self._data = data_ref
         self._data_set = GuiUtils.dataFromItem(data_ref)
@@ -445,31 +436,75 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.data_plot = self._data_list[data_ref].get(DICT_KEYS[2])
         self.dmaxWindow = self._data_list[data_ref].get(DICT_KEYS[3])
         self.logic = self._data_list[data_ref].get(DICT_KEYS[4])
-        # TODO: Do the values need to be updated when _calculator is changed?
+        self.updateGuiValues()
+
+    def updateGuiValues(self):
+        pr = self._calculator
+        out = self._calculator.out
+        cov = self._calculator.cov
+        elapsed = self._calculator.elapsed
+        alpha = self._calculator.suggested_alpha
+        nterms = self._calculator.nfunc
+        self.model.setItem(WIDGETS.W_QMIN,
+                           QtGui.QStandardItem("{:.4g}".format(pr.get_qmin())))
+        self.model.setItem(WIDGETS.W_QMAX,
+                           QtGui.QStandardItem("{:.4g}".format(pr.get_qmax())))
+        self.model.setItem(WIDGETS.W_BACKGROUND_INPUT,
+                           QtGui.QStandardItem("{:.3f}".format(pr.est_bck)))
+        self.model.setItem(WIDGETS.W_BACKGROUND_OUTPUT,
+                           QtGui.QStandardItem("{:.3g}".format(pr.background)))
+        self.model.setItem(WIDGETS.W_COMP_TIME,
+                           QtGui.QStandardItem("{:.4g}".format(elapsed)))
+        if alpha != 0:
+            self.regConstantSuggestionButton.setText("{:-3.2g}".format(alpha))
+        self.regConstantSuggestionButton.setEnabled(alpha != 0)
+        if nterms != self.nTermsSuggested:
+            self.noOfTermsSuggestionButton.setText(
+                "{:n}".format(self.nTermsSuggested))
+        self.noOfTermsSuggestionButton.setEnabled(nterms != self.nTermsSuggested)
+        self.model.setItem(WIDGETS.W_COMP_TIME,
+                           QtGui.QStandardItem("{:.2g}".format(elapsed)))
+
+        if isinstance(pr.chi2, list):
+            self.model.setItem(WIDGETS.W_CHI_SQUARED,
+                               QtGui.QStandardItem("{:.3g}".format(pr.chi2[0])))
+        if out is not None:
+            self.model.setItem(WIDGETS.W_RG,
+                               QtGui.QStandardItem("{:.3g}".format(pr.rg(out))))
+            self.model.setItem(WIDGETS.W_I_ZERO,
+                               QtGui.QStandardItem(
+                                   "{:.3g}".format(pr.iq0(out))))
+            self.model.setItem(WIDGETS.W_OSCILLATION, QtGui.QStandardItem(
+                "{:.3g}".format(pr.oscillations(out))))
+            self.model.setItem(WIDGETS.W_POS_FRACTION, QtGui.QStandardItem(
+                "{:.3g}".format(pr.get_positive(out))))
+            if cov is not None:
+                self.model.setItem(WIDGETS.W_SIGMA_POS_FRACTION,
+                                   QtGui.QStandardItem(
+                                       "{:.3g}".format(
+                                           pr.get_pos_err(out, cov))))
 
     def removeData(self):
         """Remove the existing data reference from the P(r) Persepective"""
         if self.dmaxWindow is not None:
             self.dmaxWindow = None
         self.dataList.removeItem(self.dataList.currentIndex())
-        # TODO: Remove plot references from higher level too?
-        self.dataList.setCurrentIndex(0)
-        # Last file removed
         self._data_list.pop(self._data)
-        if not self._data_list:
+        # Last file removed
+        if len(self._data_list) == 0:
             self._data = None
             self.pr_plot = None
             self._data_set = None
+            self._calculator = Invertor()
             self.logic = InversionLogic()
             self.enableButtons()
-        self.displayChange()
+        self.dataList.setCurrentIndex(0)
 
     ######################################################################
     # Thread Creators
     def startThreadAll(self):
-        for data_ref, pr in list(self._data_list.items()):
-            self._data_set = GuiUtils.dataFromItem(data_ref)
-            self._calculator = pr
+        for data_ref in self._data_list.keys():
+            self.setCurrentData(data_ref)
             self.startThread()
 
     def startThread(self):
@@ -555,9 +590,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         """
         alpha, message, elapsed = output_tuple
         # Save useful info
-        self.model.setItem(WIDGETS.W_COMP_TIME, QtGui.QStandardItem("{:.4g}".format(elapsed)))
-        self.regConstantSuggestionButton.setText("{:-3.2g}".format(alpha))
-        self.regConstantSuggestionButton.setEnabled(True)
+        self.updateGuiValues()
         if message:
             logging.info(message)
         self.performEstimateNT()
@@ -575,14 +608,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         :param nterms: estimated number of terms
         :param elapsed: computation time
         """
-        # TODO: Add estimates to DICT_KEYS
         nterms, alpha, message, elapsed = output_tuple
+        self._calculator.elapsed = elapsed
+        self._calculator.suggested_alpha = alpha
+        self.nTermsSuggested = nterms
         # Save useful info
-        self.noOfTermsSuggestionButton.setText("{:n}".format(nterms))
-        self.noOfTermsSuggestionButton.setEnabled(True)
-        self.regConstantSuggestionButton.setText("{:.3g}".format(alpha))
-        self.regConstantSuggestionButton.setEnabled(True)
-        self.model.setItem(WIDGETS.W_COMP_TIME, QtGui.QStandardItem("{:.2g}".format(elapsed)))
+        self.updateGuiValues()
         if message:
             logging.info(message)
 
@@ -606,39 +637,22 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         pr.out = out
         pr.elapsed = elapsed
 
-        # Show result on control panel
-        self.model.setItem(WIDGETS.W_RG, QtGui.QStandardItem("{:.3g}".format(pr.rg(out))))
-        self.model.setItem(WIDGETS.W_I_ZERO, QtGui.QStandardItem("{:.3g}".format(pr.iq0(out))))
-        self.model.setItem(WIDGETS.W_BACKGROUND_INPUT,
-                           QtGui.QStandardItem("{:.3f}".format(pr.est_bck)))
-        self.model.setItem(WIDGETS.W_BACKGROUND_OUTPUT, QtGui.QStandardItem("{:.3g}".format(pr.background)))
-        self.model.setItem(WIDGETS.W_CHI_SQUARED, QtGui.QStandardItem("{:.3g}".format(pr.chi2[0])))
-        self.model.setItem(WIDGETS.W_COMP_TIME, QtGui.QStandardItem("{:.2g}".format(elapsed)))
-        self.model.setItem(WIDGETS.W_OSCILLATION, QtGui.QStandardItem("{:.3g}".format(pr.oscillations(out))))
-        self.model.setItem(WIDGETS.W_POS_FRACTION, QtGui.QStandardItem("{:.3g}".format(pr.get_positive(out))))
-        self.model.setItem(WIDGETS.W_SIGMA_POS_FRACTION,
-                           QtGui.QStandardItem("{:.3g}".format(pr.get_pos_err(out, cov))))
-
         # Save Pr invertor
         self._calculator = pr
-        # Append data to data list
-        self._data_list[self._data][DICT_KEYS[0]] = self._calculator.clone()
 
         # Create new P(r) and fit plots
         if self.pr_plot is None:
             self.pr_plot = self.logic.newPRPlot(out, self._calculator, cov)
-            self._data_list[self._data][DICT_KEYS[1]] = self.pr_plot
         else:
-            # FIXME: this should update the existing plot, not create a new one
-            self.pr_plot = self.logic.newPRPlot(out, self._calculator, cov)
-            self._data_list[self._data][DICT_KEYS[1]] = self.pr_plot
+            title = self.pr_plot.name
+            GuiUtils.updateModelItemWithPlot(self._data, self.pr_plot, title)
         if self.data_plot is None:
             self.data_plot = self.logic.new1DPlot(out, self._calculator)
-            self._data_list[self._data][DICT_KEYS[2]] = self.data_plot
         else:
-            # FIXME: this should update the existing plot, not create a new one
-            self.data_plot = self.logic.new1DPlot(out, self._calculator)
-            self._data_list[self._data][DICT_KEYS[2]] = self.data_plot
+            title = self.data_plot.name
+            GuiUtils.updateModelItemWithPlot(self._data, self.data_plot, title)
+        self.updateDataList(self._data)
+        self.updateGuiValues()
 
     def _threadError(self, error):
         """
