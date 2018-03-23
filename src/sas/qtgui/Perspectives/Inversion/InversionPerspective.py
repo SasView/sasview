@@ -29,9 +29,11 @@ REGULARIZATION = 0.0001
 BACKGROUND_INPUT = 0.0
 MAX_DIST = 140.0
 DICT_KEYS = ["Calculator", "PrPlot", "DataPlot", "DMaxWindow",
-             "Logic", "NFunc", "NFuncEst", "BackgroundEst"]
+             "Logic", "NFuncEst"]
 
 
+# TODO: Remove not working
+# TODO: Explore window not working
 # TODO: Update help with batch capabilities
 # TODO: Method to export results in some meaningful way
 class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
@@ -67,6 +69,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.dmaxWindow = None
         # p(r) calculator for self._data
         self._calculator = Invertor()
+        # Default to background estimate
+        self._calculator.set_est_bck(True)
         # plots of self._data
         self.pr_plot = None
         self.data_plot = None
@@ -150,7 +154,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.explorerButton.clicked.connect(self.openExplorerWindow)
 
         self.backgroundInput.editingFinished.connect(
-            lambda: self._calculator.set_est_bck(is_float(self.backgroundInput.text())))
+            lambda: self._calculator.set_background(is_float(self.backgroundInput.text())))
         self.minQInput.editingFinished.connect(
             lambda: self._calculator.set_qmin(is_float(self.minQInput.text())))
         self.regularizationConstantInput.editingFinished.connect(
@@ -304,6 +308,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         ref_item = self.dataList.itemData(self.dataList.currentIndex())
         self.updateDataList(ref_item)
         self.setCurrentData(ref_item)
+        self.updateGuiValues()
 
     ######################################################################
     # GUI Interaction Events
@@ -354,8 +359,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         sender = self.sender()
         if sender is self.estimateBgd:
             self.backgroundInput.setEnabled(False)
+            self._calculator.set_est_bck = True
         else:
             self.backgroundInput.setEnabled(True)
+            self._calculator.set_est_bck = False
 
     def openExplorerWindow(self):
         """
@@ -397,6 +404,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             # Estimate initial values from data
             self.performEstimate()
         self.enableButtons()
+        self.updateGuiValues()
 
     def updateDataList(self, dataRef):
         """Save the current data state of the window into self._data_list"""
@@ -408,9 +416,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             DICT_KEYS[2]: self.data_plot,
             DICT_KEYS[3]: self.dmaxWindow,
             DICT_KEYS[4]: self.logic,
-            DICT_KEYS[5]: self.getNFunc(),
-            DICT_KEYS[6]: self.nTermsSuggested,
-            DICT_KEYS[7]: self.backgroundInput.text()
+            DICT_KEYS[5]: self.nTermsSuggested
         }
 
     def getNFunc(self):
@@ -425,6 +431,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
     def setCurrentData(self, data_ref):
         """Get the data by reference and display as necessary"""
+        if data_ref is None:
+            return
         if not isinstance(data_ref, QtGui.QStandardItem):
             msg = "Incorrect type passed to the P(r) Perspective"
             raise AttributeError(msg)
@@ -436,6 +444,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.data_plot = self._data_list[data_ref].get(DICT_KEYS[2])
         self.dmaxWindow = self._data_list[data_ref].get(DICT_KEYS[3])
         self.logic = self._data_list[data_ref].get(DICT_KEYS[4])
+        self.nTermsSuggested = self._data_list[data_ref].get(DICT_KEYS[5])
         self.updateGuiValues()
 
     def updateGuiValues(self):
@@ -450,14 +459,14 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.model.setItem(WIDGETS.W_QMAX,
                            QtGui.QStandardItem("{:.4g}".format(pr.get_qmax())))
         self.model.setItem(WIDGETS.W_BACKGROUND_INPUT,
-                           QtGui.QStandardItem("{:.3f}".format(pr.est_bck)))
+                           QtGui.QStandardItem("{:.3f}".format(pr.background)))
         self.model.setItem(WIDGETS.W_BACKGROUND_OUTPUT,
                            QtGui.QStandardItem("{:.3g}".format(pr.background)))
         self.model.setItem(WIDGETS.W_COMP_TIME,
                            QtGui.QStandardItem("{:.4g}".format(elapsed)))
         if alpha != 0:
             self.regConstantSuggestionButton.setText("{:-3.2g}".format(alpha))
-        self.regConstantSuggestionButton.setEnabled(alpha != 0)
+        self.regConstantSuggestionButton.setEnabled(alpha != self._calculator.alpha)
         if nterms != self.nTermsSuggested:
             self.noOfTermsSuggestionButton.setText(
                 "{:n}".format(self.nTermsSuggested))
@@ -465,7 +474,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.model.setItem(WIDGETS.W_COMP_TIME,
                            QtGui.QStandardItem("{:.2g}".format(elapsed)))
 
-        if isinstance(pr.chi2, list):
+        if isinstance(pr.chi2, np.ndarray):
             self.model.setItem(WIDGETS.W_CHI_SQUARED,
                                QtGui.QStandardItem("{:.3g}".format(pr.chi2[0])))
         if out is not None:
@@ -499,6 +508,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             self.logic = InversionLogic()
             self.enableButtons()
         self.dataList.setCurrentIndex(0)
+        self.updateGuiValues()
 
     ######################################################################
     # Thread Creators
@@ -589,7 +599,6 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         :param elapsed: computation time
         """
         alpha, message, elapsed = output_tuple
-        # Save useful info
         self.updateGuiValues()
         if message:
             logging.info(message)
@@ -643,14 +652,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         # Create new P(r) and fit plots
         if self.pr_plot is None:
             self.pr_plot = self.logic.newPRPlot(out, self._calculator, cov)
-        else:
-            title = self.pr_plot.name
-            GuiUtils.updateModelItemWithPlot(self._data, self.pr_plot, title)
         if self.data_plot is None:
             self.data_plot = self.logic.new1DPlot(out, self._calculator)
-        else:
-            title = self.data_plot.name
-            GuiUtils.updateModelItemWithPlot(self._data, self.data_plot, title)
         self.updateDataList(self._data)
         self.updateGuiValues()
 
