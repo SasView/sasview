@@ -43,6 +43,10 @@ from Calculators.UnitTesting import DataOperationUtilityTest
 # Utilities
 from Utilities.UnitTesting import GuiUtilsTest
 from Utilities.UnitTesting import SasviewLoggerTest
+from Utilities.UnitTesting import GridPanelTest
+from Utilities.UnitTesting import ModelEditorTest
+from Utilities.UnitTesting import PluginDefinitionTest
+from Utilities.UnitTesting import TabbedModelEditorTest
 
 # Unit Testing
 from UnitTesting import TestUtilsTest
@@ -98,6 +102,10 @@ def suite():
         unittest.makeSuite(GuiUtilsTest.GuiUtilsTest,             'test'),
         unittest.makeSuite(GuiUtilsTest.DoubleValidatorTest,      'test'),
         unittest.makeSuite(GuiUtilsTest.HashableStandardItemTest, 'test'),
+        unittest.makeSuite(GridPanelTest.BatchOutputPanelTest,    'test'),
+        unittest.makeSuite(ModelEditorTest.ModelEditorTest,            'test'),
+        unittest.makeSuite(PluginDefinitionTest.PluginDefinitionTest,  'test'),
+        unittest.makeSuite(TabbedModelEditorTest.TabbedModelEditorTest,'test'),
 
         # Calculators
         unittest.makeSuite(KiessigCalculatorTest.KiessigCalculatorTest,                     'test'),

@@ -350,6 +350,9 @@ packages.append("sas.qtgui.UnitTesting")
 package_dir["sas.qtgui.Utilities"] = os.path.join(
     "src", "sas", "qtgui", "Utilities")
 packages.append("sas.qtgui.Utilities")
+package_dir["sas.qtgui.UtilitiesUI"] = os.path.join(
+    "src", "sas", "qtgui", "Utilities","UI")
+packages.append("sas.qtgui.Utilities.UI")
 
 package_dir["sas.qtgui.Calculators"] = os.path.join(
     "src", "sas", "qtgui", "Calculators")

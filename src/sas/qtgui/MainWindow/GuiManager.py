@@ -18,6 +18,8 @@ import sas.qtgui.Utilities.LocalConfig as LocalConfig
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 import sas.qtgui.Utilities.ObjectLibrary as ObjectLibrary
+from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
+from sas.qtgui.Utilities.PluginManager import PluginManager
 from sas.qtgui.MainWindow.UI.AcknowledgementsUI import Ui_Acknowledgements
 from sas.qtgui.MainWindow.AboutBox import AboutBox
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
@@ -46,7 +48,6 @@ class GuiManager(object):
     """
     Main SasView window functionality
     """
-
     def __init__(self, parent=None):
         """
         Initialize the manager as a child of MainWindow.
@@ -181,12 +182,6 @@ class GuiManager(object):
         """
         Respond to change of the perspective signal
         """
-
-        # Save users from themselves...
-        #if isinstance(self._current_perspective, Perspectives.PERSPECTIVES[str(perspective_name)]):
-        self.setupPerspectiveMenubarOptions(self._current_perspective)
-        #    return
-
         # Close the previous perspective
         self.clearPerspectiveMenubarOptions(self._current_perspective)
         if self._current_perspective:
@@ -196,6 +191,8 @@ class GuiManager(object):
             self._workspace.workspace.removeSubWindow(self._current_perspective)
         # Default perspective
         self._current_perspective = Perspectives.PERSPECTIVES[str(perspective_name)](parent=self)
+
+        self.setupPerspectiveMenubarOptions(self._current_perspective)
 
         subwindow = self._workspace.workspace.addSubWindow(self._current_perspective)
 
@@ -357,6 +354,7 @@ class GuiManager(object):
         self.communicate.perspectiveChangedSignal.connect(self.perspectiveChanged)
         self.communicate.updateTheoryFromPerspectiveSignal.connect(self.updateTheoryFromPerspective)
         self.communicate.plotRequestedSignal.connect(self.showPlot)
+        self.communicate.plotFromFilenameSignal.connect(self.showPlotFromFilename)
         self.communicate.updateModelFromDataOperationPanelSignal.connect(self.updateModelFromDataOperationPanel)
 
     def addTriggers(self):
@@ -405,7 +403,9 @@ class GuiManager(object):
         self._workspace.actionGPU_Options.triggered.connect(self.actionGPU_Options)
         self._workspace.actionFit_Results.triggered.connect(self.actionFit_Results)
         self._workspace.actionChain_Fitting.triggered.connect(self.actionChain_Fitting)
+        self._workspace.actionAdd_Custom_Model.triggered.connect(self.actionAdd_Custom_Model)
         self._workspace.actionEdit_Custom_Model.triggered.connect(self.actionEdit_Custom_Model)
+        self._workspace.actionManage_Custom_Models.triggered.connect(self.actionManage_Custom_Models)
         # Window
         self._workspace.actionCascade.triggered.connect(self.actionCascade)
         self._workspace.actionTile.triggered.connect(self.actionTile)
@@ -416,6 +416,7 @@ class GuiManager(object):
         self._workspace.actionFitting.triggered.connect(self.actionFitting)
         self._workspace.actionInversion.triggered.connect(self.actionInversion)
         self._workspace.actionInvariant.triggered.connect(self.actionInvariant)
+        self._workspace.actionCorfunc.triggered.connect(self.actionCorfunc)
         # Help
         self._workspace.actionDocumentation.triggered.connect(self.actionDocumentation)
         self._workspace.actionTutorial.triggered.connect(self.actionTutorial)
@@ -661,11 +662,23 @@ class GuiManager(object):
         print("actionChain_Fitting TRIGGERED")
         pass
 
+    def actionAdd_Custom_Model(self):
+        """
+        """
+        self.model_editor = TabbedModelEditor(self)
+        self.model_editor.show()
+
     def actionEdit_Custom_Model(self):
         """
         """
-        print("actionEdit_Custom_Model TRIGGERED")
-        pass
+        self.model_editor = TabbedModelEditor(self, edit_only=True)
+        self.model_editor.show()
+
+    def actionManage_Custom_Models(self):
+        """
+        """
+        self.model_manager = PluginManager(self)
+        self.model_manager.show()
 
     #============ ANALYSIS =================
     def actionFitting(self):
@@ -673,21 +686,29 @@ class GuiManager(object):
         Change to the Fitting perspective
         """
         self.perspectiveChanged("Fitting")
+        # Notify other widgets
+        self.filesWidget.onAnalysisUpdate("Fitting")
 
     def actionInversion(self):
         """
         Change to the Inversion perspective
         """
-        # For now we'll just update the analysis menu status but when the inversion is implemented delete from here
-        self.checkAnalysisOption(self._workspace.actionInversion)
-        # to here and uncomment the following line
         self.perspectiveChanged("Inversion")
+        self.filesWidget.onAnalysisUpdate("Inversion")
 
     def actionInvariant(self):
         """
         Change to the Invariant perspective
         """
         self.perspectiveChanged("Invariant")
+        self.filesWidget.onAnalysisUpdate("Invariant")
+
+    def actionCorfunc(self):
+        """
+        Change to the Corfunc perspective
+        """
+        self.perspectiveChanged("Corfunc")
+        self.filesWidget.onAnalysisUpdate("Corfunc")
 
     #============ WINDOW =================
     def actionCascade(self):
@@ -779,6 +800,13 @@ class GuiManager(object):
         self.filesWidget.model.appendRow(new_item)
         self._data_manager.add_data(new_datalist_item)
 
+    def showPlotFromFilename(self, filename):
+        """
+        Pass the show plot request to the data explorer
+        """
+        if hasattr(self, "filesWidget"):
+            self.filesWidget.displayFile(filename=filename, is_data=True)
+
     def showPlot(self, plot):
         """
         Pass the show plot request to the data explorer
@@ -827,5 +855,7 @@ class GuiManager(object):
             self._workspace.menubar.addAction(self._workspace.menuHelp.menuAction())
         elif isinstance(perspective, Perspectives.PERSPECTIVES["Invariant"]):
             self.checkAnalysisOption(self._workspace.actionInvariant)
-        # elif isinstance(perspective, Perspectives.PERSPECTIVES["Inversion"]):
-        #     self.checkAnalysisOption(self._workspace.actionInversion)
+        elif isinstance(perspective, Perspectives.PERSPECTIVES["Inversion"]):
+            self.checkAnalysisOption(self._workspace.actionInversion)
+        elif isinstance(perspective, Perspectives.PERSPECTIVES["Corfunc"]):
+            self.checkAnalysisOption(self._workspace.actionCorfunc)
