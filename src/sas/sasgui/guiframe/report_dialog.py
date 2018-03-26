@@ -74,10 +74,11 @@ class BaseReportDialog(wx.Dialog):
                           id=button_print.GetId())
         hbox.Add(button_print)
 
-        button_save = wx.Button(self, wx.NewId(), "Save")
-        button_save.SetToolTipString("Save this report.")
-        button_save.Bind(wx.EVT_BUTTON, self.onSave, id=button_save.GetId())
-        hbox.Add(button_save)
+        if sys.platform == "win32":
+            button_save = wx.Button(self, wx.NewId(), "Save")
+            button_save.SetToolTipString("Save this report.")
+            button_save.Bind(wx.EVT_BUTTON, self.onSave, id=button_save.GetId())
+            hbox.Add(button_save)
 
         # panel for report page
         vbox = wx.BoxSizer(wx.VERTICAL)
