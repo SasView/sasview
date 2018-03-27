@@ -33,9 +33,8 @@ FIELDS_2D = ('data', 'qx_data', 'qy_data', 'q_data', 'err_data',
 DEPRECATION_MESSAGE = ("\rThe extension of this file suggests the data set migh"
                        "t not be fully reduced. Support for the reader associat"
                        "ed with this file type has been removed. An attempt to "
-                       "load the file was made, however, even if a data set was"
-                       " generated, SasView cannot guarantee the accuracy of th"
-                       "e data.")
+                       "load the file was made, but, should it be successful, "
+                       "SasView cannot guarantee the accuracy of the data.")
 
 class FileReader(object):
     # String to describe the type of data this reader can load
