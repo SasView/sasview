@@ -14,7 +14,6 @@ from .UI.TabbedInversionUI import Ui_PrInversion
 from .InversionLogic import InversionLogic
 
 # pr inversion calculation elements
-from sas.sascalc.dataloader.data_info import Data1D
 from sas.sascalc.pr.invertor import Invertor
 
 def is_float(value):
@@ -28,11 +27,9 @@ NUMBER_OF_TERMS = 10
 REGULARIZATION = 0.0001
 BACKGROUND_INPUT = 0.0
 MAX_DIST = 140.0
-DICT_KEYS = ["Calculator", "PrPlot", "DataPlot", "DMaxWindow",
-             "Logic", "NFuncEst"]
+DICT_KEYS = ["Calculator", "PrPlot", "DataPlot", "DMaxWindow", "NFuncEst"]
 
 
-# TODO: Remove not working
 # TODO: Explore window not working
 # TODO: Update help with batch capabilities
 # TODO: Method to export results in some meaningful way
@@ -308,7 +305,6 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         ref_item = self.dataList.itemData(self.dataList.currentIndex())
         self.updateDataList(ref_item)
         self.setCurrentData(ref_item)
-        self.updateGuiValues()
 
     ######################################################################
     # GUI Interaction Events
@@ -415,8 +411,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             DICT_KEYS[1]: self.pr_plot,
             DICT_KEYS[2]: self.data_plot,
             DICT_KEYS[3]: self.dmaxWindow,
-            DICT_KEYS[4]: self.logic,
-            DICT_KEYS[5]: self.nTermsSuggested
+            DICT_KEYS[4]: self.nTermsSuggested
         }
 
     def getNFunc(self):
@@ -443,8 +438,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.pr_plot = self._data_list[data_ref].get(DICT_KEYS[1])
         self.data_plot = self._data_list[data_ref].get(DICT_KEYS[2])
         self.dmaxWindow = self._data_list[data_ref].get(DICT_KEYS[3])
-        self.logic = self._data_list[data_ref].get(DICT_KEYS[4])
-        self.nTermsSuggested = self._data_list[data_ref].get(DICT_KEYS[5])
+        self.nTermsSuggested = self._data_list[data_ref].get(DICT_KEYS[4])
+        self.logic.set_data = self._data_set
         self.updateGuiValues()
 
     def updateGuiValues(self):
@@ -505,10 +500,11 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             self.pr_plot = None
             self._data_set = None
             self._calculator = Invertor()
-            self.logic = InversionLogic()
+            self.logic.data = None
             self.enableButtons()
-        self.dataList.setCurrentIndex(0)
-        self.updateGuiValues()
+        else:
+            self.dataList.setCurrentIndex(0)
+            self.updateGuiValues()
 
     ######################################################################
     # Thread Creators
@@ -599,7 +595,6 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         :param elapsed: computation time
         """
         alpha, message, elapsed = output_tuple
-        self.updateGuiValues()
         if message:
             logging.info(message)
         self.performEstimateNT()

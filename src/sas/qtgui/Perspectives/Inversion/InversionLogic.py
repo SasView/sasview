@@ -36,7 +36,7 @@ class InversionLogic(object):
     def data(self, value):
         """ data setter """
         self._data = value
-        self.data_is_loaded = True
+        self.data_is_loaded = (self._data is not None)
 
     def isLoadedData(self):
         """ accessor """
