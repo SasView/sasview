@@ -151,7 +151,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.explorerButton.clicked.connect(self.openExplorerWindow)
 
         self.backgroundInput.editingFinished.connect(
-            lambda: self._calculator.set_background(is_float(self.backgroundInput.text())))
+            lambda: self.set_background(is_float(self.backgroundInput.text())))
         self.minQInput.editingFinished.connect(
             lambda: self._calculator.set_qmin(is_float(self.minQInput.text())))
         self.regularizationConstantInput.editingFinished.connect(
@@ -316,6 +316,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self._calculator.set_x(self._data_set.x)
         self._calculator.set_y(self._data_set.y)
         self._calculator.set_err(self._data_set.dy)
+        self.set_background(self.backgroundInput.text())
+
+    def set_background(self, value):
+        self._calculator.background = is_float(value)
 
     def model_changed(self):
         """Update the values when user makes changes"""
@@ -358,9 +362,11 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         if sender is self.estimateBgd:
             self.backgroundInput.setEnabled(False)
             self._calculator.set_est_bck = True
-        else:
+        elif sender is self.manualBgd:
             self.backgroundInput.setEnabled(True)
             self._calculator.set_est_bck = False
+        else:
+            pass
 
     def openExplorerWindow(self):
         """
