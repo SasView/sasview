@@ -220,8 +220,6 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         """
         Update boxes with initial values
         """
-        item = QtGui.QStandardItem("")
-        self.model.setItem(WIDGETS.W_FILENAME, item)
         item = QtGui.QStandardItem(str(BACKGROUND_INPUT))
         self.model.setItem(WIDGETS.W_BACKGROUND_INPUT, item)
         item = QtGui.QStandardItem("")
@@ -281,6 +279,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.calculateThisButton.setEnabled(self.logic.data_is_loaded)
         self.removeButton.setEnabled(self.logic.data_is_loaded)
         self.explorerButton.setEnabled(self.logic.data_is_loaded)
+        self.regConstantSuggestionButton.setEnabled(
+            self._calculator.suggested_alpha != self._calculator.alpha)
+        self.noOfTermsSuggestionButton.setEnabled(
+            self._calculator.nfunc != self.nTermsSuggested)
 
     def populateDataComboBox(self, filename, data_ref):
         """
@@ -399,7 +401,6 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             self.setCurrentData(data)
             # Estimate initial values from data
             self.performEstimate()
-        self.enableButtons()
         self.updateGuiValues()
 
     def updateDataList(self, dataRef):
@@ -459,13 +460,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
                            QtGui.QStandardItem("{:.3g}".format(pr.background)))
         self.model.setItem(WIDGETS.W_COMP_TIME,
                            QtGui.QStandardItem("{:.4g}".format(elapsed)))
-        if alpha != 0:
-            self.regConstantSuggestionButton.setText("{:-3.2g}".format(alpha))
-        self.regConstantSuggestionButton.setEnabled(alpha != self._calculator.alpha)
-        if nterms != self.nTermsSuggested:
-            self.noOfTermsSuggestionButton.setText(
-                "{:n}".format(self.nTermsSuggested))
-        self.noOfTermsSuggestionButton.setEnabled(nterms != self.nTermsSuggested)
+        self.regConstantSuggestionButton.setText("{:-3.2g}".format(alpha))
+        self.noOfTermsSuggestionButton.setText(
+            "{:n}".format(self.nTermsSuggested))
         self.model.setItem(WIDGETS.W_COMP_TIME,
                            QtGui.QStandardItem("{:.2g}".format(elapsed)))
 
@@ -487,21 +484,30 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
                                    QtGui.QStandardItem(
                                        "{:.3g}".format(
                                            pr.get_pos_err(out, cov))))
+        self.enableButtons()
 
     def removeData(self):
         """Remove the existing data reference from the P(r) Persepective"""
         if self.dmaxWindow is not None:
+            self.dmaxWindow.done()
             self.dmaxWindow = None
         self.dataList.removeItem(self.dataList.currentIndex())
         self._data_list.pop(self._data)
         # Last file removed
         if len(self._data_list) == 0:
             self._data = None
-            self.pr_plot = None
             self._data_set = None
+            self.pr_plot = None
+            self.data_plot = None
             self._calculator = Invertor()
-            self.logic.data = None
+            self.logic.data = self._data_set
+            self.nTermsSuggested = NUMBER_OF_TERMS
+            self.noOfTermsSuggestionButton.setText("{:n}".format(
+                self.nTermsSuggested))
+            self.regConstantSuggestionButton.setText("{:-3.2g}".format(
+                REGULARIZATION))
             self.enableButtons()
+            self.setupModel()
         else:
             self.dataList.setCurrentIndex(0)
             self.updateGuiValues()
