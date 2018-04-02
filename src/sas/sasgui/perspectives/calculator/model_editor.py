@@ -659,11 +659,9 @@ class EditorPanel(wx.ScrolledWindow):
         """
         Do the layout for parameter related widgets
         """
-        param_txt = wx.StaticText(self, -1, 'Fit Parameters NOT requiring' + \
-                                  ' polydispersity (if any): ')
+        param_txt = wx.StaticText(self, -1, 'Fit Parameters: ')
 
-        param_tip = "#Set the parameters NOT requiring polydispersity " + \
-        "and their initial values.\n"
+        param_tip = "#Set the parameters and their initial values.\n"
         param_tip += "#Example:\n"
         param_tip += "A = 1\nB = 1"
         #param_txt.SetToolTipString(param_tip)
@@ -677,23 +675,6 @@ class EditorPanel(wx.ScrolledWindow):
         self.param_sizer.AddMany([(param_txt, 0, wx.LEFT, 10),
                                   (self.param_tcl, 1, wx.EXPAND | wx.ALL, 10)])
 
-        # Parameters with polydispersity
-        pd_param_txt = wx.StaticText(self, -1, 'Fit Parameters requiring ' + \
-                                     'polydispersity (if any): ')
-
-        pd_param_tip = "#Set the parameters requiring polydispersity and " + \
-        "their initial values.\n"
-        pd_param_tip += "#Example:\n"
-        pd_param_tip += "C = 2\nD = 2"
-        newid = wx.NewId()
-        self.pd_param_tcl = EditWindow(self, newid, wx.DefaultPosition,
-                                    wx.DefaultSize,
-                                    wx.CLIP_CHILDREN | wx.SUNKEN_BORDER)
-        self.pd_param_tcl.setDisplayLineNumbers(True)
-        self.pd_param_tcl.SetToolTipString(pd_param_tip)
-
-        self.param_sizer.AddMany([(pd_param_txt, 0, wx.LEFT, 10),
-                                  (self.pd_param_tcl, 1, wx.EXPAND | wx.ALL, 10)])
 
     def _layout_function(self):
         """
@@ -895,13 +876,12 @@ class EditorPanel(wx.ScrolledWindow):
         elif self.check_name():
             description = self.desc_tcl.GetValue()
             param_str = self.param_tcl.GetText()
-            pd_param_str = self.pd_param_tcl.GetText()
             func_str = self.function_tcl.GetText()
             # No input for the model function
             if func_str.lstrip().rstrip():
                 if func_str.count('return') > 0:
                     self.write_file(self.fname, name, description, param_str,
-                                    pd_param_str, func_str)
+                                    func_str)
                     try:
                         result, msg = check_model(self.fname), None
                     except Exception:
@@ -941,14 +921,13 @@ class EditorPanel(wx.ScrolledWindow):
                          StatusEvent(status=msg+check_err, info=info))
         self.warning = msg
 
-    def write_file(self, fname, name, desc_str, param_str, pd_param_str, func_str):
+    def write_file(self, fname, name, desc_str, param_str, func_str):
         """
         Write content in file
 
         :param fname: full file path
         :param desc_str: content of the description strings
         :param param_str: content of params; Strings
-        :param pd_param_str: content of params requiring polydispersity; Strings
         :param func_str: content of func; Strings
         """
         out_f = open(fname, 'w')
@@ -962,21 +941,16 @@ class EditorPanel(wx.ScrolledWindow):
 
         # Write out parameters
         param_names = []    # to store parameter names
-        pd_params = []
         out_f.write('parameters = [ \n')
         out_f.write('#   ["name", "units", default, [lower, upper], "type", "description"],\n')
         for pname, pvalue, desc in self.get_param_helper(param_str):
             param_names.append(pname)
             out_f.write("    ['%s', '', %s, [-inf, inf], '', '%s'],\n"
                         % (pname, pvalue, desc))
-        for pname, pvalue, desc in self.get_param_helper(pd_param_str):
-            param_names.append(pname)
-            pd_params.append(pname)
-            out_f.write("    ['%s', '', %s, [-inf, inf], 'volume', '%s'],\n"
-                        % (pname, pvalue, desc))
         out_f.write('    ]\n')
 
         # Write out function definition
+        out_f.write('\n')
         out_f.write('def Iq(%s):\n' % ', '.join(['x'] + param_names))
         out_f.write('    """Absolute scattering"""\n')
         if "scipy." in func_str:
@@ -986,14 +960,9 @@ class EditorPanel(wx.ScrolledWindow):
         if "np." in func_str:
             out_f.write('    import numpy as np')
         for func_line in func_str.split('\n'):
-            out_f.write('%s%s\n' % (spaces4, func_line))
+            out_f.write('%s%s\n' % ('    ', func_line))
         out_f.write('## uncomment the following if Iq works for vector x\n')
         out_f.write('#Iq.vectorized = True\n')
-
-        # If polydisperse, create place holders for form_volume, ER and VR
-        if pd_params:
-            out_f.write('\n')
-            out_f.write(CUSTOM_TEMPLATE_PD % {'args': ', '.join(pd_params)})
 
         # Create place holder for Iqxy
         out_f.write('\n')
@@ -1132,7 +1101,7 @@ def form_volume(%(args)s):
     Volume of the particles used to compute absolute scattering intensity
     and to weight polydisperse parameter contributions.
     """
-    return 0.0
+    return 1.0
 
 def ER(%(args)s):
     """
