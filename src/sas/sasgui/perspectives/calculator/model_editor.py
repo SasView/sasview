@@ -1095,31 +1095,6 @@ description = """%(description)s"""
 
 '''
 
-CUSTOM_TEMPLATE_PD = '''\
-def form_volume(%(args)s):
-    """
-    Volume of the particles used to compute absolute scattering intensity
-    and to weight polydisperse parameter contributions.
-    """
-    return 1.0
-
-def ER(%(args)s):
-    """
-    Effective radius of particles to be used when computing structure factors.
-
-    Input parameters are vectors ranging over the mesh of polydispersity values.
-    """
-    return 0.0
-
-def VR(%(args)s):
-    """
-    Volume ratio of particles to be used when computing structure factors.
-
-    Input parameters are vectors ranging over the mesh of polydispersity values.
-    """
-    return 1.0
-'''
-
 SUM_TEMPLATE = """
 from sasmodels.core import load_model_info
 from sasmodels.sasview_model import make_model_from_info
