@@ -26,7 +26,7 @@ else:
 
 class BaseReportDialog(wx.Dialog):
 
-    def __init__(self, report_list, *args, **kwds):
+    def __init__(self, report_list, imgRAM, fig_urls, *args, **kwds):
         """
         Initialization. The parameters added to Dialog are:
 
@@ -36,6 +36,10 @@ class BaseReportDialog(wx.Dialog):
         super(BaseReportDialog, self).__init__(*args, **kwds)
         kwds["image"] = 'Dynamic Image'
 
+        #MemoryFSHandle for storing images
+        self.imgRAM = imgRAM
+        #Images location in urls
+        self.fig_urls = fig_urls
         # title
         self.SetTitle("Report")
         # size
@@ -74,11 +78,10 @@ class BaseReportDialog(wx.Dialog):
                           id=button_print.GetId())
         hbox.Add(button_print)
 
-        if sys.platform == "win32":
-            button_save = wx.Button(self, wx.NewId(), "Save")
-            button_save.SetToolTipString("Save this report.")
-            button_save.Bind(wx.EVT_BUTTON, self.onSave, id=button_save.GetId())
-            hbox.Add(button_save)
+        button_save = wx.Button(self, wx.NewId(), "Save")
+        button_save.SetToolTipString("Save this report.")
+        button_save.Bind(wx.EVT_BUTTON, self.onSave, id=button_save.GetId())
+        hbox.Add(button_save)
 
         # panel for report page
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -111,11 +114,15 @@ class BaseReportDialog(wx.Dialog):
         printh = html.HtmlEasyPrinting(name="Printing", parentWindow=self)
         printh.PrintText(self.report_html)
 
+
     def OnClose(self, event=None):
         """
         Close the Dialog
         : event: Close button event
         """
+        for fig in self.fig_urls:
+            self.imgRAM.RemoveFile(fig)
+
         self.Close()
 
     def HTML2PDF(self, data, filename):

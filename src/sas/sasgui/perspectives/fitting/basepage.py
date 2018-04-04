@@ -640,10 +640,9 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         # get the strings for report
         report_str, text_str = self.state.report(fig_urls=refs)
-
         # Show the dialog
         report_list = [report_str, text_str, images]
-        dialog = ReportDialog(report_list, None, wx.ID_ANY, "")
+        dialog = ReportDialog(report_list, imgRAM, refs, None, wx.ID_ANY, "")
         dialog.Show()
 
     def _build_plots_for_report(self, figs, canvases):
@@ -676,7 +675,6 @@ class BasicPage(ScrolledPanel, PanelBase):
             name = 'img_fit%s.png' % ind
             refs.append('memory:' + name)
             imgRAM.AddFile(name, canvas.bitmap, wx.BITMAP_TYPE_PNG)
-
             # append figs
             images.append(fig)
 

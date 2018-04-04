@@ -724,7 +724,7 @@ class PageState(object):
 
         # final report html strings
         report_str = html_str + ELINE.join(image_links)
-
+        report_str += FEET_3
         return report_str, text_str
 
     def _to_xml_helper(self, thelist, element, newdoc):
