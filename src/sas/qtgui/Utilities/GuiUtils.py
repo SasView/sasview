@@ -719,6 +719,12 @@ def xyTransform(data, xLabel="", yLabel=""):
     if data.id == 'fit':
         return
 
+    # make sure we have some function to operate on
+    if xLabel is None:
+        xLabel = 'log10(x)'
+    if yLabel is None:
+        yLabel = 'log10(y)'
+
     # control axis labels from the panel itself
     yname, yunits = data.get_yaxis()
     xname, xunits = data.get_xaxis()
