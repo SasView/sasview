@@ -1956,7 +1956,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
                 fitted_data.symbol = "Line"
             self.updateModelIndex(fitted_data)
         else:
-            name = self.nameForFittedData(self.kernel_module.name)
+            name = self.nameForFittedData(self.kernel_module.id)
             fitted_data.title = name
             fitted_data.name = name
             fitted_data.filename = name

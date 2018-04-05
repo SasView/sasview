@@ -125,8 +125,13 @@ class FittingLogic(object):
         _xaxis, _xunit = data.get_xaxis()
 
         new_plot.group_id = data.group_id
-        new_plot.id = str(tab_id) + " " + data.name
-        new_plot.name = model.name + " [" + data.name + "]"
+        new_plot.id = str(tab_id) + " " + model.id
+
+        if data.filename:
+            new_plot.name = model.name + " [" + data.filename + "]" # data file
+        else:
+            new_plot.name = model.name + " [" + model.id + "]"  # theory
+
         new_plot.title = new_plot.name
         new_plot.xaxis(_xaxis, _xunit)
         new_plot.yaxis(_yaxis, _yunit)

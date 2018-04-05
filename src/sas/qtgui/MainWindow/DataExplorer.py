@@ -1132,24 +1132,16 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Check if there are any other items for this tab
         # If so, delete them
-        # TODO: fix this to resemble GuiUtils.updateModelItemWithPlot
-        #
-        ##self.model.beginResetModel()
-        ##current_tab_name = model_item.text()[:2]
-        ##for current_index in range(self.theory_model.rowCount()):
+        current_tab_name = model_item.text()
+        for current_index in range(self.theory_model.rowCount()):
             #if current_tab_name in self.theory_model.item(current_index).text():
-            #    return
-        ##        self.theory_model.removeRow(current_index)
-        ##        break
+            if current_tab_name == self.theory_model.item(current_index).text():
+                return
+                self.theory_model.removeRow(current_index)
+                break
 
-        ### Reset the view
-        ##self.model.endResetModel()
-
-        # Reset the view
+        # send in the new item
         self.theory_model.appendRow(model_item)
-
-        # Pass acting as a debugger anchor
-        pass
 
 
 if __name__ == "__main__":
