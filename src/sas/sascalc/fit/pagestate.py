@@ -645,6 +645,8 @@ class PageState(object):
                     # parsing "data : File:     filename [mmm dd hh:mm]"
                     name = value.split(':', 1)[1].strip()
                     file_value = "File name:" + name
+                    if len(file_value) > 50:
+                        file_value = "File name:.."+file_value[-40:]
                     file_name = CENTRE % file_value
                     if len(title) == 0:
                         title = name + " [" + repo_time + "]"
@@ -1367,7 +1369,7 @@ FEET_1 = \
 <br><font size='4' >Data: "%s"</font><br>
 """
 FEET_2 = \
-"""<img src="%s" ></img>
+"""<img src="%s" width="540"></img>
 """
 FEET_3 = \
 """</center>
