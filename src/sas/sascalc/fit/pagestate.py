@@ -1375,7 +1375,7 @@ FEET_1 = \
 <br><font size='4' >Data: "%s"</font><br>
 """
 FEET_2 = \
-"""<img src="%s" width="540"></img>
+"""<img src="%s"></img>
 """
 FEET_2_unix = \
 """<img src="%s" width="540"></img>
