@@ -64,7 +64,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         # p(r) calculator for self._data
         self._calculator = Invertor()
         # Default to background estimate
-        self._calculator.set_est_bck(True)
+        self._calculator.est_bck = True
         # plots of self._data
         self.pr_plot = None
         self.data_plot = None
@@ -149,7 +149,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.explorerButton.clicked.connect(self.openExplorerWindow)
 
         self.backgroundInput.editingFinished.connect(
-            lambda: self.set_background(is_float(self.backgroundInput.text())))
+            lambda: self.set_background(self.backgroundInput.text()))
         self.minQInput.editingFinished.connect(
             lambda: self._calculator.set_qmin(is_float(self.minQInput.text())))
         self.regularizationConstantInput.editingFinished.connect(
@@ -335,9 +335,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             title = self.data_plot.name
             GuiUtils.updateModelItemWithPlot(self._data, self.data_plot, title)
         if self.dmaxWindow is not None:
-            self.dmaxWindow.pr_state = self._calculator
             self.dmaxWindow.nfunc = self.getNFunc()
-            self.dmaxWindow.modelChanged()
+            self.dmaxWindow.pr_state = self._calculator
         self.mapper.toLast()
 
     def help(self):
@@ -487,10 +486,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         if self.dmaxWindow is not None:
             self.dmaxWindow.close()
             self.dmaxWindow = None
+        current_data = self._data
         self.dataList.removeItem(self.dataList.currentIndex())
-        self._data_list.pop(self._data)
+        self._data_list.pop(current_data)
         # Last file removed
         if len(self._data_list) == 0:
+            self._data = None
             self.pr_plot = None
             self.data_plot = None
             self._calculator = Invertor()
