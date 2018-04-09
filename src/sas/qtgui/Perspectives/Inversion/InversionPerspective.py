@@ -27,10 +27,9 @@ NUMBER_OF_TERMS = 10
 REGULARIZATION = 0.0001
 BACKGROUND_INPUT = 0.0
 MAX_DIST = 140.0
-DICT_KEYS = ["Calculator", "PrPlot", "DataPlot", "DMaxWindow", "NFuncEst"]
+DICT_KEYS = ["Calculator", "PrPlot", "DataPlot"]
 
 
-# TODO: Explore window not working
 # TODO: Update help with batch capabilities
 # TODO: Method to export results in some meaningful way
 class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
@@ -60,8 +59,6 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         # Visible data set items
         # current QStandardItem showing on the panel
         self._data = None
-        # current Data1D as referenced by self._data
-        self._data_set = None
         # Reference to Dmax window for self._data
         self.dmaxWindow = None
         # p(r) calculator for self._data
@@ -77,6 +74,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         # Calculation threads used by all data items
         self.calc_thread = None
         self.estimation_thread = None
+        self.estimation_thread_nt = None
 
         # Mapping for all data items
         # list mapping data to all parameters
@@ -302,20 +300,19 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.model.setItem(WIDGETS.W_REGULARIZATION, QtGui.QStandardItem(
             self.regConstantSuggestionButton.text()))
 
-    def displayChange(self):
+    def displayChange(self, data_index=0):
         """Switch to another item in the data list"""
-        ref_item = self.dataList.itemData(self.dataList.currentIndex())
-        self.updateDataList(ref_item)
-        self.setCurrentData(ref_item)
+        self.updateDataList(self._data)
+        self.setCurrentData(self.dataList.itemData(data_index))
 
     ######################################################################
     # GUI Interaction Events
 
     def update_calculator(self):
         """Update all p(r) params"""
-        self._calculator.set_x(self._data_set.x)
-        self._calculator.set_y(self._data_set.y)
-        self._calculator.set_err(self._data_set.dy)
+        self._calculator.set_x(self.logic.data.x)
+        self._calculator.set_y(self.logic.data.y)
+        self._calculator.set_err(self.logic.data.dy)
         self.set_background(self.backgroundInput.text())
 
     def set_background(self, value):
@@ -341,7 +338,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             self.dmaxWindow.pr_state = self._calculator
             self.dmaxWindow.nfunc = self.getNFunc()
             self.dmaxWindow.modelChanged()
-        self.mapper.toFirst()
+        self.mapper.toLast()
 
     def help(self):
         """
@@ -358,11 +355,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         """
         Toggle the background between manual and estimated
         """
-        sender = self.sender()
-        if sender is self.estimateBgd:
+        if self.estimateBgd.isChecked():
+            self.manualBgd.setChecked(False)
             self.backgroundInput.setEnabled(False)
             self._calculator.set_est_bck = True
-        elif sender is self.manualBgd:
+        elif self.manualBgd.isChecked():
+            self.estimateBgd.setChecked(False)
             self.backgroundInput.setEnabled(True)
             self._calculator.set_est_bck = False
         else:
@@ -394,20 +392,17 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         for data in data_item:
             if data in self._data_list.keys():
                 # Don't add data if it's already in
-                return
+                continue
             # Create initial internal mappings
-            self._data_set = GuiUtils.dataFromItem(data)
-            self.logic = InversionLogic(self._data_set)
-            self.populateDataComboBox(self._data_set.filename, data)
+            self.logic.data = GuiUtils.dataFromItem(data)
             # Estimate q range
             qmin, qmax = self.logic.computeDataRange()
             self._calculator.set_qmin(qmin)
             self._calculator.set_qmax(qmax)
             self.updateDataList(data)
-            self.setCurrentData(data)
-            # Estimate initial values from data
-            self.performEstimate()
-        self.updateGuiValues()
+            self.populateDataComboBox(self.logic.data.filename, data)
+        self.dataList.setCurrentIndex(len(self.dataList) - 1)
+        self.setCurrentData(data)
 
     def updateDataList(self, dataRef):
         """Save the current data state of the window into self._data_list"""
@@ -416,9 +411,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self._data_list[dataRef] = {
             DICT_KEYS[0]: self._calculator,
             DICT_KEYS[1]: self.pr_plot,
-            DICT_KEYS[2]: self.data_plot,
-            DICT_KEYS[3]: self.dmaxWindow,
-            DICT_KEYS[4]: self.nTermsSuggested
+            DICT_KEYS[2]: self.data_plot
         }
 
     def getNFunc(self):
@@ -426,7 +419,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         try:
             nfunc = int(self.noOfTermsInput.text())
         except ValueError:
-            logging.error("Incorrect number of terms specified: %s" %self.noOfTermsInput.text())
+            logging.error("Incorrect number of terms specified: %s"
+                          %self.noOfTermsInput.text())
             self.noOfTermsInput.setText(str(NUMBER_OF_TERMS))
             nfunc = NUMBER_OF_TERMS
         return nfunc
@@ -440,14 +434,11 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             raise AttributeError(msg)
         # Data references
         self._data = data_ref
-        self._data_set = GuiUtils.dataFromItem(data_ref)
+        self.logic.data = GuiUtils.dataFromItem(data_ref)
         self._calculator = self._data_list[data_ref].get(DICT_KEYS[0])
         self.pr_plot = self._data_list[data_ref].get(DICT_KEYS[1])
         self.data_plot = self._data_list[data_ref].get(DICT_KEYS[2])
-        self.dmaxWindow = self._data_list[data_ref].get(DICT_KEYS[3])
-        self.nTermsSuggested = self._data_list[data_ref].get(DICT_KEYS[4])
-        self.logic.set_data = self._data_set
-        self.updateGuiValues()
+        self.performEstimate()
 
     def updateGuiValues(self):
         pr = self._calculator
@@ -455,7 +446,6 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         cov = self._calculator.cov
         elapsed = self._calculator.elapsed
         alpha = self._calculator.suggested_alpha
-        nterms = self._calculator.nfunc
         self.model.setItem(WIDGETS.W_QMIN,
                            QtGui.QStandardItem("{:.4g}".format(pr.get_qmin())))
         self.model.setItem(WIDGETS.W_QMAX,
@@ -495,24 +485,22 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     def removeData(self):
         """Remove the existing data reference from the P(r) Persepective"""
         if self.dmaxWindow is not None:
-            self.dmaxWindow.done()
+            self.dmaxWindow.close()
             self.dmaxWindow = None
         self.dataList.removeItem(self.dataList.currentIndex())
         self._data_list.pop(self._data)
         # Last file removed
         if len(self._data_list) == 0:
-            self._data = None
-            self._data_set = None
             self.pr_plot = None
             self.data_plot = None
             self._calculator = Invertor()
-            self.logic.data = self._data_set
+            self.logic.data = None
             self.nTermsSuggested = NUMBER_OF_TERMS
             self.noOfTermsSuggestionButton.setText("{:n}".format(
                 self.nTermsSuggested))
             self.regConstantSuggestionButton.setText("{:-3.2g}".format(
                 REGULARIZATION))
-            self.enableButtons()
+            self.updateGuiValues()
             self.setupModel()
         else:
             self.dataList.setCurrentIndex(0)
@@ -552,10 +540,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         """
         from .Thread import EstimateNT
 
+        self.update_calculator()
+
         # If a thread is already started, stop it
-        if (self.estimation_thread is not None and
-                self.estimation_thread.isrunning()):
-            self.estimation_thread.stop()
+        if (self.estimation_thread_nt is not None and
+                self.estimation_thread_nt.isrunning()):
+            self.estimation_thread_nt.stop()
         pr = self._calculator.clone()
         # Skip the slit settings for the estimation
         # It slows down the application and it doesn't change the estimates
@@ -563,12 +553,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         pr.slit_width = 0.0
         nfunc = self.getNFunc()
 
-        self.estimation_thread = EstimateNT(pr, nfunc,
+        self.estimation_thread_nt = EstimateNT(pr, nfunc,
                                             error_func=self._threadError,
                                             completefn=self._estimateNTCompleted,
                                             updatefn=None)
-        self.estimation_thread.queue()
-        self.estimation_thread.ready(2.5)
+        self.estimation_thread_nt.queue()
+        self.estimation_thread_nt.ready(2.5)
 
     def performEstimate(self):
         """
@@ -576,15 +566,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         """
         from .Thread import EstimatePr
 
-        self.startThread()
-
         # If a thread is already started, stop it
         if (self.estimation_thread is not None and
                 self.estimation_thread.isrunning()):
             self.estimation_thread.stop()
-        pr = self._calculator.clone()
-        nfunc = self.getNFunc()
-        self.estimation_thread = EstimatePr(pr, nfunc,
+        self.estimation_thread = EstimatePr(self._calculator.clone(),
+                                            self.getNFunc(),
                                             error_func=self._threadError,
                                             completefn=self._estimateCompleted,
                                             updatefn=None)
