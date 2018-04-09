@@ -26,19 +26,21 @@ Chi2
 ^^^^
 
 $\chi^2$ is a statistical parameter that quantifies the differences between
-an observed data set and an expected dataset (or 'theory').
-
-When showing the a model with the data, *SasView* displays this parameter
-normalized to the number of data points, $N_\mathrm{pts}$ such that
+an observed data set and an expected dataset (or 'theory') calculated as
 
 .. math::
 
-  \chi^2_N
-  =  \sum[(Y_i - \mathrm{theory}_i)^2 / \mathrm{error}_i^2] / N_\mathrm{pts}
+  \chi^2
+  =  \sum[(Y_i - \mathrm{theory}_i)^2 / \mathrm{error}_i^2]
 
-When performing a fit, *SasView* instead displays the reduced $\chi^2_R$,
-which takes into account the number of fitting parameters $N_\mathrm{par}$
-(to calculate the number of 'degrees of freedom'). This is computed as
+Fitting typically minimizes the value of $\chi^2$.  For assessing the quality of
+the model and its "fit" however, *SasView* displays the traditional reduced
+$\chi^2_R$ which normalizes this parameter by dividing it by the number of
+degrees of freedom (or DOF). The DOF is the number of data points being
+considered, $N_\mathrm{pts}$, reduced by the number of free (i.e. fitted)
+parameters, $N_\mathrm{par}$. Note that model parameters that are kept fixed do
+*not* contribute to the DOF (they are not "free"). This reduced value is then
+given as
 
 .. math::
 
@@ -46,8 +48,14 @@ which takes into account the number of fitting parameters $N_\mathrm{par}$
   =  \sum[(Y_i - \mathrm{theory}_i)^2 / \mathrm{error}_i^2]
   / [N_\mathrm{pts} - N_\mathrm{par}]
 
-The normalized $\chi^2_N$ and the reduced $\chi^2_R$ are very close to each
-other when $N_\mathrm{pts} \gg N_\mathrm{par}$.
+Note that this means the displayed value will vary depending on the number of
+parameters used in the fit. In particular, when doing a calculation without a
+fit (e.g. manually changing a parameter) the DOF will now equal $N_\mathrm{pts}$
+and the $\chi^2_R$ will be the smallest possible for that combination of model,
+data set, and set of parameter values.
+
+When $N_\mathrm{pts} \gg N_\mathrm{par}$ as it should for proper fitting, the
+value of the reduced $\chi^2_R$ will not change very much.
 
 For a good fit, $\chi^2_R$ tends to 1.
 
@@ -89,3 +97,4 @@ be meaningless.
 
 | 2015-06-08 Steve King
 | 2017-09-28 Paul Kienzle
+| 2018-03-04 Paul Butler
