@@ -279,3 +279,69 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
             tmpfile.write('\n')
             index += 1
 
+
+class BatchInversionOutputPanel(BatchOutputPanel):
+    """
+        Class for stateless grid-like printout of P(r) parameters for any number
+        of data sets
+    """
+    def __init__(self, parent = None, output_data=None):
+
+        super(BatchInversionOutputPanel, self).__init__(parent, output_data)
+
+    def setupTable(self, data):
+        """
+        Create tablewidget items and show them, based on params
+        """
+        # headers
+        param_list = ['Filename', 'Rg', 'Chi^2/dof', 'I(Q=0)', 'Oscillations',
+                      'Background', 'P+ Fraction', 'P+1-theta Fraction',
+                      'Calculation Time']
+        # P(r) keys
+        pr_keys = ['background', ]
+
+        keys = data.keys()
+        rows = len(keys)
+        columns = len(param_list)
+        self.tblParams.setColumnCount(columns)
+        self.tblParams.setRowCount(rows)
+
+        for i, param in enumerate(param_list):
+            self.tblParams.setHorizontalHeaderItem(i, QtWidgets.QTableWidgetItem(param))
+
+        # first - Chi2 and data filename
+        for i_row, (filename, pr) in enumerate(data.items()):
+            out = pr.out
+            cov = pr.cov
+            self.tblParams.setItem(i_row, 0, QtWidgets.QTableWidgetItem(
+                GuiUtils.formatNumber(filename, high=True)))
+            self.tblParams.setItem(i_row, 2, QtWidgets.QTableWidgetItem(
+                "{:.3g}".format(pr.chi2[0])))
+            self.tblParams.setItem(i_row, 5, QtWidgets.QTableWidgetItem(
+                "{:.3g}".format(pr.background)))
+            self.tblParams.setItem(i_row, 8, QtWidgets.QTableWidgetItem(
+                "{:.2g}".format(pr.elapsed)))
+            if out is not None:
+                self.tblParams.setItem(i_row, 1, QtWidgets.QTableWidgetItem(
+                    "{:.3g}".format(pr.rg(out))))
+                self.tblParams.setItem(i_row, 3, QtWidgets.QTableWidgetItem(
+                    "{:.3g}".format(pr.iq0(out))))
+                self.tblParams.setItem(i_row, 4, QtWidgets.QTableWidgetItem(
+                    "{:.3g}".format(pr.oscillations(out))))
+                self.tblParams.setItem(i_row, 6, QtWidgets.QTableWidgetItem(
+                    "{:.3g}".format(pr.get_positive(out))))
+                self.tblParams.setItem(i_row, 7, QtWidgets.QTableWidgetItem(
+                    "{:.3g}".format(pr.get_pos_err(out, cov))))
+            else:
+                self.tblParams.setItem(i_row, 1, QtWidgets.QTableWidgetItem(
+                    "NaN"))
+                self.tblParams.setItem(i_row, 3, QtWidgets.QTableWidgetItem(
+                    "NaN"))
+                self.tblParams.setItem(i_row, 4, QtWidgets.QTableWidgetItem(
+                    "NaN"))
+                self.tblParams.setItem(i_row, 6, QtWidgets.QTableWidgetItem(
+                    "NaN"))
+                self.tblParams.setItem(i_row, 7, QtWidgets.QTableWidgetItem(
+                    "NaN"))
+
+        self.tblParams.resizeColumnsToContents()

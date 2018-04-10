@@ -16,6 +16,9 @@ from .InversionLogic import InversionLogic
 # pr inversion calculation elements
 from sas.sascalc.pr.invertor import Invertor
 
+# Batch calculation display
+from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
+
 def is_float(value):
     """Converts text input values to floats. Empty strings throw ValueError"""
     try:
@@ -72,6 +75,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.nTermsSuggested = NUMBER_OF_TERMS
 
         # Calculation threads used by all data items
+        self.waitForEach = False
         self.calc_thread = None
         self.estimation_thread = None
         self.estimation_thread_nt = None
@@ -89,6 +93,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
         self.model = QtGui.QStandardItemModel(self)
         self.mapper = QtWidgets.QDataWidgetMapper(self)
+
+        self.grid_window = None
 
         # Add validators
         self.setupValidators()
@@ -373,6 +379,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.dmaxWindow = DmaxWindow(self._calculator, self.getNFunc(), self)
         self.dmaxWindow.show()
 
+    def showBatchOutput(self, output_data):
+        if self.grid_window is None:
+            self.grid_window = BatchInversionOutputPanel(
+                parent=self, output_data=output_data)
+        self.grid_window.show()
+
     ######################################################################
     # Response Actions
 
@@ -450,7 +462,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.model.setItem(WIDGETS.W_QMAX,
                            QtGui.QStandardItem("{:.4g}".format(pr.get_qmax())))
         self.model.setItem(WIDGETS.W_BACKGROUND_INPUT,
-                           QtGui.QStandardItem("{:.3f}".format(pr.background)))
+                           QtGui.QStandardItem("{:.3g}".format(pr.background)))
         self.model.setItem(WIDGETS.W_BACKGROUND_OUTPUT,
                            QtGui.QStandardItem("{:.3g}".format(pr.background)))
         self.model.setItem(WIDGETS.W_COMP_TIME,
@@ -510,9 +522,14 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     ######################################################################
     # Thread Creators
     def startThreadAll(self):
+        self.waitForEach = True
+        output = {}
         for data_ref in self._data_list.keys():
             self.setCurrentData(data_ref)
             self.startThread()
+            output[self.logic.data.filename] = self._calculator
+        self.waitForEach = False
+        self.showBatchOutput(output)
 
     def startThread(self):
         """
@@ -534,6 +551,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
                                   updatefn=None)
         self.calc_thread.queue()
         self.calc_thread.ready(2.5)
+        if self.waitForEach:
+            if self.calc_thread.isrunning():
+                self.calc_thread.update()
 
     def performEstimateNT(self):
         """
