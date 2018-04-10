@@ -78,7 +78,7 @@ class BaseReportDialog(wx.Dialog):
                           id=button_print.GetId())
         hbox.Add(button_print)
 
-        if sys.platform == "win32":
+        if sys.platform != "darwin":
             button_save = wx.Button(self, wx.NewId(), "Save")
             button_save.SetToolTipString("Save this report.")
             button_save.Bind(wx.EVT_BUTTON, self.onSave, id=button_save.GetId())
