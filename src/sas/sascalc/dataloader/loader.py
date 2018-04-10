@@ -89,6 +89,8 @@ class Registry(ExtensionRegistry):
         try:
             ascii_loader = ascii_reader.Reader()
             return ascii_loader.read(path)
+        except NoKnownLoaderException:
+            pass  # Try the Cansas XML reader
         except DefaultReaderException:
             pass  # Loader specific error to try the cansas XML reader
         except FileContentsException as e:
@@ -99,6 +101,8 @@ class Registry(ExtensionRegistry):
         try:
             cansas_loader = cansas_reader.Reader()
             return cansas_loader.read(path)
+        except NoKnownLoaderException:
+            pass  # Try the NXcanSAS reader
         except DefaultReaderException:
             pass  # Loader specific error to try the NXcanSAS reader
         except FileContentsException as e:
