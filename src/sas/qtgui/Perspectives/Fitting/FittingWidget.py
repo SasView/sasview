@@ -190,6 +190,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Batch/single fitting
         self.is_batch_fitting = False
         self.is_chain_fitting = False
+        # Is the fit job running?
+        self.fit_started=False
+        # The current fit thread
+        self.calc_fit = None
         # Current SasModel in view
         self.kernel_module = None
         # Current SasModel view dimension
@@ -1199,6 +1203,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Perform fitting on the current data
         """
+        if self.fit_started:
+            self.stopFit()
+            return
+
         # initialize fitter constants
         fit_id = 0
         handler = None
@@ -1225,7 +1233,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Create the fitting thread, based on the fitter
         completefn = self.batchFittingCompleted if self.is_batch_fitting else self.fittingCompleted
 
-        calc_fit = FitThread(handler=handler,
+        self.calc_fit = FitThread(handler=handler,
                             fn=fitters,
                             batch_inputs=batch_inputs,
                             batch_outputs=batch_outputs,
@@ -1236,17 +1244,32 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         if LocalConfig.USING_TWISTED:
             # start the trhrhread with twisted
-            calc_thread = threads.deferToThread(calc_fit.compute)
+            calc_thread = threads.deferToThread(self.calc_fit.compute)
             calc_thread.addCallback(completefn)
             calc_thread.addErrback(self.fitFailed)
         else:
             # Use the old python threads + Queue
-            calc_fit.queue()
-            calc_fit.ready(2.5)
+            self.calc_fit.queue()
+            self.calc_fit.ready(2.5)
 
         self.communicate.statusBarUpdateSignal.emit('Fitting started...')
+        self.fit_started = True
         # Disable some elements
         self.setFittingStarted()
+
+    def stopFit(self):
+        """
+        Attempt to stop the fitting thread
+        """
+        if self.calc_fit is None or not self.calc_fit.isrunning():
+            return
+        self.calc_fit.stop()
+        #self.fit_started=False
+        #re-enable the Fit button
+        self.setFittingStopped()
+
+        msg = "Fitting cancelled."
+        self.communicate.statusBarUpdateSignal.emit(msg)
 
     def updateFit(self):
         """
@@ -1257,8 +1280,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
     def fitFailed(self, reason):
         """
         """
-        print("FIT FAILED: ", reason)
-        pass
+        self.setFittingStopped()
+        msg = "Fitting failed with: "+ str(reason)
+        self.communicate.statusBarUpdateSignal.emit(msg)
 
     def batchFittingCompleted(self, result):
         """
@@ -1308,7 +1332,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             return
 
         elapsed = result[1]
-        msg = "Fitting completed successfully in: %s s.\n" % GuiUtils.formatNumber(elapsed)
+        if self.calc_fit._interrupting:
+            msg = "Fitting cancelled by user after: %s s." % GuiUtils.formatNumber(elapsed)
+            logging.warning("\n"+msg+"\n")
+        else:
+            msg = "Fitting completed successfully in: %s s." % GuiUtils.formatNumber(elapsed)
         self.communicate.statusBarUpdateSignal.emit(msg)
 
         self.chi2 = res.fitness
@@ -2385,19 +2413,21 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
     def setFittingStarted(self):
         """
-        Set item enablement on fitting start
+        Set buttion caption on fitting start
         """
-        #disable the Fit button
-        self.cmdFit.setText('Running...')
-        self.cmdFit.setEnabled(False)
+        # Notify the user that fitting is being run
+        # Allow for stopping the job
+        self.cmdFit.setStyleSheet('QPushButton {color: red;}')
+        self.cmdFit.setText('Stop fit')
 
     def setFittingStopped(self):
         """
-        Set item enablement on fitting stop
+        Set button caption on fitting stop
         """
-        #enable the Fit button
+        # Notify the user that fitting is available
+        self.cmdFit.setStyleSheet('QPushButton {color: black;}')
         self.cmdFit.setText("Fit")
-        self.cmdFit.setEnabled(True)
+        self.fit_started = False
 
     def readFitPage(self, fp):
         """
