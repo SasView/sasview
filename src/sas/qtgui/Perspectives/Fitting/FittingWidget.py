@@ -1,5 +1,6 @@
 import json
 import os
+import copy
 from collections import defaultdict
 
 import copy
@@ -20,6 +21,7 @@ from sasmodels.sasview_model import load_standard_models
 from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
 
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
+from sas.sascalc.fit.pagestate import PageState
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 import sas.qtgui.Utilities.LocalConfig as LocalConfig
@@ -44,6 +46,8 @@ from sas.qtgui.Perspectives.Fitting.ViewDelegate import PolyViewDelegate
 from sas.qtgui.Perspectives.Fitting.ViewDelegate import MagnetismViewDelegate
 from sas.qtgui.Perspectives.Fitting.Constraint import Constraint
 from sas.qtgui.Perspectives.Fitting.MultiConstraint import MultiConstraint
+from sas.qtgui.Perspectives.Fitting.ReportPageLogic import ReportPageLogic
+
 
 
 TAB_MAGNETISM = 4
@@ -505,6 +509,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Signals from other widgets
         self.communicate.customModelDirectoryChanged.connect(self.onCustomModelChange)
+        self.communicate.saveAnalysisSignal.connect(self.savePageState)
+        #self.communicate.saveReportSignal.connect(self.saveReport)
 
     def modelName(self):
         """
@@ -2631,4 +2637,128 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         if self.page_stack:
             self.page_stack.pop()
+
+    def getReport(self):
+        """
+        Create and return HTML report with parameters and charts
+        """
+        index = None
+        if self.all_data:
+            index = self.all_data[self.data_index]
+        report_logic = ReportPageLogic(self,
+                                       kernel_module=self.kernel_module,
+                                       data=self.data,
+                                       index=index,
+                                       model=self._model_model)
+
+        return report_logic.reportList()
+
+    def savePageState(self):
+        """
+        Create and serialize local PageState
+        """
+        from sas.sascalc.fit.pagestate import Reader
+        model = self.kernel_module
+
+        # Old style PageState object
+        state = PageState(model=model, data=self.data)
+
+        # Add parameter data to the state
+        self.getCurrentFitState(state)
+
+        # Create the filewriter, aptly named 'Reader'
+        state_reader = Reader(self.loadPageStateCallback)
+        filepath = self.saveAsAnalysisFile()
+        if filepath is None:
+            return
+        state_reader.write(filename=filepath, fitstate=state)
+        pass
+
+    def saveAsAnalysisFile(self):
+        """
+        Show the save as... dialog and return the chosen filepath
+        """
+        default_name = "FitPage"+str(self.tab_id)+".fitv"
+
+        wildcard = "fitv files (*.fitv)"
+        kwargs = {
+            'caption'   : 'Save As',
+            'directory' : default_name,
+            'filter'    : wildcard,
+            'parent'    : None,
+        }
+        # Query user for filename.
+        filename_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+        filename = filename_tuple[0]
+        return filename
+
+    def loadPageStateCallback(self,state=None, datainfo=None, format=None):
+        """
+        This is a callback method called from the CANSAS reader.
+        We need the instance of this reader only for writing out a file,
+        so there's nothing here.
+        Until Load Analysis is implemented, that is.
+        """
+        pass
+
+    def loadPageState(self, pagestate=None):
+        """
+        Load the PageState object and update the current widget
+        """
+        pass
+
+    def getCurrentFitState(self, state=None):
+        """
+        Store current state for fit_page
+        """
+        # save model option
+        #if self.model is not None:
+        #    self.disp_list = self.getDispParamList()
+        #    state.disp_list = copy.deepcopy(self.disp_list)
+        #    #state.model = self.model.clone()
+
+        # Comboboxes
+        state.categorycombobox = self.cbCategory.currentText()
+        state.formfactorcombobox = self.cbModel.currentText()
+        if self.cbStructureFactor.isEnabled():
+            state.structureCombobox = self.cbStructureFactor.currentText()
+        state.tcChi = self.chi2
+
+        state.enable2D = self.is2D
+
+        #state.weights = copy.deepcopy(self.weights)
+        # save data
+        state.data = copy.deepcopy(self.data)
+
+        # save plotting range
+        state.qmin = self.q_range_min
+        state.qmax = self.q_range_max
+        state.npts = self.npts
+
+        #    self.state.enable_disp = self.enable_disp.GetValue()
+        #    self.state.disable_disp = self.disable_disp.GetValue()
+
+        #    self.state.enable_smearer = \
+        #                        copy.deepcopy(self.enable_smearer.GetValue())
+        #    self.state.disable_smearer = \
+        #                        copy.deepcopy(self.disable_smearer.GetValue())
+
+        #self.state.pinhole_smearer = \
+        #                        copy.deepcopy(self.pinhole_smearer.GetValue())
+        #self.state.slit_smearer = copy.deepcopy(self.slit_smearer.GetValue())
+        #self.state.dI_noweight = copy.deepcopy(self.dI_noweight.GetValue())
+        #self.state.dI_didata = copy.deepcopy(self.dI_didata.GetValue())
+        #self.state.dI_sqrdata = copy.deepcopy(self.dI_sqrdata.GetValue())
+        #self.state.dI_idata = copy.deepcopy(self.dI_idata.GetValue())
+
+        p = self.model_parameters
+        # save checkbutton state and txtcrtl values
+        state.parameters = FittingUtilities.getStandardParam()
+        state.orientation_params_disp = FittingUtilities.getOrientationParam()
+
+        #self._copy_parameters_state(self.orientation_params_disp, self.state.orientation_params_disp)
+        #self._copy_parameters_state(self.parameters, self.state.parameters)
+        #self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
+        #self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
+
 

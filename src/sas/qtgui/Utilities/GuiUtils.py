@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Global defaults and various utility functions usable by the general GUI
 """
@@ -247,6 +248,8 @@ class Communicate(QtCore.QObject):
     # Notify the gui manager about new data to be added to the grid view
     sendDataToGridSignal = QtCore.pyqtSignal(list)
 
+    # Action Save Analysis triggered
+    saveAnalysisSignal = QtCore.pyqtSignal()
 
 def updateModelItemWithPlot(item, update_data, name=""):
     """
@@ -377,6 +380,29 @@ def itemFromFilename(filename, model_item):
                              for index in range(model_item.rowCount())]
                  if str(i.text()) == filename])
     return item[0] if len(item)>0 else None
+
+def plotsFromModel(model_name, model_item):
+    """
+    Returns the list of plots for the item with model name in the model
+    """
+    assert isinstance(model_item, QtGui.QStandardItem)
+    assert isinstance(model_name, str)
+
+    plot_data = []
+    # Iterate over model looking for named items
+    for index in range(model_item.rowCount()):
+        item = model_item.child(index)
+        if isinstance(item.data(), (Data1D, Data2D)):
+            plot_data.append(item.data())
+        if model_name in str(item.text()):
+            #plot_data.append(item.child(0).data())
+            # Going 1 level deeper only
+            for index_2 in range(item.rowCount()):
+                item_2 = item.child(index_2)
+                if item_2 and isinstance(item_2.data(), (Data1D, Data2D)):
+                    plot_data.append(item_2.data())
+
+    return plot_data
 
 def plotsFromFilename(filename, model_item):
     """
@@ -839,6 +865,53 @@ def formatNumber(value, high=False):
     else:
         output = "%-5.3g" % value
     return output.lstrip().rstrip()
+
+def replaceHTMLwithUTF8(html):
+    """
+    Replace some important HTML-encoded characters
+    with their UTF-8 equivalents
+    """
+    # Angstrom
+    html_out = html.replace("&#x212B;", "Å")
+    # infinity
+    html_out = html_out.replace("&#x221e;", "∞")
+    # +/-
+    html_out = html_out.replace("&#177;", "±")
+
+    return html_out
+
+def replaceHTMLwithASCII(html):
+    """
+    Replace some important HTML-encoded characters
+    with their ASCII equivalents
+    """
+    # Angstrom
+    html_out = html.replace("&#x212B;", "Ang")
+    # infinity
+    html_out = html_out.replace("&#x221e;", "inf")
+    # +/-
+    html_out = html_out.replace("&#177;", "+/-")
+
+    return html_out
+
+def convertUnitToUTF8(unit):
+    """
+    Convert ASCII unit display into UTF-8 symbol
+    """
+    if unit == "1/A":
+        return "Å<sup>-1</sup>"
+    elif unit == "1/cm":
+        return "cm<sup>-1</sup>"
+    elif unit == "Ang":
+        return "Å"
+    elif unit == "1e-6/Ang^2":
+        return "10<sup>-6</sup>/Å<sup>2</sup>"
+    elif unit == "inf":
+        return "∞"
+    elif unit == "-inf":
+        return "-∞"
+    else:
+        return unit
 
 def convertUnitToHTML(unit):
     """

@@ -22,6 +22,7 @@ from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Utilities.PluginManager import PluginManager
 from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 
+from sas.qtgui.Utilities.ReportDialog import ReportDialog
 from sas.qtgui.MainWindow.UI.AcknowledgementsUI import Ui_Acknowledgements
 from sas.qtgui.MainWindow.AboutBox import AboutBox
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
@@ -487,10 +488,9 @@ class GuiManager(object):
 
     def actionSave_Analysis(self):
         """
+        Menu File/Save Analysis
         """
-        print("actionSave_Analysis TRIGGERED")
-
-        pass
+        self.communicate.saveAnalysisSignal.emit()
 
     def actionQuit(self):
         """
@@ -525,9 +525,18 @@ class GuiManager(object):
 
     def actionReport(self):
         """
+        Show the Fit Report dialog.
         """
-        print("actionReport TRIGGERED")
-        pass
+        report_list = None
+        if getattr(self._current_perspective, "currentTab"):
+            try:
+                report_list = self._current_perspective.currentTab.getReport()
+            except Exception as ex:
+                logging.error("Report generation failed with: " + str(ex))
+
+        if report_list is not None:
+            self.report_dialog = ReportDialog(parent=self, report_list=report_list)
+            self.report_dialog.show()
 
     def actionReset(self):
         """

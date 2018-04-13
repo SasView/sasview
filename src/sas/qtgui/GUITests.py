@@ -48,6 +48,7 @@ from Utilities.UnitTesting import ModelEditorTest
 from Utilities.UnitTesting import PluginDefinitionTest
 from Utilities.UnitTesting import TabbedModelEditorTest
 from Utilities.UnitTesting import AddMultEditorTest
+from Utilities.UnitTesting import ReportDialogTest
 
 # Unit Testing
 from UnitTesting import TestUtilsTest
@@ -108,6 +109,7 @@ def suite():
         unittest.makeSuite(PluginDefinitionTest.PluginDefinitionTest,  'test'),
         unittest.makeSuite(TabbedModelEditorTest.TabbedModelEditorTest,'test'),
         unittest.makeSuite(AddMultEditorTest.AddMultEditorTest, 'test'),
+        unittest.makeSuite(ReportDialogTest.ReportDialogTest,     'test'),
 
         # Calculators
         unittest.makeSuite(KiessigCalculatorTest.KiessigCalculatorTest,                     'test'),
