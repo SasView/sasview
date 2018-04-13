@@ -49,7 +49,7 @@ def SplashScreen():
     splashScreen = QSplashScreen(pixmap)
     return splashScreen
 
-def run():
+def run_sasview():
     app = QApplication([])
 
     # Main must have reference to the splash screen, so making it explicit
@@ -84,4 +84,4 @@ def run():
     reactor.run()
 
 if __name__ == "__main__":
-    run()
+    run_sasview()
