@@ -33,8 +33,8 @@ MAX_DIST = 140.0
 DICT_KEYS = ["Calculator", "PrPlot", "DataPlot"]
 
 
+# TODO: Use communicator to catch data deletions
 # TODO: Update help with batch capabilities
-# TODO: Method to export results in some meaningful way
 class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     """
     The main window for the P(r) Inversion perspective.
@@ -380,9 +380,15 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.dmaxWindow.show()
 
     def showBatchOutput(self, output_data):
+        """
+        Display the batch output in tabular form
+        :param output_data: Dictionary mapping filename -> P(r) instance
+        """
         if self.grid_window is None:
             self.grid_window = BatchInversionOutputPanel(
                 parent=self, output_data=output_data)
+        else:
+            self.grid_window.setupTable(output_data)
         self.grid_window.show()
 
     ######################################################################
@@ -498,9 +504,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         if self.dmaxWindow is not None:
             self.dmaxWindow.close()
             self.dmaxWindow = None
-        current_data = self._data
+        self._data_list.pop(self._data)
+        self._data = None
         self.dataList.removeItem(self.dataList.currentIndex())
-        self._data_list.pop(current_data)
         # Last file removed
         if len(self._data_list) == 0:
             self._data = None
@@ -526,6 +532,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         output = {}
         for data_ref in self._data_list.keys():
             self.setCurrentData(data_ref)
+            self.performEstimate()
+            self.performEstimateNT()
+            self.acceptAlpha()
+            self.acceptNoTerms()
             self.startThread()
             output[self.logic.data.filename] = self._calculator
         self.waitForEach = False
@@ -580,6 +590,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
                                             updatefn=None)
         self.estimation_thread_nt.queue()
         self.estimation_thread_nt.ready(2.5)
+        if self.waitForEach:
+            if self.estimation_thread_nt.isrunning():
+                self.estimation_thread_nt.update()
 
     def performEstimate(self):
         """
@@ -598,6 +611,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
                                             updatefn=None)
         self.estimation_thread.queue()
         self.estimation_thread.ready(2.5)
+        if self.waitForEach:
+            if self.estimation_thread.isrunning():
+                self.estimation_thread.update()
 
     ######################################################################
     # Thread Complete
@@ -617,7 +633,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         alpha, message, elapsed = output_tuple
         if message:
             logging.info(message)
-        self.performEstimateNT()
+        if not self.waitForEach:
+            self.performEstimateNT()
 
     def _estimateNTCompleted(self, nterms, alpha, message, elapsed):
         ''' Send a signal to the main thread for model update'''

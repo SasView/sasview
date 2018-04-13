@@ -294,11 +294,9 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         Create tablewidget items and show them, based on params
         """
         # headers
-        param_list = ['Filename', 'Rg', 'Chi^2/dof', 'I(Q=0)', 'Oscillations',
-                      'Background', 'P+ Fraction', 'P+1-theta Fraction',
-                      'Calculation Time']
-        # P(r) keys
-        pr_keys = ['background', ]
+        param_list = ['Filename', 'Rg [Å]', 'χ^2/dof', 'I(Q=0)', 'Oscillations',
+                      'Background [Å^-1]', 'P+ Fraction', 'P+1-σ Fraction',
+                      'Calc. Time [sec]']
 
         keys = data.keys()
         rows = len(keys)
@@ -313,35 +311,39 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         for i_row, (filename, pr) in enumerate(data.items()):
             out = pr.out
             cov = pr.cov
+            if out is None:
+                logging.warning("P(r) for {} did not converge.".format(filename))
+                continue
             self.tblParams.setItem(i_row, 0, QtWidgets.QTableWidgetItem(
-                GuiUtils.formatNumber(filename, high=True)))
+                "{}".format(filename)))
             self.tblParams.setItem(i_row, 2, QtWidgets.QTableWidgetItem(
                 "{:.3g}".format(pr.chi2[0])))
             self.tblParams.setItem(i_row, 5, QtWidgets.QTableWidgetItem(
                 "{:.3g}".format(pr.background)))
             self.tblParams.setItem(i_row, 8, QtWidgets.QTableWidgetItem(
                 "{:.2g}".format(pr.elapsed)))
-            if out is not None:
-                self.tblParams.setItem(i_row, 1, QtWidgets.QTableWidgetItem(
-                    "{:.3g}".format(pr.rg(out))))
-                self.tblParams.setItem(i_row, 3, QtWidgets.QTableWidgetItem(
-                    "{:.3g}".format(pr.iq0(out))))
-                self.tblParams.setItem(i_row, 4, QtWidgets.QTableWidgetItem(
-                    "{:.3g}".format(pr.oscillations(out))))
-                self.tblParams.setItem(i_row, 6, QtWidgets.QTableWidgetItem(
-                    "{:.3g}".format(pr.get_positive(out))))
-                self.tblParams.setItem(i_row, 7, QtWidgets.QTableWidgetItem(
-                    "{:.3g}".format(pr.get_pos_err(out, cov))))
-            else:
-                self.tblParams.setItem(i_row, 1, QtWidgets.QTableWidgetItem(
-                    "NaN"))
-                self.tblParams.setItem(i_row, 3, QtWidgets.QTableWidgetItem(
-                    "NaN"))
-                self.tblParams.setItem(i_row, 4, QtWidgets.QTableWidgetItem(
-                    "NaN"))
-                self.tblParams.setItem(i_row, 6, QtWidgets.QTableWidgetItem(
-                    "NaN"))
-                self.tblParams.setItem(i_row, 7, QtWidgets.QTableWidgetItem(
-                    "NaN"))
+            self.tblParams.setItem(i_row, 1, QtWidgets.QTableWidgetItem(
+                "{:.3g}".format(pr.rg(out))))
+            self.tblParams.setItem(i_row, 3, QtWidgets.QTableWidgetItem(
+                "{:.3g}".format(pr.iq0(out))))
+            self.tblParams.setItem(i_row, 4, QtWidgets.QTableWidgetItem(
+                "{:.3g}".format(pr.oscillations(out))))
+            self.tblParams.setItem(i_row, 6, QtWidgets.QTableWidgetItem(
+                "{:.3g}".format(pr.get_positive(out))))
+            self.tblParams.setItem(i_row, 7, QtWidgets.QTableWidgetItem(
+                "{:.3g}".format(pr.get_pos_err(out, cov))))
 
         self.tblParams.resizeColumnsToContents()
+
+    @classmethod
+    def onHelp(cls):
+        """
+        Open a local url in the default browser
+        """
+        # TODO: Add anchor to batch fitting help when written
+        location = GuiUtils.HELP_DIRECTORY_LOCATION
+        url = "/user/sasgui/perspectives/pr/pr_help.html"
+        try:
+            webbrowser.open('file://' + os.path.realpath(location + url))
+        except webbrowser.Error as ex:
+            logging.warning("Cannot display help. %s" % ex)
