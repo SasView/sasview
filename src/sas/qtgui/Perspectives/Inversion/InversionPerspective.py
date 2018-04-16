@@ -19,12 +19,14 @@ from sas.sascalc.pr.invertor import Invertor
 # Batch calculation display
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
 
+
 def is_float(value):
     """Converts text input values to floats. Empty strings throw ValueError"""
     try:
         return float(value)
     except ValueError:
         return 0.0
+
 
 NUMBER_OF_TERMS = 10
 REGULARIZATION = 0.0001
@@ -33,7 +35,6 @@ MAX_DIST = 140.0
 DICT_KEYS = ["Calculator", "PrPlot", "DataPlot"]
 
 
-# TODO: Use communicator to catch data deletions
 # TODO: Update help with batch capabilities
 class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     """
@@ -52,7 +53,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.setWindowTitle("P(r) Inversion Perspective")
 
         self._manager = parent
-        self.communicate = GuiUtils.Communicate()
+        self.communicate = parent.communicator()
+        self.communicate.dataDeletedSignal.connect(self.removeData)
 
         self.logic = InversionLogic()
 
@@ -499,14 +501,19 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
                                            pr.get_pos_err(out, cov))))
         self.enableButtons()
 
-    def removeData(self):
+    def removeData(self, data_list=None):
         """Remove the existing data reference from the P(r) Persepective"""
         if self.dmaxWindow is not None:
             self.dmaxWindow.close()
             self.dmaxWindow = None
-        self._data_list.pop(self._data)
+        if not data_list:
+            data_list = [self._data]
+        for data in data_list:
+            self._data_list.pop(data)
         self._data = None
-        self.dataList.removeItem(self.dataList.currentIndex())
+        for index in range(0, len(self.dataList)):
+            if self.dataList.itemData(index) in data_list:
+                self.dataList.removeItem(index)
         # Last file removed
         if len(self._data_list) == 0:
             self._data = None
