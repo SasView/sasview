@@ -1,5 +1,136 @@
 """
 Class that holds a fit page state
+
+Pagestate fields reflect the names of the gui controls from the sasview 3.x
+fit page, so they are somewhat difficult to interpret.
+
+Pagestate attributes are as follows:
+
+    # =>name: desc       indicates the attribute is derived
+    # name(xml): desc    indicates the attribute name differs from the xml tag
+
+    # SasView version which saved the file
+    version: (4, 1, 2) from <fitting_plug_in version="major.minor.point">
+
+    # Session information
+    group_id: unique id for fit page in running system (int)
+    => data_group_id: unique id for data item in running system (None)
+
+    # Data file
+    data: contents of <SASdata> (Data1D or Data2D)
+    data_name: filename + [num] (latex_smeared.xml [1])
+    data_id: filename + [num] + timestamp (latex_smeared.xml [1]1523303027.73)
+    file: filename + [date time] (latex_smeared.xml [Apr 09 15:45])
+    name: ?? (None)
+    npts: number of points (float)
+    enable2D: True if data is 2D (or if model is 2D and no data)
+    is_data: True (pagestate will not save if there is no data attached)
+
+    # Data weighting
+    dI_didata: True if dy = data.dy
+    dI_idata: True if dy = data.y
+    dI_noweight: True if dy = 1
+    dI_sqrdata: True if dy = sqrt(data.y)
+
+    # Data selection
+    qmax: maximum q (float)
+    qmin: minimum q (float)
+    => qmax_x: ?? (None)
+    => qmin_x: ?? (None)
+
+    # Resolution smearing
+    enable_smearer: True if use data.dx
+    disable_smearer: True if no smearing
+    pinhole_smearer: True if custom pinhole smear
+    slit_smearer: True if custom slit smear
+    dq_l: 2D resolution <dQp>
+    dq_r: 2D resolution <dQs>
+    dx_old: True for 3.x version of custom pinhole, which used dx_min rather
+        than dx_percent, with dx_percent interpreted as 100 * dx_percent/q[0]
+    dx_percent: custom pinhole resolution percentage
+    dxl: slit height for custom slit resolution
+    dxw: slit width for custom slit resolution
+    smearer: repr() for active smearer (None on load)
+    smear_type: None (None on load)
+
+    # Model selection
+    categorycombobox: model category
+    formfactorcombobox: model name (could be "[plug-in] name")
+    structurecombobox: structure factor model name (string or None or "None")
+    multi_factor: multiplicity (integer or None)
+    magnetic_on: True if model is magnetic (only for 2D data for now)
+    => model: active model object (None on load)
+
+    # Model parameters
+    # Parameter is a tuple with the following structure.  The parentheses
+    # indicate xml attribute for the <parameter .../> tag:
+    #    fitted(selected_to_fit): True if parameter is fitted
+    #    name(name): display name for the parameter (string)
+    #    value(value): displayed parameter value (string)
+    #    => plusminus: '+/-' (constant string)
+    #    => uncertainty: tuple
+    #        (uncertainty_displayed): True if there is an uncertainty
+    #        (uncertainty_value): displayed uncertainty (string)
+    #    => lower: tuple
+    #        (minimum_displayed): True if there is a lower bound
+    #        (minimum_value): displayed lower bound (string)
+    #    => upper: tuple
+    #        (maximum_displayed): True if there is a upper bound
+    #        (maximum_value): displayed upper bound (string)
+    #    units(unit): displayed units
+    parameters: list of normal parameters
+    fixed_param: list of non-fitting parameters (nsigma, npts in dispersity)
+    fittable_param: list of fittable dispersity parameters (distribution width)
+    str_parameters: list of selection parameters (e.g, shell forms in spherical_sld)
+    orientation_params(orientation_parameters): list of orientation and
+        magnetic parameters (already included in parameters, so safe to ignore)
+    orientation_params_disp(dispersity_parameters): list of orientation
+        disperisty parameters (already included in fixed_param and
+        fittable_param so safe to ignore)
+
+    # Dispersity controls
+    enable_disp: True if dispersity parameters
+    disable_disp: True if no dispersity parameters
+    disp_obj_dict(disp_obj): {'parameter.width': 'dispersity distribution'}
+    values: {'parameter.width': [array distribution parameter values] }
+    weights: {'parameter.width': [array distribution parameter weights] }
+    => disp_box 0
+    => disp_cb_dict {}
+    => disp_list []
+
+    # Simultaneous fitting
+
+    => images: None (initialized but unused?)
+    => reset: False (initialized but unused?)
+    => event_owner None
+    => m_name None
+    => manager None
+    => page_name
+    => param_toFit: []
+    => process: list of process done on object [] (maybe managed by guiframe?)
+    => saved_states {}
+    => cb1: False (simfit cb1 is now stored in select_all)
+
+    tcChi 1.3463
+    theory_data None
+    timestamp 1523303103.74
+
+Constraint attributes are as follows:
+
+    constraint_dict {}
+    constraints_list
+        {'model_cbox': 'M2', 'param_cbox': 'scale', 'egal_txt': ' = ', 'constraint': 'M1.scale'}
+        {'model_cbox': 'M2', 'param_cbox': 'radius', 'egal_txt': ' = ', 'constraint': 'M1.radius'}
+        {'model_cbox': 'M2', 'param_cbox': 'radius.width', 'egal_txt': ' = ', 'constraint': 'M1.radius.width'}
+    fit_page_no None
+    model_list
+        {'fit_number': '393', 'checked': 'True', 'fit_page_source': 'M2', 'name': 'latex_smeared.xml   [1]1523535051.03', 'model_name': 'sphere'}
+        {'fit_number': '335', 'checked': 'True', 'fit_page_source': 'M1', 'name': 'latex_smeared.xml  1523535050.03', 'model_name': 'sphere'}
+    model_to_fit
+    no_constraint 0
+    select_all True
+
+
 """
 # TODO: Refactor code so we don't need to use getattr/setattr
 ################################################################################
@@ -160,7 +291,6 @@ class PageState(object):
         # model data
         self.theory_data = None
         # Is 2D
-        self.is_2D = False
         self.images = None
 
         # save additional information on data that dataloader.reader
@@ -555,12 +685,9 @@ class PageState(object):
         rep += "model  : %s\n\n" % str(self.model)
         temp_parameters = []
         temp_fittable_param = []
-        if self.data.__class__.__name__ == "Data2D":
-            self.is_2D = True
-        else:
-            self.is_2D = False
         if self.data is not None:
-            if not self.is_2D:
+            is_2D = (self.data.__class__.__name__ == "Data2D")
+            if not is_2D:
                 for item in self.parameters:
                     if item not in self.orientation_params:
                         temp_parameters.append(item)
