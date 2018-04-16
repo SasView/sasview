@@ -281,7 +281,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         """
         Enable buttons when data is present, else disable them
         """
-        self.calculateAllButton.setEnabled(self.logic.data_is_loaded)
+        self.calculateAllButton.setEnabled(len(self._data_list) > 1)
         self.calculateThisButton.setEnabled(self.logic.data_is_loaded)
         self.removeButton.setEnabled(self.logic.data_is_loaded)
         self.explorerButton.setEnabled(self.logic.data_is_loaded)
@@ -336,12 +336,6 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             self.close()
             InversionWindow.__init__(self.parent(), list(self._data_list.keys()))
             exit(0)
-        if self.pr_plot is not None:
-            title = self.pr_plot.name
-            GuiUtils.updateModelItemWithPlot(self._data, self.pr_plot, title)
-        if self.data_plot is not None:
-            title = self.data_plot.name
-            GuiUtils.updateModelItemWithPlot(self._data, self.data_plot, title)
         if self.dmaxWindow is not None:
             self.dmaxWindow.nfunc = self.getNFunc()
             self.dmaxWindow.pr_state = self._calculator
@@ -688,11 +682,19 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         # Save Pr invertor
         self._calculator = pr
 
-        # Create new P(r) and fit plots
-        if self.pr_plot is None:
-            self.pr_plot = self.logic.newPRPlot(out, self._calculator, cov)
-        if self.data_plot is None:
-            self.data_plot = self.logic.new1DPlot(out, self._calculator)
+        # Update P(r) and fit plots
+        self.pr_plot = self.logic.newPRPlot(out, self._calculator, cov)
+        self.pr_plot.filename = self.logic.data.filename
+        title = self.pr_plot.name
+        GuiUtils.updateModelItemWithPlot(self._data, self.pr_plot, title)
+        self.communicate.plotRequestedSignal.emit([self.pr_plot])
+        self.data_plot = self.logic.new1DPlot(out, self._calculator)
+        self.data_plot.filename = self.logic.data.filename
+        title = self.data_plot.name
+        GuiUtils.updateModelItemWithPlot(self._data, self.data_plot, title)
+        self.communicate.plotRequestedSignal.emit([self.data_plot])
+
+        # Udpate internals and GUI
         self.updateDataList(self._data)
         self.updateGuiValues()
 

@@ -340,9 +340,8 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         """
         Open a local url in the default browser
         """
-        # TODO: Add anchor to batch fitting help when written
         location = GuiUtils.HELP_DIRECTORY_LOCATION
-        url = "/user/sasgui/perspectives/pr/pr_help.html"
+        url = "/user/sasgui/perspectives/pr/pr_help.html#batch-fit-mode"
         try:
             webbrowser.open('file://' + os.path.realpath(location + url))
         except webbrowser.Error as ex:
