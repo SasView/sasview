@@ -49,7 +49,6 @@ class FitPage(BasicPage):
 
         # draw sizer
         self._fill_data_sizer()
-        self.is_2D = None
         self.fit_started = False
         self.weightbt_string = None
         self.m_name = None
