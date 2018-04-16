@@ -66,7 +66,7 @@ def import_dll(modname, build_path):
     return imp.load_dynamic(modname, path)
 
 
-def prepare():
+def prepare(rebuild=True):
     # Don't create *.pyc files
     sys.dont_write_bytecode = True
 
@@ -112,7 +112,7 @@ def prepare():
 
     # Build project if the build directory does not already exist.
     # PAK: with "update" we can always build since it is fast
-    if True or not os.path.exists(build_path):
+    if rebuild or not os.path.exists(build_path):
         import subprocess
         build_cmd = [sys.executable, "setup.py", "build", "update"]
         if os.name == 'nt':
