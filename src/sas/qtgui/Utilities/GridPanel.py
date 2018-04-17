@@ -346,3 +346,8 @@ class BatchInversionOutputPanel(BatchOutputPanel):
             webbrowser.open('file://' + os.path.realpath(location + url))
         except webbrowser.Error as ex:
             logging.warning("Cannot display help. %s" % ex)
+
+    def closeEvent(self, event):
+        """Tell the parent window the window closed"""
+        self.parent.grid_window = None
+        event.accept()
