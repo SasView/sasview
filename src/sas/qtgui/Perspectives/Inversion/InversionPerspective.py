@@ -1,6 +1,4 @@
-import sys
 import logging
-import pylab
 import numpy as np
 
 from PyQt5 import QtGui, QtCore, QtWidgets
@@ -15,7 +13,6 @@ from .InversionLogic import InversionLogic
 
 # pr inversion calculation elements
 from sas.sascalc.pr.invertor import Invertor
-
 # Batch calculation display
 from sas.qtgui.Utilities.GridPanel import BatchInversionOutputPanel
 
@@ -59,9 +56,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.logic = InversionLogic()
 
         # The window should not close
-        self._allow_close = False
+        self._allowClose = False
 
-        # Visible data set items
+        # Visible data items
         # current QStandardItem showing on the panel
         self._data = None
         # Reference to Dmax window for self._data
@@ -71,20 +68,19 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         # Default to background estimate
         self._calculator.est_bck = True
         # plots of self._data
-        self.pr_plot = None
-        self.data_plot = None
+        self.prPlot = None
+        self.dataPlot = None
         # suggested nTerms
         self.nTermsSuggested = NUMBER_OF_TERMS
 
         # Calculation threads used by all data items
-        self.isBatch = False
-        self.calc_thread = None
-        self.estimation_thread = None
-        self.estimation_thread_nt = None
+        self.calcThread = None
+        self.estimationThread = None
+        self.estimationThreadNT = None
 
         # Mapping for all data items
-        # list mapping data to all parameters
-        self._data_list = {}
+        # Dictionary mapping data to all parameters
+        self._dataList = {}
         if not isinstance(data, list):
             data_list = [data]
         if data is not None:
@@ -96,8 +92,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.model = QtGui.QStandardItemModel(self)
         self.mapper = QtWidgets.QDataWidgetMapper(self)
 
-        # Batch fitting results
-        self.grid_window = None
+        # Batch fitting parameters
+        self.isBatch = False
+        self.batchResultsWindow = None
         self.batchResults = {}
         self.batchComplete = []
 
@@ -126,13 +123,16 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         Allow outsiders close this widget
         """
         assert isinstance(value, bool)
-        self._allow_close = value
+        self._allowClose = value
 
     def closeEvent(self, event):
         """
         Overwrite QDialog close method to allow for custom widget close
         """
-        if self._allow_close:
+        # Close report widgets before closing/minimizing main widget
+        self.closeDMax()
+        self.closeBatchResults()
+        if self._allowClose:
             # reset the closability flag
             self.setClosable(value=False)
             # Tell the MdiArea to close the container
@@ -142,6 +142,14 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             event.ignore()
             # Maybe we should just minimize
             self.setWindowState(QtCore.Qt.WindowMinimized)
+
+    def closeDMax(self):
+        if self.dmaxWindow is not None:
+            self.dmaxWindow.close()
+
+    def closeBatchResults(self):
+        if self.batchResultsWindow is not None:
+            self.batchResultsWindow.close()
 
     ######################################################################
     # Initialization routines
@@ -229,38 +237,27 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         """
         Update boxes with initial values
         """
-        item = QtGui.QStandardItem(str(BACKGROUND_INPUT))
-        self.model.setItem(WIDGETS.W_BACKGROUND_INPUT, item)
-        item = QtGui.QStandardItem("")
-        self.model.setItem(WIDGETS.W_QMIN, item)
-        item = QtGui.QStandardItem("")
-        self.model.setItem(WIDGETS.W_QMAX, item)
-        item = QtGui.QStandardItem("")
-        self.model.setItem(WIDGETS.W_SLIT_WIDTH, item)
-        item = QtGui.QStandardItem("")
-        self.model.setItem(WIDGETS.W_SLIT_HEIGHT, item)
-        item = QtGui.QStandardItem(str(NUMBER_OF_TERMS))
-        self.model.setItem(WIDGETS.W_NO_TERMS, item)
-        item = QtGui.QStandardItem(str(REGULARIZATION))
-        self.model.setItem(WIDGETS.W_REGULARIZATION, item)
-        item = QtGui.QStandardItem(str(MAX_DIST))
-        self.model.setItem(WIDGETS.W_MAX_DIST, item)
-        item = QtGui.QStandardItem("")
-        self.model.setItem(WIDGETS.W_RG, item)
-        item = QtGui.QStandardItem("")
-        self.model.setItem(WIDGETS.W_I_ZERO, item)
-        item = QtGui.QStandardItem("")
-        self.model.setItem(WIDGETS.W_BACKGROUND_OUTPUT, item)
-        item = QtGui.QStandardItem("")
-        self.model.setItem(WIDGETS.W_COMP_TIME, item)
-        item = QtGui.QStandardItem("")
-        self.model.setItem(WIDGETS.W_CHI_SQUARED, item)
-        item = QtGui.QStandardItem("")
-        self.model.setItem(WIDGETS.W_OSCILLATION, item)
-        item = QtGui.QStandardItem("")
-        self.model.setItem(WIDGETS.W_POS_FRACTION, item)
-        item = QtGui.QStandardItem("")
-        self.model.setItem(WIDGETS.W_SIGMA_POS_FRACTION, item)
+        blank_item = QtGui.QStandardItem("")
+        no_terms_item = QtGui.QStandardItem(str(NUMBER_OF_TERMS))
+        bgd_item = QtGui.QStandardItem(str(BACKGROUND_INPUT))
+        reg_item = QtGui.QStandardItem(str(REGULARIZATION))
+        max_dist_item = QtGui.QStandardItem(str(MAX_DIST))
+        self.model.setItem(WIDGETS.W_BACKGROUND_INPUT, bgd_item)
+        self.model.setItem(WIDGETS.W_QMIN, blank_item)
+        self.model.setItem(WIDGETS.W_QMAX, blank_item)
+        self.model.setItem(WIDGETS.W_SLIT_WIDTH, blank_item)
+        self.model.setItem(WIDGETS.W_SLIT_HEIGHT, blank_item)
+        self.model.setItem(WIDGETS.W_NO_TERMS, no_terms_item)
+        self.model.setItem(WIDGETS.W_REGULARIZATION, reg_item)
+        self.model.setItem(WIDGETS.W_MAX_DIST, max_dist_item)
+        self.model.setItem(WIDGETS.W_RG, blank_item)
+        self.model.setItem(WIDGETS.W_I_ZERO, blank_item)
+        self.model.setItem(WIDGETS.W_BACKGROUND_OUTPUT, bgd_item)
+        self.model.setItem(WIDGETS.W_COMP_TIME, blank_item)
+        self.model.setItem(WIDGETS.W_CHI_SQUARED, blank_item)
+        self.model.setItem(WIDGETS.W_OSCILLATION, blank_item)
+        self.model.setItem(WIDGETS.W_POS_FRACTION, blank_item)
+        self.model.setItem(WIDGETS.W_SIGMA_POS_FRACTION, blank_item)
 
     def setupWindow(self):
         """Initialize base window state on init"""
@@ -284,8 +281,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         """
         Enable buttons when data is present, else disable them
         """
-        self.calculateAllButton.setEnabled(len(self._data_list) > 1)
-        self.calculateThisButton.setEnabled(self.logic.data_is_loaded)
+        self.calculateAllButton.setEnabled(len(self._dataList) > 1
+                                           and not self.isBatch)
+        self.calculateThisButton.setEnabled(self.logic.data_is_loaded
+                                            and not self.isBatch)
         self.removeButton.setEnabled(self.logic.data_is_loaded)
         self.explorerButton.setEnabled(self.logic.data_is_loaded)
         self.regConstantSuggestionButton.setEnabled(
@@ -319,7 +318,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     ######################################################################
     # GUI Interaction Events
 
-    def update_calculator(self):
+    def updateCalculator(self):
         """Update all p(r) params"""
         self._calculator.set_x(self.logic.data.x)
         self._calculator.set_y(self.logic.data.y)
@@ -337,7 +336,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             logging.warning(msg)
             self.setClosable(True)
             self.close()
-            InversionWindow.__init__(self.parent(), list(self._data_list.keys()))
+            InversionWindow.__init__(self.parent(), list(self._dataList.keys()))
             exit(0)
         if self.dmaxWindow is not None:
             self.dmaxWindow.nfunc = self.getNFunc()
@@ -383,12 +382,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         Display the batch output in tabular form
         :param output_data: Dictionary mapping filename -> P(r) instance
         """
-        if self.grid_window is None:
-            self.grid_window = BatchInversionOutputPanel(
+        if self.batchResultsWindow is None:
+            self.batchResultsWindow = BatchInversionOutputPanel(
                 parent=self, output_data=self.batchResults)
         else:
-            self.grid_window.setupTable(self.batchResults)
-        self.grid_window.show()
+            self.batchResultsWindow.setupTable(self.batchResults)
+        self.batchResultsWindow.show()
 
     ######################################################################
     # Response Actions
@@ -406,7 +405,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             raise AttributeError(msg)
 
         for data in data_item:
-            if data in self._data_list.keys():
+            if data in self._dataList.keys():
                 # Don't add data if it's already in
                 continue
             # Create initial internal mappings
@@ -424,14 +423,14 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         """Save the current data state of the window into self._data_list"""
         if dataRef is None:
             return
-        self._data_list[dataRef] = {
+        self._dataList[dataRef] = {
             DICT_KEYS[0]: self._calculator,
-            DICT_KEYS[1]: self.pr_plot,
-            DICT_KEYS[2]: self.data_plot
+            DICT_KEYS[1]: self.prPlot,
+            DICT_KEYS[2]: self.dataPlot
         }
         # Update batch results window when finished
         self.batchResults[self.logic.data.filename] = self._calculator
-        if self.grid_window is not None:
+        if self.batchResultsWindow is not None:
             self.showBatchOutput()
 
     def getNFunc(self):
@@ -455,9 +454,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         # Data references
         self._data = data_ref
         self.logic.data = GuiUtils.dataFromItem(data_ref)
-        self._calculator = self._data_list[data_ref].get(DICT_KEYS[0])
-        self.pr_plot = self._data_list[data_ref].get(DICT_KEYS[1])
-        self.data_plot = self._data_list[data_ref].get(DICT_KEYS[2])
+        self._calculator = self._dataList[data_ref].get(DICT_KEYS[0])
+        self.prPlot = self._dataList[data_ref].get(DICT_KEYS[1])
+        self.dataPlot = self._dataList[data_ref].get(DICT_KEYS[2])
         self.performEstimate()
 
     def updateGuiValues(self):
@@ -476,11 +475,11 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
                            QtGui.QStandardItem("{:.3g}".format(pr.background)))
         self.model.setItem(WIDGETS.W_COMP_TIME,
                            QtGui.QStandardItem("{:.4g}".format(elapsed)))
+        self.model.setItem(WIDGETS.W_MAX_DIST,
+                           QtGui.QStandardItem("{:.4g}".format(pr.get_dmax())))
         self.regConstantSuggestionButton.setText("{:-3.2g}".format(alpha))
         self.noOfTermsSuggestionButton.setText(
             "{:n}".format(self.nTermsSuggested))
-        self.model.setItem(WIDGETS.W_COMP_TIME,
-                           QtGui.QStandardItem("{:.2g}".format(elapsed)))
 
         if isinstance(pr.chi2, np.ndarray):
             self.model.setItem(WIDGETS.W_CHI_SQUARED,
@@ -500,39 +499,37 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
                                    QtGui.QStandardItem(
                                        "{:.3g}".format(
                                            pr.get_pos_err(out, cov))))
-        if self.pr_plot is not None:
-            title = self.pr_plot.name
-            GuiUtils.updateModelItemWithPlot(self._data, self.pr_plot, title)
-            self.communicate.plotRequestedSignal.emit([self.pr_plot])
-        if self.data_plot is not None:
-            title = self.data_plot.name
-            GuiUtils.updateModelItemWithPlot(self._data, self.data_plot, title)
+        if self.prPlot is not None:
+            title = self.prPlot.name
+            GuiUtils.updateModelItemWithPlot(self._data, self.prPlot, title)
+            self.communicate.plotRequestedSignal.emit([self.prPlot])
+        if self.dataPlot is not None:
+            title = self.dataPlot.name
+            GuiUtils.updateModelItemWithPlot(self._data, self.dataPlot, title)
             self.communicate.plotRequestedSignal.emit(
-                [self.data_plot, self.logic.data])
+                [self.dataPlot, self.logic.data])
         self.enableButtons()
 
     def removeData(self, data_list=None):
         """Remove the existing data reference from the P(r) Persepective"""
-        if self.dmaxWindow is not None:
-            self.dmaxWindow.close()
-            self.dmaxWindow = None
-        if self.grid_window is not None:
-            self.grid_window.close()
         if not data_list:
             data_list = [self._data]
+        self.closeDMax()
         for data in data_list:
-            self._data_list.pop(data)
+            self._dataList.pop(data)
+            data_file = GuiUtils.dataFromItem(data)
+            self.batchResults.pop(data_file.filename)
         self._data = None
         for index in range(0, len(self.dataList)):
             if self.dataList.itemData(index) in data_list:
                 self.dataList.removeItem(index)
         # Last file removed
-        if len(self._data_list) == 0:
-            self._data = None
-            self.pr_plot = None
-            self.data_plot = None
-            self._calculator = Invertor()
+        if len(self._dataList) == 0:
+            self.prPlot = None
+            self.dataPlot = None
             self.logic.data = None
+            self._calculator = Invertor()
+            self.closeBatchResults()
             self.nTermsSuggested = NUMBER_OF_TERMS
             self.noOfTermsSuggestionButton.setText("{:n}".format(
                 self.nTermsSuggested))
@@ -548,6 +545,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     # Thread Creators
 
     def startThreadAll(self):
+        self.calculateAllButton.setText("Calculating...")
         self.batchComplete = []
         self.isBatch = True
         self.performEstimate()
@@ -555,14 +553,17 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
     def startNextBatchItem(self):
         self.isBatch = False
-        for index in range(len(self._data_list)):
+        for index in range(len(self._dataList)):
             if index not in self.batchComplete:
                 self.dataList.setCurrentIndex(index)
                 self.isBatch = True
                 break
-        # If none left, end
         if self.isBatch:
             self.performEstimate()
+        else:
+            # If no data sets left, end batch calculation
+            self.calculateAllButton.setText("Calculate All")
+            self.enableButtons()
 
     def startThread(self):
         """
@@ -571,19 +572,19 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         from .Thread import CalcPr
 
         # Set data before running the calculations
-        self.update_calculator()
+        self.updateCalculator()
 
         # If a thread is already started, stop it
-        if self.calc_thread is not None and self.calc_thread.isrunning():
-            self.calc_thread.stop()
+        if self.calcThread is not None and self.calcThread.isrunning():
+            self.calcThread.stop()
         pr = self._calculator.clone()
         nfunc = self.getNFunc()
-        self.calc_thread = CalcPr(pr, nfunc,
-                                  error_func=self._threadError,
-                                  completefn=self._calculateCompleted,
-                                  updatefn=None)
-        self.calc_thread.queue()
-        self.calc_thread.ready(2.5)
+        self.calcThread = CalcPr(pr, nfunc,
+                                 error_func=self._threadError,
+                                 completefn=self._calculateCompleted,
+                                 updatefn=None)
+        self.calcThread.queue()
+        self.calcThread.ready(2.5)
 
     def performEstimateNT(self):
         """
@@ -591,12 +592,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         """
         from .Thread import EstimateNT
 
-        self.update_calculator()
+        self.updateCalculator()
 
         # If a thread is already started, stop it
-        if (self.estimation_thread_nt is not None and
-                self.estimation_thread_nt.isrunning()):
-            self.estimation_thread_nt.stop()
+        if (self.estimationThreadNT is not None and
+                self.estimationThreadNT.isrunning()):
+            self.estimationThreadNT.stop()
         pr = self._calculator.clone()
         # Skip the slit settings for the estimation
         # It slows down the application and it doesn't change the estimates
@@ -604,12 +605,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         pr.slit_width = 0.0
         nfunc = self.getNFunc()
 
-        self.estimation_thread_nt = EstimateNT(pr, nfunc,
-                                            error_func=self._threadError,
-                                            completefn=self._estimateNTCompleted,
-                                            updatefn=None)
-        self.estimation_thread_nt.queue()
-        self.estimation_thread_nt.ready(2.5)
+        self.estimationThreadNT = EstimateNT(pr, nfunc,
+                                             error_func=self._threadError,
+                                             completefn=self._estimateNTCompleted,
+                                             updatefn=None)
+        self.estimationThreadNT.queue()
+        self.estimationThreadNT.ready(2.5)
 
     def performEstimate(self):
         """
@@ -618,16 +619,16 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         from .Thread import EstimatePr
 
         # If a thread is already started, stop it
-        if (self.estimation_thread is not None and
-                self.estimation_thread.isrunning()):
-            self.estimation_thread.stop()
-        self.estimation_thread = EstimatePr(self._calculator.clone(),
-                                            self.getNFunc(),
-                                            error_func=self._threadError,
-                                            completefn=self._estimateCompleted,
-                                            updatefn=None)
-        self.estimation_thread.queue()
-        self.estimation_thread.ready(2.5)
+        if (self.estimationThread is not None and
+                self.estimationThread.isrunning()):
+            self.estimationThread.stop()
+        self.estimationThread = EstimatePr(self._calculator.clone(),
+                                           self.getNFunc(),
+                                           error_func=self._threadError,
+                                           completefn=self._estimateCompleted,
+                                           updatefn=None)
+        self.estimationThread.queue()
+        self.estimationThread.ready(2.5)
 
     ######################################################################
     # Thread Complete
@@ -699,10 +700,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self._calculator = pr
 
         # Update P(r) and fit plots
-        self.pr_plot = self.logic.newPRPlot(out, self._calculator, cov)
-        self.pr_plot.filename = self.logic.data.filename
-        self.data_plot = self.logic.new1DPlot(out, self._calculator)
-        self.data_plot.filename = self.logic.data.filename
+        self.prPlot = self.logic.newPRPlot(out, self._calculator, cov)
+        self.prPlot.filename = self.logic.data.filename
+        self.dataPlot = self.logic.new1DPlot(out, self._calculator)
+        self.dataPlot.filename = self.logic.data.filename
 
         # Udpate internals and GUI
         self.updateDataList(self._data)

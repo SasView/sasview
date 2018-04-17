@@ -41,6 +41,7 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
     def __init__(self, pr_state, nfunc, parent=None):
         super(DmaxWindow, self).__init__()
         self.setupUi(self)
+        self.parent = parent
 
         self.setWindowTitle("Dₐₓ Explorer")
 
@@ -187,3 +188,8 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         data._yaxis = y_label
         data._yunit = y_unit
         self.plot.plot(data=data, marker="-")
+
+    def closeEvent(self, event):
+        """Override close event"""
+        self.parent.dmaxWindow = None
+        event.accept()

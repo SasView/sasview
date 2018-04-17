@@ -349,5 +349,5 @@ class BatchInversionOutputPanel(BatchOutputPanel):
 
     def closeEvent(self, event):
         """Tell the parent window the window closed"""
-        self.parent.grid_window = None
+        self.parent.batchResultsWindow = None
         event.accept()
