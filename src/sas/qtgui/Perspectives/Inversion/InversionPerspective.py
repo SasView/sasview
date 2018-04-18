@@ -32,7 +32,6 @@ MAX_DIST = 140.0
 DICT_KEYS = ["Calculator", "PrPlot", "DataPlot"]
 
 
-# TODO: Update help with batch capabilities
 class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     """
     The main window for the P(r) Inversion perspective.
@@ -549,7 +548,6 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.batchComplete = []
         self.isBatch = True
         self.performEstimate()
-        self.showBatchOutput()
 
     def startNextBatchItem(self):
         self.isBatch = False
@@ -563,6 +561,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         else:
             # If no data sets left, end batch calculation
             self.calculateAllButton.setText("Calculate All")
+            self.showBatchOutput()
             self.enableButtons()
 
     def startThread(self):

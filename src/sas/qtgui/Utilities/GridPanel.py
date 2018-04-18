@@ -288,14 +288,16 @@ class BatchInversionOutputPanel(BatchOutputPanel):
     def __init__(self, parent = None, output_data=None):
 
         super(BatchInversionOutputPanel, self).__init__(parent, output_data)
+        _translate = QtCore.QCoreApplication.translate
+        self.setWindowTitle(_translate("GridPanelUI", "Batch P(r) Results"))
 
     def setupTable(self, data):
         """
         Create tablewidget items and show them, based on params
         """
         # headers
-        param_list = ['Filename', 'Rg [Å]', 'χ^2/dof', 'I(Q=0)', 'Oscillations',
-                      'Background [Å^-1]', 'P+ Fraction', 'P+1-σ Fraction',
+        param_list = ['Filename', 'Rg [Å]', 'Chi^2/dof', 'I(Q=0)', 'Oscillations',
+                      'Background [Å^-1]', 'P+ Fraction', 'P+1-theta Fraction',
                       'Calc. Time [sec]']
 
         keys = data.keys()
@@ -316,22 +318,22 @@ class BatchInversionOutputPanel(BatchOutputPanel):
                 continue
             self.tblParams.setItem(i_row, 0, QtWidgets.QTableWidgetItem(
                 "{}".format(filename)))
-            self.tblParams.setItem(i_row, 2, QtWidgets.QTableWidgetItem(
-                "{:.3g}".format(pr.chi2[0])))
-            self.tblParams.setItem(i_row, 5, QtWidgets.QTableWidgetItem(
-                "{:.3g}".format(pr.background)))
-            self.tblParams.setItem(i_row, 8, QtWidgets.QTableWidgetItem(
-                "{:.2g}".format(pr.elapsed)))
             self.tblParams.setItem(i_row, 1, QtWidgets.QTableWidgetItem(
                 "{:.3g}".format(pr.rg(out))))
+            self.tblParams.setItem(i_row, 2, QtWidgets.QTableWidgetItem(
+                "{:.3g}".format(pr.chi2[0])))
             self.tblParams.setItem(i_row, 3, QtWidgets.QTableWidgetItem(
                 "{:.3g}".format(pr.iq0(out))))
             self.tblParams.setItem(i_row, 4, QtWidgets.QTableWidgetItem(
                 "{:.3g}".format(pr.oscillations(out))))
+            self.tblParams.setItem(i_row, 5, QtWidgets.QTableWidgetItem(
+                "{:.3g}".format(pr.background)))
             self.tblParams.setItem(i_row, 6, QtWidgets.QTableWidgetItem(
                 "{:.3g}".format(pr.get_positive(out))))
             self.tblParams.setItem(i_row, 7, QtWidgets.QTableWidgetItem(
                 "{:.3g}".format(pr.get_pos_err(out, cov))))
+            self.tblParams.setItem(i_row, 8, QtWidgets.QTableWidgetItem(
+                "{:.2g}".format(pr.elapsed)))
 
         self.tblParams.resizeColumnsToContents()
 
@@ -341,7 +343,7 @@ class BatchInversionOutputPanel(BatchOutputPanel):
         Open a local url in the default browser
         """
         location = GuiUtils.HELP_DIRECTORY_LOCATION
-        url = "/user/sasgui/perspectives/pr/pr_help.html#batch-fit-mode"
+        url = "/user/sasgui/perspectives/pr/pr_help.html#batch-pr-mode"
         try:
             webbrowser.open('file://' + os.path.realpath(location + url))
         except webbrowser.Error as ex:

@@ -67,6 +67,24 @@ background, positive fraction, and 1-sigma positive fraction.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
+.. _Batch_Pr_Mode:
+
+Batch P(r) inversion
+--------------------
+
+The p(r) calculator accepts any number of data sets, and supports batch fitting
+for all data sets in the p(r) data set combo box. Switching between data sets in
+the combo box allows for individual fits and review of fit parameters. The
+displayed plots will also update to include the latest fit results for the
+selected data set.
+
+The 'Calculate All' button will run the p(r) calculation for each file,
+sequentially. The calculator will estimate the number of terms, background, and
+regularization constant for each file prior to running the p(r) calculation.
+The final results for all data sets are then presented in a savable data table.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
 Reference
 ---------
 
@@ -75,4 +93,4 @@ P.B. Moore
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last modified by Paul Butler, 05 September, 2016
+.. note::  This help document was last modified by Jeff Krzywon, 18 April 2018
