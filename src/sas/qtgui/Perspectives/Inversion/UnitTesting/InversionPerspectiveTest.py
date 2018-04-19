@@ -9,6 +9,7 @@ from PyQt5 import QtCore
 
 import sas.qtgui.path_prepare
 from sas.qtgui.Perspectives.Inversion.InversionPerspective import InversionWindow
+from sas.qtgui.Perspectives.Inversion.InversionUtils import WIDGETS
 from sas.sascalc.dataloader.loader import Loader
 from sas.qtgui.Plotting.PlotterData import Data1D
 
@@ -19,30 +20,41 @@ import sas.qtgui.Utilities.GuiUtils as GuiUtils
 #if not QtWidgets.QApplication.instance():
 app = QtWidgets.QApplication(sys.argv)
 
+
 class InversionTest(unittest.TestCase):
-    '''Test the Inversion Interface'''
+    """ Test the Inversion Perspective GUI """
+
     def setUp(self):
-        '''Create the InversionWindow'''
+        """ Create the InversionWindow """
         self.widget = InversionWindow(None)
+        self.widget.performEstimate = MagicMock()
+        self.fakeData1 = GuiUtils.HashableStandardItem("A")
+        self.fakeData2 = GuiUtils.HashableStandardItem("B")
+        reference_data1 = Data1D(x=[0.1, 0.2], y=[0.0, 0.0], dy=[0.0, 0.0])
+        reference_data2 = Data1D(x=[0.1, 0.2], y=[0.0, 0.0], dy=[0.0, 0.0])
+        GuiUtils.updateModelItem(self.fakeData1, [reference_data1])
+        GuiUtils.updateModelItem(self.fakeData2, [reference_data2])
 
     def tearDown(self):
-        '''Destroy the InversionWindow'''
+        """ Destroy the InversionWindow """
+        self.widget.setClosable(True)
         self.widget.close()
         self.widget = None
 
-    def testDefaults(self):
-        '''Test the GUI in its default state'''
+    def removeAllData(self):
+        """ Cleanup method to restore widget to its base state """
+        while len(self.widget.dataList) > 0:
+            self.widget.removeData()
+
+    def baseGUIState(self):
+        """ Testing base state of Inversion """
+        # base class information
         self.assertIsInstance(self.widget, QtWidgets.QWidget)
         self.assertEqual(self.widget.windowTitle(), "P(r) Inversion Perspective")
-        self.assertEqual(self.widget.model.columnCount(), 1)
-        self.assertEqual(self.widget.model.rowCount(), 22)
-        self.assertFalse(self.widget.calculateAllButton.isEnabled())
-        self.assertFalse(self.widget.calculateThisButton.isEnabled())
+        self.assertFalse(self.widget.isClosable())
+        # mapper
         self.assertIsInstance(self.widget.mapper, QtWidgets.QDataWidgetMapper)
-        # make sure the model is assigned and at least the data is mapped
-        self.assertEqual(self.widget.mapper.model(), self.widget.model)
         self.assertNotEqual(self.widget.mapper.mappedSection(self.widget.dataList), -1)
-
         # validators
         self.assertIsInstance(self.widget.noOfTermsInput.validator(), QtGui.QIntValidator)
         self.assertIsInstance(self.widget.regularizationConstantInput.validator(), QtGui.QDoubleValidator)
@@ -51,76 +63,122 @@ class InversionTest(unittest.TestCase):
         self.assertIsInstance(self.widget.maxQInput.validator(), QtGui.QDoubleValidator)
         self.assertIsInstance(self.widget.slitHeightInput.validator(), QtGui.QDoubleValidator)
         self.assertIsInstance(self.widget.slitWidthInput.validator(), QtGui.QDoubleValidator)
-
         # model
         self.assertEqual(self.widget.model.rowCount(), 22)
+        self.assertEqual(self.widget.model.columnCount(), 1)
+        self.assertEqual(self.widget.mapper.model(), self.widget.model)
+        # buttons
+        self.assertFalse(self.widget.calculateThisButton.isEnabled())
+        self.assertFalse(self.widget.removeButton.isEnabled())
+        self.assertFalse(self.widget.regConstantSuggestionButton.isEnabled())
+        self.assertFalse(self.widget.noOfTermsSuggestionButton.isEnabled())
+        self.assertFalse(self.widget.explorerButton.isEnabled())
+        self.assertTrue(self.widget.helpButton.isEnabled())
+        # extra windows and charts
+        self.assertIsNone(self.widget.dmaxWindow)
+        self.assertIsNone(self.widget.prPlot)
+        self.assertIsNone(self.widget.dataPlot)
+        # threads
+        self.assertIsNone(self.widget.calcThread)
+        self.assertIsNone(self.widget.estimationThread)
+        self.assertIsNone(self.widget.estimationThreadNT)
 
-    def testSetData(self):
-        ''' Check if sending data works as expected'''
-        # Create dummy data
-        item1 = GuiUtils.HashableStandardItem("A")
-        item2 = GuiUtils.HashableStandardItem("B")
-        reference_data = Data1D(x=[0.1, 0.2], y=[0.0, 0.0], dy=[0.0, 0.0])
-        GuiUtils.updateModelItem(item1, [reference_data])
-        GuiUtils.updateModelItem(item2, [reference_data])
-        self.widget.performEstimate = MagicMock()
-        self.widget.setData([item1, item2])
+    def baseBatchState(self):
+        """ Testing the base batch fitting state """
+        self.assertTrue(self.widget.allowBatch())
+        self.assertFalse(self.widget.isBatch)
+        self.assertIsNone(self.widget.batchResultsWindow)
+        self.assertFalse(self.widget.calculateAllButton.isEnabled())
+        self.assertEqual(len(self.widget.batchResults), 0)
+        self.assertEqual(len(self.widget.batchComplete), 0)
+        self.widget.closeBatchResults()
+        self.assertIsNone(self.widget.batchResultsWindow)
 
-        # Test the globals
-        self.assertEqual(len(self.widget._data_list), 2)
-        self.assertEqual(len(self.widget.data_plot_list), 2)
-        self.assertEqual(len(self.widget.pr_plot_list), 2)
+    def zeroDataSetState(self):
+        """ Testing the base data state of the GUI """
+        # data variables
+        self.assertIsNone(self.widget._data)
+        self.assertEqual(len(self.widget._dataList), 0)
+        self.assertEqual(self.widget.nTermsSuggested, 10)
+        # inputs
+        self.assertEqual(len(self.widget.dataList), 0)
+        self.assertEqual(self.widget.backgroundInput.text(), "0.0")
+        self.assertEqual(self.widget.minQInput.text(), "")
+        self.assertEqual(self.widget.maxQInput.text(), self.widget.minQInput.text())
+        self.assertEqual(self.widget.regularizationConstantInput.text(), "0.0001")
+        self.assertEqual(self.widget.noOfTermsInput.text(), "10")
+        self.assertEqual(self.widget.maxDistanceInput.text(), "140.0")
+
+    def oneDataSetState(self):
+        """ Testing the base data state of the GUI """
+        # Test the globals after first sent
+        self.assertEqual(len(self.widget._dataList), 1)
+        self.assertEqual(self.widget.dataList.count(), 1)
+        # See that the buttons are now enabled properly
+        self.assertFalse(self.widget.calculateAllButton.isEnabled())
+        self.assertTrue(self.widget.calculateThisButton.isEnabled())
+        self.assertTrue(self.widget.removeButton.isEnabled())
+        self.assertTrue(self.widget.explorerButton.isEnabled())
+
+    def twoDataSetState(self):
+        """ Testing the base data state of the GUI """
+        # Test the globals after first sent
+        self.assertEqual(len(self.widget._dataList), 2)
         self.assertEqual(self.widget.dataList.count(), 2)
-
-        # See that the buttons are now enabled
+        # See that the buttons are now enabled properly
         self.assertTrue(self.widget.calculateAllButton.isEnabled())
         self.assertTrue(self.widget.calculateThisButton.isEnabled())
         self.assertTrue(self.widget.removeButton.isEnabled())
         self.assertTrue(self.widget.explorerButton.isEnabled())
 
-    def notestRemoveData(self):
-        ''' Test data removal from widget '''
-        # Create dummy data
-        item1 = GuiUtils.HashableStandardItem("A")
-        item2 = GuiUtils.HashableStandardItem("B")
-        reference_data1 = Data1D(x=[0.1, 0.2], y=[0.0, 0.0], dy=[0.0, 0.0])
-        reference_data2 = Data1D(x=[0.1, 0.2], y=[0.0, 0.0], dy=[0.0, 0.0])
-        GuiUtils.updateModelItem(item1, [reference_data1])
-        GuiUtils.updateModelItem(item2, [reference_data2])
-        self.widget.performEstimate = MagicMock()
-        self.widget.setData([item1, item2])
-
-        # Remove data 0
-        self.widget.removeData()
-
-        # Test the globals
-        self.assertEqual(len(self.widget._data_list), 1)
-        self.assertEqual(len(self.widget.data_plot_list), 1)
-        self.assertEqual(len(self.widget.pr_plot_list), 1)
-        self.assertEqual(self.widget.dataList.count(), 1)
-
+    def testDefaults(self):
+        """ Test the GUI in its default state """
+        self.baseGUIState()
+        self.zeroDataSetState()
+        self.baseBatchState()
 
     def testAllowBatch(self):
-        ''' Batch is allowed for this perspective'''
-        self.assertTrue(self.widget.allowBatch())
+        """ Batch P(r) Tests """
+        self.baseBatchState()
 
-    def notestModelChanged(self):
-        ''' test the model update '''
-        # unfinished functionality
-        pass
+    def testSetData(self):
+        """ Check if sending data works as expected """
+        self.zeroDataSetState()
+        self.widget.setData([self.fakeData1])
+        self.oneDataSetState()
+        self.widget.setData([self.fakeData1])
+        self.oneDataSetState()
+        self.widget.setData([self.fakeData2])
+        self.twoDataSetState()
+        self.removeAllData()
+        self.zeroDataSetState()
 
-    def notestHelp(self):
-        ''' test help widget show '''
-        # unfinished functionality
-        pass
+    def testRemoveData(self):
+        """ Test data removal from widget """
+        self.widget.setData([self.fakeData1, self.fakeData2])
+        self.twoDataSetState()
+        # Remove data 0
+        self.widget.removeData()
+        self.oneDataSetState()
 
-    def testOpenExplorerWindow(self):
-        ''' open Dx window '''
-        self.widget.openExplorerWindow()
-        self.assertTrue(self.widget.dmaxWindow.isVisible())
+    def testClose(self):
+        """ Test methods related to closing the window """
+        self.assertFalse(self.widget.isClosable())
+        self.widget.close()
+        self.assertTrue(self.widget.isVisible())
+        self.widget.setClosable(False)
+        self.assertFalse(self.widget.isClosable())
+        self.widget.close()
+        self.assertTrue(self.widget.isVisible())
+        self.widget.setClosable(True)
+        self.assertTrue(self.widget.isClosable())
+        self.widget.setClosable()
+        self.assertTrue(self.widget.isClosable())
+        self.widget.close()
+        self.assertFalse(self.widget.isVisible())
 
     def testGetNFunc(self):
-        ''' test nfunc getter '''
+        """ test nfunc getter """
         # Float
         self.widget.noOfTermsInput.setText("10.0")
         self.assertEqual(self.widget.getNFunc(), 10)
@@ -141,31 +199,41 @@ class InversionTest(unittest.TestCase):
         self.assertEqual(self.widget.getNFunc(), 10)
 
     def testSetCurrentData(self):
-        ''' test current data setter '''
-        # Create dummy data
-        item1 = GuiUtils.HashableStandardItem("A")
-        item2 = GuiUtils.HashableStandardItem("B")
-        reference_data1 = Data1D(x=[0.1, 0.2], y=[0.0, 0.0], dy=[0.0, 0.0])
-        reference_data2 = Data1D(x=[0.1, 0.2], y=[0.0, 0.0], dy=[0.0, 0.0])
-        GuiUtils.updateModelItem(item1, [reference_data1])
-        GuiUtils.updateModelItem(item2, [reference_data2])
-        self.widget.performEstimate = MagicMock()
-        self.widget.setData([item1, item2])
+        """ test current data setter """
+        self.widget.setData([self.fakeData1, self.fakeData2])
 
         # Check that the current data is reference2
-        self.assertEqual(self.widget._data, item2)
-
+        self.assertEqual(self.widget._data, self.fakeData2)
         # Set the ref to none
         self.widget.setCurrentData(None)
-        self.assertEqual(self.widget._data, item2)
-
+        self.assertEqual(self.widget._data, self.fakeData2)
         # Set the ref to wrong type
         with self.assertRaises(AttributeError):
             self.widget.setCurrentData("Afandi Kebab")
+        # Set the reference to ref1
+        self.widget.setCurrentData(self.fakeData1)
+        self.assertEqual(self.widget._data, self.fakeData1)
 
-        # Set the reference to ref2
-        self.widget.setCurrentData(item1)
-        self.assertEqual(self.widget._data, item1)
+    def notestModelChanged(self):
+        """ test the model update """
+        self.assertTrue(self.widget._calculator.get_dmax(), 140.0)
+        self.widget.maxDistanceInput.setText("750.0")
+        self.assertTrue(self.widget._calculator.get_dmax(), 750.0)
+        self.assertTrue(self.widget._calculator.get_qmax(), 0.0)
+        self.widget.maxQInput.setText("100.0")
+        self.assertTrue(self.widget._calculator.get_dmax(), 100.0)
+
+    def notestHelp(self):
+        """ test help widget show """
+        # TODO: test help button(s)
+        pass
+
+    def notestOpenExplorerWindow(self):
+        """ open Dx window """
+        # TODO: test explorer functionality
+        self.widget.openExplorerWindow()
+        self.assertTrue(self.widget.dmaxWindow.isVisible())
+
 
 if __name__ == "__main__":
     unittest.main()
