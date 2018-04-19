@@ -39,6 +39,8 @@ import sas.qtgui.Perspectives as Perspectives
 from sas.qtgui.Perspectives.Fitting.FittingPerspective import FittingWindow
 from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow, DEFAULT_PERSPECTIVE
 
+from sas.qtgui.Utilities.AddMultEditor import AddMultEditor
+
 class Acknowledgements(QDialog, Ui_Acknowledgements):
     def __init__(self, parent=None):
         QDialog.__init__(self, parent)
@@ -406,6 +408,7 @@ class GuiManager(object):
         self._workspace.actionAdd_Custom_Model.triggered.connect(self.actionAdd_Custom_Model)
         self._workspace.actionEdit_Custom_Model.triggered.connect(self.actionEdit_Custom_Model)
         self._workspace.actionManage_Custom_Models.triggered.connect(self.actionManage_Custom_Models)
+        self._workspace.actionAddMult_Models.triggered.connect(self.actionAddMult_Models)
         # Window
         self._workspace.actionCascade.triggered.connect(self.actionCascade)
         self._workspace.actionTile.triggered.connect(self.actionTile)
@@ -679,6 +682,15 @@ class GuiManager(object):
         """
         self.model_manager = PluginManager(self)
         self.model_manager.show()
+
+    def actionAddMult_Models(self):
+        """
+        """
+        print("Open simple add / multiply editor")
+        # Add Simple Add / Multiple Editor
+        self.add_mult_editor = AddMultEditor(self)
+        self.add_mult_editor.show()
+        # pass
 
     #============ ANALYSIS =================
     def actionFitting(self):
