@@ -86,6 +86,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             for datum in data_list:
                 self.updateDataList(datum)
 
+        self.dataDeleted = False
+
         self.enableButtons()
 
         self.model = QtGui.QStandardItemModel(self)
@@ -317,6 +319,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
     def displayChange(self, data_index=0):
         """Switch to another item in the data list"""
+        if self.dataDeleted:
+            return
         self.updateDataList(self._data)
         self.setCurrentData(self.dataList.itemData(data_index))
 
@@ -511,24 +515,24 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         if self.dataPlot is not None:
             title = self.dataPlot.name
             GuiUtils.updateModelItemWithPlot(self._data, self.dataPlot, title)
-            self.communicate.plotRequestedSignal.emit(
-                [self.dataPlot, self.logic.data])
+            self.communicate.plotRequestedSignal.emit([self.dataPlot])
         self.enableButtons()
 
     def removeData(self, data_list=None):
         """Remove the existing data reference from the P(r) Persepective"""
+        self.dataDeleted = True
         if not data_list:
             data_list = [self._data]
         self.closeDMax()
         for data in data_list:
             self._dataList.pop(data)
-            data_file = GuiUtils.dataFromItem(data)
-            self.batchResults.pop(data_file.filename)
         self._data = None
-        for index in range(0, len(self.dataList)):
+        length = len(self.dataList)
+        for index in reversed(range(length)):
             if self.dataList.itemData(index) in data_list:
                 self.dataList.removeItem(index)
         # Last file removed
+        self.dataDeleted = False
         if len(self._dataList) == 0:
             self.prPlot = None
             self.dataPlot = None
