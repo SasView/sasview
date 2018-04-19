@@ -124,6 +124,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         assert isinstance(value, bool)
         self._allowClose = value
 
+    def isClosable(self):
+        """
+        Allow outsiders close this widget
+        """
+        return self._allowClose
+
     def closeEvent(self, event):
         """
         Overwrite QDialog close method to allow for custom widget close
