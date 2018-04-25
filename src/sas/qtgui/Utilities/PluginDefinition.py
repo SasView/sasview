@@ -57,8 +57,6 @@ return y
         self.txtFunction.insertPlainText(text)
 
         # Validators
-        #rx = QtCore.QRegExp(r'^[\w,\s-]+$')
-        #rx = QtCore.QRegExp("[a-z-A-Z_]+")
         rx = QtCore.QRegExp("^[A-Za-z0-9_]*$")
 
         txt_validator = QtGui.QRegExpValidator(rx)

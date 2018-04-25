@@ -18,7 +18,7 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
     This is a simple list widget allowing for viewing/adding/deleting custom models.
     """
     def __init__(self, parent=None):
-        super(PluginManager, self).__init__()
+        super(PluginManager, self).__init__(parent._parent)
         self.setupUi(self)
 
         self.parent = parent

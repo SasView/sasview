@@ -44,11 +44,11 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
        may themselves be composite models) as well as an operation on those models
        (add or multiply) the resulting model will add a scale parameter and a
        background parameter.
-       The user also gives a brief help for the model in a description box and
-       must provide a unique name which is verified as unique before the new
+       The user can also give a brief help for the model in the description box and
+       must provide a unique name which is verified before the new model is saved.
     """
     def __init__(self, parent=None):
-        super(AddMultEditor, self).__init__()
+        super(AddMultEditor, self).__init__(parent._parent)
 
         self.parent = parent
 
@@ -56,6 +56,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
 
         #  uncheck self.chkOverwrite
         self.chkOverwrite.setChecked(False)
+        self.canOverwriteName = False
 
         # Disabled Apply button until input of valid output plugin name
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(False)
@@ -116,7 +117,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         # check existence of output filename when entering name
         # or when overwriting not allowed
         self.txtName.editingFinished.connect(self.onNameCheck)
-        self.chkOverwrite.stateChanged.connect(self.onNameCheck)
+        self.chkOverwrite.stateChanged.connect(self.onOverwrite)
 
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).clicked.connect(self.onApply)
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Help).clicked.connect(self.onHelp)
@@ -124,6 +125,12 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
 
         # change displayed equation when changing operator
         self.cbOperator.currentIndexChanged.connect(self.onOperatorChange)
+
+    def onOverwrite(self):
+        """
+        Modify state on checkbox change
+        """
+        self.canOverwriteName = self.chkOverwrite.isChecked()
 
     def onNameCheck(self):
         """
@@ -137,7 +144,7 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
 
         filename = title + '.py'
 
-        if self.chkOverwrite.isChecked():
+        if self.canOverwriteName:
             # allow overwriting -> only valid name needs to be checked
             # (done with validator in __init__ above)
             self.good_name = True
@@ -169,8 +176,6 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         self.buttonBox.button(
             QtWidgets.QDialogButtonBox.Apply).setEnabled(self.good_name)
 
-        return self.good_name
-
     def onOperatorChange(self, index):
         """ Respond to operator combo box changes """
 
@@ -181,21 +186,36 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
     def onApply(self):
         """ Validity check, save model to file """
 
-        # if name OK write file and test
-        self.buttonBox.button(
-            QtWidgets.QDialogButtonBox.Apply).setEnabled(False)
+        # Set the button enablement, so no double clicks can be made
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(False)
+
+        # Check the name/overwrite combination again, in case we managed to confuse the UI
+        self.onNameCheck()
+        if not self.good_name:
+            return
 
         self.write_new_model_to_file(self.plugin_filename,
                                      self.cbModel1.currentText(),
                                      self.cbModel2.currentText(),
                                      self.cbOperator.currentText())
 
-        success = self.checkModel(self.plugin_filename)
+        success = GuiUtils.checkModel(self.plugin_filename)
 
-        if success:
-            # Update list of models in FittingWidget and AddMultEditor
-            self.parent.communicate.customModelDirectoryChanged.emit()
-            self.updateModels()
+        if not success:
+            return
+
+        # Update list of models in FittingWidget and AddMultEditor
+        self.parent.communicate.customModelDirectoryChanged.emit()
+        # Re-read the model list so the new model is included
+        self.list_models = self.readModels()
+        self.updateModels()
+
+        # Notify the user
+        title = self.txtName.text().lstrip().rstrip()
+        msg = "Custom model "+title + " successfully created."
+        self.parent.communicate.statusBarUpdateSignal.emit(msg)
+        logging.info(msg)
+
 
     def write_new_model_to_file(self, fname, model1_name, model2_name, operator):
         """ Write and Save file """
@@ -220,28 +240,13 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         with open(fname, 'w') as out_f:
             out_f.write(output)
 
-    # same version as in TabbedModelEditor
-    @classmethod
-    def checkModel(cls, path):
-        """ Check that the model saved in file 'path' can run. """
-
-        # try running the model
-        from sasmodels.sasview_model import load_custom_model
-        Model = load_custom_model(path)
-        model = Model()
-        q = np.array([0.01, 0.1])
-        _ = model.evalDistribution(q)
-        qx, qy = np.array([0.01, 0.01]), np.array([0.1, 0.1])
-        _ = model.evalDistribution([qx, qy])
-        # check the model's unit tests run
-        from sasmodels.model_test import run_one
-        # TODO see comments in TabbedModelEditor
-        # result = run_one(path)
-        result = True  # to be commented out
-        return result
-
     def updateModels(self):
         """ Update contents of comboboxes with new plugin models """
+
+        # Keep pointers to the current indices so we can show the comboboxes with
+        # original selection
+        model_1 = self.cbModel1.currentText()
+        model_2 = self.cbModel2.currentText()
 
         self.cbModel1.blockSignals(True)
         self.cbModel1.clear()
@@ -255,6 +260,10 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         # Populate the models comboboxes
         self.cbModel1.addItems(model_list)
         self.cbModel2.addItems(model_list)
+
+        # Scroll back to the user chosen models
+        self.cbModel1.setCurrentIndex(self.cbModel1.findText(model_1))
+        self.cbModel2.setCurrentIndex(self.cbModel2.findText(model_2))
 
     def onHelp(self):
         """ Display related help section """

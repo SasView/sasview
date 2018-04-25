@@ -686,11 +686,9 @@ class GuiManager(object):
     def actionAddMult_Models(self):
         """
         """
-        print("Open simple add / multiply editor")
-        # Add Simple Add / Multiple Editor
+        # Add Simple Add/Multiply Editor
         self.add_mult_editor = AddMultEditor(self)
         self.add_mult_editor.show()
-        # pass
 
     #============ ANALYSIS =================
     def actionFitting(self):

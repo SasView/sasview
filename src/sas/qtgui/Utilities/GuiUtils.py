@@ -10,6 +10,8 @@ import warnings
 import webbrowser
 import urllib.parse
 
+import numpy as np
+
 warnings.simplefilter("ignore")
 import logging
 
@@ -924,6 +926,30 @@ class DoubleValidator(QtGui.QDoubleValidator):
         """
         super(DoubleValidator, self).fixup(input)
         input = input.replace(",", "")
+
+def checkModel(path):
+    """
+    Check that the model save in file 'path' can run.
+    """
+    # try running the model
+    from sasmodels.sasview_model import load_custom_model
+    Model = load_custom_model(path)
+    model = Model()
+    q =  np.array([0.01, 0.1])
+    _ = model.evalDistribution(q)
+    qx, qy =  np.array([0.01, 0.01]), np.array([0.1, 0.1])
+    _ = model.evalDistribution([qx, qy])
+
+    # check the model's unit tests run
+    from sasmodels.model_test import run_one
+    # TestSuite module in Qt5 now deletes tests in the suite after running,
+    # so suite[0] in run_one() in sasmodels/model_test.py will contain [None] and
+    # test.info.tests will raise.
+    # Not sure how to change the behaviour here, most likely sasmodels will have to
+    # be modified
+    result = run_one(path)
+
+    return result
 
 
 def enum(*sequential, **named):
