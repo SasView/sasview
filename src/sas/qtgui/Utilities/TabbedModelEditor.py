@@ -125,9 +125,10 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             self.editor_widget.txtEditor.setPlainText(plugin.read())
         self.editor_widget.setEnabled(True)
         self.editor_widget.blockSignals(False)
-        self.filename, _ = os.path.splitext(os.path.basename(filename))
+        self.filename = filename
+        display_name, _ = os.path.splitext(os.path.basename(filename))
 
-        self.setWindowTitle(self.window_title + " - " + self.filename)
+        self.setWindowTitle(self.window_title + " - " + display_name)
 
     def onModifiedExit(self):
         msg_box = QtWidgets.QMessageBox(self)
