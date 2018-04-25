@@ -22,6 +22,7 @@ if not QtWidgets.QApplication.instance():
 class dummy_manager(object):
     HELP_DIRECTORY_LOCATION = "html"
     communicate = Communicate()
+    _parent = QtWidgets.QDialog()
 
 class AddMultEditorTest(unittest.TestCase):
     """ Test the simple AddMultEditor dialog """
@@ -155,10 +156,6 @@ class AddMultEditorTest(unittest.TestCase):
         self.widget.cbModel1.currentText(),
         self.widget.cbModel2.currentText(),
         self.widget.cbOperator.currentText()))
-
-        self.assertFalse(self.widget.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).isEnabled())
-
-        self.assertTrue(self.widget.checkModel(self.widget.plugin_filename))
 
         self.assertTrue(self.widget.updateModels.called_once())
 
