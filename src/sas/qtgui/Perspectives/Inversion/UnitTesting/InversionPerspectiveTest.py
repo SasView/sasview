@@ -1,24 +1,26 @@
-import sys
+import time
 import unittest
-import logging
 from unittest.mock import MagicMock
 
 from PyQt5 import QtGui, QtWidgets
-from PyQt5.QtTest import QTest
-from PyQt5 import QtCore
 
-import sas.qtgui.path_prepare
+from sas.qtgui.Utilities.GuiUtils import *
 from sas.qtgui.Perspectives.Inversion.InversionPerspective import InversionWindow
 from sas.qtgui.Perspectives.Inversion.InversionUtils import WIDGETS
-from sas.sascalc.dataloader.loader import Loader
 from sas.qtgui.Plotting.PlotterData import Data1D
 
-from sas.qtgui.MainWindow.DataManager import DataManager
-import sas.qtgui.Utilities.LocalConfig
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 #if not QtWidgets.QApplication.instance():
 app = QtWidgets.QApplication(sys.argv)
+
+
+class dummy_manager(object):
+    HELP_DIRECTORY_LOCATION = "html"
+    communicate = Communicate()
+
+    def communicator(self):
+        return self.communicate
 
 
 class InversionTest(unittest.TestCase):
@@ -26,25 +28,28 @@ class InversionTest(unittest.TestCase):
 
     def setUp(self):
         """ Create the InversionWindow """
-        self.widget = InversionWindow(None)
-        self.widget.performEstimate = MagicMock()
+        self.widget = InversionWindow(dummy_manager())
+        self.widget.show()
         self.fakeData1 = GuiUtils.HashableStandardItem("A")
         self.fakeData2 = GuiUtils.HashableStandardItem("B")
         reference_data1 = Data1D(x=[0.1, 0.2], y=[0.0, 0.0], dy=[0.0, 0.0])
+        reference_data1.filename = "Test A"
         reference_data2 = Data1D(x=[0.1, 0.2], y=[0.0, 0.0], dy=[0.0, 0.0])
-        GuiUtils.updateModelItem(self.fakeData1, [reference_data1])
-        GuiUtils.updateModelItem(self.fakeData2, [reference_data2])
+        reference_data2.filename = "Test B"
+        GuiUtils.updateModelItem(self.fakeData1, reference_data1)
+        GuiUtils.updateModelItem(self.fakeData2, reference_data2)
 
     def tearDown(self):
         """ Destroy the InversionWindow """
-        self.widget.setClosable(True)
+        self.widget.setClosable(False)
         self.widget.close()
         self.widget = None
 
     def removeAllData(self):
         """ Cleanup method to restore widget to its base state """
-        while len(self.widget.dataList) > 0:
-            self.widget.removeData()
+        if len(self.widget.dataList) > 0:
+            remove_me = list(self.widget._dataList.keys())
+            self.widget.removeData(remove_me)
 
     def baseGUIState(self):
         """ Testing base state of Inversion """
@@ -104,7 +109,7 @@ class InversionTest(unittest.TestCase):
         self.assertEqual(len(self.widget.dataList), 0)
         self.assertEqual(self.widget.backgroundInput.text(), "0.0")
         self.assertEqual(self.widget.minQInput.text(), "")
-        self.assertEqual(self.widget.maxQInput.text(), self.widget.minQInput.text())
+        self.assertEqual(self.widget.maxQInput.text(), "")
         self.assertEqual(self.widget.regularizationConstantInput.text(), "0.0001")
         self.assertEqual(self.widget.noOfTermsInput.text(), "10")
         self.assertEqual(self.widget.maxDistanceInput.text(), "140.0")
@@ -115,6 +120,7 @@ class InversionTest(unittest.TestCase):
         self.assertEqual(len(self.widget._dataList), 1)
         self.assertEqual(self.widget.dataList.count(), 1)
         # See that the buttons are now enabled properly
+        self.widget.enableButtons()
         self.assertFalse(self.widget.calculateAllButton.isEnabled())
         self.assertTrue(self.widget.calculateThisButton.isEnabled())
         self.assertTrue(self.widget.removeButton.isEnabled())
@@ -126,8 +132,9 @@ class InversionTest(unittest.TestCase):
         self.assertEqual(len(self.widget._dataList), 2)
         self.assertEqual(self.widget.dataList.count(), 2)
         # See that the buttons are now enabled properly
-        self.assertTrue(self.widget.calculateAllButton.isEnabled())
+        self.widget.enableButtons()
         self.assertTrue(self.widget.calculateThisButton.isEnabled())
+        self.assertTrue(self.widget.calculateAllButton.isEnabled())
         self.assertTrue(self.widget.removeButton.isEnabled())
         self.assertTrue(self.widget.explorerButton.isEnabled())
 
@@ -136,9 +143,26 @@ class InversionTest(unittest.TestCase):
         self.baseGUIState()
         self.zeroDataSetState()
         self.baseBatchState()
+        self.removeAllData()
 
     def testAllowBatch(self):
         """ Batch P(r) Tests """
+        self.baseBatchState()
+        self.widget.setData([self.fakeData1])
+        self.oneDataSetState()
+        self.widget.setData([self.fakeData2])
+        self.twoDataSetState()
+        self.widget.calculateAllButton.click()
+        self.assertTrue(self.widget.batchResultsWindow is not None)
+        self.assertEqual(self.widget.batchResultsWindow.tblParams.columnCount(), 9)
+        self.assertEqual(self.widget.batchResultsWindow.tblParams.rowCount(), 2)
+        if self.widget.isBatch:
+            self.widget.isBatch = False
+        self.widget.batchResultsWindow.close()
+        self.assertTrue(self.widget.batchResultsWindow is None)
+        # Last test
+        self.widget.removeData()
+        self.removeAllData()
         self.baseBatchState()
 
     def testSetData(self):
@@ -152,6 +176,7 @@ class InversionTest(unittest.TestCase):
         self.twoDataSetState()
         self.removeAllData()
         self.zeroDataSetState()
+        self.removeAllData()
 
     def testRemoveData(self):
         """ Test data removal from widget """
@@ -160,22 +185,24 @@ class InversionTest(unittest.TestCase):
         # Remove data 0
         self.widget.removeData()
         self.oneDataSetState()
+        self.removeAllData()
 
     def testClose(self):
         """ Test methods related to closing the window """
         self.assertFalse(self.widget.isClosable())
         self.widget.close()
-        self.assertTrue(self.widget.isVisible())
+        self.assertTrue(self.widget.isMinimized())
+        self.assertTrue(self.widget.dmaxWindow is None)
+        self.assertTrue(self.widget.batchResultsWindow is None)
         self.widget.setClosable(False)
         self.assertFalse(self.widget.isClosable())
         self.widget.close()
-        self.assertTrue(self.widget.isVisible())
+        self.assertTrue(self.widget.isMinimized())
         self.widget.setClosable(True)
         self.assertTrue(self.widget.isClosable())
         self.widget.setClosable()
         self.assertTrue(self.widget.isClosable())
-        self.widget.close()
-        self.assertFalse(self.widget.isVisible())
+        self.removeAllData()
 
     def testGetNFunc(self):
         """ test nfunc getter """
@@ -197,6 +224,7 @@ class InversionTest(unittest.TestCase):
             n = self.widget.getNFunc()
             self.assertEqual(cm.output, ['ERROR:root:Incorrect number of terms specified: Nordvest Pizza'])
         self.assertEqual(self.widget.getNFunc(), 10)
+        self.removeAllData()
 
     def testSetCurrentData(self):
         """ test current data setter """
@@ -213,15 +241,46 @@ class InversionTest(unittest.TestCase):
         # Set the reference to ref1
         self.widget.setCurrentData(self.fakeData1)
         self.assertEqual(self.widget._data, self.fakeData1)
+        self.removeAllData()
 
-    def notestModelChanged(self):
-        """ test the model update """
-        self.assertTrue(self.widget._calculator.get_dmax(), 140.0)
-        self.widget.maxDistanceInput.setText("750.0")
-        self.assertTrue(self.widget._calculator.get_dmax(), 750.0)
-        self.assertTrue(self.widget._calculator.get_qmax(), 0.0)
-        self.widget.maxQInput.setText("100.0")
-        self.assertTrue(self.widget._calculator.get_dmax(), 100.0)
+    def testModelChanged(self):
+        """ Test setting the input and the model and vice-versa """
+        # Initial values
+        self.assertEqual(self.widget._calculator.get_dmax(), 140.0)
+        self.assertEqual(self.widget._calculator.get_qmax(), -1.0)
+        self.assertEqual(self.widget._calculator.get_qmin(), -1.0)
+        self.assertEqual(self.widget._calculator.slit_height, 0.0)
+        self.assertEqual(self.widget._calculator.slit_width, 0.0)
+        self.assertEqual(self.widget._calculator.alpha, 0.0001)
+        # Set new values
+        self.widget.maxDistanceInput.setText("1.0")
+        self.widget.maxQInput.setText("3.0")
+        self.widget.minQInput.setText("5.0")
+        self.widget.slitHeightInput.setText("7.0")
+        self.widget.slitWidthInput.setText("9.0")
+        self.widget.regularizationConstantInput.setText("11.0")
+        # Check new values
+        self.assertEqual(self.widget._calculator.get_dmax(), 1.0)
+        self.assertEqual(self.widget._calculator.get_qmax(), 3.0)
+        self.assertEqual(self.widget._calculator.get_qmin(), 5.0)
+        self.assertEqual(self.widget._calculator.slit_height, 7.0)
+        self.assertEqual(self.widget._calculator.slit_width, 9.0)
+        self.assertEqual(self.widget._calculator.alpha, 11.0)
+        # Change model directly
+        self.widget.model.setItem(WIDGETS.W_MAX_DIST, QtGui.QStandardItem("2.0"))
+        self.widget.model.setItem(WIDGETS.W_QMIN, QtGui.QStandardItem("4.0"))
+        self.widget.model.setItem(WIDGETS.W_QMAX, QtGui.QStandardItem("6.0"))
+        self.widget.model.setItem(WIDGETS.W_SLIT_HEIGHT, QtGui.QStandardItem("8.0"))
+        self.widget.model.setItem(WIDGETS.W_SLIT_WIDTH, QtGui.QStandardItem("10.0"))
+        self.widget.model.setItem(WIDGETS.W_REGULARIZATION, QtGui.QStandardItem("12.0"))
+        # Check values
+        self.assertEqual(self.widget._calculator.get_dmax(), 2.0)
+        self.assertEqual(self.widget._calculator.get_qmin(), 4.0)
+        self.assertEqual(self.widget._calculator.get_qmax(), 6.0)
+        self.assertEqual(self.widget._calculator.slit_height, 8.0)
+        self.assertEqual(self.widget._calculator.slit_width, 10.0)
+        self.assertEqual(self.widget._calculator.alpha, 12.0)
+        self.removeAllData()
 
     def notestHelp(self):
         """ test help widget show """

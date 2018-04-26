@@ -88,8 +88,6 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
         self.dataDeleted = False
 
-        self.enableButtons()
-
         self.model = QtGui.QStandardItemModel(self)
         self.mapper = QtWidgets.QDataWidgetMapper(self)
 
@@ -174,20 +172,20 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.noOfTermsSuggestionButton.clicked.connect(self.acceptNoTerms)
         self.explorerButton.clicked.connect(self.openExplorerWindow)
 
-        self.backgroundInput.editingFinished.connect(
+        self.backgroundInput.textChanged.connect(
             lambda: self.set_background(self.backgroundInput.text()))
-        self.minQInput.editingFinished.connect(
+        self.minQInput.textChanged.connect(
             lambda: self._calculator.set_qmin(is_float(self.minQInput.text())))
-        self.regularizationConstantInput.editingFinished.connect(
+        self.regularizationConstantInput.textChanged.connect(
             lambda: self._calculator.set_alpha(is_float(self.regularizationConstantInput.text())))
-        self.maxDistanceInput.editingFinished.connect(
+        self.maxDistanceInput.textChanged.connect(
             lambda: self._calculator.set_dmax(is_float(self.maxDistanceInput.text())))
-        self.maxQInput.editingFinished.connect(
+        self.maxQInput.textChanged.connect(
             lambda: self._calculator.set_qmax(is_float(self.maxQInput.text())))
-        self.slitHeightInput.editingFinished.connect(
+        self.slitHeightInput.textChanged.connect(
             lambda: self._calculator.set_slit_height(is_float(self.slitHeightInput.text())))
-        self.slitWidthInput.editingFinished.connect(
-            lambda: self._calculator.set_slit_width(is_float(self.slitHeightInput.text())))
+        self.slitWidthInput.textChanged.connect(
+            lambda: self._calculator.set_slit_width(is_float(self.slitWidthInput.text())))
 
         self.model.itemChanged.connect(self.model_changed)
         self.estimateNTSignal.connect(self._estimateNTUpdate)
@@ -244,26 +242,37 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         """
         Update boxes with initial values
         """
-        blank_item = QtGui.QStandardItem("")
-        no_terms_item = QtGui.QStandardItem(str(NUMBER_OF_TERMS))
         bgd_item = QtGui.QStandardItem(str(BACKGROUND_INPUT))
-        reg_item = QtGui.QStandardItem(str(REGULARIZATION))
-        max_dist_item = QtGui.QStandardItem(str(MAX_DIST))
         self.model.setItem(WIDGETS.W_BACKGROUND_INPUT, bgd_item)
+        blank_item = QtGui.QStandardItem("")
         self.model.setItem(WIDGETS.W_QMIN, blank_item)
+        blank_item = QtGui.QStandardItem("")
         self.model.setItem(WIDGETS.W_QMAX, blank_item)
+        blank_item = QtGui.QStandardItem("")
         self.model.setItem(WIDGETS.W_SLIT_WIDTH, blank_item)
+        blank_item = QtGui.QStandardItem("")
         self.model.setItem(WIDGETS.W_SLIT_HEIGHT, blank_item)
+        no_terms_item = QtGui.QStandardItem(str(NUMBER_OF_TERMS))
         self.model.setItem(WIDGETS.W_NO_TERMS, no_terms_item)
+        reg_item = QtGui.QStandardItem(str(REGULARIZATION))
         self.model.setItem(WIDGETS.W_REGULARIZATION, reg_item)
+        max_dist_item = QtGui.QStandardItem(str(MAX_DIST))
         self.model.setItem(WIDGETS.W_MAX_DIST, max_dist_item)
+        blank_item = QtGui.QStandardItem("")
         self.model.setItem(WIDGETS.W_RG, blank_item)
+        blank_item = QtGui.QStandardItem("")
         self.model.setItem(WIDGETS.W_I_ZERO, blank_item)
+        bgd_item = QtGui.QStandardItem(str(BACKGROUND_INPUT))
         self.model.setItem(WIDGETS.W_BACKGROUND_OUTPUT, bgd_item)
+        blank_item = QtGui.QStandardItem("")
         self.model.setItem(WIDGETS.W_COMP_TIME, blank_item)
+        blank_item = QtGui.QStandardItem("")
         self.model.setItem(WIDGETS.W_CHI_SQUARED, blank_item)
+        blank_item = QtGui.QStandardItem("")
         self.model.setItem(WIDGETS.W_OSCILLATION, blank_item)
+        blank_item = QtGui.QStandardItem("")
         self.model.setItem(WIDGETS.W_POS_FRACTION, blank_item)
+        blank_item = QtGui.QStandardItem("")
         self.model.setItem(WIDGETS.W_SIGMA_POS_FRACTION, blank_item)
 
     def setupWindow(self):
@@ -295,8 +304,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.removeButton.setEnabled(self.logic.data_is_loaded)
         self.explorerButton.setEnabled(self.logic.data_is_loaded)
         self.regConstantSuggestionButton.setEnabled(
+            self.logic.data_is_loaded and
             self._calculator.suggested_alpha != self._calculator.alpha)
         self.noOfTermsSuggestionButton.setEnabled(
+            self.logic.data_is_loaded and
             self._calculator.nfunc != self.nTermsSuggested)
 
     def populateDataComboBox(self, filename, data_ref):
@@ -521,6 +532,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     def removeData(self, data_list=None):
         """Remove the existing data reference from the P(r) Persepective"""
         self.dataDeleted = True
+        self.batchResults = {}
         if not data_list:
             data_list = [self._data]
         self.closeDMax()
@@ -554,9 +566,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     # Thread Creators
 
     def startThreadAll(self):
-        self.calculateAllButton.setText("Calculating...")
-        self.batchComplete = []
         self.isBatch = True
+        self.batchComplete = []
+        self.calculateAllButton.setText("Calculating...")
+        self.enableButtons()
+        self.batchResultsWindow = BatchInversionOutputPanel(
+            parent=self, output_data=self.batchResults)
         self.performEstimate()
 
     def startNextBatchItem(self):
@@ -570,6 +585,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             self.performEstimate()
         else:
             # If no data sets left, end batch calculation
+            self.batchComplete = []
             self.calculateAllButton.setText("Calculate All")
             self.showBatchOutput()
             self.enableButtons()
