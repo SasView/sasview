@@ -131,6 +131,8 @@ class AddMultEditor(QtWidgets.QDialog, Ui_AddMultEditorUI):
         Modify state on checkbox change
         """
         self.canOverwriteName = self.chkOverwrite.isChecked()
+        # State changed -> allow Apply
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(True)
 
     def onNameCheck(self):
         """
