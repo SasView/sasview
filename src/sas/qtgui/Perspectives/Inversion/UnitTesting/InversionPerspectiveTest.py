@@ -153,13 +153,14 @@ class InversionTest(unittest.TestCase):
         self.widget.setData([self.fakeData2])
         self.twoDataSetState()
         self.widget.calculateAllButton.click()
-        self.assertTrue(self.widget.batchResultsWindow is not None)
+        self.assertIsNotNone(self.widget.batchResultsWindow)
+        self.assertTrue(self.widget.batchResultsWindow.cmdHelp.isEnabled())
         self.assertEqual(self.widget.batchResultsWindow.tblParams.columnCount(), 9)
         self.assertEqual(self.widget.batchResultsWindow.tblParams.rowCount(), 2)
         if self.widget.isBatch:
             self.widget.isBatch = False
         self.widget.batchResultsWindow.close()
-        self.assertTrue(self.widget.batchResultsWindow is None)
+        self.assertIsNone(self.widget.batchResultsWindow)
         # Last test
         self.widget.removeData()
         self.removeAllData()
@@ -192,8 +193,8 @@ class InversionTest(unittest.TestCase):
         self.assertFalse(self.widget.isClosable())
         self.widget.close()
         self.assertTrue(self.widget.isMinimized())
-        self.assertTrue(self.widget.dmaxWindow is None)
-        self.assertTrue(self.widget.batchResultsWindow is None)
+        self.assertIsNone(self.widget.dmaxWindow)
+        self.assertIsNone(self.widget.batchResultsWindow)
         self.widget.setClosable(False)
         self.assertFalse(self.widget.isClosable())
         self.widget.close()
@@ -282,16 +283,14 @@ class InversionTest(unittest.TestCase):
         self.assertEqual(self.widget._calculator.alpha, 12.0)
         self.removeAllData()
 
-    def notestHelp(self):
-        """ test help widget show """
-        # TODO: test help button(s)
-        pass
-
-    def notestOpenExplorerWindow(self):
+    def testOpenExplorerWindow(self):
         """ open Dx window """
-        # TODO: test explorer functionality
+        self.assertIsNone(self.widget.dmaxWindow)
+        self.assertFalse(self.widget.explorerButton.isEnabled())
         self.widget.openExplorerWindow()
+        self.assertIsNotNone(self.widget.dmaxWindow)
         self.assertTrue(self.widget.dmaxWindow.isVisible())
+        self.assertTrue(self.widget.dmaxWindow.windowTitle() == "Dₐₓ Explorer")
 
 
 if __name__ == "__main__":
