@@ -1469,9 +1469,11 @@ class BasicPage(ScrolledPanel, PanelBase):
             # _update_paramv_on_fit() has been called already or
             # we need to check here ourselves.
             if not is_modified:
-                is_modified = (self._check_value_enter(self.fittable_param)
-                               or self._check_value_enter(self.fixed_param)
-                               or self._check_value_enter(self.parameters))
+                is_modified = self._check_value_enter(self.fittable_param)
+                is_modified = self._check_value_enter(
+                    self.fixed_param) or is_modified
+                is_modified = self._check_value_enter(
+                    self.parameters) or is_modified
 
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and
@@ -1533,9 +1535,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                     self._manager.page_finder[self.uid].set_fit_data(
                         data=[self.data])
             # Check the values
-            is_modified = (self._check_value_enter(self.fittable_param)
-                           or self._check_value_enter(self.fixed_param)
-                           or self._check_value_enter(self.parameters))
+            is_modified = self._check_value_enter(self.fittable_param)
+            is_modified = self._check_value_enter(self.fixed_param) or is_modified
+            is_modified = self._check_value_enter(self.parameters) or is_modified
 
             # If qmin and qmax have been modified, update qmin and qmax and
             # Here we should check whether the boundaries have been modified.
@@ -2321,7 +2323,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                     self.model.details[name][1:3] = low, high
 
             # Update value in model if it has changed
-            if value != self.model.getParam(name):
+            if (value != self.model.getParam(name) or
+                    (np.isnan(value) and np.isnan(self.model.getParam(name)))):
                 self.model.setParam(name, value)
                 is_modified = True
 
