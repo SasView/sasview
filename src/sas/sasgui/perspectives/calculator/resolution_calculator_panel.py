@@ -17,7 +17,7 @@ import logging
 #Use the WxAgg back end. The Wx one takes too long to render
 matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
-from matplotlib.backends.backend_wxagg import NavigationToolbar2Wx as Toolbar
+from matplotlib.backends.backend_wxagg import NavigationToolbar2WxAgg as Toolbar
 from matplotlib.backend_bases import FigureManagerBase
 # Wx-Pylab magic for displaying plots within an application's window.
 from matplotlib import _pylab_helpers
