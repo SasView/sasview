@@ -203,13 +203,13 @@ def check_sasmodels_compiler():
     #TODO: This doesn't work if someone uses different compiler e.g. gcc and has no cc installed. Will fix it
     import subprocess
     logger = logging.getLogger(__name__)
-    #if sys.platform == "darwin" and not\
     try:
         # need shell=True on windows to keep console box from popping up
         shell = (os.name == 'nt')
-        subprocess.check_output("cc", shell=shell, stderr=subprocess.STDOUT)
+        subprocess.check_output("ccs", shell=shell, stderr=subprocess.STDOUT)
+    except OSError:
+        print("No compiler installed. Please follow installation instructions\n")
     except subprocess.CalledProcessError:
-        raise RuntimeError("No compiler installed. Please follow installation instructions\n")
         logger.error("No compiler installed. Please follow installation instructions\n")
         logger.error(traceback.format_exc())
 
