@@ -169,7 +169,7 @@ class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
         Open the help menu when the help button is clicked
         """
         help_location = GuiUtils.HELP_DIRECTORY_LOCATION
-        help_location += "/user/sasgui/perspectives/fitting/gpu_setup.html"
+        help_location += "/user/qtgui/Perspectives/Fitting/gpu_setup.html"
         help_location += "#device-selection"
         # Display the page in default browser
         webbrowser.open('file://' + os.path.realpath(help_location))

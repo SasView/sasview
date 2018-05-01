@@ -46,7 +46,7 @@ class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
         Calls DocumentationWindow with the path of the location within the
         documentation tree (after /doc/ ....".
         """
-        location = "/user/sasgui/perspectives/calculator/slit_calculator_help.html"
+        location = "/user/qtgui/Calculators/slit_calculator_help.html"
         self._parent.showHelp(location)
 
     def onBrowse(self):

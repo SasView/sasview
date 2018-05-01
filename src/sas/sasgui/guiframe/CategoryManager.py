@@ -339,7 +339,7 @@ class CategoryManager(wx.Frame):
         #if put at top of file with rest of imports.
         from documentation_window import DocumentationWindow
 
-        _TreeLocation = "user/sasgui/perspectives/fitting/fitting_help.html"
+        _TreeLocation = "user/qtgui/Perspectives/Fitting/fitting_help.html"
         _PageAnchor = "#category-manager"
         _doc_viewer = DocumentationWindow(self, -1, _TreeLocation, _PageAnchor,
                                           "Category Manager Help")

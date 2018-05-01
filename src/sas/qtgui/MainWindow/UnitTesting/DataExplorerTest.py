@@ -436,7 +436,7 @@ class DataExplorerTest(unittest.TestCase):
         """
         Test that the Help window gets shown correctly
         """
-        partial_url = "sasgui/guiframe/data_explorer_help.html"
+        partial_url = "qtgui/MainWindow/data_explorer_help.html"
         button1 = self.form.cmdHelp
         button2 = self.form.cmdHelp_2
 

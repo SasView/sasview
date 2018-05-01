@@ -169,7 +169,7 @@ class BatchOutputPanel(QtWidgets.QMainWindow, Ui_GridPanelUI):
         Open a local url in the default browser
         """
         location = GuiUtils.HELP_DIRECTORY_LOCATION
-        url = "/user/sasgui/perspectives/fitting/fitting_help.html#batch-fit-mode"
+        url = "/user/qtgui/Perspectives/Fitting/fitting_help.html#batch-fit-mode"
         try:
             webbrowser.open('file://' + os.path.realpath(location+url))
         except webbrowser.Error as ex:

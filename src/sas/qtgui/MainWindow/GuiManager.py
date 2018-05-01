@@ -171,6 +171,7 @@ class GuiManager(object):
         """
         Open a local url in the default browser
         """
+        #location = os.path.join(GuiUtils.HELP_DIRECTORY_LOCATION, url)
         location = GuiUtils.HELP_DIRECTORY_LOCATION + url
         try:
             webbrowser.open('file://' + os.path.realpath(location))
@@ -778,7 +779,8 @@ class GuiManager(object):
 
         TODO: use QNetworkAccessManager to assure _helpLocation is valid
         """
-        self.showHelp(self._helpLocation)
+        helpfile = "index.html"
+        self.showHelp(helpfile)
 
     def actionTutorial(self):
         """

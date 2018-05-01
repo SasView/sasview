@@ -201,7 +201,7 @@ class ComplexConstraint(QtWidgets.QDialog, Ui_ComplexConstraintUI):
         """
         try:
             help_location = GuiUtils.HELP_DIRECTORY_LOCATION + \
-            "/user/sasgui/perspectives/fitting/fitting_help.html#simultaneous-fits-with-constraints"
+            "/user/qtgui/Perspectives/Fitting/fitting_help.html#simultaneous-fits-with-constraints"
             webbrowser.open('file://' + os.path.realpath(help_location))
         except AttributeError:
             # No manager defined - testing and standalone runs

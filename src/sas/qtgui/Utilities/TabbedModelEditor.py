@@ -328,7 +328,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         Calls Documentation Window with the path of the location within the
         documentation tree (after /doc/ ....".
         """
-        location = "/user/sasgui/perspectives/fitting/plugin.html"
+        location = "/user/qtgui/Perspectives/Fitting/plugin.html"
         self.parent.showHelp(location)
 
     def getModel(self):
