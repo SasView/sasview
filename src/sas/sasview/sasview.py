@@ -197,10 +197,18 @@ def setup_mpl(backend=None):
 
 def check_sasmodels_compiler():
     """
-    Checking c compiler for sasmodels
+    Checking c compiler for sasmodels and trying to trigger xcode command line
+    for installation
     """
-    if sys.platform == "darwin" and not os.path.exists("/Library/Developer/CommandLineTools/usr/bin/cc"):
-        raise RuntimeError("No compiler. Open Terminal.app and type 'cc' at the command prompt for more instructions.")
+    import subprocess
+    logger = logging.getLogger(__name__)
+    #if sys.platform == "darwin" and not\
+    try:
+        # need shell=True on windows to keep console box from popping up
+        shell = (os.name == 'nt')
+        subprocess.check_output("cc", shell=shell, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError:
+        raise RuntimeError("No compiler installed. Please follow installation instructions\n")
 
 def setup_sasmodels():
     """
@@ -224,7 +232,7 @@ def run_gui():
     setup_mpl(backend='WXAgg')
     setup_sasmodels()
     setup_wx()
-    #check_sasmodels_compiler()
+    check_sasmodels_compiler()
     SasView()
 
 
