@@ -224,7 +224,7 @@ def run_gui():
     setup_mpl(backend='WXAgg')
     setup_sasmodels()
     setup_wx()
-    check_sasmodels_compiler()
+    #check_sasmodels_compiler()
     SasView()
 
 
