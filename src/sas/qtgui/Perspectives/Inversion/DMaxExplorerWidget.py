@@ -7,8 +7,6 @@ their distribution as a function of D_max.
 """
 
 # global
-import sys
-import os
 import logging
 import numpy as np
 from PyQt5 import QtCore
@@ -50,18 +48,18 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         self.communicator = GuiUtils.Communicate()
 
         self.plot = PlotterWidget(self, self)
-        self.hasPlot = None
+        self.hasPlot = False
         self.verticalLayout.insertWidget(0, self.plot)
 
         # Let's choose the Standard Item Model.
         self.model = QtGui.QStandardItemModel(self)
-        self.mapper = None
+        self.mapper = QtWidgets.QDataWidgetMapper(self)
 
         # Add validators on line edits
         self.setupValidators()
 
-        # # Connect buttons to slots.
-        # # Needs to be done early so default values propagate properly.
+        # Connect buttons to slots.
+        # Needs to be done early so default values propagate properly.
         self.setupSlots()
 
         # Set up the model.
@@ -88,7 +86,6 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         self.model.setItem(W.VARIABLE, QtGui.QStandardItem( "χ²/dof"))
 
     def setupMapper(self):
-        self.mapper = QtWidgets.QDataWidgetMapper(self)
         self.mapper.setOrientation(QtCore.Qt.Vertical)
         self.mapper.setModel(self.model)
 
@@ -111,9 +108,15 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         bck = []
         chi2 = []
 
-        xs = np.linspace(float(self.model.item(W.DMIN).text()),
-                         float(self.model.item(W.DMAX).text()),
-                         float(self.model.item(W.NPTS).text()))
+        try:
+            dmin = float(self.model.item(W.DMIN).text())
+            dmax = float(self.model.item(W.DMAX).text())
+            npts = float(self.model.item(W.NPTS).text())
+            xs = np.linspace(dmin, dmax, npts)
+        except ValueError as e:
+            msg = ("An input value is not correctly formatted. Please check {}"
+                   .format(e.message))
+            logger.error(msg)
 
         original = self.pr_state.d_max
         for x in xs:
@@ -132,7 +135,6 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
                 # This inversion failed, skip this D_max value
                 msg = "ExploreDialog: inversion failed "
                 msg += "for D_max=%s\n%s" % (str(x), ex)
-                print(msg)
                 logger.error(msg)
 
         #Return the invertor to its original state
@@ -142,7 +144,6 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         except RuntimeError as ex:
             msg = "ExploreDialog: inversion failed "
             msg += "for D_max=%s\n%s" % (str(x), ex)
-            print(msg)
             logger.error(msg)
 
         plotter = self.model.item(W.VARIABLE).text()

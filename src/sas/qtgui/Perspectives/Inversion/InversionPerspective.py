@@ -31,6 +31,8 @@ BACKGROUND_INPUT = 0.0
 MAX_DIST = 140.0
 DICT_KEYS = ["Calculator", "PrPlot", "DataPlot"]
 
+logger = logging.getLogger(__name__)
+
 
 class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     """
@@ -353,7 +355,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         if not self.mapper:
             msg = "Unable to update P{r}. The connection between the main GUI "
             msg += "and P(r) was severed. Attempting to restart P(r)."
-            logging.warning(msg)
+            logger.warning(msg)
             self.setClosable(True)
             self.close()
             InversionWindow.__init__(self.parent(), list(self._dataList.keys()))
@@ -394,7 +396,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         Open the Explorer window to see correlations between params and results
         """
         from .DMaxExplorerWidget import DmaxWindow
-        self.dmaxWindow = DmaxWindow(self._calculator, self.getNFunc(), self)
+        self.dmaxWindow = DmaxWindow(pr_state=self._calculator,
+                                     nfunc=self.getNFunc(),
+                                     parent=self)
         self.dmaxWindow.show()
 
     def showBatchOutput(self):
@@ -458,7 +462,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         try:
             nfunc = int(self.noOfTermsInput.text())
         except ValueError:
-            logging.error("Incorrect number of terms specified: %s"
+            logger.error("Incorrect number of terms specified: %s"
                           %self.noOfTermsInput.text())
             self.noOfTermsInput.setText(str(NUMBER_OF_TERMS))
             nfunc = NUMBER_OF_TERMS
@@ -580,6 +584,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             if index not in self.batchComplete:
                 self.dataList.setCurrentIndex(index)
                 self.isBatch = True
+                # Add the index before calculating in case calculation fails
+                self.batchComplete.append(index)
                 break
         if self.isBatch:
             self.performEstimate()
@@ -598,6 +604,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
         # Set data before running the calculations
         self.updateCalculator()
+        # Disable calculation buttons to prevent thread interference
+        self.calculateAllButton.setEnabled(False)
+        self.calculateThisButton.setEnabled(False)
 
         # If a thread is already started, stop it
         if self.calcThread is not None and self.calcThread.isrunning():
@@ -671,8 +680,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         :param elapsed: computation time
         """
         alpha, message, elapsed = output_tuple
+        self._calculator.alpha = alpha
+        self._calculator.elapsed += self._calculator.elapsed
         if message:
-            logging.info(message)
+            logger.info(message)
         self.performEstimateNT()
 
     def _estimateNTCompleted(self, nterms, alpha, message, elapsed):
@@ -689,13 +700,13 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         :param elapsed: computation time
         """
         nterms, alpha, message, elapsed = output_tuple
-        self._calculator.elapsed = elapsed
+        self._calculator.elapsed += elapsed
         self._calculator.suggested_alpha = alpha
         self.nTermsSuggested = nterms
         # Save useful info
         self.updateGuiValues()
         if message:
-            logging.info(message)
+            logger.info(message)
         if self.isBatch:
             self.acceptAlpha()
             self.acceptNoTerms()
@@ -741,4 +752,4 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         """
             Call-back method for calculation errors
         """
-        logging.warning(error)
+        logger.error(error)

@@ -480,7 +480,7 @@ class Invertor(Cinvertor):
         try:
             float(chi2)
         except:
-            chi2 = [-1.0]
+            chi2 = -1.0
         self.chi2 = chi2
 
         inv_cov = np.zeros([nfunc, nfunc])
