@@ -199,6 +199,9 @@ def setup_sasmodels():
     """
     Prepare sasmodels for running within sasview.
     """
+    #Checking for the sasmodel compiler
+    if sys.platform == "darwin" and not os.path.exists("/Library/Developer/CommandLineTools/usr/bin/cc"):
+        raise RuntimeError("No compiler. Open Terminal.app and type 'cc' at the command prompt for more instructions.")
     # Set SAS_MODELPATH so sasmodels can find our custom models
     plugin_dir = os.path.join(sas.get_user_dir(), PLUGIN_MODEL_DIR)
     os.environ['SAS_MODELPATH'] = plugin_dir
