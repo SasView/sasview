@@ -29,7 +29,7 @@ platform = '.%s-%s'%(get_platform(),sys.version[:3])
 SPHINX_ROOT = dirname(abspath(__file__))
 SPHINX_BUILD = joinpath(SPHINX_ROOT, "build")
 SPHINX_SOURCE = joinpath(SPHINX_ROOT, "source-temp")
-SPHINX_PERSPECTIVES = joinpath(SPHINX_SOURCE, "user", "sasgui", "perspectives")
+SPHINX_PERSPECTIVES = joinpath(SPHINX_SOURCE, "user", "qtgui", "perspectives")
 
 # sasview paths
 SASVIEW_ROOT = joinpath(SPHINX_ROOT, '..', '..')
