@@ -206,12 +206,13 @@ def check_sasmodels_compiler():
     try:
         # need shell=True on windows to keep console box from popping up
         shell = (os.name == 'nt')
-        subprocess.check_output("ccs", shell=shell, stderr=subprocess.STDOUT)
+        subprocess.check_output("cc", shell=shell, stderr=subprocess.STDOUT)
     except OSError:
         print("No compiler installed. Please follow installation instructions\n")
-    except subprocess.CalledProcessError:
         logger.error("No compiler installed. Please follow installation instructions\n")
         logger.error(traceback.format_exc())
+    except subprocess.CalledProcessError:
+        pass
 
 def setup_sasmodels():
     """
