@@ -204,15 +204,20 @@ def check_sasmodels_compiler():
     import subprocess
     logger = logging.getLogger(__name__)
     try:
-        # need shell=True on windows to keep console box from popping up
-        shell = (os.name == 'nt')
-        subprocess.check_output("cc", shell=shell, stderr=subprocess.STDOUT)
-    except OSError:
-        print("No compiler installed. Please follow installation instructions\n")
-        logger.error("No compiler installed. Please follow installation instructions\n")
+        subprocess.check_output(["cc","--version"], stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as exc:
+        #At this stage wx should be working as it is imported earlier
+        import wx
+        app = wx.App()
+        dlg = wx.MessageBox('No compiler installed. Please follow instruction for '
+                      'Xcode command line installation and restart SasView'
+                      'SasView is terminating now',
+                      'Info', wx.OK | wx.ICON_INFORMATION)
+        dlg.Destroy()
+        logger.error("No compiler installed. %s\n"%(exc))
         logger.error(traceback.format_exc())
-    except subprocess.CalledProcessError:
-        pass
+
+        raise RuntimeError("Terminating sasview")
 
 def setup_sasmodels():
     """
