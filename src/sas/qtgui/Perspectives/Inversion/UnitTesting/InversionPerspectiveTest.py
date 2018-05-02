@@ -57,6 +57,7 @@ class InversionTest(unittest.TestCase):
         self.assertIsInstance(self.widget, QtWidgets.QWidget)
         self.assertEqual(self.widget.windowTitle(), "P(r) Inversion Perspective")
         self.assertFalse(self.widget.isClosable())
+        self.assertFalse(self.widget.isCalculating)
         # mapper
         self.assertIsInstance(self.widget.mapper, QtWidgets.QDataWidgetMapper)
         self.assertNotEqual(self.widget.mapper.mappedSection(self.widget.dataList), -1)
@@ -75,6 +76,8 @@ class InversionTest(unittest.TestCase):
         # buttons
         self.assertFalse(self.widget.calculateThisButton.isEnabled())
         self.assertFalse(self.widget.removeButton.isEnabled())
+        self.assertTrue(self.widget.stopButton.isEnabled())
+        self.assertFalse(self.widget.stopButton.isVisible())
         self.assertFalse(self.widget.regConstantSuggestionButton.isEnabled())
         self.assertFalse(self.widget.noOfTermsSuggestionButton.isEnabled())
         self.assertFalse(self.widget.explorerButton.isEnabled())
@@ -153,16 +156,24 @@ class InversionTest(unittest.TestCase):
         self.widget.setData([self.fakeData2])
         self.twoDataSetState()
         self.widget.calculateAllButton.click()
+        self.assertTrue(self.widget.isCalculating)
+        self.assertTrue(self.widget.isBatch)
+        self.assertTrue(self.widget.stopButton.isVisible())
+        self.assertTrue(self.widget.stopButton.isEnabled())
         self.assertIsNotNone(self.widget.batchResultsWindow)
         self.assertTrue(self.widget.batchResultsWindow.cmdHelp.isEnabled())
         self.assertEqual(self.widget.batchResultsWindow.tblParams.columnCount(), 9)
         self.assertEqual(self.widget.batchResultsWindow.tblParams.rowCount(), 2)
-        if self.widget.isBatch:
-            self.widget.isBatch = False
+        # Test stop button
+        self.widget.stopButton.click()
+        self.assertTrue(self.widget.batchResultsWindow.isVisible())
+        self.assertFalse(self.widget.stopButton.isVisible())
+        self.assertTrue(self.widget.stopButton.isEnabled())
+        self.assertFalse(self.widget.isBatch)
+        self.assertFalse(self.widget.isCalculating)
         self.widget.batchResultsWindow.close()
         self.assertIsNone(self.widget.batchResultsWindow)
         # Last test
-        self.widget.removeData()
         self.removeAllData()
         self.baseBatchState()
 
@@ -217,13 +228,13 @@ class InversionTest(unittest.TestCase):
         with self.assertLogs(level='ERROR') as cm:
             self.widget.noOfTermsInput.setText("")
             n = self.widget.getNFunc()
-            self.assertEqual(cm.output, ['ERROR:root:Incorrect number of terms specified: '])
+            self.assertEqual(cm.output, ['ERROR:sas.qtgui.Perspectives.Inversion.InversionPerspective:Incorrect number of terms specified: '])
         self.assertEqual(self.widget.getNFunc(), 10)
         # string
         with self.assertLogs(level='ERROR') as cm:
             self.widget.noOfTermsInput.setText("Nordvest Pizza")
             n = self.widget.getNFunc()
-            self.assertEqual(cm.output, ['ERROR:root:Incorrect number of terms specified: Nordvest Pizza'])
+            self.assertEqual(cm.output, ['ERROR:sas.qtgui.Perspectives.Inversion.InversionPerspective:Incorrect number of terms specified: Nordvest Pizza'])
         self.assertEqual(self.widget.getNFunc(), 10)
         self.removeAllData()
 

@@ -152,16 +152,16 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         x_unit = "A"
         if plotter == "χ²/dof":
             ys = chi2
-            y_label = "\chi^2/dof"
+            y_label = "\\chi^2/dof"
             y_unit = "a.u."
         elif plotter == "I(Q=0)":
             ys = iq0
             y_label = "I(q=0)"
-            y_unit = "\AA^{-1}"
+            y_unit = "\\AA^{-1}"
         elif plotter == "Rg":
             ys = rg
             y_label = "R_g"
-            y_unit = "\AA"
+            y_unit = "\\AA"
         elif plotter == "Oscillation parameter":
             ys = osc
             y_label = "Osc"
@@ -169,14 +169,14 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         elif plotter == "Background":
             ys = bck
             y_label = "Bckg"
-            y_unit = "\AA^{-1}"
+            y_unit = "\\AA^{-1}"
         elif plotter == "Positive Fraction":
             ys = pos
             y_label = "P^+"
             y_unit = "a.u."
         else:
             ys = pos_err
-            y_label = "P^{+}_{1\sigma}"
+            y_label = "P^{+}_{1\\sigma}"
             y_unit = "a.u."
 
         data = Data1D(xs, ys)

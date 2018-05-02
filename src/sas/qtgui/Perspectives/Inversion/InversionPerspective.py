@@ -78,6 +78,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.calcThread = None
         self.estimationThread = None
         self.estimationThreadNT = None
+        self.isCalculating = False
 
         # Mapping for all data items
         # Dictionary mapping data to all parameters
@@ -166,6 +167,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.dataList.currentIndexChanged.connect(self.displayChange)
         self.calculateAllButton.clicked.connect(self.startThreadAll)
         self.calculateThisButton.clicked.connect(self.startThread)
+        self.stopButton.clicked.connect(self.stopCalculation)
         self.removeButton.clicked.connect(self.removeData)
         self.helpButton.clicked.connect(self.help)
         self.estimateBgd.toggled.connect(self.toggleBgd)
@@ -300,11 +302,14 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         Enable buttons when data is present, else disable them
         """
         self.calculateAllButton.setEnabled(len(self._dataList) > 1
-                                           and not self.isBatch)
+                                           and not self.isBatch
+                                           and not self.isCalculating)
         self.calculateThisButton.setEnabled(self.logic.data_is_loaded
-                                            and not self.isBatch)
+                                            and not self.isBatch
+                                            and not self.isCalculating)
         self.removeButton.setEnabled(self.logic.data_is_loaded)
         self.explorerButton.setEnabled(self.logic.data_is_loaded)
+        self.stopButton.setVisible(self.isCalculating)
         self.regConstantSuggestionButton.setEnabled(
             self.logic.data_is_loaded and
             self._calculator.suggested_alpha != self._calculator.alpha)
@@ -412,6 +417,21 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         else:
             self.batchResultsWindow.setupTable(self.batchResults)
         self.batchResultsWindow.show()
+
+    def stopCalculation(self):
+        """ Stop all threads, return to the base state and update GUI """
+        if self.calcThread:
+            self.calcThread.stop()
+        if self.estimationThread:
+            self.estimationThread.stop()
+        if self.estimationThreadNT:
+            self.estimationThreadNT.stop()
+        # Show any batch calculations that successfully completed
+        if self.isBatch and self.batchResultsWindow is not None:
+            self.showBatchOutput()
+        self.isBatch = False
+        self.isCalculating = False
+        self.updateGuiValues()
 
     ######################################################################
     # Response Actions
@@ -570,6 +590,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
     # Thread Creators
 
     def startThreadAll(self):
+        self.isCalculating = True
         self.isBatch = True
         self.batchComplete = []
         self.calculateAllButton.setText("Calculating...")
@@ -591,6 +612,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             self.performEstimate()
         else:
             # If no data sets left, end batch calculation
+            self.isCalculating = False
             self.batchComplete = []
             self.calculateAllButton.setText("Calculate All")
             self.showBatchOutput()
@@ -603,10 +625,10 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         from .Thread import CalcPr
 
         # Set data before running the calculations
+        self.isCalculating = True
+        self.enableButtons()
         self.updateCalculator()
         # Disable calculation buttons to prevent thread interference
-        self.calculateAllButton.setEnabled(False)
-        self.calculateThisButton.setEnabled(False)
 
         # If a thread is already started, stop it
         if self.calcThread is not None and self.calcThread.isrunning():
@@ -743,10 +765,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
         # Udpate internals and GUI
         self.updateDataList(self._data)
-        self.updateGuiValues()
         if self.isBatch:
             self.batchComplete.append(self.dataList.currentIndex())
             self.startNextBatchItem()
+        else:
+            self.isCalculating = False
+        self.updateGuiValues()
 
     def _threadError(self, error):
         """

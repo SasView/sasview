@@ -314,7 +314,7 @@ p, li { white-space: pre-wrap; }
           <item row="0" column="3">
            <widget class="QLabel" name="label_22">
             <property name="text">
-             <string>      </string>
+             <string/>
             </property>
            </widget>
           </item>
@@ -740,6 +740,13 @@ p, li { white-space: pre-wrap; }
        </property>
        <property name="text">
         <string>Calculate All</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="stopButton">
+       <property name="text">
+        <string>Stop P(r)</string>
        </property>
       </widget>
      </item>
