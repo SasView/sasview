@@ -212,7 +212,7 @@ def check_sasmodels_compiler():
         dlg = wx.MessageBox('No compiler installed. Please follow instruction for '
                       'Xcode command line installation and restart SasView'
                       'SasView is terminating now',
-                      'Info', wx.OK | wx.ICON_INFORMATION)
+                      'Info', wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP)
         dlg.Destroy()
         logger.error("No compiler installed. %s\n"%(exc))
         logger.error(traceback.format_exc())
