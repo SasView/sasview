@@ -200,20 +200,34 @@ def check_sasmodels_compiler():
     Checking c compiler for sasmodels and raises xcode command line
     tools for installation
     """
-    #TODO: This doesn't work if someone uses different compiler e.g. gcc and has no cc installed. Will fix it
+    import wx
     import subprocess
+    #Generic message box is nessary here becuase standard MessageBox is not moveable
+    class GenericMessageBox(wx.Dialog):
+        def __init__(self, parent, text, title = ''):
+            wx.Dialog.__init__(self, parent, -1, title = title,
+                               size = (360,140), pos=(20,20),
+                               style = wx.DEFAULT_DIALOG_STYLE )
+            panel = wx.Panel(self, wx.ID_ANY, size = (360, 100), pos = (0,0))
+            panel.SetBackgroundColour('#FFFFFF')
+            label = wx.StaticText(panel, -1, text, pos = (0,20))
+            panel2 = wx.Panel(self, wx.ID_ANY, size = (360, 40), pos = (0, 60))
+            btn = wx.Button(panel2, wx.ID_OK, pos = (250,7))
+            self.ShowModal()
+
+
     logger = logging.getLogger(__name__)
     try:
         subprocess.check_output(["cc","--version"], stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as exc:
-        #At this stage wx should be working as it is imported earlier
-        import wx
         app = wx.App()
-        dlg = wx.MessageBox('No compiler installed. Please follow instruction for '
-                      'Xcode command line installation and restart SasView'
-                      'SasView is terminating now',
-                      'Info', wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP)
+        dlg = GenericMessageBox(parent=None,
+            text='No compiler installed. Please follow instruction for\n '
+                'Xcode command line installation and restart SasView\n'
+                'SasView is terminating now\n',
+            title = 'Info')
         dlg.Destroy()
+
         logger.error("No compiler installed. %s\n"%(exc))
         logger.error(traceback.format_exc())
 
