@@ -208,24 +208,54 @@ def check_sasmodels_compiler():
             wx.Dialog.__init__(self, parent, -1, title = title,
                                size = (360,140), pos=(20,20),
                                style = wx.DEFAULT_DIALOG_STYLE )
-            panel = wx.Panel(self, wx.ID_ANY, size = (360, 100), pos = (0,0))
-            panel.SetBackgroundColour('#FFFFFF')
-            label = wx.StaticText(panel, -1, text, pos = (0,20))
-            panel2 = wx.Panel(self, wx.ID_ANY, size = (360, 40), pos = (0, 60))
-            btn = wx.Button(panel2, wx.ID_OK, pos = (250,7))
-            self.ShowModal()
+            panel = wx.Panel(self, -1)
+            top_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
+            error_bitmap = wx.ArtProvider.GetBitmap(
+                wx.ART_ERROR, wx.ART_MESSAGE_BOX
+            )
+            error_bitmap_ctrl = wx.StaticBitmap(panel, -1)
+            error_bitmap_ctrl.SetBitmap(error_bitmap)
+            label = wx.StaticText(panel, -1, text)
+            top_row_sizer.Add(error_bitmap_ctrl, flag=wx.ALL, border=10)
+            top_row_sizer.Add(label, flag=wx.ALIGN_CENTER_VERTICAL)
+
+            #Create the OK button in the bottom row.
+            ok_button = wx.Button(panel, -1, 'OK')
+            self.Bind(wx.EVT_BUTTON, self.on_ok, source=ok_button)
+            ok_button.SetFocus()
+            ok_button.SetDefault()
+
+            sizer = wx.BoxSizer(wx.VERTICAL)
+            sizer.Add(top_row_sizer)
+            # sizer.Add(message_label, flag=wx.ALL | wx.EXPAND, border=10)
+            sizer.Add(ok_button, flag=wx.ALIGN_CENTER | wx.ALL, border=5)
+            panel.SetSizer(sizer)
+
+        def on_ok(self, event):
+            self.Destroy()
 
     logger = logging.getLogger(__name__)
     try:
         subprocess.check_output(["cc","--version"], stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError as exc:
         app = wx.App()
         dlg = GenericMessageBox(parent=None,
             text='No compiler installed. Please follow instruction for\n '
                 'Xcode command line installation and restart SasView\n'
                 'SasView is terminating now\n',
             title = 'Info')
+        dlg.ShowModal()
+        app.MainLoop()
+        pass
+        raise RuntimeError("Terminating sasview")
+
+    except subprocess.CalledProcessError as exc:
+        app = wx.App()
+        dlg = GenericMessageBox(parent=None,
+            text='No compiler installed. Please follow instruction for '
+                'Xcode command line installation and restart SasView'
+                'SasView is terminating now',
+            title = 'Compiler Info')
         dlg.Destroy()
 
         logger.error("No compiler installed. %s\n"%(exc))
