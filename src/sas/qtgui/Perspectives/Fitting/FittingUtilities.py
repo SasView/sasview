@@ -67,7 +67,10 @@ def addParametersToModel(parameters, kernel_module, is2D):
     """
     multishell_parameters = getIterParams(parameters)
     multishell_param_name, _ = getMultiplicity(parameters)
-    params = parameters.iqxy_parameters if is2D else parameters.iq_parameters
+    if is2D:
+        params = [p for p in parameters.kernel_parameters if p.type != 'magnetic']
+    else:
+        params = parameters.iq_parameters
     item = []
     for param in params:
         # don't include shell parameters
@@ -124,7 +127,10 @@ def addSimpleParametersToModel(parameters, is2D):
     """
     Update local ModelModel with sasmodel parameters
     """
-    params = parameters.iqxy_parameters if is2D else parameters.iq_parameters
+    if is2D:
+        params = [p for p in parameters.kernel_parameters if p.type != 'magnetic']
+    else:
+        params = parameters.iq_parameters
     item = []
     for param in params:
         # Create the top level, checkable item
