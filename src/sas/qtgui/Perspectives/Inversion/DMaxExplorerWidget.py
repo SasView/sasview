@@ -80,10 +80,18 @@ class DmaxWindow(QtWidgets.QDialog, Ui_DmaxExplorer):
         self.dependentVariable.currentIndexChanged.connect(lambda:self.modelChanged(None))
 
     def setupModel(self):
+        self.model.blockSignals(True)
         self.model.setItem(W.NPTS, QtGui.QStandardItem(str(self.nfunc)))
+        self.model.blockSignals(False)
+        self.model.blockSignals(True)
         self.model.setItem(W.DMIN, QtGui.QStandardItem("{:.1f}".format(0.9*self.pr_state.d_max)))
+        self.model.blockSignals(False)
+        self.model.blockSignals(True)
         self.model.setItem(W.DMAX, QtGui.QStandardItem("{:.1f}".format(1.1*self.pr_state.d_max)))
+        self.model.blockSignals(False)
+        self.model.blockSignals(True)
         self.model.setItem(W.VARIABLE, QtGui.QStandardItem( "χ²/dof"))
+        self.model.blockSignals(False)
 
     def setupMapper(self):
         self.mapper.setOrientation(QtCore.Qt.Vertical)

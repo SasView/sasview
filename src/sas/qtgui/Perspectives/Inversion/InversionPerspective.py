@@ -308,7 +308,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
                                             and not self.isBatch
                                             and not self.isCalculating)
         self.removeButton.setEnabled(self.logic.data_is_loaded)
-        self.explorerButton.setEnabled(self.logic.data_is_loaded)
+        self.explorerButton.setEnabled(self.logic.data_is_loaded
+                                       and np.all(self.logic.data.dy != 0))
         self.stopButton.setVisible(self.isCalculating)
         self.regConstantSuggestionButton.setEnabled(
             self.logic.data_is_loaded and
@@ -420,12 +421,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
 
     def stopCalculation(self):
         """ Stop all threads, return to the base state and update GUI """
-        if self.calcThread:
-            self.calcThread.stop()
-        if self.estimationThread:
-            self.estimationThread.stop()
-        if self.estimationThreadNT:
-            self.estimationThreadNT.stop()
+        self.stopCalcThread()
+        self.stopEstimationThread()
+        self.stopEstimateNTThread()
         # Show any batch calculations that successfully completed
         if self.isBatch and self.batchResultsWindow is not None:
             self.showBatchOutput()
@@ -630,9 +628,9 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.updateCalculator()
         # Disable calculation buttons to prevent thread interference
 
-        # If a thread is already started, stop it
-        if self.calcThread is not None and self.calcThread.isrunning():
-            self.calcThread.stop()
+        # If the thread is already started, stop it
+        self.stopCalcThread()
+
         pr = self._calculator.clone()
         nfunc = self.getNFunc()
         self.calcThread = CalcPr(pr, nfunc,
@@ -641,6 +639,11 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
                                  updatefn=None)
         self.calcThread.queue()
         self.calcThread.ready(2.5)
+
+    def stopCalcThread(self):
+        """ Stops a thread if it exists and is running """
+        if self.calcThread is not None and self.calcThread.isrunning():
+            self.calcThread.stop()
 
     def performEstimateNT(self):
         """
@@ -651,9 +654,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.updateCalculator()
 
         # If a thread is already started, stop it
-        if (self.estimationThreadNT is not None and
-                self.estimationThreadNT.isrunning()):
-            self.estimationThreadNT.stop()
+        self.stopEstimateNTThread()
+
         pr = self._calculator.clone()
         # Skip the slit settings for the estimation
         # It slows down the application and it doesn't change the estimates
@@ -668,6 +670,11 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         self.estimationThreadNT.queue()
         self.estimationThreadNT.ready(2.5)
 
+    def stopEstimateNTThread(self):
+        if (self.estimationThreadNT is not None and
+                self.estimationThreadNT.isrunning()):
+            self.estimationThreadNT.stop()
+
     def performEstimate(self):
         """
             Perform parameter estimation
@@ -675,9 +682,8 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         from .Thread import EstimatePr
 
         # If a thread is already started, stop it
-        if (self.estimationThread is not None and
-                self.estimationThread.isrunning()):
-            self.estimationThread.stop()
+        self.stopEstimationThread()
+
         self.estimationThread = EstimatePr(self._calculator.clone(),
                                            self.getNFunc(),
                                            error_func=self._threadError,
@@ -685,6 +691,12 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
                                            updatefn=None)
         self.estimationThread.queue()
         self.estimationThread.ready(2.5)
+
+    def stopEstimationThread(self):
+        """ Stop the estimation thread if it exists and is running """
+        if (self.estimationThread is not None and
+                self.estimationThread.isrunning()):
+            self.estimationThread.stop()
 
     ######################################################################
     # Thread Complete
@@ -777,3 +789,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
             Call-back method for calculation errors
         """
         logger.error(error)
+        if self.isBatch:
+            self.startNextBatchItem()
+        else:
+            self.stopCalculation()
