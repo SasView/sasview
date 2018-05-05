@@ -73,14 +73,16 @@ class TestCalculator(unittest.TestCase):
         # Transform is performed asynchronously; give it time to run
         while True:
             time.sleep(0.001)
-            if not self.calculator.transform_isrunning():
+            if (not self.calculator.transform_isrunning() and
+                self.transformation is not None):
                 break
 
-    def transform_callback(self, transforms):
-        transform1, transform3, idf = transforms
+        transform1, transform3, idf = self.transformation
         self.assertIsNotNone(transform1)
         self.assertAlmostEqual(transform1.y[0], 1)
         self.assertAlmostEqual(transform1.y[-1], 0, 5)
+
+    def transform_callback(self, transforms):
         self.transformation = transforms
 
     def extract_params(self):
