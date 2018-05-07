@@ -4,11 +4,13 @@ import os
 import datetime
 import numpy as np
 import logging
+import traceback
 
 from PyQt5 import QtWidgets
 
 from sas.sascalc.fit import models
 
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.UI.TabbedModelEditor import Ui_TabbedModelEditor
 from sas.qtgui.Utilities.PluginDefinition import PluginDefinition
 from sas.qtgui.Utilities.ModelEditor import ModelEditor
@@ -21,7 +23,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
     """
     # Signals for intertab communication plugin -> editor
     def __init__(self, parent=None, edit_only=False):
-        super(TabbedModelEditor, self).__init__()
+        super(TabbedModelEditor, self).__init__(parent._parent)
 
         self.parent = parent
 
@@ -32,6 +34,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.window_title = self.windowTitle()
         self.edit_only = edit_only
         self.is_modified = False
+        self.label = None
 
         self.addWidgets()
 
@@ -74,7 +77,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.cmdLoad.clicked.connect(self.onLoad)
         # signals from tabs
         self.editor_widget.modelModified.connect(self.editorModelModified)
-        self.plugin_widget.modelModified.connect(self.pluginModelModified)
+        self.plugin_widget.txtName.editingFinished.connect(self.pluginTitleSet)
 
     def setPluginActive(self, is_active=True):
         """
@@ -123,9 +126,10 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
             self.editor_widget.txtEditor.setPlainText(plugin.read())
         self.editor_widget.setEnabled(True)
         self.editor_widget.blockSignals(False)
-        self.filename, _ = os.path.splitext(os.path.basename(filename))
+        self.filename = filename
+        display_name, _ = os.path.splitext(os.path.basename(filename))
 
-        self.setWindowTitle(self.window_title + " - " + self.filename)
+        self.setWindowTitle(self.window_title + " - " + display_name)
 
     def onModifiedExit(self):
         msg_box = QtWidgets.QMessageBox(self)
@@ -168,22 +172,26 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(True)
         self.is_modified = True
 
-    def pluginModelModified(self):
+    def pluginTitleSet(self):
         """
-        User modified the model in the Plugin Editor.
-        Show that the model is changed.
+        User modified the model name.
+        Display the model name in the window title
+        and allow for model save.
         """
         # Ensure plugin name is non-empty
         model = self.getModel()
         if 'filename' in model and model['filename']:
             self.setWindowTitle(self.window_title + " - " + model['filename'])
             self.setTabEdited(True)
-            # Enable editor
-            self.editor_widget.setEnabled(True)
             self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(True)
             self.is_modified = True
         else:
+            # the model name is empty - disable Apply and clear the editor
             self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(False)
+            self.editor_widget.blockSignals(True)
+            self.editor_widget.txtEditor.setPlainText('')
+            self.editor_widget.blockSignals(False)
+            self.editor_widget.setEnabled(False)
 
     def setTabEdited(self, is_edited):
         """
@@ -227,14 +235,26 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # generate the model representation as string
         model_str = self.generateModel(model, full_path)
         self.writeFile(full_path, model_str)
-        # TODO:
-        # Temporarily disable model check -
-        # unittest.suite() gives weird results in qt5.
-        # needs investigating
-        #try:
-        #    _, msg = self.checkModel(full_path), None
-        #except Exception as ex:
-        #    result, msg = None, "Error building model: "+ str(ex)
+
+        # test the model
+
+        # Run the model test in sasmodels
+        try:
+            model_results = self.checkModel(full_path)
+            logging.info(model_results)
+        except Exception as ex:
+            msg = "Error building model: "+ str(ex)
+            logging.error(msg)
+            #print three last lines of the stack trace
+            # this will point out the exact line failing
+            last_lines = traceback.format_exc().split('\n')[-4:]
+            traceback_to_show = '\n'.join(last_lines)
+            logging.error(traceback_to_show)
+
+            self.parent.communicate.statusBarUpdateSignal.emit("Model check failed")
+            return
+
+        self.editor_widget.setEnabled(True)
 
         # Update the editor here.
         # Simple string forced into control.
@@ -248,6 +268,11 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         # Notify listeners
         self.parent.communicate.customModelDirectoryChanged.emit()
 
+        # Notify the user
+        msg = "Custom model "+filename + " successfully created."
+        self.parent.communicate.statusBarUpdateSignal.emit(msg)
+        logging.info(msg)
+
     def updateFromEditor(self):
         """
         Save the current state of the Model Editor
@@ -260,7 +285,11 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.writeFile(self.filename, model_str)
         # Update the tab title
         self.setTabEdited(False)
-        
+        # notify the user
+        msg = self.filename + " successfully saved."
+        self.parent.communicate.statusBarUpdateSignal.emit(msg)
+        logging.info(msg)
+
     def canWriteModel(self, model=None, full_path=""):
         """
         Determine if the current plugin can be written to file
@@ -299,7 +328,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         Calls Documentation Window with the path of the location within the
         documentation tree (after /doc/ ....".
         """
-        location = "/user/sasgui/perspectives/fitting/plugin.html"
+        location = "/user/qtgui/Perspectives/Fitting/plugin.html"
         self.parent.showHelp(location)
 
     def getModel(self):
@@ -377,26 +406,6 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         model_text +='#Iqxy.vectorized = True\n'
 
         return model_text
-
-    @classmethod
-    def checkModel(cls, path):
-        """
-        Check that the model save in file 'path' can run.
-        """
-        # try running the model
-        from sasmodels.sasview_model import load_custom_model
-        Model = load_custom_model(path)
-        model = Model()
-        q =  np.array([0.01, 0.1])
-        _ = model.evalDistribution(q)
-        qx, qy =  np.array([0.01, 0.01]), np.array([0.1, 0.1])
-        _ = model.evalDistribution([qx, qy])
-
-        # check the model's unit tests run
-        from sasmodels.model_test import run_one
-        result = run_one(path)
-
-        return result
 
     @classmethod
     def getParamHelper(cls, param_str):

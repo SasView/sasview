@@ -154,6 +154,6 @@ if __name__ == "__main__":
 
     logger.debug("Starting SASVIEW in debug mode.")
     prepare()
-    from sas.qtgui.MainWindow.MainWindow import run
-    run()
+    from sas.qtgui.MainWindow.MainWindow import run_sasview
+    run_sasview()
     logger.debug("Ending SASVIEW in debug mode.")

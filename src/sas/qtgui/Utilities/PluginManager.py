@@ -18,7 +18,7 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
     This is a simple list widget allowing for viewing/adding/deleting custom models.
     """
     def __init__(self, parent=None):
-        super(PluginManager, self).__init__()
+        super(PluginManager, self).__init__(parent._parent)
         self.setupUi(self)
 
         self.parent = parent
@@ -135,6 +135,6 @@ class PluginManager(QtWidgets.QDialog, Ui_PluginManagerUI):
         """
         Show the help page in the default browser
         """
-        location = "/user/sasgui/perspectives/fitting/fitting_help.html#new-plugin-model"
+        location = "/user/qtgui/Perspectives/Fitting/fitting_help.html#new-plugin-model"
         self.parent.showHelp(location)
                 

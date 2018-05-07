@@ -10,6 +10,8 @@ import warnings
 import webbrowser
 import urllib.parse
 
+import numpy as np
+
 warnings.simplefilter("ignore")
 import logging
 
@@ -242,6 +244,10 @@ class Communicate(QtCore.QObject):
     # Notify about a new custom plugin being written/deleted/modified
     customModelDirectoryChanged = QtCore.pyqtSignal()
 
+    # Notify the gui manager about new data to be added to the grid view
+    sendDataToGridSignal = QtCore.pyqtSignal(list)
+
+
 def updateModelItemWithPlot(item, update_data, name=""):
     """
     Adds a checkboxed row named "name" to QStandardItem
@@ -330,7 +336,6 @@ def updateModelItem(item, update_data, name=""):
     Adds a simple named child to QStandardItem
     """
     assert isinstance(item, QtGui.QStandardItem)
-    #assert isinstance(update_data, list)
 
     # Add the actual Data1D/Data2D object
     object_item = QtGui.QStandardItem()
@@ -462,6 +467,13 @@ def infoFromData(data):
     info_item.appendRow(process_item)
 
     return info_item
+
+def dataFromItem(item):
+    """
+    Retrieve Data1D/2D component from QStandardItem.
+    The assumption - data stored in SasView standard, in child 0
+    """
+    return item.child(0).data()
 
 def openLink(url):
     """
@@ -719,6 +731,12 @@ def xyTransform(data, xLabel="", yLabel=""):
     if data.id == 'fit':
         return
 
+    # make sure we have some function to operate on
+    if xLabel is None:
+        xLabel = 'log10(x)'
+    if yLabel is None:
+        yLabel = 'log10(y)'
+
     # control axis labels from the panel itself
     yname, yunits = data.get_yaxis()
     xname, xunits = data.get_xaxis()
@@ -803,13 +821,6 @@ def xyTransform(data, xLabel="", yLabel=""):
     data.transformView()
 
     return (xLabel, yLabel, xscale, yscale)
-
-def dataFromItem(item):
-    """
-    Retrieve Data1D/2D component from QStandardItem.
-    The assumption - data stored in SasView standard, in child 0
-    """
-    return item.child(0).data()
 
 def formatNumber(value, high=False):
     """
@@ -918,6 +929,33 @@ class DoubleValidator(QtGui.QDoubleValidator):
         """
         super(DoubleValidator, self).fixup(input)
         input = input.replace(",", "")
+
+def checkModel(path):
+    """
+    Check that the model save in file 'path' can run.
+    """
+    # The following return needs to be removed once
+    # the unittest related changes in Sasmodels are commited
+    return True
+    # try running the model
+    from sasmodels.sasview_model import load_custom_model
+    Model = load_custom_model(path)
+    model = Model()
+    q =  np.array([0.01, 0.1])
+    _ = model.evalDistribution(q)
+    qx, qy =  np.array([0.01, 0.01]), np.array([0.1, 0.1])
+    _ = model.evalDistribution([qx, qy])
+
+    # check the model's unit tests run
+    from sasmodels.model_test import run_one
+    # TestSuite module in Qt5 now deletes tests in the suite after running,
+    # so suite[0] in run_one() in sasmodels/model_test.py will contain [None] and
+    # test.info.tests will raise.
+    # Not sure how to change the behaviour here, most likely sasmodels will have to
+    # be modified
+    result = run_one(path)
+
+    return result
 
 
 def enum(*sequential, **named):

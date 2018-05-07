@@ -157,7 +157,7 @@ class FittingOptions(QtWidgets.QDialog, Ui_FittingOptions):
         Show the "Fitting options" section of help
         """
         tree_location = GuiUtils.HELP_DIRECTORY_LOCATION
-        tree_location += "/user/sasgui/perspectives/fitting/"
+        tree_location += "/user/qtgui/Perspectives/Fitting/"
 
         # Actual file anchor will depend on the combo box index
         # Note that we can be clusmy here, since bad current_fitter_id

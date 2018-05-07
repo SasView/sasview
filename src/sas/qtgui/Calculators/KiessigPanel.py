@@ -37,7 +37,7 @@ class KiessigPanel(QtWidgets.QDialog, Ui_KiessigPanel):
         Calls DocumentationWindow with the path of the location within the
         documentation tree (after /doc/ ....".
         """
-        location = "/user/sasgui/perspectives/calculator/kiessig_calculator_help.html"
+        location = "/user/qtgui/Calculators/kiessig_calculator_help.html"
         self.manager.showHelp(location)
 
     def onCompute(self):

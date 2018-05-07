@@ -180,7 +180,7 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.cbCategory.setCurrentIndex(0)
 
         # Observe no such luck
-        self.assertEqual(self.widget.cbCategory.currentIndex(), 6)
+        self.assertEqual(self.widget.cbCategory.currentIndex(), 7)
         self.assertEqual(self.widget.cbModel.count(), 29)
 
         # Set the structure factor
@@ -736,7 +736,7 @@ class FittingWidgetTest(unittest.TestCase):
             self.assertEqual(threads.deferToThread.call_args_list[0][0][0].__name__, 'compute')
 
             # the fit button changed caption and got disabled
-            self.assertEqual(self.widget.cmdFit.text(), 'Running...')
+            self.assertEqual(self.widget.cmdFit.text(), 'Stop fit')
             self.assertFalse(self.widget.cmdFit.isEnabled())
 
             # Signal pushed up
@@ -780,7 +780,7 @@ class FittingWidgetTest(unittest.TestCase):
             self.assertEqual(threads.deferToThread.call_args_list[0][0][0].__name__, 'compute')
 
             # the fit button changed caption and got disabled
-            self.assertEqual(self.widget.cmdFit.text(), 'Running...')
+            self.assertEqual(self.widget.cmdFit.text(), 'Stop fit')
             self.assertFalse(self.widget.cmdFit.isEnabled())
 
             # Signal pushed up
@@ -1204,8 +1204,7 @@ class FittingWidgetTest(unittest.TestCase):
 
         # Assure the row has the constraint
         self.assertEqual(self.widget.getConstraintForRow(row), const)
-        # but not complex constraint!
-        self.assertFalse(self.widget.rowHasConstraint(row))
+        self.assertTrue(self.widget.rowHasConstraint(row))
 
         # assign complex constraint now
         const = Constraint(parent=None, param='radius', func='5*sld')
@@ -1257,9 +1256,6 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertEqual(spy.called()[0]['args'][0], [row1])
         self.assertEqual(spy.called()[1]['args'][0], [row2])
 
-        # Other properties
-        self.assertEqual(self.widget.getConstraintsForModel(), [('background', '0.001'), ('radius', '20')])
-
     def testDeleteConstraintOnParameter(self):
         """
         Test the constraint deletion in model/view
@@ -1293,13 +1289,15 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.deleteConstraintOnParameter(param='background')
 
         # see that the other constraint is still present
-        self.assertEqual(self.widget.getConstraintsForModel(), [('radius', '20')])
+        cons = self.widget.getConstraintForRow(4) # 4 = radius
+        self.assertEqual(cons.param, "radius")
+        self.assertEqual(cons.value, "20")
 
         # kill the other constraint
         self.widget.deleteConstraint()
 
         # see that the other constraint is still present
-        self.assertEqual(self.widget.getConstraintsForModel(), [])
+        self.assertEqual(self.widget.getConstraintsForModel(), [('radius', None)])
 
     def testGetConstraintForRow(self):
         """
@@ -1399,18 +1397,28 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.addSimpleConstraint()
 
         # simple constraints
-        self.assertEqual(self.widget.getConstraintsForModel(), [('background', '0.001'), ('radius', '20')])
+        # self.assertEqual(self.widget.getConstraintsForModel(), [('background', '0.001'), ('radius', '20')])
+        cons = self.widget.getConstraintForRow(1) # 1 - background
+        self.assertEqual(cons.param, "background")
+        self.assertEqual(cons.value, "0.001")
+        cons = self.widget.getConstraintForRow(4) # 4 = radius
+        self.assertEqual(cons.param, "radius")
+        self.assertEqual(cons.value, "20")
+
         objects = self.widget.getConstraintObjectsForModel()
         self.assertEqual(len(objects), 2)
         self.assertEqual(objects[1].value, '20')
         self.assertEqual(objects[0].param, 'background')
 
-
         # add complex constraint
         const = Constraint(parent=None, param='scale', func='5*sld')
         row = 0
         self.widget.addConstraintToRow(constraint=const, row=row)
-        self.assertEqual(self.widget.getConstraintsForModel(),[('scale', '5*sld'), ('background', '0.001'), ('radius', '20')])
+        #self.assertEqual(self.widget.getConstraintsForModel(),[('scale', '5*sld'), ('background', '0.001'), ('radius', None)])
+        cons = self.widget.getConstraintForRow(4) # 4 = radius
+        self.assertEqual(cons.param, "radius")
+        self.assertEqual(cons.value, "20")
+
         objects = self.widget.getConstraintObjectsForModel()
         self.assertEqual(len(objects), 3)
         self.assertEqual(objects[0].func, '5*sld')

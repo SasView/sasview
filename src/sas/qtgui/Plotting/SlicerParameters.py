@@ -85,7 +85,7 @@ class SlicerParameters(QtWidgets.QDialog, Ui_SlicerParametersUI):
         """
         Display generic data averaging help
         """
-        location = "/user/sasgui/guiframe/graph_help.html#d-data-averaging"
+        location = "/user/qtgui/MainWindow/graph_help.html#d-data-averaging"
         self.parent.showHelp(location)
 
 

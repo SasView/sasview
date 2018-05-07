@@ -26,8 +26,7 @@ class FittingPerspectiveTest(unittest.TestCase):
         class dummy_manager(object):
             def communicator(self):
                 return GuiUtils.Communicate()
-            def communicate(self):
-                return GuiUtils.Communicate()
+            communicate = GuiUtils.Communicate()
 
         '''Create the perspective'''
         self.widget = FittingWindow(dummy_manager())
@@ -44,7 +43,6 @@ class FittingPerspectiveTest(unittest.TestCase):
         self.assertEqual(self.widget.optimizer, "Levenberg-Marquardt")
         self.assertEqual(len(self.widget.tabs), 1)
         self.assertEqual(self.widget.maxIndex, 1)
-        self.assertEqual(self.widget.maxCSIndex, 0)
         self.assertEqual(self.widget.getTabName(), "FitPage1")
 
     def testAddTab(self):
@@ -65,8 +63,7 @@ class FittingPerspectiveTest(unittest.TestCase):
         ''' Add a constraint/simult tab'''
         self.widget.addConstraintTab()
         self.assertEqual(len(self.widget.tabs), 2)
-        self.assertEqual(self.widget.getCSTabName(), "Const. & Simul. Fit1")
-        self.assertEqual(self.widget.maxCSIndex, 1)
+        self.assertEqual(self.widget.getCSTabName(), "Const. & Simul. Fit")
 
     def testResetTab(self):
         ''' Remove data from last tab'''

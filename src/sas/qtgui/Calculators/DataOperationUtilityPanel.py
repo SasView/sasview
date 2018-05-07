@@ -109,7 +109,7 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         Calls Documentation Window with the path of the location within the
         documentation tree (after /doc/ ....".
         """
-        location = "/user/sasgui/perspectives/calculator/data_operator_help.html"
+        location = "/user/qtgui/Calculators/data_operator_help.html"
         self.manager.showHelp(location)
 
     def onClose(self):

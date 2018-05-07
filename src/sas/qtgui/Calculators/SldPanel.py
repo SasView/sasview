@@ -212,7 +212,7 @@ class SldPanel(QtWidgets.QDialog):
         #self.model.endResetModel()
 
     def displayHelp(self):
-        location = "/user/sasgui/perspectives/calculator/sld_calculator_help.html"
+        location = "/user/qtgui/Calculators/sld_calculator_help.html"
         self.manager.showHelp(location)
 
 

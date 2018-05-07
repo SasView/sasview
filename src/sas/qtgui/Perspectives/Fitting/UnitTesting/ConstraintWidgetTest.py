@@ -29,11 +29,11 @@ class ConstraintWidgetTest(unittest.TestCase):
         class dummy_manager(object):
             def communicator(self):
                 return GuiUtils.Communicate()
-            def communicate(self):
-                return GuiUtils.Communicate()
+            communicate = GuiUtils.Communicate()
 
         '''Create the perspective'''
         self.perspective = FittingWindow(dummy_manager())
+        ConstraintWidget.updateSignalsFromTab = MagicMock()
 
         self.widget = ConstraintWidget(parent=self.perspective)
 

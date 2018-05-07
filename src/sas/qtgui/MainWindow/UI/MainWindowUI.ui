@@ -24,7 +24,7 @@
      <x>0</x>
      <y>0</y>
      <width>915</width>
-     <height>26</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -105,11 +105,10 @@
     <addaction name="actionGPU_Options"/>
     <addaction name="actionFit_Results"/>
     <addaction name="separator"/>
-    <addaction name="actionChain_Fitting"/>
-    <addaction name="separator"/>
     <addaction name="actionAdd_Custom_Model"/>
     <addaction name="actionEdit_Custom_Model"/>
     <addaction name="actionManage_Custom_Models"/>
+    <addaction name="actionAddMult_Models"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -523,6 +522,11 @@
    </property>
    <property name="text">
     <string>Correlation Function</string>
+   </property>
+  </action>
+  <action name="actionAddMult_Models">
+   <property name="text">
+    <string>Add/Multiply Models</string>
    </property>
   </action>
  </widget>

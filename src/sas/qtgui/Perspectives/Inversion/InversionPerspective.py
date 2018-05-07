@@ -375,7 +375,7 @@ class InversionWindow(QtWidgets.QDialog, Ui_PrInversion):
         """
         Open the P(r) Inversion help browser
         """
-        tree_location = "/user/sasgui/perspectives/pr/pr_help.html"
+        tree_location = "/user/qtgui/Perspectives/Inversion/pr_help.html"
 
         # Actual file anchor will depend on the combo box index
         # Note that we can be clusmy here, since bad current_fitter_id

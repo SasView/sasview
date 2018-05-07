@@ -67,7 +67,10 @@ def addParametersToModel(parameters, kernel_module, is2D):
     """
     multishell_parameters = getIterParams(parameters)
     multishell_param_name, _ = getMultiplicity(parameters)
-    params = parameters.iqxy_parameters if is2D else parameters.iq_parameters
+    if is2D:
+        params = [p for p in parameters.kernel_parameters if p.type != 'magnetic']
+    else:
+        params = parameters.iq_parameters
     item = []
     for param in params:
         # don't include shell parameters
@@ -124,7 +127,10 @@ def addSimpleParametersToModel(parameters, is2D):
     """
     Update local ModelModel with sasmodel parameters
     """
-    params = parameters.iqxy_parameters if is2D else parameters.iq_parameters
+    if is2D:
+        params = [p for p in parameters.kernel_parameters if p.type != 'magnetic']
+    else:
+        params = parameters.iq_parameters
     item = []
     for param in params:
         # Create the top level, checkable item
@@ -420,3 +426,19 @@ def getWeight(data, is2d, flag=None):
     elif flag == 3:
         weight = numpy.abs(data)
     return weight
+
+def updateKernelWithResults(kernel, results):
+    """
+    Takes model kernel and applies results dict to its parameters,
+    returning the modified (deep) copy of the kernel.
+    """
+    assert(isinstance(results, dict))
+    local_kernel = copy.deepcopy(kernel)
+
+    for parameter in results.keys():
+        # Update the parameter value - note: this supports +/-inf as well
+        local_kernel.setParam(parameter, results[parameter][0])
+
+    return local_kernel
+
+

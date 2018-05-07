@@ -15,6 +15,7 @@ import path_prepare
 from sas.qtgui.UnitTesting.TestUtils import QtSignalSpy
 
 from sas.sascalc.fit.AbstractFitEngine import FResult
+from sas.sascalc.fit.AbstractFitEngine import FitData1D
 from sasmodels.sasview_model import load_standard_models
 from sas.qtgui.Plotting.PlotterData import Data1D
 
@@ -31,6 +32,7 @@ class BatchOutputPanelTest(unittest.TestCase):
         '''Create the dialog'''
         # dummy perspective
         class dummy_manager(object):
+            _parent = QtWidgets.QWidget()
             def communicator(self):
                 return GuiUtils.Communicate()
             def communicate(self):
@@ -55,13 +57,16 @@ class BatchOutputPanelTest(unittest.TestCase):
                 model = m()
         self.assertIsNotNone(m)
         data = Data1D(x=[1,2], y=[3,4], dx=[0.1, 0.1], dy=[0.,0.])
+        fit_data = FitData1D(x=[1,2], y=[3,4], data=data)
         param_list = ['sld_shell', 'sld_solvent']
-        output = FResult(model=model, data=data, param_list=param_list)
+        output = FResult(model=model, data=fit_data, param_list=param_list)
+        output.sas_data = data
         output.theory = np.array([0.1,0.2])
         output.pvec = np.array([0.1, 0.02])
         output.residuals = np.array([0.01, 0.02])
         output.fitness = 9000.0
         output.fitter_id = 200
+        output.stderr = [0.001, 0.001]
         output_data = [[output],[output]]
         return output_data
 
@@ -69,7 +74,7 @@ class BatchOutputPanelTest(unittest.TestCase):
         '''Test the GUI in its default state'''
         self.assertIsInstance(self.widget, QtWidgets.QMainWindow)
         # Default title
-        self.assertEqual(self.widget.windowTitle(), "Grid Panel")
+        self.assertEqual(self.widget.windowTitle(), "Batch Fitting Results")
 
         # non-modal window
         self.assertFalse(self.widget.isModal())
