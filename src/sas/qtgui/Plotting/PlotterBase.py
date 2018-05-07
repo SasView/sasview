@@ -75,6 +75,8 @@ class PlotterBase(QtWidgets.QWidget):
         self.leftdown = False
         self.gotLegend = 0
 
+        self.show_legend = True
+
         # Annotations
         self.selectedText = None
         self.textList = []
@@ -173,6 +175,16 @@ class PlotterBase(QtWidgets.QWidget):
         self.ax.cla()
         self.ax.set_xscale(scale)
         self._xscale = scale
+
+    @property
+    def showLegend(self):
+        """ Legend visibility getter """
+        return self.show_legend
+
+    @showLegend.setter
+    def showLegend(self, show=True):
+        """ Legend visibility setter """
+        self.show_legend = show
 
     def upatePlotHelper(self):
         """

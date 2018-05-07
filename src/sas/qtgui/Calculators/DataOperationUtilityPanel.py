@@ -180,12 +180,6 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         self.cbData2.setCurrentIndex(0)
         self.cbOperator.setCurrentIndex(0)
 
-        self.output = None
-        self.data1 = None
-        self.data2 = None
-        self.filenames = None
-        self.list_data_items = []
-
         self.data1OK = False
         self.data2OK = False
 
@@ -427,8 +421,9 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
         elif isinstance(data, Data1D):
             # plot 1D data
             plotter = PlotterWidget(self, quickplot=True)
+            data.scale = 'linear'
             plotter.data = data
-
+            plotter.showLegend = False
             graph.setLayout(layout)
             layout.addWidget(plotter)
 
@@ -436,7 +431,6 @@ class DataOperationUtilityPanel(QtWidgets.QDialog, Ui_DataOperationUtility):
             plotter.ax.tick_params(axis='y', labelsize=8)
 
             plotter.plot(hide_error=True, marker='.')
-            # plotter.legend = None
 
             plotter.show()
 

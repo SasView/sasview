@@ -165,9 +165,10 @@ class PlotterWidget(PlotterBase):
 
         # Now add the legend with some customizations.
 
-        self.legend = ax.legend(loc='upper right', shadow=True)
-        if self.legend:
-            self.legend.set_picker(True)
+        if self.showLegend:
+            self.legend = ax.legend(loc='upper right', shadow=True)
+            if self.legend:
+                self.legend.set_picker(True)
 
         # Current labels for axes
         if self.y_label and not is_fit:
