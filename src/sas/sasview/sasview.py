@@ -202,7 +202,7 @@ def check_sasmodels_compiler():
     """
     import wx
     import subprocess
-    #Generic message box is nessary here becuase standard MessageBox is not moveable
+    #Generic message box created becuase standard MessageBox is not moveable
     class GenericMessageBox(wx.Dialog):
         def __init__(self, parent, text, title = ''):
             wx.Dialog.__init__(self, parent, -1, title = title,
@@ -228,7 +228,6 @@ def check_sasmodels_compiler():
 
             sizer = wx.BoxSizer(wx.VERTICAL)
             sizer.Add(top_row_sizer)
-            # sizer.Add(message_label, flag=wx.ALL | wx.EXPAND, border=10)
             sizer.Add(ok_button, flag=wx.ALIGN_CENTER | wx.ALL, border=5)
             panel.SetSizer(sizer)
 
