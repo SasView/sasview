@@ -89,8 +89,8 @@ class InvariantPerspectiveTest(unittest.TestCase):
         self.assertFalse(self.widget.txtContrast.isReadOnly())
         self.assertFalse(self.widget.txtPorodCst.isReadOnly())
 
-        self.assertFalse(self.widget.txtExtrapolQMin.isEnabled())
-        self.assertFalse(self.widget.txtExtrapolQMax.isEnabled())
+        self.assertTrue(self.widget.txtExtrapolQMin.isEnabled())
+        self.assertTrue(self.widget.txtExtrapolQMax.isEnabled())
 
         self.assertFalse(self.widget.txtNptsLowQ.isReadOnly())
         self.assertFalse(self.widget.txtNptsHighQ.isReadOnly())

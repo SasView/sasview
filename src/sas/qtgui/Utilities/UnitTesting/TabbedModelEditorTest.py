@@ -15,22 +15,26 @@ import sas.qtgui.path_prepare
 from UnitTesting.TestUtils import QtSignalSpy
 
 # Local
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Utilities.PluginDefinition import PluginDefinition
 from sas.qtgui.Utilities.ModelEditor import ModelEditor
 
 
-#if not QApplication.instance():
-#    app = QApplication(sys.argv)
-app = QApplication(sys.argv)
+if not QApplication.instance():
+    app = QApplication(sys.argv)
 
 class TabbedModelEditorTest(unittest.TestCase):
     def setUp(self):
         """
         Prepare the editors
         """
-        self.widget = TabbedModelEditor(None)
-        self.widget_edit = TabbedModelEditor(None, edit_only=True)
+        class dummy_manager(object):
+            _parent = QWidget()
+            communicate = GuiUtils.Communicate()
+
+        self.widget = TabbedModelEditor(parent=dummy_manager)
+        self.widget_edit = TabbedModelEditor(parent=dummy_manager, edit_only=True)
 
     def tearDown(self):
         """Destroy the DataOperationUtility"""
@@ -138,12 +142,12 @@ class TabbedModelEditorTest(unittest.TestCase):
          self.assertIn("*", self.widget.windowTitle())
 
 
-    def testPluginModelModified(self):
+    def testpluginTitleSet(self):
         """Test reaction to direct edit in plugin wizard"""
         self.assertFalse(self.widget.is_modified)
 
         # Call the tested method with no filename defined
-        self.widget.pluginModelModified()
+        self.widget.pluginTitleSet()
 
         # Assure the apply button is disabled
         self.assertFalse(self.widget.buttonBox.button(QDialogButtonBox.Apply).isEnabled())
@@ -156,7 +160,6 @@ class TabbedModelEditorTest(unittest.TestCase):
         # Assure relevant functionality is invoked
         self.assertIn("*", self.widget.windowTitle())
         self.assertIn(new_name, self.widget.windowTitle())
-        self.assertTrue(self.widget.editor_widget.isEnabled())
         self.assertTrue(self.widget.buttonBox.button(QDialogButtonBox.Apply).isEnabled())
         self.assertTrue(self.widget.is_modified)
 

@@ -15,9 +15,8 @@ from UnitTesting.TestUtils import QtSignalSpy
 from sas.qtgui.Utilities.PluginDefinition import PluginDefinition
 from sas.qtgui.Utilities.PythonSyntax import PythonHighlighter
 
-#if not QApplication.instance():
-#    app = QApplication(sys.argv)
-app = QApplication(sys.argv)
+if not QApplication.instance():
+    app = QApplication(sys.argv)
 
 class PluginDefinitionTest(unittest.TestCase):
     def setUp(self):
