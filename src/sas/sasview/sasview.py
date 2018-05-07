@@ -240,8 +240,8 @@ def check_sasmodels_compiler():
         subprocess.check_output(["cc","--version"], stderr=subprocess.STDOUT)
         app = wx.App()
         dlg = GenericMessageBox(parent=None,
-            text='No compiler installed. Please follow instruction for\n '
-                'Xcode command line installation and restart SasView\n'
+            text='No compiler installed. Please follow instruction for\n'
+                'Xcode command line installation and restart SasView\n\n'
                 'SasView is terminating now\n',
             title = 'Info')
         dlg.ShowModal()
