@@ -221,8 +221,7 @@ def check_sasmodels_compiler():
             top_row_sizer.Add(label, flag=wx.ALIGN_CENTER_VERTICAL)
 
             #Create the OK button in the bottom row.
-            ok_button = wx.Button(panel, -1, 'OK')
-            self.Bind(wx.EVT_BUTTON, self.on_ok, source=ok_button)
+            ok_button = wx.Button(panel, wx.ID_OK )
             ok_button.SetFocus()
             ok_button.SetDefault()
 
@@ -230,9 +229,6 @@ def check_sasmodels_compiler():
             sizer.Add(top_row_sizer)
             sizer.Add(ok_button, flag=wx.ALIGN_CENTER | wx.ALL, border=5)
             panel.SetSizer(sizer)
-
-        def on_ok(self, event):
-            self.Destroy()
 
     logger = logging.getLogger(__name__)
     try:
