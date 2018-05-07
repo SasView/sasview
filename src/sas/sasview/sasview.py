@@ -238,17 +238,6 @@ def check_sasmodels_compiler():
     logger = logging.getLogger(__name__)
     try:
         subprocess.check_output(["cc","--version"], stderr=subprocess.STDOUT)
-        app = wx.App()
-        dlg = GenericMessageBox(parent=None,
-            text='No compiler installed. Please follow instruction for\n'
-                'Xcode command line installation and restart SasView\n\n'
-                'SasView is terminating now\n',
-            title = 'Info')
-        dlg.ShowModal()
-        app.MainLoop()
-        pass
-        raise RuntimeError("Terminating sasview")
-
     except subprocess.CalledProcessError as exc:
         app = wx.App()
         dlg = GenericMessageBox(parent=None,
