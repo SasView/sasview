@@ -244,7 +244,7 @@ def check_sasmodels_compiler():
                 'Xcode command line installation and restart SasView\n\n'
                 'SasView is terminating now\n',
             title = 'Compiler Info')
-        dlg.Destroy()
+        dlg.ShowModal()
 
         logger.error("No compiler installed. %s\n"%(exc))
         logger.error(traceback.format_exc())
