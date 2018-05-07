@@ -240,9 +240,9 @@ def check_sasmodels_compiler():
     except subprocess.CalledProcessError as exc:
         app = wx.App()
         dlg = GenericMessageBox(parent=None,
-            text='No compiler installed. Please follow instruction for '
-                'Xcode command line installation and restart SasView'
-                'SasView is terminating now',
+            text='No compiler installed. Please follow instruction for\n'
+                'Xcode command line installation and restart SasView\n\n'
+                'SasView is terminating now\n',
             title = 'Compiler Info')
         dlg.Destroy()
 
