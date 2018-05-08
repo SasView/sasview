@@ -114,8 +114,7 @@ class SlitSizeCalculator(QtWidgets.QDialog, Ui_SlitSizeCalculator):
         try:
             xdata = data.x
             ydata = data.y
-            #if xdata == [] or xdata is None or ydata == [] or ydata is None:
-            if (not xdata or xdata is None) or (not ydata or ydata is None):
+            if xdata == [] or xdata is None or ydata == [] or ydata is None:
                 msg = "The current data is empty please check x and y"
                 logging.error(msg)
                 return

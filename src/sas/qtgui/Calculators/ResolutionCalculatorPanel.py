@@ -326,32 +326,29 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
                 self.resolution.set_spectrum(self.spectrum_dic['Flat'])
                 return
 
-            try:
-                basename = os.path.basename(datafile)
+            basename = os.path.basename(datafile)
+
+            input_f = open(datafile, 'r')
+            buff = input_f.read()
+            lines = buff.split('\n')
+
+            wavelength = []
+            intensity = []
+
+            for line in lines:
+                toks = line.split()
+                try:
+                    wave = float(toks[0])
+                    intens = float(toks[1])
+                    wavelength.append(wave)
+                    intensity.append(intens)
+                except:
+                    logging.info('Could not extract values from file')
+            if wavelength and intensity:
                 if basename not in list(self.spectrum_dic.keys()):
                     self.cbCustomSpectrum.addItem(basename)
-
-                input_f = open(datafile, 'r')
-                buff = input_f.read()
-                lines = buff.split('\n')
-
-                wavelength = []
-                intensity = []
-
-                for line in lines:
-                    toks = line.split()
-                    try:
-                        wave = float(toks[0])
-                        intens = float(toks[1])
-                        wavelength.append(wave)
-                        intensity.append(intens)
-                    except:
-                        logging.info('Could not extract values from file')
-            except:
-                raise
-
-            self.spectrum_dic[basename] = [wavelength, intensity]
-            self.resolution.set_spectrum(self.spectrum_dic[basename])
+                self.spectrum_dic[basename] = [wavelength, intensity]
+                self.resolution.set_spectrum(self.spectrum_dic[basename])
         return
 
     # #################################

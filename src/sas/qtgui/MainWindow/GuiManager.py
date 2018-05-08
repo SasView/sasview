@@ -601,7 +601,6 @@ class GuiManager(object):
     def actionKiessig_Calculator(self):
         """
         """
-        #self.DVCalculator.show()
         self.KIESSIGCalculator.show()
 
     def actionSlit_Size_Calculator(self):
@@ -612,12 +611,20 @@ class GuiManager(object):
     def actionSAS_Resolution_Estimator(self):
         """
         """
-        self.ResolutionCalculator.show()
+        try:
+            self.ResolutionCalculator.show()
+        except Exception as ex:
+            logging.error(str(ex))
+            return
 
     def actionGeneric_Scattering_Calculator(self):
         """
         """
-        self.GENSASCalculator.show()
+        try:
+            self.GENSASCalculator.show()
+        except Exception as ex:
+            logging.error(str(ex))
+            return
 
     def actionPython_Shell_Editor(self):
         """
