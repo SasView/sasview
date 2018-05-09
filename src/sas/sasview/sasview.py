@@ -206,7 +206,7 @@ def check_sasmodels_compiler():
     class GenericMessageBox(wx.Dialog):
         def __init__(self, parent, text, title = ''):
             wx.Dialog.__init__(self, parent, -1, title = title,
-                               size = (360,140), pos=(20,20),
+                               size = (360,180), pos=(20,20),
                                style = wx.DEFAULT_DIALOG_STYLE )
             panel = wx.Panel(self, -1)
             top_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -238,6 +238,8 @@ def check_sasmodels_compiler():
         dlg = GenericMessageBox(parent=None,
             text='No compiler installed. Please follow instruction for\n'
                 'command line developers tools installation and restart SasView\n\n'
+                'Alternatively one can use OpenCL compiler,\n'
+                 'which can be setup from menu Fitting->OpenCL Options\n\n'
                 'SasView is terminating now\n',
             title = 'Compiler Info')
         dlg.ShowModal()
@@ -245,7 +247,7 @@ def check_sasmodels_compiler():
         logger.error("No compiler installed. %s\n"%(exc))
         logger.error(traceback.format_exc())
 
-        raise RuntimeError("Terminating sasview")
+        #raise RuntimeError("Terminating sasview")
 
 def setup_sasmodels():
     """
