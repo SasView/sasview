@@ -174,24 +174,14 @@ class SasView(object):
         logger = logging.getLogger(__name__)
         try:
             subprocess.check_output(["cc","--version"], stderr=subprocess.STDOUT)
-            dlg = GenericMessageBox(parent=None,
-            text='No compiler installed. Please follow instruction for\n'
-                'command line developers tools installation and restart SasView\n\n'
-                'Alternatively one can use OpenCL compiler,\n'
-                 'which can be setup from menu Fitting->OpenCL Options\n\n',
-            title = 'Compiler Info')
-            dlg.Show(1)
-
         except subprocess.CalledProcessError as exc:
-
             dlg = GenericMessageBox(parent=None,
             text='No compiler installed. Please follow instruction for\n'
                 'command line developers tools installation and restart SasView\n\n'
                 'Alternatively one can use OpenCL compiler,\n'
                  'which can be setup from menu Fitting->OpenCL Options\n\n',
             title = 'Compiler Info')
-            dlg.ShowModal()
-
+            dlg.Show()
             logger.error("No compiler installed. %s\n"%(exc))
             logger.error(traceback.format_exc())
 
