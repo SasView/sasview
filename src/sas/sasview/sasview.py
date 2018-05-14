@@ -42,6 +42,8 @@ class SasView(object):
 
         from sas.sasgui.guiframe.gui_manager import SasViewApp
         self.gui = SasViewApp(0)
+        if sys.platform == "darwin":
+            self.check_sasmodels_compiler()
         # Set the application manager for the GUI
         self.gui.set_manager(self)
         # Add perspectives to the basic application
@@ -129,6 +131,71 @@ class SasView(object):
         # Start the main loop
         self.gui.MainLoop()
 
+    def check_sasmodels_compiler(self):
+        """
+        Checking c compiler for sasmodels and raises xcode command line
+        tools for installation
+        """
+        import wx
+        import subprocess
+        #Generic message box created becuase standard MessageBox is not moveable
+        class GenericMessageBox(wx.Dialog):
+            def __init__(self, parent, text, title = ''):
+
+                wx.Dialog.__init__(self, parent, -1, title = title,
+                               size = (360,180), pos=(20,60),
+                               style = wx.STAY_ON_TOP | wx.DEFAULT_DIALOG_STYLE)
+                panel = wx.Panel(self, -1)
+                top_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+                error_bitmap = wx.ArtProvider.GetBitmap(
+                    wx.ART_ERROR, wx.ART_MESSAGE_BOX
+                )
+                error_bitmap_ctrl = wx.StaticBitmap(panel, -1)
+                error_bitmap_ctrl.SetBitmap(error_bitmap)
+                label = wx.StaticText(panel, -1, text)
+                top_row_sizer.Add(error_bitmap_ctrl, flag=wx.ALL, border=10)
+                top_row_sizer.Add(label, flag=wx.ALIGN_CENTER_VERTICAL)
+
+                #Create the OK button in the bottom row.
+                #ok_button = wx.Button(panel, wx.ID_OK )
+                ok_button = wx.Button(panel, wx.ID_OK )
+                self.Bind(wx.EVT_BUTTON, self.on_ok, source=ok_button)
+                ok_button.SetFocus()
+                ok_button.SetDefault()
+
+                sizer = wx.BoxSizer(wx.VERTICAL)
+                sizer.Add(top_row_sizer)
+                sizer.Add(ok_button, flag=wx.ALIGN_CENTER | wx.ALL, border=5)
+                panel.SetSizer(sizer)
+
+            def on_ok(self, event):
+                self.Destroy()
+        logger = logging.getLogger(__name__)
+        try:
+            subprocess.check_output(["cc","--version"], stderr=subprocess.STDOUT)
+            dlg = GenericMessageBox(parent=None,
+            text='No compiler installed. Please follow instruction for\n'
+                'command line developers tools installation and restart SasView\n\n'
+                'Alternatively one can use OpenCL compiler,\n'
+                 'which can be setup from menu Fitting->OpenCL Options\n\n',
+            title = 'Compiler Info')
+            dlg.Show(1)
+
+        except subprocess.CalledProcessError as exc:
+
+            dlg = GenericMessageBox(parent=None,
+            text='No compiler installed. Please follow instruction for\n'
+                'command line developers tools installation and restart SasView\n\n'
+                'Alternatively one can use OpenCL compiler,\n'
+                 'which can be setup from menu Fitting->OpenCL Options\n\n',
+            title = 'Compiler Info')
+            dlg.ShowModal()
+
+            logger.error("No compiler installed. %s\n"%(exc))
+            logger.error(traceback.format_exc())
+
+        #raise RuntimeError("Terminating sasview")
 
 def setup_logging():
     from sas.logger_config import SetupLogger
@@ -195,60 +262,6 @@ def setup_mpl(backend=None):
     from matplotlib import backend_bases
     backend_bases.FigureCanvasBase.filetypes.pop('pgf', None)
 
-def check_sasmodels_compiler():
-    """
-    Checking c compiler for sasmodels and raises xcode command line
-    tools for installation
-    """
-    import wx
-    import subprocess
-    #Generic message box created becuase standard MessageBox is not moveable
-    class GenericMessageBox(wx.Dialog):
-        def __init__(self, parent, text, title = ''):
-            wx.Dialog.__init__(self, parent, -1, title = title,
-                               size = (360,180), pos=(20,20),
-                               style = wx.DEFAULT_DIALOG_STYLE )
-            panel = wx.Panel(self, -1)
-            top_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
-
-            error_bitmap = wx.ArtProvider.GetBitmap(
-                wx.ART_ERROR, wx.ART_MESSAGE_BOX
-            )
-            error_bitmap_ctrl = wx.StaticBitmap(panel, -1)
-            error_bitmap_ctrl.SetBitmap(error_bitmap)
-            label = wx.StaticText(panel, -1, text)
-            top_row_sizer.Add(error_bitmap_ctrl, flag=wx.ALL, border=10)
-            top_row_sizer.Add(label, flag=wx.ALIGN_CENTER_VERTICAL)
-
-            #Create the OK button in the bottom row.
-            ok_button = wx.Button(panel, wx.ID_OK )
-            ok_button.SetFocus()
-            ok_button.SetDefault()
-
-            sizer = wx.BoxSizer(wx.VERTICAL)
-            sizer.Add(top_row_sizer)
-            sizer.Add(ok_button, flag=wx.ALIGN_CENTER | wx.ALL, border=5)
-            panel.SetSizer(sizer)
-
-    logger = logging.getLogger(__name__)
-    try:
-        subprocess.check_output(["cc","--version"], stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError as exc:
-        app = wx.App()
-        dlg = GenericMessageBox(parent=None,
-            text='No compiler installed. Please follow instruction for\n'
-                'command line developers tools installation and restart SasView\n\n'
-                'Alternatively one can use OpenCL compiler,\n'
-                 'which can be setup from menu Fitting->OpenCL Options\n\n'
-                'SasView is terminating now\n',
-            title = 'Compiler Info')
-        dlg.ShowModal()
-
-        logger.error("No compiler installed. %s\n"%(exc))
-        logger.error(traceback.format_exc())
-
-        #raise RuntimeError("Terminating sasview")
-
 def setup_sasmodels():
     """
     Prepare sasmodels for running within sasview.
@@ -271,8 +284,6 @@ def run_gui():
     setup_mpl(backend='WXAgg')
     setup_sasmodels()
     setup_wx()
-    if sys.platform == "darwin":
-        check_sasmodels_compiler()
     SasView()
 
 
