@@ -136,6 +136,7 @@ class SasView(object):
         Checking c compiler for sasmodels and raises xcode command line
         tools for installation
         """
+        #wx should be importable at this stage
         import wx
         import subprocess
         #Generic message box created becuase standard MessageBox is not moveable
@@ -158,7 +159,6 @@ class SasView(object):
                 top_row_sizer.Add(label, flag=wx.ALIGN_CENTER_VERTICAL)
 
                 #Create the OK button in the bottom row.
-                #ok_button = wx.Button(panel, wx.ID_OK )
                 ok_button = wx.Button(panel, wx.ID_OK )
                 self.Bind(wx.EVT_BUTTON, self.on_ok, source=ok_button)
                 ok_button.SetFocus()
@@ -171,6 +171,7 @@ class SasView(object):
 
             def on_ok(self, event):
                 self.Destroy()
+
         logger = logging.getLogger(__name__)
         try:
             subprocess.check_output(["cc","--version"], stderr=subprocess.STDOUT)
@@ -184,8 +185,6 @@ class SasView(object):
             dlg.Show()
             logger.error("No compiler installed. %s\n"%(exc))
             logger.error(traceback.format_exc())
-
-        #raise RuntimeError("Terminating sasview")
 
 def setup_logging():
     from sas.logger_config import SetupLogger
