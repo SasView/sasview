@@ -240,7 +240,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
 
         # Run the model test in sasmodels
         try:
-            model_results = self.checkModel(full_path)
+            model_results = GuiUtils.checkModel(full_path)
             logging.info(model_results)
         except Exception as ex:
             msg = "Error building model: "+ str(ex)
