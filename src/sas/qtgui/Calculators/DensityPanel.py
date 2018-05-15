@@ -15,6 +15,7 @@ from sas.qtgui.Utilities.GuiUtils import HELP_DIRECTORY_LOCATION
 from sas.qtgui.Calculators.UI.DensityPanel import Ui_DensityPanel
 
 from sas.qtgui.Utilities.GuiUtils import enum
+from sas.qtgui.Utilities.GuiUtils import formatNumber
 
 MODEL = enum(
     'MOLECULAR_FORMULA',
@@ -97,6 +98,7 @@ class DensityPanel(QtWidgets.QDialog):
         for index in range(top.row(), bottom.row() + 1):
             if index == MODEL.MOLECULAR_FORMULA:
                 molarMass = toMolarMass(self.model.item(MODEL.MOLECULAR_FORMULA).text())
+                molarMass = formatNumber(molarMass, high=True)
                 self.model.item(MODEL.MOLAR_MASS).setText(molarMass)
 
                 if self.mode == MODES.VOLUME_TO_DENSITY:
@@ -119,6 +121,7 @@ class DensityPanel(QtWidgets.QDialog):
             molarVolume = float(self.model.item(MODEL.MOLAR_VOLUME).text())
 
             molarDensity = molarMass / molarVolume
+            molarDensity = formatNumber(molarDensity, high=True)
             self.model.item(MODEL.MASS_DENSITY).setText(str(molarDensity))
 
         except (ArithmeticError, ValueError):
@@ -130,6 +133,7 @@ class DensityPanel(QtWidgets.QDialog):
             molarDensity = float(self.model.item(MODEL.MASS_DENSITY).text())
 
             molarVolume = molarMass / molarDensity
+            molarVolume = formatNumber(molarVolume, high=True)
             self.model.item(MODEL.MOLAR_VOLUME).setText(str(molarVolume))
 
         except (ArithmeticError, ValueError):
