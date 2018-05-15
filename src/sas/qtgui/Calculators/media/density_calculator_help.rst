@@ -26,7 +26,7 @@ Using the tool
 3) Use the input combo box to choose between molar volume or mass density and 
    then type in an input value.
 
-4) Click the 'Calculate' button to perform the calculation.
+4) Press Tab button or click out to perform the calculation.
 
 .. image:: density_tutor.png
 
