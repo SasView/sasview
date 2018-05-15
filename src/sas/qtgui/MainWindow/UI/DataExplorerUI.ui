@@ -86,7 +86,7 @@
          <item row="0" column="1">
           <widget class="QPushButton" name="cmdDeleteData">
            <property name="text">
-            <string>Delete</string>
+            <string>Delete Data</string>
            </property>
           </widget>
          </item>

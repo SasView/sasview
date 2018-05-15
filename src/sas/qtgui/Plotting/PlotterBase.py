@@ -38,9 +38,6 @@ class PlotterBase(QtWidgets.QWidget):
         # Define canvas for the figure to be placed on
         self.canvas = FigureCanvas(self.figure)
 
-        # ... and the toolbar with all the default MPL buttons
-        self.toolbar = NavigationToolbar(self.canvas, self)
-
         # Simple window for data display
         self.txt_widget = QtWidgets.QTextEdit(None)
 
@@ -111,6 +108,7 @@ class PlotterBase(QtWidgets.QWidget):
 
         if not quickplot:
             # Add the toolbar
+            self.toolbar = NavigationToolbar(self.canvas, self)
             layout.addWidget(self.toolbar)
             # Notify PlotHelper about the new plot
             self.upatePlotHelper()
@@ -296,6 +294,8 @@ class PlotterBase(QtWidgets.QWidget):
         """
         Use the internal MPL method for saving to file
         """
+        if not hasattr(self, "toolbar"):
+            self.toolbar = NavigationToolbar(self.canvas, self)
         self.toolbar.save_figure()
 
     def onImagePrint(self):
