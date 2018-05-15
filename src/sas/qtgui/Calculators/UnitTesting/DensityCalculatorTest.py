@@ -77,7 +77,7 @@ class DensityCalculatorTest(unittest.TestCase):
         QTest.keyEvent(QTest.Press, self.widget, key, QtCore.Qt.NoModifier)
 
         # Assure the mass density field is set
-        self.assertEqual(self.widget.ui.editMassDensity.text(), '18.0153')
+        self.assertEqual(self.widget.ui.editMassDensity.text(), '18.015')
 
         # Change mass density
         self.widget.ui.editMassDensity.insert("16.0")
@@ -87,7 +87,7 @@ class DensityCalculatorTest(unittest.TestCase):
         QTest.qWait(100)
 
         # Assure the molar volume field got updated
-        self.assertEqual(self.widget.ui.editMolarVolume.text(), '1.12595625')
+        self.assertEqual(self.widget.ui.editMolarVolume.text(), '1.126')
 
     def testComplexEntryAndReset(self):
         ''' User entered compound calculations and subsequent reset'''
@@ -112,7 +112,7 @@ class DensityCalculatorTest(unittest.TestCase):
         self.widget.modelReset()
 
         self.assertEqual(self.widget.ui.editMolecularFormula.text(), "H2O")
-        self.assertEqual(self.widget.ui.editMolarMass.text(), "18.0153")
+        self.assertEqual(self.widget.ui.editMolarMass.text(), "18.015")
         self.assertEqual(self.widget.ui.editMolarVolume.text(), "")
         self.assertEqual(self.widget.ui.editMassDensity.text(), "")
 
