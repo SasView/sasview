@@ -36,6 +36,10 @@ from run import prepare
 del sys.path[0]
 prepare(rebuild=False)
 
+# =========== Set up logging ===========
+#from sas.logger_config import SetupLogger
+#SetupLogger(__name__).config_development()
+
 # =========== Run BUMPS ===============
 from sas.sascalc.fit.fitstate import bumps_cli
 bumps_cli()
