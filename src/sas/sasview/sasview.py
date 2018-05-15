@@ -144,7 +144,7 @@ class SasView(object):
             def __init__(self, parent, text, title = ''):
 
                 wx.Dialog.__init__(self, parent, -1, title = title,
-                               size = (360,180), pos=(20,60),
+                               size = (360,200), pos=(20,60),
                                style = wx.STAY_ON_TOP | wx.DEFAULT_DIALOG_STYLE)
                 panel = wx.Panel(self, -1)
                 top_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -177,10 +177,10 @@ class SasView(object):
             subprocess.check_output(["cc","--version"], stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as exc:
             dlg = GenericMessageBox(parent=None,
-            text='No compiler installed. Please follow instruction for\n'
-                'command line developers tools installation and restart SasView\n\n'
-                'Alternatively one can use OpenCL compiler,\n'
-                 'which can be setup from menu Fitting->OpenCL Options\n\n',
+            text='No compiler installed. Please install command line\n'
+                'developers tools by clicking \"Install\" in another winodw\n\n'
+                'Alternatively click \"Not Now\" and use OpenCL\n'
+                 'compiler, which can be set up from menu Fitting->OpenCL Options\n\n',
             title = 'Compiler Info')
             dlg.Show()
             logger.error("No compiler installed. %s\n"%(exc))
