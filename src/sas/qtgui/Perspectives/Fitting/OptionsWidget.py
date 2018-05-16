@@ -115,8 +115,8 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.mapper.addMapping(self.txtMaxRange, MODEL.index('MAX_RANGE'))
         self.mapper.addMapping(self.txtNpts,     MODEL.index('NPTS'))
         self.mapper.addMapping(self.chkLogData,  MODEL.index('LOG_SPACED'))
-        # FIXME DOESNT WORK WITH QT5
-        #self.mapper.toFirst()
+
+        self.mapper.toFirst()
 
     def toggleLogData(self, isChecked):
         """ Toggles between log and linear data sets """
