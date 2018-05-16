@@ -65,6 +65,9 @@ class GuiManager(object):
         # Add signal callbacks
         self.addCallbacks()
 
+        # Assure model categories are available
+        self.addCategories()
+
         # Create the data manager
         # TODO: pull out all required methods from DataManager and reimplement
         self._data_manager = DataManager()
@@ -141,6 +144,19 @@ class GuiManager(object):
         self.GENSASCalculator = GenericScatteringCalculator(self)
         self.ResolutionCalculator = ResolutionCalculatorPanel(self)
         self.DataOperation = DataOperationUtilityPanel(self)
+
+    def addCategories(self):
+        """
+        Make sure categories.json exists and if not compile it and install in ~/.sasview
+        """
+        try:
+            from sas.sascalc.fit.models import ModelManager
+            from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
+            model_list = ModelManager().cat_model_list()
+            CategoryInstaller.check_install(model_list=model_list)
+        except Exception:
+            logger.error("%s: could not load SasView models")
+            logger.error(traceback.format_exc())
 
     def statusBarSetup(self):
         """
