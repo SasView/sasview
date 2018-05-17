@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sys
 import unittest
 import webbrowser
@@ -444,6 +445,91 @@ class GuiUtilsTest(unittest.TestCase):
         xLabel, yLabel, xscale, yscale = xyTransform(data, xLabel="x", yLabel="log10(y*x^(4))")
         self.assertEqual(yLabel, " \\ \\ ^{4}(()^{4})")
         self.assertEqual(yscale, "log")
+
+    def testReplaceHTMLwithUTF8(self):
+        ''' test single character replacement '''
+        s = None
+        with self.assertRaises(AttributeError):
+            result = replaceHTMLwithUTF8(s)
+
+        s = ""
+        self.assertEqual(replaceHTMLwithUTF8(s), s)
+
+        s = "aaaa"
+        self.assertEqual(replaceHTMLwithUTF8(s), s)
+
+        s = "&#x212B; &#x221e;      &#177;"
+        self.assertEqual(replaceHTMLwithUTF8(s), "Å ∞      ±")
+
+    def testReplaceHTMLwithASCII(self):
+        ''' test single character replacement'''
+        s = None
+        with self.assertRaises(AttributeError):
+            result = replaceHTMLwithASCII(s)
+
+        s = ""
+        self.assertEqual(replaceHTMLwithASCII(s), s)
+
+        s = "aaaa"
+        self.assertEqual(replaceHTMLwithASCII(s), s)
+
+        s = "&#x212B; &#x221e;      &#177;"
+        self.assertEqual(replaceHTMLwithASCII(s), "Ang inf      +/-")
+
+    def testConvertUnitToUTF8(self):
+        ''' test unit string replacement'''
+        s = None
+        self.assertIsNone(convertUnitToUTF8(s))
+
+        s = ""
+        self.assertEqual(convertUnitToUTF8(s), s)
+
+        s = "aaaa"
+        self.assertEqual(convertUnitToUTF8(s), s)
+
+        s = "1/A"
+        self.assertEqual(convertUnitToUTF8(s), "Å<sup>-1</sup>")
+
+        s = "Ang"
+        self.assertEqual(convertUnitToUTF8(s), "Å")
+
+        s = "1e-6/Ang^2"
+        self.assertEqual(convertUnitToUTF8(s), "10<sup>-6</sup>/Å<sup>2</sup>")
+
+        s = "inf"
+        self.assertEqual(convertUnitToUTF8(s), "∞")
+
+        s = "1/cm"
+        self.assertEqual(convertUnitToUTF8(s), "cm<sup>-1</sup>")
+
+    def testConvertUnitToHTML(self):
+        ''' test unit string replacement'''
+        s = None
+        self.assertIsNone(convertUnitToHTML(s))
+
+        s = ""
+        self.assertEqual(convertUnitToHTML(s), s)
+
+        s = "aaaa"
+        self.assertEqual(convertUnitToHTML(s), s)
+
+        s = "1/A"
+        self.assertEqual(convertUnitToHTML(s), "&#x212B;<sup>-1</sup>")
+
+        s = "Ang"
+        self.assertEqual(convertUnitToHTML(s), "&#x212B;")
+
+        s = "1e-6/Ang^2"
+        self.assertEqual(convertUnitToHTML(s), "10<sup>-6</sup>/&#x212B;<sup>2</sup>")
+
+        s = "inf"
+        self.assertEqual(convertUnitToHTML(s), "&#x221e;")
+        s = "-inf"
+
+        self.assertEqual(convertUnitToHTML(s), "-&#x221e;")
+
+        s = "1/cm"
+        self.assertEqual(convertUnitToHTML(s), "cm<sup>-1</sup>")
 
     def testParseName(self):
         '''test parse out a string from the beinning of a string'''

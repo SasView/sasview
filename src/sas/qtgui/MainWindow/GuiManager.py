@@ -22,6 +22,7 @@ from sas.qtgui.Utilities.TabbedModelEditor import TabbedModelEditor
 from sas.qtgui.Utilities.PluginManager import PluginManager
 from sas.qtgui.Utilities.GridPanel import BatchOutputPanel
 
+from sas.qtgui.Utilities.ReportDialog import ReportDialog
 from sas.qtgui.MainWindow.UI.AcknowledgementsUI import Ui_Acknowledgements
 from sas.qtgui.MainWindow.AboutBox import AboutBox
 from sas.qtgui.MainWindow.WelcomePanel import WelcomePanel
@@ -64,6 +65,9 @@ class GuiManager(object):
 
         # Add signal callbacks
         self.addCallbacks()
+
+        # Assure model categories are available
+        self.addCategories()
 
         # Create the data manager
         # TODO: pull out all required methods from DataManager and reimplement
@@ -141,6 +145,19 @@ class GuiManager(object):
         self.GENSASCalculator = GenericScatteringCalculator(self)
         self.ResolutionCalculator = ResolutionCalculatorPanel(self)
         self.DataOperation = DataOperationUtilityPanel(self)
+
+    def addCategories(self):
+        """
+        Make sure categories.json exists and if not compile it and install in ~/.sasview
+        """
+        try:
+            from sas.sascalc.fit.models import ModelManager
+            from sas.qtgui.Utilities.CategoryInstaller import CategoryInstaller
+            model_list = ModelManager().cat_model_list()
+            CategoryInstaller.check_install(model_list=model_list)
+        except Exception:
+            logger.error("%s: could not load SasView models")
+            logger.error(traceback.format_exc())
 
     def statusBarSetup(self):
         """
@@ -471,10 +488,9 @@ class GuiManager(object):
 
     def actionSave_Analysis(self):
         """
+        Menu File/Save Analysis
         """
-        print("actionSave_Analysis TRIGGERED")
-
-        pass
+        self.communicate.saveAnalysisSignal.emit()
 
     def actionQuit(self):
         """
@@ -509,9 +525,18 @@ class GuiManager(object):
 
     def actionReport(self):
         """
+        Show the Fit Report dialog.
         """
-        print("actionReport TRIGGERED")
-        pass
+        report_list = None
+        if getattr(self._current_perspective, "currentTab"):
+            try:
+                report_list = self._current_perspective.currentTab.getReport()
+            except Exception as ex:
+                logging.error("Report generation failed with: " + str(ex))
+
+        if report_list is not None:
+            self.report_dialog = ReportDialog(parent=self, report_list=report_list)
+            self.report_dialog.show()
 
     def actionReset(self):
         """

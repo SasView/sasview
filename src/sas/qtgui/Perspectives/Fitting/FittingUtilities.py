@@ -67,6 +67,7 @@ def addParametersToModel(parameters, kernel_module, is2D):
     """
     multishell_parameters = getIterParams(parameters)
     multishell_param_name, _ = getMultiplicity(parameters)
+
     if is2D:
         params = [p for p in parameters.kernel_parameters if p.type != 'magnetic']
     else:
@@ -442,3 +443,61 @@ def updateKernelWithResults(kernel, results):
     return local_kernel
 
 
+def getStandardParam(model=None):
+    """
+    Returns a list with standard parameters for the current model
+    """
+    param = []
+    num_rows = model.rowCount()
+    if num_rows < 1:
+        return None
+
+    for row in range(num_rows):
+        param_name = model.item(row, 0).text()
+        checkbox_state = model.item(row,0).checkState() == QtCore.Qt.Checked
+        value= model.item(row, 1).text()
+        column_shift = 0
+        if model.columnCount() == 5: # no error column
+            error_state = False
+            error_value = 0.0
+        else:
+            error_state = True
+            error_value = model.item(row, 2).text()
+            column_shift = 1
+        min_state = True
+        max_state = True
+        min_value = model.item(row, 2+column_shift).text()
+        max_value = model.item(row, 3+column_shift).text()
+        unit = ""
+        if model.item(row, 4+column_shift) is not None:
+            unit = model.item(row, 4+column_shift).text()
+
+        param.append([checkbox_state, param_name, value, "",
+                        [error_state, error_value],
+                        [min_state, min_value],
+                        [max_state, max_value], unit])
+
+    return param
+
+def getOrientationParam(kernel_module=None):
+    """
+    Get the dictionary with orientation parameters
+    """
+    param = []
+    if kernel_module is None: 
+        return None
+    for param_name in list(kernel_module.params.keys()):
+        name = param_name
+        value = kernel_module.params[param_name]
+        min_state = True
+        max_state = True
+        error_state = False
+        error_value = 0.0
+        checkbox_state = True #??
+        details = kernel_module.details[param_name] #[unit, mix, max]
+        param.append([checkbox_state, name, value, "",
+                     [error_state, error_value],
+                     [min_state, details[1]],
+                     [max_state, details[2]], details[0]])
+
+    return param

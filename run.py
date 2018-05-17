@@ -140,8 +140,9 @@ def prepare():
 
     sys.path.append(build_path)
 
-    # Run the UI conversion tool
-    import sas.qtgui.convertUI
+    # Run the UI conversion tool if executed from script
+    if os.path.splitext(sys.argv[0])[1].lower() == ".py":
+        import sas.qtgui.convertUI
 
 
 if __name__ == "__main__":

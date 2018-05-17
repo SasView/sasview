@@ -36,8 +36,8 @@ class FittingWindow(QtWidgets.QTabWidget):
         # Max index for adding new, non-clashing tab names
         self.maxIndex = 0
 
-        # Index of the current tab
-        self.currentTab = 0
+        ## Index of the current tab
+        #self.currentTab = 0
 
         # The default optimizer
         self.optimizer = 'Levenberg-Marquardt'
@@ -317,3 +317,11 @@ class FittingWindow(QtWidgets.QTabWidget):
                 tab_object.setFittingStopped()
 
         pass
+
+    @property
+    def currentTab(self):
+        """
+        Returns the tab widget currently shown
+        """
+        return self.currentWidget()
+

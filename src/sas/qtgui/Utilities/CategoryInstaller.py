@@ -173,5 +173,5 @@ class CategoryInstaller:
                 CategoryInstaller._regenerate_master_dict(by_model_dict,
                                                           model_enabled_dict)
 
-            json.dump(master_category_dict, open(serialized_file, 'wb'))
+            json.dump(master_category_dict, open(serialized_file, "w", encoding="utf8"))
 
