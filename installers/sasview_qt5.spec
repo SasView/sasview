@@ -42,12 +42,15 @@ def add_binary(binary):
 # ADDITIONAL DATA ############################################################
 datas = [('../src/sas/sasview/images', 'images')]
 
+datas = [('../src/sas/sasview/images/ball.png', '.')]
+
 datas.append(('../src/sas/sasview/media','media'))
 datas.append(('../src/sas/sasview/test','test'))
 datas.append(('../src/sas/sasview/custom_config.py','.'))
 datas.append(('../src/sas/sasview/local_config.py','.'))
 datas.append(('../src/sas/sasview/wxcruft.py','.'))
 datas.append(('../src/sas/logger_config.py','.'))
+datas.append(('../src/sas/logging.ini','.'))
 
 # pyinstaller gets mightily confused by upper/lower case,
 # so some modules need to be copied explicitly to avoid
@@ -119,6 +122,18 @@ hiddenimports = [
  'SocketServer',
  'logging',
  'logging.config',
+ 'reportlab', 'reportlab.graphics',
+ 'reportlab.graphics.barcode.common',
+ 'reportlab.graphics.barcode.code128',
+ 'reportlab.graphics.barcode.code93',
+ 'reportlab.graphics.barcode.code39',
+ 'reportlab.graphics.barcode.lto',
+ 'reportlab.graphics.barcode.qr',
+ 'reportlab.graphics.barcode.usps',
+ 'reportlab.graphics.barcode.usps4s',
+ 'reportlab.graphics.barcode.eanbc',
+ 'reportlab.graphics.barcode.ecc200datamatrix',
+ 'reportlab.graphics.barcode.fourstate',
  'ipykernel', 'ipykernel.datapub',
  'pygments', 'pygments.lexers','pygments.lexers.python',
  'pygments.styles','pygments.styles.default',

@@ -136,6 +136,8 @@ class GuiManager(object):
         self.aboutWidget = AboutBox()
         self.welcomePanel = WelcomePanel()
         self.grid_window = None
+        self._workspace.toolBar.setVisible(LocalConfig.TOOLBAR_SHOW)
+        self._workspace.actionHide_Toolbar.setText("Show Toolbar")
 
         # Add calculators - floating for usability
         self.SLDCalculator = SldPanel(self)

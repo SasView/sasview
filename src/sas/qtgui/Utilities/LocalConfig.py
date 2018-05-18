@@ -128,7 +128,7 @@ DATALOADER_SHOW = True
 CLEANUP_PLOT = False
 WELCOME_PANEL_SHOW = False
 #Show or hide toolbar at the start up
-TOOLBAR_SHOW = True
+TOOLBAR_SHOW = False
 # set a default perspective
 DEFAULT_PERSPECTIVE = 'None'
 
