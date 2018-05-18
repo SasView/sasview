@@ -24,7 +24,7 @@
      <x>0</x>
      <y>0</y>
      <width>915</width>
-     <height>22</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -354,7 +354,7 @@
   </action>
   <action name="actionSAS_Resolution_Estimator">
    <property name="text">
-    <string>SAS Resolution Estimator</string>
+    <string>Q Resolution Estimator</string>
    </property>
   </action>
   <action name="actionGeneric_Scattering_Calculator">
