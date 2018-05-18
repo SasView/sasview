@@ -56,7 +56,8 @@ bottom of the dialog will become active. If you click on it,
 a graph of the chosen model, calculated using default parameter values, will appear.
 The graph will update dynamically as the parameter values are changed.
 
-You can decide your own model categorizations using the :ref:`Category_Manager`.
+.. TODO: uncomment after Category_Manager done
+.. You can decide your own model categorizations using the :ref:`Category_Manager`.
 
 Once you have selected a model you can read its help documentation by right clicking
 on the empty space in the parameter table.
@@ -76,45 +77,47 @@ return to 1D fitting model, de-select the same checkbox.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Category_Manager:
+.. TODO: uncomment after Category_Manager done
+..
+  .. _Category_Manager:
 
-Category Manager
-----------------
+  Category Manager
+  ----------------
 
-To change the model categorizations, either choose *Category Manager* from the
-*View* option on the menubar, or click on the *Modify* button on the *Fit Page*.
+  To change the model categorizations, either choose *Category Manager* from the
+  *View* option on the menubar, or click on the *Modify* button on the *Fit Page*.
 
-.. image:: cat_fig0.png
+  .. image:: cat_fig0.png
 
-The categorization of all models except the user supplied Plugin Models can be
-reassigned, added to, and removed using *Category Manager*. Models can also be
-hidden from view in the drop-down menus.
+  The categorization of all models except the user supplied Plugin Models can be
+  reassigned, added to, and removed using *Category Manager*. Models can also be
+  hidden from view in the drop-down menus.
 
-.. image:: cat_fig1.png
+  .. image:: cat_fig1.png
 
-Changing category
-^^^^^^^^^^^^^^^^^
+  Changing category
+  ^^^^^^^^^^^^^^^^^
 
-To change category, highlight a model in the list by left-clicking on its entry
-and then click the *Modify* button. Use the *Change Category* panel that appears
-to make the required changes.
+  To change category, highlight a model in the list by left-clicking on its entry
+  and then click the *Modify* button. Use the *Change Category* panel that appears
+  to make the required changes.
 
-.. image:: cat_fig2.png
+  .. image:: cat_fig2.png
 
-To create a category for the selected model, click the *Add* button. In order
-to delete a category, select the category name and click the *Remove Selected*
-button. Then click *Done*.
+  To create a category for the selected model, click the *Add* button. In order
+  to delete a category, select the category name and click the *Remove Selected*
+  button. Then click *Done*.
 
-Showing/hiding models
-^^^^^^^^^^^^^^^^^^^^^
+  Showing/hiding models
+  ^^^^^^^^^^^^^^^^^^^^^
 
-Use the *Enable All / Disable All* buttons and the check boxes beside each model
-to select the models to show/hide. To apply the selection, click *Ok*. Otherwise
-click *Cancel*.
+  Use the *Enable All / Disable All* buttons and the check boxes beside each model
+  to select the models to show/hide. To apply the selection, click *Ok*. Otherwise
+  click *Cancel*.
 
-*NB: It may be necessary to change to a different category and then back again*
-*before any changes take effect.*
-
+  *NB: It may be necessary to change to a different category and then back again*
+  *before any changes take effect.*
+..
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 Model Functions
@@ -534,10 +537,12 @@ In the *Const & Simul Fit* page that appears, select which data sets are to be
 simultaneously fitted (this will probably be all of them or you would not have loaded
 them in the first place!).
 
-To tie parameters between the data sets with constraints, check the 'yes' radio button
-next to *Add Constraint?* in the *Fit Constraints* box.
+.. image:: constraint_1.png
 
-*NB: You can only constrain parameters that are set to refine.*
+To tie parameters between the data sets with constraints, select the data sets and right click.
+From the menu choose *Mutual constraint of parameters in selected models*
+
+.. image:: constraint_2.png
 
 When ready, click the *Fit* button on the *Const & Simul Fit* page, NOT the *Fit*
 button on the individual *FitPage*'s.
@@ -555,8 +560,18 @@ bottom of that *FitPage* to recalculate. Also see :ref:`Assessing_Fit_Quality`.
 Simultaneous Fits with Constraints
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Use the *Easy Setup* drop-down buttons in the *Const & Simul Fit* page to set
-up constraints between *FitPage*'s.
+In the *Const. & Simul. Fit* page select two data sets which are to be constrained.
+Right clicking in the *Source choice for simultaneous fitting* area will bring up
+the context menu:
+
+.. image:: constraint_2.png
+
+Here you can choose datasets for fitting and define constraints between parameters in
+both datasets.
+
+Selecting this option will bring up the *Complex Constraint* dialog.
+
+.. image:: complex_constraint.png
 
 Constraints will generally be of the form
 
@@ -667,23 +682,26 @@ bar.
 
 .. image:: restore_batch_window.png
 
-Once a batch fit is completed, all model parameters are displayed but *not*
-their uncertainties. To view the uncertainties, click on a given column then
-go to *Edit* in the menu bar, select *Insert Column Before* and choose the
-required data from the list. An empty column can be inserted in the same way.
+..
+  Once a batch fit is completed, all model parameters are displayed but *not*
+  their uncertainties. To view the uncertainties, click on a given column then
+  go to *Edit* in the menu bar, select *Insert Column Before* and choose the
+  required data from the list. An empty column can be inserted in the same way.
 
-To remove a column from the grid, click on the column header and choose
-*Remove Column* under *Edit* in the menu bar. The same functionality also
-allows you to re-order columns.
 
-*NB: You cannot insert/remove/re-order the rows in the Grid Window.*
+  To remove a column from the grid, click on the column header and choose
+  *Remove Column* under *Edit* in the menu bar. The same functionality also
+  allows you to re-order columns.
 
-All of the above functions are also available by right-clicking on a column
-label.
+  *NB: You cannot insert/remove/re-order the rows in the Grid Window.*
 
-.. image:: edit_menu.png
+  All of the above functions are also available by right-clicking on a column
+  label.
 
-*NB: If there is an existing Grid Window and another batch fit is performed,*
+  .. image:: edit_menu.png
+..
+
+If there is an existing Grid Window and another batch fit is performed,*
 *an additional 'Table' tab will be added to the Grid Window.*
 
 The parameter values in the *currently selected* table of the *Grid Window*
@@ -703,37 +721,42 @@ Saved CSV files can be reloaded by choosing *Open* under *File* in the *Grid*
 Parameter Plots
 ^^^^^^^^^^^^^^^
 
-Any column of *numeric* parameter values can be plotted against another using
-the *Grid Window*. Simply select one column at the time and click the *Add*
-button next to the required *X/Y-axis Selection Range* text box. When both
-the X and Y axis boxes have been completed, click the *Plot* button.
+..
+  Any column of *numeric* parameter values can be plotted against another using
+  the *Grid Window*. Simply select one column at the time and click the *Add*
+  button next to the required *X/Y-axis Selection Range* text box. When both
+  the X and Y axis boxes have been completed, click the *Plot* button.
 
-When the *Add* button is clicked, *SasView* also automatically completes the
-*X/Y-axis Label* text box with the heading from Row 1 of the selected table,
-but different labels and units can be entered manually.
+  When the *Add* button is clicked, *SasView* also automatically completes the
+  *X/Y-axis Label* text box with the heading from Row 1 of the selected table,
+  but different labels and units can be entered manually.
 
-.. image:: plot_button.png
+  .. image:: plot_button.png
 
-The *X/Y-axis Selection Range* can be edited manually. The text control box
-recognises the operators +, -, \*, /, or 'pow', and allows the following
-types of expression :
+  The *X/Y-axis Selection Range* can be edited manually. The text control box
+  recognises the operators +, -, \*, /, or 'pow', and allows the following
+  types of expression :
 
-  1) if an axis label range is a function of 1 or more *columns*, write
-     this type of expression
+    1) if an axis label range is a function of 1 or more *columns*, write
+      this type of expression
 
-     constant1 * column_name1 [minimum row index :  maximum  row index]
-     operator constant2 * column_name2 [minimum row index :  maximum  row index]
+      constant1 * column_name1 [minimum row index :  maximum  row index]
+      operator constant2 * column_name2 [minimum row index :  maximum  row index]
 
-     Example: radius [2 : 5] -3 * scale [2 : 5]
+      Example: radius [2 : 5] -3 * scale [2 : 5]
 
-  2) if only some *values* of a given column are needed but the range between
-     the first row and the last row used is not continuous, write this type of
-     expression
+    2) if only some *values* of a given column are needed but the range between
+      the first row and the last row used is not continuous, write this type of
+      expression
 
-     column_name1 [minimum row index1 :  maximum  row index1] , column_name1
-     [minimum row index2 :  maximum  row index2]
+      column_name1 [minimum row index1 :  maximum  row index1] , column_name1
+      [minimum row index2 :  maximum  row index2]
 
-     Example: radius [2 : 5] , radius [10 : 25]
+      Example: radius [2 : 5] , radius [10 : 25]
+..
+
+Any row (dataset) can be plotted by selecting it and either right-clicking and choosing
+*Plot selected fits* menu item or by clicking on the *Plot* button.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -760,15 +783,17 @@ Method
 In order to use the *Combined Batch Fit*, first load all the data needed as
 described in :ref:`Loading_data`. Next start up two or more *BatchPage* fits
 following the instructions in :ref:`Batch_Fit_Mode` but **DO NOT PRESS FIT**.
-At this point the *Combine Batch Fit* menu item under the *Fitting menu* should
-be active (if there is one or no *BatchPage* the menu item will be greyed out
-and inactive).  Clicking on *Combine Batch Fit* will bring up a new panel,
-similar to the *Const & Simult Fit* panel. In this case there will be a
-checkbox for each *BatchPage* instead of each *FitPage* that should be included
-in the fit.  Once all are selected, click the Fit button on
-the *BatchPage* to run each batch fit in *sequence*
 
-.. image:: combine_batch_page.png
+When done, select *Constrained or Simultaneous Fit* under *Fitting* in the menu bar.
+
+In the *Const & Simul Fit* page that appears, choose *Batch fits* radio button and
+select which data sets are to be  fitted.
+
+.. image:: simult_batch.png
+
+Once all are selected, click the Fit button on
+the *Const. Simult. Fitting* to run each batch fit in *sequence*
+
 
 The batch table will then pop up at the end as for the case of the simple Batch
 Fitting with the following caveats:
@@ -785,22 +810,23 @@ Fitting with the following caveats:
    p#_ appended to the beginning and thus radius and p1_radius will not be
    recognized as the same parameter.
 
-.. image:: combine_batch_grid.png
 
-In the example shown above the data is a time series with a shifting peak.
-The first part of the series was fitted using the *broad_peak* model, while
-the rest of the data were fit using the *gaussian_peak* model. Unfortunately the
-time is not listed in the file but the file name contains the information. As
-described in :ref:`Grid_Window`, a column can be added manually, in this case
-called time, and the peak position plotted against time.
+..
+  .. image:: combine_batch_grid.png
 
-.. image:: combine_batch_plot.png
+  In the example shown above the data is a time series with a shifting peak.
+  The first part of the series was fitted using the *broad_peak* model, while
+  the rest of the data were fit using the *gaussian_peak* model. Unfortunately the
+  time is not listed in the file but the file name contains the information. As
+  described in :ref:`Grid_Window`, a column can be added manually, in this case
+  called time, and the peak position plotted against time.
 
-Note the discontinuity in the peak position.  This reflects the fact that the
-Gaussian fit is a rather poor model for the data and is not actually
-finding the peak.
+  .. image:: combine_batch_plot.png
 
+  Note the discontinuity in the peak position.  This reflects the fact that the
+  Gaussian fit is a rather poor model for the data and is not actually
+  finding the peak.
+..
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. note::  This help document was last changed by Paul Butler, 10 September
-   2017
+.. note::  This help document was last changed by Piotr Rozyczko, 18 May 2018
