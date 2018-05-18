@@ -9,7 +9,7 @@ Q Resolution Estimator Tool
 Description
 -----------
 
-This tool is approximately estimates the resolution of $Q$ from SAS instrumental
+This tool approximately estimates the resolution of $Q$ from SAS instrumental
 parameter values assuming that the detector is flat and normal to the
 incident beam.
 
@@ -18,9 +18,9 @@ incident beam.
 Using the tool
 --------------
 
-1) Select *SAS Resolution Estimator* from the *Tool* menu on the SasView toolbar.
+1) Select *Q Resolution Estimator* from the *Tool* menu on the SasView toolbar.
 
-2) Select the source (Neutron or Photon) and source type (Monochromatic or TOF).
+2) Select the source and source type (Monochromatic or TOF).
 
    *NOTE! The computational difference between the sources is only the
    gravitational contribution due to the mass of the particles.*
@@ -34,7 +34,7 @@ Using the tool
    the minimum and maximum values should be separated by a '-' to specify a
    range.
 
-   Optionally, the wavelength (BUT NOT of the wavelength spread) can be extended
+   Optionally, the wavelength (BUT NOT the wavelength spread) can be extended
    by adding '; nn' where the 'nn' specifies the number of the bins for the
    numerical integration. The default value is nn = 10. The same number of bins
    will be used for the corresponding wavelength spread.
@@ -48,13 +48,12 @@ Using the tool
 
 7) 1D and 2D $dQ$ values will be displayed at the bottom of the panel, and a 2D
    resolution weight distribution (a 2D elliptical Gaussian function) will also
-   be displayed in the plot panel even if the $Q$ inputs are outside of the
-   detector limit (the red lines indicate the limits of the detector).
+   be displayed in the plot panel.
 
    TOF only: green lines indicate the limits of the maximum $Q$ range accessible
    for the longest wavelength due to the size of the detector.
 
-   Note that the effect from the beam block/stop is ignored, so in the small $Q$
+   Note that the effect from the beam block/stop is ignored. So, in the small $Q$
    region near the beam block/stop
 
    [i.e., $Q < (2 \pi \cdot \text{beam block diameter}) / (\text{sample-to-detector distance} \cdot \lambda_\text{min})$]
@@ -62,9 +61,35 @@ Using the tool
    the variance is slightly under estimated.
 
 8) A summary of the calculation is written to the SasView *Console* at the
-   bottom of the main SasView window.
+   bottom of the main SasView window, below the plot.
 
-.. image:: resolution_tutor.png
+.. figure:: resolution_tutor.png
+
+   ..
+
+   1) Define the source. Select *Photon* for X-ray. This selection only affects
+      the gravitational contribution of the resolution
+   2) Select between *Monochromatic* or *TOF*
+   3) For *TOF*, there is the option
+      of loading a custom spectral distribution using *Add New* in the combo
+      box
+   4) *Wavelength* and *wavelength spread*: one value for *Monochromatic*,
+      minimum and maximum of range for *TOF*
+   5) For *Source* and *Sample Size Aperture*, one value for a circular
+      aperture (diameter) and two values separated by a comma (,) for a
+      rectangular slit (side lengths)
+   6) One value for one ($Qx$, $Qy$) location or more values separated by a
+      comma (,) for more locations. *Note: the $Qx$, $Qy$ input boxes should
+      have the same number of values.*
+   7) Click on *Compute* button to start the calculation
+   8) *Sigma_x* and *Sigma_y* are the components of the 2D $dQ$ at the last
+      ($Qx$, $Qy$) point of inputs
+   9) *Sigma_lamd* is the 2D $dQ_{\lambda}$ at the last point of inputs.
+      *Note: $dQ_{\lambda}$ has only the Qr directional component*
+   10) *(1D Sigma)* is the 1D $dQ$ at the last ($Qx$, $Qy$) point of inputs
+   11) Plot of the result. For *TOF*, a green rectangle marks the limits of
+       maximum $Q$  range accessible for the longest wavelength due to the
+       size of the detector.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
