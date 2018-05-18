@@ -232,11 +232,12 @@ fitting dialog will appear. Set some initial parameters and data limits and
 click *Fit*. The fitted parameter values are displayed and the resulting line
 calculated from them is added to the plot.
 
-This option is most useful for performing simple Guinier, XS Guinier, and
-Porod type analyses, for example, to estimate $R_g$, a rod diameter, or incoherent
-background level, respectively.
+..
+    This option is most useful for performing simple Guinier, XS Guinier, and
+    Porod type analyses, for example, to estimate $R_g$, a rod diameter, or incoherent
+    background level, respectively.
 
-The following figure shows an example of a Guinier analysis using this option
+    The following figure shows an example of a Guinier analysis using this option
 
 .. image:: guinier_fit.png
 
