@@ -94,9 +94,6 @@ class GuiManager(object):
         # Set up the status bar
         self.statusBarSetup()
 
-        # Needs URL like path, so no path.join() here
-        self._helpLocation = GuiUtils.HELP_DIRECTORY_LOCATION + "/index.html"
-
         # Current tutorial location
         self._tutorialLocation = os.path.abspath(os.path.join(GuiUtils.HELP_DIRECTORY_LOCATION,
                                               "_downloads",
@@ -190,7 +187,6 @@ class GuiManager(object):
         """
         Open a local url in the default browser
         """
-        #location = os.path.join(GuiUtils.HELP_DIRECTORY_LOCATION, url)
         location = GuiUtils.HELP_DIRECTORY_LOCATION + url
         try:
             webbrowser.open('file://' + os.path.realpath(location))
@@ -813,7 +809,7 @@ class GuiManager(object):
 
         TODO: use QNetworkAccessManager to assure _helpLocation is valid
         """
-        helpfile = "index.html"
+        helpfile = "/index.html"
         self.showHelp(helpfile)
 
     def actionTutorial(self):
