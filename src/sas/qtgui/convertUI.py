@@ -30,6 +30,7 @@ pyrrc(os.path.join(ui_root, rc_file), os.path.join(ui_root, out_file))
 
 # Images
 images_root = os.path.join(execute_root, 'images')
+out_root = os.path.join(execute_root, 'UI')
 rc_file = 'images.qrc'
 out_file = 'images_rc.py'
-pyrrc(os.path.join(images_root, rc_file), os.path.join(images_root, out_file))
+pyrrc(os.path.join(images_root, rc_file), os.path.join(out_root, out_file))
