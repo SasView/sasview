@@ -176,11 +176,15 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.all_data = value
 
         # Create logics with data items
-        self._logic=[]
         # Logics.data contains only a single Data1D/Data2D object
-        for data_item in value:
-            self._logic.append(FittingLogic())
-            self._logic[-1].data = GuiUtils.dataFromItem(data_item)
+        if len(value) == 1:
+            # single data logic is already defined, update data on it
+            self._logic[0].data = GuiUtils.dataFromItem(value[0])
+        else:
+            # batch datasets
+            for data_item in value:
+                logic = FittingLogic(data=GuiUtils.dataFromItem(data_item))
+                self._logic.append(logic)
 
         # Overwrite data type descriptor
         self.is2D = True if isinstance(self.logic.data, Data2D) else False

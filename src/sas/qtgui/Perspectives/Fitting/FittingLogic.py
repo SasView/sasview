@@ -15,8 +15,13 @@ class FittingLogic(object):
     def __init__(self, data=None):
         self._data = data
         self.data_is_loaded = False
+        #dq data presence in the dataset
+        self.dq_flag = False
+        #di data presence in the dataset
+        self.di_flag = False
         if data is not None:
             self.data_is_loaded = True
+            self.setDataProperties()
 
     @property
     def data(self):
@@ -27,10 +32,29 @@ class FittingLogic(object):
         """ data setter """
         self._data = value
         self.data_is_loaded = True
+        self.setDataProperties()
 
     def isLoadedData(self):
         """ accessor """
         return self.data_is_loaded
+
+    def setDataProperties(self):
+        """
+        Analyze data and set up some properties important for
+        the Presentation layer
+        """
+        if self._data.__class__.__name__ == "Data2D":
+            if self._data.err_data is not None and np.any(self._data.err_data):
+                self.di_flag = True
+            if self._data.dqx_data is not None and np.any(self._data.dqx_data):
+                self.dq_flag = True
+        else:
+            if self._data.dy is not None and np.any(self._data.dy):
+                self.di_flag = True
+            if self._data.dx is not None and np.any(self._data.dx):
+                self.dq_flag = True
+            elif self._data.dxl is not None and np.any(self._data.dxl):
+                self.dq_flag = True
 
     def createDefault1dData(self, interval, tab_id=0):
         """

@@ -162,24 +162,12 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         self.txtNptsFit.setEnabled(False)
         self.chkLogData.setEnabled(False)
         # Weighting controls
-        if isinstance(self.logic.data, Data2D):
-            if self.logic.data.err_data is None or\
-                    np.all(err == 1 for err in self.logic.data.err_data) or \
-                    not np.any(self.logic.data.err_data):
-                self.rbWeighting2.setEnabled(False)
-                self.rbWeighting1.setChecked(True)
-            else:
-                self.rbWeighting2.setEnabled(True)
-                self.rbWeighting2.setChecked(True)
+        if self.logic.di_flag:
+            self.rbWeighting2.setEnabled(True)
+            self.rbWeighting2.setChecked(True)
         else:
-            if self.logic.data.dy is None or\
-                    np.all(self.logic.data.dy == 1) or\
-                    not np.any(self.logic.data.dy):
-                self.rbWeighting2.setEnabled(False)
-                self.rbWeighting1.setChecked(True)
-            else:
-                self.rbWeighting2.setEnabled(True)
-                self.rbWeighting2.setChecked(True)
+            self.rbWeighting2.setEnabled(False)
+            self.rbWeighting1.setChecked(True)
 
     def updateQRange(self, q_range_min, q_range_max, npts):
         """
