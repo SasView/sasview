@@ -148,9 +148,10 @@ def retrieve_bumps_docs():
     """
     if exists(BUMPS_SOURCE):
         print("=== Retrieve BUMPS Docs ===")
-        filenames = [joinpath(BUMPS_SOURCE, "optimizer.rst")]
-        filenames += glob(joinpath(BUMPS_SOURCE, "dream-*.png"))
-        filenames += glob(joinpath(BUMPS_SOURCE, "fit-*.png"))
+        filenames = glob(joinpath(BUMPS_SOURCE, "dream-*.png"))
+        #filenames = [joinpath(BUMPS_SOURCE, "optimizer.rst")]
+        #filenames += glob(joinpath(BUMPS_SOURCE, "dream-*.png"))
+        #filenames += glob(joinpath(BUMPS_SOURCE, "fit-*.png"))
         for f in filenames:
             print("Copying file", f)
             shutil.copy(f, BUMPS_TARGET)
