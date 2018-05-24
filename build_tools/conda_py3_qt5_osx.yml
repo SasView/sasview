@@ -103,6 +103,7 @@ dependencies:
   - xz=5.2.3=intel_0
   - zlib=1.2.11=intel_3
   - pyquante2_pure=2.0=py_0
+  - sphinx=1.5.4
   - pip:
     - bumps==0.7.6
     - html5lib==1.0b10
