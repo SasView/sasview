@@ -252,16 +252,17 @@ King, S.; Griffiths, P.; Hone, J.; Cosgrove, T. *Macromol. Symp.* (2002), 190, 3
 Usage
 -----
 Upon sending data for correlation function analysis, it will be plotted (minus
-the background value), along with a *red* bar indicating the *upper end of the
-low-Q range* (used for Guinier back-extrapolation), and 2 *purple* bars indicating 
+the background value), along with a bar indicating the *upper end of the
+low-Q range* (used for Guinier back-extrapolation), and 2 bars indicating 
 the range to be used for Porod forward-extrapolation. These bars may be moved by 
-grabbing and dragging, or by entering appropriate values in the Q range input boxes.
+entering appropriate values in the Q range input boxes.
 
 .. figure:: tutorial1.png
    :align: center
 
-Once the Q ranges have been set, click the "Calculate Bg" button to determine the 
-background level. Alternatively, enter your own value into the box. If the box turns 
+Once the Q ranges have been set, click the "Calculate" button in the *Background* section
+of the dialog to determine the background level.
+Alternatively, enter your own value into the box. If the box turns 
 yellow this indicates that background subtraction has created some negative intensities.
 
 Now click the "Extrapolate" button to extrapolate the data. The graph window will update 
@@ -272,27 +273,11 @@ GUI.
 .. figure:: tutorial2.png
    :align: center
 
-Now select which type of transform you would like to perform, using the radio
-buttons:
-
-*   **Fourier**: to perform a Fourier Transform to calculate the correlation
-    functions
-*   **Hilbert**: to perform a Hilbert Transform to calculate the volume fraction
-    profile
-
-and click the "Transform" button to perform the selected transform and plot
+Now click the "Transform" button to perform the **Fourier** transform and plot
 the results.
 
  .. figure:: tutorial3.png
     :align: center
-
-If a Fourier Transform was performed, the "Compute Parameters" button can now be 
-clicked to interpret the correlation function as described earlier. The parameters 
-will appear in the "Output Parameters" section of the SasView GUI.
-
- .. figure:: tutorial4.png
-    :align: center
-
 
 .. note::
     This help document was last changed by Steve King, 26Sep2017
