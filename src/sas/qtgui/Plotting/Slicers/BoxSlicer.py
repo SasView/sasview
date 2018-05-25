@@ -1,8 +1,6 @@
 import numpy
-from PyQt4 import QtGui
-from PyQt4 import QtCore
 
-from BaseInteractor import BaseInteractor
+from .BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
@@ -135,7 +133,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         if self.averager is None:
             if new_slab is None:
                 msg = "post data:cannot average , averager is empty"
-                raise ValueError, msg
+                raise ValueError(msg)
             self.averager = new_slab
         if self.direction == "X":
             if self.fold:
@@ -151,7 +149,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
             bin_width = (y_max + y_low) / self.nbins
         else:
             msg = "post data:no Box Average direction was supplied"
-            raise ValueError, msg
+            raise ValueError(msg)
         # # Average data2D given Qx or Qy
         box = self.averager(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
                             bin_width=bin_width)
@@ -189,8 +187,7 @@ class BoxInteractor(BaseInteractor, SlicerModel):
         new_plot.group_id = "2daverage" + self.base.data.name
         new_plot.id = (self.averager.__name__) + self.base.data.name
         new_plot.is_data = True
-        variant_plot = QtCore.QVariant(new_plot)
-        GuiUtils.updateModelItemWithPlot(self._item, variant_plot, new_plot.id)
+        GuiUtils.updateModelItemWithPlot(self._item, new_plot, new_plot.id)
 
         if self.update_model:
             self.setModelFromParams()

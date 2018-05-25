@@ -21,7 +21,7 @@ class Parameter(object):
     def __init__(self, model, name, value=None):
         self.model = model
         self.name = name
-        if not value == None:
+        if value is not None:
             self.model.setParam(self.name, value)
 
     def set(self, value):
@@ -96,13 +96,13 @@ def sasfit(model, pars, x, y, err_y, qmin=None, qmax=None):
 def calcCommandline(event):
     # Testing implementation
     # Fit a Line model
-    from LineModel import LineModel
+    from .LineModel import LineModel
     line = LineModel()
     cstA = Parameter(line, 'A', event.cstA)
     cstB = Parameter(line, 'B', event.cstB)
     y = line.run()
     chisqr, out, cov = sasfit(line, [cstA, cstB], event.x, y, 0)
     # print "Output parameters:", out
-    print "The right answer is [70.0, 1.0]"
-    print chisqr, out, cov
+    print("The right answer is [70.0, 1.0]")
+    print(chisqr, out, cov)
 

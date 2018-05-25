@@ -1,7 +1,8 @@
-from copy import deepcopy
+import copy
 
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 import numpy
 
@@ -43,7 +44,7 @@ def getIterParams(model):
     """
     Returns a list of all multi-shell parameters in 'model'
     """
-    return list(filter(lambda par: "[" in par.name, model.iq_parameters))
+    return list([par for par in model.iq_parameters if "[" in par.name])
 
 def getMultiplicity(model):
     """
@@ -66,7 +67,11 @@ def addParametersToModel(parameters, kernel_module, is2D):
     """
     multishell_parameters = getIterParams(parameters)
     multishell_param_name, _ = getMultiplicity(parameters)
-    params = parameters.iqxy_parameters if is2D else parameters.iq_parameters
+
+    if is2D:
+        params = [p for p in parameters.kernel_parameters if p.type != 'magnetic']
+    else:
+        params = parameters.iq_parameters
     item = []
     for param in params:
         # don't include shell parameters
@@ -123,7 +128,10 @@ def addSimpleParametersToModel(parameters, is2D):
     """
     Update local ModelModel with sasmodel parameters
     """
-    params = parameters.iqxy_parameters if is2D else parameters.iq_parameters
+    if is2D:
+        params = [p for p in parameters.kernel_parameters if p.type != 'magnetic']
+    else:
+        params = parameters.iq_parameters
     item = []
     for param in params:
         # Create the top level, checkable item
@@ -155,45 +163,45 @@ def addHeadersToModel(model):
     Adds predefined headers to the model
     """
     for i, item in enumerate(model_header_captions):
-        model.setHeaderData(i, QtCore.Qt.Horizontal, QtCore.QVariant(item))
+        model.setHeaderData(i, QtCore.Qt.Horizontal, item)
 
-    model.header_tooltips = model_header_tooltips
+    model.header_tooltips = copy.copy(model_header_tooltips)
 
 def addErrorHeadersToModel(model):
     """
     Adds predefined headers to the model
     """
-    model_header_error_captions = model_header_captions
+    model_header_error_captions = copy.copy(model_header_captions)
     model_header_error_captions.insert(2, header_error_caption)
     for i, item in enumerate(model_header_error_captions):
-        model.setHeaderData(i, QtCore.Qt.Horizontal, QtCore.QVariant(item))
+        model.setHeaderData(i, QtCore.Qt.Horizontal, item)
 
-    model_header_error_tooltips = model_header_tooltips
+    model_header_error_tooltips = copy.copy(model_header_tooltips)
     model_header_error_tooltips.insert(2, error_tooltip)
-    model.header_tooltips = model_header_error_tooltips
+    model.header_tooltips = copy.copy(model_header_error_tooltips)
 
 def addPolyHeadersToModel(model):
     """
     Adds predefined headers to the model
     """
     for i, item in enumerate(poly_header_captions):
-        model.setHeaderData(i, QtCore.Qt.Horizontal, QtCore.QVariant(item))
+        model.setHeaderData(i, QtCore.Qt.Horizontal, item)
 
-    model.header_tooltips = poly_header_tooltips
+    model.header_tooltips = copy.copy(poly_header_tooltips)
 
 
 def addErrorPolyHeadersToModel(model):
     """
     Adds predefined headers to the model
     """
-    poly_header_error_captions = poly_header_captions
+    poly_header_error_captions = copy.copy(poly_header_captions)
     poly_header_error_captions.insert(2, header_error_caption)
     for i, item in enumerate(poly_header_error_captions):
-        model.setHeaderData(i, QtCore.Qt.Horizontal, QtCore.QVariant(item))
+        model.setHeaderData(i, QtCore.Qt.Horizontal, item)
 
-    poly_header_error_tooltips = poly_header_tooltips
+    poly_header_error_tooltips = copy.copy(poly_header_tooltips)
     poly_header_error_tooltips.insert(2, error_tooltip)
-    model.header_tooltips = poly_header_error_tooltips
+    model.header_tooltips = copy.copy(poly_header_error_tooltips)
 
 def addShellsToModel(parameters, model, index):
     """
@@ -201,7 +209,7 @@ def addShellsToModel(parameters, model, index):
     """
     multishell_parameters = getIterParams(parameters)
 
-    for i in xrange(index):
+    for i in range(index):
         for par in multishell_parameters:
             # Create the name: <param>[<i>], e.g. "sld1" for parameter "sld[n]"
             param_name = replaceShellName(par.name, i+1)
@@ -269,7 +277,7 @@ def calculateChi2(reference_data, current_data):
         else:
             ## Set consistently w/AbstractFitengine:
             # But this should be corrected later.
-            dy = deepcopy(current_data.dy)
+            dy = copy.deepcopy(current_data.dy)
             dy[dy == 0] = 1
         fn = current_data.y[index]
         gn = reference_data.y
@@ -367,7 +375,7 @@ def plotResiduals(reference_data, current_data):
     """
     Create Data1D/Data2D with residuals, ready for plotting
     """
-    data_copy = deepcopy(current_data)
+    data_copy = copy.deepcopy(current_data)
     # Get data: data I, theory I, and data dI in order
     method_name = current_data.__class__.__name__
     residuals_dict = {"Data1D": residualsData1D,
@@ -395,7 +403,7 @@ def plotResiduals(reference_data, current_data):
     return residuals
 
 def binary_encode(i, digits):
-    return [i >> d & 1 for d in xrange(digits)]
+    return [i >> d & 1 for d in range(digits)]
 
 def getWeight(data, is2d, flag=None):
     """
@@ -419,3 +427,77 @@ def getWeight(data, is2d, flag=None):
     elif flag == 3:
         weight = numpy.abs(data)
     return weight
+
+def updateKernelWithResults(kernel, results):
+    """
+    Takes model kernel and applies results dict to its parameters,
+    returning the modified (deep) copy of the kernel.
+    """
+    assert(isinstance(results, dict))
+    local_kernel = copy.deepcopy(kernel)
+
+    for parameter in results.keys():
+        # Update the parameter value - note: this supports +/-inf as well
+        local_kernel.setParam(parameter, results[parameter][0])
+
+    return local_kernel
+
+
+def getStandardParam(model=None):
+    """
+    Returns a list with standard parameters for the current model
+    """
+    param = []
+    num_rows = model.rowCount()
+    if num_rows < 1:
+        return None
+
+    for row in range(num_rows):
+        param_name = model.item(row, 0).text()
+        checkbox_state = model.item(row,0).checkState() == QtCore.Qt.Checked
+        value= model.item(row, 1).text()
+        column_shift = 0
+        if model.columnCount() == 5: # no error column
+            error_state = False
+            error_value = 0.0
+        else:
+            error_state = True
+            error_value = model.item(row, 2).text()
+            column_shift = 1
+        min_state = True
+        max_state = True
+        min_value = model.item(row, 2+column_shift).text()
+        max_value = model.item(row, 3+column_shift).text()
+        unit = ""
+        if model.item(row, 4+column_shift) is not None:
+            unit = model.item(row, 4+column_shift).text()
+
+        param.append([checkbox_state, param_name, value, "",
+                        [error_state, error_value],
+                        [min_state, min_value],
+                        [max_state, max_value], unit])
+
+    return param
+
+def getOrientationParam(kernel_module=None):
+    """
+    Get the dictionary with orientation parameters
+    """
+    param = []
+    if kernel_module is None: 
+        return None
+    for param_name in list(kernel_module.params.keys()):
+        name = param_name
+        value = kernel_module.params[param_name]
+        min_state = True
+        max_state = True
+        error_state = False
+        error_value = 0.0
+        checkbox_state = True #??
+        details = kernel_module.details[param_name] #[unit, mix, max]
+        param.append([checkbox_state, name, value, "",
+                     [error_state, error_value],
+                     [min_state, details[1]],
+                     [max_state, details[2]], details[0]])
+
+    return param

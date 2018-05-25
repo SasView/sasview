@@ -201,12 +201,12 @@ class DataOperPanel(wx.ScrolledWindow):
             text = self.data_namectr.GetValue().strip()
         else:
             text = name
-        state_list = self.get_datalist().values()
+        state_list = list(self.get_datalist().values())
         name_list = []
         for state in state_list:
             if state.data is None:
                 theory_list = state.get_theory()
-                theory, _ = theory_list.values()[0]
+                theory, _ = list(theory_list.values())[0]
                 d_name = str(theory.name)
             else:
                 d_name = str(state.data.name)
@@ -396,7 +396,7 @@ class DataOperPanel(wx.ScrolledWindow):
             self._check_newname()
             self._set_textctrl_color(self.data1_cbox, 'pink')
             self._set_textctrl_color(self.data2_cbox, 'pink')
-            msg = "DataOperation: %s" % sys.exc_value
+            msg = "DataOperation: %s" % sys.exc_info()[1]
             self.send_warnings(msg, 'error')
             self.output = None
             return flag
@@ -410,7 +410,7 @@ class DataOperPanel(wx.ScrolledWindow):
         pos = self.operator_cbox.GetCurrentSelection()
         operator = self.operator_cbox.GetClientData(pos)
         try:
-            exec "output = data1 %s data2" % operator
+            exec("output = data1 %s data2" % operator)
         except:
             raise
         return output
@@ -531,18 +531,18 @@ class DataOperPanel(wx.ScrolledWindow):
                 val = None
         self.data2_cbox.SetClientData(pos3, val)
         dnames = []
-        ids = self._data.keys()
+        ids = list(self._data.keys())
         for id in ids:
             if id is not None:
                 if self._data[id].data is not None:
                     dnames.append(self._data[id].data.name)
                 else:
                     theory_list = self._data[id].get_theory()
-                    theory, _ = theory_list.values()[0]
+                    theory, _ = list(theory_list.values())[0]
                     dnames.append(theory.name)
         ind = np.argsort(dnames)
         if len(ind) > 0:
-            val_list = np.array(self._data.values())[ind]
+            val_list = np.array(list(self._data.values()))[ind]
             for datastate in val_list:
                 data = datastate.data
                 if data is not None:
@@ -557,7 +557,7 @@ class DataOperPanel(wx.ScrolledWindow):
                       pos_pre2 = pos2
                 try:
                     theory_list = datastate.get_theory()
-                    for theory, _ in theory_list.values():
+                    for theory, _ in list(theory_list.values()):
                         th_name = theory.name
                         posth1 = self.data1_cbox.Append(str(th_name))
                         self.data1_cbox.SetClientData(posth1, theory)
@@ -587,13 +587,13 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         self.send_warnings('')
         self.data_namectr.SetBackgroundColour('white')
-        state_list = self.get_datalist().values()
+        state_list = list(self.get_datalist().values())
         name = self.data_namectr.GetValue().strip()
         name_list = []
         for state in state_list:
             if state.data is None:
                 theory_list = state.get_theory()
-                theory, _ = theory_list.values()[0]
+                theory, _ = list(theory_list.values())[0]
                 d_name = str(theory.name)
             else:
                 d_name = str(state.data.name)
@@ -895,8 +895,8 @@ class SmallPanel(PlotPanel):
         """
         list = []
         list = self.graph.returnPlottable()
-        if len(list.keys()) > 0:
-            first_item = list.keys()[0]
+        if len(list(list.keys())) > 0:
+            first_item = list(list.keys())[0]
             if first_item.x != []:
                 from sas.sasgui.plottools.PropertyDialog import Properties
                 dial = Properties(self, -1, 'Change Scale')

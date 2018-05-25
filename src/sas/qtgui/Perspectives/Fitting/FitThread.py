@@ -13,7 +13,7 @@ def map_getattr(classInstance, classFunc, *args):
     return  getattr(classInstance, classFunc)(*args)
 
 def map_apply(arguments):
-    return apply(arguments[0], arguments[1:])
+    return arguments[0](*arguments[1:])
 
 class FitThread(CalcThread):
     """Thread performing the fit """
@@ -54,7 +54,7 @@ class FitThread(CalcThread):
             CalcThread.isquit(self)
         except KeyboardInterrupt:
             msg = "Fitting: terminated by the user."
-            raise KeyboardInterrupt, msg
+            raise KeyboardInterrupt(msg)
 
     def compute(self):
         """
@@ -70,17 +70,17 @@ class FitThread(CalcThread):
             list_fit_function = ['fit']*fitter_size
             list_q = [None]*fitter_size
 
-            inputs = zip(list_map_get_attr, self.fitter, list_fit_function,
+            inputs = list(zip(list_map_get_attr, self.fitter, list_fit_function,
                          list_q, list_q, list_handler, list_curr_thread,
-                         list_reset_flag)
-            result = map(map_apply, inputs)
+                         list_reset_flag))
+            result = list(map(map_apply, inputs))
             results = (result, time.time()-self.starttime)
             if self.handler:
                 self.completefn(results)
             else:
                 return (results)
 
-        except KeyboardInterrupt, msg:
+        except KeyboardInterrupt as msg:
             # Thread was interrupted, just proceed and re-raise.
             # Real code should not print, but this is an example...
             #print "keyboard exception"
@@ -94,7 +94,10 @@ class FitThread(CalcThread):
         except Exception as ex:
             # print "ERROR IN FIT THREAD: ", traceback.format_exc()
             if self.handler is not None:
-                self.handler.error(msg=traceback.format_exc())
+                self.handler.error(msg=str(ex))
+                self.completefn(None)
+            else:
+                return(None)
 
 
 

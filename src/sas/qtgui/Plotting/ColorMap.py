@@ -1,18 +1,19 @@
 """
 Allows users to change the range of the current graph
 """
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 import sas.qtgui.path_prepare
 
 import matplotlib as mpl
 from matplotlib import pylab
 import numpy
 
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from sas.qtgui.Plotting.PlotterData import Data2D
-from sas.qtgui.Utilities.GuiUtils import formatNumber
-from rangeSlider import RangeSlider
+from sas.qtgui.Utilities.GuiUtils import formatNumber, DoubleValidator
+from .rangeSlider import RangeSlider
 
 DEFAULT_MAP = 'jet'
 
@@ -20,7 +21,7 @@ DEFAULT_MAP = 'jet'
 from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.ColorMapUI import Ui_ColorMapUI
 
-class ColorMap(QtGui.QDialog, Ui_ColorMapUI):
+class ColorMap(QtWidgets.QDialog, Ui_ColorMapUI):
     apply_signal = QtCore.pyqtSignal(tuple, str)
     def __init__(self, parent=None, cmap=None, vmin=0.0, vmax=100.0, data=None):
         super(ColorMap, self).__init__()
@@ -49,10 +50,10 @@ class ColorMap(QtGui.QDialog, Ui_ColorMapUI):
         self.initColorMap()
 
         # Initialize validators on amplitude textboxes
-        validator_min = QtGui.QDoubleValidator(self.txtMinAmplitude)
+        validator_min = DoubleValidator(self.txtMinAmplitude)
         validator_min.setNotation(0)
         self.txtMinAmplitude.setValidator(validator_min)
-        validator_max = QtGui.QDoubleValidator(self.txtMaxAmplitude)
+        validator_max = DoubleValidator(self.txtMaxAmplitude)
         validator_max.setNotation(0)
         self.txtMaxAmplitude.setValidator(validator_max)
 
@@ -70,10 +71,10 @@ class ColorMap(QtGui.QDialog, Ui_ColorMapUI):
         self.chkReverse.stateChanged.connect(self.onColorMapReversed)
 
         # Handle the Reset button click
-        self.buttonBox.button(QtGui.QDialogButtonBox.Reset).clicked.connect(self.onReset)
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Reset).clicked.connect(self.onReset)
 
         # Handle the Apply button click
-        self.buttonBox.button(QtGui.QDialogButtonBox.Apply).clicked.connect(self.onApply)
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).clicked.connect(self.onApply)
 
         # Handle the amplitude setup
         self.txtMinAmplitude.editingFinished.connect(self.onAmplitudeChange)
@@ -160,7 +161,7 @@ class ColorMap(QtGui.QDialog, Ui_ColorMapUI):
         self.slider.setHighValue(self.vmax)
         self.slider.setOrientation(QtCore.Qt.Horizontal)
 
-        self.slider_label = QtGui.QLabel()
+        self.slider_label = QtWidgets.QLabel()
         self.slider_label.setText("Drag the sliders to adjust color range.")
 
         def set_vmin(value):
@@ -191,7 +192,7 @@ class ColorMap(QtGui.QDialog, Ui_ColorMapUI):
         self.redrawColorBar()
         self.canvas = FigureCanvas(self.fig)
 
-        layout = QtGui.QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.slider_label)
         layout.addWidget(self.slider)
         layout.addWidget(self.canvas)

@@ -10,7 +10,8 @@ The File option allows you load data into *SasView* for analysis, or to save the
 
 Data can be loaded one file at a time, or by selecting multiple files, or by loading an entire folder of 
 files (in which case *SasView* will attempt to make an intelligent guess as to what to load based on the 
-file formats it recognises in the folder!).
+file formats it recognises in the folder!). Data can also be loaded by dragging and dropping files directly
+onto Data Explorer.
 
 A *SasView* session can also be saved and reloaded as an 'Analysis' (an individual model fit or invariant 
 calculation, etc), or as a 'Project' (everything you have done since starting your *SasView* session).
@@ -30,7 +31,6 @@ View
 The View option allows you to:
 
 - show the Batch Fitting Results Panel if it has been closed;
-- show/hide the Data Explorer Panel;
 - show/hide the Toolbar of icons below the Menu Bar;
 - select the default location that *SasView* looks in for data to analyse (the *SasView* installation directory, the initial default, or a custom folder). NB: any change only takes effect when *SasView* is restarted;
 - change the default assignment of categories (*Shapes*\, *Shape-independent*\, *Structure Factor*\) for fitting model functions.
@@ -59,15 +59,14 @@ Fitting
 The Fitting option allows you to:
 
 - create a new FitPage;
+- setting up a Constrained or Simultaneous Fit;
 - change optimiser (under Fit Options);
 - view fit parameter correlations, distributions, and convergence traces (under Fit Results);
-- create/edit a Plugin Model.
-
-Additional functionality is available under this menu option during particular types of model fitting, including:
-
-- setting up a Constrained or Simultaneous Fit;
-- combining a Batch Fit (an obscure capability);
-- setting up Chain Fitting.
+- create a Plugin Model.
+- edit a Plugin Model.
+- manage Plugin Models
+- create a Sum/Multiple Plugin Model
+ 
 
 Help
 ----

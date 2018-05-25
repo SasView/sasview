@@ -1,0 +1,108 @@
+name: qt5
+channels:
+- rpmuller
+- diffpy
+- intel
+- conda-forge
+- defaults
+dependencies:
+- appdirs=1.4.3=py36_0
+- asn1crypto=0.22.0=py36_0
+- attrs=17.2.0=py36_0
+- automat=0.6.0=py36_0
+- backports=1.0=py36_1
+- backports.functools_lru_cache=1.4=py36_1
+- ca-certificates=2017.7.27.1=0
+- certifi=2017.7.27.1=py36_0
+- cffi=1.10.0=py36_0
+- colorama=0.3.9=py36_0
+- constantly=15.1.0=py_0
+- cryptography=2.0.3=py36_0
+- cycler=0.10.0=py36_0
+- decorator=4.1.2=py36_0
+- freetype=2.7=vc14_1
+- h5py=2.7.1=py36_1
+- hdf5=1.8.18=vc14_1
+- hyperlink=17.3.1=py_0
+- icu=58.1=vc14_1
+- idna=2.6=py36_1
+- incremental=17.5.0=py_0
+- ipykernel=4.6.1=py36_0
+- ipython=6.2.1=py36_0
+- ipython_genutils=0.2.0=py36_0
+- jedi=0.10.2=py36_0
+- jpeg=9b=vc14_1
+- jupyter_client=5.1.0=py36_0
+- jupyter_core=4.3.0=py36_0
+- khronos-opencl-icd-loader=2016.10.12=0
+- libiconv=1.14=vc14_4
+- libpng=1.6.28=vc14_1
+- libtiff=4.0.7=vc14_0
+- libxml2=2.9.5=vc14_0
+- libxslt=1.1.29=vc14_5
+- lxml=4.1.0=py36_0
+- mako=1.0.7=py36_0
+- markupsafe=1.0=py36_0
+- matplotlib=2.1.0=py36_0
+- openssl=1.0.2l=vc14_0
+- periodictable=1.5.0=py36_0
+- pickleshare=0.7.4=py36_0
+- pip=9.0.1=py36_0
+- prompt_toolkit=1.0.15=py36_0
+- pyasn1=0.3.7=py_0
+- pyasn1-modules=0.1.4=py_0
+- pycparser=2.18=py36_0
+- pygments=2.2.0=py36_0
+- pympler=0.5=py36_0
+- pyopencl=2017.2=py36_0
+- pyopenssl=17.2.0=py36_0
+- pyparsing=2.2.0=py36_0
+- pyqt=5.6.0=py36_4
+- python=3.6.3=0
+- python-dateutil=2.6.1=py36_0
+- pytools=2017.6=py_0
+- pytz=2017.2=py36_0
+- pywin32=220=py36_1
+- qt=5.6.2=vc14_2
+- qtconsole=4.3.1=py36_0
+- setuptools=36.6.0=py36_1
+- simplegeneric=0.8.1=py36_0
+- sip=4.18=py36_1
+- six=1.11.0=py36_1
+- sqlite=3.13.0=vc14_0
+- tornado=4.5.2=py36_0
+- traitlets=4.3.2=py36_0
+- vc=14=0
+- vs2015_runtime=14.0.25420=0
+- wcwidth=0.1.7=py36_0
+- wincertstore=0.2=py36_0
+- zlib=1.2.8=vc14_3
+- icc_rt=2017.0.4=h97af966_0
+- intel-openmp=2018.0.0=hcd89f80_7
+- mkl=2018.0.0=h36b65af_4
+- numpy=1.13.3=py36ha320f96_0
+- scipy=0.19.1=py36h7565378_3
+- service_identity=17.0.0=py36_0
+- twisted=17.9.0=py36hfad864c_0
+- zope=1.0=py36_0
+- zope.interface=4.4.2=py36_0
+- pyquante2_pure=2.0=py_0
+- pip:
+  - backports.functools-lru-cache==1.4
+  - bumps==0.7.6
+  - html5lib==1.0b10
+  - ipython-genutils==0.2.0
+  - jupyter-client==5.1.0
+  - jupyter-core==4.3.0
+  - olefile==0.44
+  - pillow==4.3.0
+  - prompt-toolkit==1.0.15
+  - pyquante2==0.1
+  - qt5reactor==0.4
+  - reportlab==3.4.0
+  - sasmodels==0.97
+  - sasview==4.1
+  - service-identity==17.0.0
+  - webencodings==0.5.1
+prefix: C:\Anaconda\envs\qt5
+

@@ -474,7 +474,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             ## Set the view scale for all plots
             try:
                 self._onEVT_FUNC_PROPERTY()
-            except Exception, exc:
+            except (Exception, exc):
                 wx.PostEvent(self.parent,
                              StatusEvent(status="Plotting Error: %s" % str(exc), info="error"))
             if self.is_zoomed:
@@ -491,7 +491,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 if IS_MAC:
                     # MAC: forcing to plot 2D avg
                     self.canvas._onDrawIdle()
-            except Exception, exc:
+            except (Exception, exc):
                 wx.PostEvent(self.parent, StatusEvent(status=\
                     "Plotting Error: %s" % str(exc), info="error"))
             self.toolbar.update()

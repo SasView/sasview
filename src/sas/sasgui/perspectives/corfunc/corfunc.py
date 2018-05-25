@@ -17,7 +17,7 @@ from sas.sasgui.perspectives.pr.pr_widgets import DataDialog
 from sas.sasgui.perspectives.corfunc.corfunc_state import Reader
 from sas.sascalc.dataloader.loader import Loader
 import sas.sascalc.dataloader
-from plot_labels import *
+from .plot_labels import *
 
 logger = logging.getLogger(__name__)
 
@@ -148,7 +148,7 @@ class Plugin(PluginBase):
                     self.data_id = data.id
                     self.corfunc_panel.set_data(data)
                 except:
-                    msg = "Corfunc set_data: " + str(sys.exc_value)
+                    msg = "Corfunc set_data: " + str(sys.exc_info()[1])
                     wx.PostEvent(self.parent, StatusEvent(status=msg,
                         info='error'))
 

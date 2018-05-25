@@ -3,11 +3,11 @@ Boxsum Class: determine 2 rectangular area to compute
 the sum of pixel of a Data.
 """
 import numpy
-from PyQt4 import QtGui
-from PyQt4 import QtCore
-from sas.qtgui.Utilities.GuiUtils import formatNumber
+from PyQt5 import QtGui
 
-from BaseInteractor import BaseInteractor
+from sas.qtgui.Utilities.GuiUtils import formatNumber, toDouble
+
+from .BaseInteractor import BaseInteractor
 from sas.sascalc.dataloader.manipulations import Boxavg
 from sas.sascalc.dataloader.manipulations import Boxsum
 
@@ -109,14 +109,10 @@ class BoxSumCalculator(BaseInteractor):
         """
         parameters = self.getParams()
         # Crete/overwrite model items
-        self._model.setData(self._model.index(0, 0),
-                    QtCore.QVariant(formatNumber(parameters['Height'])))
-        self._model.setData(self._model.index(0, 1),
-                    QtCore.QVariant(formatNumber(parameters['Width'])))
-        self._model.setData(self._model.index(0, 2),
-                    QtCore.QVariant(formatNumber(parameters['center_x'])))
-        self._model.setData(self._model.index(0, 3),
-                    QtCore.QVariant(formatNumber(parameters['center_y'])))
+        self._model.setData(self._model.index(0, 0), formatNumber(parameters['Height']))
+        self._model.setData(self._model.index(0, 1), formatNumber(parameters['Width']))
+        self._model.setData(self._model.index(0, 2), formatNumber(parameters['center_x']))
+        self._model.setData(self._model.index(0, 3), formatNumber(parameters['center_y']))
 
         self.setReadOnlyParametersFromModel()
 
@@ -129,26 +125,21 @@ class BoxSumCalculator(BaseInteractor):
         Cast model content onto "read-only" subset of parameters
         """
         parameters = self.getParams()
-        self._model.setData(self._model.index(0, 4),
-                    QtCore.QVariant(formatNumber(parameters['avg'])))
-        self._model.setData(self._model.index(0, 5),
-                    QtCore.QVariant(formatNumber(parameters['avg_error'])))
-        self._model.setData(self._model.index(0, 6),
-                    QtCore.QVariant(formatNumber(parameters['sum'])))
-        self._model.setData(self._model.index(0, 7),
-                    QtCore.QVariant(formatNumber(parameters['sum_error'])))
-        self._model.setData(self._model.index(0, 8),
-                    QtCore.QVariant(formatNumber(parameters['num_points'])))
+        self._model.setData(self._model.index(0, 4), formatNumber(parameters['avg']))
+        self._model.setData(self._model.index(0, 5), formatNumber(parameters['avg_error']))
+        self._model.setData(self._model.index(0, 6), formatNumber(parameters['sum']))
+        self._model.setData(self._model.index(0, 7), formatNumber(parameters['sum_error']))
+        self._model.setData(self._model.index(0, 8), formatNumber(parameters['num_points']))
 
     def setParamsFromModel(self):
         """
         Cast model content onto params dict
         """
         params = {}
-        params["Height"] = float(self.model().item(0, 0).text())
-        params["Width"] = float(self.model().item(0, 1).text())
-        params["center_x"] = float(self.model().item(0, 2).text())
-        params["center_y"] = float(self.model().item(0, 3).text())
+        params["Height"] = toDouble(self.model().item(0, 0).text())
+        params["Width"] = toDouble(self.model().item(0, 1).text())
+        params["center_x"] = toDouble(self.model().item(0, 2).text())
+        params["center_y"] = toDouble(self.model().item(0, 3).text())
         self.update_model = False
         self.setParams(params)
         self.setReadOnlyParametersFromModel()
@@ -361,9 +352,9 @@ class PointInteractor(BaseInteractor):
         """
         Draw the new roughness on the graph.
         """
-        if center_x != None:
+        if center_x is not None:
             self.x = center_x
-        if center_y != None:
+        if center_y is not None:
             self.y = center_y
         self.center_marker.set(xdata=[self.x], ydata=[self.y])
         self.center.set(xdata=[self.x], ydata=[self.y])

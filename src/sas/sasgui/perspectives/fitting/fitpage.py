@@ -280,7 +280,7 @@ class FitPage(BasicPage):
                         self._on_select_accuracy)
 
         # Fit button
-        self.btFit = wx.Button(self, self._ids.next(), 'Fit')
+        self.btFit = wx.Button(self, next(self._ids), 'Fit')
         self.default_bt_colour = self.btFit.GetDefaultAttributes()
         self.btFit.Bind(wx.EVT_BUTTON, self._onFit, id=self.btFit.GetId())
         self.btFit.SetToolTipString("Start fitting.")
@@ -376,7 +376,7 @@ class FitPage(BasicPage):
             " Total Npts : total number of data points")
 
         # Update and Draw button
-        self.draw_button = wx.Button(self, self._ids.next(), 'Compute')
+        self.draw_button = wx.Button(self, next(self._ids), 'Compute')
         self.draw_button.Bind(wx.EVT_BUTTON,
                               self._onDraw, id=self.draw_button.GetId())
         self.draw_button.SetToolTipString("Compute and Draw.")
@@ -531,7 +531,7 @@ class FitPage(BasicPage):
         self.qmax.Bind(wx.EVT_KEY_DOWN, self.on_key)
         self.qmin.Bind(wx.EVT_TEXT, self.on_qrange_text)
         self.qmax.Bind(wx.EVT_TEXT, self.on_qrange_text)
-        wx_id = self._ids.next()
+        wx_id = next(self._ids)
         self.reset_qrange = wx.Button(self, wx_id, 'Reset')
 
         self.reset_qrange.Bind(wx.EVT_BUTTON, self.on_reset_clicked, id=wx_id)
@@ -539,7 +539,7 @@ class FitPage(BasicPage):
 
         sizer = wx.GridSizer(5, 5, 2, 6)
 
-        self.btEditMask = wx.Button(self, self._ids.next(), 'Editor')
+        self.btEditMask = wx.Button(self, next(self._ids), 'Editor')
         self.btEditMask.Bind(wx.EVT_BUTTON, self._onMask,
                              id=self.btEditMask.GetId())
         self.btEditMask.SetToolTipString("Edit Mask.")
@@ -659,7 +659,7 @@ class FitPage(BasicPage):
         self.text_disp_max.Show(True)
         self.text_disp_min.Show(True)
 
-        for item in self.model.dispersion.keys():
+        for item in list(self.model.dispersion.keys()):
             if not self.magnetic_on:
                 if item in self.model.magnetic_params:
                     continue
@@ -674,7 +674,7 @@ class FitPage(BasicPage):
                     self.model.details[name1] = ["", None, None]
 
                 iy += 1
-                for p in self.model.dispersion[item].keys():
+                for p in list(self.model.dispersion[item].keys()):
 
                     if p == "width":
                         ix = 0
@@ -764,7 +764,7 @@ class FitPage(BasicPage):
                 ix = 8
                 disp_box = wx.ComboBox(self, wx.ID_ANY, size=(65, -1),
                                        style=wx.CB_READONLY, name='%s' % name1)
-                for key, value in POLYDISPERSITY_MODELS.iteritems():
+                for key, value in POLYDISPERSITY_MODELS.items():
                     name_disp = str(key)
                     disp_box.Append(name_disp, value)
                     disp_box.SetStringSelection("gaussian")
@@ -778,7 +778,7 @@ class FitPage(BasicPage):
         self.sizer4_4.Add((20, 20), (iy, ix), (1, 1),
                           wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
         first_orient = True
-        for item in self.model.dispersion.keys():
+        for item in list(self.model.dispersion.keys()):
             if not self.magnetic_on:
                 if item in self.model.magnetic_params:
                     continue
@@ -794,7 +794,7 @@ class FitPage(BasicPage):
                     self.model.details[name1] = ["", None, None]
 
                 iy += 1
-                for p in self.model.dispersion[item].keys():
+                for p in list(self.model.dispersion[item].keys()):
 
                     if p == "width":
                         ix = 0
@@ -928,7 +928,7 @@ class FitPage(BasicPage):
                 ix = 8
                 disp_box = wx.ComboBox(self, wx.ID_ANY, size=(65, -1),
                                 style=wx.CB_READONLY, name='%s' % name1)
-                for key, value in POLYDISPERSITY_MODELS.iteritems():
+                for key, value in POLYDISPERSITY_MODELS.items():
                     name_disp = str(key)
                     disp_box.Append(name_disp, value)
                     disp_box.SetStringSelection("gaussian")
@@ -1369,7 +1369,7 @@ class FitPage(BasicPage):
                 self._check_value_enter(self.parameters)
             except:
                 tcrtl.SetBackgroundColour("pink")
-                msg = "Model Error:wrong value entered : %s" % sys.exc_value
+                msg = "Model Error:wrong value entered : %s" % sys.exc_info()[1]
                 wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                 return
         else:
@@ -1481,12 +1481,12 @@ class FitPage(BasicPage):
                         self.qmax_x = tempmax
                 else:
                     tcrtl.SetBackgroundColour("pink")
-                    msg = "Model Error:wrong value entered : %s" % sys.exc_value
+                    msg = "Model Error:wrong value entered : %s" % sys.exc_info()[1]
                     wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                     return
             except:
                 tcrtl.SetBackgroundColour("pink")
-                msg = "Model Error:wrong value entered : %s" % sys.exc_value
+                msg = "Model Error:wrong value entered : %s" % sys.exc_info()[1]
                 wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                 return
             # Check if # of points for theory model are valid(>0).
@@ -1732,7 +1732,7 @@ class FitPage(BasicPage):
         # build function (combo)box
         ind = 0
         while(ind < len(list)):
-            for key, val in list.items():
+            for key, val in list(list.items()):
                 if val == ind:
                     fun_box.Append(key, val)
                     break
@@ -1864,7 +1864,7 @@ class FitPage(BasicPage):
                                 data.filename
                     wx.PostEvent(self._manager.parent, StatusEvent(status=msg,
                                                info="error"))
-                    raise ValueError, msg
+                    raise ValueError(msg)
 
             else:
                 qmin = 0
@@ -1876,7 +1876,7 @@ class FitPage(BasicPage):
                                 data.filename
                     wx.PostEvent(self._manager.parent, StatusEvent(status=msg,
                                                info="error"))
-                    raise ValueError, msg
+                    raise ValueError(msg)
                 # Maximum value of data
                 qmax = math.sqrt(x * x + y * y)
                 npts = len(data.data)
@@ -2117,7 +2117,7 @@ class FitPage(BasicPage):
         # make sure stop button to fit button all the time
         self._on_fit_complete()
         if out is None or not np.isfinite(chisqr):
-            raise ValueError, "Fit error occured..."
+            raise ValueError("Fit error occured...")
 
         is_modified = False
         has_error = False
@@ -2192,7 +2192,7 @@ class FitPage(BasicPage):
                             has_error = True
                 i += 1
             else:
-                raise ValueError, "onsetValues: Invalid parameters..."
+                raise ValueError("onsetValues: Invalid parameters...")
         # Show error title when any errors displayed
         if has_error:
             if not self.text2_3.IsShown():
@@ -2950,8 +2950,8 @@ class FitPage(BasicPage):
                   wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
 
         # type can be either Guassian or Array
-        if len(self.model.dispersion.values()) > 0:
-            type = self.model.dispersion.values()[0]["type"]
+        if len(list(self.model.dispersion.values())) > 0:
+            type = list(self.model.dispersion.values())[0]["type"]
         else:
             type = "Gaussian"
 

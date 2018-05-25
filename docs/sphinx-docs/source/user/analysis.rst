@@ -8,10 +8,10 @@ Fitting & Other Analyses
 .. toctree::
    :maxdepth: 1
 
-   Model Fitting <sasgui/perspectives/fitting/fitting>
+   Model Fitting <qtgui/Perspectives/Fitting/fitting>
 
-   P(r) Inversion <sasgui/perspectives/pr/pr_help>
+   P(r) Inversion <qtgui/Perspectives/Inversion/pr_help>
 
-   Invariant Calculation <sasgui/perspectives/invariant/invariant_help>
+   Invariant Calculation <qtgui/Perspectives/Invariant/invariant_help>
 
-   Correlation Function <sasgui/perspectives/corfunc/corfunc_help>
+   Correlation Function <qtgui/Perspectives/Corfunc/corfunc_help>

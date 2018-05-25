@@ -23,7 +23,7 @@ import copy
 import logging
 import json
 import time
-from StringIO import StringIO
+from io import StringIO
 import numpy as np
 
 from sas.qtgui.Plotting.PlotterData import Data1D
@@ -65,7 +65,7 @@ class DataManager(object):
         _str  = ""
         _str += "No of states  is %s \n" % str(len(self.stored_data))
         n_count = 0
-        for  value in self.stored_data.values():
+        for  value in list(self.stored_data.values()):
             n_count += 1
             _str += "State No %s \n"  % str(n_count)
             _str += str(value) + "\n"
@@ -125,8 +125,12 @@ class DataManager(object):
         """
         rename data
         """
-        ## name of the data allow to differentiate data when plotted
-        name = GuiUtils.parseName(name=name, expression="_")
+        # name of the data allow to differentiate data when plotted
+        try:
+            name = GuiUtils.parseName(name=name, expression="_")
+        except TypeError:
+            # bad name sent to rename
+            return None
 
         max_char = name.find("[")
         if max_char < 0:
@@ -145,7 +149,7 @@ class DataManager(object):
         """
         receive a list of
         """
-        for id, data in data_list.iteritems():
+        for id, data in data_list.items():
             if id  in self.stored_data:
                 msg = "Data manager already stores %s" % str(data.name)
                 msg += ""
@@ -161,12 +165,12 @@ class DataManager(object):
     def update_data(self, prev_data, new_data):
         """
         """
-        if prev_data.id not in self.stored_data.keys():
+        if prev_data.id not in list(self.stored_data.keys()):
             return None, {}
         data_state = self.stored_data[prev_data.id]
         self.stored_data[new_data.id]  = data_state.clone()
         self.stored_data[new_data.id].data = new_data
-        if prev_data.id in self.stored_data.keys():
+        if prev_data.id in list(self.stored_data.keys()):
             del self.stored_data[prev_data.id]
         return prev_data.id, {new_data.id: self.stored_data[new_data.id]}
 
@@ -176,7 +180,7 @@ class DataManager(object):
         uid = data_id
         if data_id is None and theory is not None:
             uid = theory.id
-        if uid in self.stored_data.keys():
+        if uid in list(self.stored_data.keys()):
              data_state = self.stored_data[uid]
         else:
             data_state = DataState()
@@ -206,7 +210,7 @@ class DataManager(object):
                 theory_list = data_state.get_theory()
                 if search_id == d_id:
                     _selected_data[search_id] = data
-                if search_id in theory_list.keys():
+                if search_id in list(theory_list.keys()):
                      _selected_theory_list[search_id] = theory_list[search_id]
 
         return _selected_data, _selected_theory_list
@@ -215,7 +219,7 @@ class DataManager(object):
     def freeze(self, theory_id):
         """
         """
-        return self.freeze_theory(self.stored_data.keys(), theory_id)
+        return self.freeze_theory(list(self.stored_data.keys()), theory_id)
 
     def freeze_theory(self, data_id, theory_id):
         """
@@ -226,7 +230,7 @@ class DataManager(object):
                 data_state = self.stored_data[d_id]
                 theory_list = data_state.get_theory()
                 for t_id in theory_id:
-                    if t_id in theory_list.keys():
+                    if t_id in list(theory_list.keys()):
                         theory_data, theory_state = theory_list[t_id]
                         new_theory = copy.deepcopy(theory_data)
                         new_theory.id  = time.time()
@@ -246,7 +250,7 @@ class DataManager(object):
         """
         """
         for d_id in data_id:
-            if d_id in self.stored_data.keys():
+            if d_id in list(self.stored_data.keys()):
                 data_state = self.stored_data[d_id]
                 if data_state.data.name in self.data_name_dict:
                     del self.data_name_dict[data_state.data.name]
@@ -264,7 +268,7 @@ class DataManager(object):
             if d_id in self.stored_data:
                 data_state = self.stored_data[d_id]
                 theory_list = data_state.get_theory()
-                if theory_id in theory_list.keys():
+                if theory_id in list(theory_list.keys()):
                     del theory_list[theory_id]
         #del pure theory
         self.delete_by_id(theory_id)
@@ -283,7 +287,7 @@ class DataManager(object):
         """
         _selected_data = {}
         for selected_name in name_list:
-            for id, data_state in self.stored_data.iteritems():
+            for id, data_state in self.stored_data.items():
                 if data_state.data.name == selected_name:
                     _selected_data[id] = data_state.data
         return _selected_data
@@ -293,7 +297,7 @@ class DataManager(object):
         save data and path
         """
         for selected_name in name_list:
-            for id, data_state in self.stored_data.iteritems():
+            for id, data_state in self.stored_data.items():
                 if data_state.data.name == selected_name:
                     del self.stored_data[id]
 
@@ -302,7 +306,7 @@ class DataManager(object):
         for selected_name in name_list:
             # Take the copy of current, possibly shorter stored_data dict
             stored_data = copy.deepcopy(self.stored_data)
-            for idx in stored_data.keys():
+            for idx in list(stored_data.keys()):
                 if str(selected_name) in str(idx):
                     del self.stored_data[idx]
 
@@ -312,7 +316,7 @@ class DataManager(object):
         """
         _selected_data_state = {}
         for id in data_id:
-            if id in self.stored_data.keys():
+            if id in list(self.stored_data.keys()):
                 _selected_data_state[id] = self.stored_data[id]
         return _selected_data_state
 
@@ -395,7 +399,7 @@ class DataManager(object):
         def simple_type(cls, data, level):
             class Empty(object):
                 def __init__(self):
-                    for key, value in data.iteritems():
+                    for key, value in data.items():
                         setattr(self, key, generate(value, level))
 
             # create target object
@@ -450,7 +454,7 @@ class DataManager(object):
                 except KeyError:
                     # if dictionary doesn't have __type__ then it is assumed to be just an ordinary dictionary
                     o = {}
-                    for key, value in data.iteritems():
+                    for key, value in data.items():
                         o[key] = generate(value, level)
                     return o
 
@@ -462,7 +466,7 @@ class DataManager(object):
             return data
 
         new_stored_data = {}
-        for id, data in json.load(fp).iteritems():
+        for id, data in json.load(fp).items():
             try:
                 new_stored_data[id] = generate(data, 0)
             except TooComplexException:

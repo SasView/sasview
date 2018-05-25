@@ -1,6 +1,7 @@
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4.QtTest import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtTest import *
 import inspect
 
 def WarningTestNotImplemented(method_name=None):
@@ -9,11 +10,11 @@ def WarningTestNotImplemented(method_name=None):
     Test name retrieved from stack trace.
     """
     if method_name is not None:
-        print("\nWARNING: %s needs implementing!"%method_name)
+        print(("\nWARNING: %s needs implementing!"%method_name))
     else:
         (frame, filename, line_number,
             function_name, lines, index) = inspect.getouterframes(inspect.currentframe())[1]
-        print("\nWARNING: %s needs implementing!"%function_name)
+        print(("\nWARNING: %s needs implementing!"%function_name))
 
 class QtSignalSpy(QObject):
     """
@@ -38,7 +39,7 @@ class QtSignalSpy(QObject):
                 widget.signal.connect(slot)
         except AttributeError:
             msg = "Wrong construction of QtSignalSpy instance"
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
 
     def slot(self, *args, **kwargs):
         """
@@ -53,7 +54,7 @@ class QtSignalSpy(QObject):
         self._signal = [args, kwargs]
 
     def signal(self, index=None):
-        if index == None:
+        if index is None:
             return self._signal
         else:
             return self._signal[index]

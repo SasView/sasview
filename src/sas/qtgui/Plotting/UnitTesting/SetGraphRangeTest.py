@@ -1,7 +1,7 @@
 import sys
 import unittest
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 # set up import paths
 import sas.qtgui.path_prepare
@@ -9,8 +9,8 @@ import sas.qtgui.path_prepare
 # Local
 from sas.qtgui.Plotting.SetGraphRange import SetGraphRange
 
-if not QtGui.QApplication.instance():
-    app = QtGui.QApplication(sys.argv)
+if not QtWidgets.QApplication.instance():
+    app = QtWidgets.QApplication(sys.argv)
 
 class SetGraphRangeTest(unittest.TestCase):
     '''Test the SetGraphRange'''
@@ -26,9 +26,9 @@ class SetGraphRangeTest(unittest.TestCase):
 
     def testDefaults(self):
         '''Test the GUI in its default state'''
-        self.assertIsInstance(self.widget, QtGui.QDialog)
+        self.assertIsInstance(self.widget, QtWidgets.QDialog)
         self.assertEqual(self.widget.windowTitle(), "Set Graph Range")
-        self.assertIsInstance(self.widget.txtXmin, QtGui.QLineEdit)
+        self.assertIsInstance(self.widget.txtXmin, QtWidgets.QLineEdit)
         self.assertIsInstance(self.widget.txtXmin.validator(), QtGui.QDoubleValidator)
         
     def testGoodRanges(self):

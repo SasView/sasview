@@ -3,12 +3,11 @@ import time
 import numpy
 import logging
 import unittest
-from PyQt4 import QtGui
-from PyQt4 import QtCore
-from PyQt4.QtTest import QTest
-from PyQt4.QtCore import Qt
-from mock import MagicMock
-from mock import patch
+from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtCore
+from PyQt5.QtTest import QTest
+from PyQt5.QtCore import Qt
+from unittest.mock import MagicMock
 
 from twisted.internet import threads
 
@@ -27,8 +26,8 @@ BG_COLOR_ERR = 'background-color: rgb(244, 170, 164);'
 BG_COLOR_WARNING = 'background-color: rgb(244, 217, 164);'
 
 
-if not QtGui.QApplication.instance():
-    app = QtGui.QApplication(sys.argv)
+if not QtWidgets.QApplication.instance():
+    app = QtWidgets.QApplication(sys.argv)
 
 
 class ResolutionCalculatorPanelTest(unittest.TestCase):
@@ -47,7 +46,7 @@ class ResolutionCalculatorPanelTest(unittest.TestCase):
     def testDefaults(self):
         """Test the GUI in its default state"""
 
-        self.assertIsInstance(self.widget, QtGui.QDialog)
+        self.assertIsInstance(self.widget, QtWidgets.QDialog)
         self.assertEqual(self.widget.windowTitle(), "Q Resolution Estimator")
         # size
         self.assertEqual(self.widget.size().height(), 540)
@@ -230,17 +229,22 @@ class ResolutionCalculatorPanelTest(unittest.TestCase):
 
     def testOnSelectCustomSpectrum(self):
         """ Test Custom Spectrum: load file if 'Add New' """
-        QtGui.QFileDialog.getOpenFileName = MagicMock(return_value=None)
+        QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=("",""))
         self.widget.cbCustomSpectrum.setCurrentIndex(1)
 
         # Test the getOpenFileName() dialog called once
-        self.assertTrue(QtGui.QFileDialog.getOpenFileName.called)
-        QtGui.QFileDialog.getOpenFileName.assert_called_once()
+        self.assertTrue(QtWidgets.QFileDialog.getOpenFileName.called)
+        QtWidgets.QFileDialog.getOpenFileName.assert_called_once()
 
     def testHelp(self):
         """ Assure help file is shown """
         # this should not rise
+        self.widget.manager = QtWidgets.QWidget()
+        self.widget.manager.showHelp = MagicMock()
         self.widget.onHelp()
+        self.assertTrue(self.widget.manager.showHelp.called_once())
+        args = self.widget.manager.showHelp.call_args
+        self.assertIn('resolution_calculator_help.html', args[0][0])
 
     def testOnReset(self):
         """ Test onReset function"""

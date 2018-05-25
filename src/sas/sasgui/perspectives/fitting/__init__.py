@@ -1,6 +1,6 @@
 PLUGIN_ID = "Fitting plug-in 1.0"
 import os
-from fitting import *
+from .fitting import *
 from distutils.filelist import findall
 def get_data_path(media):
     """

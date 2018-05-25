@@ -6,9 +6,9 @@ from copy import deepcopy
 
 from sas.sascalc.dataloader.loader import Loader
 from sas.sascalc.dataloader.data_info import Data2D
-from detector_editor import DetectorDialog
-from collimation_editor import CollimationDialog
-from console import ConsoleDialog
+from .detector_editor import DetectorDialog
+from .collimation_editor import CollimationDialog
+from .console import ConsoleDialog
 
 from sas.sasgui.guiframe.events import StatusEvent
 
@@ -396,7 +396,7 @@ class DataEditorPanel(wx.ScrolledWindow):
         data, _, _ = self.get_current_data()
         if data is None:
             return
-        from sample_editor import SampleDialog
+        from .sample_editor import SampleDialog
         dlg = SampleDialog(parent=self, sample=data.sample)
         dlg.set_manager(self)
         dlg.ShowModal()
@@ -408,7 +408,7 @@ class DataEditorPanel(wx.ScrolledWindow):
         data, data_name, position = self.get_current_data()
         if data is None:
             return
-        from source_editor import SourceDialog
+        from .source_editor import SourceDialog
         dlg = SourceDialog(parent=self, source=data.source)
         dlg.set_manager(self)
         dlg.ShowModal()
@@ -526,7 +526,7 @@ class DataEditorPanel(wx.ScrolledWindow):
         self._default_save_location = path
         try:
             #Load data
-            from load_thread import DataReader
+            from .load_thread import DataReader
             ## If a thread is already started, stop it
             if self.reader is not None and self.reader.isrunning():
                 self.reader.stop()
@@ -535,7 +535,7 @@ class DataEditorPanel(wx.ScrolledWindow):
                                     updatefn=None)
             self.reader.queue()
         except:
-            msg = "Data Editor: %s" % (sys.exc_value)
+            msg = "Data Editor: %s" % (sys.exc_info()[1])
             load_error(msg)
             return
         event.Skip()

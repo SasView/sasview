@@ -365,7 +365,7 @@ class SldPanel(wx.Panel, PanelBase):
         myformula = formula(str(element))
         if len(myformula.atoms) != 1:
             return
-        element = myformula.atoms.keys()[0]
+        element = list(myformula.atoms.keys())[0]
         energy = xray_energy(element.K_alpha)
 
         self.sld_formula = formula(str(self.compound), density=self.density)
@@ -449,7 +449,7 @@ class SldPanel(wx.Panel, PanelBase):
         element_formula = formula(str(element))
         if len(element_formula.atoms) != 1:
             return
-        element = element_formula.atoms.keys()[0]
+        element = list(element_formula.atoms.keys())[0]
         energy = xray_energy(element.K_alpha)
         atom = molecule_formula.atoms
         return xray_sld_from_atoms(atom, density=density, energy=energy)
@@ -506,7 +506,7 @@ class SldPanel(wx.Panel, PanelBase):
             #self.wavelength_ctl.SetValue(str(self.wavelength))
         except:
             if self.base is not None:
-                msg = "SLD Calculator: %s" % (sys.exc_value)
+                msg = "SLD Calculator: %s" % (sys.exc_info()[1])
                 wx.PostEvent(self.base, StatusEvent(status=msg))
         if event is not None:
             event.Skip()

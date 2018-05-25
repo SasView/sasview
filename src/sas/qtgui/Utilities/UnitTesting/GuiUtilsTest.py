@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
 import sys
 import unittest
 import webbrowser
 
-from PyQt4 import QtCore
-from PyQt4 import QtGui
-from mock import MagicMock
+from PyQt5 import QtCore
+from PyQt5 import QtGui, QtWidgets
+from unittest.mock import MagicMock
 
 # set up import paths
 import sas.qtgui.path_prepare
@@ -18,8 +19,8 @@ from sas.qtgui.Plotting.PlotterData import Data2D
 # Tested module
 from sas.qtgui.Utilities.GuiUtils import *
 
-if not QtGui.QApplication.instance():
-    app = QtGui.QApplication(sys.argv)
+if not QtWidgets.QApplication.instance():
+    app = QtWidgets.QApplication(sys.argv)
 
 class GuiUtilsTest(unittest.TestCase):
     '''Test the GUI Utilities methods'''
@@ -89,31 +90,63 @@ class GuiUtilsTest(unittest.TestCase):
 
         # Make sure test_item got all data added
         self.assertEqual(test_item.child(0).text(), name)
-        list_from_item = test_item.child(0).data().toList()
+        list_from_item = test_item.child(0).data()
         self.assertIsInstance(list_from_item, list)
-        self.assertEqual(list_from_item[0].toPyObject(), test_list[0])
-        self.assertEqual(list_from_item[1].toPyObject(), test_list[1])
-        self.assertEqual(list_from_item[2].toPyObject(), test_list[2])
+        self.assertEqual(list_from_item[0], test_list[0])
+        self.assertEqual(list_from_item[1], test_list[1])
+        self.assertEqual(list_from_item[2], test_list[2])
 
     def testupdateModelItemWithPlot(self):
         """
         Test the QModelItem checkbox update method
         """
-        test_item = QtGui.QStandardItem()
-        test_list = ['aa','11']
-        update_data = QtCore.QVariant(test_list)
-        name = "Black Sabbath"
+        # test_item = QtGui.QStandardItem()
+        # test_list = ['aa','11']
+        # update_data = test_list
+        # name = "Black Sabbath"
 
+        # # update the item
+        # updateModelItemWithPlot(test_item, update_data, name)
+
+        test_item = QtGui.QStandardItem()
+        update_data = Data1D(x=[1.0, 2.0, 3.0], y=[10.0, 11.0, 12.0])
+        name = "Black Sabbath"
+        update_data.id = '[0]data0'
+        update_data.name = 'data0'
         # update the item
         updateModelItemWithPlot(test_item, update_data, name)
-        
+
         # Make sure test_item got all data added
         self.assertEqual(test_item.child(0).text(), name)
         self.assertTrue(test_item.child(0).isCheckable())
-        list_from_item = test_item.child(0).child(0).data().toPyObject()
-        self.assertIsInstance(list_from_item, list)
-        self.assertEqual(str(list_from_item[0]), test_list[0])
-        self.assertEqual(str(list_from_item[1]), test_list[1])
+        data_from_item = test_item.child(0).child(0).data()
+        self.assertIsInstance(data_from_item, Data1D)
+        self.assertSequenceEqual(list(data_from_item.x), [1.0, 2.0, 3.0])
+        self.assertSequenceEqual(list(data_from_item.y), [10.0, 11.0, 12.0])
+        self.assertEqual(test_item.rowCount(), 1)
+
+        # add another dataset (different from the first one)
+        update_data1 = Data1D(x=[1.1, 2.1, 3.1], y=[10.1, 11.1, 12.1])
+        update_data1.id = '[0]data1'
+        update_data1.name = 'data1'
+        name1 = "Black Sabbath1"
+        # update the item and check number of rows
+        updateModelItemWithPlot(test_item, update_data1, name1)
+
+        self.assertEqual(test_item.rowCount(), 2)
+
+        # add another dataset (with the same name as the first one)
+        # check that number of rows was not changed but data have been updated
+        update_data2 = Data1D(x=[4.0, 5.0, 6.0], y=[13.0, 14.0, 15.0])
+        update_data2.id = '[1]data0'
+        update_data2.name = 'data0'
+        name2 = "Black Sabbath2"
+        updateModelItemWithPlot(test_item, update_data2, name2)
+        self.assertEqual(test_item.rowCount(), 2)
+
+        data_from_item = test_item.child(0).child(0).data()
+        self.assertSequenceEqual(list(data_from_item.x), [4.0, 5.0, 6.0])
+        self.assertSequenceEqual(list(data_from_item.y), [13.0, 14.0, 15.0])
 
 
     def testPlotsFromCheckedItems(self):
@@ -132,14 +165,14 @@ class GuiUtilsTest(unittest.TestCase):
         checkbox_item.setCheckable(True)
         checkbox_item.setCheckState(QtCore.Qt.Checked)
         test_item0 = QtGui.QStandardItem()
-        test_item0.setData(QtCore.QVariant(test_list0))
+        test_item0.setData(test_list0)
 
         # Checked item 1
         test_item1 = QtGui.QStandardItem(True)
         test_item1.setCheckable(True)
         test_item1.setCheckState(QtCore.Qt.Checked)
         object_item = QtGui.QStandardItem()
-        object_item.setData(QtCore.QVariant(test_list1))
+        object_item.setData(test_list1)
         test_item1.setChild(0, object_item)
 
         checkbox_item.setChild(0, test_item0)
@@ -150,7 +183,7 @@ class GuiUtilsTest(unittest.TestCase):
         test_item2.setCheckable(True)
         test_item2.setCheckState(QtCore.Qt.Unchecked)
         object_item = QtGui.QStandardItem()
-        object_item.setData(QtCore.QVariant(test_list2))
+        object_item.setData(test_list2)
         test_item2.setChild(0, object_item)
         checkbox_item.appendRow(test_item2)
 
@@ -161,9 +194,9 @@ class GuiUtilsTest(unittest.TestCase):
 
         # Make sure only the checked data is present
         # FRIDAY IN
-        self.assertIn(test_list0, plot_list[0])
+        self.assertIn(test_list0, plot_list[1])
         # SATURDAY IN
-        self.assertIn(test_list1, plot_list[1])
+        self.assertIn(test_list1, plot_list[0])
         # MONDAY NOT IN
         self.assertNotIn(test_list2, plot_list[0])
         self.assertNotIn(test_list2, plot_list[1])
@@ -304,7 +337,7 @@ class GuiUtilsTest(unittest.TestCase):
 
         # Test the .txt format
         file_name = "test123_out.txt"
-        QtGui.QFileDialog.getSaveFileName = MagicMock(return_value=file_name)
+        QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
         data.filename = "test123.txt"
         saveData1D(data)
         self.assertTrue(os.path.isfile(file_name))
@@ -312,7 +345,7 @@ class GuiUtilsTest(unittest.TestCase):
 
         # Test the .xml format
         file_name = "test123_out.xml"
-        QtGui.QFileDialog.getSaveFileName = MagicMock(return_value=file_name)
+        QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
         data.filename = "test123.xml"
         saveData1D(data)
         self.assertTrue(os.path.isfile(file_name))
@@ -320,7 +353,7 @@ class GuiUtilsTest(unittest.TestCase):
 
         # Test the wrong format
         file_name = "test123_out.mp3"
-        QtGui.QFileDialog.getSaveFileName = MagicMock(return_value=file_name)
+        QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
         data.filename = "test123.mp3"
         saveData1D(data)
         self.assertFalse(os.path.isfile(file_name))
@@ -336,7 +369,7 @@ class GuiUtilsTest(unittest.TestCase):
 
         # Test the .txt format
         file_name = "test123_out.dat"
-        QtGui.QFileDialog.getSaveFileName = MagicMock(return_value=file_name)
+        QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
         data.filename = "test123.dat"
         saveData2D(data)
         self.assertTrue(os.path.isfile(file_name))
@@ -344,7 +377,7 @@ class GuiUtilsTest(unittest.TestCase):
 
         # Test the wrong format
         file_name = "test123_out.mp3"
-        QtGui.QFileDialog.getSaveFileName = MagicMock(return_value=file_name)
+        QtWidgets.QFileDialog.getSaveFileName = MagicMock(return_value=(file_name,''))
         data.filename = "test123.mp3"
         saveData2D(data)
         self.assertFalse(os.path.isfile(file_name))
@@ -413,6 +446,175 @@ class GuiUtilsTest(unittest.TestCase):
         self.assertEqual(yLabel, " \\ \\ ^{4}(()^{4})")
         self.assertEqual(yscale, "log")
 
+    def testReplaceHTMLwithUTF8(self):
+        ''' test single character replacement '''
+        s = None
+        with self.assertRaises(AttributeError):
+            result = replaceHTMLwithUTF8(s)
+
+        s = ""
+        self.assertEqual(replaceHTMLwithUTF8(s), s)
+
+        s = "aaaa"
+        self.assertEqual(replaceHTMLwithUTF8(s), s)
+
+        s = "&#x212B; &#x221e;      &#177;"
+        self.assertEqual(replaceHTMLwithUTF8(s), "Å ∞      ±")
+
+    def testReplaceHTMLwithASCII(self):
+        ''' test single character replacement'''
+        s = None
+        with self.assertRaises(AttributeError):
+            result = replaceHTMLwithASCII(s)
+
+        s = ""
+        self.assertEqual(replaceHTMLwithASCII(s), s)
+
+        s = "aaaa"
+        self.assertEqual(replaceHTMLwithASCII(s), s)
+
+        s = "&#x212B; &#x221e;      &#177;"
+        self.assertEqual(replaceHTMLwithASCII(s), "Ang inf      +/-")
+
+    def testConvertUnitToUTF8(self):
+        ''' test unit string replacement'''
+        s = None
+        self.assertIsNone(convertUnitToUTF8(s))
+
+        s = ""
+        self.assertEqual(convertUnitToUTF8(s), s)
+
+        s = "aaaa"
+        self.assertEqual(convertUnitToUTF8(s), s)
+
+        s = "1/A"
+        self.assertEqual(convertUnitToUTF8(s), "Å<sup>-1</sup>")
+
+        s = "Ang"
+        self.assertEqual(convertUnitToUTF8(s), "Å")
+
+        s = "1e-6/Ang^2"
+        self.assertEqual(convertUnitToUTF8(s), "10<sup>-6</sup>/Å<sup>2</sup>")
+
+        s = "inf"
+        self.assertEqual(convertUnitToUTF8(s), "∞")
+
+        s = "1/cm"
+        self.assertEqual(convertUnitToUTF8(s), "cm<sup>-1</sup>")
+
+    def testConvertUnitToHTML(self):
+        ''' test unit string replacement'''
+        s = None
+        self.assertIsNone(convertUnitToHTML(s))
+
+        s = ""
+        self.assertEqual(convertUnitToHTML(s), s)
+
+        s = "aaaa"
+        self.assertEqual(convertUnitToHTML(s), s)
+
+        s = "1/A"
+        self.assertEqual(convertUnitToHTML(s), "&#x212B;<sup>-1</sup>")
+
+        s = "Ang"
+        self.assertEqual(convertUnitToHTML(s), "&#x212B;")
+
+        s = "1e-6/Ang^2"
+        self.assertEqual(convertUnitToHTML(s), "10<sup>-6</sup>/&#x212B;<sup>2</sup>")
+
+        s = "inf"
+        self.assertEqual(convertUnitToHTML(s), "&#x221e;")
+        s = "-inf"
+
+        self.assertEqual(convertUnitToHTML(s), "-&#x221e;")
+
+        s = "1/cm"
+        self.assertEqual(convertUnitToHTML(s), "cm<sup>-1</sup>")
+
+    def testParseName(self):
+        '''test parse out a string from the beinning of a string'''
+        # good input
+        value = "_test"
+        self.assertEqual(parseName(value, '_'), 'test')
+        value = "____test____"
+        self.assertEqual(parseName(value, '_'), '___test____')
+        self.assertEqual(parseName(value, '___'), '_test____')
+        self.assertEqual(parseName(value, 'test'), '____test____')
+        # bad input
+        with self.assertRaises(TypeError):
+            parseName(value, None)
+        with self.assertRaises(TypeError):
+            parseName(None, '_')
+        value = []
+        with self.assertRaises(TypeError):
+            parseName(value, '_')
+        value = 1.44
+        with self.assertRaises(TypeError):
+            parseName(value, 'p')
+        value = 100
+        with self.assertRaises(TypeError):
+            parseName(value, 'p')
+
+    def testToDouble(self):
+        '''test homemade string-> double converter'''
+        #good values
+        value = "1"
+        self.assertEqual(toDouble(value), 1.0)
+        value = "1.2"
+        # has to be AlmostEqual due to numerical rounding
+        self.assertAlmostEqual(toDouble(value), 1.2, 6)
+        value = "2,1"
+        self.assertAlmostEqual(toDouble(value), 2.1, 6)
+
+        # bad values
+        value = None
+        with self.assertRaises(TypeError):
+            toDouble(value)
+        value = "MyDouble"
+        with self.assertRaises(TypeError):
+            toDouble(value)
+        value = [1,2.2]
+        with self.assertRaises(TypeError):
+            toDouble(value)
+
+
+class DoubleValidatorTest(unittest.TestCase):
+    """ Test the validator for floats """
+    def setUp(self):
+        '''Create the validator'''
+        self.validator = DoubleValidator()
+
+    def tearDown(self):
+        '''Destroy the validator'''
+        self.validator = None
+
+    def testValidateGood(self):
+        """Test a valid float """
+        QtCore.QLocale.setDefault(QtCore.QLocale('en_US'))
+        float_good = "170"
+        self.assertEqual(self.validator.validate(float_good, 1)[0], QtGui.QValidator.Acceptable)
+        float_good = "170.11"
+        ## investigate: a double returns Invalid here!
+        ##self.assertEqual(self.validator.validate(float_good, 1)[0], QtGui.QValidator.Acceptable)
+        float_good = "17e2"
+        self.assertEqual(self.validator.validate(float_good, 1)[0], QtGui.QValidator.Acceptable)
+
+    def testValidateBad(self):
+        """Test a bad float """
+        float_bad = None
+        self.assertEqual(self.validator.validate(float_bad, 1)[0], QtGui.QValidator.Intermediate)
+        float_bad = [1]
+        with self.assertRaises(TypeError):
+           self.validator.validate(float_bad, 1)
+        float_bad = "1,3"
+        self.assertEqual(self.validator.validate(float_bad, 1)[0], QtGui.QValidator.Invalid)
+
+    def notestFixup(self):
+        """Fixup of a float"""
+        float_to_fixup = "1,3"
+        self.validator.fixup(float_to_fixup)
+        self.assertEqual(float_to_fixup, "13")
+
 
 class FormulaValidatorTest(unittest.TestCase):
     """ Test the formula validator """
@@ -433,7 +635,7 @@ class FormulaValidatorTest(unittest.TestCase):
         self.assertEqual(self.validator.validate(formula_good, 1)[0], QtGui.QValidator.Acceptable)
 
     def testValidateBad(self):
-        """Test a valid Formula """
+        """Test an invalid Formula """
         formula_bad = "H24 %%%O12C4C6N2Pu"
         self.assertRaises(self.validator.validate(formula_bad, 1)[0])
         self.assertEqual(self.validator.validate(formula_bad, 1)[0], QtGui.QValidator.Intermediate)
@@ -441,6 +643,30 @@ class FormulaValidatorTest(unittest.TestCase):
         formula_bad = [1]
         self.assertEqual(self.validator.validate(formula_bad, 1)[0], QtGui.QValidator.Intermediate)
 
+class HashableStandardItemTest(unittest.TestCase):
+    """ Test the reimplementation of QStandardItem """
+    def setUp(self):
+        '''Create the validator'''
+        self.item = HashableStandardItem()
+
+    def tearDown(self):
+        '''Destroy the validator'''
+        self.item = None
+
+    def testHash(self):
+        '''assure the item returns hash'''
+        self.assertEqual(self.item.__hash__(), 0)
+
+    def testIndexing(self):
+        '''test that we can use HashableSI as an index'''
+        dictionary = {}
+        dictionary[self.item] = "wow!"
+        self.assertEqual(dictionary[self.item], "wow!")
+
+    def testClone(self):
+        '''let's see if we can clone the item'''
+        item_clone = self.item.clone()
+        self.assertEqual(item_clone.__hash__(), 0)
 
 if __name__ == "__main__":
     unittest.main()

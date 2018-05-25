@@ -117,9 +117,8 @@ def prepare():
 
     # Import the sasview package from root/sasview as sas.sasview.  It would
     # be better to just store the package in src/sas/sasview.
-    import sas
-    #sas.sasview = import_package('sas.sasview', joinpath(root, 'sasview'))
-    sas.sasview = import_package('sas.sasview', joinpath(root, 'src','sas','sasview'))
+    #import sas
+    #sas.sasview = import_package('sas.sasview', joinpath(root, 'src','sas','sasview'))
 
     # Compiled modules need to be pulled from the build directory.
     # Some packages are not where they are needed, so load them explicitly.
@@ -137,9 +136,14 @@ def prepare():
     # Some packages are not where they are needed, so load them explicitly.
     import sas.sascalc.calculator
     sas.sascalc.calculator.core = import_package('sas.sascalc.calculator.core',
-                                                 joinpath(build_path, 'sas', 'sascalc', 'calculator', 'core'))
+                                  joinpath(build_path, 'sas', 'sascalc', 'calculator', 'core'))
 
     sys.path.append(build_path)
+
+    # Run the UI conversion tool if executed from script
+    if os.path.splitext(sys.argv[0])[1].lower() == ".py":
+        import sas.qtgui.convertUI
+
 
 if __name__ == "__main__":
     # Need to add absolute path before actual prepare call,
@@ -151,6 +155,6 @@ if __name__ == "__main__":
 
     logger.debug("Starting SASVIEW in debug mode.")
     prepare()
-    from sas.qtgui.MainWindow.MainWindow import run
-    run()
+    from sas.qtgui.MainWindow.MainWindow import run_sasview
+    run_sasview()
     logger.debug("Ending SASVIEW in debug mode.")

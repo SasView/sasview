@@ -13,8 +13,8 @@ import sys
 
 from sas.sasgui.guiframe.panel_base import PanelBase
 from sas.sascalc.calculator.kiessig_calculator import KiessigThicknessCalculator
-from calculator_widgets import OutputTextCtrl
-from calculator_widgets import InputTextCtrl
+from .calculator_widgets import OutputTextCtrl
+from .calculator_widgets import InputTextCtrl
 from sas.sasgui.perspectives.calculator import calculator_widgets as widget
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
 

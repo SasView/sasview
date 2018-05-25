@@ -1,6 +1,6 @@
 import sys
 import unittest
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtCore
 
 from sas.qtgui.Plotting.PlotterData import Data1D
 from sas.qtgui.Plotting.PlotterData import Data2D
@@ -264,6 +264,26 @@ class FittingUtilitiesTest(unittest.TestCase):
         # Should throw
         with self.assertRaises(ValueError):
             chi = FittingUtilities.calculateChi2(reference_data, current_data)
+
+    def notestAddHeadersToModel(self):
+        '''Check to see if headers are correctly applied'''
+        #test model
+        model = QtGui.QStandardItemModel()
+        FittingUtilities.addHeadersToModel(model)
+
+        # Assure we have properly named columns
+        names = FittingUtilities.model_header_captions
+        names_from_model = [model.headerData(i, QtCore.Qt.Horizontal) for i in range(len(names))]
+        self.assertEqual(names, names_from_model)
+
+        # Add another model
+        model2 = QtGui.QStandardItemModel()
+        # Add headers again
+        FittingUtilities.addHeadersToModel(model2)
+        # We still should have only the original names
+        names_from_model2 = [model2.headerData(i, QtCore.Qt.Horizontal) for i in range(len(names))]
+        self.assertEqual(names, names_from_model2)
+
 
 if __name__ == "__main__":
     unittest.main()

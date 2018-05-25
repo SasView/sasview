@@ -2,10 +2,10 @@ import sys
 import unittest
 import webbrowser
 
-from PyQt4 import QtGui
-from PyQt4.QtTest import QTest
-from PyQt4 import QtCore
-from mock import MagicMock
+from PyQt5 import QtGui, QtWidgets
+from PyQt5.QtTest import QTest
+from PyQt5 import QtCore
+from unittest.mock import MagicMock
 
 # set up import paths
 import path_prepare
@@ -14,8 +14,8 @@ import path_prepare
 from sas.qtgui.MainWindow.AboutBox import AboutBox
 import sas.qtgui.Utilities.LocalConfig as LocalConfig
 
-if not QtGui.QApplication.instance():
-    app = QtGui.QApplication(sys.argv)
+if not QtWidgets.QApplication.instance():
+    app = QtWidgets.QApplication(sys.argv)
 
 class AboutBoxTest(unittest.TestCase):
     '''Test the AboutBox'''
@@ -30,7 +30,7 @@ class AboutBoxTest(unittest.TestCase):
 
     def testDefaults(self):
         '''Test the GUI in its default state'''
-        self.assertIsInstance(self.widget, QtGui.QWidget)
+        self.assertIsInstance(self.widget, QtWidgets.QWidget)
         self.assertEqual(self.widget.windowTitle(), "About")
         self.assertEqual(self.widget.cmdOK.text(), "OK")
 
@@ -44,7 +44,7 @@ class AboutBoxTest(unittest.TestCase):
         Assure the version number is as expected
         """
         version = self.widget.lblVersion
-        self.assertIsInstance(version, QtGui.QLabel)
+        self.assertIsInstance(version, QtWidgets.QLabel)
         self.assertEqual(str(version.text()), str(LocalConfig.__version__))
 
     def testAbout(self):
@@ -52,7 +52,7 @@ class AboutBoxTest(unittest.TestCase):
         Assure the about label is filled properly
         """
         about = self.widget.lblAbout
-        self.assertIsInstance(about, QtGui.QLabel)
+        self.assertIsInstance(about, QtWidgets.QLabel)
         # build version
         self.assertIn(str(LocalConfig.__build__), about.text())
         # License
@@ -82,7 +82,7 @@ class AboutBoxTest(unittest.TestCase):
                 LocalConfig._inst_url]
 
         # Press the buttons
-        buttonList = self.widget.findChildren(QtGui.QPushButton)
+        buttonList = self.widget.findChildren(QtWidgets.QPushButton)
         for button in buttonList:
             QTest.mouseClick(button, QtCore.Qt.LeftButton)
             #open_link = webbrowser.open.call_args

@@ -2,7 +2,7 @@ import sys
 import unittest
 
 import numpy
-from mock import MagicMock
+from unittest.mock import MagicMock
 
 # set up import paths
 import sas.qtgui.path_prepare
@@ -11,9 +11,6 @@ import sas.qtgui.path_prepare
 from sas.qtgui.Utilities.GuiUtils import *
 from sas.qtgui.Perspectives.Fitting.FittingWidget import *
 from sas.qtgui.Plotting.PlotterData import Data1D
-
-if not QtGui.QApplication.instance():
-    app = QtGui.QApplication(sys.argv)
 
 
 class FittingLogicTest(unittest.TestCase):
@@ -100,6 +97,7 @@ class FittingLogicTest(unittest.TestCase):
         """
         data = Data1D(x=[1,2,3],y=[3,4,5])
         data.name = "boop"
+        data.id = "poop"
         return_data = (data.x,data.y, 7, None, None,
                         0, True, 0.0, 1, data,
                         data, False, None)
@@ -109,8 +107,8 @@ class FittingLogicTest(unittest.TestCase):
         self.assertIsInstance(new_plot, Data1D)
         self.assertFalse(new_plot.is_data)
         self.assertEqual(new_plot.dy.size, 3)
-        self.assertEqual(new_plot.title, "boop [boop]")
-        self.assertEqual(new_plot.name, "boop [boop]")
+        self.assertEqual(new_plot.title, "boop [poop]")
+        self.assertEqual(new_plot.name, "boop [poop]")
 
     def testNew2DPlot(self):
         """

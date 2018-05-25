@@ -16,7 +16,7 @@ from sas.sasgui.perspectives.corfunc.corfunc_state import CorfuncState
 import sas.sasgui.perspectives.corfunc.corfunc
 from sas.sascalc.corfunc.corfunc_calculator import CorfuncCalculator
 from sas.sasgui.guiframe.documentation_window import DocumentationWindow
-from plot_labels import *
+from .plot_labels import *
 
 OUTPUT_STRINGS = {
     'max': "Long Period / 2 (A): ",
@@ -392,10 +392,10 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         """
         if params is None:
             # Reset outputs
-            for output in self._extrapolation_outputs.values():
+            for output in list(self._extrapolation_outputs.values()):
                 output.SetValue('-')
             return
-        for key, value in params.iteritems():
+        for key, value in params.items():
             output = self._extrapolation_outputs[key]
             rounded = self._round_sig_figs(value, 6)
             output.SetValue(rounded)
@@ -410,13 +410,13 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         error = False
         if params is None:
             if not reset: error = True
-            for output in self._output_boxes.values():
+            for output in list(self._output_boxes.values()):
                 output.SetValue('-')
         else:
             if len(params) < len(OUTPUT_STRINGS):
                 # Not all parameters were calculated
                 error = True
-            for key, value in params.iteritems():
+            for key, value in params.items():
                 rounded = self._round_sig_figs(value, 6)
                 self._output_boxes[key].SetValue(rounded)
         if error:
@@ -655,7 +655,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
         params_sizer.Add(k_output, (1, 3), (1, 1), wx.RIGHT | wx.EXPAND, 15)
         self._extrapolation_outputs['K'] = k_output
 
-        sigma_label = wx.StaticText(self, -1, u'\u03C3: ')
+        sigma_label = wx.StaticText(self, -1, '\u03C3: ')
         params_sizer.Add(sigma_label, (2, 2), (1, 1), wx.LEFT | wx.EXPAND, 15)
 
         sigma_output = OutputTextCtrl(self, wx.NewId(),
@@ -712,7 +712,7 @@ class CorfuncPanel(ScrolledPanel,PanelBase):
 
         self._output_boxes = dict()
         i = 0
-        for key, value in OUTPUT_STRINGS.iteritems():
+        for key, value in OUTPUT_STRINGS.items():
             # Create a label and a text box for each poperty
             label = wx.StaticText(self, -1, value)
             output_box = OutputTextCtrl(self, wx.NewId(),

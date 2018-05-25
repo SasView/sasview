@@ -1,4 +1,6 @@
-from PyQt4 import QtGui
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 from sas.qtgui.Plotting.PlotterData import Data2D
 
@@ -7,7 +9,7 @@ from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.MaskEditorUI import Ui_MaskEditorUI
 from sas.qtgui.Plotting.Plotter2D import Plotter2DWidget
 
-class MaskEditor(QtGui.QDialog, Ui_MaskEditorUI):
+class MaskEditor(QtWidgets.QDialog, Ui_MaskEditorUI):
     def __init__(self, parent=None, data=None):
         super(MaskEditor, self).__init__()
 
@@ -22,7 +24,7 @@ class MaskEditor(QtGui.QDialog, Ui_MaskEditorUI):
         self.plotter = Plotter2DWidget(self, manager=parent, quickplot=True)
         self.plotter.data = self.data
 
-        layout = QtGui.QHBoxLayout()
+        layout = QtWidgets.QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         self.frame.setLayout(layout)
         layout.addWidget(self.plotter)

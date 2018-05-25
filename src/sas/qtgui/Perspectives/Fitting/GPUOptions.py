@@ -4,9 +4,10 @@ import sys
 import sasmodels
 import json
 import platform
+import webbrowser
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
-from PyQt4 import QtGui, QtCore, QtWebKit
+from PyQt5 import QtGui, QtCore, QtWidgets
 from sas.qtgui.Perspectives.Fitting.UI.GPUOptionsUI import Ui_GPUOptions
 from sas.qtgui.Perspectives.Fitting.UI.GPUTestResultsUI import Ui_GPUTestResults
 
@@ -17,15 +18,15 @@ except AttributeError:
         return s
 
 try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
+    _encoding = QtWidgets.QApplication.UnicodeUTF8
     def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+        return QtWidgets.QApplication.translate(context, text, disambig, _encoding)
 except AttributeError:
     def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+        return QtWidgets.QApplication.translate(context, text, disambig)
 
 
-class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
+class GPUOptions(QtWidgets.QDialog, Ui_GPUOptions):
     """
     OpenCL Dialog to select the desired OpenCL driver
     """
@@ -38,7 +39,6 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
         self.parent = parent
         self.setupUi(self)
         self.addOpenCLOptions()
-        self.setFixedSize(self.size())
         self.createLinks()
 
     def addOpenCLOptions(self):
@@ -50,7 +50,7 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
         self.sas_open_cl = os.environ.get("SAS_OPENCL", "")
         for title, descr in cl_tuple:
             # Create an item for each openCL option
-            check_box = QtGui.QCheckBox()
+            check_box = QtWidgets.QCheckBox()
             check_box.setObjectName(_fromUtf8(descr))
             check_box.setText(_translate("GPUOptions", descr, None))
             self.optionsLayout.addWidget(check_box)
@@ -58,9 +58,7 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
                             title == "None" and not self.clicked):
                 check_box.click()
                 self.clicked = True
-        self.openCLCheckBoxGroup.setMinimumWidth(
-            self.optionsLayout.sizeHint().width())
-        self.setMinimumWidth(self.verticalLayout.sizeHint().width())
+        self.openCLCheckBoxGroup.setMinimumWidth(self.optionsLayout.sizeHint().width()+10)
 
     def createLinks(self):
         """
@@ -68,7 +66,7 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
         """
         self.testButton.clicked.connect(self.testButtonClicked)
         self.helpButton.clicked.connect(self.helpButtonClicked)
-        for item in self.openCLCheckBoxGroup.findChildren(QtGui.QCheckBox):
+        for item in self.openCLCheckBoxGroup.findChildren(QtWidgets.QCheckBox):
             item.clicked.connect(self.checked)
 
     def checked(self):
@@ -76,7 +74,7 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
         Only allow a single check box to be selected. Uncheck others.
         """
         checked = None
-        for box in self.openCLCheckBoxGroup.findChildren(QtGui.QCheckBox):
+        for box in self.openCLCheckBoxGroup.findChildren(QtWidgets.QCheckBox):
             if box.isChecked() and (str(box.text()) == self.sas_open_cl or (
                     str(box.text()) == "No OpenCL" and self.sas_open_cl == "")):
                 box.setChecked(False)
@@ -102,6 +100,7 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
         # Sasmodels kernelcl doesn't exist when initiated with None
         if 'sasmodels.kernelcl' in sys.modules:
             sasmodels.kernelcl.ENV = None
+        from importlib import reload # assumed Python > 3.3
         reload(sasmodels.core)
         return no_opencl_msg
 
@@ -170,11 +169,10 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
         Open the help menu when the help button is clicked
         """
         help_location = GuiUtils.HELP_DIRECTORY_LOCATION
-        help_location += "/user/sasgui/perspectives/fitting/gpu_setup.html"
+        help_location += "/user/qtgui/Perspectives/Fitting/gpu_setup.html"
         help_location += "#device-selection"
-        self.helpView = QtWebKit.QWebView()
-        self.helpView.load(QtCore.QUrl(help_location))
-        self.helpView.show()
+        # Display the page in default browser
+        webbrowser.open('file://' + os.path.realpath(help_location))
 
     def reject(self):
         """
@@ -198,7 +196,7 @@ class GPUOptions(QtGui.QDialog, Ui_GPUOptions):
         self.parent.gpu_options_widget = GPUOptions(self.parent)
 
 
-class GPUTestResults(QtGui.QDialog, Ui_GPUTestResults):
+class GPUTestResults(QtWidgets.QDialog, Ui_GPUTestResults):
     """
     OpenCL Dialog to modify the OpenCL options
     """
@@ -206,7 +204,7 @@ class GPUTestResults(QtGui.QDialog, Ui_GPUTestResults):
         super(GPUTestResults, self).__init__(parent)
         self.setupUi(self)
         self.resultsText.setText(_translate("GPUTestResults", msg, None))
-        self.setFixedSize(self.size())
+        #self.setFixedSize(self.size())
         self.open()
 
 

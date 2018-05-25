@@ -4,10 +4,9 @@ import os
 import time
 import logging
 
-from PyQt4 import QtCore
-from PyQt4 import QtGui
-from PyQt4 import QtWebKit
-from PyQt4.Qt import QMutex
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 from twisted.internet import threads
 
@@ -29,6 +28,8 @@ from sas.qtgui.MainWindow.DroppableDataLoadWidget import DroppableDataLoadWidget
 
 import sas.qtgui.Perspectives as Perspectives
 
+DEFAULT_PERSPECTIVE = "Fitting"
+
 class DataExplorerWindow(DroppableDataLoadWidget):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
@@ -47,10 +48,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.parent = guimanager
         self.loader = Loader()
         self.manager = manager if manager is not None else DataManager()
-        self.txt_widget = QtGui.QTextEdit(None)
+        self.txt_widget = QtWidgets.QTextEdit(None)
 
         # Be careful with twisted threads.
-        self.mutex = QMutex()
+        self.mutex = QtCore.QMutex()
 
         # Active plots
         self.active_plots = {}
@@ -66,9 +67,6 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cmdAppend.clicked.connect(self.appendPlot)
         self.cmdHelp.clicked.connect(self.displayHelp)
         self.cmdHelp_2.clicked.connect(self.displayHelp)
-
-        # Display HTML content
-        self._helpView = QtWebKit.QWebView()
 
         # Fill in the perspectives combo
         self.initPerspectives()
@@ -97,7 +95,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
 
         # Proxy model for showing a subset of Data1D/Data2D content
-        self.data_proxy = QtGui.QSortFilterProxyModel(self)
+        self.data_proxy = QtCore.QSortFilterProxyModel(self)
         self.data_proxy.setSourceModel(self.model)
 
         # Don't show "empty" rows with data objects
@@ -107,7 +105,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.treeView.setModel(self.data_proxy)
 
         # Proxy model for showing a subset of Theory content
-        self.theory_proxy = QtGui.QSortFilterProxyModel(self)
+        self.theory_proxy = QtCore.QSortFilterProxyModel(self)
         self.theory_proxy.setSourceModel(self.theory_model)
 
         # Don't show "empty" rows with data objects
@@ -138,10 +136,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Show the "Loading data" section of help
         """
-        tree_location = GuiUtils.HELP_DIRECTORY_LOCATION +\
-            "/user/sasgui/guiframe/data_explorer_help.html"
-        self._helpView.load(QtCore.QUrl(tree_location))
-        self._helpView.show()
+        tree_location = "/user/qtgui/MainWindow/data_explorer_help.html"
+        self.parent.showHelp(tree_location)
 
     def enableGraphCombo(self, combo_text):
         """
@@ -154,13 +150,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Populate the Perspective combobox and define callbacks
         """
-        available_perspectives = sorted([p for p in Perspectives.PERSPECTIVES.keys()])
+        available_perspectives = sorted([p for p in list(Perspectives.PERSPECTIVES.keys())])
         if available_perspectives:
             self.cbFitting.clear()
             self.cbFitting.addItems(available_perspectives)
         self.cbFitting.currentIndexChanged.connect(self.updatePerspectiveCombo)
         # Set the index so we see the default (Fitting)
-        self.updatePerspectiveCombo(0)
+        self.cbFitting.setCurrentIndex(self.cbFitting.findText(DEFAULT_PERSPECTIVE))
 
     def _perspective(self):
         """
@@ -174,6 +170,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         load_thread = threads.deferToThread(self.readData, url)
         load_thread.addCallback(self.loadComplete)
+        load_thread.addErrback(self.loadFailed)
 
     def loadFile(self, event=None):
         """
@@ -190,8 +187,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Called when the "File/Load Folder" menu item chosen.
         Opens the Qt "Open Folder..." dialog
         """
-        folder = QtGui.QFileDialog.getExistingDirectory(self, "Choose a directory", "",
-              QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontUseNativeDialog)
+        folder = QtWidgets.QFileDialog.getExistingDirectory(self, "Choose a directory", "",
+              QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontUseNativeDialog)
         if folder is None:
             return
 
@@ -214,12 +211,25 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             'parent'    : self,
             'caption'   : 'Open Project',
             'filter'    : 'Project (*.json);;All files (*.*)',
-            'options'   : QtGui.QFileDialog.DontUseNativeDialog
+            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
         }
-        filename = str(QtGui.QFileDialog.getOpenFileName(**kwargs))
+        filename = QtWidgets.QFileDialog.getOpenFileName(**kwargs)[0]
         if filename:
             load_thread = threads.deferToThread(self.readProject, filename)
             load_thread.addCallback(self.readProjectComplete)
+            load_thread.addErrback(self.readProjectFailed)
+
+    def loadFailed(self, reason):
+        """
+        """
+        print("file load FAILED: ", reason)
+        pass
+
+    def readProjectFailed(self, reason):
+        """
+        """
+        print("readProjectFailed FAILED: ", reason)
+        pass
 
     def readProject(self, filename):
         self.communicator.statusBarUpdateSignal.emit("Loading Project... %s" % os.path.basename(filename))
@@ -239,10 +249,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.model.clear()
 
         self.manager.assign(manager)
-        for id, item in self.manager.get_all_data().iteritems():
+        self.model.beginResetModel()
+        for id, item in self.manager.get_all_data().items():
             self.updateModel(item.data, item.path)
 
-        self.model.reset()
+        self.model.endResetModel()
 
     def saveProject(self):
         """
@@ -252,10 +263,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             'parent'    : self,
             'caption'   : 'Save Project',
             'filter'    : 'Project (*.json)',
-            'options'   : QtGui.QFileDialog.DontUseNativeDialog
+            'options'   : QtWidgets.QFileDialog.DontUseNativeDialog
         }
-        filename = str(QtGui.QFileDialog.getSaveFileName(**kwargs))
+        name_tuple = QtWidgets.QFileDialog.getSaveFileName(**kwargs)
+        filename = name_tuple[0]
         if filename:
+            _, extension = os.path.splitext(filename)
+            if not extension:
+                filename = '.'.join((filename, 'json'))
             self.communicator.statusBarUpdateSignal.emit("Saving Project... %s\n" % os.path.basename(filename))
             with open(filename, 'w') as outfile:
                 self.manager.save_to_writable(outfile)
@@ -267,13 +282,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Assure this is indeed wanted
         delete_msg = "This operation will delete the checked data sets and all the dependents." +\
                      "\nDo you want to continue?"
-        reply = QtGui.QMessageBox.question(self,
+        reply = QtWidgets.QMessageBox.question(self,
                                            'Warning',
                                            delete_msg,
-                                           QtGui.QMessageBox.Yes,
-                                           QtGui.QMessageBox.No)
+                                           QtWidgets.QMessageBox.Yes,
+                                           QtWidgets.QMessageBox.No)
 
-        if reply == QtGui.QMessageBox.No:
+        if reply == QtWidgets.QMessageBox.No:
             return
 
         # Figure out which rows are checked
@@ -307,13 +322,13 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Assure this is indeed wanted
         delete_msg = "This operation will delete the checked data sets and all the dependents." +\
                      "\nDo you want to continue?"
-        reply = QtGui.QMessageBox.question(self,
+        reply = QtWidgets.QMessageBox.question(self,
                                            'Warning',
                                            delete_msg,
-                                           QtGui.QMessageBox.Yes,
-                                           QtGui.QMessageBox.No)
+                                           QtWidgets.QMessageBox.Yes,
+                                           QtWidgets.QMessageBox.No)
 
-        if reply == QtGui.QMessageBox.No:
+        if reply == QtWidgets.QMessageBox.No:
             return
 
         # Figure out which rows are checked
@@ -344,7 +359,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Figure out which rows are checked
         selected_items = [self.model.item(index)
-                          for index in xrange(self.model.rowCount())
+                          for index in range(self.model.rowCount())
                           if isItemReady(index)]
 
         if len(selected_items) < 1:
@@ -353,10 +368,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Which perspective has been selected?
         if len(selected_items) > 1 and not self._perspective().allowBatch():
             msg = self._perspective().title() + " does not allow multiple data."
-            msgbox = QtGui.QMessageBox()
-            msgbox.setIcon(QtGui.QMessageBox.Critical)
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.setIcon(QtWidgets.QMessageBox.Critical)
             msgbox.setText(msg)
-            msgbox.setStandardButtons(QtGui.QMessageBox.Ok)
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.Ok)
             retval = msgbox.exec_()
             return
 
@@ -381,6 +396,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 continue
             if outer_item.isCheckable() and \
                    outer_item.checkState() == QtCore.Qt.Checked:
+                self.model.beginResetModel()
                 theories_copied += 1
                 new_item = self.recursivelyCloneItem(outer_item)
                 # Append a "unique" descriptor to the name
@@ -388,7 +404,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 new_name = new_item.text() + '_@' + time_bit
                 new_item.setText(new_name)
                 self.model.appendRow(new_item)
-            self.model.reset()
+                self.model.endResetModel()
+            #self.model.reset()
 
         freeze_msg = ""
         if theories_copied == 0:
@@ -399,7 +416,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             freeze_msg = "%i theories copied from the Theory tab as data sets" % theories_copied
         else:
             freeze_msg = "Unexpected number of theories copied: %i" % theories_copied
-            raise AttributeError, freeze_msg
+            raise AttributeError(freeze_msg)
         self.communicator.statusBarUpdateSignal.emit(freeze_msg)
         # Actively switch tabs
         self.setCurrentIndex(1)
@@ -410,7 +427,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         new_item = item.clone()
         # clone doesn't do deepcopy :(
-        for child_index in xrange(item.rowCount()):
+        for child_index in range(item.rowCount()):
             child_item = self.recursivelyCloneItem(item.child(child_index))
             new_item.setChild(child_index, child_item)
         return new_item
@@ -434,7 +451,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if not self.active_plots:
             return
         new_plots = [PlotHelper.plotById(plot) for plot in graph_list]
-        active_plots_copy = self.active_plots.keys()
+        active_plots_copy = list(self.active_plots.keys())
         for plot in active_plots_copy:
             if self.active_plots[plot] in new_plots:
                 continue
@@ -455,21 +472,21 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         Notify the gui manager about the new perspective chosen.
         """
-        self.communicator.perspectiveChangedSignal.emit(self.cbFitting.currentText())
+        self.communicator.perspectiveChangedSignal.emit(self.cbFitting.itemText(index))
         self.chkBatch.setEnabled(self.parent.perspective().allowBatch())
 
-    def displayData(self, data_list):
+    def itemFromFilename(self, filename):
+        """
+        Retrieves model item corresponding to the given filename
+        """
+        item = GuiUtils.itemFromFilename(filename, self.model)
+        return item
+
+    def displayFile(self, filename=None, is_data=True):
         """
         Forces display of charts for the given filename
         """
-        plot_to_show = data_list[0]
-
-        # passed plot is used ONLY to figure out its title,
-        # so all the charts related by it can be pulled from 
-        # the data explorer indices.
-        filename = plot_to_show.filename
-        model = self.model if plot_to_show.is_data else self.theory_model
-
+        model = self.model if is_data else self.theory_model
         # Now query the model item for available plots
         plots = GuiUtils.plotsFromFilename(filename, model)
         item = GuiUtils.itemFromFilename(filename, model)
@@ -477,7 +494,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         new_plots = []
         for plot in plots:
             plot_id = plot.id
-            if plot_id in self.active_plots.keys():
+            if plot_id in list(self.active_plots.keys()):
                 self.active_plots[plot_id].replacePlot(plot_id, plot)
             else:
                 # 'sophisticated' test to generate standalone plot for residuals
@@ -488,6 +505,17 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         if new_plots:
             self.plotData(new_plots)
+
+    def displayData(self, data_list):
+        """
+        Forces display of charts for the given data set
+        """
+        plot_to_show = data_list[0]
+        # passed plot is used ONLY to figure out its title,
+        # so all the charts related by it can be pulled from 
+        # the data explorer indices.
+        filename = plot_to_show.filename
+        self.displayFile(filename=filename, is_data=plot_to_show.is_data)
 
     def addDataPlot2D(self, plot_set, item):
         """
@@ -529,7 +557,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 self.addDataPlot2D(plot_set, item)
             else:
                 msg = "Incorrect data type passed to Plotting"
-                raise AttributeError, msg
+                raise AttributeError(msg)
 
         if 'new_plot' in locals() and \
             hasattr(new_plot, 'data') and \
@@ -560,10 +588,11 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         new_plot.setObjectName(title)
 
         # Add the plot to the workspace
-        self.parent.workspace().addWindow(new_plot)
+        self.parent.workspace().addSubWindow(new_plot)
 
         # Show the plot
         new_plot.show()
+        new_plot.canvas.draw()
 
         # Update the active chart list
         #self.active_plots[new_plot.data.id] = new_plot
@@ -596,7 +625,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         assert type(data).__name__ in ['Data1D', 'Data2D']
 
         id = data.id
-        if data.id in self.active_plots.keys():
+        if data.id in list(self.active_plots.keys()):
             self.active_plots[id].replacePlot(id, data)
 
     def chooseFiles(self):
@@ -608,13 +637,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # Location is automatically saved - no need to keep track of the last dir
         # But only with Qt built-in dialog (non-platform native)
-        paths = QtGui.QFileDialog.getOpenFileNames(self, "Choose a file", "",
-                wlist, None, QtGui.QFileDialog.DontUseNativeDialog)
-        if paths is None:
+        paths = QtWidgets.QFileDialog.getOpenFileNames(self, "Choose a file", "",
+                wlist, None, QtWidgets.QFileDialog.DontUseNativeDialog)[0]
+        if not paths:
             return
-
-        if isinstance(paths, QtCore.QStringList):
-            paths = [str(f) for f in paths]
 
         if not isinstance(paths, list):
             paths = [paths]
@@ -672,8 +698,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     # Model update should be protected
                     self.mutex.lock()
                     self.updateModel(new_data, p_file)
-                    self.model.reset()
-                    QtGui.qApp.processEvents()
+                    #self.model.reset()
+                    QtWidgets.QApplication.processEvents()
                     self.mutex.unlock()
 
                     if hasattr(item, 'errors'):
@@ -686,7 +712,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                         data_error = True
 
             except Exception as ex:
-                logging.error(sys.exc_value)
+                logging.error(sys.exc_info()[1])
 
                 any_error = True
             if any_error or error_message != "":
@@ -746,7 +772,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         """
         if not isinstance(index, int):
             msg = "Incorrect type passed to DataExplorer.selectData()"
-            raise AttributeError, msg
+            raise AttributeError(msg)
 
         # Respond appropriately
         if index == 0:
@@ -772,7 +798,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     is1D = isinstance(GuiUtils.dataFromItem(item), Data1D)
                 except AttributeError:
                     msg = "Bad structure of the data model."
-                    raise RuntimeError, msg
+                    raise RuntimeError(msg)
 
                 if is1D:
                     item.setCheckState(QtCore.Qt.Checked)
@@ -786,7 +812,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     is1D = isinstance(GuiUtils.dataFromItem(item), Data1D)
                 except AttributeError:
                     msg = "Bad structure of the data model."
-                    raise RuntimeError, msg
+                    raise RuntimeError(msg)
 
                 if item.isCheckable() and item.checkState() == QtCore.Qt.Checked and is1D:
                     item.setCheckState(QtCore.Qt.Unchecked)
@@ -800,7 +826,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     is2D = isinstance(GuiUtils.dataFromItem(item), Data2D)
                 except AttributeError:
                     msg = "Bad structure of the data model."
-                    raise RuntimeError, msg
+                    raise RuntimeError(msg)
 
                 if is2D:
                     item.setCheckState(QtCore.Qt.Checked)
@@ -814,7 +840,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                     is2D = isinstance(GuiUtils.dataFromItem(item), Data2D)
                 except AttributeError:
                     msg = "Bad structure of the data model."
-                    raise RuntimeError, msg
+                    raise RuntimeError(msg)
 
                 if item.isCheckable() and item.checkState() == QtCore.Qt.Checked and is2D:
                     item.setCheckState(QtCore.Qt.Unchecked)
@@ -822,20 +848,23 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         else:
             msg = "Incorrect value in the Selection Option"
             # Change this to a proper logging action
-            raise Exception, msg
+            raise Exception(msg)
 
     def contextMenu(self):
         """
         Define actions and layout of the right click context menu
         """
         # Create a custom menu based on actions defined in the UI file
-        self.context_menu = QtGui.QMenu(self)
+        self.context_menu = QtWidgets.QMenu(self)
         self.context_menu.addAction(self.actionDataInfo)
         self.context_menu.addAction(self.actionSaveAs)
         self.context_menu.addAction(self.actionQuickPlot)
         self.context_menu.addSeparator()
         self.context_menu.addAction(self.actionQuick3DPlot)
         self.context_menu.addAction(self.actionEditMask)
+        self.context_menu.addSeparator()
+        self.context_menu.addAction(self.actionDelete)
+
 
         # Define the callbacks
         self.actionDataInfo.triggered.connect(self.showDataInfo)
@@ -843,6 +872,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.actionQuickPlot.triggered.connect(self.quickDataPlot)
         self.actionQuick3DPlot.triggered.connect(self.quickData3DPlot)
         self.actionEditMask.triggered.connect(self.showEditDataMask)
+        self.actionDelete.triggered.connect(self.deleteItem)
 
     def onCustomContextMenu(self, position):
         """
@@ -893,7 +923,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.txt_widget.show()
         # Move the slider all the way up, if present
         vertical_scroll_bar = self.txt_widget.verticalScrollBar()
-        vertical_scroll_bar.triggerAction(QtGui.QScrollBar.SliderToMinimum)
+        vertical_scroll_bar.triggerAction(QtWidgets.QScrollBar.SliderToMinimum)
 
     def saveDataAs(self):
         """
@@ -974,6 +1004,49 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Modal dialog here.
         mask_editor.exec_()
 
+    def deleteItem(self):
+        """
+        Delete the current item
+        """
+        # Assure this is indeed wanted
+        delete_msg = "This operation will delete the selected data sets." +\
+                     "\nDo you want to continue?"
+        reply = QtWidgets.QMessageBox.question(self,
+                                           'Warning',
+                                           delete_msg,
+                                           QtWidgets.QMessageBox.Yes,
+                                           QtWidgets.QMessageBox.No)
+
+        if reply == QtWidgets.QMessageBox.No:
+            return
+
+        indices = self.current_view.selectedIndexes()
+        proxy = self.current_view.model()
+        model = proxy.sourceModel()
+
+        for index in indices:
+            row_index = proxy.mapToSource(index)
+            item_to_delete = model.itemFromIndex(row_index)
+            if item_to_delete and item_to_delete.isCheckable():
+                row = row_index.row()
+                if item_to_delete.parent():
+                    # We have a child item - delete from it
+                    item_to_delete.parent().removeRow(row)
+                else:
+                    # delete directly from model
+                    model.removeRow(row)
+        pass
+
+    def onAnalysisUpdate(self, new_perspective=""):
+        """
+        Update the perspective combo index based on passed string
+        """
+        assert new_perspective in Perspectives.PERSPECTIVES.keys()
+        self.cbFitting.blockSignals(True)
+        self.cbFitting.setCurrentIndex(self.cbFitting.findText(new_perspective))
+        self.cbFitting.blockSignals(False)
+        pass
+
     def loadComplete(self, output):
         """
         Post message to status bar and update the data manager
@@ -981,7 +1054,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         assert isinstance(output, tuple)
 
         # Reset the model so the view gets updated.
-        self.model.reset()
+        #self.model.reset()
         self.communicator.progressBarUpdateSignal.emit(-1)
 
         output_data = output[0]
@@ -990,6 +1063,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.statusBarUpdateSignal.emit(message)
         self.communicator.fileDataReceivedSignal.emit(output_data)
         self.manager.add_data(data_list=output_data)
+
+    def loadFailed(self, reason):
+        print("File Load Failed with:\n", reason)
+        pass
 
     def updateModel(self, data, p_file):
         """
@@ -1008,14 +1085,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         #     |-------> THEORIES
 
         # Top-level item: checkbox with label
-        checkbox_item = QtGui.QStandardItem(True)
+        checkbox_item = GuiUtils.HashableStandardItem()
         checkbox_item.setCheckable(True)
         checkbox_item.setCheckState(QtCore.Qt.Checked)
         checkbox_item.setText(os.path.basename(p_file))
 
         # Add the actual Data1D/Data2D object
-        object_item = QtGui.QStandardItem()
-        object_item.setData(QtCore.QVariant(data))
+        object_item = GuiUtils.HashableStandardItem()
+        object_item.setData(data)
 
         checkbox_item.setChild(0, object_item)
 
@@ -1029,7 +1106,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         checkbox_item.setChild(2, QtGui.QStandardItem("THEORIES"))
 
         # New row in the model
+        self.model.beginResetModel()
         self.model.appendRow(checkbox_item)
+        self.model.endResetModel()
 
     def updateModelFromPerspective(self, model_item):
         """
@@ -1039,12 +1118,12 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Assert the correct type
         if not isinstance(model_item, QtGui.QStandardItem):
             msg = "Wrong data type returned from calculations."
-            raise AttributeError, msg
+            raise AttributeError(msg)
 
         # TODO: Assert other properties
 
         # Reset the view
-        self.model.reset()
+        ##self.model.reset()
         # Pass acting as a debugger anchor
         pass
 
@@ -1056,30 +1135,24 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Assert the correct type
         if not isinstance(model_item, QtGui.QStandardItem):
             msg = "Wrong data type returned from calculations."
-            raise AttributeError, msg
+            raise AttributeError(msg)
 
         # Check if there are any other items for this tab
         # If so, delete them
-        # TODO: fix this to resemble GuiUtils.updateModelItemWithPlot
-        # 
-        current_tab_name = model_item.text()[:2]
-        for current_index in xrange(self.theory_model.rowCount()):
-            if current_tab_name in self.theory_model.item(current_index).text():
+        current_tab_name = model_item.text()
+        for current_index in range(self.theory_model.rowCount()):
+            #if current_tab_name in self.theory_model.item(current_index).text():
+            if current_tab_name == self.theory_model.item(current_index).text():
+                return
                 self.theory_model.removeRow(current_index)
                 break
 
-        # Reset the view
-        self.model.reset()
-
-        # Reset the view
+        # send in the new item
         self.theory_model.appendRow(model_item)
-
-        # Pass acting as a debugger anchor
-        pass
 
 
 if __name__ == "__main__":
-    app = QtGui.QApplication([])
+    app = QtWidgets.QApplication([])
     dlg = DataExplorerWindow()
     dlg.show()
     sys.exit(app.exec_())

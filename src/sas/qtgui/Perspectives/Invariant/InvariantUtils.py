@@ -1,27 +1,26 @@
-def enum(*sequential, **named):
-    enums = dict(zip(sequential, range(len(sequential))), **named)
-    return type('Enum', (), enums)
+from sas.qtgui.Utilities.GuiUtils import enum
 
-WIDGETS = enum( 'W_FILENAME',           #0
-                'W_QMIN',               #1
-                'W_QMAX',               #2
-                'W_BACKGROUND',         #3
-                'W_SCALE',              #4
-                'W_CONTRAST',           #5
-                'W_EX_QMIN',            #6
-                'W_EX_QMAX',            #7
-                'W_ENABLE_LOWQ',        #8
-                'W_ENABLE_HIGHQ',       #9
-                'W_NPTS_LOWQ',          #10
-                'W_NPTS_HIGHQ',         #11
-                'W_LOWQ_GUINIER',       #12
-                'W_LOWQ_POWER',         #13
-                'W_LOWQ_FIT',           #14
-                'W_LOWQ_FIX',           #15
-                'W_LOWQ_POWER_VALUE',   #16
-                'W_HIGHQ_FIT',          #17
-                'W_HIGHQ_FIX',          #18
-                'W_HIGHQ_POWER_VALUE',  #19
+WIDGETS = enum( 'W_FILENAME',
+                'W_QMIN',
+                'W_QMAX',
+                'W_BACKGROUND',
+                'W_SCALE',
+                'W_CONTRAST',
+                'W_POROD_CST',
+                'W_EX_QMIN',
+                'W_EX_QMAX',
+                'W_ENABLE_LOWQ',
+                'W_ENABLE_HIGHQ',
+                'W_NPTS_LOWQ',
+                'W_NPTS_HIGHQ',
+                'W_LOWQ_GUINIER',
+                'W_LOWQ_POWER',
+                'W_LOWQ_FIT',
+                'W_LOWQ_FIX',
+                'W_LOWQ_POWER_VALUE',
+                'W_HIGHQ_FIT',
+                'W_HIGHQ_FIX',
+                'W_HIGHQ_POWER_VALUE',
                 # results
                 'W_VOLUME_FRACTION',
                 'W_VOLUME_FRACTION_ERR',

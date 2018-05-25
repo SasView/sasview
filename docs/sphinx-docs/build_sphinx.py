@@ -29,7 +29,7 @@ platform = '.%s-%s'%(get_platform(),sys.version[:3])
 SPHINX_ROOT = dirname(abspath(__file__))
 SPHINX_BUILD = joinpath(SPHINX_ROOT, "build")
 SPHINX_SOURCE = joinpath(SPHINX_ROOT, "source-temp")
-SPHINX_PERSPECTIVES = joinpath(SPHINX_SOURCE, "user", "sasgui", "perspectives")
+SPHINX_PERSPECTIVES = joinpath(SPHINX_SOURCE, "user", "qtgui", "perspectives")
 
 # sasview paths
 SASVIEW_ROOT = joinpath(SPHINX_ROOT, '..', '..')
@@ -148,9 +148,10 @@ def retrieve_bumps_docs():
     """
     if exists(BUMPS_SOURCE):
         print("=== Retrieve BUMPS Docs ===")
-        filenames = [joinpath(BUMPS_SOURCE, "optimizer.rst")]
-        filenames += glob(joinpath(BUMPS_SOURCE, "dream-*.png"))
-        filenames += glob(joinpath(BUMPS_SOURCE, "fit-*.png"))
+        filenames = glob(joinpath(BUMPS_SOURCE, "dream-*.png"))
+        #filenames = [joinpath(BUMPS_SOURCE, "optimizer.rst")]
+        #filenames += glob(joinpath(BUMPS_SOURCE, "dream-*.png"))
+        #filenames += glob(joinpath(BUMPS_SOURCE, "fit-*.png"))
         for f in filenames:
             print("Copying file", f)
             shutil.copy(f, BUMPS_TARGET)
@@ -219,7 +220,7 @@ def build():
     """
     print("=== Build HTML Docs from ReST Files ===")
     subprocess.call(["sphinx-build",
-                     "-b", "html", # Builder name. TODO: accept as arg to setup.py.
+                     "-b", "qthelp", # Builder name. TODO: accept as arg to setup.py.
                      "-d", joinpath(SPHINX_BUILD, "doctrees"),
                      SPHINX_SOURCE,
                      joinpath(SPHINX_BUILD, "html")])

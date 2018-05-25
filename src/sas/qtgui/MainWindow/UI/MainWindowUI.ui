@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>915</width>
-    <height>527</height>
+    <height>762</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -105,9 +105,10 @@
     <addaction name="actionGPU_Options"/>
     <addaction name="actionFit_Results"/>
     <addaction name="separator"/>
-    <addaction name="actionChain_Fitting"/>
-    <addaction name="separator"/>
+    <addaction name="actionAdd_Custom_Model"/>
     <addaction name="actionEdit_Custom_Model"/>
+    <addaction name="actionManage_Custom_Models"/>
+    <addaction name="actionAddMult_Models"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -125,9 +126,10 @@
     <property name="title">
      <string>Analysis</string>
     </property>
+    <addaction name="actionCorfunc"/>
     <addaction name="actionFitting"/>
-    <addaction name="actionInversion"/>
     <addaction name="actionInvariant"/>
+    <addaction name="actionInversion"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -352,7 +354,7 @@
   </action>
   <action name="actionSAS_Resolution_Estimator">
    <property name="text">
-    <string>SAS Resolution Estimator</string>
+    <string>Q Resolution Estimator</string>
    </property>
   </action>
   <action name="actionGeneric_Scattering_Calculator">
@@ -503,8 +505,28 @@
    <property name="text">
     <string>GPU Options</string>
    </property>
-   <property name="softKeyRole">
-    <enum>QAction::NoSoftKey</enum>
+  </action>
+  <action name="actionAdd_Custom_Model">
+   <property name="text">
+    <string>Add Custom Model</string>
+   </property>
+  </action>
+  <action name="actionManage_Custom_Models">
+   <property name="text">
+    <string>Manage Custom Models</string>
+   </property>
+  </action>
+  <action name="actionCorfunc">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Correlation Function</string>
+   </property>
+  </action>
+  <action name="actionAddMult_Models">
+   <property name="text">
+    <string>Add/Multiply Models</string>
    </property>
   </action>
  </widget>

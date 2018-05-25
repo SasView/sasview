@@ -1,13 +1,17 @@
 """
 Allows users to change the range of the current graph
 """
-from PyQt4 import QtGui
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
+
+import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
 # Local UI
 from sas.qtgui.UI import main_resources_rc
 from sas.qtgui.Plotting.UI.SetGraphRangeUI import Ui_setGraphRangeUI
 
-class SetGraphRange(QtGui.QDialog, Ui_setGraphRangeUI):
+class SetGraphRange(QtWidgets.QDialog, Ui_setGraphRangeUI):
     def __init__(self, parent=None, x_range=(0.0, 0.0), y_range=(0.0, 0.0)):
         super(SetGraphRange, self).__init__()
 
@@ -15,10 +19,10 @@ class SetGraphRange(QtGui.QDialog, Ui_setGraphRangeUI):
         assert(isinstance(x_range, tuple))
         assert(isinstance(y_range, tuple))
 
-        self.txtXmin.setValidator(QtGui.QDoubleValidator())
-        self.txtXmax.setValidator(QtGui.QDoubleValidator())
-        self.txtYmin.setValidator(QtGui.QDoubleValidator())
-        self.txtYmax.setValidator(QtGui.QDoubleValidator())
+        self.txtXmin.setValidator(GuiUtils.DoubleValidator())
+        self.txtXmax.setValidator(GuiUtils.DoubleValidator())
+        self.txtYmin.setValidator(GuiUtils.DoubleValidator())
+        self.txtYmax.setValidator(GuiUtils.DoubleValidator())
 
         self.txtXmin.setText(str(x_range[0]))
         self.txtXmax.setText(str(x_range[1]))
