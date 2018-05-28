@@ -140,7 +140,7 @@ class OptionsWidget(QtWidgets.QWidget, Ui_tabOptions):
         """
         button_id = button.group().checkedId()
         self.weighting = abs(button_id + 2)
-        #self.fitPage.weighting = button_id
+        self.plot_signal.emit()
 
     def onModelChange(self, top, bottom):
         """

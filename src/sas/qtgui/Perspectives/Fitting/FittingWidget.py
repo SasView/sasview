@@ -399,7 +399,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.options_widget.setEnablementOnDataLoad()
         self.onSelectModel()
         # Smearing tab
-        self.smearing_widget.updateSmearing(self.data)
+        self.smearing_widget.updateData(self.data)
 
     def acceptsData(self):
         """ Tells the caller this widget can accept new dataset """
@@ -471,7 +471,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.tabFitting.setTabEnabled(TAB_MAGNETISM, False)
         self.lblChi2Value.setText("---")
         # Smearing tab
-        self.smearing_widget.updateSmearing(self.data)
+        self.smearing_widget.updateData(self.data)
         # Line edits in the option tab
         self.updateQRange()
 
@@ -514,6 +514,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Signals from other widgets
         self.communicate.customModelDirectoryChanged.connect(self.onCustomModelChange)
         self.communicate.saveAnalysisSignal.connect(self.savePageState)
+        self.smearing_widget.smearingChangedSignal.connect(self.onSmearingOptionsUpdate)
         #self.communicate.saveReportSignal.connect(self.saveReport)
 
     def modelName(self):
@@ -1440,13 +1441,10 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         if (not params_to_fit):
             raise ValueError('Fitting requires at least one parameter to optimize.')
 
-        # Potential weights added directly to data
-        self.addWeightingToData(data)
-
         # Potential smearing added
         # Remember that smearing_min/max can be None ->
         # deal with it until Python gets discriminated unions
-        smearing, accuracy, smearing_min, smearing_max = self.smearing_widget.state()
+        self.addWeightingToData(data)
 
         # Get the constraints.
         constraints = self.getComplexConstraintsForModel()
@@ -1454,7 +1452,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # For single fits - check for inter-model constraints
             constraints = self.getConstraintsForFitting()
 
-        smearer = None
+        smearer = self.smearing_widget.smearer()
         handler = None
         batch_inputs = {}
         batch_outputs = {}
@@ -1463,6 +1461,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         for fit_index in self.all_data:
             fitter_single = Fit() if fitter is None else fitter
             data = GuiUtils.dataFromItem(fit_index)
+            # Potential weights added directly to data
+            self.addWeightingToData(data)
             try:
                 fitter_single.set_model(model, fit_id, params_to_fit, data=data,
                              constraints=constraints)
@@ -1702,6 +1702,12 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.recalculatePlotData()
         self.showPlot()
 
+    def onSmearingOptionsUpdate(self):
+        """
+        React to changes in the smearing widget
+        """
+        self.calculateQGridForModel()
+
     def recalculatePlotData(self):
         """
         Generate a new dataset for model
@@ -1833,9 +1839,11 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         # Send original data for weighting
         weight = FittingUtilities.getWeight(data=data, is2d=self.is2D, flag=self.weighting)
-        update_module = data.err_data if self.is2D else data.dy
-        # Overwrite relevant values in data
-        update_module = weight
+        if self.is2D:
+            data.err_data = weight
+        else:
+            data.dy = weight
+        pass
 
     def updateQRange(self):
         """
@@ -1888,6 +1896,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.model_is_loaded = True
         # Change the model name to a monicker
         self.kernel_module.name = self.modelName()
+        # Update the smearing tab
+        self.smearing_widget.updateKernelModel(kernel_model=self.kernel_module)
 
         # (Re)-create headers
         FittingUtilities.addHeadersToModel(self._model_model)
@@ -2105,14 +2115,14 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             model = self.kernel_module
         if completefn is None:
             completefn = self.methodCompleteForData()
-
+        smearer = self.smearing_widget.smearer()
         # Awful API to a backend method.
         calc_thread = self.methodCalculateForData()(data=data,
                                                model=model,
                                                page_id=0,
                                                qmin=self.q_range_min,
                                                qmax=self.q_range_max,
-                                               smearer=None,
+                                               smearer=smearer,
                                                state=None,
                                                weight=None,
                                                fid=None,
