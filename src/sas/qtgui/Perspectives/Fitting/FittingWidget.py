@@ -383,7 +383,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.chk2DView.setEnabled(False)
         self.chk2DView.setVisible(False)
         self.chkMagnetism.setEnabled(self.is2D)
-        self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.is2D)
+        self.tabFitting.setTabEnabled(TAB_MAGNETISM, self.chkMagnetism.isChecked())
         # Combo box or label for file name"
         if self.is_batch_fitting:
             self.lblFilename.setVisible(False)
@@ -509,6 +509,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.Calc2DFinishedSignal.connect(self.complete2D)
 
         # Signals from separate tabs asking for replot
+        self.options_widget.plot_signal.connect(self.onOptionsUpdate)
         self.options_widget.plot_signal.connect(self.onOptionsUpdate)
 
         # Signals from other widgets

@@ -251,6 +251,9 @@ class Communicate(QtCore.QObject):
     # Action Save Analysis triggered
     saveAnalysisSignal = QtCore.pyqtSignal()
 
+    # Mask Editor requested
+    maskEditorSignal = QtCore.pyqtSignal(Data2D)
+
 def updateModelItemWithPlot(item, update_data, name=""):
     """
     Adds a checkboxed row named "name" to QStandardItem

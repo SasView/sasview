@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>642</width>
-    <height>431</height>
+    <width>687</width>
+    <height>507</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -103,6 +103,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="toolTip">
+      <string>Clear all the masks</string>
+     </property>
      <property name="text">
       <string>Reset</string>
      </property>
@@ -115,6 +118,9 @@
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="toolTip">
+      <string>Clear recent masks</string>
      </property>
      <property name="text">
       <string>Clear</string>

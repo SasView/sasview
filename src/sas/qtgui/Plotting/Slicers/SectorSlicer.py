@@ -4,7 +4,7 @@
 import numpy
 import logging
 
-from .BaseInteractor import BaseInteractor
+from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 from sas.qtgui.Plotting.PlotterData import Data1D
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 from sas.qtgui.Plotting.SlicerModel import SlicerModel
@@ -282,6 +282,7 @@ class SideInteractor(BaseInteractor):
         # Initialize the class
         self.markers = []
         self.axes = axes
+        self.color = color
         # compute the value of the angle between the current line and
         # the x-axis
         self.save_theta = theta2 + phi
@@ -437,7 +438,8 @@ class SideInteractor(BaseInteractor):
         self.phi = numpy.fabs(self.theta2 - self.theta)
         if self.phi > numpy.pi:
             self.phi = 2 * numpy.pi - numpy.fabs(self.theta2 - self.theta)
-        self.base.base.update()
+        #self.base.base.update()
+        self.base.update()
 
     def set_cursor(self, x, y):
         self.move(x, y, None)
@@ -463,6 +465,7 @@ class LineInteractor(BaseInteractor):
         BaseInteractor.__init__(self, base, axes, color=color)
 
         self.markers = []
+        self.color = color
         self.axes = axes
         self.save_theta = theta
         self.theta = theta
@@ -540,7 +543,8 @@ class LineInteractor(BaseInteractor):
         """
         self.theta = numpy.arctan2(y, x)
         self.has_move = True
-        self.base.base.update()
+        #self.base.base.update()
+        self.base.update()
 
     def set_cursor(self, x, y):
         self.move(x, y, None)

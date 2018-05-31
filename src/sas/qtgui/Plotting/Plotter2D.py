@@ -60,6 +60,7 @@ class Plotter2DWidget(PlotterBase):
         self.connect = BindArtist(self.figure)
         self.vmin = None
         self.vmax = None
+        self.im = None
 
         self.manager = manager
 
@@ -438,8 +439,10 @@ class Plotter2DWidget(PlotterBase):
             if self.vmin is not None:
                 zmin_temp = self.vmin
                 zmax_temp = self.vmax
-
-            im = self.ax.imshow(output, interpolation='nearest',
+            if self.im is not None:
+                self.im.set_data(output)
+            else:
+                self.im = self.ax.imshow(output, interpolation='nearest',
                                 # origin='lower',
                                 vmin=zmin_temp, vmax=zmax_temp,
                                 cmap=self.cmap,
@@ -458,11 +461,11 @@ class Plotter2DWidget(PlotterBase):
 
             if cbax is None:
                 ax.set_frame_on(False)
-                cb = self.figure.colorbar(im, shrink=0.8, aspect=20)
+                cb = self.figure.colorbar(self.im, shrink=0.8, aspect=20)
             else:
-                cb = self.figure.colorbar(im, cax=cbax)
+                cb = self.figure.colorbar(self.im, cax=cbax)
 
-            cb.update_bruteforce(im)
+            cb.update_bruteforce(self.im)
             cb.set_label('$' + self.scale + '$')
 
             self.vmin = cb.vmin

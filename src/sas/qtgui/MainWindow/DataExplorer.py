@@ -90,6 +90,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         self.communicator.activeGraphsSignal.connect(self.updateGraphCount)
         self.communicator.activeGraphName.connect(self.updatePlotName)
         self.communicator.plotUpdateSignal.connect(self.updatePlot)
+        self.communicator.maskEditorSignal.connect(self.showEditDataMask)
 
         self.cbgraph.editTextChanged.connect(self.enableGraphCombo)
         self.cbgraph.currentIndexChanged.connect(self.enableGraphCombo)
@@ -989,16 +990,17 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Show the plot
         new_plot.show()
 
-    def showEditDataMask(self):
+    def showEditDataMask(self, data=None):
         """
         Mask Editor for 2D plots
         """
-        index = self.current_view.selectedIndexes()[0]
-        proxy = self.current_view.model()
-        model = proxy.sourceModel()
-        model_item = model.itemFromIndex(proxy.mapToSource(index))
+        if data is None or not isinstance(data, Data2D):
+            index = self.current_view.selectedIndexes()[0]
+            proxy = self.current_view.model()
+            model = proxy.sourceModel()
+            model_item = model.itemFromIndex(proxy.mapToSource(index))
 
-        data = GuiUtils.dataFromItem(model_item)
+            data = GuiUtils.dataFromItem(model_item)
 
         mask_editor = MaskEditor(self, data)
         # Modal dialog here.

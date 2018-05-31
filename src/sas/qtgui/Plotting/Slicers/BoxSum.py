@@ -7,7 +7,7 @@ from PyQt5 import QtGui
 
 from sas.qtgui.Utilities.GuiUtils import formatNumber, toDouble
 
-from .BaseInteractor import BaseInteractor
+from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 from sas.sascalc.dataloader.manipulations import Boxavg
 from sas.sascalc.dataloader.manipulations import Boxsum
 

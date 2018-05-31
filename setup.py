@@ -391,9 +391,10 @@ package_dir["sas.qtgui.Plotting.UI"] = os.path.join(
     "src", "sas", "qtgui", "Plotting", "UI")
 package_dir["sas.qtgui.Plotting.Slicers"] = os.path.join(
     "src", "sas", "qtgui", "Plotting", "Slicers")
-packages.extend(["sas.qtgui.Plotting", "sas.qtgui.Plotting.UI", "sas.qtgui.Plotting.Slicers"])
-
-
+package_dir["sas.qtgui.Plotting.Masks"] = os.path.join(
+    "src", "sas", "qtgui", "Plotting", "Masks")
+packages.extend(["sas.qtgui.Plotting", "sas.qtgui.Plotting.UI",
+                 "sas.qtgui.Plotting.Slicers", "sas.qtgui.Plotting.Masks"])
 
 # # Last of the sas.models
 # package_dir["sas.models"] = os.path.join("src", "sas", "models")

@@ -1,16 +1,16 @@
 """
     Arc slicer for 2D data
 """
-import math
+import numpy as np
 
-from .BaseInteractor import BaseInteractor
+from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
 
 class ArcInteractor(BaseInteractor):
     """
     Select an annulus through a 2D plot
     """
     def __init__(self, base, axes, color='black', zorder=5, r=1.0,
-                 theta1=math.pi / 8, theta2=math.pi / 4):
+                 theta1=np.pi / 8, theta2=np.pi / 4):
         BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
@@ -54,8 +54,8 @@ class ArcInteractor(BaseInteractor):
         """
             Return arc radius
         """
-        radius = math.sqrt(math.pow(self._mouse_x, 2) + \
-                           math.pow(self._mouse_y, 2))
+        radius = np.sqrt(np.power(self._mouse_x, 2) + \
+                           np.power(self._mouse_y, 2))
         return radius
 
     def update(self, theta1=None, theta2=None, nbins=None, r=None):
@@ -74,20 +74,20 @@ class ArcInteractor(BaseInteractor):
         if theta2 is not None:
             self.theta2 = theta2
         while self.theta2 < self.theta1:
-            self.theta2 += (2 * math.pi)
-        while self.theta2 >= (self.theta1 + 2 * math.pi):
-            self.theta2 -= (2 * math.pi)
-        npts = int((self.theta2 - self.theta1) / (math.pi / 120))
+            self.theta2 += (2 * np.pi)
+        while self.theta2 >= (self.theta1 + 2 * np.pi):
+            self.theta2 -= (2 * np.pi)
+        npts = int((self.theta2 - self.theta1) / (np.pi / 120))
 
         if r is None:
-            self.radius = math.sqrt(math.pow(self._mouse_x, 2) + \
-                                     math.pow(self._mouse_y, 2))
+            self.radius = np.sqrt(np.power(self._mouse_x, 2) + \
+                                     np.power(self._mouse_y, 2))
         else:
             self.radius = r
         for i in range(self.npts):
             phi = (self.theta2 - self.theta1) / (self.npts - 1) * i + self.theta1
-            xval = 1.0 * self.radius * math.cos(phi)
-            yval = 1.0 * self.radius * math.sin(phi)
+            xval = 1.0 * self.radius * np.cos(phi)
+            yval = 1.0 * self.radius * np.sin(phi)
 
             x.append(xval)
             y.append(yval)
