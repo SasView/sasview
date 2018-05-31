@@ -3,7 +3,6 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
 from sas.qtgui.Utilities.UI.PluginDefinitionUI import Ui_PluginDefinition
-from sas.qtgui.Utilities.PythonSyntax import PythonHighlighter
 
 # txtName
 # txtDescription
@@ -61,6 +60,10 @@ return y
 
         txt_validator = QtGui.QRegExpValidator(rx)
         self.txtName.setValidator(txt_validator)
+        # Weird import location - workaround for a bug in Sphinx choking on
+        # importing QSyntaxHighlighter
+        # DO NOT MOVE TO TOP
+        from sas.qtgui.Utilities.PythonSyntax import PythonHighlighter
         self.highlight = PythonHighlighter(self.txtFunction.document())
 
     def initializeModel(self):

@@ -1,8 +1,6 @@
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 
-from sas.qtgui.Utilities.PythonSyntax import PythonHighlighter
-
 from sas.qtgui.Utilities.UI.ModelEditor import Ui_ModelEditor
 
 class ModelEditor(QtWidgets.QDialog, Ui_ModelEditor):
@@ -25,6 +23,10 @@ class ModelEditor(QtWidgets.QDialog, Ui_ModelEditor):
         Set up dialog widgets.
         Here - just the highlighter connected to the text edit.
         """
+        # Weird import location - workaround for a bug in Sphinx choking on
+        # importing QSyntaxHighlighter
+        # DO NOT MOVE TO TOP
+        from sas.qtgui.Utilities.PythonSyntax import PythonHighlighter
         self.highlight = PythonHighlighter(self.txtEditor.document())
 
     def addSignals(self):
