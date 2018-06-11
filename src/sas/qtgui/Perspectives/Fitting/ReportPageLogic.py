@@ -2,6 +2,7 @@
 import base64
 import datetime
 import re
+import sys
 import logging
 from io import BytesIO
 import urllib.parse
@@ -104,8 +105,12 @@ class ReportPageLogic(object):
             data = png_output.getvalue()
             data64 = base64.b64encode(data)
             data_to_print = urllib.parse.quote(data64)
-            html += FEET_2.format(data_to_print)
-
+            feet=FEET_2
+            if sys.platform == "darwin":  # Mac
+                feet = FEET_3
+            html += feet.format(data_to_print)
+            html += ELINE
+            del canvas
         return html
 
     def reportParams(self):
@@ -165,6 +170,7 @@ class ReportPageLogic(object):
                 plot2D.item = self._index
                 plot2D.plot(plot_set)
                 graphs.append(plot2D.figure)
+
             else:
                 msg = "Incorrect data type passed to Plotting"
                 raise AttributeError(msg)
@@ -203,6 +209,9 @@ FEET_1 = \
 <br><font size='4' >Data: "%s"</font><br>
 """
 FEET_2 = \
+'''<img src="data:image/png;base64,{}"></img>
+'''
+FEET_3 = \
 '''<img width="540" src="data:image/png;base64,{}"></img>
 '''
 ELINE = """<p class=MsoNormal>&nbsp;</p>
