@@ -104,7 +104,7 @@ class ReportPageLogic(object):
             data = png_output.getvalue()
             data64 = base64.b64encode(data)
             data_to_print = urllib.parse.quote(data64)
-            html += '<img src="data:image/png;base64,{}">'.format(data_to_print)
+            html += FEET_2.format(data_to_print)
 
         return html
 
@@ -203,8 +203,8 @@ FEET_1 = \
 <br><font size='4' >Data: "%s"</font><br>
 """
 FEET_2 = \
-"""<img src="%s" width="540"></img>
-"""
+'''<img width="540" src="data:image/png;base64,{}"></img>
+'''
 ELINE = """<p class=MsoNormal>&nbsp;</p>
 """
 
