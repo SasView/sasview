@@ -776,13 +776,13 @@ class GuiManager(object):
         """
         Arranges all the child windows in a cascade pattern.
         """
-        self._workspace.workspace.cascade()
+        self._workspace.workspace.cascadeSubWindows()
 
     def actionTile(self):
         """
         Tile workspace windows
         """
-        self._workspace.workspace.tile()
+        self._workspace.workspace.tileSubWindows()
 
     def actionArrange_Icons(self):
         """
@@ -794,13 +794,13 @@ class GuiManager(object):
         """
         Gives the input focus to the next window in the list of child windows.
         """
-        self._workspace.workspace.activateNextWindow()
+        self._workspace.workspace.activateNextSubWindow()
 
     def actionPrevious(self):
         """
         Gives the input focus to the previous window in the list of child windows.
         """
-        self._workspace.workspace.activatePreviousWindow()
+        self._workspace.workspace.activatePreviousSubWindow()
 
     #============ HELP =================
     def actionDocumentation(self):
