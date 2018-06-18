@@ -129,6 +129,7 @@ dependencies:
   - xz=5.2.3=intel_0
   - zlib=1.2.11=intel_3
   - pyquante2_pure=2.0=py_0
+  - pyopencl=2018.1.1
   - pip:
     - backports.shutil-get-terminal-size==1.0.0
     - bumps==0.7.8
