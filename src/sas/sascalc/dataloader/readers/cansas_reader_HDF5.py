@@ -631,9 +631,4 @@ class Reader(FileReader):
         unit = h5attr(value, u'units')
         if unit is None:
             unit = h5attr(value, u'unit')
-        # Convert the unit formats
-        if unit == "1/A":
-            unit = "A^{-1}"
-        elif unit == "1/cm":
-            unit = "cm^{-1}"
         return unit

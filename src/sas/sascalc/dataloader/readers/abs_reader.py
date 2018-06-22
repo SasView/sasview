@@ -224,14 +224,11 @@ class Reader(FileReader):
             self.set_all_to_none()
             raise ValueError("ascii_reader: could not load file")
 
+        self.current_dataset = self.set_default_1d_units(self.current_dataset)
         if data_conv_q is not None:
             self.current_dataset.xaxis("\\rm{Q}", base_q_unit)
-        else:
-            self.current_dataset.xaxis("\\rm{Q}", 'A^{-1}')
         if data_conv_i is not None:
             self.current_dataset.yaxis("\\rm{Intensity}", base_i_unit)
-        else:
-            self.current_dataset.yaxis("\\rm{Intensity}", "cm^{-1}")
 
         # Store loading process information
         self.current_datainfo.meta_data['loader'] = self.type_name

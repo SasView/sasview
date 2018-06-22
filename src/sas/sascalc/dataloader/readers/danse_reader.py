@@ -180,9 +180,9 @@ class Reader(FileReader):
         detector.beam_center.y = center_y * pixel
 
 
-        self.current_dataset.xaxis("\\rm{Q_{x}}", 'A^{-1}')
-        self.current_dataset.yaxis("\\rm{Q_{y}}", 'A^{-1}')
-        self.current_dataset.zaxis("\\rm{Intensity}", "cm^{-1}")
+        self.current_dataset.xaxis("\\rm{Q_{x}}", '1/A')
+        self.current_dataset.yaxis("\\rm{Q_{y}}", '1/A')
+        self.current_dataset.zaxis("\\rm{Intensity}", "1/cm")
 
         self.current_dataset.x_bins = x_vals
         self.current_dataset.y_bins = y_vals

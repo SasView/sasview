@@ -15,6 +15,7 @@ from .loader_exceptions import NoKnownLoaderException, FileContentsException,\
     DataReaderException, DefaultReaderException
 from .data_info import Data1D, Data2D, DataInfo, plottable_1D, plottable_2D,\
     combine_data_info_with_plottable
+from sas.sascalc.data_util.nxsunit import Converter
 
 logger = logging.getLogger(__name__)
 
@@ -97,8 +98,8 @@ class FileReader(object):
                         self.handle_error_message(DEPRECATION_MESSAGE)
                     if len(self.output) > 0:
                         # Sort the data that's been loaded
-                        self.sort_one_d_data()
-                        self.sort_two_d_data()
+                        self.convert_data_units()
+                        self.sort_data()
         else:
             msg = "Unable to find file at: {}\n".format(filepath)
             msg += "Please check your file path and try again."
@@ -165,7 +166,7 @@ class FileReader(object):
                                                     self.current_datainfo)
         self.output.append(data_obj)
 
-    def sort_one_d_data(self):
+    def sort_data(self):
         """
         Sort 1D data along the X axis for consistency
         """
@@ -202,6 +203,39 @@ class FileReader(object):
                     data.xmax = np.max(data.x)
                     data.ymin = np.min(data.y)
                     data.ymax = np.max(data.y)
+            elif isinstance(data, Data2D):
+                # Normalize the units for
+                data.x_unit = self.format_unit(data.Q_unit)
+                data.y_unit = self.format_unit(data.I_unit)
+                data.data = data.data.astype(np.float64)
+                data.qx_data = data.qx_data.astype(np.float64)
+                data.xmin = np.min(data.qx_data)
+                data.xmax = np.max(data.qx_data)
+                data.qy_data = data.qy_data.astype(np.float64)
+                data.ymin = np.min(data.qy_data)
+                data.ymax = np.max(data.qy_data)
+                data.q_data = np.sqrt(data.qx_data * data.qx_data
+                                         + data.qy_data * data.qy_data)
+                if data.err_data is not None:
+                    data.err_data = data.err_data.astype(np.float64)
+                if data.dqx_data is not None:
+                    data.dqx_data = data.dqx_data.astype(np.float64)
+                if data.dqy_data is not None:
+                    data.dqy_data = data.dqy_data.astype(np.float64)
+                if data.mask is not None:
+                    data.mask = data.mask.astype(dtype=bool)
+
+                if len(data.data.shape) == 2:
+                    n_rows, n_cols = data.data.shape
+                    data.y_bins = data.qy_data[0::int(n_cols)]
+                    data.x_bins = data.qx_data[:int(n_cols)]
+                    data.data = data.data.flatten()
+                    data = self._remove_nans_in_data(data)
+                if len(data.data) > 0:
+                    data.xmin = np.min(data.qx_data)
+                    data.xmax = np.max(data.qx_data)
+                    data.ymin = np.min(data.qy_data)
+                    data.ymax = np.max(data.qx_data)
 
     @staticmethod
     def _reorder_1d_array(array, ind):
@@ -241,41 +275,91 @@ class FileReader(object):
                     setattr(data, name, array[good])
         return data
 
-    def sort_two_d_data(self):
-        for dataset in self.output:
-            if isinstance(dataset, Data2D):
-                # Normalize the units for
-                dataset.x_unit = self.format_unit(dataset.Q_unit)
-                dataset.y_unit = self.format_unit(dataset.I_unit)
-                dataset.data = dataset.data.astype(np.float64)
-                dataset.qx_data = dataset.qx_data.astype(np.float64)
-                dataset.xmin = np.min(dataset.qx_data)
-                dataset.xmax = np.max(dataset.qx_data)
-                dataset.qy_data = dataset.qy_data.astype(np.float64)
-                dataset.ymin = np.min(dataset.qy_data)
-                dataset.ymax = np.max(dataset.qy_data)
-                dataset.q_data = np.sqrt(dataset.qx_data * dataset.qx_data
-                                         + dataset.qy_data * dataset.qy_data)
-                if dataset.err_data is not None:
-                    dataset.err_data = dataset.err_data.astype(np.float64)
-                if dataset.dqx_data is not None:
-                    dataset.dqx_data = dataset.dqx_data.astype(np.float64)
-                if dataset.dqy_data is not None:
-                    dataset.dqy_data = dataset.dqy_data.astype(np.float64)
-                if dataset.mask is not None:
-                    dataset.mask = dataset.mask.astype(dtype=bool)
+    @staticmethod
+    def set_default_1d_units(data):
+        """
+        Set the x and y axes to the default 1D units
+        :param data: 1D data set
+        :return:
+        """
+        data.xaxis("\\rm{Q}", '1/A')
+        data.yaxis("\\rm{Intensity}", "1/cm")
+        return data
 
-                if len(dataset.data.shape) == 2:
-                    n_rows, n_cols = dataset.data.shape
-                    dataset.y_bins = dataset.qy_data[0::int(n_cols)]
-                    dataset.x_bins = dataset.qx_data[:int(n_cols)]
-                dataset.data = dataset.data.flatten()
-                dataset = self._remove_nans_in_data(dataset)
-                if len(dataset.data) > 0:
-                    dataset.xmin = np.min(dataset.qx_data)
-                    dataset.xmax = np.max(dataset.qx_data)
-                    dataset.ymin = np.min(dataset.qy_data)
-                    dataset.ymax = np.max(dataset.qx_data)
+    @staticmethod
+    def set_default_2d_units(data):
+        """
+        Set the x and y axes to the default 2D units
+        :param data: 2D data set
+        :return:
+        """
+        data.xaxis("\\rm{Q_{x}}", '1/A')
+        data.yaxis("\\rm{Q_{y}}", '1/A')
+        data.zaxis("\\rm{Intensity}", "1/cm")
+        return data
+
+    def convert_data_units(self, default_q_unit="1/A", default_i_unit="1/cm"):
+        """
+        Converts al; data to the sasview default of units of A^{-1} for Q and
+        cm^{-1} for I.
+        :param default_x_unit: The default x unit used by Sasview
+        :param default_y_unit: The default y unit used by Sasview
+        """
+        new_output = []
+        for data in self.output:
+            file_x_unit = data._xunit
+            data_conv_x = Converter(file_x_unit)
+            file_y_unit = data._yunit
+            data_conv_y = Converter(file_y_unit)
+            if isinstance(data, Data1D):
+                try:
+                    data.x = data_conv_x(data.x, units=default_q_unit)
+                    if data.dx is not None:
+                        data.dx = data_conv_x(data.dx, units=default_q_unit)
+                    if data.dxl is not None:
+                        data.dxl = data_conv_x(data.dxl, units=default_q_unit)
+                    if data.dxw is not None:
+                        data.dxw = data_conv_x(data.dxw, units=default_q_unit)
+                except KeyError:
+                    message = "Unable to convert Q units from {0} to 1/A."
+                    message.format(default_q_unit)
+                    data.errors.append(message)
+                try:
+                    data.y = data_conv_y(data.y, units=default_i_unit)
+                    if data.dy is not None:
+                        data.dy = data_conv_y(data.dy, units=default_i_unit)
+                except KeyError:
+                    message = "Unable to convert I units from {0} to 1/cm."
+                    message.format(default_q_unit)
+                    data.errors.append(message)
+                new_output.append(data)
+            elif isinstance(data, Data2D):
+                try:
+                    data.qx_data = data_conv_x(data.qx_data, units=default_q_unit)
+                    if data.dqx_data is not None:
+                        data.dqx_data = data_conv_x(data.dqx_data, units=default_q_unit)
+                    data.qy_data = data_conv_y(data.qy_data, units=default_q_unit)
+                    if data.dqy_data is not None:
+                        data.dqy_data = data_conv_y(data.dqy_data, units=default_q_unit)
+                except KeyError:
+                    message = "Unable to convert Q units from {0} to 1/A."
+                    message.format(default_q_unit)
+                    data.errors.append(message)
+                try:
+                    file_z_unit = data._zunit
+                    data_conv_z = Converter(file_z_unit)
+                    data.data = data_conv_z(data.data, units=default_i_unit)
+                    if data.err_data is not None:
+                        data.err_data = data_conv_z(data.err_data, units=default_i_unit)
+                except KeyError:
+                    message = "Unable to convert I units from {0} to 1/cm."
+                    message.format(default_q_unit)
+                    data.errors.append(message)
+                new_output.append(data)
+            else:
+                # TODO: Throw error of some sort...
+                pass
+        self.output = new_output
 
     def format_unit(self, unit=None):
         """
