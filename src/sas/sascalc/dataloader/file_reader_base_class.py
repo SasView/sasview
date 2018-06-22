@@ -307,6 +307,9 @@ class FileReader(object):
         """
         new_output = []
         for data in self.output:
+            if data.isSesans:
+                new_output.append(data)
+                continue
             file_x_unit = data._xunit
             data_conv_x = Converter(file_x_unit)
             file_y_unit = data._yunit
@@ -332,7 +335,6 @@ class FileReader(object):
                     message = "Unable to convert I units from {0} to 1/cm."
                     message.format(default_q_unit)
                     data.errors.append(message)
-                new_output.append(data)
             elif isinstance(data, Data2D):
                 try:
                     data.qx_data = data_conv_x(data.qx_data, units=default_q_unit)
@@ -355,10 +357,10 @@ class FileReader(object):
                     message = "Unable to convert I units from {0} to 1/cm."
                     message.format(default_q_unit)
                     data.errors.append(message)
-                new_output.append(data)
             else:
                 # TODO: Throw error of some sort...
                 pass
+            new_output.append(data)
         self.output = new_output
 
     def format_unit(self, unit=None):

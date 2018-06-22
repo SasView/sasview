@@ -90,10 +90,7 @@ class cansas_reader_xml(unittest.TestCase):
     def test_real_xml(self):
         reader = XMLreader(self.xml_valid, self.schema_1_0)
         valid = reader.validate_xml()
-        if valid:
-            self.assertTrue(valid)
-        else:
-            self.assertFalse(valid)
+        self.assertTrue(valid)
 
     def _check_data(self, data):
         self.assertTrue(data.title == "TK49 c10_SANS")
@@ -192,8 +189,7 @@ class cansas_reader_xml(unittest.TestCase):
 
     def test_save_cansas_v1_0(self):
         xmlreader = XMLreader(self.isis_1_0, self.schema_1_0)
-        valid = xmlreader.validate_xml()
-        self.assertTrue(valid)
+        self.assertTrue(xmlreader.validate_xml())
         reader_generic = Loader()
         dataloader = reader_generic.load(self.isis_1_0)
         reader_cansas = Reader()
@@ -206,9 +202,8 @@ class cansas_reader_xml(unittest.TestCase):
             self.assertTrue(os.path.isfile(self.write_1_0_filename))
             return_data = reader2.read(self.write_1_0_filename)
             written_data = return_data[0]
-            XMLreader(self.write_1_0_filename, self.schema_1_0)
-            valid = xmlreader.validate_xml()
-            self.assertTrue(valid)
+            xmlreader = XMLreader(self.write_1_0_filename, self.schema_1_0)
+            self.assertTrue(xmlreader.validate_xml())
             self._check_data(written_data)
         if os.path.isfile(self.write_1_0_filename):
             os.remove(self.write_1_0_filename)
