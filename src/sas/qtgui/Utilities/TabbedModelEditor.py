@@ -76,6 +76,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Help).clicked.connect(self.onHelp)
         self.cmdLoad.clicked.connect(self.onLoad)
         # signals from tabs
+        self.plugin_widget.modelModified.connect(self.editorModelModified)
         self.editor_widget.modelModified.connect(self.editorModelModified)
         self.plugin_widget.txtName.editingFinished.connect(self.pluginTitleSet)
 
@@ -169,6 +170,7 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         Disable the plugin editor and show that the model is changed.
         """
         self.setTabEdited(True)
+        self.plugin_widget.txtFunction.setStyleSheet("")
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(True)
         self.is_modified = True
 
@@ -236,22 +238,12 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         model_str = self.generateModel(model, full_path)
         self.writeFile(full_path, model_str)
 
+        # disable "Apply"
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).setEnabled(False)
         # test the model
 
         # Run the model test in sasmodels
-        try:
-            model_results = GuiUtils.checkModel(full_path)
-            logging.info(model_results)
-        except Exception as ex:
-            msg = "Error building model: "+ str(ex)
-            logging.error(msg)
-            #print three last lines of the stack trace
-            # this will point out the exact line failing
-            last_lines = traceback.format_exc().split('\n')[-4:]
-            traceback_to_show = '\n'.join(last_lines)
-            logging.error(traceback_to_show)
-
-            self.parent.communicate.statusBarUpdateSignal.emit("Model check failed")
+        if not self.isModelCorrect(full_path):
             return
 
         self.editor_widget.setEnabled(True)
@@ -272,6 +264,41 @@ class TabbedModelEditor(QtWidgets.QDialog, Ui_TabbedModelEditor):
         msg = "Custom model "+filename + " successfully created."
         self.parent.communicate.statusBarUpdateSignal.emit(msg)
         logging.info(msg)
+
+    def isModelCorrect(self, full_path):
+        """
+        Run the sasmodels method for model check
+        and return True if the model is good.
+        False otherwise.
+        """
+        successfulCheck = True
+        try:
+            model_results = GuiUtils.checkModel(full_path)
+            logging.info(model_results)
+        # We can't guarantee the type of the exception coming from
+        # Sasmodels, so need the overreaching general Exception
+        except Exception as ex:
+            msg = "Error building model: "+ str(ex)
+            logging.error(msg)
+            #print three last lines of the stack trace
+            # this will point out the exact line failing
+            last_lines = traceback.format_exc().split('\n')[-4:]
+            traceback_to_show = '\n'.join(last_lines)
+            logging.error(traceback_to_show)
+
+            # Set the status bar message
+            self.parent.communicate.statusBarUpdateSignal.emit("Model check failed")
+
+            # Remove the file so it is not being loaded on refresh
+            os.remove(full_path)
+            # Put a thick, red border around the mini-editor
+            self.plugin_widget.txtFunction.setStyleSheet("border: 5px solid red")
+            # Use the last line of the traceback for the tooltip
+            last_lines = traceback.format_exc().split('\n')[-2:]
+            traceback_to_show = '\n'.join(last_lines)
+            self.plugin_widget.txtFunction.setToolTip(traceback_to_show)
+            successfulCheck = False
+        return successfulCheck
 
     def updateFromEditor(self):
         """

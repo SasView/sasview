@@ -35,11 +35,10 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
         # Initialize widgets
         self.addWidgets()
 
-    def addWidgets(self):
+    def addTooltip(self):
         """
-        Initialize various widgets in the dialog
+        Add the default tooltip to the text field
         """
-        # Set the tooltip
         hint_function = "#Example:\n\n"
         hint_function += "if x <= 0:\n"
         hint_function += "    y = A + B\n"
@@ -47,6 +46,13 @@ class PluginDefinition(QtWidgets.QDialog, Ui_PluginDefinition):
         hint_function += "    y = A + B * cos(2 * pi * x)\n"
         hint_function += "return y\n"
         self.txtFunction.setToolTip(hint_function)
+
+    def addWidgets(self):
+        """
+        Initialize various widgets in the dialog
+        """
+        self.addTooltip()
+
         # Initial text in the function table
         text = \
 """y = x
@@ -153,6 +159,7 @@ return y
         """
         # keep in mind that this is called every time the text changes.
         # mind the performance!
+        self.addTooltip()
         self.model['text'] = self.txtFunction.toPlainText().lstrip().rstrip()
         self.modelModified.emit()
 

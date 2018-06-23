@@ -1009,7 +1009,7 @@ def checkModel(path):
     """
     # The following return needs to be removed once
     # the unittest related changes in Sasmodels are commited
-    return True
+    # return True
     # try running the model
     from sasmodels.sasview_model import load_custom_model
     Model = load_custom_model(path)
