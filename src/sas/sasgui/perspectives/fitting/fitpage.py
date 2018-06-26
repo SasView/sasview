@@ -705,9 +705,8 @@ class FitPage(BasicPage):
                             text2.Hide()
 
                         ix = 3
-                        ctl2 = wx.TextCtrl(self, wx.ID_ANY,
-                                           size=(_BOX_WIDTH / 1.3, 20),
-                                           style=0)
+                        ctl2 = BGTextCtrl(self, wx.ID_ANY,
+                                           size=(_BOX_WIDTH / 1.3, 20))
 
                         self.sizer4_4.Add(ctl2, (iy, ix), (1, 1),
                                           wx.EXPAND | wx.ADJUST_MINSIZE, 0)
@@ -1997,6 +1996,7 @@ class FitPage(BasicPage):
 
         self.on_smear_helper()
         self.on_set_focus(None)
+        self.Layout()
         self.Refresh()
         # update model plot with new data information
         if flag:
@@ -2891,8 +2891,8 @@ class FitPage(BasicPage):
                     if not self.is_mac:
                         text2.Hide()
                     ix += 1
-                    ctl2 = wx.TextCtrl(self, wx.ID_ANY,
-                                       size=(_BOX_WIDTH / 1.2, 20), style=0)
+                    ctl2 = BGTextCtrl(self, wx.ID_ANY,
+                                       size=(_BOX_WIDTH / 1.2, 20))
                     sizer.Add(ctl2, (iy, ix), (1, 1),
                               wx.EXPAND | wx.ADJUST_MINSIZE, 0)
                     if not self.is_mac:
