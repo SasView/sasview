@@ -1011,7 +1011,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         Delete the current item
         """
         # Assure this is indeed wanted
-        delete_msg = "This operation will delete the selected data sets." +\
+        delete_msg = "This operation will delete the selected data sets " +\
+                     "and all the dependents." +\
                      "\nDo you want to continue?"
         reply = QtWidgets.QMessageBox.question(self,
                                            'Warning',
@@ -1022,22 +1023,40 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if reply == QtWidgets.QMessageBox.No:
             return
 
-        indices = self.current_view.selectedIndexes()
         proxy = self.current_view.model()
         model = proxy.sourceModel()
 
-        for index in indices:
+        deleted_indices = []
+        deleted_names = []
+
+        # Every time a row is removed, the indices change, so we'll just remove
+        # rows and keep calling selectedIndexes until it returns an empty list.
+        indices = self.current_view.selectedIndexes()
+
+        while len(indices) > 0:
+            index = indices[0]
             row_index = proxy.mapToSource(index)
             item_to_delete = model.itemFromIndex(row_index)
             if item_to_delete and item_to_delete.isCheckable():
                 row = row_index.row()
+
+                # store the deleted item details so we can pass them on later
+                deleted_names.append(str(self.model.item(row).text()))
+                deleted_indices.append(self.model.item(row))
+
                 if item_to_delete.parent():
                     # We have a child item - delete from it
                     item_to_delete.parent().removeRow(row)
                 else:
                     # delete directly from model
                     model.removeRow(row)
-        pass
+            indices = self.current_view.selectedIndexes()
+
+        # Let others know we deleted data
+        self.communicator.dataDeletedSignal.emit(deleted_indices)
+
+        # update stored_data
+        self.manager.update_stored_data(deleted_names)
 
     def onAnalysisUpdate(self, new_perspective=""):
         """
