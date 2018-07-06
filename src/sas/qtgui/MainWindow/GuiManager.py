@@ -44,6 +44,8 @@ from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow, DEFAULT_PERSPE
 
 from sas.qtgui.Utilities.AddMultEditor import AddMultEditor
 
+logger = logging.getLogger(__name__)
+
 class Acknowledgements(QDialog, Ui_Acknowledgements):
     def __init__(self, parent=None):
         QDialog.__init__(self, parent)
@@ -155,6 +157,7 @@ class GuiManager(object):
             model_list = ModelManager().cat_model_list()
             CategoryInstaller.check_install(model_list=model_list)
         except Exception:
+            import traceback
             logger.error("%s: could not load SasView models")
             logger.error(traceback.format_exc())
 
