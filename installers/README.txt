@@ -3,16 +3,17 @@ Release Notes
     This is a beta pre-release version of 4.2.0.  A number of fixes and changes
     have been made in the year since the previous release.  
     Full release notes will be compiled prior to the full release 4.2.0.
+    
     Highlights are:
         - Infrastucture for calculating 2D patterns from 3D orientated objects
           has now been totally refactored
-        - Plugins have completely migrated now, including sum/multiply to the
-          new infrastructure
+        - Plugins have completely migrated to the new infrastructure now, 
+	  including sum/multiply models
         - Some batch slicing options have been introduced
-        - The core shell parallelepiped known issue is now fixed
-        - data loading improvements
-        - Save Project improvements(Still lots more to do)
-        - numerous bug fixes
+        - The known issue with the core_shell_parallelepiped is now fixed
+        - Several data loading improvements
+        - Several save Project improvements (though there are more to come)
+        - Numerous bug fixes
         - Lots of documentation enhancement
     
     In the meantime please report any bugs or issues found while using this beta
