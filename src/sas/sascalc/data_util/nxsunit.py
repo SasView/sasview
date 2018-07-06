@@ -135,8 +135,9 @@ def _build_all_units():
 
     sld = { '10^-6 Angstrom^-2': 1e-6, 'Angstrom^-2': 1 }
     Q = { 'invA': 1, 'invAng': 1, 'invAngstroms': 1, '1/A': 1,
+          '1/Angstrom': 1, '1/angstrom': 1, 'A^{-1}': 1, 'cm^{-1}': 1,
           '10^-3 Angstrom^-1': 1e-3, '1/cm': 1e-8, '1/m': 1e-10,
-          'nm^-1': 0.1, '1/nm': 0.1, 'n_m^-1': 0.1 }
+          'nm^{-1}': 1, 'nm^-1': 0.1, '1/nm': 0.1, 'n_m^-1': 0.1 }
 
     _caret_optional(sld)
     _caret_optional(Q)
@@ -156,7 +157,7 @@ class Converter(object):
     # Note: a.u. stands for arbitrary units, which should return the default
     # units for that particular dimension.
     # Note: don't have support for dimensionless units.
-    unknown = {None:1, '???':1, '': 1, 'a.u.': 1}
+    unknown = {None:1, '???':1, '': 1, 'a.u.': 1, 'Counts': 1, 'counts': 1}
 
     def __init__(self, name):
         self.base = name

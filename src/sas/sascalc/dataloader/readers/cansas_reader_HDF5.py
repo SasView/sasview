@@ -136,6 +136,7 @@ class Reader(FileReader):
 
             if isinstance(value, h5py.Group):
                 # Set parent class before recursion
+                last_parent_class = self.parent_class
                 self.parent_class = class_name
                 parent_list.append(key)
                 # If a new sasentry, store the current data sets and create
@@ -143,13 +144,13 @@ class Reader(FileReader):
                 if class_prog.match(u'SASentry'):
                     self.add_data_set(key)
                 elif class_prog.match(u'SASdata'):
+                    self._initialize_new_data_set(value)
                     self._find_data_attributes(value)
-                    self._initialize_new_data_set(parent_list)
                 # Recursion step to access data within the group
                 self.read_children(value, parent_list)
-                # Reset parent class when returning from recursive method
-                self.parent_class = class_name
                 self.add_intermediate()
+                # Reset parent class when returning from recursive method
+                self.parent_class = last_parent_class
                 parent_list.remove(key)
 
             elif isinstance(value, h5py.Dataset):
@@ -532,7 +533,7 @@ class Reader(FileReader):
         self.data2d = []
         self.current_datainfo = DataInfo()
 
-    def _initialize_new_data_set(self, parent_list=None):
+    def _initialize_new_data_set(self, value=None):
         """
         A private class method to generate a new 1D or 2D data object based on
         the type of data within the set. Outside methods should call
@@ -540,10 +541,7 @@ class Reader(FileReader):
 
         :param parent_list: List of names of parent elements
         """
-
-        if parent_list is None:
-            parent_list = []
-        if self._find_intermediate(parent_list, "Qx"):
+        if self._is2d(value):
             self.current_dataset = plottable_2D()
         else:
             x = np.array(0)
@@ -564,10 +562,16 @@ class Reader(FileReader):
         the name of the mask.
         :param value: SASdata/NXdata HDF5 Group
         """
+        signal = "I"
+        i_axes = ["Q"]
+        q_indices = [0]
         attrs = value.attrs
-        signal = attrs.get("signal")
-        i_axes = np.array(str(attrs.get("I_axes")).split(","))
-        q_indices = np.int_(attrs.get("Q_indices").split(","))
+        if hasattr(attrs, "signal"):
+            signal = attrs.get("signal")
+        if hasattr(attrs, "I_axes"):
+            i_axes = np.array(str(attrs.get("I_axes")).split(","))
+        if hasattr(attrs, "Q_indices"):
+            q_indices = np.int_(attrs.get("Q_indices").split(","))
         keys = value.keys()
         self.mask_name = attrs.get("mask")
         for val in q_indices:
@@ -577,32 +581,28 @@ class Reader(FileReader):
         for item in self.q_name:
             if item in keys:
                 q_vals = value.get(item)
-                self.q_uncertainties = q_vals.attrs.get("uncertainty")
-                self.q_resolutions = q_vals.attrs.get("resolution")
+                self.q_uncertainties = q_vals.attrs.get("uncertainties")
+                if self.q_uncertainties is None:
+                    self.q_uncertainties = q_vals.attrs.get("uncertainty")
+                self.q_resolutions = q_vals.attrs.get("resolutions")
         if self.i_name in keys:
             i_vals = value.get(self.i_name)
-            self.i_uncertainties = i_vals.attrs.get("uncertainty")
+            self.i_uncertainties = i_vals.attrs.get("uncertainties")
+            if self.i_uncertainties is None:
+                self.i_uncertainties = i_vals.attrs.get("uncertainty")
 
-    def _find_intermediate(self, parent_list, basename=""):
+    def _is2d(self, value, basename="I"):
         """
-        A private class used to find an entry by either using a direct key or
-        knowing the approximate basename.
+        A private class to determine if the data set is 1d or 2d.
 
         :param parent_list: List of parents nodes in the HDF5 file
         :param basename: Approximate name of an entry to search for
-        :return:
+        :return: True if 2D, otherwise false
         """
 
-        entry = False
-        key_prog = re.compile(basename)
-        top = self.raw_data
-        for parent in parent_list:
-            top = top.get(parent)
-        for key in top.keys():
-            if key_prog.match(key):
-                entry = True
-                break
-        return entry
+        vals = value.get(basename)
+        return (vals is not None and vals.shape is not None
+                and len(vals.shape) != 1)
 
     def _create_unique_key(self, dictionary, name, numb=0):
         """

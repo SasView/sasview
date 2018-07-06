@@ -174,7 +174,9 @@ class FileReader(object):
             if isinstance(data, Data1D):
                 # Normalize the units for
                 data.x_unit = self.format_unit(data.x_unit)
+                data._xunit = data.x_unit
                 data.y_unit = self.format_unit(data.y_unit)
+                data._yunit = data.y_unit
                 # Sort data by increasing x and remove 1st point
                 ind = np.lexsort((data.y, data.x))
                 data.x = self._reorder_1d_array(data.x, ind)
@@ -205,8 +207,11 @@ class FileReader(object):
                     data.ymax = np.max(data.y)
             elif isinstance(data, Data2D):
                 # Normalize the units for
-                data.x_unit = self.format_unit(data.Q_unit)
-                data.y_unit = self.format_unit(data.I_unit)
+                data.Q_unit = self.format_unit(data.Q_unit)
+                data.I_unit = self.format_unit(data.I_unit)
+                data._xunit = data.Q_unit
+                data._yunit = data.Q_unit
+                data._zunit = data.I_unit
                 data.data = data.data.astype(np.float64)
                 data.qx_data = data.qx_data.astype(np.float64)
                 data.xmin = np.min(data.qx_data)
@@ -317,6 +322,8 @@ class FileReader(object):
             if isinstance(data, Data1D):
                 try:
                     data.x = data_conv_x(data.x, units=default_q_unit)
+                    data._xunit = default_q_unit
+                    data.x_unit = default_q_unit
                     if data.dx is not None:
                         data.dx = data_conv_x(data.dx, units=default_q_unit)
                     if data.dxl is not None:
@@ -329,6 +336,8 @@ class FileReader(object):
                     data.errors.append(message)
                 try:
                     data.y = data_conv_y(data.y, units=default_i_unit)
+                    data._yunit = default_i_unit
+                    data.y_unit = default_i_unit
                     if data.dy is not None:
                         data.dy = data_conv_y(data.dy, units=default_i_unit)
                 except KeyError:
