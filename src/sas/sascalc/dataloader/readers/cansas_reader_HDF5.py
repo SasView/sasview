@@ -38,9 +38,9 @@ class Reader(FileReader):
     # CanSAS version
     cansas_version = 2.0
     # Data type name
-    type_name = "CanSAS 2.0"
+    type_name = "NXcanSAS"
     # Wildcards
-    type = ["CanSAS 2.0 HDF5 Files (*.h5)|*.h5"]
+    type = ["NXcanSAS HDF5 Files (*.h5)|*.h5|"]
     # List of allowed extensions
     ext = ['.h5', '.H5']
     # Flag to bypass extension check
@@ -70,7 +70,7 @@ class Reader(FileReader):
                     self.raw_data = h5py.File(filename, 'r')
                 except Exception as e:
                     if extension not in self.ext:
-                        msg = "CanSAS2.0 HDF5 Reader could not load file {}".format(basename + extension)
+                        msg = "NXcanSAS HDF5 Reader could not load file {}".format(basename + extension)
                         raise DefaultReaderException(msg)
                     raise FileContentsException(e.message)
                 try:
