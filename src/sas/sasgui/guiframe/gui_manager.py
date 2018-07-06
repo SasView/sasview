@@ -45,6 +45,7 @@ from sas.sasgui.guiframe.data_processor import GridFrame
 from sas.sasgui.guiframe.events import EVT_NEW_BATCH
 from sas.sasgui.guiframe.CategoryManager import CategoryManager
 from sas.sascalc.dataloader.loader import Loader
+from sas.sascalc.file_converter.nxcansas_writer import NXcanSASWriter
 from sas.sasgui.guiframe.proxy import Connection
 
 logger = logging.getLogger(__name__)
@@ -2421,8 +2422,11 @@ class ViewerFrame(PARENT_FRAME):
         """
         default_name = fname
         wildcard = "Text files (*.txt)|*.txt|"\
-                    "CanSAS 1D files(*.xml)|*.xml"
-        path = None
+                    "CanSAS 1D files (*.xml)|*.xml|"\
+                     "NXcanSAS files (*.h5)|*.h5|"
+        options = {0: ".txt",
+                   1: ".xml",
+                   2: ".h5"}
         dlg = wx.FileDialog(self, "Choose a file",
                             self._default_save_location,
                             default_name, wildcard, wx.SAVE)
@@ -2432,27 +2436,25 @@ class ViewerFrame(PARENT_FRAME):
             # ext_num = 0 for .txt, ext_num = 1 for .xml
             # This is MAC Fix
             ext_num = dlg.GetFilterIndex()
-            if ext_num == 0:
-                ext_format = '.txt'
-            else:
-                ext_format = '.xml'
+
+            ext_format = options[ext_num]
             path = os.path.splitext(path)[0] + ext_format
             mypath = os.path.basename(path)
+            fName = os.path.splitext(path)[0] + ext_format
 
-            # Instantiate a loader
-            loader = Loader()
-            ext_format = ".txt"
-            if os.path.splitext(mypath)[1].lower() == ext_format:
+            if os.path.splitext(mypath)[1].lower() == options[0]:
                 # Make sure the ext included in the file name
                 # especially on MAC
-                fName = os.path.splitext(path)[0] + ext_format
                 self._onsaveTXT(data, fName)
-            ext_format = ".xml"
-            if os.path.splitext(mypath)[1].lower() == ext_format:
+            elif os.path.splitext(mypath)[1].lower() == options[1]:
                 # Make sure the ext included in the file name
                 # especially on MAC
-                fName = os.path.splitext(path)[0] + ext_format
+                # Instantiate a loader
+                loader = Loader()
                 loader.save(fName, data, ext_format)
+            elif os.path.splitext(mypath)[1].lower() == options[2]:
+                nxcansaswriter = NXcanSASWriter()
+                nxcansaswriter.write([data], fName)
             try:
                 self._default_save_location = os.path.dirname(path)
             except:
