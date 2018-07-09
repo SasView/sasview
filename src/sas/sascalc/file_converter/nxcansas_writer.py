@@ -253,16 +253,25 @@ class NXcanSASWriter(Cansas2Reader):
         """
         data_entry.attrs['signal'] = 'I'
         data_entry.attrs['I_axes'] = 'Q'
-        data_entry.attrs['I_uncertainties'] = 'Idev'
         data_entry.attrs['Q_indicies'] = 0
-
-        dI = data_obj.dy
-        if dI is None:
-            dI = np.zeros((data_obj.y.shape))
-
-        data_entry.create_dataset('Q', data=data_obj.x)
-        data_entry.create_dataset('I', data=data_obj.y)
-        data_entry.create_dataset('Idev', data=dI)
+        q_entry = data_entry.create_dataset('Q', data=data_obj.x)
+        q_entry.attrs['units'] = data_obj.x_unit
+        i_entry = data_entry.create_dataset('I', data=data_obj.y)
+        i_entry.attrs['units'] = data_obj.y_unit
+        if data_obj.dy is not None:
+            i_entry.attrs['uncertainties'] = 'Idev'
+            i_dev_entry = data_entry.create_dataset('Idev', data=data_obj.dy)
+            i_dev_entry.attrs['units'] = data_obj.y_unit
+        if data_obj.dx is not None:
+            q_entry.attrs['uncertainties'] = 'dQ'
+            dq_entry = data_entry.create_dataset('dQ', data=data_obj.dx)
+            dq_entry.attrs['units'] = data_obj.x_unit
+        elif data_obj.dxl is not None:
+            q_entry.attrs['uncertainties'] = 'dQl,dQw'
+            dql_entry = data_entry.create_dataset('dQl', data=data_obj.dxl)
+            dql_entry.attrs['units'] = data_obj.x_unit
+            dqw_entry = data_entry.create_dataset('dQw', data=data_obj.dxw)
+            dqw_entry.attrs['units'] = data_obj.x_unit
 
     def _write_2d_data(self, data, data_entry):
         """
@@ -272,8 +281,7 @@ class NXcanSASWriter(Cansas2Reader):
         :param data_entry: A h5py Group object representing the SASdata
         """
         data_entry.attrs['signal'] = 'I'
-        data_entry.attrs['I_axes'] = 'Q,Q'
-        data_entry.attrs['I_uncertainties'] = 'Idev'
+        data_entry.attrs['I_axes'] = 'Qx,Qy'
         data_entry.attrs['Q_indicies'] = [0,1]
 
         (n_rows, n_cols) = (len(data.y_bins), len(data.x_bins))
@@ -287,18 +295,28 @@ class NXcanSASWriter(Cansas2Reader):
             if n_rows * n_cols != len(data.qy_data):
                 raise ValueError("Unable to calculate dimensions of 2D data")
 
-        I = np.reshape(data.data, (n_rows, n_cols))
-        dI = np.zeros((n_rows, n_cols))
+        intensity = np.reshape(data.data, (n_rows, n_cols))
+        d_i = None
         if not all(data.err_data == [None]):
-            dI = np.reshape(data.err_data, (n_rows, n_cols))
-        qx =  np.reshape(data.qx_data, (n_rows, n_cols))
+            d_i = np.reshape(data.err_data, (n_rows, n_cols))
+        qx = np.reshape(data.qx_data, (n_rows, n_cols))
         qy = np.reshape(data.qy_data, (n_rows, n_cols))
 
-        I_entry = data_entry.create_dataset('I', data=I)
-        I_entry.attrs['units'] = data.I_unit
-        Qx_entry = data_entry.create_dataset('Qx', data=qx)
-        Qx_entry.attrs['units'] = data.Q_unit
-        Qy_entry = data_entry.create_dataset('Qy', data=qy)
-        Qy_entry.attrs['units'] = data.Q_unit
-        Idev_entry = data_entry.create_dataset('Idev', data=dI)
-        Idev_entry.attrs['units'] = data.I_unit
+        i_entry = data_entry.create_dataset('I', data=intensity)
+        i_entry.attrs['units'] = data.I_unit
+        qx_entry = data_entry.create_dataset('Qx', data=qx)
+        qx_entry.attrs['units'] = data.Q_unit
+        qy_entry = data_entry.create_dataset('Qy', data=qy)
+        qy_entry.attrs['units'] = data.Q_unit
+        if d_i:
+            i_entry.attrs['uncertainties'] = 'Idev'
+            i_dev_entry = data_entry.create_dataset('Idev', data=d_i)
+            i_dev_entry.attrs['units'] = data.I_unit
+        if not all(data.dqx_data == [None]):
+            qx_entry.attrs['uncertainties'] = 'dQx'
+            dqx_entry = data_entry.create_dataset('dQx', data=data.dqx_data)
+            dqx_entry.attrs['units'] = data.Q_unit
+        if not all(data.dqy_data == [None]):
+            qy_entry.attrs['uncertainties'] = 'dQx'
+            dqy_entry = data_entry.create_dataset('dQx', data=data.dqy_data)
+            dqy_entry.attrs['units'] = data.Q_unit
