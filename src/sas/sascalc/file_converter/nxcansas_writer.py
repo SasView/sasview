@@ -296,9 +296,6 @@ class NXcanSASWriter(Cansas2Reader):
                 raise ValueError("Unable to calculate dimensions of 2D data")
 
         intensity = np.reshape(data.data, (n_rows, n_cols))
-        d_i = None
-        if not all(data.err_data == [None]):
-            d_i = np.reshape(data.err_data, (n_rows, n_cols))
         qx = np.reshape(data.qx_data, (n_rows, n_cols))
         qy = np.reshape(data.qy_data, (n_rows, n_cols))
 
@@ -308,15 +305,16 @@ class NXcanSASWriter(Cansas2Reader):
         qx_entry.attrs['units'] = data.Q_unit
         qy_entry = data_entry.create_dataset('Qy', data=qy)
         qy_entry.attrs['units'] = data.Q_unit
-        if d_i:
+        if data.err_data is not None and not all(data.err_data == [None]):
+            d_i = np.reshape(data.err_data, (n_rows, n_cols))
             i_entry.attrs['uncertainties'] = 'Idev'
             i_dev_entry = data_entry.create_dataset('Idev', data=d_i)
             i_dev_entry.attrs['units'] = data.I_unit
-        if not all(data.dqx_data == [None]):
+        if data.dqx_data is not None and not all(data.dqx_data == [None]):
             qx_entry.attrs['resolutions'] = 'dQx'
             dqx_entry = data_entry.create_dataset('dQx', data=data.dqx_data)
             dqx_entry.attrs['units'] = data.Q_unit
-        if not all(data.dqy_data == [None]):
+        if data.dqy_data is not None and not all(data.dqy_data == [None]):
             qy_entry.attrs['resolutions'] = 'dQy'
             dqy_entry = data_entry.create_dataset('dQy', data=data.dqy_data)
             dqy_entry.attrs['units'] = data.Q_unit

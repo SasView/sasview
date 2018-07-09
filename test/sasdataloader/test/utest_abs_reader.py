@@ -117,7 +117,7 @@ class DanseReaderTests(unittest.TestCase):
         self.assertEqual(self.data.detector[0].beam_center.x, center_x)
         self.assertEqual(self.data.detector[0].beam_center.y, center_y)
 
-        self.assertEqual(self.data.I_unit, '1/cm')
+        self.assertEqual(self.data.I_unit, 'cm^{-1}')
         self.assertEqual(self.data.data[0], 1.57831)
         self.assertEqual(self.data.data[1], 2.70983)
         self.assertEqual(self.data.data[2], 3.83422)
