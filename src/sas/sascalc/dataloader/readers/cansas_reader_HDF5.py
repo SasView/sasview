@@ -104,8 +104,8 @@ class Reader(FileReader):
         self.mask_name = u''
         self.i_name = u''
         self.i_node = u''
-        self.q_uncertainties = u''
-        self.q_resolutions = u''
+        self.q_uncertainties = []
+        self.q_resolutions = []
         self.i_uncertainties = u''
         self.parent_class = u''
         self.detector = Detector()
@@ -245,10 +245,12 @@ class Reader(FileReader):
                 self.current_dataset.q = data_set.flatten()
             else:
                 self.current_dataset.x = data_set.flatten()
-        elif key in self.q_resolutions:
-            if key == u'dQw':
+        elif key in self.q_uncertainties or key in self.q_resolutions:
+            if (len(self.q_resolutions) > 1
+                    and np.where(self.q_resolutions == key)[0] == 0):
                 self.current_dataset.dxw = data_set.flatten()
-            elif key == u'dQl':
+            elif (len(self.q_resolutions) > 1
+                  and np.where(self.q_resolutions == key)[0] == 1):
                 self.current_dataset.dxl = data_set.flatten()
             else:
                 self.current_dataset.dx = data_set.flatten()
@@ -552,8 +554,8 @@ class Reader(FileReader):
         self.i_name = ""
         self.i_node = ""
         self.q_name = []
-        self.q_uncertainties = ""
-        self.q_resolutions = ""
+        self.q_uncertainties = []
+        self.q_resolutions = []
         self.i_uncertainties = ""
 
     def _find_data_attributes(self, value):
@@ -581,10 +583,16 @@ class Reader(FileReader):
         for item in self.q_name:
             if item in keys:
                 q_vals = value.get(item)
-                self.q_uncertainties = q_vals.attrs.get("uncertainties")
-                if self.q_uncertainties is None:
+                if q_vals.attrs.get("uncertainties"):
+                    self.q_uncertainties = q_vals.attrs.get("uncertainties")
+                elif q_vals.attrs.get("uncertainty"):
                     self.q_uncertainties = q_vals.attrs.get("uncertainty")
-                self.q_resolutions = q_vals.attrs.get("resolutions")
+                if isinstance(self.q_uncertainties, str):
+                    self.q_uncertainties = [self.q_uncertainties]
+                if q_vals.attrs.get("resolutions"):
+                    self.q_resolutions = q_vals.attrs.get("resolutions")
+                if isinstance(self.q_resolutions, str):
+                    self.q_resolutions = [self.q_resolutions]
         if self.i_name in keys:
             i_vals = value.get(self.i_name)
             self.i_uncertainties = i_vals.attrs.get("uncertainties")

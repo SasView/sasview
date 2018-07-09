@@ -238,8 +238,6 @@ class Plugin(PluginBase):
         elif not exception_occurred: # Everything loaded as expected
             self.load_complete(output=output, message="Loading data complete!",
                                info="info")
-        else:
-            self.load_complete(output=None, message=error_message, info="error")
 
     def load_update(self, message="", info="warning"):
         """
