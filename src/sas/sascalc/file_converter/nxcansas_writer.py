@@ -263,11 +263,11 @@ class NXcanSASWriter(Cansas2Reader):
             i_dev_entry = data_entry.create_dataset('Idev', data=data_obj.dy)
             i_dev_entry.attrs['units'] = data_obj.y_unit
         if data_obj.dx is not None:
-            q_entry.attrs['uncertainties'] = 'dQ'
+            q_entry.attrs['resolutions'] = 'dQ'
             dq_entry = data_entry.create_dataset('dQ', data=data_obj.dx)
             dq_entry.attrs['units'] = data_obj.x_unit
         elif data_obj.dxl is not None:
-            q_entry.attrs['uncertainties'] = 'dQl,dQw'
+            q_entry.attrs['resolutions'] = ['dQl','dQw']
             dql_entry = data_entry.create_dataset('dQl', data=data_obj.dxl)
             dql_entry.attrs['units'] = data_obj.x_unit
             dqw_entry = data_entry.create_dataset('dQw', data=data_obj.dxw)
@@ -313,10 +313,10 @@ class NXcanSASWriter(Cansas2Reader):
             i_dev_entry = data_entry.create_dataset('Idev', data=d_i)
             i_dev_entry.attrs['units'] = data.I_unit
         if not all(data.dqx_data == [None]):
-            qx_entry.attrs['uncertainties'] = 'dQx'
+            qx_entry.attrs['resolutions'] = 'dQx'
             dqx_entry = data_entry.create_dataset('dQx', data=data.dqx_data)
             dqx_entry.attrs['units'] = data.Q_unit
         if not all(data.dqy_data == [None]):
-            qy_entry.attrs['uncertainties'] = 'dQx'
-            dqy_entry = data_entry.create_dataset('dQx', data=data.dqy_data)
+            qy_entry.attrs['resolutions'] = 'dQy'
+            dqy_entry = data_entry.create_dataset('dQy', data=data.dqy_data)
             dqy_entry.attrs['units'] = data.Q_unit
