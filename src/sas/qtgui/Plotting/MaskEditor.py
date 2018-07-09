@@ -206,11 +206,11 @@ class MaskEditor(QtWidgets.QDialog, Ui_MaskEditorUI):
         """
         Respond to changes in masking
         """
-        # the case of liitle numbers of True points
+        # the case of litle numbers of True points
         if len(mask[mask]) < 10 and self.data is not None:
-            self.data.mask = copy.deepcopy(self.mask)
+            self.data.mask = copy.deepcopy(self.default_mask)
         else:
-            self.mask = mask
+            self.default_mask = mask
         # make temperary data to plot
         temp_mask = np.zeros(len(mask))
         temp_data = copy.deepcopy(self.data)

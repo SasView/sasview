@@ -30,15 +30,15 @@ class ArcInteractor(BaseInteractor):
 
     def set_layer(self, n):
         """
-            Allow adding plot to the same panel
-            :param n: the number of layer
+        Allow adding plot to the same panel
+        :param n: the number of layer
         """
         self.layernum = n
         self.update()
 
     def clear(self):
         """
-            Clear this slicer and its markers
+        Clear this slicer and its markers
         """
         self.clear_markers()
         try:
@@ -52,7 +52,7 @@ class ArcInteractor(BaseInteractor):
 
     def get_radius(self):
         """
-            Return arc radius
+        Return arc radius
         """
         radius = np.sqrt(np.power(self._mouse_x, 2) + \
                            np.power(self._mouse_y, 2))
@@ -60,11 +60,11 @@ class ArcInteractor(BaseInteractor):
 
     def update(self, theta1=None, theta2=None, nbins=None, r=None):
         """
-            Update the plotted arc
-            :param theta1: starting angle of the arc
-            :param theta2: ending angle of the arc
-            :param nbins: number of points along the arc
-            :param r: radius of the arc
+        Update the plotted arc
+        :param theta1: starting angle of the arc
+        :param theta2: ending angle of the arc
+        :param nbins: number of points along the arc
+        :param r: radius of the arc
         """
         # Plot inner circle
         x = []
@@ -77,7 +77,7 @@ class ArcInteractor(BaseInteractor):
             self.theta2 += (2 * np.pi)
         while self.theta2 >= (self.theta1 + 2 * np.pi):
             self.theta2 -= (2 * np.pi)
-        npts = int((self.theta2 - self.theta1) / (np.pi / 120))
+        self.npts = int((self.theta2 - self.theta1) / (np.pi / 120))
 
         if r is None:
             self.radius = np.sqrt(np.power(self._mouse_x, 2) + \
@@ -91,7 +91,6 @@ class ArcInteractor(BaseInteractor):
 
             x.append(xval)
             y.append(yval)
-        # self.marker.set(xdata=[self._mouse_x],ydata=[0])
         self.arc.set_data(x, y)
 
     def save(self, ev):
@@ -101,14 +100,12 @@ class ArcInteractor(BaseInteractor):
         """
         self._save_x = self._mouse_x
         self._save_y = self._mouse_y
-        # self._save_x = ev.xdata
-        # self._save_y = ev.ydata
         self.base.freeze_axes()
 
     def moveend(self, ev):
         """
-            After a dragging motion reset the flag self.has_move to False
-            :param ev: event
+        After a dragging motion reset the flag self.has_move to False
+        :param ev: event
         """
         self.has_move = False
 
@@ -125,7 +122,6 @@ class ArcInteractor(BaseInteractor):
         """
         Process move to a new position, making sure that the move is allowed.
         """
-        # print "ring move x, y", x,y
         self._mouse_x = x
         self._mouse_y = y
         self.has_move = True
