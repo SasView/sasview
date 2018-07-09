@@ -2566,7 +2566,8 @@ class ViewerFrame(PARENT_FRAME):
         Save data2d dialog
         """
         default_name = fname
-        wildcard = "IGOR/DAT 2D file in Q_map (*.dat)|*.DAT"
+        wildcard = "IGOR/DAT 2D file in Q_map (*.dat)|*.DAT|"\
+                   "NXcanSAS files (*.h5)|*.h5|"
         dlg = wx.FileDialog(self, "Choose a file",
                             self._default_save_location,
                             default_name, wildcard, wx.SAVE)
@@ -2578,6 +2579,8 @@ class ViewerFrame(PARENT_FRAME):
             ext_num = dlg.GetFilterIndex()
             if ext_num == 0:
                 ext_format = '.dat'
+            elif ext_num == 1:
+                ext_format = '.h5'
             else:
                 ext_format = ''
             path = os.path.splitext(path)[0] + ext_format
@@ -2585,13 +2588,17 @@ class ViewerFrame(PARENT_FRAME):
 
             # Instantiate a loader
             loader = Loader()
-
-            ext_format = ".dat"
-            if os.path.splitext(mypath)[1].lower() == ext_format:
+            if os.path.splitext(mypath)[1].lower() == '.dat':
                 # Make sure the ext included in the file name
                 # especially on MAC
                 fileName = os.path.splitext(path)[0] + ext_format
                 loader.save(fileName, data, ext_format)
+            elif os.path.splitext(mypath)[1].lower() == '.h5':
+                # Make sure the ext included in the file name
+                # especially on MAC
+                fileName = os.path.splitext(path)[0] + ext_format
+                nxcansaswriter = NXcanSASWriter()
+                nxcansaswriter.write([data], fileName)
             try:
                 self._default_save_location = os.path.dirname(path)
             except:
