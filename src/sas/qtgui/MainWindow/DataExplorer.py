@@ -30,6 +30,8 @@ import sas.qtgui.Perspectives as Perspectives
 
 DEFAULT_PERSPECTIVE = "Fitting"
 
+logger = logging.getLogger(__name__)
+
 class DataExplorerWindow(DroppableDataLoadWidget):
     # The controller which is responsible for managing signal slots connections
     # for the gui and providing an interface to the data model.
@@ -295,7 +297,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Figure out which rows are checked
         ind = -1
         # Use 'while' so the row count is forced at every iteration
-        deleted_indices = []
+        deleted_items = []
         deleted_names = []
         while ind < self.model.rowCount():
             ind += 1
@@ -304,14 +306,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if item and item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
                 # Delete these rows from the model
                 deleted_names.append(str(self.model.item(ind).text()))
-                deleted_indices.append(item)
+                deleted_items.append(item)
 
                 self.model.removeRow(ind)
                 # Decrement index since we just deleted it
                 ind -= 1
 
         # Let others know we deleted data
-        self.communicator.dataDeletedSignal.emit(deleted_indices)
+        self.communicator.dataDeletedSignal.emit(deleted_items)
 
         # update stored_data
         self.manager.update_stored_data(deleted_names)
@@ -1026,7 +1028,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         proxy = self.current_view.model()
         model = proxy.sourceModel()
 
-        deleted_indices = []
+        deleted_items = []
         deleted_names = []
 
         # Every time a row is removed, the indices change, so we'll just remove
@@ -1041,8 +1043,8 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 row = row_index.row()
 
                 # store the deleted item details so we can pass them on later
-                deleted_names.append(str(self.model.item(row).text()))
-                deleted_indices.append(self.model.item(row))
+                deleted_names.append(item_to_delete.text())
+                deleted_items.append(item_to_delete)
 
                 if item_to_delete.parent():
                     # We have a child item - delete from it
@@ -1053,7 +1055,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             indices = self.current_view.selectedIndexes()
 
         # Let others know we deleted data
-        self.communicator.dataDeletedSignal.emit(deleted_indices)
+        self.communicator.dataDeletedSignal.emit(deleted_items)
 
         # update stored_data
         self.manager.update_stored_data(deleted_names)
