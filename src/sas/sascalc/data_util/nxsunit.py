@@ -135,7 +135,7 @@ def _build_all_units():
 
     sld = { '10^-6 Angstrom^-2': 1e-6, 'Angstrom^-2': 1 }
     Q = { 'invA': 1, 'invAng': 1, 'invAngstroms': 1, '1/A': 1,
-          '1/Angstrom': 1, '1/angstrom': 1, 'A^{-1}': 1, 'cm^{-1}': 1,
+          '1/Angstrom': 1, '1/angstrom': 1, 'A^{-1}': 1, 'cm^{-1}': 1e-8,
           '10^-3 Angstrom^-1': 1e-3, '1/cm': 1e-8, '1/m': 1e-10,
           'nm^{-1}': 1, 'nm^-1': 0.1, '1/nm': 0.1, 'n_m^-1': 0.1 }
 
