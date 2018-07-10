@@ -55,7 +55,10 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # Be careful with twisted threads.
         self.mutex = QtCore.QMutex()
 
-        # Active plots
+        # Plot widgets {name:widget}, required to keep track of plots shown as MDI subwindows
+        self.plot_widgets = {}
+
+        # Active plots {id:Plotter1D/2D}, required to keep track of currently displayed plots
         self.active_plots = {}
 
         # Connect the buttons
@@ -553,6 +556,7 @@ class DataExplorerWindow(DroppableDataLoadWidget):
             if isinstance(plot_set, Data1D):
                 if not 'new_plot' in locals():
                     new_plot = Plotter(self)
+                    new_plot.item = item
                 new_plot.plot(plot_set)
                 # active_plots may contain multiple charts
                 self.active_plots[plot_set.id] = new_plot
@@ -591,11 +595,14 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         new_plot.setObjectName(title)
 
         # Add the plot to the workspace
-        self.parent.workspace().addSubWindow(new_plot)
+        plot_widget = self.parent.workspace().addSubWindow(new_plot)
 
         # Show the plot
         new_plot.show()
         new_plot.canvas.draw()
+
+        # Update the plot widgets dict
+        self.plot_widgets[title]=plot_widget
 
         # Update the active chart list
         #self.active_plots[new_plot.data.id] = new_plot
@@ -1025,15 +1032,15 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if reply == QtWidgets.QMessageBox.No:
             return
 
+        # Every time a row is removed, the indices change, so we'll just remove
+        # rows and keep calling selectedIndexes until it returns an empty list.
+        indices = self.current_view.selectedIndexes()
+
         proxy = self.current_view.model()
         model = proxy.sourceModel()
 
         deleted_items = []
         deleted_names = []
-
-        # Every time a row is removed, the indices change, so we'll just remove
-        # rows and keep calling selectedIndexes until it returns an empty list.
-        indices = self.current_view.selectedIndexes()
 
         while len(indices) > 0:
             index = indices[0]
@@ -1045,6 +1052,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
                 # store the deleted item details so we can pass them on later
                 deleted_names.append(item_to_delete.text())
                 deleted_items.append(item_to_delete)
+
+                # Delete corresponding open plots
+                self.closePlotsForItem(item_to_delete)
 
                 if item_to_delete.parent():
                     # We have a child item - delete from it
@@ -1059,6 +1069,45 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         # update stored_data
         self.manager.update_stored_data(deleted_names)
+
+    def closePlotsForItem(self, item):
+        """
+        Given standard item, close all its currently displayed plots
+        """
+        # item - HashableStandardItems of active plots
+
+        # {} -> 'Graph1' : HashableStandardItem()
+        current_plot_items = {}
+        for plot_name in PlotHelper.currentPlots():
+            current_plot_items[plot_name] = PlotHelper.plotById(plot_name).item
+
+        # item and its hashable children
+        items_being_deleted = []
+        if item.rowCount() > 0:
+            items_being_deleted = [item.child(n) for n in range(item.rowCount())
+                                   if isinstance(item.child(n), GuiUtils.HashableStandardItem)]
+        items_being_deleted.append(item)
+        # Add the parent in case a child is selected
+        if isinstance(item.parent(), GuiUtils.HashableStandardItem):
+            items_being_deleted.append(item.parent())
+
+        # Compare plot items and items to delete
+        plots_to_close = set(current_plot_items.values()) & set(items_being_deleted)
+
+        for plot_item in plots_to_close:
+            for plot_name in current_plot_items.keys():
+                if plot_item == current_plot_items[plot_name]:
+                    plotter = PlotHelper.plotById(plot_name)
+                    # try to delete the plot
+                    try:
+                        plotter.close()
+                        #self.parent.workspace().removeSubWindow(plotter)
+                        self.plot_widgets[plot_name].close()
+                        self.plot_widgets.pop(plot_name, None)
+                    except AttributeError as ex:
+                        logging.error("Closing of %s failed:\n %s" % (plot_name, str(ex)))
+
+        pass # debugger anchor
 
     def onAnalysisUpdate(self, new_perspective=""):
         """
@@ -1173,9 +1222,3 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         # send in the new item
         self.theory_model.appendRow(model_item)
 
-
-if __name__ == "__main__":
-    app = QtWidgets.QApplication([])
-    dlg = DataExplorerWindow()
-    dlg.show()
-    sys.exit(app.exec_())

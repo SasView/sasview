@@ -132,6 +132,16 @@ class PlotterBase(QtWidgets.QWidget):
         self.canvas.setObjectName(title)
 
     @property
+    def item(self):
+        ''' getter for this plot's QStandardItem '''
+        return self._item
+
+    @item.setter
+    def item(self, item=None):
+        ''' setter for this plot's QStandardItem '''
+        self._item = item
+
+    @property
     def xLabel(self, xlabel=""):
         """ x-label setter """
         return self.x_label

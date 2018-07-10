@@ -66,7 +66,7 @@ class DataExplorerTest(unittest.TestCase):
 
         # Buttons - data tab
         self.assertEqual(self.form.cmdLoad.text(), "Load data")
-        self.assertEqual(self.form.cmdDeleteData.text(), "Delete")
+        self.assertEqual(self.form.cmdDeleteData.text(), "Delete Data")
         self.assertEqual(self.form.cmdDeleteTheory.text(), "Delete")
         self.assertEqual(self.form.cmdFreeze.text(), "Freeze Theory")
         self.assertEqual(self.form.cmdSendTo.text(), "Send data to")
@@ -818,7 +818,7 @@ class DataExplorerTest(unittest.TestCase):
         """
         pass
 
-    def notestDeleteItem(self):
+    def testDeleteItem(self):
         """
         Delete selected item from data explorer
         """
@@ -874,6 +874,50 @@ class DataExplorerTest(unittest.TestCase):
 
         # Assure the model contains no items
         self.assertEqual(self.form.model.rowCount(), 3)
+
+    def testClosePlotsForItem(self):
+        """
+        Delete selected item from data explorer should also delete corresponding plots
+        """
+        # Mock the confirmation dialog with return=No
+        QMessageBox.question = MagicMock(return_value=QMessageBox.No)
+
+        loader = Loader()
+        manager = DataManager()
+        PlotHelper.clear()
+        self.form.enableGraphCombo(None)
+
+        # Make sure the controls are disabled
+        self.assertFalse(self.form.cbgraph.isEnabled())
+        self.assertFalse(self.form.cmdAppend.isEnabled())
+
+        # Populate the model
+        filename = ["cyl_400_20.txt"]
+        self.form.readData(filename)
+
+        # Mask plotting
+        self.form.parent.workspace = MagicMock()
+
+        # Call the plotting method
+        self.form.newPlot()
+
+        time.sleep(1)
+        QApplication.processEvents()
+
+        # The plot was registered
+        self.assertEqual(len(PlotHelper.currentPlots()), 1)
+        self.assertEqual(len(self.form.plot_widgets), 1)
+        self.assertEqual(list(self.form.plot_widgets.keys()), ['Graph3'])
+
+        # data index
+        model_item = self.form.model.item(0,0)
+
+        # Call the method
+        self.form.closePlotsForItem(model_item)
+
+        # See that no plot remained
+        self.assertEqual(len(PlotHelper.currentPlots()), 0)
+        self.assertEqual(len(self.form.plot_widgets), 0)
 
 
 if __name__ == "__main__":

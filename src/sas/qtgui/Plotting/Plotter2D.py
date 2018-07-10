@@ -85,16 +85,6 @@ class Plotter2DWidget(PlotterBase):
         self.yLabel = "%s(%s)"%(data._yaxis, data._yunit)
         self.title(title=data.title)
 
-    @property
-    def item(self):
-        ''' getter for this plot's QStandardItem '''
-        return self._item
-
-    @item.setter
-    def item(self, item=None):
-        ''' setter for this plot's QStandardItem '''
-        self._item = item
-
     def plot(self, data=None, marker=None, show_colorbar=True):
         """
         Plot 2D self._data

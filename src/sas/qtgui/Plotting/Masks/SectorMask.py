@@ -3,9 +3,9 @@
 """
 import numpy as np
 
-from qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
-from qtgui.Plotting.Slicers.SectorSlicer import SideInteractor
-from qtgui.Plotting.Slicers.SectorSlicer import LineInteractor
+from sas.qtgui.Plotting.Slicers.BaseInteractor import BaseInteractor
+from sas.qtgui.Plotting.Slicers.SectorSlicer import SideInteractor
+from sas.qtgui.Plotting.Slicers.SectorSlicer import LineInteractor
 
 class SectorMask(BaseInteractor):
     """
