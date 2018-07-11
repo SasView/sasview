@@ -135,14 +135,11 @@ DEFAULT_PERSPECTIVE = 'None'
 # Default threading model
 USING_TWISTED = True
 
-# Logging levels to disable, if any
-DISABLE_LOGGING = logging.DEBUG
-
 # Time out for updating sasview
 UPDATE_TIMEOUT = 2
 
 # Logging levels to disable, if any
-DISABLE_LOGGING = logging.DEBUG
+DISABLE_LOGGING = logging.NOTSET
 
 def printEVT(message):
     """
