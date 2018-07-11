@@ -175,7 +175,6 @@ class NXcanSASWriter(Cansas2Reader):
             names=['beam_size_x', 'beam_size_y'],
             units=data_info.source.beam_size_unit, write_fn=_write_h5_float)
 
-
         # Collimation metadata
         if len(data_info.collimation) > 0:
             i = 1
@@ -230,6 +229,57 @@ class NXcanSASWriter(Cansas2Reader):
             detector_entry = instrument_entry.create_group('sasdetector01')
             detector_entry.attrs['canSAS_class'] = 'SASdetector'
             detector_entry.attrs['name'] = ''
+
+        # Process meta data
+        if len(data_info.process) > 0 and not data_info.process[0].is_empty():
+            i = 1
+            for process in data_info.process:
+                process_entry = sasentry.create_group(
+                    'sasprocess{0:0=2d}'.format(i))
+                process_entry.attrs['canSAS_class'] = 'SASprocess'
+                if process.name:
+                    name = _h5_string(process.name)
+                    process_entry.create_dataset('name', data=name)
+                if process.date:
+                    date = _h5_string(process.date)
+                    process_entry.create_dataset('date', data=date)
+                if process.description:
+                    desc = _h5_string(process.description)
+                    process_entry.create_dataset('description', data=desc)
+                j = 1
+                for term in process.term:
+                    if term:
+                        h5_term = _h5_string(term)
+                        process_entry.create_dataset('term{0:0=2d}'.format(j),
+                                                     data=h5_term)
+                    j += 1
+                j = 1
+                for note in process.notes:
+                    if note:
+                        h5_note = _h5_string(note)
+                        process_entry.create_dataset('note{0:0=2d}'.format(j),
+                                                     data=h5_note)
+                    j += 1
+                i += 1
+
+        # Transmission Spectrum
+        if len(data_info.trans_spectrum) > 0:
+            i = 1
+            for trans in data_info.trans_spectrum:
+                trans_entry = sasentry.create_group(
+                    'sastransmission_spectrum{0:0=2d}'.format(i))
+                trans_entry.attrs['canSAS_class'] = 'SAStransmission_spectrum'
+                trans_entry.attrs['signal'] = 'T'
+                trans_entry.attrs['T_axes'] = 'T'
+                trans_entry.attrs['name'] = trans.name
+                if trans.timestamp is not '':
+                    trans_entry.attrs['timestamp'] = trans.timestamp
+                transmission = trans_entry.create_dataset(
+                    'T', data=trans.transmission)
+                transmission.attrs['unertainties'] = 'Tdev'
+                trans_entry.create_dataset('Tdev',
+                                           data = trans.transmission_deviation)
+                trans_entry.create_dataset('lambda', data=trans.wavelength)
 
         note_entry = sasentry.create_group('sasnote'.format(i))
         note_entry.attrs['canSAS_class'] = 'SASnote'

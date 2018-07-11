@@ -419,6 +419,7 @@ class Reader(FileReader):
         :param data_point: Single point from an HDF5 data file
         :param key: class name data_point was taken from
         """
+        term_match = re.compile(u'^term[0-9]+$')
         if key == u'Title':  # CanSAS 2.0
             self.process.name = data_point
         elif key == u'name':  # NXcanSAS
@@ -427,8 +428,8 @@ class Reader(FileReader):
             self.process.description = data_point
         elif key == u'date':
             self.process.date = data_point
-        elif key == u'term':
-            self.process.term = data_point
+        elif term_match.match(key):
+            self.process.term.append(data_point)
         else:
             self.process.notes.append(data_point)
 
@@ -472,13 +473,9 @@ class Reader(FileReader):
         if len(self.current_datainfo.trans_spectrum) > 0:
             spectrum_list = []
             for spectrum in self.current_datainfo.trans_spectrum:
-                spectrum.transmission = np.delete(spectrum.transmission, [0])
                 spectrum.transmission = spectrum.transmission.astype(np.float64)
-                spectrum.transmission_deviation = np.delete(
-                    spectrum.transmission_deviation, [0])
                 spectrum.transmission_deviation = \
                     spectrum.transmission_deviation.astype(np.float64)
-                spectrum.wavelength = np.delete(spectrum.wavelength, [0])
                 spectrum.wavelength = spectrum.wavelength.astype(np.float64)
                 if len(spectrum.transmission) > 0:
                     spectrum_list.append(spectrum)
