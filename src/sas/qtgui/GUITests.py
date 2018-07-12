@@ -8,11 +8,10 @@ Unit tests for the QT GUI
 =========================
 
 In order to run the tests, first install SasView and sasmodels to site-packages
-by running ``python setup.py install`` in the root git directories of both of
-the repositories.
+by running ``python setup.py install`` in both repositories.
 
-The tests can be run with `python GUITests.py`, or to get more verbose console
-output (recommended), use `python GUITests.py -v`.
+The tests can be run with ``python GUITests.py``, or to get more verbose
+console output (recommended), use ``python GUITests.py -v``.
 """
 
 # Prepare the general QApplication instance
