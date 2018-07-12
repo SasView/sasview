@@ -242,10 +242,12 @@ class Reader(FileReader):
         elif key in self.q_name:
             self.current_dataset.xaxis("Q", unit)
             if isinstance(self.current_dataset, plottable_2D):
+                #FIXME: This is broken - need to properly handle 2D data
                 self.current_dataset.q = data_set.flatten()
             else:
                 self.current_dataset.x = data_set.flatten()
         elif key in self.q_uncertainties or key in self.q_resolutions:
+            # FIXME: This isn't right either.
             if (len(self.q_resolutions) > 1
                     and np.where(self.q_resolutions == key)[0] == 0):
                 self.current_dataset.dxw = data_set.flatten()
@@ -508,7 +510,7 @@ class Reader(FileReader):
             if dataset.data.ndim == 2:
                 (n_rows, n_cols) = dataset.data.shape
                 dataset.y_bins = dataset.qy_data[0::n_cols]
-                dataset.x_bins = dataset.qx_data[:n_cols]
+                dataset.x_bins = dataset.qx_data[0::n_rows]
                 dataset.data = dataset.data.flatten()
             self.current_dataset = dataset
             self.send_to_output()
@@ -561,16 +563,14 @@ class Reader(FileReader):
         the name of the mask.
         :param value: SASdata/NXdata HDF5 Group
         """
-        signal = "I"
-        i_axes = ["Q"]
-        q_indices = [0]
         attrs = value.attrs
-        if hasattr(attrs, "signal"):
-            signal = attrs.get("signal")
-        if hasattr(attrs, "I_axes"):
-            i_axes = np.array(str(attrs.get("I_axes")).split(","))
-        if hasattr(attrs, "Q_indices"):
-            q_indices = np.int_(attrs.get("Q_indices").split(","))
+        signal = attrs.get("signal", "I")
+        i_axes = attrs.get("I_axes", ["Q"])
+        q_indices = attrs.get("Q_indices", [0])
+        try:
+            iter(q_indices)
+        except TypeError:
+            q_indices = [q_indices]
         keys = value.keys()
         self.mask_name = attrs.get("mask")
         for val in q_indices:
@@ -580,16 +580,16 @@ class Reader(FileReader):
         for item in self.q_name:
             if item in keys:
                 q_vals = value.get(item)
-                if q_vals.attrs.get("uncertainties"):
+                if q_vals.attrs.get("uncertainties") is not None:
                     self.q_uncertainties = q_vals.attrs.get("uncertainties")
-                elif q_vals.attrs.get("uncertainty"):
+                elif q_vals.attrs.get("uncertainty") is not None:
                     self.q_uncertainties = q_vals.attrs.get("uncertainty")
-                if isinstance(self.q_uncertainties, str):
+                if isinstance(self.q_uncertainties, str) is not None:
                     self.q_uncertainties = [self.q_uncertainties]
-                if q_vals.attrs.get("resolutions"):
+                if q_vals.attrs.get("resolutions") is not None:
                     self.q_resolutions = q_vals.attrs.get("resolutions")
                 if isinstance(self.q_resolutions, str):
-                    self.q_resolutions = [self.q_resolutions]
+                    self.q_resolutions = self.q_resolutions.split(",")
         if self.i_name in keys:
             i_vals = value.get(self.i_name)
             self.i_uncertainties = i_vals.attrs.get("uncertainties")
