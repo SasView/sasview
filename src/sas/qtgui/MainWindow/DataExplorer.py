@@ -495,10 +495,9 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         model = self.model if is_data else self.theory_model
         # Now query the model item for available plots
         plots = GuiUtils.plotsFromFilename(filename, model)
-        item = GuiUtils.itemFromFilename(filename, model)
 
         new_plots = []
-        for plot in plots:
+        for item, plot in plots.items():
             plot_id = plot.id
             if plot_id in list(self.active_plots.keys()):
                 self.active_plots[plot_id].replacePlot(plot_id, plot)

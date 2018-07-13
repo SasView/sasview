@@ -3,6 +3,17 @@ import sys
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
+"""
+Unit tests for the QT GUI
+=========================
+
+In order to run the tests, first install SasView and sasmodels to site-packages
+by running ``python setup.py install`` in both repositories.
+
+The tests can be run with ``python GUITests.py``, or to get more verbose
+console output (recommended), use ``python GUITests.py -v``.
+"""
+
 # Prepare the general QApplication instance
 app = QtWidgets.QApplication(sys.argv)
 
