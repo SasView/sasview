@@ -9,13 +9,18 @@
 #
 # Feel free to add more stuff to this as and when it becomes an issue.
 
+# stack dumps due to Git Bash internal crashes
+*.stackdump
+
 # Editor files
+*.pyproj
 .DS_Store
 /.settings
 /.vscode
 /.project
 /.pydevproject
 /.idea
+/.vs
 
 # Build and run files
 **/__pycache__
