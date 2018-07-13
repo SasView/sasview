@@ -557,6 +557,17 @@ class Reader(FileReader):
         self.q_resolutions = []
         self.i_uncertainties = ""
 
+    @staticmethod
+    def check_is_list_or_array(iterable):
+        try:
+            iter(iterable)
+            if (not isinstance(iterable, np.ndarray)) or (isinstance(iterable, str)
+                    or isinstance(iterable, unicode)):
+                raise TypeError
+        except TypeError:
+            iterable = iterable.split(",")
+        return iterable
+
     def _find_data_attributes(self, value):
         """
         A class to find the indices for Q, the name of the Qdev and Idev, and
@@ -567,10 +578,8 @@ class Reader(FileReader):
         signal = attrs.get("signal", "I")
         i_axes = attrs.get("I_axes", ["Q"])
         q_indices = attrs.get("Q_indices", [0])
-        try:
-            iter(q_indices)
-        except TypeError:
-            q_indices = [q_indices]
+        q_indices = map(int, self.check_is_list_or_array(q_indices))
+        i_axes = self.check_is_list_or_array(i_axes)
         keys = value.keys()
         self.mask_name = attrs.get("mask")
         for val in q_indices:

@@ -303,7 +303,7 @@ class NXcanSASWriter(Cansas2Reader):
         """
         data_entry.attrs['signal'] = 'I'
         data_entry.attrs['I_axes'] = 'Q'
-        data_entry.attrs['Q_indicies'] = 0
+        data_entry.attrs['Q_indices'] = [0]
         q_entry = data_entry.create_dataset('Q', data=data_obj.x)
         q_entry.attrs['units'] = data_obj.x_unit
         i_entry = data_entry.create_dataset('I', data=data_obj.y)
@@ -332,7 +332,7 @@ class NXcanSASWriter(Cansas2Reader):
         """
         data_entry.attrs['signal'] = 'I'
         data_entry.attrs['I_axes'] = 'Qx,Qy'
-        data_entry.attrs['Q_indicies'] = [0,1]
+        data_entry.attrs['Q_indices'] = [0,1]
 
         (n_rows, n_cols) = (len(data.y_bins), len(data.x_bins))
 
