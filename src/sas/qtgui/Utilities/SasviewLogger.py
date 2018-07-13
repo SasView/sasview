@@ -31,7 +31,6 @@ def setup_qt_logging():
         fmt="%(asctime)s - %(levelname)s: %(message)s",
         datefmt="%H:%M:%S"
     ))
-    handler.setLevel(logging.DEBUG)
     logger.addHandler(handler)
 
     return handler
