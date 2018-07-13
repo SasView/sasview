@@ -7,8 +7,6 @@ import os.path
 
 import pkg_resources
 
-import sas.qtgui.Utilities.LocalConfig as LocalConfig
-
 '''
 Module that manages the global logging
 '''
@@ -30,9 +28,6 @@ class SetupLogger(object):
             logging.captureWarnings(True)
             logger = logging.getLogger(self.name)
 
-        # use this as a final override if the need arises
-        logging.disable(LocalConfig.DISABLE_LOGGING)
-
         return logger
 
     def config_development(self):
@@ -42,9 +37,6 @@ class SetupLogger(object):
         logger = logging.getLogger(self.name)
         self._update_all_logs_to_debug(logger)
         logging.captureWarnings(True)
-
-        # use this as a final override if the need arises
-        logging.disable(LocalConfig.DISABLE_LOGGING)
 
         return logger
 
