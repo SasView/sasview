@@ -86,7 +86,7 @@ class GuiManager(object):
 
         # Fork off logging messages to the Log Window
         handler = setup_qt_logging()
-        handler.messageWritten.connect(self.listWidget.insertPlainText)
+        handler.messageWritten.connect(self.appendLog)
 
         # Log the start of the session
         logging.info(" --- SasView session started ---")
@@ -268,6 +268,11 @@ class GuiManager(object):
         Set the status bar text
         """
         self.statusLabel.setText(text)
+
+    def appendLog(self, msg):
+        """Appends a message to the list widget in the Log Explorer. Use this
+        instead of listWidget.insertPlainText() to facilitate auto-scrolling"""
+        self.listWidget.append(msg.strip())
 
     def createGuiData(self, item, p_file=None):
         """
