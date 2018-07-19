@@ -106,9 +106,6 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Globals
         self.initializeGlobals()
 
-        # Set up desired logging level
-        logging.disable(LocalConfig.DISABLE_LOGGING)
-
         # data index for the batch set
         self.data_index = 0
         # Main Data[12]D holders

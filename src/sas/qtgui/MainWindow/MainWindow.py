@@ -10,9 +10,6 @@ from PyQt5.QtGui import QPixmap
 from sas.qtgui.UI import main_resources_rc
 from .UI.MainWindowUI import Ui_MainWindow
 
-# Initialize logging
-import sas.qtgui.Utilities.SasviewLogger
-
 class MainSasViewWindow(QMainWindow, Ui_MainWindow):
     # Main window of the application
     def __init__(self, parent=None):
