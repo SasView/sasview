@@ -129,7 +129,7 @@ class FittingWindow(QtWidgets.QTabWidget):
             icon.addPixmap(QtGui.QPixmap("src/sas/qtgui/images/icons/layers.svg"))
         self.addTab(tab, icon, tab_name)
         # Show the new tab
-        self.setCurrentIndex(self.maxIndex-1)
+        self.setCurrentWidget(tab);
         # Notify listeners
         self.tabsModifiedSignal.emit()
 
