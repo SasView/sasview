@@ -34,7 +34,7 @@ class FittingWindow(QtWidgets.QTabWidget):
         self.tabs = []
 
         # Max index for adding new, non-clashing tab names
-        self.maxIndex = 0
+        self.maxIndex = 1
 
         ## Index of the current tab
         #self.currentTab = 0
