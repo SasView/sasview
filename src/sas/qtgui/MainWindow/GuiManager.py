@@ -12,7 +12,7 @@ from PyQt5.QtCore import Qt, QLocale, QUrl
 from twisted.internet import reactor
 # General SAS imports
 from sas.qtgui.Utilities.ConnectionProxy import ConnectionProxy
-from sas.qtgui.Utilities.SasviewLogger import XStream
+from sas.qtgui.Utilities.SasviewLogger import setup_qt_logging
 
 import sas.qtgui.Utilities.LocalConfig as LocalConfig
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
@@ -85,8 +85,8 @@ class GuiManager(object):
         self.addWidgets()
 
         # Fork off logging messages to the Log Window
-        XStream.stdout().messageWritten.connect(self.listWidget.insertPlainText)
-        XStream.stderr().messageWritten.connect(self.listWidget.insertPlainText)
+        handler = setup_qt_logging()
+        handler.messageWritten.connect(self.appendLog)
 
         # Log the start of the session
         logging.info(" --- SasView session started ---")
@@ -268,6 +268,11 @@ class GuiManager(object):
         Set the status bar text
         """
         self.statusLabel.setText(text)
+
+    def appendLog(self, msg):
+        """Appends a message to the list widget in the Log Explorer. Use this
+        instead of listWidget.insertPlainText() to facilitate auto-scrolling"""
+        self.listWidget.append(msg.strip())
 
     def createGuiData(self, item, p_file=None):
         """
