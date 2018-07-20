@@ -42,7 +42,7 @@ class FittingPerspectiveTest(unittest.TestCase):
         self.assertIn("Fit panel", self.widget.windowTitle())
         self.assertEqual(self.widget.optimizer, "Levenberg-Marquardt")
         self.assertEqual(len(self.widget.tabs), 1)
-        self.assertEqual(self.widget.maxIndex, 1)
+        self.assertEqual(self.widget.maxIndex, 2)
         self.assertEqual(self.widget.getTabName(), "FitPage1")
 
     def testAddTab(self):
@@ -52,12 +52,12 @@ class FittingPerspectiveTest(unittest.TestCase):
         self.widget.addFit(None)
         self.assertEqual(len(self.widget.tabs), 2)
         self.assertEqual(self.widget.getTabName(), "FitPage2")
-        self.assertEqual(self.widget.maxIndex, 2)
+        self.assertEqual(self.widget.maxIndex, 3)
         # Add an empty batch tab
         self.widget.addFit(None, is_batch=True)
         self.assertEqual(len(self.widget.tabs), 3)
         self.assertEqual(self.widget.getTabName(2), "BatchPage3")
-        self.assertEqual(self.widget.maxIndex, 3)
+        self.assertEqual(self.widget.maxIndex, 4)
 
     def testAddCSTab(self):
         ''' Add a constraint/simult tab'''
@@ -69,7 +69,7 @@ class FittingPerspectiveTest(unittest.TestCase):
         ''' Remove data from last tab'''
         self.assertEqual(len(self.widget.tabs), 1)
         self.assertEqual(self.widget.getTabName(), "FitPage1")
-        self.assertEqual(self.widget.maxIndex, 1)
+        self.assertEqual(self.widget.maxIndex, 2)
 
         # Attempt to remove the last tab
         self.widget.resetTab(0)
@@ -77,7 +77,7 @@ class FittingPerspectiveTest(unittest.TestCase):
         # see that the tab didn't disappear, just changed the name/id
         self.assertEqual(len(self.widget.tabs), 1)
         self.assertEqual(self.widget.getTabName(), "FitPage2")
-        self.assertEqual(self.widget.maxIndex, 2)
+        self.assertEqual(self.widget.maxIndex, 3)
 
         # Now, add data
         data = Data1D(x=[1,2], y=[1,2])
@@ -99,14 +99,14 @@ class FittingPerspectiveTest(unittest.TestCase):
         # Remove the original tab
         self.widget.tabCloses(1)
         self.assertEqual(len(self.widget.tabs), 1)
-        self.assertEqual(self.widget.maxIndex, 2)
+        self.assertEqual(self.widget.maxIndex, 3)
         self.assertEqual(self.widget.getTabName(), "FitPage2")
 
         # Attemtp to remove the last tab
         self.widget.tabCloses(1)
         # The tab should still be there
         self.assertEqual(len(self.widget.tabs), 1)
-        self.assertEqual(self.widget.maxIndex, 3)
+        self.assertEqual(self.widget.maxIndex, 4)
         self.assertEqual(self.widget.getTabName(), "FitPage3")
 
     def testAllowBatch(self):
@@ -165,8 +165,8 @@ class FittingPerspectiveTest(unittest.TestCase):
         self.assertEqual(len(self.widget.tabs), 3)
 
         # Check the names of the new tabs
-        self.assertEqual(self.widget.tabText(1), "BatchPage1")
-        self.assertEqual(self.widget.tabText(2), "BatchPage2")
+        self.assertEqual(self.widget.tabText(1), "BatchPage2")
+        self.assertEqual(self.widget.tabText(2), "BatchPage3")
 
 if __name__ == "__main__":
     unittest.main()
