@@ -1,0 +1,25 @@
+name: qt5_win
+channels:
+  - conda-forge
+dependencies:
+ - matplotlib
+ - scipy
+ - hdf5
+ - h5py
+ - ipython
+ - jupyter
+ - twisted
+ - lxml
+ - sphinx
+ - cython
+ - pytest
+ - mako
+ - pyinstaller 
+ - pyopencl
+ - pip:
+   - pytools 
+   - periodictable 
+   - bumps 
+   - xhtml2pdf 
+   - qt5reactor 
+

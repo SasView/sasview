@@ -65,7 +65,6 @@ datas.append((os.path.join('..', '..','sasmodels','sasmodels'),'sasmodels'))
 datas.append((os.path.join('..', 'src','sas','sasgui','perspectives','fitting','plugin_models'),'plugin_models'))
 datas.append((os.path.join(PYTHON_LOC,'Library','plugins','platforms'),'platforms'))
 datas.append((os.path.join(PYTHON_LOC,'Lib','site-packages','jedi'),'jedi'))
-datas.append((os.path.join(PYTHON_LOC,'Library','bin', 'libzmq.dll'),'libzmq.pyd'))
 
 # These depend on whether we have MKL or Atlas numpy
 if os.path.exists(os.path.join(LIBLOC, LIBPREFIX + 'mkl_core.' + LIBSUFFIX)):
