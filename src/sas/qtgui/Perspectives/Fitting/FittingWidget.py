@@ -2065,7 +2065,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         # Add a header
         header_row = [QtGui.QStandardItem() for i in range(5)]
-        header_row[0].setText(self.kernel_module._model_info.composition[1][1].name)
+        header_row[0].setText(structure_kernel._model_info.name)
         font = header_row[0].font()
         font.setBold(True)
         header_row[0].setFont(font)
