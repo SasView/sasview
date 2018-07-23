@@ -2030,6 +2030,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.shell_names = self.shellNamesList()
 
+        # Add a header
+        header_row = [QtGui.QStandardItem() for i in range(5)]
+        header_row[0].setText(self.kernel_module.name)
+        font = header_row[0].font()
+        font.setBold(True)
+        header_row[0].setFont(font)
+        for item in header_row:
+            item.setEditable(False)
+            item.setCheckable(False)
+            item.setSelectable(False)
+
+        self._model_model.appendRow(header_row)
+
         # Update the QModel
         new_rows = FittingUtilities.addParametersToModel(self.model_parameters, self.kernel_module, self.is2D)
 
@@ -2049,6 +2062,19 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         form_kernel = self.kernel_module
 
         self.kernel_module = MultiplicationModel(form_kernel, structure_kernel)
+
+        # Add a header
+        header_row = [QtGui.QStandardItem() for i in range(5)]
+        header_row[0].setText(self.kernel_module._model_info.composition[1][1].name)
+        font = header_row[0].font()
+        font.setBold(True)
+        header_row[0].setFont(font)
+        for item in header_row:
+            item.setEditable(False)
+            item.setCheckable(False)
+            item.setSelectable(False)
+
+        self._model_model.appendRow(header_row)
 
         new_rows = FittingUtilities.addSimpleParametersToModel(structure_parameters, self.is2D)
         for row in new_rows:
