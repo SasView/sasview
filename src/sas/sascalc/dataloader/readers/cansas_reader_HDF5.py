@@ -206,7 +206,11 @@ class Reader(FileReader):
                         self.process_source(data_point, key, unit)
                     # Everything else goes in meta_data
                     elif self.parent_class == u'SASdata':
-                        self.process_data_object(data_set, key, unit)
+                        if isinstance(self.current_dataset, plottable_2D):
+                            self.process_2d_data_object(data_set, key, unit)
+                        else:
+                            self.process_1d_data_object(data_set, key, unit)
+
                         break
                     elif self.parent_class == u'SAStransmission_spectrum':
                         self.process_trans_spectrum(data_set, key)
@@ -220,34 +224,22 @@ class Reader(FileReader):
                 # I don't know if this reachable code
                 self.errors.add("ShouldNeverHappenException")
 
-    def process_data_object(self, data_set, key, unit):
+    def process_1d_data_object(self, data_set, key, unit):
         """
-        SASdata processor method
+        SASdata processor method for 1d data items
         :param data_set: data from HDF5 file
         :param key: canSAS_class attribute
         :param unit: unit attribute
         """
         if key == self.i_name:
-            if isinstance(self.current_dataset, plottable_2D):
-                self.current_dataset.data = data_set
-                self.current_dataset.zaxis("Intensity", unit)
-            else:
-                self.current_dataset.y = data_set.flatten()
-                self.current_dataset.yaxis("Intensity", unit)
+            self.current_dataset.y = data_set.flatten()
+            self.current_dataset.yaxis("Intensity", unit)
         elif key == self.i_uncertainties:
-            if isinstance(self.current_dataset, plottable_2D):
-                self.current_dataset.err_data = data_set.flatten()
-            else:
-                self.current_dataset.dy = data_set.flatten()
+            self.current_dataset.dy = data_set.flatten()
         elif key in self.q_name:
             self.current_dataset.xaxis("Q", unit)
-            if isinstance(self.current_dataset, plottable_2D):
-                #FIXME: This is broken - need to properly handle 2D data
-                self.current_dataset.q = data_set.flatten()
-            else:
-                self.current_dataset.x = data_set.flatten()
+            self.current_dataset.x = data_set.flatten()
         elif key in self.q_uncertainties or key in self.q_resolutions:
-            # FIXME: This isn't right either.
             if (len(self.q_resolutions) > 1
                     and np.where(self.q_resolutions == key)[0] == 0):
                 self.current_dataset.dxw = data_set.flatten()
@@ -256,6 +248,30 @@ class Reader(FileReader):
                 self.current_dataset.dxl = data_set.flatten()
             else:
                 self.current_dataset.dx = data_set.flatten()
+        elif key == self.mask_name:
+            self.current_dataset.mask = data_set.flatten()
+        elif key == u'wavelength':
+            self.current_datainfo.source.wavelength = data_set[0]
+            self.current_datainfo.source.wavelength_unit = unit
+
+    def process_2d_data_object(self, data_set, key, unit):
+        if key == self.i_name:
+            self.current_dataset.data = data_set
+            self.current_dataset.zaxis("Intensity", unit)
+        elif key == self.i_uncertainties:
+            self.current_dataset.err_data = data_set.flatten()
+        elif key in self.q_name:
+            self.current_dataset.xaxis("Q", unit)
+            self.current_dataset.yaxis("Q", unit)
+            #FIXME: This is broken - need to properly handle 2D data
+            # TODO: Check shape of array (2d - cash money, homey!)
+            # TODO: 3D - check dims, etc.
+            # TODO: Put data where it belongs
+            pass
+        elif key in self.q_uncertainties or key in self.q_resolutions:
+            # FIXME: This isn't right either.
+            # TODO: find resolution/uncertainty specific to q_name
+            pass
         elif key == u'Qy':
             self.current_dataset.yaxis("Q_y", unit)
             self.current_dataset.qy_data = data_set.flatten()
@@ -266,11 +282,6 @@ class Reader(FileReader):
             self.current_dataset.qx_data = data_set.flatten()
         elif key == u'Qxdev':
             self.current_dataset.dqx_data = data_set.flatten()
-        elif key == self.mask_name:
-            self.current_dataset.mask = data_set.flatten()
-        elif key == u'wavelength':
-            self.current_datainfo.source.wavelength = data_set[0]
-            self.current_datainfo.source.wavelength_unit = unit
 
     def process_trans_spectrum(self, data_set, key):
         """
