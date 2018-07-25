@@ -181,6 +181,22 @@ def addCheckedListToModel(model, param_list):
     item_list[0].setCheckable(True)
     model.appendRow(item_list)
 
+def addHeadingRowToModel(model, name):
+    """adds a non-interactive top-level row to the model"""
+    header_row = [QtGui.QStandardItem() for i in range(5)]
+    header_row[0].setText(name)
+
+    font = header_row[0].font()
+    font.setBold(True)
+    header_row[0].setFont(font)
+
+    for item in header_row:
+        item.setEditable(False)
+        item.setCheckable(False)
+        item.setSelectable(False)
+
+    model.appendRow(header_row)
+
 def addHeadersToModel(model):
     """
     Adds predefined headers to the model

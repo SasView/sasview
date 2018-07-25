@@ -668,7 +668,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         Return list of all parameters for the current model
         """
-        return [self._model_model.item(row).text() for row in range(self._model_model.rowCount())]
+        return [self._model_model.item(row).text()
+                for row in range(self._model_model.rowCount())
+                if self.isCheckable(row)]
 
     def modifyViewOnRow(self, row, font=None, brush=None):
         """
@@ -696,6 +698,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         # Create a new item and add the Constraint object as a child
         assert isinstance(constraint, Constraint)
         assert 0 <= row <= self._model_model.rowCount()
+        assert self.isCheckable(row)
 
         item = QtGui.QStandardItem()
         item.setData(constraint)
@@ -716,6 +719,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         min_col = self.lstParams.itemDelegate().param_min
         max_col = self.lstParams.itemDelegate().param_max
         for row in self.selectedParameters():
+            assert(self.isCheckable(row))
             param = self._model_model.item(row, 0).text()
             value = self._model_model.item(row, 1).text()
             min_t = self._model_model.item(row, min_col).text()
@@ -758,6 +762,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         min_col = self.lstParams.itemDelegate().param_min
         max_col = self.lstParams.itemDelegate().param_max
         for row in range(self._model_model.rowCount()):
+            if not self.isCheckable(row):
+                continue
             if not self.rowHasConstraint(row):
                 continue
             # Get the Constraint object from of the model item
@@ -786,44 +792,49 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         For the given row, return its constraint, if any
         """
-        try:
+        if self.isCheckable(row):
             item = self._model_model.item(row, 1)
-            return item.child(0).data()
-        except AttributeError:
-            # return none when no constraints
-            return None
+            try:
+                return item.child(0).data()
+            except AttributeError:
+                # return none when no constraints
+                pass
+        return None
 
     def rowHasConstraint(self, row):
         """
         Finds out if row of the main model has a constraint child
         """
-        item = self._model_model.item(row, 1)
-        if item.hasChildren():
-            c = item.child(0).data()
-            if isinstance(c, Constraint):
-                return True
+        if self.isCheckable(row):
+            item = self._model_model.item(row, 1)
+            if item.hasChildren():
+                c = item.child(0).data()
+                if isinstance(c, Constraint):
+                    return True
         return False
 
     def rowHasActiveConstraint(self, row):
         """
         Finds out if row of the main model has an active constraint child
         """
-        item = self._model_model.item(row, 1)
-        if item.hasChildren():
-            c = item.child(0).data()
-            if isinstance(c, Constraint) and c.active:
-                return True
+        if self.isCheckable(row):
+            item = self._model_model.item(row, 1)
+            if item.hasChildren():
+                c = item.child(0).data()
+                if isinstance(c, Constraint) and c.active:
+                    return True
         return False
 
     def rowHasActiveComplexConstraint(self, row):
         """
         Finds out if row of the main model has an active, nontrivial constraint child
         """
-        item = self._model_model.item(row, 1)
-        if item.hasChildren():
-            c = item.child(0).data()
-            if isinstance(c, Constraint) and c.func and c.active:
-                return True
+        if self.isCheckable(row):
+            item = self._model_model.item(row, 1)
+            if item.hasChildren():
+                c = item.child(0).data()
+                if isinstance(c, Constraint) and c.func and c.active:
+                    return True
         return False
 
     def selectParameters(self):
@@ -1555,7 +1566,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # Utility function for main model update
             # internal so can use closure for param_dict
             param_name = str(self._model_model.item(row, 0).text())
-            if param_name not in list(param_dict.keys()):
+            if not self.isCheckable(row) or param_name not in list(param_dict.keys()):
                 return
             # modify the param value
             param_repr = GuiUtils.formatNumber(param_dict[param_name][0], high=True)
@@ -1567,7 +1578,7 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         def updatePolyValues(row):
             # Utility function for updateof polydispersity part of the main model
             param_name = str(self._model_model.item(row, 0).text())+'.width'
-            if param_name not in list(param_dict.keys()):
+            if not self.isCheckable(row) or param_name not in list(param_dict.keys()):
                 return
             # modify the param value
             param_repr = GuiUtils.formatNumber(param_dict[param_name][0], high=True)
@@ -1710,7 +1721,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         Take func and throw it inside the magnet model row loop
         """
         for row_i in range(self._magnet_model.rowCount()):
-            func(row_i)
+            if self.isCheckable(row_i):
+                func(row_i)
 
     def updateMagnetModelFromList(self, param_dict):
         """
@@ -2030,22 +2042,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.shell_names = self.shellNamesList()
 
-        # Add a header
-        header_row = [QtGui.QStandardItem() for i in range(5)]
-        header_row[0].setText(self.kernel_module.name)
-        font = header_row[0].font()
-        font.setBold(True)
-        header_row[0].setFont(font)
-        for item in header_row:
-            item.setEditable(False)
-            item.setCheckable(False)
-            item.setSelectable(False)
-
-        self._model_model.appendRow(header_row)
-
-        # Update the QModel
+        # Get new rows for QModel
         new_rows = FittingUtilities.addParametersToModel(self.model_parameters, self.kernel_module, self.is2D)
 
+        # Add heading row
+        FittingUtilities.addHeadingRowToModel(self._model_model, model_name)
+
+        # Update QModel
         for row in new_rows:
             self._model_model.appendRow(row)
         # Update the counter used for multishell display
@@ -2063,20 +2066,13 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         self.kernel_module = MultiplicationModel(form_kernel, structure_kernel)
 
-        # Add a header
-        header_row = [QtGui.QStandardItem() for i in range(5)]
-        header_row[0].setText(structure_kernel._model_info.name)
-        font = header_row[0].font()
-        font.setBold(True)
-        header_row[0].setFont(font)
-        for item in header_row:
-            item.setEditable(False)
-            item.setCheckable(False)
-            item.setSelectable(False)
-
-        self._model_model.appendRow(header_row)
-
+        # Get new rows for QModel
         new_rows = FittingUtilities.addSimpleParametersToModel(structure_parameters, self.is2D)
+
+        # Add heading row
+        FittingUtilities.addHeadingRowToModel(self._model_model, structure_factor)
+
+        # Update QModel
         for row in new_rows:
             self._model_model.appendRow(row)
             # disable fitting of parameters not listed in self.kernel_module (probably radius_effective)
@@ -2516,6 +2512,8 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
 
         def updateFunctionCaption(row):
             # Utility function for update of polydispersity function name in the main model
+            if not self.isCheckable(row):
+                return
             param_name = str(self._model_model.item(row, 0).text())
             if param_name !=  param.name:
                 return

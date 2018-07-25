@@ -254,7 +254,7 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.cbStructureFactor.setCurrentIndex(structure_index)
 
         # We have 4 more rows now
-        self.assertEqual(self.widget._model_model.rowCount(), rowcount+4)
+        self.assertEqual(self.widget._model_model.rowCount(), rowcount+5)
 
         # Switch models
         self.widget.cbModel.setCurrentIndex(0)
@@ -274,7 +274,7 @@ class FittingWidgetTest(unittest.TestCase):
         last_index = self.widget.cbStructureFactor.count()
         self.widget.cbStructureFactor.setCurrentIndex(last_index-1)
         # Do we have all the rows?
-        self.assertEqual(self.widget._model_model.rowCount(), 4)
+        self.assertEqual(self.widget._model_model.rowCount(), 5)
 
         # Are the command buttons properly enabled?
         self.assertTrue(self.widget.cmdPlot.isEnabled())
@@ -495,7 +495,11 @@ class FittingWidgetTest(unittest.TestCase):
         """
         Test opening of the load file dialog for 'array' polydisp. function
         """
+
+        # open a non-existent file
         filename = os.path.join("UnitTesting", "testdata_noexist.txt")
+        with self.assertRaises(OSError, msg="testdata_noexist.txt should be a non-existent file"):
+            os.stat(filename)
         QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=(filename,''))
         self.widget.show()
         # Change the category index so we have a model with polydisp
@@ -511,7 +515,14 @@ class FittingWidgetTest(unittest.TestCase):
             self.widget.disp_model()
 
         # good file
+        # TODO: this depends on the working directory being src/sas/qtgui,
+        # TODO: which isn't convenient if you want to run this test suite
+        # TODO: individually
         filename = os.path.join("UnitTesting", "testdata.txt")
+        try:
+            os.stat(filename)
+        except OSError:
+            self.assertTrue(False, "testdata.txt does not exist")
         QtWidgets.QFileDialog.getOpenFileName = MagicMock(return_value=(filename,''))
 
         self.widget.onPolyComboIndexChange('array', 0)
@@ -1011,7 +1022,7 @@ class FittingWidgetTest(unittest.TestCase):
         name_modified_param = str(self.widget._model_model.item(5, 0).text())
 
          # Check the model
-        self.assertEqual(self.widget._model_model.rowCount(), 6)
+        self.assertEqual(self.widget._model_model.rowCount(), 7)
         self.assertEqual(self.widget._model_model.columnCount(), 5)
 
         # Test the header
@@ -1127,7 +1138,7 @@ class FittingWidgetTest(unittest.TestCase):
 
         # two rows selected
         index1 = self.widget.lstParams.model().index(1, 0, QtCore.QModelIndex())
-        index2 = self.widget.lstParams.model().index(2, 0, QtCore.QModelIndex())
+        index2 = self.widget.lstParams.model().index(3, 0, QtCore.QModelIndex())
         selection_model = self.widget.lstParams.selectionModel()
         selection_model.select(index1, selection_model.Select | selection_model.Rows)
         selection_model.select(index2, selection_model.Select | selection_model.Rows)
@@ -1163,7 +1174,7 @@ class FittingWidgetTest(unittest.TestCase):
 
         # several random parameters
         self.assertEqual(self.widget.getRowFromName('scale'), 0)
-        self.assertEqual(self.widget.getRowFromName('length'), 5)
+        self.assertEqual(self.widget.getRowFromName('length'), 6)
 
     def testGetParamNames(self):
         """
@@ -1200,7 +1211,7 @@ class FittingWidgetTest(unittest.TestCase):
 
         # Create a constraint object
         const = Constraint(parent=None, value=7.0)
-        row = 2
+        row = 3
 
         spy = QtSignalSpy(self.widget, self.widget.constraintAddedSignal)
 
@@ -1219,7 +1230,7 @@ class FittingWidgetTest(unittest.TestCase):
 
         # assign complex constraint now
         const = Constraint(parent=None, param='radius', func='5*sld')
-        row = 4
+        row = 5
         # call the method tested
         self.widget.addConstraintToRow(constraint=const, row=row)
 
@@ -1278,9 +1289,16 @@ class FittingWidgetTest(unittest.TestCase):
         model_index = self.widget.cbModel.findText("cylinder")
         self.widget.cbModel.setCurrentIndex(model_index)
 
-        # select two rows
         row1 = 1
-        row2 = 4
+        row2 = 5
+
+        param1 = "background"
+        param2 = "radius"
+
+        #default_value1 = "0.001"
+        default_value2 = "20"
+
+        # select two rows
         index1 = self.widget.lstParams.model().index(row1, 0, QtCore.QModelIndex())
         index2 = self.widget.lstParams.model().index(row2, 0, QtCore.QModelIndex())
         selection_model = self.widget.lstParams.selectionModel()
@@ -1297,18 +1315,18 @@ class FittingWidgetTest(unittest.TestCase):
         selection_model.select(index1, selection_model.Select | selection_model.Rows)
 
         # delete one of the constraints
-        self.widget.deleteConstraintOnParameter(param='background')
+        self.widget.deleteConstraintOnParameter(param=param1)
 
         # see that the other constraint is still present
-        cons = self.widget.getConstraintForRow(4) # 4 = radius
-        self.assertEqual(cons.param, "radius")
-        self.assertEqual(cons.value, "20")
+        cons = self.widget.getConstraintForRow(row2)
+        self.assertEqual(cons.param, param2)
+        self.assertEqual(cons.value, default_value2)
 
         # kill the other constraint
         self.widget.deleteConstraint()
 
         # see that the other constraint is still present
-        self.assertEqual(self.widget.getConstraintsForModel(), [('radius', None)])
+        self.assertEqual(self.widget.getConstraintsForModel(), [(param2, None)])
 
     def testGetConstraintForRow(self):
         """
@@ -1328,9 +1346,10 @@ class FittingWidgetTest(unittest.TestCase):
         model_index = self.widget.cbModel.findText("cylinder")
         self.widget.cbModel.setCurrentIndex(model_index)
 
-        # select two rows
         row1 = 1
-        row2 = 4
+        row2 = 5
+
+        # select two rows
         index1 = self.widget.lstParams.model().index(row1, 0, QtCore.QModelIndex())
         index2 = self.widget.lstParams.model().index(row2, 0, QtCore.QModelIndex())
         selection_model = self.widget.lstParams.selectionModel()
@@ -1340,7 +1359,7 @@ class FittingWidgetTest(unittest.TestCase):
         # add constraints
         self.widget.addSimpleConstraint()
 
-        con_list = [False, True, False, False, True, False]
+        con_list = [False, True, False, False, False, True, False]
         new_list = []
         for row in range(self.widget._model_model.rowCount()):
             new_list.append(self.widget.rowHasConstraint(row))
@@ -1358,9 +1377,10 @@ class FittingWidgetTest(unittest.TestCase):
         model_index = self.widget.cbModel.findText("cylinder")
         self.widget.cbModel.setCurrentIndex(model_index)
 
-        # select two rows
         row1 = 1
-        row2 = 4
+        row2 = 5
+
+        # select two rows
         index1 = self.widget.lstParams.model().index(row1, 0, QtCore.QModelIndex())
         index2 = self.widget.lstParams.model().index(row2, 0, QtCore.QModelIndex())
         selection_model = self.widget.lstParams.selectionModel()
@@ -1374,7 +1394,7 @@ class FittingWidgetTest(unittest.TestCase):
         constraint_objects = self.widget.getConstraintObjectsForModel()
         constraint_objects[0].active = False
 
-        con_list = [False, False, False, False, True, False]
+        con_list = [False, False, False, False, False, True, False]
         new_list = []
         for row in range(self.widget._model_model.rowCount()):
             new_list.append(self.widget.rowHasActiveConstraint(row))
@@ -1395,9 +1415,16 @@ class FittingWidgetTest(unittest.TestCase):
         # no constraints
         self.assertEqual(self.widget.getConstraintsForModel(),[])
 
-        # select two rows
         row1 = 1
-        row2 = 4
+        row2 = 5
+
+        param1 = "background"
+        param2 = "radius"
+
+        default_value1 = "0.001"
+        default_value2 = "20"
+
+        # select two rows
         index1 = self.widget.lstParams.model().index(row1, 0, QtCore.QModelIndex())
         index2 = self.widget.lstParams.model().index(row2, 0, QtCore.QModelIndex())
         selection_model = self.widget.lstParams.selectionModel()
@@ -1409,30 +1436,33 @@ class FittingWidgetTest(unittest.TestCase):
 
         # simple constraints
         # self.assertEqual(self.widget.getConstraintsForModel(), [('background', '0.001'), ('radius', '20')])
-        cons = self.widget.getConstraintForRow(1) # 1 - background
-        self.assertEqual(cons.param, "background")
-        self.assertEqual(cons.value, "0.001")
-        cons = self.widget.getConstraintForRow(4) # 4 = radius
-        self.assertEqual(cons.param, "radius")
-        self.assertEqual(cons.value, "20")
+        cons = self.widget.getConstraintForRow(row1)
+        self.assertEqual(cons.param, param1)
+        self.assertEqual(cons.value, default_value1)
+        cons = self.widget.getConstraintForRow(row2)
+        self.assertEqual(cons.param, param2)
+        self.assertEqual(cons.value, default_value2)
 
         objects = self.widget.getConstraintObjectsForModel()
         self.assertEqual(len(objects), 2)
-        self.assertEqual(objects[1].value, '20')
-        self.assertEqual(objects[0].param, 'background')
+        self.assertEqual(objects[1].value, default_value2)
+        self.assertEqual(objects[0].param, param1)
+
+        row = 0
+        param = "scale"
+        func = "5*sld"
 
         # add complex constraint
-        const = Constraint(parent=None, param='scale', func='5*sld')
-        row = 0
+        const = Constraint(parent=None, param=param, func=func)
         self.widget.addConstraintToRow(constraint=const, row=row)
         #self.assertEqual(self.widget.getConstraintsForModel(),[('scale', '5*sld'), ('background', '0.001'), ('radius', None)])
-        cons = self.widget.getConstraintForRow(4) # 4 = radius
-        self.assertEqual(cons.param, "radius")
-        self.assertEqual(cons.value, "20")
+        cons = self.widget.getConstraintForRow(row2)
+        self.assertEqual(cons.param, param2)
+        self.assertEqual(cons.value, default_value2)
 
         objects = self.widget.getConstraintObjectsForModel()
         self.assertEqual(len(objects), 3)
-        self.assertEqual(objects[0].func, '5*sld')
+        self.assertEqual(objects[0].func, func)
 
     def testReplaceConstraintName(self):
         """
