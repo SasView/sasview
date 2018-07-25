@@ -265,6 +265,7 @@ chosen dataset, or to change the dataset label that appears in the plot legend
 box.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+.. _d_data_averaging:
 
 2D data averaging
 -----------------
@@ -300,8 +301,9 @@ the size of the data.*
 
 Alternatively, once a 'slicer' is active you can also select the region to
 average by bringing back the *Dataset Menu* and selecting *Edit Slicer
-Parameters*. A dialog window will appear in which you can enter values to
-define a region or select the number of points to plot (*nbins*).
+Parameters and Batch Fitting*. A dialog window will appear in which you can
+enter values to define a region, select the number of points to plot (*nbins*),
+or apply the slicer to any or all other 2D data plots.
 
 A separate plot window will also have appeared, displaying the requested
 average.
@@ -314,6 +316,32 @@ Selecting *Box Sum* automatically brings up the 'Slicer Parameters' dialog in
 order to display the average numerically, rather than graphically.
 
 To remove a 'slicer', bring back the *Dataset menu* and select *Clear Slicer*.
+
+Batch Slicing
+^^^^^^^^^^^^^
+
+An existing slicer can be applied to multiple data plots by opening the 'Slicer
+Parameters' window by bringing back the *Dataset Menu* and selecting *Edit
+Slicer Parameters and Batch Fitting*. At the bottom of the window, batch slicing
+options are available.
+
+Select the data plots you want to apply the slicer. All data plots are selected
+by default. The resulting 1d data for all slicers can be saved as a text file
+and then sent to fitting by selecting the 'Auto save generated 1D' check box.
+Sending data to the fitting perspective requires the data be saved.
+
+Once the auto save check box is selected, you can select where the files are
+saved. The file name for the saved data is the file name from the original data
+set, plus what is in the 'Append to file name' field. The default value in the
+append to field includes the names and values for all of the slicer parameters.
+
+Three options for fitting are available. The first is to not send the data to
+a fit page. The second is to send each slice to individual fit page. The last
+is to send all sliced data to a batch fit.
+
+Clicking the 'Apply Slicer to Selected Plots' will then run through each of plot
+and create a slicer for that plot with the exact parameters as the slicer from
+the plot used to open the 'Slicer Parameters' popup window.
 
 Unmasked circular average
 ^^^^^^^^^^^^^^^^^^^^^^^^^
