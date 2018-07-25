@@ -464,7 +464,7 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.onPolyComboIndexChange('rectangle', 0)
         # check values
         self.assertEqual(self.widget.kernel_module.getParam('radius_bell.npts'), 35)
-        self.assertAlmostEqual(self.widget.kernel_module.getParam('radius_bell.nsigmas'), 1.70325, 5)
+        self.assertAlmostEqual(self.widget.kernel_module.getParam('radius_bell.nsigmas'), 1.73205, 5)
         # Change the index
         self.widget.onPolyComboIndexChange('lognormal', 0)
         # check values
