@@ -320,28 +320,31 @@ To remove a 'slicer', bring back the *Dataset menu* and select *Clear Slicer*.
 Batch Slicing
 ^^^^^^^^^^^^^
 
-An existing slicer can be applied to multiple data plots by opening the 'Slicer
-Parameters' window by bringing back the *Dataset Menu* and selecting *Edit
-Slicer Parameters and Batch Fitting*. At the bottom of the window, batch slicing
-options are available.
+A slicer can be applied to any or all existing 2D data plots using the 'Slicer
+Parameters' window. To open the window, select *Edit Slicer Parameters and Batch
+Fitting* in the *Dataset Menu* (see Invoking_the_dataset_menu_). Batch slicing
+options are available at the bottom of the window.
 
-Select the data plots you want to apply the slicer. All data plots are selected
+Select the 2D plots you want to apply the slicer. All 2D plots are selected
 by default. The resulting 1d data for all slicers can be saved as a text file
-and then sent to fitting by selecting the 'Auto save generated 1D' check box.
+and then sent to fitting by selecting the *Auto save generated 1D* check box.
 Sending data to the fitting perspective requires the data be saved.
 
 Once the auto save check box is selected, you can select where the files are
-saved. The file name for the saved data is the file name from the original data
-set, plus what is in the 'Append to file name' field. The default value in the
-append to field includes the names and values for all of the slicer parameters.
+saved. The file name for the saved data is the slicer name plus the file name
+of the original data set, plus what is in the *Append to file name* field. The
+default value in the append to field includes the names and values for all of
+the slicer parameters.
 
-Three options for fitting are available. The first is to not send the data to
-a fit page. The second is to send each slice to individual fit page. The last
-is to send all sliced data to a batch fit.
+The batch of slices can be sent to fitting if desired, with three options
+available. The first is to not fit the data, the second is to send the
+slices to individual fit pages, and the third is to send all sliced data to a
+single batch fit window.
 
-Clicking the 'Apply Slicer to Selected Plots' will then run through each of plot
-and create a slicer for that plot with the exact parameters as the slicer from
-the plot used to open the 'Slicer Parameters' popup window.
+Clicking *Apply Slicer to Selected Plots* will create a slicer for each selected
+plot with the parameters entered in the 'Slicer Parameters' window. Depending on
+the options selected the data may then be saved, loaded as separate data sets in
+the data manager panel, and finally sent to fitting.
 
 Unmasked circular average
 ^^^^^^^^^^^^^^^^^^^^^^^^^
