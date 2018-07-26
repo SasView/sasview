@@ -11,15 +11,9 @@ from unittest.mock import MagicMock
 
 from twisted.internet import threads
 
-# from UnitTesting.TestUtils import QtSignalSpy
-# from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from sas.qtgui.Utilities.GuiUtils import Communicate
 from sas.qtgui.Calculators.ResolutionCalculatorPanel \
     import ResolutionCalculatorPanel
-
-# from sas.qtgui.MainWindow.DataManager import DataManager
-# from sas.qtgui.MainWindow.GuiManager import GuiManager
-# from sas.qtgui.Utilities.GuiUtils import *
-
 
 BG_COLOR_ERR = 'background-color: rgb(244, 170, 164);'
 
@@ -33,13 +27,17 @@ if not QtWidgets.QApplication.instance():
 class ResolutionCalculatorPanelTest(unittest.TestCase):
     """Test the ResolutionCalculator"""
     def setUp(self):
+        class dummy_manager(object):
+            communicator = Communicate()
         """Create the ResolutionCalculator"""
-        self.widget = ResolutionCalculatorPanel(None)
+        self.widget = ResolutionCalculatorPanel(dummy_manager())
 
         # self.widget.onCompute = MagicMock()
 
     def tearDown(self):
         """Destroy the ResolutionCalculator"""
+        if self.widget.plotter is not None:
+            self.widget.plotter.close()
         self.widget.close()
         self.widget = None
 

@@ -250,22 +250,22 @@ class GuiManagerTest(unittest.TestCase):
         self.manager._workspace.show()
 
         # Check the initial state
-        self.assertTrue(self.manager._workspace.toolBar.isVisible())
-        self.assertEqual('Hide Toolbar', self.manager._workspace.actionHide_Toolbar.text())
+        self.assertFalse(self.manager._workspace.toolBar.isVisible())
+        self.assertEqual('Show Toolbar', self.manager._workspace.actionHide_Toolbar.text())
 
         # Invoke action
         self.manager.actionHide_Toolbar()
 
         # Assure changes propagated correctly
-        self.assertFalse(self.manager._workspace.toolBar.isVisible())
-        self.assertEqual('Show Toolbar', self.manager._workspace.actionHide_Toolbar.text())
+        self.assertTrue(self.manager._workspace.toolBar.isVisible())
+        self.assertEqual('Hide Toolbar', self.manager._workspace.actionHide_Toolbar.text())
 
         # Revert
         self.manager.actionHide_Toolbar()
 
         # Assure the original values are back
-        self.assertTrue(self.manager._workspace.toolBar.isVisible())
-        self.assertEqual('Hide Toolbar', self.manager._workspace.actionHide_Toolbar.text())
+        self.assertFalse(self.manager._workspace.toolBar.isVisible())
+        self.assertEqual('Show Toolbar', self.manager._workspace.actionHide_Toolbar.text())
 
 
     #### HELP ####

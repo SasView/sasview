@@ -410,9 +410,16 @@ class FittingWidgetTest(unittest.TestCase):
         # Change the category index so we have a model with polydisp
         category_index = self.widget.cbCategory.findText("Cylinder")
         self.widget.cbCategory.setCurrentIndex(category_index)
+        model_index = self.widget.cbModel.findText("barbell")
+        self.widget.cbModel.setCurrentIndex(model_index)
 
         # click on a poly parameter checkbox
         index = self.widget._poly_model.index(0,0)
+
+        #self.widget.show()
+        #QtWidgets.QApplication(sys.argv).exec_()
+
+
         # Set the checbox
         self.widget._poly_model.item(0,0).setCheckState(2)
         # Assure the parameter is added
@@ -454,6 +461,8 @@ class FittingWidgetTest(unittest.TestCase):
         # Change the category index so we have a model with polydisp
         category_index = self.widget.cbCategory.findText("Cylinder")
         self.widget.cbCategory.setCurrentIndex(category_index)
+        model_index = self.widget.cbModel.findText("barbell")
+        self.widget.cbModel.setCurrentIndex(model_index)
 
         # call method with default settings
         self.widget.onPolyComboIndexChange('gaussian', 0)
@@ -493,6 +502,8 @@ class FittingWidgetTest(unittest.TestCase):
         # Change the category index so we have a model with polydisp
         category_index = self.widget.cbCategory.findText("Cylinder")
         self.widget.cbCategory.setCurrentIndex(category_index)
+        model_index = self.widget.cbModel.findText("barbell")
+        self.widget.cbModel.setCurrentIndex(model_index)
 
         self.widget.onPolyComboIndexChange('array', 0)
         # check values - unchanged since the file doesn't exist
@@ -523,7 +534,7 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.cbCategory.setCurrentIndex(category_index)
 
         # Check the magnetic model
-        self.assertEqual(self.widget._magnet_model.rowCount(), 9)
+        self.assertEqual(self.widget._magnet_model.rowCount(), 12)
         self.assertEqual(self.widget._magnet_model.columnCount(), 5)
 
         # Test the header
@@ -534,10 +545,10 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertEqual(len(self.widget._magnet_model.header_tooltips), 5)
 
         header_tooltips = ['Select parameter for fitting',
-                             'Enter parameter value',
-                             'Enter minimum value for parameter',
-                             'Enter maximum value for parameter',
-                             'Unit of the parameter']
+                           'Enter parameter value',
+                           'Enter minimum value for parameter',
+                           'Enter maximum value for parameter',
+                           'Unit of the parameter']
         for column, tooltip in enumerate(header_tooltips):
              self.assertEqual(self.widget._magnet_model.headerData(column,
                 QtCore.Qt.Horizontal, QtCore.Qt.ToolTipRole),
@@ -941,7 +952,7 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertListEqual(list(fp.data.x), [1,2])
         self.assertTrue(fp.data_is_loaded)
         self.assertEqual(fp.current_category, "Sphere")
-        self.assertEqual(fp.current_model, "adsorbed_layer")
+        self.assertEqual(fp.current_model, "binary_hard_sphere")
         self.assertListEqual(fp.parameters_to_fit, ['scale'])
 
     def testPushFitPage(self):

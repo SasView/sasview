@@ -19,9 +19,8 @@ from sas.qtgui.Utilities.GuiUtils import FormulaValidator
 
 import sas.qtgui.Utilities.LocalConfig
 
-#if not QtWidgets.QApplication.instance():
-#    app = QtWidgets.QApplication(sys.argv)
-app = QtWidgets.QApplication(sys.argv)
+if not QtWidgets.QApplication.instance():
+    app = QtWidgets.QApplication(sys.argv)
 
 class SldResultTest(unittest.TestCase):
     """ Test the simple container class"""

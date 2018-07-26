@@ -46,7 +46,6 @@ class PlotterBaseTest(unittest.TestCase):
         """ default method variables values """
         self.assertIsInstance(self.plotter, QtWidgets.QWidget)
         self.assertIsInstance(self.plotter.canvas, FigureCanvas)
-        self.assertIsInstance(self.plotter.toolbar, NavigationToolbar)
         self.assertIsInstance(self.plotter.properties, ScaleProperties)
 
         self.assertEqual(self.plotter._data, [])
@@ -83,12 +82,6 @@ class PlotterBaseTest(unittest.TestCase):
         PlotHelper.deletePlot = MagicMock()
         self.plotter.closeEvent(None)
         self.assertTrue(PlotHelper.deletePlot.called)
-
-    def testOnImageSave(self):
-        ''' test the workspace save '''
-        self.plotter.toolbar.save_figure = MagicMock()
-        self.plotter.onImageSave()
-        self.assertTrue(self.plotter.toolbar.save_figure.called)
 
     def testOnImagePrint(self):
         ''' test the workspace print '''
@@ -131,12 +124,6 @@ class PlotterBaseTest(unittest.TestCase):
 
         actions = self.plotter.contextMenu.actions()
         self.assertEqual(len(actions), 4)
-
-        # Trigger Save Image and make sure the method is called
-        self.assertEqual(actions[0].text(), "Save Image")
-        self.plotter.toolbar.save_figure = MagicMock()
-        actions[0].trigger()
-        self.assertTrue(self.plotter.toolbar.save_figure.called)
 
         # Trigger Print Image and make sure the method is called
         self.assertEqual(actions[1].text(), "Print Image")

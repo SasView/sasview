@@ -706,7 +706,7 @@ class ResolutionCalculatorPanel(QtWidgets.QDialog, Ui_ResolutionCalculatorPanel)
         """
         Create a template for 2D data
         """
-        self.plotter = Plotter2DWidget(self, quickplot=True)
+        self.plotter = Plotter2DWidget(self, manager=self.manager, quickplot=True)
         self.plotter.scale = 'linear'
         self.plotter.cmap = None
         layout = QtWidgets.QHBoxLayout()

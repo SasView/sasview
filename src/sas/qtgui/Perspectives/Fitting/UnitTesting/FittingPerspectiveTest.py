@@ -43,7 +43,7 @@ class FittingPerspectiveTest(unittest.TestCase):
         self.assertEqual(self.widget.optimizer, "Levenberg-Marquardt")
         self.assertEqual(len(self.widget.tabs), 1)
         self.assertEqual(self.widget.maxIndex, 2)
-        self.assertEqual(self.widget.getTabName(), "FitPage1")
+        self.assertEqual(self.widget.getTabName(), "FitPage2")
 
     def testAddTab(self):
         '''Add a tab and test it'''
@@ -51,12 +51,12 @@ class FittingPerspectiveTest(unittest.TestCase):
         # Add an empty tab
         self.widget.addFit(None)
         self.assertEqual(len(self.widget.tabs), 2)
-        self.assertEqual(self.widget.getTabName(), "FitPage2")
+        self.assertEqual(self.widget.getTabName(), "FitPage3")
         self.assertEqual(self.widget.maxIndex, 3)
         # Add an empty batch tab
         self.widget.addFit(None, is_batch=True)
         self.assertEqual(len(self.widget.tabs), 3)
-        self.assertEqual(self.widget.getTabName(2), "BatchPage3")
+        self.assertEqual(self.widget.getTabName(2), "BatchPage4")
         self.assertEqual(self.widget.maxIndex, 4)
 
     def testAddCSTab(self):
@@ -68,7 +68,7 @@ class FittingPerspectiveTest(unittest.TestCase):
     def testResetTab(self):
         ''' Remove data from last tab'''
         self.assertEqual(len(self.widget.tabs), 1)
-        self.assertEqual(self.widget.getTabName(), "FitPage1")
+        self.assertEqual(self.widget.getTabName(), "FitPage2")
         self.assertEqual(self.widget.maxIndex, 2)
 
         # Attempt to remove the last tab
@@ -76,7 +76,7 @@ class FittingPerspectiveTest(unittest.TestCase):
 
         # see that the tab didn't disappear, just changed the name/id
         self.assertEqual(len(self.widget.tabs), 1)
-        self.assertEqual(self.widget.getTabName(), "FitPage2")
+        self.assertEqual(self.widget.getTabName(), "FitPage3")
         self.assertEqual(self.widget.maxIndex, 3)
 
         # Now, add data
@@ -100,14 +100,14 @@ class FittingPerspectiveTest(unittest.TestCase):
         self.widget.tabCloses(1)
         self.assertEqual(len(self.widget.tabs), 1)
         self.assertEqual(self.widget.maxIndex, 3)
-        self.assertEqual(self.widget.getTabName(), "FitPage2")
+        self.assertEqual(self.widget.getTabName(), "FitPage3")
 
         # Attemtp to remove the last tab
         self.widget.tabCloses(1)
         # The tab should still be there
         self.assertEqual(len(self.widget.tabs), 1)
         self.assertEqual(self.widget.maxIndex, 4)
-        self.assertEqual(self.widget.getTabName(), "FitPage3")
+        self.assertEqual(self.widget.getTabName(), "FitPage4")
 
     def testAllowBatch(self):
         '''Assure the perspective allows multiple datasets'''

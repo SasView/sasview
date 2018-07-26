@@ -22,8 +22,8 @@ from sas.qtgui.MainWindow.DataExplorer import DataExplorerWindow
 
 import sas.qtgui.Utilities.GuiUtils as GuiUtils
 
-#if not QtWidgets.QApplication.instance():
-app = QtWidgets.QApplication(sys.argv)
+if not QtWidgets.QApplication.instance():
+    app = QtWidgets.QApplication(sys.argv)
 
 BG_COLOR_ERR = 'background-color: rgb(244, 170, 164);'
 

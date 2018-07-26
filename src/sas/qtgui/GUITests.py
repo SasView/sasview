@@ -10,9 +10,28 @@ Unit tests for the QT GUI
 In order to run the tests, first install SasView and sasmodels to site-packages
 by running ``python setup.py install`` in both repositories.
 
-The tests can be run with ``python GUITests.py``, or to get more verbose
-console output (recommended), use ``python GUITests.py -v``.
+The tests can be run with ``python GUITests.py``, or
+``python GUITests.py suiteName1 suiteName2 ...`` for a subset of tests.
+
+To get more verbose console output (recommended), use ``python GUITests.py -v``
+or modify tge VERBOSITY module variable.
 """
+
+# Llist of all suite names. Every time a new suite is added, its name should
+# also be added here
+ALL_SUITES = [
+    'calculatorsSuite',
+    'mainSuite',
+    'fittingSuite',
+    'plottingSuite',
+    'utilitiesSuite',
+    'perspectivesSuite',
+    ]
+
+# Define output verbosity
+#VERBOSITY = 0 # quiet - just the total number of tests run and global result
+VERBOSITY = 1 # default - quiet + a dot for every successful test or a F for failure
+#VERBOSITY = 2 # verbose - default + help string of every test and the result
 
 # Prepare the general QApplication instance
 app = QtWidgets.QApplication(sys.argv)
@@ -82,7 +101,7 @@ from Perspectives.Invariant.UnitTesting import InvariantPerspectiveTest
 #  Inversion
 from Perspectives.Inversion.UnitTesting import InversionPerspectiveTest
 
-def suite():
+def plottingSuite():
     suites = (
         # Plotting
         unittest.makeSuite(Plotter2DTest.Plotter2DTest,               'test'),
@@ -100,7 +119,11 @@ def suite():
         unittest.makeSuite(SlicerParametersTest.SlicerParametersTest, 'test'),
         unittest.makeSuite(PlotterBaseTest.PlotterBaseTest,           'test'),
         unittest.makeSuite(PlotterTest.PlotterTest,                   'test'),
+        )
+    return unittest.TestSuite(suites)
 
+def mainSuite():
+    suites = (
         # Main window
         unittest.makeSuite(DataExplorerTest.DataExplorerTest,  'test'),
         unittest.makeSuite(DroppableDataLoadWidgetTest.DroppableDataLoadWidgetTest, 'test'),
@@ -108,8 +131,12 @@ def suite():
         unittest.makeSuite(GuiManagerTest.GuiManagerTest,      'test'),
         unittest.makeSuite(AboutBoxTest.AboutBoxTest,          'test'),
         unittest.makeSuite(WelcomePanelTest.WelcomePanelTest,  'test'),
+        )
+    return unittest.TestSuite(suites)
 
-        # Utilities
+def utilitiesSuite():
+    suites = (
+        ## Utilities
         unittest.makeSuite(TestUtilsTest.TestUtilsTest,           'test'),
         unittest.makeSuite(SasviewLoggerTest.SasviewLoggerTest,   'test'),
         unittest.makeSuite(GuiUtilsTest.GuiUtilsTest,             'test'),
@@ -121,7 +148,11 @@ def suite():
         unittest.makeSuite(TabbedModelEditorTest.TabbedModelEditorTest,'test'),
         unittest.makeSuite(AddMultEditorTest.AddMultEditorTest, 'test'),
         unittest.makeSuite(ReportDialogTest.ReportDialogTest,     'test'),
+        )
+    return unittest.TestSuite(suites)
 
+def calculatorsSuite():
+    suites = (
         # Calculators
         unittest.makeSuite(KiessigCalculatorTest.KiessigCalculatorTest,                     'test'),
         unittest.makeSuite(DensityCalculatorTest.DensityCalculatorTest,                     'test'),
@@ -130,7 +161,11 @@ def suite():
         unittest.makeSuite(SlitSizeCalculatorTest.SlitSizeCalculatorTest, 'test'),
         unittest.makeSuite(ResolutionCalculatorPanelTest.ResolutionCalculatorPanelTest, 'test'),
         unittest.makeSuite(DataOperationUtilityTest.DataOperationUtilityTest, 'test'),
+        )
+    return unittest.TestSuite(suites)
 
+def fittingSuite():
+    suites = (
         # Perspectives
         #  Fitting
         unittest.makeSuite(FittingPerspectiveTest.FittingPerspectiveTest, 'test'),
@@ -142,14 +177,31 @@ def suite():
         unittest.makeSuite(MultiConstraintTest.MultiConstraintTest,       'test'),
         unittest.makeSuite(ConstraintWidgetTest.ConstraintWidgetTest,     'test'),
         unittest.makeSuite(ComplexConstraintTest.ComplexConstraintTest,   'test'),
+        )
+    return unittest.TestSuite(suites)
 
+def perspectivesSuite():
+    suites = (
         #  Invariant
         unittest.makeSuite(InvariantPerspectiveTest.InvariantPerspectiveTest,  'test'),
         #  Inversion
-        unittest.makeSuite(InversionPerspectiveTest.InversionTest,  'test'),
+        #unittest.makeSuite(InversionPerspectiveTest.InversionTest,  'test'),
         )
     return unittest.TestSuite(suites)
 
 if __name__ == "__main__":
-    unittest.main(defaultTest="suite")
 
+    user_suites = ALL_SUITES
+    # Check if user asked for specific suites:
+    if len(sys.argv) > 1:
+        user_suites = sys.argv[1:]
+
+    runner = unittest.TextTestRunner(verbosity=VERBOSITY)
+    for suite in user_suites:
+        # create the suite object from name
+        try:
+            suite_instance = globals()[suite]()
+            results = runner.run(suite_instance)
+        except KeyError:
+            print("ERROR: Incorrect suite name: %s " % suite)
+            pass
