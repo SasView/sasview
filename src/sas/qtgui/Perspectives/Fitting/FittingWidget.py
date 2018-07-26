@@ -60,6 +60,9 @@ STRUCTURE_DEFAULT = "None"
 DEFAULT_POLYDISP_FUNCTION = 'gaussian'
 
 
+logger = logging.getLogger(__name__)
+
+
 class ToolTippedItemModel(QtGui.QStandardItemModel):
     """
     Subclass from QStandardItemModel to allow displaying tooltips in
@@ -1913,7 +1916,23 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
             # custom kernel load requires full path
             name = os.path.join(ModelUtilities.find_plugins_dir(), model_name+".py")
         kernel_module = generate.load_kernel_module(name)
-        self.model_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
+
+        if hasattr(kernel_module, 'parameters'):
+            # built-in and custom models
+            self.model_parameters = modelinfo.make_parameter_table(getattr(kernel_module, 'parameters', []))
+
+        elif hasattr(kernel_module, 'model_info'):
+            # for sum/multiply models
+            self.model_parameters = kernel_module.model_info.parameters
+
+        elif hasattr(kernel_module, 'Model') and hasattr(kernel_module.Model, "_model_info"):
+            # this probably won't work if there's no model_info, but just in case
+            self.model_parameters = kernel_module.Model._model_info.parameters
+        else:
+            # no parameters - default to blank table
+            msg = "No parameters found in model '{}'.".format(model_name)
+            logger.warning(msg)
+            self.model_parameters = modelinfo.ParameterTable([])
 
         # Instantiate the current sasmodel
         self.kernel_module = self.models[model_name]()
