@@ -952,7 +952,7 @@ class FittingWidgetTest(unittest.TestCase):
         self.assertListEqual(list(fp.data.x), [1,2])
         self.assertTrue(fp.data_is_loaded)
         self.assertEqual(fp.current_category, "Sphere")
-        self.assertEqual(fp.current_model, "binary_hard_sphere")
+        self.assertEqual(fp.current_model, "adsorbed_layer")
         self.assertListEqual(fp.parameters_to_fit, ['scale'])
 
     def testPushFitPage(self):
