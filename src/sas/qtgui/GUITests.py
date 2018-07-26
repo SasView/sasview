@@ -14,7 +14,6 @@ The tests can be run with ``python GUITests.py``, or
 ``python GUITests.py suiteName1 suiteName2 ...`` for a subset of tests.
 
 To get more verbose console output (recommended), use ``python GUITests.py -v``
-or modify tge VERBOSITY module variable.
 """
 
 # Llist of all suite names. Every time a new suite is added, its name should
@@ -27,11 +26,6 @@ ALL_SUITES = [
     'utilitiesSuite',
     'perspectivesSuite',
     ]
-
-# Define output verbosity
-#VERBOSITY = 0 # quiet - just the total number of tests run and global result
-VERBOSITY = 1 # default - quiet + a dot for every successful test or a F for failure
-#VERBOSITY = 2 # verbose - default + help string of every test and the result
 
 # Prepare the general QApplication instance
 app = QtWidgets.QApplication(sys.argv)
@@ -195,13 +189,36 @@ if __name__ == "__main__":
     # Check if user asked for specific suites:
     if len(sys.argv) > 1:
         user_suites = sys.argv[1:]
-
-    runner = unittest.TextTestRunner(verbosity=VERBOSITY)
+    errors = {}
     for suite in user_suites:
         # create the suite object from name
         try:
+
             suite_instance = globals()[suite]()
-            results = runner.run(suite_instance)
+            result=unittest.TextTestResult(sys.stdout,True,True)
+            print("\nRunning %d test cases for %s"%(suite_instance.countTestCases(), suite))
+            result.buffer=True
+            suite_instance.run(result)
+
+            if not result.wasSuccessful():
+                if len(result.errors) or len(result.failures):
+                    errors[suite] = (result.errors, result.failures)
+                if len(result.errors):
+                    print("\n============ Errors disovered ===================")
+                if len(result.failures):
+                    print("\n============ Failures disovered =================")
+            else:
+                print("\nAll tests successful")
+
         except KeyError:
+            print("Failure : %s "%str(ex))
             print("ERROR: Incorrect suite name: %s " % suite)
             pass
+
+    if len(errors.keys())>0:
+        for suite, errors in errors.items():
+            for r in errors[0]:
+                    print("\nSuite: %s had following errors:\n %s : %s"%(suite, r[0], r[1]))
+            for r in errors[1]:
+                    print("\nSuite: %s had following failures:\n %s : %s"%(suite, r[0], r[1]))
+            print("=================================================")
