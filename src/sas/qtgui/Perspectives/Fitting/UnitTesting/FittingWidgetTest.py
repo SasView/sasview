@@ -534,7 +534,7 @@ class FittingWidgetTest(unittest.TestCase):
         self.widget.cbCategory.setCurrentIndex(category_index)
 
         # Check the magnetic model
-        self.assertEqual(self.widget._magnet_model.rowCount(), 12)
+        self.assertEqual(self.widget._magnet_model.rowCount(), 9)
         self.assertEqual(self.widget._magnet_model.columnCount(), 5)
 
         # Test the header
