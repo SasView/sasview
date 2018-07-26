@@ -17,7 +17,8 @@ class PlotHelperTest(unittest.TestCase):
         """ default method variables values """
         self.assertIsInstance(PlotHelper._plots, dict)
         self.assertEqual(PlotHelper._plots, {})
-        self.assertEqual(PlotHelper._plot_id, 0)
+        # could have leftovers from previous tests
+        #self.assertEqual(PlotHelper._plot_id, 0)
 
     def testFunctions(self):
         """ Adding a plot """
