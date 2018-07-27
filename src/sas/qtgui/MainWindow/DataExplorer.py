@@ -964,17 +964,17 @@ class DataExplorerWindow(DroppableDataLoadWidget):
         if isinstance(data, Data2D):
             method_name='Plotter2D'
 
-        new_plot = globals()[method_name](self, quickplot=True)
-        new_plot.data = data
+        self.new_plot = globals()[method_name](self, quickplot=True)
+        self.new_plot.data = data
         #new_plot.plot(marker='o')
-        new_plot.plot()
+        self.new_plot.plot()
 
         # Update the global plot counter
         title = "Plot " + data.name
-        new_plot.setWindowTitle(title)
+        self.new_plot.setWindowTitle(title)
 
         # Show the plot
-        new_plot.show()
+        self.new_plot.show()
 
     def quickData3DPlot(self):
         """
@@ -987,16 +987,16 @@ class DataExplorerWindow(DroppableDataLoadWidget):
 
         data = GuiUtils.dataFromItem(model_item)
 
-        new_plot = Plotter2D(self, quickplot=True, dimension=3)
-        new_plot.data = data
-        new_plot.plot()
+        self.new_plot = Plotter2D(self, quickplot=True, dimension=3)
+        self.new_plot.data = data
+        self.new_plot.plot()
 
         # Update the global plot counter
         title = "Plot " + data.name
-        new_plot.setWindowTitle(title)
+        self.new_plot.setWindowTitle(title)
 
         # Show the plot
-        new_plot.show()
+        self.new_plot.show()
 
     def showEditDataMask(self, data=None):
         """

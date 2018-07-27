@@ -401,6 +401,11 @@ class Plotter2DWidget(PlotterBase):
         else:
             output = copy.deepcopy(data)
 
+        # get the x and y_bin arrays.
+        x_bins, y_bins = PlotUtilities.get_bins(self.qx_data, self.qy_data)
+        self._data.x_bins = x_bins
+        self._data.y_bins = y_bins
+
         zmin_temp = self.zmin
         # check scale
         if self.scale == 'log_{10}':
