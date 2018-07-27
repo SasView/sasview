@@ -54,6 +54,7 @@ class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
             # Convert the unit description into HTML
             text_html = GuiUtils.convertUnitToHTML(str(options.text))
             doc.setHtml(text_html)
+            doc.setDocumentMargin(1)
 
             # delete the original content
             options.text = ""
