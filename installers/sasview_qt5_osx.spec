@@ -69,7 +69,7 @@ print("HW------WH")
 #TRN datas.append((os.path.join(PYTHON_LOC,'Library','plugins','platforms'),'platforms'))
 datas.append((os.path.join(PYTHON_LOC,'plugins','platforms'),'platforms'))
 #TRN datas.append((os.path.join(PYTHON_LOC,'Lib','site-packages','zmq','libzmq.cp36-win_amd64.pyd'),'.'))
-datas.append((os.path.join(PYTHON_LOC,'lib','python3.6', 'site-packages','zmq','libzmq.cpython-36m-darwin.so'),'.'))
+datas.append((os.path.join(PYTHON_LOC,'lib','python3.6', 'site-packages','zmq'),'.'))
 # These depend on whether we have MKL or Atlas numpy
 #if os.path.exists(os.path.join(LIBLOC, LIBPREFIX + 'mkl_core.' + LIBSUFFIX)):
 #    datas.append(add_binary(LIBPREFIX + 'mkl_avx2.' + LIBSUFFIX))
