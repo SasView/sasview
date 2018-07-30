@@ -36,7 +36,21 @@ def check_model(path):
     # To fix the proximal problem of models failing on test, perform the
     # run_one() tests first.  To fix the deeper problem we should either
     # remove caching from sasmodels.sasview_model.load_custom_model() or
-    # add caching to sasmodels.custom.load_custom_kernel_module().
+    # add caching to sasmodels.custom.load_custom_kernel_module().  Another
+    # option is to add a runTests method to SasviewModel which runs the
+    # test suite directly from the model info structure.  Probably some
+    # combination of options:
+    #    (1) have this function (check_model) operate on a loaded model
+    #    so that caching isn't needed in sasview_models.load_custom_model
+    #    (2) add the runTests method to SasviewModel so that tests can
+    #    be run on a loaded module.
+    #
+    # Also, note that the model test suite runs the equivalent of the
+    # "try running the model" block below, and doesn't need to be run
+    # twice.  The reason for duplicating the block here is to generate
+    # an exception that show_model_output can catch.  Need to write the
+    # runTests method so that it returns success flag as well as output
+    # string so that the extra test is not necessary.
 
     # check the model's unit tests run
     from sasmodels.model_test import run_one
