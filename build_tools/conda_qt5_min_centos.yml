@@ -1,0 +1,26 @@
+name: qt5_centos
+channels:
+  - conda-forge
+dependencies:
+ - matplotlib
+ - scipy
+ - hdf5
+ - h5py
+ - ipython
+ - jupyter
+ - twisted
+ - lxml
+ - sphinx
+ - cython
+ - pytest
+ - mako
+ - pyinstaller 
+# GPU not set for Centos build system
+# - pyopencl
+ - pip:
+   - pytools 
+   - periodictable 
+   - bumps 
+   - xhtml2pdf 
+   - qt5reactor 
+
