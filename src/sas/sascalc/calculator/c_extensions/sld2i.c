@@ -52,18 +52,24 @@ void genicomXY(GenI* this, int npoints, double *qx, double *qy, double *I_out){
 	//double Pi = 4.0*atan(1.0);
 	polar_sld b_sld;
 	double qr = 0.0;
-	complex iqr = cassign(0.0, 0.0);
-	complex ephase = cassign(0.0, 0.0);
-	complex comp_sld = cassign(0.0, 0.0);
+	Cplx iqr;
+	Cplx ephase;
+	Cplx comp_sld;
 
-	complex sumj_uu;
-	complex sumj_ud;
-	complex sumj_du;
-	complex sumj_dd;
-	complex temp_fi;
+	Cplx sumj_uu;
+	Cplx sumj_ud;
+	Cplx sumj_du;
+	Cplx sumj_dd;
+	Cplx temp_fi;
+
+	int i, j;
 
 	double count = 0.0;
 	//check if this computation is for averaging
+
+	cassign(&iqr, 0.0, 0.0);
+	cassign(&ephase, 0.0, 0.0);
+	cassign(&comp_sld, 0.0, 0.0);
 
 	//Assume that pixel volumes are given in vol_pix in A^3 unit
 	//int x_size = 0; //in Ang
@@ -71,58 +77,56 @@ void genicomXY(GenI* this, int npoints, double *qx, double *qy, double *I_out){
 	//int z_size = 0; //in Ang
 
 	// Loop over q-values and multiply apply matrix
-        int i;
 	for(i=0; i<npoints; i++){
 		//I_out[i] = 0.0;
-		sumj_uu = cassign(0.0, 0.0);
-		sumj_ud = cassign(0.0, 0.0);
-		sumj_du = cassign(0.0, 0.0);
-		sumj_dd = cassign(0.0, 0.0);
-		//printf ("%d ", i);
+		cassign(&sumj_uu, 0.0, 0.0);
+		cassign(&sumj_ud, 0.0, 0.0);
+		cassign(&sumj_du, 0.0, 0.0);
+		cassign(&sumj_dd, 0.0, 0.0);
+		//printf("i: %d\n", i);
 		//q = sqrt(qx[i]*qx[i] + qy[i]*qy[i]); // + qz[i]*qz[i]);
-                int j;
 		for(j=0; j<this->n_pix; j++){
 			if (this->sldn_val[j]!=0.0
 				||this->mx_val[j]!=0.0
 				||this->my_val[j]!=0.0
 				||this->mz_val[j]!=0.0)
 			{
+			    // printf("i,j: %d,%d\n", i,j);
 				//anisotropic
-				temp_fi = cassign(0.0, 0.0);
-				b_sld = cal_msld(0, qx[i], qy[i], this->sldn_val[j],
+				cassign(&temp_fi, 0.0, 0.0);
+				cal_msld(&b_sld, 0, qx[i], qy[i], this->sldn_val[j],
 							 this->mx_val[j], this->my_val[j], this->mz_val[j],
 			 				 this->inspin, this->outspin, this->stheta);
 				qr = (qx[i]*this->x_val[j] + qy[i]*this->y_val[j]);
-				iqr = cassign(0.0, qr);
-				ephase = cplx_exp(iqr);
+				cassign(&iqr, 0.0, qr);
+				cplx_exp(&ephase, iqr);
 
 				//Let's multiply pixel(atomic) volume here
-				ephase = rcmult(this->vol_pix[j], ephase);
+				rcmult(&ephase, this->vol_pix[j], ephase);
 				//up_up
 				if (this->inspin > 0.0 && this->outspin > 0.0){
-					comp_sld = cassign(b_sld.uu, 0.0);
-					temp_fi = cplx_mult(comp_sld, ephase);
-					sumj_uu = cplx_add(sumj_uu, temp_fi);
+					cassign(&comp_sld, b_sld.uu, 0.0);
+					cplx_mult(&temp_fi, comp_sld, ephase);
+					cplx_add(&sumj_uu, sumj_uu, temp_fi);
 				}
 				//down_down
 				if (this->inspin < 1.0 && this->outspin < 1.0){
-					comp_sld = cassign(b_sld.dd, 0.0);
-					temp_fi = cplx_mult(comp_sld, ephase);
-					sumj_dd = cplx_add(sumj_dd, temp_fi);
+					cassign(&comp_sld, b_sld.dd, 0.0);
+					cplx_mult(&temp_fi, comp_sld, ephase);
+					cplx_add(&sumj_dd, sumj_dd, temp_fi);
 				}
 				//up_down
 				if (this->inspin > 0.0 && this->outspin < 1.0){
-					comp_sld = cassign(b_sld.re_ud, b_sld.im_ud);
-					temp_fi = cplx_mult(comp_sld, ephase);
-					sumj_ud = cplx_add(sumj_ud, temp_fi);
+					cassign(&comp_sld, b_sld.re_ud, b_sld.im_ud);
+					cplx_mult(&temp_fi, comp_sld, ephase);
+					cplx_add(&sumj_ud, sumj_ud, temp_fi);
 				}
 				//down_up
 				if (this->inspin < 1.0 && this->outspin > 0.0){
-					comp_sld = cassign(b_sld.re_du, b_sld.im_du);
-					temp_fi = cplx_mult(comp_sld, ephase);
-					sumj_du = cplx_add(sumj_du, temp_fi);
+					cassign(&comp_sld, b_sld.re_du, b_sld.im_du);
+					cplx_mult(&temp_fi, comp_sld, ephase);
+					cplx_add(&sumj_du, sumj_du, temp_fi);
 				}
-
 
 				if (i == 0){
 					count += this->vol_pix[j];
@@ -157,10 +161,9 @@ void genicom(GenI* this, int npoints, double *q, double *I_out){
 	int n_pix = is_sym ? -this->n_pix : this->n_pix;
 	//Assume that pixel volumes are given in vol_pix in A^3 unit
 	// Loop over q-values and multiply apply matrix
-        int i;   
+    int i, j, k;
 	for(i=0; i<npoints; i++){
 		sumj =0.0;
-                int j;
 		for(j=0; j<n_pix; j++){
 			//Isotropic: Assumes all slds are real (no magnetic)
 			//Also assumes there is no polarization: No dependency on spin
@@ -178,7 +181,6 @@ void genicom(GenI* this, int npoints, double *q, double *I_out){
 			else{
 				//full calculation
 				//pragma omp parallel for
-                                int k;
 				for(k=0; k<n_pix; k++){
 					sld_j =  this->sldn_val[j] * this->sldn_val[k] * this->vol_pix[j] * this->vol_pix[k];
 					qr = (this->x_val[j]-this->x_val[k])*(this->x_val[j]-this->x_val[k])+

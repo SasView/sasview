@@ -3,7 +3,7 @@
  */
 #include <Python.h>
 #include <stdio.h>
-#include <sld2i.h>
+#include "sld2i.h"
 
 #if PY_MAJOR_VERSION < 3
 typedef void (*PyCapsule_Destructor)(PyObject *);
@@ -67,6 +67,7 @@ PyObject * new_GenI(PyObject *self, PyObject *args) {
 	double inspin;
 	double outspin;
 	double stheta;
+	GenI *sld2i;
 
 	if (!PyArg_ParseTuple(args, "iOOOOOOOOddd", &n_pix, &x_val_obj, &y_val_obj, &z_val_obj, &sldn_val_obj, &mx_val_obj, &my_val_obj, &mz_val_obj, &vol_pix_obj, &inspin, &outspin, &stheta)) return NULL;
 	OUTVECTOR(x_val_obj, x_val, n_x);
@@ -77,7 +78,7 @@ PyObject * new_GenI(PyObject *self, PyObject *args) {
 	OUTVECTOR(my_val_obj, my_val, n_x);
 	OUTVECTOR(mz_val_obj, mz_val, n_x);
 	OUTVECTOR(vol_pix_obj, vol_pix, n_x);
-	GenI* sld2i =  PyMem_Malloc(sizeof(GenI));
+	sld2i =  PyMem_Malloc(sizeof(GenI));
 	if (sld2i != NULL) {
 		initGenI(sld2i, n_pix,x_val,y_val,z_val,sldn_val,mx_val,my_val,mz_val,vol_pix,inspin,outspin,stheta);
 	}
@@ -97,6 +98,7 @@ PyObject * genicom_inputXY(PyObject *self, PyObject *args) {
 	Py_ssize_t n_out;
 	double *I_out;
 	PyObject *gen_obj;
+	GenI *sld2i;
 
 	if (!PyArg_ParseTuple(args, "OiOOO",  &gen_obj, &npoints, &qx_obj, &qy_obj, &I_out_obj)) return NULL;
 	OUTVECTOR(qx_obj, qx, n_out);
@@ -107,7 +109,7 @@ PyObject * genicom_inputXY(PyObject *self, PyObject *args) {
 	//if(n_in!=n_out) return Py_BuildValue("i",-1);
 
 	// Set the array pointers
-	GenI* sld2i = (GenI *)PyCapsule_GetPointer(gen_obj, "GenI");
+	sld2i = (GenI *)PyCapsule_GetPointer(gen_obj, "GenI");
 
 	genicomXY(sld2i, npoints, qx, qy, I_out);
 	//return PyCObject_FromVoidPtr(s, del_genicom);
@@ -125,6 +127,7 @@ PyObject * genicom_input(PyObject *self, PyObject *args) {
 	Py_ssize_t n_out;
 	double *I_out;
 	PyObject *gen_obj;
+	GenI *sld2i;
 
 	if (!PyArg_ParseTuple(args, "OiOO",  &gen_obj, &npoints, &q_obj, &I_out_obj)) return NULL;
 	OUTVECTOR(q_obj, q, n_out);
@@ -134,7 +137,7 @@ PyObject * genicom_input(PyObject *self, PyObject *args) {
 	//if(n_in!=n_out) return Py_BuildValue("i",-1);
 
 	// Set the array pointers
-	GenI *sld2i = (GenI *)PyCapsule_GetPointer(gen_obj, "GenI");
+	sld2i = (GenI *)PyCapsule_GetPointer(gen_obj, "GenI");
 
 	genicom(sld2i, npoints, q, I_out);
 	//return PyCObject_FromVoidPtr(s, del_genicom);
