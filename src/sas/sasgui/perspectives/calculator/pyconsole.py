@@ -27,6 +27,21 @@ def check_model(path):
     """
     Check that the model on the path can run.
     """
+    # TODO: fix model caching
+    # model_test.run_one() is directly forcing a reload of the module, but
+    # sasview_model is caching models that have already been loaded.
+    # If the sasview load happens before the test, then the module is
+    # reloaded out from under it, which causes the global variables in
+    # the model function definitions to be cleared (at least in python 2.7).
+    # To fix the proximal problem of models failing on test, perform the
+    # run_one() tests first.  To fix the deeper problem we should either
+    # remove caching from sasmodels.sasview_model.load_custom_model() or
+    # add caching to sasmodels.custom.load_custom_kernel_module().
+
+    # check the model's unit tests run
+    from sasmodels.model_test import run_one
+    result = run_one(path)
+
     # try running the model
     from sasmodels.sasview_model import load_custom_model
     Model = load_custom_model(path)
@@ -35,10 +50,6 @@ def check_model(path):
     Iq = model.evalDistribution(q)
     qx, qy =  np.array([0.01, 0.01]), np.array([0.1, 0.1])
     Iqxy = model.evalDistribution([qx, qy])
-
-    # check the model's unit tests run
-    from sasmodels.model_test import run_one
-    result = run_one(path)
 
     return result
 
