@@ -2,7 +2,6 @@ name: qt5_osx
 channels:
   - conda-forge
 dependencies:
- - numpy
  - matplotlib
  - scipy
  - hdf5

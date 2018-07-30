@@ -71,13 +71,13 @@ datas.append((os.path.join(PYTHON_LOC,'plugins','platforms'),'platforms'))
 #TRN datas.append((os.path.join(PYTHON_LOC,'Lib','site-packages','zmq','libzmq.cp36-win_amd64.pyd'),'.'))
 datas.append((os.path.join(PYTHON_LOC,'lib','python3.6', 'site-packages','zmq','libzmq.cpython-36m-darwin.so'),'.'))
 # These depend on whether we have MKL or Atlas numpy
-if os.path.exists(os.path.join(LIBLOC, LIBPREFIX + 'mkl_core.' + LIBSUFFIX)):
-    datas.append(add_binary(LIBPREFIX + 'mkl_avx2.' + LIBSUFFIX))
-    datas.append(add_binary(LIBPREFIX + 'mkl_core.' + LIBSUFFIX))
-elif os.path.exists(os.path.join(LIBLOC, LIBPREFIX + 'numpy-atlas.' + LIBSUFFIX)):
-    datas.append(add_binary(LIBPREFIX + 'numpy-atlas.' + LIBSUFFIX))
-else:
-    raise Exception("No numerical library for numpy found.")
+#if os.path.exists(os.path.join(LIBLOC, LIBPREFIX + 'mkl_core.' + LIBSUFFIX)):
+#    datas.append(add_binary(LIBPREFIX + 'mkl_avx2.' + LIBSUFFIX))
+#    datas.append(add_binary(LIBPREFIX + 'mkl_core.' + LIBSUFFIX))
+#elif os.path.exists(os.path.join(LIBLOC, LIBPREFIX + 'numpy-atlas.' + LIBSUFFIX)):
+#    datas.append(add_binary(LIBPREFIX + 'numpy-atlas.' + LIBSUFFIX))
+#else:
+#    raise Exception("No numerical library for numpy found.")
 
 #import sas.sascalc.dataloader.readers
 #f = os.path.join(sas.sascalc.dataloader.readers.get_data_path(), 'defaults.json')
