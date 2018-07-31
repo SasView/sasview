@@ -64,8 +64,15 @@ class ModelViewDelegate(QtWidgets.QStyledItemDelegate):
             textRect = style.subElementRect(QtWidgets.QStyle.SE_ItemViewItemText, options)
 
             painter.save()
-            painter.translate(textRect.topLeft())
-            painter.setClipRect(textRect.translated(-textRect.topLeft()))
+            rect = textRect.topLeft()
+            x = rect.x()
+            y = rect.y()
+            x += 3.0 # magic value for rendering nice display in the table
+            y += 2.0 # magic value for rendering nice display in the table
+            rect.setX(x)
+            rect.setY(y)
+            painter.translate(rect)
+            painter.setClipRect(textRect.translated(-rect))
             # Draw the QTextDocument in the cell
             doc.documentLayout().draw(painter, context)
             painter.restore()
@@ -181,7 +188,8 @@ class PolyViewDelegate(QtWidgets.QStyledItemDelegate):
 
             # Prepare document for inserting into cell
             doc = QtGui.QTextDocument()
-
+            current_font = painter.font()
+            doc.setDefaultFont(current_font)
             # Convert the unit description into HTML
             text_html = GuiUtils.convertUnitToHTML(str(options.text))
             doc.setHtml(text_html)
@@ -192,10 +200,14 @@ class PolyViewDelegate(QtWidgets.QStyledItemDelegate):
 
             context = QtGui.QAbstractTextDocumentLayout.PaintContext()
             textRect = style.subElementRect(QtWidgets.QStyle.SE_ItemViewItemText, options)
-
             painter.save()
-            painter.translate(textRect.topLeft())
-            painter.setClipRect(textRect.translated(-textRect.topLeft()))
+
+            rect = textRect.topLeft()
+            y = rect.y()
+            y += 5.0 # magic value for rendering nice display in the table
+            rect.setY(y)
+            painter.translate(rect)
+            painter.setClipRect(textRect.translated(-rect))
             # Draw the QTextDocument in the cell
             doc.documentLayout().draw(painter, context)
             painter.restore()
@@ -259,7 +271,8 @@ class MagnetismViewDelegate(QtWidgets.QStyledItemDelegate):
 
             # Prepare document for inserting into cell
             doc = QtGui.QTextDocument()
-
+            current_font = painter.font()
+            doc.setDefaultFont(current_font)
             # Convert the unit description into HTML
             text_html = GuiUtils.convertUnitToHTML(str(options.text))
             doc.setHtml(text_html)
@@ -272,8 +285,12 @@ class MagnetismViewDelegate(QtWidgets.QStyledItemDelegate):
             textRect = style.subElementRect(QtWidgets.QStyle.SE_ItemViewItemText, options)
 
             painter.save()
-            painter.translate(textRect.topLeft())
-            painter.setClipRect(textRect.translated(-textRect.topLeft()))
+            rect = textRect.topLeft()
+            y = rect.y()
+            y += 5.0 # magic value for rendering nice display in the table
+            rect.setY(y)
+            painter.translate(rect)
+            painter.setClipRect(textRect.translated(-rect))
             # Draw the QTextDocument in the cell
             doc.documentLayout().draw(painter, context)
             painter.restore()
