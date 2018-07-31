@@ -16,8 +16,6 @@ if os.name == 'posix':
     # Darwin needs UPX=False, Linux actually builds with both...
     if platform.system() == 'Darwin':
         UPX=False
-        LIBSUFFIX='dylib'
-        #TRN LIBLOC = os.path.join(PYTHON_LOC,'lib', 'python3.6')
     else:
         UPX=True
 else:
@@ -44,13 +42,16 @@ def add_binary(binary):
 # ADDITIONAL DATA ############################################################
 datas = [('../src/sas/sasview/images', 'images')]
 
+# datas = [('../src/sas/sasview/images/ball.png', '.')]
 datas = [('../src/sas/sasview/images/ball.ico', '.')]
+
 
 datas.append(('../src/sas/sasview/media','media'))
 datas.append(('../src/sas/sasview/test','test'))
 datas.append(('../src/sas/sasview/custom_config.py','.'))
 datas.append(('../src/sas/sasview/local_config.py','.'))
-datas.append(('../src/sas/sasview/wxcruft.py','.'))
+# TRN COMMENT OUT
+#datas.append(('../src/sas/sasview/wxcruft.py','.'))
 datas.append(('../src/sas/logger_config.py','.'))
 datas.append(('../src/sas/logging.ini','.'))
 
@@ -58,35 +59,38 @@ datas.append(('../src/sas/logging.ini','.'))
 # so some modules need to be copied explicitly to avoid
 # messages like
 # WARNING: Attempted to add Python module twice with different upper/lowercases
-#TRN datas.append((os.path.join(PYTHON_LOC,'Lib','SocketServer.py'),'.'))
-#TRN datas.append((os.path.join(PYTHON_LOC,'Lib','Queue.py'),'.'))
+# TRN COMMENT OsUT
+# datas.append((os.path.join(PYTHON_LOC,'Lib','SocketServer.py'),'.'))
+# datas.append((os.path.join(PYTHON_LOC,'Lib','Queue.py'),'.'))
 
 # TODO
 # NEED BETTER WAY TO DEAL WITH THESE RELATIVE PATHS
 datas.append((os.path.join('..', '..','sasmodels','sasmodels'),'sasmodels'))
 datas.append((os.path.join('..', 'src','sas','sasgui','perspectives','fitting','plugin_models'),'plugin_models'))
-print("HW------WH")
-#TRN datas.append((os.path.join(PYTHON_LOC,'Library','plugins','platforms'),'platforms'))
-datas.append((os.path.join(PYTHON_LOC,'plugins','platforms'),'platforms'))
-#TRN datas.append((os.path.join(PYTHON_LOC,'Lib','site-packages','zmq','libzmq.cp36-win_amd64.pyd'),'.'))
-datas.append((os.path.join(PYTHON_LOC,'lib','python3.6', 'site-packages','zmq'),'.'))
-# These depend on whether we have MKL or Atlas numpy
-#if os.path.exists(os.path.join(LIBLOC, LIBPREFIX + 'mkl_core.' + LIBSUFFIX)):
-#    datas.append(add_binary(LIBPREFIX + 'mkl_avx2.' + LIBSUFFIX))
-#    datas.append(add_binary(LIBPREFIX + 'mkl_core.' + LIBSUFFIX))
-#elif os.path.exists(os.path.join(LIBLOC, LIBPREFIX + 'numpy-atlas.' + LIBSUFFIX)):
-#    datas.append(add_binary(LIBPREFIX + 'numpy-atlas.' + LIBSUFFIX))
-#else:
-#    raise Exception("No numerical library for numpy found.")
+
+# TRN COMMENT OUT 
+# datas.append((os.path.join(PYTHON_LOC,'Library','plugins','platforms'),'platforms'))
+#sdatas.append((os.path.join(PYTHON_LOC,'Lib','site-packages','zmq','libzmq.cp36-win_amd64.pyd'),'.'))
+
+# 
+# # These depend on whether we have MKL or Atlas numpy
+# if os.path.exists(os.path.join(LIBLOC, LIBPREFIX + 'mkl_core.' + LIBSUFFIX)):
+#     datas.append(add_binary(LIBPREFIX + 'mkl_avx2.' + LIBSUFFIX))
+#     datas.append(add_binary(LIBPREFIX + 'mkl_def.' + LIBSUFFIX))
+# elif os.path.exists(os.path.join(LIBLOC, LIBPREFIX + 'numpy-atlas.' + LIBSUFFIX)):
+#     datas.append(add_binary(LIBPREFIX + 'numpy-atlas.' + LIBSUFFIX))
+# else:
+#     raise Exception("No numerical library for numpy found.")
+# 
 
 #import sas.sascalc.dataloader.readers
 #f = os.path.join(sas.sascalc.dataloader.readers.get_data_path(), 'defaults.json')
 #datas.append((f, '.'))
 
-#TRN # Add a custom pyopencl hook, as described in
-#TRN # https://github.com/pyinstaller/pyinstaller/issues/2130
-#TRN from PyInstaller.utils.hooks import copy_metadata
-#TRN datas.append(copy_metadata('pyopencl')[0])
+# # Add a custom pyopencl hook, as described in
+# # https://github.com/pyinstaller/pyinstaller/issues/2130
+# from PyInstaller.utils.hooks import copy_metadata
+# datas.append(copy_metadata('pyopencl')[0])
 
 import sasmodels
 add_data(sasmodels.data_files())
@@ -121,9 +125,9 @@ hiddenimports = [
  'PyQt5',
  'periodictable.core',
  'sasmodels.core',
- #TRN 'pyopencl',
- 'tinycc',
- #TRN 'SocketServer',
+  #'pyopencl',
+  #'tinycc',
+  #'SocketServer',
  'logging',
  'logging.config',
  'reportlab', 'reportlab.graphics',
@@ -184,8 +188,8 @@ coll = COLLECT(exe,
                name='sasview')
 
 if platform.system() == 'Darwin':
-    app = BUNDLE(coll,
-        name='sasview.app',
+    app = BUNDLE(exe,
+        name='SasView.app',
         icon='../src/sas/sasview/images/ball.ico',
         bundle_identifier=None)
 

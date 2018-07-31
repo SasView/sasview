@@ -1,4 +1,4 @@
-name: qt5_osx
+name: qt5_centos
 channels:
   - conda-forge
 dependencies:
@@ -15,7 +15,8 @@ dependencies:
  - pytest
  - mako
  - pyinstaller 
- - pyopencl
+# GPU not set for Centos build system
+# - pyopencl
  - pip:
    - pytools 
    - periodictable 
