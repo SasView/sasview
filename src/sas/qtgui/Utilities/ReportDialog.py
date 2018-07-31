@@ -100,11 +100,11 @@ class ReportDialog(QtWidgets.QDialog, Ui_ReportDialogUI):
         pictures = self.getPictures(basename)
 
         # translate png references into html from base64 string to on-disk name
-        cleanr = re.compile('<img src="data:image.*>')
+        cleanr = re.compile('<img src.*$')
         replacement_name = ""
+        html = self.data_html
         for picture in pictures:
             replacement_name += '<img src="'+ picture + '"><p></p>'
-
         # <img src="data:image/png;.*>  => <img src=filename>
         html = re.sub(cleanr, replacement_name, self.data_html)
 
