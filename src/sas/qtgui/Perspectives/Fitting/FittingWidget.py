@@ -1403,6 +1403,9 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         self.chi2 = res.fitness
         param_dict = self.paramDictFromResults(res)
 
+        if param_dict is None:
+            return
+
         elapsed = result[1]
         if self.calc_fit._interrupting:
             msg = "Fitting cancelled by user after: %s s." % GuiUtils.formatNumber(elapsed)
