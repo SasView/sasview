@@ -14,10 +14,10 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
-from sasmodels import product
 from sasmodels import generate
 from sasmodels import modelinfo
 from sasmodels.sasview_model import load_standard_models
+from sasmodels.sasview_model import MultiplicationModel
 from sasmodels.weights import MODELS as POLYDISPERSITY_MODELS
 
 from sas.sascalc.fit.BumpsFitting import BumpsFit as Fit
@@ -1960,13 +1960,20 @@ class FittingWidget(QtWidgets.QWidget, Ui_FittingWidgetUI):
         """
         structure_module = generate.load_kernel_module(structure_factor)
         structure_parameters = modelinfo.make_parameter_table(getattr(structure_module, 'parameters', []))
-        structure_kernel = self.models[structure_factor]()
 
-        self.kernel_module._model_info = product.make_product_info(self.kernel_module._model_info, structure_kernel._model_info)
+        structure_kernel = self.models[structure_factor]()
+        form_kernel = self.kernel_module
+
+        self.kernel_module = MultiplicationModel(form_kernel, structure_kernel)
 
         new_rows = FittingUtilities.addSimpleParametersToModel(structure_parameters, self.is2D)
         for row in new_rows:
             self._model_model.appendRow(row)
+            # disable fitting of parameters not listed in self.kernel_module (probably radius_effective)
+            if row[0].text() not in self.kernel_module.params.keys():
+                row_num = self._model_model.rowCount() - 1
+                FittingUtilities.markParameterDisabled(self._model_model, row_num)
+
         # Update the counter used for multishell display
         self._last_model_row = self._model_model.rowCount()
 
